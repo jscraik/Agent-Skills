@@ -1,0 +1,8 @@
+# Copilot Instructions (template)
+
+Optional instructions for GitHub Copilot agentic tooling.
+
+- Follow `.ralph/pin.md` and `.ralph/plan.md`.
+- Do not invent requirements; update the pin if something is missing.
+- Keep diffs small and test-backed.
+- If blocked, explain what you tried and what information is missing.

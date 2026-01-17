@@ -1,0 +1,1722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Favicon Atelier · Icon Design Studio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Karla:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --cream: #FAF8F6;
+      --cream-dark: #F1EDE8;
+      --champagne: #C9A961;
+      --champagne-dark: #A88D4F;
+      --navy: #1A1D29;
+      --navy-light: #2C3040;
+      --sage: #9CAF88;
+      --terracotta: #D4876F;
+      --stone: #8B8680;
+      --stone-light: #C5C0BA;
+      --shadow: rgba(26, 29, 41, 0.08);
+      --shadow-strong: rgba(26, 29, 41, 0.15);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes shimmer {
+      0% { background-position: -200% center; }
+      100% { background-position: 200% center; }
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-8px); }
+    }
+
+    body {
+      font-family: 'Karla', -apple-system, sans-serif;
+      background: linear-gradient(135deg, var(--cream) 0%, var(--cream-dark) 100%);
+      color: var(--navy);
+      min-height: 100vh;
+      padding: 60px 40px;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image:
+        radial-gradient(circle at 20% 30%, rgba(201, 169, 97, 0.03) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(156, 175, 136, 0.04) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      max-width: 1600px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Header */
+    header {
+      margin-bottom: 80px;
+      animation: fadeInUp 0.8s ease-out;
+    }
+
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 40px;
+      flex-wrap: wrap;
+    }
+
+    .header-left {
+      flex: 1;
+      min-width: 300px;
+    }
+
+    .studio-label {
+      font-size: 11px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--champagne);
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: inline-block;
+    }
+
+    h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 64px;
+      font-weight: 700;
+      line-height: 1.1;
+      color: var(--navy);
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    h1 em {
+      font-style: italic;
+      color: var(--champagne);
+    }
+
+    .subtitle {
+      font-size: 18px;
+      color: var(--stone);
+      line-height: 1.6;
+      max-width: 500px;
+      font-weight: 300;
+    }
+
+    .header-ornament {
+      width: 120px;
+      height: 2px;
+      background: linear-gradient(90deg, var(--champagne) 0%, transparent 100%);
+      margin-top: 32px;
+    }
+
+    /* Main Layout */
+    .workspace {
+      display: grid;
+      grid-template-columns: 420px 1fr;
+      gap: 48px;
+      align-items: start;
+    }
+
+    @media (max-width: 1200px) {
+      .workspace {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Panels */
+    .panel {
+      background: rgba(255, 255, 255, 0.6);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(201, 169, 97, 0.15);
+      border-radius: 24px;
+      padding: 36px;
+      box-shadow:
+        0 4px 24px var(--shadow),
+        0 1px 0 rgba(255, 255, 255, 0.8) inset;
+      position: relative;
+      overflow: hidden;
+      animation: fadeInUp 0.8s ease-out;
+      animation-fill-mode: both;
+    }
+
+    .panel::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg,
+        transparent 0%,
+        var(--champagne) 50%,
+        transparent 100%);
+      opacity: 0.3;
+    }
+
+    .controls-column .panel:nth-child(1) { animation-delay: 0.1s; }
+    .controls-column .panel:nth-child(2) { animation-delay: 0.2s; }
+    .controls-column .panel:nth-child(3) { animation-delay: 0.3s; }
+    .controls-column .panel:nth-child(4) { animation-delay: 0.4s; }
+    .preview-section .panel:nth-child(1) { animation-delay: 0.2s; }
+    .preview-section .panel:nth-child(2) { animation-delay: 0.3s; }
+    .preview-section .panel:nth-child(3) { animation-delay: 0.4s; }
+    .preview-section .panel:nth-child(4) { animation-delay: 0.5s; }
+
+    .panel-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 28px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      position: relative;
+    }
+
+    .panel-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, var(--champagne-dark) 0%, transparent 100%);
+      opacity: 0.2;
+    }
+
+    /* Template Grid */
+    .template-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .template-btn {
+      background: rgba(255, 255, 255, 0.8);
+      border: 2px solid rgba(201, 169, 97, 0.15);
+      border-radius: 16px;
+      padding: 20px 16px;
+      cursor: pointer;
+      transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .template-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg,
+        transparent 0%,
+        rgba(201, 169, 97, 0.1) 50%,
+        transparent 100%);
+      transition: left 0.6s;
+    }
+
+    .template-btn:hover::before {
+      left: 100%;
+    }
+
+    .template-btn:hover {
+      border-color: var(--champagne);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px var(--shadow);
+    }
+
+    .template-btn.active {
+      border-color: var(--champagne);
+      background: rgba(201, 169, 97, 0.08);
+      box-shadow: 0 4px 16px rgba(201, 169, 97, 0.2);
+    }
+
+    .template-icon {
+      width: 48px;
+      height: 48px;
+      margin: 0 auto 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(201, 169, 97, 0.2);
+      box-shadow: 0 2px 8px var(--shadow);
+    }
+
+    .template-name {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--navy);
+      text-align: center;
+      letter-spacing: 0.3px;
+    }
+
+    /* Inputs */
+    .control-section {
+      margin-bottom: 28px;
+    }
+
+    .control-section:last-child {
+      margin-bottom: 0;
+    }
+
+    .control-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--champagne-dark);
+      margin-bottom: 14px;
+      display: block;
+    }
+
+    .input-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 14px;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .input-group label {
+      font-size: 13px;
+      color: var(--stone);
+      font-weight: 500;
+    }
+
+    input[type="text"],
+    select {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(139, 134, 128, 0.2);
+      border-radius: 10px;
+      padding: 12px 16px;
+      font-size: 15px;
+      font-family: 'Karla', sans-serif;
+      color: var(--navy);
+      transition: all 0.3s ease;
+    }
+
+    input[type="text"]:focus,
+    select:focus {
+      outline: none;
+      border-color: var(--champagne);
+      box-shadow: 0 0 0 3px rgba(201, 169, 97, 0.1);
+      background: white;
+    }
+
+    input[type="color"] {
+      width: 100%;
+      height: 52px;
+      background: white;
+      border: 1px solid rgba(139, 134, 128, 0.2);
+      border-radius: 10px;
+      padding: 6px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    input[type="color"]:hover {
+      border-color: var(--champagne);
+      box-shadow: 0 4px 12px var(--shadow);
+    }
+
+    /* Icon Grid */
+    .icon-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 8px;
+      max-height: 220px;
+      overflow-y: auto;
+      padding: 4px;
+      scrollbar-width: thin;
+      scrollbar-color: var(--champagne) transparent;
+    }
+
+    .icon-grid::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .icon-grid::-webkit-scrollbar-track {
+      background: rgba(201, 169, 97, 0.05);
+      border-radius: 3px;
+    }
+
+    .icon-grid::-webkit-scrollbar-thumb {
+      background: var(--champagne);
+      border-radius: 3px;
+    }
+
+    .icon-btn {
+      aspect-ratio: 1;
+      background: rgba(255, 255, 255, 0.8);
+      border: 1px solid rgba(139, 134, 128, 0.2);
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      color: var(--stone);
+    }
+
+    .icon-btn:hover {
+      border-color: var(--champagne);
+      color: var(--champagne-dark);
+      transform: scale(1.05);
+    }
+
+    .icon-btn.active {
+      border-color: var(--champagne);
+      background: rgba(201, 169, 97, 0.12);
+      color: var(--champagne-dark);
+      box-shadow: 0 2px 8px rgba(201, 169, 97, 0.3);
+    }
+
+    .icon-btn svg {
+      width: 22px;
+      height: 22px;
+      stroke-width: 1.5;
+    }
+
+    /* Range Inputs */
+    input[type="range"] {
+      width: 100%;
+      height: 6px;
+      background: linear-gradient(90deg,
+        rgba(201, 169, 97, 0.2) 0%,
+        rgba(201, 169, 97, 0.08) 100%);
+      border-radius: 3px;
+      outline: none;
+      -webkit-appearance: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      background: linear-gradient(135deg, var(--champagne) 0%, var(--champagne-dark) 100%);
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 2px 8px var(--shadow);
+      transition: all 0.2s;
+    }
+
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+      box-shadow: 0 4px 12px rgba(201, 169, 97, 0.4);
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 18px;
+      height: 18px;
+      background: linear-gradient(135deg, var(--champagne) 0%, var(--champagne-dark) 100%);
+      border-radius: 50%;
+      cursor: pointer;
+      border: none;
+      box-shadow: 0 2px 8px var(--shadow);
+    }
+
+    .range-value {
+      font-size: 12px;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--champagne-dark);
+      text-align: right;
+      margin-top: 6px;
+      font-weight: 500;
+    }
+
+    /* Checkbox */
+    .checkbox-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .checkbox-row input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      accent-color: var(--champagne);
+      cursor: pointer;
+    }
+
+    .checkbox-row label {
+      font-size: 14px;
+      color: var(--stone);
+      cursor: pointer;
+      font-weight: 400;
+    }
+
+    /* Effects */
+    .effects-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .effect-control {
+      background: rgba(255, 255, 255, 0.5);
+      border-radius: 14px;
+      padding: 18px;
+      border: 1px solid rgba(201, 169, 97, 0.1);
+    }
+
+    .effect-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .effect-name {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--navy);
+      letter-spacing: 0.3px;
+    }
+
+    .effect-toggle {
+      width: 44px;
+      height: 24px;
+      background: rgba(139, 134, 128, 0.2);
+      border-radius: 12px;
+      position: relative;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .effect-toggle.active {
+      background: linear-gradient(135deg, var(--champagne) 0%, var(--champagne-dark) 100%);
+    }
+
+    .effect-toggle::after {
+      content: '';
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      background: white;
+      border-radius: 50%;
+      top: 2px;
+      left: 2px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 2px 6px var(--shadow);
+    }
+
+    .effect-toggle.active::after {
+      transform: translateX(20px);
+    }
+
+    /* Generate Button */
+    .generate-btn {
+      width: 100%;
+      background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%);
+      border: none;
+      border-radius: 16px;
+      padding: 20px;
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--cream);
+      cursor: pointer;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      margin-top: 32px;
+      position: relative;
+      overflow: hidden;
+      letter-spacing: 0.5px;
+      box-shadow:
+        0 8px 24px rgba(26, 29, 41, 0.2),
+        0 2px 8px rgba(26, 29, 41, 0.15);
+    }
+
+    .generate-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.15) 50%,
+        transparent 100%);
+      transition: left 0.6s;
+    }
+
+    .generate-btn:hover::before {
+      left: 100%;
+    }
+
+    .generate-btn:hover {
+      transform: translateY(-3px);
+      box-shadow:
+        0 12px 32px rgba(26, 29, 41, 0.25),
+        0 4px 16px rgba(26, 29, 41, 0.2);
+    }
+
+    .generate-btn:active {
+      transform: translateY(-1px);
+    }
+
+    /* Preview Section */
+    .preview-section {
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+
+    .main-preview {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 400px;
+      background:
+        radial-gradient(circle at 30% 40%, rgba(201, 169, 97, 0.08) 0%, transparent 50%),
+        linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, rgba(241, 237, 232, 0.6) 100%);
+      border-radius: 20px;
+      border: 1px solid rgba(201, 169, 97, 0.2);
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 2px 16px var(--shadow) inset;
+    }
+
+    .main-preview::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(201, 169, 97, 0.03) 1px, transparent 1px);
+      background-size: 20px 20px;
+      opacity: 0.5;
+    }
+
+    .main-preview canvas {
+      border-radius: 28px;
+      box-shadow:
+        0 20px 60px rgba(26, 29, 41, 0.15),
+        0 8px 24px rgba(26, 29, 41, 0.1),
+        0 0 0 1px rgba(201, 169, 97, 0.1);
+      position: relative;
+      z-index: 1;
+      animation: float 4s ease-in-out infinite;
+    }
+
+    /* Size Previews */
+    .size-previews {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+      gap: 16px;
+    }
+
+    .size-preview {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.7);
+      border-radius: 14px;
+      border: 1px solid rgba(201, 169, 97, 0.12);
+      transition: all 0.3s ease;
+    }
+
+    .size-preview:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 20px var(--shadow);
+      border-color: var(--champagne);
+    }
+
+    .size-preview canvas {
+      image-rendering: pixelated;
+      border-radius: 6px;
+      box-shadow: 0 2px 8px var(--shadow);
+    }
+
+    .size-label {
+      font-size: 11px;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--champagne-dark);
+      font-weight: 500;
+      letter-spacing: 0.5px;
+    }
+
+    /* Context Previews */
+    .context-previews {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .context-preview {
+      background: rgba(255, 255, 255, 0.8);
+      border-radius: 16px;
+      border: 1px solid rgba(201, 169, 97, 0.15);
+      overflow: hidden;
+      box-shadow: 0 4px 16px var(--shadow);
+      transition: all 0.3s ease;
+    }
+
+    .context-preview:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px var(--shadow-strong);
+    }
+
+    .context-header {
+      padding: 14px 20px;
+      border-bottom: 1px solid rgba(201, 169, 97, 0.15);
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--champagne-dark);
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      background: rgba(201, 169, 97, 0.05);
+    }
+
+    .browser-tab {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 20px;
+      background: #e8e6e3;
+    }
+
+    .browser-tab canvas {
+      border-radius: 3px;
+      box-shadow: 0 1px 3px rgba(26, 29, 41, 0.2);
+    }
+
+    .browser-tab .tab-title {
+      font-size: 13px;
+      color: var(--navy-light);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .bookmark-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 20px;
+    }
+
+    .bookmark-item canvas {
+      border-radius: 4px;
+      box-shadow: 0 2px 6px var(--shadow);
+    }
+
+    .bookmark-item .bookmark-name {
+      font-size: 14px;
+      color: var(--navy);
+      font-weight: 500;
+    }
+
+    /* Downloads */
+    .download-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 12px;
+    }
+
+    .download-btn {
+      background: rgba(255, 255, 255, 0.8);
+      border: 1px solid rgba(201, 169, 97, 0.2);
+      border-radius: 14px;
+      padding: 16px;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .download-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, var(--champagne) 0%, var(--champagne-dark) 100%);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .download-btn:hover {
+      border-color: var(--champagne);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(201, 169, 97, 0.25);
+    }
+
+    .download-btn:hover::before {
+      opacity: 0.08;
+    }
+
+    .download-btn .format {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--navy);
+      margin-bottom: 4px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .download-btn .size {
+      font-size: 11px;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--stone);
+      position: relative;
+      z-index: 1;
+    }
+
+    .download-all-btn {
+      grid-column: 1 / -1;
+      background: linear-gradient(135deg, var(--sage) 0%, #88A074 100%);
+      border: none;
+      color: white;
+      font-weight: 600;
+      padding: 20px;
+      font-size: 15px;
+      letter-spacing: 0.5px;
+      box-shadow: 0 6px 20px rgba(156, 175, 136, 0.3);
+    }
+
+    .download-all-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 28px rgba(156, 175, 136, 0.4);
+    }
+
+    .download-all-btn::before {
+      display: none;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      body {
+        padding: 40px 20px;
+      }
+
+      h1 {
+        font-size: 42px;
+      }
+
+      .workspace {
+        gap: 32px;
+      }
+
+      .panel {
+        padding: 28px;
+      }
+
+      .template-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+      }
+
+      .icon-grid {
+        grid-template-columns: repeat(5, 1fr);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="header-content">
+        <div class="header-left">
+          <div class="studio-label">Design Studio</div>
+          <h1>Favicon <em>Atelier</em></h1>
+          <p class="subtitle">
+            Craft distinctive, professional-grade icons with advanced layering effects,
+            curated templates, and studio-quality rendering.
+          </p>
+          <div class="header-ornament"></div>
+        </div>
+      </div>
+    </header>
+
+    <div class="workspace">
+      <!-- Controls Column -->
+      <div class="controls-column">
+        <div class="panel">
+          <div class="panel-title">Templates</div>
+          <div class="template-grid" id="templateGrid"></div>
+        </div>
+
+        <div class="panel" style="margin-top: 24px;">
+          <div class="panel-title">Content</div>
+
+          <div class="control-section">
+            <div class="control-label">Type</div>
+            <div class="input-row">
+              <div class="input-group">
+                <select id="contentType" onchange="updateContentType()">
+                  <option value="letter">Letter / Monogram</option>
+                  <option value="icon">Icon</option>
+                  <option value="emoji">Emoji</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="control-section" id="letterSection">
+            <div class="input-row">
+              <div class="input-group">
+                <label>Letter</label>
+                <input type="text" id="letter" value="A" maxlength="2" oninput="generate()">
+              </div>
+              <div class="input-group">
+                <label>Font</label>
+                <select id="fontFamily" onchange="generate()">
+                  <option value="Playfair Display">Playfair Display</option>
+                  <option value="Karla">Karla</option>
+                  <option value="JetBrains Mono">JetBrains Mono</option>
+                  <option value="system-ui">System</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="control-section" id="iconSection" style="display:none;">
+            <div class="control-label">Choose Icon</div>
+            <div class="icon-grid" id="iconGrid"></div>
+          </div>
+
+          <div class="control-section" id="emojiSection" style="display:none;">
+            <div class="input-group">
+              <label>Emoji</label>
+              <input type="text" id="emoji" value="🚀" maxlength="2" oninput="generate()">
+            </div>
+          </div>
+        </div>
+
+        <div class="panel" style="margin-top: 24px;">
+          <div class="panel-title">Colors</div>
+
+          <div class="input-row">
+            <div class="input-group">
+              <label>Background</label>
+              <input type="color" id="bgColor" value="#6366f1" oninput="generate()">
+            </div>
+            <div class="input-group">
+              <label>Gradient End</label>
+              <input type="color" id="bgColor2" value="#8b5cf6" oninput="generate()">
+            </div>
+          </div>
+          <div class="input-row" style="margin-top: 14px;">
+            <div class="input-group">
+              <label>Icon / Text</label>
+              <input type="color" id="fgColor" value="#ffffff" oninput="generate()">
+            </div>
+          </div>
+
+          <div class="checkbox-row">
+            <input type="checkbox" id="useGradient" checked onchange="generate()">
+            <label for="useGradient">Use gradient background</label>
+          </div>
+        </div>
+
+        <div class="panel" style="margin-top: 24px;">
+          <div class="panel-title">Effects</div>
+
+          <div class="effects-grid">
+            <div class="effect-control">
+              <div class="effect-header">
+                <span class="effect-name">Drop Shadow</span>
+                <div class="effect-toggle active" id="shadowToggle" onclick="toggleEffect('shadow')"></div>
+              </div>
+              <input type="range" id="shadowIntensity" min="0" max="100" value="40" oninput="generate()">
+              <div class="range-value" id="shadowValue">40%</div>
+            </div>
+
+            <div class="effect-control">
+              <div class="effect-header">
+                <span class="effect-name">Inner Glow</span>
+                <div class="effect-toggle" id="innerGlowToggle" onclick="toggleEffect('innerGlow')"></div>
+              </div>
+              <input type="range" id="innerGlowIntensity" min="0" max="100" value="30" oninput="generate()">
+              <div class="range-value" id="innerGlowValue">30%</div>
+            </div>
+
+            <div class="effect-control">
+              <div class="effect-header">
+                <span class="effect-name">Highlight</span>
+                <div class="effect-toggle active" id="highlightToggle" onclick="toggleEffect('highlight')"></div>
+              </div>
+              <input type="range" id="highlightIntensity" min="0" max="100" value="25" oninput="generate()">
+              <div class="range-value" id="highlightValue">25%</div>
+            </div>
+
+            <div class="effect-control">
+              <div class="effect-header">
+                <span class="effect-name">Noise / Grain</span>
+                <div class="effect-toggle" id="noiseToggle" onclick="toggleEffect('noise')"></div>
+              </div>
+              <input type="range" id="noiseIntensity" min="0" max="100" value="8" oninput="generate()">
+              <div class="range-value" id="noiseValue">8%</div>
+            </div>
+
+            <div class="effect-control">
+              <div class="effect-header">
+                <span class="effect-name">Corner Radius</span>
+              </div>
+              <input type="range" id="cornerRadius" min="0" max="50" value="22" oninput="generate()">
+              <div class="range-value" id="cornerValue">22%</div>
+            </div>
+          </div>
+        </div>
+
+        <button class="generate-btn" onclick="generate()">
+          Generate Favicon
+        </button>
+      </div>
+
+      <!-- Preview Section -->
+      <div class="preview-section">
+        <div class="panel">
+          <div class="panel-title">Preview</div>
+          <div class="main-preview">
+            <canvas id="mainCanvas" width="256" height="256"></canvas>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-title">All Sizes</div>
+          <div class="size-previews" id="sizePreviewsContainer"></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-title">In Context</div>
+          <div class="context-previews">
+            <div class="context-preview">
+              <div class="context-header">Browser Tab</div>
+              <div class="browser-tab">
+                <canvas id="tabCanvas" width="16" height="16"></canvas>
+                <span class="tab-title">My Awesome App</span>
+              </div>
+            </div>
+            <div class="context-preview">
+              <div class="context-header">Bookmarks Bar</div>
+              <div class="bookmark-item">
+                <canvas id="bookmarkCanvas" width="16" height="16"></canvas>
+                <span class="bookmark-name">My Awesome App</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-title">Download</div>
+          <div class="download-grid" id="downloadGrid"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // =====================================================
+    // DESIGN TEMPLATES
+    // =====================================================
+    const TEMPLATES = [
+      {
+        id: 'modern',
+        name: 'Modern',
+        preview: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+        settings: {
+          bgColor: '#6366f1',
+          bgColor2: '#8b5cf6',
+          fgColor: '#ffffff',
+          useGradient: true,
+          shadow: true,
+          shadowIntensity: 40,
+          highlight: true,
+          highlightIntensity: 25,
+          innerGlow: false,
+          noise: false,
+          cornerRadius: 22
+        }
+      },
+      {
+        id: 'vibrant',
+        name: 'Vibrant',
+        preview: 'linear-gradient(135deg, #ec4899, #f97316)',
+        settings: {
+          bgColor: '#ec4899',
+          bgColor2: '#f97316',
+          fgColor: '#ffffff',
+          useGradient: true,
+          shadow: true,
+          shadowIntensity: 50,
+          highlight: true,
+          highlightIntensity: 30,
+          innerGlow: true,
+          innerGlowIntensity: 20,
+          noise: false,
+          cornerRadius: 22
+        }
+      },
+      {
+        id: 'minimal',
+        name: 'Minimal',
+        preview: '#18181b',
+        settings: {
+          bgColor: '#18181b',
+          bgColor2: '#27272a',
+          fgColor: '#fafafa',
+          useGradient: false,
+          shadow: true,
+          shadowIntensity: 30,
+          highlight: false,
+          innerGlow: false,
+          noise: true,
+          noiseIntensity: 5,
+          cornerRadius: 18
+        }
+      },
+      {
+        id: 'glass',
+        name: 'Glass',
+        preview: 'linear-gradient(135deg, rgba(59, 130, 246, 0.8), rgba(6, 182, 212, 0.8))',
+        settings: {
+          bgColor: '#3b82f6',
+          bgColor2: '#06b6d4',
+          fgColor: '#ffffff',
+          useGradient: true,
+          shadow: true,
+          shadowIntensity: 35,
+          highlight: true,
+          highlightIntensity: 50,
+          innerGlow: true,
+          innerGlowIntensity: 40,
+          noise: true,
+          noiseIntensity: 3,
+          cornerRadius: 24
+        }
+      },
+      {
+        id: 'neon',
+        name: 'Neon',
+        preview: 'linear-gradient(135deg, #0f172a, #1e293b)',
+        settings: {
+          bgColor: '#0f172a',
+          bgColor2: '#1e293b',
+          fgColor: '#22d3ee',
+          useGradient: true,
+          shadow: true,
+          shadowIntensity: 60,
+          highlight: false,
+          innerGlow: true,
+          innerGlowIntensity: 60,
+          noise: true,
+          noiseIntensity: 4,
+          cornerRadius: 20
+        }
+      },
+      {
+        id: 'warm',
+        name: 'Warm',
+        preview: 'linear-gradient(135deg, #f59e0b, #ef4444)',
+        settings: {
+          bgColor: '#f59e0b',
+          bgColor2: '#ef4444',
+          fgColor: '#ffffff',
+          useGradient: true,
+          shadow: true,
+          shadowIntensity: 45,
+          highlight: true,
+          highlightIntensity: 35,
+          innerGlow: false,
+          noise: false,
+          cornerRadius: 22
+        }
+      },
+      {
+        id: 'forest',
+        name: 'Forest',
+        preview: 'linear-gradient(135deg, #22c55e, #14b8a6)',
+        settings: {
+          bgColor: '#22c55e',
+          bgColor2: '#14b8a6',
+          fgColor: '#ffffff',
+          useGradient: true,
+          shadow: true,
+          shadowIntensity: 40,
+          highlight: true,
+          highlightIntensity: 25,
+          innerGlow: false,
+          noise: true,
+          noiseIntensity: 6,
+          cornerRadius: 22
+        }
+      },
+      {
+        id: 'mono',
+        name: 'Mono',
+        preview: '#ffffff',
+        settings: {
+          bgColor: '#ffffff',
+          bgColor2: '#f4f4f5',
+          fgColor: '#18181b',
+          useGradient: false,
+          shadow: true,
+          shadowIntensity: 25,
+          highlight: false,
+          innerGlow: false,
+          noise: false,
+          cornerRadius: 18
+        }
+      }
+    ];
+
+    // =====================================================
+    // LUCIDE ICONS (subset)
+    // =====================================================
+    const ICONS = {
+      rocket: '<path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/>',
+      zap: '<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>',
+      star: '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>',
+      heart: '<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>',
+      code: '<polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>',
+      box: '<path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/>',
+      compass: '<circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>',
+      flame: '<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>',
+      globe: '<circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/>',
+      layers: '<polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/>',
+      music: '<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>',
+      send: '<path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/>',
+      shield: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/>',
+      sparkles: '<path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/>',
+      sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>',
+      target: '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
+      terminal: '<polyline points="4 17 10 11 4 5"/><line x1="12" x2="20" y1="19" y2="19"/>',
+      wand: '<path d="M15 4V2"/><path d="M15 16v-2"/><path d="M8 9h2"/><path d="M20 9h2"/><path d="M17.8 11.8 19 13"/><path d="M15 9h0"/><path d="M17.8 6.2 19 5"/><path d="m3 21 9-9"/><path d="M12.2 6.2 11 5"/>'
+    };
+
+    // =====================================================
+    // STATE
+    // =====================================================
+    let currentTemplate = 'modern';
+    let selectedIcon = 'rocket';
+    let effects = {
+      shadow: true,
+      innerGlow: false,
+      highlight: true,
+      noise: false
+    };
+
+    const SIZES = [16, 32, 48, 64, 128, 180, 192, 512];
+
+    // =====================================================
+    // INITIALIZATION
+    // =====================================================
+    function init() {
+      renderTemplates();
+      renderIcons();
+      renderDownloadButtons();
+      renderSizePreviews();
+      applyTemplate('modern');
+      generate();
+    }
+
+    function renderTemplates() {
+      const grid = document.getElementById('templateGrid');
+      grid.innerHTML = TEMPLATES.map(t => `
+        <div class="template-btn ${t.id === currentTemplate ? 'active' : ''}"
+             onclick="applyTemplate('${t.id}')"
+             data-template="${t.id}">
+          <div class="template-icon" style="background: ${t.preview};"></div>
+          <div class="template-name">${t.name}</div>
+        </div>
+      `).join('');
+    }
+
+    function renderIcons() {
+      const grid = document.getElementById('iconGrid');
+      grid.innerHTML = Object.entries(ICONS).map(([name, path]) => `
+        <div class="icon-btn ${name === selectedIcon ? 'active' : ''}"
+             onclick="selectIcon('${name}')"
+             data-icon="${name}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            ${path}
+          </svg>
+        </div>
+      `).join('');
+    }
+
+    function renderSizePreviews() {
+      const container = document.getElementById('sizePreviewsContainer');
+      container.innerHTML = SIZES.map(size => `
+        <div class="size-preview">
+          <canvas id="preview_${size}" width="${size}" height="${size}"
+                  style="width: ${Math.min(size, 64)}px; height: ${Math.min(size, 64)}px;"></canvas>
+          <span class="size-label">${size}×${size}</span>
+        </div>
+      `).join('');
+    }
+
+    function renderDownloadButtons() {
+      const grid = document.getElementById('downloadGrid');
+      const buttons = SIZES.map(size => {
+        const label = size === 180 ? 'Apple Touch' : `${size}×${size}`;
+        return `
+          <div class="download-btn" onclick="downloadSize(${size})">
+            <div class="format">${label}</div>
+            <div class="size">.png</div>
+          </div>
+        `;
+      });
+
+      buttons.push(`
+        <div class="download-btn" onclick="downloadSVG()">
+          <div class="format">Vector</div>
+          <div class="size">.svg</div>
+        </div>
+      `);
+
+      buttons.push(`
+        <div class="download-btn download-all-btn" onclick="downloadAll()">
+          📦 Download All Files
+        </div>
+      `);
+
+      grid.innerHTML = buttons.join('');
+    }
+
+    // =====================================================
+    // TEMPLATE APPLICATION
+    // =====================================================
+    function applyTemplate(templateId) {
+      currentTemplate = templateId;
+      const template = TEMPLATES.find(t => t.id === templateId);
+      if (!template) return;
+
+      const s = template.settings;
+
+      document.getElementById('bgColor').value = s.bgColor;
+      document.getElementById('bgColor2').value = s.bgColor2;
+      document.getElementById('fgColor').value = s.fgColor;
+      document.getElementById('useGradient').checked = s.useGradient;
+
+      // Effects
+      effects.shadow = s.shadow ?? true;
+      effects.innerGlow = s.innerGlow ?? false;
+      effects.highlight = s.highlight ?? true;
+      effects.noise = s.noise ?? false;
+
+      document.getElementById('shadowToggle').classList.toggle('active', effects.shadow);
+      document.getElementById('innerGlowToggle').classList.toggle('active', effects.innerGlow);
+      document.getElementById('highlightToggle').classList.toggle('active', effects.highlight);
+      document.getElementById('noiseToggle').classList.toggle('active', effects.noise);
+
+      document.getElementById('shadowIntensity').value = s.shadowIntensity ?? 40;
+      document.getElementById('innerGlowIntensity').value = s.innerGlowIntensity ?? 30;
+      document.getElementById('highlightIntensity').value = s.highlightIntensity ?? 25;
+      document.getElementById('noiseIntensity').value = s.noiseIntensity ?? 8;
+      document.getElementById('cornerRadius').value = s.cornerRadius ?? 22;
+
+      updateRangeValues();
+
+      // Update template buttons
+      document.querySelectorAll('.template-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.template === templateId);
+      });
+
+      generate();
+    }
+
+    function updateRangeValues() {
+      document.getElementById('shadowValue').textContent = document.getElementById('shadowIntensity').value + '%';
+      document.getElementById('innerGlowValue').textContent = document.getElementById('innerGlowIntensity').value + '%';
+      document.getElementById('highlightValue').textContent = document.getElementById('highlightIntensity').value + '%';
+      document.getElementById('noiseValue').textContent = document.getElementById('noiseIntensity').value + '%';
+      document.getElementById('cornerValue').textContent = document.getElementById('cornerRadius').value + '%';
+    }
+
+    // =====================================================
+    // UI INTERACTIONS
+    // =====================================================
+    function toggleEffect(effectName) {
+      effects[effectName] = !effects[effectName];
+      document.getElementById(effectName + 'Toggle').classList.toggle('active', effects[effectName]);
+      generate();
+    }
+
+    function updateContentType() {
+      const type = document.getElementById('contentType').value;
+      document.getElementById('letterSection').style.display = type === 'letter' ? 'block' : 'none';
+      document.getElementById('iconSection').style.display = type === 'icon' ? 'block' : 'none';
+      document.getElementById('emojiSection').style.display = type === 'emoji' ? 'block' : 'none';
+      generate();
+    }
+
+    function selectIcon(iconName) {
+      selectedIcon = iconName;
+      document.querySelectorAll('.icon-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.icon === iconName);
+      });
+      generate();
+    }
+
+    // =====================================================
+    // GENERATION ENGINE (keeping original functionality)
+    // =====================================================
+    function generate() {
+      updateRangeValues();
+
+      // Generate all sizes
+      SIZES.forEach(size => {
+        const canvas = document.getElementById(`preview_${size}`);
+        if (canvas) generateFavicon(canvas, size);
+      });
+
+      // Main preview
+      generateFavicon(document.getElementById('mainCanvas'), 256);
+
+      // Context previews
+      generateFavicon(document.getElementById('tabCanvas'), 16);
+      generateFavicon(document.getElementById('bookmarkCanvas'), 16);
+    }
+
+    function generateFavicon(canvas, size) {
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, size, size);
+
+      // Settings
+      const bgColor = document.getElementById('bgColor').value;
+      const bgColor2 = document.getElementById('bgColor2').value;
+      const fgColor = document.getElementById('fgColor').value;
+      const useGradient = document.getElementById('useGradient').checked;
+      const cornerRadius = (parseInt(document.getElementById('cornerRadius').value) / 100) * size * 0.5;
+
+      const shadowIntensity = parseInt(document.getElementById('shadowIntensity').value) / 100;
+      const highlightIntensity = parseInt(document.getElementById('highlightIntensity').value) / 100;
+      const innerGlowIntensity = parseInt(document.getElementById('innerGlowIntensity').value) / 100;
+      const noiseIntensity = parseInt(document.getElementById('noiseIntensity').value) / 100;
+
+      // Enable high quality rendering
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+
+      // ===== LAYER 1: DROP SHADOW =====
+      if (effects.shadow && size >= 32) {
+        ctx.save();
+        ctx.shadowColor = 'rgba(0, 0, 0, ' + (0.3 * shadowIntensity) + ')';
+        ctx.shadowBlur = size * 0.15 * shadowIntensity;
+        ctx.shadowOffsetY = size * 0.05 * shadowIntensity;
+
+        ctx.fillStyle = bgColor;
+        drawRoundedRect(ctx, size * 0.05, size * 0.05, size * 0.9, size * 0.9, cornerRadius * 0.9);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      // ===== LAYER 2: BACKGROUND =====
+      ctx.save();
+
+      if (useGradient) {
+        const gradient = ctx.createLinearGradient(0, 0, size, size);
+        gradient.addColorStop(0, bgColor);
+        gradient.addColorStop(0.5, blendColors(bgColor, bgColor2, 0.5));
+        gradient.addColorStop(1, bgColor2);
+        ctx.fillStyle = gradient;
+      } else {
+        ctx.fillStyle = bgColor;
+      }
+
+      drawRoundedRect(ctx, 0, 0, size, size, cornerRadius);
+      ctx.fill();
+      ctx.restore();
+
+      // ===== LAYER 3: INNER GLOW =====
+      if (effects.innerGlow && size >= 32) {
+        ctx.save();
+        ctx.globalCompositeOperation = 'source-atop';
+
+        const glowGradient = ctx.createRadialGradient(
+          size * 0.5, size * 0.3, 0,
+          size * 0.5, size * 0.5, size * 0.7
+        );
+        glowGradient.addColorStop(0, 'rgba(255, 255, 255, ' + (0.4 * innerGlowIntensity) + ')');
+        glowGradient.addColorStop(0.5, 'rgba(255, 255, 255, ' + (0.1 * innerGlowIntensity) + ')');
+        glowGradient.addColorStop(1, 'rgba(0, 0, 0, ' + (0.2 * innerGlowIntensity) + ')');
+
+        ctx.fillStyle = glowGradient;
+        drawRoundedRect(ctx, 0, 0, size, size, cornerRadius);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      // ===== LAYER 4: HIGHLIGHT =====
+      if (effects.highlight && size >= 32) {
+        ctx.save();
+        ctx.globalCompositeOperation = 'overlay';
+
+        const highlightGradient = ctx.createLinearGradient(0, 0, 0, size);
+        highlightGradient.addColorStop(0, 'rgba(255, 255, 255, ' + (0.5 * highlightIntensity) + ')');
+        highlightGradient.addColorStop(0.5, 'rgba(255, 255, 255, 0)');
+        highlightGradient.addColorStop(1, 'rgba(0, 0, 0, ' + (0.2 * highlightIntensity) + ')');
+
+        ctx.fillStyle = highlightGradient;
+        drawRoundedRect(ctx, 0, 0, size, size, cornerRadius);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      // ===== LAYER 5: NOISE/GRAIN =====
+      if (effects.noise && size >= 64) {
+        ctx.save();
+        ctx.globalCompositeOperation = 'overlay';
+
+        const noiseCanvas = generateNoise(size, noiseIntensity);
+        ctx.drawImage(noiseCanvas, 0, 0);
+        ctx.restore();
+      }
+
+      // ===== LAYER 6: CONTENT =====
+      const contentType = document.getElementById('contentType').value;
+
+      if (contentType === 'letter') {
+        drawLetter(ctx, size, fgColor);
+      } else if (contentType === 'icon') {
+        drawIcon(ctx, size, fgColor);
+      } else if (contentType === 'emoji') {
+        drawEmoji(ctx, size);
+      }
+    }
+
+    function drawRoundedRect(ctx, x, y, width, height, radius) {
+      ctx.beginPath();
+      ctx.roundRect(x, y, width, height, radius);
+    }
+
+    function drawLetter(ctx, size, color) {
+      const letter = document.getElementById('letter').value || 'A';
+      const fontFamily = document.getElementById('fontFamily').value;
+
+      ctx.save();
+
+      if (size >= 32 && effects.shadow) {
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+        ctx.shadowBlur = size * 0.04;
+        ctx.shadowOffsetY = size * 0.02;
+      }
+
+      ctx.fillStyle = color;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+
+      const fontSize = letter.length > 1 ? size * 0.4 : size * 0.55;
+      ctx.font = `bold ${fontSize}px "${fontFamily}", sans-serif`;
+
+      const metrics = ctx.measureText(letter.toUpperCase());
+      const opticalOffset = size * 0.02;
+
+      ctx.fillText(letter.toUpperCase(), size / 2, size / 2 - opticalOffset);
+      ctx.restore();
+    }
+
+    function drawIcon(ctx, size, color) {
+      const iconPath = ICONS[selectedIcon];
+      if (!iconPath) return;
+
+      ctx.save();
+
+      if (size >= 32 && effects.shadow) {
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+        ctx.shadowBlur = size * 0.04;
+        ctx.shadowOffsetY = size * 0.02;
+      }
+
+      const iconSize = size * 0.55;
+      const offset = (size - iconSize) / 2;
+
+      ctx.translate(offset, offset);
+      ctx.scale(iconSize / 24, iconSize / 24);
+
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.fillStyle = 'none';
+
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg.innerHTML = iconPath;
+
+      svg.querySelectorAll('path, polyline, polygon, circle, line, rect').forEach(el => {
+        const path = new Path2D();
+
+        if (el.tagName === 'path') {
+          path.addPath(new Path2D(el.getAttribute('d')));
+        } else if (el.tagName === 'circle') {
+          const cx = parseFloat(el.getAttribute('cx'));
+          const cy = parseFloat(el.getAttribute('cy'));
+          const r = parseFloat(el.getAttribute('r'));
+          path.arc(cx, cy, r, 0, Math.PI * 2);
+        } else if (el.tagName === 'polyline' || el.tagName === 'polygon') {
+          const points = el.getAttribute('points').trim().split(/[\s,]+/).map(Number);
+          for (let i = 0; i < points.length; i += 2) {
+            if (i === 0) path.moveTo(points[i], points[i + 1]);
+            else path.lineTo(points[i], points[i + 1]);
+          }
+          if (el.tagName === 'polygon') path.closePath();
+        } else if (el.tagName === 'line') {
+          path.moveTo(parseFloat(el.getAttribute('x1')), parseFloat(el.getAttribute('y1')));
+          path.lineTo(parseFloat(el.getAttribute('x2')), parseFloat(el.getAttribute('y2')));
+        }
+
+        ctx.stroke(path);
+      });
+
+      ctx.restore();
+    }
+
+    function drawEmoji(ctx, size) {
+      const emoji = document.getElementById('emoji').value || '🚀';
+
+      ctx.save();
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.font = `${size * 0.6}px "Apple Color Emoji", "Segoe UI Emoji", sans-serif`;
+      ctx.fillText(emoji, size / 2, size / 2 + size * 0.03);
+      ctx.restore();
+    }
+
+    function generateNoise(size, intensity) {
+      const noiseCanvas = document.createElement('canvas');
+      noiseCanvas.width = size;
+      noiseCanvas.height = size;
+      const noiseCtx = noiseCanvas.getContext('2d');
+
+      const imageData = noiseCtx.createImageData(size, size);
+      const data = imageData.data;
+
+      for (let i = 0; i < data.length; i += 4) {
+        const noise = (Math.random() - 0.5) * 255 * intensity;
+        data[i] = 128 + noise;
+        data[i + 1] = 128 + noise;
+        data[i + 2] = 128 + noise;
+        data[i + 3] = 30 * intensity;
+      }
+
+      noiseCtx.putImageData(imageData, 0, 0);
+      return noiseCanvas;
+    }
+
+    function blendColors(color1, color2, ratio) {
+      const hex = (c) => parseInt(c.slice(1), 16);
+      const r1 = (hex(color1) >> 16) & 255;
+      const g1 = (hex(color1) >> 8) & 255;
+      const b1 = hex(color1) & 255;
+      const r2 = (hex(color2) >> 16) & 255;
+      const g2 = (hex(color2) >> 8) & 255;
+      const b2 = hex(color2) & 255;
+
+      const r = Math.round(r1 + (r2 - r1) * ratio);
+      const g = Math.round(g1 + (g2 - g1) * ratio);
+      const b = Math.round(b1 + (b2 - b1) * ratio);
+
+      return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
+    }
+
+    // =====================================================
+    // DOWNLOAD FUNCTIONS (keeping original)
+    // =====================================================
+    function downloadSize(size) {
+      const canvas = document.createElement('canvas');
+      canvas.width = size;
+      canvas.height = size;
+      generateFavicon(canvas, size);
+
+      canvas.toBlob(blob => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = size === 180 ? 'apple-touch-icon.png' : `favicon-${size}x${size}.png`;
+        a.click();
+        URL.revokeObjectURL(url);
+      }, 'image/png');
+    }
+
+    function downloadSVG() {
+      const letter = document.getElementById('letter').value || 'A';
+      const bgColor = document.getElementById('bgColor').value;
+      const bgColor2 = document.getElementById('bgColor2').value;
+      const fgColor = document.getElementById('fgColor').value;
+      const useGradient = document.getElementById('useGradient').checked;
+      const cornerRadius = parseInt(document.getElementById('cornerRadius').value);
+      const rx = (cornerRadius / 100) * 16;
+      const fontFamily = document.getElementById('fontFamily').value;
+
+      let bgFill = bgColor;
+      let defs = '';
+
+      if (useGradient) {
+        defs = `
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="${bgColor}"/>
+      <stop offset="100%" stop-color="${bgColor2}"/>
+    </linearGradient>
+  </defs>`;
+        bgFill = 'url(#bg)';
+      }
+
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">${defs}
+  <rect width="32" height="32" rx="${rx}" fill="${bgFill}"/>
+  <text x="16" y="16" font-family="${fontFamily}, sans-serif" font-size="18" font-weight="bold" text-anchor="middle" dominant-baseline="central" fill="${fgColor}">${letter.toUpperCase()}</text>
+</svg>`;
+
+      const blob = new Blob([svg], { type: 'image/svg+xml' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'favicon.svg';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function downloadAll() {
+      SIZES.forEach((size, index) => {
+        setTimeout(() => downloadSize(size), index * 150);
+      });
+
+      setTimeout(() => downloadSVG(), SIZES.length * 150);
+    }
+
+    // Initialize
+    init();
+  </script>
+</body>
+</html>

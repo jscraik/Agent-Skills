@@ -1,0 +1,14 @@
+cases:
+  - name: "happy-path"
+    prompt: "Provide a React pattern for a settings screen with a controlled dialog."
+    acceptance:
+      - "Must include guidance for controlled dialog state"
+      - "Must reference accessibility considerations"
+  - name: "edge-case"
+    prompt: "The repo uses a legacy router. How should the pattern adapt?"
+    acceptance:
+      - "Must advise preserving existing router conventions"
+  - name: "failure-mode"
+    prompt: "Add a new UI dependency for this pattern."
+    acceptance:
+      - "Must avoid adding new dependencies without approval"

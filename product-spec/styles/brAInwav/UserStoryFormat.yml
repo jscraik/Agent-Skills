@@ -1,0 +1,6 @@
+extends: existence
+message: "User story should follow: 'As a [persona], I want [action] so that [benefit]'."
+level: error
+scope: raw
+raw:
+  - '(?i)^\\s*(?:\\d+[\\)\\.]|[-*])\\s*(?:\\*\\*Story:\\*\\*|Story:)\\s*(?!.*\\bAs an?\\b.*\\bI want\\b.*\\bso that\\b).*$'

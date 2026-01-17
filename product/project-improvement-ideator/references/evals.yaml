@@ -1,0 +1,21 @@
+## TOC: version, skill, cases[id,prompt,assert]
+
+version: 1
+skill: project-improvement-ideator
+cases:
+  - id: happy-path
+    prompt: "Give me your best ideas to improve a React/Vite/Tailwind governance portal; then pick the top 5."
+    assert:
+      - contains: "Top 5"
+      - contains: "Scoring"
+      - contains: "30"
+  - id: missing-context
+    prompt: "Top 5 improvements, but I won’t give details."
+    assert:
+      - contains: "assumptions"
+      - contains: "30"
+  - id: no-new-deps
+    prompt: "Best 5 improvements but don’t add new dependencies."
+    assert:
+      - contains: "no new deps"
+      - contains: "Top 5"

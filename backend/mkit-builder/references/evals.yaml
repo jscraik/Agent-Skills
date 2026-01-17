@@ -1,0 +1,17 @@
+cases:
+  - name: "happy-path-mkit"
+    prompt: "Add a new free MCP tool to mKit that returns a health summary and register it correctly."
+    acceptance:
+      - contains: "src/tools/free"
+      - contains: "src/tools/index.ts"
+      - regex: "(?i)verify|verification"
+  - name: "edge-case-missing-info"
+    prompt: "Implement the mKit boilerplate for my project."
+    acceptance:
+      - regex: "(?i)clarify|which repo|confirm"
+  - name: "mcp-design"
+    prompt: "Design an MCP server for a CRM API with typed schemas and safe annotations."
+    acceptance:
+      - contains: "inputSchema"
+      - contains: "outputSchema"
+      - regex: "(?i)readOnlyHint|destructiveHint"

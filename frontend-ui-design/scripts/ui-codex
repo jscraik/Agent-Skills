@@ -1,0 +1,174 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# ui-codex: structured UI triage/fix reporting via codex exec.
+
+usage() {
+  cat <<'TXT'
+Usage:
+  ui-codex triage --issue "..." [--profile iphone_pro] [--path /] [--before <png>] [--schema codex/ui_report.schema.json]
+  ui-codex fix    --issue "..." [--profile iphone_pro] [--path /] [--before <png>] [--after <png>] [--schema codex/ui_report.schema.json]
+
+Options:
+  --issue         Required. Short description of what's wrong (what you see on iOS).
+  --profile       Optional. Device profile label (freeform string). Default: iphone_pro
+  --path          Optional. Route/path to open (e.g. /settings). Default: /
+  --before        Optional. Path to a BEFORE screenshot PNG. If omitted, tries to create one via bin/ios-web.
+  --after         Optional. Path to an AFTER screenshot PNG (fix mode). Default: .ios-web/after/<profile>.png
+  --schema        Optional. JSON Schema path. Default: codex/ui_report.schema.json
+  --out           Optional. Output report path. Default: .ios-web/reports/ui_report_<timestamp>_<profile>.json
+
+Codex options:
+  --codex-profile Optional. Codex config profile name to pass to `codex exec --profile`.
+  --model         Optional. Override model (`codex exec --model`).
+  --sandbox       Optional. Override sandbox mode (read-only|workspace-write|danger-full-access).
+  --full-auto     Optional. Add `--full-auto` (low-friction automation preset).
+  --skip-git-repo-check Optional. Pass through to `codex exec`.
+TXT
+}
+
+if [[ $# -lt 1 ]]; then
+  usage
+  exit 2
+fi
+
+if [[ "$1" == "-h" || "$1" == "--help" ]]; then
+  usage
+  exit 0
+fi
+
+SUBCOMMAND="$1"
+shift
+
+if [[ "$SUBCOMMAND" != "triage" && "$SUBCOMMAND" != "fix" ]]; then
+  echo "ERROR: first argument must be 'triage' or 'fix'"
+  usage
+  exit 2
+fi
+
+ISSUE=""
+DEVICE_PROFILE="iphone_pro"
+ROUTE_PATH="/"
+BEFORE=""
+AFTER=""
+SCHEMA="codex/ui_report.schema.json"
+OUT=""
+
+CODEX_PROFILE=""
+CODEX_MODEL=""
+CODEX_SANDBOX=""
+CODEX_FULL_AUTO="0"
+CODEX_SKIP_GIT_REPO_CHECK="0"
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --issue) ISSUE="${2:-}"; shift 2 ;;
+    --profile) DEVICE_PROFILE="${2:-}"; shift 2 ;;
+    --path) ROUTE_PATH="${2:-}"; shift 2 ;;
+    --before) BEFORE="${2:-}"; shift 2 ;;
+    --after) AFTER="${2:-}"; shift 2 ;;
+    --schema) SCHEMA="${2:-}"; shift 2 ;;
+    --out) OUT="${2:-}"; shift 2 ;;
+    --codex-profile) CODEX_PROFILE="${2:-}"; shift 2 ;;
+    --model) CODEX_MODEL="${2:-}"; shift 2 ;;
+    --sandbox) CODEX_SANDBOX="${2:-}"; shift 2 ;;
+    --full-auto) CODEX_FULL_AUTO="1"; shift 1 ;;
+    --skip-git-repo-check) CODEX_SKIP_GIT_REPO_CHECK="1"; shift 1 ;;
+    -h|--help) usage; exit 0 ;;
+    *) echo "ERROR: unknown option: $1"; usage; exit 2 ;;
+  esac
+done
+
+if [[ -z "$ISSUE" ]]; then
+  echo "ERROR: --issue is required"
+  usage
+  exit 2
+fi
+
+mkdir -p .ios-web/before .ios-web/after .ios-web/reports
+
+if [[ -z "$BEFORE" ]]; then
+  BEFORE=".ios-web/before/${DEVICE_PROFILE}.png"
+  if [[ -x "bin/ios-web" ]]; then
+    echo "Capturing BEFORE screenshot via bin/ios-web -> $BEFORE"
+    bin/ios-web --profile "$DEVICE_PROFILE" --path "$ROUTE_PATH" --snap "$BEFORE"
+  else
+    echo "ERROR: --before not provided and bin/ios-web not found/executable."
+    echo "Provide --before <png> or add bin/ios-web."
+    exit 2
+  fi
+fi
+
+if [[ -z "$AFTER" ]]; then
+  AFTER=".ios-web/after/${DEVICE_PROFILE}.png"
+fi
+
+if [[ -z "$OUT" ]]; then
+  TS="$(date +%Y%m%d_%H%M%S)"
+  OUT=".ios-web/reports/ui_report_${TS}_${DEVICE_PROFILE}.json"
+fi
+
+if [[ ! -f "$SCHEMA" ]]; then
+  echo "ERROR: schema not found at: $SCHEMA"
+  exit 2
+fi
+
+if [[ -z "$CODEX_SANDBOX" ]]; then
+  if [[ "$SUBCOMMAND" == "triage" ]]; then
+    CODEX_SANDBOX="read-only"
+  else
+    CODEX_SANDBOX="workspace-write"
+  fi
+fi
+
+PROMPT=$(cat <<TXT
+You are working in a React + Vite + Tailwind repository.
+
+Task mode: ${SUBCOMMAND}
+iOS UI issue: ${ISSUE}
+Device profile label: ${DEVICE_PROFILE}
+Route path: ${ROUTE_PATH}
+
+Screenshot paths:
+- BEFORE: ${BEFORE}
+- AFTER: ${AFTER}
+
+Instructions:
+- The BEFORE screenshot is attached to this run. Inspect it carefully.
+- If mode is "triage":
+  - Do not modify repository files.
+  - Provide: suspected root cause, likely files/components, and next steps.
+  - Set after_screenshot to null.
+- If mode is "fix":
+  - Implement the smallest fix that resolves the issue.
+  - Use existing scripts and project conventions.
+  - Reproduce + capture AFTER screenshot to the path above (use bin/ios-web if available).
+  - Run available checks from package.json (lint/typecheck/tests/build as appropriate).
+
+Output requirements:
+- Output ONLY a single JSON object that conforms exactly to the provided output schema.
+- No markdown, no extra keys, no commentary outside JSON.
+TXT
+)
+
+CMD=(codex exec - --output-schema "$SCHEMA" -o "$OUT" --image "$BEFORE" --sandbox "$CODEX_SANDBOX")
+
+if [[ "$CODEX_FULL_AUTO" == "1" ]]; then
+  CMD+=(--full-auto)
+fi
+
+if [[ -n "$CODEX_PROFILE" ]]; then
+  CMD+=(--profile "$CODEX_PROFILE")
+fi
+
+if [[ -n "$CODEX_MODEL" ]]; then
+  CMD+=(--model "$CODEX_MODEL")
+fi
+
+if [[ "$CODEX_SKIP_GIT_REPO_CHECK" == "1" ]]; then
+  CMD+=(--skip-git-repo-check)
+fi
+
+echo "$PROMPT" | "${CMD[@]}"
+
+echo "Wrote UI report: $OUT"

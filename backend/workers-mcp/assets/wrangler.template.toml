@@ -1,0 +1,136 @@
+# Cloudflare Workers MCP Server Configuration
+# Copy this file to wrangler.toml and update with your account details
+
+name = "PROJECT_NAME"
+main = "src/workers/mcp/index.ts"
+compatibility_date = "2026-01-04"
+compatibility_flags = ["nodejs_compat"]
+
+# ============================================================================
+# ACCOUNT
+# ============================================================================
+account_id = "your-account-id"  # Get from: wrangler whoami
+
+# ============================================================================
+# BINDINGS - D1 Database
+# ============================================================================
+[[d1_databases]]
+binding = "DB"
+database_name = "PROJECT_NAME"
+database_id = "your-d1-database-id"  # Create: wrangler d1 create PROJECT_NAME
+
+# ============================================================================
+# BINDINGS - Workers KV
+# ============================================================================
+[[kv_namespaces]]
+binding = "CACHE"
+id = "your-cache-kv-id"  # Create: wrangler kv:namespace create CACHE
+
+[[kv_namespaces]]
+binding = "RATE_LIMITS"
+id = "your-rate-limits-kv-id"
+
+[[kv_namespaces]]
+binding = "OAUTH_KV"
+id = "your-oauth-kv-id"
+
+# ============================================================================
+# BINDINGS - R2 Storage
+# ============================================================================
+[[r2_buckets]]
+binding = "R2"
+bucket_name = "PROJECT_NAME-storage"  # Create: wrangler r2 bucket create PROJECT_NAME-storage
+
+# ============================================================================
+# BINDINGS - Cloudflare Vectorize
+# ============================================================================
+[[vectorize]]
+binding = "VECTORIZE_INDEX"
+index_name = "PROJECT_NAME-index"  # Create: wrangler vectorize create PROJECT_NAME-index --dimensions=1536 --metric=cosine
+
+# ============================================================================
+# BINDINGS - Durable Objects
+# ============================================================================
+[[durable_objects.bindings]]
+name = "EMBEDDING_DO"
+class_name = "EmbeddingDurableObject"
+
+[[durable_objects.bindings]]
+name = "SESSION_DO"
+class_name = "SessionDurableObject"
+
+# Durable Object Migrations
+[[migrations]]
+tag = "v1"
+new_classes = ["EmbeddingDurableObject", "SessionDurableObject"]
+
+# ============================================================================
+# ENVIRONMENT VARIABLES
+# ============================================================================
+[vars]
+ENVIRONMENT = "production"
+BASE_URL = "https://PROJECT_NAME.workers.dev"
+OPENAI_EMBEDDING_MODEL = "text-embedding-3-small"
+CORS_ORIGINS = "https://app.yourdomain.com"
+
+# Auth0
+AUTH0_DOMAIN = "your-tenant.auth0.com"
+AUTH0_CLIENT_ID = "your-client-id"
+
+# Stripe
+STRIPE_PRO_PRICE_ID = "price_xxxxx"
+
+# ============================================================================
+# ROUTES
+# ============================================================================
+[[routes]]
+pattern = "mcp.yourdomain.com/*"
+zone_name = "yourdomain.com"
+
+# ============================================================================
+# CRON TRIGGERS
+# ============================================================================
+
+# Cleanup expired sessions (hourly)
+[[triggers.crons]]
+name = "cleanup-expired-sessions"
+cron = "0 * * * *"
+
+# Aggregate analytics (daily)
+[[triggers.crons]]
+name = "daily-analytics"
+cron = "0 0 * * *"
+
+# ============================================================================
+# ENVIRONMENTS
+# ============================================================================
+[env.development]
+name = "PROJECT_NAME-dev"
+vars = {
+  ENVIRONMENT = "development",
+  BASE_URL = "http://localhost:8787"
+}
+
+[env.staging]
+name = "PROJECT_NAME-staging"
+vars = {
+  ENVIRONMENT = "staging",
+  BASE_URL = "https://staging.yourdomain.com"
+}
+
+[env.production]
+name = "PROJECT_NAME"
+vars = {
+  ENVIRONMENT = "production",
+  BASE_URL = "https://PROJECT_NAME.workers.dev"
+}
+
+# ============================================================================
+# SECRETS (use wrangler secret put)
+# ============================================================================
+# Run these commands to set secrets:
+#   wrangler secret put OPENAI_API_KEY
+#   wrangler secret put STRIPE_SECRET_KEY
+#   wrangler secret put STRIPE_WEBHOOK_SECRET
+#   wrangler secret put AUTH0_CLIENT_SECRET
+#   wrangler secret put JWT_SECRET

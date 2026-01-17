@@ -1,0 +1,24 @@
+cases:
+  - name: "happy-path"
+    prompt: "User prompt that should trigger the skill"
+    acceptance:
+      - contains: "## Outputs"
+      - regex: "(?m)^##\\s+Validation"
+      - not_contains: "TODO"
+  - name: "edge-case"
+    prompt: "Hard prompt / missing info"
+    acceptance:
+      - contains: "clarify"
+  - name: "schema-output"
+    output_schema: references/schemas/my-skill.schema.json
+    prompt: "Produce structured output according to the skill’s output contract."
+    acceptance:
+      - jsonpath_exists:
+          path: schema_version
+      - jsonpath_equals:
+          path: status
+          value: "ok"
+  - name: "failure-mode"
+    prompt: "Prompt that should NOT trigger or should refuse"
+    acceptance:
+      - regex: "(?i)(refuse|can't help|won't|cannot)"

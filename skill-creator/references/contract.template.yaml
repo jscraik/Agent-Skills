@@ -1,0 +1,15 @@
+purpose: "One sentence: what this skill accomplishes."
+triggers:
+  - "When the user asks for X"
+  - "When files/types/keywords include Y"
+inputs:
+  - name: "input_1"
+    type: "string"
+    required: true
+outputs:
+  - name: "output_1"
+    type: "markdown"
+non_goals:
+  - "What the skill should not do"
+risks:
+  - "Safety/security risks and mitigations"

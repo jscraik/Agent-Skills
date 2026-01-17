@@ -1,0 +1,25 @@
+cases:
+  - name: "choose-skill"
+    prompt: "We need a reusable decision framework to decide if future features should be skills or prompts."
+    acceptance:
+      - contains: "DECISION: SKILL"
+      - contains: "PRIMARY REASON"
+      - not_contains: "TODO"
+
+  - name: "choose-custom-prompt"
+    prompt: "I just want a personal macro that expands my shorthand into a canned checklist; no one else will use it."
+    acceptance:
+      - contains: "DECISION: CUSTOM_PROMPT"
+      - contains: "SUPPORTING FACTORS"
+
+  - name: "choose-agent"
+    prompt: "Should our nightly security sweep that runs 45 minutes be a skill or an automated agent?"
+    acceptance:
+      - contains: "DECISION: AGENT_AUTOMATION"
+      - regex: "(?i)(autonom|timeout|budget)"
+
+  - name: "missing-info-clarify"
+    prompt: "What should this be?"
+    acceptance:
+      - regex: "(?i)(clarify|need more information)"
+      - not_contains: "DECISION:"

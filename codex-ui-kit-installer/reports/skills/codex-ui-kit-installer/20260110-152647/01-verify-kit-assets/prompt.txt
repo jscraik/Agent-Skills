@@ -1,0 +1,3 @@
+$codex-ui-kit-installer
+
+Verify kit assets

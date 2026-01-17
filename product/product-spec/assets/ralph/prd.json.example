@@ -1,0 +1,31 @@
+{
+  "project": "example-project",
+  "branchName": "ralph/example-project",
+  "stories": [
+    {
+      "id": 1,
+      "priority": 1,
+      "title": "Add a /health endpoint",
+      "description": "Expose a health endpoint that returns 200 OK and basic version info.",
+      "acceptance": [
+        "GET /health returns 200",
+        "Response includes {status:'ok'} and version string",
+        "Covered by a basic test"
+      ],
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": 2,
+      "priority": 2,
+      "title": "Add smoke test command to AGENTS.md",
+      "description": "Document a single command that validates the app quickly.",
+      "acceptance": [
+        "AGENTS.md contains a Smoke Test section",
+        "Smoke test command runs in <10s"
+      ],
+      "passes": false,
+      "notes": ""
+    }
+  ]
+}

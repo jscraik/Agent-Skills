@@ -1,0 +1,593 @@
+#!/usr/bin/env node
+/**
+ * ios-web: terminal-first iOS Simulator Safari preview for Vite/React apps.
+ * Requires: macOS + Xcode (Simulator) + Node.
+ */
+
+import { spawn, spawnSync } from "node:child_process";
+import fs from "node:fs";
+import path from "node:path";
+import http from "node:http";
+import https from "node:https";
+
+function die(msg, code = 1) {
+  console.error(`ios-web: ${msg}`);
+  process.exit(code);
+}
+
+function run(cmd, args, opts = {}) {
+  const res = spawnSync(cmd, args, {
+    encoding: "utf8",
+    stdio: opts.stdio ?? "pipe",
+  });
+
+  const stdout = (res.stdout ?? "").toString();
+  const stderr = (res.stderr ?? "").toString();
+
+  if (res.error) {
+    if (opts.allowFail) return { ok: false, stdout, stderr, status: res.status ?? 1 };
+    throw res.error;
+  }
+  if (res.status !== 0) {
+    if (opts.allowFail) return { ok: false, stdout, stderr, status: res.status };
+    const tail = stderr.trim() ? `\n${stderr.trim()}` : "";
+    throw new Error(`${cmd} ${args.join(" ")} failed (exit ${res.status})${tail}`);
+  }
+  return { ok: true, stdout, stderr, status: 0 };
+}
+
+function printHelp() {
+  console.log(`
+ ios-web - open your dev URL in iOS Simulator Safari (terminal-driven)
+
+ Usage:
+   ios-web [options]
+
+ Options:
+   --list                 List available iOS simulator devices and exit
+   --json                 With --list, print JSON
+   --device "<name>"      Pick a simulator by name (substring match)
+   --udid <udid>          Pick a simulator by UDID
+   --prefer-booted        Prefer an already-booted simulator (default: true)
+   --no-prefer-booted     Disable prefer-booted behavior
+
+   --profile <name>       Load device settings from ios-web.profiles.json
+   --profiles <path>      Path to profiles file (default: ./ios-web.profiles.json)
+   --orientation <value>  portrait | landscapeLeft | landscapeRight | portraitUpsideDown
+
+   --port <n>             Dev server port (default: 5173)
+   --url <url>            URL to open (default: http://127.0.0.1:<port>/)
+   --path <path>          Path to append to URL (e.g. /foo)
+
+   --dev                  Start dev server (default: true)
+   --no-dev               Don't start dev server (use --url to point at an existing server)
+   --dev-cmd "<cmd>"      Shell command to start dev server.
+                           Supports {port} placeholder.
+                           Default: npm run dev -- --host --port {port} --strictPort
+
+   --wait-ms <n>          Wait for URL to respond (default: 15000)
+
+   --open                 Open Simulator UI + URL (default: true)
+   --no-open              Don't open URL (useful with --list only)
+
+   --snap [file]          Take a simulator screenshot after opening (optional path)
+   --record <seconds>     Record a QuickTime video (seconds)
+   --record-path <file>   Output file for video (defaults to profile-based path)
+
+ Examples:
+   ./bin/ios-web
+   ./bin/ios-web --device "iPhone 15 Pro" --port 5173
+   ./bin/ios-web --profile iphone_pro
+   ./bin/ios-web --no-dev --url http://127.0.0.1:5173
+   ./bin/ios-web --snap ./.tmp/ios.png
+   ./bin/ios-web --record 5 --record-path ./.tmp/ios.mov
+ `.trim());
+}
+
+function parseArgs(argv) {
+  const opt = {
+    list: false,
+    json: false,
+    device: "",
+    udid: "",
+    preferBooted: true,
+
+    profile: "",
+    profilesPath: "",
+    orientation: "",
+    snapDir: "",
+    statusBar: null,
+
+    port: 5173,
+    url: "",
+    urlPath: "",
+
+    dev: true,
+    devCmd: "",
+    waitMs: 15000,
+
+    open: true,
+
+    snap: false,
+    snapPath: "",
+
+    recordSec: 0,
+    recordPath: "",
+  };
+
+  const takeValue = (i) => {
+    if (i + 1 >= argv.length) die(`Missing value for ${argv[i]}`);
+    return argv[i + 1];
+  };
+
+  for (let i = 0; i < argv.length; i++) {
+    const a = argv[i];
+
+    if (a === "--help" || a === "-h") {
+      printHelp();
+      process.exit(0);
+    } else if (a === "--list") opt.list = true;
+    else if (a === "--json") opt.json = true;
+
+    else if (a === "--device") {
+      opt.device = takeValue(i);
+      i++;
+    } else if (a === "--udid") {
+      opt.udid = takeValue(i);
+      i++;
+    } else if (a === "--prefer-booted") opt.preferBooted = true;
+    else if (a === "--no-prefer-booted") opt.preferBooted = false;
+
+    else if (a === "--profile") {
+      opt.profile = takeValue(i);
+      i++;
+    } else if (a === "--profiles") {
+      opt.profilesPath = takeValue(i);
+      i++;
+    } else if (a === "--orientation") {
+      opt.orientation = takeValue(i);
+      i++;
+    }
+
+    else if (a === "--port") {
+      opt.port = Number(takeValue(i));
+      if (!Number.isFinite(opt.port) || opt.port <= 0) die(`Invalid --port: ${argv[i + 1]}`);
+      i++;
+    } else if (a === "--url") {
+      opt.url = takeValue(i);
+      i++;
+    } else if (a === "--path") {
+      opt.urlPath = takeValue(i);
+      i++;
+    }
+
+    else if (a === "--dev") opt.dev = true;
+    else if (a === "--no-dev") opt.dev = false;
+    else if (a === "--dev-cmd") {
+      opt.devCmd = takeValue(i);
+      i++;
+    } else if (a === "--wait-ms") {
+      opt.waitMs = Number(takeValue(i));
+      if (!Number.isFinite(opt.waitMs) || opt.waitMs < 0) die(`Invalid --wait-ms: ${argv[i + 1]}`);
+      i++;
+    }
+
+    else if (a === "--open") opt.open = true;
+    else if (a === "--no-open") opt.open = false;
+
+    else if (a === "--snap") {
+      opt.snap = true;
+      const maybe = argv[i + 1];
+      if (maybe && !maybe.startsWith("-")) {
+        opt.snapPath = maybe;
+        i++;
+      }
+    }
+
+    else if (a === "--record") {
+      opt.recordSec = Number(takeValue(i));
+      if (!Number.isFinite(opt.recordSec) || opt.recordSec <= 0) {
+        die(`Invalid --record seconds: ${argv[i + 1]}`);
+      }
+      i++;
+    } else if (a === "--record-path") {
+      opt.recordPath = takeValue(i);
+      i++;
+    }
+
+    else {
+      die(`Unknown arg: ${a}`);
+    }
+  }
+
+  return opt;
+}
+
+function runtimeVersion(runtime) {
+  const m = runtime.match(/iOS-(\d+(?:-\d+)*)/);
+  if (!m) return [0];
+  return m[1]
+    .split("-")
+    .map((x) => Number.parseInt(x, 10))
+    .filter((n) => Number.isFinite(n));
+}
+
+function compareVer(a, b) {
+  const len = Math.max(a.length, b.length);
+  for (let i = 0; i < len; i++) {
+    const av = a[i] ?? 0;
+    const bv = b[i] ?? 0;
+    if (av !== bv) return av - bv;
+  }
+  return 0;
+}
+
+function getAvailableIosDevices() {
+  const r = run("xcrun", ["simctl", "list", "-j", "devices", "available"], { stdio: "pipe" });
+  const data = JSON.parse(r.stdout);
+
+  const out = [];
+  for (const [runtime, devices] of Object.entries(data.devices || {})) {
+    if (!runtime.includes(".iOS-")) continue;
+    for (const d of devices || []) {
+      if (d.isAvailable === false) continue;
+      out.push({ runtime, ...d });
+    }
+  }
+  return out;
+}
+
+function sortDevices(devices) {
+  return [...devices].sort((a, b) => {
+    const aBoot = a.state === "Booted" ? 1 : 0;
+    const bBoot = b.state === "Booted" ? 1 : 0;
+    if (aBoot !== bBoot) return bBoot - aBoot;
+
+    const aIphone = (a.name || "").startsWith("iPhone") ? 1 : 0;
+    const bIphone = (b.name || "").startsWith("iPhone") ? 1 : 0;
+    if (aIphone !== bIphone) return bIphone - aIphone;
+
+    const vcmp = compareVer(runtimeVersion(b.runtime), runtimeVersion(a.runtime));
+    if (vcmp !== 0) return vcmp;
+
+    return (a.name || "").localeCompare(b.name || "");
+  });
+}
+
+function pickDevice(devices, { udid, name, preferBooted }) {
+  if (!devices.length) {
+    die("No available iOS Simulator devices found. Install an iOS Simulator runtime in Xcode.");
+  }
+
+  let pool = devices;
+
+  if (udid) {
+    const found = pool.find((d) => (d.udid || "").toLowerCase() === udid.toLowerCase());
+    if (!found) die(`No device with UDID ${udid}`);
+    return found;
+  }
+
+  if (name) {
+    const needle = name.toLowerCase();
+    pool = pool.filter((d) => (d.name || "").toLowerCase().includes(needle));
+    if (!pool.length) {
+      const sample = sortDevices(devices)
+        .slice(0, 10)
+        .map((d) => `- ${d.name} (${d.runtime}) [${d.state}]`)
+        .join("\n");
+      die(`No device matching "${name}". Some available:\n${sample}`);
+    }
+  }
+
+  const sorted = sortDevices(pool);
+  if (!preferBooted) return sorted[0];
+
+  const booted = sorted.filter((d) => d.state === "Booted");
+  return (booted[0] ?? sorted[0]);
+}
+
+function buildUrl({ url, port, urlPath }) {
+  const base = url || `http://127.0.0.1:${port}/`;
+  const u = new URL(base);
+  if (urlPath) {
+    const p = urlPath.startsWith("/") ? urlPath : `/${urlPath}`;
+    u.pathname = path.posix.join(u.pathname || "/", p);
+  }
+  return u.toString();
+}
+
+function httpGetOnce(targetUrl) {
+  const u = new URL(targetUrl);
+  const lib = u.protocol === "https:" ? https : http;
+
+  return new Promise((resolve, reject) => {
+    const req = lib.request(
+      {
+        method: "GET",
+        hostname: u.hostname,
+        port: u.port,
+        path: `${u.pathname}${u.search}`,
+        timeout: 3000,
+        headers: { "User-Agent": "ios-web" },
+      },
+      (res) => {
+        res.resume();
+        resolve(res.statusCode ?? 0);
+      }
+    );
+    req.on("timeout", () => {
+      req.destroy(new Error("timeout"));
+    });
+    req.on("error", reject);
+    req.end();
+  });
+}
+
+async function waitForUrl(targetUrl, timeoutMs) {
+  const start = Date.now();
+  while (true) {
+    try {
+      const code = await httpGetOnce(targetUrl);
+      if (code > 0 && code < 500) return;
+    } catch {
+      // ignore; retry
+    }
+    if (Date.now() - start > timeoutMs) {
+      die(`Timed out waiting for ${targetUrl}`);
+    }
+    await new Promise((r) => setTimeout(r, 200));
+  }
+}
+
+function ensureDir(p) {
+  fs.mkdirSync(path.dirname(p), { recursive: true });
+}
+
+function sanitizeProfileName(name) {
+  if (!name) return "default";
+  return name.replace(/[^a-z0-9_-]+/gi, "_").toLowerCase();
+}
+
+function resolvePath(p) {
+  if (!p) return p;
+  return path.isAbsolute(p) ? p : path.join(process.cwd(), p);
+}
+
+function resolveSnapDir(opt) {
+  if (opt.snapDir) return resolvePath(opt.snapDir);
+  const base = path.join(process.cwd(), ".ios-web", sanitizeProfileName(opt.profile || "default"));
+  return base;
+}
+
+function defaultSnapPath(opt) {
+  const dir = resolveSnapDir(opt);
+  return path.join(dir, "current.png");
+}
+
+function defaultRecordPath(opt) {
+  const dir = resolveSnapDir(opt);
+  return path.join(dir, "record.mov");
+}
+
+function takeScreenshot(udid, outPath) {
+  ensureDir(outPath);
+  run("xcrun", ["simctl", "io", udid, "screenshot", outPath], { stdio: "inherit" });
+  return outPath;
+}
+
+function applyStatusBar(udid, overrides) {
+  if (!overrides || typeof overrides !== "object") return;
+
+  const args = ["simctl", "status_bar", udid, "override"];
+
+  if (overrides.time) args.push("--time", String(overrides.time));
+  if (overrides.dataNetwork) args.push("--dataNetwork", String(overrides.dataNetwork));
+  if (overrides.wifiMode) args.push("--wifiMode", String(overrides.wifiMode));
+  if (Number.isFinite(overrides.wifiBars)) args.push("--wifiBars", String(overrides.wifiBars));
+  if (overrides.cellularMode) args.push("--cellularMode", String(overrides.cellularMode));
+  if (Number.isFinite(overrides.cellularBars)) args.push("--cellularBars", String(overrides.cellularBars));
+  if (overrides.operatorName !== undefined) args.push("--operatorName", String(overrides.operatorName));
+  if (overrides.batteryState) args.push("--batteryState", String(overrides.batteryState));
+  if (Number.isFinite(overrides.batteryLevel)) args.push("--batteryLevel", String(overrides.batteryLevel));
+
+  if (args.length === 4) return;
+  run("xcrun", args, { stdio: "inherit", allowFail: true });
+}
+
+function rotateSimulator(direction, times) {
+  if (!times || times <= 0) return;
+  const dirLabel = direction === "left" ? "Left" : "Right";
+  const script = [
+    'tell application "Simulator" to activate',
+    'tell application "System Events"',
+    '  tell process "Simulator"',
+    `    repeat ${times}`,
+    `      click menu item "Rotate ${dirLabel}" of menu "Device" of menu bar 1`,
+    '    end repeat',
+    '  end tell',
+    'end tell',
+  ];
+
+  const args = script.flatMap((line) => ["-e", line]);
+  run("osascript", args, { allowFail: true });
+}
+
+function applyOrientation(orientation) {
+  if (!orientation) return;
+
+  const map = {
+    portrait: [],
+    landscapeleft: [{ dir: "left", times: 1 }],
+    landscaperight: [{ dir: "right", times: 1 }],
+    portraitupsidedown: [{ dir: "right", times: 2 }],
+  };
+
+  const key = orientation.toLowerCase();
+  const steps = map[key];
+  if (!steps) return;
+  for (const step of steps) rotateSimulator(step.dir, step.times);
+}
+
+function recordVideo(udid, outPath, seconds) {
+  ensureDir(outPath);
+  return new Promise((resolve, reject) => {
+    const child = spawn("xcrun", ["simctl", "io", udid, "recordVideo", "--force", outPath], {
+      stdio: "inherit",
+    });
+
+    const timer = setTimeout(() => {
+      try {
+        child.kill("SIGINT");
+      } catch {}
+    }, Math.max(1, seconds) * 1000);
+
+    child.on("error", (err) => {
+      clearTimeout(timer);
+      reject(err);
+    });
+    child.on("exit", () => {
+      clearTimeout(timer);
+      resolve();
+    });
+  });
+}
+
+function openSimulatorAndUrl(udid, targetUrl) {
+  run("xcrun", ["simctl", "boot", udid], { stdio: "inherit", allowFail: true });
+  run("xcrun", ["simctl", "bootstatus", udid, "-b"], { stdio: "inherit", allowFail: true });
+
+  run("open", ["-a", "Simulator", "--args", "-CurrentDeviceUDID", udid], {
+    stdio: "inherit",
+    allowFail: true,
+  });
+
+  run("xcrun", ["simctl", "openurl", udid, targetUrl], { stdio: "inherit" });
+}
+
+function startDevServer(devCmd) {
+  const child = spawn(devCmd, {
+    shell: true,
+    stdio: "inherit",
+    env: { ...process.env },
+  });
+
+  const kill = () => {
+    if (!child.killed) child.kill("SIGTERM");
+  };
+  process.on("SIGINT", () => kill());
+  process.on("SIGTERM", () => kill());
+  process.on("exit", () => kill());
+
+  return child;
+}
+
+function loadProfiles(filePath) {
+  const fullPath = resolvePath(filePath);
+  if (!fs.existsSync(fullPath)) return null;
+  const raw = fs.readFileSync(fullPath, "utf8");
+  return JSON.parse(raw);
+}
+
+function applyProfile(opt) {
+  if (!opt.profile) return;
+  const profilesPath = opt.profilesPath || "ios-web.profiles.json";
+  const profiles = loadProfiles(profilesPath);
+  if (!profiles || typeof profiles !== "object") {
+    die(`Profile file not found or invalid: ${profilesPath}`);
+  }
+  const p = profiles[opt.profile];
+  if (!p) {
+    die(`Profile not found: ${opt.profile}`);
+  }
+
+  if (p.device) opt.device = opt.device || p.device;
+  if (p.udid) opt.udid = opt.udid || p.udid;
+  if (p.port) opt.port = opt.port || p.port;
+  if (p.url) opt.url = opt.url || p.url;
+  if (p.urlPath) opt.urlPath = opt.urlPath || p.urlPath;
+  if (p.orientation) opt.orientation = opt.orientation || p.orientation;
+  if (p.snapDir) opt.snapDir = opt.snapDir || p.snapDir;
+  if (p.preferBooted !== undefined) opt.preferBooted = p.preferBooted;
+  if (p.statusBar) opt.statusBar = p.statusBar;
+}
+
+async function main() {
+  if (process.platform !== "darwin") {
+    die("This workflow requires macOS (Xcode Simulator).");
+  }
+
+  const opt = parseArgs(process.argv.slice(2));
+  applyProfile(opt);
+
+  let devices;
+  try {
+    devices = getAvailableIosDevices();
+  } catch (e) {
+    die("Failed to query simulators. Ensure Xcode is installed and Command Line Tools are configured.");
+  }
+
+  if (opt.list) {
+    const sorted = sortDevices(devices).map((d) => ({
+      name: d.name,
+      udid: d.udid,
+      state: d.state,
+      runtime: d.runtime,
+    }));
+    if (opt.json) {
+      console.log(JSON.stringify(sorted, null, 2));
+    } else {
+      for (const d of sorted) {
+        console.log(`${d.name} | ${d.state} | ${d.runtime} | ${d.udid}`);
+      }
+    }
+    return;
+  }
+
+  const device = pickDevice(devices, {
+    udid: opt.udid,
+    name: opt.device,
+    preferBooted: opt.preferBooted,
+  });
+
+  const targetUrl = buildUrl({ url: opt.url, port: opt.port, urlPath: opt.urlPath });
+
+  let devChild = null;
+  if (opt.dev) {
+    const cmd = (opt.devCmd || `npm run dev -- --host --port {port} --strictPort`).replaceAll(
+      "{port}",
+      String(opt.port)
+    );
+    devChild = startDevServer(cmd);
+    await waitForUrl(targetUrl, opt.waitMs);
+  }
+
+  if (opt.open) {
+    openSimulatorAndUrl(device.udid, targetUrl);
+  }
+
+  if (opt.statusBar) {
+    applyStatusBar(device.udid, opt.statusBar);
+  }
+
+  if (opt.orientation) {
+    applyOrientation(opt.orientation);
+  }
+
+  if (opt.recordSec > 0) {
+    const recordPath = opt.recordPath ? resolvePath(opt.recordPath) : defaultRecordPath(opt);
+    await recordVideo(device.udid, recordPath, opt.recordSec);
+    console.log(`ios-web: recording -> ${recordPath}`);
+  }
+
+  if (opt.snap) {
+    const snapPath = opt.snapPath ? resolvePath(opt.snapPath) : defaultSnapPath(opt);
+    takeScreenshot(device.udid, snapPath);
+    console.log(`ios-web: screenshot -> ${snapPath}`);
+  }
+
+  if (devChild) {
+    await new Promise((resolve) => devChild.on("exit", resolve));
+  }
+}
+
+main().catch((e) => die(e?.stack || String(e)));

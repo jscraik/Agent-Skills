@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "lintCommand": "./scripts/run-quality-gates.sh spec-output.md tech-spec-output.md && ./scripts/check-brand-signature.sh",
+  "stories": [
+    {
+      "id": "story-1",
+      "title": "<short title>",
+      "description": "As a <persona>, I want <capability> so that <benefit>.",
+      "acceptanceCriteria": [
+        "<criterion 1>",
+        "<criterion 2>"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+extends: existence
+message: "Avoid marketing language in technical/product docs: '%s'."
+level: warning
+ignorecase: true
+tokens:
+  - revolutionary
+  - game-changing
+  - groundbreaking
+  - next-generation
+  - disrupt
+  - magical
+  - incredible
+  - amazing

@@ -1,0 +1,26 @@
+purpose: "Produce a complete backend architecture and API design spec with explicit tradeoffs, compliance, and integration guidance."
+triggers:
+  - "When the user asks for backend architecture or system design"
+  - "When designing or refactoring backend APIs, data models, auth, reliability, or integration surfaces"
+inputs:
+  - name: "system_type"
+    type: "string"
+    required: false
+  - name: "compliance_scope"
+    type: "string"
+    required: false
+  - name: "primary_workflows"
+    type: "string"
+    required: false
+outputs:
+  - name: "design_spec"
+    type: "markdown"
+  - name: "api_contract"
+    type: "markdown"
+  - name: "file_plan"
+    type: "markdown"
+non_goals:
+  - "Implementation code or database migrations without explicit request"
+  - "Operational runbooks or deployment playbooks unless requested"
+risks:
+  - "Incomplete requirements can lead to incorrect architecture choices; mitigate by confirming scope and constraints"

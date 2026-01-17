@@ -1,0 +1,26 @@
+purpose: >
+  Guide creation of complete PRDs/technical specifications and end-to-end UX/UI design
+  reviews via interview-led discovery, templated drafting, adversarial review, and
+  diagrams-as-code, producing implementation-ready documents or actionable critique.
+schema_version: 1.0
+triggers:
+  - user requests PRD, product requirements, or software design steps
+  - user requests technical spec/architecture document
+  - user asks to take an idea from concept to production plan
+  - user requests UX/UI audit, design review, or heuristic evaluation
+inputs:
+  - document_type: PRD | tech
+  - starting_point: existing file path or concept description
+  - options: interview_mode flag, focus areas (security|scalability|performance|ux|reliability|cost), opponent models
+  - design_review_scope: target flow, platform(s), artifacts/screens/links, constraints
+outputs:
+  - finalized spec markdown written to spec-output.md and printed
+  - debate summary with rounds/cycles, models, key refinements
+  - design review report with prioritized findings and fixes
+non_goals:
+  - implementation code
+  - committing changes or running production deployments
+risks:
+  - incomplete inputs leading to assumptions; mitigated via interview mode and explicit assumption listing
+  - missed security/accessibility requirements; mitigated by mandatory NFR and critique criteria
+  - ambiguity in flows; mitigated by diagrams-as-code and debate rounds
