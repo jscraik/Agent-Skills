@@ -17,7 +17,8 @@ for category in "${categories[@]}"; do
   while IFS= read -r skill_path; do
     skill_dir="$(dirname "$skill_path")"
     skill_name="$(basename "$skill_dir")"
-    ln -s "$skill_dir" "$skills_dir/$skill_name"
+    skill_dir_abs="$repo_root/$skill_dir"
+    ln -s "$skill_dir_abs" "$skills_dir/$skill_name"
   done < <(rg --files -g 'SKILL.md' "$category")
 done
 
