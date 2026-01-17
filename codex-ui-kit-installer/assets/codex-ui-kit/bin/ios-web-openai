@@ -1,6 +1,0 @@
-#!/usr/bin/env bash
-set -euo pipefail
-# Convenience wrapper for OpenAI widget demos in iOS Simulator Safari.
-# Defaults: iPad 13", host localhost, port 5173. Override with flags.
-SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-exec "${SCRIPT_DIR}/ios-web" --profile ipad_13 --port 5173 "$@"

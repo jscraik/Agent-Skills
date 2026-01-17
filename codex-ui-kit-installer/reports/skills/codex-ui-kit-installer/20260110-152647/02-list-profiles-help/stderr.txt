@@ -1,3 +1,0 @@
-Error loading config.toml: unknown variant `keychain`, expected one of `file`, `keyring`, `auto`
-in `cli_auth_credentials_store`
-

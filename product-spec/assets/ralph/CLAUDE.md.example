@@ -1,8 +1,0 @@
-# CLAUDE.md (template)
-
-Optional Claude Code instructions for this repo.
-
-- Use Grep/Glob to find relevant code.
-- Avoid reading huge files end-to-end.
-- Make the smallest change that satisfies the pin + plan.
-- Run the project's checks (or let the harness run them) before declaring DONE.

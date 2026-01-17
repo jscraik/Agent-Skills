@@ -1,8 +1,0 @@
-# Ignore common junk
-.DS_Store
-node_modules/
-*.log
-.tmp/
-venv/
-.venv/
-__pycache__/

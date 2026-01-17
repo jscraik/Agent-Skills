@@ -1,3 +1,28 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$repo_root"
+
+categories=(github frontend apple backend product utilities)
+skills_dir="$repo_root/skills"
+
+mkdir -p "$skills_dir"
+
+# Remove stale symlinks only (keep any real files that might be intentional).
+find "$skills_dir" -maxdepth 1 -type l -exec rm -f {} +
+
+# Recreate symlinks for each category's SKILL.md directories.
+for category in "${categories[@]}"; do
+  while IFS= read -r skill_path; do
+    skill_dir="$(dirname "$skill_path")"
+    skill_name="$(basename "$skill_dir")"
+    ln -s "$skill_dir" "$skills_dir/$skill_name"
+  done < <(rg --files -g 'SKILL.md' "$category")
+done
+
+# Regenerate root SKILL.md index.
+cat > "$repo_root/SKILL.md" <<'INDEX_EOF'
 # Agent Skills Index
 
 Canonical skills live in categorized folders below. Each tool loads skills via the flat symlink directory at `~/dev/agent-skills/skills`.
@@ -62,3 +87,8 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - `skill-creator` — Create, update, validate, or package skills and their resources. Use when a user asks to create or revise a skill, improve routing/portability, or package a skill; not for installing skills or choosing the right build primitive (use skill-installer or decide-build-primitive).
 - `skill-installer` — Install skills into $CODEX_HOME/skills from curated lists or GitHub paths. Not for clawdhub.com installs or skill creation.
 - `video-transcript-downloader` — Download videos, audio, subtitles, and clean paragraph-style transcripts from YouTube and any other yt-dlp supported site. Use when asked to “download this video”, “save this clip”, “rip audio”, “get subtitles”, “get transcript”, or to troubleshoot yt-dlp/ffmpeg and formats/playlists.
+INDEX_EOF
+
+chmod +x "$repo_root/scripts/sync_skills.sh"
+
+echo "Synced symlinks and regenerated SKILL.md."
