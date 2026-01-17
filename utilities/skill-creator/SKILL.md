@@ -378,16 +378,16 @@ skills-ref validate <path/to/skill-folder>
 ```
 
 Use validation results to fix naming or frontmatter issues before packaging.
-If `skills-ref` is installed in a local venv, activate it first (e.g., `~/.codex/.venv-skills-ref/bin/activate`).
-Default local venv path for this skill: `~/.codex/skills/skill-creator/.venv`.
+If `skills-ref` is installed in a local venv, activate it first (e.g., `~/dev/agent-skills/.venv-skills-ref/bin/activate`).
+Default local venv path for this skill: `~/dev/agent-skills/skills/skill-creator/.venv`.
 
 **If `skills-ref` is missing, install it into the skill-creator venv:**
 
-1) Read the pinned commit from `~/.codex/.venv-skills-ref/lib/pythonX.Y/site-packages/skills_ref-*/direct_url.json` (if that venv exists).
-2) Install with pip into `~/.codex/skills/skill-creator/.venv` using the same commit:
+1) Read the pinned commit from `~/dev/agent-skills/.venv-skills-ref/lib/pythonX.Y/site-packages/skills_ref-*/direct_url.json` (if that venv exists).
+2) Install with pip into `~/dev/agent-skills/skills/skill-creator/.venv` using the same commit:
 
 ```bash
-~/.codex/skills/skill-creator/.venv/bin/python -m pip install \
+~/dev/agent-skills/skills/skill-creator/.venv/bin/python -m pip install \
   "git+https://github.com/agentskills/agentskills@<commit>#subdirectory=skills-ref"
 ```
 
@@ -846,16 +846,16 @@ skills-ref validate <path/to/skill-folder>
 ```
 
 Use validation results to fix naming or frontmatter issues before packaging.
-If `skills-ref` is installed in a local venv, activate it first (e.g., `~/.codex/.venv-skills-ref/bin/activate`).
-Default local venv path for this skill: `~/.codex/skills/skill-creator/.venv`.
+If `skills-ref` is installed in a local venv, activate it first (e.g., `~/dev/agent-skills/.venv-skills-ref/bin/activate`).
+Default local venv path for this skill: `~/dev/agent-skills/skills/skill-creator/.venv`.
 
 **If `skills-ref` is missing, install it into the skill-creator venv:**
 
-1) Read the pinned commit from `~/.codex/.venv-skills-ref/lib/pythonX.Y/site-packages/skills_ref-*/direct_url.json` (if that venv exists).
-2) Install with pip into `~/.codex/skills/skill-creator/.venv` using the same commit:
+1) Read the pinned commit from `~/dev/agent-skills/.venv-skills-ref/lib/pythonX.Y/site-packages/skills_ref-*/direct_url.json` (if that venv exists).
+2) Install with pip into `~/dev/agent-skills/skills/skill-creator/.venv` using the same commit:
 
 ```bash
-~/.codex/skills/skill-creator/.venv/bin/python -m pip install \
+~/dev/agent-skills/skills/skill-creator/.venv/bin/python -m pip install \
   "git+https://github.com/agentskills/agentskills@<commit>#subdirectory=skills-ref"
 ```
 

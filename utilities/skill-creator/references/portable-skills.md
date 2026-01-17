@@ -55,17 +55,18 @@ When documenting Claude Code environments, specify dependencies and commands in 
 
 ## Where skills live
 
-- Codex loads skills from repo scopes (for example, `.codex/skills`) and user scope (`~/.codex/skills`), with higher precedence overriding lower scopes.
+- For this repo, the canonical location is `~/dev/agent-skills/skills` (symlinked view).
+- Codex also loads skills from repo scopes (for example, `.codex/skills`) and user scope (`~/.codex/skills`), with higher precedence overriding lower scopes.
 - Claude Code loads skills from `.claude/skills` (project) and `~/.claude/skills` (user).
 
-If your team uses both tools, copy the same skill into both `.codex/skills/<skill-name>` and `.claude/skills/<skill-name>`.
+If your team uses both tools, ensure the same skill exists in `~/dev/agent-skills/skills/<skill-name>` and `.claude/skills/<skill-name>`.
 
 ## Troubleshooting checklist
 
 - If a skill does not appear in Codex, restart Codex after adding or editing skills.
 - Confirm the file name is `SKILL.md` and the YAML is valid.
 - Ensure `name` and `description` are within limits and single line.
-- Avoid symlinked skill directories when using Codex.
+- If using symlinked skill directories, ensure they resolve to real directories and that Codex can follow them.
 
 ## Trigger tests (portable)
 

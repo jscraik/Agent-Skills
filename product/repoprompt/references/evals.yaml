@@ -1,0 +1,20 @@
+schema_version: 1
+cases:
+  - name: "mcp-integration-monorepo"
+    prompt: "Integrate Repo Prompt with Claude Code for a monorepo."
+    acceptance:
+      - regex:(?i)mcp-backed editor path
+      - regex:(?i)context builder
+      - regex:(?i)codemaps/slices
+      - regex:(?i)setup checklist and validation
+  - name: "compose-vs-chat-refactor"
+    prompt: "Should I use Compose or Chat mode for a large refactor?"
+    acceptance:
+      - regex:(?i)compose for planning or chat for implementation with pro edit
+      - regex:(?i)context strategy
+      - regex:(?i)(why|because|yields|rationale|excels|best)
+  - name: "rp-cli-automation"
+    prompt: "How do I use rp-cli in automation?"
+    acceptance:
+      - regex:(?i)rp-cli path
+      - regex:(?i)basic setup and smoke test

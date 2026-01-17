@@ -1,6 +1,6 @@
 ---
 name: skill-installer
-description: Install skills into $CODEX_HOME/skills from curated lists or GitHub paths. Not for clawdhub.com installs or skill creation; use clawdhub or skill-creator.
+description: Install skills into ~/dev/agent-skills/skills by default (override with AGENT_SKILLS_HOME, CODEX_HOME, or --dest). Not for clawdhub.com installs or skill creation; use clawdhub or skill-creator.
 metadata:
   short-description: Install curated skills from openai/skills or other repos
 ---
@@ -27,11 +27,11 @@ metadata:
 
 ## Inputs
 - Skill source (curated list, repo URL, or repo/path).
-- Destination path or `$CODEX_HOME`.
+- Destination path or `AGENT_SKILLS_HOME`/`CODEX_HOME` override.
 - User confirmation for overwrites or updates.
 
 ## Outputs
-- Installed skill directory under `$CODEX_HOME/skills`.
+- Installed skill directory under `~/dev/agent-skills/skills` (default) or override path.
 - A summary of what was installed and from where.
 - A reminder to restart Codex to pick up new skills.
 
@@ -92,7 +92,8 @@ All of these scripts use network, so when running in the sandbox, request escala
 - Defaults to direct download for public GitHub repos.
 - If download fails with auth/permission errors, falls back to git sparse checkout.
 - Aborts if the destination skill directory already exists.
-- Installs into `$CODEX_HOME/skills/<skill-name>` (defaults to `~/.codex/skills`).
+- Installs into `~/dev/agent-skills/skills/<skill-name>` by default.
+- Overrides: `AGENT_SKILLS_HOME`, then `CODEX_HOME`, then `--dest`.
 - Multiple `--path` values install multiple skills in one run, each named from the path basename unless `--name` is supplied.
 - Options: `--ref <ref>` (default `main`), `--dest <path>`, `--method auto|download|git`.
 
@@ -102,7 +103,7 @@ All of these scripts use network, so when running in the sandbox, request escala
 - Private GitHub repos can be accessed via existing git credentials or optional `GITHUB_TOKEN`/`GH_TOKEN` for download.
 - Git fallback tries HTTPS first, then SSH.
 - The skills at https://github.com/openai/skills/tree/main/skills/.system are preinstalled, so no need to help users install those. If they ask, just explain this. If they insist, you can download and overwrite.
-- Installed annotations come from `$CODEX_HOME/skills`.
+- Installed annotations come from `~/dev/agent-skills/skills` (or overrides).
 
 ## Example prompts
 - "List the curated skills I can install."
@@ -122,7 +123,7 @@ Frontmatter:
 ```yaml
 ---
 name: skill-installer
-description: Install Codex skills into $CODEX_HOME/skills from a curated list or a GitHub repo path. Use when a user asks to list installable skills, install a curated skill, or install a skill from another repo (including private repos).
+description: Install Codex skills into ~/dev/agent-skills/skills by default (override with AGENT_SKILLS_HOME, CODEX_HOME, or --dest). Use when a user asks to list installable skills, install a curated skill, or install a skill from another repo (including private repos).
 metadata:
   short-description: Install curated skills from openai/skills or other repos
 ---
@@ -171,7 +172,8 @@ All of these scripts use network, so when running in the sandbox, request escala
 - Defaults to direct download for public GitHub repos.
 - If download fails with auth/permission errors, falls back to git sparse checkout.
 - Aborts if the destination skill directory already exists.
-- Installs into `$CODEX_HOME/skills/<skill-name>` (defaults to `~/.codex/skills`).
+- Installs into `~/dev/agent-skills/skills/<skill-name>` by default.
+- Overrides: `AGENT_SKILLS_HOME`, then `CODEX_HOME`, then `--dest`.
 - Multiple `--path` values install multiple skills in one run, each named from the path basename unless `--name` is supplied.
 - Options: `--ref <ref>` (default `main`), `--dest <path>`, `--method auto|download|git`.
 
@@ -181,4 +183,4 @@ All of these scripts use network, so when running in the sandbox, request escala
 - Private GitHub repos can be accessed via existing git credentials or optional `GITHUB_TOKEN`/`GH_TOKEN` for download.
 - Git fallback tries HTTPS first, then SSH.
 - The skills at https://github.com/openai/skills/tree/main/skills/.system are preinstalled, so no need to help users install those. If they ask, just explain this. If they insist, you can download and overwrite.
-- Installed annotations come from `$CODEX_HOME/skills`.
+- Installed annotations come from `~/dev/agent-skills/skills` (or overrides).

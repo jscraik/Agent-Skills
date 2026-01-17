@@ -1,3 +1,12 @@
+---
+name: interview-me
+description: "Guide a systematic interview using AskUserQuestion to clarify requirements, assumptions, and edge cases before work starts. Use when starting new features, debugging complex issues, planning refactors, or when requirements are unclear."
+metadata:
+  short-description: Systematic requirements interview
+  version: "1.0.0"
+  last_updated: "2026-01-17"
+---
+
 # interview-me
 
 A systematic interview skill that uses AskUserQuestion to explore requirements, assumptions, and edge cases before starting any work.
