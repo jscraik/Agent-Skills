@@ -1,0 +1,9 @@
+{
+  "name": "failure-mode",
+  "passed": false,
+  "failures": [
+    "contains failed: '## When to use'"
+  ],
+  "dir": "/Users/jamiecraik/dev/agent-skills/reports/skills/1password/20260118-212541/03-failure-mode",
+  "used_schema": false
+}

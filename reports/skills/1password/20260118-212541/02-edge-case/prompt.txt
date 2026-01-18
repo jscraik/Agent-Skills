@@ -1,0 +1,3 @@
+$1password
+
+Handle an edge case for 1password without enough inputs.

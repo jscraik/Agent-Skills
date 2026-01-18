@@ -1,0 +1,3 @@
+$1password
+
+Use the 1password skill for a typical request.

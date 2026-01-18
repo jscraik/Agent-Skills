@@ -1,0 +1,36 @@
+{
+  "skill": "1password",
+  "skill_path": "/Users/jamiecraik/dev/agent-skills/utilities/1password",
+  "workspace_root": "/Users/jamiecraik/dev/agent-skills",
+  "run_id": "20260118-212541",
+  "cases": [
+    {
+      "name": "happy-path",
+      "passed": false,
+      "failures": [
+        "contains failed: '## Outputs'"
+      ],
+      "dir": "/Users/jamiecraik/dev/agent-skills/reports/skills/1password/20260118-212541/01-happy-path",
+      "used_schema": false
+    },
+    {
+      "name": "edge-case",
+      "passed": false,
+      "failures": [
+        "contains failed: '## Inputs'"
+      ],
+      "dir": "/Users/jamiecraik/dev/agent-skills/reports/skills/1password/20260118-212541/02-edge-case",
+      "used_schema": false
+    },
+    {
+      "name": "failure-mode",
+      "passed": false,
+      "failures": [
+        "contains failed: '## When to use'"
+      ],
+      "dir": "/Users/jamiecraik/dev/agent-skills/reports/skills/1password/20260118-212541/03-failure-mode",
+      "used_schema": false
+    }
+  ],
+  "passed": false
+}
