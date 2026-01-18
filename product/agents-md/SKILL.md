@@ -1,6 +1,6 @@
 ---
 name: agents-md
-description: "Prefer concise, verifiable instructions over comprehensive prose. Every command and path must be real and sourced from the repo. Treat AGENTS.md as an operator checklist: short, direct, and actionable.. Use when The user asks to create or update AGENTS.md.."
+description: "Refactor or create AGENTS.md using progressive disclosure: keep root minimal, split detailed instructions into linked docs, and flag contradictions/redundancy. Use when the user asks to create, update, or refactor AGENTS.md."
 ---
 
 # Agents Md
@@ -10,7 +10,7 @@ description: "Prefer concise, verifiable instructions over comprehensive prose. 
 
 ## Philosophy
 
-Prefer concise, verifiable instructions over comprehensive prose. Every command and path must be real and sourced from the repo. Treat AGENTS.md as an operator checklist: short, direct, and actionable.
+Prefer concise, verifiable instructions over comprehensive prose. Every command and path must be real and sourced from the repo. Treat AGENTS.md as an operator checklist: short, direct, and actionable. Use progressive disclosure: keep root minimal, link out for details.
 
 Guiding principles:
 - Optimize for reader success in under 2 minutes.
@@ -20,20 +20,62 @@ Guiding principles:
 ## When to use
 
 - The user asks to create or update AGENTS.md.
+- The user asks to refactor AGENTS.md for progressive disclosure or split instructions into multiple files.
 - The repo needs a short contributor guide for agents or humans.
 - The user requests “Repository Guidelines” content under 400 words.
+
+## Response format (required)
+- Always include all three sections in every response:
+  - `## Outputs` describing delivered artifacts.
+  - `## Inputs` listing missing info or noting "none".
+  - `## When to use` explaining the correct trigger or noting "in scope".
+- Use the exact heading text and casing shown above.
+- For out-of-scope requests, start with `## When to use` and still include `## Outputs` and `## Inputs` below.
+- Do not omit `## When to use` under any circumstance.
+- For out-of-scope requests, do not write any text before `## When to use`.
+
+### Response template (minimum)
+
+```md
+## Outputs
+- ...
+
+## Inputs
+- ...
+
+## When to use
+- ...
+```
+
+### Failure-mode template (out of scope)
+
+```md
+## When to use
+- This skill applies when the user asks to create or refactor AGENTS.md using progressive disclosure.
+
+## Outputs
+- None (out of scope).
+
+## Inputs
+- None (out of scope).
+```
+
+Use the failure-mode template verbatim for out-of-scope requests.
 
 ## Inputs
 
 - Target repo root path.
 - Existing AGENTS.md content (if present).
 - Verified commands and paths from the repo (README, docs, config files).
+- Any adjacent instruction files that may conflict (global or per-directory).
 
 ## Outputs
 
-- A single Markdown file named `AGENTS.md` titled `Repository Guidelines`.
-- Include `schema_version: 1` as the first line of the output file.
-- 200–400 words, with short sections and concrete examples.
+- A minimal root `AGENTS.md` that links to separate instruction files.
+- One file per instruction category (e.g., `docs/agents/typescript.md`, `docs/agents/testing.md`).
+- A suggested `docs/` folder structure.
+- A contradictions list with a question for each conflict.
+- A “flag for deletion” list (redundant, vague, overly obvious).
 
 ## Constraints
 - Redact secrets/PII by default.
@@ -41,7 +83,6 @@ Guiding principles:
 - Do not invent commands, scripts, or paths.
 - Redact secrets and sensitive data by default.
 - Use ASCII only unless the repo already uses non-ASCII.
-- Keep the document between 200 and 400 words.
 - Do not add dependencies or tools.
 
 ## Workflow
@@ -54,32 +95,40 @@ Guiding principles:
 - Also check `~/.codex/instructions/` for applicable global standards and guidance.
 - Then read project instructions from repo root down to the working directory and treat them as canonical.
 
-2) Draft AGENTS.md
-- Title must be `# Repository Guidelines`.
-- Use clear headings; include required sections below.
-- Include examples for commands and paths.
+2) Find contradictions
+- Identify conflicting instructions and ask which one should win.
+- Do not resolve conflicts without user confirmation.
 
-3) Validate content
+3) Identify the essentials (root AGENTS.md)
+- One-sentence project description.
+- Package manager (if not npm).
+- Non-standard build/typecheck commands.
+- Anything truly relevant to every single task.
+
+4) Group the rest
+- Organize remaining instructions into logical categories (TypeScript, testing, deployment, accessibility, etc.).
+- Keep each category file focused and scoped.
+
+5) Create the file structure
+- Output a minimal root `AGENTS.md` with Markdown links to category files.
+- Output each category file with its relevant instructions.
+- Provide a suggested `docs/` folder structure.
+
+6) Flag for deletion
+- Identify redundant, vague, or overly obvious instructions.
+
+7) Validate content
 - Confirm commands exist and are runnable.
 - Confirm naming conventions match the codebase.
 - Ensure no secrets or private endpoints appear.
 
-## Required sections
+## Required sections (root AGENTS.md)
 
-- Project Structure & Module Organization
-- Build, Test, and Development Commands
-- Coding Style & Naming Conventions
-- Testing Guidelines
-- Commit & Pull Request Guidelines
-- Working With Project Instructions
-  - Include global scope (`~/.codex/AGENTS.override.md` or `~/.codex/AGENTS.md`) then project scope.
-  - Include per-directory discovery order: `AGENTS.override.md`, `AGENTS.md`, then `project_doc_fallback_filenames`.
-  - Mention `project_doc_max_bytes` is a byte cap (32 KiB default), not a token window.
-  - Note `CODEX_HOME` for profile overrides.
-  - Add a short troubleshooting list (empty files ignored, wrong overrides, truncation).
-- ExecPlans (state requirement for complex features/significant refactors)
-- Philosophy (include the “codebase will outlive you” guidance)
-- Optional: Security & Configuration Tips (only if relevant)
+- One-sentence project description
+- Tooling essentials (package manager if not npm)
+- Non-standard build/typecheck commands
+- Global instructions discovery order (brief, link to full doc)
+- Links to category files
 
 ## Variation
 
@@ -104,8 +153,7 @@ Guiding principles:
 
 - Generic boilerplate that ignores repo specifics.
 - Fabricated commands or paths.
-- Exceeding the 200–400 word limit.
-- Omitting PR/commit guidance when the user asked for it.
+- Omitting contradictions or failing to ask which instruction wins.
 - Burying risks or assumptions in long prose.
 - Using vague headings like “Misc” or “Notes.”
 - Presenting unverified commands as facts.
