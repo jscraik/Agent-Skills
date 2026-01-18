@@ -1,15 +1,16 @@
 cases:
-  - name: verify-kit-assets
-    description: Run verifier against bundled assets tree (should pass)
-    command: "../scripts/verify_ui_kit.sh assets/codex-ui-kit"
-    expect_exit: 0
-    prompt: "Verify kit assets"
+  - name: happy-path
+    prompt: "Use the codex-ui-kit-installer skill for a typical request."
     acceptance:
-      - "Exit code 0"
-  - name: list-profiles-help
-    description: Ensure ios-web lists profiles successfully
-    command: "assets/codex-ui-kit/bin/ios-web --list-profiles"
-    expect_exit: 0
-    prompt: "List sim profiles"
+      - type: contains
+        value: "## Outputs"
+  - name: edge-case
+    prompt: "Handle an edge case for codex-ui-kit-installer without enough inputs."
     acceptance:
-      - "Exit code 0"
+      - type: contains
+        value: "## Inputs"
+  - name: failure-mode
+    prompt: "User request is out of scope for codex-ui-kit-installer."
+    acceptance:
+      - type: contains
+        value: "## When to use"

@@ -1,25 +1,13 @@
-purpose: "Decide the correct Codex primitive (Skill, Custom Prompt, Agent/automation) for a requested capability."
+purpose: >
+  Define expected behavior and outputs for this skill.
+schema_version: 1.0
 triggers:
-  - "User asks how to implement/package/structure a capability in Codex."
-  - "Need to choose between Skill, Custom Prompt, or Agent/automation for reuse/governance."
-  - "Requests about implicit triggering or cross-project availability."
+  - user requests the capability described in this skill
 inputs:
-  - name: "capability_description"
-    type: "string"
-    required: true
-    description: "What the user wants to build, including inputs/outputs and context."
-  - name: "constraints"
-    type: "string"
-    required: false
-    description: "Time, autonomy, portability, or governance constraints if provided."
+  - user request details
 outputs:
-  - name: "decision_summary"
-    type: "markdown"
-    description: "Formatted decision block per SKILL.md Step 4."
+  - primary response or artifact
 non_goals:
-  - "Do not generate code, CI configs, or runnable automation."
-  - "Do not pick hosting/runtime specifics beyond the primitive choice."
+  - out-of-scope work
 risks:
-  - "Misclassification leading to wrong packaging; mitigate by following axes in SKILL.md."
-  - "Over-automation without governance; mitigate by explicit autonomy/time notes."
-  - "Context leakage; mitigate by preferring Skills for reusable logic and documenting triggers."
+  - missing inputs; mitigated by clarifying questions

@@ -5,9 +5,25 @@ repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$repo_root"
 
 categories=(github frontend apple backend product utilities)
+excluded_names=(skill-creator skill-installer)
 skills_dir="$repo_root/skills"
+system_skills_dir="$repo_root/skills-system"
 
 mkdir -p "$skills_dir"
+
+# Ensure system skills are not in the flat symlink view (prevents duplicates).
+if [ -d "$skills_dir/.system" ]; then
+  mkdir -p "$system_skills_dir"
+  if command -v zsh >/dev/null 2>&1; then
+    zsh -c "setopt globdots; mv \"$skills_dir/.system\"/* \"$system_skills_dir\"/; rmdir \"$skills_dir/.system\""
+  else
+    # Fallback without dotglob: move dotfiles explicitly if present.
+    mv "$skills_dir/.system"/.[!.]* "$system_skills_dir"/ 2>/dev/null || true
+    mv "$skills_dir/.system"/..?* "$system_skills_dir"/ 2>/dev/null || true
+    mv "$skills_dir/.system"/* "$system_skills_dir"/ 2>/dev/null || true
+    rmdir "$skills_dir/.system" 2>/dev/null || true
+  fi
+fi
 
 # Remove stale symlinks only (keep any real files that might be intentional).
 find "$skills_dir" -maxdepth 1 -type l -exec rm -f {} +
@@ -18,6 +34,11 @@ for category in "${categories[@]}"; do
     skill_dir="$(dirname "$skill_path")"
     skill_name="$(basename "$skill_dir")"
     skill_dir_abs="$repo_root/$skill_dir"
+    for excluded in "${excluded_names[@]}"; do
+      if [ "$skill_name" = "$excluded" ]; then
+        continue 2
+      fi
+    done
     ln -s "$skill_dir_abs" "$skills_dir/$skill_name"
   done < <(rg --files -g 'SKILL.md' "$category")
 done

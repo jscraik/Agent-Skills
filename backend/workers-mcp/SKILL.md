@@ -1,6 +1,6 @@
 ---
 name: workers-mcp
-description: "Create Cloudflare Workers MCP servers with OAuth 2.1 (Auth0), Stripe licensing, D1, Durable Objects, Workers KV, and Vectorize search. Use when Codex needs to scaffold a Workers MCP project, add MCP tools/schemas, configure D1 migrations, set up Auth0, implement Stripe licensing, add Vectorize search, or deploy to Workers."
+description: "Create production-ready MCP servers on Cloudflare Workers with:. Use when Use this skill when the task matches its description and triggers.."
 ---
 
 # Workers MCP
@@ -453,3 +453,38 @@ PROJECT_NAME/
 ├── package.json
 └── tsconfig.json
 ```
+
+## When to use
+- Use this skill when the task matches its description and triggers.
+- If the request is outside scope, route to the referenced skill.
+
+
+## Inputs
+- User request details and any relevant files/links.
+
+
+## Outputs
+- A structured response or artifact appropriate to the skill.
+- Include `schema_version: 1` if outputs are contract-bound.
+
+
+## Constraints
+- Redact secrets/PII by default.
+- Avoid destructive operations without explicit user direction.
+
+
+## Validation
+- Run any relevant checks or scripts when available.
+- Fail fast and report errors before proceeding.
+
+
+## Anti-patterns
+- Avoid vague guidance without concrete steps.
+- Do not invent results or commands.
+## Procedure
+1) Clarify scope and inputs.
+2) Execute the core workflow.
+3) Summarize outputs and next steps.
+
+## Antipatterns
+- Do not add features outside the agreed scope.

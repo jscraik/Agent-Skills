@@ -1,9 +1,6 @@
 ---
 name: threejs-builder
-description: >
-  Creates simple Three.js web apps with scene setup, lighting, geometries, materials,
-  animations, and responsive rendering. Use for: "Create a threejs scene/app/showcase"
-  or when user wants 3D web content. Supports ES modules, modern Three.js r150+ APIs.
+description: "A focused skill for creating simple, performant Three.js web applications using modern ES module patterns.. Use when Use this skill when the task matches its description and triggers.."
 ---
 
 # Three.js Builder
@@ -382,3 +379,38 @@ Effective Three.js apps:
 For advanced topics (GLTF models, shaders, post-processing), see references/advanced-topics.md.
 
 **Claude is capable of creating elegant, performant 3D web experiences. These patterns guide the way—they don't limit the result.**
+
+## When to use
+- Use this skill when the task matches its description and triggers.
+- If the request is outside scope, route to the referenced skill.
+
+
+## Inputs
+- User request details and any relevant files/links.
+
+
+## Outputs
+- A structured response or artifact appropriate to the skill.
+- Include `schema_version: 1` if outputs are contract-bound.
+
+
+## Constraints
+- Redact secrets/PII by default.
+- Avoid destructive operations without explicit user direction.
+
+
+## Validation
+- Run any relevant checks or scripts when available.
+- Fail fast and report errors before proceeding.
+
+
+## Anti-patterns
+- Avoid vague guidance without concrete steps.
+- Do not invent results or commands.
+## Procedure
+1) Clarify scope and inputs.
+2) Execute the core workflow.
+3) Summarize outputs and next steps.
+
+## Antipatterns
+- Do not add features outside the agreed scope.

@@ -1,8 +1,6 @@
 ---
 name: app-store-release-notes
-description: Create user-facing App Store release notes by collecting and summarizing all user-impacting changes since the last git tag (or a specified ref). Use when asked to generate a comprehensive release changelog, App Store "What's New" text, or release notes based on git history or tags.
-metadata:
-  short-description: App Store release notes
+description: "Generate a comprehensive, user-facing changelog from git history since the last tag, then translate commits into clear App Store release notes.. Use when Creating App Store “What’s New” text from git history.."
 ---
 
 # App Store Changelog
@@ -66,6 +64,7 @@ Generate a comprehensive, user-facing changelog from git history since the last 
 - Stick to storefront limits if the user provides one.
 
 ## Constraints / Safety
+- Redact secrets/PII by default.
 - Do not invent features or exaggerate impact.
 - Do not include internal-only changes.
 - Redact sensitive or internal identifiers if present in commit text.
@@ -97,3 +96,14 @@ Generate a comprehensive, user-facing changelog from git history since the last 
 
 The agent is capable of extraordinary work in this domain. These guidelines unlock that potential—they don't constrain it.
 Use judgment, adapt to context, and push boundaries when appropriate.
+
+## Validation
+- Run any relevant checks or scripts when available.
+- Fail fast and report errors before proceeding.
+## Procedure
+1) Clarify scope and inputs.
+2) Execute the core workflow.
+3) Summarize outputs and next steps.
+
+## Antipatterns
+- Do not add features outside the agreed scope.

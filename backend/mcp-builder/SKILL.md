@@ -1,7 +1,6 @@
 ---
 name: mcp-builder
-description: Guide for creating high-quality MCP (Model Context Protocol) servers that enable LLMs to interact with external services through well-designed tools. Use when building MCP servers to integrate external APIs or services, whether in Python (FastMCP) or Node/TypeScript (MCP SDK).
-license: Complete terms in LICENSE.txt
+description: "Create MCP (Model Context Protocol) servers that enable LLMs to interact with external services through well-designed tools, resources, and prompts. The quality of an MCP server is measured by how well it enables LLMs to accomplish real-world tasks safely, reliably, and with predictable outputs.. Use when Use this skill when the task matches its description and triggers.."
 ---
 
 # MCP Server Development Guide (Gold Standard, Dec 2025)
@@ -328,3 +327,42 @@ Load these resources as needed during development:
 - [🧱 Apps SDK Requirements](./reference/apps_sdk_requirements.md) - OpenAI Apps SDK compliance
 - [🛡 Reliability & Ops Runbook](./reference/reliability_ops_runbook.md) - SLOs, metrics, incident response
 - [🧾 Spec vs SEP Notes](./reference/spec_vs_sep_notes.md) - resolve conflicts between spec and proposals
+
+## When to use
+- Use this skill when the task matches its description and triggers.
+- If the request is outside scope, route to the referenced skill.
+
+
+## Inputs
+- User request details and any relevant files/links.
+
+
+## Outputs
+- A structured response or artifact appropriate to the skill.
+- Include `schema_version: 1` if outputs are contract-bound.
+
+
+## Constraints
+- Redact secrets/PII by default.
+- Avoid destructive operations without explicit user direction.
+
+
+## Validation
+- Run any relevant checks or scripts when available.
+- Fail fast and report errors before proceeding.
+
+
+## Philosophy
+- Favor clarity, explicit tradeoffs, and verifiable outputs.
+
+
+## Anti-patterns
+- Avoid vague guidance without concrete steps.
+- Do not invent results or commands.
+## Procedure
+1) Clarify scope and inputs.
+2) Execute the core workflow.
+3) Summarize outputs and next steps.
+
+## Antipatterns
+- Do not add features outside the agreed scope.

@@ -1,0 +1,16 @@
+cases:
+  - name: happy-path
+    prompt: "Use the interview-me skill for a typical request."
+    acceptance:
+      - type: contains
+        value: "## Outputs"
+  - name: edge-case
+    prompt: "Handle an edge case for interview-me without enough inputs."
+    acceptance:
+      - type: contains
+        value: "## Inputs"
+  - name: failure-mode
+    prompt: "User request is out of scope for interview-me."
+    acceptance:
+      - type: contains
+        value: "## When to use"

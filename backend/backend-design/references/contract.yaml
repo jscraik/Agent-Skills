@@ -1,26 +1,13 @@
-purpose: "Produce a complete backend architecture and API design spec with explicit tradeoffs, compliance, and integration guidance."
+purpose: >
+  Define expected behavior and outputs for this skill.
+schema_version: 1.0
 triggers:
-  - "When the user asks for backend architecture or system design"
-  - "When designing or refactoring backend APIs, data models, auth, reliability, or integration surfaces"
+  - user requests the capability described in this skill
 inputs:
-  - name: "system_type"
-    type: "string"
-    required: false
-  - name: "compliance_scope"
-    type: "string"
-    required: false
-  - name: "primary_workflows"
-    type: "string"
-    required: false
+  - user request details
 outputs:
-  - name: "design_spec"
-    type: "markdown"
-  - name: "api_contract"
-    type: "markdown"
-  - name: "file_plan"
-    type: "markdown"
+  - primary response or artifact
 non_goals:
-  - "Implementation code or database migrations without explicit request"
-  - "Operational runbooks or deployment playbooks unless requested"
+  - out-of-scope work
 risks:
-  - "Incomplete requirements can lead to incorrect architecture choices; mitigate by confirming scope and constraints"
+  - missing inputs; mitigated by clarifying questions

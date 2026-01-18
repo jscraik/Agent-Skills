@@ -3,12 +3,13 @@
 Skill Initializer - Creates a new skill from template
 
 Usage:
+    init_skill.py <skill-name> --category <category> [--resources scripts,references,assets] [--examples]
     init_skill.py <skill-name> --path <path> [--resources scripts,references,assets] [--examples]
 
 Examples:
-    init_skill.py my-new-skill --path skills/public
-    init_skill.py my-new-skill --path skills/public --resources scripts,references
-    init_skill.py my-api-helper --path skills/private --resources scripts --examples
+    init_skill.py my-new-skill --category utilities
+    init_skill.py my-new-skill --category backend --resources scripts,references
+    init_skill.py my-api-helper --category product --resources scripts --examples
     init_skill.py custom-skill --path /custom/location
 """
 
@@ -19,6 +20,7 @@ from pathlib import Path
 
 MAX_SKILL_NAME_LENGTH = 64
 ALLOWED_RESOURCES = {"scripts", "references", "assets"}
+CATEGORIES = {"github", "frontend", "apple", "backend", "product", "utilities"}
 
 SKILL_TEMPLATE = """---
 name: {skill_name}
@@ -328,7 +330,12 @@ def main():
         description="Create a new skill directory with a SKILL.md template.",
     )
     parser.add_argument("skill_name", help="Skill name (normalized to hyphen-case)")
-    parser.add_argument("--path", required=True, help="Output directory for the skill")
+    parser.add_argument("--path", help="Output directory for the skill")
+    parser.add_argument(
+        "--category",
+        choices=sorted(CATEGORIES),
+        help="Category folder under the repo (github, frontend, apple, backend, product, utilities)",
+    )
     parser.add_argument(
         "--resources",
         default="",
@@ -360,7 +367,26 @@ def main():
         print("[ERROR] --examples requires --resources to be set.")
         sys.exit(1)
 
-    path = args.path
+    if args.path and args.category:
+        print("[ERROR] Use either --path or --category, not both.")
+        sys.exit(1)
+
+    repo_root = Path(__file__).resolve().parents[3]
+    if args.category:
+        path = repo_root / args.category
+    elif args.path:
+        path = Path(args.path)
+    else:
+        print("[ERROR] Missing required option: --category or --path.")
+        sys.exit(1)
+
+    # Reject the flat symlink view to keep skills in canonical category folders.
+    skills_symlink = (repo_root / "skills").resolve()
+    resolved_path = path.resolve()
+    if resolved_path == skills_symlink or str(resolved_path).startswith(str(skills_symlink) + "/"):
+        print("[ERROR] Do not create skills under the flat skills/ symlink view.")
+        print("       Use --category or a category folder path instead.")
+        sys.exit(1)
 
     print(f"Initializing skill: {skill_name}")
     print(f"   Location: {path}")

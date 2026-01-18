@@ -1,8 +1,6 @@
 ---
 name: product-design-review
-description: Review end-to-end user experience and UI for products or flows; produce a user-perspective critique with usability, accessibility, content, and interaction issues plus fixes. Use for UX/UI audits, product design reviews, onboarding or checkout critiques, heuristic evaluations, accessibility-first reviews, or when asked to find issues in a user journey from the user's point of view. Target web, iOS, and macOS products, including React apps and open-source software.
-metadata:
-  short-description: End-to-end UX/UI critique with fixes
+description: "Deliver a complete, user-centered critique of a product or flow, identifying issues, risks, and improvements across the entire experience.. Use when When a user requests a UX/UI audit or heuristic review of a product.."
 ---
 
 # Product Design Review
@@ -144,3 +142,32 @@ Use when the product is open-source and adoption or contributor experience is cr
 The agent is capable of extraordinary work in this domain. These guidelines unlock that potential—they don't constrain it.
 Use judgment, adapt to context, and push boundaries when appropriate.
 
+## Inputs
+- User request details and any relevant files/links.
+
+
+## Outputs
+- A structured response or artifact appropriate to the skill.
+- Include `schema_version: 1` if outputs are contract-bound.
+
+
+## Constraints
+- Redact secrets/PII by default.
+- Avoid destructive operations without explicit user direction.
+
+
+## Validation
+- Run any relevant checks or scripts when available.
+- Fail fast and report errors before proceeding.
+
+
+## Anti-patterns
+- Avoid vague guidance without concrete steps.
+- Do not invent results or commands.
+## Procedure
+1) Clarify scope and inputs.
+2) Execute the core workflow.
+3) Summarize outputs and next steps.
+
+## Antipatterns
+- Do not add features outside the agreed scope.

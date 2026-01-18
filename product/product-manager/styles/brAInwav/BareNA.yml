@@ -1,6 +1,0 @@
-extends: existence
-message: "Do not use bare 'N/A'. Write 'N/A — <1–2 lines explaining why>'."
-level: error
-scope: raw
-raw:
-  - '(?i)^\\s*(?:[-*]\\s*)?N\\/A\\s*$'

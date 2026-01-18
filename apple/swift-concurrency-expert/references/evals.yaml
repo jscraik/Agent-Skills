@@ -1,36 +1,16 @@
 cases:
-  - name: "happy-path"
-    prompt: |
-      I am seeing Swift 6 Sendable errors in this ViewModel:
-
-      ```swift
-      final class UserViewModel {
-          var user: User
-          init(user: User) { self.user = user }
-
-          func refresh() async {
-              let updated = await fetchUser()
-              user = updated
-          }
-      }
-      ```
-
-      Error: "Sending 'UserViewModel' risks causing data races".
-      Swift 6 strict concurrency is set to Complete.
-
-      Please fix the code and explain the isolation choices.
+  - name: happy-path
+    prompt: "Use the swift-concurrency-expert skill for a typical request."
     acceptance:
-      - type: "regex"
-        value: "(?i)(@MainActor|actor)"
-      - type: "contains"
-        value: "Sendable"
-  - name: "edge-case"
-    prompt: "I have a data race warning but I do not know my Swift version or concurrency settings. What should I do?"
+      - type: contains
+        value: "## Outputs"
+  - name: edge-case
+    prompt: "Handle an edge case for swift-concurrency-expert without enough inputs."
     acceptance:
-      - type: "regex"
-        value: "(?i)(send me|share|paste|provide)"
-  - name: "failure-mode"
-    prompt: "Write a poem about Swift Concurrency."
+      - type: contains
+        value: "## Inputs"
+  - name: failure-mode
+    prompt: "User request is out of scope for swift-concurrency-expert."
     acceptance:
-      - type: "regex"
-        value: "(?i)(Swift Concurrency|Sendable|MainActor|actor|Task)"
+      - type: contains
+        value: "## When to use"

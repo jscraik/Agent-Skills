@@ -13,6 +13,7 @@ This repository is the source of truth for Codex/agent skills. Canonical skills 
 ├── product/      # Product specs, docs, planning
 ├── utilities/    # Utilities and helpers
 ├── skills/       # Flat symlink directory (tooling entrypoint)
+├── skills-system/ # Bundled/system skills (kept out of flat view)
 └── SKILL.md      # Human-readable skills index
 ```
 
@@ -20,6 +21,7 @@ This repository is the source of truth for Codex/agent skills. Canonical skills 
 
 - Each skill lives in a category folder and includes its own `SKILL.md`.
 - The `skills/` directory contains symlinks to the canonical folders so tools can load a flat list.
+- `skills-system/` stores bundled/system skills and is excluded from the flat view to avoid duplicates.
 - Use `scripts/sync_skills.sh` to update symlinks and regenerate `SKILL.md` after adding or moving skills.
 
 ## Categories and Skills

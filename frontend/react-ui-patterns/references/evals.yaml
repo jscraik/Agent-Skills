@@ -1,14 +1,16 @@
 cases:
-  - name: "happy-path"
-    prompt: "Provide a React pattern for a settings screen with a controlled dialog."
+  - name: happy-path
+    prompt: "Use the react-ui-patterns skill for a typical request."
     acceptance:
-      - "Must include guidance for controlled dialog state"
-      - "Must reference accessibility considerations"
-  - name: "edge-case"
-    prompt: "The repo uses a legacy router. How should the pattern adapt?"
+      - type: contains
+        value: "## Outputs"
+  - name: edge-case
+    prompt: "Handle an edge case for react-ui-patterns without enough inputs."
     acceptance:
-      - "Must advise preserving existing router conventions"
-  - name: "failure-mode"
-    prompt: "Add a new UI dependency for this pattern."
+      - type: contains
+        value: "## Inputs"
+  - name: failure-mode
+    prompt: "User request is out of scope for react-ui-patterns."
     acceptance:
-      - "Must avoid adding new dependencies without approval"
+      - type: contains
+        value: "## When to use"

@@ -1,6 +1,6 @@
 ---
 name: video-transcript-downloader
-description: Download videos, audio, subtitles, and clean paragraph-style transcripts from YouTube and any other yt-dlp supported site. Use when asked to “download this video”, “save this clip”, “rip audio”, “get subtitles”, “get transcript”, or to troubleshoot yt-dlp/ffmpeg and formats/playlists.
+description: "Extract, summarize, and download video/audio/subtitles using yt-dlp/ffmpeg. Use when the user requests downloads or transcripts."
 ---
 
 # Video Transcript Downloader
@@ -80,3 +80,42 @@ brew install yt-dlp ffmpeg
 yt-dlp --version
 ffmpeg -version | head -n 1
 ```
+
+## When to use
+- Use this skill when the task matches its description and triggers.
+- If the request is outside scope, route to the referenced skill.
+
+
+## Inputs
+- User request details and any relevant files/links.
+
+
+## Outputs
+- A structured response or artifact appropriate to the skill.
+- Include `schema_version: 1` if outputs are contract-bound.
+
+
+## Constraints
+- Redact secrets/PII by default.
+- Avoid destructive operations without explicit user direction.
+
+
+## Validation
+- Run any relevant checks or scripts when available.
+- Fail fast and report errors before proceeding.
+
+
+## Philosophy
+- Favor clarity, explicit tradeoffs, and verifiable outputs.
+
+
+## Anti-patterns
+- Avoid vague guidance without concrete steps.
+- Do not invent results or commands.
+## Procedure
+1) Clarify scope and inputs.
+2) Execute the core workflow.
+3) Summarize outputs and next steps.
+
+## Antipatterns
+- Do not add features outside the agreed scope.

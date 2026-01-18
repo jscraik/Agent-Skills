@@ -1,18 +1,13 @@
-purpose: "Provide React UI patterns and component guidance for building or refactoring screens and components."
+purpose: >
+  Define expected behavior and outputs for this skill.
+schema_version: 1.0
 triggers:
-  - "When the user asks for React UI patterns or component guidance"
-  - "When designing layouts, routing, or component composition in React"
+  - user requests the capability described in this skill
 inputs:
-  - name: "target_components"
-    type: "string"
-    required: false
-  - name: "repo_conventions"
-    type: "string"
-    required: false
+  - user request details
 outputs:
-  - name: "pattern_guidance"
-    type: "markdown"
+  - primary response or artifact
 non_goals:
-  - "Implementing full features or changing unrelated code"
+  - out-of-scope work
 risks:
-  - "Introducing patterns that conflict with repo conventions"
+  - missing inputs; mitigated by clarifying questions

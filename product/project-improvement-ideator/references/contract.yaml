@@ -1,21 +1,13 @@
-## TOC: name, purpose, triggers, inputs, outputs, non_goals, risks
-
-name: project-improvement-ideator
-purpose: Generate a broad set of improvement ideas (target ~30), assess them, and return the top 5 with rationale.
+purpose: >
+  Define expected behavior and outputs for this skill.
+schema_version: 1.0
 triggers:
-  - "best ideas"
-  - "improve this project"
-  - "top 5" or "winnow"
-  - "roadmap"
+  - user requests the capability described in this skill
 inputs:
-  context: description of current project/repo and constraints (if absent, assume current repo state).
+  - user request details
 outputs:
-  top_5_ranked: list with title, why, how (bullets), risks/mitigations.
-  scoring_summary: impact/feasibility/alignment/time-to-value per idea.
-  full_list: concise 30-idea list.
+  - primary response or artifact
 non_goals:
-  - Deep architectural redesigns without explicit request.
-  - Adding new dependencies by default.
+  - out-of-scope work
 risks:
-  - Over-fitting to missing context -> mitigated by stating assumptions.
-  - Excess verbosity -> mitigated by concise format guardrails.
+  - missing inputs; mitigated by clarifying questions

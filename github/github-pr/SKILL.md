@@ -1,12 +1,6 @@
 ---
 name: github-pr
-description: Fetch, preview, merge, and test GitHub PRs locally. Great for trying upstream PRs before they're merged.
-metadata:
-  homepage: https://cli.github.com
-  clawdhub:
-    emoji: "🔀"
-    requires:
-      bins: ["gh", "git"]
+description: "Fetch, preview, test, and merge GitHub PRs locally. Use when the user wants to evaluate a PR before merge."
 ---
 
 # GitHub PR Tool
@@ -69,3 +63,44 @@ github-pr test clawdbot/clawdbot 404
 - Use `--remote <name>` to specify a different remote
 - Merge conflicts must be resolved manually
 - The `test` command auto-detects package manager (npm/pnpm/yarn/bun)
+
+## When to use
+- Use this skill when the task matches its description and triggers.
+- If the request is outside scope, route to the referenced skill.
+
+
+## Inputs
+- User request details and any relevant files/links.
+
+
+## Outputs
+- A structured response or artifact appropriate to the skill.
+- Include `schema_version: 1` if outputs are contract-bound.
+
+
+## Constraints
+- Redact secrets/PII by default.
+- Avoid destructive operations without explicit user direction.
+
+
+## Validation
+- Run any relevant checks or scripts when available.
+- Fail fast and report errors before proceeding.
+
+
+## Philosophy
+- Favor clarity, explicit tradeoffs, and verifiable outputs.
+
+- Encourage variation: adapt steps for different contexts and enable creative exploration.
+
+## Anti-patterns
+- Avoid vague guidance without concrete steps.
+- Do not invent results or commands.
+## Procedure
+1) Clarify scope and inputs.
+2) Execute the core workflow.
+3) Summarize outputs and next steps.
+- If context differs, customize steps to fit the situation.
+
+## Antipatterns
+- Do not add features outside the agreed scope.

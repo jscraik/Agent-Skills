@@ -1,9 +1,6 @@
 ---
 name: agents-md
-description: Create or update a repository-level AGENTS.md contributor guide with clear sections, commands, and repo-specific conventions. Use when asked to draft, improve, or standardize AGENTS.md files or when a repo needs concise contributor instructions.
-metadata:
-  version: "1.0.0"
-  last_updated: "2026-01-15"
+description: "Prefer concise, verifiable instructions over comprehensive prose. Every command and path must be real and sourced from the repo. Treat AGENTS.md as an operator checklist: short, direct, and actionable.. Use when The user asks to create or update AGENTS.md.."
 ---
 
 # Agents Md
@@ -39,6 +36,7 @@ Guiding principles:
 - 200–400 words, with short sections and concrete examples.
 
 ## Constraints
+- Redact secrets/PII by default.
 
 - Do not invent commands, scripts, or paths.
 - Redact secrets and sensitive data by default.
@@ -118,3 +116,10 @@ Guiding principles:
 - "Draft an AGENTS.md for this repo."
 - "Create a Repository Guidelines AGENTS.md under 400 words."
 - "Standardize our AGENTS.md using actual repo commands."
+## Procedure
+1) Clarify scope and inputs.
+2) Execute the core workflow.
+3) Summarize outputs and next steps.
+
+## Antipatterns
+- Do not add features outside the agreed scope.

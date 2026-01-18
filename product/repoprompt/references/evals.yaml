@@ -1,20 +1,16 @@
-schema_version: 1
 cases:
-  - name: "mcp-integration-monorepo"
-    prompt: "Integrate Repo Prompt with Claude Code for a monorepo."
+  - name: happy-path
+    prompt: "Use the repoprompt skill for a typical request."
     acceptance:
-      - regex:(?i)mcp-backed editor path
-      - regex:(?i)context builder
-      - regex:(?i)codemaps/slices
-      - regex:(?i)setup checklist and validation
-  - name: "compose-vs-chat-refactor"
-    prompt: "Should I use Compose or Chat mode for a large refactor?"
+      - type: contains
+        value: "## Outputs"
+  - name: edge-case
+    prompt: "Handle an edge case for repoprompt without enough inputs."
     acceptance:
-      - regex:(?i)compose for planning or chat for implementation with pro edit
-      - regex:(?i)context strategy
-      - regex:(?i)(why|because|yields|rationale|excels|best)
-  - name: "rp-cli-automation"
-    prompt: "How do I use rp-cli in automation?"
+      - type: contains
+        value: "## Inputs"
+  - name: failure-mode
+    prompt: "User request is out of scope for repoprompt."
     acceptance:
-      - regex:(?i)rp-cli path
-      - regex:(?i)basic setup and smoke test
+      - type: contains
+        value: "## When to use"

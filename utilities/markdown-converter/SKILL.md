@@ -1,6 +1,6 @@
 ---
 name: markdown-converter
-description: Convert documents and files to Markdown using markitdown. Use when converting PDF, Word (.docx), PowerPoint (.pptx), Excel (.xlsx, .xls), HTML, CSV, JSON, XML, images (with EXIF/OCR), audio (with transcription), ZIP archives, YouTube URLs, or EPubs to Markdown format for LLM processing or text analysis.
+description: "Convert files to Markdown using — no installation required.. Use when Use this skill when the task matches its description and triggers.."
 ---
 
 # Markdown Converter
@@ -65,3 +65,42 @@ uvx markitdown scan.pdf -d -e "https://your-resource.cognitiveservices.azure.com
 - Output preserves document structure: headings, tables, lists, links
 - First run caches dependencies; subsequent runs are faster
 - For complex PDFs with poor extraction, use `-d` with Azure Document Intelligence
+
+## When to use
+- Use this skill when the task matches its description and triggers.
+- If the request is outside scope, route to the referenced skill.
+
+
+## Inputs
+- User request details and any relevant files/links.
+
+
+## Outputs
+- A structured response or artifact appropriate to the skill.
+- Include `schema_version: 1` if outputs are contract-bound.
+
+
+## Constraints
+- Redact secrets/PII by default.
+- Avoid destructive operations without explicit user direction.
+
+
+## Validation
+- Run any relevant checks or scripts when available.
+- Fail fast and report errors before proceeding.
+
+
+## Philosophy
+- Favor clarity, explicit tradeoffs, and verifiable outputs.
+
+
+## Anti-patterns
+- Avoid vague guidance without concrete steps.
+- Do not invent results or commands.
+## Procedure
+1) Clarify scope and inputs.
+2) Execute the core workflow.
+3) Summarize outputs and next steps.
+
+## Antipatterns
+- Do not add features outside the agreed scope.

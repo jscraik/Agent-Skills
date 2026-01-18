@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Install a skill from a GitHub repo path into ~/dev/agent-skills/skills by default."""
+"""Install a skill from a GitHub repo path into a category folder under ~/dev/agent-skills by default."""
 
 from __future__ import annotations
 
@@ -16,6 +16,7 @@ import zipfile
 
 from github_utils import github_request
 DEFAULT_REF = "main"
+CATEGORIES = {"github", "frontend", "apple", "backend", "product", "utilities"}
 
 
 @dataclass
@@ -246,10 +247,6 @@ def _resolve_source(args: Args) -> Source:
     )
 
 
-def _default_dest() -> str:
-    return os.path.join(_skills_root(), "skills")
-
-
 def _parse_args(argv: list[str]) -> Args:
     parser = argparse.ArgumentParser(description="Install a skill from GitHub.")
     parser.add_argument("--repo", help="owner/repo")
@@ -261,6 +258,11 @@ def _parse_args(argv: list[str]) -> Args:
     )
     parser.add_argument("--ref", default=DEFAULT_REF)
     parser.add_argument("--dest", help="Destination skills directory")
+    parser.add_argument(
+        "--category",
+        choices=sorted(CATEGORIES),
+        help="Category folder under the skills repo (github, frontend, apple, backend, product, utilities)",
+    )
     parser.add_argument(
         "--name", help="Destination skill name (defaults to basename of path)"
     )
@@ -281,7 +283,12 @@ def main(argv: list[str]) -> int:
             raise InstallError("No skill paths provided.")
         for path in source.paths:
             _validate_relative_path(path)
-        dest_root = args.dest or _default_dest()
+        if args.dest:
+            dest_root = args.dest
+        else:
+            if not args.category:
+                raise InstallError("Missing --category (required when --dest is not set).")
+            dest_root = os.path.join(_skills_root(), args.category)
         tmp_dir = tempfile.mkdtemp(prefix="skill-install-", dir=_tmp_root())
         try:
             repo_root = _prepare_repo(source, args.method, tmp_dir)

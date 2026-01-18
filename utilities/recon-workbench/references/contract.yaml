@@ -1,26 +1,13 @@
-purpose: "Design or inspect a controlled, evidence-only interrogation workbench for authorized targets across macOS/iOS, web/React, and OSS, with strict legal/safety guardrails."
+purpose: >
+  Define expected behavior and outputs for this skill.
+schema_version: 1.0
 triggers:
-  - "When asked to build or update the recon workbench toolchain, schemas, or probe catalogs"
-  - "When asked to inspect or run probes on an authorized target and produce evidence-backed outputs"
+  - user requests the capability described in this skill
 inputs:
-  - name: "target_type"
-    type: "string"
-    required: false
-  - name: "authorization_scope"
-    type: "string"
-    required: true
-  - name: "goal"
-    type: "string"
-    required: false
+  - user request details
 outputs:
-  - name: "workbench_design"
-    type: "markdown"
-  - name: "probe_plan"
-    type: "markdown"
-  - name: "findings_report"
-    type: "markdown"
+  - primary response or artifact
 non_goals:
-  - "Circumvention, DRM bypass, or unauthorized data access"
-  - "Claims without artifact evidence"
+  - out-of-scope work
 risks:
-  - "Running probes without clear authorization; mitigate by requiring authorization_scope and citing evidence paths"
+  - missing inputs; mitigated by clarifying questions

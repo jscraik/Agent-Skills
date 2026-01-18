@@ -1,10 +1,6 @@
 ---
 name: repoprompt
-description: "Plan and guide integration of Repo Prompt (MCP, rp-cli, Compose/Chat/Apply) into AI coding workflows. Use when Codex needs to work with Repo Prompt for: (1) setup/integration, (2) workflow selection, (3) context optimization with codemaps/slices, or (4) comparisons with AI editors."
-metadata:
-  short-description: Integrate Repo Prompt into workflows
-  version: "1.0.0"
-  last_updated: "2026-01-17"
+description: "Plan and guide Repo Prompt integration and usage in AI coding workflows. Use when integrating Repo Prompt with editors/agents."
 ---
 
 # Repo Prompt Integration
@@ -38,6 +34,7 @@ Guide the user to the most effective Repo Prompt integration path for their work
 - If proposing /interview-me, still provide a minimal recommendation + checklist first.
 
 ## Constraints
+- Redact secrets/PII by default.
 - Redact secrets/sensitive data by default.
 - Avoid adding dependencies or requiring paid features without explicit user approval.
 - Do not claim features beyond the provided source notes.
@@ -129,3 +126,14 @@ Guide the user to the most effective Repo Prompt integration path for their work
 ## References
 Read when needed:
 - references/repoprompt_source.md
+
+## When to use
+- Use this skill when the task matches its description and triggers.
+- If the request is outside scope, route to the referenced skill.
+## Procedure
+1) Clarify scope and inputs.
+2) Execute the core workflow.
+3) Summarize outputs and next steps.
+
+## Antipatterns
+- Do not add features outside the agreed scope.

@@ -1,10 +1,6 @@
 ---
 name: seo-optimizer
-description: >
-  Comprehensive SEO optimization for web applications. Use when asked to improve
-  search rankings, add meta tags, create structured data, generate sitemaps,
-  optimize for Core Web Vitals, or analyze SEO issues. Works with Next.js, Astro,
-  React, and static HTML sites.
+description: "Transform your web application from invisible to discoverable. This skill analyzes your codebase and implements comprehensive SEO optimizations that help search engines and social platforms understand, index, and surface your content.. Use when Use this skill when the task matches its description and triggers.."
 ---
 
 # SEO Optimizer
@@ -462,3 +458,38 @@ The best SEO:
 Focus on making your content findable and understandable. The rankings follow from genuine value clearly communicated.
 
 **Claude is capable of comprehensive SEO analysis and implementation. These guidelines illuminate the path—they don't fence it.**
+
+## When to use
+- Use this skill when the task matches its description and triggers.
+- If the request is outside scope, route to the referenced skill.
+
+
+## Inputs
+- User request details and any relevant files/links.
+
+
+## Outputs
+- A structured response or artifact appropriate to the skill.
+- Include `schema_version: 1` if outputs are contract-bound.
+
+
+## Constraints
+- Redact secrets/PII by default.
+- Avoid destructive operations without explicit user direction.
+
+
+## Validation
+- Run any relevant checks or scripts when available.
+- Fail fast and report errors before proceeding.
+
+
+## Anti-patterns
+- Avoid vague guidance without concrete steps.
+- Do not invent results or commands.
+## Procedure
+1) Clarify scope and inputs.
+2) Execute the core workflow.
+3) Summarize outputs and next steps.
+
+## Antipatterns
+- Do not add features outside the agreed scope.

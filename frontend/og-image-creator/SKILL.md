@@ -1,9 +1,6 @@
 ---
 name: og-image-creator
-description: >
-  Smart OG image generation that studies your codebase, understands routes and brand identity,
-  then creates contextually appropriate Open Graph images using Playwright and React components.
-  Triggers: "create og images", "generate social cards", "add open graph images".
+description: "Generate authentic, brand-aligned Open Graph images by understanding your codebase first, then creating contextually appropriate images for each route using Playwright and your existing components.. Use when Use this skill when the task matches its description and triggers.."
 ---
 
 # OG Image Creator
@@ -214,3 +211,38 @@ Study the codebase to understand the design language. Extract the brand identity
 When someone shares your page, the OG image should feel like a natural preview—not a template slapped on top.
 
 **You're capable of creating sophisticated, brand-aligned OG images that enhance rather than undermine the site's identity.**
+
+## When to use
+- Use this skill when the task matches its description and triggers.
+- If the request is outside scope, route to the referenced skill.
+
+
+## Inputs
+- User request details and any relevant files/links.
+
+
+## Outputs
+- A structured response or artifact appropriate to the skill.
+- Include `schema_version: 1` if outputs are contract-bound.
+
+
+## Constraints
+- Redact secrets/PII by default.
+- Avoid destructive operations without explicit user direction.
+
+
+## Validation
+- Run any relevant checks or scripts when available.
+- Fail fast and report errors before proceeding.
+
+
+## Anti-patterns
+- Avoid vague guidance without concrete steps.
+- Do not invent results or commands.
+## Procedure
+1) Clarify scope and inputs.
+2) Execute the core workflow.
+3) Summarize outputs and next steps.
+
+## Antipatterns
+- Do not add features outside the agreed scope.

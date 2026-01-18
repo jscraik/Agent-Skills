@@ -1,33 +1,13 @@
-schema_version: 1
-name: repoprompt
-purpose: Provide guidance to integrate Repo Prompt into AI coding workflows.
+purpose: >
+  Define expected behavior and outputs for this skill.
+schema_version: 1.0
 triggers:
-  - setup Repo Prompt
-  - connect MCP or rp-cli
-  - choose Compose vs Chat vs Editor workflow
-  - optimize context with codemaps/slices
-  - compare Repo Prompt to AI editors
-non_goals:
-  - selling licenses or pricing negotiation
-  - inventing undocumented features
-  - troubleshooting OS-level install issues beyond basic guidance
-risks:
-  - over-scoping context selection
-  - misrouting to an inefficient workflow
-  - leaking sensitive data in prompts
+  - user requests the capability described in this skill
 inputs:
-  - workflow: editor-first | chat-first | automation
-  - tools: list of target tools/editors
-  - repo_scope: single | multi-root | monorepo
-  - model_access: api_keys | cli_providers
-  - constraints: token_budget | cost | latency | security
+  - user request details
 outputs:
-  - recommendation: one primary integration path with rationale
-  - setup_steps: ordered checklist (3-7 steps)
-  - context_strategy: full/slices/codemaps guidance
-  - validation_steps: quick smoke tests
-constraints:
-  - do_not_invent_features: true
-  - redact_sensitive_data: true
-  - keep_steps_concise: true
-  - prefer_recommendation_over_options: true
+  - primary response or artifact
+non_goals:
+  - out-of-scope work
+risks:
+  - missing inputs; mitigated by clarifying questions

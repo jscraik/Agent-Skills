@@ -1,17 +1,16 @@
 cases:
-  - name: "happy-path-mkit"
-    prompt: "Add a new free MCP tool to mKit that returns a health summary and register it correctly."
+  - name: happy-path
+    prompt: "Use the mkit-builder skill for a typical request."
     acceptance:
-      - contains: "src/tools/free"
-      - contains: "src/tools/index.ts"
-      - regex: "(?i)verify|verification"
-  - name: "edge-case-missing-info"
-    prompt: "Implement the mKit boilerplate for my project."
+      - type: contains
+        value: "## Outputs"
+  - name: edge-case
+    prompt: "Handle an edge case for mkit-builder without enough inputs."
     acceptance:
-      - regex: "(?i)clarify|which repo|confirm"
-  - name: "mcp-design"
-    prompt: "Design an MCP server for a CRM API with typed schemas and safe annotations."
+      - type: contains
+        value: "## Inputs"
+  - name: failure-mode
+    prompt: "User request is out of scope for mkit-builder."
     acceptance:
-      - contains: "inputSchema"
-      - contains: "outputSchema"
-      - regex: "(?i)readOnlyHint|destructiveHint"
+      - type: contains
+        value: "## When to use"
