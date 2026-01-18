@@ -1,17 +1,36 @@
 ---
 name: swiftui-liquid-glass
-description: "Use this skill to build or review SwiftUI features that fully align with the iOS 26+ Liquid Glass API. Prioritize native APIs (, , glass button styles) and Apple design guidance. Keep usage consistent, interactive where needed, and performance aware.. Use when When adopting Liquid Glass in new SwiftUI UI or components.."
+description: "Use this skill to build or review SwiftUI features that align with the iOS 26+ Liquid Glass API. Prioritize native APIs (glassEffect, GlassEffectContainer, glass button styles) and Apple design guidance. Keep usage consistent, interactive where needed, and performance-aware. Also use this skill to provide AppKit Liquid Glass notes for macOS when requested."
+metadata:
+  short-description: SwiftUI + AppKit Liquid Glass guidance, patterns, and reviews.
 ---
 
 # SwiftUI Liquid Glass
 
 ## Overview
 Use this skill to build or review SwiftUI features that fully align with the iOS 26+ Liquid Glass API. Prioritize native APIs (`glassEffect`, `GlassEffectContainer`, glass button styles) and Apple design guidance. Keep usage consistent, interactive where needed, and performance aware.
+If the request targets AppKit/macOS, follow the AppKit notes in `references/appkit-liquid-glass.md` and confirm API availability in the current SDK.
+If the request targets widgets or WidgetKit rendering modes, follow `references/widget-liquid-glass.md`.
+If the request targets UIKit, follow `references/uikit-liquid-glass.md` and confirm API availability in the current SDK.
+
+## When to use
+- Adopting Liquid Glass in SwiftUI views or components.
+- Auditing Liquid Glass usage for performance, accessibility, and design alignment.
+- Adapting Liquid Glass behavior for AppKit, UIKit, or WidgetKit.
 
 ## Philosophy
 - Prefer native Liquid Glass APIs over custom effects to match platform behavior.
 - Treat glass as a design system layer, not an afterthought.
 - Keep the feature readable first; glass is an enhancement, not a replacement for structure.
+- Favor clarity over novelty; glass should clarify hierarchy, not blur it.
+- Use motion sparingly to reinforce state changes and transitions.
+- Maintain accessibility first: contrast, legibility, and focus must remain strong.
+
+## Principles
+- Principle: prioritize platform fidelity over bespoke effects.
+- Principle: preserve legibility and focus states before adding glass.
+- Principle: reduce visual noise; fewer glass surfaces beat many.
+- Principle: smooth transitions should communicate state changes, not distract.
 
 ## When to use
 - When adopting Liquid Glass in new SwiftUI UI or components.
@@ -86,6 +105,19 @@ Choose the path that matches the request:
 - Applying `.interactive()` to non-interactive elements.
 - Missing `#available(iOS 26, *)` guards or fallback UI.
 - Inconsistent shapes/tints across related elements.
+- Overusing glass on large surfaces that reduce readability.
+- Mixing multiple glass styles in the same hierarchy without intent.
+- Animating glass effects on every frame or interaction without need.
+- Adding glass to critical text backgrounds without verifying contrast.
+- Anti-pattern: shipping glass without verifying contrast across light/dark.
+- Anti-pattern: layering glass on top of glass with no hierarchy cue.
+- Anti-pattern: applying interactive glass to passive decorative elements.
+- Anti-pattern: hiding focus rings or reducing focus visibility on glass surfaces.
+- Anti-pattern: mismatched corner radii across a glass group.
+- Anti-pattern: skipping container grouping when multiple glass views merge.
+- Anti-pattern: using glass to mask layout issues instead of fixing layout.
+- Anti-pattern: relying on glass to separate content without spacing or dividers.
+- Anti-pattern: prioritizing glass visuals over accessibility requirements.
 
 ## Example prompts
 - "Refactor this SwiftUI card to use Liquid Glass with proper fallback."
@@ -129,6 +161,9 @@ Button("Confirm") { }
 
 ## Resources
 - Reference guide: `references/liquid-glass.md`
+- AppKit guide: `references/appkit-liquid-glass.md`
+- Widget guide: `references/widget-liquid-glass.md`
+- UIKit guide: `references/uikit-liquid-glass.md`
 - Prefer Apple docs for up-to-date API details.
 
 ## Compliance
@@ -147,6 +182,8 @@ Use judgment, adapt to context, and push boundaries when appropriate.
 ## Anti-patterns
 - Avoid vague guidance without concrete steps.
 - Do not invent results or commands.
+- Do not ship glass without explicit fallback UI and availability guards.
+- Do not degrade input focus visibility or pointer clarity.
 ## Procedure
 1) Clarify scope and inputs.
 2) Execute the core workflow.
@@ -154,3 +191,18 @@ Use judgment, adapt to context, and push boundaries when appropriate.
 
 ## Antipatterns
 - Do not add features outside the agreed scope.
+
+## Response format (required)
+Always use this format, including for out-of-scope requests.
+
+## When to use
+- ...
+
+## Inputs
+- ...
+
+## Outputs
+- ...
+
+## Failure mode (required)
+If the request is out of scope, respond using the same headings and explain when this skill should be used instead. Include `## When to use` in the response.
