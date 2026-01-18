@@ -1,3 +1,0 @@
-$1password
-
-User request is out of scope for 1password.

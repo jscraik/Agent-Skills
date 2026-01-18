@@ -1,9 +1,0 @@
-{
-  "name": "happy-path",
-  "passed": false,
-  "failures": [
-    "contains failed: '## Outputs'"
-  ],
-  "dir": "/Users/jamiecraik/dev/agent-skills/reports/skills/1password/20260118-212541/01-happy-path",
-  "used_schema": false
-}
