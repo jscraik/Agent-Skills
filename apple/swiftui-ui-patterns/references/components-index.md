@@ -31,6 +31,15 @@ Use this file to find component-specific guidance. Each entry lists when to use 
 - Styled text and editors: `references/styled-text.md` — Use for AttributedString, rich text, and TextEditor formatting.
 - Web content (WebKit): `references/webview.md` — Use for embedded web content, navigation, and JS interop.
 - AlarmKit: `references/alarmkit.md` — Use for alarms/timers with AlarmKit and Live Activities.
+- AppIntents updates: `references/appintents-updates.md` — Use for intent modes, Apple Intelligence integrations, snippets, and Spotlight indexing.
+- Assistive Access: `references/assistive-access.md` — Use for Assistive Access scenes and simplified UI.
+- Foundation AttributedString updates: `references/attributedstring-foundation.md` — Use for advanced AttributedString APIs and selection editing.
+- Swift InlineArray and Span: `references/inlinearray-span.md` — Use for fixed-size inline storage and safe contiguous memory access.
+- Swift Charts 3D: `references/charts-3d.md` — Use for 3D Chart3D/SurfacePlot usage.
+- StoreKit updates: `references/storekit-updates.md` — Use for StoreKit 18.4+ updates and SubscriptionOfferView.
+- Place descriptors (GeoToolbox): `references/geotoolbox-place-descriptors.md` — Use for PlaceDescriptor/MapKit interop.
+- SwiftData inheritance: `references/swiftdata-inheritance.md` — Use for SwiftData model inheritance and type filtering.
+- Foundation Models: `references/foundation-models.md` — Use for on-device LLM integration and guided generation.
 
 ## Planned components (create files as needed)
 
