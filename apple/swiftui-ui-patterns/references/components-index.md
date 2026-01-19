@@ -27,10 +27,13 @@ Use this file to find component-specific guidance. Each entry lists when to use 
 - Title menus: `references/title-menus.md` — Use for filter or context menus in the navigation title.
 - Loading & placeholders: `references/loading-placeholders.md` — Use for redacted skeletons, empty states, and loading UX.
 - Lightweight clients: `references/lightweight-clients.md` — Use for small, closure-based API clients injected into stores.
+- Toolbars (customizable/search/placement): `references/toolbar-features.md` — Use for customizable toolbars, search placement, and new toolbar placements.
+- Styled text and editors: `references/styled-text.md` — Use for AttributedString, rich text, and TextEditor formatting.
+- Web content (WebKit): `references/webview.md` — Use for embedded web content, navigation, and JS interop.
+- AlarmKit: `references/alarmkit.md` — Use for alarms/timers with AlarmKit and Live Activities.
 
 ## Planned components (create files as needed)
 
-- Web content: create `references/webview.md` — Use for embedded web content or in-app browsing.
 - Status composer patterns: create `references/composer.md` — Use for composition or editor workflows.
 - Text input and validation: create `references/text-input.md` — Use for forms, validation, and text-heavy input.
 - Design system usage: create `references/design-system.md` — Use when applying shared styling rules.

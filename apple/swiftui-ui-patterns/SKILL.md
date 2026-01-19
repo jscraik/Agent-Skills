@@ -23,6 +23,17 @@ description: "Choose a track based on your goal:. Use when Building or refactori
 - Pattern guidance and example structure for the requested view.
 - References to relevant component docs or in-repo examples.
 
+## Response format (required)
+Always include these headings in the response (in this order):
+
+```
+## When to use
+## Inputs
+## Outputs
+```
+
+After the required headings, add only the extra sections needed to answer the request (e.g., “## Quick guidance”, “## Next step”, “## References”).
+
 ## Quick start
 
 Choose a track based on your goal:
@@ -140,8 +151,10 @@ Use judgment, adapt to context, and push boundaries when appropriate.
 - Do not invent results or commands.
 ## Procedure
 1) Clarify scope and inputs.
-2) Execute the core workflow.
-3) Summarize outputs and next steps.
+2) If out of scope, say so and include "## When to use" with the correct scope and handoff.
+3) Always include the required response headings in this order: "## When to use", "## Inputs", "## Outputs".
+4) Execute the core workflow.
+5) Summarize outputs and next steps.
 
 ## Antipatterns
 - Do not add features outside the agreed scope.
