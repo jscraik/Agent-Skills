@@ -3,14 +3,14 @@ cases:
     prompt: "Use the skill-creator skill for a typical request."
     acceptance:
       - type: contains
-        value: "## Outputs"
+        value: "Objective:"
   - name: edge-case
     prompt: "Handle an edge case for skill-creator without enough inputs."
     acceptance:
       - type: contains
-        value: "## Inputs"
+        value: "Plan:"
   - name: failure-mode
     prompt: "User request is out of scope for skill-creator."
     acceptance:
       - type: contains
-        value: "## When to use"
+        value: "Next step:"

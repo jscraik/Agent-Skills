@@ -7,7 +7,7 @@ description: "Create or update Codex skills (structure, resources, packaging). U
 
 This skill provides guidance for creating effective skills.
 
-**Version**: 1.1.1  
+**Version**: 1.2.0  
 **Last updated**: 2026-01-18
 
 ## When to Use
@@ -28,6 +28,21 @@ This skill provides guidance for creating effective skills.
 - Packaging instructions or artifacts when requested.
 - If outputs are schema-bound, include `schema_version` in the output contract.
 
+## Response format (required)
+Always start the response with these headings, in this order, with no text before them. Do not use the Objective/Plan/Next step labels for this skill; place any such content under the headings below.
+
+## When to use
+- ...
+
+## Inputs
+- ...
+
+## Outputs
+- ...
+
+## Failure mode (required)
+If the request is out of scope, respond using the same headings and explain when this skill should be used instead. Include `## When to use` in the response.
+
 ## Constraints
 - Redact secrets/PII by default.
 
@@ -40,6 +55,11 @@ This skill provides guidance for creating effective skills.
 ## About Skills (Short)
 
 For deeper background on skill purpose, structure, and best-use philosophy, see `references/about-skills.md`.
+
+For Claude-style guidance and scaffolds, see:
+- References: `references/best-practices.md`, `references/skill-structure.md`, `references/official-spec.md`
+- Templates: `templates/simple-skill.md`, `templates/router-skill.md`
+- Workflows: `workflows/create-new-skill.md`, `workflows/audit-skill.md`, `workflows/verify-skill.md`
 
 ## Core Principles
 
@@ -162,6 +182,46 @@ Keep SKILL.md body to the essentials and under 500 lines to minimize context blo
 
 See `references/progressive-disclosure-patterns.md` for worked examples and guidance.
 
+## Claude Skill Compatibility (Merge Notes)
+
+Use standard Markdown headings only; avoid XML tags in the body. Keep SKILL.md under 500 lines and push detail into references. Write descriptions in third person and include trigger keywords ("Use when ..."). For Claude Code compatibility, prefer gerund form for names (e.g., `processing-pdfs`, `reviewing-code`) and avoid generic names like `helper`, `utils`, `tools`, `anthropic-*`, or `claude-*`. If Claude-only frontmatter is required, use `allowed-tools` and `model` sparingly and keep portable mode as default.
+
+## Audit Checklist (Claude + Codex)
+
+- [ ] Valid YAML frontmatter with `name` and `description` (single line).
+- [ ] Description includes trigger keywords and when-to-use context.
+- [ ] Markdown headings only (no XML tags).
+- [ ] SKILL.md under 500 lines and uses references for detail.
+- [ ] References are one level deep from SKILL.md.
+- [ ] Examples are concrete and include inputs/outputs.
+- [ ] Terminology is consistent and non-ambiguous.
+- [ ] No time-sensitive guidance; put aging patterns in references.
+- [ ] Scripts include clear errors and explicit dependencies.
+
+## Patterns (Concise)
+
+### Template Pattern
+Provide output templates to standardize responses.
+
+### Workflow Pattern
+Use checklists with explicit steps and commands for multi-step tasks.
+
+### Conditional Pattern
+Present a decision split ("Create" vs "Edit") and direct to the right flow.
+
+## Success Criteria
+
+A well-structured skill:
+- Has valid frontmatter with a descriptive name and trigger-rich description.
+- Uses standard Markdown headings and concise core guidance.
+- Delegates detailed guidance to references (one level deep).
+- Includes concrete examples with input/output pairs.
+- Is tested against real usage or evals when available.
+
+## Sources (Claude)
+- https://code.claude.com/docs/en/skills
+- https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices
+
 ## Anti-Patterns to Avoid (Quick List)
 
 - **Template trap**: Rigid templates that force slot-filling and generic output.
@@ -170,6 +230,7 @@ See `references/progressive-disclosure-patterns.md` for worked examples and guid
 - **Context blindness**: "Always X" rules that ignore constraints and goals.
 - **Missing negative guidance**: No explicit "don't do this" warnings.
 - **Duplication**: The same content in SKILL.md and references.
+
 
 ## Variation Guidance (Prevent Convergence)
 

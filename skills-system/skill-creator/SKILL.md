@@ -9,6 +9,35 @@ metadata:
 
 This skill provides guidance for creating effective skills.
 
+## When to use
+- Use when the user asks to create, update, validate, or package a skill.
+- Use when the user requests skill design guidance, trigger tuning, or portability across Codex and Claude Code.
+
+## Inputs
+- Required: user goal, example prompts, and the target skill name.
+- If updating: existing skill path and any current SKILL.md or bundled resources.
+- Optional: target platforms (Codex/Claude Code), desired scripts/references/assets, validation or packaging requirements.
+
+## Outputs
+- Updated skill artifacts (SKILL.md plus any references/scripts/assets).
+- Clear validation results and any follow-up actions.
+- Packaging instructions or artifacts when requested.
+
+## Response format (required)
+Always start the response with these headings, in this order, with no text before them. Do not use the Objective/Plan/Next step labels for this skill; place any such content under the headings below.
+
+## When to use
+- ...
+
+## Inputs
+- ...
+
+## Outputs
+- ...
+
+## Failure mode (required)
+If the request is out of scope, respond using the same headings and explain when this skill should be used instead. Include `## When to use` in the response.
+
 ## About Skills
 
 Skills are modular, self-contained packages that extend Codex's capabilities by providing
