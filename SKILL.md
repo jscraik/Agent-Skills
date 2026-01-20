@@ -56,7 +56,6 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 
 ## Utilities
 - `1password` — Set up and use 1Password CLI (op) for install, desktop integration, sign-in, and secret injection. Not for non-1Password secret tooling.
-- `codeception` — Extract reusable, non-obvious learnings from completed tasks into new Codex skills. Use when the user requests a retrospective, skill extraction, or to turn a workaround into a reusable skill.
 - `markdown-converter` — Convert documents and files to Markdown using markitdown. Use when converting PDF, Word (.docx), PowerPoint (.pptx), Excel (.xlsx, .xls), HTML, CSV, JSON, XML, images (with EXIF/OCR), audio (with transcription), ZIP archives, YouTube URLs, or EPubs to Markdown format for LLM processing or text analysis.
 - `process-watch` — Monitor system processes and resources (CPU, memory, I/O, network) and manage runaway processes. Not for app-level profiling or code tuning.
 - `recon-workbench` — Production-grade forensic evidence collection for software interrogation across macOS/iOS, web/React, and OSS repos. Use when running rwb CLI commands (doctor, authorize, plan, run, manifest, summarize, validate), designing probe catalogs or schemas, generating evidence-backed findings, inspecting targets under authorization guardrails, or configuring scope and compliance policies.

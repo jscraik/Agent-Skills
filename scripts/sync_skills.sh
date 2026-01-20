@@ -14,13 +14,18 @@ mkdir -p "$skills_dir"
 # Ensure system skills are not in the flat symlink view (prevents duplicates).
 if [ -d "$skills_dir/.system" ]; then
   mkdir -p "$system_skills_dir"
-  if command -v zsh >/dev/null 2>&1; then
-    zsh -c "setopt globdots; mv \"$skills_dir/.system\"/* \"$system_skills_dir\"/; rmdir \"$skills_dir/.system\""
+  # Use rsync to handle existing directories, then remove source
+  if command -v rsync >/dev/null 2>&1; then
+    rsync -a --delete "$skills_dir/.system/" "$system_skills_dir/"
+    rm -rf "$skills_dir/.system"
+  elif command -v zsh >/dev/null 2>&1; then
+    zsh -c "setopt globdots; rm -rf \"$system_skills_dir\"/*; mv \"$skills_dir/.system\"/* \"$system_skills_dir\"/; rmdir \"$skills_dir/.system\""
   else
-    # Fallback without dotglob: move dotfiles explicitly if present.
-    mv "$skills_dir/.system"/.[!.]* "$system_skills_dir"/ 2>/dev/null || true
-    mv "$skills_dir/.system"/..?* "$system_skills_dir"/ 2>/dev/null || true
-    mv "$skills_dir/.system"/* "$system_skills_dir"/ 2>/dev/null || true
+    # Fallback: remove target first, then move
+    rm -rf "$system_skills_dir"/*
+    mv "$skills_dir"/.[!.]* "$system_skills_dir"/ 2>/dev/null || true
+    mv "$skills_dir"/..?* "$system_skills_dir"/ 2>/dev/null || true
+    mv "$skills_dir"/* "$system_skills_dir"/ 2>/dev/null || true
     rmdir "$skills_dir/.system" 2>/dev/null || true
   fi
 fi

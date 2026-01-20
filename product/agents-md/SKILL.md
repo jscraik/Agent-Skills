@@ -76,6 +76,7 @@ Use the failure-mode template verbatim for out-of-scope requests.
 - A suggested `docs/` folder structure.
 - A contradictions list with a question for each conflict.
 - A “flag for deletion” list (redundant, vague, overly obvious).
+- Output contract schema_version: 1
 
 ## Constraints
 - Redact secrets/PII by default.
@@ -94,6 +95,7 @@ Use the failure-mode template verbatim for out-of-scope requests.
 - Read global instructions from `~/.codex/AGENTS.override.md` or `~/.codex/AGENTS.md` if present.
 - Also check `~/.codex/instructions/` for applicable global standards and guidance.
 - Then read project instructions from repo root down to the working directory and treat them as canonical.
+- Note: Codex `AGENTS.md` does not support `@` imports; Claude `CLAUDE.md` and `~/.claude/rules/*.md` do.
 
 2) Find contradictions
 - Identify conflicting instructions and ask which one should win.
@@ -105,19 +107,32 @@ Use the failure-mode template verbatim for out-of-scope requests.
 - Non-standard build/typecheck commands.
 - Anything truly relevant to every single task.
 
-4) Group the rest
+4) Add inserts (global references)
+- If a canonical global protocol exists (for example `~/.codex/instructions/rvcp-common.md`), add a short "References" or "Imports" section at the top of the root `AGENTS.md` that points to it.
+- Never duplicate the full protocol content in repo files; link only.
+- If `CODEX_HOME` is set, prefer `$CODEX_HOME/...` for global references; otherwise use `~/.codex/...`.
+- Only insert references that exist on disk; if not found, state "not observed" and do not invent paths.
+- If the repo uses a different global protocol, add the same style of reference block.
+  - Example (root `AGENTS.md` block):
+    ```md
+    ## References (informational)
+    - Global protocol: ~/.codex/instructions/rvcp-common.md
+    - Global override: ~/.codex/AGENTS.override.md
+    ```
+
+5) Group the rest
 - Organize remaining instructions into logical categories (TypeScript, testing, deployment, accessibility, etc.).
 - Keep each category file focused and scoped.
 
-5) Create the file structure
+6) Create the file structure
 - Output a minimal root `AGENTS.md` with Markdown links to category files.
 - Output each category file with its relevant instructions.
 - Provide a suggested `docs/` folder structure.
 
-6) Flag for deletion
+7) Flag for deletion
 - Identify redundant, vague, or overly obvious instructions.
 
-7) Validate content
+8) Validate content
 - Confirm commands exist and are runnable.
 - Confirm naming conventions match the codebase.
 - Ensure no secrets or private endpoints appear.
@@ -127,6 +142,7 @@ Use the failure-mode template verbatim for out-of-scope requests.
 - One-sentence project description
 - Tooling essentials (package manager if not npm)
 - Non-standard build/typecheck commands
+- References or imports (global protocol pointers; no duplication)
 - Global instructions discovery order (brief, link to full doc)
 - Links to category files
 
@@ -141,6 +157,8 @@ Use the failure-mode template verbatim for out-of-scope requests.
 - Call out unknowns explicitly and ask for confirmation before finalizing.
 - Encourage the user to prioritize sections when the scope is broad.
 - Empower the user to choose between a minimal or detailed guideline set.
+- Ask whether to proceed with inserts when the global protocol is detected but optional.
+- Provide a one-sentence rationale for each recommended insert or deletion.
 
 ## Validation
 
@@ -148,6 +166,7 @@ Use the failure-mode template verbatim for out-of-scope requests.
 - Run `python scripts/quick_validate.py <skill>` if available.
 - Run `python scripts/skill_gate.py <skill>` and fix any missing sections.
 - If needed, consult `references/contract.yaml` and `references/evals.yaml`.
+- If validation scripts or paths are missing, state "not run (tooling not available)" and continue.
 
 ## Anti-patterns
 
@@ -158,6 +177,11 @@ Use the failure-mode template verbatim for out-of-scope requests.
 - Using vague headings like “Misc” or “Notes.”
 - Presenting unverified commands as facts.
 - Mixing unrelated policies into the same section.
+- Adding global protocol content directly into repo `AGENTS.md` instead of linking.
+- Stating paths that do not exist under the current `$CODEX_HOME` or repo.
+- Treating imports as supported in Codex `AGENTS.md` (they are not).
+- Hiding conflicts in linked docs instead of calling them out in the root file.
+- Expanding root `AGENTS.md` beyond 400 words without explicit user approval.
 
 ## Example prompts that should trigger this skill
 

@@ -1,6 +1,6 @@
 ---
 name: product-spec
-description: "Create and review PRDs/tech specs with structured discovery and acceptance criteria. Use when the user needs a product or technical spec."
+description: "Create and review PRDs/tech specs with structured discovery and acceptance criteria. Use when the user needs a product or technical spec, especially for high-risk or contentious scopes that require Oracle second-model validation."
 ---
 
 # Product Spec Skill
@@ -10,6 +10,14 @@ Purpose: Produce complete PRDs/tech specs ready for implementation, using interv
 ## Triggers (when Codex should use this skill)
 - User asks for PRD, technical spec/architecture doc, software design steps, product requirements, or “take an idea to production”.
 - User mentions interview mode, spec debate, or wants structured requirements.
+- If scope is high-risk or contentious, run Oracle cross-validation as required.
+
+
+## Oracle integration (required for high-risk scopes)
+- For high-risk or contentious specs, run the `oracle` skill before finalizing.
+- Preferred flow: `--dry-run summary` + `--files-report`, then run Oracle with a tight file set.
+- Use API mode for reliability; browser mode only when UI validation is needed.
+- Treat Oracle outputs as advisory; verify against sources and acceptance criteria.
 
 ## Core Workflow
 1) **Gather inputs (Step 0)**  
@@ -49,6 +57,7 @@ Purpose: Produce complete PRDs/tech specs ready for implementation, using interv
    - Present the draft wrapped in `[SPEC] ... [/SPEC]` and ask: “Does this capture intent? Changes before adversarial review?”
 
 4) **Adversarial debate (Step 2–4)**  
+   - If additional cross-validation is needed, run the `oracle` skill with a tight file set and include the Oracle review summary in the evidence map.
    - If user provides opponent models, run rounds until all say `[AGREE]`. Otherwise use adaptive personas based on repo inference from stack + dirs + README. Use `references/adversarial-review-personas.md` to select personas and ordering.  
    - Use tagged prompt blocks and strict formatting from `references/adversarial-review-prompts.md` for each persona.  
    - Default order (after selection): PM, UX, Frontend, Backend, Security, Reliability/SRE, Data/ML, Platform/Infra, QA/Test (if triggered), DevEx/Tooling (if triggered).  

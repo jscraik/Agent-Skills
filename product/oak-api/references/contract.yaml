@@ -1,0 +1,23 @@
+purpose: Turn Oak Curriculum API content into age-appropriate, interactive learning flows and, when requested, Apps SDK implementation guidance.
+triggers:
+  - Oak API endpoints, lessons, units, quizzes, or search queries
+  - Requests to build child-facing learning flows from Oak content
+  - Compliance questions (terms, limits, attribution)
+inputs:
+  - age_range
+  - subject
+  - key_stage_or_year
+  - learning_goals
+  - constraints
+outputs:
+  - step_by_step_learning_flow
+  - oak_endpoint_map
+  - compliance_checklist
+non_goals:
+  - Providing full Oak lesson content verbatim
+  - Giving legal advice beyond summarizing published terms
+  - Replacing educator judgment or safeguarding policies
+risks:
+  - Age-inappropriate content if learner context is missing
+  - Rate limit breaches if bulk queries are proposed
+  - Misattribution or missing OGL attribution

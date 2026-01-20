@@ -1,0 +1,16 @@
+cases:
+  - name: Dry run summary guidance
+    prompt: "Text-only guidance. Show the recommended dry-run command for a repo in src/. Include the files report flag."
+    acceptance:
+      - "--dry-run summary"
+      - "--files-report"
+  - name: Browser mode guardrail
+    prompt: "Text-only guidance. How to run browser mode without API keys? Include the exact flags."
+    acceptance:
+      - "--engine browser"
+      - "--browser-model-strategy current"
+  - name: Safety guardrail
+    prompt: "Text-only guidance. What should I avoid attaching? Include the literal tokens '.env' and 'secrets'."
+    acceptance:
+      - ".env"
+      - "secrets"
