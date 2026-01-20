@@ -1,138 +1,178 @@
 ---
 name: interview-me
-description: "Plan and review requirements with discovery/decision gating and approval. Use when requirements are unclear for a feature or refactor."
+description: "Interactive, multiple-choice interview that turns an underspecified idea into a design-ready spec (decisions + assumptions + approval)."
 ---
 
-# interview-me (wrapper)
+# interview-me (interactive front door)
 
 Use **Interview Kernel** rules, state model, synthesis, and approval gate.
-Kernel-enforced: Question validity gate, DISCOVER vs DECIDE intent switch, Decisions table, and Assumptions register + approval.
+Kernel-enforced: single-question loop, question validity gate, DISCOVER vs DECIDE intent switch, Decisions table, and Assumptions register + approval.
 
-## Philosophy
-- Default to clarity over speed: explicit decisions prevent rework.
-- The interview exists to remove ambiguity, not to brainstorm.
+## What this wrapper optimizes for
 
-## Anti-patterns
-- Asking “nice to know” questions that don’t change scope.
-- Skipping the approval gate after assumptions are captured.
-- Letting the interview drift into brainstorming or implementation.
-- Accepting vague goals without forcing a measurable success signal.
-- Allowing scope changes without recording what was removed.
-- Anti-pattern: treating interviews as validation instead of decision forcing.
+- **Low cognitive load**: one question, multiple-choice answers, safe defaults.
+- **Design-ready output**: scope, acceptance criteria, decisions, assumptions, risks, rollout.
+- **Works without prerequisite knowledge**: if the user is unsure, pick a default and record it as an assumption to approve.
 
-## Variation
-- Adapt question phrasing to the domain; do not reuse the same wording every time.
-- Vary focus across scope, tradeoffs, and failure modes based on what is still unclear.
+## User interaction contract (UX)
 
-## Empowerment
-- Present tradeoffs with defaults; let the user choose and own the scope.
-- Offer a clear “stop and ship” option when scope is sufficient.
-- Let the user pick the acceptance-criteria format and hold it fixed for the session.
-- Empower the user to reject additional questions once the stop conditions are met.
+The assistant MUST:
+
+- Ask **one question** per turn (Kernel rule).
+- Keep choices to **3–5 options** max, with **1-line “when to pick”** guidance per option.
+- Accept replies as:
+  - `a` / `b` / `c` / …
+  - `default`
+  - optionally **one short sentence** after the letter (to add context).
+- If the user replies in free text, map it to the closest option and confirm on the next turn.
+
+Optional commands (do not break the single-question rule):
+
+- `back` → revert the last captured answer and re-ask the same question.
+- `skip` → leave blank, record an assumption, move on.
+- `stop` → synthesize with current state (even if imperfect).
+- `log` → show the full Interview Log (otherwise keep the log compact).
 
 ## Default mode + intent
 
-* Mode: `standard`
-* Intent: start `DISCOVER`, switch to `DECIDE` when tradeoffs appear
+- Mode: `standard`
+- Intent: start `DISCOVER`, switch to `DECIDE` as soon as tradeoffs appear
 
 ## When to use
 
-- Use when requirements are unclear for a new feature or refactor.
-- Use when stakeholders disagree on scope or success criteria.
-- Use when you need explicit tradeoffs before implementation.
+- Use when requirements or scope are unclear for a feature/refactor.
+- Use when you want to produce a design-ready spec with explicit decisions.
+- Use when you need a beginner-friendly, guided path to a software design answer.
 
-## Example prompts
+## Track selection (first question)
 
-- "I want to add a new feature but I’m not sure what the scope should be."
-- "We keep debating requirements — can you interview me first?"
-- "Help me clarify success criteria for this refactor."
+If the user’s intent is not obvious from context, start here.
 
-## Universal question spine (standard, 7 prompts)
+1) **Choose the interview track**
 
-Ask these in order, but skip any already answered by context.
+- a) Feature/refactor requirements (default) — clarify what to build
+- b) System design answer (beginner) — guided design interview
+- c) Architecture decision / ADR — choose between alternatives
+- d) Product/PM scope — value + metrics + rollout
+- e) Bug triage — repro + evidence + next experiment
 
-1. **PAS: Amplify**
+Default: a)
 
-* “What’s the impact if we do nothing for 30 days?”
+Behavior:
 
-2. **Success signal**
+- If user chooses **c** → invoke `/architecture-interview` immediately (carry over captured context).
+- If user chooses **d** → invoke `/pm-interview` immediately.
+- If user chooses **e** → invoke `/bug-interview` immediately.
+- If user chooses **b** → run **Spine B** below (within this wrapper).
+- If user chooses **a** → run **Spine A** below.
 
-* “What’s the success signal: metric, user-visible behavior, or both?”
+## Spine A — Requirements-to-build (default)
 
-3. **Done definition**
+Ask these in order, skipping anything already answered by context.
 
-* “Pick acceptance criteria style: bullets vs Given/When/Then vs IO pairs.”
+1) **Impact type (PAS: Amplify)**
+- Options should classify impact: user pain / revenue risk / ops toil / compliance risk / other.
 
-4. **Scope boundary**
+2) **Success signal**
+- Options: user-visible behavior / metric / both.
 
-* “What’s explicitly out-of-scope for this iteration?”
+3) **Acceptance criteria style**
+- Options: bullets / Given-When-Then / IO pairs.
 
-5. **Constraints**
+4) **Scope bias for v1**
+- Options: smallest shippable / balanced / refactor-heavy.
 
-* “Any hard constraints (compat, perf budget, security, deps)?”
+5) **Primary constraint driver (choose 1)**
+- Options: security / reliability / performance / cost / simplicity (or “other”).
 
-6. **Edge / failure**
+6) **One failure mode we must handle well**
+- Options: correctness/data loss / availability/downtime / latency/perf / security/privacy / UX breakage.
 
-* “Name one failure mode we must handle well (or explicitly accept).”
+7) **Primary tradeoff decision (DECIDE)**
+- Options: speed-to-ship / flexibility / correctness.
 
-7. **Tradeoff decision (DECIDE)**
+Optional (if still unclear or for `:deep`):
 
-* “Optimize for: speed-to-ship vs flexibility vs correctness?”
+- rollout posture (flagged vs staged vs big-bang)
+- observability expectations (logs/metrics/traces)
+- migration/rollback constraints
 
-## Quick / Deep variants
+## Spine B — System design answer (beginner-friendly)
 
-* `:quick` uses questions 1–3 + 1 scope question
-* `:deep` expands by adding:
+Use this when the user wants to produce a system design answer but doesn’t have all the jargon or patterns memorized.
 
-  * data model invariants
-  * observability
-  * migration/rollback
-  * testing strategy depth
-  * security/privacy constraints
+1) **What are we designing (in one sentence)?**
+- Options should force a crisp framing: “Build X for Y measured by Z” vs “Improve X to reduce Y”.
+
+2) **Functional scope (pick the top 2–3)**
+- Options: CRUD / search / feeds & ranking / real-time updates / background jobs / analytics/reporting.
+
+3) **Scale guess (pick one range)**
+- Options: prototype (10s/day) / small (1–10 rps) / medium (100 rps) / large (10k rps+) / unknown.
+- If unknown, pick a conservative default and record it as an assumption.
+
+4) **Reliability & latency target (SLO-ish)**
+- Options: internal tool (looser) / consumer-facing (medium) / mission-critical (tight).
+
+5) **Data correctness preference**
+- Options: strong consistency / eventual consistency acceptable / mixed (strong for writes, eventual for reads).
+
+6) **Data model shape**
+- Options: relational / key-value / document / time-series / graph.
+
+7) **Core interfaces**
+- Options: request/response API / async job queue / event stream / mixed.
+
+8) **High-level architecture style**
+- Options: single service + DB / modular monolith / microservices / serverless-managed.
+
+9) **Biggest bottleneck risk**
+- Options: read-heavy hot key / write amplification / fanout / large payloads / external dependency.
+
+10) **Worst credible failure mode**
+- Options: data loss / long outage / security leak / silent correctness bug / runaway cost.
+
+Optional (if time remains):
+
+- caching approach (none vs CDN vs app cache)
+- rollout posture (flagged vs staged vs big-bang)
+- observability baseline (logs/metrics/traces)
 
 ## Output
 
 Use Kernel synthesis output verbatim.
 
+If Spine B was used, append a short **Design Addendum**:
+
+- **Text C4-style sketch**: Context (actors) → Containers (services/data stores) → Key flows.
+- **Core APIs / operations** (bullets).
+- **Entities + invariants** (bullets; 3–7 items).
+- **Quick cross-cutting checklist**: security, reliability, performance, cost.
+
+If an architecture decision was made, optionally append an **ADR Draft** (status: Proposed) in Nygard format.
+
 ---
-
-## Optional patch to keep your ecosystem clean
-
-If you keep `ask-questions-if-underspecified`, add this single escalation rule:
-
-* If you need more than 5 questions → invoke the appropriate wrapper:
-
-  * product-ish → `/pm-interview`
-  * system design → `/architecture-interview`
-  * failures → `/bug-interview`
-  * otherwise → `/interview-me`
-
-## Remember
-
-The agent is capable of extraordinary work in this domain. These guidelines unlock that potential—they don't constrain it.
-Use judgment, adapt to context, and push boundaries when appropriate.
 
 ## Inputs
 - User request details and any relevant files/links.
-
 
 ## Outputs
 - A structured response or artifact appropriate to the skill.
 - Include `schema_version: 1` if outputs are contract-bound.
 
-
 ## Constraints
 - Redact secrets/PII by default.
 - Avoid destructive operations without explicit user direction.
 
-
 ## Validation
 - Run any relevant checks or scripts when available.
 - Fail fast and report errors before proceeding.
+
 ## Procedure
-1) Clarify scope and inputs.
-2) Execute the core workflow.
-3) Summarize outputs and next steps.
+1) Clarify track + mode.
+2) Run the single-question interview loop.
+3) Synthesize + approval gate.
 
 ## Antipatterns
 - Do not add features outside the agreed scope.
+- Do not drift into implementation before approval.

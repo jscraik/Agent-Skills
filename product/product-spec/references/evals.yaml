@@ -4,6 +4,8 @@ cases:
     acceptance:
       - type: contains
         value: "## Outputs"
+      - type: contains
+        value: "Evidence Map"
   - name: edge-case
     prompt: "Handle an edge case for product-spec without enough inputs."
     acceptance:

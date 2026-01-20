@@ -3,10 +3,15 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SPEC_LINT="${SCRIPT_DIR}/spec-lint.py"
+SPEC_EXPORT="${SCRIPT_DIR}/spec-export.py"
 VALIDATE_MERMAID="${SCRIPT_DIR}/validate-mermaid.sh"
 
 if [[ ! -f "$SPEC_LINT" ]]; then
   echo "error: missing $SPEC_LINT" >&2
+  exit 1
+fi
+if [[ ! -f "$SPEC_EXPORT" ]]; then
+  echo "error: missing $SPEC_EXPORT" >&2
   exit 1
 fi
 
@@ -52,7 +57,14 @@ echo ""
 echo "==> Mermaid validation"
 "$VALIDATE_MERMAID" "${FILES[@]}"
 
-# 3) Optional: Vale prose lint
+# 3) Template metadata export validation
+echo ""
+echo "==> Template metadata validation"
+for f in "${FILES[@]}"; do
+  python3 "$SPEC_EXPORT" --validate "$f"
+done
+
+# 4) Optional: Vale prose lint
 echo ""
 echo "==> Prose lint (Vale) [optional]"
 if command -v vale >/dev/null 2>&1; then

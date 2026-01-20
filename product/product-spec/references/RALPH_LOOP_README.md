@@ -60,11 +60,33 @@ Include a `## Tasks` section with checkbox lines:
 ## Loop behavior and exit gates
 
 - One task per iteration.
+- Tasks must be atomic (5–15 minutes) with explicit acceptance criteria and a test command.
 - Backpressure via gate commands in `.ralph/ralph.toml` under `[gates].commands`.
 - Dual exit gate: all tasks done AND the agent prints `EXIT_SIGNAL: true` at the end of output.
 - The orchestrator will treat `EXIT_SIGNAL` as false if the repo is dirty or gates/judge fail.
 - Circuit breaker: stops after `loop.no_progress_limit` consecutive no-progress iterations.
 - Optional rate limiting: `loop.rate_limit_per_hour`.
+
+## Evidence discipline (required)
+
+- Every claim must be supported by evidence (file paths or command output).
+- If evidence is unavailable, state: "Unable to verify: <reason>".
+- Use `.ralph/progress.md` to record blockers and missing requirements.
+
+## Planning rules (from PROMPT_plan)
+
+- Plan only in planning mode; do not implement production code.
+- Start with a gap analysis between `.ralph/specs/*` and code.
+- Do not assume anything is missing—confirm via search/inspection.
+
+## Judge gate (from PROMPT_judge)
+
+- Be conservative: fail if requirements are ambiguous or evidence is insufficient.
+- Passing tests are necessary but not sufficient if acceptance criteria are unmet.
+
+## Gate diagnostics
+
+- Use `ralph diagnose --test-gates` to validate each gate command individually before running the loop.
 
 Exit codes (ralph run):
 - 0: successful completion

@@ -7,7 +7,18 @@ inputs:
   - user request details
 outputs:
   - primary response or artifact
+  - adversarial review report with persona findings, Evidence Gaps, and Evidence Map
 non_goals:
   - out-of-scope work
 risks:
   - missing inputs; mitigated by clarifying questions
+output_contracts:
+  adversarial_review_report:
+    required_sections:
+      - Executive Summary
+      - Persona Findings
+      - Evidence Gaps
+      - Evidence Map
+    required_rules:
+      - each paragraph ends with Evidence or Evidence gap
+      - severity tags used for findings (ERROR/WARN/INFO)

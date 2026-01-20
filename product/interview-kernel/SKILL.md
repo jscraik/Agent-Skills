@@ -125,6 +125,20 @@ Maintain this block and keep it current:
 - [ ] ...
 ```
 
+### Display mode (UX)
+
+Default to **compact** output to keep the interview usable with minimal cognitive load:
+
+- Keep the **full Interview Log** as the source of truth.
+- In normal turns, show a **compact log view**: only sections that changed this turn and any still-blocking blanks (1–2 lines each).
+- If the user replies `log` or asks to see state, render the **full Interview Log** block verbatim.
+
+Always include a lightweight progress header:
+
+`Progress: <mode> Q<n>/<budget> · Intent: DISCOVER|DECIDE`
+
+(Progress is informational; do not ask extra questions about it.)
+
 Also maintain a running “Captured answer” line after each response:
 
 ```md
@@ -167,13 +181,14 @@ If a candidate question does none of these, do not ask it.
 ```text
 Question: <one thing>
 
-Options:
-a) ...
-b) ...
-c) Not sure — use default
+Options (3–5 max):
+a) ... — when to pick this
+b) ... — when to pick this
+c) ... — when to pick this
+d) Not sure — use default (record as an assumption if it affects scope)
 
 Default: a)
-Reply: a / b / c (or "default")
+Reply: a / b / c / d (or "default")
 ```
 
 If free-text is required (rare), constrain it:

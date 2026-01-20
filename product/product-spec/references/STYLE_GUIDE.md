@@ -4,6 +4,11 @@ Purpose: keep docs clear, testable, and production-oriented. This guide applies 
 
 ---
 
+## 0) Evidence Discipline
+- Every paragraph ends with `Evidence:` or `Evidence gap:`.
+- Cite file paths/links; if missing, state the gap and owner.
+- Summarize all gaps and citations in Evidence Gaps + Evidence Map sections.
+
 ## 1) Voice and Tone
 - Prefer short sentences, concrete nouns, and testable statements.
 - Avoid hype and marketing language.

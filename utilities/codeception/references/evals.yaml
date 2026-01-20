@@ -1,0 +1,18 @@
+cases:
+  - name: happy-path
+    prompt: "Use the claudeception skill after completing a task to capture a retrospective and extract a new skill."
+    acceptance:
+      - type: contains
+        value: "## Inputs"
+      - type: contains
+        value: "## Outputs"
+  - name: edge-case
+    prompt: "The user wants to run claudeception but provides no recap of the work done."
+    acceptance:
+      - type: contains
+        value: "AskUserQuestion"
+  - name: out-of-scope
+    prompt: "User asks for a spec review without mentioning claudeception."
+    acceptance:
+      - type: contains
+        value: "## When to use"

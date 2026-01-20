@@ -10,3 +10,7 @@ reports/
 /ai/tmp/
 /ai/cache/
 /ai/raw/
+.temp/
+sessions/
+**/__pycache__/
+product/Archive.zip

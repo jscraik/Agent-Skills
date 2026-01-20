@@ -6,6 +6,8 @@
 **Audience:** solo dev | stakeholders | team  
 **Inputs reviewed:** README | PRD | Tech Spec | issues | metrics | user feedback | codebase
 
+> Evidence rule: Every paragraph must end with an `Evidence:` line or `Evidence gap:` line. Use file paths/links; summarize all gaps and sources in the Evidence sections.
+
 ---
 
 ## 1) Executive Summary
@@ -108,7 +110,21 @@ If evidence is missing:
 
 ---
 
-## 9) Appendix
+## 9) Evidence Gaps (required)
+- **Gap:** <missing evidence for a key claim> — **Impact:** <risk of being wrong> — **Owner:** <name>
+- **Gap:** <missing evidence for a key claim> — **Impact:** <risk of being wrong> — **Owner:** <name>
+
+---
+
+## 10) Evidence Map (required)
+| Section / Claim | Evidence | Confidence | Notes |
+|---|---|---|---|
+| <section or claim> | <file path or URL> | High/Medium/Low | <why it supports the claim> |
+| <section or claim> | <file path or URL> | High/Medium/Low | <why it supports the claim> |
+
+---
+
+## 11) Appendix
 - Key files/docs reviewed:
 - Commands run:
 - Notes:

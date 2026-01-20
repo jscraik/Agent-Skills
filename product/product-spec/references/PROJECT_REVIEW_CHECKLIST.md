@@ -1,6 +1,12 @@
 # Project Review Checklist (Quality Gate)
 
 > Rule: If an item is not applicable, mark it `N/A` and explain why.
+> Evidence rule: Every paragraph must end with an `Evidence:` line or `Evidence gap:` line.
+
+## Evidence Coverage (Required)
+- [ ] Every paragraph ends with `Evidence:` or `Evidence gap:`
+- [ ] Evidence Gaps section lists all missing sources
+- [ ] Evidence Map table lists all citations
 
 ## Vision and Problem Fit
 - [ ] Original vision is reconstructed from evidence (docs/issues/commits)

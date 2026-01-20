@@ -1,6 +1,6 @@
 ---
 name: recon-workbench
-description: "Analyze and report authorized evidence using Recon Workbench workflows (rwb). Use when running rwb commands."
+description: "Analyze and report authorized evidence using Recon Workbench workflows. Use when running recon/rwb CLI commands, planning probe runs, or summarizing evidence-backed findings for macOS, iOS, web apps, or OSS repos."
 ---
 
 # Recon Workbench (rwb)
@@ -9,11 +9,16 @@ description: "Analyze and report authorized evidence using Recon Workbench workf
 
 Answer with sections titled exactly: **Outputs** and **Procedure** (include authorization notes).
 
-## Compliance
-- Check against GOLD Industry Standards guide in ~/.codex/AGENTS.override.md
+## When to use
+- Running Recon Workbench CLI flows (`recon` or `uv run python -m rwb`)
+- Planning or executing probe sets for authorized targets
+- Summarizing evidence-backed findings and reports with artifact citations
 
-- Check against GOLD Industry Standards guide in `~/.codex/AGENTS.override.md`
-- All reconnaissance runs require explicit authorization
+## Compliance
+- Follow `/Users/jamiecraik/dev/recon-workbench/AGENTS.md`
+- Use `/Users/jamiecraik/dev/recon-workbench/docs/GOLD_STANDARD.md` for compliance gates
+- Apply `/Users/jamiecraik/dev/recon-workbench/docs/AUTHORIZATION_CHECKLIST.md` before any run
+- Apply `/Users/jamiecraik/dev/recon-workbench/docs/DATA_HANDLING.md` for redaction/retention
 - Evidence-only claims: every finding must cite an artifact path
 
 ## Purpose
@@ -38,15 +43,6 @@ Before building or inspecting, clarify:
 4. **Evidence outputs**: What artifacts are required (JSON schemas, reports, traces)?
 5. **Escalation limit**: Maximum allowed level (read_only < instrumentation < escalation)?
 
-## When to Use
-
-- Running `rwb` CLI commands for evidence collection
-- Designing or updating probe catalogs, schemas, or validation pipelines
-- Generating evidence-backed findings and reports
-- Inspecting targets under strict legal/safety constraints
-- Configuring scope policies and compliance guardrails
-- If the target is a web app and source is unavailable, use `web-app-interrogate` for HAR/trace capture and endpoint mapping
-
 ## Core Constraints (Non-Negotiable)
 
 - **No circumvention**: No DRM bypass, no cracking, no private data access
@@ -56,19 +52,27 @@ Before building or inspecting, clarify:
 - **Web/React caution**: Component inspection only on authorized apps with documented permission
 - **Redact by default**: Scrub secrets from logs, snapshots, and reports
 
-## CLI Commands (rwb)
+## CLI Commands (recon/rwb)
 
-The `rwb` CLI is the primary interface via `uv run python -m rwb` or `recon` (from repo root):
+Prefer the CLI-first wrapper in the repo root: `recon` (ensure repo root is on PATH).
+The legacy module entrypoint `uv run python -m rwb` remains valid for compatibility.
+
+Core commands (see `/Users/jamiecraik/dev/recon-workbench/docs/CLI_REFERENCE.md` for flags):
 
 | Command | Purpose |
 |---------|---------|
-| `rwb doctor` | Check toolchain readiness (Python, Node, Xcode, probe scripts) |
-| `rwb authorize` | Create authorization artifact with target metadata |
-| `rwb plan` | Generate or validate probe plan from catalog |
-| `rwb run` | Execute probes with metadata capture |
-| `rwb manifest` | Generate SHA256 integrity manifest |
-| `rwb summarize` | Generate findings and report from run artifacts |
-| `rwb validate` | Validate schemas and artifacts |
+| `recon doctor` | Check toolchain readiness (use `--json` for machine output) |
+| `recon setup` | Validate required tooling presence |
+| `recon init` | Register a target and locator |
+| `recon plan` | Dry-run planner (requires `--probes` or `--probe-set`) |
+| `recon run` | Execute probes (requires `--write --exec --confirm-run`; optional `--parallel N`) |
+| `recon diff` | Compare baseline vs stimulus runs |
+| `recon summarize` | Generate findings.json from artifacts |
+| `recon report` | Compile report.md and report.json |
+| `recon prune` | Delete old sessions (requires `--write --confirm-prune`) |
+| `recon export` | Export a run as a portable evidence bundle |
+| `recon import` | Import evidence bundle from ZIP |
+| `recon mcp-serve` | Start MCP server for AI agent integration |
 
 ## Target Kinds
 
@@ -82,20 +86,14 @@ The `rwb` CLI is the primary interface via `uv run python -m rwb` or `recon` (fr
 
 ## Probe Sets
 
-Predefined probe sets for common scenarios:
+Predefined probe sets live in `/Users/jamiecraik/dev/recon-workbench/probes/catalog.json`.
+Common sets (not exhaustive):
 
-- `macos-baseline`: Bundle tree, codesign, Mach-O imports, metadata
-- `macos-objc-static`: Static analysis including class dump and Swift demangling
-- `macos-debug`: Baseline + LLDB backtrace + log capture
-- `ios-baseline`: Bundle tree, setup, health, screenshot, metadata
-- `ios-objc-static`: iOS static analysis
-- `ios-debug`: Baseline + LLDB backtrace + log capture
-- `ios-smoke`: Quick simulator validation
-- `web-baseline`: Playwright trace + HAR capture
-- `web-react`: Baseline + React Fiber component extraction
-- `web-react-only`: React Fiber extraction only
-- `oss-baseline`: Git hotspots + dependency tree
-- `oss-full`: Baseline + Semgrep SAST scan
+- `macos-baseline`, `macos-objc-static`, `macos-debug`, `macos-accessibility`
+- `ios-baseline`, `ios-objc-static`, `ios-debug`, `ios-smoke`
+- `ios-diagnose`, `ios-device-diagnose`, `ios-sim-diagnose-pack`, `ios-device-diagnose-pack`
+- `web-baseline`
+- `oss-baseline`, `oss-full`
 
 ## Escalation Levels
 
@@ -125,7 +123,6 @@ require_authorization: true
 - `target_id`: Unique identifier for the target
 - `target_kind`: One of macos-app, ios-sim, ios-device, web-app, oss-repo
 - `target_locator`: Path, URL, bundle ID, or repo identifier
-- `authorization`: Authorization artifact (required)
 - `probe_set`: Predefined probe set or custom probe list
 - `run_dir`: Output directory for artifacts
 
@@ -134,61 +131,46 @@ require_authorization: true
 **Structure**: `runs/<target>/<session>/<run>/`
 - `raw/` - Probe artifacts (logs, dumps, traces, HARs)
 - `manifest.json` - SHA256 hashes for integrity verification
-- `derived/findings.json` - Schema-valid findings with evidence citations; include `schema_version` matching `schemas/findings.v2.schema.json`
+- `derived/findings.json` - Schema-valid findings with evidence citations; include `schema_version`
 - `derived/report.md` - Human-readable summary with artifact paths
+- `derived/report.json` - Machine-readable report (when generated); include `schema_version` when schema-bound
 
 ## Procedure
 
 ### 1) Check Toolchain
 
 ```bash
-uv run python -m rwb doctor --json
+recon doctor --json
 ```
 
-### 2) Create Authorization
+### 2) Initialize Target
 
 ```bash
-uv run python -m rwb authorize \
-  --target-id myapp \
-  --target-kind macos-app \
-  --target-locator "/Applications/MyApp.app" \
-  --output authorization.json
+recon init myapp --kind macos-app --locator "/Applications/MyApp.app"
 ```
 
 ### 3) Generate Probe Plan
 
 ```bash
-uv run python -m rwb plan \
-  --target-id myapp \
-  --target-kind macos-app \
-  --target-locator "/Applications/MyApp.app" \
-  --probe-set macos-baseline \
-  --authorization authorization.json
+recon plan myapp --type baseline --probe-set macos-baseline --json
 ```
 
-This creates `probe-plan.json` with all probes to execute.
-
-### 4) Execute Probes
+### 4) Execute Probes (explicit consent required)
 
 ```bash
-uv run python -m rwb run \
-  --plan-file probe-plan.json \
-  --run-dir runs/myapp/
+recon run myapp --type baseline --probe-set macos-baseline --write --exec --confirm-run
 ```
 
 ### 5) Generate Findings
 
 ```bash
-uv run python -m rwb summarize \
-  --run-dir runs/myapp/
+recon summarize myapp --run baseline_123456 --json
 ```
 
-### 6) Generate Integrity Manifest
+### 6) Compile Report
 
 ```bash
-uv run python -m rwb manifest \
-  --run-dir runs/myapp/ \
-  --output runs/myapp/manifest.json
+recon report myapp --json
 ```
 
 ## Validation
@@ -288,59 +270,38 @@ Use judgment, adapt to context, and push boundaries when appropriate.
 
 ### Documentation
 
-- `README.md` - Project overview and quickstart
-- `docs/GOLD_STANDARD.md` - Gold Industry Standard compliance
-- `AGENTS.md` - Agent instructions and workflows
-- `SECURITY.md` - Security policy and vulnerability reporting
-- `scope.example.yaml` - Scope configuration template
+- `/Users/jamiecraik/dev/recon-workbench/README.md` - Project overview and quickstart
+- `/Users/jamiecraik/dev/recon-workbench/docs/GOLD_STANDARD.md` - Gold Industry Standard compliance
+- `/Users/jamiecraik/dev/recon-workbench/AGENTS.md` - Agent instructions and workflows
+- `/Users/jamiecraik/dev/recon-workbench/SECURITY.md` - Security policy and vulnerability reporting
+- `/Users/jamiecraik/dev/recon-workbench/scope.example.yaml` - Scope configuration template
 
 ### Schemas
 
-- `schemas/authorization.schema.json` - Authorization artifact structure
-- `schemas/probe-plan.v2.schema.json` - Probe plan validation
-- `schemas/findings.v2.schema.json` - Findings structure
-- `schemas/manifest.v2.schema.json` - Integrity manifest structure
+- `/Users/jamiecraik/dev/recon-workbench/schemas/authorization.schema.json` - Authorization artifact structure
+- `/Users/jamiecraik/dev/recon-workbench/schemas/probe-plan.v2.schema.json` - Probe plan validation
+- `/Users/jamiecraik/dev/recon-workbench/schemas/findings.v2.schema.json` - Findings structure
+- `/Users/jamiecraik/dev/recon-workbench/schemas/manifest.v2.schema.json` - Integrity manifest structure
 
 ### Probe Catalog
 
-- `probes/catalog.json` - All available probes and probe sets
+- `/Users/jamiecraik/dev/recon-workbench/probes/catalog.json` - All available probes and probe sets
 
 ### Validation Scripts
 
-- `scripts/validate_catalog.py` - Validate probe catalog
-- `scripts/validate_manifest.py` - Validate integrity manifest
-- `scripts/validate_evidence.py` - Validate evidence paths in findings
+- `/Users/jamiecraik/dev/recon-workbench/scripts/validate_catalog.py` - Validate probe catalog
+- `/Users/jamiecraik/dev/recon-workbench/scripts/validate_manifest.py` - Validate integrity manifest
+- `/Users/jamiecraik/dev/recon-workbench/scripts/validate_evidence.py` - Validate evidence paths in findings
 
 ### MCP Integration
 
-- `scripts/mcp_server.py` - MCP server for AI agent integration
-
-## Compliance Evidence
-
-This skill meets Gold Industry Standards (baseline: January 31, 2026) for:
-
-- **Security & Privacy**: Authorization enforcement, scope constraints, path traversal protection
-- **Performance**: Timeouts, parallel execution, resource limits
-- **Accessibility**: Structured JSON output, human-readable help text
-- **Testing**: Lint (ruff), type check (mypy), tests (pytest), security scanning (Trivy, Semgrep)
-- **Documentation**: Comprehensive docs, type hints, docstrings
-- **Supply Chain**: Pinned dependencies, SBOM generation, provenance attestations
-
-**Verification**: Run `uv run python -m rwb doctor` to check toolchain health.
-
-## When to use
-- Use this skill when the task matches its description and triggers.
-- If the request is outside scope, route to the referenced skill.
-
+- `/Users/jamiecraik/dev/recon-workbench/scripts/mcp_server.py` - MCP server for AI agent integration
 
 ## Constraints
 - Redact secrets/PII by default.
 - Avoid destructive operations without explicit user direction.
 
-
 ## Anti-patterns
 - Avoid vague guidance without concrete steps.
 - Do not invent results or commands.
-
-## Antipatterns
 - Do not add features outside the agreed scope.
