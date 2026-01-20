@@ -5,3 +5,8 @@ build/dist/
 reports/
 *.skill
 .venv-skillpack/
+
+# AI artifacts - transient only
+/ai/tmp/
+/ai/cache/
+/ai/raw/

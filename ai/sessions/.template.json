@@ -1,0 +1,9 @@
+{
+  "tool": "claude-code",
+  "started_at": "YYYY-MM-DDTHH:MM:SSZ",
+  "ended_at": "YYYY-MM-DDTHH:MM:SSZ",
+  "files_touched": ["path/a", "path/b"],
+  "tests_run": ["command ..."],
+  "human_verification": "What you reviewed/validated",
+  "notes": "High-level only; no secrets"
+}

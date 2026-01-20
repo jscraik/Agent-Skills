@@ -1,0 +1,9 @@
+id: pr-<slug>-YYYY-MM-DD
+tool: claude-code
+mode: normal
+task: "<what the agent was asked to do>"
+constraints:
+  - "follow PR template exactly"
+  - "no secrets"
+outputs_expected:
+  - "<files expected to change>"
