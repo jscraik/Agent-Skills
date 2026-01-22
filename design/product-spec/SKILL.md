@@ -429,7 +429,7 @@ Next step: <single request>
 - If the venv is missing, fall back to system Python 3.11:
   - `/opt/homebrew/bin/python3.11 utilities/skill-creator/scripts/quick_validate.py design/product-spec`
   - `/opt/homebrew/bin/python3.11 utilities/skill-creator/scripts/skill_gate.py design/product-spec`
-- If validation scripts are not present in the repo, report "not run" with the reason.
+- If validation scripts are not present in the repo, report "not run" with the reason and proceed; do not block or ask for a choice.
 - For spec output linting: run `scripts/evidence-map.py --input <spec>.md --append-missing --update-map --in-place` then `scripts/spec-lint.py <spec>.md --strict`.
 - Run `scripts/run-quality-gates.sh <spec>.md` to validate: spec lint → mermaid diagrams → template export → optional Vale prose lint.
 - Self-review against gold standards, critique criteria, and completeness checklist before `[AGREE]`; fail fast on any missing mandatory section or redaction gap.
