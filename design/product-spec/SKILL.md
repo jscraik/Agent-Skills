@@ -135,6 +135,7 @@ Spec artifacts are written to `.spec/` with the following naming convention:
   2) **Review** — audit an existing project/repo to reconstruct vision, assess usefulness, find product/engineering/ops gaps, realign, and output findings + recommendations (no implementation). Only draft or modify PRD/Tech Spec/ADRs if the user explicitly requests it after the audit.
   3) **Lite PRD** — demo-grade PRD with sections 1-7 only (see Lite PRD Generator).
 - For review mode, ask for: repo path or key files; existing PRD/tech spec/roadmap; what is shipped vs WIP; available evidence (metrics, feedback, tickets); constraints (time/budget/non-negotiables).
+- For review mode, ask **one question at a time** and wait for the reply before the next.
 - **Audit discipline (default):** The audit output is findings + recommendations + a Recovery Plan (stop/continue/start + top actions), not implemented fixes. Do not change code, write specs, or create new process artifacts unless explicitly asked after the audit.
 - Use `design/references/recovery-plan-template.md` for the Recovery Plan section.
 - **Documentation trap (default):** Treat new docs (e.g., `SPEC_INDEX.md`) as scope with maintenance burden. Apply the 48-hour rule and require explicit justification before adding or proposing new documentation artifacts.
@@ -422,9 +423,13 @@ Next step: <single request>
 ```
 
 ## Validation
-- Run `public/skills/skill-creator/.venv/bin/python public/skills/skill-creator/scripts/quick_validate.py skills/product-spec`.
-- Fail fast and report errors before proceeding.
-- Run `public/skills/skill-creator/.venv/bin/python public/skills/skill-creator/scripts/skill_gate.py skills/product-spec` to enforce contract/eval presence and section checks.
+- Prefer the local venv if present:
+  - `utilities/skill-creator/.venv/bin/python utilities/skill-creator/scripts/quick_validate.py design/product-spec`
+  - `utilities/skill-creator/.venv/bin/python utilities/skill-creator/scripts/skill_gate.py design/product-spec`
+- If the venv is missing, fall back to system Python 3.11:
+  - `/opt/homebrew/bin/python3.11 utilities/skill-creator/scripts/quick_validate.py design/product-spec`
+  - `/opt/homebrew/bin/python3.11 utilities/skill-creator/scripts/skill_gate.py design/product-spec`
+- If validation scripts are not present in the repo, report "not run" with the reason.
 - For spec output linting: run `scripts/evidence-map.py --input <spec>.md --append-missing --update-map --in-place` then `scripts/spec-lint.py <spec>.md --strict`.
 - Run `scripts/run-quality-gates.sh <spec>.md` to validate: spec lint → mermaid diagrams → template export → optional Vale prose lint.
 - Self-review against gold standards, critique criteria, and completeness checklist before `[AGREE]`; fail fast on any missing mandatory section or redaction gap.
