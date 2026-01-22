@@ -1,0 +1,16 @@
+cases:
+  - name: happy-path
+    prompt: "Generate an ops/runbook spec from a tech spec; use tech-to-ops."
+    acceptance:
+      - type: contains
+        value: "## Outputs"
+  - name: edge-case
+    prompt: "Generate an ops spec with missing SLOs; note assumptions."
+    acceptance:
+      - type: contains
+        value: "## Inputs"
+  - name: failure-mode
+    prompt: "User asks for PRD ideation; out of scope for tech-to-ops."
+    acceptance:
+      - type: contains
+        value: "## When to use"

@@ -1,6 +1,6 @@
 ---
 name: ios_sim_interrogate
-description: iOS Simulator interrogation: simctl screenshots/video, Web Inspector for web content, Instruments for native behaviors.
+description: "iOS Simulator interrogation: simctl screenshots/video, Web Inspector for web content, Instruments for native behaviors."
 ---
 
 Inputs:

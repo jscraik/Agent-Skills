@@ -1,0 +1,16 @@
+cases:
+  - name: happy-path
+    prompt: "Generate a migration plan from a tech spec; use tech-to-migration."
+    acceptance:
+      - type: contains
+        value: "## Outputs"
+  - name: edge-case
+    prompt: "Generate a migration plan with unclear rollback; note assumptions."
+    acceptance:
+      - type: contains
+        value: "## Inputs"
+  - name: failure-mode
+    prompt: "User asks for marketing copy; out of scope for tech-to-migration."
+    acceptance:
+      - type: contains
+        value: "## When to use"

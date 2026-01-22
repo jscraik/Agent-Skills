@@ -1,0 +1,16 @@
+cases:
+  - name: happy-path
+    prompt: "Translate a PRD into a UX spec with the six passes; use prd-to-ux."
+    acceptance:
+      - type: contains
+        value: "## Outputs"
+  - name: edge-case
+    prompt: "Translate a sparse PRD into a UX spec; note assumptions."
+    acceptance:
+      - type: contains
+        value: "## Inputs"
+  - name: failure-mode
+    prompt: "User asks for database tuning; out of scope for prd-to-ux."
+    acceptance:
+      - type: contains
+        value: "## When to use"

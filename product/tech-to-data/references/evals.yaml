@@ -1,0 +1,16 @@
+cases:
+  - name: happy-path
+    prompt: "Generate a data spec from a tech spec; use tech-to-data."
+    acceptance:
+      - type: contains
+        value: "## Outputs"
+  - name: edge-case
+    prompt: "Generate a data spec with missing schema details; document gaps."
+    acceptance:
+      - type: contains
+        value: "## Inputs"
+  - name: failure-mode
+    prompt: "User asks for UI flows; out of scope for tech-to-data."
+    acceptance:
+      - type: contains
+        value: "## When to use"

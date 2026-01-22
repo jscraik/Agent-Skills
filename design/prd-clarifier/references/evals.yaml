@@ -1,0 +1,16 @@
+cases:
+  - name: happy-path
+    prompt: "Clarify a PRD with ambiguities; use prd-clarifier to run a tracked clarification session."
+    acceptance:
+      - type: contains
+        value: "## Outputs"
+  - name: edge-case
+    prompt: "Clarify a PRD but details are missing; use prd-clarifier and ask one question."
+    acceptance:
+      - type: contains
+        value: "## Inputs"
+  - name: failure-mode
+    prompt: "Request is unrelated to PRD clarification; handle as out of scope for prd-clarifier."
+    acceptance:
+      - type: contains
+        value: "## When to use"

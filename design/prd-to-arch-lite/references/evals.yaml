@@ -1,0 +1,16 @@
+cases:
+  - name: happy-path
+    prompt: "Create a lite architecture snapshot from a PRD; use prd-to-arch-lite."
+    acceptance:
+      - type: contains
+        value: "## Outputs"
+  - name: edge-case
+    prompt: "Create a lite architecture snapshot with missing details; note assumptions."
+    acceptance:
+      - type: contains
+        value: "## Inputs"
+  - name: failure-mode
+    prompt: "User asks for database migrations; out of scope for prd-to-arch-lite."
+    acceptance:
+      - type: contains
+        value: "## When to use"

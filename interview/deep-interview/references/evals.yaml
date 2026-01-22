@@ -1,0 +1,20 @@
+cases:
+  - name: file-delta
+    prompt: "Deepen an existing spec file using deep-interview and append Delta Insights."
+    acceptance:
+      - type: contains
+        value: "## Delta Insights"
+      - type: contains
+        value: "Approval gate"
+  - name: topic-fresh
+    prompt: "Run deep-interview on a topic and produce a structured synthesis with decisions and assumptions."
+    acceptance:
+      - type: contains
+        value: "Decisions table"
+      - type: contains
+        value: "Assumptions register"
+  - name: code-file-sidecar
+    prompt: "Deep-interview a code file path and avoid injecting prose into code; suggest a sidecar insights doc."
+    acceptance:
+      - type: contains
+        value: "sidecar"

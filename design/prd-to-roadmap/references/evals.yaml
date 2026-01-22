@@ -1,0 +1,16 @@
+cases:
+  - name: happy-path
+    prompt: "Generate a phased roadmap from a PRD; use prd-to-roadmap."
+    acceptance:
+      - type: contains
+        value: "## Outputs"
+  - name: edge-case
+    prompt: "Generate a roadmap with unclear dependencies; document gaps."
+    acceptance:
+      - type: contains
+        value: "## Inputs"
+  - name: failure-mode
+    prompt: "User asks for API contract; out of scope for prd-to-roadmap."
+    acceptance:
+      - type: contains
+        value: "## When to use"

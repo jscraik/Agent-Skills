@@ -4,8 +4,7 @@ set -euo pipefail
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$repo_root"
 
-categories=(github frontend apple backend product utilities)
-excluded_names=(skill-creator skill-installer)
+categories=(github frontend apple backend interview product design utilities)
 skills_dir="$repo_root/skills"
 system_skills_dir="$repo_root/skills-system"
 
@@ -34,18 +33,18 @@ fi
 find "$skills_dir" -maxdepth 1 -type l -exec rm -f {} +
 
 # Recreate symlinks for each category's SKILL.md directories.
+if command -v rg >/dev/null 2>&1; then
+  skill_files_cmd() { rg --files -g 'SKILL.md' "$1"; }
+else
+  skill_files_cmd() { find "$1" -type f -name 'SKILL.md'; }
+fi
 for category in "${categories[@]}"; do
   while IFS= read -r skill_path; do
     skill_dir="$(dirname "$skill_path")"
     skill_name="$(basename "$skill_dir")"
     skill_dir_abs="$repo_root/$skill_dir"
-    for excluded in "${excluded_names[@]}"; do
-      if [ "$skill_name" = "$excluded" ]; then
-        continue 2
-      fi
-    done
     ln -s "$skill_dir_abs" "$skills_dir/$skill_name"
-  done < <(rg --files -g 'SKILL.md' "$category")
+  done < <(skill_files_cmd "$category")
 done
 
 # Regenerate root SKILL.md index.
@@ -91,6 +90,28 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - `mkit-builder` — Build MCP servers integrating external APIs and services, including OAuth, billing, and Apps SDK UI. Not for general backend architecture; use backend-design.
 - `workers-mcp` — Create production-ready Cloudflare Workers MCP servers with OAuth 2.1 authentication (Auth0), feature-based licensing (Stripe), D1 database, Durable Objects, Workers KV, and Vectorize vector search. Use when Codex needs to: (1) Scaffold a new Workers MCP project, (2) Add MCP tools with proper schemas and licensing, (3) Configure D1 database with migrations, (4) Set up Auth0 OAuth 2.1 authentication, (5) Implement Stripe subscription licensing, (6) Add Vectorize semantic search, (7) Deploy to Cloudflare Workers.
 
+## Interview
+- `architecture-interview` — Plan and review architecture decisions via a structured interview and ADR output. Use when choosing between system design alternatives.
+- `bug-interview` — Analyze and review bug reports to capture repro, evidence, and next diagnostic step. Use when a bug report lacks clear reproduction.
+- `interview-kernel` — Core interview engine enforcing single-question discovery/decision gating. Use when building interview wrapper skills.
+- `interview-me` — Interactive, multiple-choice interview that turns an underspecified idea into a design-ready spec (decisions + assumptions + approval).
+- `pm-interview` — Plan and review product scope, value, metrics, and rollout via a structured interview. Use when product direction or scope must be clarified.
+
+## Design/PRD
+- `product-spec` — Create PRDs and tech specs and critique UX flows. Not for documentation QA or implementation plans; use docs-expert or code-plan.
+- `prd-clarifier` — Resolve PRD ambiguities and requirements through structured questioning and a tracked session log.
+- `prd-to-accessibility` — Generate accessibility requirements and checks from PRDs.
+- `prd-to-api` — Generate a full API specification from a PRD (endpoints, schemas, errors, auth, compatibility).
+- `prd-to-api-lite` — Generate a minimal API outline from a PRD (endpoints, examples, basic errors).
+- `prd-to-arch` — Generate an architecture specification from a PRD.
+- `prd-to-arch-lite` — Generate a lite architecture snapshot from a PRD.
+- `prd-to-qa-cases` — Generate QA test cases from PRD acceptance criteria.
+- `prd-to-risk` — Generate a risk register and mitigation plan from a PRD.
+- `prd-to-roadmap` — Generate a phased roadmap from a PRD.
+- `prd-to-security-review` — Generate a security review from a PRD.
+- `prd-to-testplan` — Generate a test plan and validation matrix from a PRD.
+- `prd-to-ux` — Generate UX specifications from PRDs or feature specs.
+
 ## Product/Docs
 - `agents-md` — Create or update a repository-level AGENTS.md contributor guide with clear sections, commands, and repo-specific conventions. Use when asked to draft, improve, or standardize AGENTS.md files or when a repo needs concise contributor instructions.
 - `app-store-release-notes` — Create user-facing App Store release notes by collecting and summarizing all user-impacting changes since the last git tag (or a specified ref). Use when asked to generate a comprehensive release changelog, App Store "What's New" text, or release notes based on git history or tags.
@@ -101,7 +122,6 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - `llm-design-review` — Run design reviews and audits for LLM features across UX, architecture, model/prompt, safety, evaluation, and governance. Not for product PRDs; use product-spec.
 - `product-design-review` — Review end-to-end user experience and UI for products or flows; produce a user-perspective critique with usability, accessibility, content, and interaction issues plus fixes. Use for UX/UI audits, product design reviews, onboarding or checkout critiques, heuristic evaluations, accessibility-first reviews, or when asked to find issues in a user journey from the user's point of view. Target web, iOS, and macOS products, including React apps and open-source software.
 - `product-manager` — Lead users through every software design step—from idea to production-ready PRD or technical spec—via interview, drafting, adversarial debate, diagrams, and gold-standard validation; use whenever the user asks for PRD/tech specs, software design steps, or taking an idea to production.
-- `product-spec` — Create PRDs and tech specs and critique UX flows. Not for documentation QA or implementation plans; use docs-expert or code-plan.
 - `project-improvement-ideator` — Generate 30 pragmatic improvement ideas for the current project, weigh feasibility/impact/user perception, then winnow to the best 5 with rationale. Use when asked for “best ideas”, “improvements”, “roadmap”, or “top 5”/“winnow” prioritization. Not for full product specs or LLM design reviews; use product-spec or llm-design-review.
 - `youtube-hooks-scripts` — Create compelling hooks and full scripts for technical YouTube videos about coding and AI. Use when given a video idea, braindump, source code, or rough notes to develop into engaging long-form content. Helps transform raw material into conversational scripts that grab attention and maintain engagement throughout.
 - `youtube-titles-thumbnails` — Create high-performing YouTube titles and thumbnail text that maximize CTR and virality while maintaining authenticity. Use when analyzing video transcripts to generate title and thumbnail suggestions, optimizing existing titles/thumbnails, or when users request help with YouTube content strategy for click-through rate optimization.

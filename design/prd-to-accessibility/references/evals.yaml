@@ -1,0 +1,16 @@
+cases:
+  - name: happy-path
+    prompt: "Generate accessibility requirements from a PRD; use prd-to-accessibility."
+    acceptance:
+      - type: contains
+        value: "## Outputs"
+  - name: edge-case
+    prompt: "Generate accessibility requirements with unknown targets; state assumptions."
+    acceptance:
+      - type: contains
+        value: "## Inputs"
+  - name: failure-mode
+    prompt: "User asks for database indexing; out of scope for prd-to-accessibility."
+    acceptance:
+      - type: contains
+        value: "## When to use"

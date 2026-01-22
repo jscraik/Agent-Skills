@@ -10,7 +10,9 @@ This repository is the source of truth for Codex/agent skills. Canonical skills 
 ├── frontend/     # Frontend/UI patterns
 ├── apple/        # Apple/Swift/SwiftUI skills
 ├── backend/      # Backend/Architecture/CLI
+├── interview/    # Interview workflows and kernels
 ├── product/      # Product specs, docs, planning
+├── design/       # PRD/spec skills and design-oriented workflows
 ├── utilities/    # Utilities and helpers
 ├── skills/       # Flat symlink directory (tooling entrypoint)
 ├── skills-system/ # Bundled/system skills (kept out of flat view)

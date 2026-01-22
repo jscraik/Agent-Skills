@@ -1,0 +1,16 @@
+cases:
+  - name: happy-path
+    prompt: "Generate a test plan from a PRD; use prd-to-testplan."
+    acceptance:
+      - type: contains
+        value: "## Outputs"
+  - name: edge-case
+    prompt: "Generate a test plan but acceptance criteria are missing; ask clarifiers."
+    acceptance:
+      - type: contains
+        value: "## Inputs"
+  - name: failure-mode
+    prompt: "User asks for branding updates; out of scope for prd-to-testplan."
+    acceptance:
+      - type: contains
+        value: "## When to use"

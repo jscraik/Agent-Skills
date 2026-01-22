@@ -1,0 +1,16 @@
+cases:
+  - name: happy-path
+    prompt: "Generate a performance plan from a tech spec; use tech-to-performance."
+    acceptance:
+      - type: contains
+        value: "## Outputs"
+  - name: edge-case
+    prompt: "Generate a performance plan with missing targets; state assumptions."
+    acceptance:
+      - type: contains
+        value: "## Inputs"
+  - name: failure-mode
+    prompt: "User asks for QA cases; out of scope for tech-to-performance."
+    acceptance:
+      - type: contains
+        value: "## When to use"

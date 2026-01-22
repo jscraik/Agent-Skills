@@ -1,0 +1,16 @@
+cases:
+  - name: happy-path
+    prompt: "Generate a security review from a PRD; use prd-to-security-review."
+    acceptance:
+      - type: contains
+        value: "## Outputs"
+  - name: edge-case
+    prompt: "Generate a security review with missing threat context; ask clarifiers."
+    acceptance:
+      - type: contains
+        value: "## Inputs"
+  - name: failure-mode
+    prompt: "User asks for design tokens; out of scope for prd-to-security-review."
+    acceptance:
+      - type: contains
+        value: "## When to use"

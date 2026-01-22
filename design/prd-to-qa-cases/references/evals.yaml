@@ -1,0 +1,16 @@
+cases:
+  - name: happy-path
+    prompt: "Convert PRD acceptance criteria into QA cases; use prd-to-qa-cases."
+    acceptance:
+      - type: contains
+        value: "## Outputs"
+  - name: edge-case
+    prompt: "Convert partial acceptance criteria into QA cases; note missing info."
+    acceptance:
+      - type: contains
+        value: "## Inputs"
+  - name: failure-mode
+    prompt: "User asks for UX spec; out of scope for prd-to-qa-cases."
+    acceptance:
+      - type: contains
+        value: "## When to use"

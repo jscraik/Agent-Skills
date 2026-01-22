@@ -1,0 +1,16 @@
+cases:
+  - name: happy-path
+    prompt: "Convert a UX spec into build-order prompts; use ux-spec-to-prompts."
+    acceptance:
+      - type: contains
+        value: "## Outputs"
+  - name: edge-case
+    prompt: "Convert a short UX spec into prompts with missing measurements; note assumptions."
+    acceptance:
+      - type: contains
+        value: "## Inputs"
+  - name: failure-mode
+    prompt: "User asks for backend refactor; out of scope for ux-spec-to-prompts."
+    acceptance:
+      - type: contains
+        value: "## When to use"

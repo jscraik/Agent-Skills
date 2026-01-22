@@ -1,0 +1,17 @@
+purpose: >
+  Deepen an existing doc/spec (preferred) or explore a topic via an in-depth interview that forces decisions and produces an approval-gated artifact.
+schema_version: 1.0
+triggers:
+  - user requests deep interview, gap-filling, spec refinement, or doc enhancement
+inputs:
+  - file path or topic
+  - optional supporting docs/links
+outputs:
+  - updated file (if applicable) with Delta/Interview Insights
+  - otherwise a structured synthesis (decisions/assumptions/ACs/risks) + approval gate
+non_goals:
+  - writing implementation code during the interview
+  - modifying code files with prose by default
+risks:
+  - scope creep; mitigated by explicit in/out scope and tradeoff forcing
+  - drift/loops; mitigated by strict kernel stop conditions and question budget

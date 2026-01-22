@@ -1,6 +1,6 @@
 ---
 name: oss_repo_map
-description: Open-source repo mapping: hotspots, dependency tree, SAST, tests/coverage pointers.
+description: "Open-source repo mapping: hotspots, dependency tree, SAST, tests/coverage pointers."
 ---
 
 Inputs:

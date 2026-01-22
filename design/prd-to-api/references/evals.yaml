@@ -1,0 +1,16 @@
+cases:
+  - name: happy-path
+    prompt: "Generate an API spec from a PRD; use prd-to-api."
+    acceptance:
+      - type: contains
+        value: "## Outputs"
+  - name: edge-case
+    prompt: "Generate an API spec from a thin PRD; document assumptions."
+    acceptance:
+      - type: contains
+        value: "## Inputs"
+  - name: failure-mode
+    prompt: "User asks for UX wireframes; out of scope for prd-to-api."
+    acceptance:
+      - type: contains
+        value: "## When to use"

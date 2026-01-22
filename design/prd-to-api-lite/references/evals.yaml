@@ -1,0 +1,16 @@
+cases:
+  - name: happy-path
+    prompt: "Generate a lite API outline from a PRD; use prd-to-api-lite."
+    acceptance:
+      - type: contains
+        value: "## Outputs"
+  - name: edge-case
+    prompt: "Generate a lite API outline with missing details; note assumptions."
+    acceptance:
+      - type: contains
+        value: "## Inputs"
+  - name: failure-mode
+    prompt: "User asks for team roadmap; out of scope for prd-to-api-lite."
+    acceptance:
+      - type: contains
+        value: "## When to use"
