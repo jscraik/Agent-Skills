@@ -7,6 +7,7 @@ description: "Create and review PRDs/tech specs with structured discovery and ac
 - Apply the full discipline checklist, templates, and scripts in `references/avoid-feature-creep.md`.
 - Treat any new feature as a scope change that must displace something else.
 - Use explicit in/out-of-scope lists, decision logs, and the 48-hour rule before adding items.
+- Check against GOLD Industry Standards guide in ~/.codex/AGENTS.override.md
 
 # Product Spec Skill
 
@@ -21,6 +22,36 @@ Purpose: Produce complete PRDs/tech specs ready for implementation, using interv
 - Vibe engineer = design system + tests: use component registry and TDD to keep AI output trustworthy.
 - Automate the boring glue: use MCP connectors, skills, and hooks; keep only essential integrations to preserve context.
 - Cure curse of knowledge: highlight cost of inaction and force value prop through NEW / EASY / SAFE / BIG.
+- **Decision quality > completeness:** avoid academic dumps; if a section doesn't change a decision, it does not belong.
+
+## Spec layering (required, not symmetric)
+Use three layers to prevent PRD bloat and keep execution fast:
+
+### 1) Always required (PRD)
+These are mandatory for every PRD:
+- **Problem & Job (JTBD-lite):** primary user, the job they're trying to accomplish, current workaround, why now.
+- **Success criteria:** primary metric, activation definition, guardrail metrics.
+- **Scope:** in-scope (MVP) and explicitly out-of-scope.
+- **Primary journey:** happy path only (no edge cases here).
+
+### 2) Always required (Product Spec / Build Plan)
+These are mandatory for every product spec:
+- **Outcome → Opportunities → Solution:** chosen solution with rejected alternatives.
+- **UX specification:** mental model, information architecture, affordances/actions, system feedback.
+- **Key assumptions & risks:** top 3–5 only, with mitigations.
+- **Build breakdown:** epics → stories → acceptance criteria.
+- **Release & measurement plan:** rollout + how success is measured.
+
+### 3) Conditional (use only when risk/ambiguity is high)
+Include only when it materially changes decisions or reduces risk:
+- Pre-mortems, dependency SLAs, regulatory/compliance deep dives, cost models, migration plans, or operational readiness.
+
+### 4) Explicitly excluded (by default)
+Do NOT embed these in PRDs or product specs:
+- Full SWOT, full value prop canvas, full market/competitive analysis, marketing persuasion frameworks.
+- If they exist, link them and summarize the decision, not the analysis.
+
+**Guiding rule:** If a section does not change a decision, it does not belong in the PRD or product spec.
 
 ## Transcript-Derived Tips (Apply When Prototyping/UI)
 - PRD is a rich prompt: pull PRDs into tools via connectors; avoid re-typing context.
@@ -104,7 +135,8 @@ Spec artifacts are written to `.spec/` with the following naming convention:
   2) **Review** — audit an existing project/repo to reconstruct vision, assess usefulness, find product/engineering/ops gaps, realign, and output findings + recommendations (no implementation). Only draft or modify PRD/Tech Spec/ADRs if the user explicitly requests it after the audit.
   3) **Lite PRD** — demo-grade PRD with sections 1-7 only (see Lite PRD Generator).
 - For review mode, ask for: repo path or key files; existing PRD/tech spec/roadmap; what is shipped vs WIP; available evidence (metrics, feedback, tickets); constraints (time/budget/non-negotiables).
-- **Audit discipline (default):** The audit output is findings + recommendations, not implemented fixes. Do not change code, write specs, or create new process artifacts unless explicitly asked after the audit.
+- **Audit discipline (default):** The audit output is findings + recommendations + a Recovery Plan (stop/continue/start + top actions), not implemented fixes. Do not change code, write specs, or create new process artifacts unless explicitly asked after the audit.
+- Use `design/references/recovery-plan-template.md` for the Recovery Plan section.
 - **Documentation trap (default):** Treat new docs (e.g., `SPEC_INDEX.md`) as scope with maintenance burden. Apply the 48-hour rule and require explicit justification before adding or proposing new documentation artifacts.
 - If the user requests a UX/UI audit or heuristic review, route to `product-design-review` instead.
 
@@ -122,6 +154,7 @@ Spec artifacts are written to `.spec/` with the following naming convention:
 - Write to `.spec/foundation-YYYY-MM-DD-<slug>.md`.
 - Use the **Foundation Spec template** from `design/references/foundation-spec-template.md`.
 - Populate every section; include assumptions and placeholder metrics when unknown.
+- Ensure the PRD always-on sections are explicit: **Problem & Job**, **Success Criteria**, **Scope (in/out)**, and **Primary Journey (happy path)**.
 - Run the **Socratic Spec Reviewer** prompt from `design/references/prompts.md` to interrogate the draft.
 - **Positioning constraints (3 bullets):**
   - What does the user already believe about this problem? (awareness level)
@@ -147,11 +180,13 @@ Spec artifacts are written to `.spec/` with the following naming convention:
 - After UX Spec is approved, draft the Build Plan using the **Build Plan template** from `design/references/build-plan-template.md`.
 - Write to `.spec/build-plan-YYYY-MM-DD-<slug>.md`.
 - Populate every section:
+  - **Outcome → opportunities → solution** — chosen solution and rejected alternatives
+  - **Key assumptions & risks** — top 3–5 only with mitigations
   - **Epics (sequenced)** — Smallest coherent order for execution
   - **Stories per epic** — Each with acceptance criteria, telemetry/events, tests
   - **Data + contracts (lightweight)** — Entities, key fields, API/routes, permissions/auth
   - **Test strategy** — Unit, integration, E2E, failure-mode tests
-  - **Release plan** — Feature flags, rollout, monitoring
+  - **Release & measurement plan** — Feature flags, rollout, monitoring, measurement window + owner
 - Run the **Build Plan Decomposer** prompt from `design/references/prompts.md` if needed.
 - Present the draft wrapped in `[SPEC] ... [/SPEC]` and ask: "Does this capture the execution plan? Changes before adversarial review?"
 - **Evidence discipline:** every paragraph should end with an `Evidence:` line or `Evidence gap:` line.
@@ -160,8 +195,10 @@ Spec artifacts are written to `.spec/` with the following naming convention:
 - After each stage (Foundation, UX, Build Plan), run the **Spec Linter Checklist** from `design/references/spec-linter-checklist.md`.
 - Verify:
   - Problem & success (singular core problem, measurable success metric, MVP vs later separated)
+  - PRD always-on sections (Problem & Job, Success Criteria, Scope in/out, Primary Journey)
   - UX ambiguity removal (mental model written, IA specified, system feedback states specified)
   - Execution (epics with clear AC, small stories, minimal test plan)
+  - Product spec always-on sections (Outcome → Opportunities → Solution, Key Assumptions & Risks)
   - Communication clarity (new teammate can explain, terms defined)
   - Evidence discipline (Evidence/Evidence gap lines, sources cited, Evidence Gaps and Evidence Map present)
 - Fail fast on any missing mandatory section or redaction gap.
@@ -178,7 +215,7 @@ Spec artifacts are written to `.spec/` with the following naming convention:
   - **UX Spec:** mental model explicitly stated; IA covers all entities and relationships; affordances clear for all screens; system feedback states specified for all key views; UX acceptance criteria testable.
   - **Build Plan:** epics are sequenced and coherent; stories are small (5–15 minutes) with explicit acceptance criteria; test plan covers unit/integration/E2E; release plan has rollback; telemetry plan defined.
   - **Tech:** architecture decisions + rationale; complete API contracts (method, path, request/response schemas, error codes); data models with types/constraints/indexes/relationships; security (authz/authn/encryption/validation); enumerated error handling; specific performance targets; repeatable/reversible deploy; SLO/error budget + policy.
-  - **Review mode:** vision reconstructed; evidence captured; product/engineering/ops gaps enumerated; viability assessed; recommendations only with next-14-day actions and "done when" criteria; no implementation.
+  - **Review mode:** vision reconstructed; evidence captured; product/engineering/ops gaps enumerated; viability assessed; Recovery Plan (stop/continue/start + top actions) with next-14-day actions and "done when" criteria; no implementation.
 - If gaps remain, return to interview-style questioning, then revise and debate again.
 
 ### 7) Design review routing (if requested)
@@ -186,12 +223,20 @@ Spec artifacts are written to `.spec/` with the following naming convention:
 
 ### 8) Finalize
 - **Quality gate:** completeness (all sections substantive), consistency, clarity, actionability.
-- **Foundation Spec specifics:** one-sentence summary; core problem with anti-goal; target user + context; success (primary metric, guardrails, activation); MVP scope (must-have vs out-of-scope); user stories (top 5–10 with AC and edge cases); primary journey (happy path); positioning constraints; evidence discipline applied.
+- **Foundation Spec specifics:** one-sentence summary; core problem with anti-goal; target user + context + job-to-be-done; success (primary metric, guardrails, activation); MVP scope (must-have vs out-of-scope); user stories (top 5–10 with AC and edge cases); primary journey (happy path); positioning constraints; evidence discipline applied.
 - **UX Spec specifics:** mental model alignment; information architecture (entities, relationships, navigation); affordances & actions per screen/component; system feedback states per key view; UX acceptance criteria in Gherkin format; evidence discipline applied.
-- **Build Plan specifics:** epics sequenced; stories per epic with AC, telemetry/events, tests; data + contracts (lightweight); test strategy (unit/integration/E2E/failure-mode); release plan (feature flags, rollout, monitoring); evidence discipline applied.
-- **PRD specifics (if drafting traditional PRD):** 2–3 para executive summary; personas with names/roles/goals/pain points; every story in correct format; metrics with numeric targets + measurement method; explicit out-of-scope list; top-level `Acceptance Criteria` section present and populated; decision log/ADRs referenced; data lifecycle/retention/deletion addressed; feature creep guardrails answered with evidence; scope decision log populated; launch/rollback guardrails and go/no-go metrics defined; post-launch monitoring plan with owners and window; support/ops impact and runbook links; compliance/regulatory review triggers stated; ownership/RACI defined; security/privacy classification completed; dependency SLAs/vendor risk covered; cost model with guardrails; localization/i18n stance; backward compatibility/deprecation policy; experimentation/feature flag plan; explicit kill criteria.
+- **Build Plan specifics:** outcome → opportunities → solution (with rejected alternatives); top 3–5 assumptions/risks; epics sequenced; stories per epic with AC, telemetry/events, tests; data + contracts (lightweight); test strategy (unit/integration/E2E/failure-mode); release & measurement plan (feature flags, rollout, monitoring, measurement window); evidence discipline applied.
+- **PRD specifics (decision-first, default):**
+  - One-sentence summary
+  - Problem & Job (JTBD-lite) + anti-goal
+  - Target user + context + workaround
+  - Success criteria (primary metric, activation, guardrails)
+  - Scope (in/out) + primary journey (happy path only)
+  - Top user stories with acceptance criteria
+  - Optional (only if decision-impacting): assumptions/risks, rollout/measurement, or compliance notes
+  - If deeper analyses exist (SWOT, market, value prop, pre-mortem), link and summarize the decision only
 - **Tech specifics:** architecture diagram/description covers all components; every API endpoint has method/path/schemas/errors; data models detail fields + constraints + indexes; security covers authN/Z + encryption + input validation; performance includes latency/throughput/availability; deployment repeatable & rollback-able; observability plan; SLOs/error budget + policy; top-level `Acceptance Criteria` section present and populated; decision log/ADRs referenced; data lifecycle/retention/deletion addressed; feature creep guardrails answered with evidence; scope decision log populated; launch/rollback guardrails and go/no-go metrics defined; post-launch monitoring plan with owners and window; support/ops impact and runbook links; compliance/regulatory review triggers stated; ownership/RACI defined; security/privacy classification completed; dependency SLAs/vendor risk covered; cost model with guardrails; localization/i18n stance; backward compatibility/deprecation policy; experimentation/feature flag plan; explicit kill criteria.
-- **Review mode specifics:** Project Review Report produced; checklist passed; realignment plan + top actions listed; follow-ups to update PRD/Tech Spec/ADRs noted (only if explicitly requested after audit). Every paragraph includes `Evidence:` or `Evidence gap:`; include `Evidence Gaps` + `Evidence Map` sections.
+- **Review mode specifics:** Project Review Report produced; checklist passed; Recovery Plan section (stop/continue/start + top actions + "done when"); follow-ups to update PRD/Tech Spec/ADRs noted (only if explicitly requested after audit). Every paragraph includes `Evidence:` or `Evidence gap:`; include `Evidence Gaps` + `Evidence Map` sections.
 - **Review artifact vs. new process (default):** The adversarial review document is evidence of the audit (like a transcript), not a new ongoing project process. Keep it, but do not introduce new mandatory processes unless the user explicitly asks.
 - Run production gates before `[AGREE]` when shipping: ORR checklist, Launch checklist, SLO template (or N/A with reason).
 - When satisfied and all models said `[AGREE]`, write the final documents:
@@ -281,21 +326,7 @@ Key refinements: - <bullets>
 - Always embed Mermaid source in the doc; if rendering is unavailable, keep the code blocks and note optional export (e.g., via `mermaid-cli`/Kroki) to `assets/diagram.png`.  
 - State diagrams: generate for every stateful component or user-facing workflow with ≥3 states; include start/end states, triggers, failures/timeouts, and invariants. Avoid forcing state machines for stateless components—use flowcharts or sequence diagrams instead.  
 - State machine style (must match the provided reference diagram aesthetic): keep a single vertical spine for the main happy path, branch alternates to the sides, label every transition with the trigger/guard, and show timing hooks (e.g., periodic re-check). Use uppercase state names, concise trigger labels, and avoid crossing lines. Example:
-
-See mermaid examples and export requirements in `design/references/mermaid-examples.md`.
-    ORDERBOOK_OK --> ORDERBOOK_OK: orderbook fresh + canFill
-    ORDERBOOK_OK --> CHECKING: orderbook stale + HAS cached estimate
-    ORDERBOOK_OK --> CHECKING: orderbook stale + NO cached estimate
-    ORDERBOOK_OK --> CHECKING: orderbook canFill=false
-    CHECKING --> CONFIRMED: canFill=true / show estimate
-    CHECKING --> INSUFFICIENT: canFill=false / show warning
-    CONFIRMED --> CHECKING: periodic re-check (10s)
-    INSUFFICIENT --> CHECKING: periodic re-check (10s)
-    CONFIRMED --> IDLE: amount changes / market changes
 - See mermaid examples and export requirements in `design/references/mermaid-examples.md`.
-- **Quality, safety, and standards:** Check against GOLD Industry Standards guide in `~/.codex/AGENTS.override.md` plus `instructions/standards.md` and `instructions/engineering-guidance.md`. Ensure security/privacy, accessibility, performance/scalability, reliability, and governance considerations are addressed explicitly.
-
-- **Quality, safety, and standards:** Check against GOLD Industry Standards guide in `~/.codex/AGENTS.override.md` plus `instructions/standards.md` and `instructions/engineering-guidance.md`. See quality gate scripts and checklists in `design/product-spec/references/` and `design/product-spec/scripts/`.
 - Keep diagrams aligned with described flows and components; update when requirements change.
 
 ## Quality, safety, and standards
@@ -308,24 +339,12 @@ See mermaid examples and export requirements in `design/references/mermaid-examp
 - Avoid persisting sensitive info; do not embed secrets in diagrams or file paths.
 - When unsure if data is sensitive, treat it as sensitive and ask for redaction/confirmation.
 
-## Avoid feature creep (baseline discipline)
-- Apply the full discipline checklist, templates, and scripts in `references/avoid-feature-creep.md`.
-- Treat any new feature as a scope change that must displace something else.
-- Use explicit in/out-of-scope lists, decision logs, and the 48-hour rule before adding items.
-- **Documentation is scope:** Adding new docs/indexes is scope and ongoing maintenance; require justification and apply the 48-hour rule.
-
-## Safety & Redaction
-- Reject/strip secrets, credentials, tokens, or personal data from inputs and outputs.  
-- Avoid persisting sensitive info; do not embed secrets in diagrams or file paths.  
-- Redact secrets/sensitive data by default.  
-- Redaction of secrets/sensitive data is required by default.  
-- When unsure if data is sensitive, treat it as sensitive and ask for redaction/confirmation.
-
 ## References (open only when needed)
 ### Shared References (new pipeline)
 - `design/references/foundation-spec-template.md` — Foundation template
 - `design/references/ux-spec-template.md` — UX spec template
 - `design/references/build-plan-template.md` — Build plan template
+- `design/references/recovery-plan-template.md` — Recovery plan template (review mode)
 - `design/references/spec-linter-checklist.md` — Quality gate checklist
 - `design/references/prompts.md` — Socratic reviewer, UX ambiguity killer, Build plan decomposer
 - `design/references/mermaid-examples.md` — Mermaid diagram examples
@@ -346,9 +365,7 @@ See mermaid examples and export requirements in `design/references/mermaid-examp
 - `prd-to-accessibility` — accessibility
 - `prd-to-security-review` — security review
 - `tech-to-ops` — ops/runbook (SLOs, alerts, rollback)
-- `tech-to-data` — data spec
 - `tech-to-migration` — migration/rollback
-- `tech-to-performance` — performance
 
 ## Philosophy
 - Evidence-led: clarify problem/users/metrics before solutioning; debate until consensus `[AGREE]`.
@@ -413,10 +430,6 @@ Next step: <single request>
 - Self-review against gold standards, critique criteria, and completeness checklist before `[AGREE]`; fail fast on any missing mandatory section or redaction gap.
 - **TDD validation:** Verify that every non-trivial story has test cases defined in the Build Plan. Failing tests block acceptance of stories.
 - **Component registry validation:** Verify that UI stories reference existing components or specify new components to add to the registry. Custom implementations require explicit justification.
-- Fail fast and report errors before proceeding.
-- Run `public/skills/skill-creator/.venv/bin/python public/skills/skill-creator/scripts/skill_gate.py skills/product-spec` to enforce contract/eval presence and section checks.
-- For spec output linting: run `scripts/evidence-map.py --input <spec>.md --append-missing --update-map --in-place` then `scripts/spec-lint.py <spec>.md --strict`.
-- Self-review against gold standards, critique criteria, and completeness checklist before `[AGREE]`; fail fast on any missing mandatory section or redaction gap.
 
 ## Anti-patterns
 - Skipping stages of the pipeline (Foundation → UX → Build Plan) without justification.
@@ -441,19 +454,6 @@ Next step: <single request>
 - DO NOT skip the component registry check—if a component exists, use it; if not, add it to the registry.
 - Avoid hand-waving test coverage—"we tested it manually" is not evidence of reliability.
 - DO NOT merge PRs with failing tests—failing tests mean the code is not ready.
-- Skipping sections or leaving placeholders without assumptions.
-- Omitting evidence lines per paragraph or missing Evidence Gaps/Evidence Map sections.
-- Accepting vague user stories (missing "so that" benefit) or metrics without targets.
-- Omitting security/privacy or accessibility requirements.
-- Removing unconventional but intentional choices without justification; instead, add safeguards and rationale.
-- Forcing state machines on stateless components; prefer flow/sequence diagrams when state is trivial.
-- Shipping without an explicit rollout/kill-switch plan for risky changes (AI, payments, auth).
-- Conflating PRD and tech spec: keep product intent separate from implementation details.
-- Reusing stale metrics or personas across projects without revalidation.
-- Design review anti-patterns: generic advice, aesthetic-only feedback, skipping accessibility/edge states, or unscoped redesigns.
-- Silent scope changes without updating assumptions, risks, and out-of-scope lists.
-- Treating audit outputs as implementation work (code/spec changes) without explicit user request.
-- Creating new documentation artifacts without accounting for ongoing maintenance burden.
 
 ## Examples
 - "Draft a Foundation Spec for a mobile habit-tracking app; include problem, success metrics, and user stories."

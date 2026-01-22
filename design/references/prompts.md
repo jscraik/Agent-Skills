@@ -10,7 +10,8 @@ Read my Foundation Spec below and do NOT rewrite it yet.
 1) Ask the 15 most important clarifying questions that would materially change scope, UX, or architecture.
 2) Identify the single most ambiguous part of the problem statement and propose 3 alternate interpretations.
 3) Propose a primary metric + 2 guardrails and explain why.
-4) List hidden assumptions and risks.
+4) Confirm the JTBD-lite job framing, in-scope/out-of-scope, and primary journey (happy path only).
+5) List hidden assumptions and risks (top 3–5).
 
 Spec:
 <paste>
@@ -36,10 +37,12 @@ Turn a UX spec into an executable build plan with epics and stories.
 
 ```
 Turn this UX spec into:
-1) A sequenced list of epics (smallest coherent order)
-2) Stories per epic with acceptance criteria
-3) A minimal telemetry plan (events + properties)
-4) A minimal test plan (unit/integration/e2e + failure modes)
+1) Outcome → opportunities → solution (with rejected alternatives)
+2) Top 3–5 assumptions/risks with mitigations
+3) A sequenced list of epics (smallest coherent order)
+4) Stories per epic with acceptance criteria
+5) A minimal telemetry plan (events + properties)
+6) A minimal test plan (unit/integration/e2e + failure modes)
 
 UX spec:
 <paste>

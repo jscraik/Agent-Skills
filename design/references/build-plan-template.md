@@ -1,5 +1,14 @@
 # Build Plan — <feature>
 
+## 0) Outcome → opportunities → solution
+- Outcome:
+- Top user opportunities:
+- Chosen solution:
+- Why alternatives were rejected:
+
+## 0.1) Key assumptions & risks (top 3–5)
+| Assumption | Impact | Uncertainty | Mitigation |
+
 ## 1) Epics (sequenced)
 Epic 1: ...
 Epic 2: ...
@@ -52,7 +61,8 @@ Epic 2: ...
 
 **Non-negotiable:** DO NOT write code without a corresponding test. Tests are the definition of "done."
 
-## 5) Release plan
+## 5) Release & measurement plan
 - Feature flags:
 - Rollout:
 - Monitoring:
+- Measurement window + owner:

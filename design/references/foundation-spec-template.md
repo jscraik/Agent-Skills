@@ -9,6 +9,7 @@ Anti-goal: <what problem are we NOT solving?>
 
 ## 3) Target user + context
 - Primary user:
+- Job they are trying to accomplish:
 - When/where this happens:
 - Current workaround(s):
 
