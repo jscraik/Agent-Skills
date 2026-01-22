@@ -1,554 +1,266 @@
 ---
 name: skill-creator
-description: "Create or update Codex skills (structure, resources, packaging). Use when a user asks to create or revise a skill."
+description: "Create, revise, and quality-gate Codex skills (SKILL.md + resources + evals + packaging). Use when asked to build or improve a skill."
+metadata:
+  short-description: "Create or update Codex skills with templates, validation, and packaging."
 ---
 
 # Skill Creator
 
-This skill provides guidance for creating effective skills.
+This skill helps you design, author, validate, and package high-quality skills.
 
-**Version**: 1.2.0  
-**Last updated**: 2026-01-18
+**Version**: 1.3.0  
+**Last updated**: 2026-01-22
 
 ## When to Use
 
-- Use when the user asks to create, update, validate, or package a skill.
-- Use when the user requests skill design guidance, trigger tuning, or portability across Codex and Claude Code.
+- Create a new skill (instruction-only or router-style skill folder).
+- Revise an existing skill for better triggering, portability, or reliability.
+- Audit/upgrade a skill to meet “gold standard” structure, progressive disclosure, and validation.
+- Package a skill into a distributable `.skill` archive.
 
 ## Inputs
 
-- Required: user goal, example prompts, and the target skill name.
-- If updating: existing skill path and any current SKILL.md or bundled resources.
-- Optional: target platforms (Codex/Claude Code), desired scripts/references/assets, validation or packaging requirements.
+- Desired skill goal (what users want to accomplish).
+- 3–10 example user prompts (happy-path + edge-cases + out-of-scope prompts).
+- Target environment(s): Codex, Claude Code, or portable subset.
+- Any required assets, schemas, APIs, CLIs, or “house style” constraints.
+
+If any of the above are missing, ask only the minimum questions required to proceed safely.
 
 ## Outputs
 
-- Updated skill artifacts (SKILL.md plus any references/scripts/assets).
-- Clear validation results and any follow-up actions.
-- Packaging instructions or artifacts when requested.
-- If outputs are schema-bound, include `schema_version` in the output contract.
+Depending on the request, produce one or more of:
+
+- A skill folder containing:
+  - `SKILL.md` (required)
+  - `scripts/` (optional)
+  - `references/` (optional)
+  - `assets/` (optional)
+- `references/contract.yaml` (output contract) and `references/evals.yaml` (eval cases) when the skill is non-trivial. Include `schema_version` in the contract.
+- A validation report (what passed/failed and what to fix).
+- A packaged `.skill` file created via `scripts/package_skill.py`.
 
 ## Response format (required)
-Always start the response with these headings, in this order, with no text before them. Do not use the Objective/Plan/Next step labels for this skill; place any such content under the headings below.
+
+Always start responses with these headings (no text before them):
 
 ## When to use
-- ...
+- 1–3 bullets on when this skill applies (confirm scope).
 
 ## Inputs
-- ...
+- List required inputs and ask targeted questions if needed.
 
 ## Outputs
-- ...
+- List deliverables you will produce.
 
 ## Failure mode (required)
-If the request is out of scope, respond using the same headings and explain when this skill should be used instead. Include `## When to use` in the response.
+
+If the request is out of scope:
+- Use the headings above.
+- Under **Inputs**, explain what’s missing or why it’s out of scope.
+- Under **Outputs**, propose the closest appropriate next step or skill.
 
 ## Constraints
-- Redact secrets/PII by default.
 
-- Keep SKILL.md concise (prefer < 500 lines) and use progressive disclosure via references.
-- Follow frontmatter requirements and keep `name`/`description` single-line.
-- Do not add new dependencies without explicit user approval.
-- Redact secrets or sensitive data by default in any outputs or logs.
-- Check against GOLD Industry Standards guide in `~/.codex/AGENTS.override.md`.
-
-## About Skills (Short)
-
-For deeper background on skill purpose, structure, and best-use philosophy, see `references/about-skills.md`.
-
-For Claude-style guidance and scaffolds, see:
-- References: `references/best-practices.md`, `references/skill-structure.md`, `references/official-spec.md`
-- Templates: `templates/simple-skill.md`, `templates/router-skill.md`
-- Workflows: `workflows/create-new-skill.md`, `workflows/audit-skill.md`, `workflows/verify-skill.md`
-
-## Core Principles
-
-### Concise is Key
-
-The context window is a public good. Skills share the context window with everything else Codex needs: system prompt, conversation history, other Skills' metadata, and the actual user request.
-
-**Default assumption: Codex is already very smart.** Only add context Codex doesn't already have. Challenge each piece of information: "Does Codex really need this explanation?" and "Does this paragraph justify its token cost?"
-
-Prefer concise examples over verbose explanations.
-
-### Set Appropriate Degrees of Freedom
-
-Match the level of specificity to the task's fragility and variability:
-
-**High freedom (text-based instructions)**: Use when multiple approaches are valid, decisions depend on context, or heuristics guide the approach.
-
-**Medium freedom (pseudocode or scripts with parameters)**: Use when a preferred pattern exists, some variation is acceptable, or configuration affects behavior.
-
-**Low freedom (specific scripts, few parameters)**: Use when operations are fragile and error-prone, consistency is critical, or a specific sequence must be followed.
-
-Think of Codex as exploring a path: a narrow bridge with cliffs needs specific guardrails (low freedom), while an open field allows many routes (high freedom).
-
-### Philosophy Before Procedure
-
-Before writing step-by-step instructions, establish a small mental framework that guides decisions:
-
-- Define the purpose, audience, and success criteria for the skill's domain.
-- Add 3-5 pre-action questions or 3-5 guiding principles.
-- Use a simple mental model or spectrum when helpful.
-- Frame guidance to **unlock** capabilities, not constrain outputs.
-
-This prevents rigid templates and makes the skill adaptable to context.
-
-### Anatomy of a Skill
-
-Every skill consists of a required SKILL.md file and optional bundled resources:
-
-```
-skill-name/
-├── SKILL.md (required)
-│   ├── YAML frontmatter (required)
-│   │   ├── name: (required)
-│   │   └── description: (required)
-│   └── Markdown instructions (required)
-└── Bundled Resources (optional)
-    ├── scripts/          - Executable code (Python/Bash/etc.)
-    ├── references/       - Documentation intended to be loaded into context as needed
-    └── assets/           - Files used in output (templates, icons, fonts, etc.)
-```
-
-#### SKILL.md (required)
-
-Every SKILL.md consists of:
-
-- **Frontmatter** (YAML): Contains `name` and `description` fields. Codex reads these to determine when the skill gets used, so be clear and comprehensive about what the skill does and when to use it. Keep frontmatter minimal by default; only add optional fields (e.g., `metadata`, `license`, `compatibility`, `allowed-tools`) when required.
-- **Body** (Markdown): Instructions and guidance for using the skill. Only loaded AFTER the skill triggers (if at all).
-
-**Metadata hygiene (portable):**
-- Use `metadata.version` and `metadata.last_updated` for machine-readable provenance.
-- Use `metadata.source_repo` (canonical HTTPS URL) and `metadata.source_rev` (40-char SHA). Packaging can inject these automatically when a git repo is present.
-
-#### Bundled Resources (optional)
-
-##### Scripts (`scripts/`)
-
-Executable code (Python/Bash/etc.) for tasks that require deterministic reliability or are repeatedly rewritten.
-
-- **When to include**: When the same code is being rewritten repeatedly or deterministic reliability is needed
-- **Example**: `scripts/rotate_pdf.py` for PDF rotation tasks
-- **Benefits**: Token efficient, deterministic, may be executed without loading into context
-- **Note**: Scripts may still need to be read by Codex for patching or environment-specific adjustments
-- **Quality bar**: Document dependencies and expected inputs/outputs; handle edge cases and provide clear error messages. If network access is required, say so explicitly (e.g., in `compatibility`).
-
-##### References (`references/`)
-
-Documentation and reference material intended to be loaded as needed into context to inform Codex's process and thinking.
-
-- **When to include**: For documentation that Codex should reference while working
-- **Examples**: `references/finance.md` for financial schemas, `references/mnda.md` for company NDA template, `references/policies.md` for company policies, `references/api_docs.md` for API specifications
-- **Use cases**: Database schemas, API documentation, domain knowledge, company policies, detailed workflow guides
-- **Benefits**: Keeps SKILL.md lean, loaded only when Codex determines it's needed
-- **Best practice**: If files are large (>10k words), include grep search patterns in SKILL.md
-- **Avoid duplication**: Information should live in either SKILL.md or references files, not both. Prefer references files for detailed information unless it's truly core to the skill—this keeps SKILL.md lean while making information discoverable without hogging the context window. Keep only essential procedural instructions and workflow guidance in SKILL.md; move detailed reference material, schemas, and examples to references files.
-
-##### Assets (`assets/`)
-
-Files not intended to be loaded into context, but rather used within the output Codex produces.
-
-- **When to include**: When the skill needs files that will be used in the final output
-- **Examples**: `assets/logo.png` for brand assets, `assets/slides.pptx` for PowerPoint templates, `assets/frontend-template/` for HTML/React boilerplate, `assets/font.ttf` for typography
-- **Use cases**: Templates, images, icons, boilerplate code, fonts, sample documents that get copied or modified
-- **Benefits**: Separates output resources from documentation, enables Codex to use files without loading them into context
-
-#### What to Not Include in a Skill
-
-A skill should only contain essential files that directly support its functionality. Do NOT create extraneous documentation or auxiliary files, including:
-
-- README.md
-- INSTALLATION_GUIDE.md
-- QUICK_REFERENCE.md
-- CHANGELOG.md
-- etc.
-
-The skill should only contain the information needed for an AI agent to do the job at hand. It should not contain auxiliary context about the process that went into creating it, setup and testing procedures, user-facing documentation, etc. Creating additional documentation files just adds clutter and confusion.
-
-### Progressive Disclosure Design Principle
-
-Skills use a three-level loading system to manage context efficiently:
-
-1. **Metadata (name + description)** - Always in context (~100 words)
-2. **SKILL.md body** - When skill triggers (<5000 tokens recommended)
-3. **Bundled resources** - As needed by Codex (Unlimited because scripts can be executed without reading into context window)
-
-#### Progressive Disclosure Patterns
-
-Keep SKILL.md body to the essentials and under 500 lines to minimize context bloat. Split content into separate files when approaching this limit. When splitting out content into other files, reference them from SKILL.md and describe when to read them so they are discoverable without bloating context.
-
-**Key principle:** When a skill supports multiple variations, frameworks, or options, keep only the core workflow and selection guidance in SKILL.md. Move variant-specific details (patterns, examples, configuration) into separate reference files.
-
-See `references/progressive-disclosure-patterns.md` for worked examples and guidance.
-
-## Claude Skill Compatibility (Merge Notes)
-
-Use standard Markdown headings only; avoid XML tags in the body. Keep SKILL.md under 500 lines and push detail into references. Write descriptions in third person and include trigger keywords ("Use when ..."). For Claude Code compatibility, prefer gerund form for names (e.g., `processing-pdfs`, `reviewing-code`) and avoid generic names like `helper`, `utils`, `tools`, `anthropic-*`, or `claude-*`. If Claude-only frontmatter is required, use `allowed-tools` and `model` sparingly and keep portable mode as default.
-
-## Audit Checklist (Claude + Codex)
-
-- [ ] Valid YAML frontmatter with `name` and `description` (single line).
-- [ ] Description includes trigger keywords and when-to-use context.
-- [ ] Markdown headings only (no XML tags).
-- [ ] SKILL.md under 500 lines and uses references for detail.
-- [ ] References are one level deep from SKILL.md.
-- [ ] Examples are concrete and include inputs/outputs.
-- [ ] Terminology is consistent and non-ambiguous.
-- [ ] No time-sensitive guidance; put aging patterns in references.
-- [ ] Scripts include clear errors and explicit dependencies.
-
-## Patterns (Concise)
-
-### Template Pattern
-Provide output templates to standardize responses.
-
-### Workflow Pattern
-Use checklists with explicit steps and commands for multi-step tasks.
-
-### Conditional Pattern
-Present a decision split ("Create" vs "Edit") and direct to the right flow.
-
-## Success Criteria
-
-A well-structured skill:
-- Has valid frontmatter with a descriptive name and trigger-rich description.
-- Uses standard Markdown headings and concise core guidance.
-- Delegates detailed guidance to references (one level deep).
-- Includes concrete examples with input/output pairs.
-- Is tested against real usage or evals when available.
-
-## Sources (Claude)
-- https://code.claude.com/docs/en/skills
-- https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices
-
-## Anti-Patterns to Avoid (Quick List)
-
-- **Template trap**: Rigid templates that force slot-filling and generic output.
-- **Checklist without rationale**: Rules with no underlying philosophy or decision framework.
-- **Generic guidance**: Advice that applies to everything but helps with nothing.
-- **Context blindness**: "Always X" rules that ignore constraints and goals.
-- **Missing negative guidance**: No explicit "don't do this" warnings.
-- **Duplication**: The same content in SKILL.md and references.
-
-
-## Variation Guidance (Prevent Convergence)
-
-Explicitly require variation when outputs should not look identical:
-
-- Name 2-3 dimensions that must vary (structure, tone, depth, examples, visuals).
-- Call out patterns to avoid repeating.
-- Encourage context-specific choices over favorites.
-
-## Composability
-
-Design skills to work well together:
-
-- Keep the scope tight and the description specific to reduce collisions.
-- Avoid explicit references to other skills.
-- Use "prefer X unless..." instead of "always/never" where context matters.
-
-## Claude Enhanced Mode (Optional)
-
-If the skill is Claude-first (or needs Claude-specific behavior), add Claude-only frontmatter keys in a dedicated section and keep portable mode as the default:
-
-- `allowed-tools`: explicit tool allowlist.
-- `context: fork`: isolate tool execution or sub-agents.
-- `hooks`: PreToolUse / PostToolUse / Stop handlers.
-- `user-invocable`: allow manual invocation in Claude Code UI.
-- `disable-model-invocation`: prevent model auto-runs when required.
-
-When portability is required, keep Claude-only keys out of the portable template and add them in a Claude-specific variant.
-
-## Reference Map (When to Open Which File)
-
-- **workflows.md**: Use when defining multi-step or conditional workflows.
-- **output-patterns.md**: Use when outputs need strict templates or quality patterns.
-- **philosophy-patterns.md**: Use when the skill needs a strong mental model or guiding questions.
-- **anti-patterns.md**: Use to add explicit “don’t do this” guidance.
-- **variation-patterns.md**: Use when preventing output convergence or repetitive defaults.
-- **composability.md**: Use when the skill overlaps other domains or may collide with other skills.
-- **about-skills.md**: Use when you need deeper framing or rationale.
-- **portable-skills.md**: Use when making skills portable across Claude Code and Codex.
-- **quality-tools.md**: Use when running or interpreting skill quality tooling.
-- **examples.md**: Use when you need concrete examples to calibrate output style.
-- **progressive-disclosure-patterns.md**: Use when you need worked examples for progressive disclosure.
+- Redact secrets/credentials/PII by default. Never print raw tokens or env var values.
+- Do not invent file contents, commands, or external facts. If you must rely on time-sensitive details, ask to verify or propose a verification step.
+- Keep YAML frontmatter valid:
+  - `name` and `description` must be single-line YAML scalars.
+  - Quote values if they contain `:` or could be parsed as YAML syntax.
+- Prefer progressive disclosure:
+  - Keep `SKILL.md` under ~500 lines.
+  - Push depth into `references/` and executable helpers into `scripts/`.
+- Prefer instruction-only skills by default; add scripts only when determinism/repeatability matters.
+
+## Principles
+
+- **Trigger-first design**: discovery depends on `name` + `description`. Put trigger keywords and “use when …” contexts in the description.
+- **Progressive disclosure**: keep the core workflow in `SKILL.md`; link out to `references/` for deep docs and `scripts/` for automation.
+- **Eval-driven iteration (RED → GREEN → REFACTOR)**:
+  1. Write eval cases that fail without the skill (or against the old skill).
+  2. Implement the smallest change that passes.
+  3. Add pressure tests to prevent backsliding and rationalization.
+- **Least privilege**: scripts should be minimal, explicit, and safe; avoid network assumptions unless explicitly enabled.
+
+## Reference Map
+
+Use these files when needed:
+
+- `references/about-skills.md`: background on skills, intent, and structure.
+- `references/portable-skills.md`: strict subset for cross-platform portability.
+- `references/skill-structure.md`: router vs single-file skill patterns.
+- `references/progressive-disclosure-patterns.md`: how to split SKILL.md into references/scripts.
+- `references/quality-tools.md`: how to run validators/evals and interpret output.
+- `references/iteration-and-testing.md`: eval-driven iteration patterns, pressure tests, and rationalization hardening.
+- `references/examples.md`: calibrated examples for phrasing and structure.
+- `references/anti-patterns.md`: common failure modes + remediation patterns.
 
 ## Skill Creation Process
 
-Skill creation involves these steps:
+Follow this workflow, skipping steps only with a clear reason.
 
-1. Understand the skill with concrete examples
-2. Plan reusable skill contents (scripts, references, assets)
-3. Initialize the skill (run init_skill.py)
-4. Edit the skill (implement resources and write SKILL.md)
-5. Validate the skill (quick_validate.py or skills-ref)
-6. Package the skill (run package_skill.py)
-7. Iterate based on real usage
+### 0) Confirm scope and target
 
-Follow these steps in order, skipping only if there is a clear reason why they are not applicable.
+- Identify where the skill will live:
+  - Repo scope: `.codex/skills/<skill-name>/`
+  - User scope: `~/.codex/skills/<skill-name>/`
+- Admin scope: `/etc/codex/skills/<skill-name>/` (system-wide)
+  - (Claude Code uses `~/.claude/skills/`)
 
-### Skill Naming
+Reload note:
+- Restart Codex after adding/updating skills so the index refreshes.
+- You can enable/disable skills in `~/.codex/config.toml` under `[skills]` (for example, a `disabled = [...]` list).
+- Decide target: `portable` (strict subset), `codex`, or `claude`.
 
-- Use lowercase letters, digits, and hyphens only; normalize user-provided titles to hyphen-case (e.g., "Plan Mode" -> `plan-mode`).
-- Use 1–64 characters; do not start or end with a hyphen; do not use consecutive hyphens.
-- Prefer short, verb-led phrases that describe the action.
-- Namespace by tool when it improves clarity or triggering (e.g., `gh-address-comments`, `linear-address-issue`).
-- Name the skill folder exactly after the skill name.
+### 1) Lock down triggers (with examples)
 
-### Step 1: Understanding the Skill with Concrete Examples
+- Collect 3–10 prompts:
+  - 2–5 happy-path prompts
+  - 1–3 edge-cases
+  - 1–3 “should NOT trigger” prompts
+- Use these prompts to write `references/evals.yaml` early (at least 3 cases).
 
-Skip this step only when the skill's usage patterns are already clearly understood. It remains valuable even when working with an existing skill.
+### 2) Pick the skill structure
 
-To create an effective skill, clearly understand concrete examples of how the skill will be used. This understanding can come from either direct user examples or generated examples that are validated with user feedback.
+- **Single-file**: one intent, one workflow, < ~200 lines.
+- **Router style**: multiple intents/workflows, or heavy domain knowledge.
 
-For example, when building an image-editor skill, relevant questions include:
-
-- "What functionality should the image-editor skill support? Editing, rotating, anything else?"
-- "Can you give some examples of how this skill would be used?"
-- "I can imagine users asking for things like 'Remove the red-eye from this image' or 'Rotate this image'. Are there other ways you imagine this skill being used?"
-- "What would a user say that should trigger this skill?"
-
-To avoid overwhelming users, avoid asking too many questions in a single message. Start with the most important questions and follow up as needed for better effectiveness.
-
-Conclude this step when there is a clear sense of the functionality the skill should support.
-
-### Step 2: Planning the Reusable Skill Contents
-
-To turn concrete examples into an effective skill, analyze each example by:
-
-1. Considering how to execute on the example from scratch
-2. Identifying what scripts, references, and assets would be helpful when executing these workflows repeatedly
-
-Example: When building a `pdf-editor` skill to handle queries like "Help me rotate this PDF," the analysis shows:
-
-1. Rotating a PDF requires re-writing the same code each time
-2. A `scripts/rotate_pdf.py` script would be helpful to store in the skill
-
-Example: When designing a `frontend-webapp-builder` skill for queries like "Build me a todo app" or "Build me a dashboard to track my steps," the analysis shows:
-
-1. Writing a frontend webapp requires the same boilerplate HTML/React each time
-2. An `assets/hello-world/` template containing the boilerplate HTML/React project files would be helpful to store in the skill
-
-Example: When building a `big-query` skill to handle queries like "How many users have logged in today?" the analysis shows:
-
-1. Querying BigQuery requires re-discovering the table schemas and relationships each time
-2. A `references/schema.md` file documenting the table schemas would be helpful to store in the skill
-
-To establish the skill's contents, analyze each concrete example to create a list of the reusable resources to include: scripts, references, and assets.
-
-Always include this instruction into every Skill.md "- Check against GOLD Industry Standards guide in ~/.codex/AGENTS.override.md"
-
-### Step 3: Initializing the Skill
-
-At this point, it is time to actually create the skill.
-
-Skip this step only if the skill being developed already exists, and iteration or packaging is needed. In this case, continue to the next step.
-
-When creating a new skill from scratch, always run the `init_skill.py` script. The script conveniently generates a new template skill directory that automatically includes everything a skill requires, making the skill creation process much more efficient and reliable.
-
-Usage:
-
-```bash
-scripts/init_skill.py <skill-name> --category <category> [--resources scripts,references,assets] [--examples]
+Router layout:
+```
+skill-name/
+  SKILL.md
+  workflows/
+  references/
+  scripts/
+  assets/
 ```
 
-Examples:
+### 3) Scaffold the folder
+
+Use the initializer:
 
 ```bash
-scripts/init_skill.py my-skill --category utilities
-scripts/init_skill.py my-skill --category backend --resources scripts,references
-scripts/init_skill.py my-skill --category product --resources scripts --examples
+python scripts/init_skill.py <skill-name> --target codex --run-type instruction --path <output-dir> --resources scripts,references,assets
 ```
+Tip: for script-backed skills, use `--run-type python` (creates `scripts/run.py`) or `--run-type container` (adds `Dockerfile` + `scripts/run.py`).
 
-Note: Do not create skills under the flat `skills/` symlink view. Always target the canonical category folders.
+Then delete any unused resource folders and example files.
 
-The script:
+### 4) Author SKILL.md (core)
 
-- Creates the skill directory at the specified path
-- Generates a SKILL.md template with proper frontmatter and TODO placeholders
-- Optionally creates resource directories based on `--resources`
-- Optionally adds example files when `--examples` is set
+**Frontmatter**
+- `name`: kebab-case, matches folder name.
+- `description`: single-line; includes WHAT + WHEN (trigger contexts + keywords).
+- Keep frontmatter minimal by default.
 
-After initialization, customize the SKILL.md and add resources as needed. If you used `--examples`, replace or delete placeholder files.
+**Body**
+- Include a short Principles section before detailed steps.
+- Write the minimal reliable Procedure.
+- Put deep docs in `references/` and reference them explicitly (“Read X when you need Y”).
 
-### Step 4: Edit the Skill
+### 5) Add reusable resources (as needed)
 
-When editing the (newly-generated or existing) skill, remember that the skill is being created for another instance of Codex to use. Include information that would be beneficial and non-obvious to Codex. Consider what procedural knowledge, domain-specific details, or reusable assets would help another Codex instance execute these tasks more effectively.
+- `scripts/`: executable helpers for deterministic operations and token efficiency.
+- `references/`: schemas, API docs, policies, style guides, large examples.
+- `assets/`: templates, boilerplate folders, brand files, fixtures.
 
-#### Learn Proven Design Patterns
+Prefer relative paths (`scripts/foo.py`, `references/bar.md`) so the skill works in different locations.
 
-Consult these helpful guides based on your skill's needs:
+### 6) Validate and iterate (fail-fast)
 
-- **Multi-step processes**: See references/workflows.md for sequential workflows and conditional logic
-- **Specific output formats or quality standards**: See references/output-patterns.md for template and example patterns
-- **Philosophy-first design**: See references/philosophy-patterns.md for mental framework patterns
-- **Anti-patterns**: See references/anti-patterns.md for common mistakes and fixes
-- **Variation**: See references/variation-patterns.md for techniques to prevent output convergence
-- **Composability**: See references/composability.md for skills that play well together
-- **Background refresher**: See references/about-skills.md for purpose and structure overview
-
-These files contain established best practices for effective skill design.
-
-#### Start with Reusable Skill Contents
-
-To begin implementation, start with the reusable resources identified above: `scripts/`, `references/`, and `assets/` files. Note that this step may require user input. For example, when implementing a `brand-guidelines` skill, the user may need to provide brand assets or templates to store in `assets/`, or documentation to store in `references/`.
-
-Added scripts must be tested by actually running them to ensure there are no bugs and that the output matches what is expected. If there are many similar scripts, only a representative sample needs to be tested to ensure confidence that they all work while balancing time to completion.
-
-If you used `--examples`, delete any placeholder files that are not needed for the skill. Only create resource directories that are actually required.
-
-#### Update SKILL.md
-
-**Writing Guidelines:** Always use imperative/infinitive form.
-
-##### Frontmatter
-
-Write the YAML frontmatter with `name` and `description`:
-
-- `name`: The skill name
-- `description`: This is the primary triggering mechanism for your skill, and helps Codex understand when to use the skill.
-  - Include both what the Skill does and specific triggers/contexts for when to use it.
-  - Include all "when to use" information here - Not in the body. The body is only loaded after triggering, so "When to Use This Skill" sections in the body are not helpful to Codex.
-  - Example description for a `docx` skill: "Comprehensive document creation, editing, and analysis with support for tracked changes, comments, formatting preservation, and text extraction. Use when Codex needs to work with professional documents (.docx files) for: (1) Creating new documents, (2) Modifying or editing content, (3) Working with tracked changes, (4) Adding comments, or any other document tasks"
-
-Only add optional frontmatter fields (`metadata`, `license`, `compatibility`, `allowed-tools`) when required. Keep frontmatter minimal by default.
-
-##### Body
-
-Write instructions for using the skill and its bundled resources.
-
-### Step 5: Validate the Skill (Recommended)
-
-## Validation
-
-Fail fast: stop at the first failed validation gate, fix the issue, and re-run the failed check before proceeding.
-
-Run the lightweight validator first:
+Run the lightweight checks first:
 
 ```bash
 python scripts/quick_validate.py <path/to/skill-folder>
+python scripts/skill_gate.py <path/to/skill-folder>
 ```
 
-If available, run the deeper validator:
+If available, run deeper validation:
 
 ```bash
 skills-ref validate <path/to/skill-folder>
 ```
 
-Use validation results to fix naming or frontmatter issues before packaging.
-Use the local venv for this skill to run validators without dependency prompts.
-Default local venv path for this skill: `~/dev/agent-skills/utilities/skill-creator/.venv`.
-If `skills-ref` is installed in a local venv, activate it first (e.g., `~/dev/agent-skills/.venv-skills-ref/bin/activate`).
-
-**If `skills-ref` is missing, install it into the skill-creator venv:**
-
-1) Read the pinned commit from `~/dev/agent-skills/.venv-skills-ref/lib/pythonX.Y/site-packages/skills_ref-*/direct_url.json` (if that venv exists).
-2) Install with pip into `~/dev/agent-skills/utilities/skill-creator/.venv` using the same commit:
+Then run evals:
 
 ```bash
-~/dev/agent-skills/utilities/skill-creator/.venv/bin/python -m pip install \
-  "git+https://github.com/agentskills/agentskills@<commit>#subdirectory=skills-ref"
+python scripts/run_skill_evals.py <path/to/skill-folder>
 ```
 
-If no pinned commit is available, ask the user which revision to use rather than guessing.
+Fix the first failure, re-run, then proceed.
 
-### Step 6: Package a Skill
-
-Once development of the skill is complete, package it into a distributable .skill file.
+### 7) Package (optional)
 
 ```bash
-scripts/package_skill.py <path/to/skill-folder>
+python scripts/package_skill.py <path/to/skill-folder> dist/
 ```
 
-Optional output directory specification:
+Packaging should exclude dev artifacts via `.skillignore`.
 
-```bash
-scripts/package_skill.py <path/to/skill-folder> dist
-```
+## Validation
 
-The packaging script will:
+- Fail fast: stop at the first failed validation gate, fix it, and re-run before proceeding.
+For any non-trivial skill, ensure:
 
-1. **Validate** the skill automatically, checking:
-
-   - YAML frontmatter format and required fields
-   - Skill naming conventions and directory structure
-   - Description completeness and quality
-   - File organization and resource references
-
-2. **Package** the skill if validation passes, creating a .skill file named after the skill (e.g., `my-skill.skill`) that includes all files and maintains the proper directory structure for distribution. The .skill file is a zip file with a .skill extension.
-
-Packaging excludes common dev artifacts by default (e.g., .DS_Store, **pycache**, .venv, .pytest_cache, .mypy_cache, .ruff_cache, .idea, .vscode, .git) and anything matched by `.skillignore` patterns at the skill root. Use one glob per line and `#` for comments:
-
-```text
-# Ignore scratch artifacts
-assets/tmp/**
-*.log
-```
-
-If validation fails, the script will report the errors and exit without creating a package. Fix any validation errors and run the packaging command again.
-
-### Step 7: Iterate
-
-After testing the skill, users may request improvements. Often this happens right after using the skill, with fresh context of how the skill performed.
-
-**Iteration workflow:**
-
-1. Use the skill on real tasks
-2. Notice struggles or inefficiencies
-3. Identify how SKILL.md or bundled resources should be updated
-4. Implement changes and test again
+- Frontmatter passes `quick_validate.py`.
+- `SKILL.md` stays under the line budget and references external files instead of bloating.
+- At least 3 eval cases exist (happy / edge / failure).
+- Scripts run successfully in the intended environment.
+- Trigger prompts reliably select the skill over nearby alternatives.
 
 ## Trigger Testing (Quick Check)
 
-Before shipping a new skill, write 3–5 example prompts and confirm they would select this skill over similar skills. If not, tighten the `description` keywords or scope.
+Before shipping, confirm the description selects the skill:
 
-Example prompts for this skill:
-- "Create a new skill for handling database migrations."
-- "Improve this existing skill so it triggers more reliably."
-- "Design a skill that helps with CLI specification writing."
-- "Audit this SKILL.md for quality and suggest upgrades."
-- "Package and validate a skill for distribution."
+- Write 3–5 prompts and sanity check that they match the description keywords.
+- Add 1–2 negative prompts (should not select this skill).
 
-## Quality Analysis and Examples
+## Anti-Patterns
 
-See `references/quality-tools.md` for quality tooling guidance and `references/examples.md` for calibrated examples.
+- **Discovery mismatch**: description lacks trigger keywords or “use when …” contexts.
+- **Monolith SKILL.md**: huge docs embedded directly instead of `references/`.
+- **Rigid template trap**: forces slot-filling and produces generic output.
+- **Checklist without rationale**: steps with no principles, making the skill brittle.
+- **Untested scripts**: scripts included but never executed to confirm behavior.
 
-## Compliance Evidence (For Significant Skills)
+- **Workflow-in-description trap**: description becomes a step-by-step recipe, so the model shortcuts and never reads the body. Keep discovery keywords in the description; keep workflows in the body/references.
+- **Absolute-path coupling**: hardcoded machine paths (`/home/...`, `~/.claude/...`) instead of portable, repo-relative paths.
+- **Over-questioning**: asking broad or excessive clarifying questions instead of proceeding with reasonable defaults + a small number of targeted questions.
+- **Unsafe automation**: scripts that assume network access, exfiltrate secrets, or run destructive commands without explicit approval.
+- **No eval coverage**: no happy/edge/failure prompts, so regressions slip in.
+- **Missing failure path**: no explicit failure mode for out-of-scope requests.
+- **Hidden expectations**: response format or outputs implied but not written down.
 
-Provide at least one verifiable signal that the skill meets current best practices:
+## Empowerment
 
-- Standards mapping (brief note mapping to applicable specs/best practices)
-- Automated checks (e.g., `python scripts/quick_validate.py`, `skills-ref validate`, lint/tests for scripts)
-- Review artifact (self-review note or peer review)
-- Deviation rationale (if any experimental approach is used)
-- Check against GOLD Industry Standards guide in ~/.codex/AGENTS.override.md
+- Make a default recommendation and say why; let the user override.
+- Call out tradeoffs briefly so the user can decide fast.
+- Offer the next single action in each response.
+- Make assumptions explicit, then proceed without stalling.
 
-Minimum recommended evidence for significant changes:
+## Variation
 
-- Run `python scripts/quick_validate.py` and capture the output
-- Run `python scripts/skill_gate.py` and capture the output
-- Run `python scripts/run_skill_evals.py` and capture the report summary
-- Add a short self-review note covering frontmatter, packaging, and any scripts touched
-- skills-ref validate from `~/.codex/.venv-skills-ref/bin/skills-ref`.
+If a created skill produces repeated artifacts (reports, templates, PR descriptions), prevent “samey” output:
+- Vary structure, depth, and examples based on context.
+- Name 2–3 dimensions that must vary (tone, outline, level of detail).
+- Link to `references/variation-patterns.md` when needed.
+
+## Examples
+
+### Create a new skill (router style)
+
+**User prompt:** "Create a Codex skill for reviewing API security changes in PRs."
+
+**Expected outcome:** a `review-api-security/` skill folder with a trigger-rich description, a short core workflow in `SKILL.md`, deeper guidance in `references/`, and `references/evals.yaml` with pressure-test prompts.
+
+## Claude Skill Compatibility
+
+If targeting both systems:
+- Prefer the portable subset (see `references/portable-skills.md`).
+- Avoid platform-specific tools/flags in the core workflow; isolate them behind scripts or per-platform references.
 
 ## Remember
 
 The agent is capable of extraordinary work in this domain. These guidelines unlock that potential—they don't constrain it.
 Use judgment, adapt to context, and push boundaries when appropriate.
-
-## When to use
-- Use this skill when the task matches its description and triggers.
-- If the request is outside scope, route to the referenced skill.
-
-
-## Anti-patterns
-- Avoid vague guidance without concrete steps.
-- Do not invent results or commands.
-## Procedure
-1) Clarify scope and inputs.
-2) Execute the core workflow.
-3) Summarize outputs and next steps.
-
-## Antipatterns
-- Do not add features outside the agreed scope.

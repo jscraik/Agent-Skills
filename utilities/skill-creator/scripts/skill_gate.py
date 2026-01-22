@@ -232,6 +232,22 @@ def check_codex_frontmatter(doc: SkillDoc, *, min_desc_len: int) -> List[Finding
             evidence=f"description: {desc.strip()}",
         ))
 
+    # Heuristic: avoid putting step-by-step workflow text in `description`.
+    # The description is primarily for discovery/selection; workflows belong in the body/references.
+    workflowy_terms = [
+        "step", "steps", "first", "second", "third", "then", "next", "after", "before",
+        "finally", "workflow", "procedure", "checklist",
+    ]
+    hits = [t for t in workflowy_terms if t in desc]
+    if len(hits) >= 2 or re.search(r"\b(1\)|2\)|3\)|first|second|third|then|next|finally)\b", desc):
+        out.append(Finding(
+            Level.WARN,
+            "FM_DESC_WORKFLOWY",
+            "Description looks workflow-like. Prefer outcome + trigger keywords in `description`; keep procedures in the body/references.",
+            evidence=f"description: {desc.strip()}",
+        ))
+
+
     return out
 
 
@@ -386,7 +402,7 @@ def check_path_safety(doc: SkillDoc) -> List[Finding]:
     if re.search(r"(?m)^\s*/", body):
         out.append(Finding(Level.WARN, "PATH_ABSOLUTE", "Absolute paths detected; prefer repo-relative paths."))
 
-    if re.search(r"(?m)\./", body):
+    if re.search(r"(?m)\.\./", body):
         out.append(Finding(Level.WARN, "PATH_TRAVERSAL", "Parent directory traversal (`../`) mentioned; avoid in references."))
 
     return out

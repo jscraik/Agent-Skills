@@ -18,13 +18,14 @@ import re
 import sys
 from pathlib import Path
 
-MAX_SKILL_NAME_LENGTH = 64
+TARGET_NAME_LIMITS = {"portable": 64, "codex": 100, "claude": 64}
+DEFAULT_TARGET = "portable"
 ALLOWED_RESOURCES = {"scripts", "references", "assets"}
 CATEGORIES = {"github", "frontend", "apple", "backend", "product", "utilities"}
 
 SKILL_TEMPLATE = """---
 name: {skill_name}
-description: [TODO: Complete and informative explanation of what the skill does and when to use it. Include WHEN to use this skill - specific scenarios, file types, or tasks that trigger it.]
+description: "TODO: One-line description of WHAT this skill does and WHEN to use it (trigger contexts + keywords)."
 ---
 
 # {skill_title}
@@ -32,84 +33,44 @@ description: [TODO: Complete and informative explanation of what the skill does 
 ## Compliance
 - Check against GOLD Industry Standards guide in ~/.codex/AGENTS.override.md
 
-## Overview
+## When to Use
+- TODO: List triggers/symptoms that should activate this skill.
+- Reminder: In Codex, only `name` + `description` are loaded for discovery; keep trigger keywords in the description too.
 
-[TODO: 1-2 sentences explaining what this skill enables]
+## Inputs
+- TODO: Required information, files, repos, constraints, and assumptions.
+- Ask clarifying questions only for genuine gaps.
 
-## Structuring This Skill
+## Outputs
+- TODO: Concrete deliverables (files changed, scripts run, reports, commands, PR text, etc.).
 
-[TODO: Choose the structure that best fits this skill's purpose. Common patterns:
+## Principles
+- TODO: 2-6 bullets capturing the core mental model / philosophy (why this approach works).
+- Keep this lightweight; move deep context to references/.
 
-**1. Workflow-Based** (best for sequential processes)
-- Works well when there are clear step-by-step procedures
-- Example: DOCX skill with "Workflow Decision Tree" -> "Reading" -> "Creating" -> "Editing"
-- Structure: ## Overview -> ## Workflow Decision Tree -> ## Step 1 -> ## Step 2...
+## Procedure
+1) TODO: Provide the smallest reliable workflow.
+2) Prefer progressive disclosure:
+   - Put heavy reference material in `references/` and link to it.
+   - Put reusable automation in `scripts/` and reference it from here.
+3) Include at least one realistic example (short, high-signal).
 
-**2. Task-Based** (best for tool collections)
-- Works well when the skill offers different operations/capabilities
-- Example: PDF skill with "Quick Start" -> "Merge PDFs" -> "Split PDFs" -> "Extract Text"
-- Structure: ## Overview -> ## Quick Start -> ## Task Category 1 -> ## Task Category 2...
+## Validation
+- TODO: Define how to verify correctness (tests, commands, file checks).
+- Add `references/evals.yaml` with at least 3 cases (happy-path / edge-case / failure-mode).
 
-**3. Reference/Guidelines** (best for standards or specifications)
-- Works well for brand guidelines, coding standards, or requirements
-- Example: Brand styling with "Brand Guidelines" -> "Colors" -> "Typography" -> "Features"
-- Structure: ## Overview -> ## Guidelines -> ## Specifications -> ## Usage...
+## Anti-patterns
+- TODO: Common pitfalls + explicit "do not do X" guidance.
 
-**4. Capabilities-Based** (best for integrated systems)
-- Works well when the skill provides multiple interrelated features
-- Example: Product Management with "Core Capabilities" -> numbered capability list
-- Structure: ## Overview -> ## Core Capabilities -> ### 1. Feature -> ### 2. Feature...
-
-Patterns can be mixed and matched as needed. Most skills combine patterns (e.g., start with task-based, add workflow for complex operations).
-
-Delete this entire "Structuring This Skill" section when done - it's just guidance.]
-
-## [TODO: Replace with the first main section based on chosen structure]
-
-[TODO: Add content here. See examples in existing skills:
-- Code samples for technical skills
-- Decision trees for complex workflows
-- Concrete examples with realistic user requests
-- References to scripts/templates/references as needed]
+## Constraints
+- Redact secrets/PII by default.
+- Keep `name` and `description` single-line YAML scalars (quote if needed).
+- Do not add new dependencies without explicit user approval.
 
 ## Resources (optional)
-
-Create only the resource directories this skill actually needs. Delete this section if no resources are required.
-
-### scripts/
-Executable code (Python/Bash/etc.) that can be run directly to perform specific operations.
-
-**Examples from other skills:**
-- PDF skill: `fill_fillable_fields.py`, `extract_form_field_info.py` - utilities for PDF manipulation
-- DOCX skill: `document.py`, `utilities.py` - Python modules for document processing
-
-**Appropriate for:** Python scripts, shell scripts, or any executable code that performs automation, data processing, or specific operations.
-
-**Note:** Scripts may be executed without loading into context, but can still be read by Codex for patching or environment adjustments.
-
-### references/
-Documentation and reference material intended to be loaded into context to inform Codex's process and thinking.
-
-**Examples from other skills:**
-- Product management: `communication.md`, `context_building.md` - detailed workflow guides
-- BigQuery: API reference documentation and query examples
-- Finance: Schema documentation, company policies
-
-**Appropriate for:** In-depth documentation, API references, database schemas, comprehensive guides, or any detailed information that Codex should reference while working.
-
-### assets/
-Files not intended to be loaded into context, but rather used within the output Codex produces.
-
-**Examples from other skills:**
-- Brand styling: PowerPoint template files (.pptx), logo files
-- Frontend builder: HTML/React boilerplate project directories
-- Typography: Font files (.ttf, .woff2)
-
-**Appropriate for:** Templates, boilerplate code, document templates, images, icons, fonts, or any files meant to be copied or used in the final output.
-
----
-
-**Not every skill requires all three types of resources.**
+- `references/`: deep docs loaded only when needed
+- `scripts/`: executable helpers (more reliable + token-efficient than inline code)
+- `assets/`: templates/static files copied into outputs
 """
 
 EXAMPLE_SCRIPT = '''#!/usr/bin/env python3
@@ -195,6 +156,48 @@ Example asset files from other skills:
 Note: This is a text placeholder. Actual assets can be any file type.
 """
 
+PYTHON_RUNNER_TEMPLATE = '''#!/usr/bin/env python3
+"""
+Skill script entrypoint for {skill_name}.
+
+Keep scripts deterministic and safe:
+- Do not print secrets or env vars
+- Prefer --dry-run modes for destructive operations
+- Avoid network assumptions unless explicitly enabled
+"""
+
+import argparse
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Skill helper entrypoint for {skill_name}")
+    parser.add_argument("--dry-run", action="store_true", help="Print intended actions without making changes")
+    args = parser.parse_args()
+
+    # TODO: implement the real behavior for this skill.
+    if args.dry_run:
+        print("[DRY RUN] TODO: describe intended actions")
+        return
+
+    print("TODO: implement {skill_name} script")
+
+
+if __name__ == "__main__":
+    main()
+'''
+
+DOCKERFILE_TEMPLATE = """FROM python:3.11-slim
+
+WORKDIR /app
+COPY . /app
+
+# If you add dependencies, include a requirements.txt and uncomment:
+# RUN pip install --no-cache-dir -r requirements.txt
+
+CMD ["python", "scripts/run.py", "--help"]
+"""
+
+
 
 def normalize_skill_name(skill_name):
     """Normalize a skill name to lowercase hyphen-case."""
@@ -257,7 +260,7 @@ def create_resource_dirs(skill_dir, skill_name, skill_title, resources, include_
                 print("[OK] Created assets/")
 
 
-def init_skill(skill_name, path, resources, include_examples):
+def init_skill(skill_name, path, resources, include_examples, run_type="instruction"):
     """
     Initialize a new skill directory with template SKILL.md.
 
@@ -266,6 +269,7 @@ def init_skill(skill_name, path, resources, include_examples):
         path: Path where the skill directory should be created
         resources: Resource directories to create
         include_examples: Whether to create example files in resource directories
+        run_type: 'instruction', 'python', or 'container' (scaffolds script/container stubs)
 
     Returns:
         Path to created skill directory, or None if error
@@ -309,6 +313,32 @@ def init_skill(skill_name, path, resources, include_examples):
             print(f"[ERROR] Error creating resource directories: {e}")
             return None
 
+    # Scaffold run-type helpers (optional)
+    if run_type != "instruction":
+        try:
+            scripts_dir = skill_dir / "scripts"
+            scripts_dir.mkdir(exist_ok=True)
+
+            run_py = scripts_dir / "run.py"
+            if not run_py.exists():
+                run_py.write_text(PYTHON_RUNNER_TEMPLATE.format(skill_name=skill_name))
+                try:
+                    # Best-effort: make executable on POSIX systems.
+                    run_py.chmod(run_py.stat().st_mode | 0o111)
+                except Exception:
+                    pass
+                print("[OK] Created scripts/run.py")
+
+            if run_type == "container":
+                dockerfile = skill_dir / "Dockerfile"
+                if not dockerfile.exists():
+                    dockerfile.write_text(DOCKERFILE_TEMPLATE)
+                    print("[OK] Created Dockerfile")
+        except Exception as e:
+            print(f"[ERROR] Error scaffolding run-type '{run_type}': {e}")
+            return None
+
+
     # Print next steps
     print(f"\n[OK] Skill '{skill_name}' initialized successfully at {skill_dir}")
     print("\nNext steps:")
@@ -330,6 +360,12 @@ def main():
         description="Create a new skill directory with a SKILL.md template.",
     )
     parser.add_argument("skill_name", help="Skill name (normalized to hyphen-case)")
+    parser.add_argument(
+        "--target",
+        choices=sorted(TARGET_NAME_LIMITS.keys()),
+        default=DEFAULT_TARGET,
+        help="Target environment (controls name/description limits): portable (Agent Skills spec subset), codex (OpenAI Codex), claude (Claude Code).",
+    )
     parser.add_argument("--path", help="Output directory for the skill")
     parser.add_argument(
         "--category",
@@ -340,6 +376,12 @@ def main():
         "--resources",
         default="",
         help="Comma-separated list: scripts,references,assets",
+    )
+    parser.add_argument(
+        "--run-type",
+        choices=["instruction", "python", "container"],
+        default="instruction",
+        help="Scaffold type: instruction-only (default), python script-backed (scripts/run.py), or container-backed (Dockerfile + scripts/run.py).",
     )
     parser.add_argument(
         "--examples",
@@ -353,16 +395,20 @@ def main():
     if not skill_name:
         print("[ERROR] Skill name must include at least one letter or digit.")
         sys.exit(1)
-    if len(skill_name) > MAX_SKILL_NAME_LENGTH:
+    max_name_len = TARGET_NAME_LIMITS[args.target]
+    if len(skill_name) > max_name_len:
         print(
             f"[ERROR] Skill name '{skill_name}' is too long ({len(skill_name)} characters). "
-            f"Maximum is {MAX_SKILL_NAME_LENGTH} characters."
+            f"Maximum for target '{args.target}' is {max_name_len} characters."
         )
         sys.exit(1)
     if skill_name != raw_skill_name:
         print(f"Note: Normalized skill name from '{raw_skill_name}' to '{skill_name}'.")
 
     resources = parse_resources(args.resources)
+    if args.run_type != "instruction":
+        if "scripts" not in resources:
+            resources.append("scripts")
     if args.examples and not resources:
         print("[ERROR] --examples requires --resources to be set.")
         sys.exit(1)
@@ -398,7 +444,7 @@ def main():
         print("   Resources: none (create as needed)")
     print()
 
-    result = init_skill(skill_name, path, resources, args.examples)
+    result = init_skill(skill_name, path, resources, args.examples, run_type=args.run_type)
 
     if result:
         sys.exit(0)

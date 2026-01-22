@@ -7,6 +7,7 @@ How skills work together and design principles for composable skills.
 - MUST keep skills self-contained and non-conflicting.
 - MUST encode WHAT + WHEN in descriptions to enable correct selection.
 - SHOULD prefer “context-conditional” guidance over absolutes.
+- SHOULD reference other skills by name (avoid file-path references or forced-load syntax) to preserve composability and context budget.
 
 ## Conflict Resolution Policy
 
