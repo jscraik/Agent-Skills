@@ -1,0 +1,21 @@
+schema_version: 1
+name: better-icons
+purpose: "Provide CLI/MCP guidance to search and fetch SVG icons via Better Icons."
+triggers:
+  - "icon search"
+  - "icon SVG"
+  - "Iconify"
+  - "better-icons"
+inputs:
+  - "Icon query or ID"
+  - "Optional library prefix"
+  - "Optional size/color"
+non_goals:
+  - "Design system governance"
+  - "Batch asset pipelines or export tooling"
+risks:
+  - "Using inconsistent icon libraries across a UI surface"
+outputs:
+  - id: guidance
+    type: markdown
+    description: "CLI/MCP guidance and icon selection steps"

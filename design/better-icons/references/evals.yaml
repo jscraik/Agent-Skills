@@ -1,0 +1,16 @@
+cases:
+  - name: happy-path
+    prompt: "Find a set of arrow icons using better-icons and fetch SVGs."
+    acceptance:
+      - type: contains
+        value: "## Outputs"
+  - name: edge-case
+    prompt: "I need a home icon but only from the lucide library."
+    acceptance:
+      - type: contains
+        value: "lucide"
+  - name: failure-mode
+    prompt: "Write a backend API for icon search."
+    acceptance:
+      - type: contains
+        value: "## When to use"

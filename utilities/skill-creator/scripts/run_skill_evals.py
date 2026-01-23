@@ -241,8 +241,41 @@ def run_codex_exec(
     profile: Optional[str],
     codex_home: Optional[Path],
     jsonl_path: Optional[Path],
+    codex_bin: Optional[Path],
     extra_codex_args: Optional[List[str]] = None,
 ) -> Tuple[int, str, str]:
+    if codex_bin:
+        node_bin = codex_bin.parent / "node"
+        if node_bin.exists():
+            cmd = [
+                str(node_bin),
+                str(codex_bin),
+                "exec",
+            ]
+        else:
+            cmd = [
+                str(codex_bin),
+                "exec",
+            ]
+    else:
+        cmd = [
+            "codex",
+            "exec",
+        ]
+    cmd.extend(
+        [
+            "--sandbox",
+            sandbox,
+        ]
+    )
+    if ask_for_approval:
+        cmd.extend(["--ask-for-approval", ask_for_approval])
+    cmd.extend(
+        [
+            "--output-last-message",
+            str(output_last_message_path),
+        ]
+    )
     if extra_codex_args:
         cmd.extend(extra_codex_args)
 
@@ -261,6 +294,8 @@ def run_codex_exec(
     env = os.environ.copy()
     if codex_home:
         env["CODEX_HOME"] = str(codex_home)
+    if codex_bin:
+        env["PATH"] = f"{codex_bin.parent}{os.pathsep}{env.get('PATH', '')}"
 
     # Add a timeout to prevent hangs; default 60s, override with CODEX_EVAL_TIMEOUT_SEC
     timeout = float(os.environ.get("CODEX_EVAL_TIMEOUT_SEC", "60"))
@@ -272,6 +307,7 @@ def run_codex_exec(
             text=True,
             capture_output=True,
             env=env,
+            cwd=workspace_root,
             timeout=timeout,
         )
     except FileNotFoundError:
@@ -292,13 +328,14 @@ def build_arg_parser() -> argparse.ArgumentParser:
     p.add_argument("--sandbox", default="read-only", choices=["read-only", "workspace-write", "danger-full-access"])
     p.add_argument(
         "--ask-for-approval",
-        default="never",
+        default=None,
         choices=["untrusted", "on-failure", "on-request", "never"],
-        help="Codex approval mode (use \"never\" for CI).",
+        help="Codex approval mode (optional; older codex versions may not support this flag).",
     )
     p.add_argument("--model", default=None, help="Override model for codex exec.")
     p.add_argument("--profile", default=None, help="Codex config profile name.")
     p.add_argument("--codex-home", default=None, help="Set CODEX_HOME (useful for repo-scoped .codex).")
+    p.add_argument("--codex-bin", default=None, help="Override codex CLI path (e.g., ~/.local/share/mise/.../codex).")
     p.add_argument("--capture-jsonl", action="store_true", help="Also capture Codex JSONL event stream (--json).")
     p.add_argument("--reports-dir", default="reports/skills", help="Base directory for eval reports.")
     p.add_argument("--format", choices=["text", "json"], default="text")
@@ -342,6 +379,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     workspace_root = Path(args.workspace).expanduser().resolve() if args.workspace else _guess_repo_root(skill_dir)
     codex_home = Path(args.codex_home).expanduser().resolve() if args.codex_home else None
+    codex_bin = Path(args.codex_bin).expanduser() if args.codex_bin else None
+    if codex_bin and not codex_bin.exists():
+        print(f"ERROR: --codex-bin not found: {codex_bin}", file=sys.stderr)
+        return 1
 
     run_id = dt.datetime.now().strftime("%Y%m%d-%H%M%S")
     reports_base = Path(args.reports_dir).expanduser().resolve() / skill_name / run_id
@@ -389,6 +430,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             profile=args.profile,
             codex_home=codex_home,
             jsonl_path=jsonl_path,
+            codex_bin=codex_bin,
             extra_codex_args=args.codex_arg or None,
         )
 
