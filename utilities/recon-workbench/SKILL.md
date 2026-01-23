@@ -15,11 +15,12 @@ Answer with sections titled exactly: **Outputs** and **Procedure** (include auth
 - Summarizing evidence-backed findings and reports with artifact citations
 
 ## Compliance
-- Follow `/Users/jamiecraik/dev/recon-workbench/AGENTS.md`
-- Use `/Users/jamiecraik/dev/recon-workbench/docs/GOLD_STANDARD.md` for compliance gates
-- Apply `/Users/jamiecraik/dev/recon-workbench/docs/AUTHORIZATION_CHECKLIST.md` before any run
-- Apply `/Users/jamiecraik/dev/recon-workbench/docs/DATA_HANDLING.md` for redaction/retention
-- Evidence-only claims: every finding must cite an artifact path
+- Follow `docs/agents/scope-safety.md`, `docs/agents/cli.md`, `docs/agents/dev-workflow.md`, and `docs/agents/ai-governance.md`
+- Follow `AGENTS.md` and linked agent docs under `docs/agents/`
+- Use `docs/reference/GOLD_STANDARD.md` for compliance gates
+- Apply `docs/reference/AUTHORIZATION_CHECKLIST.md` before any run
+- Apply `docs/reference/DATA_HANDLING.md` for redaction/retention
+- Evidence-only claims: every finding must cite an artifact path under `data/runs/...`
 
 ## Purpose
 
@@ -46,7 +47,7 @@ Before building or inspecting, clarify:
 ## Core Constraints (Non-Negotiable)
 
 - **No circumvention**: No DRM bypass, no cracking, no private data access
-- **Evidence-only**: Every finding must cite an artifact path under `runs/...`
+- **Evidence-only**: Every finding must cite an artifact path under `data/runs/...`
 - **Observation-first**: Prefer static analysis; use dynamic only when authorized
 - **Authorized tools only**: For deeper visibility, request debug builds and use LLDB/Instruments/logs
 - **Web/React caution**: Component inspection only on authorized apps with documented permission
@@ -54,10 +55,11 @@ Before building or inspecting, clarify:
 
 ## CLI Commands (recon/rwb)
 
-Prefer the CLI-first wrapper in the repo root: `recon` (ensure repo root is on PATH).
-The legacy module entrypoint `uv run python -m rwb` remains valid for compatibility.
+Primary entrypoint from repo root: `uv run python -m rwb <command>`.
+Secondary wrapper: `./recon <command>` (same subcommands).
+Command names below use `recon` for brevity; substitute the primary entrypoint when running.
 
-Core commands (see `/Users/jamiecraik/dev/recon-workbench/docs/CLI_REFERENCE.md` for flags):
+Core commands (see `docs/reference/CLI_REFERENCE.md` for flags):
 
 | Command | Purpose |
 |---------|---------|
@@ -86,7 +88,7 @@ Core commands (see `/Users/jamiecraik/dev/recon-workbench/docs/CLI_REFERENCE.md`
 
 ## Probe Sets
 
-Predefined probe sets live in `/Users/jamiecraik/dev/recon-workbench/probes/catalog.json`.
+Predefined probe sets live in `probes/catalog.json`.
 Common sets (not exhaustive):
 
 - `macos-baseline`, `macos-objc-static`, `macos-debug`, `macos-accessibility`
@@ -128,7 +130,7 @@ require_authorization: true
 
 ## Outputs
 
-**Structure**: `runs/<target>/<session>/<run>/`
+**Structure**: `data/runs/<target>/<session>/<run>/`
 - `raw/` - Probe artifacts (logs, dumps, traces, HARs)
 - `manifest.json` - SHA256 hashes for integrity verification
 - `derived/findings.json` - Schema-valid findings with evidence citations; include `schema_version`
@@ -140,37 +142,37 @@ require_authorization: true
 ### 1) Check Toolchain
 
 ```bash
-recon doctor --json
+uv run python -m rwb doctor --json
 ```
 
 ### 2) Initialize Target
 
 ```bash
-recon init myapp --kind macos-app --locator "/Applications/MyApp.app"
+uv run python -m rwb init myapp --kind macos-app --locator "/Applications/MyApp.app"
 ```
 
 ### 3) Generate Probe Plan
 
 ```bash
-recon plan myapp --type baseline --probe-set macos-baseline --json
+uv run python -m rwb plan myapp --type baseline --probe-set macos-baseline --json
 ```
 
 ### 4) Execute Probes (explicit consent required)
 
 ```bash
-recon run myapp --type baseline --probe-set macos-baseline --write --exec --confirm-run
+uv run python -m rwb run myapp --type baseline --probe-set macos-baseline --write --exec --confirm-run
 ```
 
 ### 5) Generate Findings
 
 ```bash
-recon summarize myapp --run baseline_123456 --json
+uv run python -m rwb summarize myapp --run baseline_123456 --json
 ```
 
 ### 6) Compile Report
 
 ```bash
-recon report myapp --json
+uv run python -m rwb report myapp --json
 ```
 
 ## Validation
@@ -182,10 +184,10 @@ Fail fast: stop at the first failed validation gate, fix the issue, and re-run t
 python scripts/validate_catalog.py --catalog probes/catalog.json
 
 # Validate a manifest
-python scripts/validate_manifest.py runs/myapp/manifest.json
+python scripts/validate_manifest.py data/runs/myapp/manifest.json
 
 # Validate evidence paths in findings
-python scripts/validate_evidence.py runs/myapp/derived/findings.json runs/myapp/
+python scripts/validate_evidence.py data/runs/myapp/derived/findings.json data/runs/myapp/
 ```
 
 ## Escalation Ladder (Worst-Case Path)
@@ -206,7 +208,7 @@ python scripts/validate_evidence.py runs/myapp/derived/findings.json runs/myapp/
 - Every finding must cite one or more evidence paths
 - Summaries must list commands used + artifact locations
 - If evidence is insufficient, request additional probes rather than speculating
-- Use `manifest.json` to verify artifact integrity
+- Use `manifest.json` to verify artifact integrity in `data/runs/...`
 
 ## Build Mode (Tooling Design)
 
@@ -270,32 +272,32 @@ Use judgment, adapt to context, and push boundaries when appropriate.
 
 ### Documentation
 
-- `/Users/jamiecraik/dev/recon-workbench/README.md` - Project overview and quickstart
-- `/Users/jamiecraik/dev/recon-workbench/docs/GOLD_STANDARD.md` - Gold Industry Standard compliance
-- `/Users/jamiecraik/dev/recon-workbench/AGENTS.md` - Agent instructions and workflows
-- `/Users/jamiecraik/dev/recon-workbench/SECURITY.md` - Security policy and vulnerability reporting
-- `/Users/jamiecraik/dev/recon-workbench/scope.example.yaml` - Scope configuration template
+- `README.md` - Project overview and quickstart
+- `docs/reference/GOLD_STANDARD.md` - Gold Industry Standard compliance
+- `AGENTS.md` - Agent instructions and workflows
+- `docs/guides/SECURITY.md` - Security policy and vulnerability reporting
+- `config/scope.example.yaml` - Scope configuration template
 
 ### Schemas
 
-- `/Users/jamiecraik/dev/recon-workbench/schemas/authorization.schema.json` - Authorization artifact structure
-- `/Users/jamiecraik/dev/recon-workbench/schemas/probe-plan.v2.schema.json` - Probe plan validation
-- `/Users/jamiecraik/dev/recon-workbench/schemas/findings.v2.schema.json` - Findings structure
-- `/Users/jamiecraik/dev/recon-workbench/schemas/manifest.v2.schema.json` - Integrity manifest structure
+- `schemas/authorization.schema.json` - Authorization artifact structure
+- `schemas/probe-plan.v2.schema.json` - Probe plan validation
+- `schemas/findings.v2.schema.json` - Findings structure
+- `schemas/manifest.v2.schema.json` - Integrity manifest structure
 
 ### Probe Catalog
 
-- `/Users/jamiecraik/dev/recon-workbench/probes/catalog.json` - All available probes and probe sets
+- `probes/catalog.json` - All available probes and probe sets
 
 ### Validation Scripts
 
-- `/Users/jamiecraik/dev/recon-workbench/scripts/validate_catalog.py` - Validate probe catalog
-- `/Users/jamiecraik/dev/recon-workbench/scripts/validate_manifest.py` - Validate integrity manifest
-- `/Users/jamiecraik/dev/recon-workbench/scripts/validate_evidence.py` - Validate evidence paths in findings
+- `scripts/validate_catalog.py` - Validate probe catalog
+- `scripts/validate_manifest.py` - Validate integrity manifest
+- `scripts/validate_evidence.py` - Validate evidence paths in findings
 
 ### MCP Integration
 
-- `/Users/jamiecraik/dev/recon-workbench/scripts/mcp_server.py` - MCP server for AI agent integration
+- `scripts/mcp_server.py` - MCP server for AI agent integration
 
 ## Constraints
 - Redact secrets/PII by default.

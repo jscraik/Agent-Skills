@@ -1,0 +1,16 @@
+cases:
+  - name: happy-path
+    prompt: "I am building Remotion compositions and need best practices for timing and assets."
+    acceptance:
+      - type: contains
+        value: "## Outputs"
+  - name: edge-case
+    prompt: "I need guidance on checking video decode support in Remotion."
+    acceptance:
+      - type: contains
+        value: "Mediabunny"
+  - name: failure-mode
+    prompt: "Refactor my backend API for performance."
+    acceptance:
+      - type: contains
+        value: "## When to use"

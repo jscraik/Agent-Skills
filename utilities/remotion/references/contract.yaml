@@ -1,0 +1,24 @@
+schema_version: 1
+name: remotion-best-practices
+purpose: "Provide best-practice guidance for Remotion (React video) workflows."
+triggers:
+  - "Remotion"
+  - "composition"
+  - "video render"
+  - "audio timing"
+  - "captions"
+  - "transitions"
+  - "Mediabunny"
+inputs:
+  - "Question or code context"
+  - "Optional topic area (compositions, timing, assets, audio, captions, transitions)"
+non_goals:
+  - "Write a full Remotion app"
+  - "Run renders or publish videos"
+  - "Add dependencies without approval"
+risks:
+  - "Applying advice without project context can cause regressions"
+outputs:
+  - id: guidance
+    type: markdown
+    description: "Rule-backed recommendations and verification steps"
