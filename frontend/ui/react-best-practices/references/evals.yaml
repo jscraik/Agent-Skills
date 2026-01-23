@@ -1,0 +1,17 @@
+schema_version: 1
+cases:
+  - name: bundle-optimization
+    prompt: "Review a Next.js page that imports a barrel file and suggest bundle size fixes."
+    acceptance:
+      - "Recommends direct imports or dynamic imports where appropriate."
+      - "Mentions expected impact on bundle size."
+  - name: server-waterfall
+    prompt: "Identify server data-fetching waterfalls in an App Router route and propose fixes."
+    acceptance:
+      - "Suggests parallelization with Promise.all or restructure."
+      - "Calls out the critical-path request."
+  - name: rerender-reduction
+    prompt: "Review a component re-render issue and suggest memoization or derived state optimizations."
+    acceptance:
+      - "Focuses on user-visible performance."
+      - "Avoids unnecessary caching suggestions."

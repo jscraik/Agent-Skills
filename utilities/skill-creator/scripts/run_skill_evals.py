@@ -337,7 +337,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
     p.add_argument("--codex-home", default=None, help="Set CODEX_HOME (useful for repo-scoped .codex).")
     p.add_argument("--codex-bin", default=None, help="Override codex CLI path (e.g., ~/.local/share/mise/.../codex).")
     p.add_argument("--capture-jsonl", action="store_true", help="Also capture Codex JSONL event stream (--json).")
-    p.add_argument("--reports-dir", default="reports/skills", help="Base directory for eval reports.")
+    p.add_argument("--reports-dir", default="artifacts/reports/skills", help="Base directory for eval reports.")
     p.add_argument("--format", choices=["text", "json"], default="text")
     p.add_argument(
         "--codex-arg",

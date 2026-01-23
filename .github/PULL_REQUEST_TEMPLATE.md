@@ -40,16 +40,16 @@ Rollback plan: [PROMPT: Concrete rollback steps if needed.]
 - [ ] I understand what the code does and can explain it
 - [ ] Prompts or session logs included (Optional, but helpful)
 
-Prompt: `[PROMPT: ai/prompts/YYYY-MM-DD-<slug>.yaml]`
-Session: `[PROMPT: ai/sessions/YYYY-MM-DD-<slug>.json]`
+Prompt: `[PROMPT: artifacts/ai/prompts/YYYY-MM-DD-<slug>.yaml]`
+Session: `[PROMPT: artifacts/ai/sessions/YYYY-MM-DD-<slug>.json]`
 
 <details>
 <summary>AI Session Log (click to expand)</summary>
 
 [PROMPT: Short AI session summary]
 
-- Log file: `[PROMPT: ai/sessions/YYYY-MM-DD-<slug>.json]`
-- Prompt file: `[PROMPT: ai/prompts/YYYY-MM-DD-<slug>.yaml]`
+- Log file: `[PROMPT: artifacts/ai/sessions/YYYY-MM-DD-<slug>.json]`
+- Prompt file: `[PROMPT: artifacts/ai/prompts/YYYY-MM-DD-<slug>.yaml]`
 - Files touched: [PROMPT: paths]
 - Tests run: [PROMPT: commands]
 - Human verification: [PROMPT: what you personally checked]

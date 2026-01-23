@@ -1,0 +1,33 @@
+schema_version: 1
+name: create-auth-skill
+purpose: Bootstrap Better Auth integrations for TS/JS apps with secure defaults.
+triggers:
+  - New project needs Better Auth setup.
+  - Existing app needs auth added or migrated.
+  - Adding new auth features like OAuth or passkeys.
+inputs:
+  - name: framework
+    type: string
+    description: Framework/runtime context.
+  - name: adapter
+    type: string
+    description: Database adapter choice.
+  - name: features
+    type: array
+    items: string
+    description: Auth features/plugins required.
+outputs:
+  - name: setup_steps
+    type: array
+    items: string
+    description: Ordered steps to implement auth.
+  - name: commands
+    type: array
+    items: string
+    description: CLI commands for schema/migrations.
+non_goals:
+  - Full UI implementation without approval.
+  - Handling secrets in plaintext.
+risks:
+  - Misconfigured adapters can break auth.
+  - Skipped migrations can cause runtime failures.

@@ -1,11 +1,64 @@
 ---
 name: agent-browser
-description: Browser automation using Vercel's agent-browser CLI. Use when you need to interact with web pages, fill forms, take screenshots, or scrape data. Alternative to Playwright MCP - uses Bash commands with ref-based element selection. Triggers on "browse website", "fill form", "click button", "take screenshot", "scrape page", "web automation".
+description: Use this skill to extract page state and automate web interactions with the agent-browser CLI (navigate, snapshot, click, fill, screenshot). Use this when you need deterministic browser automation or scraping via ref-based elements.
 ---
 
 # agent-browser: CLI Browser Automation
 
 Vercel's headless browser automation CLI designed for AI agents. Uses ref-based selection (@e1, @e2) from accessibility snapshots.
+
+## Philosophy
+
+- Prefer accessibility-first selectors (refs) for stability.
+- Re-snapshot after navigation or DOM changes.
+- Keep actions minimal and observable.
+
+## When to use
+
+- You need to interact with live web pages or forms.
+- You need screenshots or PDFs of UI states.
+- You need to scrape data with deterministic steps.
+
+## Inputs
+
+- Target URL(s).
+- Desired interactions (click/fill/scroll).
+- Output artifacts (screenshots, PDFs, extracted text).
+
+## Outputs
+
+- Action results and snapshots.
+- Saved artifacts (png/pdf) when requested.
+- Extracted content for further processing.
+
+## Constraints / Safety
+
+- Redact secrets, tokens, and private URLs in logs.
+- Avoid interacting with sensitive accounts without explicit approval.
+- Do not run destructive actions on production systems.
+
+## Variation
+
+- Use refs for deterministic steps; use semantic locators when refs are unstable.
+- Use `--session` for parallel flows when isolation is required.
+- Prefer JSON snapshots for parsing and automation.
+
+## Anti-Patterns
+
+- Clicking without a fresh snapshot after navigation.
+- Using brittle selectors when refs are available.
+- Running long sequences without verification checkpoints.
+
+## Validation
+
+- Confirm each step with a snapshot or expected UI change.
+- Fail fast: stop at the first failed step and fix before continuing.
+- See `references/contract.yaml` (schema_version: 1) and `references/evals.yaml`.
+
+## Remember
+
+The agent is capable of extraordinary work in this domain. These guidelines unlock that potential—they don't constrain it.
+Use judgment, adapt to context, and push boundaries when appropriate.
 
 ## Setup Check
 

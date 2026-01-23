@@ -1,0 +1,16 @@
+schema_version: 1
+cases:
+  - name: accessibility-audit
+    prompt: "Review the checkout UI for accessibility issues and report file:line findings."
+    acceptance:
+      - "Findings use file:line format."
+      - "Includes at least one accessibility-focused issue."
+  - name: guideline-fetch
+    prompt: "Audit a settings page using the latest Web Interface Guidelines."
+    acceptance:
+      - "Mentions fetching the latest guidelines."
+      - "Reports issues with rule context."
+  - name: scope-clarification
+    prompt: "User asks for UI review without files; ask for file patterns."
+    acceptance:
+      - "Requests files or patterns before analysis."

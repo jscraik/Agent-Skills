@@ -1,0 +1,15 @@
+schema_version: 1
+cases:
+  - name: snapshot-flow
+    prompt: "Open a page, take an interactive snapshot, and click a button by ref."
+    acceptance:
+      - "Uses snapshot before interacting."
+      - "References ref-based selection."
+  - name: capture-artifact
+    prompt: "Take a full-page screenshot after navigation."
+    acceptance:
+      - "Produces a screenshot artifact path."
+  - name: scrape-text
+    prompt: "Extract headline text from a news page using refs."
+    acceptance:
+      - "Uses get text with a ref."

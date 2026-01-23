@@ -1,6 +1,6 @@
 ---
 name: better-auth-best-practices
-description: Skill for integrating Better Auth - the comprehensive TypeScript authentication framework.
+description: Analyze Better Auth setups and highlight secure integration best practices. Use this when adding Better Auth, configuring plugins/providers, or debugging auth/session flows.
 ---
 
 # Better Auth Integration Guide
@@ -10,6 +10,73 @@ description: Skill for integrating Better Auth - the comprehensive TypeScript au
 Better Auth is a TypeScript-first, framework-agnostic auth framework supporting email/password, OAuth, magic links, passkeys, and more via plugins.
 
 ---
+
+## Philosophy
+
+- Security first: defaults should be safe, explicit, and least-privilege.
+- Prefer minimal viable configuration, then layer features.
+- Validate with real flows, not just configuration checks.
+
+## When to use
+
+- You are adding Better Auth to a TS/JS application.
+- You need to configure plugins or providers.
+- You are debugging auth flows or session handling.
+
+## Inputs
+
+- Framework and runtime context.
+- Database adapter choice.
+- Auth features (email/password, OAuth, passkeys, etc.).
+- Plugin list and provider credentials (redacted).
+
+## Outputs
+
+- Recommended config changes and file locations.
+- CLI commands for schema and plugin updates.
+- Checklist for secure deployment.
+
+## Constraints / Safety
+
+- Redact secrets, tokens, and private URLs by default.
+- Do not change auth flows without explicit approval.
+- Never log or paste secrets into code or output.
+
+## Variation
+
+- Adapt to framework (Next.js, SvelteKit, Express).
+- Adapt to adapter (Prisma, Drizzle, raw DB client).
+- Prefer incremental migration for existing auth.
+
+## Procedure
+
+1. Identify framework/runtime and current auth state.
+2. Review configured providers/plugins and adapters.
+3. Check env vars and core config for secure defaults.
+4. Validate session storage/cookie settings.
+5. Provide the minimal change set with verification steps.
+
+## Anti-Patterns
+
+- Disabling CSRF/origin checks without a clear mitigation.
+- Mixing auth providers without reviewing account linking.
+- Skipping migrations after adding plugins.
+
+## Validation
+
+- Run a full sign-in/sign-out flow in a non-prod environment.
+- Verify session behavior (DB vs cookie cache).
+- Fail fast: stop at the first failed check and fix before continuing.
+
+## Examples
+
+- "Audit my Better Auth config for security gaps."
+- "Review my plugin list and session settings."
+
+## Remember
+
+The agent is capable of extraordinary work in this domain. These guidelines unlock that potential—they don't constrain it.
+Use judgment, adapt to context, and push boundaries when appropriate.
 
 ## Quick Reference
 

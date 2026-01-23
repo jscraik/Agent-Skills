@@ -1,16 +1,25 @@
+schema_version: 1
 cases:
-  - name: happy-path
-    prompt: "Find a set of arrow icons using better-icons and fetch SVGs."
+  - name: search-basic
+    prompt: "Search for a home icon, return 5 results, and show at least one lucide entry."
+    input:
+      query: home
+      limit: 5
     acceptance:
-      - type: contains
-        value: "## Outputs"
-  - name: edge-case
-    prompt: "I need a home icon but only from the lucide library."
+      - "Output includes a list of icon IDs."
+      - "At least one result contains the prefix `lucide:`."
+  - name: get-basic-svg
+    prompt: "Fetch SVG for lucide:home and return the raw SVG."
+    input:
+      icon_id: lucide:home
     acceptance:
-      - type: contains
-        value: "lucide"
-  - name: failure-mode
-    prompt: "Write a backend API for icon search."
+      - "Output contains `<svg` and `</svg>`."
+      - "SVG is returned without extra formatting noise."
+  - name: prefix-filter
+    prompt: "Search for arrow icons in the mdi collection only and return 3 results."
+    input:
+      query: arrow
+      prefix: mdi
+      limit: 3
     acceptance:
-      - type: contains
-        value: "## When to use"
+      - "All returned icon IDs start with `mdi:`."

@@ -4,7 +4,6 @@ set -euo pipefail
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$repo_root"
 
-categories=(github frontend apple backend interview product design utilities auth)
 skills_dir="$repo_root/skills"
 system_skills_dir="$repo_root/skills-system"
 
@@ -32,20 +31,35 @@ fi
 # Remove stale symlinks only (keep any real files that might be intentional).
 find "$skills_dir" -maxdepth 1 -type l -exec rm -f {} +
 
-# Recreate symlinks for each category's SKILL.md directories.
-if command -v rg >/dev/null 2>&1; then
-  skill_files_cmd() { rg --files -g 'SKILL.md' "$1"; }
-else
-  skill_files_cmd() { find "$1" -type f -name 'SKILL.md'; }
-fi
-for category in "${categories[@]}"; do
-  while IFS= read -r skill_path; do
-    skill_dir="$(dirname "$skill_path")"
-    skill_name="$(basename "$skill_dir")"
-    skill_dir_abs="$repo_root/$skill_dir"
-    ln -s "$skill_dir_abs" "$skills_dir/$skill_name"
-  done < <(skill_files_cmd "$category")
-done
+# Recreate symlinks for all discovered SKILL.md directories (with exclusions).
+skill_files_cmd() {
+  find . \
+    -path "./skills" -prune -o \
+    -path "./skills-system" -prune -o \
+    -path "./.git" -prune -o \
+    -path "./.tmp" -prune -o \
+    -path "./.system" -prune -o \
+    -path "./node_modules" -prune -o \
+    -path "./data/recon-workbench/assets/template" -prune -o \
+    -path "*/assets/*" -prune -o \
+    -path "*/rules/*" -prune -o \
+    -path "*/scripts/*" -prune -o \
+    -name "SKILL.md" -print
+}
+while IFS= read -r skill_path; do
+  # Skip the root index.
+  if [ "$skill_path" = "./SKILL.md" ]; then
+    continue
+  fi
+  skill_dir="$(dirname "$skill_path")"
+  skill_name="$(basename "$skill_dir")"
+  skill_dir_abs="$repo_root/$skill_dir"
+  if [ -e "$skills_dir/$skill_name" ]; then
+    echo "Duplicate skill name: $skill_name (skip $skill_dir_abs)"
+    continue
+  fi
+  ln -s "$skill_dir_abs" "$skills_dir/$skill_name"
+done < <(skill_files_cmd | sort)
 
 # Regenerate root SKILL.md index.
 cat > "$repo_root/SKILL.md" <<'INDEX_EOF'
@@ -60,17 +74,26 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - `gh-pr-local` — Fetch, preview, merge, and test GitHub PRs locally. Not for issue workflows or CI debugging; use gh-issue-fix or gh-actions-fix.
 - `github-pr` — Fetch, preview, merge, and test GitHub PRs locally. Great for trying upstream PRs before they're merged.
 
-## Frontend/UI
-- `codex-ui-kit-installer` — Install or update codex-ui-kit in a repo and optional Codex UI prompts. Not for general skill installation; use skill-installer or clawdhub.
-- `favicon-generator` — Generate professional-quality favicons that rival the best app icons. Uses a multi-layer effects engine with drop shadows, inner glows, highlights, gradients, and noise textures. Includes 8 curated design templates and 18 Lucide icons. Produces complete favicon suites with proper ICO, SVG, PNG formats and framework integration. Trigger when users need favicons, app icons, or browser tab icons.
+## Frontend
+### UI
 - `frontend-ui-design` — Design or implement frontend UI/UX components across web, Apple, and Tauri desktop surfaces with tokens and accessibility. Not for design-system governance or visual regression; use ui-design-system or ui-visual-regression.
-- `nano-banana-builder` — Build full-stack web applications powered by Google Gemini's Nano Banana & Nano Banana Pro image generation APIs. Use when creating Next.js image generators, editors, galleries, or any web app that integrates gemini-2.5-flash-image or gemini-3-pro-image-preview models. Covers React components, server actions, API routes, storage, rate limiting, and production deployment patterns.
-- `og-image-creator` — Smart OG image generation that studies your codebase, understands routes and brand identity, then creates contextually appropriate Open Graph images using Playwright and React components. Triggers: "create og images", "generate social cards", "add open graph images".
 - `react-ui-patterns` — Provide React UI patterns and examples with TypeScript, Tailwind, and Radix. Not for design-system governance or visual regression; use ui-design-system or ui-visual-regression.
-- `seo-optimizer` — Comprehensive SEO optimization for web applications. Use when asked to improve search rankings, add meta tags, create structured data, generate sitemaps, optimize for Core Web Vitals, or analyze SEO issues. Works with Next.js, Astro, React, and static HTML sites.
-- `threejs-builder` — Creates simple Three.js web apps with scene setup, lighting, geometries, materials, animations, and responsive rendering. Use for: "Create a threejs scene/app/showcase" or when user wants 3D web content. Supports ES modules, modern Three.js r150+ APIs.
-- `ui-design-system` — Create or update governed UI design systems across SwiftUI and React stacks. Not for app-specific UI implementation or visual regression; use frontend-ui-design or ui-visual-regression.
 - `ui-visual-regression` — Run and interpret UI visual regression workflows (Storybook, Playwright, Argos). Not for UI implementation or design-system governance; use frontend-ui-design or ui-design-system.
+- `ui-design-system` — Create or update governed UI design systems across SwiftUI and React stacks. Not for app-specific UI implementation or visual regression; use frontend-ui-design or ui-visual-regression.
+- `web-design-guidelines` — Web design guidelines and patterns for consistent UI decisions across projects.
+- `react-best-practices` — Practical React guidance for structure, patterns, and performance.
+
+### SEO
+- `seo-optimizer` — Comprehensive SEO optimization for web applications. Use when asked to improve search rankings, add meta tags, create structured data, generate sitemaps, optimize for Core Web Vitals, or analyze SEO issues. Works with Next.js, Astro, React, and static HTML sites.
+
+### Graphics
+- `threejs-builder` — Creates simple Three.js web apps with scene setup, lighting, geometries, materials, animations, and responsive rendering. Use for: "Create a threejs scene/app/showcase" or when user wants 3D web content. Supports ES modules, modern Three.js r150+ APIs.
+- `og-image-creator` — Smart OG image generation that studies your codebase, understands routes and brand identity, then creates contextually appropriate Open Graph images using Playwright and React components. Triggers: "create og images", "generate social cards", "add open graph images".
+- `favicon-generator` — Generate professional-quality favicons that rival the best app icons. Uses a multi-layer effects engine with drop shadows, inner glows, highlights, gradients, and noise textures. Includes 8 curated design templates and 18 Lucide icons. Produces complete favicon suites with proper ICO, SVG, PNG formats and framework integration. Trigger when users need favicons, app icons, or browser tab icons.
+
+### Tools
+- `codex-ui-kit-installer` — Install or update codex-ui-kit in a repo and optional Codex UI prompts. Not for general skill installation; use skill-installer or clawdhub.
+- `nano-banana-builder` — Build full-stack web applications powered by Google Gemini's Nano Banana & Nano Banana Pro image generation APIs. Use when creating Next.js image generators, editors, galleries, or any web app that integrates gemini-2.5-flash-image or gemini-3-pro-image-preview models. Covers React components, server actions, API routes, storage, rate limiting, and production deployment patterns.
 
 ## Apple/Swift
 - `apple-mail-search` — Search, triage, and organize Apple Mail on macOS. Not for Gmail, Outlook, or webmail workflows.
@@ -97,7 +120,15 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - `interview-me` — Interactive, multiple-choice interview that turns an underspecified idea into a design-ready spec (decisions + assumptions + approval).
 - `pm-interview` — Plan and review product scope, value, metrics, and rollout via a structured interview. Use when product direction or scope must be clarified.
 
-## Design/PRD
+## Design
+- `better-icons` — Icon search/retrieval via Better Icons CLI/MCP. Use when you need to find or fetch SVG icons from Iconify libraries.
+
+## Product
+### Docs
+- `agents-md` — Create or update a repository-level AGENTS.md contributor guide with clear sections, commands, and repo-specific conventions. Use when asked to draft, improve, or standardize AGENTS.md files or when a repo needs concise contributor instructions.
+- `docs-expert` — Co-author, improve, and QA documentation (specs, READMEs, guides, runbooks). Trigger when user asks to create, revise, audit, or QA docs; not for implementation plans or PRDs (use code-plan or product-spec).
+
+### Specs
 - `product-spec` — Create PRDs and tech specs and critique UX flows. Not for documentation QA or implementation plans; use docs-expert or code-plan.
 - `prd-clarifier` — Resolve PRD ambiguities and requirements through structured questioning and a tracked session log.
 - `prd-to-accessibility` — Generate accessibility requirements and checks from PRDs.
@@ -111,19 +142,36 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - `prd-to-security-review` — Generate a security review from a PRD.
 - `prd-to-testplan` — Generate a test plan and validation matrix from a PRD.
 - `prd-to-ux` — Generate UX specifications from PRDs or feature specs.
+- `prd-to-ui-spec` — Generate UI specs from PRDs/UX using aStudio tokens and state machines.
+- `ui-spec-to-prompts` — Convert UI specs into build-order prompts for UI generators.
+- `ux-spec-to-prompts` — Convert UX specs into build-order prompts for UI generators.
 
-## Product/Docs
-- `agents-md` — Create or update a repository-level AGENTS.md contributor guide with clear sections, commands, and repo-specific conventions. Use when asked to draft, improve, or standardize AGENTS.md files or when a repo needs concise contributor instructions.
-- `app-store-release-notes` — Create user-facing App Store release notes by collecting and summarizing all user-impacting changes since the last git tag (or a specified ref). Use when asked to generate a comprehensive release changelog, App Store "What's New" text, or release notes based on git history or tags.
-- `code-plan` — Create concise, actionable plans for coding tasks. Use when users ask for a plan, roadmap, or steps to implement a feature, fix, refactor, or investigation.
-- `decide-build-primitive` — Decide whether a capability should be a Skill, custom prompt, or automation agent. Not for creating or installing skills; use skill-creator or skill-installer.
-- `docs-expert` — Co-author, improve, and QA documentation (specs, READMEs, guides, runbooks). Trigger when user asks to create, revise, audit, or QA docs; not for implementation plans or PRDs (use code-plan or product-spec).
-- `linear` — Manage Linear issues and projects (read, create, update). Not for GitHub issue flows; use gh-issue-fix.
+### Review
 - `llm-design-review` — Run design reviews and audits for LLM features across UX, architecture, model/prompt, safety, evaluation, and governance. Not for product PRDs; use product-spec.
 - `product-design-review` — Review end-to-end user experience and UI for products or flows; produce a user-perspective critique with usability, accessibility, content, and interaction issues plus fixes. Use for UX/UI audits, product design reviews, onboarding or checkout critiques, heuristic evaluations, accessibility-first reviews, or when asked to find issues in a user journey from the user's point of view. Target web, iOS, and macOS products, including React apps and open-source software.
-- `product-manager` — Lead users through every software design step—from idea to production-ready PRD or technical spec—via interview, drafting, adversarial debate, diagrams, and gold-standard validation; use whenever the user asks for PRD/tech specs, software design steps, or taking an idea to production.
+
+### Strategy
 - `project-improvement-ideator` — Generate 30 pragmatic improvement ideas for the current project, weigh feasibility/impact/user perception, then winnow to the best 5 with rationale. Use when asked for “best ideas”, “improvements”, “roadmap”, or “top 5”/“winnow” prioritization. Not for full product specs or LLM design reviews; use product-spec or llm-design-review.
+- `code-plan` — Create concise, actionable plans for coding tasks. Use when users ask for a plan, roadmap, or steps to implement a feature, fix, refactor, or investigation.
+
+### Content
+- `app-store-release-notes` — Create user-facing App Store release notes by collecting and summarizing all user-impacting changes since the last git tag (or a specified ref). Use when asked to generate a comprehensive release changelog, App Store "What's New" text, or release notes based on git history or tags.
 - `youtube-hooks-scripts` — Create compelling hooks and full scripts for technical YouTube videos about coding and AI. Use when given a video idea, braindump, source code, or rough notes to develop into engaging long-form content. Helps transform raw material into conversational scripts that grab attention and maintain engagement throughout.
+- `youtube-titles-thumbnails` — Create high-performing YouTube titles and thumbnail text that maximize CTR and virality while maintaining authenticity. Use when analyzing video transcripts to generate title and thumbnail suggestions, optimizing existing titles/thumbnails, or when users request help with YouTube content strategy for click-through rate optimization.
+
+### Ops
+- `decide-build-primitive` — Decide whether a capability should be a Skill, custom prompt, or automation agent. Not for creating or installing skills; use skill-creator or skill-installer.
+- `linear` — Manage Linear issues and projects (read, create, update). Not for GitHub issue flows; use gh-issue-fix.
+
+### Domain
+- `oak-api` — Oak Curriculum API integration and learning workflows. Use when building curriculum-driven experiences.
+- `oracle` — Decision arbitration and conflict resolution workflow.
+
+### Tech
+- `tech-to-data` — Generate a data specification from a tech spec.
+- `tech-to-migration` — Generate a migration plan from a tech spec.
+- `tech-to-ops` — Generate an ops/runbook spec from a tech spec.
+- `tech-to-performance` — Generate a performance plan from a tech spec.
 - `youtube-titles-thumbnails` — Create high-performing YouTube titles and thumbnail text that maximize CTR and virality while maintaining authenticity. Use when analyzing video transcripts to generate title and thumbnail suggestions, optimizing existing titles/thumbnails, or when users request help with YouTube content strategy for click-through rate optimization.
 
 ## Utilities

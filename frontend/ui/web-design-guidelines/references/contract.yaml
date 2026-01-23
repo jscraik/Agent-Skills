@@ -1,0 +1,30 @@
+schema_version: 1
+name: web-design-guidelines
+purpose: Review UI code against Web Interface Guidelines with file:line findings.
+triggers:
+  - User asks to review UI/UX for accessibility or design issues.
+  - User requests a guideline-based UI audit.
+  - Need to validate UI against best-practice standards.
+inputs:
+  - name: target_files
+    type: array
+    items: string
+    description: Files or patterns to review.
+  - name: surfaces
+    type: array
+    items: string
+    description: UI surfaces to prioritize.
+outputs:
+  - name: findings
+    type: array
+    items: string
+    description: File:line findings per guideline rule.
+  - name: summary
+    type: string
+    description: Top issues by impact.
+non_goals:
+  - Implementing UI changes without approval.
+  - Visual design or branding overhauls.
+risks:
+  - Missing guideline fetch can cause stale checks.
+  - False positives if file scope is unclear.

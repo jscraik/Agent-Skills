@@ -1,0 +1,32 @@
+schema_version: 1
+name: codeception
+purpose: Extract reusable learnings from a completed task into new Codex skills.
+triggers:
+  - User requests a retrospective or skill extraction.
+  - A non-obvious fix or workflow should be preserved.
+inputs:
+  - name: task_summary
+    type: string
+    description: Summary of what was done and why.
+  - name: learnings
+    type: array
+    items: string
+    description: Non-obvious fixes or workflows.
+  - name: evidence
+    type: array
+    items: string
+    description: Verification commands or logs.
+outputs:
+  - name: created_skills
+    type: array
+    items: string
+    description: Paths to new or updated skills.
+  - name: report
+    type: string
+    description: Summary of extracted skills and triggers.
+non_goals:
+  - Capturing trivial or one-off fixes.
+  - Writing production application code.
+risks:
+  - Over-extraction can bloat the skill set.
+  - Missing validation can encode incorrect guidance.

@@ -1,0 +1,16 @@
+schema_version: 1
+cases:
+  - name: new-setup
+    prompt: "Set up Better Auth for a new Next.js app using Prisma."
+    acceptance:
+      - "Includes auth.ts + auth-client setup."
+      - "Includes migration commands."
+  - name: migration
+    prompt: "Migrate existing auth to Better Auth with minimal disruption."
+    acceptance:
+      - "Uses incremental migration guidance."
+      - "Highlights validation steps."
+  - name: plugin-add
+    prompt: "Add OAuth providers and passkey support."
+    acceptance:
+      - "Mentions plugin installation and CLI regenerate steps."

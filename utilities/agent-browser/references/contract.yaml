@@ -1,0 +1,30 @@
+schema_version: 1
+name: agent-browser
+purpose: Drive deterministic browser automation using ref-based snapshots.
+triggers:
+  - Need to interact with web pages (click/fill/scroll).
+  - Need screenshots or PDFs of UI states.
+  - Need deterministic scraping with accessibility refs.
+inputs:
+  - name: url
+    type: string
+    description: Target URL to open.
+  - name: actions
+    type: array
+    items: string
+    description: Ordered browser actions.
+outputs:
+  - name: snapshots
+    type: array
+    items: string
+    description: Snapshot outputs or saved files.
+  - name: artifacts
+    type: array
+    items: string
+    description: Screenshot/PDF file paths if created.
+non_goals:
+  - Running destructive actions without approval.
+  - Full end-to-end testing (use Playwright for tests).
+risks:
+  - Stale refs after navigation.
+  - Sensitive data exposure if logs are not redacted.

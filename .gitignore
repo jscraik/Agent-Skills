@@ -1,17 +1,17 @@
 .DS_Store
 .system/
-dist/
-build/dist/
-reports/
+artifacts/dist/
+artifacts/build/dist/
+artifacts/reports/
 *.skill
 .venv-skillpack/
 .venv/
 
 # AI artifacts - transient only
-/ai/tmp/
-/ai/cache/
-/ai/raw/
+/artifacts/ai/tmp/
+/artifacts/ai/cache/
+/artifacts/ai/raw/
 .temp/
-sessions/
+artifacts/sessions/
 **/__pycache__/
 product/Archive.zip

@@ -1,18 +1,16 @@
+schema_version: 1
 cases:
-  - name: happy-path
-    prompt: "Use the claudeception skill after completing a task to capture a retrospective and extract a new skill."
+  - name: extract-skill
+    prompt: "Extract a new skill from a debugging session and list triggers."
     acceptance:
-      - type: contains
-        value: "## Inputs"
-      - type: contains
-        value: "## Outputs"
-  - name: edge-case
-    prompt: "The user wants to run claudeception but provides no recap of the work done."
+      - "Creates or updates a SKILL.md with clear triggers."
+      - "Includes a verification step."
+  - name: skip-trivial
+    prompt: "User shares a trivial change; decide whether to extract a skill."
     acceptance:
-      - type: contains
-        value: "AskUserQuestion"
-  - name: out-of-scope
-    prompt: "User asks for a spec review without mentioning claudeception."
+      - "Declines extraction if not reusable or non-obvious."
+  - name: update-existing
+    prompt: "Update an existing skill with a new edge case and verification."
     acceptance:
-      - type: contains
-        value: "## When to use"
+      - "Adds the edge case without bloating the skill."
+      - "Keeps triggers precise and specific."

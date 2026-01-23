@@ -1,0 +1,33 @@
+schema_version: 1
+name: vercel-react-best-practices
+purpose: Provide React/Next.js performance best practices and rule selection guidance.
+triggers:
+  - Need to review React/Next.js code for performance issues.
+  - Need to reduce bundle size, re-render cost, or TTFB.
+  - Need rule-based refactor guidance for Next.js data fetching.
+inputs:
+  - name: target_files
+    type: array
+    items: string
+    description: Files or patterns to review.
+  - name: runtime_context
+    type: string
+    description: App Router vs Pages Router, Edge vs Node.
+  - name: performance_goal
+    type: string
+    description: Primary optimization target.
+outputs:
+  - name: rule_recommendations
+    type: array
+    items: string
+    description: Applicable rules with brief rationale.
+  - name: proposed_edits
+    type: array
+    items: string
+    description: Concrete edit suggestions.
+non_goals:
+  - Implementing a full performance audit or profiling report.
+  - Rewriting entire architectures without confirmation.
+risks:
+  - Over-optimizing non-critical paths can add complexity.
+  - Unverified changes may regress performance.

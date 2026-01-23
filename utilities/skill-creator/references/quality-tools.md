@@ -31,7 +31,7 @@ Notes:
 - Keep `--sandbox read-only` unless the eval requires edits.
 
 Outputs:
-- PASS/FAIL per case with report artifacts under reports/skills/
+- PASS/FAIL per case with report artifacts under artifacts/reports/skills/
 
 ## analyze_skill.py
 

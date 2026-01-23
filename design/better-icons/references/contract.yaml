@@ -1,21 +1,52 @@
 schema_version: 1
 name: better-icons
-purpose: "Provide CLI/MCP guidance to search and fetch SVG icons via Better Icons."
+purpose: Search Iconify libraries and retrieve SVG icons via CLI or MCP.
 triggers:
-  - "icon search"
-  - "icon SVG"
-  - "Iconify"
-  - "better-icons"
-inputs:
-  - "Icon query or ID"
-  - "Optional library prefix"
-  - "Optional size/color"
+  - Need a consistent icon family for UI/UX work.
+  - Need to fetch or sync SVG icons into a codebase.
+  - Need MCP tooling to browse or retrieve icons.
 non_goals:
-  - "Design system governance"
-  - "Batch asset pipelines or export tooling"
+  - Designing full UI layouts or components.
+  - Replacing a design system's icon guidelines.
 risks:
-  - "Using inconsistent icon libraries across a UI surface"
+  - Mixing icon families or styles can reduce visual consistency.
+  - Missing labels can harm accessibility for critical actions.
+description: Search Iconify libraries and retrieve SVG icons via CLI or MCP.
+inputs:
+  - name: query
+    type: string
+    description: Search query for icons.
+  - name: icon_id
+    type: string
+    description: Icon ID in `prefix:name` format.
+  - name: prefix
+    type: string
+    optional: true
+    description: Icon collection prefix (e.g., lucide, mdi).
+  - name: color
+    type: string
+    optional: true
+    description: Icon color (prefer design tokens).
+  - name: size
+    type: number
+    optional: true
+    description: Icon size in pixels.
+  - name: output_path
+    type: string
+    optional: true
+    description: Target file path for SVG output.
 outputs:
-  - id: guidance
-    type: markdown
-    description: "CLI/MCP guidance and icon selection steps"
+  - name: icon_ids
+    type: array
+    items: string
+    description: Matching icon IDs returned by search.
+  - name: svg
+    type: string
+    description: SVG markup for a single icon.
+  - name: synced_file
+    type: string
+    optional: true
+    description: Path to the updated icons file when syncing.
+constraints:
+  - Redact sensitive file paths or proprietary names in logs by default.
+  - Do not overwrite existing files without confirmation.

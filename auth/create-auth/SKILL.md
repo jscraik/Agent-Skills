@@ -1,6 +1,6 @@
 ---
 name: create-auth-skill
-description: Skill for creating auth layers in TypeScript/JavaScript apps using Better Auth.
+description: Build Better Auth integrations for TS/JS apps with secure defaults. Use this when bootstrapping auth, migrating existing auth, or adding new auth features.
 ---
 
 # Create Auth Skill
@@ -10,6 +10,75 @@ Guide for adding authentication to TypeScript/JavaScript applications using Bett
 **For code examples and syntax, see [better-auth.com/docs](https://better-auth.com/docs).**
 
 ---
+
+## Philosophy
+
+- Start with secure defaults and minimal features.
+- Add one auth surface at a time, validate, then expand.
+- Prefer incremental migration over rewrites.
+
+## When to use
+
+- New app needs Better Auth setup.
+- Existing app needs auth added or migrated.
+- Adding new auth features (OAuth, passkeys, 2FA).
+
+## Inputs
+
+- Framework/runtime context.
+- Database adapter choice.
+- Desired auth features and plugins.
+- Existing auth constraints (if any).
+
+## Outputs
+
+- Step-by-step setup path and required files.
+- CLI commands for schema generation/migrations.
+- Security checklist for go-live.
+
+## Constraints / Safety
+
+- Redact secrets, tokens, and private URLs by default.
+- Do not change auth flows without explicit approval.
+- Never log or paste secrets into code or output.
+
+## Variation
+
+- Adapt to framework (Next.js, SvelteKit, Express).
+- Adapt to database adapter (Prisma, Drizzle, raw DB client).
+- Use migration path when existing auth is present.
+
+## Procedure
+
+1. Identify framework/runtime and current auth state.
+2. Choose database adapter and install Better Auth.
+3. Create `auth.ts` and client config.
+4. Add route handler and plugins.
+5. Run migrations/generate schema.
+6. Validate a full auth flow.
+
+## Anti-Patterns
+
+- Skipping migrations after adding plugins.
+- Disabling CSRF/origin checks without mitigations.
+- Storing secrets in source control.
+
+## Validation
+
+- Run a full auth flow (sign-up, sign-in, sign-out).
+- Validate session persistence and logout behavior.
+- Fail fast: stop at the first failed check and fix before continuing.
+- See `references/contract.yaml` (schema_version: 1) and `references/evals.yaml`.
+
+## Examples
+
+- "Add Better Auth to a Next.js app with Prisma."
+- "Migrate existing auth to Better Auth."
+
+## Remember
+
+The agent is capable of extraordinary work in this domain. These guidelines unlock that potential—they don't constrain it.
+Use judgment, adapt to context, and push boundaries when appropriate.
 
 ## Decision Tree
 

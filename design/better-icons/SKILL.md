@@ -1,70 +1,66 @@
 ---
 name: better-icons
-description: "Create and retrieve SVG icons via Better Icons (CLI/MCP). Use when you need icon lookup or SVG retrieval from Iconify libraries for UI work."
+description: "Use this skill to search and extract SVG icons via the better-icons CLI or MCP. Use this when you need icons from Iconify collections for UI/UX work, product mocks, or codebases."
 metadata:
-  tags: icons, svg, iconify, cli, mcp
-  short-description: "Find and fetch SVG icons."
+  short-description: Search Iconify libraries and fetch SVGs via CLI/MCP.
 ---
 
 # Better Icons
 
-## When to use
-- You need to search icons across multiple libraries (Iconify) and retrieve SVGs.
-- You want a CLI workflow to fetch icons for design or UI implementation.
-- You want to use the Better Icons MCP server for AI-assisted icon lookup.
-
-## Inputs
-- Icon query (keywords, or specific prefix:name ID).
-- Optional: library prefix (e.g., `lucide`, `mdi`, `heroicons`).
-- Optional: output size or color.
-- Optional: JSON output preference.
-
-## Outputs
-- CLI command guidance for search/get.
-- Suggested icon IDs or SVG output steps.
-- Include `schema_version: 1` if outputs are contract-bound.
+Search and retrieve icons from 200+ libraries via Iconify.
 
 ## Philosophy
-- Why: icon choice shapes user comprehension; clarity beats novelty.
-- Principle: prefer explicit IDs and libraries to avoid ambiguity.
-- Mental model: search -> shortlist -> select -> fetch -> verify in context.
-- Framework: constraints + library choice + consistent usage = coherent iconography.
-- Keep icon usage consistent across a feature (one library per surface when possible).
-- Fetch SVGs deterministically to avoid visual drift.
 
-## Variation
-- Vary output to the consumer: design exploration (many options) vs implementation (single choice).
-- Adapt by platform: mobile needs bolder silhouettes, desktop tolerates finer detail.
-- Avoid generic patterns; tailor suggestions to the UI context (navigation, status, action).
-- If the query is vague, return 3–5 candidate icons with rationale.
-- For strict design systems, constrain to approved libraries only.
+- Prefer clarity over decoration; icons should reinforce meaning.
+- Keep visual consistency by staying within one family per surface.
+- Optimize for accessibility: icons should not be the only cue.
+
+## When to Use
+
+- You need SVG icons quickly from Iconify libraries.
+- You want consistent icon families across UI or docs.
+- You need batch fetch or sync into a project file.
+- You want to use the MCP tools from an agent.
+
+## Inputs
+
+- Search query (string) and optional collection prefix.
+- Icon ID (`prefix:name`).
+- Optional size and color (use design tokens when available).
+- Output target path (if writing a file).
+- Framework target for `sync_icon` (e.g., React, Vue, Svelte).
+
+## Outputs
+
+- SVG output to stdout or a file.
+- Search results (JSON list of icon IDs).
+- Updated project icon file (when syncing).
+- Collections list (when listing libraries).
+
+## Constraints / Safety
+
+- Redact sensitive file paths, project names, or proprietary terms from logs by default.
+- Do not overwrite existing files without explicit confirmation.
+- If icons are used for interactive controls, ensure a minimum 44x44 hit-area and align spacing/breakpoints to design tokens where applicable.
+
+## Anti-Patterns
+
+- Mixing icon styles (stroke vs solid) within the same UI surface.
+- Using icons without text labels for critical actions.
+- Hardcoding colors that ignore the design system.
+- Fetching excessive icons without narrowing by prefix or use case.
 
 ## Procedure
-1) Clarify the icon goal (concept, UI context, and target library).
-2) Use `better-icons search` to find candidates.
-3) Pick the best icon IDs and fetch SVGs with `better-icons get`.
-4) If needed, output JSON for tooling pipelines.
 
-## Validation
-- Fail fast: stop at the first failed validation gate.
-- Ensure the suggested IDs exist in the target library.
-- Provide a minimal verification command (`better-icons get <id>`).
+1. Confirm the use case and icon style constraints.
+2. Search by query (optionally with a prefix).
+3. Select icon IDs that match the family and style.
+4. Fetch SVGs with token-aligned size/color.
+5. Sync into the project if needed.
+6. Validate output and usage context.
 
-## Anti-patterns
-- Guessing icon IDs without searching first.
-- Mixing icon libraries in the same UI surface without justification.
-- Using raw SVGs that violate brand or licensing constraints.
-- Mistake: choosing icons by name only without checking shape semantics.
-- Avoid generic icons that conflict with established product metaphors.
-- DO NOT claim an icon exists without a `search` confirmation.
-- NEVER ignore library prefix conflicts.
+## CLI
 
-## Constraints
-- Redact secrets/PII by default.
-- Do not add dependencies without explicit approval.
-- Prefer library‑approved icons where a design system exists.
-
-## CLI Quick Reference
 ```bash
 # Search icons
 better-icons search <query> [--prefix <prefix>] [--limit <n>] [--json]
@@ -77,6 +73,7 @@ better-icons setup [-a cursor,claude-code] [-s global|project]
 ```
 
 ## Examples
+
 ```bash
 better-icons search arrow --limit 10
 better-icons search home --json | jq '.icons[0]'
@@ -84,10 +81,78 @@ better-icons get lucide:home > icon.svg
 better-icons get mdi:home --color '#333' --json
 ```
 
-## Resources
-- `references/contract.yaml`
-- `references/evals.yaml`
+## Icon ID Format
+
+`prefix:name` - e.g., `lucide:home`, `mdi:arrow-right`, `heroicons:check`
+
+## Popular Collections
+
+`lucide`, `mdi`, `heroicons`, `tabler`, `ph`, `ri`, `solar`, `iconamoon`
+
+---
+
+## MCP Tools (for AI agents)
+
+| Tool | Description |
+|------|-------------|
+| `search_icons` | Search across all libraries |
+| `get_icon` | Get single icon SVG |
+| `get_icons` | Batch retrieve multiple icons |
+| `list_collections` | Browse available icon sets |
+| `recommend_icons` | Smart recommendations for use cases |
+| `find_similar_icons` | Find variations across collections |
+| `sync_icon` | Add icon to project file |
+| `scan_project_icons` | List icons in project |
+
+## TypeScript Interfaces
+
+```typescript
+interface SearchIcons {
+  query: string
+  limit?: number        // 1-999, default 32
+  prefix?: string       // e.g., 'mdi', 'lucide'
+  category?: string     // e.g., 'General', 'Emoji'
+}
+
+interface GetIcon {
+  icon_id: string       // 'prefix:name' format
+  color?: string        // e.g., '#ff0000', 'currentColor'
+  size?: number         // pixels
+}
+
+interface GetIcons {
+  icon_ids: string[]    // max 20
+  color?: string
+  size?: number
+}
+
+interface RecommendIcons {
+  use_case: string      // e.g., 'navigation menu'
+  style?: 'solid' | 'outline' | 'any'
+  limit?: number        // default 10
+}
+
+interface SyncIcon {
+  icons_file: string    // absolute path
+  framework: 'react' | 'vue' | 'svelte' | 'solid' | 'svg'
+  icon_id: string
+  component_name?: string
+}
+```
+
+## API
+
+All icons from `https://api.iconify.design`
+
+## Validation
+
+- `better-icons search home --limit 5` returns a list of icon IDs.
+- `better-icons get lucide:home` outputs valid SVG markup.
+- If syncing, verify the target file updates and renders correctly.
+- See `references/contract.yaml` (schema_version: 1) and `references/evals.yaml` for the formal contract and eval cases.
+- Fail fast: stop at the first failed check and fix before continuing.
 
 ## Remember
-The agent is capable of extraordinary work in this domain. These guidelines unlock that potential—they do not constrain it.
+
+The agent is capable of extraordinary work in this domain. These guidelines unlock that potential—they don't constrain it.
 Use judgment, adapt to context, and push boundaries when appropriate.

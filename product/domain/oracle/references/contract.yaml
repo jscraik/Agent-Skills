@@ -1,0 +1,31 @@
+schema_version: 1
+name: oracle
+purpose: Run @steipete/oracle to get a second-model review with repo context.
+triggers:
+  - Need a second-model review for debugging or refactors.
+  - Need multi-model comparison for risk/uncertainty.
+  - Need browser-mode verification for UI behavior.
+inputs:
+  - name: prompt
+    type: string
+    description: The question or task to review.
+  - name: files
+    type: array
+    items: string
+    description: File globs or explicit file list.
+  - name: engine
+    type: string
+    description: api or browser.
+outputs:
+  - name: oracle_response
+    type: string
+    description: Model output with context.
+  - name: session_id
+    type: string
+    description: Session identifier for reattach.
+non_goals:
+  - Treating outputs as authoritative without verification.
+  - Running paid API calls without approval.
+risks:
+  - Oversharing files can leak sensitive data.
+  - Browser mode can be slower and less deterministic.
