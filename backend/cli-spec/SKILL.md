@@ -33,7 +33,7 @@ Ask, then proceed with best-guess defaults if user is unsure:
 - Interactivity: prompts allowed? need `--no-input`? confirmations for destructive ops?
 - Config model: flags/env/config-file; precedence; XDG vs repo-local.
 - Security/telemetry: how auth is provided, stored, and redacted; any analytics opt-in?
-- Platform/runtime constraints: macOS/Linux/Windows; single binary vs runtime.
+- Platform/runtime constraints: Linux/Windows; single binary vs runtime.
 
 ## Deliverables (what to output)
 
@@ -48,6 +48,40 @@ When designing a CLI, produce a compact spec the user can implement:
 - Config/env rules + precedence (flags > env > project config > user config > system).
 - Help/docs ergonomics: `--help` layout, `cmd help`, docs/manpage link, shell completions if shipping.
 - 5-10 example invocations (common flows; include piped/stdin examples).
+
+## Required response headings
+Every response must include these headings:
+- `## When to use`
+- `## Inputs`
+- `## Outputs` (place the CLI spec deliverables under this heading)
+
+## Edge-case template (missing info)
+Use this exact structure when key inputs are missing:
+
+```md
+## When to use
+- This skill applies to CLI specification and refactor requests.
+
+## Inputs
+- Missing: <list the minimum required inputs>.
+
+## Outputs
+- None until inputs are provided.
+```
+
+## Failure-mode template (out of scope)
+Use this exact structure when the request is out of scope:
+
+```md
+## When to use
+- This skill applies to CLI specification and refactor requests. The current request is out of scope.
+
+## Outputs
+- None (out of scope).
+
+## Inputs
+- None (out of scope).
+```
 
 ## Decision ladder (flags vs subcommands vs prompts)
 - Use flags for small variations in a single operation.

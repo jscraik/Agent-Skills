@@ -1,7 +1,7 @@
 # Inspector overview
 
 ## Goal
-Build or operate a controlled interrogation package that produces evidence-backed findings for macOS/iOS, web/React, and OSS targets.
+Build or operate a controlled interrogation package that produces evidence-backed findings for web/React and OSS targets.
 
 ## Default loop
 1) Baseline capture (minimal interaction)

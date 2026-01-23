@@ -24,6 +24,26 @@ Install the codex-ui-kit assets into a target repo and (optionally) copy the reu
 - Installed kit files in the repo.
 - Optional prompts installed locally.
 
+## Required response headings
+Every response must include these headings:
+- `## When to use`
+- `## Inputs`
+- `## Outputs`
+
+## Failure-mode template (out of scope)
+Use this exact structure when the request is out of scope:
+
+```md
+## When to use
+- This skill applies to installing or updating codex-ui-kit. The current request is out of scope.
+
+## Outputs
+- None (out of scope).
+
+## Inputs
+- None (out of scope).
+```
+
 ## Philosophy
 - Prefer least-privilege changes and explicit user consent.
 - Preserve repo integrity; avoid overwriting unless instructed.
@@ -78,27 +98,12 @@ scripts/install_kit.sh --repo /path/to/repo --install-prompts
 - Overwriting custom repo files without user approval.
 - Skipping executable permission checks on `bin/ui-codex`.
 
-## Browser handling (macOS)
-- If Safari is not the default macOS browser and you need to open URLs in Safari, use `open -a Safari "<url>"`.
-
 ## Post-install checklist
 - `AGENTS.md` present at repo root.
 - `codex/ui_report.schema.json` present.
 - `bin/ui-codex` present and executable.
-- `bin/ios-web` present and executable; default profile opens iPad 13" Safari.
-- `bin/ios-web-storybook` and `bin/ios-web-openai` present for Storybook/OpenAI widget presets.
-- Optional: run `scripts/verify_ui_kit.sh <repo>` to confirm files, executables, and simctl availability.
+- Optional: run `scripts/verify_ui_kit.sh <repo>` to confirm files and executables.
 - Prompts visible after restarting Codex CLI (if installed).
-
-## iOS simulator defaults (web UI preview)
-- `bin/ios-web` now defaults to an iPad 13" profile (iPad Air 13-inch (M2)) and always uses Safari via simctl openurl.
-- Fallback order: target device name → any available iPad → any available iPhone.
-- Example (React/Vite/OpenAI widgets): start your dev server on port 5173, then run  
-  `bin/ios-web --path / --port 5173 --profile ipad_13 --snap ./artifacts/ios-ipad13.png`
-- Example (Storybook): `bin/ios-web --port 6006 --profile ipad_13`
-- Presets: `bin/ios-web-storybook` (port 6006, iPad 13), `bin/ios-web-openai` (port 5173, iPad 13).
-- Xcode-beta: if you need the beta toolchain, pass `--developer-dir /Applications/Xcode-beta.app/Contents/Developer` to `ios-web` (presets inherit it via extra args).
-- For native SwiftUI/SwiftPM apps, use the ios-debugger-agent/xcode-build skills to run the app; use `ios-web` only for web surfaces.
 
 ## Resources
 

@@ -130,7 +130,7 @@ Documentation & Collaboration: `list_documents`, `get_document`, `search_documen
 
 ## Example prompts
 - "Create a Linear issue for the login bug and assign it to me."
-- "Summarize open P1 bugs for the mobile team."
+- "Summarize open P1 bugs for the client team."
 - "Update the project timeline and add a status comment."
 
 ## Remember

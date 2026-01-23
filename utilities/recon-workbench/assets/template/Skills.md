@@ -2,8 +2,6 @@
 
 This repository defines a Codex-driven software interrogation toolkit spanning:
 
-- macOS apps (Mach-O, Swift/ObjC, app bundles)
-- iOS Simulator apps (native + WKWebView) with Safari Web Inspector
 - Browser / React-style web apps (cloud-served SPAs)
 - Open-source repos (architecture mapping, testing, static analysis)
 
@@ -47,7 +45,6 @@ Skills live under .codex/skills/<skill_name>/SKILL.md and can be invoked in Code
 | interrogate | Main orchestrator (plan -> run -> summarize) | target kind + locator + goal | probe plan + findings + report |
 | worst_case_interrogation | Escalation when targets are hardened/minified/opaque | target kind + goal | updated plan + high-signal evidence |
 | macos_app_triage | Static + bundle mapping for .app / Mach-O | app path | inventory + derived capability map |
-| ios_sim_interrogate | Simulator runs, screenshots/video, Web Inspector evidence | bundle id / url / goal | traces + media + findings |
 | web_app_interrogate | HAR/trace capture, endpoint inventory, runtime mapping | URL + scenario | endpoints + trace/har + findings |
 | oss_repo_map | Architecture map, hotspots, dependency graph, SAST | repo path + goal | map + hotspots + SAST summary |
 | report_compiler | Merge multi-run findings into a single understanding report | multiple run folders | consolidated report |

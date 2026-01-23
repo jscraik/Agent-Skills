@@ -10,7 +10,7 @@ triggers:
 inputs:
   - "UI spec file path"
   - "Target UI tool (v0, Bolt, Claude, Figma AI)"
-  - "Target platform (web, mobile, desktop)"
+  - "Target platform (web, touch-first, desktop)"
 non_goals:
   - "Generate a UI spec from a PRD"
   - "Invent design tokens or components"

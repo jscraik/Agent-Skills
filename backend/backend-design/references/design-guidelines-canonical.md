@@ -78,7 +78,7 @@ Tests:
 - `docs/KEYBOARD_NAVIGATION_TESTS.md`
 
 ## Appendices
-Appendix A–J contain UI/UX/Brand patterns, anti-patterns, decisions, and sharp edges. Apply them in SwiftUI surfaces too.
+Appendix A–J contain UI/UX/Brand patterns, anti-patterns, decisions, and sharp edges. Apply them consistently across web and desktop surfaces.
 
 ## Tailwind preset (bind tokens to Tailwind)
 Use this preset to wire DTCG-derived CSS variables into Tailwind (adapt package names as needed):

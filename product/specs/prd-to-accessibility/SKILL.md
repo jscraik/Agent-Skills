@@ -106,7 +106,7 @@ Write the accessibility spec in the same directory as the source PRD.
 ## Variation
 - Adapt accessibility depth to product type: consumer products need full WCAG compliance, internal tools can have baseline compliance.
 - Vary assistive tech assumptions: consumer apps must support screen readers, admin panels may prioritize keyboard navigation.
-- For mobile products, expand on touch target sizing and gesture accessibility.
+- For touch-first products, expand on touch target sizing and gesture accessibility.
 - For data products, expand on data visualization accessibility and screen reader optimization.
 - Adjust validation rigor based on audience—public products need formal audit, internal products can use lighter validation.
 

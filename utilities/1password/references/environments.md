@@ -9,9 +9,8 @@ Key points
 - Destinations currently include AWS Secrets Manager sync and local `.env` file mounting.
 
 Requirements (from docs)
-- 1Password subscription and desktop app on macOS, Windows, or Linux.
+- 1Password subscription and desktop app on Windows or Linux.
 - 1Password Developer experience enabled in the desktop app.
-- Not available on iOS/Android.
 
 Example UI labels (desktop app)
 - Enable Developer: Settings > Developer > Show 1Password Developer experience.

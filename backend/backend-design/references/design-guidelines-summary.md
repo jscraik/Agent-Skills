@@ -1,10 +1,10 @@
-# SwiftUI Design Guidelines (summary, canonical across projects)
+# UI Design Guidelines (summary, canonical across projects)
 
 Last updated: 2026-01-12
 Owner: TBD
 Review cadence: TBD
-Audience: SwiftUI developers (beginner–intermediate)
-Scope: task-focused guidance for shared UI used across ChatGPT widgets and standalone apps.
+Audience: frontend developers (beginner–intermediate)
+Scope: task-focused guidance for shared UI used across ChatGPT widgets and web/desktop apps.
 Non-scope: full architecture reference.
 
 ## Core principles
@@ -44,9 +44,6 @@ Non-scope: full architecture reference.
 - Component usage: `packages/ui/README.md`
 - Page patterns: `docs/guides/PAGES_QUICK_START.md`
 - A11y tests: `docs/KEYBOARD_NAVIGATION_TESTS.md`
-
-## Appendices (UI/UX/Brand)
-See `swiftui-ui-patterns` skill appendices for patterns, anti-patterns, decisions, and sharp edges. Apply the same principles in SwiftUI surfaces.
 
 ## Tokens
 - Use the canonical DTCG token source of truth: `references/index.dtcg.json`.

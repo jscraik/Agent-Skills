@@ -60,9 +60,8 @@ def _truncate(s: str, n: int) -> str:
 
 
 def _notify(title: str, message: str, group: Optional[str] = None) -> None:
-    """Best-effort desktop notification (macOS/Linux) with a stdout fallback."""
+    """Best-effort desktop notification (Linux) with a stdout fallback."""
 
-    # macOS
     if shutil.which("terminal-notifier"):
         cmd = [
             "terminal-notifier",

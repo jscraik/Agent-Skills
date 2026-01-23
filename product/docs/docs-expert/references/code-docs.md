@@ -25,31 +25,6 @@ Rules:
 - Inline comments explain why or constraints, not what the code already says.
 - Do not invent; docs must match implementation and tests.
 
-## Swift (DocC or SwiftDoc)
-
-Use `///` DocC comments for public types and methods, and anything with tricky invariants.
-
-Required content for public symbols:
-
-- Summary sentence
-- `- Parameters:` and `- Returns:` (when applicable)
-- `- Throws:` (conditions and error meaning)
-- `- Important:` for invariants or constraints
-- `- Warning:` for footguns (threading, main-actor, performance, security)
-- `- Example:` for non-obvious usage
-
-Best practice (richer DocC directives):
-
-- Add `### Discussion` to explain behavior, edge cases, and tradeoffs.
-- Add `- Complexity:` when time or space cost is non-trivial.
-- Use `- Note:` for usage guidance and `- Attention:` for user-impacting caveats.
-- Use `## Topics` and `### <Group>` to cluster related symbols on type docs.
-- Add a "See Also" list when there are close alternatives or companion APIs.
-
-Concurrency:
-
-- Document actor or isolation expectations (`@MainActor`, thread-safety) explicitly.
-
 ## Config files (JSON, TOML, YAML)
 
 Goal: readers can safely edit config without guessing.

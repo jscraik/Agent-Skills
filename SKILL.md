@@ -11,10 +11,10 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 
 ## Frontend
 ### UI
-- `frontend-ui-design` — Design or implement frontend UI/UX components across web, Apple, and Tauri desktop surfaces with tokens and accessibility. Not for design-system governance or visual regression; use ui-design-system or ui-visual-regression.
+- `frontend-ui-design` — Design or implement frontend UI/UX components across web and Tauri desktop surfaces with tokens and accessibility. Not for design-system governance or visual regression; use ui-design-system or ui-visual-regression.
 - `react-ui-patterns` — Provide React UI patterns and examples with TypeScript, Tailwind, and Radix. Not for design-system governance or visual regression; use ui-design-system or ui-visual-regression.
 - `ui-visual-regression` — Run and interpret UI visual regression workflows (Storybook, Playwright, Argos). Not for UI implementation or design-system governance; use frontend-ui-design or ui-design-system.
-- `ui-design-system` — Create or update governed UI design systems across SwiftUI and React stacks. Not for app-specific UI implementation or visual regression; use frontend-ui-design or ui-visual-regression.
+- `ui-design-system` — Create or update governed UI design systems across React and web stacks. Not for app-specific UI implementation or visual regression; use frontend-ui-design or ui-visual-regression.
 - `web-design-guidelines` — Web design guidelines and patterns for consistent UI decisions across projects.
 - `react-best-practices` — Practical React guidance for structure, patterns, and performance.
 
@@ -29,17 +29,6 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 ### Tools
 - `codex-ui-kit-installer` — Install or update codex-ui-kit in a repo and optional Codex UI prompts. Not for general skill installation; use skill-installer or clawdhub.
 - `nano-banana-builder` — Build full-stack web applications powered by Google Gemini's Nano Banana & Nano Banana Pro image generation APIs. Use when creating Next.js image generators, editors, galleries, or any web app that integrates gemini-2.5-flash-image or gemini-3-pro-image-preview models. Covers React components, server actions, API routes, storage, rate limiting, and production deployment patterns.
-
-## Apple/Swift
-- `apple-mail-search` — Search, triage, and organize Apple Mail on macOS. Not for Gmail, Outlook, or webmail workflows.
-- `instruments-profiling` — Use when profiling native macOS or iOS apps with Instruments/xctrace. Covers correct binary selection, CLI arguments, exports, and common gotchas.
-- `ios-sim-debug` — Use XcodeBuildMCP to build, run, launch, and debug the current iOS project on a booted simulator. Trigger when asked to run an iOS app, interact with the simulator UI, inspect on-screen state, capture logs/console output, or diagnose runtime behavior using XcodeBuildMCP tools.
-- `macos-spm-packager` — Scaffold, build, and package SwiftPM-based macOS apps without an Xcode project. Use when you need a from-scratch macOS app layout, SwiftPM targets/resources, a custom .app bundle assembly script, or signing/notarization/appcast steps outside Xcode.
-- `swift-concurrency-expert` — Review and remediate Swift concurrency (async/await, actors, Sendable, isolation) and performance issues. Not for SwiftUI layout or visual design.
-- `swiftui-liquid-glass` — Adopt or review iOS 26+ Liquid Glass in SwiftUI. Not for general SwiftUI patterns or refactors; use swiftui-ui-patterns or swiftui-view-refactor.
-- `swiftui-ui-patterns` — SwiftUI UI patterns and example structures for building screens and components. Not for refactors or Liquid Glass adoption; use swiftui-view-refactor or swiftui-liquid-glass.
-- `swiftui-view-refactor` — Refactor SwiftUI views for structure, dependency injection, and Observation usage. Not for general UI patterns or Liquid Glass; use swiftui-ui-patterns or swiftui-liquid-glass.
-- `xcode-build` — Build and manage iOS/macOS apps via XcodeBuildMCP and Xcode CLI tools. Not for interactive simulator debugging; use ios-sim-debug.
 
 ## Backend/Arch
 - `backend-design` — Design backend architecture, data models, API contracts, auth, reliability, observability, and integrations. Trigger when user asks for backend design/specs or system architecture; not for frontend UI or product requirements (use frontend-ui-design or product-spec).
@@ -83,7 +72,7 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 
 ### Review
 - `llm-design-review` — Run design reviews and audits for LLM features across UX, architecture, model/prompt, safety, evaluation, and governance. Not for product PRDs; use product-spec.
-- `product-design-review` — Review end-to-end user experience and UI for products or flows; produce a user-perspective critique with usability, accessibility, content, and interaction issues plus fixes. Use for UX/UI audits, product design reviews, onboarding or checkout critiques, heuristic evaluations, accessibility-first reviews, or when asked to find issues in a user journey from the user's point of view. Target web, iOS, and macOS products, including React apps and open-source software.
+- `product-design-review` — Review end-to-end user experience and UI for products or flows; produce a user-perspective critique with usability, accessibility, content, and interaction issues plus fixes. Use for UX/UI audits, product design reviews, onboarding or checkout critiques, heuristic evaluations, accessibility-first reviews, or when asked to find issues in a user journey from the user's point of view. Target web products, including React apps and open-source software.
 
 ### Strategy
 - `project-improvement-ideator` — Generate 30 pragmatic improvement ideas for the current project, weigh feasibility/impact/user perception, then winnow to the best 5 with rationale. Use when asked for “best ideas”, “improvements”, “roadmap”, or “top 5”/“winnow” prioritization. Not for full product specs or LLM design reviews; use product-spec or llm-design-review.
@@ -113,7 +102,7 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - `1password` — Set up and use 1Password CLI (op) for install, desktop integration, sign-in, and secret injection. Not for non-1Password secret tooling.
 - `markdown-converter` — Convert documents and files to Markdown using markitdown. Use when converting PDF, Word (.docx), PowerPoint (.pptx), Excel (.xlsx, .xls), HTML, CSV, JSON, XML, images (with EXIF/OCR), audio (with transcription), ZIP archives, YouTube URLs, or EPubs to Markdown format for LLM processing or text analysis.
 - `process-watch` — Monitor system processes and resources (CPU, memory, I/O, network) and manage runaway processes. Not for app-level profiling or code tuning.
-- `recon-workbench` — Production-grade forensic evidence collection for software interrogation across macOS/iOS, web/React, and OSS repos. Use when running rwb CLI commands (doctor, authorize, plan, run, manifest, summarize, validate), designing probe catalogs or schemas, generating evidence-backed findings, inspecting targets under authorization guardrails, or configuring scope and compliance policies.
+- `recon-workbench` — Production-grade forensic evidence collection for software interrogation across web/React and OSS repos. Use when running rwb CLI commands (doctor, authorize, plan, run, manifest, summarize, validate), designing probe catalogs or schemas, generating evidence-backed findings, inspecting targets under authorization guardrails, or configuring scope and compliance policies.
 - `remotion-best-practices` — Best practices for Remotion (React video): compositions, timing, assets, audio, captions, transitions, and Mediabunny utilities. Use when writing or reviewing Remotion code.
 - `skill-creator` — Create, update, validate, or package skills and their resources. Use when a user asks to create or revise a skill, improve routing/portability, or package a skill; not for installing skills or choosing the right build primitive (use skill-installer or decide-build-primitive).
 - `skill-installer` — Install skills into $CODEX_HOME/skills from curated lists or GitHub paths. Not for clawdhub.com installs or skill creation.

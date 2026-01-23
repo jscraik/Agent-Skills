@@ -8,10 +8,6 @@ Web:
 - `packages/ui/src/styles/tokens.css`
 - `packages/ui/src/styles/theme.css`
 
-Swift:
-- `swift/ChatUIFoundation/.../Generated/Tokens.swift`
-- `swift/ChatUIThemes/.../Generated/Theme+Tokens.swift`
-
 Docs:
 - `docs/theming/token-reference.md`
 - `docs/architecture/cross-platform-design.md` (must link to the token reference)

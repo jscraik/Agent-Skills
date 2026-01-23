@@ -20,7 +20,7 @@ Structure a multidisciplinary design review for LLM-powered products, producing 
 
 ## Review Workflow (use in order)
 1) Scope and risk tier
-- Define surface (web, iOS, API), scope boundaries, and risk classification.
+- Define surface (web, API), scope boundaries, and risk classification.
 - Identify data types (PII, PHI, PCI) and policies that apply.
 
 2) UX and interaction integrity

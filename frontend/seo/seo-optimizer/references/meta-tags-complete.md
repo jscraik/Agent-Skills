@@ -14,7 +14,7 @@ Always first in `<head>`. UTF-8 supports all languages.
 ```html
 <meta name="viewport" content="width=device-width, initial-scale=1">
 ```
-Required for mobile responsiveness. Never use `user-scalable=no` (accessibility issue).
+Required for responsive layouts. Never use `user-scalable=no` (accessibility issue).
 
 ### Title
 ```html
@@ -221,15 +221,11 @@ Note: Google no longer uses these for indexing but they help with crawling.
 <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
 
-<!-- Safari/Apple specific -->
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 ```
 
 ### App-Like Behavior
 ```html
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="App Name">
-<meta name="mobile-web-app-capable" content="yes">
+<!-- Platform-specific web app meta (omit unless explicitly needed) -->
 <meta name="application-name" content="App Name">
 ```
 

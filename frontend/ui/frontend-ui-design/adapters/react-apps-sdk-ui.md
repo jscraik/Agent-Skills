@@ -31,7 +31,3 @@ Recommend small hooks:
 - Do not import `@radix-ui/*` outside `packages/ui/src/primitives`.
 - Do not import `lucide-react` directly; use `packages/ui/src/icons` adapter.
 - Confirm the current `@openai/apps-sdk-ui` version in `packages/ui/package.json` and `packages/widgets/package.json`.
-
-## F) iOS Simulator Safari preview (web widgets)
-- For a terminal-driven preview loop, use `xcrun simctl` to boot a device and open the dev URL.
-- See: `references/ios-simulator-web-preview.md`

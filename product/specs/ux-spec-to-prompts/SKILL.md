@@ -259,7 +259,7 @@ Before finalizing prompts:
 ## Variation
 - Vary prompt granularity based on spec size and tool limits.
 - Expand state and interaction detail for high-risk flows.
-- Avoid generic patterns; adapt prompts to domain (dashboard vs mobile vs editor) and user sophistication.
+- Avoid generic patterns; adapt prompts to domain (dashboard vs compact screens vs editor) and user sophistication.
 - If the spec is thin, bias toward asking for missing measurements rather than guessing.
 
 ## Empowerment

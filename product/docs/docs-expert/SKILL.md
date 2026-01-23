@@ -45,6 +45,12 @@ Use this when the user wants help quickly and does not want the full three-stage
 - Open questions or items requiring confirmation.
 - Evidence bundle (lint outputs, brand checks, readability, checklist snapshot).
 
+## Required response headings
+Every response must include these headings:
+- `## When to use`
+- `## Inputs`
+- `## Outputs`
+
 ## Full workflow (reference)
 
 Read `references/DOC_COAUTHORING.md` for the full stage-by-stage process, question prompts, and reader testing rubric.
@@ -102,7 +108,6 @@ If tooling is missing, state what is missing and how to enable it.
 - "Draft a decision doc for migrating from REST to GraphQL"
 - "Rewrite our README to make onboarding faster and add a quickstart"
 - "Audit this runbook for missing rollback steps and unclear prerequisites"
-- "Add DocC comments for these Swift APIs"
 
 ## Anti-patterns
 

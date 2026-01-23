@@ -68,6 +68,26 @@ You are capable of extraordinary rigor here. Push boundaries on clarity and risk
 
 Use `assets/backend_design_output_template.md` as the default structure.
 
+## Required response headings
+Every response must include these headings:
+- `## When to use`
+- `## Inputs`
+- `## Outputs` (place the output contract under this heading)
+
+## Failure-mode template (out of scope)
+Use this exact structure when the request is out of scope:
+
+```md
+## When to use
+- This skill applies to backend architecture and API design requests. The current request is out of scope.
+
+## Outputs
+- None (out of scope).
+
+## Inputs
+- None (out of scope).
+```
+
 ## Standards baseline (enforce as of Jan 2026)
 - HTTP semantics and status codes per RFC 9110
 - OpenAPI latest published version (check `oas/latest`; 3.1.1 as of Oct 24, 2024) for REST contracts (JSON Schema 2020-12 dialect)
@@ -111,7 +131,7 @@ Use references:
 - Specify logs, metrics, traces, and alerting.
 - Add idempotency + replay protection for MCP tools (nonce, request_id, dedupe window).
 
-- If clients include React/Vite/Tailwind/TS, Swift, Apps SDK UI, OpenAI widgets, MCP, Storybook, or CLI, define contract-first integration. When UI is involved, align with canonical design tokens/guidelines in `references/design-guidelines-canonical.md` (or summary).
+- If clients include React/Vite/Tailwind/TS, Apps SDK UI, OpenAI widgets, MCP, Storybook, or CLI, define contract-first integration. When UI is involved, align with canonical design tokens/guidelines in `references/design-guidelines-canonical.md` (or summary).
 - If a Tauri desktop app is in scope, define the Rust command/IPC layer, permission/allowlist boundaries, and data validation rules. Specify how backend services interact with the Tauri layer (local vs remote calls, auth handoff, and error mapping).
 - If Cloudflare Workers are used, account for Workers limits, streaming, and security model constraints.
 - If Ollama Cloud API or frontier models are used, document provider-specific auth, data handling, and usage constraints.

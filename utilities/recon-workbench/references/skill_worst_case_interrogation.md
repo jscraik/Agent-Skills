@@ -18,8 +18,6 @@ Escalation ladder:
 2) stimulus scenario(s)
 3) diff
 4) instrumentation:
-   - macOS: Instruments + unified logs
-   - iOS Simulator: simctl media capture + Web Inspector + Instruments
    - Web: Playwright trace + HAR + (optional) proxy
    - OSS: tests + coverage + Semgrep/CodeQL
 5) request authorized debug builds/symbols (if needed)

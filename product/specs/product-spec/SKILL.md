@@ -388,7 +388,7 @@ Next step: <single request>
 - DO NOT merge PRs with failing tests—failing tests mean the code is not ready.
 
 ## Examples
-- "Draft a Foundation Spec for a mobile habit-tracking app; include problem, success metrics, and user stories."
+- "Draft a Foundation Spec for a habit-tracking app; include problem, success metrics, and user stories."
 - "Create a full spec pipeline (Foundation → UX → Build Plan) for a B2B onboarding flow."
 - "Interview me first, then write the Foundation Spec for a CSV ingest API."
 - "Review this existing project and produce a Project Review Report."

@@ -6,7 +6,6 @@
 - Tailwind CSS (official docs): https://tailwindcss.com/docs
 - TypeScript (official docs): https://www.typescriptlang.org/docs/
 - JavaScript / ECMAScript (spec): https://tc39.es/ecma262/
-- Swift (official docs): https://www.swift.org/documentation/
 
 ## API + Contracts
 - OpenAPI 3.1.1: https://spec.openapis.org/oas/v3.1.1

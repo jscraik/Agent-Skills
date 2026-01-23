@@ -114,7 +114,7 @@ await argosScreenshot(page, "button/primary/default/desktop");
 - Format: `component/variant/state/viewport`
 - Examples:
   - `button/primary/default/desktop`
-  - `modal/confirmation/open/mobile`
+  - `modal/confirmation/open/compact`
 
 ## Storybook story naming → snapshot naming (guide)
 - Prefer `title` + `storyName` as base, then append viewport.

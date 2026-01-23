@@ -1,9 +1,9 @@
-# DTCG Token Mapping (Web + Swift)
+# DTCG Token Mapping (Web)
 
 Last verified: 2026-01-01
 
 This guide normalizes the Apps-in-ChatGPT brand tokens into DTCG-compliant
-names and provides platform mapping rules for web and Swift.
+names and provides platform mapping rules for web surfaces.
 
 ## 1) Canonical token naming (DTCG)
 Use nested groups (no dots in token or group names). Favor semantic names over
@@ -104,7 +104,6 @@ Spec reference: https://www.designtokens.org/TR/2025.10/format/
 ## 2) Value mapping rules
 - Store values in px (dimensions) and ms (durations).
 - Derive rem: 1rem = 16px unless project overrides.
-- Apple mapping uses pt = px unless overridden by platform scaling rules.
 
 ## 3) Theme strategy
 - DTCG themes: `themes/light.json`, `themes/dark.json`
@@ -119,17 +118,7 @@ Spec reference: https://www.designtokens.org/TR/2025.10/format/
   - radius/24 -> --radius-24
 - Use CSS variables in React/App SDK UI components. Never hardcode raw values.
 
-## 5) Swift mapping
-- Export to Swift structs derived from the same semantic groups:
-  - `Tokens.Color.Bg.primary`
-  - `Tokens.Space.s12`
-  - `Tokens.Radius.r24`
-  - `Tokens.Type.body.size`
-- Provide light/dark values via `ColorAsset` or `Color` initializers based on
-  dynamic color providers.
-- Keep iOS/macOS/AppKit mapping parity. Avoid platform drift.
-
-## 6) Validation checklist
+## 5) Validation checklist
 - No raw hex values in component styles.
 - No magic numbers for spacing or radius.
 - All tokens referenced in `packages/tokens` and mapped by the bridge.

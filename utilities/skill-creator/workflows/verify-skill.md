@@ -34,8 +34,8 @@ Categorize by primary dependency type:
 | Type | Examples | Verification Method |
 |------|----------|---------------------|
 | **API/Service** | manage-stripe, manage-gohighlevel | Context7 + WebSearch |
-| **CLI Tools** | build-macos-apps (xcodebuild, swift) | Run commands |
-| **Framework** | build-iphone-apps (SwiftUI, UIKit) | Context7 for docs |
+| **CLI Tools** | build-rust-cli (cargo, rustfmt) | Run commands |
+| **Framework** | react-ui-patterns (React) | Context7 for docs |
 | **Integration** | setup-stripe-payments | WebFetch + Context7 |
 | **Pure Process** | create-agent-skills | No external deps |
 
@@ -46,7 +46,7 @@ Report: "This skill is primarily [type]-based. I'll verify using [method]."
 Scan skill content and extract:
 
 **CLI Tools mentioned:**
-- Tool names (xcodebuild, swift, npm, etc.)
+- Tool names (cargo, rustfmt, npm, etc.)
 - Specific flags/options documented
 - Expected output patterns
 
@@ -57,7 +57,7 @@ Scan skill content and extract:
 - SDK versions
 
 **Framework Patterns:**
-- Framework names (SwiftUI, React, etc.)
+- Framework names (React, etc.)
 - Specific APIs/patterns documented
 - Version-specific features
 

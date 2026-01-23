@@ -11,14 +11,6 @@
 - Config reference: https://developers.openai.com/codex/config-reference/
 - Codex SDK: https://developers.openai.com/codex/sdk/
 
-## Apple (macOS / iOS Simulator / Safari)
-- Safari Develop menu: https://developer.apple.com/documentation/safari-developer-tools/develop-menu
-- Inspecting iOS & iPadOS (simulators appear in Develop menu): https://developer.apple.com/documentation/safari-developer-tools/inspecting-ios
-- Web Inspector overview: https://developer.apple.com/documentation/safari-developer-tools/web-inspector
-- Capturing screenshots & videos from Simulator (Xcode): https://developer.apple.com/documentation/xcode/capturing-screenshots-and-videos-from-simulator
-- simctl io screenshot/recordVideo (archive guide): https://developer.apple.com/library/archive/documentation/IDEs/Conceptual/iOS_Simulator_Guide/InteractingwiththeiOSSimulator/InteractingwiththeiOSSimulator.html
-- Analyzing HTTP traffic with Instruments: https://developer.apple.com/documentation/foundation/analyzing-http-traffic-with-instruments
-
 ## Browser tooling
 - Chrome DevTools Network reference (HAR export): https://developer.chrome.com/docs/devtools/network/reference
 

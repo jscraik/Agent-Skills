@@ -87,7 +87,7 @@ process-watch watch --alert-cpu 90 --alert-mem 85
 
 ## Platform Support
 
-- **macOS**: Full support
+- **Desktop**: Full support
 - **Linux**: Full support  
 - **Windows**: Partial (basic process list, no lsof equivalent)
 

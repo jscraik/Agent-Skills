@@ -1,0 +1,17 @@
+purpose: >
+  Define expected behavior and outputs for the release skill.
+schema_version: 1.0
+triggers:
+  - user requests a release using just release X.Y.Z
+  - user asks to cut a new semver version on main
+inputs:
+  - target version X.Y.Z
+  - confirmation of main branch and clean working tree
+  - cargo credentials present
+outputs:
+  - release run completed or explicit failure report
+non_goals:
+  - performing releases without just
+  - bypassing version validation or safety checks
+risks:
+  - failed publish or tag; mitigated by fail-fast and error reporting

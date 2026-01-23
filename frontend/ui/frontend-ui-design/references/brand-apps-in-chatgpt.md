@@ -146,16 +146,6 @@ Pattern: layouts cluster around 8 / 12 / 16 / 24 / 32.
 - Button label (common): 15 / 24, Medium, tracking -0.24
 - Button label (small): 14 / 20, Semibold, tracking -0.3
 
-#### Text styles (iOS set)
-| Style | Size / Line | Weight | Tracking |
-| --- | ---: | ---: | ---: |
-| heading1 | 32 / 40 | 600 | -0.1 |
-| heading2 | 24 / 28 | 600 | -0.25 |
-| heading3 | 18 / 26 | 600 | -0.45 |
-| body | 16 / 26 | 400 (emphasis 600) | -0.4 |
-| body-small | 14 / 18 | 400 (emphasis 600) | -0.3 |
-| caption | 12 / 16 | 400 (emphasis 600) | -0.1 |
-
 #### Text styles (Android set)
 | Style | Size / Line | Weight | Tracking |
 | --- | ---: | ---: | ---: |
@@ -274,16 +264,8 @@ Observed structure (key constraints):
 
 Rule: design app content to fit gracefully in 728px width without horizontal scroll.
 
-### 4.2 Conversation Inline Card (iOS)
-- Device width: 393px
-- Typical inset: 20px
-- Working width: 353px
-- Card / entity card commonly align to 353-345px widths
-
-Rule: ensure primary cards work at 353px and keep CTAs 44px tall.
-
 ### 4.3 Inline Carousel
-- Mobile carousel row consumes the full working width and sets a fixed row height
+- Small-screen carousel row consumes the full working width and sets a fixed row height
   (~330-447 depending on whether model response/actions are visible below).
 - Desktop carousel commonly shows 3 tiles across in a 728px region, with explicit
   next/prev button (40x40) when needed.

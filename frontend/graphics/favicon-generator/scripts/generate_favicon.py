@@ -226,7 +226,7 @@ def render_lucide_icon(
     """
     if not HAS_CAIROSVG:
         print(f"Warning: cairosvg not available. Install with: pip install cairosvg")
-        print(f"         Also need native cairo: brew install cairo (macOS)")
+        print("         Also need native cairo: brew install cairo")
         return None
     
     if icon_name not in LUCIDE_ICONS:
@@ -543,7 +543,7 @@ def get_system_font(size: int, bold: bool = True) -> ImageFont.FreeTypeFont | No
     """
     # Common font paths by OS
     font_paths = [
-        # macOS
+        # platform-specific
         "/System/Library/Fonts/SFNSDisplay.ttf",
         "/System/Library/Fonts/Helvetica.ttc",
         "/Library/Fonts/Arial Bold.ttf" if bold else "/Library/Fonts/Arial.ttf",
@@ -1090,7 +1090,7 @@ Available icons: """ + ", ".join(LUCIDE_ICONS.keys()) + """
         if not HAS_CAIROSVG:
             print("\n⚠️  Warning: cairosvg not installed!")
             print("   Install with: pip install cairosvg")
-            print("   Also need native cairo: brew install cairo (macOS)")
+            print("   Also need native cairo: brew install cairo")
             print("   Falling back to letter mode...\n")
             args.letter = args.lucide[0].upper()
             args.lucide = None
@@ -1142,4 +1142,3 @@ Available icons: """ + ", ".join(LUCIDE_ICONS.keys()) + """
 
 if __name__ == "__main__":
     main()
-

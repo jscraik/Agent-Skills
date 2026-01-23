@@ -30,8 +30,6 @@ Ask only what is needed to avoid blocking:
 
 ## Platform Selection Rules
 - If the experience runs in a browser, use the web reference.
-- If the experience is an iOS app, use the iOS reference.
-- If the experience is a macOS desktop app, use the macOS reference.
 - If the product is built in React or is OSS, also use the React/OSS reference.
 - If multiple surfaces share a flow, evaluate each surface independently, then summarize cross-platform gaps.
 
@@ -112,8 +110,6 @@ Use when the product is open-source and adoption or contributor experience is cr
 
 ## References
 - For web reviews, use `references/heuristics-web.md`.
-- For iOS app reviews, use `references/heuristics-ios.md`.
-- For macOS app reviews, use `references/heuristics-macos.md`.
 - For React or OSS context, use `references/react-and-oss.md`.
 - For OSS adoption checks, use `references/oss-checklist.md`.
 

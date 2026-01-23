@@ -10,7 +10,7 @@ Usage:
   ui-codex fix    --issue "..." [--profile iphone_pro] [--path /] [--before <png>] [--after <png>] [--schema codex/ui_report.schema.json]
 
 Options:
-  --issue         Required. Short description of what's wrong (what you see on iOS).
+  --issue         Required. Short description of what's wrong (what you see on small screens).
   --profile       Optional. Device profile label (freeform string). Default: iphone_pro
   --path          Optional. Route/path to open (e.g. /settings). Default: /
   --before        Optional. Path to a BEFORE screenshot PNG. If omitted, tries to create one via bin/ios-web.
@@ -125,7 +125,7 @@ PROMPT=$(cat <<TXT
 You are working in a React + Vite + Tailwind repository.
 
 Task mode: ${SUBCOMMAND}
-iOS UI issue: ${ISSUE}
+Small-screen UI issue: ${ISSUE}
 Device profile label: ${DEVICE_PROFILE}
 Route path: ${ROUTE_PATH}
 

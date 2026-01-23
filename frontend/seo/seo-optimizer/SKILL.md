@@ -7,6 +7,26 @@ description: "Transform your web application from invisible to discoverable. Thi
 
 Transform your web application from invisible to discoverable. This skill analyzes your codebase and implements comprehensive SEO optimizations that help search engines and social platforms understand, index, and surface your content.
 
+## Required response headings
+Every response must include these headings:
+- `## When to use`
+- `## Inputs`
+- `## Outputs`
+
+## Failure-mode template (out of scope)
+Use this exact structure when the request is out of scope:
+
+```md
+## When to use
+- This skill applies to SEO audits and optimization tasks. The current request is out of scope.
+
+## Outputs
+- None (out of scope).
+
+## Inputs
+- None (out of scope).
+```
+
 ## Philosophy: SEO as Semantic Communication
 
 SEO is not about gaming algorithms—it's about **clearly communicating what your content IS** to machines (search engines, social platforms, AI crawlers) so they can properly understand and surface it.
@@ -113,14 +133,7 @@ See `references/analysis-checklist.md` for detailed audit procedures.
 - Accurately describe page content
 - Include brand for recognition (usually at end)
 
-**Title Patterns by Page Type**:
-```
-Homepage:     {Brand} - {Value Proposition}
-Product:      {Product Name} - {Key Benefit} | {Brand}
-Article:      {Article Title} | {Brand}
-Category:     {Category} Products | {Brand}
-Search:       Search Results for "{Query}" | {Brand}
-```
+See `references/meta-tags-complete.md` for full title patterns by page type.
 
 ### Meta Description Best Practices
 
@@ -131,11 +144,7 @@ Search:       Search Results for "{Query}" | {Brand}
 - Unique for every page
 - Include primary keyword naturally
 
-**DO NOT**:
-- Stuff keywords unnaturally
-- Use the same description across pages
-- Write descriptions that don't match content
-- Start with "Welcome to..." or similar filler
+See `references/meta-tags-complete.md` for full do/don't guidance.
 
 ### Open Graph Tags (Social Sharing)
 
@@ -315,8 +324,8 @@ Disallow: /
 Why bad: Complete deindexing. Check robots.txt carefully.
 
 ❌ **Ignoring Mobile**
-Not having responsive design or mobile-specific considerations.
-Why bad: Google uses mobile-first indexing. Most traffic is mobile.
+Not having responsive design or small-screen considerations.
+Why bad: most traffic is small-screen and responsive issues hurt rankings.
 
 ❌ **Over-Optimization**
 Adding structured data for content that doesn't exist.
@@ -355,7 +364,6 @@ Why bad: Provides no value. Won't rank. Won't get clicks.
 ### Next.js (App Router)
 
 ```typescript
-// app/page.tsx
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -372,7 +380,6 @@ export const metadata: Metadata = {
 ### Next.js (Pages Router)
 
 ```typescript
-// pages/index.tsx
 import Head from 'next/head'
 
 export default function Page() {
@@ -389,29 +396,12 @@ export default function Page() {
 
 ```astro
 ---
-// src/pages/index.astro
-import Layout from '../layouts/Layout.astro';
+import Layout from 'path/to/Layout.astro';
 ---
 <Layout
   title="Page Title | Brand"
   description="Page description"
-  ogImage="/og-image.png"
-/>
-```
-
-### React (react-helmet)
-
-```jsx
-import { Helmet } from 'react-helmet';
-
-function Page() {
-  return (
-    <Helmet>
-      <title>Page Title | Brand</title>
-      <meta name="description" content="Page description" />
-    </Helmet>
-  );
-}
+  ogImage="path/to/og-image.png" />
 ```
 
 See `references/framework-implementations.md` for complete guides.
@@ -443,6 +433,10 @@ python scripts/generate_sitemap.py <path-to-project> --domain https://example.co
 ```
 
 ---
+
+## Examples
+1) "Audit my Astro docs site and propose SEO fixes (titles, descriptions, sitemap)."
+2) "Add JSON-LD for product pages in Next.js App Router with a reusable helper."
 
 ## Remember
 

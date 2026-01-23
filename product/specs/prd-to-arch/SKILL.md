@@ -93,7 +93,7 @@ Write the architecture spec in the same directory as the source PRD or tech spec
 - **Component registry:** Enable teams to reuse battle-tested components instead of reinventing wheels. Custom components must be justified.
 
 ## Variation
-- Adapt architecture style to product type: SaaS products need clear multi-tenant boundaries, mobile apps need service layering, data products need pipeline clarity.
+- Adapt architecture style to product type: SaaS products need clear multi-tenant boundaries, client apps need service layering, data products need pipeline clarity.
 - Vary depth based on maturity: discovery specs need boundaries and key flows, production specs need complete component inventories.
 - For distributed systems, expand on consistency models and failure scenarios.
 - For data-heavy products, expand on data lineage and transformation flows.

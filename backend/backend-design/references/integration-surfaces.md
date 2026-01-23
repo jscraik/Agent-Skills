@@ -2,13 +2,12 @@
 
 ## Client Surfaces
 - Web: React + Vite + Tailwind + TS/JS
-- Mobile: Swift (iOS)
 - Apps SDK UI / OpenAI widgets
 
 ## Contract-First Integration
 - REST: OpenAPI 3.1 as source of truth
 - GraphQL: schema-first with typed clients
-- Use codegen for TS and Swift clients
+- Use codegen for TS clients
 
 ## MCP Tools
 - Define tool schemas with clear inputs/outputs and error shapes

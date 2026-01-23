@@ -9,7 +9,6 @@ One sentence: reusable doc comment templates for common languages, with space fo
 - [Python docstring (Google style)](#python-docstring-google-style)
 - [Rust doc comment](#rust-doc-comment)
 - [Go doc comment](#go-doc-comment)
-- [Swift DocC](#swift-docc)
 - [Kotlin KDoc / JavaDoc](#kotlin-kdoc--javadoc)
 
 ## General guidance
@@ -118,29 +117,6 @@ pub fn function_name(arg: Type) -> Result<ReturnType, Error> {
 // - <units, ranges, defaults>
 // - <side effects, performance notes>
 func FunctionName(arg Type) (ReturnType, error) {
-    // ...
-}
-```
-
-## Swift DocC
-```swift
-/// <Verb> <object> to <result>.
-///
-/// Purpose: <what this does and who it is for>.
-///
-/// ### Discussion
-/// <how it works, edge cases, and tradeoffs>
-///
-/// - Parameters:
-///   - name: <meaning, type constraints, defaults>
-/// - Returns: <what is returned and when>
-/// - Throws: <when it throws>
-/// - Complexity: <time/space complexity if non-trivial>
-/// - Important: <invariants, ordering, or state requirements>
-/// - Warning: <footguns, performance, or thread-safety>
-/// - Note: <additional usage guidance>
-/// - Attention: <user-impacting caveats>
-func functionName(_ name: Type) throws -> ReturnType {
     // ...
 }
 ```

@@ -19,12 +19,12 @@
 ## 2) Information architecture + navigation
 - Entry points:
 - Navigation model:
-- Back/escape behavior (widget + iOS + macOS):
+- Back/escape behavior (widget + desktop):
 
 ## 3) Screens and states (token-referenced)
 For each screen/state:
-- Layout (token refs + px/rem + pt)
-- Components used (React + Swift names)
+- Layout (token refs + px/rem)
+- Components used (React)
 - States: default / loading / empty / error / offline / permission-denied
 - Error prevention and recovery
 - Feedback timing (<=100ms)
@@ -38,16 +38,15 @@ For each screen/state:
 ## 5) Responsive/adaptive behavior
 - Breakpoints (px):
 - Widget (maxHeight + displayMode):
-- iOS size class rules:
-- macOS window resizing rules:
+- Desktop window resizing rules (macOS/Windows/Linux):
 
 ## 6) Motion
 - Animations (tokenized duration/easing)
 - Reduced motion alternatives (required for each)
 
-## 7) Accessibility map (WCAG 2.2 AA + Apple AX)
+## 7) Accessibility map (WCAG 2.2 AA)
 ### 7.1 Semantics and labels
-- ARIA intent + Apple equivalents
+- ARIA intent
 - Accessible names/labels
 - Hints only if needed
 
@@ -66,13 +65,13 @@ State: Error
 - Tab order:
 - Activation keys:
 - Escape/back:
-- Shortcuts (macOS):
+- Shortcuts:
 
 ### 7.4 Contrast + accommodations
 - Contrast checks per state:
 - Reduce transparency handling:
 - Increased contrast handling:
-- Dynamic Type expectations:
+- Text scaling expectations:
 
 ## 8) Acceptance criteria
 - Task success >=95% (measurement plan)
@@ -88,17 +87,9 @@ State: Error
 - callTool wiring
 - requestDisplayMode usage
 
-### 9.2 SwiftUI
-(snippets)
-
-### 9.3 UIKit / AppKit (if in scope)
-(snippets)
-
 ## 10) Test plan (step-by-step)
-- VoiceOver / Switch Control:
-- Dynamic Type:
+- Text scaling:
 - Reduce Motion:
 - Reduce Transparency:
 - Keyboard nav:
-- AX Inspector:
 - Regression checklist:

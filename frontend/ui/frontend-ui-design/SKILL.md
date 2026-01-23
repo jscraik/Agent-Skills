@@ -3,7 +3,7 @@ name: frontend-ui-design
 description: "Create and review production-ready frontend UI components with accessibility and distinct visual direction. Use when building or redesigning frontend UI."
 ---
 
-# Frontend Design System (Apps SDK UI + React + SwiftUI/UIKit/AppKit)
+# Frontend Design System (Apps SDK UI + React + Tauri)
 
 ## Compliance
 - Check against GOLD Industry Standards guide in ~/.codex/AGENTS.override.md
@@ -16,12 +16,11 @@ exceptional attention to aesthetic details and creative choices.
 
 Design and implement UI/UX and reusable components across:
 - ChatGPT Apps SDK widgets (React + Apps SDK UI, hosted runtime)
-- Apple-native UI libraries (SwiftUI, UIKit, AppKit)
 - Tauri desktop apps (web UI + Rust command layer)
 
 This skill enforces:
 - Single token source-of-truth (DTCG/W3C design tokens)
-- WCAG 2.2 AA + Apple Accessibility (AX) compliance
+- WCAG 2.2 AA + platform accessibility compliance
 - Neuroinclusive defaults (reduced cognitive load, predictable focus, optional density)
 - Performance and responsiveness targets
 
@@ -42,7 +41,7 @@ best practices and compliance targets as of Jan 2026 across all projects.
 5. Brand aesthetics and purposeful motion
 
 ## 1.5) Brand baseline (global)
-Default to the shared canonical design system across all surfaces (ChatGPT widgets, React, iOS, macOS, AppKit, SwiftUI).
+Default to the shared canonical design system across all surfaces (ChatGPT widgets, React, Tauri desktop).
 Use the common tokens and component rules in:
 - `references/design-guidelines-canonical.md` (full)
 - `references/design-guidelines-summary.md` (quick)
@@ -59,7 +58,7 @@ Opt-out confirmation prompt (use verbatim):
 Use for:
 - FEATURE_DESIGN: journeys, specs, interaction maps, accessibility maps, developer handoff
 - Design system work: tokens, theming, component contracts, cross-platform parity rules
-- Implementation: React (Apps SDK UI) and SwiftUI/UIKit/AppKit component code
+- Implementation: React (Apps SDK UI) component code and Tauri web UI
 - Audits: a11y, focus order, keyboard nav, reduced motion, contrast, performance feedback timing
 - Reviews: existing UI code/implementations for improvements and compliance
 
@@ -68,29 +67,23 @@ Do not use for:
 
 ## 3) Inputs (ask only if blocking; max 2 questions)
 If not provided and needed to proceed:
-1) Target surfaces: ChatGPT widget only vs widget + iOS vs widget + iOS + macOS vs Tauri desktop
+1) Target surfaces: ChatGPT widget only vs widget + Tauri desktop (macOS/Windows/Linux)
 2) Critical path: "what must succeed" + primary user goal
 
 Otherwise proceed with assumptions and state them.
 
-## 3.5) Tooling for Apple-native validation (when needed)
-If the task requires building, running, or validating SwiftUI/UIKit/AppKit
-work, prefer XcodeBuildMCP for simulator control, build/test, and screenshots.
-Fall back to `xcodebuild`/`xcrun simctl` if MCP is unavailable or missing a
-needed capability.
-
-For web/App SDK UI preview in iOS Simulator Safari, see:
-- `references/ios-simulator-web-preview.md`
-- Profiles template: `assets/ios-web.profiles.json`
-- Structured UI reporting: `scripts/ui-codex` + `assets/codex/ui_report.schema.json`
+## Required response headings
+Every response must include these headings:
+- `## When to use`
+- `## Inputs`
+- `## Outputs`
 
 ## 4) Output contract (always produce these sections in order)
 When invoked, output:
 
 1) FEATURE_DESIGN
    - Aesthetic direction (web/React/Apps SDK UI only)
-   - Liquid Glass subsection (SwiftUI when iOS 26+ or "new Apple design" is requested)
-   - SwiftUI Performance subsection (SwiftUI-heavy tasks)
+   - Visual direction (web/React/Apps SDK UI only)
    - User journeys (happy path + 2 edge/failure paths)
    - IA / navigation model
    - Screen-by-screen spec (default/loading/empty/error/offline/permission states)
@@ -98,32 +91,28 @@ When invoked, output:
    - Responsive/adaptive rules (breakpoints + platform mapping)
    - Motion spec + reduced-motion alternative for every animation
    - Accessibility map:
-     - names/labels/roles (ARIA mapping + Apple equivalents)
+     - names/labels/roles (ARIA mapping)
      - focus order per state
      - keyboard behavior and shortcuts
      - localization/RTL considerations (if user-facing text or icons are directional)
-   - Performance risks + mitigations (SwiftUI-heavy tasks)
+   - Performance risks + mitigations (web/Tauri UI)
    - Acceptance criteria + test plan
 
 2) TOKEN_REFERENCED_MEASUREMENTS
-   - Every measurement includes: token ref + px + rem + (Apple) pt
+   - Every measurement includes: token ref + px + rem
    - No ad-hoc styling values unless explicitly justified + added back into tokens
 
 3) IMPLEMENTATION_SNIPPETS
    - Apps SDK widget (React + Apps SDK UI) snippets
-   - SwiftUI snippet(s)
-   - UIKit snippet(s) if applicable
-   - AppKit snippet(s) if applicable
    - Tauri snippet(s) if applicable (web UI + Rust command/IPC stub)
    - Each snippet includes accessibility hooks and reduced-motion handling
    - Storybook (React): CSF story snippet(s) for new/updated components with a11y + interaction coverage
 
 4) ACCESSIBILITY_TESTING_STEPS
-   - VoiceOver / Switch Control / Keyboard navigation
-   - Automated checks: axe-core/Playwright a11y (web) and Accessibility Inspector (Apple)
-   - Dynamic Type / Larger Text
-   - Reduce Motion + Reduce Transparency
-   - High Contrast / Increase Contrast
+   - Keyboard navigation
+   - Automated checks: axe-core/Playwright a11y (web)
+   - Reduce Motion
+   - High Contrast
    - Text scaling + layout reflow (no clipping at large sizes)
    - RTL pass (if applicable)
    - Contrast checks for all states
@@ -134,7 +123,7 @@ When invoked, output:
    - Localization + RTL verified where applicable
    - Performance: <=100ms interaction feedback
    - Web performance: Core Web Vitals targets (INP <=200ms, LCP <=2.5s, CLS <=0.1) when web
-   - Layout stability (no major CLS/jank in web; no layout thrash in SwiftUI)
+   - Layout stability (no major CLS/jank in web)
    - Keyboard completeness
    - Contrast validation for all component states
    - Automated accessibility tests pass (axe-core/Playwright or equivalent)
@@ -155,9 +144,6 @@ in the deliverables:
 - WCAG 2.2 AA for web accessibility
 - WAI-ARIA Authoring Practices for patterns and keyboard behavior
 - DTCG/W3C Design Tokens spec for token structure and naming
-- Apple Accessibility evaluation criteria for VoiceOver/Reduce Motion/Contrast
-- Apple Human Interface Guidelines (latest as of Jan 2026)
-- iOS/macOS platform conventions for navigation, focus, and system controls
 
 Reference pack:
 - `references/a11y-gold-standard.md`
@@ -175,7 +161,6 @@ Use this as a quick compliance pass and link to the verified sources:
 - WAI-ARIA APG: https://www.w3.org/WAI/ARIA/apg/
 - ARIA 1.2: https://www.w3.org/TR/wai-aria-1.2/
 - Design Tokens Format: https://www.designtokens.org/TR/2025.10/format/
-- Apple HIG (Accessibility): https://developer.apple.com/design/human-interface-guidelines/accessibility
 - Storybook Accessibility Tests: https://storybook.js.org/docs/writing-tests/accessibility-testing
 
 Automated link audit:
@@ -210,10 +195,7 @@ Use nested DTCG groups (no dots in token or group names):
 ### Units + conversions
 - Token values stored in px (dimensions) and ms (durations).
 - Always provide derived rem: assume 1rem=16px unless project overrides.
-- Apple mapping:
-  - Provide pt equivalents alongside px/rem (default 1:1 for spec unless project defines scaling).
-
-### DTCG token mapping (web + Swift)
+### DTCG token mapping (web)
 Use the canonical naming and mapping guidance:
 - `references/token-mapping-dtcg.md`
 
@@ -228,11 +210,10 @@ Follow lifecycle rules:
 ## 6) Accessibility + neuroinclusion (hard requirements)
 ### Accessibility
 - Provide explicit focus order per screen state.
-- Provide ARIA intent mapping plus Apple equivalents for all interactive controls.
+- Provide ARIA intent mapping for all interactive controls.
 - All interactive controls must have accessible names.
 - Dynamic Type:
   - Web: support text scaling (do not lock line-height or container height).
-  - SwiftUI: prefer system text styles and scaling.
 - Reduced motion alternatives for every animation.
 - Contrast verification for default/hover/pressed/disabled/focus states.
 - Minimum contrast ratios: follow `references/contrast-minimums.md`.
@@ -253,11 +234,6 @@ Follow lifecycle rules:
 - Avoid nested scrolling in ChatGPT widgets; size content to contents and/or request fullscreen for complex flows.
 - Avoid layout shift: reserve space for async content and media.
 - Web: target Core Web Vitals (INP <=200ms, LCP <=2.5s, CLS <=0.1) unless project defines stricter gates.
-- For SwiftUI performance reviews, use the references in `references/`:
-  - `references/demystify-swiftui-performance-wwdc23.md`
-  - `references/optimizing-swiftui-performance-instruments.md`
-  - `references/understanding-improving-swiftui-performance.md`
-  - `references/understanding-hangs-in-your-app.md`
 
 ## 7.5) Data safety and UX safeguards
 - Prefer idempotent writes and confirmation for destructive actions.
@@ -305,7 +281,7 @@ When delivering web/App SDK UI output, follow these:
    - Better: Combine color with icons, patterns, or text labels
 
 ❌ **"Just add a modal"**: Using modals for everything
-   - Why: Breaks flow; focus trap issues; terrible on mobile
+   - Why: Breaks flow; focus trap issues; poor on small screens
    - Better: Use inline expansion, sheets, or dedicated screens based on platform
 
 ❌ **Skip acceptance criteria**: Shipping without measurable success criteria
@@ -317,16 +293,14 @@ When delivering web/App SDK UI output, follow these:
 **IMPORTANT**: Outputs MUST vary based on context. This skill should not converge on repeated "favorite" patterns.
 
 **Dimensions that should vary**:
-- **Target surface**: Widget inline (max 2 actions) vs fullscreen vs iOS sheet vs macOS window
+- **Target surface**: Widget inline (max 2 actions) vs fullscreen vs desktop window (macOS/Windows/Linux)
 - **User context**: First-time user (education, affordances) vs power user (shortcuts, density)
 - **Accessibility preferences**: Reduced motion (fade/skip) vs full animation; high contrast; larger text
-- **Platform idioms**: Bottom sheets (iOS) vs sidebars (macOS) vs inline panels (widget)
 
 **What creates context-appropriateness**:
 - Ask about target platforms (section 3) before defaulting
 - Check existing codebase patterns before creating new patterns
 - Match complexity to task: simple input ≠ full screen form
-- Respect platform conventions (iOS NavigationStack vs macOS sidebar)
 
 **Avoid converging on**:
 - Always choosing "fullscreen" for every flow
@@ -381,16 +355,6 @@ Then implement working code (HTML/CSS/JS, React, Vue, etc.) that is:
 Remember: Codex is capable of extraordinary creative work. Don't hold back,
 show what can truly be created when thinking outside the box and committing
 fully to a distinctive vision.
-
-## 9.6) Liquid Glass guidance (SwiftUI)
-When asked to adopt new Apple design patterns, always consult Liquid Glass
-guides first and follow Apple APIs and availability gates.
-
-Reference: `references/liquid-glass.md`.
-
-## 9.7) SwiftUI-heavy task definition
-Treat a task as SwiftUI-heavy if it involves lists/tables, animations, complex
-layout, async data loading, scrolling performance, or view update frequency.
 
 ## 10) Surface adapters (wired in)
 This umbrella skill delegates surface-specific constraints to adapters:

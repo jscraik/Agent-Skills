@@ -148,7 +148,7 @@ Use the failure-mode template verbatim for out-of-scope requests.
 
 ## Variation
 
-- Vary examples and commands to match the target repo’s stack (Python vs Node vs Swift).
+- Vary examples and commands to match the target repo’s stack (Python vs Node).
 - Use repo-specific paths and filenames; avoid repeating generic defaults across repos.
 
 ## Empowerment

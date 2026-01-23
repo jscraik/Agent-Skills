@@ -23,7 +23,6 @@ Use all three signals; pick the highest-confidence project types. If ambiguous, 
 ### Tech stack file signals
 - Web app: `package.json`, `vite.config.*`, `next.config.*`, `astro.config.*`, `svelte.config.*`
 - Backend/API: `Dockerfile`, `docker-compose.yml`, `go.mod`, `pyproject.toml`, `requirements.txt`, `Gemfile`, `pom.xml`, `build.gradle`, `Cargo.toml`
-- iOS/macOS: `*.xcodeproj`, `*.xcworkspace`, `Package.swift`
 - CLI/devtools: `bin/`, `cmd/`, `cli/`, `Click`, `Typer`, `Cobra`, `clap`, `argparse`, `commander`
 - Data/ML: `notebooks/`, `data/`, `ml/`, `model/`, `pipelines/`, `requirements-ml.txt`, `torch`, `tensorflow`, `jax`, `sklearn`, `mlflow`, `wandb`
 - Infra/DevOps: `terraform/`, `pulumi/`, `helm/`, `k8s/`, `ansible/`, `.github/workflows/`, `cloudformation`
@@ -31,7 +30,6 @@ Use all three signals; pick the highest-confidence project types. If ambiguous, 
 ### Directory name signals
 - `apps/`, `web/`, `frontend/` -> Web app
 - `services/`, `api/`, `server/` -> Backend/API
-- `ios/`, `macos/`, `mobile/` -> iOS/macOS
 - `cli/`, `tools/`, `scripts/` -> CLI/devtools
 - `ml/`, `data/`, `pipelines/` -> Data/ML
 - `infra/`, `ops/`, `platform/` -> Infra/DevOps
@@ -39,7 +37,6 @@ Use all three signals; pick the highest-confidence project types. If ambiguous, 
 ### README keyword signals
 - Web app: "UI", "frontend", "SPA", "browser", "React", "Vite"
 - Backend/API: "API", "service", "endpoint", "database"
-- iOS/macOS: "Swift", "SwiftUI", "Xcode", "iOS", "macOS"
 - CLI/devtools: "CLI", "command line", "terminal", "devtool"
 - Data/ML: "model", "training", "dataset", "inference", "pipeline"
 - Infra/DevOps: "deploy", "infra", "Kubernetes", "CI/CD"
@@ -53,10 +50,6 @@ Use all three signals; pick the highest-confidence project types. If ambiguous, 
 ### Backend services/APIs
 - Core: PM, UX (if user-facing), BE, Security, Reliability/SRE, Data/ML (if data-heavy), Platform/Infra
 - Optional: QA/Test (contracts), DevEx/Tooling (CI/CD, SDKs)
-
-### iOS/macOS apps
-- Core: PM, UX, FE (client), Security, Reliability/SRE (sync/offline), Data/ML (if on-device inference), Platform/Infra (build/release)
-- Optional: QA/Test (device matrix), DevEx/Tooling (build pipelines)
 
 ### CLI/devtools
 - Core: PM, UX (terminal UX), FE (CLI UX), BE (core logic), Security, Reliability/SRE

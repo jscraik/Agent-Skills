@@ -3,7 +3,7 @@
 Source: `/Users/jamiecraik/dev/recon-workbench`
 
 ## Purpose
-- CLI-first interrogation toolkit for macOS apps, iOS simulator apps, web/React apps, and OSS repos.
+- CLI-first interrogation toolkit for web/React apps and OSS repos.
 - Evidence-backed runs with explicit authorization, no circumvention, and artifact citations.
 
 ## Key entry points
@@ -25,4 +25,3 @@ Source: `/Users/jamiecraik/dev/recon-workbench`
 - Keep CLI-first design; MCP is optional layer.
 - Honor AGENTS.md and docs/LEGAL_NOTES_UK_EU.md.
 - Use docs/ARTIFACTS_AND_EVIDENCE.md and docs/DATA_HANDLING.md for evidence and redaction rules.
-

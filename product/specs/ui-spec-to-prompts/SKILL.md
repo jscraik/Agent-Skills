@@ -26,7 +26,7 @@ Avoid generating prompts without a UI spec; route upstream first.
 ## Inputs
 - UI spec file path.
 - Target UI tool (v0, Bolt, Claude, Figma AI, or other).
-- Target platform (web, mobile, desktop).
+- Target platform (web, touch-first, desktop).
 - aStudio repo path (default: `/Users/jamiecraik/dev/aStudio`).
 - Output location preference (default: same directory as UI spec).
 
@@ -50,7 +50,7 @@ Avoid generating prompts without a UI spec; route upstream first.
 
 ## Variation
 - Vary prompt granularity based on complexity and tool limits.
-- Adapt output structure to platform (web vs mobile vs desktop).
+- Adapt output structure to platform (web vs touch-first vs desktop).
 - Avoid generic patterns; tailor prompts to domain-specific workflows.
 
 ## Build Order Strategy

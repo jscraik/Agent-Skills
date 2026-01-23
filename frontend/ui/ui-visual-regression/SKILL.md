@@ -19,6 +19,26 @@ If design-system guidance, tokens, or component standards are needed, consult th
 - Stabilizing snapshot tests and fixing layout regressions.
 - Reviewing whether diffs are expected vs unintended.
 
+## Required response headings
+Every response must include these headings:
+- `## When to use`
+- `## Inputs`
+- `## Outputs`
+
+## Failure-mode template (out of scope)
+Use this exact structure when the request is out of scope:
+
+```md
+## When to use
+- This skill applies to UI visual regression workflows. The current request is out of scope.
+
+## Outputs
+- None (out of scope).
+
+## Inputs
+- None (out of scope).
+```
+
 ## Philosophy
 - Prefer determinism over speed; stabilize before fixing.
 - Treat diffs as signals to verify intent, not defects by default.
@@ -51,7 +71,7 @@ If design-system guidance, tokens, or component standards are needed, consult th
 3. Enumerate stories (use Storybook CLI, Playwright tests, or Storybook test runner depending on repo).
 
 **Stability checklist (before capture):**
-- Pin viewport sizes (desktop + mobile).
+- Pin viewport sizes (desktop + small-screen).
 - Disable animations/transitions in test mode.
 - Ensure deterministic fonts (local or preloaded).
 - Set timezone/locale.

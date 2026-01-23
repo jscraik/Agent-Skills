@@ -23,7 +23,7 @@ First, determine the directory where the user's PRD file is located. This is whe
 
 IMMEDIATELY create a tracking document file in the SAME directory as the PRD being processed. Name it based on the PRD filename:
 - If PRD is `feature-auth.md` → create `feature-auth-clarification-session.md`
-- If PRD is `mobile-redesign-prd.md` → create `mobile-redesign-prd-clarification-session.md`
+- If PRD is `responsive-redesign-prd.md` → create `responsive-redesign-prd-clarification-session.md`
 
 Initialize the tracking document with this structure:
 

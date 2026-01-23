@@ -7,7 +7,7 @@ Use this when adding or changing tokens.
 ## Add
 - Add new tokens only after confirming no existing token fits the need.
 - Add semantic tokens first; map to raw values in themes.
-- Update bridge mappings for web + Swift.
+- Update bridge mappings for web surfaces.
 
 ## Deprecate
 - Mark deprecated tokens in token metadata and docs.

@@ -2,7 +2,7 @@
 
 Last verified: 2026-01-01
 
-Use these specs as defaults across web, SwiftUI, UIKit, and AppKit. All
+Use these specs as defaults across web and desktop. All
 measurements must reference tokens (see `token-mapping-dtcg.md`).
 
 ## 1) Buttons
@@ -13,7 +13,6 @@ measurements must reference tokens (see `token-mapping-dtcg.md`).
 - Background: color.text.primary (light) / color.text.primary (dark)
 - Label: color.text.inverted
 - Typography (Web): 15/24 Medium, tracking -0.24
-- Typography (iOS): map to `body` with Medium emphasis (SwiftUI `.body.weight(.medium)`)
 - Typography (Android): map to `body` with Medium emphasis (Material bodyLarge/Medium)
 - Icon (optional): size.icon.20, gap space.6
 
@@ -28,7 +27,6 @@ measurements must reference tokens (see `token-mapping-dtcg.md`).
 - Height: 40
 - Radius: radius.round
 - Typography (Web): 14/20 Semibold, tracking -0.3
-- Typography (iOS): map to `body-small` with Semibold emphasis
 - Typography (Android): map to `body-small` with Semibold emphasis (Material bodyMedium/SemiBold)
 
 ### States
@@ -46,7 +44,6 @@ measurements must reference tokens (see `token-mapping-dtcg.md`).
 - Label: persistent label above or inline floating label
 - Helper/error: bodySmall; error uses color.icon.status.error
  - Typography (Web): body / body-small from brand guide
-- Typography (iOS): map to body scales in the iOS table of the brand guide
 - Typography (Android): map to body scales in the Android table of the brand guide
   - Example: `MaterialTheme.typography.bodyLarge` or `bodyMedium` with weight override
 
@@ -61,7 +58,6 @@ measurements must reference tokens (see `token-mapping-dtcg.md`).
 - Background: color.bg.tertiary
 - Active indicator: bottom line or filled pill; use color.text.primary for text
 - Label (Web): 14/20 Semibold
-- Label (iOS): map to body-small Semibold
 - Label (Android): map to body-small Semibold (Material bodyMedium/SemiBold)
 - Hit area: >=44x44 for each tab
 
@@ -79,7 +75,6 @@ measurements must reference tokens (see `token-mapping-dtcg.md`).
 - Radius: radius.round
 - Background: color.bg.tertiary
 - Text (Web): 14/20 Regular or Medium
-- Text (iOS): map to body-small Regular/Medium
 - Text (Android): map to body-small Regular/Medium (Material bodySmall/Regular)
 - Icon: size.icon.16 or size.icon.20
 

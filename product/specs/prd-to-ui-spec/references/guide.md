@@ -23,12 +23,12 @@ Absolute root: `/Users/jamiecraik/dev/aStudio`
 ## Gold UI Standard (Jan 2026)
 - Accessibility baseline: WCAG 2.2 AA, keyboard-first, visible focus, icon labels.
 - Contrast targets: text 4.5:1 (normal) / 3:1 (large); UI controls 3:1 minimum.
-- Touch targets: 44x44px (mobile), 32x32px minimum (desktop).
+- Touch targets: 44x44px (touch-first), 32x32px minimum (desktop).
 - Hit-area spacing: minimum 8px between adjacent interactive targets.
 - Layout: 4px spacing scale, consistent padding, avoid absolute positioning unless necessary.
 - Responsive breakpoints: define token-based breakpoints and layout shifts.
 - Grid sizes: define token-based grid (columns, gutters, margins) per breakpoint.
-- Hit-area rules: document min target sizes (44x44 mobile, 32x32 desktop) and 8px spacing between adjacent targets.
+- Hit-area rules: document min target sizes (44x44 touch-first, 32x32 desktop) and 8px spacing between adjacent targets.
 - Typography: use aStudio type scale and semantic hierarchy; no ad-hoc sizes.
 - Type rhythm: baseline grid and line-height rules; avoid orphans/widows.
 - Color: use semantic tokens; avoid raw hex; contrast checked for text + UI.

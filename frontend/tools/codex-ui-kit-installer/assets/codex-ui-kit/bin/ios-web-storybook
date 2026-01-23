@@ -1,5 +1,0 @@
-#!/usr/bin/env bash
-set -euo pipefail
-# Convenience wrapper for Storybook previews in iOS Simulator Safari (iPad 13" by default).
-SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-exec "${SCRIPT_DIR}/ios-web" --profile ipad_13 --port 6006 "$@"

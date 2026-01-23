@@ -3,7 +3,7 @@
 Last verified: 2026-01-01
 
 Use this checklist as the minimum bar for accessibility and platform alignment.
-Prefer authoritative sources (W3C + Apple) and keep the output verifiable.
+Prefer authoritative sources (W3C) and keep the output verifiable.
 
 ## Web (WCAG 2.2 AA)
 - Meet WCAG 2.2 AA success criteria for all critical flows.
@@ -23,19 +23,9 @@ Prefer authoritative sources (W3C + Apple) and keep the output verifiable.
 - Prefer native elements; use ARIA only when needed.
 - Align with the WAI-ARIA 1.2 recommendation when specifying roles/states.
 
-## Apple (iOS/macOS)
-- VoiceOver: correct labels, hints (if needed), and rotor behavior.
-- Dynamic Type: scalable text without clipping.
-- Reduce Motion and Reduce Transparency respected.
-- Hit targets sized for touch and accessibility.
-  - Use Apple’s App Store Connect evaluation criteria for VoiceOver and
-    Reduced Motion when validating support.
-- High Contrast / Increase Contrast respected.
-- RTL layout correctness where applicable.
-
 ## Testing checklist (minimum)
 - Keyboard navigation across all states.
-- Screen reader (VoiceOver) for primary flows.
+- Screen reader coverage for primary flows.
 - Reduced Motion and Reduced Transparency.
 - High contrast and color-blind safe states.
 - Dynamic Type / Larger Text.

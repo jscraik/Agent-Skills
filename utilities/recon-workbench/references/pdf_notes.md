@@ -1,15 +1,8 @@
 # Notes from reverse_engineering_techniques.pdf (summary)
 
 ## Scope covered in the PDF
-- macOS/iOS app analysis (Swift/Objective-C)
 - Web apps (React/SPAs)
 - Open-source codebase analysis
-
-## macOS/iOS (high-level tools and themes)
-- Static analysis uses disassemblers/decompilers (e.g., Ghidra, IDA Pro, Hopper) and native Mach-O tools (`otool`, `nm`, `codesign`, `strings`).
-- Objective-C metadata can be inspected with class-dump style tooling when legally permitted.
-- Dynamic debugging is discussed (LLDB), with emphasis on platform restrictions for protected apps.
-- The document repeatedly emphasizes legal/ethical boundaries and avoiding misuse.
 
 ## Web/React (high-level tools and themes)
 - Browser DevTools as the primary inspection surface (Elements, Sources, Network).

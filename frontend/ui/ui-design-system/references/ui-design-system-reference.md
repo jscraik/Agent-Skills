@@ -13,7 +13,7 @@ Use this as the detailed checklist and inventory. Keep outputs concise and tailo
 ## 2) Foundations
 - Brand: logo usage, color usage rules, iconography, voice/tone.
 - Accessibility: WCAG 2.2 AA baseline; focus states; keyboard support; reduced motion.
-- Layout: spacing scale, grid rules (web), adaptive layout (SwiftUI).
+- Layout: spacing scale, grid rules (web), adaptive layout.
 - Typography: scale, line-height, dynamic type strategy; responsive web rules.
 - Motion: durations, easing, feedback states; limit surprise motion in embeds.
 
@@ -24,8 +24,7 @@ Use this as the detailed checklist and inventory. Keep outputs concise and tailo
   motion, breakpoints, icon sizes, focus ring.
 - Themes: light/dark + high contrast + brand themes as needed.
 - Tailwind: map tokens to theme variables + CSS variables for runtime theming.
-- Embedded widgets: expose host overrides via CSS variables (web) and environment
-  injection (iOS); document safe overrides.
+- Embedded widgets: expose host overrides via CSS variables (web) and document safe overrides.
 
 ## 4) Components
 - Taxonomy: primitives (behavior), styled components (tokens), composites (flows).
@@ -52,7 +51,7 @@ Use this as the detailed checklist and inventory. Keep outputs concise and tailo
 
 ## 6) Stack-specific blueprint
 - React web: Radix primitives + Tailwind + Storybook.
-- SwiftUI: native components with token-driven theming and Dynamic Type.
+- Desktop (Tauri): web UI + Rust command layer; reuse web tokens and components.
 - Embedded widgets: shadow DOM isolation + CSS var theming + host constraints.
 
 ## 7) QA and release gates
@@ -67,10 +66,8 @@ Use this as the detailed checklist and inventory. Keep outputs concise and tailo
 - packages/tailwind-preset
 - packages/ui-react (Radix + Tailwind)
 - apps/storybook-docs
-- packages/swift-tokens (generated)
-- packages/swiftui-components
 - packages/widgets (embedded runtime)
-- examples/ (inline card, fullscreen, iOS demo)
+- examples/ (inline card, fullscreen demo)
 - governance/ (RFCs, ADRs, releases, deprecations)
 
 ## 9) Minimum viable system path

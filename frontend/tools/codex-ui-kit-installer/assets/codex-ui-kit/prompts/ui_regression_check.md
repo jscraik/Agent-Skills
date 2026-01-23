@@ -17,7 +17,6 @@ Compare two UI screenshots and list regressions.
    - severity: `blocker | major | minor`
    - likely cause: CSS/layout vs component logic vs data/state
    - likely file areas (components/styles/routes)
-4) If a regression is likely an iOS Safari-specific issue, explicitly say so.
 5) Output a short checklist of what to verify after fixing.
 
 If FOCUS is provided, prioritize it: $FOCUS

@@ -7,6 +7,26 @@ description: "Build and validate simple, performant Three.js web apps using mode
 
 A focused skill for creating simple, performant Three.js web applications using modern ES module patterns.
 
+## Required response headings
+Every response must include these headings:
+- `## When to use`
+- `## Inputs`
+- `## Outputs`
+
+## Failure-mode template (out of scope)
+Use this exact structure when the request is out of scope:
+
+```md
+## When to use
+- This skill applies to building small Three.js scenes and demos. The current request is out of scope.
+
+## Outputs
+- None (out of scope).
+
+## Inputs
+- None (out of scope).
+```
+
 ## Philosophy: The Scene Graph Mental Model
 
 Three.js is built on the **scene graph**—a hierarchical tree of objects where parent transformations affect children. Understanding this mental model is key to effective 3D web development.
@@ -14,7 +34,7 @@ Three.js is built on the **scene graph**—a hierarchical tree of objects where 
 **Before creating a Three.js app, ask**:
 - What is the **core visual element**? (geometry, shape, model)
 - What **interaction** does the user need? (none, orbit controls, custom input)
-- What **performance** constraints exist? (mobile, desktop, WebGL capabilities)
+- What **performance** constraints exist? (compact screens, desktop, WebGL capabilities)
 - What **animation** brings it to life? (rotation, movement, transitions)
 
 **Core principles**:

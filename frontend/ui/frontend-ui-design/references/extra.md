@@ -7,19 +7,6 @@
   `references/tailwind-best-practices.md`,
   `references/vite-build-standards.md`
 
-- Adapter: Apple-native implementation (SwiftUI/UIKit/AppKit)
-  See: `adapters/apple-native.md`
-  References: `references/apple-human-interface-guidelines.md`,
-  `references/ios-design-guidelines-hig.md`,
-  `references/mv-patterns.md`,
-  `references/swift-6-2-concurrency.md`,
-  `references/swiftui-concurrency-tour-wwdc.md`,
-  `references/demystify-swiftui-performance-wwdc23.md`,
-  `references/optimizing-swiftui-performance-instruments.md`,
-  `references/understanding-improving-swiftui-performance.md`,
-  `references/understanding-hangs-in-your-app.md`,
-  `references/swiftui-performance-audit.md`
-
 - Adapter: Tauri desktop (web UI + Rust command layer)
   See: `adapters/tauri.md`
   References: `references/tauri.md`, `references/rust-frontend-bridge.md`
@@ -30,8 +17,6 @@ When producing output, include "Implementation Snippets" for every surface in sc
 Given this repo layout:
 - Tokens live in: `packages/tokens/src/tokens/**`
 - React components live in: `packages/ui/src/components/ui/**`
-- Swift components live in: `platforms/apple/swift/ChatUIComponents/Sources/**`
-- Swift foundations/themes live in: `platforms/apple/swift/ChatUIFoundation/**`, `platforms/apple/swift/ChatUIThemes/**`
 - Storybook app lives in: `platforms/web/apps/storybook`
 - Storybook guide lives in: `packages/ui/STORYBOOK_GUIDE.md`
 Canonical repo: https://github.com/jscraik/Chatui.git
@@ -59,7 +44,6 @@ Core usage expectations (from design guidelines):
 - Generate tokens: `pnpm generate:tokens`
 - Sync TS exports: `pnpm -C packages/tokens tokens:sync`
 - Validate tokens: `pnpm validate:tokens`
-- Swift colors update in: `platforms/apple/swift/ChatUIFoundation/Sources/ChatUIFoundation/Resources/Colors.xcassets/`
 
 ## 11.3) ChatUI compliance checks
 - Lint compliance: `pnpm lint:compliance`
@@ -67,7 +51,6 @@ Core usage expectations (from design guidelines):
 - Web e2e: `pnpm test:e2e:web`
 - Web visual: `pnpm test:visual:web`
 - Storybook visual: `pnpm test:visual:storybook`
-- Swift tests: `pnpm test:swift` (or `pnpm test:swift:*`)
 
 ## 11.4) Apps SDK compliance quick checks (ChatUI)
 Reference: `docs/architecture/APPS_SDK_GAP_ANALYSIS.md`, `docs/audits/APPS_SDK_COMPLIANCE_AUDIT.md`
@@ -95,7 +78,7 @@ When asked to build core UI controls in the Apps-in-ChatGPT brand, follow:
 - `references/brand-components.md`
 
 ## 11.8) Layout grids + breakpoints
-For cross-platform layout guidance (web, iOS, macOS), use:
+For cross-platform layout guidance (web, desktop), use:
 - `references/layout-grids-breakpoints.md`
 
 ## 11.9) Iconography (official set)
@@ -111,7 +94,7 @@ Context control:
 
 Default expectation:
 - Token changes happen in `packages/tokens` first.
-- React + Swift consume generated/mapped tokens (no hand-written divergence).
+- React and desktop surfaces consume generated/mapped tokens (no hand-written divergence).
 - Docs live in `docs/components/**` and `docs/architecture/**` and must include accessibility notes and cross-platform parity rules.
 - Use Storybook stories (`*.stories.tsx`/`*.stories.mdx`) to document and test new React components.
 
@@ -120,13 +103,13 @@ When platform deviations are required, include:
 - `references/cross-platform-diff-matrix.md`
 
 ## 12) Example prompts that should trigger this skill
-- "Design a settings panel that works as a ChatGPT widget (inline + fullscreen) and as a SwiftUI screen; include tokens, focus order, reduced motion, and tests."
-- "Add a token-based Button component across React and Swift with matching states and accessibility mappings."
-- "Audit the Modal and Dialog components for WCAG 2.2 AA and VoiceOver; propose fixes with code."
+- "Design a settings panel that works as a ChatGPT widget (inline + fullscreen) and a desktop window; include tokens, focus order, reduced motion, and tests."
+- "Add a token-based Button component across React and desktop UI with matching states and accessibility mappings."
+- "Audit the Modal and Dialog components for WCAG 2.2 AA; propose fixes with code."
 - "Replicate the Apps-in-ChatGPT UI style in a new widget and provide tokens/components."
 - "Review the current UI implementation for token usage, a11y, RTL, and performance issues."
 - "Add a new token and provide deprecation/migration notes for the old one."
-- "Document the cross-platform deviations between Web, SwiftUI, UIKit, and AppKit for this feature."
+- "Document the cross-platform deviations between web and desktop for this feature."
 - "Provide QA recipes and test steps for Button, Input, Modal, List, Carousel, and Tabs."
 - "Audit localization/RTL readiness and formatting rules for dates and numbers."
 
@@ -138,10 +121,7 @@ Always follow these docs, and include them in FILE_PLAN when tokens or
 components change:
 - `bridge/token-export-bridge.md`
 - `bridge/mapping.web.md`
-- `bridge/mapping.swift.md`
 - `bridge/mapping.docs.md`
-
-Additional guidance: `references/token-export-bridge-summary.md`.
 
 ## 14) Apps-in-ChatGPT brand guide
 When the user asks to match or replicate the ChatGPT apps UI (inline cards,

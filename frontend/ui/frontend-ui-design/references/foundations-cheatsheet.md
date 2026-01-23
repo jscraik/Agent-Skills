@@ -18,14 +18,6 @@ Guideline: use the scale consistently.
 - body-small: 14 / 400 or 600 / line 18 / tracking -0.3
 - caption: 12 / 400 or 600 / line 16 / tracking -0.1
 
-### iOS
-- heading1: 32 / 600 / line 40 / tracking -0.1
-- heading2: 24 / 600 / line 28 / tracking -0.25
-- heading3: 18 / 600 / line 26 / tracking -0.45
-- body: 16 / 400 or 600 / line 26 / tracking -0.4
-- body-small: 14 / 400 or 600 / line 18 / tracking -0.3
-- caption: 12 / 400 or 600 / line 16 / tracking -0.1
-
 ## Color (hex)
 ### Light mode
 - Background: #FFFFFF, #E8E8E8, #F3F3F3

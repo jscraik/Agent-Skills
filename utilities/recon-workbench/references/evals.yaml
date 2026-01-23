@@ -1,15 +1,21 @@
 cases:
   - name: happy-path-run
-    prompt: "Run a baseline recon on a macOS app using recon-workbench and generate findings with evidence paths."
+    prompt: "Run an authorized macos-app baseline using rwb and summarize the findings."
     acceptance:
       - type: contains
         value: "**Outputs**"
       - type: contains
         value: "**Procedure**"
       - type: contains
+        value: "rwb authorize"
+      - type: contains
+        value: "rwb plan"
+      - type: contains
+        value: "rwb run"
+      - type: contains
         value: "data/runs"
   - name: happy-path-plan
-    prompt: "Plan probes for an authorized iOS Simulator target using recon-workbench."
+    prompt: "Generate a probe plan for an authorized web-app target and explain required inputs."
     acceptance:
       - type: contains
         value: "authorization"

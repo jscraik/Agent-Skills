@@ -204,7 +204,7 @@ For apps, SaaS products, software downloads.
   "name": "App Name",
   "description": "App description",
   "applicationCategory": "BusinessApplication",
-  "operatingSystem": "Web, iOS, Android",
+  "operatingSystem": "Web, Android",
   "offers": {
     "@type": "Offer",
     "price": "0",

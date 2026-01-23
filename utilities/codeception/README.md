@@ -50,7 +50,7 @@ Example `~/.codex/config.toml`:
 notify = ["python3", "~/.codex/skills/claudeception/scripts/claudeception-notify.py"]
 ```
 
-If `terminal-notifier` (macOS) or `notify-send` (Linux) is available, the script will use it; otherwise it prints a short reminder.
+If `notify-send` (Linux) is available, the script will use it; otherwise it prints a short reminder.
 
 ## Usage
 

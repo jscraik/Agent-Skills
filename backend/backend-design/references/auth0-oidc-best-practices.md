@@ -7,7 +7,7 @@
 ## Auth0-specific guidance
 - Enable Refresh Token Rotation for SPAs and public clients.
 - Use short-lived access tokens and rotate refresh tokens on use.
-- Prefer Authorization Code + PKCE for browser and mobile apps.
+- Prefer Authorization Code + PKCE for browser and desktop apps.
 - Monitor reuse detection events for rotated refresh tokens.
 
 ## References

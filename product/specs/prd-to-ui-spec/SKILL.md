@@ -72,7 +72,7 @@ Write the UI spec in the same directory as the source file.
 ## Variation
 - Adapt depth based on product complexity (simple flows vs multi-surface systems).
 - Expand components/state detail when risk or ambiguity is high.
-- Avoid generic patterns; tailor UI spec depth to platform (web, mobile, desktop) and input model.
+- Avoid generic patterns; tailor UI spec depth to platform (web, touch-first, desktop) and input model.
 - If brand constraints are strong, bias toward stricter token usage; if exploratory, add explicit experiments + rollback notes.
 
 ## Empowerment

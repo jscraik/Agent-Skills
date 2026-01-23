@@ -17,7 +17,7 @@ Design a complete, multi-platform UI design system that covers governance, found
 - Patterns beat one-off components for user trust and consistency.
 
 ## Guiding Questions
-- What products and surfaces are in scope (web, iOS, embedded widgets)?
+- What products and surfaces are in scope (web, desktop, embedded widgets)?
 - What brand constraints and accessibility targets apply?
 - Which token standard and theming modes are required?
 - What component and pattern gaps exist today?
@@ -49,6 +49,12 @@ Design a complete, multi-platform UI design system that covers governance, found
 - Risks and open questions
 - Next actions (short list)
 
+## Required response headings
+Every response must include these headings:
+- `## When to use`
+- `## Inputs`
+- `## Outputs` (place the output format under this heading)
+
 ## Variation Rules
 - Adjust depth to match scope (single surface vs multi-platform).
 - Prioritize embedded constraints when Apps SDK widgets are in scope.
@@ -68,7 +74,7 @@ Design a complete, multi-platform UI design system that covers governance, found
 - Offer tradeoffs when timelines or staffing are constrained.
 
 ## Trigger Examples
-- Create a full design system for SwiftUI + React + Tailwind + embedded widgets.
+- Create a full design system for React + Tailwind + embedded widgets.
 - Define DTCG token architecture and package layout for our Apps SDK UI.
 - Establish AI/LLM interaction patterns and QA gates for our UI system.
 

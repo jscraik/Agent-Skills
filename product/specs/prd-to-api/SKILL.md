@@ -86,7 +86,7 @@ Write the API spec in the same directory as the source PRD or tech spec.
 - Trust the contract but don't be rigid—if the API needs to evolve to support real use cases, adapt and document.
 
 ## Variation
-- Adapt API style to product type: SaaS APIs need strong versioning, internal APIs can be simpler, mobile-first APIs need optimized responses.
+- Adapt API style to product type: SaaS APIs need strong versioning, internal APIs can be simpler, latency-sensitive clients need optimized responses.
 - Vary depth based on audience: public APIs need exhaustive documentation, internal APIs can be lighter.
 - For CRUD-heavy products, expand on consistent resource modeling and pagination patterns.
 - For event-driven products, expand on webhook schemas and event versioning.

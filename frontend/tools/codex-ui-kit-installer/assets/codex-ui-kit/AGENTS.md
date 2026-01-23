@@ -1,7 +1,7 @@
 # AGENTS.md
 
 ## Project summary
-This is a React + Vite + Tailwind web app. Primary dev target is **mobile Safari (iOS)** and the iOS Simulator.
+This is a React + Vite + Tailwind web app. Primary dev target is **small-screen browsers**.
 
 ## Working agreements for Codex
 - Prefer **small, targeted diffs**. Avoid refactors unless explicitly requested.
@@ -30,28 +30,9 @@ Common scripts (if present):
 
 If a needed script is missing, prefer running the underlying tool via the package manager (e.g. `pnpm eslint .`) only if it already exists in `devDependencies`.
 
-## iOS Simulator workflow (UI issues)
-Use a tight “snapshot → change → snapshot” loop:
-1. Capture a **before** screenshot on iOS Simulator Safari.
-2. Identify the minimal root cause (safe-area, viewport units, overflow, font sizing, sticky, etc.).
-3. Implement the smallest fix.
-4. Run the fastest available checks (`lint`/`typecheck`/`test` as available).
-5. Capture an **after** screenshot and confirm the issue is resolved.
-
-### Screenshot artifacts
-Store temporary screenshots and reports under:
-- `.ios-web/` (or your project’s equivalent)
-Do not commit these artifacts unless asked.
-
-## iOS Safari gotchas to consider (common causes)
+## Small-screen browser gotchas to consider (common causes)
 - Safe areas / notch: `env(safe-area-inset-*)`, padding, and `viewport-fit=cover` interactions.
-- `100vh` / address bar: prefer `dvh/svh/lvh` or CSS that doesn’t rely on fixed `100vh` on mobile.
+- `100vh` / address bar: prefer `dvh/svh/lvh` or CSS that doesn’t rely on fixed `100vh` on small screens.
 - `position: sticky` inside overflow containers.
 - `overflow-x` from long words / transforms / full-width elements.
 - Touch hit areas (minimum ~44px) and fixed headers overlapping content.
-
-## Codex automation helpers (optional but recommended)
-- `bin/ui-codex triage --issue "…" --profile iphone_pro --path /…`
-- `bin/ui-codex fix --issue "…" --profile iphone_pro --path /…`
-
-These produce a structured JSON report using `codex exec --output-schema`.

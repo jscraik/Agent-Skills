@@ -130,7 +130,7 @@ No visual specs until all six passes complete.
 Only after all passes AND a state machine diagram exists for each component referenced in Pass 3.
 Then write visual specs (layout, components, interactions, responsive behavior).
 Required inclusions:
-- Minimum hit-area targets (mobile 44x44px, desktop 32x32px) and minimum spacing between adjacent targets (8px).
+- Minimum hit-area targets (touch-first 44x44px, desktop 32x32px) and minimum spacing between adjacent targets (8px).
 - Responsive breakpoints using token names, with layout shifts described per breakpoint.
 - Token-based grid sizes (columns, gutters, margins) per breakpoint.
 
@@ -223,7 +223,7 @@ Required inclusions:
 - **Component registry:** Enable teams to reuse battle-tested UI components instead of reinventing. Custom components must be justified.
 
 ## Variation
-- Adapt the six-pass sequence to product type: SaaS tools need strong IA, mobile apps need tight state design, dashboards need clear affordances.
+- Adapt the six-pass sequence to product type: SaaS tools need strong IA, touch-first apps need tight state design, dashboards need clear affordances.
 - Vary depth based on scope: discovery PRDs may need lighter passes; production-ready specs need exhaustive coverage.
 - For highly visual products, expand Pass 3 (Affordances) and Pass 5 (State Design) with interaction patterns.
 - For information-dense products, expand Pass 2 (Information Architecture) with grouping hierarchies.
@@ -239,7 +239,7 @@ Required inclusions:
 - NEVER skip the six-pass sequence or produce visual specs before completing all passes—this guarantees ambiguous UX decisions that require rebuilds.
 - DO NOT invent visual specs or component details without grounding them in the six forced passes.
 - NEVER assume users will understand implicit affordances—explicitly state what is clickable, editable, or destructive.
-- Avoid generic UX patterns without domain consideration—adapt the six passes to the specific product type (SaaS, mobile, dashboard, etc.).
+- Avoid generic UX patterns without domain consideration—adapt the six passes to the specific product type (SaaS, touch-first, dashboard, etc.).
 - DO NOT omit state design for screens with 3+ states—incomplete state design guarantees broken error/edge cases.
 - **Component registry anti-patterns:** NEVER create custom UI components without checking the registry first. Custom components create divergence and maintenance burden.
 

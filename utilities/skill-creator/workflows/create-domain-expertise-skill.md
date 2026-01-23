@@ -9,7 +9,6 @@ Build a comprehensive execution skill that does real work in a specific domain. 
 **Domain expertise skill:** "Do EVERYTHING in this domain, with complete practitioner knowledge"
 
 Examples:
-- `expertise/macos-apps` - Build macOS apps from scratch through shipping
 - `expertise/python-games` - Build complete Python games with full game dev lifecycle
 - `expertise/rust-systems` - Build Rust systems programs with exhaustive systems knowledge
 - `expertise/web-scraping` - Build scrapers, handle all edge cases, deploy at scale
@@ -17,7 +16,7 @@ Examples:
 Domain expertise skills:
 - ✅ Execute tasks (build, debug, optimize, ship)
 - ✅ Have comprehensive domain knowledge in references
-- ✅ Are invoked directly by users ("build a macOS app")
+- ✅ Are invoked directly by users ("build a Rust CLI")
 - ✅ Can be loaded by other skills (create-plans reads references for planning)
 - ✅ Cover the FULL lifecycle, not just getting started
 </critical_distinction>
@@ -35,7 +34,6 @@ Domain expertise skills:
 Ask user what domain expertise to build:
 
 **Example domains:**
-- macOS/iOS app development
 - Python game development
 - Rust systems programming
 - Machine learning / AI
@@ -165,25 +163,6 @@ references/
 ├── packaging.md           # Building executables, installers
 ├── distribution.md        # Steam, itch.io, app stores
 └── anti-patterns.md       # Common mistakes, what NOT to do
-```
-
-**For macOS app development example:**
-```
-references/
-├── app-architecture.md     # State management, dependency injection
-├── swiftui-patterns.md     # Declarative UI patterns
-├── appkit-integration.md   # Using AppKit with SwiftUI
-├── concurrency-patterns.md # Async/await, actors, structured concurrency
-├── data-persistence.md     # Storage strategies
-├── networking.md           # URLSession, async networking
-├── system-apis.md          # macOS-specific frameworks
-├── testing-tdd.md          # Testing patterns
-├── testing-debugging.md    # Debugging tools and techniques
-├── performance.md          # Profiling, optimization
-├── design-system.md        # Platform conventions
-├── macos-polish.md         # Native feel, accessibility
-├── security-code-signing.md # Signing, notarization
-└── project-scaffolding.md  # CLI-based setup
 ```
 
 **For each reference file:**
@@ -426,7 +405,6 @@ Brief introduction to this domain area
 ## Platform-Specific Notes
 
 **Windows:** [considerations]
-**macOS:** [considerations]
 **Linux:** [considerations]
 **Mobile:** [if applicable]
 </platform_considerations>

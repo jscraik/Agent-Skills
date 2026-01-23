@@ -185,7 +185,7 @@ Check: /sitemap.xml or /sitemap-index.xml
 - [ ] Text readable without zooming
 - [ ] Tap targets adequately sized (48x48 CSS pixels)
 - [ ] No horizontal scrolling
-- [ ] Content same on mobile and desktop
+- [ ] Content same on small screens and desktop
 
 ---
 

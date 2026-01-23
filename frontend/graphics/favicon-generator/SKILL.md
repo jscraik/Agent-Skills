@@ -7,6 +7,12 @@ description: "Generate complete favicon/app icon suites with templates and asset
 
 Create stunning, professional-quality favicons that stand alongside icons from Linear, Notion, Figma, and other polished apps.
 
+## Required response headings
+Every response must include these headings:
+- `## When to use`
+- `## Inputs`
+- `## Outputs`
+
 ## Philosophy: Favicons Are Miniature Design Artifacts
 
 The difference between a mediocre favicon and a great one isn't complexity—it's **polish**. Great favicons have:
@@ -73,7 +79,7 @@ If using lucide-react or similar libraries:
 3. **Use cairosvg for accurate rendering** (recommended):
    ```bash
    pip install cairosvg
-   brew install cairo  # macOS - required native library
+   brew install cairo  # required native library
    ```
    
    **Why cairosvg?** Pillow cannot render SVG bezier curves and arcs. Lucide icons
@@ -314,7 +320,7 @@ Shape of the icon background.
 
 | Value | Shape | Platform |
 |-------|-------|----------|
-| 0.15–0.18 | Squircle | iOS-like |
+| 0.15–0.18 | Squircle | rounded |
 | 0.20–0.24 | Rounded | Modern default |
 | 0.30+ | Very round | Playful, bubble |
 | 0.50 | Circle | Circular icons |
@@ -333,7 +339,7 @@ public/
 ├── favicon-48x48.png    # Windows tiles
 ├── favicon-64x64.png    # Windows tiles
 ├── favicon-128x128.png  # Chrome Web Store
-├── apple-touch-icon.png # iOS home screen (180x180)
+├── apple-touch-icon.png # touch icon (180x180)
 ├── favicon-192x192.png  # Android Chrome
 └── favicon-512x512.png  # PWA, Android
 ```
@@ -430,4 +436,3 @@ See references/extra.md for extended guidance.
 - Do not add features outside the agreed scope.
 ## When to use
 - Use when generating favicons or app icons.
-

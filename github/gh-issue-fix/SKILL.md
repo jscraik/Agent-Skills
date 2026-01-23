@@ -1,6 +1,6 @@
 ---
 name: gh-issue-fix
-description: "Resolve a GitHub issue from intake through fix, validation, and push using gh, local edits, XcodeBuildMCP, and git.. Use when Fixing a GitHub issue end-to-end using gh and local changes.."
+description: "Analyze and resolve a GitHub issue from intake through fix, validation, and push using gh, local edits, and git. Use this skill when you need to analyze and fix a GitHub issue end-to-end using gh and local changes."
 ---
 
 # GH Issue Fix Flow
@@ -10,7 +10,8 @@ description: "Resolve a GitHub issue from intake through fix, validation, and pu
 
 
 ## Overview
-Resolve a GitHub issue from intake through fix, validation, and push using gh, local edits, XcodeBuildMCP, and git.
+Resolve a GitHub issue from intake through fix, validation, and push using gh, local edits, and git.
+See `references/contract.yaml` and `references/evals.yaml` for contract and eval expectations.
 
 ## When to use
 - Fixing a GitHub issue end-to-end using gh and local changes.
@@ -23,6 +24,40 @@ Resolve a GitHub issue from intake through fix, validation, and push using gh, l
 ## Outputs
 - Code changes, tests, and a closing commit pushed to the repo.
 - Summary with evidence and follow-ups.
+
+## Required response headings
+Every response must include these headings:
+- `## When to use`
+- `## Inputs`
+- `## Outputs`
+
+## Edge-case template (missing info)
+Use this exact structure when key inputs are missing:
+
+```md
+## When to use
+- This skill applies to GitHub issue fixes using gh and local edits.
+
+## Inputs
+- Missing: <issue number and repo>.
+
+## Outputs
+- None until inputs are provided.
+```
+
+## Failure-mode template (out of scope)
+Use this exact structure when the request is out of scope:
+
+```md
+## When to use
+- This skill applies to GitHub issue fixes using gh and local edits. The current request is out of scope.
+
+## Outputs
+- None (out of scope).
+
+## Inputs
+- None (out of scope).
+```
 
 ## Philosophy
 - Fix the smallest surface area that resolves the issue.
@@ -53,11 +88,8 @@ Resolve a GitHub issue from intake through fix, validation, and push using gh, l
 3. Add tests when behavior changes and test coverage is practical.
 
 ### 4) Build and test
-1. Use XcodeBuildMCP for required builds/tests:
-   - Set defaults once: `mcp__XcodeBuildMCP__session-set-defaults`.
-   - Build: `mcp__XcodeBuildMCP__build_macos` or `mcp__XcodeBuildMCP__build_sim`.
-   - Tests: prefer targeted schemes (e.g., `mcp__XcodeBuildMCP__test_sim`).
-2. If macOS tests fail due to deployment target mismatches, run the equivalent iOS simulator tests.
+1. Use repo-provided build/test scripts when available.
+2. Prefer targeted test suites to reduce risk and runtime.
 3. Report warnings or failures; do not hide them.
 
 ### 5) Commit and push

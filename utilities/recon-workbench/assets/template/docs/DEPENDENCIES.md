@@ -1,38 +1,16 @@
 # Dependencies (Baseline -> Advanced -> Worst-case)
 
 This is the dependency inventory required to cover the "worst-case" tier across:
-macOS apps, iOS Simulator, browser apps (React/etc), and OSS.
+browser apps (React/etc) and OSS.
 
 ## Baseline (recommended for all workflows)
 - Codex CLI (planning + summarization; schema outputs)
 - Git
 - Python 3
 - Node.js + npm (for Playwright/web probes)
-- Xcode Command Line Tools (codesign, otool, etc.)
-- Xcode + iOS Simulator
-
-## macOS apps
-Baseline:
-- codesign, otool, nm, strings (Apple tooling)
-- Optional: Ghidra (static disassembly/decomp)
-
-Worst-case (observation-first; no circumvention):
-- Instruments (Network/File Activity templates)
-- Unified logging capture (log stream / Console)
-
-## iOS Simulator
-Baseline:
-- xcrun simctl (screenshot, recordVideo)
-- Safari Web Inspector / Develop menu
-
-Worst-case:
-- Instruments Network template (HTTP analysis)
-- HTTPS proxy tooling (mitmproxy / Burp / Charles) + certificate install
-
 ## Web/React + browser apps
 Baseline:
 - Chrome DevTools HAR export
-- Safari Web Inspector (especially for WKWebView and Simulator inspection)
 
 Worst-case:
 - Playwright + trace viewer

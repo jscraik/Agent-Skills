@@ -190,7 +190,7 @@ tool magic --auto
 ### Preferred Install (Recommended)
 
 ```bash
-# macOS/Linux (Homebrew)
+# Homebrew
 brew install user/tap/tool
 ```
 
@@ -212,7 +212,7 @@ sudo bash /tmp/install.sh --system
 ### Package Managers
 
 ```bash
-# macOS/Linux (Homebrew)
+# Homebrew
 brew install user/tap/tool
 
 # Windows (Scoop)

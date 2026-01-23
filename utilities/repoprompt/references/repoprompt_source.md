@@ -84,12 +84,11 @@ Repo Prompt complements AI editors rather than replacing them. Via MCP, it acts 
 - Use Cursor/Claude Code for daily coding
 - Use Repo Prompt for deep context building, multi-repo analysis
 
-## Getting Started (macOS)
+## Getting Started (desktop)
 
 ### Installation
-- Download DMG from repoprompt.com
-- Drag to Applications
-- macOS 14.0+ (Sonoma), Apple Silicon or Intel
+- Download installer from repoprompt.com
+- Follow the installer prompts for your OS
 
 ### First Launch
 - Open Repo Prompt, grant folder access

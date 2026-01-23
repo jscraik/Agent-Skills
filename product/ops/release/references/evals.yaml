@@ -1,0 +1,22 @@
+cases:
+  - name: happy-path
+    prompt: "/release 1.4.2"
+    acceptance:
+      - type: contains
+        value: "just release"
+      - type: contains
+        value: "semver"
+  - name: edge-case
+    prompt: "Release without specifying a version."
+    acceptance:
+      - type: contains
+        value: "prompt"
+      - type: contains
+        value: "X.Y.Z"
+  - name: failure-mode
+    prompt: "Release from a dirty branch and non-main."
+    acceptance:
+      - type: contains
+        value: "clean"
+      - type: contains
+        value: "main"

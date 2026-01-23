@@ -1,12 +1,10 @@
 ---
 name: recon-workbench
-description: Analyze and report authorized evidence using Recon Workbench workflows.
-  Use when running recon/rwb CLI commands, planning probe runs, or summarizing evidence-backed
-  findings for macOS, iOS, web apps, or OSS repos.
+description: "Analyze and report authorized evidence using Recon Workbench (rwb) workflows. Use when you need authorize/plan/run/summarize flows and evidence-backed reporting for web apps or OSS repos."
 metadata:
   source_repo: https://github.com/jscraik/Agent-Skills
   source_rev: 7e31061c353c94746910d239ae122900cc5324fb-dirty
-  source_dirty: 'true'
+  source_dirty: "true"
   source_dirty_paths: utilities/recon-workbench/references/evals.yaml, utilities/skill-creator/scripts/run_skill_evals.py,
     design/better-icons/
 ---
@@ -18,8 +16,8 @@ metadata:
 Answer with sections titled exactly: **Outputs** and **Procedure** (include authorization notes).
 
 ## When to use
-- Running Recon Workbench CLI flows (`recon` or `uv run python -m rwb`)
-- Planning or executing probe sets for authorized targets
+- Running Recon Workbench CLI flows (`uv run python -m rwb`, or legacy `./recon` wrapper)
+- Creating authorization artifacts and probe plans for authorized targets
 - Summarizing evidence-backed findings and reports with artifact citations
 
 ## Compliance
@@ -47,7 +45,7 @@ Create or evolve a unified, controlled interrogation workflow that: (1) authoriz
 Before building or inspecting, clarify:
 
 1. **Authorization**: Do we have explicit permission to analyze the target?
-2. **Target type**: macOS app, iOS Simulator/device, web app, or OSS repo?
+2. **Target type**: web app or OSS repo?
 3. **Goal**: Inventory, behavior map, API surface, regression diff, or patch plan?
 4. **Evidence outputs**: What artifacts are required (JSON schemas, reports, traces)?
 5. **Escalation limit**: Maximum allowed level (read_only < instrumentation < escalation)?
@@ -61,36 +59,34 @@ Before building or inspecting, clarify:
 - **Web/React caution**: Component inspection only on authorized apps with documented permission
 - **Redact by default**: Scrub secrets from logs, snapshots, and reports
 
-## CLI Commands (recon/rwb)
+## CLI Commands (rwb)
 
 Primary entrypoint from repo root: `uv run python -m rwb <command>`.
-Secondary wrapper: `./recon <command>` (same subcommands).
-Command names below use `recon` for brevity; substitute the primary entrypoint when running.
+Secondary wrapper: `./recon <command>` (legacy CLI; prefer `rwb` workflows).
 
-Core commands (see `docs/reference/CLI_REFERENCE.md` for flags):
+Core commands (see `docs/agents/cli.md` and `docs/reference/CLI_REFERENCE.md` for flags):
 
 | Command | Purpose |
 |---------|---------|
-| `recon doctor` | Check toolchain readiness (use `--json` for machine output) |
-| `recon setup` | Validate required tooling presence |
-| `recon init` | Register a target and locator |
-| `recon plan` | Dry-run planner (requires `--probes` or `--probe-set`) |
-| `recon run` | Execute probes (requires `--write --exec --confirm-run`; optional `--parallel N`) |
-| `recon diff` | Compare baseline vs stimulus runs |
-| `recon summarize` | Generate findings.json from artifacts |
-| `recon report` | Compile report.md and report.json |
-| `recon prune` | Delete old sessions (requires `--write --confirm-prune`) |
-| `recon export` | Export a run as a portable evidence bundle |
-| `recon import` | Import evidence bundle from ZIP |
-| `recon mcp-serve` | Start MCP server for AI agent integration |
+| `rwb doctor` | Check toolchain readiness (use `--json` for machine output) |
+| `rwb authorize` | Create authorization artifact (required for most plans) |
+| `rwb plan` | Generate or validate a probe plan (`probe-plan.json`) |
+| `rwb run` | Execute a probe plan (`--plan-file`, `--run-dir`) |
+| `rwb summarize` | Generate findings and report from a run directory |
+| `rwb manifest` | Generate a run manifest with SHA-256 hashes |
+| `rwb validate` | Validate schemas, catalogs, plans, evidence, or runs |
+| `rwb diff` | Compare baseline vs stimulus runs |
+| `rwb reconcile` | Reconcile run directories with config updates |
+| `rwb completion` | Generate shell completion script |
+| `rwb cleanup` | Clean old runs/repos/temp files (supports `--dry-run`) |
 
 ## Target Kinds
 
 | Kind | Description | Example Locator |
 |------|-------------|-----------------|
-| `macos-app` | macOS applications (.app bundles) | `/Applications/MyApp.app` |
-| `ios-sim` | iOS Simulator apps | `com.example.MyApp` (bundle ID) |
-| `ios-device` | Physical iOS devices | `UDID` or device serial |
+| `macos-app` | macOS applications | `/Applications/MyApp.app` |
+| `ios-sim` | iOS Simulator apps | `com.example.MyApp` |
+| `ios-device` | iOS device apps | `com.example.MyApp` |
 | `web-app` | Web applications | `https://example.com` |
 | `oss-repo` | Open source repositories | `owner/repo` or git URL |
 
@@ -99,10 +95,8 @@ Core commands (see `docs/reference/CLI_REFERENCE.md` for flags):
 Predefined probe sets live in `probes/catalog.json`.
 Common sets (not exhaustive):
 
-- `macos-baseline`, `macos-objc-static`, `macos-debug`, `macos-accessibility`
-- `ios-baseline`, `ios-objc-static`, `ios-debug`, `ios-smoke`
-- `ios-diagnose`, `ios-device-diagnose`, `ios-sim-diagnose-pack`, `ios-device-diagnose-pack`
-- `web-baseline`
+- `macos-baseline`, `ios-baseline`
+- `web-baseline`, `web-stimulus`
 - `oss-baseline`, `oss-full`
 
 ## Escalation Levels
@@ -119,7 +113,6 @@ Create `scope.yaml` to set organizational defaults:
 # Disallow dangerous probes
 disallowed_probes:
   - "debug.lldb_backtrace"
-  - "ios.device_diagnose"
 
 # Limit escalation level
 max_escalation_level: "instrumentation"  # read_only < instrumentation < escalation
@@ -133,12 +126,13 @@ require_authorization: true
 - `target_id`: Unique identifier for the target
 - `target_kind`: One of macos-app, ios-sim, ios-device, web-app, oss-repo
 - `target_locator`: Path, URL, bundle ID, or repo identifier
-- `probe_set`: Predefined probe set or custom probe list
-- `run_dir`: Output directory for artifacts
+- `probe_set` or `probes`: Predefined probe set or custom probe list
+- `authorization`: Authorization artifact (required when scope enforces authorization)
+- `run_dir`: Output directory for artifacts (prefer under `data/runs/`)
 
 ## Outputs
 
-**Structure**: `data/runs/<target>/<session>/<run>/`
+**Structure**: `data/runs/<target>/<session>/<run>/` (or an explicit `--run-dir` under `data/runs/`)
 - `raw/` - Probe artifacts (logs, dumps, traces, HARs)
 - `manifest.json` - SHA256 hashes for integrity verification
 - `derived/findings.json` - Schema-valid findings with evidence citations; include `schema_version`
@@ -153,34 +147,40 @@ require_authorization: true
 uv run python -m rwb doctor --json
 ```
 
-### 2) Initialize Target
+### 2) Create Authorization (required by scope)
 
 ```bash
-uv run python -m rwb init myapp --kind macos-app --locator "/Applications/MyApp.app"
+uv run python -m rwb authorize \
+  --target-id myapp \
+  --target-kind macos-app \
+  --target-locator "/Applications/MyApp.app" \
+  --output authorization.json
 ```
 
 ### 3) Generate Probe Plan
 
 ```bash
-uv run python -m rwb plan myapp --type baseline --probe-set macos-baseline --json
+uv run python -m rwb plan \
+  --target-id myapp \
+  --target-kind macos-app \
+  --target-locator "/Applications/MyApp.app" \
+  --probe-set macos-baseline \
+  --authorization authorization.json
 ```
 
-### 4) Execute Probes (explicit consent required)
+### 4) Execute Probes
 
 ```bash
-uv run python -m rwb run myapp --type baseline --probe-set macos-baseline --write --exec --confirm-run
+uv run python -m rwb run \
+  --plan-file probe-plan.json \
+  --run-dir data/runs/myapp/
 ```
 
-### 5) Generate Findings
+### 5) Generate Findings + Report
 
 ```bash
-uv run python -m rwb summarize myapp --run baseline_123456 --json
-```
-
-### 6) Compile Report
-
-```bash
-uv run python -m rwb report myapp --json
+uv run python -m rwb summarize \
+  --run-dir data/runs/myapp/
 ```
 
 ## Validation
@@ -265,10 +265,8 @@ When analyzing a target:
 
 ## Example Prompts
 
-- "Run a baseline reconnaissance on this macOS app and generate findings"
 - "Design a probe set for React web app component inspection"
 - "Validate the evidence paths in this findings.json"
-- "Create an authorization artifact for this iOS Simulator target"
 - "Generate a SHA256 manifest for this run directory"
 
 ## Remember
