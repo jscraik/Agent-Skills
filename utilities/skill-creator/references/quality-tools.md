@@ -23,8 +23,12 @@ python scripts/run_skill_evals.py <path/to/skill-folder>
 ```
 
 Use when:
-- running eval cases from references/evals.yaml using Codex CLI
+- running eval cases from references/evals.yaml using Codex CLI (`codex exec`)
 - capturing final output and applying acceptance assertions
+
+Notes:
+- In CI, prefer `--ask-for-approval never` to avoid prompts.
+- Keep `--sandbox read-only` unless the eval requires edits.
 
 Outputs:
 - PASS/FAIL per case with report artifacts under reports/skills/

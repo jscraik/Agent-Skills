@@ -1,6 +1,8 @@
 ---
 name: prd-to-accessibility
 description: "Generate accessibility requirements and checks from a PRD, aligned to WCAG targets and key journeys. Use when accessibility expectations must be explicit and testable."
+metadata:
+  short-description: "Derive accessibility requirements from PRDs."
 ---
 
 # PRD to Accessibility Spec
@@ -25,6 +27,28 @@ Every response must include:
 - `## When to use`
 
 Produce accessibility requirements and validation guidance from a PRD.
+
+## Iron law
+- No visual specs or layout guidance until accessibility requirements are complete.
+
+## Output template (strict)
+```markdown
+# Accessibility Spec
+
+## Target standard and scope
+
+## Key user journeys and assistive tech assumptions
+
+## Requirements by component/flow
+
+## Non-text content and media alternatives
+
+## Keyboard, focus, and navigation rules
+
+## Validation plan (automated + manual)
+
+## Known limitations and risks
+```
 
 ## Output location
 Write the accessibility spec in the same directory as the source PRD.

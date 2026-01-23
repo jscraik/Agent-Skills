@@ -1,6 +1,8 @@
 ---
 name: prd-to-security-review
-description: "Generate a security review from a PRD with threat model, abuse cases, controls, and validation steps. Use when security requirements must be explicit before build."
+description: "Generate a security review from a PRD. Use when security requirements, threats, and mitigations must be explicit before build."
+metadata:
+  short-description: "Threat model + controls from a PRD."
 ---
 
 # PRD to Security Review
@@ -24,6 +26,9 @@ Every response must include:
 - `## When to use`
 
 Generate a security review artifact from a PRD.
+
+## Iron law
+- Threat model and trust boundaries must be completed before listing controls.
 
 ## Output location
 Write the security review in the same directory as the source PRD.

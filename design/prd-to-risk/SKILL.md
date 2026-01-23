@@ -1,6 +1,8 @@
 ---
 name: prd-to-risk
 description: "Generate a risk register and mitigation plan from a PRD, covering product, security, delivery, and dependency risks. Use when risks must be explicitly enumerated and owned."
+metadata:
+  short-description: "Create a PRD-based risk register."
 ---
 
 # PRD to Risk Register
@@ -24,6 +26,13 @@ Every response must include:
 - `## When to use`
 
 Produce a structured risk register from the PRD.
+
+## Risk register template (strict)
+```markdown
+| Risk | Likelihood | Impact | Mitigation | Owner | Detection |
+| --- | --- | --- | --- | --- | --- |
+| | | | | | |
+```
 
 ## Output location
 Write the risk register in the same directory as the source PRD.

@@ -1,6 +1,8 @@
 ---
 name: prd-to-ux
 description: "Generate UX specifications from PRDs, feature specs, or product requirements for mockup tools. Use when preparing UX foundations before visual design."
+metadata:
+  short-description: "6-pass UX spec from a PRD."
 ---
 
 # PRD to UX Translation
@@ -17,6 +19,11 @@ This skill implements **Stage 2 of the Spec Pipeline** (UX Spec). It converts a 
 - `design/references/spec-linter-checklist.md` — Quality gate checklist
 - `design/references/prompts.md` — UX ambiguity killer prompt
 
+### Shared Template Alignment (required)
+
+- Prefer the shared UX template at:
+  - `/Users/jamiecraik/dev/agent-skills/design/product-spec/references/ux-spec-template.md`
+
 ## Response format (strict)
 The first line of any response MUST be `## Inputs`.
 Every response must include:
@@ -25,6 +32,7 @@ Every response must include:
 - `## When to use`
 
 Translate requirements into UX foundations via six forced passes. Do not produce visual specs until all passes are complete.
+Each pass section must include explicit `Evidence:` or `Evidence gap:` lines.
 
 ## Output location
 Write the UX specification to a file in the same directory as the source PRD.
@@ -119,7 +127,12 @@ No visual specs until all six passes complete.
 ```
 
 ## Then: Visual specifications
-Only after all passes, write visual specs (layout, components, interactions, responsive behavior).
+Only after all passes AND a state machine diagram exists for each component referenced in Pass 3.
+Then write visual specs (layout, components, interactions, responsive behavior).
+Required inclusions:
+- Minimum hit-area targets (mobile 44x44px, desktop 32x32px) and minimum spacing between adjacent targets (8px).
+- Responsive breakpoints using token names, with layout shifts described per breakpoint.
+- Token-based grid sizes (columns, gutters, margins) per breakpoint.
 
 ## Output template
 ```markdown
@@ -146,6 +159,20 @@ Only after all passes, write visual specs (layout, components, interactions, res
 ---
 
 ## Visual Specifications
+**Hit-area rules:**
+- Mobile min target: 44x44px
+- Desktop min target: 32x32px
+- Min spacing between adjacent targets: 8px
+
+**Responsive breakpoints (tokenized):**
+- Breakpoint tokens:
+- Layout shifts per breakpoint:
+
+**Token-based grid:**
+- Columns:
+- Gutters:
+- Margins:
+
 ...
 ```
 

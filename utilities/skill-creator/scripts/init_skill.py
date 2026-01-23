@@ -160,24 +160,61 @@ PYTHON_RUNNER_TEMPLATE = '''#!/usr/bin/env python3
 """
 Skill script entrypoint for {skill_name}.
 
-Keep scripts deterministic and safe:
-- Do not print secrets or env vars
-- Prefer --dry-run modes for destructive operations
-- Avoid network assumptions unless explicitly enabled
+Security / safety baseline (keep these true unless the user explicitly opts in):
+- No network assumptions: default to offline behavior. If network is required, gate it behind --allow-network.
+- Never echo secrets or environment variables. Do not print os.environ / process.env / token values.
+- Destructive actions require an explicit confirmation flag. Prefer --dry-run by default.
+
+This file is a scaffold. Replace the TODOs with the real implementation.
 """
 
+from __future__ import annotations
+
 import argparse
+import re
+import sys
+from typing import Iterable
+
+
+_SENSITIVE_HINTS = ("KEY", "TOKEN", "SECRET", "PASSWORD", "PRIVATE_KEY", "BEARER ")
+
+
+def redact(text: str) -> str:
+    """
+    Best-effort redaction for logs. Never rely on this as your only control:
+    the primary control is "do not print secrets".
+    """
+    out = text
+    for hint in _SENSITIVE_HINTS:
+        out = re.sub(rf"(?i)({re.escape(hint)}\s*[:=]\s*)([^\s]+)", r"\1[REDACTED]", out)
+    return out
+
+
+def require_confirm(*, confirm: bool, dry_run: bool, message: str) -> None:
+    if dry_run:
+        print(f"[DRY RUN] {message}")
+        return
+    if not confirm:
+        raise SystemExit("Refusing to perform a destructive action without --confirm. Re-run with --dry-run to preview.")
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Skill helper entrypoint for {skill_name}")
-    parser.add_argument("--dry-run", action="store_true", help="Print intended actions without making changes")
+    parser.add_argument("--dry-run", action="store_true", help="Preview intended actions without making changes")
+    parser.add_argument("--confirm", action="store_true", help="Required to run destructive actions (delete/overwrite/remote writes)")
+    parser.add_argument("--allow-network", action="store_true", help="Opt-in to network operations (default: offline)")
     args = parser.parse_args()
 
     # TODO: implement the real behavior for this skill.
-    if args.dry_run:
-        print("[DRY RUN] TODO: describe intended actions")
-        return
+    # Example guardrails:
+    if not args.allow_network:
+        # Keep network code paths disabled unless explicitly enabled.
+        pass
+
+    # Example destructive action:
+    # require_confirm(confirm=args.confirm, dry_run=args.dry_run, message="Would delete ./build and recreate it")
+    # if not args.dry_run:
+    #     ... perform deletion ...
 
     print("TODO: implement {skill_name} script")
 
@@ -251,6 +288,14 @@ def create_resource_dirs(skill_dir, skill_name, skill_title, resources, include_
                 print("[OK] Created references/api_reference.md")
             else:
                 print("[OK] Created references/")
+            # Always create a plan artifact placeholder.
+            plan_md = resource_dir / "plan.md"
+            if not plan_md.exists():
+                plan_md.write_text(
+                    f"# Plan for {skill_title}\n\n"
+                    "TODO: Paste the output from `$create-plan` (if available) or write the plan used to build this skill.\n"
+                )
+                print("[OK] Created references/plan.md")
         elif resource == "assets":
             if include_examples:
                 example_asset = resource_dir / "example_asset.txt"

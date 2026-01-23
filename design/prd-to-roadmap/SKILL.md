@@ -1,6 +1,8 @@
 ---
 name: prd-to-roadmap
 description: "Generate a phased roadmap from a PRD with goals, dependencies, and validation gates. Use when sequencing and milestone logic must be explicit without dates."
+metadata:
+  short-description: "Turn PRDs into phased roadmaps."
 ---
 
 # PRD to Roadmap
@@ -24,6 +26,32 @@ Every response must include:
 - `## When to use`
 
 Generate a phased roadmap from a PRD.
+
+## Iron law
+- Sequence by dependency first; never by convenience.
+
+## Output template (strict)
+```markdown
+# Roadmap
+
+## Phase 1: [Name]
+- Goal:
+- Dependencies:
+- Validation gate:
+- Scope (in/out):
+
+## Phase 2: [Name]
+- Goal:
+- Dependencies:
+- Validation gate:
+- Scope (in/out):
+
+## Phase 3: [Name]
+- Goal:
+- Dependencies:
+- Validation gate:
+- Scope (in/out):
+```
 
 ## Output location
 Write the roadmap in the same directory as the source PRD.

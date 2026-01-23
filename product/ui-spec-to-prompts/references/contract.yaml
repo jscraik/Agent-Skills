@@ -1,0 +1,22 @@
+schema_version: 1
+name: ui-spec-to-prompts
+purpose: "Produce build-order prompts from a UI spec for UI generation tools."
+triggers:
+  - "UI spec to prompts"
+  - "build-order prompts"
+  - "v0 prompts"
+  - "Bolt prompts"
+  - "Claude UI prompts"
+inputs:
+  - "UI spec file path"
+  - "Target UI tool (v0, Bolt, Claude, Figma AI)"
+  - "Target platform (web, mobile, desktop)"
+non_goals:
+  - "Generate a UI spec from a PRD"
+  - "Invent design tokens or components"
+risks:
+  - "Missing measurements or tokens produce incomplete prompts"
+outputs:
+  - id: prompts_doc
+    type: markdown
+    description: "Build-order prompts derived from the UI spec"

@@ -408,6 +408,102 @@ def check_path_safety(doc: SkillDoc) -> List[Finding]:
     return out
 
 
+
+def check_script_security(skill_dir: Path, doc: SkillDoc) -> List[Finding]:
+    """
+    Heuristic safety checks for script-backed skills.
+
+    Goals:
+    - catch accidental secret/env echo
+    - discourage implicit network dependency
+    - encourage explicit confirmation for destructive operations
+    """
+    out: List[Finding] = []
+    scripts_dir = skill_dir / "scripts"
+    if not scripts_dir.exists() or not scripts_dir.is_dir():
+        return out
+
+    script_files: List[Path] = []
+    for ext in ("*.py", "*.sh", "*.bash", "*.zsh", "*.js", "*.ts"):
+        script_files.extend(sorted(scripts_dir.glob(ext)))
+
+    if not script_files:
+        return out
+
+    body_l = doc.body.lower()
+    mentions_network = _has_any(body_l, ["network", "internet", "offline", "allow-network", "no network"])
+    mentions_confirm = _has_any(body_l, ["--confirm", "--force", "dry-run", "destructive"])
+
+    # Patterns: keep tight to avoid false positives.
+    env_echo_patterns = [
+        re.compile(r"print\s*\(\s*os\.environ", re.IGNORECASE),
+        re.compile(r"pprint\s*\(\s*os\.environ", re.IGNORECASE),
+        re.compile(r"logging\.\w+\s*\(\s*os\.environ", re.IGNORECASE),
+        re.compile(r"console\.log\s*\(\s*process\.env", re.IGNORECASE),
+    ]
+    secret_echo_patterns = [
+        re.compile(r"(print|logging\.\w+|console\.log)\s*\(.*(API_KEY|TOKEN|SECRET|PASSWORD|PRIVATE_KEY)", re.IGNORECASE),
+    ]
+    network_patterns = [
+        re.compile(r"^\s*import\s+requests\b", re.MULTILINE),
+        re.compile(r"^\s*from\s+requests\b", re.MULTILINE),
+        re.compile(r"^\s*import\s+httpx\b", re.MULTILINE),
+        re.compile(r"^\s*import\s+aiohttp\b", re.MULTILINE),
+        re.compile(r"urllib\.request\.urlopen", re.IGNORECASE),
+        re.compile(r"\bcurl\b", re.IGNORECASE),
+        re.compile(r"\bwget\b", re.IGNORECASE),
+    ]
+    destructive_patterns = [
+        re.compile(r"shutil\.rmtree", re.IGNORECASE),
+        re.compile(r"\.unlink\s*\(", re.IGNORECASE),
+        re.compile(r"os\.remove\s*\(", re.IGNORECASE),
+        re.compile(r"os\.rmdir\s*\(", re.IGNORECASE),
+        re.compile(r"\brm\s+-rf\b", re.IGNORECASE),
+        re.compile(r"\bgit\s+push\b", re.IGNORECASE),
+        re.compile(r"\bnpm\s+publish\b", re.IGNORECASE),
+    ]
+
+    for f in script_files:
+        txt = _read_text(f)
+
+        if any(p.search(txt) for p in env_echo_patterns):
+            out.append(Finding(
+                Level.FAIL,
+                "SAFE_ENV_ECHO",
+                "Script appears to print environment variables. Never echo env vars or secrets.",
+                evidence=str(f.relative_to(skill_dir)),
+            ))
+
+        if any(p.search(txt) for p in secret_echo_patterns):
+            out.append(Finding(
+                Level.FAIL,
+                "SAFE_SECRET_ECHO",
+                "Script appears to log/print secret-like values (API_KEY/TOKEN/SECRET/PASSWORD). Redact or remove.",
+                evidence=str(f.relative_to(skill_dir)),
+            ))
+
+        uses_network = any(p.search(txt) for p in network_patterns)
+        if uses_network and not mentions_network:
+            out.append(Finding(
+                Level.WARN,
+                "SAFE_NETWORK_UNDECLARED",
+                "Network usage detected in scripts but SKILL.md does not explicitly describe network requirements/constraints. Default to offline; gate behind --allow-network if needed.",
+                evidence=str(f.relative_to(skill_dir)),
+            ))
+
+        is_destructive = any(p.search(txt) for p in destructive_patterns)
+        if is_destructive and not mentions_confirm and not _has_any(txt.lower(), ["--dry-run", "--confirm", "--force", "dry_run", "confirm", "force"]):
+            out.append(Finding(
+                Level.WARN,
+                "SAFE_DESTRUCTIVE_GUARD",
+                "Potentially destructive operations detected in scripts without an obvious dry-run/confirm guard. Prefer --dry-run default and require --confirm/--force.",
+                evidence=str(f.relative_to(skill_dir)),
+            ))
+
+    return out
+
+
+
 def check_contract_and_evals(skill_dir: Path, *, require_contract: bool, require_evals: bool) -> List[Finding]:
     out: List[Finding] = []
     refs_dir = skill_dir / "references"

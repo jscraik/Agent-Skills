@@ -1,0 +1,16 @@
+cases:
+  - name: happy-path
+    prompt: "Convert this UI spec into build-order prompts for v0."
+    acceptance:
+      - type: contains
+        value: "## Outputs"
+  - name: edge-case
+    prompt: "UI spec is missing breakpoints; generate prompts and ask for missing measurements."
+    acceptance:
+      - type: contains
+        value: "## Inputs"
+  - name: failure-mode
+    prompt: "User asks to create a UI spec from a PRD."
+    acceptance:
+      - type: contains
+        value: "## When to use"

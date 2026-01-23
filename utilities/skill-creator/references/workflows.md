@@ -59,6 +59,12 @@ Prefer short, numbered steps with explicit gates and evidence.
 - Next steps
 ```
 
+## Planning with `$create-plan`
+
+If the `$create-plan` skill is available, use it for non-trivial work before writing files, then store the output as a plan artifact (recommended: `references/plan.md`).
+
+If `$create-plan` is not available, write an equivalent plan manually and store it the same way.
+
 ## Preflight (Required)
 
 Capture inputs, constraints, and any required confirmations.

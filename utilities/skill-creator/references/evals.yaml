@@ -6,6 +6,8 @@ cases:
         value: "## Outputs"
       - type: contains
         value: "SKILL.md"
+      - type: contains
+        value: "references/plan.md"
   - name: edge-case
     prompt: "Use $skill-creator to create a new Codex skill for deploying to production, but I did not specify the platform. Ask only the minimum questions needed and do not invent details."
     acceptance:

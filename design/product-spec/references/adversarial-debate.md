@@ -1,0 +1,14 @@
+### 6) Adversarial debate
+- If additional cross-validation is needed, run the `oracle` skill with a tight file set and include the Oracle review summary in the evidence map.
+- If user provides opponent models, run rounds until all say `[AGREE]`. Otherwise use adaptive personas based on repo inference from stack + dirs + README. Use `references/adversarial-review-personas.md` to select personas and ordering.
+- Use tagged prompt blocks and strict formatting from `references/adversarial-review-prompts.md` for each persona.
+- Default order (after selection): PM, UX, Frontend, Backend, Security, Reliability/SRE, Data/ML, Platform/Infra, QA/Test (if triggered), DevEx/Tooling (if triggered).
+- If inference is ambiguous, include the broader set and record an Evidence gap for persona selection.
+- A persona may only `[AGREE]` once all ERROR findings for that persona are resolved.
+- Apply critique criteria:
+  - **Foundation Spec:** clear problem evidence; real personas; user stories "As a … I want … so that …"; measurable success metrics; explicit in/out scope; realistic risks; no implementation detail.
+  - **UX Spec:** mental model explicitly stated; IA covers all entities and relationships; affordances clear for all screens; system feedback states specified for all key views; UX acceptance criteria testable.
+  - **Build Plan:** epics are sequenced and coherent; stories are small (5–15 minutes) with explicit acceptance criteria; test plan covers unit/integration/E2E; release plan has rollback; telemetry plan defined.
+  - **Tech:** architecture decisions + rationale; complete API contracts (method, path, request/response schemas, error codes); data models with types/constraints/indexes/relationships; security (authz/authn/encryption/validation); enumerated error handling; specific performance targets; repeatable/reversible deploy; SLO/error budget + policy.
+  - **Review mode:** vision reconstructed; evidence captured; product/engineering/ops gaps enumerated; viability assessed; Recovery Plan (stop/continue/start + top actions) with next-14-day actions and "done when" criteria; no implementation.
+- If gaps remain, return to interview-style questioning, then revise and debate again.

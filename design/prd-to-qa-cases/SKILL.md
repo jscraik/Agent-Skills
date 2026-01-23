@@ -1,6 +1,8 @@
 ---
 name: prd-to-qa-cases
 description: "Generate QA test cases from PRD acceptance criteria using Given/When/Then and expected results. Use when QA coverage needs explicit, auditable cases."
+metadata:
+  short-description: "Translate PRDs into QA test cases."
 ---
 
 # PRD to QA Cases
@@ -25,6 +27,21 @@ Every response must include:
 - `## When to use`
 
 Generate QA test cases from acceptance criteria.
+
+## Traceability matrix (required)
+```markdown
+| Acceptance Criteria | Test Case ID | Test Type | Status |
+| --- | --- | --- | --- |
+| | | | |
+```
+
+## Test case template (Given/When/Then)
+```markdown
+**Test Case ID:** TC-001
+**Given** ...
+**When** ...
+**Then** ...
+```
 
 ## Output location
 Write QA cases in the same directory as the source PRD.

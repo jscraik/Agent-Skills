@@ -1,6 +1,8 @@
 ---
 name: product-spec
-description: "Create and review PRDs/tech specs with structured discovery and acceptance criteria. Use when the user needs a product or technical spec, especially for high-risk or contentious scopes that require Oracle second-model validation."
+description: "Create or review PRDs/tech specs for product ideas; use when you need structured requirements, UX spec, and build plan, especially for high-risk scopes."
+metadata:
+  short-description: "End-to-end PRD + UX spec + build plan."
 ---
 
 - **Documentation is scope:** Adding new docs/indexes is scope and ongoing maintenance; require justification and apply the 48-hour rule.
@@ -84,6 +86,25 @@ The following shared templates and tools replace individual skill templates:
 - `design/references/build-plan-template.md` — Build Plan template
 - `design/references/spec-linter-checklist.md` — Quality gate checklist (run after each stage)
 - `design/references/prompts.md` — Socratic reviewer, UX ambiguity killer, Build plan decomposer
+
+Extended workflow references:
+- `design/product-spec/references/adversarial-debate.md`
+- `design/product-spec/references/finalize.md`
+- `design/product-spec/references/lite-prd-generator.md`
+- `design/product-spec/references/ralph-loop.md`
+
+### Template resolution (required)
+
+If a required template is missing in the repo, fall back to the local skill reference:
+
+- `/Users/jamiecraik/dev/agent-skills/design/product-spec/references/foundation-spec-template.md`
+- `/Users/jamiecraik/dev/agent-skills/design/product-spec/references/ux-spec-template.md`
+- `/Users/jamiecraik/dev/agent-skills/design/product-spec/references/build-plan-template.md`
+- `/Users/jamiecraik/dev/agent-skills/design/product-spec/references/spec-linter-checklist.md`
+- `/Users/jamiecraik/dev/agent-skills/design/product-spec/references/prompts.md`
+- `/Users/jamiecraik/dev/agent-skills/design/product-spec/references/mermaid-examples.md`
+
+If both repo and local templates are missing, proceed with a best-effort spec and mark an Evidence gap for the missing template.
 
 ## Output Artifacts
 
@@ -171,8 +192,11 @@ Spec artifacts are written to `.spec/` with the following naming convention:
   - **Mental model alignment** — What the user believes is happening; what we must reinforce; what we must never imply
   - **Information architecture** — Entities and their definitions, relationships, navigation structure
   - **Affordances & actions** — For each screen/component: what is clickable, editable, destructive, needs confirmation, disabled and why
-  - **System feedback states** — For each key view: empty state, loading state, partial/incomplete data, error state(s), permissions/auth state
+  - **Cognitive load** — Friction points (choice/uncertainty/waiting) + simplifications + defaults
+  - **State design** — For each key view: empty state, loading state, partial/incomplete data, error state(s), permissions/auth state
+  - **Flow integrity** — Where users get lost, first-time failures, and visibility rules
   - **UX acceptance criteria** — Given/When/Then format for testable UX behavior
+- Enforce the **6 passes** (Mental Model → IA → Affordances → Cognitive Load → State Design → Flow Integrity) before any visuals.
 - Run the **UX Ambiguity Killer** prompt from `design/references/prompts.md` if needed.
 - Present the draft wrapped in `[SPEC] ... [/SPEC]` and ask: "Does this capture the intended experience? Changes before build plan?"
 - **Evidence discipline:** every paragraph should end with an `Evidence:` line or `Evidence gap:` line.
@@ -205,82 +229,16 @@ Spec artifacts are written to `.spec/` with the following naming convention:
 - Fail fast on any missing mandatory section or redaction gap.
 
 ### 6) Adversarial debate
-- If additional cross-validation is needed, run the `oracle` skill with a tight file set and include the Oracle review summary in the evidence map.
-- If user provides opponent models, run rounds until all say `[AGREE]`. Otherwise use adaptive personas based on repo inference from stack + dirs + README. Use `references/adversarial-review-personas.md` to select personas and ordering.
-- Use tagged prompt blocks and strict formatting from `references/adversarial-review-prompts.md` for each persona.
-- Default order (after selection): PM, UX, Frontend, Backend, Security, Reliability/SRE, Data/ML, Platform/Infra, QA/Test (if triggered), DevEx/Tooling (if triggered).
-- If inference is ambiguous, include the broader set and record an Evidence gap for persona selection.
-- A persona may only `[AGREE]` once all ERROR findings for that persona are resolved.
-- Apply critique criteria:
-  - **Foundation Spec:** clear problem evidence; real personas; user stories "As a … I want … so that …"; measurable success metrics; explicit in/out scope; realistic risks; no implementation detail.
-  - **UX Spec:** mental model explicitly stated; IA covers all entities and relationships; affordances clear for all screens; system feedback states specified for all key views; UX acceptance criteria testable.
-  - **Build Plan:** epics are sequenced and coherent; stories are small (5–15 minutes) with explicit acceptance criteria; test plan covers unit/integration/E2E; release plan has rollback; telemetry plan defined.
-  - **Tech:** architecture decisions + rationale; complete API contracts (method, path, request/response schemas, error codes); data models with types/constraints/indexes/relationships; security (authz/authn/encryption/validation); enumerated error handling; specific performance targets; repeatable/reversible deploy; SLO/error budget + policy.
-  - **Review mode:** vision reconstructed; evidence captured; product/engineering/ops gaps enumerated; viability assessed; Recovery Plan (stop/continue/start + top actions) with next-14-day actions and "done when" criteria; no implementation.
-- If gaps remain, return to interview-style questioning, then revise and debate again.
+- Full procedure: `design/product-spec/references/adversarial-debate.md`.
 
 ### 7) Design review routing (if requested)
 - Use `product-design-review` for UX/UI audits, heuristic evaluations, accessibility-first reviews, onboarding/checkout critique, or end-to-end journey analysis.
 
 ### 8) Finalize
-- **Quality gate:** completeness (all sections substantive), consistency, clarity, actionability.
-- **Foundation Spec specifics:** one-sentence summary; core problem with anti-goal; target user + context + job-to-be-done; success (primary metric, guardrails, activation); MVP scope (must-have vs out-of-scope); user stories (top 5–10 with AC and edge cases); primary journey (happy path); positioning constraints; evidence discipline applied.
-- **UX Spec specifics:** mental model alignment; information architecture (entities, relationships, navigation); affordances & actions per screen/component; system feedback states per key view; UX acceptance criteria in Gherkin format; evidence discipline applied.
-- **Build Plan specifics:** outcome → opportunities → solution (with rejected alternatives); top 3–5 assumptions/risks; epics sequenced; stories per epic with AC, telemetry/events, tests; data + contracts (lightweight); test strategy (unit/integration/E2E/failure-mode); release & measurement plan (feature flags, rollout, monitoring, measurement window); evidence discipline applied.
-- **PRD specifics (decision-first, default):**
-  - One-sentence summary
-  - Problem & Job (JTBD-lite) + anti-goal
-  - Target user + context + workaround
-  - Success criteria (primary metric, activation, guardrails)
-  - Scope (in/out) + primary journey (happy path only)
-  - Top user stories with acceptance criteria
-  - Optional (only if decision-impacting): assumptions/risks, rollout/measurement, or compliance notes
-  - If deeper analyses exist (SWOT, market, value prop, pre-mortem), link and summarize the decision only
-- **Tech specifics:** architecture diagram/description covers all components; every API endpoint has method/path/schemas/errors; data models detail fields + constraints + indexes; security covers authN/Z + encryption + input validation; performance includes latency/throughput/availability; deployment repeatable & rollback-able; observability plan; SLOs/error budget + policy; top-level `Acceptance Criteria` section present and populated; decision log/ADRs referenced; data lifecycle/retention/deletion addressed; feature creep guardrails answered with evidence; scope decision log populated; launch/rollback guardrails and go/no-go metrics defined; post-launch monitoring plan with owners and window; support/ops impact and runbook links; compliance/regulatory review triggers stated; ownership/RACI defined; security/privacy classification completed; dependency SLAs/vendor risk covered; cost model with guardrails; localization/i18n stance; backward compatibility/deprecation policy; experimentation/feature flag plan; explicit kill criteria.
-- **Review mode specifics:** Project Review Report produced; checklist passed; Recovery Plan section (stop/continue/start + top actions + "done when"); follow-ups to update PRD/Tech Spec/ADRs noted (only if explicitly requested after audit). Every paragraph includes `Evidence:` or `Evidence gap:`; include `Evidence Gaps` + `Evidence Map` sections.
-- **Review artifact vs. new process (default):** The adversarial review document is evidence of the audit (like a transcript), not a new ongoing project process. Keep it, but do not introduce new mandatory processes unless the user explicitly asks.
-- Run production gates before `[AGREE]` when shipping: ORR checklist, Launch checklist, SLO template (or N/A with reason).
-- When satisfied and all models said `[AGREE]`, write the final documents:
-  - `.spec/foundation-YYYY-MM-DD-<slug>.md`
-  - `.spec/ux-YYYY-MM-DD-<slug>.md`
-  - `.spec/build-plan-YYYY-MM-DD-<slug>.md`
-  - (Optionally) `.spec/spec-YYYY-MM-DD-<slug>.md` for backward compatibility
-  - Print all documents with debate summary.
-- Add final summary block:
-```
-=== Debate Complete ===
-Documents: Foundation Spec, UX Spec, Build Plan (or [PRD | Technical Specification])
-Rounds: <N> (or include cycles if >1)
-Models: <list>
-Key refinements: - <bullets>
-```
-- For template-driven deliverables, run `python3 scripts/spec-export.py <spec>.md --out <spec>.template.json` and include the JSON in deliverables.
-- **Validation guidance:** For each story and top-level acceptance criteria, include a validation method (tests, lint, build, manual check) and prefer repo scripts. If no repo scripts are known, recommend tools from `~/.codex/instructions/tooling.md` (e.g., `biome`, `pnpm test`, `uv run pytest`) as appropriate to the stack.
+- Full checklist: `design/product-spec/references/finalize.md`.
 
 ### 9) Lite PRD Generator (demo-grade)
-- Use only when Lite PRD mode is selected or the user asks for a demo-grade PRD.
-- Output **sections 1-7 only** with the exact headings below. Keep concise and builder-friendly.
-- Optimize for believable demo scope; avoid architecture, tech stack, pricing, or GTM.
-- Make assumptions explicit. If input is extremely vague, ask **one** clarifying question max, then proceed.
-- Write to `.spec/lite-prd-YYYY-MM-DD-<slug>.md` unless the user provides a path.
-- After writing the Lite PRD, **invoke the `prd-clarifier` skill** to run structured clarification.
-- When expanding to a full PRD, map Lite sections to full PRD headings (compatibility map below) and then complete the remaining sections.
-- **Output structure (strict):**
-  1) **One-Sentence Problem** — `[User] struggles to [do X] because [reason], resulting in [impact].`
-  2) **Demo Goal (What Success Looks Like)** — success criteria + optional non-goals.
-  3) **Target User (Role-Based)** — role/context, skill level, key constraint.
-  4) **Core Use Case (Happy Path)** — start condition, numbered steps, end condition.
-  5) **Functional Decisions (What It Must Do)** — table: `ID | Function | Notes` (capabilities only).
-  6) **UX Decisions (What the Experience Is Like)** — entry point, inputs, outputs, feedback/states, errors.
-  7) **Data & Logic (At a Glance)** — inputs, processing, outputs.
-- **Compatibility map (Lite -> Full PRD):**
-  - One-Sentence Problem -> `0) PRD Summary` + `2) Problem Statement / Opportunity`
-  - Demo Goal -> `1) Executive Summary` + `10) Success Metrics / KPIs`
-  - Target User -> `3) Target Users / Personas`
-  - Core Use Case -> `4) User Stories / Use Cases` (core narrative)
-  - Functional Decisions -> `8) Functional Requirements`
-  - UX Decisions -> `4.2 Use case narratives` + `9) Non-Functional Requirements` (UX aspects)
-  - Data & Logic -> `7) Data Lifecycle & Retention` + `14) Dependencies` (data sources)
+- Full generator spec: `design/product-spec/references/lite-prd-generator.md`.
 
 ### 10) User review
 - Offer options: accept as-is; request changes; run another debate cycle (can reuse or change models). Apply changes, rewrite files, and repeat summary. Track cycle count if >1.
@@ -289,38 +247,7 @@ Key refinements: - <bullets>
 - If PRD finalized, ask if they want to proceed to a tech spec using the PRD as input; rerun workflow.
 
 ### 12) Delivery with RALPH loop (optional but recommended for implementation)
-- After a PRD and/or Tech Spec is finalized, offer: "Would you like to run the Golden Ralph Loop to deliver incrementally?"
-- If yes:
-  1) **Initialize the loop scaffold** (in repo root):
-     - Run `ralph init` to create `.ralph/ralph.toml`, `.ralph/PRD.md`, `.ralph/prd.json`, `.ralph/AGENTS.md`, `.ralph/progress.md`, `.ralph/specs/`, `.ralph/PROMPT_build.md`, `.ralph/PROMPT_plan.md`, `.ralph/PROMPT_judge.md`, `.ralph/logs/`, and `.ralph/state.json`.
-     - Verify `ralph --help` and `ralph doctor` if needed (ensures git + agent CLIs are available).
-     - Run `ralph diagnose --test-gates` to validate gate commands before the loop.
-  2) **Choose the PRD format** (set in `ralph.toml` under `[files].prd`):
-     - JSON (`.ralph/prd.json`) with a `stories` array (id, priority, title, description, acceptance, and done state).
-     - Markdown (`.ralph/PRD.md`) with a `## Tasks` section and checkbox lines.
-     - If you use `[tracker].kind`, set it to `auto|markdown|json|beads` and keep `files.prd` aligned.
-  3) **Write loop instructions and commands**:
-     - Update `.ralph/PROMPT_build.md` with the implementation plan and guardrails.
-     - Update `.ralph/AGENTS.md` with repo-specific build/test/run commands.
-     - If `CLAUDE.md` is present, list dependencies and commands there and reference `.ralph/AGENTS.md` to keep a single source of truth.
-  4) **Wire quality gates**:
-     - Set `ralph.toml` `[gates].commands` to the repo's quality gate commands (lint/test/typecheck).
-     - Gates run after each iteration; failures keep the task open and block exit.
-  5) **Generate or refine the PRD** (optional):
-     - Use `ralph plan --agent <runner> --desc "<summary>"` to create or update tasks.
-     - Ensure tasks are atomic (5–15 minutes) with explicit acceptance criteria + a test command.
-     - Enforce evidence discipline: cite file paths and command output, or state "Unable to verify: <reason>".
-  6) **Run the loop (attended first)**:
-     - `ralph step --agent codex` (single iteration), or
-     - `ralph run --agent codex --max-iterations N`
-     - The agent must print `EXIT_SIGNAL: true|false` at the end of output.
-  7) **Monitor progress**:
-     - `ralph status` for progress and last iteration summary.
-     - Logs are in `.ralph/logs/`; loop state in `.ralph/state.json`.
-  8) **Exit conditions**:
-     - Loop exits only when all tasks are done AND the agent prints `EXIT_SIGNAL: true`.
-     - The orchestrator ignores `EXIT_SIGNAL: true` if the repo is dirty or gates/judge fail.
-     - Circuit breaker stops on repeated no-progress iterations (`loop.no_progress_limit`).
+- Full loop instructions: `design/product-spec/references/ralph-loop.md`.
 
 ## Visuals & assets
 - Default to Mermaid for system/sequence/state diagrams; PlantUML acceptable.  

@@ -1,15 +1,13 @@
 ---
 name: skill-creator
 description: "Create, revise, and quality-gate Codex skills (SKILL.md + resources + evals + packaging). Use when asked to build or improve a skill."
-metadata:
-  short-description: "Create or update Codex skills with templates, validation, and packaging."
 ---
 
 # Skill Creator
 
 This skill helps you design, author, validate, and package high-quality skills.
 
-**Version**: 1.3.0  
+**Version**: 1.4.0  
 **Last updated**: 2026-01-22
 
 ## When to Use
@@ -38,6 +36,7 @@ Depending on the request, produce one or more of:
   - `references/` (optional)
   - `assets/` (optional)
 - `references/contract.yaml` (output contract) and `references/evals.yaml` (eval cases) when the skill is non-trivial. Include `schema_version` in the contract.
+- `references/plan.md` (plan artifact) for non-trivial skill builds; store the `$create-plan` output here when available.
 - A validation report (what passed/failed and what to fix).
 - A packaged `.skill` file created via `scripts/package_skill.py`.
 
@@ -73,6 +72,16 @@ If the request is out of scope:
   - Push depth into `references/` and executable helpers into `scripts/`.
 - Prefer instruction-only skills by default; add scripts only when determinism/repeatability matters.
 
+## Script-backed security rules (required)
+
+When a skill includes executable code (`scripts/` or containers), apply these rules:
+
+- No network assumptions: default to offline behavior. If network access is required, make it explicit and gate it behind an `--allow-network` flag.
+- Never echo secrets or environment variables. Do not print `os.environ`, `process.env`, or token values.
+- Require explicit confirmation for destructive actions (delete/overwrite/remote writes). Prefer `--dry-run` by default and require `--confirm` / `--force` to execute.
+
+See `references/security-hardening.md` for patterns and a Codex `.rules` template.
+
 ## Principles
 
 - **Trigger-first design**: discovery depends on `name` + `description`. Put trigger keywords and “use when …” contexts in the description.
@@ -93,6 +102,9 @@ Use these files when needed:
 - `references/progressive-disclosure-patterns.md`: how to split SKILL.md into references/scripts.
 - `references/quality-tools.md`: how to run validators/evals and interpret output.
 - `references/iteration-and-testing.md`: eval-driven iteration patterns, pressure tests, and rationalization hardening.
+- `references/planning.md`: how to use `$create-plan` and store plan artifacts.
+- `references/security-hardening.md`: script-backed safety patterns (no-network defaults, redaction, destructive action confirmations, Codex rules).
+- `references/destructive-commands.rules`: example Codex rules file to prompt/block risky commands.
 - `references/examples.md`: calibrated examples for phrasing and structure.
 - `references/anti-patterns.md`: common failure modes + remediation patterns.
 
@@ -112,6 +124,17 @@ Reload note:
 - Restart Codex after adding/updating skills so the index refreshes.
 - You can enable/disable skills in `~/.codex/config.toml` under `[skills]` (for example, a `disabled = [...]` list).
 - Decide target: `portable` (strict subset), `codex`, or `claude`.
+
+### 0.5) Planning phase (Codex-native `$create-plan`)
+
+If the task is non-trivial (multiple files, scripts, contracts/evals, or safety gates):
+
+1. If the `$create-plan` skill is installed, invoke it first.
+2. Store the resulting plan artifact in the target skill folder as:
+   - `references/plan.md` (preferred)
+3. Then execute the plan (RED → GREEN → REFACTOR).
+
+If `$create-plan` is not installed, write a compact plan yourself and store it in the same place.
 
 ### 1) Lock down triggers (with examples)
 
@@ -144,6 +167,7 @@ Use the initializer:
 python scripts/init_skill.py <skill-name> --target codex --run-type instruction --path <output-dir> --resources scripts,references,assets
 ```
 Tip: for script-backed skills, use `--run-type python` (creates `scripts/run.py`) or `--run-type container` (adds `Dockerfile` + `scripts/run.py`).
+Security note: for any executable code, follow `references/security-hardening.md` (offline defaults, no secret/env echo, `--dry-run` + `--confirm` for destructive actions).
 
 Then delete any unused resource folders and example files.
 
@@ -152,6 +176,7 @@ Then delete any unused resource folders and example files.
 **Frontmatter**
 - `name`: kebab-case, matches folder name.
 - `description`: single-line; includes WHAT + WHEN (trigger contexts + keywords).
+- Avoid workflow summaries in `description` (no steps / procedures). Keep workflows in the body / references.
 - Keep frontmatter minimal by default.
 
 **Body**
@@ -228,16 +253,6 @@ Before shipping, confirm the description selects the skill:
 - **Absolute-path coupling**: hardcoded machine paths (`/home/...`, `~/.claude/...`) instead of portable, repo-relative paths.
 - **Over-questioning**: asking broad or excessive clarifying questions instead of proceeding with reasonable defaults + a small number of targeted questions.
 - **Unsafe automation**: scripts that assume network access, exfiltrate secrets, or run destructive commands without explicit approval.
-- **No eval coverage**: no happy/edge/failure prompts, so regressions slip in.
-- **Missing failure path**: no explicit failure mode for out-of-scope requests.
-- **Hidden expectations**: response format or outputs implied but not written down.
-
-## Empowerment
-
-- Make a default recommendation and say why; let the user override.
-- Call out tradeoffs briefly so the user can decide fast.
-- Offer the next single action in each response.
-- Make assumptions explicit, then proceed without stalling.
 
 ## Variation
 
@@ -259,8 +274,3 @@ If a created skill produces repeated artifacts (reports, templates, PR descripti
 If targeting both systems:
 - Prefer the portable subset (see `references/portable-skills.md`).
 - Avoid platform-specific tools/flags in the core workflow; isolate them behind scripts or per-platform references.
-
-## Remember
-
-The agent is capable of extraordinary work in this domain. These guidelines unlock that potential—they don't constrain it.
-Use judgment, adapt to context, and push boundaries when appropriate.

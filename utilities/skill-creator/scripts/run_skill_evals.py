@@ -236,26 +236,13 @@ def run_codex_exec(
     output_last_message_path: Path,
     output_schema_path: Optional[Path],
     sandbox: str,
+    ask_for_approval: str,
     model: Optional[str],
     profile: Optional[str],
     codex_home: Optional[Path],
     jsonl_path: Optional[Path],
     extra_codex_args: Optional[List[str]] = None,
 ) -> Tuple[int, str, str]:
-    # Allow disabling MCP during evals to avoid startup hangs: set CODEX_MCP_DISABLED=1
-    cmd: List[str] = [
-        "codex",
-        "exec",
-        "--skip-git-repo-check",
-        "--cd",
-        str(workspace_root),
-        "--sandbox",
-        sandbox,
-        "-o",
-        str(output_last_message_path),
-    ]
-    if os.environ.get("CODEX_MCP_DISABLED") == "1":
-        cmd.append("--disable-mcp")
     if extra_codex_args:
         cmd.extend(extra_codex_args)
 
@@ -278,14 +265,19 @@ def run_codex_exec(
     # Add a timeout to prevent hangs; default 60s, override with CODEX_EVAL_TIMEOUT_SEC
     timeout = float(os.environ.get("CODEX_EVAL_TIMEOUT_SEC", "60"))
 
-    proc = subprocess.run(
-        cmd,
-        input=prompt,
-        text=True,
-        capture_output=True,
-        env=env,
-        timeout=timeout,
-    )
+    try:
+        proc = subprocess.run(
+            cmd,
+            input=prompt,
+            text=True,
+            capture_output=True,
+            env=env,
+            timeout=timeout,
+        )
+    except FileNotFoundError:
+        return 127, "", "codex CLI not found on PATH. Install it (for example: npm i -g @openai/codex)."
+    except subprocess.TimeoutExpired:
+        return 124, "", f"codex exec timed out after {timeout} seconds."
 
     if jsonl_path:
         jsonl_path.write_text(proc.stdout, encoding="utf-8")
@@ -298,6 +290,12 @@ def build_arg_parser() -> argparse.ArgumentParser:
     p.add_argument("path", help="Path to a skill directory or SKILL.md.")
     p.add_argument("--workspace", default=None, help="Workspace root to run codex exec in (defaults to repo root guess).")
     p.add_argument("--sandbox", default="read-only", choices=["read-only", "workspace-write", "danger-full-access"])
+    p.add_argument(
+        "--ask-for-approval",
+        default="never",
+        choices=["untrusted", "on-failure", "on-request", "never"],
+        help="Codex approval mode (use \"never\" for CI).",
+    )
     p.add_argument("--model", default=None, help="Override model for codex exec.")
     p.add_argument("--profile", default=None, help="Codex config profile name.")
     p.add_argument("--codex-home", default=None, help="Set CODEX_HOME (useful for repo-scoped .codex).")
@@ -386,6 +384,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             output_last_message_path=output_path,
             output_schema_path=schema_path,
             sandbox=args.sandbox,
+            ask_for_approval=args.ask_for_approval,
             model=args.model,
             profile=args.profile,
             codex_home=codex_home,

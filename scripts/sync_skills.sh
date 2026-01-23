@@ -4,7 +4,7 @@ set -euo pipefail
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$repo_root"
 
-categories=(github frontend apple backend interview product design utilities)
+categories=(github frontend apple backend interview product design utilities auth)
 skills_dir="$repo_root/skills"
 system_skills_dir="$repo_root/skills-system"
 
@@ -134,6 +134,10 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - `skill-creator` — Create, update, validate, or package skills and their resources. Use when a user asks to create or revise a skill, improve routing/portability, or package a skill; not for installing skills or choosing the right build primitive (use skill-installer or decide-build-primitive).
 - `skill-installer` — Install skills into $CODEX_HOME/skills from curated lists or GitHub paths. Not for clawdhub.com installs or skill creation.
 - `video-transcript-downloader` — Download videos, audio, subtitles, and clean paragraph-style transcripts from YouTube and any other yt-dlp supported site. Use when asked to “download this video”, “save this clip”, “rip audio”, “get subtitles”, “get transcript”, or to troubleshoot yt-dlp/ffmpeg and formats/playlists.
+
+## Auth
+- `create-auth` — Add authentication to TypeScript/JavaScript apps with Better Auth. Covers new setup, migration, env vars, core config, and framework handlers.
+- `best-practices` — Better Auth integration guide covering config, database adapters, sessions, hooks, and security options.
 INDEX_EOF
 
 chmod +x "$repo_root/scripts/sync_skills.sh"

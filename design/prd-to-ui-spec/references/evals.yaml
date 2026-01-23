@@ -1,0 +1,27 @@
+schema_version: 1
+cases:
+  - name: ui_spec_from_ux
+    prompt: "Create a UI spec from this UX spec using aStudio tokens."
+    acceptance:
+      - type: contains
+        value: "UI Spec"
+      - type: contains
+        value: "Evidence:"
+      - type: contains
+        value: "stateDiagram-v2"
+  - name: ui_spec_from_prd
+    prompt: "Translate this PRD into a UI spec aligned with aStudio."
+    acceptance:
+      - type: contains
+        value: "Design Tokens"
+      - type: contains
+        value: "Iconography"
+      - type: contains
+        value: "Evidence:"
+  - name: ui_spec_for_v0
+    prompt: "I have a UX spec; produce a UI spec for v0 with aStudio tokens and state machines."
+    acceptance:
+      - type: contains
+        value: "State Machine"
+      - type: contains
+        value: "Evidence:"

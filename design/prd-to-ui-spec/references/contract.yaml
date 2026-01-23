@@ -1,0 +1,20 @@
+schema_version: 1
+name: prd-to-ui-spec
+purpose: "Produce a UI specification aligned to aStudio tokens and brand rules."
+triggers:
+  - "UI spec"
+  - "UI specification"
+  - "from PRD or UX spec"
+  - "aStudio tokens"
+inputs:
+  - "PRD or UX spec file path"
+  - "Optional output path"
+non_goals:
+  - "Produce visual mockups or layouts"
+  - "Invent design tokens"
+risks:
+  - "Missing tokens leads to Evidence gaps and incomplete specs"
+outputs:
+  - id: ui_spec
+    type: markdown
+    description: "UI specification aligned to aStudio tokens with state machine diagrams"
