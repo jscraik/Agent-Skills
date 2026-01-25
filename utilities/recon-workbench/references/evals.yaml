@@ -12,8 +12,8 @@ cases:
         value: "rwb plan"
       - type: contains
         value: "rwb run"
-      - type: contains
-        value: "data/runs"
+      - type: regex
+        value: "data/runs|runs/"
   - name: happy-path-plan
     prompt: "Generate a probe plan for an authorized web-app target and explain required inputs."
     acceptance:

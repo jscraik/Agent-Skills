@@ -1,32 +1,30 @@
 # Dependencies (Baseline -> Advanced -> Worst-case)
 
-This is the dependency inventory required to cover the "worst-case" tier across:
-browser apps (React/etc) and OSS.
+Summary from `docs/reference/DEPENDENCIES.md`.
 
-## Baseline (recommended for all workflows)
-- Codex CLI (planning + summarization; schema outputs)
-- Git
-- Python 3
-- Node.js + npm (for Playwright/web probes)
-## Web/React + browser apps
-Baseline:
-- Chrome DevTools HAR export
+## Baseline (recommended)
+- Codex CLI, Git, Python 3, Node.js + npm
+- Xcode Command Line Tools
+- Xcode + iOS Simulator
 
-Worst-case:
-- Playwright + trace viewer
-- Playwright requires `npm install -D playwright` and `npx playwright install` to fetch browsers.
-- Optional helper: `scripts/install_playwright.sh` in the template.
-- HTTPS proxy tooling (mitmproxy / Burp) when appropriate
+## macOS apps
+- Baseline: codesign, otool, nm, strings
+- Optional: Ghidra, class-dump, swift-demangle, Hopper/IDA
+- Worst-case: Instruments + unified logging (no circumvention)
+
+## iOS Simulator
+- Baseline: xcrun simctl, Safari Web Inspector
+- Optional: class-dump, swift-demangle, LLDB (debug builds only)
+- Worst-case: Instruments + HTTPS proxy tooling (mitmproxy/Burp/Charles)
+
+## Web/React apps
+- Baseline: Chrome DevTools HAR export, Safari Web Inspector
+- Worst-case: Playwright + trace viewer, HTTPS proxy tooling
 
 ## OSS repos
-Baseline:
-- language toolchains + package managers
-- optional: ripgrep, graphviz
-
-Worst-case:
-- Semgrep (SAST)
-- CodeQL CLI (deep static analysis)
+- Baseline: language toolchains + package managers
+- Worst-case: Semgrep, CodeQL CLI
 
 ## Verification
-- Use a "doctor" check to confirm presence and record versions before running probes.
-- For schema validation, install the Python package `jsonschema`.
+- Run doctor before probes to record tool versions.
+- Schema validation requires `jsonschema`.

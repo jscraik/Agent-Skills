@@ -7,12 +7,12 @@
 - Use approved probes from probes/catalog.json. Avoid ad-hoc commands when a probe exists.
 
 ## Evidence discipline
-- Every finding must cite one or more evidence paths under runs/...
+- Every finding must cite one or more evidence paths under `data/runs/...` (preferred) or legacy `runs/...`
 - If evidence is insufficient, request additional probes rather than speculating.
 - Summaries must list commands used + artifact locations.
 
 ## Outputs
-- Write derived output to runs/<target>/<session>/<run>/derived/
+- Write derived output to `data/runs/<target>/<session>/<run>/derived/` (legacy `runs/...` supported)
 - Produce:
   - findings.json (schema-valid)
   - report.md (human-readable; all claims anchored to artifact paths)

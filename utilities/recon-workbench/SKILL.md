@@ -26,7 +26,8 @@ Answer with sections titled exactly: **Outputs** and **Procedure** (include auth
 - Use `docs/reference/GOLD_STANDARD.md` for compliance gates
 - Apply `docs/reference/AUTHORIZATION_CHECKLIST.md` before any run
 - Apply `docs/reference/DATA_HANDLING.md` for redaction/retention
-- Evidence-only claims: every finding must cite an artifact path under `data/runs/...`
+- Evidence-only claims: every finding must cite an artifact path under `data/runs/...` (preferred) or legacy `runs/...`
+- If AI assistance is used, produce `ai/prompts/...` and `ai/sessions/...` artifacts (see `docs/agents/ai-governance.md`)
 
 ## Purpose
 
@@ -53,7 +54,7 @@ Before building or inspecting, clarify:
 ## Core Constraints (Non-Negotiable)
 
 - **No circumvention**: No DRM bypass, no cracking, no private data access
-- **Evidence-only**: Every finding must cite an artifact path under `data/runs/...`
+- **Evidence-only**: Every finding must cite an artifact path under `data/runs/...` (preferred) or legacy `runs/...`
 - **Observation-first**: Prefer static analysis; use dynamic only when authorized
 - **Authorized tools only**: For deeper visibility, request debug builds and use LLDB/Instruments/logs
 - **Web/React caution**: Component inspection only on authorized apps with documented permission
@@ -80,6 +81,10 @@ Core commands (see `docs/agents/cli.md` and `docs/reference/CLI_REFERENCE.md` fo
 | `rwb completion` | Generate shell completion script |
 | `rwb cleanup` | Clean old runs/repos/temp files (supports `--dry-run`) |
 
+Wrapper note: the legacy `./recon` CLI exposes additional subcommands and safety flags
+(`init`, `run --write --exec --confirm-run`, `report`, `export/import`). Use
+`docs/reference/CLI_REFERENCE.md` when operating via `./recon`.
+
 ## Target Kinds
 
 | Kind | Description | Example Locator |
@@ -90,12 +95,16 @@ Core commands (see `docs/agents/cli.md` and `docs/reference/CLI_REFERENCE.md` fo
 | `web-app` | Web applications | `https://example.com` |
 | `oss-repo` | Open source repositories | `owner/repo` or git URL |
 
+Web locator default: a bare domain (e.g., `summarize.sh`) defaults to `https://` unless the locator starts with `localhost`, `127.0.0.1`, or `0.0.0.0`, which default to `http://`.
+
 ## Probe Sets
 
 Predefined probe sets live in `probes/catalog.json`.
 Common sets (not exhaustive):
 
-- `macos-baseline`, `ios-baseline`
+- `macos-baseline`, `macos-objc-static`, `macos-debug`, `macos-accessibility`
+- `ios-baseline`, `ios-objc-static`, `ios-debug`, `ios-smoke`
+- `ios-diagnose`, `ios-device-diagnose`, `ios-sim-diagnose-pack`, `ios-device-diagnose-pack`, `diagnose-pack`
 - `web-baseline`, `web-stimulus`
 - `oss-baseline`, `oss-full`
 
@@ -128,16 +137,20 @@ require_authorization: true
 - `target_locator`: Path, URL, bundle ID, or repo identifier
 - `probe_set` or `probes`: Predefined probe set or custom probe list
 - `authorization`: Authorization artifact (required when scope enforces authorization)
-- `run_dir`: Output directory for artifacts (prefer under `data/runs/`)
+- `run_dir`: Output directory for artifacts (prefer under `data/runs/`; legacy `runs/` also supported)
 
 ## Outputs
 
-**Structure**: `data/runs/<target>/<session>/<run>/` (or an explicit `--run-dir` under `data/runs/`)
+**Structure**: `data/runs/<target>/<session>/<run>/` (preferred; `runs/` is legacy but still supported)
 - `raw/` - Probe artifacts (logs, dumps, traces, HARs)
 - `manifest.json` - SHA256 hashes for integrity verification
 - `derived/findings.json` - Schema-valid findings with evidence citations; include `schema_version`
 - `derived/report.md` - Human-readable summary with artifact paths
 - `derived/report.json` - Machine-readable report (when generated); include `schema_version` when schema-bound
+
+**Data root**: defaults to `<repo>/data` and can be overridden via `RWB_DATA_DIR` (see `docs/reference/data-structure.md`).
+
+**Authorization**: authorization artifacts are JWT-signed; ensure `RECON_JWT_SECRET` is set (see `README.md`).
 
 ## Procedure
 
@@ -183,6 +196,18 @@ uv run python -m rwb summarize \
   --run-dir data/runs/myapp/
 ```
 
+### 6) Validate Artifacts (CLI-first)
+
+```bash
+uv run python -m rwb validate \
+  --catalog probes/catalog.json \
+  --plan probe-plan.json
+
+uv run python -m rwb validate \
+  --evidence data/runs/myapp/derived/findings.json \
+  --run-dir data/runs/myapp
+```
+
 ## Validation
 
 Fail fast: stop at the first failed validation gate, fix the issue, and re-run the failed check before proceeding.
@@ -216,14 +241,15 @@ python scripts/validate_evidence.py data/runs/myapp/derived/findings.json data/r
 - Every finding must cite one or more evidence paths
 - Summaries must list commands used + artifact locations
 - If evidence is insufficient, request additional probes rather than speculating
-- Use `manifest.json` to verify artifact integrity in `data/runs/...`
+- Redact HAR files before sharing and record redaction in the report
+- Use `manifest.json` to verify artifact integrity in `data/runs/...` (or legacy `runs/...`)
 
 ## Build Mode (Tooling Design)
 
 When creating or evolving the workbench:
 
-- Design schemas in `schemas/` with JSON Schema validation
-- Add probes to `probes/catalog.json` with target kinds and timeouts
+- Design schemas in `config/schemas/` with JSON Schema validation
+- Add probes to `probes/catalog.json` (alias to `config/probes/catalog.json`) with target kinds and timeouts
 - Implement probe scripts in `scripts/probes/`
 - Define probe sets for common workflows
 - Update `AGENTS.md` with agent instructions
@@ -286,10 +312,10 @@ Use judgment, adapt to context, and push boundaries when appropriate.
 
 ### Schemas
 
-- `schemas/authorization.schema.json` - Authorization artifact structure
-- `schemas/probe-plan.v2.schema.json` - Probe plan validation
-- `schemas/findings.v2.schema.json` - Findings structure
-- `schemas/manifest.v2.schema.json` - Integrity manifest structure
+- `config/schemas/authorization.schema.json` - Authorization artifact structure
+- `config/schemas/probe-plan.v2.schema.json` - Probe plan validation
+- `config/schemas/findings.v2.schema.json` - Findings structure
+- `config/schemas/manifest.v2.schema.json` - Integrity manifest structure
 
 ### Probe Catalog
 

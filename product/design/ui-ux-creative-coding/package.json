@@ -1,0 +1,10 @@
+{
+  "name": "ui-ux-creative-coding-skill",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "skill:lint": "node scripts/skill_lint.mjs SKILL.md",
+    "tokens:theme": "node scripts/tokens_to_tailwind_theme.mjs assets/tokens.json",
+    "tokens:contrast": "node scripts/contrast_check.mjs assets/tokens.json"
+  }
+}

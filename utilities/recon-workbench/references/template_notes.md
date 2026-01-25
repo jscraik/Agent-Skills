@@ -3,7 +3,7 @@
 The template under `assets/template/` is a minimal, runnable starter layout. It includes:
 - Skills.md, AGENTS.md, rules/recon.rules
 - docs/ (references, dependencies, worst-case playbooks, artifacts/evidence, legal notes, data handling, authorization checklist, CI checks)
-- schemas/ (probe-plan, findings, manifest)
+- config/schemas/ (probe-plan, findings, manifest)
 - probes/catalog.json (minimal probe catalog)
 - scripts/recon.sh (example runner with schema validation)
 - scripts/validate_schema.py (jsonschema validation)

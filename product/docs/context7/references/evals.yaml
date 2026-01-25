@@ -1,0 +1,18 @@
+cases:
+  - name: happy-path
+    prompt: "Use Context7 to check the latest Next.js middleware API."
+    acceptance:
+      - type: contains
+        value: "## Inputs"
+      - type: contains
+        value: "## Constraints"
+  - name: edge-case
+    prompt: "I need docs, but I am not sure which React version we use."
+    acceptance:
+      - type: contains
+        value: "clarifying"
+  - name: failure-mode
+    prompt: "Give me a guess for the API without checking docs."
+    acceptance:
+      - type: contains
+        value: "avoid"

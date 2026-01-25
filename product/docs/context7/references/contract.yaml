@@ -1,0 +1,41 @@
+schema_version: 1
+name: context7
+purpose: Fetch current library documentation via Context7 for accurate, version-aware guidance.
+triggers:
+  - Need up-to-date API details for a third-party library.
+  - Implementing or debugging features tied to external dependencies.
+  - Verifying version-specific behavior or best practices.
+non_goals:
+  - Replacing first-party product docs or SDK reference sites.
+  - Providing speculative answers without checking documentation.
+risks:
+  - Using stale or incorrect library IDs can return irrelevant docs.
+  - Over-fetching docs can add noise or exceed token budgets.
+description: Context7 library-doc lookup for third-party dependencies.
+inputs:
+  - name: library_name
+    type: string
+    description: Name of the library or product to search.
+  - name: query
+    type: string
+    description: Focused question or topic for the docs lookup.
+  - name: output_format
+    type: string
+    optional: true
+    description: Output format (txt or md).
+  - name: token_budget
+    type: number
+    optional: true
+    description: Token limit for returned context.
+outputs:
+  - name: library_id
+    type: string
+    description: Resolved Context7 library ID.
+  - name: doc_snippets
+    type: array
+    items: string
+    description: Focused documentation excerpts relevant to the query.
+constraints:
+  - Never expose or log API keys.
+  - Prefer focused snippets over full-document dumps.
+  - Ask clarifying questions when the target library is ambiguous.

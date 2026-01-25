@@ -1,5 +1,7 @@
 # Data handling and redaction
 
+Summary from `docs/reference/DATA_HANDLING.md`.
+
 ## Principles
 - Collect only what is necessary to answer the goal.
 - Avoid capturing credentials, personal data, or customer content.
@@ -13,4 +15,4 @@
 ## Retention
 - Keep raw artifacts only as long as needed.
 - Prefer derived summaries for long-term storage.
-- If required, encrypt and restrict access to raw artifacts.
+- Encrypt/restrict access to raw artifacts if required.

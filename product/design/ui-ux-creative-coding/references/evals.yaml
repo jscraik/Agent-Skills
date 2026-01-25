@@ -1,0 +1,16 @@
+cases:
+  - name: happy-path
+    prompt: "Use the ui-ux-creative-coding skill to design a new settings panel for a Tauri app with motion polish."
+    acceptance:
+      - type: contains
+        value: "## Outputs"
+  - name: edge-case
+    prompt: "Use ui-ux-creative-coding but I have no assets or constraints; ask for what you need."
+    acceptance:
+      - type: contains
+        value: "## Inputs"
+  - name: failure-mode
+    prompt: "Create a brand logo and full identity kit with no UI deliverables."
+    acceptance:
+      - type: contains
+        value: "## When to use"

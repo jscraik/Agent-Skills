@@ -12,7 +12,7 @@ Purpose: Provide a permissioned, evidence-first workflow to inspect React compon
 - Capture **React component tree** using React Developer Tools.
 - Capture **DOM snapshots** and **computed styles** for the same elements.
 - Record **props to rendered output** examples for multiple instances of the same component.
-- Store artifacts under `runs/<target>/<session>/<run>/raw/...`.
+- Store artifacts under `data/runs/<target>/<session>/<run>/raw/...` (legacy `runs/...` supported).
 
 ## Component grouping (safe version)
 - Group component instances by **component identity** as exposed by React DevTools.
@@ -33,4 +33,3 @@ Purpose: Provide a permissioned, evidence-first workflow to inspect React compon
 - Explicitly state authorization and scope.
 - Cite artifact paths for tree, props, DOM, and diffs.
 - Flag any reconstructed component as “approximate” unless verification passes.
-

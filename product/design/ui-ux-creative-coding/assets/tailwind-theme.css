@@ -1,0 +1,24 @@
+/* Generated from assets/tokens.json */
+@import "tailwindcss";
+
+@theme {
+  --color-bg: #fafaf7;
+  --color-border: #e5e7eb;
+  --color-brand-500: #3b82f6;
+  --color-brand-600: #2563eb;
+  --color-danger-500: #ef4444;
+  --color-danger-600: #dc2626;
+  --color-fg: #101114;
+  --color-focus: #7c3aed;
+  --color-muted: #6b7280;
+  --color-surface: #ffffff;
+  --dur-fast: 140ms;
+  --dur-med: 220ms;
+  --dur-slow: 360ms;
+  --ease-inOut: cubic-bezier(.4,0,.2,1);
+  --ease-out: cubic-bezier(.2,.8,.2,1);
+  --radius-lg: 24px;
+  --radius-md: 16px;
+  --radius-sm: 10px;
+  --shadow-soft: 0 1px 2px rgb(0 0 0 / 0.06), 0 12px 32px rgb(0 0 0 / 0.10);
+}

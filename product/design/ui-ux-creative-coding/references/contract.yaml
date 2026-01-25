@@ -1,0 +1,21 @@
+purpose: >
+  Define expected behavior and outputs for the ui-ux-creative-coding skill.
+schema_version: 1.0
+triggers:
+  - user requests UI/UX direction or implementation using creative coding
+  - user asks for motion polish, micro-interactions, or WebGL accents in UI
+inputs:
+  - product brief or target workflow
+  - platform and stack constraints
+  - existing assets or references
+  - acceptance criteria and required checks
+outputs:
+  - UI brief and user-model summary
+  - component/system plan and motion rules
+  - prototype implementation notes or snippets
+  - validation checklist and handoff artifacts
+non_goals:
+  - brand-only work without UI deliverables
+  - full WebGL apps or games unless explicitly requested
+risks:
+  - missing inputs; mitigated by targeted clarifying questions

@@ -1,0 +1,56 @@
+# Motion Spec (template)
+# Keep motion consistent across the app.
+# Prefer a small set of tokens over one-off values.
+
+tokens:
+  duration:
+    instant: 0ms
+    fast: 120ms
+    normal: 180ms
+    slow: 260ms
+    xslow: 360ms
+
+  easing:
+    standard: "cubic-bezier(0.2, 0.0, 0.0, 1.0)"      # fast-out, slow-in
+    emphasized: "cubic-bezier(0.2, 0.0, 0.0, 1.2)"   # a touch more snap (use sparingly)
+    linear: "linear"
+
+  spring:
+    # If using a motion library, map to these "feels"
+    subtle:
+      stiffness: 380
+      damping: 30
+      mass: 1
+    bouncy:
+      stiffness: 420
+      damping: 22
+      mass: 1
+
+rules:
+  - Use motion to communicate state changes (open/close, success, error recovery).
+  - Avoid continuous animation as decoration unless explicitly desired.
+  - Avoid animating layout (height/width/top/left). Prefer transforms and opacity.
+  - Keep UI responsive: no animation should block interaction completion.
+
+reduced_motion:
+  # If prefers-reduced-motion is enabled:
+  - Replace movement with opacity/instant changes.
+  - Remove non-essential flourish.
+  - Keep essential state transitions but shorten durations.
+
+patterns:
+  dialog:
+    open:
+      opacity: { from: 0, to: 1, duration: normal, easing: standard }
+      transform: { from: "translateY(4px) scale(0.98)", to: "translateY(0) scale(1)", duration: normal, easing: standard }
+    close:
+      opacity: { from: 1, to: 0, duration: fast, easing: standard }
+      transform: { from: "translateY(0) scale(1)", to: "translateY(2px) scale(0.99)", duration: fast, easing: standard }
+
+  toast:
+    enter:
+      opacity: { from: 0, to: 1, duration: fast, easing: standard }
+      transform: { from: "translateY(8px)", to: "translateY(0)", duration: fast, easing: standard }
+    exit:
+      opacity: { from: 1, to: 0, duration: fast, easing: standard }
+      transform: { from: "translateY(0)", to: "translateY(6px)", duration: fast, easing: standard }
