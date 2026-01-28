@@ -24,6 +24,7 @@ This repository is the source of truth for Codex/agent skills. Canonical skills 
 - The `skills/` directory contains symlinks to the canonical folders so tools can load a flat list.
 - `skills-system/` stores bundled/system skills and is excluded from the flat view to avoid duplicates.
 - Use `scripts/sync_skills.sh` to update symlinks and regenerate `SKILL.md` after adding or moving skills.
+- See `references/sync-status.md` for cross-tool sync paths (Claude, Codex, Copilot, Cursor, Kimi).
 - Swift/SwiftUI skills are removed. macOS references remain only for Tauri desktop contexts.
 
 ## Categories and Skills
