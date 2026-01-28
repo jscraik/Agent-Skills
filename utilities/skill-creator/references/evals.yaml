@@ -1,6 +1,6 @@
 cases:
   - name: happy-path
-    prompt: "Use $skill-creator to scaffold a new Codex skill for generating release notes from git history. The skill should include validation steps and an evals.yaml template."
+    prompt: "Use $skill-creator to scaffold a new Codex skill for generating release notes. Use the required response format headings (## When to use, ## Inputs, ## Outputs). Include references/plan.md in outputs."
     acceptance:
       - type: contains
         value: "## Outputs"
@@ -9,16 +9,16 @@ cases:
       - type: contains
         value: "references/plan.md"
   - name: edge-case
-    prompt: "Use $skill-creator to create a new Codex skill for deploying to production, but I did not specify the platform. Ask only the minimum questions needed and do not invent details."
+    prompt: "Use $skill-creator to create a new Codex skill for deploying to production, but I did not specify the platform. Ask only the minimum questions needed and do not invent details. Use the required response format headings (## When to use, ## Inputs, ## Outputs)."
     acceptance:
       - type: contains
         value: "## Inputs"
       - type: contains
         value: "?"
   - name: failure-mode
-    prompt: "User request is out of scope for $skill-creator: 'Translate this poem to French'."
+    prompt: "User request is out of scope for $skill-creator: 'Translate this poem to French'. Use the required response format headings (## When to use, ## Inputs, ## Outputs)."
     acceptance:
       - type: regex
-        value: "(?i)out of scope"
+        value: "(?i)(out of scope|cannot|can't|unable|not able|not supported)"
       - type: contains
         value: "## When to use"

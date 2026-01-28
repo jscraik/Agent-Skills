@@ -1,0 +1,26 @@
+[
+  {
+    "code": "PI_OVERRIDE",
+    "regex": "\\b(ignore|disregard|forget)\\b.*\\b(previous|prior|system|developer)\\b",
+    "message": "Potential prompt-injection override language detected; ensure this is not instructing the model to bypass system/developer instructions.",
+    "severity": "high"
+  },
+  {
+    "code": "PI_ROLEPLAY",
+    "regex": "\\byou are now\\b|\\bpretend to be\\b|\\bact as\\b",
+    "message": "Role-shifting language detected; verify it is safe and limited to user content.",
+    "severity": "medium"
+  },
+  {
+    "code": "PI_TOOL_CHAIN",
+    "regex": "\\b(bypass|jailbreak|override|exfiltrate)\\b",
+    "message": "High-risk control language detected; verify this does not instruct unsafe behavior.",
+    "severity": "high"
+  },
+  {
+    "code": "PI_COMMANDS",
+    "regex": "\\b(curl|wget|powershell|invoke-webrequest|nc|netcat|rm\\s+-rf|chmod\\s+777)\\b",
+    "message": "Command-like instructions detected; ensure commands are gated and safe.",
+    "severity": "medium"
+  }
+]

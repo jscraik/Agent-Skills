@@ -111,6 +111,7 @@ def main() -> int:
 
     group = f"codex-{thread_id}" if thread_id else None
     _notify(title, message, group=group)
+    print(f"[codeception] notify hook ran: {title}", file=sys.stderr)
     return 0
 
 

@@ -213,6 +213,12 @@ Then run evals:
 python scripts/run_skill_evals.py <path/to/skill-folder>
 ```
 
+Codex runner (optional):
+
+```bash
+python scripts/run_skill_evals.py <path/to/skill-folder> --runner codex
+```
+
 Fix the first failure, re-run, then proceed.
 
 ### 7) Package (optional)
@@ -229,6 +235,9 @@ Packaging should exclude dev artifacts via `.skillignore`.
 For any non-trivial skill, ensure:
 
 - Frontmatter passes `quick_validate.py`.
+- Prompt-injection warnings from `skill_gate.py` are reviewed and resolved (or explicitly justified).
+- Prompt-injection patterns are configurable via `references/prompt-injection-patterns.json` (supports `severity`).
+- Local allow/block config (not in repo) can override matches: `~/.codex/skill-security/allow-block.json` or `CODEX_SKILL_SECURITY_CONFIG`.
 - `SKILL.md` stays under the line budget and references external files instead of bloating.
 - At least 3 eval cases exist (happy / edge / failure).
 - Scripts run successfully in the intended environment.

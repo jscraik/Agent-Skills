@@ -34,7 +34,7 @@ Add this to `~/.codex/AGENTS.md`:
 ## Continuous learning (Claudeception)
 After finishing a task, do a 15–30s retrospective.
 If the solution involved non-obvious debugging, workarounds, or a repeatable workflow:
-- invoke $claudeception
+- invoke $codeception
 - extract a new skill into ~/.codex/skills/<skill-name>/SKILL.md
 ```
 
@@ -42,12 +42,13 @@ If the solution involved non-obvious debugging, workarounds, or a repeatable wor
 
 This repo includes:
 
-- `scripts/claudeception-notify.py`
+- `scripts/codeception-notify.py` (preferred)
+- `scripts/claudeception-notify.py` (legacy)
 
 Example `~/.codex/config.toml`:
 
 ```toml
-notify = ["python3", "~/.codex/skills/claudeception/scripts/claudeception-notify.py"]
+notify = ["python3", "~/.codex/skills/codeception/scripts/codeception-notify.py"]
 ```
 
 If `notify-send` (Linux) is available, the script will use it; otherwise it prints a short reminder.

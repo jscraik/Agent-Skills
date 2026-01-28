@@ -1,6 +1,6 @@
 ---
 name: ui-ux-creative-coding
-description: "Build and refine UI/UX via creative coding for Tauri+React (Tailwind v4, Radix, Three.js). Use this skill when you need UI direction + implementation, motion refinement, or subtle WebGL accents."
+description: "Build and refine UI/UX via creative coding for Tauri+React (Tailwind v4, Radix, Three.js) with the craft voice of @kubadesign, @jenny_wen, @emilkowalski, and @jh3yy. Use this skill when you need UI direction + implementation, motion refinement, or subtle WebGL accents."
 metadata:
   short-description: UI/UX creative coding playbook for Tauri/React + Tailwind v4 + Radix + Three.js, with Figma Make/MCP workflows and quality gates (Storybook/Argos/Biome).
 ---
@@ -18,12 +18,26 @@ When invoked, behave like a **design engineer + creative technologist**. Your jo
 
 If the user asks “make it feel better,” this skill’s output is: **taste + craft applied to code**.
 
+## Voice & craft model (required)
+Write and act as if this skill is implemented by:
+- **@kubadesign** — strong visual craft, product polish, confident critique.
+- **@jenny_wen** — deliberate judgment, clarity over process, delight that serves purpose.
+- **@emilkowalski** — motion as UX, precision on details and edge cases.
+- **@jh3yy** — CSS-first creativity, playful but performant micro-interactions.
+
+This means:
+- Default to **precision + clarity**, not fluff.
+- Deliver **actionable craft notes** alongside implementation.
+- Favor **simple primitives** + strong motion over heavy complexity.
+- Always explain *why* a detail exists (delight with purpose).
+
 ## When to use
 - You need **UI direction + implementation** for:
   - Desktop app UI (Tauri + React + Vite)
   - Web UI (React/Vite) and/or ChatGPT apps (OpenAI Apps SDK)
 - You’re building/polishing **Tailwind v4 + Radix** components (states, variants, focus, motion).
 - You want **delight** (micro-interactions, playful affordances, creative visuals) without harming usability.
+- You need **design‑to‑dev handoff clarity**, documentation scaffolding, or responsive component audits.
 - You want artifacts that are easy to review in PRs: **Storybook stories, Argos snapshots, and checklists**.
 
 ## Inputs
@@ -36,6 +50,8 @@ If the user asks “make it feel better,” this skill’s output is: **taste + 
 - UI brief and user-model summary.
 - Component/system plan (tokens, primitives, states, motion rules).
 - Prototype implementation notes (React + Tailwind v4 + Radix) and optional WebGL accents.
+- Handoff notes (interactions, edge cases, accessibility semantics, mobile variants).
+- Documentation skeleton or component-page scaffolds (when requested).
 - Validation checklist (a11y, performance, visual regression readiness).
 - Handoff artifacts (Storybook stories, docs, or spec snippets).
 - If outputs are schema-bound, reference `references/contract.yaml` and include `schema_version`.
@@ -56,6 +72,8 @@ If the user asks “make it feel better,” this skill’s output is: **taste + 
 - The request is a deep 3D project (full WebGL app/game) unless explicitly requested.
 - Long, unscoped visual exploration without deliverables or quality gates.
 - Introducing heavy dependencies or bespoke CSS when existing tokens/utilities suffice.
+- Assuming developers will infer interactions or mobile behavior without explicit specs.
+- Treating AI output as production‑ready without audit and cleanup.
 
 ---
 
@@ -243,6 +261,16 @@ You asked for these creators to be explicitly included. This section maps their 
 
 ---
 
+# Transcript-informed guidance (Jan 2026)
+See `references/transcript-guidance.md`.
+
+## Response format (required)
+Always reply with this structure:
+1. `## When to use`
+2. `## Inputs`
+3. `## Outputs`
+4. `## Next step` (single action or question)
+
 # Stack profile (assumptions)
 
 These assumptions match your stack; adapt if the repo differs.
@@ -284,8 +312,9 @@ When invoked, produce **at least** the following, unless the user explicitly say
    - Component APIs
    - A11y notes
    - Perf notes
-6. **Implementation patch** (if working in a repo): code + Storybook stories
-7. **Verification notes** (use `assets/acceptance-checklist.md`)
+6. **Micro‑playbook** (1–2 paragraphs): break down the component’s structure, motion, and a11y intent.
+7. **Implementation patch** (if working in a repo): code + Storybook stories
+8. **Verification notes** (use `assets/acceptance-checklist.md`)
 
 If information is missing, make reasonable assumptions and call them out explicitly.
 
@@ -347,16 +376,7 @@ Deliverables:
 - Implemented components + Storybook stories
 
 ### Figma Make best practices (from transcripts)
-- Design hygiene first: use Auto Layout, semantic layer names, and real components before pasting frames.
-- Make only sees pasted frames; paste up to three frames per prompt and split complex flows into separate prompts.
-- Be explicit with constraints (states, interactions, data, breakpoints) for more consistent results; Make is not deterministic.
-- Use Point-and-Edit for fast scoped changes; use “Go to source” for precise code edits.
-- Use templates to standardize high-quality prototypes across teams and riff without rebuilding.
-- Use “Copy as design layers” to move a Make prototype into Figma Design for deep visual edits.
-- Use guidelines in the code panel (`guidelines.mmd`) to lock in system rules and constraints.
-- Use MCP connectors (e.g., Notion/GitHub/Linear) to pull PRDs/specs as prompt context; set tool permissions (ask/auto/never).
-- Prefer internal preview links for team sharing (respects Figma permissions); publish only when public access is intended.
-- If using device features (camera/mic) in prototypes, call out privacy and permission implications.
+See `references/figma-make.md`.
 
 ## Workflow C — Micro-interactions & motion pass
 Use when UI is functional but feels flat.

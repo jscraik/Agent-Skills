@@ -2,11 +2,11 @@
 """
 run_skill_evals.py
 
-Run evaluation cases for a Codex skill using Codex CLI non-interactive mode.
+Run evaluation cases for a Codex skill using Claude Code CLI (default) or Codex CLI in headless mode.
 
 - Loads SKILL.md -> skill name
 - Loads references/evals.yaml
-- For each case, runs: codex exec (optionally with --output-schema)
+- For each case, runs: codex exec (optionally with --output-schema) or claude -p (headless)
 - Captures final output via --output-last-message (-o)
 - Applies acceptance assertions and exits non-zero on failures
 
@@ -321,9 +321,51 @@ def run_codex_exec(
     return proc.returncode, proc.stdout, proc.stderr
 
 
+def run_claude_exec(
+    *,
+    workspace_root: Path,
+    prompt: str,
+    output_last_message_path: Path,
+    claude_bin: Optional[Path],
+    output_format: str,
+    extra_claude_args: Optional[List[str]] = None,
+) -> Tuple[int, str, str]:
+    if claude_bin:
+        cmd = [str(claude_bin), "-p"]
+    else:
+        cmd = ["claude", "-p"]
+
+    cmd.extend(["--output-format", output_format])
+    if extra_claude_args:
+        cmd.extend(extra_claude_args)
+
+    timeout = float(os.environ.get("CODEX_EVAL_TIMEOUT_SEC", "60"))
+
+    try:
+        proc = subprocess.run(
+            cmd,
+            input=prompt,
+            text=True,
+            capture_output=True,
+            cwd=workspace_root,
+            timeout=timeout,
+        )
+    except FileNotFoundError:
+        return 127, "", "claude CLI not found on PATH. Install Claude Code CLI and ensure it is on PATH."
+    except subprocess.TimeoutExpired:
+        return 124, "", f"claude headless timed out after {timeout} seconds."
+
+    output_last_message_path.write_text(proc.stdout or "", encoding="utf-8")
+    return proc.returncode, proc.stdout, proc.stderr
+
+
 def build_arg_parser() -> argparse.ArgumentParser:
-    p = argparse.ArgumentParser(prog="run_skill_evals.py", description="Run skill evals using Codex CLI (codex exec).")
+    p = argparse.ArgumentParser(
+        prog="run_skill_evals.py",
+        description="Run skill evals using Codex CLI (codex exec) or Claude Code CLI (claude -p).",
+    )
     p.add_argument("path", help="Path to a skill directory or SKILL.md.")
+    p.add_argument("--runner", choices=["codex", "claude"], default="claude", help="LLM runner to use.")
     p.add_argument("--workspace", default=None, help="Workspace root to run codex exec in (defaults to repo root guess).")
     p.add_argument("--sandbox", default="read-only", choices=["read-only", "workspace-write", "danger-full-access"])
     p.add_argument(
@@ -336,6 +378,19 @@ def build_arg_parser() -> argparse.ArgumentParser:
     p.add_argument("--profile", default=None, help="Codex config profile name.")
     p.add_argument("--codex-home", default=None, help="Set CODEX_HOME (useful for repo-scoped .codex).")
     p.add_argument("--codex-bin", default=None, help="Override codex CLI path (e.g., ~/.local/share/mise/.../codex).")
+    p.add_argument("--claude-bin", default=None, help="Override claude CLI path (e.g., ~/.local/bin/claude).")
+    p.add_argument(
+        "--claude-output-format",
+        choices=["text", "json"],
+        default="text",
+        help="Claude output format (default: text).",
+    )
+    p.add_argument(
+        "--claude-arg",
+        action="append",
+        default=[],
+        help="Extra flag to pass to claude CLI (repeatable), e.g. --claude-arg='--model' --claude-arg=claude-3-5-sonnet",
+    )
     p.add_argument("--capture-jsonl", action="store_true", help="Also capture Codex JSONL event stream (--json).")
     p.add_argument("--reports-dir", default="artifacts/reports/skills", help="Base directory for eval reports.")
     p.add_argument("--format", choices=["text", "json"], default="text")
@@ -383,6 +438,13 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     if codex_bin and not codex_bin.exists():
         print(f"ERROR: --codex-bin not found: {codex_bin}", file=sys.stderr)
         return 1
+    claude_bin = Path(args.claude_bin).expanduser() if args.claude_bin else None
+    if claude_bin and not claude_bin.exists():
+        print(f"ERROR: --claude-bin not found: {claude_bin}", file=sys.stderr)
+        return 1
+    if args.runner == "claude" and args.capture_jsonl:
+        print("WARN: --capture-jsonl is Codex-only; ignoring for Claude runner.", file=sys.stderr)
+        args.capture_jsonl = False
 
     run_id = dt.datetime.now().strftime("%Y%m%d-%H%M%S")
     reports_base = Path(args.reports_dir).expanduser().resolve() / skill_name / run_id
@@ -392,6 +454,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "skill": skill_name,
         "skill_path": str(skill_dir),
         "workspace_root": str(workspace_root),
+        "runner": args.runner,
         "run_id": run_id,
         "cases": [],
         "passed": True,
@@ -419,20 +482,30 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
         (case_dir / "prompt.txt").write_text(composed_prompt, encoding="utf-8")
 
-        rc, stdout, stderr = run_codex_exec(
-            workspace_root=workspace_root,
-            prompt=composed_prompt,
-            output_last_message_path=output_path,
-            output_schema_path=schema_path,
-            sandbox=args.sandbox,
-            ask_for_approval=args.ask_for_approval,
-            model=args.model,
-            profile=args.profile,
-            codex_home=codex_home,
-            jsonl_path=jsonl_path,
-            codex_bin=codex_bin,
-            extra_codex_args=args.codex_arg or None,
-        )
+        if args.runner == "claude":
+            rc, stdout, stderr = run_claude_exec(
+                workspace_root=workspace_root,
+                prompt=composed_prompt,
+                output_last_message_path=output_path,
+                claude_bin=claude_bin,
+                output_format=args.claude_output_format,
+                extra_claude_args=args.claude_arg or None,
+            )
+        else:
+            rc, stdout, stderr = run_codex_exec(
+                workspace_root=workspace_root,
+                prompt=composed_prompt,
+                output_last_message_path=output_path,
+                output_schema_path=schema_path,
+                sandbox=args.sandbox,
+                ask_for_approval=args.ask_for_approval,
+                model=args.model,
+                profile=args.profile,
+                codex_home=codex_home,
+                jsonl_path=jsonl_path,
+                codex_bin=codex_bin,
+                extra_codex_args=args.codex_arg or None,
+            )
 
         (case_dir / "stderr.txt").write_text(stderr or "", encoding="utf-8")
         (case_dir / "stdout.txt").write_text(stdout or "", encoding="utf-8")
@@ -442,9 +515,21 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
         failures: List[str] = []
         if rc != 0:
-            failures.append(f"codex exec returned non-zero exit code: {rc}")
+            runner_label = "codex exec" if args.runner == "codex" else "claude headless"
+            failures.append(f"{runner_label} returned non-zero exit code: {rc}")
 
-        if schema_path:
+        if schema_path and args.runner == "claude":
+            failures.append("Claude runner does not support output_schema; use Codex or text-only assertions.")
+
+        if args.runner == "claude" and args.claude_output_format == "json":
+            try:
+                parsed = json.loads(output_text)
+            except Exception as e:
+                failures.append(f"expected JSON output (Claude json format), but parsing failed: {e}")
+                parsed = None
+            if parsed is not None:
+                failures.extend(evaluate_assertions_json(parsed, c.acceptance))
+        elif schema_path and args.runner == "codex":
             try:
                 parsed = json.loads(output_text)
             except Exception as e:

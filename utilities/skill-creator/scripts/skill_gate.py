@@ -31,6 +31,8 @@ import re
 import sys
 from dataclasses import dataclass
 from enum import IntEnum
+import fnmatch
+import os
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
@@ -189,6 +191,209 @@ def _iter_files(skill_dir: Path, rel_dir: str) -> List[Path]:
     if not p.exists() or not p.is_dir():
         return []
     return sorted([c for c in p.rglob("*") if c.is_file()])
+
+
+_TEXT_EXTENSIONS = {
+    ".md",
+    ".txt",
+    ".yaml",
+    ".yml",
+    ".json",
+    ".rules",
+    ".toml",
+    ".ini",
+    ".cfg",
+    ".py",
+    ".sh",
+    ".bash",
+    ".zsh",
+    ".js",
+    ".ts",
+}
+
+
+def _default_prompt_patterns() -> List[Dict[str, str]]:
+    return [
+        {
+            "code": "PI_OVERRIDE",
+            "regex": r"\b(ignore|disregard|forget)\b.*\b(previous|prior|system|developer)\b",
+            "message": "Potential prompt-injection override language detected; ensure this is not instructing the model to bypass system/developer instructions.",
+            "severity": "high",
+        },
+        {
+            "code": "PI_ROLEPLAY",
+            "regex": r"\byou are now\b|\bpretend to be\b|\bact as\b",
+            "message": "Role-shifting language detected; verify it is safe and limited to user content.",
+            "severity": "medium",
+        },
+        {
+            "code": "PI_TOOL_CHAIN",
+            "regex": r"\b(bypass|jailbreak|override|exfiltrate)\b",
+            "message": "High-risk control language detected; verify this does not instruct unsafe behavior.",
+            "severity": "high",
+        },
+        {
+            "code": "PI_COMMANDS",
+            "regex": r"\b(curl|wget|powershell|invoke-webrequest|nc|netcat|rm\s+-rf|chmod\s+777)\b",
+            "message": "Command-like instructions detected; ensure commands are gated and safe.",
+            "severity": "medium",
+        },
+    ]
+
+
+def _local_security_config_path() -> Path:
+    override = os.environ.get("CODEX_SKILL_SECURITY_CONFIG")
+    if override:
+        return Path(override).expanduser()
+    return Path("~/.codex/skill-security/allow-block.json").expanduser()
+
+
+def _load_allow_block_patterns() -> Tuple[List[re.Pattern[str]], List[Tuple[re.Pattern[str], str, str]], List[Finding]]:
+    findings: List[Finding] = []
+    allowlist: List[re.Pattern[str]] = []
+    blocklist: List[Tuple[re.Pattern[str], str, str]] = []
+    config_path = _local_security_config_path()
+
+    if not config_path.exists():
+        return allowlist, blocklist, findings
+
+    try:
+        raw = json.loads(config_path.read_text(encoding="utf-8"))
+        if not isinstance(raw, dict):
+            raise ValueError("allow/block config must be an object")
+        allow_raw = raw.get("allowlist", [])
+        block_raw = raw.get("blocklist", [])
+        if not isinstance(allow_raw, list) or not isinstance(block_raw, list):
+            raise ValueError("allowlist and blocklist must be lists")
+
+        for entry in allow_raw:
+            if not isinstance(entry, dict):
+                raise ValueError("allowlist entries must be objects")
+            regex = str(entry.get("regex", "")).strip()
+            if not regex:
+                raise ValueError("allowlist entries must include regex")
+            allowlist.append(re.compile(regex, re.IGNORECASE | re.DOTALL))
+
+        for entry in block_raw:
+            if not isinstance(entry, dict):
+                raise ValueError("blocklist entries must be objects")
+            regex = str(entry.get("regex", "")).strip()
+            message = str(entry.get("message", "Blocklist match")).strip()
+            severity = str(entry.get("severity", "high")).strip().lower()
+            if not regex:
+                raise ValueError("blocklist entries must include regex")
+            blocklist.append((re.compile(regex, re.IGNORECASE | re.DOTALL), message, severity))
+    except Exception as exc:
+        findings.append(Finding(
+            Level.WARN,
+            "PI_LOCAL_CONFIG",
+            f"Failed to load local allow/block config; ignoring ({exc}).",
+            evidence=str(config_path),
+        ))
+        allowlist = []
+        blocklist = []
+
+    return allowlist, blocklist, findings
+
+
+def _is_text_file(path: Path) -> bool:
+    if path.suffix.lower() in _TEXT_EXTENSIONS or path.name == "SKILL.md":
+        return True
+    try:
+        chunk = path.read_bytes()[:4096]
+    except OSError:
+        return False
+    if b"\x00" in chunk:
+        return False
+    try:
+        chunk.decode("utf-8")
+        return True
+    except UnicodeDecodeError:
+        return False
+
+
+def _load_prompt_patterns(
+    skill_dir: Path,
+) -> Tuple[List[Tuple[str, re.Pattern[str], str, str]], List[Finding]]:
+    config_path = skill_dir / "references" / "prompt-injection-patterns.json"
+    findings: List[Finding] = []
+    patterns: List[Tuple[str, re.Pattern[str], str, str]] = []
+    allowed_severity = {"low", "medium", "high"}
+
+    if config_path.exists():
+        try:
+            raw = json.loads(config_path.read_text(encoding="utf-8"))
+            if not isinstance(raw, list):
+                raise ValueError("prompt pattern config must be a list")
+            for entry in raw:
+                if not isinstance(entry, dict):
+                    raise ValueError("prompt pattern entries must be objects")
+                code = str(entry.get("code", "")).strip()
+                regex = str(entry.get("regex", "")).strip()
+                message = str(entry.get("message", "")).strip()
+                severity = str(entry.get("severity", "medium")).strip().lower()
+                if not code or not regex or not message:
+                    raise ValueError("prompt pattern entries must include code, regex, message")
+                if severity not in allowed_severity:
+                    findings.append(Finding(
+                        Level.WARN,
+                        "PI_PATTERN_CONFIG",
+                        f"Invalid severity '{severity}' for {code}; defaulting to medium.",
+                        evidence=str(config_path.relative_to(skill_dir)),
+                    ))
+                    severity = "medium"
+                patterns.append((code, re.compile(regex, re.IGNORECASE | re.DOTALL), message, severity))
+        except Exception as exc:
+            findings.append(Finding(
+                Level.WARN,
+                "PI_PATTERN_CONFIG",
+                f"Failed to load prompt-injection patterns; using defaults ({exc}).",
+                evidence=str(config_path.relative_to(skill_dir)),
+            ))
+            patterns = []
+
+    if not patterns:
+        for entry in _default_prompt_patterns():
+            patterns.append((
+                entry["code"],
+                re.compile(entry["regex"], re.IGNORECASE | re.DOTALL),
+                entry["message"],
+                entry["severity"],
+            ))
+
+    return patterns, findings
+
+
+def _load_skillignore(skill_dir: Path) -> List[str]:
+    ignore_file = skill_dir / ".skillignore"
+    if not ignore_file.exists():
+        return []
+    lines = []
+    for raw in ignore_file.read_text(encoding="utf-8", errors="replace").splitlines():
+        line = raw.strip()
+        if not line or line.startswith("#"):
+            continue
+        lines.append(line)
+    return lines
+
+
+def _is_ignored(path: Path, skill_dir: Path, patterns: Sequence[str]) -> bool:
+    rel = str(path.relative_to(skill_dir)).replace("\\", "/")
+    return any(fnmatch.fnmatch(rel, pattern) for pattern in patterns)
+
+
+def _iter_scan_targets(skill_dir: Path) -> List[Tuple[Path, bool]]:
+    ignore_patterns = _load_skillignore(skill_dir)
+    targets: List[Tuple[Path, bool]] = []
+    for path in skill_dir.rglob("*"):
+        if not path.is_file():
+            continue
+        if ".git" in path.parts:
+            continue
+        if _is_ignored(path, skill_dir, ignore_patterns):
+            continue
+        targets.append((path, _is_text_file(path)))
+    return sorted(targets, key=lambda item: str(item[0]))
 
 
 def check_codex_frontmatter(doc: SkillDoc, *, min_desc_len: int) -> List[Finding]:
@@ -503,6 +708,44 @@ def check_script_security(skill_dir: Path, doc: SkillDoc) -> List[Finding]:
     return out
 
 
+def check_prompt_injection_signals(skill_dir: Path, doc: SkillDoc) -> List[Finding]:
+    out: List[Finding] = []
+
+    patterns, config_findings = _load_prompt_patterns(skill_dir)
+    out.extend(config_findings)
+    allowlist, blocklist, local_findings = _load_allow_block_patterns()
+    out.extend(local_findings)
+
+    def _scan(text: str, evidence: str) -> None:
+        for pattern, message, severity in blocklist:
+            if pattern.search(text):
+                out.append(Finding(Level.WARN, "PI_BLOCKLIST", f"[{severity}] {message}", evidence=evidence))
+
+        for code, pattern, message, severity in patterns:
+            if any(allow.search(evidence) for allow in allowlist):
+                continue
+            if pattern.search(text):
+                out.append(Finding(Level.WARN, code, f"[{severity}] {message}", evidence=evidence))
+
+    _scan(doc.raw, "SKILL.md")
+
+    for path, is_text in _iter_scan_targets(skill_dir):
+        rel_path = str(path.relative_to(skill_dir))
+        if not is_text:
+            out.append(Finding(
+                Level.WARN,
+                "PI_BINARY_ATTACHMENT",
+                "Binary attachment detected; manual review required (prompt scan skipped).",
+                evidence=rel_path,
+            ))
+            continue
+        if path.name == "SKILL.md":
+            continue
+        _scan(_read_text(path), rel_path)
+
+    return out
+
+
 
 def check_contract_and_evals(skill_dir: Path, *, require_contract: bool, require_evals: bool) -> List[Finding]:
     out: List[Finding] = []
@@ -610,6 +853,7 @@ def run_gate(
     findings.extend(check_path_safety(doc))
 
     skill_dir = doc.path.parent
+    findings.extend(check_prompt_injection_signals(skill_dir, doc))
     findings.extend(check_contract_and_evals(skill_dir, require_contract=require_contract, require_evals=require_evals))
     findings.extend(check_repo_references(doc))
 

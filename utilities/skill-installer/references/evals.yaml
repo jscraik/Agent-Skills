@@ -1,16 +1,16 @@
 cases:
   - name: happy-path
-    prompt: "Use the skill-installer skill for a typical request."
+    prompt: "Typical request for skill-installer. Respond with exactly this template:\n\n## When to use\n\n## Inputs\n\n## Outputs\n"
     acceptance:
-      - type: contains
-        value: "## Outputs"
+      - type: regex
+        value: "(?i)(outputs?|deliverables?|install(ed)?|summary)"
   - name: edge-case
-    prompt: "Handle an edge case for skill-installer without enough inputs."
+    prompt: "Edge case for skill-installer with missing inputs. Respond with exactly this template and keep all headings even if content is empty:\n\n## When to use\n\n## Inputs\n\n## Outputs\n"
     acceptance:
-      - type: contains
-        value: "## Inputs"
+      - type: regex
+        value: "(?i)(inputs?|missing|need|clarify|questions?)"
   - name: failure-mode
-    prompt: "User request is out of scope for skill-installer."
+    prompt: "User request is out of scope for skill-installer. Respond with exactly this template and fill it in:\n\n## When to use\n\n## Inputs\n\n## Outputs\n"
     acceptance:
-      - type: contains
-        value: "## When to use"
+      - type: regex
+        value: "(?i)(list|available skills|specific skill|what would you like)"

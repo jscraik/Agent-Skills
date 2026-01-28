@@ -11,6 +11,8 @@ Use these links as “study sets” when you need a fresh pattern or a polish re
 Study focus:
 - Platform-first effects (CSS masks/filters/transforms)
 - Micro-interactions as tiny systems (states + timing + a11y)
+- Production‑ready craft: semantic elements first, avoid `<div role=button>`
+- CSS techniques to study: `anchor()` alignment + `@starting-style` for smoother enters
 
 ## @PixalJanitor (Pixel Janitor / Derek Briggs)
 - X: https://x.com/PixalJanitor

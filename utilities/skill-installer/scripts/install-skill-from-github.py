@@ -5,7 +5,10 @@ from __future__ import annotations
 
 import argparse
 from dataclasses import dataclass
+import fnmatch
+import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -13,10 +16,57 @@ import tempfile
 import urllib.error
 import urllib.parse
 import zipfile
+from pathlib import Path
 
 from github_utils import github_request
 DEFAULT_REF = "main"
 CATEGORIES = {"github", "frontend", "apple", "backend", "product", "utilities"}
+TEXT_EXTENSIONS = {
+    ".md",
+    ".txt",
+    ".yaml",
+    ".yml",
+    ".json",
+    ".rules",
+    ".toml",
+    ".ini",
+    ".cfg",
+    ".py",
+    ".sh",
+    ".bash",
+    ".zsh",
+    ".js",
+    ".ts",
+}
+DEFAULT_RISK_PATTERNS = [
+    {
+        "label": "Prompt override language",
+        "regex": r"\b(ignore|disregard|forget)\b.*\b(previous|prior|system|developer)\b",
+        "severity": "high",
+    },
+    {
+        "label": "Role-shifting language",
+        "regex": r"\byou are now\b|\bpretend to be\b|\bact as\b",
+        "severity": "medium",
+    },
+    {
+        "label": "High-risk control language",
+        "regex": r"\b(bypass|jailbreak|override|exfiltrate)\b",
+        "severity": "high",
+    },
+    {
+        "label": "Command-like instructions",
+        "regex": r"\b(curl|wget|powershell|invoke-webrequest|nc|netcat|rm\s+-rf|chmod\s+777)\b",
+        "severity": "medium",
+    },
+]
+
+
+def _local_security_config_path() -> Path:
+    override = os.environ.get("CODEX_SKILL_SECURITY_CONFIG")
+    if override:
+        return Path(override).expanduser()
+    return Path("~/.codex/skill-security/allow-block.json").expanduser()
 
 
 @dataclass
@@ -28,6 +78,7 @@ class Args:
     dest: str | None = None
     name: str | None = None
     method: str = "auto"
+    on_warning: str = "prompt"
 
 
 @dataclass
@@ -176,6 +227,284 @@ def _validate_skill(path: str) -> None:
         raise InstallError("SKILL.md not found in selected skill directory.")
 
 
+def _read_text(path: str) -> str:
+    try:
+        return Path(path).read_text(encoding="utf-8")
+    except UnicodeDecodeError:
+        return Path(path).read_text(encoding="utf-8", errors="replace")
+
+
+def _is_text_file(path: str) -> bool:
+    ext = os.path.splitext(path)[1].lower()
+    if os.path.basename(path) == "SKILL.md" or ext in TEXT_EXTENSIONS:
+        return True
+    try:
+        chunk = Path(path).read_bytes()[:4096]
+    except OSError:
+        return False
+    if b"\x00" in chunk:
+        return False
+    try:
+        chunk.decode("utf-8")
+        return True
+    except UnicodeDecodeError:
+        return False
+
+
+def _load_skillignore(root: str) -> list[str]:
+    ignore_path = os.path.join(root, ".skillignore")
+    if not os.path.isfile(ignore_path):
+        return []
+    patterns: list[str] = []
+    for raw in Path(ignore_path).read_text(encoding="utf-8", errors="replace").splitlines():
+        line = raw.strip()
+        if not line or line.startswith("#"):
+            continue
+        patterns.append(line)
+    return patterns
+
+
+def _load_risk_patterns() -> tuple[list[tuple[str, re.Pattern[str], str]], list[str]]:
+    config_path = Path(__file__).resolve().parents[1] / "references" / "prompt-injection-patterns.json"
+    warnings: list[str] = []
+    patterns: list[tuple[str, re.Pattern[str], str]] = []
+    allowed_severity = {"low", "medium", "high"}
+
+    if config_path.exists():
+        try:
+            raw = json.loads(config_path.read_text(encoding="utf-8"))
+            if not isinstance(raw, list):
+                raise ValueError("pattern config must be a list")
+            for entry in raw:
+                if not isinstance(entry, dict):
+                    raise ValueError("pattern entries must be objects")
+                label = str(entry.get("label", "")).strip()
+                regex = str(entry.get("regex", "")).strip()
+                severity = str(entry.get("severity", "medium")).strip().lower()
+                if not label or not regex:
+                    raise ValueError("pattern entries must include label and regex")
+                if severity not in allowed_severity:
+                    warnings.append(f"config: invalid severity '{severity}' for {label}; defaulting to medium")
+                    severity = "medium"
+                patterns.append((label, re.compile(regex, re.IGNORECASE | re.DOTALL), severity))
+        except Exception as exc:
+            warnings.append(f"config: failed to load prompt patterns; using defaults ({exc})")
+            patterns = []
+
+    if not patterns:
+        for entry in DEFAULT_RISK_PATTERNS:
+            patterns.append((
+                entry["label"],
+                re.compile(entry["regex"], re.IGNORECASE | re.DOTALL),
+                entry["severity"],
+            ))
+
+    return patterns, warnings
+
+
+def _load_allow_block_patterns() -> tuple[list[re.Pattern[str]], list[tuple[re.Pattern[str], str, str]], list[str]]:
+    warnings: list[str] = []
+    allowlist: list[re.Pattern[str]] = []
+    blocklist: list[tuple[re.Pattern[str], str, str]] = []
+    config_path = _local_security_config_path()
+
+    if not config_path.exists():
+        return allowlist, blocklist, warnings
+
+    try:
+        raw = json.loads(config_path.read_text(encoding="utf-8"))
+        if not isinstance(raw, dict):
+            raise ValueError("allow/block config must be an object")
+        allow_raw = raw.get("allowlist", [])
+        block_raw = raw.get("blocklist", [])
+        if not isinstance(allow_raw, list) or not isinstance(block_raw, list):
+            raise ValueError("allowlist and blocklist must be lists")
+
+        for entry in allow_raw:
+            if not isinstance(entry, dict):
+                raise ValueError("allowlist entries must be objects")
+            regex = str(entry.get("regex", "")).strip()
+            if not regex:
+                raise ValueError("allowlist entries must include regex")
+            allowlist.append(re.compile(regex, re.IGNORECASE | re.DOTALL))
+
+        for entry in block_raw:
+            if not isinstance(entry, dict):
+                raise ValueError("blocklist entries must be objects")
+            regex = str(entry.get("regex", "")).strip()
+            message = str(entry.get("message", "Blocklist match")).strip()
+            severity = str(entry.get("severity", "high")).strip().lower()
+            if not regex:
+                raise ValueError("blocklist entries must include regex")
+            if severity not in {"low", "medium", "high"}:
+                warnings.append(f"config: invalid severity '{severity}' for blocklist; defaulting to medium")
+                severity = "medium"
+            blocklist.append((re.compile(regex, re.IGNORECASE | re.DOTALL), message, severity))
+    except Exception as exc:
+        warnings.append(f"config: failed to load allow/block config; ignoring ({exc})")
+        allowlist = []
+        blocklist = []
+
+    return allowlist, blocklist, warnings
+
+
+def _is_ignored(path: str, root: str, patterns: list[str]) -> bool:
+    rel_path = os.path.relpath(path, root).replace("\\", "/")
+    return any(fnmatch.fnmatch(rel_path, pattern) for pattern in patterns)
+
+
+def _iter_scan_targets(root: str) -> list[tuple[str, bool]]:
+    ignore_patterns = _load_skillignore(root)
+    targets: list[tuple[str, bool]] = []
+    for dirpath, _, filenames in os.walk(root):
+        if ".git" in Path(dirpath).parts:
+            continue
+        for filename in filenames:
+            path = os.path.join(dirpath, filename)
+            if _is_ignored(path, root, ignore_patterns):
+                continue
+            targets.append((path, _is_text_file(path)))
+    return targets
+
+
+def _scan_skill_for_risks(skill_path: str) -> list[str]:
+    warnings: list[str] = []
+    patterns, config_warnings = _load_risk_patterns()
+    warnings.extend(config_warnings)
+    allowlist, blocklist, allow_block_warnings = _load_allow_block_patterns()
+    warnings.extend(allow_block_warnings)
+    for file_path, is_text in _iter_scan_targets(skill_path):
+        rel_path = os.path.relpath(file_path, skill_path)
+        try:
+            if os.path.getsize(file_path) > 1_000_000:
+                warnings.append(f"{rel_path}: skipped large file (>1MB) from risk scan")
+                continue
+        except OSError:
+            warnings.append(f"{rel_path}: unable to determine file size for risk scan")
+            continue
+
+        if not is_text:
+            warnings.append(f"{rel_path}: non-text attachment (manual review required)")
+            continue
+
+        text = _read_text(file_path)
+        for pattern, message, severity in blocklist:
+            if pattern.search(text):
+                warnings.append(f"{rel_path}: blocklist match - {message} (severity: {severity})")
+        if any(allow.search(rel_path) for allow in allowlist):
+            continue
+        for label, pattern, severity in patterns:
+            if pattern.search(text):
+                warnings.append(f"{rel_path}: {label} (severity: {severity})")
+    return warnings
+
+
+def _format_warnings(warnings: list[str]) -> str:
+    lines = ["Warning: Potential prompt-injection or risky command patterns detected:"]
+    lines.extend([f"  - {warning}" for warning in warnings])
+    return "\n".join(lines)
+
+
+def _investigate_skill(skill_path: str, warnings: list[str]) -> None:
+    total_files = 0
+    text_files = 0
+    binary_files: list[tuple[str, int]] = []
+    largest_files: list[tuple[str, int]] = []
+
+    for file_path, is_text in _iter_scan_targets(skill_path):
+        total_files += 1
+        rel_path = os.path.relpath(file_path, skill_path)
+        try:
+            size = os.path.getsize(file_path)
+        except OSError:
+            size = -1
+        if is_text:
+            text_files += 1
+        else:
+            binary_files.append((rel_path, size))
+        if size >= 0:
+            largest_files.append((rel_path, size))
+
+    largest_files.sort(key=lambda item: item[1], reverse=True)
+    binary_files.sort(key=lambda item: item[1], reverse=True)
+
+    print("\nInvestigation summary (read-only):", file=sys.stderr)
+    print(f"- Skill path: {skill_path}", file=sys.stderr)
+    print(f"- Total files: {total_files}", file=sys.stderr)
+    print(f"- Text files: {text_files}", file=sys.stderr)
+    print(f"- Binary attachments: {len(binary_files)}", file=sys.stderr)
+    if warnings:
+        print("- Warning matches:", file=sys.stderr)
+        for warning in warnings:
+            triage = _triage_warning(warning)
+            print(f"  - {warning} [triage: {triage}]", file=sys.stderr)
+    if largest_files:
+        print("- Largest files:", file=sys.stderr)
+        for rel_path, size in largest_files[:10]:
+            size_kb = "unknown" if size < 0 else f"{size / 1024:.1f} KB"
+            print(f"  - {rel_path} ({size_kb})", file=sys.stderr)
+    if binary_files:
+        print("- Binary attachments (top 10):", file=sys.stderr)
+        for rel_path, size in binary_files[:10]:
+            size_kb = "unknown" if size < 0 else f"{size / 1024:.1f} KB"
+            print(f"  - {rel_path} ({size_kb})", file=sys.stderr)
+    print("\nSuggested next actions:", file=sys.stderr)
+    print(f"- Open folder: {skill_path}", file=sys.stderr)
+    print(f"- Open in Finder (macOS): open \"{skill_path}\"", file=sys.stderr)
+    print("- Search for commands: rg -n \"curl|wget|rm -rf|powershell\" <skill_path>", file=sys.stderr)
+
+
+def _triage_warning(warning: str) -> str:
+    if warning.startswith("config:"):
+        return "config"
+
+    rel_path = warning.split(": ", 1)[0]
+    path = Path(rel_path)
+    ext = path.suffix.lower()
+    parts = [part.lower() for part in path.parts]
+
+    if "scripts" in parts or ext in {".py", ".sh", ".bash", ".zsh", ".js", ".ts"}:
+        return "code-context"
+    if "rules" in parts or "references" in parts or ext == ".md":
+        return "docs-context"
+    if ext:
+        return "unknown"
+    return "unknown"
+
+
+def _should_continue_after_warning(
+    warnings: list[str],
+    *,
+    mode: str,
+    skill_name: str,
+    skill_path: str,
+) -> bool:
+    if mode == "continue":
+        print(_format_warnings(warnings), file=sys.stderr)
+        print("Warning: Review the skill files before installing. Continuing install.", file=sys.stderr)
+        return True
+    if mode == "stop":
+        print(_format_warnings(warnings), file=sys.stderr)
+        print("Install stopped due to warnings. Re-run with --on-warning continue to proceed.", file=sys.stderr)
+        return False
+
+    print(_format_warnings(warnings), file=sys.stderr)
+    print("Choose an action:", file=sys.stderr)
+    print("  [A] Investigate (read-only summary and stop)", file=sys.stderr)
+    print("  [B] Continue install", file=sys.stderr)
+    print("  [C] Stop install", file=sys.stderr)
+    choice = input(f"Action for {skill_name} (A/B/C): ").strip().lower()
+    if choice in {"a", "investigate"}:
+        print("Investigate: review the skill files before installing.", file=sys.stderr)
+        _investigate_skill(skill_path, warnings)
+        return False
+    if choice in {"b", "continue"}:
+        print("Continuing install by user choice.", file=sys.stderr)
+        return True
+    print("Install stopped by user choice.", file=sys.stderr)
+    return False
+
+
 def _copy_skill(src: str, dest_dir: str) -> None:
     os.makedirs(os.path.dirname(dest_dir), exist_ok=True)
     if os.path.exists(dest_dir):
@@ -271,6 +600,12 @@ def _parse_args(argv: list[str]) -> Args:
         choices=["auto", "download", "git"],
         default="auto",
     )
+    parser.add_argument(
+        "--on-warning",
+        choices=["prompt", "continue", "stop"],
+        default="prompt",
+        help="Behavior when warnings are detected (prompt, continue, stop).",
+    )
     return parser.parse_args(argv, namespace=Args())
 
 
@@ -304,6 +639,15 @@ def main(argv: list[str]) -> int:
                     raise InstallError(f"Destination already exists: {dest_dir}")
                 skill_src = os.path.join(repo_root, path)
                 _validate_skill(skill_src)
+                warnings = _scan_skill_for_risks(skill_src)
+                if warnings:
+                    if not _should_continue_after_warning(
+                        warnings,
+                        mode=args.on_warning,
+                        skill_name=skill_name,
+                        skill_path=skill_src,
+                    ):
+                        raise InstallError("Install stopped due to warnings.")
                 _copy_skill(skill_src, dest_dir)
                 installed.append((skill_name, dest_dir))
         finally:
