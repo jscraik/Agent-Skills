@@ -3,6 +3,11 @@
 This skill is inspired by the following design-engineering / creative-coding voices.
 Use these links as “study sets” when you need a fresh pattern or a polish reference.
 
+**How to use these notes:**
+- Pick **one influence** to lead the solution (voice + tradeoffs).
+- Use **Emil + Jhey** notes for motion/micro-interactions by default.
+- Cite the note files when explaining timing/easing or interaction decisions.
+
 ## @jh3yy (Jhey Tompkins)
 - Craft of UI: https://craftofui.com/
 - CodePen profile: https://codepen.io/jh3yy
@@ -13,6 +18,7 @@ Study focus:
 - Micro-interactions as tiny systems (states + timing + a11y)
 - Production‑ready craft: semantic elements first, avoid `<div role=button>`
 - CSS techniques to study: `anchor()` alignment + `@starting-style` for smoother enters
+- Reduce-motion and performance-first defaults
 
 ## @PixalJanitor (Pixel Janitor / Derek Briggs)
 - X: https://x.com/PixalJanitor
@@ -37,7 +43,10 @@ Study focus:
 
 Study focus:
 - Motion as UX communication (not decoration)
+- Timing + easing as first-class design decisions
+- “Best animation is no animation” when clarity doesn’t improve
 - Consistent choreography across components
+- CSS-first building blocks (transforms, clip-path, filters)
 
 ## @richtabor
 - Blog: https://rich.blog/
