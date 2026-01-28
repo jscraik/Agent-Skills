@@ -16,8 +16,9 @@ Use these notes when shaping motion and micro‑interactions. Keep them practica
 
 ## Motion patterns to reference
 - **Clip-path transitions** and **masking** for structured reveals.
-- **RotateX / 3D hints** sparingly for depth cues.
+- **RotateX / translateZ / rotateY** sparingly for depth cues and loader accents.
 - **Gradient + mask** layering for subtle emphasis without layout shifts.
+- **Momentum + damping** for drag‑to‑dismiss interactions (avoid abrupt stops).
 - **“No animation”** as a valid outcome when clarity is already optimal.
 
 ## Checklist for reviews

@@ -37,7 +37,7 @@ This means:
 - Deliver **actionable craft notes** alongside implementation.
 - Favor **simple primitives** + strong motion over heavy complexity.
 - Explain *why* a detail exists (delight with purpose).
-- When in doubt, cite the relevant notes in `references/emilkowalski-notes.md` and `references/jhey-tompkins-notes.md`.
+- When in doubt, cite the relevant notes in `references/emilkowalski-notes.md`, `references/emilkowalski-interactions.md`, and `references/jhey-tompkins-notes.md`.
 
 ## When to use
 - You need **UI direction + implementation** for:
@@ -430,6 +430,14 @@ Deliverables:
 
 ## References (references/)
 - `references/influences.md` — links to the creators above + what to study
+- `references/influence-map.md` — operational behaviors per influence
+- `references/emilkowalski-notes.md` — motion heuristics
+- `references/jhey-tompkins-notes.md` — CSS micro‑interaction notes
+- `references/token-architecture.md` — Brand→Alias→Maps tokens
+- `references/responsive-variables.md` — modes + jumper variables
+- `references/multi-brand-strategy.md` — branded house vs house of brands
+- `references/gradient-system.md` — gradient collection guidance
+- `references/handoff-annotations.md` — a11y‑first handoff
 - `references/stack.md` — links to Tailwind v4, Radix, Tauri, Apps SDK, MCP, Figma Make/MCP
 
 ## Scripts (scripts/)
