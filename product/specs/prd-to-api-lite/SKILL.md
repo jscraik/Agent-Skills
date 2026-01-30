@@ -1,6 +1,6 @@
 ---
 name: prd-to-api-lite
-description: "Generate a lite API outline from a PRD with endpoints, example requests/responses, and basic error notes. Use when a minimal contract is sufficient for demo work."
+description: "Generate a minimal API outline from a PRD (endpoints + example requests/responses). Use for demos or early alignment, not full contracts."
 ---
 
 # PRD to API Lite

@@ -1,6 +1,6 @@
 ---
 name: prd-to-arch-lite
-description: "Generate a lite architecture snapshot from a PRD with a minimal component list, primary flow, and top risks. Use when you need demo-grade architecture guidance without full governance overhead."
+description: "Generate a lite architecture snapshot from a PRD (minimal components + primary flow). Use for demo-grade guidance, not full governance."
 ---
 
 # PRD to Architecture Lite

@@ -1,6 +1,6 @@
 ---
 name: product-design-review
-description: "Deliver a complete, user-centered critique of a product or flow, identifying issues, risks, and improvements across the entire experience.. Use when When a user requests a UX/UI audit or heuristic review of a product.."
+description: "Deliver a user-centered UX critique across the full experience. Use for heuristic reviews and journey analysis (not file:line guideline compliance)."
 ---
 
 # Product Design Review

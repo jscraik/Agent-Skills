@@ -1,6 +1,6 @@
 ---
 name: prd-to-arch
-description: "Generate an architecture specification from a PRD or tech spec. Use when architecture boundaries and diagrams must be defined before build."
+description: "Generate a full architecture specification from a PRD or tech spec. Use when system boundaries and diagrams must be locked before build."
 ---
 
 # PRD to Architecture Spec

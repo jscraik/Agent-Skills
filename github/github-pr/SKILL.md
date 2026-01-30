@@ -1,6 +1,6 @@
 ---
 name: github-pr
-description: "Fetch, preview, test, and merge GitHub PRs locally. Use when the user wants to evaluate a PR before merge."
+description: "Compatibility alias for the gh-pr-local workflow. Use only when a user explicitly requests github-pr."
 ---
 
 # GitHub PR Tool

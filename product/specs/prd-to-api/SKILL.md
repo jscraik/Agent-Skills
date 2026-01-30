@@ -1,6 +1,6 @@
 ---
 name: prd-to-api
-description: "Generate an API specification from a PRD or tech spec, including endpoints, schemas, errors, auth, and compatibility rules. Use when API contracts must be defined before implementation."
+description: "Generate a full API specification from a PRD or tech spec (endpoints, schemas, errors, auth). Use when a production-grade contract is required."
 ---
 
 # PRD to API Spec

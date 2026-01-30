@@ -1,6 +1,6 @@
 ---
 name: gh-pr-local
-description: "Fetch, preview, test, and merge GitHub PRs locally. Use when the user wants to evaluate a PR before merge."
+description: "Fetch, preview, test, and merge GitHub PRs locally using the primary PR workflow. Use when you want a local evaluation before merge."
 ---
 
 # GitHub PR Tool

@@ -1,6 +1,6 @@
 ---
 name: create-auth-skill
-description: Build Better Auth integrations for TS/JS apps with secure defaults. Use this when bootstrapping auth, migrating existing auth, or adding new auth features.
+description: Build Better Auth integrations for TS/JS apps with secure defaults. Use for implementation or migration work (not just review).
 ---
 
 # Create Auth Skill

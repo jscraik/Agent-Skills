@@ -1,6 +1,6 @@
 ---
 name: frontend-ui-design
-description: "Create and review production-ready frontend UI components with accessibility and distinct visual direction. Use when building or redesigning frontend UI."
+description: "Create and review production-ready UI systems/components with tokens and accessibility. Use for standard UI implementation or redesign (not creative-coding polish)."
 ---
 
 # Frontend Design System (Apps SDK UI + React + Tauri)

@@ -1,6 +1,6 @@
 ---
 name: mkit-builder
-description: "Create MCP (Model Context Protocol) servers that enable LLMs to interact with external services through well-designed tools, resources, and prompts. The quality of an MCP server is measured by how well it enables LLMs to accomplish real-world tasks safely, reliably, and with predictable outputs.. Use when Use this skill when the task matches its description and triggers.."
+description: "Create MCP servers with OAuth, billing/licensing, and Apps SDK UI integration. Use when you need enterprise-grade MCP patterns beyond the standard MCP builder."
 ---
 
 # MCP Server Development Guide (Gold Standard, Dec 2025)

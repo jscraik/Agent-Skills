@@ -1,6 +1,6 @@
 ---
 name: ux-spec-to-prompts
-description: Use when translating UX specifications into build-order prompts for UI generation tools. Triggers when user has a UX spec, PRD, or detailed feature doc and needs sequential, self-contained prompts for tools like v0, Bolt, or Claude frontend-design.
+description: Translate UX specifications into build-order prompts for UI generator tools. Use when you have UX flows/PRDs and need sequenced prompts (not a full UI spec).
 metadata:
   short-description: "Turn UX specs into build-order prompts."
 ---

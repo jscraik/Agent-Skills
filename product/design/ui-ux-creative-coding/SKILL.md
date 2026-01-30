@@ -1,6 +1,6 @@
 ---
 name: ui-ux-creative-coding
-description: "Build and refine UI/UX via creative coding for Tauri+React (Tailwind v4, Radix, Three.js) with the craft voice of @kubadesign, @jenny_wen, @emilkowalski, and @jh3yy. Use this skill when you need UI direction + implementation, motion refinement, or subtle WebGL accents."
+description: "Creative-coding UI polish for Tauri+React (Tailwind v4, Radix, Three.js). Use when you need expressive motion craft or WebGL accents—not baseline UI system work."
 metadata:
   short-description: UI/UX creative coding playbook for Tauri/React + Tailwind v4 + Radix + Three.js, with Figma Make/MCP workflows and quality gates (Storybook/Argos/Biome).
 ---

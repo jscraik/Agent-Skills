@@ -1,6 +1,6 @@
 ---
 name: ui-spec-to-prompts
-description: "Translate a UI spec into build-order prompts for UI generator tools (v0, Bolt, Claude). Use when a UI spec already exists and you need sequenced, self-contained prompts."
+description: "Translate a UI spec into build-order prompts for UI generator tools (v0, Bolt, Claude). Use when a UI spec already exists (not UX‑only)."
 metadata:
   short-description: "UI spec -> build-order prompts."
 ---

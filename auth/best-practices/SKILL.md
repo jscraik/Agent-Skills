@@ -1,6 +1,6 @@
 ---
 name: better-auth-best-practices
-description: Analyze Better Auth setups and highlight secure integration best practices. Use this when adding Better Auth, configuring plugins/providers, or debugging auth/session flows.
+description: Review Better Auth setups and highlight secure integration best practices. Use for audits, config guidance, or debugging flows (not full implementation).
 ---
 
 # Better Auth Integration Guide

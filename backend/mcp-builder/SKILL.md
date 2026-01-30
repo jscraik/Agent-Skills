@@ -1,6 +1,6 @@
 ---
 name: mcp-builder
-description: "Create MCP (Model Context Protocol) servers that enable LLMs to interact with external services through well-designed tools, resources, and prompts. The quality of an MCP server is measured by how well it enables LLMs to accomplish real-world tasks safely, reliably, and with predictable outputs.. Use when Use this skill when the task matches its description and triggers.."
+description: "Create general-purpose MCP servers and tool schemas for standard integrations. Use when building MCP services without OAuth/billing/Apps UI requirements."
 ---
 
 # MCP Server Development Guide (Gold Standard, Dec 2025)
