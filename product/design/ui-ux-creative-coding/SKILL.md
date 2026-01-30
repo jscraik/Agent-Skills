@@ -145,6 +145,7 @@ Before any other content, **emit the three headings immediately**. Do not wait t
 - Run the repo’s UI checks when available (Storybook, Argos, Biome, typecheck, tests).
 - Perform a basic accessibility pass (keyboard focus, contrast, semantic structure).
 - Confirm performance budgets for interactions and motion are respected.
+- For motion work, apply `references/motion-performance-guardrails.md`.
 
 ## Anti-patterns
 - The request is purely brand identity (logo/brand book) with no UI to ship.

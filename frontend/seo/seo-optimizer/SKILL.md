@@ -81,6 +81,7 @@ Check for existing implementations:
 - [ ] Robots.txt file
 - [ ] Canonical URLs
 - [ ] Alt text on images
+- [ ] Metadata correctness gate (duplicates, canonical/og alignment, deterministic values). See `references/metadata-correctness-gate.md`.
 
 ### Step 3: Identify Page Types
 

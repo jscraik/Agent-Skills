@@ -8,8 +8,11 @@ usage() {
 Usage:
   ui-codex triage --issue "..." [--profile iphone_pro] [--path /] [--before <png>] [--schema codex/ui_report.schema.json]
   ui-codex fix    --issue "..." [--profile iphone_pro] [--path /] [--before <png>] [--after <png>] [--schema codex/ui_report.schema.json]
+  ui-codex <triage|fix> --confirm --allow-network [other options...]
 
 Options:
+  --confirm       Required. Acknowledge that this script will write files and run tools.
+  --allow-network Required. Explicitly allow network access for tooling as needed.
   --issue         Required. Short description of what's wrong (what you see on small screens).
   --profile       Optional. Device profile label (freeform string). Default: iphone_pro
   --path          Optional. Route/path to open (e.g. /settings). Default: /
@@ -20,8 +23,8 @@ Options:
 
 Codex options:
   --codex-profile Optional. Codex config profile name to pass to `codex exec --profile`.
-  --model         Optional. Override model (`codex exec --model`).
-  --sandbox       Optional. Override sandbox mode (read-only|workspace-write|danger-full-access).
+  --model         Optional. Set model (`codex exec --model`).
+  --sandbox       Optional. Set sandbox mode (read-only|workspace-write|danger-full-access).
   --full-auto     Optional. Add `--full-auto` (low-friction automation preset).
   --skip-git-repo-check Optional. Pass through to `codex exec`.
 TXT
@@ -59,9 +62,13 @@ CODEX_MODEL=""
 CODEX_SANDBOX=""
 CODEX_FULL_AUTO="0"
 CODEX_SKIP_GIT_REPO_CHECK="0"
+ALLOW_NETWORK="0"
+CONFIRM="0"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
+    --confirm) CONFIRM="1"; shift 1 ;;
+    --allow-network) ALLOW_NETWORK="1"; shift 1 ;;
     --issue) ISSUE="${2:-}"; shift 2 ;;
     --profile) DEVICE_PROFILE="${2:-}"; shift 2 ;;
     --path) ROUTE_PATH="${2:-}"; shift 2 ;;
@@ -78,6 +85,18 @@ while [[ $# -gt 0 ]]; do
     *) echo "ERROR: unknown option: $1"; usage; exit 2 ;;
   esac
 done
+
+if [[ "$CONFIRM" != "1" ]]; then
+  echo "ERROR: --confirm is required."
+  usage
+  exit 2
+fi
+
+if [[ "$ALLOW_NETWORK" != "1" ]]; then
+  echo "ERROR: --allow-network is required."
+  usage
+  exit 2
+fi
 
 if [[ -z "$ISSUE" ]]; then
   echo "ERROR: --issue is required"

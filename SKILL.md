@@ -100,6 +100,7 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 
 ## Utilities
 - `1password` — Set up and use 1Password CLI (op) for install, desktop integration, sign-in, and secret injection. Not for non-1Password secret tooling.
+- `beautiful-mermaid` — Render Mermaid diagrams to SVG and PNG assets using Beautiful Mermaid. Use when you need diagram images from Mermaid code or descriptions.
 - `markdown-converter` — Convert documents and files to Markdown using markitdown. Use when converting PDF, Word (.docx), PowerPoint (.pptx), Excel (.xlsx, .xls), HTML, CSV, JSON, XML, images (with EXIF/OCR), audio (with transcription), ZIP archives, YouTube URLs, or EPubs to Markdown format for LLM processing or text analysis.
 - `process-watch` — Monitor system processes and resources (CPU, memory, I/O, network) and manage runaway processes. Not for app-level profiling or code tuning.
 - `recon-workbench` — Production-grade forensic evidence collection for software interrogation across web/React and OSS repos. Use when running rwb CLI commands (doctor, authorize, plan, run, manifest, summarize, validate), designing probe catalogs or schemas, generating evidence-backed findings, inspecting targets under authorization guardrails, or configuring scope and compliance policies.

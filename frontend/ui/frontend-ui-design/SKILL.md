@@ -6,7 +6,7 @@ description: "Create and review production-ready frontend UI components with acc
 # Frontend Design System (Apps SDK UI + React + Tauri)
 
 ## Compliance
-- Check against GOLD Industry Standards guide in ~/.codex/AGENTS.override.md
+- Check against the GOLD Industry Standards guide in the user’s codex AGENTS file (see environment instructions).
 
 
 ## 0) What this skill does
@@ -52,7 +52,7 @@ requirements), keep platform compliance but preserve the brand wherever it does
 not break usability or accessibility. Ask for confirmation before diverging.
 
 Opt-out confirmation prompt (use verbatim):
-"You asked for a different brand. Do you want to override the Apps-in-ChatGPT baseline for this task (yes/no)?"
+"You asked for a different brand. Do you want to replace the Apps-in-ChatGPT baseline for this task (yes/no)?"
 
 ## 2) When to use
 Use for:
@@ -134,6 +134,9 @@ When invoked, output:
 
 Use `assets/FEATURE_DESIGN.template.md` as the default structure.
 
+Schema note:
+- If outputs are schema-bound, include `schema_version` from `references/contract.yaml`.
+
 For small, focused tasks (single component tweak or minor UI patch), you may
 compress the output by omitting IA/navigation and screen-by-screen states,
 but still include accessibility, performance, and token-referenced measurements.
@@ -147,6 +150,7 @@ in the deliverables:
 
 Reference pack:
 - `references/a11y-gold-standard.md`
+- `references/baseline-ui-checklist.md`
 - `references/standards-jan-2026.md`
 - `references/tauri.md`
 - `references/rust-frontend-bridge.md`
@@ -164,7 +168,7 @@ Use this as a quick compliance pass and link to the verified sources:
 - Storybook Accessibility Tests: https://storybook.js.org/docs/writing-tests/accessibility-testing
 
 Automated link audit:
-- Run `scripts/link_audit.sh` to check all reference URLs for drift.
+- If explicitly approved, run the repo’s link audit helper to check reference URLs for drift.
 
 ## 4.7) Code review checklist (use for existing implementations)
 - Tokens: no raw values; all measurements reference tokens
@@ -173,6 +177,24 @@ Automated link audit:
 - Platform idioms: navigation, input controls, focus behavior per platform
 - Localization/RTL: no clipping at large text, RTL mirroring correct
 - Storybook: stories + a11y + interaction tests for new/changed components
+
+## 4.8) Baseline UI guardrails (fast pass)
+Use this when you need a quick quality pass before deeper design work:
+- `references/baseline-ui-checklist.md`
+
+Notes:
+- Opinionated aesthetics (e.g., no gradients/glows) are defaults; replace only with explicit brand/brief approval.
+- Do not introduce new dependencies (e.g., `tw-animate-css`) unless already present or explicitly approved.
+
+## Validation (fail-fast)
+- Stop at the first failed gate, fix, and re-run before proceeding.
+- Use repo scripts for lint/tests/Storybook when UI changes are present.
+- Treat external commands as gated; only run with explicit approval.
+
+## Examples
+- "Design a settings screen component set with accessibility and motion specs."
+- "Review this component for token and a11y compliance."
+- "Create a small UI patch for error states (minimal diff)."
 
 ## 5) Design tokens (single source-of-truth)
 ### Standard
@@ -194,7 +216,7 @@ Use nested DTCG groups (no dots in token or group names):
 
 ### Units + conversions
 - Token values stored in px (dimensions) and ms (durations).
-- Always provide derived rem: assume 1rem=16px unless project overrides.
+- Always provide derived rem: assume 1rem=16px unless the project specifies otherwise.
 ### DTCG token mapping (web)
 Use the canonical naming and mapping guidance:
 - `references/token-mapping-dtcg.md`

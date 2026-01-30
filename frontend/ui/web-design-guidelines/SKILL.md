@@ -31,6 +31,12 @@ Aim for accessible, predictable interfaces that reduce user error and cognitive 
 3. Check against all rules in the fetched guidelines
 4. Output findings in the terse `file:line` format
 
+## Pre-flight accessibility triage (fast pass)
+Before the full guideline pass, you may run the quick triage checklist:
+- `references/a11y-triage.md`
+
+This does **not** replace the required guideline fetch; always apply the full ruleset after the triage pass.
+
 ## Guidelines Source
 
 Fetch fresh guidelines before each review:
@@ -110,6 +116,7 @@ If no files specified, ask the user which files to review.
 - `references/checklist.md` for review order and reporting format.
 - `references/sources.md` for guideline sources.
 - `references/anti-patterns.md` for expanded pitfalls.
+- `references/a11y-triage.md` for a fast critical-issues pre-check.
 - `assets/review-output-template.md` for the reporting template.
 - `references/contract.yaml` and `references/evals.yaml` for gold-gate validation.
 
