@@ -27,12 +27,17 @@ function main() {
     flatten("", tokens.colors, flat);
     for (const [k, v] of Object.entries(flat)) vars[`--color-${k}`] = v;
   }
-  if (tokens.radius) for (const [k, v] of Object.entries(tokens.radius)) vars[`--radius-${k}`] = v;
+  const radii = tokens.radius ?? tokens.radii;
+  if (radii) for (const [k, v] of Object.entries(radii)) vars[`--radius-${k}`] = v;
   if (tokens.shadow) for (const [k, v] of Object.entries(tokens.shadow)) vars[`--shadow-${k}`] = v;
 
   const motion = tokens.motion ?? {};
   if (motion.durations) for (const [k, v] of Object.entries(motion.durations)) vars[`--dur-${k}`] = v;
   if (motion.easing) for (const [k, v] of Object.entries(motion.easing)) vars[`--ease-${k}`] = v;
+  for (const [k, v] of Object.entries(motion)) {
+    if (k.startsWith("duration-")) vars[`--dur-${k.replace("duration-", "")}`] = v;
+    if (k.startsWith("ease-")) vars[`--ease-${k.replace("ease-", "")}`] = v;
+  }
 
   const lines = [];
   lines.push("/* Generated from assets/tokens.json */");

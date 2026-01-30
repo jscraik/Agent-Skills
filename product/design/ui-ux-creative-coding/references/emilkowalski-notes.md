@@ -1,6 +1,6 @@
 # Emil Kowalski — Motion Craft Notes (Jan 2026)
 
-Use these notes when shaping motion and micro‑interactions. Keep them practical and code‑anchored.
+Use these notes when shaping motion craft. For interaction‑level guidance, see `emilkowalski-interactions.md`.
 
 ## Core principles
 - **Motion is UX communication**: every movement should explain state, intent, or change.

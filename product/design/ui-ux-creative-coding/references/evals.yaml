@@ -1,6 +1,6 @@
 cases:
   - name: happy-path
-    prompt: "Use the ui-ux-creative-coding skill to design a new settings panel for a Tauri app with motion polish."
+    prompt: "Use the ui-ux-creative-coding skill to design a new settings panel for a Tauri app with motion polish. Keep the response concise and include the standard headings."
     acceptance:
       - type: contains
         value: "## Outputs"
@@ -14,3 +14,65 @@ cases:
     acceptance:
       - type: contains
         value: "## When to use"
+  # Persona integration tests - @jenny_wen persona guidance
+  - name: persona-reference-jenny-wen
+    prompt: "Use the ui-ux-creative-coding skill to write user-facing copy for an onboarding flow. Apply @jenny_wen's communication style."
+    acceptance:
+      - type: regex
+        value: "(@jenny_wen|Jenny Wen|jenny_wen)"
+  - name: persona-applies-clarity-over-process
+    prompt: "Use the ui-ux-creative-coding skill to explain a complex interaction pattern. Use @jenny_wen's approach."
+    acceptance:
+      - type: regex
+        value: "(clarity over process|casual and friendly|user needs)"
+  - name: persona-references-detailed-guidance
+    prompt: "Use the ui-ux-creative-coding skill. I need guidance on applying @jenny_wen's persona to my UI work. Cite the relevant persona reference file."
+    acceptance:
+      - type: contains
+        value: "references/jenny_wen-persona.md"
+  - name: persona-reference-emilkowalski
+    prompt: "Use the ui-ux-creative-coding skill to explain a motion system. Apply @emilkowalski's persona and cite the relevant persona reference."
+    acceptance:
+      - type: regex
+        value: "(@emilkowalski|emilkowalski)"
+      - type: contains
+        value: "references/emilkowalski-persona.md"
+  - name: persona-reference-jh3yy
+    prompt: "Use the ui-ux-creative-coding skill to explain a CSS micro-interaction. Apply @jh3yy's persona."
+    acceptance:
+      - type: regex
+        value: "(@jh3yy|jh3yy)"
+      - type: regex
+        value: "🧑‍🍳"
+  - name: persona-references-detailed-guidance-jh3yy
+    prompt: "Use the ui-ux-creative-coding skill. I need guidance on applying @jh3yy's persona to my UI work. Cite the relevant persona reference file."
+    acceptance:
+      - type: contains
+        value: "references/jhey-tompkins-persona.md"
+  - name: persona-reference-kubadesign
+    prompt: "Use the ui-ux-creative-coding skill to outline a landing page refresh. Apply @kubadesign's persona."
+    acceptance:
+      - type: regex
+        value: "(@kubadesign|kubadesign)"
+  - name: persona-references-detailed-guidance-kubadesign
+    prompt: "Use the ui-ux-creative-coding skill. I need guidance on applying @kubadesign's persona to my UI work. Cite the relevant persona reference file."
+    acceptance:
+      - type: contains
+        value: "references/kubadesign-persona.md"
+  - name: persona-reference-benjitaylor
+    prompt: "Use the ui-ux-creative-coding skill to outline a developer tool UI refinement. Apply @benjitaylor's persona."
+    acceptance:
+      - type: regex
+        value: "(@benjitaylor|benjitaylor)"
+  - name: persona-references-detailed-guidance-benjitaylor
+    prompt: "Use the ui-ux-creative-coding skill. I need guidance on applying @benjitaylor's persona to my UI work. Cite the relevant persona reference file."
+    acceptance:
+      - type: contains
+        value: "references/benjitaylor-persona.md"
+  - name: format-headings-order
+    prompt: "Use the ui-ux-creative-coding skill and include the standard headings. Keep it concise."
+    acceptance:
+      - type: regex
+        value: "## When to use[\\s\\S]*## Inputs[\\s\\S]*## Outputs"
+      - type: not_contains
+        value: "## Next step"
