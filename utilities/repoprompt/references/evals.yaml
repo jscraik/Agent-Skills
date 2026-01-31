@@ -14,3 +14,13 @@ cases:
     acceptance:
       - type: contains
         value: "## When to use"
+  - name: mcp-tooling-guidance
+    prompt: "I need Repo Prompt MCP tool guidance for selection, search, and context_builder."
+    acceptance:
+      - type: contains
+        value: "MCP/CLI"
+  - name: cli-review-workflow
+    prompt: "How do I run rp-cli review workflows without pasting diffs?"
+    acceptance:
+      - type: contains
+        value: "review"

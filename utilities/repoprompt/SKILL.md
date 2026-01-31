@@ -1,6 +1,6 @@
 ---
 name: repoprompt
-description: "Plan and guide Repo Prompt integration and usage in AI coding workflows. Use when integrating Repo Prompt with editors/agents."
+description: "Plan and guide Repo Prompt integration and usage in AI coding workflows. Use when integrating Repo Prompt with editors/agents or when needing MCP/CLI tool guidance."
 ---
 
 # Repo Prompt Integration
@@ -17,6 +17,7 @@ Guide the user to the most effective Repo Prompt integration path for their work
 - User asks how to optimize context (codemaps, slices, multi-root workspaces).
 - User asks for a comparison between Repo Prompt and AI editors.
 - User asks about rp-cli usage or MCP server setup.
+- User asks for MCP/CLI tool usage patterns (window/tab routing, review workflows).
 
 ## Inputs
 - Current workflow (editor-first, chat-first, CLI automation).
@@ -31,7 +32,20 @@ Guide the user to the most effective Repo Prompt integration path for their work
 - Context strategy (full vs slices vs codemaps).
 - Quick validation/smoke test steps.
 - 2–3 concrete next-step options and a clear recommendation.
+- MCP/CLI tooling guidance when requested (routing, safe flows, review workflows).
 - If proposing /interview-me, still provide a minimal recommendation + checklist first.
+
+## Response format (required)
+Always start responses with these headings (no text before them):
+
+```
+## When to use
+## Inputs
+## Outputs
+## Failure mode
+```
+
+If the user asks for MCP/CLI tooling guidance, include the phrase **MCP/CLI** in your response.
 
 ## Constraints
 - Redact secrets/PII by default.
@@ -40,6 +54,7 @@ Guide the user to the most effective Repo Prompt integration path for their work
 - Do not claim features beyond the provided source notes.
 - Prefer short, actionable steps over long explanations.
 - When multiple options fit, give one recommendation and explain why.
+- Do not ask for permission to read skill references; assume they are available. If a reference is missing, proceed with SKILL.md only and note the limitation.
 
 ## Philosophy
 - Context efficiency beats brute-force context dumping.
@@ -78,6 +93,11 @@ Guide the user to the most effective Repo Prompt integration path for their work
 ### 4) rp-cli (Automation / non-MCP agents)
 - Use rp-cli to build context and export prompts.
 - Suitable for shell-based agents or scripts.
+
+## Tooling Guidance (MCP/CLI quick refs)
+- MCP tool map, flows, and selection hygiene: `references/repoprompt_mcp_tooling.md`.
+- rp-cli exec usage + window/tab routing: `references/repoprompt_cli_tooling.md`.
+- Diff review + review follow-up workflows: `references/repoprompt_review_workflows.md`.
 
 ## Context Strategy (token-efficient defaults)
 - Full: files you will edit.
@@ -126,6 +146,9 @@ Guide the user to the most effective Repo Prompt integration path for their work
 ## References
 Read when needed:
 - references/repoprompt_source.md
+- references/repoprompt_mcp_tooling.md
+- references/repoprompt_cli_tooling.md
+- references/repoprompt_review_workflows.md
 
 ## When to use
 - Use this skill when the task matches its description and triggers.
