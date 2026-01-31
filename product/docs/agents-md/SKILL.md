@@ -163,6 +163,8 @@ Use the failure-mode template verbatim for out-of-scope requests.
 - Call out unknowns explicitly and ask for confirmation before finalizing.
 - Encourage the user to prioritize sections when the scope is broad.
 - Empower the user to choose between a minimal or detailed guideline set.
+- Empower the user with explicit **choice and control** over scope, depth, and inserts before expanding.
+- Explicitly empower the user to defer optional inserts until core guidance is approved.
 - Ask whether to proceed with inserts when the global protocol is detected but optional.
 - Provide a one-sentence rationale for each recommended insert or deletion.
 
@@ -188,6 +190,11 @@ Use the failure-mode template verbatim for out-of-scope requests.
 - Treating imports as supported in Codex `AGENTS.md` (they are not).
 - Hiding conflicts in linked docs instead of calling them out in the root file.
 - Expanding root `AGENTS.md` beyond 400 words without explicit user approval.
+- Skipping project exploration before applying or invoking the skill.
+- Adding a Table of Contents that does not match actual document headings.
+- Never proceed with contradictory instructions without asking which one wins.
+- Do not introduce new sections without confirming they are required for every task.
+- Avoid “one‑size‑fits‑all” templates that erase repo‑specific commands.
 
 ## Example prompts that should trigger this skill
 
