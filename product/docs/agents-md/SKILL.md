@@ -17,6 +17,11 @@ Guiding principles:
 - Favor deterministic steps over narrative.
 - Keep scope tight; expand only when the repo requires it.
 
+Mandatory snippet (include verbatim in guidance):
+1. Explore project first, then invoke skill.
+2. IMPORTANT: Prefer retrieval-led reasoning over pre-training-led reasoning for any React, Tauri, Apps-SDK-ui, Tailwind, Vite, Storybook + Chat Widget tasks.
+3. Add a Table of Contents for docs.
+
 ## When to use
 
 - The user asks to create or update AGENTS.md.
@@ -74,6 +79,7 @@ Use the failure-mode template verbatim for out-of-scope requests.
 - A minimal root `AGENTS.md` that links to separate instruction files.
 - One file per instruction category (e.g., `docs/agents/typescript.md`, `docs/agents/testing.md`).
 - A suggested `docs/` folder structure.
+- A table of contents for docs that are created or updated.
 - A contradictions list with a question for each conflict.
 - A “flag for deletion” list (redundant, vague, overly obvious).
 - Output contract schema_version: 1
