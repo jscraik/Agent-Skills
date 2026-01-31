@@ -6,6 +6,11 @@ artifacts/reports/
 *.skill
 .venv-skillpack/
 .venv/
+.venv-skill-creator/
+.tmp/
+
+# Internal docs (do not commit)
+FORJAMIE.md
 
 # AI artifacts - transient only
 /artifacts/ai/tmp/
