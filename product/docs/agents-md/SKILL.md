@@ -171,8 +171,8 @@ Use the failure-mode template verbatim for out-of-scope requests.
 ## Validation
 
 - Fail fast: stop at the first failed validation gate, fix it, then re-run.
-- Run `python scripts/quick_validate.py <skill>` if available.
-- Run `python scripts/skill_gate.py <skill>` and fix any missing sections.
+- Run `~/.venvs/pyyaml/bin/python scripts/quick_validate.py <skill>` if available.
+- Run `~/.venvs/pyyaml/bin/python scripts/skill_gate.py <skill>` and fix any missing sections.
 - If needed, consult `references/contract.yaml` and `references/evals.yaml`.
 - If validation scripts or paths are missing, state "not run (tooling not available)" and continue.
 

@@ -12,7 +12,7 @@ Enforces:
 - Basic safety hygiene (redaction language; fail-fast gating)
 
 Usage:
-  python scripts/skill_gate.py <path/to/skill-dir-or-SKILL.md>
+  ~/.venvs/pyyaml/bin/python scripts/skill_gate.py <path/to/skill-dir-or-SKILL.md>
 
 Exit codes:
   0  pass
@@ -20,7 +20,7 @@ Exit codes:
   2  gate failed (one or more FAIL findings)
 
 Recommended CI:
-  python scripts/skill_gate.py ~/dev/agent-skills/skills/<skill-name> --format json
+  ~/.venvs/pyyaml/bin/python scripts/skill_gate.py ~/dev/agent-skills/skills/<skill-name> --format json
 """
 
 from __future__ import annotations

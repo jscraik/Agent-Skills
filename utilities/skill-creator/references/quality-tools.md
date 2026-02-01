@@ -5,7 +5,7 @@ Use these scripts to upgrade skill quality before packaging.
 ## skill_gate.py
 
 ```bash
-python scripts/skill_gate.py <path/to/skill-folder>
+~/.venvs/pyyaml/bin/python scripts/skill_gate.py <path/to/skill-folder>
 ```
 
 Use when:
@@ -19,7 +19,7 @@ Outputs:
 ## run_skill_evals.py
 
 ```bash
-python scripts/run_skill_evals.py <path/to/skill-folder>
+~/.venvs/pyyaml/bin/python scripts/run_skill_evals.py <path/to/skill-folder>
 ```
 
 Use when:
@@ -36,7 +36,7 @@ Outputs:
 ## analyze_skill.py
 
 ```bash
-python scripts/analyze_skill.py <path/to/skill-folder>
+~/.venvs/pyyaml/bin/python scripts/analyze_skill.py <path/to/skill-folder>
 ```
 
 Use when:
@@ -50,7 +50,7 @@ Output:
 ## upgrade_skill.py
 
 ```bash
-python scripts/upgrade_skill.py <path/to/skill-folder>
+~/.venvs/pyyaml/bin/python scripts/upgrade_skill.py <path/to/skill-folder>
 ```
 
 Use when:

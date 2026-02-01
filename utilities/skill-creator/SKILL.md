@@ -197,8 +197,8 @@ Prefer relative paths (`scripts/foo.py`, `references/bar.md`) so the skill works
 Run the lightweight checks first:
 
 ```bash
-python scripts/quick_validate.py <path/to/skill-folder>
-python scripts/skill_gate.py <path/to/skill-folder>
+~/.venvs/pyyaml/bin/python scripts/quick_validate.py <path/to/skill-folder>
+~/.venvs/pyyaml/bin/python scripts/skill_gate.py <path/to/skill-folder>
 ```
 
 If available, run deeper validation:
@@ -210,13 +210,13 @@ skills-ref validate <path/to/skill-folder>
 Then run evals:
 
 ```bash
-python scripts/run_skill_evals.py <path/to/skill-folder>
+~/.venvs/pyyaml/bin/python scripts/run_skill_evals.py <path/to/skill-folder>
 ```
 
 Codex runner (optional):
 
 ```bash
-python scripts/run_skill_evals.py <path/to/skill-folder> --runner codex
+~/.venvs/pyyaml/bin/python scripts/run_skill_evals.py <path/to/skill-folder> --runner codex
 ```
 
 Fix the first failure, re-run, then proceed.

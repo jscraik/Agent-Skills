@@ -8,6 +8,7 @@ artifacts/reports/
 .venv/
 .venv-skill-creator/
 .tmp/
+skills/
 
 # Internal docs (do not commit)
 FORJAMIE.md

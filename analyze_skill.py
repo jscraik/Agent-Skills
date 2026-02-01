@@ -5,11 +5,11 @@ analyze_skill.py
 Analyze a Codex agent skill (SKILL.md) and emit a quality score + actionable feedback.
 
 Usage:
-    python analyze_skill.py <path/to/skill-dir-or-SKILL.md>
+    ~/.venvs/pyyaml/bin/python analyze_skill.py <path/to/skill-dir-or-SKILL.md>
 
 Examples:
-    python analyze_skill.py .codex/skills/my-skill
-    python analyze_skill.py .codex/skills/my-skill/SKILL.md
+    ~/.venvs/pyyaml/bin/python analyze_skill.py .codex/skills/my-skill
+    ~/.venvs/pyyaml/bin/python analyze_skill.py .codex/skills/my-skill/SKILL.md
 
 Exit codes:
     0  score >= --min-pass

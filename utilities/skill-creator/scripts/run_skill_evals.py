@@ -11,7 +11,7 @@ Run evaluation cases for a Codex skill using Claude Code CLI (default) or Codex 
 - Applies acceptance assertions and exits non-zero on failures
 
 Usage:
-  python scripts/run_skill_evals.py <path/to/skill-dir-or-SKILL.md>
+  ~/.venvs/pyyaml/bin/python scripts/run_skill_evals.py <path/to/skill-dir-or-SKILL.md>
 
 Exit codes:
   0  all evals passed
