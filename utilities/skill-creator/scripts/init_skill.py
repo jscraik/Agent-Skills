@@ -321,6 +321,23 @@ def create_resource_dirs(skill_dir, skill_name, skill_title, resources, include_
                     "TODO: Paste the output from `$create-plan` (if available) or write the plan used to build this skill.\n"
                 )
                 print("[OK] Created references/plan.md")
+            # Copy contract.yaml template if available
+            repo_root = Path(__file__).resolve().parents[4]
+            template_contract = repo_root / "templates" / "contract.yaml"
+            if template_contract.exists():
+                target_contract = resource_dir / "contract.yaml"
+                if not target_contract.exists():
+                    import shutil
+                    shutil.copy(template_contract, target_contract)
+                    print("[OK] Created references/contract.yaml (from template)")
+            # Copy evals.yaml template if available
+            template_evals = repo_root / "templates" / "evals.yaml"
+            if template_evals.exists():
+                target_evals = resource_dir / "evals.yaml"
+                if not target_evals.exists():
+                    import shutil
+                    shutil.copy(template_evals, target_evals)
+                    print("[OK] Created references/evals.yaml (from template)")
         elif resource == "assets":
             if include_examples:
                 example_asset = resource_dir / "example_asset.txt"

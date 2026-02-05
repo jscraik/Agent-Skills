@@ -1,33 +1,53 @@
 ---
-name: {{SKILL_NAME}}
-description: {{What it does}} Use when {{trigger conditions}}.
+name: {{skill-name}}
+description: "{{What it does}} Use when {{trigger conditions}}."
 ---
 
-<objective>
-{{Clear statement of what this skill accomplishes}}
-</objective>
+## When to use
+- {{First trigger scenario}}
+- {{Second trigger scenario}}
+- {{Third trigger scenario}}
 
-<quick_start>
-{{Immediate actionable guidance - what Claude should do first}}
-</quick_start>
+## Inputs
+- {{First required input}}
+- {{Second required input}}
+- {{Optional input}}
 
-<process>
-## Step 1: {{First action}}
+## Outputs
+- {{Primary output}}
+- {{Secondary output}}
+- {{Success indicators}}
 
+## Constraints
+- {{First constraint or limitation}}
+- {{Second constraint or limitation}}
+- {{Safety or security consideration}}
+
+## Validation
+- {{How to verify correctness}}
+- {{Test or check to run}}
+
+## Philosophy
+- {{Core principle or approach}}
+- {{Guiding philosophy}}
+
+## Anti-patterns
+- {{Common mistake to avoid}}
+- {{What not to do}}
+
+## Procedure
+
+### Step 1: {{First action}}
 {{Instructions for step 1}}
 
-## Step 2: {{Second action}}
-
+### Step 2: {{Second action}}
 {{Instructions for step 2}}
 
-## Step 3: {{Third action}}
-
+### Step 3: {{Third action}}
 {{Instructions for step 3}}
-</process>
 
-<success_criteria>
+## Success criteria
 {{Skill name}} is complete when:
 - [ ] {{First success criterion}}
 - [ ] {{Second success criterion}}
 - [ ] {{Third success criterion}}
-</success_criteria>

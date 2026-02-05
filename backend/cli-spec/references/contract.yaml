@@ -1,13 +1,33 @@
+# Skill Output Contract
+# Source: templates/contract.yaml - Copy and customize for your skill.
+
+schema_version: "1.0"
+
 purpose: >
   Define expected behavior and outputs for this skill.
-schema_version: 1.0
+  This skill designs CLI surface area including commands, flags,
+  subcommands, help text, output formats, and UX behavior.
+
 triggers:
-  - user requests the capability described in this skill
+  - user requests CLI design
+  - command-line interface specification needed
+  - CLI refactoring or standardization
+
 inputs:
-  - user request details
+  - command name and purpose
+  - user type (humans, scripts, or both)
+  - constraints and requirements
+
 outputs:
-  - primary response or artifact
+  - command tree and usage synopsis
+  - flags/args specification
+  - output contracts (json/plain)
+  - exit code definitions
+
 non_goals:
-  - out-of-scope work
+  - GUI or web interface design
+  - implementation code generation
+
 risks:
-  - missing inputs; mitigated by clarifying questions
+  - ambiguous requirements; mitigated by clarifying questions
+  - scope creep beyond CLI surface

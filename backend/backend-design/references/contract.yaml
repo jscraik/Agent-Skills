@@ -1,13 +1,33 @@
+# Skill Output Contract
+# Source: templates/contract.yaml - Copy and customize for your skill.
+
+schema_version: "1.0"
+
 purpose: >
   Define expected behavior and outputs for this skill.
-schema_version: 1.0
+  This skill designs backend architecture, data models, API contracts,
+  auth, reliability, observability, and integrations.
+
 triggers:
-  - user requests the capability described in this skill
+  - user requests backend design/specs
+  - system architecture discussion
+  - API contract design
+
 inputs:
-  - user request details
+  - user requirements
+  - constraints and assumptions
+  - existing system context
+
 outputs:
-  - primary response or artifact
+  - architecture specification
+  - data models
+  - API contracts
+  - implementation guidance
+
 non_goals:
-  - out-of-scope work
+  - frontend UI implementation
+  - product requirements documentation
+
 risks:
   - missing inputs; mitigated by clarifying questions
+  - scope creep; mitigated by explicit boundaries
