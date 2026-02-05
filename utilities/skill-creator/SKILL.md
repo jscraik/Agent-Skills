@@ -32,6 +32,7 @@ Depending on the request, produce one or more of:
 
 - A skill folder containing:
   - `SKILL.md` (required)
+  - `agents/openai.yaml` (optional) - OpenAI/Codex appearance and MCP dependencies configuration
   - `scripts/` (optional)
   - `references/` (optional)
   - `assets/` (optional)
@@ -115,13 +116,13 @@ Follow this workflow, skipping steps only with a clear reason.
 ### 0) Confirm scope and target
 
 - Identify where the skill will live:
-  - Repo scope: `.codex/skills/<skill-name>/`
-  - User scope: `~/.codex/skills/<skill-name>/`
+  - Repo scope: `.agents/skills/<skill-name>/`
+  - User scope: `~/.agents/skills/<skill-name>/`
 - Admin scope: `/etc/codex/skills/<skill-name>/` (system-wide)
   - (Claude Code uses `~/.claude/skills/`)
 
 Reload note:
-- Restart Codex after adding/updating skills so the index refreshes.
+- Restart Codex/Agents after adding/updating skills so the index refreshes.
 - You can enable/disable skills in `~/.codex/config.toml` under `[skills]` (for example, a `disabled = [...]` list).
 - Decide target: `portable` (strict subset), `codex`, or `claude`.
 
@@ -164,8 +165,17 @@ skill-name/
 Use the initializer:
 
 ```bash
-python scripts/init_skill.py <skill-name> --target codex --run-type instruction --path <output-dir> --resources scripts,references,assets
+python scripts/init_skill.py <skill-name> --target codex --run-type instruction --path <output-dir>
 ```
+
+**Resource auto-creation:** The initializer intelligently creates directories based on skill needs:
+- `scripts/` — always created for `--run-type python` or `--run-type container`
+- `references/` — always created for complex skills (external APIs, multiple workflows)
+- `assets/` — created when templates/static files would help
+- `agents/openai.yaml` — always created for OpenAI/Codex compatibility
+
+To override auto-creation, use `--resources scripts,references,assets` or `--minimal` for just `SKILL.md`.
+
 Tip: for script-backed skills, use `--run-type python` (creates `scripts/run.py`) or `--run-type container` (adds `Dockerfile` + `scripts/run.py`).
 Security note: for any executable code, follow `references/security-hardening.md` (offline defaults, no secret/env echo, `--dry-run` + `--confirm` for destructive actions).
 

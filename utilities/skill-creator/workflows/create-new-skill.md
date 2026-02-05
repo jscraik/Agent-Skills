@@ -89,11 +89,30 @@ See references/recommended-structure.md for templates.
 
 ## Step 4: Create Directory
 
+Use the initializer (auto-creates beneficial resources):
+
+```bash
+python scripts/init_skill.py {skill-name} --path ~/.claude/skills --category utilities
+```
+
+**Auto-created by default:**
+- `references/` - for evals.yaml, contracts, progressive disclosure
+- `assets/` - for templates, icons, static files
+- `agents/openai.yaml` - OpenAI/Codex configuration
+- `scripts/` - only for `--run-type python` or `container`
+
+**Override options:**
+- `--minimal` - Just SKILL.md + agents/openai.yaml (no resources)
+- `--resources scripts,references,assets` - Explicit list
+- `--examples` - Add example files to resources
+
+Or manually:
 ```bash
 mkdir -p ~/.claude/skills/{skill-name}
 # If complex:
 mkdir -p ~/.claude/skills/{skill-name}/workflows
 mkdir -p ~/.claude/skills/{skill-name}/references
+mkdir -p ~/.claude/skills/{skill-name}/agents
 # If needed:
 mkdir -p ~/.claude/skills/{skill-name}/templates  # for output structures
 mkdir -p ~/.claude/skills/{skill-name}/scripts    # for reusable code
@@ -115,7 +134,32 @@ mkdir -p ~/.claude/skills/{skill-name}/scripts    # for reusable code
 - `<routing>` (maps answers to workflows)
 - `<reference_index>` and `<workflows_index>`
 
-## Step 6: Write Workflows (if complex)
+## Step 6: Configure agents/openai.yaml (Optional)
+
+For OpenAI/Codex compatibility, create `agents/openai.yaml`:
+
+```yaml
+# OpenAI Agents SDK Configuration
+# interface:
+#   display_name: "User-facing name"
+#   short_description: "User-facing description"
+#   icon_small: "./assets/small-logo.svg"    # 16x16px SVG
+#   icon_large: "./assets/large-logo.png"    # 100x100px PNG/JPG
+#   brand_color: "#3B82F6"
+#   default_prompt: "Optional surrounding prompt"
+#
+# dependencies:
+#   tools:
+#     - type: "mcp"
+#       value: "serverName"
+#       description: "MCP server description"
+#       transport: "streamable_http"
+#       url: "https://example.com/mcp"
+```
+
+See: https://developers.openai.com/codex/skills/create-skill/
+
+## Step 7: Write Workflows (if complex)
 
 For each workflow:
 ```xml
@@ -132,14 +176,14 @@ How to know this workflow is done
 </success_criteria>
 ```
 
-## Step 7: Write References (if needed)
+## Step 8: Write References (if needed)
 
 Domain knowledge that:
 - Multiple workflows might need
 - Doesn't change based on workflow
 - Contains patterns, examples, technical details
 
-## Step 8: Validate Structure
+## Step 9: Validate Structure
 
 Check:
 - [ ] YAML frontmatter valid
@@ -151,7 +195,7 @@ Check:
 - [ ] SKILL.md under 500 lines
 - [ ] XML tags properly closed
 
-## Step 9: Create Slash Command
+## Step 10: Create Slash Command
 
 ```bash
 cat > ~/.claude/commands/{skill-name}.md << 'EOF'
@@ -165,7 +209,7 @@ Invoke the {skill-name} skill for: $ARGUMENTS
 EOF
 ```
 
-## Step 10: Test
+## Step 11: Test
 
 Invoke the skill and observe:
 - Does it ask the right intake question?
@@ -182,6 +226,7 @@ Skill is complete when:
 - [ ] API research done if external service involved
 - [ ] Directory structure correct
 - [ ] SKILL.md has valid frontmatter
+- [ ] agents/openai.yaml configured (if targeting OpenAI/Codex)
 - [ ] Essential principles inline (if complex skill)
 - [ ] Intake question routes to correct workflow
 - [ ] All workflows have required_reading + process + success_criteria

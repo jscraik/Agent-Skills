@@ -3,14 +3,19 @@
 Skill Initializer - Creates a new skill from template
 
 Usage:
-    init_skill.py <skill-name> --category <category> [--resources scripts,references,assets] [--examples]
+    init_skill.py <skill-name> --category <category> [--minimal] [--examples]
     init_skill.py <skill-name> --path <path> [--resources scripts,references,assets] [--examples]
 
 Examples:
     init_skill.py my-new-skill --category utilities
     init_skill.py my-new-skill --category backend --resources scripts,references
-    init_skill.py my-api-helper --category product --resources scripts --examples
+    init_skill.py my-api-helper --category product --minimal
     init_skill.py custom-skill --path /custom/location
+
+Resource auto-creation (without --resources or --minimal):
+  - references/  : Always created (for progressive disclosure, evals.yaml, contracts)
+  - scripts/     : Created for --run-type python or container
+  - assets/      : Always created (for templates, icons, static files)
 """
 
 import argparse
@@ -71,6 +76,7 @@ description: "TODO: One-line description of WHAT this skill does and WHEN to use
 - `references/`: deep docs loaded only when needed
 - `scripts/`: executable helpers (more reliable + token-efficient than inline code)
 - `assets/`: templates/static files copied into outputs
+- `agents/openai.yaml`: OpenAI/Codex appearance and MCP dependencies configuration
 """
 
 EXAMPLE_SCRIPT = '''#!/usr/bin/env python3
@@ -158,7 +164,7 @@ Note: This is a text placeholder. Actual assets can be any file type.
 
 PYTHON_RUNNER_TEMPLATE = '''#!/usr/bin/env python3
 """
-Skill script entrypoint for {skill_name}.
+Skill script entrypoint for SKILL_NAME_PLACEHOLDER.
 
 Security / safety baseline (keep these true unless the user explicitly opts in):
 - No network assumptions: default to offline behavior. If network is required, gate it behind --allow-network.
@@ -180,26 +186,24 @@ _SENSITIVE_HINTS = ("KEY", "TOKEN", "SECRET", "PASSWORD", "PRIVATE_KEY", "BEARER
 
 
 def redact(text: str) -> str:
-    """
-    Best-effort redaction for logs. Never rely on this as your only control:
-    the primary control is "do not print secrets".
-    """
+    """Best-effort redaction for logs."""
     out = text
     for hint in _SENSITIVE_HINTS:
-        out = re.sub(rf"(?i)({re.escape(hint)}\s*[:=]\s*)([^\s]+)", r"\1[REDACTED]", out)
+        pattern = r"(?i)(" + re.escape(hint) + r"\\s*[:=]\\s*)([^\\s]+)"
+        out = re.sub(pattern, r"\\1[REDACTED]", out)
     return out
 
 
 def require_confirm(*, confirm: bool, dry_run: bool, message: str) -> None:
     if dry_run:
-        print(f"[DRY RUN] {message}")
+        print(f"[DRY RUN] {{message}}")
         return
     if not confirm:
         raise SystemExit("Refusing to perform a destructive action without --confirm. Re-run with --dry-run to preview.")
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Skill helper entrypoint for {skill_name}")
+    parser = argparse.ArgumentParser(description="Skill helper entrypoint for SKILL_NAME_PLACEHOLDER")
     parser.add_argument("--dry-run", action="store_true", help="Preview intended actions without making changes")
     parser.add_argument("--confirm", action="store_true", help="Required to run destructive actions (delete/overwrite/remote writes)")
     parser.add_argument("--allow-network", action="store_true", help="Opt-in to network operations (default: offline)")
@@ -216,7 +220,7 @@ def main() -> None:
     # if not args.dry_run:
     #     ... perform deletion ...
 
-    print("TODO: implement {skill_name} script")
+    print("TODO: implement SKILL_NAME_PLACEHOLDER script")
 
 
 if __name__ == "__main__":
@@ -232,6 +236,27 @@ COPY . /app
 # RUN pip install --no-cache-dir -r requirements.txt
 
 CMD ["python", "scripts/run.py", "--help"]
+"""
+
+AGENTS_OPENAI_YAML_TEMPLATE = """# OpenAI Agents SDK Configuration
+# This file configures how the skill appears in Codex and any MCP dependencies.
+# See: https://developers.openai.com/codex/skills/create-skill/
+#
+# interface:
+#   display_name: "Optional user-facing name"
+#   short_description: "Optional user-facing description"
+#   icon_small: "./assets/small-logo.svg"    # 16x16px SVG with currentColor fill
+#   icon_large: "./assets/large-logo.png"    # 100x100px PNG/JPG
+#   brand_color: "#3B82F6"
+#   default_prompt: "Optional surrounding prompt"
+#
+# dependencies:
+#   tools:
+#     - type: "mcp"
+#       value: "serverName"
+#       description: "MCP server description"
+#       transport: "streamable_http"
+#       url: "https://example.com/mcp"
 """
 
 
@@ -358,6 +383,17 @@ def init_skill(skill_name, path, resources, include_examples, run_type="instruct
             print(f"[ERROR] Error creating resource directories: {e}")
             return None
 
+    # Create agents/openai.yaml for OpenAI/Codex compatibility
+    try:
+        agents_dir = skill_dir / "agents"
+        agents_dir.mkdir(exist_ok=True)
+        openai_yaml = agents_dir / "openai.yaml"
+        openai_yaml.write_text(AGENTS_OPENAI_YAML_TEMPLATE)
+        print("[OK] Created agents/openai.yaml")
+    except Exception as e:
+        print(f"[ERROR] Error creating agents/openai.yaml: {e}")
+        return None
+
     # Scaffold run-type helpers (optional)
     if run_type != "instruction":
         try:
@@ -366,7 +402,7 @@ def init_skill(skill_name, path, resources, include_examples, run_type="instruct
 
             run_py = scripts_dir / "run.py"
             if not run_py.exists():
-                run_py.write_text(PYTHON_RUNNER_TEMPLATE.format(skill_name=skill_name))
+                run_py.write_text(PYTHON_RUNNER_TEMPLATE.replace("SKILL_NAME_PLACEHOLDER", skill_name))
                 try:
                     # Best-effort: make executable on POSIX systems.
                     run_py.chmod(run_py.stat().st_mode | 0o111)
@@ -389,15 +425,42 @@ def init_skill(skill_name, path, resources, include_examples, run_type="instruct
     print("\nNext steps:")
     print("1. Edit SKILL.md to complete the TODO items and update the description")
     if resources:
-        if include_examples:
-            print("2. Customize or delete the example files in scripts/, references/, and assets/")
-        else:
-            print("2. Add resources to scripts/, references/, and assets/ as needed")
+        print("2. Customize resource directories as needed (delete unused ones):")
+        for r in resources:
+            print(f"   - {r}/")
     else:
-        print("2. Create resource directories only if needed (scripts/, references/, assets/)")
-    print("3. Run the validator when ready to check the skill structure")
+        print("2. Add resource directories if needed (scripts/, references/, assets/)")
+    print("3. Configure agents/openai.yaml for OpenAI/Codex appearance and MCP dependencies")
+    print("4. Run the validator when ready to check the skill structure")
 
     return skill_dir
+
+
+def get_auto_resources(run_type, explicit_resources=None, minimal=False):
+    """
+    Determine which resources to auto-create based on skill needs.
+
+    Args:
+        run_type: 'instruction', 'python', or 'container'
+        explicit_resources: If provided, use these instead of auto-detecting
+        minimal: If True, create minimal structure (just SKILL.md + agents/openai.yaml)
+
+    Returns:
+        List of resource names to create
+    """
+    if minimal:
+        return []
+
+    if explicit_resources:
+        return explicit_resources
+
+    # Auto-detect resources that improve the skill
+    resources = {"references", "assets"}  # Always useful for progressive disclosure
+
+    if run_type in ("python", "container"):
+        resources.add("scripts")
+
+    return sorted(resources)
 
 
 def main():
@@ -420,7 +483,12 @@ def main():
     parser.add_argument(
         "--resources",
         default="",
-        help="Comma-separated list: scripts,references,assets",
+        help="Explicit comma-separated list (overrides auto-creation): scripts,references,assets",
+    )
+    parser.add_argument(
+        "--minimal",
+        action="store_true",
+        help="Create minimal structure: only SKILL.md and agents/openai.yaml (no resources)",
     )
     parser.add_argument(
         "--run-type",
@@ -450,12 +518,11 @@ def main():
     if skill_name != raw_skill_name:
         print(f"Note: Normalized skill name from '{raw_skill_name}' to '{skill_name}'.")
 
-    resources = parse_resources(args.resources)
-    if args.run_type != "instruction":
-        if "scripts" not in resources:
-            resources.append("scripts")
+    explicit_resources = parse_resources(args.resources) if args.resources else None
+    resources = get_auto_resources(args.run_type, explicit_resources, args.minimal)
+
     if args.examples and not resources:
-        print("[ERROR] --examples requires --resources to be set.")
+        print("[ERROR] --examples requires resources to be created (don't use --minimal without --resources)")
         sys.exit(1)
 
     if args.path and args.category:
@@ -481,12 +548,14 @@ def main():
 
     print(f"Initializing skill: {skill_name}")
     print(f"   Location: {path}")
-    if resources:
-        print(f"   Resources: {', '.join(resources)}")
-        if args.examples:
-            print("   Examples: enabled")
+    if args.resources:
+        print(f"   Resources: {', '.join(resources)} (explicit)")
+    elif args.minimal:
+        print("   Resources: minimal (none)")
     else:
-        print("   Resources: none (create as needed)")
+        print(f"   Resources: {', '.join(resources)} (auto-selected)")
+    if args.examples:
+        print("   Examples: enabled")
     print()
 
     result = init_skill(skill_name, path, resources, args.examples, run_type=args.run_type)

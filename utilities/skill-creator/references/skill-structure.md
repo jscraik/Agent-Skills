@@ -285,6 +285,8 @@ Typical skill structure:
 ```
 skill-name/
 ├── SKILL.md (main entry point, pure XML structure)
+├── agents/
+│   └── openai.yaml (optional, OpenAI/Codex appearance and MCP dependencies)
 ├── references/ (optional, for progressive disclosure)
 │   ├── guide-1.md (pure XML structure)
 │   ├── guide-2.md (pure XML structure)

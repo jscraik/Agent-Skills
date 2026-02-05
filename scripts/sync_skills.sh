@@ -179,6 +179,43 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - `best-practices` — Better Auth integration guide covering config, database adapters, sessions, hooks, and security options.
 INDEX_EOF
 
+# Remove legacy tool symlinks (no longer supported)
+remove_legacy_symlink() {
+  local target_dir="$1"
+  if [ -L "$target_dir" ]; then
+    rm -f "$target_dir"
+    echo "[OK] Removed legacy symlink: $target_dir"
+  fi
+}
+
+# Remove old symlinks from unsupported tools
+remove_legacy_symlink "$HOME/.copilot/skills"
+remove_legacy_symlink "$HOME/.config/agents/skills"
+remove_legacy_symlink "$HOME/.cursor/skills"
+
+# Sync to user-level tool directories (Claude Code + OpenAI Codex/Agents)
+sync_user_skills() {
+  local target_dir="$1"
+  mkdir -p "$(dirname "$target_dir")"
+  if [ -L "$target_dir" ]; then
+    # Update existing symlink
+    ln -sfn "$skills_dir" "$target_dir"
+    echo "[OK] Updated symlink: $target_dir -> $skills_dir"
+  elif [ -e "$target_dir" ] && [ ! -L "$target_dir" ]; then
+    # Exists but is not a symlink - warn and skip
+    echo "[WARN] $target_dir exists but is not a symlink (skipping)"
+    echo "       Remove it manually to enable automatic sync: rm -rf $target_dir"
+  else
+    # Create new symlink
+    ln -s "$skills_dir" "$target_dir"
+    echo "[OK] Created symlink: $target_dir -> $skills_dir"
+  fi
+}
+
+# Sync to Claude Code and OpenAI Agents/Codex
+sync_user_skills "$HOME/.claude/skills"
+sync_user_skills "$HOME/.agents/skills"
+
 chmod +x "$repo_root/scripts/sync_skills.sh"
 
 echo "Synced symlinks and regenerated SKILL.md."
