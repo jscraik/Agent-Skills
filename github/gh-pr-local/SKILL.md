@@ -1,6 +1,10 @@
 ---
 name: gh-pr-local
-description: "Fetch, preview, test, and merge GitHub PRs locally using the primary PR workflow. Use when you want a local evaluation before merge."
+description: Fetch, preview, test, and merge GitHub PRs locally using the primary
+  PR workflow. Use when you want a local evaluation before merge.
+metadata:
+  short-description: Fetch, preview, test, and merge GitHub PRs locally using the
+    primary PR workf...
 ---
 
 # GitHub PR Tool
@@ -71,16 +75,16 @@ github-pr test clawdbot/clawdbot 404
 ## Compliance
 - Check against GOLD Industry Standards guide in ~/.codex/AGENTS.override.md
 
-## When to use
+## Scope and triggers
 - Use this skill when the task matches its description and triggers.
 - If the request is outside scope, route to the referenced skill.
 
 
-## Inputs
+## Required inputs
 - User request details and any relevant files/links.
 
 
-## Outputs
+## Deliverables
 - A structured response or artifact appropriate to the skill.
 - Include `schema_version: 1` if outputs are contract-bound.
 
@@ -111,3 +115,13 @@ github-pr test clawdbot/clawdbot 404
 
 ## Antipatterns
 - Do not add features outside the agreed scope.
+
+## Remember
+The agent is capable of extraordinary work in this domain. Use judgment, adapt to context, and push boundaries when appropriate.
+
+## Scripts
+- `scripts/github-pr.py`
+
+## References
+- `references/contract.yaml`
+- `references/evals.yaml`

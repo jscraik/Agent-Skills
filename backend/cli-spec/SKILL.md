@@ -1,13 +1,18 @@
 ---
 name: cli-spec
-description: "Plan and draft CLI UX and surface area (commands, flags, help, output). Use when specifying or refactoring a command-line interface."
+description: Plan and draft CLI UX and surface area (commands, flags, help, output).
+  Use when specifying or refactoring a command-line interface.
+metadata:
+  short-description: Plan and draft CLI UX and surface area (commands, flags, help,
+    output).
 ---
-
 # Create CLI
+
+Avoid skipping validation steps or inventing results.
+
 
 ## Compliance
 - Check against GOLD Industry Standards guide in ~/.codex/AGENTS.override.md
-
 
 Design CLI surface area (syntax + behavior), human-first, script-friendly.
 
@@ -59,13 +64,13 @@ Every response must include these headings:
 Use this exact structure when key inputs are missing:
 
 ```md
-## When to use
+## Scope and triggers
 - This skill applies to CLI specification and refactor requests.
 
-## Inputs
+## Required inputs
 - Missing: <list the minimum required inputs>.
 
-## Outputs
+## Deliverables
 - None until inputs are provided.
 ```
 
@@ -73,13 +78,13 @@ Use this exact structure when key inputs are missing:
 Use this exact structure when the request is out of scope:
 
 ```md
-## When to use
+## Scope and triggers
 - This skill applies to CLI specification and refactor requests. The current request is out of scope.
 
-## Outputs
+## Deliverables
 - None (out of scope).
 
-## Inputs
+## Required inputs
 - None (out of scope).
 ```
 
@@ -285,78 +290,11 @@ if __name__ == \"__main__\":
     app()
 ```
 
-### TypeScript/Node (tsx + yargs)
-```bash
-npm i yargs
-npm i -D tsx typescript
-```
-
-```ts
-import yargs from \"yargs\";
-import { hideBin } from \"yargs/helpers\";
-
-yargs(hideBin(process.argv))
-  .command(
-    \"run\",
-    \"Plan only; no side effects\",
-    (y) => y.option(\"json\", { type: \"boolean\", default: false }),
-    (args) => {
-      if (args.json) {
-        process.stdout.write(JSON.stringify({ schema: \"mycmd.run.v1\" }));
-      } else {
-        process.stdout.write(\"Plan preview\\n\");
-      }
-    }
-  )
-  .strict()
-  .help()
-  .parse();
-```
-
-## Notes
-
-- Prefer recommending a parsing library (language-specific) only when asked; otherwise keep this skill language-agnostic.
-- If the request is "design parameters", do not drift into implementation.
-
-## When to use
-- Use this skill when the task matches its description and triggers.
-- If the request is outside scope, route to the referenced skill.
-
-
-## Inputs
-- User request details and any relevant files/links.
-
-
-## Outputs
-- A structured response or artifact appropriate to the skill.
-- Include `schema_version: 1` if outputs are contract-bound.
-
-
-## Constraints
-- Redact secrets/PII by default.
-- Avoid destructive operations without explicit user direction.
-
-- Redact secrets/sensitive data by default.
-
-## Validation
-- Run any relevant checks or scripts when available.
-- Fail fast and report errors before proceeding.
-
-- Fail fast on first failed gate.
+## Remember
+The agent is capable of extraordinary work in this domain. Use judgment, adapt to context, and push boundaries when appropriate.
 
 ## Philosophy
-- Favor clarity, explicit tradeoffs, and verifiable outputs.
+- Prefer clarity, explicit tradeoffs, and verifiable outputs.
 
-
-## Anti-patterns
-- Avoid vague guidance without concrete steps.
-- Do not invent results or commands.
-## Procedure
-1) Clarify scope and inputs.
-2) Execute the core workflow.
-3) Summarize outputs and next steps.
-
-## Antipatterns
-- Do not add features outside the agreed scope.
-
-- Redact secrets/sensitive data by default.
+## Extended guidance
+See `references/extended.md` for additional examples, workflows, and appendices.

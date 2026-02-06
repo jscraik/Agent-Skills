@@ -1,6 +1,12 @@
 ---
 name: og-image-creator
-description: "Generate authentic, brand-aligned Open Graph images by understanding your codebase first, then creating contextually appropriate images for each route using Playwright and your existing components.. Use when Use this skill when the task matches its description and triggers.."
+description: Generate authentic, brand-aligned Open Graph images by understanding
+  your codebase first, then creating contextually appropriate images for each route
+  using Playwright and your existing components.. Use when Use this skill when the
+  task matches its description and triggers..
+metadata:
+  short-description: Generate authentic, brand-aligned Open Graph images by understanding
+    your cod...
 ---
 
 # OG Image Creator
@@ -212,16 +218,16 @@ When someone shares your page, the OG image should feel like a natural previewâ€
 
 **You're capable of creating sophisticated, brand-aligned OG images that enhance rather than undermine the site's identity.**
 
-## When to use
+## Scope and triggers
 - Use this skill when the task matches its description and triggers.
 - If the request is outside scope, route to the referenced skill.
 
 
-## Inputs
+## Required inputs
 - User request details and any relevant files/links.
 
 
-## Outputs
+## Deliverables
 - A structured response or artifact appropriate to the skill.
 - Include `schema_version: 1` if outputs are contract-bound.
 
@@ -246,3 +252,14 @@ When someone shares your page, the OG image should feel like a natural previewâ€
 
 ## Antipatterns
 - Do not add features outside the agreed scope.
+
+## Examples
+- "Provide a concise response for this task."
+- "Follow the workflow and summarize outputs."
+
+## References
+- `references/best-practices.md`
+- `references/contract.yaml`
+- `references/evals.yaml`
+- `references/framework-workflows.md`
+- `references/og-specifications.md`

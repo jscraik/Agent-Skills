@@ -63,7 +63,7 @@ Optional commands (do not break the single-question rule):
 - Mode: `standard`
 - Intent: start `DISCOVER`, switch to `DECIDE` as soon as tradeoffs appear
 
-## When to use
+## Scope and triggers
 
 - Use when requirements or scope are unclear for a feature/refactor.
 - Use when you want to produce a spec with explicit decisions and an approval gate.
@@ -210,10 +210,10 @@ After approval, recommend a clean handoff:
 
 Avoid repeating identical option sets. Vary structure and examples based on domain (product, infra, data, UX) while keeping cognitive load low.
 
-## Inputs
+## Required inputs
 - User request details and any relevant files/links.
 
-## Outputs
+## Deliverables
 - A structured response or artifact appropriate to the skill.
 - Include `schema_version: 1` if outputs are contract-bound.
 

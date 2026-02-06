@@ -82,6 +82,65 @@ Claude:
 
 ---
 
+## Output Structure (Standard Suite)
+
+```
+public/
+├── favicon.ico          # Legacy (16+32 combined)
+├── favicon.svg          # Modern browsers (scalable)
+├── favicon-16x16.png    # Browser tabs
+├── favicon-32x32.png    # Browser tabs (retina)
+├── favicon-48x48.png    # Windows tiles
+├── favicon-64x64.png    # Windows tiles
+├── favicon-128x128.png  # Chrome Web Store
+├── apple-touch-icon.png # touch icon (180x180)
+├── favicon-192x192.png  # Android Chrome
+└── favicon-512x512.png  # PWA, Android
+```
+
+## Framework Integration
+
+### Next.js (App Router)
+```typescript
+// app/layout.tsx
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  icons: {
+    icon: [
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+      { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/apple-touch-icon.png', sizes: '180x180' },
+    ],
+  },
+}
+```
+
+### Standard HTML
+```html
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+```
+
+### PWA Manifest
+```json
+{
+  "icons": [
+    { "src": "/favicon-192x192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/favicon-512x512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
+```
+
+---
+
 ## Anti-Patterns
 
 ❌ **Flat, shadowless designs**

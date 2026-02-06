@@ -332,6 +332,30 @@ def generate_suggestions(doc: SkillDoc, *, min_description_len: int = 120) -> Li
             """,
         )
 
+    # Prohibited headings inside SKILL.md
+    prohibited = {"when to use", "inputs", "outputs", "failure mode"}
+    bad_headings = [h for h in headings if h in prohibited]
+    if bad_headings:
+        add(
+            rule="body.prohibited_headings",
+            category="Organization",
+            priority=Priority.HIGH,
+            message=(
+                "Remove or rename prohibited headings in SKILL.md "
+                f"({', '.join(sorted(set(bad_headings)))})."
+            ),
+            rationale=(
+                "These headings are reserved for the skill response format and should not appear "
+                "inside SKILL.md."
+            ),
+            example="""\
+            Use headings like:
+            ## Principles
+            ## Workflow
+            ## Anti-Patterns
+            """,
+        )
+
     # --- Body: structure + progressive disclosure ---
     if not body.strip():
         add(
@@ -446,23 +470,23 @@ def generate_suggestions(doc: SkillDoc, *, min_description_len: int = 120) -> Li
                 """,
             )
 
-        # Additional useful structure checks (kept from improved version)
-        if not _has_any(body, ["when to use", "use this skill when", "trigger", "invocation"]):
+        # Conciseness check (align with ~200–300 lines, hard cap ~400)
+        line_count = len(doc.raw_text.splitlines())
+        if line_count > 400:
             add(
-                rule="body.triggers.missing",
-                category="Body",
-                priority=Priority.MEDIUM,
-                message="Add a 'When to use' section with 2–5 concrete trigger examples.",
-                rationale="Helps humans and keeps the body self-contained when opened directly.",
+                rule="body.too_long",
+                category="Conciseness",
+                priority=Priority.HIGH,
+                message=f"SKILL.md is too long ({line_count} lines). Reduce to ~200–300; hard cap ~400.",
+                rationale="Shorter skills improve focus and reduce model drift.",
             )
-
-        if not _has_any(body, ["inputs", "input:", "assumptions", "outputs", "output:"]):
+        elif line_count > 300:
             add(
-                rule="body.io.missing",
-                category="Body",
+                rule="body.long",
+                category="Conciseness",
                 priority=Priority.MEDIUM,
-                message="Add explicit 'Inputs' and 'Outputs' sections.",
-                rationale="Clearly defining I/O reduces ambiguity and improves determinism.",
+                message=f"SKILL.md is a bit long ({line_count} lines). Aim for ~200–300 lines.",
+                rationale="Concise skills are easier to execute reliably.",
             )
 
         if not _has_any(body, ["example prompt", "example prompts", "examples"]):

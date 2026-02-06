@@ -46,7 +46,7 @@ Follow `/Users/jamiecraik/.codex/USER_PROFILE.md`: single-threaded, explicit ste
 - Mode: `standard`
 - Intent: start `DISCOVER`, switch to `DECIDE` when choosing what to try next
 
-## When to use
+## Scope and triggers
 
 - Bug report lacks clear reproduction steps.
 - Need to narrow suspected layer quickly.
@@ -102,10 +102,10 @@ Follow `/Users/jamiecraik/.codex/USER_PROFILE.md`: single-threaded, explicit ste
 - Rollback/mitigation options:
 ```
 
-## Inputs
+## Required inputs
 - User request details and any relevant files/links.
 
-## Outputs
+## Deliverables
 - Kernel synthesis + Triage Addendum.
 - Include `schema_version: 1` if outputs are contract-bound.
 

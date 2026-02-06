@@ -1,6 +1,9 @@
 ---
 name: docs-expert
-description: "Co-author and QA documentation such as READMEs, guides, and runbooks. Use when writing or auditing docs (not PRDs/specs)."
+description: Co-author and QA documentation such as READMEs, guides, and runbooks.
+  Use when writing or auditing docs (not PRDs/specs).
+metadata:
+  short-description: Co-author and QA documentation such as READMEs, guides, and runbooks.
 ---
 
 # Doc Co-Authoring Workflow
@@ -31,14 +34,14 @@ Use this when the user wants help quickly and does not want the full three-stage
 4. Run a fast QA pass (clarity, missing steps, top 3 failure points).
 5. Offer to switch to the full workflow if scope grows or ambiguity remains.
 
-## Inputs
+## Required inputs
 
 - Doc target(s): file path(s) or doc surface name.
 - Audience and experience level.
 - Constraints: platforms, versions, compliance requirements.
 - Existing content or links (if any).
 
-## Outputs
+## Deliverables
 
 - Updated Markdown docs (PR-ready edits).
 - Doc QA summary (what changed and what to verify).
@@ -175,7 +178,7 @@ If you touch in-code documentation, also include Code Doc QA checklist results (
 The agent is capable of extraordinary work in this domain. These guidelines unlock that potential - they do not constrain it.
 Use judgment, adapt to context, and push boundaries when appropriate.
 
-## When to use
+## Scope and triggers
 - Use this skill when the task matches its description and triggers.
 - If the request is outside scope, route to the referenced skill.
 ## Procedure
@@ -185,3 +188,7 @@ Use judgment, adapt to context, and push boundaries when appropriate.
 
 ## Antipatterns
 - Do not add features outside the agreed scope.
+
+## Variation
+- Vary tone, depth, and structure based on context.
+- Avoid repeating the same outline across outputs.

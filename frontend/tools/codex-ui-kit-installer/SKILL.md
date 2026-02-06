@@ -1,6 +1,11 @@
 ---
 name: codex-ui-kit-installer
-description: "Scaffold and install codex-ui-kit assets and optional prompts in a repo. Use when adding codex-ui-kit to a project."
+description: Scaffold and install codex-ui-kit assets, prompts, and optional config
+  into an existing repo. Use when adding or refreshing codex-ui-kit folders and wiring
+  prompts.
+metadata:
+  short-description: Scaffold and install codex-ui-kit assets, prompts, and optional
+    config into a...
 ---
 
 # Codex UI Kit Installer
@@ -11,16 +16,16 @@ description: "Scaffold and install codex-ui-kit assets and optional prompts in a
 ## Overview
 Install the codex-ui-kit assets into a target repo and (optionally) copy the reusable prompts into the user’s Codex prompts directory.
 
-## When to use
+## Scope and triggers
 - Installing or updating the codex-ui-kit in a repo.
 - Adding the ui-codex wrapper and schema files.
 - Installing Codex UI prompts into the local prompts directory.
 
-## Inputs
+## Required inputs
 - Target repo root path.
 - Whether prompts should be installed to `~/.codex/prompts`.
 
-## Outputs
+## Deliverables
 - Installed kit files in the repo.
 - Optional prompts installed locally.
 
@@ -34,13 +39,13 @@ Every response must include these headings:
 Use this exact structure when the request is out of scope:
 
 ```md
-## When to use
+## Scope and triggers
 - This skill applies to installing or updating codex-ui-kit. The current request is out of scope.
 
-## Outputs
+## Deliverables
 - None (out of scope).
 
-## Inputs
+## Required inputs
 - None (out of scope).
 ```
 

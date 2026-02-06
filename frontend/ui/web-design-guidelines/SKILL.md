@@ -1,19 +1,25 @@
 ---
 name: web-design-guidelines
-description: Review UI code against Web Interface Guidelines with file:line findings. Use for rule-based compliance checks (not experiential critiques).
+description: Review UI code against Web Interface Guidelines with file:line findings.
+  Use for rule-based compliance checks (not experiential critiques). Use when the
+  user requests this capability.
 metadata:
   author: vercel
-  version: "1.0.0"
+  version: 1.0.0
   argument-hint: <file-or-pattern>
   short-description: UI review against Web Interface Guidelines
-  tags: [ux, ui, accessibility, guidelines]
+  tags:
+  - ux
+  - ui
+  - accessibility
+  - guidelines
 ---
 
 # Web Interface Guidelines
 
 Review files for compliance with Web Interface Guidelines.
 
-## When to use
+## Scope and triggers
 
 Use this skill when a user asks to:
 - Review UI/UX for accessibility or design issues.
@@ -65,13 +71,13 @@ When a user provides a file or pattern argument:
 
 If no files specified, ask the user which files to review.
 
-## Inputs
+## Required inputs
 
 - Files or glob patterns to review.
 - Any known UI surfaces to prioritize.
 - Existing design system or token references, if any.
 
-## Outputs
+## Deliverables
 
 - Findings in the `file:line` format required by the guidelines.
 - A short summary of top issues by impact.

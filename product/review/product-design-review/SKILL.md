@@ -1,6 +1,11 @@
 ---
 name: product-design-review
-description: "Deliver a user-centered UX critique across the full experience. Use for heuristic reviews and journey analysis (not file:line guideline compliance)."
+description: Deliver a user-centered UX critique across the full experience. Use for
+  heuristic reviews and journey analysis (not file:line guideline compliance). Use
+  when the user requests this capability.
+metadata:
+  short-description: Deliver a user-centered UX critique across the full experience.
+    Use for heuri...
 ---
 
 # Product Design Review
@@ -23,7 +28,7 @@ Ask only what is needed to avoid blocking:
 - What artifacts are available (screens, links, prototypes, analytics, support tickets)?
 - Any constraints (platform, tech, brand, deadlines)?
 
-## When to use
+## Scope and triggers
 - When a user requests a UX/UI audit or heuristic review of a product.
 - When the user wants onboarding, checkout, or core flow critique.
 - When accessibility or content clarity reviews are requested.
@@ -138,11 +143,11 @@ Use when the product is open-source and adoption or contributor experience is cr
 The agent is capable of extraordinary work in this domain. These guidelines unlock that potential—they don't constrain it.
 Use judgment, adapt to context, and push boundaries when appropriate.
 
-## Inputs
+## Required inputs
 - User request details and any relevant files/links.
 
 
-## Outputs
+## Deliverables
 - A structured response or artifact appropriate to the skill.
 - Include `schema_version: 1` if outputs are contract-bound.
 

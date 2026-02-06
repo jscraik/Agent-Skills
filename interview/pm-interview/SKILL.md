@@ -54,7 +54,7 @@ Follow `/Users/jamiecraik/.codex/USER_PROFILE.md`: single-threaded, explicit ste
 - Mode: `standard`
 - Intent: start `DISCOVER`, then `DECIDE` for scope/tradeoffs
 
-## When to use
+## Scope and triggers
 
 - Defining product scope, value, and success metrics.
 - Validating a roadmap item before committing engineering time.
@@ -116,10 +116,10 @@ Ask in order, skipping anything already answered by context.
 - Open questions for later:
 ```
 
-## Inputs
+## Required inputs
 - User request details and any relevant files/links.
 
-## Outputs
+## Deliverables
 - Kernel synthesis + PRD-lite Addendum.
 - Include `schema_version: 1` if outputs are contract-bound.
 

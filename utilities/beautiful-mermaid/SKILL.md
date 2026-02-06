@@ -1,6 +1,9 @@
 ---
 name: beautiful-mermaid
-description: Render Mermaid diagrams to SVG and PNG with Beautiful Mermaid. Use when the user asks to render or convert Mermaid diagrams into images.
+description: Render Mermaid diagrams to SVG and PNG with Beautiful Mermaid. Use when
+  the user asks to render or convert Mermaid diagrams into images.
+metadata:
+  short-description: Render Mermaid diagrams to SVG and PNG with Beautiful Mermaid.
 ---
 
 # Beautiful Mermaid Diagram Rendering
@@ -12,18 +15,18 @@ Render Mermaid diagrams as SVG and PNG images using the Beautiful Mermaid librar
 - Keep the workflow minimal and reproducible.
 - Never auto-install dependencies without explicit approval.
 
-## When to use
+## Scope and triggers
 - The user provides Mermaid code and wants SVG/PNG outputs.
 - The user describes a diagram and wants it rendered as Mermaid images.
 - The user needs high-resolution diagram assets for docs or slides.
 
-## Inputs
+## Required inputs
 - Mermaid code (string) or a path to a `.mmd` file.
 - Output base name (without extension).
 - Theme selection (optional; default `default`).
 - Whether PNG capture is required (default: yes).
 
-## Outputs
+## Deliverables
 - `<output>.svg` (vector output).
 - `<output>.png` (high-resolution screenshot) when PNG capture is requested.
 - Notes on theme and any constraints applied.
@@ -222,3 +225,6 @@ Check the render script output for the `bg` and `fg` values, or inspect the SVG'
 - Validate Mermaid syntax at https://mermaid.live before rendering
 - Check for special characters that need escaping (wrap in quotes)
 - Ensure flowchart direction is specified (`graph TD`, `graph LR`, etc.)
+
+## Remember
+The agent is capable of extraordinary work in this domain. Use judgment, adapt to context, and push boundaries when appropriate.

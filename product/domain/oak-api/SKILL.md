@@ -12,6 +12,8 @@ metadata:
   source_dirty_paths: SKILL.md, product/agents-md/SKILL.md, scripts/sync_skills.sh,
     skills-system/skill-creator/SKILL.md, data/, product/oak-api/, skills/agent-browser,
     skills/codeception, skills/oak-api
+  short-description: Build or adapt Oak Curriculum API driven learning experiences,
+    especially for...
 ---
 
 # Oak API
@@ -19,7 +21,7 @@ metadata:
 ## Overview
 Use this skill to turn Oak Curriculum API content into engaging, interactive learning experiences. Default output is recommendations and step-by-step workflows, not code, unless the user explicitly asks for implementation details. Treat text-only guidance as non-significant and do not read or modify files unless explicitly asked.
 
-## When to use
+## Scope and triggers
 - Turning Oak API curriculum data into a learner-centered flow.
 - Designing adaptive lesson experiences for children using Oak content.
 - Mapping Oak data (subjects, units, lessons, quizzes) into activities.
@@ -30,13 +32,13 @@ Use this skill to turn Oak Curriculum API content into engaging, interactive lea
 - Treat Oak content as a factual backbone, not a script to read verbatim.
 - Prefer small, testable learning steps with explicit checks.
 
-## Inputs
+## Required inputs
 - Age range and learner context (classroom, home, tutoring).
 - Subject, key stage, year group, and learning goals. If a key stage is provided (e.g., KS2/KS3), infer the typical age range and proceed.
 - Desired interaction style (explain, practice, quiz, project).
 - Constraints (time, materials, accessibility needs).
 
-## Outputs
+## Deliverables
 - A step-by-step learning flow with checks and pitfalls.
 - A minimal content map: Oak endpoints + selected lesson IDs.
 - If asked: code snippets or Apps SDK integration guidance.
@@ -126,3 +128,10 @@ Use this skill to turn Oak Curriculum API content into engaging, interactive lea
 
 ## Scripts
 - `scripts/oak_api_fetch.py` - authenticated fetch helper with offset/limit pagination.
+
+## Variation
+- Vary tone, depth, and structure based on context.
+- Avoid repeating the same outline across outputs.
+
+## Remember
+The agent is capable of extraordinary work in this domain. Use judgment, adapt to context, and push boundaries when appropriate.

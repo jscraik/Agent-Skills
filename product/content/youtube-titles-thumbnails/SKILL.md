@@ -1,20 +1,25 @@
 ---
 name: youtube-titles-thumbnails
-description: "Generate YouTube titles and thumbnail text optimized for CTR. Use when crafting or optimizing titles/thumbnails."
+description: Generate multiple SEO/CTR-optimized YouTube title and thumbnail text
+  options with variants and rationale. Use when the user wants packaging ideas, titles,
+  or thumbnail copy.
+metadata:
+  short-description: Generate multiple SEO/CTR-optimized YouTube title and thumbnail
+    text options...
 ---
 
 # YouTube Titles & Thumbnails
 
 Purpose: Deliver the core outputs for this skill. The full guidance lives in `references/full-guide.md`.
 
-## When to use
+## Scope and triggers
 - Use when asked for high-performing YouTube titles and thumbnail text.
 - For broader product/PRD work, route to `product-spec`.
 
-## Inputs
+## Required inputs
 - Topic, audience, and any provided transcript/notes.
 
-## Outputs
+## Deliverables
 - Requested deliverable (hooks/scripts or titles/thumbnail text).
 - Include `schema_version: 1` if you return a structured schema.
 
@@ -42,3 +47,10 @@ Purpose: Deliver the core outputs for this skill. The full guidance lives in `re
 
 ## Antipatterns
 - Do not add features outside the agreed scope.
+
+## Examples
+- "Provide a concise response for this task."
+- "Follow the workflow and summarize outputs."
+
+## Remember
+The agent is capable of extraordinary work in this domain. Use judgment, adapt to context, and push boundaries when appropriate.

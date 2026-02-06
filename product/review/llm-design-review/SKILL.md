@@ -1,6 +1,12 @@
 ---
 name: llm-design-review
-description: "Structure a multidisciplinary design review for LLM-powered products, producing actionable risks, fixes, and evidence gaps across UX, architecture, AI safety, and operations.. Use when Use this skill when the task matches its description and triggers.."
+description: Structure a multidisciplinary design review for LLM-powered products,
+  producing actionable risks, fixes, and evidence gaps across UX, architecture, AI
+  safety, and operations.. Use when Use this skill when the task matches its description
+  and triggers..
+metadata:
+  short-description: Structure a multidisciplinary design review for LLM-powered products,
+    produci...
 ---
 
 # LLM Design Review
@@ -88,16 +94,16 @@ Structure a multidisciplinary design review for LLM-powered products, producing 
 The agent is capable of extraordinary work in this domain. These guidelines unlock that potential—they don't constrain it.
 Use judgment, adapt to context, and push boundaries when appropriate.
 
-## When to use
+## Scope and triggers
 - Use this skill when the task matches its description and triggers.
 - If the request is outside scope, route to the referenced skill.
 
 
-## Inputs
+## Required inputs
 - User request details and any relevant files/links.
 
 
-## Outputs
+## Deliverables
 - A structured response or artifact appropriate to the skill.
 - Include `schema_version: 1` if outputs are contract-bound.
 

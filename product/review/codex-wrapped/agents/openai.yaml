@@ -1,0 +1,10 @@
+# OpenAI Agents SDK Configuration
+# https://developers.openai.com/codex/skills/create-skill/
+
+interface:
+  display_name: "Codex Wrapped"
+  short_description: "Generate a coding activity report from local agent logs"
+  default_prompt: "Generate a usage report from my local Codex/Claude logs."
+  brand_color: "#10B981"
+
+# No MCP dependencies for this skill - operates entirely on local files

@@ -11,7 +11,7 @@ metadata:
 
 Transform detailed UX specifications into a sequence of self-contained prompts optimized for UI generation tools. Each prompt builds one discrete feature/view with full context included.
 
-## When to Use
+## Scope and triggers
 
 - User has a UX spec, PRD, or detailed feature documentation
 - Output needs to feed into UI generation tools (v0, Bolt, Claude, etc.)
@@ -229,15 +229,15 @@ Before finalizing prompts:
 - `references/contract.yaml`
 - `references/evals.yaml`
 
-## When to use
+## Scope and triggers
 - Use when translating UX specs or PRDs into build-order prompts for UI generators.
 - Avoid for single, atomic components that fit in one prompt.
 
-## Inputs
+## Required inputs
 - UX spec or PRD file path.
 - Optional: target tool (v0, Bolt, Claude, etc.).
 
-## Outputs
+## Deliverables
 - Build-order prompt document with self-contained prompts.
 - Include `schema_version: 1` if outputs are contract-bound.
 

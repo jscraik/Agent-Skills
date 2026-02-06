@@ -1,6 +1,10 @@
 ---
 name: skill-installer
-description: "Plan and install skills into a Codex skills directory from a curated list or repo. Use when a user asks to list or install skills."
+description: Plan and install skills into a Codex skills directory from a curated
+  list or repo. Use when a user asks to list or install skills.
+metadata:
+  short-description: Plan and install skills into a Codex skills directory from a
+    curated list or...
 ---
 
 # Skill Installer
@@ -19,17 +23,17 @@ description: "Plan and install skills into a Codex skills directory from a curat
 - Is overwrite permitted if the skill exists?
 - How will we verify installation success?
 
-## When to use
+## Scope and triggers
 - When the user asks to list installable skills.
 - When the user asks to install a curated skill by name.
 - When the user provides a GitHub repo/path for skill installation.
 
-## Inputs
+## Required inputs
 - Skill source (curated list, repo URL, or repo/path).
 - Destination path or `AGENT_SKILLS_HOME`/`CODEX_HOME` override.
 - User confirmation for overwrites or updates.
 
-## Outputs
+## Deliverables
 - Installed skill directory under a category folder (e.g., `~/dev/agent-skills/utilities/<skill-name>`) or an override path.
 - A summary of what was installed and from where.
 - A reminder to restart Codex to pick up new skills.

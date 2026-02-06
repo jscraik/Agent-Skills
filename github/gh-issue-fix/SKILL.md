@@ -1,6 +1,11 @@
 ---
 name: gh-issue-fix
-description: "Analyze and resolve a GitHub issue from intake through fix, validation, and push using gh, local edits, and git. Use this skill when you need to analyze and fix a GitHub issue end-to-end using gh and local changes."
+description: Analyze and resolve a GitHub issue from intake through fix, validation,
+  and push using gh, local edits, and git. Use this skill when you need to analyze
+  and fix a GitHub issue end-to-end using gh and local changes.
+metadata:
+  short-description: Analyze and resolve a GitHub issue from intake through fix, validation,
+    and p...
 ---
 
 # GH Issue Fix Flow
@@ -13,15 +18,15 @@ description: "Analyze and resolve a GitHub issue from intake through fix, valida
 Resolve a GitHub issue from intake through fix, validation, and push using gh, local edits, and git.
 See `references/contract.yaml` and `references/evals.yaml` for contract and eval expectations.
 
-## When to use
+## Scope and triggers
 - Fixing a GitHub issue end-to-end using gh and local changes.
 - When a user provides an issue number to resolve.
 
-## Inputs
+## Required inputs
 - Issue number and repo (owner/name).
 - Any reproduction steps or constraints.
 
-## Outputs
+## Deliverables
 - Code changes, tests, and a closing commit pushed to the repo.
 - Summary with evidence and follow-ups.
 
@@ -35,13 +40,13 @@ Every response must include these headings:
 Use this exact structure when key inputs are missing:
 
 ```md
-## When to use
+## Scope and triggers
 - This skill applies to GitHub issue fixes using gh and local edits.
 
-## Inputs
+## Required inputs
 - Missing: <issue number and repo>.
 
-## Outputs
+## Deliverables
 - None until inputs are provided.
 ```
 
@@ -49,13 +54,13 @@ Use this exact structure when key inputs are missing:
 Use this exact structure when the request is out of scope:
 
 ```md
-## When to use
+## Scope and triggers
 - This skill applies to GitHub issue fixes using gh and local edits. The current request is out of scope.
 
-## Outputs
+## Deliverables
 - None (out of scope).
 
-## Inputs
+## Required inputs
 - None (out of scope).
 ```
 

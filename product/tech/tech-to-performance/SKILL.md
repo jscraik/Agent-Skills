@@ -1,6 +1,10 @@
 ---
 name: tech-to-performance
-description: "Generate a performance plan from a tech spec with budgets, load tests, thresholds, and monitoring. Use when performance targets must be explicit and verifiable."
+description: Generate a performance plan from a tech spec with budgets, load tests,
+  thresholds, and monitoring. Use when performance targets must be explicit and verifiable.
+metadata:
+  short-description: Generate a performance plan from a tech spec with budgets, load
+    tests, thresh...
 ---
 
 # Tech Spec to Performance Plan
@@ -33,14 +37,14 @@ Write the performance plan in the same directory as the source tech spec.
 - Contract: references/contract.yaml
 - Evals: references/evals.yaml
 
-## When to use
+## Scope and triggers
 - Use this skill when the task matches its description and triggers.
 - If the request is outside scope, route to the appropriate skill.
 
-## Inputs
+## Required inputs
 - User request details and any relevant files/links.
 
-## Outputs
+## Deliverables
 - A structured response or artifact appropriate to the skill.
 - Include `schema_version: 1` if outputs are contract-bound.
 
@@ -76,7 +80,7 @@ Every user-facing response must include these headings:
 
 Failure/out-of-scope template (use verbatim structure):
 ```markdown
-## Inputs
+## Required inputs
 Objective: <what you received>
 
 Plan:
@@ -85,9 +89,16 @@ Plan:
 
 Next step: <single request>
 
-## Outputs
+## Deliverables
 - <what would be produced if in scope>
 
-## When to use
+## Scope and triggers
 - <when this skill applies>
 ```
+
+## Variation
+- Vary tone, depth, and structure based on context.
+- Avoid repeating the same outline across outputs.
+
+## Remember
+The agent is capable of extraordinary work in this domain. Use judgment, adapt to context, and push boundaries when appropriate.

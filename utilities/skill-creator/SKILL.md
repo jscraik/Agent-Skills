@@ -1,6 +1,10 @@
 ---
 name: skill-creator
-description: "Create, revise, and quality-gate Codex skills (SKILL.md + resources + evals + packaging). Use when asked to build or improve a skill."
+description: Create, revise, and quality-gate Codex skills (SKILL.md + resources +
+  evals + packaging). Use when asked to build or improve a skill.
+metadata:
+  short-description: Create, revise, and quality-gate Codex skills (SKILL.md + resources
+    + evals +...
 ---
 
 # Skill Creator
@@ -10,14 +14,14 @@ This skill helps you design, author, validate, and package high-quality skills.
 **Version**: 1.4.0  
 **Last updated**: 2026-01-22
 
-## When to Use
+## Scope and triggers
 
 - Create a new skill (instruction-only or router-style skill folder).
 - Revise an existing skill for better triggering, portability, or reliability.
 - Audit/upgrade a skill to meet “gold standard” structure, progressive disclosure, and validation.
 - Package a skill into a distributable `.skill` archive.
 
-## Inputs
+## Required inputs
 
 - Desired skill goal (what users want to accomplish).
 - 3–10 example user prompts (happy-path + edge-cases + out-of-scope prompts).
@@ -26,13 +30,13 @@ This skill helps you design, author, validate, and package high-quality skills.
 
 If any of the above are missing, ask only the minimum questions required to proceed safely.
 
-## Outputs
+## Deliverables
 
 Depending on the request, produce one or more of:
 
 - A skill folder containing:
   - `SKILL.md` (required)
-  - `agents/openai.yaml` (optional) - OpenAI/Codex appearance and MCP dependencies configuration
+  - `agents/openai.yaml` (recommended when targeting Codex/OpenAI/Agents) - appearance + MCP dependencies configuration
   - `scripts/` (optional)
   - `references/` (optional)
   - `assets/` (optional)
@@ -45,13 +49,13 @@ Depending on the request, produce one or more of:
 
 Always start responses with these headings (no text before them):
 
-## When to use
+## Scope and triggers
 - 1–3 bullets on when this skill applies (confirm scope).
 
-## Inputs
+## Required inputs
 - List required inputs and ask targeted questions if needed.
 
-## Outputs
+## Deliverables
 - List deliverables you will produce.
 
 ## Failure mode (required)
@@ -69,9 +73,17 @@ If the request is out of scope:
   - `name` and `description` must be single-line YAML scalars.
   - Quote values if they contain `:` or could be parsed as YAML syntax.
 - Prefer progressive disclosure:
-  - Keep `SKILL.md` under ~500 lines.
+  - Keep `SKILL.md` short (aim ~200–300 lines; hard cap ~400).
   - Push depth into `references/` and executable helpers into `scripts/`.
 - Prefer instruction-only skills by default; add scripts only when determinism/repeatability matters.
+
+## What to not include
+
+- No extra YAML frontmatter fields beyond `name` and `description`.
+- Do not add “When to use / Inputs / Outputs / Failure mode” headings inside `SKILL.md`.
+- Do not embed long API docs, policies, or large examples; move them to `references/`.
+- Do not include eval outputs, logs, or run artifacts in `SKILL.md`.
+- Do not put step-by-step workflows in the `description`; keep workflows in the body/references.
 
 ## Script-backed security rules (required)
 
@@ -85,6 +97,7 @@ See `references/security-hardening.md` for patterns and a Codex `.rules` templat
 
 ## Principles
 
+- **Concise is key**: keep `SKILL.md` short (aim ~200–300 lines; hard cap ~400) and push depth into `references/`/`scripts/`.
 - **Trigger-first design**: discovery depends on `name` + `description`. Put trigger keywords and “use when …” contexts in the description.
 - **Progressive disclosure**: keep the core workflow in `SKILL.md`; link out to `references/` for deep docs and `scripts/` for automation.
 - **Eval-driven iteration (RED → GREEN → REFACTOR)**:
@@ -92,6 +105,17 @@ See `references/security-hardening.md` for patterns and a Codex `.rules` templat
   2. Implement the smallest change that passes.
   3. Add pressure tests to prevent backsliding and rationalization.
 - **Least privilege**: scripts should be minimal, explicit, and safe; avoid network assumptions unless explicitly enabled.
+- **Set degrees of freedom** (choose one):
+  - **Low**: strict steps, fixed templates, minimal variation.
+  - **Medium**: clear steps with bounded options or branches.
+  - **High**: high-level guidance, creative latitude.
+
+### Progressive disclosure patterns (quick list)
+
+- Keep the core workflow in `SKILL.md`; move depth to `references/`.
+- Put deterministic or repetitive steps into `scripts/` with safe flags.
+- Keep examples short in `SKILL.md`; link to full examples in `references/`.
+- Use `assets/` for templates, boilerplate, or fixtures.
 
 ## Reference Map
 
@@ -108,6 +132,14 @@ Use these files when needed:
 - `references/destructive-commands.rules`: example Codex rules file to prompt/block risky commands.
 - `references/examples.md`: calibrated examples for phrasing and structure.
 - `references/anti-patterns.md`: common failure modes + remediation patterns.
+
+## Anatomy of a Skill (quick schematic)
+
+- **Frontmatter**: `name` + `description` with trigger keywords.
+- **Core workflow**: principles + minimal reliable procedure.
+- **References**: deep docs, schemas, evals, contracts.
+- **Scripts/assets**: optional helpers/templates for determinism.
+- **Agents metadata**: `agents/openai.yaml` when targeting Codex/OpenAI/Agents.
 
 ## Skill Creation Process
 
@@ -260,36 +292,9 @@ Before shipping, confirm the description selects the skill:
 - Write 3–5 prompts and sanity check that they match the description keywords.
 - Add 1–2 negative prompts (should not select this skill).
 
-## Anti-Patterns
 
-- **Discovery mismatch**: description lacks trigger keywords or “use when …” contexts.
-- **Monolith SKILL.md**: huge docs embedded directly instead of `references/`.
-- **Rigid template trap**: forces slot-filling and produces generic output.
-- **Checklist without rationale**: steps with no principles, making the skill brittle.
-- **Untested scripts**: scripts included but never executed to confirm behavior.
+## Remember
+The agent is capable of extraordinary work in this domain. Use judgment, adapt to context, and push boundaries when appropriate.
 
-- **Workflow-in-description trap**: description becomes a step-by-step recipe, so the model shortcuts and never reads the body. Keep discovery keywords in the description; keep workflows in the body/references.
-- **Absolute-path coupling**: hardcoded machine paths (`/home/...`, `~/.claude/...`) instead of portable, repo-relative paths.
-- **Over-questioning**: asking broad or excessive clarifying questions instead of proceeding with reasonable defaults + a small number of targeted questions.
-- **Unsafe automation**: scripts that assume network access, exfiltrate secrets, or run destructive commands without explicit approval.
-
-## Variation
-
-If a created skill produces repeated artifacts (reports, templates, PR descriptions), prevent “samey” output:
-- Vary structure, depth, and examples based on context.
-- Name 2–3 dimensions that must vary (tone, outline, level of detail).
-- Link to `references/variation-patterns.md` when needed.
-
-## Examples
-
-### Create a new skill (router style)
-
-**User prompt:** "Create a Codex skill for reviewing API security changes in PRs."
-
-**Expected outcome:** a `review-api-security/` skill folder with a trigger-rich description, a short core workflow in `SKILL.md`, deeper guidance in `references/`, and `references/evals.yaml` with pressure-test prompts.
-
-## Claude Skill Compatibility
-
-If targeting both systems:
-- Prefer the portable subset (see `references/portable-skills.md`).
-- Avoid platform-specific tools/flags in the core workflow; isolate them behind scripts or per-platform references.
+## Extended guidance
+See `references/extended.md` for additional examples, workflows, and appendices.

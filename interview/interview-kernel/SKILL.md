@@ -1,11 +1,17 @@
 ---
 name: interview-kernel
-description: "Core interview engine enforcing strict discovery/decision gating with externalized state, decisions, assumptions, and an approval gate. Use when building interview wrapper skills."
+description: Core interview engine enforcing strict discovery/decision gating with
+  externalized state, decisions, assumptions, and an approval gate. Use when building
+  interview wrapper skills.
 metadata:
-  short-description: "Core interview engine for wrapper skills."
+  short-description: Core interview engine for wrapper skills.
 ---
 
 # Interview Kernel (v2)
+
+## Remember
+The agent is capable of extraordinary work in this domain. Use judgment, adapt to context, and push boundaries when appropriate.
+
 
 A reusable “engine” for interviews. Wrappers (PM / Architecture / Bug / Deepen) provide only the domain spine; the kernel enforces consistent behavior, low drift, and a reliable output artifact.
 
@@ -22,7 +28,7 @@ A reusable “engine” for interviews. Wrappers (PM / Architecture / Bug / Deep
 2) Produce/update a **spec artifact** (Decisions + Assumptions + Acceptance Criteria).
 3) Only after approval, start a new implementation/planning phase (or a new agent session) using that spec as the source of truth.
 
-## When to use
+## Scope and triggers
 
 - Use as a shared kernel for any interview wrapper skill.
 - Use when you need strict interviewing with approval gating.
@@ -286,172 +292,6 @@ If free-text is required (rare), constrain it:
 
 ---
 
-## “Idea Legos” fallback (when you’re stuck)
 
-Pick exactly **one** and ask a single question:
-
-- **Example**: “Give one concrete example (input → output).”
-- **Counterexample**: “Name one case this must NOT affect.”
-- **Metric**: “What signal proves success?”
-- **Reframe**: “Is this mainly UX vs correctness vs performance?”
-
----
-
-## Interview loop (kernel algorithm)
-
-1) Initialize Interview Log with blanks.
-2) Read any provided materials (discovery-only), pre-fill the log.
-3) Ask the next spine question (wrapper-provided) that passes the validity gate.
-4) Record answer → update Interview Log → write “Captured answer”.
-5) Check stop conditions:
-   - If satisfied or budget exhausted → synthesize.
-   - Else continue.
-
----
-
-## Stop conditions
-
-Stop and synthesize when you have:
-
-- PAS snapshot (Problem/Impact/Success)
-- Acceptance criteria format chosen + at least 3 criteria drafted
-- Scope in/out
-- Constraints
-- Key edge cases / failure modes
-- Integration points
-- At least one explicit decision if tradeoffs exist
-- Any assumptions clearly listed
-
-Or when you hit question budget.
-
----
-
-## Kernel synthesis output (standardized)
-
-Wrappers can add extra sections, but the kernel always outputs:
-
-### A) One-sentence pitch
-
-“We are building **<X>** so that **<Y>** for **<Z>**, measured by **<metric>**.”
-
-### B) Pyramid summary (answer-first)
-
-1) Main decision (1 sentence)  
-2) 3 key reasons / drivers  
-3) Evidence/examples (scenarios, IO pairs, repro steps, constraints)
-
-### C) Scope + non-goals
-
-### D) Acceptance criteria (choose one)
-
-- Bullet ACs, or
-- Given/When/Then scenarios, or
-- IO pairs
-
-### E) Decisions table (required if any tradeoff exists)
-
-```md
-| Decision | Chosen | Alternatives | Sacrificed |
-|---|---|---|---|
-| | | | |
-```
-
-### F) Assumptions register (required if any assumption exists)
-
-```md
-| Assumption | Risk if wrong | How we’ll detect |
-|---|---|---|
-| | | |
-```
-
-### G) Risks / rollout / rollback / observability
-
-### H) Open questions
-
-### I) Next step (single action)
-
-One concrete action that moves the work forward (e.g., “Run planning mode on this spec”, “Confirm option B with stakeholder X”, “Collect a repro artifact”).
-
-### Approval gate (must end with)
-
-“Reply `approve` to proceed, or say what to change. If assumptions exist, reply `approve assumptions` or correct them.”
-
----
-
-## File update rules (when a wrapper targets a document)
-
-When updating a document in-place:
-
-- Preserve the original structure.
-- Prefer **append** over rewrite.
-- Add one clearly labeled section:
-  - `## Interview Insights` (fresh mode), or
-  - `## Delta Insights` (enhancement mode)
-- Never inject prose into code files by default; write to a sidecar doc instead.
-
----
-
-## Optional: Defaults Profile hook (recommended)
-
-If `@DEFAULTS.md` or a user profile exists, treat it as default answers for:
-
-- scope bias (minimal vs refactor)
-- correctness vs speed
-- testing expectations
-- compatibility targets
-- rollout posture
-
-Only ask about these if the current task conflicts with defaults.
-
-## Remember
-
-These guidelines prevent drift and make the work finishable.
----
-
-## Inputs
-- Wrapper-provided user request details
-- Any relevant files/links/source material
-
-## Outputs
-- A structured interview log (state) maintained throughout
-- Kernel synthesis output (pitch, scope, ACs, decisions, assumptions, risks, open questions)
-- Approval gate (`approve` / `approve assumptions`)
-- Include `schema_version: 1` if outputs are contract-bound.
-
-## Constraints
-- Default to low cognitive load: one question per turn.
-- Prefer discovery over assumptions; record assumptions explicitly when unavoidable.
-- No implementation/code changes during interview.
-- Redact secrets/PII by default.
-- Check against GOLD Industry Standards guide in ~/.codex/AGENTS.override.md.
-
-## Validation
-
-- Fail fast: stop at the first failed gate and correct before proceeding.
-- Confirm Interview Log is maintained and approvals are explicit.
-- Confirm assumptions are listed before approval.
-
-## References
-- `references/contract.yaml` (output contract)
-- `references/evals.yaml` (quality checks)
-
-## Procedure
-1) Initialize Interview Log and read any provided source material.
-2) Run the strict interview loop (DISCOVER ↔ DECIDE) within the question budget.
-3) Produce kernel synthesis output.
-4) Require explicit approval before any implementation/planning begins.
-
-## Antipatterns
-- Drifting into implementation or planning that depends on unknowns
-- Asking obvious/inferable questions instead of reading the source material
-- Proceeding without approval when assumptions exist
-
-## Examples
-
-- "Build a concise interview spine for a payments refactor decision."
-- "Use the kernel to interview for a migration plan before any code changes."
-
-## Remember
-
-The agent is capable of extraordinary work in this domain. These guidelines unlock that potential—they don't constrain it.
-Use judgment, adapt to context, and push boundaries when appropriate.
+## Extended guidance
+See `references/extended.md` for additional examples, workflows, and appendices.

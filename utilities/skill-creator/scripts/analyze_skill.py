@@ -364,12 +364,20 @@ def score_organization(body: str) -> CategoryResult:
         score += 2
         findings.append(Finding("Organization", 2, f"⚠️ Some list structure ({list_items} items).", Severity.WARN))
 
-    # sanity: presence of key structure sections
-    has_when = any("when" in t for t in h2s) or _has_any(body, ["when to use", "use this skill when"])
-    has_io = _has_any(body, ["## inputs", "## outputs"]) or _has_any(body, ["inputs", "outputs"])
-    if has_when and has_io:
-        score = min(max_score, score + 1)
-        findings.append(Finding("Organization", 1, "✅ Includes 'when to use' and I/O structure."))
+    # discourage prohibited headings inside SKILL.md
+    prohibited = {"when to use", "inputs", "outputs", "failure mode"}
+    bad = [t for t in h2s if t in prohibited]
+    if bad:
+        penalty = min(4, len(bad) * 2)
+        score = max(0, score - penalty)
+        findings.append(
+            Finding(
+                "Organization",
+                -penalty,
+                f"❌ Prohibited headings found: {', '.join(sorted(set(bad)))}.",
+                Severity.FAIL,
+            )
+        )
 
     return CategoryResult("Organization", min(score, max_score), max_score, findings)
 
@@ -402,6 +410,38 @@ def score_empowerment(body: str) -> CategoryResult:
         findings.append(Finding("Empowerment", -2, f"⚠️ Many rigid constraints ({rigid} instances).", Severity.WARN))
 
     return CategoryResult("Empowerment", max(0, score), max_score, findings)
+
+
+def score_conciseness(doc: SkillDoc) -> CategoryResult:
+    findings: List[Finding] = []
+    score = 0
+    max_score = 10
+
+    line_count = len(doc.raw_text.splitlines())
+    if line_count <= 300:
+        score = 10
+        findings.append(Finding("Conciseness", 10, f"✅ Concise length ({line_count} lines)."))
+    elif line_count <= 400:
+        score = 6
+        findings.append(
+            Finding(
+                "Conciseness",
+                6,
+                f"⚠️ Slightly long ({line_count} lines). Aim for ~200–300; hard cap ~400.",
+                Severity.WARN,
+            )
+        )
+    else:
+        findings.append(
+            Finding(
+                "Conciseness",
+                0,
+                f"❌ Too long ({line_count} lines). Reduce to ~200–300; hard cap ~400.",
+                Severity.FAIL,
+            )
+        )
+
+    return CategoryResult("Conciseness", score, max_score, findings)
 
 
 def score_repo_integration(doc: SkillDoc) -> CategoryResult:
@@ -531,6 +571,7 @@ def analyze(doc: SkillDoc) -> Tuple[int, int, List[CategoryResult]]:
     results.append(score_variation(doc.body))
     results.append(score_organization(doc.body))
     results.append(score_empowerment(doc.body))
+    results.append(score_conciseness(doc))
     results.append(score_repo_integration(doc))
 
     total = sum(r.score for r in results)

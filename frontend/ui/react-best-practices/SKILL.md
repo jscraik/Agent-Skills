@@ -26,7 +26,7 @@ Reference these guidelines when:
 - Refactoring existing React/Next.js code
 - Optimizing bundle size or load times
 
-## When to use
+## Scope and triggers
 
 Use this skill when a user asks to:
 - Review or refactor React/Next.js code for performance.
@@ -138,13 +138,13 @@ Use this skill when a user asks to:
 - Offer the smallest safe refactor that fixes the bottleneck.
 - Ask for profiling output when impact is unclear.
 
-## Inputs
+## Required inputs
 
 - Target files or directories.
 - Framework context (Next.js App Router vs Pages Router).
 - Performance goal (latency, bundle size, re-render reduction).
 
-## Outputs
+## Deliverables
 
 - A short list of applicable rules with concrete edits or refactors.
 - Any files that need additional profiling or measurement.

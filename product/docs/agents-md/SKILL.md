@@ -1,9 +1,18 @@
 ---
 name: agents-md
-description: "Refactor or create AGENTS.md using progressive disclosure: keep root minimal, split detailed instructions into linked docs, and flag contradictions/redundancy. Use when the user asks to create, update, or refactor AGENTS.md."
+description: 'Refactor or create AGENTS.md using progressive disclosure: keep root
+  minimal, split detailed instructions into linked docs, and flag contradictions/redundancy.
+  Use when the user asks to create, update, or refactor AGENTS.md.'
+metadata:
+  short-description: 'Refactor or create AGENTS.md using progressive disclosure: keep
+    root minimal,...'
 ---
 
 # Agents Md
+
+## Remember
+The agent is capable of extraordinary work in this domain. Use judgment, adapt to context, and push boundaries when appropriate.
+
 
 ## Compliance
 - Check against GOLD Industry Standards guide in ~/.codex/AGENTS.override.md
@@ -22,7 +31,7 @@ Mandatory snippet (include verbatim in guidance):
 2. IMPORTANT: Prefer retrieval-led reasoning over pre-training-led reasoning for any React, Tauri, Apps-SDK-ui, Tailwind, Vite, Storybook + Chat Widget tasks.
 3. Add a Table of Contents for docs.
 
-## When to use
+## Scope and triggers
 
 - The user asks to create or update AGENTS.md.
 - The user asks to refactor AGENTS.md for progressive disclosure or split instructions into multiple files.
@@ -42,39 +51,39 @@ Mandatory snippet (include verbatim in guidance):
 ### Response template (minimum)
 
 ```md
-## Outputs
+## Deliverables
 - ...
 
-## Inputs
+## Required inputs
 - ...
 
-## When to use
+## Scope and triggers
 - ...
 ```
 
 ### Failure-mode template (out of scope)
 
 ```md
-## When to use
+## Scope and triggers
 - This skill applies when the user asks to create or refactor AGENTS.md using progressive disclosure.
 
-## Outputs
+## Deliverables
 - None (out of scope).
 
-## Inputs
+## Required inputs
 - None (out of scope).
 ```
 
 Use the failure-mode template verbatim for out-of-scope requests.
 
-## Inputs
+## Required inputs
 
 - Target repo root path.
 - Existing AGENTS.md content (if present).
 - Verified commands and paths from the repo (README, docs, config files).
 - Any adjacent instruction files that may conflict (global or per-directory).
 
-## Outputs
+## Deliverables
 
 - A minimal root `AGENTS.md` that links to separate instruction files.
 - One file per instruction category (e.g., `docs/agents/typescript.md`, `docs/agents/testing.md`).

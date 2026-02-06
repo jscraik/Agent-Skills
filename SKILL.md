@@ -9,7 +9,6 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 
 ## Backend
 
-- `backend-design` — Produce a complete, review-ready backend design spec with explicit tradeoffs, compliance checks, and a fixed output contract.. Use when Use this skill when the task matches its description and triggers..
 - `cli-spec` — Plan and draft CLI UX and surface area (commands, flags, help, output). Use when specifying or refactoring a command-line interface.
 - `mcp-builder` — Create general-purpose MCP servers and tool schemas for standard integrations. Use when building MCP services without OAuth/billing/Apps UI requirements.
 - `mkit-builder` — Create MCP servers with OAuth, billing/licensing, and Apps SDK UI integration. Use when you need enterprise-grade MCP patterns beyond the standard MCP builder.
@@ -39,7 +38,6 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - `frontend-ui-design` — Create and review production-ready UI systems/components with tokens and accessibility. Use for standard UI implementation or redesign (not creative-coding polish).
 - `react-best-practices` — React and Next.js performance optimization guidelines from Vercel Engineering. This skill should be used when writing, reviewing, or refactoring React/Next.js code to ensure optimal performance patterns. Triggers on tasks involving React components, Next.js pages, data fetching, bundle optimization, or performance improvements.
 - `react-ui-patterns` — Provide concrete, example-driven guidance for React UI composition, state, routing, and component patterns in a TypeScript + Tailwind + Radix stack.. Use when Building or refactoring React screens and components..
-- `ui-design-system` — Create or update a governed UI design system (tokens, components, governance). Use when establishing or revising a multi-platform design system.
 - `ui-visual-regression` — Run a minimal, repeatable UI visual regression pipeline (Storybook build + Playwright capture + Argos diff) and iterate on targeted UI fixes until visual diffs pass. If design-system guidance, tokens, or component standards are needed, consult the skill.. Use when Investigating visual diffs in Storybook/Argos pipelines..
 - `web-design-guidelines` — Review UI code against Web Interface Guidelines with file:line findings. Use for rule-based compliance checks (not experiential critiques).
 
@@ -49,7 +47,6 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - `gh-address-comments` — The agent is capable of extraordinary work in this domain. These guidelines unlock that potential—they don't constrain it. Use judgment, adapt to context, and push boundaries when appropriate.. Use when When the user asks to address review comments on an open GitHub PR..
 - `gh-issue-fix` — Analyze and resolve a GitHub issue from intake through fix, validation, and push using gh, local edits, and git. Use this skill when you need to analyze and fix a GitHub issue end-to-end using gh and local changes.
 - `gh-pr-local` — Fetch, preview, test, and merge GitHub PRs locally using the primary PR workflow. Use when you want a local evaluation before merge.
-- `github-pr` — Compatibility alias for the gh-pr-local workflow. Use only when a user explicitly requests github-pr.
 
 ## Interview
 
@@ -66,7 +63,6 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 
 ## Product — Content
 
-- `app-store-release-notes` — Generate a comprehensive, user-facing changelog from git history since the last tag, then translate commits into clear App Store release notes.. Use when Creating App Store “What’s New” text from git history..
 - `youtube-hooks-scripts` — Create hooks and full scripts for technical YouTube videos. Use when drafting video hooks or scripts.
 - `youtube-titles-thumbnails` — Generate YouTube titles and thumbnail text optimized for CTR. Use when crafting or optimizing titles/thumbnails.
 
@@ -83,7 +79,6 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 ## Product — Domain
 
 - `oak-api` — Build or adapt Oak Curriculum API driven learning experiences, especially
-- `oracle` — Use the @steipete/oracle CLI to bundle a prompt plus the right files and get a peer-model review (API or browser) for debugging, refactors, design checks, or cross-validation. Use this when you need a peer-model review with real repo context, multi-model comparisons, or browser-mode verification.
 
 ## Product — Ops
 
@@ -93,6 +88,7 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 
 ## Product — Review
 
+- `codex-wrapped` — Generate a Codex/Claude Code usage recap from local logs, including last 30 days, last 7 days, and all-time stats. Use when the user asks for a usage summary, activity recap, or coding activity report.
 - `llm-design-review` — Structure a multidisciplinary design review for LLM-powered products, producing actionable risks, fixes, and evidence gaps across UX, architecture, AI safety, and operations.. Use when Use this skill when the task matches its description and triggers..
 - `product-design-review` — Deliver a user-centered UX critique across the full experience. Use for heuristic reviews and journey analysis (not file:line guideline compliance).
 
@@ -117,7 +113,6 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 
 ## Product — Strategy
 
-- `code-plan` — Turn a user prompt into a **single, actionable plan** delivered in the final assistant message.. Use when When a user explicitly asks for a plan or roadmap..
 - `project-improvement-ideator` — Generate and winnow project improvement ideas to a top 5. Use when asked for roadmap/improvement ideas.
 
 ## Product — Tech
@@ -132,7 +127,6 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - `1password` — Plan, validate, and use 1Password CLI setup for secret injection and auth. Use when tasks need 1Password CLI usage, secret references, op run/read/inject, or provisioning secrets via env vars/.env files and scripts.
 - `agent-browser` — Use this skill to extract page state and automate web interactions with the agent-browser CLI (navigate, snapshot, click, fill, screenshot). Use this when you need deterministic browser automation or scraping via ref-based elements.
 - `beautiful-mermaid` — Render Mermaid diagrams to SVG and PNG with Beautiful Mermaid. Use when the user asks to render or convert Mermaid diagrams into images.
-- `codeception` — Extract reusable, non-obvious learnings from a completed task into new Codex agent skills (SKILL.md). Use when the user asks to run codeception, do a retrospective, save/extract a skill, or turn a workaround into a reusable skill.
 - `markdown-converter` — Convert files to Markdown using — no installation required.. Use when Use this skill when the task matches its description and triggers..
 - `process-watch` — Analyze system processes and resource usage to diagnose runaway processes. Use when investigating CPU/memory/IO spikes.
 - `recon-workbench` — Analyze and report authorized evidence using Recon Workbench (rwb) workflows. Use when you need authorize/plan/run/summarize flows and evidence-backed reporting for web apps or OSS repos.

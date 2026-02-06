@@ -28,7 +28,7 @@ Guiding questions:
 - What would make this spec fail in the real world?
 - What evidence would make us confident to proceed?
 
-## When to use
+## Scope and triggers
 
 - Use when a draft spec, PRD, ADR, ticket, or notes exist but gaps remain.
 - Use when you need delta-mode enhancement rather than a greenfield interview.
@@ -111,10 +111,10 @@ When complete:
 
 ---
 
-## Inputs
+## Required inputs
 - `$ARGUMENTS` (file path or topic) + any relevant links.
 
-## Outputs
+## Deliverables
 - Updated spec/doc (if file input) OR a structured summary artifact (if topic input).
 - Include `schema_version: 1` if outputs are contract-bound.
 

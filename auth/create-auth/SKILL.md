@@ -1,6 +1,11 @@
 ---
 name: create-auth-skill
-description: Build Better Auth integrations for TS/JS apps with secure defaults. Use for implementation or migration work (not just review).
+description: Build Better Auth integrations for TS/JS apps with secure defaults. Use
+  for implementation or migration work (not just review). Use when the user requests
+  this capability.
+metadata:
+  short-description: Build Better Auth integrations for TS/JS apps with secure defaults.
+    Use for i...
 ---
 
 # Create Auth Skill
@@ -17,20 +22,20 @@ Guide for adding authentication to TypeScript/JavaScript applications using Bett
 - Add one auth surface at a time, validate, then expand.
 - Prefer incremental migration over rewrites.
 
-## When to use
+## Scope and triggers
 
 - New app needs Better Auth setup.
 - Existing app needs auth added or migrated.
 - Adding new auth features (OAuth, passkeys, 2FA).
 
-## Inputs
+## Required inputs
 
 - Framework/runtime context.
 - Database adapter choice.
 - Desired auth features and plugins.
 - Existing auth constraints (if any).
 
-## Outputs
+## Deliverables
 
 - Step-by-step setup path and required files.
 - CLI commands for schema generation/migrations.

@@ -1,9 +1,19 @@
 ---
 name: nano-banana-builder
-description: "Build production-ready web applications powered by Google's Nano Banana image generation APIs—creating everything from simple text-to-image generators to sophisticated iterative editors with multi-turn conversation.. Use when Use this skill when the task matches its description and triggers.."
+description: Build production-ready web applications powered by Google's Nano Banana
+  image generation APIs—creating everything from simple text-to-image generators to
+  sophisticated iterative editors with multi-turn conversation.. Use when Use this
+  skill when the task matches its description and triggers..
+metadata:
+  short-description: Build production-ready web applications powered by Google's Nano
+    Banana image...
 ---
 
 # Nano Banana Builder
+
+## Remember
+The agent is capable of extraordinary work in this domain. Use judgment, adapt to context, and push boundaries when appropriate.
+
 
 Build production-ready web applications powered by Google's Nano Banana image generation APIs—creating everything from simple text-to-image generators to sophisticated iterative editors with multi-turn conversation.
 
@@ -266,16 +276,16 @@ The best apps:
 
 You're building more than an image generator—you're creating a creative experience. Design it thoughtfully.
 
-## When to use
+## Scope and triggers
 - Use this skill when the task matches its description and triggers.
 - If the request is outside scope, route to the referenced skill.
 
 
-## Inputs
+## Required inputs
 - User request details and any relevant files/links.
 
 
-## Outputs
+## Deliverables
 - A structured response or artifact appropriate to the skill.
 - Include `schema_version: 1` if outputs are contract-bound.
 
@@ -283,20 +293,8 @@ You're building more than an image generator—you're creating a creative experi
 ## Constraints
 - Redact secrets/PII by default.
 - Avoid destructive operations without explicit user direction.
-
-
-## Validation
-- Run any relevant checks or scripts when available.
-- Fail fast and report errors before proceeding.
-
-
-## Anti-patterns
-- Avoid vague guidance without concrete steps.
-- Do not invent results or commands.
-## Procedure
-1) Clarify scope and inputs.
-2) Execute the core workflow.
-3) Summarize outputs and next steps.
-
-## Antipatterns
-- Do not add features outside the agreed scope.
+## Examples
+- "Provide a concise response for this task."
+- "Follow the workflow and summarize outputs."
+## Extended guidance
+See `references/extended.md` for additional examples, workflows, and appendices.

@@ -1,6 +1,12 @@
 ---
 name: gh-actions-fix
-description: "Use gh to locate failing PR checks, fetch GitHub Actions logs for actionable failures, summarize the failure snippet, then propose a fix plan and implement after explicit approval.. Use when When a user asks to debug or fix failing GitHub Actions checks on a PR.."
+description: Use gh to locate failing PR checks, fetch GitHub Actions logs for actionable
+  failures, summarize the failure snippet, then propose a fix plan and implement after
+  explicit approval.. Use when When a user asks to debug or fix failing GitHub Actions
+  checks on a PR..
+metadata:
+  short-description: Use gh to locate failing PR checks, fetch GitHub Actions logs
+    for actionable...
 ---
 
 # Gh Pr Checks Plan Fix
@@ -28,12 +34,12 @@ Prereq: ensure `gh` is authenticated (for example, run `gh auth login` once), th
 - What is the smallest change that resolves the failure?
 - How will the fix be verified (re-run jobs, targeted tests)?
 
-## When to use
+## Scope and triggers
 - When a user asks to debug or fix failing GitHub Actions checks on a PR.
 - When a user wants a plan before applying CI fixes.
 - When the user needs a summary of failing jobs and log evidence.
 
-## Inputs
+## Required inputs
 
 - `repo`: path inside the repo (default `.`)
 - `pr`: PR number or URL (optional; defaults to current branch PR)
@@ -115,7 +121,7 @@ Usage examples:
 - `python "<path-to-skill>/scripts/inspect_pr_checks.py" --repo "." --pr "https://github.com/org/repo/pull/123" --json`
 - `python "<path-to-skill>/scripts/inspect_pr_checks.py" --repo "." --max-lines 200 --context 40`
 
-## Outputs
+## Deliverables
 - A structured response or artifact appropriate to the skill.
 - Include `schema_version: 1` if outputs are contract-bound.
 
@@ -135,3 +141,7 @@ Usage examples:
 
 ## Antipatterns
 - Do not add features outside the agreed scope.
+
+## References
+- `references/contract.yaml`
+- `references/evals.yaml`

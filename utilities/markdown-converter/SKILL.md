@@ -1,6 +1,9 @@
 ---
 name: markdown-converter
-description: "Convert files to Markdown using — no installation required.. Use when Use this skill when the task matches its description and triggers.."
+description: Convert files to Markdown using — no installation required.. Use when
+  Use this skill when the task matches its description and triggers..
+metadata:
+  short-description: Convert files to Markdown using — no installation required..
 ---
 
 # Markdown Converter
@@ -66,16 +69,16 @@ uvx markitdown scan.pdf -d -e "https://your-resource.cognitiveservices.azure.com
 - First run caches dependencies; subsequent runs are faster
 - For complex PDFs with poor extraction, use `-d` with Azure Document Intelligence
 
-## When to use
+## Scope and triggers
 - Use this skill when the task matches its description and triggers.
 - If the request is outside scope, route to the referenced skill.
 
 
-## Inputs
+## Required inputs
 - User request details and any relevant files/links.
 
 
-## Outputs
+## Deliverables
 - A structured response or artifact appropriate to the skill.
 - Include `schema_version: 1` if outputs are contract-bound.
 
@@ -104,3 +107,14 @@ uvx markitdown scan.pdf -d -e "https://your-resource.cognitiveservices.azure.com
 
 ## Antipatterns
 - Do not add features outside the agreed scope.
+
+## Variation
+- Vary tone, depth, and structure based on context.
+- Avoid repeating the same outline across outputs.
+
+## Remember
+The agent is capable of extraordinary work in this domain. Use judgment, adapt to context, and push boundaries when appropriate.
+
+## References
+- `references/contract.yaml`
+- `references/evals.yaml`

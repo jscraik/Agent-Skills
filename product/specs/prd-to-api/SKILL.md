@@ -1,6 +1,10 @@
 ---
 name: prd-to-api
-description: "Generate a full API specification from a PRD or tech spec (endpoints, schemas, errors, auth). Use when a production-grade contract is required."
+description: Generate a full API specification from a PRD or tech spec (endpoints,
+  schemas, errors, auth). Use when a production-grade contract is required.
+metadata:
+  short-description: Generate a full API specification from a PRD or tech spec (endpoints,
+    schemas...
 ---
 
 # PRD to API Spec
@@ -49,14 +53,14 @@ Write the API spec in the same directory as the source PRD or tech spec.
 - Contract: references/contract.yaml
 - Evals: references/evals.yaml
 
-## When to use
+## Scope and triggers
 - Use this skill when the task matches its description and triggers.
 - If the request is outside scope, route to the appropriate skill.
 
-## Inputs
+## Required inputs
 - User request details and any relevant files/links.
 
-## Outputs
+## Deliverables
 - A structured response or artifact appropriate to the skill.
 - Include `schema_version: 1` if outputs are contract-bound.
 
@@ -124,7 +128,7 @@ Every user-facing response must include these headings:
 
 Failure/out-of-scope template (use verbatim structure):
 ```markdown
-## Inputs
+## Required inputs
 Objective: <what you received>
 
 Plan:
@@ -133,9 +137,9 @@ Plan:
 
 Next step: <single request>
 
-## Outputs
+## Deliverables
 - <what would be produced if in scope>
 
-## When to use
+## Scope and triggers
 - <when this skill applies>
 ```

@@ -18,19 +18,19 @@ Every response must include:
 This skill is used after a UI spec exists (for example from `prd-to-ui-spec`) and before UI generation or implementation.
 Avoid generating prompts without a UI spec; route upstream first.
 
-## When to use
+## Scope and triggers
 - You have a UI spec with tokens, components, and state definitions.
 - You need sequential prompts for tools like v0, Bolt, or Claude UI generation.
 - You want build order by dependencies (foundations -> components -> screens -> polish).
 
-## Inputs
+## Required inputs
 - UI spec file path.
 - Target UI tool (v0, Bolt, Claude, Figma AI, or other).
 - Target platform (web, touch-first, desktop).
 - aStudio repo path (default: `/Users/jamiecraik/dev/aStudio`).
 - Output location preference (default: same directory as UI spec).
 
-## Outputs
+## Deliverables
 - A build-order prompts document saved next to the UI spec.
   - Naming: `{ui-spec-basename}-ui-prompts.md` (or `UI-prompts.md` if spec is generic).
 - Include `schema_version: 1` if outputs are contract-bound.

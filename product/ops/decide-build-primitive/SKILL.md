@@ -1,6 +1,11 @@
 ---
 name: decide-build-primitive
-description: "Analyze and decide the right Codex primitive (Skill, Custom Prompt, or Agent automation) for a capability. Use this when you need to plan how to package or automate a workflow."
+description: Analyze and decide the right Codex primitive (Skill, Custom Prompt, or
+  Agent automation) for a capability. Use this when you need to plan how to package
+  or automate a workflow.
+metadata:
+  short-description: Analyze and decide the right Codex primitive (Skill, Custom Prompt,
+    or Agent...
 ---
 
 # Decide Build Primitive
@@ -60,16 +65,16 @@ POTENTIAL HYBRID:
 - `references/contract.yaml` — purpose, triggers, inputs/outputs, non-goals, risks.
 - `references/evals.yaml` — evaluation cases to validate triggering and outputs.
 
-## When to use
+## Scope and triggers
 - Use this skill when the task matches its description and triggers.
 - If the request is outside scope, route to the referenced skill.
 
 
-## Inputs
+## Required inputs
 - User request details and any relevant files/links.
 
 
-## Outputs
+## Deliverables
 - A structured response or artifact appropriate to the skill.
 - Include `schema_version: 1` if outputs are contract-bound.
 
@@ -103,3 +108,10 @@ POTENTIAL HYBRID:
 
 - "Should this be a Skill or a custom prompt?"
 - "Choose between agent automation vs skill for a long-running workflow."
+
+## Variation
+- Vary tone, depth, and structure based on context.
+- Avoid repeating the same outline across outputs.
+
+## Remember
+The agent is capable of extraordinary work in this domain. Use judgment, adapt to context, and push boundaries when appropriate.

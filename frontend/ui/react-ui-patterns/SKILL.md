@@ -1,6 +1,11 @@
 ---
 name: react-ui-patterns
-description: "Provide concrete, example-driven guidance for React UI composition, state, routing, and component patterns in a TypeScript + Tailwind + Radix stack.. Use when Building or refactoring React screens and components.."
+description: Provide concrete, example-driven guidance for React UI composition, state,
+  routing, and component patterns in a TypeScript + Tailwind + Radix stack.. Use when
+  Building or refactoring React screens and components..
+metadata:
+  short-description: Provide concrete, example-driven guidance for React UI composition,
+    state, ro...
 ---
 
 # React UI Patterns
@@ -16,17 +21,17 @@ Provide concrete, example-driven guidance for React UI composition, state, routi
 - Keep state local when possible; lift only when needed.
 - Preserve repo conventions; do not introduce new patterns without need.
 
-## When to use
+## Scope and triggers
 - Building or refactoring React screens and components.
 - Designing layout, routing, or tabbed navigation structures.
 - Choosing component-specific patterns or examples in a React stack.
 
-## Inputs
+## Required inputs
 - Target React component(s) or feature description.
 - Existing repo conventions, design system, and component references.
 - Constraints (router, state library, or data fetching approach).
 
-## Outputs
+## Deliverables
 - Pattern guidance and example structure for the requested UI.
 - References to relevant component docs or in-repo examples.
 - Notes on accessibility and state ownership where needed.

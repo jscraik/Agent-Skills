@@ -1,0 +1,51 @@
+# Skill Evaluation Cases
+# Source: templates/evals.yaml - Copy and customize for your skill.
+
+schema_version: "1.0"
+
+skill_name: "codex-wrapped"
+
+cases:
+  - name: happy-path
+    prompt: "Show me my coding activity report."
+    context:
+      - "User wants to see their agent usage stats"
+    acceptance:
+      - type: contains
+        value: "## Outputs"
+      - type: contains
+        value: "get_stats.py"
+
+  - name: edge-case
+    prompt: "Generate a wrapped report but I have no logs."
+    context:
+      - "No agent log directories exist"
+    acceptance:
+      - type: contains
+        value: "## Inputs"
+      - type: contains
+        value: "logs"
+
+  - name: failure-mode
+    prompt: "Create a dashboard for my coding stats."
+    context:
+      - "Request is for a web dashboard, not text report"
+    acceptance:
+      - type: contains
+        value: "## When to use"
+      - type: not_contains
+        value: "dashboard"
+
+  - name: trigger-wrapped
+    prompt: "Give me my Codex wrapped summary."
+    context:
+      - "User explicitly mentions 'wrapped'"
+    acceptance:
+      - type: contains
+        value: "## Procedure"
+      - type: contains
+        value: "stats"
+
+metadata:
+  last_updated: "2026-02-05"
+  review_status: "draft"

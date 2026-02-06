@@ -1,6 +1,13 @@
 ---
 name: linear
-description: "This skill provides a structured workflow for managing issues, projects & team workflows in Linear. It ensures consistent integration with the Linear MCP server, which offers natural-language project management for issues, projects, documentation, and team collaboration.. Use when When the user wants to read, create, or update Linear issues or projects.."
+description: This skill provides a structured workflow for managing issues, projects
+  & team workflows in Linear. It ensures consistent integration with the Linear MCP
+  server, which offers natural-language project management for issues, projects, documentation,
+  and team collaboration.. Use when When the user wants to read, create, or update
+  Linear issues or projects..
+metadata:
+  short-description: This skill provides a structured workflow for managing issues,
+    projects & tea...
 ---
 
 # Linear
@@ -24,17 +31,17 @@ This skill provides a structured workflow for managing issues, projects & team w
 - What is the evidence for the proposed change (context, docs, comments)?
 - How will the team verify and follow up?
 
-## When to use
+## Scope and triggers
 - When the user wants to read, create, or update Linear issues or projects.
 - When the user asks for triage, planning, or reporting inside Linear.
 - When the user needs documentation or comment updates in Linear.
 
-## Inputs
+## Required inputs
 - User intent (team, project, issue scope, and desired outcomes).
 - Access to Linear MCP and the target workspace/team identifiers.
 - Any required fields for create/update actions (priority, labels, assignee).
 
-## Outputs
+## Deliverables
 - Retrieved issue/project data or applied updates.
 - A concise summary of changes and any remaining gaps.
 - Follow-up actions or confirmations needed from the user.
@@ -153,3 +160,7 @@ Use judgment, adapt to context, and push boundaries when appropriate.
 
 ## Antipatterns
 - Do not add features outside the agreed scope.
+
+## References
+- `references/contract.yaml`
+- `references/evals.yaml`

@@ -1,6 +1,11 @@
 ---
 name: better-auth-best-practices
-description: Review Better Auth setups and highlight secure integration best practices. Use for audits, config guidance, or debugging flows (not full implementation).
+description: Review Better Auth setups and highlight secure integration best practices.
+  Use for audits, config guidance, or debugging flows (not full implementation). Use
+  when the user requests this capability.
+metadata:
+  short-description: Review Better Auth setups and highlight secure integration best
+    practices. Us...
 ---
 
 # Better Auth Integration Guide
@@ -17,20 +22,20 @@ Better Auth is a TypeScript-first, framework-agnostic auth framework supporting 
 - Prefer minimal viable configuration, then layer features.
 - Validate with real flows, not just configuration checks.
 
-## When to use
+## Scope and triggers
 
 - You are adding Better Auth to a TS/JS application.
 - You need to configure plugins or providers.
 - You are debugging auth flows or session handling.
 
-## Inputs
+## Required inputs
 
 - Framework and runtime context.
 - Database adapter choice.
 - Auth features (email/password, OAuth, passkeys, etc.).
 - Plugin list and provider credentials (redacted).
 
-## Outputs
+## Deliverables
 
 - Recommended config changes and file locations.
 - CLI commands for schema and plugin updates.

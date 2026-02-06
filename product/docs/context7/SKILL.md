@@ -1,6 +1,10 @@
 ---
 name: context7
-description: "Extract current library documentation via Context7 when users need up-to-date API details, version checks, or dependency troubleshooting for external libraries."
+description: Extract current library documentation via Context7 when users need up-to-date
+  API details, version checks, or dependency troubleshooting for external libraries.
+metadata:
+  short-description: Extract current library documentation via Context7 when users
+    need up-to-date...
 ---
 
 # Context7 Documentation Fetcher
@@ -13,14 +17,14 @@ Retrieve current library documentation via Context7 API.
 - Keep queries narrow and purposeful to reduce noise.
 - Validate version-specific details before implementation.
 
-## Inputs
+## Required inputs
 
 - Library name or product name.
 - Specific question or feature area (API, patterns, version behavior).
 - Desired output format (txt or md).
 - Token/length budget (optional).
 
-## Outputs
+## Deliverables
 
 - Resolved library ID from Context7.
 - Targeted documentation snippets relevant to the query.
@@ -111,9 +115,16 @@ Options:
 - “Find the latest Next.js middleware docs.”
 - “What is the current Supabase auth API for RLS?”
 
-## When to Use
+## Scope and triggers
 
 - Before implementing any library-dependent feature
 - When unsure about current API signatures
 - For library version-specific behavior
 - To verify best practices and patterns
+
+## Variation
+- Vary tone, depth, and structure based on context.
+- Avoid repeating the same outline across outputs.
+
+## Remember
+The agent is capable of extraordinary work in this domain. Use judgment, adapt to context, and push boundaries when appropriate.

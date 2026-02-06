@@ -15,14 +15,14 @@ Search and retrieve icons from 200+ libraries via Iconify.
 - Keep visual consistency by staying within one family per surface.
 - Optimize for accessibility: icons should not be the only cue.
 
-## When to Use
+## Scope and triggers
 
 - You need SVG icons quickly from Iconify libraries.
 - You want consistent icon families across UI or docs.
 - You need batch fetch or sync into a project file.
 - You want to use the MCP tools from an agent.
 
-## Inputs
+## Required inputs
 
 - Search query (string) and optional collection prefix.
 - Icon ID (`prefix:name`).
@@ -30,7 +30,7 @@ Search and retrieve icons from 200+ libraries via Iconify.
 - Output target path (if writing a file).
 - Framework target for `sync_icon` (e.g., React, Vue, Svelte).
 
-## Outputs
+## Deliverables
 
 - SVG output to stdout or a file.
 - Search results (JSON list of icon IDs).

@@ -1,8 +1,11 @@
 ---
 name: ui-ux-creative-coding
-description: "Creative-coding UI polish for Tauri+React (Tailwind v4, Radix, Three.js). Use when you need expressive motion craft or WebGL accents—not baseline UI system work."
+description: Creative-coding UI polish for Tauri+React (Tailwind v4, Radix, Three.js).
+  Use when you need expressive motion craft or WebGL accents—not baseline UI system
+  work.
 metadata:
-  short-description: UI/UX creative coding playbook for Tauri/React + Tailwind v4 + Radix + Three.js, with Figma Make/MCP workflows and quality gates (Storybook/Argos/Biome).
+  short-description: UI/UX creative coding playbook for Tauri/React + Tailwind v4
+    + Radix + Three.js, with Figma Make/MCP workflows and quality gates (Storybook/Argos/Biome).
 ---
 
 # UI/UX + Creative Coding Skill (Jan 2026)
@@ -83,7 +86,7 @@ This means:
 ## Persona synthesis (shared convictions + cohesion)
 See `references/persona-synthesis.md`.
 
-## When to use
+## Scope and triggers
 - You need **UI direction + implementation** for:
   - Desktop app UI (Tauri + React + Vite)
   - Web UI (React/Vite) and/or ChatGPT apps (OpenAI Apps SDK)
@@ -92,13 +95,13 @@ See `references/persona-synthesis.md`.
 - You need **design‑to‑dev handoff clarity**, documentation scaffolding, or responsive component audits.
 - You want artifacts that are easy to review in PRs: **Storybook stories, Argos snapshots, and checklists**.
 
-## Inputs
+## Required inputs
 - Product brief or target: what to build, audience, constraints, success metrics.
 - Platform and stack constraints (Tauri/React/Vite, Tailwind v4, Radix, Three.js).
 - Any existing assets (design tokens, brand rules, Figma links, prior components).
 - Acceptance criteria (what "done" means and required checks).
 
-## Outputs
+## Deliverables
 - UI brief and user-model summary.
 - Component/system plan (tokens, primitives, states, motion rules).
 - Prototype implementation notes (React + Tailwind v4 + Radix) and optional WebGL accents.
@@ -147,6 +150,15 @@ Before any other content, **emit the three headings immediately**. Do not wait t
 - Confirm performance budgets for interactions and motion are respected.
 - For motion work, apply `references/motion-performance-guardrails.md`.
 
+## Remember
+The agent is capable of extraordinary work in this domain. Use judgment, adapt to context, and push boundaries when appropriate.
+
+## Scripts
+- `scripts/contrast_check.mjs`
+- `scripts/scaffold_component.mjs`
+- `scripts/skill_lint.mjs`
+- `scripts/tokens_to_tailwind_theme.mjs`
+
 ## Anti-patterns
 - The request is purely brand identity (logo/brand book) with no UI to ship.
 - The request is a deep 3D project (full WebGL app/game) unless explicitly requested.
@@ -178,58 +190,10 @@ Avoid samey output by varying **at least two** of these dimensions per response:
 - **Exploration:** 1 direction vs. 2–3 alternatives with tradeoffs
 - **Motion emphasis:** subtle feedback vs. expressive micro‑interactions
 
----
-
 ## Project Review Mode (Repo Audit)
-See `references/project-review-mode.md`.
-
-## What it can reliably catch
-
-### Engineering issues
-- TypeScript type issues, unsafe any, inconsistent patterns.
-- Biome lint/format drift, import ordering, unused code.
-- Rust issues via clippy, Tauri command boundary issues.
-- Workers/Hono patterns (request validation, error envelope consistency).
-- Drizzle schema/migration mismatches and query anti-patterns.
-- Missing Zod validation or inconsistent server/client types.
-- Incorrect Radix usage (focus traps, portal stacking, keyboard support).
-- Tailwind v4 token drift (hardcoded colors/spacings that should be tokens).
-
-### UI/UX issues (without screenshots)
-- Missing states (loading/empty/error/success/auth-expired).
-- Weak hierarchy (component structure implies poor layout).
-- Inconsistent spacing/radius/shadows (token violations).
-- Poor keyboard/focus behavior (dialogs/menus/combobox).
-- Motion misuse (over-animated, jank risks, reduced-motion ignored).
-- Desktop UX issues (hover-only affordances, missing shortcuts, focus restoration).
-
-### UI/UX issues (with Storybook/Argos/screens)
-- Visual regressions and inconsistency across variants.
-- Contrast issues and readability problems.
-- Layout shifts, cramped spacing, inconsistent density.
-
-## What it needs for a real review
-At least one of:
-1) Agent runs inside the repo (Codex CLI / Claude Code) so it can read files and run commands.
-2) You paste key files/folder trees/error logs here.
-
-Without access to files, output stays generic.
-
-## Browser Verification Pass (agent-browser)
-See `references/browser-verification.md`.
-
-## Example prompts that work well
-- "Review this project. Identify build/lint issues, risky patterns, UI/UX inconsistencies, and missing states. Give a prioritized refactor plan with file paths and suggested diffs."
-- "Audit `/src/components` for Radix misuse, missing variants/states, token drift, and accessibility gaps. Propose a normalized component API and update 2–3 components as examples."
-- "Do a UI polish sweep: hierarchy, spacing rhythm, typography, focus states, empty/loading/error/success, reduced-motion. Output a punch list and implement the top 5 changes."
-- "Review for desktop-native expectations: shortcuts, focus restoration, context menus, offline/network error UX, window/resizing edge cases. Provide actionable recommendations."
-
-## Limitations (practical)
-- Without Storybook or snapshots, it can flag structural UX issues but not pixel-level problems.
-- For visual-level recommendations, provide Storybook stories + Argos snapshots or screen captures.
+See `references/project-review-mode.md` for detailed review criteria, example prompts, and limitations. For browser verification, use `references/browser-verification.md`.
 
 ## Philosophy (the “rewrite the process” mindset)
-
 Use process as a **tool**, not a religion. The goal is **reasoned judgment quickly**, not perfect ceremony.
 
 Guiding questions:
@@ -245,12 +209,8 @@ Guiding questions:
 6. **Prefer the platform first**: HTML/CSS/JS fundamentals before heavy libraries; add complexity only when it earns its keep.
 7. **Quality takes concerted time**: polish is not accidental—budget for it and verify it.
 
----
-
 # Influence map (what to emulate, operationally)
 See `references/influence-map.md`.
-
----
 
 # Transcript-informed guidance (Jan 2026)
 See `references/transcript-guidance.md`.
@@ -310,7 +270,6 @@ These assumptions match your stack; adapt if the repo differs.
 # Output contract (what to produce)
 
 When invoked, produce **at least** the following, unless the user explicitly says otherwise:
-
 1. **UI Brief** (use `assets/design-brief.md` template)
 2. **Component plan** (new/changed components, states, variants, data contract)
 3. **Motion plan** (use `assets/motion-spec.yml` template)
@@ -323,15 +282,10 @@ When invoked, produce **at least** the following, unless the user explicitly say
 6. **Micro‑playbook** (1–2 paragraphs): break down the component’s structure, motion, and a11y intent.
 7. **Implementation patch** (if working in a repo): code + Storybook stories
 8. **Verification notes** (use `assets/acceptance-checklist.md`)
-
 If information is missing, make reasonable assumptions and call them out explicitly.
-
 ---
-
 # The golden loop (fast taste → real implementation)
-
 Use this loop; reorder steps freely:
-
 1. **Name the moment**: define the user action and the intended feeling.
 2. **Sketch constraints**: layout, hierarchy, tokens, accessibility, performance budget.
 3. **Prototype 1** (fast): simplest working thing.
@@ -340,158 +294,7 @@ Use this loop; reorder steps freely:
 6. **Polish pass**: spacing, typography, motion, copy, keyboard.
 7. **Quality gates**: a11y + perf + visual regression.
 8. **Package**: Storybook story, docs, and a short “how to extend” note.
-
 ---
-
 # Workflows (copy/paste playbooks)
-
-## Workflow A — Code-first UI (Tailwind v4 + Radix)
-Use when you need to ship UI quickly and validate in real code.
-
-1. Pick or create tokens (semantic first).
-2. Implement layout with Tailwind utilities.
-3. Wrap behavior with Radix primitives.
-4. Style states via `data-*` and CSS variables.
-5. Add Storybook story and cover:
-   - default, hover/focus, disabled
-   - loading/error/empty where applicable
-6. Add motion (enter/exit/feedback), respecting reduced motion.
-
-Deliverables:
-- Component file(s)
-- Storybook story
-- Updated tokens/theme (if needed)
-- Notes on states + keyboard behavior
-
-## Workflow B — Figma-first UI (Make → Dev Mode → Code)
-Use when a Figma file exists or you can generate a first draft.
-
-1. Generate or review a first draft (Figma Make / design file).
-2. Identify:
-   - tokens/variables (colors, type scale, spacing, radii)
-   - components (buttons, inputs, dialogs)
-   - key states (loading/error/empty)
-3. Map design → code:
-   - tokens → Tailwind `@theme` variables
-   - components → Radix-based primitives
-4. Implement the UI in code and re-check in the running app/Storybook.
-
-If MCP tooling is available, prefer “extract real values” over guessing.
-
-Deliverables:
-- Token mapping table (Figma variable → CSS var/Tailwind token)
-- Component spec(s)
-- Implemented components + Storybook stories
-
-### Figma Make best practices (from transcripts)
-See `references/figma-make.md`.
-
-## Workflow C — Micro-interactions & motion pass
-Use when UI is functional but feels flat.
-
-1. Identify 1–2 key moments (hover, submit, success, error recovery).
-2. Add motion for:
-   - feedback (press, hover, drag)
-   - transition (enter/exit)
-   - continuity (reorder, expand/collapse)
-3. Keep motion fast; reduce friction; never block completion.
-4. Ensure:
-   - keyboard focus remains stable
-   - reduced-motion fallback exists
-   - performance stays smooth
-
-Deliverables:
-- Motion spec update
-- Implementation + Storybook story showing interactions
-
-## Workflow D — Three.js/WebGL accent (optional)
-Use for subtle delight (hero accent, background, celebratory moment), not core UI.
-
-Rules:
-- Gate with feature flag / visibility heuristics.
-- Provide fallback (static image/CSS) and respect reduced motion.
-- Keep GPU cost bounded; prefer “accent” not “always animating”.
-
-Deliverables:
-- Small isolated scene component
-- Performance notes + fallback behavior
-- Toggle/flag and Storybook story
-
-## Workflow E — ChatGPT app UI (OpenAI Apps SDK)
-Use when building within the Apps SDK. Align to its UI patterns (cards, carousel, fullscreen).
-
-Deliverables:
-- View selection (inline vs fullscreen)
-- UX flow aligned to tool results and loading/error states
-- Components consistent with Apps SDK UI guidelines
-
----
-
-# Implementation guardrails (don’t skip)
-
-## Accessibility (minimum bar)
-- Keyboard navigation for all controls
-- Visible focus states
-- Semantic structure (headings, landmarks)
-- Reduced motion (`prefers-reduced-motion`) behavior
-- Color contrast checks (use `scripts/contrast_check.mjs` if you have tokens)
-
-## Performance (minimum bar)
-- Avoid long main-thread tasks (especially with continuous animation)
-- Don’t animate layout; prefer transforms/opacity
-- Avoid re-render storms; memoize where needed
-- For WebGL: avoid always-on high-FPS backgrounds; throttle/idle
-
-## Quality (minimum bar)
-- Storybook story for each new/changed component
-- Argos snapshots for key variants
-- Biome/TypeScript clean
-- Document any non-obvious behavior (especially keyboard/focus)
-
-## Examples
-- "Design a new settings panel for a Tauri app with a glassmorphism feel, but keep it accessible."
-- "Refine this onboarding flow for React + Tailwind v4; add micro-interactions and a11y checks."
-- "Prototype a dashboard layout with a subtle WebGL accent and a Storybook story."
-
----
-
-# Assets, scripts, and where things live
-
-## Templates (assets/)
-- `assets/design-brief.md` — UI brief template
-- `assets/component-spec.md` — component spec template (Radix + Tailwind ready)
-- `assets/motion-spec.yml` — motion system template
-- `assets/tokens.json` — token starter set
-- `assets/acceptance-checklist.md` — definition-of-done checklist
-- `assets/prompt-flows.md` — ready-to-run prompts/flows for Codex + Claude Code
-
-## References (references/)
-- `references/influences.md` — links to the creators above + what to study
-- `references/influence-map.md` — operational behaviors per influence
-- `references/emilkowalski-notes.md` — motion heuristics
-- `references/jhey-tompkins-notes.md` — CSS micro‑interaction notes
-- `references/token-architecture.md` — Brand→Alias→Maps tokens
-- `references/responsive-variables.md` — modes + jumper variables
-- `references/multi-brand-strategy.md` — branded house vs house of brands
-- `references/gradient-system.md` — gradient collection guidance
-- `references/handoff-annotations.md` — a11y‑first handoff
-- `references/stack.md` — links to Tailwind v4, Radix, Tauri, Apps SDK, MCP, Figma Make/MCP
-
-## Scripts (scripts/)
-- `node scripts/skill_lint.mjs` — validate SKILL front matter
-- `node scripts/tokens_to_tailwind_theme.mjs assets/tokens.json > theme.css` — generate Tailwind v4 `@theme`
-
-## Remember
-
-The agent is capable of extraordinary work in this domain. These guidelines unlock that potential—they don't constrain it.
-Use judgment, adapt to context, and push boundaries when appropriate.
-- `node scripts/contrast_check.mjs assets/tokens.json` — quick contrast report
-- `node scripts/scaffold_component.mjs Button src/components/ui` — create a component + Storybook story + spec stub
-
----
-
-# Invocation examples
-
-- `$ui-ux-creative-coding Design and implement a Settings screen (account + privacy) for our Tauri app. Include tokens, motion spec, and Storybook stories.`
-- `$ui-ux-creative-coding Add delight to this onboarding flow without hurting speed. Propose 3 variants and implement the best one.`
-- `$ui-ux-creative-coding Build a Radix Dialog with Tailwind v4 tokens, focus handling, and a polished open/close animation.`
+## Extended guidance
+See `references/extended.md` for additional examples, workflows, and appendices.

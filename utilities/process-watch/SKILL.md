@@ -1,6 +1,11 @@
 ---
 name: process-watch
-description: "Analyze system processes and resource usage to diagnose runaway processes. Use when investigating CPU/memory/IO spikes."
+description: Analyze system processes and resource usage to diagnose runaway CPU/memory/IO,
+  identify culprits, and propose next diagnostic steps. Use when investigating performance
+  spikes or leaks.
+metadata:
+  short-description: Analyze system processes and resource usage to diagnose runaway
+    CPU/memory/IO...
 ---
 
 # Process Watch
@@ -94,16 +99,16 @@ process-watch watch --alert-cpu 90 --alert-mem 85
 ## Compliance
 - Check against GOLD Industry Standards guide in ~/.codex/AGENTS.override.md
 
-## When to use
+## Scope and triggers
 - Use this skill when the task matches its description and triggers.
 - If the request is outside scope, route to the referenced skill.
 
 
-## Inputs
+## Required inputs
 - User request details and any relevant files/links.
 
 
-## Outputs
+## Deliverables
 - A structured response or artifact appropriate to the skill.
 - Include `schema_version: 1` if outputs are contract-bound.
 
@@ -134,3 +139,13 @@ process-watch watch --alert-cpu 90 --alert-mem 85
 
 ## Antipatterns
 - Do not add features outside the agreed scope.
+
+## Remember
+The agent is capable of extraordinary work in this domain. Use judgment, adapt to context, and push boundaries when appropriate.
+
+## Scripts
+- `scripts/process-watch.py`
+
+## References
+- `references/contract.yaml`
+- `references/evals.yaml`

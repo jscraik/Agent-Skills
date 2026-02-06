@@ -1,6 +1,11 @@
 ---
 name: agent-browser
-description: Use this skill to extract page state and automate web interactions with the agent-browser CLI (navigate, snapshot, click, fill, screenshot). Use this when you need deterministic browser automation or scraping via ref-based elements.
+description: Use this skill to extract page state and automate web interactions with
+  the agent-browser CLI (navigate, snapshot, click, fill, screenshot). Use this when
+  you need deterministic browser automation or scraping via ref-based elements.
+metadata:
+  short-description: Use this skill to extract page state and automate web interactions
+    with the a...
 ---
 
 # agent-browser: CLI Browser Automation
@@ -13,19 +18,19 @@ Vercel's headless browser automation CLI designed for AI agents. Uses ref-based 
 - Re-snapshot after navigation or DOM changes.
 - Keep actions minimal and observable.
 
-## When to use
+## Scope and triggers
 
 - You need to interact with live web pages or forms.
 - You need screenshots or PDFs of UI states.
 - You need to scrape data with deterministic steps.
 
-## Inputs
+## Required inputs
 
 - Target URL(s).
 - Desired interactions (click/fill/scroll).
 - Output artifacts (screenshots, PDFs, extracted text).
 
-## Outputs
+## Deliverables
 
 - Action results and snapshots.
 - Saved artifacts (png/pdf) when requested.

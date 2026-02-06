@@ -46,7 +46,7 @@ Follow `/Users/jamiecraik/.codex/USER_PROFILE.md`: single-threaded, explicit ste
 - Mode: `standard` (use `deep` for major rewrites)
 - Intent: start `DECIDE`
 
-## When to use
+## Scope and triggers
 
 - Choosing between architectural alternatives.
 - Producing an ADR before implementation.
@@ -110,10 +110,10 @@ Proposed (pending approval)
 ## Observability plan
 ```
 
-## Inputs
+## Required inputs
 - User request details and any relevant files/links.
 
-## Outputs
+## Deliverables
 - Kernel synthesis + ADR Draft (Proposed).
 - Include `schema_version: 1` if outputs are contract-bound.
 

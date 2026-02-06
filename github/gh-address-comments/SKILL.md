@@ -1,6 +1,12 @@
 ---
 name: gh-address-comments
-description: "The agent is capable of extraordinary work in this domain. These guidelines unlock that potential—they don't constrain it. Use judgment, adapt to context, and push boundaries when appropriate.. Use when When the user asks to address review comments on an open GitHub PR.."
+description: The agent is capable of extraordinary work in this domain. These guidelines
+  unlock that potential—they don't constrain it. Use judgment, adapt to context, and
+  push boundaries when appropriate.. Use when When the user asks to address review
+  comments on an open GitHub PR..
+metadata:
+  short-description: The agent is capable of extraordinary work in this domain. These
+    guidelines u...
 ---
 
 # PR Comment Handler
@@ -21,18 +27,18 @@ description: "The agent is capable of extraordinary work in this domain. These g
 - What is the smallest change that resolves the issue?
 - How will this change be verified (tests, lint, evidence)?
 
-## When to use
+## Scope and triggers
 - When the user asks to address review comments on an open GitHub PR.
 - When the user wants to respond to reviewer feedback using `gh` CLI.
 - When the user needs a summary of PR review threads before fixing.
 - When the user asks to verify `gh` auth or fetch PR comments.
 
-## Inputs
+## Required inputs
 - Current git branch and repository context.
 - `gh` CLI authenticated session and repo access.
 - User-selected comment numbers to address.
 
-## Outputs
+## Deliverables
 - A numbered summary of review threads and proposed fixes.
 - Code changes addressing selected comments.
 - A response plan for each addressed comment (path + rationale + verification).
@@ -95,3 +101,7 @@ Notes:
 
 ## Antipatterns
 - Do not add features outside the agreed scope.
+
+## References
+- `references/contract.yaml`
+- `references/evals.yaml`

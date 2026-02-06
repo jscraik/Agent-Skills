@@ -1,9 +1,18 @@
 ---
 name: repoprompt
-description: "Plan and guide Repo Prompt integration and usage in AI coding workflows. Use when integrating Repo Prompt with editors/agents or when needing MCP/CLI tool guidance."
+description: Plan and guide Repo Prompt integration and usage in AI coding workflows.
+  Use when integrating Repo Prompt with editors/agents or when needing MCP/CLI tool
+  guidance.
+metadata:
+  short-description: Plan and guide Repo Prompt integration and usage in AI coding
+    workflows.
 ---
 
 # Repo Prompt Integration
+
+## Remember
+The agent is capable of extraordinary work in this domain. Use judgment, adapt to context, and push boundaries when appropriate.
+
 
 ## Compliance
 - Check against GOLD Industry Standards guide in ~/.codex/AGENTS.override.md
@@ -11,7 +20,7 @@ description: "Plan and guide Repo Prompt integration and usage in AI coding work
 ## Overview
 Guide the user to the most effective Repo Prompt integration path for their workflow, with minimal setup friction and maximal context efficiency.
 
-## When to Use
+## Scope and triggers
 - User asks how to integrate Repo Prompt with Claude Code, Cursor, Codex, or other editors/agents.
 - User asks how to use Compose vs Chat vs Apply/Pro Edit workflows.
 - User asks how to optimize context (codemaps, slices, multi-root workspaces).
@@ -19,14 +28,14 @@ Guide the user to the most effective Repo Prompt integration path for their work
 - User asks about rp-cli usage or MCP server setup.
 - User asks for MCP/CLI tool usage patterns (window/tab routing, review workflows).
 
-## Inputs
+## Required inputs
 - Current workflow (editor-first, chat-first, CLI automation).
 - Target tools (Cursor, Claude Code, Codex, ChatGPT, etc.).
 - Repo scale (single repo vs multi-repo/monorepo).
 - Model access (API keys vs CLI providers).
 - Constraints (token budget, latency, cost, security policies).
 
-## Outputs
+## Deliverables
 - Recommended integration path (MCP editor, Compose external chat, Chat mode, or rp-cli).
 - Short, ordered setup checklist (3–7 steps).
 - Context strategy (full vs slices vs codemaps).
@@ -39,10 +48,10 @@ Guide the user to the most effective Repo Prompt integration path for their work
 Always start responses with these headings (no text before them):
 
 ```
-## When to use
-## Inputs
-## Outputs
-## Failure mode
+## Scope and triggers
+## Required inputs
+## Deliverables
+## Out-of-scope handling
 ```
 
 If the user asks for MCP/CLI tooling guidance, include the phrase **MCP/CLI** in your response.
@@ -150,7 +159,7 @@ Read when needed:
 - references/repoprompt_cli_tooling.md
 - references/repoprompt_review_workflows.md
 
-## When to use
+## Scope and triggers
 - Use this skill when the task matches its description and triggers.
 - If the request is outside scope, route to the referenced skill.
 ## Procedure

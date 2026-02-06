@@ -1,9 +1,14 @@
 ---
 name: workers-mcp
-description: "Create production-ready MCP servers on Cloudflare Workers with:. Use when Use this skill when the task matches its description and triggers.."
+description: Create production-ready MCP servers on Cloudflare Workers with:. Use
+  when Use this skill when the task matches its description and triggers..
+metadata:
+  short-description: Create production-ready MCP servers on Cloudflare Workers with:.
 ---
-
 # Workers MCP
+Avoid skipping validation steps or inventing results.
+Principle: Favor clarity, explicit tradeoffs, and verifiable outputs.
+
 
 ## Compliance
 - Check against GOLD Industry Standards guide in ~/.codex/AGENTS.override.md
@@ -273,218 +278,23 @@ wrangler deploy --env staging
 wrangler dev
 ```
 
-### Post-Deployment
-- [ ] Test health endpoint: `curl https://your-worker.workers.dev/health`
-- [ ] Test with MCP Inspector: `npx @modelcontextprotocol/inspector https://your-worker.workers.dev`
-- [ ] Verify OAuth flow in Auth0 dashboard
-- [ ] Test Stripe webhook delivery
-
----
-
-## Common Patterns
-
-### Rate Limiting
-
-```typescript
-const rateLimit = await this.rateLimiter.check(
-  this.env.RATE_LIMITS,
-  `tool:${userId}`,
-  100,  // 100 requests
-  60000 // per minute
-);
-if (!rateLimit.allowed) {
-  throw new Error(`Rate limit exceeded. Retry in ${rateLimit.retryAfter}s`);
-}
-```
-
-### Caching with KV
-
-```typescript
-// Check cache
-const cached = await this.env.CACHE.get(`key:${id}`, 'json');
-if (cached) return cached;
-
-// Generate data
-const data = await expensiveOperation();
-
-// Cache for 5 minutes
-await this.env.CACHE.put(`key:${id}`, JSON.stringify(data), {
-  expirationTtl: 300,
-});
-```
-
-### Batch Operations (D1 Transactions)
-
-```typescript
-await this.env.DB.batch([
-  this.env.DB.prepare('INSERT INTO memories ...'),
-  this.env.DB.prepare('UPDATE tenants SET memory_count = ...')
-]);
-```
-
----
-
-## Environment Variables
-
-| Variable | Purpose |
-|----------|---------|
-| `ENVIRONMENT` | `development` \| `staging` \| `production` |
-| `BASE_URL` | Base URL for OAuth callbacks |
-| `AUTH0_DOMAIN` | Your Auth0 domain |
-| `AUTH0_CLIENT_ID` | Auth0 client ID |
-| `STRIPE_PRO_PRICE_ID` | Stripe Pro price ID |
-| `OPENAI_EMBEDDING_MODEL` | Default: `text-embedding-3-small` |
-
-## Secrets
-
-| Secret | Purpose |
-|--------|---------|
-| `OPENAI_API_KEY` | OpenAI embeddings |
-| `STRIPE_SECRET_KEY` | Stripe API |
-| `STRIPE_WEBHOOK_SECRET` | Stripe webhook verification |
-| `AUTH0_CLIENT_SECRET` | Auth0 OAuth |
-| `JWT_SECRET` | JWT signing |
-
----
-
-## Claude Desktop Configuration
-
-After OAuth flow, users configure Claude Desktop:
-
-```json
-{
-  "mcpServers": {
-    "your-server": {
-      "url": "https://your-worker.workers.dev",
-      "headers": {
-        "Authorization": "Bearer YOUR_JWT_TOKEN"
-      }
-    }
-  }
-}
-```
-
----
-
-## Testing
-
-### Local Development
-```bash
-# Start dev server
-wrangler dev
-
-# Test with MCP Inspector
-npx @modelcontextprotocol/inspector http://localhost:8787
-```
-
-### Remote Testing
-```bash
-# Test deployed worker
-npx @modelcontextprotocol/inspector https://your-worker.workers.dev
-```
-
-### Unit Tests
-```typescript
-import { describe, it, expect } from 'vitest';
-
-describe('MyMCPServer', () => {
-  it('should remember a memory', async () => {
-    const server = new MyMCPServer(mockState, mockEnv);
-    const result = await server.remember({ content: 'Test' });
-    expect(result.id).toBeDefined();
-  });
-});
-```
-
----
-
-## Troubleshooting
-
-### Common Errors
-
-1. **"Invalid JWT"**: Verify `JWT_SECRET` matches between signing and verification
-2. **"Tenant not found"**: Ensure user provisioning runs after OAuth callback
-3. **"Rate limit exceeded"**: Check KV namespace is bound correctly
-4. **"D1 error"**: Run migrations with `wrangler d1 execute DB --file=migrations/...`
-
-### Debug Logging
-
-```typescript
-console.log(JSON.stringify({
-  type: 'mcp_tool_execution',
-  tool: 'remember',
-  userId,
-  tenantId,
-  timestamp: Date.now(),
-}));
-```
-
----
-
-## Philosophy
-
-1. **Simplicity First**: Use workers-mcp SDK to avoid boilerplate
-2. **Security by Default**: All tools require authentication by default
-3. **Tenant Isolation**: All data scoped to tenant with cascade deletes
-4. **Graceful Degradation**: Soft deletes preserve data, downgrade preserves read access
-5. **Observability**: Structured logging for all operations
-
----
-
-## File Structure
-
-```
-PROJECT_NAME/
-├── src/
-│   ├── workers/mcp/
-│   │   └── index.ts              # Main Worker with ProxyToSelf
-│   ├── durable-objects/
-│   │   └── embedding-do.ts       # Embedding generation DO
-│   ├── lib/
-│   │   ├── db/d1.ts              # D1 client wrapper
-│   │   ├── kv/cache.ts           # KV cache wrapper
-│   │   ├── auth/auth0.ts         # Auth0 integration
-│   │   ├── license/verifier.ts   # License verification
-│   │   └── embeddings/openai.ts  # OpenAI embeddings
-│   └── middleware/auth.ts        # Auth middleware
-├── migrations/
-│   └── 001_initial.sql           # D1 schema
-├── wrangler.toml                 # Workers config
-├── package.json
-└── tsconfig.json
-```
-
-## When to use
-- Use this skill when the task matches its description and triggers.
-- If the request is outside scope, route to the referenced skill.
-
-
-## Inputs
-- User request details and any relevant files/links.
-
-
-## Outputs
-- A structured response or artifact appropriate to the skill.
-- Include `schema_version: 1` if outputs are contract-bound.
-
-
 ## Constraints
 - Redact secrets/PII by default.
 - Avoid destructive operations without explicit user direction.
 
+## Examples
+- "Provide a concise response for this task."
+- "Follow the workflow and summarize outputs."
 
-## Validation
-- Run any relevant checks or scripts when available.
-- Fail fast and report errors before proceeding.
+## Variation
+- Vary tone, depth, and structure based on context.
+- Avoid repeating the same outline across outputs.
 
+## Remember
+The agent is capable of extraordinary work in this domain. Use judgment, adapt to context, and push boundaries when appropriate.
 
-## Anti-patterns
-- Avoid vague guidance without concrete steps.
-- Do not invent results or commands.
-## Procedure
-1) Clarify scope and inputs.
-2) Execute the core workflow.
-3) Summarize outputs and next steps.
+## Scripts
+- `scripts/init_workers_mcp.sh`
 
-## Antipatterns
-- Do not add features outside the agreed scope.
+## Extended guidance
+See `references/extended.md` for additional examples, workflows, and appendices.

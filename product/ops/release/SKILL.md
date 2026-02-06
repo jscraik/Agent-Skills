@@ -1,6 +1,11 @@
 ---
 name: release
-description: "Create and publish a new project release (semver) when you need to cut a main-branch, clean-tree release via just release X.Y.Z for Cargo publish and git tag creation."
+description: Create and publish a new project release (semver) when you need to cut
+  a main-branch, clean-tree release via just release X.Y.Z for Cargo publish and git
+  tag creation.
+metadata:
+  short-description: Create and publish a new project release (semver) when you need
+    to cut a main...
 ---
 
 # Release
@@ -8,18 +13,18 @@ description: "Create and publish a new project release (semver) when you need to
 ## Compliance
 - Follow the Gold Industry Standard and repo release policies.
 
-## When to Use
+## Scope and triggers
 - You need to ship a new version using `just release X.Y.Z`.
 - The release must be semver-valid, greater than current, and performed from `main`.
 - The flow includes Cargo.toml version bumps, lockfile update, tag, and crates.io publish.
 
-## Inputs
+## Required inputs
 - Target version `X.Y.Z` (prompt if missing).
 - Repo root and current version (read from `Cargo.toml`).
 - Confirmation you are on `main` with a clean working tree.
 - Cargo credentials available (`cargo login` or `CARGO_REGISTRY_TOKEN`).
 
-## Outputs
+## Deliverables
 - A completed release run (or a clear stop with error context).
 - A new version commit + tag (created by `just release`).
 - Confirmation that publish/tag steps were invoked.
@@ -65,3 +70,10 @@ just release 1.4.2
 
 ## Resources (optional)
 - `references/evals.yaml`
+
+## Variation
+- Vary tone, depth, and structure based on context.
+- Avoid repeating the same outline across outputs.
+
+## Remember
+The agent is capable of extraordinary work in this domain. Use judgment, adapt to context, and push boundaries when appropriate.

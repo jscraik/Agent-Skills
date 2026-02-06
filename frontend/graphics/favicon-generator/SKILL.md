@@ -1,9 +1,15 @@
 ---
 name: favicon-generator
-description: "Generate complete favicon/app icon suites with templates and assets. Use when the user needs favicons or app icons for a web/app project."
+description: Generate complete favicon/app icon suites with templates and assets.
+  Use when the user needs favicons or app icons for a web/app project.
+metadata:
+  short-description: Generate complete favicon/app icon suites with templates and
+    assets.
 ---
-
 # Pro-Grade Favicon Generator
+
+Avoid skipping validation steps or inventing results.
+
 
 Create stunning, professional-quality favicons that stand alongside icons from Linear, Notion, Figma, and other polished apps.
 
@@ -81,7 +87,7 @@ If using lucide-react or similar libraries:
    pip install cairosvg
    brew install cairo  # required native library
    ```
-   
+
    **Why cairosvg?** Pillow cannot render SVG bezier curves and arcs. Lucide icons
    use arc commands (`a2 2 0 0 0...`) that only a proper SVG renderer can draw.
 
@@ -125,7 +131,7 @@ def render_lucide_icon(size):
     scale = (size * 0.7) / 24
     offset = size * 0.15
     radius = int(size * 0.22)
-    
+
     svg = SVG_TEMPLATE.format(size=size, scale=scale, offset=offset, radius=radius)
     png_data = cairosvg.svg2png(bytestring=svg.encode('utf-8'))
     return Image.open(BytesIO(png_data)).convert('RGBA')
@@ -279,160 +285,16 @@ Native emoji for playful, informal apps.
 
 ## Effects Reference
 
-### Drop Shadow
-Creates depth and lift. Essential for polished look.
-
-| Intensity | Effect | Use When |
-|-----------|--------|----------|
-| 0.2–0.3 | Subtle | Minimal designs, light backgrounds |
-| 0.4–0.5 | Balanced | Most apps (default) |
-| 0.6+ | Strong | Dark backgrounds, high contrast |
-
-### Highlight
-Top-lit gradient that adds dimensionality.
-
-| Intensity | Effect | Use When |
-|-----------|--------|----------|
-| 0.15–0.25 | Gentle | Subtle polish |
-| 0.3–0.4 | Pronounced | Glass, vibrant styles |
-| 0.5+ | Strong | Glossy, skeuomorphic look |
-
-### Inner Glow
-Radial lighting from center, creates depth.
-
-| Intensity | Effect | Use When |
-|-----------|--------|----------|
-| 0.2–0.3 | Soft ambient | Glass style |
-| 0.4–0.5 | Noticeable | Neon, futuristic |
-| 0.6+ | Strong | Glowing effect |
-
-### Noise/Grain
-Subtle texture that prevents banding and adds organic feel.
-
-| Intensity | Effect | Use When |
-|-----------|--------|----------|
-| 0.03–0.05 | Barely visible | Anti-banding only |
-| 0.06–0.08 | Subtle texture | Organic, natural feel |
-| 0.1+ | Visible grain | Vintage, film aesthetic |
-
-### Corner Radius
-Shape of the icon background.
-
-| Value | Shape | Platform |
-|-------|-------|----------|
-| 0.15–0.18 | Squircle | rounded |
-| 0.20–0.24 | Rounded | Modern default |
-| 0.30+ | Very round | Playful, bubble |
-| 0.50 | Circle | Circular icons |
-
----
-
-## Output Structure
-
-### Standard Suite (Default)
-```
-public/
-├── favicon.ico          # Legacy (16+32 combined)
-├── favicon.svg          # Modern browsers (scalable)
-├── favicon-16x16.png    # Browser tabs
-├── favicon-32x32.png    # Browser tabs (retina)
-├── favicon-48x48.png    # Windows tiles
-├── favicon-64x64.png    # Windows tiles
-├── favicon-128x128.png  # Chrome Web Store
-├── apple-touch-icon.png # touch icon (180x180)
-├── favicon-192x192.png  # Android Chrome
-└── favicon-512x512.png  # PWA, Android
-```
-
-### Framework Integration
-
-#### Next.js (App Router)
-```typescript
-// app/layout.tsx
-import type { Metadata } from 'next'
-
-export const metadata: Metadata = {
-  icons: {
-    icon: [
-      { url: '/favicon.ico', sizes: 'any' },
-      { url: '/favicon.svg', type: 'image/svg+xml' },
-      { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
-      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
-    ],
-    apple: [
-      { url: '/apple-touch-icon.png', sizes: '180x180' },
-    ],
-  },
-}
-```
-
-#### Standard HTML
-```html
-<link rel="icon" href="/favicon.ico" sizes="any">
-<link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-```
-
-#### PWA Manifest
-```json
-{
-  "icons": [
-    { "src": "/favicon-192x192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "/favicon-512x512.png", "sizes": "512x512", "type": "image/png" }
-  ]
-}
-```
-
----
-
-## Workflow Examples
-
-### Example 1: New SaaS Product
-
-```
-User: "Create a favicon for my project management app called Flowboard"
-
-Claude:
-1. [Discovers existing icons]
-   - Searches codebase: rg "from.*lucide-react"
-   - Finds: Header.tsx uses PackagePlus icon
-   - Checks: No existing favicon, but brand uses PackagePlus
-   
-2. [Analyzes codebase]
-   - tailwind.config.ts: primary = "#6366f1"
-   - Package name: "flowboard"
-   - Brand icon: PackagePlus (from lucide-react)
-
-See references/extra.md for extended guidance.
-
-## When To Use
-- Use when the task matches this skill's purpose and triggers.
-
-## Procedure
-1) Confirm objective.
-2) Gather required inputs.
-3) Execute steps.
-4) Validate output.
-
-## Inputs
-- User request
-- Relevant files/paths
-
-## Outputs
-- Updated artifacts or guidance
-- Summary of changes
-
 ## Constraints
-- Redact secrets/sensitive data by default.
-- Ask before adding dependencies or making system-wide changes.
+- Redact secrets/PII by default.
+- Avoid destructive operations without explicit user direction.
 
-## Validation
-- Fail fast on first failed gate.
-- Run required checks when applicable.
+## Variation
+- Vary tone, depth, and structure based on context.
+- Avoid repeating the same outline across outputs.
 
-## Anti-patterns
-- Do not add features outside the agreed scope.
-## When to use
-- Use when generating favicons or app icons.
+## Remember
+The agent is capable of extraordinary work in this domain. Use judgment, adapt to context, and push boundaries when appropriate.
+
+## Extended guidance
+See `references/extended.md` for additional examples, workflows, and appendices.

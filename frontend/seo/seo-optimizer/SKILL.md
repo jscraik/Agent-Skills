@@ -1,9 +1,16 @@
 ---
 name: seo-optimizer
-description: "Transform your web application from invisible to discoverable. This skill analyzes your codebase and implements comprehensive SEO optimizations that help search engines and social platforms understand, index, and surface your content.. Use when Use this skill when the task matches its description and triggers.."
+description: Transform your web application from invisible to discoverable. This skill
+  analyzes your codebase and implements comprehensive SEO optimizations that help
+  search engines and social platforms understand, index, and surface your content..
+  Use when Use this skill when the task matches its description and triggers..
+metadata:
+  short-description: Transform your web application from invisible to discoverable.
+    This skill ana...
 ---
 
 # SEO Optimizer
+Avoid skipping validation steps or inventing results.
 
 Transform your web application from invisible to discoverable. This skill analyzes your codebase and implements comprehensive SEO optimizations that help search engines and social platforms understand, index, and surface your content.
 
@@ -17,13 +24,13 @@ Every response must include these headings:
 Use this exact structure when the request is out of scope:
 
 ```md
-## When to use
+## Scope and triggers
 - This skill applies to SEO audits and optimization tasks. The current request is out of scope.
 
-## Outputs
+## Deliverables
 - None (out of scope).
 
-## Inputs
+## Required inputs
 - None (out of scope).
 ```
 
@@ -269,222 +276,25 @@ Sitemap: https://yourdomain.com/sitemap.xml
 - Query parameters
 
 ### Performance (Core Web Vitals)
-
 Core Web Vitals affect rankings. Monitor:
-
 | Metric | Target | What It Measures |
 |--------|--------|------------------|
 | LCP | < 2.5s | Largest Contentful Paint (loading) |
 | INP | < 200ms | Interaction to Next Paint (interactivity) |
 | CLS | < 0.1 | Cumulative Layout Shift (visual stability) |
-
 **Quick wins**:
 - Optimize images (WebP, lazy loading, proper sizing)
 - Minimize JavaScript bundles
 - Use efficient fonts (display: swap)
 - Implement proper caching
-
 ---
-
-## Anti-Patterns to Avoid
-
-❌ **Keyword Stuffing**
-```html
-<!-- BAD -->
-<title>Best Shoes | Buy Shoes | Cheap Shoes | Shoes Online | Shoe Store</title>
-
-<!-- GOOD -->
-<title>Running Shoes for Marathon Training | SportShop</title>
-```
-Why bad: Search engines penalize unnatural keyword repetition. Users don't click spammy titles.
-
-❌ **Duplicate Descriptions**
-Using the same meta description across multiple pages.
-Why bad: Misses opportunity for page-specific relevance. Google may ignore and auto-generate.
-
-❌ **Description/Content Mismatch**
-Writing descriptions for keywords rather than actual content.
-Why bad: High bounce rates signal low quality. Users feel deceived.
-
-❌ **Missing Alt Text**
-```html
-<!-- BAD -->
-<img src="product.jpg">
-
-<!-- GOOD -->
-<img src="product.jpg" alt="Blue Nike Air Max running shoe, side view">
-```
-Why bad: Accessibility violation. Missed image search opportunity.
-
-❌ **Blocking Crawlers Unintentionally**
-```txt
-# Accidentally blocking everything
-User-agent: *
-Disallow: /
-```
-Why bad: Complete deindexing. Check robots.txt carefully.
-
-❌ **Ignoring Mobile**
-Not having responsive design or small-screen considerations.
-Why bad: most traffic is small-screen and responsive issues hurt rankings.
-
-❌ **Over-Optimization**
-Adding structured data for content that doesn't exist.
-Why bad: Schema violations can result in penalties. Trust erosion.
-
-❌ **Generic Auto-Generated Content**
-```html
-<!-- BAD: Template without customization -->
-<meta name="description" content="Welcome to our website. We offer great products and services.">
-```
-Why bad: Provides no value. Won't rank. Won't get clicks.
-
----
-
-## Variation Guidance
-
-**IMPORTANT**: SEO implementation should vary based on context.
-
-**Vary based on**:
-- **Industry**: E-commerce needs Product schema; SaaS needs Software schema
-- **Content type**: Blog posts vs landing pages vs documentation
-- **Audience**: B2B vs B2C affects tone and keywords
-- **Competition**: Highly competitive niches need more sophisticated optimization
-- **Framework**: Use native patterns (Next.js metadata API vs manual tags)
-
-**Avoid converging on**:
-- Same title format for all page types
-- Generic descriptions that could apply to any site
-- Identical structured data without page-specific content
-- One-size-fits-all sitemap configuration
-
----
-
-## Framework Quick Reference
-
-### Next.js (App Router)
-
-```typescript
-import { Metadata } from 'next'
-
-export const metadata: Metadata = {
-  title: 'Page Title | Brand',
-  description: 'Page description',
-  openGraph: {
-    title: 'Page Title',
-    description: 'Page description',
-    images: ['/og-image.png'],
-  },
-}
-```
-
-### Next.js (Pages Router)
-
-```typescript
-import Head from 'next/head'
-
-export default function Page() {
-  return (
-    <Head>
-      <title>Page Title | Brand</title>
-      <meta name="description" content="Page description" />
-    </Head>
-  )
-}
-```
-
-### Astro
-
-```astro
----
-import Layout from 'path/to/Layout.astro';
----
-<Layout
-  title="Page Title | Brand"
-  description="Page description"
-  ogImage="path/to/og-image.png" />
-```
-
-See `references/framework-implementations.md` for complete guides.
-
----
-
-## Scripts
-
-### analyze_seo.py
-
-Analyzes a codebase for SEO issues and opportunities:
-
-```bash
-python scripts/analyze_seo.py <path-to-project>
-```
-
-**Output**:
-- Current SEO state (what's implemented)
-- Missing elements by priority
-- Page-by-page recommendations
-- Structured data opportunities
-
-### generate_sitemap.py
-
-Generates sitemap.xml from project routes:
-
-```bash
-python scripts/generate_sitemap.py <path-to-project> --domain https://example.com
-```
-
----
-
-## Examples
-1) "Audit my Astro docs site and propose SEO fixes (titles, descriptions, sitemap)."
-2) "Add JSON-LD for product pages in Next.js App Router with a reusable helper."
-
-## Remember
-
-**SEO is semantic communication, not algorithm manipulation.**
-
-The best SEO:
-- Accurately describes what content IS
-- Helps machines understand meaning through structured data
-- Prioritizes user value over keyword optimization
-- Uses framework-native patterns
-- Implements progressively based on page importance
-
-Focus on making your content findable and understandable. The rankings follow from genuine value clearly communicated.
-
-**Claude is capable of comprehensive SEO analysis and implementation. These guidelines illuminate the path—they don't fence it.**
-
-## When to use
-- Use this skill when the task matches its description and triggers.
-- If the request is outside scope, route to the referenced skill.
-
-
-## Inputs
-- User request details and any relevant files/links.
-
-
-## Outputs
-- A structured response or artifact appropriate to the skill.
-- Include `schema_version: 1` if outputs are contract-bound.
-
-
 ## Constraints
 - Redact secrets/PII by default.
 - Avoid destructive operations without explicit user direction.
-
-
-## Validation
-- Run any relevant checks or scripts when available.
-- Fail fast and report errors before proceeding.
-
-
-## Anti-patterns
-- Avoid vague guidance without concrete steps.
-- Do not invent results or commands.
-## Procedure
-1) Clarify scope and inputs.
-2) Execute the core workflow.
-3) Summarize outputs and next steps.
-
-## Antipatterns
-- Do not add features outside the agreed scope.
+## Remember
+The agent is capable of extraordinary work in this domain. Use judgment, adapt to context, and push boundaries when appropriate.
+## Scripts
+- `scripts/analyze_seo.py`
+- `scripts/generate_sitemap.py`
+## Extended guidance
+See `references/extended.md` for additional examples, workflows, and appendices.

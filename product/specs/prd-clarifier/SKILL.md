@@ -163,15 +163,15 @@ The running tracker should be maintained in a code block or separate document se
 
 Remember: Your goal is not just to ask questions, but to systematically transform an ambiguous PRD into a clear, actionable specification through structured dialogue. Each question should demonstrably improve the document's clarity and completeness.
 
-## When to use
+## Scope and triggers
 - Use when a PRD is ambiguous, missing acceptance criteria, or needs scoped clarification.
 - Use before planning or implementation to avoid rework.
 
-## Inputs
+## Required inputs
 - PRD file path and any relevant context.
 - Optional: depth preference (quick/medium/long/ultralong).
 
-## Outputs
+## Deliverables
 - A clarification session log saved alongside the PRD.
 - A summary of clarified requirements and remaining ambiguities.
 - Include `schema_version: 1` if outputs are contract-bound.

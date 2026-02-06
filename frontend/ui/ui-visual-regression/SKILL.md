@@ -1,6 +1,12 @@
 ---
 name: ui-visual-regression
-description: "Run a minimal, repeatable UI visual regression pipeline (Storybook build + Playwright capture + Argos diff) and iterate on targeted UI fixes until visual diffs pass. If design-system guidance, tokens, or component standards are needed, consult the skill.. Use when Investigating visual diffs in Storybook/Argos pipelines.."
+description: Run a minimal, repeatable UI visual regression pipeline (Storybook build
+  + Playwright capture + Argos diff) and iterate on targeted UI fixes until visual
+  diffs pass. If design-system guidance, tokens, or component standards are needed,
+  consult the skill.. Use when Investigating visual diffs in Storybook/Argos pipelines..
+metadata:
+  short-description: Run a minimal, repeatable UI visual regression pipeline (Storybook
+    build + Pl...
 ---
 
 # Ui Visual Regression
@@ -14,7 +20,7 @@ description: "Run a minimal, repeatable UI visual regression pipeline (Storybook
 Run a minimal, repeatable UI visual regression pipeline (Storybook build + Playwright capture + Argos diff) and iterate on targeted UI fixes until visual diffs pass.
 If design-system guidance, tokens, or component standards are needed, consult the `frontend-design` skill.
 
-## When to use
+## Scope and triggers
 - Investigating visual diffs in Storybook/Argos pipelines.
 - Stabilizing snapshot tests and fixing layout regressions.
 - Reviewing whether diffs are expected vs unintended.
@@ -29,13 +35,13 @@ Every response must include these headings:
 Use this exact structure when the request is out of scope:
 
 ```md
-## When to use
+## Scope and triggers
 - This skill applies to UI visual regression workflows. The current request is out of scope.
 
-## Outputs
+## Deliverables
 - None (out of scope).
 
-## Inputs
+## Required inputs
 - None (out of scope).
 ```
 
@@ -174,11 +180,11 @@ See `references/argos-quickstart-notes.md` for the user-provided Argos quickstar
 ### assets/
 Optional templates for consistent snapshots or fixture assets.
 
-## Inputs
+## Required inputs
 - User request details and any relevant files/links.
 
 
-## Outputs
+## Deliverables
 - A structured response or artifact appropriate to the skill.
 - Include `schema_version: 1` if outputs are contract-bound.
 

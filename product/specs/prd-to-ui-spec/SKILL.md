@@ -45,14 +45,14 @@ Write the UI spec in the same directory as the source file.
 - Redact secrets/PII by default.
 - Avoid destructive operations without explicit user direction.
 
-## When to use
+## Scope and triggers
 - Use this skill when a PRD/UX spec needs a concrete UI spec grounded in aStudio.
 - If the request is outside scope, route to `prd-to-ux` or `product-spec`.
 
-## Inputs
+## Required inputs
 - User request details and any relevant files/links.
 
-## Outputs
+## Deliverables
 - UI spec file with design-token references and state diagrams.
 - Include `schema_version: 1` if outputs are contract-bound.
 

@@ -1,6 +1,11 @@
 ---
 name: 1password
-description: "Plan, validate, and use 1Password CLI setup for secret injection and auth. Use when tasks need 1Password CLI usage, secret references, op run/read/inject, or provisioning secrets via env vars/.env files and scripts."
+description: Plan, validate, and use 1Password CLI setup for secret injection and
+  auth. Use when tasks need 1Password CLI usage, secret references, op run/read/inject,
+  or provisioning secrets via env vars/.env files and scripts.
+metadata:
+  short-description: Plan, validate, and use 1Password CLI setup for secret injection
+    and auth.
 ---
 
 # 1Password CLI
@@ -155,7 +160,7 @@ tmux -S "$SOCKET" kill-session -t "$SESSION"
 ## Compliance
 - Follow repo and platform security standards (least privilege, no plaintext secrets).
 
-## When to use
+## Scope and triggers
 - Use this skill when the task matches its description and triggers.
 - If the request is outside scope, route to the referenced skill.
 
@@ -165,11 +170,11 @@ tmux -S "$SOCKET" kill-session -t "$SESSION"
 - For out-of-scope requests, include a `## When to use` section explaining the correct trigger.
 
 
-## Inputs
+## Required inputs
 - User request details and any relevant files/links.
 
 
-## Outputs
+## Deliverables
 - A structured response or artifact appropriate to the skill.
 - Include `schema_version: 1` if outputs are contract-bound.
 
@@ -196,3 +201,10 @@ tmux -S "$SOCKET" kill-session -t "$SESSION"
 1) Clarify scope and inputs.
 2) Execute the core workflow.
 3) Summarize outputs and next steps.
+
+## Variation
+- Vary tone, depth, and structure based on context.
+- Avoid repeating the same outline across outputs.
+
+## Remember
+The agent is capable of extraordinary work in this domain. Use judgment, adapt to context, and push boundaries when appropriate.

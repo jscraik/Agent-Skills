@@ -1,6 +1,10 @@
 ---
 name: video-transcript-downloader
-description: "Extract, summarize, and download video/audio/subtitles using yt-dlp/ffmpeg. Use when the user requests downloads or transcripts."
+description: Extract, summarize, and download video/audio/subtitles using yt-dlp/ffmpeg.
+  Use when the user requests downloads or transcripts.
+metadata:
+  short-description: Extract, summarize, and download video/audio/subtitles using
+    yt-dlp/ffmpeg.
 ---
 
 # Video Transcript Downloader
@@ -81,16 +85,16 @@ yt-dlp --version
 ffmpeg -version | head -n 1
 ```
 
-## When to use
+## Scope and triggers
 - Use this skill when the task matches its description and triggers.
 - If the request is outside scope, route to the referenced skill.
 
 
-## Inputs
+## Required inputs
 - User request details and any relevant files/links.
 
 
-## Outputs
+## Deliverables
 - A structured response or artifact appropriate to the skill.
 - Include `schema_version: 1` if outputs are contract-bound.
 
@@ -119,3 +123,18 @@ ffmpeg -version | head -n 1
 
 ## Antipatterns
 - Do not add features outside the agreed scope.
+
+## Examples
+- "Provide a concise response for this task."
+- "Follow the workflow and summarize outputs."
+
+## Variation
+- Vary tone, depth, and structure based on context.
+- Avoid repeating the same outline across outputs.
+
+## Remember
+The agent is capable of extraordinary work in this domain. Use judgment, adapt to context, and push boundaries when appropriate.
+
+## References
+- `references/contract.yaml`
+- `references/evals.yaml`

@@ -8,17 +8,17 @@ metadata:
 
 # Remotion Best Practices
 
-## When to use
+## Scope and triggers
 - You are writing or reviewing Remotion code and need domain-specific guidance.
 - You need patterns for compositions, timing, assets, audio, captions, transitions, or Mediabunny utilities.
 - You want a rule-backed checklist before implementing a Remotion feature.
 
-## Inputs
+## Required inputs
 - Question or code context (optional file paths or snippets).
 - Desired topic area (optional): compositions, timing, assets, audio, captions, transitions, rendering, or mediabunny.
 - Constraints (performance, render target, platform, deadlines).
 
-## Outputs
+## Deliverables
 - Rule-backed guidance with pointers to the most relevant rule files.
 - Suggested patterns or code approaches grounded in the rules.
 - Risks and verification steps when applicable.

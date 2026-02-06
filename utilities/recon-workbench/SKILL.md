@@ -1,21 +1,29 @@
 ---
 name: recon-workbench
-description: "Analyze and report authorized evidence using Recon Workbench (rwb) workflows. Use when you need authorize/plan/run/summarize flows and evidence-backed reporting for web apps or OSS repos."
+description: Analyze and report authorized evidence using Recon Workbench (rwb) workflows.
+  Use when you need authorize/plan/run/summarize flows and evidence-backed reporting
+  for web apps or OSS repos.
 metadata:
   source_repo: https://github.com/jscraik/Agent-Skills
   source_rev: 7e31061c353c94746910d239ae122900cc5324fb-dirty
-  source_dirty: "true"
+  source_dirty: 'true'
   source_dirty_paths: utilities/recon-workbench/references/evals.yaml, utilities/skill-creator/scripts/run_skill_evals.py,
     design/better-icons/
+  short-description: Analyze and report authorized evidence using Recon Workbench
+    (rwb) workflows.
 ---
 
 # Recon Workbench (rwb)
+
+## Remember
+The agent is capable of extraordinary work in this domain. Use judgment, adapt to context, and push boundaries when appropriate.
+
 
 **Recon Workbench** is a production-grade forensic evidence collection platform with policy-driven authorization, comprehensive validation, and supply chain integrity.
 
 Answer with sections titled exactly: **Outputs** and **Procedure** (include authorization notes).
 
-## When to use
+## Scope and triggers
 - Running Recon Workbench CLI flows (`uv run python -m rwb`, or legacy `./recon` wrapper)
 - Creating authorization artifacts and probe plans for authorized targets
 - Summarizing evidence-backed findings and reports with artifact citations
@@ -130,7 +138,7 @@ max_escalation_level: "instrumentation"  # read_only < instrumentation < escalat
 require_authorization: true
 ```
 
-## Inputs
+## Required inputs
 
 - `target_id`: Unique identifier for the target
 - `target_kind`: One of macos-app, ios-sim, ios-device, web-app, oss-repo
@@ -139,7 +147,7 @@ require_authorization: true
 - `authorization`: Authorization artifact (required when scope enforces authorization)
 - `run_dir`: Output directory for artifacts (prefer under `data/runs/`; legacy `runs/` also supported)
 
-## Outputs
+## Deliverables
 
 **Structure**: `data/runs/<target>/<session>/<run>/` (preferred; `runs/` is legacy but still supported)
 - `raw/` - Probe artifacts (logs, dumps, traces, HARs)
@@ -288,54 +296,5 @@ When analyzing a target:
 - Escalating by default instead of justifying each step
 - Treating unknowns as confirmed facts
 - Relying on inferred behavior without artifacts
-
-## Example Prompts
-
-- "Design a probe set for React web app component inspection"
-- "Validate the evidence paths in this findings.json"
-- "Generate a SHA256 manifest for this run directory"
-
-## Remember
-
-The agent is capable of extraordinary work in this domain. These guidelines unlock that potential—they don't constrain it.
-Use judgment, adapt to context, and push boundaries when appropriate.
-
-## Resources
-
-### Documentation
-
-- `README.md` - Project overview and quickstart
-- `docs/reference/GOLD_STANDARD.md` - Gold Industry Standard compliance
-- `AGENTS.md` - Agent instructions and workflows
-- `docs/guides/SECURITY.md` - Security policy and vulnerability reporting
-- `config/scope.example.yaml` - Scope configuration template
-
-### Schemas
-
-- `config/schemas/authorization.schema.json` - Authorization artifact structure
-- `config/schemas/probe-plan.v2.schema.json` - Probe plan validation
-- `config/schemas/findings.v2.schema.json` - Findings structure
-- `config/schemas/manifest.v2.schema.json` - Integrity manifest structure
-
-### Probe Catalog
-
-- `probes/catalog.json` - All available probes and probe sets
-
-### Validation Scripts
-
-- `scripts/validate_catalog.py` - Validate probe catalog
-- `scripts/validate_manifest.py` - Validate integrity manifest
-- `scripts/validate_evidence.py` - Validate evidence paths in findings
-
-### MCP Integration
-
-- `scripts/mcp_server.py` - MCP server for AI agent integration
-
-## Constraints
-- Redact secrets/PII by default.
-- Avoid destructive operations without explicit user direction.
-
-## Anti-patterns
-- Avoid vague guidance without concrete steps.
-- Do not invent results or commands.
-- Do not add features outside the agreed scope.
+## Extended guidance
+See `references/extended.md` for additional examples, workflows, and appendices.
