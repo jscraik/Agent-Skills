@@ -94,6 +94,15 @@ require_authorization: true
 
 ## Inputs
 
+## Cognitive Support / Plain-Language
+- Optimize for low cognitive load (TBI support): one task at a time, explicit steps.
+- Use plain language first; define jargon in parentheses.
+- Keep steps short and checklist-driven where possible.
+- Externalize state: decisions, assumptions, and the next step.
+- Provide ELI5 explanations for non-trivial logic.
+- Ask one question at a time; prefer multiple-choice when possible.
+
+
 - `target_id`: Unique identifier for the target
 - `target_kind`: One of macos-app, ios-sim, ios-device, web-app, oss-repo
 - `target_locator`: Path, URL, bundle ID, or repo identifier

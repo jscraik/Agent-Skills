@@ -14,3 +14,13 @@ cases:
     acceptance:
       - type: contains
         value: "## When to use"
+  - name: glossary-inline
+    prompt: "Run a PM interview with inline glossary translations."
+    acceptance:
+      - type: contains
+        value: "activation ("
+  - name: uiux-persona-detection
+    prompt: "PM interview for UI polish and interaction improvements."
+    acceptance:
+      - type: contains
+        value: "Craft Notes"

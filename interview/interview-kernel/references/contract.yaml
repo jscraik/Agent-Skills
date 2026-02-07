@@ -6,8 +6,12 @@ triggers:
 inputs:
   - user request details
 outputs:
-  - primary response or artifact
+  - interview log updates with decisions/assumptions
+  - recap cards per cadence rules
+  - synthesis with inline glossary translations when needed
+  - persona overlay in synthesis (UI/UX may influence questions)
 non_goals:
   - out-of-scope work
 risks:
   - missing inputs; mitigated by clarifying questions
+  - jargon overload; mitigated by inline translations and dual-phrase wording

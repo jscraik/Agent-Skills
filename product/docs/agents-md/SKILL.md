@@ -42,6 +42,15 @@ Mandatory snippet (include verbatim in guidance):
 - Always include all three sections in every response:
   - `## Outputs` describing delivered artifacts.
   - `## Inputs` listing missing info or noting "none".
+
+## Cognitive Support / Plain-Language
+- Optimize for low cognitive load (TBI support): one task at a time, explicit steps.
+- Use plain language first; define jargon in parentheses.
+- Keep steps short and checklist-driven where possible.
+- Externalize state: decisions, assumptions, and the next step.
+- Provide ELI5 explanations for non-trivial logic.
+- Ask one question at a time; prefer multiple-choice when possible.
+
   - `## When to use` explaining the correct trigger or noting "in scope".
 - Use the exact heading text and casing shown above.
 - For out-of-scope requests, start with `## When to use` and still include `## Outputs` and `## Inputs` below.

@@ -1,0 +1,18 @@
+cases:
+  - name: happy-path
+    prompt: "Use backend-engineer to extend an existing Workers + Hono endpoint safely with GWT acceptance criteria."
+    acceptance:
+      - type: contains
+        value: "## Acceptance criteria (Given/When/Then)"
+      - type: contains
+        value: "## Verification"
+  - name: edge-case
+    prompt: "We need to patch a backend but I have not specified the target module or tests."
+    acceptance:
+      - type: contains
+        value: "## Questions"
+  - name: failure-mode
+    prompt: "Create a brand-new backend architecture from scratch."
+    acceptance:
+      - type: contains
+        value: "backend-design"

@@ -167,6 +167,15 @@ tmux -S "$SOCKET" kill-session -t "$SESSION"
 ## Response format (required)
 - For normal requests, include a `## Outputs` section describing delivered artifacts.
 - For edge cases with missing info, include a `## Inputs` section listing what is missing.
+
+## Cognitive Support / Plain-Language
+- Optimize for low cognitive load (TBI support): one task at a time, explicit steps.
+- Use plain language first; define jargon in parentheses.
+- Keep steps short and checklist-driven where possible.
+- Externalize state: decisions, assumptions, and the next step.
+- Provide ELI5 explanations for non-trivial logic.
+- Ask one question at a time; prefer multiple-choice when possible.
+
 - For out-of-scope requests, include a `## When to use` section explaining the correct trigger.
 
 

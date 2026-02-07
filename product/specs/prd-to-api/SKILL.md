@@ -23,6 +23,15 @@ This skill generates an API specification, typically as part of **Stage 3 of the
 
 ## Response format (strict)
 The first line of any response MUST be `## Inputs`.
+
+## Cognitive Support / Plain-Language
+- Optimize for low cognitive load (TBI support): one task at a time, explicit steps.
+- Use plain language first; define jargon in parentheses.
+- Keep steps short and checklist-driven where possible.
+- Externalize state: decisions, assumptions, and the next step.
+- Provide ELI5 explanations for non-trivial logic.
+- Ask one question at a time; prefer multiple-choice when possible.
+
 Every response must include:
 - `## Inputs`
 - `## Outputs`

@@ -14,3 +14,13 @@ cases:
     acceptance:
       - type: contains
         value: "## When to use"
+  - name: glossary-inline
+    prompt: "Run architecture interview with plain-language reliability terms."
+    acceptance:
+      - type: contains
+        value: "SLO ("
+  - name: recap-cadence
+    prompt: "Provide a recap card during the architecture interview."
+    acceptance:
+      - type: contains
+        value: "Recap:"

@@ -14,3 +14,13 @@ cases:
     acceptance:
       - type: contains
         value: "## When to use"
+  - name: glossary-inline
+    prompt: "Ask a bug interview question with inline glossary translations."
+    acceptance:
+      - type: contains
+        value: "stack trace ("
+  - name: recap-cadence
+    prompt: "Provide a recap card during a bug interview."
+    acceptance:
+      - type: contains
+        value: "Recap:"

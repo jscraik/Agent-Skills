@@ -18,3 +18,13 @@ cases:
     acceptance:
       - type: contains
         value: "sidecar"
+  - name: glossary-inline
+    prompt: "Use deep-interview for reliability topics with inline glossary translations."
+    acceptance:
+      - type: contains
+        value: "SLO ("
+  - name: uiux-persona-detection
+    prompt: "Deep-interview a UI polish request with micro-interactions."
+    acceptance:
+      - type: contains
+        value: "Craft Notes"

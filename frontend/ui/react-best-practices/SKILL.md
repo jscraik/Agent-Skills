@@ -140,6 +140,15 @@ Use this skill when a user asks to:
 
 ## Required inputs
 
+## Cognitive Support / Plain-Language
+- Optimize for low cognitive load (TBI support): one task at a time, explicit steps.
+- Use plain language first; define jargon in parentheses.
+- Keep steps short and checklist-driven where possible.
+- Externalize state: decisions, assumptions, and the next step.
+- Provide ELI5 explanations for non-trivial logic.
+- Ask one question at a time; prefer multiple-choice when possible.
+
+
 - Target files or directories.
 - Framework context (Next.js App Router vs Pages Router).
 - Performance goal (latency, bundle size, re-render reduction).

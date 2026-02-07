@@ -18,6 +18,15 @@ Transform your web application from invisible to discoverable. This skill analyz
 Every response must include these headings:
 - `## When to use`
 - `## Inputs`
+
+## Cognitive Support / Plain-Language
+- Optimize for low cognitive load (TBI support): one task at a time, explicit steps.
+- Use plain language first; define jargon in parentheses.
+- Keep steps short and checklist-driven where possible.
+- Externalize state: decisions, assumptions, and the next step.
+- Provide ELI5 explanations for non-trivial logic.
+- Ask one question at a time; prefer multiple-choice when possible.
+
 - `## Outputs`
 
 ## Failure-mode template (out of scope)

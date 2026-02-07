@@ -41,6 +41,15 @@ Prereq: ensure `gh` is authenticated (for example, run `gh auth login` once), th
 
 ## Required inputs
 
+## Cognitive Support / Plain-Language
+- Optimize for low cognitive load (TBI support): one task at a time, explicit steps.
+- Use plain language first; define jargon in parentheses.
+- Keep steps short and checklist-driven where possible.
+- Externalize state: decisions, assumptions, and the next step.
+- Provide ELI5 explanations for non-trivial logic.
+- Ask one question at a time; prefer multiple-choice when possible.
+
+
 - `repo`: path inside the repo (default `.`)
 - `pr`: PR number or URL (optional; defaults to current branch PR)
 - `gh` authentication for the repo host

@@ -14,3 +14,18 @@ cases:
     acceptance:
       - type: contains
         value: "## When to use"
+  - name: glossary-inline
+    prompt: "Run an interview question about reliability using plain language with inline glossary terms."
+    acceptance:
+      - type: contains
+        value: "SLO ("
+  - name: uiux-persona-detection
+    prompt: "Interview me about UI polish and micro-interactions for a new component."
+    acceptance:
+      - type: contains
+        value: "Craft Notes"
+  - name: recap-cadence
+    prompt: "Continue the interview and provide a recap card after a couple of answers."
+    acceptance:
+      - type: contains
+        value: "Recap:"

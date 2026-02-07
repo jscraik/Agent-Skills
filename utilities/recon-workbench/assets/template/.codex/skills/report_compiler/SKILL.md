@@ -1,7 +1,7 @@
 ---
 name: report_compiler
-description: Compile multiple run findings into a single report with cross-run diffs
-  and stable conclusions.
+description: Summarize and compile multiple run findings into a single report with
+  cross-run diffs and stable conclusions. Use when consolidating investigation outputs.
 metadata:
   source_repo: https://github.com/jscraik/Agent-Skills
   source_rev: 7e31061c353c94746910d239ae122900cc5324fb-dirty
@@ -18,3 +18,12 @@ Output:
   - what changed between baseline and stimulus
   - stable behaviors (observed repeatedly)
   - open questions and recommended next probes
+
+## Cognitive Support / Plain-Language
+- Optimize for low cognitive load (TBI support): one task at a time, explicit steps.
+- Use plain language first; define jargon in parentheses.
+- Keep steps short and checklist-driven where possible.
+- Externalize state: decisions, assumptions, and the next step.
+- Provide ELI5 explanations for non-trivial logic.
+- Ask one question at a time; prefer multiple-choice when possible.
+
