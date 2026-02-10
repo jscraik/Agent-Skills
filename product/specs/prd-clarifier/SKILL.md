@@ -1,6 +1,6 @@
 ---
 name: prd-clarifier
-description: "Refine and clarify PRDs via structured AskUserQuestion sessions. Use when a PRD is ambiguous, missing acceptance criteria, or needs scoped clarification before planning."
+description: "Clarify an existing PRD via structured AskUserQuestion sessions (fill gaps, acceptance criteria). Use when a PRD is ambiguous/missing detail; use product-spec to draft from scratch."
 metadata:
   short-description: "Structured PRD clarification interview."
 ---

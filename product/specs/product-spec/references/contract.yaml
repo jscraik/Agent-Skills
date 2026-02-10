@@ -1,19 +1,64 @@
 purpose: >
-  Define expected behavior and outputs for this skill.
-schema_version: 1.0
+  Define expected behavior and outputs for the product-spec skill (documentation/spec generation only).
+schema_version: 1.1
 triggers:
-  - user requests the capability described in this skill
+  - user asks for an end-to-end PRD/Foundation + UX spec + build plan
+  - user asks to review an existing PRD/repo and identify product/UX/build-plan gaps (no implementation)
 inputs:
-  - user request details
+  - mode (create|review|lite) and any constraints (timeline, budget, non-negotiables)
+  - starting point (idea summary and/or doc paths)
+  - evidence sources when available (metrics, feedback, tickets); otherwise mark Evidence gaps
 outputs:
-  - primary response or artifact
-  - adversarial review report with persona findings, Evidence Gaps, and Evidence Map
+  - Foundation Spec (file under .spec/)
+  - UX Spec (file under .spec/)
+  - Build Plan (file under .spec/)
+  - Evidence Gaps + Evidence Map
 non_goals:
-  - out-of-scope work
+  - implementing product code, migrations, deployments, or refactors
+  - inventing evidence (must mark Evidence gap instead)
 risks:
   - missing inputs; mitigated by clarifying questions
 output_contracts:
+  foundation_spec:
+    schema_version: 1
+    required_sections:
+      - Problem & Job
+      - Success Criteria
+      - Scope (In / Out)
+      - Primary Journey (Happy Path)
+      - Assumptions
+      - Evidence Gaps
+      - Evidence Map
+    required_rules:
+      - "each paragraph ends with Evidence: or Evidence gap:"
+  ux_spec:
+    schema_version: 1
+    required_sections:
+      - Mental Model
+      - Information Architecture
+      - Affordances & Actions
+      - Cognitive Load
+      - State Design
+      - Flow Integrity
+      - UX Acceptance Criteria
+      - Evidence Gaps
+      - Evidence Map
+    required_rules:
+      - "each paragraph ends with Evidence: or Evidence gap:"
+  build_plan:
+    schema_version: 1
+    required_sections:
+      - Outcome → Opportunities → Solution
+      - Key Assumptions & Risks
+      - Epics (Sequenced)
+      - Stories (with Acceptance Criteria + Tests + Telemetry)
+      - Release & Measurement Plan
+      - Evidence Gaps
+      - Evidence Map
+    required_rules:
+      - "each paragraph ends with Evidence: or Evidence gap:"
   adversarial_review_report:
+    schema_version: 1
     required_sections:
       - Executive Summary
       - Persona Findings

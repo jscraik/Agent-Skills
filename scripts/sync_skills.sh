@@ -12,9 +12,15 @@ mkdir -p "$skills_dir"
 # Ensure system skills are not in the flat symlink view (prevents duplicates).
 if [ -d "$skills_dir/.system" ]; then
   mkdir -p "$system_skills_dir"
+  # Safety: if repo already has a skills-system marker, do NOT overwrite it from
+  # whatever happens to be in skills/.system (which can be partial/ephemeral).
+  # Just remove skills/.system so system skills don't appear in the flat view.
+  if [ -f "$system_skills_dir/.codex-system-skills.marker" ]; then
+    rm -rf "$skills_dir/.system"
+  else
   # Use rsync to handle existing directories, then remove source
   if command -v rsync >/dev/null 2>&1; then
-    rsync -a --delete "$skills_dir/.system/" "$system_skills_dir/"
+    rsync -a "$skills_dir/.system/" "$system_skills_dir/"
     rm -rf "$skills_dir/.system"
   elif command -v zsh >/dev/null 2>&1; then
     zsh -c "setopt globdots; rm -rf \"$system_skills_dir\"/*; mv \"$skills_dir/.system\"/* \"$system_skills_dir\"/; rmdir \"$skills_dir/.system\""
@@ -26,6 +32,7 @@ if [ -d "$skills_dir/.system" ]; then
     mv "$skills_dir"/* "$system_skills_dir"/ 2>/dev/null || true
     rmdir "$skills_dir/.system" 2>/dev/null || true
   fi
+  fi
 fi
 
 # Remove stale symlinks only (keep any real files that might be intentional).
@@ -34,6 +41,7 @@ find "$skills_dir" -maxdepth 1 -type l -exec rm -f {} +
 # Recreate symlinks for all discovered SKILL.md directories (with exclusions).
 skill_files_cmd() {
   find . \
+    -path "*/_archive" -prune -o \
     -path "./skills" -prune -o \
     -path "./skills-system" -prune -o \
     -path "./.git" -prune -o \

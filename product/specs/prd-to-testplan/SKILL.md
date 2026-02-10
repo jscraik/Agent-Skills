@@ -1,8 +1,6 @@
 ---
 name: prd-to-testplan
-description: Generate a test plan and validation matrix from a PRD, mapping acceptance
-  criteria to test types and quality gates. Use when verification strategy must be
-  explicit before build.
+description: "Generate a test plan from an existing PRD (map acceptance criteria to tests + quality gates). Use when verification must be explicit before build; use product-spec to draft end-to-end."
 metadata:
   short-description: Generate a test plan and validation matrix from a PRD, mapping
     acceptance cri...

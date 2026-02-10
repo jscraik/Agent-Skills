@@ -1,6 +1,6 @@
 ---
 name: prd-to-ux
-description: "Generate UX specifications from PRDs, feature specs, or product requirements for mockup tools. Use when preparing UX foundations before visual design."
+description: "Generate a UX specification from an existing PRD/Foundation Spec (Stage 2). Use when you need UX clarity before build planning; use product-spec for end-to-end PRD+UX+plan."
 metadata:
   short-description: "6-pass UX spec from a PRD."
 ---

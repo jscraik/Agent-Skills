@@ -4,15 +4,16 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 
 ## Auth
 
-- `best-practices` — Review Better Auth setups and highlight secure integration best practices. Use for audits, config guidance, or debugging flows (not full implementation).
-- `create-auth` — Build Better Auth integrations for TS/JS apps with secure defaults. Use for implementation or migration work (not just review).
+- `best-practices` — Review Better Auth setups and highlight secure integration best practices.
+- `create-auth` — Build Better Auth integrations for TS/JS apps with secure defaults. Use
 
 ## Backend
 
-- `cli-spec` — Plan and draft CLI UX and surface area (commands, flags, help, output). Use when specifying or refactoring a command-line interface.
-- `mcp-builder` — Create general-purpose MCP servers and tool schemas for standard integrations. Use when building MCP services without OAuth/billing/Apps UI requirements.
-- `mkit-builder` — Create MCP servers with OAuth, billing/licensing, and Apps SDK UI integration. Use when you need enterprise-grade MCP patterns beyond the standard MCP builder.
-- `workers-mcp` — Create production-ready MCP servers on Cloudflare Workers with:. Use when Use this skill when the task matches its description and triggers..
+- `backend-engineer` — Plan and review safe backend extensions for existing services (Cloudflare Workers + Hono primary). Use this skill when patching or adding backend features in an existing codebase.
+- `cli-spec` — Plan and draft CLI UX and surface area (commands, flags, help, output).
+- `mcp-builder` — Create general-purpose MCP servers and tool schemas for standard integrations.
+- `mkit-builder` — Create MCP servers with OAuth, billing/licensing, and Apps SDK UI integration.
+- `workers-mcp` — Create production-ready MCP servers on Cloudflare Workers with:. Use
 
 ## Design
 
@@ -20,40 +21,46 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 
 ## Frontend — Graphics
 
-- `favicon-generator` — Generate complete favicon/app icon suites with templates and assets. Use when the user needs favicons or app icons for a web/app project.
-- `og-image-creator` — Generate authentic, brand-aligned Open Graph images by understanding your codebase first, then creating contextually appropriate images for each route using Playwright and your existing components.. Use when Use this skill when the task matches its description and triggers..
-- `threejs-builder` — Build and validate simple, performant Three.js web apps using modern ES module patterns. Use this when you need a minimal Three.js scene, interaction, or animation for a web UI or demo.
+- `favicon-generator` — Generate complete favicon/app icon suites with templates and assets.
+- `imagegen` — Use when the user asks to generate or edit images via the OpenAI Image API (for example: generate image, edit/inpaint/mask, background removal or replacement, transparent background, product shots, concept art, covers, or batch variants); run the bundled CLI (`scripts/image_gen.py`) and require `OPENAI_API_KEY` for live calls.
+- `og-image-creator` — Generate authentic, brand-aligned Open Graph images by understanding
+- `sora` — Use when the user asks to generate, remix, poll, list, download, or delete Sora videos via OpenAI\u2019s video API using the bundled CLI (`scripts/sora.py`), including requests like \u201cgenerate AI video,\u201d \u201cSora,\u201d \u201cvideo remix,\u201d \u201cdownload video/thumbnail/spritesheet,\u201d and batch video generation; requires `OPENAI_API_KEY` and Sora API access.
+- `threejs-builder` — Build and validate simple, performant Three.js web apps using modern
 
 ## Frontend — Seo
 
-- `seo-optimizer` — Transform your web application from invisible to discoverable. This skill analyzes your codebase and implements comprehensive SEO optimizations that help search engines and social platforms understand, index, and surface your content.. Use when Use this skill when the task matches its description and triggers..
+- `seo-optimizer` — Transform your web application from invisible to discoverable. This skill
 
 ## Frontend — Tools
 
-- `codex-ui-kit-installer` — Scaffold and install codex-ui-kit assets and optional prompts in a repo. Use when adding codex-ui-kit to a project.
-- `nano-banana-builder` — Build production-ready web applications powered by Google's Nano Banana image generation APIs—creating everything from simple text-to-image generators to sophisticated iterative editors with multi-turn conversation.. Use when Use this skill when the task matches its description and triggers..
+- `agent-trace-debug` — Analyze Agent Trace data flow when AIAttributionPanel shows empty/incorrect trace by tracing expected vs actual shapes across agentTraceStore and API.
+- `codex-ui-kit-installer` — Scaffold and install codex-ui-kit assets, prompts, and optional config
+- `nano-banana-builder` — Build production-ready web applications powered by Google's Nano Banana
 
 ## Frontend — Ui
 
-- `frontend-ui-design` — Create and review production-ready UI systems/components with tokens and accessibility. Use for standard UI implementation or redesign (not creative-coding polish).
+- `figma-implement-design` — Translate Figma nodes into production-ready code with 1:1 visual fidelity using the Figma MCP workflow (design context, screenshots, assets, and project-convention translation). Trigger when the user provides Figma URLs or node IDs, or asks to implement designs or components that must match Figma specs. Requires a working Figma MCP server connection.
+- `figma` — Use the Figma MCP server to fetch design context, screenshots, variables, and assets from Figma, and to translate Figma nodes into production code. Trigger when a task involves Figma URLs, node IDs, design-to-code implementation, or Figma MCP setup and troubleshooting.
+- `frontend-ui-design` — Create and review production-ready UI systems/components with tokens
 - `react-best-practices` — React and Next.js performance optimization guidelines from Vercel Engineering. This skill should be used when writing, reviewing, or refactoring React/Next.js code to ensure optimal performance patterns. Triggers on tasks involving React components, Next.js pages, data fetching, bundle optimization, or performance improvements.
-- `react-ui-patterns` — Provide concrete, example-driven guidance for React UI composition, state, routing, and component patterns in a TypeScript + Tailwind + Radix stack.. Use when Building or refactoring React screens and components..
-- `ui-visual-regression` — Run a minimal, repeatable UI visual regression pipeline (Storybook build + Playwright capture + Argos diff) and iterate on targeted UI fixes until visual diffs pass. If design-system guidance, tokens, or component standards are needed, consult the skill.. Use when Investigating visual diffs in Storybook/Argos pipelines..
-- `web-design-guidelines` — Review UI code against Web Interface Guidelines with file:line findings. Use for rule-based compliance checks (not experiential critiques).
+- `react-ui-patterns` — Provide concrete, example-driven guidance for React UI composition, state,
+- `ui-visual-regression` — Run a minimal, repeatable UI visual regression pipeline (Storybook build
+- `web-design-guidelines` — Review UI code against Web Interface Guidelines with file:line findings.
 
 ## Github
 
-- `gh-actions-fix` — Use gh to locate failing PR checks, fetch GitHub Actions logs for actionable failures, summarize the failure snippet, then propose a fix plan and implement after explicit approval.. Use when When a user asks to debug or fix failing GitHub Actions checks on a PR..
-- `gh-address-comments` — The agent is capable of extraordinary work in this domain. These guidelines unlock that potential—they don't constrain it. Use judgment, adapt to context, and push boundaries when appropriate.. Use when When the user asks to address review comments on an open GitHub PR..
-- `gh-issue-fix` — Analyze and resolve a GitHub issue from intake through fix, validation, and push using gh, local edits, and git. Use this skill when you need to analyze and fix a GitHub issue end-to-end using gh and local changes.
-- `gh-pr-local` — Fetch, preview, test, and merge GitHub PRs locally using the primary PR workflow. Use when you want a local evaluation before merge.
+- `gh-actions-fix` — Use gh to locate failing PR checks, fetch GitHub Actions logs for actionable
+- `gh-address-comments` — The agent is capable of extraordinary work in this domain. These guidelines
+- `gh-issue-fix` — Analyze and resolve a GitHub issue from intake through fix, validation,
+- `gh-pr-local` — Fetch, preview, test, and merge GitHub PRs locally using the primary
+- `yeet` — Use only when the user explicitly asks to stage, commit, push, and open a GitHub pull request in one flow using the GitHub CLI (`gh`).
 
 ## Interview
 
 - `architecture-interview` — Plan and review architecture decisions via a structured interview and ADR output. Use when choosing between system design alternatives.
 - `bug-interview` — Analyze and review bug reports to capture repro, evidence, and the next smallest diagnostic step. Use when a bug report lacks clear reproduction.
 - `deep-interview` — Deep, gap-filling interview that enhances an existing doc/spec (preferred) or explores a topic. Use when deepening PRDs, ADRs, tickets, notes, or draft specs; if given a doc path, update it in-place with Delta/Interview Insights and an approval gate.
-- `interview-kernel` — Core interview engine enforcing strict discovery/decision gating with externalized state, decisions, assumptions, and an approval gate. Use when building interview wrapper skills.
+- `interview-kernel` — Core interview engine enforcing strict discovery/decision gating with
 - `interview-me` — Interactive, multiple-choice interview for requirements discovery and spec clarification; turns an underspecified idea (or draft spec) into an execution-ready spec with decisions, assumptions, acceptance criteria, and approval. Use when a user asks to 'interview me', clarify scope, or refine a draft spec.
 - `pm-interview` — Plan and review product scope, value, metrics, and rollout via a structured interview. Use when product direction or scope must be clarified.
 
@@ -63,76 +70,78 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 
 ## Product — Content
 
-- `youtube-hooks-scripts` — Create hooks and full scripts for technical YouTube videos. Use when drafting video hooks or scripts.
-- `youtube-titles-thumbnails` — Generate YouTube titles and thumbnail text optimized for CTR. Use when crafting or optimizing titles/thumbnails.
+- `youtube-hooks-scripts` — Create high-retention hooks and full scripts for technical YouTube videos
+- `youtube-titles-thumbnails` — Generate multiple SEO/CTR-optimized YouTube title and thumbnail text
 
 ## Product — Design
 
-- `ui-ux-creative-coding` — Creative-coding UI polish for Tauri+React (Tailwind v4, Radix, Three.js). Use when you need expressive motion craft or WebGL accents—not baseline UI system work.
+- `ui-ux-creative-coding` — Creative-coding UI polish for Tauri+React (Tailwind v4, Radix, Three.js).
 
 ## Product — Docs
 
-- `agents-md` — Refactor or create AGENTS.md using progressive disclosure: keep root minimal, split detailed instructions into linked docs, and flag contradictions/redundancy. Use when the user asks to create, update, or refactor AGENTS.md.
-- `context7` — Extract current library documentation via Context7 when users need up-to-date API details, version checks, or dependency troubleshooting for external libraries.
-- `docs-expert` — Co-author and QA documentation such as READMEs, guides, and runbooks. Use when writing or auditing docs (not PRDs/specs).
+- `agents-md` — 'Refactor or create AGENTS.md using progressive disclosure: keep root
+- `context7` — Extract current library documentation via Context7 when users need up-to-date
+- `docs-expert` — Co-author and QA documentation such as READMEs, guides, and runbooks.
 
 ## Product — Domain
 
+- `cloudflare-deploy` — Deploy applications and infrastructure to Cloudflare using Workers, Pages, and related platform services. Use when the user asks to deploy, host, publish, or set up a project on Cloudflare.
 - `oak-api` — Build or adapt Oak Curriculum API driven learning experiences, especially
 
 ## Product — Ops
 
-- `decide-build-primitive` — Analyze and decide the right Codex primitive (Skill, Custom Prompt, or Agent automation) for a capability. Use this when you need to plan how to package or automate a workflow.
-- `linear` — This skill provides a structured workflow for managing issues, projects & team workflows in Linear. It ensures consistent integration with the Linear MCP server, which offers natural-language project management for issues, projects, documentation, and team collaboration.. Use when When the user wants to read, create, or update Linear issues or projects..
-- `release` — Create and publish a new project release (semver) when you need to cut a main-branch, clean-tree release via just release X.Y.Z for Cargo publish and git tag creation.
+- `decide-build-primitive` — Analyze and decide the right Codex primitive (Skill, Custom Prompt, or
+- `linear` — This skill provides a structured workflow for managing issues, projects
+- `release` — Create and publish a new project release (semver) when you need to cut
 
 ## Product — Review
 
-- `codex-wrapped` — Generate a Codex/Claude Code usage recap from local logs, including last 30 days, last 7 days, and all-time stats. Use when the user asks for a usage summary, activity recap, or coding activity report.
-- `llm-design-review` — Structure a multidisciplinary design review for LLM-powered products, producing actionable risks, fixes, and evidence gaps across UX, architecture, AI safety, and operations.. Use when Use this skill when the task matches its description and triggers..
-- `product-design-review` — Deliver a user-centered UX critique across the full experience. Use for heuristic reviews and journey analysis (not file:line guideline compliance).
+- `codex-wrapped` — Generate a Codex/Claude Code usage recap from local logs, including last
+- `llm-design-review` — Structure a multidisciplinary design review for LLM-powered products,
+- `product-design-review` — Deliver a user-centered UX critique across the full experience. Use for
+
+## Product — Security
+
+- `security-best-practices` — Perform language and framework specific security best-practice reviews and suggest improvements. Trigger only when the user explicitly requests security best practices guidance, a security review/report, or secure-by-default coding help. Trigger only for supported languages (python, javascript/typescript, go). Do not trigger for general code review, debugging, or non-security tasks.
+- `security-ownership-map` — Analyze git repositories to build a security ownership topology (people-to-file), compute bus factor and sensitive-code ownership, and export CSV/JSON for graph databases and visualization. Trigger only when the user explicitly wants a security-oriented ownership or bus-factor analysis grounded in git history (for example: orphaned sensitive code, security maintainers, CODEOWNERS reality checks for risk, sensitive hotspots, or ownership clusters). Do not trigger for general maintainer lists or non-security ownership questions.
+- `security-threat-model` — Repository-grounded threat modeling that enumerates trust boundaries, assets, attacker capabilities, abuse paths, and mitigations, and writes a concise Markdown threat model. Trigger only when the user explicitly asks to threat model a codebase or path, enumerate threats/abuse paths, or perform AppSec threat modeling. Do not trigger for general architecture summaries, code review, or non-security design work.
 
 ## Product — Specs
 
-- `prd-clarifier` — Refine and clarify PRDs via structured AskUserQuestion sessions. Use when a PRD is ambiguous, missing acceptance criteria, or needs scoped clarification before planning.
-- `prd-to-accessibility` — Generate accessibility requirements and checks from a PRD, aligned to WCAG targets and key journeys. Use when accessibility expectations must be explicit and testable.
-- `prd-to-api-lite` — Generate a minimal API outline from a PRD (endpoints + example requests/responses). Use for demos or early alignment, not full contracts.
-- `prd-to-api` — Generate a full API specification from a PRD or tech spec (endpoints, schemas, errors, auth). Use when a production-grade contract is required.
-- `prd-to-arch-lite` — Generate a lite architecture snapshot from a PRD (minimal components + primary flow). Use for demo-grade guidance, not full governance.
-- `prd-to-arch` — Generate a full architecture specification from a PRD or tech spec. Use when system boundaries and diagrams must be locked before build.
-- `prd-to-qa-cases` — Generate QA test cases from PRD acceptance criteria using Given/When/Then and expected results. Use when QA coverage needs explicit, auditable cases.
-- `prd-to-risk` — Generate a risk register and mitigation plan from a PRD, covering product, security, delivery, and dependency risks. Use when risks must be explicitly enumerated and owned.
-- `prd-to-roadmap` — Generate a phased roadmap from a PRD with goals, dependencies, and validation gates. Use when sequencing and milestone logic must be explicit without dates.
-- `prd-to-security-review` — Generate a security review from a PRD. Use when security requirements, threats, and mitigations must be explicit before build.
-- `prd-to-testplan` — Generate a test plan and validation matrix from a PRD, mapping acceptance criteria to test types and quality gates. Use when verification strategy must be explicit before build.
-- `prd-to-ui-spec` — Generate UI specifications from PRDs or UX specs using the aStudio design system. Use when a UI spec is needed before build or mockups.
-- `prd-to-ux` — Generate UX specifications from PRDs, feature specs, or product requirements for mockup tools. Use when preparing UX foundations before visual design.
-- `product-spec` — Create or review PRDs/tech specs for product ideas; use when you need structured requirements, UX spec, and build plan, especially for high-risk scopes.
-- `ui-spec-to-prompts` — Translate a UI spec into build-order prompts for UI generator tools (v0, Bolt, Claude). Use when a UI spec already exists (not UX‑only).
-- `ux-spec-to-prompts` — Translate UX specifications into build-order prompts for UI generator tools. Use when you have UX flows/PRDs and need sequenced prompts (not a full UI spec).
+- `prd-clarifier` — Clarify an existing PRD via structured AskUserQuestion sessions (fill gaps, acceptance criteria). Use when a PRD is ambiguous/missing detail; use product-spec to draft from scratch.
+- `prd-to-api` — Generate a full API specification from an existing PRD/tech spec (endpoints, schemas, errors, auth). Use when a production-grade contract is required; use product-spec to draft end-to-end.
+- `prd-to-arch` — Generate a full architecture specification from an existing PRD/tech spec. Use when boundaries/diagrams must be locked before build; use product-spec to draft end-to-end.
+- `prd-to-testplan` — Generate a test plan from an existing PRD (map acceptance criteria to tests + quality gates). Use when verification must be explicit before build; use product-spec to draft end-to-end.
+- `prd-to-ux` — Generate a UX specification from an existing PRD/Foundation Spec (Stage 2). Use when you need UX clarity before build planning; use product-spec for end-to-end PRD+UX+plan.
+- `product-spec` — Create or review end-to-end product specs (PRD + UX spec + build plan) from an idea or existing docs. Use when you want implementation-ready documentation without writing code.
 
 ## Product — Strategy
 
-- `project-improvement-ideator` — Generate and winnow project improvement ideas to a top 5. Use when asked for roadmap/improvement ideas.
+- `project-improvement-ideator` — Generate, score, and winnow project improvement ideas into a top 5 with
 
 ## Product — Tech
 
-- `tech-to-data` — Generate a data specification from a tech spec covering schemas, lifecycle, retention, and access controls. Use when data contracts must be explicit before implementation.
-- `tech-to-migration` — Generate a migration plan from a tech spec with phased rollout, rollback, and validation. Use when schema or data changes require controlled execution.
-- `tech-to-ops` — Generate an ops/runbook spec from a tech spec with SLOs, alerts, dashboards, and rollback steps. Use when operational readiness must be defined.
-- `tech-to-performance` — Generate a performance plan from a tech spec with budgets, load tests, thresholds, and monitoring. Use when performance targets must be explicit and verifiable.
+- `tech-to-data` — Generate a data specification from a tech spec covering schemas, lifecycle,
+- `tech-to-migration` — Generate a migration plan from a tech spec with phased rollout, rollback,
+- `tech-to-ops` — Generate an ops/runbook spec from a tech spec with SLOs, alerts, dashboards,
+- `tech-to-performance` — Generate a performance plan from a tech spec with budgets, load tests,
 
 ## Utilities
 
-- `1password` — Plan, validate, and use 1Password CLI setup for secret injection and auth. Use when tasks need 1Password CLI usage, secret references, op run/read/inject, or provisioning secrets via env vars/.env files and scripts.
-- `agent-browser` — Use this skill to extract page state and automate web interactions with the agent-browser CLI (navigate, snapshot, click, fill, screenshot). Use this when you need deterministic browser automation or scraping via ref-based elements.
-- `beautiful-mermaid` — Render Mermaid diagrams to SVG and PNG with Beautiful Mermaid. Use when the user asks to render or convert Mermaid diagrams into images.
-- `markdown-converter` — Convert files to Markdown using — no installation required.. Use when Use this skill when the task matches its description and triggers..
-- `process-watch` — Analyze system processes and resource usage to diagnose runaway processes. Use when investigating CPU/memory/IO spikes.
-- `recon-workbench` — Analyze and report authorized evidence using Recon Workbench (rwb) workflows. Use when you need authorize/plan/run/summarize flows and evidence-backed reporting for web apps or OSS repos.
+- `1password` — Plan, validate, and use 1Password CLI setup for secret injection and
+- `agent-browser` — Use this skill to extract page state and automate web interactions with
+- `alignment-checkpoint` — Intent-alignment gate for ambiguous/high-stakes requests. Use this when you want to extract goal/assumptions/criteria and require an explicit /proceed approval gate before any tool use.
+- `atlas` — macOS-only AppleScript control for the ChatGPT Atlas desktop app. Use only when the user explicitly asks to control Atlas tabs/bookmarks/history on macOS and the \"ChatGPT Atlas\" app is installed; do not trigger for general browser tasks or non-macOS environments.
+- `beautiful-mermaid` — Render Mermaid diagrams to SVG and PNG with Beautiful Mermaid. Use when
+- `codex-home-audit` — Audit and improve a Codex home directory (AGENTS.md, USER_PROFILE, instructions/, rules/, config.toml) when you want a dated report of risks, duplication, and recommended cleanups.
+- `codex-sessions-skill-scan` — Daily skill health scan: analyze ~/.codex/sessions (default last 1 day) and summarize skill invocations + likely failures for personal skills in ~/dev/agent-skills (missing paths, tool failures). Use when you ask to scan recent Codex sessions for skill issues or when a skill keeps failing. Optional: include best-effort local OTel signals.
+- `markdown-converter` — Convert files to Markdown using — no installation required.. Use when
+- `process-watch` — Analyze system processes and resource usage to diagnose runaway CPU/memory/IO,
+- `prompt-creator` — Create or update Codex skills (shareable, can be invoked implicitly) under .agents/skills when you want reusable team workflows; optionally create local custom prompts in ~/.codex/prompts when you explicitly want /prompts:... slash commands (deprecated).
+- `recon-workbench` — Run authorized, evidence-backed Recon Workbench (rwb) workflows (doctor/authorize/plan/run/summarize/manifest/validate/reconcile) and produce evidence-cited findings. Use when interrogating macOS/iOS, web/React, or OSS targets under explicit scope/permission.
 - `remotion` — Best-practice guidance for Remotion (React video). Use when building or reviewing Remotion compositions, timing, assets, audio, captions, or rendering.
-- `repoprompt` — Plan and guide Repo Prompt integration and usage in AI coding workflows. Use when integrating Repo Prompt with editors/agents or when needing MCP/CLI tool guidance.
-- `skill-creator` — Create, revise, and quality-gate Codex skills (SKILL.md + resources + evals + packaging). Use when asked to build or improve a skill.
-- `skill-installer` — Plan and install skills into a Codex skills directory from a curated list or repo. Use when a user asks to list or install skills.
-- `video-transcript-downloader` — Extract, summarize, and download video/audio/subtitles using yt-dlp/ffmpeg. Use when the user requests downloads or transcripts.
+- `repoprompt` — Plan and guide Repo Prompt integration and usage in AI coding workflows.
+- `skill-creator` — Create, revise, and quality-gate Codex skills (SKILL.md + resources +
+- `skill-installer` — Plan and install skills into a Codex skills directory from a curated
+- `video-transcript-downloader` — Extract, summarize, and download video/audio/subtitles using yt-dlp/ffmpeg.
 
