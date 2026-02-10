@@ -1,0 +1,28 @@
+purpose: >
+  Help users create or update Codex skills (preferred) under .agents/skills (repo) or ~/.agents/skills (user)
+  so they can be shared, invoked explicitly (e.g. $skill-name), or invoked implicitly via matching the skill description.
+  Optionally, when explicitly requested, help users create deprecated custom prompts under ~/.codex/prompts for /prompts:<name>.
+schema_version: 1.0
+triggers:
+  - user asks to create a Codex skill
+  - user asks for reusable, shareable instructions or implicit invocation
+  - user asks to create or update a skill under .agents/skills
+  - user explicitly asks to create a /prompts:<name> custom prompt (deprecated)
+inputs:
+  - skill name (kebab-case)
+  - one-line description (with trigger boundaries)
+  - skill workflow instructions
+  - skill scope (repo vs user) and target path
+  - optional references/assets/agents/openai.yaml needs
+  - safety constraints (what must not happen)
+outputs:
+  - a skill folder path under .agents/skills/<skill-name>/ (or ~/.agents/skills/<skill-name>/)
+  - SKILL.md content (front matter + instructions) or a minimal patch/diff description
+  - invocation example (explicit $skill-name, plus note about implicit invocation)
+  - optional (only when requested): a Markdown prompt file path under ~/.codex/prompts/<name>.md
+non_goals:
+  - using deprecated custom prompts as the default primitive when a skill is appropriate
+  - storing secrets or credentials in prompt files
+risks:
+  - accidental overwrite of existing SKILL.md content; mitigated by checking for existing files and requiring explicit overwrite intent
+  - misuse for destructive operations; mitigated by safety constraints and recommending skills for gated workflows

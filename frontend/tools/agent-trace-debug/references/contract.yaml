@@ -1,0 +1,16 @@
+purpose: >
+  Provide a deterministic workflow for debugging Agent Trace data flow issues by capturing expected vs actual data shapes across UI, store, and API boundaries.
+schema_version: 1.0
+triggers:
+  - Agent Trace UI is empty/incorrect (AIAttributionPanel shows missing attribution, trace section blank, undefined values)
+  - Store/API shape mismatch for AgentTrace data (agentTraceStore expects one shape but runtime data differs)
+inputs:
+  - Repo checkout containing the UI consumer, store, and API client implementation
+  - Symptom description (what user sees) and any relevant console/network evidence
+outputs:
+  - A report describing expected vs actual data shape at each checkpoint (UI consumer, store shape, API response, transformations/log points)
+non_goals:
+  - Refactoring unrelated code or changing state management libraries
+  - Implementing a permanent fix unless explicitly requested after the mismatch is identified
+risks:
+  - Sensitive payload logging; mitigated by logging only shape/counters/IDs and avoiding raw prompts/tokens/user content

@@ -1,0 +1,26 @@
+cases:
+  - name: happy-path-create-skill
+    prompt: "Create a Codex skill named draftpr and put it at .agents/skills/draftpr/SKILL.md. Include the full SKILL.md content in a fenced code block. Include a tight description so Codex can invoke it implicitly when I ask to open a draft PR."
+    acceptance:
+      - type: contains
+        value: ".agents/skills/draftpr/SKILL.md"
+      - type: contains
+        value: "name: draftpr"
+      - type: contains
+        value: "description:"
+
+  - name: edge-case-existing-prompt-file
+    prompt: "Update my existing .agents/skills/draftpr/SKILL.md to mention inputs FILES and PR_TITLE, but keep the rest of the prompt body intact."
+    acceptance:
+      - type: contains
+        value: ".agents/skills/draftpr/SKILL.md"
+      - type: contains
+        value: "FILES"
+
+  - name: failure-mode-should-use-skill
+    prompt: "In Codex, I specifically want a local-only /prompts:draftpr slash command shortcut. What should I use? Answer in 1-2 sentences and include the word \"deprecated\". No tools."
+    acceptance:
+      - type: contains
+        value: "~/.codex/prompts"
+      - type: contains
+        value: "deprecated"

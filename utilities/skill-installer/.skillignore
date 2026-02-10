@@ -1,0 +1,4 @@
+# Local tooling and caches
+__pycache__/
+*.pyc
+.DS_Store

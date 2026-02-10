@@ -1,0 +1,23 @@
+purpose: "Scan ~/.codex/sessions for the last N days (default 1) to detect skill-related friction and propose fixes for personal skills in ~/dev/agent-skills."
+triggers:
+  - "When the user asks to scan Codex sessions/logs for skill issues or recurring errors."
+  - "When debugging why a particular skill keeps failing or referencing missing paths."
+  - "As a daily health check: \"scan yesterday's sessions for skill problems\"."
+inputs:
+  - name: "days"
+    type: "number"
+    required: false
+  - name: "sessions_root"
+    type: "path"
+    required: false
+outputs:
+  - name: "daily_skill_health_report"
+    type: "markdown"
+non_goals:
+  - "Do not edit or update skills automatically without explicit user request."
+  - "Do not modify skills-system/.system skills; personal skills only."
+  - "Do not dump full session transcripts or leak secrets/PII from logs."
+risks:
+  - "Session logs may contain sensitive information; mitigation: keep output to short, redacted snippets and avoid copying secrets."
+  - "Over-eager auto-fixes could change intended behavior; mitigation: propose minimal patches and require confirmation before edits."
+

@@ -1,0 +1,22 @@
+[
+  {
+    "label": "Prompt override language",
+    "regex": "\\b(ignore|disregard|forget)\\b.*\\b(previous|prior|system|developer)\\b",
+    "severity": "high"
+  },
+  {
+    "label": "Role-shifting language",
+    "regex": "\\byou are now\\b|\\bpretend to be\\b|\\bact as\\b",
+    "severity": "medium"
+  },
+  {
+    "label": "High-risk control language",
+    "regex": "\\b(bypass|jailbreak|override|exfiltrate)\\b",
+    "severity": "high"
+  },
+  {
+    "label": "Command-like instructions",
+    "regex": "\\b(curl|wget|powershell|invoke-webrequest|nc|netcat|rm\\s+-rf|chmod\\s+777)\\b",
+    "severity": "medium"
+  }
+]

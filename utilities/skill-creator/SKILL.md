@@ -77,6 +77,20 @@ If the request is out of scope:
   - Push depth into `references/` and executable helpers into `scripts/`.
 - Prefer instruction-only skills by default; add scripts only when determinism/repeatability matters.
 
+## Local validation (agent-skills repo)
+
+When you are creating/updating skills in `/Users/jamiecraik/dev/agent-skills`, run the validators with the PyYAML venv:
+
+Fail fast: **stop at the first failed gate** and do not proceed until it’s fixed.
+
+```bash
+cd /Users/jamiecraik/dev/agent-skills
+~/.venvs/pyyaml/bin/python utilities/skill-creator/scripts/quick_validate.py <skill-folder>
+~/.venvs/pyyaml/bin/python utilities/skill-creator/scripts/skill_gate.py <skill-folder>
+```
+
+Common pitfall: **do not** assume `python` exists on PATH, and do not look for `utilities/skill-creator/.venv/bin/python` (this repo does not use a per-skill `.venv`).
+
 ## What to not include
 
 - No extra YAML frontmatter fields beyond `name` and `description`.
@@ -127,6 +141,7 @@ Use these files when needed:
 - `references/progressive-disclosure-patterns.md`: how to split SKILL.md into references/scripts.
 - `references/quality-tools.md`: how to run validators/evals and interpret output.
 - `references/iteration-and-testing.md`: eval-driven iteration patterns, pressure tests, and rationalization hardening.
+- `references/cso-description-writing.md`: how to write high-performing `description` frontmatter (WHAT+WHEN without workflow).
 - `references/planning.md`: how to use `$create-plan` and store plan artifacts.
 - `references/security-hardening.md`: script-backed safety patterns (no-network defaults, redaction, destructive action confirmations, Codex rules).
 - `references/destructive-commands.rules`: example Codex rules file to prompt/block risky commands.
@@ -273,7 +288,8 @@ Packaging should exclude dev artifacts via `.skillignore`.
 
 ## Validation
 
-- Fail fast: stop at the first failed validation gate, fix it, and re-run before proceeding.
+Fail fast: stop at the first failed validation gate, fix it, and re-run before proceeding.
+
 For any non-trivial skill, ensure:
 
 - Frontmatter passes `quick_validate.py`.
@@ -292,6 +308,18 @@ Before shipping, confirm the description selects the skill:
 - Write 3–5 prompts and sanity check that they match the description keywords.
 - Add 1–2 negative prompts (should not select this skill).
 
+## Examples
+
+- “Create a new skill called `foo-bar` under `utilities/` and include eval cases + an output contract.”
+- “Audit this skill for triggering issues and reduce the description so it passes `skill_gate.py`.”
+- “My skill keeps failing validation—scan the errors and propose the smallest fix, then re-run gates.”
+
+## Anti-patterns
+
+- Adding dependencies or changing global system settings without explicit approval.
+- Editing `skills-system/` skills when asked to update personal skills only.
+- Pasting large session logs or secrets into chat/issues (use short redacted snippets).
+- Skipping validation gates (always run `quick_validate.py` + `skill_gate.py` after edits).
 
 ## Remember
 The agent is capable of extraordinary work in this domain. Use judgment, adapt to context, and push boundaries when appropriate.

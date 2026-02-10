@@ -1,0 +1,19 @@
+# OpenAI Agents SDK Configuration
+# This file configures how the skill appears in Codex and any MCP dependencies.
+# See: https://developers.openai.com/codex/skills/create-skill/
+#
+# interface:
+#   display_name: "Optional user-facing name"
+#   short_description: "Optional user-facing description"
+#   icon_small: "./assets/small-logo.svg"    # 16x16px SVG with currentColor fill
+#   icon_large: "./assets/large-logo.png"    # 100x100px PNG/JPG
+#   brand_color: "#3B82F6"
+#   default_prompt: "Optional surrounding prompt"
+#
+# dependencies:
+#   tools:
+#     - type: "mcp"
+#       value: "serverName"
+#       description: "MCP server description"
+#       transport: "streamable_http"
+#       url: "https://example.com/mcp"

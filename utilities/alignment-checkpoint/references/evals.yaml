@@ -1,0 +1,28 @@
+cases:
+  - name: happy-path-gate
+    prompt: "Use /alignment-checkpoint. Build a small CLI that prints 'hello'. Don't run tools until I say so."
+    acceptance:
+      - type: contains
+        value: "\"explicit_goal\""
+      - type: contains
+        value: "\"implicit_assumptions\""
+      - type: contains
+        value: "\"success_criteria\""
+      - type: regex
+        value: "(?i)/proceed\\s+(minimal|balanced|comprehensive)"
+  - name: stasis-mode-do-not-implement
+    prompt: "Use /alignment-checkpoint. Create a plan for feature X—do NOT implement; preserve only."
+    acceptance:
+      - type: contains
+        value: "STASIS_RECORD"
+      - type: regex
+        value: "(?i)stasis mode is active"
+      - type: regex
+        value: "(?i)no tools will be used"
+  - name: clarify-single-question
+    prompt: "Use /alignment-checkpoint. Make it better."
+    acceptance:
+      - type: regex
+        value: "(?i)reply\\s+/clarify\\s+<answer>"
+      - type: regex
+        value: "(?i)(one|single)\\s+clarifying\\s+question"
