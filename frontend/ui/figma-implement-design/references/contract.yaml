@@ -1,0 +1,13 @@
+purpose: >
+  Preserve backward-compatible alias routing from figma-implement-design to figma implement_design mode.
+schema_version: 1.0
+triggers:
+  - user explicitly invokes figma-implement-design
+inputs:
+  - original user request and any figma URL/node context
+outputs:
+  - deterministic route to canonical figma skill in implement_design mode
+non_goals:
+  - duplicate implementation workflow content in alias skill
+risks:
+  - circular routing or stale alias behavior; mitigated by explicit canonical mode mapping

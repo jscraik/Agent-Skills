@@ -5,18 +5,18 @@ description: Analyze Agent Trace data flow when AIAttributionPanel shows empty/i
 
 # agent-trace-debug
 
-## When to use
+## Scope and triggers
 - The Agent Trace UI is empty/incorrect (missing attribution, unexpected `undefined`, wrong counts) and you need to find where the data shape diverges.
 - Bugs involving these components/files: `AIAttributionPanel`, `agentTraceStore`, `AgentTrace` types, API response parsing/normalization.
 
-## Inputs
+## Required inputs
 - Repo checked out locally with the relevant UI + store + API client code.
 - The expected user-visible symptom (1 sentence) and, if available, a screenshot or console error snippet.
 - Ability to run the app (or at least inspect the network/API response) to observe runtime shapes.
 
 If the files mentioned in the procedure do not exist at the given paths, stop and ask for the correct paths (do not guess).
 
-## Outputs
+## Deliverables
 - A report of **expected vs actual data shape** at each checkpoint (UI consumer → store → API → transforms), using the included template.
 - A short list of the **first divergence point(s)** (where the shape stops matching expectations).
 

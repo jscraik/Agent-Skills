@@ -12,7 +12,7 @@ artifacts and validation.
 When you respond while this skill is active, answer with sections titled exactly:
 **Outputs** and **Procedure** (and include authorization notes).
 
-## When to use
+## Scope and triggers
 - Running rwb CLI flows (`doctor`, `authorize`, `plan`, `run`, `summarize`, `manifest`, `validate`, `reconcile`).
 - Designing/updating probe catalogs, schemas, or validation scripts.
 - Producing evidence-backed findings/reports with artifact citations (no speculation).
@@ -92,8 +92,7 @@ max_escalation_level: "instrumentation"  # read_only < instrumentation < escalat
 require_authorization: true
 ```
 
-## Inputs
-
+## Required inputs
 ## Cognitive Support / Plain-Language
 - Optimize for low cognitive load (TBI support): one task at a time, explicit steps.
 - Use plain language first; define jargon in parentheses.
@@ -110,8 +109,7 @@ require_authorization: true
 - `authorization`: Authorization artifact (required when scope enforces authorization)
 - `run_dir`: Output directory for artifacts (use `runs/<target_id>/...`)
 
-## Outputs
-
+## Deliverables
 **Structure**: `runs/<target>/<session>/<run>/`
 - `raw/` - Probe artifacts (logs, dumps, traces, HARs)
 - `manifest.json` - SHA256 hashes for integrity verification

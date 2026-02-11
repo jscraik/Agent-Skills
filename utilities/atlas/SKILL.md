@@ -32,6 +32,12 @@ The CLI requires the Atlas app bundle in `/Applications` or `~/Applications`:
 
 If AppleScript fails with a permissions error, grant Automation permission in System Settings > Privacy & Security > Automation, allowing your terminal to control ChatGPT Atlas.
 
+## Philosophy
+
+- Prefer root-cause understanding over quick symptom patches.
+- Keep guidance evidence-based, explicit, and reproducible.
+- Optimize for decisions that reduce rework and operational risk.
+
 ## Tabs Workflow
 
 1. List tabs to get `window_id` and `tab_index`:
@@ -97,3 +103,9 @@ If history looks stale or empty, ask the user which Atlas install they are using
 ## References
 
 Read `references/atlas-data.md` in the skill folder (for example, `$CODEX_HOME/skills/atlas/references/atlas-data.md`) when adjusting data paths or timestamps.
+
+## Anti-patterns
+
+- Skipping investigation and jumping directly to fixes.
+- Making claims without evidence, logs, or reproducible steps.
+- Mixing unrelated workstreams in a single execution path.

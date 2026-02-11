@@ -7,8 +7,7 @@ description: Audit and improve a Codex home directory (AGENTS.md, USER_PROFILE, 
 
 Produce a dated Markdown audit report for a Codex home directory (default: `$CODEX_HOME` / `~/.codex`) and print a short summary. The skill is report-first: it should not apply changes unless the user explicitly asks.
 
-## When to use
-
+## Scope and triggers
 Use this skill when you want to:
 - Audit a Codex home folder for **instruction precedence issues** (e.g. `AGENTS.override.md` shadowing `AGENTS.md`).
 - Identify **duplication/drift** across `AGENTS*` and `USER_PROFILE*`.
@@ -16,8 +15,7 @@ Use this skill when you want to:
 - Review `.rules` for **bypass risks** (especially `zsh -lc "<script>"` patterns) and missing guardrails.
 - Flag config risk hotspots (e.g. defaulting to `danger-full-access`, noisy OTel exporters).
 
-## Inputs
-
+## Required inputs
 - `codex_home` (path): optional. Defaults to `$CODEX_HOME` if set, otherwise `~/.codex`.
 - `out_dir` (path): optional. Defaults to `<codex_home>/reports/codex-home-audit/`.
 
@@ -25,8 +23,7 @@ Assumptions:
 - You should **not** print secrets. Do not output `.env` contents or environment variables beyond key names.
 - File reads should be targeted; prefer metadata + small excerpts.
 
-## Outputs
-
+## Deliverables
 - A dated Markdown report written to the output directory.
 - A short console summary that includes:
   - the report path

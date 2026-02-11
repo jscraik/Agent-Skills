@@ -8,7 +8,7 @@ description: "Use when the user asks to generate or edit images via the OpenAI I
 
 Generates or edits images for the current project (e.g., website assets, game assets, UI mockups, product mockups, wireframes, logo design, photorealistic images, infographics). Defaults to `gpt-image-1.5` and the OpenAI Image API, and prefers the bundled CLI for deterministic, reproducible runs.
 
-## When to use
+## Scope and triggers
 - Generate a new image (concept art, product shot, cover, website hero)
 - Edit an existing image (inpainting, masked edits, lighting or weather transformations, background replacement, object removal, compositing, transparent background)
 - Batch runs (many prompts, or many variants across prompts)
@@ -121,6 +121,12 @@ Augmentation rules:
 - If the user gives a broad request (e.g., "Generate images for this website"), use judgment to propose tasteful, context-appropriate assets and map each to a taxonomy slug.
 - For edits, explicitly list invariants ("change only X; keep Y unchanged").
 - If any critical detail is missing and blocks success, ask a question; otherwise proceed.
+
+## Anti-patterns
+
+- Skipping investigation and jumping directly to fixes.
+- Making claims without evidence, logs, or reproducible steps.
+- Mixing unrelated workstreams in a single execution path.
 
 ## Examples
 

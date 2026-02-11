@@ -16,6 +16,12 @@ Deliver an actionable AppSec-grade threat model that is specific to the reposito
 - Use prompts in `references/prompt-template.md` to generate a repository summary.
 - Follow the required output contract in `references/prompt-template.md`. Use it verbatim when possible.
 
+## Philosophy
+
+- Prefer root-cause understanding over quick symptom patches.
+- Keep guidance evidence-based, explicit, and reproducible.
+- Optimize for decisions that reduce rework and operational risk.
+
 ## Workflow
 
 ### 1) Scope and extract the system model
@@ -79,3 +85,9 @@ Deliver an actionable AppSec-grade threat model that is specific to the reposito
 - Optional controls/asset list: `references/security-controls-and-assets.md`
 
 Only load the reference files you need. Keep the final result concise, grounded, and reviewable.
+
+## Anti-patterns
+
+- Skipping investigation and jumping directly to fixes.
+- Making claims without evidence, logs, or reproducible steps.
+- Mixing unrelated workstreams in a single execution path.

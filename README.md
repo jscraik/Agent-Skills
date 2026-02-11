@@ -11,7 +11,7 @@ This repository is the source of truth for Codex/agent skills. Canonical skills 
 ├── backend/      # Backend/Architecture/CLI
 ├── interview/    # Interview workflows and kernels
 ├── product/      # Product specs, docs, planning
-├── design/       # PRD/spec skills and design-oriented workflows
+├── design/       # PRD/spec templates and design-oriented references
 ├── utilities/    # Utilities and helpers
 ├── skills/       # Flat symlink directory (tooling entrypoint)
 ├── skills-system/ # Bundled/system skills (kept out of flat view)
@@ -21,11 +21,24 @@ This repository is the source of truth for Codex/agent skills. Canonical skills 
 ## How It Works
 
 - Each skill lives in a category folder and includes its own `SKILL.md`.
-- The `skills/` directory contains symlinks to the canonical folders so tools can load a flat list.
+- The `skills/` directory contains symlinks to canonical folders so tools can load a flat list.
 - `skills-system/` stores bundled/system skills and is excluded from the flat view to avoid duplicates.
 - Use `scripts/sync_skills.sh` to update symlinks and regenerate `SKILL.md` after adding or moving skills.
 - The sync script auto-links to `~/.claude/skills` (Claude Code) and `~/.agents/skills` (OpenAI Codex/Agents).
-- Swift/SwiftUI skills are removed. macOS references remain only for Tauri desktop contexts.
+
+## Wave 1 consolidation status (2026-02-11)
+
+Canonical skills for the first consolidation wave:
+
+- `product-spec` now includes focused modes: `full_pipeline`, `clarify_prd`, `ux_only`, `api_spec`, `arch_spec`, `testplan`.
+- `tech-spec` is the canonical technical transformation skill with modes: `data_spec`, `migration_plan`, `ops_spec`, `performance_plan`.
+- `figma` is the canonical Figma skill with modes: `setup`, `extract_context`, `implement_design`, `troubleshoot`.
+
+Backward-compatible aliases remain active during deprecation window (target review date: **2026-04-12**):
+
+- PRD aliases: `prd-clarifier`, `prd-to-api`, `prd-to-arch`, `prd-to-testplan`, `prd-to-ux`
+- Tech aliases: `tech-to-data`, `tech-to-migration`, `tech-to-ops`, `tech-to-performance`
+- Figma alias: `figma-implement-design`
 
 ## Categories and Skills
 

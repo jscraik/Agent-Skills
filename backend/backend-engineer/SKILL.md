@@ -15,7 +15,7 @@ metadata:
   - `/Users/jamiecraik/.codex/instructions/work-rules.md`
 - Apply Gold Industry Standard (baseline Jan 2026).
 
-## When to Use
+## Scope and triggers
 - Extending or patching an existing backend service safely.
 - You need an implementation playbook (steps + file plan + verification).
 - You want code-level guidance (snippets/pseudo-diffs), not just design.
@@ -24,8 +24,7 @@ metadata:
 ## Out of Scope
 - Greenfield architecture or full backend design from scratch → use `backend-design` instead.
 
-## Inputs
-
+## Required inputs
 ## Cognitive Support / Plain-Language
 - Optimize for low cognitive load (TBI support): one task at a time, explicit steps.
 - Use plain language first; define jargon in parentheses.
@@ -40,7 +39,7 @@ metadata:
 - Acceptance criteria (Given/When/Then preferred).
 - Deployment/runtime constraints (e.g., Workers limits, Auth0 flows).
 
-## Outputs
+## Deliverables
 - **Intent** (1–2 sentences).
 - **Plan** (3–7 steps, single-threaded).
 - **Patch summary** (files + what changes).

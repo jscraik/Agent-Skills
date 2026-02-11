@@ -1,0 +1,16 @@
+cases:
+  - name: happy-path-implement
+    prompt: "Implement this Figma node URL in code using figma implement_design mode."
+    acceptance:
+      - type: contains
+        value: "## Procedure"
+  - name: edge-case-truncated
+    prompt: "Figma design context is too large; recover safely."
+    acceptance:
+      - type: contains
+        value: "## Validation"
+  - name: failure-mode-auth
+    prompt: "Figma MCP login is failing; troubleshoot and next steps."
+    acceptance:
+      - type: contains
+        value: "## When to use"

@@ -1,6 +1,6 @@
 ---
 name: "security-ownership-map"
-description: "Analyze git repositories to build a security ownership topology (people-to-file), compute bus factor and sensitive-code ownership, and export CSV/JSON for graph databases and visualization. Trigger only when the user explicitly wants a security-oriented ownership or bus-factor analysis grounded in git history (for example: orphaned sensitive code, security maintainers, CODEOWNERS reality checks for risk, sensitive hotspots, or ownership clusters). Do not trigger for general maintainer lists or non-security ownership questions."
+description: "Analyze git repositories to map security ownership (people-to-file), compute bus-factor and sensitive-code risk, and export CSV/JSON/graph artifacts for visualization. Use only when the user explicitly requests security-focused ownership analysis grounded in git history."
 ---
 
 # Security Ownership Map
@@ -19,6 +19,12 @@ Install with:
 ```bash
 pip install networkx
 ```
+
+## Philosophy
+
+- Prefer root-cause understanding over quick symptom patches.
+- Keep guidance evidence-based, explicit, and reproducible.
+- Optimize for decisions that reduce rework and operational risk.
 
 ## Workflow
 
@@ -204,3 +210,9 @@ Use `references/neo4j-import.md` when you need to load the CSVs into Neo4j. It i
 - `bus_factor_hotspots` in `summary.json` lists sensitive files with low bus factor; `orphaned_sensitive_code` is the stale subset.
 - If `git log` is too large, narrow with `--since` or `--until`.
 - Compare `summary.json` against CODEOWNERS to highlight ownership drift.
+
+## Anti-patterns
+
+- Skipping investigation and jumping directly to fixes.
+- Making claims without evidence, logs, or reproducible steps.
+- Mixing unrelated workstreams in a single execution path.

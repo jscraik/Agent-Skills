@@ -1,0 +1,16 @@
+cases:
+  - name: happy-path-migration
+    prompt: "Generate a migration plan from a tech spec using tech-spec migration_plan mode."
+    acceptance:
+      - type: contains
+        value: "## Outputs"
+  - name: edge-case-missing-inputs
+    prompt: "Generate an ops spec from sparse tech notes and document assumptions."
+    acceptance:
+      - type: contains
+        value: "## Inputs"
+  - name: failure-mode-out-of-scope
+    prompt: "User asks for UI copy rewrites with no tech spec context."
+    acceptance:
+      - type: contains
+        value: "## When to use"

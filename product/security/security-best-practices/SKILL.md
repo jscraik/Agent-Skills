@@ -11,6 +11,12 @@ This skill provides a description of how to identify the language and frameworks
 
 This information, if present, can be used to write new secure by default code, or to passively detect major issues within existing code, or (if requested by the user) provide a vulnerability report and suggest fixes.
 
+## Philosophy
+
+- Prefer root-cause understanding over quick symptom patches.
+- Keep guidance evidence-based, explicit, and reproducible.
+- Optimize for decisions that reduce rework and operational risk.
+
 ## Workflow
 
 The initial step for this skill is to identify ALL languages and ALL frameworks which you are being asked to use or already exist in the scope of the project you are working in. Focus on the primary core frameworks. Often you will want to identify both frontend and backend languages and frameworks.
@@ -84,3 +90,9 @@ When assigning an ID for some resource, which will then be used by exposed to th
 ### A note on TLS
 
 While TLS is important for production deployments, most development work will be with TLS disabled or provided by some out-of-scope TLS proxy. Due to this, be very careful about not reporting lack of TLS as a security issue. Also be very careful around use of "secure" cookies. They should only be set if the application will actually be over TLS. If they are set on non-TLS applications (such as when deployed for local dev or testing), it will break the application. You can provide a env or other flag to override setting secure as a way to keep it off until on a TLS production deployment. Additionally avoid recommending HSTS. It is dangerous to use without full understanding of the lasting impacts (can cause major outages and user lockout) and it is not generally recommended for the scope of projects being reviewed by codex.
+
+## Anti-patterns
+
+- Skipping investigation and jumping directly to fixes.
+- Making claims without evidence, logs, or reproducible steps.
+- Mixing unrelated workstreams in a single execution path.

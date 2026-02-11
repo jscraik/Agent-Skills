@@ -5,7 +5,7 @@ description: Create or update Codex skills (shareable, can be invoked implicitly
 
 # Prompt Creator (Codex skills-first)
 
-## When to use
+## Scope and triggers
 - You want a **shareable, reusable** workflow that your team can commit to a repo and Codex can invoke **implicitly** (based on `description`) or **explicitly** (by typing `$...`). Skills are the recommended primitive.
 - You want a reusable workflow that also shows up in the **slash command menu** (enabled skills appear there too).
 - You have an existing skill under `.agents/skills/**` and want to refine scope, inputs, safety constraints, or examples.
@@ -13,7 +13,7 @@ description: Create or update Codex skills (shareable, can be invoked implicitly
 
 > Note: Codex docs mark “custom prompts” as **deprecated** and recommend using **skills** for reusable instructions that Codex can invoke explicitly or implicitly. Only use `~/.codex/prompts` when you explicitly want `/prompts:<name>` local-only slash commands.
 
-## Inputs
+## Required inputs
 - Skill name (kebab-case): for example `draftpr`.
 - Skill scope + location:
   - Repo skill (recommended): `<repo>/.agents/skills/<skill-name>/`
@@ -27,7 +27,7 @@ description: Create or update Codex skills (shareable, can be invoked implicitly
 - (Optional) If you explicitly want `/prompts:<name>`: a custom prompt name + body + placeholders.
 - Safety constraints: anything that must *not* happen (no deletes, no deploys, no secrets, etc.).
 
-## Outputs
+## Deliverables
 - A skill folder containing a `SKILL.md` file at one of:
   - `.agents/skills/<skill-name>/SKILL.md` (repo; recommended)
   - `~/.agents/skills/<skill-name>/SKILL.md` (user)

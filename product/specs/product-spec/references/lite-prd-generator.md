@@ -174,6 +174,6 @@ A builder could:
 
 ## After PRD Generation
 
-Once you have generated the complete PRD (sections 1-7), you MUST invoke the `prd-clarifier` skill using the Skill tool to refine and clarify the PRD through structured questioning.
+Once you have generated the complete PRD (sections 1-7), you MUST continue with `product-spec` in `clarify_prd` mode to refine and clarify the PRD through structured questioning.
 
 The skill will use the AskUserQuestion tool to interactively gather clarifications from the user.

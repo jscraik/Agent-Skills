@@ -8,7 +8,7 @@ description: "Daily skill health scan: analyze ~/.codex/sessions (default last 1
 ## Overview
 This skill runs a **daily scan** over Codex session logs to catch repeated “paper cuts” when using skills (broken file paths, missing scripts, validation commands that don’t run) and produces a short report + suggested fixes.
 
-## When to use
+## Scope and triggers
 - “Scan yesterday’s Codex sessions for skill failures (personal skills only).”
 - “Why does `$some-skill` keep failing? Look at recent session logs and tell me what’s wrong.”
 - “Daily check: any broken skill references or validation commands in the last 24 hours?”
@@ -25,14 +25,14 @@ python3 utilities/codex-sessions-skill-scan/scripts/scan_codex_sessions.py --day
 - **Evidence-led:** cite the specific error snippets + point to the exact personal SKILL.md path when possible.
 - **Safety-first:** redact secrets; do not copy full transcripts.
 
-## Inputs
+## Required inputs
 - `--days <float>`: how far back to scan (default `1`).
 - `--sessions-root <path>`: where to scan (default `~/.codex/sessions`).
 - `--max-samples-per-skill <int>`: cap snippets per skill (default `3`).
 - `--include-otel`: include best-effort OTel signals (Codex OTLP endpoint listening status + repo-local OTLP-derived trace artifacts under `.narrative/trace/`).
 - `--codex-config-toml <path>`: path to read Codex `[otel]` endpoints from (default `~/.codex/config.toml`).
 
-## Outputs
+## Deliverables
 - A “daily skill health report” in Markdown (skills invoked, skills with issues, sample error snippets).
 - A list of *suggested fix patterns* (no changes applied).
 

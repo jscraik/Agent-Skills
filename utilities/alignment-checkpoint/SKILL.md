@@ -5,21 +5,18 @@ description: "Intent-alignment gate for ambiguous/high-stakes requests. Use this
 
 # Alignment Checkpoint
 
-## When to use
-
+## Scope and triggers
 Use this skill when:
 - You want to **prevent misunderstandings** before work begins.
 - The request is ambiguous, multi-part, or high-risk.
 - The user says: “alignment”, “checkpoint”, “confirm first”, “don’t start yet”, “before you run tools”, or similar.
 - You are about to run tools (shell/web/filesystem/MCP) and want a clear go/no-go.
 
-## Inputs
-
+## Required inputs
 - The user’s request text (treat as canonical; quote exactly in stasis mode).
 - Any explicit constraints already stated by the user (time, scope, “do not implement”, etc.).
 
-## Outputs
-
+## Deliverables
 Always produce (Phase 0):
 1) A JSON extraction containing:
    - `explicit_goal`

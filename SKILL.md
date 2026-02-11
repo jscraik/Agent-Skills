@@ -39,9 +39,10 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 
 ## Frontend — Ui
 
-- `figma-implement-design` — Translate Figma nodes into production-ready code with 1:1 visual fidelity using the Figma MCP workflow (design context, screenshots, assets, and project-convention translation). Trigger when the user provides Figma URLs or node IDs, or asks to implement designs or components that must match Figma specs. Requires a working Figma MCP server connection.
-- `figma` — Use the Figma MCP server to fetch design context, screenshots, variables, and assets from Figma, and to translate Figma nodes into production code. Trigger when a task involves Figma URLs, node IDs, design-to-code implementation, or Figma MCP setup and troubleshooting.
+- `figma-implement-design` — DEPRECATED alias of figma. Convert legacy invocations when requests explicitly name figma-implement-design; immediately route to figma in implement_design mode.
+- `figma` — Use this canonical Figma skill to extract design context/screenshots/assets with Figma MCP and build production-ready UI guidance. Use when requests include Figma URLs/node IDs, design-to-code implementation, or Figma MCP setup/troubleshooting.
 - `frontend-ui-design` — Create and review production-ready UI systems/components with tokens
+- `interface-craft` — Interface Craft by Josh Puckett helps build polished, animated React interfaces using Storyboard Animation, DialKit tuning panels, and Design Critique. Use when requests involve motion design, animation sequencing, live tuning controls, or structured UI critique and polish.
 - `react-best-practices` — React and Next.js performance optimization guidelines from Vercel Engineering. This skill should be used when writing, reviewing, or refactoring React/Next.js code to ensure optimal performance patterns. Triggers on tasks involving React components, Next.js pages, data fetching, bundle optimization, or performance improvements.
 - `react-ui-patterns` — Provide concrete, example-driven guidance for React UI composition, state,
 - `ui-visual-regression` — Run a minimal, repeatable UI visual regression pipeline (Storybook build
@@ -103,17 +104,17 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 ## Product — Security
 
 - `security-best-practices` — Perform language and framework specific security best-practice reviews and suggest improvements. Trigger only when the user explicitly requests security best practices guidance, a security review/report, or secure-by-default coding help. Trigger only for supported languages (python, javascript/typescript, go). Do not trigger for general code review, debugging, or non-security tasks.
-- `security-ownership-map` — Analyze git repositories to build a security ownership topology (people-to-file), compute bus factor and sensitive-code ownership, and export CSV/JSON for graph databases and visualization. Trigger only when the user explicitly wants a security-oriented ownership or bus-factor analysis grounded in git history (for example: orphaned sensitive code, security maintainers, CODEOWNERS reality checks for risk, sensitive hotspots, or ownership clusters). Do not trigger for general maintainer lists or non-security ownership questions.
+- `security-ownership-map` — Analyze git repositories to map security ownership (people-to-file), compute bus-factor and sensitive-code risk, and export CSV/JSON/graph artifacts for visualization. Use only when the user explicitly requests security-focused ownership analysis grounded in git history.
 - `security-threat-model` — Repository-grounded threat modeling that enumerates trust boundaries, assets, attacker capabilities, abuse paths, and mitigations, and writes a concise Markdown threat model. Trigger only when the user explicitly asks to threat model a codebase or path, enumerate threats/abuse paths, or perform AppSec threat modeling. Do not trigger for general architecture summaries, code review, or non-security design work.
 
 ## Product — Specs
 
-- `prd-clarifier` — Clarify an existing PRD via structured AskUserQuestion sessions (fill gaps, acceptance criteria). Use when a PRD is ambiguous/missing detail; use product-spec to draft from scratch.
-- `prd-to-api` — Generate a full API specification from an existing PRD/tech spec (endpoints, schemas, errors, auth). Use when a production-grade contract is required; use product-spec to draft end-to-end.
-- `prd-to-arch` — Generate a full architecture specification from an existing PRD/tech spec. Use when boundaries/diagrams must be locked before build; use product-spec to draft end-to-end.
-- `prd-to-testplan` — Generate a test plan from an existing PRD (map acceptance criteria to tests + quality gates). Use when verification must be explicit before build; use product-spec to draft end-to-end.
-- `prd-to-ux` — Generate a UX specification from an existing PRD/Foundation Spec (Stage 2). Use when you need UX clarity before build planning; use product-spec for end-to-end PRD+UX+plan.
-- `product-spec` — Create or review end-to-end product specs (PRD + UX spec + build plan) from an idea or existing docs. Use when you want implementation-ready documentation without writing code.
+- `prd-clarifier` — DEPRECATED alias of product-spec. Convert legacy invocations when requests explicitly name prd-clarifier; immediately route to product-spec in clarify_prd mode.
+- `prd-to-api` — DEPRECATED alias of product-spec. Convert legacy invocations when requests explicitly name prd-to-api; immediately route to product-spec in api_spec mode.
+- `prd-to-arch` — DEPRECATED alias of product-spec. Convert legacy invocations when requests explicitly name prd-to-arch; immediately route to product-spec in arch_spec mode.
+- `prd-to-testplan` — DEPRECATED alias of product-spec. Convert legacy invocations when requests explicitly name prd-to-testplan; immediately route to product-spec in testplan mode.
+- `prd-to-ux` — DEPRECATED alias of product-spec. Convert legacy invocations when requests explicitly name prd-to-ux; immediately route to product-spec in ux_only mode.
+- `product-spec` — Create or review implementation-ready product specifications from ideas or existing docs. Use when you need a full PRD+UX+build plan pipeline or a focused mode (clarify_prd, ux_only, api_spec, arch_spec, testplan).
 
 ## Product — Strategy
 
@@ -121,10 +122,11 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 
 ## Product — Tech
 
-- `tech-to-data` — Generate a data specification from a tech spec covering schemas, lifecycle,
-- `tech-to-migration` — Generate a migration plan from a tech spec with phased rollout, rollback,
-- `tech-to-ops` — Generate an ops/runbook spec from a tech spec with SLOs, alerts, dashboards,
-- `tech-to-performance` — Generate a performance plan from a tech spec with budgets, load tests,
+- `tech-spec` — Create implementation-ready technical planning artifacts from an existing tech spec. Use when you need one focused mode: data_spec, migration_plan, ops_spec, or performance_plan.
+- `tech-to-data` — DEPRECATED alias of tech-spec. Convert legacy invocations when requests explicitly name tech-to-data; immediately route to tech-spec in data_spec mode.
+- `tech-to-migration` — DEPRECATED alias of tech-spec. Convert legacy invocations when requests explicitly name tech-to-migration; immediately route to tech-spec in migration_plan mode.
+- `tech-to-ops` — DEPRECATED alias of tech-spec. Convert legacy invocations when requests explicitly name tech-to-ops; immediately route to tech-spec in ops_spec mode.
+- `tech-to-performance` — DEPRECATED alias of tech-spec. Convert legacy invocations when requests explicitly name tech-to-performance; immediately route to tech-spec in performance_plan mode.
 
 ## Utilities
 
@@ -143,5 +145,6 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - `repoprompt` — Plan and guide Repo Prompt integration and usage in AI coding workflows.
 - `skill-creator` — Create, revise, and quality-gate Codex skills (SKILL.md + resources +
 - `skill-installer` — Plan and install skills into a Codex skills directory from a curated
+- `systematic-debugging` — Use this skill when encountering bugs, test failures, regressions, or unexpected behavior to run a root-cause-first debugging workflow before proposing fixes or code changes.
 - `video-transcript-downloader` — Extract, summarize, and download video/audio/subtitles using yt-dlp/ffmpeg.
 

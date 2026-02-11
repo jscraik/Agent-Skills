@@ -8,7 +8,13 @@ description: "Use when the user asks to generate, remix, poll, list, download, o
 
 Creates or manages short video clips for the current project (product demos, marketing spots, cinematic shots, UI mocks). Defaults to `sora-2` and a structured prompt augmentation workflow, and prefers the bundled CLI for deterministic runs. Note: `$sora` is a skill tag in prompts, not a shell command.
 
-## When to use
+## Philosophy
+
+- Prefer root-cause understanding over quick symptom patches.
+- Keep guidance evidence-based, explicit, and reproducible.
+- Optimize for decisions that reduce rework and operational risk.
+
+## Scope and triggers
 - Generate a new video clip from a prompt
 - Remix an existing video by ID
 - Poll status, list jobs, or download assets (video/thumbnail/spritesheet)
@@ -100,6 +106,12 @@ Augmentation rules:
 - For remixes, explicitly list invariants ("same shot, change only X").
 - If any critical detail is missing and blocks success, ask a question; otherwise proceed.
 - If you pass a structured prompt file to the CLI, add `--no-augment` to avoid the tool re-wrapping it.
+
+## Anti-patterns
+
+- Skipping investigation and jumping directly to fixes.
+- Making claims without evidence, logs, or reproducible steps.
+- Mixing unrelated workstreams in a single execution path.
 
 ## Examples
 
