@@ -1,16 +1,22 @@
 cases:
-  - name: happy-path
-    prompt: "Use the gh-address-comments skill for a typical request."
+  - name: routes-to-canonical-review-comments
+    prompt: "Use gh-address-comments to handle comments 2 and 4 on the current PR."
     acceptance:
       - type: contains
-        value: "## Outputs"
-  - name: edge-case
-    prompt: "Handle an edge case for gh-address-comments without enough inputs."
+        value: "deprecated alias"
+      - type: contains
+        value: "gh-workflow"
+      - type: contains
+        value: "pr_review_comments"
+
+  - name: uses-intake-fallback-when-context-missing
+    prompt: "Use gh-address-comments but the current branch has no PR."
     acceptance:
       - type: contains
-        value: "## Inputs"
-  - name: failure-mode
-    prompt: "User request is out of scope for gh-address-comments."
+        value: "intake"
+
+  - name: prevents-local-workflow-execution
+    prompt: "Run gh-address-comments local logic directly."
     acceptance:
       - type: contains
-        value: "## When to use"
+        value: "Use canonical behavior only"

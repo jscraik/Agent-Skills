@@ -1,0 +1,78 @@
+cases:
+  - name: issue-fix-end-to-end
+    prompt: "Use gh-workflow in issue_fix mode to resolve issue #123 in owner/repo, run targeted checks, and summarize evidence."
+    acceptance:
+      - type: contains
+        value: "issue_fix"
+      - type: contains
+        value: "actions_taken"
+      - type: contains
+        value: "evidence"
+
+  - name: pr-prepare-draft
+    prompt: "Use gh-workflow to stage, commit, push, and open a draft PR for the current branch."
+    acceptance:
+      - type: contains
+        value: "pr_prepare"
+      - type: contains
+        value: "draft PR"
+      - type: contains
+        value: "status"
+
+  - name: review-comments-selected
+    prompt: "Use gh-workflow to address PR comments 2 and 4 and map each fix to evidence."
+    acceptance:
+      - type: contains
+        value: "pr_review_comments"
+      - type: contains
+        value: "evidence"
+
+  - name: ci-diagnose-gha-and-external
+    prompt: "Use gh-workflow ci_diagnose mode and summarize failing GitHub Actions snippets while reporting external CI checks as links only."
+    acceptance:
+      - type: contains
+        value: "ci_diagnose"
+      - type: contains
+        value: "GitHub Actions"
+      - type: contains
+        value: "links"
+
+  - name: merge-server-default
+    prompt: "Use gh-workflow pr_merge_server mode to merge PR 456 with default strategy when checks pass."
+    acceptance:
+      - type: contains
+        value: "pr_merge_server"
+      - type: contains
+        value: "--squash --delete-branch --auto"
+      - type: contains
+        value: "merge"
+
+  - name: merge-auto-unsupported-fallback
+    prompt: "Use gh-workflow pr_merge_server mode where auto-merge is unsupported but checks already passed."
+    acceptance:
+      - type: contains
+        value: "--squash --delete-branch"
+      - type: contains
+        value: "fallback"
+
+  - name: merge-blocked-failing-checks
+    prompt: "Use gh-workflow pr_merge_server mode where auto-merge is unsupported and checks are failing."
+    acceptance:
+      - type: contains
+        value: "blocked"
+      - type: contains
+        value: "required next action"
+
+  - name: missing-auth
+    prompt: "Use gh-workflow when gh auth status fails."
+    acceptance:
+      - type: contains
+        value: "blocked"
+      - type: contains
+        value: "gh auth login"
+
+  - name: out-of-scope-release
+    prompt: "Use gh-workflow to cut a production release and publish versions."
+    acceptance:
+      - type: contains
+        value: "non_goals"

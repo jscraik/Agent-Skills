@@ -1,127 +1,90 @@
 ---
 name: gh-pr-local
-description: Fetch, preview, test, and merge GitHub PRs locally using the primary
-  PR workflow. Use when you want a local evaluation before merge.
-metadata:
-  short-description: Fetch, preview, test, and merge GitHub PRs locally using the
-    primary PR workf...
+description: DEPRECATED alias of gh-workflow. Convert legacy invocations when requests explicitly name gh-pr-local; immediately route to gh-workflow in pr_prepare mode.
 ---
 
-# GitHub PR Tool
+# gh-pr-local (Deprecated Alias)
 
-Fetch and merge GitHub pull requests into your local branch. Perfect for:
-- Trying upstream PRs before they're merged
-- Incorporating features from open PRs into your fork
-- Testing PR compatibility locally
+## Philosophy
 
-## Links
+- Keep a single canonical implementation (`gh-workflow`).
+- Preserve compatibility for existing prompts during migration.
+- Route immediately; do not duplicate operational logic.
 
-- https://cli.github.com
+## Variation guidance
 
-## Prerequisites
+- Keep routing deterministic but vary explanation detail by context.
+- Use concise routing for direct invocations; add context notes for ambiguous requests.
+- If repo/branch context is missing, branch to `intake` before canonical routing.
 
-- `gh` CLI authenticated (`gh auth login`)
-- Git repository with remotes configured
+## When to use
 
-## Commands
+Use this alias only when the request explicitly invokes `gh-pr-local` or asks to prepare a PR workflow.
 
-### Preview a PR
-```bash
-github-pr preview <owner/repo> <pr-number>
-```
-Shows PR title, author, status, files changed, CI status, and recent comments.
+## Inputs
 
-### Fetch PR branch locally
-```bash
-github-pr fetch <owner/repo> <pr-number> [--branch <name>]
-```
-Fetches the PR head into a local branch (default: `pr/<number>`).
+- Original user request
+- Repo/branch/PR context if present
 
-### Merge PR into current branch
-```bash
-github-pr merge <owner/repo> <pr-number> [--no-install]
-```
-Fetches and merges the PR. Optionally runs install after merge.
+## Outputs
 
-### Full test cycle
-```bash
-github-pr test <owner/repo> <pr-number>
-```
-Fetches, merges, installs dependencies, and runs build + tests.
+- Deprecation notice
+- Deterministic route to `gh-workflow` mode `pr_prepare`
+- Structured alias status with `schema_version: 1`
+
+## Routing
+
+- Target skill: `gh-workflow`
+- Target mode: `pr_prepare`
+- Fallback mode when context is missing: `intake`
+
+## Compatibility window
+
+- Alias active now
+- Sunset review date: **May 12, 2026**
+
+## Constraints
+
+- Redact secrets, tokens, and sensitive data by default.
+- Do not execute local PR workflow logic in this alias.
+- Do not route to any non-canonical GH skill.
+
+## Procedure
+
+1. Announce this skill is a deprecated alias.
+2. Route to `gh-workflow` with mode `pr_prepare`.
+3. If context is missing, route with `intake` first.
+4. Continue with canonical behavior only.
+
+## Validation
+
+Fail fast: **stop at the first failed gate**.
+
+- Confirm route target is `gh-workflow`.
+- Confirm mode is `pr_prepare`.
+- Confirm no circular route to this alias.
+
+## Anti-patterns
+
+- Re-implementing PR prep logic in alias.
+- Routing to deprecated peer aliases.
+- Silent routing without deprecation notice.
 
 ## Examples
 
-```bash
-# Preview MS Teams PR from clawdbot
-github-pr preview clawdbot/clawdbot 404
+- "Use gh-pr-local to open a draft PR" -> route to `gh-workflow` `pr_prepare`.
 
-# Fetch it locally
-github-pr fetch clawdbot/clawdbot 404
+## Legacy resources
 
-# Merge into your current branch
-github-pr merge clawdbot/clawdbot 404
-
-# Or do the full test cycle
-github-pr test clawdbot/clawdbot 404
-```
-
-## Notes
-
-- PRs are fetched from the `upstream` remote by default
-- Use `--remote <name>` to specify a different remote
-- Merge conflicts must be resolved manually
-- The `test` command auto-detects package manager (npm/pnpm/yarn/bun)
-
-## Compliance
-- Check against GOLD Industry Standards guide in ~/.codex/AGENTS.override.md
-
-## Scope and triggers
-- Use this skill when the task matches its description and triggers.
-- If the request is outside scope, route to the referenced skill.
-
-
-## Required inputs
-- User request details and any relevant files/links.
-
-
-## Deliverables
-- A structured response or artifact appropriate to the skill.
-- Include `schema_version: 1` if outputs are contract-bound.
-
-
-## Constraints
-- Redact secrets/PII by default.
-- Avoid destructive operations without explicit user direction.
-
-
-## Validation
-- Run any relevant checks or scripts when available.
-- Fail fast and report errors before proceeding.
-
-
-## Philosophy
-- Favor clarity, explicit tradeoffs, and verifiable outputs.
-
-- Encourage variation: adapt steps for different contexts and enable creative exploration.
-
-## Anti-patterns
-- Avoid vague guidance without concrete steps.
-- Do not invent results or commands.
-## Procedure
-1) Clarify scope and inputs.
-2) Execute the core workflow.
-3) Summarize outputs and next steps.
-- If context differs, customize steps to fit the situation.
-
-## Antipatterns
-- Do not add features outside the agreed scope.
+- `scripts/github-pr.py` (retained temporarily; canonical script is in `github/gh-workflow/scripts/`)
 
 ## Remember
-The agent is capable of extraordinary work in this domain. Use judgment, adapt to context, and push boundaries when appropriate.
 
-## Scripts
-- `scripts/github-pr.py`
+The agent is capable of extraordinary work in this domain. These guidelines unlock that potential—they don't constrain it.
+Use judgment, adapt to context, and push boundaries when appropriate.
 
 ## References
+
+- `github/gh-workflow/SKILL.md`
 - `references/contract.yaml`
 - `references/evals.yaml`

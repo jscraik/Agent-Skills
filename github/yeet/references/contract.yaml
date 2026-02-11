@@ -1,23 +1,23 @@
 schema_version: 1
 purpose: Deprecated alias routing contract.
 triggers:
-  - Explicit gh-actions-fix invocation
-  - Requests about failing PR checks and CI log diagnosis
+  - Explicit yeet invocation
+  - Requests for one-shot stage/commit/push/draft-PR flow
 inputs:
   - user request
-  - optional repo/pr context
+  - optional repo/branch/auth context
 outputs:
   - deprecation notice
   - route target and mode
   - schema_version: 1 alias status
 non_goals:
-  - running CI diagnosis logic in this alias
+  - running PR workflow logic in this alias
 risks:
   - accidental local workflow execution instead of canonical routing
 alias:
   active: true
   target_skill: gh-workflow
-  target_mode: ci_diagnose
+  target_mode: pr_prepare
   fallback_mode: intake
   sunset_review_date: 2026-05-12
 required_behavior:
