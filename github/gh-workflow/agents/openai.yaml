@@ -1,0 +1,4 @@
+interface:
+  display_name: "GH Workflow"
+  short_description: "Canonical GitHub lifecycle orchestration"
+  default_prompt: "Handle this GitHub workflow end-to-end: intake context, perform the requested mode, and return evidence-backed status."

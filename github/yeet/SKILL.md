@@ -1,28 +1,91 @@
 ---
-name: "yeet"
-description: "Use only when the user explicitly asks to stage, commit, push, and open a GitHub pull request in one flow using the GitHub CLI (`gh`)."
+name: yeet
+description: DEPRECATED alias of gh-workflow. Convert legacy invocations when requests explicitly name yeet; immediately route to gh-workflow in pr_prepare mode.
 ---
 
-## Prerequisites
+# yeet (Deprecated Alias)
 
-- Require GitHub CLI `gh`. Check `gh --version`. If missing, ask the user to install `gh` and stop.
-- Require authenticated `gh` session. Run `gh auth status`. If not authenticated, ask the user to run `gh auth login` (and re-run `gh auth status`) before continuing.
+## Philosophy
 
-## Naming conventions
+- Keep the shortcut name while consolidating behavior in `gh-workflow`.
+- Preserve compatibility for existing prompts during migration.
+- Route immediately; do not duplicate operational logic.
 
-- Branch: `codex/{description}` when starting from main/master/default.
-- Commit: `{description}` (terse).
-- PR title: `[codex] {description}` summarizing the full diff.
+## Variation guidance
 
-## Workflow
+- Keep routing deterministic but vary explanation detail by context.
+- Use concise routing for direct invocations; add context notes for ambiguous requests.
+- If repo/branch/auth context is missing, branch to `intake` before canonical routing.
 
-- If on main/master/default, create a branch: `git checkout -b "codex/{description}"`
-- Otherwise stay on the current branch.
-- Confirm status, then stage everything: `git status -sb` then `git add -A`.
-- Commit tersely with the description: `git commit -m "{description}"`
-- Run checks if not already. If checks fail due to missing deps/tools, install dependencies and rerun once.
-- Push with tracking: `git push -u origin $(git branch --show-current)`
-- If git push fails due to workflow auth errors, pull from master and retry the push.
-- Open a PR and edit title/body to reflect the description and the deltas: `GH_PROMPT_DISABLED=1 GIT_TERMINAL_PROMPT=0 gh pr create --draft --fill --head $(git branch --show-current)`
-- Write the PR description to a temp file with real newlines (e.g. pr-body.md ... EOF) and run pr-body.md to avoid \\n-escaped markdown.
-- PR description (markdown) must be detailed prose covering the issue, the cause and effect on users, the root cause, the fix, and any tests or checks used to validate.
+## When to use
+
+Use this alias only when the request explicitly invokes `yeet` or requests the one-flow stage/commit/push/open-PR action.
+
+## Inputs
+
+- Original user request
+- Repo/branch/auth context if present
+
+## Outputs
+
+- Deprecation notice
+- Deterministic route to `gh-workflow` mode `pr_prepare`
+- Structured alias status with `schema_version: 1`
+
+## Routing
+
+- Target skill: `gh-workflow`
+- Target mode: `pr_prepare`
+- Fallback mode when context is missing: `intake`
+
+## Compatibility window
+
+- Alias active now
+- Sunset review date: **May 12, 2026**
+
+## Constraints
+
+- Redact secrets, tokens, and sensitive data by default.
+- Do not execute local PR workflow logic in this alias.
+- Do not route to any non-canonical GH skill.
+
+## Procedure
+
+1. Announce this skill is a deprecated alias.
+2. Route to `gh-workflow` with mode `pr_prepare`.
+3. If context is missing, route with `intake` first.
+4. Continue with canonical behavior only.
+
+## Validation
+
+Fail fast: **stop at the first failed gate**.
+
+- Confirm route target is `gh-workflow`.
+- Confirm mode is `pr_prepare`.
+- Confirm no circular route to this alias.
+
+## Anti-patterns
+
+- Re-implementing one-shot PR prep logic in alias.
+- Routing to deprecated peer aliases.
+- Silent routing without deprecation notice.
+
+## Examples
+
+- "Yeet this branch" -> route to `gh-workflow` `pr_prepare`.
+
+## Legacy resources
+
+- `assets/yeet-small.svg`
+- `assets/yeet.png`
+
+## Remember
+
+The agent is capable of extraordinary work in this domain. These guidelines unlock that potential—they don't constrain it.
+Use judgment, adapt to context, and push boundaries when appropriate.
+
+## References
+
+- `github/gh-workflow/SKILL.md`
+- `references/contract.yaml`
+- `references/evals.yaml`

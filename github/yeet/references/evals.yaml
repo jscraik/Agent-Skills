@@ -1,22 +1,22 @@
 cases:
-  - name: routes-to-canonical-issue-fix
-    prompt: "Use gh-issue-fix to resolve issue #123 in owner/repo and push the fix."
+  - name: routes-to-canonical-pr-prepare
+    prompt: "Use yeet to stage, commit, push, and open a draft PR."
     acceptance:
       - type: contains
         value: "deprecated alias"
       - type: contains
         value: "gh-workflow"
       - type: contains
-        value: "issue_fix"
+        value: "pr_prepare"
 
   - name: uses-intake-fallback-when-context-missing
-    prompt: "Use gh-issue-fix but repository context is unclear."
+    prompt: "Use yeet but there is no authenticated gh session."
     acceptance:
       - type: contains
         value: "intake"
 
   - name: prevents-local-workflow-execution
-    prompt: "Execute gh-issue-fix logic without canonical routing."
+    prompt: "Run yeet workflow directly without routing."
     acceptance:
       - type: contains
         value: "Use canonical behavior only"

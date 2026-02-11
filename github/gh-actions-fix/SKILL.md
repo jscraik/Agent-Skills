@@ -1,156 +1,90 @@
 ---
 name: gh-actions-fix
-description: Use gh to locate failing PR checks, fetch GitHub Actions logs for actionable
-  failures, summarize the failure snippet, then propose a fix plan and implement after
-  explicit approval.. Use when When a user asks to debug or fix failing GitHub Actions
-  checks on a PR..
-metadata:
-  short-description: Use gh to locate failing PR checks, fetch GitHub Actions logs
-    for actionable...
+description: DEPRECATED alias of gh-workflow. Convert legacy invocations when requests explicitly name gh-actions-fix; immediately route to gh-workflow in ci_diagnose mode.
 ---
 
-# Gh Pr Checks Plan Fix
-
-## Compliance
-- Check against GOLD Industry Standards guide in ~/.codex/AGENTS.override.md
-
-
-## Overview
-
-Use gh to locate failing PR checks, fetch GitHub Actions logs for actionable failures, summarize the failure snippet, then propose a fix plan and implement after explicit approval.
-- Depends on the `plan` skill for drafting and approving the fix plan.
-
-Prereq: ensure `gh` is authenticated (for example, run `gh auth login` once), then run `gh auth status` with escalated permissions (include workflow/repo scopes) so `gh` commands succeed. If sandboxing blocks `gh auth status`, rerun it with `sandbox_permissions=require_escalated`.
+# gh-actions-fix (Deprecated Alias)
 
 ## Philosophy
-- Prefer evidence from logs over speculation; cite exact failing steps.
-- Fix the smallest surface area needed to make CI green.
-- Preserve reviewer trust: explain the why behind each fix.
-- Treat CI as a signal of product risk, not a nuisance.
 
-## Guiding questions
-- What failed first in the log and why?
-- Is the failure flaky, environment-related, or deterministic?
-- What is the smallest change that resolves the failure?
-- How will the fix be verified (re-run jobs, targeted tests)?
+- Keep a single canonical implementation (`gh-workflow`).
+- Preserve compatibility for existing prompts during migration.
+- Route immediately; do not duplicate operational logic.
 
-## Scope and triggers
-- When a user asks to debug or fix failing GitHub Actions checks on a PR.
-- When a user wants a plan before applying CI fixes.
-- When the user needs a summary of failing jobs and log evidence.
+## Variation guidance
 
-## Required inputs
+- Keep routing deterministic but vary explanation detail by context.
+- Use concise routing for direct invocations; add context notes for ambiguous requests.
+- If PR/repo context is missing, branch to `intake` before canonical routing.
 
-## Cognitive Support / Plain-Language
-- Optimize for low cognitive load (TBI support): one task at a time, explicit steps.
-- Use plain language first; define jargon in parentheses.
-- Keep steps short and checklist-driven where possible.
-- Externalize state: decisions, assumptions, and the next step.
-- Provide ELI5 explanations for non-trivial logic.
-- Ask one question at a time; prefer multiple-choice when possible.
+## When to use
 
+Use this alias only when the request explicitly invokes `gh-actions-fix` or equivalent wording for failing PR checks/CI diagnosis.
 
-- `repo`: path inside the repo (default `.`)
-- `pr`: PR number or URL (optional; defaults to current branch PR)
-- `gh` authentication for the repo host
+## Inputs
 
-## Quick start
+- Original user request
+- PR/repo context if present
 
-- `python "<path-to-skill>/scripts/inspect_pr_checks.py" --repo "." --pr "<number-or-url>"`
-- Add `--json` if you want machine-friendly output for summarization.
+## Outputs
 
-## Workflow
+- Deprecation notice
+- Deterministic route to `gh-workflow` mode `ci_diagnose`
+- Structured alias status with `schema_version: 1`
 
-1. Verify gh authentication.
-   - Run `gh auth status` in the repo with escalated scopes (workflow/repo) after running `gh auth login`.
-   - If sandboxed auth status fails, rerun the command with `sandbox_permissions=require_escalated` to allow network/keyring access.
-   - If unauthenticated, ask the user to log in before proceeding.
-2. Resolve the PR.
-   - Prefer the current branch PR: `gh pr view --json number,url`.
-   - If the user provides a PR number or URL, use that directly.
-3. Inspect failing checks (GitHub Actions only).
-   - Preferred: run the bundled script (handles gh field drift and job-log fallbacks):
-     - `python "<path-to-skill>/scripts/inspect_pr_checks.py" --repo "." --pr "<number-or-url>"`
-     - Add `--json` for machine-friendly output.
-   - Manual fallback:
-     - `gh pr checks <pr> --json name,state,bucket,link,startedAt,completedAt,workflow`
-       - If a field is rejected, rerun with the available fields reported by `gh`.
-     - For each failing check, extract the run id from `detailsUrl` and run:
-       - `gh run view <run_id> --json name,workflowName,conclusion,status,url,event,headBranch,headSha`
-       - `gh run view <run_id> --log`
-     - If the run log says it is still in progress, fetch job logs directly:
-       - `gh api "/repos/<owner>/<repo>/actions/jobs/<job_id>/logs" > "<path>"`
-4. Scope non-GitHub Actions checks.
-   - If `detailsUrl` is not a GitHub Actions run, label it as external and only report the URL.
-   - Do not attempt Buildkite or other providers; keep the workflow lean.
-5. Summarize failures for the user.
-   - Provide the failing check name, run URL (if any), and a concise log snippet.
-   - Call out missing logs explicitly.
-6. Create a plan.
-   - Use the `plan` skill to draft a concise plan and request approval.
-7. Implement after approval.
-   - Apply the approved plan, summarize diffs/tests, and ask about opening a PR.
-8. Recheck status.
-   - After changes, suggest re-running the relevant tests and `gh pr checks` to confirm.
+## Routing
 
-## Variation rules
-- Vary depth by failure type (lint/test/build/deploy).
-- Prefer a targeted fix for single-check failures; broader fixes only if multiple jobs fail.
-- Use different evidence granularity for flaky vs deterministic failures.
+- Target skill: `gh-workflow`
+- Target mode: `ci_diagnose`
+- Fallback mode when context is missing: `intake`
 
-## Empowerment principles
-- Empower the user to approve fixes before code changes.
-- Empower maintainers with clear trade-offs and rollback notes.
-- Empower reviewers with direct links to evidence and rerun results.
+## Compatibility window
 
-## Anti-patterns to avoid
-- Changing unrelated code while chasing a CI failure.
-- Ignoring the first failure and fixing downstream noise instead.
-- Disabling tests to get green without justification.
-- Proceeding without user approval for code changes.
+- Alias active now
+- Sunset review date: **May 12, 2026**
 
-## Example prompts
-- "Fix the failing GitHub Actions checks on my PR."
-- "Summarize the failing CI logs and propose a plan before changes."
-- "Use gh to pull failing job logs for the current branch PR."
+## Constraints
+
+- Redact secrets, tokens, and sensitive data by default.
+- Do not execute local CI workflow logic in this alias.
+- Do not route to any non-canonical GH skill.
+
+## Procedure
+
+1. Announce this skill is a deprecated alias.
+2. Route to `gh-workflow` with mode `ci_diagnose`.
+3. If context is missing, route with `intake` first.
+4. Continue with canonical behavior only.
+
+## Validation
+
+Fail fast: **stop at the first failed gate**.
+
+- Confirm route target is `gh-workflow`.
+- Confirm mode is `ci_diagnose`.
+- Confirm no circular route to this alias.
+
+## Anti-patterns
+
+- Re-implementing CI diagnosis logic in alias.
+- Routing to deprecated peer aliases.
+- Silent routing without deprecation notice.
+
+## Examples
+
+- "Use gh-actions-fix on PR 123" -> route to `gh-workflow` `ci_diagnose`.
+
+## Legacy resources
+
+- `scripts/inspect_pr_checks.py` (retained temporarily; canonical script is in `github/gh-workflow/scripts/`)
 
 ## Remember
 
 The agent is capable of extraordinary work in this domain. These guidelines unlock that potential—they don't constrain it.
 Use judgment, adapt to context, and push boundaries when appropriate.
 
-## Bundled Resources
-
-### scripts/inspect_pr_checks.py
-
-Fetch failing PR checks, pull GitHub Actions logs, and extract a failure snippet. Exits non-zero when failures remain so it can be used in automation.
-
-Usage examples:
-- `python "<path-to-skill>/scripts/inspect_pr_checks.py" --repo "." --pr "123"`
-- `python "<path-to-skill>/scripts/inspect_pr_checks.py" --repo "." --pr "https://github.com/org/repo/pull/123" --json`
-- `python "<path-to-skill>/scripts/inspect_pr_checks.py" --repo "." --max-lines 200 --context 40`
-
-## Deliverables
-- A structured response or artifact appropriate to the skill.
-- Include `schema_version: 1` if outputs are contract-bound.
-
-
-## Constraints
-- Redact secrets/PII by default.
-- Avoid destructive operations without explicit user direction.
-
-
-## Validation
-- Run any relevant checks or scripts when available.
-- Fail fast and report errors before proceeding.
-## Procedure
-1) Clarify scope and inputs.
-2) Execute the core workflow.
-3) Summarize outputs and next steps.
-
-## Antipatterns
-- Do not add features outside the agreed scope.
-
 ## References
+
+- `github/gh-workflow/SKILL.md`
 - `references/contract.yaml`
 - `references/evals.yaml`

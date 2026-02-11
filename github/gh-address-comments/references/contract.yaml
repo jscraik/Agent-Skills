@@ -1,13 +1,26 @@
-purpose: >
-  Define expected behavior and outputs for this skill.
-schema_version: 1.0
+schema_version: 1
+purpose: Deprecated alias routing contract.
 triggers:
-  - user requests the capability described in this skill
+  - Explicit gh-address-comments invocation
+  - Requests about PR review comment handling
 inputs:
-  - user request details
+  - user request
+  - optional repo/pr context
 outputs:
-  - primary response or artifact
+  - deprecation notice
+  - route target and mode
+  - schema_version: 1 alias status
 non_goals:
-  - out-of-scope work
+  - running comment-handling logic in this alias
 risks:
-  - missing inputs; mitigated by clarifying questions
+  - accidental local workflow execution instead of canonical routing
+alias:
+  active: true
+  target_skill: gh-workflow
+  target_mode: pr_review_comments
+  fallback_mode: intake
+  sunset_review_date: 2026-05-12
+required_behavior:
+  - announce_deprecation
+  - route_to_target
+  - do_not_execute_local_workflow
