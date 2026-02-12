@@ -50,11 +50,13 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 
 ## Github
 
-- `gh-actions-fix` — Use gh to locate failing PR checks, fetch GitHub Actions logs for actionable
-- `gh-address-comments` — The agent is capable of extraordinary work in this domain. These guidelines
-- `gh-issue-fix` — Analyze and resolve a GitHub issue from intake through fix, validation,
-- `gh-pr-local` — Fetch, preview, test, and merge GitHub PRs locally using the primary
-- `yeet` — Use only when the user explicitly asks to stage, commit, push, and open a GitHub pull request in one flow using the GitHub CLI (`gh`).
+- `gh-actions-fix` — DEPRECATED alias of gh-workflow. Convert legacy invocations when requests explicitly name gh-actions-fix; immediately route to gh-workflow in ci_diagnose mode.
+- `gh-address-comments` — DEPRECATED alias of gh-workflow. Convert legacy invocations when requests explicitly name gh-address-comments; immediately route to gh-workflow in pr_review_comments mode.
+- `gh-fix-ci` — Use when a user asks to debug or fix failing GitHub PR checks that run in GitHub Actions; use `gh` to inspect checks and logs, summarize failure context, draft a fix plan, and implement only after explicit approval. Treat external providers (for example Buildkite) as out of scope and report only the details URL.
+- `gh-issue-fix` — DEPRECATED alias of gh-workflow. Convert legacy invocations when requests explicitly name gh-issue-fix; immediately route to gh-workflow in issue_fix mode.
+- `gh-pr-local` — DEPRECATED alias of gh-workflow. Convert legacy invocations when requests explicitly name gh-pr-local; immediately route to gh-workflow in pr_prepare mode.
+- `gh-workflow` — Consolidated GitHub lifecycle skill for agents and users: intake, issue fixing, PR prep, review comment handling, CI diagnosis, and server-side merge via gh. Use when requests involve GitHub issues/PRs/checks/merge operations.
+- `yeet` — DEPRECATED alias of gh-workflow. Convert legacy invocations when requests explicitly name yeet; immediately route to gh-workflow in pr_prepare mode.
 
 ## Interview
 
@@ -83,6 +85,7 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - `agents-md` — 'Refactor or create AGENTS.md using progressive disclosure: keep root
 - `context7` — Extract current library documentation via Context7 when users need up-to-date
 - `docs-expert` — Co-author and QA documentation such as READMEs, guides, and runbooks.
+- `openai-docs` — Use when the user asks how to build with OpenAI products or APIs and needs up-to-date official documentation with citations (for example: Codex, Responses API, Chat Completions, Apps SDK, Agents SDK, Realtime, model capabilities or limits); prioritize OpenAI docs MCP tools and restrict any fallback browsing to official OpenAI domains.
 
 ## Product — Domain
 
@@ -122,6 +125,7 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 
 ## Product — Tech
 
+- `agent-native-architecture` — Design or review agent-native application architecture for Codex-based workflows. Use when planning parity between UI and agent actions, primitive tool design, execution-loop completion signals, context injection, and safe rollout/rollback for agent-driven products.
 - `tech-spec` — Create implementation-ready technical planning artifacts from an existing tech spec. Use when you need one focused mode: data_spec, migration_plan, ops_spec, or performance_plan.
 - `tech-to-data` — DEPRECATED alias of tech-spec. Convert legacy invocations when requests explicitly name tech-to-data; immediately route to tech-spec in data_spec mode.
 - `tech-to-migration` — DEPRECATED alias of tech-spec. Convert legacy invocations when requests explicitly name tech-to-migration; immediately route to tech-spec in migration_plan mode.
