@@ -43,3 +43,36 @@ Backward-compatible aliases remain active during deprecation window (target revi
 ## Categories and Skills
 
 See `SKILL.md` for the full index with descriptions.
+
+## Docs governance
+
+- Contributor docs contract: `CONTRIBUTING.md`
+- Policy config: `docs-policy.json`
+- Local lint command:
+
+```bash
+python3 scripts/docs_lint.py --mode warn --config docs-policy.json
+```
+
+- CI workflow: `.github/workflows/docs-governance.yml`
+
+<!-- AGENT-FIRST-WORKFLOW:START -->
+## Agent-first workflow
+
+1. Create/update implementation plan using `.agent/PLANS.md` contract.
+2. Validate plan graph:
+
+```bash
+python3 /Users/jamiecraik/.codex/scripts/plan-graph-lint.py .agent/PLANS.md
+```
+
+3. Run canonical verification:
+
+```bash
+/Users/jamiecraik/.codex/scripts/verify-work.sh
+```
+
+4. Follow global scaffold policy:
+
+- `/Users/jamiecraik/.codex/instructions/agent-first-scaffold-spec.md`
+<!-- AGENT-FIRST-WORKFLOW:END -->

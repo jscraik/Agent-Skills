@@ -60,7 +60,10 @@ Session: `[PROMPT: artifacts/ai/sessions/YYYY-MM-DD-<slug>.json]`
 
 - [ ] Linked an issue or explained why none exists
 - [ ] Added/updated tests or explained why not
-- [ ] Updated docs where needed (Optional)
+- [ ] Updated docs where needed (Required for behavior/config/API/CLI changes)
+- [ ] Internal docs links use full root paths (for example, `/docs/deployment`)
+- [ ] Internal docs links do not use trailing slashes
+- [ ] Ran docs lint: `python3 scripts/docs_lint.py --mode warn --config docs-policy.json`
 - [ ] Considered backward compatibility / migrations (Optional)
 - [ ] Verified no secrets are committed (tokens, keys, passwords)
 - [ ] Confirmed CI is green (or explained failures)
