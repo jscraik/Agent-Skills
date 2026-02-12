@@ -327,19 +327,34 @@ def generate_suggestions(doc: SkillDoc, *, min_description_len: int = 120) -> Li
                 rationale="Codex relies on the description to decide when to invoke a skill implicitly.",
             )
 
-    # Optional metadata.short-description
-    metadata = fm.get("metadata")
-    if metadata is None or not isinstance(metadata, dict) or not isinstance(metadata.get("short-description"), str):
+    # Optional agents/openai.yaml short_description
+        metadata = fm.get("metadata")
+    if metadata is not None:
         add(
-            rule="frontmatter.metadata.short_description",
+            rule="frontmatter.metadata.discouraged",
             category="Frontmatter",
             priority=Priority.LOW,
-            message="Consider adding `metadata.short-description` for user-facing UI (optional).",
+            message="Prefer minimal SKILL.md frontmatter (name + description). Move UI metadata to `agents/openai.yaml` and remove `metadata`.",
             example="""\
-            metadata:
-              short-description: One-line summary shown in skill pickers.
+            # agents/openai.yaml
+            interface:
+              display_name: "Human-friendly name"
+              short_description: "One-line summary shown in skill pickers."
             """,
         )
+    else:
+        add(
+            rule="agents.openai_yaml.short_description",
+            category="Frontmatter",
+            priority=Priority.LOW,
+            message="Consider adding `agents/openai.yaml` with `interface.short_description` for user-facing UI (optional).",
+            example="""\
+            interface:
+              display_name: "Human-friendly name"
+              short_description: "One-line summary shown in skill pickers."
+            """,
+        )
+
 
     # Prohibited headings inside SKILL.md
     prohibited = {"when to use", "inputs", "outputs", "failure mode"}
@@ -384,7 +399,7 @@ def generate_suggestions(doc: SkillDoc, *, min_description_len: int = 120) -> Li
             1. ...
             2. ...
 
-            ## Outputs
+            ## Deliverables
             - ...
             """,
         )
