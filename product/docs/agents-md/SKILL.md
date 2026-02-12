@@ -40,8 +40,13 @@ Mandatory snippet (include verbatim in guidance):
 
 ## Response format (required)
 - Always include all three sections in every response:
+  - `## When to use` explaining the trigger or noting "in scope".
   - `## Outputs` describing delivered artifacts.
   - `## Inputs` listing missing info or noting "none".
+- Use the exact heading text and casing shown above.
+- For out-of-scope requests, start with `## When to use` and still include `## Outputs` and `## Inputs` below.
+- Do not omit `## When to use` under any circumstance.
+- For out-of-scope requests, do not write any text before `## When to use`.
 
 ## Cognitive Support / Plain-Language
 - Optimize for low cognitive load (TBI support): one task at a time, explicit steps.
@@ -51,35 +56,29 @@ Mandatory snippet (include verbatim in guidance):
 - Provide ELI5 explanations for non-trivial logic.
 - Ask one question at a time; prefer multiple-choice when possible.
 
-  - `## When to use` explaining the correct trigger or noting "in scope".
-- Use the exact heading text and casing shown above.
-- For out-of-scope requests, start with `## When to use` and still include `## Outputs` and `## Inputs` below.
-- Do not omit `## When to use` under any circumstance.
-- For out-of-scope requests, do not write any text before `## When to use`.
-
 ### Response template (minimum)
 
 ```md
-## Deliverables
+## When to use
+- in scope
+
+## Outputs
 - ...
 
-## Required inputs
-- ...
-
-## Scope and triggers
+## Inputs
 - ...
 ```
 
 ### Failure-mode template (out of scope)
 
 ```md
-## Scope and triggers
+## When to use
 - This skill applies when the user asks to create or refactor AGENTS.md using progressive disclosure.
 
-## Deliverables
+## Outputs
 - None (out of scope).
 
-## Required inputs
+## Inputs
 - None (out of scope).
 ```
 
@@ -91,6 +90,7 @@ Use the failure-mode template verbatim for out-of-scope requests.
 - Existing AGENTS.md content (if present).
 - Verified commands and paths from the repo (README, docs, config files).
 - Any adjacent instruction files that may conflict (global or per-directory).
+- Whether Jamie's agent-first scaffold standard is requested (`/Users/jamiecraik/.codex/instructions/agent-first-scaffold-spec.md`).
 
 ## Deliverables
 
@@ -100,6 +100,7 @@ Use the failure-mode template verbatim for out-of-scope requests.
 - A table of contents for docs that are created or updated.
 - A contradictions list with a question for each conflict.
 - A “flag for deletion” list (redundant, vague, overly obvious).
+- When requested: idempotent scaffold blocks for `AGENTS.md`, `.agent/PLANS.md`, and `README.md`.
 - Output contract schema_version: 1
 
 ## Constraints
@@ -137,6 +138,7 @@ Use the failure-mode template verbatim for out-of-scope requests.
 - If `CODEX_HOME` is set, prefer `$CODEX_HOME/...` for global references; otherwise use `~/.codex/...`.
 - Only insert references that exist on disk; if not found, state "not observed" and do not invent paths.
 - If the repo uses a different global protocol, add the same style of reference block.
+- When scaffold mode is requested, include references to the scaffold spec and governance docs listed above.
   - Example (root `AGENTS.md` block):
     ```md
     ## References (informational)
@@ -160,6 +162,9 @@ Use the failure-mode template verbatim for out-of-scope requests.
 - Confirm commands exist and are runnable.
 - Confirm naming conventions match the codebase.
 - Ensure no secrets or private endpoints appear.
+- For scaffold mode: verify marker blocks are present and not duplicated.
+- For scaffold mode: run `python3 /Users/jamiecraik/.codex/scripts/plan-graph-lint.py <repo>/.agent/PLANS.md`.
+- For scaffold mode: run link-integrity checks with `rg -n` for required global references.
 
 ## Required sections (root AGENTS.md)
 
@@ -169,6 +174,36 @@ Use the failure-mode template verbatim for out-of-scope requests.
 - References or imports (global protocol pointers; no duplication)
 - Global instructions discovery order (brief, link to full doc)
 - Links to category files
+
+## Agent-first scaffold integration (Jamie standard)
+
+Apply this when the user asks for agent-first rollout/scaffold across repos (especially under `/Users/jamiecraik/dev`).
+
+Required global references (verify they exist before insertion):
+- `/Users/jamiecraik/.codex/instructions/openai-agent-workflow-playbook.md`
+- `/Users/jamiecraik/.codex/instructions/README.checklist.md`
+- `/Users/jamiecraik/.codex/instructions/validator-contracts.md`
+- `/Users/jamiecraik/.codex/instructions/strict-toggle-governance.md`
+- `/Users/jamiecraik/.codex/instructions/agent-first-scaffold-spec.md`
+
+Use idempotent marker blocks:
+- `AGENTS.md`: `<!-- AGENT-FIRST-SCAFFOLD:START --> ... <!-- AGENT-FIRST-SCAFFOLD:END -->`
+- `.agent/PLANS.md`: `<!-- AGENT-FIRST-PLANS:START --> ... <!-- AGENT-FIRST-PLANS:END -->`
+- `README.md`: `<!-- AGENT-FIRST-WORKFLOW:START --> ... <!-- AGENT-FIRST-WORKFLOW:END -->`
+
+`.agent/PLANS.md` contract requirements:
+- `tasks[]`, each task has `id`, `title`, `depends_on`
+- `id` format `^T[1-9][0-9]*$`
+- IDs unique within plan
+- `depends_on` references in-plan IDs only
+- no self-dependency; DAG required; single connected component
+- validation command: `python3 /Users/jamiecraik/.codex/scripts/plan-graph-lint.py <plan-file>`
+
+Canonical verification command:
+- `/Users/jamiecraik/.codex/scripts/verify-work.sh`
+
+Rollout policy:
+- Link to 3-gate warn->block model in `/Users/jamiecraik/.codex/instructions/agent-first-scaffold-spec.md`.
 
 ## Variation
 
@@ -213,6 +248,8 @@ Use the failure-mode template verbatim for out-of-scope requests.
 - Never proceed with contradictory instructions without asking which one wins.
 - Do not introduce new sections without confirming they are required for every task.
 - Avoid “one‑size‑fits‑all” templates that erase repo‑specific commands.
+- In scaffold mode, writing non-idempotent edits without marker blocks.
+- Omitting `/Users/jamiecraik/.codex/instructions/agent-first-scaffold-spec.md` when Jamie standard is requested.
 
 ## Example prompts that should trigger this skill
 
@@ -224,5 +261,3 @@ Use the failure-mode template verbatim for out-of-scope requests.
 2) Execute the core workflow.
 3) Summarize outputs and next steps.
 
-## Antipatterns
-- Do not add features outside the agreed scope.

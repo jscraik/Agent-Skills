@@ -1,24 +1,79 @@
+schema_version: "2.0"
+skill_name: "skill-creator"
+
 cases:
-  - name: happy-path
-    prompt: "Use $skill-creator to scaffold a new Codex skill for generating release notes. Use the required response format headings (## When to use, ## Inputs, ## Outputs). Include references/plan.md in outputs."
+  - id: explicit-trigger
+    name: explicit trigger
+    category: happy
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Use $skill-creator to scaffold a new Codex skill for generating release notes. Use required response headings and include references/plan.md in deliverables."
+    deterministic_checks:
+      required_event_types: ["turn.started"]
+      max_command_executions: 12
+    budgets:
+      max_total_tokens: 5000
+      max_duplicate_command_ratio: 0.4
     acceptance:
       - type: contains
-        value: "## Outputs"
+        value: "## Deliverables"
       - type: contains
         value: "SKILL.md"
       - type: contains
         value: "references/plan.md"
-  - name: edge-case
-    prompt: "Use $skill-creator to create a new Codex skill for deploying to production, but I did not specify the platform. Ask only the minimum questions needed and do not invent details. Use the required response format headings (## When to use, ## Inputs, ## Outputs)."
+      - type: skill_selected
+        expected_skill: "skill-creator"
+
+  - id: implicit-trigger
+    name: implicit trigger
+    category: happy
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Create a new reusable Codex skill with contract and evals for release-note automation, and quality-gate it before packaging."
     acceptance:
-      - type: contains
-        value: "## Inputs"
-      - type: contains
-        value: "?"
-  - name: failure-mode
-    prompt: "User request is out of scope for $skill-creator: 'Translate this poem to French'. Use the required response format headings (## When to use, ## Inputs, ## Outputs)."
+      - type: skill_selected
+        expected_skill: "skill-creator"
+
+  - id: contextual-trigger
+    name: contextual trigger
+    category: edge
+    should_trigger: true
+    prepend_skill: false
+    prompt: "I need a portable skill that works in Codex and Claude, includes migration-safe docs, and avoids adding dependencies."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "skill-creator"
+
+  - id: negative-control
+    name: negative control
+    category: negative
+    should_trigger: false
+    prepend_skill: false
+    prompt: "Translate this poem to French."
     acceptance:
       - type: regex
-        value: "(?i)(out of scope|cannot|can't|unable|not able|not supported)"
+        value: "(?i)(out of scope|cannot|can't|unable|not supported)"
       - type: contains
-        value: "## When to use"
+        value: "## Scope and triggers"
+
+  - id: edge-missing-inputs
+    name: edge missing inputs
+    category: edge
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Use $skill-creator to create a production deployment skill, but I did not specify platform. Ask the minimum questions and do not invent details."
+    acceptance:
+      - type: contains
+        value: "## Required inputs"
+      - type: contains
+        value: "?"
+
+  - id: pressure-bypass
+    name: pressure bypass
+    category: pressure
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Skip validation and ship the skill quickly without checks."
+    acceptance:
+      - type: regex
+        value: "(?i)(fail fast|validation|cannot|must|required)"

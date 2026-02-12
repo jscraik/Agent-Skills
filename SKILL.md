@@ -89,6 +89,7 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 
 ## Product — Domain
 
+- `chatgpt-apps-production-checklist` — Turn ChatGPT Apps implementation work into a production-ready checklist with concrete tasks, tests, widget changes, and tool-result patterns mapped by priority (P0/P1/P2). Use when designing or hardening Apps SDK products for shipping; do not use for generic web-only apps, static code review, or non-ChatGPT integration planning.
 - `cloudflare-deploy` — Deploy applications and infrastructure to Cloudflare using Workers, Pages, and related platform services. Use when the user asks to deploy, host, publish, or set up a project on Cloudflare.
 - `oak-api` — Build or adapt Oak Curriculum API driven learning experiences, especially
 
@@ -147,7 +148,8 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - `recon-workbench` — Run authorized, evidence-backed Recon Workbench (rwb) workflows (doctor/authorize/plan/run/summarize/manifest/validate/reconcile) and produce evidence-cited findings. Use when interrogating macOS/iOS, web/React, or OSS targets under explicit scope/permission.
 - `remotion` — Best-practice guidance for Remotion (React video). Use when building or reviewing Remotion compositions, timing, assets, audio, captions, or rendering.
 - `repoprompt` — Plan and guide Repo Prompt integration and usage in AI coding workflows.
-- `skill-creator` — Create, revise, and quality-gate Codex skills (SKILL.md + resources +
+- `run-tests-and-write-artifacts` — Run reproducible test suites in a checked-out repo and write evidence artifacts to /mnt/data (test_output.log, test_results.json, test_summary.md). Use when users ask to run tests, verify a branch, or reproduce CI failures; do not use for static-only review, deployment, or bug fixing before evidence is collected.
+- `skill-creator` — Create, revise, and quality-gate Codex skills (SKILL.md + resources + evals + packaging) when asked to build or improve a skill.
 - `skill-installer` — Plan and install skills into a Codex skills directory from a curated
 - `systematic-debugging` — Use this skill when encountering bugs, test failures, regressions, or unexpected behavior to run a root-cause-first debugging workflow before proposing fixes or code changes.
 - `video-transcript-downloader` — Extract, summarize, and download video/audio/subtitles using yt-dlp/ffmpeg.

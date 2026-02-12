@@ -12,7 +12,7 @@ Enforces:
 - Basic safety hygiene (redaction language; fail-fast gating)
 
 Usage:
-  ~/.venvs/pyyaml/bin/python scripts/skill_gate.py <path/to/skill-dir-or-SKILL.md>
+  ~/.venvs/pyyaml/bin/python utilities/skill-creator/scripts/skill_gate.py <path/to/skill-dir-or-SKILL.md>
 
 Exit codes:
   0  pass
@@ -20,7 +20,7 @@ Exit codes:
   2  gate failed (one or more FAIL findings)
 
 Recommended CI:
-  ~/.venvs/pyyaml/bin/python scripts/skill_gate.py ~/dev/agent-skills/skills/<skill-name> --format json
+  ~/.venvs/pyyaml/bin/python utilities/skill-creator/scripts/skill_gate.py ~/dev/agent-skills/skills/<skill-name> --format json
 """
 
 from __future__ import annotations
@@ -36,7 +36,19 @@ import os
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
-import yaml
+try:
+    import yaml  # type: ignore
+except ModuleNotFoundError:  # pragma: no cover
+    print(
+        "ERROR: PyYAML is required to run skill_gate.py.\n\n"
+        "Fix (recommended):\n"
+        "  ~/.venvs/pyyaml/bin/python utilities/skill-creator/scripts/skill_gate.py <path/to/skill-dir-or-SKILL.md>\n\n"
+        "Notes:\n"
+        "  - Do not use utilities/skill-creator/.venv/bin/python (this repo does not ship that venv).\n"
+        "  - If ~/.venvs/pyyaml doesn't exist, create a venv with PyYAML installed.",
+        file=sys.stderr,
+    )
+    raise SystemExit(1)
 
 
 class Level(IntEnum):
@@ -783,6 +795,8 @@ def check_contract_and_evals(skill_dir: Path, *, require_contract: bool, require
                 if not isinstance(obj, dict) or "cases" not in obj or not isinstance(obj["cases"], list):
                     out.append(Finding(Level.FAIL, "EVALS_SHAPE", "evals.yaml must be a mapping with `cases: [ ... ]`."))
                 else:
+                    if "schema_version" in obj and not isinstance(obj["schema_version"], (str, int, float)):
+                        out.append(Finding(Level.FAIL, "EVALS_SCHEMA_VERSION_SHAPE", "`schema_version` must be a scalar when provided."))
                     cases = obj["cases"]
                     if len(cases) < 3:
                         out.append(Finding(Level.FAIL, "EVALS_TOO_FEW", "Provide at least 3 evaluation cases (happy/edge/failure)."))
@@ -796,6 +810,38 @@ def check_contract_and_evals(skill_dir: Path, *, require_contract: bool, require
                                 out.append(Finding(Level.FAIL, "EVALS_CASE_KEYS", f"Case #{i} missing `{k}`."))
                         if "acceptance" in c and not isinstance(c["acceptance"], list):
                             out.append(Finding(Level.FAIL, "EVALS_ACCEPTANCE_SHAPE", f"Case #{i} `acceptance` must be a list."))
+
+                        # v2 optional fields (backward compatible)
+                        if "id" in c and not isinstance(c["id"], str):
+                            out.append(Finding(Level.FAIL, "EVALS_CASE_ID_SHAPE", f"Case #{i} `id` must be a string when provided."))
+                        if "should_trigger" in c and not isinstance(c["should_trigger"], bool):
+                            out.append(Finding(Level.FAIL, "EVALS_SHOULD_TRIGGER_SHAPE", f"Case #{i} `should_trigger` must be boolean when provided."))
+                        if "prepend_skill" in c and not isinstance(c["prepend_skill"], bool):
+                            out.append(Finding(Level.FAIL, "EVALS_PREPEND_SKILL_SHAPE", f"Case #{i} `prepend_skill` must be boolean when provided."))
+                        if "output_schema" in c and not isinstance(c["output_schema"], str):
+                            out.append(Finding(Level.FAIL, "EVALS_OUTPUT_SCHEMA_SHAPE", f"Case #{i} `output_schema` must be a string path when provided."))
+
+                        if "category" in c:
+                            allowed_categories = {"happy", "edge", "negative", "pressure"}
+                            if not isinstance(c["category"], str) or c["category"].strip().lower() not in allowed_categories:
+                                out.append(Finding(
+                                    Level.FAIL,
+                                    "EVALS_CATEGORY_INVALID",
+                                    f"Case #{i} `category` must be one of: {', '.join(sorted(allowed_categories))}.",
+                                ))
+
+                        if "deterministic_checks" in c and not isinstance(c["deterministic_checks"], dict):
+                            out.append(Finding(
+                                Level.FAIL,
+                                "EVALS_DETERMINISTIC_CHECKS_SHAPE",
+                                f"Case #{i} `deterministic_checks` must be a mapping when provided.",
+                            ))
+                        if "budgets" in c and not isinstance(c["budgets"], dict):
+                            out.append(Finding(
+                                Level.FAIL,
+                                "EVALS_BUDGETS_SHAPE",
+                                f"Case #{i} `budgets` must be a mapping when provided.",
+                            ))
             except Exception as e:
                 out.append(Finding(Level.FAIL, "EVALS_INVALID", f"evals.yaml invalid: {e}"))
 

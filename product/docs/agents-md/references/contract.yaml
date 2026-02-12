@@ -1,32 +1,58 @@
-# Skill Output Contract
-# Source: templates/contract.yaml - Copy and customize for your skill.
-
-schema_version: "1.0"
+schema_version: "1.1"
 
 purpose: >
-  Define expected behavior and outputs for this skill.
-  This skill creates or updates repository-level AGENTS.md files
-  with clear sections, commands, and repo-specific conventions.
+  Define expected behavior and outputs for the agents-md skill, including
+  progressive-disclosure AGENTS refactors and optional Jamie agent-first
+  scaffold rollout guidance.
 
 triggers:
   - user requests AGENTS.md creation or update
-  - repository needs contributor guidelines
-  - onboarding documentation needed
+  - user requests progressive-disclosure split of AGENTS guidance
+  - user explicitly requests Jamie agent-first scaffold rollout
 
 inputs:
-  - repository structure and conventions
-  - specific areas to document
-  - target audience (contributors, users, etc.)
+  - repo_root_path
+  - existing_agents_state
+  - verified_repo_commands_and_paths
+  - conflicting_instruction_sources
+  - scaffold_mode_requested
 
 outputs:
-  - AGENTS.md file
-  - clear contributor instructions
-  - repo-specific conventions
+  - minimal_root_agents_with_links
+  - category_guidance_files_or_split_plan
+  - contradictions_list_with_resolution_questions
+  - flag_for_deletion_list
+  - scaffold_mode_artifacts_when_requested
+
+required_response_sections:
+  - "When to use"
+  - "Outputs"
+  - "Inputs"
+
+scaffold_mode_contract:
+  required_global_references:
+    - /Users/jamiecraik/.codex/instructions/openai-agent-workflow-playbook.md
+    - /Users/jamiecraik/.codex/instructions/README.checklist.md
+    - /Users/jamiecraik/.codex/instructions/validator-contracts.md
+    - /Users/jamiecraik/.codex/instructions/strict-toggle-governance.md
+    - /Users/jamiecraik/.codex/instructions/agent-first-scaffold-spec.md
+  required_markers:
+    - AGENT-FIRST-SCAFFOLD
+    - AGENT-FIRST-PLANS
+    - AGENT-FIRST-WORKFLOW
+  required_commands:
+    plan_lint: "python3 /Users/jamiecraik/.codex/scripts/plan-graph-lint.py <plan-file>"
+    verification: "/Users/jamiecraik/.codex/scripts/verify-work.sh"
 
 non_goals:
-  - full project documentation
-  - API reference documentation
+  - implementing product code
+  - inventing non-existent commands or paths
+  - duplicating full global policy text in repo AGENTS files
 
 risks:
-  - incomplete information; mitigated by asking for specifics
-  - drift from actual practices; mitigated by examples
+  - risk: stale_global_paths
+    mitigation: verify paths on disk before insertion; otherwise emit "not observed"
+  - risk: contradictory_instructions
+    mitigation: surface conflict and ask user which instruction wins
+  - risk: non_idempotent_scaffold_edits
+    mitigation: enforce marker-block update pattern

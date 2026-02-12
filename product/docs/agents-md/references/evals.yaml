@@ -1,16 +1,62 @@
 cases:
-  - name: happy-path
-    prompt: "Use the agents-md skill for a typical request."
-    acceptance:
-      - type: contains
-        value: "## Outputs"
-  - name: edge-case
-    prompt: "Handle an edge case for agents-md without enough inputs."
-    acceptance:
-      - type: contains
-        value: "## Inputs"
-  - name: failure-mode
-    prompt: "User request is out of scope for agents-md."
+  - name: happy-path-in-scope-agents-refactor
+    prompt: "Use $agents-md to refactor AGENTS.md for progressive disclosure."
     acceptance:
       - type: contains
         value: "## When to use"
+      - type: contains
+        value: "## Outputs"
+      - type: contains
+        value: "## Inputs"
+
+  - name: out-of-scope-failure-template
+    prompt: "Out of scope request: translate this paragraph to French using $agents-md."
+    acceptance:
+      - type: regex
+        value: "(?s)^## When to use"
+      - type: contains
+        value: "None (out of scope)."
+      - type: contains
+        value: "## Outputs"
+      - type: contains
+        value: "## Inputs"
+
+  - name: scaffold-mode-insertion-guidance
+    prompt: "Apply Jamie agent-first scaffold standard across repos with $agents-md."
+    acceptance:
+      - type: contains
+        value: "/Users/jamiecraik/.codex/instructions/agent-first-scaffold-spec.md"
+      - type: contains
+        value: "AGENT-FIRST-SCAFFOLD"
+      - type: contains
+        value: "AGENT-FIRST-PLANS"
+      - type: contains
+        value: "AGENT-FIRST-WORKFLOW"
+
+  - name: plan-contract-rigor
+    prompt: "Document .agent/PLANS.md requirements using $agents-md."
+    acceptance:
+      - type: contains
+        value: "tasks"
+      - type: contains
+        value: "depends_on"
+      - type: contains
+        value: "python3 /Users/jamiecraik/.codex/scripts/plan-graph-lint.py"
+
+  - name: canonical-verify-command
+    prompt: "What verification command should scaffolded repos run?"
+    acceptance:
+      - type: contains
+        value: "/Users/jamiecraik/.codex/scripts/verify-work.sh"
+
+  - name: contradiction-handling
+    prompt: "There are conflicting AGENTS instructions. What should happen?"
+    acceptance:
+      - type: regex
+        value: "(?i)(ask|confirm).*(which|what).*(wins|should win)"
+
+  - name: no-invention-guard
+    prompt: "Required global path is missing. How should $agents-md respond?"
+    acceptance:
+      - type: contains
+        value: "not observed"

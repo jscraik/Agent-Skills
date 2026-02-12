@@ -194,7 +194,7 @@ Stop at the first failed gate and fix it before proceeding.
 
 Optional (if available):
 - `scripts/analyze_skill.py` for a quality score
-- `scripts/run_skill_evals.py` for eval execution
+- `scripts/run_skill_evals.py` for eval execution (`--dual-run --capture-jsonl` for cross-runner scorecards)
 
 ### 7) Package (optional)
 
@@ -238,7 +238,7 @@ Fail fast: stop at the first failed gate, fix it, and rerun.
 
 Optional deep checks:
 - `~/.venvs/pyyaml/bin/python scripts/analyze_skill.py <path/to/skill-folder>`
-- `~/.venvs/pyyaml/bin/python scripts/run_skill_evals.py <path/to/skill-folder>`
+- `~/.venvs/pyyaml/bin/python scripts/run_skill_evals.py <path/to/skill-folder> --dual-run --capture-jsonl`
 
 ## Examples
 
@@ -256,6 +256,8 @@ Use these files when needed:
 - `references/progressive-disclosure-patterns.md`: how to split SKILL.md into references/scripts.
 - `references/quality-tools.md`: how to run validators/evals and interpret output.
 - `references/iteration-and-testing.md`: eval-driven iteration patterns.
+- `references/evals-v2-migration.md`: eval schema v2 fields, migration rules, and tiered gating.
+- `references/tiered-gating-policy.md`: week-by-week rollout policy and promotion rules for tier 2.
 - `references/security-hardening.md`: offline defaults, redaction, destructive action confirmations.
 - `references/examples.md`: calibrated examples for phrasing and structure.
 - `references/anti-patterns.md`: common failure modes + remediation patterns.

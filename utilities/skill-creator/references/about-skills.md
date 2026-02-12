@@ -34,6 +34,9 @@ equipped with procedural knowledge that no model can fully possess.
 ## Evaluation Requirement
 
 - MUST provide at least 3 eval cases (happy, edge, failure) with acceptance criteria.
+- SHOULD include the full 6-case coverage set (explicit/implicit/contextual/negative/edge/pressure).
+- SHOULD adopt eval schema v2 fields when relevant:
+  - `id`, `should_trigger`, `category`, `deterministic_checks`, `budgets`
 - MUST include a clear Definition of Done in the skill body or contract.
 
 ## Design Reminder
