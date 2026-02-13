@@ -1,0 +1,13 @@
+interface:
+  display_name: "ChatGPT Apps Checklist"
+  short_description: "Operationalize ChatGPT Apps lessons into production tasks, tests, and result-contract changes"
+  default_prompt: "Create a project-specific ChatGPT Apps production checklist mapped by priority with tasks, tests, widget changes, and tool-result patterns."
+
+policy:
+  allow_implicit_invocation: true
+
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "openaiDeveloperDocs"
+      description: "Official OpenAI developer docs for Apps SDK behavior verification"

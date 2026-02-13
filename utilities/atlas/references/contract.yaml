@@ -1,0 +1,15 @@
+purpose: macOS-only AppleScript control for the ChatGPT Atlas desktop app. Use only
+  when the user explicitly asks to control Atlas tabs/bookmarks/history on macOS and
+  the "ChatGPT Atlas" app is installed; do not trigger for general browser tasks or
+  non-macOS environments.
+schema_version: '1.0'
+triggers:
+- When requests match atlas scope and intent.
+inputs:
+- user request details
+outputs:
+- structured response or artifacts defined by the skill
+non_goals:
+- out-of-scope requests outside the skill boundary
+risks:
+- missing context; mitigated by clarifying questions and explicit assumptions
