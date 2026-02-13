@@ -1,0 +1,1 @@
+Please wire Agentation into my Next.js layout and set up MCP so Claude can use annotations.

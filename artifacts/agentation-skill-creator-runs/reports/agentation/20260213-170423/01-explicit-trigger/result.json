@@ -1,0 +1,43 @@
+{
+  "id": "explicit-trigger",
+  "name": "explicit trigger",
+  "category": "happy",
+  "should_trigger": true,
+  "prepend_skill": true,
+  "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/agentation-skill-creator-runs/reports/agentation/20260213-170423/01-explicit-trigger",
+  "runners": {
+    "codex": {
+      "runner": "codex",
+      "exit_code": 1,
+      "passed": false,
+      "tier1_failures": [
+        "codex returned non-zero exit code: 1",
+        "deterministic_checks/budgets requested but Codex JSONL was not captured (enable --capture-jsonl).",
+        "contains failed: 'restart Claude Code'"
+      ],
+      "tier2_findings": [],
+      "warnings": [],
+      "artifacts": {
+        "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/agentation-skill-creator-runs/reports/agentation/20260213-170423/01-explicit-trigger/codex",
+        "final": "/Users/jamiecraik/dev/agent-skills/artifacts/agentation-skill-creator-runs/reports/agentation/20260213-170423/01-explicit-trigger/codex/final.txt",
+        "stdout": "/Users/jamiecraik/dev/agent-skills/artifacts/agentation-skill-creator-runs/reports/agentation/20260213-170423/01-explicit-trigger/codex/stdout.txt",
+        "stderr": "/Users/jamiecraik/dev/agent-skills/artifacts/agentation-skill-creator-runs/reports/agentation/20260213-170423/01-explicit-trigger/codex/stderr.txt",
+        "jsonl": null
+      },
+      "metrics": {
+        "selected_skill": true
+      },
+      "used_schema": false
+    }
+  },
+  "passed": false,
+  "tier1_failed": true,
+  "tier2_failed": false,
+  "tier1_failures": [
+    "[codex] codex returned non-zero exit code: 1",
+    "[codex] deterministic_checks/budgets requested but Codex JSONL was not captured (enable --capture-jsonl).",
+    "[codex] contains failed: 'restart Claude Code'"
+  ],
+  "tier2_findings": [],
+  "warnings": []
+}

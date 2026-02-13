@@ -1,0 +1,3 @@
+===== run_skill_evals =====
+ERROR: Missing evals file: /Users/jamiecraik/dev/agent-skills/frontend/agentation/references/evals.yaml
+EXIT_CODE=1

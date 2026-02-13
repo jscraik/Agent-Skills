@@ -19,6 +19,10 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 
 - `better-icons` — Use this skill to search and extract SVG icons via the better-icons CLI or MCP. Use this when you need icons from Iconify collections for UI/UX work, product mocks, or codebases.
 
+## Frontend
+
+- `agentation` — Use when a user wants to install, verify, or troubleshoot Agentation in a Next.js app; this skill validates current setup, wires the dev toolbar, configures MCP, and reports final status.
+
 ## Frontend — Graphics
 
 - `favicon-generator` — Generate complete favicon/app icon suites with templates and assets.

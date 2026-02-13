@@ -1,0 +1,29 @@
+schema_version: "1.0"
+
+purpose: >
+  Install or verify Agentation in a Next.js project, including development-only
+  toolbar wiring and optional Claude MCP registration.
+
+triggers:
+  - User asks to install, set up, or enable Agentation in Next.js.
+  - User asks to check whether Agentation integration is already complete.
+  - User asks to configure Agentation MCP integration for Claude.
+
+inputs:
+  - Project path and package manager context.
+  - Existing app structure (App Router or Pages Router).
+  - Permission to run local CLI commands for MCP registration.
+
+outputs:
+  - Setup status for dependency, component wiring, and MCP registration.
+  - List of file edits performed (or explicit statement that no edits were needed).
+  - Final next step (for example restart Claude Code).
+
+non_goals:
+  - Full frontend redesign or non-Agentation feature changes.
+  - Framework migrations unrelated to Agentation setup.
+
+risks:
+  - Duplicate component injection in multiple files; mitigated by pre-checks.
+  - Production exposure of dev tooling; mitigated with NODE_ENV guard.
+  - Misreported completion state; mitigated by explicit verification steps.

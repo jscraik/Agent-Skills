@@ -1,0 +1,42 @@
+===== analyze_skill =====
+==============================================================================
+SKILL QUALITY ANALYSIS: agentation
+==============================================================================
+
+OVERALL SCORE: 45/120
+
+Frontmatter: 16/30
+  ℹ️ [+10] ✅ `name` present and valid.
+  ⚠️ [+6] ⚠️ `description` is brief and lacks explicit triggers.
+
+Philosophy: 8/20
+  ⚠️ [+8] ⚠️ Some philosophy indicators found: framework.
+
+Anti-Patterns: 0/20
+  ❌ [+0] ❌ No explicit anti-pattern warnings detected.
+
+Variation: 0/15
+  ❌ [+0] ❌ No explicit variation encouragement.
+
+Organization: 7/10
+  ⚠️ [+3] ⚠️ Has 3 headings.
+  ℹ️ [+4] ✅ Contains 21 list items (actionable).
+
+Empowerment: 0/5
+  ℹ️ [+0] ℹ️ No explicit empowering language found.
+
+Conciseness: 10/10
+  ℹ️ [+10] ✅ Concise length (66 lines).
+
+Repo Integration: 4/10
+  ℹ️ [+2] ℹ️ No `scripts/` directory (fine for instruction-only skills).
+  ℹ️ [+1] ℹ️ No `references/` directory.
+  ℹ️ [+1] ℹ️ No `assets/` directory.
+
+==============================================================================
+RECOMMENDATIONS
+==============================================================================
+
+Needs improvement: prioritize Frontmatter, Philosophy, and Anti-Patterns.
+
+EXIT_CODE=2
