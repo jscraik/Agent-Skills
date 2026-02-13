@@ -1,0 +1,6 @@
+===== migrate_evals_v2 =====
+[DRY-RUN] skills scanned: 1
+[DRY-RUN] contract.yaml created: 1
+[DRY-RUN] evals.yaml created: 1
+[DRY-RUN] evals normalized: 0
+EXIT_CODE=0

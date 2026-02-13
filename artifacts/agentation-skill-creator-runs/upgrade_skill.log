@@ -1,0 +1,103 @@
+===== upgrade_skill =====
+
+Skill: agentation
+Path:  /Users/jamiecraik/dev/agent-skills/frontend/agentation/SKILL.md
+
+==============================================================================
+
+🔴 HIGH PRIORITY (3)
+------------------------------------------------------------------------------
+
+1. [Anti-Patterns] Add anti-patterns or a "what to avoid" section.
+
+   Example:
+
+   ## Anti-Patterns to Avoid
+
+   Common mistakes when [doing this task]:
+   - ❌ **Template trap**: Using rigid templates that constrain creativity
+   - ❌ **Context blindness**: Applying same approach regardless of situation
+   - ❌ **Over-specification**: Adding unnecessary constraints
+
+2. [Description] Expand the `description` field (current length 59; aim for ~120–200 chars with clear trigger + outcome).
+   Why: Short/ambiguous descriptions reduce correct implicit invocation. Include a clear 'when' clause and the expected output.
+
+   Example:
+
+   Current: Add Agentation visual feedback toolbar to a Next.js project
+
+   Suggested pattern:
+   description: Use this skill when <trigger>. It will <produce outcome> using <inputs>.
+
+3. [Philosophy] Add a philosophy or principles section.
+
+   Example:
+
+   ## Core Philosophy
+
+   Before diving into procedures, understand the fundamental approach:
+   - What is the underlying philosophy guiding this domain?
+   - What questions should be asked before taking action?
+   - What mental model helps make better decisions?
+
+🟡 MEDIUM PRIORITY (3)
+------------------------------------------------------------------------------
+
+1. [Description] Add explicit trigger language to `description` (e.g., 'when the user asks ...').
+   Why: Codex relies on the description to decide when to invoke a skill implicitly.
+
+2. [Organization] Add more section headers for better organization.
+
+   Example:
+
+   Organize the skill into clear sections:
+   ## Philosophy/Principles
+   ## Core Guidelines
+   ## Anti-Patterns
+   ## Examples (optional)
+   ## Advanced Topics (optional)
+
+3. [Variation] Add explicit variation encouragement.
+
+   Example:
+
+   ## Encouraging Variation
+
+   **IMPORTANT**: Outputs should vary based on context. Avoid converging on "favorite" patterns:
+   - Adapt to the specific use case
+   - Consider different approaches for different scenarios
+   - No two outputs should be identical unless requirements are identical
+
+🟢 LOW PRIORITY (4)
+------------------------------------------------------------------------------
+
+1. [Body] Consider adding a 'Constraints / Safety' section (especially for destructive actions).
+
+2. [Body] Consider adding 2–3 example prompts that should trigger this skill.
+
+3. [Empowerment] Add a short empowering conclusion.
+
+   Example:
+
+   ## Remember
+
+   The agent is capable of extraordinary work in this domain. These guidelines unlock that potential—they don't constrain it.
+   Use judgment, adapt to context, and push boundaries when appropriate.
+
+4. [Frontmatter] Consider adding `agents/openai.yaml` with `interface.short_description` for user-facing UI (optional).
+
+   Example:
+
+   interface:
+     display_name: "Human-friendly name"
+     short_description: "One-line summary shown in skill pickers."
+
+==============================================================================
+NEXT STEPS
+1) Review the suggestions above.
+2) Edit your SKILL.md to incorporate relevant improvements.
+3) Run analyze_skill.py to see how the score improves (if you have it).
+4) Test the skill with real use cases.
+5) Iterate based on performance.
+
+EXIT_CODE=2
