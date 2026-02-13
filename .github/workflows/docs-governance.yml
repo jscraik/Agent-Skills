@@ -1,0 +1,120 @@
+name: docs-governance
+
+on:
+  pull_request:
+    paths:
+      - "docs/**"
+      - "CONTRIBUTING.md"
+      - "docs-policy.json"
+      - "scripts/docs_lint.py"
+      - ".github/PULL_REQUEST_TEMPLATE.md"
+      - ".github/workflows/docs-governance.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "docs/**"
+      - "CONTRIBUTING.md"
+      - "docs-policy.json"
+      - "scripts/docs_lint.py"
+      - ".github/PULL_REQUEST_TEMPLATE.md"
+      - ".github/workflows/docs-governance.yml"
+  workflow_dispatch:
+
+jobs:
+  docs-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Resolve lint mode
+        id: mode
+        run: |
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          from datetime import date
+
+          with open("docs-policy.json", "r", encoding="utf-8") as f:
+              cfg = json.load(f)
+
+          mode = cfg.get("enforcement_mode", "warn")
+          block_after = cfg.get("block_after")
+          if block_after and date.today().isoformat() >= block_after:
+              mode = "block"
+          print(f"mode={mode}")
+          print(f"today={date.today().isoformat()}")
+          PY
+
+      - name: Configure git range for changed-only mode
+        id: range
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "base_sha=${{ github.event.pull_request.base.sha }}" >> "$GITHUB_OUTPUT"
+          elif [ "${{ github.event_name }}" = "push" ]; then
+            echo "base_sha=${{ github.event.before }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "base_sha=" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Run docs lint
+        env:
+          GITHUB_BASE_SHA: ${{ steps.range.outputs.base_sha }}
+          GITHUB_SHA: ${{ github.sha }}
+        run: |
+          CHANGED_ONLY=""
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            CHANGED_ONLY="--changed-only"
+          fi
+          python3 scripts/docs_lint.py \
+            --config docs-policy.json \
+            --mode "${{ steps.mode.outputs.mode }}" \
+            --report-json /tmp/docs-lint-report.json \
+            $CHANGED_ONLY
+
+      - name: Publish lint summary
+        if: always()
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          report_path = Path("/tmp/docs-lint-report.json")
+          summary_path = Path("${GITHUB_STEP_SUMMARY}")
+          if not report_path.exists():
+              summary_path.write_text("## Docs Governance\n\nNo report generated.\n", encoding="utf-8")
+              raise SystemExit(0)
+
+          report = json.loads(report_path.read_text(encoding="utf-8"))
+          lines = [
+              "## Docs Governance",
+              "",
+              f"- Mode: `{report['mode']}`",
+              f"- Scanned files: `{report['scanned_files']}`",
+              f"- Errors: `{report['errors']}`",
+              f"- Warnings: `{report['warnings']}`",
+              "",
+          ]
+          if report["issues"]:
+              lines.append("### Findings")
+              for issue in report["issues"][:50]:
+                  lines.append(
+                      f"- `{issue['severity']}` `{issue['code']}` in `{issue['file']}:{issue['line']}` - {issue['message']}"
+                  )
+          else:
+              lines.append("No findings.")
+
+          summary_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+          PY
+
+      - name: Upload docs lint report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: docs-lint-report
+          path: /tmp/docs-lint-report.json

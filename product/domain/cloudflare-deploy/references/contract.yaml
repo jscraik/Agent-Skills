@@ -1,0 +1,14 @@
+purpose: Deploy applications and infrastructure to Cloudflare using Workers, Pages,
+  and related platform services. Use when the user asks to deploy, host, publish,
+  or set up a project on Cloudflare.
+schema_version: '1.0'
+triggers:
+- When requests match cloudflare-deploy scope and intent.
+inputs:
+- user request details
+outputs:
+- structured response or artifacts defined by the skill
+non_goals:
+- out-of-scope requests outside the skill boundary
+risks:
+- missing context; mitigated by clarifying questions and explicit assumptions

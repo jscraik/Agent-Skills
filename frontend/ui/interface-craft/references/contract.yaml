@@ -1,0 +1,15 @@
+purpose: Interface Craft by Josh Puckett helps build polished, animated React interfaces
+  using Storyboard Animation, DialKit tuning panels, and Design Critique. Use when
+  requests involve motion design, animation sequencing, live tuning controls, or structured
+  UI critique and polish.
+schema_version: '1.0'
+triggers:
+- When requests match interface-craft scope and intent.
+inputs:
+- user request details
+outputs:
+- structured response or artifacts defined by the skill
+non_goals:
+- out-of-scope requests outside the skill boundary
+risks:
+- missing context; mitigated by clarifying questions and explicit assumptions

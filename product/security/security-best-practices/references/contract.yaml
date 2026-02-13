@@ -1,0 +1,16 @@
+purpose: Perform language and framework specific security best-practice reviews and
+  suggest improvements. Trigger only when the user explicitly requests security best
+  practices guidance, a security review/report, or secure-by-default coding help.
+  Trigger only for supported languages (python, javascript/typescript, go). Do not
+  trigger for general code review, debugging, or non-security tasks.
+schema_version: '1.0'
+triggers:
+- When requests match security-best-practices scope and intent.
+inputs:
+- user request details
+outputs:
+- structured response or artifacts defined by the skill
+non_goals:
+- out-of-scope requests outside the skill boundary
+risks:
+- missing context; mitigated by clarifying questions and explicit assumptions

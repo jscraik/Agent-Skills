@@ -5,11 +5,11 @@ analyze_skill.py
 Analyze a Codex agent skill (SKILL.md) and emit a quality score + actionable feedback.
 
 Usage:
-    ~/.venvs/pyyaml/bin/python analyze_skill.py <path/to/skill-dir-or-SKILL.md>
+    ~/.venvs/pyyaml/bin/python utilities/skill-creator/scripts/analyze_skill.py <path/to/skill-dir-or-SKILL.md>
 
 Examples:
-    ~/.venvs/pyyaml/bin/python analyze_skill.py .codex/skills/my-skill
-    ~/.venvs/pyyaml/bin/python analyze_skill.py .codex/skills/my-skill/SKILL.md
+    ~/.venvs/pyyaml/bin/python utilities/skill-creator/scripts/analyze_skill.py .codex/skills/my-skill
+    ~/.venvs/pyyaml/bin/python utilities/skill-creator/scripts/analyze_skill.py .codex/skills/my-skill/SKILL.md
 
 Exit codes:
     0  score >= --min-pass
@@ -33,7 +33,16 @@ from enum import IntEnum
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
-import yaml
+try:
+    import yaml  # type: ignore
+except ModuleNotFoundError:  # pragma: no cover
+    print(
+        "ERROR: PyYAML is required to run analyze_skill.py.\n\n"
+        "Fix:\n"
+        "  ~/.venvs/pyyaml/bin/python utilities/skill-creator/scripts/analyze_skill.py <path/to/skill-dir-or-SKILL.md>\n",
+        file=sys.stderr,
+    )
+    raise SystemExit(1)
 
 
 # -----------------------------
@@ -201,6 +210,31 @@ def score_frontmatter(doc: SkillDoc) -> CategoryResult:
 
     name = fm.get("name")
     desc = fm.get("description")
+
+
+    # Prefer minimal frontmatter: keep it to `name` + `description`.
+    # Put UI metadata and tool dependencies in agents/openai.yaml instead.
+    extra_keys = sorted(set(fm.keys()) - {"name", "description"})
+    if extra_keys:
+        findings.append(
+            Finding(
+                "Frontmatter",
+                -2,
+                f"⚠️ Extra frontmatter keys present: {', '.join(extra_keys)}. Prefer minimal frontmatter; use `agents/openai.yaml` for UI metadata.",
+            )
+        )
+        score -= 2
+
+    # description should be a single-line scalar (no YAML block scalars)
+    if isinstance(desc, str) and ("\n" in desc or "\r" in desc):
+        findings.append(
+            Finding(
+                "Frontmatter",
+                -5,
+                "⚠️ `description` should be a single-line YAML scalar (no newlines / block scalars).",
+            )
+        )
+        score -= 5
 
     # name (0..10)
     if isinstance(name, str) and name.strip():

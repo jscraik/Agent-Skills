@@ -1,0 +1,98 @@
+schema_version: "1.0"
+
+purpose: >
+  Define expected behavior and outputs for the run-tests-and-write-artifacts skill,
+  which executes scoped project tests and writes durable artifacts to /mnt/data.
+
+triggers:
+  - user asks to run tests, verify a branch, or reproduce CI test failures
+  - user requests machine-readable test artifacts or a failing test report
+
+inputs:
+  - repository path available in current workspace/container
+  - optional user-specified test command or suite scope
+  - writable /mnt/data artifact boundary
+
+outputs:
+  - /mnt/data/test_output.log
+  - /mnt/data/test_results.json
+  - /mnt/data/test_summary.md
+  - optional: /mnt/data/junit.xml
+  - optional: /mnt/data/coverage.xml or /mnt/data/coverage.html
+  - optional: /mnt/data/flaky_tests.json
+
+required_artifacts:
+  must_write:
+    - /mnt/data/test_output.log
+    - /mnt/data/test_results.json
+    - /mnt/data/test_summary.md
+  optional_when_supported:
+    - /mnt/data/junit.xml
+    - /mnt/data/coverage.xml
+    - /mnt/data/coverage.html
+    - /mnt/data/flaky_tests.json
+
+result_schema:
+  file: /mnt/data/test_results.json
+  required_fields:
+    - schema_version
+    - status
+    - commands
+    - summary
+    - failures
+    - notes
+  status_enum:
+    - passed
+    - failed
+    - blocked
+  commands_item:
+    required:
+      - cmd
+      - cwd
+      - exit_code
+    optional:
+      - duration_seconds
+  summary_fields:
+    - passed
+    - failed
+    - skipped
+    - errors
+  failures_item_optional_fields:
+    - name
+    - file
+    - message
+    - location
+
+command_selection_policy:
+  ordered_defaults:
+    - just test
+    - uv run pytest -q
+    - pnpm test
+    - pnpm -r test
+  notes:
+    - prefer user-specified safe command when provided
+    - do not auto-run go/rust/java tests unless explicitly requested
+    - do not auto-install dependencies in v0.1.0
+
+non_goals:
+  - deployment, packaging, or release execution
+  - static-only code review without command execution
+  - performance benchmarking or profiling workflows
+  - automatic dependency installation as default behavior
+
+risks:
+  - risk: missing repository/runtime/tooling can block execution
+    mitigation: emit status blocked with concrete unblock steps while still writing required artifacts
+  - risk: mixed ecosystems can create ambiguous command choice
+    mitigation: use deterministic command order and document assumptions in notes
+  - risk: flaky tests can mislead triage
+    mitigation: allow one controlled rerun and emit flaky_tests.json when suspected
+  - risk: sensitive data leaks in logs
+    mitigation: redact secrets/tokens/credentials and avoid raw environment dumps
+
+security:
+  network_access: deny_by_default
+  secrets_policy: do_not_echo
+  artifact_policy:
+    write_dir: /mnt/data
+    overwrite: true

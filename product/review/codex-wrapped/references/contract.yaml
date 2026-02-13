@@ -1,0 +1,14 @@
+purpose: Generate a Codex/Claude Code usage recap from local logs, including last
+  30 days, last 7 days, and all-time stats. Use when the user asks for a usage summary,
+  activity recap, or coding activity report.
+schema_version: '1.0'
+triggers:
+- When requests match codex-wrapped scope and intent.
+inputs:
+- user request details
+outputs:
+- structured response or artifacts defined by the skill
+non_goals:
+- out-of-scope requests outside the skill boundary
+risks:
+- missing context; mitigated by clarifying questions and explicit assumptions

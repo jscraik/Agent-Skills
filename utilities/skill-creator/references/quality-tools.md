@@ -23,10 +23,20 @@ Outputs:
 ```
 
 Use when:
-- running eval cases from references/evals.yaml using Codex CLI (`codex exec`)
+- running eval cases from references/evals.yaml with Codex and/or Claude runners
 - capturing final output and applying acceptance assertions
+- generating scorecards for CI/regression tracking
 
 Notes:
+- For cross-runner coverage, use dual-run mode:
+  - `--dual-run --capture-jsonl`
+- `--capture-jsonl` is required for deterministic Codex trace checks and dual-run mode.
+- Tiered gating:
+  - `--tier2-mode warn` (default): style/efficiency findings are non-blocking
+  - `--tier2-mode fail`: style/efficiency findings fail the run
+  - `--tier2-mode off`: suppress tier-2 findings
+- Write merged scorecards with:
+  - `--scorecard-out /absolute/or/relative/path.json`
 - In CI, prefer `--ask-for-approval never` to avoid prompts.
 - Keep `--sandbox read-only` unless the eval requires edits.
 - If Codex evals time out during MCP startup, increase the subprocess timeout via:
@@ -35,6 +45,7 @@ Notes:
 
 Outputs:
 - PASS/FAIL per case with report artifacts under artifacts/reports/skills/
+- merged scorecard JSON (default: `<run>/scorecard.json`, or `--scorecard-out`)
 
 ## analyze_skill.py
 
@@ -77,6 +88,48 @@ Notes:
 - Default output is **Markdown to stdout**.
 - Use `--out` + `--overwrite` to write a file.
 - Paste the best scenarios into your `references/evals.yaml` (or keep as a human review checklist).
+
+## migrate_evals_v2.py
+
+```bash
+~/.venvs/pyyaml/bin/python utilities/skill-creator/scripts/migrate_evals_v2.py --root /absolute/repo --apply --normalize-existing
+```
+
+Use when:
+- backfilling missing `references/contract.yaml` or `references/evals.yaml`
+- upgrading existing eval suites to schema v2 fields (`id`, `should_trigger`, `category`, `deterministic_checks`, `budgets`)
+
+## ci_skill_quality_gate.py
+
+```bash
+python utilities/skill-creator/scripts/ci_skill_quality_gate.py artifacts/reports/skills --tier2-mode warn
+```
+
+Use when:
+- enforcing tiered scorecard policy over one or more scorecards
+- integrating pass/fail behavior in CI
+
+## build_skill_eval_dashboard.py
+
+```bash
+python utilities/skill-creator/scripts/build_skill_eval_dashboard.py --reports-root artifacts/reports/skills
+```
+
+Use when:
+- building baseline/regression dashboards from stored scorecards
+- tracking tier1/tier2 trend deltas over time
+
+## run_repo_skill_quality.py
+
+```bash
+python utilities/skill-creator/scripts/run_repo_skill_quality.py \
+  --root /absolute/repo \
+  --baseline-file utilities/skill-creator/references/skill-quality-baseline.json
+```
+
+Use when:
+- enforcing repo-wide structure gates with baseline-aware drift detection
+- running optional eval sweeps (`--run-evals --dual-run --capture-jsonl`)
 
 ## Contract and evals (gold standard)
 

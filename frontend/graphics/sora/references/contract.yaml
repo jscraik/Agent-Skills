@@ -1,0 +1,15 @@
+purpose: Use when the user asks to generate, remix, poll, list, download, or delete
+  Sora videos via OpenAI’s video API using the bundled CLI (`scripts/sora.py`), including
+  requests like “generate AI video,” “Sora,” “video remix,” “download video/thumbnail/spritesheet,”
+  and batch video generation; requires `OPENAI_API_KEY` and Sora API access.
+schema_version: '1.0'
+triggers:
+- When requests match sora scope and intent.
+inputs:
+- user request details
+outputs:
+- structured response or artifacts defined by the skill
+non_goals:
+- out-of-scope requests outside the skill boundary
+risks:
+- missing context; mitigated by clarifying questions and explicit assumptions

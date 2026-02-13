@@ -1,0 +1,32 @@
+# Skill Output Contract
+# Source: templates/contract.yaml - Copy and customize for your skill.
+
+schema_version: "1.0"
+
+purpose: >
+  Define expected behavior and outputs for this skill.
+  This skill creates or updates repository-level AGENTS.md files
+  with clear sections, commands, and repo-specific conventions.
+
+triggers:
+  - user requests AGENTS.md creation or update
+  - repository needs contributor guidelines
+  - onboarding documentation needed
+
+inputs:
+  - repository structure and conventions
+  - specific areas to document
+  - target audience (contributors, users, etc.)
+
+outputs:
+  - AGENTS.md file
+  - clear contributor instructions
+  - repo-specific conventions
+
+non_goals:
+  - full project documentation
+  - API reference documentation
+
+risks:
+  - incomplete information; mitigated by asking for specifics
+  - drift from actual practices; mitigated by examples

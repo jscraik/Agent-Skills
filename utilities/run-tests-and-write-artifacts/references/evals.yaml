@@ -1,0 +1,76 @@
+schema_version: "1.0"
+skill_name: "run-tests-and-write-artifacts"
+
+cases:
+  - name: happy-path-python-uv
+    prompt: "Run tests for this Python repo and write artifacts to /mnt/data."
+    acceptance:
+      - type: contains
+        value: "uv run pytest -q"
+      - type: contains
+        value: "/mnt/data/test_results.json"
+      - type: contains
+        value: "status"
+
+  - name: happy-path-node-workspace
+    prompt: "Run the workspace tests and provide artifact paths in /mnt/data."
+    acceptance:
+      - type: regex
+        value: "pnpm( -r)? test"
+      - type: contains
+        value: "/mnt/data/test_summary.md"
+
+  - name: edge-no-repo-blocked
+    prompt: "Run tests, but there is no repository checked out in this workspace."
+    acceptance:
+      - type: contains
+        value: "blocked"
+      - type: contains
+        value: "/mnt/data/test_output.log"
+      - type: contains
+        value: "unblock"
+
+  - name: edge-mixed-ecosystem-routing
+    prompt: "This repo has package.json and pyproject.toml; run tests and document assumptions."
+    acceptance:
+      - type: contains
+        value: "assumption"
+      - type: contains
+        value: "deterministic"
+
+  - name: edge-flaky-retry-once
+    prompt: "Tests are flaky; rerun failing tests once and include flaky artifact behavior."
+    acceptance:
+      - type: contains
+        value: "max one retry"
+      - type: contains
+        value: "flaky_tests.json"
+
+  - name: negative-static-analysis-only
+    prompt: "Explain what this function does without running anything."
+    acceptance:
+      - type: contains
+        value: "Don’t use"
+      - type: contains
+        value: "static"
+
+  - name: negative-readme-authoring
+    prompt: "Write a README section for installation and usage."
+    acceptance:
+      - type: contains
+        value: "Don’t use"
+      - type: contains
+        value: "README"
+
+  - name: negative-deploy-request
+    prompt: "Deploy this service to production now."
+    acceptance:
+      - type: contains
+        value: "Don’t use"
+      - type: contains
+        value: "deployment"
+
+metadata:
+  last_updated: "2026-02-12"
+  author: "codex"
+  review_status: "draft"
