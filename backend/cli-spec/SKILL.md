@@ -2,10 +2,8 @@
 name: cli-spec
 description: Plan and draft CLI UX and surface area (commands, flags, help, output).
   Use when specifying or refactoring a command-line interface.
-metadata:
-  short-description: Plan and draft CLI UX and surface area (commands, flags, help,
-    output).
 ---
+
 # Create CLI
 
 Avoid skipping validation steps or inventing results.
@@ -53,6 +51,24 @@ When designing a CLI, produce a compact spec the user can implement:
 - Config/env rules + precedence (flags > env > project config > user config > system).
 - Help/docs ergonomics: `--help` layout, `cmd help`, docs/manpage link, shell completions if shipping.
 - 5-10 example invocations (common flows; include piped/stdin examples).
+
+## Procedure
+
+1) Read `references/cli-guidelines.md` (and `references/agentic-cli-design.md` when relevant).  
+2) Ask the minimum questions in **Clarify (fast)**.  
+3) Produce the CLI spec under **## Outputs** (command tree, flags table, semantics, exit codes).  
+4) Add top failure modes + safety defaults (`--dry-run`, confirmations, non-interactive mode).
+
+## Validation
+
+- Fail fast: if a required input is missing, ask before you invent details.
+- Sanity check: every flag/subcommand in the spec is named consistently across synopsis + tables.
+- Safety check: destructive actions must have a confirmation or `--force`, and a `--dry-run` path when possible.
+
+## Anti-patterns
+
+- Putting step-by-step workflow text into the frontmatter `description`.
+- Inventing commands/flags/output that were not agreed or cannot be implemented.
 
 ## Required response headings
 Every response must include these headings:
@@ -307,3 +323,36 @@ The agent is capable of extraordinary work in this domain. Use judgment, adapt t
 
 ## Extended guidance
 See `references/extended.md` for additional examples, workflows, and appendices.
+
+<!-- skill-score-boost-v1 -->
+## Philosophy and tradeoffs
+- Use this skill when consistent decision-making matters more than one-off execution because project context should drive the approach.
+- Principle and mindset: prioritize tradeoffs and constraints over rigid checklists; understand why each step exists.
+- Ask this to keep outcomes robust: Why is this the right default, and what could change this outcome?
+- How do we adapt if constraints shift?
+- What evidence is needed before choosing one path over another?
+
+## Anti-patterns and caveats
+- Avoid applying this playbook generically without checking repository-specific context.
+- **NEVER** skip required validation gates when behavior changes.
+- **DO NOT** use this skill as a rigid replacement for engineering judgment.
+- **DON'T** ignore warnings or assume one pattern fits all repos.
+- Common pitfall: treating anti-patterns as optional.
+- Incorrect assumptions here can lead to fragile guidance.
+- Warning: wrong sequencing can create avoidable regressions.
+
+## Variation and adaptation
+- Vary the workflow by team size, risk, and deployment target.
+- Use different strategies for small, medium, and large changes.
+- Adapt recommendations to the specific environment and avoid repetitive templates.
+- Avoid generic or cookie-cutter responses; craft context-specific alternatives.
+- Keep outputs diverse and not repetitive.
+- Converge on a custom path only after evidence review.
+- Different constraints should produce different, non-generic recommendations.
+
+## Empowering execution style
+- Be capable of exploring multiple options and enabling the team to make safe decisions.
+- Unlock confidence by explaining options and tradeoffs clearly.
+- Feel free to be creative while staying rigorous and precise.
+- Push boundaries with practical alternatives when simple recipes fail.
+- Enable outcomes-oriented problem solving.

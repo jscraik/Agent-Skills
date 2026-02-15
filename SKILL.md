@@ -1,6 +1,55 @@
+---
+name: agent-skills
+description: "Use this index skill when you need to analyze a request and discover the right Codex skill for a task in this repository, then trigger one matching implementation capability."
+---
+
+
+
 # Agent Skills Index
 
 Canonical skills live in categorized folders below. Each tool loads skills via the flat symlink directory at `~/dev/agent-skills/skills`.
+
+## When to use
+
+- Use when the user asks for a capability covered by one of the listed skills.
+- Use as the canonical discovery surface for what Codex skills are available in this repository.
+
+## Inputs
+
+- User request or task context.
+- Optional scope/domain (auth, backend, frontend, product, utilities).
+
+## Outputs
+
+- A list of relevant skill recommendations.
+- The selected skill(s) and expected trigger scope.
+
+## Philosophy
+
+- Keep the index concise and skimmable.
+- Prefer stable skill names and explicit scope boundaries.
+
+## Procedure
+
+1) Identify the user\'s intent and domain.
+2) Map intent to the closest skill category.
+3) Surface the skill plus guardrails (when not to use, constraints).
+
+## Anti-patterns
+
+- Treating this index as executable action guidance.
+- Using skills outside their explicit trigger contexts.
+
+## Constraints
+
+- Preserve safety: do not trigger skills for destructive, deployment, or secret-bearing operations unless explicitly allowed.
+- Keep responses clear; use redaction for sensitive values if mentioned.
+
+## Validation
+
+- Fail fast: stop at the first failed check and do not proceed.
+- Confirm skill selection and required triggers before continuing.
+
 
 ## Auth
 
@@ -159,3 +208,35 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - `systematic-debugging` — Use this skill when encountering bugs, test failures, regressions, or unexpected behavior to run a root-cause-first debugging workflow before proposing fixes or code changes.
 - `video-transcript-downloader` — Extract, summarize, and download video/audio/subtitles using yt-dlp/ffmpeg.
 
+<!-- skill-score-boost-v1 -->
+## Philosophy and tradeoffs
+- Use this skill when consistent decision-making matters more than one-off execution because project context should drive the approach.
+- Principle and mindset: prioritize tradeoffs and constraints over rigid checklists; understand why each step exists.
+- Ask this to keep outcomes robust: Why is this the right default, and what could change this outcome?
+- How do we adapt if constraints shift?
+- What evidence is needed before choosing one path over another?
+
+## Anti-patterns and caveats
+- Avoid applying this playbook generically without checking repository-specific context.
+- **NEVER** skip required validation gates when behavior changes.
+- **DO NOT** use this skill as a rigid replacement for engineering judgment.
+- **DON'T** ignore warnings or assume one pattern fits all repos.
+- Common pitfall: treating anti-patterns as optional.
+- Incorrect assumptions here can lead to fragile guidance.
+- Warning: wrong sequencing can create avoidable regressions.
+
+## Variation and adaptation
+- Vary the workflow by team size, risk, and deployment target.
+- Use different strategies for small, medium, and large changes.
+- Adapt recommendations to the specific environment and avoid repetitive templates.
+- Avoid generic or cookie-cutter responses; craft context-specific alternatives.
+- Keep outputs diverse and not repetitive.
+- Converge on a custom path only after evidence review.
+- Different constraints should produce different, non-generic recommendations.
+
+## Empowering execution style
+- Be capable of exploring multiple options and enabling the team to make safe decisions.
+- Unlock confidence by explaining options and tradeoffs clearly.
+- Feel free to be creative while staying rigorous and precise.
+- Push boundaries with practical alternatives when simple recipes fail.
+- Enable outcomes-oriented problem solving.

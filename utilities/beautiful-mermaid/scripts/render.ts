@@ -156,15 +156,17 @@ async function ensurePackage(name: string, allowInstall: boolean): Promise<any> 
     }
     console.error(`${name} not found. Installing...`);
 
-    const { execSync } = await import("node:child_process");
-
     try {
       if (runtime === "bun") {
-        execSync(`bun add ${name}`, { stdio: "inherit" });
+        const { spawnSync } = await import("node:child_process");
+        const r = spawnSync("bun", ["add", name], { stdio: "inherit" });
+        if (r.status !== 0) throw new Error(`bun add failed (exit ${r.status ?? "unknown"})`);
       } else if (runtime === "deno") {
         return await import(`npm:${name}`);
       } else {
-        execSync(`npm install ${name}`, { stdio: "inherit" });
+        const { spawnSync } = await import("node:child_process");
+        const r = spawnSync("npm", ["install", name], { stdio: "inherit" });
+        if (r.status !== 0) throw new Error(`npm install failed (exit ${r.status ?? "unknown"})`);
       }
       return await import(name);
     } catch (installError) {

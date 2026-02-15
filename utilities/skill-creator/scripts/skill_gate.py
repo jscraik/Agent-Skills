@@ -447,6 +447,9 @@ def check_codex_frontmatter(doc: SkillDoc, *, min_desc_len: int) -> List[Finding
     has_what = _has_any(desc, [
         "draft", "generate", "analyze", "extract", "validate", "convert", "build",
         "create", "summarize", "review", "audit", "lint", "plan", "scaffold",
+        # Common action verbs that are valid "what" signals for skills in this repo.
+        "deploy", "debug", "diagnose", "troubleshoot", "automate", "control",
+        "install", "download", "render",
     ])
     if not (has_when and has_what):
         out.append(Finding(

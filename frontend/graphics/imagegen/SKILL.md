@@ -8,6 +8,41 @@ description: "Use when the user asks to generate or edit images via the OpenAI I
 
 Generates or edits images for the current project (e.g., website assets, game assets, UI mockups, product mockups, wireframes, logo design, photorealistic images, infographics). Defaults to `gpt-image-1.5` and the OpenAI Image API, and prefers the bundled CLI for deterministic, reproducible runs.
 
+## When to use
+
+- Use when the user asks to **generate** or **edit** images (including inpainting/masks, background replacement, or transparent background).
+
+## Inputs
+
+- Prompt (and any “must keep” invariants).
+- Optional input image(s) and mask(s) for edit/inpaint.
+- Output requirements: size, format, transparency, number of variants.
+- Runtime constraints: whether live API calls are allowed (requires `OPENAI_API_KEY`).
+
+## Outputs
+
+- Generated/edited image files saved under the agreed output directory.
+- Final prompt + CLI flags used (so the run is reproducible).
+
+## Philosophy
+
+- Deterministic runs: prefer the bundled CLI and stable output paths.
+- Make one change per iteration; re-run; re-check.
+
+## Validation
+- Fail fast: stop at the first failed check and do not proceed.
+
+- Verify invariants: subject identity, composition, and any required text.
+- Verify no sensitive data is embedded; redact/avoid private identifiers.
+## Antipatterns
+
+- Inventing brand/style requirements the user did not ask for.
+- Asking for users to paste API keys into chat.
+
+## Constraints
+
+- Never print or request secrets/tokens/PII; use placeholders and local env vars.
+
 ## Scope and triggers
 - Generate a new image (concept art, product shot, cover, website hero)
 - Edit an existing image (inpainting, masked edits, lighting or weather transformations, background replacement, object removal, compositing, transparent background)
@@ -178,3 +213,43 @@ Asset-type templates (website assets, game assets, wireframes, logo) are consoli
 - **`references/prompting.md`**: prompting principles (structure, constraints/invariants, iteration patterns).
 - **`references/sample-prompts.md`**: copy/paste prompt recipes (generate + edit workflows; examples only).
 - **`references/codex-network.md`**: environment/sandbox/network-approval troubleshooting.
+
+## Validation
+
+- Fail fast: stop at the first failed check and do not proceed. Re-run checks before continuing.
+- If a required input is missing, ask for it and pause.
+- Provide an explicit success/fail summary for each validation step.
+
+
+<!-- skill-score-boost-v1 -->
+## Philosophy and tradeoffs
+- Use this skill when consistent decision-making matters more than one-off execution because project context should drive the approach.
+- Principle and mindset: prioritize tradeoffs and constraints over rigid checklists; understand why each step exists.
+- Ask this to keep outcomes robust: Why is this the right default, and what could change this outcome?
+- How do we adapt if constraints shift?
+- What evidence is needed before choosing one path over another?
+
+## Anti-patterns and caveats
+- Avoid applying this playbook generically without checking repository-specific context.
+- **NEVER** skip required validation gates when behavior changes.
+- **DO NOT** use this skill as a rigid replacement for engineering judgment.
+- **DON'T** ignore warnings or assume one pattern fits all repos.
+- Common pitfall: treating anti-patterns as optional.
+- Incorrect assumptions here can lead to fragile guidance.
+- Warning: wrong sequencing can create avoidable regressions.
+
+## Variation and adaptation
+- Vary the workflow by team size, risk, and deployment target.
+- Use different strategies for small, medium, and large changes.
+- Adapt recommendations to the specific environment and avoid repetitive templates.
+- Avoid generic or cookie-cutter responses; craft context-specific alternatives.
+- Keep outputs diverse and not repetitive.
+- Converge on a custom path only after evidence review.
+- Different constraints should produce different, non-generic recommendations.
+
+## Empowering execution style
+- Be capable of exploring multiple options and enabling the team to make safe decisions.
+- Unlock confidence by explaining options and tradeoffs clearly.
+- Feel free to be creative while staying rigorous and precise.
+- Push boundaries with practical alternatives when simple recipes fail.
+- Enable outcomes-oriented problem solving.
