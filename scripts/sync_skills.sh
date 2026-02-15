@@ -174,6 +174,104 @@ generate_skill_index() {
     ' "$skill_path"
   }
 
+  # Extract `metadata.short-description:` (preferred for the generated index).
+  # Supports:
+  # - `metadata:\n  short-description: ...`
+  # - single-line and common multiline continuation styles
+  extract_short_description() {
+    local skill_path="$1"
+    awk '
+      function ltrim(s) { sub(/^[ \t]+/, "", s); return s }
+      function rtrim(s) { sub(/[ \t]+$/, "", s); return s }
+      function trim(s) { return rtrim(ltrim(s)) }
+      BEGIN {
+        in_fm = 0
+        in_meta = 0
+        in_sd = 0
+        quote = ""
+        block = ""
+        sd = ""
+      }
+      /^---[ \t]*$/ {
+        if (in_fm == 0) { in_fm = 1; next }
+        if (in_sd) { print trim(sd) }
+        exit
+      }
+      in_fm == 0 { next }
+
+      # Enter/leave metadata block (top-level key)
+      /^[A-Za-z0-9_-]+:[ \t]*/ {
+        key = $0
+        sub(/:.*/, "", key)
+        if (key == "metadata") { in_meta = 1; next }
+        if (in_meta == 1) { in_meta = 0 }
+      }
+
+      in_sd == 1 {
+        # Continuations are usually indented (>=4 spaces). Stop when we hit
+        # a new key at indent 0 or 2 (common frontmatter patterns).
+        match($0, /^[ ]*/)
+        ind = RLENGTH
+        if (ind < 4 && $0 ~ /^[ ]*[A-Za-z0-9_-]+:[ \t]*/) {
+          print trim(sd)
+          exit
+        }
+
+        line = substr($0, ind + 1)
+        line = trim(line)
+
+        if (quote != "") {
+          if (substr(line, length(line), 1) == quote) {
+            line = substr(line, 1, length(line) - 1)
+            sd = (sd == "" ? line : sd " " line)
+            print trim(sd)
+            exit
+          }
+          sd = (sd == "" ? line : sd " " line)
+          next
+        }
+
+        if (block != "") {
+          sd = (sd == "" ? line : sd "\n" line)
+          next
+        }
+
+        # Plain multiline scalar: keep indented lines.
+        sd = (sd == "" ? line : sd " " line)
+        next
+      }
+
+      in_meta == 1 && /^[ \t]+short-description:[ \t]*/ {
+        rest = $0
+        sub(/^[ \t]+short-description:[ \t]*/, "", rest)
+        rest = trim(rest)
+
+        if (rest == "|" || rest == ">") {
+          block = rest
+          in_sd = 1
+          next
+        }
+
+        if (rest ~ /^["\047]/) {
+          quote = substr(rest, 1, 1)
+          rest = substr(rest, 2)
+          if (substr(rest, length(rest), 1) == quote) {
+            rest = substr(rest, 1, length(rest) - 1)
+            print trim(rest)
+            exit
+          }
+          sd = rest
+          in_sd = 1
+          next
+        }
+
+        sd = rest
+        in_sd = 1
+        next
+      }
+    ' "$skill_path"
+  }
+
   # Start with header
   cat > "$index_file" << 'HEADER'
 # Agent Skills Index
@@ -197,7 +295,12 @@ HEADER
     # Extract description from YAML frontmatter
     description=""
     if [ -f "$skill_path" ]; then
-      description="$(extract_description "$skill_path" | tr '\n' ' ' | sed -E 's/[[:space:]]+/ /g; s/[[:space:]]+$//')"
+      short_description="$(extract_short_description "$skill_path" | tr '\n' ' ' | sed -E 's/[[:space:]]+/ /g; s/[[:space:]]+$//')"
+      if [ -n "$short_description" ]; then
+        description="$short_description"
+      else
+        description="$(extract_description "$skill_path" | tr '\n' ' ' | sed -E 's/[[:space:]]+/ /g; s/[[:space:]]+$//')"
+      fi
     fi
 
     # Store description (or placeholder)
