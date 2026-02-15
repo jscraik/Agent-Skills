@@ -24,6 +24,7 @@ Exit codes:
 from __future__ import annotations
 
 import argparse
+import os
 import re
 import sys
 from pathlib import Path
@@ -32,6 +33,12 @@ from typing import Any, Dict, Optional, Sequence, Tuple
 try:
     import yaml  # type: ignore
 except ModuleNotFoundError:
+    preferred = Path.home() / ".venvs" / "pyyaml" / "bin" / "python"
+    already_reexec = os.environ.get("SKILL_CREATOR_PYYAML_REEXEC") == "1"
+    if preferred.exists() and not already_reexec:
+        env = dict(os.environ)
+        env["SKILL_CREATOR_PYYAML_REEXEC"] = "1"
+        os.execve(str(preferred), [str(preferred), __file__, *sys.argv[1:]], env)
     print("ERROR: PyYAML is required (pip install pyyaml).", file=sys.stderr)
     raise SystemExit(1)
 
