@@ -36,6 +36,7 @@ metadata:
 ## Deliverables
 - Installed skill directory under a category folder (e.g., `~/dev/agent-skills/utilities/<skill-name>`) or an override path.
 - A summary of what was installed and from where.
+- An OpenClaw-style readiness + security report (critical/warn/info) for each installed skill.
 - A reminder to restart Codex to pick up new skills.
 
 ## Constraints / Safety
@@ -128,6 +129,9 @@ Use judgment, adapt to context, and push boundaries when appropriate.
 ## Validation
 - Run any relevant checks or scripts when available.
 - Fail fast and report errors before proceeding.
+- Run OpenClaw-style checks on installed targets:
+  - `~/.venvs/pyyaml/bin/python utilities/skill-creator/scripts/openclaw_skill_guard.py <installed-skill-dir> --mode both`
+- If critical findings exist, stop and ask for approval before enabling/using the skill.
 ## Procedure
 1) Clarify scope and inputs.
 2) Execute the core workflow.

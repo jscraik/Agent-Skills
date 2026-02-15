@@ -36,6 +36,7 @@ description: Create or update Codex skills (shareable, can be invoked implicitly
   - Implicit: describe the task; Codex can choose the skill when it matches `description`.
 - Optional (only when requested): a deprecated custom prompt file at `~/.codex/prompts/<name>.md` for `/prompts:<name>`.
 - **Always include the full proposed file contents** for any new/updated `SKILL.md` (and `~/.codex/prompts/*.md` if applicable) inside fenced code blocks so the user can copy/paste if Codex can’t write files in the current sandbox.
+- For created/updated skills, include a short OpenClaw-style readiness + security summary (critical/warn/info).
 
 ## Philosophy
 - Prefer **skills** for anything shareable, multi-step, or policy-heavy.
@@ -89,6 +90,9 @@ description: Create or update Codex skills (shareable, can be invoked implicitly
 
 ## Validation
 - Fail fast: if validation fails, stop and fix the smallest issue before continuing.
+- For any new/updated skill folder, run:
+  - `~/.venvs/pyyaml/bin/python utilities/skill-creator/scripts/openclaw_skill_guard.py <skill-dir> --mode both`
+- If critical findings appear, do not recommend enablement until fixed or explicitly approved.
 - Restart Codex if your new/updated skill doesn’t appear.
 - Confirm you can invoke the skill:
   - Explicit: type `$<skill-name>` in the composer and select the skill.

@@ -1,0 +1,9 @@
+interface:
+  display_name: "Asymmetric Ideation Engine"
+  short_description: "Excavate a repo and output radical, launchable ideas with strict novelty constraints."
+
+policy:
+  allow_implicit_invocation: true
+
+dependencies:
+  tools: []

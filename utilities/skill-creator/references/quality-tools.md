@@ -61,6 +61,20 @@ Output:
 - overall score out of 100 plus per-category scoring
 - score bands: 80+ strong, 60-79 acceptable, 40-59 needs work, <40 redesign needed
 
+## openclaw_skill_guard.py
+
+```bash
+~/.venvs/pyyaml/bin/python utilities/skill-creator/scripts/openclaw_skill_guard.py <path/to/skill-folder> --mode both
+```
+
+Use when:
+- you want OpenClaw-style **operational readiness** + **security risk** checks
+- producing severity output in `critical/warn/info` format before install/publish
+
+Output:
+- readiness findings (missing SKILL.md/frontmatter/references artifacts)
+- security findings from script pattern scan (dangerous exec/eval/env-harvesting/network)
+
 ## upgrade_skill.py
 
 ```bash

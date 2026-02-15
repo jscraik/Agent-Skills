@@ -54,6 +54,7 @@ Depending on the request, produce one or more of:
 - `references/contract.yaml` (output contract) and `references/evals.yaml` (eval cases) when the skill is non-trivial.
 - `references/plan.md` (plan artifact) for non-trivial skill builds; store `$create-plan` output here when available.
 - A validation report (what passed/failed and what to fix).
+- An operational-readiness + security-risk report (OpenClaw-style summary: critical/warn/info).
 - A packaged `.skill` file (optional).
 
 ## Response format (required)
@@ -234,6 +235,7 @@ Fail fast: stop at the first failed gate, fix it, and rerun.
 ```bash
 ~/.venvs/pyyaml/bin/python scripts/quick_validate.py <path/to/skill-folder>
 ~/.venvs/pyyaml/bin/python scripts/skill_gate.py <path/to/skill-folder>
+~/.venvs/pyyaml/bin/python scripts/openclaw_skill_guard.py <path/to/skill-folder> --mode both
 ```
 
 Optional deep checks:

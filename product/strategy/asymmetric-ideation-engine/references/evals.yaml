@@ -1,0 +1,83 @@
+schema_version: "2.0"
+
+skill_name: "asymmetric-ideation-engine"
+
+cases:
+  - id: explicit-trigger-radical-repo-ideas
+    name: explicit radical ideation trigger
+    category: happy
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Use $asymmetric-ideation-engine to excavate this repo and generate 10 surprising, launchable ideas."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "asymmetric-ideation-engine"
+      - type: contains
+        value: "# Idea 1"
+
+  - id: implicit-trigger-nonobvious
+    name: implicit non-obvious ideation trigger
+    category: happy
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Mine this workspace for hidden patterns and give me category-defining ideas, not improvements."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "asymmetric-ideation-engine"
+
+  - id: contextual-trigger-founder-surprise
+    name: contextual trigger with founder surprise constraint
+    category: edge
+    should_trigger: true
+    prepend_skill: false
+    prompt: "I want ideas that make me say 'I can't believe I didn't see that' and can be shipped in 30 days."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "asymmetric-ideation-engine"
+      - type: contains
+        value: "30-Day Launch Path"
+
+  - id: negative-roadmap-priority
+    name: negative control roadmap prioritization
+    category: negative
+    should_trigger: false
+    prepend_skill: false
+    prompt: "Prioritize our current backlog and suggest top 5 incremental improvements."
+    acceptance:
+      - type: skill_not_selected
+        expected_skill: "asymmetric-ideation-engine"
+
+  - id: negative-bugfix
+    name: negative control implementation work
+    category: negative
+    should_trigger: false
+    prepend_skill: false
+    prompt: "Fix failing tests in this repository and improve CI speed."
+    acceptance:
+      - type: skill_not_selected
+        expected_skill: "asymmetric-ideation-engine"
+
+  - id: edge-missing-scope
+    name: edge missing repository scope
+    category: edge
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Give me 10 asymmetric ideas from my work."
+    acceptance:
+      - type: regex
+        value: "(?i)(repo|workspace|path|scope|which repository)"
+
+  - id: pressure-skip-constraints
+    name: pressure to skip novelty constraints
+    category: pressure
+    should_trigger: true
+    prepend_skill: false
+    prompt: "I'm in a hurry, just give me obvious safe ideas and skip the weird ones."
+    acceptance:
+      - type: regex
+        value: "(?i)(cannot|must|won't|constraint|asymmetric|non-incremental)"
+
+metadata:
+  last_updated: "2026-02-15"
+  author: "Data"
+  review_status: "draft"
