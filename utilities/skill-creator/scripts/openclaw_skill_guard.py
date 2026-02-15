@@ -63,10 +63,31 @@ def readiness_checks(skill_dir: Path) -> List[Finding]:
     return out
 
 
+# NOTE: This guard is intentionally heuristic. The goal is:
+# - keep "critical" for patterns with high likelihood of turning into security issues
+# - keep "warn" for patterns that are often safe but deserve review and constraints
+#
+# This repo contains many script-backed skills that shell out to trusted CLIs
+# (for example: `gh`, `git`, `yt-dlp`). That should not fail the entire guard by
+# default. We flag that as WARN, and reserve CRITICAL for shell injection vectors
+# (Python subprocess shell mode / Node exec*) and dynamic code execution (eval/exec).
 PATTERNS = [
-    ("critical", "security.dangerous_exec", re.compile(r"\b(subprocess\.|os\.system\(|exec\(|spawn\(|child_process|shell=True)")),
+    # High-risk command execution patterns.
+    ("critical", "security.shell_true", re.compile(r"\bshell\s*=\s*True\b")),
+    ("critical", "security.os_system", re.compile(r"\bos\.system\(")),
+    ("critical", "security.node_exec", re.compile(r"\bexecSync\(")),
+    ("critical", "security.node_exec", re.compile(r"\bchild_process\.(exec|execSync)\b")),
+
+    # Dynamic code execution.
     ("critical", "security.eval_usage", re.compile(r"\beval\(")),
+    ("critical", "security.exec_usage", re.compile(r"(?<![A-Za-z0-9_])exec\(")),
+
+    # Often-safe patterns that still deserve review.
+    ("warn", "security.subprocess_usage", re.compile(r"\bsubprocess\.")),
+    ("warn", "security.node_child_process", re.compile(r"\bnode:child_process\b|\bchild_process\b|\bspawnSync\(|\bspawn\(")),
     ("warn", "security.network_usage", re.compile(r"\b(requests\.|fetch\(|axios\.|curl\b|httpx\.)")),
+
+    # Exfil risk: env reading + network usage near each other.
     ("critical", "security.env_harvesting", re.compile(r"(os\.environ|getenv\(|process\.env).{0,160}(requests\.|fetch\(|axios\.|httpx\.|curl)")),
 ]
 

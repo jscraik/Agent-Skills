@@ -75,6 +75,203 @@ generate_skill_index() {
   local temp_dir="$(mktemp -d)"
   trap "rm -rf $temp_dir" EXIT
 
+  # Extract a YAML frontmatter `description:` value, including common multiline forms.
+  #
+  # Supported patterns seen in this repo:
+  # - Single-line: description: Foo bar.
+  # - Multiline indented scalar:
+  #     description: Foo bar. Use
+  #       when ...
+  # - Quoted multiline scalar (single or double quotes)
+  # - Block scalars (| or >), best-effort
+  extract_description() {
+    local skill_path="$1"
+    awk '
+      function ltrim(s) { sub(/^[ \t]+/, "", s); return s }
+      function rtrim(s) { sub(/[ \t]+$/, "", s); return s }
+      function trim(s) { return rtrim(ltrim(s)) }
+      BEGIN {
+        in_fm = 0
+        in_desc = 0
+        quote = ""
+        block = ""
+        desc = ""
+      }
+      /^---[ \t]*$/ {
+        if (in_fm == 0) { in_fm = 1; next }
+        # End of frontmatter
+        if (in_desc) { print trim(desc) }
+        exit
+      }
+      in_fm == 0 { next }
+
+      # While collecting the description, stop at the next top-level key.
+      in_desc == 1 {
+        if ($0 ~ /^[A-Za-z0-9_-]+:[ \t]*/) {
+          print trim(desc)
+          exit
+        }
+
+        line = $0
+        line = ltrim(line)
+
+        if (quote != "") {
+          # Quoted scalar: keep consuming until a closing quote at line end.
+          if (line ~ quote "[ \t]*$") {
+            sub(quote "[ \t]*$", "", line)
+            desc = (desc == "" ? line : desc " " line)
+            print trim(desc)
+            exit
+          }
+          desc = (desc == "" ? line : desc " " line)
+          next
+        }
+
+        if (block != "") {
+          # Block scalar: keep newlines (best-effort; good enough for index output).
+          desc = (desc == "" ? line : desc "\n" line)
+          next
+        }
+
+        # Plain multiline scalar: only treat indented lines as continuation.
+        if ($0 ~ /^[ \t]+/) {
+          desc = (desc == "" ? line : desc " " line)
+          next
+        }
+
+        print trim(desc)
+        exit
+      }
+
+      /^description:[ \t]*/ {
+        rest = $0
+        sub(/^description:[ \t]*/, "", rest)
+        rest = trim(rest)
+
+        if (rest == "|" || rest == ">") {
+          block = rest
+          in_desc = 1
+          next
+        }
+
+        if (rest ~ /^["\047]/) {
+          quote = substr(rest, 1, 1)
+          rest = substr(rest, 2)
+          if (rest ~ quote "[ \t]*$") {
+            sub(quote "[ \t]*$", "", rest)
+            print trim(rest)
+            exit
+          }
+          desc = rest
+          in_desc = 1
+          next
+        }
+
+        desc = rest
+        in_desc = 1
+        next
+      }
+    ' "$skill_path"
+  }
+
+  # Extract `metadata.short-description:` (preferred for the generated index).
+  # Supports:
+  # - `metadata:\n  short-description: ...`
+  # - single-line and common multiline continuation styles
+  extract_short_description() {
+    local skill_path="$1"
+    awk '
+      function ltrim(s) { sub(/^[ \t]+/, "", s); return s }
+      function rtrim(s) { sub(/[ \t]+$/, "", s); return s }
+      function trim(s) { return rtrim(ltrim(s)) }
+      BEGIN {
+        in_fm = 0
+        in_meta = 0
+        in_sd = 0
+        quote = ""
+        block = ""
+        sd = ""
+      }
+      /^---[ \t]*$/ {
+        if (in_fm == 0) { in_fm = 1; next }
+        if (in_sd) { print trim(sd) }
+        exit
+      }
+      in_fm == 0 { next }
+
+      # Enter/leave metadata block (top-level key)
+      /^[A-Za-z0-9_-]+:[ \t]*/ {
+        key = $0
+        sub(/:.*/, "", key)
+        if (key == "metadata") { in_meta = 1; next }
+        if (in_meta == 1) { in_meta = 0 }
+      }
+
+      in_sd == 1 {
+        # Continuations are usually indented (>=4 spaces). Stop when we hit
+        # a new key at indent 0 or 2 (common frontmatter patterns).
+        match($0, /^[ ]*/)
+        ind = RLENGTH
+        if (ind < 4 && $0 ~ /^[ ]*[A-Za-z0-9_-]+:[ \t]*/) {
+          print trim(sd)
+          exit
+        }
+
+        line = substr($0, ind + 1)
+        line = trim(line)
+
+        if (quote != "") {
+          if (substr(line, length(line), 1) == quote) {
+            line = substr(line, 1, length(line) - 1)
+            sd = (sd == "" ? line : sd " " line)
+            print trim(sd)
+            exit
+          }
+          sd = (sd == "" ? line : sd " " line)
+          next
+        }
+
+        if (block != "") {
+          sd = (sd == "" ? line : sd "\n" line)
+          next
+        }
+
+        # Plain multiline scalar: keep indented lines.
+        sd = (sd == "" ? line : sd " " line)
+        next
+      }
+
+      in_meta == 1 && /^[ \t]+short-description:[ \t]*/ {
+        rest = $0
+        sub(/^[ \t]+short-description:[ \t]*/, "", rest)
+        rest = trim(rest)
+
+        if (rest == "|" || rest == ">") {
+          block = rest
+          in_sd = 1
+          next
+        }
+
+        if (rest ~ /^["\047]/) {
+          quote = substr(rest, 1, 1)
+          rest = substr(rest, 2)
+          if (substr(rest, length(rest), 1) == quote) {
+            rest = substr(rest, 1, length(rest) - 1)
+            print trim(rest)
+            exit
+          }
+          sd = rest
+          in_sd = 1
+          next
+        }
+
+        sd = rest
+        in_sd = 1
+        next
+      }
+    ' "$skill_path"
+  }
+
   # Start with header
   cat > "$index_file" << 'HEADER'
 # Agent Skills Index
@@ -98,7 +295,12 @@ HEADER
     # Extract description from YAML frontmatter
     description=""
     if [ -f "$skill_path" ]; then
-      description=$(head -20 "$skill_path" | awk '/^description:/{found=1; sub(/^description: *"?/, ""); sub(/"?$/, ""); print; exit}')
+      short_description="$(extract_short_description "$skill_path" | tr '\n' ' ' | sed -E 's/[[:space:]]+/ /g; s/[[:space:]]+$//')"
+      if [ -n "$short_description" ]; then
+        description="$short_description"
+      else
+        description="$(extract_description "$skill_path" | tr '\n' ' ' | sed -E 's/[[:space:]]+/ /g; s/[[:space:]]+$//')"
+      fi
     fi
 
     # Store description (or placeholder)

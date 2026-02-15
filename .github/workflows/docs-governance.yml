@@ -29,6 +29,9 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Ensure GitHub CLI is installed
+        run: bash scripts/ensure-gh-cli.sh
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"

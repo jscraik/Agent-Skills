@@ -21,3 +21,11 @@ FORJAMIE.md
 artifacts/sessions/
 **/__pycache__/
 product/Archive.zip
+
+# Skill validation artifacts (generated locally)
+artifacts/skill-validation*
+artifacts/run_skill_validation.sh
+
+FORJAMIE.md
+
+FORJAMIE.md

@@ -27,6 +27,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - name: Ensure GitHub CLI is installed
+        run: bash scripts/ensure-gh-cli.sh
       - name: Install deps
         run: python -m pip install --upgrade pip pyyaml
       - name: Tier-1 structure gate (skill_gate)

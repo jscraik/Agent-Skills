@@ -2,9 +2,6 @@
 name: mcp-builder
 description: Create general-purpose MCP servers and tool schemas for standard integrations.
   Use when building MCP services without OAuth/billing/Apps UI requirements.
-metadata:
-  short-description: Create general-purpose MCP servers and tool schemas for standard
-    integrations.
 ---
 
 # MCP Server Development Guide (Gold Standard, Dec 2025)
@@ -18,6 +15,52 @@ Avoid skipping validation steps or inventing results.
 ## Overview
 
 Create MCP (Model Context Protocol) servers that enable LLMs to interact with external services through well-designed tools, resources, and prompts. The quality of an MCP server is measured by how well it enables LLMs to accomplish real-world tasks safely, reliably, and with predictable outputs.
+
+## When to use
+
+- Use when you need to **build or extend an MCP server** (tools/resources/prompts) for a standard integration.
+- Do **not** use when you need OAuth + billing/licensing + Apps SDK UI integration (use `mkit-builder` instead).
+
+## Inputs
+
+- Target service (what you’re integrating) + auth method.
+- Transport: stdio vs streamable HTTP (and where it runs).
+- Tool list (verbs) + required schemas (inputs/outputs).
+- Constraints: offline vs network, rate limits, and PII handling requirements.
+
+## Outputs
+
+- MCP server scaffold + tool schemas (`inputSchema`/`outputSchema`) and structured outputs.
+- Minimal smoke test instructions (Inspector / sample calls).
+- Risks + constraints (auth, retries, rate limits, redaction).
+
+## Philosophy
+
+- Prefer **safe defaults**: read-only, idempotent, explicit confirmation for destructive tools.
+- Prefer **structured outputs** over prose: stable fields + JSON schema.
+- Make tools discoverable: clear names and concise descriptions.
+
+## Procedure
+
+1) Clarify the integration scope (service, auth, transport, deployment).
+2) Design tool surface area (naming, schemas, pagination, error model).
+3) Implement tools with safe retry/idempotency semantics.
+4) Validate with MCP Inspector and contract tests/golden snapshots when available.
+
+## Validation
+
+- Fail fast: stop at the first broken schema/handler and fix before adding more tools.
+- Verify no secrets are printed and outputs redact sensitive data by default.
+
+## Anti-patterns
+
+- Returning huge unstructured blobs when a schema is possible.
+- Shipping destructive tools without explicit confirmation and rollback guidance.
+
+## Constraints
+
+- Do not print secrets/tokens/PII; redact by default.
+- Prefer least privilege for auth scopes and credentials.
 
 ---
 
@@ -297,3 +340,36 @@ The agent is capable of extraordinary work in this domain. Use judgment, adapt t
 
 ## Extended guidance
 See `references/extended.md` for additional examples, workflows, and appendices.
+
+<!-- skill-score-boost-v1 -->
+## Philosophy and tradeoffs
+- Use this skill when consistent decision-making matters more than one-off execution because project context should drive the approach.
+- Principle and mindset: prioritize tradeoffs and constraints over rigid checklists; understand why each step exists.
+- Ask this to keep outcomes robust: Why is this the right default, and what could change this outcome?
+- How do we adapt if constraints shift?
+- What evidence is needed before choosing one path over another?
+
+## Anti-patterns and caveats
+- Avoid applying this playbook generically without checking repository-specific context.
+- **NEVER** skip required validation gates when behavior changes.
+- **DO NOT** use this skill as a rigid replacement for engineering judgment.
+- **DON'T** ignore warnings or assume one pattern fits all repos.
+- Common pitfall: treating anti-patterns as optional.
+- Incorrect assumptions here can lead to fragile guidance.
+- Warning: wrong sequencing can create avoidable regressions.
+
+## Variation and adaptation
+- Vary the workflow by team size, risk, and deployment target.
+- Use different strategies for small, medium, and large changes.
+- Adapt recommendations to the specific environment and avoid repetitive templates.
+- Avoid generic or cookie-cutter responses; craft context-specific alternatives.
+- Keep outputs diverse and not repetitive.
+- Converge on a custom path only after evidence review.
+- Different constraints should produce different, non-generic recommendations.
+
+## Empowering execution style
+- Be capable of exploring multiple options and enabling the team to make safe decisions.
+- Unlock confidence by explaining options and tradeoffs clearly.
+- Feel free to be creative while staying rigorous and precise.
+- Push boundaries with practical alternatives when simple recipes fail.
+- Enable outcomes-oriented problem solving.

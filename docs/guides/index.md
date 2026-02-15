@@ -1,5 +1,16 @@
 # Guides
 
-Task-oriented how-to documentation belongs here.
+Task-oriented “how to” docs belong here. Keep each page focused on one job to be done.
+
+Guides should list prerequisites up front, show the exact command(s) to run, and say what “success” looks like (expected output or files changed).
+
+Prefer numbered steps, and add a short Troubleshooting section for the most common failure modes.
+
+Good guide topics for this repo:
+
+- Add a new skill folder and `SKILL.md`
+- Run `scripts/sync_skills.sh` and confirm `/SKILL.md` updates
+- Validate a skill before you open a PR
+- Cut a release (if/when the repo starts versioning skills)
 
 - Back to [Docs index](/docs)

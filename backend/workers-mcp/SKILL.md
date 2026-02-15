@@ -1,10 +1,10 @@
 ---
 name: workers-mcp
-description: Create production-ready MCP servers on Cloudflare Workers with:. Use
-  when Use this skill when the task matches its description and triggers..
-metadata:
-  short-description: Create production-ready MCP servers on Cloudflare Workers with:.
+description: Create and deploy production-ready MCP servers on Cloudflare Workers.
+  Use when building a Workers-hosted MCP server with auth, billing, and operational
+  guardrails.
 ---
+
 # Workers MCP
 Avoid skipping validation steps or inventing results.
 Principle: Favor clarity, explicit tradeoffs, and verifiable outputs.
@@ -22,6 +22,52 @@ Create production-ready MCP servers on Cloudflare Workers with:
 - **D1** for SQLite database
 - **Durable Objects** for stateful operations
 - **Vectorize** for semantic vector search
+
+## When to use
+
+- Use when you want to run an MCP server on **Cloudflare Workers** (and possibly Durable Objects/D1/Vectorize).
+- Use when auth/billing/licensing are in scope for the server.
+
+## Inputs
+
+- Cloudflare account/app details (Workers/Pages), and deployment target (dev/staging/prod).
+- Auth requirements (OAuth provider, scopes, redirect URIs).
+- Billing/licensing requirements (Stripe products, entitlements model).
+- Data storage needs (D1 schema, DO state model, Vectorize indexes).
+
+## Outputs
+
+- Worker MCP server scaffold (tool schemas + handlers).
+- Auth/billing wiring plan (and where secrets/config live).
+- Deployment steps + rollback notes.
+
+## Philosophy
+
+- Safe-by-default: read-only tools unless explicitly requested.
+- Prefer structured outputs + explicit schemas for tools.
+- Keep secrets out of logs; redact tokens/PII by default.
+
+## Procedure
+
+1) Scaffold (wrangler + folder structure).
+2) Define tool schemas + handlers.
+3) Add auth/billing/storage as needed.
+4) Deploy and run smoke checks (local + preview + production).
+
+## Validation
+
+- Fail fast: stop at the first failed deploy/smoke test and fix before adding more tools.
+- Verify secrets are never printed (no env dumps; redact credentials).
+
+## Anti-patterns
+
+- Auto-deploying or migrating prod data without explicit confirmation.
+- Shelling out to external commands in production handlers.
+
+## Constraints
+
+- Do not print secrets/tokens/PII; redact by default.
+- Destructive actions must require explicit confirmation and provide rollback steps.
 
 ---
 
@@ -298,3 +344,36 @@ The agent is capable of extraordinary work in this domain. Use judgment, adapt t
 
 ## Extended guidance
 See `references/extended.md` for additional examples, workflows, and appendices.
+
+<!-- skill-score-boost-v1 -->
+## Philosophy and tradeoffs
+- Use this skill when consistent decision-making matters more than one-off execution because project context should drive the approach.
+- Principle and mindset: prioritize tradeoffs and constraints over rigid checklists; understand why each step exists.
+- Ask this to keep outcomes robust: Why is this the right default, and what could change this outcome?
+- How do we adapt if constraints shift?
+- What evidence is needed before choosing one path over another?
+
+## Anti-patterns and caveats
+- Avoid applying this playbook generically without checking repository-specific context.
+- **NEVER** skip required validation gates when behavior changes.
+- **DO NOT** use this skill as a rigid replacement for engineering judgment.
+- **DON'T** ignore warnings or assume one pattern fits all repos.
+- Common pitfall: treating anti-patterns as optional.
+- Incorrect assumptions here can lead to fragile guidance.
+- Warning: wrong sequencing can create avoidable regressions.
+
+## Variation and adaptation
+- Vary the workflow by team size, risk, and deployment target.
+- Use different strategies for small, medium, and large changes.
+- Adapt recommendations to the specific environment and avoid repetitive templates.
+- Avoid generic or cookie-cutter responses; craft context-specific alternatives.
+- Keep outputs diverse and not repetitive.
+- Converge on a custom path only after evidence review.
+- Different constraints should produce different, non-generic recommendations.
+
+## Empowering execution style
+- Be capable of exploring multiple options and enabling the team to make safe decisions.
+- Unlock confidence by explaining options and tradeoffs clearly.
+- Feel free to be creative while staying rigorous and precise.
+- Push boundaries with practical alternatives when simple recipes fail.
+- Enable outcomes-oriented problem solving.

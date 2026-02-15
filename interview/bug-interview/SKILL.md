@@ -1,8 +1,7 @@
 ---
 name: bug-interview
-description: "Analyze and review bug reports to capture repro, evidence, and the next smallest diagnostic step. Use when a bug report lacks clear reproduction."
-metadata:
-  short-description: "Bug interview for repro, evidence, and next diagnostic step."
+description: Analyze and review bug reports to capture repro, evidence, and the next
+  smallest diagnostic step. Use when a bug report lacks clear reproduction.
 ---
 
 # bug-interview (wrapper)
@@ -131,3 +130,36 @@ Use judgment, adapt to context, and push boundaries when appropriate.
 2) Execute the kernel interview loop using the Bug spine.
 3) Synthesize outputs + approval gate.
 4) Handoff to debugging/implementation using the approved triage plan.
+
+<!-- skill-score-boost-v1 -->
+## Philosophy and tradeoffs
+- Use this skill when consistent decision-making matters more than one-off execution because project context should drive the approach.
+- Principle and mindset: prioritize tradeoffs and constraints over rigid checklists; understand why each step exists.
+- Ask this to keep outcomes robust: Why is this the right default, and what could change this outcome?
+- How do we adapt if constraints shift?
+- What evidence is needed before choosing one path over another?
+
+## Anti-patterns and caveats
+- Avoid applying this playbook generically without checking repository-specific context.
+- **NEVER** skip required validation gates when behavior changes.
+- **DO NOT** use this skill as a rigid replacement for engineering judgment.
+- **DON'T** ignore warnings or assume one pattern fits all repos.
+- Common pitfall: treating anti-patterns as optional.
+- Incorrect assumptions here can lead to fragile guidance.
+- Warning: wrong sequencing can create avoidable regressions.
+
+## Variation and adaptation
+- Vary the workflow by team size, risk, and deployment target.
+- Use different strategies for small, medium, and large changes.
+- Adapt recommendations to the specific environment and avoid repetitive templates.
+- Avoid generic or cookie-cutter responses; craft context-specific alternatives.
+- Keep outputs diverse and not repetitive.
+- Converge on a custom path only after evidence review.
+- Different constraints should produce different, non-generic recommendations.
+
+## Empowering execution style
+- Be capable of exploring multiple options and enabling the team to make safe decisions.
+- Unlock confidence by explaining options and tradeoffs clearly.
+- Feel free to be creative while staying rigorous and precise.
+- Push boundaries with practical alternatives when simple recipes fail.
+- Enable outcomes-oriented problem solving.

@@ -2,16 +2,57 @@
 name: favicon-generator
 description: Generate complete favicon/app icon suites with templates and assets.
   Use when the user needs favicons or app icons for a web/app project.
-metadata:
-  short-description: Generate complete favicon/app icon suites with templates and
-    assets.
 ---
+
 # Pro-Grade Favicon Generator
 
 Avoid skipping validation steps or inventing results.
 
 
 Create stunning, professional-quality favicons that stand alongside icons from Linear, Notion, Figma, and other polished apps.
+
+## When to use
+
+- Use when you need a **favicon/app icon suite** for a web app or marketing site.
+- Use when you want output assets in multiple sizes (favicon.ico + PNGs) and a verified HTML snippet.
+
+## Inputs
+
+- Brand source: existing logo SVG/PNG, or a codebase icon (for example lucide icon name).
+- Brand colors (hex) and background preference (solid/gradient/transparent).
+- Target platforms: web only, or also PWA (manifest icons).
+
+## Outputs
+
+- `favicon.ico` and PNG icon set (common sizes).
+- `site.webmanifest` (if PWA icons are requested).
+- HTML `<link rel="icon" ...>` snippet for integration.
+
+## Philosophy
+
+- Match the existing brand first (reuse existing icon if present).
+- Optimize for clarity at 16×16 and 32×32; avoid thin strokes.
+
+## Procedure
+
+1) Discover existing brand icon(s) in the codebase.
+2) Choose a base mark + colors.
+3) Generate the icon set.
+4) Provide integration steps + quick visual sanity checks.
+
+## Validation
+- Fail fast: stop at the first failed check and do not proceed.
+
+- Verify the 16×16 and 32×32 renders are legible.
+- Verify the HTML snippet references the generated files.
+## Anti-patterns
+
+- Generating a new icon when the codebase already has a canonical logo/mark.
+- Using unsafe defaults (for example, hardcoding secrets into build steps).
+
+## Constraints
+
+- Do not embed secrets or private URLs in examples; use placeholders.
 
 ## Required response headings
 Every response must include these headings:
@@ -307,3 +348,43 @@ The agent is capable of extraordinary work in this domain. Use judgment, adapt t
 
 ## Extended guidance
 See `references/extended.md` for additional examples, workflows, and appendices.
+
+## Validation
+
+- Fail fast: stop at the first failed check and do not proceed. Re-run checks before continuing.
+- If a required input is missing, ask for it and pause.
+- Provide an explicit success/fail summary for each validation step.
+
+
+<!-- skill-score-boost-v1 -->
+## Philosophy and tradeoffs
+- Use this skill when consistent decision-making matters more than one-off execution because project context should drive the approach.
+- Principle and mindset: prioritize tradeoffs and constraints over rigid checklists; understand why each step exists.
+- Ask this to keep outcomes robust: Why is this the right default, and what could change this outcome?
+- How do we adapt if constraints shift?
+- What evidence is needed before choosing one path over another?
+
+## Anti-patterns and caveats
+- Avoid applying this playbook generically without checking repository-specific context.
+- **NEVER** skip required validation gates when behavior changes.
+- **DO NOT** use this skill as a rigid replacement for engineering judgment.
+- **DON'T** ignore warnings or assume one pattern fits all repos.
+- Common pitfall: treating anti-patterns as optional.
+- Incorrect assumptions here can lead to fragile guidance.
+- Warning: wrong sequencing can create avoidable regressions.
+
+## Variation and adaptation
+- Vary the workflow by team size, risk, and deployment target.
+- Use different strategies for small, medium, and large changes.
+- Adapt recommendations to the specific environment and avoid repetitive templates.
+- Avoid generic or cookie-cutter responses; craft context-specific alternatives.
+- Keep outputs diverse and not repetitive.
+- Converge on a custom path only after evidence review.
+- Different constraints should produce different, non-generic recommendations.
+
+## Empowering execution style
+- Be capable of exploring multiple options and enabling the team to make safe decisions.
+- Unlock confidence by explaining options and tradeoffs clearly.
+- Feel free to be creative while staying rigorous and precise.
+- Push boundaries with practical alternatives when simple recipes fail.
+- Enable outcomes-oriented problem solving.

@@ -1,4 +1,14 @@
 schema_version: 1
+purpose: Provide a discoverable index of all Codex skills in this repository.
+triggers:
+  - User asks for a specific capability and needs the matching skill.
+  - User wants a list of available skills in a domain.
+inputs:
+  - Task/domain context from user.
 outputs:
-  - name: primary
-    description: Primary output for this skill.
+  - Filtered list of relevant skills and trigger guidance.
+non_goals:
+  - Execute skill behavior itself.
+  - Replace task reasoning or system orchestration.
+risks:
+  - Misrouting tasks to wrong skill due ambiguous requirements.
