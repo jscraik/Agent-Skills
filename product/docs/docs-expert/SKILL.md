@@ -1,18 +1,22 @@
 ---
 name: docs-expert
-description: Co-author and QA documentation such as READMEs, guides, and runbooks.
-  Use when writing or auditing docs (not PRDs/specs).
+description: "Co-author and QA GitHub repository documentation (README, docs, runbooks, community health files); use when auditing/upgrading repo docs and delivering a checklist + PR-ready edits; do not use for PRDs/specs."
 ---
 
-# Doc Co-Authoring Workflow
+# docs-expert (Repository Documentation)
 
-## Compliance
-- Check against GOLD Industry Standards guide in ~/.codex/AGENTS.override.md. If missing, use `references/docs-baseline.md`.
+## When to use
+- You want to **write, rewrite, or audit** repo documentation (README, `/docs`, guides, runbooks).
+- You want a repo to meet **GitHub “community profile” / community health** expectations (README, LICENSE, CODE_OF_CONDUCT, CONTRIBUTING, SECURITY, SUPPORT, issue/PR templates).
+- You want **docs-as-code QA**: link sanity, structure, clarity, and “don’t invent commands/paths/versions” verification.
+
+**Do not use when**
+- The request is primarily **product specs/PRDs**, architecture design, or code implementation.
 
 ## Anti-pattern quick warnings
 Avoid these anti-patterns: DO NOT start writing before audience/purpose are clear. NEVER fabricate commands, paths, or results. These mistakes and pitfalls lead to wrong or incorrect guidance. Treat this as a warning to keep docs grounded and verifiable.
 
-This skill provides a structured workflow for guiding users through collaborative document creation. Act as an active guide, walking users through three stages: Context Gathering, Refinement and Structure, and Reader Testing.
+This skill provides a structured workflow for **collaborative doc creation and repo doc QA**. Default approach: inventory → outline → draft → verify against repo → ship evidence bundle.
 
 ## Philosophy
 - Clarity over completeness: prefer a smaller, readable doc with explicit gaps.
@@ -32,7 +36,12 @@ Use this when the user wants help quickly and does not want the full three-stage
 4. Run a fast QA pass (clarity, missing steps, top 3 failure points).
 5. Offer to switch to the full workflow if scope grows or ambiguity remains.
 
-## Required inputs
+## Inputs
+- Repo context: link or local path; whether it’s public OSS vs internal.
+- Doc target(s): file path(s) or doc surface name (README, `/docs`, runbook).
+- Audience and experience level.
+- Constraints: platforms, versions, compliance requirements.
+- Existing content or links (if any).
 
 ## Cognitive Support / Plain-Language
 - Optimize for low cognitive load (TBI support): one task at a time, explicit steps.
@@ -42,24 +51,32 @@ Use this when the user wants help quickly and does not want the full three-stage
 - Provide ELI5 explanations for non-trivial logic.
 - Ask one question at a time; prefer multiple-choice when possible.
 
+## Outputs
+- Updated Markdown docs (**PR-ready edits**).
+- A **doc audit summary** (what changed, what’s still unknown, and what to verify).
+- A **GitHub community health checklist** snapshot when repo-wide documentation is in scope (see `references/CHECKLIST.md`).
+- Evidence bundle when tooling exists (lint outputs, readability output, checklist snapshot).
 
-- Doc target(s): file path(s) or doc surface name.
-- Audience and experience level.
-- Constraints: platforms, versions, compliance requirements.
-- Existing content or links (if any).
+## Response format (required)
+Every response must include:
+- `## Inputs` (what you need / what’s missing)
+- `## Outputs` (what you will deliver or what you delivered)
+- `## Next step` (the single next action or question)
 
-## Deliverables
-
-- Updated Markdown docs (PR-ready edits).
-- Doc QA summary (what changed and what to verify).
-- Open questions or items requiring confirmation.
-- Evidence bundle (lint outputs, brand checks, readability, checklist snapshot).
-
-## Required response headings
-Every response must include these headings:
-- `## When to use`
-- `## Inputs`
-- `## Outputs`
+## Core workflow (repo doc “gold standard”)
+1) **Inventory & scope**
+   - Identify canonical doc surfaces (README, `/docs`, runbooks).
+   - If repo-wide: run the **GitHub community health** checklist (see `references/CHECKLIST.md`).
+2) **Outline first**
+   - Fix navigation/TOC and reader questions before drafting.
+3) **Draft with evidence**
+   - Keep examples minimal; include “Verify” and “Troubleshooting”.
+4) **Verify against the repo**
+   - Cross-check scripts/paths/flags/versions; if you can’t verify, mark it as a TODO to confirm.
+5) **Run doc QA tooling (when present)**
+   - Follow `references/docs-baseline.md` → “Run doc linters”.
+6) **Ship the evidence bundle**
+   - Checklist snapshot + what was run + what to do next.
 
 ## Full workflow (reference)
 
@@ -184,21 +201,6 @@ If you touch in-code documentation, also include Code Doc QA checklist results (
 
 The agent is capable of extraordinary work in this domain. These guidelines unlock that potential - they do not constrain it.
 Use judgment, adapt to context, and push boundaries when appropriate.
-
-## Scope and triggers
-- Use this skill when the task matches its description and triggers.
-- If the request is outside scope, route to the referenced skill.
-## Procedure
-1) Clarify scope and inputs.
-2) Execute the core workflow.
-3) Summarize outputs and next steps.
-
-## Antipatterns
-- Do not add features outside the agreed scope.
-
-## Variation
-- Vary tone, depth, and structure based on context.
-- Avoid repeating the same outline across outputs.
 
 <!-- skill-score-boost-v1 -->
 ## Philosophy and tradeoffs

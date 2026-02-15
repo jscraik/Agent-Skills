@@ -34,6 +34,7 @@ If the user did not provide these, infer from repo context (existing docs, packa
 
 - Identify the canonical doc surface(s): README, /docs, /guides, /runbooks, /api, etc.
 - Do not rewrite everything. Pick the smallest set of files that solves the user task.
+- If the task is repo-wide, also capture **GitHub community health** gaps (README, LICENSE, CONTRIBUTING, CODE_OF_CONDUCT, SECURITY, SUPPORT, issue/PR templates). Use `references/CHECKLIST.md`.
 
 ### 1a) Capture doc requirements
 
@@ -145,6 +146,7 @@ Standards mapping:
 - CommonMark or Markdown structure and formatting
 - Accessibility and inclusive language basics
 - Security and privacy guidance for sensitive info
+- GitHub repository community health basics (when repo-wide documentation is in scope)
 - Brand compliance (when branding or README signature applies)
 
 Automated checks (if available):
