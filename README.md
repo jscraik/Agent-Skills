@@ -1,6 +1,22 @@
 # Agent Skills
 
-This repository is the source of truth for Codex/agent skills. Canonical skills live in the categorized folders below, while the `skills/` directory provides a flat symlink view used by tooling.
+This repository is the source of truth for Codex/agent skills.
+
+If you are new here: start with the skills index in `/SKILL.md`, then use `/docs/index.md` for contributor docs.
+
+## Quick commands
+
+- Sync symlinks and regenerate the skills index:
+
+```bash
+bash scripts/sync_skills.sh
+```
+
+- Lint docs links and docs structure (warn mode):
+
+```bash
+python3 scripts/docs_lint.py --mode warn --config docs-policy.json
+```
 
 ## Repository Layout
 
@@ -20,13 +36,13 @@ This repository is the source of truth for Codex/agent skills. Canonical skills 
 
 ## How It Works
 
-- Each skill lives in a category folder and includes its own `SKILL.md`.
-- The `skills/` directory contains symlinks to canonical folders so tools can load a flat list.
-- `skills-system/` stores bundled/system skills and is excluded from the flat view to avoid duplicates.
-- Use `scripts/sync_skills.sh` to update symlinks and regenerate `SKILL.md` after adding or moving skills.
-- The sync script auto-links to `~/.claude/skills` (Claude Code) and `~/.agents/skills` (OpenAI Codex/Agents).
+- Each skill lives in a category folder and includes its own `SKILL.md` (with YAML frontmatter).
+- The `skills/` directory contains symlinks so tools can load a flat list.
+- `skills-system/` stores bundled/system skills and is excluded from the flat view.
+- `scripts/sync_skills.sh` updates symlinks and regenerates `/SKILL.md`.
+- The sync script also links `skills/` into `~/.claude/skills` and `~/.agents/skills`.
 
-## Wave 1 consolidation status (2026-02-11)
+## Deprecations (Wave 1)
 
 Canonical skills for the first consolidation wave:
 

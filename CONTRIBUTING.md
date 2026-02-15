@@ -1,26 +1,19 @@
-# Contributing Documentation
+# Contributing docs
 
-This repository treats documentation as structured, navigable data. Clear hierarchy, consistent linking, and predictable patterns help humans and AI tools (including Codex) extend docs safely.
+Docs are part of the product. Keep them short, clear, and safe to follow.
 
----
+## Update docs when you change
 
-## 1. Documentation philosophy
+- Env vars.
+- CLI flags.
+- Config.
+- Public APIs.
+- User-facing behavior.
+- Breaking changes.
 
-Documentation must be:
+## Docs structure (required)
 
-- Hierarchical and predictable
-- Linked using canonical full paths
-- Non-ambiguous and non-redundant
-- Referenceable by file path for AI workflows
-- Written so code and docs can be traversed together
-
-If Codex can generate working examples from the documentation alone, documentation coverage is strong.
-
----
-
-## 2. Documentation hierarchy
-
-Use this structure:
+Docs live under `/docs`:
 
 ```
 /docs
@@ -32,202 +25,82 @@ Use this structure:
   /api
 ```
 
-### Rules
+Rules:
 
-- Each directory must contain an `index.md`.
-- Do not mix conceptual, API, and tutorial content on one page.
-- Keep one primary concept per page.
-- Avoid cross-domain mixing (for example, deployment details inside guides unless explicitly needed and cross-linked).
+- Each directory must include an `index.md`.
+- Keep pages single-purpose. Don’t mix guide + concept + API on one page.
 
----
+## Linking rules (critical)
 
-## 3. Linking standards (critical)
-
-### 3.1 Always use full paths
-
-Use absolute paths from repository root.
+Use full paths that start with `/`. This keeps links stable in agent prompts and tooling.
 
 Correct:
 
 ```
-See [Deployment guide](/docs/deployment)
+See [Deployment](/docs/deployment)
 ```
 
 Incorrect:
 
 ```
-See [Deployment guide](deployment)
+See [Deployment](deployment)
 ```
 
-### 3.2 Never use trailing slashes on internal docs links
+Also:
 
-Correct:
+- Do not use trailing slashes: use `/docs/deployment`, not `/docs/deployment/`.
+- Use clear link text (avoid “click here”).
 
-```
-/docs/deployment
-```
+## File references for Codex
 
-Incorrect:
+Prefer explicit file paths in docs and PR notes.
 
-```
-/docs/deployment/
-```
-
----
-
-## 4. File reference conventions for Codex
-
-Use explicit file paths in docs and PR notes so Codex can scope context correctly.
-
-Correct:
+Examples:
 
 ```
-See implementation in `scripts/docs_lint.py`
-```
-
-Codex-friendly references:
-
-```
-@scripts/docs_lint.py
+See `scripts/docs_lint.py`.
 @docs/deployment/index.md
 ```
 
-Avoid vague references like "the server file" or "that config file".
+Avoid vague references like “that config file”.
 
----
+## Code examples
 
-## 5. Code example standards
+Code examples should be:
 
-All code examples should:
+- Runnable or buildable.
+- Complete. Include imports.
+- Marked as pseudo-code if they are not runnable.
+- Clear about assumptions.
 
-- Be runnable or compile-valid
-- Include required imports
-- Avoid pseudo-code unless clearly marked
-- Use consistent formatting
-- State assumptions if not standalone
+## Local checks
 
----
-
-## 6. PR documentation workflow
-
-If a PR introduces any of the following, docs must be updated in the same PR:
-
-- New environment variables
-- New CLI flags
-- New configuration fields
-- New API endpoints
-- New user-visible behavior
-- Breaking changes
-
----
-
-## 7. Codex PR explainer pattern
-
-Step 1:
-
-```bash
-gh pr diff <number>
-```
-
-Step 2 prompt pattern:
-
-```
-Review pull request 12345 using `gh pr diff 12345`.
-Summarize:
-- What feature was added
-- What files changed
-- What config changes were introduced
-- Whether documentation was updated
-
-If docs are missing, update:
-@docs/deployment/index.md
-```
-
----
-
-## 8. Updating docs via Codex
-
-Use structured prompts:
-
-```
-You are using Codex in /Users/jamiecraik/dev/agent-skills
-
-1. Review PR 12345:
-   gh pr diff 12345
-2. Identify new configuration or behavior changes.
-3. Update:
-   @docs/deployment/index.md
-4. Keep style consistent.
-5. Use full-path, non-trailing-slash links.
-```
-
----
-
-## 9. Documentation coverage evaluation pattern
-
-Coverage test pattern:
-
-1. Provide only docs as context.
-2. Ask Codex to generate minimal working output.
-3. Validate generated output with tests/checks.
-
-Example:
-
-```
-Using only:
-@docs/guides/index.md
-@docs/api/index.md
-
-Generate a minimal working example project.
-```
-
----
-
-## 10. Required local and CI checks
-
-Run locally before opening a PR:
+Run:
 
 ```bash
 python3 scripts/docs_lint.py --mode warn --config docs-policy.json
 ```
 
-Use blocking mode to preflight strict enforcement:
+To preflight strict enforcement:
 
 ```bash
 python3 scripts/docs_lint.py --mode block --config docs-policy.json
 ```
 
----
+## Pull request checklist (required)
 
-## 11. Pull request checklist (required)
+- [ ] Docs updated when behavior, config, API, or CLI changed.
+- [ ] Internal docs links use full paths.
+- [ ] Internal docs links do not use trailing slashes.
+- [ ] Examples run, or assumptions are stated.
+- [ ] New config is documented.
+- [ ] This doc updated if the docs structure contract changed.
 
-- [ ] Documentation updated when behavior, config, API, or CLI changed
-- [ ] Internal docs links use full paths
-- [ ] Internal docs links do not use trailing slashes
-- [ ] Examples are runnable/valid or assumptions are stated
-- [ ] New configuration is documented
-- [ ] `CONTRIBUTING.md` updated if docs structure contract changed
+## Common anti-patterns
 
----
-
-## 12. Common anti-patterns
-
-- Vague references (for example, "the server file")
-- Relative internal docs links
-- Trailing-slash internal docs links
-- Mixed content types on one page
-- Hidden configuration details
-- Examples missing required imports/context
-
----
-
-## 13. Summary
-
-Well-structured docs:
-
-- Reduce contributor confusion
-- Improve discoverability
-- Help Codex reason across code and docs
-- Enable reliable documentation automation
-
-Treat documentation as structured data.
+- Vague references (for example, "the server file").
+- Relative internal docs links.
+- Trailing-slash internal docs links.
+- Mixed content types on one page.
+- Hidden config details.
+- Examples missing required imports or context.
