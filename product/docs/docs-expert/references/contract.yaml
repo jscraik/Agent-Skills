@@ -1,13 +1,22 @@
 purpose: >
-  Define expected behavior and outputs for this skill.
+  Define expected behavior and outputs for docs-expert.
 schema_version: 1.0
 triggers:
-  - user requests the capability described in this skill
+  - audit or upgrade repository documentation (README, docs, guides, runbooks)
+  - bring a repository up to GitHub community health expectations (community profile files)
+  - perform a docs QA pass with an evidence bundle (when tooling exists)
 inputs:
-  - user request details
+  - repo context (url or local path) and doc targets
+  - audience and job-to-be-done
+  - constraints (platforms, versions, compliance, security/privacy)
 outputs:
-  - primary response or artifact
+  - PR-ready documentation edits (Markdown)
+  - doc audit summary (gaps + changes + what to verify)
+  - checklist snapshot (including GitHub community health when repo-wide)
+  - evidence bundle when tooling exists (lint/link/readability/brand checks)
 non_goals:
-  - out-of-scope work
+  - writing PRDs/specs or architecture docs that are not repository documentation
+  - implementing product features or code changes (unless explicitly requested separately)
 risks:
-  - missing inputs; mitigated by clarifying questions
+  - missing inputs; mitigated by clarifying questions and explicit assumptions
+  - inaccurate steps (invented commands/paths/versions); mitigated by verifying against the repo

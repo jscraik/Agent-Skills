@@ -37,6 +37,18 @@
 - [ ] "Last updated" and owner are present for top-level docs.
 - [ ] Acceptance criteria included (5-10 items).
 
+### GitHub repository community health (repo-wide)
+- [ ] README exists and answers: what it is, who it’s for, quickstart, verify, troubleshooting, how to get help.
+- [ ] LICENSE exists (or the repo explicitly documents why it’s absent).
+- [ ] CONTRIBUTING guide exists (how to propose changes, run checks, style/commit conventions).
+- [ ] CODE_OF_CONDUCT exists (or repo explicitly documents why it’s absent).
+- [ ] SECURITY policy exists (how to report vulnerabilities; do not direct reporters to public issues).
+- [ ] SUPPORT guidance exists (where users should ask questions; what maintainers will/won’t support).
+- [ ] Issue intake exists (`.github/ISSUE_TEMPLATE/*` issue templates or issue forms).
+- [ ] PR intake exists (`.github/PULL_REQUEST_TEMPLATE.md` or equivalent).
+- [ ] Changelog / release notes exist when the project is versioned (CHANGELOG.md or Releases guidance).
+- [ ] Ownership is discoverable (CODEOWNERS and/or “Maintainers” section in docs) when the project has multiple contributors.
+
 ### Brand compliance (when applicable)
 - [ ] Root README includes the documentation signature (image or ASCII fallback).
 - [ ] Brand assets exist in `brand/` and match approved formats.

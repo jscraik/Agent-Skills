@@ -1,16 +1,48 @@
 cases:
-  - name: happy-path
-    prompt: "Use the docs-expert skill for a typical request."
-    acceptance:
-      - type: contains
-        value: "## Outputs"
-  - name: edge-case
-    prompt: "Handle an edge case for docs-expert without enough inputs."
+  - name: happy-readme-audit
+    prompt: "Audit our README.md and bring it up to a GitHub gold standard. Include a community health checklist and an evidence bundle."
     acceptance:
       - type: contains
         value: "## Inputs"
-  - name: failure-mode
-    prompt: "User request is out of scope for docs-expert."
+      - type: contains
+        value: "## Outputs"
+      - type: contains
+        value: "## Next step"
+
+  - name: happy-repo-docs-upkeep
+    prompt: "Our repo docs keep going stale. Propose a docs upkeep plan (review cadence, ownership, and what checks to run when available)."
     acceptance:
       - type: contains
-        value: "## When to use"
+        value: "## Outputs"
+      - type: contains
+        value: "## Next step"
+
+  - name: edge-missing-repo-context
+    prompt: "Improve our documentation, but I can't share the repo yet."
+    acceptance:
+      - type: contains
+        value: "## Inputs"
+      - type: contains
+        value: "assumption"
+
+  - name: edge-community-health
+    prompt: "Which GitHub community health docs should we have (SECURITY, SUPPORT, CONTRIBUTING, etc.), and what should they include?"
+    acceptance:
+      - type: contains
+        value: "community health"
+      - type: contains
+        value: "SECURITY"
+
+  - name: negative-prd-request
+    prompt: "Write a PRD for our new onboarding flow."
+    acceptance:
+      - type: contains
+        value: "not"
+      - type: contains
+        value: "PRD"
+
+  - name: failure-out-of-scope-code-change
+    prompt: "Implement a new authentication system and update the docs."
+    acceptance:
+      - type: contains
+        value: "out of scope"
