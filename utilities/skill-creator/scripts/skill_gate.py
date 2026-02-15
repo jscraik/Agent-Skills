@@ -39,6 +39,13 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple
 try:
     import yaml  # type: ignore
 except ModuleNotFoundError:  # pragma: no cover
+    preferred = Path.home() / ".venvs" / "pyyaml" / "bin" / "python"
+    already_reexec = os.environ.get("SKILL_CREATOR_PYYAML_REEXEC") == "1"
+    if preferred.exists() and not already_reexec:
+        env = dict(os.environ)
+        env["SKILL_CREATOR_PYYAML_REEXEC"] = "1"
+        os.execve(str(preferred), [str(preferred), __file__, *sys.argv[1:]], env)
+
     print(
         "ERROR: PyYAML is required to run skill_gate.py.\n\n"
         "Fix (recommended):\n"

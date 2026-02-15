@@ -63,6 +63,16 @@ _LOOKS_LIKE_SEARCH_RESULTS_RE = re.compile(
     re.I,
 )
 
+# Heuristic: ignore known shell/heredoc failures from ad-hoc analyzer commands.
+# Example:
+#   zsh:2: z0: parameter not set
+#   IndexError: no such group
+# These are tooling mistakes, not skill failures.
+_LOOKS_LIKE_HEREDOC_ANALYZER_FAILURE_RE = re.compile(
+    r"(?s)\bzsh:\d+:\s*z0:\s*parameter not set\b.*\bIndexError:\s*no such group\b",
+    re.I,
+)
+
 # Very lightweight redaction: avoid printing anything that looks like a token.
 _TOKENY_RE = re.compile(r"(?i)(api[_-]?key|token|secret|bearer)\s*[:=]\s*\S+")
 
@@ -213,7 +223,7 @@ def _summarize_repo_otel(repo_root: Path, since: dt.datetime) -> Optional[RepoOt
     )
 
 
-def _extract_text_from_event(obj: dict) -> Optional[str]:
+def _extract_text_from_event(obj: dict) -> Optional[tuple[str, str]]:
     typ = obj.get("type")
     payload = obj.get("payload")
     if not isinstance(payload, dict):
@@ -221,7 +231,7 @@ def _extract_text_from_event(obj: dict) -> Optional[str]:
 
     if typ == "event_msg":
         msg = payload.get("message")
-        return msg if isinstance(msg, str) and msg.strip() else None
+        return (msg, "event_msg") if isinstance(msg, str) and msg.strip() else None
 
     if typ == "response_item" and payload.get("type") == "message":
         content = payload.get("content")
@@ -231,14 +241,14 @@ def _extract_text_from_event(obj: dict) -> Optional[str]:
                 if isinstance(seg, dict) and isinstance(seg.get("text"), str):
                     parts.append(seg["text"])
             joined = "\n".join([p for p in parts if p.strip()]).strip()
-            return joined if joined else None
+            return (joined, "message") if joined else None
         if isinstance(content, str) and content.strip():
-            return content
+            return (content, "message")
         return None
 
     if typ == "response_item" and payload.get("type") == "function_call_output":
         out = payload.get("output")
-        return out if isinstance(out, str) and out.strip() else None
+        return (out, "tool_output") if isinstance(out, str) and out.strip() else None
 
     return None
 
@@ -337,13 +347,17 @@ def scan(
                             if isinstance(cwd, str) and cwd.strip():
                                 session_cwds.add(Path(cwd.strip()))
 
-                    text = _extract_text_from_event(obj)
-                    if not text:
+                    extracted = _extract_text_from_event(obj)
+                    if not extracted:
                         continue
+                    text, source_kind = extracted
 
                     # Prefer using the explicit "Using skill:" marker.
                     m = _SKILL_INVOKE_RE.search(text)
                     if m:
+                        # Ignore nested/historical "Using skill:" strings printed by tool outputs.
+                        if source_kind == "tool_output":
+                            continue
                         current_skill = m.group(1).lower()
                         invoked[current_skill] += 1
                         continue
@@ -357,6 +371,10 @@ def scan(
                     # Avoid false positives when the current skill is running a
                     # grep-like scan and printing historical matches.
                     if _LOOKS_LIKE_SEARCH_RESULTS_RE.search(text):
+                        continue
+                    if _LOOKS_LIKE_HEREDOC_ANALYZER_FAILURE_RE.search(text):
+                        continue
+                    if source_kind == "tool_output" and re.search(r"\.jsonl:\d+:\{", text):
                         continue
 
                     # Count every issue event (even if we cap saved samples).
