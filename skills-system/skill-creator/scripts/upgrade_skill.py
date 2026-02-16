@@ -328,7 +328,18 @@ def generate_suggestions(doc: SkillDoc, *, min_description_len: int = 120) -> Li
             )
 
     # Optional agents/openai.yaml short_description
-        metadata = fm.get("metadata")
+    metadata = fm.get("metadata")
+    openai_yaml = skill_dir / "agents" / "openai.yaml"
+    has_openai_short_description = False
+    if openai_yaml.exists():
+        try:
+            openai_obj = yaml.safe_load(openai_yaml.read_text(encoding="utf-8")) or {}
+            interface = openai_obj.get("interface") if isinstance(openai_obj, dict) else {}
+            short_description = interface.get("short_description") if isinstance(interface, dict) else None
+            has_openai_short_description = isinstance(short_description, str) and bool(short_description.strip())
+        except Exception:
+            has_openai_short_description = False
+
     if metadata is not None:
         add(
             rule="frontmatter.metadata.discouraged",
@@ -342,7 +353,7 @@ def generate_suggestions(doc: SkillDoc, *, min_description_len: int = 120) -> Li
               short_description: "One-line summary shown in skill pickers."
             """,
         )
-    else:
+    elif not has_openai_short_description:
         add(
             rule="agents.openai_yaml.short_description",
             category="Frontmatter",

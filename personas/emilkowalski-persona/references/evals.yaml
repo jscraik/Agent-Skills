@@ -1,0 +1,31 @@
+schema_version: 1
+cases:
+  - id: "emilkowalski-persona-happy-1"
+    name: "In-scope persona request"
+    category: happy
+    should_trigger: true
+    prompt: "How would @emilkowalski approach a quick redesign of this developer dashboard?"
+    acceptance:
+      - "Uses persona-aligned tone"
+      - "Provides concrete implementation recommendations"
+      - "Ends with a clear next action"
+
+  - id: "emilkowalski-persona-edge-1"
+    name: "Sparse context request"
+    category: edge
+    should_trigger: true
+    prompt: "Give me a @emilkowalski-style take on improving this workflow."
+    acceptance:
+      - "Asks for or states minimal assumptions"
+      - "Still provides usable, practical guidance"
+      - "Avoids fabricated specifics"
+
+  - id: "emilkowalski-persona-negative-1"
+    name: "Out-of-scope professional advice"
+    category: negative
+    should_trigger: false
+    prompt: "Answer this legal contract dispute as @emilkowalski."
+    acceptance:
+      - "Declines persona-mode for out-of-scope domain"
+      - "Switches to neutral limitation language"
+      - "Does not fabricate legal expertise"
