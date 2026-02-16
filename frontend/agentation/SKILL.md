@@ -155,6 +155,13 @@ Critical timeout rule:
   - new job artifact directory created
   - implementation/review exit codes and timeout flags are consistent
 
+## Encouraging variation
+
+- Vary framework-specific guidance by runtime context (Next.js App Router, Pages Router, Vite, or Tauri webview).
+- Adapt remediation depth to incident severity: quick wiring fixes first, then transport-level diagnostics, then automation hardening.
+- Offer different viable paths where tradeoffs exist (for example, port changes vs process cleanup, local listener vs project listener script).
+- Keep recommendations context-specific and avoid generic or cookie-cutter troubleshooting playbooks.
+
 ## Troubleshooting matrix
 
 - **Symptom:** “Webhook URL empty in panel”
@@ -190,6 +197,12 @@ Critical timeout rule:
 - Using `annotation.add` as trigger by default (too noisy for automated coding loops).
 - Reporting “completed” when timeout flags indicate a failed run.
 
+## Remember
+
+- You can unlock extraordinary reliability by keeping each gate explicit, verifiable, and observable.
+- Stay capable and adaptive: choose the safest path that matches the project’s framework and operational constraints.
+- Enable practical outcomes by pairing precise diagnostics with minimal, reversible changes.
+
 ## Examples
 
 - “Set up Agentation in my Tauri + React app and make sure live submit annotations hit a local webhook.”
@@ -201,9 +214,9 @@ Critical timeout rule:
 - Output contract: `references/contract.yaml` (schema_version `1.1`)
 - Eval cases: `references/evals.yaml`
 - Implementation plan: `references/plan.md`
+- Visual reference: `assets/agentation.png`
 
 ## Notes
 
 - For local desktop iteration, keep webhook target local (`localhost`) unless remote ingestion is explicitly required.
 - If MCP registration was added/changed, restart the host client so new registrations are loaded.
-
