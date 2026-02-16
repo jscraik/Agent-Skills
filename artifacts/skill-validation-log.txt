@@ -1,0 +1,1985 @@
+[1/91] ./auth/best-practices
+[OK] SKILL.md frontmatter looks valid.
+Skill: better-auth-best-practices
+Path:  /Users/jamiecraik/dev/agent-skills/auth/best-practices/SKILL.md
+
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/best-practices.png
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+
+RESULT: PASS
+OpenClaw skill guard: best-practices
+Summary: 0 critical · 0 warn · 2 info
+INFO readiness.checked: Operational readiness checks completed
+INFO security.no_scripts: No executable scripts found; static security scan skipped
+[2/91] ./auth/create-auth
+[OK] SKILL.md frontmatter looks valid.
+Skill: create-auth-skill
+Path:  /Users/jamiecraik/dev/agent-skills/auth/create-auth/SKILL.md
+
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/create-auth.png
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+
+RESULT: PASS
+OpenClaw skill guard: create-auth
+Summary: 0 critical · 0 warn · 2 info
+INFO readiness.checked: Operational readiness checks completed
+INFO security.no_scripts: No executable scripts found; static security scan skipped
+[3/91] ./backend/backend-engineer
+[WARN] Description may be too vague; consider including explicit trigger language (e.g., 'Use when ...').
+[OK] SKILL.md frontmatter looks valid.
+Skill: backend-engineer
+Path:  /Users/jamiecraik/dev/agent-skills/backend/backend-engineer/SKILL.md
+
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/backend-engineer.png
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+
+RESULT: PASS
+OpenClaw skill guard: backend-engineer
+Summary: 0 critical · 0 warn · 3 info
+INFO readiness.scripts_empty: scripts/ exists but has no .py/.js/.ts files
+INFO readiness.checked: Operational readiness checks completed
+INFO security.no_scripts: No executable scripts found; static security scan skipped
+[4/91] ./backend/cli-spec
+[OK] SKILL.md frontmatter looks valid.
+Skill: cli-spec
+Path:  /Users/jamiecraik/dev/agent-skills/backend/cli-spec/SKILL.md
+
+FAIL SEC_ANTIPATTERNS_MISSING: Missing required section: antipatterns (add a ## heading).
+WARN OUT_SCHEMA_VERSION_MISSING: Schema-bound outputs detected; consider including `schema_version` in the output contract.
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .DS_Store
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/cli-spec.png
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | SKILL.md
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+
+RESULT: FAIL
+OpenClaw skill guard: cli-spec
+Summary: 0 critical · 0 warn · 2 info
+INFO readiness.checked: Operational readiness checks completed
+INFO security.no_scripts: No executable scripts found; static security scan skipped
+[5/91] ./backend/mcp-builder
+[OK] SKILL.md frontmatter looks valid.
+Skill: mcp-builder
+Path:  /Users/jamiecraik/dev/agent-skills/backend/mcp-builder/SKILL.md
+
+FAIL SEC_ANTIPATTERNS_MISSING: Missing required section: antipatterns (add a ## heading).
+WARN OUT_SCHEMA_VERSION_MISSING: Schema-bound outputs detected; consider including `schema_version` in the output contract.
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/mcp-builder.png
+WARN PI_COMMANDS: [medium] Command-like instructions detected; ensure commands are gated and safe. | reference/node_mcp_server.md
+WARN PI_COMMANDS: [medium] Command-like instructions detected; ensure commands are gated and safe. | reference/test_command_recipes.md
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | SKILL.md
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | reference/review_fix_checklist.md
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+WARN SEC_EXAMPLES_MISSING: Missing recommended section: examples (add a ## heading).
+
+RESULT: FAIL
+OpenClaw skill guard: mcp-builder
+Summary: 0 critical · 0 warn · 2 info
+INFO readiness.checked: Operational readiness checks completed
+INFO security.clean: No risky patterns detected in scanned scripts
+[6/91] ./backend/mkit-builder
+[OK] SKILL.md frontmatter looks valid.
+Skill: mkit-builder
+Path:  /Users/jamiecraik/dev/agent-skills/backend/mkit-builder/SKILL.md
+
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/mkit-builder.png
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | SKILL.md
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+
+RESULT: PASS
+OpenClaw skill guard: mkit-builder
+Summary: 0 critical · 0 warn · 2 info
+INFO readiness.checked: Operational readiness checks completed
+INFO security.clean: No risky patterns detected in scanned scripts
+[7/91] ./backend/workers-mcp
+[OK] SKILL.md frontmatter looks valid.
+Skill: workers-mcp
+Path:  /Users/jamiecraik/dev/agent-skills/backend/workers-mcp/SKILL.md
+
+FAIL SEC_ANTIPATTERNS_MISSING: Missing required section: antipatterns (add a ## heading).
+WARN OUT_SCHEMA_VERSION_MISSING: Schema-bound outputs detected; consider including `schema_version` in the output contract.
+WARN PATH_ABSOLUTE: Absolute paths detected; prefer repo-relative paths.
+WARN PATH_TRAVERSAL: Parent directory traversal (`../`) mentioned; avoid in references.
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/workers-mcp.png
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | SKILL.md
+
+RESULT: FAIL
+OpenClaw skill guard: workers-mcp
+Summary: 0 critical · 0 warn · 3 info
+INFO readiness.scripts_empty: scripts/ exists but has no .py/.js/.ts files
+INFO readiness.checked: Operational readiness checks completed
+INFO security.clean: No risky patterns detected in scanned scripts
+[8/91] ./design/better-icons
+[OK] SKILL.md frontmatter looks valid.
+Skill: better-icons
+Path:  /Users/jamiecraik/dev/agent-skills/design/better-icons/SKILL.md
+
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/better-icons.png
+WARN PI_OVERRIDE: [high] Potential prompt-injection override language detected; ensure this is not instructing the model to bypass system/developer instructions. | SKILL.md
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+
+RESULT: PASS
+OpenClaw skill guard: better-icons
+Summary: 0 critical · 0 warn · 2 info
+INFO readiness.checked: Operational readiness checks completed
+INFO security.no_scripts: No executable scripts found; static security scan skipped
+[9/91] ./frontend/agentation
+[OK] SKILL.md frontmatter looks valid.
+Skill: agentation
+Path:  /Users/jamiecraik/dev/agent-skills/frontend/agentation/SKILL.md
+
+
+RESULT: PASS
+OpenClaw skill guard: agentation
+Summary: 0 critical · 0 warn · 2 info
+INFO readiness.checked: Operational readiness checks completed
+INFO security.no_scripts: No executable scripts found; static security scan skipped
+[10/91] ./frontend/graphics/favicon-generator
+[OK] SKILL.md frontmatter looks valid.
+Skill: favicon-generator
+Path:  /Users/jamiecraik/dev/agent-skills/frontend/graphics/favicon-generator/SKILL.md
+
+FAIL SEC_ANTIPATTERNS_MISSING: Missing required section: antipatterns (add a ## heading).
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .DS_Store
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/favicon-generator.png
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | scripts/__pycache__/generate_favicon.cpython-314.pyc
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | scripts/generate_favicon.py
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+WARN SEC_EXAMPLES_MISSING: Missing recommended section: examples (add a ## heading).
+WARN WF_FAIL_FAST_MISSING: Validation section should specify fail-fast behavior (stop at first failed gate).
+
+RESULT: FAIL
+OpenClaw skill guard: favicon-generator
+Summary: 0 critical · 0 warn · 2 info
+INFO readiness.checked: Operational readiness checks completed
+INFO security.clean: No risky patterns detected in scanned scripts
+[11/91] ./frontend/graphics/imagegen
+[OK] SKILL.md frontmatter looks valid.
+Skill: imagegen
+Path:  /Users/jamiecraik/dev/agent-skills/frontend/graphics/imagegen/SKILL.md
+
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/imagegen.png
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | scripts/__pycache__/image_gen.cpython-314.pyc
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+WARN WF_FAIL_FAST_MISSING: Validation section should specify fail-fast behavior (stop at first failed gate).
+
+RESULT: PASS
+OpenClaw skill guard: imagegen
+Summary: 0 critical · 0 warn · 2 info
+INFO readiness.checked: Operational readiness checks completed
+INFO security.clean: No risky patterns detected in scanned scripts
+[12/91] ./frontend/graphics/og-image-creator
+[OK] SKILL.md frontmatter looks valid.
+Skill: og-image-creator
+Path:  /Users/jamiecraik/dev/agent-skills/frontend/graphics/og-image-creator/SKILL.md
+
+WARN FM_DESC_WORKFLOWY: Description looks workflow-like. Prefer outcome + trigger keywords in `description`; keep procedures in the body/references. | description: Generate authentic, brand-aligned Open Graph images by understanding your codebase first, then creating contextually appropriate images for each route using Playwright and your existing components.. Use when Use this skill when the task matches its description and triggers..
+WARN PATH_ABSOLUTE: Absolute paths detected; prefer repo-relative paths.
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/og-image-creator.png
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | scripts/__pycache__/analyze_codebase.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | scripts/__pycache__/generate_og_images.cpython-314.pyc
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+
+RESULT: PASS
+OpenClaw skill guard: og-image-creator
+Summary: 0 critical · 0 warn · 2 info
+INFO readiness.checked: Operational readiness checks completed
+INFO security.clean: No risky patterns detected in scanned scripts
+[13/91] ./frontend/graphics/sora
+[OK] SKILL.md frontmatter looks valid.
+Skill: sora
+Path:  /Users/jamiecraik/dev/agent-skills/frontend/graphics/sora/SKILL.md
+
+FAIL SEC_CONSTRAINTS_MISSING: Missing required section: constraints (add a ## heading).
+FAIL SEC_INPUTS_MISSING: Missing required section: inputs (add a ## heading).
+FAIL SEC_OUTPUTS_MISSING: Missing required section: outputs (add a ## heading).
+FAIL SEC_VALIDATION_MISSING: Missing required section: validation (add a ## heading).
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/sora.png
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | scripts/__pycache__/sora.cpython-314.pyc
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+
+RESULT: FAIL
+OpenClaw skill guard: sora
+Summary: 0 critical · 0 warn · 2 info
+INFO readiness.checked: Operational readiness checks completed
+INFO security.clean: No risky patterns detected in scanned scripts
+[14/91] ./frontend/graphics/threejs-builder
+[OK] SKILL.md frontmatter looks valid.
+Skill: threejs-builder
+Path:  /Users/jamiecraik/dev/agent-skills/frontend/graphics/threejs-builder/SKILL.md
+
+FAIL SAFE_REDACTION_REQUIRED: Constraints/Safety MUST mention redaction of secrets/sensitive data by default.
+FAIL SEC_CONSTRAINTS_MISSING: Missing required section: constraints (add a ## heading).
+FAIL SEC_PROCEDURE_MISSING: Missing required section: procedure (add a ## heading).
+FAIL SEC_VALIDATION_MISSING: Missing required section: validation (add a ## heading).
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .DS_Store
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/threejs-builder.png
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+
+RESULT: FAIL
+OpenClaw skill guard: threejs-builder
+Summary: 0 critical · 0 warn · 2 info
+INFO readiness.checked: Operational readiness checks completed
+INFO security.no_scripts: No executable scripts found; static security scan skipped
+[15/91] ./frontend/seo/seo-optimizer
+[OK] SKILL.md frontmatter looks valid.
+Skill: seo-optimizer
+Path:  /Users/jamiecraik/dev/agent-skills/frontend/seo/seo-optimizer/SKILL.md
+
+FAIL SEC_ANTIPATTERNS_MISSING: Missing required section: antipatterns (add a ## heading).
+FAIL SEC_VALIDATION_MISSING: Missing required section: validation (add a ## heading).
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/seo-optimizer.png
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | scripts/__pycache__/analyze_seo.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | scripts/__pycache__/generate_sitemap.cpython-314.pyc
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+WARN SEC_EXAMPLES_MISSING: Missing recommended section: examples (add a ## heading).
+
+RESULT: FAIL
+OpenClaw skill guard: seo-optimizer
+Summary: 0 critical · 0 warn · 2 info
+INFO readiness.checked: Operational readiness checks completed
+INFO security.clean: No risky patterns detected in scanned scripts
+[16/91] ./frontend/tools/agent-trace-debug
+[WARN] Description may be too vague; consider including explicit trigger language (e.g., 'Use when ...').
+[OK] SKILL.md frontmatter looks valid.
+Skill: agent-trace-debug
+Path:  /Users/jamiecraik/dev/agent-skills/frontend/tools/agent-trace-debug/SKILL.md
+
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/agent-trace-debug.png
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+
+RESULT: PASS
+OpenClaw skill guard: agent-trace-debug
+Summary: 0 critical · 0 warn · 2 info
+INFO readiness.checked: Operational readiness checks completed
+INFO security.no_scripts: No executable scripts found; static security scan skipped
+[17/91] ./frontend/tools/codex-ui-kit-installer
+[OK] SKILL.md frontmatter looks valid.
+Skill: codex-ui-kit-installer
+Path:  /Users/jamiecraik/dev/agent-skills/frontend/tools/codex-ui-kit-installer/SKILL.md
+
+WARN OUT_SCHEMA_VERSION_MISSING: Schema-bound outputs detected; consider including `schema_version` in the output contract.
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/bin/python
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/bin/python3
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/bin/python3.14
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/bin/𝜋thon
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/_yaml/__pycache__/__init__.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/__pycache__/__init__.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/__pycache__/__main__.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/__pycache__/__pip-runner__.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/__pycache__/__init__.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/__pycache__/build_env.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/__pycache__/cache.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/__pycache__/configuration.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/__pycache__/exceptions.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/__pycache__/main.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/__pycache__/pyproject.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/__pycache__/self_outdated_check.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/__pycache__/wheel_builder.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/cli/__pycache__/__init__.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/cli/__pycache__/autocompletion.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/cli/__pycache__/base_command.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/cli/__pycache__/cmdoptions.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/cli/__pycache__/command_context.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/cli/__pycache__/index_command.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/cli/__pycache__/main.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/cli/__pycache__/main_parser.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/cli/__pycache__/parser.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/cli/__pycache__/progress_bars.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/cli/__pycache__/req_command.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/cli/__pycache__/spinners.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/cli/__pycache__/status_codes.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/commands/__pycache__/__init__.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/commands/__pycache__/cache.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/commands/__pycache__/check.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/commands/__pycache__/completion.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/commands/__pycache__/configuration.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/commands/__pycache__/debug.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/commands/__pycache__/download.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/commands/__pycache__/freeze.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/commands/__pycache__/hash.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/commands/__pycache__/help.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/commands/__pycache__/index.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/commands/__pycache__/inspect.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/commands/__pycache__/install.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/commands/__pycache__/list.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/commands/__pycache__/lock.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/commands/__pycache__/search.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/commands/__pycache__/show.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/commands/__pycache__/uninstall.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/commands/__pycache__/wheel.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/distributions/__pycache__/__init__.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/distributions/__pycache__/base.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/distributions/__pycache__/installed.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/distributions/__pycache__/sdist.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/distributions/__pycache__/wheel.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/index/__pycache__/__init__.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/index/__pycache__/collector.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/index/__pycache__/package_finder.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/index/__pycache__/sources.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/locations/__pycache__/__init__.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/locations/__pycache__/_distutils.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/locations/__pycache__/_sysconfig.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/locations/__pycache__/base.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/metadata/__pycache__/__init__.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/metadata/__pycache__/_json.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/metadata/__pycache__/base.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/metadata/__pycache__/pkg_resources.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/metadata/importlib/__pycache__/__init__.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/metadata/importlib/__pycache__/_compat.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/metadata/importlib/__pycache__/_dists.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/metadata/importlib/__pycache__/_envs.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/models/__pycache__/__init__.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/models/__pycache__/candidate.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/models/__pycache__/direct_url.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/models/__pycache__/format_control.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/models/__pycache__/index.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/models/__pycache__/installation_report.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/models/__pycache__/link.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/models/__pycache__/pylock.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/models/__pycache__/scheme.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/models/__pycache__/search_scope.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/models/__pycache__/selection_prefs.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/models/__pycache__/target_python.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/models/__pycache__/wheel.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/network/__pycache__/__init__.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/network/__pycache__/auth.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/network/__pycache__/cache.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/network/__pycache__/download.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/network/__pycache__/lazy_wheel.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/network/__pycache__/session.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/network/__pycache__/utils.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/network/__pycache__/xmlrpc.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/operations/__pycache__/__init__.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/operations/__pycache__/check.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/operations/__pycache__/freeze.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/operations/__pycache__/prepare.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/operations/build/__pycache__/__init__.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/operations/build/__pycache__/build_tracker.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/operations/build/__pycache__/metadata.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/operations/build/__pycache__/metadata_editable.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/operations/build/__pycache__/wheel.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/operations/build/__pycache__/wheel_editable.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/operations/install/__pycache__/__init__.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/operations/install/__pycache__/wheel.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/req/__pycache__/__init__.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/req/__pycache__/constructors.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/req/__pycache__/req_dependency_group.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/req/__pycache__/req_file.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/req/__pycache__/req_install.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/req/__pycache__/req_set.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/req/__pycache__/req_uninstall.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/resolution/__pycache__/__init__.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/resolution/__pycache__/base.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/resolution/legacy/__pycache__/__init__.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/resolution/legacy/__pycache__/resolver.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/resolution/resolvelib/__pycache__/__init__.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/resolution/resolvelib/__pycache__/base.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/resolution/resolvelib/__pycache__/candidates.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/resolution/resolvelib/__pycache__/factory.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/resolution/resolvelib/__pycache__/found_candidates.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/resolution/resolvelib/__pycache__/provider.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/resolution/resolvelib/__pycache__/reporter.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/resolution/resolvelib/__pycache__/requirements.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/resolution/resolvelib/__pycache__/resolver.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/utils/__pycache__/__init__.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/utils/__pycache__/_jaraco_text.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/utils/__pycache__/_log.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/utils/__pycache__/appdirs.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/utils/__pycache__/compat.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/utils/__pycache__/compatibility_tags.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/utils/__pycache__/datetime.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/utils/__pycache__/deprecation.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/utils/__pycache__/direct_url_helpers.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/utils/__pycache__/egg_link.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/utils/__pycache__/entrypoints.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/utils/__pycache__/filesystem.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/utils/__pycache__/filetypes.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/utils/__pycache__/glibc.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/utils/__pycache__/hashes.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/utils/__pycache__/logging.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/utils/__pycache__/misc.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/utils/__pycache__/packaging.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/utils/__pycache__/retry.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/utils/__pycache__/subprocess.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/utils/__pycache__/temp_dir.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/utils/__pycache__/unpacking.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/utils/__pycache__/urls.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/utils/__pycache__/virtualenv.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/utils/__pycache__/wheel.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/vcs/__pycache__/__init__.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/vcs/__pycache__/bazaar.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/vcs/__pycache__/git.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/vcs/__pycache__/mercurial.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/vcs/__pycache__/subversion.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_internal/vcs/__pycache__/versioncontrol.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/__pycache__/__init__.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/cachecontrol/__pycache__/__init__.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/cachecontrol/__pycache__/_cmd.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/cachecontrol/__pycache__/adapter.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/cachecontrol/__pycache__/cache.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/cachecontrol/__pycache__/controller.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/cachecontrol/__pycache__/filewrapper.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/cachecontrol/__pycache__/heuristics.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/cachecontrol/__pycache__/serialize.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/cachecontrol/__pycache__/wrapper.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/cachecontrol/caches/__pycache__/__init__.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/cachecontrol/caches/__pycache__/file_cache.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/cachecontrol/caches/__pycache__/redis_cache.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/certifi/__pycache__/__init__.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/certifi/__pycache__/__main__.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/certifi/__pycache__/core.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/dependency_groups/__pycache__/__init__.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/dependency_groups/__pycache__/__main__.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/dependency_groups/__pycache__/_implementation.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/dependency_groups/__pycache__/_lint_dependency_groups.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/dependency_groups/__pycache__/_pip_wrapper.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/dependency_groups/__pycache__/_toml_compat.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/distlib/__pycache__/__init__.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/distlib/__pycache__/compat.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/distlib/__pycache__/resources.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/distlib/__pycache__/scripts.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/distlib/__pycache__/util.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/distlib/t32.exe
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/distlib/t64-arm.exe
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/distlib/t64.exe
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/distlib/w32.exe
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/distlib/w64-arm.exe
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/distlib/w64.exe
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/distro/__pycache__/__init__.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/distro/__pycache__/__main__.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/distro/__pycache__/distro.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/idna/__pycache__/__init__.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/idna/__pycache__/codec.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/idna/__pycache__/compat.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/idna/__pycache__/core.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/idna/__pycache__/idnadata.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/idna/__pycache__/intranges.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/idna/__pycache__/package_data.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/idna/__pycache__/uts46data.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/msgpack/__pycache__/__init__.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/msgpack/__pycache__/exceptions.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/msgpack/__pycache__/ext.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/msgpack/__pycache__/fallback.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/packaging/__pycache__/__init__.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/packaging/__pycache__/_elffile.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/packaging/__pycache__/_manylinux.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/packaging/__pycache__/_musllinux.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/packaging/__pycache__/_parser.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/packaging/__pycache__/_structures.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/packaging/__pycache__/_tokenizer.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/packaging/__pycache__/markers.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/packaging/__pycache__/metadata.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/packaging/__pycache__/requirements.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/packaging/__pycache__/specifiers.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/packaging/__pycache__/tags.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/packaging/__pycache__/utils.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/packaging/__pycache__/version.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/packaging/licenses/__pycache__/__init__.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/packaging/licenses/__pycache__/_spdx.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/pkg_resources/__pycache__/__init__.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/platformdirs/__pycache__/__init__.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/platformdirs/__pycache__/__main__.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/platformdirs/__pycache__/android.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/platformdirs/__pycache__/api.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/platformdirs/__pycache__/macos.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/platformdirs/__pycache__/unix.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/platformdirs/__pycache__/version.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/platformdirs/__pycache__/windows.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/pygments/__pycache__/__init__.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/pygments/__pycache__/__main__.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/pygments/__pycache__/console.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/pygments/__pycache__/filter.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/pygments/__pycache__/formatter.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/pygments/__pycache__/lexer.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/pygments/__pycache__/modeline.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/pygments/__pycache__/plugin.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/pygments/__pycache__/regexopt.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/pygments/__pycache__/scanner.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/pygments/__pycache__/sphinxext.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/pygments/__pycache__/style.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/pygments/__pycache__/token.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/pygments/__pycache__/unistring.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/pygments/__pycache__/util.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/pygments/filters/__pycache__/__init__.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/pygments/formatters/__pycache__/__init__.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/pygments/formatters/__pycache__/_mapping.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/pygments/lexers/__pycache__/__init__.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/pygments/lexers/__pycache__/_mapping.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/pygments/lexers/__pycache__/python.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/pygments/styles/__pycache__/__init__.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/pygments/styles/__pycache__/_mapping.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/pyproject_hooks/__pycache__/__init__.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/pyproject_hooks/__pycache__/_impl.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/pyproject_hooks/_in_process/__pycache__/__init__.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/pyproject_hooks/_in_process/__pycache__/_in_process.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/requests/__pycache__/__init__.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/requests/__pycache__/__version__.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/requests/__pycache__/_internal_utils.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/requests/__pycache__/adapters.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/requests/__pycache__/api.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/requests/__pycache__/auth.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/requests/__pycache__/certs.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/requests/__pycache__/compat.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/requests/__pycache__/cookies.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/requests/__pycache__/exceptions.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/requests/__pycache__/help.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/requests/__pycache__/hooks.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/requests/__pycache__/models.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/requests/__pycache__/packages.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/requests/__pycache__/sessions.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/requests/__pycache__/status_codes.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/requests/__pycache__/structures.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/requests/__pycache__/utils.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/resolvelib/__pycache__/__init__.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/resolvelib/__pycache__/providers.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/resolvelib/__pycache__/reporters.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/resolvelib/__pycache__/structs.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/resolvelib/resolvers/__pycache__/__init__.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/resolvelib/resolvers/__pycache__/abstract.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/resolvelib/resolvers/__pycache__/criterion.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/resolvelib/resolvers/__pycache__/exceptions.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/resolvelib/resolvers/__pycache__/resolution.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/rich/__pycache__/__init__.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/rich/__pycache__/__main__.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/rich/__pycache__/_cell_widths.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/rich/__pycache__/_emoji_codes.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/rich/__pycache__/_emoji_replace.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/rich/__pycache__/_export_format.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/rich/__pycache__/_extension.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/rich/__pycache__/_fileno.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/rich/__pycache__/_inspect.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/rich/__pycache__/_log_render.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/rich/__pycache__/_loop.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/rich/__pycache__/_null_file.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/rich/__pycache__/_palettes.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/rich/__pycache__/_pick.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/rich/__pycache__/_ratio.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/rich/__pycache__/_spinners.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/rich/__pycache__/_stack.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/rich/__pycache__/_timer.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/rich/__pycache__/_win32_console.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/rich/__pycache__/_windows.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/rich/__pycache__/_windows_renderer.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/rich/__pycache__/_wrap.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/rich/__pycache__/abc.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/rich/__pycache__/align.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/rich/__pycache__/ansi.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/rich/__pycache__/bar.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/rich/__pycache__/box.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/rich/__pycache__/cells.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/rich/__pycache__/color.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/rich/__pycache__/color_triplet.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/rich/__pycache__/columns.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/rich/__pycache__/console.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/rich/__pycache__/constrain.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/rich/__pycache__/containers.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/rich/__pycache__/control.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/rich/__pycache__/default_styles.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/rich/__pycache__/diagnose.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/rich/__pycache__/emoji.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/rich/__pycache__/errors.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/rich/__pycache__/file_proxy.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/rich/__pycache__/filesize.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/rich/__pycache__/highlighter.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/rich/__pycache__/json.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/rich/__pycache__/jupyter.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/rich/__pycache__/layout.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/rich/__pycache__/live.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/rich/__pycache__/live_render.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/rich/__pycache__/logging.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/rich/__pycache__/markup.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/rich/__pycache__/measure.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/rich/__pycache__/padding.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/rich/__pycache__/pager.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/rich/__pycache__/palette.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/rich/__pycache__/panel.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/rich/__pycache__/pretty.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/rich/__pycache__/progress.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/rich/__pycache__/progress_bar.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/rich/__pycache__/prompt.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/rich/__pycache__/protocol.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/rich/__pycache__/region.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/rich/__pycache__/repr.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/rich/__pycache__/rule.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/rich/__pycache__/scope.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/rich/__pycache__/screen.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/rich/__pycache__/segment.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/rich/__pycache__/spinner.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/rich/__pycache__/status.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/rich/__pycache__/style.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/rich/__pycache__/styled.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/rich/__pycache__/syntax.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/rich/__pycache__/table.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/rich/__pycache__/terminal_theme.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/rich/__pycache__/text.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/rich/__pycache__/theme.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/rich/__pycache__/themes.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/rich/__pycache__/traceback.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/rich/__pycache__/tree.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/tomli/__pycache__/__init__.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/tomli/__pycache__/_parser.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/tomli/__pycache__/_re.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/tomli/__pycache__/_types.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/tomli_w/__pycache__/__init__.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/tomli_w/__pycache__/_writer.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/truststore/__pycache__/__init__.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/truststore/__pycache__/_api.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/truststore/__pycache__/_macos.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/truststore/__pycache__/_openssl.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/truststore/__pycache__/_ssl_constants.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/truststore/__pycache__/_windows.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/urllib3/__pycache__/__init__.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/urllib3/__pycache__/_collections.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/urllib3/__pycache__/_version.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/urllib3/__pycache__/connection.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/urllib3/__pycache__/connectionpool.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/urllib3/__pycache__/exceptions.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/urllib3/__pycache__/fields.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/urllib3/__pycache__/filepost.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/urllib3/__pycache__/poolmanager.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/urllib3/__pycache__/request.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/urllib3/__pycache__/response.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/urllib3/contrib/__pycache__/__init__.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/urllib3/contrib/__pycache__/_appengine_environ.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/urllib3/contrib/__pycache__/appengine.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/urllib3/contrib/__pycache__/ntlmpool.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/urllib3/contrib/__pycache__/pyopenssl.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/urllib3/contrib/__pycache__/securetransport.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/urllib3/contrib/__pycache__/socks.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/urllib3/contrib/_securetransport/__pycache__/__init__.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/urllib3/contrib/_securetransport/__pycache__/bindings.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/urllib3/contrib/_securetransport/__pycache__/low_level.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/urllib3/packages/__pycache__/__init__.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/urllib3/packages/__pycache__/six.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/urllib3/packages/backports/__pycache__/__init__.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/urllib3/packages/backports/__pycache__/makefile.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/urllib3/packages/backports/__pycache__/weakref_finalize.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/urllib3/util/__pycache__/__init__.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/urllib3/util/__pycache__/connection.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/urllib3/util/__pycache__/proxy.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/urllib3/util/__pycache__/queue.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/urllib3/util/__pycache__/request.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/urllib3/util/__pycache__/response.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/urllib3/util/__pycache__/retry.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/urllib3/util/__pycache__/ssl_.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/urllib3/util/__pycache__/ssl_match_hostname.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/urllib3/util/__pycache__/ssltransport.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/urllib3/util/__pycache__/timeout.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/urllib3/util/__pycache__/url.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/pip/_vendor/urllib3/util/__pycache__/wait.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/yaml/__pycache__/__init__.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/yaml/__pycache__/composer.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/yaml/__pycache__/constructor.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/yaml/__pycache__/cyaml.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/yaml/__pycache__/dumper.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/yaml/__pycache__/emitter.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/yaml/__pycache__/error.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/yaml/__pycache__/events.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/yaml/__pycache__/loader.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/yaml/__pycache__/nodes.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/yaml/__pycache__/parser.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/yaml/__pycache__/reader.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/yaml/__pycache__/representer.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/yaml/__pycache__/resolver.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/yaml/__pycache__/scanner.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/yaml/__pycache__/serializer.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/yaml/__pycache__/tokens.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/lib/python3.14/site-packages/yaml/_yaml.cpython-314-darwin.so
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/codex-ui-kit-installer.png
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | dist/codex-ui-kit-installer.skill
+WARN PI_COMMANDS: [medium] Command-like instructions detected; ensure commands are gated and safe. | .venv/bin/Activate.ps1
+WARN PI_COMMANDS: [medium] Command-like instructions detected; ensure commands are gated and safe. | .venv/lib/python3.14/site-packages/pip-25.3.dist-info/licenses/src/pip/_vendor/certifi/LICENSE
+WARN PI_COMMANDS: [medium] Command-like instructions detected; ensure commands are gated and safe. | .venv/lib/python3.14/site-packages/pip/_internal/commands/completion.py
+WARN PI_COMMANDS: [medium] Command-like instructions detected; ensure commands are gated and safe. | .venv/lib/python3.14/site-packages/pip/_vendor/certifi/LICENSE
+WARN PI_COMMANDS: [medium] Command-like instructions detected; ensure commands are gated and safe. | .venv/lib/python3.14/site-packages/pip/_vendor/packaging/licenses/_spdx.py
+WARN PI_COMMANDS: [medium] Command-like instructions detected; ensure commands are gated and safe. | .venv/lib/python3.14/site-packages/pip/_vendor/pygments/lexers/_mapping.py
+WARN PI_COMMANDS: [medium] Command-like instructions detected; ensure commands are gated and safe. | .venv/lib/python3.14/site-packages/pip/_vendor/pygments/token.py
+WARN PI_COMMANDS: [medium] Command-like instructions detected; ensure commands are gated and safe. | .venv/lib/python3.14/site-packages/pip/_vendor/requests/auth.py
+WARN PI_COMMANDS: [medium] Command-like instructions detected; ensure commands are gated and safe. | .venv/lib/python3.14/site-packages/pip/_vendor/requests/sessions.py
+WARN PI_COMMANDS: [medium] Command-like instructions detected; ensure commands are gated and safe. | .venv/lib/python3.14/site-packages/pip/_vendor/requests/utils.py
+WARN PI_COMMANDS: [medium] Command-like instructions detected; ensure commands are gated and safe. | .venv/lib/python3.14/site-packages/pip/_vendor/urllib3/fields.py
+WARN PI_OVERRIDE: [high] Potential prompt-injection override language detected; ensure this is not instructing the model to bypass system/developer instructions. | .venv/lib/python3.14/site-packages/pip/_internal/build_env.py
+WARN PI_OVERRIDE: [high] Potential prompt-injection override language detected; ensure this is not instructing the model to bypass system/developer instructions. | .venv/lib/python3.14/site-packages/pip/_internal/cli/cmdoptions.py
+WARN PI_OVERRIDE: [high] Potential prompt-injection override language detected; ensure this is not instructing the model to bypass system/developer instructions. | .venv/lib/python3.14/site-packages/pip/_internal/commands/install.py
+WARN PI_OVERRIDE: [high] Potential prompt-injection override language detected; ensure this is not instructing the model to bypass system/developer instructions. | .venv/lib/python3.14/site-packages/pip/_internal/exceptions.py
+WARN PI_OVERRIDE: [high] Potential prompt-injection override language detected; ensure this is not instructing the model to bypass system/developer instructions. | .venv/lib/python3.14/site-packages/pip/_internal/locations/__init__.py
+WARN PI_OVERRIDE: [high] Potential prompt-injection override language detected; ensure this is not instructing the model to bypass system/developer instructions. | .venv/lib/python3.14/site-packages/pip/_internal/locations/_distutils.py
+WARN PI_OVERRIDE: [high] Potential prompt-injection override language detected; ensure this is not instructing the model to bypass system/developer instructions. | .venv/lib/python3.14/site-packages/pip/_internal/network/session.py
+WARN PI_OVERRIDE: [high] Potential prompt-injection override language detected; ensure this is not instructing the model to bypass system/developer instructions. | .venv/lib/python3.14/site-packages/pip/_internal/req/req_file.py
+WARN PI_OVERRIDE: [high] Potential prompt-injection override language detected; ensure this is not instructing the model to bypass system/developer instructions. | .venv/lib/python3.14/site-packages/pip/_internal/utils/misc.py
+WARN PI_OVERRIDE: [high] Potential prompt-injection override language detected; ensure this is not instructing the model to bypass system/developer instructions. | .venv/lib/python3.14/site-packages/pip/_internal/utils/subprocess.py
+WARN PI_OVERRIDE: [high] Potential prompt-injection override language detected; ensure this is not instructing the model to bypass system/developer instructions. | .venv/lib/python3.14/site-packages/pip/_vendor/cachecontrol/heuristics.py
+WARN PI_OVERRIDE: [high] Potential prompt-injection override language detected; ensure this is not instructing the model to bypass system/developer instructions. | .venv/lib/python3.14/site-packages/pip/_vendor/cachecontrol/serialize.py
+WARN PI_OVERRIDE: [high] Potential prompt-injection override language detected; ensure this is not instructing the model to bypass system/developer instructions. | .venv/lib/python3.14/site-packages/pip/_vendor/certifi/core.py
+WARN PI_OVERRIDE: [high] Potential prompt-injection override language detected; ensure this is not instructing the model to bypass system/developer instructions. | .venv/lib/python3.14/site-packages/pip/_vendor/distlib/compat.py
+WARN PI_OVERRIDE: [high] Potential prompt-injection override language detected; ensure this is not instructing the model to bypass system/developer instructions. | .venv/lib/python3.14/site-packages/pip/_vendor/packaging/tags.py
+WARN PI_OVERRIDE: [high] Potential prompt-injection override language detected; ensure this is not instructing the model to bypass system/developer instructions. | .venv/lib/python3.14/site-packages/pip/_vendor/pkg_resources/__init__.py
+WARN PI_OVERRIDE: [high] Potential prompt-injection override language detected; ensure this is not instructing the model to bypass system/developer instructions. | .venv/lib/python3.14/site-packages/pip/_vendor/requests/sessions.py
+WARN PI_OVERRIDE: [high] Potential prompt-injection override language detected; ensure this is not instructing the model to bypass system/developer instructions. | .venv/lib/python3.14/site-packages/pip/_vendor/rich/console.py
+WARN PI_OVERRIDE: [high] Potential prompt-injection override language detected; ensure this is not instructing the model to bypass system/developer instructions. | .venv/lib/python3.14/site-packages/pip/_vendor/rich/traceback.py
+WARN PI_OVERRIDE: [high] Potential prompt-injection override language detected; ensure this is not instructing the model to bypass system/developer instructions. | .venv/lib/python3.14/site-packages/pip/_vendor/truststore/_api.py
+WARN PI_OVERRIDE: [high] Potential prompt-injection override language detected; ensure this is not instructing the model to bypass system/developer instructions. | .venv/lib/python3.14/site-packages/pip/_vendor/truststore/_macos.py
+WARN PI_OVERRIDE: [high] Potential prompt-injection override language detected; ensure this is not instructing the model to bypass system/developer instructions. | .venv/lib/python3.14/site-packages/pip/_vendor/truststore/_windows.py
+WARN PI_ROLEPLAY: [medium] Role-shifting language detected; verify it is safe and limited to user content. | .venv/lib/python3.14/site-packages/pip/_internal/cli/spinners.py
+WARN PI_ROLEPLAY: [medium] Role-shifting language detected; verify it is safe and limited to user content. | .venv/lib/python3.14/site-packages/pip/_vendor/packaging/specifiers.py
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | SKILL.md
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | .venv/bin/activate.fish
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | .venv/lib/python3.14/site-packages/pip/_internal/cli/base_command.py
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | .venv/lib/python3.14/site-packages/pip/_internal/cli/parser.py
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | .venv/lib/python3.14/site-packages/pip/_internal/exceptions.py
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | .venv/lib/python3.14/site-packages/pip/_internal/locations/__init__.py
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | .venv/lib/python3.14/site-packages/pip/_internal/locations/_distutils.py
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | .venv/lib/python3.14/site-packages/pip/_internal/metadata/importlib/_envs.py
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | .venv/lib/python3.14/site-packages/pip/_internal/operations/install/wheel.py
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | .venv/lib/python3.14/site-packages/pip/_internal/resolution/legacy/resolver.py
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | .venv/lib/python3.14/site-packages/pip/_internal/resolution/resolvelib/base.py
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | .venv/lib/python3.14/site-packages/pip/_internal/resolution/resolvelib/candidates.py
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | .venv/lib/python3.14/site-packages/pip/_internal/utils/logging.py
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | .venv/lib/python3.14/site-packages/pip/_internal/vcs/subversion.py
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | .venv/lib/python3.14/site-packages/pip/_internal/vcs/versioncontrol.py
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | .venv/lib/python3.14/site-packages/pip/_vendor/cachecontrol/adapter.py
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | .venv/lib/python3.14/site-packages/pip/_vendor/distlib/compat.py
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | .venv/lib/python3.14/site-packages/pip/_vendor/msgpack/ext.py
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | .venv/lib/python3.14/site-packages/pip/_vendor/packaging/markers.py
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | .venv/lib/python3.14/site-packages/pip/_vendor/packaging/specifiers.py
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | .venv/lib/python3.14/site-packages/pip/_vendor/pkg_resources/__init__.py
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | .venv/lib/python3.14/site-packages/pip/_vendor/pygments/formatter.py
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | .venv/lib/python3.14/site-packages/pip/_vendor/pygments/lexer.py
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | .venv/lib/python3.14/site-packages/pip/_vendor/pygments/lexers/python.py
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | .venv/lib/python3.14/site-packages/pip/_vendor/requests/adapters.py
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | .venv/lib/python3.14/site-packages/pip/_vendor/requests/sessions.py
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | .venv/lib/python3.14/site-packages/pip/_vendor/requests/utils.py
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | .venv/lib/python3.14/site-packages/pip/_vendor/resolvelib/resolvers/resolution.py
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | .venv/lib/python3.14/site-packages/pip/_vendor/rich/console.py
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | .venv/lib/python3.14/site-packages/pip/_vendor/rich/logging.py
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | .venv/lib/python3.14/site-packages/pip/_vendor/rich/progress.py
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | .venv/lib/python3.14/site-packages/pip/_vendor/rich/syntax.py
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | .venv/lib/python3.14/site-packages/pip/_vendor/rich/traceback.py
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | .venv/lib/python3.14/site-packages/pip/_vendor/urllib3/connection.py
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | .venv/lib/python3.14/site-packages/pip/_vendor/urllib3/connectionpool.py
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | .venv/lib/python3.14/site-packages/pip/_vendor/urllib3/packages/six.py
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | .venv/lib/python3.14/site-packages/pip/_vendor/urllib3/poolmanager.py
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | assets/codex-ui-kit/bin/ui-codex
+
+RESULT: PASS
+OpenClaw skill guard: codex-ui-kit-installer
+Summary: 0 critical · 0 warn · 3 info
+INFO readiness.scripts_empty: scripts/ exists but has no .py/.js/.ts files
+INFO readiness.checked: Operational readiness checks completed
+INFO security.clean: No risky patterns detected in scanned scripts
+[18/91] ./frontend/tools/nano-banana-builder
+[OK] SKILL.md frontmatter looks valid.
+Skill: nano-banana-builder
+Path:  /Users/jamiecraik/dev/agent-skills/frontend/tools/nano-banana-builder/SKILL.md
+
+FAIL SEC_PROCEDURE_MISSING: Missing required section: procedure (add a ## heading).
+FAIL SEC_VALIDATION_MISSING: Missing required section: validation (add a ## heading).
+WARN PATH_ABSOLUTE: Absolute paths detected; prefer repo-relative paths.
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/nano-banana-builder.png
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+
+RESULT: FAIL
+OpenClaw skill guard: nano-banana-builder
+Summary: 0 critical · 0 warn · 2 info
+INFO readiness.checked: Operational readiness checks completed
+INFO security.no_scripts: No executable scripts found; static security scan skipped
+[19/91] ./frontend/ui/figma-implement-design
+[WARN] Description may be too vague; consider including explicit trigger language (e.g., 'Use when ...').
+[OK] SKILL.md frontmatter looks valid.
+Skill: figma-implement-design
+Path:  /Users/jamiecraik/dev/agent-skills/frontend/ui/figma-implement-design/SKILL.md
+
+WARN OUT_SCHEMA_VERSION_MISSING: Schema-bound outputs detected; consider including `schema_version` in the output contract.
+WARN PATH_TRAVERSAL: Parent directory traversal (`../`) mentioned; avoid in references.
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/figma.png
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+
+RESULT: PASS
+OpenClaw skill guard: figma-implement-design
+Summary: 0 critical · 0 warn · 2 info
+INFO readiness.checked: Operational readiness checks completed
+INFO security.no_scripts: No executable scripts found; static security scan skipped
+[20/91] ./frontend/ui/figma
+[OK] SKILL.md frontmatter looks valid.
+Skill: figma
+Path:  /Users/jamiecraik/dev/agent-skills/frontend/ui/figma/SKILL.md
+
+WARN OUT_SCHEMA_VERSION_MISSING: Schema-bound outputs detected; consider including `schema_version` in the output contract.
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/figma.png
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | SKILL.md
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+
+RESULT: PASS
+OpenClaw skill guard: figma
+Summary: 0 critical · 0 warn · 2 info
+INFO readiness.checked: Operational readiness checks completed
+INFO security.no_scripts: No executable scripts found; static security scan skipped
+[21/91] ./frontend/ui/frontend-ui-design
+[OK] SKILL.md frontmatter looks valid.
+Skill: frontend-ui-design
+Path:  /Users/jamiecraik/dev/agent-skills/frontend/ui/frontend-ui-design/SKILL.md
+
+FAIL SEC_ANTIPATTERNS_MISSING: Missing required section: antipatterns (add a ## heading).
+FAIL SEC_OUTPUTS_MISSING: Missing required section: outputs (add a ## heading).
+FAIL SEC_PROCEDURE_MISSING: Missing required section: procedure (add a ## heading).
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/frontend-ui-design.png
+
+RESULT: FAIL
+OpenClaw skill guard: frontend-ui-design
+Summary: 0 critical · 1 warn · 2 info
+INFO readiness.scripts_empty: scripts/ exists but has no .py/.js/.ts files
+INFO readiness.checked: Operational readiness checks completed
+WARN security.network_usage: Matched pattern: \b(requests\.|fetch\(|axios\.|curl\b|httpx\.) (scripts/link_audit.sh:10)
+[22/91] ./frontend/ui/interface-craft
+[WARN] Unknown frontmatter key(s): argument-hint (ignored by this validator).
+[OK] SKILL.md frontmatter looks valid.
+Skill: interface-craft
+Path:  /Users/jamiecraik/dev/agent-skills/frontend/ui/interface-craft/SKILL.md
+
+FAIL SAFE_REDACTION_REQUIRED: Constraints/Safety MUST mention redaction of secrets/sensitive data by default.
+FAIL SEC_CONSTRAINTS_MISSING: Missing required section: constraints (add a ## heading).
+FAIL SEC_INPUTS_MISSING: Missing required section: inputs (add a ## heading).
+FAIL SEC_OUTPUTS_MISSING: Missing required section: outputs (add a ## heading).
+FAIL SEC_PROCEDURE_MISSING: Missing required section: procedure (add a ## heading).
+FAIL SEC_VALIDATION_MISSING: Missing required section: validation (add a ## heading).
+FAIL SEC_WHEN_TO_USE_MISSING: Missing required section: when to use (add a ## heading).
+WARN PATH_ABSOLUTE: Absolute paths detected; prefer repo-relative paths.
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/interface-craft.png
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+WARN REPO_REFERENCES_UNREFERENCED: references/ exists but is not referenced in SKILL.md.
+WARN SEC_EXAMPLES_MISSING: Missing recommended section: examples (add a ## heading).
+
+RESULT: FAIL
+OpenClaw skill guard: interface-craft
+Summary: 0 critical · 0 warn · 2 info
+INFO readiness.checked: Operational readiness checks completed
+INFO security.no_scripts: No executable scripts found; static security scan skipped
+[23/91] ./frontend/ui/react-best-practices
+[WARN] Description may be too vague; consider including explicit trigger language (e.g., 'Use when ...').
+[OK] SKILL.md frontmatter looks valid.
+Skill: vercel-react-best-practices
+Path:  /Users/jamiecraik/dev/agent-skills/frontend/ui/react-best-practices/SKILL.md
+
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .DS_Store
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/react-best-practices.png
+
+RESULT: PASS
+OpenClaw skill guard: react-best-practices
+Summary: 0 critical · 0 warn · 2 info
+INFO readiness.checked: Operational readiness checks completed
+INFO security.no_scripts: No executable scripts found; static security scan skipped
+[24/91] ./frontend/ui/react-ui-patterns
+[OK] SKILL.md frontmatter looks valid.
+Skill: react-ui-patterns
+Path:  /Users/jamiecraik/dev/agent-skills/frontend/ui/react-ui-patterns/SKILL.md
+
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/react-ui-patterns.png
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | SKILL.md
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+
+RESULT: PASS
+OpenClaw skill guard: react-ui-patterns
+Summary: 0 critical · 0 warn · 2 info
+INFO readiness.checked: Operational readiness checks completed
+INFO security.no_scripts: No executable scripts found; static security scan skipped
+[25/91] ./frontend/ui/ui-visual-regression
+[OK] SKILL.md frontmatter looks valid.
+Skill: ui-visual-regression
+Path:  /Users/jamiecraik/dev/agent-skills/frontend/ui/ui-visual-regression/SKILL.md
+
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/ui-visual-regression.png
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | SKILL.md
+
+RESULT: PASS
+OpenClaw skill guard: ui-visual-regression
+Summary: 0 critical · 0 warn · 3 info
+INFO readiness.scripts_empty: scripts/ exists but has no .py/.js/.ts files
+INFO readiness.checked: Operational readiness checks completed
+INFO security.no_scripts: No executable scripts found; static security scan skipped
+[26/91] ./frontend/ui/web-design-guidelines
+[OK] SKILL.md frontmatter looks valid.
+Skill: web-design-guidelines
+Path:  /Users/jamiecraik/dev/agent-skills/frontend/ui/web-design-guidelines/SKILL.md
+
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/web-design-guidelines.png
+
+RESULT: PASS
+OpenClaw skill guard: web-design-guidelines
+Summary: 0 critical · 0 warn · 2 info
+INFO readiness.checked: Operational readiness checks completed
+INFO security.no_scripts: No executable scripts found; static security scan skipped
+[27/91] ./github/gh-actions-fix
+[WARN] Description may be too vague; consider including explicit trigger language (e.g., 'Use when ...').
+[OK] SKILL.md frontmatter looks valid.
+Skill: gh-actions-fix
+Path:  /Users/jamiecraik/dev/agent-skills/github/gh-actions-fix/SKILL.md
+
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/gh-actions-fix.png
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+
+RESULT: PASS
+OpenClaw skill guard: gh-actions-fix
+Summary: 0 critical · 3 warn · 1 info
+INFO readiness.checked: Operational readiness checks completed
+WARN security.subprocess_usage: Matched pattern: \bsubprocess\. (scripts/inspect_pr_checks.py:58)
+WARN security.subprocess_usage: Matched pattern: \bsubprocess\. (scripts/inspect_pr_checks.py:68)
+WARN security.subprocess_usage: Matched pattern: \bsubprocess\. (scripts/inspect_pr_checks.py:138)
+[28/91] ./github/gh-address-comments
+[WARN] Description may be too vague; consider including explicit trigger language (e.g., 'Use when ...').
+[OK] SKILL.md frontmatter looks valid.
+Skill: gh-address-comments
+Path:  /Users/jamiecraik/dev/agent-skills/github/gh-address-comments/SKILL.md
+
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/gh-address-comments.png
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+
+RESULT: PASS
+OpenClaw skill guard: gh-address-comments
+Summary: 0 critical · 1 warn · 1 info
+INFO readiness.checked: Operational readiness checks completed
+WARN security.subprocess_usage: Matched pattern: \bsubprocess\. (scripts/fetch_comments.py:96)
+[29/91] ./github/gh-fix-ci
+[OK] SKILL.md frontmatter looks valid.
+Skill: gh-fix-ci
+Path:  /Users/jamiecraik/dev/agent-skills/github/gh-fix-ci/SKILL.md
+
+FAIL SAFE_REDACTION_REQUIRED: Constraints/Safety MUST mention redaction of secrets/sensitive data by default.
+FAIL SEC_CONSTRAINTS_MISSING: Missing required section: constraints (add a ## heading).
+FAIL SEC_OUTPUTS_MISSING: Missing required section: outputs (add a ## heading).
+FAIL SEC_VALIDATION_MISSING: Missing required section: validation (add a ## heading).
+FAIL SEC_WHEN_TO_USE_MISSING: Missing required section: when to use (add a ## heading).
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/github.png
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+WARN REPO_REFERENCES_UNREFERENCED: references/ exists but is not referenced in SKILL.md.
+WARN SEC_EXAMPLES_MISSING: Missing recommended section: examples (add a ## heading).
+
+RESULT: FAIL
+OpenClaw skill guard: gh-fix-ci
+Summary: 0 critical · 3 warn · 1 info
+INFO readiness.checked: Operational readiness checks completed
+WARN security.subprocess_usage: Matched pattern: \bsubprocess\. (scripts/inspect_pr_checks.py:59)
+WARN security.subprocess_usage: Matched pattern: \bsubprocess\. (scripts/inspect_pr_checks.py:69)
+WARN security.subprocess_usage: Matched pattern: \bsubprocess\. (scripts/inspect_pr_checks.py:139)
+[30/91] ./github/gh-issue-fix
+[WARN] Description may be too vague; consider including explicit trigger language (e.g., 'Use when ...').
+[OK] SKILL.md frontmatter looks valid.
+Skill: gh-issue-fix
+Path:  /Users/jamiecraik/dev/agent-skills/github/gh-issue-fix/SKILL.md
+
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/gh-issue-fix.png
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+
+RESULT: PASS
+OpenClaw skill guard: gh-issue-fix
+Summary: 0 critical · 0 warn · 2 info
+INFO readiness.checked: Operational readiness checks completed
+INFO security.no_scripts: No executable scripts found; static security scan skipped
+[31/91] ./github/gh-pr-local
+[WARN] Description may be too vague; consider including explicit trigger language (e.g., 'Use when ...').
+[OK] SKILL.md frontmatter looks valid.
+Skill: gh-pr-local
+Path:  /Users/jamiecraik/dev/agent-skills/github/gh-pr-local/SKILL.md
+
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/gh-pr-local.png
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+
+RESULT: PASS
+OpenClaw skill guard: gh-pr-local
+Summary: 0 critical · 3 warn · 1 info
+INFO readiness.checked: Operational readiness checks completed
+WARN security.subprocess_usage: Matched pattern: \bsubprocess\. (scripts/github-pr.py:25)
+WARN security.subprocess_usage: Matched pattern: \bsubprocess\. (scripts/github-pr.py:27)
+WARN security.network_usage: Matched pattern: \b(requests\.|fetch\(|axios\.|curl\b|httpx\.) (scripts/github-pr.py:111)
+[32/91] ./github/gh-workflow
+[OK] SKILL.md frontmatter looks valid.
+Skill: gh-workflow
+Path:  /Users/jamiecraik/dev/agent-skills/github/gh-workflow/SKILL.md
+
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/gh-workflow.png
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+
+RESULT: PASS
+OpenClaw skill guard: gh-workflow
+Summary: 0 critical · 7 warn · 1 info
+INFO readiness.checked: Operational readiness checks completed
+WARN security.subprocess_usage: Matched pattern: \bsubprocess\. (scripts/github-pr.py:25)
+WARN security.subprocess_usage: Matched pattern: \bsubprocess\. (scripts/github-pr.py:27)
+WARN security.network_usage: Matched pattern: \b(requests\.|fetch\(|axios\.|curl\b|httpx\.) (scripts/github-pr.py:111)
+WARN security.subprocess_usage: Matched pattern: \bsubprocess\. (scripts/inspect_pr_checks.py:58)
+WARN security.subprocess_usage: Matched pattern: \bsubprocess\. (scripts/inspect_pr_checks.py:68)
+WARN security.subprocess_usage: Matched pattern: \bsubprocess\. (scripts/inspect_pr_checks.py:138)
+WARN security.subprocess_usage: Matched pattern: \bsubprocess\. (scripts/fetch_comments.py:96)
+[33/91] ./github/yeet
+[WARN] Description may be too vague; consider including explicit trigger language (e.g., 'Use when ...').
+[OK] SKILL.md frontmatter looks valid.
+Skill: yeet
+Path:  /Users/jamiecraik/dev/agent-skills/github/yeet/SKILL.md
+
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/yeet.png
+
+RESULT: PASS
+OpenClaw skill guard: yeet
+Summary: 0 critical · 0 warn · 2 info
+INFO readiness.checked: Operational readiness checks completed
+INFO security.no_scripts: No executable scripts found; static security scan skipped
+[34/91] ./interview/architecture-interview
+[OK] SKILL.md frontmatter looks valid.
+Skill: architecture-interview
+Path:  /Users/jamiecraik/dev/agent-skills/interview/architecture-interview/SKILL.md
+
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/architecture-interview.png
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+
+RESULT: PASS
+OpenClaw skill guard: architecture-interview
+Summary: 0 critical · 0 warn · 2 info
+INFO readiness.checked: Operational readiness checks completed
+INFO security.no_scripts: No executable scripts found; static security scan skipped
+[35/91] ./interview/bug-interview
+[OK] SKILL.md frontmatter looks valid.
+Skill: bug-interview
+Path:  /Users/jamiecraik/dev/agent-skills/interview/bug-interview/SKILL.md
+
+WARN FM_DESC_WORKFLOWY: Description looks workflow-like. Prefer outcome + trigger keywords in `description`; keep procedures in the body/references. | description: Analyze and review bug reports to capture repro, evidence, and the next smallest diagnostic step. Use when a bug report lacks clear reproduction.
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/bug-interview.png
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+
+RESULT: PASS
+OpenClaw skill guard: bug-interview
+Summary: 0 critical · 0 warn · 2 info
+INFO readiness.checked: Operational readiness checks completed
+INFO security.no_scripts: No executable scripts found; static security scan skipped
+[36/91] ./interview/deep-interview
+[OK] SKILL.md frontmatter looks valid.
+Skill: deep-interview
+Path:  /Users/jamiecraik/dev/agent-skills/interview/deep-interview/SKILL.md
+
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/deep-interview.png
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | SKILL.md
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+
+RESULT: PASS
+OpenClaw skill guard: deep-interview
+Summary: 0 critical · 0 warn · 2 info
+INFO readiness.checked: Operational readiness checks completed
+INFO security.no_scripts: No executable scripts found; static security scan skipped
+[37/91] ./interview/interview-kernel
+[OK] SKILL.md frontmatter looks valid.
+Skill: interview-kernel
+Path:  /Users/jamiecraik/dev/agent-skills/interview/interview-kernel/SKILL.md
+
+FAIL SEC_CONSTRAINTS_MISSING: Missing required section: constraints (add a ## heading).
+FAIL SEC_INPUTS_MISSING: Missing required section: inputs (add a ## heading).
+FAIL SEC_OUTPUTS_MISSING: Missing required section: outputs (add a ## heading).
+FAIL SEC_VALIDATION_MISSING: Missing required section: validation (add a ## heading).
+WARN OUT_SCHEMA_VERSION_MISSING: Schema-bound outputs detected; consider including `schema_version` in the output contract.
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/interview-kernel.png
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | SKILL.md
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+WARN SEC_EXAMPLES_MISSING: Missing recommended section: examples (add a ## heading).
+
+RESULT: FAIL
+OpenClaw skill guard: interview-kernel
+Summary: 0 critical · 0 warn · 2 info
+INFO readiness.checked: Operational readiness checks completed
+INFO security.no_scripts: No executable scripts found; static security scan skipped
+[38/91] ./interview/interview-me
+[OK] SKILL.md frontmatter looks valid.
+Skill: interview-me
+Path:  /Users/jamiecraik/dev/agent-skills/interview/interview-me/SKILL.md
+
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/interview-me.png
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | SKILL.md
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+
+RESULT: PASS
+OpenClaw skill guard: interview-me
+Summary: 0 critical · 0 warn · 2 info
+INFO readiness.checked: Operational readiness checks completed
+INFO security.no_scripts: No executable scripts found; static security scan skipped
+[39/91] ./interview/pm-interview
+[OK] SKILL.md frontmatter looks valid.
+Skill: pm-interview
+Path:  /Users/jamiecraik/dev/agent-skills/interview/pm-interview/SKILL.md
+
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/pm-interview.png
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | SKILL.md
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+
+RESULT: PASS
+OpenClaw skill guard: pm-interview
+Summary: 0 critical · 0 warn · 2 info
+INFO readiness.checked: Operational readiness checks completed
+INFO security.no_scripts: No executable scripts found; static security scan skipped
+[40/91] ./personas/steipete
+[OK] SKILL.md frontmatter looks valid.
+Skill: steipete
+Path:  /Users/jamiecraik/dev/agent-skills/personas/steipete/SKILL.md
+
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/steipete.png
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+
+RESULT: PASS
+OpenClaw skill guard: steipete
+Summary: 0 critical · 0 warn · 2 info
+INFO readiness.checked: Operational readiness checks completed
+INFO security.no_scripts: No executable scripts found; static security scan skipped
+[41/91] ./product/content/youtube-hooks-scripts
+[OK] SKILL.md frontmatter looks valid.
+Skill: youtube-hooks-scripts
+Path:  /Users/jamiecraik/dev/agent-skills/product/content/youtube-hooks-scripts/SKILL.md
+
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/youtube-hooks-scripts.png
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+
+RESULT: PASS
+OpenClaw skill guard: youtube-hooks-scripts
+Summary: 0 critical · 0 warn · 2 info
+INFO readiness.checked: Operational readiness checks completed
+INFO security.no_scripts: No executable scripts found; static security scan skipped
+[42/91] ./product/content/youtube-titles-thumbnails
+[OK] SKILL.md frontmatter looks valid.
+Skill: youtube-titles-thumbnails
+Path:  /Users/jamiecraik/dev/agent-skills/product/content/youtube-titles-thumbnails/SKILL.md
+
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/youtube-titles-thumbnails.png
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+
+RESULT: PASS
+OpenClaw skill guard: youtube-titles-thumbnails
+Summary: 0 critical · 0 warn · 2 info
+INFO readiness.checked: Operational readiness checks completed
+INFO security.no_scripts: No executable scripts found; static security scan skipped
+[43/91] ./product/design/ui-ux-creative-coding
+[OK] SKILL.md frontmatter looks valid.
+Skill: ui-ux-creative-coding
+Path:  /Users/jamiecraik/dev/agent-skills/product/design/ui-ux-creative-coding/SKILL.md
+
+FAIL FM_DESC_WHAT_WHEN: Description MUST include WHAT the skill does and WHEN to use it (trigger contexts). | description: Creative-coding UI polish for Tauri+React (Tailwind v4, Radix, Three.js). Use when you need expressive motion craft or WebGL accents—not baseline UI system work.
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/ui-ux-creative-coding.png
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | references/images/benjitaylor/docs-layout.jpg
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | references/images/benjitaylor/icon-grid.jpg
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | references/images/benjitaylor/soft-ui-panel.jpg
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | references/images/emilkowalski/lesson-dark.jpg
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | references/images/emilkowalski/superb-light.jpg
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | references/images/emilkowalski/vespri-light.jpg
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | references/images/jenny_wen/handmade-texture.jpg
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | references/images/jenny_wen/notes-editorial.jpg
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | references/images/jenny_wen/seasonal-print.jpg
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | references/images/jh3yy/dark-grid-article.jpg
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | references/images/jh3yy/glass-displacement.jpg
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | references/images/jh3yy/neon-emblem.jpg
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | references/images/kubadesign/ecommerce-light.jpg
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | references/images/kubadesign/gradient-texture-grid.jpg
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | references/images/kubadesign/mobile-dark.jpg
+WARN SEC_EXAMPLES_MISSING: Missing recommended section: examples (add a ## heading).
+
+RESULT: FAIL
+OpenClaw skill guard: ui-ux-creative-coding
+Summary: 0 critical · 0 warn · 3 info
+INFO readiness.scripts_empty: scripts/ exists but has no .py/.js/.ts files
+INFO readiness.checked: Operational readiness checks completed
+INFO security.no_scripts: No executable scripts found; static security scan skipped
+[44/91] ./product/docs/agents-md
+[OK] SKILL.md frontmatter looks valid.
+Skill: agents-md
+Path:  /Users/jamiecraik/dev/agent-skills/product/docs/agents-md/SKILL.md
+
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/agents-md.png
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | SKILL.md
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+
+RESULT: PASS
+OpenClaw skill guard: agents-md
+Summary: 0 critical · 0 warn · 2 info
+INFO readiness.checked: Operational readiness checks completed
+INFO security.no_scripts: No executable scripts found; static security scan skipped
+[45/91] ./product/docs/context7
+[WARN] Description may be too vague; consider including explicit trigger language (e.g., 'Use when ...').
+[OK] SKILL.md frontmatter looks valid.
+Skill: context7
+Path:  /Users/jamiecraik/dev/agent-skills/product/docs/context7/SKILL.md
+
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/context7.png
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+
+RESULT: PASS
+OpenClaw skill guard: context7
+Summary: 0 critical · 0 warn · 2 info
+INFO readiness.checked: Operational readiness checks completed
+INFO security.clean: No risky patterns detected in scanned scripts
+[46/91] ./product/docs/docs-expert
+[OK] SKILL.md frontmatter looks valid.
+Skill: docs-expert
+Path:  /Users/jamiecraik/dev/agent-skills/product/docs/docs-expert/SKILL.md
+
+WARN OUT_SCHEMA_VERSION_MISSING: Schema-bound outputs detected; consider including `schema_version` in the output contract.
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/brand/brand-mark.png
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/brand/brand-mark.webp
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/brand/brand-mark@2x.png
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/brand/brand-mark@2x.webp
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/docs-expert.png
+WARN PI_COMMANDS: [medium] Command-like instructions detected; ensure commands are gated and safe. | SKILL.md
+WARN PI_ROLEPLAY: [medium] Role-shifting language detected; verify it is safe and limited to user content. | SKILL.md
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | SKILL.md
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | scripts/check_brand_guidelines.py
+
+RESULT: PASS
+OpenClaw skill guard: docs-expert
+Summary: 0 critical · 0 warn · 2 info
+INFO readiness.checked: Operational readiness checks completed
+INFO security.clean: No risky patterns detected in scanned scripts
+[47/91] ./product/docs/openai-docs
+[OK] SKILL.md frontmatter looks valid.
+Skill: openai-docs
+Path:  /Users/jamiecraik/dev/agent-skills/product/docs/openai-docs/SKILL.md
+
+FAIL SAFE_REDACTION_REQUIRED: Constraints/Safety MUST mention redaction of secrets/sensitive data by default.
+FAIL SEC_CONSTRAINTS_MISSING: Missing required section: constraints (add a ## heading).
+FAIL SEC_INPUTS_MISSING: Missing required section: inputs (add a ## heading).
+FAIL SEC_OUTPUTS_MISSING: Missing required section: outputs (add a ## heading).
+FAIL SEC_VALIDATION_MISSING: Missing required section: validation (add a ## heading).
+FAIL SEC_WHEN_TO_USE_MISSING: Missing required section: when to use (add a ## heading).
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/openai.png
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+WARN REPO_REFERENCES_UNREFERENCED: references/ exists but is not referenced in SKILL.md.
+WARN SEC_EXAMPLES_MISSING: Missing recommended section: examples (add a ## heading).
+
+RESULT: FAIL
+OpenClaw skill guard: openai-docs
+Summary: 0 critical · 0 warn · 2 info
+INFO readiness.checked: Operational readiness checks completed
+INFO security.no_scripts: No executable scripts found; static security scan skipped
+[48/91] ./product/domain/chatgpt-apps-production-checklist
+[OK] SKILL.md frontmatter looks valid.
+Skill: chatgpt-apps-production-checklist
+Path:  /Users/jamiecraik/dev/agent-skills/product/domain/chatgpt-apps-production-checklist/SKILL.md
+
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/chatgpt-apps-production-checklist.png
+
+RESULT: PASS
+OpenClaw skill guard: chatgpt-apps-production-checklist
+Summary: 0 critical · 0 warn · 2 info
+INFO readiness.checked: Operational readiness checks completed
+INFO security.no_scripts: No executable scripts found; static security scan skipped
+[49/91] ./product/domain/cloudflare-deploy
+[OK] SKILL.md frontmatter looks valid.
+Skill: cloudflare-deploy
+Path:  /Users/jamiecraik/dev/agent-skills/product/domain/cloudflare-deploy/SKILL.md
+
+FAIL FM_DESC_WHAT_WHEN: Description MUST include WHAT the skill does and WHEN to use it (trigger contexts). | description: Deploy applications and infrastructure to Cloudflare using Workers, Pages, and related platform services. Use when the user asks to deploy, host, publish, or set up a project on Cloudflare.
+FAIL SEC_CONSTRAINTS_MISSING: Missing required section: constraints (add a ## heading).
+FAIL SEC_INPUTS_MISSING: Missing required section: inputs (add a ## heading).
+FAIL SEC_OUTPUTS_MISSING: Missing required section: outputs (add a ## heading).
+FAIL SEC_PROCEDURE_MISSING: Missing required section: procedure (add a ## heading).
+FAIL SEC_VALIDATION_MISSING: Missing required section: validation (add a ## heading).
+FAIL SEC_WHEN_TO_USE_MISSING: Missing required section: when to use (add a ## heading).
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/cloudflare.png
+WARN SEC_EXAMPLES_MISSING: Missing recommended section: examples (add a ## heading).
+
+RESULT: FAIL
+OpenClaw skill guard: cloudflare-deploy
+Summary: 0 critical · 0 warn · 2 info
+INFO readiness.checked: Operational readiness checks completed
+INFO security.no_scripts: No executable scripts found; static security scan skipped
+[50/91] ./product/domain/oak-api
+[OK] SKILL.md frontmatter looks valid.
+Skill: oak-api
+Path:  /Users/jamiecraik/dev/agent-skills/product/domain/oak-api/SKILL.md
+
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .DS_Store
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/oak-api.png
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+
+RESULT: PASS
+OpenClaw skill guard: oak-api
+Summary: 0 critical · 0 warn · 2 info
+INFO readiness.checked: Operational readiness checks completed
+INFO security.clean: No risky patterns detected in scanned scripts
+[51/91] ./product/ops/decide-build-primitive
+[OK] SKILL.md frontmatter looks valid.
+Skill: decide-build-primitive
+Path:  /Users/jamiecraik/dev/agent-skills/product/ops/decide-build-primitive/SKILL.md
+
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/decide-build-primitive.png
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | SKILL.md
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+
+RESULT: PASS
+OpenClaw skill guard: decide-build-primitive
+Summary: 0 critical · 0 warn · 2 info
+INFO readiness.checked: Operational readiness checks completed
+INFO security.no_scripts: No executable scripts found; static security scan skipped
+[52/91] ./product/ops/linear
+[OK] SKILL.md frontmatter looks valid.
+Skill: linear
+Path:  /Users/jamiecraik/dev/agent-skills/product/ops/linear/SKILL.md
+
+WARN OUT_SCHEMA_VERSION_MISSING: Schema-bound outputs detected; consider including `schema_version` in the output contract.
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/linear.png
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | SKILL.md
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+
+RESULT: PASS
+OpenClaw skill guard: linear
+Summary: 0 critical · 0 warn · 2 info
+INFO readiness.checked: Operational readiness checks completed
+INFO security.no_scripts: No executable scripts found; static security scan skipped
+[53/91] ./product/ops/release
+[OK] SKILL.md frontmatter looks valid.
+Skill: release
+Path:  /Users/jamiecraik/dev/agent-skills/product/ops/release/SKILL.md
+
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/release.png
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+
+RESULT: PASS
+OpenClaw skill guard: release
+Summary: 0 critical · 0 warn · 2 info
+INFO readiness.checked: Operational readiness checks completed
+INFO security.no_scripts: No executable scripts found; static security scan skipped
+[54/91] ./product/review/codex-wrapped
+[OK] SKILL.md frontmatter looks valid.
+Skill: codex-wrapped
+Path:  /Users/jamiecraik/dev/agent-skills/product/review/codex-wrapped/SKILL.md
+
+FAIL SEC_VALIDATION_MISSING: Missing required section: validation (add a ## heading).
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/codex-wrapped.png
+WARN PI_OVERRIDE: [high] Potential prompt-injection override language detected; ensure this is not instructing the model to bypass system/developer instructions. | scripts/get_stats.py
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+
+RESULT: FAIL
+OpenClaw skill guard: codex-wrapped
+Summary: 0 critical · 0 warn · 2 info
+INFO readiness.checked: Operational readiness checks completed
+INFO security.clean: No risky patterns detected in scanned scripts
+[55/91] ./product/review/llm-design-review
+[OK] SKILL.md frontmatter looks valid.
+Skill: llm-design-review
+Path:  /Users/jamiecraik/dev/agent-skills/product/review/llm-design-review/SKILL.md
+
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/llm-design-review.png
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | SKILL.md
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+
+RESULT: PASS
+OpenClaw skill guard: llm-design-review
+Summary: 0 critical · 0 warn · 2 info
+INFO readiness.checked: Operational readiness checks completed
+INFO security.no_scripts: No executable scripts found; static security scan skipped
+[56/91] ./product/review/product-design-review
+[OK] SKILL.md frontmatter looks valid.
+Skill: product-design-review
+Path:  /Users/jamiecraik/dev/agent-skills/product/review/product-design-review/SKILL.md
+
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/product-design-review.png
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | SKILL.md
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+
+RESULT: PASS
+OpenClaw skill guard: product-design-review
+Summary: 0 critical · 0 warn · 2 info
+INFO readiness.checked: Operational readiness checks completed
+INFO security.no_scripts: No executable scripts found; static security scan skipped
+[57/91] ./product/security/security-best-practices
+[OK] SKILL.md frontmatter looks valid.
+Skill: security-best-practices
+Path:  /Users/jamiecraik/dev/agent-skills/product/security/security-best-practices/SKILL.md
+
+FAIL SAFE_REDACTION_REQUIRED: Constraints/Safety MUST mention redaction of secrets/sensitive data by default.
+FAIL SEC_CONSTRAINTS_MISSING: Missing required section: constraints (add a ## heading).
+FAIL SEC_INPUTS_MISSING: Missing required section: inputs (add a ## heading).
+FAIL SEC_OUTPUTS_MISSING: Missing required section: outputs (add a ## heading).
+FAIL SEC_VALIDATION_MISSING: Missing required section: validation (add a ## heading).
+FAIL SEC_WHEN_TO_USE_MISSING: Missing required section: when to use (add a ## heading).
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/security-best-practices.png
+WARN PI_BLOCKLIST: [high] Explicit exfiltration directive | references/javascript-general-web-frontend-security.md
+WARN PI_BLOCKLIST: [high] Explicit exfiltration directive | references/javascript-typescript-react-web-frontend-security.md
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | SKILL.md
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+WARN SEC_EXAMPLES_MISSING: Missing recommended section: examples (add a ## heading).
+
+RESULT: FAIL
+OpenClaw skill guard: security-best-practices
+Summary: 0 critical · 0 warn · 2 info
+INFO readiness.checked: Operational readiness checks completed
+INFO security.no_scripts: No executable scripts found; static security scan skipped
+[58/91] ./product/security/security-ownership-map
+[OK] SKILL.md frontmatter looks valid.
+Skill: security-ownership-map
+Path:  /Users/jamiecraik/dev/agent-skills/product/security/security-ownership-map/SKILL.md
+
+FAIL SEC_CONSTRAINTS_MISSING: Missing required section: constraints (add a ## heading).
+FAIL SEC_OUTPUTS_MISSING: Missing required section: outputs (add a ## heading).
+FAIL SEC_VALIDATION_MISSING: Missing required section: validation (add a ## heading).
+FAIL SEC_WHEN_TO_USE_MISSING: Missing required section: when to use (add a ## heading).
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/security-ownership-map.png
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | SKILL.md
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+WARN SEC_EXAMPLES_MISSING: Missing recommended section: examples (add a ## heading).
+
+RESULT: FAIL
+OpenClaw skill guard: security-ownership-map
+Summary: 0 critical · 7 warn · 1 info
+INFO readiness.checked: Operational readiness checks completed
+WARN security.subprocess_usage: Matched pattern: \bsubprocess\. (scripts/community_maintainers.py:324)
+WARN security.subprocess_usage: Matched pattern: \bsubprocess\. (scripts/community_maintainers.py:326)
+WARN security.subprocess_usage: Matched pattern: \bsubprocess\. (scripts/community_maintainers.py:327)
+WARN security.subprocess_usage: Matched pattern: \bsubprocess\. (scripts/run_ownership_map.py:195)
+WARN security.subprocess_usage: Matched pattern: \bsubprocess\. (scripts/build_ownership_map.py:360)
+WARN security.subprocess_usage: Matched pattern: \bsubprocess\. (scripts/build_ownership_map.py:362)
+WARN security.subprocess_usage: Matched pattern: \bsubprocess\. (scripts/build_ownership_map.py:363)
+[59/91] ./product/security/security-threat-model
+[OK] SKILL.md frontmatter looks valid.
+Skill: security-threat-model
+Path:  /Users/jamiecraik/dev/agent-skills/product/security/security-threat-model/SKILL.md
+
+FAIL SEC_CONSTRAINTS_MISSING: Missing required section: constraints (add a ## heading).
+FAIL SEC_INPUTS_MISSING: Missing required section: inputs (add a ## heading).
+FAIL SEC_OUTPUTS_MISSING: Missing required section: outputs (add a ## heading).
+FAIL SEC_VALIDATION_MISSING: Missing required section: validation (add a ## heading).
+FAIL SEC_WHEN_TO_USE_MISSING: Missing required section: when to use (add a ## heading).
+WARN OUT_SCHEMA_VERSION_MISSING: Schema-bound outputs detected; consider including `schema_version` in the output contract.
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/security-threat-model.png
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | SKILL.md
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+WARN SEC_EXAMPLES_MISSING: Missing recommended section: examples (add a ## heading).
+
+RESULT: FAIL
+OpenClaw skill guard: security-threat-model
+Summary: 0 critical · 0 warn · 2 info
+INFO readiness.checked: Operational readiness checks completed
+INFO security.no_scripts: No executable scripts found; static security scan skipped
+[60/91] ./product/specs/prd-clarifier
+[WARN] Description may be too vague; consider including explicit trigger language (e.g., 'Use when ...').
+[OK] SKILL.md frontmatter looks valid.
+Skill: prd-clarifier
+Path:  /Users/jamiecraik/dev/agent-skills/product/specs/prd-clarifier/SKILL.md
+
+WARN OUT_SCHEMA_VERSION_MISSING: Schema-bound outputs detected; consider including `schema_version` in the output contract.
+WARN PATH_TRAVERSAL: Parent directory traversal (`../`) mentioned; avoid in references.
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/prd-clarifier.png
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+
+RESULT: PASS
+OpenClaw skill guard: prd-clarifier
+Summary: 0 critical · 0 warn · 2 info
+INFO readiness.checked: Operational readiness checks completed
+INFO security.no_scripts: No executable scripts found; static security scan skipped
+[61/91] ./product/specs/prd-to-api
+[WARN] Description may be too vague; consider including explicit trigger language (e.g., 'Use when ...').
+[OK] SKILL.md frontmatter looks valid.
+Skill: prd-to-api
+Path:  /Users/jamiecraik/dev/agent-skills/product/specs/prd-to-api/SKILL.md
+
+WARN OUT_SCHEMA_VERSION_MISSING: Schema-bound outputs detected; consider including `schema_version` in the output contract.
+WARN PATH_TRAVERSAL: Parent directory traversal (`../`) mentioned; avoid in references.
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/prd-to-api.png
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+
+RESULT: PASS
+OpenClaw skill guard: prd-to-api
+Summary: 0 critical · 0 warn · 2 info
+INFO readiness.checked: Operational readiness checks completed
+INFO security.no_scripts: No executable scripts found; static security scan skipped
+[62/91] ./product/specs/prd-to-arch
+[WARN] Description may be too vague; consider including explicit trigger language (e.g., 'Use when ...').
+[OK] SKILL.md frontmatter looks valid.
+Skill: prd-to-arch
+Path:  /Users/jamiecraik/dev/agent-skills/product/specs/prd-to-arch/SKILL.md
+
+WARN OUT_SCHEMA_VERSION_MISSING: Schema-bound outputs detected; consider including `schema_version` in the output contract.
+WARN PATH_TRAVERSAL: Parent directory traversal (`../`) mentioned; avoid in references.
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/prd-to-arch.png
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+
+RESULT: PASS
+OpenClaw skill guard: prd-to-arch
+Summary: 0 critical · 0 warn · 2 info
+INFO readiness.checked: Operational readiness checks completed
+INFO security.no_scripts: No executable scripts found; static security scan skipped
+[63/91] ./product/specs/prd-to-testplan
+[WARN] Description may be too vague; consider including explicit trigger language (e.g., 'Use when ...').
+[OK] SKILL.md frontmatter looks valid.
+Skill: prd-to-testplan
+Path:  /Users/jamiecraik/dev/agent-skills/product/specs/prd-to-testplan/SKILL.md
+
+WARN OUT_SCHEMA_VERSION_MISSING: Schema-bound outputs detected; consider including `schema_version` in the output contract.
+WARN PATH_TRAVERSAL: Parent directory traversal (`../`) mentioned; avoid in references.
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/prd-to-testplan.png
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+
+RESULT: PASS
+OpenClaw skill guard: prd-to-testplan
+Summary: 0 critical · 0 warn · 2 info
+INFO readiness.checked: Operational readiness checks completed
+INFO security.no_scripts: No executable scripts found; static security scan skipped
+[64/91] ./product/specs/prd-to-ux
+[WARN] Description may be too vague; consider including explicit trigger language (e.g., 'Use when ...').
+[OK] SKILL.md frontmatter looks valid.
+Skill: prd-to-ux
+Path:  /Users/jamiecraik/dev/agent-skills/product/specs/prd-to-ux/SKILL.md
+
+WARN OUT_SCHEMA_VERSION_MISSING: Schema-bound outputs detected; consider including `schema_version` in the output contract.
+WARN PATH_TRAVERSAL: Parent directory traversal (`../`) mentioned; avoid in references.
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/prd-to-ux.png
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+
+RESULT: PASS
+OpenClaw skill guard: prd-to-ux
+Summary: 0 critical · 0 warn · 2 info
+INFO readiness.checked: Operational readiness checks completed
+INFO security.no_scripts: No executable scripts found; static security scan skipped
+[65/91] ./product/specs/product-spec
+[OK] SKILL.md frontmatter looks valid.
+Skill: product-spec
+Path:  /Users/jamiecraik/dev/agent-skills/product/specs/product-spec/SKILL.md
+
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/product-spec.png
+WARN PI_COMMANDS: [medium] Command-like instructions detected; ensure commands are gated and safe. | scripts/render-diagrams.sh
+WARN PI_COMMANDS: [medium] Command-like instructions detected; ensure commands are gated and safe. | scripts/validate-mermaid.sh
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | assets/ralph/scripts/ralph/ralph-claude.sh
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | assets/ralph/scripts/ralph/ralph-codex.sh
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | assets/ralph/scripts/ralph/spec_to_prd.py
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+
+RESULT: PASS
+OpenClaw skill guard: product-spec
+Summary: 0 critical · 0 warn · 2 info
+INFO readiness.checked: Operational readiness checks completed
+INFO security.clean: No risky patterns detected in scanned scripts
+[66/91] ./product/strategy/asymmetric-ideation-engine
+[OK] SKILL.md frontmatter looks valid.
+Skill: asymmetric-ideation-engine
+Path:  /Users/jamiecraik/dev/agent-skills/product/strategy/asymmetric-ideation-engine/SKILL.md
+
+
+RESULT: PASS
+OpenClaw skill guard: asymmetric-ideation-engine
+Summary: 0 critical · 0 warn · 2 info
+INFO readiness.checked: Operational readiness checks completed
+INFO security.clean: No risky patterns detected in scanned scripts
+[67/91] ./product/strategy/project-improvement-ideator
+[OK] SKILL.md frontmatter looks valid.
+Skill: project-improvement-ideator
+Path:  /Users/jamiecraik/dev/agent-skills/product/strategy/project-improvement-ideator/SKILL.md
+
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/project-improvement-ideator.png
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | SKILL.md
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+
+RESULT: PASS
+OpenClaw skill guard: project-improvement-ideator
+Summary: 0 critical · 0 warn · 2 info
+INFO readiness.checked: Operational readiness checks completed
+INFO security.no_scripts: No executable scripts found; static security scan skipped
+[68/91] ./product/tech/agent-native-architecture
+[OK] SKILL.md frontmatter looks valid.
+Skill: agent-native-architecture
+Path:  /Users/jamiecraik/dev/agent-skills/product/tech/agent-native-architecture/SKILL.md
+
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/agent-native-architecture.png
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+
+RESULT: PASS
+OpenClaw skill guard: agent-native-architecture
+Summary: 0 critical · 0 warn · 2 info
+INFO readiness.checked: Operational readiness checks completed
+INFO security.no_scripts: No executable scripts found; static security scan skipped
+[69/91] ./product/tech/tech-spec
+[OK] SKILL.md frontmatter looks valid.
+Skill: tech-spec
+Path:  /Users/jamiecraik/dev/agent-skills/product/tech/tech-spec/SKILL.md
+
+WARN OUT_SCHEMA_VERSION_MISSING: Schema-bound outputs detected; consider including `schema_version` in the output contract.
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/tech-spec.png
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+
+RESULT: PASS
+OpenClaw skill guard: tech-spec
+Summary: 0 critical · 0 warn · 2 info
+INFO readiness.checked: Operational readiness checks completed
+INFO security.no_scripts: No executable scripts found; static security scan skipped
+[70/91] ./product/tech/tech-to-data
+[WARN] Description may be too vague; consider including explicit trigger language (e.g., 'Use when ...').
+[OK] SKILL.md frontmatter looks valid.
+Skill: tech-to-data
+Path:  /Users/jamiecraik/dev/agent-skills/product/tech/tech-to-data/SKILL.md
+
+WARN OUT_SCHEMA_VERSION_MISSING: Schema-bound outputs detected; consider including `schema_version` in the output contract.
+WARN PATH_TRAVERSAL: Parent directory traversal (`../`) mentioned; avoid in references.
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/tech-to-data.png
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+
+RESULT: PASS
+OpenClaw skill guard: tech-to-data
+Summary: 0 critical · 0 warn · 2 info
+INFO readiness.checked: Operational readiness checks completed
+INFO security.no_scripts: No executable scripts found; static security scan skipped
+[71/91] ./product/tech/tech-to-migration
+[WARN] Description may be too vague; consider including explicit trigger language (e.g., 'Use when ...').
+[OK] SKILL.md frontmatter looks valid.
+Skill: tech-to-migration
+Path:  /Users/jamiecraik/dev/agent-skills/product/tech/tech-to-migration/SKILL.md
+
+WARN OUT_SCHEMA_VERSION_MISSING: Schema-bound outputs detected; consider including `schema_version` in the output contract.
+WARN PATH_TRAVERSAL: Parent directory traversal (`../`) mentioned; avoid in references.
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/tech-to-migration.png
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+
+RESULT: PASS
+OpenClaw skill guard: tech-to-migration
+Summary: 0 critical · 0 warn · 2 info
+INFO readiness.checked: Operational readiness checks completed
+INFO security.no_scripts: No executable scripts found; static security scan skipped
+[72/91] ./product/tech/tech-to-ops
+[WARN] Description may be too vague; consider including explicit trigger language (e.g., 'Use when ...').
+[OK] SKILL.md frontmatter looks valid.
+Skill: tech-to-ops
+Path:  /Users/jamiecraik/dev/agent-skills/product/tech/tech-to-ops/SKILL.md
+
+WARN OUT_SCHEMA_VERSION_MISSING: Schema-bound outputs detected; consider including `schema_version` in the output contract.
+WARN PATH_TRAVERSAL: Parent directory traversal (`../`) mentioned; avoid in references.
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/tech-to-ops.png
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+
+RESULT: PASS
+OpenClaw skill guard: tech-to-ops
+Summary: 0 critical · 0 warn · 2 info
+INFO readiness.checked: Operational readiness checks completed
+INFO security.no_scripts: No executable scripts found; static security scan skipped
+[73/91] ./product/tech/tech-to-performance
+[WARN] Description may be too vague; consider including explicit trigger language (e.g., 'Use when ...').
+[OK] SKILL.md frontmatter looks valid.
+Skill: tech-to-performance
+Path:  /Users/jamiecraik/dev/agent-skills/product/tech/tech-to-performance/SKILL.md
+
+WARN OUT_SCHEMA_VERSION_MISSING: Schema-bound outputs detected; consider including `schema_version` in the output contract.
+WARN PATH_TRAVERSAL: Parent directory traversal (`../`) mentioned; avoid in references.
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/tech-to-performance.png
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+
+RESULT: PASS
+OpenClaw skill guard: tech-to-performance
+Summary: 0 critical · 0 warn · 2 info
+INFO readiness.checked: Operational readiness checks completed
+INFO security.no_scripts: No executable scripts found; static security scan skipped
+[74/91] ./utilities/1password
+[OK] SKILL.md frontmatter looks valid.
+Skill: 1password
+Path:  /Users/jamiecraik/dev/agent-skills/utilities/1password/SKILL.md
+
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/1password.png
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+WARN SEC_EXAMPLES_MISSING: Missing recommended section: examples (add a ## heading).
+
+RESULT: PASS
+OpenClaw skill guard: 1password
+Summary: 0 critical · 0 warn · 2 info
+INFO readiness.checked: Operational readiness checks completed
+INFO security.no_scripts: No executable scripts found; static security scan skipped
+[75/91] ./utilities/agent-browser
+[OK] SKILL.md frontmatter looks valid.
+Skill: agent-browser
+Path:  /Users/jamiecraik/dev/agent-skills/utilities/agent-browser/SKILL.md
+
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/agent-browser.png
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+
+RESULT: PASS
+OpenClaw skill guard: agent-browser
+Summary: 0 critical · 0 warn · 2 info
+INFO readiness.checked: Operational readiness checks completed
+INFO security.no_scripts: No executable scripts found; static security scan skipped
+[76/91] ./utilities/alignment-checkpoint
+[OK] SKILL.md frontmatter looks valid.
+Skill: alignment-checkpoint
+Path:  /Users/jamiecraik/dev/agent-skills/utilities/alignment-checkpoint/SKILL.md
+
+WARN OUT_SCHEMA_VERSION_MISSING: Schema-bound outputs detected; consider including `schema_version` in the output contract.
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/alignment-checkpoint.png
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+
+RESULT: PASS
+OpenClaw skill guard: alignment-checkpoint
+Summary: 0 critical · 0 warn · 2 info
+INFO readiness.checked: Operational readiness checks completed
+INFO security.no_scripts: No executable scripts found; static security scan skipped
+[77/91] ./utilities/atlas
+[OK] SKILL.md frontmatter looks valid.
+Skill: atlas
+Path:  /Users/jamiecraik/dev/agent-skills/utilities/atlas/SKILL.md
+
+FAIL FM_DESC_WHAT_WHEN: Description MUST include WHAT the skill does and WHEN to use it (trigger contexts). | description: macOS-only AppleScript control for the ChatGPT Atlas desktop app. Use only when the user explicitly asks to control Atlas tabs/bookmarks/history on macOS and the "ChatGPT Atlas" app is installed; do not trigger for general browser tasks or non-macOS environments.
+FAIL SAFE_REDACTION_REQUIRED: Constraints/Safety MUST mention redaction of secrets/sensitive data by default.
+FAIL SEC_CONSTRAINTS_MISSING: Missing required section: constraints (add a ## heading).
+FAIL SEC_INPUTS_MISSING: Missing required section: inputs (add a ## heading).
+FAIL SEC_OUTPUTS_MISSING: Missing required section: outputs (add a ## heading).
+FAIL SEC_VALIDATION_MISSING: Missing required section: validation (add a ## heading).
+FAIL SEC_WHEN_TO_USE_MISSING: Missing required section: when to use (add a ## heading).
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/atlas.png
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | scripts/__pycache__/atlas_cli.cpython-314.pyc
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | scripts/__pycache__/atlas_common.cpython-314.pyc
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+WARN SEC_EXAMPLES_MISSING: Missing recommended section: examples (add a ## heading).
+
+RESULT: FAIL
+OpenClaw skill guard: atlas
+Summary: 0 critical · 2 warn · 1 info
+INFO readiness.checked: Operational readiness checks completed
+WARN security.subprocess_usage: Matched pattern: \bsubprocess\. (scripts/atlas_common.py:102)
+WARN security.subprocess_usage: Matched pattern: \bsubprocess\. (scripts/atlas_common.py:106)
+[78/91] ./utilities/beautiful-mermaid
+[OK] SKILL.md frontmatter looks valid.
+Skill: beautiful-mermaid
+Path:  /Users/jamiecraik/dev/agent-skills/utilities/beautiful-mermaid/SKILL.md
+
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/beautiful-mermaid.png
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+
+RESULT: PASS
+OpenClaw skill guard: beautiful-mermaid
+Summary: 0 critical · 4 warn · 1 info
+INFO readiness.checked: Operational readiness checks completed
+WARN security.node_child_process: Matched pattern: \bnode:child_process\b|\bchild_process\b|\bspawnSync\(|\bspawn\( (scripts/render.ts:161)
+WARN security.node_child_process: Matched pattern: \bnode:child_process\b|\bchild_process\b|\bspawnSync\(|\bspawn\( (scripts/render.ts:162)
+WARN security.node_child_process: Matched pattern: \bnode:child_process\b|\bchild_process\b|\bspawnSync\(|\bspawn\( (scripts/render.ts:167)
+WARN security.node_child_process: Matched pattern: \bnode:child_process\b|\bchild_process\b|\bspawnSync\(|\bspawn\( (scripts/render.ts:168)
+[79/91] ./utilities/codex-home-audit
+[OK] SKILL.md frontmatter looks valid.
+Skill: codex-home-audit
+Path:  /Users/jamiecraik/dev/agent-skills/utilities/codex-home-audit/SKILL.md
+
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/codex-home-audit.png
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | scripts/__pycache__/audit_codex_home.cpython-314.pyc
+WARN PI_COMMANDS: [medium] Command-like instructions detected; ensure commands are gated and safe. | scripts/audit_codex_home.py
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | SKILL.md
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | scripts/audit_codex_home.py
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+
+RESULT: PASS
+OpenClaw skill guard: codex-home-audit
+Summary: 0 critical · 0 warn · 2 info
+INFO readiness.checked: Operational readiness checks completed
+INFO security.clean: No risky patterns detected in scanned scripts
+[80/91] ./utilities/codex-sessions-skill-scan
+[OK] SKILL.md frontmatter looks valid.
+Skill: codex-sessions-skill-scan
+Path:  /Users/jamiecraik/dev/agent-skills/utilities/codex-sessions-skill-scan/SKILL.md
+
+WARN OUT_SCHEMA_VERSION_MISSING: Schema-bound outputs detected; consider including `schema_version` in the output contract.
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/codex-sessions-skill-scan.png
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | scripts/__pycache__/scan_codex_sessions.cpython-314.pyc
+WARN PI_OVERRIDE: [high] Potential prompt-injection override language detected; ensure this is not instructing the model to bypass system/developer instructions. | scripts/scan_codex_sessions.py
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+
+RESULT: PASS
+OpenClaw skill guard: codex-sessions-skill-scan
+Summary: 0 critical · 0 warn · 2 info
+INFO readiness.checked: Operational readiness checks completed
+INFO security.clean: No risky patterns detected in scanned scripts
+[81/91] ./utilities/markdown-converter
+[OK] SKILL.md frontmatter looks valid.
+Skill: markdown-converter
+Path:  /Users/jamiecraik/dev/agent-skills/utilities/markdown-converter/SKILL.md
+
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/markdown-converter.png
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+
+RESULT: PASS
+OpenClaw skill guard: markdown-converter
+Summary: 0 critical · 0 warn · 2 info
+INFO readiness.checked: Operational readiness checks completed
+INFO security.no_scripts: No executable scripts found; static security scan skipped
+[82/91] ./utilities/process-watch
+[OK] SKILL.md frontmatter looks valid.
+Skill: process-watch
+Path:  /Users/jamiecraik/dev/agent-skills/utilities/process-watch/SKILL.md
+
+WARN FM_DESC_WORKFLOWY: Description looks workflow-like. Prefer outcome + trigger keywords in `description`; keep procedures in the body/references. | description: Analyze system processes and resource usage to diagnose runaway CPU/memory/IO, identify culprits, and propose next diagnostic steps. Use when investigating performance spikes or leaks.
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/process-watch.png
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | scripts/__pycache__/process-watch.cpython-314.pyc
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | SKILL.md
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+
+RESULT: PASS
+OpenClaw skill guard: process-watch
+Summary: 0 critical · 0 warn · 2 info
+INFO readiness.checked: Operational readiness checks completed
+INFO security.clean: No risky patterns detected in scanned scripts
+[83/91] ./utilities/prompt-creator
+[OK] SKILL.md frontmatter looks valid.
+Skill: prompt-creator
+Path:  /Users/jamiecraik/dev/agent-skills/utilities/prompt-creator/SKILL.md
+
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/prompt-creator.png
+
+RESULT: PASS
+OpenClaw skill guard: prompt-creator
+Summary: 0 critical · 0 warn · 2 info
+INFO readiness.checked: Operational readiness checks completed
+INFO security.no_scripts: No executable scripts found; static security scan skipped
+[84/91] ./utilities/recon-workbench
+[OK] SKILL.md frontmatter looks valid.
+Skill: recon-workbench
+Path:  /Users/jamiecraik/dev/agent-skills/utilities/recon-workbench/SKILL.md
+
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/recon-workbench.png
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/reverse_engineering_techniques.pdf
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/template/scripts/__pycache__/validate_schema.cpython-314.pyc
+WARN PI_COMMANDS: [medium] Command-like instructions detected; ensure commands are gated and safe. | assets/template/rules/recon.rules
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | SKILL.md
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | assets/template/AGENTS.md
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | assets/template/Skills.md
+
+RESULT: PASS
+OpenClaw skill guard: recon-workbench
+Summary: 0 critical · 0 warn · 3 info
+INFO readiness.scripts_empty: scripts/ exists but has no .py/.js/.ts files
+INFO readiness.checked: Operational readiness checks completed
+INFO security.clean: No risky patterns detected in scanned scripts
+[85/91] ./utilities/remotion
+[OK] SKILL.md frontmatter looks valid.
+Skill: remotion-best-practices
+Path:  /Users/jamiecraik/dev/agent-skills/utilities/remotion/SKILL.md
+
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/remotion.png
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | rules/calculate-metadata.md
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+
+RESULT: PASS
+OpenClaw skill guard: remotion
+Summary: 0 critical · 0 warn · 2 info
+INFO readiness.checked: Operational readiness checks completed
+INFO security.no_scripts: No executable scripts found; static security scan skipped
+[86/91] ./utilities/repoprompt
+[OK] SKILL.md frontmatter looks valid.
+Skill: repoprompt
+Path:  /Users/jamiecraik/dev/agent-skills/utilities/repoprompt/SKILL.md
+
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/repoprompt.png
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | SKILL.md
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+
+RESULT: PASS
+OpenClaw skill guard: repoprompt
+Summary: 0 critical · 0 warn · 2 info
+INFO readiness.checked: Operational readiness checks completed
+INFO security.no_scripts: No executable scripts found; static security scan skipped
+[87/91] ./utilities/run-tests-and-write-artifacts
+[OK] SKILL.md frontmatter looks valid.
+Skill: run-tests-and-write-artifacts
+Path:  /Users/jamiecraik/dev/agent-skills/utilities/run-tests-and-write-artifacts/SKILL.md
+
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/run-tests-and-write-artifacts.png
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+
+RESULT: PASS
+OpenClaw skill guard: run-tests-and-write-artifacts
+Summary: 0 critical · 0 warn · 2 info
+INFO readiness.checked: Operational readiness checks completed
+INFO security.no_scripts: No executable scripts found; static security scan skipped
+[88/91] ./utilities/skill-creator
+[WARN] Description may be too vague; consider including explicit trigger language (e.g., 'Use when ...').
+[OK] SKILL.md frontmatter looks valid.
+Skill: skill-creator
+Path:  /Users/jamiecraik/dev/agent-skills/utilities/skill-creator/SKILL.md
+
+WARN OUT_SCHEMA_VERSION_MISSING: Schema-bound outputs detected; consider including `schema_version` in the output contract.
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/skill-creator.png
+WARN PI_BLOCKLIST: [high] Explicit exfiltration directive | references/destructive-commands.rules
+WARN PI_BLOCKLIST: [high] Explicit exfiltration directive | references/extended.md
+WARN PI_BLOCKLIST: [high] Explicit exfiltration directive | references/prompt-injection-patterns.json
+WARN PI_BLOCKLIST: [high] Explicit exfiltration directive | scripts/skill_gate.py
+WARN PI_COMMANDS: [medium] Command-like instructions detected; ensure commands are gated and safe. | scripts/generate_pressure_tests.py
+WARN PI_COMMANDS: [medium] Command-like instructions detected; ensure commands are gated and safe. | scripts/openclaw_skill_guard.py
+WARN PI_COMMANDS: [medium] Command-like instructions detected; ensure commands are gated and safe. | scripts/skill_gate.py
+WARN PI_OVERRIDE: [high] Potential prompt-injection override language detected; ensure this is not instructing the model to bypass system/developer instructions. | scripts/openclaw_skill_guard.py
+WARN PI_OVERRIDE: [high] Potential prompt-injection override language detected; ensure this is not instructing the model to bypass system/developer instructions. | scripts/skill_gate.py
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | examples/before-after/procedural-to-philosophical.md
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | scripts/migrate_evals_v2.py
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | scripts/run_skill_evals.py
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | scripts/skill_gate.py
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | workflows/create-new-skill.md
+
+RESULT: PASS
+OpenClaw skill guard: skill-creator
+Summary: 1 critical · 12 warn · 1 info
+INFO readiness.checked: Operational readiness checks completed
+WARN security.network_usage: Matched pattern: \b(requests\.|fetch\(|axios\.|curl\b|httpx\.) (scripts/generate_pressure_tests.py:229)
+WARN security.network_usage: Matched pattern: \b(requests\.|fetch\(|axios\.|curl\b|httpx\.) (scripts/generate_pressure_tests.py:287)
+WARN security.network_usage: Matched pattern: \b(requests\.|fetch\(|axios\.|curl\b|httpx\.) (scripts/skill_gate.py:256)
+CRITICAL security.shell_true: Matched pattern: \bshell\s*=\s*True\b (scripts/openclaw_skill_guard.py:73)
+WARN security.node_child_process: Matched pattern: \bnode:child_process\b|\bchild_process\b|\bspawnSync\(|\bspawn\( (scripts/openclaw_skill_guard.py:87)
+WARN security.network_usage: Matched pattern: \b(requests\.|fetch\(|axios\.|curl\b|httpx\.) (scripts/openclaw_skill_guard.py:88)
+WARN security.network_usage: Matched pattern: \b(requests\.|fetch\(|axios\.|curl\b|httpx\.) (scripts/openclaw_skill_guard.py:91)
+WARN security.subprocess_usage: Matched pattern: \bsubprocess\. (scripts/run_skill_evals.py:530)
+WARN security.subprocess_usage: Matched pattern: \bsubprocess\. (scripts/run_skill_evals.py:541)
+WARN security.subprocess_usage: Matched pattern: \bsubprocess\. (scripts/run_skill_evals.py:571)
+WARN security.subprocess_usage: Matched pattern: \bsubprocess\. (scripts/run_skill_evals.py:581)
+WARN security.subprocess_usage: Matched pattern: \bsubprocess\. (scripts/run_repo_skill_quality.py:41)
+WARN security.subprocess_usage: Matched pattern: \bsubprocess\. (scripts/run_repo_skill_quality.py:42)
+[89/91] ./utilities/skill-installer
+[OK] SKILL.md frontmatter looks valid.
+Skill: skill-installer
+Path:  /Users/jamiecraik/dev/agent-skills/utilities/skill-installer/SKILL.md
+
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/skill-installer.png
+WARN PI_BLOCKLIST: [high] Explicit exfiltration directive | references/prompt-injection-patterns.json
+WARN PI_BLOCKLIST: [high] Explicit exfiltration directive | scripts/install-skill-from-github.py
+WARN PI_COMMANDS: [medium] Command-like instructions detected; ensure commands are gated and safe. | scripts/install-skill-from-github.py
+WARN PI_OVERRIDE: [high] Potential prompt-injection override language detected; ensure this is not instructing the model to bypass system/developer instructions. | scripts/install-skill-from-github.py
+WARN PI_PATTERN_CONFIG: Failed to load prompt-injection patterns; using defaults (prompt pattern entries must include code, regex, message). | references/prompt-injection-patterns.json
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | SKILL.md
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | scripts/install-skill-from-github.py
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+
+RESULT: PASS
+OpenClaw skill guard: skill-installer
+Summary: 0 critical · 5 warn · 1 info
+INFO readiness.checked: Operational readiness checks completed
+WARN security.subprocess_usage: Matched pattern: \bsubprocess\. (scripts/install-skill-from-github.py:158)
+WARN security.subprocess_usage: Matched pattern: \bsubprocess\. (scripts/install-skill-from-github.py:158)
+WARN security.subprocess_usage: Matched pattern: \bsubprocess\. (scripts/install-skill-from-github.py:158)
+WARN security.network_usage: Matched pattern: \b(requests\.|fetch\(|axios\.|curl\b|httpx\.) (scripts/install-skill-from-github.py:59)
+WARN security.network_usage: Matched pattern: \b(requests\.|fetch\(|axios\.|curl\b|httpx\.) (scripts/install-skill-from-github.py:454)
+[90/91] ./utilities/systematic-debugging
+[WARN] Description may be too vague; consider including explicit trigger language (e.g., 'Use when ...').
+[OK] SKILL.md frontmatter looks valid.
+Skill: systematic-debugging
+Path:  /Users/jamiecraik/dev/agent-skills/utilities/systematic-debugging/SKILL.md
+
+FAIL FM_DESC_WHAT_WHEN: Description MUST include WHAT the skill does and WHEN to use it (trigger contexts). | description: Use this skill when encountering bugs, test failures, regressions, or unexpected behavior to run a root-cause-first debugging workflow before proposing fixes or code changes.
+FAIL SEC_CONSTRAINTS_MISSING: Missing required section: constraints (add a ## heading).
+FAIL SEC_INPUTS_MISSING: Missing required section: inputs (add a ## heading).
+FAIL SEC_OUTPUTS_MISSING: Missing required section: outputs (add a ## heading).
+FAIL SEC_PHILOSOPHY_MISSING: Missing required section: philosophy (add a ## heading).
+FAIL SEC_VALIDATION_MISSING: Missing required section: validation (add a ## heading).
+WARN FM_DESC_WORKFLOWY: Description looks workflow-like. Prefer outcome + trigger keywords in `description`; keep procedures in the body/references. | description: Use this skill when encountering bugs, test failures, regressions, or unexpected behavior to run a root-cause-first debugging workflow before proposing fixes or code changes.
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/systematic-debugging.png
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | defense-in-depth.md
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+WARN REPO_REFERENCES_UNREFERENCED: references/ exists but is not referenced in SKILL.md.
+WARN SEC_EXAMPLES_MISSING: Missing recommended section: examples (add a ## heading).
+
+RESULT: FAIL
+OpenClaw skill guard: systematic-debugging
+Summary: 0 critical · 0 warn · 2 info
+INFO readiness.checked: Operational readiness checks completed
+INFO security.no_scripts: No executable scripts found; static security scan skipped
+[91/91] ./utilities/video-transcript-downloader
+[OK] SKILL.md frontmatter looks valid.
+Skill: video-transcript-downloader
+Path:  /Users/jamiecraik/dev/agent-skills/utilities/video-transcript-downloader/SKILL.md
+
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/video-transcript-downloader.png
+WARN PI_OVERRIDE: [high] Potential prompt-injection override language detected; ensure this is not instructing the model to bypass system/developer instructions. | scripts/vtd.js
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+
+RESULT: PASS
+OpenClaw skill guard: video-transcript-downloader
+Summary: 0 critical · 2 warn · 1 info
+INFO readiness.checked: Operational readiness checks completed
+WARN security.node_child_process: Matched pattern: \bnode:child_process\b|\bchild_process\b|\bspawnSync\(|\bspawn\( (scripts/vtd.js:2)
+WARN security.node_child_process: Matched pattern: \bnode:child_process\b|\bchild_process\b|\bspawnSync\(|\bspawn\( (scripts/vtd.js:77)
+DONE
