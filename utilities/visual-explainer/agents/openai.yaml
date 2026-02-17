@@ -1,0 +1,3 @@
+interface:
+  display_name: "Visual Explainer"
+  short_description: "Generate self-contained HTML explainers for systems, plans, and comparisons."

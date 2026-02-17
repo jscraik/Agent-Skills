@@ -30,6 +30,11 @@ Ask only what is needed to avoid blocking:
 - When the user wants onboarding, checkout, or core flow critique.
 - When accessibility or content clarity reviews are requested.
 
+## Tooling preflight (required before repo commands)
+- Verify required local tools first: `command -v rg && command -v fd`.
+- If either tool is missing, stop and report the missing binary instead of continuing with failing commands.
+- Keep analysis local unless the user explicitly asks for network lookups.
+
 ## Platform Selection Rules
 - If the experience runs in a browser, use the web reference.
 - If the product is built in React or is OSS, also use the React/OSS reference.
@@ -157,6 +162,7 @@ Use judgment, adapt to context, and push boundaries when appropriate.
 ## Validation
 - Run any relevant checks or scripts when available.
 - Fail fast and report errors before proceeding.
+- If command execution is blocked by policy/permissions, report that as an environment issue (not a UX finding).
 
 
 ## Anti-patterns

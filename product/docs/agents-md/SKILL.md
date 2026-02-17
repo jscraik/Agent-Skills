@@ -22,6 +22,7 @@ Guiding principles:
 - Optimize for reader success in under 2 minutes.
 - Favor deterministic steps over narrative.
 - Keep scope tight; expand only when the repo requires it.
+- Default to canonical implementations for unreleased/greenfield projects; do not add backwards-compatibility layers unless explicitly required.
 
 Mandatory snippet (include verbatim in guidance):
 1. Explore project first, then invoke skill.
@@ -88,6 +89,7 @@ Use the failure-mode template verbatim for out-of-scope requests.
 - Verified commands and paths from the repo (README, docs, config files).
 - Any adjacent instruction files that may conflict (global or per-directory).
 - Whether Jamie's agent-first scaffold standard is requested (`/Users/jamiecraik/.codex/instructions/agent-first-scaffold-spec.md`).
+- Compatibility posture (default: canonical-only for unreleased/greenfield repos; override only when explicitly requested).
 
 ## Deliverables
 
@@ -107,6 +109,7 @@ Use the failure-mode template verbatim for out-of-scope requests.
 - Redact secrets and sensitive data by default.
 - Use ASCII only unless the repo already uses non-ASCII.
 - Do not add dependencies or tools.
+- Do not add legacy shims, adapter layers, dual-write paths, or backwards-compatibility promises unless the user explicitly requires compatibility.
 
 ## Workflow
 
@@ -122,6 +125,10 @@ Use the failure-mode template verbatim for out-of-scope requests.
 2) Find contradictions
 - Identify conflicting instructions and ask which one should win.
 - Do not resolve conflicts without user confirmation.
+
+2.1) Set compatibility posture
+- Default to canonical-only guidance for unreleased/greenfield projects.
+- Only include backwards-compatibility instructions when explicitly requested or when the repo shows clear released-version compatibility commitments.
 
 3) Identify the essentials (root AGENTS.md)
 - One-sentence project description.
@@ -247,6 +254,8 @@ Rollout policy:
 - Avoid “one‑size‑fits‑all” templates that erase repo‑specific commands.
 - In scaffold mode, writing non-idempotent edits without marker blocks.
 - Omitting `/Users/jamiecraik/.codex/instructions/agent-first-scaffold-spec.md` when Jamie standard is requested.
+- Adding backwards-compatibility requirements by default in unreleased/greenfield projects.
+- Generating extra legacy-preservation code paths without an explicit compatibility requirement.
 
 ## Example prompts that should trigger this skill
 
