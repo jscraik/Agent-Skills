@@ -13,7 +13,7 @@ Use API tokens with Zone:Argo Smart Routing:Edit permissions:
 ```bash
 # Headers required
 X-Auth-Email: user@example.com
-Authorization: Bearer YOUR_API_TOKEN
+Authorization: Bearer YOUR_API_TOKEN  # gitleaks:allow
 ```
 
 ### Get Argo Smart Routing Status
@@ -25,7 +25,7 @@ Authorization: Bearer YOUR_API_TOKEN
 **cURL Example:**
 ```bash
 curl -X GET "https://api.cloudflare.com/client/v4/zones/{zone_id}/argo/smart_routing" \
-  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Authorization: Bearer YOUR_API_TOKEN  # gitleaks:allow" \
   -H "Content-Type: application/json"
 ```
 
@@ -82,7 +82,7 @@ print(f"Argo status: {status.value}, editable: {status.editable}")
 **cURL Example:**
 ```bash
 curl -X PATCH "https://api.cloudflare.com/client/v4/zones/{zone_id}/argo/smart_routing" \
-  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Authorization: Bearer YOUR_API_TOKEN  # gitleaks:allow" \
   -H "Content-Type: application/json" \
   -d '{"value": "on"}'
 ```
