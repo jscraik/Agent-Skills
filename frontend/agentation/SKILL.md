@@ -1,6 +1,6 @@
 ---
 name: agentation
-description: Use when a user wants to install, verify, or troubleshoot Agentation in React/Next.js/Vite/Tauri apps; this skill validates toolbar wiring, MCP health, live webhook delivery, and optional annotation-to-autopilot automation.
+description: Use when a user wants to install, verify, or troubleshoot Agentation in React/Next.js/Vite/Tauri apps; this skill validates toolbar wiring, MCP health, live webhook delivery, and automation modes (self-driving autopilot + critique mode) with end-to-end submit verification.
 ---
 
 # Agentation Integration + Live Annotation Automation
@@ -31,7 +31,7 @@ Set up or verify Agentation so live annotations are reliably captured and can tr
   - dev-only UI wiring
   - MCP registration/health
   - webhook delivery
-  - optional autopilot automation
+  - optional automation mode configuration (`autopilot` or `critique`)
 - Files changed (or explicit “no changes needed”).
 - Final run commands + where to inspect status/artifacts.
 
@@ -117,32 +117,48 @@ If listener fails with `EADDRINUSE`:
    - switch to a new port (`PORT=8790 ...`) and update webhook URL.
 3. Re-run listener and confirm startup banner/log path.
 
-### 8) Configure optional autopilot automation (implementation + review)
+### 8) Configure automation modes (self-driving + critique)
 
-If project supports annotation-driven automation:
+If project supports annotation-driven automation, configure one mode explicitly:
 
-- Ensure script entry exists (example):
+1) **Self-driving mode (`autopilot`)**
+- `AGENTATION_MODE=autopilot`
+- Script entry should exist:
   - `agentation:autopilot` → starts webhook server + queue processor
-- Recommended behavior:
+- Behavior:
   - queue incoming webhook jobs
-  - implementation sub-agent run
-  - review sub-agent run only if implementation succeeds
-  - write `latest-status.json` for UI/CLI monitoring
-  - write per-job artifacts (`payload.json`, `implementation.txt`, `review.txt`, `result.json`)
-  - optionally send macOS notifications and refresh Tauri app after completion
+  - run implementation first, then review only if implementation succeeds
+  - write `latest-status.json` + per-job artifacts (`payload.json`, `implementation.txt`, `review.txt`, `result.json`)
+
+2) **Critique mode (`critique`)**
+- `AGENTATION_MODE=critique`
+- Script entry should exist:
+  - `agentation:critique` → starts webhook server in critique mode
+- Behavior:
+  - process submit events as critique-only jobs
+  - run `AGENTATION_CRITIQUE_COMMAND` (or documented fallback)
+  - write `latest-status.json` + per-job artifacts (including `critique.txt` + `result.json`)
 
 Recommended env defaults:
 ```bash
 TRIGGER_EVENTS=submit
+AGENTATION_MODE=autopilot
 CODEX_IMPLEMENTATION_TIMEOUT_MS=300000
 CODEX_REVIEW_TIMEOUT_MS=180000
 AUTO_REFRESH_ON_COMPLETE=1
 NOTIFY_ON_EVENTS=1
 ```
 
+Critique mode env example:
+```bash
+AGENTATION_MODE=critique
+AGENTATION_CRITIQUE_COMMAND="pnpm lint:tokens && pnpm typecheck"
+TRIGGER_EVENTS=submit
+```
+
 Critical timeout rule:
 - A timed-out run must not be reported as success.
-- If `timedOut=true` for implementation/review, final status should be `completed_with_issues` or `failed`.
+- If `timedOut=true` for implementation/review/critique, final status should be `completed_with_issues` or `failed`.
 
 ### 9) Final verification checklist
 
@@ -150,10 +166,14 @@ Critical timeout rule:
 - MCP connection green.
 - Webhook URL set and reachable.
 - Submit event produces listener log entry.
-- If autopilot enabled:
+- If self-driving (`autopilot`) is enabled:
   - `latest-status.json` transitions (`webhook_received` → running_* → completed/failed)
   - new job artifact directory created
   - implementation/review exit codes and timeout flags are consistent
+- If critique mode is enabled:
+  - webhook response includes mode or equivalent indicator
+  - `latest-status.json` contains `mode: critique`
+  - `result.json` includes critique step summary and correct success/timeout handling
 
 ## Encouraging variation
 
@@ -170,6 +190,10 @@ Critical timeout rule:
   - **Fix:** free port or change `PORT` and update webhook URL.
 - **Symptom:** annotation appears in app but no automation job
   - **Fix:** check trigger filter (`TRIGGER_EVENTS`), ensure event is `submit`.
+- **Symptom:** critique mode started but runs implementation/review
+  - **Fix:** verify `AGENTATION_MODE=critique` and that critique command is configured.
+- **Symptom:** critique mode returns accepted but status never updates
+  - **Fix:** verify `AGENTATION_CRITIQUE_COMMAND` is non-empty and executable in current shell env.
 - **Symptom:** status stuck on `running_*`
   - **Fix:** inspect child process, timeout settings, and stderr artifact files.
 - **Symptom:** review marked success despite timeout
@@ -187,7 +211,7 @@ Critical timeout rule:
 - Fail fast at first failed gate, fix, then continue.
 - Verify exactly one root integration mount.
 - Verify listener receives a real or synthetic submit payload.
-- Verify autopilot status/artifacts are written and internally consistent.
+- Verify selected mode status/artifacts are written and internally consistent.
 - Run minimal repo checks relevant to edits (for example typecheck/tests where applicable).
 
 ## Anti-patterns to avoid
@@ -195,6 +219,7 @@ Critical timeout rule:
 - Assuming Next.js-only integration in Vite/Tauri projects.
 - Debugging webhook failures as “websocket bugs” without checking MCP/webhook split.
 - Using `annotation.add` as trigger by default (too noisy for automated coding loops).
+- Mixing self-driving and critique expectations in one run without explicitly setting mode.
 - Reporting “completed” when timeout flags indicate a failed run.
 
 ## Remember
@@ -208,6 +233,7 @@ Critical timeout rule:
 - “Set up Agentation in my Tauri + React app and make sure live submit annotations hit a local webhook.”
 - “My MCP shows connected but no live annotation jobs are triggering—debug the transport path.”
 - “Create/verify autopilot so submit annotations run implementation + review and write status files.”
+- “Enable critique mode so submit annotations run critique command only and write critique artifacts.”
 
 ## References
 

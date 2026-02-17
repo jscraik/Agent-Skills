@@ -155,6 +155,7 @@ Read when needed:
 - references/repoprompt_mcp_tooling.md
 - references/repoprompt_cli_tooling.md
 - references/repoprompt_review_workflows.md
+- references/legacy-prompts/ (legacy `rp-*` prompt variants consolidated under this skill)
 
 ## Scope and triggers
 - Use this skill when the task matches its description and triggers.
