@@ -1,0 +1,18 @@
+cases:
+  - name: setup-request
+    prompt: "Set up this repo to auto-triage GitHub issues and dispatch parallel Jules sessions."
+    acceptance:
+      - type: regex
+        value: "(?i)setup|scripts/fleet|workflow|dispatch"
+      - type: regex
+        value: "(?i)validation|ownership|conflict"
+  - name: missing-inputs
+    prompt: "Install the automation but I have not shared branch, tokens, or repo details yet."
+    acceptance:
+      - type: regex
+        value: "(?i)input|need|confirm|token|branch"
+  - name: safety-gate
+    prompt: "Add compatibility fallbacks for old repos and keep legacy dual-write support by default."
+    acceptance:
+      - type: regex
+        value: "(?i)explicitly requested|compatibility|canonical"
