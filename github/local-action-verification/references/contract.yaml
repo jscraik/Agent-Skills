@@ -1,0 +1,21 @@
+purpose: >
+  Define expected behavior for enabling local GitHub Actions verification with act
+  before push/PR.
+schema_version: 1.0
+triggers:
+  - user asks for local CI verification using act
+  - user wants agent-readable pre-push CI instructions
+inputs:
+  - target repository path
+  - docker availability and workflow/job selection
+  - permission to update AGENTS.md and scripts
+outputs:
+  - scripts/act install and run guidance
+  - AGENTS.md local verification section
+  - validation and troubleshooting steps
+non_goals:
+  - replacing hosted CI
+  - backward-compatibility wrappers unless explicitly requested
+risks:
+  - secret leakage via .secrets mishandling
+  - false confidence if wrong workflow job is executed locally

@@ -37,6 +37,7 @@ Use this alias only when the request explicitly invokes `yeet` or requests the o
 - Target skill: `gh-workflow`
 - Target mode: `pr_prepare`
 - Fallback mode when context is missing: `intake`
+- This alias must immediately hand off to `gh-workflow`; do not perform PR/local git actions in `yeet`.
 
 ## Compatibility window
 
@@ -54,7 +55,7 @@ Use this alias only when the request explicitly invokes `yeet` or requests the o
 1. Announce this skill is a deprecated alias.
 2. Route to `gh-workflow` with mode `pr_prepare`.
 3. If context is missing, route with `intake` first.
-4. Continue with canonical behavior only.
+4. Do not execute alias-specific logic; continue with canonical `gh-workflow` behavior only.
 
 ## Validation
 
@@ -69,6 +70,7 @@ Fail fast: **stop at the first failed gate**.
 - Re-implementing one-shot PR prep logic in alias.
 - Routing to deprecated peer aliases.
 - Silent routing without deprecation notice.
+- Running local stage/commit/push actions directly in `yeet`.
 
 ## Examples
 

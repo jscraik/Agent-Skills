@@ -37,6 +37,7 @@ Use this skill to:
   - 1–3 “should NOT trigger” prompts (negative examples) 
 - Target environment(s): `codex`, `claude`, or `portable` subset.
 - Any required assets, schemas, APIs, CLIs, or “house style” constraints.
+- Compatibility posture (default: canonical-only for unreleased/greenfield projects; add backwards compatibility only when explicitly required).
 
 If any of the above are missing, ask only the minimum questions required to proceed safely.
 
@@ -100,6 +101,11 @@ The `description` is effectively the model’s decision boundary. It should be c
 - Outputs/artifacts
 - Success criteria 
 
+### Default compatibility posture
+
+- For unreleased/greenfield projects, default to canonical implementations and guidance.
+- Do not add compatibility shims, adapter layers, migration bridges, or dual-write flows unless explicitly requested or required by an existing released contract.
+
 ### Put templates/examples inside the skill
 
 Do not cram templates into system prompts. Put them inside the skill so they load only when needed. 
@@ -135,6 +141,7 @@ Skip steps only with a clear reason.
   - trigger keywords
   - explicit “don’t use when …” near-misses
   - output artifacts and success criteria 
+- Encode compatibility stance in the trigger boundary: default to canonical-only for unreleased work; require explicit language to trigger compatibility-preserving outputs.
 - For non-trivial skills, write `references/evals.yaml` early (RED → GREEN → REFACTOR).
 
 ### 2) Choose the skill structure
@@ -220,6 +227,7 @@ When a skill includes executable code (`scripts/` or containers):
 - Putting templates/examples in system prompts; put them inside the skill. 
 - Assuming network access; keep allowlists tight and explicit. 
 - Printing logs that could contain secrets.
+- Adding backward-compatibility work by default when the project is unreleased/greenfield.
 
 ## Constraints
 
@@ -227,6 +235,7 @@ When a skill includes executable code (`scripts/` or containers):
 - Keep frontmatter valid and explicit (`name` + `description` as single-line scalars; use `agents/openai.yaml` for UI/dependency metadata).
 - Do not invent external facts; if uncertain, add a verification step.
 - For script-backed skills, default to offline behavior and require explicit confirmation for destructive actions.
+- Default to canonical implementations for unreleased/greenfield projects; only include backwards-compatibility requirements when explicitly requested.
 
 ## Validation
 
@@ -277,6 +286,7 @@ Use these files when needed:
 - **NEVER** skip required validation gates when behavior changes.
 - **DO NOT** use this skill as a rigid replacement for engineering judgment.
 - **DON'T** ignore warnings or assume one pattern fits all repos.
+- **DON'T** introduce legacy-preservation code paths unless the user explicitly asks for compatibility.
 - Common pitfall: treating anti-patterns as optional.
 - Incorrect assumptions here can lead to fragile guidance.
 - Warning: wrong sequencing can create avoidable regressions.

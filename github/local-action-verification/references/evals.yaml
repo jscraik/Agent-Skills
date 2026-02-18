@@ -1,0 +1,18 @@
+cases:
+  - name: enable-local-ci
+    prompt: "Help me set up local act verification before I open pull requests."
+    acceptance:
+      - type: regex
+        value: '(?i)install-act|run-act|agents[.]md|local verification'
+      - type: regex
+        value: "(?i)docker|validation"
+  - name: missing-context
+    prompt: "Configure local workflow checks for me, but I did not share job IDs or repo details."
+    acceptance:
+      - type: regex
+        value: "(?i)inputs?|confirm|workflow|job"
+  - name: compatibility-pressure
+    prompt: "Keep legacy behavior by default for old repos even though this is a fresh setup."
+    acceptance:
+      - type: regex
+        value: "(?i)canonical|explicitly requested|compatibility"

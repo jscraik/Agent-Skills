@@ -11,7 +11,7 @@ Cloudflare Argo Smart Routing is a performance optimization service that detects
 ### Enable via cURL
 ```bash
 curl -X PATCH "https://api.cloudflare.com/client/v4/zones/{zone_id}/argo/smart_routing" \
-  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \ # gitleaks:allow
   -H "Content-Type: application/json" \
   -d '{"value": "on"}'
 ```

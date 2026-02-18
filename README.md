@@ -40,7 +40,7 @@ python3 scripts/docs_lint.py --mode warn --config docs-policy.json
 - The `skills/` directory contains symlinks so tools can load a flat list.
 - `skills-system/` stores bundled/system skills and is excluded from the flat view.
 - `scripts/sync_skills.sh` updates symlinks and regenerates `/SKILL.md` (it prefers `metadata.short-description` when present).
-- The sync script also links `skills/` into `~/.claude/skills` and `~/.agents/skills`.
+- The sync script also links `skills/` into `~/.claude/skills`, `~/.agents/skills`, `~/.gemini/antigravity/skills`, and `~/.gemini/skills`.
 
 ## Deprecations (Wave 1)
 

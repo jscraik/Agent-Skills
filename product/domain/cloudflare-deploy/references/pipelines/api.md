@@ -112,7 +112,7 @@ curl -X POST https://{stream-id}.ingest.cloudflare.com \
 ```bash
 curl -X POST https://{stream-id}.ingest.cloudflare.com \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \ # gitleaks:allow
   -d '[{"event": "data"}]'
 ```
 

@@ -1,0 +1,41 @@
+# Skill Output Contract
+# Copy this file to your skill's references/ directory and customize for your skill.
+
+schema_version: "1.0"
+
+purpose: >
+  Define expected behavior and outputs for this skill.
+  Replace this with a specific description of what this skill accomplishes.
+
+triggers:
+  - user requests the capability described in this skill
+  - specific keywords or patterns that should activate this skill
+
+inputs:
+  - user request details
+  - relevant files or context
+  - any required parameters
+
+outputs:
+  - primary response or artifact
+  - expected format (markdown, JSON, etc.)
+  - success indicators
+
+non_goals:
+  - out-of-scope work not covered by this skill
+  - capabilities explicitly excluded
+
+risks:
+  - missing inputs; mitigated by clarifying questions
+  - potential misinterpretation; mitigated by explicit confirmation
+
+examples:
+  happy_path:
+    input: "Typical user request"
+    expected_output: "Expected skill response"
+  edge_case:
+    input: "Unusual but valid request"
+    expected_output: "How skill should handle it"
+  failure_mode:
+    input: "Out of scope or invalid request"
+    expected_output: "Skill should decline gracefully"
