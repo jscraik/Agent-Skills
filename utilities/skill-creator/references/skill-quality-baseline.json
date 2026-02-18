@@ -9,11 +9,7 @@
     "frontend/graphics/imagegen",
     "frontend/graphics/sora",
     "frontend/graphics/threejs-builder",
-    "frontend/react-components",
     "frontend/seo/seo-optimizer",
-    "frontend/shadcn-ui",
-    "frontend/stitch-loop",
-    "frontend/stitch-remotion",
     "frontend/tools/nano-banana-builder",
     "frontend/ui/frontend-ui-design",
     "frontend/ui/interface-craft",
@@ -32,8 +28,7 @@
     "utilities/atlas",
     "utilities/bootstrap",
     "utilities/fix-mise",
-    "utilities/systematic-debugging",
-    "utilities/visual-explainer"
+    "utilities/systematic-debugging"
   ],
   "generated_by": "run_repo_skill_quality.py"
 }
