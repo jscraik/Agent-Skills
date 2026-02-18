@@ -1,0 +1,132 @@
+[
+  {
+    "skill": "andrew-kane-gem-writer",
+    "analyze_score": 101,
+    "analyze_max": 120,
+    "analyze_exit": 0,
+    "guard_critical": 0,
+    "guard_warn": 0,
+    "guard_info": 2,
+    "guard_exit": 0
+  },
+  {
+    "skill": "brainstorming",
+    "analyze_score": 101,
+    "analyze_max": 120,
+    "analyze_exit": 0,
+    "guard_critical": 0,
+    "guard_warn": 0,
+    "guard_info": 2,
+    "guard_exit": 0
+  },
+  {
+    "skill": "compound-docs",
+    "analyze_score": 91,
+    "analyze_max": 120,
+    "analyze_exit": 0,
+    "guard_critical": 0,
+    "guard_warn": 0,
+    "guard_info": 2,
+    "guard_exit": 0
+  },
+  {
+    "skill": "create-agent-skills",
+    "analyze_score": 99,
+    "analyze_max": 120,
+    "analyze_exit": 0,
+    "guard_critical": 0,
+    "guard_warn": 0,
+    "guard_info": 2,
+    "guard_exit": 0
+  },
+  {
+    "skill": "dhh-rails-style",
+    "analyze_score": 102,
+    "analyze_max": 120,
+    "analyze_exit": 0,
+    "guard_critical": 0,
+    "guard_warn": 0,
+    "guard_info": 2,
+    "guard_exit": 0
+  },
+  {
+    "skill": "document-review",
+    "analyze_score": 107,
+    "analyze_max": 120,
+    "analyze_exit": 0,
+    "guard_critical": 0,
+    "guard_warn": 0,
+    "guard_info": 2,
+    "guard_exit": 0
+  },
+  {
+    "skill": "dspy-ruby",
+    "analyze_score": 94,
+    "analyze_max": 120,
+    "analyze_exit": 0,
+    "guard_critical": 0,
+    "guard_warn": 0,
+    "guard_info": 2,
+    "guard_exit": 0
+  },
+  {
+    "skill": "every-style-editor",
+    "analyze_score": 102,
+    "analyze_max": 120,
+    "analyze_exit": 0,
+    "guard_critical": 0,
+    "guard_warn": 0,
+    "guard_info": 2,
+    "guard_exit": 0
+  },
+  {
+    "skill": "file-todos",
+    "analyze_score": 99,
+    "analyze_max": 120,
+    "analyze_exit": 0,
+    "guard_critical": 0,
+    "guard_warn": 0,
+    "guard_info": 2,
+    "guard_exit": 0
+  },
+  {
+    "skill": "frontend-design",
+    "analyze_score": 112,
+    "analyze_max": 120,
+    "analyze_exit": 0,
+    "guard_critical": 0,
+    "guard_warn": 0,
+    "guard_info": 2,
+    "guard_exit": 0
+  },
+  {
+    "skill": "gemini-imagegen",
+    "analyze_score": 87,
+    "analyze_max": 120,
+    "analyze_exit": 0,
+    "guard_critical": 0,
+    "guard_warn": 0,
+    "guard_info": 2,
+    "guard_exit": 0
+  },
+  {
+    "skill": "git-worktree",
+    "analyze_score": 99,
+    "analyze_max": 120,
+    "analyze_exit": 0,
+    "guard_critical": 0,
+    "guard_warn": 0,
+    "guard_info": 3,
+    "guard_exit": 0
+  },
+  {
+    "skill": "orchestrating-swarms",
+    "analyze_score": 82,
+    "analyze_max": 120,
+    "analyze_exit": 0,
+    "guard_critical": 0,
+    "guard_warn": 0,
+    "guard_info": 2,
+    "guard_exit": 0
+  }
+]

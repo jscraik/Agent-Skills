@@ -1,0 +1,330 @@
+{
+  "summary": {
+    "skills_count": 16,
+    "upgrade_clean_count": 16,
+    "guard_clean_count": 16,
+    "analyze_pass_count": 16
+  },
+  "rows": [
+    {
+      "skill": "andrew-kane-gem-writer",
+      "upgrade": {
+        "high": 0,
+        "medium": 0,
+        "low": 0,
+        "exit": 0
+      },
+      "analyze": {
+        "score": 101,
+        "max": 120,
+        "exit": 0
+      },
+      "guard": {
+        "critical": 0,
+        "warn": 0,
+        "info": 2,
+        "exit": 0
+      }
+    },
+    {
+      "skill": "brainstorming",
+      "upgrade": {
+        "high": 0,
+        "medium": 0,
+        "low": 0,
+        "exit": 0
+      },
+      "analyze": {
+        "score": 101,
+        "max": 120,
+        "exit": 0
+      },
+      "guard": {
+        "critical": 0,
+        "warn": 0,
+        "info": 2,
+        "exit": 0
+      }
+    },
+    {
+      "skill": "compound-docs",
+      "upgrade": {
+        "high": 0,
+        "medium": 0,
+        "low": 0,
+        "exit": 0
+      },
+      "analyze": {
+        "score": 91,
+        "max": 120,
+        "exit": 0
+      },
+      "guard": {
+        "critical": 0,
+        "warn": 0,
+        "info": 2,
+        "exit": 0
+      }
+    },
+    {
+      "skill": "create-agent-skills",
+      "upgrade": {
+        "high": 0,
+        "medium": 0,
+        "low": 0,
+        "exit": 0
+      },
+      "analyze": {
+        "score": 99,
+        "max": 120,
+        "exit": 0
+      },
+      "guard": {
+        "critical": 0,
+        "warn": 0,
+        "info": 2,
+        "exit": 0
+      }
+    },
+    {
+      "skill": "dhh-rails-style",
+      "upgrade": {
+        "high": 0,
+        "medium": 0,
+        "low": 0,
+        "exit": 0
+      },
+      "analyze": {
+        "score": 102,
+        "max": 120,
+        "exit": 0
+      },
+      "guard": {
+        "critical": 0,
+        "warn": 0,
+        "info": 2,
+        "exit": 0
+      }
+    },
+    {
+      "skill": "document-review",
+      "upgrade": {
+        "high": 0,
+        "medium": 0,
+        "low": 0,
+        "exit": 0
+      },
+      "analyze": {
+        "score": 107,
+        "max": 120,
+        "exit": 0
+      },
+      "guard": {
+        "critical": 0,
+        "warn": 0,
+        "info": 2,
+        "exit": 0
+      }
+    },
+    {
+      "skill": "dspy-ruby",
+      "upgrade": {
+        "high": 0,
+        "medium": 0,
+        "low": 0,
+        "exit": 0
+      },
+      "analyze": {
+        "score": 94,
+        "max": 120,
+        "exit": 0
+      },
+      "guard": {
+        "critical": 0,
+        "warn": 0,
+        "info": 2,
+        "exit": 0
+      }
+    },
+    {
+      "skill": "every-style-editor",
+      "upgrade": {
+        "high": 0,
+        "medium": 0,
+        "low": 0,
+        "exit": 0
+      },
+      "analyze": {
+        "score": 102,
+        "max": 120,
+        "exit": 0
+      },
+      "guard": {
+        "critical": 0,
+        "warn": 0,
+        "info": 2,
+        "exit": 0
+      }
+    },
+    {
+      "skill": "file-todos",
+      "upgrade": {
+        "high": 0,
+        "medium": 0,
+        "low": 0,
+        "exit": 0
+      },
+      "analyze": {
+        "score": 99,
+        "max": 120,
+        "exit": 0
+      },
+      "guard": {
+        "critical": 0,
+        "warn": 0,
+        "info": 2,
+        "exit": 0
+      }
+    },
+    {
+      "skill": "frontend-design",
+      "upgrade": {
+        "high": 0,
+        "medium": 0,
+        "low": 0,
+        "exit": 0
+      },
+      "analyze": {
+        "score": 112,
+        "max": 120,
+        "exit": 0
+      },
+      "guard": {
+        "critical": 0,
+        "warn": 0,
+        "info": 2,
+        "exit": 0
+      }
+    },
+    {
+      "skill": "gemini-imagegen",
+      "upgrade": {
+        "high": 0,
+        "medium": 0,
+        "low": 0,
+        "exit": 0
+      },
+      "analyze": {
+        "score": 87,
+        "max": 120,
+        "exit": 0
+      },
+      "guard": {
+        "critical": 0,
+        "warn": 0,
+        "info": 2,
+        "exit": 0
+      }
+    },
+    {
+      "skill": "git-worktree",
+      "upgrade": {
+        "high": 0,
+        "medium": 0,
+        "low": 0,
+        "exit": 0
+      },
+      "analyze": {
+        "score": 99,
+        "max": 120,
+        "exit": 0
+      },
+      "guard": {
+        "critical": 0,
+        "warn": 0,
+        "info": 3,
+        "exit": 0
+      }
+    },
+    {
+      "skill": "orchestrating-swarms",
+      "upgrade": {
+        "high": 0,
+        "medium": 0,
+        "low": 0,
+        "exit": 0
+      },
+      "analyze": {
+        "score": 82,
+        "max": 120,
+        "exit": 0
+      },
+      "guard": {
+        "critical": 0,
+        "warn": 0,
+        "info": 2,
+        "exit": 0
+      }
+    },
+    {
+      "skill": "rclone",
+      "upgrade": {
+        "high": 0,
+        "medium": 0,
+        "low": 0,
+        "exit": 0
+      },
+      "analyze": {
+        "score": 92,
+        "max": 120,
+        "exit": 0
+      },
+      "guard": {
+        "critical": 0,
+        "warn": 0,
+        "info": 3,
+        "exit": 0
+      }
+    },
+    {
+      "skill": "resolve-pr-parallel",
+      "upgrade": {
+        "high": 0,
+        "medium": 0,
+        "low": 0,
+        "exit": 0
+      },
+      "analyze": {
+        "score": 94,
+        "max": 120,
+        "exit": 0
+      },
+      "guard": {
+        "critical": 0,
+        "warn": 0,
+        "info": 3,
+        "exit": 0
+      }
+    },
+    {
+      "skill": "setup",
+      "upgrade": {
+        "high": 0,
+        "medium": 0,
+        "low": 0,
+        "exit": 0
+      },
+      "analyze": {
+        "score": 98,
+        "max": 120,
+        "exit": 0
+      },
+      "guard": {
+        "critical": 0,
+        "warn": 0,
+        "info": 2,
+        "exit": 0
+      }
+    }
+  ]
+}
