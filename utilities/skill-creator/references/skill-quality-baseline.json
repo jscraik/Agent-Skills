@@ -26,8 +26,6 @@
     "skills/.system/skill-creator",
     "skills/.system/skill-installer",
     "utilities/atlas",
-    "utilities/bootstrap",
-    "utilities/fix-mise",
     "utilities/systematic-debugging"
   ],
   "generated_by": "run_repo_skill_quality.py"
