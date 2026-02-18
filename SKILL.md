@@ -2,6 +2,11 @@
 
 Canonical skills live in categorized folders below. Each tool loads skills via the flat symlink directory at `~/dev/agent-skills/skills`.
 
+## Agents — Skills
+
+- `agentation-self-driving` — Autonomous design critique mode using the Agentation annotation toolbar. Use when the user asks to "critique this page," "add design annotations," "review the UI," "self-driving mode," "auto-annotate," or wants an AI agent to autonomously add design feedback annotations to a web page via the browser. Requires the Agentation toolbar to be installed on the target page and agent-browser skill to be available.
+- `draftpr` — Create and open a GitHub *draft* pull request (branch, commit, push, gh pr create --draft) when I ask to "open a draft PR".
+
 ## Auth
 
 - `best-practices` — Review Better Auth setups and highlight secure integration best practices. Use for audits, config guidance, or debugging flows (not full implementation). Use when the user requests this capability.
@@ -60,12 +65,14 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 
 ## Github
 
+- `automate-github-issues` — Use when the user asks to automate GitHub issue triage with parallel Jules agents; output a validated fleet setup and runbook for analyze, plan, dispatch, and merge.
 - `gh-actions-fix` — DEPRECATED alias of gh-workflow. Convert legacy invocations when requests explicitly name gh-actions-fix; immediately route to gh-workflow in ci_diagnose mode.
 - `gh-address-comments` — DEPRECATED alias of gh-workflow. Convert legacy invocations when requests explicitly name gh-address-comments; immediately route to gh-workflow in pr_review_comments mode.
 - `gh-fix-ci` — Use when a user asks to debug or fix failing GitHub PR checks that run in GitHub Actions; use `gh` to inspect checks and logs, summarize failure context, draft a fix plan, and implement only after explicit approval. Treat external providers (for example Buildkite) as out of scope and report only the details URL.
 - `gh-issue-fix` — DEPRECATED alias of gh-workflow. Convert legacy invocations when requests explicitly name gh-issue-fix; immediately route to gh-workflow in issue_fix mode.
 - `gh-pr-local` — DEPRECATED alias of gh-workflow. Convert legacy invocations when requests explicitly name gh-pr-local; immediately route to gh-workflow in pr_prepare mode.
 - `gh-workflow` — Consolidated GitHub lifecycle skill for agents and users: intake, issue fixing, PR prep, review comment handling, CI diagnosis, and server-side merge via gh. Use when requests involve GitHub issues/PRs/checks/merge operations.
+- `local-action-verification` — Use when the user asks to validate GitHub Actions locally with act; output setup guidance, AGENTS.md instructions, and fail-fast checks before push or PR.
 - `yeet` — DEPRECATED alias of gh-workflow. Convert legacy invocations when requests explicitly name yeet; immediately route to gh-workflow in pr_prepare mode.
 
 ## Interview
@@ -138,6 +145,7 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 ## Product — Strategy
 
 - `asymmetric-ideation-engine` — Generate 10 launchable asymmetric ideas by excavating a repository for hidden patterns. Use when users ask for radical non-incremental ideation from repo context; don't use for roadmap optimization, bug fixing, or routine prioritization. Outputs: structured idea set + artifact file. Success: all novelty constraints satisfied.
+- `brainstorming` — This skill should be used before implementing features, building components, or making changes. It guides exploring user intent, approaches, and design decisions before planning. Triggers on "let's brainstorm", "help me think through", "what should we build", "explore approaches", ambiguous feature requests, or when the user's request has multiple valid interpretations that need clarification.
 - `project-improvement-ideator` — Generate, score, and winnow project improvement ideas into a top 5 with impact/effort notes. Use when asked for roadmap ideas, prioritization, or improvement brainstorming.
 
 ## Product — Tech
@@ -148,6 +156,10 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - `tech-to-migration` — DEPRECATED alias of tech-spec. Convert legacy invocations when requests explicitly name tech-to-migration; immediately route to tech-spec in migration_plan mode.
 - `tech-to-ops` — DEPRECATED alias of tech-spec. Convert legacy invocations when requests explicitly name tech-to-ops; immediately route to tech-spec in ops_spec mode.
 - `tech-to-performance` — DEPRECATED alias of tech-spec. Convert legacy invocations when requests explicitly name tech-to-performance; immediately route to tech-spec in performance_plan mode.
+
+## Skills
+
+- `sentry` — Use when the user asks to inspect Sentry issues or events, summarize recent production errors, or pull basic Sentry health data via the Sentry API; perform read-only queries with the bundled script and require `SENTRY_AUTH_TOKEN`.
 
 ## Utilities
 

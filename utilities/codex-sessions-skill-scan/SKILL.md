@@ -42,6 +42,12 @@ python3 utilities/codex-sessions-skill-scan/scripts/scan_codex_sessions.py --day
 - Keep output small (snippets only); avoid dumping raw logs.
 - Redact secrets/sensitive data by default; never paste tokens/keys from logs into chat or files.
 
+## Reliability hardening (from recurring failures)
+- **rg/fd preflight:** before any repo-wide search commands, run `command -v rg` and `command -v fd`. If missing, report the missing binary and stop (or use absolute paths such as `/opt/homebrew/bin/rg` and `/opt/homebrew/bin/fd` when available).
+- **No direct network curl:** do not run external `curl` commands in this workflow. Use local scripts/MCP tools instead.
+- **TTY for interactive/streaming commands:** if a command expects stdin or may run interactively (for example auth/login flows), run it with `tty=true`; otherwise avoid `write_stdin` follow-ups.
+- **Claude auth check:** when `claude_projects` emits auth failures, verify with `claude auth status` and treat `loggedIn=false` as environment/auth state, not a skill regression.
+
 ## Procedure
 ### A) Scan (read-only)
 1) Run the scan script (Quick start).

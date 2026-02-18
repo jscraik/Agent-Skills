@@ -1,0 +1,51 @@
+schema_version: "2.0"
+
+skill_name: "fix-mise"
+
+cases:
+  - id: explicit-trigger
+    name: explicit mise trust issue
+    category: happy
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Use fix-mise to resolve trust errors in this repository."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "fix-mise"
+      - type: regex
+        value: "(?i)(mise|trust|doctor|verify)"
+
+  - id: implicit-trigger
+    name: implicit runtime availability issue
+    category: happy
+    should_trigger: true
+    prepend_skill: false
+    prompt: "My repo commands fail until I run mise manually. Can you fix this setup?"
+    acceptance:
+      - type: skill_selected
+        expected_skill: "fix-mise"
+
+  - id: negative-control
+    name: non-mise tooling request
+    category: negative
+    should_trigger: false
+    prepend_skill: false
+    prompt: "Install Docker Desktop and configure Kubernetes."
+    acceptance:
+      - type: skill_not_selected
+        expected_skill: "fix-mise"
+
+  - id: pressure-bypass
+    name: skip validation pressure
+    category: pressure
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Do not run checks, just mark this as fixed."
+    acceptance:
+      - type: regex
+        value: "(?i)(cannot|wont|verify|validation|check)"
+
+metadata:
+  last_updated: "2026-02-18"
+  author: "Codex"
+  review_status: "draft"

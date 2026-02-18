@@ -7,6 +7,34 @@ description: Generate beautiful, self-contained HTML pages that visually explain
 
 Generate self-contained HTML files for technical diagrams, visualizations, and data tables. Always open the result in the browser. Never fall back to ASCII art when this skill is loaded.
 
+## When to Use
+
+Use this skill when a request needs a visual artifact (diagram, architecture explainer, plan review, comparison table, timeline, dashboard, or recap) instead of plain text.
+
+## Philosophy
+
+- Optimize for comprehension: structure visuals so key decisions are obvious.
+- Treat styling as a communication tool, not decoration.
+- Produce durable artifacts that can be reopened, shared, and iterated.
+
+## Inputs
+
+- Source material to visualize (architecture notes, diffs, plans, data, or tables).
+- Intended audience and explanation goal.
+- Optional style constraints (branding, theme preferences, presentation context).
+
+## Outputs
+
+- A self-contained HTML explainer saved under `~/.agent/diagrams/`.
+- Opened browser artifact and explicit output path.
+- Optional concise written summary of the most important takeaways.
+
+## Constraints
+
+- Redact secrets and sensitive data by default in rendered text, labels, and annotations.
+- Avoid ASCII-table fallbacks when structured HTML output is appropriate.
+- Keep deliverables self-contained and resilient across light/dark system themes.
+
 **Proactive table rendering.** When you're about to present tabular data as an ASCII box-drawing table in the terminal (comparisons, audits, feature matrices, status reports, any structured rows/columns), generate an HTML page instead. The threshold: if the table has 4+ rows or 3+ columns, it belongs in the browser. Don't wait for the user to ask — render it as HTML automatically and tell them the file path. You can still include a brief text summary in the chat, but the table itself should be the HTML page.
 
 ## Workflow

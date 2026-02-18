@@ -1,31 +1,46 @@
+# OS/editor noise
 .DS_Store
+
+# Local runtime/state directories
 .system/
+.claude/
+.agents/
+.cursor/
+.kiro/
+.narrative/
+.skillsctl/
+
+# Python/build artifacts
+**/__pycache__/
+.venv/
+.venv-skillpack/
+.venv-skill-creator/
+.tmp/
+.temp/
+
+# Generated skill views
+skills/
+
+# Generated artifacts
 artifacts/dist/
 artifacts/build/dist/
 artifacts/reports/
-*.skill
-.venv-skillpack/
-.venv/
-.venv-skill-creator/
-.tmp/
-skills/
+artifacts/sessions/
+artifacts/skill-validation*
+artifacts/run_skill_validation.sh
+/artifacts/ai/tmp/
+/artifacts/ai/cache/
+/artifacts/ai/raw/
+
+# Local backups/patch leftovers
+*.bak
+*.bak.*
+*.orig
+*.rej
 
 # Internal docs (do not commit)
 FORJAMIE.md
 
-# AI artifacts - transient only
-/artifacts/ai/tmp/
-/artifacts/ai/cache/
-/artifacts/ai/raw/
-.temp/
-artifacts/sessions/
-**/__pycache__/
+# Misc local throwaways
+*.skill
 product/Archive.zip
-
-# Skill validation artifacts (generated locally)
-artifacts/skill-validation*
-artifacts/run_skill_validation.sh
-
-FORJAMIE.md
-
-FORJAMIE.md

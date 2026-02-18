@@ -26,6 +26,13 @@ This skill helps you create `DESIGN.md` files that serve as the "source of truth
 
 The `DESIGN.md` file will serve as the "source of truth" for prompting Stitch to generate new screens that align perfectly with the existing design language. Stitch interprets design through "Visual Descriptions" supported by specific color values.
 
+## Inputs
+
+- Stitch project context (project title/URL, optional projectId).
+- Target screen context (screen title/URL, optional screenId).
+- Access to Stitch MCP responses and downloadable assets for analysis.
+- Optional existing design documentation to preserve naming consistency.
+
 ## Retrieval and Networking
 
 To analyze a Stitch project, you must retrieve screen metadata and design assets using the Stitch MCP Server tools:
@@ -162,6 +169,27 @@ To use this skill for the Furniture Collection project:
 3. **Think semantically:** Name colors by their purpose, not just their appearance
 4. **Consider hierarchy:** Document how visual weight and importance are communicated
 5. **Reference the guide:** Use language and patterns from the Stitch Effective Prompting Guide
+
+## Procedure
+
+1. Resolve project and screen identifiers using Stitch MCP tools.
+2. Fetch metadata and download the target screen HTML (and screenshot when helpful).
+3. Extract color, typography, geometry, spacing, and elevation patterns.
+4. Synthesize semantic token language and map each token to functional usage.
+5. Produce `DESIGN.md` in the prescribed structure and verify it is reusable for prompting.
+
+## Outputs
+
+- Primary: `DESIGN.md` with semantic design system guidance and explicit token roles.
+- Secondary: short assumptions/unknowns list when required data is missing.
+- Optional: concise handoff notes for follow-on prompt work.
+
+## Constraints
+
+- Keep output in natural design language with exact supporting values (for example hex codes).
+- Do not fabricate project metadata; mark inferred values clearly.
+- Redact secrets and sensitive data by default in copied snippets, URLs, and notes.
+- Prefer project-specific guidance over generic templates.
 
 ## Common Pitfalls to Avoid
 

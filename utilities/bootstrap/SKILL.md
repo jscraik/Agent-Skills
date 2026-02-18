@@ -1,11 +1,62 @@
 ---
 name: bootstrap
-description: "Clone a GitHub repo and set up a fully working local dev environment automatically."
+description: Bootstrap a local development environment from a GitHub repository URL. Use when the user asks to clone a repo, install toolchains/dependencies, and validate a working dev setup automatically.
 ---
 
 # Environment Bootstrap
 
-Clone a GitHub repo and set up a fully working local dev environment automatically.
+Create a working local dev environment from a repository with reproducible setup steps and verification output.
+
+## When to Use
+
+Use this skill when the user asks to quickly stand up a new repo locally, reproduce onboarding setup, or validate that a project can run from a clean environment.
+
+## Philosophy
+
+- Prefer deterministic setup over ad-hoc shell steps.
+- Detect and report blockers early so users can recover quickly.
+- Keep generated setup notes actionable for the next contributor.
+
+## Inputs
+
+- Repository URL (required).
+- Optional target branch/tag/ref.
+- Optional runtime/tooling constraints (Node/Python/Rust versions, package manager preference).
+
+## Procedure
+
+1. Clone the requested repository into a clean workspace.
+2. Detect project type(s) and required toolchain.
+3. Install or activate required tools via mise where applicable.
+4. Install project dependencies with the detected package manager/workflow.
+5. Prepare environment scaffolding (`.env`, service dependencies, startup prerequisites).
+6. Run a minimal startup/health verification command.
+7. Record outcomes and next steps in setup artifacts.
+
+## Outputs
+
+- Bootstrapped local repository ready for development (or clear failure report).
+- Concise setup summary (commands executed, detected stack, verification result).
+- Follow-up artifact (`SETUP.md` or `SETUP_FAILED.md`) with reproducible instructions.
+
+## Constraints
+
+- Redact secrets and sensitive data by default in logs, setup artifacts, and copied config values.
+- Do not silently bypass failing prerequisites; surface explicit remediation steps.
+- Avoid destructive system changes outside the requested repo context without user approval.
+
+## Validation
+
+- Verify clone success and expected directory structure.
+- Verify dependency install command exits successfully.
+- Verify at least one project health check/start command outcome is recorded.
+- Fail fast on unrecoverable setup gates and report first actionable blocker.
+
+## Anti-patterns
+
+- Running broad system modifications without clear user consent.
+- Suppressing setup failures to produce a false "success" status.
+- Hardcoding environment-specific assumptions without documenting them.
 
 ## Usage
 
@@ -13,32 +64,6 @@ Clone a GitHub repo and set up a fully working local dev environment automatical
 /bootstrap https://github.com/owner/repo
 /bootstrap https://github.com/owner/repo --branch develop
 ```
-
-## What It Does
-
-1. **Clones** the repository to a temp workspace
-2. **Detects** project type (Node, Python, Rust, Go, Ruby, or multi)
-3. **Installs** required tools via mise (node, python, rust, go, pnpm, uv, etc.)
-4. **Installs** dependencies (npm/pnpm/yarn install, pip/uv install, cargo build, etc.)
-5. **Sets up** environment (.env from .env.example, docker-compose notes)
-6. **Starts** the dev server and verifies it works
-7. **Self-corrects** through common failures:
-   - Mise trust errors
-   - Engine mismatch (npm --force)
-   - Permission issues (--unsafe-perm)
-   - Lockfile conflicts
-   - Missing build step
-8. **Documents** the working setup in SETUP.md
-
-## Supported Project Types
-
-| Type | Detection | Package Manager |
-|------|-----------|-----------------|
-| Node | package.json | npm/pnpm/yarn/bun |
-| Python | pyproject.toml, requirements.txt | pip/uv/poetry |
-| Rust | Cargo.toml | cargo |
-| Go | go.mod | go mod |
-| Ruby | Gemfile | bundle |
 
 ## Example Output
 
@@ -52,27 +77,18 @@ Clone a GitHub repo and set up a fully working local dev environment automatical
 
 🔍 Step 2: Detecting project type...
    Detected project type: node
-   Configs found: package-json, pnpm-lock, mise-toml
 
 🛠️  Step 3: Installing required tools...
-   Tools to install: node@20, pnpm@latest
-   Installing node@20...
-   Installing pnpm@latest...
    ✅ Tools installed
 
 📥 Step 4: Installing dependencies...
-   Running: pnpm install
    ✅ Dependencies installed
 
-⚙️  Step 5: Setting up environment...
-   Found .env.example, copying to .env
+🚀 Step 5: Verifying project startup...
+   ✅ Health check completed
 
-🚀 Step 6: Starting dev server...
-   Attempting to start: pnpm dev
-   ✅ Dev server started successfully
-
-📝 Step 7: Documenting setup...
-   ✅ SETUP.md created at /tmp/bootstrap-next.js-1234567890/repo/SETUP.md
+📝 Step 6: Documenting setup...
+   ✅ SETUP.md created
 
 ✅ Bootstrap complete!
 ```
@@ -81,9 +97,6 @@ Clone a GitHub repo and set up a fully working local dev environment automatical
 
 If bootstrap fails:
 
-1. Check `SETUP_FAILED.md` in the work directory
-2. Review the error log for specific failures
-3. Common fixes:
-   - Run `mise trust` manually if tools aren't loading
-   - Check Docker is running if docker-compose is needed
-   - Verify network access for package downloads
+1. Check `SETUP_FAILED.md` in the workspace.
+2. Review first failing command and remediation notes.
+3. Re-run with explicit toolchain versions if auto-detection was ambiguous.

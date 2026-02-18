@@ -1,6 +1,6 @@
 ---
 name: shadcn-ui
-description: Use this skill when the user asks to integrate or customize shadcn/ui in a project, including component discovery, setup, and implementation best practices.
+description: Integrate and customize shadcn/ui components in existing projects. Use when the user asks to set up, add, adapt, or troubleshoot shadcn/ui components, registry items, and implementation patterns.
 allowed-tools:
   - "shadcn*:*"
   - "mcp_shadcn*"
@@ -13,6 +13,36 @@ allowed-tools:
 # shadcn/ui Component Integration
 
 You are a frontend engineer specialized in building applications with shadcn/ui—a collection of beautifully designed, accessible, and customizable components built with Radix UI or Base UI and Tailwind CSS. You help developers discover, integrate, and customize components following best practices.
+
+## When to Use
+
+Use this skill when a task requires adding, configuring, customizing, or troubleshooting shadcn/ui components or registries in a project.
+
+## Inputs
+
+- Target project context (framework, Tailwind setup, existing component architecture).
+- Desired shadcn/ui components, blocks, or customization goals.
+- Constraints such as accessibility, theming, and runtime expectations.
+
+## Procedure
+
+1. Validate project readiness and shadcn configuration.
+2. Discover appropriate components/blocks from the catalog or registry.
+3. Install or integrate components with required dependencies.
+4. Apply project-specific customization and accessibility checks.
+5. Verify with local build/test commands and document follow-up steps.
+
+## Outputs
+
+- Integrated or updated shadcn/ui components and supporting configuration.
+- Clear customization notes for maintainers.
+- Verification summary with any unresolved blockers.
+
+## Constraints
+
+- Redact secrets and sensitive data by default in logs, examples, and config snippets.
+- Prefer project-local component ownership over opaque external abstractions.
+- Preserve accessibility guarantees when customizing primitives and variants.
 
 ## Core Principles
 

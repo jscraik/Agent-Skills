@@ -95,14 +95,25 @@ Treat this as a transport triage, not a single bug:
 2. Enable **Auto-Send** if desired.
 3. Run a local listener (or project listener script) and verify POSTs arrive.
 
-Minimal local listener verification:
+Minimal local listener verification (no `curl` required):
 ```bash
-curl -sS -X POST http://localhost:8787 \
-  -H "Content-Type: application/json" \
-  -d '{"event":"submit","output":"smoke-test"}'
+python3 - <<'PY'
+import json
+import urllib.request
+
+payload = json.dumps({"event": "submit", "output": "smoke-test"}).encode("utf-8")
+req = urllib.request.Request(
+    "http://localhost:8787",
+    data=payload,
+    headers={"Content-Type": "application/json"},
+    method="POST",
+)
+with urllib.request.urlopen(req, timeout=5) as resp:
+    print(resp.status)
+PY
 ```
 
-Expected: HTTP 200 and listener log entry/event file update.
+Expected: HTTP `200` and listener log entry/event file update.
 
 ### 7) Handle port collision (`EADDRINUSE`) deterministically
 

@@ -13,6 +13,42 @@ allowed-tools:
 
 You are an **autonomous frontend builder** participating in an iterative site-building loop. Your goal is to generate a page using Stitch, integrate it into the site, and prepare instructions for the next iteration.
 
+## When to Use
+
+Use this skill when the user wants iterative, baton-driven site generation where each pass produces one page and queues the next task.
+
+## Philosophy
+
+- Keep each iteration small, testable, and handoff-ready.
+- Preserve design-system consistency across every generated page.
+- Optimize for continuity: never end an iteration without a valid next baton.
+
+## Inputs
+
+- `next-prompt.md` baton with a target `page` and prompt body.
+- Project context files (`SITE.md`, `DESIGN.md`, optional `stitch.json`).
+- Access to Stitch MCP tools and optional browser verification tools.
+
+## Procedure
+
+1. Read the baton and resolve the target page/task.
+2. Validate context files and sitemap state to avoid duplicate generation.
+3. Generate and retrieve Stitch assets for the page.
+4. Integrate output into site structure and wire navigation.
+5. Update `SITE.md` plus a new `next-prompt.md` baton before finishing.
+
+## Outputs
+
+- Integrated page artifact in the site public directory.
+- Updated planning/state docs (`SITE.md` and next baton).
+- Optional verification screenshots/logs when browser checks run.
+
+## Constraints
+
+- Redact secrets and sensitive data by default in prompts, logs, and exported notes.
+- Do not skip baton refresh; loop continuity is mandatory.
+- Do not regenerate existing sitemap-complete pages unless explicitly asked.
+
 ## Overview
 
 The Build Loop pattern enables continuous, autonomous website development through a "baton" system. Each iteration:

@@ -126,7 +126,7 @@ Vary by:
 - `~/.venvs/pyyaml/bin/python quick_validate.py <skill-dir>`
 - `~/.venvs/pyyaml/bin/python skill_gate.py <skill-dir>`
 - `~/.venvs/pyyaml/bin/python run_skill_evals.py <skill-dir>`
-- `~/.venvs/pyyaml/bin/python analyze_skill.py <skill-dir>`
+- `~/.venvs/pyyaml/bin/python utilities/skill-creator/scripts/analyze_skill.py <skill-dir>`
 
 See `references/contract.yaml` (schema_version: 1) and `references/evals.yaml` for the evaluation contract and test prompts.
 

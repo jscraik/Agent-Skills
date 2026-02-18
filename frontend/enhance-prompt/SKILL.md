@@ -26,6 +26,19 @@ Activate when a user wants to:
 - Add design system consistency to a simple idea
 - Structure a vague concept into an actionable prompt
 
+## Philosophy
+
+- Convert ambiguity into concrete, runnable prompt language.
+- Preserve user intent while adding only the minimum structure needed for quality output.
+- Favor clarity and specificity over verbosity.
+- Keep edits explainable so users can iterate confidently.
+
+## Inputs
+
+- Original user prompt (raw or partially structured).
+- Optional `DESIGN.md` for system-level styling constraints.
+- Optional target format/output path (for example `next-prompt.md`).
+
 ## Enhancement Pipeline
 
 Follow these steps to enhance any prompt:
@@ -141,6 +154,18 @@ Structure the enhanced prompt in this order:
 **Optional file output:** If the user requests, write to a file:
 - `next-prompt.md` — for use with the `stitch-loop` skill
 - Custom filename specified by user
+
+## Procedure
+
+See [Enhancement Pipeline](#enhancement-pipeline) above for the full step-by-step workflow.
+After formatting, validate that the final prompt is actionable, coherent, and aligned with user intent.
+
+## Constraints
+
+- Do not invent product requirements; flag assumptions explicitly.
+- Keep generated edits scoped to the user’s requested outcome.
+- Redact secrets and sensitive data by default in examples and saved prompt files.
+- Avoid over-constraining creative prompts unless the user asks for strict structure.
 
 ## Examples
 

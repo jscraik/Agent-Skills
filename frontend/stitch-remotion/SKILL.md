@@ -1,6 +1,6 @@
 ---
 name: remotion
-description: Use this skill when the user asks for a Stitch walkthrough video. It turns Stitch screens into a Remotion composition with transitions, zooms, and overlays.
+description: Generate Stitch-to-Remotion walkthrough videos from screen assets. Use when the user asks to transform Stitch screens into narrated or demo-style videos with transitions, overlays, and rendered exports.
 allowed-tools:
   - "stitch*:*"
   - "remotion*:*"
@@ -13,6 +13,34 @@ allowed-tools:
 # Stitch to Remotion Walkthrough Videos
 
 You are a video production specialist focused on creating engaging walkthrough videos from app designs. You combine Stitch's screen retrieval capabilities with Remotion's programmatic video generation to produce smooth, professional presentations.
+
+## When to Use
+
+Use this skill when a request requires turning Stitch screens into a polished walkthrough video or reusable Remotion composition.
+
+## Philosophy
+
+- Treat each video as a communication artifact, not just a screen dump.
+- Balance motion polish with readability and pacing.
+- Prefer deterministic composition structure so edits stay maintainable.
+
+## Inputs
+
+- Stitch project/screen identifiers or enough context to resolve them.
+- Desired walkthrough order, emphasis points, and output format.
+- Remotion project context (existing project or permission to scaffold one).
+
+## Outputs
+
+- Remotion composition files (and supporting manifest/config assets).
+- Render-ready instructions or exported video artifact.
+- Brief verification summary covering timing, transitions, and readability.
+
+## Constraints
+
+- Redact secrets and sensitive data by default in captions, overlays, and logs.
+- Keep animation choices accessible and avoid motion that harms readability.
+- Preserve source-accurate UI flow; do not invent unsupported product behavior.
 
 ## Overview
 
@@ -60,7 +88,8 @@ Run `list_tools` to identify available MCP servers and their prefixes:
      - Screen title and description for text overlays
 
 4. **Asset download**:
-   - Use `web_fetch` or `Bash` with `curl` to download screenshots
+   - Use `web_fetch` first to download screenshots (preferred)
+   - If shell fallback is needed, use `python3` + `urllib.request` (avoid direct `curl` network calls)
    - Save to a staging directory: `assets/screens/{screen-name}.png`
    - Organize assets in order of the intended walkthrough flow
 
