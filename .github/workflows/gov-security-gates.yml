@@ -1,0 +1,41 @@
+name: gov-security-gates
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "GOVERNANCE/**"
+      - "COMPLIANCE/**"
+      - "SECURITY/**"
+      - "EVALUATION/**"
+      - ".github/PULL_REQUEST_TEMPLATE.md"
+      - ".github/branch-protection-manifest.md"
+      - ".github/workflows/gov-security-gates.yml"
+      - ".github/scripts/gov_security_gates.py"
+      - ".github/CODEOWNERS"
+      - "CODEOWNERS"
+      - "SUPPORT.md"
+      - "SECURITY.md"
+      - "CONTRIBUTING.md"
+      - "CODE_OF_CONDUCT.md"
+
+permissions:
+  contents: read
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run governance security gates
+        run: python3 .github/scripts/gov_security_gates.py

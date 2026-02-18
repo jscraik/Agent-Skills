@@ -1,0 +1,10 @@
+# Default owner for repository governance controls.
+* @jscraik
+
+/.github/branch-protection-manifest.md @jscraik
+/.github/workflows/gov-security-gates.yml @jscraik
+/.github/scripts/gov_security_gates.py @jscraik
+/GOVERNANCE/** @jscraik
+/COMPLIANCE/** @jscraik
+/SECURITY/** @jscraik
+/EVALUATION/** @jscraik
