@@ -62,6 +62,37 @@ skill_files_cmd() {
     -path "*/scripts/*" -prune -o \
     -name "SKILL.md" -print
 }
+
+# Include supplemental skills that intentionally live outside canonical
+# category folders.
+extra_skill_files_cmd() {
+  if [ -d "./.agents/skills" ]; then
+    find "./.agents/skills" -mindepth 2 -maxdepth 2 -name "SKILL.md" -print
+  fi
+  if [ -d "./skills" ]; then
+    find "./skills" -mindepth 2 -maxdepth 2 -name "SKILL.md" -print
+  fi
+}
+
+# Emit skill files in deterministic precedence order:
+# 1) canonical category folders
+# 2) supplemental locations
+# Deduplicate by skill name (folder basename), keeping the first match.
+all_skill_files_cmd() {
+  {
+    skill_files_cmd | sort
+    extra_skill_files_cmd | sort
+  } | awk '
+    {
+      skill = $0
+      sub(/\/SKILL\.md$/, "", skill)
+      sub(/^.*\//, "", skill)
+      if (!seen[skill]++) {
+        print $0
+      }
+    }
+  '
+}
 while IFS= read -r skill_path; do
   # Skip the root index.
   if [ "$skill_path" = "./SKILL.md" ]; then
@@ -71,11 +102,18 @@ while IFS= read -r skill_path; do
   skill_name="$(basename "$skill_dir")"
   skill_dir_abs="$repo_root/$skill_dir"
   if [ -e "$skills_dir/$skill_name" ]; then
+    existing_dir="$(cd "$skills_dir/$skill_name" 2>/dev/null && pwd || true)"
+    discovered_dir="$(cd "$skill_dir_abs" 2>/dev/null && pwd || true)"
+    # If the discovered skill already lives directly in the flat skills view
+    # (for example ./skills/sentry), skip without duplicate noise.
+    if [ -n "$existing_dir" ] && [ "$existing_dir" = "$discovered_dir" ]; then
+      continue
+    fi
     echo "Duplicate skill name: $skill_name (skip $skill_dir_abs)"
     continue
   fi
   ln -s "$skill_dir_abs" "$skills_dir/$skill_name"
-done < <(skill_files_cmd | sort)
+done < <(all_skill_files_cmd)
 
 # Regenerate root SKILL.md index dynamically from skill frontmatter.
 generate_skill_index() {
@@ -297,7 +335,7 @@ HEADER
 
     skill_dir="$(dirname "$skill_path")"
     skill_name="$(basename "$skill_dir")"
-    category="$(dirname "$skill_dir" | sed 's|^\./||')"
+    category="$(dirname "$skill_dir" | sed 's|^\./||; s|^\.||')"
     safe_category="$(echo "$category" | tr '/' '_')"
 
     # Extract description from YAML frontmatter
@@ -318,10 +356,10 @@ HEADER
 
     # Append to category file
     echo "- \`$skill_name\` — $description" >> "$temp_dir/$safe_category"
-  done < <(skill_files_cmd | sort)
+  done < <(all_skill_files_cmd)
 
   # Output categories and skills in deterministic order
-  for cat_file in $(ls "$temp_dir" | sort); do
+  while IFS= read -r cat_file; do
     category="$(echo "$cat_file" | tr '_' '/' | sed 's|/| — |g; s|-| |g; s|_| |g')"
     # Capitalize each word
     category_display=""
@@ -335,7 +373,7 @@ HEADER
     echo "" >> "$index_file"
     sort "$temp_dir/$cat_file" >> "$index_file"
     echo "" >> "$index_file"
-  done
+  done < <(cd "$temp_dir" && find . -mindepth 1 -maxdepth 1 -type f -print | sed 's|^\./||' | sort)
 }
 
 generate_skill_index "$repo_root/SKILL.md"

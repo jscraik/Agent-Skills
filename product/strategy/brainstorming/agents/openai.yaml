@@ -1,0 +1,9 @@
+interface:
+  display_name: "Brainstorming"
+  short_description: "Clarify intent and explore options/tradeoffs before planning implementation."
+
+policy:
+  allow_implicit_invocation: true
+
+dependencies:
+  tools: []
