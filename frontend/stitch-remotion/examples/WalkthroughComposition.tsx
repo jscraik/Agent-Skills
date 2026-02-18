@@ -1,8 +1,8 @@
+import React from 'react';
 import {Composition} from 'remotion';
-import {Sequence} from 'remotion';
 import {fade} from '@remotion/transitions/fade';
 import {slide} from '@remotion/transitions/slide';
-import {TransitionSeries} from '@remotion/transitions';
+import {linearTiming, TransitionSeries} from '@remotion/transitions';
 import {ScreenSlide} from './ScreenSlide';
 import screensManifest from '../screens.json';
 
@@ -22,7 +22,7 @@ export const WalkthroughComposition: React.FC = () => {
     <TransitionSeries>
       {screensManifest.screens.map((screen, index) => {
         const durationInFrames = screen.duration * fps;
-        
+
         // Select transition based on screen config
         const transition =
           screen.transitionType === 'slide'
@@ -32,26 +32,25 @@ export const WalkthroughComposition: React.FC = () => {
             : fade();
 
         return (
-          <TransitionSeries.Sequence
-            key={screen.id}
-            durationInFrames={durationInFrames}
-          >
-            <ScreenSlide
-              imageSrc={screen.imagePath}
-              title={screen.title}
-              description={screen.description}
-              width={screen.width}
-              height={screen.height}
-            />
+          <React.Fragment key={screen.id}>
+            <TransitionSeries.Sequence
+              durationInFrames={durationInFrames}
+            >
+              <ScreenSlide
+                imageSrc={screen.imagePath}
+                title={screen.title}
+                description={screen.description}
+                width={screen.width}
+                height={screen.height}
+              />
+            </TransitionSeries.Sequence>
             {index < screensManifest.screens.length - 1 && (
               <TransitionSeries.Transition
                 presentation={transition}
-                timing={{
-                  durationInFrames: 20, // 20 frames for transition
-                }}
+                timing={linearTiming({durationInFrames: 20})}
               />
             )}
-          </TransitionSeries.Sequence>
+          </React.Fragment>
         );
       })}
     </TransitionSeries>
