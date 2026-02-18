@@ -1,6 +1,6 @@
 # Skill Analysis Report — ui-ux-creative-coding (2026-01-30)
 
-Source: `analyze_skill.py` (repo root)
+Source: `utilities/skill-creator/scripts/analyze_skill.py`
 
 ```
 ==============================================================================

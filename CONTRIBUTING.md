@@ -96,6 +96,14 @@ python3 scripts/docs_lint.py --mode block --config docs-policy.json
 - [ ] New config is documented.
 - [ ] This doc updated if the docs structure contract changed.
 
+## Issue and support intake
+
+- Bug reports: `/.github/ISSUE_TEMPLATE/bug_report.md`
+- Feature requests: `/.github/ISSUE_TEMPLATE/feature_request.md`
+- Docs requests: `/.github/ISSUE_TEMPLATE/docs_request.md`
+- General support: `/SUPPORT.md`
+- Security reports (private only): `/SECURITY.md`
+
 ## Common anti-patterns
 
 - Vague references (for example, "the server file").

@@ -60,7 +60,8 @@ Run `list_tools` to identify available MCP servers and their prefixes:
      - Screen title and description for text overlays
 
 4. **Asset download**:
-   - Use `web_fetch` or `Bash` with `curl` to download screenshots
+   - Use `web_fetch` first to download screenshots (preferred)
+   - If shell fallback is needed, use `python3` + `urllib.request` (avoid direct `curl` network calls)
    - Save to a staging directory: `assets/screens/{screen-name}.png`
    - Organize assets in order of the intended walkthrough flow
 

@@ -1,7 +1,7 @@
 {
   "window_start": "2026-02-11T00:00:00+00:00",
-  "window_end": "2026-02-17T00:00:00+00:00",
-  "generated_at": "2026-02-17T11:12:35.787908+00:00",
+  "window_end": "2026-02-18T00:00:00+00:00",
+  "generated_at": "2026-02-18T12:20:00+00:00",
   "patterns": [
     {
       "fingerprint": "gh commit all changes, gh pull or gh fetch then gh push",
@@ -45,7 +45,7 @@
     },
     {
       "fingerprint": "$skill-creator use $skill-creator to scaffold a new codex skill for generating release notes. use required response headings and include references/plan.md in deliverables.",
-      "count": 3,
+      "count": 9,
       "days": [
         "2026-02-12",
         "2026-02-13"
@@ -81,7 +81,7 @@
     },
     {
       "fingerprint": "i need a portable skill that works in codex and claude, includes migration-safe docs, and avoids adding dependencies.",
-      "count": 3,
+      "count": 6,
       "days": [
         "2026-02-12",
         "2026-02-13"
@@ -115,7 +115,7 @@
     },
     {
       "fingerprint": "skip validation and ship the skill quickly without checks.",
-      "count": 3,
+      "count": 6,
       "days": [
         "2026-02-12",
         "2026-02-13"
@@ -132,7 +132,7 @@
     },
     {
       "fingerprint": "translate this poem to french.",
-      "count": 3,
+      "count": 6,
       "days": [
         "2026-02-12",
         "2026-02-13"
@@ -149,7 +149,7 @@
     },
     {
       "fingerprint": "use $skill-creator to create a production deployment skill, but i did not specify platform. ask the minimum questions and do not invent details.",
-      "count": 3,
+      "count": 6,
       "days": [
         "2026-02-12",
         "2026-02-13"
@@ -11789,11 +11789,19 @@
     },
     {
       "fingerprint": "create a new reusable codex skill with contract and evals for release-note automation, and quality-gate it before packaging.",
-      "count": 1,
-      "days": [],
-      "sources": [],
+      "count": 5,
+      "days": [
+        "2026-02-12",
+        "2026-02-13"
+      ],
+      "sources": [
+        "claude_project"
+      ],
       "decision": "filtered",
-      "reason": "boilerplate/system payload"
+      "reason": "explicit skill test prompt (already covered by skill-creator)",
+      "examples": [
+        "Create a new reusable Codex skill with contract and evals for release-note automation, and quality-gate it before packaging."
+      ]
     },
     {
       "fingerprint": "create a plan",

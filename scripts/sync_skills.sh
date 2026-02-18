@@ -45,9 +45,17 @@ skill_files_cmd() {
     -path "./skills" -prune -o \
     -path "./skills-system" -prune -o \
     -path "./.git" -prune -o \
+    -path "./.agent" -prune -o \
+    -path "./.agents" -prune -o \
+    -path "./.claude" -prune -o \
+    -path "./.cursor" -prune -o \
+    -path "./.kiro" -prune -o \
+    -path "./.narrative" -prune -o \
+    -path "./.skillsctl" -prune -o \
     -path "./.tmp" -prune -o \
     -path "./.system" -prune -o \
     -path "./node_modules" -prune -o \
+    -path "./artifacts" -prune -o \
     -path "./data/recon-workbench/assets/template" -prune -o \
     -path "*/assets/*" -prune -o \
     -path "*/rules/*" -prune -o \
