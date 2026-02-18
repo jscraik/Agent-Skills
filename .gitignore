@@ -33,6 +33,7 @@ artifacts/run_skill_validation.sh
 /artifacts/ai/raw/
 
 # Local backups/patch leftovers
+*.bak
 *.bak.*
 *.orig
 *.rej
