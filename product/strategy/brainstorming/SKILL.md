@@ -21,6 +21,25 @@ Brainstorming can be skipped when:
 - The user knows exactly what they want
 - The task is a straightforward bug fix or well-defined change
 
+## Inputs
+
+- User request or draft idea that needs clarification before planning.
+- Relevant constraints already known (timeline, platform, dependencies, scope).
+- Optional existing artifacts (PRD, ticket, screenshots, prior brainstorm notes).
+
+## Outputs
+
+- A concise decision-oriented brainstorm summary.
+- Recommended approach with trade-offs.
+- A handoff artifact at `docs/brainstorms/YYYY-MM-DD-<topic>-brainstorm.md` when asked.
+
+## Constraints
+
+- Keep questions incremental (one focused question at a time when clarification is needed).
+- Prioritize clarity of intent over implementation details.
+- Redact secrets and sensitive data by default in all summaries, examples, and notes.
+- Avoid inventing requirements; explicitly label assumptions.
+
 ## Core Process
 
 ### Phase 0: Assess Requirement Clarity
