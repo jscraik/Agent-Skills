@@ -157,11 +157,8 @@ Structure the enhanced prompt in this order:
 
 ## Procedure
 
-1. Parse the user prompt and identify missing context (platform, structure, style, components).
-2. Resolve local design constraints by checking for `DESIGN.md` when relevant.
-3. Apply deterministic prompt upgrades (keyword precision, hierarchy, token roles, scoped edits).
-4. Format output using the required section order and explicit design-system framing.
-5. Validate that the final prompt is actionable, coherent, and aligned with user intent.
+See [Enhancement Pipeline](#enhancement-pipeline) above for the full step-by-step workflow.
+After formatting, validate that the final prompt is actionable, coherent, and aligned with user intent.
 
 ## Constraints
 
