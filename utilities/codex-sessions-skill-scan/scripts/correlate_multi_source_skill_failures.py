@@ -34,23 +34,30 @@ PATTERNS = {
     "skill_frontmatter_missing": re.compile(r"SKILL\.md\s+frontmatter\s+missing", re.I),
     "skill_path_missing": re.compile(r"skill path does not exist|cannot read [^\n]{0,240}SKILL\.md", re.I),
     "tool_exec_failed": re.compile(r"exec_command failed", re.I),
-    "tool_stdin_failed": re.compile(r"write_stdin failed", re.I),
+    "tool_stdin_failed": re.compile(r"write_stdin failed:\s*stdin is closed for this session", re.I),
     "nonzero_exit": re.compile(r"Process exited with code ([1-9][0-9]*)", re.I),
     "tool_result_error": re.compile(r'"is_error"\s*:\s*true', re.I),
-    "claude_auth_failed": re.compile(r"authentication_failed|Not logged in|token expired or incorrect", re.I),
+    "claude_auth_failed": re.compile(r"authentication_failed|claude auth status[^\n]{0,80}loggedin\s*=\s*false", re.I),
 }
 
 SKILL_FROM_PATH_RE = re.compile(r"/([a-z0-9-]+)/SKILL\.md", re.I)
 SKILL_INVOKE_RE = re.compile(r"Using skill:\s*`?([a-z0-9][a-z0-9-]{1,63})`?", re.I)
 NOISE_RE = re.compile(
-    r"## Inputs\\s*- since:|explicit_issues:|Correlate explicit skill/tool failure signals across|scan_codex_sessions\\.py",
+    r"## Inputs\s*- since:|explicit_issues:|Correlate explicit skill/tool failure signals across|scan_codex_sessions\.py",
     re.I,
 )
 NONZERO_RELEVANT_RE = re.compile(
-    r"SKILL\.md|\\bskill\\b|agent-skills|scan_codex_sessions|skill-creator|quick_validate|skill_gate|command not found: (rg|fd)",
+    r"SKILL\.md|agent-skills/(?:utilities|skills-system|frontend|product|backend|personas)|scan_codex_sessions|codex-sessions-skill-scan|skill-creator|quick_validate|skill_gate|run_skill_evals|command not found: (rg|fd)",
     re.I,
 )
-SKILL_ERROR_CONTEXT_RE = re.compile(r"Process exited with code [1-9]|\\b(?:ERROR|error|failed|Issue)\\b", re.I)
+TOOL_FAILURE_RELEVANT_RE = re.compile(
+    r"SKILL\.md|agent-skills/(?:utilities|skills-system|frontend|product|backend|personas)|codex-sessions-skill-scan|skill-creator|quick_validate|skill_gate|run_skill_evals",
+    re.I,
+)
+SKILL_ERROR_CONTEXT_RE = re.compile(r"ERROR:|FileNotFoundError|Traceback|\bfail(?:ed)?\b|\bIssue\b", re.I)
+PRIMARY_EXIT_RE = re.compile(r"Process exited with code (\d+)", re.I)
+CODE_DUMP_RE = re.compile(r'(^|\n)\s*(?:\d+\s+)?#!/usr/bin/env python3|(^|\n)\s*"""', re.I)
+PATH_LINE_LISTING_RE = re.compile(r"(?m)^\s*/[^\n]+:\d+:")
 
 
 @dataclass(frozen=True)
@@ -214,14 +221,37 @@ def scan_source(
             for text in candidates:
                 if NOISE_RE.search(text):
                     continue
+
+                primary_exit: int | None = None
+                m_exit = PRIMARY_EXIT_RE.search(text)
+                if m_exit:
+                    try:
+                        primary_exit = int(m_exit.group(1))
+                    except ValueError:
+                        primary_exit = None
+
                 skill = extract_skill(text)
                 for pname, preg in PATTERNS.items():
                     if not preg.search(text):
                         continue
-                    if pname == "nonzero_exit" and not NONZERO_RELEVANT_RE.search(text):
+                    if pname == "nonzero_exit":
+                        if primary_exit is None or primary_exit == 0:
+                            continue
+                        if not NONZERO_RELEVANT_RE.search(text):
+                            continue
+                    if pname in {"tool_exec_failed", "tool_stdin_failed", "tool_result_error"} and not TOOL_FAILURE_RELEVANT_RE.search(text):
+                        continue
+                    if pname == "tool_exec_failed" and "Process running with session ID" in text:
                         continue
                     if pname in {"skill_md_not_found", "skill_frontmatter_missing", "skill_path_missing"}:
                         if not SKILL_ERROR_CONTEXT_RE.search(text):
+                            continue
+                        if primary_exit == 0 and (CODE_DUMP_RE.search(text) or PATH_LINE_LISTING_RE.search(text)):
+                            continue
+                    if pname == "claude_auth_failed":
+                        if primary_exit == 0 and PATH_LINE_LISTING_RE.search(text):
+                            continue
+                        if "```diff" in text.lower():
                             continue
 
                     snippet = redact(text)

@@ -15,6 +15,7 @@ If you are trying to find or use skills (not edit docs), start with:
 - [Deployment](/docs/deployment) — publishing/syncing workflows (when applicable).
 - [Examples](/docs/examples) — runnable or copy/paste snippets.
 - [API](/docs/api) — contracts and schemas (when a tool needs a stable interface).
+- [Skill Graphs](/docs/skill-graphs) — recursive improvement loop contracts, workflows, pilots, and runbooks.
 
 ## Contributing
 

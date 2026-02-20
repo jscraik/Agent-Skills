@@ -1,0 +1,135 @@
+{
+  "generated_at": "2026-02-20T19:56:17Z",
+  "runs_root": "artifacts/skill-graphs/runs",
+  "pilot_profiles": [
+    "ui-ux-creative-coding",
+    "interface-craft",
+    "frontend-ui-design",
+    "react-ui-patterns"
+  ],
+  "window_days": 7,
+  "current_window": "2026-02-14..2026-02-20",
+  "current": {
+    "runs_total": 8,
+    "by_profile": {
+      "ui-ux-creative-coding": 5,
+      "interface-craft": 1,
+      "frontend-ui-design": 1,
+      "react-ui-patterns": 1
+    },
+    "repeat_failure_rate": 0.125,
+    "first_pass_acceptance_rate": 0.25,
+    "median_iterations": 2.0,
+    "p90_iterations": 4.3,
+    "quality_uplift_median": 0.1415,
+    "quality_uplift_positive_rate": 1.0,
+    "critical_non_regression_compliance": 0.625,
+    "budget_compliance": 0.875,
+    "evaluator_flip_rate": 0.2437
+  },
+  "baseline": null,
+  "decision": {
+    "state": "HOLD",
+    "reasons": [
+      "insufficient sample size (8/40)",
+      "ui-ux-creative-coding below required run count (5/10)",
+      "interface-craft below required run count (1/10)",
+      "frontend-ui-design below required run count (1/10)",
+      "react-ui-patterns below required run count (1/10)",
+      "critical non-regression compliance below 100%",
+      "budget compliance below 95%",
+      "baseline window unavailable for delta KPIs"
+    ]
+  },
+  "recent_runs": [
+    {
+      "run_id": "run_20260220T195545Z_8799c2",
+      "profile_id": "ui-ux-creative-coding",
+      "terminal_status": "passed",
+      "stop_reason": "pass",
+      "iterations_completed": 1,
+      "quality_uplift": 0.04,
+      "critical_non_regression_passed": true,
+      "tokens_used": 44,
+      "finished_at": "2026-02-20T19:55:45Z"
+    },
+    {
+      "run_id": "run_20260220T150021Z_518880",
+      "profile_id": "interface-craft",
+      "terminal_status": "passed",
+      "stop_reason": "pass",
+      "iterations_completed": 2,
+      "quality_uplift": 0.132,
+      "critical_non_regression_passed": true,
+      "tokens_used": 219,
+      "finished_at": "2026-02-20T15:00:21Z"
+    },
+    {
+      "run_id": "run_20260220T150021Z_82ecf7",
+      "profile_id": "react-ui-patterns",
+      "terminal_status": "passed",
+      "stop_reason": "pass",
+      "iterations_completed": 1,
+      "quality_uplift": 0.097,
+      "critical_non_regression_passed": true,
+      "tokens_used": 85,
+      "finished_at": "2026-02-20T15:00:21Z"
+    },
+    {
+      "run_id": "run_20260220T150021Z_9b592b",
+      "profile_id": "ui-ux-creative-coding",
+      "terminal_status": "passed",
+      "stop_reason": "pass",
+      "iterations_completed": 2,
+      "quality_uplift": 0.092,
+      "critical_non_regression_passed": false,
+      "tokens_used": 235,
+      "finished_at": "2026-02-20T15:00:21Z"
+    },
+    {
+      "run_id": "run_20260220T150021Z_bb9acb",
+      "profile_id": "frontend-ui-design",
+      "terminal_status": "passed",
+      "stop_reason": "pass",
+      "iterations_completed": 3,
+      "quality_uplift": 0.151,
+      "critical_non_regression_passed": false,
+      "tokens_used": 427,
+      "finished_at": "2026-02-20T15:00:21Z"
+    },
+    {
+      "run_id": "run_20260220T144736Z_425b7a",
+      "profile_id": "ui-ux-creative-coding",
+      "terminal_status": "passed",
+      "stop_reason": "pass",
+      "iterations_completed": 2,
+      "quality_uplift": 0.187,
+      "critical_non_regression_passed": false,
+      "tokens_used": 181,
+      "finished_at": "2026-02-20T14:47:36Z"
+    },
+    {
+      "run_id": "run_20260220T144710Z_425b7a",
+      "profile_id": "ui-ux-creative-coding",
+      "terminal_status": "passed",
+      "stop_reason": "pass",
+      "iterations_completed": 5,
+      "quality_uplift": 0.304,
+      "critical_non_regression_passed": true,
+      "tokens_used": 959,
+      "finished_at": "2026-02-20T14:47:10Z"
+    },
+    {
+      "run_id": "run_20260220T144703Z_425b7a",
+      "profile_id": "ui-ux-creative-coding",
+      "terminal_status": "failed",
+      "stop_reason": "budget_exhausted",
+      "iterations_completed": 4,
+      "quality_uplift": 0.277,
+      "critical_non_regression_passed": true,
+      "tokens_used": 645,
+      "finished_at": "2026-02-20T14:47:03Z"
+    }
+  ],
+  "skipped_runs": []
+}

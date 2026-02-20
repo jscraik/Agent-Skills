@@ -67,10 +67,18 @@ skill_files_cmd() {
 # category folders.
 extra_skill_files_cmd() {
   if [ -d "./.agents/skills" ]; then
-    find "./.agents/skills" -mindepth 2 -maxdepth 2 -name "SKILL.md" -print
+    while IFS= read -r extra_skill; do
+      if git ls-files --error-unmatch "$extra_skill" >/dev/null 2>&1; then
+        echo "$extra_skill"
+      fi
+    done < <(find "./.agents/skills" -mindepth 2 -maxdepth 2 -name "SKILL.md" -print)
   fi
   if [ -d "./skills" ]; then
-    find "./skills" -mindepth 2 -maxdepth 2 -name "SKILL.md" -print
+    while IFS= read -r extra_skill; do
+      if git ls-files --error-unmatch "$extra_skill" >/dev/null 2>&1; then
+        echo "$extra_skill"
+      fi
+    done < <(find "./skills" -mindepth 2 -maxdepth 2 -name "SKILL.md" -print)
   fi
 }
 
@@ -387,11 +395,12 @@ remove_legacy_symlink() {
   fi
 }
 
-# Remove old symlinks from unsupported tools
+# Remove old/legacy symlinks from unsupported locations
 remove_legacy_symlink "$HOME/.copilot/skills"
 remove_legacy_symlink "$HOME/.config/agents/skills"
 remove_legacy_symlink "$HOME/.cursor/skills"
 remove_legacy_symlink "$HOME/.gemini/skills"
+remove_legacy_symlink "$HOME/.codex/skills"
 
 # Sync to user-level tool directories (Claude Code + OpenAI Codex/Agents)
 sync_user_skills() {
@@ -412,8 +421,9 @@ sync_user_skills() {
   fi
 }
 
-# Sync to Claude Code, OpenAI Agents/Codex, and Gemini Antigravity
+# Sync to Claude Code, OpenAI Codex/Agents, and Gemini Antigravity
 sync_user_skills "$HOME/.claude/skills"
+sync_user_skills "$HOME/.agent/skills"
 sync_user_skills "$HOME/.agents/skills"
 sync_user_skills "$HOME/.gemini/antigravity/skills"
 

@@ -1,0 +1,29 @@
+{
+  "budget": {
+    "max_elapsed_ms": 120000,
+    "max_iterations": 4,
+    "max_tokens": 12000
+  },
+  "counters": {
+    "consecutive_passes": 1,
+    "iterations_completed": 2,
+    "tokens_used": 219
+  },
+  "created_by": "recursive-skill-loop",
+  "duration_ms": 0,
+  "finished_at": "2026-02-20T15:00:21Z",
+  "profile_id": "interface-craft",
+  "prompt_hash": "3e8085a03d6f35651b33d8374df0189969a1b1471a66eb13da13a7403d6a6b45",
+  "run_id": "run_20260220T150021Z_518880",
+  "schema_version": "1.0",
+  "scope_profile": "ui",
+  "scope_skill": "interface-craft",
+  "started_at": "2026-02-20T15:00:21Z",
+  "stop_reason": "pass",
+  "terminal_status": "passed",
+  "versions": {
+    "evaluator_version": "v1",
+    "persona_set_id": "ui-v1-checkpoint",
+    "rubric_version": "2026-02-19"
+  }
+}

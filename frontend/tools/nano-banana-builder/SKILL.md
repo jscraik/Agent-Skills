@@ -1,9 +1,6 @@
 ---
 name: nano-banana-builder
-description: "Build production-ready web applications powered by Google's Nano Banana\
-  \ image generation APIs\u2014creating everything from simple text-to-image generators\
-  \ to sophisticated iterative editors with multi-turn conversation.. Use when Use\
-  \ this skill when the task matches its description and triggers.."
+description: "Build web applications that use Google's Nano Banana image APIs for generation and iterative editing workflows. Use when a user asks to prototype or ship a Nano Banana powered image product from text-to-image to multi-turn editing."
 ---
 
 # Nano Banana Builder

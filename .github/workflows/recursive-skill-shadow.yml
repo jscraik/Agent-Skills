@@ -1,0 +1,60 @@
+name: recursive-skill-shadow
+
+on:
+  workflow_dispatch:
+    inputs:
+      runs_per_profile:
+        description: "Runs per pilot profile"
+        required: false
+        default: "2"
+      window_days:
+        description: "Aggregation window in days"
+        required: false
+        default: "7"
+  schedule:
+    - cron: "0 13 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  shadow-cycle:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run recursive shadow cycle
+        run: |
+          RUNS_PER_PROFILE="${{ inputs.runs_per_profile }}"
+          WINDOW_DAYS="${{ inputs.window_days }}"
+
+          if [ -z "$RUNS_PER_PROFILE" ]; then
+            RUNS_PER_PROFILE="2"
+          fi
+          if [ -z "$WINDOW_DAYS" ]; then
+            WINDOW_DAYS="7"
+          fi
+
+          bash scripts/run_recursive_skill_shadow_cycle.sh \
+            --runs-per-profile "$RUNS_PER_PROFILE" \
+            --window-days "$WINDOW_DAYS"
+
+      - name: Docs lint (warn mode)
+        run: |
+          python3 scripts/docs_lint.py \
+            --config docs-policy.json \
+            --mode warn \
+            --report-json /tmp/docs-lint-shadow.json
+
+      - name: Upload shadow artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: recursive-skill-shadow-artifacts
+          path: |
+            artifacts/skill-graphs
+            docs/skill-graphs/pilots/ui-skills-shadow-results.md
+            docs/skill-graphs/pilots/ui-skills-pilot-readout.md
+            /tmp/docs-lint-shadow.json

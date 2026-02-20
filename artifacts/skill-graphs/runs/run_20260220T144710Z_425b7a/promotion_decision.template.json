@@ -1,0 +1,26 @@
+{
+  "decision": "draft",
+  "expected_version": "",
+  "gate_decision": {
+    "notes": "Fill before approve/reject.",
+    "provenance_complete": true,
+    "runtime_gates_passed": true,
+    "security_checklist_passed": false
+  },
+  "lesson_id": "",
+  "provenance": {
+    "evaluator_version": "v1",
+    "iteration_ids": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "prompt_hash": "eaa11c4fcb6fe83e3c2a4f77c18885ece81fd8f93c1060ba9c6a9f3c6b648e21",
+    "rubric_version": "2026-02-19"
+  },
+  "reviewer_ids": [],
+  "run_id": "run_20260220T144710Z_425b7a",
+  "schema_version": "1.0"
+}

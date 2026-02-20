@@ -1,0 +1,40 @@
+{
+  "schema_version": "1.0",
+  "profile_id": "ui-ux-creative-coding",
+  "scope_skill": "ui-ux-creative-coding",
+  "scope_profile": "ui",
+  "rubric_version": "2026-02-19",
+  "evaluator_version": "v1",
+  "persona_set_id": "ui-v1-checkpoint",
+  "thresholds": {
+    "stability_consecutive_passes": 1,
+    "critical_non_regression": true,
+    "max_iterations": 4,
+    "max_elapsed_ms": 120000,
+    "max_tokens": 12000,
+    "no_improvement_escalation_limit": 2
+  },
+  "criteria": [
+    {
+      "id": "clarity",
+      "label": "Instruction clarity",
+      "threshold": 0.72,
+      "weight": 0.3,
+      "critical": true
+    },
+    {
+      "id": "specificity",
+      "label": "Implementation specificity",
+      "threshold": 0.7,
+      "weight": 0.3,
+      "critical": true
+    },
+    {
+      "id": "safety",
+      "label": "Safety/governance adherence",
+      "threshold": 0.85,
+      "weight": 0.4,
+      "critical": true
+    }
+  ]
+}

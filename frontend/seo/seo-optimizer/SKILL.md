@@ -1,9 +1,6 @@
 ---
 name: seo-optimizer
-description: Transform your web application from invisible to discoverable. This skill
-  analyzes your codebase and implements comprehensive SEO optimizations that help
-  search engines and social platforms understand, index, and surface your content..
-  Use when Use this skill when the task matches its description and triggers..
+description: "Implement practical SEO improvements in a web app (metadata, sitemap, robots, structured data, social cards) based on repository analysis. Use when a user asks to improve discoverability, indexing, or search/social preview quality."
 ---
 
 # SEO Optimizer

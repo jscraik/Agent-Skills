@@ -31,6 +31,11 @@ artifacts/run_skill_validation.sh
 /artifacts/ai/tmp/
 /artifacts/ai/cache/
 /artifacts/ai/raw/
+/artifacts/skill-graphs/runs/**/debug/
+/artifacts/skill-graphs/runs/**/iter-*-generated.txt
+/artifacts/skill-graphs/runs/**/iter-*-improved.txt
+/artifacts/skill-graphs/runs/**/summary.md
+/artifacts/skill-graphs/runs/**/events.jsonl
 
 # Local backups/patch leftovers
 *.bak
@@ -44,3 +49,9 @@ FORJAMIE.md
 # Misc local throwaways
 *.skill
 product/Archive.zip
+
+FORJAMIE.md
+
+FORJAMIE.md
+
+FORJAMIE.md
