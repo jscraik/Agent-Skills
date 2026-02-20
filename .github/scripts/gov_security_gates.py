@@ -117,11 +117,12 @@ def get_changed_file_status(base_sha: str | None, head_sha: str | None):
 
     out = {}
     for line in cp.stdout.splitlines():
-        parts = line.split("	", 1)
-        if len(parts) != 2:
+        parts = line.split("\t")
+        if len(parts) < 2:
             continue
-        status, path = parts
-        out[path.strip()] = status.strip()
+        status = parts[0].strip()
+        path = parts[-1].strip()
+        out[path] = status
     return out
 
 
