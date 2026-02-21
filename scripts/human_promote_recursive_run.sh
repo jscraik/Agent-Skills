@@ -111,6 +111,10 @@ if [[ "$decision" == "approved" && -z "$lesson_file" ]]; then
   echo "--lesson-file is required for approved decisions" >&2
   exit 2
 fi
+if [[ -n "$lesson_file" && ! -f "$lesson_file" ]]; then
+  echo "--lesson-file does not exist: $lesson_file" >&2
+  exit 2
+fi
 
 run_dir="$(cd "$run_dir" 2>/dev/null && pwd || true)"
 if [[ -z "$run_dir" ]]; then
@@ -119,6 +123,7 @@ if [[ -z "$run_dir" ]]; then
 fi
 
 decision_path="$run_dir/promotion_decision.json"
+decision_tmp="${decision_path}.tmp"
 run_json_path="$run_dir/run.json"
 template_path="$run_dir/promotion_decision.template.json"
 seed_path="$decision_path"
@@ -135,7 +140,9 @@ if [[ ! -f "$run_json_path" ]]; then
   exit 2
 fi
 
-python3 - "$repo_root" "$seed_path" "$decision_path" "$lesson_id" "$reviewers" "$expected_version" "$decision" "$note" "$lesson_file" <<'PY'
+trap 'rm -f "$decision_tmp"' EXIT
+
+python3 - "$repo_root" "$seed_path" "$decision_tmp" "$lesson_id" "$reviewers" "$expected_version" "$decision" "$note" "$lesson_file" <<'PY'
 import hashlib
 import json
 import sys
@@ -189,7 +196,7 @@ out.write_text(json.dumps(obj, indent=2, sort_keys=True) + '\n', encoding='utf-8
 PY
 
 validator="utilities/skill-creator/scripts/validate_recursive_promotion.py"
-validator_cmd=(python3 "$validator" --run-dir "$run_dir" --decision-file "$decision_path")
+validator_cmd=(python3 "$validator" --run-dir "$run_dir" --decision-file "$decision_tmp")
 
 if [[ -n "$lesson_file" ]]; then
   validator_cmd+=(--lesson-file "$lesson_file")
@@ -198,6 +205,9 @@ elif [[ "$skip_lesson_scan" -eq 1 ]]; then
 fi
 
 "${validator_cmd[@]}"
+
+mv -f "$decision_tmp" "$decision_path"
+trap - EXIT
 
 if [[ "$decision" == "approved" ]]; then
   python3 - "$run_json_path" "$run_dir/debug/events.jsonl" "$reviewers" "$lesson_id" <<'PY'

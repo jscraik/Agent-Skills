@@ -50,8 +50,8 @@ Optional debug traces are written only when `--emit-debug-artifacts` is set and 
 ## Verify graph plans
 
 ```bash
-python3 /Users/jamiecraik/.codex/scripts/plan-graph-lint.py .agent/PLANS.md
-python3 /Users/jamiecraik/.codex/scripts/plan-graph-lint.py docs/plans/2026-02-19-feat-recursive-skill-self-improvement-loop-plan.md
+python3 "$HOME/.codex/scripts/plan-graph-lint.py" .agent/PLANS.md
+python3 "$HOME/.codex/scripts/plan-graph-lint.py" docs/plans/2026-02-19-feat-recursive-skill-self-improvement-loop-plan.md
 ```
 
 ## Next step: human promotion gate

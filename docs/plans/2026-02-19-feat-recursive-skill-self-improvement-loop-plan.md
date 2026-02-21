@@ -3,7 +3,7 @@ title: feat: Recursive Skill Self-Improvement Loop (Drafts to Canonical Graph)
 type: feat
 date: 2026-02-19
 deepened_on: 2026-02-19
-brainstorm: /Users/jamiecraik/dev/agent-skills/docs/brainstorms/2026-02-19-skill-graph-learning-loop-brainstorm.md
+brainstorm: docs/brainstorms/2026-02-19-skill-graph-learning-loop-brainstorm.md
 ---
 
 # feat: Recursive Skill Self-Improvement Loop (Drafts to Canonical Graph)
@@ -85,20 +85,20 @@ The loop is task-profile driven (e.g., ad concept, video hook, positioning, SEO 
 Found brainstorm from **2026-02-19**: `skill-graph-learning-loop`. Used as source of truth for WHAT to build.
 
 ### Local repo findings (internal)
-- Skill indexing/sync conventions: `/Users/jamiecraik/dev/agent-skills/scripts/sync_skills.sh:126`
-- Existing lessons slot: `/Users/jamiecraik/dev/agent-skills/FORJAMIE.md:93`
-- Tiered gating model (`report-only -> warn -> fail`): `/Users/jamiecraik/dev/agent-skills/skills-system/skill-creator/references/tiered-gating-policy.md:5`
-- MUST/SHOULD/MAY rubric pattern: `/Users/jamiecraik/dev/agent-skills/skills-system/skill-creator/references/gold-skill-rubric.md:1`
-- Docs governance cutoff model: `/Users/jamiecraik/dev/agent-skills/docs-policy.json:2`
-- Task dependency graph convention: `/Users/jamiecraik/dev/agent-skills/.agent/PLANS.md:19`
-- Session-scan learning extraction precedent: `/Users/jamiecraik/dev/agent-skills/utilities/codex-sessions-skill-scan/scripts/scan_codex_sessions.py:5`
-- Eval scorecard/gate precedent: `/Users/jamiecraik/dev/agent-skills/utilities/skill-creator/scripts/run_skill_evals.py:14`
+- Skill indexing/sync conventions: `scripts/sync_skills.sh:126`
+- Existing lessons slot: `FORJAMIE.md:93`
+- Tiered gating model (`report-only -> warn -> fail`): `skills-system/skill-creator/references/tiered-gating-policy.md:5`
+- MUST/SHOULD/MAY rubric pattern: `skills-system/skill-creator/references/gold-skill-rubric.md:1`
+- Docs governance cutoff model: `docs-policy.json:2`
+- Task dependency graph convention: `.agent/PLANS.md:19`
+- Session-scan learning extraction precedent: `utilities/codex-sessions-skill-scan/scripts/scan_codex_sessions.py:5`
+- Eval scorecard/gate precedent: `utilities/skill-creator/scripts/run_skill_evals.py:14`
 
 ### Institutional learnings
 - `docs/solutions/` is not present; nearest alternatives:
-  - `/Users/jamiecraik/dev/agent-skills/docs/reference/index.md`
-  - `/Users/jamiecraik/dev/agent-skills/product/domain/chatgpt-apps-production-checklist/references/lessons-matrix.md:1`
-  - Governance docs under `/Users/jamiecraik/dev/agent-skills/GOVERNANCE/`
+  - `docs/reference/index.md`
+  - `product/domain/chatgpt-apps-production-checklist/references/lessons-matrix.md:1`
+  - Governance docs under `GOVERNANCE/`
 - Reusable pitfall: duplicate source-of-truth risk between mirrored skill-creator areas (`skills-system/...` and `utilities/...`).
 
 ### External research decision
@@ -350,17 +350,17 @@ Daily operator outputs:
 - Define draft/canonical artifact schemas and naming conventions.
 - Define gate contract and telemetry schema.
 - Draft files:
-  - `/Users/jamiecraik/dev/agent-skills/docs/skill-graphs/schemas/task-profile.schema.md`
-  - `/Users/jamiecraik/dev/agent-skills/docs/skill-graphs/schemas/iteration-journal.schema.md`
-  - `/Users/jamiecraik/dev/agent-skills/docs/skill-graphs/schemas/canonical-lesson.schema.md`
-  - `/Users/jamiecraik/dev/agent-skills/docs/skill-graphs/schemas/gate-contract.schema.md`
+  - `docs/skill-graphs/schemas/task-profile.schema.md`
+  - `docs/skill-graphs/schemas/iteration-journal.schema.md`
+  - `docs/skill-graphs/schemas/canonical-lesson.schema.md`
+  - `docs/skill-graphs/schemas/gate-contract.schema.md`
 - Success criteria: schemas reviewed and accepted with governance owners.
 
 #### Phase 2: Shadow-mode evaluation loop (no auto-improve)
 - Run evaluator + adversarial evaluator and record results only.
 - Validate score stability, mirrored pairwise consistency, and false-positive rates.
 - Pilot files:
-  - `/Users/jamiecraik/dev/agent-skills/docs/skill-graphs/pilots/ui-skills-shadow-results.md`
+  - `docs/skill-graphs/pilots/ui-skills-shadow-results.md`
 - Success criteria: stable scoring variance and actionable diagnoses.
 
 #### Phase 3: Assisted recursive loop + human promotion
@@ -368,8 +368,8 @@ Daily operator outputs:
 - Add promotion checklist and reviewer workflow for canonical promotion.
 - Enforce security/privacy checks before promotion.
 - Workflow docs:
-  - `/Users/jamiecraik/dev/agent-skills/docs/skill-graphs/workflows/promotion-gate.md`
-  - `/Users/jamiecraik/dev/agent-skills/docs/skill-graphs/workflows/reviewer-rubric.md`
+  - `docs/skill-graphs/workflows/promotion-gate.md`
+  - `docs/skill-graphs/workflows/reviewer-rubric.md`
 - Success criteria: meaningful quality deltas and acceptable review overhead.
 
 ## Post-MVP Expansion (Phase 4+)
@@ -378,7 +378,7 @@ Daily operator outputs:
 - Enable bounded automatic loops for approved pilot profiles.
 - Inject promoted canonical lessons on skill start for selected UI skills.
 - Runbook docs:
-  - `/Users/jamiecraik/dev/agent-skills/docs/skill-graphs/runbooks/kill-switch-and-escalation.md`
+  - `docs/skill-graphs/runbooks/kill-switch-and-escalation.md`
 - Success criteria: reduced repeat-failure rate and no governance regressions.
 
 ## Phase-to-Task Execution Map
@@ -449,7 +449,7 @@ tasks:
 ## Acceptance Criteria
 
 ### Functional requirements
-- [ ] Loop executes generate/evaluate/diagnose/improve/re-score cycle for a configured task profile (`/Users/jamiecraik/dev/agent-skills/docs/skill-graphs/schemas/task-profile.schema.md`).
+- [ ] Loop executes generate/evaluate/diagnose/improve/re-score cycle for a configured task profile (`docs/skill-graphs/schemas/task-profile.schema.md`).
 - [ ] Every iteration writes auditable artifacts with score deltas, rationale, and immutable metadata (`run_id`, `iteration_id`, versions, prompt hash).
 - [ ] Adversarial evaluator follows checkpoint policy in MVP (initial, final, and failure-triggered), and outputs actionable findings with severity.
 - [ ] Run finalization records both `terminal_status` (`passed|failed|escalated|aborted`) and explicit `stop_reason` (`pass|budget_exhausted|escalated|aborted|policy_failed|evaluator_conflict|dependency_missing`).
@@ -515,23 +515,23 @@ _Baseline protocol (applies to all KPIs unless noted):_
 | Artifact leakage | secrets/PII in logs | Security owner | redaction + secret scan + TTL retention | block promotion |
 
 ## Documentation Plan
-- Add new docs root: `/Users/jamiecraik/dev/agent-skills/docs/skill-graphs/`
-- Add pilot readout: `/Users/jamiecraik/dev/agent-skills/docs/skill-graphs/pilots/ui-skills-pilot-readout.md`
+- Add new docs root: `docs/skill-graphs/`
+- Add pilot readout: `docs/skill-graphs/pilots/ui-skills-pilot-readout.md`
 - Add governance appendix for promotion decisions and exceptions.
 - Add framework dependency manifest for runner/tooling versions.
 
 ## References & Research
 
 ### Internal references
-- `/Users/jamiecraik/dev/agent-skills/docs/brainstorms/2026-02-19-skill-graph-learning-loop-brainstorm.md`
-- `/Users/jamiecraik/dev/agent-skills/scripts/sync_skills.sh:126`
-- `/Users/jamiecraik/dev/agent-skills/FORJAMIE.md:93`
-- `/Users/jamiecraik/dev/agent-skills/.agent/PLANS.md:19`
-- `/Users/jamiecraik/dev/agent-skills/skills-system/skill-creator/references/tiered-gating-policy.md:5`
-- `/Users/jamiecraik/dev/agent-skills/skills-system/skill-creator/references/gold-skill-rubric.md:1`
-- `/Users/jamiecraik/dev/agent-skills/utilities/codex-sessions-skill-scan/scripts/scan_codex_sessions.py:5`
-- `/Users/jamiecraik/dev/agent-skills/utilities/skill-creator/scripts/run_skill_evals.py:14`
-- `/Users/jamiecraik/dev/agent-skills/docs-policy.json:2`
+- `docs/brainstorms/2026-02-19-skill-graph-learning-loop-brainstorm.md`
+- `scripts/sync_skills.sh:126`
+- `FORJAMIE.md:93`
+- `.agent/PLANS.md:19`
+- `skills-system/skill-creator/references/tiered-gating-policy.md:5`
+- `skills-system/skill-creator/references/gold-skill-rubric.md:1`
+- `utilities/codex-sessions-skill-scan/scripts/scan_codex_sessions.py:5`
+- `utilities/skill-creator/scripts/run_skill_evals.py:14`
+- `docs-policy.json:2`
 
 ### External references
 - OpenAI evaluation best practices: https://platform.openai.com/docs/guides/evals-best-practices

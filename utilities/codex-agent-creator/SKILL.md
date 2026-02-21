@@ -13,6 +13,37 @@ This skill updates `~/.codex/config.toml` (or a project `.codex/config.toml`), w
 
 Default behavior is strict-minimal: configure only `model`, `model_reasoning_effort`, and `developer_instructions` unless the user explicitly asks for additional parameters.
 
+## When to use
+
+- Creating a new custom agent role or adjusting an existing role definition.
+- Troubleshooting role config errors, invalid keys, or schema validation failures.
+- Installing role entries into `~/.codex/config.toml` or a project `.codex/config.toml`.
+
+## Outputs
+
+- Summary of changes (role name, config path, and updated keys).
+- The created/updated role config file path.
+- Validation results (success or explicit error details).
+- A runnable `spawn_agent` example for the new role.
+
+## Constraints
+
+- Redact secrets, tokens, and sensitive data by default in outputs.
+- Do not write files until required inputs are confirmed.
+- Only change keys explicitly requested by the user.
+
+## Validation
+
+- Run `scripts/validate_role.sh` before reporting success.
+- Confirm `[agents.<role_name>]` only includes `description` and `config_file`.
+- Confirm role config keys pass schema validation.
+
+## Examples
+
+```json
+{"agent_type":"researcher","message":"Audit the repo for failing checks and summarize next steps."}
+```
+
 ## Core Philosophy
 
 - Collect intent before writing files.

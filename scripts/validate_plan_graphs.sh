@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-LINTER="/Users/jamiecraik/.codex/scripts/plan-graph-lint.py"
+CODEX_HOME="${CODEX_HOME:-$HOME/.codex}"
+LINTER="${PLAN_GRAPH_LINTER:-$CODEX_HOME/scripts/plan-graph-lint.py}"
 
 if [[ ! -f "$LINTER" ]]; then
   echo "[plan-graph] missing linter: $LINTER" >&2

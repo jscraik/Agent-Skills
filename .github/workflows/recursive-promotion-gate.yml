@@ -33,7 +33,7 @@ jobs:
           bash scripts/validate_recursive_promotions.sh \
             --changed-only \
             --base-sha "${{ github.event.pull_request.base.sha }}" \
-            --head-sha "${{ github.sha }}" \
+            --head-sha "${{ github.event.pull_request.head.sha }}" \
             --report-json artifacts/skill-graphs/pilot/promotion-validation-report.json
 
       - name: Validate all promotion decisions (manual)

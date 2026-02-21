@@ -103,6 +103,7 @@ fi
 
 status=0
 results_jsonl="$(mktemp)"
+trap 'rm -f "$results_jsonl"' EXIT
 
 for file in "${promotion_files[@]}"; do
   run_dir="$(dirname "$file")"
@@ -139,7 +140,7 @@ report = {
 }
 out_path.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
 PY
-
+trap - EXIT
 rm -f "$results_jsonl"
 
 if [[ "$status" -ne 0 ]]; then

@@ -1,6 +1,6 @@
 ---
 name: ui-visual-regression
-description: "Run a repeatable visual regression workflow using Storybook, Playwright capture, and Argos diffs, then guide targeted UI fixes. Use when investigating failing visual snapshots or preventing visual drift in component libraries."
+description: "Review and validate UI visual regression diffs (Storybook + Playwright capture + Argos) when snapshot changes or layout regressions appear."
 ---
 
 # Ui Visual Regression

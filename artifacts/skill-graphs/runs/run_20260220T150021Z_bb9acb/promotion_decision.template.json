@@ -3,8 +3,8 @@
   "expected_version": "",
   "gate_decision": {
     "notes": "Fill before approve/reject.",
-    "provenance_complete": true,
-    "runtime_gates_passed": true,
+    "provenance_complete": false,
+    "runtime_gates_passed": false,
     "security_checklist_passed": false
   },
   "lesson_id": "",

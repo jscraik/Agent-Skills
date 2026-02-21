@@ -37,7 +37,7 @@ gates:
     class: blocking
     evidence: runtime_counters
   - id: promotion_safety
-    threshold_ref: required
+    threshold_ref: TR-06
     class: blocking
     evidence: promotion_decision.gate_decision
   - id: evaluator_consistency
