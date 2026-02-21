@@ -62,6 +62,8 @@ A run directory with:
 - `iteration_journal.jsonl`
 - `promotion_decision.json` (draft decision artifact)
 
+`run.json` includes a baseline `runtime_context` envelope with execution mode, profile scope, and artifact pointers.
+
 Optional debug traces are written only when `--emit-debug-artifacts` is set and stored under `run/debug/`.
 
 ## Verify graph plans

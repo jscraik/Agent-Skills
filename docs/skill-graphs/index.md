@@ -20,6 +20,7 @@ This section defines the MVP contracts and operating workflows for the recursive
 - Keep canonical promotion human-gated with provenance + security checklist.
 - Keep runtime retrieval injection disabled until Phase 4.
 - Treat optional runtime traces as debug output only (`run/debug/*`) and keep them gitignored.
+- Emit a baseline runtime context envelope on every run/event (`run_id`, `task_profile`, execution mode, and artifact pointers).
 
 ## Pilot Profile Set (fixed)
 

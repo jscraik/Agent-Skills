@@ -406,6 +406,33 @@ def queue_terminal_action(
     return 0
 
 
+def build_runtime_context(
+    *,
+    run_id: str,
+    profile: Profile,
+    emit_debug_artifacts: bool,
+) -> Dict[str, Any]:
+    return {
+        "schema_version": "1.0",
+        "run_id": run_id,
+        "task_profile": profile.profile_id,
+        "scope_skill": profile.scope_skill,
+        "execution_mode": "mvp_bounded_loop",
+        "operator_action": "start_run",
+        "flags": {
+            "retrieval_injection_enabled": False,
+            "emit_debug_artifacts": emit_debug_artifacts,
+        },
+        "artifact_paths": {
+            "run": "run.json",
+            "iteration_journal": "iteration_journal.jsonl",
+            "promotion_decision": "promotion_decision.json",
+            "run_control": "run_control.json",
+            "debug_dir": "debug/" if emit_debug_artifacts else None,
+        },
+    }
+
+
 def run_loop(args: argparse.Namespace) -> int:
     profile = load_profile(Path(args.profile_file).resolve())
     out_root = Path(args.out_root).resolve()
@@ -438,6 +465,11 @@ def run_loop(args: argparse.Namespace) -> int:
     max_iterations = args.max_iterations or profile.thresholds.max_iterations
     max_elapsed_ms = args.max_elapsed_ms or profile.thresholds.max_elapsed_ms
     max_tokens = args.max_tokens or profile.thresholds.max_tokens
+    runtime_context = build_runtime_context(
+        run_id=run_id,
+        profile=profile,
+        emit_debug_artifacts=args.emit_debug_artifacts,
+    )
 
     events: List[Dict[str, Any]] = [
         {
@@ -455,6 +487,7 @@ def run_loop(args: argparse.Namespace) -> int:
             "evaluator_version": profile.evaluator_version,
             "rubric_version": profile.rubric_version,
             "prompt_hash": sha256_text(args.objective),
+            "runtime_context": runtime_context,
         }
     ]
 
@@ -642,6 +675,7 @@ def run_loop(args: argparse.Namespace) -> int:
             "evaluator_version": profile.evaluator_version,
             "rubric_version": profile.rubric_version,
             "prompt_hash": sha256_text(args.objective),
+            "runtime_context": runtime_context,
         }
     )
 
@@ -662,6 +696,7 @@ def run_loop(args: argparse.Namespace) -> int:
                 "evaluator_version": profile.evaluator_version,
                 "rubric_version": profile.rubric_version,
                 "prompt_hash": sha256_text(args.objective),
+                "runtime_context": runtime_context,
             }
         )
 
@@ -694,6 +729,7 @@ def run_loop(args: argparse.Namespace) -> int:
         "prompt_hash": sha256_text(args.objective),
         "created_by": args.actor_id,
         "idempotency_key": args.idempotency_key,
+        "runtime_context": runtime_context,
     }
 
     promotion_decision = {
