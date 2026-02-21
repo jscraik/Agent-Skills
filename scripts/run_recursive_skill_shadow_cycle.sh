@@ -82,9 +82,11 @@ PY
     objective="Shadow evaluation run ${n} for ${profile}: improve instruction quality with safe, testable outputs."
 
     echo "[shadow-cycle] run profile=${profile} n=${n}"
-    if ! python3 "$loop_script" \
+    idempotency_key="shadow:${profile}:run:${n}"
+    if ! python3 "$loop_script" start_run \
       --profile-file "$profile_file" \
       --objective "$objective" \
+      --idempotency-key "$idempotency_key" \
       --out-root "$out_root"; then
       echo "[shadow-cycle] warning: loop exited non-zero (expected in bounded shadow scenarios)" >&2
     fi

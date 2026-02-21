@@ -1,29 +1,72 @@
 {
-  "window_start": "2026-02-13T00:00:00+00:00",
-  "window_end": "2026-02-20T00:00:00+00:00",
-  "generated_at": "2026-02-20T12:56:54.915754+00:00",
+  "window_start": "2026-02-14T01:38:38.593156+00:00",
+  "window_end": "2026-02-21T01:38:38.593156+00:00",
+  "generated_at": "2026-02-21T01:38:38.593156+00:00",
   "patterns": [
     {
       "fingerprint": "gh commit all changes, gh pull or gh fetch then gh push",
-      "count": 6,
+      "count": 11,
       "days": [
-        "2026-02-13",
+        "2026-02-14",
         "2026-02-15",
         "2026-02-17"
       ],
       "sources": [
         "codex_archived",
         "codex_sessions",
-        "kimi_sessions"
+        "kimi"
       ],
       "examples": [
-        "Gh commit all changes, gh pull or gh fetch then gh push",
         "gh commit all changes, gh pull or gh fetch then gh push",
+        "Gh commit all changes, gh pull or gh fetch then gh push",
         "gh commit all changes, gh pull or gh fetch then gh push"
       ],
       "match": {
         "name": "draftpr",
-        "path": "/Users/jamiecraik/dev/agent-skills/skills/draftpr/SKILL.md"
+        "path": "/Users/jamiecraik/dev/agent-skills/skills/draftpr/SKILL.md",
+        "decision": "matched_existing_skill",
+        "note": "No edit this run (fewer than 2 reusable patterns)."
+      }
+    },
+    {
+      "fingerprint": "https:<path>",
+      "count": 3,
+      "days": [
+        "2026-02-14",
+        "2026-02-16"
+      ],
+      "sources": [
+        "codex_archived",
+        "kimi"
+      ],
+      "examples": [
+        "https://ghostty.org/docs",
+        "https://agentation.dev/changelog",
+        "https://agentation.dev/changelog"
+      ],
+      "match": {
+        "decision": "deferred",
+        "reason": "no clear skill match"
+      }
+    },
+    {
+      "fingerprint": "reply with exactly: ok",
+      "count": 4,
+      "days": [
+        "2026-02-16",
+        "2026-02-18"
+      ],
+      "sources": [
+        "codex_sessions"
+      ],
+      "examples": [
+        "Reply with exactly: OK",
+        "Reply with exactly: OK",
+        "Reply with exactly: ok"
+      ],
+      "match": {
+        "decision": "deferred",
+        "reason": "instructional test prompt; not a reusable skill trigger"
       }
     }
   ]

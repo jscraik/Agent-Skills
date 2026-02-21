@@ -283,15 +283,151 @@ def write_jsonl(path: Path, rows: List[Dict[str, Any]]) -> None:
             f.write("\n")
 
 
+def status_exit_code(terminal_status: str) -> int:
+    if terminal_status == "passed":
+        return 0
+    if terminal_status == "escalated":
+        return 3
+    if terminal_status == "aborted":
+        return 4
+    return 2
+
+
+def control_path_for(run_dir: Path) -> Path:
+    return run_dir / "run_control.json"
+
+
+def write_control_state(
+    *,
+    path: Path,
+    run_id: str,
+    state: str,
+    actor_id: str,
+    requested_action: Optional[Dict[str, Any]] = None,
+    processed_requests: Optional[List[Dict[str, Any]]] = None,
+) -> None:
+    payload = {
+        "schema_version": "1.0",
+        "run_id": run_id,
+        "state": state,
+        "updated_at": iso_now(),
+        "updated_by": actor_id,
+        "requested_action": requested_action,
+        "processed_requests": processed_requests or [],
+    }
+    write_json(path, payload)
+
+
+def load_json(path: Path) -> Dict[str, Any]:
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def find_existing_run_by_idempotency(out_root: Path, idempotency_key: str) -> Optional[Tuple[Path, Dict[str, Any]]]:
+    if not out_root.exists():
+        return None
+
+    for run_json in sorted(out_root.glob("run_*/run.json")):
+        try:
+            run_obj = load_json(run_json)
+        except Exception:
+            continue
+        if run_obj.get("idempotency_key") == idempotency_key:
+            return run_json.parent, run_obj
+    return None
+
+
+def queue_terminal_action(
+    *,
+    action: str,
+    run_id: str,
+    reason: str,
+    idempotency_key: str,
+    out_root: Path,
+    actor_id: str,
+) -> int:
+    run_dir = out_root / run_id
+    if not run_dir.exists():
+        print(f"ERROR: run_id '{run_id}' not found under {out_root}", file=sys.stderr)
+        return 2
+
+    run_json = run_dir / "run.json"
+    if run_json.exists():
+        run_obj = load_json(run_json)
+        terminal = run_obj.get("terminal_status")
+        if terminal in TERMINAL_STATUSES:
+            print(
+                f"[recursive-loop] run_id={run_id} already terminal ({terminal}); action '{action}' ignored.",
+                file=sys.stderr,
+            )
+            return status_exit_code(terminal)
+
+    control_path = control_path_for(run_dir)
+    if control_path.exists():
+        control = load_json(control_path)
+    else:
+        control = {
+            "schema_version": "1.0",
+            "run_id": run_id,
+            "state": "active",
+            "updated_at": iso_now(),
+            "updated_by": actor_id,
+            "requested_action": None,
+            "processed_requests": [],
+        }
+
+    pending = control.get("requested_action")
+    if pending:
+        if pending.get("idempotency_key") == idempotency_key and pending.get("action") == action:
+            print(f"[recursive-loop] action already queued for run_id={run_id} (idempotent replay)")
+            return 0
+        print(
+            f"ERROR: run_id={run_id} already has pending action '{pending.get('action')}'.",
+            file=sys.stderr,
+        )
+        return 2
+
+    request = {
+        "action": action,
+        "reason": reason,
+        "idempotency_key": idempotency_key,
+        "requested_at": iso_now(),
+        "requested_by": actor_id,
+    }
+    processed = list(control.get("processed_requests", []))
+    write_control_state(
+        path=control_path,
+        run_id=run_id,
+        state="active",
+        actor_id=actor_id,
+        requested_action=request,
+        processed_requests=processed,
+    )
+    print(f"[recursive-loop] queued {action} for run_id={run_id}")
+    return 0
+
+
 def run_loop(args: argparse.Namespace) -> int:
     profile = load_profile(Path(args.profile_file).resolve())
+    out_root = Path(args.out_root).resolve()
+
+    existing = find_existing_run_by_idempotency(out_root, args.idempotency_key)
+    if existing is not None:
+        run_dir, run_obj = existing
+        existing_status = str(run_obj.get("terminal_status") or "failed")
+        print(
+            f"[recursive-loop] idempotency replay: key={args.idempotency_key} run_id={run_obj.get('run_id')}"
+        )
+        print(f"[recursive-loop] out_dir={run_dir}")
+        return status_exit_code(existing_status)
 
     run_seed = args.seed if args.seed is not None else int(stable_unit_float(args.objective, profile.profile_id) * 10_000_000)
     rng = random.Random(run_seed)
 
     run_id = f"run_{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')}_{sha256_text(profile.profile_id + args.objective)[:6]}"
-    out_dir = Path(args.out_root).resolve() / run_id
+    out_dir = out_root / run_id
     out_dir.mkdir(parents=True, exist_ok=True)
+    control_path = control_path_for(out_dir)
+    write_control_state(path=control_path, run_id=run_id, state="active", actor_id=args.actor_id)
     debug_dir = out_dir / "debug"
     if args.emit_debug_artifacts:
         debug_dir.mkdir(parents=True, exist_ok=True)
@@ -334,6 +470,26 @@ def run_loop(args: argparse.Namespace) -> int:
     stop_reason = "budget_exhausted"
 
     for iteration_id in range(1, max_iterations + 1):
+        if control_path.exists():
+            control_obj = load_json(control_path)
+            requested_action = control_obj.get("requested_action")
+            if requested_action:
+                action = requested_action.get("action")
+                if action in {"escalate_run", "abort_run"}:
+                    processed_requests = list(control_obj.get("processed_requests", []))
+                    processed_requests.append(requested_action)
+                    write_control_state(
+                        path=control_path,
+                        run_id=run_id,
+                        state="active",
+                        actor_id=args.actor_id,
+                        requested_action=None,
+                        processed_requests=processed_requests,
+                    )
+                    terminal_status = "escalated" if action == "escalate_run" else "aborted"
+                    stop_reason = "escalated" if action == "escalate_run" else "aborted"
+                    break
+
         now_ms = int((time.time() - started_at) * 1000)
         if now_ms > max_elapsed_ms or total_tokens > max_tokens:
             terminal_status = "failed"
@@ -537,6 +693,7 @@ def run_loop(args: argparse.Namespace) -> int:
         },
         "prompt_hash": sha256_text(args.objective),
         "created_by": args.actor_id,
+        "idempotency_key": args.idempotency_key,
     }
 
     promotion_decision = {
@@ -579,25 +736,40 @@ def run_loop(args: argparse.Namespace) -> int:
         write_jsonl(debug_dir / "events.jsonl", events)
         (debug_dir / "summary.md").write_text(summary_md, encoding="utf-8")
 
+    control_obj = load_json(control_path) if control_path.exists() else {}
+    write_control_state(
+        path=control_path,
+        run_id=run_id,
+        state="terminal",
+        actor_id=args.actor_id,
+        requested_action=control_obj.get("requested_action"),
+        processed_requests=list(control_obj.get("processed_requests", [])),
+    )
+
     print(f"[recursive-loop] run_id={run_id}")
     print(f"[recursive-loop] status={terminal_status} stop_reason={stop_reason}")
     print(f"[recursive-loop] out_dir={out_dir}")
 
-    if terminal_status == "passed":
-        return 0
-    if terminal_status == "escalated":
-        return 3
-    if terminal_status == "aborted":
-        return 4
-    return 2
+    return status_exit_code(terminal_status)
 
 
 def build_parser() -> argparse.ArgumentParser:
-    p = argparse.ArgumentParser(description="Run bounded recursive skill loop (MVP scaffold)")
-    p.add_argument("--profile-file", required=True, help="Path to profile JSON")
-    p.add_argument("--objective", required=True, help="Run objective text")
+    p = argparse.ArgumentParser(description="Recursive skill loop operator primitives")
+    p.add_argument(
+        "action",
+        nargs="?",
+        default="start_run",
+        choices=["start_run", "escalate_run", "abort_run"],
+        help="Operator action primitive (default: start_run)",
+    )
+    p.add_argument("--profile-file", help="Path to profile JSON (start_run)")
+    p.add_argument("--objective", help="Run objective text (start_run)")
     p.add_argument("--out-root", default="artifacts/skill-graphs/runs", help="Output root directory")
     p.add_argument("--actor-id", default="recursive-skill-loop", help="Actor id for artifacts/events")
+    p.add_argument("--idempotency-key", help="Idempotency key for start/escalate/abort")
+    p.add_argument("--run-id", help="Target run_id for escalate_run/abort_run")
+    p.add_argument("--reason-code", help="Escalation reason code (escalate_run)")
+    p.add_argument("--reason", help="Abort reason (abort_run)")
     p.add_argument("--seed", type=int, help="Optional deterministic seed override")
     p.add_argument("--max-iterations", type=int, help="Override max iterations")
     p.add_argument("--max-elapsed-ms", type=int, help="Override elapsed budget")
@@ -610,12 +782,55 @@ def build_parser() -> argparse.ArgumentParser:
     return p
 
 
+def validate_args(args: argparse.Namespace) -> Optional[str]:
+    if not args.idempotency_key:
+        return "--idempotency-key is required"
+
+    if args.action == "start_run":
+        if not args.profile_file:
+            return "--profile-file is required for start_run"
+        if not args.objective:
+            return "--objective is required for start_run"
+        return None
+
+    if not args.run_id:
+        return "--run-id is required for escalate_run/abort_run"
+
+    if args.action == "escalate_run" and not args.reason_code:
+        return "--reason-code is required for escalate_run"
+    if args.action == "abort_run" and not args.reason:
+        return "--reason is required for abort_run"
+    return None
+
+
 def main(argv: Optional[List[str]] = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
+    validation_error = validate_args(args)
+    if validation_error:
+        print(f"ERROR: {validation_error}", file=sys.stderr)
+        return 2
 
     try:
-        return run_loop(args)
+        if args.action == "start_run":
+            return run_loop(args)
+        if args.action == "escalate_run":
+            return queue_terminal_action(
+                action="escalate_run",
+                run_id=args.run_id,
+                reason=args.reason_code,
+                idempotency_key=args.idempotency_key,
+                out_root=Path(args.out_root).resolve(),
+                actor_id=args.actor_id,
+            )
+        return queue_terminal_action(
+            action="abort_run",
+            run_id=args.run_id,
+            reason=args.reason,
+            idempotency_key=args.idempotency_key,
+            out_root=Path(args.out_root).resolve(),
+            actor_id=args.actor_id,
+        )
     except Exception as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 1

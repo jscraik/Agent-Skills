@@ -1,0 +1,36 @@
+name: recursive-operator-parity
+
+on:
+  pull_request:
+    paths:
+      - "docs/plans/2026-02-19-feat-recursive-skill-self-improvement-loop-plan.md"
+      - "utilities/skill-creator/scripts/recursive_skill_loop.py"
+      - "scripts/validate_recursive_operator_parity.py"
+      - ".github/workflows/recursive-operator-parity.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "docs/plans/2026-02-19-feat-recursive-skill-self-improvement-loop-plan.md"
+      - "utilities/skill-creator/scripts/recursive_skill_loop.py"
+      - "scripts/validate_recursive_operator_parity.py"
+      - ".github/workflows/recursive-operator-parity.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-operator-parity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Validate plan-declared operator actions are implemented
+        run: |
+          python3 scripts/validate_recursive_operator_parity.py
+
