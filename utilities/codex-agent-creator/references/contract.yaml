@@ -1,0 +1,21 @@
+purpose: >
+  Define expected behavior for creating, installing, and validating Codex multi-agent role configs.
+schema_version: 1.0
+triggers:
+  - user asks to create, update, or troubleshoot a custom agent role
+inputs:
+  - model
+  - model_reasoning_effort
+  - developer_instructions
+  - install scope (global or project)
+  - role name, description, and role config file path
+outputs:
+  - updated role config file
+  - updated config.toml role declaration
+  - validation result summary
+non_goals:
+  - editing unrelated codex config sections
+  - guessing missing required role inputs
+risks:
+  - unsupported role keys; mitigated by schema/key validation
+  - path mistakes; mitigated by explicit path confirmation

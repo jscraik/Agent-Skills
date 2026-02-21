@@ -1,7 +1,6 @@
 ---
 name: markdown-converter
-description: "Convert files to Markdown using \u2014 no installation required.. Use\
-  \ when Use this skill when the task matches its description and triggers.."
+description: "Convert source files into Markdown outputs using the bundled converter workflow. Use when a user asks to transform documents, notes, or technical files into clean Markdown format."
 ---
 
 # Markdown Converter

@@ -20,18 +20,45 @@ Closes #[PROMPT: #123] (or explain why none exists)
 - [PROMPT: e.g. pnpm lint]
 - [PROMPT: e.g. pnpm build]
 
-## Risk & rollout
+## Risk & rollback
 
 Risk level: low / medium / high
 
 Rollback plan: [PROMPT: Concrete rollback steps if needed.]
 
-## Security / privacy
+## Security / privacy impact
 
 - [ ] No security impact
-- [ ] Security impact (describe at a high level; do NOT disclose vulnerabilities publicly)
+- [ ] Security impact (describe at high level; do NOT disclose vulnerabilities publicly)
 
+Security/AI risk section:
 [PROMPT: High-level description if security impact checked.]
+
+## Governance evidence
+
+### Threat model
+
+- [ ] Threat model exists: [PROMPT: path or short summary]
+- [ ] Threat model rationale: [PROMPT: why existing threat model still applies OR new threat changes are required]
+
+### AI and data impact
+
+- [ ] AI/tool execution impact: [PROMPT: new model calls, tool calls, prompt surfaces]
+- [ ] Data handling impact: [PROMPT: what user data enters/leaves the system]
+- [ ] Privacy / logging changes: [PROMPT: what is logged, masked, retained]
+
+### Verification evidence
+
+- [ ] Test evidence included (commands + results)
+- [ ] Dependency / secret checks run where applicable
+- [ ] PR body includes release artifact notes:
+  - [ ] SBOM added (if release path changed)
+  - [ ] Provenance/signature artifacts noted (if release path changed)
+
+## Review of exception/incident updates
+
+- [ ] New control bypasses documented in `GOVERNANCE/exceptions.md` (if any)
+- [ ] Related incidents documented in `GOVERNANCE/incidents.md` (if any)
 
 ## AI assistance
 

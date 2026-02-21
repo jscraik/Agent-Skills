@@ -1,0 +1,29 @@
+{
+  "budget": {
+    "max_elapsed_ms": 120000,
+    "max_iterations": 4,
+    "max_tokens": 12000
+  },
+  "counters": {
+    "consecutive_passes": 1,
+    "iterations_completed": 2,
+    "tokens_used": 181
+  },
+  "created_by": "recursive-skill-loop",
+  "duration_ms": 0,
+  "finished_at": "2026-02-20T14:47:36Z",
+  "profile_id": "ui-ux-creative-coding",
+  "prompt_hash": "eaa11c4fcb6fe83e3c2a4f77c18885ece81fd8f93c1060ba9c6a9f3c6b648e21",
+  "run_id": "run_20260220T144736Z_425b7a",
+  "schema_version": "1.0",
+  "scope_profile": "ui",
+  "scope_skill": "ui-ux-creative-coding",
+  "started_at": "2026-02-20T14:47:36Z",
+  "stop_reason": "pass",
+  "terminal_status": "passed",
+  "versions": {
+    "evaluator_version": "v1",
+    "persona_set_id": "ui-v1-checkpoint",
+    "rubric_version": "2026-02-19"
+  }
+}

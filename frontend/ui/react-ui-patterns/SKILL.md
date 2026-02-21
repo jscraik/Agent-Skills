@@ -1,8 +1,6 @@
 ---
 name: react-ui-patterns
-description: Provide concrete, example-driven guidance for React UI composition, state,
-  routing, and component patterns in a TypeScript + Tailwind + Radix stack.. Use when
-  Building or refactoring React screens and components..
+description: "Provide concrete React UI composition patterns for TypeScript + Tailwind + Radix, including state, routing, and component structure examples. Use when building or refactoring React screens and components for maintainability."
 ---
 
 # React UI Patterns

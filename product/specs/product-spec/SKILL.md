@@ -89,7 +89,7 @@ Contract:
 2. Stage 1: draft foundation spec using `design/references/foundation-spec-template.md`.
 3. Stage 2: draft UX spec using `design/references/ux-spec-template.md`.
 4. Stage 3: draft build plan using `design/references/build-plan-template.md`.
-5. Stage 4: run quality gates (`design/references/spec-linter-checklist.md`, optional local scripts).
+5. Stage 4: run quality gates (`references/spec-linter-checklist.md`, optional local scripts).
 
 #### `clarify_prd` workflow
 
@@ -139,7 +139,7 @@ Additional references:
 
 Fail fast: **stop at the first failed gate and do not proceed**.
 
-- Validate structure and evidence quality against `design/references/spec-linter-checklist.md`.
+- Validate structure and evidence quality against `references/spec-linter-checklist.md`.
 - Confirm MVP scope and explicit non-scope.
 - Confirm success metrics, owner, and measurement window.
 - Confirm tests map to acceptance criteria (especially in `testplan` mode).

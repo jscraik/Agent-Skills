@@ -32,7 +32,7 @@ Ask only what is needed to avoid blocking:
 
 ## Tooling preflight (required before repo commands)
 - Verify required local tools first: `command -v rg && command -v fd`.
-- If PATH is flaky, try absolute paths before failing (`/opt/homebrew/bin/rg`, `/opt/homebrew/bin/fd`).
+- If PATH is flaky, use a discovery fallback before failing (for example: `RG_BIN="$(command -v rg || true)"; [ -z "$RG_BIN" ] && for p in /opt/homebrew/bin/rg /usr/local/bin/rg /usr/bin/rg; do [ -x "$p" ] && RG_BIN="$p" && break; done`; repeat for `fd`).
 - If either tool is still missing, stop and report the missing binary instead of continuing with failing commands.
 - Keep analysis local unless the user explicitly asks for network lookups.
 

@@ -1,9 +1,6 @@
 ---
 name: ui-visual-regression
-description: Run a minimal, repeatable UI visual regression pipeline (Storybook build
-  + Playwright capture + Argos diff) and iterate on targeted UI fixes until visual
-  diffs pass. If design-system guidance, tokens, or component standards are needed,
-  consult the skill.. Use when Investigating visual diffs in Storybook/Argos pipelines..
+description: "Review and validate UI visual regression diffs (Storybook + Playwright capture + Argos) when snapshot changes or layout regressions appear."
 ---
 
 # Ui Visual Regression

@@ -67,6 +67,7 @@ If either check fails, use the troubleshooting section below.
 - `scripts/sync_skills.sh` refreshes symlinks and regenerates `/SKILL.md`.
 - The sync script links `/skills` into:
   - `~/.claude/skills`
+  - `~/.agent/skills`
   - `~/.agents/skills`
   - `~/.gemini/antigravity/skills`
 
@@ -112,7 +113,7 @@ python3 scripts/docs_lint.py --mode warn --config docs-policy.json
 ### Symlink targets are missing
 
 - Re-run `bash scripts/sync_skills.sh`.
-- Check write permissions for `~/.claude/skills`, `~/.agents/skills`, and `~/.gemini/antigravity/skills`.
+- Check write permissions for `~/.claude/skills`, `~/.agent/skills`, `~/.agents/skills`, and `~/.gemini/antigravity/skills`.
 
 ## Support and security
 

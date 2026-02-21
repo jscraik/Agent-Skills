@@ -1,9 +1,6 @@
 ---
 name: og-image-creator
-description: Generate authentic, brand-aligned Open Graph images by understanding
-  your codebase first, then creating contextually appropriate images for each route
-  using Playwright and your existing components.. Use when Use this skill when the
-  task matches its description and triggers..
+description: "Generate brand-aligned Open Graph images for existing routes by inspecting a web codebase and rendering assets with Playwright components. Use when a user asks for route-specific OG image generation or refresh in an existing app."
 ---
 
 # OG Image Creator

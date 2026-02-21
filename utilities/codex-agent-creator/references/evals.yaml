@@ -1,0 +1,16 @@
+cases:
+  - name: create-minimal-role
+    prompt: "Create a global role named researcher with model gpt-5.3-codex, medium reasoning, and read-only research instructions."
+    acceptance:
+      - type: regex
+        value: "(?i)(model_reasoning_effort|developer_instructions|install_role\\.sh|validate_role\\.sh)"
+  - name: reject-missing-required-inputs
+    prompt: "Create a role but I don't care which model/reasoning/instructions."
+    acceptance:
+      - type: regex
+        value: "(?i)(need|missing|required|model|reasoning|developer instructions)"
+  - name: advanced-role-with-restrictions
+    prompt: "Create a project-scoped role with workspace-write sandbox, no network, and restricted writable roots."
+    acceptance:
+      - type: regex
+        value: "(?i)(sandbox_mode|network_access|writable_roots|project)"

@@ -1,0 +1,50 @@
+name: recursive-promotion-gate
+
+on:
+  pull_request:
+    paths:
+      - "artifacts/skill-graphs/runs/**/promotion_decision.json"
+      - "artifacts/skill-graphs/runs/**/iteration_journal.jsonl"
+      - "artifacts/skill-graphs/runs/**/run.json"
+      - "scripts/human_promote_recursive_run.sh"
+      - "scripts/validate_recursive_promotions.sh"
+      - "utilities/skill-creator/scripts/validate_recursive_promotion.py"
+      - ".github/workflows/recursive-promotion-gate.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-promotion-artifacts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Validate changed promotion decisions
+        if: github.event_name == 'pull_request'
+        run: |
+          bash scripts/validate_recursive_promotions.sh \
+            --changed-only \
+            --base-sha "${{ github.event.pull_request.base.sha }}" \
+            --head-sha "${{ github.event.pull_request.head.sha }}" \
+            --report-json artifacts/skill-graphs/pilot/promotion-validation-report.json
+
+      - name: Validate all promotion decisions (manual)
+        if: github.event_name != 'pull_request'
+        run: |
+          bash scripts/validate_recursive_promotions.sh \
+            --report-json artifacts/skill-graphs/pilot/promotion-validation-report.json
+
+      - name: Upload promotion validation report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: recursive-promotion-validation
+          path: artifacts/skill-graphs/pilot/promotion-validation-report.json

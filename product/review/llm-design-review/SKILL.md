@@ -1,9 +1,6 @@
 ---
 name: llm-design-review
-description: Structure a multidisciplinary design review for LLM-powered products,
-  producing actionable risks, fixes, and evidence gaps across UX, architecture, AI
-  safety, and operations.. Use when Use this skill when the task matches its description
-  and triggers..
+description: "Run a multidisciplinary design review for LLM-powered products and produce actionable risks, fixes, and evidence gaps across UX, architecture, safety, and ops. Use when a user asks for an AI product design review or pre-launch critique."
 ---
 
 # LLM Design Review
