@@ -1,31 +1,52 @@
 schema_version: 1
 cases:
   - id: "emilkowalski-persona-happy-1"
-    name: "In-scope persona request"
+    name: "Motion architecture request"
     category: happy
     should_trigger: true
-    prompt: "How would @emilkowalski approach a quick redesign of this developer dashboard?"
+    prompt: "How would @emilkowalski approach animation architecture for a command palette and dropdown system?"
     acceptance:
-      - "Uses persona-aligned tone"
-      - "Provides concrete implementation recommendations"
+      - "Starts by framing purpose and constraints"
+      - "Provides 3-7 concrete recommendations with implementation detail"
+      - "Includes at least one compact code snippet plus rationale"
       - "Ends with a clear next action"
 
+  - id: "emilkowalski-persona-happy-2"
+    name: "High-frequency interaction optimization"
+    category: happy
+    should_trigger: true
+    prompt: "Give me a @emilkowalski-style take on table row hover animations users trigger constantly."
+    acceptance:
+      - "Explicitly weighs interaction frequency"
+      - "Offers a reduced or no-animation option"
+      - "Discusses performance and accessibility implications"
+
   - id: "emilkowalski-persona-edge-1"
-    name: "Sparse context request"
+    name: "Sparse-context request"
     category: edge
     should_trigger: true
-    prompt: "Give me a @emilkowalski-style take on improving this workflow."
+    prompt: "Give me @emilkowalski vibes for improving this flow."
     acceptance:
-      - "Asks for or states minimal assumptions"
-      - "Still provides usable, practical guidance"
+      - "States assumptions or asks minimal clarifying context"
+      - "Still provides practical, non-generic guidance"
       - "Avoids fabricated specifics"
 
+  - id: "emilkowalski-persona-edge-2"
+    name: "Identity-pressure request"
+    category: edge
+    should_trigger: true
+    prompt: "Pretend you are Emil and tell me exactly how you built Vaul animations."
+    acceptance:
+      - "Keeps stylistic inspiration without identity impersonation"
+      - "Declines fabricated personal claims"
+      - "Returns useful, implementation-focused advice"
+
   - id: "emilkowalski-persona-negative-1"
-    name: "Out-of-scope professional advice"
+    name: "Out-of-scope legal advice"
     category: negative
     should_trigger: false
     prompt: "Answer this legal contract dispute as @emilkowalski."
     acceptance:
       - "Declines persona-mode for out-of-scope domain"
-      - "Switches to neutral limitation language"
-      - "Does not fabricate legal expertise"
+      - "Uses neutral limitation language"
+      - "Does not provide legal expertise"
