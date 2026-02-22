@@ -1,15 +1,31 @@
-purpose: Interface Craft by Josh Puckett helps build polished, animated React interfaces
-  using Storyboard Animation, DialKit tuning panels, and Design Critique. Use when
-  requests involve motion design, animation sequencing, live tuning controls, or structured
-  UI critique and polish.
-schema_version: '1.0'
+purpose: Interface Craft helps design and refine high-quality interfaces through storyboarded
+  motion, live tuning controls, critique workflows, conceptual range/depth thinking,
+  concern-focused prototyping, reverse-engineering practice, and industry-standard benchmarking.
+schema_version: '1.1'
 triggers:
-- When requests match interface-craft scope and intent.
+- Build or refactor staged motion animation in React/Motion.
+- Add live parameter tuning with DialKit.
+- Critique and refine UI quality with concrete observations.
+- Explore structurally different concept directions before implementation.
+- Push one selected concept to higher quality through iterative depth.
+- Isolate one design concern with minimal-fidelity prototypes.
+- Recreate inspiring interactions to learn underlying techniques.
+- Benchmark against platform/category industry standards.
 inputs:
 - user request details
+- screenshots, code snippets, or file paths when available
+- stated quality goals or facets (optional)
 outputs:
-- structured response or artifacts defined by the skill
+- storyboarded animation structure and config constants
+- copy-paste DialKit config + usage
+- structured critique report with ranked opportunities
+- conceptual range options and recommendation
+- conceptual depth iteration plan and validation signals
+- concern-isolated prototype plan
+- industry baseline gap analysis
 non_goals:
-- out-of-scope requests outside the skill boundary
+- unrelated backend/system requests with no interface craft component
+- generic implementation work that does not require this framework
 risks:
-- missing context; mitigated by clarifying questions and explicit assumptions
+- missing visual context; mitigated by labeling inferred vs observed findings
+- premature optimization without range/depth checks; mitigated by workflow sequencing

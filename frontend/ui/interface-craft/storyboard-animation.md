@@ -6,6 +6,12 @@ A pattern for writing and refactoring React animations into a human-readable sto
 
 ---
 
+## Table of Contents
+- [When to use](#when-to-use)
+- [The Storyboard Pattern](#the-storyboard-pattern)
+- [How to apply](#how-to-apply)
+- [Quick checklist](#quick-checklist)
+
 ## When to use
 
 - User says "animate", "transition", "entrance animation", "storyboard", etc.
@@ -196,3 +202,4 @@ Before finishing, verify:
 - [ ] Repeated elements use `.map()` over a data array
 - [ ] Stage values in JSX are `>=` checks (allows stages to be additive)
 - [ ] `replayTrigger` in the dependency array for dev/debug replay support
+- [ ] Concern isolation was respected (interaction proof first, full visual fidelity second)

@@ -1,56 +1,57 @@
 ---
 name: interface-craft
-description: Interface Craft by Josh Puckett helps build polished, animated React
-  interfaces using Storyboard Animation, DialKit tuning panels, and Design Critique.
-  Use when requests involve motion design, animation sequencing, live tuning controls,
-  or structured UI critique and polish.
+description: Interface Craft by Josh Puckett helps build polished React interfaces with storyboard motion, live tuning controls, critique frameworks, and concept workflows; use when requests involve UI motion, critique, refinement, concept exploration, or interaction craft.
 ---
 
 # Interface Craft
 
 **By Josh Puckett**
 
-A toolkit for building polished, animated interfaces. Write animations you can read like a script, then tune them with live controls.
+A toolkit for building polished, animated interfaces. Write motion like a script, tune values live, critique with specificity, explore conceptual range, then push depth with uncommon care.
 
 ---
+
+## Table of Contents
+- [Skills](#skills)
+- [Quick Start](#quick-start)
+- [Try It Out](#try-it-out)
+- [Sub-Skill Routing](#sub-skill-routing)
+- [Design Principles](#design-principles)
+- [Reference Map](#reference-map)
+- [When to use](#when-to-use)
+- [Anti-patterns](#anti-patterns)
+- [Inputs](#inputs)
+- [Outputs](#outputs)
+- [Procedure](#procedure)
+- [Examples](#examples)
+- [Constraints / Safety](#constraints--safety)
+- [Validation](#validation)
 
 ## Skills
 
 | Skill | When to Use | Invoke |
 | --- | --- | --- |
-| [Storyboard Animation](storyboard-animation.md) | Writing or refactoring multi-stage animations into a human-readable DSL | `/interface-craft storyboard` or describe an animation |
-| [DialKit](dialkit.md) | Adding live control panels to tune animation/style values | `/interface-craft dialkit` or mention dials/sliders/controls |
-| [Design Critique](design-critique.md) | Systematic UI critique of a screenshot, component, or page | `/interface-craft critique` or paste a screenshot for review |
+| [Storyboard Animation](storyboard-animation.md) | Writing or refactoring multi-stage animations into a readable, stage-driven DSL | `/interface-craft storyboard` or describe an animation |
+| [DialKit Live Tuning](dialkit.md) | Building real-time control panels to feel value changes instantly and explore variants | `/interface-craft dialkit` or mention sliders/dials/controls |
+| [Design Critique](design-critique.md) | Systematic UI critique using noticing, expectation gaps, and uncommon-care opportunities | `/interface-craft critique` or paste a screenshot |
+| [Conceptual Range](conceptual-range.md) | Generating structurally different UX directions before going deep on implementation | `/interface-craft range` or ask for alternatives/concepts |
+| [Conceptual Depth](conceptual-depth.md) | Refining one chosen concept through progressive quality levels (1→10) | `/interface-craft depth` or ask to push/polish/refine further |
+| [Separation of Concerns](separation-of-concerns.md) | Isolating one design question at a time with right-fidelity prototypes | `/interface-craft concerns` or ask for a minimal focused prototype |
+| [Recreate Everything](recreate-everything.md) | Reverse-engineering inspiring interactions fast to learn techniques and expand your toolbelt | `/interface-craft recreate` or ask “how did they do this?” |
+| [Industry Standards](industry-standards.md) | Benchmarking quality against platform/category expectations before innovating | `/interface-craft standards` or ask where the baseline bar is |
 
 ## Quick Start
 
 ### Storyboard Animation
-
-Turn any animation into a readable storyboard with named timing, config objects, and stage-driven sequencing:
-
 ```tsx
-/* ─────────────────────────────────────────────────────────
- * ANIMATION STORYBOARD
- *
- *    0ms   waiting for scroll into view
- *  300ms   card fades in, scale 0.85 → 1.0
- *  900ms   heading highlights
- * 1500ms   rows slide up (staggered 200ms)
- * ───────────────────────────────────────────────────────── */
-
 const TIMING = {
-  cardAppear:  300,   // card fades in
-  heading:     900,   // heading highlights
-  rows:        1500,  // rows start staggering
-};
+  cardAppear: 300,
+  heading: 900,
+  rows: 1500,
+}
 ```
 
-See [storyboard-animation.md](storyboard-animation.md) for the full pattern spec.
-
 ### DialKit
-
-Generate live control panels for tuning values in real time:
-
 ```tsx
 const params = useDialKit('Card', {
   scale: [1, 0.5, 2],
@@ -59,99 +60,111 @@ const params = useDialKit('Card', {
 })
 ```
 
-See [dialkit.md](dialkit.md) for all control types and patterns.
+### Range → Depth
+Use conceptual range when the core solution may be wrong. Once a direction is chosen, use conceptual depth to push quality beyond “good enough.”
+
+## Try It Out
+
+- **Build and tune a component**  
+  “Build a notification toast that slides in from the top with a spring animation. Add DialKit controls for spring, opacity, and vertical offset so I can tune it in real time.”
+
+- **Get a design critique**  
+  “Review the settings page component for design quality. Look at hierarchy, spacing, color usage, and interaction patterns. What would you improve?”
+
+- **Choreograph a complex animation**  
+  “Create a page transition where the old content fades out, then the new content slides up with staggered children. Use the storyboard animation pattern for sequencing and add DialKit controls for each timing value.”
 
 ## Sub-Skill Routing
 
 When the user invokes `/interface-craft`:
 
-1. **With `storyboard` argument or animation-related context** → Load and follow [storyboard-animation.md](storyboard-animation.md)
-2. **With `dialkit` argument or control-panel-related context** → Load and follow [dialkit.md](dialkit.md)
-3. **With `critique` argument, a pasted image, or review-related context** → Load and follow [design-critique.md](design-critique.md)
-4. **With a file path** → Read the file, detect whether it needs storyboard refactoring, dialkit controls, or a design critique, and apply the appropriate skill
-5. **With a plain-English description of an animation** → Use storyboard-animation to write it
-6. **Ambiguous** → Ask which skill to use
+1. **Storyboard context** (`storyboard`, animation sequencing, motion timing cleanup) → [storyboard-animation.md](storyboard-animation.md)
+2. **Dial controls context** (`dialkit`, sliders, tune, tweak, control panel) → [dialkit.md](dialkit.md)
+3. **Critique context** (`critique`, `review`, screenshot/image feedback) → [design-critique.md](design-critique.md)
+4. **Range context** (`alternatives`, `options`, `breadth`, `concept exploration`, `don’t commit too early`) → [conceptual-range.md](conceptual-range.md)
+5. **Depth context** (`push further`, `polish`, `iterate`, `1 to 10`, `world class`) → [conceptual-depth.md](conceptual-depth.md)
+6. **Concern-isolation context** (`minimal prototype`, `just test interaction`, `wireframe fidelity`, `one question`) → [separation-of-concerns.md](separation-of-concerns.md)
+7. **Recreate context** (`how did they do this`, `recreate`, `reverse engineer interaction`) → [recreate-everything.md](recreate-everything.md)
+8. **Standards context** (`industry standard`, `is this below baseline`, `platform expectations`) → [industry-standards.md](industry-standards.md)
+9. **File path only** → Inspect file, select best matching workflow (or combine critique + range + depth)
+10. **Ambiguous** → Ask which workflow they want first
 
 ## Design Principles
 
-1. **Readable over clever** — Anyone should be able to scan the top of a file and understand the animation sequence without reading implementation code
-2. **Tunable by default** — Every value that affects timing or appearance should be a named constant, trivially adjustable
-3. **Data-driven** — Repeated elements use arrays and `.map()`, not copy-pasted blocks
-4. **Stage-driven** — A single integer state drives the entire sequence; no scattered boolean flags
-5. **Spring-first** — Prefer spring physics over duration-based easing for natural motion
+1. **Readable over clever** — anyone should scan the top of a file and understand the flow
+2. **Tunable by default** — every critical value should be named and adjustable
+3. **Data-driven structures** — repeated elements come from arrays and `.map()`
+4. **Stage-driven motion** — one stage state coordinates sequence timing
+5. **Noticing before fixing** — capture concrete observations before prescribing changes
+6. **Range before commitment** — generate structurally different concepts before optimizing a single one
+7. **Depth after selection** — once a direction is selected, iterate deliberately from baseline to exceptional
+8. **Uncommon care** — improve edge cases, error paths, and overlooked moments that build trust
+9. **Concern isolation** — resolve one design question at a time at the right level of fidelity
+10. **Recreate to learn** — replicate inspiring patterns quickly to build capability
+11. **Meet the baseline, then innovate** — respect platform/category standards before deviation
+12. **Tools must match the medium** — favor adaptive, responsive, data-real workflows over static mock certainty
+13. **Design as systems** — components, constraints, and reusable primitives over one-off screens
 
-## Anti-patterns
+## Reference Map
 
-- Skipping investigation and jumping directly to fixes.
-- Making claims without evidence, logs, or reproducible steps.
-- Mixing unrelated workstreams in a single execution path.
-
-## Constraints / Safety
-
-- Redact secrets, tokens, credentials, and PII by default; never echo raw environment values.
-- Prefer safe defaults and avoid irreversible changes without explicit confirmation.
-
-## Inputs
-
-- User task context and target environment.
-- Relevant constraints, permissions, and preferences required to execute safely.
-
-## Outputs
-
-- A concrete next-step response with explicit, reproducible actions.
-- A short verification checklist and caveats for the user.
-
-## Procedure
-
-1. Verify scope and constraints before taking action.
-2. Execute the minimal safe path first.
-3. Validate intermediate state before making changes.
-
-## Validation
-
-- Fail fast: stop at the first failed check and do not continue.
-- Re-run the required checks before proceeding to the next step.
-- Report any failed check and requested follow-up actions clearly.
+- [Noticing + critique lens](design-critique.md)
+- [Concept generation breadth](conceptual-range.md)
+- [Refinement and quality ladder](conceptual-depth.md)
+- [Focused prototype strategy](separation-of-concerns.md)
+- [Reverse-engineering workflow](recreate-everything.md)
+- [Baseline quality benchmarking](industry-standards.md)
+- [Live tuning panel patterns](dialkit.md)
+- [Storyboard sequencing pattern](storyboard-animation.md)
+- [Principles summary](references/josh-principles.md)
+- [Refinement case patterns](references/refinement-case-studies.md)
+- [Persona style + corpus synthesis](references/persona-profile.md)
 
 ## When to use
 
-- Use this skill when the request matches the skill's intent and scope.
-- Do not use it when a different domain or higher-privilege workflow is required.
+- Use this skill for React/UI motion design, visual/interface critique, interaction refinement, and concept range/depth workflows.
+- Use this skill when users ask for better polish, clearer hierarchy, “how to make this feel better,” or to recreate notable interaction patterns.
+- Do not use this skill for backend-only optimization or non-UI infrastructure work.
+
+## Anti-patterns
+
+- Jumping to fixes before a noticing/diagnosis pass.
+- Treating cosmetic variants as conceptual range.
+- Overbuilding fidelity before resolving the core concern.
+- Ignoring platform/category baseline standards before innovating.
+
+## Inputs
+
+- User intent and target workflow (storyboard, dialkit, critique, range, depth, concerns, recreate, standards).
+- Interface artifact: screenshot, component path/code, or URL.
+- Platform/context constraints (web/iOS/etc.) and quality goals/facets (if provided).
+
+## Outputs
+
+- Structured critique and refinement plans, or implementation-ready motion/tuning snippets.
+- Ranked opportunities and tradeoffs grounded in user impact.
+- Workflow-specific artifacts (range options, depth ladder, baseline gap assessment, recreate plan).
+
+## Procedure
+
+1. Route to the correct sub-skill based on user intent and evidence available.
+2. Run the minimum workflow needed to answer the user’s request.
+3. Validate output against baseline quality and stated goals before finalizing.
+
+## Examples
+
+- “Build and tune a notification toast with DialKit controls.”
+- “Critique this settings page and tell me what to improve first.”
+- “Give me 3 structurally different concepts before we commit.”
+- “Push this component from level 3 to level 8 with uncommon-care refinements.”
 
 ## Constraints / Safety
 
-- Redact secrets, tokens, credentials, and PII by default; never echo raw environment values.
-- Prefer safe defaults and avoid irreversible changes without explicit confirmation.
+- Redact secrets, tokens, credentials, and PII by default.
+- Prefer reversible edits and explicit assumptions.
+- Do not claim visual certainty from code-only review; label inferred observations.
 
-<!-- skill-score-boost-v1 -->
-## Philosophy and tradeoffs
-- Use this skill when consistent decision-making matters more than one-off execution because project context should drive the approach.
-- Principle and mindset: prioritize tradeoffs and constraints over rigid checklists; understand why each step exists.
-- Ask this to keep outcomes robust: Why is this the right default, and what could change this outcome?
-- How do we adapt if constraints shift?
-- What evidence is needed before choosing one path over another?
+## Validation
 
-## Anti-patterns and caveats
-- Avoid applying this playbook generically without checking repository-specific context.
-- **NEVER** skip required validation gates when behavior changes.
-- **DO NOT** use this skill as a rigid replacement for engineering judgment.
-- **DON'T** ignore warnings or assume one pattern fits all repos.
-- Common pitfall: treating anti-patterns as optional.
-- Incorrect assumptions here can lead to fragile guidance.
-- Warning: wrong sequencing can create avoidable regressions.
-
-## Variation and adaptation
-- Vary the workflow by team size, risk, and deployment target.
-- Use different strategies for small, medium, and large changes.
-- Adapt recommendations to the specific environment and avoid repetitive templates.
-- Avoid generic or cookie-cutter responses; craft context-specific alternatives.
-- Keep outputs diverse and not repetitive.
-- Converge on a custom path only after evidence review.
-- Different constraints should produce different, non-generic recommendations.
-
-## Empowering execution style
-- Be capable of exploring multiple options and enabling the team to make safe decisions.
-- Unlock confidence by explaining options and tradeoffs clearly.
-- Feel free to be creative while staying rigorous and precise.
-- Push boundaries with practical alternatives when simple recipes fail.
-- Enable outcomes-oriented problem solving.
+- Fail fast on missing context or blocked inputs.
+- Re-check that routing (storyboard/dialkit/critique/range/depth/concerns/recreate/standards) matches user intent.
+- For critique/range/depth outputs, prioritize structural and behavioral issues before visual polish.

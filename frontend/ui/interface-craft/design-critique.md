@@ -1,199 +1,168 @@
 # Design Critique
 
-A systematic interface critique skill based on Josh Puckett's methodology from Interface Craft. Analyzes UI screenshots or component code and delivers specific, actionable feedback organized by visual design, interface design, interaction consistency, and user context.
+A systematic critique workflow for interface quality. Start with noticing, then diagnose structure/behavior/visuals, and end with actionable opportunities grounded in user impact.
 
 ---
+
+## Table of Contents
+- [When to Use](#when-to-use)
+- [Input Modes](#input-modes)
+- [Critique Workflow](#critique-workflow)
+- [What to Notice](#what-to-notice)
+- [Facets of Quality Lens](#facets-of-quality-lens)
+- [Output Format](#output-format)
+- [Voice Rules](#voice-rules)
+- [Severity Guide](#severity-guide)
 
 ## When to Use
 
-Trigger on: "critique", "review", "feedback", "audit", "what's wrong", "improve", "polish", "refine", "redesign", "analyze this UI", "look at this", or when the user pastes a screenshot/image for evaluation.
+Trigger on: `critique`, `review`, `feedback`, `audit`, `polish`, `redesign`, `what feels off`, or any screenshot/component/page quality review request.
 
----
+Use this for **improving an existing interface**.  
+If the user needs fundamentally different concepts first, run [conceptual-range.md](conceptual-range.md) before deep critique.
 
 ## Input Modes
 
-### 1. Image / Screenshot (Primary)
-The user pastes or attaches a screenshot. Read the image with the Read tool, then critique what you see.
+1. **Image / screenshot (primary)** — critique what is actually visible.
+2. **File path (secondary)** — infer layout and interaction from code; mark all inferred points.
+3. **Live URL (tertiary)** — critique captured content and any supplied screenshots.
 
-### 2. File Path (Secondary)
-The user provides a component file path. Read the file, mentally render the layout from the JSX/TSX, and critique the structural and stylistic decisions in the code. Note: you cannot see the rendered output, so focus on what's inferrable — layout structure, spacing patterns, color choices, typography, hierarchy, component organization, and interaction patterns.
+## Critique Workflow
 
-### 3. Live URL (Tertiary)
-The user provides a URL. Use WebFetch to retrieve the page content, then critique based on the markup and any screenshots the user provides.
+### Step 0 — Context Frame
+Capture:
+- what this screen is
+- who it serves
+- emotional context (stressful, routine, high-stakes, playful)
+- whether the interface is being assessed with real/representative data
 
----
+### Step 1 — Noticing Pass (no fixes yet)
+Log observations only:
+- where attention lands first
+- where users might hesitate
+- where expectations break
+- where emotional tone shifts
+- what appears missing
 
-## Critique Methodology
+No prescriptions in this step.
 
-Follow this sequence. Do NOT skip steps or merge them. Each section should feel like its own focused lens.
+### Step 2 — First Impressions
+One direct paragraph on gut reaction. Be specific and decisive.
 
-### Step 0: Context
+### Step 3 — Multi-Lens Audit
+Audit in this order:
+1. **Visual design** — color intent, typography, spacing/alignment, shadows/strokes, icon consistency
+2. **Interface design** — focus mechanism, progressive disclosure, density, feedback, redundancy
+3. **Consistency & conventions** — pattern reuse, platform conventions, cohesive design language
+4. **User context** — does this reduce stress and build trust for this task?
 
-Before critiquing, briefly establish:
-- **What is this?** (app type, screen purpose, target user)
-- **What emotional context surrounds this task?** (stressful? casual? high-stakes? routine?)
+For each issue:
+> **[Issue]** — [specific observation]. [impact]. [better direction].
 
-This matters. A divorce filing app demands different care than a podcast player. Name the context so the critique respects it.
+### Step 4 — Uncommon Care Scan
+Identify details users remember:
+- edge cases
+- error states
+- recovery states
+- small moments where care can exceed expectation
 
-### Step 1: First Impressions
+Ask: “Where are we currently at good enough, and what would uncommon care look like?”
 
-Spend one paragraph on gut reaction. What stands out? What feels off? What's the overall impression? Be honest and direct — not tentative.
+### Step 5 — Less, but Better Pass
+Find unnecessary complexity:
+- remove redundant UI elements
+- reduce competing styles
+- simplify copy and affordances
 
-This is the "noticing" step. The skill of seeing what's actually in front of you, not what you expect to see.
+Prioritize fewer, clearer, better-executed elements over additional flourish.
 
-### Step 2: Visual Design
+### Step 6 — Recommendation Pack
+Deliver ranked opportunities with rationale and expected user impact.
 
-Audit these specific dimensions:
+### Step 7 — Industry Standard Gap
+Briefly classify current state:
+- below baseline
+- at baseline
+- above baseline
 
-| Dimension | What to Look For |
-| --- | --- |
-| **Color intentionality** | Is every color used with purpose? Or are colors applied as decoration without meaning? Look for: too many background colors, competing accents, colors that don't establish hierarchy. |
-| **Typographic hierarchy** | Is there a clear scale from most important to least? Count the distinct sizes/weights. Are headlines distinguished from body from labels? Is there unnecessary repetition of type styles? |
-| **Shadow & stroke quality** | Are shadows crisp or muddy? Are strokes too prominent, competing with content? Do outlines/borders add structure or noise? |
-| **Visual weight vs. importance** | Do the visually heaviest elements match what's semantically most important? Or do decorative elements steal attention from primary actions? |
-| **Spacing & alignment** | Is spacing consistent? Are elements aligned to a clear grid? Is there excess padding pushing content away from where it should be? |
-| **Icon consistency** | Are icons from the same family? Same weight/stroke width? Same optical size? Or is it a mix of styles? |
+Then specify what must change to reach baseline before innovation.
 
-For each issue found, use this structure:
-> **[Issue name]** — [Specific factual observation]. [Impact on user or experience]. [What it could be instead.]
+## What to Notice
 
-Be precise. Count things. Quote text. Name colors. Measure relative sizes. "There are four distinct background colors competing for attention" is better than "too many colors."
+Use these prompts:
+- **Moments of hesitation** — uncertainty about what happens next
+- **Expectation gaps** — mismatch between user mental model and UI response
+- **Emotional shifts** — where confidence drops or delight appears
+- **Missing elements** — what users look for but cannot find
+- **Assumptions** — hidden expectations the interface places on users
+- **Perceived craft** — cheap vs crafted visual/interaction signals
+- **Felt quality** — fast vs sluggish, durable vs fragile
 
-### Step 3: Interface Design
+## Facets of Quality Lens
 
-Audit these dimensions:
+When useful, ask the user to define 3–5 facets (e.g., crafted, fidgetable, authentic, expansive, inventive), then:
+1. score each facet (1–5 or 1–10)
+2. identify weakest facet
+3. focus next iteration on improving that facet
 
-| Dimension | What to Look For |
-| --- | --- |
-| **Focusing mechanism** | Is it clear where the user should look first? Is there a visual entry point? Or does everything compete for attention equally? |
-| **Progressive disclosure** | Is complexity revealed gradually, or is everything dumped on the user at once? Are there 40 things on screen when 5 would suffice? |
-| **Information density** | Is the density appropriate for the context? Data dashboards can be dense; onboarding should not be. |
-| **Expectation setting** | Does the user know what will happen next? Is progress communicated? Is scope clear? |
-| **Feedback & reward** | Does the interface acknowledge user actions? Are completed items celebrated or just checked off? Is there a sense of forward momentum? |
-| **Redundancy** | Are labels, titles, or descriptions repeating information the user already knows? Can anything be removed without losing meaning? |
-
-Frame issues as missed opportunities:
-> "We're missing an opportunity to [reward progress / reduce cognitive load / set expectations / etc.]"
-
-### Step 4: Consistency & Conventions
-
-| Dimension | What to Look For |
-| --- | --- |
-| **Pattern consistency** | Are similar actions handled the same way throughout? Or do interaction patterns shift without reason? |
-| **Platform conventions** | Does the design follow established platform patterns (iOS, Android, web)? Deviations should be intentional improvements, not accidents. |
-| **Component reuse** | Are there elements that look like they should be the same component but aren't? Inconsistent card styles, button treatments, list items? |
-| **Visual language cohesion** | Does the interface feel like one designer made it? Or does it feel assembled from different kits? |
-
-### Step 5: User Context
-
-This is where empathy meets analysis:
-
-- **How does this design make the user feel?** Name the emotion. "Overwhelmed," "confused," "unsupported," "rushed."
-- **What is the user's likely state of mind?** Anxious? Focused? Browsing casually? Under time pressure?
-- **Does the interface respect that state?** Or does it add unnecessary cognitive burden?
-- **What would "uncommon care" look like here?** What would surprise the user with thoughtfulness?
-
----
+Use facets to make critique and planning explicit, not subjective.
 
 ## Output Format
 
-Structure the critique as:
-
-```
+```md
 ## Context
-[1-2 sentences on what this is and who it's for]
+[screen purpose + user + emotional context]
+
+## Noticing Log
+[specific observations only]
 
 ## First Impressions
-[1 paragraph, direct and honest]
+[one direct paragraph]
 
 ## Visual Design
-[Each issue as: **Issue Name** — observation. Impact. Opportunity.]
+[issue -> impact -> direction]
 
 ## Interface Design
-[Each issue framed as missed opportunities]
+[issue -> impact -> direction]
 
 ## Consistency & Conventions
-[Pattern and convention issues]
+[issue -> impact -> direction]
 
 ## User Context
-[Empathy-driven observations]
+[empathy + cognitive/emotional load]
+
+## Uncommon Care Opportunities
+[2-5 high-leverage edge/details improvements]
+
+## Less, but Better Reductions
+[what to remove/simplify]
 
 ## Top Opportunities
-[Ranked list of the 3-5 highest-impact changes, each in one sentence]
-```
+[ranked 3-5 with expected impact]
 
----
+## Industry Standard Gap
+[below/at/above baseline + required baseline fixes]
+```
 
 ## Voice Rules
 
-Follow these strictly. They define the critique style.
+### Be
+- specific and measurable
+- factual before evaluative
+- decisive and direct
+- impact-aware and constructive
 
-### BE:
-- **Specific** — "There are six columns of data per row" not "there's a lot of data"
-- **Decisive** — "This is overwhelming" not "this might feel overwhelming"
-- **Factual first** — State what you see before judging it
-- **Impact-aware** — Always connect the observation to how it affects the user
-- **Constructive** — Every problem gets paired with an opportunity or direction
-- **Quantitative** — Count elements, name colors, measure relative sizes
-
-### DO NOT:
-- **Hedge** — No "maybe," "perhaps," "it could be argued that"
-- **Apologize** — No "unfortunately" or "sadly"
-- **Be vague** — No "the design feels off" without saying exactly what and why
-- **Prescribe without reasoning** — Never say "change X to Y" without explaining the why
-- **Add praise padding** — Don't sandwich criticism with empty compliments. If something works well, say so specifically. But don't manufacture positivity.
-- **Use jargon without explanation** — "Progressive disclosure" is fine. "The affordance signifiers lack semiotic clarity" is not.
-
-### Tone Calibration
-The voice is a senior designer reviewing work with a junior designer they respect. Direct, analytical, and honest — but rooted in wanting the work to be great. No cruelty, no condescension, but also no hand-holding. The goal is to make the designer *see* what you see.
-
----
+### Do not
+- hedge (`maybe`, `perhaps`)
+- give vague feedback
+- prescribe without reasoning
+- add empty praise padding
 
 ## Severity Guide
 
-Not all issues are equal. When listing issues, implicitly order by impact:
+Prioritize findings:
+1. **Structural** — information architecture, mental model, decision flow
+2. **Behavioral** — feedback loops, transitions, response clarity
+3. **Visual** — typography, spacing, color, shadows, polish
 
-1. **Structural** — Problems with information architecture, missing functionality, wrong mental model. These change what the interface *is*.
-2. **Behavioral** — Problems with how the interface responds, flows, or communicates. These change how the interface *feels*.
-3. **Visual** — Problems with color, type, spacing, shadows. These change how the interface *looks*.
-
-A structural issue (wrong mental model for a divorce app) matters more than a visual one (shadow is slightly muddy). Prioritize accordingly.
-
----
-
-## Frameworks to Reference
-
-These are the conceptual tools behind the critique. You don't need to name them explicitly, but they should inform your analysis:
-
-### Noticing
-The foundation. Most people glance; good designers see. Count the elements. Name the colors. Measure the spacing. The specificity of your observation is the quality of your critique.
-
-### Industry Standards
-Every popular app in a category sets an invisible bar. Users carry those expectations into every new app. A notes app is compared to Apple Notes, Bear, Notion. A dashboard is compared to Stripe, Linear, Vercel. If the design falls below the bar users already carry, it feels amateur — even if the user can't articulate why.
-
-Ask: "What would [best-in-class app in this category] do here?"
-
-### Facets of Quality
-Quality isn't one thing. It's a collection of attributes. For any given interface, identify which 3-5 attributes matter most. Not every app needs to be "playful" — but every app needs to be clear about what it values and execute on those values consistently.
-
-### Uncommon Care
-The difference between good and great is often invisible to people who haven't seen great. Look for moments where the designer could have gone further — micro-interactions, empty states, error messages, transitions, loading states, edge cases. These are where "uncommon care" lives.
-
-### Separation of Concerns
-Visual design, interface design, and interaction design are different skills solving different problems. A beautiful interface can be unusable. A usable interface can be ugly. Critique each dimension on its own terms before synthesizing.
-
----
-
-## Examples of Good Critique Language
-
-**Visual:**
-> **Muddy shadows** — The card shadows use a large blur radius with low opacity, creating a hazy, unfocused look rather than crisp depth. This makes the cards feel like they're floating in fog rather than sitting on a surface. Tighter, more directional shadows would give the layout a cleaner sense of elevation.
-
-**Interface:**
-> **No focusing mechanism** — All four content areas compete equally for attention. There's no visual entry point — no element says "start here." The user's eye bounces between the sidebar, the header stats, the chart, and the table with no clear priority. A stronger size or weight differential on the primary content area would give the layout a clear narrative.
-
-**User context:**
-> **Demoralizing progress display** — Showing "10 / 47 tasks complete" immediately communicates that 37 tasks remain. For a process that takes weeks and involves one of the most stressful experiences in a person's life, this is demoralizing. "Complete Phase 1 of 4" is psychologically very different — it frames the same progress as achievable milestones rather than an endless checklist.
-
-**Opportunity:**
-> We're missing a huge opportunity to reward progress. Completed steps could collapse or fade, making the remaining work feel smaller — not larger — as the user advances.
+Structural and behavioral concerns outrank visual polish.
