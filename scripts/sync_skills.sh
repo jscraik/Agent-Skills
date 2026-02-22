@@ -422,10 +422,10 @@ sync_user_skills() {
 }
 
 # Sync to Claude Code, OpenAI Codex/Agents, and Gemini Antigravity
-sync_user_skills "$HOME/.claude/skills"
-sync_user_skills "$HOME/.agent/skills"
+# sync_user_skills "$HOME/.claude/skills"
+# sync_user_skills "$HOME/.agent/skills"
 sync_user_skills "$HOME/.agents/skills"
-sync_user_skills "$HOME/.gemini/antigravity/skills"
+# sync_user_skills "$HOME/.gemini/antigravity/skills"
 
 chmod +x "$repo_root/scripts/sync_skills.sh"
 
