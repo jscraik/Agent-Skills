@@ -55,7 +55,7 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - `interface-craft` — Interface Craft by Josh Puckett helps build polished, animated React interfaces using Storyboard Animation, DialKit tuning panels, and Design Critique. Use when requests involve motion design, animation sequencing, live tuning controls, or structured UI critique and polish.
 - `react-best-practices` — React and Next.js performance optimization guidelines from Vercel Engineering. This skill should be used when writing, reviewing, or refactoring React/Next.js code to ensure optimal performance patterns. Triggers on tasks involving React components, Next.js pages, data fetching, bundle optimization, or performance improvements.
 - `react-ui-patterns` — Provide concrete React UI composition patterns for TypeScript + Tailwind + Radix, including state, routing, and component structure examples. Use when building or refactoring React screens and components for maintainability.
-- `ui-visual-regression` — Run a repeatable visual regression workflow using Storybook, Playwright capture, and Argos diffs, then guide targeted UI fixes. Use when investigating failing visual snapshots or preventing visual drift in component libraries.
+- `ui-visual-regression` — Review and validate UI visual regression diffs (Storybook + Playwright capture + Argos) when snapshot changes or layout regressions appear.
 - `web-design-guidelines` — Review UI code against Web Interface Guidelines with file:line findings. Use for rule-based compliance checks (not experiential critiques). Use when the user requests this capability.
 
 ## Github
