@@ -1,0 +1,7 @@
+interface:
+  display_name: "Recent Code Bugfix"
+  short_description: "Find and fix a bug from the current authors last-week commits"
+  default_prompt: "Identify one bug introduced by the current author within the last week, implement a minimal fix, and verify with the smallest relevant check."
+
+policy:
+  allow_implicit_invocation: true
