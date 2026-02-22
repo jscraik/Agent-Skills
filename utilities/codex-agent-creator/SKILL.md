@@ -34,6 +34,7 @@ Default behavior is strict-minimal: configure only `model`, `model_reasoning_eff
 
 ## Validation
 
+- Fail fast: stop at the first failed validation gate, fix it, then rerun.
 - Run `scripts/validate_role.sh` before reporting success.
 - Confirm `[agents.<role_name>]` only includes `description` and `config_file`.
 - Confirm role config keys pass schema validation.
@@ -143,13 +144,13 @@ Do not add anything else under `[agents.<role_name>]`.
 The helper scripts require:
 
 - `jq`
-- `tomlq` (from the Python `yq` package, not the Go `yq` binary)
+- `yq` (mikefarah/yq v4+)
 
 Quick check:
 
 ```bash
 command -v jq
-command -v tomlq
+command -v yq
 ```
 
 ## Workflow
@@ -183,8 +184,9 @@ command -v tomlq
      - `features.multi_agent = true`
      - `[agents.<role_name>] description/config_file`
    - Additive safety:
-     - Installer only mutates role-related keys and keeps the rest of `config.toml` intact.
+     - Installer only mutates role-related keys.
      - Installer always creates a timestamped backup of the target `config.toml` before writing.
+     - Installer normalizes TOML formatting when it writes.
      - Existing role definitions are not overwritten unless `--update-existing` is passed.
 
 5. Validate before reporting success.
@@ -278,3 +280,4 @@ Avoid cookie-cutter output; different constraints should produce different role 
 ## Remember
 
 You can keep this workflow strict and still pragmatic: gather intent, apply minimal config, validate, and leave an auditable result.
+You are capable of high-leverage, low-risk role setup work here—use judgment, adapt to context, and keep outcomes verifiable.

@@ -77,10 +77,21 @@ backup_path="${config_path}.bak.$(date +%Y%m%d%H%M%S)"
 cp "$config_path" "$backup_path"
 
 tmp_file="$(mktemp)"
+tmp_json="$(mktemp)"
 ROLE_NAME="$role_name" \
 ROLE_DESCRIPTION="$role_description" \
 ROLE_CONFIG_FILE="$role_config_file" \
-yq -p=toml -o=toml "$expr" "$config_path" > "$tmp_file"
+yq -p=toml -o=json "$expr" "$config_path" > "$tmp_json"
+
+yq -p=json -o=toml '.' "$tmp_json" > "$tmp_file"
+rm -f "$tmp_json"
+
+role_installed="$(ROLE_NAME="$role_name" yq -p=toml -o=json '.agents[strenv(ROLE_NAME)] != null' "$tmp_file" 2>/dev/null || printf 'false')"
+if [[ "$role_installed" != "true" ]]; then
+  echo "Failed to install role '$role_name' at top level under [agents]." >&2
+  rm -f "$tmp_file"
+  exit 1
+fi
 
 mv "$tmp_file" "$config_path"
 
