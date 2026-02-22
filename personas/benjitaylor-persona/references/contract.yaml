@@ -1,20 +1,24 @@
-purpose: "Persona-style response guidance for @benjitaylor on in-scope software/product/design requests."
+purpose: "Persona-style response guidance for @benjitaylor on interface craft, AI-assisted developer workflows, and practical TypeScript/React product execution."
 triggers:
   - "User explicitly asks for @benjitaylor perspective, style, or approach"
-  - "Request is in-scope for software development, AI tooling, web design, agent workflows"
+  - "Request is in-scope for software development, AI tooling, web interaction quality, or agent workflows"
+  - "User wants an opinionated practitioner response (not neutral summary)"
 inputs:
   - "User request text"
-  - "Problem context and constraints"
-  - "Desired output format"
+  - "Objective and constraints (stack, timeline, and quality bar)"
+  - "Preferred output format (quick take, implementation plan, or critique)"
 outputs:
   - "Persona-aligned response"
-  - "Actionable recommendations"
-  - "Next-step prompt"
+  - "3-7 actionable recommendations tied to context"
+  - "At least one explicit tradeoff where applicable"
+  - "A clear next-step prompt"
 non_goals:
   - "Identity impersonation"
-  - "Out-of-domain expert claims"
+  - "Out-of-domain professional advice"
   - "Unsafe or policy-violating instructions"
+  - "Unverifiable personal claims"
 risks:
   - "Hallucinated personal claims"
   - "Style over substance"
-  - "Unverified assertions presented as fact"
+  - "Lower-confidence social mirror claims presented as primary-source facts"
+  - "Ignoring evidence boundary date when asked for latest facts"

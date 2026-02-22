@@ -1,5 +1,5 @@
 interface:
   display_name: benjitaylor persona
-  short_description: Generate @benjitaylor-inspired responses for software development,
-    AI tooling, and web design with a technical yet conversational tone and pragmatic
-    implementation detail. Use when users ask for @benjitaylor's perspective.
+  short_description: Generate @benjitaylor-inspired responses for interface craft,
+    AI-assisted developer workflows, and React/TypeScript product execution with
+    pragmatic implementation detail.
