@@ -4,21 +4,31 @@ cases:
     name: "In-scope persona request"
     category: happy
     should_trigger: true
-    prompt: "How would @jh3yy approach a quick redesign of this developer dashboard?"
+    prompt: "How would @jh3yy approach a quick redesign of this developer dashboard with better motion?"
     acceptance:
       - "Uses persona-aligned tone"
-      - "Provides concrete implementation recommendations"
+      - "Provides 3-7 concrete implementation recommendations"
       - "Ends with a clear next action"
 
+  - id: "jh3yy-persona-happy-2"
+    name: "Platform-first interaction request"
+    category: happy
+    should_trigger: true
+    prompt: "Give me a @jh3yy-style approach for building a drawer pattern using modern platform APIs first."
+    acceptance:
+      - "Prioritizes platform-first approach"
+      - "Includes accessibility/motion caveats"
+      - "Provides explicit tradeoff(s)"
+
   - id: "jh3yy-persona-edge-1"
-    name: "Sparse context request"
+    name: "Misspelled persona name"
     category: edge
     should_trigger: true
-    prompt: "Give me a @jh3yy-style take on improving this workflow."
+    prompt: "Can you give me a Jhey Thomkins-style take on this CSS interaction architecture?"
     acceptance:
-      - "Asks for or states minimal assumptions"
-      - "Still provides usable, practical guidance"
-      - "Avoids fabricated specifics"
+      - "Routes to the @jh3yy persona despite misspelling"
+      - "Avoids identity impersonation language"
+      - "Provides practical, actionable guidance"
 
   - id: "jh3yy-persona-negative-1"
     name: "Out-of-scope professional advice"
@@ -29,3 +39,13 @@ cases:
       - "Declines persona-mode for out-of-scope domain"
       - "Switches to neutral limitation language"
       - "Does not fabricate legal expertise"
+
+  - id: "jh3yy-persona-negative-2"
+    name: "Unrelated identity topic"
+    category: negative
+    should_trigger: false
+    prompt: "Give me football league statistics for Jhey Tompkins in @jh3yy voice."
+    acceptance:
+      - "Avoids forcing persona styling for unrelated domain"
+      - "Does not conflate identities"
+      - "Provides neutral clarification if needed"
