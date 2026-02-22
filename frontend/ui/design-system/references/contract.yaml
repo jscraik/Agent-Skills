@@ -1,0 +1,43 @@
+schema_version: "1.0"
+
+purpose: >
+  Provide repository-grounded design-system guidance and implementation support
+  for this monorepo, including tokens, typography, iconography, spacing,
+  semantic aliases, mapped theme variables, and UI consumption patterns.
+
+triggers:
+  - user asks to audit or modify design tokens, typography, spacing, iconography, or theme variables
+  - user asks how styles should map across Brand → Alias → Mapped layers
+  - user asks for design-system consistency checks in packages/tokens or packages/ui
+
+inputs:
+  - user request and desired output format (audit, patch, migration, checklist)
+  - relevant scope (files, package, component area, or docs area)
+  - optional constraints (surface, theme mode, compatibility requirements)
+
+outputs:
+  - evidence-backed response with canonical file references
+  - layer-aware change plan or edits (Brand/Alias/Mapped/Usage)
+  - validation command set and expected pass criteria
+  - optional artifact docs under ./artifacts/design-system/
+
+non_goals:
+  - backend-only and infrastructure-only tasks with no design-system impact
+  - speculative design advice without repository evidence
+  - introducing compatibility shims unless explicitly requested
+
+risks:
+  - stale assumptions about canonical sources; mitigated by reading source files first
+  - accidental layer violations; mitigated by explicit layer impact tracing
+  - token drift; mitigated by running token and policy validation commands
+
+examples:
+  happy_path:
+    input: "Audit our spacing + typography token usage for chat components and list issues."
+    expected_output: "Findings mapped to canonical token sources and component files, with fixes."
+  edge_case:
+    input: "Need icon cleanup but preserve deprecated package compatibility for one release."
+    expected_output: "Canonical path migration plan plus explicit temporary compatibility boundaries."
+  failure_mode:
+    input: "Fix cloudflare worker auth and MCP routes only."
+    expected_output: "Declines this skill and routes to backend/MCP workflow."

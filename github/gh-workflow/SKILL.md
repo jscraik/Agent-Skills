@@ -1,6 +1,6 @@
 ---
 name: gh-workflow
-description: "Consolidated GitHub lifecycle skill for agents and users: intake, issue fixing, PR prep, review comment handling, CI diagnosis, and server-side merge via gh. Use when requests involve GitHub issues/PRs/checks/merge operations."
+description: "Consolidated GitHub lifecycle skill for agents and users: intake, issue fixing, PR prep, review request/reception, review comment handling, CI diagnosis, and server-side merge via gh. Use when requests involve GitHub issues/PRs/checks/merge operations."
 ---
 
 # GH Workflow (Canonical)
@@ -10,7 +10,7 @@ description: "Consolidated GitHub lifecycle skill for agents and users: intake, 
 Use this as the single source of truth for GitHub task execution when a request involves:
 
 - GitHub issue triage/fixing
-- PR preparation or review comment handling
+- PR preparation, review request/reception, or review comment handling
 - CI failure diagnosis for PR checks
 - Server-side merge with `gh pr merge`
 
@@ -35,6 +35,8 @@ Select one mode explicitly from user intent; default to `full_lifecycle` when mu
 - `intake`
 - `issue_fix`
 - `pr_prepare`
+- `pr_request_review`
+- `pr_receive_review`
 - `pr_review_comments`
 - `ci_diagnose`
 - `pr_merge_server`
@@ -46,6 +48,7 @@ Select one mode explicitly from user intent; default to `full_lifecycle` when mu
 - Repo path/slug when ambiguous
 - PR number or URL for PR/comment/check/merge workflows (optional only when discoverable from current branch)
 - Issue number for `issue_fix`
+- Review summary/context when handling incoming feedback (`pr_receive_review`)
 
 ## Preconditions
 
@@ -72,6 +75,15 @@ If any precondition fails, return `status=blocked` with remediation.
 - GitHub Actions: extract run/job evidence + failure snippets.
 - Non-GitHub Actions checks: capture provider/check name + details URL only.
 
+### Review lifecycle defaults
+
+- `pr_request_review`:
+  - Summarize change scope + risk areas before requesting review.
+  - Include exact verification evidence used to justify readiness.
+- `pr_receive_review`:
+  - Triage each review item as `accept`, `clarify`, or `push_back_with_evidence`.
+  - Do not apply feedback blindly; verify technically in repo context first.
+
 ## Outputs
 
 All substantive responses must align with `references/contract.yaml` (`schema_version: 1`) and include:
@@ -93,10 +105,12 @@ Also provide a concise human-readable summary.
 3. Execute mode-specific workflow:
    - `issue_fix`: inspect issue, implement minimal fix, run checks, summarize evidence.
    - `pr_prepare`: branch prep, stage intended files, commit, push, create draft PR.
+   - `pr_request_review`: gather readiness evidence, produce review request summary, and propose reviewer focus points.
+   - `pr_receive_review`: classify feedback, ask clarifying questions when needed, and apply only validated changes.
    - `pr_review_comments`: list threads, apply scoped fixes, map each fix to evidence.
    - `ci_diagnose`: inspect failing checks, summarize first actionable failure.
    - `pr_merge_server`: apply merge defaults/fallback and report final merge status.
-   - `full_lifecycle`: chain `intake -> issue_fix -> pr_prepare -> pr_review_comments -> ci_diagnose -> pr_merge_server`.
+   - `full_lifecycle`: chain `intake -> issue_fix -> pr_prepare -> pr_request_review -> pr_receive_review -> pr_review_comments -> ci_diagnose -> pr_merge_server`.
 4. Return contract + human summary.
 
 ## Failure handling
@@ -135,6 +149,8 @@ Fail fast: **stop at the first failed gate** and fix it before continuing.
 ## Example prompts
 
 - "Fix issue #123, open a draft PR, then merge when checks pass."
+- "Prepare this PR for review with a concise reviewer brief and verification evidence."
+- "Help me process this code review feedback and apply only valid changes."
 - "Diagnose failing checks on PR 456 and summarize the first actionable failure."
 - "Use gh to merge this PR to main server-side."
 - "Address comments 2 and 4 on the current PR and show evidence."

@@ -19,6 +19,22 @@ cases:
       - type: contains
         value: "status"
 
+  - name: pr-request-review
+    prompt: "Use gh-workflow in pr_request_review mode to prepare a reviewer brief with verification evidence."
+    acceptance:
+      - type: contains
+        value: "pr_request_review"
+      - type: contains
+        value: "verification"
+
+  - name: pr-receive-review
+    prompt: "Use gh-workflow in pr_receive_review mode to triage incoming feedback and apply only validated changes."
+    acceptance:
+      - type: contains
+        value: "pr_receive_review"
+      - type: regex
+        value: "(?i)clarify|push_back|accept"
+
   - name: review-comments-selected
     prompt: "Use gh-workflow to address PR comments 2 and 4 and map each fix to evidence."
     acceptance:

@@ -367,29 +367,10 @@ def generate_suggestions(doc: SkillDoc, *, min_description_len: int = 120) -> Li
         )
 
 
-    # Prohibited headings inside SKILL.md
-    prohibited = {"when to use", "inputs", "outputs", "failure mode"}
-    bad_headings = [h for h in headings if h in prohibited]
-    if bad_headings:
-        add(
-            rule="body.prohibited_headings",
-            category="Organization",
-            priority=Priority.HIGH,
-            message=(
-                "Remove or rename prohibited headings in SKILL.md "
-                f"({', '.join(sorted(set(bad_headings)))})."
-            ),
-            rationale=(
-                "These headings are reserved for the skill response format and should not appear "
-                "inside SKILL.md."
-            ),
-            example="""\
-            Use headings like:
-            ## Principles
-            ## Workflow
-            ## Anti-Patterns
-            """,
-        )
+    # NOTE:
+    # We intentionally do not emit "prohibited heading" suggestions for
+    # "when to use", "inputs", "outputs", or "failure mode". Earlier guidance
+    # conflicted with the active skill-gate expectations and existing templates.
 
     # --- Body: structure + progressive disclosure ---
     if not body.strip():

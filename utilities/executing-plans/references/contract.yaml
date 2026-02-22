@@ -1,0 +1,28 @@
+schema_version: "1.0"
+
+purpose: >
+  Execute existing implementation plans in verified batches with explicit
+  checkpoints, blocker handling, and status reporting.
+
+triggers:
+  - User asks to execute an existing plan
+  - Plan tasks need disciplined, evidence-backed completion
+
+inputs:
+  - Plan path and task scope
+  - Verification commands
+  - Checkpoint cadence
+
+outputs:
+  - Task execution status updates
+  - Verification evidence per task or batch
+  - Blocker report with remediation when halted
+
+non_goals:
+  - Writing new plans from scratch
+  - Running parallel task execution by default
+
+risks:
+  - Plan ambiguity causing mis-execution
+  - Unverified progress claims
+  - Hidden blockers discovered too late

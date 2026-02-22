@@ -1,0 +1,28 @@
+schema_version: "1.0"
+
+purpose: >
+  Provide a safe, repeatable workflow for creating and validating git worktrees
+  before implementation starts.
+
+triggers:
+  - User requests isolated workspace setup for feature work
+  - A plan should be executed in a clean branch/worktree context
+
+inputs:
+  - Repo path and branch name
+  - Worktree location preference
+  - Baseline verification command
+
+outputs:
+  - Worktree path and branch details
+  - Baseline verification evidence
+  - Cleanup guidance for completion lifecycle
+
+non_goals:
+  - Performing feature implementation itself
+  - Auto-merging or deleting branches without explicit request
+
+risks:
+  - Accidental tracking of worktree directories
+  - Starting from a failing baseline
+  - Loss of work from unsafe cleanup operations

@@ -49,6 +49,7 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 
 ## Frontend — Ui
 
+- `design-system` — Analyze and implement repository-grounded design-system work (tokens, typography, iconography, spacing, styles, aliases, and theme variables) for this monorepo. Use when requests involve UI styling systems or token-layer changes; don’t use for backend/MCP-only tasks with no UI impact. Outputs: evidence-backed analysis or changes with canonical file references, layer impact, and validation commands. Success: work aligns to Brand→Alias→Mapped rules and passes design-system checks.
 - `figma-implement-design` — DEPRECATED alias of figma. Convert legacy invocations when requests explicitly name figma-implement-design; immediately route to figma in implement_design mode.
 - `figma` — Use this canonical Figma skill to extract design context/screenshots/assets with Figma MCP and build production-ready UI guidance. Use when requests include Figma URLs/node IDs, design-to-code implementation, or Figma MCP setup/troubleshooting.
 - `frontend-ui-design` — Create and review production-ready UI systems/components with tokens and accessibility. Use for standard UI implementation or redesign (not creative-coding polish). Use when the user requests this capability.
@@ -66,7 +67,7 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - `gh-fix-ci` — Use when a user asks to debug or fix failing GitHub PR checks that run in GitHub Actions; use `gh` to inspect checks and logs, summarize failure context, draft a fix plan, and implement only after explicit approval. Treat external providers (for example Buildkite) as out of scope and report only the details URL.
 - `gh-issue-fix` — DEPRECATED alias of gh-workflow. Convert legacy invocations when requests explicitly name gh-issue-fix; immediately route to gh-workflow in issue_fix mode.
 - `gh-pr-local` — DEPRECATED alias of gh-workflow. Convert legacy invocations when requests explicitly name gh-pr-local; immediately route to gh-workflow in pr_prepare mode.
-- `gh-workflow` — Consolidated GitHub lifecycle skill for agents and users: intake, issue fixing, PR prep, review comment handling, CI diagnosis, and server-side merge via gh. Use when requests involve GitHub issues/PRs/checks/merge operations.
+- `gh-workflow` — Consolidated GitHub lifecycle skill for agents and users: intake, issue fixing, PR prep, review request/reception, review comment handling, CI diagnosis, and server-side merge via gh. Use when requests involve GitHub issues/PRs/checks/merge operations.
 - `local-action-verification` — Use when the user asks to validate GitHub Actions locally with act; output setup guidance, AGENTS.md instructions, and fail-fast checks before push or PR.
 - `yeet` — DEPRECATED alias of gh-workflow. Convert legacy invocations when requests explicitly name yeet; immediately route to gh-workflow in pr_prepare mode.
 
@@ -81,12 +82,12 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 
 ## Personas
 
-- `benjitaylor-persona` — Generate @benjitaylor-inspired responses for software development, AI tooling, and web design with a technical yet conversational tone and pragmatic implementation detail. Use when users ask for @benjitaylor's perspective.
+- `benjitaylor-persona` — Generate @benjitaylor-inspired responses for interface craft, AI-assisted developer workflows, and React/TypeScript product execution. Use when users ask for @benjitaylor's perspective and need pragmatic, implementation-first guidance.
 - `emilkowalski-persona` — Generate @emilkowalski-inspired responses for design-engineering decisions on UI feel, motion quality, performance, accessibility, and developer experience. Use when users explicitly ask for @emilkowalski's perspective.
-- `jenny-wen-persona` — Generate @jenny_wen-inspired responses for AI product updates, collaboration tools, and team-facing communication with a friendly, accessible, product-minded tone. Use when users ask for @jenny_wen's perspective.
+- `jenny-wen-persona` — Generate @jenny_wen-inspired responses for AI product updates, collaboration tools, and team-facing communication with a friendly, practical, craft-forward, product-minded tone. Use when users ask for @jenny_wen's perspective.
 - `jh3yy-persona` — Generate @jh3yy-inspired responses for modern web development, CSS animation, interaction design, and accessibility with a platform-first, example-driven teaching style. Use when users ask for @jh3yy's perspective.
 - `kubadesign-persona` — Generate @kubadesign-inspired responses for web design, experimentation, and portfolio-driven product work with an enthusiastic but actionable tone. Use when users ask for @kubadesign's perspective.
-- `steipete` — Generate @steipete-style persona responses for agentic engineering,\ \ AI dev tooling, and open-source shipping. Use when users ask for @steipete\u2019\ s voice or approach.
+- `steipete` — Generate @steipete-inspired guidance for agentic engineering, AI dev tooling, and open-source shipping. Use when users explicitly ask for @steipete’s perspective on shipping and tooling tradeoffs.
 
 ## Product — Content
 
@@ -95,7 +96,7 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 
 ## Product — Design
 
-- `ui-ux-creative-coding` — Create expressive motion and polished UI/UX polish with WebGL accents for Tauri+React (Tailwind v4, Radix, Three.js) when the user needs creative UI/UX flourishes, custom motion design, and interaction polish.
+- `ui-ux-creative-coding` — Use when UI work needs polished motion + implementation artifacts in React/Tauri (Tailwind v4, Radix, optional Three.js); deliver brief, component/motion plans, and validation notes; do not use for brand-only identity or full 3D/game builds.
 
 ## Product — Docs
 
@@ -163,6 +164,7 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - `codex-agent-creator` — Create and install Codex custom multi-agent roles when the user asks to add, update, or troubleshoot role entries under agents with a role config file.
 - `codex-home-audit` — Audit and improve a Codex home directory (AGENTS.md, USER_PROFILE, instructions/, rules/, config.toml) when you want a dated report of risks, duplication, and recommended cleanups.
 - `codex-sessions-skill-scan` — Daily skill health scan: analyze ~/.codex/sessions (default last 1 day) and summarize skill invocations + likely failures for personal skills in ~/dev/agent-skills (missing paths, tool failures). Use when you ask to scan recent Codex sessions for skill issues or when a skill keeps failing. Optional: include best-effort local OTel signals.
+- `executing-plans` — Validate and execute written implementation plans in verified batches with checkpoints. Use when a plan already exists and work must proceed task-by-task.
 - `fix-mise` — Diagnose and resolve mise trust/setup failures for local toolchains. Use when the user reports mise trust errors, missing runtimes, or broken mise-managed commands.
 - `markdown-converter` — Convert source files into Markdown outputs using the bundled converter workflow. Use when a user asks to transform documents, notes, or technical files into clean Markdown format.
 - `process-watch` — Analyze system processes and resource usage to diagnose runaway CPU/memory/IO, identify culprits, and propose next diagnostic steps. Use when investigating performance spikes or leaks.
@@ -175,6 +177,10 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - `skill-creator` — Create, revise, and quality-gate Codex skills (SKILL.md + resources + evals + packaging) when asked to build or improve a skill.
 - `skill-installer` — Plan and install skills into a Codex skills directory from a curated list or repo. Use when a user asks to list or install skills.
 - `systematic-debugging` — Use this skill when encountering bugs, test failures, regressions, or unexpected behavior to run a root-cause-first debugging workflow before proposing fixes or code changes.
+- `test-driven-development` — Create test-first Red-Green-Refactor delivery for behavior changes. Use when implementing a feature or bugfix before writing production code.
+- `using-git-worktrees` — Create isolated git worktrees with baseline checks and cleanup safety. Use when starting feature work or plan execution in a dedicated worktree.
+- `verification-before-completion` — Validate completion claims with fresh command evidence. Use when you are about to claim work is complete, fixed, or passing.
 - `video-transcript-downloader` — Extract, summarize, and download video/audio/subtitles using yt-dlp/ffmpeg. Use when the user requests downloads or transcripts.
 - `visual-explainer` — Generate beautiful, self-contained HTML pages that visually explain systems, code changes, plans, and data. Use when the user asks for a diagram, architecture overview, diff review, plan review, project recap, comparison table, or any visual explanation of technical concepts. Also use proactively when you are about to render a complex ASCII table (4+ rows or 3+ columns) — present it as a styled HTML page instead.
+- `writing-plans` — Create execution-ready implementation plans with task sequencing and checks. Use when requirements are known but implementation is multi-step.
 

@@ -1,0 +1,13 @@
+interface:
+  display_name: Executing Plans
+  short_description: Validate and execute written implementation plans in verified…
+policy:
+  allow_implicit_invocation: false
+
+# dependencies:
+#   tools:
+#     - type: "mcp"
+#       value: "serverName"
+#       description: "MCP server description"
+#       transport: "streamable_http"
+#       url: "https://example.com/mcp"

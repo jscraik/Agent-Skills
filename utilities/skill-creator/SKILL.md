@@ -7,8 +7,29 @@ description: "Create, revise, and quality-gate Codex skills (SKILL.md + resource
 
 This skill helps you design, author, validate, and package high-quality skills.
 
-**Version**: 1.5.0  
-**Last updated**: 2026-02-12
+**Version**: 1.6.0  
+**Last updated**: 2026-02-22
+
+## Table of Contents
+- [Working agreement (skills + shell + compaction)](#working-agreement-skills--shell--compaction)
+- [Scope and triggers](#scope-and-triggers)
+- [Modes (conservative)](#modes-conservative)
+- [Required inputs](#required-inputs)
+- [Deliverables](#deliverables)
+- [Response format (required)](#response-format-required)
+- [Operating principles](#operating-principles)
+- [Skill creation process (follow by default)](#skill-creation-process-follow-by-default)
+- [Script-backed security rules (required)](#script-backed-security-rules-required)
+- [What to avoid](#what-to-avoid)
+- [Constraints](#constraints)
+- [Validation](#validation)
+- [Examples](#examples)
+- [Skill test strategy by type](#skill-test-strategy-by-type)
+- [Reference map (skill-creator internal)](#reference-map-skill-creator-internal)
+- [Philosophy and tradeoffs](#philosophy-and-tradeoffs)
+- [Anti-patterns and caveats](#anti-patterns-and-caveats)
+- [Variation and adaptation](#variation-and-adaptation)
+- [Empowering execution style](#empowering-execution-style)
 
 ## Working agreement (skills + shell + compaction)
 
@@ -27,6 +48,18 @@ Use this skill to:
 - Revise an existing skill for better triggering, portability, or reliability.
 - Audit/upgrade a skill to meet “gold standard” structure, progressive disclosure, and validation.
 - Package a skill into a distributable `.skill` archive.
+
+## Modes (conservative)
+
+Select the smallest mode that matches user intent:
+
+- **create**: scaffold and author a new skill.
+- **improve**: revise an existing skill for routing quality, reliability, or safety.
+- **eval**: run quality checks/evals and summarize findings.
+- **benchmark-lite**: compare two variants with deterministic checks (`run_skill_evals.py --dual-run`) and report evidence.
+- **package**: produce a `.skill` archive once quality gates pass.
+
+Default to `create`/`improve`; use `benchmark-lite` only when the user asks to compare variants.
 
 ## Required inputs
 
@@ -123,6 +156,12 @@ Default posture:
 - Shell: allowed
 - Network: enabled only when required, behind strict allowlists, and never echo secrets. 
 
+### Environment compatibility notes (Codex-first)
+
+- Keep canonical behavior Codex-first unless the user explicitly asks for Claude-specific features.
+- Claude-only frontmatter fields (for example `disable-model-invocation`, `argument-hint`, `context: fork`) should be documented as optional compatibility notes, not default guidance.
+- Do not assume slash-command semantics in Codex unless explicitly requested.
+
 ## Skill creation process (follow by default)
 
 Skip steps only with a clear reason.
@@ -143,6 +182,14 @@ Skip steps only with a clear reason.
   - output artifacts and success criteria 
 - Encode compatibility stance in the trigger boundary: default to canonical-only for unreleased work; require explicit language to trigger compatibility-preserving outputs.
 - For non-trivial skills, write `references/evals.yaml` early (RED → GREEN → REFACTOR).
+
+### 1.5) Immediate feedback loop (recommended)
+
+Do not wait for a “perfect” spec before testing:
+- Run 1–2 realistic prompts against the draft early.
+- Show concrete outputs/artifacts quickly.
+- Use observed failures to tighten triggers and constraints before expanding scope.
+- Keep loops short and evidence-backed; avoid speculative rewrites.
 
 ### 2) Choose the skill structure
 
@@ -204,6 +251,14 @@ Optional (if available):
 - `scripts/analyze_skill.py` for a quality score
 - `scripts/run_skill_evals.py` for eval execution (`--dual-run --capture-jsonl` for cross-runner scorecards)
 
+### 6.5) Optional A/B compare loop (conservative)
+
+Use this only when the user asks for optimization or variant comparison:
+1. Create baseline (`v1`) and candidate (`v2`) skill variants.
+2. Run shared eval prompts with `scripts/run_skill_evals.py --dual-run --capture-jsonl`.
+3. Compare pass/fail evidence + failure modes, not style preferences alone.
+4. Keep the better variant, then rerun core validators.
+
 ### 7) Package (optional)
 
 ```bash
@@ -256,6 +311,16 @@ Optional deep checks:
 - “Create a new skill called `foo-bar` under `utilities/` with eval cases and an output contract.”
 - “Audit this skill for trigger quality and tighten the description so it routes correctly.”
 - “Fix validation failures (`quick_validate.py` / `skill_gate.py`) with the smallest safe patch and rerun gates.”
+
+## Skill test strategy by type
+
+Choose eval style by skill type:
+- **Discipline skills** (rules/process): pressure prompts + negative prompts to catch rationalizations.
+- **Technique skills** (how-to): application prompts that prove transfer to new scenarios.
+- **Pattern skills** (mental model): recognition + “when NOT to use” prompts.
+- **Reference skills** (docs/API): retrieval accuracy + correct application prompts.
+
+For each type, include at least one explicit trigger case and one clear non-trigger case.
 
 ## Reference map (skill-creator internal)
 

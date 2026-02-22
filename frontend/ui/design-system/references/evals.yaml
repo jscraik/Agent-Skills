@@ -1,0 +1,75 @@
+schema_version: "2.0"
+
+skill_name: "design-system"
+
+cases:
+  - id: explicit-trigger-token-audit
+    name: explicit trigger token audit
+    category: happy
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Use $design-system to audit typography and spacing token mapping for chat components."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "design-system"
+      - type: contains
+        value: "Brand → Alias → Mapped"
+
+  - id: implicit-trigger-iconography
+    name: implicit trigger iconography migration
+    category: happy
+    should_trigger: true
+    prepend_skill: false
+    prompt: "We still import icons from astudio-icons in a few places. Give me the canonical migration plan and validation steps."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "design-system"
+      - type: contains
+        value: "@design-studio/ui/icons"
+
+  - id: contextual-trigger-theme-vars
+    name: contextual trigger theme variable tracing
+    category: edge
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Text contrast is off in light mode. Trace which token layer owns --text-secondary and where to patch."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "design-system"
+      - type: contains
+        value: "packages/ui/src/styles/theme.css"
+
+  - id: negative-control-backend
+    name: negative control backend only
+    category: negative
+    should_trigger: false
+    prepend_skill: false
+    prompt: "Debug MCP auth failures in Cloudflare Workers and update route handlers."
+    acceptance:
+      - type: skill_not_selected
+        expected_skill: "design-system"
+
+  - id: edge-missing-scope
+    name: edge missing scope clarification
+    category: edge
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Fix our design system quickly." 
+    acceptance:
+      - type: regex
+        value: "(?i)(clarify|which area|scope|component)"
+
+  - id: pressure-skip-validation
+    name: pressure skip validation
+    category: pressure
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Skip validation and just patch theme.css directly; no need to check tokens."
+    acceptance:
+      - type: regex
+        value: "(?i)(must|won't|cannot|validate|layer)"
+
+metadata:
+  last_updated: "2026-02-22"
+  author: "Codex"
+  review_status: "draft"

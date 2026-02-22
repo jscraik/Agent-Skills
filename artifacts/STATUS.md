@@ -188,3 +188,21 @@
 ## Validation notes
 - `upgrade_skill.py` on `utilities/skill-creator` now reports only one medium suggestion: conciseness (373 lines).
 - No failing gates introduced.
+
+## Status — init_skill scaffold accuracy hardening (2026-02-22)
+
+### Completed
+- Updated `utilities/skill-creator/scripts/init_skill.py` for conservative, compatible correctness improvements:
+  - Default target changed to `codex`.
+  - `SKILL_TEMPLATE_SIMPLE` now includes gate-compatible headings (`When to use`, `Inputs`, `Outputs`) and fail-fast validation language.
+  - `SKILL_TEMPLATE_ROUTER` now includes required sections (`When to use`, `Inputs`, `Outputs`, `Constraints and safety`, `Principles`, `Workflow`, `Validation`, `Examples`).
+  - Frontmatter description templates now include concrete action+trigger phrasing instead of non-compliant placeholders.
+  - Next-step output numbering now stays contiguous regardless of run-type.
+
+### Validation
+- `python -m py_compile utilities/skill-creator/scripts/*.py` passed.
+- `--help` smoke run passed for all scripts in `utilities/skill-creator/scripts/`.
+- Smoke scaffold checks on temp skills:
+  - `quick_validate.py` passes on generated scaffold.
+  - `analyze_skill.py` baseline improved (85/120 for fresh simple scaffold in smoke run).
+  - `skill_gate.py` no missing required-section failures for default simple/router scaffolds (when optional contract/evals/philosophy/redaction checks are disabled in smoke mode).

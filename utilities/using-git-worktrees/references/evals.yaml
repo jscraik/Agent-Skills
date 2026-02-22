@@ -1,0 +1,37 @@
+schema_version: "2.0"
+skill_name: "using-git-worktrees"
+
+cases:
+  - id: explicit-worktree-setup
+    name: explicit worktree setup
+    category: happy
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Create a git worktree for feature/checkout-refactor and verify baseline tests."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "using-git-worktrees"
+      - type: contains
+        value: "worktree"
+
+  - id: isolate-before-plan
+    name: isolate before plan execution
+    category: edge
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Before executing this plan, set up an isolated branch workspace."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "using-git-worktrees"
+      - type: contains
+        value: "baseline"
+
+  - id: no-branch-context
+    name: no branch context negative
+    category: negative
+    should_trigger: false
+    prepend_skill: false
+    prompt: "Summarize this architecture document."
+    acceptance:
+      - type: skill_not_selected
+        expected_skill: "using-git-worktrees"

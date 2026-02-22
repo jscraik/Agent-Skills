@@ -31,7 +31,7 @@ from typing import Iterable, List, Optional
 
 TARGET_NAME_LIMITS = {"portable": 64, "codex": 100, "claude": 64}
 TARGET_DESCRIPTION_LIMITS = {"portable": 1024, "codex": 500, "claude": 1024}
-DEFAULT_TARGET = "portable"
+DEFAULT_TARGET = "codex"
 
 CATEGORIES = {"github", "frontend", "apple", "backend", "product", "utilities"}
 
@@ -41,7 +41,7 @@ STRUCTURES = {"simple", "router"}
 
 SKILL_TEMPLATE_SIMPLE = """---
 name: {skill_name}
-description: "TODO: {{WHAT}}. Use when {{TRIGGERS}}. Don't use when {{NON-TRIGGERS}}. Outputs: {{ARTIFACTS}}. Success: {{DONE}}."
+description: "Use this skill when the user asks for {{TRIGGER_CONTEXT}}. It helps create or update {{PRIMARY_OUTPUTS}} using {{INPUTS}}; avoid it for {{NON_TRIGGERS}}."
 ---
 
 # {skill_title}
@@ -53,17 +53,21 @@ description: "TODO: {{WHAT}}. Use when {{TRIGGERS}}. Don't use when {{NON-TRIGGE
   - Local CLI: write deliverables to `./artifacts/`
   - Hosted shell: write deliverables to `/mnt/data/`
 
-## Scope
+## When to use
 - Primary triggers:
   - TODO
 - Non-triggers (route elsewhere):
   - TODO
+
+## Inputs
 - Assumptions:
   - TODO
-
-## Required context
 - TODO: files, repos, APIs, schemas, constraints.
 - Ask clarifying questions only for genuine gaps.
+
+## Outputs
+- TODO: concrete outputs (paths + formats).
+- Always write artifacts to `./artifacts/` (local) or `/mnt/data/` (hosted).
 
 ## Constraints and safety
 - Redact secrets/PII by default.
@@ -72,6 +76,7 @@ description: "TODO: {{WHAT}}. Use when {{TRIGGERS}}. Don't use when {{NON-TRIGGE
 
 ## Principles
 - TODO: 2–6 bullets capturing the mental model / why this works.
+- Adapt execution and output shape to context; avoid rigid one-size-fits-all responses.
 
 ## Workflow
 1) TODO: smallest reliable workflow.
@@ -81,12 +86,9 @@ description: "TODO: {{WHAT}}. Use when {{TRIGGERS}}. Don't use when {{NON-TRIGGE
    - Put templates/boilerplate in `assets/`.
 3) End by writing artifacts + listing changed files/commands.
 
-## Deliverables
-- TODO: concrete outputs (paths + formats).
-- Always write artifacts to `./artifacts/` (local) or `/mnt/data/` (hosted).
-
 ## Validation
 - TODO: commands/tests/checks to verify correctness.
+- Fail fast: if a gate fails, stop and report the failure before continuing.
 - For non-trivial skills, add `references/evals.yaml` with at least:
   - happy-path
   - edge-case
@@ -103,7 +105,7 @@ description: "TODO: {{WHAT}}. Use when {{TRIGGERS}}. Don't use when {{NON-TRIGGE
 
 SKILL_TEMPLATE_ROUTER = """---
 name: {skill_name}
-description: "TODO: {{WHAT}}. Use when {{TRIGGERS}}. Don't use when {{NON-TRIGGERS}}. Outputs: {{ARTIFACTS}}. Success: {{DONE}}."
+description: "Use this skill when the user needs routing across multiple workflows. It asks one intake question, selects the right route, and executes with validated outputs."
 ---
 
 # {skill_title}
@@ -115,15 +117,30 @@ description: "TODO: {{WHAT}}. Use when {{TRIGGERS}}. Don't use when {{NON-TRIGGE
   - Local CLI: write deliverables to `./artifacts/`
   - Hosted shell: write deliverables to `/mnt/data/`
 
-## Scope
+## When to use
 - This is a **router skill**: it asks one intake question and routes to a workflow in `workflows/`.
 - Primary triggers:
   - TODO
 - Non-triggers (route elsewhere):
   - TODO
 
-## Required context
+## Inputs
 - TODO: what you need from the user before routing.
+- Ask follow-up questions only when the route cannot be selected safely.
+
+## Outputs
+- TODO: routed output contract (paths + formats).
+- Always write artifacts to `./artifacts/` (local) or `/mnt/data/` (hosted).
+
+## Constraints and safety
+- Redact secrets/PII by default.
+- Prefer read-only checks before mutating actions.
+- Destructive actions require explicit confirmation.
+
+## Principles
+- Route with the smallest sufficient question.
+- Prefer deterministic route criteria over intuition.
+- Keep route explanations concise and evidence-based.
 
 ## Intake
 Ask the user one concise routing question and wait for the response.
@@ -135,17 +152,29 @@ Ask the user one concise routing question and wait for the response.
 | 2 | `workflows/option-2.md` |
 | 3 | `workflows/option-3.md` |
 
-## Execution rules
-- Read the chosen workflow fully, then follow it exactly.
-- Write artifacts to `./artifacts/` (local) or `/mnt/data/` (hosted).
-- End with: created/modified files + commands run.
+## Workflow
+1) Ask one intake question and capture the response.
+2) Match the response to the route table and select one workflow.
+3) Read the chosen workflow fully, then execute it exactly.
+4) End with created/modified files, commands run, and route rationale.
+
+## Validation
+- Validate route selection before execution.
+- Fail fast: if route criteria are ambiguous or checks fail, stop and ask for clarification.
+- Verify outputs match the chosen workflow contract.
 
 ## References map
 Prefer pointers over pasted docs.
 - `references/` for deep docs, contracts, and evals.
 
 ## Anti-patterns
-- ❌ TODO
+- ❌ Asking multiple intake questions before attempting routing.
+- ❌ Executing multiple routes in parallel without explicit user approval.
+- ❌ Proceeding when route criteria are ambiguous.
+
+## Examples
+- Triggering prompt: "Route this request to the correct workflow."
+- Non-triggering prompt: "Implement the final feature directly without routing."
 """
 
 
@@ -407,12 +436,20 @@ def init_skill(
 
     print(f"\n[OK] Skill '{skill_name}' initialized successfully at {skill_dir}")
     print("\nNext steps:")
-    print("1. Edit SKILL.md (especially the description) to remove TODOs and add negative examples.")
-    print("2. Keep SKILL.md as a map; put depth in references/ and scripts/.")
+    next_steps = [
+        "Edit SKILL.md (especially the description) to remove TODOs and tailor triggers/non-triggers.",
+        "Keep SKILL.md as a map; put depth in references/ and scripts/.",
+    ]
     if run_type != "instruction":
-        print("3. Implement scripts/run.py and document usage in SKILL.md.")
-    print("4. Configure agents/openai.yaml for UI metadata and MCP dependencies.")
-    print("5. Run validation when ready (quick_validate.py, skill_gate.py, evals).")
+        next_steps.append("Implement scripts/run.py and document usage in SKILL.md.")
+    next_steps.extend(
+        [
+            "Configure agents/openai.yaml for UI metadata and MCP dependencies.",
+            "Run validation when ready (quick_validate.py, skill_gate.py, evals).",
+        ]
+    )
+    for i, step in enumerate(next_steps, 1):
+        print(f"{i}. {step}")
 
     return skill_dir
 

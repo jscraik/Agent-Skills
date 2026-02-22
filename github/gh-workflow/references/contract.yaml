@@ -1,11 +1,11 @@
 schema_version: 1
 purpose: >
   Canonical contract for consolidated GitHub lifecycle execution across intake,
-  issue fixing, PR preparation, review comment handling, CI diagnosis, and
+  issue fixing, PR preparation, review request/reception, review comment handling, CI diagnosis, and
   server-side PR merge.
 
 triggers:
-  - Requests involving GitHub issues, pull requests, review comments, PR checks, or server-side merge
+  - Requests involving GitHub issues, pull requests, review intake, review comments, PR checks, or server-side merge
 
 inputs:
   - mode
@@ -26,6 +26,8 @@ modes:
   - intake
   - issue_fix
   - pr_prepare
+  - pr_request_review
+  - pr_receive_review
   - pr_review_comments
   - ci_diagnose
   - pr_merge_server

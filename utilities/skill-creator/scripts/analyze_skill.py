@@ -398,20 +398,11 @@ def score_organization(body: str) -> CategoryResult:
         score += 2
         findings.append(Finding("Organization", 2, f"⚠️ Some list structure ({list_items} items).", Severity.WARN))
 
-    # discourage prohibited headings inside SKILL.md
-    prohibited = {"when to use", "inputs", "outputs", "failure mode"}
-    bad = [t for t in h2s if t in prohibited]
-    if bad:
-        penalty = min(4, len(bad) * 2)
-        score = max(0, score - penalty)
-        findings.append(
-            Finding(
-                "Organization",
-                -penalty,
-                f"❌ Prohibited headings found: {', '.join(sorted(set(bad)))}.",
-                Severity.FAIL,
-            )
-        )
+    # NOTE:
+    # Older analyzer versions penalized headings like "when to use" / "inputs" /
+    # "outputs" / "failure mode". That guidance conflicted with the active
+    # skill-gate requirements and with widely used skill templates in this repo.
+    # We intentionally do not penalize those headings here.
 
     return CategoryResult("Organization", min(score, max_score), max_score, findings)
 

@@ -1,0 +1,6 @@
+interface:
+  display_name: "Design System"
+  short_description: "Repository-grounded skill for tokens, typography, spacing, iconography, and theme variables in aStudio."
+
+policy:
+  allow_implicit_invocation: true

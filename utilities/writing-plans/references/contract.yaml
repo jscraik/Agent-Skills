@@ -1,0 +1,28 @@
+schema_version: "1.0"
+
+purpose: >
+  Produce implementation-ready plans with granular tasks, file targets, and
+  verification checkpoints for predictable execution.
+
+triggers:
+  - User asks for an implementation plan or execution breakdown
+  - Requirements exist but coding should not begin yet
+
+inputs:
+  - Feature requirements or spec
+  - Repository context and constraints
+  - Risk and rollout expectations
+
+outputs:
+  - Ordered task plan with acceptance criteria
+  - File-level change targets per task
+  - Verification commands and handoff checkpoints
+
+non_goals:
+  - Direct implementation of plan tasks
+  - Ambiguous product discovery without requirements
+
+risks:
+  - Under-scoped steps that hide dependencies
+  - Overly broad tasks that make verification impossible
+  - Missing handoff details causing execution drift
