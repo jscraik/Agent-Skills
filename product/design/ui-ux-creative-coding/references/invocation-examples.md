@@ -1,5 +1,11 @@
 # Invocation examples
 
-- `$ui-ux-creative-coding Design and implement a Settings screen (account + privacy) for our Tauri app. Include tokens, motion spec, and Storybook stories.`
-- `$ui-ux-creative-coding Add delight to this onboarding flow without hurting speed. Propose 3 variants and implement the best one.`
-- `$ui-ux-creative-coding Build a Radix Dialog with Tailwind v4 tokens, focus handling, and a polished open/close animation.`
+## Intertwined mode (default)
+- `$ui-ux-creative-coding Design and implement a Settings screen for our Tauri app. Blend @benjitaylor, @jh3yy, @jenny_wen, and @emilkowalski, then include tokens, motion spec, and Storybook stories.`
+- `$ui-ux-creative-coding Add delight to this onboarding flow without hurting speed. Give 2 variants and pick one with tradeoffs.`
+
+## Separate mode (explicit persona overlays)
+- `$ui-ux-creative-coding Use @emilkowalski only to refine drawer and popover timing/easing for this Radix flow.`
+- `$ui-ux-creative-coding Use @jh3yy only for CSS-first micro-interactions with reduced-motion parity.`
+- `$ui-ux-creative-coding Use @jenny_wen only for adoption-ready UX messaging and rollout notes.`
+- `$ui-ux-creative-coding Use @benjitaylor only for builder-first agent workflow and developer UX polish.`

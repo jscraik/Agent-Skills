@@ -1,18 +1,20 @@
 purpose: >
-  Define expected behavior and outputs for the ui-ux-creative-coding skill.
-schema_version: 1.1
+  Define expected behavior and outputs for the ui-ux-creative-coding skill,
+  including intertwined and separate persona composition modes.
+schema_version: 1.2
 triggers:
-  - user requests UI/UX direction or implementation using creative coding
-  - user asks for motion polish, micro-interactions, or WebGL accents in UI
+  - user requests UI/UX direction plus implementation-ready delivery artifacts
+  - user asks for motion polish, micro-interactions, or creative coding accents in UI
+  - user asks to apply one or more personas (benjitaylor, jh3yy, jenny_wen, emilkowalski)
 inputs:
   - product brief or target workflow
   - platform and stack constraints
-  - existing assets or references
+  - existing assets, tokens, and references
   - acceptance criteria and required checks
 outputs:
   - UI brief and user-model summary
   - component/system plan and motion rules
-  - prototype implementation notes or snippets
+  - implementation-ready plan with concrete next steps
   - validation checklist and handoff artifacts
 response_format:
   headings_order:
@@ -21,13 +23,24 @@ response_format:
     - "## Outputs"
   notes:
     - Always include the three headings in this order.
-    - Apply persona-specific first-line and first-bullet rules when requested.
+    - Keep concise by default; cap at <=12 bullets when explicitly asked for concise output.
+persona_modes:
+  default: intertwined
+  supported:
+    - intertwined
+    - separate
+persona_markers:
+  benjitaylor: "@benjitaylor — references/benjitaylor-persona.md"
+  jh3yy: "@jh3yy — references/jhey-tompkins-persona.md 🧑‍🍳"
+  jenny_wen: "@jenny_wen — references/jenny_wen-persona.md — clarity over process"
+  emilkowalski: "@emilkowalski — references/emilkowalski-persona.md"
 output_rules:
   - Do not omit required headings.
-  - Keep responses concise unless explicit depth is requested.
-  - When persona guidance is requested, include handle + reference per SKILL.md.
+  - If persona guidance is requested, first Outputs bullet(s) must contain requested persona marker(s).
+  - For multi-persona requests, include each selected marker once in requested order.
 non_goals:
   - brand-only work without UI deliverables
   - full WebGL apps or games unless explicitly requested
 risks:
-  - missing inputs; mitigated by targeted clarifying questions
+  - missing inputs; mitigate with minimal clarifying questions
+  - over-animation; mitigate with reduced-motion and performance gates

@@ -1,78 +1,74 @@
 cases:
-  - name: happy-path
-    prompt: "Use the ui-ux-creative-coding skill to design a new settings panel for a Tauri app with motion polish. Keep the response concise and include the standard headings."
-    acceptance:
-      - type: contains
-        value: "## Outputs"
-  - name: edge-case
-    prompt: "Use ui-ux-creative-coding but I have no assets or constraints; ask for what you need."
-    acceptance:
-      - type: contains
-        value: "## Inputs"
-  - name: failure-mode
-    prompt: "Create a brand logo and full identity kit with no UI deliverables."
-    acceptance:
-      - type: contains
-        value: "## When to use"
-  # Persona integration tests - @jenny_wen persona guidance
-  - name: persona-reference-jenny-wen
-    prompt: "Use the ui-ux-creative-coding skill to write user-facing copy for an onboarding flow. Apply @jenny_wen's communication style."
-    acceptance:
-      - type: regex
-        value: "(@jenny_wen|Jenny Wen|jenny_wen)"
-  - name: persona-applies-clarity-over-process
-    prompt: "Use the ui-ux-creative-coding skill to explain a complex interaction pattern. Use @jenny_wen's approach."
-    acceptance:
-      - type: regex
-        value: "(clarity over process|casual and friendly|user needs)"
-  - name: persona-references-detailed-guidance
-    prompt: "Use the ui-ux-creative-coding skill. I need guidance on applying @jenny_wen's persona to my UI work. Cite the relevant persona reference file."
-    acceptance:
-      - type: contains
-        value: "references/jenny_wen-persona.md"
-  - name: persona-reference-emilkowalski
-    prompt: "Use the ui-ux-creative-coding skill to explain a motion system. Apply @emilkowalski's persona and cite the relevant persona reference."
-    acceptance:
-      - type: regex
-        value: "(@emilkowalski|emilkowalski)"
-      - type: contains
-        value: "references/emilkowalski-persona.md"
-  - name: persona-reference-jh3yy
-    prompt: "Use the ui-ux-creative-coding skill to explain a CSS micro-interaction. Apply @jh3yy's persona."
-    acceptance:
-      - type: regex
-        value: "(@jh3yy|jh3yy)"
-      - type: regex
-        value: "🧑‍🍳"
-  - name: persona-references-detailed-guidance-jh3yy
-    prompt: "Use the ui-ux-creative-coding skill. I need guidance on applying @jh3yy's persona to my UI work. Cite the relevant persona reference file."
-    acceptance:
-      - type: contains
-        value: "references/jhey-tompkins-persona.md"
-  - name: persona-reference-kubadesign
-    prompt: "Use the ui-ux-creative-coding skill to outline a landing page refresh. Apply @kubadesign's persona."
-    acceptance:
-      - type: regex
-        value: "(@kubadesign|kubadesign)"
-  - name: persona-references-detailed-guidance-kubadesign
-    prompt: "Use the ui-ux-creative-coding skill. I need guidance on applying @kubadesign's persona to my UI work. Cite the relevant persona reference file."
-    acceptance:
-      - type: contains
-        value: "references/kubadesign-persona.md"
-  - name: persona-reference-benjitaylor
-    prompt: "Use the ui-ux-creative-coding skill to outline a developer tool UI refinement. Apply @benjitaylor's persona."
-    acceptance:
-      - type: regex
-        value: "(@benjitaylor|benjitaylor)"
-  - name: persona-references-detailed-guidance-benjitaylor
-    prompt: "Use the ui-ux-creative-coding skill. I need guidance on applying @benjitaylor's persona to my UI work. Cite the relevant persona reference file."
-    acceptance:
-      - type: contains
-        value: "references/benjitaylor-persona.md"
-  - name: format-headings-order
-    prompt: "Use the ui-ux-creative-coding skill and include the standard headings. Keep it concise."
+  - name: happy-path-standard-headings
+    prompt: "Use ui-ux-creative-coding to design a Tauri settings panel with motion polish. Keep it concise and include standard headings."
     acceptance:
       - type: regex
         value: "## When to use[\\s\\S]*## Inputs[\\s\\S]*## Outputs"
-      - type: not_contains
-        value: "## Next step"
+
+  - name: edge-missing-inputs
+    prompt: "Use ui-ux-creative-coding. I have no assets or constraints yet, ask for what you need."
+    acceptance:
+      - type: contains
+        value: "## Inputs"
+
+  - name: failure-mode-brand-only
+    prompt: "Create a brand logo and identity kit only; no UI screens or product flows."
+    acceptance:
+      - type: contains
+        value: "## When to use"
+      - type: regex
+        value: "(out of scope|not to use|brand-only)"
+
+  - name: persona-benjitaylor-marker
+    prompt: "Use ui-ux-creative-coding with @benjitaylor guidance for a dev-tool dashboard polish pass."
+    acceptance:
+      - type: contains
+        value: "@benjitaylor"
+      - type: contains
+        value: "references/benjitaylor-persona.md"
+
+  - name: persona-jh3yy-marker
+    prompt: "Use ui-ux-creative-coding with @jh3yy guidance for CSS micro-interactions."
+    acceptance:
+      - type: contains
+        value: "@jh3yy"
+      - type: contains
+        value: "references/jhey-tompkins-persona.md"
+      - type: contains
+        value: "🧑‍🍳"
+
+  - name: persona-jenny-wen-marker
+    prompt: "Use ui-ux-creative-coding with @jenny_wen guidance for onboarding UX copy and interaction notes."
+    acceptance:
+      - type: contains
+        value: "@jenny_wen"
+      - type: contains
+        value: "references/jenny_wen-persona.md"
+      - type: contains
+        value: "clarity over process"
+
+  - name: persona-emilkowalski-marker
+    prompt: "Use ui-ux-creative-coding with @emilkowalski guidance for a drawer motion system."
+    acceptance:
+      - type: contains
+        value: "@emilkowalski"
+      - type: contains
+        value: "references/emilkowalski-persona.md"
+
+  - name: persona-multi-intertwined
+    prompt: "Use ui-ux-creative-coding and blend @benjitaylor, @jh3yy, @jenny_wen, and @emilkowalski for a dashboard refresh."
+    acceptance:
+      - type: contains
+        value: "@benjitaylor"
+      - type: contains
+        value: "@jh3yy"
+      - type: contains
+        value: "@jenny_wen"
+      - type: contains
+        value: "@emilkowalski"
+
+  - name: concise-bullet-cap-request
+    prompt: "Use ui-ux-creative-coding and include the standard headings. concise please."
+    acceptance:
+      - type: contains
+        value: "## Outputs"
