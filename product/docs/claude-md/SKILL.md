@@ -34,6 +34,7 @@ Mandatory snippet (include verbatim in guidance):
 - The user asks to refactor `CLAUDE.md` for clarity, brevity, or progressive disclosure.
 - The user asks for repo-wide Claude rules (bash commands, code style, workflow).
 - The user asks to split always-on instructions vs optional domain workflows.
+- The repo has `AGENTS.md`, `CLAUDE.md`, and `GEMINI.md`, and the user asks to keep shared instruction guidance synchronized.
 
 ## Response format (required)
 - Always include all three sections in every response:
@@ -89,7 +90,7 @@ Use the failure-mode template verbatim for out-of-scope requests.
 - Code style and workflow rules that differ from language defaults.
 - Any adjacent instruction files that may conflict (AGENTS.md, docs, team runbooks).
 - Preference for shared (`CLAUDE.md`) vs local-only (`CLAUDE.local.md`) instructions.
-- Compatibility posture (default: canonical-only for unreleased/greenfield repos; override only when explicitly requested).
+- Compatibility posture (default: canonical-only for unreleased/greenfield repos; replace only when explicitly requested).
 
 ## Deliverables
 
@@ -100,6 +101,7 @@ Use the failure-mode template verbatim for out-of-scope requests.
 - A contradictions list with a question for each conflict.
 - A "flag for deletion" list (redundant, vague, volatile, obvious).
 - Optional `@path` import block for deeper docs.
+- Optional guidance on instruction-file structure (for domain-specific splits in larger repos).
 - Output contract schema_version: 1
 
 ## Constraints
@@ -116,21 +118,32 @@ Use the failure-mode template verbatim for out-of-scope requests.
 - Locate applicable files in this order: `~/.claude/CLAUDE.md`, parent directories, repo root, child directories.
 - Confirm which scope the user wants changed.
 - Note: Codex `AGENTS.md` does not support `@` imports; Claude `CLAUDE.md` does.
+- Canonical hierarchy rule: when `AGENTS.md` exists, use it as the canonical repository-wide reference for overlapping rules. Keep `CLAUDE.md` focused on always-on, Claude-specific guidance and project-local workflow deltas.
 
 2) Discover repo facts
+- Read instruction files in precedence order before drafting changes.
 - Read README and `docs/` for real commands and structure.
 - Inspect config files (for example `package.json`, `pyproject.toml`, `Makefile`).
 - If commit conventions are not visible, state "not observed."
+- If existing `CLAUDE.md`, `CLAUDE.local.md`, `AGENTS.md`, or required instruction directories already exist, merge instead of overwrite.
+- Apply **idempotent updates**: keep existing sections, append only missing required content, and dedupe duplicate bullets/anchors.
+- Create/modify files only where absent or missing sections; avoid regenerating already-correct blocks.
+- If a repo already has `AGENTS.md`, `CLAUDE.md`, and `GEMINI.md`, update shared sections in `CLAUDE.md` and `GEMINI.md` to reference canonical `AGENTS.md` content instead of duplicating it, then keep tool-specific sections in sync.
 
-2.1) Set compatibility posture
+3) Add instruction inserts (when applicable)
+- If a higher-level global guidance source exists and is relevant, add a short references/import block rather than repeating source content.
+- Verify referenced files and paths exist before including them.
+- Keep linked references minimal and always scoped to this repo’s guidance.
+
+4) Set compatibility posture
 - Default to canonical-only guidance for unreleased/greenfield projects.
 - Only include backwards-compatibility instructions when explicitly requested or when the repo shows clear released-version compatibility commitments.
 
-3) Build include/exclude set
+5) Build include/exclude set
 - Include: non-obvious bash commands, non-default style rules, test workflow preferences, repo etiquette, architectural decisions, environment quirks.
 - Exclude: things Claude can infer from code, standard conventions, long tutorials, file-by-file descriptions, frequently changing details.
 
-4) Draft concise structure
+6) Draft concise structure
 - Prefer short sections such as:
   - Code style
   - Bash commands
@@ -140,18 +153,19 @@ Use the failure-mode template verbatim for out-of-scope requests.
   - Architecture notes
 - Keep each rule independently testable and specific.
 
-5) Add progressive disclosure with imports
+7) Add progressive disclosure with imports
 - Use `@path/to/file.md` for longer guides.
 - Verify every import path exists before finalizing.
-- For personal overrides, keep project-safe defaults and mention local-only file option.
+- For personal replacements, keep project-safe defaults and mention local-only file option.
 
-6) Find contradictions
+8) Find contradictions
 - Identify conflicting instructions across layers and ask which should win.
 - Do not resolve conflicts without user confirmation.
 
-7) Validate content
+9) Validate content
 - Confirm commands exist and are runnable.
 - Confirm referenced files exist.
+- Confirm naming conventions in examples match project conventions.
 - Ensure no secrets or private endpoints appear.
 - Check brevity: remove any line that fails "Would deleting this cause mistakes?"
 
@@ -169,7 +183,7 @@ Use the failure-mode template verbatim for out-of-scope requests.
 
 - `~/.claude/CLAUDE.md`: applies to all Claude sessions.
 - `./CLAUDE.md`: repo-shared defaults (check into git).
-- `./CLAUDE.local.md`: local-only overrides (usually gitignored).
+  - `./CLAUDE.local.md`: local-only replacements (usually gitignored).
 - Parent directories: useful for monorepo shared rules.
 - Child directories: loaded when Claude works in that subtree.
 
@@ -204,8 +218,12 @@ Use the failure-mode template verbatim for out-of-scope requests.
 - Omitting contradictions or failing to ask which instruction wins.
 - Presenting unverified commands as facts.
 - Mixing unrelated policies into the same section.
+- Using vague headings like "Misc" or "Notes."
+- Adding a Table of Contents that does not match actual headings.
 - Adding backwards-compatibility requirements by default in unreleased/greenfield projects.
+- Introducing non-required sections without confirming they are universally needed.
 - Generating extra legacy-preservation code paths without explicit compatibility requirements.
+- Replacing existing instruction files/directories with full rewrites when a scoped merge would preserve intent.
 
 ## Example prompts that should trigger this skill
 

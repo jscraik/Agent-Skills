@@ -36,6 +36,7 @@ Mandatory snippet (include verbatim in guidance):
 - The user asks to refactor AGENTS.md for progressive disclosure or split instructions into multiple files.
 - The repo needs a short contributor guide for agents or humans.
 - The user requests “Repository Guidelines” content under 400 words.
+- The repo already has `AGENTS.md`, `CLAUDE.md`, and `GEMINI.md`, and the user asks to keep shared instruction guidance synchronized across them.
 
 ## Response format (required)
 - Always include all three sections in every response:
@@ -90,7 +91,7 @@ Use the failure-mode template verbatim for out-of-scope requests.
 - Verified commands and paths from the repo (README, docs, config files).
 - Any adjacent instruction files that may conflict (global or per-directory).
 - Whether Jamie's agent-first scaffold standard is requested (`/Users/jamiecraik/.codex/instructions/agent-first-scaffold-spec.md`).
-- Compatibility posture (default: canonical-only for unreleased/greenfield repos; override only when explicitly requested).
+- Compatibility posture (default: canonical-only for unreleased/greenfield repos; replace only when explicitly requested).
 
 ## Deliverables
 
@@ -122,6 +123,11 @@ Use the failure-mode template verbatim for out-of-scope requests.
 - Also check `~/.codex/instructions/` for applicable global standards and guidance.
 - Then read project instructions from repo root down to the working directory and treat them as canonical.
 - Note: Codex `AGENTS.md` does not support `@` imports; Claude `CLAUDE.md` and `~/.claude/rules/*.md` do.
+- Canonical hierarchy rule: when both `AGENTS.md` and `CLAUDE.md`/`GEMINI.md` exist, treat `AGENTS.md` as canonical source of truth for repository-wide, cross-tool instructions. Keep CLAUDE/GEMINI focused on agent/CLI-specific usage and memory conventions.
+- If a repo already has `AGENTS.md`, `CLAUDE.md`, and `GEMINI.md`, update shared sections in `CLAUDE.md` and `GEMINI.md` to reference the canonical `AGENTS.md` guidance rather than duplicate it.
+- If existing `AGENTS.md`, `.agent/PLANS.md`, `README.md`, or required `docs/` directories already exist, merge instead of overwrite.
+- Apply **idempotent updates**: preserve existing content, insert only missing sections/links, and dedupe existing lines.
+- Create directories/files only if absent; do not recreate duplicates.
 
 2) Find contradictions
 - Identify conflicting instructions and ask which one should win.
@@ -255,6 +261,7 @@ Rollout policy:
 - Avoid “one‑size‑fits‑all” templates that erase repo‑specific commands.
 - In scaffold mode, writing non-idempotent edits without marker blocks.
 - Omitting `/Users/jamiecraik/.codex/instructions/agent-first-scaffold-spec.md` when Jamie standard is requested.
+- Overwriting existing instruction files/directories instead of performing scoped, deduplicated inserts.
 - Adding backwards-compatibility requirements by default in unreleased/greenfield projects.
 - Generating extra legacy-preservation code paths without an explicit compatibility requirement.
 

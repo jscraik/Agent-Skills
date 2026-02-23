@@ -1,0 +1,46 @@
+schema_version: "1.1"
+
+purpose: >
+  Define expected behavior and outputs for the gemini-md skill, including
+  merge-safe GEMINI.md authoring/review and Gemini memory workflow guidance.
+
+triggers:
+  - user requests GEMINI.md creation or update
+  - user requests merging repository instruction context into `GEMINI.md`
+  - user asks to add memory-management guidance for Gemini CLI
+
+inputs:
+  - repo_root_path
+  - existing_gemini_md_state
+  - verified_repo_commands_and_paths
+  - conflicting_instruction_sources
+
+outputs:
+  - minimal_root_gemini_md_with_links
+  - idempotent_or_merge_style_edits
+  - optional_nested_gemini_md_scoping_plan
+  - memory_workflow_and_refresh_guidance
+  - contradictions_list_with_resolution_questions
+
+required_response_sections:
+  - "When to use"
+  - "Outputs"
+  - "Inputs"
+
+non_goals:
+  - implementing repository product code
+  - inventing non-existent commands or paths
+  - dumping entire internal wikis into GEMINI.md
+
+risks:
+  - risk: non_idempotent_overwrite
+    mitigation: only insert missing sections and avoid duplicate blocks
+  - risk: stale_context_rules
+    mitigation: include `/memory refresh` guidance for long sessions
+  - risk: conflicting_instruction_sources
+    mitigation: identify conflicts and ask which source should win
+
+required_memories_commands:
+  - /memory show
+  - /memory refresh
+
