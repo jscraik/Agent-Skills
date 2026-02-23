@@ -14,6 +14,7 @@ The agent is capable of extraordinary work in this domain. Use judgment, adapt t
 ## Compliance
 - Check against GOLD Industry Standards guide in ~/.codex/instructions/standards.md
 - Use ~/.codex/AGENTS.md as the global index that links to current standards docs.
+- If this skill is used from `~/.codex/`, write reference links only under `~/.codex/instructions/` (and not to `docs/` for global protocols).
 - Visual reference: [agents-md workflow map](assets/agents-md.png)
 
 ## Philosophy
@@ -179,6 +180,7 @@ Use the failure-mode template verbatim for out-of-scope requests.
 - Never duplicate the full protocol content in repo files; link only.
 - If `CODEX_HOME` is set, prefer `$CODEX_HOME/...` for global references; otherwise use `~/.codex/...`.
 - Only insert references that exist on disk; if not found, state "not observed" and do not invent paths.
+- In `~/.codex/` context, do not write global protocol references to `docs/` paths. Always use `~/.codex/instructions/...` for protocol links.
 - If the repo uses a different global protocol, add the same style of reference block.
 - When scaffold mode is requested, include references to the scaffold spec and governance docs listed above.
   - Example (root `AGENTS.md` block):
