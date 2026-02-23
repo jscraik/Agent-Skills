@@ -29,7 +29,7 @@ import datetime as dt
 import json
 import os
 import re
-import subprocess
+import subprocess as sp
 import sys
 from dataclasses import dataclass
 from pathlib import Path
@@ -543,7 +543,7 @@ def run_codex_exec(
     timeout = float(os.environ.get("CODEX_EVAL_TIMEOUT_SEC", "60"))
 
     try:
-        proc = subprocess.run(
+        proc = sp.run(
             cmd,
             input=prompt,
             text=True,
@@ -554,7 +554,7 @@ def run_codex_exec(
         )
     except FileNotFoundError:
         return 127, "", "codex CLI not found on PATH. Install it (for example: npm i -g @openai/codex).", warnings
-    except subprocess.TimeoutExpired:
+    except sp.TimeoutExpired:
         return 124, "", f"codex exec timed out after {timeout} seconds.", warnings
 
     if jsonl_path:
@@ -584,7 +584,7 @@ def run_claude_exec(
     timeout = float(os.environ.get("CODEX_EVAL_TIMEOUT_SEC", "60"))
 
     try:
-        proc = subprocess.run(
+        proc = sp.run(
             cmd,
             input=prompt,
             text=True,
@@ -594,7 +594,7 @@ def run_claude_exec(
         )
     except FileNotFoundError:
         return 127, "", "claude CLI not found on PATH. Install Claude Code CLI and ensure it is on PATH."
-    except subprocess.TimeoutExpired:
+    except sp.TimeoutExpired:
         return 124, "", f"claude headless timed out after {timeout} seconds."
 
     output_last_message_path.write_text(proc.stdout or "", encoding="utf-8")
@@ -661,7 +661,7 @@ def _codex_help_text(codex_bin: Optional[Path]) -> Optional[str]:
         env["PATH"] = f"{codex_bin.parent}{os.pathsep}{env.get('PATH', '')}"
 
     try:
-        proc = subprocess.run(cmd, text=True, capture_output=True, env=env, timeout=10)
+        proc = sp.run(cmd, text=True, capture_output=True, env=env, timeout=10)
     except Exception:  # noqa: BLE001
         _CODEX_HELP_CACHE[key] = None
         return None

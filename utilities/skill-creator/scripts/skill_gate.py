@@ -810,7 +810,7 @@ def check_script_security(skill_dir: Path, doc: SkillDoc) -> List[Finding]:
             out.append(Finding(
                 Level.FAIL,
                 "SAFE_UNTRUSTED_TO_SHELL",
-                "Untrusted input source combined with shell-style command execution detected. Avoid shell=True/os.system/exec* on user-controlled input.",
+                "Untrusted input source combined with shell-style command execution detected. Avoid shell mode/os.system/exec* on user-controlled input.",
                 evidence=str(f.relative_to(skill_dir)),
             ))
         elif has_untrusted_input and has_command_sink and not has_sanitizer:

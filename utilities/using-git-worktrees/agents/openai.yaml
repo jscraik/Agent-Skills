@@ -1,6 +1,6 @@
 interface:
   display_name: Using Git Worktrees
-  short_description: Create isolated git worktrees with baseline checks and cleanup…
+  short_description: Align Codex and Claude worktree setup, sync strategy, and cleanup safety.
 policy:
   allow_implicit_invocation: false
 

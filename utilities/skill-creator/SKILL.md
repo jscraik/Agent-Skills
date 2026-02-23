@@ -7,8 +7,8 @@ description: "Create, revise, and quality-gate Codex skills (SKILL.md + resource
 
 This skill helps you design, author, validate, and package high-quality skills.
 
-**Version**: 1.6.0  
-**Last updated**: 2026-02-22
+**Version**: 1.6.1  
+**Last updated**: 2026-02-23
 
 ## Table of Contents
 - [Working agreement (skills + shell + compaction)](#working-agreement-skills--shell--compaction)
@@ -88,6 +88,7 @@ Depending on the request, produce one or more of:
 - `references/contract.yaml` (output contract) and `references/evals.yaml` (eval cases) when the skill is non-trivial.
 - `references/plan.md` (plan artifact) for non-trivial skill builds; store `$create-plan` output here when available.
 - A validation report (what passed/failed and what to fix).
+- An `analyze_skill.py` quality report for every validation run.
 - An operational-readiness + security-risk report (OpenClaw-style summary: critical/warn/info).
 - A packaged `.skill` file (optional).
 
@@ -245,11 +246,17 @@ Stop at the first failed gate and fix it before proceeding.
 ```bash
 ~/.venvs/pyyaml/bin/python scripts/quick_validate.py <path/to/skill-folder>
 ~/.venvs/pyyaml/bin/python scripts/skill_gate.py <path/to/skill-folder>
+~/.venvs/pyyaml/bin/python scripts/analyze_skill.py <path/to/skill-folder>
 ```
 
-Optional (if available):
-- `scripts/analyze_skill.py` for a quality score
-- `scripts/run_skill_evals.py` for eval execution (`--dual-run --capture-jsonl` for cross-runner scorecards)
+If the skill is **newly created** (mode `create`), evals are required before completion:
+
+```bash
+~/.venvs/pyyaml/bin/python scripts/run_skill_evals.py <path/to/skill-folder>
+```
+
+Optional expansion:
+- `scripts/run_skill_evals.py --dual-run --capture-jsonl` for cross-runner scorecards
 
 ### 6.5) Optional A/B compare loop (conservative)
 
@@ -299,11 +306,14 @@ Fail fast: stop at the first failed gate, fix it, and rerun.
 ```bash
 ~/.venvs/pyyaml/bin/python scripts/quick_validate.py <path/to/skill-folder>
 ~/.venvs/pyyaml/bin/python scripts/skill_gate.py <path/to/skill-folder>
+~/.venvs/pyyaml/bin/python scripts/analyze_skill.py <path/to/skill-folder>
 ~/.venvs/pyyaml/bin/python scripts/openclaw_skill_guard.py <path/to/skill-folder> --mode both
 ```
 
+Required for new skills:
+- `~/.venvs/pyyaml/bin/python scripts/run_skill_evals.py <path/to/skill-folder>`
+
 Optional deep checks:
-- `~/.venvs/pyyaml/bin/python scripts/analyze_skill.py <path/to/skill-folder>`
 - `~/.venvs/pyyaml/bin/python scripts/run_skill_evals.py <path/to/skill-folder> --dual-run --capture-jsonl`
 
 ## Examples

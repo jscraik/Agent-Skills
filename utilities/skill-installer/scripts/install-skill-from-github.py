@@ -10,7 +10,7 @@ import json
 import os
 import re
 import shutil
-import subprocess
+import subprocess as sp
 import sys
 import tempfile
 import urllib.error
@@ -20,7 +20,7 @@ from pathlib import Path
 
 from github_utils import github_request
 DEFAULT_REF = "main"
-CATEGORIES = {"github", "frontend", "apple", "backend", "product", "utilities"}
+CATEGORY_RE = re.compile(r"^[a-z0-9][a-z0-9-]*$")
 TEXT_EXTENSIONS = {
     ".md",
     ".txt",
@@ -79,6 +79,7 @@ class Args:
     name: str | None = None
     method: str = "auto"
     on_warning: str = "prompt"
+    force_unsafe: bool = False
 
 
 @dataclass
@@ -88,6 +89,13 @@ class Source:
     ref: str
     paths: list[str]
     repo_url: str | None = None
+
+
+@dataclass(frozen=True)
+class RiskFinding:
+    source: str
+    message: str
+    severity: str
 
 
 class InstallError(Exception):
@@ -100,7 +108,7 @@ def _skills_root() -> str:
         return os.path.expanduser(env_home)
     codex_home = os.environ.get("CODEX_HOME")
     if codex_home:
-        return os.path.expanduser(codex_home)
+        return os.path.join(os.path.expanduser(codex_home), "skills")
     return os.path.expanduser("~/dev/agent-skills")
 
 
@@ -155,7 +163,7 @@ def _download_repo_zip(owner: str, repo: str, ref: str, dest_dir: str) -> str:
 
 
 def _run_git(args: list[str]) -> None:
-    result = subprocess.run(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    result = sp.run(args, stdout=sp.PIPE, stderr=sp.PIPE, text=True)
     if result.returncode != 0:
         raise InstallError(result.stderr.strip() or "Git command failed.")
 
@@ -181,6 +189,18 @@ def _validate_skill_name(name: str) -> None:
         raise InstallError("Skill name must be a single path segment.")
     if name in (".", ".."):
         raise InstallError("Invalid skill name.")
+
+
+def _validate_category_name(category: str) -> None:
+    if not CATEGORY_RE.fullmatch(category):
+        raise InstallError("Category must be lowercase kebab-case (letters, numbers, hyphens).")
+
+
+def _normalize_severity(severity: str) -> str:
+    text = str(severity).strip().lower()
+    if text not in {"low", "medium", "high"}:
+        return "medium"
+    return text
 
 
 def _git_sparse_checkout(repo_url: str, ref: str, paths: list[str], dest_dir: str) -> str:
@@ -278,11 +298,16 @@ def _load_risk_patterns() -> tuple[list[tuple[str, re.Pattern[str], str]], list[
             for entry in raw:
                 if not isinstance(entry, dict):
                     raise ValueError("pattern entries must be objects")
-                label = str(entry.get("label", "")).strip()
+                label = str(
+                    entry.get("label")
+                    or entry.get("code")
+                    or entry.get("message")
+                    or ""
+                ).strip()
                 regex = str(entry.get("regex", "")).strip()
                 severity = str(entry.get("severity", "medium")).strip().lower()
                 if not label or not regex:
-                    raise ValueError("pattern entries must include label and regex")
+                    raise ValueError("pattern entries must include label/code/message and regex")
                 if severity not in allowed_severity:
                     warnings.append(f"config: invalid severity '{severity}' for {label}; defaulting to medium")
                     severity = "medium"
@@ -367,45 +392,81 @@ def _iter_scan_targets(root: str) -> list[tuple[str, bool]]:
     return targets
 
 
-def _scan_skill_for_risks(skill_path: str) -> list[str]:
-    warnings: list[str] = []
+def _scan_skill_for_risks(skill_path: str) -> list[RiskFinding]:
+    findings: list[RiskFinding] = []
     patterns, config_warnings = _load_risk_patterns()
-    warnings.extend(config_warnings)
+    findings.extend(
+        RiskFinding(source="config", message=warning, severity="medium")
+        for warning in config_warnings
+    )
     allowlist, blocklist, allow_block_warnings = _load_allow_block_patterns()
-    warnings.extend(allow_block_warnings)
+    findings.extend(
+        RiskFinding(source="config", message=warning, severity="medium")
+        for warning in allow_block_warnings
+    )
     for file_path, is_text in _iter_scan_targets(skill_path):
         rel_path = os.path.relpath(file_path, skill_path)
         try:
             if os.path.getsize(file_path) > 1_000_000:
-                warnings.append(f"{rel_path}: skipped large file (>1MB) from risk scan")
+                findings.append(
+                    RiskFinding(
+                        source=rel_path,
+                        message="skipped large file (>1MB) from risk scan",
+                        severity="low",
+                    )
+                )
                 continue
         except OSError:
-            warnings.append(f"{rel_path}: unable to determine file size for risk scan")
+            findings.append(
+                RiskFinding(
+                    source=rel_path,
+                    message="unable to determine file size for risk scan",
+                    severity="low",
+                )
+            )
             continue
 
         if not is_text:
-            warnings.append(f"{rel_path}: non-text attachment (manual review required)")
+            findings.append(
+                RiskFinding(
+                    source=rel_path,
+                    message="non-text attachment (manual review required)",
+                    severity="low",
+                )
+            )
             continue
 
         text = _read_text(file_path)
         for pattern, message, severity in blocklist:
             if pattern.search(text):
-                warnings.append(f"{rel_path}: blocklist match - {message} (severity: {severity})")
+                findings.append(
+                    RiskFinding(
+                        source=rel_path,
+                        message=f"blocklist match - {message}",
+                        severity=_normalize_severity(severity),
+                    )
+                )
         if any(allow.search(rel_path) for allow in allowlist):
             continue
         for label, pattern, severity in patterns:
             if pattern.search(text):
-                warnings.append(f"{rel_path}: {label} (severity: {severity})")
-    return warnings
+                findings.append(
+                    RiskFinding(
+                        source=rel_path,
+                        message=label,
+                        severity=_normalize_severity(severity),
+                    )
+                )
+    return findings
 
 
-def _format_warnings(warnings: list[str]) -> str:
+def _format_warnings(warnings: list[RiskFinding]) -> str:
     lines = ["Warning: Potential prompt-injection or risky command patterns detected:"]
-    lines.extend([f"  - {warning}" for warning in warnings])
+    lines.extend([f"  - [{warning.severity.upper()}] {warning.source}: {warning.message}" for warning in warnings])
     return "\n".join(lines)
 
 
-def _investigate_skill(skill_path: str, warnings: list[str]) -> None:
+def _investigate_skill(skill_path: str, warnings: list[RiskFinding]) -> None:
     total_files = 0
     text_files = 0
     binary_files: list[tuple[str, int]] = []
@@ -437,7 +498,10 @@ def _investigate_skill(skill_path: str, warnings: list[str]) -> None:
         print("- Warning matches:", file=sys.stderr)
         for warning in warnings:
             triage = _triage_warning(warning)
-            print(f"  - {warning} [triage: {triage}]", file=sys.stderr)
+            print(
+                f"  - [{warning.severity.upper()}] {warning.source}: {warning.message} [triage: {triage}]",
+                file=sys.stderr,
+            )
     if largest_files:
         print("- Largest files:", file=sys.stderr)
         for rel_path, size in largest_files[:10]:
@@ -454,11 +518,11 @@ def _investigate_skill(skill_path: str, warnings: list[str]) -> None:
     print("- Search for commands: rg -n \"curl|wget|rm -rf|powershell\" <skill_path>", file=sys.stderr)
 
 
-def _triage_warning(warning: str) -> str:
-    if warning.startswith("config:"):
+def _triage_warning(warning: RiskFinding) -> str:
+    if warning.source == "config":
         return "config"
 
-    rel_path = warning.split(": ", 1)[0]
+    rel_path = warning.source
     path = Path(rel_path)
     ext = path.suffix.lower()
     parts = [part.lower() for part in path.parts]
@@ -473,12 +537,22 @@ def _triage_warning(warning: str) -> str:
 
 
 def _should_continue_after_warning(
-    warnings: list[str],
+    warnings: list[RiskFinding],
     *,
     mode: str,
     skill_name: str,
     skill_path: str,
+    force_unsafe: bool,
 ) -> bool:
+    has_high = any(warning.severity == "high" for warning in warnings)
+    if has_high and not force_unsafe:
+        print(_format_warnings(warnings), file=sys.stderr)
+        print(
+            "Install blocked: high-severity findings detected. Re-run with --force-unsafe to override.",
+            file=sys.stderr,
+        )
+        return False
+
     if mode == "continue":
         print(_format_warnings(warnings), file=sys.stderr)
         print("Warning: Review the skill files before installing. Continuing install.", file=sys.stderr)
@@ -510,6 +584,61 @@ def _copy_skill(src: str, dest_dir: str) -> None:
     if os.path.exists(dest_dir):
         raise InstallError(f"Destination already exists: {dest_dir}")
     shutil.copytree(src, dest_dir)
+
+
+def _choose_python() -> str:
+    preferred = Path.home() / ".venvs" / "pyyaml" / "bin" / "python"
+    if preferred.exists():
+        return str(preferred)
+    return sys.executable
+
+
+def _validator_scripts_root() -> Path:
+    # .../utilities/skill-installer/scripts/install-skill-from-github.py
+    # -> .../utilities/skill-creator/scripts
+    scripts_root = Path(__file__).resolve().parents[2] / "skill-creator" / "scripts"
+    if not scripts_root.exists():
+        raise InstallError(f"Missing validator scripts directory: {scripts_root}")
+    return scripts_root
+
+
+def _run_required_validations(installed_skill_dir: str) -> None:
+    py = _choose_python()
+    scripts_root = _validator_scripts_root()
+    skill_path = str(Path(installed_skill_dir).resolve())
+
+    runner = "claude" if shutil.which("claude") else "codex" if shutil.which("codex") else None
+    if runner is None:
+        raise InstallError(
+            "run_skill_evals.py is required for new skills, but no `claude` or `codex` CLI was found on PATH."
+        )
+
+    commands: list[list[str]] = [
+        [py, str(scripts_root / "quick_validate.py"), skill_path],
+        [py, str(scripts_root / "skill_gate.py"), skill_path],
+        [py, str(scripts_root / "analyze_skill.py"), skill_path],
+        [py, str(scripts_root / "openclaw_skill_guard.py"), skill_path, "--mode", "both"],
+        [py, str(scripts_root / "run_skill_evals.py"), skill_path, "--runner", runner],
+    ]
+
+    if runner == "codex":
+        # Trust checks can block evals in some local contexts; this flag is supported by the repo runner.
+        commands[-1].extend(["--codex-arg=--skip-git-repo-check"])
+
+    for cmd in commands:
+        proc = sp.run(cmd, text=True, capture_output=True)
+        if proc.returncode != 0:
+            stdout = (proc.stdout or "").strip()
+            stderr = (proc.stderr or "").strip()
+            details = []
+            if stdout:
+                details.append(f"STDOUT:\n{stdout}")
+            if stderr:
+                details.append(f"STDERR:\n{stderr}")
+            detail_block = ("\n\n" + "\n\n".join(details)) if details else ""
+            raise InstallError(
+                f"Validation failed: {' '.join(cmd)}{detail_block}"
+            )
 
 
 def _build_repo_url(owner: str, repo: str) -> str:
@@ -589,8 +718,7 @@ def _parse_args(argv: list[str]) -> Args:
     parser.add_argument("--dest", help="Destination skills directory")
     parser.add_argument(
         "--category",
-        choices=sorted(CATEGORIES),
-        help="Category folder under the skills repo (github, frontend, apple, backend, product, utilities)",
+        help="Category folder under the skills root (for example: utilities, product, frontend, interview, github).",
     )
     parser.add_argument(
         "--name", help="Destination skill name (defaults to basename of path)"
@@ -605,6 +733,11 @@ def _parse_args(argv: list[str]) -> Args:
         choices=["prompt", "continue", "stop"],
         default="prompt",
         help="Behavior when warnings are detected (prompt, continue, stop).",
+    )
+    parser.add_argument(
+        "--force-unsafe",
+        action="store_true",
+        help="Allow install to continue when high-severity risk findings are detected.",
     )
     return parser.parse_args(argv, namespace=Args())
 
@@ -623,6 +756,7 @@ def main(argv: list[str]) -> int:
         else:
             if not args.category:
                 raise InstallError("Missing --category (required when --dest is not set).")
+            _validate_category_name(args.category)
             dest_root = os.path.join(_skills_root(), args.category)
         tmp_dir = tempfile.mkdtemp(prefix="skill-install-", dir=_tmp_root())
         try:
@@ -646,9 +780,15 @@ def main(argv: list[str]) -> int:
                         mode=args.on_warning,
                         skill_name=skill_name,
                         skill_path=skill_src,
+                        force_unsafe=args.force_unsafe,
                     ):
                         raise InstallError("Install stopped due to warnings.")
                 _copy_skill(skill_src, dest_dir)
+                try:
+                    _run_required_validations(dest_dir)
+                except InstallError:
+                    shutil.rmtree(dest_dir, ignore_errors=True)
+                    raise
                 installed.append((skill_name, dest_dir))
         finally:
             if os.path.isdir(tmp_dir):

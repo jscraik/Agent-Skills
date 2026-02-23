@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
-import subprocess
+import subprocess as sp
 import sys
 from pathlib import Path
 from typing import List
@@ -42,8 +42,8 @@ def find_skill_dirs(root: Path) -> List[Path]:
     return sorted(set(out))
 
 
-def run_cmd(cmd: List[str], cwd: Path) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(cmd, cwd=cwd, text=True, capture_output=True)
+def run_cmd(cmd: List[str], cwd: Path) -> sp.CompletedProcess[str]:
+    return sp.run(cmd, cwd=cwd, text=True, capture_output=True)
 
 
 def choose_python() -> str:

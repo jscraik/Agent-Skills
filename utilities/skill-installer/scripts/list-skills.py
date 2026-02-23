@@ -8,6 +8,7 @@ import json
 import os
 import sys
 import urllib.error
+from pathlib import Path
 
 from github_utils import github_api_contents_url, github_request
 
@@ -37,19 +38,19 @@ def _skills_root() -> str:
         return os.path.expanduser(env_home)
     codex_home = os.environ.get("CODEX_HOME")
     if codex_home:
-        return os.path.expanduser(codex_home)
+        return os.path.join(os.path.expanduser(codex_home), "skills")
     return os.path.expanduser("~/dev/agent-skills")
 
 
 def _installed_skills() -> set[str]:
-    root = os.path.join(_skills_root(), "skills")
-    if not os.path.isdir(root):
+    root = Path(_skills_root())
+    if not root.is_dir():
         return set()
-    entries = set()
-    for name in os.listdir(root):
-        path = os.path.join(root, name)
-        if os.path.isdir(path):
-            entries.add(name)
+    entries: set[str] = set()
+    for skill_md in root.rglob("SKILL.md"):
+        if ".git" in skill_md.parts:
+            continue
+        entries.add(skill_md.parent.name)
     return entries
 
 
