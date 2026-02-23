@@ -219,6 +219,47 @@ Use the failure-mode template verbatim for out-of-scope requests.
 - Global instructions discovery order (brief, link to full doc)
 - Links to category files
 
+## Frontend Website Rules (injectable block)
+
+When the user asks for frontend website/workflow documentation, inject this block into the generated `AGENTS.md` (or category docs) so behavior is concrete and repeatable:
+
+### AGENTS.md — Frontend Website Rules
+
+- **Always Do First**: invoke `$ui-ux-creative-coding` and `$interface-craft` before writing any frontend code.
+- If a reference image is provided:
+  - Match layout, spacing, typography, and color exactly.
+  - Use placeholders (`https://placehold.co/`) only when content is missing.
+  - Do not improve or add to the design beyond the reference.
+- If no reference image: design from scratch with the guardrails in this section.
+- **Local server required**: Always serve from `http://localhost:2000` using the project’s `node serve.mjs`.
+  - Never use `file:///`.
+  - Start `node serve.mjs` in background before screenshots.
+  - If already running, reuse that instance.
+- Replace Puppeteer-specific assumptions with **agent-browser**:
+  - Use `agent-browser` for navigation and screenshot capture.
+  - Keep workflow tool-first: `agent-browser open http://localhost:2000` then capture screenshots.
+- Pair with `$agentation` (or `agentation` MCP invocation) for execution orchestration:
+  - session setup, screenshot loop control, and comparison pass tracking.
+- **Screenshot naming convention**:
+  - If the screenshot is a full page: `screenshot-page-<name>-<pass>.png`
+  - If the screenshot is a component: `screenshot-component-<type>-<state>-<pass>.png`
+    - examples: `screenshot-component-card-default-1.png`, `screenshot-component-button-hover-2.png`
+  - Never overwrite; increment pass number when rerunning comparisons.
+- Compare against the reference after each pass and continue at least 2 rounds until no visible mismatch.
+- Output should use inline styles in a single `index.html` and Tailwind via `https://cdn.tailwindcss.com`.
+- Tailwind classes:
+  - Do not use default indigo/blue primaries.
+  - Do not use `transition-all`.
+  - For clickables, define hover, focus-visible, and active states.
+- If `brand/` assets exist, prefer them over placeholders.
+- Use existing brand variables; do not invent colors, spacing tokens, or typography scales.
+
+### Runtime checks for screenshot workflows
+
+- Run at least 2 screenshot rounds for visual parity.
+- Use consistent comparison criteria: spacing/padding, typography scale, color hex, alignment, border radii, shadows, sizing.
+- For component screenshots, include the component type in filename (`card`, `button`, `modal`, `form`, etc.) to keep review context explicit.
+
 ## Agent-first scaffold integration (Jamie standard)
 
 Apply this when the user asks for agent-first rollout/scaffold across repos (especially under `/Users/jamiecraik/dev`).
