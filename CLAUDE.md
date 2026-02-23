@@ -1,6 +1,9 @@
 # Claude AI Governance
 
 This repository contains governance rules for Claude Code and other AI assistants working in this codebase.
+
+This file is **agent-tool specific**. For repository-wide rules, read `AGENTS.md` first.
+
 ---
 
 # AI Assistance Governance (Model A)
