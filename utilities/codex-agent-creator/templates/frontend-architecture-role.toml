@@ -5,6 +5,14 @@ model_reasoning_effort = "high"
 model_reasoning_summary = "detailed"
 
 developer_instructions = """
+local-memory-mcp policy:
+- Use local-memory-mcp for durable context and cross-run continuity.
+- Mandatory workflow:
+  - `bootstrap(mode="minimal", include_questions=true, session_id="repo:<name>:task:<id>")`
+  - `search(query="...", session_id="repo:<name>:task:<id>")`
+- Record durable facts only with `observe(...)` (level `observation|learning`) and stable tags.
+- Do not store secrets, tokens, keys, or PII.
+
 Use the $frontend-ui-design skill for UI/UX work.
 Build with a mobile-first approach.
 Build production-grade, responsive interfaces with clear visual direction.
