@@ -15,6 +15,9 @@ Use this guide to create and validate `promotion_decision.json` for a completed 
 
 - A completed run directory under `/artifacts/skill-graphs/runs/<run_id>`.
 - A lesson content file for security/PII scanning when approving (required for approved decisions).
+- Reviewer policy + signature files:
+  - `/docs/skill-graphs/governance/recursive-loop-approvers.yaml`
+  - `/docs/skill-graphs/governance/recursive-loop-approvers.sig`
 
 ## Approve a run
 
@@ -25,6 +28,8 @@ bash scripts/human_promote_recursive_run.sh \
   --reviewer jamie \
   --expected-version v1 \
   --lesson-file docs/skill-graphs/workflows/reviewer-rubric.md \
+  --policy-file docs/skill-graphs/governance/recursive-loop-approvers.yaml \
+  --policy-sig-file docs/skill-graphs/governance/recursive-loop-approvers.sig \
   --note "Promotion approved after rubric + security checks"
 ```
 
@@ -62,7 +67,11 @@ Workflow: `.github/workflows/recursive-promotion-gate.yml`.
 
 - `promotion_decision.json` created/updated in the run directory.
 - Validation report emitted to stdout as JSON.
-- For approved decisions, a `promotion_approved` event recorded in `debug/events.jsonl` (idempotent per run+lesson).
+- For approved decisions, canonical lesson lifecycle updated in:
+  - `artifacts/skill-graphs/lessons/canonical-lessons.jsonl`
+  - `artifacts/skill-graphs/lessons/canonical-lesson-index.json`
+- For approved decisions, a `promotion_approved` event recorded in `events.jsonl` (idempotent per run+lesson).
+- Rejected policy/role/signature paths emit immutable `run_blocked` evidence in `run_blocker.json` + `events.jsonl`.
 
 Related:
 - [Promotion gate workflow](/docs/skill-graphs/workflows/promotion-gate.md)

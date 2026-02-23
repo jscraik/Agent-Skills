@@ -22,6 +22,7 @@ import argparse
 import hashlib
 import json
 import math
+import os
 import random
 import sys
 import time
@@ -39,6 +40,13 @@ STOP_REASONS = {
     "policy_failed",
     "evaluator_conflict",
     "dependency_missing",
+}
+
+BLOCKER_CODES = {
+    "run_rollforward_blocked",
+    "run_rollback_required",
+    "kill_switch_activated",
+    "evaluator_conflict",
 }
 
 
@@ -283,6 +291,147 @@ def write_jsonl(path: Path, rows: List[Dict[str, Any]]) -> None:
             f.write("\n")
 
 
+def emit_event(
+    *,
+    events: List[Dict[str, Any]],
+    run_id: str,
+    profile: Profile,
+    actor_id: str,
+    objective_hash: str,
+    event_type: str,
+    severity: str,
+    terminal_status: Optional[str],
+    stop_reason: Optional[str],
+    blocker_code: Optional[str] = None,
+    extra: Optional[Dict[str, Any]] = None,
+) -> None:
+    seed = f"{run_id}:{event_type}:{terminal_status}:{stop_reason}:{blocker_code}:{len(events)}"
+    event: Dict[str, Any] = {
+        "schema_version": "1.0",
+        "event_id": sha256_text(seed)[:16],
+        "ts": iso_now(),
+        "run_id": run_id,
+        "skill_name": profile.scope_skill,
+        "task_profile": profile.profile_id,
+        "event_type": event_type,
+        "severity": severity,
+        "terminal_status": terminal_status,
+        "stop_reason": stop_reason,
+        "actor_id": actor_id,
+        "evaluator_version": profile.evaluator_version,
+        "rubric_version": profile.rubric_version,
+        "prompt_hash": objective_hash,
+    }
+    if blocker_code:
+        event["blocker_code"] = blocker_code
+    if extra:
+        event.update(extra)
+    events.append(event)
+
+
+def normalize_blocked_reason(blocker_code: str) -> Tuple[str, str]:
+    if blocker_code == "run_rollforward_blocked":
+        return ("failed", "policy_failed")
+    if blocker_code == "run_rollback_required":
+        return ("failed", "dependency_missing")
+    if blocker_code == "evaluator_conflict":
+        return ("escalated", "evaluator_conflict")
+    if blocker_code == "kill_switch_activated":
+        return ("aborted", "aborted")
+    return ("failed", "policy_failed")
+
+
+def is_kill_switch_activated(path: Optional[Path]) -> bool:
+    if path is None or not path.exists():
+        return False
+    try:
+        raw = path.read_text(encoding="utf-8", errors="ignore").strip().lower()
+    except Exception:
+        return True
+    if raw in {"", "1", "true", "yes", "on", "kill", "stop"}:
+        return True
+    return raw not in {"0", "false", "off", "no"}
+
+
+def acquire_run_lock(lock_path: Path, run_id: str, run_owner: str, idempotency_key: str) -> None:
+    lock_path.parent.mkdir(parents=True, exist_ok=True)
+    payload = {
+        "run_id": run_id,
+        "run_owner": run_owner,
+        "idempotency_key": idempotency_key,
+        "created_at": iso_now(),
+    }
+    flags = os.O_CREAT | os.O_EXCL | os.O_WRONLY
+    fd = os.open(lock_path, flags)
+    with os.fdopen(fd, "w", encoding="utf-8") as f:
+        f.write(json.dumps(payload, sort_keys=True))
+        f.write("\n")
+
+
+def release_run_lock(lock_path: Path, run_id: str) -> None:
+    if not lock_path.exists():
+        return
+    try:
+        payload = json.loads(lock_path.read_text(encoding="utf-8"))
+        if str(payload.get("run_id", "")) != run_id:
+            return
+    except Exception:
+        return
+    try:
+        lock_path.unlink()
+    except FileNotFoundError:
+        return
+
+
+def evaluate_candidate_adversarial(
+    *,
+    profile: Profile,
+    objective: str,
+    candidate: str,
+    iteration_id: int,
+    seed: int,
+    checkpoint_reason: str,
+) -> Dict[str, Any]:
+    base = evaluate_candidate(
+        profile=profile,
+        objective=objective,
+        candidate=candidate,
+        iteration_id=iteration_id,
+        improved=True,
+        seed=seed,
+    )
+    penalty_scale = 0.08 if checkpoint_reason == "initial" else 0.11
+    adjusted_scores: Dict[str, float] = {}
+    findings: List[Dict[str, str]] = list(base.get("findings", []))
+
+    for c in profile.criteria:
+        deterministic = stable_unit_float(profile.profile_id, c.id, "adversarial", str(seed))
+        penalty = round(penalty_scale * (0.6 + deterministic), 3)
+        adjusted = clamp(float(base["scores"][c.id]) - penalty, 0.0, 0.99)
+        adjusted_scores[c.id] = round(adjusted, 3)
+        deficit = round(c.threshold - adjusted_scores[c.id], 3)
+        if deficit > 0:
+            findings.append(
+                {
+                    "severity": "fail" if c.critical or deficit >= 0.08 else "warn",
+                    "criterion_id": c.id,
+                    "message": f"adversarial: {c.id} below threshold by {deficit:.3f}",
+                }
+            )
+
+    total_weight = sum(c.weight for c in profile.criteria)
+    overall = sum(adjusted_scores[c.id] * c.weight for c in profile.criteria) / total_weight
+    return {
+        "judge_mode": "adversarial",
+        "checkpoint_reason": checkpoint_reason,
+        "scores": adjusted_scores,
+        "overall_score": round(overall, 3),
+        "findings": findings,
+        "eligible_for_gate_check": True,
+        "objective_hash": sha256_text(objective),
+    }
+
+
 def run_loop(args: argparse.Namespace) -> int:
     profile = load_profile(Path(args.profile_file).resolve())
 
@@ -291,36 +440,200 @@ def run_loop(args: argparse.Namespace) -> int:
 
     run_id = f"run_{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')}_{sha256_text(profile.profile_id + args.objective)[:6]}"
     out_dir = Path(args.out_root).resolve() / run_id
+    out_root = Path(args.out_root).resolve()
     out_dir.mkdir(parents=True, exist_ok=True)
     debug_dir = out_dir / "debug"
     if args.emit_debug_artifacts:
         debug_dir.mkdir(parents=True, exist_ok=True)
 
+    events_path = out_dir / "events.jsonl"
     started_at = time.time()
     created_at = iso_now()
+    objective_hash = sha256_text(args.objective)
 
     max_iterations = args.max_iterations or profile.thresholds.max_iterations
     max_elapsed_ms = args.max_elapsed_ms or profile.thresholds.max_elapsed_ms
     max_tokens = args.max_tokens or profile.thresholds.max_tokens
 
-    events: List[Dict[str, Any]] = [
-        {
+    run_owner = str(args.run_owner).strip()
+    idempotency_key = (
+        str(args.idempotency_key).strip()
+        if args.idempotency_key
+        else sha256_text(f"{profile.profile_id}:{args.objective}:{run_owner}")[:20]
+    )
+    lock_path = (
+        Path(args.run_lock).resolve()
+        if args.run_lock
+        else out_root / ".locks" / f"{profile.profile_id}.lock"
+    )
+    kill_switch_raw = (
+        str(args.kill_switch_file).strip()
+        if args.kill_switch_file
+        else str(os.environ.get("SKILL_GRAPH_KILL_SWITCH_PATH", "")).strip()
+    )
+    kill_switch_path = Path(kill_switch_raw).expanduser().resolve() if kill_switch_raw else None
+
+    events: List[Dict[str, Any]] = []
+    emit_event(
+        events=events,
+        run_id=run_id,
+        profile=profile,
+        actor_id=args.actor_id,
+        objective_hash=objective_hash,
+        event_type="run_initialized",
+        severity="info",
+        terminal_status=None,
+        stop_reason=None,
+        extra={"run_owner": run_owner, "idempotency_key": idempotency_key},
+    )
+
+    def write_blocker_artifacts(
+        *,
+        blocker_code: str,
+        message: str,
+        terminal_status: str,
+        stop_reason: str,
+    ) -> None:
+        blocker = {
             "schema_version": "1.0",
-            "event_id": sha256_text(run_id + "run_initialized")[:16],
-            "ts": created_at,
             "run_id": run_id,
-            "skill_name": profile.scope_skill,
-            "task_profile": profile.profile_id,
-            "event_type": "run_initialized",
-            "severity": "info",
-            "terminal_status": None,
-            "stop_reason": None,
-            "actor_id": args.actor_id,
-            "evaluator_version": profile.evaluator_version,
-            "rubric_version": profile.rubric_version,
-            "prompt_hash": sha256_text(args.objective),
+            "code": blocker_code,
+            "message": message,
+            "remediation_owner": run_owner,
+            "created_at": iso_now(),
         }
-    ]
+        write_json(out_dir / "run_blocker.json", blocker)
+        if blocker_code in {"kill_switch_activated", "run_rollback_required", "run_rollforward_blocked"}:
+            write_json(
+                out_dir / "rollback_recommendation.json",
+                {
+                    "schema_version": "1.0",
+                    "run_id": run_id,
+                    "reason": blocker_code,
+                    "owner": run_owner,
+                    "recommended_actions": [
+                        "review run_blocker.json",
+                        "confirm canonical lesson/index unchanged",
+                        "rerun with corrected lock/policy inputs",
+                    ],
+                    "created_at": iso_now(),
+                },
+            )
+
+        run_obj = {
+            "schema_version": profile.schema_version,
+            "run_id": run_id,
+            "profile_id": profile.profile_id,
+            "scope_skill": profile.scope_skill,
+            "scope_profile": profile.scope_profile,
+            "terminal_status": terminal_status,
+            "stop_reason": stop_reason,
+            "started_at": created_at,
+            "finished_at": iso_now(),
+            "duration_ms": int((time.time() - started_at) * 1000),
+            "budget": {
+                "max_iterations": max_iterations,
+                "max_elapsed_ms": max_elapsed_ms,
+                "max_tokens": max_tokens,
+            },
+            "counters": {
+                "iterations_completed": 0,
+                "tokens_used": 0,
+                "consecutive_passes": 0,
+            },
+            "versions": {
+                "rubric_version": profile.rubric_version,
+                "evaluator_version": profile.evaluator_version,
+                "persona_set_id": profile.persona_set_id,
+            },
+            "prompt_hash": objective_hash,
+            "created_by": args.actor_id,
+            "run_owner": run_owner,
+            "idempotency_key": idempotency_key,
+            "lock_path": str(lock_path),
+            "kill_switch_file": str(kill_switch_path) if kill_switch_path else "",
+            "run_blocker": blocker,
+        }
+        promotion_decision = {
+            "schema_version": profile.schema_version,
+            "run_id": run_id,
+            "lesson_id": "",
+            "decision": "draft",
+            "reviewer_ids": [],
+            "expected_version": "",
+            "lesson_status": "",
+            "lesson_effective_to": None,
+            "gate_decision": {
+                "runtime_gates_passed": False,
+                "provenance_complete": False,
+                "security_checklist_passed": False,
+                "notes": message,
+            },
+            "provenance": {
+                "prompt_hash": objective_hash,
+                "rubric_version": profile.rubric_version,
+                "evaluator_version": profile.evaluator_version,
+                "iteration_ids": [],
+            },
+            "run_blocker": blocker,
+        }
+        write_json(out_dir / "run.json", run_obj)
+        write_jsonl(out_dir / "iteration_journal.jsonl", [])
+        write_json(out_dir / "promotion_decision.json", promotion_decision)
+        write_jsonl(events_path, events)
+
+    try:
+        acquire_run_lock(lock_path, run_id, run_owner, idempotency_key)
+    except FileExistsError:
+        blocker_code = "run_rollforward_blocked"
+        terminal_status, stop_reason = normalize_blocked_reason(blocker_code)
+        emit_event(
+            events=events,
+            run_id=run_id,
+            profile=profile,
+            actor_id=args.actor_id,
+            objective_hash=objective_hash,
+            event_type="run_blocked",
+            severity="warn",
+            terminal_status=terminal_status,
+            stop_reason=stop_reason,
+            blocker_code=blocker_code,
+            extra={"message": f"lock already exists: {lock_path}"},
+        )
+        emit_event(
+            events=events,
+            run_id=run_id,
+            profile=profile,
+            actor_id=args.actor_id,
+            objective_hash=objective_hash,
+            event_type="run_state_changed",
+            severity="warn",
+            terminal_status=terminal_status,
+            stop_reason=stop_reason,
+            blocker_code=blocker_code,
+        )
+        emit_event(
+            events=events,
+            run_id=run_id,
+            profile=profile,
+            actor_id=args.actor_id,
+            objective_hash=objective_hash,
+            event_type="failure_event",
+            severity="fail",
+            terminal_status=terminal_status,
+            stop_reason=stop_reason,
+            blocker_code=blocker_code,
+        )
+        write_blocker_artifacts(
+            blocker_code=blocker_code,
+            message=f"run lock exists at {lock_path}; run blocked",
+            terminal_status=terminal_status,
+            stop_reason=stop_reason,
+        )
+        print(f"[recursive-loop] run_id={run_id}")
+        print(f"[recursive-loop] status={terminal_status} stop_reason={stop_reason}")
+        print(f"[recursive-loop] out_dir={out_dir}")
+        return 5
 
     journals: List[Dict[str, Any]] = []
     candidate = args.objective.strip()
@@ -332,136 +645,182 @@ def run_loop(args: argparse.Namespace) -> int:
     best_accepted_scores: Optional[Dict[str, float]] = None
     terminal_status = "failed"
     stop_reason = "budget_exhausted"
+    blocker_code: Optional[str] = None
 
-    for iteration_id in range(1, max_iterations + 1):
-        now_ms = int((time.time() - started_at) * 1000)
-        if now_ms > max_elapsed_ms or total_tokens > max_tokens:
-            terminal_status = "failed"
-            stop_reason = "budget_exhausted"
-            break
+    try:
+        for iteration_id in range(1, max_iterations + 1):
+            if is_kill_switch_activated(kill_switch_path):
+                blocker_code = "kill_switch_activated"
+                terminal_status, stop_reason = normalize_blocked_reason(blocker_code)
+                break
 
-        generated_path = debug_dir / f"iter-{iteration_id}-generated.txt"
-        if args.emit_debug_artifacts:
-            generated_path.write_text(candidate + "\n", encoding="utf-8")
+            now_ms = int((time.time() - started_at) * 1000)
+            if now_ms > max_elapsed_ms or total_tokens > max_tokens:
+                terminal_status = "failed"
+                stop_reason = "budget_exhausted"
+                break
 
-        eval_report = evaluate_candidate(
-            profile=profile,
-            objective=args.objective,
-            candidate=candidate,
-            iteration_id=iteration_id,
-            improved=False,
-            seed=run_seed,
-        )
+            generated_path = debug_dir / f"iter-{iteration_id}-generated.txt"
+            if args.emit_debug_artifacts:
+                generated_path.write_text(candidate + "\n", encoding="utf-8")
 
-        if baseline_scores is None:
-            baseline_scores = dict(eval_report["scores"])
+            eval_report = evaluate_candidate(
+                profile=profile,
+                objective=args.objective,
+                candidate=candidate,
+                iteration_id=iteration_id,
+                improved=False,
+                seed=run_seed,
+            )
 
-        diagnosis_obj = diagnose(profile, eval_report)
-        improvement_action = improve(candidate, diagnosis_obj, iteration_id)
-        improved_candidate = improvement_action["candidate"]
+            if baseline_scores is None:
+                baseline_scores = dict(eval_report["scores"])
 
-        improved_path = debug_dir / f"iter-{iteration_id}-improved.txt"
-        if args.emit_debug_artifacts:
-            improved_path.write_text(improved_candidate + "\n", encoding="utf-8")
+            diagnosis_obj = diagnose(profile, eval_report)
+            improvement_action = improve(candidate, diagnosis_obj, iteration_id)
+            improved_candidate = improvement_action["candidate"]
 
-        reevaluation_report = evaluate_candidate(
-            profile=profile,
-            objective=args.objective,
-            candidate=improved_candidate,
-            iteration_id=iteration_id,
-            improved=True,
-            seed=run_seed + iteration_id + rng.randint(0, 3),
-        )
+            improved_path = debug_dir / f"iter-{iteration_id}-improved.txt"
+            if args.emit_debug_artifacts:
+                improved_path.write_text(improved_candidate + "\n", encoding="utf-8")
 
-        baseline_for_regression = best_accepted_scores or baseline_scores
-        non_regression_ok, regressions = check_non_regression(
-            profile=profile,
-            baseline_scores=baseline_for_regression,
-            candidate_scores=reevaluation_report["scores"],
-        )
-        reevaluation_report["non_regression_passed"] = non_regression_ok
-        reevaluation_report["regression_criteria"] = regressions
+            reevaluation_report = evaluate_candidate(
+                profile=profile,
+                objective=args.objective,
+                candidate=improved_candidate,
+                iteration_id=iteration_id,
+                improved=True,
+                seed=run_seed + iteration_id + rng.randint(0, 3),
+            )
 
-        criterion_deltas = {
-            c.id: round(reevaluation_report["scores"][c.id] - eval_report["scores"][c.id], 3)
-            for c in profile.criteria
-        }
+            baseline_for_regression = best_accepted_scores or baseline_scores
+            non_regression_ok, regressions = check_non_regression(
+                profile=profile,
+                baseline_scores=baseline_for_regression,
+                candidate_scores=reevaluation_report["scores"],
+            )
+            reevaluation_report["non_regression_passed"] = non_regression_ok
+            reevaluation_report["regression_criteria"] = regressions
 
-        iteration_pass = pass_thresholds(profile, reevaluation_report["scores"]) and (
-            non_regression_ok if profile.thresholds.critical_non_regression else True
-        )
+            criterion_deltas = {
+                c.id: round(reevaluation_report["scores"][c.id] - eval_report["scores"][c.id], 3)
+                for c in profile.criteria
+            }
 
-        if iteration_pass:
-            consecutive_passes += 1
-            best_accepted_scores = dict(reevaluation_report["scores"])
-            state = "accepted"
-            gate_decision = "pass"
-        else:
-            consecutive_passes = 0
-            state = "rejected"
-            gate_decision = "continue"
+            iteration_pass = pass_thresholds(profile, reevaluation_report["scores"]) and (
+                non_regression_ok if profile.thresholds.critical_non_regression else True
+            )
 
-        reevaluation_report["gate_decision"] = gate_decision
+            if iteration_pass:
+                consecutive_passes += 1
+                best_accepted_scores = dict(reevaluation_report["scores"])
+                state = "accepted"
+                gate_decision = "pass"
+            else:
+                consecutive_passes = 0
+                state = "rejected"
+                gate_decision = "continue"
 
-        generated_tokens = token_estimate(candidate)
-        improved_tokens = token_estimate(improved_candidate)
-        total_tokens += generated_tokens + improved_tokens
+            reevaluation_report["gate_decision"] = gate_decision
 
-        overall_after = float(reevaluation_report["overall_score"])
-        if last_overall is not None and overall_after <= (last_overall + 0.005):
-            no_improvement_count += 1
-        else:
-            no_improvement_count = 0
-        last_overall = overall_after
+            checkpoint_reason: Optional[str] = None
+            if iteration_id == 1:
+                checkpoint_reason = "initial"
+            elif any(f.get("severity") == "fail" for f in eval_report.get("findings", [])):
+                checkpoint_reason = "failure_triggered"
+            elif iteration_id == max_iterations:
+                checkpoint_reason = "final"
 
-        journal = {
-            "schema_version": profile.schema_version,
-            "run_id": run_id,
-            "iteration_id": iteration_id,
-            "run_version": iteration_id,
-            "state": state,
-            "created_at": iso_now(),
-            "created_by": args.actor_id,
-            "rubric_version": profile.rubric_version,
-            "evaluator_version": profile.evaluator_version,
-            "persona_set_id": profile.persona_set_id,
-            "prompt_hash": sha256_text(candidate),
-            "applied_lessons": [],
-            "generated": {
-                "content_ref": (
-                    str(generated_path.relative_to(out_dir.parent))
-                    if args.emit_debug_artifacts
-                    else ""
-                ),
-                "token_estimate": generated_tokens,
-            },
-            "evaluation_report": eval_report,
-            "diagnosis": diagnosis_obj,
-            "improvement_action": {
-                "action_type": improvement_action["action_type"],
-                "summary": improvement_action["summary"],
-            },
-            "reevaluation_report": reevaluation_report,
-            "criterion_deltas": criterion_deltas,
-        }
-        journals.append(journal)
+            adversarial_report: Optional[Dict[str, Any]] = None
+            if checkpoint_reason:
+                adversarial_report = evaluate_candidate_adversarial(
+                    profile=profile,
+                    objective=args.objective,
+                    candidate=improved_candidate,
+                    iteration_id=iteration_id,
+                    seed=run_seed + iteration_id + 17,
+                    checkpoint_reason=checkpoint_reason,
+                )
+                adversarial_pass = pass_thresholds(profile, adversarial_report["scores"])
+                reevaluation_report["adversarial_checkpoint_triggered"] = True
+                reevaluation_report["adversarial_checkpoint_reason"] = checkpoint_reason
+                reevaluation_report["adversarial_passed"] = adversarial_pass
+                if iteration_pass and not adversarial_pass:
+                    blocker_code = "evaluator_conflict"
+                    terminal_status, stop_reason = normalize_blocked_reason(blocker_code)
+                    gate_decision = "hold"
+                    state = "escalated"
+                    reevaluation_report["gate_decision"] = gate_decision
 
-        candidate = improved_candidate
+            generated_tokens = token_estimate(candidate)
+            improved_tokens = token_estimate(improved_candidate)
+            total_tokens += generated_tokens + improved_tokens
 
-        if consecutive_passes >= max(1, profile.thresholds.stability_consecutive_passes):
-            terminal_status = "passed"
-            stop_reason = "pass"
-            break
+            overall_after = float(reevaluation_report["overall_score"])
+            if last_overall is not None and overall_after <= (last_overall + 0.005):
+                no_improvement_count += 1
+            else:
+                no_improvement_count = 0
+            last_overall = overall_after
 
-        if no_improvement_count >= max(1, profile.thresholds.no_improvement_escalation_limit):
-            terminal_status = "escalated"
-            stop_reason = "escalated"
-            break
+            journal = {
+                "schema_version": profile.schema_version,
+                "run_id": run_id,
+                "iteration_id": iteration_id,
+                "run_version": iteration_id,
+                "state": state,
+                "created_at": iso_now(),
+                "created_by": args.actor_id,
+                "rubric_version": profile.rubric_version,
+                "evaluator_version": profile.evaluator_version,
+                "persona_set_id": profile.persona_set_id,
+                "prompt_hash": sha256_text(candidate),
+                "applied_lessons": [],
+                "generated": {
+                    "content_ref": (
+                        str(generated_path.relative_to(out_dir.parent))
+                        if args.emit_debug_artifacts
+                        else ""
+                    ),
+                    "token_estimate": generated_tokens,
+                },
+                "evaluation_report": eval_report,
+                "diagnosis": diagnosis_obj,
+                "improvement_action": {
+                    "action_type": improvement_action["action_type"],
+                    "summary": improvement_action["summary"],
+                },
+                "reevaluation_report": reevaluation_report,
+                "adversarial_report": adversarial_report or {},
+                "criterion_deltas": criterion_deltas,
+            }
+            journals.append(journal)
 
-        if total_tokens > max_tokens or int((time.time() - started_at) * 1000) > max_elapsed_ms:
-            terminal_status = "failed"
-            stop_reason = "budget_exhausted"
-            break
+            candidate = improved_candidate
+            if blocker_code:
+                break
+
+            if consecutive_passes >= max(1, profile.thresholds.stability_consecutive_passes):
+                terminal_status = "passed"
+                stop_reason = "pass"
+                break
+
+            if no_improvement_count >= max(1, profile.thresholds.no_improvement_escalation_limit):
+                terminal_status = "escalated"
+                stop_reason = "escalated"
+                break
+
+            if total_tokens > max_tokens or int((time.time() - started_at) * 1000) > max_elapsed_ms:
+                terminal_status = "failed"
+                stop_reason = "budget_exhausted"
+                break
+
+            if is_kill_switch_activated(kill_switch_path):
+                blocker_code = "kill_switch_activated"
+                terminal_status, stop_reason = normalize_blocked_reason(blocker_code)
+                break
+    finally:
+        release_run_lock(lock_path, run_id)
 
     if terminal_status not in TERMINAL_STATUSES:
         terminal_status = "failed"
@@ -470,43 +829,72 @@ def run_loop(args: argparse.Namespace) -> int:
 
     duration_ms = int((time.time() - started_at) * 1000)
 
-    events.append(
-        {
-            "schema_version": "1.0",
-            "event_id": sha256_text(run_id + terminal_status + stop_reason)[:16],
-            "ts": iso_now(),
-            "run_id": run_id,
-            "skill_name": profile.scope_skill,
-            "task_profile": profile.profile_id,
-            "event_type": "run_state_changed",
-            "severity": "info" if terminal_status == "passed" else "warn",
-            "terminal_status": terminal_status,
-            "stop_reason": stop_reason,
-            "actor_id": args.actor_id,
-            "evaluator_version": profile.evaluator_version,
-            "rubric_version": profile.rubric_version,
-            "prompt_hash": sha256_text(args.objective),
-        }
+    if blocker_code in BLOCKER_CODES:
+        emit_event(
+            events=events,
+            run_id=run_id,
+            profile=profile,
+            actor_id=args.actor_id,
+            objective_hash=objective_hash,
+            event_type="run_blocked",
+            severity="warn",
+            terminal_status=terminal_status,
+            stop_reason=stop_reason,
+            blocker_code=blocker_code,
+        )
+        write_json(
+            out_dir / "run_blocker.json",
+            {
+                "schema_version": "1.0",
+                "run_id": run_id,
+                "code": blocker_code,
+                "message": f"run halted by blocker: {blocker_code}",
+                "remediation_owner": run_owner,
+                "created_at": iso_now(),
+            },
+        )
+        if blocker_code in {"kill_switch_activated", "run_rollback_required", "run_rollforward_blocked"}:
+            write_json(
+                out_dir / "rollback_recommendation.json",
+                {
+                    "schema_version": "1.0",
+                    "run_id": run_id,
+                    "reason": blocker_code,
+                    "owner": run_owner,
+                    "recommended_actions": [
+                        "inspect blocker and event logs",
+                        "validate lock and canonical lesson state",
+                        "retry only after blocker condition cleared",
+                    ],
+                    "created_at": iso_now(),
+                },
+            )
+
+    emit_event(
+        events=events,
+        run_id=run_id,
+        profile=profile,
+        actor_id=args.actor_id,
+        objective_hash=objective_hash,
+        event_type="run_state_changed",
+        severity="info" if terminal_status == "passed" else "warn",
+        terminal_status=terminal_status,
+        stop_reason=stop_reason,
+        blocker_code=blocker_code,
     )
 
     if terminal_status != "passed":
-        events.append(
-            {
-                "schema_version": "1.0",
-                "event_id": sha256_text(run_id + "failure_event")[:16],
-                "ts": iso_now(),
-                "run_id": run_id,
-                "skill_name": profile.scope_skill,
-                "task_profile": profile.profile_id,
-                "event_type": "failure_event",
-                "severity": "fail" if terminal_status == "failed" else "warn",
-                "terminal_status": terminal_status,
-                "stop_reason": stop_reason,
-                "actor_id": args.actor_id,
-                "evaluator_version": profile.evaluator_version,
-                "rubric_version": profile.rubric_version,
-                "prompt_hash": sha256_text(args.objective),
-            }
+        emit_event(
+            events=events,
+            run_id=run_id,
+            profile=profile,
+            actor_id=args.actor_id,
+            objective_hash=objective_hash,
+            event_type="failure_event",
+            severity="fail" if terminal_status == "failed" else "warn",
+            terminal_status=terminal_status,
+            stop_reason=stop_reason,
+            blocker_code=blocker_code,
         )
 
     run_obj = {
@@ -535,8 +923,20 @@ def run_loop(args: argparse.Namespace) -> int:
             "evaluator_version": profile.evaluator_version,
             "persona_set_id": profile.persona_set_id,
         },
-        "prompt_hash": sha256_text(args.objective),
+        "prompt_hash": objective_hash,
         "created_by": args.actor_id,
+        "run_owner": run_owner,
+        "idempotency_key": idempotency_key,
+        "lock_path": str(lock_path),
+        "kill_switch_file": str(kill_switch_path) if kill_switch_path else "",
+        "run_blocker": (
+            {
+                "code": blocker_code,
+                "remediation_owner": run_owner,
+            }
+            if blocker_code
+            else None
+        ),
     }
 
     promotion_decision = {
@@ -546,6 +946,8 @@ def run_loop(args: argparse.Namespace) -> int:
         "decision": "draft",
         "reviewer_ids": [],
         "expected_version": "",
+        "lesson_status": "",
+        "lesson_effective_to": None,
         "gate_decision": {
             "runtime_gates_passed": terminal_status == "passed",
             "provenance_complete": True,
@@ -574,9 +976,9 @@ def run_loop(args: argparse.Namespace) -> int:
     write_json(out_dir / "run.json", run_obj)
     write_jsonl(out_dir / "iteration_journal.jsonl", journals)
     write_json(out_dir / "promotion_decision.json", promotion_decision)
+    write_jsonl(events_path, events)
 
     if args.emit_debug_artifacts:
-        write_jsonl(debug_dir / "events.jsonl", events)
         (debug_dir / "summary.md").write_text(summary_md, encoding="utf-8")
 
     print(f"[recursive-loop] run_id={run_id}")
@@ -598,6 +1000,10 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--objective", required=True, help="Run objective text")
     p.add_argument("--out-root", default="artifacts/skill-graphs/runs", help="Output root directory")
     p.add_argument("--actor-id", default="recursive-skill-loop", help="Actor id for artifacts/events")
+    p.add_argument("--run-owner", default="recursive-loop-system", help="Owning operator/service id")
+    p.add_argument("--run-lock", help="Optional explicit lock file path")
+    p.add_argument("--idempotency-key", help="Optional idempotency key for run ownership")
+    p.add_argument("--kill-switch-file", help="Kill switch file path (or use SKILL_GRAPH_KILL_SWITCH_PATH)")
     p.add_argument("--seed", type=int, help="Optional deterministic seed override")
     p.add_argument("--max-iterations", type=int, help="Override max iterations")
     p.add_argument("--max-elapsed-ms", type=int, help="Override elapsed budget")

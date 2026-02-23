@@ -22,7 +22,9 @@ This guide runs the MVP loop engine in bounded mode and emits auditable artifact
 python3 utilities/skill-creator/scripts/recursive_skill_loop.py \
   --profile-file docs/skill-graphs/schemas/examples/ui-skills-profile.example.json \
   --objective "Improve UI skill response quality for traceable, safe outputs" \
-  --out-root artifacts/skill-graphs/runs
+  --out-root artifacts/skill-graphs/runs \
+  --run-owner recursive-loop-operator \
+  --kill-switch-file artifacts/skill-graphs/controls/kill-switch.txt
 ```
 
 ## Shadow cycle automation
@@ -44,6 +46,8 @@ A run directory with:
 - `run.json`
 - `iteration_journal.jsonl`
 - `promotion_decision.json` (draft decision artifact)
+- `events.jsonl` (always-on event stream)
+- `run_blocker.json` / `rollback_recommendation.json` on blocked or kill-switch paths
 
 Optional debug traces are written only when `--emit-debug-artifacts` is set and stored under `run/debug/`.
 
