@@ -11,8 +11,10 @@
 
 ## Token architecture
 - **Brand source of truth (DTCG):** `packages/tokens/src/tokens/index.dtcg.json`
+- **Brand governance:** `brand/README.md`, `docs/design-system/CHARTER.md`, `docs/design-system/UPSTREAM_ALIGNMENT.md`
 - **Generated foundations:** `packages/tokens/src/foundations.css`
 - **Semantic aliases:** `packages/tokens/src/aliases.css`
+- **Generated output artifacts:** `packages/tokens/src/tokens.css`, `packages/tokens/src/enhanced.css`
 - **Tailwind mapping:** `packages/tokens/tailwind.preset.ts`
 - **Runtime mapped slots:** `packages/ui/src/styles/theme.css`
 - **Governance contract:** `docs/design-system/CONTRACT.md`
@@ -56,10 +58,14 @@
 - Token validation: `pnpm validate:tokens`
 - Coverage policy: `pnpm ds:matrix:check`
 - Design-system governance docs:
-  - `docs/design-system/collections/brand-collection-rules.md`
-  - `docs/design-system/collections/alias-collection-rules.md`
-  - `docs/design-system/collections/mapped-collection-rules.md`
-  - `docs/design-system/collections/responsive-collection-rules.md`
+- `docs/design-system/collections/brand-collection-rules.md`
+- `docs/design-system/collections/alias-collection-rules.md`
+- `docs/design-system/collections/mapped-collection-rules.md`
+- `docs/design-system/collections/responsive-collection-rules.md`
+- `docs/design-system/ADOPTION_CHECKLIST.md`
+- `docs/design-system/A11Y_CONTRACTS.md`
+- `docs/design-system/COVERAGE_MATRIX.md`
+- `packages/tokens/docs/FIGMA_EXPORT_GUIDE.md`
 
 ## Fast retrieval commands
 ```bash
@@ -71,4 +77,5 @@ jq '.radius | keys' packages/tokens/src/tokens/index.dtcg.json
 rg -n "--foundation-|--ds-|--color-" packages/tokens packages/ui/src/styles
 rg -n "@design-studio/ui/icons|@design-studio/astudio-icons" packages/ui/src
 rg -n "Brand|Alias|Mapped" docs/design-system/CONTRACT.md docs/design-system/collections/*.md
+rg -n "CHARTER|UPSTREAM_ALIGNMENT|ADOPTION_CHECKLIST|COVERAGE_MATRIX|A11Y_CONTRACTS" docs/design-system brand/README.md
 ```

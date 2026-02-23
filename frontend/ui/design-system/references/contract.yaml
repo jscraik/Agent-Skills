@@ -18,6 +18,7 @@ inputs:
 outputs:
   - evidence-backed response with canonical file references
   - layer-aware change plan or edits (Brand/Alias/Mapped/Usage)
+  - brand-accessibility audit matrix when color/interaction/mode changes are in scope
   - validation command set and expected pass criteria
   - optional artifact docs under ./artifacts/design-system/
 
