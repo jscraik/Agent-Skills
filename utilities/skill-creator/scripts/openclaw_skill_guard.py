@@ -83,13 +83,47 @@ PATTERNS = [
     ("critical", "security.exec_usage", re.compile(r"(?<![A-Za-z0-9_])exec\(")),
 
     # Often-safe patterns that still deserve review.
-    ("warn", "security.subprocess_usage", re.compile(r"\bsubprocess\.")),
-    ("warn", "security.node_child_process", re.compile(r"\bnode:child_process\b|\bchild_process\b|\bspawnSync\(|\bspawn\(")),
-    ("warn", "security.network_usage", re.compile(r"\b(requests\.|fetch\(|axios\.|curl\b|httpx\.)")),
+    ("warn", "security.subprocess_usage", re.compile(r"\bsubprocess\.(run|Popen|call|check_call|check_output)\(")),
+    ("warn", "security.node_child_process", re.compile(r"\bnode:child_process\b|\bchild_process\.(?:spawn|spawnSync|exec|execSync)\b|\bspawnSync\(|\bspawn\(")),
+    (
+        "warn",
+        "security.network_usage",
+        re.compile(
+            r"\b(?:"
+            r"requests\.(?:get|post|put|patch|delete|request)\(|"
+            r"httpx\.(?:get|post|put|patch|delete|request|Client)\(|"
+            r"axios\.(?:get|post|put|patch|delete|request)\(|"
+            r"fetch\(\s*[\"'`](?:https?:)?//|"
+            r"curl\s+-[A-Za-z]"
+            r")"
+        ),
+    ),
 
     # Exfil risk: env reading + network usage near each other.
     ("critical", "security.env_harvesting", re.compile(r"(os\.environ|getenv\(|process\.env).{0,160}(requests\.|fetch\(|axios\.|httpx\.|curl)")),
 ]
+
+
+def _line_text(text: str, idx: int) -> str:
+    start = text.rfind("\n", 0, idx) + 1
+    end = text.find("\n", idx)
+    if end == -1:
+        end = len(text)
+    return text[start:end]
+
+
+def _should_skip_match(code: str, line_text: str) -> bool:
+    stripped = line_text.strip()
+    if not stripped:
+        return True
+    if stripped.startswith("#"):
+        return True
+    # Avoid self-referential false positives from regex definition tables.
+    if "re.compile(" in line_text:
+        return True
+    if code in {"security.network_usage", "security.node_child_process"} and "pattern" in stripped.lower():
+        return True
+    return False
 
 
 def iter_code_files(skill_dir: Path) -> Iterable[Path]:
@@ -113,6 +147,9 @@ def security_checks(skill_dir: Path) -> List[Finding]:
         txt = f.read_text(encoding="utf-8", errors="ignore")
         for level, code, rx in PATTERNS:
             for m in rx.finditer(txt):
+                line_text = _line_text(txt, m.start())
+                if _should_skip_match(code, line_text):
+                    continue
                 out.append(
                     Finding(
                         level,

@@ -33,7 +33,7 @@ import subprocess
 import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
+from typing import Any, Dict, List, Optional, Sequence, Set, Tuple, Union
 
 try:
     import yaml  # type: ignore
@@ -61,6 +61,31 @@ if str(SCRIPT_DIR) not in sys.path:
 from deterministic_trace_checks import evaluate_trace, load_jsonl_events  # noqa: E402
 
 _FM_DELIM = re.compile(r"^\s*---\s*$")
+_CODEX_HELP_CACHE: Dict[str, Optional[str]] = {}
+
+# Script-level options (used to disambiguate `--codex-arg --foo` intent).
+_SCRIPT_OPTIONS: Set[str] = {
+    "--runner",
+    "--dual-run",
+    "--workspace",
+    "--sandbox",
+    "--ask-for-approval",
+    "--model",
+    "--profile",
+    "--codex-home",
+    "--codex-bin",
+    "--claude-bin",
+    "--claude-output-format",
+    "--claude-arg",
+    "--capture-jsonl",
+    "--reports-dir",
+    "--scorecard-out",
+    "--format",
+    "--tier2-mode",
+    "--codex-arg",
+    "-h",
+    "--help",
+}
 
 
 def _resolve_skill_md_path(path_like: str) -> Path:
@@ -473,30 +498,21 @@ def run_codex_exec(
     jsonl_path: Optional[Path],
     codex_bin: Optional[Path],
     extra_codex_args: Optional[List[str]] = None,
-) -> Tuple[int, str, str]:
-    if codex_bin:
-        node_bin = codex_bin.parent / "node"
-        if node_bin.exists():
-            cmd = [
-                str(node_bin),
-                str(codex_bin),
-                "exec",
-            ]
-        else:
-            cmd = [
-                str(codex_bin),
-                "exec",
-            ]
-    else:
-        cmd = [
-            "codex",
-            "exec",
-        ]
+) -> Tuple[int, str, str, List[str]]:
+    warnings: List[str] = []
+    cmd = _codex_exec_prefix(codex_bin)
 
     cmd.extend(["--sandbox", sandbox])
 
     if ask_for_approval:
-        cmd.extend(["--ask-for-approval", ask_for_approval])
+        supports = _codex_supports_exec_flag(codex_bin, "--ask-for-approval")
+        if supports is False:
+            warnings.append(
+                "Codex CLI does not support --ask-for-approval; running without it. "
+                "Upgrade Codex CLI if you need this flag."
+            )
+        else:
+            cmd.extend(["--ask-for-approval", ask_for_approval])
 
     cmd.extend([
         "--output-last-message",
@@ -537,14 +553,14 @@ def run_codex_exec(
             timeout=timeout,
         )
     except FileNotFoundError:
-        return 127, "", "codex CLI not found on PATH. Install it (for example: npm i -g @openai/codex)."
+        return 127, "", "codex CLI not found on PATH. Install it (for example: npm i -g @openai/codex).", warnings
     except subprocess.TimeoutExpired:
-        return 124, "", f"codex exec timed out after {timeout} seconds."
+        return 124, "", f"codex exec timed out after {timeout} seconds.", warnings
 
     if jsonl_path:
         jsonl_path.write_text(proc.stdout, encoding="utf-8")
 
-    return proc.returncode, proc.stdout, proc.stderr
+    return proc.returncode, proc.stdout, proc.stderr, warnings
 
 
 def run_claude_exec(
@@ -602,6 +618,77 @@ def _safe_slug(value: str) -> str:
     return re.sub(r"[^A-Za-z0-9_.-]+", "-", value).strip("-") or "case"
 
 
+def _rewrite_dash_prefixed_codex_args(argv: Sequence[str]) -> List[str]:
+    """
+    Allow ergonomic `--codex-arg --flag` usage by rewriting it to
+    `--codex-arg=--flag` before argparse runs.
+
+    We only rewrite when the next token is not a known script option.
+    """
+    out: List[str] = []
+    i = 0
+    n = len(argv)
+    while i < n:
+        tok = argv[i]
+        if tok == "--codex-arg" and i + 1 < n:
+            nxt = argv[i + 1]
+            if nxt.startswith("-") and nxt not in _SCRIPT_OPTIONS:
+                out.append(f"--codex-arg={nxt}")
+                i += 2
+                continue
+        out.append(tok)
+        i += 1
+    return out
+
+
+def _codex_exec_prefix(codex_bin: Optional[Path]) -> List[str]:
+    if codex_bin:
+        node_bin = codex_bin.parent / "node"
+        if node_bin.exists():
+            return [str(node_bin), str(codex_bin), "exec"]
+        return [str(codex_bin), "exec"]
+    return ["codex", "exec"]
+
+
+def _codex_help_text(codex_bin: Optional[Path]) -> Optional[str]:
+    key = str(codex_bin.resolve()) if codex_bin else "codex"
+    if key in _CODEX_HELP_CACHE:
+        return _CODEX_HELP_CACHE[key]
+
+    cmd = _codex_exec_prefix(codex_bin) + ["--help"]
+    env = os.environ.copy()
+    if codex_bin:
+        env["PATH"] = f"{codex_bin.parent}{os.pathsep}{env.get('PATH', '')}"
+
+    try:
+        proc = subprocess.run(cmd, text=True, capture_output=True, env=env, timeout=10)
+    except Exception:  # noqa: BLE001
+        _CODEX_HELP_CACHE[key] = None
+        return None
+
+    text = (proc.stdout or "") + "\n" + (proc.stderr or "")
+    _CODEX_HELP_CACHE[key] = text
+    return text
+
+
+def _codex_supports_exec_flag(codex_bin: Optional[Path], flag: str) -> Optional[bool]:
+    help_text = _codex_help_text(codex_bin)
+    if help_text is None:
+        return None
+    return flag in help_text
+
+
+def _is_codex_untrusted_repo_error(stderr_text: str) -> bool:
+    low = (stderr_text or "").lower()
+    return ("not inside a trusted directory" in low) and ("skip-git-repo-check" in low)
+
+
+def _has_skip_git_repo_check(extra_codex_args: Optional[Sequence[str]]) -> bool:
+    if not extra_codex_args:
+        return False
+    return any(arg.strip() == "--skip-git-repo-check" for arg in extra_codex_args if isinstance(arg, str))
+
+
 def build_arg_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         prog="run_skill_evals.py",
@@ -655,7 +742,11 @@ def build_arg_parser() -> argparse.ArgumentParser:
         "--codex-arg",
         action="append",
         default=[],
-        help="Extra flag to pass to codex exec (repeatable).",
+        help=(
+            "Extra flag to pass to codex exec (repeatable). "
+            "For dash-prefixed values, either use `--codex-arg=--flag` "
+            "or `--codex-arg --flag`."
+        ),
     )
     return p
 
@@ -703,7 +794,9 @@ def _extract_require_overall_pass(budgets: Optional[Dict[str, Any]]) -> Optional
 
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
-    args = build_arg_parser().parse_args(argv)
+    raw_argv = list(argv) if argv is not None else sys.argv[1:]
+    normalized_argv = _rewrite_dash_prefixed_codex_args(raw_argv)
+    args = build_arg_parser().parse_args(normalized_argv)
 
     if args.dual_run and not args.capture_jsonl:
         print("ERROR: --dual-run requires --capture-jsonl for deterministic Codex checks.", file=sys.stderr)
@@ -740,6 +833,14 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     reports_base.mkdir(parents=True, exist_ok=True)
 
     selected_runners = ["codex", "claude"] if args.dual_run else [args.runner]
+    preflight_warnings: List[str] = []
+    if "codex" in selected_runners:
+        if not (workspace_root / ".git").exists() and not _has_skip_git_repo_check(args.codex_arg):
+            preflight_warnings.append(
+                "Workspace does not appear to be a trusted git repository. "
+                "Codex may fail with 'Not inside a trusted directory'. "
+                "If this is an ephemeral directory, add --codex-arg=--skip-git-repo-check."
+            )
 
     summary: Dict[str, Any] = {
         "schema_version": "2.0",
@@ -753,6 +854,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "passed": True,
         "tier1_failures": 0,
         "tier2_findings": 0,
+        "preflight_warnings": preflight_warnings,
     }
 
     any_tier1_failed = False
@@ -797,8 +899,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                     output_format=args.claude_output_format,
                     extra_claude_args=args.claude_arg or None,
                 )
+                runner_exec_warnings: List[str] = []
             else:
-                rc, stdout, stderr = run_codex_exec(
+                rc, stdout, stderr, runner_exec_warnings = run_codex_exec(
                     workspace_root=workspace_root,
                     prompt=composed_prompt,
                     output_last_message_path=output_path,
@@ -821,12 +924,18 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
             runner_tier1_failures: List[str] = []
             runner_tier2_findings: List[str] = []
-            runner_warnings: List[str] = []
+            runner_warnings: List[str] = list(runner_exec_warnings)
             runner_metrics: Dict[str, Any] = {}
             events: Optional[List[Dict[str, Any]]] = None
 
             if rc != 0:
                 runner_tier1_failures.append(f"{runner_name} returned non-zero exit code: {rc}")
+                if runner_name == "codex" and _is_codex_untrusted_repo_error(stderr):
+                    runner_warnings.append(
+                        "Codex rejected this workspace as untrusted. "
+                        "Use a trusted git repo as --workspace, or pass "
+                        "--codex-arg=--skip-git-repo-check for ephemeral temp directories."
+                    )
 
             if runner_name == "codex" and jsonl_path is not None:
                 events, parse_warnings = load_jsonl_events(jsonl_path)
@@ -1002,6 +1111,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         print(f"Scorecard: {scorecard_path}")
         print(f"Runner mode: {summary['runner_mode']}")
         print(f"Tier-2 mode: {args.tier2_mode}")
+        for w in summary.get("preflight_warnings", []):
+            print(f"WARNING: {w}")
         for c in summary["cases"]:
             status = "PASS" if c["passed"] else "FAIL"
             print(f"- {status}: {c['id']} ({c['name']})")

@@ -28,11 +28,15 @@ def parse_args() -> argparse.Namespace:
 
 def find_skill_dirs(root: Path) -> List[Path]:
     out: List[Path] = []
+    root_resolved = root.resolve()
     for skill_md in root.rglob("SKILL.md"):
         s = str(skill_md)
         if "/.git/" in s or "/_archive/" in s or "/assets/template/.codex/skills/" in s:
             continue
         if any(part in skill_md.parts for part in {"artifacts", "reports", "templates"}):
+            continue
+        # Repo-root SKILL.md is often an index/readme, not a runnable skill.
+        if skill_md.parent.resolve() == root_resolved:
             continue
         out.append(skill_md.parent)
     return sorted(set(out))

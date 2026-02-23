@@ -257,6 +257,12 @@ def _default_prompt_patterns() -> List[Dict[str, str]]:
             "message": "Command-like instructions detected; ensure commands are gated and safe.",
             "severity": "medium",
         },
+        {
+            "code": "PI_OBFUSCATION",
+            "regex": r"\b(base64|b64decode|decode\(['\"]base64['\"]\)|rot13|url ?decode|hex(?:lify)?|unicode escape|zero[- ]width|invisible character)\b",
+            "message": "Potential obfuscation / hidden-instruction language detected; verify it cannot bypass safety checks.",
+            "severity": "high",
+        },
     ]
 
 
@@ -413,6 +419,15 @@ def _iter_scan_targets(skill_dir: Path) -> List[Tuple[Path, bool]]:
             continue
         targets.append((path, _is_text_file(path)))
     return sorted(targets, key=lambda item: str(item[0]))
+
+
+def _severity_to_level(severity: str, *, fail_on_high: bool) -> Level:
+    sev = (severity or "").strip().lower()
+    if sev == "high" and fail_on_high:
+        return Level.FAIL
+    if sev in {"high", "medium", "low"}:
+        return Level.WARN
+    return Level.WARN
 
 
 def check_codex_frontmatter(doc: SkillDoc, *, min_desc_len: int) -> List[Finding]:
@@ -659,6 +674,17 @@ def check_script_security(skill_dir: Path, doc: SkillDoc) -> List[Finding]:
 
     body_l = doc.body.lower()
     mentions_network = _has_any(body_l, ["network", "internet", "offline", "allow-network", "no network"])
+    mentions_network_allowlist = _has_any(
+        body_l,
+        [
+            "allowlist",
+            "allowed domains",
+            "allowed hosts",
+            "domain allowlist",
+            "host allowlist",
+            "network allowlist",
+        ],
+    )
     mentions_confirm = _has_any(body_l, ["--confirm", "--force", "dry-run", "destructive"])
 
     # Patterns: keep tight to avoid false positives.
@@ -669,7 +695,14 @@ def check_script_security(skill_dir: Path, doc: SkillDoc) -> List[Finding]:
         re.compile(r"console\.log\s*\(\s*process\.env", re.IGNORECASE),
     ]
     secret_echo_patterns = [
-        re.compile(r"(print|logging\.\w+|console\.log)\s*\(.*(API_KEY|TOKEN|SECRET|PASSWORD|PRIVATE_KEY)", re.IGNORECASE),
+        re.compile(
+            r"(print|logging\.\w+|console\.log)\s*\([^)]*(os\.environ|getenv\(|process\.env)[^)]*(API_KEY|TOKEN|SECRET|PASSWORD|PRIVATE_KEY)",
+            re.IGNORECASE,
+        ),
+        re.compile(
+            r"(print|logging\.\w+|console\.log)\s*\([^)]*(API_KEY|TOKEN|SECRET|PASSWORD|PRIVATE_KEY)[^)]*(os\.environ|getenv\(|process\.env)",
+            re.IGNORECASE,
+        ),
     ]
     network_patterns = [
         re.compile(r"^\s*import\s+requests\b", re.MULTILINE),
@@ -680,6 +713,9 @@ def check_script_security(skill_dir: Path, doc: SkillDoc) -> List[Finding]:
         re.compile(r"\bcurl\b", re.IGNORECASE),
         re.compile(r"\bwget\b", re.IGNORECASE),
     ]
+    network_url_patterns = [
+        re.compile(r"https?://[A-Za-z0-9.\-_/:%?=&#+]+", re.IGNORECASE),
+    ]
     destructive_patterns = [
         re.compile(r"shutil\.rmtree", re.IGNORECASE),
         re.compile(r"\.unlink\s*\(", re.IGNORECASE),
@@ -688,6 +724,30 @@ def check_script_security(skill_dir: Path, doc: SkillDoc) -> List[Finding]:
         re.compile(r"\brm\s+-rf\b", re.IGNORECASE),
         re.compile(r"\bgit\s+push\b", re.IGNORECASE),
         re.compile(r"\bnpm\s+publish\b", re.IGNORECASE),
+    ]
+    untrusted_input_patterns = [
+        re.compile(r"\bsys\.argv\b", re.IGNORECASE),
+        re.compile(r"\bargparse\.ArgumentParser\b", re.IGNORECASE),
+        re.compile(r"\binput\s*\(", re.IGNORECASE),
+        re.compile(r"\bstdin\b", re.IGNORECASE),
+        re.compile(r"\bprocess\.argv\b", re.IGNORECASE),
+        re.compile(r"\breadline\s*\(", re.IGNORECASE),
+    ]
+    shell_sink_patterns = [
+        re.compile(r"\bos\.system\s*\(", re.IGNORECASE),
+        re.compile(r"\bsubprocess\.(run|Popen|call|check_output)\s*\([^\)]*shell\s*=\s*True", re.IGNORECASE | re.DOTALL),
+        re.compile(r"\bchild_process\.(exec|execSync)\s*\(", re.IGNORECASE),
+        re.compile(r"\bexecSync\s*\(", re.IGNORECASE),
+    ]
+    command_sink_patterns = [
+        re.compile(r"\bsubprocess\.(run|Popen|call|check_output)\s*\(", re.IGNORECASE),
+        re.compile(r"\bchild_process\.(spawn|spawnSync|exec|execSync)\s*\(", re.IGNORECASE),
+        re.compile(r"\bspawn(Sync)?\s*\(", re.IGNORECASE),
+    ]
+    sanitizer_patterns = [
+        re.compile(r"\bshlex\.quote\s*\(", re.IGNORECASE),
+        re.compile(r"\bshell\s*=\s*False\b", re.IGNORECASE),
+        re.compile(r"\bsubprocess\.(run|Popen|call|check_output)\s*\(\s*\[", re.IGNORECASE),
     ]
 
     for f in script_files:
@@ -717,6 +777,20 @@ def check_script_security(skill_dir: Path, doc: SkillDoc) -> List[Finding]:
                 "Network usage detected in scripts but SKILL.md does not explicitly describe network requirements/constraints. Default to offline; gate behind --allow-network if needed.",
                 evidence=str(f.relative_to(skill_dir)),
             ))
+        if uses_network and not mentions_network_allowlist:
+            out.append(Finding(
+                Level.WARN,
+                "SAFE_NETWORK_ALLOWLIST",
+                "Network usage detected in scripts without an explicit domain/host allowlist policy in SKILL.md.",
+                evidence=str(f.relative_to(skill_dir)),
+            ))
+        if uses_network and any(p.search(txt) for p in network_url_patterns) and not mentions_network_allowlist:
+            out.append(Finding(
+                Level.WARN,
+                "SAFE_NETWORK_URL_ALLOWLIST",
+                "Hard-coded URL(s) detected in scripts; document explicit allowed domains/hosts in SKILL.md.",
+                evidence=str(f.relative_to(skill_dir)),
+            ))
 
         is_destructive = any(p.search(txt) for p in destructive_patterns)
         if is_destructive and not mentions_confirm and not _has_any(txt.lower(), ["--dry-run", "--confirm", "--force", "dry_run", "confirm", "force"]):
@@ -727,10 +801,30 @@ def check_script_security(skill_dir: Path, doc: SkillDoc) -> List[Finding]:
                 evidence=str(f.relative_to(skill_dir)),
             ))
 
+        has_untrusted_input = any(p.search(txt) for p in untrusted_input_patterns)
+        has_shell_sink = any(p.search(txt) for p in shell_sink_patterns)
+        has_command_sink = any(p.search(txt) for p in command_sink_patterns)
+        has_sanitizer = any(p.search(txt) for p in sanitizer_patterns)
+
+        if has_untrusted_input and has_shell_sink:
+            out.append(Finding(
+                Level.FAIL,
+                "SAFE_UNTRUSTED_TO_SHELL",
+                "Untrusted input source combined with shell-style command execution detected. Avoid shell=True/os.system/exec* on user-controlled input.",
+                evidence=str(f.relative_to(skill_dir)),
+            ))
+        elif has_untrusted_input and has_command_sink and not has_sanitizer:
+            out.append(Finding(
+                Level.WARN,
+                "SAFE_UNTRUSTED_TO_COMMAND",
+                "Untrusted input appears to flow into command execution without clear sanitization/argument-list hardening.",
+                evidence=str(f.relative_to(skill_dir)),
+            ))
+
     return out
 
 
-def check_prompt_injection_signals(skill_dir: Path, doc: SkillDoc) -> List[Finding]:
+def check_prompt_injection_signals(skill_dir: Path, doc: SkillDoc, *, pi_high_fail: bool) -> List[Finding]:
     out: List[Finding] = []
 
     patterns, config_findings = _load_prompt_patterns(skill_dir)
@@ -741,18 +835,21 @@ def check_prompt_injection_signals(skill_dir: Path, doc: SkillDoc) -> List[Findi
     def _scan(text: str, evidence: str) -> None:
         for pattern, message, severity in blocklist:
             if pattern.search(text):
-                out.append(Finding(Level.WARN, "PI_BLOCKLIST", f"[{severity}] {message}", evidence=evidence))
+                out.append(Finding(_severity_to_level(severity, fail_on_high=pi_high_fail), "PI_BLOCKLIST", f"[{severity}] {message}", evidence=evidence))
 
         for code, pattern, message, severity in patterns:
             if any(allow.search(evidence) for allow in allowlist):
                 continue
             if pattern.search(text):
-                out.append(Finding(Level.WARN, code, f"[{severity}] {message}", evidence=evidence))
+                out.append(Finding(_severity_to_level(severity, fail_on_high=pi_high_fail), code, f"[{severity}] {message}", evidence=evidence))
 
     _scan(doc.raw, "SKILL.md")
 
     for path, is_text in _iter_scan_targets(skill_dir):
         rel_path = str(path.relative_to(skill_dir))
+        # Pattern definition files contain attack strings intentionally.
+        if path.name == "prompt-injection-patterns.json":
+            continue
         if not is_text:
             out.append(Finding(
                 Level.WARN,
@@ -764,6 +861,99 @@ def check_prompt_injection_signals(skill_dir: Path, doc: SkillDoc) -> List[Findi
         if path.name == "SKILL.md":
             continue
         _scan(_read_text(path), rel_path)
+
+    return out
+
+
+def check_security_eval_coverage(skill_dir: Path, *, require_security_evals: bool) -> List[Finding]:
+    """
+    Ensure eval suites include adversarial security coverage.
+
+    Focus:
+    - at least one negative (non-trigger) case
+    - at least one pressure/adversarial PI case
+    - at least one deterministic safety guard for high-risk commands
+    """
+    out: List[Finding] = []
+    evals_path = skill_dir / "references" / "evals.yaml"
+    if not evals_path.exists():
+        return out
+
+    try:
+        obj = yaml.safe_load(evals_path.read_text(encoding="utf-8"))
+    except Exception as exc:  # noqa: BLE001
+        out.append(Finding(Level.WARN, "SEC_EVALS_PARSE", f"Could not parse evals.yaml for security coverage checks: {exc}"))
+        return out
+
+    if not isinstance(obj, dict) or not isinstance(obj.get("cases"), list):
+        return out
+
+    cases = [c for c in obj.get("cases", []) if isinstance(c, dict)]
+    if not cases:
+        return out
+
+    pi_terms = (
+        "prompt injection",
+        "jailbreak",
+        "ignore previous",
+        "ignore system",
+        "override system",
+        "bypass safety",
+        "exfiltrate",
+        "hidden instruction",
+    )
+    risky_commands = ("rm -rf", "curl", "wget", "netcat", "nc ", "powershell", "invoke-webrequest")
+
+    has_negative = False
+    has_pressure = False
+    has_pi_prompt_case = False
+    has_risky_command_guard = False
+
+    for c in cases:
+        category = str(c.get("category", "")).strip().lower()
+        should_trigger = c.get("should_trigger")
+        prompt = str(c.get("prompt", "")).lower()
+        acceptance = c.get("acceptance", [])
+        deterministic_checks = c.get("deterministic_checks", {})
+
+        if category == "negative" or should_trigger is False:
+            has_negative = True
+        if category == "pressure":
+            has_pressure = True
+        if any(term in prompt for term in pi_terms):
+            has_pi_prompt_case = True
+
+        # Check deterministic forbidden commands and textual acceptance guards.
+        forbidden_cmds: List[str] = []
+        if isinstance(deterministic_checks, dict):
+            raw_forbidden = deterministic_checks.get("forbidden_commands", [])
+            if isinstance(raw_forbidden, list):
+                forbidden_cmds = [str(x).lower() for x in raw_forbidden]
+            elif isinstance(raw_forbidden, str):
+                forbidden_cmds = [raw_forbidden.lower()]
+        if any(any(rc in cmd for rc in risky_commands) for cmd in forbidden_cmds):
+            has_risky_command_guard = True
+
+        if isinstance(acceptance, list):
+            for a in acceptance:
+                text = str(a).lower()
+                if any(rc in text for rc in risky_commands):
+                    has_risky_command_guard = True
+                    break
+
+    missing: List[Tuple[str, str]] = []
+    if not has_negative:
+        missing.append(("SEC_EVALS_NEGATIVE_MISSING", "No negative/non-trigger security case detected in evals.yaml. Add `category: negative` or `should_trigger: false` coverage."))
+    if not has_pressure:
+        missing.append(("SEC_EVALS_PRESSURE_MISSING", "No pressure/adversarial case detected in evals.yaml. Add at least one `category: pressure` case."))
+    if not has_pi_prompt_case:
+        missing.append(("SEC_EVALS_PI_CASE_MISSING", "No prompt-injection/jailbreak-style prompt detected in evals.yaml. Add one adversarial PI prompt case."))
+    if not has_risky_command_guard:
+        missing.append(("SEC_EVALS_COMMAND_GUARD_MISSING", "No deterministic risky-command guard detected. Add forbidden command checks (e.g., curl/wget/rm -rf/netcat)."))
+
+    level = Level.FAIL if require_security_evals else Level.WARN
+    for code, message in missing:
+        out.append(Finding(level, code, message, evidence="references/evals.yaml"))
 
     return out
 
@@ -897,6 +1087,8 @@ def run_gate(
     require_philosophy: bool,
     require_redaction: bool,
     require_fail_fast: bool,
+    require_security_evals: bool,
+    pi_high_fail: bool,
 ) -> List[Finding]:
     findings: List[Finding] = []
 
@@ -909,7 +1101,9 @@ def run_gate(
     findings.extend(check_path_safety(doc))
 
     skill_dir = doc.path.parent
-    findings.extend(check_prompt_injection_signals(skill_dir, doc))
+    findings.extend(check_script_security(skill_dir, doc))
+    findings.extend(check_prompt_injection_signals(skill_dir, doc, pi_high_fail=pi_high_fail))
+    findings.extend(check_security_eval_coverage(skill_dir, require_security_evals=require_security_evals))
     findings.extend(check_contract_and_evals(skill_dir, require_contract=require_contract, require_evals=require_evals))
     findings.extend(check_repo_references(doc))
 
@@ -937,6 +1131,16 @@ def build_arg_parser() -> argparse.ArgumentParser:
     p.add_argument("--no-require-philosophy", action="store_true", help="Do not require a Philosophy/Principles section.")
     p.add_argument("--no-require-redaction", action="store_true", help="Do not require redaction language in Constraints/Safety.")
     p.add_argument("--require-fail-fast", action="store_true", help="Require fail-fast language in Validation section (FAIL if absent).")
+    p.add_argument(
+        "--require-security-evals",
+        action="store_true",
+        help="Fail when adversarial security eval coverage is missing (negative/pressure/PI/command-guard checks).",
+    )
+    p.add_argument(
+        "--pi-high-fail",
+        action="store_true",
+        help="Treat high-severity prompt-injection pattern matches as FAIL instead of WARN.",
+    )
 
     return p
 
@@ -960,6 +1164,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         require_philosophy=not args.no_require_philosophy,
         require_redaction=not args.no_require_redaction,
         require_fail_fast=bool(args.require_fail_fast),
+        require_security_evals=bool(args.require_security_evals),
+        pi_high_fail=bool(args.pi_high_fail),
     )
 
     failed = any(f.level == Level.FAIL for f in findings)

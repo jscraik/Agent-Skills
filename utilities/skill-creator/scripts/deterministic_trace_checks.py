@@ -12,8 +12,10 @@ This module provides lightweight, explainable checks for skill eval traces:
 
 from __future__ import annotations
 
+import argparse
 import json
 import re
+import sys
 from dataclasses import dataclass, asdict
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Tuple
@@ -427,3 +429,94 @@ def _num(primary: Any, default: int = 0) -> int:
         if re.fullmatch(r"-?\d+", text):
             return int(text)
     return default
+
+
+def _load_json_payload(
+    *,
+    inline_json: Optional[str],
+    json_file: Optional[str],
+    label: str,
+) -> Optional[Dict[str, Any]]:
+    if inline_json and json_file:
+        raise ValueError(f"Provide only one of --{label}-json or --{label}-file.")
+
+    if inline_json:
+        obj = json.loads(inline_json)
+    elif json_file:
+        obj = json.loads(Path(json_file).expanduser().read_text(encoding="utf-8"))
+    else:
+        return None
+
+    if not isinstance(obj, dict):
+        raise ValueError(f"{label} payload must be a JSON object.")
+    return obj
+
+
+def _build_parser() -> argparse.ArgumentParser:
+    p = argparse.ArgumentParser(description="Run deterministic trace checks over a Codex JSONL trace.")
+    p.add_argument("jsonl_path", help="Path to Codex JSONL events file.")
+    p.add_argument("--checks-json", help="Inline JSON for deterministic_checks.")
+    p.add_argument("--checks-file", help="JSON file containing deterministic_checks.")
+    p.add_argument("--budgets-json", help="Inline JSON for budgets.")
+    p.add_argument("--budgets-file", help="JSON file containing budgets.")
+    p.add_argument("--tier2-mode", choices=["warn", "fail", "off"], default="warn")
+    p.add_argument("--format", choices=["text", "json"], default="text")
+    return p
+
+
+def main(argv: Optional[List[str]] = None) -> int:
+    args = _build_parser().parse_args(argv)
+
+    try:
+        checks = _load_json_payload(
+            inline_json=args.checks_json,
+            json_file=args.checks_file,
+            label="checks",
+        ) or {}
+        budgets = _load_json_payload(
+            inline_json=args.budgets_json,
+            json_file=args.budgets_file,
+            label="budgets",
+        ) or {}
+    except Exception as exc:  # noqa: BLE001
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 1
+
+    events, parse_warnings = load_jsonl_events(Path(args.jsonl_path).expanduser())
+    result = evaluate_trace(events, deterministic_checks=checks, budgets=budgets)
+    all_warnings = [*parse_warnings, *result.warnings]
+
+    payload = {
+        "tier1_failures": result.hard_failures,
+        "tier2_failures": result.soft_failures,
+        "warnings": all_warnings,
+        "metrics": asdict(result.metrics),
+    }
+
+    tier1_failed = len(result.hard_failures) > 0
+    tier2_failed = len(result.soft_failures) > 0
+    passed = (not tier1_failed) and (args.tier2_mode != "fail" or not tier2_failed)
+
+    if args.format == "json":
+        out = dict(payload)
+        out["passed"] = passed
+        out["tier2_mode"] = args.tier2_mode
+        print(json.dumps(out, indent=2, ensure_ascii=False))
+    else:
+        print(f"Trace events: {result.metrics.event_count}")
+        print(f"Commands: {result.metrics.command_count}")
+        print(f"Tier1 failures: {len(result.hard_failures)}")
+        print(f"Tier2 findings: {len(result.soft_failures)} (mode={args.tier2_mode})")
+        for msg in result.hard_failures:
+            print(f"- TIER1: {msg}")
+        for msg in result.soft_failures:
+            print(f"- TIER2: {msg}")
+        for msg in all_warnings:
+            print(f"- WARN: {msg}")
+        print(f"RESULT: {'PASS' if passed else 'FAIL'}")
+
+    return 0 if passed else 2
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
