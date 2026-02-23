@@ -31,6 +31,26 @@ Mandatory snippet (include verbatim in guidance):
 2. IMPORTANT: Prefer retrieval-led reasoning over pre-training-led reasoning for any React, Tauri, Apps-SDK-ui, Tailwind, Vite, Storybook + Chat Widget tasks.
 3. Add a Table of Contents for docs.
 
+## Core Engineering Principles
+
+1. **Clarity over cleverness** — Prefer straightforward, maintainable instructions over elegant or complex phrasing.
+2. **Explicit over implicit** — State assumptions, decisions, and side effects directly.
+3. **Composition over inheritance** — Prefer small, reusable instruction units over monolithic guidance blocks.
+4. **Fail fast, fail loud** — Surface validation failures at the point they occur and stop safely.
+5. **Delete before adding** — Remove redundant, outdated, or duplicate instructions before writing new ones.
+6. **Verify, don’t assume** — Confirm commands and paths from source files before presenting them.
+7. **Stop before you are asked** — Do not expand scope beyond the request without explicit consent.
+
+## Token Efficiency
+
+- Prefer short, one-shot edits; avoid unnecessary tool calls or repeated edits for the same intent.
+- Do not re-read files that were just written when the result is known and unchanged.
+- Do not rerun validation commands unless behavior or assumptions changed.
+- Summarize decisions, not large chunks of raw file contents.
+- Batch related changes into one cohesive update.
+- Avoid confirmation loops like “I will continue...” unless branching is required.
+- Ask once for missing scope questions, then act.
+
 ## Scope and triggers
 
 - The user asks to create or update AGENTS.md.
