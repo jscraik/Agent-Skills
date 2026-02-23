@@ -400,7 +400,6 @@ remove_legacy_symlink "$HOME/.copilot/skills"
 remove_legacy_symlink "$HOME/.config/agents/skills"
 remove_legacy_symlink "$HOME/.cursor/skills"
 remove_legacy_symlink "$HOME/.gemini/skills"
-remove_legacy_symlink "$HOME/.codex/skills"
 
 # Sync to user-level tool directories (Claude Code + OpenAI Codex/Agents)
 sync_user_skills() {
@@ -425,6 +424,7 @@ sync_user_skills() {
 # sync_user_skills "$HOME/.claude/skills"
 # sync_user_skills "$HOME/.agent/skills"
 sync_user_skills "$HOME/.agents/skills"
+sync_user_skills "$HOME/.codex/skills"
 # sync_user_skills "$HOME/.gemini/antigravity/skills"
 
 chmod +x "$repo_root/scripts/sync_skills.sh"

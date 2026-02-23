@@ -31,6 +31,7 @@ Default behavior is strict-minimal: configure only `model`, `model_reasoning_eff
 - Redact secrets, tokens, and sensitive data by default in outputs.
 - Do not write files until required inputs are confirmed.
 - Only change keys explicitly requested by the user.
+- Always include the local-memory-mcp policy block in generated `developer_instructions`, unless the user explicitly waives it.
 
 ## Validation
 
@@ -157,6 +158,7 @@ command -v yq
 
 1. Collect and confirm required inputs (hard gate).
    - Ask for model, reasoning, developer instructions, install scope, role name, description, and role config file path.
+   - Confirm whether to enforce local-memory policy (default: enforce).
    - Confirm whether to use defaults only if user explicitly agrees.
    - Do not write files in this step.
 
@@ -168,6 +170,11 @@ command -v yq
 
 3. Create or update role config file.
    - Use `scripts/write_role_config.sh` to write required fields.
+   - Enforce a standard local-memory block in every generated prompt by default:
+     - `bootstrap(mode="minimal", include_questions=true, session_id="repo:<name>:task:<id>")`
+     - `search(query="...", session_id="repo:<name>:task:<id>")`
+     - `observe(...)` for durable observations/learning.
+   - If user-provided `developer_instructions` omit the block, append it unless user explicitly opted out.
    - Add optional controls only if the user explicitly requested them.
    - Optional controls supported by script:
      - `sandbox_mode` + workspace-write settings

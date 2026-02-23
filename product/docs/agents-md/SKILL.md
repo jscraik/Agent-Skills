@@ -14,6 +14,8 @@ The agent is capable of extraordinary work in this domain. Use judgment, adapt t
 ## Compliance
 - Check against GOLD Industry Standards guide in ~/.codex/instructions/standards.md
 - Use ~/.codex/AGENTS.md as the global index that links to current standards docs.
+- If this skill is used from `~/.codex/`, write reference links only under `~/.codex/instructions/` (and not to `docs/` for global protocols).
+- Visual reference: [agents-md workflow map](assets/agents-md.png)
 
 ## Philosophy
 
@@ -29,6 +31,26 @@ Mandatory snippet (include verbatim in guidance):
 1. Explore project first, then invoke skill.
 2. IMPORTANT: Prefer retrieval-led reasoning over pre-training-led reasoning for any React, Tauri, Apps-SDK-ui, Tailwind, Vite, Storybook + Chat Widget tasks.
 3. Add a Table of Contents for docs.
+
+## Core Engineering Principles
+
+1. **Clarity over cleverness** — Prefer straightforward, maintainable instructions over elegant or complex phrasing.
+2. **Explicit over implicit** — State assumptions, decisions, and side effects directly.
+3. **Composition over inheritance** — Prefer small, reusable instruction units over monolithic guidance blocks.
+4. **Fail fast, fail loud** — Surface validation failures at the point they occur and stop safely.
+5. **Delete before adding** — Remove redundant, outdated, or duplicate instructions before writing new ones.
+6. **Verify, don’t assume** — Confirm commands and paths from source files before presenting them.
+7. **Stop before you are asked** — Do not expand scope beyond the request without explicit consent.
+
+## Token Efficiency
+
+- Prefer short, one-shot edits; avoid unnecessary tool calls or repeated edits for the same intent.
+- Do not re-read files that were just written when the result is known and unchanged.
+- Do not rerun validation commands unless behavior or assumptions changed.
+- Summarize decisions, not large chunks of raw file contents.
+- Batch related changes into one cohesive update.
+- Avoid confirmation loops like “I will continue...” unless branching is required.
+- Ask once for missing scope questions, then act.
 
 ## Scope and triggers
 
@@ -93,6 +115,22 @@ Use the failure-mode template verbatim for out-of-scope requests.
 - Whether Jamie's agent-first scaffold standard is requested (`/Users/jamiecraik/.codex/instructions/agent-first-scaffold-spec.md`).
 - Compatibility posture (default: canonical-only for unreleased/greenfield repos; replace only when explicitly requested).
 
+
+## Local Memory usage
+
+- Follow `instructions/local-memory.md` for memory read/write workflow, tagging, and safety rules.
+- Rule: search memory before writing new memory; store durable facts only.
+- Never store secrets in memory.
+
+## local-memory-mcp policy
+
+- Use `local-memory-mcp` for durable context and cross-run continuity.
+- Mandatory workflow:
+  - `bootstrap(mode="minimal", include_questions=true, session_id="repo:<name>:task:<id>")`
+  - `search(query="...", session_id="repo:<name>:task:<id>")`
+- Record durable facts only with `observe(...)` (level `observation|learning`) and stable tags.
+- Do not store secrets, tokens, keys, or PII.
+
 ## Deliverables
 
 - A minimal root `AGENTS.md` that links to separate instruction files.
@@ -148,6 +186,7 @@ Use the failure-mode template verbatim for out-of-scope requests.
 - Never duplicate the full protocol content in repo files; link only.
 - If `CODEX_HOME` is set, prefer `$CODEX_HOME/...` for global references; otherwise use `~/.codex/...`.
 - Only insert references that exist on disk; if not found, state "not observed" and do not invent paths.
+- In `~/.codex/` context, do not write global protocol references to `docs/` paths. Always use `~/.codex/instructions/...` for protocol links.
 - If the repo uses a different global protocol, add the same style of reference block.
 - When scaffold mode is requested, include references to the scaffold spec and governance docs listed above.
   - Example (root `AGENTS.md` block):
@@ -185,6 +224,57 @@ Use the failure-mode template verbatim for out-of-scope requests.
 - References or imports (global protocol pointers; no duplication)
 - Global instructions discovery order (brief, link to full doc)
 - Links to category files
+
+## Frontend Website Rules (injectable block, conditional)
+
+Use this only when there is evidence the repo/task is frontend website work.
+
+Decision rule (to let the skill "figure it out"):
+1) If the user explicitly requests UI/frontend implementation, visual parity, screenshot, component polish, or reference-based frontend behavior, treat as frontend.
+2) Else, infer from repo facts:
+   - `package.json` includes React/Next/Vite/Tauri/Vue/Svelte frameworks or UI tooling.
+   - `index.html`, `vite.config.*`, `next.config.*`, or `src/main.*` exists near `src/`.
+   - A `brand/` folder is relevant and used for style assets.
+3) If no evidence, do not inject this block; output a short note in `## Outputs` asking for clarification.
+
+If frontend evidence is present, inject the block into the generated `AGENTS.md` (or category docs) so behavior is concrete and repeatable:
+
+### AGENTS.md — Frontend Website Rules
+
+- **Always Do First**: invoke `$ui-ux-creative-coding` and `$interface-craft` before writing any frontend code.
+- If a reference image is provided:
+  - Match layout, spacing, typography, and color exactly.
+  - Use placeholders (`https://placehold.co/`) only when content is missing.
+  - Do not improve or add to the design beyond the reference.
+- If no reference image: design from scratch with the guardrails in this section.
+- **Local server required**: Always serve from `http://localhost:2000` using the project’s `node serve.mjs`.
+  - Never use `file:///`.
+  - Start `node serve.mjs` in background before screenshots.
+  - If already running, reuse that instance.
+- Replace Puppeteer-specific assumptions with **agent-browser**:
+  - Use `agent-browser` for navigation and screenshot capture.
+  - Keep workflow tool-first: `agent-browser open http://localhost:2000` then capture screenshots.
+- Pair with `$agentation` (or `agentation` MCP invocation) for execution orchestration:
+  - session setup, screenshot loop control, and comparison pass tracking.
+- **Screenshot naming convention**:
+  - If the screenshot is a full page: `screenshot-page-<name>-<pass>.png`
+  - If the screenshot is a component: `screenshot-component-<type>-<state>-<pass>.png`
+    - examples: `screenshot-component-card-default-1.png`, `screenshot-component-button-hover-2.png`
+  - Never overwrite; increment pass number when rerunning comparisons.
+- Compare against the reference after each pass and continue at least 2 rounds until no visible mismatch.
+- Output should use inline styles in a single `index.html` and Tailwind via `https://cdn.tailwindcss.com`.
+- Tailwind classes:
+  - Do not use default indigo/blue primaries.
+  - Do not use `transition-all`.
+  - For clickables, define hover, focus-visible, and active states.
+- If `brand/` assets exist, prefer them over placeholders.
+- Use existing brand variables; do not invent colors, spacing tokens, or typography scales.
+
+### Runtime checks for screenshot workflows
+
+- Run at least 2 screenshot rounds for visual parity.
+- Use consistent comparison criteria: spacing/padding, typography scale, color hex, alignment, border radii, shadows, sizing.
+- For component screenshots, include the component type in filename (`card`, `button`, `modal`, `form`, etc.) to keep review context explicit.
 
 ## Agent-first scaffold integration (Jamie standard)
 

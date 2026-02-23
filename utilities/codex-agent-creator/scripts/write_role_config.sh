@@ -132,11 +132,14 @@ if [[ -n "$developer_instructions_file" ]]; then
   developer_instructions="$(cat "$developer_instructions_file")"
 fi
 
+LOCAL_MEMORY_SNIPPET=$'local-memory-mcp policy:\n- Use local-memory-mcp for durable context and cross-run continuity.\n- Mandatory workflow:\n  - `bootstrap(mode="minimal", include_questions=true, session_id="repo:<name>:task:<id>")`\n  - `search(query="...", session_id="repo:<name>:task:<id>")`\n- Record durable facts only with `observe(...)` (level `observation|learning`) and stable tags.\n- Do not store secrets, tokens, keys, or PII.'
+
 if [[ -z "$developer_instructions" ]]; then
-  developer_instructions="You are the ${role_name} role.
-Own the assigned task end-to-end.
-State assumptions clearly, fail fast on invalid inputs, and report concrete evidence for results.
-Stay within scope and do not modify unrelated files."
+  developer_instructions="You are the ${role_name} role.\nOwn the assigned task end-to-end.\nState assumptions clearly, fail fast on invalid inputs, and report concrete evidence for results.\nStay within scope and do not modify unrelated files.\n\n${LOCAL_MEMORY_SNIPPET}"
+fi
+
+if [[ "$developer_instructions" != *"local-memory-mcp policy:"* ]]; then
+  developer_instructions="${developer_instructions}\n\n${LOCAL_MEMORY_SNIPPET}"
 fi
 
 if ! command -v jq >/dev/null 2>&1; then
