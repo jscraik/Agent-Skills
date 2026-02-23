@@ -219,9 +219,19 @@ Use the failure-mode template verbatim for out-of-scope requests.
 - Global instructions discovery order (brief, link to full doc)
 - Links to category files
 
-## Frontend Website Rules (injectable block)
+## Frontend Website Rules (injectable block, conditional)
 
-When the user asks for frontend website/workflow documentation, inject this block into the generated `AGENTS.md` (or category docs) so behavior is concrete and repeatable:
+Use this only when there is evidence the repo/task is frontend website work.
+
+Decision rule (to let the skill "figure it out"):
+1) If the user explicitly requests UI/frontend implementation, visual parity, screenshot, component polish, or reference-based frontend behavior, treat as frontend.
+2) Else, infer from repo facts:
+   - `package.json` includes React/Next/Vite/Tauri/Vue/Svelte frameworks or UI tooling.
+   - `index.html`, `vite.config.*`, `next.config.*`, or `src/main.*` exists near `src/`.
+   - A `brand/` folder is relevant and used for style assets.
+3) If no evidence, do not inject this block; output a short note in `## Outputs` asking for clarification.
+
+If frontend evidence is present, inject the block into the generated `AGENTS.md` (or category docs) so behavior is concrete and repeatable:
 
 ### AGENTS.md — Frontend Website Rules
 
