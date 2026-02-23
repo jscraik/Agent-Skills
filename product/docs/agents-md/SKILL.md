@@ -12,7 +12,8 @@ The agent is capable of extraordinary work in this domain. Use judgment, adapt t
 
 
 ## Compliance
-- Check against GOLD Industry Standards guide in ~/.codex/AGENTS.override.md
+- Check against GOLD Industry Standards guide in ~/.codex/instructions/standards.md
+- Use ~/.codex/AGENTS.md as the global index that links to current standards docs.
 
 ## Philosophy
 
@@ -117,7 +118,7 @@ Use the failure-mode template verbatim for out-of-scope requests.
 - Read README and `docs/` for real commands and structure.
 - Inspect config files (for example `pyproject.toml`, package scripts).
 - If commit conventions are not visible, state “not observed.”
-- Read global instructions from `~/.codex/AGENTS.override.md` or `~/.codex/AGENTS.md` if present.
+- Read global instructions from `~/.codex/AGENTS.md`.
 - Also check `~/.codex/instructions/` for applicable global standards and guidance.
 - Then read project instructions from repo root down to the working directory and treat them as canonical.
 - Note: Codex `AGENTS.md` does not support `@` imports; Claude `CLAUDE.md` and `~/.claude/rules/*.md` do.
@@ -147,7 +148,7 @@ Use the failure-mode template verbatim for out-of-scope requests.
     ```md
     ## References (informational)
     - Global protocol: ~/.codex/instructions/rvcp-common.md
-    - Global override: ~/.codex/AGENTS.override.md
+    - Security and standards baseline: ~/.codex/instructions/standards.md
     ```
 
 5) Group the rest

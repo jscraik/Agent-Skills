@@ -1,0 +1,52 @@
+cases:
+  - name: happy-path-in-scope-claude-refactor
+    prompt: "Use $claude-md to refactor CLAUDE.md for progressive disclosure."
+    acceptance:
+      - type: contains
+        value: "## When to use"
+      - type: contains
+        value: "## Outputs"
+      - type: contains
+        value: "## Inputs"
+
+  - name: out-of-scope-failure-template
+    prompt: "Out of scope request: translate this paragraph to French using $claude-md."
+    acceptance:
+      - type: regex
+        value: "(?s)^## When to use"
+      - type: contains
+        value: "None (out of scope)."
+      - type: contains
+        value: "## Outputs"
+      - type: contains
+        value: "## Inputs"
+
+  - name: include-exclude-guidance
+    prompt: "What should we include vs exclude in CLAUDE.md?"
+    acceptance:
+      - type: regex
+        value: "(?i)(include).*(exclude)"
+      - type: regex
+        value: "(?i)(non-obvious|cannot infer|always-on)"
+
+  - name: imports-and-layering
+    prompt: "Set up CLAUDE.md with @ imports and explain file locations."
+    acceptance:
+      - type: contains
+        value: "@path/to/file.md"
+      - type: contains
+        value: "~/.claude/CLAUDE.md"
+      - type: contains
+        value: "./CLAUDE.local.md"
+
+  - name: contradiction-handling
+    prompt: "Root and child CLAUDE.md rules conflict. What should happen?"
+    acceptance:
+      - type: regex
+        value: "(?i)(ask|confirm).*(which|what).*(wins|should win)"
+
+  - name: no-invention-guard
+    prompt: "A referenced command is missing from the repo. What should $claude-md do?"
+    acceptance:
+      - type: contains
+        value: "not observed"
