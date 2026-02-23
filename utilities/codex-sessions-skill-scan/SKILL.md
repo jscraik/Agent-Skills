@@ -1,12 +1,12 @@
 ---
 name: codex-sessions-skill-scan
-description: "Daily skill health scan: analyze ~/.codex/sessions (default last 1 day) and summarize skill invocations + likely failures for personal skills in ~/dev/agent-skills (missing paths, tool failures). Use when you ask to scan recent Codex sessions for skill issues or when a skill keeps failing. Optional: include best-effort local OTel signals."
+description: "Daily skill health scan: analyze ~/.codex/sessions plus per-repo session logs under ~/dev (default last 1 day) and summarize skill invocations + likely failures for personal skills in ~/dev/agent-skills (missing paths, tool failures, complex-task word triggers). Optional: include best-effort local OTel signals."
 ---
 
 # Codex Sessions Skill Scan
 
 ## Overview
-This skill runs a **daily scan** over Codex session logs to catch repeated “paper cuts” when using skills (broken file paths, missing scripts, validation commands that don’t run) and produces a short report + suggested fixes.
+This skill runs a **daily scan** over Codex session logs (global `~/.codex/sessions` and per-repo sessions under `~/dev`) to catch repeated “paper cuts” when using skills (broken file paths, missing scripts, validation commands that don’t run) and produces a short report + suggested fixes. It also highlights user words that often indicate complex tasks and adds a step-by-step reminder.
 
 ## Scope and triggers
 - “Scan yesterday’s Codex sessions for skill failures (personal skills only).”
@@ -28,8 +28,11 @@ python3 utilities/codex-sessions-skill-scan/scripts/scan_codex_sessions.py --day
 ## Required inputs
 - `--days <float>`: how far back to scan (default `1`).
 - `--sessions-root <path>`: where to scan (default `~/.codex/sessions`).
+- `--include-dev-project-sessions` (enabled by default): also scan per-project `.codex/sessions` under `~/dev`. Use `--no-include-dev-project-sessions` to disable.
 - `--max-samples-per-skill <int>`: cap snippets per skill (default `3`).
 - `--include-otel`: include best-effort OTel signals (Codex OTLP endpoint listening status + repo-local OTLP-derived trace artifacts under `.narrative/trace/`).
+- `--include-otel-collector`: include summary from `~/.agents/otel-collector/data/processed/stats.json`.
+- `--otel-collector-stats <path>`: override collector stats path (default `~/.agents/otel-collector/data/processed/stats.json`).
 - `--codex-config-toml <path>`: path to read Codex `[otel]` endpoints from (default `~/.codex/config.toml`).
 
 ## Deliverables
