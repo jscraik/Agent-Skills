@@ -65,7 +65,7 @@ jobs:
             --out-json artifacts/reports/skills/dashboard.json \
             --out-md artifacts/reports/skills/dashboard.md
       - name: Upload reports
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: skill-quality-reports
           path: artifacts/reports/skills
