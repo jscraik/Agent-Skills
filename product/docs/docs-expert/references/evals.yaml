@@ -33,6 +33,16 @@ cases:
       - type: contains
         value: "SECURITY"
 
+  - name: edge-missing-doc-qa-tooling
+    prompt: "Our repo has no .vale.ini, no markdownlint config, and no brand directory. Update docs and make sure checks are not skipped."
+    acceptance:
+      - type: contains
+        value: "bootstrap_doc_qa.py"
+      - type: contains
+        value: "QA bootstrap"
+      - type: contains
+        value: "Brand"
+
   - name: negative-prd-request
     prompt: "Write a PRD for our new onboarding flow."
     acceptance:

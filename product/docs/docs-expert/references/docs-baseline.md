@@ -26,6 +26,7 @@ If the user did not provide these, infer from repo context (existing docs, packa
 - A short "Doc QA" summary of what changed and what to verify.
 - If information is missing or unknown: a TODO list of specific facts the team must confirm.
 - If branding applies: include brand compliance results and evidence (signature and assets).
+- A QA bootstrap summary listing which lint/brand files were auto-installed.
 - An evidence bundle that records lint outputs, brand check output, and checklist snapshot.
 
 ## Operating procedure
@@ -111,7 +112,15 @@ section that includes:
 - Cross-check installation steps with actual configs (package scripts, Makefile, Dockerfile, CI).
 - If you cannot verify a detail, flag it as needing confirmation.
 
-### 9) Run doc linters (when available)
+### 9) Bootstrap missing QA tooling (default)
+
+- Run `python scripts/bootstrap_doc_qa.py --repo . --apply` before lint and brand checks.
+- If `.vale.ini` is missing, install a local Vale baseline (`.vale.ini` and `.vale/styles/Docs/`).
+- If markdownlint config is missing, install `.markdownlint-cli2.yaml`.
+- If `brand/` or branding constraints are missing, install baseline brand assets and `brand/README.md`.
+- Record exactly which files were created and which files were already present.
+
+### 10) Run doc linters (when available)
 
 - If `.vale.ini` exists, run `vale <doc>` and record results.
 - If markdownlint config exists, run `markdownlint-cli2 <doc> --config <config>`.
@@ -119,18 +128,19 @@ section that includes:
 - If tooling is missing, state what is missing and how to enable it.
 - If `scripts/check_readability.py` exists, run it and record the score and target range (default target: 45-70 Flesch Reading Ease; override with `--min/--max` or use `--no-range`).
 
-### 9a) Automation hooks (optional)
+### 10a) Automation hooks (optional)
 
 Use these commands in CI or pre-commit, adjusting paths to your repo:
 
 ```sh
+python /path/to/bootstrap_doc_qa.py --repo . --apply
 vale <doc>
 markdownlint-cli2 <doc> --config <config>
 python /path/to/check_brand_guidelines.py --repo . --docs <doc>
 python /path/to/check_readability.py <doc>
 ```
 
-### 10) Finish with verification hooks
+### 11) Finish with verification hooks
 
 - Add "Verify" steps readers can run (expected output, health checks).
 - Add Troubleshooting for the top 3 predictable failures.

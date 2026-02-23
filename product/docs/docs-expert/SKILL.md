@@ -5,6 +5,16 @@ description: "Co-author and QA GitHub repository documentation (README, docs, ru
 
 # docs-expert (Repository Documentation)
 
+## Table of Contents
+- [When to use](#when-to-use)
+- [Quickstart (Lightweight Path)](#quickstart-lightweight-path)
+- [Inputs](#inputs)
+- [Outputs](#outputs)
+- [Response format (required)](#response-format-required)
+- [Core workflow (repo doc "gold standard")](#core-workflow-repo-doc-gold-standard)
+- [Validation](#validation)
+- [Deliverable format](#deliverable-format)
+
 ## When to use
 - You want to **write, rewrite, or audit** repo documentation (README, `/docs`, guides, runbooks).
 - You want a repo to meet **GitHub “community profile” / community health** expectations (README, LICENSE, CODE_OF_CONDUCT, CONTRIBUTING, SECURITY, SUPPORT, issue/PR templates).
@@ -55,6 +65,7 @@ Use this when the user wants help quickly and does not want the full three-stage
 - Updated Markdown docs (**PR-ready edits**).
 - A **doc audit summary** (what changed, what’s still unknown, and what to verify).
 - A **GitHub community health checklist** snapshot when repo-wide documentation is in scope (see `references/CHECKLIST.md`).
+- A **QA bootstrap summary** documenting files auto-installed when lint/brand baselines were missing.
 - Evidence bundle when tooling exists (lint outputs, readability output, checklist snapshot).
 
 ## Response format (required)
@@ -73,8 +84,10 @@ Every response must include:
    - Keep examples minimal; include “Verify” and “Troubleshooting”.
 4) **Verify against the repo**
    - Cross-check scripts/paths/flags/versions; if you can’t verify, mark it as a TODO to confirm.
-5) **Run doc QA tooling (when present)**
-   - Follow `references/docs-baseline.md` → “Run doc linters”.
+5) **Bootstrap and run doc QA tooling**
+   - Follow `references/docs-baseline.md` → “Bootstrap missing QA tooling” before linting.
+   - If lint configs are missing, install the baseline configs first, then rerun lint.
+   - If `brand/` and branding constraints are missing, install baseline brand assets/constraints first, then rerun brand checks.
 6) **Ship the evidence bundle**
    - Checklist snapshot + what was run + what to do next.
 
@@ -121,14 +134,15 @@ For JSDoc, DocC, and config documentation rules, use `references/code-docs.md` a
 ## Validation
 
 Run these when available and record results:
-- `vale <doc>` if `.vale.ini` exists.
-- `markdownlint-cli2 <doc> --config <config>` if configured.
+- `python scripts/bootstrap_doc_qa.py --repo . --apply` to install missing lint and brand baselines.
+- `vale <doc>` after `.vale.ini` is present.
+- `markdownlint-cli2 <doc> --config <config>` after markdownlint config is present.
 - Link checker if present.
 - `python scripts/check_readability.py <doc>` if available (default target: 45-70 Flesch Reading Ease).
 - `python scripts/check_brand_guidelines.py --repo . --docs <doc>` when branding applies.
 
 Fail fast: if any validation fails, stop and report before continuing edits.
-If tooling is missing, state what is missing and how to enable it.
+If tooling is missing and bootstrap is not approved, state what is missing and why checks were skipped.
 
 ## Examples
 
@@ -193,7 +207,7 @@ If you touch in-code documentation, also include Code Doc QA checklist results (
 - Docs upkeep runbook: `references/docs-upkeep-runbook.md`
 - README deep dive: `references/readme-crafting.md`
 - README extended sections: `references/readme-section-templates.md`
-- Automation scripts: `scripts/check_brand_guidelines.py`, `scripts/check_readability.py`
+- Automation scripts: `scripts/bootstrap_doc_qa.py`, `scripts/check_brand_guidelines.py`, `scripts/check_readability.py`
 - Output contract schema: `references/contract.yaml`
 - Evaluation rubric: `references/evals.yaml`
 

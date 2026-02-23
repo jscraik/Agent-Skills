@@ -56,6 +56,7 @@
 - [ ] Visual styling follows brand guidance only when requested.
 
 ### Evidence bundle
+- [ ] QA bootstrap output recorded when baseline files were installed.
 - [ ] Lint outputs recorded (Vale/markdownlint/link check).
 - [ ] Brand check output recorded when branding applies.
 - [ ] Readability output recorded when available.
