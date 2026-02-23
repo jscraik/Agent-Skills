@@ -17,11 +17,18 @@ ts: "ISO-8601"
 run_id: "run-id"
 skill_name: "kebab-case"
 task_profile: "profile-id"
-event_type: "run_initialized|run_state_changed|promotion_approved|failure_event"
+event_type: "run_initialized|run_state_changed|promotion_approved|failure_event|run_blocked"
 severity: "info|warn|fail"
 terminal_status: "passed|failed|escalated|aborted|null"
 stop_reason: "pass|budget_exhausted|escalated|aborted|policy_failed|evaluator_conflict|dependency_missing|null"
+blocker_code: "run_rollforward_blocked|run_rollback_required|kill_switch_activated|evaluator_conflict|null"
 ```
+
+Required per run:
+- `events.jsonl` must exist (always-on output).
+- At least one `run_state_changed` event must be present.
+- Approved decisions must emit `promotion_approved`.
+- Blocked/rejected control paths must emit `run_blocked` with non-null `blocker_code`.
 
 ## Retention + privacy
 

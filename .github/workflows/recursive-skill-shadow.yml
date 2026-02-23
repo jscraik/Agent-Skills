@@ -57,4 +57,7 @@ jobs:
             artifacts/skill-graphs
             docs/skill-graphs/pilots/ui-skills-shadow-results.md
             docs/skill-graphs/pilots/ui-skills-pilot-readout.md
+            docs/skill-graphs/telemetry/daily-skill-health.md
+            artifacts/skill-graphs/telemetry/failure-pattern-candidates.jsonl
+            artifacts/skill-graphs/telemetry/promotion-queue.md
             /tmp/docs-lint-shadow.json

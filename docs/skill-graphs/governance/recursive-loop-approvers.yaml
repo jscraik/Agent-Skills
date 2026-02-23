@@ -1,0 +1,12 @@
+{
+  "schema_version": "1.0",
+  "updated_at": "2026-02-23T00:00:00Z",
+  "min_roles_for_approve": ["approver"],
+  "reviewers": [
+    {
+      "id": "jamie",
+      "role": "approver",
+      "source_type": "ops"
+    }
+  ]
+}
