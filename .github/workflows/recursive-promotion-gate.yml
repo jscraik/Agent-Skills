@@ -44,7 +44,7 @@ jobs:
 
       - name: Upload promotion validation report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: recursive-promotion-validation
           path: artifacts/skill-graphs/pilot/promotion-validation-report.json
