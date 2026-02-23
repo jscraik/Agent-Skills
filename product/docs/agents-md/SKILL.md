@@ -14,6 +14,7 @@ The agent is capable of extraordinary work in this domain. Use judgment, adapt t
 ## Compliance
 - Check against GOLD Industry Standards guide in ~/.codex/instructions/standards.md
 - Use ~/.codex/AGENTS.md as the global index that links to current standards docs.
+- Visual reference: [agents-md workflow map](assets/agents-md.png)
 
 ## Philosophy
 
@@ -91,6 +92,22 @@ Use the failure-mode template verbatim for out-of-scope requests.
 - Any adjacent instruction files that may conflict (global or per-directory).
 - Whether Jamie's agent-first scaffold standard is requested (`/Users/jamiecraik/.codex/instructions/agent-first-scaffold-spec.md`).
 - Compatibility posture (default: canonical-only for unreleased/greenfield repos; override only when explicitly requested).
+
+
+## Local Memory usage
+
+- Follow `instructions/local-memory.md` for memory read/write workflow, tagging, and safety rules.
+- Rule: search memory before writing new memory; store durable facts only.
+- Never store secrets in memory.
+
+## local-memory-mcp policy
+
+- Use `local-memory-mcp` for durable context and cross-run continuity.
+- Mandatory workflow:
+  - `bootstrap(mode="minimal", include_questions=true, session_id="repo:<name>:task:<id>")`
+  - `search(query="...", session_id="repo:<name>:task:<id>")`
+- Record durable facts only with `observe(...)` (level `observation|learning`) and stable tags.
+- Do not store secrets, tokens, keys, or PII.
 
 ## Deliverables
 
