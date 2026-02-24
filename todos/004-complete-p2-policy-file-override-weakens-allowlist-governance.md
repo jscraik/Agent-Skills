@@ -1,5 +1,5 @@
 ---
-status: pending
+status: complete
 priority: p2
 issue_id: '004'
 tags:
@@ -51,6 +51,7 @@ Policy and signature paths are user-overridable via CLI, and signature validatio
 - [ ] Audit logs show when non-canonical policy is attempted and block decision.
 
 ## Work Log
+- 2026-02-24: Implemented and validated fix in repository code.
 - 2026-02-24: Created from PR #18 multi-agent code review synthesis.
 
 ## Resources

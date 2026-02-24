@@ -1,5 +1,5 @@
 ---
-status: pending
+status: complete
 priority: p3
 issue_id: '008'
 tags:
@@ -50,6 +50,7 @@ Pilot profile identifiers are hard-coded in multiple files, increasing drift ris
 - [ ] Regression test or lint rule detects profile-list drift.
 
 ## Work Log
+- 2026-02-24: Implemented and validated fix in repository code.
 - 2026-02-24: Created from PR #18 multi-agent code review synthesis.
 
 ## Resources
