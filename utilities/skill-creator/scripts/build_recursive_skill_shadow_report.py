@@ -18,6 +18,14 @@ PILOT_PROFILES = [
     "react-ui-patterns",
 ]
 
+EVENT_TYPES = {
+    "run_initialized",
+    "run_state_changed",
+    "promotion_approved",
+    "failure_event",
+    "run_blocked",
+}
+
 
 @dataclass(frozen=True)
 class RunRecord:
@@ -61,6 +69,9 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--shadow-md", default="docs/skill-graphs/pilots/ui-skills-shadow-results.md")
     p.add_argument("--readout-md", default="docs/skill-graphs/pilots/ui-skills-pilot-readout.md")
     p.add_argument("--out-json", default="artifacts/skill-graphs/pilot/shadow-dashboard.json")
+    p.add_argument("--daily-health-md", default="docs/skill-graphs/telemetry/daily-skill-health.md")
+    p.add_argument("--failure-patterns-jsonl", default="artifacts/skill-graphs/telemetry/failure-pattern-candidates.jsonl")
+    p.add_argument("--promotion-queue-md", default="artifacts/skill-graphs/telemetry/promotion-queue.md")
     p.add_argument("--max-run-lines", type=int, default=40)
     return p.parse_args()
 
@@ -95,6 +106,32 @@ def load_jsonl(path: Path) -> List[Dict[str, Any]]:
             continue
         rows.append(json.loads(line))
     return rows
+
+
+def validate_event_envelope(events: List[Dict[str, Any]], run_id: str) -> List[str]:
+    errors: List[str] = []
+    required = [
+        "schema_version",
+        "event_id",
+        "ts",
+        "run_id",
+        "skill_name",
+        "task_profile",
+        "event_type",
+        "severity",
+        "terminal_status",
+        "stop_reason",
+    ]
+    for idx, row in enumerate(events, start=1):
+        for key in required:
+            if key not in row:
+                errors.append(f"{run_id}:event#{idx} missing field {key}")
+        et = str(row.get("event_type", ""))
+        if et not in EVENT_TYPES:
+            errors.append(f"{run_id}:event#{idx} unknown event_type {et}")
+        if et == "run_blocked" and not str(row.get("blocker_code", "")).strip():
+            errors.append(f"{run_id}:event#{idx} run_blocked missing blocker_code")
+    return errors
 
 
 def has_fail_finding(report: Dict[str, Any]) -> bool:
@@ -461,6 +498,8 @@ def main() -> int:
     repo_root = Path.cwd().resolve()
     run_records: List[RunRecord] = []
     skipped_runs: List[Dict[str, str]] = []
+    event_errors: List[str] = []
+    promotion_approved_by_run: Dict[str, bool] = {}
 
     for run_dir in sorted(runs_root.glob("run_*")):
         if not run_dir.is_dir():
@@ -477,6 +516,20 @@ def main() -> int:
             continue
         if record is not None:
             run_records.append(record)
+            events_path = run_dir / "events.jsonl"
+            if not events_path.exists():
+                event_errors.append(f"{record.run_id}: missing events.jsonl")
+                promotion_approved_by_run[record.run_id] = False
+            else:
+                try:
+                    events = load_jsonl(events_path)
+                    event_errors.extend(validate_event_envelope(events, record.run_id))
+                    promotion_approved_by_run[record.run_id] = any(
+                        e.get("event_type") == "promotion_approved" for e in events
+                    )
+                except Exception as exc:
+                    event_errors.append(f"{record.run_id}: invalid events.jsonl ({exc})")
+                    promotion_approved_by_run[record.run_id] = False
 
     run_records.sort(key=lambda r: r.finished_at, reverse=True)
 
@@ -523,10 +576,16 @@ def main() -> int:
     shadow_md_path = Path(args.shadow_md).expanduser().resolve()
     readout_md_path = Path(args.readout_md).expanduser().resolve()
     out_json_path = Path(args.out_json).expanduser().resolve()
+    daily_health_path = Path(args.daily_health_md).expanduser().resolve()
+    failure_patterns_path = Path(args.failure_patterns_jsonl).expanduser().resolve()
+    promotion_queue_path = Path(args.promotion_queue_md).expanduser().resolve()
 
     shadow_md_path.parent.mkdir(parents=True, exist_ok=True)
     readout_md_path.parent.mkdir(parents=True, exist_ok=True)
     out_json_path.parent.mkdir(parents=True, exist_ok=True)
+    daily_health_path.parent.mkdir(parents=True, exist_ok=True)
+    failure_patterns_path.parent.mkdir(parents=True, exist_ok=True)
+    promotion_queue_path.parent.mkdir(parents=True, exist_ok=True)
 
     shadow_md_path.write_text(shadow_md_text, encoding="utf-8")
     readout_md_path.write_text(readout_md_text, encoding="utf-8")
@@ -547,6 +606,7 @@ def main() -> int:
             "state": decision,
             "reasons": reasons,
         },
+        "event_envelope_errors": event_errors,
         "recent_runs": [
             {
                 "run_id": r.run_id,
@@ -566,11 +626,69 @@ def main() -> int:
 
     out_json_path.write_text(json.dumps(dashboard, indent=2), encoding="utf-8")
 
+    daily_lines: List[str] = [
+        "# Daily Skill Health",
+        "",
+        f"- Generated at: `{dashboard['generated_at']}`",
+        f"- Window: `{current_window}`",
+        f"- Runs total: `{current_summary.runs_total}`",
+        f"- Decision: `{decision}`",
+        f"- Critical non-regression compliance: `{fmt_pct(current_summary.critical_non_regression_compliance)}`",
+        f"- Budget compliance: `{fmt_pct(current_summary.budget_compliance)}`",
+        f"- Event envelope errors: `{len(event_errors)}`",
+        "",
+    ]
+    if event_errors:
+        daily_lines.append("## Event envelope errors")
+        daily_lines.append("")
+        for err in event_errors[:50]:
+            daily_lines.append(f"- {err}")
+        daily_lines.append("")
+    daily_health_path.write_text("\n".join(daily_lines) + "\n", encoding="utf-8")
+
+    failure_rows: List[Dict[str, Any]] = []
+    for r in current_records:
+        if r.terminal_status != "passed" or r.stop_reason != "pass":
+            failure_rows.append(
+                {
+                    "schema_version": "1.0",
+                    "run_id": r.run_id,
+                    "profile_id": r.profile_id,
+                    "terminal_status": r.terminal_status,
+                    "stop_reason": r.stop_reason,
+                    "iterations_completed": r.iterations_completed,
+                    "quality_uplift": r.quality_uplift,
+                    "finished_at": r.finished_at.isoformat().replace("+00:00", "Z"),
+                }
+            )
+    failure_patterns_path.write_text(
+        "".join(json.dumps(row, sort_keys=True) + "\n" for row in failure_rows),
+        encoding="utf-8",
+    )
+
+    queue_lines = ["# Promotion Queue", ""]
+    queue_items = [
+        r for r in current_records
+        if r.terminal_status == "passed" and not promotion_approved_by_run.get(r.run_id, False)
+    ]
+    if not queue_items:
+        queue_lines.append("- No pending promotions in window.")
+    else:
+        for r in queue_items:
+            queue_lines.append(
+                f"- `{r.run_id}` | profile `{r.profile_id}` | finished `{r.finished_at.isoformat().replace('+00:00', 'Z')}`"
+            )
+    queue_lines.append("")
+    promotion_queue_path.write_text("\n".join(queue_lines), encoding="utf-8")
+
     print(f"[shadow-report] runs={len(run_records)} current_runs={len(current_records)}")
     print(f"[shadow-report] decision={decision}")
     print(f"[shadow-report] shadow_md={shadow_md_path}")
     print(f"[shadow-report] readout_md={readout_md_path}")
     print(f"[shadow-report] out_json={out_json_path}")
+    print(f"[shadow-report] daily_health={daily_health_path}")
+    print(f"[shadow-report] failure_patterns={failure_patterns_path}")
+    print(f"[shadow-report] promotion_queue={promotion_queue_path}")
 
     return 0
 

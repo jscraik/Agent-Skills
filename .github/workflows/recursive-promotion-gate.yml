@@ -6,6 +6,9 @@ on:
       - "artifacts/skill-graphs/runs/**/promotion_decision.json"
       - "artifacts/skill-graphs/runs/**/iteration_journal.jsonl"
       - "artifacts/skill-graphs/runs/**/run.json"
+      - "artifacts/skill-graphs/lessons/**"
+      - "docs/skill-graphs/governance/recursive-loop-approvers.yaml"
+      - "docs/skill-graphs/governance/recursive-loop-approvers.sig"
       - "scripts/human_promote_recursive_run.sh"
       - "scripts/validate_recursive_promotions.sh"
       - "utilities/skill-creator/scripts/validate_recursive_promotion.py"
@@ -19,7 +22,7 @@ jobs:
   validate-promotion-artifacts:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
 

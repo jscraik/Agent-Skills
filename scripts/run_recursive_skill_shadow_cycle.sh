@@ -85,7 +85,8 @@ PY
     if ! python3 "$loop_script" \
       --profile-file "$profile_file" \
       --objective "$objective" \
-      --out-root "$out_root"; then
+      --out-root "$out_root" \
+      --run-owner "shadow-cycle"; then
       echo "[shadow-cycle] warning: loop exited non-zero (expected in bounded shadow scenarios)" >&2
     fi
   done

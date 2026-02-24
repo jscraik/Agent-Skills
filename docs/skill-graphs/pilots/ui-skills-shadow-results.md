@@ -1,6 +1,6 @@
 # UI Skills Shadow Results (Phase 2)
 
-Shadow mode runs evaluator + checkpoint adversarial checks without automatic improvement writes.
+Shadow mode runs the full bounded loop (generate/evaluate/diagnose/improve/re-score) with checkpoint adversarial checks, without automatic canonical promotion writes.
 
 ## Table of Contents
 

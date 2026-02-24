@@ -19,7 +19,8 @@ This section defines the MVP contracts and operating workflows for the recursive
 - Use checkpoint adversarial evaluation (initial, final, failure-triggered).
 - Keep canonical promotion human-gated with provenance + security checklist.
 - Keep runtime retrieval injection disabled until Phase 4.
-- Treat optional runtime traces as debug output only (`run/debug/*`) and keep them gitignored.
+- Treat `run/events.jsonl` as mandatory runtime telemetry; keep optional debug traces under `run/debug/*`.
+- Enforce compatibility mapping for control blockers (`run_rollforward_blocked`, `run_rollback_required`) via `terminal_status` + `stop_reason` normalization.
 
 ## Pilot Profile Set (fixed)
 

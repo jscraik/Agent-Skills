@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 import sys
@@ -35,6 +36,16 @@ def parse_args() -> argparse.Namespace:
         "--skip-lesson-content-scan",
         action="store_true",
         help="Allow approved decisions without lesson content scan",
+    )
+    p.add_argument(
+        "--policy-file",
+        default="docs/skill-graphs/governance/recursive-loop-approvers.yaml",
+        help="Reviewer policy file (JSON content in .yaml path is supported)",
+    )
+    p.add_argument(
+        "--policy-sig-file",
+        default="docs/skill-graphs/governance/recursive-loop-approvers.sig",
+        help="Policy signature file containing sha256(policy file)",
     )
     p.add_argument("--write-report", help="Optional JSON output path for validation report")
     return p.parse_args()
@@ -102,6 +113,18 @@ def scan_lesson_content(path: Path) -> Dict[str, List[str]]:
     return {"secret_hits": secret_hits, "pii_hits": pii_hits}
 
 
+def load_policy(policy_file: Path, sig_file: Path) -> Dict[str, Any]:
+    policy_raw = policy_file.read_text(encoding="utf-8")
+    recorded_sig = sig_file.read_text(encoding="utf-8").strip().split()[0]
+    actual_sig = hashlib.sha256(policy_raw.encode("utf-8")).hexdigest()
+    if recorded_sig != actual_sig:
+        raise ValueError("reviewer policy signature mismatch")
+    policy = json.loads(policy_raw)
+    if not isinstance(policy, dict):
+        raise ValueError("reviewer policy must be object")
+    return policy
+
+
 def resolve_lesson_file(
     *,
     args: argparse.Namespace,
@@ -150,6 +173,7 @@ def validate(args: argparse.Namespace) -> Dict[str, Any]:
 
     run_json_path = run_dir / "run.json"
     journal_path = run_dir / "iteration_journal.jsonl"
+    events_path = run_dir / "events.jsonl"
     decision_path = (
         Path(args.decision_file).expanduser().resolve()
         if args.decision_file
@@ -209,6 +233,35 @@ def validate(args: argparse.Namespace) -> Dict[str, Any]:
         reviewers = decision.get("reviewer_ids")
         if not isinstance(reviewers, list) or not any(str(r).strip() for r in reviewers):
             errors.append("reviewer_ids must include at least one reviewer for candidate/approved decisions")
+        else:
+            policy_file = Path(args.policy_file).expanduser().resolve()
+            sig_file = Path(args.policy_sig_file).expanduser().resolve()
+            if not policy_file.exists():
+                errors.append(f"reviewer policy file missing: {policy_file}")
+            elif not sig_file.exists():
+                errors.append(f"reviewer policy signature missing: {sig_file}")
+            else:
+                try:
+                    policy = load_policy(policy_file, sig_file)
+                    allowed_map = {
+                        str(r.get("id", "")).strip(): str(r.get("role", "")).strip().lower()
+                        for r in policy.get("reviewers", [])
+                        if isinstance(r, dict) and str(r.get("id", "")).strip()
+                    }
+                    min_roles = {
+                        str(role).strip().lower()
+                        for role in policy.get("min_roles_for_approve", ["approver"])
+                        if str(role).strip()
+                    } or {"approver"}
+                    for reviewer in reviewers:
+                        rv = str(reviewer).strip()
+                        if rv not in allowed_map:
+                            errors.append(f"reviewer not allowlisted: {rv}")
+                            continue
+                        if allowed_map[rv] not in min_roles:
+                            errors.append(f"reviewer role not permitted: {rv}:{allowed_map[rv]}")
+                except Exception as exc:
+                    errors.append(f"reviewer policy validation failed: {exc}")
 
     if decision_state == "approved":
         if args.skip_lesson_content_scan:
@@ -228,6 +281,10 @@ def validate(args: argparse.Namespace) -> Dict[str, Any]:
             errors.append("gate_decision.provenance_complete must be true for approved decision")
         if gate.get("security_checklist_passed") is not True:
             errors.append("gate_decision.security_checklist_passed must be true for approved decision")
+        if str(decision.get("lesson_status", "")).strip().lower() != "active":
+            warnings.append("lesson_status should be 'active' for approved decision (legacy artifacts may omit)")
+        if not str(decision.get("canonical_version", "")).strip():
+            warnings.append("canonical_version should be present for approved decision (legacy artifacts may omit)")
 
         required_fields(
             provenance,
@@ -293,6 +350,18 @@ def validate(args: argparse.Namespace) -> Dict[str, Any]:
                     "approved decision requires non_regression_passed=true for all iterations; failed iterations: "
                     + ",".join(str(x) for x in non_regression_failures)
                 )
+
+        if events_path.exists():
+            events = load_jsonl(events_path)
+            promotion_events = [
+                e
+                for e in events
+                if e.get("event_type") == "promotion_approved" and e.get("run_id") == run_id
+            ]
+            if not promotion_events:
+                warnings.append("promotion_approved event missing in run/events.jsonl")
+        else:
+            warnings.append("run/events.jsonl missing")
 
         lesson_file = resolve_lesson_file(
             args=args,
