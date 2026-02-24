@@ -291,6 +291,12 @@ def write_jsonl(path: Path, rows: List[Dict[str, Any]]) -> None:
             f.write("\n")
 
 
+def append_jsonl(path: Path, row: Dict[str, Any]) -> None:
+    with path.open("a", encoding="utf-8") as f:
+        f.write(json.dumps(row, sort_keys=True))
+        f.write("\n")
+
+
 def emit_event(
     *,
     events: List[Dict[str, Any]],
@@ -447,6 +453,7 @@ def run_loop(args: argparse.Namespace) -> int:
         debug_dir.mkdir(parents=True, exist_ok=True)
 
     events_path = out_dir / "events.jsonl"
+    iteration_journal_path = out_dir / "iteration_journal.jsonl"
     started_at = time.time()
     created_at = iso_now()
     objective_hash = sha256_text(args.objective)
@@ -472,6 +479,12 @@ def run_loop(args: argparse.Namespace) -> int:
         else str(os.environ.get("SKILL_GRAPH_KILL_SWITCH_PATH", "")).strip()
     )
     kill_switch_path = Path(kill_switch_raw).expanduser().resolve() if kill_switch_raw else None
+    rollback_required_raw = (
+        str(args.rollback_required_file).strip()
+        if args.rollback_required_file
+        else str(os.environ.get("SKILL_GRAPH_ROLLBACK_REQUIRED_PATH", "")).strip()
+    )
+    rollback_required_path = Path(rollback_required_raw).expanduser().resolve() if rollback_required_raw else None
 
     events: List[Dict[str, Any]] = []
     emit_event(
@@ -486,6 +499,7 @@ def run_loop(args: argparse.Namespace) -> int:
         stop_reason=None,
         extra={"run_owner": run_owner, "idempotency_key": idempotency_key},
     )
+    write_jsonl(iteration_journal_path, [])
 
     def write_blocker_artifacts(
         *,
@@ -552,6 +566,7 @@ def run_loop(args: argparse.Namespace) -> int:
             "idempotency_key": idempotency_key,
             "lock_path": str(lock_path),
             "kill_switch_file": str(kill_switch_path) if kill_switch_path else "",
+            "rollback_required_file": str(rollback_required_path) if rollback_required_path else "",
             "run_blocker": blocker,
         }
         promotion_decision = {
@@ -578,9 +593,61 @@ def run_loop(args: argparse.Namespace) -> int:
             "run_blocker": blocker,
         }
         write_json(out_dir / "run.json", run_obj)
-        write_jsonl(out_dir / "iteration_journal.jsonl", [])
+        write_jsonl(iteration_journal_path, [])
         write_json(out_dir / "promotion_decision.json", promotion_decision)
         write_jsonl(events_path, events)
+
+    if is_kill_switch_activated(rollback_required_path):
+        blocker_code = "run_rollback_required"
+        terminal_status, stop_reason = normalize_blocked_reason(blocker_code)
+        emit_event(
+            events=events,
+            run_id=run_id,
+            profile=profile,
+            actor_id=args.actor_id,
+            objective_hash=objective_hash,
+            event_type="run_blocked",
+            severity="warn",
+            terminal_status=terminal_status,
+            stop_reason=stop_reason,
+            blocker_code=blocker_code,
+            extra={"message": f"rollback required control active: {rollback_required_path}"},
+        )
+        emit_event(
+            events=events,
+            run_id=run_id,
+            profile=profile,
+            actor_id=args.actor_id,
+            objective_hash=objective_hash,
+            event_type="run_state_changed",
+            severity="warn",
+            terminal_status=terminal_status,
+            stop_reason=stop_reason,
+            blocker_code=blocker_code,
+        )
+        emit_event(
+            events=events,
+            run_id=run_id,
+            profile=profile,
+            actor_id=args.actor_id,
+            objective_hash=objective_hash,
+            event_type="failure_event",
+            severity="fail",
+            terminal_status=terminal_status,
+            stop_reason=stop_reason,
+            blocker_code=blocker_code,
+        )
+        write_blocker_artifacts(
+            blocker_code=blocker_code,
+            message=f"rollback required control active at {rollback_required_path}",
+            terminal_status=terminal_status,
+            stop_reason=stop_reason,
+        )
+        write_jsonl(events_path, events)
+        print(f"[recursive-loop] run_id={run_id}")
+        print(f"[recursive-loop] status={terminal_status} stop_reason={stop_reason}")
+        print(f"[recursive-loop] out_dir={out_dir}")
+        return 5
 
     try:
         acquire_run_lock(lock_path, run_id, run_owner, idempotency_key)
@@ -630,12 +697,14 @@ def run_loop(args: argparse.Namespace) -> int:
             terminal_status=terminal_status,
             stop_reason=stop_reason,
         )
+        write_jsonl(events_path, events)
         print(f"[recursive-loop] run_id={run_id}")
         print(f"[recursive-loop] status={terminal_status} stop_reason={stop_reason}")
         print(f"[recursive-loop] out_dir={out_dir}")
         return 5
 
-    journals: List[Dict[str, Any]] = []
+    journal_iteration_ids: List[int] = []
+    iterations_completed = 0
     candidate = args.objective.strip()
     total_tokens = 0
     consecutive_passes = 0
@@ -649,6 +718,11 @@ def run_loop(args: argparse.Namespace) -> int:
 
     try:
         for iteration_id in range(1, max_iterations + 1):
+            if is_kill_switch_activated(rollback_required_path):
+                blocker_code = "run_rollback_required"
+                terminal_status, stop_reason = normalize_blocked_reason(blocker_code)
+                break
+
             if is_kill_switch_activated(kill_switch_path):
                 blocker_code = "kill_switch_activated"
                 terminal_status, stop_reason = normalize_blocked_reason(blocker_code)
@@ -794,7 +868,9 @@ def run_loop(args: argparse.Namespace) -> int:
                 "adversarial_report": adversarial_report or {},
                 "criterion_deltas": criterion_deltas,
             }
-            journals.append(journal)
+            append_jsonl(iteration_journal_path, journal)
+            journal_iteration_ids.append(iteration_id)
+            iterations_completed += 1
 
             candidate = improved_candidate
             if blocker_code:
@@ -817,6 +893,10 @@ def run_loop(args: argparse.Namespace) -> int:
 
             if is_kill_switch_activated(kill_switch_path):
                 blocker_code = "kill_switch_activated"
+                terminal_status, stop_reason = normalize_blocked_reason(blocker_code)
+                break
+            if is_kill_switch_activated(rollback_required_path):
+                blocker_code = "run_rollback_required"
                 terminal_status, stop_reason = normalize_blocked_reason(blocker_code)
                 break
     finally:
@@ -914,7 +994,7 @@ def run_loop(args: argparse.Namespace) -> int:
             "max_tokens": max_tokens,
         },
         "counters": {
-            "iterations_completed": len(journals),
+            "iterations_completed": iterations_completed,
             "tokens_used": total_tokens,
             "consecutive_passes": consecutive_passes,
         },
@@ -929,6 +1009,7 @@ def run_loop(args: argparse.Namespace) -> int:
         "idempotency_key": idempotency_key,
         "lock_path": str(lock_path),
         "kill_switch_file": str(kill_switch_path) if kill_switch_path else "",
+        "rollback_required_file": str(rollback_required_path) if rollback_required_path else "",
         "run_blocker": (
             {
                 "code": blocker_code,
@@ -958,7 +1039,7 @@ def run_loop(args: argparse.Namespace) -> int:
             "prompt_hash": sha256_text(args.objective),
             "rubric_version": profile.rubric_version,
             "evaluator_version": profile.evaluator_version,
-            "iteration_ids": [j["iteration_id"] for j in journals],
+            "iteration_ids": journal_iteration_ids,
         },
     }
 
@@ -968,13 +1049,12 @@ def run_loop(args: argparse.Namespace) -> int:
         f"- profile_id: `{profile.profile_id}`\n"
         f"- terminal_status: `{terminal_status}`\n"
         f"- stop_reason: `{stop_reason}`\n"
-        f"- iterations_completed: `{len(journals)}`\n"
+        f"- iterations_completed: `{iterations_completed}`\n"
         f"- tokens_used: `{total_tokens}`\n"
         f"- duration_ms: `{duration_ms}`\n"
     )
 
     write_json(out_dir / "run.json", run_obj)
-    write_jsonl(out_dir / "iteration_journal.jsonl", journals)
     write_json(out_dir / "promotion_decision.json", promotion_decision)
     write_jsonl(events_path, events)
 
@@ -1004,6 +1084,10 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--run-lock", help="Optional explicit lock file path")
     p.add_argument("--idempotency-key", help="Optional idempotency key for run ownership")
     p.add_argument("--kill-switch-file", help="Kill switch file path (or use SKILL_GRAPH_KILL_SWITCH_PATH)")
+    p.add_argument(
+        "--rollback-required-file",
+        help="Rollback-required control file path (or use SKILL_GRAPH_ROLLBACK_REQUIRED_PATH)",
+    )
     p.add_argument("--seed", type=int, help="Optional deterministic seed override")
     p.add_argument("--max-iterations", type=int, help="Override max iterations")
     p.add_argument("--max-elapsed-ms", type=int, help="Override elapsed budget")

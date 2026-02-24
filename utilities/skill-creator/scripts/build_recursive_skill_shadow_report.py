@@ -11,12 +11,13 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
-PILOT_PROFILES = [
+DEFAULT_PILOT_PROFILES = [
     "ui-ux-creative-coding",
     "interface-craft",
     "frontend-ui-design",
     "react-ui-patterns",
 ]
+PILOT_PROFILES = list(DEFAULT_PILOT_PROFILES)
 
 EVENT_TYPES = {
     "run_initialized",
@@ -46,6 +47,14 @@ class RunRecord:
 
 
 @dataclass(frozen=True)
+class RunMeta:
+    run_id: str
+    profile_id: str
+    finished_at: datetime
+    run_dir: Path
+
+
+@dataclass(frozen=True)
 class WindowSummary:
     runs_total: int
     by_profile: Dict[str, int]
@@ -72,6 +81,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--daily-health-md", default="docs/skill-graphs/telemetry/daily-skill-health.md")
     p.add_argument("--failure-patterns-jsonl", default="artifacts/skill-graphs/telemetry/failure-pattern-candidates.jsonl")
     p.add_argument("--promotion-queue-md", default="artifacts/skill-graphs/telemetry/promotion-queue.md")
+    p.add_argument("--pilot-profiles-file", default="docs/skill-graphs/schemas/examples/pilot-profiles.json")
     p.add_argument("--max-run-lines", type=int, default=40)
     return p.parse_args()
 
@@ -96,6 +106,16 @@ def safe_int(value: Any, default: int = 0) -> int:
 
 def load_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+def load_pilot_profiles(path: Path) -> List[str]:
+    raw = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(raw, list):
+        raise ValueError("pilot profiles file must be a JSON array")
+    profiles = [str(item).strip() for item in raw if str(item).strip()]
+    if not profiles:
+        raise ValueError("pilot profiles file must include at least one profile id")
+    return profiles
 
 
 def load_jsonl(path: Path) -> List[Dict[str, Any]]:
@@ -195,6 +215,22 @@ def load_run_record(run_dir: Path) -> Optional[RunRecord]:
         first_pass_accepted=terminal_status == "passed" and iter_count == 1,
         evaluator_flip_rate=round(flip_count / len(journals), 3),
     )
+
+
+def load_run_meta(run_dir: Path) -> Optional[RunMeta]:
+    run_path = run_dir / "run.json"
+    if not run_path.exists():
+        return None
+    run = load_json(run_path)
+    profile_id = str(run.get("profile_id", "")).strip()
+    if profile_id not in PILOT_PROFILES:
+        return None
+    finished_raw = str(run.get("finished_at", "")).strip()
+    if not finished_raw:
+        raise ValueError("run.json missing finished_at")
+    finished_at = parse_iso8601(finished_raw)
+    run_id = str(run.get("run_id", run_dir.name))
+    return RunMeta(run_id=run_id, profile_id=profile_id, finished_at=finished_at, run_dir=run_dir)
 
 
 def percentile(values: List[float], p: float) -> float:
@@ -492,11 +528,15 @@ def to_dict(summary: WindowSummary) -> Dict[str, Any]:
 
 
 def main() -> int:
+    global PILOT_PROFILES
     args = parse_args()
+    pilot_profiles_path = Path(args.pilot_profiles_file).expanduser().resolve()
+    PILOT_PROFILES = load_pilot_profiles(pilot_profiles_path)
 
     runs_root = Path(args.runs_root).expanduser().resolve()
     repo_root = Path.cwd().resolve()
     run_records: List[RunRecord] = []
+    run_meta: List[RunMeta] = []
     skipped_runs: List[Dict[str, str]] = []
     event_errors: List[str] = []
     promotion_approved_by_run: Dict[str, bool] = {}
@@ -504,6 +544,33 @@ def main() -> int:
     for run_dir in sorted(runs_root.glob("run_*")):
         if not run_dir.is_dir():
             continue
+        try:
+            meta = load_run_meta(run_dir)
+        except Exception as exc:
+            run_dir_out = (
+                str(run_dir.relative_to(repo_root))
+                if run_dir.is_relative_to(repo_root)
+                else str(run_dir)
+            )
+            skipped_runs.append({"run_dir": run_dir_out, "reason": str(exc)})
+            continue
+        if meta is not None:
+            run_meta.append(meta)
+
+    run_meta.sort(key=lambda r: r.finished_at, reverse=True)
+
+    if run_meta:
+        latest = run_meta[0].finished_at
+    else:
+        latest = datetime.now(timezone.utc)
+
+    window_days = max(1, args.window_days)
+    current_start = latest - timedelta(days=window_days - 1)
+    baseline_start = current_start - timedelta(days=window_days)
+
+    selected_run_meta = [m for m in run_meta if m.finished_at >= baseline_start]
+    for meta in selected_run_meta:
+        run_dir = meta.run_dir
         try:
             record = load_run_record(run_dir)
         except Exception as exc:
@@ -514,33 +581,25 @@ def main() -> int:
             )
             skipped_runs.append({"run_dir": run_dir_out, "reason": str(exc)})
             continue
-        if record is not None:
-            run_records.append(record)
-            events_path = run_dir / "events.jsonl"
-            if not events_path.exists():
-                event_errors.append(f"{record.run_id}: missing events.jsonl")
+        if record is None:
+            continue
+        run_records.append(record)
+        events_path = run_dir / "events.jsonl"
+        if not events_path.exists():
+            event_errors.append(f"{record.run_id}: missing events.jsonl")
+            promotion_approved_by_run[record.run_id] = False
+        else:
+            try:
+                events = load_jsonl(events_path)
+                event_errors.extend(validate_event_envelope(events, record.run_id))
+                promotion_approved_by_run[record.run_id] = any(
+                    e.get("event_type") == "promotion_approved" for e in events
+                )
+            except Exception as exc:
+                event_errors.append(f"{record.run_id}: invalid events.jsonl ({exc})")
                 promotion_approved_by_run[record.run_id] = False
-            else:
-                try:
-                    events = load_jsonl(events_path)
-                    event_errors.extend(validate_event_envelope(events, record.run_id))
-                    promotion_approved_by_run[record.run_id] = any(
-                        e.get("event_type") == "promotion_approved" for e in events
-                    )
-                except Exception as exc:
-                    event_errors.append(f"{record.run_id}: invalid events.jsonl ({exc})")
-                    promotion_approved_by_run[record.run_id] = False
 
     run_records.sort(key=lambda r: r.finished_at, reverse=True)
-
-    if run_records:
-        latest = max(r.finished_at for r in run_records)
-    else:
-        latest = datetime.now(timezone.utc)
-
-    window_days = max(1, args.window_days)
-    current_start = latest - timedelta(days=window_days - 1)
-    baseline_start = current_start - timedelta(days=window_days)
 
     current_records = [r for r in run_records if r.finished_at >= current_start]
     baseline_records = [r for r in run_records if baseline_start <= r.finished_at < current_start]
@@ -598,6 +657,7 @@ def main() -> int:
             else str(runs_root)
         ),
         "pilot_profiles": PILOT_PROFILES,
+        "pilot_profiles_file": str(pilot_profiles_path),
         "window_days": window_days,
         "current_window": current_window,
         "current": to_dict(current_summary),

@@ -24,7 +24,8 @@ python3 utilities/skill-creator/scripts/recursive_skill_loop.py \
   --objective "Improve UI skill response quality for traceable, safe outputs" \
   --out-root artifacts/skill-graphs/runs \
   --run-owner recursive-loop-operator \
-  --kill-switch-file artifacts/skill-graphs/controls/kill-switch.txt
+  --kill-switch-file artifacts/skill-graphs/controls/kill-switch.txt \
+  --rollback-required-file artifacts/skill-graphs/controls/rollback-required.txt
 ```
 
 ## Shadow cycle automation
@@ -32,6 +33,7 @@ python3 utilities/skill-creator/scripts/recursive_skill_loop.py \
 ```bash
 bash scripts/run_recursive_skill_shadow_cycle.sh \
   --runs-per-profile 2 \
+  --profiles-file docs/skill-graphs/schemas/examples/pilot-profiles.json \
   --window-days 7
 ```
 

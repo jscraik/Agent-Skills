@@ -15,6 +15,8 @@ note="Human gate review completed."
 skip_lesson_scan=0
 policy_file="docs/skill-graphs/governance/recursive-loop-approvers.yaml"
 policy_sig_file="docs/skill-graphs/governance/recursive-loop-approvers.sig"
+canonical_policy_file="docs/skill-graphs/governance/recursive-loop-approvers.yaml"
+canonical_policy_sig_file="docs/skill-graphs/governance/recursive-loop-approvers.sig"
 
 usage() {
   cat <<'USAGE'
@@ -211,7 +213,28 @@ if [[ ! -f "$run_json_path" ]]; then
   exit 2
 fi
 
+resolve_path() {
+  python3 - "$1" <<'PY'
+from pathlib import Path
+import sys
+print(Path(sys.argv[1]).expanduser().resolve())
+PY
+}
+
 if [[ "$decision" == "approved" || "$decision" == "candidate" ]]; then
+  allow_policy_override="${RECURSIVE_PROMOTION_ALLOW_POLICY_OVERRIDE:-0}"
+  policy_file_resolved="$(resolve_path "$policy_file")"
+  policy_sig_file_resolved="$(resolve_path "$policy_sig_file")"
+  canonical_policy_file_resolved="$(resolve_path "$canonical_policy_file")"
+  canonical_policy_sig_file_resolved="$(resolve_path "$canonical_policy_sig_file")"
+  if [[ "$allow_policy_override" != "1" && "$allow_policy_override" != "true" && "$allow_policy_override" != "TRUE" ]]; then
+    if [[ "$policy_file_resolved" != "$canonical_policy_file_resolved" ]]; then
+      write_blocker_and_exit "run_rollforward_blocked" "non-canonical policy-file rejected (set RECURSIVE_PROMOTION_ALLOW_POLICY_OVERRIDE=1 to override)"
+    fi
+    if [[ "$policy_sig_file_resolved" != "$canonical_policy_sig_file_resolved" ]]; then
+      write_blocker_and_exit "run_rollforward_blocked" "non-canonical policy-sig-file rejected (set RECURSIVE_PROMOTION_ALLOW_POLICY_OVERRIDE=1 to override)"
+    fi
+  fi
   if [[ ! -f "$policy_file" ]]; then
     write_blocker_and_exit "run_rollforward_blocked" "missing reviewer policy file: $policy_file"
   fi
@@ -328,8 +351,11 @@ fi
 
 if [[ "$decision" == "approved" ]]; then
   if ! python3 - "$run_json_path" "$decision_tmp" "$lesson_id" "$expected_version" "$reviewers" <<'PY'
+import fcntl
 import json
+import os
 import sys
+import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -345,8 +371,53 @@ jsonl_path = lessons_dir / "canonical-lessons.jsonl"
 index_path = lessons_dir / "canonical-lesson-index.json"
 lessons_dir.mkdir(parents=True, exist_ok=True)
 
+
 def now_iso():
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+
+
+def load_jsonl_rows(path: Path):
+    rows = []
+    if path.exists():
+        for line in path.read_text(encoding="utf-8").splitlines():
+            line = line.strip()
+            if line:
+                rows.append(json.loads(line))
+    return rows
+
+
+def write_text_atomic(path: Path, payload: str):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp_path = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="w",
+            encoding="utf-8",
+            dir=path.parent,
+            prefix=f".{path.name}.",
+            suffix=".tmp",
+            delete=False,
+        ) as tmp:
+            tmp.write(payload)
+            tmp.flush()
+            os.fsync(tmp.fileno())
+            tmp_path = Path(tmp.name)
+        os.replace(tmp_path, path)
+    finally:
+        if tmp_path and tmp_path.exists():
+            try:
+                tmp_path.unlink()
+            except Exception:
+                pass
+
+
+def write_jsonl_atomic(path: Path, rows):
+    write_text_atomic(path, "".join(json.dumps(row, sort_keys=True) + "\n" for row in rows))
+
+
+def write_json_atomic(path: Path, obj):
+    write_text_atomic(path, json.dumps(obj, indent=2, sort_keys=True) + "\n")
+
 
 run = json.loads(run_path.read_text(encoding="utf-8"))
 decision = json.loads(decision_path.read_text(encoding="utf-8"))
@@ -355,94 +426,89 @@ scope_profile = str(run.get("scope_profile", "")).strip()
 if not scope_skill or not scope_profile:
     raise SystemExit("run missing scope_skill/scope_profile")
 
-entries = []
-if jsonl_path.exists():
-    for line in jsonl_path.read_text(encoding="utf-8").splitlines():
-        line = line.strip()
-        if line:
-            entries.append(json.loads(line))
+lock_path = lessons_dir / ".canonical-lessons.lock"
+with lock_path.open("a+", encoding="utf-8") as lock_file:
+    fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX)
 
-index = {"schema_version": "1.0", "scopes": {}}
-if index_path.exists():
-    index = json.loads(index_path.read_text(encoding="utf-8"))
-    if "scopes" not in index or not isinstance(index["scopes"], dict):
-        index["scopes"] = {}
+    entries = load_jsonl_rows(jsonl_path)
+    index = {"schema_version": "1.0", "scopes": {}}
+    if index_path.exists():
+        index = json.loads(index_path.read_text(encoding="utf-8"))
+        if "scopes" not in index or not isinstance(index["scopes"], dict):
+            index["scopes"] = {}
 
-scope_key = f"{scope_skill}::{scope_profile}"
-scope_state = index["scopes"].get(scope_key, {"current_version": 0, "active_lesson_id": ""})
-current_version = int(scope_state.get("current_version", 0))
-expected_token = f"v{current_version}"
-if expected_version != expected_token:
-    raise SystemExit(f"expected-version mismatch: got {expected_version} expected {expected_token}")
+    scope_key = f"{scope_skill}::{scope_profile}"
+    scope_state = index["scopes"].get(scope_key, {"current_version": 0, "active_lesson_id": ""})
+    current_version = int(scope_state.get("current_version", 0))
+    expected_token = f"v{current_version}"
+    if expected_version != expected_token:
+        raise SystemExit(f"expected-version mismatch: got {expected_version} expected {expected_token}")
 
-for e in entries:
-    if (
-        str(e.get("lesson_id", "")) == lesson_id
-        and str(e.get("status", "")) == "active"
-        and str(e.get("provenance", {}).get("run_id", "")) == str(run.get("run_id", ""))
-    ):
-        decision["lesson_status"] = "active"
-        decision["lesson_effective_to"] = None
-        decision["canonical_version"] = f"v{current_version}"
-        decision_path.write_text(json.dumps(decision, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-        print("idempotent")
-        raise SystemExit(0)
+    for e in entries:
+        if (
+            str(e.get("lesson_id", "")) == lesson_id
+            and str(e.get("status", "")) == "active"
+            and str(e.get("provenance", {}).get("run_id", "")) == str(run.get("run_id", ""))
+        ):
+            decision["lesson_status"] = "active"
+            decision["lesson_effective_to"] = None
+            decision["canonical_version"] = f"v{current_version}"
+            decision_path.write_text(json.dumps(decision, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+            print("idempotent")
+            raise SystemExit(0)
 
-ts = now_iso()
-new_version = current_version + 1
-for e in entries:
-    if (
-        str(e.get("scope_skill", "")) == scope_skill
-        and str(e.get("scope_profile", "")) == scope_profile
-        and str(e.get("status", "")) == "active"
-        and not e.get("effective_to")
-    ):
-        e["status"] = "superseded"
-        e["effective_to"] = ts
-        e["superseded_by_lesson_id"] = lesson_id
+    ts = now_iso()
+    new_version = current_version + 1
+    for e in entries:
+        if (
+            str(e.get("scope_skill", "")) == scope_skill
+            and str(e.get("scope_profile", "")) == scope_profile
+            and str(e.get("status", "")) == "active"
+            and not e.get("effective_to")
+        ):
+            e["status"] = "superseded"
+            e["effective_to"] = ts
+            e["superseded_by_lesson_id"] = lesson_id
 
-new_entry = {
-    "schema_version": "1.0",
-    "lesson_id": lesson_id,
-    "scope_skill": scope_skill,
-    "scope_profile": scope_profile,
-    "status": "active",
-    "effective_from": ts,
-    "effective_to": None,
-    "supersedes_lesson_id": scope_state.get("active_lesson_id") or None,
-    "superseded_by_lesson_id": None,
-    "confidence": 0.75,
-    "version": f"v{new_version}",
-    "provenance": {
-        "run_id": run.get("run_id"),
-        "iteration_ids": decision.get("provenance", {}).get("iteration_ids", []),
-        "prompt_hash": run.get("prompt_hash"),
-        "rubric_version": run.get("versions", {}).get("rubric_version"),
-        "evaluator_version": run.get("versions", {}).get("evaluator_version"),
-    },
-    "review": {
-        "reviewer_ids": reviewers,
-        "decision": "approved",
-        "security_checklist_passed": True,
-    },
-}
-entries.append(new_entry)
+    new_entry = {
+        "schema_version": "1.0",
+        "lesson_id": lesson_id,
+        "scope_skill": scope_skill,
+        "scope_profile": scope_profile,
+        "status": "active",
+        "effective_from": ts,
+        "effective_to": None,
+        "supersedes_lesson_id": scope_state.get("active_lesson_id") or None,
+        "superseded_by_lesson_id": None,
+        "confidence": 0.75,
+        "version": f"v{new_version}",
+        "provenance": {
+            "run_id": run.get("run_id"),
+            "iteration_ids": decision.get("provenance", {}).get("iteration_ids", []),
+            "prompt_hash": run.get("prompt_hash"),
+            "rubric_version": run.get("versions", {}).get("rubric_version"),
+            "evaluator_version": run.get("versions", {}).get("evaluator_version"),
+        },
+        "review": {
+            "reviewer_ids": reviewers,
+            "decision": "approved",
+            "security_checklist_passed": True,
+        },
+    }
+    entries.append(new_entry)
 
-jsonl_path.write_text(
-    "".join(json.dumps(row, sort_keys=True) + "\n" for row in entries),
-    encoding="utf-8",
-)
-scope_state["current_version"] = new_version
-scope_state["active_lesson_id"] = lesson_id
-scope_state["updated_at"] = ts
-index["scopes"][scope_key] = scope_state
-index_path.write_text(json.dumps(index, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    write_jsonl_atomic(jsonl_path, entries)
+    scope_state["current_version"] = new_version
+    scope_state["active_lesson_id"] = lesson_id
+    scope_state["updated_at"] = ts
+    index["scopes"][scope_key] = scope_state
+    write_json_atomic(index_path, index)
 
-decision["lesson_status"] = "active"
-decision["lesson_effective_to"] = None
-decision["canonical_version"] = f"v{new_version}"
-decision_path.write_text(json.dumps(decision, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-print("updated")
+    decision["lesson_status"] = "active"
+    decision["lesson_effective_to"] = None
+    decision["canonical_version"] = f"v{new_version}"
+    decision_path.write_text(json.dumps(decision, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    print("updated")
 PY
   then
     write_blocker_and_exit "run_rollforward_blocked" "canonical lesson persistence failed (CAS/policy/index conflict)"

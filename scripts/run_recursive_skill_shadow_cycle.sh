@@ -7,6 +7,7 @@ cd "$repo_root"
 runs_per_profile=2
 window_days=7
 out_root="artifacts/skill-graphs/runs"
+profiles_file="docs/skill-graphs/schemas/examples/pilot-profiles.json"
 
 while (($# > 0)); do
   case "$1" in
@@ -22,6 +23,10 @@ while (($# > 0)); do
       out_root="$2"
       shift 2
       ;;
+    --profiles-file)
+      profiles_file="$2"
+      shift 2
+      ;;
     --help|-h)
       cat <<'USAGE'
 Usage: scripts/run_recursive_skill_shadow_cycle.sh [options]
@@ -30,6 +35,7 @@ Options:
   --runs-per-profile N   Number of loop runs per pilot profile (default: 2)
   --window-days N        Window size for report aggregation (default: 7)
   --out-root PATH        Output root for run artifacts (default: artifacts/skill-graphs/runs)
+  --profiles-file PATH   JSON array of pilot profile ids (default: docs/skill-graphs/schemas/examples/pilot-profiles.json)
 USAGE
       exit 0
       ;;
@@ -40,12 +46,35 @@ USAGE
   esac
 done
 
-profiles=(
-  "ui-ux-creative-coding"
-  "interface-craft"
-  "frontend-ui-design"
-  "react-ui-patterns"
+if [[ ! -f "$profiles_file" ]]; then
+  echo "[shadow-cycle] missing profiles file: $profiles_file" >&2
+  exit 2
+fi
+
+profiles=()
+while IFS= read -r profile; do
+  [[ -z "$profile" ]] && continue
+  profiles+=("$profile")
+done < <(python3 - "$profiles_file" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+path = Path(sys.argv[1])
+data = json.loads(path.read_text(encoding="utf-8"))
+if not isinstance(data, list) or not data:
+    raise SystemExit("profiles file must be a non-empty JSON array")
+for item in data:
+    value = str(item).strip()
+    if value:
+        print(value)
+PY
 )
+
+if [[ ${#profiles[@]} -eq 0 ]]; then
+  echo "[shadow-cycle] no profiles found in $profiles_file" >&2
+  exit 2
+fi
 
 example_profile="docs/skill-graphs/schemas/examples/ui-skills-profile.example.json"
 loop_script="utilities/skill-creator/scripts/recursive_skill_loop.py"
@@ -53,6 +82,7 @@ report_script="utilities/skill-creator/scripts/build_recursive_skill_shadow_repo
 
 echo "[shadow-cycle] runs_per_profile=${runs_per_profile}"
 echo "[shadow-cycle] window_days=${window_days}"
+echo "[shadow-cycle] profiles_file=${profiles_file}"
 
 tmp_dir="$(mktemp -d)"
 cleanup() {
@@ -95,6 +125,7 @@ done
 python3 "$report_script" \
   --runs-root "$out_root" \
   --window-days "$window_days" \
+  --pilot-profiles-file "$profiles_file" \
   --shadow-md "docs/skill-graphs/pilots/ui-skills-shadow-results.md" \
   --readout-md "docs/skill-graphs/pilots/ui-skills-pilot-readout.md" \
   --out-json "artifacts/skill-graphs/pilot/shadow-dashboard.json"

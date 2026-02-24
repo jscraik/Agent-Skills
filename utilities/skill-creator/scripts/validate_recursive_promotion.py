@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import re
 import sys
 from hashlib import sha256
@@ -13,6 +14,8 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Set
 
 ALLOWED_DECISIONS = {"draft", "candidate", "approved", "rejected"}
+DEFAULT_POLICY_FILE = "docs/skill-graphs/governance/recursive-loop-approvers.yaml"
+DEFAULT_POLICY_SIG_FILE = "docs/skill-graphs/governance/recursive-loop-approvers.sig"
 SECRET_PATTERNS = [
     re.compile(r"sk-[A-Za-z0-9]{20,}"),
     re.compile(r"ghp_[A-Za-z0-9]{30,}"),
@@ -39,12 +42,12 @@ def parse_args() -> argparse.Namespace:
     )
     p.add_argument(
         "--policy-file",
-        default="docs/skill-graphs/governance/recursive-loop-approvers.yaml",
+        default=DEFAULT_POLICY_FILE,
         help="Reviewer policy file (JSON content in .yaml path is supported)",
     )
     p.add_argument(
         "--policy-sig-file",
-        default="docs/skill-graphs/governance/recursive-loop-approvers.sig",
+        default=DEFAULT_POLICY_SIG_FILE,
         help="Policy signature file containing sha256(policy file)",
     )
     p.add_argument("--write-report", help="Optional JSON output path for validation report")
@@ -236,6 +239,19 @@ def validate(args: argparse.Namespace) -> Dict[str, Any]:
         else:
             policy_file = Path(args.policy_file).expanduser().resolve()
             sig_file = Path(args.policy_sig_file).expanduser().resolve()
+            allow_policy_override = os.environ.get("RECURSIVE_PROMOTION_ALLOW_POLICY_OVERRIDE", "").strip().lower() in {
+                "1",
+                "true",
+                "yes",
+                "on",
+            }
+            canonical_policy = (repo_root / DEFAULT_POLICY_FILE).resolve()
+            canonical_policy_sig = (repo_root / DEFAULT_POLICY_SIG_FILE).resolve()
+            if not allow_policy_override:
+                if policy_file != canonical_policy:
+                    errors.append(f"non-canonical policy-file not allowed: {policy_file}")
+                if sig_file != canonical_policy_sig:
+                    errors.append(f"non-canonical policy-sig-file not allowed: {sig_file}")
             if not policy_file.exists():
                 errors.append(f"reviewer policy file missing: {policy_file}")
             elif not sig_file.exists():
@@ -359,9 +375,9 @@ def validate(args: argparse.Namespace) -> Dict[str, Any]:
                 if e.get("event_type") == "promotion_approved" and e.get("run_id") == run_id
             ]
             if not promotion_events:
-                warnings.append("promotion_approved event missing in run/events.jsonl")
+                errors.append("promotion_approved event missing in run/events.jsonl")
         else:
-            warnings.append("run/events.jsonl missing")
+            errors.append("run/events.jsonl missing")
 
         lesson_file = resolve_lesson_file(
             args=args,
