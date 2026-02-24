@@ -14,9 +14,9 @@ Outputs:
 """
 
 import os
-import sys
 import re
 import json
+import argparse
 from pathlib import Path
 from collections import defaultdict
 from typing import Optional, Dict, List, Any
@@ -473,23 +473,23 @@ class SEOAnalyzer:
 
 
 def main():
-    if len(sys.argv) < 2:
-        print("Usage: python analyze_seo.py <project-path>")
-        print("\nAnalyzes a web project for SEO issues and opportunities.")
-        sys.exit(1)
+    parser = argparse.ArgumentParser(
+        description="Analyze a web project for SEO issues and opportunities."
+    )
+    parser.add_argument("project_path", help="Path to the web project")
+    parser.add_argument("--json", action="store_true", dest="emit_json", help="Print JSON findings")
+    args = parser.parse_args()
 
-    project_path = sys.argv[1]
-
+    project_path = args.project_path
     if not os.path.isdir(project_path):
-        print(f"Error: '{project_path}' is not a valid directory")
-        sys.exit(1)
+        parser.error(f"'{project_path}' is not a valid directory")
 
     analyzer = SEOAnalyzer(project_path)
     analyzer.analyze()
     analyzer.print_report()
 
     # Optionally output JSON
-    if "--json" in sys.argv:
+    if args.emit_json:
         print("\n" + "-" * 40)
         print("JSON OUTPUT")
         print("-" * 40)

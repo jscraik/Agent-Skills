@@ -15,8 +15,8 @@ Outputs:
 """
 
 import os
-import sys
 import re
+import argparse
 from pathlib import Path
 from datetime import datetime
 from typing import List, Dict, Optional
@@ -275,40 +275,20 @@ class SitemapGenerator:
 
 
 def main():
-    if len(sys.argv) < 2:
-        print("Usage: python generate_sitemap.py <project-path> --domain https://example.com")
-        print("\nGenerates sitemap.xml from project routes.")
-        print("\nOptions:")
-        print("  --domain    Required. The domain for URLs in the sitemap.")
-        print("  --output    Output path (default: sitemap.xml in project)")
-        sys.exit(1)
+    parser = argparse.ArgumentParser(
+        description="Generate sitemap.xml from project routes."
+    )
+    parser.add_argument("project_path", help="Path to the web project")
+    parser.add_argument("--domain", required=True, help="Domain prefix for sitemap URLs (e.g. https://example.com)")
+    parser.add_argument("--output", help="Output file path (default: <project>/sitemap.xml)")
+    args = parser.parse_args()
 
-    project_path = sys.argv[1]
-
+    project_path = args.project_path
     if not os.path.isdir(project_path):
-        print(f"Error: '{project_path}' is not a valid directory")
-        sys.exit(1)
+        parser.error(f"'{project_path}' is not a valid directory")
 
-    # Parse domain
-    domain = None
-    output_path = None
-
-    args = sys.argv[2:]
-    i = 0
-    while i < len(args):
-        if args[i] == "--domain" and i + 1 < len(args):
-            domain = args[i + 1]
-            i += 2
-        elif args[i] == "--output" and i + 1 < len(args):
-            output_path = args[i + 1]
-            i += 2
-        else:
-            i += 1
-
-    if not domain:
-        print("Error: --domain is required")
-        print("Example: python generate_sitemap.py ./project --domain https://example.com")
-        sys.exit(1)
+    domain = args.domain
+    output_path = args.output
 
     generator = SitemapGenerator(project_path, domain)
     xml_content = generator.generate()

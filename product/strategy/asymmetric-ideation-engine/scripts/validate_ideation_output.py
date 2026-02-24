@@ -8,7 +8,7 @@ Usage:
 from __future__ import annotations
 
 import re
-import sys
+import argparse
 from pathlib import Path
 
 REQUIRED_FIELDS = [
@@ -26,10 +26,13 @@ def fail(msg: str) -> int:
 
 
 def main() -> int:
-    if len(sys.argv) != 2:
-        return fail("provide one markdown file path")
+    parser = argparse.ArgumentParser(
+        description="Validate asymmetric ideation markdown output for required structure."
+    )
+    parser.add_argument("ideas_markdown", help="Path to ideas markdown file")
+    args = parser.parse_args()
 
-    path = Path(sys.argv[1])
+    path = Path(args.ideas_markdown)
     if not path.exists():
         return fail(f"file not found: {path}")
 

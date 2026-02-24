@@ -9,10 +9,9 @@ Output:
     analysis.json with routes, brand colors, fonts, logo paths, and page categorization
 """
 
-import os
-import sys
 import json
 import re
+import argparse
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
@@ -49,35 +48,66 @@ def find_nextjs_routes(project_path: Path) -> List[Dict]:
     # App router
     app_dir = project_path / "app"
     if app_dir.exists():
-        for page_file in app_dir.rglob("page.{tsx,ts,jsx,js}"):
-            route_path = page_file.parent.relative_to(app_dir)
-            route_str = "/" + str(route_path).replace("\\", "/")
+        for ext in ("tsx", "ts", "jsx", "js"):
+            for page_file in app_dir.rglob(f"page.{ext}"):
+                route_path = page_file.parent.relative_to(app_dir)
+                route_str = "/" + str(route_path).replace("\\", "/")
 
-            # Clean up route groups and handle root
-            route_str = re.sub(r'/\([^)]+\)', '', route_str)
-            route_str = re.sub(r'/+', '/', route_str)
-            if route_str == "/.":
-                route_str = "/"
+                # Clean up route groups and handle root
+                route_str = re.sub(r'/\([^)]+\)', '', route_str)
+                route_str = re.sub(r'/+', '/', route_str)
+                if route_str == "/.":
+                    route_str = "/"
 
-            metadata = extract_metadata_from_file(page_file)
-            page_type = categorize_page(route_str, metadata)
+                metadata = extract_metadata_from_file(page_file)
+                page_type = categorize_page(route_str, metadata)
 
-            routes.append({
-                "path": route_str,
-                "file": str(page_file.relative_to(project_path)),
-                "type": page_type,
-                "metadata": metadata,
-                "router": "app"
-            })
+                routes.append({
+                    "path": route_str,
+                    "file": str(page_file.relative_to(project_path)),
+                    "type": page_type,
+                    "metadata": metadata,
+                    "router": "app"
+                })
 
     # Pages router
     pages_dir = project_path / "pages"
     if pages_dir.exists():
-        for page_file in pages_dir.rglob("*.{tsx,ts,jsx,js}"):
-            # Skip _app, _document, api routes
-            if page_file.name.startswith('_') or 'api' in page_file.parts:
-                continue
+        for ext in ("tsx", "ts", "jsx", "js"):
+            for page_file in pages_dir.rglob(f"*.{ext}"):
+                # Skip _app, _document, api routes
+                if page_file.name.startswith('_') or 'api' in page_file.parts:
+                    continue
 
+                route_path = page_file.relative_to(pages_dir)
+                route_str = "/" + str(route_path.with_suffix('')).replace("\\", "/")
+
+                if route_str.endswith("/index"):
+                    route_str = route_str[:-6] or "/"
+
+                metadata = extract_metadata_from_file(page_file)
+                page_type = categorize_page(route_str, metadata)
+
+                routes.append({
+                    "path": route_str,
+                    "file": str(page_file.relative_to(project_path)),
+                    "type": page_type,
+                    "metadata": metadata,
+                    "router": "pages"
+                })
+
+    return routes
+
+def find_astro_routes(project_path: Path) -> List[Dict]:
+    """Find routes in an Astro project."""
+    routes = []
+    pages_dir = project_path / "src" / "pages"
+
+    if not pages_dir.exists():
+        return routes
+
+    for ext in ("astro", "md", "mdx"):
+        for page_file in pages_dir.rglob(f"*.{ext}"):
             route_path = page_file.relative_to(pages_dir)
             route_str = "/" + str(route_path.with_suffix('')).replace("\\", "/")
 
@@ -92,36 +122,8 @@ def find_nextjs_routes(project_path: Path) -> List[Dict]:
                 "file": str(page_file.relative_to(project_path)),
                 "type": page_type,
                 "metadata": metadata,
-                "router": "pages"
+                "framework": "astro"
             })
-
-    return routes
-
-def find_astro_routes(project_path: Path) -> List[Dict]:
-    """Find routes in an Astro project."""
-    routes = []
-    pages_dir = project_path / "src" / "pages"
-
-    if not pages_dir.exists():
-        return routes
-
-    for page_file in pages_dir.rglob("*.{astro,md,mdx}"):
-        route_path = page_file.relative_to(pages_dir)
-        route_str = "/" + str(route_path.with_suffix('')).replace("\\", "/")
-
-        if route_str.endswith("/index"):
-            route_str = route_str[:-6] or "/"
-
-        metadata = extract_metadata_from_file(page_file)
-        page_type = categorize_page(route_str, metadata)
-
-        routes.append({
-            "path": route_str,
-            "file": str(page_file.relative_to(project_path)),
-            "type": page_type,
-            "metadata": metadata,
-            "framework": "astro"
-        })
 
     return routes
 
@@ -134,20 +136,21 @@ def find_react_routes(project_path: Path) -> List[Dict]:
     if not src_dir.exists():
         return routes
 
-    for file_path in src_dir.rglob("*.{tsx,ts,jsx,js}"):
-        content = file_path.read_text(errors='ignore')
+    for ext in ("tsx", "ts", "jsx", "js"):
+        for file_path in src_dir.rglob(f"*.{ext}"):
+            content = file_path.read_text(errors='ignore')
 
-        # Look for react-router Route definitions
-        route_matches = re.findall(r'<Route\s+path=["\']([^"\']+)["\']', content)
-        for route_path in route_matches:
-            if route_path and not route_path.startswith(':'):
-                routes.append({
-                    "path": route_path,
-                    "file": str(file_path.relative_to(project_path)),
-                    "type": categorize_page(route_path, {}),
-                    "metadata": {},
-                    "framework": "react-router"
-                })
+            # Look for react-router Route definitions
+            route_matches = re.findall(r'<Route\s+path=["\']([^"\']+)["\']', content)
+            for route_path in route_matches:
+                if route_path and not route_path.startswith(':'):
+                    routes.append({
+                        "path": route_path,
+                        "file": str(file_path.relative_to(project_path)),
+                        "type": categorize_page(route_path, {}),
+                        "metadata": {},
+                        "framework": "react-router"
+                    })
 
     # Deduplicate
     seen = set()
@@ -365,11 +368,16 @@ def analyze_codebase(project_path: Path) -> Dict:
     }
 
 def main():
-    project_path = Path(sys.argv[1] if len(sys.argv) > 1 else ".")
+    parser = argparse.ArgumentParser(
+        description="Analyze a codebase to discover routes and brand metadata for OG image generation."
+    )
+    parser.add_argument("project_path", nargs="?", default=".", help="Path to project root (default: .)")
+    args = parser.parse_args()
+
+    project_path = Path(args.project_path)
 
     if not project_path.exists():
-        print(f"Error: Path {project_path} does not exist")
-        sys.exit(1)
+        parser.error(f"Path does not exist: {project_path}")
 
     print(f"Analyzing codebase at: {project_path.resolve()}")
     print("-" * 50)
