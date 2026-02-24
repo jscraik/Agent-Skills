@@ -15,26 +15,25 @@ validate() {
   fi
 }
 
-# Validate any existing findings.json files
-if command -v fd >/dev/null 2>&1; then
-  mapfile -t findings < <(fd -t f 'findings.json' "$ROOT/runs")
-else
-  mapfile -t findings < <(find "$ROOT/runs" -type f -name 'findings.json')
-fi
+find_files() {
+  local name="$1"
+  if command -v fd >/dev/null 2>&1; then
+    fd -t f "$name" "$ROOT/runs"
+  else
+    find "$ROOT/runs" -type f -name "$name"
+  fi
+}
 
-for f in "${findings[@]:-}"; do
+# Validate any existing findings.json files
+while IFS= read -r f; do
+  [[ -n "$f" ]] || continue
   validate "$ROOT/schemas/findings.schema.json" "$f"
-done
+done < <(find_files 'findings.json')
 
 # Validate any existing manifest.json files
-if command -v fd >/dev/null 2>&1; then
-  mapfile -t manifests < <(fd -t f 'manifest.json' "$ROOT/runs")
-else
-  mapfile -t manifests < <(find "$ROOT/runs" -type f -name 'manifest.json')
-fi
-
-for f in "${manifests[@]:-}"; do
+while IFS= read -r f; do
+  [[ -n "$f" ]] || continue
   validate "$ROOT/schemas/manifest.schema.json" "$f"
-done
+done < <(find_files 'manifest.json')
 
 echo "CI checks complete."

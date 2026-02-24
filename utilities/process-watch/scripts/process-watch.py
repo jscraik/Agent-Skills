@@ -13,13 +13,21 @@ import time
 from datetime import datetime
 from typing import Optional
 
-import psutil
-import typer
-from rich.console import Console
-from rich.live import Live
-from rich.panel import Panel
-from rich.table import Table
-from rich.text import Text
+try:
+    import psutil
+    import typer
+    from rich.console import Console
+    from rich.live import Live
+    from rich.panel import Panel
+    from rich.table import Table
+    from rich.text import Text
+except ModuleNotFoundError as exc:  # pragma: no cover - environment-dependent
+    missing = exc.name or "unknown"
+    print(
+        f"ERROR: Missing dependency '{missing}'. Install with: python3 -m pip install psutil rich typer",
+        file=sys.stderr,
+    )
+    raise SystemExit(1)
 
 app = typer.Typer(help="Process Watch - monitor system processes, resources, and ports")
 console = Console()

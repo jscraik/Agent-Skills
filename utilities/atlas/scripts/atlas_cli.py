@@ -23,9 +23,10 @@ ROW_SEP = "|||"
 CHROME_EPOCH_OFFSET_SECONDS = 11_644_473_600
 DEFAULT_HISTORY_LIMIT = 200
 DEFAULT_BOOKMARK_LIMIT = 200
+DATACLASS_KWARGS = {"slots": True} if sys.version_info >= (3, 10) else {}
 
 
-@dataclass(slots=True)
+@dataclass(**DATACLASS_KWARGS)
 class Tab:
     title: str
     url: str
@@ -34,7 +35,7 @@ class Tab:
     is_active: bool
 
 
-@dataclass(slots=True)
+@dataclass(**DATACLASS_KWARGS)
 class HistoryRow:
     id: int
     url: str
@@ -42,7 +43,7 @@ class HistoryRow:
     last_visited_at: str
 
 
-@dataclass(slots=True)
+@dataclass(**DATACLASS_KWARGS)
 class Bookmark:
     id: str
     name: str
