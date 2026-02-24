@@ -1,6 +1,29 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+usage() {
+  cat <<'USAGE'
+Usage:
+  scripts/validate_plan_graphs.sh
+
+Runs plan graph lint against .agent/PLANS.md and docs/plans/*.md.
+USAGE
+}
+
+if [[ $# -gt 0 ]]; then
+  case "${1:-}" in
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      echo "Unknown option: $1" >&2
+      usage
+      exit 2
+      ;;
+  esac
+fi
+
 CODEX_HOME="${CODEX_HOME:-$HOME/.codex}"
 LINTER="${PLAN_GRAPH_LINTER:-$CODEX_HOME/scripts/plan-graph-lint.py}"
 
