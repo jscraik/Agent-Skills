@@ -17,22 +17,20 @@ try:
     import psutil
     import typer
     from rich.console import Console
-    from rich.live import Live
     from rich.panel import Panel
     from rich.table import Table
-    from rich.text import Text
 except ModuleNotFoundError as exc:  # pragma: no cover - environment-dependent
     missing = exc.name or "unknown"
     if any(arg in {"-h", "--help"} for arg in sys.argv[1:]):
         print("Process Watch - monitor system processes, resources, and ports")
         print("Requires optional dependencies: psutil, rich, typer")
         print("Install with: python3 -m pip install psutil rich typer")
-        raise SystemExit(0)
+        raise SystemExit(0) from None
     print(
         f"ERROR: Missing dependency '{missing}'. Install with: python3 -m pip install psutil rich typer",
         file=sys.stderr,
     )
-    raise SystemExit(1)
+    raise SystemExit(1) from None
 
 app = typer.Typer(help="Process Watch - monitor system processes, resources, and ports")
 console = Console()
@@ -154,11 +152,11 @@ def list_procs(
         mem_style = "red" if p["mem"] > 10 else "yellow" if p["mem"] > 5 else ""
         table.add_row(
             str(p["pid"]),
-            p["name"][:20],
+            safe_name(p.get("name"))[:20],
             f"[{cpu_style}]{p['cpu']:.1f}[/]",
             f"[{mem_style}]{p['mem']:.1f}[/]",
             format_bytes(p["mem_bytes"]),
-            p["user"][:10],
+            safe_name(p.get("user"))[:10],
             p["cmdline"][:40] if p["cmdline"] else "-",
         )
     
@@ -175,7 +173,7 @@ def top(
     for proc in psutil.process_iter():
         try:
             proc.cpu_percent()
-        except:
+        except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
             pass
     time.sleep(0.2)
     
@@ -228,7 +226,7 @@ def info(pid: int = typer.Argument(..., help="Process ID")):
         proc = psutil.Process(pid)
     except psutil.NoSuchProcess:
         console.print(f"[red]Process {pid} not found[/red]")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from None
     
     try:
         proc.cpu_percent()
@@ -300,7 +298,7 @@ def info(pid: int = typer.Argument(..., help="Process ID")):
                         
     except psutil.AccessDenied:
         console.print(f"[red]Access denied to process {pid}[/red]")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from None
 
 
 @app.command()
@@ -381,7 +379,7 @@ def ports(
         connections = unique
     
     if not connections:
-        msg = f"No connections found"
+        msg = "No connections found"
         if port:
             msg += f" on port {port}"
         console.print(f"[yellow]{msg}[/yellow]")
@@ -421,7 +419,7 @@ def kill(
     """Kill a process by PID or name."""
     if not pid and not name:
         console.print("[red]Provide either a PID or --name[/red]")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from None
     
     sig = signal.SIGKILL if force else signal.SIGTERM
     sig_name = "SIGKILL" if force else "SIGTERM"
@@ -434,10 +432,10 @@ def kill(
             console.print(f"[green]✓ Sent {sig_name} to {pid} ({pname})[/green]")
         except psutil.NoSuchProcess:
             console.print(f"[red]Process {pid} not found[/red]")
-            raise typer.Exit(1)
+            raise typer.Exit(1) from None
         except psutil.AccessDenied:
-            console.print(f"[red]Access denied - try with sudo[/red]")
-            raise typer.Exit(1)
+            console.print("[red]Access denied - try with sudo[/red]")
+            raise typer.Exit(1) from None
     
     if name:
         killed = 0
@@ -498,7 +496,7 @@ def summary():
     for proc in psutil.process_iter(['pid', 'name', 'cpu_percent']):
         try:
             procs.append(proc.info)
-        except:
+        except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
             pass
     procs.sort(key=lambda x: x['cpu_percent'] or 0, reverse=True)
     for p in procs[:5]:
@@ -526,7 +524,7 @@ def watch(
             for proc in psutil.process_iter(['pid', 'name', 'cpu_percent', 'memory_percent']):
                 try:
                     procs.append(proc.info)
-                except:
+                except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
                     pass
             procs.sort(key=lambda x: x['cpu_percent'] or 0, reverse=True)
             
