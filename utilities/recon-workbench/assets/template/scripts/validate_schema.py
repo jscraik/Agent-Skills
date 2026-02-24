@@ -3,11 +3,14 @@ import argparse
 import json
 import sys
 
-try:
-    import jsonschema
-except Exception:
-    sys.stderr.write("ERROR: jsonschema is required. Install with: python3 -m pip install jsonschema\n")
-    sys.exit(2)
+
+def _load_jsonschema():
+    try:
+        import jsonschema  # type: ignore
+    except ModuleNotFoundError:
+        sys.stderr.write("ERROR: jsonschema is required. Install with: python3 -m pip install jsonschema\n")
+        return None
+    return jsonschema
 
 
 def main() -> int:
@@ -15,19 +18,22 @@ def main() -> int:
     parser.add_argument("--schema", required=True, help="Path to schema JSON")
     parser.add_argument("--data", required=True, help="Path to JSON data")
     args = parser.parse_args()
+    jsonschema = _load_jsonschema()
+    if jsonschema is None:
+        return 2
 
     with open(args.schema, "r", encoding="utf-8") as f:
         schema = json.load(f)
     with open(args.data, "r", encoding="utf-8") as f:
         data = json.load(f)
 
-    jsonschema.validate(instance=data, schema=schema)
+    try:
+        jsonschema.validate(instance=data, schema=schema)
+    except jsonschema.ValidationError as e:
+        sys.stderr.write(f"ValidationError: {e.message}\n")
+        return 1
     return 0
 
 
 if __name__ == "__main__":
-    try:
-        raise SystemExit(main())
-    except jsonschema.ValidationError as e:
-        sys.stderr.write(f"ValidationError: {e.message}\n")
-        raise SystemExit(1)
+    raise SystemExit(main())
