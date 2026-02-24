@@ -33,8 +33,6 @@ if [ -d "$skills_dir/.system" ]; then
   if command -v rsync >/dev/null 2>&1; then
     rsync -a "$skills_dir/.system/" "$system_skills_dir/"
     rm -rf "$skills_dir/.system"
-  elif command -v zsh >/dev/null 2>&1; then
-    zsh -c "setopt globdots; rm -rf \"$system_skills_dir\"/*; mv \"$skills_dir/.system\"/* \"$system_skills_dir\"/; rmdir \"$skills_dir/.system\""
   else
     # Fallback: remove target first, then move
     find "$system_skills_dir" -mindepth 1 -maxdepth 1 -exec rm -rf -- {} +
