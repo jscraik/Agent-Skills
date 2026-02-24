@@ -13,10 +13,11 @@ Usage:
     python generate_favicon.py --lucide package-plus --bg "#f97316" --bg2 "#ef4444" --output ./public/
 """
 
+from __future__ import annotations
+
 import argparse
 import colorsys
 import math
-import os
 import struct
 import zlib
 from io import BytesIO
@@ -25,9 +26,13 @@ from typing import Literal
 
 try:
     from PIL import Image, ImageDraw, ImageFilter, ImageFont
+    PIL_AVAILABLE = True
 except ImportError:
-    print("Error: Pillow is required. Install with: pip install Pillow")
-    exit(1)
+    Image = None  # type: ignore[assignment]
+    ImageDraw = None  # type: ignore[assignment]
+    ImageFilter = None  # type: ignore[assignment]
+    ImageFont = None  # type: ignore[assignment]
+    PIL_AVAILABLE = False
 
 # Try to import cairosvg for Lucide icon rendering
 try:
@@ -1077,6 +1082,9 @@ Available icons: """ + ", ".join(LUCIDE_ICONS.keys()) + """
     )
 
     args = parser.parse_args()
+
+    if not PIL_AVAILABLE:
+        parser.error("Pillow is required. Install with: pip install Pillow")
 
     # Validate: must have either --letter or --lucide
     if not args.letter and not args.lucide:

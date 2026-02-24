@@ -3,6 +3,8 @@
 Context7 API client for searching libraries and fetching documentation.
 """
 
+from __future__ import annotations
+
 import argparse
 import json
 import sys

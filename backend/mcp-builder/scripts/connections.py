@@ -2,12 +2,28 @@
 
 from abc import ABC, abstractmethod
 from contextlib import AsyncExitStack
-from typing import Any
+from typing import Any, Optional
 
-from mcp import ClientSession, StdioServerParameters
-from mcp.client.sse import sse_client
-from mcp.client.stdio import stdio_client
-from mcp.client.streamable_http import streamablehttp_client
+try:
+    from mcp import ClientSession, StdioServerParameters
+    from mcp.client.sse import sse_client
+    from mcp.client.stdio import stdio_client
+    from mcp.client.streamable_http import streamablehttp_client
+    MCP_IMPORT_ERROR: Optional[Exception] = None
+except ModuleNotFoundError as exc:
+    ClientSession = None  # type: ignore[assignment]
+    StdioServerParameters = None  # type: ignore[assignment]
+    sse_client = None  # type: ignore[assignment]
+    stdio_client = None  # type: ignore[assignment]
+    streamablehttp_client = None  # type: ignore[assignment]
+    MCP_IMPORT_ERROR = exc
+
+
+def _require_mcp_dependency() -> None:
+    if MCP_IMPORT_ERROR is not None:
+        raise RuntimeError(
+            "Missing optional dependency 'mcp'. Install with: pip install mcp"
+        ) from MCP_IMPORT_ERROR
 
 
 class MCPConnection(ABC):
@@ -23,6 +39,7 @@ class MCPConnection(ABC):
 
     async def __aenter__(self):
         """Initialize MCP server connection."""
+        _require_mcp_dependency()
         self._stack = AsyncExitStack()
         await self._stack.__aenter__()
 
@@ -80,6 +97,7 @@ class MCPConnectionStdio(MCPConnection):
         self.env = env
 
     def _create_context(self):
+        _require_mcp_dependency()
         return stdio_client(
             StdioServerParameters(command=self.command, args=self.args, env=self.env)
         )
@@ -94,6 +112,7 @@ class MCPConnectionSSE(MCPConnection):
         self.headers = headers or {}
 
     def _create_context(self):
+        _require_mcp_dependency()
         return sse_client(url=self.url, headers=self.headers)
 
 
@@ -106,6 +125,7 @@ class MCPConnectionHTTP(MCPConnection):
         self.headers = headers or {}
 
     def _create_context(self):
+        _require_mcp_dependency()
         return streamablehttp_client(url=self.url, headers=self.headers)
 
 

@@ -3,6 +3,8 @@
 This script evaluates MCP servers by running test questions against them using Claude.
 """
 
+from __future__ import annotations
+
 import argparse
 import asyncio
 import json
@@ -13,10 +15,6 @@ import traceback
 import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Any
-
-from anthropic import Anthropic
-
-from connections import create_connection
 
 EVALUATION_PROMPT = """You are an AI assistant with access to tools.
 
@@ -84,7 +82,7 @@ def extract_xml_content(text: str, tag: str) -> str | None:
 
 
 async def agent_loop(
-    client: Anthropic,
+    client: Any,
     model: str,
     question: str,
     tools: list[dict[str, Any]],
@@ -152,7 +150,7 @@ async def agent_loop(
 
 
 async def evaluate_single_task(
-    client: Anthropic,
+    client: Any,
     model: str,
     qa_pair: dict[str, Any],
     tools: list[dict[str, Any]],
@@ -225,7 +223,8 @@ async def run_evaluation(
     """Run evaluation with MCP server tools."""
     print("🚀 Starting Evaluation")
 
-    client = Anthropic()
+    anthropic_cls = _load_anthropic_client()
+    client = anthropic_cls()
 
     tools = await connection.list_tools()
     print(f"📋 Loaded {len(tools)} tools from MCP server")
@@ -302,6 +301,26 @@ def parse_env_vars(env_list: list[str]) -> dict[str, str]:
     return env
 
 
+def _load_anthropic_client():
+    try:
+        from anthropic import Anthropic
+    except ModuleNotFoundError as exc:
+        raise RuntimeError(
+            "Missing optional dependency 'anthropic'. Install with: pip install anthropic"
+        ) from exc
+    return Anthropic
+
+
+def _load_create_connection():
+    try:
+        from connections import create_connection
+    except ModuleNotFoundError as exc:
+        raise RuntimeError(
+            "Missing optional dependency required by connections.py. Install with: pip install mcp"
+        ) from exc
+    return create_connection
+
+
 async def main():
     parser = argparse.ArgumentParser(
         description="Evaluate MCP servers using test questions",
@@ -344,6 +363,7 @@ Examples:
     env_vars = parse_env_vars(args.env) if args.env else None
 
     try:
+        create_connection = _load_create_connection()
         connection = create_connection(
             transport=args.transport,
             command=args.command,
@@ -352,7 +372,7 @@ Examples:
             url=args.url,
             headers=headers,
         )
-    except ValueError as e:
+    except (ValueError, RuntimeError) as e:
         print(f"Error: {e}")
         sys.exit(1)
 

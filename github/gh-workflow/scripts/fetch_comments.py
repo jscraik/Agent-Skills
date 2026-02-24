@@ -15,6 +15,7 @@ Usage:
 
 from __future__ import annotations
 
+import argparse
 import json
 import subprocess
 import sys
@@ -226,12 +227,43 @@ def fetch_all(owner: str, repo: str, number: int) -> dict[str, Any]:
     }
 
 
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Fetch PR conversation comments, reviews, and review threads via gh GraphQL."
+    )
+    parser.add_argument("--owner", help="GitHub repository owner")
+    parser.add_argument("--repo", help="GitHub repository name")
+    parser.add_argument("--number", type=int, help="Pull request number")
+    args = parser.parse_args()
+
+    specified = [args.owner, args.repo, args.number]
+    if any(v is not None for v in specified) and not all(v is not None for v in specified):
+        parser.error("--owner, --repo, and --number must be provided together")
+    return args
+
+
 def main() -> None:
+    args = parse_args()
     _ensure_gh_authenticated()
-    owner, repo, number = get_current_pr_ref()
+
+    if args.owner and args.repo and args.number is not None:
+        owner, repo, number = args.owner, args.repo, args.number
+    else:
+        try:
+            owner, repo, number = get_current_pr_ref()
+        except RuntimeError as exc:
+            raise RuntimeError(
+                f"{exc}\nNo PR associated with current branch. "
+                "Pass --owner --repo --number explicitly."
+            ) from exc
+
     result = fetch_all(owner, repo, number)
     print(json.dumps(result, indent=2))
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except RuntimeError as exc:
+        print(str(exc), file=sys.stderr)
+        raise SystemExit(1) from exc

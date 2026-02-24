@@ -16,13 +16,11 @@ Output:
     OG images in public/og/ directory
 """
 
-import os
-import sys
+import argparse
 import json
 import asyncio
 from pathlib import Path
-from typing import Dict, List, Optional
-from playwright.async_api import async_playwright
+from typing import Any, Dict
 
 # OG image standard dimensions
 OG_WIDTH = 1200
@@ -225,6 +223,7 @@ def is_dark_color(hex_color: str) -> bool:
 async def generate_og_image(html: str, output_path: Path):
     """Generate OG image from HTML using Playwright."""
 
+    async_playwright = _load_playwright()
     async with async_playwright() as p:
         browser = await p.chromium.launch()
         page = await browser.new_page(viewport={'width': OG_WIDTH, 'height': OG_HEIGHT})
@@ -275,18 +274,32 @@ async def generate_all_images(project_path: Path, analysis: Dict):
     print("-" * 50)
     print(f"Generated {len(routes)} OG images in {og_dir.relative_to(project_path)}")
 
+def _load_playwright() -> Any:
+    try:
+        from playwright.async_api import async_playwright
+    except ModuleNotFoundError as exc:
+        raise RuntimeError(
+            "Playwright is required. Install with: pip install playwright && playwright install chromium"
+        ) from exc
+    return async_playwright
+
+
 def main():
-    project_path = Path(sys.argv[1] if len(sys.argv) > 1 else ".")
+    parser = argparse.ArgumentParser(
+        description="Generate OG images for routes using og-analysis.json."
+    )
+    parser.add_argument("project_path", nargs="?", default=".", help="Project path containing og-analysis.json")
+    args = parser.parse_args()
+
+    project_path = Path(args.project_path)
 
     if not project_path.exists():
-        print(f"Error: Path {project_path} does not exist")
-        sys.exit(1)
+        parser.error(f"Path does not exist: {project_path}")
 
     # Load analysis
     analysis_file = project_path / "og-analysis.json"
     if not analysis_file.exists():
-        print(f"Error: {analysis_file} not found. Run analyze_codebase.py first.")
-        sys.exit(1)
+        parser.error(f"{analysis_file} not found. Run analyze_codebase.py first.")
 
     with open(analysis_file, 'r') as f:
         analysis = json.load(f)
@@ -297,7 +310,11 @@ def main():
     print()
 
     # Generate images
-    asyncio.run(generate_all_images(project_path, analysis))
+    try:
+        _load_playwright()
+        asyncio.run(generate_all_images(project_path, analysis))
+    except RuntimeError as exc:
+        parser.error(str(exc))
 
     # Print next steps
     print("\nNext steps:")
