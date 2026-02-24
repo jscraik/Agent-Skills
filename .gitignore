@@ -9,6 +9,7 @@
 .kiro/
 .narrative/
 .skillsctl/
+.codex/
 
 # Python/build artifacts
 **/__pycache__/
