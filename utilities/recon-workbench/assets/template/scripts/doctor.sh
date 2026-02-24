@@ -14,15 +14,24 @@ Options:
 EOF
 }
 
-if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
-  usage
-  exit 0
-fi
-
 emit_json="0"
-if [[ "${1:-}" == "--json" ]]; then
-  emit_json="1"
-fi
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --json)
+      emit_json="1"
+      shift
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      echo "Unknown option: $1" >&2
+      usage
+      exit 2
+      ;;
+  esac
+done
 
 tools=(
   "rg"
@@ -57,6 +66,16 @@ tool_version() {
   echo ""
 }
 
+json_escape() {
+  local s="$1"
+  s="${s//\\/\\\\}"
+  s="${s//\"/\\\"}"
+  s="${s//$'\n'/\\n}"
+  s="${s//$'\r'/\\r}"
+  s="${s//$'\t'/\\t}"
+  printf '%s' "$s"
+}
+
 if [[ "$emit_json" == "1" ]]; then
   printf '{ "tools": ['
   first=1
@@ -75,7 +94,10 @@ if [[ "$emit_json" == "1" ]]; then
       printf ', '
     fi
     first=0
-    printf '{ "name": "%s", "status": "%s", "version": "%s" }' "$t" "$status" "$version"
+    printf '{ "name": "%s", "status": "%s", "version": "%s" }' \
+      "$(json_escape "$t")" \
+      "$(json_escape "$status")" \
+      "$(json_escape "$version")"
   done
   printf ' ] }\n'
   exit 0

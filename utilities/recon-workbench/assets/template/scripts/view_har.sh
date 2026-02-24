@@ -44,7 +44,15 @@ if [[ ! -f "$HAR" ]]; then
 fi
 
 if [[ "$REVEAL" == "1" ]]; then
-  open -R "$HAR"
+  if command -v open >/dev/null 2>&1; then
+    open -R "$HAR"
+  elif command -v xdg-open >/dev/null 2>&1; then
+    xdg-open "$(dirname "$HAR")"
+  elif command -v explorer.exe >/dev/null 2>&1; then
+    explorer.exe "/select,$HAR"
+  else
+    echo "No file explorer command found. HAR path: $HAR"
+  fi
   exit 0
 fi
 
