@@ -87,6 +87,7 @@ Use the failure-mode template verbatim for out-of-scope requests.
 - Target repo root path.
 - Existing `CLAUDE.md` files by scope (home, parent, repo root, child directories).
 - Verified commands and paths from the repo (README, docs, config files).
+- Package-manager signals from repo facts (`package.json#packageManager`, lockfiles, and existing command style in README/CI/docs).
 - Code style and workflow rules that differ from language defaults.
 - Any adjacent instruction files that may conflict (AGENTS.md, docs, team runbooks).
 - Preference for shared (`CLAUDE.md`) vs local-only (`CLAUDE.local.md`) instructions.
@@ -102,6 +103,7 @@ Use the failure-mode template verbatim for out-of-scope requests.
 - A "flag for deletion" list (redundant, vague, volatile, obvious).
 - Optional `@path` import block for deeper docs.
 - Optional guidance on instruction-file structure (for domain-specific splits in larger repos).
+- A detected package-manager command map (`install`, `run`, optional `exec`) derived from repo evidence and reused across generated guidance.
 - Output contract schema_version: 1
 
 ## Constraints
@@ -111,6 +113,7 @@ Use the failure-mode template verbatim for out-of-scope requests.
 - Do not add dependencies or tools.
 - Do not add legacy shims, adapter layers, dual-write paths, or backwards-compatibility promises unless the user explicitly requires compatibility.
 - Keep always-on files concise; move occasional or domain-specific workflows to skills.
+- Do not hardcode npm/pnpm/yarn/bun command examples without repo evidence.
 
 ## Workflow
 
@@ -124,6 +127,9 @@ Use the failure-mode template verbatim for out-of-scope requests.
 - Read instruction files in precedence order before drafting changes.
 - Read README and `docs/` for real commands and structure.
 - Inspect config files (for example `package.json`, `pyproject.toml`, `Makefile`).
+- Detect package manager in this precedence: `package.json#packageManager` -> lockfiles (`pnpm-lock.yaml`, `yarn.lock`, `bun.lockb`/`bun.lock`, `package-lock.json`, `npm-shrinkwrap.json`) -> existing command style in README/CI/docs.
+- If package-manager signals conflict or are missing, state "not observed" and ask which command style should be used before emitting manager-specific commands.
+- Build one package-manager command map from detected evidence and apply it consistently across generated CLAUDE/AGENTS/GEMINI updates.
 - If commit conventions are not visible, state "not observed."
 - If existing `CLAUDE.md`, `CLAUDE.local.md`, `AGENTS.md`, or required instruction directories already exist, merge instead of overwrite.
 - Apply **idempotent updates**: keep existing sections, append only missing required content, and dedupe duplicate bullets/anchors.
@@ -173,11 +179,36 @@ Use the failure-mode template verbatim for out-of-scope requests.
 
 - One-sentence project context
 - Bash command defaults (non-obvious, repo-specific)
+- Repo-native package-manager command map (`install`, `run`, optional `exec`) when Node tooling exists
 - Code style deviations from defaults
 - Workflow/testing preferences
 - Git/PR etiquette
 - Architecture decisions that impact most tasks
 - Imports/references for deep docs (optional, verified paths only)
+
+## Flaky Test Artifact Capture (injectable block, conditional)
+
+When repos have automated tests, CLAUDE.md should include a compact flaky-artifact block aligned with canonical AGENTS guidance.
+
+Injection rule:
+- Inject when user asks for flaky test workflows, artifact capture, or detector automation.
+- Inject when repo facts show tests (`test` scripts, `pytest`, `vitest`, `playwright`, `jest`, `cargo test`, or `tests/`) **and** the repo already contains `scripts/test-with-artifacts.sh` (or an equivalent artifact-capture script you can verify on disk).
+- Skip if repo has no test evidence.
+
+Required content to include (or reference from AGENTS):
+- Verified artifact-capture script path (canonical default: `scripts/test-with-artifacts.sh`) with modes `all|unit|integration|e2e`
+- Stable artifact root `artifacts/test`
+- Stable outputs: `summary-*.json`, `test-output-*.log`, `junit-*.xml`, `*-results.json`, `artifact-manifest.json`
+- Package scripts (if `package.json` exists and script keys are present): `test:artifacts*`
+
+Insert this section in CLAUDE.md for test repos:
+
+```md
+## Flaky Test Artifact Capture
+- Run the verified artifact-capture script in `all` mode (or the detected repo-native command for `test:artifacts`) to emit machine-readable flaky evidence under `artifacts/test`.
+- Optional targeted modes: `unit`, `integration`, `e2e`.
+- Preserve stable artifact filenames so recurring flaky scans can compare runs.
+```
 
 ## Claude loading behavior (authoring guidance)
 
@@ -224,6 +255,7 @@ Use the failure-mode template verbatim for out-of-scope requests.
 - Introducing non-required sections without confirming they are universally needed.
 - Generating extra legacy-preservation code paths without explicit compatibility requirements.
 - Replacing existing instruction files/directories with full rewrites when a scoped merge would preserve intent.
+- Mixing npm/pnpm/yarn/bun command examples in one output block or defaulting to npm without repository evidence.
 
 ## Example prompts that should trigger this skill
 

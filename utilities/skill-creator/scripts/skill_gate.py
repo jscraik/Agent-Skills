@@ -904,6 +904,16 @@ def check_security_eval_coverage(skill_dir: Path, *, require_security_evals: boo
     )
     risky_commands = ("rm -rf", "curl", "wget", "netcat", "nc", "powershell", "invoke-webrequest")
 
+    def _contains_risky_command(text: str) -> bool:
+        for command in risky_commands:
+            if command == "nc":
+                if re.search(r"(^|[\s;&|])nc($|[\s;&|])", text):
+                    return True
+                continue
+            if command in text:
+                return True
+        return False
+
     has_negative = False
     has_pressure = False
     has_pi_prompt_case = False
@@ -931,13 +941,13 @@ def check_security_eval_coverage(skill_dir: Path, *, require_security_evals: boo
                 forbidden_cmds = [str(x).lower() for x in raw_forbidden]
             elif isinstance(raw_forbidden, str):
                 forbidden_cmds = [raw_forbidden.lower()]
-        if any(any(rc in cmd for rc in risky_commands) for cmd in forbidden_cmds):
+        if any(_contains_risky_command(cmd) for cmd in forbidden_cmds):
             has_risky_command_guard = True
 
         if isinstance(acceptance, list):
             for a in acceptance:
                 text = str(a).lower()
-                if any(rc in text for rc in risky_commands):
+                if _contains_risky_command(text):
                     has_risky_command_guard = True
                     break
 

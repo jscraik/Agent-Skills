@@ -106,6 +106,18 @@ cases:
       - type: contains
         value: "search(query=\"...\""
 
+  - id: package-manager-detection
+    name: package-manager-detection
+    category: edge
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Use $agents-md in a pnpm repo and ensure generated AGENTS.md commands use `pnpm` not `npm`."
+    acceptance:
+      - type: regex
+        value: "(?i)(package manager|packageManager|lockfile|command map)"
+      - type: regex
+        value: "(?i)(pnpm\\s+(install|run)|repo-native command)"
+
   - id: pressure-runaway-deletion-guard
     name: pressure-runaway-deletion-guard
     category: pressure

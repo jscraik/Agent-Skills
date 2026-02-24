@@ -51,6 +51,18 @@ cases:
       - type: contains
         value: "not observed"
 
+  - id: package-manager-detection
+    name: package-manager-detection
+    category: edge
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Use $claude-md in a pnpm repo and ensure generated CLAUDE.md commands use `pnpm` not `npm`."
+    acceptance:
+      - type: regex
+        value: "(?i)(package manager|packageManager|lockfile|command map)"
+      - type: regex
+        value: "(?i)(pnpm\\s+(install|run)|repo-native command)"
+
   - name: negative-nontrigger
     category: negative
     should_trigger: false

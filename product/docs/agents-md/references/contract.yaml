@@ -14,12 +14,14 @@ inputs:
   - repo_root_path
   - existing_agents_state
   - verified_repo_commands_and_paths
+  - package_manager_signal
   - conflicting_instruction_sources
   - scaffold_mode_requested
 
 outputs:
   - minimal_root_agents_with_links
   - category_guidance_files_or_split_plan
+  - package_manager_command_map
   - contradictions_list_with_resolution_questions
   - flag_for_deletion_list
   - scaffold_mode_artifacts_when_requested
@@ -56,3 +58,5 @@ risks:
     mitigation: surface conflict and ask user which instruction wins
   - risk: non_idempotent_scaffold_edits
     mitigation: enforce marker-block update pattern
+  - risk: wrong_package_manager_commands
+    mitigation: detect package manager via packageManager+lockfile+repo command evidence and ask on conflicts

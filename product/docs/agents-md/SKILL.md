@@ -111,6 +111,7 @@ Use the failure-mode template verbatim for out-of-scope requests.
 - Target repo root path.
 - Existing AGENTS.md content (if present).
 - Verified commands and paths from the repo (README, docs, config files).
+- Package-manager signals from repo facts (`package.json#packageManager`, lockfiles, and existing command style in README/CI/docs).
 - Any adjacent instruction files that may conflict (global or per-directory).
 - Whether Jamie's agent-first scaffold standard is requested (`~/.codex/instructions/agent-first-scaffold-spec.md`).
 - Compatibility posture (default: canonical-only for unreleased/greenfield repos; replace only when explicitly requested).
@@ -139,6 +140,7 @@ Use the failure-mode template verbatim for out-of-scope requests.
 - A table of contents for docs that are created or updated.
 - A contradictions list with a question for each conflict.
 - A “flag for deletion” list (redundant, vague, overly obvious).
+- A detected package-manager command map (`install`, `run`, optional `exec`) derived from repo evidence and reused across generated docs.
 - When requested: idempotent scaffold blocks for `AGENTS.md`, `.agent/PLANS.md`, and `README.md`.
 - Output contract schema_version: 1
 
@@ -150,12 +152,16 @@ Use the failure-mode template verbatim for out-of-scope requests.
 - Use ASCII only unless the repo already uses non-ASCII.
 - Do not add dependencies or tools.
 - Do not add legacy shims, adapter layers, dual-write paths, or backwards-compatibility promises unless the user explicitly requires compatibility.
+- Do not hardcode npm/pnpm/yarn/bun command examples without repo evidence.
 
 ## Workflow
 
 1) Discover repo facts
 - Read README and `docs/` for real commands and structure.
 - Inspect config files (for example `pyproject.toml`, package scripts).
+- Detect package manager in this precedence: `package.json#packageManager` -> lockfiles (`pnpm-lock.yaml`, `yarn.lock`, `bun.lockb`/`bun.lock`, `package-lock.json`, `npm-shrinkwrap.json`) -> existing command style in README/CI/docs.
+- If package-manager signals conflict or are missing, state "not observed" and ask which command style should be used before emitting manager-specific commands.
+- Build one package-manager command map from detected evidence and apply it consistently in generated AGENTS/CLAUDE/GEMINI updates.
 - If commit conventions are not visible, state “not observed.”
 - Read global instructions from `~/.codex/AGENTS.md`.
 - Also check `~/.codex/instructions/` for applicable global standards and guidance.
@@ -177,7 +183,7 @@ Use the failure-mode template verbatim for out-of-scope requests.
 
 3) Identify the essentials (root AGENTS.md)
 - One-sentence project description.
-- Package manager (if not npm).
+- Repo-native package manager command style (install/run/exec, as observed).
 - Non-standard build/typecheck commands.
 - Anything truly relevant to every single task.
 
@@ -219,7 +225,7 @@ Use the failure-mode template verbatim for out-of-scope requests.
 ## Required sections (root AGENTS.md)
 
 - One-sentence project description
-- Tooling essentials (package manager if not npm)
+- Tooling essentials (repo-native package-manager commands, including install/run equivalents)
 - Non-standard build/typecheck commands
 - References or imports (global protocol pointers; no duplication)
 - Global instructions discovery order (brief, link to full doc)
@@ -246,12 +252,13 @@ When injected, include these concrete requirements:
   - `artifacts/test/artifact-manifest.json`
 - If `package.json` exists, wire scripts:
   - `test:artifacts`, `test:artifacts:unit`, `test:artifacts:integration`, `test:artifacts:e2e`
+- Use the detected package-manager command map for script invocations; do not mix manager variants in one generated block.
 
 Insert this exact section in generated AGENTS.md for test repos:
 
 ```md
 ## Flaky Test Artifact Capture
-- Run `bash scripts/test-with-artifacts.sh all` (or `pnpm run test:artifacts` / `npm run test:artifacts` / `bun run test:artifacts`) to emit machine-readable flaky evidence under `artifacts/test`.
+- Run `bash scripts/test-with-artifacts.sh all` (or the detected repo-native command for `test:artifacts`) to emit machine-readable flaky evidence under `artifacts/test`.
 - Optional targeted modes:
   - `bash scripts/test-with-artifacts.sh unit`
   - `bash scripts/test-with-artifacts.sh integration`
@@ -394,6 +401,7 @@ Rollout policy:
 - Overwriting existing instruction files/directories instead of performing scoped, deduplicated inserts.
 - Adding backwards-compatibility requirements by default in unreleased/greenfield projects.
 - Generating extra legacy-preservation code paths without an explicit compatibility requirement.
+- Mixing npm/pnpm/yarn/bun command examples in one output block or defaulting to npm without repository evidence.
 
 ## Example prompts that should trigger this skill
 

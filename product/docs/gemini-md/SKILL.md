@@ -18,6 +18,7 @@ description: "Use when a user asks to create, update, or review Gemini CLI conte
 - [Constraints](#constraints)
 - [Workflow](#workflow)
 - [Required sections (root GEMINI.md)](#required-sections-root-geminimd)
+- [Flaky Test Artifact Capture (injectable block, conditional)](#flaky-test-artifact-capture-injectable-block-conditional)
 - [Memory operations](#memory-operations)
 - [Hierarchy and folder-scoped context](#hierarchy-and-folder-scoped-context)
 - [Validation](#validation)
@@ -117,6 +118,7 @@ Use the failure-mode template verbatim for out-of-scope requests.
 - Target repo root path.
 - Existing `GEMINI.md` file(s) (global, project, and nested) if present.
 - Verified commands and paths from the repo (README, docs, config files).
+- Package-manager signals from repo facts (`package.json#packageManager`, lockfiles, and existing command style in README/CI/docs).
 - Any adjacent instruction files that may conflict (AGENTS.md, CLAUDE.md, local scripts, docs).
 - Project-specific memory conventions (facts the agent should remember).
 - Compatibility posture (default: canonical-only for unreleased/greenfield repos; replace only when explicitly requested).
@@ -131,6 +133,7 @@ Use the failure-mode template verbatim for out-of-scope requests.
   - append only missing content,
   - dedupe duplicate bullets/anchors,
   - create files/dirs only when absent.
+- A detected package-manager command map (`install`, `run`, optional `exec`) derived from repo evidence and reused across generated guidance.
 - Optional conflict list with one question per contradiction.
 - Output contract schema_version: 1
 
@@ -142,6 +145,7 @@ Use the failure-mode template verbatim for out-of-scope requests.
 - Do not add backwards-compatibility requirements or dual-write behavior unless explicitly requested.
 - Do not replace existing `AGENTS.md`/`CLAUDE.md`/`GEMINI.md` content; update by merging.
 - Redact sensitive/PII/credential-like content by default and avoid adding secrets, tokens, keys, or private identifiers.
+- Do not hardcode npm/pnpm/yarn/bun command examples without repo evidence.
 
 ## Workflow
 
@@ -152,6 +156,9 @@ Use the failure-mode template verbatim for out-of-scope requests.
 2) Discover repository facts
 - Read instruction files in precedence order: `~/.codex/AGENTS.md`, repo `AGENTS.md`, `~/.claude/CLAUDE.md`, repo `CLAUDE.md` (as constraints), then docs/code.
 - Read README and `docs/` for real commands and structure.
+- Detect package manager in this precedence: `package.json#packageManager` -> lockfiles (`pnpm-lock.yaml`, `yarn.lock`, `bun.lockb`/`bun.lock`, `package-lock.json`, `npm-shrinkwrap.json`) -> existing command style in README/CI/docs.
+- If package-manager signals conflict or are missing, state "not observed" and ask which command style should be used before emitting manager-specific commands.
+- Build one package-manager command map from detected evidence and apply it consistently across generated GEMINI/AGENTS/CLAUDE updates.
 - If commit or run conventions are absent, state "not observed."
 - Canonical hierarchy rule: when `AGENTS.md` exists, treat it as canonical for repository-wide instruction overlap; keep `GEMINI.md` for Gemini-specific memory/loading conventions and only cite shared repo rules from AGENTS.
 
@@ -189,10 +196,36 @@ Use the failure-mode template verbatim for out-of-scope requests.
 
 - Project summary (one sentence).
 - Package/build/test defaults.
+- Repo-native package-manager command map (`install`, `run`, optional `exec`) when Node tooling exists.
 - Non-obvious command patterns.
 - Explicit boundaries / forbidden patterns.
 - Memory persistence guidance (`save_memory` prompts and retention logic).
 - Project-specific facts that benefit from persistent memory.
+
+## Flaky Test Artifact Capture (injectable block, conditional)
+
+When repos have automated tests, include a flaky-artifact block in GEMINI.md (or reference canonical AGENTS section).
+
+Injection rule:
+- Inject if user asks for flaky detection/artifacts or automated test-history workflows.
+- Inject if repo has test evidence (`test` scripts, `pytest`, `vitest`, `playwright`, `jest`, `cargo test`, `tests/`) **and** a verified artifact-capture script already exists (`scripts/test-with-artifacts.sh` or equivalent).
+- Skip if no test evidence.
+
+Required content:
+- Verified script path (canonical default: `scripts/test-with-artifacts.sh`)
+- Modes: `all`, `unit`, `integration`, `e2e`
+- Artifact root: `artifacts/test`
+- Stable outputs: `summary-*.json`, `test-output-*.log`, `junit-*.xml` (when supported), `*-results.json` (when supported), `artifact-manifest.json`
+- If `package.json` exists and script keys are present, include `test:artifacts*` scripts.
+
+Insert this section in GEMINI.md for test repos:
+
+```md
+## Flaky Test Artifact Capture
+- Run the verified artifact-capture script in `all` mode (or the detected repo-native command for `test:artifacts`) to emit machine-readable flaky evidence under `artifacts/test`.
+- Optional targeted modes: `unit`, `integration`, `e2e`.
+- Keep artifact filenames stable (no timestamps in filenames) for cross-run comparison.
+```
 
 ## Memory operations
 
@@ -233,6 +266,7 @@ When adding nested files, keep changes focused and non-overlapping with parent f
 - Treating `GEMINI.md` as a place for secrets.
 - Using memory facts for data that should be in code, config, or docs.
 - Assuming hidden command support without verification from current Gemini CLI behavior.
+- Mixing npm/pnpm/yarn/bun command examples in one output block or defaulting to npm without repository evidence.
 
 ## Example prompts
 

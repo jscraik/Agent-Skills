@@ -5,8 +5,8 @@ Canonical GitHub skill: `gh-workflow`
 ## Effective date
 - February 11, 2026
 
-## Aliases (compatibility window)
-The following skills are deprecated aliases that now route to `gh-workflow` modes:
+## Alias retirement status
+The following deprecated aliases were retired and removed on **February 24, 2026**:
 
 - `gh-actions-fix` -> `ci_diagnose`
 - `gh-address-comments` -> `pr_review_comments`
@@ -14,8 +14,8 @@ The following skills are deprecated aliases that now route to `gh-workflow` mode
 - `gh-pr-local` -> `pr_prepare` (or `intake` for discovery)
 - `yeet` -> `pr_prepare`
 
-## Sunset review date
-- May 12, 2026
+## Historical sunset plan (superseded)
+- May 12, 2026 (superseded by early retirement on February 24, 2026)
 
 ## Merge policy default
 - Server-side merge via `gh pr merge`
