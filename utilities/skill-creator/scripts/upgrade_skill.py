@@ -37,13 +37,7 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple
 try:
     import yaml  # type: ignore
 except ModuleNotFoundError:  # pragma: no cover
-    print(
-        "ERROR: PyYAML is required to run upgrade_skill.py.\n\n"
-        "Fix:\n"
-        "  ~/.venvs/pyyaml/bin/python utilities/skill-creator/scripts/upgrade_skill.py <path/to/skill-dir-or-SKILL.md>\n",
-        file=sys.stderr,
-    )
-    raise SystemExit(1)
+    yaml = None
 
 
 # -----------------------------
@@ -663,6 +657,14 @@ def build_arg_parser() -> argparse.ArgumentParser:
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     args = build_arg_parser().parse_args(argv)
+    if yaml is None:
+        print(
+            "ERROR: PyYAML is required to run upgrade_skill.py.\n\n"
+            "Fix:\n"
+            "  ~/.venvs/pyyaml/bin/python utilities/skill-creator/scripts/upgrade_skill.py <path/to/skill-dir-or-SKILL.md>\n",
+            file=sys.stderr,
+        )
+        return 1
 
     try:
         doc = load_skill(args.path)

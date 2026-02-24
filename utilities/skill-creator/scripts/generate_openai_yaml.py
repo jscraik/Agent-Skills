@@ -27,8 +27,7 @@ from typing import Any, Dict, Optional, Sequence, Tuple
 try:
     import yaml  # type: ignore
 except ModuleNotFoundError:
-    print("ERROR: PyYAML is required (pip install pyyaml).", file=sys.stderr)
-    raise SystemExit(1)
+    yaml = None
 
 
 _FRONTMATTER_DELIM_RE = re.compile(r"^\s*---\s*$")
@@ -109,6 +108,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     p.add_argument("--no-policy", action="store_true", help="Do not include the policy section")
     p.add_argument("--allow-implicit", action="store_true", help="Set policy.allow_implicit_invocation=true (default false)")
     args = p.parse_args(list(argv) if argv is not None else None)
+    if yaml is None:
+        print("ERROR: PyYAML is required (pip install pyyaml).", file=sys.stderr)
+        return 1
 
     skill_md = resolve_skill_md_path(args.path)
     if not skill_md.exists():
