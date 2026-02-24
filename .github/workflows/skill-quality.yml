@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
       - name: Ensure GitHub CLI is installed
@@ -44,7 +44,7 @@ jobs:
     needs: [structure-gate]
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
       - name: Install deps
@@ -65,7 +65,7 @@ jobs:
             --out-json artifacts/reports/skills/dashboard.json \
             --out-md artifacts/reports/skills/dashboard.md
       - name: Upload reports
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: skill-quality-reports
           path: artifacts/reports/skills

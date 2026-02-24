@@ -140,6 +140,27 @@ report = {
 }
 out_path.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
 PY
+
+python3 - <<'PY'
+import json
+from pathlib import Path
+
+jsonl_path = Path("artifacts/skill-graphs/lessons/canonical-lessons.jsonl")
+index_path = Path("artifacts/skill-graphs/lessons/canonical-lesson-index.json")
+if jsonl_path.exists():
+    for i, line in enumerate(jsonl_path.read_text(encoding="utf-8").splitlines(), start=1):
+        line = line.strip()
+        if not line:
+            continue
+        obj = json.loads(line)
+        if "lesson_id" not in obj or "status" not in obj:
+            raise SystemExit(f"invalid canonical-lessons.jsonl row at line {i}")
+if index_path.exists():
+    obj = json.loads(index_path.read_text(encoding="utf-8"))
+    if not isinstance(obj, dict) or "scopes" not in obj:
+        raise SystemExit("invalid canonical-lesson-index.json structure")
+PY
+
 trap - EXIT
 rm -f "$results_jsonl"
 

@@ -75,6 +75,35 @@ MVP core:
 - `run_state_changed`
 - `promotion_approved`
 - `failure_event`
+- `run_blocked`
+
+## Event envelope (Phase 3 parity extension)
+
+```yaml
+schema_version: "1.0"
+event_id: "uuid"
+ts: "ISO-8601"
+run_id: "run-id"
+skill_name: "kebab-case"
+task_profile: "profile-id"
+event_type: "run_initialized|run_state_changed|promotion_approved|failure_event|run_blocked"
+severity: "info|warn|fail"
+terminal_status: "passed|failed|escalated|aborted|null"
+stop_reason: "pass|budget_exhausted|escalated|aborted|policy_failed|evaluator_conflict|dependency_missing|null"
+blocker_code: "run_rollforward_blocked|run_rollback_required|kill_switch_activated|evaluator_conflict" # required when event_type=run_blocked
+```
+
+## Compatibility mapping for control states
+
+Control-only states must remain compatible with the public terminal enums:
+
+- `run_rollforward_blocked` -> `terminal_status=failed`, `stop_reason=policy_failed`
+- `run_rollback_required` -> `terminal_status=failed`, `stop_reason=dependency_missing`
+- `run_aborted` -> `terminal_status=aborted`, `stop_reason=aborted`
+
+Migration guard:
+- Keep compatibility mapping until Phase-4 contract promotion explicitly updates public enums.
+- CI/reporting must consume `terminal_status` + `stop_reason` as source-of-truth.
 
 Deferred (Phase 4+):
 - `run_inspected`

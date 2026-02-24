@@ -6,6 +6,9 @@ on:
       - "artifacts/skill-graphs/runs/**/promotion_decision.json"
       - "artifacts/skill-graphs/runs/**/iteration_journal.jsonl"
       - "artifacts/skill-graphs/runs/**/run.json"
+      - "artifacts/skill-graphs/lessons/**"
+      - "docs/skill-graphs/governance/recursive-loop-approvers.yaml"
+      - "docs/skill-graphs/governance/recursive-loop-approvers.sig"
       - "scripts/human_promote_recursive_run.sh"
       - "scripts/validate_recursive_promotions.sh"
       - "utilities/skill-creator/scripts/validate_recursive_promotion.py"
@@ -23,7 +26,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
 
@@ -44,7 +47,7 @@ jobs:
 
       - name: Upload promotion validation report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: recursive-promotion-validation
           path: artifacts/skill-graphs/pilot/promotion-validation-report.json

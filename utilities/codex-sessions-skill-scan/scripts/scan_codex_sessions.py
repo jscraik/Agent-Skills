@@ -76,6 +76,26 @@ _LOOKS_LIKE_HEREDOC_ANALYZER_FAILURE_RE = re.compile(
 # Very lightweight redaction: avoid printing anything that looks like a token.
 _TOKENY_RE = re.compile(r"(?i)(api[_-]?key|token|secret|bearer)\s*[:=]\s*\S+")
 
+_COMPLEXITY_HINT_STEPS = (
+    "1. Restate the objective in one sentence.",
+    "2. Break into 3–5 concrete deliverables.",
+    "3. Define verification for each deliverable.",
+    "4. Execute incrementally and stop after each milestone.",
+)
+
+_COMPLEXITY_TRIGGER_RULES = [
+    (re.compile(r"\bimplement(?:ing|ation|ed)?\b", re.I), "implement"),
+    (re.compile(r"\brefactor(?:ing|ed|s)?\b", re.I), "refactor"),
+    (re.compile(r"\brewrite(?:ing|ed)?\b", re.I), "rewrite"),
+    (re.compile(r"\bmigrate(?:ing|d)?\b", re.I), "migrate"),
+    (re.compile(r"\bintegrat(?:e|ion)\b", re.I), "integrate"),
+    (re.compile(r"\bdesign(?:ing)?\b", re.I), "design"),
+    (re.compile(r"\brebuild(?:ing|ed|s)?\b", re.I), "rebuild"),
+    (re.compile(r"\boptimi[sz]e(?:ing|d)?\b", re.I), "optimize"),
+    (re.compile(r"\boverhaul(?:ing|ed)?\b", re.I), "overhaul"),
+    (re.compile(r"\bmassive\b", re.I), "massive scope"),
+]
+
 
 @dataclass(frozen=True)
 class SkillIssue:
@@ -94,23 +114,88 @@ class RepoOtelSummary:
     last_trace_mtime: Optional[dt.datetime]
 
 
+@dataclass(frozen=True)
+class ComplexityHit:
+    session_path: Path
+    line_no: int
+    term: str
+    snippet: str
+
+
+@dataclass(frozen=True)
+class OTelCollectorSummary:
+    updated_at: Optional[str]
+    services: dict[str, int]
+    top_metric_names: list[tuple[str, int]]
+    top_span_names: list[tuple[str, int]]
+
+
 def _now_local() -> dt.datetime:
     # Local timezone is fine for a daily scan UX.
     return dt.datetime.now().astimezone()
 
 
-def _iter_recent_jsonl_files(root: Path, since: dt.datetime) -> Iterator[Path]:
+def _iter_recent_jsonl_files(roots: Sequence[Path], since: dt.datetime) -> Iterator[Path]:
     since_ts = since.timestamp()
-    for dirpath, _, filenames in os.walk(root):
-        for name in filenames:
-            if not name.endswith(".jsonl"):
-                continue
-            p = Path(dirpath) / name
-            try:
-                if p.stat().st_mtime >= since_ts:
-                    yield p
-            except FileNotFoundError:
-                continue
+    for root in roots:
+        for dirpath, _, filenames in os.walk(root):
+            for name in filenames:
+                if not name.endswith(".jsonl"):
+                    continue
+                p = Path(dirpath) / name
+                try:
+                    if p.stat().st_mtime >= since_ts:
+                        yield p
+                except FileNotFoundError:
+                    continue
+
+
+def _discover_project_sessions(project_root: Path) -> list[Path]:
+    """
+    Find likely session roots like `<project>/.codex/sessions` for each project under
+    the provided root. This catches per-repo sessions outside the default global
+    ~/.codex/sessions location.
+    """
+    roots: list[Path] = []
+    if not project_root.is_dir():
+        return roots
+
+    for p in project_root.rglob(".codex/sessions"):
+        if p.is_dir():
+            roots.append(p)
+    return sorted(roots)
+
+
+def _parse_otel_collector_stats(stats_json: Path) -> Optional[OTelCollectorSummary]:
+    """
+    Parse best-effort summary data from ~/.agents/otel-collector/data/processed/stats.json.
+    """
+    if not stats_json.exists():
+        return None
+
+    try:
+        raw = json.loads(stats_json.read_text(encoding="utf-8", errors="replace"))
+    except (OSError, json.JSONDecodeError):
+        return None
+
+    if not isinstance(raw, dict):
+        return None
+
+    services = raw.get("services")
+    metrics = raw.get("top_metric_names")
+    spans = raw.get("top_span_names")
+    if not isinstance(services, dict) or not isinstance(metrics, dict) or not isinstance(spans, dict):
+        return None
+
+    top_metrics = sorted(((k, int(v)) for k, v in metrics.items() if isinstance(k, str) and isinstance(v, (int, float))), reverse=True, key=lambda x: x[1])[:10]
+    top_spans = sorted(((k, int(v)) for k, v in spans.items() if isinstance(k, str) and isinstance(v, (int, float))), reverse=True, key=lambda x: x[1])[:10]
+    updated_at = raw.get("updated_at")
+    return OTelCollectorSummary(
+        updated_at=updated_at if isinstance(updated_at, str) else None,
+        services={k: int(v) for k, v in services.items() if isinstance(k, str) and isinstance(v, (int, float))},
+        top_metric_names=top_metrics,
+        top_span_names=top_spans,
+    )
 
 
 def _is_port_open(host: str, port: int, timeout_s: float = 0.25) -> bool:
@@ -223,7 +308,7 @@ def _summarize_repo_otel(repo_root: Path, since: dt.datetime) -> Optional[RepoOt
     )
 
 
-def _extract_text_from_event(obj: dict) -> Optional[tuple[str, str]]:
+def _extract_text_from_event(obj: dict) -> Optional[tuple[str, str, Optional[str]]]:
     typ = obj.get("type")
     payload = obj.get("payload")
     if not isinstance(payload, dict):
@@ -231,9 +316,12 @@ def _extract_text_from_event(obj: dict) -> Optional[tuple[str, str]]:
 
     if typ == "event_msg":
         msg = payload.get("message")
-        return (msg, "event_msg") if isinstance(msg, str) and msg.strip() else None
+        return (msg, "event_msg", None) if isinstance(msg, str) and msg.strip() else None
 
     if typ == "response_item" and payload.get("type") == "message":
+        role = payload.get("role")
+        if isinstance(role, str):
+            role = role.strip().lower()
         content = payload.get("content")
         if isinstance(content, list):
             parts: list[str] = []
@@ -241,14 +329,14 @@ def _extract_text_from_event(obj: dict) -> Optional[tuple[str, str]]:
                 if isinstance(seg, dict) and isinstance(seg.get("text"), str):
                     parts.append(seg["text"])
             joined = "\n".join([p for p in parts if p.strip()]).strip()
-            return (joined, "message") if joined else None
+            return (joined, "message", role) if joined else None
         if isinstance(content, str) and content.strip():
-            return (content, "message")
+            return (content, "message", role)
         return None
 
     if typ == "response_item" and payload.get("type") == "function_call_output":
         out = payload.get("output")
-        return (out, "tool_output") if isinstance(out, str) and out.strip() else None
+        return (out, "tool_output", None) if isinstance(out, str) and out.strip() else None
 
     return None
 
@@ -303,16 +391,27 @@ def _skill_index_personal(agent_skills_root: Path) -> dict[str, Path]:
 
 
 def scan(
-    sessions_root: Path,
+    sessions_roots: Sequence[Path],
     since: dt.datetime,
     max_samples_per_skill: int,
     agent_skills_root: Path,
     include_otel: bool,
     codex_config_toml: Path,
-) -> tuple[list[SkillIssue], Counter[str], Counter[str], dict[str, Path]]:
+    include_otel_collector: bool = False,
+    otel_collector_stats: Path | None = None,
+) -> tuple[
+    list[SkillIssue],
+    list[ComplexityHit],
+    Counter[str],
+    Counter[str],
+    Counter[str],
+    dict[str, Path],
+]:
     """
     Returns:
       - issues list
+      - complexity hits
+      - complexity hit count by term
       - skills invoked counter
       - issue counter by skill
       - skill index (personal)
@@ -321,13 +420,16 @@ def scan(
 
     invoked: Counter[str] = Counter()
     issues_by_skill: Counter[str] = Counter()
+    complexity_terms: Counter[str] = Counter()
     issues: list[SkillIssue] = []
+    complexity_hits: list[ComplexityHit] = []
     captured_by_skill: Counter[str] = Counter()
+    captured_by_term: Counter[str] = Counter()
 
     # Optional: correlate recent sessions -> repo roots -> local OTLP-derived trace artifacts.
     session_cwds: set[Path] = set()
 
-    for fpath in sorted(_iter_recent_jsonl_files(sessions_root, since)):
+    for fpath in sorted(_iter_recent_jsonl_files(sessions_roots, since)):
         current_skill: Optional[str] = None
 
         try:
@@ -350,7 +452,7 @@ def scan(
                     extracted = _extract_text_from_event(obj)
                     if not extracted:
                         continue
-                    text, source_kind = extracted
+                    text, source_kind, role = extracted
 
                     # Prefer using the explicit "Using skill:" marker.
                     m = _SKILL_INVOKE_RE.search(text)
@@ -361,6 +463,24 @@ def scan(
                         current_skill = m.group(1).lower()
                         invoked[current_skill] += 1
                         continue
+
+                    if source_kind == "message" and role == "user":
+                        hit_terms: set[str] = set()
+                        for pattern, term in _COMPLEXITY_TRIGGER_RULES:
+                            if pattern.search(text):
+                                hit_terms.add(term)
+                        for term in hit_terms:
+                            complexity_terms[term] += 1
+                            if captured_by_term[term] < 3:
+                                captured_by_term[term] += 1
+                                complexity_hits.append(
+                                    ComplexityHit(
+                                        session_path=fpath,
+                                        line_no=i,
+                                        term=term,
+                                        snippet=_safe_snippet(text, limit=240),
+                                    )
+                                )
 
                     if not current_skill:
                         continue
@@ -400,8 +520,9 @@ def scan(
     # Attach OTEL-derived state via function attributes to avoid widening return type too much.
     scan._session_cwds = session_cwds  # type: ignore[attr-defined]
     scan._otel_config = _read_codex_otel_config(codex_config_toml) if include_otel else {}  # type: ignore[attr-defined]
+    scan._otel_collector = _parse_otel_collector_stats(otel_collector_stats) if include_otel_collector and otel_collector_stats else None  # type: ignore[attr-defined]
 
-    return issues, invoked, issues_by_skill, skill_index
+    return issues, complexity_hits, complexity_terms, invoked, issues_by_skill, skill_index
 
 
 def _md_list(items: Iterable[str], indent: str = "") -> str:
@@ -411,16 +532,19 @@ def _md_list(items: Iterable[str], indent: str = "") -> str:
 def render_report(
     *,
     issues: list[SkillIssue],
+    complexity_hits: list[ComplexityHit],
+    complexity_terms: Counter[str],
     invoked: Counter[str],
     issues_by_skill: Counter[str],
     skill_index: dict[str, Path],
-    sessions_root: Path,
+    sessions_roots: Sequence[Path],
     since: dt.datetime,
     now: dt.datetime,
     max_show_skills: int,
     include_otel: bool,
     session_cwds: Sequence[Path],
     otel_config: dict[str, str],
+    otel_collector: Optional[OTelCollectorSummary],
 ) -> str:
     total_inv = sum(invoked.values())
     total_issue_events = sum(issues_by_skill.values())
@@ -428,7 +552,7 @@ def render_report(
 
     lines: list[str] = []
     lines.append("## Inputs")
-    lines.append(f"- sessions_root: `{sessions_root}`")
+    lines.append(f"- sessions_roots: `{', '.join(str(p) for p in sessions_roots)}`")
     lines.append(f"- since: `{since.isoformat()}`")
     lines.append(f"- now: `{now.isoformat()}`")
     lines.append("")
@@ -441,7 +565,26 @@ def render_report(
     lines.append(f"- skills_with_issues: **{len(issues_by_skill)}**")
     lines.append(f"- issue_events_detected: **{total_issue_events}**")
     lines.append(f"- issue_samples_captured: **{total_issue_samples}**")
+    lines.append(f"- complexity_triggers_seen: **{sum(complexity_terms.values())}**")
     lines.append("")
+
+    if complexity_terms:
+        lines.append("## Complexity-word reminder triggers")
+        for term, count in complexity_terms.most_common(max_show_skills):
+            lines.append(f"- `{term}`: **{count}x**")
+        lines.append("")
+        lines.append("### Suggested step-by-step reminder")
+        lines.append("- Break the request into: scope, design, implementation, validation.")
+        for s in _COMPLEXITY_HINT_STEPS:
+            lines.append(f"- {s}")
+        lines.append("")
+        lines.append("### Occurrences (actionable reminders)")
+        for hit in complexity_hits[: max_show_skills]:
+            lines.append(
+                f"- `{hit.session_path.name}:{hit.line_no}` matched `{hit.term}` — Reminder: treat as a multi-step task."
+            )
+            lines.append(f"  - sample: `{hit.snippet}`")
+        lines.append("")
 
     if include_otel:
         lines.append("## Local OTel signals (best-effort)")
@@ -481,6 +624,20 @@ def render_report(
                 )
         else:
             lines.append("- Repo OTLP-derived traces: none found for repos referenced in the scanned sessions window.")
+
+        if otel_collector:
+            lines.append("- /Users/jamiecraik/.agents/otel-collector summary:")
+            if otel_collector.updated_at:
+                lines.append(f"  - updated_at: `{otel_collector.updated_at}`")
+            lines.append(f"  - services: `{', '.join(f'{k}:{v}' for k, v in list(otel_collector.services.items())[:10])}`")
+            if otel_collector.top_span_names:
+                lines.append(
+                    f"  - top_spans: `{', '.join(f'{k}:{v}' for k, v in otel_collector.top_span_names[:6])}`"
+                )
+            if otel_collector.top_metric_names:
+                lines.append(
+                    f"  - top_metrics: `{', '.join(f'{k}:{v}' for k, v in otel_collector.top_metric_names[:6])}`"
+                )
         lines.append("")
 
     if invoked:
@@ -539,6 +696,27 @@ def main(argv: list[str]) -> int:
         help="Root directory of Codex sessions (default: ~/.codex/sessions).",
     )
     parser.add_argument(
+        "--include-dev-project-sessions",
+        action="store_true",
+        default=True,
+        help=(
+            "Also scan per-project .codex/sessions directories discovered under --projects-root. "
+            "Use this to include sessions for any repo under ~/dev."
+        ),
+    )
+    parser.add_argument(
+        "--no-include-dev-project-sessions",
+        action="store_false",
+        dest="include_dev_project_sessions",
+        help="Skip per-project .codex/sessions discovery under --projects-root.",
+    )
+    parser.add_argument(
+        "--projects-root",
+        type=Path,
+        default=Path.home() / "dev",
+        help="Project root to discover per-project session dirs (default: ~/dev).",
+    )
+    parser.add_argument(
         "--days",
         type=float,
         default=1.0,
@@ -568,6 +746,17 @@ def main(argv: list[str]) -> int:
         help="Include best-effort OTel signals: Codex [otel] endpoint status and repo-local OTLP-derived trace artifacts.",
     )
     parser.add_argument(
+        "--include-otel-collector",
+        action="store_true",
+        help="Include best-effort summary from ~/.agents/otel-collector/data/processed/stats.json.",
+    )
+    parser.add_argument(
+        "--otel-collector-stats",
+        type=Path,
+        default=Path.home() / ".agents" / "otel-collector" / "data" / "processed" / "stats.json",
+        help="Path to OTel collector stats.json (default: ~/.agents/otel-collector/data/processed/stats.json).",
+    )
+    parser.add_argument(
         "--codex-config-toml",
         type=Path,
         default=Path.home() / ".codex" / "config.toml",
@@ -579,13 +768,20 @@ def main(argv: list[str]) -> int:
     since = now - dt.timedelta(days=args.days)
 
     try:
-        issues, invoked, issues_by_skill, skill_index = scan(
-            sessions_root=args.sessions_root,
+        session_roots = [args.sessions_root]
+        if args.include_dev_project_sessions:
+            session_roots.extend(_discover_project_sessions(args.projects_root))
+        session_roots = sorted({str(p.resolve()): p for p in session_roots}.values())  # dedupe
+
+        issues, complexity_hits, complexity_terms, invoked, issues_by_skill, skill_index = scan(
+            sessions_roots=session_roots,
             since=since,
             max_samples_per_skill=args.max_samples_per_skill,
             agent_skills_root=args.agent_skills_root,
             include_otel=args.include_otel,
             codex_config_toml=args.codex_config_toml,
+            include_otel_collector=args.include_otel_collector,
+            otel_collector_stats=args.otel_collector_stats,
         )
     except Exception as e:  # fail fast for daily tool UX
         print(f"ERROR: {e}", file=sys.stderr)
@@ -593,19 +789,23 @@ def main(argv: list[str]) -> int:
 
     session_cwds = sorted(getattr(scan, "_session_cwds", []))
     otel_config = getattr(scan, "_otel_config", {})
+    otel_collector = getattr(scan, "_otel_collector", None)
 
     report = render_report(
         issues=issues,
+        complexity_hits=complexity_hits,
+        complexity_terms=complexity_terms,
         invoked=invoked,
         issues_by_skill=issues_by_skill,
         skill_index=skill_index,
-        sessions_root=args.sessions_root,
+        sessions_roots=session_roots,
         since=since,
         now=now,
         max_show_skills=args.max_show_skills,
         include_otel=args.include_otel,
         session_cwds=session_cwds,
         otel_config=otel_config,
+        otel_collector=otel_collector,
     )
     sys.stdout.write(report)
 
