@@ -16,10 +16,9 @@ import datetime as dt
 import hashlib
 import os
 import re
-import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable, List, Optional, Sequence, Tuple
+from typing import List, Optional, Sequence, Tuple
 
 
 MOJIBAKE_SIGNALS: Sequence[str] = (
@@ -183,7 +182,7 @@ def _duplication_report(files: Sequence[Path]) -> List[Tuple[str, List[Path], st
 def _safe_rel(path: Path, base: Path) -> str:
     try:
         return str(path.relative_to(base))
-    except Exception:
+    except ValueError:
         return str(path)
 
 
@@ -333,7 +332,7 @@ def generate_report(*, codex_home: Path, out_dir: Path) -> Tuple[Path, List[Find
     report_path = out_dir / f"{stamp}.md"
 
     report_lines: List[str] = []
-    report_lines.append(f"# Codex Home Audit Report")
+    report_lines.append("# Codex Home Audit Report")
     report_lines.append("")
     report_lines.append(f"- Timestamp: {dt.datetime.now().isoformat(timespec='seconds')}")
     report_lines.append(f"- Codex home: `{codex_home}`")
