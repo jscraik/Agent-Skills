@@ -349,6 +349,57 @@ Execute one consolidated implementation pass with a small rollout sequence:
 **Implementation details:**
 - Add golden fixture sets for: lock contention, CAS miss, missing allowlist, and kill-switch during finalization.
 
+## Phase-to-Task Execution Map
+| Phase | Task IDs | Exit Gate |
+|---|---|---|
+| Phase 1 | T1, T2, T3, T4 | Canonical lifecycle + telemetry schema contracts approved |
+| Phase 2 | T5, T6, T7, T8 | Runtime governance controls implemented and validated |
+| Phase 3 | T9, T10, T11, T12, T13 | Validation + docs parity checks passing |
+
+## Task Graph (id / depends_on)
+```yaml
+tasks:
+  - id: T1
+    title: Implement canonical lesson store and lifecycle index
+    depends_on: []
+  - id: T2
+    title: Implement approved-path canonical writer with CAS safeguards
+    depends_on: [T1]
+  - id: T3
+    title: Enforce mandatory event envelope and always-on events.jsonl emission
+    depends_on: []
+  - id: T4
+    title: Extend schema contracts for blocker and terminal compatibility mappings
+    depends_on: [T3]
+  - id: T5
+    title: Add run recovery, lock ownership, and idempotency controls
+    depends_on: [T1, T3]
+  - id: T6
+    title: Add kill-switch and rollback-required blocking semantics
+    depends_on: [T5]
+  - id: T7
+    title: Enforce reviewer allowlist policy and signed governance checks
+    depends_on: [T2]
+  - id: T8
+    title: Implement adversarial checkpoint gating and conflict escalation
+    depends_on: [T3]
+  - id: T9
+    title: Generate required daily telemetry outputs and promotion queue artifacts
+    depends_on: [T3, T4]
+  - id: T10
+    title: Wire CI workflows to validate and publish governance/telemetry artifacts
+    depends_on: [T7, T9]
+  - id: T11
+    title: Extend promotion validation to enforce policy, provenance, and event evidence
+    depends_on: [T2, T7, T10]
+  - id: T12
+    title: Update guides and schema docs to match implemented runtime behavior
+    depends_on: [T4, T6, T9, T11]
+  - id: T13
+    title: Execute verification suite and publish rollout readiness evidence
+    depends_on: [T8, T10, T11, T12]
+```
+
 ## 3) Acceptance criteria
 - A v1 run always writes events to a canonical location.
 - `run_*/run.json`, `iteration_journal.jsonl`, and `promotion_decision.json` remain emitted and schema-valid.
