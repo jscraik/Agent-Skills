@@ -902,7 +902,7 @@ def check_security_eval_coverage(skill_dir: Path, *, require_security_evals: boo
         "exfiltrate",
         "hidden instruction",
     )
-    risky_commands = ("rm -rf", "curl", "wget", "netcat", "nc ", "powershell", "invoke-webrequest")
+    risky_commands = ("rm -rf", "curl", "wget", "netcat", "nc", "powershell", "invoke-webrequest")
 
     has_negative = False
     has_pressure = False

@@ -22,7 +22,7 @@ description: "Analyze and implement repository-grounded design-system work (toke
 - [Remember](#remember)
 
 ## Working agreement
-- Follow `/Users/jamiecraik/dev/design-system/AGENTS.md` and treat docs as maps.
+- Follow `~/dev/design-system/AGENTS.md` and treat docs as maps.
 - Prefer retrieval-led reasoning: inspect canonical files before proposing answers/changes.
 - Treat this as the brand/design map for this repo: validate `docs/design-system/CHARTER.md` and `docs/design-system/UPSTREAM_ALIGNMENT.md` before token/theme edits.
 - Use `zsh -lc`, `rg`, `fd`, and `jq`; avoid `grep`/`find` for repo-wide scans.

@@ -35,7 +35,7 @@ Avoid generating prompts without a UI spec; route upstream first.
 - UI spec file path.
 - Target UI tool (v0, Bolt, Claude, Figma AI, or other).
 - Target platform (web, touch-first, desktop).
-- aStudio repo path (default: `/Users/jamiecraik/dev/aStudio`).
+- aStudio repo path (default: `~/dev/aStudio`).
 - Output location preference (default: same directory as UI spec).
 
 ## Deliverables

@@ -1,5 +1,5 @@
 ## Objective
-Update the `recon-workbench` skill so its workflow, commands, and compliance notes match the current `/Users/jamiecraik/dev/recon-workbench` repo.
+Update the `recon-workbench` skill so its workflow, commands, and compliance notes match the current `~/dev/recon-workbench` repo.
 
 ## Plan
 1) Review repo source-of-truth docs and CLI implementation for current commands and workflow.

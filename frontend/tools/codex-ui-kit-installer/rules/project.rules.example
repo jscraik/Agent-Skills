@@ -1,4 +1,4 @@
-include: /Users/jamiecraik/.codex/rules/work.rules
+include: ~/.codex/rules/work.rules
 
 # Add repo-specific allows here (keep them narrow):
 # prefix_rule(pattern=["pnpm", "dev"], decision="allow")

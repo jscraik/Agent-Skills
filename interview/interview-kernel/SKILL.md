@@ -52,7 +52,7 @@ A reusable “engine” for interviews. Wrappers (PM / Architecture / Bug / Deep
 
 ## User profile alignment (Jamie)
 
-The interview must match `/Users/jamiecraik/.codex/USER_PROFILE.md`:
+The interview must match `~/.codex/USER_PROFILE.md`:
 
 - Single-threaded, explicit, low cognitive load.
 - Always use **multiple-choice** questions (3–5 options) with a clear recommended default.

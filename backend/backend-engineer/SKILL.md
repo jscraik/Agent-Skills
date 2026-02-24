@@ -9,10 +9,10 @@ description: Plan and review safe backend extensions for existing services (Clou
 
 ## Compliance
 - Read and follow:
-  - `/Users/jamiecraik/.codex/instructions/standards.md`
-  - `/Users/jamiecraik/.codex/instructions/engineering-guidance.md`
-  - `/Users/jamiecraik/.codex/instructions/CODESTYLE.md`
-  - `/Users/jamiecraik/.codex/instructions/work-rules.md`
+  - `~/.codex/instructions/standards.md`
+  - `~/.codex/instructions/engineering-guidance.md`
+  - `~/.codex/instructions/CODESTYLE.md`
+  - `~/.codex/instructions/work-rules.md`
 - Apply Gold Industry Standard (baseline Jan 2026).
 
 ## Scope and triggers
@@ -135,7 +135,7 @@ The agent is capable of extraordinary work in this domain. These guidelines unlo
 
 ## Resources
 - Deep design checklists (when needed):
-  - `/Users/jamiecraik/dev/agent-skills/backend/backend-design/references/`
+  - `~/dev/agent-skills/backend/backend-design/references/`
 
 <!-- skill-score-boost-v1 -->
 ## Philosophy and tradeoffs

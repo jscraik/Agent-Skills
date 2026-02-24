@@ -7,10 +7,10 @@ Figma nodes (Foundations + Inline Cards + Inline Carousel + Full Screen + PiP)
 into a single, implementation-ready style guide.
 
 Source of truth PDFs (prefer these if any values conflict here):
-- `/Users/jamiecraik/chatui/docs/foundations/chatgpt-apps/Apps in ChatGPT • Colours.pdf`
-- `/Users/jamiecraik/chatui/docs/foundations/chatgpt-apps/Apps in ChatGPT • Typeography.pdf`
-- `/Users/jamiecraik/chatui/docs/foundations/chatgpt-apps/Apps in ChatGPT • spacing.pdf`
-- `/Users/jamiecraik/chatui/docs/foundations/chatgpt-apps/Apps in ChatGPT • Iconography.pdf`
+- `~/chatui/docs/foundations/chatgpt-apps/Apps in ChatGPT • Colours.pdf`
+- `~/chatui/docs/foundations/chatgpt-apps/Apps in ChatGPT • Typeography.pdf`
+- `~/chatui/docs/foundations/chatgpt-apps/Apps in ChatGPT • spacing.pdf`
+- `~/chatui/docs/foundations/chatgpt-apps/Apps in ChatGPT • Iconography.pdf`
 
 ## 1) Brand DNA
 

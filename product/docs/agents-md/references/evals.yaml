@@ -40,7 +40,7 @@ cases:
     prompt: "Apply Jamie agent-first scaffold standard across repos with $agents-md."
     acceptance:
       - type: contains
-        value: "/Users/jamiecraik/.codex/instructions/agent-first-scaffold-spec.md"
+        value: "~/.codex/instructions/agent-first-scaffold-spec.md"
       - type: contains
         value: "AGENT-FIRST-SCAFFOLD"
       - type: contains
@@ -60,7 +60,7 @@ cases:
       - type: contains
         value: "depends_on"
       - type: contains
-        value: "python3 /Users/jamiecraik/.codex/scripts/plan-graph-lint.py"
+        value: "python3 ~/.codex/scripts/plan-graph-lint.py"
 
   - id: canonical-verify-command
     name: canonical-verify-command
@@ -70,7 +70,7 @@ cases:
     prompt: "What verification command should scaffolded repos run?"
     acceptance:
       - type: contains
-        value: "/Users/jamiecraik/.codex/scripts/verify-work.sh"
+        value: "bash ~/.codex/scripts/verify-work.sh"
 
   - id: contradiction-handling
     name: contradiction-handling

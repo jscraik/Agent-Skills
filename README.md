@@ -156,16 +156,16 @@ See `/LICENSE`.
 2. Validate the plan graph:
 
 ```bash
-python3 /Users/jamiecraik/.codex/scripts/plan-graph-lint.py .agent/PLANS.md
+python3 ~/.codex/scripts/plan-graph-lint.py .agent/PLANS.md
 ```
 
 3. Run canonical verification:
 
 ```bash
-/Users/jamiecraik/.codex/scripts/verify-work.sh
+bash ~/.codex/scripts/verify-work.sh
 ```
 
 4. Follow scaffold policy:
 
-- `/Users/jamiecraik/.codex/instructions/agent-first-scaffold-spec.md`
+- `~/.codex/instructions/agent-first-scaffold-spec.md`
 <!-- AGENT-FIRST-WORKFLOW:END -->

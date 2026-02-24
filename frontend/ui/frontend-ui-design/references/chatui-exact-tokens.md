@@ -2,7 +2,7 @@
 
 Last verified: 2026-01-04
 
-Use this reference when the task targets `/Users/jamiecraik/chatui` and you
+Use this reference when the task targets `~/chatui` and you
 must quote exact values for colors, typography, spacing, iconography, and
 layout rules. These values are generated from the DTCG token source and the
 ChatUI icon system; do not edit tokens directly.

@@ -44,7 +44,7 @@ Fail fast:
 
 Recommended checks after updates:
 - Run the skill’s audit again and confirm issues are resolved.
-- For rules: run `/Users/jamiecraik/.codex/scripts/rules-check.sh` and `/Users/jamiecraik/.codex/scripts/rules-lint.py`.
+- For rules: run `~/.codex/scripts/rules-check.sh` and `~/.codex/scripts/rules-lint.py`.
 
 ## Constraints / Safety
 

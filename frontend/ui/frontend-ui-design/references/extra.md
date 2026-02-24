@@ -24,7 +24,7 @@ Storybook requirements: see `references/storybook.md`.
 Storybook standards: see `references/storybook-standards.md`.
 
 ## 11.1) ChatUI design + Apps SDK references (repo)
-Use these when working inside `/Users/jamiecraik/chatui`:
+Use these when working inside `~/chatui`:
 - Design rules: `docs/guides/DESIGN_GUIDELINES.md` (Apps SDK UI first, avoid raw tokens)
 - Apps SDK integration: `docs/guides/CHATGPT_INTEGRATION.md`
 - Apps SDK gap analysis: `docs/architecture/APPS_SDK_GAP_ANALYSIS.md`

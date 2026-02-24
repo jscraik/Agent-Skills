@@ -112,7 +112,7 @@ Use the failure-mode template verbatim for out-of-scope requests.
 - Existing AGENTS.md content (if present).
 - Verified commands and paths from the repo (README, docs, config files).
 - Any adjacent instruction files that may conflict (global or per-directory).
-- Whether Jamie's agent-first scaffold standard is requested (`/Users/jamiecraik/.codex/instructions/agent-first-scaffold-spec.md`).
+- Whether Jamie's agent-first scaffold standard is requested (`~/.codex/instructions/agent-first-scaffold-spec.md`).
 - Compatibility posture (default: canonical-only for unreleased/greenfield repos; replace only when explicitly requested).
 
 
@@ -213,7 +213,7 @@ Use the failure-mode template verbatim for out-of-scope requests.
 - Confirm naming conventions match the codebase.
 - Ensure no secrets or private endpoints appear.
 - For scaffold mode: verify marker blocks are present and not duplicated.
-- For scaffold mode: run `python3 /Users/jamiecraik/.codex/scripts/plan-graph-lint.py <repo>/.agent/PLANS.md`.
+- For scaffold mode: run `python3 ~/.codex/scripts/plan-graph-lint.py <repo>/.agent/PLANS.md`.
 - For scaffold mode: run link-integrity checks with `rg -n` for required global references.
 
 ## Required sections (root AGENTS.md)
@@ -224,6 +224,46 @@ Use the failure-mode template verbatim for out-of-scope requests.
 - References or imports (global protocol pointers; no duplication)
 - Global instructions discovery order (brief, link to full doc)
 - Links to category files
+
+## Flaky Test Artifact Capture (injectable block, conditional)
+
+Use this block when the repo has automated tests (Node, Python, Rust, Playwright, Vitest, Jest, or pytest evidence).
+
+Decision rule:
+1) If the user asks for flaky-test detection/artifacts/history, always inject this block.
+2) Else, inject when repo facts show test commands/config (`test` scripts, `pytest`, `vitest`, `playwright`, `jest`, `Cargo test`, or `tests/` directory).
+3) If no test evidence exists, do not inject.
+
+When injected, include these concrete requirements:
+- Required script path: `scripts/test-with-artifacts.sh`
+- Required modes: `all`, `unit`, `integration`, `e2e`
+- Required output root: `artifacts/test`
+- Required stable outputs:
+  - `artifacts/test/summary-*.json`
+  - `artifacts/test/test-output-*.log`
+  - `artifacts/test/junit-*.xml` (when runner supports it)
+  - `artifacts/test/*-results.json` (when runner supports it)
+  - `artifacts/test/artifact-manifest.json`
+- If `package.json` exists, wire scripts:
+  - `test:artifacts`, `test:artifacts:unit`, `test:artifacts:integration`, `test:artifacts:e2e`
+
+Insert this exact section in generated AGENTS.md for test repos:
+
+```md
+## Flaky Test Artifact Capture
+- Run `bash scripts/test-with-artifacts.sh all` (or `pnpm run test:artifacts` / `npm run test:artifacts` / `bun run test:artifacts`) to emit machine-readable flaky evidence under `artifacts/test`.
+- Optional targeted modes:
+  - `bash scripts/test-with-artifacts.sh unit`
+  - `bash scripts/test-with-artifacts.sh integration`
+  - `bash scripts/test-with-artifacts.sh e2e`
+- Commit/retain stable artifact paths for local automation ingestion:
+  - `artifacts/test/summary-*.json`
+  - `artifacts/test/test-output-*.log`
+  - `artifacts/test/junit-*.xml` (when supported by test runner)
+  - `artifacts/test/*-results.json` (when supported by test runner)
+  - `artifacts/test/artifact-manifest.json`
+- Keep artifact filenames stable (no timestamps in filenames) so recurring flake scans can compare runs.
+```
 
 ## Frontend Website Rules (injectable block, conditional)
 
@@ -278,14 +318,14 @@ If frontend evidence is present, inject the block into the generated `AGENTS.md`
 
 ## Agent-first scaffold integration (Jamie standard)
 
-Apply this when the user asks for agent-first rollout/scaffold across repos (especially under `/Users/jamiecraik/dev`).
+Apply this when the user asks for agent-first rollout/scaffold across repos (especially under `~/dev`).
 
 Required global references (verify they exist before insertion):
-- `/Users/jamiecraik/.codex/instructions/openai-agent-workflow-playbook.md`
-- `/Users/jamiecraik/.codex/instructions/README.checklist.md`
-- `/Users/jamiecraik/.codex/instructions/validator-contracts.md`
-- `/Users/jamiecraik/.codex/instructions/strict-toggle-governance.md`
-- `/Users/jamiecraik/.codex/instructions/agent-first-scaffold-spec.md`
+- `~/.codex/instructions/openai-agent-workflow-playbook.md`
+- `~/.codex/instructions/README.checklist.md`
+- `~/.codex/instructions/validator-contracts.md`
+- `~/.codex/instructions/strict-toggle-governance.md`
+- `~/.codex/instructions/agent-first-scaffold-spec.md`
 
 Use idempotent marker blocks:
 - `AGENTS.md`: `<!-- AGENT-FIRST-SCAFFOLD:START --> ... <!-- AGENT-FIRST-SCAFFOLD:END -->`
@@ -298,13 +338,13 @@ Use idempotent marker blocks:
 - IDs unique within plan
 - `depends_on` references in-plan IDs only
 - no self-dependency; DAG required; single connected component
-- validation command: `python3 /Users/jamiecraik/.codex/scripts/plan-graph-lint.py <plan-file>`
+- validation command: `python3 ~/.codex/scripts/plan-graph-lint.py <plan-file>`
 
 Canonical verification command:
-- `/Users/jamiecraik/.codex/scripts/verify-work.sh`
+- `bash ~/.codex/scripts/verify-work.sh`
 
 Rollout policy:
-- Link to 3-gate warn->block model in `/Users/jamiecraik/.codex/instructions/agent-first-scaffold-spec.md`.
+- Link to 3-gate warn->block model in `~/.codex/instructions/agent-first-scaffold-spec.md`.
 
 ## Variation
 
@@ -350,7 +390,7 @@ Rollout policy:
 - Do not introduce new sections without confirming they are required for every task.
 - Avoid “one‑size‑fits‑all” templates that erase repo‑specific commands.
 - In scaffold mode, writing non-idempotent edits without marker blocks.
-- Omitting `/Users/jamiecraik/.codex/instructions/agent-first-scaffold-spec.md` when Jamie standard is requested.
+- Omitting `~/.codex/instructions/agent-first-scaffold-spec.md` when Jamie standard is requested.
 - Overwriting existing instruction files/directories instead of performing scoped, deduplicated inserts.
 - Adding backwards-compatibility requirements by default in unreleased/greenfield projects.
 - Generating extra legacy-preservation code paths without an explicit compatibility requirement.

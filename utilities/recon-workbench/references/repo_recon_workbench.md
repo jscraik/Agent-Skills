@@ -1,6 +1,6 @@
 # Recon Workbench Repo Notes (Local)
 
-Source: `/Users/jamiecraik/dev/recon-workbench`
+Source: `~/dev/recon-workbench`
 
 ## Purpose
 - CLI-first interrogation toolkit for macOS, iOS Simulator, web apps, and OSS repos.

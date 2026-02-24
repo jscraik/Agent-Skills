@@ -31,18 +31,18 @@ required_response_sections:
 
 scaffold_mode_contract:
   required_global_references:
-    - /Users/jamiecraik/.codex/instructions/openai-agent-workflow-playbook.md
-    - /Users/jamiecraik/.codex/instructions/README.checklist.md
-    - /Users/jamiecraik/.codex/instructions/validator-contracts.md
-    - /Users/jamiecraik/.codex/instructions/strict-toggle-governance.md
-    - /Users/jamiecraik/.codex/instructions/agent-first-scaffold-spec.md
+    - ~/.codex/instructions/openai-agent-workflow-playbook.md
+    - ~/.codex/instructions/README.checklist.md
+    - ~/.codex/instructions/validator-contracts.md
+    - ~/.codex/instructions/strict-toggle-governance.md
+    - ~/.codex/instructions/agent-first-scaffold-spec.md
   required_markers:
     - AGENT-FIRST-SCAFFOLD
     - AGENT-FIRST-PLANS
     - AGENT-FIRST-WORKFLOW
   required_commands:
-    plan_lint: "python3 /Users/jamiecraik/.codex/scripts/plan-graph-lint.py <plan-file>"
-    verification: "/Users/jamiecraik/.codex/scripts/verify-work.sh"
+    plan_lint: "python3 ~/.codex/scripts/plan-graph-lint.py <plan-file>"
+    verification: "bash ~/.codex/scripts/verify-work.sh"
 
 non_goals:
   - implementing product code

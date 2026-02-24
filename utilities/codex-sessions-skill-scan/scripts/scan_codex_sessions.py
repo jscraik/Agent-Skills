@@ -626,7 +626,7 @@ def render_report(
             lines.append("- Repo OTLP-derived traces: none found for repos referenced in the scanned sessions window.")
 
         if otel_collector:
-            lines.append("- /Users/jamiecraik/.agents/otel-collector summary:")
+            lines.append("- ~/.agents/otel-collector summary:")
             if otel_collector.updated_at:
                 lines.append(f"  - updated_at: `{otel_collector.updated_at}`")
             lines.append(f"  - services: `{', '.join(f'{k}:{v}' for k, v in list(otel_collector.services.items())[:10])}`")
@@ -672,7 +672,7 @@ def render_report(
                 "If you see paths like `design/product-spec/...`: replace with `product/specs/product-spec/...`.",
                 "If validation scripts fail with `ModuleNotFoundError: yaml`: run them with `~/.venvs/pyyaml/bin/python`.",
                 "If errors show `python: command not found`: prefer explicit interpreters (`python3` for stdlib scripts; `~/.venvs/pyyaml/bin/python` for skill gates).",
-                "If `~` is not expanding in a tool config: replace with an absolute path (e.g. `/Users/jamiecraik/...`).",
+                "If `~` is not expanding in a tool config: replace with an absolute path (e.g. `/home/<user>/...`).",
             ]
         )
     )
