@@ -1,0 +1,32 @@
+[
+  {
+    "code": "PI_OVERRIDE",
+    "regex": "\\b(ignore|disregard|forget)\\b.{0,120}\\b(previous|prior|system|developer)\\b",
+    "message": "Potential prompt-injection override language detected; ensure this is not instructing bypass of higher-priority instructions.",
+    "severity": "high"
+  },
+  {
+    "code": "PI_ROLEPLAY",
+    "regex": "\\byou are now\\b|\\bpretend to be\\b|\\bact as\\b",
+    "message": "Role-shifting language detected; verify it is safe and constrained to user intent.",
+    "severity": "medium"
+  },
+  {
+    "code": "PI_TOOL_CHAIN",
+    "regex": "\\b(jailbreak|exfiltrate)\\b|\\b(bypass|override)\\b.{0,120}\\b(system|developer|safety|guardrail|policy|instruction)s?\\b",
+    "message": "High-risk control language detected; verify this does not request bypassing system/developer/safety constraints.",
+    "severity": "high"
+  },
+  {
+    "code": "PI_COMMANDS",
+    "regex": "\\b(run|execute|invoke)\\b.{0,40}\\b(curl|wget|powershell|invoke-webrequest|nc|netcat|rm\\s+-rf|chmod\\s+777)\\b",
+    "message": "Command-like instructions detected; ensure commands are gated and safe.",
+    "severity": "medium"
+  },
+  {
+    "code": "PI_OBFUSCATION",
+    "regex": "\\b(base64|b64decode|decode\\(['\\\"]base64['\\\"]\\)|rot13|url ?decode|unicode escape|zero[- ]width|invisible character)\\b",
+    "message": "Potential hidden-instruction language detected; verify it cannot bypass safety checks.",
+    "severity": "high"
+  }
+]

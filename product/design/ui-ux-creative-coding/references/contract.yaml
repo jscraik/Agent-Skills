@@ -1,21 +1,24 @@
 purpose: >
   Define expected behavior and outputs for the ui-ux-creative-coding skill,
   including intertwined and separate persona composition modes.
-schema_version: 1.2
+schema_version: 1.3
 triggers:
   - user requests UI/UX direction plus implementation-ready delivery artifacts
   - user asks for motion polish, micro-interactions, or creative coding accents in UI
   - user asks to apply one or more personas (benjitaylor, jh3yy, jenny_wen, emilkowalski)
+  - user explicitly opts into a style profile overlay (for example design-taste-frontend)
 inputs:
   - product brief or target workflow
   - platform and stack constraints
   - existing assets, tokens, and references
   - acceptance criteria and required checks
+  - optional overlay selection and whether strict enforcement is required
 outputs:
   - UI brief and user-model summary
   - component/system plan and motion rules
   - implementation-ready plan with concrete next steps
   - validation checklist and handoff artifacts
+  - overlay summary when enabled (active dials + enforced guardrails)
 response_format:
   headings_order:
     - "## When to use"
@@ -38,6 +41,7 @@ output_rules:
   - Do not omit required headings.
   - If persona guidance is requested, first Outputs bullet(s) must contain requested persona marker(s).
   - For multi-persona requests, include each selected marker once in requested order.
+  - If a style overlay is requested, include active dial values or explicit user overrides.
 non_goals:
   - brand-only work without UI deliverables
   - full WebGL apps or games unless explicitly requested

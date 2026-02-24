@@ -10,6 +10,7 @@ description: "Use when UI work needs polished motion + implementation artifacts 
 - [When to use](#when-to-use)
 - [When not to use](#when-not-to-use)
 - [Persona composition modes](#persona-composition-modes)
+- [Optional style overlays](#optional-style-overlays)
 - [Required inputs](#required-inputs)
 - [Deliverables](#deliverables)
 - [Response format (required)](#response-format-required)
@@ -73,11 +74,26 @@ Dedicated standalone persona skills (for stricter persona workflows):
 - `~/dev/agent-skills/personas/jenny-wen-persona/SKILL.md`
 - `~/dev/agent-skills/personas/emilkowalski-persona/SKILL.md`
 
+## Optional style overlays
+Use optional overlays only when explicitly requested by the user.
+
+### `design-taste-frontend` overlay (opt-in)
+- Activates a high-agency frontend style profile with baseline dials:
+  - `DESIGN_VARIANCE: 8`
+  - `MOTION_INTENSITY: 6`
+  - `VISUAL_DENSITY: 4`
+- Treat these as defaults that users may adjust in-prompt.
+- Apply strict rules from this overlay only when requested (for example dependency verification, interaction-state completeness, anti-emoji policy, layout/motion guardrails).
+- Keep core skill behavior unchanged when overlay is not requested.
+
+Reference: `references/design-taste-overlay.md`
+
 ## Required inputs
 - Product goal, user context, and success metric(s).
 - Stack + platform constraints (Tauri/React/Vite, Tailwind v4, Radix, optional Three.js).
 - Existing system constraints (tokens, components, patterns, content model).
 - Definition of done (a11y/perf/visual checks, acceptance criteria).
+- Optional overlay selection (default none). If `design-taste-frontend` is active, confirm whether strict rules are hard requirements or strong defaults.
 
 If input is missing, ask only the minimum questions needed to proceed safely.
 
@@ -88,6 +104,7 @@ Unless the user asks otherwise, produce:
 3. Motion plan (durations, easing, reduced-motion parity).
 4. Implementation plan (file paths, APIs, interaction notes).
 5. Verification notes (a11y + performance + visual regression readiness).
+6. Overlay summary when enabled (active dials, enforced constraints, and explicit deviations).
 
 When requested, add:
 - Storybook stories / handoff snippets.
@@ -117,23 +134,28 @@ Persona marker rules:
 ## Workflow
 1. **Frame the moment**: user action, intent, and desired feeling.
 2. **Pick mode**: intertwined (default) or separate persona overlay.
-3. **Draft brief**: goals, constraints, success metrics, and non-goals.
-4. **Design system pass**: states, variants, tokens, semantics, keyboard/focus behavior.
-5. **Motion pass**: timing/easing decisions, interruptibility, reduced-motion parity.
-6. **Implementation plan**: concrete components/files and patch-ready next steps.
-7. **Verify**: a11y, performance, and visual consistency gates.
+3. **Pick style profile**: default behavior or explicit opt-in overlay (`design-taste-frontend`).
+4. **Draft brief**: goals, constraints, success metrics, and non-goals.
+5. **Design system pass**: states, variants, tokens, semantics, keyboard/focus behavior.
+6. **Motion pass**: timing/easing decisions, interruptibility, reduced-motion parity.
+7. **Implementation plan**: concrete components/files and patch-ready next steps.
+8. **Verify**: a11y, performance, and visual consistency gates.
 
 ## Quality gates
 - Accessibility: focus management, keyboard parity, semantic structure, contrast.
 - Motion safety: reduced-motion parity and interruptible transitions.
 - Performance: prefer transform/opacity; avoid layout thrash in high-frequency interactions.
 - Regression readiness: Storybook states + visual review path (Argos or equivalent).
+- Fail fast: stop at first failed gate and do not proceed until fixed.
+- Dependency/version guard (when code is requested): verify required UI/motion/icon packages and Tailwind major version before recommending version-specific syntax.
+- Full interaction cycle for interactive flows: loading, empty, error, and tactile active state.
 
 ## Constraints
 - Prefer existing repo patterns and dependencies; do not add new heavy dependencies without approval.
 - Keep recommendations incremental, testable, and patch-ready.
 - Never expose secrets, credentials, or private URLs in outputs.
 - Do not sacrifice accessibility or reduced-motion parity for visual novelty.
+- Overlay rules are opt-in only. Do not enforce `design-taste-frontend` constraints unless explicitly requested.
 
 ## Validation
 Fail fast: stop at first failed gate, fix, and rerun.
@@ -144,6 +166,7 @@ Required checks:
 - Persona marker contract when persona overlays are requested.
 - Accessibility baseline (focus, keyboard, semantics, contrast).
 - Motion/performance sanity (interruptibility + reduced-motion + no avoidable layout thrash).
+- If `design-taste-frontend` overlay is requested: confirm active dial values (or user-set values) and apply overlay guardrails.
 
 ## Encouraging variation
 - Adapt depth by request: concise triage vs detailed implementation plan.
@@ -168,7 +191,7 @@ Helpers:
 ## Anti-patterns
 - Over-animating core flows where motion adds no clarity.
 - Shipping hover-only affordances without focus/keyboard parity.
-- One-off styling that bypasses tokens/variants without justification.
+- One-off styling that ignores tokens/variants without justification.
 - Recommending heavy dependencies before platform-native options.
 - Treating AI output as production-ready without a quality pass.
 
@@ -192,6 +215,7 @@ The agent is capable of extraordinary work in this domain. Use these guidelines 
 
 ## Reference map
 - Persona synthesis: `references/persona-synthesis.md`
+- Optional style overlay: `references/design-taste-overlay.md`
 - Motion guidance: `references/motion-guidelines.md`, `references/motion-performance-guardrails.md`
 - Interaction notes: `references/emilkowalski-notes.md`, `references/jhey-tompkins-notes.md`
 - Examples: `references/examples.md`, `references/invocation-examples.md`
