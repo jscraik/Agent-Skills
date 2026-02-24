@@ -13,10 +13,12 @@ inputs:
   - repo_root_path
   - existing_gemini_md_state
   - verified_repo_commands_and_paths
+  - package_manager_signal
   - conflicting_instruction_sources
 
 outputs:
   - minimal_root_gemini_md_with_links
+  - package_manager_command_map
   - idempotent_or_merge_style_edits
   - optional_nested_gemini_md_scoping_plan
   - memory_workflow_and_refresh_guidance
@@ -39,8 +41,9 @@ risks:
     mitigation: include `/memory refresh` guidance for long sessions
   - risk: conflicting_instruction_sources
     mitigation: identify conflicts and ask which source should win
+  - risk: wrong_package_manager_commands
+    mitigation: detect package manager via packageManager+lockfile+repo command evidence and ask on conflicts
 
 required_memories_commands:
   - /memory show
   - /memory refresh
-

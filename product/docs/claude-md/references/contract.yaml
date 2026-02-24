@@ -14,11 +14,13 @@ inputs:
   - repo_root_path
   - existing_claude_file_state
   - verified_repo_commands_and_paths
+  - package_manager_signal
   - conflicting_instruction_sources
   - target_scope_for_changes
 
 outputs:
   - minimal_claude_md_for_target_scope
+  - package_manager_command_map
   - include_exclude_matrix
   - contradictions_list_with_resolution_questions
   - flag_for_deletion_list
@@ -41,3 +43,5 @@ risks:
     mitigation: surface conflict and ask user which rule should win
   - risk: broken_import_links
     mitigation: verify every @path exists before finalizing
+  - risk: wrong_package_manager_commands
+    mitigation: detect package manager via packageManager+lockfile+repo command evidence and ask on conflicts
