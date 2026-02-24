@@ -9,6 +9,15 @@ base_sha=""
 head_sha="HEAD"
 report_json="artifacts/skill-graphs/pilot/promotion-validation-report.json"
 
+require_option_value() {
+  local opt="$1"
+  if [[ $# -lt 2 || -z "${2:-}" || "${2:-}" == --* ]]; then
+    echo "Missing value for ${opt}" >&2
+    usage
+    exit 2
+  fi
+}
+
 usage() {
   cat <<'USAGE'
 Usage: scripts/validate_recursive_promotions.sh [options]
@@ -28,14 +37,17 @@ while (($# > 0)); do
       shift
       ;;
     --base-sha)
+      require_option_value "$1" "$@"
       base_sha="$2"
       shift 2
       ;;
     --head-sha)
+      require_option_value "$1" "$@"
       head_sha="$2"
       shift 2
       ;;
     --report-json)
+      require_option_value "$1" "$@"
       report_json="$2"
       shift 2
       ;;

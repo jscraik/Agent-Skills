@@ -18,6 +18,15 @@ policy_sig_file="docs/skill-graphs/governance/recursive-loop-approvers.sig"
 canonical_policy_file="docs/skill-graphs/governance/recursive-loop-approvers.yaml"
 canonical_policy_sig_file="docs/skill-graphs/governance/recursive-loop-approvers.sig"
 
+require_option_value() {
+  local opt="$1"
+  if [[ $# -lt 2 || -z "${2:-}" || "${2:-}" == --* ]]; then
+    echo "Missing value for ${opt}" >&2
+    usage
+    exit 2
+  fi
+}
+
 usage() {
   cat <<'USAGE'
 Usage: scripts/human_promote_recursive_run.sh [options]
@@ -42,34 +51,42 @@ USAGE
 while (($# > 0)); do
   case "$1" in
     --run-id)
+      require_option_value "$1" "$@"
       run_id="$2"
       shift 2
       ;;
     --run-dir)
+      require_option_value "$1" "$@"
       run_dir="$2"
       shift 2
       ;;
     --lesson-id)
+      require_option_value "$1" "$@"
       lesson_id="$2"
       shift 2
       ;;
     --reviewer)
+      require_option_value "$1" "$@"
       reviewers="$2"
       shift 2
       ;;
     --expected-version)
+      require_option_value "$1" "$@"
       expected_version="$2"
       shift 2
       ;;
     --lesson-file)
+      require_option_value "$1" "$@"
       lesson_file="$2"
       shift 2
       ;;
     --decision)
+      require_option_value "$1" "$@"
       decision="$2"
       shift 2
       ;;
     --note)
+      require_option_value "$1" "$@"
       note="$2"
       shift 2
       ;;
@@ -78,10 +95,12 @@ while (($# > 0)); do
       shift
       ;;
     --policy-file)
+      require_option_value "$1" "$@"
       policy_file="$2"
       shift 2
       ;;
     --policy-sig-file)
+      require_option_value "$1" "$@"
       policy_sig_file="$2"
       shift 2
       ;;

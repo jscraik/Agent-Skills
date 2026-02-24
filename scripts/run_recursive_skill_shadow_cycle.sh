@@ -9,21 +9,33 @@ window_days=7
 out_root="artifacts/skill-graphs/runs"
 profiles_file="docs/skill-graphs/schemas/examples/pilot-profiles.json"
 
+require_option_value() {
+  local opt="$1"
+  if [[ $# -lt 2 || -z "${2:-}" || "${2:-}" == --* ]]; then
+    echo "Missing value for ${opt}" >&2
+    exit 2
+  fi
+}
+
 while (($# > 0)); do
   case "$1" in
     --runs-per-profile)
+      require_option_value "$1" "$@"
       runs_per_profile="$2"
       shift 2
       ;;
     --window-days)
+      require_option_value "$1" "$@"
       window_days="$2"
       shift 2
       ;;
     --out-root)
+      require_option_value "$1" "$@"
       out_root="$2"
       shift 2
       ;;
     --profiles-file)
+      require_option_value "$1" "$@"
       profiles_file="$2"
       shift 2
       ;;
