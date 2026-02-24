@@ -907,7 +907,7 @@ def check_security_eval_coverage(skill_dir: Path, *, require_security_evals: boo
     def _contains_risky_command(text: str) -> bool:
         for command in risky_commands:
             if command == "nc":
-                if re.search(r"(^|[\\s;&|])nc($|[\\s;&|])", text):
+                if re.search(r"(^|[\s;&|])nc($|[\s;&|])", text):
                     return True
                 continue
             if command in text:
