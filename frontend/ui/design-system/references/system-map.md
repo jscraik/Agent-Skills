@@ -58,14 +58,14 @@
 - Token validation: `pnpm validate:tokens`
 - Coverage policy: `pnpm ds:matrix:check`
 - Design-system governance docs:
-- `docs/design-system/collections/brand-collection-rules.md`
-- `docs/design-system/collections/alias-collection-rules.md`
-- `docs/design-system/collections/mapped-collection-rules.md`
-- `docs/design-system/collections/responsive-collection-rules.md`
-- `docs/design-system/ADOPTION_CHECKLIST.md`
-- `docs/design-system/A11Y_CONTRACTS.md`
-- `docs/design-system/COVERAGE_MATRIX.md`
-- `packages/tokens/docs/FIGMA_EXPORT_GUIDE.md`
+  - `docs/design-system/collections/brand-collection-rules.md`
+  - `docs/design-system/collections/alias-collection-rules.md`
+  - `docs/design-system/collections/mapped-collection-rules.md`
+  - `docs/design-system/collections/responsive-collection-rules.md`
+  - `docs/design-system/ADOPTION_CHECKLIST.md`
+  - `docs/design-system/A11Y_CONTRACTS.md`
+  - `docs/design-system/COVERAGE_MATRIX.md`
+  - `packages/tokens/docs/FIGMA_EXPORT_GUIDE.md`
 
 ## Fast retrieval commands
 ```bash
