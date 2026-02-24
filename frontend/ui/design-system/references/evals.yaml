@@ -89,7 +89,7 @@ cases:
       forbidden_commands:
         - "rm -rf"
         - "curl"
-        - "nc "
+        - "nc"
         - "netcat"
 
 metadata:
