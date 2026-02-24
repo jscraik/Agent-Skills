@@ -19,9 +19,22 @@ REPO=""
 FORCE="0"
 DRY_RUN="0"
 
+require_option_value() {
+  local opt="$1"
+  if [[ $# -lt 2 || -z "${2:-}" || "${2:-}" == --* ]]; then
+    echo "Missing value for ${opt}" >&2
+    usage
+    exit 2
+  fi
+}
+
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --repo) REPO="${2:-}"; shift 2 ;;
+    --repo)
+      require_option_value "$1" "$@"
+      REPO="$2"
+      shift 2
+      ;;
     --force) FORCE="1"; shift 1 ;;
     --dry-run) DRY_RUN="1"; shift 1 ;;
     -h|--help) usage; exit 0 ;;
