@@ -68,10 +68,10 @@ Primary references inside this skill:
 - `references/emilkowalski-persona.md`
 
 Dedicated standalone persona skills (for stricter persona workflows):
-- `/Users/jamiecraik/dev/agent-skills/personas/benjitaylor-persona/SKILL.md`
-- `/Users/jamiecraik/dev/agent-skills/personas/jh3yy-persona/SKILL.md`
-- `/Users/jamiecraik/dev/agent-skills/personas/jenny-wen-persona/SKILL.md`
-- `/Users/jamiecraik/dev/agent-skills/personas/emilkowalski-persona/SKILL.md`
+- `~/dev/agent-skills/personas/benjitaylor-persona/SKILL.md`
+- `~/dev/agent-skills/personas/jh3yy-persona/SKILL.md`
+- `~/dev/agent-skills/personas/jenny-wen-persona/SKILL.md`
+- `~/dev/agent-skills/personas/emilkowalski-persona/SKILL.md`
 
 ## Required inputs
 - Product goal, user context, and success metric(s).

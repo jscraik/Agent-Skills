@@ -25,7 +25,7 @@ Interview → write/update spec → (after approval) run planning/execution as a
 
 ## User profile alignment (Jamie)
 
-Follow `/Users/jamiecraik/.codex/USER_PROFILE.md`: single-threaded, explicit steps, low cognitive load. Always use multiple-choice questions (3–5 options, include a recommended default) and map any free-text reply to the closest option with confirmation.
+Follow `~/.codex/USER_PROFILE.md`: single-threaded, explicit steps, low cognitive load. Always use multiple-choice questions (3–5 options, include a recommended default) and map any free-text reply to the closest option with confirmation.
 
 ## Philosophy + guiding questions
 

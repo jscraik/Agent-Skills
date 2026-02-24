@@ -1,7 +1,7 @@
 # UI Spec Guide (Gold Standard, Jan 2026)
 
 ## Design system source of truth (aStudio)
-Absolute root: `/Users/jamiecraik/dev/aStudio`
+Absolute root: `~/dev/aStudio`
 
 ## Token source map (required)
 

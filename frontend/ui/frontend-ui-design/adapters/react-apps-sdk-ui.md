@@ -26,7 +26,7 @@ Recommend small hooks:
 - toolOutput is authoritative; treat it as read-only.
 - widgetState is for UI-only, ephemeral state; keep payload small; do not store secrets.
 
-## E) ChatUI guardrails (when in /Users/jamiecraik/chatui)
+## E) ChatUI guardrails (when in ~/chatui)
 - Prefer `@chatui/ui` wrappers before importing `@openai/apps-sdk-ui` directly.
 - Do not import `@radix-ui/*` outside `packages/ui/src/primitives`.
 - Do not import `lucide-react` directly; use `packages/ui/src/icons` adapter.

@@ -23,7 +23,7 @@ Kernel-enforced: Question validity gate, DISCOVER vs DECIDE intent switch, Decis
 
 ## User profile alignment (Jamie)
 
-Follow `/Users/jamiecraik/.codex/USER_PROFILE.md`: single-threaded, explicit steps, low cognitive load. Keep one question per turn and map any free-text reply to the closest option with confirmation.
+Follow `~/.codex/USER_PROFILE.md`: single-threaded, explicit steps, low cognitive load. Keep one question per turn and map any free-text reply to the closest option with confirmation.
 
 ## Philosophy
 

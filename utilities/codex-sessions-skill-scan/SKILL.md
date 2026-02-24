@@ -16,7 +16,7 @@ This skill runs a **daily scan** over Codex session logs (global `~/.codex/sessi
 ## Quick start (daily)
 Run:
 ```bash
-cd /Users/jamiecraik/dev/agent-skills
+cd ~/dev/agent-skills
 python3 utilities/codex-sessions-skill-scan/scripts/scan_codex_sessions.py --days 1 --include-otel
 ```
 
@@ -70,7 +70,7 @@ If the user asks to apply fixes:
 1) Make the smallest possible edits to the referenced personal skill files.
 2) Re-run skill gates (fail fast on first failure):
 ```bash
-cd /Users/jamiecraik/dev/agent-skills
+cd ~/dev/agent-skills
 ~/.venvs/pyyaml/bin/python utilities/skill-creator/scripts/quick_validate.py <skill-folder>
 ~/.venvs/pyyaml/bin/python utilities/skill-creator/scripts/skill_gate.py <skill-folder>
 ```

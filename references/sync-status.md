@@ -1,6 +1,6 @@
 # Skills Sync Status
 
-**Canonical source**: `/Users/jamiecraik/dev/agent-skills/skills`
+**Canonical source**: `~/dev/agent-skills/skills`
 
 ## Auto-synced paths
 

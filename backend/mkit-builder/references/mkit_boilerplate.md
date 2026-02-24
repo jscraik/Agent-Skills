@@ -1,7 +1,7 @@
 # mKit Boilerplate Guide (Cloudflare Workers)
 
 Use this guide when implementing or extending the mKit MCP boilerplate in
-`/Users/jamiecraik/dev/mKit`.
+`~/dev/mKit`.
 
 ## Purpose
 

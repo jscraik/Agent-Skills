@@ -4,9 +4,9 @@
 
 1. Ensure canonical skill path exists in repo.
 2. Sync skill symlinks/index:
-   - `/Users/jamiecraik/dev/agent-skills/scripts/sync_skills.sh`
+   - `~/dev/agent-skills/scripts/sync_skills.sh`
 3. Confirm skill appears in flat skills view:
-   - `/Users/jamiecraik/dev/agent-skills/skills/agent-native-architecture`
+   - `~/dev/agent-skills/skills/agent-native-architecture`
 4. Verify explicit invocation in Codex:
    - `$agent-native-architecture ...`
 5. Run evals and validation gates before broad adoption.
@@ -25,7 +25,7 @@ Disable without deleting files using `~/.codex/config.toml`:
 
 ```toml
 [[skills.config]]
-path = "/Users/jamiecraik/dev/agent-skills/product/tech/agent-native-architecture/SKILL.md"
+path = "~/dev/agent-skills/product/tech/agent-native-architecture/SKILL.md"
 enabled = false
 ```
 

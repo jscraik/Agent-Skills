@@ -22,7 +22,7 @@ description: "Analyze and implement repository-grounded design-system work (toke
 - [Remember](#remember)
 
 ## Working agreement
-- Follow `/Users/jamiecraik/dev/design-system/AGENTS.md` and treat docs as maps.
+- Follow `~/dev/design-system/AGENTS.md` and treat docs as maps.
 - Prefer retrieval-led reasoning: inspect canonical files before proposing answers/changes.
 - Use `zsh -lc`, `rg`, `fd`, and `jq`; avoid `grep`/`find` for repo-wide scans.
 - Artifact boundary:
