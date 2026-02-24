@@ -70,17 +70,13 @@ If either check fails, use the troubleshooting section below.
 
 ## Deprecations (Wave 1)
 
-Canonical skills for the first consolidation wave:
+Wave 1 deprecated aliases were retired early and removed from the repository on **2026-02-24**.
+
+Canonical replacements:
 
 - `product-spec` with modes: `full_pipeline`, `clarify_prd`, `ux_only`, `api_spec`, `arch_spec`, `testplan`
 - `tech-spec` with modes: `data_spec`, `migration_plan`, `ops_spec`, `performance_plan`
 - `figma` with modes: `setup`, `extract_context`, `implement_design`, `troubleshoot`
-
-Backward-compatible aliases remain active during the deprecation window (target review date: **2026-04-12**):
-
-- PRD aliases: `prd-clarifier`, `prd-to-api`, `prd-to-arch`, `prd-to-testplan`, `prd-to-ux`
-- Tech aliases: `tech-to-data`, `tech-to-migration`, `tech-to-ops`, `tech-to-performance`
-- Figma alias: `figma-implement-design`
 
 ## Docs governance
 

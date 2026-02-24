@@ -50,7 +50,6 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 ## Frontend — Ui
 
 - `design-system` — Analyze and implement repository-grounded design-system work (tokens, typography, iconography, spacing, styles, aliases, and theme variables) for this monorepo. Use when requests involve UI styling systems or token-layer changes; don’t use for backend/MCP-only tasks with no UI impact. Outputs: evidence-backed analysis or changes with canonical file references, layer impact, and validation commands. Success: work aligns to Brand→Alias→Mapped rules and passes design-system checks.
-- `figma-implement-design` — DEPRECATED alias of figma. Convert legacy invocations when requests explicitly name figma-implement-design; immediately route to figma in implement_design mode.
 - `figma` — Use this canonical Figma skill to extract design context/screenshots/assets with Figma MCP and build production-ready UI guidance. Use when requests include Figma URLs/node IDs, design-to-code implementation, or Figma MCP setup/troubleshooting.
 - `frontend-ui-design` — Create and review production-ready UI systems/components with tokens and accessibility. Use for standard UI implementation or redesign (not creative-coding polish). Use when the user requests this capability.
 - `interface-craft` — Interface Craft by Josh Puckett helps build polished React interfaces with storyboard motion, live tuning controls, critique frameworks, and concept workflows; use when requests involve UI motion, critique, refinement, concept exploration, or interaction craft.
@@ -62,14 +61,9 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 ## Github
 
 - `automate-github-issues` — Use when the user asks to automate GitHub issue triage with parallel Jules agents; output a validated fleet setup and runbook for analyze, plan, dispatch, and merge.
-- `gh-actions-fix` — DEPRECATED alias of gh-workflow. Convert legacy invocations when requests explicitly name gh-actions-fix; immediately route to gh-workflow in ci_diagnose mode.
-- `gh-address-comments` — DEPRECATED alias of gh-workflow. Convert legacy invocations when requests explicitly name gh-address-comments; immediately route to gh-workflow in pr_review_comments mode.
 - `gh-fix-ci` — Use when a user asks to debug or fix failing GitHub PR checks that run in GitHub Actions; use `gh` to inspect checks and logs, summarize failure context, draft a fix plan, and implement only after explicit approval. Treat external providers (for example Buildkite) as out of scope and report only the details URL.
-- `gh-issue-fix` — DEPRECATED alias of gh-workflow. Convert legacy invocations when requests explicitly name gh-issue-fix; immediately route to gh-workflow in issue_fix mode.
-- `gh-pr-local` — DEPRECATED alias of gh-workflow. Convert legacy invocations when requests explicitly name gh-pr-local; immediately route to gh-workflow in pr_prepare mode.
 - `gh-workflow` — Consolidated GitHub lifecycle skill for agents and users: intake, issue fixing, PR prep, review request/reception, review comment handling, CI diagnosis, and server-side merge via gh. Use when requests involve GitHub issues/PRs/checks/merge operations.
 - `local-action-verification` — Use when the user asks to validate GitHub Actions locally with act; output setup guidance, AGENTS.md instructions, and fail-fast checks before push or PR.
-- `yeet` — DEPRECATED alias of gh-workflow. Convert legacy invocations when requests explicitly name yeet; immediately route to gh-workflow in pr_prepare mode.
 
 ## Interview
 
@@ -133,11 +127,6 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 
 ## Product — Specs
 
-- `prd-clarifier` — DEPRECATED alias of product-spec. Convert legacy invocations when requests explicitly name prd-clarifier; immediately route to product-spec in clarify_prd mode.
-- `prd-to-api` — DEPRECATED alias of product-spec. Convert legacy invocations when requests explicitly name prd-to-api; immediately route to product-spec in api_spec mode.
-- `prd-to-arch` — DEPRECATED alias of product-spec. Convert legacy invocations when requests explicitly name prd-to-arch; immediately route to product-spec in arch_spec mode.
-- `prd-to-testplan` — DEPRECATED alias of product-spec. Convert legacy invocations when requests explicitly name prd-to-testplan; immediately route to product-spec in testplan mode.
-- `prd-to-ux` — DEPRECATED alias of product-spec. Convert legacy invocations when requests explicitly name prd-to-ux; immediately route to product-spec in ux_only mode.
 - `product-spec` — Create or review implementation-ready product specifications from ideas or existing docs. Use when you need a full PRD+UX+build plan pipeline or a focused mode (clarify_prd, ux_only, api_spec, arch_spec, testplan).
 
 ## Product — Strategy
@@ -150,10 +139,6 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 
 - `agent-native-architecture` — Design or review agent-native application architecture for Codex-based workflows. Use when planning parity between UI and agent actions, primitive tool design, execution-loop completion signals, context injection, and safe rollout/rollback for agent-driven products.
 - `tech-spec` — Create implementation-ready technical planning artifacts from an existing tech spec. Use when you need one focused mode: data_spec, migration_plan, ops_spec, or performance_plan.
-- `tech-to-data` — DEPRECATED alias of tech-spec. Convert legacy invocations when requests explicitly name tech-to-data; immediately route to tech-spec in data_spec mode.
-- `tech-to-migration` — DEPRECATED alias of tech-spec. Convert legacy invocations when requests explicitly name tech-to-migration; immediately route to tech-spec in migration_plan mode.
-- `tech-to-ops` — DEPRECATED alias of tech-spec. Convert legacy invocations when requests explicitly name tech-to-ops; immediately route to tech-spec in ops_spec mode.
-- `tech-to-performance` — DEPRECATED alias of tech-spec. Convert legacy invocations when requests explicitly name tech-to-performance; immediately route to tech-spec in performance_plan mode.
 
 ## Utilities
 

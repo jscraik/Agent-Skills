@@ -50,9 +50,13 @@ References containing legacy names were found in:
 
 ## Deprecation window
 
-- Alias wrappers active: now
-- Alias review date: **2026-04-12**
-- Retirement condition: zero alias hits for prior 30 days
+- Alias wrappers active: from 2026-02-11 to 2026-02-24
+- Planned alias review date (historical): **2026-04-12**
+- Planned retirement condition (historical): zero alias hits for prior 30 days
+
+## Retirement update
+
+- Deprecated aliases were retired early and removed on **2026-02-24**.
 
 ## Follow-up checkpoints
 

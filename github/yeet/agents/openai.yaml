@@ -1,6 +1,0 @@
-interface:
-  display_name: "Yeet (Alias)"
-  short_description: "Alias to gh-workflow pr_prepare"
-  icon_small: "./assets/yeet-small.svg"
-  icon_large: "./assets/yeet.png"
-  default_prompt: "Use the canonical gh-workflow skill in pr_prepare mode for this request."

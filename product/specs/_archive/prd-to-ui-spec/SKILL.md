@@ -55,7 +55,7 @@ Write the UI spec in the same directory as the source file.
 
 ## Scope and triggers
 - Use this skill when a PRD/UX spec needs a concrete UI spec grounded in aStudio.
-- If the request is outside scope, route to `prd-to-ux` or `product-spec`.
+- If the request is outside scope, route to `product-spec`.
 
 ## Required inputs
 - User request details and any relevant files/links.
