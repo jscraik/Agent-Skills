@@ -15,12 +15,37 @@ TARGET_ID=""
 TARGET_LOCATOR=""
 OUT=""
 
+require_option_value() {
+  local opt="$1"
+  if [[ $# -lt 2 || -z "${2:-}" || "${2:-}" == --* ]]; then
+    echo "Missing value for ${opt}" >&2
+    usage
+    exit 2
+  fi
+}
+
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --run-dir) RUN_DIR="$2"; shift 2 ;;
-    --target-id) TARGET_ID="$2"; shift 2 ;;
-    --target-locator) TARGET_LOCATOR="$2"; shift 2 ;;
-    --out) OUT="$2"; shift 2 ;;
+    --run-dir)
+      require_option_value "$1" "$@"
+      RUN_DIR="$2"
+      shift 2
+      ;;
+    --target-id)
+      require_option_value "$1" "$@"
+      TARGET_ID="$2"
+      shift 2
+      ;;
+    --target-locator)
+      require_option_value "$1" "$@"
+      TARGET_LOCATOR="$2"
+      shift 2
+      ;;
+    --out)
+      require_option_value "$1" "$@"
+      OUT="$2"
+      shift 2
+      ;;
     -h|--help) usage; exit 0 ;;
     *) echo "Unknown option: $1"; usage; exit 2 ;;
   esac

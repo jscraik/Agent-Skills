@@ -30,15 +30,44 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 ROOT="$(cd -- "$SCRIPT_DIR/.." && pwd)"
 VALIDATE="1"
 
+require_option_value() {
+  local opt="$1"
+  if [[ $# -lt 2 || -z "${2:-}" || "${2:-}" == --* ]]; then
+    echo "Missing value for ${opt}" >&2
+    usage
+    exit 2
+  fi
+}
+
 if [[ "$cmd" == "plan" ]]; then
   target_id=""; kind=""; locator=""; goal=""; out=""
   while [[ $# -gt 0 ]]; do
     case "$1" in
-      --target-id) target_id="$2"; shift 2 ;;
-      --kind) kind="$2"; shift 2 ;;
-      --locator) locator="$2"; shift 2 ;;
-      --goal) goal="$2"; shift 2 ;;
-      --out) out="$2"; shift 2 ;;
+      --target-id)
+        require_option_value "$1" "$@"
+        target_id="$2"
+        shift 2
+        ;;
+      --kind)
+        require_option_value "$1" "$@"
+        kind="$2"
+        shift 2
+        ;;
+      --locator)
+        require_option_value "$1" "$@"
+        locator="$2"
+        shift 2
+        ;;
+      --goal)
+        require_option_value "$1" "$@"
+        goal="$2"
+        shift 2
+        ;;
+      --out)
+        require_option_value "$1" "$@"
+        out="$2"
+        shift 2
+        ;;
       --no-validate) VALIDATE="0"; shift 1 ;;
       -h|--help) usage; exit 0 ;;
       *) echo "Unknown option: $1"; usage; exit 2 ;;
@@ -62,10 +91,26 @@ if [[ "$cmd" == "summarize" ]]; then
   target_id=""; run_dir=""; schema=""; out=""
   while [[ $# -gt 0 ]]; do
     case "$1" in
-      --target-id) target_id="$2"; shift 2 ;;
-      --run-dir) run_dir="$2"; shift 2 ;;
-      --schema) schema="$2"; shift 2 ;;
-      --out) out="$2"; shift 2 ;;
+      --target-id)
+        require_option_value "$1" "$@"
+        target_id="$2"
+        shift 2
+        ;;
+      --run-dir)
+        require_option_value "$1" "$@"
+        run_dir="$2"
+        shift 2
+        ;;
+      --schema)
+        require_option_value "$1" "$@"
+        schema="$2"
+        shift 2
+        ;;
+      --out)
+        require_option_value "$1" "$@"
+        out="$2"
+        shift 2
+        ;;
       --no-validate) VALIDATE="0"; shift 1 ;;
       -h|--help) usage; exit 0 ;;
       *) echo "Unknown option: $1"; usage; exit 2 ;;
