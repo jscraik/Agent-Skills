@@ -132,7 +132,7 @@ def list_procs(
         "cpu": lambda x: x["cpu"],
         "mem": lambda x: x["mem"],
         "disk": lambda x: x["read_bytes"] + x["write_bytes"],
-        "name": lambda x: x["name"].lower(),
+        "name": lambda x: safe_name(x["name"]).lower(),
         "pid": lambda x: x["pid"],
     }
     procs.sort(key=sort_keys.get(sort, sort_keys["cpu"]), reverse=sort != "name")
@@ -307,11 +307,12 @@ def info(pid: int = typer.Argument(..., help="Process ID")):
 def find(name: str = typer.Argument(..., help="Process name to search")):
     """Find processes by name."""
     found = []
+    needle = name.lower()
     for proc in psutil.process_iter(['pid', 'name', 'cmdline', 'cpu_percent', 'memory_percent']):
         try:
-            pname = proc.info['name'].lower()
+            pname = safe_name(proc.info.get('name')).lower()
             cmdline = " ".join(proc.info['cmdline'] or []).lower()
-            if name.lower() in pname or name.lower() in cmdline:
+            if needle in pname or needle in cmdline:
                 found.append(proc.info)
         except (psutil.NoSuchProcess, psutil.AccessDenied):
             pass
