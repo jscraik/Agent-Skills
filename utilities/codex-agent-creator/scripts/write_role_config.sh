@@ -47,7 +47,7 @@ require_option_value() {
   if [[ $# -lt 2 || -z "${2:-}" || "${2:-}" == --* ]]; then
     echo "Missing value for ${opt}" >&2
     usage
-    exit 1
+    exit 2
   fi
 }
 
@@ -96,14 +96,14 @@ while [[ $# -gt 0 ]]; do
     *)
       echo "Unknown argument: $1" >&2
       usage
-      exit 1 ;;
+      exit 2 ;;
   esac
 done
 
 if [[ -z "$output_path" || -z "$role_name" || -z "$model" || -z "$reasoning" ]]; then
   echo "Missing required arguments." >&2
   usage
-  exit 1
+  exit 2
 fi
 
 case "$reasoning" in

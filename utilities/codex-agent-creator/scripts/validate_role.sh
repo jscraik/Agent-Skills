@@ -18,7 +18,7 @@ require_option_value() {
   if [[ $# -lt 2 || -z "${2:-}" || "${2:-}" == --* ]]; then
     echo "Missing value for ${opt}" >&2
     usage
-    exit 1
+    exit 2
   fi
 }
 
@@ -41,14 +41,14 @@ while [[ $# -gt 0 ]]; do
     *)
       echo "Unknown argument: $1" >&2
       usage
-      exit 1 ;;
+      exit 2 ;;
   esac
 done
 
 if [[ -z "$role_name" || -z "$config_path" || -z "$role_config_path" || -z "$schema_path" ]]; then
   echo "Missing required arguments." >&2
   usage
-  exit 1
+  exit 2
 fi
 
 if ! command -v jq >/dev/null 2>&1; then

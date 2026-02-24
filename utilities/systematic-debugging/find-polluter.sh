@@ -5,16 +5,30 @@
 
 set -euo pipefail
 
+usage() {
+  cat <<'TXT'
+Usage:
+  find-polluter.sh <file_to_check> <test_pattern>
+
+Example:
+  find-polluter.sh '.git' 'src/**/*.test.ts'
+TXT
+}
+
 if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
-  echo "Usage: $0 <file_to_check> <test_pattern>"
-  echo "Example: $0 '.git' 'src/**/*.test.ts'"
+  usage
   exit 0
 fi
 
+if [[ "${1:-}" == --* || "${1:-}" == -?* ]]; then
+  echo "ERROR: unknown option: ${1:-}" >&2
+  usage >&2
+  exit 2
+fi
+
 if [ $# -ne 2 ]; then
-  echo "Usage: $0 <file_to_check> <test_pattern>"
-  echo "Example: $0 '.git' 'src/**/*.test.ts'"
-  exit 1
+  usage >&2
+  exit 2
 fi
 
 POLLUTION_CHECK="$1"
@@ -31,11 +45,14 @@ if command -v fd >/dev/null 2>&1; then
     [[ -n "$test_file" ]] || continue
     TEST_FILES+=("$test_file")
   done < <(fd -t f -g "$TEST_PATTERN" . | sort)
-else
+elif command -v rg >/dev/null 2>&1; then
   while IFS= read -r test_file; do
     [[ -n "$test_file" ]] || continue
     TEST_FILES+=("$test_file")
-  done < <(find . -type f -path "$TEST_PATTERN" | sort)
+  done < <(rg --files -g "$TEST_PATTERN" . | sort)
+else
+  echo "❌ Missing dependency: fd or rg is required to enumerate test files." >&2
+  exit 1
 fi
 
 TOTAL=${#TEST_FILES[@]}
@@ -47,6 +64,11 @@ fi
 
 echo "Found $TOTAL test files"
 echo ""
+
+if ! command -v npm >/dev/null 2>&1; then
+  echo "❌ Missing dependency: npm is required to run test files." >&2
+  exit 1
+fi
 
 COUNT=0
 for TEST_FILE in "${TEST_FILES[@]}"; do
