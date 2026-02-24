@@ -208,21 +208,21 @@ When repos have automated tests, include a flaky-artifact block in GEMINI.md (or
 
 Injection rule:
 - Inject if user asks for flaky detection/artifacts or automated test-history workflows.
-- Inject if repo has test evidence (`test` scripts, `pytest`, `vitest`, `playwright`, `jest`, `cargo test`, `tests/`).
+- Inject if repo has test evidence (`test` scripts, `pytest`, `vitest`, `playwright`, `jest`, `cargo test`, `tests/`) **and** a verified artifact-capture script already exists (`scripts/test-with-artifacts.sh` or equivalent).
 - Skip if no test evidence.
 
 Required content:
-- Script path: `scripts/test-with-artifacts.sh`
+- Verified script path (canonical default: `scripts/test-with-artifacts.sh`)
 - Modes: `all`, `unit`, `integration`, `e2e`
 - Artifact root: `artifacts/test`
 - Stable outputs: `summary-*.json`, `test-output-*.log`, `junit-*.xml` (when supported), `*-results.json` (when supported), `artifact-manifest.json`
-- If `package.json` exists, include `test:artifacts*` scripts.
+- If `package.json` exists and script keys are present, include `test:artifacts*` scripts.
 
 Insert this section in GEMINI.md for test repos:
 
 ```md
 ## Flaky Test Artifact Capture
-- Run `bash scripts/test-with-artifacts.sh all` (or the detected repo-native command for `test:artifacts`) to emit machine-readable flaky evidence under `artifacts/test`.
+- Run the verified artifact-capture script in `all` mode (or the detected repo-native command for `test:artifacts`) to emit machine-readable flaky evidence under `artifacts/test`.
 - Optional targeted modes: `unit`, `integration`, `e2e`.
 - Keep artifact filenames stable (no timestamps in filenames) for cross-run comparison.
 ```

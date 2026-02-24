@@ -24,7 +24,7 @@ This repository is the canonical source of Codex skills, docs, and agent workflo
 4. Ask before changing behavior when instructions conflict.
 
 ## Tooling essentials
-- Run shell commands with `zsh -lc`.
+- Run shell commands with `zsh -lc` (fallback to `bash -lc` when `zsh` is unavailable).
 - Prefer `rg`, `fd`, and `jq`.
 - Read `~/.codex/instructions/tooling.md` before choosing tools.
 - Use repository-verified paths from README, `docs/`, and scripts.

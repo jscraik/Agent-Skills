@@ -8,7 +8,7 @@ into a single, implementation-ready style guide.
 
 Source of truth PDFs (prefer these if any values conflict here):
 - `~/chatui/docs/foundations/chatgpt-apps/Apps in ChatGPT • Colours.pdf`
-- `~/chatui/docs/foundations/chatgpt-apps/Apps in ChatGPT • Typeography.pdf`
+- `~/chatui/docs/foundations/chatgpt-apps/Apps in ChatGPT • Typography.pdf`
 - `~/chatui/docs/foundations/chatgpt-apps/Apps in ChatGPT • spacing.pdf`
 - `~/chatui/docs/foundations/chatgpt-apps/Apps in ChatGPT • Iconography.pdf`
 

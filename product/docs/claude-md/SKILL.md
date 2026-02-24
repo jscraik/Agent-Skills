@@ -192,20 +192,20 @@ When repos have automated tests, CLAUDE.md should include a compact flaky-artifa
 
 Injection rule:
 - Inject when user asks for flaky test workflows, artifact capture, or detector automation.
-- Inject when repo facts show tests (`test` scripts, `pytest`, `vitest`, `playwright`, `jest`, `cargo test`, or `tests/`).
+- Inject when repo facts show tests (`test` scripts, `pytest`, `vitest`, `playwright`, `jest`, `cargo test`, or `tests/`) **and** the repo already contains `scripts/test-with-artifacts.sh` (or an equivalent artifact-capture script you can verify on disk).
 - Skip if repo has no test evidence.
 
 Required content to include (or reference from AGENTS):
-- `scripts/test-with-artifacts.sh` with modes `all|unit|integration|e2e`
+- Verified artifact-capture script path (canonical default: `scripts/test-with-artifacts.sh`) with modes `all|unit|integration|e2e`
 - Stable artifact root `artifacts/test`
 - Stable outputs: `summary-*.json`, `test-output-*.log`, `junit-*.xml`, `*-results.json`, `artifact-manifest.json`
-- Package scripts (if `package.json` exists): `test:artifacts*`
+- Package scripts (if `package.json` exists and script keys are present): `test:artifacts*`
 
 Insert this section in CLAUDE.md for test repos:
 
 ```md
 ## Flaky Test Artifact Capture
-- Run `bash scripts/test-with-artifacts.sh all` (or the detected repo-native command for `test:artifacts`) to emit machine-readable flaky evidence under `artifacts/test`.
+- Run the verified artifact-capture script in `all` mode (or the detected repo-native command for `test:artifacts`) to emit machine-readable flaky evidence under `artifacts/test`.
 - Optional targeted modes: `unit`, `integration`, `e2e`.
 - Preserve stable artifact filenames so recurring flaky scans can compare runs.
 ```
