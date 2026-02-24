@@ -58,6 +58,23 @@ def format_time(seconds: float) -> str:
     return f"{seconds/86400:.1f}d"
 
 
+def safe_percent(value: object) -> float:
+    """Normalize optional/invalid percent values to float."""
+    if value is None:
+        return 0.0
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return 0.0
+
+
+def safe_name(value: object) -> str:
+    """Normalize process names that may be missing."""
+    if isinstance(value, str) and value:
+        return value
+    return "<unknown>"
+
+
 def get_process_info(proc: psutil.Process) -> dict:
     """Get comprehensive process info safely."""
     try:
@@ -195,11 +212,11 @@ def top(
     
     for p in procs:
         if type_ == "cpu":
-            table.add_row(str(p["pid"]), p["name"], f"{p['cpu']:.1f}%", p["user"])
+            table.add_row(str(p["pid"]), safe_name(p["name"]), f"{p['cpu']:.1f}%", p["user"])
         elif type_ == "mem":
-            table.add_row(str(p["pid"]), p["name"], f"{p['mem']:.1f}%", format_bytes(p["mem_bytes"]), p["user"])
+            table.add_row(str(p["pid"]), safe_name(p["name"]), f"{p['mem']:.1f}%", format_bytes(p["mem_bytes"]), p["user"])
         else:
-            table.add_row(str(p["pid"]), p["name"], format_bytes(p["read_bytes"]), format_bytes(p["write_bytes"]), p["user"])
+            table.add_row(str(p["pid"]), safe_name(p["name"]), format_bytes(p["read_bytes"]), format_bytes(p["write_bytes"]), p["user"])
     
     console.print(table)
 
@@ -310,7 +327,12 @@ def find(name: str = typer.Argument(..., help="Process name to search")):
     table.add_column("Mem%", justify="right")
     
     for p in found:
-        table.add_row(str(p['pid']), p['name'], f"{p['cpu_percent']:.1f}", f"{p['memory_percent']:.1f}")
+        table.add_row(
+            str(p['pid']),
+            safe_name(p.get('name')),
+            f"{safe_percent(p.get('cpu_percent')):.1f}",
+            f"{safe_percent(p.get('memory_percent')):.1f}",
+        )
     
     console.print(table)
     console.print(f"\n[dim]Found {len(found)} process(es)[/dim]")
@@ -420,10 +442,12 @@ def kill(
         killed = 0
         for proc in psutil.process_iter(['pid', 'name']):
             try:
-                if name.lower() in proc.info['name'].lower():
-                    proc.send_signal(sig)
-                    console.print(f"[green]✓ Sent {sig_name} to {proc.info['pid']} ({proc.info['name']})[/green]")
-                    killed += 1
+                proc_name = safe_name(proc.info.get('name'))
+                if name.lower() not in proc_name.lower():
+                    continue
+                proc.send_signal(sig)
+                console.print(f"[green]✓ Sent {sig_name} to {proc.info['pid']} ({proc_name})[/green]")
+                killed += 1
             except (psutil.NoSuchProcess, psutil.AccessDenied):
                 pass
         
@@ -477,8 +501,8 @@ def summary():
             pass
     procs.sort(key=lambda x: x['cpu_percent'] or 0, reverse=True)
     for p in procs[:5]:
-        cpu_val = p['cpu_percent'] or 0
-        console.print(f"  {p['pid']:>6}  {p['name']:<20} {cpu_val:.1f}%")
+        cpu_val = safe_percent(p.get('cpu_percent'))
+        console.print(f"  {p['pid']:>6}  {safe_name(p.get('name')):<20} {cpu_val:.1f}%")
 
 
 @app.command()
@@ -524,8 +548,9 @@ def watch(
             # Top 5 processes
             console.print("\n[bold]Top Processes:[/bold]")
             for p in procs[:5]:
-                cpu_style = "red" if (p['cpu_percent'] or 0) > 50 else ""
-                console.print(f"  {p['pid']:>6}  {p['name']:<25} [{cpu_style}]{p['cpu_percent']:.1f}%[/]")
+                cpu_value = safe_percent(p.get('cpu_percent'))
+                cpu_style = "red" if cpu_value > 50 else ""
+                console.print(f"  {p['pid']:>6}  {safe_name(p.get('name')):<25} [{cpu_style}]{cpu_value:.1f}%[/]")
             
             # Alerts
             if cpu > alert_cpu:
