@@ -19,16 +19,37 @@
 
 set -euo pipefail
 
-ACT_ARGS="${1:-}"
 LOG_FILE="act_output.log"
 TIMEOUT="${ACT_TIMEOUT:-600}"       # Default: 10 minutes
 POLL_INTERVAL="${ACT_POLL:-10}"     # Default: 10 seconds
 
-if [ -z "$ACT_ARGS" ]; then
+usage() {
+  cat <<'TXT'
+Usage:
+  run-act.sh "<act arguments>"
+  run-act.sh <act> [args...]
+
+Examples:
+  run-act.sh "push -j build --matrix node-version:20.x"
+  run-act.sh push -j build --matrix node-version:20.x
+TXT
+}
+
+if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
+  usage
+  exit 0
+fi
+
+ACT_ARGS=()
+if [[ $# -eq 0 ]]; then
   echo "Error: No arguments provided."
-  echo "Usage: $0 \"<act arguments>\""
-  echo "Example: $0 \"push -j build --matrix node-version:20.x\""
-  exit 1
+  usage
+  exit 2
+elif [[ $# -eq 1 ]]; then
+  # Backward-compatible mode for quoted argument strings.
+  read -r -a ACT_ARGS <<<"$1"
+else
+  ACT_ARGS=("$@")
 fi
 
 # Check Docker is running
@@ -43,17 +64,25 @@ if ! command -v act &> /dev/null; then
   exit 1
 fi
 
-echo "🚀 Starting: act ${ACT_ARGS}"
+echo "🚀 Starting: act ${ACT_ARGS[*]}"
 echo "📄 Logging to: ${LOG_FILE}"
 echo "⏱️  Timeout: ${TIMEOUT}s | Poll: ${POLL_INTERVAL}s"
 echo ""
 
 # Run act in background
 # Add default runner image only if the user didn't specify one via -P
-if echo "$ACT_ARGS" | grep -q -- '-P '; then
-  act ${ACT_ARGS} > "$LOG_FILE" 2>&1 &
+HAS_PLATFORM_FLAG=0
+for arg in "${ACT_ARGS[@]}"; do
+  if [[ "$arg" == "-P" || "$arg" == "-P"* ]]; then
+    HAS_PLATFORM_FLAG=1
+    break
+  fi
+done
+
+if [[ "$HAS_PLATFORM_FLAG" -eq 1 ]]; then
+  act "${ACT_ARGS[@]}" > "$LOG_FILE" 2>&1 &
 else
-  act ${ACT_ARGS} -P ubuntu-latest=catthehacker/ubuntu:act-latest > "$LOG_FILE" 2>&1 &
+  act "${ACT_ARGS[@]}" -P ubuntu-latest=catthehacker/ubuntu:act-latest > "$LOG_FILE" 2>&1 &
 fi
 
 ACT_PID=$!

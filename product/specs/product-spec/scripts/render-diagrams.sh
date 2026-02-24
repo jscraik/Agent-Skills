@@ -1,6 +1,19 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+usage() {
+  cat <<'TXT'
+Usage:
+  render-diagrams.sh [markdown-file ...]
+
+Environment:
+  OUT_DIR         Output directory for rendered PNG files (default: docs/assets/diagrams)
+  TMP_DIR         Temporary extraction directory (default: .tmp/mermaid-extracted)
+  KEEP_TMP        Keep TMP_DIR after rendering when set to 1 (default: 0)
+  MMDC_EXTRA_ARGS Extra args passed to mmdc (space-delimited)
+TXT
+}
+
 if ! command -v mmdc >/dev/null 2>&1; then
   echo "error: mmdc (mermaid-cli) not found" >&2
   echo "install: npm i -g @mermaid-js/mermaid-cli" >&2
@@ -21,12 +34,23 @@ mkdir -p "$OUT_DIR" "$TMP_DIR"
 
 # Default to spec-output.md if no args provided
 if [[ $# -gt 0 ]]; then
+  if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
+    usage
+    exit 0
+  fi
+  for arg in "$@"; do
+    if [[ "$arg" == --* || "$arg" == -?* ]]; then
+      echo "error: unknown option: $arg" >&2
+      usage >&2
+      exit 2
+    fi
+  done
   MD_FILES=("$@")
 else
   if [[ -f "spec-output.md" ]]; then
     MD_FILES=("spec-output.md")
   else
-    echo "usage: $0 <markdown files...>" >&2
+    usage >&2
     echo "tip: run from a folder containing spec-output.md or pass explicit files" >&2
     exit 1
   fi
@@ -40,7 +64,10 @@ if [[ -n "$MMDC_EXTRA_ARGS" ]]; then
 fi
 
 # Extract mermaid code blocks into TMP_DIR and print list of extracted .mmd files
-mapfile -t MMD_FILES < <(python3 - "$TMP_DIR" "${MD_FILES[@]}" <<'PY'
+MMD_FILES=()
+while IFS= read -r mmd_path; do
+  [[ -n "$mmd_path" ]] && MMD_FILES+=("$mmd_path")
+done < <(python3 - "$TMP_DIR" "${MD_FILES[@]}" <<'PY'
 import re
 import sys
 from pathlib import Path

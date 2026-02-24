@@ -15,10 +15,24 @@ TXT
 ALLOW_NETWORK=0
 MAX_URLS_ARG=""
 
+require_option_value() {
+  local opt="$1"
+  local value="${2:-}"
+  if [[ -z "$value" || "$value" == --* ]]; then
+    echo "ERROR: missing value for $opt"
+    usage
+    exit 2
+  fi
+}
+
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --allow-network) ALLOW_NETWORK=1; shift 1 ;;
-    --max-urls) MAX_URLS_ARG="${2:-}"; shift 2 ;;
+    --max-urls)
+      require_option_value "$1" "${2:-}"
+      MAX_URLS_ARG="$2"
+      shift 2
+      ;;
     -h|--help) usage; exit 0 ;;
     *) echo "ERROR: unknown option: $1"; usage; exit 2 ;;
   esac
@@ -39,16 +53,32 @@ SKILL_FILE="$ROOT_DIR/SKILL.md"
 # Exclude non-reference URLs, SVG namespace, and local/example endpoints.
 EXCLUDE_RE='(http://www.w3.org/2000/svg|http://www.w3.org/2000/|https?://(127\.0\.0\.1|localhost)|https?://192\.168\.|https?://10\.|https?://172\.(1[6-9]|2[0-9]|3[0-1])\.|https?://oaistatic\.com)'
 
+SEARCH_PATHS=()
+for path in "$REF_DIR" "$ADAPTERS_DIR" "$BRIDGE_DIR" "$SKILL_FILE"; do
+  if [[ -e "$path" ]]; then
+    SEARCH_PATHS+=("$path")
+  fi
+done
+
+if [[ "${#SEARCH_PATHS[@]}" -eq 0 ]]; then
+  echo "No valid paths found for URL audit."
+  exit 0
+fi
+
 # Collect URLs from references + adapters + bridge + SKILL.md.
 # Filter out SVG namespace and other non-reference URLs (e.g., xmlns attributes).
-mapfile -t URLS < <(grep -RhoE 'https?://[^[:space:])"]+' \
-  "$REF_DIR" "$ADAPTERS_DIR" "$BRIDGE_DIR" "$SKILL_FILE" 2>/dev/null \
-  | sed -E 's/[),.]+$//' \
-  | grep -Ev "$EXCLUDE_RE" \
-  | sort -u)
+URLS=()
+while IFS= read -r url; do
+  [[ -n "$url" ]] && URLS+=("$url")
+done < <(
+  { rg -o --no-filename 'https?://[^[:space:])"]+' "${SEARCH_PATHS[@]}" 2>/dev/null || true; } \
+    | sed -E 's/[),.]+$//' \
+    | rg -v "$EXCLUDE_RE" \
+    | sort -u || true
+)
 
-if [ ${#URLS[@]} -eq 0 ]; then
-  echo "No URLs found in $REF_DIR"
+if [[ ${#URLS[@]} -eq 0 ]]; then
+  echo "No URLs found in audited paths."
   exit 0
 fi
 
@@ -59,26 +89,33 @@ if [[ -n "$MAX_URLS_ARG" ]]; then
 fi
 export MAX_URLS="${MAX_URLS:-0}"
 
-printf '%s\n' "${URLS[@]}" | python3 - <<'PY'
+URL_FILE="$(mktemp)"
+trap 'rm -f "$URL_FILE"' EXIT
+printf '%s\n' "${URLS[@]}" > "$URL_FILE"
+
+python3 - "$URL_FILE" <<'PY'
 import sys
 import time
+import os
 import urllib.request
 import urllib.error
 
-urls = [line.strip() for line in sys.stdin if line.strip()]
+url_file = sys.argv[1]
+with open(url_file, encoding="utf-8") as handle:
+    urls = [line.strip() for line in handle if line.strip()]
 
 connect_timeout = 4
 max_time = 10
 max_urls_env = 0
 
 try:
-    max_urls_env = int(__import__("os").environ.get("MAX_URLS", "0"))
+    max_urls_env = int(os.environ.get("MAX_URLS", "0"))
 except ValueError:
     max_urls_env = 0
 
 max_urls_arg = 0
 try:
-    max_urls_arg = int(__import__("os").environ.get("MAX_URLS_ARG", "0"))
+    max_urls_arg = int(os.environ.get("MAX_URLS_ARG", "0"))
 except ValueError:
     max_urls_arg = 0
 

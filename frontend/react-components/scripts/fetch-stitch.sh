@@ -13,14 +13,29 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-URL=$1
-OUTPUT=$2
-if [ -z "$URL" ] || [ -z "$OUTPUT" ]; then
-  echo "Usage: $0 <url> <output_path>"
-  exit 1
+set -euo pipefail
+
+usage() {
+  cat <<'TXT'
+Usage:
+  fetch-stitch.sh <url> <output_path>
+TXT
+}
+
+if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
+  usage
+  exit 0
 fi
+
+if [[ $# -ne 2 ]]; then
+  usage
+  exit 2
+fi
+
+URL="$1"
+OUTPUT="$2"
 echo "Initiating high-reliability fetch for Stitch HTML..."
-python3 - "$URL" "$OUTPUT" <<'PY'
+if python3 - "$URL" "$OUTPUT" <<'PY'
 import pathlib
 import sys
 import urllib.request
@@ -40,8 +55,7 @@ with urllib.request.urlopen(req, timeout=20) as response:
     data = response.read()
 pathlib.Path(output).write_bytes(data)
 PY
-
-if [ $? -eq 0 ]; then
+then
   echo "✅ Successfully retrieved HTML at: $OUTPUT"
   exit 0
 fi

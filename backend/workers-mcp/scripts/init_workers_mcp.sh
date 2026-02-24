@@ -2,7 +2,35 @@
 # init_workers_mcp.sh - Scaffold a new Cloudflare Workers MCP server
 # Usage: ./scripts/init_workers_mcp.sh <project-name> <destination>
 
-set -e
+set -euo pipefail
+
+usage() {
+  cat <<'TXT'
+Usage:
+  init_workers_mcp.sh [project-name] [destination]
+
+Examples:
+  init_workers_mcp.sh my-mcp-server .
+  init_workers_mcp.sh
+TXT
+}
+
+if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
+  usage
+  exit 0
+fi
+
+for arg in "$@"; do
+  if [[ "$arg" == --* || "$arg" == -?* ]]; then
+    echo "ERROR: unknown option: $arg"
+    usage
+    exit 2
+  fi
+done
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SKILL_DIR="$(dirname "$SCRIPT_DIR")"
+ASSETS_DIR="$SKILL_DIR/assets"
 
 PROJECT_NAME=${1:-"my-mcp-server"}
 DEST_DIR=${2:-"."}
@@ -10,7 +38,7 @@ DEST_DIR=${2:-"."}
 echo "🏗️  Creating Workers MCP server: $PROJECT_NAME"
 
 # Create project structure
-mkdir -p "$DEST_DIR/$PROJECT_NAME"/{src/{workers/mcp,durable-objects,lib/{db,kv,auth,license,embeddings,monitoring,types},middleware},migrations,scripts,tests/{unit,integration,contract}}
+mkdir -p "$DEST_DIR/$PROJECT_NAME"/{src/{workers/mcp/tools,durable-objects,lib/{db,kv,auth,license,embeddings,monitoring,types},middleware},migrations,scripts,tests/{unit,integration,contract}}
 
 # Copy templates from assets
 cp "$ASSETS_DIR/wrangler.template.toml" "$DEST_DIR/$PROJECT_NAME/wrangler.toml"

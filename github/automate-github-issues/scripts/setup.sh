@@ -16,6 +16,26 @@
 # Setup script for the automate-github-issues skill
 set -e
 
+usage() {
+  cat <<'TXT'
+Usage:
+  setup.sh
+
+Bootstraps Bun dependencies and .env scaffolding for automate-github-issues.
+TXT
+}
+
+if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
+  usage
+  exit 0
+fi
+
+if [[ $# -gt 0 ]]; then
+  echo "ERROR: unknown option: $1"
+  usage
+  exit 2
+fi
+
 echo "🔧 Setting up automate-github-issues skill..."
 echo ""
 

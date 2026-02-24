@@ -3,12 +3,25 @@
 # Download Stitch screen asset with proper handling of Google Cloud Storage URLs
 # Usage: ./download-stitch-asset.sh "https://storage.googleapis.com/..." "output-path.png"
 
-set -e
+set -euo pipefail
 
-if [ $# -ne 2 ]; then
-  echo "Usage: $0 <download_url> <output_path>"
-  echo "Example: $0 'https://storage.googleapis.com/stitch/screenshot.png' 'assets/screen.png'"
-  exit 1
+usage() {
+  cat <<'TXT'
+Usage:
+  download-stitch-asset.sh <download_url> <output_path>
+Example:
+  download-stitch-asset.sh 'https://storage.googleapis.com/stitch/screenshot.png' 'assets/screen.png'
+TXT
+}
+
+if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
+  usage
+  exit 0
+fi
+
+if [[ $# -ne 2 ]]; then
+  usage
+  exit 2
 fi
 
 DOWNLOAD_URL="$1"
@@ -21,7 +34,7 @@ mkdir -p "$OUTPUT_DIR"
 echo "Downloading from: $DOWNLOAD_URL"
 echo "Saving to: $OUTPUT_PATH"
 
-python3 - "$DOWNLOAD_URL" "$OUTPUT_PATH" <<'PY'
+if python3 - "$DOWNLOAD_URL" "$OUTPUT_PATH" <<'PY'
 import pathlib
 import sys
 import urllib.request
@@ -34,13 +47,12 @@ req = urllib.request.Request(url, headers={"User-Agent": "codex-stitch-remotion/
 with urllib.request.urlopen(req, timeout=30) as response:
     path.write_bytes(response.read())
 PY
-
-if [ $? -ne 0 ]; then
+then
+  echo "✓ Successfully downloaded to $OUTPUT_PATH"
+else
   echo "✗ Download failed"
   exit 1
 fi
-
-echo "✓ Successfully downloaded to $OUTPUT_PATH"
 
 # Display file size for verification
 if command -v stat &> /dev/null; then

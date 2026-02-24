@@ -3,6 +3,27 @@ set -euo pipefail
 
 say() { printf '%s\n' "$*"; }
 
+usage() {
+  cat <<'TXT'
+Usage:
+  verify_ui_kit.sh [repo-path]
+
+Checks expected codex-ui-kit files for a target repository.
+Defaults to current directory.
+TXT
+}
+
+if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
+  usage
+  exit 0
+fi
+
+if [[ "${1:-}" == --* || "${1:-}" == -?* ]]; then
+  say "ERROR: unknown option: ${1:-}"
+  usage
+  exit 2
+fi
+
 REPO="${1:-.}"
 REPO="$(cd "$REPO" && pwd)"
 BIN="$REPO/bin"

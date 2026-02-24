@@ -4,6 +4,29 @@
 
 set -e
 
+usage() {
+    cat <<'TXT'
+Usage:
+  verify-setup.sh [project-path]
+
+Validates shadcn/ui setup for the target project (default: current directory).
+TXT
+}
+
+if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
+    usage
+    exit 0
+fi
+
+if [[ "${1:-}" == --* || "${1:-}" == -?* ]]; then
+    echo "ERROR: unknown option: ${1:-}" >&2
+    usage >&2
+    exit 2
+fi
+
+PROJECT_PATH="${1:-.}"
+cd "$PROJECT_PATH"
+
 GREEN='\033[0;32m'
 RED='\033[0;31m'
 YELLOW='\033[1;33m'
@@ -32,7 +55,7 @@ fi
 
 # Check if tsconfig.json has path aliases
 if [ -f "tsconfig.json" ]; then
-    if grep -q '"@/\*"' tsconfig.json; then
+    if rg -q '"@/\*"' tsconfig.json; then
         echo -e "${GREEN}✓${NC} Path aliases configured in tsconfig.json"
     else
         echo -e "${YELLOW}⚠${NC} Path aliases not found in tsconfig.json"
@@ -48,8 +71,8 @@ if [ -f "src/index.css" ] || [ -f "src/globals.css" ] || [ -f "app/globals.css" 
     echo -e "${GREEN}✓${NC} Global CSS file found"
     
     # Check for Tailwind directives
-    CSS_FILE=$(find . -name "globals.css" -o -name "index.css" | head -n 1)
-    if grep -q "@tailwind base" "$CSS_FILE"; then
+    CSS_FILE="$(fd -a -t f '^(globals|index)\.css$' . | head -n 1)"
+    if rg -q "@tailwind base" "$CSS_FILE"; then
         echo -e "${GREEN}✓${NC} Tailwind directives present"
     else
         echo -e "${RED}✗${NC} Tailwind directives missing"
@@ -60,7 +83,7 @@ if [ -f "src/index.css" ] || [ -f "src/globals.css" ] || [ -f "app/globals.css" 
     fi
     
     # Check for CSS variables
-    if grep -q "^:root" "$CSS_FILE" || grep -q "@layer base" "$CSS_FILE"; then
+    if rg -q "^:root" "$CSS_FILE" || rg -q "@layer base" "$CSS_FILE"; then
         echo -e "${GREEN}✓${NC} CSS variables defined"
     else
         echo -e "${YELLOW}⚠${NC} CSS variables not found"
@@ -75,7 +98,7 @@ if [ -d "src/components/ui" ] || [ -d "components/ui" ]; then
     echo -e "${GREEN}✓${NC} components/ui directory exists"
     
     # Count components
-    COMPONENT_COUNT=$(find . -path "*/components/ui/*.tsx" -o -path "*/components/ui/*.jsx" | wc -l)
+    COMPONENT_COUNT=$(fd -a -t f '.+\.(tsx|jsx)$' . | rg '/components/ui/' | wc -l | tr -d ' ')
     echo -e "  ${COMPONENT_COUNT} components installed"
 else
     echo -e "${YELLOW}⚠${NC} components/ui directory not found"
@@ -87,8 +110,8 @@ if [ -f "src/lib/utils.ts" ] || [ -f "lib/utils.ts" ]; then
     echo -e "${GREEN}✓${NC} lib/utils.ts exists"
     
     # Check for cn function
-    UTILS_FILE=$(find . -name "utils.ts" | grep "lib" | head -n 1)
-    if grep -q "export function cn" "$UTILS_FILE"; then
+    UTILS_FILE=$(fd -a -t f 'utils\.ts$' . | rg '/lib/' | head -n 1)
+    if rg -q "export function cn" "$UTILS_FILE"; then
         echo -e "${GREEN}✓${NC} cn() utility function present"
     else
         echo -e "${RED}✗${NC} cn() utility function missing"
@@ -107,7 +130,7 @@ if [ -f "package.json" ]; then
     RECOMMENDED_DEPS=("class-variance-authority" "clsx" "tailwind-merge" "tailwindcss-animate")
     
     for dep in "${REQUIRED_DEPS[@]}"; do
-        if grep -q "\"$dep\"" package.json; then
+        if rg -q "\"$dep\"" package.json; then
             echo -e "${GREEN}✓${NC} $dep installed"
         else
             echo -e "${RED}✗${NC} $dep not installed"
@@ -117,7 +140,7 @@ if [ -f "package.json" ]; then
     echo ""
     echo "Recommended dependencies:"
     for dep in "${RECOMMENDED_DEPS[@]}"; do
-        if grep -q "\"$dep\"" package.json; then
+        if rg -q "\"$dep\"" package.json; then
             echo -e "${GREEN}✓${NC} $dep installed"
         else
             echo -e "${YELLOW}⚠${NC} $dep not installed (recommended)"

@@ -227,7 +227,8 @@ story_title_from_json() { jq -r '.title // .name // .summary // .id // "Untitled
 # Run checks (returns 0 if all pass, 1 otherwise)
 run_checks() {
   local iter="$1"
-  local checks_log="$LOG_DIR/iter-$(printf "%04d" "$iter").checks.log"
+  local checks_log
+  checks_log="$LOG_DIR/iter-$(printf "%04d" "$iter").checks.log"
   mkdir -p "$LOG_DIR"
 
   local ok=0

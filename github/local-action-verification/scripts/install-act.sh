@@ -19,6 +19,27 @@
 
 set -euo pipefail
 
+usage() {
+  cat <<'TXT'
+Usage:
+  install-act.sh
+
+Installs the latest nektos/act binary system-wide when sudo is available,
+or to ~/.local/bin otherwise.
+TXT
+}
+
+if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
+  usage
+  exit 0
+fi
+
+if [[ $# -gt 0 ]]; then
+  echo "ERROR: unknown option: $1"
+  usage
+  exit 2
+fi
+
 INSTALL_DIR="${HOME}/.local/bin"
 ACT_INSTALLER_URL="https://raw.githubusercontent.com/nektos/act/master/install.sh"
 
@@ -27,6 +48,14 @@ echo "🔧 Installing act..."
 # Detect platform
 OS=$(uname -s | tr '[:upper:]' '[:lower:]')
 ARCH=$(uname -m)
+
+case "$OS" in
+  linux|darwin) ;;
+  *)
+    echo "❌ Unsupported operating system: $OS"
+    exit 1
+    ;;
+esac
 
 case "$ARCH" in
   x86_64)  ARCH="x86_64" ;;
@@ -37,6 +66,8 @@ case "$ARCH" in
     exit 1
     ;;
 esac
+
+echo "  Detected platform: ${OS}/${ARCH}"
 
 # Create install directory if it doesn't exist
 mkdir -p "$INSTALL_DIR"
