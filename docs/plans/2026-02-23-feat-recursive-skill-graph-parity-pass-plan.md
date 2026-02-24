@@ -416,8 +416,8 @@ Execute one consolidated implementation pass with a small rollout sequence:
 - `bash scripts/run_recursive_skill_shadow_cycle.sh --runs-per-profile 1 --window-days 3`
 - `python3 utilities/skill-creator/scripts/build_recursive_skill_shadow_report.py --runs-root artifacts/skill-graphs/runs --window-days 3`
 - `bash scripts/validate_recursive_promotions.sh --changed-only --base-sha HEAD~1 --head-sha HEAD`
-- `python3 /Users/jamiecraik/.codex/scripts/plan-graph-lint.py .agent/PLANS.md`
-- `python3 /Users/jamiecraik/.codex/scripts/verify-work.sh`
+- `python3 ~/.codex/scripts/plan-graph-lint.py .agent/PLANS.md`
+- `bash ~/.codex/scripts/verify-work.sh`
 
 ### Enhanced Verification matrix (added)
 

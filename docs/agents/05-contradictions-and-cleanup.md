@@ -8,10 +8,10 @@
 - None.
 
 ## Flag for deletion
-- Remove references to non-existent scaffold protocol files from `AGENTS.md`:
-  - `/Users/jamiecraik/.codex/instructions/openai-agent-workflow-playbook.md`
-  - `/Users/jamiecraik/.codex/instructions/validator-contracts.md`
-  - `/Users/jamiecraik/.codex/instructions/strict-toggle-governance.md`
-  - `/Users/jamiecraik/.codex/instructions/agent-first-scaffold-spec.md`
+- Remove references to non-existent scaffold protocol files from:
+  - `product/docs/agents-md/SKILL.md`
+  - `product/docs/agents-md/references/contract.yaml`
+  - `product/docs/agents-md/references/evals.yaml`
+  - `README.md`
 - Drop this entry once deletion is committed.
 - Verify all links in `docs/agents/*.md` before adding new top-level sections.

@@ -89,6 +89,7 @@ cases:
       forbidden_commands:
         - "rm -rf"
         - "curl"
+        - "wget"
         - "nc"
         - "netcat"
 

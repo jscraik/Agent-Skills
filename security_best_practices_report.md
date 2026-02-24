@@ -7,7 +7,7 @@
 The plan already covers several strong controls for governance and rollback, but as written it leaves multiple high-impact trust-boundary gaps for the approval and artifact pipelines. The highest remaining risk is an insufficiently tamper-resistant approval-to-write path: if a malicious or compromised actor can alter decision artifacts or control metadata inputs, canonical lesson promotion can occur outside the intended reviewer flow.
 
 ## Method
-- Skill instructions were followed from `security-best-practices` and all language/framework references available under `/Users/jamiecraik/.agents/skills/security-best-practices/references` were considered.
+- Skill instructions were followed from `security-best-practices` and all language/framework references available under `${HOME}/.agents/skills/security-best-practices/references` were considered.
 - No dedicated Python web-framework reference matches these CLI-only scripts exactly, so plan-level security review and known secure defaults were applied.
 - Findings are scoped to this plan content and referenced with exact plan line numbers.
 
@@ -120,4 +120,3 @@ The plan already covers several strong controls for governance and rollback, but
 - [ ] Add/execute a test case where maliciously named `run_id` with traversal-like characters is rejected.
 - [ ] Add/execute a test case where CI artifact upload is rejected on secret-pattern match.
 - [ ] Validate rollback evidence is immutable, append-only, and retained with run lineage.
-

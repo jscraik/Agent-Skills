@@ -7,8 +7,8 @@
 ## Validation order
 1. `bash scripts/sync_skills.sh`
 2. `python3 scripts/docs_lint.py --mode warn --config docs-policy.json`
-3. `python3 /Users/jamiecraik/.codex/scripts/plan-graph-lint.py .agent/PLANS.md` (if plans touched)
-4. `/Users/jamiecraik/.codex/scripts/verify-work.sh`
+3. `python3 ~/.codex/scripts/plan-graph-lint.py .agent/PLANS.md` (if plans touched)
+4. `bash ~/.codex/scripts/verify-work.sh`
 
 ## Failure policy
 - Fail fast.

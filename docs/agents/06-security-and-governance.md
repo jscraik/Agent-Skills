@@ -6,8 +6,8 @@
 - [AI disclosure artifacts](#ai-disclosure-artifacts)
 
 ## Baselines
-- See `/Users/jamiecraik/.codex/instructions/standards.md`.
-- See `/Users/jamiecraik/.codex/instructions/rvcp-common.md`.
+- See `~/.codex/instructions/standards.md`.
+- See `~/.codex/instructions/rvcp-common.md`.
 
 ## Repository practice
 - Repository-wide security and workflow rules in `AGENTS.md` take precedence.
