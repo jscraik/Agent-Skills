@@ -13,15 +13,28 @@ config_path=""
 role_config_path=""
 schema_path=""
 
+require_option_value() {
+  local opt="$1"
+  if [[ $# -lt 2 || -z "${2:-}" || "${2:-}" == --* ]]; then
+    echo "Missing value for ${opt}" >&2
+    usage
+    exit 1
+  fi
+}
+
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --role-name)
+      require_option_value "$1" "$@"
       role_name="$2"; shift 2 ;;
     --config)
+      require_option_value "$1" "$@"
       config_path="$2"; shift 2 ;;
     --role-config)
+      require_option_value "$1" "$@"
       role_config_path="$2"; shift 2 ;;
     --schema)
+      require_option_value "$1" "$@"
       schema_path="$2"; shift 2 ;;
     -h|--help)
       usage; exit 0 ;;

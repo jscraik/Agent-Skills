@@ -21,15 +21,28 @@ role_config_file=""
 set_multi_agent="true"
 update_existing="false"
 
+require_option_value() {
+  local opt="$1"
+  if [[ $# -lt 2 || -z "${2:-}" || "${2:-}" == --* ]]; then
+    echo "Missing value for ${opt}" >&2
+    usage
+    exit 1
+  fi
+}
+
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --config)
+      require_option_value "$1" "$@"
       config_path="$2"; shift 2 ;;
     --role-name)
+      require_option_value "$1" "$@"
       role_name="$2"; shift 2 ;;
     --description)
+      require_option_value "$1" "$@"
       role_description="$2"; shift 2 ;;
     --role-config-file)
+      require_option_value "$1" "$@"
       role_config_file="$2"; shift 2 ;;
     --update-existing)
       update_existing="true"; shift ;;

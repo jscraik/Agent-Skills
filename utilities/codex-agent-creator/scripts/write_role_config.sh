@@ -42,33 +42,54 @@ mcp_clear="false"
 mcp_enable_csv=""
 mcp_disable_csv=""
 
+require_option_value() {
+  local opt="$1"
+  if [[ $# -lt 2 || -z "${2:-}" || "${2:-}" == --* ]]; then
+    echo "Missing value for ${opt}" >&2
+    usage
+    exit 1
+  fi
+}
+
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --output)
+      require_option_value "$1" "$@"
       output_path="$2"; shift 2 ;;
     --role-name)
+      require_option_value "$1" "$@"
       role_name="$2"; shift 2 ;;
     --model)
+      require_option_value "$1" "$@"
       model="$2"; shift 2 ;;
     --reasoning)
+      require_option_value "$1" "$@"
       reasoning="$2"; shift 2 ;;
     --developer-instructions)
+      require_option_value "$1" "$@"
       developer_instructions="$2"; shift 2 ;;
     --developer-instructions-file)
+      require_option_value "$1" "$@"
       developer_instructions_file="$2"; shift 2 ;;
     --sandbox-mode)
+      require_option_value "$1" "$@"
       sandbox_mode="$2"; shift 2 ;;
     --network-access)
+      require_option_value "$1" "$@"
       network_access="$2"; shift 2 ;;
     --writable-roots)
+      require_option_value "$1" "$@"
       writable_roots_csv="$2"; shift 2 ;;
     --web-search)
+      require_option_value "$1" "$@"
       web_search="$2"; shift 2 ;;
     --mcp-clear)
       mcp_clear="true"; shift ;;
     --mcp-enable)
+      require_option_value "$1" "$@"
       mcp_enable_csv="$2"; shift 2 ;;
     --mcp-disable)
+      require_option_value "$1" "$@"
       mcp_disable_csv="$2"; shift 2 ;;
     -h|--help)
       usage; exit 0 ;;
