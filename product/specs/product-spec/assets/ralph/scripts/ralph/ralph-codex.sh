@@ -81,6 +81,27 @@ die() { echo "ERROR: $*" >&2; exit 1; }
 
 have() { command -v "$1" >/dev/null 2>&1; }
 
+require_option_value() {
+  local opt="$1"
+  local value="${2:-}"
+  if [[ -z "$value" || "$value" == --* ]]; then
+    echo "ERROR: missing value for $opt" >&2
+    usage >&2
+    exit 2
+  fi
+}
+
+option_requires_value() {
+  case "$1" in
+    -C|--cd|-n|--iterations|-m|--model|-s|--sandbox|-a|--ask-for-approval|--search|--task-file|--prd|--pin|--plan|--guardrails|--progress|--prompt-addendum|--structured|--iteration-schema|--branch|--push|--commit|--no-verify|--require-clean-tree|--archive-per-branch|--test-cmd|--typecheck-cmd|--lint-cmd|--check-fail-limit|--agent-fail-limit|--sleep)
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
 usage() {
   cat <<'EOF'
 Ralph Loop for Codex CLI
@@ -407,6 +428,10 @@ codex_supports_flag() {
 # Parse args
 # ----------------------------
 while [[ $# -gt 0 ]]; do
+  if option_requires_value "$1"; then
+    require_option_value "$1" "${2:-}"
+  fi
+
   case "$1" in
     -C|--cd) WORKSPACE="$2"; shift 2;;
     -n|--iterations) MAX_ITERATIONS="$2"; shift 2;;
@@ -442,7 +467,11 @@ while [[ $# -gt 0 ]]; do
     --sleep) SLEEP_SECONDS="$2"; shift 2;;
 
     -h|--help) usage; exit 0;;
-    *) die "Unknown option: $1 (use --help)";;
+    *)
+      echo "ERROR: Unknown option: $1 (use --help)" >&2
+      usage >&2
+      exit 2
+      ;;
   esac
 done
 

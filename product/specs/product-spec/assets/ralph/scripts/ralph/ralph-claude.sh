@@ -72,6 +72,27 @@ ERROR_LOG="$RALPH_DIR/errors.log"
 die() { echo "ERROR: $*" >&2; exit 1; }
 have() { command -v "$1" >/dev/null 2>&1; }
 
+require_option_value() {
+  local opt="$1"
+  local value="${2:-}"
+  if [[ -z "$value" || "$value" == --* ]]; then
+    echo "ERROR: missing value for $opt" >&2
+    usage >&2
+    exit 2
+  fi
+}
+
+option_requires_value() {
+  case "$1" in
+    -w|--workspace|-n|--iterations|-m|--model|--max-turns|--permission-mode|--tools|--allowed-tools|--dangerously-skip-permissions|--structured|--iteration-schema|--output-format|--task|--prd|--pin|--plan|--guardrails|--progress|--addendum|--branch|--push|--commit|--no-verify|--require-clean-tree|--archive-per-branch|--test-cmd|--typecheck-cmd|--lint-cmd|--check-fail-limit|--agent-fail-limit|--sleep)
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
 usage() {
   cat <<'EOF'
 Usage:
@@ -369,6 +390,10 @@ append_progress_note() {
 # Parse args
 # -----------------------
 while [[ $# -gt 0 ]]; do
+  if option_requires_value "$1"; then
+    require_option_value "$1" "${2:-}"
+  fi
+
   case "$1" in
     -w|--workspace) WORKSPACE="$2"; shift 2;;
     -n|--iterations) MAX_ITERATIONS="$2"; shift 2;;
@@ -408,7 +433,11 @@ while [[ $# -gt 0 ]]; do
     --sleep) SLEEP_SECONDS="$2"; shift 2;;
 
     -h|--help) usage; exit 0;;
-    *) die "Unknown option: $1";;
+    *)
+      echo "ERROR: Unknown option: $1" >&2
+      usage >&2
+      exit 2
+      ;;
   esac
 done
 
