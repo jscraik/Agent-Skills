@@ -25,7 +25,7 @@ require_option_value() {
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --har)
-      require_option_value "$1" "$@"
+      require_option_value "$1" "${2:-}"
       HAR="$2"
       shift 2
       ;;

@@ -44,27 +44,27 @@ if [[ "$cmd" == "plan" ]]; then
   while [[ $# -gt 0 ]]; do
     case "$1" in
       --target-id)
-        require_option_value "$1" "$@"
+        require_option_value "$1" "${2:-}"
         target_id="$2"
         shift 2
         ;;
       --kind)
-        require_option_value "$1" "$@"
+        require_option_value "$1" "${2:-}"
         kind="$2"
         shift 2
         ;;
       --locator)
-        require_option_value "$1" "$@"
+        require_option_value "$1" "${2:-}"
         locator="$2"
         shift 2
         ;;
       --goal)
-        require_option_value "$1" "$@"
+        require_option_value "$1" "${2:-}"
         goal="$2"
         shift 2
         ;;
       --out)
-        require_option_value "$1" "$@"
+        require_option_value "$1" "${2:-}"
         out="$2"
         shift 2
         ;;
@@ -92,22 +92,22 @@ if [[ "$cmd" == "summarize" ]]; then
   while [[ $# -gt 0 ]]; do
     case "$1" in
       --target-id)
-        require_option_value "$1" "$@"
+        require_option_value "$1" "${2:-}"
         target_id="$2"
         shift 2
         ;;
       --run-dir)
-        require_option_value "$1" "$@"
+        require_option_value "$1" "${2:-}"
         run_dir="$2"
         shift 2
         ;;
       --schema)
-        require_option_value "$1" "$@"
+        require_option_value "$1" "${2:-}"
         schema="$2"
         shift 2
         ;;
       --out)
-        require_option_value "$1" "$@"
+        require_option_value "$1" "${2:-}"
         out="$2"
         shift 2
         ;;

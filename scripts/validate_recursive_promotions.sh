@@ -37,17 +37,17 @@ while (($# > 0)); do
       shift
       ;;
     --base-sha)
-      require_option_value "$1" "$@"
+      require_option_value "$1" "${2:-}"
       base_sha="$2"
       shift 2
       ;;
     --head-sha)
-      require_option_value "$1" "$@"
+      require_option_value "$1" "${2:-}"
       head_sha="$2"
       shift 2
       ;;
     --report-json)
-      require_option_value "$1" "$@"
+      require_option_value "$1" "${2:-}"
       report_json="$2"
       shift 2
       ;;

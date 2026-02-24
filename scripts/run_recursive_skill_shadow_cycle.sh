@@ -20,22 +20,22 @@ require_option_value() {
 while (($# > 0)); do
   case "$1" in
     --runs-per-profile)
-      require_option_value "$1" "$@"
+      require_option_value "$1" "${2:-}"
       runs_per_profile="$2"
       shift 2
       ;;
     --window-days)
-      require_option_value "$1" "$@"
+      require_option_value "$1" "${2:-}"
       window_days="$2"
       shift 2
       ;;
     --out-root)
-      require_option_value "$1" "$@"
+      require_option_value "$1" "${2:-}"
       out_root="$2"
       shift 2
       ;;
     --profiles-file)
-      require_option_value "$1" "$@"
+      require_option_value "$1" "${2:-}"
       profiles_file="$2"
       shift 2
       ;;

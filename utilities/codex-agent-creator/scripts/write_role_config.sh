@@ -54,42 +54,42 @@ require_option_value() {
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --output)
-      require_option_value "$1" "$@"
+      require_option_value "$1" "${2:-}"
       output_path="$2"; shift 2 ;;
     --role-name)
-      require_option_value "$1" "$@"
+      require_option_value "$1" "${2:-}"
       role_name="$2"; shift 2 ;;
     --model)
-      require_option_value "$1" "$@"
+      require_option_value "$1" "${2:-}"
       model="$2"; shift 2 ;;
     --reasoning)
-      require_option_value "$1" "$@"
+      require_option_value "$1" "${2:-}"
       reasoning="$2"; shift 2 ;;
     --developer-instructions)
-      require_option_value "$1" "$@"
+      require_option_value "$1" "${2:-}"
       developer_instructions="$2"; shift 2 ;;
     --developer-instructions-file)
-      require_option_value "$1" "$@"
+      require_option_value "$1" "${2:-}"
       developer_instructions_file="$2"; shift 2 ;;
     --sandbox-mode)
-      require_option_value "$1" "$@"
+      require_option_value "$1" "${2:-}"
       sandbox_mode="$2"; shift 2 ;;
     --network-access)
-      require_option_value "$1" "$@"
+      require_option_value "$1" "${2:-}"
       network_access="$2"; shift 2 ;;
     --writable-roots)
-      require_option_value "$1" "$@"
+      require_option_value "$1" "${2:-}"
       writable_roots_csv="$2"; shift 2 ;;
     --web-search)
-      require_option_value "$1" "$@"
+      require_option_value "$1" "${2:-}"
       web_search="$2"; shift 2 ;;
     --mcp-clear)
       mcp_clear="true"; shift ;;
     --mcp-enable)
-      require_option_value "$1" "$@"
+      require_option_value "$1" "${2:-}"
       mcp_enable_csv="$2"; shift 2 ;;
     --mcp-disable)
-      require_option_value "$1" "$@"
+      require_option_value "$1" "${2:-}"
       mcp_disable_csv="$2"; shift 2 ;;
     -h|--help)
       usage; exit 0 ;;

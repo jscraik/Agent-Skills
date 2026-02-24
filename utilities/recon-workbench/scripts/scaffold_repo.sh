@@ -31,7 +31,7 @@ require_option_value() {
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --repo)
-      require_option_value "$1" "$@"
+      require_option_value "$1" "${2:-}"
       REPO="$2"
       shift 2
       ;;

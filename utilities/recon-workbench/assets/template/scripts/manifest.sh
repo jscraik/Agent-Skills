@@ -27,22 +27,22 @@ require_option_value() {
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --run-dir)
-      require_option_value "$1" "$@"
+      require_option_value "$1" "${2:-}"
       RUN_DIR="$2"
       shift 2
       ;;
     --target-id)
-      require_option_value "$1" "$@"
+      require_option_value "$1" "${2:-}"
       TARGET_ID="$2"
       shift 2
       ;;
     --target-locator)
-      require_option_value "$1" "$@"
+      require_option_value "$1" "${2:-}"
       TARGET_LOCATOR="$2"
       shift 2
       ;;
     --out)
-      require_option_value "$1" "$@"
+      require_option_value "$1" "${2:-}"
       OUT="$2"
       shift 2
       ;;

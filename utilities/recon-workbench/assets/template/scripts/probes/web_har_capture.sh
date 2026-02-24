@@ -15,10 +15,35 @@ USAGE
 HAR=""
 OUT=""
 
+require_option_value() {
+  local opt="$1"
+  if [[ $# -lt 2 || -z "${2:-}" || "${2:-}" == --* ]]; then
+    echo "Missing value for ${opt}" >&2
+    usage
+    exit 2
+  fi
+}
+
+require_cmd() {
+  local cmd="$1"
+  if ! command -v "$cmd" >/dev/null 2>&1; then
+    echo "Missing required command: $cmd" >&2
+    exit 127
+  fi
+}
+
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --har) HAR="$2"; shift 2 ;;
-    --out) OUT="$2"; shift 2 ;;
+    --har)
+      require_option_value "$1" "${2:-}"
+      HAR="$2"
+      shift 2
+      ;;
+    --out)
+      require_option_value "$1" "${2:-}"
+      OUT="$2"
+      shift 2
+      ;;
     -h|--help) usage; exit 0 ;;
     *) echo "Unknown option: $1"; usage; exit 2 ;;
   esac
@@ -34,13 +59,13 @@ fi
 
 mkdir -p "$OUT"
 
-python3 - <<'PY'
+require_cmd python3
+python3 - "$HAR" <<'PY'
 import json, sys
 path = sys.argv[1]
 with open(path, 'r', encoding='utf-8') as f:
     json.load(f)
 PY
-"$HAR"
 
 cp "$HAR" "$OUT/har.json"
 

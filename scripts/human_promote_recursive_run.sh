@@ -51,42 +51,42 @@ USAGE
 while (($# > 0)); do
   case "$1" in
     --run-id)
-      require_option_value "$1" "$@"
+      require_option_value "$1" "${2:-}"
       run_id="$2"
       shift 2
       ;;
     --run-dir)
-      require_option_value "$1" "$@"
+      require_option_value "$1" "${2:-}"
       run_dir="$2"
       shift 2
       ;;
     --lesson-id)
-      require_option_value "$1" "$@"
+      require_option_value "$1" "${2:-}"
       lesson_id="$2"
       shift 2
       ;;
     --reviewer)
-      require_option_value "$1" "$@"
+      require_option_value "$1" "${2:-}"
       reviewers="$2"
       shift 2
       ;;
     --expected-version)
-      require_option_value "$1" "$@"
+      require_option_value "$1" "${2:-}"
       expected_version="$2"
       shift 2
       ;;
     --lesson-file)
-      require_option_value "$1" "$@"
+      require_option_value "$1" "${2:-}"
       lesson_file="$2"
       shift 2
       ;;
     --decision)
-      require_option_value "$1" "$@"
+      require_option_value "$1" "${2:-}"
       decision="$2"
       shift 2
       ;;
     --note)
-      require_option_value "$1" "$@"
+      require_option_value "$1" "${2:-}"
       note="$2"
       shift 2
       ;;
@@ -95,12 +95,12 @@ while (($# > 0)); do
       shift
       ;;
     --policy-file)
-      require_option_value "$1" "$@"
+      require_option_value "$1" "${2:-}"
       policy_file="$2"
       shift 2
       ;;
     --policy-sig-file)
-      require_option_value "$1" "$@"
+      require_option_value "$1" "${2:-}"
       policy_sig_file="$2"
       shift 2
       ;;

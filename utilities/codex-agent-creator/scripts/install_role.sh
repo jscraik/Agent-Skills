@@ -33,16 +33,16 @@ require_option_value() {
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --config)
-      require_option_value "$1" "$@"
+      require_option_value "$1" "${2:-}"
       config_path="$2"; shift 2 ;;
     --role-name)
-      require_option_value "$1" "$@"
+      require_option_value "$1" "${2:-}"
       role_name="$2"; shift 2 ;;
     --description)
-      require_option_value "$1" "$@"
+      require_option_value "$1" "${2:-}"
       role_description="$2"; shift 2 ;;
     --role-config-file)
-      require_option_value "$1" "$@"
+      require_option_value "$1" "${2:-}"
       role_config_file="$2"; shift 2 ;;
     --update-existing)
       update_existing="true"; shift ;;
