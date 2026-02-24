@@ -15,10 +15,14 @@ from __future__ import annotations
 
 import argparse
 import re
+import sys
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
-import yaml
+try:
+    import yaml
+except ModuleNotFoundError:  # pragma: no cover - environment-dependent
+    yaml = None
 
 
 def parse_args() -> argparse.Namespace:
@@ -246,6 +250,10 @@ def dump_yaml(path: Path, data: Dict[str, Any]) -> None:
 
 def main() -> int:
     args = parse_args()
+    if yaml is None:
+        print("ERROR: PyYAML is required to run migrate_evals_v2.py.", file=sys.stderr)
+        print("Install with: pip install pyyaml", file=sys.stderr)
+        return 1
     root = Path(args.root).expanduser().resolve()
 
     created_contract = 0
