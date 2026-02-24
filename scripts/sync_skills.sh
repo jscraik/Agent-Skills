@@ -9,6 +9,17 @@ system_skills_dir="$repo_root/skills-system"
 
 mkdir -p "$skills_dir"
 
+cleanup_paths=()
+cleanup_on_exit() {
+  local path=""
+  for path in "${cleanup_paths[@]:-}"; do
+    if [ -n "$path" ] && [ -d "$path" ]; then
+      rm -rf -- "$path"
+    fi
+  done
+}
+trap cleanup_on_exit EXIT
+
 # Ensure system skills are not in the flat symlink view (prevents duplicates).
 if [ -d "$skills_dir/.system" ]; then
   mkdir -p "$system_skills_dir"
@@ -26,7 +37,7 @@ if [ -d "$skills_dir/.system" ]; then
     zsh -c "setopt globdots; rm -rf \"$system_skills_dir\"/*; mv \"$skills_dir/.system\"/* \"$system_skills_dir\"/; rmdir \"$skills_dir/.system\""
   else
     # Fallback: remove target first, then move
-    rm -rf "$system_skills_dir"/*
+    find "$system_skills_dir" -mindepth 1 -maxdepth 1 -exec rm -rf -- {} +
     mv "$skills_dir"/.[!.]* "$system_skills_dir"/ 2>/dev/null || true
     mv "$skills_dir"/..?* "$system_skills_dir"/ 2>/dev/null || true
     mv "$skills_dir"/* "$system_skills_dir"/ 2>/dev/null || true
@@ -126,8 +137,9 @@ done < <(all_skill_files_cmd)
 # Regenerate root SKILL.md index dynamically from skill frontmatter.
 generate_skill_index() {
   local index_file="$1"
-  local temp_dir="$(mktemp -d)"
-  trap "rm -rf $temp_dir" EXIT
+  local temp_dir=""
+  temp_dir="$(mktemp -d)"
+  cleanup_paths+=("$temp_dir")
 
   # Extract a YAML frontmatter `description:` value, including common multiline forms.
   #
