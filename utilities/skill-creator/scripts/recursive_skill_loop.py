@@ -214,6 +214,190 @@ def build_evidence_packet(
     }
 
 
+def load_iteration_rows(path: Path) -> List[Dict[str, Any]]:
+    if not path.exists():
+        return []
+    rows: List[Dict[str, Any]] = []
+    for line in path.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        obj = json.loads(line)
+        if isinstance(obj, dict):
+            rows.append(obj)
+    return rows
+
+
+def quality_signal_from_uplift(uplift: float) -> float:
+    if uplift >= 0.05:
+        return 1.0
+    if uplift >= 0.02:
+        return 0.8
+    if uplift >= 0.0:
+        return 0.6
+    if uplift >= -0.03:
+        return 0.4
+    return 0.2
+
+
+def feedback_signal(status: str) -> float:
+    table = {
+        "worked": 1.0,
+        "partly": 0.7,
+        "didnt_work": 0.2,
+        "missing": 0.5,
+    }
+    return table.get(status, 0.5)
+
+
+def compute_confidence_assessment(
+    *,
+    run_obj: Dict[str, Any],
+    promotion_decision: Dict[str, Any],
+    evidence_packet: Dict[str, Any],
+    feedback: Dict[str, str],
+    iteration_rows: List[Dict[str, Any]],
+) -> Dict[str, Any]:
+    initial_overall = 0.0
+    final_overall = 0.0
+    non_regression_all = True
+    if iteration_rows:
+        first = iteration_rows[0]
+        last = iteration_rows[-1]
+        initial_overall = float(first.get("evaluation_report", {}).get("overall_score", 0.0))
+        final_overall = float(last.get("reevaluation_report", {}).get("overall_score", initial_overall))
+        non_regression_all = all(
+            bool(row.get("reevaluation_report", {}).get("non_regression_passed", False))
+            for row in iteration_rows
+        )
+
+    quality_uplift = round(final_overall - initial_overall, 3)
+    evidence_completeness = float(evidence_packet.get("completeness", {}).get("score", 0.0))
+    runtime_gates_passed = bool(promotion_decision.get("gate_decision", {}).get("runtime_gates_passed", False))
+
+    components = {
+        "evidence_completeness": evidence_completeness,
+        "runtime_gate_signal": 1.0 if runtime_gates_passed else 0.0,
+        "non_regression_signal": 1.0 if non_regression_all else 0.0,
+        "quality_uplift_signal": quality_signal_from_uplift(quality_uplift),
+        "feedback_signal": feedback_signal(feedback.get("status", "missing")),
+    }
+    weights = {
+        "evidence_completeness": 0.35,
+        "runtime_gate_signal": 0.25,
+        "non_regression_signal": 0.2,
+        "quality_uplift_signal": 0.1,
+        "feedback_signal": 0.1,
+    }
+    score = round(sum(components[k] * weights[k] for k in weights), 3)
+
+    if score >= 0.8:
+        bucket = "high"
+        calibration_bucket = "C1_high_confidence"
+    elif score >= 0.6:
+        bucket = "medium"
+        calibration_bucket = "C2_medium_confidence"
+    else:
+        bucket = "low"
+        calibration_bucket = "C3_low_confidence"
+
+    return {
+        "schema_version": "1.0",
+        "score": score,
+        "bucket": bucket,
+        "calibration_bucket": calibration_bucket,
+        "quality_uplift": quality_uplift,
+        "inputs": {
+            **components,
+            "feedback_status": feedback.get("status", "missing"),
+            "iterations_observed": len(iteration_rows),
+            "terminal_status": str(run_obj.get("terminal_status", "")),
+            "stop_reason": str(run_obj.get("stop_reason", "")),
+        },
+    }
+
+
+def build_lesson_candidates(
+    *,
+    run_id: str,
+    profile: Profile,
+    iteration_rows: List[Dict[str, Any]],
+    run_obj: Dict[str, Any],
+    feedback: Dict[str, str],
+    confidence: Dict[str, Any],
+    evidence_packet: Dict[str, Any],
+) -> List[Dict[str, Any]]:
+    if not iteration_rows:
+        return []
+
+    latest = iteration_rows[-1]
+    iteration_id = int(latest.get("iteration_id", len(iteration_rows)))
+    diagnosis = latest.get("diagnosis", {}) if isinstance(latest.get("diagnosis"), dict) else {}
+    action = latest.get("improvement_action", {}) if isinstance(latest.get("improvement_action"), dict) else {}
+    deltas = latest.get("criterion_deltas", {}) if isinstance(latest.get("criterion_deltas"), dict) else {}
+    positive_deltas = {
+        str(k): float(v)
+        for k, v in deltas.items()
+        if isinstance(v, (int, float)) and float(v) > 0
+    }
+
+    weakest = diagnosis.get("weakest_criteria", [])
+    if isinstance(weakest, list):
+        weakest_text = ", ".join(str(w) for w in weakest if str(w).strip())
+    else:
+        weakest_text = ""
+
+    candidate_id_seed = f"{run_id}:{profile.profile_id}:{iteration_id}:candidate"
+    candidate_id = f"candidate_{sha256_text(candidate_id_seed)[:12]}"
+    terminal_status = str(run_obj.get("terminal_status", ""))
+
+    advice_summary = str(diagnosis.get("reason", "")).strip() or "No diagnosis summary available."
+    implementation_summary = str(action.get("summary", "")).strip() or "No improvement action summary available."
+
+    candidate = {
+        "schema_version": "1.0",
+        "candidate_id": candidate_id,
+        "run_id": run_id,
+        "profile_id": profile.profile_id,
+        "scope_skill": profile.scope_skill,
+        "scope_profile": profile.scope_profile,
+        "iteration_id": iteration_id,
+        "created_at": iso_now(),
+        "status": "candidate",
+        "advice": {
+            "summary": advice_summary,
+            "weakest_criteria": weakest if isinstance(weakest, list) else [],
+        },
+        "implementation": {
+            "summary": implementation_summary,
+            "positive_criterion_deltas": positive_deltas,
+        },
+        "outcome": {
+            "terminal_status": terminal_status,
+            "stop_reason": str(run_obj.get("stop_reason", "")),
+            "feedback_status": feedback.get("status", "missing"),
+            "feedback_note": feedback.get("note", ""),
+            "quality_uplift": float(confidence.get("quality_uplift", 0.0)),
+        },
+        "confidence": {
+            "score": float(confidence.get("score", 0.0)),
+            "bucket": str(confidence.get("bucket", "low")),
+            "calibration_bucket": str(confidence.get("calibration_bucket", "C3_low_confidence")),
+            "evidence_completeness": float(evidence_packet.get("completeness", {}).get("score", 0.0)),
+        },
+        "evidence_refs": {
+            "iteration_journal_path": "iteration_journal.jsonl",
+            "events_path": "events.jsonl",
+            "evidence_packet_path": "evidence_packet.json",
+        },
+        "title": (
+            f"{profile.scope_skill} remediation candidate"
+            + (f" ({weakest_text})" if weakest_text else "")
+        ),
+    }
+    return [candidate]
+
+
 def load_profile(path: Path) -> Profile:
     obj = json.loads(path.read_text(encoding="utf-8"))
 
@@ -613,6 +797,7 @@ def run_loop(args: argparse.Namespace) -> int:
     write_jsonl(iteration_journal_path, [])
 
     def write_capture_artifacts(run_obj: Dict[str, Any], promotion_decision: Dict[str, Any]) -> None:
+        iteration_rows = load_iteration_rows(iteration_journal_path)
         evidence_packet = build_evidence_packet(
             run_id=run_id,
             out_dir=out_dir,
@@ -623,6 +808,22 @@ def run_loop(args: argparse.Namespace) -> int:
         )
         evidence_packet_path = out_dir / "evidence_packet.json"
         write_json(evidence_packet_path, evidence_packet)
+        confidence = compute_confidence_assessment(
+            run_obj=run_obj,
+            promotion_decision=promotion_decision,
+            evidence_packet=evidence_packet,
+            feedback=feedback_payload,
+            iteration_rows=iteration_rows,
+        )
+        lesson_candidates = build_lesson_candidates(
+            run_id=run_id,
+            profile=profile,
+            iteration_rows=iteration_rows,
+            run_obj=run_obj,
+            feedback=feedback_payload,
+            confidence=confidence,
+            evidence_packet=evidence_packet,
+        )
 
         capture_seed = f"{run_id}:{run_obj.get('finished_at', '')}:{run_obj.get('terminal_status', '')}:capture"
         capture_record = {
@@ -657,8 +858,29 @@ def run_loop(args: argparse.Namespace) -> int:
                 "evidence_packet_path": str(evidence_packet_path.relative_to(out_dir)),
                 "completeness": evidence_packet["completeness"],
             },
+            "confidence": confidence,
+            "candidate_lessons": {
+                "count": len(lesson_candidates),
+                "top_candidate_id": lesson_candidates[0]["candidate_id"] if lesson_candidates else "",
+            },
         }
         write_json(out_dir / "capture_record.json", capture_record)
+        write_json(out_dir / "lesson_candidates.json", {"schema_version": "1.0", "run_id": run_id, "items": lesson_candidates})
+
+        promotion_decision["confidence"] = {
+            "schema_version": "1.0",
+            "score": confidence["score"],
+            "bucket": confidence["bucket"],
+            "calibration_bucket": confidence["calibration_bucket"],
+            "quality_uplift": confidence["quality_uplift"],
+            "evidence_completeness": evidence_packet["completeness"]["score"],
+        }
+        promotion_decision["evidence_packet"] = {
+            "evidence_packet_id": evidence_packet["evidence_packet_id"],
+            "completeness_score": evidence_packet["completeness"]["score"],
+        }
+        promotion_decision["lesson_candidates"] = lesson_candidates
+        write_json(out_dir / "promotion_decision.json", promotion_decision)
 
     def write_blocker_artifacts(
         *,

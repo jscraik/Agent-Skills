@@ -44,6 +44,10 @@ class RunRecord:
     budget_compliant: bool
     first_pass_accepted: bool
     evaluator_flip_rate: float
+    confidence_score: Optional[float]
+    confidence_bucket: Optional[str]
+    evidence_completeness_score: Optional[float]
+    candidate_count: int
 
 
 @dataclass(frozen=True)
@@ -198,6 +202,27 @@ def load_run_record(run_dir: Path) -> Optional[RunRecord]:
 
     terminal_status = str(run.get("terminal_status", "failed"))
     stop_reason = str(run.get("stop_reason", "policy_failed"))
+    promotion_path = run_dir / "promotion_decision.json"
+    confidence_score: Optional[float] = None
+    confidence_bucket: Optional[str] = None
+    evidence_completeness_score: Optional[float] = None
+    candidate_count = 0
+    if promotion_path.exists():
+        promotion = load_json(promotion_path)
+        conf = promotion.get("confidence", {}) if isinstance(promotion.get("confidence"), dict) else {}
+        if "score" in conf:
+            confidence_score = safe_float(conf.get("score"), 0.0)
+        bucket_raw = str(conf.get("bucket", "")).strip()
+        confidence_bucket = bucket_raw or None
+        if "evidence_completeness" in conf:
+            evidence_completeness_score = safe_float(conf.get("evidence_completeness"), 0.0)
+        elif isinstance(promotion.get("evidence_packet"), dict):
+            evidence_completeness_score = safe_float(
+                promotion.get("evidence_packet", {}).get("completeness_score"), 0.0
+            )
+        candidates = promotion.get("lesson_candidates")
+        if isinstance(candidates, list):
+            candidate_count = len(candidates)
 
     return RunRecord(
         run_id=str(run.get("run_id", run_dir.name)),
@@ -214,6 +239,10 @@ def load_run_record(run_dir: Path) -> Optional[RunRecord]:
         budget_compliant=stop_reason != "budget_exhausted",
         first_pass_accepted=terminal_status == "passed" and iter_count == 1,
         evaluator_flip_rate=round(flip_count / len(journals), 3),
+        confidence_score=confidence_score,
+        confidence_bucket=confidence_bucket,
+        evidence_completeness_score=evidence_completeness_score,
+        candidate_count=candidate_count,
     )
 
 
@@ -676,6 +705,10 @@ def main() -> int:
                 "iterations_completed": r.iterations_completed,
                 "quality_uplift": r.quality_uplift,
                 "critical_non_regression_passed": r.critical_non_regression_passed,
+                "confidence_score": r.confidence_score,
+                "confidence_bucket": r.confidence_bucket,
+                "evidence_completeness_score": r.evidence_completeness_score,
+                "candidate_count": r.candidate_count,
                 "tokens_used": r.tokens_used,
                 "finished_at": r.finished_at.isoformat().replace("+00:00", "Z"),
             }
@@ -735,8 +768,15 @@ def main() -> int:
         queue_lines.append("- No pending promotions in window.")
     else:
         for r in queue_items:
+            confidence_str = "n/a" if r.confidence_score is None else f"{r.confidence_score:.3f}"
+            bucket_str = r.confidence_bucket or "n/a"
+            completeness_str = (
+                "n/a" if r.evidence_completeness_score is None else f"{r.evidence_completeness_score:.3f}"
+            )
             queue_lines.append(
-                f"- `{r.run_id}` | profile `{r.profile_id}` | finished `{r.finished_at.isoformat().replace('+00:00', 'Z')}`"
+                f"- `{r.run_id}` | profile `{r.profile_id}` | confidence `{confidence_str}` (`{bucket_str}`)"
+                f" | evidence completeness `{completeness_str}` | candidates `{r.candidate_count}`"
+                f" | finished `{r.finished_at.isoformat().replace('+00:00', 'Z')}`"
             )
     queue_lines.append("")
     promotion_queue_path.write_text("\n".join(queue_lines), encoding="utf-8")

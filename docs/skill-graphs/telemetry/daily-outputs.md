@@ -8,6 +8,12 @@ Daily operator artifacts for recursive loop health monitoring.
 - `failure-pattern-candidates.jsonl`
 - `promotion-queue.md`
 
+`promotion-queue.md` entries should include:
+- run id + profile id
+- confidence score + confidence bucket
+- evidence completeness score
+- candidate lesson count
+
 ## Minimum event envelope
 
 ```yaml

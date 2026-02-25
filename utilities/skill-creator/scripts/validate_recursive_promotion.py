@@ -279,6 +279,35 @@ def validate(args: argparse.Namespace) -> Dict[str, Any]:
                 except Exception as exc:
                     errors.append(f"reviewer policy validation failed: {exc}")
 
+        confidence_obj = decision.get("confidence")
+        if not isinstance(confidence_obj, dict):
+            warnings.append("confidence object missing (Phase-4 queue enrichment expected)")
+        else:
+            score = confidence_obj.get("score")
+            if score is None:
+                warnings.append("confidence.score missing (Phase-4 queue enrichment expected)")
+            else:
+                try:
+                    score_f = float(score)
+                    if score_f < 0.0 or score_f > 1.0:
+                        errors.append("confidence.score must be between 0 and 1")
+                except Exception:
+                    errors.append("confidence.score must be numeric")
+            bucket = str(confidence_obj.get("bucket", "")).strip().lower()
+            if bucket and bucket not in {"high", "medium", "low"}:
+                errors.append("confidence.bucket must be one of high|medium|low")
+
+        evidence_obj = decision.get("evidence_packet")
+        if isinstance(evidence_obj, dict):
+            completeness = evidence_obj.get("completeness_score")
+            if completeness is not None:
+                try:
+                    completeness_f = float(completeness)
+                    if completeness_f < 0.0 or completeness_f > 1.0:
+                        errors.append("evidence_packet.completeness_score must be between 0 and 1")
+                except Exception:
+                    errors.append("evidence_packet.completeness_score must be numeric")
+
     if decision_state == "approved":
         if args.skip_lesson_content_scan:
             errors.append("approved decision cannot use --skip-lesson-content-scan")

@@ -50,11 +50,20 @@ class RecursiveLoopCaptureTests(unittest.TestCase):
 
         capture = json.loads((run_dir / "capture_record.json").read_text(encoding="utf-8"))
         evidence = json.loads((run_dir / "evidence_packet.json").read_text(encoding="utf-8"))
+        promotion = json.loads((run_dir / "promotion_decision.json").read_text(encoding="utf-8"))
+        candidates = json.loads((run_dir / "lesson_candidates.json").read_text(encoding="utf-8"))
 
         self.assertEqual(capture["feedback"]["status"], "worked")
         self.assertEqual(capture["feedback"]["source"], "cli_one_tap")
         self.assertTrue(capture["capture_id"])
         self.assertEqual(capture["evidence"]["evidence_packet_id"], evidence["evidence_packet_id"])
+        self.assertIn("confidence", capture)
+        self.assertIn("score", capture["confidence"])
+        self.assertIn(capture["confidence"]["bucket"], {"high", "medium", "low"})
+        self.assertIn("confidence", promotion)
+        self.assertIn("lesson_candidates", promotion)
+        self.assertEqual(len(promotion["lesson_candidates"]), len(candidates["items"]))
+        self.assertGreaterEqual(len(candidates["items"]), 1)
         self.assertIn("score", evidence["completeness"])
         for key in ("events", "logs", "traces", "session_signals", "checks"):
             self.assertIn(key, evidence["completeness"])
@@ -70,10 +79,12 @@ class RecursiveLoopCaptureTests(unittest.TestCase):
         capture = json.loads((run_dir / "capture_record.json").read_text(encoding="utf-8"))
         evidence = json.loads((run_dir / "evidence_packet.json").read_text(encoding="utf-8"))
         run_obj = json.loads((run_dir / "run.json").read_text(encoding="utf-8"))
+        candidates = json.loads((run_dir / "lesson_candidates.json").read_text(encoding="utf-8"))
 
         self.assertEqual(capture["feedback"]["status"], "missing")
         self.assertEqual(capture["output_summary"]["terminal_status"], run_obj["terminal_status"])
         self.assertEqual(evidence["run_id"], run_obj["run_id"])
+        self.assertEqual(candidates["items"], [])
 
 
 if __name__ == "__main__":

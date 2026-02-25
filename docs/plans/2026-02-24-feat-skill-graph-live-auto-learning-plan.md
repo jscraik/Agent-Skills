@@ -221,4 +221,7 @@ Optional dry-run checks once implementation starts:
 - [x] T1: Define capture + feedback event schema for all skill invocations
 - [x] T2: Implement post-run one-tap feedback capture flow
 - [x] T3: Build evidence packet assembler (events/logs/traces/sessions/checks)
-- [ ] T4+: Remaining tasks pending next execution batch
+- [x] T4: Implement confidence scoring contract and calibration buckets
+- [x] T5: Generate lesson candidates from advice/implementation/outcome evidence
+- [x] T6: Extend promotion queue artifacts with confidence and evidence completeness fields
+- [ ] T7+: Remaining tasks pending next execution batch
