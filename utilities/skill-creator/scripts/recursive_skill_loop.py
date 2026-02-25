@@ -456,6 +456,8 @@ def retrieve_and_rank_lessons(
     ranked: List[Dict[str, Any]] = []
     for row in scoped:
         lesson_id = str(row.get("lesson_id", "")).strip()
+        if not lesson_id:
+            continue
         status = str(row.get("status", "promoted")).strip().lower() or "promoted"
         confidence = float(row.get("confidence", 0.0) or 0.0)
         effective_from_ts = parse_lesson_effective_from(row.get("effective_from"))
@@ -662,7 +664,8 @@ def compute_counterfactual_uplift_gate(
         "decision_window_days": window_days,
         "sample_size": sample_size,
         "treated_sample_size": treated_total,
-        "control_sample_size": control_total,
+        "control_sample_size": sample_size,
+        "control_pool_size": control_total,
         "pair_counts_by_skill": {profile.scope_skill: sample_size},
         "treatment_outcome": round(treatment_outcome, 4) if treatment_outcome is not None else None,
         "control_outcome": round(control_outcome, 4) if control_outcome is not None else None,
@@ -1180,12 +1183,16 @@ def run_loop(args: argparse.Namespace) -> int:
         auto_apply_ci_lower_bound=args.uplift_auto_apply_ci_lower_bound,
         unmatched_rate_max=args.uplift_unmatched_rate_max,
     )
-    if auto_apply_enabled and uplift_gate.get("auto_apply_decision") != "pass":
-        if args.uplift_gate_mode == "enforce":
+    uplift_auto_apply_decision = str(uplift_gate.get("auto_apply_decision", "")).strip().lower()
+    if auto_apply_enabled and uplift_auto_apply_decision != "pass":
+        allow_bootstrap = uplift_auto_apply_decision in {"insufficient_data", "hold"}
+        if args.uplift_gate_mode == "enforce" and not allow_bootstrap:
             auto_apply_enabled = False
-            control_reasons.append(f"uplift_auto_apply_gate_{uplift_gate.get('auto_apply_decision')}")
+            control_reasons.append(f"uplift_auto_apply_gate_{uplift_auto_apply_decision or 'unknown'}")
+        elif args.uplift_gate_mode == "enforce" and allow_bootstrap:
+            control_reasons.append(f"uplift_auto_apply_gate_bootstrap_{uplift_auto_apply_decision}")
         else:
-            control_reasons.append(f"uplift_auto_apply_gate_observe_{uplift_gate.get('auto_apply_decision')}")
+            control_reasons.append(f"uplift_auto_apply_gate_observe_{uplift_auto_apply_decision or 'unknown'}")
 
     effective_rollout_mode = rollout_mode
     if (

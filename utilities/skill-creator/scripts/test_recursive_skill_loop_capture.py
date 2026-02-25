@@ -94,6 +94,14 @@ class RecursiveLoopCaptureTests(unittest.TestCase):
         rows = [
             {
                 "schema_version": "1.0",
+                "scope_skill": "ui-ux-creative-coding",
+                "scope_profile": "ui",
+                "status": "active",
+                "effective_from": "2026-02-24T12:00:00Z",
+                "confidence": 0.99,
+            },
+            {
+                "schema_version": "1.0",
                 "lesson_id": "lesson_ui_high",
                 "scope_skill": "ui-ux-creative-coding",
                 "scope_profile": "ui",
@@ -144,6 +152,7 @@ class RecursiveLoopCaptureTests(unittest.TestCase):
         self.assertEqual(len(injected), 2)
         self.assertEqual(injected[0]["lesson_id"], "lesson_ui_high")
         self.assertEqual(injected[1]["lesson_id"], "lesson_ui_low")
+        self.assertNotIn("", [item["lesson_id"] for item in injected])
         self.assertFalse(bool(injected[0]["low_confidence_flag"]))
         self.assertTrue(bool(injected[1]["low_confidence_flag"]))
         self.assertEqual(injected[1]["warning"], "low_confidence_downranked")
@@ -240,7 +249,7 @@ class RecursiveLoopCaptureTests(unittest.TestCase):
         self.assertEqual(run_obj.get("injected_lessons", []), [])
         self.assertFalse((run_dir / "capture_record.json").exists())
 
-    def test_uplift_gate_enforce_blocks_auto_apply_when_insufficient_pairs(self) -> None:
+    def test_uplift_gate_enforce_allows_bootstrap_when_insufficient_pairs(self) -> None:
         lessons_file = Path(tempfile.mkdtemp(prefix="uplift-lessons-")) / "canonical-lessons.jsonl"
         lessons_file.write_text(
             json.dumps(
@@ -272,11 +281,12 @@ class RecursiveLoopCaptureTests(unittest.TestCase):
         reasons = set(controls.get("reasons", []))
         uplift = promotion.get("counterfactual_uplift", {})
 
-        self.assertFalse(bool(controls.get("auto_apply_enabled")))
-        self.assertIn("uplift_auto_apply_gate_insufficient_data", reasons)
+        self.assertTrue(bool(controls.get("auto_apply_enabled")))
+        self.assertIn("uplift_auto_apply_gate_bootstrap_insufficient_data", reasons)
         self.assertEqual(promotion.get("schema_version"), "1.1")
         self.assertEqual(uplift.get("promotion_decision"), "insufficient_data")
         self.assertEqual(uplift.get("auto_apply_decision"), "insufficient_data")
+        self.assertGreaterEqual(len(run_obj.get("injected_lessons", [])), 1)
 
 
 if __name__ == "__main__":
