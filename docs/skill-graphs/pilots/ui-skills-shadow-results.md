@@ -1,6 +1,6 @@
 # UI Skills Shadow Results (Phase 2)
 
-Shadow mode runs the full bounded loop (generate/evaluate/diagnose/improve/re-score) with checkpoint adversarial checks, without automatic canonical promotion writes.
+Shadow mode runs evaluator + checkpoint adversarial checks without automatic improvement writes.
 
 ## Table of Contents
 
@@ -35,6 +35,11 @@ Shadow mode runs the full bounded loop (generate/evaluate/diagnose/improve/re-sc
 - Critical non-regression compliance: `62.5%`
 - Budget compliance: `87.5%`
 - Evaluator flip rate: `24.4%`
+- Capture coverage: `0.0%` (`0/8` runs with capture artifacts)
+- Confidence bucket distribution: `high=0` `medium=0` `low=0` `unknown=8`
+- Injection usage rate: `0.0%` (`0/8` runs, total lessons `0`, suppressed-by-controls runs `0`)
+- Rollout mode distribution: `active=0` `observe_only=8` `off=0` `other=0`
+- Uplift gate decisions (promotion/auto-apply): `pass=0/0` `insufficient_data=0/0` `regressed=0/0`
 
 ## Run log
 

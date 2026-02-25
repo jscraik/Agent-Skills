@@ -55,6 +55,9 @@ class RunRecord:
     injected_lesson_count: int
     retrieved_lesson_count: int
     injection_suppressed: bool
+    uplift_promotion_decision: Optional[str]
+    uplift_auto_apply_decision: Optional[str]
+    uplift_sample_size: Optional[int]
 
 
 @dataclass(frozen=True)
@@ -91,6 +94,8 @@ class WindowSummary:
     total_injected_lessons: int
     average_injected_lessons_per_run: float
     rollout_mode_counts: Dict[str, int]
+    uplift_promotion_decision_counts: Dict[str, int]
+    uplift_auto_apply_decision_counts: Dict[str, int]
 
 
 def parse_args() -> argparse.Namespace:
@@ -245,6 +250,10 @@ def load_run_record(run_dir: Path) -> Optional[RunRecord]:
         if isinstance(retrieved_lessons, list):
             retrieved_lesson_count = len(retrieved_lessons)
     injection_suppressed = bool(injection_summary.get("suppressed_by_controls", False))
+    uplift_obj_run = run.get("counterfactual_uplift", {}) if isinstance(run.get("counterfactual_uplift"), dict) else {}
+    uplift_promotion_decision: Optional[str] = None
+    uplift_auto_apply_decision: Optional[str] = None
+    uplift_sample_size: Optional[int] = None
     if promotion_path.exists():
         promotion = load_json(promotion_path)
         conf = promotion.get("confidence", {}) if isinstance(promotion.get("confidence"), dict) else {}
@@ -261,6 +270,21 @@ def load_run_record(run_dir: Path) -> Optional[RunRecord]:
         candidates = promotion.get("lesson_candidates")
         if isinstance(candidates, list):
             candidate_count = len(candidates)
+        uplift_obj = (
+            promotion.get("counterfactual_uplift", {})
+            if isinstance(promotion.get("counterfactual_uplift"), dict)
+            else uplift_obj_run
+        )
+    else:
+        uplift_obj = uplift_obj_run
+
+    if isinstance(uplift_obj, dict):
+        promotion_state = str(uplift_obj.get("promotion_decision", "")).strip().lower()
+        auto_apply_state = str(uplift_obj.get("auto_apply_decision", "")).strip().lower()
+        uplift_promotion_decision = promotion_state or None
+        uplift_auto_apply_decision = auto_apply_state or None
+        if "sample_size" in uplift_obj:
+            uplift_sample_size = safe_int(uplift_obj.get("sample_size"), 0)
 
     return RunRecord(
         run_id=str(run.get("run_id", run_dir.name)),
@@ -288,6 +312,9 @@ def load_run_record(run_dir: Path) -> Optional[RunRecord]:
         injected_lesson_count=injected_lesson_count,
         retrieved_lesson_count=retrieved_lesson_count,
         injection_suppressed=injection_suppressed,
+        uplift_promotion_decision=uplift_promotion_decision,
+        uplift_auto_apply_decision=uplift_auto_apply_decision,
+        uplift_sample_size=uplift_sample_size,
     )
 
 
@@ -347,6 +374,22 @@ def summarize(records: List[RunRecord]) -> WindowSummary:
             total_injected_lessons=0,
             average_injected_lessons_per_run=0.0,
             rollout_mode_counts={"off": 0, "observe_only": 0, "active": 0, "other": 0},
+            uplift_promotion_decision_counts={
+                "pass": 0,
+                "hold": 0,
+                "regressed": 0,
+                "insufficient_data": 0,
+                "insufficient_match_quality": 0,
+                "unknown": 0,
+            },
+            uplift_auto_apply_decision_counts={
+                "pass": 0,
+                "hold": 0,
+                "regressed": 0,
+                "insufficient_data": 0,
+                "insufficient_match_quality": 0,
+                "unknown": 0,
+            },
         )
 
     by_profile = {p: 0 for p in PILOT_PROFILES}
@@ -380,6 +423,14 @@ def summarize(records: List[RunRecord]) -> WindowSummary:
     for r in records:
         mode = r.rollout_mode if r.rollout_mode in {"off", "observe_only", "active"} else "other"
         rollout_mode_counts[mode] += 1
+    uplift_states = ["pass", "hold", "regressed", "insufficient_data", "insufficient_match_quality", "unknown"]
+    uplift_promotion_decision_counts = {key: 0 for key in uplift_states}
+    uplift_auto_apply_decision_counts = {key: 0 for key in uplift_states}
+    for r in records:
+        promotion_state = r.uplift_promotion_decision if r.uplift_promotion_decision in uplift_promotion_decision_counts else "unknown"
+        auto_apply_state = r.uplift_auto_apply_decision if r.uplift_auto_apply_decision in uplift_auto_apply_decision_counts else "unknown"
+        uplift_promotion_decision_counts[promotion_state] += 1
+        uplift_auto_apply_decision_counts[auto_apply_state] += 1
 
     iteration_values = [float(r.iterations_completed) for r in records]
     uplift_values = [r.quality_uplift for r in records]
@@ -410,6 +461,8 @@ def summarize(records: List[RunRecord]) -> WindowSummary:
         total_injected_lessons=total_injected_lessons,
         average_injected_lessons_per_run=round(total_injected_lessons / total, 3),
         rollout_mode_counts=rollout_mode_counts,
+        uplift_promotion_decision_counts=uplift_promotion_decision_counts,
+        uplift_auto_apply_decision_counts=uplift_auto_apply_decision_counts,
     )
 
 
@@ -546,6 +599,12 @@ def render_shadow_md(
         f"`observe_only={current_summary.rollout_mode_counts['observe_only']}` "
         f"`off={current_summary.rollout_mode_counts['off']}` "
         f"`other={current_summary.rollout_mode_counts['other']}`"
+    )
+    lines.append(
+        "- Uplift gate decisions (promotion/auto-apply): "
+        f"`pass={current_summary.uplift_promotion_decision_counts['pass']}/{current_summary.uplift_auto_apply_decision_counts['pass']}` "
+        f"`insufficient_data={current_summary.uplift_promotion_decision_counts['insufficient_data']}/{current_summary.uplift_auto_apply_decision_counts['insufficient_data']}` "
+        f"`regressed={current_summary.uplift_promotion_decision_counts['regressed']}/{current_summary.uplift_auto_apply_decision_counts['regressed']}`"
     )
     lines.append("")
 
@@ -688,6 +747,8 @@ def to_dict(summary: WindowSummary) -> Dict[str, Any]:
         "total_injected_lessons": summary.total_injected_lessons,
         "average_injected_lessons_per_run": summary.average_injected_lessons_per_run,
         "rollout_mode_counts": summary.rollout_mode_counts,
+        "uplift_promotion_decision_counts": summary.uplift_promotion_decision_counts,
+        "uplift_auto_apply_decision_counts": summary.uplift_auto_apply_decision_counts,
     }
 
 
@@ -851,6 +912,9 @@ def main() -> int:
                 "injected_lesson_count": r.injected_lesson_count,
                 "retrieved_lesson_count": r.retrieved_lesson_count,
                 "injection_suppressed": r.injection_suppressed,
+                "uplift_promotion_decision": r.uplift_promotion_decision,
+                "uplift_auto_apply_decision": r.uplift_auto_apply_decision,
+                "uplift_sample_size": r.uplift_sample_size,
                 "tokens_used": r.tokens_used,
                 "finished_at": r.finished_at.isoformat().replace("+00:00", "Z"),
             }
@@ -874,6 +938,8 @@ def main() -> int:
         f"- Confidence buckets: `high={current_summary.confidence_bucket_counts['high']}` `medium={current_summary.confidence_bucket_counts['medium']}` `low={current_summary.confidence_bucket_counts['low']}` `unknown={current_summary.confidence_bucket_counts['unknown']}`",
         f"- Injection usage: `{fmt_pct(current_summary.injection_usage_rate)}` ({current_summary.runs_with_injection}/{current_summary.runs_total})",
         f"- Injection suppressed by controls: `{current_summary.suppressed_injection_runs}`",
+        f"- Uplift promotion decisions: `pass={current_summary.uplift_promotion_decision_counts['pass']}` `hold={current_summary.uplift_promotion_decision_counts['hold']}` `insufficient_data={current_summary.uplift_promotion_decision_counts['insufficient_data']}`",
+        f"- Uplift auto-apply decisions: `pass={current_summary.uplift_auto_apply_decision_counts['pass']}` `hold={current_summary.uplift_auto_apply_decision_counts['hold']}` `insufficient_data={current_summary.uplift_auto_apply_decision_counts['insufficient_data']}`",
         f"- Event envelope errors: `{len(event_errors)}`",
         "",
     ]
@@ -923,6 +989,7 @@ def main() -> int:
                 f"- `{r.run_id}` | profile `{r.profile_id}` | confidence `{confidence_str}` (`{bucket_str}`)"
                 f" | evidence completeness `{completeness_str}` | candidates `{r.candidate_count}`"
                 f" | rollout `{r.rollout_mode}` | injected `{r.injected_lesson_count}`"
+                f" | uplift `{r.uplift_promotion_decision or 'unknown'}/{r.uplift_auto_apply_decision or 'unknown'}`"
                 f" | finished `{r.finished_at.isoformat().replace('+00:00', 'Z')}`"
             )
     queue_lines.append("")

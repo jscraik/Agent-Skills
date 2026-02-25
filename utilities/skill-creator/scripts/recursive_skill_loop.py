@@ -30,7 +30,7 @@ import random
 import sys
 import time
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -509,6 +509,188 @@ def retrieve_and_rank_lessons(
     }
 
 
+def parse_iso_timestamp(value: Any) -> Optional[datetime]:
+    raw = str(value or "").strip()
+    if not raw:
+        return None
+    try:
+        return datetime.fromisoformat(raw.replace("Z", "+00:00")).astimezone(timezone.utc)
+    except Exception:
+        return None
+
+
+def compute_counterfactual_uplift_gate(
+    *,
+    runs_root: Path,
+    profile: Profile,
+    window_days: int,
+    min_pairs: int,
+    min_pairs_per_skill: int,
+    pass_delta: float,
+    ci_lower_bound: float,
+    auto_apply_min_pairs: int,
+    auto_apply_min_pairs_per_skill: int,
+    auto_apply_pass_delta: float,
+    auto_apply_ci_lower_bound: float,
+    unmatched_rate_max: float,
+) -> Dict[str, Any]:
+    window_days = max(1, int(window_days))
+    now = datetime.now(timezone.utc)
+    window_start = now - timedelta(days=window_days)
+    analysis_method_version = "counterfactual_uplift_v1"
+    treated: List[Dict[str, Any]] = []
+    controls_by_bucket: Dict[str, List[Dict[str, Any]]] = {}
+    control_total = 0
+
+    for run_dir in sorted(runs_root.glob("run_*")):
+        run_path = run_dir / "run.json"
+        if not run_path.exists():
+            continue
+        try:
+            run_obj = json.loads(run_path.read_text(encoding="utf-8"))
+        except Exception:
+            continue
+        if str(run_obj.get("profile_id", "")).strip() != profile.profile_id:
+            continue
+        if str(run_obj.get("scope_skill", "")).strip() != profile.scope_skill:
+            continue
+        finished_at = parse_iso_timestamp(run_obj.get("finished_at"))
+        if finished_at is None or finished_at < window_start:
+            continue
+
+        counters = run_obj.get("counters", {}) if isinstance(run_obj.get("counters"), dict) else {}
+        first_pass = (
+            str(run_obj.get("terminal_status", "")).strip() == "passed"
+            and str(run_obj.get("stop_reason", "")).strip() == "pass"
+            and int(counters.get("iterations_completed", 0) or 0) == 1
+        )
+        injection_summary = (
+            run_obj.get("injection_summary", {})
+            if isinstance(run_obj.get("injection_summary"), dict)
+            else {}
+        )
+        selected_count = int(injection_summary.get("selected_count", 0) or 0)
+        recency_bucket = finished_at.date().isoformat()
+        row = {
+            "run_id": str(run_obj.get("run_id", run_dir.name)),
+            "outcome": 1.0 if first_pass else 0.0,
+            "recency_bucket": recency_bucket,
+        }
+        if selected_count > 0:
+            treated.append(row)
+        else:
+            controls_by_bucket.setdefault(recency_bucket, []).append(row)
+            control_total += 1
+
+    matched_pairs: List[Tuple[Dict[str, Any], Dict[str, Any]]] = []
+    unmatched_treated = 0
+    for treatment in treated:
+        bucket = treatment["recency_bucket"]
+        controls = controls_by_bucket.get(bucket, [])
+        if not controls:
+            unmatched_treated += 1
+            continue
+        control = controls.pop(0)
+        matched_pairs.append((treatment, control))
+
+    sample_size = len(matched_pairs)
+    treated_total = len(treated)
+    if sample_size > 0:
+        treatment_outcome = sum(t[0]["outcome"] for t in matched_pairs) / sample_size
+        control_outcome = sum(t[1]["outcome"] for t in matched_pairs) / sample_size
+        uplift_delta = treatment_outcome - control_outcome
+        se = math.sqrt(
+            max(0.0, treatment_outcome * (1 - treatment_outcome) / sample_size)
+            + max(0.0, control_outcome * (1 - control_outcome) / sample_size)
+        )
+        margin = 1.96 * se
+        ci_lower = uplift_delta - margin
+        ci_upper = uplift_delta + margin
+    else:
+        treatment_outcome = None
+        control_outcome = None
+        uplift_delta = None
+        ci_lower = None
+        ci_upper = None
+
+    unmatched_rate = (unmatched_treated / treated_total) if treated_total > 0 else 0.0
+    match_quality_metrics = {
+        "required_covariates": ["skill_id", "task_profile", "recency_bucket"],
+        "smd": {
+            "skill_id": 0.0,
+            "task_profile": 0.0,
+            "recency_bucket": 0.0,
+        },
+        "treated_unmatched_count": unmatched_treated,
+        "treated_unmatched_rate": round(unmatched_rate, 4),
+        "max_allowed_unmatched_rate": unmatched_rate_max,
+        "valid": unmatched_rate <= unmatched_rate_max,
+    }
+
+    def decide(*, min_n: int, min_per_skill_n: int, delta_gate: float, ci_gate: float) -> str:
+        if sample_size < min_n:
+            return "insufficient_data"
+        if sample_size < min_per_skill_n:
+            return "insufficient_data"
+        if unmatched_rate > unmatched_rate_max:
+            return "insufficient_match_quality"
+        if uplift_delta is None or ci_lower is None:
+            return "insufficient_data"
+        if uplift_delta <= -0.02 or ci_lower <= 0:
+            return "regressed"
+        if uplift_delta >= delta_gate and ci_lower >= ci_gate:
+            return "pass"
+        return "hold"
+
+    promotion_decision = decide(
+        min_n=min_pairs,
+        min_per_skill_n=min_pairs_per_skill,
+        delta_gate=pass_delta,
+        ci_gate=ci_lower_bound,
+    )
+    auto_apply_decision = decide(
+        min_n=auto_apply_min_pairs,
+        min_per_skill_n=auto_apply_min_pairs_per_skill,
+        delta_gate=auto_apply_pass_delta,
+        ci_gate=auto_apply_ci_lower_bound,
+    )
+
+    return {
+        "schema_version": "1.0",
+        "analysis_method_version": analysis_method_version,
+        "computed_at": iso_now(),
+        "decision_window_days": window_days,
+        "sample_size": sample_size,
+        "treated_sample_size": treated_total,
+        "control_sample_size": control_total,
+        "pair_counts_by_skill": {profile.scope_skill: sample_size},
+        "treatment_outcome": round(treatment_outcome, 4) if treatment_outcome is not None else None,
+        "control_outcome": round(control_outcome, 4) if control_outcome is not None else None,
+        "uplift_delta": round(uplift_delta, 4) if uplift_delta is not None else None,
+        "uplift_confidence_band": {
+            "method": "normal_approx_95",
+            "level": 0.95,
+            "lower": round(ci_lower, 4) if ci_lower is not None else None,
+            "upper": round(ci_upper, 4) if ci_upper is not None else None,
+        },
+        "match_quality_metrics": match_quality_metrics,
+        "promotion_thresholds": {
+            "min_pairs_total": min_pairs,
+            "min_pairs_per_skill": min_pairs_per_skill,
+            "delta_min": pass_delta,
+            "ci_lower_min": ci_lower_bound,
+        },
+        "auto_apply_thresholds": {
+            "min_pairs_total": auto_apply_min_pairs,
+            "min_pairs_per_skill": auto_apply_min_pairs_per_skill,
+            "delta_min": auto_apply_pass_delta,
+            "ci_lower_min": auto_apply_ci_lower_bound,
+        },
+        "promotion_decision": promotion_decision,
+        "auto_apply_decision": auto_apply_decision,
+    }
+
+
 def load_profile(path: Path) -> Profile:
     obj = json.loads(path.read_text(encoding="utf-8"))
 
@@ -984,11 +1166,45 @@ def run_loop(args: argparse.Namespace) -> int:
         auto_apply_enabled = False
         control_reasons.append("skill_auto_apply_kill_switch")
 
+    uplift_gate = compute_counterfactual_uplift_gate(
+        runs_root=out_root,
+        profile=profile,
+        window_days=args.uplift_window_days,
+        min_pairs=args.uplift_min_pairs,
+        min_pairs_per_skill=args.uplift_min_pairs_per_skill,
+        pass_delta=args.uplift_pass_delta,
+        ci_lower_bound=args.uplift_ci_lower_bound,
+        auto_apply_min_pairs=args.uplift_auto_apply_min_pairs,
+        auto_apply_min_pairs_per_skill=args.uplift_auto_apply_min_pairs_per_skill,
+        auto_apply_pass_delta=args.uplift_auto_apply_pass_delta,
+        auto_apply_ci_lower_bound=args.uplift_auto_apply_ci_lower_bound,
+        unmatched_rate_max=args.uplift_unmatched_rate_max,
+    )
+    if auto_apply_enabled and uplift_gate.get("auto_apply_decision") != "pass":
+        if args.uplift_gate_mode == "enforce":
+            auto_apply_enabled = False
+            control_reasons.append(f"uplift_auto_apply_gate_{uplift_gate.get('auto_apply_decision')}")
+        else:
+            control_reasons.append(f"uplift_auto_apply_gate_observe_{uplift_gate.get('auto_apply_decision')}")
+
+    effective_rollout_mode = rollout_mode
+    if (
+        rollout_mode == "active"
+        and not auto_apply_enabled
+        and uplift_gate.get("auto_apply_decision") in {"regressed", "insufficient_match_quality"}
+    ):
+        effective_rollout_mode = "observe_only"
+        control_reasons.append("auto_downgraded_to_observe_only")
+
     runtime_controls = {
         "schema_version": "1.0",
         "rollout_mode": rollout_mode,
+        "effective_rollout_mode": effective_rollout_mode,
         "auto_capture_enabled": auto_capture_enabled,
         "auto_apply_enabled": auto_apply_enabled,
+        "uplift_gate_mode": args.uplift_gate_mode,
+        "uplift_promotion_decision": uplift_gate.get("promotion_decision"),
+        "uplift_auto_apply_decision": uplift_gate.get("auto_apply_decision"),
         "reasons": sorted(set(control_reasons)),
         "paths": {
             "controls_dir": str(controls_dir),
@@ -1030,6 +1246,8 @@ def run_loop(args: argparse.Namespace) -> int:
             "rollout_mode": rollout_mode,
             "auto_capture_enabled": auto_capture_enabled,
             "auto_apply_enabled": auto_apply_enabled,
+            "uplift_promotion_decision": uplift_gate.get("promotion_decision"),
+            "uplift_auto_apply_decision": uplift_gate.get("auto_apply_decision"),
             "retrieved_lesson_ids": [item["lesson_id"] for item in retrieved_lessons],
             "injected_lesson_ids": [item["lesson_id"] for item in injected_lessons],
         },
@@ -1198,6 +1416,7 @@ def run_loop(args: argparse.Namespace) -> int:
             "kill_switch_file": str(kill_switch_path) if kill_switch_path else "",
             "rollback_required_file": str(rollback_required_path) if rollback_required_path else "",
             "runtime_controls": runtime_controls,
+            "counterfactual_uplift": uplift_gate,
             "injection_summary": {
                 "lessons_file": str(lessons_file),
                 "retrieved_count": len(retrieved_lessons),
@@ -1211,7 +1430,7 @@ def run_loop(args: argparse.Namespace) -> int:
             "run_blocker": blocker,
         }
         promotion_decision = {
-            "schema_version": profile.schema_version,
+            "schema_version": "1.1",
             "run_id": run_id,
             "lesson_id": "",
             "decision": "draft",
@@ -1233,6 +1452,7 @@ def run_loop(args: argparse.Namespace) -> int:
             },
             "injected_lesson_ids": [item["lesson_id"] for item in injected_lessons],
             "runtime_controls": runtime_controls,
+            "counterfactual_uplift": uplift_gate,
             "run_blocker": blocker,
         }
         write_json(out_dir / "run.json", run_obj)
@@ -1709,6 +1929,7 @@ def run_loop(args: argparse.Namespace) -> int:
         "kill_switch_file": str(kill_switch_path) if kill_switch_path else "",
         "rollback_required_file": str(rollback_required_path) if rollback_required_path else "",
         "runtime_controls": runtime_controls,
+        "counterfactual_uplift": uplift_gate,
         "run_blocker": (
             {
                 "code": blocker_code,
@@ -1730,7 +1951,7 @@ def run_loop(args: argparse.Namespace) -> int:
     }
 
     promotion_decision = {
-        "schema_version": profile.schema_version,
+        "schema_version": "1.1",
         "run_id": run_id,
         "lesson_id": "",
         "decision": "draft",
@@ -1739,10 +1960,16 @@ def run_loop(args: argparse.Namespace) -> int:
         "lesson_status": "",
         "lesson_effective_to": None,
         "gate_decision": {
-            "runtime_gates_passed": terminal_status == "passed",
+            "runtime_gates_passed": (
+                terminal_status == "passed"
+                and (
+                    args.uplift_gate_mode != "enforce"
+                    or uplift_gate.get("promotion_decision") == "pass"
+                )
+            ),
             "provenance_complete": True,
             "security_checklist_passed": False,
-            "notes": "Fill before approve/reject.",
+            "notes": f"Fill before approve/reject. uplift_decision={uplift_gate.get('promotion_decision')}",
         },
         "provenance": {
             "prompt_hash": sha256_text(args.objective),
@@ -1752,6 +1979,7 @@ def run_loop(args: argparse.Namespace) -> int:
         },
         "injected_lesson_ids": [item["lesson_id"] for item in injected_lessons],
         "runtime_controls": runtime_controls,
+        "counterfactual_uplift": uplift_gate,
     }
 
     summary_md = (
@@ -1824,6 +2052,72 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument(
         "--auto-apply-switch-file",
         help="Global auto-apply kill switch path (default: <controls-dir>/auto_apply.disabled)",
+    )
+    p.add_argument(
+        "--uplift-gate-mode",
+        choices=["enforce", "observe"],
+        default="enforce",
+        help="Whether uplift gate blocks promotion/auto-apply decisions",
+    )
+    p.add_argument(
+        "--uplift-window-days",
+        type=int,
+        default=7,
+        help="Counterfactual uplift decision window in days",
+    )
+    p.add_argument(
+        "--uplift-min-pairs",
+        type=int,
+        default=40,
+        help="Minimum matched pairs required for promotion gate",
+    )
+    p.add_argument(
+        "--uplift-min-pairs-per-skill",
+        type=int,
+        default=10,
+        help="Minimum matched pairs per skill for promotion gate",
+    )
+    p.add_argument(
+        "--uplift-pass-delta",
+        type=float,
+        default=0.03,
+        help="Minimum uplift delta for promotion gate pass",
+    )
+    p.add_argument(
+        "--uplift-ci-lower-bound",
+        type=float,
+        default=0.0,
+        help="Minimum uplift CI lower bound for promotion gate pass",
+    )
+    p.add_argument(
+        "--uplift-auto-apply-min-pairs",
+        type=int,
+        default=100,
+        help="Minimum matched pairs required for auto-apply gate",
+    )
+    p.add_argument(
+        "--uplift-auto-apply-min-pairs-per-skill",
+        type=int,
+        default=20,
+        help="Minimum matched pairs per skill for auto-apply gate",
+    )
+    p.add_argument(
+        "--uplift-auto-apply-pass-delta",
+        type=float,
+        default=0.05,
+        help="Minimum uplift delta for auto-apply gate pass",
+    )
+    p.add_argument(
+        "--uplift-auto-apply-ci-lower-bound",
+        type=float,
+        default=0.02,
+        help="Minimum uplift CI lower bound for auto-apply gate pass",
+    )
+    p.add_argument(
+        "--uplift-unmatched-rate-max",
+        type=float,
+        default=0.15,
+        help="Maximum treated unmatched rate allowed by match-quality gate",
     )
     p.add_argument("--seed", type=int, help="Optional deterministic seed override")
     p.add_argument("--max-iterations", type=int, help="Override max iterations")

@@ -62,6 +62,8 @@ class RecursiveLoopCaptureTests(unittest.TestCase):
         self.assertIn(capture["confidence"]["bucket"], {"high", "medium", "low"})
         self.assertIn("confidence", promotion)
         self.assertIn("lesson_candidates", promotion)
+        self.assertEqual(promotion.get("schema_version"), "1.1")
+        self.assertIn("counterfactual_uplift", promotion)
         self.assertEqual(len(promotion["lesson_candidates"]), len(candidates["items"]))
         self.assertGreaterEqual(len(candidates["items"]), 1)
         self.assertIn("score", evidence["completeness"])
@@ -129,6 +131,8 @@ class RecursiveLoopCaptureTests(unittest.TestCase):
             "0.6",
             "--rollout-mode",
             "active",
+            "--uplift-gate-mode",
+            "observe",
         )
         self.assertIn(returncode, {0, 2, 3, 4, 5})
 
@@ -235,6 +239,44 @@ class RecursiveLoopCaptureTests(unittest.TestCase):
         self.assertIn("skill_auto_apply_kill_switch", reasons)
         self.assertEqual(run_obj.get("injected_lessons", []), [])
         self.assertFalse((run_dir / "capture_record.json").exists())
+
+    def test_uplift_gate_enforce_blocks_auto_apply_when_insufficient_pairs(self) -> None:
+        lessons_file = Path(tempfile.mkdtemp(prefix="uplift-lessons-")) / "canonical-lessons.jsonl"
+        lessons_file.write_text(
+            json.dumps(
+                {
+                    "schema_version": "1.0",
+                    "lesson_id": "lesson_ui_high",
+                    "scope_skill": "ui-ux-creative-coding",
+                    "scope_profile": "ui",
+                    "status": "active",
+                    "effective_from": "2026-02-24T10:00:00Z",
+                    "confidence": 0.9,
+                }
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+
+        returncode, run_dir = self._run_loop(
+            "--rollout-mode",
+            "active",
+            "--lessons-jsonl",
+            str(lessons_file),
+        )
+        self.assertIn(returncode, {0, 2, 3, 4, 5})
+
+        run_obj = json.loads((run_dir / "run.json").read_text(encoding="utf-8"))
+        promotion = json.loads((run_dir / "promotion_decision.json").read_text(encoding="utf-8"))
+        controls = run_obj.get("runtime_controls", {})
+        reasons = set(controls.get("reasons", []))
+        uplift = promotion.get("counterfactual_uplift", {})
+
+        self.assertFalse(bool(controls.get("auto_apply_enabled")))
+        self.assertIn("uplift_auto_apply_gate_insufficient_data", reasons)
+        self.assertEqual(promotion.get("schema_version"), "1.1")
+        self.assertEqual(uplift.get("promotion_decision"), "insufficient_data")
+        self.assertEqual(uplift.get("auto_apply_decision"), "insufficient_data")
 
 
 if __name__ == "__main__":

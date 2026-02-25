@@ -20,6 +20,7 @@ Daily operator artifacts for recursive loop health monitoring.
 - confidence bucket counts (`high|medium|low|unknown`)
 - injection usage rate (runs with injected lessons / total runs)
 - suppression count (runs where retrieval occurred but injection was disabled by controls)
+- uplift gate decision counts (`pass|hold|insufficient_data|regressed`) for promotion and auto-apply paths
 
 ## Minimum event envelope
 

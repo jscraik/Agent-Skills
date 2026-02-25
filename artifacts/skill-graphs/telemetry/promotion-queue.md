@@ -1,0 +1,8 @@
+# Promotion Queue
+
+- `run_20260220T195545Z_8799c2` | profile `ui-ux-creative-coding` | confidence `n/a` (`n/a`) | evidence completeness `n/a` | candidates `0` | rollout `observe_only` | injected `0` | uplift `unknown/unknown` | finished `2026-02-20T19:55:45Z`
+- `run_20260220T150021Z_82ecf7` | profile `react-ui-patterns` | confidence `n/a` (`n/a`) | evidence completeness `n/a` | candidates `0` | rollout `observe_only` | injected `0` | uplift `unknown/unknown` | finished `2026-02-20T15:00:21Z`
+- `run_20260220T150021Z_9b592b` | profile `ui-ux-creative-coding` | confidence `n/a` (`n/a`) | evidence completeness `n/a` | candidates `0` | rollout `observe_only` | injected `0` | uplift `unknown/unknown` | finished `2026-02-20T15:00:21Z`
+- `run_20260220T150021Z_bb9acb` | profile `frontend-ui-design` | confidence `n/a` (`n/a`) | evidence completeness `n/a` | candidates `0` | rollout `observe_only` | injected `0` | uplift `unknown/unknown` | finished `2026-02-20T15:00:21Z`
+- `run_20260220T144736Z_425b7a` | profile `ui-ux-creative-coding` | confidence `n/a` (`n/a`) | evidence completeness `n/a` | candidates `0` | rollout `observe_only` | injected `0` | uplift `unknown/unknown` | finished `2026-02-20T14:47:36Z`
+- `run_20260220T144710Z_425b7a` | profile `ui-ux-creative-coding` | confidence `n/a` (`n/a`) | evidence completeness `n/a` | candidates `0` | rollout `observe_only` | injected `0` | uplift `unknown/unknown` | finished `2026-02-20T14:47:10Z`

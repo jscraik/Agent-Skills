@@ -3,7 +3,7 @@ title: feat: Skill Graph Live Auto-Learning (Post-Use Capture + Start-of-Run Inj
 type: feat
 date: 2026-02-24
 brainstorm: docs/brainstorms/2026-02-24-skill-graph-live-auto-learning-brainstorm.md
-status: draft
+status: completed
 affected_features:
   - skill runtime capture
   - evidence confidence scoring
@@ -230,4 +230,10 @@ Optional dry-run checks once implementation starts:
 - [x] T10: Add global and per-skill kill switches for auto-capture/auto-apply
 - [x] T11: Add rollout modes (off, observe_only, active) and pilot-safe defaults
 - [x] T12: Extend telemetry dashboards and daily reports for live auto-learning metrics
-- [ ] T13+: Remaining tasks pending next execution batch
+- [x] T13: Add full validation suite for schema, ranking invariants, uplift contracts, and switch precedence
+- [x] T16: Implement counterfactual uplift gate (treatment vs control) for promotion and auto-apply decisions
+- [x] T17: Version promotion decision schema to include uplift, match-quality, and decision metadata fields
+- [x] T18: Update promotion validators and CI enforcement for uplift and match-quality contracts
+- [x] T14: Update docs and activation runbooks for Phase-4 live learning
+- [x] T19: Run rollback drill and kill-switch propagation verification with evidence capture
+- [x] T15: Execute pilot rollout verification and publish go/no-go summary

@@ -8,6 +8,7 @@ Operator runbook for safely halting autonomous behavior.
 - [Control hierarchy](#control-hierarchy)
 - [Immediate response](#immediate-response)
 - [Escalation policy](#escalation-policy)
+- [Rollback drill evidence](#rollback-drill-evidence)
 - [Recovery checklist](#recovery-checklist)
 
 ## When to trigger
@@ -48,6 +49,18 @@ Precedence: kill-switch/rollback controls override rollout mode; rollout mode th
 - Severity `warn`: runtime owner triage within same business day.
 - Severity `fail`: governance + security owners notified immediately.
 - Any `fail` involving data leakage blocks promotions until clearance.
+
+## Rollback drill evidence
+
+Run the propagation drill:
+
+```bash
+bash scripts/run_recursive_rollout_drill.sh
+```
+
+Evidence artifacts:
+- `/artifacts/skill-graphs/pilot/rollback-drill-report.json`
+- `/docs/skill-graphs/pilots/rollback-drill.md`
 
 ## Recovery checklist
 

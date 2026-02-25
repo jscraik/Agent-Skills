@@ -25,6 +25,7 @@ python3 utilities/skill-creator/scripts/recursive_skill_loop.py \
   --out-root artifacts/skill-graphs/runs \
   --run-owner recursive-loop-operator \
   --rollout-mode active \
+  --uplift-gate-mode observe \
   --controls-dir artifacts/skill-graphs/controls \
   --lessons-jsonl artifacts/skill-graphs/lessons/canonical-lessons.jsonl \
   --max-injected-lessons 3 \
@@ -64,6 +65,7 @@ A run directory with:
 Start-of-run retrieval uses canonical lessons from `--lessons-jsonl` filtered by `{scope_skill, scope_profile}`.
 Low-confidence lessons are retained but down-ranked and flagged in injected lesson attribution.
 Default rollout mode is `observe_only` (capture on, auto-apply off). Use `--rollout-mode active` to enable lesson injection.
+Default uplift gate mode is `enforce`; use `--uplift-gate-mode observe` for pilot dry-runs when counterfactual sample sizes are intentionally sparse.
 
 Optional debug traces are written only when `--emit-debug-artifacts` is set and stored under `run/debug/`.
 
