@@ -115,4 +115,6 @@ criterion_deltas:                     # key=criterion_id, value=float
 
 Related:
 - [Task profile schema](/docs/skill-graphs/schemas/task-profile.schema.md)
+- [Capture record schema](/docs/skill-graphs/schemas/capture-record.schema.md)
+- [Evidence packet schema](/docs/skill-graphs/schemas/evidence-packet.schema.md)
 - [Gate contract schema](/docs/skill-graphs/schemas/gate-contract.schema.md)

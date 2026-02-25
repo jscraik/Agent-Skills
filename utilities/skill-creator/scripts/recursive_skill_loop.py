@@ -8,6 +8,8 @@ Canonical artifacts written per run:
 - run.json
 - iteration_journal.jsonl
 - promotion_decision.json
+- capture_record.json
+- evidence_packet.json
 
 Optional debug artifacts (disabled by default):
 - debug/events.jsonl
@@ -41,6 +43,8 @@ STOP_REASONS = {
     "evaluator_conflict",
     "dependency_missing",
 }
+
+FEEDBACK_OUTCOMES = {"worked", "partly", "didnt_work"}
 
 BLOCKER_CODES = {
     "run_rollforward_blocked",
@@ -90,6 +94,14 @@ def sha256_text(text: str) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
+def sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as f:
+        for chunk in iter(lambda: f.read(65536), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
 def stable_unit_float(*parts: str) -> float:
     raw = "::".join(parts)
     h = hashlib.sha256(raw.encode("utf-8")).hexdigest()
@@ -103,6 +115,103 @@ def clamp(v: float, lo: float = 0.0, hi: float = 1.0) -> float:
 def token_estimate(text: str) -> int:
     # Lightweight approximation for deterministic budgeting.
     return max(1, math.ceil(len(text) / 4))
+
+
+def normalize_feedback(feedback_outcome: Optional[str], feedback_note: Optional[str]) -> Dict[str, str]:
+    outcome_raw = (feedback_outcome or "").strip().lower()
+    note = (feedback_note or "").strip()
+    if outcome_raw and outcome_raw not in FEEDBACK_OUTCOMES:
+        raise ValueError(f"Invalid feedback outcome: {feedback_outcome}")
+    outcome = outcome_raw if outcome_raw else "missing"
+    if len(note) > 500:
+        note = note[:500]
+    if outcome == "missing":
+        note = ""
+    return {
+        "status": outcome,
+        "note": note,
+        "captured_at": iso_now(),
+        "source": "cli_one_tap" if outcome_raw else "none",
+    }
+
+
+def build_evidence_packet(
+    *,
+    run_id: str,
+    out_dir: Path,
+    events_path: Path,
+    iteration_journal_path: Path,
+    run_obj: Dict[str, Any],
+    promotion_decision: Dict[str, Any],
+) -> Dict[str, Any]:
+    debug_dir = out_dir / "debug"
+    debug_files = sorted(str(p.relative_to(out_dir)) for p in debug_dir.glob("*") if p.is_file()) if debug_dir.exists() else []
+
+    events_present = events_path.exists()
+    traces_present = iteration_journal_path.exists()
+    logs_present = len(debug_files) > 0
+
+    sources: Dict[str, Any] = {
+        "events": {
+            "present": events_present,
+            "path": str(events_path.relative_to(out_dir)) if events_present else "",
+            "sha256": sha256_file(events_path) if events_present else "",
+            "size_bytes": events_path.stat().st_size if events_present else 0,
+        },
+        "logs": {
+            "present": logs_present,
+            "paths": debug_files,
+        },
+        "traces": {
+            "present": traces_present,
+            "path": str(iteration_journal_path.relative_to(out_dir)) if traces_present else "",
+            "sha256": sha256_file(iteration_journal_path) if traces_present else "",
+            "size_bytes": iteration_journal_path.stat().st_size if traces_present else 0,
+        },
+        "session_signals": {
+            "present": bool(run_obj.get("run_id")),
+            "terminal_status": run_obj.get("terminal_status", ""),
+            "stop_reason": run_obj.get("stop_reason", ""),
+            "iterations_completed": int(run_obj.get("counters", {}).get("iterations_completed", 0)),
+            "tokens_used": int(run_obj.get("counters", {}).get("tokens_used", 0)),
+            "duration_ms": int(run_obj.get("duration_ms", 0)),
+        },
+        "checks": {
+            "present": bool(promotion_decision.get("gate_decision")),
+            "runtime_gates_passed": bool(
+                promotion_decision.get("gate_decision", {}).get("runtime_gates_passed", False)
+            ),
+            "provenance_complete": bool(
+                promotion_decision.get("gate_decision", {}).get("provenance_complete", False)
+            ),
+            "security_checklist_passed": bool(
+                promotion_decision.get("gate_decision", {}).get("security_checklist_passed", False)
+            ),
+            "run_blocker_present": bool(run_obj.get("run_blocker")),
+        },
+    }
+
+    completeness_flags = {
+        "events": bool(sources["events"]["present"]),
+        "logs": bool(sources["logs"]["present"]),
+        "traces": bool(sources["traces"]["present"]),
+        "session_signals": bool(sources["session_signals"]["present"]),
+        "checks": bool(sources["checks"]["present"]),
+    }
+    completeness_score = round(sum(1 for ok in completeness_flags.values() if ok) / len(completeness_flags), 3)
+
+    packet_seed = f"{run_id}:{run_obj.get('finished_at', '')}:{run_obj.get('terminal_status', '')}:evidence"
+    return {
+        "schema_version": "1.0",
+        "evidence_packet_id": sha256_text(packet_seed)[:16],
+        "run_id": run_id,
+        "created_at": iso_now(),
+        "sources": sources,
+        "completeness": {
+            **completeness_flags,
+            "score": completeness_score,
+        },
+    }
 
 
 def load_profile(path: Path) -> Profile:
@@ -457,6 +566,8 @@ def run_loop(args: argparse.Namespace) -> int:
     started_at = time.time()
     created_at = iso_now()
     objective_hash = sha256_text(args.objective)
+    feedback_payload = normalize_feedback(args.feedback_outcome, args.feedback_note)
+    invocation_id = sha256_text(f"{objective_hash}:{args.actor_id}:{created_at}")[:16]
 
     max_iterations = args.max_iterations or profile.thresholds.max_iterations
     max_elapsed_ms = args.max_elapsed_ms or profile.thresholds.max_elapsed_ms
@@ -500,6 +611,54 @@ def run_loop(args: argparse.Namespace) -> int:
         extra={"run_owner": run_owner, "idempotency_key": idempotency_key},
     )
     write_jsonl(iteration_journal_path, [])
+
+    def write_capture_artifacts(run_obj: Dict[str, Any], promotion_decision: Dict[str, Any]) -> None:
+        evidence_packet = build_evidence_packet(
+            run_id=run_id,
+            out_dir=out_dir,
+            events_path=events_path,
+            iteration_journal_path=iteration_journal_path,
+            run_obj=run_obj,
+            promotion_decision=promotion_decision,
+        )
+        evidence_packet_path = out_dir / "evidence_packet.json"
+        write_json(evidence_packet_path, evidence_packet)
+
+        capture_seed = f"{run_id}:{run_obj.get('finished_at', '')}:{run_obj.get('terminal_status', '')}:capture"
+        capture_record = {
+            "schema_version": "1.0",
+            "capture_id": sha256_text(capture_seed)[:16],
+            "run_id": run_id,
+            "profile_id": profile.profile_id,
+            "scope_skill": profile.scope_skill,
+            "scope_profile": profile.scope_profile,
+            "created_at": iso_now(),
+            "invocation_envelope": {
+                "invocation_id": invocation_id,
+                "invoked_at": created_at,
+                "actor_id": args.actor_id,
+                "run_owner": run_owner,
+                "objective_hash": objective_hash,
+                "idempotency_key": idempotency_key,
+                "kill_switch_file": str(kill_switch_path) if kill_switch_path else "",
+                "rollback_required_file": str(rollback_required_path) if rollback_required_path else "",
+            },
+            "output_summary": {
+                "finished_at": run_obj.get("finished_at", ""),
+                "terminal_status": run_obj.get("terminal_status", ""),
+                "stop_reason": run_obj.get("stop_reason", ""),
+                "iterations_completed": int(run_obj.get("counters", {}).get("iterations_completed", 0)),
+                "tokens_used": int(run_obj.get("counters", {}).get("tokens_used", 0)),
+                "duration_ms": int(run_obj.get("duration_ms", 0)),
+            },
+            "feedback": feedback_payload,
+            "evidence": {
+                "evidence_packet_id": evidence_packet["evidence_packet_id"],
+                "evidence_packet_path": str(evidence_packet_path.relative_to(out_dir)),
+                "completeness": evidence_packet["completeness"],
+            },
+        }
+        write_json(out_dir / "capture_record.json", capture_record)
 
     def write_blocker_artifacts(
         *,
@@ -596,6 +755,7 @@ def run_loop(args: argparse.Namespace) -> int:
         write_jsonl(iteration_journal_path, [])
         write_json(out_dir / "promotion_decision.json", promotion_decision)
         write_jsonl(events_path, events)
+        write_capture_artifacts(run_obj, promotion_decision)
 
     if is_kill_switch_activated(rollback_required_path):
         blocker_code = "run_rollback_required"
@@ -1057,6 +1217,7 @@ def run_loop(args: argparse.Namespace) -> int:
     write_json(out_dir / "run.json", run_obj)
     write_json(out_dir / "promotion_decision.json", promotion_decision)
     write_jsonl(events_path, events)
+    write_capture_artifacts(run_obj, promotion_decision)
 
     if args.emit_debug_artifacts:
         (debug_dir / "summary.md").write_text(summary_md, encoding="utf-8")
@@ -1092,6 +1253,15 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--max-iterations", type=int, help="Override max iterations")
     p.add_argument("--max-elapsed-ms", type=int, help="Override elapsed budget")
     p.add_argument("--max-tokens", type=int, help="Override token budget")
+    p.add_argument(
+        "--feedback-outcome",
+        choices=sorted(FEEDBACK_OUTCOMES),
+        help="Optional immediate one-tap outcome feedback: worked|partly|didnt_work",
+    )
+    p.add_argument(
+        "--feedback-note",
+        help="Optional short feedback note paired with --feedback-outcome",
+    )
     p.add_argument(
         "--emit-debug-artifacts",
         action="store_true",

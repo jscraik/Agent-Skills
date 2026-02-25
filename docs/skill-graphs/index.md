@@ -13,9 +13,10 @@ This section defines the MVP contracts and operating workflows for the recursive
 - [Telemetry Outputs](/docs/skill-graphs/telemetry/daily-outputs.md)
 - [Execution Guide](/docs/guides/recursive-skill-loop.md)
 
-## MVP Scope (Phases 1-3)
+## MVP Scope (Phases 1-3) + Phase 4 capture baseline
 
-- Persist only three canonical top-level artifacts: `run`, `iteration_journal`, `promotion_decision`.
+- Persist canonical top-level artifacts: `run`, `iteration_journal`, `promotion_decision`.
+- Phase 4 capture baseline also writes `capture_record` + `evidence_packet` per run.
 - Use checkpoint adversarial evaluation (initial, final, failure-triggered).
 - Keep canonical promotion human-gated with provenance + security checklist.
 - Keep runtime retrieval injection disabled until Phase 4.
