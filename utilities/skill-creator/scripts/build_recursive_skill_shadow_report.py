@@ -133,6 +133,10 @@ def safe_int(value: Any, default: int = 0) -> int:
         return default
 
 
+def as_dict(value: Any) -> Dict[str, Any]:
+    return value if isinstance(value, dict) else {}
+
+
 def load_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
@@ -210,8 +214,10 @@ def load_run_record(run_dir: Path) -> Optional[RunRecord]:
 
     first = journals[0]
     last = journals[-1]
-    initial_overall = safe_float(first.get("evaluation_report", {}).get("overall_score"), 0.0)
-    final_overall = safe_float(last.get("reevaluation_report", {}).get("overall_score"), initial_overall)
+    first_eval = as_dict(first.get("evaluation_report"))
+    last_reeval = as_dict(last.get("reevaluation_report"))
+    initial_overall = safe_float(first_eval.get("overall_score"), 0.0)
+    final_overall = safe_float(last_reeval.get("overall_score"), initial_overall)
 
     flip_count = 0
     for row in journals:
@@ -220,9 +226,10 @@ def load_run_record(run_dir: Path) -> Optional[RunRecord]:
         if before != after:
             flip_count += 1
 
-    iter_count = max(1, safe_int(run.get("counters", {}).get("iterations_completed"), len(journals)))
+    counters = as_dict(run.get("counters"))
+    iter_count = max(1, safe_int(counters.get("iterations_completed"), len(journals)))
     non_regression_all = all(
-        bool(row.get("reevaluation_report", {}).get("non_regression_passed", False)) for row in journals
+        bool(as_dict(row.get("reevaluation_report")).get("non_regression_passed", False)) for row in journals
     )
 
     terminal_status = str(run.get("terminal_status", "failed"))
@@ -293,7 +300,7 @@ def load_run_record(run_dir: Path) -> Optional[RunRecord]:
         stop_reason=stop_reason,
         finished_at=parse_iso8601(str(run.get("finished_at"))),
         iterations_completed=iter_count,
-        tokens_used=safe_int(run.get("counters", {}).get("tokens_used"), 0),
+        tokens_used=safe_int(counters.get("tokens_used"), 0),
         initial_overall=initial_overall,
         final_overall=final_overall,
         quality_uplift=round(final_overall - initial_overall, 3),

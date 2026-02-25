@@ -511,7 +511,21 @@ def validate(args: argparse.Namespace) -> Dict[str, Any]:
             errors.append("provenance.evaluator_version mismatch with run.versions.evaluator_version")
 
         if journals:
-            last = sorted(journals, key=lambda x: int(x.get("iteration_id", 0)))[-1]
+            valid_rows: List[Dict[str, Any]] = []
+            invalid_iteration_ids: List[Any] = []
+            for row in journals:
+                iteration_id = row.get("iteration_id")
+                if isinstance(iteration_id, int):
+                    valid_rows.append(row)
+                else:
+                    invalid_iteration_ids.append(iteration_id)
+            if invalid_iteration_ids:
+                errors.append("iteration_journal iteration_id must be an integer for approved decisions")
+
+            if valid_rows:
+                last = sorted(valid_rows, key=lambda x: x.get("iteration_id", 0))[-1]
+            else:
+                last = {}
             last_gate = (
                 last.get("reevaluation_report", {}).get("gate_decision")
                 if isinstance(last.get("reevaluation_report"), dict)

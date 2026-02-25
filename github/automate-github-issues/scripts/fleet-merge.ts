@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import path from "node:path";
+import { readFile, writeFile } from "node:fs/promises";
 import { findUpSync } from "find-up";
 import type { IssueAnalysis, Task } from "./types.js";
 import { getGitRepoInfo, getCurrentBranch } from "./github/git.js";
@@ -47,14 +48,22 @@ const date = new Intl.DateTimeFormat("en-CA", { year: "numeric", month: "2-digit
   .format(new Date())
   .replaceAll("-", "_");
 
-const root = path.dirname(findUpSync(".git")!);
+const gitDir = findUpSync(".git");
+if (!gitDir) {
+  throw new Error("Could not locate .git directory. Run fleet-merge from within a git repository.");
+}
+const root = path.dirname(gitDir);
 const fleetDir = path.join(root, ".fleet", date);
 
 // Load task ordering (already sorted by risk in the analysis phase)
-const analysis = await Bun.file(path.join(fleetDir, "issue_tasks.json")).json() as IssueAnalysis;
+const analysis = JSON.parse(
+  await readFile(path.join(fleetDir, "issue_tasks.json"), "utf-8"),
+) as IssueAnalysis;
 
 // Load session mapping written by fleet-dispatch.ts
-const sessions = await Bun.file(path.join(fleetDir, "sessions.json")).json() as Array<{
+const sessions = JSON.parse(
+  await readFile(path.join(fleetDir, "sessions.json"), "utf-8"),
+) as Array<{
   taskId: string;
   sessionId: string;
 }>;
@@ -139,7 +148,7 @@ async function redispatchTask(
 
   // Create a new Jules session with the same prompt
   console.log(`  🚀 Re-dispatching task "${task.id}" against current ${BASE_BRANCH}...`);
-  const session = await jules.createSession({
+  const session = await jules.session({
     prompt: task.prompt,
     source: {
       github: `${OWNER}/${REPO}`,
@@ -153,7 +162,7 @@ async function redispatchTask(
   if (sessionEntry) {
     sessionEntry.sessionId = session.id;
     const sessionsPath = path.join(fleetDir, "sessions.json");
-    await Bun.write(sessionsPath, JSON.stringify(sessions, null, 2));
+    await writeFile(sessionsPath, JSON.stringify(sessions, null, 2), "utf-8");
   }
 
   // Poll for the new PR

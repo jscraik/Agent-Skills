@@ -21,7 +21,7 @@ import { getGitRepoInfo } from "../github/git.js";
  *
  * Since the Jules scheduled session receives a fixed prompt (issues aren't
  * known at scheduling time), this prompt instructs Jules to:
- * 1. Run `bun run scripts/fleet/fleet-analyze.ts` to fetch current open issues
+ * 1. Run `npm run analyze` to fetch current open issues
  * 2. Use the output as input for the analyze-issues prompt
  * 3. Run the dispatcher to dispatch sub-tasks
  *
@@ -45,7 +45,7 @@ export async function bootstrapPrompt(): Promise<string> {
 Run this command to get the current open issues as markdown:
 
 \`\`\`bash
-bun run scripts/fleet/fleet-analyze.ts
+npm run analyze
 \`\`\`
 
 Capture the entire output. This is the issues document you will analyze.
@@ -65,7 +65,7 @@ ${analysisPrompt}
 After writing both \`.fleet/\` files, run the dispatcher:
 
 \`\`\`bash
-bun run scripts/fleet/fleet-dispatch.ts
+npm run dispatch
 \`\`\`
 
 This dispatches parallel Jules sessions for each task and logs session IDs to \`.fleet/{date}/sessions.json\`.

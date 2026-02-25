@@ -378,14 +378,35 @@ def _is_ignored(path: str, root: str, patterns: list[str]) -> bool:
     return any(fnmatch.fnmatch(rel_path, pattern) for pattern in patterns)
 
 
+def _assert_within_root(path: str, root_real: str, *, kind: str) -> None:
+    resolved = os.path.realpath(path)
+    if resolved == root_real or resolved.startswith(root_real + os.sep):
+        return
+    raise InstallError(f"{kind} escapes skill root via symlink or traversal: {path}")
+
+
 def _iter_scan_targets(root: str) -> list[tuple[str, bool]]:
     ignore_patterns = _load_skillignore(root)
     targets: list[tuple[str, bool]] = []
-    for dirpath, _, filenames in os.walk(root):
+    root_real = os.path.realpath(root)
+    if os.path.islink(root):
+        raise InstallError(f"Skill root cannot be a symlink: {root}")
+    _assert_within_root(root, root_real, kind="skill root")
+
+    for dirpath, dirnames, filenames in os.walk(root):
+        _assert_within_root(dirpath, root_real, kind="directory")
         if ".git" in Path(dirpath).parts:
             continue
+        for dirname in list(dirnames):
+            dir_full = os.path.join(dirpath, dirname)
+            if os.path.islink(dir_full):
+                raise InstallError(f"Symlinked directory is not allowed in skill package: {dir_full}")
+            _assert_within_root(dir_full, root_real, kind="directory")
         for filename in filenames:
             path = os.path.join(dirpath, filename)
+            if os.path.islink(path):
+                raise InstallError(f"Symlinked file is not allowed in skill package: {path}")
+            _assert_within_root(path, root_real, kind="file")
             if _is_ignored(path, root, ignore_patterns):
                 continue
             targets.append((path, _is_text_file(path)))
@@ -583,6 +604,7 @@ def _copy_skill(src: str, dest_dir: str) -> None:
     os.makedirs(os.path.dirname(dest_dir), exist_ok=True)
     if os.path.exists(dest_dir):
         raise InstallError(f"Destination already exists: {dest_dir}")
+    _iter_scan_targets(src)
     shutil.copytree(src, dest_dir)
 
 

@@ -39,7 +39,8 @@ scripts/fleet/               # Pipeline scripts (committed to your repo)
 
 ## Prerequisites
 
-- [Bun](https://bun.sh/) runtime
+- [Node.js](https://nodejs.org/) runtime (LTS)
+- npm (bundled with Node.js)
 - A [Jules API key](https://jules.google.com/)
 - GitHub token with repo access
 
@@ -125,18 +126,19 @@ After setup, run the pipeline locally:
 
 ```bash
 cd scripts/fleet
+npm install
 
 # Fetch open issues
-bun fleet-analyze.ts
+npm run analyze
 
 # Plan tasks (creates a Jules planning session)
-JULES_API_KEY=<key> bun fleet-plan.ts
+JULES_API_KEY=<key> npm run plan
 
 # Dispatch parallel agents
-JULES_API_KEY=<key> bun fleet-dispatch.ts
+JULES_API_KEY=<key> npm run dispatch
 
 # Merge PRs sequentially
-GITHUB_TOKEN=<token> bun fleet-merge.ts
+GITHUB_TOKEN=<token> npm run merge
 ```
 
 ## Setup (after skill activation)

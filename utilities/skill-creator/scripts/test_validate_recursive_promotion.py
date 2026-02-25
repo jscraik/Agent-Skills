@@ -143,6 +143,26 @@ class ValidateRecursivePromotionTests(unittest.TestCase):
             any("counterfactual_uplift.promotion_decision=pass" in err for err in report["errors"])
         )
 
+    def test_validator_handles_null_iteration_id_without_crashing(self) -> None:
+        run_dir, decision_path = self._build_run(promotion_decision_state="pass")
+        (run_dir / "iteration_journal.jsonl").write_text(
+            json.dumps(
+                {
+                    "run_id": "run_test_counterfactual",
+                    "iteration_id": None,
+                    "reevaluation_report": {
+                        "gate_decision": "pass",
+                        "non_regression_passed": True,
+                    },
+                }
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+        report = self._run_validator(run_dir, decision_path)
+        self.assertEqual(report["status"], "fail")
+        self.assertTrue(any("iteration_id must be an integer" in err for err in report["errors"]))
+
 
 if __name__ == "__main__":
     unittest.main()

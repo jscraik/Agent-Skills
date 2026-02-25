@@ -9,6 +9,14 @@ description: Use when the user asks to automate GitHub issue triage with paralle
 - Build a deterministic issue pipeline: analyze -> plan -> validate -> dispatch -> merge.
 - Keep setup canonical for unreleased/greenfield repos; do not add compatibility shims unless explicitly requested.
 - Prefer explicit validation gates before dispatching parallel agents.
+- Principles over cargo-culting: understand **why** each gate exists and prefer tradeoff-aware decisions.
+- Mental model: parallelism increases throughput and risk; consider rollback and observability before scaling fan-out.
+- Use context-specific variation so each repository gets a tailored workflow instead of a generic template.
+
+## Decision checkpoints (ask before running)
+- What is the smallest safe batch we can ship first?
+- Which tradeoff matters most right now: speed, review quality, or merge safety?
+- How will we detect, recover, and learn if an innovative automation step fails mid-run?
 
 ## Triggers and usage
 - The user wants automated GitHub issue triage and multi-agent implementation.
@@ -60,7 +68,7 @@ Copy `assets/.env.example` to the repository root as `.env` and fill required va
 
 ### Step 5: Install dependencies
 ```bash
-cd scripts/fleet && bun install
+cd scripts/fleet && npm install
 ```
 
 ### Step 6: Share next steps with the user
@@ -72,8 +80,8 @@ cd scripts/fleet && bun install
 ## Validation
 - Fail fast: stop at the first failed validation gate, fix the issue, and rerun checks.
 - Confirm files exist in `scripts/fleet/` and `.github/workflows/`.
-- Run `bun install` and verify it exits cleanly.
-- Run `bun fleet-analyze.ts` to confirm issue fetch path is wired.
+- Run `npm install` and verify it exits cleanly.
+- Run `npm run analyze` to confirm issue fetch path is wired.
 - Ensure task validation rejects overlapping file ownership before dispatch.
 
 ## Constraints
@@ -85,11 +93,22 @@ cd scripts/fleet && bun install
 - Dispatching parallel tasks before ownership conflict checks.
 - Merging generated PRs without CI/branch protection checks.
 - Introducing legacy adapters for unreleased repos by default.
+- Avoid skipping validation because of schedule pressure; that pitfall creates costly rollback churn.
+- NEVER bypass ownership conflict validation.
+- DO NOT merge when required checks are red or missing.
+- DON'T dispatch one batch across unrelated modules when smaller scoped batches are possible.
 
 ## Variation and adaptation
 - Tune analysis depth in `scripts/fleet/prompts/analyze-issues.ts`.
 - Adjust issue filtering in `scripts/fleet/github/issues.ts`.
 - Modify dispatch cadence by editing workflow schedules.
+- Customize prompts for different team review cultures and context-specific risk tolerance.
+
+## Empowered execution mindset
+- Use this skill to **enable** maintainers to ship safely at higher velocity.
+- Let the runbook **empower** reviewers with explicit checkpoints and recovery paths.
+- A strong setup should **unlock** creative parallelization without sacrificing control.
+- **Explore** innovative batching strategies after baseline validation is consistently green.
 
 ## Examples
 - "Set up automated issue triage + parallel Jules execution for this repo."
@@ -100,10 +119,10 @@ cd scripts/fleet && bun install
 ```bash
 cd scripts/fleet
 
-bun fleet-analyze.ts
-JULES_API_KEY=<key> bun fleet-plan.ts
-JULES_API_KEY=<key> bun fleet-dispatch.ts
-GITHUB_TOKEN=<token> bun fleet-merge.ts
+npm run analyze
+JULES_API_KEY=<key> npm run plan
+JULES_API_KEY=<key> npm run dispatch
+GITHUB_TOKEN=<token> npm run merge
 ```
 
 ## Resource references
@@ -115,7 +134,7 @@ GITHUB_TOKEN=<token> bun fleet-merge.ts
 - "Unable to parse git remote URL": ensure `origin` points to GitHub.
 - Ownership conflict errors: merge or split overlapping tasks before dispatch.
 - CI timeout during merge: increase `maxWaitMs` in `fleet-merge.ts`.
-- Bun not found: install Bun using the official installer at https://bun.sh/docs/installation.
+- Node.js/npm not found: install Node.js LTS from https://nodejs.org/ and rerun setup.
 
 ## Remember
 Use judgment, adapt the setup to repo constraints, and keep the pipeline auditable.

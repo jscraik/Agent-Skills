@@ -21,7 +21,7 @@ usage() {
 Usage:
   setup.sh
 
-Bootstraps Bun dependencies and .env scaffolding for automate-github-issues.
+Bootstraps Node/npm dependencies and .env scaffolding for automate-github-issues.
 TXT
 }
 
@@ -39,32 +39,31 @@ fi
 echo "🔧 Setting up automate-github-issues skill..."
 echo ""
 
-# Check for Bun
-if command -v bun &> /dev/null; then
-  echo "✅ Bun found: $(bun --version)"
+# Check for Node.js + npm
+if command -v node &> /dev/null; then
+  echo "✅ Node.js found: $(node --version)"
 else
-  echo "⚠️  Bun not found. Installing..."
-  if ! command -v python3 &> /dev/null; then
-    echo "❌ python3 is required to download the Bun installer."
-    exit 1
-  fi
-  python3 - <<'PY' | bash
-import urllib.request
+  echo "❌ Node.js is required but was not found on PATH."
+  echo ""
+  echo "Install Node.js (LTS) using a trusted package source, then re-run setup:"
+  echo "  - macOS (Homebrew): brew install node"
+  echo "  - Ubuntu/Debian: sudo apt install nodejs npm"
+  echo "  - Official docs: https://nodejs.org/"
+  exit 1
+fi
 
-INSTALLER_URL = "https://bun.sh/install"
-with urllib.request.urlopen(INSTALLER_URL) as response:
-    print(response.read().decode("utf-8"), end="")
-PY
-  export BUN_INSTALL="$HOME/.bun"
-  export PATH="$BUN_INSTALL/bin:$PATH"
-  echo "✅ Bun installed: $(bun --version)"
+if command -v npm &> /dev/null; then
+  echo "✅ npm found: $(npm --version)"
+else
+  echo "❌ npm is required but was not found on PATH."
+  exit 1
 fi
 
 echo ""
 
 # Install dependencies
 echo "📦 Installing dependencies..."
-bun install
+npm install
 echo "✅ Dependencies installed."
 
 echo ""

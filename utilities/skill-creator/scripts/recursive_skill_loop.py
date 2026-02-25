@@ -638,7 +638,7 @@ def compute_counterfactual_uplift_gate(
             return "insufficient_match_quality"
         if uplift_delta is None or ci_lower is None:
             return "insufficient_data"
-        if uplift_delta <= -0.02 or ci_lower <= 0:
+        if uplift_delta <= -0.02 and ci_upper is not None and ci_upper <= 0:
             return "regressed"
         if uplift_delta >= delta_gate and ci_lower >= ci_gate:
             return "pass"
@@ -712,6 +712,8 @@ def load_profile(path: Path) -> Profile:
             raise ValueError(f"Profile missing required field: {field}")
 
     t = obj["thresholds"]
+    if not isinstance(t, dict):
+        raise ValueError("Profile thresholds must be an object")
     thresholds = Thresholds(
         stability_consecutive_passes=int(t.get("stability_consecutive_passes", 1)),
         critical_non_regression=bool(t.get("critical_non_regression", True)),
@@ -721,8 +723,12 @@ def load_profile(path: Path) -> Profile:
         no_improvement_escalation_limit=int(t.get("no_improvement_escalation_limit", 2)),
     )
 
+    if not isinstance(obj["criteria"], list):
+        raise ValueError("Profile criteria must be an array")
     criteria: List[Criterion] = []
     for idx, c in enumerate(obj["criteria"], start=1):
+        if not isinstance(c, dict):
+            raise ValueError(f"Criterion #{idx} must be an object")
         try:
             criterion = Criterion(
                 id=str(c["id"]),
@@ -962,7 +968,13 @@ def read_rollout_mode(path: Optional[Path], fallback: str) -> str:
         return fallback
 
 
-def acquire_run_lock(lock_path: Path, run_id: str, run_owner: str, idempotency_key: str) -> None:
+def acquire_run_lock(
+    lock_path: Path,
+    run_id: str,
+    run_owner: str,
+    idempotency_key: str,
+    stale_after_seconds: int = 21600,
+) -> None:
     lock_path.parent.mkdir(parents=True, exist_ok=True)
     payload = {
         "run_id": run_id,
@@ -971,7 +983,28 @@ def acquire_run_lock(lock_path: Path, run_id: str, run_owner: str, idempotency_k
         "created_at": iso_now(),
     }
     flags = os.O_CREAT | os.O_EXCL | os.O_WRONLY
-    fd = os.open(lock_path, flags)
+    try:
+        fd = os.open(lock_path, flags)
+    except FileExistsError:
+        if stale_after_seconds > 0 and lock_path.exists():
+            try:
+                existing = json.loads(lock_path.read_text(encoding="utf-8"))
+                created_at = parse_iso_timestamp(existing.get("created_at"))
+                if created_at is not None:
+                    age_seconds = (datetime.now(timezone.utc) - created_at).total_seconds()
+                    if age_seconds >= stale_after_seconds:
+                        lock_path.unlink(missing_ok=True)
+                        fd = os.open(lock_path, flags)
+                    else:
+                        raise
+                else:
+                    raise
+            except FileExistsError:
+                raise
+            except Exception:
+                raise
+        else:
+            raise
     with os.fdopen(fd, "w", encoding="utf-8") as f:
         f.write(json.dumps(payload, sort_keys=True))
         f.write("\n")
@@ -1047,7 +1080,11 @@ def run_loop(args: argparse.Namespace) -> int:
     run_seed = args.seed if args.seed is not None else int(stable_unit_float(args.objective, profile.profile_id) * 10_000_000)
     rng = random.Random(run_seed)
 
-    run_id = f"run_{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')}_{sha256_text(profile.profile_id + args.objective)[:6]}"
+    run_nonce = f"{os.getpid():x}{rng.randint(0, 0xFFFF):04x}"
+    run_id = (
+        f"run_{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S%fZ')}"
+        f"_{sha256_text(profile.profile_id + args.objective)[:6]}_{run_nonce[:8]}"
+    )
     out_dir = Path(args.out_root).resolve() / run_id
     out_root = Path(args.out_root).resolve()
     out_dir.mkdir(parents=True, exist_ok=True)

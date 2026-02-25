@@ -30,16 +30,26 @@ def find_log_dirs() -> list[Path]:
         Path.home() / ".claude" / "logs",
         Path.home() / ".claude",
     ]
-    return [p for p in candidates if p.exists() and p.is_dir()]
+    existing = [p.resolve() for p in candidates if p.exists() and p.is_dir()]
+    existing.sort(key=lambda p: len(str(p)))
+    pruned: list[Path] = []
+    for path in existing:
+        if any(path == root or str(path).startswith(str(root) + os.sep) for root in pruned):
+            continue
+        pruned.append(path)
+    return pruned
 
 
-def parse_timestamp(line: str) -> datetime | None:
+def parse_timestamp(line: str, tz: timezone, now: datetime) -> datetime | None:
     """Extract timestamp from log line if present."""
     # Try ISO format
-    iso_match = re.search(r'(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})', line)
+    iso_match = re.search(r'(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:Z|[+-]\d{2}:?\d{2})?)', line)
     if iso_match:
         try:
-            return datetime.fromisoformat(iso_match.group(1))
+            parsed = datetime.fromisoformat(iso_match.group(1).replace("Z", "+00:00"))
+            if parsed.tzinfo is None:
+                parsed = parsed.replace(tzinfo=tz)
+            return parsed.astimezone(tz)
         except ValueError:
             pass
 
@@ -47,7 +57,13 @@ def parse_timestamp(line: str) -> datetime | None:
     log_match = re.search(r'(\w{3}\s+\d{1,2}\s+\d{2}:\d{2}:\d{2})', line)
     if log_match:
         try:
-            return datetime.strptime(log_match.group(1), '%b %d %H:%M:%S')
+            parsed = datetime.strptime(log_match.group(1), '%b %d %H:%M:%S').replace(
+                year=now.year,
+                tzinfo=tz,
+            )
+            if parsed > now + timedelta(days=1):
+                parsed = parsed.replace(year=now.year - 1)
+            return parsed
         except ValueError:
             pass
 
@@ -78,8 +94,13 @@ def analyze_logs(log_dirs: list[Path], tz: timezone) -> dict[str, Any]:
     first_seen = now
     last_seen = datetime.min.replace(tzinfo=tz)
 
+    seen_log_files: set[Path] = set()
     for log_dir in log_dirs:
         for log_file in log_dir.rglob("*.log*"):
+            resolved_file = log_file.resolve()
+            if resolved_file in seen_log_files:
+                continue
+            seen_log_files.add(resolved_file)
             if log_file.is_file():
                 try:
                     stat = log_file.stat()
@@ -98,37 +119,45 @@ def analyze_logs(log_dirs: list[Path], tz: timezone) -> dict[str, Any]:
 
                     # Parse content
                     content = log_file.read_text(encoding='utf-8', errors='ignore')
+                    repo_mentions_in_file: set[str] = set()
+                    for line in content.splitlines():
+                        lower = line.lower()
+                        line_ts = parse_timestamp(line, tz=tz, now=now) or mtime
+                        in_7d = line_ts >= cutoff_7d
+                        in_30d = line_ts >= cutoff_30d
 
-                    # Count messages (heuristic: lines with common patterns)
-                    msg_count = len([l for l in content.split('\n')
-                                   if any(k in l.lower() for k in ['user:', 'assistant:', 'tool:'])])
+                        if any(k in lower for k in ['user:', 'assistant:', 'tool:']):
+                            total_messages += 1
+                            if in_7d:
+                                messages_7d += 1
+                                messages_30d += 1
+                            elif in_30d:
+                                messages_30d += 1
 
-                    if mtime >= cutoff_7d:
-                        messages_7d += msg_count
-                        messages_30d += msg_count
-                    elif mtime >= cutoff_30d:
-                        messages_30d += msg_count
-                    total_messages += msg_count
+                        file_changes = re.findall(
+                            r'(?:modified|created|deleted|changed)[\s:]+([^\s]+\.\w+)',
+                            line,
+                            re.IGNORECASE,
+                        )
+                        for changed in file_changes:
+                            total_files += 1
+                            if in_7d:
+                                files_7d += 1
+                                files_30d += 1
+                            elif in_30d:
+                                files_30d += 1
+                            ext = Path(changed).suffix.lower() or 'no_extension'
+                            file_types[ext] += 1
 
-                    # Extract file changes
-                    file_changes = re.findall(r'(?:modified|created|deleted|changed)[\s:]+([^\s]+\.\w+)', content, re.IGNORECASE)
+                        repo_matches = re.findall(
+                            r'(?:/|\s)([\w-]+)/([\w-]+)\.(?:git|md|json|js|ts|py)',
+                            line,
+                        )
+                        for org, repo in repo_matches:
+                            repo_mentions_in_file.add(f"{org}/{repo}")
 
-                    if mtime >= cutoff_7d:
-                        files_7d += len(file_changes)
-                        files_30d += len(file_changes)
-                    elif mtime >= cutoff_30d:
-                        files_30d += len(file_changes)
-                    total_files += len(file_changes)
-
-                    # Track file types
-                    for f in file_changes:
-                        ext = Path(f).suffix.lower() or 'no_extension'
-                        file_types[ext] += 1
-
-                    # Extract repo names from paths
-                    repo_matches = re.findall(r'(?:/|\s)([\w-]+)/([\w-]+)\.(?:git|md|json|js|ts|py)', content)
-                    for org, repo in repo_matches:
-                        repos[f"{org}/{repo}"] += 1
+                    for repo_name in repo_mentions_in_file:
+                        repos[repo_name] += 1
 
                 except (OSError, IOError):
                     continue
