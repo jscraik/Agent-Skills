@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import path from "node:path";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { findUpSync } from "find-up";
 import type { IssueAnalysis } from "./types.js";
 import { jules } from "@google/jules-sdk";
@@ -22,10 +23,14 @@ const date = new Intl.DateTimeFormat("en-CA", { year: "numeric", month: "2-digit
   .format(new Date())
   .replaceAll("-", "_");
 
-const root = path.dirname(findUpSync(".git")!);
+const gitDir = findUpSync(".git");
+if (!gitDir) {
+  throw new Error("Could not locate .git directory. Run fleet-dispatch from within a git repository.");
+}
+const root = path.dirname(gitDir);
 const fleetDir = path.join(root, ".fleet", date);
 const tasksPath = path.join(fleetDir, "issue_tasks.json");
-const analysis = await Bun.file(tasksPath).json() as IssueAnalysis;
+const analysis = JSON.parse(await readFile(tasksPath, "utf-8")) as IssueAnalysis;
 const { tasks } = analysis;
 
 // Resolve repo info dynamically from git remote
@@ -52,22 +57,23 @@ function validateOwnership(analysis: IssueAnalysis): void {
 validateOwnership(analysis);
 console.log(`✅ Ownership validated: ${analysis.tasks.length} tasks, no conflicts.`);
 
-const sessions = await jules.all(tasks, task => ({
-  prompt: task.prompt,
-  source: {
-    github: repoInfo.fullName,
-    baseBranch,
-  }
-}))
-
 const sessionResults: Array<{ taskId: string; sessionId: string }> = [];
-for await (const session of sessions) {
-  const taskId = tasks[sessionResults.length]?.id ?? "unknown";
-  sessionResults.push({ taskId, sessionId: session.id });
-  console.log(`Task ${taskId} → Session ${session.id}`);
+for (const task of tasks) {
+  const sessions = await jules.all([task], currentTask => ({
+    prompt: currentTask.prompt,
+    source: {
+      github: repoInfo.fullName,
+      baseBranch,
+    },
+  }));
+  for await (const session of sessions) {
+    sessionResults.push({ taskId: task.id, sessionId: session.id });
+    console.log(`Task ${task.id} → Session ${session.id}`);
+  }
 }
 
 // Write session mapping for fleet-merge.ts
 const sessionsPath = path.join(fleetDir, "sessions.json");
-await Bun.write(sessionsPath, JSON.stringify(sessionResults, null, 2));
+await mkdir(fleetDir, { recursive: true });
+await writeFile(sessionsPath, JSON.stringify(sessionResults, null, 2), "utf-8");
 console.log(`📝 Session mapping written to ${sessionsPath}`);

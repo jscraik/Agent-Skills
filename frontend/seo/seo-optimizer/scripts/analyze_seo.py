@@ -231,10 +231,13 @@ class SEOAnalyzer:
             "pages_with_og": 0,
             "pages_with_twitter": 0,
             "pages_with_canonical": 0,
+            "pages_analyzed": 0,
             "issues": []
         }
 
-        for page in self.pages[:20]:  # Analyze first 20 pages
+        pages_sample = self.pages[:20]
+        meta_findings["pages_analyzed"] = len(pages_sample)
+        for page in pages_sample:  # Analyze first 20 pages
             content = Path(page["full_path"]).read_text()
 
             has_title = self._check_meta_tag(content, "title")
@@ -261,7 +264,7 @@ class SEOAnalyzer:
 
         self.findings["meta_tags"] = meta_findings
 
-        pages_analyzed = min(len(self.pages), 20)
+        pages_analyzed = meta_findings["pages_analyzed"]
         print(f"  Pages with title: {meta_findings['pages_with_title']}/{pages_analyzed}")
         print(f"  Pages with description: {meta_findings['pages_with_description']}/{pages_analyzed}")
         print(f"  Pages with Open Graph: {meta_findings['pages_with_og']}/{pages_analyzed}")
@@ -425,14 +428,15 @@ class SEOAnalyzer:
             })
 
         meta = self.findings.get("meta_tags", {})
-        if meta.get("pages_with_description", 0) < len(self.pages):
+        pages_analyzed = int(meta.get("pages_analyzed", len(self.pages)))
+        if pages_analyzed > 0 and meta.get("pages_with_description", 0) < pages_analyzed:
             recommendations.append({
                 "title": "Add Meta Descriptions",
                 "description": "Ensure all pages have unique, compelling meta descriptions (150-160 characters).",
                 "priority": "HIGH"
             })
 
-        if meta.get("pages_with_og", 0) < len(self.pages):
+        if pages_analyzed > 0 and meta.get("pages_with_og", 0) < pages_analyzed:
             recommendations.append({
                 "title": "Add Open Graph Tags",
                 "description": "Implement Open Graph tags for better social media sharing previews.",

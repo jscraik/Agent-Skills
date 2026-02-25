@@ -8,6 +8,20 @@ Daily operator artifacts for recursive loop health monitoring.
 - `failure-pattern-candidates.jsonl`
 - `promotion-queue.md`
 
+`promotion-queue.md` entries should include:
+- run id + profile id
+- confidence score + confidence bucket
+- evidence completeness score
+- candidate lesson count
+- rollout mode + injected lesson count
+
+`daily-skill-health.md` should include:
+- capture coverage (`capture_record` written / total runs)
+- confidence bucket counts (`high|medium|low|unknown`)
+- injection usage rate (runs with injected lessons / total runs)
+- suppression count (runs where retrieval occurred but injection was disabled by controls)
+- uplift gate decision counts (`pass|hold|insufficient_data|regressed`) for promotion and auto-apply paths
+
 ## Minimum event envelope
 
 ```yaml

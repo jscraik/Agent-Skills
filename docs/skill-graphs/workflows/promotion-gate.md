@@ -83,6 +83,12 @@ Workflow: `.github/workflows/recursive-promotion-gate.yml`.
 - security checklist fields
 - provenance references (`run_id`, `iteration_ids`, `prompt_hash`)
 - `lesson_source_path` and `lesson_content_sha256` for approved decisions
+- confidence contract fields (`confidence.score`, `confidence.bucket`, `confidence.calibration_bucket`)
+- evidence completeness linkage (`evidence_packet.evidence_packet_id`, `evidence_packet.completeness_score`)
+- draft candidate payload(s) in `lesson_candidates[]` for queueing/reviewer triage
+- retrieval attribution in `injected_lesson_ids[]` for traceability
+- runtime control snapshot in `runtime_controls{rollout_mode, auto_capture_enabled, auto_apply_enabled}` for rollback audits
+- counterfactual uplift contract: `counterfactual_uplift{treatment_outcome, control_outcome, uplift_delta, uplift_confidence_band, sample_size, match_quality_metrics, promotion_decision, auto_apply_decision}`
 
 Approved promotions emit a deduplicated `promotion_approved` debug event in `run/debug/events.jsonl`.
 

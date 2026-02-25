@@ -41,11 +41,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: scripts/fleet/package-lock.json
 
       - name: Install fleet dependencies
-        run: cd scripts/fleet && bun install
+        run: cd scripts/fleet && npm install
 
       - name: Find and merge fleet PRs sequentially
         run: |
@@ -103,9 +107,9 @@ jobs:
                 # Re-dispatch via Jules SDK
                 echo "  🚀 Re-dispatching against current ${BASE_BRANCH}..."
                 REPO_FULL="${{ github.repository }}"
-                NEW_SESSION_ID=$(bun -e "
+                NEW_SESSION_ID=$(node --input-type=module -e "
                   import { jules } from '@google/jules-sdk';
-                  const session = await jules.createSession({
+                  const session = await jules.session({
                     prompt: process.env.TASK_PROMPT,
                     source: { github: '${REPO_FULL}', baseBranch: '${BASE_BRANCH}' },
                   });

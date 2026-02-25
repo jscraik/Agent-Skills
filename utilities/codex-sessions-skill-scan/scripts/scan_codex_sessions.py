@@ -434,7 +434,7 @@ def scan(
 
         try:
             with fpath.open("r", encoding="utf-8", errors="replace") as f:
-                for i, line in enumerate(f):
+                for i, line in enumerate(f, start=1):
                     try:
                         obj = json.loads(line)
                     except Exception:

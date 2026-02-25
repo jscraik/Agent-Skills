@@ -27,6 +27,27 @@ SECRET_PATTERNS = [
 EMAIL_PATTERN = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}")
 
 
+def schema_version_at_least(version: str, minimum: str) -> bool:
+    def parse(raw: str) -> List[int]:
+        parts: List[int] = []
+        for token in str(raw or "").split("."):
+            token = token.strip()
+            if not token:
+                continue
+            try:
+                parts.append(int(token))
+            except Exception:
+                parts.append(0)
+        return parts or [0]
+
+    left = parse(version)
+    right = parse(minimum)
+    max_len = max(len(left), len(right))
+    left.extend([0] * (max_len - len(left)))
+    right.extend([0] * (max_len - len(right)))
+    return left >= right
+
+
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Validate recursive promotion decision artifact")
     p.add_argument("--run-dir", required=True, help="Path to run artifact directory")
@@ -219,6 +240,8 @@ def validate(args: argparse.Namespace) -> Dict[str, Any]:
     decision_state = str(decision.get("decision", "")).strip().lower()
     if decision_state not in ALLOWED_DECISIONS:
         errors.append(f"invalid decision state: {decision_state}")
+    decision_schema_version = str(decision.get("schema_version", "1.0")).strip() or "1.0"
+    requires_counterfactual = schema_version_at_least(decision_schema_version, "1.1")
 
     gate = decision.get("gate_decision")
     if not isinstance(gate, dict):
@@ -279,6 +302,106 @@ def validate(args: argparse.Namespace) -> Dict[str, Any]:
                 except Exception as exc:
                     errors.append(f"reviewer policy validation failed: {exc}")
 
+        confidence_obj = decision.get("confidence")
+        if not isinstance(confidence_obj, dict):
+            warnings.append("confidence object missing (Phase-4 queue enrichment expected)")
+        else:
+            score = confidence_obj.get("score")
+            if score is None:
+                warnings.append("confidence.score missing (Phase-4 queue enrichment expected)")
+            else:
+                try:
+                    score_f = float(score)
+                    if score_f < 0.0 or score_f > 1.0:
+                        errors.append("confidence.score must be between 0 and 1")
+                except Exception:
+                    errors.append("confidence.score must be numeric")
+            bucket = str(confidence_obj.get("bucket", "")).strip().lower()
+            if bucket and bucket not in {"high", "medium", "low"}:
+                errors.append("confidence.bucket must be one of high|medium|low")
+
+        evidence_obj = decision.get("evidence_packet")
+        if isinstance(evidence_obj, dict):
+            completeness = evidence_obj.get("completeness_score")
+            if completeness is not None:
+                try:
+                    completeness_f = float(completeness)
+                    if completeness_f < 0.0 or completeness_f > 1.0:
+                        errors.append("evidence_packet.completeness_score must be between 0 and 1")
+                except Exception:
+                    errors.append("evidence_packet.completeness_score must be numeric")
+
+        counterfactual = decision.get("counterfactual_uplift")
+        if not isinstance(counterfactual, dict):
+            if requires_counterfactual:
+                errors.append("counterfactual_uplift object is required for schema_version >= 1.1")
+            else:
+                warnings.append("counterfactual_uplift missing (legacy schema)")
+            counterfactual = {}
+        else:
+            required_cf_fields = [
+                "analysis_method_version",
+                "sample_size",
+                "match_quality_metrics",
+                "promotion_decision",
+                "auto_apply_decision",
+                "uplift_confidence_band",
+            ]
+            required_fields(counterfactual, required_cf_fields, "counterfactual_uplift", errors)
+            sample_size_raw = counterfactual.get("sample_size")
+            try:
+                sample_size = int(sample_size_raw)
+                if sample_size < 0:
+                    errors.append("counterfactual_uplift.sample_size must be >= 0")
+            except Exception:
+                sample_size = 0
+                errors.append("counterfactual_uplift.sample_size must be an integer")
+
+            for key in ("treatment_outcome", "control_outcome", "uplift_delta"):
+                value = counterfactual.get(key)
+                if value is None:
+                    continue
+                try:
+                    value_f = float(value)
+                    if value_f < -1.0 or value_f > 1.0:
+                        errors.append(f"counterfactual_uplift.{key} must be between -1 and 1")
+                except Exception:
+                    errors.append(f"counterfactual_uplift.{key} must be numeric when present")
+
+            ci_obj = counterfactual.get("uplift_confidence_band")
+            if isinstance(ci_obj, dict):
+                lower = ci_obj.get("lower")
+                upper = ci_obj.get("upper")
+                if lower is not None and upper is not None:
+                    try:
+                        lower_f = float(lower)
+                        upper_f = float(upper)
+                        if lower_f > upper_f:
+                            errors.append("counterfactual_uplift.uplift_confidence_band lower cannot exceed upper")
+                    except Exception:
+                        errors.append("counterfactual_uplift.uplift_confidence_band bounds must be numeric")
+
+            match_obj = counterfactual.get("match_quality_metrics")
+            if isinstance(match_obj, dict):
+                unmatched_rate = match_obj.get("treated_unmatched_rate")
+                if unmatched_rate is not None:
+                    try:
+                        unmatched_rate_f = float(unmatched_rate)
+                        if unmatched_rate_f < 0.0 or unmatched_rate_f > 1.0:
+                            errors.append(
+                                "counterfactual_uplift.match_quality_metrics.treated_unmatched_rate must be between 0 and 1"
+                            )
+                    except Exception:
+                        errors.append(
+                            "counterfactual_uplift.match_quality_metrics.treated_unmatched_rate must be numeric"
+                        )
+
+            for key in ("promotion_decision", "auto_apply_decision"):
+                if key in counterfactual:
+                    state = str(counterfactual.get(key, "")).strip().lower()
+                    if state not in {"pass", "hold", "regressed", "insufficient_data", "insufficient_match_quality"}:
+                        errors.append(f"counterfactual_uplift.{key} has invalid value: {state}")
+
     if decision_state == "approved":
         if args.skip_lesson_content_scan:
             errors.append("approved decision cannot use --skip-lesson-content-scan")
@@ -297,6 +420,48 @@ def validate(args: argparse.Namespace) -> Dict[str, Any]:
             errors.append("gate_decision.provenance_complete must be true for approved decision")
         if gate.get("security_checklist_passed") is not True:
             errors.append("gate_decision.security_checklist_passed must be true for approved decision")
+
+        if isinstance(counterfactual, dict) and counterfactual:
+            if str(counterfactual.get("promotion_decision", "")).strip().lower() != "pass":
+                errors.append("approved decision requires counterfactual_uplift.promotion_decision=pass")
+            try:
+                sample_size = int(counterfactual.get("sample_size", 0))
+            except Exception:
+                sample_size = 0
+            thresholds = (
+                counterfactual.get("promotion_thresholds", {})
+                if isinstance(counterfactual.get("promotion_thresholds"), dict)
+                else {}
+            )
+            min_pairs_required = int(thresholds.get("min_pairs_total", 0) or 0)
+            if min_pairs_required and sample_size < min_pairs_required:
+                errors.append("approved decision requires counterfactual sample_size >= promotion threshold")
+            ci_obj = (
+                counterfactual.get("uplift_confidence_band", {})
+                if isinstance(counterfactual.get("uplift_confidence_band"), dict)
+                else {}
+            )
+            ci_lower_required = float(thresholds.get("ci_lower_min", 0.0) or 0.0)
+            ci_lower_raw = ci_obj.get("lower")
+            if ci_lower_raw is None:
+                errors.append("approved decision requires counterfactual_uplift.uplift_confidence_band.lower")
+            else:
+                try:
+                    ci_lower = float(ci_lower_raw)
+                    if ci_lower < ci_lower_required:
+                        errors.append("approved decision requires uplift CI lower bound above threshold")
+                except Exception:
+                    errors.append("counterfactual_uplift.uplift_confidence_band.lower must be numeric")
+            match_obj = (
+                counterfactual.get("match_quality_metrics", {})
+                if isinstance(counterfactual.get("match_quality_metrics"), dict)
+                else {}
+            )
+            if match_obj and match_obj.get("valid") is not True:
+                errors.append("approved decision requires valid counterfactual match_quality_metrics")
+        elif requires_counterfactual:
+            errors.append("approved decision requires counterfactual_uplift object")
+
         if str(decision.get("lesson_status", "")).strip().lower() != "active":
             warnings.append("lesson_status should be 'active' for approved decision (legacy artifacts may omit)")
         if not str(decision.get("canonical_version", "")).strip():
@@ -346,7 +511,21 @@ def validate(args: argparse.Namespace) -> Dict[str, Any]:
             errors.append("provenance.evaluator_version mismatch with run.versions.evaluator_version")
 
         if journals:
-            last = sorted(journals, key=lambda x: int(x.get("iteration_id", 0)))[-1]
+            valid_rows: List[Dict[str, Any]] = []
+            invalid_iteration_ids: List[Any] = []
+            for row in journals:
+                iteration_id = row.get("iteration_id")
+                if isinstance(iteration_id, int):
+                    valid_rows.append(row)
+                else:
+                    invalid_iteration_ids.append(iteration_id)
+            if invalid_iteration_ids:
+                errors.append("iteration_journal iteration_id must be an integer for approved decisions")
+
+            if valid_rows:
+                last = sorted(valid_rows, key=lambda x: x.get("iteration_id", 0))[-1]
+            else:
+                last = {}
             last_gate = (
                 last.get("reevaluation_report", {}).get("gate_decision")
                 if isinstance(last.get("reevaluation_report"), dict)

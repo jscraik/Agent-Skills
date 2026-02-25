@@ -28,6 +28,8 @@ Use this page to record expansion-gate evidence after pilot runs.
 - Quality uplift median: `0.141` (target: `>= +0.120`)
 - Critical non-regression compliance: `62.5%` (target: `100.0%`)
 - Budget compliance: `87.5%` (target: `>=95.0%`)
+- Capture coverage: `0.0%` (target: `>=95.0%`)
+- Injection usage rate: `0.0%` (target: pilot-defined; monitor suppression count `0`)
 - Reviewer overhead median / p90: `n/a / n/a` (not captured in MVP telemetry yet)
 
 ## Gate decision

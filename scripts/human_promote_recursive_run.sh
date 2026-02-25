@@ -132,6 +132,7 @@ write_blocker_and_exit() {
   local blocker_path="$run_dir/run_blocker.json"
   local events_path="$run_dir/events.jsonl"
   python3 - "$run_json_path" "$blocker_path" "$events_path" "$code" "$message" "$reviewers" "$now" <<'PY'
+import fcntl
 import hashlib
 import json
 import sys
@@ -175,9 +176,17 @@ event = {
     "rubric_version": run.get("versions", {}).get("rubric_version"),
     "prompt_hash": run.get("prompt_hash"),
 }
-with events_path.open("a", encoding="utf-8") as f:
-    f.write(json.dumps(event, sort_keys=True))
-    f.write("\n")
+with events_path.open("a+", encoding="utf-8") as f:
+    fcntl.flock(f.fileno(), fcntl.LOCK_EX)
+    f.seek(0, 2)
+    f.write(json.dumps(event, sort_keys=True) + "\n")
+    f.flush()
+    try:
+        import os
+        os.fsync(f.fileno())
+    except Exception:
+        pass
+    fcntl.flock(f.fileno(), fcntl.LOCK_UN)
 PY
   echo "[promotion-gate] blocked: $message" >&2
   exit 3
@@ -215,7 +224,7 @@ if [[ -z "$run_dir" ]]; then
 fi
 
 decision_path="$run_dir/promotion_decision.json"
-decision_tmp="${decision_path}.tmp"
+decision_tmp="$(mktemp "${run_dir}/promotion_decision.XXXXXX.tmp")"
 run_json_path="$run_dir/run.json"
 template_path="$run_dir/promotion_decision.template.json"
 seed_path="$decision_path"
@@ -305,8 +314,10 @@ fi
 trap 'rm -f "$decision_tmp"' EXIT
 
 python3 - "$repo_root" "$seed_path" "$decision_tmp" "$lesson_id" "$reviewers" "$expected_version" "$decision" "$note" "$lesson_file" <<'PY'
+import fcntl
 import hashlib
 import json
+import os
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -401,7 +412,9 @@ def load_jsonl_rows(path: Path):
         for line in path.read_text(encoding="utf-8").splitlines():
             line = line.strip()
             if line:
-                rows.append(json.loads(line))
+                obj = json.loads(line)
+                if isinstance(obj, dict):
+                    rows.append(obj)
     return rows
 
 
@@ -464,10 +477,13 @@ with lock_path.open("a+", encoding="utf-8") as lock_file:
         raise SystemExit(f"expected-version mismatch: got {expected_version} expected {expected_token}")
 
     for e in entries:
+        provenance = e.get("provenance")
+        if not isinstance(provenance, dict):
+            provenance = {}
         if (
             str(e.get("lesson_id", "")) == lesson_id
             and str(e.get("status", "")) == "active"
-            and str(e.get("provenance", {}).get("run_id", "")) == str(run.get("run_id", ""))
+            and str(provenance.get("run_id", "")) == str(run.get("run_id", ""))
         ):
             decision["lesson_status"] = "active"
             decision["lesson_effective_to"] = None
@@ -503,7 +519,11 @@ with lock_path.open("a+", encoding="utf-8") as lock_file:
         "version": f"v{new_version}",
         "provenance": {
             "run_id": run.get("run_id"),
-            "iteration_ids": decision.get("provenance", {}).get("iteration_ids", []),
+            "iteration_ids": (
+                decision.get("provenance", {}).get("iteration_ids", [])
+                if isinstance(decision.get("provenance"), dict)
+                else []
+            ),
             "prompt_hash": run.get("prompt_hash"),
             "rubric_version": run.get("versions", {}).get("rubric_version"),
             "evaluator_version": run.get("versions", {}).get("evaluator_version"),
@@ -554,51 +574,51 @@ actor = reviewers[0] if reviewers else 'human-reviewer'
 run = json.loads(run_path.read_text(encoding='utf-8'))
 events_path.parent.mkdir(parents=True, exist_ok=True)
 
-existing = []
-if events_path.exists():
-    for line in events_path.read_text(encoding='utf-8').splitlines():
+with events_path.open('a+', encoding='utf-8') as f:
+    fcntl.flock(f.fileno(), fcntl.LOCK_EX)
+    f.seek(0)
+    for line in f.read().splitlines():
         line = line.strip()
         if not line:
             continue
         try:
-            existing.append(json.loads(line))
+            row = json.loads(line)
         except Exception:
             continue
+        if (
+            row.get("event_type") == "promotion_approved"
+            and row.get("run_id") == run.get("run_id")
+            and row.get("lesson_id") == lesson_id
+        ):
+            print("[promotion-gate] promotion_approved already present; skipping duplicate append")
+            fcntl.flock(f.fileno(), fcntl.LOCK_UN)
+            raise SystemExit(0)
 
-for event in existing:
-    if (
-        event.get("event_type") == "promotion_approved"
-        and event.get("run_id") == run.get("run_id")
-        and event.get("lesson_id") == lesson_id
-    ):
-        print("[promotion-gate] promotion_approved already present; skipping duplicate append")
-        raise SystemExit(0)
-
-ts = datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace('+00:00', 'Z')
-seed = f"{run.get('run_id')}::promotion_approved::{actor}::{lesson_id}".encode('utf-8')
-event_id = hashlib.sha256(seed).hexdigest()[:16]
-
-event = {
-    'schema_version': '1.0',
-    'event_id': event_id,
-    'ts': ts,
-    'run_id': run.get('run_id'),
-    'lesson_id': lesson_id,
-    'skill_name': run.get('scope_skill'),
-    'task_profile': run.get('profile_id'),
-    'event_type': 'promotion_approved',
-    'severity': 'info',
-    'terminal_status': run.get('terminal_status'),
-    'stop_reason': run.get('stop_reason'),
-    'actor_id': actor,
-    'evaluator_version': run.get('versions', {}).get('evaluator_version'),
-    'rubric_version': run.get('versions', {}).get('rubric_version'),
-    'prompt_hash': run.get('prompt_hash'),
-}
-
-with events_path.open('a', encoding='utf-8') as f:
-    f.write(json.dumps(event, sort_keys=True))
-    f.write('\n')
+    ts = datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace('+00:00', 'Z')
+    seed = f"{run.get('run_id')}::promotion_approved::{actor}::{lesson_id}".encode('utf-8')
+    event_id = hashlib.sha256(seed).hexdigest()[:16]
+    event = {
+        'schema_version': '1.0',
+        'event_id': event_id,
+        'ts': ts,
+        'run_id': run.get('run_id'),
+        'lesson_id': lesson_id,
+        'skill_name': run.get('scope_skill'),
+        'task_profile': run.get('profile_id'),
+        'event_type': 'promotion_approved',
+        'severity': 'info',
+        'terminal_status': run.get('terminal_status'),
+        'stop_reason': run.get('stop_reason'),
+        'actor_id': actor,
+        'evaluator_version': run.get('versions', {}).get('evaluator_version'),
+        'rubric_version': run.get('versions', {}).get('rubric_version'),
+        'prompt_hash': run.get('prompt_hash'),
+    }
+    f.seek(0, 2)
+    f.write(json.dumps(event, sort_keys=True) + '\n')
+    f.flush()
+    os.fsync(f.fileno())
+    fcntl.flock(f.fileno(), fcntl.LOCK_UN)
 PY
 fi
 

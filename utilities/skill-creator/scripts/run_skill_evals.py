@@ -828,9 +828,23 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         print(f"ERROR: --claude-bin not found: {claude_bin}", file=sys.stderr)
         return 1
 
-    run_id = dt.datetime.now().strftime("%Y%m%d-%H%M%S")
-    reports_base = Path(args.reports_dir).expanduser().resolve() / skill_name / run_id
-    reports_base.mkdir(parents=True, exist_ok=True)
+    reports_root = Path(args.reports_dir).expanduser().resolve() / skill_name
+    reports_root.mkdir(parents=True, exist_ok=True)
+    reports_base: Optional[Path] = None
+    run_id = ""
+    for _ in range(8):
+        candidate = dt.datetime.now().strftime("%Y%m%d-%H%M%S-%f")
+        candidate_path = reports_root / candidate
+        try:
+            candidate_path.mkdir(parents=False, exist_ok=False)
+            reports_base = candidate_path
+            run_id = candidate
+            break
+        except FileExistsError:
+            continue
+    if reports_base is None or not run_id:
+        print("ERROR: unable to allocate unique report directory run_id", file=sys.stderr)
+        return 1
 
     selected_runners = ["codex", "claude"] if args.dual_run else [args.runner]
     preflight_warnings: List[str] = []

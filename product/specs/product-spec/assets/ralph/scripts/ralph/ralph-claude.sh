@@ -55,6 +55,7 @@ ARCHIVE_PER_BRANCH="${RALPH_ARCHIVE_PER_BRANCH:-true}"  # true|false
 TEST_CMD="${RALPH_TEST_CMD:-}"
 TYPECHECK_CMD="${RALPH_TYPECHECK_CMD:-}"
 LINT_CMD="${RALPH_LINT_CMD:-}"
+ALLOW_UNSAFE_CHECK_CMD="${RALPH_ALLOW_UNSAFE_CHECK_CMD:-false}" # true|false (default false)
 
 # Failure handling
 CHECK_FAILURE_STREAK_LIMIT="${RALPH_CHECK_FAILURE_STREAK_LIMIT:-3}"
@@ -84,7 +85,7 @@ require_option_value() {
 
 option_requires_value() {
   case "$1" in
-    -w|--workspace|-n|--iterations|-m|--model|--max-turns|--permission-mode|--tools|--allowed-tools|--dangerously-skip-permissions|--structured|--iteration-schema|--output-format|--task|--prd|--pin|--plan|--guardrails|--progress|--addendum|--branch|--push|--commit|--no-verify|--require-clean-tree|--archive-per-branch|--test-cmd|--typecheck-cmd|--lint-cmd|--check-fail-limit|--agent-fail-limit|--sleep)
+    -w|--workspace|-n|--iterations|-m|--model|--max-turns|--permission-mode|--tools|--allowed-tools|--dangerously-skip-permissions|--structured|--iteration-schema|--output-format|--task|--prd|--pin|--plan|--guardrails|--progress|--addendum|--branch|--push|--commit|--no-verify|--require-clean-tree|--archive-per-branch|--test-cmd|--typecheck-cmd|--lint-cmd|--allow-unsafe-check-cmd|--check-fail-limit|--agent-fail-limit|--sleep)
       return 0
       ;;
     *)
@@ -136,6 +137,8 @@ Checks:
       --test-cmd CMD            Override test command
       --typecheck-cmd CMD       Override typecheck command
       --lint-cmd CMD            Override lint command
+      --allow-unsafe-check-cmd BOOL
+                                true|false; when false, check commands must be simple allowlisted commands
 
 Failure handling:
       --check-fail-limit N      Stop after N consecutive failing check runs (default: 3)
@@ -186,6 +189,55 @@ frontmatter_get() {
   ' "$file"
 }
 
+bool_true() {
+  case "${1,,}" in
+    1|true|yes|on) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+is_safe_check_command() {
+  local cmd="$1"
+  [[ -n "$cmd" ]] || return 0
+  [[ "$cmd" =~ ^[A-Za-z0-9_./:@%+=,\ -]+$ ]] || return 1
+
+  local first_word="${cmd%% *}"
+  case "$first_word" in
+    bun|npm|pnpm|yarn|node|npx|deno|python|python3|pytest|pip|pip3|uv|go|cargo|just|make|ruby|bundle|rails|rake|swift|xcodebuild|gradle|./*|bin/*|scripts/*)
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
+run_check_command() {
+  local label="$1"
+  local cmd="$2"
+  local checks_log="$3"
+  echo "== ${label}: $cmd" | tee -a "$checks_log"
+
+  if bool_true "$ALLOW_UNSAFE_CHECK_CMD"; then
+    if ! bash -lc "$cmd" 2>&1 | tee -a "$checks_log"; then
+      return 1
+    fi
+    return 0
+  fi
+
+  if ! is_safe_check_command "$cmd"; then
+    echo "Rejected unsafe ${label} command. Pass --allow-unsafe-check-cmd true to override." | tee -a "$checks_log"
+    return 1
+  fi
+
+  local -a cmd_parts=()
+  read -r -a cmd_parts <<<"$cmd"
+  if ! "${cmd_parts[@]}" 2>&1 | tee -a "$checks_log"; then
+    return 1
+  fi
+  return 0
+}
+
 count_unchecked_boxes() {
   local file="$1"
   [[ -f "$file" ]] || { echo "0"; return 0; }
@@ -233,20 +285,17 @@ run_checks() {
   local ok=0
 
   if [[ -n "$TYPECHECK_CMD" ]]; then
-    echo "== TYPECHECK: $TYPECHECK_CMD" | tee -a "$checks_log"
-    if ! bash -lc "$TYPECHECK_CMD" 2>&1 | tee -a "$checks_log"; then ok=1; fi
+    if ! run_check_command "TYPECHECK" "$TYPECHECK_CMD" "$checks_log"; then ok=1; fi
     echo "" | tee -a "$checks_log"
   fi
 
   if [[ -n "$LINT_CMD" ]]; then
-    echo "== LINT: $LINT_CMD" | tee -a "$checks_log"
-    if ! bash -lc "$LINT_CMD" 2>&1 | tee -a "$checks_log"; then ok=1; fi
+    if ! run_check_command "LINT" "$LINT_CMD" "$checks_log"; then ok=1; fi
     echo "" | tee -a "$checks_log"
   fi
 
   if [[ -n "$TEST_CMD" ]]; then
-    echo "== TEST: $TEST_CMD" | tee -a "$checks_log"
-    if ! bash -lc "$TEST_CMD" 2>&1 | tee -a "$checks_log"; then ok=1; fi
+    if ! run_check_command "TEST" "$TEST_CMD" "$checks_log"; then ok=1; fi
     echo "" | tee -a "$checks_log"
   fi
 
@@ -427,6 +476,7 @@ while [[ $# -gt 0 ]]; do
     --test-cmd) TEST_CMD="$2"; shift 2;;
     --typecheck-cmd) TYPECHECK_CMD="$2"; shift 2;;
     --lint-cmd) LINT_CMD="$2"; shift 2;;
+    --allow-unsafe-check-cmd) ALLOW_UNSAFE_CHECK_CMD="$2"; shift 2;;
 
     --check-fail-limit) CHECK_FAILURE_STREAK_LIMIT="$2"; shift 2;;
     --agent-fail-limit) AGENT_FAILURE_STREAK_LIMIT="$2"; shift 2;;

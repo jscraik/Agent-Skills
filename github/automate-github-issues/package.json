@@ -4,18 +4,21 @@
   "type": "module",
   "scripts": {
     "setup": "bash scripts/setup.sh",
-    "analyze": "bun run fleet-analyze.ts",
-    "plan": "bun run fleet-plan.ts",
-    "dispatch": "bun run fleet-dispatch.ts",
-    "merge": "bun run fleet-merge.ts"
+    "analyze": "tsx scripts/fleet-analyze.ts",
+    "plan": "tsx scripts/fleet-plan.ts",
+    "dispatch": "tsx scripts/fleet-dispatch.ts",
+    "merge": "tsx scripts/fleet-merge.ts",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@google/jules-sdk": "^0.1.0",
+    "@google/jules-sdk": "^0.0.6",
     "octokit": "^4.1.0",
     "find-up": "^7.0.0"
   },
   "devDependencies": {
-    "@types/bun": "^1.2.0"
+    "@types/node": "^22.13.10",
+    "tsx": "^4.20.5",
+    "typescript": "^5.8.2"
   },
   "engines": {
     "node": ">=18.0.0"
