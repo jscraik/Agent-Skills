@@ -24,6 +24,8 @@ python3 utilities/skill-creator/scripts/recursive_skill_loop.py \
   --objective "Improve UI skill response quality for traceable, safe outputs" \
   --out-root artifacts/skill-graphs/runs \
   --run-owner recursive-loop-operator \
+  --rollout-mode active \
+  --controls-dir artifacts/skill-graphs/controls \
   --lessons-jsonl artifacts/skill-graphs/lessons/canonical-lessons.jsonl \
   --max-injected-lessons 3 \
   --low-confidence-threshold 0.6 \
@@ -53,14 +55,15 @@ A run directory with:
 - `run.json`
 - `iteration_journal.jsonl`
 - `promotion_decision.json` (draft decision artifact)
-- `capture_record.json` (invocation envelope + output summary + feedback)
-- `evidence_packet.json` (assembled events/logs/traces/session/check signals)
-- `lesson_candidates.json` (draft candidate lessons derived from advice + implementation + outcome evidence)
+- `capture_record.json` (invocation envelope + output summary + feedback; omitted if `auto_capture` disabled)
+- `evidence_packet.json` (assembled events/logs/traces/session/check signals; omitted if `auto_capture` disabled)
+- `lesson_candidates.json` (draft candidate lessons derived from advice + implementation + outcome evidence; omitted if `auto_capture` disabled)
 - `events.jsonl` (always-on event stream)
 - `run_blocker.json` / `rollback_recommendation.json` on blocked or kill-switch paths
 
 Start-of-run retrieval uses canonical lessons from `--lessons-jsonl` filtered by `{scope_skill, scope_profile}`.
 Low-confidence lessons are retained but down-ranked and flagged in injected lesson attribution.
+Default rollout mode is `observe_only` (capture on, auto-apply off). Use `--rollout-mode active` to enable lesson injection.
 
 Optional debug traces are written only when `--emit-debug-artifacts` is set and stored under `run/debug/`.
 

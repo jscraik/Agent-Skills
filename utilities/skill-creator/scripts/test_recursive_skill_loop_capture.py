@@ -127,6 +127,8 @@ class RecursiveLoopCaptureTests(unittest.TestCase):
             "2",
             "--low-confidence-threshold",
             "0.6",
+            "--rollout-mode",
+            "active",
         )
         self.assertIn(returncode, {0, 2, 3, 4, 5})
 
@@ -147,6 +149,92 @@ class RecursiveLoopCaptureTests(unittest.TestCase):
             [item["lesson_id"] for item in injected],
         )
         self.assertEqual(capture.get("injected_lessons", {}).get("count"), 2)
+
+    def test_observe_only_default_disables_auto_apply(self) -> None:
+        lessons_dir = Path(tempfile.mkdtemp(prefix="lessons-observe-"))
+        lessons_file = lessons_dir / "canonical-lessons.jsonl"
+        rows = [
+            {
+                "schema_version": "1.0",
+                "lesson_id": "lesson_ui_high",
+                "scope_skill": "ui-ux-creative-coding",
+                "scope_profile": "ui",
+                "status": "active",
+                "effective_from": "2026-02-24T10:00:00Z",
+                "confidence": 0.9,
+            }
+        ]
+        lessons_file.write_text("".join(json.dumps(r) + "\n" for r in rows), encoding="utf-8")
+
+        returncode, run_dir = self._run_loop("--lessons-jsonl", str(lessons_file))
+        self.assertIn(returncode, {0, 2, 3, 4, 5})
+
+        run_obj = json.loads((run_dir / "run.json").read_text(encoding="utf-8"))
+        controls = run_obj.get("runtime_controls", {})
+        self.assertEqual(controls.get("rollout_mode"), "observe_only")
+        self.assertFalse(bool(controls.get("auto_apply_enabled")))
+        self.assertEqual(run_obj.get("injected_lessons", []), [])
+        self.assertEqual(run_obj.get("injection_summary", {}).get("retrieved_count"), 1)
+        self.assertEqual(run_obj.get("injection_summary", {}).get("selected_count"), 0)
+
+    def test_rollout_mode_off_blocks_run_and_disables_capture(self) -> None:
+        returncode, run_dir = self._run_loop("--rollout-mode", "off")
+        self.assertEqual(returncode, 5)
+
+        run_obj = json.loads((run_dir / "run.json").read_text(encoding="utf-8"))
+        blocker = json.loads((run_dir / "run_blocker.json").read_text(encoding="utf-8"))
+        controls = run_obj.get("runtime_controls", {})
+
+        self.assertEqual(controls.get("rollout_mode"), "off")
+        self.assertFalse(bool(controls.get("auto_capture_enabled")))
+        self.assertFalse(bool(controls.get("auto_apply_enabled")))
+        self.assertEqual(blocker.get("code"), "run_rollforward_blocked")
+        self.assertFalse((run_dir / "capture_record.json").exists())
+
+    def test_global_and_per_skill_kill_switches_disable_auto_paths(self) -> None:
+        controls_dir = Path(tempfile.mkdtemp(prefix="controls-test-"))
+        (controls_dir / "auto_capture.disabled").write_text("1\n", encoding="utf-8")
+        skill_switch = controls_dir / "skills" / "ui-ux-creative-coding" / "auto_apply.disabled"
+        skill_switch.parent.mkdir(parents=True, exist_ok=True)
+        skill_switch.write_text("1\n", encoding="utf-8")
+
+        lessons_file = controls_dir / "canonical-lessons.jsonl"
+        lessons_file.write_text(
+            json.dumps(
+                {
+                    "schema_version": "1.0",
+                    "lesson_id": "lesson_ui_high",
+                    "scope_skill": "ui-ux-creative-coding",
+                    "scope_profile": "ui",
+                    "status": "active",
+                    "effective_from": "2026-02-24T10:00:00Z",
+                    "confidence": 0.9,
+                }
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+
+        returncode, run_dir = self._run_loop(
+            "--rollout-mode",
+            "active",
+            "--controls-dir",
+            str(controls_dir),
+            "--lessons-jsonl",
+            str(lessons_file),
+        )
+        self.assertIn(returncode, {0, 2, 3, 4, 5})
+
+        run_obj = json.loads((run_dir / "run.json").read_text(encoding="utf-8"))
+        controls = run_obj.get("runtime_controls", {})
+        reasons = set(controls.get("reasons", []))
+
+        self.assertFalse(bool(controls.get("auto_capture_enabled")))
+        self.assertFalse(bool(controls.get("auto_apply_enabled")))
+        self.assertIn("global_auto_capture_kill_switch", reasons)
+        self.assertIn("skill_auto_apply_kill_switch", reasons)
+        self.assertEqual(run_obj.get("injected_lessons", []), [])
+        self.assertFalse((run_dir / "capture_record.json").exists())
 
 
 if __name__ == "__main__":

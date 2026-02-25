@@ -87,6 +87,7 @@ Workflow: `.github/workflows/recursive-promotion-gate.yml`.
 - evidence completeness linkage (`evidence_packet.evidence_packet_id`, `evidence_packet.completeness_score`)
 - draft candidate payload(s) in `lesson_candidates[]` for queueing/reviewer triage
 - retrieval attribution in `injected_lesson_ids[]` for traceability
+- runtime control snapshot in `runtime_controls{rollout_mode, auto_capture_enabled, auto_apply_enabled}` for rollback audits
 
 Approved promotions emit a deduplicated `promotion_approved` debug event in `run/debug/events.jsonl`.
 

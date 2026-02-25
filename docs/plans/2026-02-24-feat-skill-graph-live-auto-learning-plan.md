@@ -227,4 +227,6 @@ Optional dry-run checks once implementation starts:
 - [x] T7: Implement start-of-run retrieval and scoped lesson injection
 - [x] T8: Add confidence-aware ranking with low-confidence warning/down-rank behavior
 - [x] T9: Persist injected lesson attribution in run artifacts
-- [ ] T10+: Remaining tasks pending next execution batch
+- [x] T10: Add global and per-skill kill switches for auto-capture/auto-apply
+- [x] T11: Add rollout modes (off, observe_only, active) and pilot-safe defaults
+- [ ] T12+: Remaining tasks pending next execution batch

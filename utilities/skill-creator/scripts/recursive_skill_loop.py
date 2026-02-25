@@ -46,6 +46,7 @@ STOP_REASONS = {
 }
 
 FEEDBACK_OUTCOMES = {"worked", "partly", "didnt_work"}
+ROLLOUT_MODES = {"off", "observe_only", "active"}
 LESSON_STATUS_PRIORITY = {
     "active": 5,
     "promoted": 4,
@@ -762,6 +763,20 @@ def is_kill_switch_activated(path: Optional[Path]) -> bool:
     return raw not in {"0", "false", "off", "no"}
 
 
+def normalize_rollout_mode(raw_mode: Optional[str]) -> str:
+    mode = str(raw_mode or "").strip().lower()
+    return mode if mode in ROLLOUT_MODES else "observe_only"
+
+
+def read_rollout_mode(path: Optional[Path], fallback: str) -> str:
+    if path is None or not path.exists():
+        return fallback
+    try:
+        return normalize_rollout_mode(path.read_text(encoding="utf-8", errors="ignore"))
+    except Exception:
+        return fallback
+
+
 def acquire_run_lock(lock_path: Path, run_id: str, run_owner: str, idempotency_key: str) -> None:
     lock_path.parent.mkdir(parents=True, exist_ok=True)
     payload = {
@@ -862,14 +877,6 @@ def run_loop(args: argparse.Namespace) -> int:
     objective_hash = sha256_text(args.objective)
     feedback_payload = normalize_feedback(args.feedback_outcome, args.feedback_note)
     invocation_id = sha256_text(f"{objective_hash}:{args.actor_id}:{created_at}")[:16]
-    lessons_file = Path(args.lessons_jsonl).expanduser().resolve()
-    injection_context = retrieve_and_rank_lessons(
-        profile=profile,
-        lessons_file=lessons_file,
-        max_lessons=args.max_injected_lessons,
-        low_confidence_threshold=args.low_confidence_threshold,
-    )
-    injected_lessons = injection_context["selected"]
 
     max_iterations = args.max_iterations or profile.thresholds.max_iterations
     max_elapsed_ms = args.max_elapsed_ms or profile.thresholds.max_elapsed_ms
@@ -898,6 +905,113 @@ def run_loop(args: argparse.Namespace) -> int:
         else str(os.environ.get("SKILL_GRAPH_ROLLBACK_REQUIRED_PATH", "")).strip()
     )
     rollback_required_path = Path(rollback_required_raw).expanduser().resolve() if rollback_required_raw else None
+    controls_dir_raw = str(
+        args.controls_dir
+        or os.environ.get("SKILL_GRAPH_CONTROLS_DIR")
+        or "artifacts/skill-graphs/controls"
+    ).strip()
+    controls_dir = Path(controls_dir_raw).expanduser().resolve()
+    skill_controls_dir_raw = (
+        str(args.skill_controls_dir).strip()
+        if args.skill_controls_dir
+        else str(os.environ.get("SKILL_GRAPH_SKILL_CONTROLS_DIR", "")).strip()
+    )
+    skill_controls_dir = (
+        Path(skill_controls_dir_raw).expanduser().resolve()
+        if skill_controls_dir_raw
+        else controls_dir / "skills"
+    )
+    rollout_mode_file_raw = (
+        str(args.rollout_mode_file).strip()
+        if args.rollout_mode_file
+        else str(os.environ.get("SKILL_GRAPH_ROLLOUT_MODE_PATH", "")).strip()
+    )
+    rollout_mode_file = (
+        Path(rollout_mode_file_raw).expanduser().resolve()
+        if rollout_mode_file_raw
+        else controls_dir / "rollout-mode.txt"
+    )
+    rollout_mode = (
+        normalize_rollout_mode(args.rollout_mode)
+        if args.rollout_mode
+        else read_rollout_mode(
+            rollout_mode_file,
+            normalize_rollout_mode(os.environ.get("SKILL_GRAPH_ROLLOUT_MODE")),
+        )
+    )
+
+    auto_capture_switch_raw = (
+        str(args.auto_capture_switch_file).strip()
+        if args.auto_capture_switch_file
+        else str(os.environ.get("SKILL_GRAPH_AUTO_CAPTURE_SWITCH_PATH", "")).strip()
+    )
+    auto_capture_switch_path = (
+        Path(auto_capture_switch_raw).expanduser().resolve()
+        if auto_capture_switch_raw
+        else controls_dir / "auto_capture.disabled"
+    )
+    auto_apply_switch_raw = (
+        str(args.auto_apply_switch_file).strip()
+        if args.auto_apply_switch_file
+        else str(os.environ.get("SKILL_GRAPH_AUTO_APPLY_SWITCH_PATH", "")).strip()
+    )
+    auto_apply_switch_path = (
+        Path(auto_apply_switch_raw).expanduser().resolve()
+        if auto_apply_switch_raw
+        else controls_dir / "auto_apply.disabled"
+    )
+    skill_auto_capture_switch_path = skill_controls_dir / profile.scope_skill / "auto_capture.disabled"
+    skill_auto_apply_switch_path = skill_controls_dir / profile.scope_skill / "auto_apply.disabled"
+
+    control_reasons: List[str] = []
+    auto_capture_enabled = rollout_mode != "off"
+    if rollout_mode == "off":
+        control_reasons.append("rollout_mode_off_disables_auto_capture")
+    if is_kill_switch_activated(auto_capture_switch_path):
+        auto_capture_enabled = False
+        control_reasons.append("global_auto_capture_kill_switch")
+    if is_kill_switch_activated(skill_auto_capture_switch_path):
+        auto_capture_enabled = False
+        control_reasons.append("skill_auto_capture_kill_switch")
+
+    auto_apply_enabled = rollout_mode == "active"
+    if rollout_mode != "active":
+        control_reasons.append(f"rollout_mode_{rollout_mode}_disables_auto_apply")
+    if is_kill_switch_activated(auto_apply_switch_path):
+        auto_apply_enabled = False
+        control_reasons.append("global_auto_apply_kill_switch")
+    if is_kill_switch_activated(skill_auto_apply_switch_path):
+        auto_apply_enabled = False
+        control_reasons.append("skill_auto_apply_kill_switch")
+
+    runtime_controls = {
+        "schema_version": "1.0",
+        "rollout_mode": rollout_mode,
+        "auto_capture_enabled": auto_capture_enabled,
+        "auto_apply_enabled": auto_apply_enabled,
+        "reasons": sorted(set(control_reasons)),
+        "paths": {
+            "controls_dir": str(controls_dir),
+            "skill_controls_dir": str(skill_controls_dir),
+            "rollout_mode_file": str(rollout_mode_file),
+            "global_auto_capture_switch_file": str(auto_capture_switch_path),
+            "global_auto_apply_switch_file": str(auto_apply_switch_path),
+            "skill_auto_capture_switch_file": str(skill_auto_capture_switch_path),
+            "skill_auto_apply_switch_file": str(skill_auto_apply_switch_path),
+        },
+    }
+
+    lessons_file = Path(args.lessons_jsonl).expanduser().resolve()
+    injection_context = retrieve_and_rank_lessons(
+        profile=profile,
+        lessons_file=lessons_file,
+        max_lessons=args.max_injected_lessons,
+        low_confidence_threshold=args.low_confidence_threshold,
+    )
+    retrieved_lessons = injection_context["selected"]
+    injected_lessons = list(retrieved_lessons if auto_apply_enabled else [])
+    if not auto_apply_enabled:
+        injection_context["injection_text"] = ""
 
     events: List[Dict[str, Any]] = []
     emit_event(
@@ -913,12 +1027,18 @@ def run_loop(args: argparse.Namespace) -> int:
         extra={
             "run_owner": run_owner,
             "idempotency_key": idempotency_key,
+            "rollout_mode": rollout_mode,
+            "auto_capture_enabled": auto_capture_enabled,
+            "auto_apply_enabled": auto_apply_enabled,
+            "retrieved_lesson_ids": [item["lesson_id"] for item in retrieved_lessons],
             "injected_lesson_ids": [item["lesson_id"] for item in injected_lessons],
         },
     )
     write_jsonl(iteration_journal_path, [])
 
     def write_capture_artifacts(run_obj: Dict[str, Any], promotion_decision: Dict[str, Any]) -> None:
+        if not auto_capture_enabled:
+            return
         iteration_rows = load_iteration_rows(iteration_journal_path)
         evidence_packet = build_evidence_packet(
             run_id=run_id,
@@ -965,6 +1085,9 @@ def run_loop(args: argparse.Namespace) -> int:
                 "idempotency_key": idempotency_key,
                 "kill_switch_file": str(kill_switch_path) if kill_switch_path else "",
                 "rollback_required_file": str(rollback_required_path) if rollback_required_path else "",
+                "rollout_mode": rollout_mode,
+                "auto_capture_enabled": auto_capture_enabled,
+                "auto_apply_enabled": auto_apply_enabled,
             },
             "output_summary": {
                 "finished_at": run_obj.get("finished_at", ""),
@@ -1074,13 +1197,17 @@ def run_loop(args: argparse.Namespace) -> int:
             "lock_path": str(lock_path),
             "kill_switch_file": str(kill_switch_path) if kill_switch_path else "",
             "rollback_required_file": str(rollback_required_path) if rollback_required_path else "",
+            "runtime_controls": runtime_controls,
             "injection_summary": {
                 "lessons_file": str(lessons_file),
+                "retrieved_count": len(retrieved_lessons),
                 "selected_count": len(injected_lessons),
                 "selected_lesson_ids": [item["lesson_id"] for item in injected_lessons],
                 "low_confidence_threshold": args.low_confidence_threshold,
+                "suppressed_by_controls": (not auto_apply_enabled and len(retrieved_lessons) > 0),
             },
             "injected_lessons": injected_lessons,
+            "retrieved_lessons": retrieved_lessons,
             "run_blocker": blocker,
         }
         promotion_decision = {
@@ -1105,6 +1232,7 @@ def run_loop(args: argparse.Namespace) -> int:
                 "iteration_ids": [],
             },
             "injected_lesson_ids": [item["lesson_id"] for item in injected_lessons],
+            "runtime_controls": runtime_controls,
             "run_blocker": blocker,
         }
         write_json(out_dir / "run.json", run_obj)
@@ -1112,6 +1240,58 @@ def run_loop(args: argparse.Namespace) -> int:
         write_json(out_dir / "promotion_decision.json", promotion_decision)
         write_jsonl(events_path, events)
         write_capture_artifacts(run_obj, promotion_decision)
+
+    if rollout_mode == "off":
+        blocker_code = "run_rollforward_blocked"
+        terminal_status, stop_reason = normalize_blocked_reason(blocker_code)
+        emit_event(
+            events=events,
+            run_id=run_id,
+            profile=profile,
+            actor_id=args.actor_id,
+            objective_hash=objective_hash,
+            event_type="run_blocked",
+            severity="warn",
+            terminal_status=terminal_status,
+            stop_reason=stop_reason,
+            blocker_code=blocker_code,
+            extra={"message": f"rollout mode is off via {rollout_mode_file}"},
+        )
+        emit_event(
+            events=events,
+            run_id=run_id,
+            profile=profile,
+            actor_id=args.actor_id,
+            objective_hash=objective_hash,
+            event_type="run_state_changed",
+            severity="warn",
+            terminal_status=terminal_status,
+            stop_reason=stop_reason,
+            blocker_code=blocker_code,
+        )
+        emit_event(
+            events=events,
+            run_id=run_id,
+            profile=profile,
+            actor_id=args.actor_id,
+            objective_hash=objective_hash,
+            event_type="failure_event",
+            severity="fail",
+            terminal_status=terminal_status,
+            stop_reason=stop_reason,
+            blocker_code=blocker_code,
+        )
+        write_blocker_artifacts(
+            blocker_code=blocker_code,
+            message=f"rollout mode is off ({rollout_mode}); run blocked before execution",
+            terminal_status=terminal_status,
+            stop_reason=stop_reason,
+        )
+        write_jsonl(events_path, events)
+        print(f"[recursive-loop] run_id={run_id}")
+        print(f"[recursive-loop] status={terminal_status} stop_reason={stop_reason}")
+        print(f"[recursive-loop] out_dir={out_dir}")
+        return 5
 
     if is_kill_switch_activated(rollback_required_path):
         blocker_code = "run_rollback_required"
@@ -1528,6 +1708,7 @@ def run_loop(args: argparse.Namespace) -> int:
         "lock_path": str(lock_path),
         "kill_switch_file": str(kill_switch_path) if kill_switch_path else "",
         "rollback_required_file": str(rollback_required_path) if rollback_required_path else "",
+        "runtime_controls": runtime_controls,
         "run_blocker": (
             {
                 "code": blocker_code,
@@ -1538,11 +1719,14 @@ def run_loop(args: argparse.Namespace) -> int:
         ),
         "injection_summary": {
             "lessons_file": str(lessons_file),
+            "retrieved_count": len(retrieved_lessons),
             "selected_count": len(injected_lessons),
             "selected_lesson_ids": [item["lesson_id"] for item in injected_lessons],
             "low_confidence_threshold": args.low_confidence_threshold,
+            "suppressed_by_controls": (not auto_apply_enabled and len(retrieved_lessons) > 0),
         },
         "injected_lessons": injected_lessons,
+        "retrieved_lessons": retrieved_lessons,
     }
 
     promotion_decision = {
@@ -1567,6 +1751,7 @@ def run_loop(args: argparse.Namespace) -> int:
             "iteration_ids": journal_iteration_ids,
         },
         "injected_lesson_ids": [item["lesson_id"] for item in injected_lessons],
+        "runtime_controls": runtime_controls,
     }
 
     summary_md = (
@@ -1614,6 +1799,31 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument(
         "--rollback-required-file",
         help="Rollback-required control file path (or use SKILL_GRAPH_ROLLBACK_REQUIRED_PATH)",
+    )
+    p.add_argument(
+        "--controls-dir",
+        help="Control root directory (default: artifacts/skill-graphs/controls)",
+    )
+    p.add_argument(
+        "--skill-controls-dir",
+        help="Optional skill control root (default: <controls-dir>/skills)",
+    )
+    p.add_argument(
+        "--rollout-mode",
+        choices=sorted(ROLLOUT_MODES),
+        help="Runtime rollout mode override (off|observe_only|active)",
+    )
+    p.add_argument(
+        "--rollout-mode-file",
+        help="Rollout mode control file (default: <controls-dir>/rollout-mode.txt)",
+    )
+    p.add_argument(
+        "--auto-capture-switch-file",
+        help="Global auto-capture kill switch path (default: <controls-dir>/auto_capture.disabled)",
+    )
+    p.add_argument(
+        "--auto-apply-switch-file",
+        help="Global auto-apply kill switch path (default: <controls-dir>/auto_apply.disabled)",
     )
     p.add_argument("--seed", type=int, help="Optional deterministic seed override")
     p.add_argument("--max-iterations", type=int, help="Override max iterations")

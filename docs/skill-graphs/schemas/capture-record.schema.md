@@ -27,6 +27,9 @@ invocation_envelope:
   idempotency_key: string
   kill_switch_file: string
   rollback_required_file: string
+  rollout_mode: string               # off|observe_only|active
+  auto_capture_enabled: bool
+  auto_apply_enabled: bool
 output_summary:
   finished_at: string                 # ISO-8601
   terminal_status: string             # passed|failed|escalated|aborted
@@ -85,7 +88,10 @@ injected_lessons:
     "objective_hash": "sha256:...",
     "idempotency_key": "a76f7abf0d6de8b1cc93",
     "kill_switch_file": "",
-    "rollback_required_file": ""
+    "rollback_required_file": "",
+    "rollout_mode": "active",
+    "auto_capture_enabled": true,
+    "auto_apply_enabled": true
   },
   "output_summary": {
     "finished_at": "2026-02-25T18:01:05Z",
