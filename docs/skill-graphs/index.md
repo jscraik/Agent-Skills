@@ -19,7 +19,7 @@ This section defines the MVP contracts and operating workflows for the recursive
 - Phase 4 capture baseline also writes `capture_record` + `evidence_packet` per run.
 - Use checkpoint adversarial evaluation (initial, final, failure-triggered).
 - Keep canonical promotion human-gated with provenance + security checklist.
-- Keep runtime retrieval injection disabled until Phase 4.
+- Runtime retrieval/injection is rollout-controlled (`off | observe_only | active`) with pilot-safe default `observe_only`.
 - Treat `run/events.jsonl` as mandatory runtime telemetry; keep optional debug traces under `run/debug/*`.
 - Enforce compatibility mapping for control blockers (`run_rollforward_blocked`, `run_rollback_required`) via `terminal_status` + `stop_reason` normalization.
 

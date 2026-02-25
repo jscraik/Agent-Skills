@@ -48,6 +48,13 @@ class RunRecord:
     confidence_bucket: Optional[str]
     evidence_completeness_score: Optional[float]
     candidate_count: int
+    capture_record_present: bool
+    rollout_mode: str
+    auto_capture_enabled: bool
+    auto_apply_enabled: bool
+    injected_lesson_count: int
+    retrieved_lesson_count: int
+    injection_suppressed: bool
 
 
 @dataclass(frozen=True)
@@ -71,6 +78,19 @@ class WindowSummary:
     critical_non_regression_compliance: float
     budget_compliance: float
     evaluator_flip_rate: float
+    capture_records_written: int
+    capture_coverage_rate: float
+    auto_capture_enabled_rate: float
+    auto_apply_enabled_rate: float
+    confidence_bucket_counts: Dict[str, int]
+    confidence_bucket_distribution: Dict[str, float]
+    runs_with_injection: int
+    runs_with_retrieved_lessons: int
+    suppressed_injection_runs: int
+    injection_usage_rate: float
+    total_injected_lessons: int
+    average_injected_lessons_per_run: float
+    rollout_mode_counts: Dict[str, int]
 
 
 def parse_args() -> argparse.Namespace:
@@ -207,6 +227,24 @@ def load_run_record(run_dir: Path) -> Optional[RunRecord]:
     confidence_bucket: Optional[str] = None
     evidence_completeness_score: Optional[float] = None
     candidate_count = 0
+    capture_record_present = (run_dir / "capture_record.json").exists()
+    runtime_controls = run.get("runtime_controls", {}) if isinstance(run.get("runtime_controls"), dict) else {}
+    rollout_mode = str(runtime_controls.get("rollout_mode", "observe_only")).strip() or "observe_only"
+    auto_capture_enabled = bool(runtime_controls.get("auto_capture_enabled", True))
+    auto_apply_enabled = bool(runtime_controls.get("auto_apply_enabled", rollout_mode == "active"))
+    injected_lesson_count = 0
+    injected_lessons = run.get("injected_lessons")
+    if isinstance(injected_lessons, list):
+        injected_lesson_count = len(injected_lessons)
+    retrieved_lesson_count = 0
+    injection_summary = run.get("injection_summary", {}) if isinstance(run.get("injection_summary"), dict) else {}
+    if "retrieved_count" in injection_summary:
+        retrieved_lesson_count = safe_int(injection_summary.get("retrieved_count"), 0)
+    else:
+        retrieved_lessons = run.get("retrieved_lessons")
+        if isinstance(retrieved_lessons, list):
+            retrieved_lesson_count = len(retrieved_lessons)
+    injection_suppressed = bool(injection_summary.get("suppressed_by_controls", False))
     if promotion_path.exists():
         promotion = load_json(promotion_path)
         conf = promotion.get("confidence", {}) if isinstance(promotion.get("confidence"), dict) else {}
@@ -243,6 +281,13 @@ def load_run_record(run_dir: Path) -> Optional[RunRecord]:
         confidence_bucket=confidence_bucket,
         evidence_completeness_score=evidence_completeness_score,
         candidate_count=candidate_count,
+        capture_record_present=capture_record_present,
+        rollout_mode=rollout_mode,
+        auto_capture_enabled=auto_capture_enabled,
+        auto_apply_enabled=auto_apply_enabled,
+        injected_lesson_count=injected_lesson_count,
+        retrieved_lesson_count=retrieved_lesson_count,
+        injection_suppressed=injection_suppressed,
     )
 
 
@@ -289,6 +334,19 @@ def summarize(records: List[RunRecord]) -> WindowSummary:
             critical_non_regression_compliance=0.0,
             budget_compliance=0.0,
             evaluator_flip_rate=0.0,
+            capture_records_written=0,
+            capture_coverage_rate=0.0,
+            auto_capture_enabled_rate=0.0,
+            auto_apply_enabled_rate=0.0,
+            confidence_bucket_counts={"high": 0, "medium": 0, "low": 0, "unknown": 0},
+            confidence_bucket_distribution={"high": 0.0, "medium": 0.0, "low": 0.0, "unknown": 0.0},
+            runs_with_injection=0,
+            runs_with_retrieved_lessons=0,
+            suppressed_injection_runs=0,
+            injection_usage_rate=0.0,
+            total_injected_lessons=0,
+            average_injected_lessons_per_run=0.0,
+            rollout_mode_counts={"off": 0, "observe_only": 0, "active": 0, "other": 0},
         )
 
     by_profile = {p: 0 for p in PILOT_PROFILES}
@@ -301,6 +359,27 @@ def summarize(records: List[RunRecord]) -> WindowSummary:
     positive_uplift = sum(1 for r in records if r.quality_uplift > 0)
     non_reg_ok = sum(1 for r in records if r.critical_non_regression_passed)
     budget_ok = sum(1 for r in records if r.budget_compliant)
+    capture_records_written = sum(1 for r in records if r.capture_record_present)
+    auto_capture_enabled_runs = sum(1 for r in records if r.auto_capture_enabled)
+    auto_apply_enabled_runs = sum(1 for r in records if r.auto_apply_enabled)
+    confidence_bucket_counts = {"high": 0, "medium": 0, "low": 0, "unknown": 0}
+    for r in records:
+        bucket = (r.confidence_bucket or "unknown").strip().lower()
+        if bucket not in confidence_bucket_counts:
+            bucket = "unknown"
+        confidence_bucket_counts[bucket] += 1
+    confidence_bucket_distribution = {
+        k: round(v / total, 4)
+        for k, v in confidence_bucket_counts.items()
+    }
+    runs_with_injection = sum(1 for r in records if r.injected_lesson_count > 0)
+    runs_with_retrieved_lessons = sum(1 for r in records if r.retrieved_lesson_count > 0)
+    suppressed_injection_runs = sum(1 for r in records if r.injection_suppressed)
+    total_injected_lessons = sum(max(0, r.injected_lesson_count) for r in records)
+    rollout_mode_counts = {"off": 0, "observe_only": 0, "active": 0, "other": 0}
+    for r in records:
+        mode = r.rollout_mode if r.rollout_mode in {"off", "observe_only", "active"} else "other"
+        rollout_mode_counts[mode] += 1
 
     iteration_values = [float(r.iterations_completed) for r in records]
     uplift_values = [r.quality_uplift for r in records]
@@ -318,6 +397,19 @@ def summarize(records: List[RunRecord]) -> WindowSummary:
         critical_non_regression_compliance=round(non_reg_ok / total, 4),
         budget_compliance=round(budget_ok / total, 4),
         evaluator_flip_rate=round(sum(flip_values) / total, 4),
+        capture_records_written=capture_records_written,
+        capture_coverage_rate=round(capture_records_written / total, 4),
+        auto_capture_enabled_rate=round(auto_capture_enabled_runs / total, 4),
+        auto_apply_enabled_rate=round(auto_apply_enabled_runs / total, 4),
+        confidence_bucket_counts=confidence_bucket_counts,
+        confidence_bucket_distribution=confidence_bucket_distribution,
+        runs_with_injection=runs_with_injection,
+        runs_with_retrieved_lessons=runs_with_retrieved_lessons,
+        suppressed_injection_runs=suppressed_injection_runs,
+        injection_usage_rate=round(runs_with_injection / total, 4),
+        total_injected_lessons=total_injected_lessons,
+        average_injected_lessons_per_run=round(total_injected_lessons / total, 3),
+        rollout_mode_counts=rollout_mode_counts,
     )
 
 
@@ -431,6 +523,30 @@ def render_shadow_md(
     lines.append(f"- Critical non-regression compliance: `{fmt_pct(current_summary.critical_non_regression_compliance)}`")
     lines.append(f"- Budget compliance: `{fmt_pct(current_summary.budget_compliance)}`")
     lines.append(f"- Evaluator flip rate: `{fmt_pct(current_summary.evaluator_flip_rate)}`")
+    lines.append(
+        f"- Capture coverage: `{fmt_pct(current_summary.capture_coverage_rate)}` "
+        f"(`{current_summary.capture_records_written}/{current_summary.runs_total}` runs with capture artifacts)"
+    )
+    lines.append(
+        "- Confidence bucket distribution: "
+        f"`high={current_summary.confidence_bucket_counts['high']}` "
+        f"`medium={current_summary.confidence_bucket_counts['medium']}` "
+        f"`low={current_summary.confidence_bucket_counts['low']}` "
+        f"`unknown={current_summary.confidence_bucket_counts['unknown']}`"
+    )
+    lines.append(
+        f"- Injection usage rate: `{fmt_pct(current_summary.injection_usage_rate)}` "
+        f"(`{current_summary.runs_with_injection}/{current_summary.runs_total}` runs, "
+        f"total lessons `{current_summary.total_injected_lessons}`, "
+        f"suppressed-by-controls runs `{current_summary.suppressed_injection_runs}`)"
+    )
+    lines.append(
+        "- Rollout mode distribution: "
+        f"`active={current_summary.rollout_mode_counts['active']}` "
+        f"`observe_only={current_summary.rollout_mode_counts['observe_only']}` "
+        f"`off={current_summary.rollout_mode_counts['off']}` "
+        f"`other={current_summary.rollout_mode_counts['other']}`"
+    )
     lines.append("")
 
     lines.append("## Run log")
@@ -517,6 +633,12 @@ def render_readout_md(
     lines.append(
         f"- Budget compliance: `{fmt_pct(current_summary.budget_compliance)}` (target: `>=95.0%`)"
     )
+    lines.append(
+        f"- Capture coverage: `{fmt_pct(current_summary.capture_coverage_rate)}` (target: `>=95.0%`)"
+    )
+    lines.append(
+        f"- Injection usage rate: `{fmt_pct(current_summary.injection_usage_rate)}` (target: pilot-defined; monitor suppression count `{current_summary.suppressed_injection_runs}`)"
+    )
     lines.append("- Reviewer overhead median / p90: `n/a / n/a` (not captured in MVP telemetry yet)")
     lines.append("")
 
@@ -553,6 +675,19 @@ def to_dict(summary: WindowSummary) -> Dict[str, Any]:
         "critical_non_regression_compliance": summary.critical_non_regression_compliance,
         "budget_compliance": summary.budget_compliance,
         "evaluator_flip_rate": summary.evaluator_flip_rate,
+        "capture_records_written": summary.capture_records_written,
+        "capture_coverage_rate": summary.capture_coverage_rate,
+        "auto_capture_enabled_rate": summary.auto_capture_enabled_rate,
+        "auto_apply_enabled_rate": summary.auto_apply_enabled_rate,
+        "confidence_bucket_counts": summary.confidence_bucket_counts,
+        "confidence_bucket_distribution": summary.confidence_bucket_distribution,
+        "runs_with_injection": summary.runs_with_injection,
+        "runs_with_retrieved_lessons": summary.runs_with_retrieved_lessons,
+        "suppressed_injection_runs": summary.suppressed_injection_runs,
+        "injection_usage_rate": summary.injection_usage_rate,
+        "total_injected_lessons": summary.total_injected_lessons,
+        "average_injected_lessons_per_run": summary.average_injected_lessons_per_run,
+        "rollout_mode_counts": summary.rollout_mode_counts,
     }
 
 
@@ -709,6 +844,13 @@ def main() -> int:
                 "confidence_bucket": r.confidence_bucket,
                 "evidence_completeness_score": r.evidence_completeness_score,
                 "candidate_count": r.candidate_count,
+                "capture_record_present": r.capture_record_present,
+                "rollout_mode": r.rollout_mode,
+                "auto_capture_enabled": r.auto_capture_enabled,
+                "auto_apply_enabled": r.auto_apply_enabled,
+                "injected_lesson_count": r.injected_lesson_count,
+                "retrieved_lesson_count": r.retrieved_lesson_count,
+                "injection_suppressed": r.injection_suppressed,
                 "tokens_used": r.tokens_used,
                 "finished_at": r.finished_at.isoformat().replace("+00:00", "Z"),
             }
@@ -728,6 +870,10 @@ def main() -> int:
         f"- Decision: `{decision}`",
         f"- Critical non-regression compliance: `{fmt_pct(current_summary.critical_non_regression_compliance)}`",
         f"- Budget compliance: `{fmt_pct(current_summary.budget_compliance)}`",
+        f"- Capture coverage: `{fmt_pct(current_summary.capture_coverage_rate)}` ({current_summary.capture_records_written}/{current_summary.runs_total})",
+        f"- Confidence buckets: `high={current_summary.confidence_bucket_counts['high']}` `medium={current_summary.confidence_bucket_counts['medium']}` `low={current_summary.confidence_bucket_counts['low']}` `unknown={current_summary.confidence_bucket_counts['unknown']}`",
+        f"- Injection usage: `{fmt_pct(current_summary.injection_usage_rate)}` ({current_summary.runs_with_injection}/{current_summary.runs_total})",
+        f"- Injection suppressed by controls: `{current_summary.suppressed_injection_runs}`",
         f"- Event envelope errors: `{len(event_errors)}`",
         "",
     ]
@@ -776,6 +922,7 @@ def main() -> int:
             queue_lines.append(
                 f"- `{r.run_id}` | profile `{r.profile_id}` | confidence `{confidence_str}` (`{bucket_str}`)"
                 f" | evidence completeness `{completeness_str}` | candidates `{r.candidate_count}`"
+                f" | rollout `{r.rollout_mode}` | injected `{r.injected_lesson_count}`"
                 f" | finished `{r.finished_at.isoformat().replace('+00:00', 'Z')}`"
             )
     queue_lines.append("")

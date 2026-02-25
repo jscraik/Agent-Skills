@@ -13,6 +13,13 @@ Daily operator artifacts for recursive loop health monitoring.
 - confidence score + confidence bucket
 - evidence completeness score
 - candidate lesson count
+- rollout mode + injected lesson count
+
+`daily-skill-health.md` should include:
+- capture coverage (`capture_record` written / total runs)
+- confidence bucket counts (`high|medium|low|unknown`)
+- injection usage rate (runs with injected lessons / total runs)
+- suppression count (runs where retrieval occurred but injection was disabled by controls)
 
 ## Minimum event envelope
 

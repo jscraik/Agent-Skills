@@ -229,4 +229,5 @@ Optional dry-run checks once implementation starts:
 - [x] T9: Persist injected lesson attribution in run artifacts
 - [x] T10: Add global and per-skill kill switches for auto-capture/auto-apply
 - [x] T11: Add rollout modes (off, observe_only, active) and pilot-safe defaults
-- [ ] T12+: Remaining tasks pending next execution batch
+- [x] T12: Extend telemetry dashboards and daily reports for live auto-learning metrics
+- [ ] T13+: Remaining tasks pending next execution batch
