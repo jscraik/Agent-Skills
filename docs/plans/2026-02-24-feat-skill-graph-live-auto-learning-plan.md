@@ -224,4 +224,7 @@ Optional dry-run checks once implementation starts:
 - [x] T4: Implement confidence scoring contract and calibration buckets
 - [x] T5: Generate lesson candidates from advice/implementation/outcome evidence
 - [x] T6: Extend promotion queue artifacts with confidence and evidence completeness fields
-- [ ] T7+: Remaining tasks pending next execution batch
+- [x] T7: Implement start-of-run retrieval and scoped lesson injection
+- [x] T8: Add confidence-aware ranking with low-confidence warning/down-rank behavior
+- [x] T9: Persist injected lesson attribution in run artifacts
+- [ ] T10+: Remaining tasks pending next execution batch

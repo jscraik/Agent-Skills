@@ -86,6 +86,68 @@ class RecursiveLoopCaptureTests(unittest.TestCase):
         self.assertEqual(evidence["run_id"], run_obj["run_id"])
         self.assertEqual(candidates["items"], [])
 
+    def test_start_of_run_retrieval_ranking_and_injection_attribution(self) -> None:
+        lessons_dir = Path(tempfile.mkdtemp(prefix="lessons-test-"))
+        lessons_file = lessons_dir / "canonical-lessons.jsonl"
+        rows = [
+            {
+                "schema_version": "1.0",
+                "lesson_id": "lesson_ui_high",
+                "scope_skill": "ui-ux-creative-coding",
+                "scope_profile": "ui",
+                "status": "active",
+                "effective_from": "2026-02-24T10:00:00Z",
+                "confidence": 0.9,
+            },
+            {
+                "schema_version": "1.0",
+                "lesson_id": "lesson_ui_low",
+                "scope_skill": "ui-ux-creative-coding",
+                "scope_profile": "ui",
+                "status": "active",
+                "effective_from": "2026-02-24T09:00:00Z",
+                "confidence": 0.4,
+            },
+            {
+                "schema_version": "1.0",
+                "lesson_id": "lesson_other_scope",
+                "scope_skill": "interface-craft",
+                "scope_profile": "ui",
+                "status": "active",
+                "effective_from": "2026-02-24T11:00:00Z",
+                "confidence": 0.95,
+            },
+        ]
+        lessons_file.write_text("".join(json.dumps(r) + "\n" for r in rows), encoding="utf-8")
+
+        returncode, run_dir = self._run_loop(
+            "--lessons-jsonl",
+            str(lessons_file),
+            "--max-injected-lessons",
+            "2",
+            "--low-confidence-threshold",
+            "0.6",
+        )
+        self.assertIn(returncode, {0, 2, 3, 4, 5})
+
+        run_obj = json.loads((run_dir / "run.json").read_text(encoding="utf-8"))
+        capture = json.loads((run_dir / "capture_record.json").read_text(encoding="utf-8"))
+        promotion = json.loads((run_dir / "promotion_decision.json").read_text(encoding="utf-8"))
+
+        injected = run_obj.get("injected_lessons", [])
+        self.assertEqual(len(injected), 2)
+        self.assertEqual(injected[0]["lesson_id"], "lesson_ui_high")
+        self.assertEqual(injected[1]["lesson_id"], "lesson_ui_low")
+        self.assertFalse(bool(injected[0]["low_confidence_flag"]))
+        self.assertTrue(bool(injected[1]["low_confidence_flag"]))
+        self.assertEqual(injected[1]["warning"], "low_confidence_downranked")
+
+        self.assertEqual(
+            promotion.get("injected_lesson_ids", []),
+            [item["lesson_id"] for item in injected],
+        )
+        self.assertEqual(capture.get("injected_lessons", {}).get("count"), 2)
+
 
 if __name__ == "__main__":
     unittest.main()

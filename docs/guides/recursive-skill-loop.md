@@ -24,6 +24,9 @@ python3 utilities/skill-creator/scripts/recursive_skill_loop.py \
   --objective "Improve UI skill response quality for traceable, safe outputs" \
   --out-root artifacts/skill-graphs/runs \
   --run-owner recursive-loop-operator \
+  --lessons-jsonl artifacts/skill-graphs/lessons/canonical-lessons.jsonl \
+  --max-injected-lessons 3 \
+  --low-confidence-threshold 0.6 \
   --feedback-outcome worked \
   --feedback-note "Output was concise and directly actionable" \
   --kill-switch-file artifacts/skill-graphs/controls/kill-switch.txt \
@@ -52,8 +55,12 @@ A run directory with:
 - `promotion_decision.json` (draft decision artifact)
 - `capture_record.json` (invocation envelope + output summary + feedback)
 - `evidence_packet.json` (assembled events/logs/traces/session/check signals)
+- `lesson_candidates.json` (draft candidate lessons derived from advice + implementation + outcome evidence)
 - `events.jsonl` (always-on event stream)
 - `run_blocker.json` / `rollback_recommendation.json` on blocked or kill-switch paths
+
+Start-of-run retrieval uses canonical lessons from `--lessons-jsonl` filtered by `{scope_skill, scope_profile}`.
+Low-confidence lessons are retained but down-ranked and flagged in injected lesson attribution.
 
 Optional debug traces are written only when `--emit-debug-artifacts` is set and stored under `run/debug/`.
 

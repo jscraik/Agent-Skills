@@ -43,6 +43,21 @@ evidence:
   evidence_packet_id: string
   evidence_packet_path: string
   completeness: object
+confidence:
+  score: float                        # 0..1
+  bucket: string                      # high|medium|low
+  calibration_bucket: string
+candidate_lessons:
+  count: int
+  top_candidate_id: string
+injected_lessons:
+  count: int
+  items:
+    - lesson_id: string
+      status: string
+      confidence: float
+      low_confidence_flag: bool
+      warning: string
 ```
 
 ## Feedback contract
@@ -97,6 +112,29 @@ evidence:
       "checks": true,
       "score": 0.8
     }
+  },
+  "confidence": {
+    "score": 0.84,
+    "bucket": "high",
+    "calibration_bucket": "C1_high_confidence",
+    "quality_uplift": 0.08
+  },
+  "candidate_lessons": {
+    "count": 1,
+    "top_candidate_id": "candidate_3f95baf2e4ab"
+  },
+  "injected_lessons": {
+    "count": 1,
+    "items": [
+      {
+        "lesson_id": "lesson_ui_20260220_001",
+        "status": "active",
+        "confidence": 0.82,
+        "low_confidence_flag": false,
+        "warning": "",
+        "ranking_score": 50.82
+      }
+    ]
   }
 }
 ```

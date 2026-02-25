@@ -10,6 +10,7 @@ Canonical artifacts written per run:
 - promotion_decision.json
 - capture_record.json
 - evidence_packet.json
+- lesson_candidates.json
 
 Optional debug artifacts (disabled by default):
 - debug/events.jsonl
@@ -45,6 +46,13 @@ STOP_REASONS = {
 }
 
 FEEDBACK_OUTCOMES = {"worked", "partly", "didnt_work"}
+LESSON_STATUS_PRIORITY = {
+    "active": 5,
+    "promoted": 4,
+    "superseded": 3,
+    "deprecated": 1,
+    "revoked": 0,
+}
 
 BLOCKER_CODES = {
     "run_rollforward_blocked",
@@ -396,6 +404,108 @@ def build_lesson_candidates(
         ),
     }
     return [candidate]
+
+
+def parse_lesson_effective_from(value: Any) -> float:
+    raw = str(value or "").strip()
+    if not raw:
+        return 0.0
+    try:
+        return datetime.fromisoformat(raw.replace("Z", "+00:00")).timestamp()
+    except Exception:
+        return 0.0
+
+
+def load_canonical_lessons(path: Path) -> List[Dict[str, Any]]:
+    if not path.exists():
+        return []
+    rows: List[Dict[str, Any]] = []
+    for line in path.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            obj = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if isinstance(obj, dict):
+            rows.append(obj)
+    return rows
+
+
+def retrieve_and_rank_lessons(
+    *,
+    profile: Profile,
+    lessons_file: Path,
+    max_lessons: int,
+    low_confidence_threshold: float,
+) -> Dict[str, Any]:
+    all_rows = load_canonical_lessons(lessons_file)
+    scoped: List[Dict[str, Any]] = []
+    for row in all_rows:
+        scope_skill = str(row.get("scope_skill", "")).strip()
+        scope_profile = str(row.get("scope_profile", "")).strip()
+        if scope_skill != profile.scope_skill or scope_profile != profile.scope_profile:
+            continue
+        status = str(row.get("status", "")).strip().lower()
+        if status in {"revoked"}:
+            continue
+        scoped.append(row)
+
+    ranked: List[Dict[str, Any]] = []
+    for row in scoped:
+        lesson_id = str(row.get("lesson_id", "")).strip()
+        status = str(row.get("status", "promoted")).strip().lower() or "promoted"
+        confidence = float(row.get("confidence", 0.0) or 0.0)
+        effective_from_ts = parse_lesson_effective_from(row.get("effective_from"))
+        status_priority = LESSON_STATUS_PRIORITY.get(status, 2)
+        low_confidence = confidence < low_confidence_threshold
+        confidence_adjusted = confidence - (0.15 if low_confidence else 0.0)
+        ranking_score = round(status_priority * 10.0 + confidence_adjusted, 4)
+        ranked.append(
+            {
+                "lesson_id": lesson_id,
+                "status": status,
+                "confidence": round(confidence, 3),
+                "status_priority": status_priority,
+                "effective_from": str(row.get("effective_from", "")),
+                "effective_from_ts": effective_from_ts,
+                "low_confidence_flag": low_confidence,
+                "warning": (
+                    "low_confidence_downranked" if low_confidence else ""
+                ),
+                "ranking_score": ranking_score,
+            }
+        )
+
+    ranked.sort(
+        key=lambda x: (
+            float(x["ranking_score"]),
+            float(x["effective_from_ts"]),
+            str(x["lesson_id"]),
+        ),
+        reverse=True,
+    )
+    selected = ranked[: max(0, max_lessons)]
+    injection_text = ""
+    if selected:
+        lines = ["[Injected canonical lessons]"]
+        for item in selected:
+            warn = f" ⚠ {item['warning']}" if item["warning"] else ""
+            lines.append(
+                f"- lesson_id={item['lesson_id']} status={item['status']} confidence={item['confidence']:.3f}{warn}"
+            )
+        injection_text = "\n".join(lines)
+
+    return {
+        "schema_version": "1.0",
+        "lessons_file": str(lessons_file),
+        "scoped_count": len(scoped),
+        "selected_count": len(selected),
+        "low_confidence_threshold": low_confidence_threshold,
+        "selected": selected,
+        "injection_text": injection_text,
+    }
 
 
 def load_profile(path: Path) -> Profile:
@@ -752,6 +862,14 @@ def run_loop(args: argparse.Namespace) -> int:
     objective_hash = sha256_text(args.objective)
     feedback_payload = normalize_feedback(args.feedback_outcome, args.feedback_note)
     invocation_id = sha256_text(f"{objective_hash}:{args.actor_id}:{created_at}")[:16]
+    lessons_file = Path(args.lessons_jsonl).expanduser().resolve()
+    injection_context = retrieve_and_rank_lessons(
+        profile=profile,
+        lessons_file=lessons_file,
+        max_lessons=args.max_injected_lessons,
+        low_confidence_threshold=args.low_confidence_threshold,
+    )
+    injected_lessons = injection_context["selected"]
 
     max_iterations = args.max_iterations or profile.thresholds.max_iterations
     max_elapsed_ms = args.max_elapsed_ms or profile.thresholds.max_elapsed_ms
@@ -792,7 +910,11 @@ def run_loop(args: argparse.Namespace) -> int:
         severity="info",
         terminal_status=None,
         stop_reason=None,
-        extra={"run_owner": run_owner, "idempotency_key": idempotency_key},
+        extra={
+            "run_owner": run_owner,
+            "idempotency_key": idempotency_key,
+            "injected_lesson_ids": [item["lesson_id"] for item in injected_lessons],
+        },
     )
     write_jsonl(iteration_journal_path, [])
 
@@ -862,6 +984,10 @@ def run_loop(args: argparse.Namespace) -> int:
             "candidate_lessons": {
                 "count": len(lesson_candidates),
                 "top_candidate_id": lesson_candidates[0]["candidate_id"] if lesson_candidates else "",
+            },
+            "injected_lessons": {
+                "count": len(injected_lessons),
+                "items": injected_lessons,
             },
         }
         write_json(out_dir / "capture_record.json", capture_record)
@@ -948,6 +1074,13 @@ def run_loop(args: argparse.Namespace) -> int:
             "lock_path": str(lock_path),
             "kill_switch_file": str(kill_switch_path) if kill_switch_path else "",
             "rollback_required_file": str(rollback_required_path) if rollback_required_path else "",
+            "injection_summary": {
+                "lessons_file": str(lessons_file),
+                "selected_count": len(injected_lessons),
+                "selected_lesson_ids": [item["lesson_id"] for item in injected_lessons],
+                "low_confidence_threshold": args.low_confidence_threshold,
+            },
+            "injected_lessons": injected_lessons,
             "run_blocker": blocker,
         }
         promotion_decision = {
@@ -971,6 +1104,7 @@ def run_loop(args: argparse.Namespace) -> int:
                 "evaluator_version": profile.evaluator_version,
                 "iteration_ids": [],
             },
+            "injected_lesson_ids": [item["lesson_id"] for item in injected_lessons],
             "run_blocker": blocker,
         }
         write_json(out_dir / "run.json", run_obj)
@@ -1088,6 +1222,8 @@ def run_loop(args: argparse.Namespace) -> int:
     journal_iteration_ids: List[int] = []
     iterations_completed = 0
     candidate = args.objective.strip()
+    if injection_context["injection_text"]:
+        candidate = candidate + "\n\n" + injection_context["injection_text"]
     total_tokens = 0
     consecutive_passes = 0
     no_improvement_count = 0
@@ -1400,6 +1536,13 @@ def run_loop(args: argparse.Namespace) -> int:
             if blocker_code
             else None
         ),
+        "injection_summary": {
+            "lessons_file": str(lessons_file),
+            "selected_count": len(injected_lessons),
+            "selected_lesson_ids": [item["lesson_id"] for item in injected_lessons],
+            "low_confidence_threshold": args.low_confidence_threshold,
+        },
+        "injected_lessons": injected_lessons,
     }
 
     promotion_decision = {
@@ -1423,6 +1566,7 @@ def run_loop(args: argparse.Namespace) -> int:
             "evaluator_version": profile.evaluator_version,
             "iteration_ids": journal_iteration_ids,
         },
+        "injected_lesson_ids": [item["lesson_id"] for item in injected_lessons],
     }
 
     summary_md = (
@@ -1475,6 +1619,23 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--max-iterations", type=int, help="Override max iterations")
     p.add_argument("--max-elapsed-ms", type=int, help="Override elapsed budget")
     p.add_argument("--max-tokens", type=int, help="Override token budget")
+    p.add_argument(
+        "--lessons-jsonl",
+        default="artifacts/skill-graphs/lessons/canonical-lessons.jsonl",
+        help="Path to canonical lessons JSONL for start-of-run retrieval/injection",
+    )
+    p.add_argument(
+        "--max-injected-lessons",
+        type=int,
+        default=3,
+        help="Maximum number of scoped lessons to inject at run start",
+    )
+    p.add_argument(
+        "--low-confidence-threshold",
+        type=float,
+        default=0.6,
+        help="Confidence threshold below which lessons are down-ranked and flagged",
+    )
     p.add_argument(
         "--feedback-outcome",
         choices=sorted(FEEDBACK_OUTCOMES),

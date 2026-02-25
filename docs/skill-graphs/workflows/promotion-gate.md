@@ -86,6 +86,7 @@ Workflow: `.github/workflows/recursive-promotion-gate.yml`.
 - confidence contract fields (`confidence.score`, `confidence.bucket`, `confidence.calibration_bucket`)
 - evidence completeness linkage (`evidence_packet.evidence_packet_id`, `evidence_packet.completeness_score`)
 - draft candidate payload(s) in `lesson_candidates[]` for queueing/reviewer triage
+- retrieval attribution in `injected_lesson_ids[]` for traceability
 
 Approved promotions emit a deduplicated `promotion_approved` debug event in `run/debug/events.jsonl`.
 
