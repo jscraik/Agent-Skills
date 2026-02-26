@@ -25,16 +25,16 @@ Trigger kill switch if any occur:
 Runtime controls are file-based and fail-closed:
 
 1. Global emergency controls:
-   - `controls/kill-switch.txt`
-   - `controls/rollback-required.txt`
+   - `artifacts/skill-graphs/controls/kill-switch.txt`
+   - `artifacts/skill-graphs/controls/rollback-required.txt`
 2. Rollout mode:
-   - `controls/rollout-mode.txt` with `off | observe_only | active`
+   - `artifacts/skill-graphs/controls/rollout-mode.txt` with `off | observe_only | active`
 3. Feature kill switches:
-   - `controls/auto_capture.disabled`
-   - `controls/auto_apply.disabled`
+   - `artifacts/skill-graphs/controls/auto_capture.disabled`
+   - `artifacts/skill-graphs/controls/auto_apply.disabled`
 4. Per-skill kill switches:
-   - `controls/skills/<scope_skill>/auto_capture.disabled`
-   - `controls/skills/<scope_skill>/auto_apply.disabled`
+   - `artifacts/skill-graphs/controls/skills/<scope_skill>/auto_capture.disabled`
+   - `artifacts/skill-graphs/controls/skills/<scope_skill>/auto_apply.disabled`
 
 ## Mandatory pre-run invocation check
 

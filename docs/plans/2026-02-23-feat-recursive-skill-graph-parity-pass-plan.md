@@ -5,7 +5,7 @@ date: 2026-02-23
 deepened_on: 2026-02-23
 deepened_source: manual_parallel_research_and_agent_feedback
 brainstorm: docs/brainstorms/2026-02-23-skill-graph-recursive-loop-parity-pass-brainstorm.md
-status: draft
+status: completed
 affected_features:
   - recursive skill loop
   - promotion governance
@@ -54,6 +54,7 @@ affected_features:
 - [4) Risks and checks](#4-risks-and-checks)
 - [5) Execution order and dependencies](#5-execution-order-and-dependencies)
 - [6) Verification command set](#6-verification-command-set)
+- [7) Remediation closeout status (2026-02-26)](#7-remediation-closeout-status-2026-02-26)
 
 ## 0) Outcome → opportunities → solution
 
@@ -487,3 +488,15 @@ tasks:
 - Validation script returns strict-mode pass.
 - Evidence bundle produced (event + report + promotion decision).
 - Replay/blocked fixture checks confirm no canonical mutation on reject paths and hard-fail on wrong reviewer.
+
+## 7) Remediation closeout status (2026-02-26)
+
+- [x] T1: Baseline parity manifest collection added (`scripts/verify_recursive_skill_graph_artifacts.py`) and run directory classification implemented.
+- [x] T2: Canonical control/lesson roots are initialized and tracked in-repo with deterministic defaults and schema metadata.
+- [x] T3: Non-destructive verifier/repair tooling added (`--dry-run`, `--prune-empty`) with quarantine semantics for legacy/empty run dirs.
+- [x] T4: Validation layer hardened for mandatory telemetry artifacts, blocker-state checks, and schema-specific error codes.
+- [x] T5: CI gate wiring updated for strict per-run artifact checks, including promotion + parity report emission.
+- [x] T6: Shadow reporting now enforces required telemetry output files and validates JSON/JSONL payloads.
+- [x] T7: Docs updated for required control and lesson artifact paths; new closeout status appended to this plan.
+- [x] T8: Regression coverage expanded for bootstrap/parity verification and required-file validation.
+- [x] T9: Closeout execution path completed (dry-run manifest, strict mode smoke checks, and command set execution).

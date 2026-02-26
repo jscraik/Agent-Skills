@@ -1,0 +1,1088 @@
+{
+  "generated_at": "2026-02-26T18:45:22Z",
+  "runs_root": "/Users/jamiecraik/dev/agent-skills/artifacts/skill-graphs/runs",
+  "counts": {
+    "compliant": 0,
+    "missing_mandatory": 37,
+    "legacy_partial": 0,
+    "empty": 0
+  },
+  "total_runs": 37,
+  "run_status_counts": {
+    "compliant": 0,
+    "missing_mandatory": 37,
+    "legacy_partial": 0,
+    "empty": 0
+  },
+  "compliance_rate": 0.0,
+  "runs": [
+    {
+      "run_dir": "artifacts/skill-graphs/runs/run_20260220T144703Z_425b7a",
+      "status": "missing_mandatory",
+      "required_files": [
+        "capture_record.json",
+        "events.jsonl",
+        "evidence_packet.json",
+        "iteration_journal.jsonl",
+        "lesson_candidates.json",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "missing_files": [
+        "capture_record.json",
+        "evidence_packet.json",
+        "lesson_candidates.json",
+        "promotion_decision.json"
+      ],
+      "present_files": [
+        "events.jsonl",
+        "iteration_journal.jsonl",
+        "promotion_decision.template.json",
+        "run.json"
+      ],
+      "promotion_state": null,
+      "auto_capture_enabled": true,
+      "terminal_status": "failed",
+      "stop_reason": "budget_exhausted",
+      "blocker_code": null,
+      "notes": [
+        "terminal_status=failed",
+        "stop_reason=budget_exhausted"
+      ],
+      "event_blocker_codes": []
+    },
+    {
+      "run_dir": "artifacts/skill-graphs/runs/run_20260220T144710Z_425b7a",
+      "status": "missing_mandatory",
+      "required_files": [
+        "capture_record.json",
+        "events.jsonl",
+        "evidence_packet.json",
+        "iteration_journal.jsonl",
+        "lesson_candidates.json",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "missing_files": [
+        "capture_record.json",
+        "evidence_packet.json",
+        "lesson_candidates.json",
+        "promotion_decision.json"
+      ],
+      "present_files": [
+        "events.jsonl",
+        "iteration_journal.jsonl",
+        "promotion_decision.template.json",
+        "run.json"
+      ],
+      "promotion_state": null,
+      "auto_capture_enabled": true,
+      "terminal_status": "passed",
+      "stop_reason": "pass",
+      "blocker_code": null,
+      "notes": [
+        "terminal_status=passed",
+        "stop_reason=pass"
+      ],
+      "event_blocker_codes": []
+    },
+    {
+      "run_dir": "artifacts/skill-graphs/runs/run_20260220T144736Z_425b7a",
+      "status": "missing_mandatory",
+      "required_files": [
+        "capture_record.json",
+        "events.jsonl",
+        "evidence_packet.json",
+        "iteration_journal.jsonl",
+        "lesson_candidates.json",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "missing_files": [
+        "capture_record.json",
+        "evidence_packet.json",
+        "lesson_candidates.json",
+        "promotion_decision.json"
+      ],
+      "present_files": [
+        "events.jsonl",
+        "iteration_journal.jsonl",
+        "promotion_decision.template.json",
+        "run.json"
+      ],
+      "promotion_state": null,
+      "auto_capture_enabled": true,
+      "terminal_status": "passed",
+      "stop_reason": "pass",
+      "blocker_code": null,
+      "notes": [
+        "terminal_status=passed",
+        "stop_reason=pass"
+      ],
+      "event_blocker_codes": []
+    },
+    {
+      "run_dir": "artifacts/skill-graphs/runs/run_20260220T150021Z_518880",
+      "status": "missing_mandatory",
+      "required_files": [
+        "capture_record.json",
+        "events.jsonl",
+        "evidence_packet.json",
+        "iteration_journal.jsonl",
+        "lesson_candidates.json",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "missing_files": [
+        "capture_record.json",
+        "evidence_packet.json",
+        "lesson_candidates.json"
+      ],
+      "present_files": [
+        "events.jsonl",
+        "iteration_journal.jsonl",
+        "promotion_decision.json",
+        "promotion_decision.template.json",
+        "run.json"
+      ],
+      "promotion_state": "approved",
+      "auto_capture_enabled": true,
+      "terminal_status": "passed",
+      "stop_reason": "pass",
+      "blocker_code": null,
+      "notes": [
+        "terminal_status=passed",
+        "stop_reason=pass"
+      ],
+      "event_blocker_codes": []
+    },
+    {
+      "run_dir": "artifacts/skill-graphs/runs/run_20260220T150021Z_82ecf7",
+      "status": "missing_mandatory",
+      "required_files": [
+        "capture_record.json",
+        "events.jsonl",
+        "evidence_packet.json",
+        "iteration_journal.jsonl",
+        "lesson_candidates.json",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "missing_files": [
+        "capture_record.json",
+        "evidence_packet.json",
+        "lesson_candidates.json",
+        "promotion_decision.json"
+      ],
+      "present_files": [
+        "events.jsonl",
+        "iteration_journal.jsonl",
+        "promotion_decision.template.json",
+        "run.json"
+      ],
+      "promotion_state": null,
+      "auto_capture_enabled": true,
+      "terminal_status": "passed",
+      "stop_reason": "pass",
+      "blocker_code": null,
+      "notes": [
+        "terminal_status=passed",
+        "stop_reason=pass"
+      ],
+      "event_blocker_codes": []
+    },
+    {
+      "run_dir": "artifacts/skill-graphs/runs/run_20260220T150021Z_9b592b",
+      "status": "missing_mandatory",
+      "required_files": [
+        "capture_record.json",
+        "events.jsonl",
+        "evidence_packet.json",
+        "iteration_journal.jsonl",
+        "lesson_candidates.json",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "missing_files": [
+        "capture_record.json",
+        "evidence_packet.json",
+        "lesson_candidates.json",
+        "promotion_decision.json"
+      ],
+      "present_files": [
+        "events.jsonl",
+        "iteration_journal.jsonl",
+        "promotion_decision.template.json",
+        "run.json"
+      ],
+      "promotion_state": null,
+      "auto_capture_enabled": true,
+      "terminal_status": "passed",
+      "stop_reason": "pass",
+      "blocker_code": null,
+      "notes": [
+        "terminal_status=passed",
+        "stop_reason=pass"
+      ],
+      "event_blocker_codes": []
+    },
+    {
+      "run_dir": "artifacts/skill-graphs/runs/run_20260220T150021Z_bb9acb",
+      "status": "missing_mandatory",
+      "required_files": [
+        "capture_record.json",
+        "events.jsonl",
+        "evidence_packet.json",
+        "iteration_journal.jsonl",
+        "lesson_candidates.json",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "missing_files": [
+        "capture_record.json",
+        "evidence_packet.json",
+        "lesson_candidates.json",
+        "promotion_decision.json"
+      ],
+      "present_files": [
+        "events.jsonl",
+        "iteration_journal.jsonl",
+        "promotion_decision.template.json",
+        "run.json"
+      ],
+      "promotion_state": null,
+      "auto_capture_enabled": true,
+      "terminal_status": "passed",
+      "stop_reason": "pass",
+      "blocker_code": null,
+      "notes": [
+        "terminal_status=passed",
+        "stop_reason=pass"
+      ],
+      "event_blocker_codes": []
+    },
+    {
+      "run_dir": "artifacts/skill-graphs/runs/run_20260220T195545Z_8799c2",
+      "status": "missing_mandatory",
+      "required_files": [
+        "capture_record.json",
+        "events.jsonl",
+        "evidence_packet.json",
+        "iteration_journal.jsonl",
+        "lesson_candidates.json",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "missing_files": [
+        "capture_record.json",
+        "evidence_packet.json",
+        "lesson_candidates.json"
+      ],
+      "present_files": [
+        "events.jsonl",
+        "iteration_journal.jsonl",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "promotion_state": "draft",
+      "auto_capture_enabled": true,
+      "terminal_status": "passed",
+      "stop_reason": "pass",
+      "blocker_code": null,
+      "notes": [
+        "terminal_status=passed",
+        "stop_reason=pass"
+      ],
+      "event_blocker_codes": []
+    },
+    {
+      "run_dir": "artifacts/skill-graphs/runs/run_20260224T175736Z_331545",
+      "status": "missing_mandatory",
+      "required_files": [
+        "events.jsonl",
+        "iteration_journal.jsonl",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "missing_files": [
+        "iteration_journal.jsonl",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "present_files": [
+        "events.jsonl"
+      ],
+      "promotion_state": null,
+      "auto_capture_enabled": null,
+      "terminal_status": null,
+      "stop_reason": null,
+      "blocker_code": null,
+      "notes": [
+        "run.json is missing or unreadable"
+      ],
+      "event_blocker_codes": []
+    },
+    {
+      "run_dir": "artifacts/skill-graphs/runs/run_20260224T175736Z_518880",
+      "status": "missing_mandatory",
+      "required_files": [
+        "events.jsonl",
+        "iteration_journal.jsonl",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "missing_files": [
+        "iteration_journal.jsonl",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "present_files": [
+        "events.jsonl"
+      ],
+      "promotion_state": null,
+      "auto_capture_enabled": null,
+      "terminal_status": null,
+      "stop_reason": null,
+      "blocker_code": null,
+      "notes": [
+        "run.json is missing or unreadable"
+      ],
+      "event_blocker_codes": []
+    },
+    {
+      "run_dir": "artifacts/skill-graphs/runs/run_20260224T175736Z_5ca1db",
+      "status": "missing_mandatory",
+      "required_files": [
+        "events.jsonl",
+        "iteration_journal.jsonl",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "missing_files": [
+        "iteration_journal.jsonl",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "present_files": [
+        "events.jsonl"
+      ],
+      "promotion_state": null,
+      "auto_capture_enabled": null,
+      "terminal_status": null,
+      "stop_reason": null,
+      "blocker_code": null,
+      "notes": [
+        "run.json is missing or unreadable"
+      ],
+      "event_blocker_codes": []
+    },
+    {
+      "run_dir": "artifacts/skill-graphs/runs/run_20260224T175736Z_82ecf7",
+      "status": "missing_mandatory",
+      "required_files": [
+        "events.jsonl",
+        "iteration_journal.jsonl",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "missing_files": [
+        "iteration_journal.jsonl",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "present_files": [
+        "events.jsonl"
+      ],
+      "promotion_state": null,
+      "auto_capture_enabled": null,
+      "terminal_status": null,
+      "stop_reason": null,
+      "blocker_code": null,
+      "notes": [
+        "run.json is missing or unreadable"
+      ],
+      "event_blocker_codes": []
+    },
+    {
+      "run_dir": "artifacts/skill-graphs/runs/run_20260224T175736Z_8786fa",
+      "status": "missing_mandatory",
+      "required_files": [
+        "events.jsonl",
+        "iteration_journal.jsonl",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "missing_files": [
+        "iteration_journal.jsonl",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "present_files": [
+        "events.jsonl"
+      ],
+      "promotion_state": null,
+      "auto_capture_enabled": null,
+      "terminal_status": null,
+      "stop_reason": null,
+      "blocker_code": null,
+      "notes": [
+        "run.json is missing or unreadable"
+      ],
+      "event_blocker_codes": []
+    },
+    {
+      "run_dir": "artifacts/skill-graphs/runs/run_20260224T175736Z_9b592b",
+      "status": "missing_mandatory",
+      "required_files": [
+        "events.jsonl",
+        "iteration_journal.jsonl",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "missing_files": [
+        "iteration_journal.jsonl",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "present_files": [
+        "events.jsonl"
+      ],
+      "promotion_state": null,
+      "auto_capture_enabled": null,
+      "terminal_status": null,
+      "stop_reason": null,
+      "blocker_code": null,
+      "notes": [
+        "run.json is missing or unreadable"
+      ],
+      "event_blocker_codes": []
+    },
+    {
+      "run_dir": "artifacts/skill-graphs/runs/run_20260224T175736Z_bb9acb",
+      "status": "missing_mandatory",
+      "required_files": [
+        "events.jsonl",
+        "iteration_journal.jsonl",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "missing_files": [
+        "iteration_journal.jsonl",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "present_files": [
+        "events.jsonl"
+      ],
+      "promotion_state": null,
+      "auto_capture_enabled": null,
+      "terminal_status": null,
+      "stop_reason": null,
+      "blocker_code": null,
+      "notes": [
+        "run.json is missing or unreadable"
+      ],
+      "event_blocker_codes": []
+    },
+    {
+      "run_dir": "artifacts/skill-graphs/runs/run_20260224T175736Z_e5ee22",
+      "status": "missing_mandatory",
+      "required_files": [
+        "events.jsonl",
+        "iteration_journal.jsonl",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "missing_files": [
+        "iteration_journal.jsonl",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "present_files": [
+        "events.jsonl"
+      ],
+      "promotion_state": null,
+      "auto_capture_enabled": null,
+      "terminal_status": null,
+      "stop_reason": null,
+      "blocker_code": null,
+      "notes": [
+        "run.json is missing or unreadable"
+      ],
+      "event_blocker_codes": []
+    },
+    {
+      "run_dir": "artifacts/skill-graphs/runs/run_20260226T171034662912Z_83cb58_213e8147",
+      "status": "missing_mandatory",
+      "required_files": [
+        "events.jsonl",
+        "iteration_journal.jsonl",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "missing_files": [
+        "iteration_journal.jsonl",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "present_files": [
+        "events.jsonl"
+      ],
+      "promotion_state": null,
+      "auto_capture_enabled": null,
+      "terminal_status": null,
+      "stop_reason": null,
+      "blocker_code": null,
+      "notes": [
+        "run.json is missing or unreadable"
+      ],
+      "event_blocker_codes": []
+    },
+    {
+      "run_dir": "artifacts/skill-graphs/runs/run_20260226T171034705740Z_0f1548_213f68e1",
+      "status": "missing_mandatory",
+      "required_files": [
+        "events.jsonl",
+        "iteration_journal.jsonl",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "missing_files": [
+        "iteration_journal.jsonl",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "present_files": [
+        "events.jsonl"
+      ],
+      "promotion_state": null,
+      "auto_capture_enabled": null,
+      "terminal_status": null,
+      "stop_reason": null,
+      "blocker_code": null,
+      "notes": [
+        "run.json is missing or unreadable"
+      ],
+      "event_blocker_codes": []
+    },
+    {
+      "run_dir": "artifacts/skill-graphs/runs/run_20260226T171034749921Z_181f31_21400397",
+      "status": "missing_mandatory",
+      "required_files": [
+        "events.jsonl",
+        "iteration_journal.jsonl",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "missing_files": [
+        "iteration_journal.jsonl",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "present_files": [
+        "events.jsonl"
+      ],
+      "promotion_state": null,
+      "auto_capture_enabled": null,
+      "terminal_status": null,
+      "stop_reason": null,
+      "blocker_code": null,
+      "notes": [
+        "run.json is missing or unreadable"
+      ],
+      "event_blocker_codes": []
+    },
+    {
+      "run_dir": "artifacts/skill-graphs/runs/run_20260226T171034792213Z_2f18b9_21410f9b",
+      "status": "missing_mandatory",
+      "required_files": [
+        "events.jsonl",
+        "iteration_journal.jsonl",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "missing_files": [
+        "iteration_journal.jsonl",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "present_files": [
+        "events.jsonl"
+      ],
+      "promotion_state": null,
+      "auto_capture_enabled": null,
+      "terminal_status": null,
+      "stop_reason": null,
+      "blocker_code": null,
+      "notes": [
+        "run.json is missing or unreadable"
+      ],
+      "event_blocker_codes": []
+    },
+    {
+      "run_dir": "artifacts/skill-graphs/runs/run_20260226T171034837284Z_e3a8be_214254d5",
+      "status": "missing_mandatory",
+      "required_files": [
+        "events.jsonl",
+        "iteration_journal.jsonl",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "missing_files": [
+        "iteration_journal.jsonl",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "present_files": [
+        "events.jsonl"
+      ],
+      "promotion_state": null,
+      "auto_capture_enabled": null,
+      "terminal_status": null,
+      "stop_reason": null,
+      "blocker_code": null,
+      "notes": [
+        "run.json is missing or unreadable"
+      ],
+      "event_blocker_codes": []
+    },
+    {
+      "run_dir": "artifacts/skill-graphs/runs/run_20260226T171034887760Z_2d4047_2144e0f0",
+      "status": "missing_mandatory",
+      "required_files": [
+        "events.jsonl",
+        "iteration_journal.jsonl",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "missing_files": [
+        "iteration_journal.jsonl",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "present_files": [
+        "events.jsonl"
+      ],
+      "promotion_state": null,
+      "auto_capture_enabled": null,
+      "terminal_status": null,
+      "stop_reason": null,
+      "blocker_code": null,
+      "notes": [
+        "run.json is missing or unreadable"
+      ],
+      "event_blocker_codes": []
+    },
+    {
+      "run_dir": "artifacts/skill-graphs/runs/run_20260226T171034943960Z_cf5698_2145c964",
+      "status": "missing_mandatory",
+      "required_files": [
+        "events.jsonl",
+        "iteration_journal.jsonl",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "missing_files": [
+        "iteration_journal.jsonl",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "present_files": [
+        "events.jsonl"
+      ],
+      "promotion_state": null,
+      "auto_capture_enabled": null,
+      "terminal_status": null,
+      "stop_reason": null,
+      "blocker_code": null,
+      "notes": [
+        "run.json is missing or unreadable"
+      ],
+      "event_blocker_codes": []
+    },
+    {
+      "run_dir": "artifacts/skill-graphs/runs/run_20260226T171034985085Z_18e3f9_214933e4",
+      "status": "missing_mandatory",
+      "required_files": [
+        "events.jsonl",
+        "iteration_journal.jsonl",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "missing_files": [
+        "iteration_journal.jsonl",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "present_files": [
+        "events.jsonl"
+      ],
+      "promotion_state": null,
+      "auto_capture_enabled": null,
+      "terminal_status": null,
+      "stop_reason": null,
+      "blocker_code": null,
+      "notes": [
+        "run.json is missing or unreadable"
+      ],
+      "event_blocker_codes": []
+    },
+    {
+      "run_dir": "artifacts/skill-graphs/runs/run_20260226T171035025129Z_0712e1_214a22b7",
+      "status": "missing_mandatory",
+      "required_files": [
+        "events.jsonl",
+        "iteration_journal.jsonl",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "missing_files": [
+        "iteration_journal.jsonl",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "present_files": [
+        "events.jsonl"
+      ],
+      "promotion_state": null,
+      "auto_capture_enabled": null,
+      "terminal_status": null,
+      "stop_reason": null,
+      "blocker_code": null,
+      "notes": [
+        "run.json is missing or unreadable"
+      ],
+      "event_blocker_codes": []
+    },
+    {
+      "run_dir": "artifacts/skill-graphs/runs/run_20260226T171035065451Z_327cdb_214b6a52",
+      "status": "missing_mandatory",
+      "required_files": [
+        "events.jsonl",
+        "iteration_journal.jsonl",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "missing_files": [
+        "iteration_journal.jsonl",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "present_files": [
+        "events.jsonl"
+      ],
+      "promotion_state": null,
+      "auto_capture_enabled": null,
+      "terminal_status": null,
+      "stop_reason": null,
+      "blocker_code": null,
+      "notes": [
+        "run.json is missing or unreadable"
+      ],
+      "event_blocker_codes": []
+    },
+    {
+      "run_dir": "artifacts/skill-graphs/runs/run_20260226T171035105378Z_4b845e_214c6433",
+      "status": "missing_mandatory",
+      "required_files": [
+        "events.jsonl",
+        "iteration_journal.jsonl",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "missing_files": [
+        "iteration_journal.jsonl",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "present_files": [
+        "events.jsonl"
+      ],
+      "promotion_state": null,
+      "auto_capture_enabled": null,
+      "terminal_status": null,
+      "stop_reason": null,
+      "blocker_code": null,
+      "notes": [
+        "run.json is missing or unreadable"
+      ],
+      "event_blocker_codes": []
+    },
+    {
+      "run_dir": "artifacts/skill-graphs/runs/run_20260226T171035145117Z_2d867d_214d8055",
+      "status": "missing_mandatory",
+      "required_files": [
+        "events.jsonl",
+        "iteration_journal.jsonl",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "missing_files": [
+        "iteration_journal.jsonl",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "present_files": [
+        "events.jsonl"
+      ],
+      "promotion_state": null,
+      "auto_capture_enabled": null,
+      "terminal_status": null,
+      "stop_reason": null,
+      "blocker_code": null,
+      "notes": [
+        "run.json is missing or unreadable"
+      ],
+      "event_blocker_codes": []
+    },
+    {
+      "run_dir": "artifacts/skill-graphs/runs/run_20260226T171439728483Z_9b592b_3e51d322",
+      "status": "missing_mandatory",
+      "required_files": [
+        "events.jsonl",
+        "iteration_journal.jsonl",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "missing_files": [
+        "iteration_journal.jsonl",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "present_files": [
+        "events.jsonl"
+      ],
+      "promotion_state": null,
+      "auto_capture_enabled": null,
+      "terminal_status": null,
+      "stop_reason": null,
+      "blocker_code": null,
+      "notes": [
+        "run.json is missing or unreadable"
+      ],
+      "event_blocker_codes": []
+    },
+    {
+      "run_dir": "artifacts/skill-graphs/runs/run_20260226T171439820489Z_8786fa_3e640051",
+      "status": "missing_mandatory",
+      "required_files": [
+        "events.jsonl",
+        "iteration_journal.jsonl",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "missing_files": [
+        "iteration_journal.jsonl",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "present_files": [
+        "events.jsonl"
+      ],
+      "promotion_state": null,
+      "auto_capture_enabled": null,
+      "terminal_status": null,
+      "stop_reason": null,
+      "blocker_code": null,
+      "notes": [
+        "run.json is missing or unreadable"
+      ],
+      "event_blocker_codes": []
+    },
+    {
+      "run_dir": "artifacts/skill-graphs/runs/run_20260226T171439910572Z_518880_3e6ae292",
+      "status": "missing_mandatory",
+      "required_files": [
+        "events.jsonl",
+        "iteration_journal.jsonl",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "missing_files": [
+        "iteration_journal.jsonl",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "present_files": [
+        "events.jsonl"
+      ],
+      "promotion_state": null,
+      "auto_capture_enabled": null,
+      "terminal_status": null,
+      "stop_reason": null,
+      "blocker_code": null,
+      "notes": [
+        "run.json is missing or unreadable"
+      ],
+      "event_blocker_codes": []
+    },
+    {
+      "run_dir": "artifacts/skill-graphs/runs/run_20260226T171439998828Z_331545_3e6cdb11",
+      "status": "missing_mandatory",
+      "required_files": [
+        "events.jsonl",
+        "iteration_journal.jsonl",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "missing_files": [
+        "iteration_journal.jsonl",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "present_files": [
+        "events.jsonl"
+      ],
+      "promotion_state": null,
+      "auto_capture_enabled": null,
+      "terminal_status": null,
+      "stop_reason": null,
+      "blocker_code": null,
+      "notes": [
+        "run.json is missing or unreadable"
+      ],
+      "event_blocker_codes": []
+    },
+    {
+      "run_dir": "artifacts/skill-graphs/runs/run_20260226T171440087620Z_bb9acb_3e6fbddf",
+      "status": "missing_mandatory",
+      "required_files": [
+        "events.jsonl",
+        "iteration_journal.jsonl",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "missing_files": [
+        "iteration_journal.jsonl",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "present_files": [
+        "events.jsonl"
+      ],
+      "promotion_state": null,
+      "auto_capture_enabled": null,
+      "terminal_status": null,
+      "stop_reason": null,
+      "blocker_code": null,
+      "notes": [
+        "run.json is missing or unreadable"
+      ],
+      "event_blocker_codes": []
+    },
+    {
+      "run_dir": "artifacts/skill-graphs/runs/run_20260226T171440175092Z_5ca1db_3e71dcb4",
+      "status": "missing_mandatory",
+      "required_files": [
+        "events.jsonl",
+        "iteration_journal.jsonl",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "missing_files": [
+        "iteration_journal.jsonl",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "present_files": [
+        "events.jsonl"
+      ],
+      "promotion_state": null,
+      "auto_capture_enabled": null,
+      "terminal_status": null,
+      "stop_reason": null,
+      "blocker_code": null,
+      "notes": [
+        "run.json is missing or unreadable"
+      ],
+      "event_blocker_codes": []
+    },
+    {
+      "run_dir": "artifacts/skill-graphs/runs/run_20260226T171440265063Z_82ecf7_3e74e6fc",
+      "status": "missing_mandatory",
+      "required_files": [
+        "events.jsonl",
+        "iteration_journal.jsonl",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "missing_files": [
+        "iteration_journal.jsonl",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "present_files": [
+        "events.jsonl"
+      ],
+      "promotion_state": null,
+      "auto_capture_enabled": null,
+      "terminal_status": null,
+      "stop_reason": null,
+      "blocker_code": null,
+      "notes": [
+        "run.json is missing or unreadable"
+      ],
+      "event_blocker_codes": []
+    },
+    {
+      "run_dir": "artifacts/skill-graphs/runs/run_20260226T171440352137Z_e5ee22_3e76d9f5",
+      "status": "missing_mandatory",
+      "required_files": [
+        "events.jsonl",
+        "iteration_journal.jsonl",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "missing_files": [
+        "iteration_journal.jsonl",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "present_files": [
+        "events.jsonl"
+      ],
+      "promotion_state": null,
+      "auto_capture_enabled": null,
+      "terminal_status": null,
+      "stop_reason": null,
+      "blocker_code": null,
+      "notes": [
+        "run.json is missing or unreadable"
+      ],
+      "event_blocker_codes": []
+    },
+    {
+      "run_dir": "artifacts/skill-graphs/runs/run_20260226T173403662298Z_83cb58_14467814",
+      "status": "missing_mandatory",
+      "required_files": [
+        "events.jsonl",
+        "iteration_journal.jsonl",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "missing_files": [
+        "iteration_journal.jsonl",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "present_files": [
+        "events.jsonl"
+      ],
+      "promotion_state": null,
+      "auto_capture_enabled": null,
+      "terminal_status": null,
+      "stop_reason": null,
+      "blocker_code": null,
+      "notes": [
+        "run.json is missing or unreadable"
+      ],
+      "event_blocker_codes": []
+    }
+  ],
+  "prune_empty": {
+    "enabled": false,
+    "dry_run": false,
+    "actions": {}
+  },
+  "status": "fail"
+}

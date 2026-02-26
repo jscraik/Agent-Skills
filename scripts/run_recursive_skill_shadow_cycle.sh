@@ -91,10 +91,26 @@ fi
 example_profile="docs/skill-graphs/schemas/examples/ui-skills-profile.example.json"
 loop_script="utilities/skill-creator/scripts/recursive_skill_loop.py"
 report_script="utilities/skill-creator/scripts/build_recursive_skill_shadow_report.py"
+shadow_md="docs/skill-graphs/pilots/ui-skills-shadow-results.md"
+readout_md="docs/skill-graphs/pilots/ui-skills-pilot-readout.md"
+dashboard_json="artifacts/skill-graphs/pilot/shadow-dashboard.json"
+daily_health_md="docs/skill-graphs/telemetry/daily-skill-health.md"
+failure_patterns_jsonl="artifacts/skill-graphs/telemetry/failure-pattern-candidates.jsonl"
+promotion_queue_md="artifacts/skill-graphs/telemetry/promotion-queue.md"
 
 echo "[shadow-cycle] runs_per_profile=${runs_per_profile}"
 echo "[shadow-cycle] window_days=${window_days}"
 echo "[shadow-cycle] profiles_file=${profiles_file}"
+
+require_file_nonempty() {
+  local path="$1"
+  local label="$2"
+  if [[ ! -s "$path" ]]; then
+    echo "[shadow-cycle] required telemetry output missing or empty: ${label} (${path})" >&2
+    return 1
+  fi
+  return 0
+}
 
 tmp_dir="$(mktemp -d)"
 cleanup() {
@@ -138,8 +154,53 @@ python3 "$report_script" \
   --runs-root "$out_root" \
   --window-days "$window_days" \
   --pilot-profiles-file "$profiles_file" \
-  --shadow-md "docs/skill-graphs/pilots/ui-skills-shadow-results.md" \
-  --readout-md "docs/skill-graphs/pilots/ui-skills-pilot-readout.md" \
-  --out-json "artifacts/skill-graphs/pilot/shadow-dashboard.json"
+  --shadow-md "$shadow_md" \
+  --readout-md "$readout_md" \
+  --out-json "$dashboard_json" \
+  --daily-health-md "$daily_health_md" \
+  --failure-patterns-jsonl "$failure_patterns_jsonl" \
+  --promotion-queue-md "$promotion_queue_md"
+
+for output in "$shadow_md" "$readout_md" "$dashboard_json" "$daily_health_md" "$failure_patterns_jsonl" "$promotion_queue_md"; do
+  require_file_nonempty "$output" "$(basename "$output")"
+done
+
+if ! python3 - "$failure_patterns_jsonl" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+path = Path(sys.argv[1])
+for line_no, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
+    line = line.strip()
+    if not line:
+        continue
+    try:
+        json.loads(line)
+    except Exception as exc:
+        raise SystemExit(f"failure-pattern row {line_no} invalid JSON: {exc}")
+PY
+then
+  echo "[shadow-cycle] failure-pattern output is not valid jsonl" >&2
+  exit 2
+fi
+
+if ! python3 - "$dashboard_json" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+path = Path(sys.argv[1])
+obj = json.loads(path.read_text(encoding="utf-8"))
+if not isinstance(obj, dict):
+    raise SystemExit("dashboard JSON is not an object")
+for key in ("artifact_outputs", "current", "decision"):
+    if key not in obj:
+        raise SystemExit(f"dashboard JSON missing key: {key}")
+PY
+then
+  echo "[shadow-cycle] dashboard output is invalid JSON" >&2
+  exit 2
+fi
 
 echo "[shadow-cycle] complete"

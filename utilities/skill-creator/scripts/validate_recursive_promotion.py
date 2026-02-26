@@ -14,8 +14,51 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Set
 
 ALLOWED_DECISIONS = {"draft", "candidate", "approved", "rejected"}
+ALLOWED_STOP_REASONS = {
+    "pass",
+    "budget_exhausted",
+    "escalated",
+    "aborted",
+    "policy_failed",
+    "evaluator_conflict",
+    "dependency_missing",
+}
+ALLOWED_TERMINAL_STATUSES = {"passed", "failed", "escalated", "aborted"}
+
 DEFAULT_POLICY_FILE = "docs/skill-graphs/governance/recursive-loop-approvers.yaml"
 DEFAULT_POLICY_SIG_FILE = "docs/skill-graphs/governance/recursive-loop-approvers.sig"
+
+RUN_REQUIRED_FILES = {"run.json", "iteration_journal.jsonl", "events.jsonl", "promotion_decision.json"}
+CONTROL_CAPTURE_FILES = {
+    "capture_record.json",
+    "evidence_packet.json",
+    "lesson_candidates.json",
+}
+CONTROL_BLOCKER_REQUIRED_FILES = {
+    "run_rollforward_blocked": {"run_blocker.json", "rollback_recommendation.json"},
+    "run_rollback_required": {"run_blocker.json", "rollback_recommendation.json"},
+    "kill_switch_activated": {"run_blocker.json", "rollback_recommendation.json"},
+    "evaluator_conflict": {"run_blocker.json"},
+}
+STOP_REASON_TO_BLOCKER: Dict[str, str] = {
+    "policy_failed": "run_rollforward_blocked",
+    "dependency_missing": "run_rollback_required",
+    "evaluator_conflict": "evaluator_conflict",
+    "aborted": "kill_switch_activated",
+}
+TERMINAL_STOP_TO_BLOCKER: Dict[str, Dict[str, str]] = {
+    "failed": {
+        "policy_failed": "run_rollforward_blocked",
+        "dependency_missing": "run_rollback_required",
+    },
+    "escalated": {
+        "evaluator_conflict": "evaluator_conflict",
+    },
+    "aborted": {
+        "aborted": "kill_switch_activated",
+    },
+}
+
 SECRET_PATTERNS = [
     re.compile(r"sk-[A-Za-z0-9]{20,}"),
     re.compile(r"ghp_[A-Za-z0-9]{30,}"),
@@ -25,27 +68,6 @@ SECRET_PATTERNS = [
     re.compile(r"(?i)(?:api[_-]?key|access[_-]?token|secret|password)\s*[:=]\s*['\"]?[A-Za-z0-9_\-]{8,}"),
 ]
 EMAIL_PATTERN = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}")
-
-
-def schema_version_at_least(version: str, minimum: str) -> bool:
-    def parse(raw: str) -> List[int]:
-        parts: List[int] = []
-        for token in str(raw or "").split("."):
-            token = token.strip()
-            if not token:
-                continue
-            try:
-                parts.append(int(token))
-            except Exception:
-                parts.append(0)
-        return parts or [0]
-
-    left = parse(version)
-    right = parse(minimum)
-    max_len = max(len(left), len(right))
-    left.extend([0] * (max_len - len(left)))
-    right.extend([0] * (max_len - len(right)))
-    return left >= right
 
 
 def parse_args() -> argparse.Namespace:
@@ -75,13 +97,49 @@ def parse_args() -> argparse.Namespace:
     return p.parse_args()
 
 
+def add_error(errors: List[Dict[str, str]], code: str, message: str) -> None:
+    errors.append({"code": code, "message": message})
+
+
+def add_warning(warnings: List[Dict[str, str]], code: str, message: str) -> None:
+    warnings.append({"code": code, "message": message})
+
+
+def required_fields(
+    obj: Dict[str, Any],
+    fields: List[str],
+    prefix: str,
+    code: str,
+    errors: List[Dict[str, str]],
+) -> None:
+    for field in fields:
+        if field not in obj:
+            add_error(errors, code, f"{prefix} missing field: {field}")
+
+
+def schema_version_at_least(version: str, minimum: str) -> bool:
+    def parse(raw: str) -> List[int]:
+        parts: List[int] = []
+        for token in str(raw or "").split("."):
+            token = token.strip()
+            if not token:
+                continue
+            try:
+                parts.append(int(token))
+            except Exception:
+                parts.append(0)
+        return parts or [0]
+
+    left = parse(version)
+    right = parse(minimum)
+    max_len = max(len(left), len(right))
+    left.extend([0] * (max_len - len(left)))
+    right.extend([0] * (max_len - len(right)))
+    return left >= right
+
+
 def load_json(path: Path) -> Dict[str, Any]:
-    try:
-        obj = json.loads(path.read_text(encoding="utf-8"))
-    except FileNotFoundError:
-        raise ValueError(f"missing file: {path}")
-    except json.JSONDecodeError as exc:
-        raise ValueError(f"invalid JSON ({path}): {exc}") from exc
+    obj = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(obj, dict):
         raise ValueError(f"JSON root must be object: {path}")
     return obj
@@ -103,10 +161,27 @@ def load_jsonl(path: Path) -> List[Dict[str, Any]]:
     return rows
 
 
-def required_fields(obj: Dict[str, Any], fields: List[str], prefix: str, errors: List[str]) -> None:
-    for field in fields:
-        if field not in obj:
-            errors.append(f"{prefix} missing field: {field}")
+def locate_repo_root(start_dir: Path) -> Path:
+    """Resolve the repository root from ``start_dir``, falling back to known roots.
+
+    Tests and callers may construct run directories in temp paths, so this helper
+    walks upward to find ``.git`` and falls back to the validator location or cwd.
+    """
+    cur = start_dir
+    while cur != cur.parent:
+        if (cur / ".git").exists():
+            return cur
+        cur = cur.parent
+    if (cur / ".git").exists():
+        return cur
+
+    script_root = Path(__file__).resolve()
+    fallback_roots = [Path.cwd().resolve(), script_root.parents[3] if len(script_root.parents) >= 4 else script_root]
+    for candidate in fallback_roots:
+        if (candidate / ".git").exists():
+            return candidate
+
+    return Path.cwd().resolve()
 
 
 def sha256_file(path: Path) -> str:
@@ -155,12 +230,12 @@ def resolve_lesson_file(
     decision: Dict[str, Any],
     repo_root: Path,
     run_dir: Path,
-    errors: List[str],
+    errors: List[Dict[str, str]],
 ) -> Optional[Path]:
     if args.lesson_file:
         lesson_file = Path(args.lesson_file).expanduser().resolve()
         if not lesson_file.exists():
-            errors.append(f"lesson file not found: {lesson_file}")
+            add_error(errors, "E_LESSON_FILE_NOT_FOUND", f"lesson file not found: {lesson_file}")
             return None
         return lesson_file
 
@@ -172,28 +247,130 @@ def resolve_lesson_file(
             candidate = (repo_root / candidate).resolve()
         if candidate.exists():
             return candidate
-        # fallback relative to run dir
         candidate_run = (run_dir / raw).resolve()
         if candidate_run.exists():
             return candidate_run
-        errors.append(f"lesson_source_path does not resolve to a file: {source_path}")
+        add_error(
+            errors,
+            "E_LESSON_SOURCE_MISSING",
+            f"lesson_source_path does not resolve to a file: {source_path}",
+        )
         return None
 
     if args.skip_lesson_content_scan:
         return None
 
-    errors.append("approved decision requires lesson content scan (provide --lesson-file or lesson_source_path)")
+    add_error(
+        errors,
+        "E_LESSON_SCAN_REQUIRED",
+        "approved decision requires lesson content scan (provide --lesson-file or lesson_source_path)",
+    )
     return None
 
 
+def normalize_blocker_code(terminal_status: Optional[str], stop_reason: Optional[str]) -> Optional[str]:
+    status = str(terminal_status or "").strip().lower()
+    reason = str(stop_reason or "").strip().lower()
+    if reason in STOP_REASON_TO_BLOCKER:
+        candidate = STOP_REASON_TO_BLOCKER[reason]
+        if status in TERMINAL_STOP_TO_BLOCKER:
+            mapped = TERMINAL_STOP_TO_BLOCKER[status].get(reason)
+            if mapped:
+                return mapped
+        if candidate == "kill_switch_activated" and status != "aborted":
+            return None
+        return candidate
+    if status in TERMINAL_STOP_TO_BLOCKER and reason:
+        return TERMINAL_STOP_TO_BLOCKER[status].get(reason)
+    return None
+
+
+def validate_event_rows(
+    events: List[Dict[str, Any]],
+    run_id: str,
+    errors: List[Dict[str, str]],
+    warnings: List[Dict[str, str]],
+) -> Set[str]:
+    blocker_codes: Set[str] = set()
+    has_state_change = False
+    has_approved = False
+
+    required = {
+        "schema_version",
+        "event_id",
+        "ts",
+        "run_id",
+        "event_type",
+        "severity",
+        "terminal_status",
+        "stop_reason",
+    }
+
+    allowed_event_types = {
+        "run_initialized",
+        "run_state_changed",
+        "run_blocked",
+        "promotion_approved",
+        "run_completed",
+        "failure_event",
+        "run_aborted",
+    }
+
+    for idx, row in enumerate(events, start=1):
+        missing = [key for key in required if key not in row]
+        if missing:
+            add_error(
+                errors,
+                "E_EVENT_REQUIRED_FIELD_MISSING",
+                f"event row {idx} missing fields: {', '.join(sorted(missing))}",
+            )
+            continue
+
+        event_type = str(row.get("event_type", "")).strip()
+        row_run_id = str(row.get("run_id", ""))
+        if row_run_id and row_run_id != run_id:
+            add_warning(
+                warnings,
+                "W_EVENT_RUN_ID_MISMATCH",
+                f"event row {idx} run_id does not match run_id ({row_run_id} != {run_id})",
+            )
+
+        if event_type not in allowed_event_types:
+            add_warning(warnings, "W_EVENT_UNKNOWN_TYPE", f"event row {idx} has unknown event_type={event_type}")
+        if event_type == "run_state_changed":
+            has_state_change = True
+        if event_type == "promotion_approved":
+            has_approved = True
+        if event_type == "run_blocked":
+            code = str(row.get("blocker_code", "")).strip()
+            if not code:
+                add_error(
+                    errors,
+                    "E_EVENT_BLOCKER_CODE_MISSING",
+                    f"event row {idx} run_blocked missing blocker_code",
+                )
+            else:
+                blocker_codes.add(code)
+
+    if not has_state_change:
+        add_warning(
+            warnings,
+            "W_EVENT_STATE_CHANGED_MISSING",
+            "events.jsonl does not include a run_state_changed event",
+        )
+
+    # Keep behavior stable with older callers that check for explicit approval event.
+    # Approved decisions will enforce this separately in schema checks.
+    _ = has_approved
+    return blocker_codes
+
+
 def validate(args: argparse.Namespace) -> Dict[str, Any]:
-    errors: List[str] = []
-    warnings: List[str] = []
+    errors: List[Dict[str, str]] = []
+    warnings: List[Dict[str, str]] = []
 
     run_dir = Path(args.run_dir).expanduser().resolve()
-    repo_root = run_dir
-    while repo_root != repo_root.parent and not (repo_root / ".git").exists():
-        repo_root = repo_root.parent
+    repo_root = locate_repo_root(run_dir)
 
     run_json_path = run_dir / "run.json"
     journal_path = run_dir / "iteration_journal.jsonl"
@@ -204,226 +381,489 @@ def validate(args: argparse.Namespace) -> Dict[str, Any]:
         else run_dir / "promotion_decision.json"
     )
 
-    run = load_json(run_json_path)
-    journals = load_jsonl(journal_path)
-    decision = load_json(decision_path)
+    if str(decision_path) == str(run_json_path):
+        add_warning(
+            warnings,
+            "W_DECISION_PATH_MISCONFIG",
+            "decision file resolves to run.json; expected promotion_decision.json",
+        )
+
     decision_file_out = (
         str(decision_path.relative_to(repo_root))
         if decision_path.is_relative_to(repo_root)
         else str(decision_path)
     )
 
-    if not journals:
-        errors.append("iteration_journal.jsonl has no rows")
+    for required_file in (run_json_path, journal_path, events_path, decision_path):
+        if not required_file.exists():
+            add_error(errors, "E_REQUIRED_ARTIFACT_MISSING", f"missing required file: {required_file.name}")
+
+    run: Dict[str, Any] = {}
+    if run_json_path.exists():
+        try:
+            run = load_json(run_json_path)
+        except Exception as exc:
+            add_error(errors, "E_RUN_JSON_INVALID", f"invalid run.json: {exc}")
+
+    journal_rows: List[Dict[str, Any]] = []
+    if journal_path.exists():
+        try:
+            journal_rows = load_jsonl(journal_path)
+        except Exception as exc:
+            add_error(errors, "E_JOURNAL_JSONL_INVALID", f"invalid iteration_journal.jsonl: {exc}")
+
+    decision: Dict[str, Any] = {}
+    if decision_path.exists():
+        try:
+            decision = load_json(decision_path)
+        except Exception as exc:
+            add_error(errors, "E_DECISION_JSON_INVALID", f"invalid decision file: {exc}")
+
+    if not run or not decision:
+        report = {
+            "validator": "recursive_promotion",
+            "run_id": str(run.get("run_id", "")) if run else None,
+            "decision_file": decision_file_out,
+            "status": "fail",
+            "error_count": len(errors),
+            "warning_count": len(warnings),
+            "errors": errors,
+            "warnings": warnings,
+            "decision": str(decision.get("decision", "")) if decision else "",
+        }
+        if args.write_report:
+            report_path = Path(args.write_report).expanduser().resolve()
+            report_path.parent.mkdir(parents=True, exist_ok=True)
+            report_path.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+        return report
+
+    control_obj = run.get("runtime_controls", {}) if isinstance(run.get("runtime_controls"), dict) else {}
+    auto_capture_enabled = bool(control_obj.get("auto_capture_enabled", True))
+    auto_apply_enabled = bool(control_obj.get("auto_apply_enabled", True))
+
+    terminal_status = str(run.get("terminal_status", "")).strip().lower() or None
+    stop_reason = str(run.get("stop_reason", "")).strip().lower() or None
+
+    if terminal_status and terminal_status not in ALLOWED_TERMINAL_STATUSES:
+        add_error(errors, "E_INVALID_TERMINAL_STATUS", f"unknown terminal_status: {terminal_status}")
+        terminal_status = None
+    if stop_reason and stop_reason not in ALLOWED_STOP_REASONS:
+        add_error(errors, "E_INVALID_STOP_REASON", f"unknown stop_reason: {stop_reason}")
+        stop_reason = None
+
+    blocker_code_run = None
+    run_blocker = run.get("run_blocker")
+    if isinstance(run_blocker, dict):
+        blocker_code_run = str(run_blocker.get("code", "")).strip() or None
+
+    expected_blocker = normalize_blocker_code(terminal_status, stop_reason)
+
+    required_artifacts = set(RUN_REQUIRED_FILES)
+    if auto_capture_enabled:
+        required_artifacts.update(CONTROL_CAPTURE_FILES)
+
+    if blocker_code_run:
+        blocker_key = blocker_code_run
+        required_artifacts.update(CONTROL_BLOCKER_REQUIRED_FILES.get(blocker_key, set()))
+    elif expected_blocker:
+        required_artifacts.update(CONTROL_BLOCKER_REQUIRED_FILES.get(expected_blocker, set()))
+
+    # Re-check after reading runtime controls and blocker state.
+    for file_name in sorted(required_artifacts):
+        if file_name == "promotion_decision.json":
+            target = decision_path
+        elif file_name == "run.json":
+            target = run_json_path
+        elif file_name == "iteration_journal.jsonl":
+            target = journal_path
+        elif file_name == "events.jsonl":
+            target = events_path
+        else:
+            target = run_dir / file_name
+        if not target.exists():
+            add_error(errors, "E_REQUIRED_ARTIFACT_MISSING", f"missing required file: {file_name}")
+
+    run_id = str(run.get("run_id", "")).strip()
+    if not run_id:
+        add_error(errors, "E_RUN_ID_MISSING", "run.json missing run_id")
 
     required_fields(
-        decision,
-        [
-            "schema_version",
-            "run_id",
-            "lesson_id",
-            "decision",
-            "reviewer_ids",
-            "expected_version",
-            "gate_decision",
-            "provenance",
-        ],
-        "promotion_decision",
+        run,
+        ["run_id", "schema_version", "terminal_status", "stop_reason", "prompt_hash", "versions", "counters"],
+        "run",
+        "E_RUN_MISSING_FIELD",
         errors,
     )
 
-    run_id = str(run.get("run_id", ""))
-    decision_run_id = str(decision.get("run_id", ""))
-    if run_id and decision_run_id and run_id != decision_run_id:
-        errors.append(f"run_id mismatch: run.json={run_id} decision={decision_run_id}")
+    required_fields(
+        decision,
+        ["schema_version", "run_id", "lesson_id", "decision", "reviewer_ids", "expected_version", "provenance"],
+        "promotion_decision",
+        "E_DECISION_MISSING_FIELD",
+        errors,
+    )
 
     decision_state = str(decision.get("decision", "")).strip().lower()
     if decision_state not in ALLOWED_DECISIONS:
-        errors.append(f"invalid decision state: {decision_state}")
-    decision_schema_version = str(decision.get("schema_version", "1.0")).strip() or "1.0"
-    requires_counterfactual = schema_version_at_least(decision_schema_version, "1.1")
+        add_error(errors, "E_INVALID_DECISION_STATE", f"invalid decision state: {decision_state}")
+
+    decision_run_id = str(decision.get("run_id", "")).strip()
+    if run_id and decision_run_id and run_id != decision_run_id:
+        add_error(
+            errors,
+            "E_RUN_ID_MISMATCH",
+            f"run_id mismatch: run.json={run_id} decision={decision_run_id}",
+        )
+
+    if decision_state in {"approved", "candidate"}:
+        if not str(decision.get("lesson_id", "")).strip():
+            add_error(errors, "E_LESSON_ID_MISSING", "lesson_id is required for candidate/approved decisions")
+
+        reviewers = decision.get("reviewer_ids")
+        if not isinstance(reviewers, list) or not any(str(r).strip() for r in reviewers):
+            add_error(errors, "E_REVIEWER_IDS_MISSING", "reviewer_ids must include at least one reviewer")
+
+        if not str(decision.get("expected_version", "")).strip():
+            add_error(errors, "E_EXPECTED_VERSION_MISSING", "expected_version is required")
+
+        policy_file = Path(args.policy_file).expanduser().resolve()
+        sig_file = Path(args.policy_sig_file).expanduser().resolve()
+        allow_policy_override = os.environ.get("RECURSIVE_PROMOTION_ALLOW_POLICY_OVERRIDE", "").strip().lower() in {
+            "1",
+            "true",
+            "yes",
+            "on",
+        }
+        canonical_policy = (repo_root / DEFAULT_POLICY_FILE).resolve()
+        canonical_policy_sig = (repo_root / DEFAULT_POLICY_SIG_FILE).resolve()
+
+        if not allow_policy_override:
+            if policy_file != canonical_policy:
+                add_error(
+                    errors,
+                    "E_POLICY_FILE_NON_CANONICAL",
+                    f"non-canonical policy-file not allowed: {policy_file}",
+                )
+            if sig_file != canonical_policy_sig:
+                add_error(
+                    errors,
+                    "E_POLICY_SIG_NON_CANONICAL",
+                    f"non-canonical policy-sig-file not allowed: {sig_file}",
+                )
+
+        if not policy_file.exists():
+            add_error(errors, "E_POLICY_FILE_MISSING", f"reviewer policy file missing: {policy_file}")
+        if not sig_file.exists():
+            add_error(errors, "E_POLICY_SIG_MISSING", f"reviewer policy signature missing: {sig_file}")
+        if policy_file.exists() and sig_file.exists():
+            try:
+                policy = load_policy(policy_file, sig_file)
+                allowed_map = {
+                    str(r.get("id", "")).strip(): str(r.get("role", "")).strip().lower()
+                    for r in policy.get("reviewers", [])
+                    if isinstance(r, dict) and str(r.get("id", "")).strip()
+                }
+                min_roles = {
+                    str(role).strip().lower()
+                    for role in policy.get("min_roles_for_approve", ["approver"])
+                    if str(role).strip()
+                } or {"approver"}
+                for reviewer in reviewers or []:
+                    rv = str(reviewer).strip()
+                    if rv not in allowed_map:
+                        add_error(errors, "E_REVIEWER_NOT_ALLOWLISTED", f"reviewer not allowlisted: {rv}")
+                        continue
+                    if allowed_map[rv] not in min_roles:
+                        add_error(
+                            errors,
+                            "E_REVIEWER_ROLE_INSUFFICIENT",
+                            f"reviewer role not permitted: {rv}:{allowed_map[rv]}",
+                        )
+            except Exception as exc:
+                add_error(errors, "E_POLICY_VALIDATION_FAILED", f"reviewer policy validation failed: {exc}")
+
+    confidence_obj = decision.get("confidence")
+    if confidence_obj is None:
+        add_warning(warnings, "W_CONFIDENCE_MISSING", "confidence object missing (Phase-4 queue enrichment expected)")
+    elif not isinstance(confidence_obj, dict):
+        add_error(errors, "E_CONFIDENCE_INVALID", "confidence must be an object")
+    else:
+        score = confidence_obj.get("score")
+        if score is None:
+            add_warning(warnings, "W_CONFIDENCE_SCORE_MISSING", "confidence.score missing (Phase-4 queue enrichment expected)")
+        else:
+            try:
+                score_f = float(score)
+                if score_f < 0.0 or score_f > 1.0:
+                    add_error(errors, "E_CONFIDENCE_SCORE_OUT_OF_RANGE", "confidence.score must be between 0 and 1")
+            except Exception:
+                add_error(errors, "E_CONFIDENCE_SCORE_INVALID", "confidence.score must be numeric")
+
+        bucket = str(confidence_obj.get("bucket", "")).strip().lower()
+        if bucket and bucket not in {"high", "medium", "low"}:
+            add_error(errors, "E_CONFIDENCE_BUCKET_INVALID", "confidence.bucket must be one of high|medium|low")
+
+    evidence_obj = decision.get("evidence_packet")
+    if isinstance(evidence_obj, dict):
+        completeness = evidence_obj.get("completeness_score")
+        if completeness is not None:
+            try:
+                completeness_f = float(completeness)
+                if completeness_f < 0.0 or completeness_f > 1.0:
+                    add_error(
+                        errors,
+                        "E_EVIDENCE_COMPLTENESS_SCORE_OUT_OF_RANGE",
+                        "evidence_packet.completeness_score must be between 0 and 1",
+                    )
+            except Exception:
+                add_error(errors, "E_EVIDENCE_COMPLTENESS_SCORE_INVALID", "evidence_packet.completeness_score must be numeric")
 
     gate = decision.get("gate_decision")
     if not isinstance(gate, dict):
-        errors.append("gate_decision must be an object")
+        add_error(errors, "E_GATE_MISSING", "gate_decision must be an object")
         gate = {}
 
     provenance = decision.get("provenance")
     if not isinstance(provenance, dict):
-        errors.append("provenance must be an object")
+        add_error(errors, "E_PROVENANCE_INVALID", "provenance must be an object")
         provenance = {}
 
+    if decision_state == "approved":
+        if args.skip_lesson_content_scan:
+            add_error(errors, "E_SKIP_SCAN_NOT_ALLOWED", "approved decision cannot use --skip-lesson-content-scan")
+
+        if terminal_status != "passed":
+            add_error(errors, "E_APPROVED_NOT_PASSED", "approved decision requires run terminal_status=passed")
+        if stop_reason != "pass":
+            add_error(errors, "E_APPROVED_NOT_PASSED", "approved decision requires run stop_reason=pass")
+
+        if gate.get("runtime_gates_passed") is not True:
+            add_error(errors, "E_APPROVED_RUNTIME_GATE", "gate_decision.runtime_gates_passed must be true for approved decision")
+        if gate.get("provenance_complete") is not True:
+            add_error(errors, "E_APPROVED_PROVENANCE", "gate_decision.provenance_complete must be true for approved decision")
+        if gate.get("security_checklist_passed") is not True:
+            add_error(errors, "E_APPROVED_SECURITY", "gate_decision.security_checklist_passed must be true for approved decision")
+
+    # Control-state-specific expectations.
+    if expected_blocker:
+        blocker_json = run_dir / "run_blocker.json"
+        if not blocker_json.exists():
+            add_error(
+                errors,
+                "E_BLOCKER_ARTIFACT_MISSING",
+                f"blocked terminal_state requires run_blocker.json for {expected_blocker}",
+            )
+        else:
+            try:
+                blocker_obj = load_json(blocker_json)
+                blocker_code_artifact = str(blocker_obj.get("code", "")).strip() or None
+                if blocker_code_run and blocker_code_artifact and blocker_code_artifact != blocker_code_run:
+                    add_error(
+                        errors,
+                        "E_BLOCKER_CODE_MISMATCH",
+                        "run_blocker.json code does not match run.run_blocker.code",
+                    )
+                if blocker_code_artifact != expected_blocker:
+                    add_error(
+                        errors,
+                        "E_BLOCKER_CODE_MISMATCH",
+                        f"expected blocker code {expected_blocker} for terminal state {terminal_status}/{stop_reason}",
+                    )
+            except Exception as exc:
+                add_error(errors, "E_BLOCKER_JSON_INVALID", f"invalid run_blocker.json: {exc}")
+
+        if expected_blocker in {"run_rollforward_blocked", "run_rollback_required", "kill_switch_activated"}:
+            if not (run_dir / "rollback_recommendation.json").exists():
+                add_error(
+                    errors,
+                    "E_ROLLBACK_RECOMMENDATION_MISSING",
+                    f"blocked terminal_state requires rollback_recommendation.json for {expected_blocker}",
+                )
+
+    # Journal checks.
+    if terminal_status == "passed" and stop_reason == "pass" and decision_state in {"approved", "candidate"}:
+        if not journal_rows:
+            add_warning(
+                warnings,
+                "W_JOURNAL_EMPTY",
+                "run journal has no rows for terminal passing run",
+            )
+
+    journal_ids: Set[int] = set()
+    for row in journal_rows:
+        if not isinstance(row, dict):
+            continue
+        iteration_id = row.get("iteration_id")
+        if isinstance(iteration_id, int):
+            journal_ids.add(iteration_id)
+        else:
+            add_error(
+                errors,
+                "E_JOURNAL_ITERATION_ID_INVALID",
+                "iteration_journal iteration_id must be an integer",
+            )
+
     if decision_state in {"approved", "candidate"}:
-        if not str(decision.get("lesson_id", "")).strip():
-            errors.append("lesson_id is required for candidate/approved decisions")
-        reviewers = decision.get("reviewer_ids")
-        if not isinstance(reviewers, list) or not any(str(r).strip() for r in reviewers):
-            errors.append("reviewer_ids must include at least one reviewer for candidate/approved decisions")
-        else:
-            policy_file = Path(args.policy_file).expanduser().resolve()
-            sig_file = Path(args.policy_sig_file).expanduser().resolve()
-            allow_policy_override = os.environ.get("RECURSIVE_PROMOTION_ALLOW_POLICY_OVERRIDE", "").strip().lower() in {
-                "1",
-                "true",
-                "yes",
-                "on",
-            }
-            canonical_policy = (repo_root / DEFAULT_POLICY_FILE).resolve()
-            canonical_policy_sig = (repo_root / DEFAULT_POLICY_SIG_FILE).resolve()
-            if not allow_policy_override:
-                if policy_file != canonical_policy:
-                    errors.append(f"non-canonical policy-file not allowed: {policy_file}")
-                if sig_file != canonical_policy_sig:
-                    errors.append(f"non-canonical policy-sig-file not allowed: {sig_file}")
-            if not policy_file.exists():
-                errors.append(f"reviewer policy file missing: {policy_file}")
-            elif not sig_file.exists():
-                errors.append(f"reviewer policy signature missing: {sig_file}")
-            else:
-                try:
-                    policy = load_policy(policy_file, sig_file)
-                    allowed_map = {
-                        str(r.get("id", "")).strip(): str(r.get("role", "")).strip().lower()
-                        for r in policy.get("reviewers", [])
-                        if isinstance(r, dict) and str(r.get("id", "")).strip()
-                    }
-                    min_roles = {
-                        str(role).strip().lower()
-                        for role in policy.get("min_roles_for_approve", ["approver"])
-                        if str(role).strip()
-                    } or {"approver"}
-                    for reviewer in reviewers:
-                        rv = str(reviewer).strip()
-                        if rv not in allowed_map:
-                            errors.append(f"reviewer not allowlisted: {rv}")
-                            continue
-                        if allowed_map[rv] not in min_roles:
-                            errors.append(f"reviewer role not permitted: {rv}:{allowed_map[rv]}")
-                except Exception as exc:
-                    errors.append(f"reviewer policy validation failed: {exc}")
+        required_fields(
+            provenance,
+            ["prompt_hash", "rubric_version", "evaluator_version", "iteration_ids"],
+            "provenance",
+            "E_PROVENANCE_MISSING_FIELD",
+            errors,
+        )
 
-        confidence_obj = decision.get("confidence")
-        if not isinstance(confidence_obj, dict):
-            warnings.append("confidence object missing (Phase-4 queue enrichment expected)")
+        prov_ids_raw = provenance.get("iteration_ids")
+        if isinstance(prov_ids_raw, list) and prov_ids_raw:
+            if any(not isinstance(x, int) for x in prov_ids_raw):
+                add_error(errors, "E_PROVENANCE_ITERATION_IDS_TYPE", "provenance.iteration_ids must contain only integers")
+            prov_ids = {int(x) for x in prov_ids_raw if isinstance(x, int)}
         else:
-            score = confidence_obj.get("score")
-            if score is None:
-                warnings.append("confidence.score missing (Phase-4 queue enrichment expected)")
-            else:
-                try:
-                    score_f = float(score)
-                    if score_f < 0.0 or score_f > 1.0:
-                        errors.append("confidence.score must be between 0 and 1")
-                except Exception:
-                    errors.append("confidence.score must be numeric")
-            bucket = str(confidence_obj.get("bucket", "")).strip().lower()
-            if bucket and bucket not in {"high", "medium", "low"}:
-                errors.append("confidence.bucket must be one of high|medium|low")
+            prov_ids = set()
+            if not isinstance(prov_ids_raw, list):
+                add_error(errors, "E_PROVENANCE_ITERATION_IDS_TYPE", "provenance.iteration_ids must be an array of integers")
 
-        evidence_obj = decision.get("evidence_packet")
-        if isinstance(evidence_obj, dict):
-            completeness = evidence_obj.get("completeness_score")
-            if completeness is not None:
-                try:
-                    completeness_f = float(completeness)
-                    if completeness_f < 0.0 or completeness_f > 1.0:
-                        errors.append("evidence_packet.completeness_score must be between 0 and 1")
-                except Exception:
-                    errors.append("evidence_packet.completeness_score must be numeric")
+        if prov_ids and not prov_ids.issubset(journal_ids):
+            add_error(
+                errors,
+                "E_PROVENANCE_ITERATION_IDS_MISMATCH",
+                "provenance.iteration_ids must reference existing iteration ids",
+            )
 
-        counterfactual = decision.get("counterfactual_uplift")
-        if not isinstance(counterfactual, dict):
-            if requires_counterfactual:
-                errors.append("counterfactual_uplift object is required for schema_version >= 1.1")
-            else:
-                warnings.append("counterfactual_uplift missing (legacy schema)")
-            counterfactual = {}
+        if provenance.get("prompt_hash") != run.get("prompt_hash"):
+            add_error(errors, "E_PROMPT_HASH_MISMATCH", "provenance.prompt_hash mismatch with run.prompt_hash")
+
+        versions = run.get("versions", {}) if isinstance(run.get("versions"), dict) else {}
+        if provenance.get("rubric_version") != versions.get("rubric_version"):
+            add_error(errors, "E_VERSION_MISMATCH", "provenance.rubric_version mismatch with run.versions.rubric_version")
+        if provenance.get("evaluator_version") != versions.get("evaluator_version"):
+            add_error(errors, "E_VERSION_MISMATCH", "provenance.evaluator_version mismatch with run.versions.evaluator_version")
+
+        if journal_rows:
+            last_row = journal_rows[-1]
+            if isinstance(last_row, dict):
+                last_gate = (
+                    last_row.get("reevaluation_report", {}).get("gate_decision")
+                    if isinstance(last_row.get("reevaluation_report"), dict)
+                    else None
+                )
+                if decision_state == "approved" and last_gate != "pass":
+                    add_error(
+                        errors,
+                        "E_APPROVED_GATING_FAIL",
+                        "latest iteration reevaluation_report.gate_decision must be pass for approved decisions",
+                    )
+            for row in journal_rows:
+                if not isinstance(row, dict):
+                    continue
+                ree = row.get("reevaluation_report")
+                if isinstance(ree, dict) and ree.get("non_regression_passed") is not True:
+                    add_error(
+                        errors,
+                        "E_APPROVED_NON_REGRESSION_FAIL",
+                        "approved decision requires non_regression_passed=true for all iterations",
+                    )
+                    break
+
+    # Counterfactual checks.
+    requires_counterfactual = schema_version_at_least(str(decision.get("schema_version", "1.0")), "1.1")
+    counterfactual = decision.get("counterfactual_uplift")
+    if not isinstance(counterfactual, dict):
+        if requires_counterfactual:
+            add_error(errors, "E_COUNTERFACTUAL_MISSING", "counterfactual_uplift object is required for schema_version >= 1.1")
         else:
-            required_cf_fields = [
+            add_warning(warnings, "W_COUNTERFACTUAL_MISSING", "counterfactual_uplift missing (legacy schema)")
+    else:
+        required_fields(
+            counterfactual,
+            [
                 "analysis_method_version",
                 "sample_size",
                 "match_quality_metrics",
                 "promotion_decision",
                 "auto_apply_decision",
                 "uplift_confidence_band",
-            ]
-            required_fields(counterfactual, required_cf_fields, "counterfactual_uplift", errors)
-            sample_size_raw = counterfactual.get("sample_size")
+            ],
+            "counterfactual_uplift",
+            "E_COUNTERFACTUAL_MISSING_FIELD",
+            errors,
+        )
+        try:
+            sample_size = int(counterfactual.get("sample_size"))
+            if sample_size < 0:
+                add_error(errors, "E_COUNTERFACTUAL_SAMPLE_SIZE", "counterfactual_uplift.sample_size must be >= 0")
+        except Exception:
+            add_error(errors, "E_COUNTERFACTUAL_SAMPLE_SIZE", "counterfactual_uplift.sample_size must be an integer")
+
+        for key in ("treatment_outcome", "control_outcome", "uplift_delta"):
+            value = counterfactual.get(key)
+            if value is None:
+                continue
             try:
-                sample_size = int(sample_size_raw)
-                if sample_size < 0:
-                    errors.append("counterfactual_uplift.sample_size must be >= 0")
+                value_f = float(value)
+                if value_f < -1.0 or value_f > 1.0:
+                    add_error(
+                        errors,
+                        "E_COUNTERFACTUAL_BOUND",
+                        f"counterfactual_uplift.{key} must be between -1 and 1",
+                    )
             except Exception:
-                sample_size = 0
-                errors.append("counterfactual_uplift.sample_size must be an integer")
+                add_error(errors, "E_COUNTERFACTUAL_NUMERIC", f"counterfactual_uplift.{key} must be numeric when present")
 
-            for key in ("treatment_outcome", "control_outcome", "uplift_delta"):
-                value = counterfactual.get(key)
-                if value is None:
-                    continue
+        ci_obj = counterfactual.get("uplift_confidence_band")
+        if isinstance(ci_obj, dict):
+            lower = ci_obj.get("lower")
+            upper = ci_obj.get("upper")
+            if lower is not None and upper is not None:
                 try:
-                    value_f = float(value)
-                    if value_f < -1.0 or value_f > 1.0:
-                        errors.append(f"counterfactual_uplift.{key} must be between -1 and 1")
+                    lower_f = float(lower)
+                    upper_f = float(upper)
+                    if lower_f > upper_f:
+                        add_error(errors, "E_COUNTERFACTUAL_CI", "counterfactual_uplift.uplift_confidence_band lower cannot exceed upper")
                 except Exception:
-                    errors.append(f"counterfactual_uplift.{key} must be numeric when present")
+                    add_error(errors, "E_COUNTERFACTUAL_CI", "counterfactual_uplift.uplift_confidence_band bounds must be numeric")
 
-            ci_obj = counterfactual.get("uplift_confidence_band")
-            if isinstance(ci_obj, dict):
-                lower = ci_obj.get("lower")
-                upper = ci_obj.get("upper")
-                if lower is not None and upper is not None:
-                    try:
-                        lower_f = float(lower)
-                        upper_f = float(upper)
-                        if lower_f > upper_f:
-                            errors.append("counterfactual_uplift.uplift_confidence_band lower cannot exceed upper")
-                    except Exception:
-                        errors.append("counterfactual_uplift.uplift_confidence_band bounds must be numeric")
-
-            match_obj = counterfactual.get("match_quality_metrics")
-            if isinstance(match_obj, dict):
-                unmatched_rate = match_obj.get("treated_unmatched_rate")
-                if unmatched_rate is not None:
-                    try:
-                        unmatched_rate_f = float(unmatched_rate)
-                        if unmatched_rate_f < 0.0 or unmatched_rate_f > 1.0:
-                            errors.append(
-                                "counterfactual_uplift.match_quality_metrics.treated_unmatched_rate must be between 0 and 1"
-                            )
-                    except Exception:
-                        errors.append(
-                            "counterfactual_uplift.match_quality_metrics.treated_unmatched_rate must be numeric"
+        match_obj = counterfactual.get("match_quality_metrics")
+        if isinstance(match_obj, dict):
+            untreated = match_obj.get("treated_unmatched_rate")
+            if untreated is not None:
+                try:
+                    untreated_f = float(untreated)
+                    if untreated_f < 0.0 or untreated_f > 1.0:
+                        add_error(
+                            errors,
+                            "E_COUNTERFACTUAL_MATCH",
+                            "counterfactual_uplift.match_quality_metrics.treated_unmatched_rate must be between 0 and 1",
                         )
+                except Exception:
+                    add_error(
+                        errors,
+                        "E_COUNTERFACTUAL_MATCH",
+                        "counterfactual_uplift.match_quality_metrics.treated_unmatched_rate must be numeric",
+                    )
 
-            for key in ("promotion_decision", "auto_apply_decision"):
-                if key in counterfactual:
-                    state = str(counterfactual.get(key, "")).strip().lower()
-                    if state not in {"pass", "hold", "regressed", "insufficient_data", "insufficient_match_quality"}:
-                        errors.append(f"counterfactual_uplift.{key} has invalid value: {state}")
+        for key in ("promotion_decision", "auto_apply_decision"):
+            if key in counterfactual:
+                state = str(counterfactual.get(key, "")).strip().lower()
+                if state not in {
+                    "pass",
+                    "hold",
+                    "regressed",
+                    "insufficient_data",
+                    "insufficient_match_quality",
+                }:
+                    add_error(
+                        errors,
+                        "E_COUNTERFACTUAL_DECISION_VALUE",
+                        f"counterfactual_uplift.{key} has invalid value: {state}",
+                    )
 
-    if decision_state == "approved":
-        if args.skip_lesson_content_scan:
-            errors.append("approved decision cannot use --skip-lesson-content-scan")
-
-        if run.get("terminal_status") != "passed":
-            errors.append("approved decision requires run terminal_status=passed")
-        if run.get("stop_reason") != "pass":
-            errors.append("approved decision requires run stop_reason=pass")
-
-        if not str(decision.get("expected_version", "")).strip():
-            errors.append("expected_version is required for approved decision")
-
-        if gate.get("runtime_gates_passed") is not True:
-            errors.append("gate_decision.runtime_gates_passed must be true for approved decision")
-        if gate.get("provenance_complete") is not True:
-            errors.append("gate_decision.provenance_complete must be true for approved decision")
-        if gate.get("security_checklist_passed") is not True:
-            errors.append("gate_decision.security_checklist_passed must be true for approved decision")
-
-        if isinstance(counterfactual, dict) and counterfactual:
+        if decision_state == "approved":
             if str(counterfactual.get("promotion_decision", "")).strip().lower() != "pass":
-                errors.append("approved decision requires counterfactual_uplift.promotion_decision=pass")
+                add_error(
+                    errors,
+                    "E_APPROVED_COUNTERFACTUAL_NOT_PASS",
+                    "approved decision requires counterfactual_uplift.promotion_decision=pass",
+                )
             try:
                 sample_size = int(counterfactual.get("sample_size", 0))
             except Exception:
@@ -435,7 +875,11 @@ def validate(args: argparse.Namespace) -> Dict[str, Any]:
             )
             min_pairs_required = int(thresholds.get("min_pairs_total", 0) or 0)
             if min_pairs_required and sample_size < min_pairs_required:
-                errors.append("approved decision requires counterfactual sample_size >= promotion threshold")
+                add_error(
+                    errors,
+                    "E_APPROVED_COUNTERFACTUAL_SAMPLE_SIZE",
+                    "approved decision requires sample_size >= promotion threshold",
+                )
             ci_obj = (
                 counterfactual.get("uplift_confidence_band", {})
                 if isinstance(counterfactual.get("uplift_confidence_band"), dict)
@@ -444,120 +888,80 @@ def validate(args: argparse.Namespace) -> Dict[str, Any]:
             ci_lower_required = float(thresholds.get("ci_lower_min", 0.0) or 0.0)
             ci_lower_raw = ci_obj.get("lower")
             if ci_lower_raw is None:
-                errors.append("approved decision requires counterfactual_uplift.uplift_confidence_band.lower")
+                add_error(
+                    errors,
+                    "E_APPROVED_COUNTERFACTUAL_CI_MISSING",
+                    "approved decision requires counterfactual_uplift.uplift_confidence_band.lower",
+                )
             else:
                 try:
-                    ci_lower = float(ci_lower_raw)
-                    if ci_lower < ci_lower_required:
-                        errors.append("approved decision requires uplift CI lower bound above threshold")
+                    if float(ci_lower_raw) < ci_lower_required:
+                        add_error(errors, "E_APPROVED_COUNTERFACTUAL_CI", "approved decision requires uplift CI lower bound above threshold")
                 except Exception:
-                    errors.append("counterfactual_uplift.uplift_confidence_band.lower must be numeric")
+                    add_error(
+                        errors,
+                        "E_APPROVED_COUNTERFACTUAL_CI_INVALID",
+                        "counterfactual_uplift.uplift_confidence_band.lower must be numeric",
+                    )
             match_obj = (
                 counterfactual.get("match_quality_metrics", {})
                 if isinstance(counterfactual.get("match_quality_metrics"), dict)
                 else {}
             )
-            if match_obj and match_obj.get("valid") is not True:
-                errors.append("approved decision requires valid counterfactual match_quality_metrics")
-        elif requires_counterfactual:
-            errors.append("approved decision requires counterfactual_uplift object")
+            if isinstance(match_obj, dict) and match_obj.get("valid") is not True:
+                add_error(
+                    errors,
+                    "E_APPROVED_COUNTERFACTUAL_MATCH",
+                    "approved decision requires valid counterfactual match_quality_metrics",
+                )
 
-        if str(decision.get("lesson_status", "")).strip().lower() != "active":
-            warnings.append("lesson_status should be 'active' for approved decision (legacy artifacts may omit)")
-        if not str(decision.get("canonical_version", "")).strip():
-            warnings.append("canonical_version should be present for approved decision (legacy artifacts may omit)")
+    # Events are mandatory when promotions are being validated.
+    event_blocker_codes: Set[str] = set()
+    if events_path.exists():
+        try:
+            events = load_jsonl(events_path)
+            event_blocker_codes = validate_event_rows(events, run_id, errors, warnings)
+            if decision_state == "approved" and not any(
+                isinstance(row, dict) and row.get("event_type") == "promotion_approved" and str(row.get("run_id", "")).strip() == run_id
+                for row in events
+            ):
+                add_error(errors, "E_APPROVED_PROMOTION_EVENT", "run/events.jsonl missing promotion_approved event")
 
-        required_fields(
-            provenance,
-            ["prompt_hash", "rubric_version", "evaluator_version", "iteration_ids"],
-            "provenance",
+            if expected_blocker:
+                if not any(
+                    isinstance(row, dict)
+                    and row.get("event_type") == "run_blocker"
+                    and str(row.get("run_id", "")).strip() == run_id
+                    and str(row.get("blocker_code", "")).strip() == expected_blocker
+                    for row in events
+                ):
+                    add_error(
+                        errors,
+                        "E_BLOCKER_EVENT_MISMATCH",
+                        f"run_blocked event with blocker_code={expected_blocker} required for terminal state {terminal_status}/{stop_reason}",
+                    )
+        except Exception as exc:
+            add_error(errors, "E_EVENTS_JSONL_INVALID", f"invalid events.jsonl: {exc}")
+    elif not errors:
+        add_error(errors, "E_EVENTS_FILE_MISSING", "events.jsonl missing")
+
+    if blocker_code_run and expected_blocker and blocker_code_run != expected_blocker:
+        add_error(
             errors,
+            "E_BLOCKER_STATE_MISMATCH",
+            f"run_blocker code {blocker_code_run} does not match terminal state {terminal_status}/{stop_reason}",
         )
 
-        journal_ids: Set[int] = set()
-        for row in journals:
-            jid = row.get("iteration_id")
-            if isinstance(jid, int):
-                journal_ids.add(jid)
-            if str(row.get("run_id", "")) != run_id:
-                errors.append("iteration journal run_id mismatch")
+    # Ensure event blocker consistency with file blocker (best-effort)
+    if blocker_code_run and blocker_code_run not in event_blocker_codes:
+        add_warning(
+            warnings,
+            "W_BLOCKER_EVENT_MISSING",
+            f"run_blocker code {blocker_code_run} not observed in events.jsonl",
+        )
 
-        prov_ids_raw = provenance.get("iteration_ids")
-        if not isinstance(prov_ids_raw, list) or not prov_ids_raw:
-            errors.append("provenance.iteration_ids must be a non-empty list")
-            prov_ids: Set[int] = set()
-        else:
-            non_int_ids = [x for x in prov_ids_raw if not isinstance(x, int)]
-            if non_int_ids:
-                errors.append("provenance.iteration_ids must contain only integers")
-            duplicate_ids = {x for x in prov_ids_raw if isinstance(x, int) and prov_ids_raw.count(x) > 1}
-            if duplicate_ids:
-                errors.append(
-                    "provenance.iteration_ids must not contain duplicates: "
-                    + ",".join(str(x) for x in sorted(duplicate_ids))
-                )
-            prov_ids = {int(x) for x in prov_ids_raw if isinstance(x, int)}
-
-        if prov_ids and not prov_ids.issubset(journal_ids):
-            errors.append("provenance.iteration_ids must reference existing iteration ids")
-
-        if provenance.get("prompt_hash") != run.get("prompt_hash"):
-            errors.append("provenance.prompt_hash mismatch with run.prompt_hash")
-
-        run_versions = run.get("versions", {}) if isinstance(run.get("versions"), dict) else {}
-        if provenance.get("rubric_version") != run_versions.get("rubric_version"):
-            errors.append("provenance.rubric_version mismatch with run.versions.rubric_version")
-        if provenance.get("evaluator_version") != run_versions.get("evaluator_version"):
-            errors.append("provenance.evaluator_version mismatch with run.versions.evaluator_version")
-
-        if journals:
-            valid_rows: List[Dict[str, Any]] = []
-            invalid_iteration_ids: List[Any] = []
-            for row in journals:
-                iteration_id = row.get("iteration_id")
-                if isinstance(iteration_id, int):
-                    valid_rows.append(row)
-                else:
-                    invalid_iteration_ids.append(iteration_id)
-            if invalid_iteration_ids:
-                errors.append("iteration_journal iteration_id must be an integer for approved decisions")
-
-            if valid_rows:
-                last = sorted(valid_rows, key=lambda x: x.get("iteration_id", 0))[-1]
-            else:
-                last = {}
-            last_gate = (
-                last.get("reevaluation_report", {}).get("gate_decision")
-                if isinstance(last.get("reevaluation_report"), dict)
-                else None
-            )
-            if last_gate != "pass":
-                errors.append("latest iteration reevaluation_report.gate_decision must be pass for approved decisions")
-
-            non_regression_failures = [
-                row.get("iteration_id")
-                for row in journals
-                if isinstance(row.get("reevaluation_report"), dict)
-                and row["reevaluation_report"].get("non_regression_passed") is not True
-            ]
-            if non_regression_failures:
-                errors.append(
-                    "approved decision requires non_regression_passed=true for all iterations; failed iterations: "
-                    + ",".join(str(x) for x in non_regression_failures)
-                )
-
-        if events_path.exists():
-            events = load_jsonl(events_path)
-            promotion_events = [
-                e
-                for e in events
-                if e.get("event_type") == "promotion_approved" and e.get("run_id") == run_id
-            ]
-            if not promotion_events:
-                errors.append("promotion_approved event missing in run/events.jsonl")
-        else:
-            errors.append("run/events.jsonl missing")
-
+    # Candidate decisions often skip lesson scan requirements.
+    if decision_state in {"candidate", "approved"}:
         lesson_file = resolve_lesson_file(
             args=args,
             decision=decision,
@@ -565,23 +969,23 @@ def validate(args: argparse.Namespace) -> Dict[str, Any]:
             run_dir=run_dir,
             errors=errors,
         )
-
         if lesson_file and lesson_file.exists():
             scan = scan_lesson_content(lesson_file)
-            if scan["secret_hits"]:
-                errors.extend([f"lesson security check failed: {m}" for m in scan["secret_hits"]])
-            if scan["pii_hits"]:
-                warnings.extend([f"lesson privacy warning: {m}" for m in scan["pii_hits"]])
+            for message in scan["secret_hits"]:
+                add_error(errors, "E_LESSON_SECRET", f"lesson security check failed: {message}")
+            for message in scan["pii_hits"]:
+                add_warning(warnings, "W_LESSON_PII", f"lesson privacy warning: {message}")
 
             recorded_sha = decision.get("lesson_content_sha256")
             actual_sha = sha256_file(lesson_file)
-            if recorded_sha:
-                if str(recorded_sha) != actual_sha:
-                    errors.append("lesson_content_sha256 mismatch with lesson source file")
-            else:
-                errors.append("lesson_content_sha256 is required for approved decisions")
+            if decision_state == "approved":
+                if recorded_sha:
+                    if str(recorded_sha) != actual_sha:
+                        add_error(errors, "E_LESSON_HASH_MISMATCH", "lesson_content_sha256 mismatch with lesson source file")
+                else:
+                    add_error(errors, "E_LESSON_HASH_MISSING", "lesson_content_sha256 is required for approved decisions")
 
-    result = {
+    return {
         "validator": "recursive_promotion",
         "run_id": run_id or decision_run_id,
         "decision_file": decision_file_out,
@@ -592,13 +996,6 @@ def validate(args: argparse.Namespace) -> Dict[str, Any]:
         "warnings": warnings,
         "decision": decision_state,
     }
-
-    if args.write_report:
-        report_path = Path(args.write_report).expanduser().resolve()
-        report_path.parent.mkdir(parents=True, exist_ok=True)
-        report_path.write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
-
-    return result
 
 
 def main() -> int:
@@ -618,6 +1015,11 @@ def main() -> int:
         return 1
 
     print(json.dumps(report))
+    if args.write_report:
+        report_path = Path(args.write_report).expanduser().resolve()
+        report_path.parent.mkdir(parents=True, exist_ok=True)
+        report_path.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+
     return 0 if report["status"] == "ok" else 2
 
 

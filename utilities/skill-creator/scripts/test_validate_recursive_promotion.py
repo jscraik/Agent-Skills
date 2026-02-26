@@ -1,16 +1,17 @@
 #!/usr/bin/env python3
-"""Tests for uplift/match-quality validation contracts."""
+"""Tests for recursive promotion validation contracts."""
 
 from __future__ import annotations
 
 import hashlib
 import json
-import shutil
 import subprocess
 import sys
 import tempfile
-import unittest
 from pathlib import Path
+from typing import Any, Dict
+
+import unittest
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -21,98 +22,18 @@ def sha256_text(value: str) -> str:
     return hashlib.sha256(value.encode("utf-8")).hexdigest()
 
 
+def _to_row_error_codes(report: Dict[str, Any]) -> set[str]:
+    codes = set()
+    for item in report.get("errors", []):
+        if isinstance(item, dict):
+            code = item.get("code")
+            if isinstance(code, str):
+                codes.add(code)
+    return codes
+
+
 class ValidateRecursivePromotionTests(unittest.TestCase):
-    def _build_run(self, *, promotion_decision_state: str = "pass") -> tuple[Path, Path]:
-        run_dir = Path(tempfile.mkdtemp(prefix="validate-promotion-", dir=REPO_ROOT / "artifacts"))
-        self.addCleanup(lambda: shutil.rmtree(run_dir, ignore_errors=True))
-        run_id = "run_test_counterfactual"
-        lesson_file = run_dir / "lesson.md"
-        lesson_file.write_text("Safe lesson body.\n", encoding="utf-8")
-
-        run_obj = {
-            "schema_version": "1.0",
-            "run_id": run_id,
-            "profile_id": "ui-ux-creative-coding",
-            "terminal_status": "passed",
-            "stop_reason": "pass",
-            "prompt_hash": "hash-123",
-            "versions": {
-                "rubric_version": "2026-02-19",
-                "evaluator_version": "v1",
-            },
-            "counters": {"iterations_completed": 1},
-        }
-        (run_dir / "run.json").write_text(json.dumps(run_obj, indent=2), encoding="utf-8")
-
-        journal_row = {
-            "run_id": run_id,
-            "iteration_id": 1,
-            "reevaluation_report": {
-                "gate_decision": "pass",
-                "non_regression_passed": True,
-            },
-        }
-        (run_dir / "iteration_journal.jsonl").write_text(
-            json.dumps(journal_row) + "\n",
-            encoding="utf-8",
-        )
-
-        event_row = {
-            "event_type": "promotion_approved",
-            "run_id": run_id,
-        }
-        (run_dir / "events.jsonl").write_text(json.dumps(event_row) + "\n", encoding="utf-8")
-
-        counterfactual = {
-            "analysis_method_version": "counterfactual_uplift_v1",
-            "sample_size": 50,
-            "match_quality_metrics": {
-                "treated_unmatched_rate": 0.0,
-                "max_allowed_unmatched_rate": 0.15,
-                "valid": True,
-            },
-            "promotion_thresholds": {
-                "min_pairs_total": 40,
-                "ci_lower_min": 0.0,
-            },
-            "uplift_confidence_band": {
-                "method": "normal_approx_95",
-                "level": 0.95,
-                "lower": 0.01,
-                "upper": 0.09,
-            },
-            "promotion_decision": promotion_decision_state,
-            "auto_apply_decision": "hold",
-        }
-        decision = {
-            "schema_version": "1.1",
-            "run_id": run_id,
-            "lesson_id": "lesson_ui_001",
-            "decision": "approved",
-            "reviewer_ids": ["jamie"],
-            "expected_version": "v1",
-            "lesson_status": "active",
-            "canonical_version": "v1",
-            "lesson_source_path": "lesson.md",
-            "lesson_content_sha256": sha256_text(lesson_file.read_text(encoding="utf-8")),
-            "gate_decision": {
-                "runtime_gates_passed": True,
-                "provenance_complete": True,
-                "security_checklist_passed": True,
-            },
-            "provenance": {
-                "prompt_hash": "hash-123",
-                "rubric_version": "2026-02-19",
-                "evaluator_version": "v1",
-                "iteration_ids": [1],
-            },
-            "counterfactual_uplift": counterfactual,
-        }
-        decision_path = run_dir / "promotion_decision.json"
-        decision_path.write_text(json.dumps(decision, indent=2), encoding="utf-8")
-        return run_dir, decision_path
-
-    def _run_validator(self, run_dir: Path, decision_path: Path) -> dict:
+    def _run_script(self, run_dir: Path, decision_path: Path) -> Dict[str, Any]:
         proc = subprocess.run(
             [
                 sys.executable,
@@ -130,38 +51,201 @@ class ValidateRecursivePromotionTests(unittest.TestCase):
         self.assertNotEqual(proc.stdout.strip(), "", msg=proc.stderr)
         return json.loads(proc.stdout.strip().splitlines()[-1])
 
-    def test_approved_decision_passes_with_valid_counterfactual_contract(self) -> None:
-        run_dir, decision_path = self._build_run(promotion_decision_state="pass")
-        report = self._run_validator(run_dir, decision_path)
-        self.assertEqual(report["status"], "ok")
+    def _build_run(
+        self,
+        run_dir: Path,
+        decision_state: str,
+        decision_promotion: str,
+        *,
+        terminal_status: str = "passed",
+        stop_reason: str = "pass",
+        auto_capture_enabled: bool = True,
+        include_capture_artifacts: bool = True,
+    ) -> Dict[str, Any]:
+        run_id = run_dir.name
+        lesson_file = run_dir / "lesson.md"
+        lesson_file.write_text("Safe lesson body.\n", encoding="utf-8")
 
-    def test_approved_decision_fails_when_counterfactual_not_passed(self) -> None:
-        run_dir, decision_path = self._build_run(promotion_decision_state="hold")
-        report = self._run_validator(run_dir, decision_path)
-        self.assertEqual(report["status"], "fail")
-        self.assertTrue(
-            any("counterfactual_uplift.promotion_decision=pass" in err for err in report["errors"])
-        )
+        run_obj = {
+            "schema_version": "1.0",
+            "run_id": run_id,
+            "profile_id": "ui-ux-creative-coding",
+            "terminal_status": terminal_status,
+            "stop_reason": stop_reason,
+            "prompt_hash": "hash-123",
+            "scope_skill": "ui-ux-creative-coding",
+            "scope_profile": "ui",
+            "versions": {
+                "rubric_version": "2026-02-19",
+                "evaluator_version": "v1",
+            },
+            "counters": {"iterations_completed": 1},
+            "runtime_controls": {
+                "auto_capture_enabled": auto_capture_enabled,
+            },
+            "finished_at": "2026-02-26T12:00:00Z",
+        }
+        (run_dir / "run.json").write_text(json.dumps(run_obj, indent=2), encoding="utf-8")
 
-    def test_validator_handles_null_iteration_id_without_crashing(self) -> None:
-        run_dir, decision_path = self._build_run(promotion_decision_state="pass")
-        (run_dir / "iteration_journal.jsonl").write_text(
-            json.dumps(
-                {
-                    "run_id": "run_test_counterfactual",
-                    "iteration_id": None,
-                    "reevaluation_report": {
-                        "gate_decision": "pass",
-                        "non_regression_passed": True,
-                    },
-                }
+        journal_row = {
+            "run_id": run_id,
+            "iteration_id": 1,
+            "reevaluation_report": {
+                "gate_decision": "pass",
+                "non_regression_passed": True,
+            },
+        }
+        (run_dir / "iteration_journal.jsonl").write_text(json.dumps(journal_row) + "\n", encoding="utf-8")
+
+        if include_capture_artifacts:
+            (run_dir / "capture_record.json").write_text(
+                json.dumps({"schema_version": "1.0"}, indent=2),
+                encoding="utf-8",
             )
-            + "\n",
-            encoding="utf-8",
-        )
-        report = self._run_validator(run_dir, decision_path)
-        self.assertEqual(report["status"], "fail")
-        self.assertTrue(any("iteration_id must be an integer" in err for err in report["errors"]))
+            (run_dir / "evidence_packet.json").write_text(
+                json.dumps({"schema_version": "1.0", "completeness_score": 1.0}, indent=2),
+                encoding="utf-8",
+            )
+            (run_dir / "lesson_candidates.json").write_text(
+                json.dumps({"schema_version": "1.0", "items": []}, indent=2),
+                encoding="utf-8",
+            )
+
+        event_row = {
+            "schema_version": "1.0",
+            "event_id": f"evt-{run_id}",
+            "ts": "2026-02-26T12:00:00Z",
+            "run_id": run_id,
+            "skill_name": "ui-ux-creative-coding",
+            "task_profile": "ui",
+            "event_type": "promotion_approved",
+            "severity": "info",
+            "terminal_status": terminal_status,
+            "stop_reason": stop_reason,
+            "actor_id": "test-suite",
+            "evaluator_version": "v1",
+            "rubric_version": "2026-02-19",
+            "prompt_hash": "hash-123",
+        }
+        (run_dir / "events.jsonl").write_text(json.dumps(event_row) + "\n", encoding="utf-8")
+
+        decision = {
+            "schema_version": "1.1",
+            "run_id": run_id,
+            "lesson_id": f"lesson_{run_id}",
+            "decision": decision_state,
+            "reviewer_ids": ["jamie"],
+            "expected_version": "v1",
+            "lesson_status": "active",
+            "lesson_source_path": str(lesson_file),
+            "lesson_content_sha256": sha256_text(lesson_file.read_text(encoding="utf-8")),
+            "gate_decision": {
+                "runtime_gates_passed": True,
+                "provenance_complete": True,
+                "security_checklist_passed": True,
+            },
+            "provenance": {
+                "prompt_hash": "hash-123",
+                "rubric_version": "2026-02-19",
+                "evaluator_version": "v1",
+                "iteration_ids": [1],
+            },
+            "counterfactual_uplift": {
+                "analysis_method_version": "counterfactual_uplift_v1",
+                "sample_size": 50,
+                "match_quality_metrics": {
+                    "treated_unmatched_rate": 0.0,
+                    "max_allowed_unmatched_rate": 0.15,
+                    "valid": True,
+                },
+                "promotion_thresholds": {
+                    "min_pairs_total": 40,
+                    "ci_lower_min": 0.0,
+                },
+                "uplift_confidence_band": {
+                    "method": "normal_approx_95",
+                    "level": 0.95,
+                    "lower": 0.01,
+                    "upper": 0.09,
+                },
+                "promotion_decision": decision_promotion,
+                "auto_apply_decision": "hold",
+            },
+        }
+        decision_path = run_dir / "promotion_decision.json"
+        decision_path.write_text(json.dumps(decision, indent=2), encoding="utf-8")
+        return decision
+
+    def test_approved_decision_passes_with_valid_counterfactual_contract(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="validate-promotion-") as tmpdir:
+            run_dir = Path(tmpdir) / "run-approved-valid"
+            run_dir.mkdir()
+            self._build_run(
+                run_dir=run_dir,
+                decision_state="approved",
+                decision_promotion="pass",
+            )
+            report = self._run_script(run_dir, run_dir / "promotion_decision.json")
+            self.assertEqual(report["status"], "ok")
+
+    def test_approved_decision_rejects_nonpass_counterfactual(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="validate-promotion-") as tmpdir:
+            run_dir = Path(tmpdir) / "run-approved-hold"
+            run_dir.mkdir()
+            self._build_run(
+                run_dir=run_dir,
+                decision_state="approved",
+                decision_promotion="hold",
+            )
+            report = self._run_script(run_dir, run_dir / "promotion_decision.json")
+            self.assertEqual(report["status"], "fail")
+            self.assertIn("E_APPROVED_COUNTERFACTUAL_NOT_PASS", _to_row_error_codes(report))
+
+    def test_validator_catches_non_integer_iteration_ids(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="validate-promotion-") as tmpdir:
+            run_dir = Path(tmpdir) / "run-invalid-journal"
+            run_dir.mkdir()
+            self._build_run(
+                run_dir=run_dir,
+                decision_state="approved",
+                decision_promotion="pass",
+            )
+            (run_dir / "iteration_journal.jsonl").write_text(
+                json.dumps(
+                    {
+                        "run_id": "run-invalid-journal",
+                        "iteration_id": None,
+                        "reevaluation_report": {
+                            "gate_decision": "pass",
+                            "non_regression_passed": True,
+                        },
+                    }
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            report = self._run_script(run_dir, run_dir / "promotion_decision.json")
+            self.assertEqual(report["status"], "fail")
+            self.assertIn("E_JOURNAL_ITERATION_ID_INVALID", _to_row_error_codes(report))
+
+    def test_validator_rejects_blocked_terminal_without_required_blocker_artifacts(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="validate-promotion-") as tmpdir:
+            run_dir = Path(tmpdir) / "run-blocker-missing"
+            run_dir.mkdir()
+            self._build_run(
+                run_dir=run_dir,
+                decision_state="candidate",
+                decision_promotion="hold",
+                terminal_status="failed",
+                stop_reason="dependency_missing",
+            )
+
+            # Do not write run_blocker.json or rollback_recommendation.json.
+            report = self._run_script(run_dir, run_dir / "promotion_decision.json")
+            error_codes = _to_row_error_codes(report)
+            self.assertEqual(report["status"], "fail")
+            self.assertIn("E_BLOCKER_ARTIFACT_MISSING", error_codes)
+            self.assertIn("E_BLOCKER_EVENT_MISMATCH", error_codes)
 
 
 if __name__ == "__main__":

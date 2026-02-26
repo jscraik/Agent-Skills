@@ -8,10 +8,5 @@
 - None.
 
 ## Flag for deletion
-- Remove references to non-existent scaffold protocol files from:
-  - `product/docs/agents-md/SKILL.md`
-  - `product/docs/agents-md/references/contract.yaml`
-  - `product/docs/agents-md/references/evals.yaml`
-  - `README.md`
-- Drop this entry once deletion is committed.
-- Verify all links in `docs/agents/*.md` before adding new top-level sections.
+- Keep this list to short, concrete items. Remove entries only when the owning cleanup is complete.
+- Remove stale cleanup references to files that no longer require deletion.

@@ -1,29 +1,6 @@
 {
   "status": "ok",
-  "validated": 2,
+  "validated": 0,
   "failed": 0,
-  "results": [
-    {
-      "validator": "recursive_promotion",
-      "run_id": "run_20260220T150021Z_518880",
-      "decision_file": "artifacts/skill-graphs/runs/run_20260220T150021Z_518880/promotion_decision.json",
-      "status": "ok",
-      "error_count": 0,
-      "warning_count": 0,
-      "errors": [],
-      "warnings": [],
-      "decision": "approved"
-    },
-    {
-      "validator": "recursive_promotion",
-      "run_id": "run_20260220T195545Z_8799c2",
-      "decision_file": "artifacts/skill-graphs/runs/run_20260220T195545Z_8799c2/promotion_decision.json",
-      "status": "ok",
-      "error_count": 0,
-      "warning_count": 0,
-      "errors": [],
-      "warnings": [],
-      "decision": "draft"
-    }
-  ]
+  "results": []
 }

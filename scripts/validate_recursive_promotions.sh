@@ -7,7 +7,14 @@ cd "$repo_root"
 changed_only=0
 base_sha=""
 head_sha="HEAD"
+strict_runs=0
 report_json="artifacts/skill-graphs/pilot/promotion-validation-report.json"
+runs_root="artifacts/skill-graphs/runs"
+parity_manifest="artifacts/skill-graphs/pilot/artifact-parity-manifest.json"
+status=0
+changed_run_count=0
+
+changed_run_dirs=()
 
 require_option_value() {
   local opt="$1"
@@ -26,8 +33,35 @@ Options:
   --changed-only         Validate only changed promotion_decision.json files in git diff
   --base-sha SHA         Base SHA for changed-only mode
   --head-sha SHA         Head SHA for changed-only mode (default: HEAD)
+  --runs-root PATH       Runs root for strict run-dir parity checks (default: artifacts/skill-graphs/runs)
   --report-json PATH     Output JSON report path
+  --strict-runs          Enable strict run-parity checks for changed run directories
+  --parity-manifest PATH Path for artifact-parity manifest output
 USAGE
+}
+
+collect_changed_run_dirs() {
+  local file
+  while IFS= read -r file; do
+    [[ -z "$file" ]] && continue
+    [[ "$file" == "$runs_root"/* ]] || continue
+  local rel="${file#"${runs_root}"/}"
+    local run_dir_name="${rel%%/*}"
+    [[ "$run_dir_name" == run_* ]] || continue
+    changed_run_dirs+=("$runs_root/$run_dir_name")
+    changed_run_count=$((changed_run_count + 1))
+  done < <(git diff --name-only "$base_sha" "$head_sha")
+}
+
+collect_changed_decision_files() {
+  local file
+  while IFS= read -r file; do
+    [[ -z "$file" ]] && continue
+    [[ "$file" == "$runs_root"/run_*/promotion_decision.json ]] || continue
+    if [[ -f "$file" ]]; then
+      promotion_files+=("$file")
+    fi
+  done < <(git diff --name-only "$base_sha" "$head_sha")
 }
 
 while (($# > 0)); do
@@ -49,6 +83,20 @@ while (($# > 0)); do
     --report-json)
       require_option_value "$1" "${2:-}"
       report_json="$2"
+      shift 2
+      ;;
+    --runs-root)
+      require_option_value "$1" "${2:-}"
+      runs_root="$2"
+      shift 2
+      ;;
+    --strict-runs)
+      strict_runs=1
+      shift
+      ;;
+    --parity-manifest)
+      require_option_value "$1" "${2:-}"
+      parity_manifest="$2"
       shift 2
       ;;
     --help|-h)
@@ -77,29 +125,28 @@ if [[ "$changed_only" -eq 1 ]]; then
     exit 2
   fi
 
-  while IFS= read -r file; do
-    [[ -z "$file" ]] && continue
-    [[ "$file" == *"/promotion_decision.json" ]] || continue
-    if [[ -f "$file" ]]; then
-      promotion_files+=("$file")
-    fi
-  done < <(git diff --name-only "$base_sha" "$head_sha")
+  collect_changed_run_dirs
+  collect_changed_decision_files
 else
   while IFS= read -r file; do
     [[ -z "$file" ]] && continue
     promotion_files+=("$file")
-  done < <(python3 - <<'PY'
+  done < <(python3 - "$runs_root" <<'PY'
+import sys
 from pathlib import Path
-for p in sorted(Path("artifacts/skill-graphs/runs").glob("run_*/promotion_decision.json")):
+
+runs_root = Path(sys.argv[1])
+for p in sorted(runs_root.glob("run_*/promotion_decision.json")):
     print(p.as_posix())
 PY
 )
 fi
 
 if [[ ${#promotion_files[@]} -eq 0 ]]; then
-  echo "[promotion-ci] no promotion_decision.json files to validate"
-  mkdir -p "$(dirname "$report_json")"
-  python3 - <<'PY' "$report_json"
+  if [[ "$strict_runs" -ne 1 ]]; then
+    echo "[promotion-ci] no promotion_decision.json files to validate"
+    mkdir -p "$(dirname "$report_json")"
+    python3 - <<'PY' "$report_json"
 import json, sys
 from pathlib import Path
 path = Path(sys.argv[1])
@@ -111,9 +158,59 @@ path.write_text(json.dumps({
 }, indent=2) + "\n", encoding="utf-8")
 PY
   exit 0
-fi
+  fi
 
-status=0
+  if [[ "$changed_only" -eq 1 ]]; then
+    if [[ "$changed_run_count" -eq 0 ]]; then
+      echo "[promotion-ci] strict run-parity validation skipped (no changed run directories)"
+      mkdir -p "$(dirname "$report_json")"
+      python3 - <<'PY' "$report_json"
+import json
+import sys
+from pathlib import Path
+
+path = Path(sys.argv[1])
+path.write_text(
+    json.dumps(
+        {
+            "status": "ok",
+            "validated": 0,
+            "failed": 0,
+            "results": [],
+        },
+        indent=2,
+    )
+    + "\n",
+    encoding="utf-8",
+)
+PY
+      mkdir -p "$(dirname "$parity_manifest")"
+      if ! python3 scripts/verify_recursive_skill_graph_artifacts.py \
+        --manifest "$parity_manifest" \
+        --runs-root "$runs_root" \
+        > /dev/null; then
+        :
+      fi
+      exit 0
+    fi
+  fi
+
+  mkdir -p "$(dirname "$parity_manifest")"
+  strict_args=("--strict" "--run-state-check" "--manifest" "$parity_manifest" "--runs-root" "$runs_root")
+  if [[ "$changed_only" -eq 1 && "$changed_run_count" -gt 0 ]]; then
+    for run_dir in "${changed_run_dirs[@]}"; do
+      strict_args+=("--run-dir" "$run_dir")
+    done
+  fi
+  if ! python3 scripts/verify_recursive_skill_graph_artifacts.py "${strict_args[@]}"; then
+    echo "[promotion-ci] strict run-parity validation failed" >&2
+    status=1
+  fi
+  if [[ "$status" -ne 0 ]]; then
+    exit 2
+  fi
+  exit 0
+fi
 results_jsonl="$(mktemp)"
 trap 'rm -f "$results_jsonl"' EXIT
 
@@ -152,6 +249,20 @@ report = {
 }
 out_path.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
 PY
+
+if [[ "$strict_runs" -eq 1 ]]; then
+  mkdir -p "$(dirname "$parity_manifest")"
+  strict_args=("--strict" "--run-state-check" "--manifest" "$parity_manifest" "--runs-root" "$runs_root")
+  if [[ "$changed_only" -eq 1 && "$changed_run_count" -gt 0 ]]; then
+    for run_dir in "${changed_run_dirs[@]}"; do
+      strict_args+=("--run-dir" "$run_dir")
+    done
+  fi
+  if ! python3 scripts/verify_recursive_skill_graph_artifacts.py "${strict_args[@]}"; then
+    echo "[promotion-ci] strict run-parity validation failed" >&2
+    status=1
+  fi
+fi
 
 python3 - <<'PY'
 import json
