@@ -29,8 +29,10 @@ cd "$repo_root"
 
 skills_dir="$repo_root/skills"
 system_skills_dir="$repo_root/skills-system"
+antigravity_skills_dir="$repo_root/skills-antigravity"
 
 mkdir -p "$skills_dir"
+mkdir -p "$antigravity_skills_dir"
 
 cleanup_paths=()
 cleanup_on_exit() {
@@ -154,6 +156,26 @@ while IFS= read -r skill_path; do
   fi
   ln -s "$skill_dir_abs" "$skills_dir/$skill_name"
 done < <(all_skill_files_cmd)
+
+# Build a strict Antigravity-compatible projection:
+# - flat first-level skill folders only
+# - each folder must contain SKILL.md
+# This avoids loader confusion from metadata folders like .system/ or helper repos.
+find "$antigravity_skills_dir" -mindepth 1 -maxdepth 1 -type l -exec rm -f {} +
+find "$antigravity_skills_dir" -mindepth 1 -maxdepth 1 -type f -exec rm -f {} +
+
+for skill_link in "$skills_dir"/*; do
+  if [ ! -L "$skill_link" ]; then
+    continue
+  fi
+  if [ ! -f "$skill_link/SKILL.md" ]; then
+    continue
+  fi
+
+  skill_name="$(basename "$skill_link")"
+  target_dir="$(cd "$skill_link" && pwd)"
+  ln -s "$target_dir" "$antigravity_skills_dir/$skill_name"
+done
 
 # Regenerate root SKILL.md index dynamically from skill frontmatter.
 generate_skill_index() {
@@ -436,29 +458,31 @@ remove_legacy_symlink "$HOME/.gemini/skills"
 
 # Sync to user-level tool directories (Claude Code + OpenAI Codex/Agents)
 sync_user_skills() {
-  local target_dir="$1"
+  local source_dir="$1"
+  local target_dir="$2"
   mkdir -p "$(dirname "$target_dir")"
   if [ -L "$target_dir" ]; then
     # Update existing symlink
-    ln -sfn "$skills_dir" "$target_dir"
-    echo "[OK] Updated symlink: $target_dir -> $skills_dir"
+    ln -sfn "$source_dir" "$target_dir"
+    echo "[OK] Updated symlink: $target_dir -> $source_dir"
   elif [ -e "$target_dir" ] && [ ! -L "$target_dir" ]; then
     # Exists but is not a symlink - warn and skip
     echo "[WARN] $target_dir exists but is not a symlink (skipping)"
     echo "       Remove it manually to enable automatic sync: rm -rf $target_dir"
   else
     # Create new symlink
-    ln -s "$skills_dir" "$target_dir"
-    echo "[OK] Created symlink: $target_dir -> $skills_dir"
+    ln -s "$source_dir" "$target_dir"
+    echo "[OK] Created symlink: $target_dir -> $source_dir"
   fi
 }
 
 # Sync to Claude Code, OpenAI Codex/Agents, and Gemini Antigravity
-# sync_user_skills "$HOME/.claude/skills"
-# sync_user_skills "$HOME/.agent/skills"
-sync_user_skills "$HOME/.agents/skills"
-sync_user_skills "$HOME/.codex/skills"
-# sync_user_skills "$HOME/.gemini/antigravity/skills"
+# sync_user_skills "$skills_dir" "$HOME/.claude/skills"
+# sync_user_skills "$skills_dir" "$HOME/.agent/skills"
+sync_user_skills "$skills_dir" "$HOME/.agents/skills"
+sync_user_skills "$skills_dir" "$HOME/.codex/skills"
+sync_user_skills "$antigravity_skills_dir" "$HOME/.gemini/antigravity/skills"
+sync_user_skills "$antigravity_skills_dir" "$HOME/.antigravity/skills"
 
 chmod +x "$repo_root/scripts/sync_skills.sh"
 
