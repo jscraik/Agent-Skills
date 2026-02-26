@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import sys
 import json
 import statistics
 from dataclasses import dataclass
@@ -41,6 +42,7 @@ class RunRecord:
     final_overall: float
     quality_uplift: float
     critical_non_regression_passed: bool
+    non_regression_recovered: bool  # True if intermediate failures existed but final iteration passed
     budget_compliant: bool
     first_pass_accepted: bool
     evaluator_flip_rate: float
@@ -58,6 +60,7 @@ class RunRecord:
     uplift_promotion_decision: Optional[str]
     uplift_auto_apply_decision: Optional[str]
     uplift_sample_size: Optional[int]
+    queue_reason: Optional[str]
 
 
 @dataclass(frozen=True)
@@ -79,6 +82,7 @@ class WindowSummary:
     quality_uplift_median: float
     quality_uplift_positive_rate: float
     critical_non_regression_compliance: float
+    non_regression_recovered_rate: float  # Runs with intermediate failures that recovered
     budget_compliance: float
     evaluator_flip_rate: float
     capture_records_written: int
@@ -161,6 +165,28 @@ def load_jsonl(path: Path) -> List[Dict[str, Any]]:
     return rows
 
 
+def infer_queue_reason(
+    *,
+    run_obj: Dict[str, Any],
+    capture_present: bool,
+    confidence: Optional[float],
+    evidence_completeness: Optional[float],
+    candidate_count: int,
+) -> Optional[str]:
+    if not capture_present:
+        return "missing_capture_outputs"
+    if confidence is None:
+        return "missing_confidence"
+    if evidence_completeness is None:
+        return "missing_evidence_completeness"
+    if candidate_count <= 0:
+        return "no_candidates"
+
+    if not str(run_obj.get("terminal_status", "")).strip() == "passed":
+        return "non_passing_run"
+    return None
+
+
 def validate_event_envelope(events: List[Dict[str, Any]], run_id: str) -> List[str]:
     errors: List[str] = []
     required = [
@@ -232,6 +258,19 @@ def load_run_record(run_dir: Path) -> Optional[RunRecord]:
         bool(as_dict(row.get("reevaluation_report")).get("non_regression_passed", False)) for row in journals
     )
 
+    # Check if any intermediate iteration failed non-regression but final iteration passed
+    non_regression_recovered = False
+    if journals and not non_regression_all:
+        final_reeval = as_dict(journals[-1].get("reevaluation_report", {}))
+        final_passed = bool(final_reeval.get("non_regression_passed", False))
+        if final_passed:
+            # At least one intermediate failed, but final passed
+            any_intermediate_failed = any(
+                not bool(as_dict(row.get("reevaluation_report", {})).get("non_regression_passed", False))
+                for row in journals[:-1]
+            )
+            non_regression_recovered = any_intermediate_failed
+
     terminal_status = str(run.get("terminal_status", "failed"))
     stop_reason = str(run.get("stop_reason", "policy_failed"))
     promotion_path = run_dir / "promotion_decision.json"
@@ -292,6 +331,13 @@ def load_run_record(run_dir: Path) -> Optional[RunRecord]:
         uplift_auto_apply_decision = auto_apply_state or None
         if "sample_size" in uplift_obj:
             uplift_sample_size = safe_int(uplift_obj.get("sample_size"), 0)
+    queue_reason = infer_queue_reason(
+        run_obj=run,
+        capture_present=capture_record_present,
+        confidence=confidence_score,
+        evidence_completeness=evidence_completeness_score,
+        candidate_count=candidate_count,
+    )
 
     return RunRecord(
         run_id=str(run.get("run_id", run_dir.name)),
@@ -305,6 +351,7 @@ def load_run_record(run_dir: Path) -> Optional[RunRecord]:
         final_overall=final_overall,
         quality_uplift=round(final_overall - initial_overall, 3),
         critical_non_regression_passed=non_regression_all,
+        non_regression_recovered=non_regression_recovered,
         budget_compliant=stop_reason != "budget_exhausted",
         first_pass_accepted=terminal_status == "passed" and iter_count == 1,
         evaluator_flip_rate=round(flip_count / len(journals), 3),
@@ -322,6 +369,7 @@ def load_run_record(run_dir: Path) -> Optional[RunRecord]:
         uplift_promotion_decision=uplift_promotion_decision,
         uplift_auto_apply_decision=uplift_auto_apply_decision,
         uplift_sample_size=uplift_sample_size,
+        queue_reason=queue_reason,
     )
 
 
@@ -366,6 +414,7 @@ def summarize(records: List[RunRecord]) -> WindowSummary:
             quality_uplift_median=0.0,
             quality_uplift_positive_rate=0.0,
             critical_non_regression_compliance=0.0,
+            non_regression_recovered_rate=0.0,
             budget_compliance=0.0,
             evaluator_flip_rate=0.0,
             capture_records_written=0,
@@ -408,6 +457,7 @@ def summarize(records: List[RunRecord]) -> WindowSummary:
     first_pass = sum(1 for r in records if r.first_pass_accepted)
     positive_uplift = sum(1 for r in records if r.quality_uplift > 0)
     non_reg_ok = sum(1 for r in records if r.critical_non_regression_passed)
+    non_reg_recovered = sum(1 for r in records if r.non_regression_recovered)
     budget_ok = sum(1 for r in records if r.budget_compliant)
     capture_records_written = sum(1 for r in records if r.capture_record_present)
     auto_capture_enabled_runs = sum(1 for r in records if r.auto_capture_enabled)
@@ -453,6 +503,7 @@ def summarize(records: List[RunRecord]) -> WindowSummary:
         quality_uplift_median=round(statistics.median(uplift_values), 4),
         quality_uplift_positive_rate=round(positive_uplift / total, 4),
         critical_non_regression_compliance=round(non_reg_ok / total, 4),
+        non_regression_recovered_rate=round(non_reg_recovered / total, 4),
         budget_compliance=round(budget_ok / total, 4),
         evaluator_flip_rate=round(sum(flip_values) / total, 4),
         capture_records_written=capture_records_written,
@@ -759,6 +810,51 @@ def to_dict(summary: WindowSummary) -> Dict[str, Any]:
     }
 
 
+def write_text_artifact(path: Path, content: str, *, label: str) -> None:
+    path.write_text(content, encoding="utf-8")
+    if not path.exists():
+        raise RuntimeError(f"{label} output missing: {path}")
+    if path.stat().st_size == 0:
+        raise RuntimeError(f"{label} output empty: {path}")
+
+
+def write_json_artifact(path: Path, value: Any, *, label: str) -> None:
+    path.write_text(json.dumps(value, indent=2) + "\n", encoding="utf-8")
+    if not path.exists():
+        raise RuntimeError(f"{label} output missing: {path}")
+    if path.stat().st_size == 0:
+        raise RuntimeError(f"{label} output empty: {path}")
+    json.loads(path.read_text(encoding="utf-8"))
+
+
+def write_jsonl_artifact(
+    path: Path,
+    rows: List[Dict[str, Any]],
+    *,
+    label: str,
+    allow_empty: bool = False,
+) -> None:
+    path.write_text("".join(json.dumps(row, sort_keys=True) + "\n" for row in rows), encoding="utf-8")
+    if not path.exists():
+        raise RuntimeError(f"{label} output missing: {path}")
+    if (not allow_empty) and path.stat().st_size == 0:
+        raise RuntimeError(f"{label} output empty: {path}")
+    for i, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            json.loads(line)
+        except Exception as exc:
+            raise RuntimeError(f"{label} invalid json on line {i}: {exc}") from exc
+
+
+def write_markdown_artifact(path: Path, content: str, *, label: str) -> str:
+    text = content if content.endswith("\n") else f"{content}\n"
+    write_text_artifact(path, text, label=label)
+    return text
+
+
 def main() -> int:
     global PILOT_PROFILES
     args = parse_args()
@@ -878,9 +974,6 @@ def main() -> int:
     failure_patterns_path.parent.mkdir(parents=True, exist_ok=True)
     promotion_queue_path.parent.mkdir(parents=True, exist_ok=True)
 
-    shadow_md_path.write_text(shadow_md_text, encoding="utf-8")
-    readout_md_path.write_text(readout_md_text, encoding="utf-8")
-
     dashboard = {
         "generated_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
         "runs_root": (
@@ -912,6 +1005,7 @@ def main() -> int:
                 "confidence_bucket": r.confidence_bucket,
                 "evidence_completeness_score": r.evidence_completeness_score,
                 "candidate_count": r.candidate_count,
+                "queue_reason": r.queue_reason,
                 "capture_record_present": r.capture_record_present,
                 "rollout_mode": r.rollout_mode,
                 "auto_capture_enabled": r.auto_capture_enabled,
@@ -928,79 +1022,115 @@ def main() -> int:
             for r in current_records
         ],
         "skipped_runs": skipped_runs,
+        "artifact_outputs": {
+            "shadow_md": {"path": str(shadow_md_path), "generated": False},
+            "readout_md": {"path": str(readout_md_path), "generated": False},
+            "dashboard_json": {"path": str(out_json_path), "generated": False},
+            "daily_health_md": {"path": str(daily_health_path), "generated": False},
+            "failure_patterns_jsonl": {"path": str(failure_patterns_path), "generated": False},
+            "promotion_queue_md": {"path": str(promotion_queue_path), "generated": False},
+        },
     }
 
-    out_json_path.write_text(json.dumps(dashboard, indent=2), encoding="utf-8")
+    try:
+        write_markdown_artifact(shadow_md_path, shadow_md_text, label="shadow dashboard markdown")
+        dashboard["artifact_outputs"]["shadow_md"]["generated"] = True
 
-    daily_lines: List[str] = [
-        "# Daily Skill Health",
-        "",
-        f"- Generated at: `{dashboard['generated_at']}`",
-        f"- Window: `{current_window}`",
-        f"- Runs total: `{current_summary.runs_total}`",
-        f"- Decision: `{decision}`",
-        f"- Critical non-regression compliance: `{fmt_pct(current_summary.critical_non_regression_compliance)}`",
-        f"- Budget compliance: `{fmt_pct(current_summary.budget_compliance)}`",
-        f"- Capture coverage: `{fmt_pct(current_summary.capture_coverage_rate)}` ({current_summary.capture_records_written}/{current_summary.runs_total})",
-        f"- Confidence buckets: `high={current_summary.confidence_bucket_counts['high']}` `medium={current_summary.confidence_bucket_counts['medium']}` `low={current_summary.confidence_bucket_counts['low']}` `unknown={current_summary.confidence_bucket_counts['unknown']}`",
-        f"- Injection usage: `{fmt_pct(current_summary.injection_usage_rate)}` ({current_summary.runs_with_injection}/{current_summary.runs_total})",
-        f"- Injection suppressed by controls: `{current_summary.suppressed_injection_runs}`",
-        f"- Uplift promotion decisions: `pass={current_summary.uplift_promotion_decision_counts['pass']}` `hold={current_summary.uplift_promotion_decision_counts['hold']}` `insufficient_data={current_summary.uplift_promotion_decision_counts['insufficient_data']}`",
-        f"- Uplift auto-apply decisions: `pass={current_summary.uplift_auto_apply_decision_counts['pass']}` `hold={current_summary.uplift_auto_apply_decision_counts['hold']}` `insufficient_data={current_summary.uplift_auto_apply_decision_counts['insufficient_data']}`",
-        f"- Event envelope errors: `{len(event_errors)}`",
-        "",
-    ]
-    if event_errors:
-        daily_lines.append("## Event envelope errors")
-        daily_lines.append("")
-        for err in event_errors[:50]:
-            daily_lines.append(f"- {err}")
-        daily_lines.append("")
-    daily_health_path.write_text("\n".join(daily_lines) + "\n", encoding="utf-8")
+        write_markdown_artifact(readout_md_path, readout_md_text, label="readout markdown")
+        dashboard["artifact_outputs"]["readout_md"]["generated"] = True
 
-    failure_rows: List[Dict[str, Any]] = []
-    for r in current_records:
-        if r.terminal_status != "passed" or r.stop_reason != "pass":
-            failure_rows.append(
-                {
-                    "schema_version": "1.0",
-                    "run_id": r.run_id,
-                    "profile_id": r.profile_id,
-                    "terminal_status": r.terminal_status,
-                    "stop_reason": r.stop_reason,
-                    "iterations_completed": r.iterations_completed,
-                    "quality_uplift": r.quality_uplift,
-                    "finished_at": r.finished_at.isoformat().replace("+00:00", "Z"),
-                }
-            )
-    failure_patterns_path.write_text(
-        "".join(json.dumps(row, sort_keys=True) + "\n" for row in failure_rows),
-        encoding="utf-8",
-    )
+        daily_lines: List[str] = [
+            "# Daily Skill Health",
+            "",
+            f"- Generated at: `{dashboard['generated_at']}`",
+            f"- Window: `{current_window}`",
+            f"- Runs total: `{current_summary.runs_total}`",
+            f"- Decision: `{decision}`",
+            f"- Critical non-regression compliance: `{fmt_pct(current_summary.critical_non_regression_compliance)}`",
+            f"- Non-regression recovered: `{fmt_pct(current_summary.non_regression_recovered_rate)}` (intermediate failures recovered)",
+            f"- Budget compliance: `{fmt_pct(current_summary.budget_compliance)}`",
+            f"- Capture coverage: `{fmt_pct(current_summary.capture_coverage_rate)}` ({current_summary.capture_records_written}/{current_summary.runs_total})",
+            f"- Confidence buckets: `high={current_summary.confidence_bucket_counts['high']}` `medium={current_summary.confidence_bucket_counts['medium']}` `low={current_summary.confidence_bucket_counts['low']}` `unknown={current_summary.confidence_bucket_counts['unknown']}`",
+            f"- Injection usage: `{fmt_pct(current_summary.injection_usage_rate)}` ({current_summary.runs_with_injection}/{current_summary.runs_total})",
+            f"- Injection suppressed by controls: `{current_summary.suppressed_injection_runs}`",
+            f"- Uplift promotion decisions: `pass={current_summary.uplift_promotion_decision_counts['pass']}` `hold={current_summary.uplift_promotion_decision_counts['hold']}` `insufficient_data={current_summary.uplift_promotion_decision_counts['insufficient_data']}`",
+            f"- Uplift auto-apply decisions: `pass={current_summary.uplift_auto_apply_decision_counts['pass']}` `hold={current_summary.uplift_auto_apply_decision_counts['hold']}` `insufficient_data={current_summary.uplift_auto_apply_decision_counts['insufficient_data']}`",
+            f"- Event envelope errors: `{len(event_errors)}`",
+            "",
+        ]
+        if event_errors:
+            daily_lines.append("## Event envelope errors")
+            daily_lines.append("")
+            for err in event_errors[:50]:
+                daily_lines.append(f"- {err}")
+            daily_lines.append("")
+        write_markdown_artifact(
+            daily_health_path,
+            "\n".join(daily_lines),
+            label="daily health markdown",
+        )
+        dashboard["artifact_outputs"]["daily_health_md"]["generated"] = True
 
-    queue_lines = ["# Promotion Queue", ""]
-    queue_items = [
-        r for r in current_records
-        if r.terminal_status == "passed" and not promotion_approved_by_run.get(r.run_id, False)
-    ]
-    if not queue_items:
-        queue_lines.append("- No pending promotions in window.")
-    else:
-        for r in queue_items:
-            confidence_str = "n/a" if r.confidence_score is None else f"{r.confidence_score:.3f}"
-            bucket_str = r.confidence_bucket or "n/a"
-            completeness_str = (
-                "n/a" if r.evidence_completeness_score is None else f"{r.evidence_completeness_score:.3f}"
-            )
-            queue_lines.append(
-                f"- `{r.run_id}` | profile `{r.profile_id}` | confidence `{confidence_str}` (`{bucket_str}`)"
-                f" | evidence completeness `{completeness_str}` | candidates `{r.candidate_count}`"
-                f" | rollout `{r.rollout_mode}` | injected `{r.injected_lesson_count}`"
-                f" | uplift `{r.uplift_promotion_decision or 'unknown'}/{r.uplift_auto_apply_decision or 'unknown'}`"
-                f" | finished `{r.finished_at.isoformat().replace('+00:00', 'Z')}`"
-            )
-    queue_lines.append("")
-    promotion_queue_path.write_text("\n".join(queue_lines), encoding="utf-8")
+        failure_rows: List[Dict[str, Any]] = []
+        for r in current_records:
+            if r.terminal_status != "passed" or r.stop_reason != "pass":
+                failure_rows.append(
+                    {
+                        "schema_version": "1.0",
+                        "run_id": r.run_id,
+                        "profile_id": r.profile_id,
+                        "terminal_status": r.terminal_status,
+                        "stop_reason": r.stop_reason,
+                        "iterations_completed": r.iterations_completed,
+                        "quality_uplift": r.quality_uplift,
+                        "finished_at": r.finished_at.isoformat().replace("+00:00", "Z"),
+                    }
+                )
+        write_jsonl_artifact(
+            failure_patterns_path,
+            failure_rows,
+            label="failure-pattern candidates",
+            allow_empty=True,
+        )
+        dashboard["artifact_outputs"]["failure_patterns_jsonl"]["generated"] = True
+
+        queue_lines = ["# Promotion Queue", ""]
+        queue_items = [
+            r for r in current_records
+            if r.terminal_status == "passed" and not promotion_approved_by_run.get(r.run_id, False)
+        ]
+        if not queue_items:
+            queue_lines.append("- No pending promotions in window.")
+        else:
+            for r in queue_items:
+                confidence_str = "n/a" if r.confidence_score is None else f"{r.confidence_score:.3f}"
+                bucket_str = r.confidence_bucket or "n/a"
+                completeness_str = (
+                    "n/a" if r.evidence_completeness_score is None else f"{r.evidence_completeness_score:.3f}"
+                )
+                reason = r.queue_reason or "unknown"
+                queue_lines.append(
+                    f"- `{r.run_id}` | profile `{r.profile_id}` | confidence `{confidence_str}` (`{bucket_str}`)"
+                    f" | evidence completeness `{completeness_str}` | candidates `{r.candidate_count}`"
+                    f" | rollout `{r.rollout_mode}` | injected `{r.injected_lesson_count}`"
+                    f" | uplift `{r.uplift_promotion_decision or 'unknown'}/{r.uplift_auto_apply_decision or 'unknown'}`"
+                    f" | reason `{reason}`"
+                    f" | finished `{r.finished_at.isoformat().replace('+00:00', 'Z')}`"
+                )
+        queue_lines.append("")
+        write_markdown_artifact(
+            promotion_queue_path,
+            "\n".join(queue_lines),
+            label="promotion queue markdown",
+        )
+        dashboard["artifact_outputs"]["promotion_queue_md"]["generated"] = True
+
+        write_json_artifact(out_json_path, dashboard, label="shadow dashboard json")
+        dashboard["artifact_outputs"]["dashboard_json"]["generated"] = True
+
+    except Exception as exc:
+        print(f"[shadow-report] fatal: failed to write outputs: {exc}", file=sys.stderr)
+        return 2
 
     print(f"[shadow-report] runs={len(run_records)} current_runs={len(current_records)}")
     print(f"[shadow-report] decision={decision}")
