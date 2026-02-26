@@ -3,6 +3,7 @@ name: prd-to-api-lite
 description: Generate a minimal API outline from a PRD (endpoints + example requests/responses).
   Use for demos or early alignment, not full contracts. Use when the user requests
   this capability.
+knowledge_graph_profile: references/task-profile.json
 ---
 
 # PRD to API Lite

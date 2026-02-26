@@ -1,6 +1,7 @@
 ---
 name: codex-home-audit
 description: Audit and improve a Codex home directory (AGENTS.md, USER_PROFILE, instructions/, rules/, config.toml) when you want a dated report of risks, duplication, and recommended cleanups.
+knowledge_graph_profile: references/task-profile.json
 ---
 
 # Codex Home Audit

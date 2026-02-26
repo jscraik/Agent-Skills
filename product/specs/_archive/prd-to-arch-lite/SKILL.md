@@ -3,6 +3,7 @@ name: prd-to-arch-lite
 description: Generate a lite architecture snapshot from a PRD (minimal components
   + primary flow). Use for demo-grade guidance, not full governance. Use when the
   user requests this capability.
+knowledge_graph_profile: references/task-profile.json
 ---
 
 # PRD to Architecture Lite

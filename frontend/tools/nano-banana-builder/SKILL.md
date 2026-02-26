@@ -1,6 +1,7 @@
 ---
 name: nano-banana-builder
 description: "Build web applications that use Google's Nano Banana image APIs for generation and iterative editing workflows. Use when a user asks to prototype or ship a Nano Banana powered image product from text-to-image to multi-turn editing."
+knowledge_graph_profile: references/task-profile.json
 ---
 
 # Nano Banana Builder

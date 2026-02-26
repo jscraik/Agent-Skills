@@ -2,6 +2,7 @@
 name: architecture-interview
 description: Plan and review architecture decisions via a structured interview and
   ADR output. Use when choosing between system design alternatives.
+knowledge_graph_profile: references/task-profile.json
 ---
 
 # architecture-interview (wrapper)

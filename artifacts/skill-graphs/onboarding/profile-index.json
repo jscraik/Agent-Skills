@@ -1,0 +1,1063 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-02-26T17:37:29Z",
+  "decision_date": "2026-02-26",
+  "active_skill_count": 116,
+  "expected_count": 116,
+  "summary": {
+    "valid_count": 116,
+    "invalid_count": 0,
+    "missing_profile_count": 0,
+    "missing_binding_count": 0,
+    "wave_counts": {
+      "wave-1-manual": 13,
+      "wave-2-co-pilot": 103
+    }
+  },
+  "skills": [
+    {
+      "skill_path": "auth/best-practices/SKILL.md",
+      "scope_skill": "auth/best-practices",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "auth/best-practices/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "auth/create-auth/SKILL.md",
+      "scope_skill": "auth/create-auth",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "auth/create-auth/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "backend/backend-engineer/SKILL.md",
+      "scope_skill": "backend/backend-engineer",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "backend/backend-engineer/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "backend/cli-spec/SKILL.md",
+      "scope_skill": "backend/cli-spec",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "backend/cli-spec/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "backend/mcp-builder/SKILL.md",
+      "scope_skill": "backend/mcp-builder",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "backend/mcp-builder/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "backend/mkit-builder/SKILL.md",
+      "scope_skill": "backend/mkit-builder",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "backend/mkit-builder/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "backend/workers-mcp/SKILL.md",
+      "scope_skill": "backend/workers-mcp",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "backend/workers-mcp/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "design/better-icons/SKILL.md",
+      "scope_skill": "design/better-icons",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "design/better-icons/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "frontend/agentation/SKILL.md",
+      "scope_skill": "frontend/agentation",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "frontend/agentation/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "frontend/design-md/SKILL.md",
+      "scope_skill": "frontend/design-md",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "frontend/design-md/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "frontend/enhance-prompt/SKILL.md",
+      "scope_skill": "frontend/enhance-prompt",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "frontend/enhance-prompt/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "frontend/graphics/favicon-generator/SKILL.md",
+      "scope_skill": "frontend/graphics/favicon-generator",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "frontend/graphics/favicon-generator/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "frontend/graphics/imagegen/SKILL.md",
+      "scope_skill": "frontend/graphics/imagegen",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "frontend/graphics/imagegen/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "frontend/graphics/og-image-creator/SKILL.md",
+      "scope_skill": "frontend/graphics/og-image-creator",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "frontend/graphics/og-image-creator/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "frontend/graphics/sora/SKILL.md",
+      "scope_skill": "frontend/graphics/sora",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "frontend/graphics/sora/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "frontend/graphics/threejs-builder/SKILL.md",
+      "scope_skill": "frontend/graphics/threejs-builder",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "frontend/graphics/threejs-builder/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "frontend/react-components/SKILL.md",
+      "scope_skill": "frontend/react-components",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "frontend/react-components/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "frontend/seo/seo-optimizer/SKILL.md",
+      "scope_skill": "frontend/seo/seo-optimizer",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "frontend/seo/seo-optimizer/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "frontend/shadcn-ui/SKILL.md",
+      "scope_skill": "frontend/shadcn-ui",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "frontend/shadcn-ui/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "frontend/stitch-loop/SKILL.md",
+      "scope_skill": "frontend/stitch-loop",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "frontend/stitch-loop/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "frontend/stitch-remotion/SKILL.md",
+      "scope_skill": "frontend/stitch-remotion",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "frontend/stitch-remotion/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "frontend/tools/agent-trace-debug/SKILL.md",
+      "scope_skill": "frontend/tools/agent-trace-debug",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "frontend/tools/agent-trace-debug/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "frontend/tools/codex-ui-kit-installer/SKILL.md",
+      "scope_skill": "frontend/tools/codex-ui-kit-installer",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "frontend/tools/codex-ui-kit-installer/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "frontend/tools/nano-banana-builder/SKILL.md",
+      "scope_skill": "frontend/tools/nano-banana-builder",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "frontend/tools/nano-banana-builder/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "frontend/ui/design-system/SKILL.md",
+      "scope_skill": "frontend/ui/design-system",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "frontend/ui/design-system/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "frontend/ui/figma/SKILL.md",
+      "scope_skill": "frontend/ui/figma",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "frontend/ui/figma/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "frontend/ui/frontend-ui-design/SKILL.md",
+      "scope_skill": "frontend/ui/frontend-ui-design",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "frontend/ui/frontend-ui-design/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "frontend/ui/interface-craft/SKILL.md",
+      "scope_skill": "frontend/ui/interface-craft",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "frontend/ui/interface-craft/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "frontend/ui/react-best-practices/SKILL.md",
+      "scope_skill": "frontend/ui/react-best-practices",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "frontend/ui/react-best-practices/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "frontend/ui/react-ui-patterns/SKILL.md",
+      "scope_skill": "frontend/ui/react-ui-patterns",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "frontend/ui/react-ui-patterns/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "frontend/ui/ui-visual-regression/SKILL.md",
+      "scope_skill": "frontend/ui/ui-visual-regression",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "frontend/ui/ui-visual-regression/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "frontend/ui/web-design-guidelines/SKILL.md",
+      "scope_skill": "frontend/ui/web-design-guidelines",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "frontend/ui/web-design-guidelines/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "github/automate-github-issues/SKILL.md",
+      "scope_skill": "github/automate-github-issues",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "github/automate-github-issues/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "github/gh-fix-ci/SKILL.md",
+      "scope_skill": "github/gh-fix-ci",
+      "wave": "wave-1-manual",
+      "profile_path": "github/gh-fix-ci/references/task-profile.json",
+      "delegation_mode": "manual",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "github/gh-workflow/SKILL.md",
+      "scope_skill": "github/gh-workflow",
+      "wave": "wave-1-manual",
+      "profile_path": "github/gh-workflow/references/task-profile.json",
+      "delegation_mode": "manual",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "github/local-action-verification/SKILL.md",
+      "scope_skill": "github/local-action-verification",
+      "wave": "wave-1-manual",
+      "profile_path": "github/local-action-verification/references/task-profile.json",
+      "delegation_mode": "manual",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "interview/architecture-interview/SKILL.md",
+      "scope_skill": "interview/architecture-interview",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "interview/architecture-interview/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "interview/bug-interview/SKILL.md",
+      "scope_skill": "interview/bug-interview",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "interview/bug-interview/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "interview/deep-interview/SKILL.md",
+      "scope_skill": "interview/deep-interview",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "interview/deep-interview/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "interview/interview-kernel/SKILL.md",
+      "scope_skill": "interview/interview-kernel",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "interview/interview-kernel/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "interview/interview-me/SKILL.md",
+      "scope_skill": "interview/interview-me",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "interview/interview-me/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "interview/pm-interview/SKILL.md",
+      "scope_skill": "interview/pm-interview",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "interview/pm-interview/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "personas/benjitaylor-persona/SKILL.md",
+      "scope_skill": "personas/benjitaylor-persona",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "personas/benjitaylor-persona/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "personas/emilkowalski-persona/SKILL.md",
+      "scope_skill": "personas/emilkowalski-persona",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "personas/emilkowalski-persona/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "personas/jenny-wen-persona/SKILL.md",
+      "scope_skill": "personas/jenny-wen-persona",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "personas/jenny-wen-persona/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "personas/jh3yy-persona/SKILL.md",
+      "scope_skill": "personas/jh3yy-persona",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "personas/jh3yy-persona/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "personas/kubadesign-persona/SKILL.md",
+      "scope_skill": "personas/kubadesign-persona",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "personas/kubadesign-persona/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "personas/steipete/SKILL.md",
+      "scope_skill": "personas/steipete",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "personas/steipete/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "product/content/youtube-hooks-scripts/SKILL.md",
+      "scope_skill": "product/content/youtube-hooks-scripts",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "product/content/youtube-hooks-scripts/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "product/content/youtube-titles-thumbnails/SKILL.md",
+      "scope_skill": "product/content/youtube-titles-thumbnails",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "product/content/youtube-titles-thumbnails/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "product/design/ui-ux-creative-coding/SKILL.md",
+      "scope_skill": "product/design/ui-ux-creative-coding",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "product/design/ui-ux-creative-coding/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "product/docs/agents-md/SKILL.md",
+      "scope_skill": "product/docs/agents-md",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "product/docs/agents-md/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "product/docs/claude-md/SKILL.md",
+      "scope_skill": "product/docs/claude-md",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "product/docs/claude-md/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "product/docs/context7/SKILL.md",
+      "scope_skill": "product/docs/context7",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "product/docs/context7/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "product/docs/docs-expert/SKILL.md",
+      "scope_skill": "product/docs/docs-expert",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "product/docs/docs-expert/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "product/docs/gemini-md/SKILL.md",
+      "scope_skill": "product/docs/gemini-md",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "product/docs/gemini-md/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "product/docs/openai-docs/SKILL.md",
+      "scope_skill": "product/docs/openai-docs",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "product/docs/openai-docs/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "product/domain/chatgpt-apps-production-checklist/SKILL.md",
+      "scope_skill": "product/domain/chatgpt-apps-production-checklist",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "product/domain/chatgpt-apps-production-checklist/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "product/domain/cloudflare-deploy/SKILL.md",
+      "scope_skill": "product/domain/cloudflare-deploy",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "product/domain/cloudflare-deploy/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "product/domain/oak-api/SKILL.md",
+      "scope_skill": "product/domain/oak-api",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "product/domain/oak-api/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "product/ops/decide-build-primitive/SKILL.md",
+      "scope_skill": "product/ops/decide-build-primitive",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "product/ops/decide-build-primitive/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "product/ops/linear/SKILL.md",
+      "scope_skill": "product/ops/linear",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "product/ops/linear/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "product/ops/release/SKILL.md",
+      "scope_skill": "product/ops/release",
+      "wave": "wave-1-manual",
+      "profile_path": "product/ops/release/references/task-profile.json",
+      "delegation_mode": "manual",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "product/review/codex-wrapped/SKILL.md",
+      "scope_skill": "product/review/codex-wrapped",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "product/review/codex-wrapped/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "product/review/llm-design-review/SKILL.md",
+      "scope_skill": "product/review/llm-design-review",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "product/review/llm-design-review/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "product/review/product-design-review/SKILL.md",
+      "scope_skill": "product/review/product-design-review",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "product/review/product-design-review/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "product/security/security-best-practices/SKILL.md",
+      "scope_skill": "product/security/security-best-practices",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "product/security/security-best-practices/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "product/security/security-ownership-map/SKILL.md",
+      "scope_skill": "product/security/security-ownership-map",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "product/security/security-ownership-map/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "product/security/security-threat-model/SKILL.md",
+      "scope_skill": "product/security/security-threat-model",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "product/security/security-threat-model/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "product/specs/_archive/prd-to-accessibility/SKILL.md",
+      "scope_skill": "product/specs/_archive/prd-to-accessibility",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "product/specs/_archive/prd-to-accessibility/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "product/specs/_archive/prd-to-api-lite/SKILL.md",
+      "scope_skill": "product/specs/_archive/prd-to-api-lite",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "product/specs/_archive/prd-to-api-lite/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "product/specs/_archive/prd-to-arch-lite/SKILL.md",
+      "scope_skill": "product/specs/_archive/prd-to-arch-lite",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "product/specs/_archive/prd-to-arch-lite/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "product/specs/_archive/prd-to-qa-cases/SKILL.md",
+      "scope_skill": "product/specs/_archive/prd-to-qa-cases",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "product/specs/_archive/prd-to-qa-cases/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "product/specs/_archive/prd-to-risk/SKILL.md",
+      "scope_skill": "product/specs/_archive/prd-to-risk",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "product/specs/_archive/prd-to-risk/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "product/specs/_archive/prd-to-roadmap/SKILL.md",
+      "scope_skill": "product/specs/_archive/prd-to-roadmap",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "product/specs/_archive/prd-to-roadmap/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "product/specs/_archive/prd-to-security-review/SKILL.md",
+      "scope_skill": "product/specs/_archive/prd-to-security-review",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "product/specs/_archive/prd-to-security-review/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "product/specs/_archive/prd-to-ui-spec/SKILL.md",
+      "scope_skill": "product/specs/_archive/prd-to-ui-spec",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "product/specs/_archive/prd-to-ui-spec/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "product/specs/_archive/ui-spec-to-prompts/SKILL.md",
+      "scope_skill": "product/specs/_archive/ui-spec-to-prompts",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "product/specs/_archive/ui-spec-to-prompts/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "product/specs/_archive/ux-spec-to-prompts/SKILL.md",
+      "scope_skill": "product/specs/_archive/ux-spec-to-prompts",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "product/specs/_archive/ux-spec-to-prompts/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "product/specs/product-spec/SKILL.md",
+      "scope_skill": "product/specs/product-spec",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "product/specs/product-spec/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "product/strategy/asymmetric-ideation-engine/SKILL.md",
+      "scope_skill": "product/strategy/asymmetric-ideation-engine",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "product/strategy/asymmetric-ideation-engine/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "product/strategy/brainstorming/SKILL.md",
+      "scope_skill": "product/strategy/brainstorming",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "product/strategy/brainstorming/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "product/strategy/project-improvement-ideator/SKILL.md",
+      "scope_skill": "product/strategy/project-improvement-ideator",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "product/strategy/project-improvement-ideator/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "product/tech/agent-native-architecture/SKILL.md",
+      "scope_skill": "product/tech/agent-native-architecture",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "product/tech/agent-native-architecture/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "product/tech/tech-spec/SKILL.md",
+      "scope_skill": "product/tech/tech-spec",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "product/tech/tech-spec/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "skills/greptile/check-pr/SKILL.md",
+      "scope_skill": "skills/greptile/check-pr",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "skills/greptile/check-pr/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "skills/greptile/greploop/SKILL.md",
+      "scope_skill": "skills/greptile/greploop",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "skills/greptile/greploop/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "utilities/1password/SKILL.md",
+      "scope_skill": "utilities/1password",
+      "wave": "wave-1-manual",
+      "profile_path": "utilities/1password/references/task-profile.json",
+      "delegation_mode": "manual",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "utilities/agent-browser/SKILL.md",
+      "scope_skill": "utilities/agent-browser",
+      "wave": "wave-1-manual",
+      "profile_path": "utilities/agent-browser/references/task-profile.json",
+      "delegation_mode": "manual",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "utilities/alignment-checkpoint/SKILL.md",
+      "scope_skill": "utilities/alignment-checkpoint",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "utilities/alignment-checkpoint/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "utilities/atlas/SKILL.md",
+      "scope_skill": "utilities/atlas",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "utilities/atlas/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "utilities/beautiful-mermaid/SKILL.md",
+      "scope_skill": "utilities/beautiful-mermaid",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "utilities/beautiful-mermaid/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "utilities/bootstrap/SKILL.md",
+      "scope_skill": "utilities/bootstrap",
+      "wave": "wave-1-manual",
+      "profile_path": "utilities/bootstrap/references/task-profile.json",
+      "delegation_mode": "manual",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "utilities/codex-agent-creator/SKILL.md",
+      "scope_skill": "utilities/codex-agent-creator",
+      "wave": "wave-1-manual",
+      "profile_path": "utilities/codex-agent-creator/references/task-profile.json",
+      "delegation_mode": "manual",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "utilities/codex-home-audit/SKILL.md",
+      "scope_skill": "utilities/codex-home-audit",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "utilities/codex-home-audit/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "utilities/codex-sessions-skill-scan/SKILL.md",
+      "scope_skill": "utilities/codex-sessions-skill-scan",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "utilities/codex-sessions-skill-scan/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "utilities/executing-plans/SKILL.md",
+      "scope_skill": "utilities/executing-plans",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "utilities/executing-plans/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "utilities/fix-mise/SKILL.md",
+      "scope_skill": "utilities/fix-mise",
+      "wave": "wave-1-manual",
+      "profile_path": "utilities/fix-mise/references/task-profile.json",
+      "delegation_mode": "manual",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "utilities/insight-report/SKILL.md",
+      "scope_skill": "utilities/insight-report",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "utilities/insight-report/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "utilities/markdown-converter/SKILL.md",
+      "scope_skill": "utilities/markdown-converter",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "utilities/markdown-converter/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "utilities/process-watch/SKILL.md",
+      "scope_skill": "utilities/process-watch",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "utilities/process-watch/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "utilities/prompt-creator/SKILL.md",
+      "scope_skill": "utilities/prompt-creator",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "utilities/prompt-creator/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "utilities/recent-code-bugfix/SKILL.md",
+      "scope_skill": "utilities/recent-code-bugfix",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "utilities/recent-code-bugfix/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "utilities/recon-workbench/SKILL.md",
+      "scope_skill": "utilities/recon-workbench",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "utilities/recon-workbench/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "utilities/remotion/SKILL.md",
+      "scope_skill": "utilities/remotion",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "utilities/remotion/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "utilities/repoprompt/SKILL.md",
+      "scope_skill": "utilities/repoprompt",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "utilities/repoprompt/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "utilities/run-tests-and-write-artifacts/SKILL.md",
+      "scope_skill": "utilities/run-tests-and-write-artifacts",
+      "wave": "wave-1-manual",
+      "profile_path": "utilities/run-tests-and-write-artifacts/references/task-profile.json",
+      "delegation_mode": "manual",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "utilities/skill-creator/SKILL.md",
+      "scope_skill": "utilities/skill-creator",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "utilities/skill-creator/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "utilities/skill-installer/SKILL.md",
+      "scope_skill": "utilities/skill-installer",
+      "wave": "wave-1-manual",
+      "profile_path": "utilities/skill-installer/references/task-profile.json",
+      "delegation_mode": "manual",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "utilities/systematic-debugging/SKILL.md",
+      "scope_skill": "utilities/systematic-debugging",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "utilities/systematic-debugging/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "utilities/test-driven-development/SKILL.md",
+      "scope_skill": "utilities/test-driven-development",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "utilities/test-driven-development/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "utilities/using-git-worktrees/SKILL.md",
+      "scope_skill": "utilities/using-git-worktrees",
+      "wave": "wave-1-manual",
+      "profile_path": "utilities/using-git-worktrees/references/task-profile.json",
+      "delegation_mode": "manual",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "utilities/verification-before-completion/SKILL.md",
+      "scope_skill": "utilities/verification-before-completion",
+      "wave": "wave-1-manual",
+      "profile_path": "utilities/verification-before-completion/references/task-profile.json",
+      "delegation_mode": "manual",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "utilities/video-transcript-downloader/SKILL.md",
+      "scope_skill": "utilities/video-transcript-downloader",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "utilities/video-transcript-downloader/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "utilities/visual-explainer/SKILL.md",
+      "scope_skill": "utilities/visual-explainer",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "utilities/visual-explainer/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "utilities/writing-plans/SKILL.md",
+      "scope_skill": "utilities/writing-plans",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "utilities/writing-plans/references/task-profile.json",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    }
+  ]
+}

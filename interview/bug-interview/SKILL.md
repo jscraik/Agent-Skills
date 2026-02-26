@@ -2,6 +2,7 @@
 name: bug-interview
 description: Analyze and review bug reports to capture repro, evidence, and the next
   smallest diagnostic step. Use when a bug report lacks clear reproduction.
+knowledge_graph_profile: references/task-profile.json
 ---
 
 # bug-interview (wrapper)

@@ -1,6 +1,7 @@
 ---
 name: alignment-checkpoint
 description: "Intent-alignment gate for ambiguous/high-stakes requests. Use this when you want to extract goal/assumptions/criteria and require an explicit /proceed approval gate before any tool use."
+knowledge_graph_profile: references/task-profile.json
 ---
 
 # Alignment Checkpoint

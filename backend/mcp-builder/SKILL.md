@@ -2,6 +2,7 @@
 name: mcp-builder
 description: Create general-purpose MCP servers and tool schemas for standard integrations.
   Use when building MCP services without OAuth/billing/Apps UI requirements.
+knowledge_graph_profile: references/task-profile.json
 ---
 
 # MCP Server Development Guide (Gold Standard, Dec 2025)

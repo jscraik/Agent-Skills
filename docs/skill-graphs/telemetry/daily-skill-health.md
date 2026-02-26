@@ -1,26 +1,16 @@
 # Daily Skill Health
 
-- Generated at: `2026-02-25T11:47:30Z`
-- Window: `2026-02-14..2026-02-20`
+- Generated at: `2026-02-26T17:14:40Z`
+- Window: `2026-02-24..2026-02-26`
 - Runs total: `8`
 - Decision: `HOLD`
-- Critical non-regression compliance: `62.5%`
-- Budget compliance: `87.5%`
-- Capture coverage: `0.0%` (0/8)
-- Confidence buckets: `high=0` `medium=0` `low=0` `unknown=8`
+- Critical non-regression compliance: `50.0%`
+- Budget compliance: `100.0%`
+- Capture coverage: `100.0%` (8/8)
+- Confidence buckets: `high=0` `medium=4` `low=4` `unknown=0`
 - Injection usage: `0.0%` (0/8)
 - Injection suppressed by controls: `0`
-- Uplift promotion decisions: `pass=0` `hold=0` `insufficient_data=0`
-- Uplift auto-apply decisions: `pass=0` `hold=0` `insufficient_data=0`
-- Event envelope errors: `7`
-
-## Event envelope errors
-
-- run_20260220T195545Z_8799c2: missing events.jsonl
-- run_20260220T150021Z_82ecf7: missing events.jsonl
-- run_20260220T150021Z_9b592b: missing events.jsonl
-- run_20260220T150021Z_bb9acb: missing events.jsonl
-- run_20260220T144736Z_425b7a: missing events.jsonl
-- run_20260220T144710Z_425b7a: missing events.jsonl
-- run_20260220T144703Z_425b7a: missing events.jsonl
+- Uplift promotion decisions: `pass=0` `hold=0` `insufficient_data=8`
+- Uplift auto-apply decisions: `pass=0` `hold=0` `insufficient_data=8`
+- Event envelope errors: `0`
 

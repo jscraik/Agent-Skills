@@ -3,6 +3,7 @@ name: threejs-builder
 description: Build and validate simple, performant Three.js web apps using modern
   ES module patterns. Use this when you need a minimal Three.js scene, interaction,
   or animation for a web UI or demo.
+knowledge_graph_profile: references/task-profile.json
 ---
 
 # Three.js Builder

@@ -1,6 +1,7 @@
 ---
 name: agentation
 description: Use when a user wants to install, verify, or troubleshoot Agentation in React/Next.js/Vite/Tauri apps; this skill validates toolbar wiring, MCP health, live webhook delivery, and automation modes (self-driving autopilot + critique mode) with end-to-end submit verification.
+knowledge_graph_profile: references/task-profile.json
 ---
 
 # Agentation Integration + Live Annotation Automation

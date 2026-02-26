@@ -1,0 +1,31 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-02-26T17:34:03Z",
+  "repo_root": "/Users/jamiecraik/dev/agent-skills",
+  "dry_run": false,
+  "profile_count": 1,
+  "pass_count": 1,
+  "fail_count": 0,
+  "results": [
+    {
+      "profile_path": "auth/best-practices/references/task-profile.json",
+      "status": "accepted",
+      "execution_status": "nonzero_exit",
+      "exit_code": 2,
+      "run_id": "run_20260226T173403662298Z_83cb58_14467814",
+      "run_out_dir": "/Users/jamiecraik/dev/agent-skills/artifacts/skill-graphs/runs/run_20260226T173403662298Z_83cb58_14467814",
+      "missing_artifacts": [],
+      "artifact_details": {
+        "terminal_status": "failed",
+        "stop_reason": "budget_exhausted",
+        "evidence_completeness": 0.8
+      },
+      "stdout_tail": [
+        "[recursive-loop] run_id=run_20260226T173403662298Z_83cb58_14467814",
+        "[recursive-loop] status=failed stop_reason=budget_exhausted",
+        "[recursive-loop] out_dir=/Users/jamiecraik/dev/agent-skills/artifacts/skill-graphs/runs/run_20260226T173403662298Z_83cb58_14467814"
+      ],
+      "stderr_tail": []
+    }
+  ]
+}

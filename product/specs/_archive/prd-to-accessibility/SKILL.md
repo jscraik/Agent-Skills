@@ -3,6 +3,7 @@ name: prd-to-accessibility
 description: Generate accessibility requirements and checks from a PRD, aligned to
   WCAG targets and key journeys. Use when accessibility expectations must be explicit
   and testable.
+knowledge_graph_profile: references/task-profile.json
 ---
 
 # PRD to Accessibility Spec

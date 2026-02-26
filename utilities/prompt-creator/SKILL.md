@@ -1,6 +1,7 @@
 ---
 name: prompt-creator
 description: "Create or update reusable Codex skills under .agents/skills and optionally local ~/.codex/prompts shortcuts. Use when a user asks to build, revise, or package prompts and skills for repeatable workflows."
+knowledge_graph_profile: references/task-profile.json
 ---
 
 # Prompt Creator (Codex skills-first)

@@ -1,6 +1,7 @@
 ---
 name: fix-mise
 description: Diagnose and resolve mise trust/setup failures for local toolchains. Use when the user reports mise trust errors, missing runtimes, or broken mise-managed commands.
+knowledge_graph_profile: references/task-profile.json
 ---
 
 # Fix Mise Trust Errors

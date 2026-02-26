@@ -1,6 +1,7 @@
 ---
 name: agent-native-architecture
 description: Design or review agent-native application architecture for Codex-based workflows. Use when planning parity between UI and agent actions, primitive tool design, execution-loop completion signals, context injection, and safe rollout/rollback for agent-driven products.
+knowledge_graph_profile: references/task-profile.json
 ---
 
 # Agent-Native Architecture (Codex)

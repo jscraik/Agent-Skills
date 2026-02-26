@@ -1,6 +1,7 @@
 ---
 name: systematic-debugging
 description: "Use this skill when encountering bugs, test failures, regressions, or unexpected behavior to run a root-cause-first debugging workflow before proposing fixes or code changes."
+knowledge_graph_profile: references/task-profile.json
 ---
 
 # Systematic Debugging

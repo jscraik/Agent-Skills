@@ -3,6 +3,7 @@ name: web-design-guidelines
 description: Review UI code against Web Interface Guidelines with file:line findings.
   Use for rule-based compliance checks (not experiential critiques). Use when the
   user requests this capability.
+knowledge_graph_profile: references/task-profile.json
 ---
 
 # Web Interface Guidelines

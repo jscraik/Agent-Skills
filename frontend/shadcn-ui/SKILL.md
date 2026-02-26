@@ -8,6 +8,7 @@ allowed-tools:
   - "Write"
   - "Bash"
   - "web_fetch"
+knowledge_graph_profile: references/task-profile.json
 ---
 
 # shadcn/ui Component Integration

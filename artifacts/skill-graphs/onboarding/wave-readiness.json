@@ -1,0 +1,50 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-02-26T17:37:29Z",
+  "decision_date": "2026-02-26",
+  "summary": {
+    "active_skill_count": 116,
+    "manual_skill_count": 13,
+    "co_pilot_skill_count": 103,
+    "profile_valid_count": 116,
+    "profile_invalid_count": 0,
+    "event_envelope_errors": 0,
+    "approver_count": 2
+  },
+  "waves": {
+    "wave-0-controls": {
+      "ready": true,
+      "checks": {
+        "required_controls_present": true,
+        "event_envelope_errors_zero": true,
+        "approver_count_gte_2": true
+      },
+      "blockers": []
+    },
+    "wave-1-manual": {
+      "ready": true,
+      "checks": {
+        "manual_profiles_valid": true,
+        "wave_0_ready": true
+      },
+      "coverage": {
+        "total": 13,
+        "valid": 13
+      },
+      "blockers": []
+    },
+    "wave-2-co-pilot": {
+      "ready": true,
+      "checks": {
+        "co_pilot_profiles_valid": true,
+        "wave_1_ready": true,
+        "event_envelope_errors_zero": true
+      },
+      "coverage": {
+        "total": 103,
+        "valid": 103
+      },
+      "blockers": []
+    }
+  }
+}

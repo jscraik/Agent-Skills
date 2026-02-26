@@ -1,6 +1,7 @@
 ---
 name: asymmetric-ideation-engine
 description: "Generate 10 launchable asymmetric ideas by excavating a repository for hidden patterns. Use when users ask for radical non-incremental ideation from repo context; don't use for roadmap optimization, bug fixing, or routine prioritization. Outputs: structured idea set + artifact file. Success: all novelty constraints satisfied."
+knowledge_graph_profile: references/task-profile.json
 ---
 
 # Asymmetric Ideation Engine

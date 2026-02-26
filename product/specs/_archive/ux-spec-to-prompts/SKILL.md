@@ -3,6 +3,7 @@ name: ux-spec-to-prompts
 description: Translate UX specifications into build-order prompts for UI generator
   tools. Use when you have UX flows/PRDs and need sequenced prompts (not a full UI
   spec).
+knowledge_graph_profile: references/task-profile.json
 ---
 
 # UX Spec to Build-Order Prompts

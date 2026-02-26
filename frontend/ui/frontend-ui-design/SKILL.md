@@ -3,6 +3,7 @@ name: frontend-ui-design
 description: Create and review production-ready UI systems/components with tokens
   and accessibility. Use for standard UI implementation or redesign (not creative-coding
   polish). Use when the user requests this capability.
+knowledge_graph_profile: references/task-profile.json
 ---
 
 # Frontend Design System (Apps SDK UI + React + Tauri)

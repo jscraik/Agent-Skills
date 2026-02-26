@@ -4,6 +4,7 @@ description: Deep, gap-filling interview that enhances an existing doc/spec (pre
   or explores a topic. Use when deepening PRDs, ADRs, tickets, notes, or draft specs;
   if given a doc path, update it in-place with Delta/Interview Insights and an approval
   gate.
+knowledge_graph_profile: references/task-profile.json
 ---
 
 # deep-interview (enhancer wrapper)

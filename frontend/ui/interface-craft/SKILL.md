@@ -1,6 +1,7 @@
 ---
 name: interface-craft
 description: Interface Craft by Josh Puckett helps build polished React interfaces with storyboard motion, live tuning controls, critique frameworks, and concept workflows; use when requests involve UI motion, critique, refinement, concept exploration, or interaction craft.
+knowledge_graph_profile: references/task-profile.json
 ---
 
 # Interface Craft

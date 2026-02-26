@@ -1,6 +1,7 @@
 ---
 name: run-tests-and-write-artifacts
 description: "Run reproducible test suites in a checked-out repo and write evidence artifacts to /mnt/data (test_output.log, test_results.json, test_summary.md). Use when users ask to run tests, verify a branch, or reproduce CI failures; do not use for static-only review, deployment, or bug fixing before evidence is collected."
+knowledge_graph_profile: references/task-profile.json
 ---
 
 # run-tests-and-write-artifacts (v0.1.0)

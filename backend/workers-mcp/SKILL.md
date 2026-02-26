@@ -3,6 +3,7 @@ name: workers-mcp
 description: Create and deploy production-ready MCP servers on Cloudflare Workers.
   Use when building a Workers-hosted MCP server with auth, billing, and operational
   guardrails.
+knowledge_graph_profile: references/task-profile.json
 ---
 
 # Workers MCP

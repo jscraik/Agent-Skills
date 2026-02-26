@@ -1,6 +1,7 @@
 ---
 name: claude-md
 description: "Refactor or create CLAUDE.md using progressive disclosure: keep always-on guidance concise, include only non-obvious commands/style/workflow rules, use @imports for deeper docs, and flag contradictions/bloat. Use when the user asks to create, update, or audit CLAUDE.md files."
+knowledge_graph_profile: references/task-profile.json
 ---
 
 # Claude Md

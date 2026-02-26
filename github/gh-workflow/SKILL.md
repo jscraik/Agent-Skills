@@ -1,6 +1,7 @@
 ---
 name: gh-workflow
 description: "Consolidated GitHub lifecycle skill for agents and users: intake, issue fixing, PR prep, review request/reception, review comment handling, CI diagnosis, and server-side merge via gh. Use when requests involve GitHub issues/PRs/checks/merge operations."
+knowledge_graph_profile: references/task-profile.json
 ---
 
 # GH Workflow (Canonical)

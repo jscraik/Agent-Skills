@@ -1,6 +1,7 @@
 ---
 name: local-action-verification
 description: Use when the user asks to validate GitHub Actions locally with act; output setup guidance, AGENTS.md instructions, and fail-fast checks before push or PR.
+knowledge_graph_profile: references/task-profile.json
 ---
 
 # Local Action Verification with act

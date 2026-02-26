@@ -2,6 +2,7 @@
 name: ui-spec-to-prompts
 description: "Translate a UI spec into build-order prompts for UI generator tools\
   \ (v0, Bolt, Claude). Use when a UI spec already exists (not UX\u2011only)."
+knowledge_graph_profile: references/task-profile.json
 ---
 
 # UI Spec to Build-Order Prompts

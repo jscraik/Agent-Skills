@@ -1,14 +1,15 @@
 ---
 name: skill-creator
-description: "Create, revise, and quality-gate Codex skills (SKILL.md + resources + evals + packaging) when asked to build or improve a skill."
+description: "Create, revise, benchmark, and quality-gate Codex skills (SKILL.md + resources + evals + packaging). Use when the user asks to build/audit/improve a skill or skill-graph contract; do not use for unrelated feature coding."
+knowledge_graph_profile: references/task-profile.json
 ---
 
 # Skill Creator
 
 This skill helps you design, author, validate, and package high-quality skills.
 
-**Version**: 1.6.1  
-**Last updated**: 2026-02-23
+**Version**: 1.8.0  
+**Last updated**: 2026-02-26
 
 ## Table of Contents
 - [Working agreement (skills + shell + compaction)](#working-agreement-skills--shell--compaction)
@@ -26,6 +27,8 @@ This skill helps you design, author, validate, and package high-quality skills.
 - [Examples](#examples)
 - [Skill test strategy by type](#skill-test-strategy-by-type)
 - [Reference map (skill-creator internal)](#reference-map-skill-creator-internal)
+- [Deck-aligned upgrade checklist](#deck-aligned-upgrade-checklist)
+- [Skill-graph contract gap report](#skill-graph-contract-gap-report)
 - [Philosophy and tradeoffs](#philosophy-and-tradeoffs)
 - [Anti-patterns and caveats](#anti-patterns-and-caveats)
 - [Variation and adaptation](#variation-and-adaptation)
@@ -47,6 +50,7 @@ Use this skill to:
 - Create a new skill (instruction-only, script-backed, or router-style).
 - Revise an existing skill for better triggering, portability, or reliability.
 - Audit/upgrade a skill to meet “gold standard” structure, progressive disclosure, and validation.
+- Improve skill-knowledge graph contracts (schemas/workflows/telemetry) tied to recursive loop operations.
 - Package a skill into a distributable `.skill` archive.
 
 ## Modes (conservative)
@@ -57,6 +61,7 @@ Select the smallest mode that matches user intent:
 - **improve**: revise an existing skill for routing quality, reliability, or safety.
 - **eval**: run quality checks/evals and summarize findings.
 - **benchmark-lite**: compare two variants with deterministic checks (`run_skill_evals.py --dual-run`) and report evidence.
+- **graph**: improve skill-graph docs/contracts and runtime metadata for learn/promotion loops.
 - **package**: produce a `.skill` archive once quality gates pass.
 
 Default to `create`/`improve`; use `benchmark-lite` only when the user asks to compare variants.
@@ -71,6 +76,7 @@ Default to `create`/`improve`; use `benchmark-lite` only when the user asks to c
 - Target environment(s): `codex`, `claude`, or `portable` subset.
 - Any required assets, schemas, APIs, CLIs, or “house style” constraints.
 - Compatibility posture (default: canonical-only for unreleased/greenfield projects; add backwards compatibility only when explicitly required).
+- If graph work is requested: target profiles/scopes and desired graph outputs (schema/docs/runtime artifact updates).
 
 If any of the above are missing, ask only the minimum questions required to proceed safely.
 
@@ -86,10 +92,12 @@ Depending on the request, produce one or more of:
   - `assets/` (optional)
   - `workflows/` (optional for router-style skills)
 - `references/contract.yaml` (output contract) and `references/evals.yaml` (eval cases) when the skill is non-trivial.
+- For schema-bound outputs, require a top-level `schema_version` in the output contract/artifact examples.
 - `references/plan.md` (plan artifact) for non-trivial skill builds; store `$create-plan` output here when available.
 - A validation report (what passed/failed and what to fix).
 - An `analyze_skill.py` quality report for every validation run.
 - An operational-readiness + security-risk report (OpenClaw-style summary: critical/warn/info).
+- For graph-mode work: updated `docs/skill-graphs/*` contracts and any coupled runtime artifact/schema updates.
 - A packaged `.skill` file (optional).
 
 ## Response format (required)
@@ -345,8 +353,102 @@ Use these files when needed:
 - `references/evals-v2-migration.md`: eval schema v2 fields, migration rules, and tiered gating.
 - `references/tiered-gating-policy.md`: week-by-week rollout policy and promotion rules for tier 2.
 - `references/security-hardening.md`: offline defaults, redaction, destructive action confirmations.
+- `references/skill-knowledge-graph.md`: skill/graph mental model + Cockpit Rule delegation mapping.
 - `references/examples.md`: calibrated examples for phrasing and structure.
 - `references/anti-patterns.md`: common failure modes + remediation patterns.
+
+## Runtime injection boundary (graph mode)
+
+When a recursive run consumes injected lessons or external lesson suggestions:
+
+- Keep **decisioning** in SKILL/description only:
+  - `description` and SKILL body decide if graph mode runs and what boundaries apply.
+- Keep **execution** in scripts/tools only after gates pass:
+  - controls check passed,
+  - delegation rationale present,
+  - immutable IDs present.
+- Required invocation envelope inputs before tool use:
+  - `invocation_id`
+  - `objective_hash`
+  - `scope_skill`
+  - `scope_profile`
+  - `prompt_hash`
+- Before any file/command execution, redact/validate:
+  - strip secret-like tokens and credentials from `notes`, `feedback`, and notes,
+  - require redaction for any user-supplied free text.
+- Required artifact completeness before promotion review:
+  - `run.json`
+  - `capture_record.json` (if auto-capture enabled)
+  - `evidence_packet.json` (if capture enabled)
+  - `promotion_decision.json`
+
+## Deck-aligned upgrade checklist
+
+Use this checklist before drafting or revising a recursive skill runbook.
+
+### 1) Cockpit modes and delegation metadata
+
+- [x] Keep `mode` explicit in delegation metadata for each task profile.
+- [x] Align vocabulary to deck terms (**autopilot / co-pilot / manual override**) and document compatibility aliases where downstream enums still use `collaboration`.
+- [x] Add a one-line migration note in skill-graph docs when a profile still emits `collaboration`.
+- [ ] Require each profile to state `delegation` rationale and cost-benefit assumptions (`HBT`, `APT`, `Ps`) at run start.
+
+### 2) Recipe/runner/tool architecture in SKILL.md
+
+- [x] Keep `SKILL.md` as SOP + routing instructions and move helpers to `references/` and `scripts/`.
+- [x] Add an explicit “architecture” block: **LLM processor (reasoning) + skill recipe (logic) + MCP/tools (actions)**.
+- [ ] Document when `tools`/scripts are optional vs required, with exact argument names.
+
+### 3) Structure and progressive disclosure
+
+- [x] Preserve metadata -> SKILL body -> `references/` -> `scripts/` loading order.
+- [x] Add a brief section in this file that states the minimum fields to keep in `SKILL.md` vs `references/`.
+- [x] Add a short "load contract" for any dynamic injection inputs used by recursive runs.
+
+### 4) Routing-by-description and boundaries
+
+- [x] Keep description as WHAT + WHEN + non-goals (selection boundary).
+- [ ] Add one mandatory negative-trigger case for each major boundary.
+- [ ] Require acceptance assertions for trigger and non-trigger prompts in `references/evals.yaml`.
+
+### 5) Sandbox boundary and invocation gating
+
+- [x] Split process guidance into:
+  - **Decision model** (pure text/metadata selection in SKILL/description)
+  - **Script execution model** (explicit command allowlist, `--dry-run`, `--confirm`, approvals)
+- [ ] Before any recursive run, require pre-checks for:
+  - controls existence (`kill-switch`, `rollback-required`, rollout mode),
+  - invocation envelope fields,
+  - sub-agent isolation and network allowlist.
+- [ ] Require gate checks before approval:
+  - `run`, `iteration_journal`, `promotion_decision` completeness
+  - reviewer signatures + provenance fields.
+
+### 6) Workflow archetypes
+
+- [x] Add explicit mapping in this skill to deck patterns:
+  - **sequential**: strict step order,
+  - **router**: multiple skill/branch paths,
+  - **orchestrator**: coordinator + bounded child workers.
+- [x] Keep SKILL execution defaulted to sequential, with optional router/orchestrator paths.
+
+### 7) Evaluation + two-agent hardening loop
+
+- [x] Use RED → GREEN → REFACTOR sequence.
+- [ ] Keep a two-agent pattern for upgrades: one author + one verification pass before merge.
+- [ ] Add explicit pressure-tests for rationalization and policy bypass attempts.
+
+## Skill-graph contract gap report
+
+| Contract/doc | What the deck emphasizes | Current state | Gap / action |
+| --- | --- | --- | --- |
+| `docs/skill-graphs/schemas/task-profile.schema.md` | Cockpit mode vocabulary: `autopilot/co-pilot/manual` | Updated to canonical wording with compatibility note (`collaboration` -> `co-pilot`). | ✅ Updated plus legacy alias note. |
+| `utilities/skill-creator/references/skill-knowledge-graph.md` | Delegation rubric terms + explicit cockpit mapping | Uses `collaboration` term and broad rubric | ✅ Updated to explicit `autopilot / co-pilot / manual override` language with legacy note. |
+| `docs/skill-graphs/knowledge-graph-operating-model.md` | Explicit architecture + invocation delegation framing | Mentions skills/tools/chef and optional delegation; no explicit deck-language terms | ✅ Added explicit architecture split + mode map + archetype mapping. |
+| `docs/skill-graphs/index.md` | Workflow archetypes (sequential/router/orchestrator) | Shows phase pipeline only | ✅ Added explicit mapping to deck archetypes. |
+| `docs/skill-graphs/workflows/promotion-gate.md` | Control gates + security + human gate before promotion | Has checks and reviewer gate but no explicit invocation-boundary section | ✅ Added explicit Invocation boundary checks section. |
+| `docs/skill-graphs/runbooks/kill-switch-and-escalation.md` | Invocation gating hierarchy + safe rollback | Has control hierarchy; no direct link from SKILL to mandatory pre-run checks | ✅ Added mandatory pre-run invocation check section and cross-reference. |
+| `utilities/skill-creator/SKILL.md` (this file) | Dynamic injection and boundary-safe loading | Previously no explicit dynamic-injection contract | ✅ Added `Runtime injection boundary` contract and redaction policy. |
 
 <!-- skill-score-boost-v1 -->
 ## Philosophy and tradeoffs

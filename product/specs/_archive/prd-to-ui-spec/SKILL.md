@@ -2,6 +2,7 @@
 name: prd-to-ui-spec
 description: Generate UI specifications from PRDs or UX specs using the aStudio design
   system. Use when a UI spec is needed before build or mockups.
+knowledge_graph_profile: references/task-profile.json
 ---
 
 # PRD/UX to UI Spec (Quick Start)

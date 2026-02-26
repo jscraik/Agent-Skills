@@ -2,6 +2,7 @@
 name: prd-to-security-review
 description: Generate a security review from a PRD. Use when security requirements,
   threats, and mitigations must be explicit before build.
+knowledge_graph_profile: references/task-profile.json
 ---
 
 # PRD to Security Review

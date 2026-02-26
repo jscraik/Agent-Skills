@@ -53,4 +53,46 @@ Optional cross-plan reference:
 ```yaml
 external_dep: "/absolute/repo/path#T12"
 ```
+
+Skill-graph onboarding migration plan (2026-02-26):
+
+```yaml
+tasks:
+  - id: M1
+    title: Freeze active skill inventory and baseline onboarding snapshot
+    depends_on: []
+  - id: M2
+    title: Enforce task-profile schema requirements (delegation + no-improvement escalation)
+    depends_on: [M1]
+  - id: M3
+    title: Implement profile generator and SKILL frontmatter binding updater
+    depends_on: [M2]
+  - id: M4
+    title: Implement profile validator and wave-readiness artifact generation
+    depends_on: [M3]
+  - id: M5
+    title: Generate all per-skill task profiles and onboarding checklist
+    depends_on: [M3]
+  - id: M6
+    title: Validate all skills and publish profile-index + wave-readiness artifacts
+    depends_on: [M4, M5]
+  - id: M7
+    title: Update promotion workflow and kill-switch runbook for wave gate preconditions
+    depends_on: [M2]
+  - id: M8
+    title: Update governance approver policy to require >=2 approvers
+    depends_on: [M2]
+  - id: M9
+    title: Add smoke runner for observe-only recursive loop probes
+    depends_on: [M4]
+  - id: M10
+    title: Run onboarding smoke checks and capture report artifact
+    depends_on: [M6, M9]
+  - id: M11
+    title: Document all-skills migration plan in docs/plans with wave acceptance gates
+    depends_on: [M6, M7, M8]
+  - id: M12
+    title: Final verification and go/no-go readiness summary
+    depends_on: [M10, M11]
+```
 <!-- AGENT-FIRST-PLANS:END -->

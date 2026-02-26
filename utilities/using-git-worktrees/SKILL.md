@@ -1,6 +1,7 @@
 ---
 name: using-git-worktrees
 description: "Create and validate Codex app and Claude CLI git worktree workflows with safe branch/sync strategy and cleanup guidance. Use when users request isolated checkouts; do not use for explicit in-place same-branch edits."
+knowledge_graph_profile: references/task-profile.json
 ---
 
 # Using Git Worktrees

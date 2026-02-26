@@ -1,6 +1,7 @@
 ---
 name: agent-trace-debug
 description: Analyze Agent Trace data flow when AIAttributionPanel shows empty/incorrect trace by tracing expected vs actual shapes across agentTraceStore and API.
+knowledge_graph_profile: references/task-profile.json
 ---
 
 # agent-trace-debug

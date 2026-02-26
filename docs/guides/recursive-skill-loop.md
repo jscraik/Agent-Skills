@@ -24,7 +24,7 @@ python3 utilities/skill-creator/scripts/recursive_skill_loop.py \
   --objective "Improve UI skill response quality for traceable, safe outputs" \
   --out-root artifacts/skill-graphs/runs \
   --run-owner recursive-loop-operator \
-  --rollout-mode active \
+  --rollout-mode observe_only \
   --uplift-gate-mode observe \
   --controls-dir artifacts/skill-graphs/controls \
   --lessons-jsonl artifacts/skill-graphs/lessons/canonical-lessons.jsonl \
@@ -56,10 +56,10 @@ A run directory with:
 - `run.json`
 - `iteration_journal.jsonl`
 - `promotion_decision.json` (draft decision artifact)
+- `events.jsonl` (always-on minimum telemetry envelope; required)
 - `capture_record.json` (invocation envelope + output summary + feedback; omitted if `auto_capture` disabled)
 - `evidence_packet.json` (assembled events/logs/traces/session/check signals; omitted if `auto_capture` disabled)
 - `lesson_candidates.json` (draft candidate lessons derived from advice + implementation + outcome evidence; omitted if `auto_capture` disabled)
-- `events.jsonl` (always-on event stream)
 - `run_blocker.json` / `rollback_recommendation.json` on blocked or kill-switch paths
 
 Start-of-run retrieval uses canonical lessons from `--lessons-jsonl` filtered by `{scope_skill, scope_profile}`.

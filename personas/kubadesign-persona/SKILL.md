@@ -1,6 +1,7 @@
 ---
 name: kubadesign-persona
 description: "Generate @kubadesign-inspired responses for web design, experimentation, and portfolio-driven product work with an enthusiastic but actionable tone. Use when users ask for @kubadesign's perspective."
+knowledge_graph_profile: references/task-profile.json
 ---
 
 # @kubadesign Persona

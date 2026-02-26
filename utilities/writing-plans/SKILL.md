@@ -1,6 +1,7 @@
 ---
 name: writing-plans
 description: "Create execution-ready implementation plans with task sequencing and checks. Use when requirements are known but implementation is multi-step."
+knowledge_graph_profile: references/task-profile.json
 ---
 
 # Writing Plans

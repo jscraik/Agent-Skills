@@ -1,6 +1,7 @@
 ---
 name: automate-github-issues
 description: Use when the user asks to automate GitHub issue triage with parallel Jules agents; output a validated fleet setup and runbook for analyze, plan, dispatch, and merge.
+knowledge_graph_profile: references/task-profile.json
 ---
 
 # Automate GitHub Issues with Jules

@@ -5,7 +5,9 @@ Canonical promotions are human-gated and must include provenance + security evid
 ## Table of Contents
 
 - [Inputs](#inputs)
+- [Onboarding preconditions (all-skills migration)](#onboarding-preconditions-all-skills-migration)
 - [Gate checks](#gate-checks)
+- [Invocation boundary checks](#invocation-boundary-checks)
 - [Decision states](#decision-states)
 - [Commands](#commands)
 - [CI enforcement](#ci-enforcement)
@@ -17,6 +19,24 @@ Canonical promotions are human-gated and must include provenance + security evid
 - `iteration_journal.jsonl`
 - candidate lesson payload
 - reviewer identity
+
+## Onboarding preconditions (all-skills migration)
+
+Before wave promotion is allowed, verify:
+
+1. **Per-skill profile presence**
+   - `<skill>/references/task-profile.json` exists for every in-scope skill.
+   - Profile validates required fields (`schema_version`, `profile_id`, `scope_skill`, `scope_profile`, `criteria[]`, `thresholds`, `delegation`).
+2. **SKILL binding presence**
+   - Every in-scope `SKILL.md` includes:
+     - `knowledge_graph_profile: references/task-profile.json`
+3. **Wave model sequencing**
+   - `wave-0-controls` (control precedence + telemetry integrity) must pass before `wave-1-manual`.
+   - `wave-1-manual` must pass before `wave-2-co-pilot`.
+4. **Governance capacity**
+   - Approver policy must include at least 2 approvers before wave promotion.
+5. **Telemetry envelope integrity**
+   - Decision window must report zero missing `events.jsonl` envelopes.
 
 ## Gate checks
 
@@ -33,6 +53,28 @@ Canonical promotions are human-gated and must include provenance + security evid
    - Retention + redaction policy acknowledged.
 5. **Reviewer checklist**
    - At least one authorized reviewer signs off.
+   - Wave promotion decisions require two approvers from the allowlist.
+
+## Invocation boundary checks
+
+Before creating/validating a promotion decision, verify:
+
+1. **Control files present and parsed**
+   - `kill-switch.txt` (global kill switch)
+   - `rollback-required.txt` (rollback requirement)
+   - `rollout-mode.txt` or equivalent `--rollout-mode` override
+   - auto_capture / auto_apply switches (`auto_capture.disabled`, `auto_apply.disabled`, plus per-skill switches when used)
+2. **Invocation envelope completeness**
+   - capture record contains:
+     - `invocation_id`
+     - `invocation_envelope.actor_id`
+     - `invocation_envelope.rollout_mode` / `auto_capture_enabled` / `auto_apply_enabled`
+   - run object records:
+     - `runtime_controls`
+     - `control_reasons` (or equivalent rationale field)
+3. **Network + execution isolation assumptions**
+   - confirm recursive run used isolated profile-scoped execution and explicit allowlist (if any external fetches occurred).
+   - confirm destructive or side-effect commands had explicit run-mode guards and confirmation.
 
 ## Decision states
 
@@ -90,7 +132,7 @@ Workflow: `.github/workflows/recursive-promotion-gate.yml`.
 - runtime control snapshot in `runtime_controls{rollout_mode, auto_capture_enabled, auto_apply_enabled}` for rollback audits
 - counterfactual uplift contract: `counterfactual_uplift{treatment_outcome, control_outcome, uplift_delta, uplift_confidence_band, sample_size, match_quality_metrics, promotion_decision, auto_apply_decision}`
 
-Approved promotions emit a deduplicated `promotion_approved` debug event in `run/debug/events.jsonl`.
+Approved promotions emit a deduplicated `promotion_approved` event in `run/events.jsonl`.
 
 Related:
 - [Reviewer rubric](/docs/skill-graphs/workflows/reviewer-rubric.md)

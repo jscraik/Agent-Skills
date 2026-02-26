@@ -6,12 +6,20 @@
   "rubric_version": "2026-02-19",
   "evaluator_version": "v1",
   "persona_set_id": "ui-v1-checkpoint",
+  "delegation": {
+    "mode": "co-pilot",
+    "human_baseline_minutes": 90,
+    "ai_process_minutes": 30,
+    "probability_of_success": 0.78,
+    "rationale": "High-context UI improvement requires iterative human + agent synthesis."
+  },
   "thresholds": {
     "stability_consecutive_passes": 1,
     "critical_non_regression": true,
     "max_iterations": 4,
     "max_elapsed_ms": 120000,
-    "max_tokens": 12000
+    "max_tokens": 12000,
+    "no_improvement_escalation_limit": 2
   },
   "criteria": [
     {

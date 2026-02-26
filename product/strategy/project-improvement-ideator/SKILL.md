@@ -3,6 +3,7 @@ name: project-improvement-ideator
 description: Generate, score, and winnow project improvement ideas into a top 5 with
   impact/effort notes. Use when asked for roadmap ideas, prioritization, or improvement
   brainstorming.
+knowledge_graph_profile: references/task-profile.json
 ---
 
 # Project Improvement Ideator

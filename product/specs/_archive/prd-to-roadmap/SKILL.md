@@ -2,6 +2,7 @@
 name: prd-to-roadmap
 description: Generate a phased roadmap from a PRD with goals, dependencies, and validation
   gates. Use when sequencing and milestone logic must be explicit without dates.
+knowledge_graph_profile: references/task-profile.json
 ---
 
 # PRD to Roadmap

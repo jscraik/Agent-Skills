@@ -1,6 +1,7 @@
 ---
 name: insight-report
 description: Generate a high-fidelity Codex usage insights HTML report from local Codex session data when asked for "insights report", "usage report", or "analyze my Codex sessions".
+knowledge_graph_profile: references/task-profile.json
 ---
 
 # Insight Report (Codex)

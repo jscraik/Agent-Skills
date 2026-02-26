@@ -3,6 +3,7 @@ name: prd-to-risk
 description: Generate a risk register and mitigation plan from a PRD, covering product,
   security, delivery, and dependency risks. Use when risks must be explicitly enumerated
   and owned.
+knowledge_graph_profile: references/task-profile.json
 ---
 
 # PRD to Risk Register

@@ -1,6 +1,7 @@
 ---
 name: seo-optimizer
 description: "Implement practical SEO improvements in a web app (metadata, sitemap, robots, structured data, social cards) based on repository analysis. Use when a user asks to improve discoverability, indexing, or search/social preview quality."
+knowledge_graph_profile: references/task-profile.json
 ---
 
 # SEO Optimizer

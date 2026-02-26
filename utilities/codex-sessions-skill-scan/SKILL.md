@@ -1,6 +1,7 @@
 ---
 name: codex-sessions-skill-scan
 description: "Daily skill health scan: analyze ~/.codex/sessions plus per-repo session logs under ~/dev (default last 1 day) and summarize skill invocations + likely failures for personal skills in ~/dev/agent-skills (missing paths, tool failures, complex-task word triggers). Optional: include best-effort local OTel signals."
+knowledge_graph_profile: references/task-profile.json
 ---
 
 # Codex Sessions Skill Scan

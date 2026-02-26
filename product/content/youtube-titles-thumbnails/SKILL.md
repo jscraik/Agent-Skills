@@ -3,6 +3,7 @@ name: youtube-titles-thumbnails
 description: Generate multiple SEO/CTR-optimized YouTube title and thumbnail text
   options with variants and rationale. Use when the user wants packaging ideas, titles,
   or thumbnail copy.
+knowledge_graph_profile: references/task-profile.json
 ---
 
 # YouTube Titles & Thumbnails

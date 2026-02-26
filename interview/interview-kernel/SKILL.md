@@ -3,6 +3,7 @@ name: interview-kernel
 description: Core interview engine enforcing strict discovery/decision gating with
   externalized state, decisions, assumptions, and an approval gate. Use when building
   interview wrapper skills.
+knowledge_graph_profile: references/task-profile.json
 ---
 
 # Interview Kernel (v2)

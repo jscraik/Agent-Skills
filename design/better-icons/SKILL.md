@@ -3,6 +3,7 @@ name: better-icons
 description: Use this skill to search and extract SVG icons via the better-icons CLI
   or MCP. Use this when you need icons from Iconify collections for UI/UX work, product
   mocks, or codebases.
+knowledge_graph_profile: references/task-profile.json
 ---
 
 # Better Icons

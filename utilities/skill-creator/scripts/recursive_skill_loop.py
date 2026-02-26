@@ -47,6 +47,8 @@ STOP_REASONS = {
 
 FEEDBACK_OUTCOMES = {"worked", "partly", "didnt_work"}
 ROLLOUT_MODES = {"off", "observe_only", "active"}
+COCKPIT_MODES = {"autopilot", "co-pilot", "manual"}
+COCKPIT_MODE_ALIASES = {"collaboration": "co-pilot"}
 LESSON_STATUS_PRIORITY = {
     "active": 5,
     "promoted": 4,
@@ -83,6 +85,15 @@ class Thresholds:
 
 
 @dataclass(frozen=True)
+class DelegationDecision:
+    mode: str
+    human_baseline_minutes: float
+    ai_process_minutes: float
+    probability_of_success: float
+    rationale: str
+
+
+@dataclass(frozen=True)
 class Profile:
     schema_version: str
     profile_id: str
@@ -93,6 +104,7 @@ class Profile:
     persona_set_id: str
     thresholds: Thresholds
     criteria: List[Criterion]
+    delegation: Optional[DelegationDecision]
 
 
 def iso_now() -> str:
@@ -124,6 +136,24 @@ def clamp(v: float, lo: float = 0.0, hi: float = 1.0) -> float:
 def token_estimate(text: str) -> int:
     # Lightweight approximation for deterministic budgeting.
     return max(1, math.ceil(len(text) / 4))
+
+
+def delegation_to_dict(delegation: Optional[DelegationDecision]) -> Optional[Dict[str, Any]]:
+    if delegation is None:
+        return None
+    time_delta = round(delegation.human_baseline_minutes - delegation.ai_process_minutes, 2)
+    roi_signal = "positive" if time_delta > 0 else ("neutral" if time_delta == 0 else "negative")
+    return {
+        "mode": delegation.mode,
+        "agentic_cost_benefit": {
+            "human_baseline_minutes": round(delegation.human_baseline_minutes, 2),
+            "ai_process_minutes": round(delegation.ai_process_minutes, 2),
+            "probability_of_success": round(delegation.probability_of_success, 3),
+            "time_delta_minutes": time_delta,
+            "roi_signal": roi_signal,
+        },
+        "rationale": delegation.rationale,
+    }
 
 
 def normalize_feedback(feedback_outcome: Optional[str], feedback_note: Optional[str]) -> Dict[str, str]:
@@ -404,6 +434,9 @@ def build_lesson_candidates(
             + (f" ({weakest_text})" if weakest_text else "")
         ),
     }
+    delegation_context = run_obj.get("delegation")
+    if isinstance(delegation_context, dict):
+        candidate["delegation_context"] = delegation_context
     return [candidate]
 
 
@@ -748,6 +781,39 @@ def load_profile(path: Path) -> Profile:
     if total_weight <= 0:
         raise ValueError("At least one criterion must have positive weight")
 
+    if obj.get("delegation") is None:
+        raise ValueError("Profile missing required field: delegation")
+    d = obj.get("delegation")
+    if not isinstance(d, dict):
+        raise ValueError("Profile delegation must be an object")
+    mode = str(d.get("mode", "")).strip().lower()
+    if mode in COCKPIT_MODE_ALIASES:
+        mode = COCKPIT_MODE_ALIASES[mode]
+    if mode not in COCKPIT_MODES:
+        raise ValueError(
+            "Profile delegation.mode must be one of: autopilot | co-pilot | manual"
+        )
+    try:
+        human_baseline_minutes = float(d.get("human_baseline_minutes"))
+        ai_process_minutes = float(d.get("ai_process_minutes"))
+        probability_of_success = float(d.get("probability_of_success"))
+    except (TypeError, ValueError) as exc:
+        raise ValueError(
+            "Profile delegation requires numeric fields: human_baseline_minutes, ai_process_minutes, probability_of_success"
+        ) from exc
+    if human_baseline_minutes < 0 or ai_process_minutes < 0:
+        raise ValueError("Profile delegation time fields must be >= 0")
+    if not (0.0 <= probability_of_success <= 1.0):
+        raise ValueError("Profile delegation.probability_of_success must be in range 0..1")
+    rationale = str(d.get("rationale", "")).strip()
+    delegation = DelegationDecision(
+        mode=mode,
+        human_baseline_minutes=human_baseline_minutes,
+        ai_process_minutes=ai_process_minutes,
+        probability_of_success=probability_of_success,
+        rationale=rationale[:500],
+    )
+
     return Profile(
         schema_version=str(obj["schema_version"]),
         profile_id=str(obj["profile_id"]),
@@ -758,6 +824,7 @@ def load_profile(path: Path) -> Profile:
         persona_set_id=str(obj["persona_set_id"]),
         thresholds=thresholds,
         criteria=criteria,
+        delegation=delegation,
     )
 
 
@@ -1429,9 +1496,11 @@ def run_loop(args: argparse.Namespace) -> int:
         run_obj = {
             "schema_version": profile.schema_version,
             "run_id": run_id,
+            "invocation_id": invocation_id,
             "profile_id": profile.profile_id,
             "scope_skill": profile.scope_skill,
             "scope_profile": profile.scope_profile,
+            "delegation": delegation_to_dict(profile.delegation),
             "terminal_status": terminal_status,
             "stop_reason": stop_reason,
             "started_at": created_at,
@@ -1453,6 +1522,7 @@ def run_loop(args: argparse.Namespace) -> int:
                 "persona_set_id": profile.persona_set_id,
             },
             "prompt_hash": objective_hash,
+            "objective_hash": objective_hash,
             "created_by": args.actor_id,
             "run_owner": run_owner,
             "idempotency_key": idempotency_key,
@@ -1476,6 +1546,7 @@ def run_loop(args: argparse.Namespace) -> int:
         promotion_decision = {
             "schema_version": "1.1",
             "run_id": run_id,
+            "invocation_id": invocation_id,
             "lesson_id": "",
             "decision": "draft",
             "reviewer_ids": [],
@@ -1490,11 +1561,15 @@ def run_loop(args: argparse.Namespace) -> int:
             },
             "provenance": {
                 "prompt_hash": objective_hash,
+                "objective_hash": objective_hash,
+                "scope_skill": profile.scope_skill,
+                "scope_profile": profile.scope_profile,
                 "rubric_version": profile.rubric_version,
                 "evaluator_version": profile.evaluator_version,
                 "iteration_ids": [],
             },
             "injected_lesson_ids": [item["lesson_id"] for item in injected_lessons],
+            "delegation": delegation_to_dict(profile.delegation),
             "runtime_controls": runtime_controls,
             "counterfactual_uplift": uplift_gate,
             "run_blocker": blocker,
@@ -1942,9 +2017,11 @@ def run_loop(args: argparse.Namespace) -> int:
     run_obj = {
         "schema_version": profile.schema_version,
         "run_id": run_id,
+        "invocation_id": invocation_id,
         "profile_id": profile.profile_id,
         "scope_skill": profile.scope_skill,
         "scope_profile": profile.scope_profile,
+        "delegation": delegation_to_dict(profile.delegation),
         "terminal_status": terminal_status,
         "stop_reason": stop_reason,
         "started_at": created_at,
@@ -1966,6 +2043,7 @@ def run_loop(args: argparse.Namespace) -> int:
             "persona_set_id": profile.persona_set_id,
         },
         "prompt_hash": objective_hash,
+        "objective_hash": objective_hash,
         "created_by": args.actor_id,
         "run_owner": run_owner,
         "idempotency_key": idempotency_key,
@@ -1997,6 +2075,7 @@ def run_loop(args: argparse.Namespace) -> int:
     promotion_decision = {
         "schema_version": "1.1",
         "run_id": run_id,
+        "invocation_id": invocation_id,
         "lesson_id": "",
         "decision": "draft",
         "reviewer_ids": [],
@@ -2017,11 +2096,15 @@ def run_loop(args: argparse.Namespace) -> int:
         },
         "provenance": {
             "prompt_hash": sha256_text(args.objective),
+            "objective_hash": objective_hash,
+            "scope_skill": profile.scope_skill,
+            "scope_profile": profile.scope_profile,
             "rubric_version": profile.rubric_version,
             "evaluator_version": profile.evaluator_version,
             "iteration_ids": journal_iteration_ids,
         },
         "injected_lesson_ids": [item["lesson_id"] for item in injected_lessons],
+        "delegation": delegation_to_dict(profile.delegation),
         "runtime_controls": runtime_controls,
         "counterfactual_uplift": uplift_gate,
     }

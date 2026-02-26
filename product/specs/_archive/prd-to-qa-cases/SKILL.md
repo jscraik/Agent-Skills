@@ -2,6 +2,7 @@
 name: prd-to-qa-cases
 description: Generate QA test cases from PRD acceptance criteria using Given/When/Then
   and expected results. Use when QA coverage needs explicit, auditable cases.
+knowledge_graph_profile: references/task-profile.json
 ---
 
 # PRD to QA Cases
