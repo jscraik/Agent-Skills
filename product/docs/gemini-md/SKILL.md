@@ -19,6 +19,9 @@ description: "Use when a user asks to create, update, or review Gemini CLI conte
 - [Workflow](#workflow)
 - [Required sections (root GEMINI.md)](#required-sections-root-geminimd)
 - [Flaky Test Artifact Capture (injectable block, conditional)](#flaky-test-artifact-capture-injectable-block-conditional)
+- [Code Quality Standards (injectable block, conditional)](#code-quality-standards-injectable-block-conditional)
+- [Plan Review Guidelines (injectable block, conditional)](#plan-review-guidelines-injectable-block-conditional)
+- [Shell Script Conventions (injectable block, conditional)](#shell-script-conventions-injectable-block-conditional)
 - [Memory operations](#memory-operations)
 - [Hierarchy and folder-scoped context](#hierarchy-and-folder-scoped-context)
 - [Validation](#validation)
@@ -197,6 +200,9 @@ Use the failure-mode template verbatim for out-of-scope requests.
 - Project summary (one sentence).
 - Package/build/test defaults.
 - Repo-native package-manager command map (`install`, `run`, optional `exec`) when Node tooling exists.
+- Code quality standards (inject when requested or supported by repo evidence).
+- Planning guidance (inject plan-review rules for complex implementation work).
+- Shell script conventions when shell wrappers/scripts are present.
 - Non-obvious command patterns.
 - Explicit boundaries / forbidden patterns.
 - Memory persistence guidance (`save_memory` prompts and retention logic).
@@ -225,6 +231,55 @@ Insert this section in GEMINI.md for test repos:
 - Run the verified artifact-capture script in `all` mode (or the detected repo-native command for `test:artifacts`) to emit machine-readable flaky evidence under `artifacts/test`.
 - Optional targeted modes: `unit`, `integration`, `e2e`.
 - Keep artifact filenames stable (no timestamps in filenames) for cross-run comparison.
+```
+
+## Code Quality Standards (injectable block, conditional)
+
+Injection rule:
+- Inject when the user requests code-quality standards.
+- Else inject when repo evidence shows tests, linting, or TypeScript workflows.
+- Skip if no quality workflow evidence exists.
+
+Insert this section in GEMINI.md when injected:
+
+```md
+## Code Quality Standards
+- Run full test suite before committing: `npm test` or the detected repo-native equivalent.
+- Fix TypeScript errors and lint issues before marking tasks complete.
+- Ensure test isolation - tests should not depend on execution order.
+```
+
+## Plan Review Guidelines (injectable block, conditional)
+
+Injection rule:
+- Inject when the user asks for planning guardrails.
+- Else inject for complex feature/refactor/architecture tasks.
+- Skip for trivial edits unless explicitly requested.
+
+Insert this section in GEMINI.md when injected:
+
+```md
+## Planning
+### Plan Review Guidelines
+- Before implementing complex features, create a minimal v1 scope.
+- Avoid over-engineering - prefer simple solutions over comprehensive ones.
+- Scale back ambition if initial plan feels too large.
+```
+
+## Shell Script Conventions (injectable block, conditional)
+
+Injection rule:
+- Inject when the user asks for shell script quality guidance.
+- Else inject when repo evidence includes shell scripts or wrapper scripts.
+- Skip if shell scripts are not part of the repo workflow.
+
+Insert this section in GEMINI.md when injected:
+
+```md
+## Shell Script Conventions
+- Always validate wrapper scripts with shellcheck before considering complete.
+- Test script syntax with `bash -n script.sh` to catch errors early.
+- Handle edge cases for function conflicts and environment variable loading.
 ```
 
 ## Memory operations

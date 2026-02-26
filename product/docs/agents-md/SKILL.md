@@ -8,8 +8,7 @@ description: 'Refactor or create AGENTS.md using progressive disclosure: keep ro
 # Agents Md
 
 ## Remember
-The agent is capable of extraordinary work in this domain. Use judgment, adapt to context, and push boundaries when appropriate.
-
+Use judgment, adapt to context, and stay within explicit safety and scope constraints.
 
 ## Compliance
 - Check against GOLD Industry Standards guide in ~/.codex/instructions/standards.md
@@ -135,7 +134,7 @@ Use the failure-mode template verbatim for out-of-scope requests.
 ## Deliverables
 
 - A minimal root `AGENTS.md` that links to separate instruction files.
-- One file per instruction category (e.g., `docs/agents/typescript.md`, `docs/agents/testing.md`).
+- One file per instruction category under the repo's canonical instruction root (e.g., `docs/agents/...` or `instructions/agents/...`).
 - A suggested `docs/` folder structure.
 - A table of contents for docs that are created or updated.
 - A contradictions list with a question for each conflict.
@@ -146,7 +145,6 @@ Use the failure-mode template verbatim for out-of-scope requests.
 
 ## Constraints
 - Redact secrets/PII by default.
-
 - Do not invent commands, scripts, or paths.
 - Redact secrets and sensitive data by default.
 - Use ASCII only unless the repo already uses non-ASCII.
@@ -159,6 +157,9 @@ Use the failure-mode template verbatim for out-of-scope requests.
 1) Discover repo facts
 - Read README and `docs/` for real commands and structure.
 - Inspect config files (for example `pyproject.toml`, package scripts).
+- Determine canonical instruction root before generating files:
+  - If target path is `~/.codex` or a Codex config repo clone (for example `/Users/<user>/dev/config/codex`), prefer `instructions/` and do not create `docs/` for agent guidance.
+  - Else, follow existing repo convention (`docs/agents` vs `instructions/agents`) and avoid introducing a second instruction tree.
 - Detect package manager in this precedence: `package.json#packageManager` -> lockfiles (`pnpm-lock.yaml`, `yarn.lock`, `bun.lockb`/`bun.lock`, `package-lock.json`, `npm-shrinkwrap.json`) -> existing command style in README/CI/docs.
 - If package-manager signals conflict or are missing, state "not observed" and ask which command style should be used before emitting manager-specific commands.
 - Build one package-manager command map from detected evidence and apply it consistently in generated AGENTS/CLAUDE/GEMINI updates.
@@ -207,9 +208,9 @@ Use the failure-mode template verbatim for out-of-scope requests.
 - Keep each category file focused and scoped.
 
 6) Create the file structure
-- Output a minimal root `AGENTS.md` with Markdown links to category files.
+- Output a minimal root `AGENTS.md` with Markdown links to category files under the canonical instruction root selected in step 1.
 - Output each category file with its relevant instructions.
-- Provide a suggested `docs/` folder structure.
+- Provide a suggested folder structure rooted at the selected instruction root.
 
 7) Flag for deletion
 - Identify redundant, vague, or overly obvious instructions.
@@ -227,9 +228,13 @@ Use the failure-mode template verbatim for out-of-scope requests.
 - One-sentence project description
 - Tooling essentials (repo-native package-manager commands, including install/run equivalents)
 - Non-standard build/typecheck commands
+- Code quality standards (inject when requested or supported by repo evidence)
+- Planning guidance (inject plan-review rules for complex implementation work)
+- Shell script conventions (inject when shell scripts/wrappers are present)
 - References or imports (global protocol pointers; no duplication)
 - Global instructions discovery order (brief, link to full doc)
 - Links to category files
+  - For Codex home/config repos: prefer `instructions/agents/...` links over `docs/agents/...`.
 
 ## Flaky Test Artifact Capture (injectable block, conditional)
 
@@ -270,6 +275,55 @@ Insert this exact section in generated AGENTS.md for test repos:
   - `artifacts/test/*-results.json` (when supported by test runner)
   - `artifacts/test/artifact-manifest.json`
 - Keep artifact filenames stable (no timestamps in filenames) so recurring flake scans can compare runs.
+```
+
+## Code Quality Standards (injectable block, conditional)
+
+Decision rule:
+1) Inject when the user explicitly asks for code-quality or testing standards.
+2) Else, inject when repo evidence shows automated tests, linting, or typechecking workflows.
+3) If no evidence exists, do not inject.
+
+Insert this section when injected:
+
+```md
+## Code Quality Standards
+- Run full test suite before committing: `npm test` or the detected repo-native equivalent.
+- Fix TypeScript errors and lint issues before marking tasks complete.
+- Ensure test isolation - tests should not depend on execution order.
+```
+
+## Plan Review Guidelines (injectable block, conditional)
+
+Decision rule:
+1) Inject when the user asks for planning guardrails.
+2) Else, inject when the task includes complex features, refactors, or architecture changes.
+3) Skip for trivial edits unless explicitly requested.
+
+Insert this section when injected:
+
+```md
+## Planning
+### Plan Review Guidelines
+- Before implementing complex features, create a minimal v1 scope.
+- Avoid over-engineering - prefer simple solutions over comprehensive ones.
+- Scale back ambition if initial plan feels too large.
+```
+
+## Shell Script Conventions (injectable block, conditional)
+
+Decision rule:
+1) Inject when the user asks for shell/script quality guidance.
+2) Else, inject when repo evidence includes shell scripts, wrapper scripts, or script-based automation.
+3) If no shell-script evidence exists, do not inject.
+
+Insert this section when injected:
+
+```md
+## Shell Script Conventions
+- Always validate wrapper scripts with shellcheck before considering complete.
+- Test script syntax with `bash -n script.sh` to catch errors early.
+- Handle edge cases for function conflicts and environment variable loading.
 ```
 
 ## Frontend Website Rules (injectable block, conditional)
@@ -320,7 +374,7 @@ If frontend evidence is present, inject the block into the generated `AGENTS.md`
 ### Runtime checks for screenshot workflows
 
 - Run at least 2 screenshot rounds for visual parity.
-- Use consistent comparison criteria: spacing/padding, typography scale, color hex, alignment, border radii, shadows, sizing.
+- Use consistent comparison criteria: spacing/padding, typography scale, color values, alignment, border radii, shadows, sizing.
 - For component screenshots, include the component type in filename (`card`, `button`, `modal`, `form`, etc.) to keep review context explicit.
 
 ## Agent-first scaffold integration (Jamie standard)
@@ -391,6 +445,7 @@ Rollout policy:
 - Treating imports as supported in Codex `AGENTS.md` (they are not).
 - Hiding conflicts in linked docs instead of calling them out in the root file.
 - Expanding root `AGENTS.md` beyond 400 words without explicit user approval.
+- Creating a new `docs/agents` tree in Codex home/config repos where `instructions/` is canonical.
 - Skipping project exploration before applying or invoking the skill.
 - Adding a Table of Contents that does not match actual document headings.
 - Never proceed with contradictory instructions without asking which one wins.
@@ -412,37 +467,3 @@ Rollout policy:
 1) Clarify scope and inputs.
 2) Execute the core workflow.
 3) Summarize outputs and next steps.
-
-
-<!-- skill-score-boost-v1 -->
-## Philosophy and tradeoffs
-- Use this skill when consistent decision-making matters more than one-off execution because project context should drive the approach.
-- Principle and mindset: prioritize tradeoffs and constraints over rigid checklists; understand why each step exists.
-- Ask this to keep outcomes robust: Why is this the right default, and what could change this outcome?
-- How do we adapt if constraints shift?
-- What evidence is needed before choosing one path over another?
-
-## Anti-patterns and caveats
-- Avoid applying this playbook generically without checking repository-specific context.
-- **NEVER** skip required validation gates when behavior changes.
-- **DO NOT** use this skill as a rigid replacement for engineering judgment.
-- **DON'T** ignore warnings or assume one pattern fits all repos.
-- Common pitfall: treating anti-patterns as optional.
-- Incorrect assumptions here can lead to fragile guidance.
-- Warning: wrong sequencing can create avoidable regressions.
-
-## Variation and adaptation
-- Vary the workflow by team size, risk, and deployment target.
-- Use different strategies for small, medium, and large changes.
-- Adapt recommendations to the specific environment and avoid repetitive templates.
-- Avoid generic or cookie-cutter responses; craft context-specific alternatives.
-- Keep outputs diverse and not repetitive.
-- Converge on a custom path only after evidence review.
-- Different constraints should produce different, non-generic recommendations.
-
-## Empowering execution style
-- Be capable of exploring multiple options and enabling the team to make safe decisions.
-- Unlock confidence by explaining options and tradeoffs clearly.
-- Feel free to be creative while staying rigorous and precise.
-- Push boundaries with practical alternatives when simple recipes fail.
-- Enable outcomes-oriented problem solving.

@@ -182,6 +182,9 @@ Use the failure-mode template verbatim for out-of-scope requests.
 - Repo-native package-manager command map (`install`, `run`, optional `exec`) when Node tooling exists
 - Code style deviations from defaults
 - Workflow/testing preferences
+- Code quality standards (inject when requested or supported by repo evidence)
+- Plan review guidance for complex implementation work
+- Shell script conventions when shell wrappers/scripts exist
 - Git/PR etiquette
 - Architecture decisions that impact most tasks
 - Imports/references for deep docs (optional, verified paths only)
@@ -208,6 +211,54 @@ Insert this section in CLAUDE.md for test repos:
 - Run the verified artifact-capture script in `all` mode (or the detected repo-native command for `test:artifacts`) to emit machine-readable flaky evidence under `artifacts/test`.
 - Optional targeted modes: `unit`, `integration`, `e2e`.
 - Preserve stable artifact filenames so recurring flaky scans can compare runs.
+```
+
+## Code Quality Standards (injectable block, conditional)
+
+Injection rule:
+- Inject when the user requests code-quality standards.
+- Else inject when repo evidence shows tests, linting, or TypeScript workflows.
+- Skip if no quality workflow evidence exists.
+
+Insert this section in CLAUDE.md when injected:
+
+```md
+### Code Quality Standards
+- Run full test suite before committing: `npm test` or the detected repo-native equivalent.
+- Fix TypeScript errors and lint issues before marking tasks complete.
+- Ensure test isolation - tests should not depend on execution order.
+```
+
+## Plan Review Guidelines (injectable block, conditional)
+
+Injection rule:
+- Inject when the user asks for planning guardrails.
+- Else inject for complex features/refactors/architecture work.
+- Skip for trivial changes unless explicitly requested.
+
+Insert this section in CLAUDE.md when injected:
+
+```md
+### Plan Review Guidelines
+- Before implementing complex features, create a minimal v1 scope.
+- Avoid over-engineering - prefer simple solutions over comprehensive ones.
+- Scale back ambition if initial plan feels too large.
+```
+
+## Shell Script Conventions (injectable block, conditional)
+
+Injection rule:
+- Inject when the user asks for shell scripting quality standards.
+- Else inject when repo evidence includes shell scripts or wrapper scripts.
+- Skip if shell scripts are not part of the repo workflow.
+
+Insert this section in CLAUDE.md when injected:
+
+```md
+### Shell Script Conventions
+- Always validate wrapper scripts with shellcheck before considering complete.
+- Test script syntax with `bash -n script.sh` to catch errors early.
+- Handle edge cases for function conflicts and environment variable loading.
 ```
 
 ## Claude loading behavior (authoring guidance)

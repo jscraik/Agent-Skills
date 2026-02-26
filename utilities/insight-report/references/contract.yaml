@@ -1,0 +1,15 @@
+schema_version: 1
+skill: insight-report
+outputs:
+  - name: report_path
+    type: string
+    required: true
+    description: Absolute path to generated HTML report
+  - name: facets_path
+    type: string
+    required: true
+    description: Absolute path to generated facets JSON
+  - name: session_meta_path
+    type: string
+    required: true
+    description: Absolute path to generated session metadata directory
