@@ -57,7 +57,7 @@ The interview must match `~/.codex/USER_PROFILE.md`:
 
 - Single-threaded, explicit, low cognitive load.
 - Always use **multiple-choice** questions (3–5 options) with a clear recommended default.
-- Prefer AskUserQuestion UI; otherwise use `a/b/c` options.
+- Prefer `default_mode_request_user_input` UI; otherwise use `a/b/c` options.
 - If the user replies in free text, map to the closest option and confirm next turn.
 
 ## Kernel contract
@@ -87,7 +87,7 @@ Wrappers MUST NOT rewrite kernel rules.
 ## Operating rules (non-negotiable)
 
 1) **One question per turn.**
-   - Optional override: if the user explicitly says `batch`, you may ask up to **3** questions in one AskUserQuestion call *for that turn only* and provide a reply key (e.g. `1a 2b 3c`). Default remains single-question.
+- Optional override: if the user explicitly says `batch`, you may ask up to **3** questions in one `default_mode_request_user_input` call *for that turn only* and provide a reply key (e.g. `1a 2b 3c`). Default remains single-question.
 2) **No implementation.** No code edits, no refactors, no “final plan” that depends on unknowns.
 3) Allowed: **read-only discovery** (skim provided docs/configs/files) if it doesn’t commit to a direction.
 4) After every answer: update the **Interview Log** + add a one-line **Captured answer**.
@@ -245,12 +245,12 @@ Additionally, reject questions that are:
 
 ---
 
-## Question format (preferred: AskUserQuestion tool)
+## Question format (preferred: default_mode_request_user_input tool)
 
-If the environment supports an AskUserQuestion-style UI, use it.
+If the environment supports a `default_mode_request_user_input` UI, use it.
 
 ```yaml
-AskUserQuestion:
+default_mode_request_user_input:
   questions:
     - header: "<Category>"
       question: "<One thing>"
@@ -269,7 +269,7 @@ Reply format: a / b / c / d (or "default")
 
 ### Fallback (plain text)
 
-If AskUserQuestion UI is not available, use:
+If `default_mode_request_user_input` UI is not available, use:
 
 ```text
 Question: <one thing>

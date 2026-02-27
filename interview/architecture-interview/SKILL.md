@@ -18,7 +18,7 @@ Kernel-enforced: Question validity gate, DISCOVER vs DECIDE intent switch, Decis
 
 ## Interaction notes
 
-- Must use AskUserQuestion-style multiple choice (3–5 options, include a recommended default).
+- Must use `default_mode_request_user_input` multiple choice (3–5 options, include a recommended default).
 - Start in **DECIDE**: architecture is primarily decision forcing.
 - In Delta mode (existing ADR/draft spec), do not re-ask settled decisions; fill gaps and verify consequences.
 

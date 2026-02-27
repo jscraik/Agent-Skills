@@ -85,7 +85,7 @@ Follow kernel rules (default: one question per turn). If the user says `batch`, 
 Each round:
 1) Summarize what the doc already claims (1–3 bullets).
 2) Identify the top gap using the kernel prioritization rubric.
-3) Ask the next high-leverage question using AskUserQuestion (preferred).
+3) Ask the next high-leverage question using `default_mode_request_user_input` (preferred).
 4) Update Interview Log + Captured answer.
 5) Continue until stop conditions or user says `done`.
 

@@ -18,9 +18,9 @@
 **If user just invoked skill without context:**
 → Ask what they want to build
 
-### Using AskUserQuestion
+### Using default_mode_request_user_input
 
-Ask 2-4 domain-specific questions based on actual gaps. Each question should:
+Ask 2-4 domain-specific questions based on actual gaps, via `default_mode_request_user_input`. Each question should:
 - Have specific options with descriptions
 - Focus on scope, complexity, outputs, boundaries
 - NOT ask things obvious from context
@@ -48,7 +48,7 @@ Before writing the skill body, draft the `description:` using **WHAT + WHEN** (b
 
 ## Step 2: Research Trigger (If External API)
 
-**When external service detected**, ask using AskUserQuestion:
+**When external service detected**, use `default_mode_request_user_input`:
 "This involves [service name] API. Would you like me to research current endpoints and patterns before building?"
 
 Options:

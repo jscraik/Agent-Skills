@@ -176,4 +176,4 @@ A builder could:
 
 Once you have generated the complete PRD (sections 1-7), you MUST continue with `product-spec` in `clarify_prd` mode to refine and clarify the PRD through structured questioning.
 
-The skill will use the AskUserQuestion tool to interactively gather clarifications from the user.
+The skill will use the `default_mode_request_user_input` tool to interactively gather clarifications from the user.

@@ -10,7 +10,7 @@
 <process>
 ## Step 1: List Available Skills
 
-**DO NOT use AskUserQuestion** - there may be many skills.
+**DO NOT use default_mode_request_user_input** - there may be many skills.
 
 Enumerate skills in chat as numbered list:
 ```bash
