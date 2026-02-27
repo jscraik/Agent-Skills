@@ -26,10 +26,12 @@ preflight_repo() {
   fi
 
   root="$(cd "${root}" && pwd -P)"
+  local workspace_root
+  workspace_root="$(cd "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)"
   echo "repo root: ${root}"
 
-  if [[ "${root}" != "$(cd /Users/jamiecraik/dev && pwd -P)"/* ]]; then
-    echo "❌ repo is outside /Users/jamiecraik/dev" >&2
+  if [[ "${root}" != "${workspace_root}" ]]; then
+    echo "❌ script workspace mismatch: expected ${workspace_root}" >&2
     return 2
   fi
 
