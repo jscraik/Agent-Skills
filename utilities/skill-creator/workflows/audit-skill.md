@@ -10,7 +10,8 @@
 <process>
 ## Step 1: List Available Skills
 
-**DO NOT use default_mode_request_user_input** - there may be many skills.
+For large skill lists, do not force `default_mode_request_user_input` selection UIs.
+Use a numbered list in chat and ask for number/name.
 
 Enumerate skills in chat as numbered list:
 ```bash
@@ -107,6 +108,9 @@ Options:
 1. **Fix all** - Apply all recommended fixes
 2. **Fix one by one** - Review each fix before applying
 3. **Just the report** - No changes needed
+
+When available, `default_mode_request_user_input` is preferred for this decision.
+If unavailable, keep the same options in plain text (`1/2/3`).
 
 If fixing:
 - Make each change

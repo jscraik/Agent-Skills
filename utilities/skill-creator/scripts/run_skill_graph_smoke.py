@@ -17,6 +17,7 @@ EXCLUDED_PREFIXES = (
     "skills/.system/",
     "utilities/recon-workbench/assets/template/.codex/skills/",
 )
+ALLOWED_EXECUTABLES = {"python3"}
 
 
 def iso_now() -> str:
@@ -114,6 +115,22 @@ def check_required_run_artifacts(run_out_dir: Path) -> Tuple[List[str], Dict[str
     return missing, details
 
 
+def run_recursive_loop(command: List[str], repo_root: Path) -> subprocess.CompletedProcess[str]:
+    if not command:
+        raise ValueError("Command cannot be empty.")
+    executable = command[0]
+    if executable not in ALLOWED_EXECUTABLES:
+        raise ValueError(f"Executable not allowed for smoke runner: {executable}")
+    return subprocess.run(
+        command,
+        cwd=str(repo_root),
+        text=True,
+        capture_output=True,
+        check=False,
+        shell=False,
+    )
+
+
 def main() -> int:
     args = parse_args()
     repo_root = Path(args.repo_root).resolve()
@@ -170,13 +187,7 @@ def main() -> int:
             )
             continue
 
-        completed = subprocess.run(
-            command,
-            cwd=str(repo_root),
-            text=True,
-            capture_output=True,
-            check=False,
-        )
+        completed = run_recursive_loop(command, repo_root)
         execution_status = "passed" if completed.returncode == 0 else "nonzero_exit"
         run_id = ""
         out_dir = ""

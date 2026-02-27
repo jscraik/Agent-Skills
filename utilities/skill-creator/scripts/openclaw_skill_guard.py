@@ -13,10 +13,11 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 from dataclasses import dataclass, asdict
 from pathlib import Path
-from typing import Iterable, List
+from typing import Iterable, List, Pattern
 
 
 @dataclass
@@ -26,6 +27,97 @@ class Finding:
     message: str
     file: str | None = None
     line: int | None = None
+    remediation: str | None = None
+
+
+@dataclass(frozen=True)
+class Rule:
+    level: str
+    code: str
+    message: str
+    pattern: Pattern[str]
+    requires_context: Pattern[str] | None = None
+    remediation: str | None = None
+
+
+@dataclass(frozen=True)
+class SourceRule:
+    level: str
+    code: str
+    message: str
+    pattern: Pattern[str]
+    requires_context: Pattern[str] | None = None
+    remediation: str | None = None
+
+
+SCANNABLE_EXTENSIONS = {".py", ".js", ".ts", ".sh"}
+DEFAULT_MAX_SCAN_FILES = 500
+DEFAULT_MAX_FILE_BYTES = 1024 * 1024
+
+
+def has_nested_repetition(source: str) -> bool:
+    """Conservative regex guard against nested repetition bombs."""
+    frames = [{"last_repeated": False, "contains_repetition": False}]
+    in_char_class = False
+    i = 0
+    while i < len(source):
+        ch = source[i]
+        if ch == "\\":
+            i += 2
+            frames[-1]["last_repeated"] = False
+            continue
+        if in_char_class:
+            if ch == "]":
+                in_char_class = False
+            i += 1
+            continue
+        if ch == "[":
+            in_char_class = True
+            frames[-1]["last_repeated"] = False
+            i += 1
+            continue
+        if ch == "(":
+            frames.append({"last_repeated": False, "contains_repetition": False})
+            i += 1
+            continue
+        if ch == ")":
+            if len(frames) > 1:
+                frame = frames.pop()
+                frames[-1]["last_repeated"] = bool(frame["contains_repetition"])
+                if frame["contains_repetition"]:
+                    frames[-1]["contains_repetition"] = True
+            i += 1
+            continue
+        quant = None
+        if ch in {"*", "+", "?"}:
+            quant = 1
+        elif ch == "{":
+            j = i + 1
+            while j < len(source) and source[j].isdigit():
+                j += 1
+            if j > i + 1 and j < len(source) and source[j] in {",", "}"}:
+                if source[j] == ",":
+                    j += 1
+                    while j < len(source) and source[j].isdigit():
+                        j += 1
+                if j < len(source) and source[j] == "}":
+                    quant = (j - i) + 1
+        if quant:
+            if frames[-1]["last_repeated"]:
+                return True
+            frames[-1]["last_repeated"] = True
+            frames[-1]["contains_repetition"] = True
+            i += quant
+            continue
+        frames[-1]["last_repeated"] = False
+        i += 1
+    return False
+
+
+def compile_safe_regex(source: str, flags: int = 0, *, allow_nested: bool = False) -> Pattern[str]:
+    if not allow_nested and has_nested_repetition(source):
+        raise ValueError(f"Unsafe regex (nested repetition): {source}")
+    return re.compile(source, flags)
 
 
 def _line_no(text: str, idx: int) -> int:
@@ -63,44 +155,70 @@ def readiness_checks(skill_dir: Path) -> List[Finding]:
     return out
 
 
-# NOTE: This guard is intentionally heuristic. The goal is:
-# - keep "critical" for patterns with high likelihood of turning into security issues
-# - keep "warn" for patterns that are often safe but deserve review and constraints
-#
-# This repo contains many script-backed skills that shell out to trusted CLIs
-# (for example: `gh`, `git`, `yt-dlp`). That should not fail the entire guard by
-# default. We flag that as WARN, and reserve CRITICAL for shell injection vectors
-# (Python subprocess shell mode / Node exec*) and dynamic code execution (eval/exec).
-PATTERNS = [
-    # High-risk command execution patterns.
-    ("critical", "security.shell_true", re.compile(r"\bshell\s*=\s*True\b")),
-    ("critical", "security.os_system", re.compile(r"\bos\.system\(")),
-    ("critical", "security.node_exec", re.compile(r"\bexecSync\(")),
-    ("critical", "security.node_exec", re.compile(r"\bchild_process\.(exec|execSync)\b")),
+LINE_RULES: List[Rule] = [
+    Rule(
+        "critical",
+        "security.shell_true",
+        "Shell mode execution detected (`shell=True`).",
+        compile_safe_regex(r"\bshell\s*=\s*True\b"),
+        remediation="Use argument lists with `shell=False` and explicit command allowlists.",
+    ),
+    Rule(
+        "critical",
+        "security.os_system",
+        "os.system execution detected.",
+        compile_safe_regex(r"\bos\.system\("),
+        remediation="Replace os.system with subprocess argument lists and input validation.",
+    ),
+    Rule(
+        "critical",
+        "security.node_exec",
+        "Node exec/execSync execution detected.",
+        compile_safe_regex(r"\b(child_process\.(exec|execSync)|execSync)\b"),
+        remediation="Prefer spawn/spawnSync with fixed argv and strict input validation.",
+    ),
+    Rule(
+        "critical",
+        "security.dynamic_code_execution",
+        "Dynamic code execution detected (`eval`/`exec`/`new Function`).",
+        compile_safe_regex(r"\b(eval\(|(?<![A-Za-z0-9_])exec\(|new\s+Function\s*\()"),
+        remediation="Remove dynamic execution and replace with static dispatch logic.",
+    ),
+    Rule(
+        "warn",
+        "security.subprocess_usage",
+        "subprocess command execution detected; review for input hardening.",
+        compile_safe_regex(r"\bsubprocess\.(run|Popen|call|check_call|check_output)\("),
+        requires_context=compile_safe_regex(r"\bsubprocess\b"),
+        remediation="Ensure argv lists, `shell=False`, and strict input sanitization are used.",
+    ),
+    Rule(
+        "warn",
+        "security.node_child_process",
+        "Node child_process usage detected; review for command injection risk.",
+        compile_safe_regex(r"\b(node:child_process|child_process\.(?:spawn|spawnSync|exec|execSync)|spawnSync\(|spawn\()"),
+        remediation="Ensure command/argv are fixed or validated and avoid shell wrappers.",
+    ),
+]
 
-    # Dynamic code execution.
-    ("critical", "security.eval_usage", re.compile(r"\beval\(")),
-    ("critical", "security.exec_usage", re.compile(r"(?<![A-Za-z0-9_])exec\(")),
-
-    # Often-safe patterns that still deserve review.
-    ("warn", "security.subprocess_usage", re.compile(r"\bsubprocess\.(run|Popen|call|check_call|check_output)\(")),
-    ("warn", "security.node_child_process", re.compile(r"\bnode:child_process\b|\bchild_process\.(?:spawn|spawnSync|exec|execSync)\b|\bspawnSync\(|\bspawn\(")),
-    (
+SOURCE_RULES: List[SourceRule] = [
+    SourceRule(
         "warn",
         "security.network_usage",
-        re.compile(
-            r"\b(?:"
-            r"requests\.(?:get|post|put|patch|delete|request)\(|"
-            r"httpx\.(?:get|post|put|patch|delete|request|Client)\(|"
-            r"axios\.(?:get|post|put|patch|delete|request)\(|"
-            r"fetch\(\s*[\"'`](?:https?:)?//|"
-            r"curl\s+-[A-Za-z]"
-            r")"
+        "Network calls detected in scripts.",
+        compile_safe_regex(
+            r"\b(?:requests\.(?:get|post|put|patch|delete|request)\(|httpx\.(?:get|post|put|patch|delete|request|Client)\(|axios\.(?:get|post|put|patch|delete|request)\(|fetch\(\s*[\"'`](?:https?:)?//|curl\s+-[A-Za-z])",
+            allow_nested=True,
         ),
+        remediation="Document and enforce explicit network allowlists and offline defaults.",
     ),
-
-    # Exfil risk: env reading + network usage near each other.
-    ("critical", "security.env_harvesting", re.compile(r"(os\.environ|getenv\(|process\.env).{0,160}(requests\.|fetch\(|axios\.|httpx\.|curl)")),
+    SourceRule(
+        "critical",
+        "security.env_harvesting",
+        "Environment access combined with network send detected.",
+        compile_safe_regex(r"(os\.environ|getenv\(|process\.env).{0,200}(requests\.|fetch\(|axios\.|httpx\.|curl)", re.DOTALL),
+        remediation="Avoid sending env-derived data over network; explicitly redact and isolate secrets.",
+    ),
 ]
 
 
@@ -121,44 +239,113 @@ def _should_skip_match(code: str, line_text: str) -> bool:
     # Avoid self-referential false positives from regex definition tables.
     if "re.compile(" in line_text:
         return True
+    if "compile_safe_regex(" in line_text:
+        return True
     if code in {"security.network_usage", "security.node_child_process"} and "pattern" in stripped.lower():
         return True
     return False
 
 
-def iter_code_files(skill_dir: Path) -> Iterable[Path]:
+def _is_path_inside(base: Path, candidate: Path) -> bool:
+    base_resolved = base.resolve()
+    candidate_resolved = candidate.resolve()
+    rel = os.path.relpath(candidate_resolved, base_resolved)
+    return rel == "." or (not rel.startswith("..") and not os.path.isabs(rel))
+
+
+def iter_code_files(skill_dir: Path, *, max_files: int, max_file_bytes: int) -> Iterable[Path]:
+    count = 0
     for rel in ("scripts",):
-        d = skill_dir / rel
+        d = (skill_dir / rel).resolve()
         if not d.exists():
             continue
         for f in d.rglob("*"):
-            if f.suffix.lower() in {".py", ".js", ".ts", ".sh"} and f.is_file():
-                yield f
+            if count >= max_files:
+                return
+            if not f.is_file():
+                continue
+            if f.suffix.lower() not in SCANNABLE_EXTENSIONS:
+                continue
+            if f.name == "openclaw_skill_guard.py":
+                continue
+            if f.name.startswith("test_") or f.name.endswith("_test.py") or f.name.endswith(".test.py"):
+                continue
+            if "/node_modules/" in f.as_posix() or "/." in f.as_posix().replace("/..", "/"):
+                continue
+            if not _is_path_inside(d, f):
+                continue
+            try:
+                if f.stat().st_size > max_file_bytes:
+                    continue
+            except OSError:
+                continue
+            yield f
+            count += 1
 
 
-def security_checks(skill_dir: Path) -> List[Finding]:
+def scan_source(text: str, rel_file: str) -> List[Finding]:
     out: List[Finding] = []
-    files = list(iter_code_files(skill_dir))
+
+    for rule in LINE_RULES:
+        if rule.requires_context and not rule.requires_context.search(text):
+            continue
+        for m in rule.pattern.finditer(text):
+            line_text = _line_text(text, m.start())
+            if _should_skip_match(rule.code, line_text):
+                continue
+            if rule.code == "security.subprocess_usage":
+                window = text[max(0, m.start() - 120) : min(len(text), m.end() + 240)]
+                if re.search(r"\bshell\s*=\s*False\b", window):
+                    continue
+                if re.search(r"\bsubprocess\.(run|Popen|call|check_call|check_output)\s*\(\s*\[", window):
+                    continue
+            out.append(
+                Finding(
+                    rule.level,
+                    rule.code,
+                    rule.message,
+                    rel_file,
+                    _line_no(text, m.start()),
+                    remediation=rule.remediation,
+                )
+            )
+            break
+
+    for rule in SOURCE_RULES:
+        if rule.requires_context and not rule.requires_context.search(text):
+            continue
+        m = rule.pattern.search(text)
+        if not m:
+            continue
+        out.append(
+            Finding(
+                rule.level,
+                rule.code,
+                rule.message,
+                rel_file,
+                _line_no(text, m.start()),
+                remediation=rule.remediation,
+            )
+        )
+
+    return out
+
+
+def security_checks(skill_dir: Path, *, max_files: int, max_file_bytes: int) -> List[Finding]:
+    out: List[Finding] = []
+    skill_root = skill_dir.resolve()
+    files = list(iter_code_files(skill_root, max_files=max_files, max_file_bytes=max_file_bytes))
     if not files:
         out.append(Finding("info", "security.no_scripts", "No executable scripts found; static security scan skipped"))
         return out
 
     for f in files:
         txt = f.read_text(encoding="utf-8", errors="ignore")
-        for level, code, rx in PATTERNS:
-            for m in rx.finditer(txt):
-                line_text = _line_text(txt, m.start())
-                if _should_skip_match(code, line_text):
-                    continue
-                out.append(
-                    Finding(
-                        level,
-                        code,
-                        f"Matched pattern: {rx.pattern}",
-                        str(f.relative_to(skill_dir)),
-                        _line_no(txt, m.start()),
-                    )
-                )
+        try:
+            rel_file = str(f.resolve().relative_to(skill_root))
+        except ValueError:
+            rel_file = str(f.name)
+        out.extend(scan_source(txt, rel_file))
 
     if not out:
         out.append(Finding("info", "security.clean", "No risky patterns detected in scanned scripts"))
@@ -170,6 +357,8 @@ def main() -> int:
     ap.add_argument("skill_dir")
     ap.add_argument("--mode", choices=["readiness", "security", "both"], default="both")
     ap.add_argument("--format", choices=["text", "json"], default="text")
+    ap.add_argument("--max-files", type=int, default=DEFAULT_MAX_SCAN_FILES)
+    ap.add_argument("--max-file-bytes", type=int, default=DEFAULT_MAX_FILE_BYTES)
     args = ap.parse_args()
 
     skill_dir = Path(args.skill_dir).expanduser().resolve()
@@ -178,7 +367,13 @@ def main() -> int:
     if args.mode in {"readiness", "both"}:
         findings.extend(readiness_checks(skill_dir))
     if args.mode in {"security", "both"}:
-        findings.extend(security_checks(skill_dir))
+        findings.extend(
+            security_checks(
+                skill_dir,
+                max_files=max(1, args.max_files),
+                max_file_bytes=max(1, args.max_file_bytes),
+            )
+        )
 
     critical = [f for f in findings if f.level == "critical"]
     warn = [f for f in findings if f.level == "warn"]
@@ -197,7 +392,8 @@ def main() -> int:
         print(f"Summary: {len(critical)} critical · {len(warn)} warn · {len(info)} info")
         for f in findings:
             loc = f" ({f.file}:{f.line})" if f.file else ""
-            print(f"{f.level.upper()} {f.code}: {f.message}{loc}")
+            remediation = f" | Remediation: {f.remediation}" if f.remediation else ""
+            print(f"{f.level.upper()} {f.code}: {f.message}{loc}{remediation}")
 
     return 2 if critical else 0
 
