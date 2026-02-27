@@ -18,6 +18,7 @@
 .venv-skill-creator/
 .tmp/
 .temp/
+node_modules/
 
 # Generated skill views
 skills/
