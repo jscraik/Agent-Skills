@@ -45,3 +45,7 @@ See `artifacts/ai/prompts/.template.yaml` and `artifacts/ai/sessions/.template.j
 ## PR Template
 
 All PRs must use `.github/PULL_REQUEST_TEMPLATE.md` which includes required AI disclosure sections.
+
+## Command preflight helper
+- Source `scripts/codex-preflight.sh` and run `preflight_repo` before command-heavy, destructive, or path-sensitive work.
+- Validate required bins and target paths first so mistakes are prevented before edits.

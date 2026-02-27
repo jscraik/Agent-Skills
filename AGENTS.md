@@ -108,3 +108,7 @@ Repo-level requirements:
 
 State model: `S0 -> S1 -> S2 -> S3 -> S4 -> S5` with rollback to `Sx` on critical governance events.
 <!-- AGENT-FIRST-SCAFFOLD:END -->
+
+## Repository preflight helper
+- Use `scripts/codex-preflight.sh` before multi-step, destructive, or path-sensitive workflows.
+- Source it with `source scripts/codex-preflight.sh` and run `preflight_repo` (or `preflight_js`, `preflight_py`, `preflight_rust`) as a guard before changing repo state.
