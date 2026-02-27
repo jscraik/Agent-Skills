@@ -67,6 +67,12 @@ Step 1 must always be input collection. Before running any write/install/validat
 - `description`
 - `role_config_file` (absolute path preferred)
 
+### Codex ask-questions collection (required)
+
+- In Codex Plan mode, use `request_user_input` to collect required inputs in 1-3 short multiple-choice prompts where practical.
+- In Codex Default mode (or when `request_user_input` is unavailable), ask direct numbered questions in chat and wait for explicit answers.
+- Never start Step 2 until required inputs are confirmed in either collection path.
+
 Ask concise questions:
 
 1. `Which model should this role use?` (recommend: `gpt-5.3-codex`)
