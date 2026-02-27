@@ -8,7 +8,6 @@ import hashlib
 import json
 import os
 import re
-import sys
 from hashlib import sha256
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set
@@ -439,7 +438,6 @@ def validate(args: argparse.Namespace) -> Dict[str, Any]:
 
     control_obj = run.get("runtime_controls", {}) if isinstance(run.get("runtime_controls"), dict) else {}
     auto_capture_enabled = bool(control_obj.get("auto_capture_enabled", True))
-    auto_apply_enabled = bool(control_obj.get("auto_apply_enabled", True))
 
     terminal_status = str(run.get("terminal_status", "")).strip().lower() or None
     stop_reason = str(run.get("stop_reason", "")).strip().lower() or None

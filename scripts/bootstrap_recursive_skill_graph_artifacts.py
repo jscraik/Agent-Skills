@@ -8,7 +8,7 @@ import json
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Sequence
+from typing import Any, Dict, List, Sequence
 
 
 DEFAULT_CONTROL_ROOT = Path("artifacts/skill-graphs/controls")

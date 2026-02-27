@@ -306,7 +306,7 @@ def _decode_write_and_downscale(
 def _create_client():
     try:
         from openai import OpenAI
-    except ImportError as exc:
+    except ImportError:
         _die("openai SDK not installed. Install with `uv pip install openai`.")
     return OpenAI()
 

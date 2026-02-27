@@ -156,11 +156,11 @@ if HAS_OPTIONAL_DEPS:
         console.print(f"[dim]+{pr['additions']} / -{pr['deletions']} across {len(pr.get('files', []))} files[/dim]\n")
 
         # Fetch the PR
-        console.print(f"[blue]Fetching PR branch...[/blue]")
+        console.print("[blue]Fetching PR branch...[/blue]")
         run(["git", "fetch", remote, f"pull/{pr_number}/head:{branch_name}"])
 
         # Merge
-        console.print(f"[blue]Merging into current branch...[/blue]")
+        console.print("[blue]Merging into current branch...[/blue]")
         result = run(["git", "merge", branch_name, "--no-edit"], check=False)
 
         if result.returncode != 0:
@@ -178,7 +178,7 @@ if HAS_OPTIONAL_DEPS:
                 if pm == "pnpm":
                     install_cmd.append("--force")  # Handle patch issues
                 run(install_cmd, capture=False)
-                console.print(f"[green]✓ Dependencies installed[/green]")
+                console.print("[green]✓ Dependencies installed[/green]")
 
 
     @app.command()
@@ -196,12 +196,12 @@ if HAS_OPTIONAL_DEPS:
         console.print(Panel(f"[bold]{pr['title']}[/bold]\n+{pr['additions']} / -{pr['deletions']}", title=f"PR #{pr_number}"))
 
         # Fetch
-        console.print(f"\n[blue]Step 1/4: Fetching PR branch...[/blue]")
+        console.print("\n[blue]Step 1/4: Fetching PR branch...[/blue]")
         run(["git", "fetch", remote, f"pull/{pr_number}/head:{branch_name}"])
         console.print("[green]✓ Fetched[/green]")
 
         # Merge
-        console.print(f"\n[blue]Step 2/4: Merging...[/blue]")
+        console.print("\n[blue]Step 2/4: Merging...[/blue]")
         result = run(["git", "merge", branch_name, "--no-edit"], check=False)
         if result.returncode != 0:
             console.print("[red]✗ Merge conflicts - resolve manually[/red]")
@@ -219,7 +219,7 @@ if HAS_OPTIONAL_DEPS:
             console.print("[green]✓ Installed[/green]")
 
             # Build
-            console.print(f"\n[blue]Step 4/4: Building...[/blue]")
+            console.print("\n[blue]Step 4/4: Building...[/blue]")
             build_result = run([pm, "run", "build"], check=False, capture=False)
             if build_result.returncode != 0:
                 console.print("[yellow]⚠️ Build had errors (may still work)[/yellow]")

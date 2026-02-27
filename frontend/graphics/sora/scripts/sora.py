@@ -14,7 +14,7 @@ from pathlib import Path
 import re
 import sys
 import time
-from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 DEFAULT_MODEL = "sora-2"
 DEFAULT_SIZE = "1280x720"

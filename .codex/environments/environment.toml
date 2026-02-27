@@ -40,6 +40,23 @@ python3 ~/.codex/scripts/plan-graph-lint.py .agent/PLANS.md
 '''
 
 [[actions]]
+name = "Install Python deps for image/favicons"
+icon = "tool"
+command = '''
+set -euo pipefail
+
+cd /Users/jamiecraik/dev/agent-skills
+
+mise install pipx:openai
+
+if command -v uv >/dev/null 2>&1; then
+  uv pip install openai pillow cairosvg
+else
+  python3 -m pip install openai pillow cairosvg
+fi
+'''
+
+[[actions]]
 name = "Canonical verification"
 icon = "tool"
 command = '''

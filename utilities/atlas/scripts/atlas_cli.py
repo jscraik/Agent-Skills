@@ -6,7 +6,6 @@ import sqlite3
 import sys
 from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
-from pathlib import Path
 from typing import Iterable, Sequence
 
 from atlas_common import (

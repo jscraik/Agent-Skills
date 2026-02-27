@@ -235,7 +235,7 @@ class SitemapGenerator:
         try:
             mtime = file_path.stat().st_mtime
             lastmod = datetime.fromtimestamp(mtime).strftime("%Y-%m-%d")
-        except:
+        except (OSError, OverflowError, ValueError):
             lastmod = datetime.now().strftime("%Y-%m-%d")
 
         return {

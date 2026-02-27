@@ -1082,8 +1082,8 @@ def check_repo_references(doc: SkillDoc) -> List[Finding]:
     return out
 
 
-def _lvl_name(l: Level) -> str:
-    return {Level.INFO: "INFO", Level.WARN: "WARN", Level.FAIL: "FAIL"}[l]
+def _lvl_name(level: Level) -> str:
+    return {Level.INFO: "INFO", Level.WARN: "WARN", Level.FAIL: "FAIL"}[level]
 
 
 def run_gate(
