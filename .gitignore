@@ -22,6 +22,7 @@ node_modules/
 
 # Generated skill views
 skills/
+skills-antigravity/
 
 # Generated artifacts
 artifacts/dist/
