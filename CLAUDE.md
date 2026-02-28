@@ -4,6 +4,10 @@ This repository contains governance rules for Claude Code and other AI assistant
 
 This file is **agent-tool specific**. For repository-wide rules, read `AGENTS.md` first.
 
+## Output Paths
+- Before generating files, verify output directory paths against `package.json` (or package-local script config) so generated paths match configured output settings.
+- Audit existing scripts and config files for hardcoded output paths; update generated destinations to match configured paths.
+
 ---
 
 # AI Assistance Governance (Model A)
@@ -50,6 +54,8 @@ All PRs must use `.github/PULL_REQUEST_TEMPLATE.md` which includes required AI d
 - For this repo, run full test suites in the relevant package before committing (`npm test`, `pytest`, or the package-native equivalent used for that folder).
 - Ensure all tests pass after multi-file changes.
 - Fix test isolation issues immediately (mock async operations properly).
+- After modifying auth-related, CLI-related, or async code, always run the full test suite.
+- For CLI tests that exercise `process.exit`, mock exit calls to avoid hanging tests.
 
 ## Development Workflow
 - Applies to Codex and Claude workflow execution in this repository.
@@ -66,6 +72,7 @@ All PRs must use `.github/PULL_REQUEST_TEMPLATE.md` which includes required AI d
 - When working on PRs, check ALL review comments before marking complete.
 - After fixing review comments, re-verify PR state on GitHub before reporting success.
 - Handle merge conflicts directly on GitHub, not just locally.
+- When resolving review feedback, run `gh pr view <PR_NUMBER> --comments` and inspect every comment/thread status before declaring completion.
 
 ## MCP & External Tools
 - Keep MCP server setup explicit and tool-agnostic where possible.
@@ -73,6 +80,13 @@ All PRs must use `.github/PULL_REQUEST_TEMPLATE.md` which includes required AI d
 ## MCP Server Configuration
 - Register MCP servers with `claude mcp add <name> -- <command>` and keep command arguments explicit.
 - For 1Password integrations, use `[ -e ]` instead of `[ -f ]` to handle named pipes correctly.
+
+## Shell Script Portability
+- For file existence checks, prefer `[ -e "..." ]` over `[ -f "..." ]` to correctly handle named pipes and other special files.
+
+## TypeScript Configuration
+- TypeScript strict mode is enabled where applicable; guard property access with null/undefined checks before using values.
+- Run `pnpm typecheck` after significant TypeScript changes (or use the repo-native command when using a different package manager).
 
 ## Command preflight helper
 - Source `scripts/codex-preflight.sh` and run `preflight_repo` before command-heavy, destructive, or path-sensitive work.

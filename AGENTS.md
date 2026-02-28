@@ -13,11 +13,13 @@ This repository is the canonical source of Codex skills, docs, and agent workflo
 
 ## Table of Contents
 - [Required essentials](#required-essentials)
+- [Output Paths](#output-paths)
 - [Package-manager command map](#package-manager-command-map)
 - [Non-standard build/typecheck commands](#non-standard-buildtypecheck-commands)
 - [Testing Standards](#testing-standards)
 - [Tooling essentials](#tooling-essentials)
 - [Shell script conventions](#shell-script-conventions)
+- [TypeScript Configuration](#typescript-configuration)
 - [Global instructions discovery order](#global-instructions-discovery-order)
 - [Documentation map](#documentation-map)
 - [Planning](#planning)
@@ -34,6 +36,10 @@ This repository is the canonical source of Codex skills, docs, and agent workflo
 - Package manager: none for the repository root (configuration-only).
 - Non-standard build/typecheck commands: none at repository root.
 - Compatibility posture: canonical-only.
+
+## Output Paths
+- Before generating files, verify output paths against `package.json` and package script/config output settings.
+- Prefer configured output directories from scripts/config over hardcoded paths when generating artifacts.
 
 ## Package-manager command map
 - Root (configuration-only): install/run/exec are not observed at root.
@@ -62,6 +68,8 @@ This repository is the canonical source of Codex skills, docs, and agent workflo
 - Run full test suite before committing (for example `npm test`, `pytest`, or the detected package-native equivalent in that package).
 - Ensure all tests pass after multi-file changes.
 - Fix test isolation issues immediately; mock async operations properly.
+- For auth-related, CLI-related, or async code changes, run the full test suite.
+- For CLI tests calling `process.exit`, mock exit calls to prevent hangs.
 
 ## Tooling essentials
 - Run shell commands with `zsh -lc` (fallback to `bash -lc` when `zsh` is unavailable).
@@ -74,6 +82,11 @@ This repository is the canonical source of Codex skills, docs, and agent workflo
 - Validate script syntax with `bash -n script.sh`.
 - Run `shellcheck` on wrapper scripts when available in repo workflow.
 - Keep shell scripts deterministic; avoid hidden environment assumptions.
+- Prefer `[ -e ]` over `[ -f ]` for file-existence checks to cover named pipes and special files.
+
+## TypeScript Configuration
+- TypeScript strict mode is enabled where applicable. Guard property access with null/undefined checks.
+- Run `pnpm typecheck` after significant TypeScript edits (or use the project’s native typecheck command).
 
 ## Global instructions discovery order
 1. `~/.codex/AGENTS.md`
@@ -114,6 +127,7 @@ This repository is the canonical source of Codex skills, docs, and agent workflo
 - When working on PRs, check all review comments before marking complete.
 - After fixing review comments, re-verify PR state on GitHub before reporting success.
 - Handle merge conflicts directly on GitHub, not just locally.
+- For full thread audits, run `gh pr view <PR_NUMBER> --comments` and verify each comment status before completion.
 
 ## MCP & External Tools
 - Use the same command discipline for internal and external MCP integrations.
