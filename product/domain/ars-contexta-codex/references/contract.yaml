@@ -1,0 +1,31 @@
+schema_version: 1
+name: ars-contexta-codex
+purpose: Keep Ars Contexta behavior in Codex aligned with canonical Ars sources while preserving Codex-native execution.
+triggers:
+  - User asks to port, validate, or maintain Ars Contexta parity in Codex.
+  - Codex prompts/agents/automations drift from canonical Ars skill sources.
+  - User asks for launchd/cron parity with Claude hook behavior.
+inputs:
+  - name: target_surfaces
+    type: array
+    items: string
+    description: One or more of skills, prompts, agents, automations, launchd.
+  - name: canonical_source
+    type: string
+    description: Canonical Ars source path in agent-skills or uploaded package path.
+  - name: codex_config_root
+    type: string
+    description: Codex config root where prompts/agents/automations live.
+outputs:
+  - name: parity_report
+    type: object
+    description: Report containing schema_version, touched files, checks run, and unresolved deltas.
+  - name: validation_summary
+    type: object
+    description: Pass/fail summary for prompt path checks, TOML checks, and runtime parity checks.
+non_goals:
+  - Implementing unrelated product features outside Ars Contexta parity.
+  - Changing system settings or installing dependencies without explicit request.
+risks:
+  - Hidden drift when duplicate source trees exist.
+  - Automation breakage if command wrappers are renamed without downstream updates.
