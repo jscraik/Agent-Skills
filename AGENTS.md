@@ -15,11 +15,18 @@ This repository is the canonical source of Codex skills, docs, and agent workflo
 - [Required essentials](#required-essentials)
 - [Package-manager command map](#package-manager-command-map)
 - [Non-standard build/typecheck commands](#non-standard-buildtypecheck-commands)
+- [Testing Standards](#testing-standards)
 - [Tooling essentials](#tooling-essentials)
 - [Shell script conventions](#shell-script-conventions)
 - [Global instructions discovery order](#global-instructions-discovery-order)
 - [Documentation map](#documentation-map)
 - [Planning](#planning)
+- [Development Workflow](#development-workflow)
+- [Code Quality Checks](#code-quality-checks)
+- [Git & PR Workflow](#git--pr-workflow)
+- [PR Workflow](#pr-workflow)
+- [MCP & External Tools](#mcp--external-tools)
+- [MCP Server Configuration](#mcp-server-configuration)
 - [Agent-First Scaffold Contract](#agent-first-scaffold-contract-managed-by-codex)
 
 ## Required essentials
@@ -50,6 +57,11 @@ This repository is the canonical source of Codex skills, docs, and agent workflo
 ## Non-standard build/typecheck commands
 - This repository is configuration/content oriented; no root build or typecheck commands are defined here.
 - In package-based subdirectories, use declared scripts (for example `typecheck`, `build`, or `test`) from that package’s own `package.json`.
+
+## Testing Standards
+- Run full test suite before committing (for example `npm test`, `pytest`, or the detected package-native equivalent in that package).
+- Ensure all tests pass after multi-file changes.
+- Fix test isolation issues immediately; mock async operations properly.
 
 ## Tooling essentials
 - Run shell commands with `zsh -lc` (fallback to `bash -lc` when `zsh` is unavailable).
@@ -86,6 +98,29 @@ This repository is the canonical source of Codex skills, docs, and agent workflo
 ## Planning
 - For complex implementation work or architecture work, keep planning artifacts in `.agent/PLANS.md` with task `id`/`depends_on` checks.
 - Validate plan files with `python3 ~/.codex/scripts/plan-graph-lint.py <plan-file>`.
+
+## Development Workflow
+- Applies to codex-maintained source changes across package-specific areas.
+
+## Code Quality Checks
+- Run TypeScript type check (`tsc --noEmit`) after code changes in TypeScript packages where applicable.
+- Run linter before committing.
+- Fix all TypeScript errors and lint issues before tasks are marked complete.
+
+## Git & PR Workflow
+- For Codex-guided reviews and merge tasks, use the checks below.
+
+## PR Workflow
+- When working on PRs, check all review comments before marking complete.
+- After fixing review comments, re-verify PR state on GitHub before reporting success.
+- Handle merge conflicts directly on GitHub, not just locally.
+
+## MCP & External Tools
+- Use the same command discipline for internal and external MCP integrations.
+
+## MCP Server Configuration
+- Register MCP servers with `claude mcp add <name> -- <command>` using correct argument separation.
+- For 1Password integrations, use `[ -e ]` instead of `[ -f ]` so named pipes are handled correctly.
 
 <!-- AGENT-FIRST-SCAFFOLD:START -->
 ## Agent-First Scaffold Contract (managed by ~/.codex)
