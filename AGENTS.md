@@ -108,3 +108,8 @@ Repo-level requirements:
 
 State model: `S0 -> S1 -> S2 -> S3 -> S4 -> S5` with rollback to `Sx` on critical governance events.
 <!-- AGENT-FIRST-SCAFFOLD:END -->
+
+## Mandatory workflow snippet
+1. Explore project first, then invoke skill.
+2. IMPORTANT: Prefer retrieval-led reasoning over pre-training-led reasoning for any React, Tauri, Apps-SDK-ui, Tailwind, Vite, Storybook + Chat Widget tasks.
+3. Add a Table of Contents for docs.
