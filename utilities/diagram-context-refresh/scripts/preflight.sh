@@ -82,6 +82,20 @@ require_cmd() {
   fi
 }
 
+require_canonical_repo_root() {
+  local canonical
+  if git -C "$repo_root" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    canonical="$(git -C "$repo_root" rev-parse --show-toplevel)"
+    if [[ "$repo_root" != "$canonical" ]]; then
+      fail "Repo root is not the canonical project root. Use: $canonical"
+    else
+      ok "Repo root is canonical: $canonical"
+    fi
+  else
+    fail "Not a git repository at $repo_root; canonical-root mode requires git repo"
+  fi
+}
+
 require_file() {
   local path="$1"
   if [[ -f "$path" ]]; then
@@ -106,6 +120,8 @@ if [[ -w "$repo_root" ]]; then
 else
   fail "Repo root is not writable: $repo_root"
 fi
+
+require_canonical_repo_root
 
 require_cmd rg
 require_cmd jq
@@ -134,7 +150,28 @@ if command -v mise >/dev/null 2>&1; then
   fi
 fi
 
-require_file "$repo_root/scripts/refresh-diagram-context.sh"
+has_refresh_entrypoint=false
+
+if [[ -f "$repo_root/scripts/refresh-diagram-context.sh" ]]; then
+  ok "Repo-local refresh script found: $repo_root/scripts/refresh-diagram-context.sh"
+  has_refresh_entrypoint=true
+fi
+
+if [[ -f "$repo_root/package.json" ]]; then
+  if jq -e '.scripts["refresh-diagram-context"]' "$repo_root/package.json" >/dev/null 2>&1; then
+    ok "package.json defines npm script: refresh-diagram-context"
+    has_refresh_entrypoint=true
+    require_cmd npm
+  else
+    warn "package.json exists but does not define refresh-diagram-context script"
+  fi
+else
+  warn "package.json not found; skipping npm-script refresh checks"
+fi
+
+if [[ "$has_refresh_entrypoint" == "false" ]]; then
+  fail "No refresh entrypoint found. Expected either scripts/refresh-diagram-context.sh or package.json script 'refresh-diagram-context'"
+fi
 
 if [[ "$mode" == "silent-on-open" ]]; then
   require_file "$repo_root/scripts/install-repo-open-hook.sh"

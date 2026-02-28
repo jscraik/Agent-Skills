@@ -12,9 +12,9 @@ inputs:
   - CI refresh preference (enabled or disabled)
 outputs:
   - preflight readiness result (pass/fail + actionable checks)
-  - AI/diagrams/*.mmd
-  - AI/context/diagram-context.md
-  - AI/context/diagram-context.meta.json
+  - .diagram/*.mmd
+  - .diagram/context/diagram-context.md
+  - .diagram/context/diagram-context.meta.json
   - optional shell hook install instructions
   - optional PR-merge workflow instructions
 non_goals:

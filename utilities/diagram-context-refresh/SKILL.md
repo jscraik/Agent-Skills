@@ -13,24 +13,30 @@ Generate architecture diagrams from code and compact them into one AI context fi
 - Keep architecture context deterministic and regenerated from code.
 - Favor one shared context pack for both Codex and Claude.
 - Keep automation quiet, reversible, and easy to validate.
+- Use a consistent approach (principle: deterministic source-of-truth refresh) so context is always derived from the same code snapshot, not manual edits.
+- This is about tradeoff management: faster onboarding via fresh context versus reduced churn from unnecessary refreshes.
+- Use the shared mental model that context accuracy is a function of completeness, correctness, and recent source-of-truth generation.
+- How frequent are changes in this repository, and when does staleness become an actual risk?
+- Which refresh mode best balances signal-to-noise for this team’s risk tolerance?
+- What would make the generated context less trustworthy in practice?
 
 ## Scope and triggers
 
 - User asks to automate Mermaid/context refresh.
 - User wants Codex and Claude to share the same architecture context.
-- User asks to update `AI/diagrams` or `AI/context/diagram-context.md`.
+- User asks to update `.diagram` artifacts (`.diagram/*.mmd`, `.diagram/context/diagram-context.md`).
 
 ## Required inputs
 
-- Repo root path.
+- Repo root path (canonical git root, not a nested subdirectory).
 - Refresh mode: `dry-run`, `manual`, `silent-on-open`, or `ci-only`.
 - Confirmation whether GitHub Action PR-merge refresh should be enabled.
 
 ## Deliverables
 
-- Fresh `AI/diagrams/*.mmd`.
-- Fresh `AI/context/diagram-context.md`.
-- Fresh `AI/context/diagram-context.meta.json` (including `schema_version`).
+- Fresh `.diagram/*.mmd`.
+- Fresh `.diagram/context/diagram-context.md`.
+- Fresh `.diagram/context/diagram-context.meta.json` (including `schema_version`).
 - Preflight readiness result (pass/fail + actionable checks).
 - Optional shell hook install for silent-on-open behavior.
 - Optional CI workflow for merged PR refresh.
@@ -52,44 +58,58 @@ Generate architecture diagrams from code and compact them into one AI context fi
    SKILL_DIR=/path/to/diagram-context-refresh
    REPO_ROOT=/path/to/repo
    MODE=manual
+   REPO_ROOT="$(cd "$REPO_ROOT" && git rev-parse --show-toplevel)"
    ```
 
-2. Run preflight checks (fail fast if any check fails):
+2. Choose refresh invocation (prefer npm script when available):
+
+   ```bash
+   refresh_command() {
+     local mode_flag="$1"
+     if [[ -f "$REPO_ROOT/package.json" ]] && jq -e '.scripts["refresh-diagram-context"]' "$REPO_ROOT/package.json" >/dev/null 2>&1; then
+       (cd "$REPO_ROOT" && npm run refresh-diagram-context -- "$mode_flag")
+     else
+       bash "$REPO_ROOT/scripts/refresh-diagram-context.sh" "$mode_flag"
+     fi
+   }
+   ```
+
+3. Run preflight checks (fail fast if any check fails):
 
    ```bash
    bash "$SKILL_DIR/scripts/preflight.sh" --repo-root "$REPO_ROOT" --mode "$MODE"
    ```
 
-3. If local companion agent `diagram-cli` is installed, align execution with its guardrails:
+4. If local companion agent `diagram-cli` is installed, align execution with its guardrails:
    - `~/.codex/agents/diagram-cli/diagram-cli.toml`
    - `~/.codex/agents/diagram-cli/diagram-cli.instructions.md`
 
-4. Execute mode-specific actions in order:
+5. Execute mode-specific actions in order:
    - `dry-run`:
 
      ```bash
-     bash "$REPO_ROOT/scripts/refresh-diagram-context.sh" --dry-run
+     refresh_command --dry-run
      ```
 
    - `manual`:
 
      ```bash
-     bash "$REPO_ROOT/scripts/refresh-diagram-context.sh" --force
+     refresh_command --force
      ```
 
    - `silent-on-open`:
 
      ```bash
-     bash "$REPO_ROOT/scripts/refresh-diagram-context.sh" --force
+     refresh_command --force
      bash "$REPO_ROOT/scripts/install-repo-open-hook.sh"
      ```
 
    - `ci-only`: do not install local hook; keep refresh execution in CI workflow only.
 
-5. If requested (or if `MODE=ci-only`), ensure PR-merge workflow exists at:
+6. If requested (or if `MODE=ci-only`), ensure PR-merge workflow exists at:
    - `.github/workflows/refresh-diagram-context.yml`
 
-6. Stop immediately on any command failure and report the first failing check/action with the exact command.
+7. Stop immediately on any command failure and report the first failing check/action with the exact command.
 
 ## Validation
 
@@ -103,13 +123,13 @@ Generate architecture diagrams from code and compact them into one AI context fi
 - Context file exists and is non-empty:
 
   ```bash
-  test -s "$REPO_ROOT/AI/context/diagram-context.md"
+  test -s "$REPO_ROOT/.diagram/context/diagram-context.md"
   ```
 
 - Metadata is valid JSON:
 
   ```bash
-  jq -e . "$REPO_ROOT/AI/context/diagram-context.meta.json" >/dev/null
+  jq -e . "$REPO_ROOT/.diagram/context/diagram-context.meta.json" >/dev/null
   ```
 
 - Output contract keeps an explicit schema version:
@@ -121,7 +141,7 @@ Generate architecture diagrams from code and compact them into one AI context fi
 - At least one Mermaid file exists:
 
   ```bash
-  ls "$REPO_ROOT"/AI/diagrams/*.mmd >/dev/null
+  ls "$REPO_ROOT"/.diagram/*.mmd >/dev/null
   ```
 
 ## Constraints
@@ -134,7 +154,12 @@ Generate architecture diagrams from code and compact them into one AI context fi
 ## Anti-patterns
 
 - Hand-writing diagram context instead of regenerating from source code.
-- Running background refresh without cooldown controls.
+- DO NOT run background refresh loops without cooldown or exit conditions.
+- Running refresh without a canonical repo root (`git rev-parse --show-toplevel`) can generate wrong outputs.
+- DO NOT bypass preflight checks for speed; you cannot prove correctness without them.
+- Avoid using this skill to fix non-diagram tasks; that is a wrong task selection.
+- Warning: including secrets in generated diagrams is a critical mistake.
+- Treat malformed or placeholder diagrams as an incorrect end state, even if generation succeeds.
 - Storing secrets inside generated Mermaid diagrams or context packs.
 
 ## Variation and adaptation

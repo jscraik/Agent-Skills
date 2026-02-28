@@ -5,6 +5,7 @@
 - [Quick reference fixes](#quick-reference-fixes)
 - [Preflight fails](#preflight-fails)
 - [Refresh script missing](#refresh-script-missing)
+- [npm refresh script fallback missing](#npm-refresh-script-fallback-missing)
 - [Global `diagram` command not found](#global-diagram-command-not-found)
 - [Mise installed but package not detected](#mise-installed-but-package-not-detected)
 - [Hook install fails in `silent-on-open` mode](#hook-install-fails-in-silent-on-open-mode)
@@ -17,11 +18,12 @@
 | --- | --- |
 | Preflight fails | `bash "$SKILL_DIR/scripts/preflight.sh" --repo-root "$REPO_ROOT" --mode "$MODE"` |
 | Refresh script missing | `test -f "$REPO_ROOT/scripts/refresh-diagram-context.sh"` |
+| NPM refresh script missing | `jq -e '.scripts["refresh-diagram-context"]' "$REPO_ROOT/package.json"` |
 | Global CLI missing | `command -v diagram >/dev/null && diagram --version` |
 | Mise package missing | `command -v mise >/dev/null && mise current \| rg "@brainwav/diagram"` |
 | Hook install issue | `bash "$REPO_ROOT/scripts/install-repo-open-hook.sh"` |
 | CI-only workflow missing | `test -f "$REPO_ROOT/.github/workflows/refresh-diagram-context.yml"` |
-| Outputs missing | `test -s "$REPO_ROOT/AI/context/diagram-context.md" && jq -e . "$REPO_ROOT/AI/context/diagram-context.meta.json" >/dev/null && ls "$REPO_ROOT"/AI/diagrams/*.mmd >/dev/null` |
+| Outputs missing | `test -s "$REPO_ROOT/.diagram/context/diagram-context.md" && jq -e . "$REPO_ROOT/.diagram/context/diagram-context.meta.json" >/dev/null && ls "$REPO_ROOT"/.diagram/*.mmd >/dev/null` |
 
 ## Preflight fails
 
@@ -47,6 +49,22 @@ test -f "$REPO_ROOT/scripts/refresh-diagram-context.sh"
 Fix:
 - Point `REPO_ROOT` at the correct repository.
 - Restore the script if it was deleted/moved.
+
+## npm refresh script fallback missing
+
+Symptom: preflight warns that package-based refresh is unavailable.
+
+Checks:
+
+```bash
+test -f "$REPO_ROOT/package.json"
+jq -e '.scripts["refresh-diagram-context"]' "$REPO_ROOT/package.json"
+```
+
+Fix:
+- Add the `refresh-diagram-context` npm script in `package.json`, or keep using
+  `scripts/refresh-diagram-context.sh` directly.
+- If both are intentionally unavailable, preflight will continue to fail by design.
 
 ## Global `diagram` command not found
 
@@ -116,9 +134,9 @@ Fix:
 Checks:
 
 ```bash
-test -s "$REPO_ROOT/AI/context/diagram-context.md"
-jq -e . "$REPO_ROOT/AI/context/diagram-context.meta.json" >/dev/null
-ls "$REPO_ROOT"/AI/diagrams/*.mmd >/dev/null
+test -s "$REPO_ROOT/.diagram/context/diagram-context.md"
+jq -e . "$REPO_ROOT/.diagram/context/diagram-context.meta.json" >/dev/null
+ls "$REPO_ROOT"/.diagram/*.mmd >/dev/null
 ```
 
 Fix:

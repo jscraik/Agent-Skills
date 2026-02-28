@@ -8,11 +8,11 @@ cases:
     prompt: "Set up silent diagram context refresh when I open this repo."
     acceptance:
       - type: regex
-        value: "(?i)(install-repo-open-hook\\.sh|refresh-diagram-context\\.sh|diagram-context\\.md)"
+        value: "(?i)(install-repo-open-hook\\.sh|refresh-diagram-context|diagram-context\\.md)"
     deterministic_checks:
       required_commands:
         - "scripts/preflight.sh"
-        - "refresh-diagram-context.sh"
+        - "refresh-diagram-context"
       forbidden_commands:
         - "rm -rf"
         - "curl"
@@ -20,7 +20,7 @@ cases:
         - "netcat"
       command_order:
         - "scripts/preflight.sh"
-        - "refresh-diagram-context.sh"
+        - "refresh-diagram-context"
       max_command_executions: 8
       max_duplicate_command_ratio: 0.5
 
@@ -32,11 +32,11 @@ cases:
     prompt: "Make Codex and Claude share one architecture diagram context file."
     acceptance:
       - type: regex
-        value: "(?i)(AI/context/diagram-context\\.md|AI/diagrams|meta\\.json)"
+        value: "(?i)(\\.diagram/context/diagram-context\\.md|\\.diagram/|meta\\.json)"
     deterministic_checks:
       required_commands:
         - "scripts/preflight.sh"
-        - "refresh-diagram-context.sh"
+        - "refresh-diagram-context"
       forbidden_commands:
         - "rm -rf"
         - "curl"
@@ -44,7 +44,7 @@ cases:
         - "nc"
       command_order:
         - "scripts/preflight.sh"
-        - "refresh-diagram-context.sh"
+        - "refresh-diagram-context"
       max_command_executions: 8
       max_duplicate_command_ratio: 0.5
 
