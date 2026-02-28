@@ -38,6 +38,7 @@ Use this skill when commands fail due to untrusted mise config, missing mise-man
 
 - Untrusted config file in a repo and trust check fails: run `mise trust <path>`, `mise doctor`, then retry.
 - `~/.config/mise/config.toml` lacks a required tool/version: run `mise use -g` for that tool/version, `mise install`, then verify.
+- Stale global tool entries are present (`mise outdated`): if the user requested dependency refresh, run `mise outdated` and `mise upgrade` explicitly, then re-check state.
 - User asks “fix global tools” but does not specify versions: confirm required versions before running global update and log a pending-confirmation step if unknown.
 
 ## Variation
@@ -57,9 +58,12 @@ Use this skill when commands fail due to untrusted mise config, missing mise-man
 3. For any trust/runtime blocker tied to missing tools, reconcile versions:
    - update global config for required tools using scoped `mise use -g <tool>@<version>` (or your project-standard install flow),
    - run `mise sync` / `mise install` to install anything still missing.
-4. Re-run trust/runtimes checks (`mise doctor`) and confirm all expected tools are installed (`mise list` plus `which <tool>` checks where relevant).
-5. Retry the original failing command.
-6. If global trust/config changes were required, verify they are persisted and safe:
+4. Reconcile tool drift in scope if requested:
+   - run `mise outdated` and record stale entries.
+   - if stale entries are present and dependency refresh was requested/confirmed, run `mise upgrade` and re-run `mise outdated`.
+5. Re-run trust/runtimes checks (`mise doctor`) and confirm all expected tools are installed (`mise list` plus `which <tool>` checks where relevant).
+6. Retry the original failing command.
+7. If global trust/config changes were required, verify they are persisted and safe:
    - keep a timestamped backup of `~/.config/mise/config.toml` before writing,
    - confirm file contents contain only intended tool entry updates.
 
@@ -81,6 +85,7 @@ Use this skill when commands fail due to untrusted mise config, missing mise-man
 
 - `mise doctor` reports no blocking trust/runtime errors.
 - `mise list` (or equivalent) reflects required tool availability.
+- `mise outdated` is clean after any requested upgrade flow (or stale drift is logged and handled with user confirmation).
 - Original failing command is retried and outcome is recorded.
 - Fail fast on unresolved blockers with explicit next steps.
 
@@ -96,5 +101,6 @@ Use this skill when commands fail due to untrusted mise config, missing mise-man
 2. Run `mise trust <path>`.
 3. Run `mise doctor`.
 4. Reconcile global tool entries as needed with `mise use -g` and `mise install`.
-5. Confirm runtime/tool presence via `mise list`.
-6. Retry the failing command.
+5. If dependency refresh is requested, run `mise outdated` then `mise upgrade`.
+6. Confirm runtime/tool presence via `mise list` (and rerun `mise outdated` after upgrades).
+7. Retry the failing command.
