@@ -11,6 +11,12 @@
 .skillsctl/
 .codex/
 
+# Local dependency caches
+node_modules/
+/node_modules/
+/**/node_modules/
+skills-antigravity/
+
 # Python/build artifacts
 **/__pycache__/
 .venv/
