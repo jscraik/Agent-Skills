@@ -31,6 +31,7 @@ Use this skill when commands fail due to untrusted mise config, missing mise-man
 3. Verify mise health (`mise doctor`) and inspect active tool state.
 4. Install/sync missing tools as needed.
 5. Re-run the originally failing command to confirm recovery.
+6. For update-safe maintenance, run `mise upgrade --dry-run` first and only apply upgrades if review passes.
 
 ## Outputs
 
@@ -61,6 +62,8 @@ Use this skill when commands fail due to untrusted mise config, missing mise-man
 
 1. Identify untrusted config path.
 2. Run `mise trust <path>`.
-3. Run `mise doctor`.
-4. Confirm runtime/tool presence via `mise list`.
-5. Retry the failing command.
+3. Run `mise upgrade --dry-run` (optional, pre-change).
+4. Run `mise doctor`.
+5. Confirm runtime/tool presence via `mise list`.
+6. Run `mise upgrade` only if dry-run looks good.
+7. Retry the failing command.
