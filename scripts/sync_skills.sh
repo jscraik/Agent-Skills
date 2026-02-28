@@ -105,14 +105,18 @@ extra_skill_files_cmd() {
       if git ls-files --error-unmatch "$extra_skill" >/dev/null 2>&1; then
         echo "$extra_skill"
       fi
-    done < <(find "./.agents/skills" -mindepth 2 -maxdepth 2 -name "SKILL.md" -print)
+    done < <(find "./.agents/skills" -mindepth 2 -maxdepth 3 -name "SKILL.md" -print)
   fi
   if [ -d "./skills" ]; then
     while IFS= read -r extra_skill; do
-      if git ls-files --error-unmatch "$extra_skill" >/dev/null 2>&1; then
-        echo "$extra_skill"
-      fi
-    done < <(find "./skills" -mindepth 2 -maxdepth 2 -name "SKILL.md" -print)
+      # `./skills` may include vendored git submodules. Files inside those
+      # submodules are intentionally not visible to `git ls-files` in the
+      # parent repo, so do not require a tracked-file check here.
+      case "$extra_skill" in
+        ./skills/.system/*) continue ;;
+      esac
+      echo "$extra_skill"
+    done < <(find "./skills" -mindepth 2 -maxdepth 3 -name "SKILL.md" -print)
   fi
 }
 
