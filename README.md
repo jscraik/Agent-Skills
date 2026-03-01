@@ -67,6 +67,9 @@ If either check fails, use the troubleshooting section below.
 - `scripts/sync_skills.sh` refreshes symlinks and regenerates `/SKILL.md`.
 - The sync script links `/skills` into:
   - `~/.agents/skills`
+  - `~/.codex/skills`
+  - `~/.gemini/antigravity/skills`
+  - `~/.antigravity/skills`
 
 ## Deprecations (Wave 1)
 
