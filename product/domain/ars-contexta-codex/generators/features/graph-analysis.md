@@ -35,8 +35,10 @@ rg -L '^description:' {DOMAIN:notes}/*.md
 # Find {DOMAIN:notes} by {DOMAIN:topic map}
 rg '^topics:.*\[\[methodology\]\]' {DOMAIN:notes}/
 
-# Cross-field queries (combine with xargs)
-rg -l '^type: tension' {DOMAIN:notes}/ | xargs rg '^status: pending'
+# Cross-field queries (portable loop form)
+rg -l '^type: tension' {DOMAIN:notes}/ | while read -r file; do
+  rg '^status: pending' "$file"
+done
 ```
 
 Field-level queries answer: "What properties do my {DOMAIN:notes} have?" They are fast, precise, and require no external tools.
@@ -73,10 +75,21 @@ Query the graph's topology — clusters, bridges, synthesis opportunities, influ
 ./ops/scripts/graph/find-bridges.sh
 
 # Measure overall graph health
-./ops/scripts/link-density.sh
+./ops/scripts/graph/link-density.sh
 ```
 
 Graph-level queries answer: "What does the structure of my knowledge look like?" They reveal patterns invisible from any single {DOMAIN:note}.
+
+### Query-Class Routing (Feb 2026 baseline)
+
+Route graph questions before operation selection:
+
+| Query class | Intent | Typical operations |
+|------------|--------|--------------------|
+| `local` | Note-neighborhood reasoning | `forward`, `backward`, `siblings`, exact `query` |
+| `global` | Whole-graph synthesis | `health`, `clusters`, `hubs` |
+| `drift` | Gap/failure hunting | `triangles`, `bridges`, orphan/dangling checks |
+| `basic` | Exact field lookup | constrained `query` |
 
 ### Available Graph Operations
 
@@ -108,6 +121,7 @@ Understand the architecture of your knowledge graph:
 | Operation | Script | What It Does |
 |-----------|--------|-------------|
 | Cluster detection | `graph/find-clusters.sh` | Find connected components — groups of {DOMAIN:notes} that link to each other but not to other groups. Reveals topic boundaries and isolated knowledge islands. |
+| Community detection (preferred, when available) | `graph/find-communities-leiden.sh` | Detect high-quality communities using iterative partition refinement; better than raw components for dense graphs. |
 | Bridge detection | `graph/find-bridges.sh` | Find bridge {DOMAIN:notes} — nodes whose removal would disconnect parts of the graph. These are structurally critical and may need splitting to reduce fragility. |
 | Connected components | `graph/find-clusters.sh --components` | Count the number of separate connected subgraphs. A healthy vault is one large connected component. Multiple components suggest domain silos. |
 
@@ -117,9 +131,9 @@ Measure the health of your graph's connectivity:
 
 | Operation | Script | What It Does |
 |-----------|--------|-------------|
-| Link density | `link-density.sh` | Average outgoing links per {DOMAIN:note}. Target: 3+ links per {DOMAIN:note}. Below this, the graph is sparse and traversal is unreliable. |
-| Orphan detection | `orphan-notes.sh` | {DOMAIN:Notes} with zero incoming links. Invisible to traversal — they exist but no path leads to them. |
-| Dangling links | `dangling-links.sh` | Wiki links pointing to {DOMAIN:notes} that do not exist. Demand signals for what should be created. |
+| Link density | `graph/link-density.sh` | Average outgoing links per {DOMAIN:note}. Target: 3+ links per {DOMAIN:note}. Below this, the graph is sparse and traversal is unreliable. |
+| Orphan detection | `graph/orphan-notes.sh` | {DOMAIN:Notes} with zero incoming links. Invisible to traversal — they exist but no path leads to them. |
+| Dangling links | `graph/dangling-links.sh` | Wiki links pointing to {DOMAIN:notes} that do not exist. Demand signals for what should be created. |
 
 #### Centrality Operations
 
@@ -128,6 +142,8 @@ Identify the most important and influential {DOMAIN:notes}:
 | Operation | Script | What It Does |
 |-----------|--------|-------------|
 | Hub/authority ranking | `graph/influence-flow.sh` | Ranks {DOMAIN:notes} by link patterns. Hubs are {DOMAIN:notes} with many outgoing links (they point to lots of things). Authorities are {DOMAIN:notes} with many incoming links (lots of things point to them). Synthesizers have both high incoming and high outgoing — they integrate knowledge. |
+| PageRank (optional) | `graph/pagerank.sh` | Measures transitive influence where links from already-influential {DOMAIN:notes} contribute more weight. |
+| Betweenness (optional) | `graph/betweenness.sh` | Finds structural brokers that connect otherwise distant regions of the graph. |
 
 #### Schema Queries
 
@@ -138,13 +154,15 @@ Use YAML frontmatter as a queryable property layer:
 rg '^methodology:.*Zettelkasten' {DOMAIN:notes}/
 
 # Unresolved tensions
-rg -l '^type: tension' {DOMAIN:notes}/ | xargs rg '^status: pending'
+rg -l '^type: tension' {DOMAIN:notes}/ | while read -r file; do
+  rg '^status: pending' "$file"
+done
 
 # {DOMAIN:Notes} adapted from human patterns
-rg '^adapted_from: ' {DOMAIN:notes}/ | grep -v 'null'
+rg '^adapted_from:' {DOMAIN:notes}/ | rg -v ':\s*null$'
 
 # Combined methodology synthesis {DOMAIN:notes}
-rg '^methodology: \[' {DOMAIN:notes}/ | grep -E '\[.*,.*\]'
+rg '^methodology:\s*\[[^]]+,[^]]+\]' {DOMAIN:notes}/
 
 # {DOMAIN:Notes} without source attribution
 rg -L '^source:' {DOMAIN:notes}/*.md

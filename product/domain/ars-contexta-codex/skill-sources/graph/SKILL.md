@@ -1,7 +1,7 @@
 ---
 name: graph
 description: Interactive knowledge graph analysis. Routes natural language questions to graph scripts, interprets results in domain vocabulary, and suggests concrete actions. Triggers on "/graph", "/graph health", "/graph triangles", "find synthesis opportunities", "graph analysis".
-version: "1.0"
+version: "1.1"
 generated_from: "arscontexta-v1.6"
 user-invocable: true
 context: fork
@@ -50,6 +50,19 @@ Every operation produces two things: **findings** (what the analysis reveals) an
 
 ---
 
+## Feb 2026 Baseline (must apply before running)
+
+- Use **query-class routing** before operation routing:
+  - **local** (targeted neighborhood): `forward`, `backward`, `siblings`, field `query`
+  - **global** (corpus-level synthesis): `health`, `clusters`, `hubs`
+  - **drift** (gap/failure hunting): `triangles`, `bridges`, orphan/dangling checks
+  - **basic** (exact lookups): `query` with explicit field/value filters
+- Prefer deterministic graph scripts in `ops/scripts/graph/` when present.
+- For inline fallback, prefer `rg` + `fd` pipelines over `grep` + `ls` for portability and scale.
+- Treat all graph findings as **candidates**; semantic validity requires /{vocabulary.cmd_reflect} judgment.
+
+---
+
 ## Operations
 
 ### /graph health
@@ -61,12 +74,12 @@ Full graph health report: density, orphans, dangling links, coverage.
 ```bash
 # Count total notes (excluding MOCs)
 NOTES_DIR="{vocabulary.notes}"
-TOTAL=$(ls -1 "$NOTES_DIR"/*.md 2>/dev/null | wc -l | tr -d ' ')
-MOC_COUNT=$(grep -rl '^type: moc' "$NOTES_DIR"/*.md 2>/dev/null | wc -l | tr -d ' ')
+TOTAL=$(fd -e md . "$NOTES_DIR" | wc -l | tr -d ' ')
+MOC_COUNT=$(rg -l '^type:\s*moc\b' "$NOTES_DIR" -g '*.md' | wc -l | tr -d ' ')
 NOTE_COUNT=$((TOTAL - MOC_COUNT))
 
 # Count all wiki links
-LINK_COUNT=$(grep -ohP '\[\[[^\]]+\]\]' "$NOTES_DIR"/*.md 2>/dev/null | wc -l | tr -d ' ')
+LINK_COUNT=$(rg -o '\[\[[^]]+\]\]' "$NOTES_DIR" -g '*.md' | wc -l | tr -d ' ')
 
 # Calculate link density
 # Density = actual_links / possible_links
@@ -76,12 +89,12 @@ echo "Density: $LINK_COUNT / ($NOTE_COUNT * ($NOTE_COUNT - 1))"
 # Find orphan notes (zero incoming links)
 for f in "$NOTES_DIR"/*.md; do
   NAME=$(basename "$f" .md)
-  INCOMING=$(grep -rl "\[\[$NAME\]\]" "$NOTES_DIR"/ 2>/dev/null | grep -v "$f" | wc -l | tr -d ' ')
+  INCOMING=$(rg -l "\[\[$NAME\]\]" "$NOTES_DIR" -g '*.md' | rg -v "^$f$" | wc -l | tr -d ' ')
   [[ "$INCOMING" -eq 0 ]] && echo "ORPHAN: $NAME"
 done
 
 # Find dangling links (links to non-existent files)
-grep -ohP '\[\[([^\]]+)\]\]' "$NOTES_DIR"/*.md 2>/dev/null | sort -u | while read -r link; do
+rg -o '\[\[[^]]+\]\]' "$NOTES_DIR" -g '*.md' | sort -u | while read -r link; do
   NAME=$(echo "$link" | sed 's/\[\[//;s/\]\]//')
   [[ ! -f "$NOTES_DIR/$NAME.md" ]] && echo "DANGLING: $NAME"
 done
@@ -91,9 +104,16 @@ COVERED=0
 for f in "$NOTES_DIR"/*.md; do
   NAME=$(basename "$f" .md)
   # Skip MOCs themselves
-  grep -q '^type: moc' "$f" 2>/dev/null && continue
+  rg -q '^type:\s*moc\b' "$f" && continue
   # Check if any MOC links to this note
-  if grep -rl '^type: moc' "$NOTES_DIR"/*.md 2>/dev/null | xargs grep -l "\[\[$NAME\]\]" >/dev/null 2>&1; then
+  FOUND_IN_MOC=0
+  while read -r moc; do
+    if rg -q "\[\[$NAME\]\]" "$moc"; then
+      FOUND_IN_MOC=1
+      break
+    fi
+  done < <(rg -l '^type:\s*moc\b' "$NOTES_DIR" -g '*.md')
+  if [[ "$FOUND_IN_MOC" -eq 1 ]]; then
     COVERED=$((COVERED + 1))
   fi
 done
@@ -148,7 +168,7 @@ Find synthesis opportunities — open triadic closures where A links to B and A 
 # For each note, extract outgoing wiki links
 for f in "$NOTES_DIR"/*.md; do
   NAME=$(basename "$f" .md)
-  LINKS=$(grep -oP '\[\[([^\]]+)\]\]' "$f" 2>/dev/null | sed 's/\[\[//;s/\]\]//' | sort -u)
+  LINKS=$(rg -o '\[\[[^]]+\]\]' "$f" | sed 's/\[\[//;s/\]\]//' | sort -u)
   echo "FROM:$NAME"
   echo "$LINKS" | while read -r target; do
     [[ -n "$target" ]] && echo "  TO:$target"
@@ -247,6 +267,7 @@ Discover connected components and topic boundaries.
 Build a bidirectional adjacency list from all wiki links.
 
 If `ops/scripts/graph/find-clusters.sh` exists, use it directly.
+If `ops/scripts/graph/find-communities-leiden.sh` exists, run it as the preferred community detector and include its partition quality output.
 
 **Step 2: Find connected components**
 
@@ -298,19 +319,22 @@ Rank {vocabulary.note_plural} by influence — most-linked-to (authorities) and 
 # Authority score: incoming links per note
 for f in "$NOTES_DIR"/*.md; do
   NAME=$(basename "$f" .md)
-  INCOMING=$(grep -rl "\[\[$NAME\]\]" "$NOTES_DIR"/ 2>/dev/null | grep -v "$f" | wc -l | tr -d ' ')
+  INCOMING=$(rg -l "\[\[$NAME\]\]" "$NOTES_DIR" -g '*.md' | rg -v "^$f$" | wc -l | tr -d ' ')
   echo "AUTH:$INCOMING:$NAME"
 done | sort -t: -k2 -rn | head -10
 
 # Hub score: outgoing links per note
 for f in "$NOTES_DIR"/*.md; do
   NAME=$(basename "$f" .md)
-  OUTGOING=$(grep -oP '\[\[[^\]]+\]\]' "$f" 2>/dev/null | wc -l | tr -d ' ')
+  OUTGOING=$(rg -o '\[\[[^]]+\]\]' "$f" | wc -l | tr -d ' ')
   echo "HUB:$OUTGOING:$NAME"
 done | sort -t: -k2 -rn | head -10
 ```
 
 If `ops/scripts/graph/influence-flow.sh` exists, use it directly.
+If available, augment with:
+- `ops/scripts/graph/pagerank.sh` for influence under transitive flow
+- `ops/scripts/graph/betweenness.sh` for bridge-like structural brokerage
 
 **Step 2: Identify synthesizers**
 
@@ -350,8 +374,8 @@ Find and read the {vocabulary.topic_map} matching the argument. Extract all {voc
 **Step 2: Check pairwise connections**
 
 For each pair of {vocabulary.note_plural} in the {vocabulary.topic_map}:
-1. Does A link to B? (grep for `[[B]]` in A's file)
-2. Does B link to A? (grep for `[[A]]` in B's file)
+1. Does A link to B? (`rg` for `[[B]]` in A's file)
+2. Does B link to A? (`rg` for `[[A]]` in B's file)
 3. If neither: this is an unconnected sibling pair
 
 If `ops/scripts/graph/topic-siblings.sh` exists, use it with the topic argument.
@@ -431,7 +455,7 @@ Find all notes that link TO this {vocabulary.note} (hop 1).
 
 ```bash
 NAME="[note name]"
-grep -rl "\[\[$NAME\]\]" "$NOTES_DIR"/*.md 2>/dev/null
+rg -l "\[\[$NAME\]\]" "$NOTES_DIR" -g '*.md'
 ```
 
 If `ops/scripts/graph/recursive-backlinks.sh` exists, use it with the note and depth arguments.
@@ -480,7 +504,9 @@ Supported query patterns:
 **Step 2: Execute query**
 
 ```bash
-rg "^{field}:.*{value}" "$NOTES_DIR"/*.md -l 2>/dev/null
+FIELD_PATTERN=$(printf '%s' "{field}" | sed 's/[^a-zA-Z0-9_-]//g')
+VALUE_PATTERN=$(printf '%s' "{value}" | sed 's/[][(){}.^$*+?|\\/]/\\&/g')
+rg -l "^${FIELD_PATTERN}:.*${VALUE_PATTERN}" "$NOTES_DIR" -g '*.md'
 ```
 
 For each matching file, extract the description for context.
@@ -549,7 +575,10 @@ All operations still run — they just produce less data.
 
 ### No Graph Scripts Available
 
-If `ops/scripts/graph/` does not exist or individual scripts are missing, implement the analysis inline using grep, file reads, and bash loops as shown in each operation's steps. The inline implementations are complete — scripts are optimization, not requirements.
+If `ops/scripts/graph/` does not exist or individual scripts are missing, implement the analysis inline using `rg`, `fd`, file reads, and bash loops as shown in each operation's steps. The inline implementations are complete — scripts are optimization, not requirements.
+
+When bootstrapping a new vault, reference implementations for advanced graph scripts are available at:
+`/Users/jamiecraik/dev/agent-skills/product/domain/ars-contexta-codex/reference/scripts/graph/`
 
 ### No ops/derivation-manifest.md
 
@@ -562,6 +591,6 @@ Report: "No {vocabulary.note_plural} found in {vocabulary.notes}/. Start by capt
 ### Note Not Found (for forward/backward/siblings)
 
 If the specified {vocabulary.note} or {vocabulary.topic_map} does not exist:
-1. Search for partial matches: `ls "$NOTES_DIR"/*{query}*.md 2>/dev/null`
+1. Search for partial matches: `fd -e md "{query}" "$NOTES_DIR"`
 2. If matches found: "Did you mean: [[match1]], [[match2]]?"
 3. If no matches: "{vocabulary.note} '[[name]]' not found. Check the name and try again."

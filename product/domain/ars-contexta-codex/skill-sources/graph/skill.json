@@ -1,7 +1,7 @@
 {
   "name": "knowledge-graph",
   "description": "Interactive knowledge graph analysis. Routes natural language questions to graph scripts, interprets results in domain vocabulary, and suggests concrete actions.",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "author": "arscontexta",
   "tags": [
     "knowledge-management",

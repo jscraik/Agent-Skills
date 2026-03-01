@@ -86,6 +86,7 @@ description: "Use when you need to install, validate, or maintain Ars Contexta p
 ## Script references
 - Sync helper: `/Users/jamiecraik/dev/agent-skills/product/domain/ars-contexta-codex/scripts/sync-thinking.sh`
 - Hook parity scripts (source material): `/Users/jamiecraik/dev/agent-skills/product/domain/ars-contexta-codex/hooks/scripts/`
+- Graph reference scripts (for generated `ops/scripts/graph/` parity): `/Users/jamiecraik/dev/agent-skills/product/domain/ars-contexta-codex/reference/scripts/graph/`
 
 ## AskQuestion parity
 When a canonical spec expects Claude AskQuestion-style interaction (`askquestiontool` or `default_mode_request_user_input`), use Codex `request_user_input` as the equivalent.

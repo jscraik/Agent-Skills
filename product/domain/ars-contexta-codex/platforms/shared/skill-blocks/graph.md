@@ -20,6 +20,8 @@ quality_gates:
   - results interpreted with domain vocabulary (not raw data)
   - {vocabulary.note} descriptions included in output (not just titles)
   - specific next-step commands suggested
+  - operation routing first classifies intent as local/global/drift/basic
+  - inline fallbacks use rg/fd-compatible commands (portable on macOS/Linux)
 handoff_protocol: false  # interactive analysis, not orchestrated
 pipeline_position: meta_cognitive  # operates outside the main pipeline
 ```
@@ -40,7 +42,7 @@ Graph analysis does not vary by processing depth. All operations run the same wa
 
 ## Skill Template
 
-**Source:** `skill-sources/graph/SKILL.md` (reference implementation, 567 lines)
+**Source:** `skill-sources/graph/SKILL.md` (reference implementation)
 
 The derivation engine reads the full `skill-sources/graph/SKILL.md` and applies vocabulary transformation:
 
@@ -60,11 +62,24 @@ The derivation engine reads the full `skill-sources/graph/SKILL.md` and applies 
 | `triangles` | `find-triangles.sh` | Synthesis opportunities: A links to B, A links to C, but B does not link to C |
 | `bridges` | `find-bridges.sh` | Fragile {vocabulary.note_plural}: removal would disconnect graph regions |
 | `clusters` | `find-clusters.sh` | Connected components — isolated subgraphs that may need cross-linking |
+| `clusters` (preferred when present) | `find-communities-leiden.sh` | Higher-quality community partitions for dense graphs |
 | `hubs` | `influence-flow.sh` | Hub/authority analysis — which {vocabulary.note_plural} are most influential |
+| `hubs` (optional enrichers) | `pagerank.sh`, `betweenness.sh` | Transitive influence and structural brokerage scoring |
 | `siblings` | `topic-siblings.sh` | Unconnected {vocabulary.note_plural} sharing a {vocabulary.topic_map} — missed connections |
 | `forward` | `n-hop-forward.sh` | N-hop forward traversal from a specific {vocabulary.note} |
 | `backward` | `recursive-backlinks.sh` | N-hop backward traversal to a specific {vocabulary.note} |
 | `query` | Combined | Natural language graph question (routed to appropriate operation) |
+
+### Query Class Routing (Invariant)
+
+Before selecting an operation, classify intent:
+
+| Query class | Intent | Typical operations |
+|------------|--------|--------------------|
+| `local` | note-neighborhood reasoning | `forward`, `backward`, `siblings`, exact `query` |
+| `global` | whole-graph state/synthesis | `health`, `clusters`, `hubs` |
+| `drift` | structural risk/gap detection | `triangles`, `bridges`, orphan/dangling checks |
+| `basic` | exact field lookup | constrained `query` |
 
 ### Operation Output Pattern (Invariant)
 
@@ -109,7 +124,8 @@ During /setup, the derivation engine generates graph analysis scripts in `ops/sc
 - Scripts use `{vocabulary.notes}` for the notes directory path
 - Scripts use wiki link syntax `[[title]]` for output
 - Scripts are bash, platform-independent
-- Each script is self-contained (no dependencies beyond grep, awk, sort)
+- Each script is self-contained (no dependencies beyond `rg`, `fd`, `awk`, `sort`)
+- Canonical reference implementations live at `reference/scripts/graph/` in this repository
 
 ### Health Report Structure
 
@@ -143,3 +159,5 @@ The `health` operation combines multiple scripts into a single report:
 - [ ] Never dump raw data — always interpret with descriptions
 - [ ] `{vocabulary.X}` markers used throughout
 - [ ] Specific command suggestions in Actions sections
+- [ ] Query class routing (local/global/drift/basic) is present and used
+- [ ] Inline command examples are rg/fd-compatible
