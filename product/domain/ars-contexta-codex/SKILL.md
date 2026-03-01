@@ -90,6 +90,7 @@ description: "Use when you need to install, validate, or maintain Ars Contexta p
 
 ## AskQuestion parity
 When a canonical spec expects Claude AskQuestion-style interaction (`askquestiontool` or `default_mode_request_user_input`), use Codex `request_user_input` as the equivalent.
+Use this pattern for graph recommendation review: capture decision (`accepted|partial|rejected|deferred`), outcome (`good|neutral|bad|unknown`), and confidence (`high|medium|low`), then persist via graph feedback scripts.
 
 ## Validation checklist
 - Run checks in fail-fast order and stop at first failed gate.

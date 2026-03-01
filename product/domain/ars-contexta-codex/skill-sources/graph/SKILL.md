@@ -566,6 +566,31 @@ If no arguments provided:
 
 ---
 
+## Decision Quality Feedback (AskQuestion parity)
+
+When `feedback-loop.sh` outputs recommendations (`rec-XXX` IDs), collect user feedback with AskQuestion parity (`request_user_input`):
+
+1. **Decision** — Was `rec-XXX` applied?
+   - `accepted` / `partial` / `rejected` / `deferred`
+2. **Outcome** — How did it perform?
+   - `good` / `neutral` / `bad` / `unknown`
+3. **Confidence** — How reliable is the judgment?
+   - `high` / `medium` / `low`
+
+Record each response:
+
+```bash
+ops/scripts/graph/record-feedback.sh . rec-001 accepted good high "Reduced orphan notes"
+```
+
+Review trend quality:
+
+```bash
+ops/scripts/graph/feedback-scoreboard.sh . ops/metrics/graph
+```
+
+---
+
 ## Edge Cases
 
 ### Small Vault (<10 notes)

@@ -6,6 +6,7 @@ Reference implementations for advanced graph analysis scripts that generated vau
 - [Scripts](#scripts)
 - [Usage](#usage)
 - [Feedback loop](#feedback-loop)
+- [User feedback capture (AskQuestion)](#user-feedback-capture-askquestion)
 - [Output contracts](#output-contracts)
 - [Validation](#validation)
 - [Notes](#notes)
@@ -26,6 +27,10 @@ Reference implementations for advanced graph analysis scripts that generated vau
   - End-to-end local validation with a synthetic vault graph.
 - `feedback-loop.sh`
   - Runs all graph analyzers, stores timestamped snapshots, compares drift vs previous run, and writes actionable recommendations.
+- `record-feedback.sh`
+  - Appends user-judged recommendation outcomes (good/neutral/bad) to a durable JSONL log.
+- `feedback-scoreboard.sh`
+  - Summarizes decision/outcome performance by recommendation action key.
 
 ## Usage
 
@@ -36,6 +41,8 @@ From a vault root containing `notes/`:
 ./ops/scripts/graph/pagerank.sh notes 20
 ./ops/scripts/graph/betweenness.sh notes 20
 ./ops/scripts/graph/feedback-loop.sh . notes 20 ops/metrics/graph
+./ops/scripts/graph/record-feedback.sh . rec-001 accepted good high "Improved retrieval quality"
+./ops/scripts/graph/feedback-scoreboard.sh . ops/metrics/graph
 ```
 
 From this repository (reference scripts):
@@ -45,6 +52,8 @@ From this repository (reference scripts):
 ./product/domain/ars-contexta-codex/reference/scripts/graph/pagerank.sh /path/to/vault/notes 20
 ./product/domain/ars-contexta-codex/reference/scripts/graph/betweenness.sh /path/to/vault/notes 20
 ./product/domain/ars-contexta-codex/reference/scripts/graph/feedback-loop.sh /path/to/vault notes 20 ops/metrics/graph
+./product/domain/ars-contexta-codex/reference/scripts/graph/record-feedback.sh /path/to/vault rec-001 accepted good high "Improved retrieval quality"
+./product/domain/ars-contexta-codex/reference/scripts/graph/feedback-scoreboard.sh /path/to/vault ops/metrics/graph
 ```
 
 ## Feedback loop
@@ -64,6 +73,26 @@ Typical weekly command from vault root:
 
 ```bash
 ./ops/scripts/graph/feedback-loop.sh . notes 20 ops/metrics/graph
+```
+
+## User feedback capture (AskQuestion)
+
+After reviewing recommendations, collect user judgment with AskQuestion / `request_user_input`:
+
+1. Did you apply recommendation `rec-XXX`? (`accepted` | `partial` | `rejected` | `deferred`)
+2. Outcome quality? (`good` | `neutral` | `bad` | `unknown`)
+3. Confidence in judgment? (`high` | `medium` | `low`)
+
+Record it:
+
+```bash
+./ops/scripts/graph/record-feedback.sh . rec-001 accepted good high "Reduced orphan notes"
+```
+
+Review score trends:
+
+```bash
+./ops/scripts/graph/feedback-scoreboard.sh . ops/metrics/graph
 ```
 
 ## Output contracts

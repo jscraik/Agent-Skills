@@ -127,6 +127,7 @@ During /setup, the derivation engine generates graph analysis scripts in `ops/sc
 - Each script is self-contained (no dependencies beyond `rg`, `fd`, `awk`, `sort`)
 - Canonical reference implementations live at `reference/scripts/graph/` in this repository
 - Include `feedback-loop.sh` to persist snapshots and emit drift-aware recommendations
+- Include `record-feedback.sh` + `feedback-scoreboard.sh` to capture AskQuestion outcomes (good/bad quality signals)
 
 ### Health Report Structure
 
@@ -163,3 +164,4 @@ The `health` operation combines multiple scripts into a single report:
 - [ ] Query class routing (local/global/drift/basic) is present and used
 - [ ] Inline command examples are rg/fd-compatible
 - [ ] Feedback loop script is documented (`ops/scripts/graph/feedback-loop.sh`)
+- [ ] AskQuestion/request_user_input outcome capture is documented and persisted

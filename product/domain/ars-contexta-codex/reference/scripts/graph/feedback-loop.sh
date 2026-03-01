@@ -19,13 +19,15 @@ SNAPSHOT_DIR="$METRICS_DIR/snapshots"
 REPORT_DIR="$METRICS_DIR/reports"
 RAW_ROOT="$METRICS_DIR/raw"
 RECOMMEND_DIR="$METRICS_DIR/recommendations"
+FEEDBACK_DIR="$METRICS_DIR/feedback"
+FEEDBACK_LOG="$FEEDBACK_DIR/decision-feedback.jsonl"
 
 if [[ ! -d "$NOTES_DIR" ]]; then
   echo "ERROR: notes directory not found: $NOTES_DIR" >&2
   exit 1
 fi
 
-mkdir -p "$SNAPSHOT_DIR" "$REPORT_DIR" "$RAW_ROOT" "$RECOMMEND_DIR"
+mkdir -p "$SNAPSHOT_DIR" "$REPORT_DIR" "$RAW_ROOT" "$RECOMMEND_DIR" "$FEEDBACK_DIR"
 
 STAMP="$(date -u +"%Y%m%dT%H%M%SZ")"
 STAMP_HUMAN="$(date -u +"%Y-%m-%d %H:%M:%SZ")"
@@ -44,7 +46,7 @@ SNAPSHOT_PATH="$SNAPSHOT_DIR/$STAMP.json"
 REPORT_PATH="$REPORT_DIR/$STAMP.md"
 RECOMMEND_PATH="$RECOMMEND_DIR/$STAMP.json"
 
-python3 - "$SNAPSHOT_DIR" "$PAGERANK_OUT" "$BETWEENNESS_OUT" "$COMMUNITIES_OUT" "$SNAPSHOT_PATH" "$REPORT_PATH" "$RECOMMEND_PATH" "$STAMP_HUMAN" "$NOTES_DIR_REL" "$TOP_N" <<'PY'
+python3 - "$SNAPSHOT_DIR" "$PAGERANK_OUT" "$BETWEENNESS_OUT" "$COMMUNITIES_OUT" "$SNAPSHOT_PATH" "$REPORT_PATH" "$RECOMMEND_PATH" "$STAMP_HUMAN" "$NOTES_DIR_REL" "$TOP_N" "$FEEDBACK_LOG" <<'PY'
 import json
 import pathlib
 import re
@@ -61,7 +63,8 @@ import sys
     generated_at,
     notes_dir_rel,
     top_n,
-) = sys.argv[1:11]
+    feedback_log,
+) = sys.argv[1:12]
 
 snapshot_dir = pathlib.Path(snapshot_dir)
 pagerank_path = pathlib.Path(pagerank_path)
@@ -182,6 +185,19 @@ recommendations = []
 insights = []
 curr_signals = snapshot["signals"]
 
+
+def add_recommendation(priority: str, action: str, reason: str, action_key: str):
+    rec_id = f"rec-{len(recommendations)+1:03d}"
+    recommendations.append(
+        {
+            "id": rec_id,
+            "priority": priority,
+            "action_key": action_key,
+            "action": action,
+            "reason": reason,
+        }
+    )
+
 if prev:
     prev_signals = prev.get("signals", {})
     notes_delta = curr_signals["notes"] - int(prev_signals.get("notes", 0))
@@ -201,55 +217,67 @@ if prev:
     insights.append(f"Top-5 bridge overlap: {bt_overlap:.2f}")
 
     if pr_overlap < 0.4:
-        recommendations.append({
-            "priority": "high",
-            "action": "Run /graph forward on the newest top PageRank note and /reflect to stabilize new linkage patterns.",
-            "reason": "Top influence set shifted materially (overlap < 0.40).",
-        })
+        add_recommendation(
+            "high",
+            "Run /graph forward on the newest top PageRank note and /reflect to stabilize new linkage patterns.",
+            "Top influence set shifted materially (overlap < 0.40).",
+            "influence_shift",
+        )
     if bt_overlap < 0.4:
-        recommendations.append({
-            "priority": "high",
-            "action": "Run /graph bridges and /reweave on emerging bridge notes to reduce single-point-of-failure risk.",
-            "reason": "Bridge structure shifted materially (overlap < 0.40).",
-        })
+        add_recommendation(
+            "high",
+            "Run /graph bridges and /reweave on emerging bridge notes to reduce single-point-of-failure risk.",
+            "Bridge structure shifted materially (overlap < 0.40).",
+            "bridge_shift",
+        )
     if communities_delta > 1:
-        recommendations.append({
-            "priority": "medium",
-            "action": "Run /graph clusters and add 1-2 cross-community links where conceptually justified.",
-            "reason": "Community count increased; graph may be fragmenting.",
-        })
+        add_recommendation(
+            "medium",
+            "Run /graph clusters and add 1-2 cross-community links where conceptually justified.",
+            "Community count increased; graph may be fragmenting.",
+            "community_fragmentation",
+        )
 else:
     insights.append("No previous snapshot found; this is your baseline run.")
 
 if curr_signals["isolated_notes"]:
-    recommendations.append({
-        "priority": "high",
-        "action": "Run /graph health and /reflect on isolated notes to attach them to active MOCs.",
-        "reason": f"Detected isolated singleton communities: {', '.join(curr_signals['isolated_notes'][:5])}",
-    })
+    add_recommendation(
+        "high",
+        "Run /graph health and /reflect on isolated notes to attach them to active MOCs.",
+        f"Detected isolated singleton communities: {', '.join(curr_signals['isolated_notes'][:5])}",
+        "isolated_notes",
+    )
 
 if curr_signals["top_pagerank"] and curr_signals["top_bridges"]:
     top_influence = curr_signals["top_pagerank"][0]
     top_bridge = curr_signals["top_bridges"][0]
     if top_influence == top_bridge:
-        recommendations.append({
-            "priority": "medium",
-            "action": f"Review [[{top_influence}]] for potential split/summary-note extraction.",
-            "reason": "Same note is top influence and top bridge; may become a bottleneck.",
-        })
+        add_recommendation(
+            "medium",
+            f"Review [[{top_influence}]] for potential split/summary-note extraction.",
+            "Same note is top influence and top bridge; may become a bottleneck.",
+            "single_point_bottleneck",
+        )
 
 if not recommendations:
-    recommendations.append({
-        "priority": "low",
-        "action": "No urgent graph drift detected. Continue normal /reflect and /reweave cadence.",
-        "reason": "Current metrics are stable.",
-    })
+    add_recommendation(
+        "low",
+        "No urgent graph drift detected. Continue normal /reflect and /reweave cadence.",
+        "Current metrics are stable.",
+        "stable_state",
+    )
 
 recommend_payload = {
     "schema_version": 1,
     "generated_at": generated_at,
     "snapshot": snapshot_out.name,
     "previous_snapshot": previous_path.name if previous_path else None,
+    "feedback_log": feedback_log,
+    "feedback_schema": {
+        "decision": ["accepted", "partial", "rejected", "deferred"],
+        "outcome": ["good", "neutral", "bad", "unknown"],
+        "confidence": ["high", "medium", "low"],
+    },
     "insights": insights,
     "recommendations": recommendations,
 }
@@ -277,10 +305,15 @@ for item in insights:
 
 report_lines.extend(["", "## Recommended Actions"])
 for rec in recommendations:
-    report_lines.append(f"- **{rec['priority'].upper()}** — {rec['action']}  ")
+    report_lines.append(f"- **{rec['priority'].upper()}** `{rec['id']}` ({rec['action_key']}) — {rec['action']}  ")
     report_lines.append(f"  Reason: {rec['reason']}")
 
 report_lines.extend([
+    "",
+    "## Decision Feedback (AskQuestion / request_user_input)",
+    "- Capture user feedback for each HIGH/MEDIUM recommendation after it is attempted.",
+    "- Record outcomes with `ops/scripts/graph/record-feedback.sh` so the loop can learn what worked.",
+    f"- Feedback log path: `{feedback_log}`",
     "",
     "## Next Run",
     "- Re-run this script after meaningful note growth or on a weekly schedule.",
@@ -297,3 +330,4 @@ echo "feedback-loop: PASS"
 echo "snapshot: $SNAPSHOT_PATH"
 echo "report:   $REPORT_PATH"
 echo "actions:  $RECOMMEND_PATH"
+echo "feedback: $FEEDBACK_LOG"
