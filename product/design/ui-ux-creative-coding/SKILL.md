@@ -222,3 +222,10 @@ The agent is capable of extraordinary work in this domain. Use these guidelines 
 - Examples: `references/examples.md`, `references/invocation-examples.md`
 - Review mode: `references/project-review-mode.md`, `references/browser-verification.md`
 - Output contract: `references/contract.yaml` (`schema_version`)
+
+<!-- decision-feedback-protocol:v1 -->
+**Decision feedback protocol (required):**
+- For non-trivial outcomes, collect user feedback via AskQuestion parity (`request_user_input`) before closing the run.
+- Capture: `decision` (`accepted|partial|rejected|deferred`), `outcome` (`good|neutral|bad|unknown`), and `confidence` (`high|medium|low`).
+- If available, persist with `ops/scripts/graph/record-feedback.sh`; otherwise append a JSONL record to `ops/metrics/skill-feedback/decision-feedback.jsonl` in the active workspace.
+<!-- /decision-feedback-protocol -->

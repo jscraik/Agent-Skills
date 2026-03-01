@@ -308,3 +308,10 @@ Overall: PASS (1 warning)
 - use template `_schema` as the authoritative source when available
 - fall back to default checks gracefully when no template exists
 - log patterns when running batch validation (recurring issues signal systematic problems)
+
+<!-- decision-feedback-protocol:v1 -->
+**Decision feedback protocol (required):**
+- For non-trivial outcomes, collect user feedback via AskQuestion parity (`request_user_input`) before closing the run.
+- Capture: `decision` (`accepted|partial|rejected|deferred`), `outcome` (`good|neutral|bad|unknown`), and `confidence` (`high|medium|low`).
+- If available, persist with `ops/scripts/graph/record-feedback.sh`; otherwise append a JSONL record to `ops/metrics/skill-feedback/decision-feedback.jsonl` in the active workspace.
+<!-- /decision-feedback-protocol -->

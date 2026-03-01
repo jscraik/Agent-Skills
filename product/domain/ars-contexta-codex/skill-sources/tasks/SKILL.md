@@ -400,3 +400,10 @@ When a user wants to convert a discovery to a task:
 4. Remove from Discoveries section
 
 This is a manual workflow — discoveries do not auto-promote.
+
+<!-- decision-feedback-protocol:v1 -->
+**Decision feedback protocol (required):**
+- For non-trivial outcomes, collect user feedback via AskQuestion parity (`request_user_input`) before closing the run.
+- Capture: `decision` (`accepted|partial|rejected|deferred`), `outcome` (`good|neutral|bad|unknown`), and `confidence` (`high|medium|low`).
+- If available, persist with `ops/scripts/graph/record-feedback.sh`; otherwise append a JSONL record to `ops/metrics/skill-feedback/decision-feedback.jsonl` in the active workspace.
+<!-- /decision-feedback-protocol -->

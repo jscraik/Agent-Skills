@@ -301,3 +301,10 @@ When /archive-batch runs later, it moves task files into the existing archive fo
 - Use the archived path (not original) in the task file for {DOMAIN:inbox} sources
 - Report next steps clearly so the user knows what to do next
 - Compute next_claim_start from both queue AND archive (not just one)
+
+<!-- decision-feedback-protocol:v1 -->
+**Decision feedback protocol (required):**
+- For non-trivial outcomes, collect user feedback via AskQuestion parity (`request_user_input`) before closing the run.
+- Capture: `decision` (`accepted|partial|rejected|deferred`), `outcome` (`good|neutral|bad|unknown`), and `confidence` (`high|medium|low`).
+- If available, persist with `ops/scripts/graph/record-feedback.sh`; otherwise append a JSONL record to `ops/metrics/skill-feedback/decision-feedback.jsonl` in the active workspace.
+<!-- /decision-feedback-protocol -->

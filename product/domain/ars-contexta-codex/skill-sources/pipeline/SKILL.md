@@ -312,3 +312,10 @@ State lives in the queue file. The pipeline reads queue state, not session state
 - Show the user what was created (list of {DOMAIN:note_plural})
 - Suggest next steps if interrupted
 - Use domain-native vocabulary from derivation manifest
+
+<!-- decision-feedback-protocol:v1 -->
+**Decision feedback protocol (required):**
+- For non-trivial outcomes, collect user feedback via AskQuestion parity (`request_user_input`) before closing the run.
+- Capture: `decision` (`accepted|partial|rejected|deferred`), `outcome` (`good|neutral|bad|unknown`), and `confidence` (`high|medium|low`).
+- If available, persist with `ops/scripts/graph/record-feedback.sh`; otherwise append a JSONL record to `ops/metrics/skill-feedback/decision-feedback.jsonl` in the active workspace.
+<!-- /decision-feedback-protocol -->

@@ -99,6 +99,9 @@ Depending on the request, produce one or more of:
 - An operational-readiness + security-risk report (OpenClaw-style summary: critical/warn/info).
 - For graph-mode work: updated `docs/skill-graphs/*` contracts and any coupled runtime artifact/schema updates.
 - A packaged `.skill` file (optional).
+- Decision-feedback instrumentation in created/updated skills:
+  - Include the `decision-feedback-protocol:v1` block in `SKILL.md`.
+  - Ensure AskQuestion parity (`request_user_input`) is explicitly required for non-trivial outcomes.
 
 ## Response format (required)
 
@@ -238,6 +241,7 @@ Body:
 - Keep the workflow minimal and reliable.
 - Link to `references/` instead of pasting long docs (progressive disclosure). 
 - Store templates/examples in the skill bundle, not in prompts. 
+- Include the decision feedback protocol block (`decision-feedback-protocol:v1`) unless a stronger repo-specific equivalent already exists.
 
 ### 5) Add resources (as needed)
 
@@ -483,3 +487,10 @@ Use this checklist before drafting or revising a recursive skill runbook.
 - Feel free to be creative while staying rigorous and precise.
 - Push boundaries with practical alternatives when simple recipes fail.
 - Enable outcomes-oriented problem solving.
+
+<!-- decision-feedback-protocol:v1 -->
+**Decision feedback protocol (required):**
+- For non-trivial outcomes, collect user feedback via AskQuestion parity (`request_user_input`) before closing the run.
+- Capture: `decision` (`accepted|partial|rejected|deferred`), `outcome` (`good|neutral|bad|unknown`), and `confidence` (`high|medium|low`).
+- If available, persist with `ops/scripts/graph/record-feedback.sh`; otherwise append a JSONL record to `ops/metrics/skill-feedback/decision-feedback.jsonl` in the active workspace.
+<!-- /decision-feedback-protocol -->
