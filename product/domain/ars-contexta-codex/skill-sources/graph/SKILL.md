@@ -562,6 +562,7 @@ If no arguments provided:
 - **For large result sets,** summarize top findings (max 10) and offer to show more: "[N] more results. Show all? (yes/no)"
 - **Include density benchmarks** for context — "your density of 0.04 is in the healthy range."
 - **Distinguish structural from semantic.** Graph analysis reveals structural properties. Semantic judgment about WHETHER connections should exist requires /{vocabulary.cmd_reflect}.
+- **Close the loop.** When available, run `ops/scripts/graph/feedback-loop.sh` on a cadence and prioritize its high-priority actions first.
 
 ---
 

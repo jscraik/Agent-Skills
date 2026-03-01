@@ -73,10 +73,12 @@ pushd "$VAULT_DIR" >/dev/null
 PR_OUT="$TMP_DIR/pagerank.out"
 BT_OUT="$TMP_DIR/betweenness.out"
 LC_OUT="$TMP_DIR/leiden.out"
+FB_OUT="$TMP_DIR/feedback.out"
 
 "$SCRIPT_DIR/pagerank.sh" notes 5 > "$PR_OUT"
 "$SCRIPT_DIR/betweenness.sh" notes 5 > "$BT_OUT"
 "$SCRIPT_DIR/find-communities-leiden.sh" notes > "$LC_OUT"
+"$SCRIPT_DIR/feedback-loop.sh" "$VAULT_DIR" notes 5 ops/metrics/graph > "$FB_OUT"
 
 rg -q '^mode: pagerank$' "$PR_OUT"
 rg -q '^notes: 7$' "$PR_OUT"
@@ -91,6 +93,14 @@ rg -q '^notes: 7$' "$LC_OUT"
 rg -q '^communities: ' "$LC_OUT"
 rg -q '\[\[A\]\]' "$LC_OUT"
 rg -q '\[\[G\]\]' "$LC_OUT"
+
+rg -q '^feedback-loop: PASS$' "$FB_OUT"
+rg -q 'snapshot:' "$FB_OUT"
+rg -q 'report:' "$FB_OUT"
+rg -q 'actions:' "$FB_OUT"
+test -f "$VAULT_DIR/ops/metrics/graph/snapshots/latest.json"
+test -f "$VAULT_DIR/ops/metrics/graph/reports/latest.md"
+test -f "$VAULT_DIR/ops/metrics/graph/recommendations/latest.json"
 
 popd >/dev/null
 

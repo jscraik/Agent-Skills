@@ -126,6 +126,7 @@ During /setup, the derivation engine generates graph analysis scripts in `ops/sc
 - Scripts are bash, platform-independent
 - Each script is self-contained (no dependencies beyond `rg`, `fd`, `awk`, `sort`)
 - Canonical reference implementations live at `reference/scripts/graph/` in this repository
+- Include `feedback-loop.sh` to persist snapshots and emit drift-aware recommendations
 
 ### Health Report Structure
 
@@ -161,3 +162,4 @@ The `health` operation combines multiple scripts into a single report:
 - [ ] Specific command suggestions in Actions sections
 - [ ] Query class routing (local/global/drift/basic) is present and used
 - [ ] Inline command examples are rg/fd-compatible
+- [ ] Feedback loop script is documented (`ops/scripts/graph/feedback-loop.sh`)

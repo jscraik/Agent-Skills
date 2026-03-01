@@ -5,6 +5,7 @@ Reference implementations for advanced graph analysis scripts that generated vau
 ## Table of Contents
 - [Scripts](#scripts)
 - [Usage](#usage)
+- [Feedback loop](#feedback-loop)
 - [Output contracts](#output-contracts)
 - [Validation](#validation)
 - [Notes](#notes)
@@ -23,6 +24,8 @@ Reference implementations for advanced graph analysis scripts that generated vau
   - Highlights structural brokers/bridge notes.
 - `smoke-test.sh`
   - End-to-end local validation with a synthetic vault graph.
+- `feedback-loop.sh`
+  - Runs all graph analyzers, stores timestamped snapshots, compares drift vs previous run, and writes actionable recommendations.
 
 ## Usage
 
@@ -32,6 +35,7 @@ From a vault root containing `notes/`:
 ./ops/scripts/graph/find-communities-leiden.sh notes
 ./ops/scripts/graph/pagerank.sh notes 20
 ./ops/scripts/graph/betweenness.sh notes 20
+./ops/scripts/graph/feedback-loop.sh . notes 20 ops/metrics/graph
 ```
 
 From this repository (reference scripts):
@@ -40,6 +44,26 @@ From this repository (reference scripts):
 ./product/domain/ars-contexta-codex/reference/scripts/graph/find-communities-leiden.sh /path/to/vault/notes
 ./product/domain/ars-contexta-codex/reference/scripts/graph/pagerank.sh /path/to/vault/notes 20
 ./product/domain/ars-contexta-codex/reference/scripts/graph/betweenness.sh /path/to/vault/notes 20
+./product/domain/ars-contexta-codex/reference/scripts/graph/feedback-loop.sh /path/to/vault notes 20 ops/metrics/graph
+```
+
+## Feedback loop
+
+`feedback-loop.sh` turns one-off graph analysis into an improvement cycle:
+
+1. Run `pagerank.sh`, `betweenness.sh`, and `find-communities-leiden.sh`.
+2. Write timestamped raw outputs and normalized snapshot JSON.
+3. Compare against the previous snapshot for drift signals.
+4. Generate:
+   - `ops/metrics/graph/snapshots/<timestamp>.json`
+   - `ops/metrics/graph/reports/<timestamp>.md`
+   - `ops/metrics/graph/recommendations/<timestamp>.json`
+   - `latest.*` copies for automation consumers
+
+Typical weekly command from vault root:
+
+```bash
+./ops/scripts/graph/feedback-loop.sh . notes 20 ops/metrics/graph
 ```
 
 ## Output contracts

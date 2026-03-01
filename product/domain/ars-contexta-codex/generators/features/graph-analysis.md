@@ -185,6 +185,16 @@ Use /{DOMAIN:analyze} for interactive graph analysis. Ask questions in natural l
 
 The command routes to the appropriate script(s), interprets results in domain vocabulary, and suggests concrete actions. Results always include context (descriptions, relationship types), not bare file lists. Large result sets are summarized with top findings rather than dumped in full.
 
+### Continuous Improvement Loop
+
+Use a recurring graph feedback loop so analysis compounds over time:
+
+```bash
+./ops/scripts/graph/feedback-loop.sh . {DOMAIN:notes} 20 ops/metrics/graph
+```
+
+This records snapshots, compares drift against prior runs, and generates prioritized actions you can feed back into `/reflect`, `/reweave`, and `/graph` follow-up operations.
+
 ### When to Use Each Operation Type
 
 | Situation | Operation | Why |
