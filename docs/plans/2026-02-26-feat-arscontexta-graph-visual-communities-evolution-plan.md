@@ -1,7 +1,7 @@
 ---
 title: feat: Ars Contexta Graph Visual + Communities + Evolution
 type: feat
-status: active
+status: completed
 date: 2026-02-26
 ---
 
@@ -448,34 +448,34 @@ run_graph_op.sh unknown --json
 - Plan section on error propagation and rollback patterns.
 
 ## Implementation Tasks (files-first)
-- [ ] **Restore skill path prerequisite**
+- [x] **Restore skill path prerequisite**
   - `${REPO_ROOT}/product/domain/ars-contexta-codex/SKILL.md`
   - `${REPO_ROOT}/skills/ars-contexta-codex` symlink validation (`product/domain/...` target exists)
-- [ ] **Update wrapper operations**
+- [x] **Update wrapper operations**
   - `${CONFIG_DIR}/codex/prompts/graph.md`
   - Add explicit branching and guardrails for `visual|communities|evolution` with stable fallback on unknown operations.
   - Keep existing `/graph` operations intact; no behavior changes to existing flows.
-- [ ] **Add graph script directory**
+- [x] **Add graph script directory**
   - `${VAULT_ROOT}/ops/scripts/graph/`
-- [ ] **Create shared graph helper module**
+- [x] **Create shared graph helper module**
   - `${VAULT_ROOT}/ops/scripts/graph/_graph_op_lib.sh`
   - `${VAULT_ROOT}/ops/scripts/graph/_graph_lib.py`
   - Centralize shell parsing/exit-contract helpers in `_graph_op_lib.sh` and deterministic/serialization helpers in `_graph_lib.py`.
-- [ ] **Create index builder**
+- [x] **Create index builder**
   - `${VAULT_ROOT}/ops/scripts/graph/build_graph_index.py`
   - Add recoverable frontmatter parsing and duplicate basename warning strategy (namespace by first-seen path).
 
 
 ### Backend validation gates (recommended)
- - [ ] `bash -n "${VAULT_ROOT}/ops/scripts/graph/run_graph_op.sh"`
- - [ ] `shellcheck -x "${VAULT_ROOT}/ops/scripts/graph/run_graph_op.sh"`
- - [ ] `python3 -m py_compile "${VAULT_ROOT}/ops/scripts/graph/"*.py`
- - [ ] `bash "${VAULT_ROOT}/ops/scripts/graph/run_graph_op.sh" --dry-run --json visual`
- - [ ] `bash "${VAULT_ROOT}/ops/scripts/graph/run_graph_op.sh" --dry-run --json communities`
- - [ ] `bash "${VAULT_ROOT}/ops/scripts/graph/run_graph_op.sh" --dry-run --json evolution`
- - [ ] `bash "${VAULT_ROOT}/ops/scripts/graph/run_graph_op.sh" communities --json --max-nodes 30 > /tmp/run1.json && bash "${VAULT_ROOT}/ops/scripts/graph/run_graph_op.sh" communities --json --max-nodes 30 > /tmp/run2.json && diff -q /tmp/run1.json /tmp/run2.json`
- - [ ] `bash "${VAULT_ROOT}/ops/scripts/graph/run_graph_op.sh" visual --json --vault-root /does/not/exist` (expect non-zero + `E_IO`/`E_VALIDATION`; verify no artifact writes)
- - [ ] Schema validation smoke check:
+ - [x] `bash -n "${VAULT_ROOT}/ops/scripts/graph/run_graph_op.sh"`
+ - [x] `shellcheck -x "${VAULT_ROOT}/ops/scripts/graph/run_graph_op.sh"`
+ - [x] `python3 -m py_compile "${VAULT_ROOT}/ops/scripts/graph/"*.py`
+ - [x] `bash "${VAULT_ROOT}/ops/scripts/graph/run_graph_op.sh" --dry-run --json visual`
+ - [x] `bash "${VAULT_ROOT}/ops/scripts/graph/run_graph_op.sh" --dry-run --json communities`
+ - [x] `bash "${VAULT_ROOT}/ops/scripts/graph/run_graph_op.sh" --dry-run --json evolution`
+ - [x] `bash "${VAULT_ROOT}/ops/scripts/graph/run_graph_op.sh" communities --json --max-nodes 30 > /tmp/run1.json && bash "${VAULT_ROOT}/ops/scripts/graph/run_graph_op.sh" communities --json --max-nodes 30 > /tmp/run2.json && diff -q /tmp/run1.json /tmp/run2.json`
+ - [x] `bash "${VAULT_ROOT}/ops/scripts/graph/run_graph_op.sh" visual --json --vault-root /does/not/exist` (expect non-zero + `E_IO`/`E_VALIDATION`; verify no artifact writes)
+ - [x] Schema validation smoke check:
 ```bash
 export REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
 export CONFIG_DIR="${CONFIG_DIR:-${REPO_ROOT}/../config}"
@@ -489,7 +489,7 @@ assert payload.get('schema') == 'run_graph_op.v1'
 print('schema:', payload.get('schema'))
 PY
 ```
- - [ ] Schema validation with evolution timeout path:
+ - [x] Schema validation with evolution timeout path:
 ```bash
 export REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
 export CONFIG_DIR="${CONFIG_DIR:-${REPO_ROOT}/../config}"
@@ -634,16 +634,16 @@ erDiagram
 - Mermaid ERD syntax and direction semantics.
 
 ## Acceptance Criteria
-- [ ] `/graph visual` generates `graph-visual.md` with Mermaid graph + summary metrics.
-- [ ] `/graph communities` generates `graph-communities.json` and `graph-communities.md` with split/merge recommendations.
-- [ ] `/graph evolution` generates `graph-evolution.md` from `graph-metrics.ndjson`.
-- [ ] All artifacts are written under `${VAULT_ROOT}/ops/health/graph/` only.
-- [ ] `run_graph_op.sh` returns documented exit codes (`0`, `1`, `2`, `3`, `4`, `130`) and maps to machine-readable `run_graph_op.v1` `error.code` fields.
-- [ ] `run_graph_op.sh --dry-run` never writes artifacts and prints planned actions.
-- [ ] `run_graph_op.sh --json` emits stable schema fields for stdout parsing by automation.
-- [ ] Existing `/graph` operations remain functional and unchanged.
-- [ ] Empty vault and malformed notes return graceful, non-crashing results.
-- [ ] No new runtime dependencies are introduced.
+- [x] `/graph visual` generates `graph-visual.md` with Mermaid graph + summary metrics.
+- [x] `/graph communities` generates `graph-communities.json` and `graph-communities.md` with split/merge recommendations.
+- [x] `/graph evolution` generates `graph-evolution.md` from `graph-metrics.ndjson`.
+- [x] All artifacts are written under `${VAULT_ROOT}/ops/health/graph/` only.
+- [x] `run_graph_op.sh` returns documented exit codes (`0`, `1`, `2`, `3`, `4`, `130`) and maps to machine-readable `run_graph_op.v1` `error.code` fields.
+- [x] `run_graph_op.sh --dry-run` never writes artifacts and prints planned actions.
+- [x] `run_graph_op.sh --json` emits stable schema fields for stdout parsing by automation.
+- [x] Existing `/graph` operations remain functional and unchanged.
+- [x] Empty vault and malformed notes return graceful, non-crashing results.
+- [x] No new runtime dependencies are introduced.
 
 
 ### Research Insights
