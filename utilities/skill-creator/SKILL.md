@@ -100,8 +100,9 @@ Depending on the request, produce one or more of:
 - For graph-mode work: updated `docs/skill-graphs/*` contracts and any coupled runtime artifact/schema updates.
 - A packaged `.skill` file (optional).
 - Decision-feedback instrumentation in created/updated skills:
-  - Include the `decision-feedback-protocol:v1` block in `SKILL.md`.
+  - Include the `decision-feedback-protocol:v2` block in `SKILL.md`.
   - Ensure AskQuestion parity (`request_user_input`) is explicitly required for non-trivial outcomes.
+  - Ensure feedback records can be written with `scripts/record_skill_feedback.py` including subject tags.
 
 ## Response format (required)
 
@@ -241,7 +242,7 @@ Body:
 - Keep the workflow minimal and reliable.
 - Link to `references/` instead of pasting long docs (progressive disclosure). 
 - Store templates/examples in the skill bundle, not in prompts. 
-- Include the decision feedback protocol block (`decision-feedback-protocol:v1`) unless a stronger repo-specific equivalent already exists.
+- Include the decision feedback protocol block (`decision-feedback-protocol:v2`) unless a stronger repo-specific equivalent already exists.
 
 ### 5) Add resources (as needed)
 
@@ -327,6 +328,8 @@ Required for new skills:
 
 Optional deep checks:
 - `~/.venvs/pyyaml/bin/python scripts/run_skill_evals.py <path/to/skill-folder> --dual-run --capture-jsonl`
+- `python3 scripts/record_skill_feedback.py --skill-path <path/to/skill-folder>/SKILL.md --decision accepted --outcome good --confidence high --notes "validation sample" --workspace <workspace>`
+- `python3 scripts/skill_subject_scoreboard.py --workspace <workspace> --format table`
 
 ## Examples
 
@@ -488,9 +491,10 @@ Use this checklist before drafting or revising a recursive skill runbook.
 - Push boundaries with practical alternatives when simple recipes fail.
 - Enable outcomes-oriented problem solving.
 
-<!-- decision-feedback-protocol:v1 -->
+<!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**
 - For non-trivial outcomes, collect user feedback via AskQuestion parity (`request_user_input`) before closing the run.
 - Capture: `decision` (`accepted|partial|rejected|deferred`), `outcome` (`good|neutral|bad|unknown`), and `confidence` (`high|medium|low`).
-- If available, persist with `ops/scripts/graph/record-feedback.sh`; otherwise append a JSONL record to `ops/metrics/skill-feedback/decision-feedback.jsonl` in the active workspace.
+- Persist with: `python3 utilities/skill-creator/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
+- The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
 <!-- /decision-feedback-protocol -->

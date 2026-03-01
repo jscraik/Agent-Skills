@@ -210,9 +210,10 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - `visual-explainer` — Generate beautiful, self-contained HTML pages that visually explain systems, code changes, plans, and data. Use when the user asks for a diagram, architecture overview, diff review, plan review, project recap, comparison table, or any visual explanation of technical concepts. Also use proactively when you are about to render a complex ASCII table (4+ rows or 3+ columns) — present it as a styled HTML page instead.
 - `writing-plans` — Create execution-ready implementation plans with task sequencing and checks. Use when requirements are known but implementation is multi-step.
 
-<!-- decision-feedback-protocol:v1 -->
+<!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**
 - For non-trivial outcomes, collect user feedback via AskQuestion parity (`request_user_input`) before closing the run.
 - Capture: `decision` (`accepted|partial|rejected|deferred`), `outcome` (`good|neutral|bad|unknown`), and `confidence` (`high|medium|low`).
-- If available, persist with `ops/scripts/graph/record-feedback.sh`; otherwise append a JSONL record to `ops/metrics/skill-feedback/decision-feedback.jsonl` in the active workspace.
+- Persist with: `python3 utilities/skill-creator/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
+- The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
 <!-- /decision-feedback-protocol -->

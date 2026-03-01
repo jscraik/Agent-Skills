@@ -370,9 +370,10 @@ The orphan and MOC coverage checks may be slow for large vaults. If {vocabulary.
 
 macOS uses `date -v-7d`, Linux uses `date -d '7 days ago'`. The script tries both. If neither works, report "?" for growth metrics instead of failing.
 
-<!-- decision-feedback-protocol:v1 -->
+<!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**
 - For non-trivial outcomes, collect user feedback via AskQuestion parity (`request_user_input`) before closing the run.
 - Capture: `decision` (`accepted|partial|rejected|deferred`), `outcome` (`good|neutral|bad|unknown`), and `confidence` (`high|medium|low`).
-- If available, persist with `ops/scripts/graph/record-feedback.sh`; otherwise append a JSONL record to `ops/metrics/skill-feedback/decision-feedback.jsonl` in the active workspace.
+- Persist with: `python3 utilities/skill-creator/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
+- The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
 <!-- /decision-feedback-protocol -->

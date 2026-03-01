@@ -57,8 +57,9 @@ knowledge_graph_profile: references/task-profile.json
 - An OpenClaw-style readiness + security report (critical/warn/info) for each installed skill.
 - A reminder to restart Codex to pick up new skills.
 - Post-install decision-feedback readiness check:
-  - Verify installed `SKILL.md` contains `decision-feedback-protocol:v1` (or a stronger equivalent).
+  - Verify installed `SKILL.md` contains `decision-feedback-protocol:v2` (or a stronger equivalent).
   - If missing, patch it and report that AskQuestion parity feedback capture was enabled.
+  - Verify the workspace can run subject analytics via `python3 utilities/skill-creator/scripts/skill_subject_scoreboard.py --workspace <workspace>`.
 
 ## Constraints / Safety
 - Redact secrets/PII by default.
@@ -161,7 +162,7 @@ Use judgment, adapt to context, and push boundaries when appropriate.
   - `~/.venvs/pyyaml/bin/python utilities/skill-creator/scripts/run_skill_evals.py <installed-skill-dir>`
 - If critical findings exist, stop and ask for approval before enabling/using the skill.
 - Verify decision-feedback protocol presence in each installed `SKILL.md`:
-  - `rg -n \"decision-feedback-protocol:v1|Decision Quality Feedback|request_user_input\" <installed-skill-dir>/SKILL.md`
+  - `rg -n \"decision-feedback-protocol:v2|Decision Quality Feedback|request_user_input\" <installed-skill-dir>/SKILL.md`
 ## Procedure
 1) Clarify scope and inputs.
 2) Execute the core workflow.
@@ -203,9 +204,10 @@ Use judgment, adapt to context, and push boundaries when appropriate.
 - Push boundaries with practical alternatives when simple recipes fail.
 - Enable outcomes-oriented problem solving.
 
-<!-- decision-feedback-protocol:v1 -->
+<!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**
 - For non-trivial outcomes, collect user feedback via AskQuestion parity (`request_user_input`) before closing the run.
 - Capture: `decision` (`accepted|partial|rejected|deferred`), `outcome` (`good|neutral|bad|unknown`), and `confidence` (`high|medium|low`).
-- If available, persist with `ops/scripts/graph/record-feedback.sh`; otherwise append a JSONL record to `ops/metrics/skill-feedback/decision-feedback.jsonl` in the active workspace.
+- Persist with: `python3 utilities/skill-creator/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
+- The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
 <!-- /decision-feedback-protocol -->
