@@ -2,7 +2,7 @@
   "run_id": "run_001",
   "scope_skill": "interview-kernel",
   "started_at": "2026-02-26T10:00:00Z",
-  "terminal_status": "failed",
+  "terminal_status": "passed",
   "stop_reason": "evaluator_conflict",
   "trigger_source": "nightly_genome_loop",
   "confusion_signals": {
