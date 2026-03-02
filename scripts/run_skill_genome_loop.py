@@ -41,6 +41,7 @@ SCHEMA_VERSION = "1.0"
 
 # Control file paths
 KILL_SWITCH_PATH = CONTROLS_ROOT / "kill-switch.txt"
+ROLLBACK_REQUIRED_PATH = CONTROLS_ROOT / "rollback-required.txt"
 ROLLOUT_MODE_PATH = CONTROLS_ROOT / "rollout-mode.txt"
 
 # Allowlist fields for candidate emission (privacy-first)
@@ -122,7 +123,25 @@ def read_rollout_mode(path: Path, default: str = "observe_only") -> str:
 
 
 def is_kill_switch_activated(path: Path) -> bool:
-    """Check if kill-switch control file exists."""
+    """Check if kill-switch control file content indicates active state.
+
+    P1 FIX: Parse file content instead of just checking existence.
+    Bootstrap creates the file with 'off' by default, so we must
+    check the content to determine if the switch is actually active.
+    """
+    if not path.exists():
+        return False
+    content = path.read_text(encoding="utf-8").strip().lower()
+    # Only truthy values activate the kill-switch
+    return content in {"on", "true", "1", "yes", "active"}
+
+
+def is_rollback_required(path: Path) -> bool:
+    """Check if rollback-required control file exists.
+
+    P2 FIX: Enforce rollback-required control before candidate emission.
+    Rollback takes precedence over rollout-mode in the control hierarchy.
+    """
     return path.exists()
 
 
@@ -459,6 +478,11 @@ def main() -> int:
     # P1 FIX: Check kill-switch FIRST
     if is_kill_switch_activated(KILL_SWITCH_PATH):
         log("Kill-switch activated; aborting candidate generation")
+        return 1
+
+    # P2 FIX: Check rollback-required (control hierarchy: rollback > rollout)
+    if is_rollback_required(ROLLBACK_REQUIRED_PATH):
+        log("Rollback required; blocking candidate emission")
         return 1
 
     # P1 FIX: Check rollout mode
