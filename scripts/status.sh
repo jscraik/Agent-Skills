@@ -19,7 +19,8 @@ pending_count=$(wc -l < artifacts/skill-graphs/telemetry/pending-candidates.json
 echo "📝 Pending candidates: $pending_count"
 
 # Kill switch
-if [ -f artifacts/skill-graphs/controls/kill-switch.txt ]; then
+kill_switch=$(cat artifacts/skill-graphs/controls/kill-switch.txt 2>/dev/null || echo "")
+if [ "$kill_switch" = "on" ]; then
     echo "🚨 Kill switch: ACTIVE"
 else
     echo "✅ Kill switch: inactive"
