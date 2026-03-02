@@ -794,7 +794,7 @@ candidates:
 
 ### Origin
 
-- **Brainstorm document:** [docs/brainstorms/2026-03-01-skill-genome-loop-brainstorm.md](docs/brainstorms/2026-03-01-skill-genome-loop-brainstorm.md)
+- **Brainstorm document:** [docs/brainstorms/2026-03-01-skill-genome-loop-brainstorm.md](/docs/brainstorms/2026-03-01-skill-genome-loop-brainstorm.md)
   - Carried forward: routing-first KPI, draft-PR copilot choice, confidence-gated proposals, strict non-goals around autonomous merge/apply.
 
 ### Internal References
