@@ -384,3 +384,65 @@ For nightly cron execution:
 - **Plan**: `docs/plans/2026-03-02-feat-skill-genome-loop-draft-pr-copilot-plan.md`
 - **Brainstorm**: `docs/brainstorms/2026-03-01-skill-genome-loop-brainstorm.md`
 - **Kill-Switch Runbook**: `docs/skill-graphs/runbooks/kill-switch-and-escalation.md`
+
+---
+
+## Cron Job Setup
+
+### Installation
+
+```bash
+# Install the cron job (runs daily at 4:00 AM UTC)
+./scripts/install_cron.sh
+
+# Verify installation
+crontab -l | grep genome
+
+# View logs
+tail -f logs/genome-loop.log
+```
+
+### Manual Cron Setup
+
+If you prefer manual installation:
+
+```bash
+# Add to crontab
+crontab -e
+
+# Add this line:
+0 4 * * * /Users/jamiecraik/dev/agent-skills/scripts/cron_genome_loop.sh >> /Users/jamiecraik/dev/agent-skills/logs/genome-loop.log 2>&1
+```
+
+### Cron Job Features
+
+- **Schedule**: Daily at 4:00 AM UTC
+- **Logging**: All output to `logs/genome-loop.log`
+- **Notifications**: Pending candidate count logged (Slack hook optional)
+- **Error handling**: Non-zero exit codes logged for debugging
+
+### Log Rotation
+
+Add logrotate config:
+
+```bash
+# /etc/logrotate.d/agent-skills-genome
+/Users/jamiecraik/dev/agent-skills/logs/genome-loop.log {
+    daily
+    rotate 7
+    compress
+    missingok
+    notifempty
+}
+```
+
+### Remove Cron Job
+
+```bash
+# Edit crontab
+crontab -e
+
+# Delete the genome-loop line
+# OR remove the file:
+rm scripts/cron_genome_loop.sh
+```
