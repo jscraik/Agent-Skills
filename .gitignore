@@ -65,3 +65,8 @@ FORJAMIE.md
 
 
 environment.toml
+
+# Skill Genome Loop runtime artifacts
+artifacts/skill-graphs/telemetry/candidates.jsonl
+artifacts/skill-graphs/telemetry/skill-genome-processing-stats.json
+artifacts/skill-graphs/telemetry/.genome-watermark
