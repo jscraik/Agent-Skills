@@ -1,8 +1,8 @@
 ---
 name: interview-kernel
-description: Core interview engine enforcing strict discovery/decision gating with
-  externalized state, decisions, assumptions, and an approval gate. Use when building
-  interview wrapper skills.
+description: INTERNAL ENGINE - Core interview engine for wrapper skills. Do NOT invoke
+  directly. Use interview-me, deep-interview, architecture-interview, bug-interview,
+  or pm-interview instead.
 knowledge_graph_profile: references/task-profile.json
 ---
 
@@ -29,10 +29,11 @@ A reusable “engine” for interviews. Wrappers (PM / Architecture / Bug / Deep
 
 ## Scope and triggers
 
-- Use as a shared kernel for any interview wrapper skill.
-- Use when you need strict interviewing with approval gating.
-- Use when assumptions and tradeoffs must be made explicit before work begins.
-- Use when the user’s working memory is limited and you must keep interaction **single-threaded**.
+**This is an internal engine - do not invoke directly.**
+
+- Use ONLY as a shared kernel for interview wrapper skills (interview-me, deep-interview, architecture-interview, bug-interview, pm-interview).
+- End users should invoke the wrapper skills, not this kernel.
+- This skill should only appear in skill discovery when building new interview wrappers.
 
 ## Anti-patterns (do not do)
 
