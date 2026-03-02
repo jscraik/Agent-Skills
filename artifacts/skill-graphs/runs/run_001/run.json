@@ -1,12 +1,12 @@
 {
   "run_id": "run_001",
-  "scope_skill": "interview-kernel",
+  "scope_skill": "interview-me",
   "started_at": "2026-02-26T10:00:00Z",
   "terminal_status": "passed",
-  "stop_reason": "evaluator_conflict",
-  "trigger_source": "nightly_genome_loop",
+  "stop_reason": "approval_granted",
+  "trigger_source": "user_request",
   "confusion_signals": {
-    "routing_mismatch": true,
-    "low_confidence": 0.45
+    "routing_mismatch": false,
+    "low_confidence": null
   }
 }
