@@ -846,19 +846,19 @@ diff -q /tmp/graph.json /tmp/graph2.json
 ## Documentation-backed behavior updates
 
 ### Mermaid syntax references (retrieved)
-- Source: [Mermaid getting-started](https://github.com/mermaid-js/mermaid/blob/develop/docs/intro/getting-started.md)  
+- Source: [Mermaid getting-started](https://github.com/mermaid-js/mermaid/blob/develop/docs/intro/getting-started.md)
   Use fenced Mermaid blocks for Markdown rendering:
   ```mermaid
   flowchart LR
     A --> B
   ```
-- Source: [Mermaid ERD syntax](https://github.com/mermaid-js/mermaid/blob/develop/packages/mermaid/src/docs/syntax/entityRelationshipDiagram.md)  
+- Source: [Mermaid ERD syntax](https://github.com/mermaid-js/mermaid/blob/develop/packages/mermaid/src/docs/syntax/entityRelationshipDiagram.md)
   Use explicit cardinality operators (`||--o{`, `}|..|{`) for relationship edges.
-- Source: [Mermaid flowchart direction](https://github.com/mermaid-js/mermaid/blob/develop/packages/mermaid/src/docs/syntax/flowchart.md)  
+- Source: [Mermaid flowchart direction](https://github.com/mermaid-js/mermaid/blob/develop/packages/mermaid/src/docs/syntax/flowchart.md)
   Direction tokens include `TB/TD`, `BT`, `RL`, and `LR`.
 
 ### Python stdlib collections references (retrieved)
-- Source: [Python 3.13 `collections`](https://docs.python.org/3.13/library/collections)  
+- Source: [Python 3.13 `collections`](https://docs.python.org/3.13/library/collections)
   ```python
   from collections import defaultdict, deque, Counter
   adjacency = defaultdict(set)
@@ -866,7 +866,7 @@ diff -q /tmp/graph.json /tmp/graph2.json
   degree = Counter()
   degree["A"] += 1
   ```
-- Source: [Python 3.13 `dict` order guarantees](https://docs.python.org/3.13/library/stdtypes)  
+- Source: [Python 3.13 `dict` order guarantees](https://docs.python.org/3.13/library/stdtypes)
   Dict insertion order is guaranteed, but sorted emission is still needed for deterministic diffs across runs.
 
 ### Recommendations to apply in this plan

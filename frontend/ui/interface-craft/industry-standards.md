@@ -20,7 +20,7 @@ Use when users ask:
 
 ## Core Principle
 
-Industry standard is the **floor**, not the goal.  
+Industry standard is the **floor**, not the goal.
 Meet default platform/category expectations first, then innovate.
 
 ## Workflow

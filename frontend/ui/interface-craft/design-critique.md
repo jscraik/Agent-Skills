@@ -18,7 +18,7 @@ A systematic critique workflow for interface quality. Start with noticing, then 
 
 Trigger on: `critique`, `review`, `feedback`, `audit`, `polish`, `redesign`, `what feels off`, or any screenshot/component/page quality review request.
 
-Use this for **improving an existing interface**.  
+Use this for **improving an existing interface**.
 If the user needs fundamentally different concepts first, run [conceptual-range.md](conceptual-range.md) before deep critique.
 
 ## Input Modes

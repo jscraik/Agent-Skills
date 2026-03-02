@@ -1,10 +1,10 @@
 # PRD (Mini): <Product / Feature Name>
 
-**Owner:** <name>  
-**Status:** Draft | In Review | Approved  
-**Last updated:** YYYY-MM-DD  
-**Stakeholders:** <names/roles>  
-**Links:** Repo/Issue | Design file | Tech Spec | Analytics dashboard | Support threads  
+**Owner:** <name>
+**Status:** Draft | In Review | Approved
+**Last updated:** YYYY-MM-DD
+**Stakeholders:** <names/roles>
+**Links:** Repo/Issue | Design file | Tech Spec | Analytics dashboard | Support threads
 
 > Rule: If a section is not applicable, write `N/A` and explain why in 1–2 lines.
 > Evidence rule: Every paragraph must end with an `Evidence:` line or `Evidence gap:` line. Use file paths/links; summarize all gaps and sources in the Evidence sections.
@@ -49,34 +49,34 @@
 | <Name> | <Role> | <where/when> | <goal phrases> | <pain phrases> |
 | <Name> | <Role> | <where/when> | <goal phrases> | <pain phrases> |
 
-**Primary:** <persona>  
-**Secondary:** <persona or N/A>  
+**Primary:** <persona>
+**Secondary:** <persona or N/A>
 
 ---
 
 ## 3) User Stories (MVP)
 > Format must be: **As a [persona], I want [action] so that [benefit].**
 
-1) **Story:** As a <persona>, I want <action> so that <benefit>.  
+1) **Story:** As a <persona>, I want <action> so that <benefit>.
    **Acceptance criteria:**
    - [ ] <observable behavior>
    - [ ] <observable behavior>
    **Validation method:** <tests/lint/build/manual check; prefer repo scripts>
-   **Priority:** Must | Should | Could  
+   **Priority:** Must | Should | Could
 
-2) **Story:** As a <persona>, I want <action> so that <benefit>.  
+2) **Story:** As a <persona>, I want <action> so that <benefit>.
    **Acceptance criteria:**
    - [ ] <observable behavior>
    - [ ] <observable behavior>
    **Validation method:** <tests/lint/build/manual check; prefer repo scripts>
-   **Priority:** Must | Should | Could  
+   **Priority:** Must | Should | Could
 
-3) **Story:** As a <persona>, I want <action> so that <benefit>.  
+3) **Story:** As a <persona>, I want <action> so that <benefit>.
    **Acceptance criteria:**
    - [ ] <observable behavior>
    - [ ] <observable behavior>
    **Validation method:** <tests/lint/build/manual check; prefer repo scripts>
-   **Priority:** Must | Should | Could  
+   **Priority:** Must | Should | Could
 
 ---
 
@@ -137,7 +137,7 @@
 | <Metric> | <#/%> | <how measured> | <event/dashboard> |
 | <Metric> | <#/%> | <how measured> | <event/dashboard> |
 
-**Measurement window:** <e.g., 7/30 days post-launch>  
+**Measurement window:** <e.g., 7/30 days post-launch>
 
 ### Guardrails (required)
 - <metric that must not regress>
@@ -186,14 +186,14 @@
 ---
 
 ## 14) Risks & Mitigations
-- Risk: <risk>  
-  - Likelihood: Low/Med/High  
-  - Impact: Low/Med/High  
+- Risk: <risk>
+  - Likelihood: Low/Med/High
+  - Impact: Low/Med/High
   - Mitigation: <mitigation/fallback>
 
-- Risk: <risk>  
-  - Likelihood: Low/Med/High  
-  - Impact: Low/Med/High  
+- Risk: <risk>
+  - Likelihood: Low/Med/High
+  - Impact: Low/Med/High
   - Mitigation: <mitigation/fallback>
 
 ---

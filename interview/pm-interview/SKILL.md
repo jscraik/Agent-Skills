@@ -98,7 +98,7 @@ Ask in order, skipping anything already answered by context.
 - Name one thing we will NOT do in this iteration.
 
 10) **Tradeoff + rollout posture (DECIDE)**
-- Optimize for: fastest ship vs best UX polish vs most future-proof  
+- Optimize for: fastest ship vs best UX polish vs most future-proof
 - Release: everyone immediately vs staged rollout vs behind a flag
 
 ## PM synthesis add-on (append after Kernel synthesis)

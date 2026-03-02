@@ -55,9 +55,9 @@ When designing a CLI, produce a compact spec the user can implement:
 
 ## Procedure
 
-1) Read `references/cli-guidelines.md` (and `references/agentic-cli-design.md` when relevant).  
-2) Ask the minimum questions in **Clarify (fast)**.  
-3) Produce the CLI spec under **## Outputs** (command tree, flags table, semantics, exit codes).  
+1) Read `references/cli-guidelines.md` (and `references/agentic-cli-design.md` when relevant).
+2) Ask the minimum questions in **Clarify (fast)**.
+3) Produce the CLI spec under **## Outputs** (command tree, flags table, semantics, exit codes).
 4) Add top failure modes + safety defaults (`--dry-run`, confirmations, non-interactive mode).
 
 ## Validation

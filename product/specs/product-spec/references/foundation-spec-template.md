@@ -1,11 +1,11 @@
 # Foundation Spec Template
 
-> Use for `.spec/foundation-YYYY-MM-DD-<slug>.md`.  
+> Use for `.spec/foundation-YYYY-MM-DD-<slug>.md`.
 > Every paragraph ends with `Evidence:` or `Evidence gap:`.
 
 ## 0) PRD Summary
 
-One-sentence summary.  
+One-sentence summary.
 Evidence:
 
 ## 1) Problem & Job (JTBD-lite)
@@ -49,8 +49,8 @@ Evidence:
 
 ## 5) User Stories (Top 5–10)
 
-- As a ..., I want ..., so that ...  
-  Acceptance Criteria: ...  
+- As a ..., I want ..., so that ...
+  Acceptance Criteria: ...
   Evidence:
 
 ## 6) Assumptions
@@ -61,8 +61,8 @@ Evidence:
 
 ## 7) Risks & Mitigations (Top 3–5)
 
-- Risk: ...  
-  Mitigation: ...  
+- Risk: ...
+  Mitigation: ...
   Evidence:
 
 ## 8) Positioning Constraints (NEW / EASY / SAFE / BIG)

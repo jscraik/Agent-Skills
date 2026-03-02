@@ -37,7 +37,7 @@ export function AuthLayout() {
           <TabsTrigger value="login">Login</TabsTrigger>
           <TabsTrigger value="register">Register</TabsTrigger>
         </TabsList>
-        
+
         <TabsContent value="login">
           <Card>
             <CardHeader>
@@ -67,8 +67,8 @@ export function AuthLayout() {
                 </div>
               </CardContent>
               <CardFooter className="flex flex-col space-y-4">
-                <Button 
-                  type="submit" 
+                <Button
+                  type="submit"
                   className="w-full"
                   disabled={isLoading}
                 >
@@ -85,7 +85,7 @@ export function AuthLayout() {
             </form>
           </Card>
         </TabsContent>
-        
+
         <TabsContent value="register">
           <Card>
             <CardHeader>
@@ -131,8 +131,8 @@ export function AuthLayout() {
                 </div>
               </CardContent>
               <CardFooter>
-                <Button 
-                  type="submit" 
+                <Button
+                  type="submit"
                   className="w-full"
                   disabled={isLoading}
                 >
@@ -149,7 +149,7 @@ export function AuthLayout() {
 
 /**
  * Key Patterns Demonstrated:
- * 
+ *
  * 1. Layout Composition: Centered authentication card with full-height viewport
  * 2. Card Usage: Structured content with header, body, and footer
  * 3. Tabs: Switch between login and register forms
@@ -157,17 +157,17 @@ export function AuthLayout() {
  * 5. Loading States: Button disabled state during form submission
  * 6. Responsive Design: Mobile-friendly with max-width constraint
  * 7. Tailwind Utilities: Using spacing, flexbox, and grid utilities
- * 
+ *
  * Design Choices:
  * - Minimal, clean interface focusing on the task at hand
  * - Proper semantic HTML with form elements
  * - Accessible labels and inputs
  * - Clear visual hierarchy with card components
  * - Loading feedback for better UX
- * 
+ *
  * Required Dependencies:
  * None beyond React and shadcn/ui components
- * 
+ *
  * Installation:
  * npx shadcn@latest add card
  * npx shadcn@latest add input

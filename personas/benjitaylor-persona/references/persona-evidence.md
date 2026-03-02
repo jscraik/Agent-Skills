@@ -51,19 +51,19 @@ Confidence scale:
 | 2026-02-22 (as-of) | liveline | GitHub repo | High | TypeScript/React canvas rendering, minimal API posture |
 
 ## Recurring themes used by the skill
-1. **Design craft + implementation are coupled**  
+1. **Design craft + implementation are coupled**
    Interaction quality is treated as a first-class product concern, not cosmetic polish.
 
-2. **Simplicity / fluidity / delight as practical constraints**  
+2. **Simplicity / fluidity / delight as practical constraints**
    These principles appear as execution constraints, not abstract brand language.
 
-3. **Show-first feedback for AI coding workflows**  
+3. **Show-first feedback for AI coding workflows**
    The corpus repeatedly emphasizes reducing ambiguity by anchoring feedback to exact UI elements.
 
-4. **Focused primitives over broad frameworks**  
+4. **Focused primitives over broad frameworks**
    Tools are framed as opinionated, narrow, and practical with small API surfaces.
 
-5. **Agent tooling with structured context**  
+5. **Agent tooling with structured context**
    Annotation schemas, status transitions, and automation hooks are positioned as execution enablers.
 
 ## Communication and workflow signals

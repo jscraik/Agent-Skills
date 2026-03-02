@@ -16,7 +16,7 @@ How to design individual notes for maximum composability and retrieval quality. 
 - [[each module must be describable in one sentence under 200 characters or it does too many things]] -- The single-sentence test operationalizes Unix "do one thing" as a measurable constraint — if the description exceeds 200
 - [[elaborative encoding is the quality gate for new notes]] -- Zettelkasten works because connecting new information to existing knowledge — not just filing it — creates encoding dept
 - [[enforcing atomicity can create paralysis when ideas resist decomposition]] -- The cognitive effort of splitting complex arguments into single-concept notes can exceed productive friction, becoming s
-- [[external memory shapes cognition more than base model]] -- retrieval architecture shapes what enters the context window and therefore what the agent thinks — memory structure has 
+- [[external memory shapes cognition more than base model]] -- retrieval architecture shapes what enters the context window and therefore what the agent thinks — memory structure has
 - [[forced engagement produces weak connections]] -- Waiting for natural fits where you have genuine substance to contribute builds better connections than engaging for acti
 - [[guided notes might outperform post-hoc structuring for high-volume capture]] -- Research suggests skeleton outlines provided before capture reduce cognitive load more than structuring afterward, chall
 - [[logic column pattern separates reasoning from procedure]] -- Dual-column structure where right side shows steps and left side shows the principle or rule applied at each step — agen
@@ -29,7 +29,7 @@ How to design individual notes for maximum composability and retrieval quality. 
 - [[schema field names are the only domain specific element in the universal note pattern]] -- The five-component note architecture (prose-title, YAML frontmatter, body, wiki links, topics footer) is domain-invarian
 - [[schema fields should use domain-native vocabulary not abstract terminology]] -- When schema field names match how practitioners naturally think — "triggers" not "antecedent_conditions" — adoption succ
 - [[source attribution enables tracing claims to foundations]] -- Distinguishes original thinking from consumed ideas, creating a verification graph where any claim can follow its eviden
-- [[structure without processing provides no value]] -- The "Lazy Cornell" anti-pattern shows that drawing lines without doing the work produces no benefit over linear notes — 
+- [[structure without processing provides no value]] -- The "Lazy Cornell" anti-pattern shows that drawing lines without doing the work produces no benefit over linear notes —
 - [[summary coherence tests composability before filing]] -- If a note cannot be summarized in 1-3 coherent sentences, it bundles multiple claims that should be split before leaving
 - [[the generation effect requires active transformation not just storage]] -- Moving files between folders or tagging content is not processing — agents must synthesize descriptions, connections, or
 - [[the system is the argument]] -- Philosophy with proof of work — for agents, this is verifiable constraint: the system cannot claim what it does not prac
@@ -40,7 +40,7 @@ How to design individual notes for maximum composability and retrieval quality. 
 - [[you operate a system that takes notes]] -- the shift from note-taking to system operation reframes the human role from creator to curator — judgment over mechanics
 
 ### Guidance
-- [[design MOCs as attention management devices with lifecycle governance]] -- MOC best practices for derived knowledge systems — hierarchy patterns, lifecycle management, and health metrics adapted 
+- [[design MOCs as attention management devices with lifecycle governance]] -- MOC best practices for derived knowledge systems — hierarchy patterns, lifecycle management, and health metrics adapted
 
 ## Tensions
 

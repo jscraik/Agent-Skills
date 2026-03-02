@@ -1,11 +1,11 @@
 # Build Plan Template
 
-> Use for `.spec/build-plan-YYYY-MM-DD-<slug>.md`.  
+> Use for `.spec/build-plan-YYYY-MM-DD-<slug>.md`.
 > Every paragraph ends with `Evidence:` or `Evidence gap:`.
 
 ## 0) Build Plan Summary
 
-One-sentence execution summary.  
+One-sentence execution summary.
 Evidence:
 
 ## 1) Outcome → Opportunities → Solution
@@ -19,8 +19,8 @@ Evidence:
 
 ## 2) Key Assumptions & Risks (Top 3–5)
 
-- Assumption/Risk: ...  
-  Mitigation: ...  
+- Assumption/Risk: ...
+  Mitigation: ...
   Evidence:
 
 ## 3) Epics (Sequenced)
@@ -34,9 +34,9 @@ Evidence:
 
 ### Epic: <Name>
 
-- Story: ...  
-  Acceptance Criteria: ...  
-  Validation: tests/lint/build/manual  
+- Story: ...
+  Acceptance Criteria: ...
+  Validation: tests/lint/build/manual
   Evidence:
 
 ## 5) Data + Contracts (Lightweight)

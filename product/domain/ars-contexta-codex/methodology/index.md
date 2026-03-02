@@ -29,4 +29,3 @@ The Ars Contexta research substrate. This vault contains the research claims, op
 ## Domain Examples
 
 - [[domain-compositions]] -- worked examples of derived vaults across 12 domains
-

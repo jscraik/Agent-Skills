@@ -1,11 +1,11 @@
 # ADR-XXXX: <Decision Title>
 
-**Status:** Proposed | Accepted | Deprecated | Superseded  
-**Date:** YYYY-MM-DD  
-**Owner:** <name>  
-**Deciders:** <names>  
-**Consulted:** <names>  
-**Informed:** <names>  
+**Status:** Proposed | Accepted | Deprecated | Superseded
+**Date:** YYYY-MM-DD
+**Owner:** <name>
+**Deciders:** <names>
+**Consulted:** <names>
+**Informed:** <names>
 **Related:** PRD | Tech Spec | Issue | RFC | Incident
 
 ---

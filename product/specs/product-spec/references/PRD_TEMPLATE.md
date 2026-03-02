@@ -1,10 +1,10 @@
 # PRD: <Product / Feature Name>
 
-**Owner:** <name>  
-**Status:** Draft | In Review | Approved  
-**Last updated:** YYYY-MM-DD  
-**Stakeholders:** <names/roles>  
-**Links:** Repo/Issue | Design file | Tech Spec | Analytics dashboard | Support threads  
+**Owner:** <name>
+**Status:** Draft | In Review | Approved
+**Last updated:** YYYY-MM-DD
+**Stakeholders:** <names/roles>
+**Links:** Repo/Issue | Design file | Tech Spec | Analytics dashboard | Support threads
 
 > Rule: If a section is not applicable, write `N/A` and explain why in 1–2 lines.
 > Evidence rule: Every paragraph must end with an `Evidence:` line or `Evidence gap:` line. Use file paths/links; summarize all gaps and sources in the Evidence sections.
@@ -70,8 +70,8 @@ List concrete evidence that the problem is real:
 | <Name> | <Role> | <When/where they use it> | <goal phrases> | <pain phrases> |
 | <Name> | <Role> | <When/where they use it> | <goal phrases> | <pain phrases> |
 
-**Primary user(s):** <persona(s)>  
-**Secondary user(s):** <persona(s) or N/A>  
+**Primary user(s):** <persona(s)>
+**Secondary user(s):** <persona(s) or N/A>
 
 ---
 
@@ -80,15 +80,15 @@ List concrete evidence that the problem is real:
 ### 4.1 Core user stories (MVP)
 > Format must be: **As a [persona], I want [action] so that [benefit].**
 
-1) **Story:** As a <persona>, I want <action> so that <benefit>.  
+1) **Story:** As a <persona>, I want <action> so that <benefit>.
    **Acceptance criteria:**
    - [ ] <observable behavior>
    - [ ] <observable behavior>
    **Validation method:** <tests/lint/build/manual check; prefer repo scripts>
-   **Priority:** Must | Should | Could  
+   **Priority:** Must | Should | Could
    **Notes:** <constraints, policy, permissions in product terms>
 
-2) **Story:** As a <persona>, I want <action> so that <benefit>.  
+2) **Story:** As a <persona>, I want <action> so that <benefit>.
    **Acceptance criteria:**
    - [ ] <observable behavior>
    - [ ] <observable behavior>
@@ -97,8 +97,8 @@ List concrete evidence that the problem is real:
 
 ### 4.2 Use case narratives (recommended)
 Write 1–3 short narratives:
-- **Use case A:** Trigger → Steps → Outcome  
-- **Use case B:** Trigger → Steps → Outcome  
+- **Use case A:** Trigger → Steps → Outcome
+- **Use case B:** Trigger → Steps → Outcome
 
 ---
 
@@ -170,7 +170,7 @@ Write 1–3 short narratives:
 | <Metric> | <#/%> | <how measured> | <event/dashboard> |
 | <Metric> | <#/%> | <how measured> | <event/dashboard> |
 
-**Measurement window:** <e.g., 7 days post-launch, 30 days post-launch>  
+**Measurement window:** <e.g., 7 days post-launch, 30 days post-launch>
 
 ### Guardrails (required)
 - <metric that must not regress>

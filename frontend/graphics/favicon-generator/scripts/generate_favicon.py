@@ -217,7 +217,7 @@ def render_lucide_icon(
 ) -> Image.Image | None:
     """
     Render a Lucide icon using cairosvg.
-    
+
     Args:
         icon_name: Name of the Lucide icon (e.g., 'package-plus', 'rocket')
         size: Output size in pixels
@@ -225,7 +225,7 @@ def render_lucide_icon(
         bg_color2: Gradient end color (hex), None for solid
         fg_color: Icon stroke color (hex)
         corner_radius: Corner radius as fraction (0-0.5)
-    
+
     Returns:
         PIL Image with the rendered icon, or None if cairosvg not available
     """
@@ -233,21 +233,21 @@ def render_lucide_icon(
         print(f"Warning: cairosvg not available. Install with: pip install cairosvg")
         print("         Also need native cairo: brew install cairo")
         return None
-    
+
     if icon_name not in LUCIDE_ICONS:
         print(f"Warning: Unknown icon '{icon_name}'. Available: {', '.join(LUCIDE_ICONS.keys())}")
         return None
-    
+
     # Build SVG with icon paths
     icon_paths = "\n    ".join(LUCIDE_ICONS[icon_name])
-    
+
     # Calculate scaling: Lucide uses 24x24 viewBox
     padding_ratio = 0.15
     icon_area = size * (1 - 2 * padding_ratio)
     scale = icon_area / 24
     offset = size * padding_ratio
     radius = int(size * corner_radius)
-    
+
     # Build gradient or solid fill
     if bg_color2 and bg_color2 != bg_color:
         gradient_def = f'''<defs>
@@ -260,17 +260,17 @@ def render_lucide_icon(
     else:
         gradient_def = ""
         fill = bg_color
-    
+
     svg_content = f'''<svg xmlns="http://www.w3.org/2000/svg" width="{size}" height="{size}" viewBox="0 0 {size} {size}">
   {gradient_def}
   <rect width="{size}" height="{size}" rx="{radius}" fill="{fill}"/>
-  <g transform="translate({offset}, {offset}) scale({scale})" 
-     stroke="{fg_color}" stroke-width="2" fill="none" 
+  <g transform="translate({offset}, {offset}) scale({scale})"
+     stroke="{fg_color}" stroke-width="2" fill="none"
      stroke-linecap="round" stroke-linejoin="round">
     {icon_paths}
   </g>
 </svg>'''
-    
+
     # Render SVG to PNG
     png_data = cairosvg.svg2png(bytestring=svg_content.encode('utf-8'))
     return Image.open(BytesIO(png_data)).convert('RGBA')
@@ -315,11 +315,11 @@ def adjust_brightness(
 def create_rounded_mask(size: int, radius: float) -> Image.Image:
     """
     Create an anti-aliased rounded rectangle mask.
-    
+
     Args:
         size: Image size in pixels
         radius: Corner radius as fraction of size (0-0.5)
-    
+
     Returns:
         Grayscale mask image
     """
@@ -348,13 +348,13 @@ def create_gradient(
 ) -> Image.Image:
     """
     Create a smooth gradient image.
-    
+
     Args:
         size: Image size in pixels
         color1: Starting color (RGB)
         color2: Ending color (RGB)
         direction: Gradient direction
-    
+
     Returns:
         RGBA gradient image
     """
@@ -379,11 +379,11 @@ def create_gradient(
 def add_noise(img: Image.Image, intensity: float) -> Image.Image:
     """
     Add subtle noise/grain texture to an image.
-    
+
     Args:
         img: Source image
         intensity: Noise intensity (0-1)
-    
+
     Returns:
         Image with noise applied
     """
@@ -415,13 +415,13 @@ def apply_drop_shadow(
 ) -> Image.Image:
     """
     Apply drop shadow effect to the image.
-    
+
     Args:
         img: Source image with transparency
         intensity: Shadow opacity (0-1)
         offset: Shadow offset as fraction of size
         blur: Shadow blur as fraction of size
-    
+
     Returns:
         Image with drop shadow
     """
@@ -452,11 +452,11 @@ def apply_drop_shadow(
 def apply_highlight(img: Image.Image, intensity: float) -> Image.Image:
     """
     Apply top highlight gradient effect.
-    
+
     Args:
         img: Source image
         intensity: Highlight opacity (0-1)
-    
+
     Returns:
         Image with highlight overlay
     """
@@ -487,12 +487,12 @@ def apply_highlight(img: Image.Image, intensity: float) -> Image.Image:
 def apply_inner_glow(img: Image.Image, intensity: float, mask: Image.Image) -> Image.Image:
     """
     Apply inner glow/ambient occlusion effect.
-    
+
     Args:
         img: Source image
         intensity: Glow intensity (0-1)
         mask: Rounded rectangle mask
-    
+
     Returns:
         Image with inner glow
     """
@@ -538,11 +538,11 @@ def apply_inner_glow(img: Image.Image, intensity: float, mask: Image.Image) -> I
 def get_system_font(size: int, bold: bool = True) -> ImageFont.FreeTypeFont | None:
     """
     Get a system font for text rendering.
-    
+
     Args:
         size: Font size in pixels
         bold: Whether to use bold weight
-    
+
     Returns:
         Font object or None if not found
     """
@@ -579,13 +579,13 @@ def render_letter(
 ) -> Image.Image:
     """
     Render a letter/monogram on the favicon.
-    
+
     Args:
         img: Background image
         letter: Letter(s) to render
         color: Text color (RGB)
         shadow_intensity: Text shadow intensity
-    
+
     Returns:
         Image with letter rendered
     """
@@ -610,7 +610,7 @@ def render_letter(
     if shadow_intensity > 0 and size >= 32:
         shadow_offset = max(1, int(size * 0.02))
         shadow_color = (0, 0, 0, int(255 * 0.3 * shadow_intensity))
-        
+
         # Create shadow layer
         shadow_layer = Image.new("RGBA", (size, size), (0, 0, 0, 0))
         shadow_draw = ImageDraw.Draw(shadow_layer)
@@ -620,7 +620,7 @@ def render_letter(
             font=font,
             fill=shadow_color,
         )
-        
+
         # Blur shadow
         shadow_layer = shadow_layer.filter(ImageFilter.GaussianBlur(size * 0.02))
         result = Image.alpha_composite(result, shadow_layer)
@@ -651,7 +651,7 @@ def generate_favicon(
 ) -> Image.Image:
     """
     Generate a professional-quality favicon.
-    
+
     Args:
         size: Output size in pixels
         letter: Letter/monogram to display
@@ -664,7 +664,7 @@ def generate_favicon(
         inner_glow_intensity: Inner glow intensity (0-1)
         noise_intensity: Noise/grain intensity (0-1)
         corner_radius: Corner radius as fraction (0-0.5)
-    
+
     Returns:
         Generated favicon as RGBA Image
     """
@@ -728,13 +728,13 @@ def generate_favicon_suite(
 ) -> list[str]:
     """
     Generate a complete favicon suite with all standard sizes.
-    
+
     Args:
         output_dir: Directory to save files
         letter: Letter/monogram to display
         style: Template name to use (overrides other settings)
         **kwargs: Override settings (bg_color, fg_color, etc.)
-    
+
     Returns:
         List of generated file paths
     """
@@ -805,13 +805,13 @@ def generate_lucide_favicon_suite(
 ) -> list[str]:
     """
     Generate a complete favicon suite using a Lucide icon.
-    
+
     Args:
         output_dir: Directory to save files
         icon_name: Lucide icon name (e.g., 'package-plus', 'rocket')
         style: Template name to use (overrides other settings)
         **kwargs: Override settings (bg_color, fg_color, etc.)
-    
+
     Returns:
         List of generated file paths
     """
@@ -874,7 +874,7 @@ def generate_lucide_favicon_suite(
 def create_lucide_svg_file(filepath: str, icon_name: str, settings: dict) -> None:
     """
     Create an SVG favicon file using Lucide icon paths.
-    
+
     Args:
         filepath: Output SVG file path
         icon_name: Lucide icon name
@@ -882,7 +882,7 @@ def create_lucide_svg_file(filepath: str, icon_name: str, settings: dict) -> Non
     """
     if icon_name not in LUCIDE_ICONS:
         return
-    
+
     bg_color = settings.get("bg_color", "#6366f1")
     bg_color2 = settings.get("bg_color2", bg_color)
     fg_color = settings.get("fg_color", "#ffffff")
@@ -890,7 +890,7 @@ def create_lucide_svg_file(filepath: str, icon_name: str, settings: dict) -> Non
 
     rx = corner_radius * 32
     icon_paths = "\n    ".join(LUCIDE_ICONS[icon_name])
-    
+
     # Scale: 24x24 Lucide → 32x32 favicon with padding
     # offset = 32 * 0.15 = 4.8, scale = (32 * 0.7) / 24 = 0.933
     scale = 0.933
@@ -911,8 +911,8 @@ def create_lucide_svg_file(filepath: str, icon_name: str, settings: dict) -> Non
     svg = f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
   {gradient_def}
   <rect width="32" height="32" rx="{rx:.1f}" fill="{fill}"/>
-  <g transform="translate({offset}, {offset}) scale({scale})" 
-     stroke="{fg_color}" stroke-width="2" fill="none" 
+  <g transform="translate({offset}, {offset}) scale({scale})"
+     stroke="{fg_color}" stroke-width="2" fill="none"
      stroke-linecap="round" stroke-linejoin="round">
     {icon_paths}
   </g>
@@ -925,7 +925,7 @@ def create_lucide_svg_file(filepath: str, icon_name: str, settings: dict) -> Non
 def create_ico_file(filepath: str, images: list[Image.Image]) -> None:
     """
     Create an ICO file from multiple PNG images.
-    
+
     Args:
         filepath: Output ICO file path
         images: List of PIL Images (should include 16x16 and 32x32)
@@ -979,7 +979,7 @@ def create_ico_file(filepath: str, images: list[Image.Image]) -> None:
 def create_svg_file(filepath: str, letter: str, settings: dict) -> None:
     """
     Create an SVG favicon file.
-    
+
     Args:
         filepath: Output SVG file path
         letter: Letter to display
@@ -1040,7 +1040,7 @@ Available icons: """ + ", ".join(LUCIDE_ICONS.keys()) + """
         "--letter", "-l", help="Letter or monogram to display"
     )
     parser.add_argument(
-        "--lucide", "-i", 
+        "--lucide", "-i",
         choices=list(LUCIDE_ICONS.keys()),
         help="Use a Lucide icon (requires cairosvg: pip install cairosvg)"
     )
@@ -1089,10 +1089,10 @@ Available icons: """ + ", ".join(LUCIDE_ICONS.keys()) + """
     # Validate: must have either --letter or --lucide
     if not args.letter and not args.lucide:
         args.letter = "A"  # Default
-    
+
     print(f"\n🎨 Pro Favicon Generator")
     print(f"{'=' * 40}")
-    
+
     if args.lucide:
         print(f"Lucide Icon: {args.lucide}")
         if not HAS_CAIROSVG:
@@ -1104,7 +1104,7 @@ Available icons: """ + ", ".join(LUCIDE_ICONS.keys()) + """
             args.lucide = None
     else:
         print(f"Letter: {args.letter.upper()}")
-    
+
     if args.style:
         print(f"Style: {args.style}")
     else:

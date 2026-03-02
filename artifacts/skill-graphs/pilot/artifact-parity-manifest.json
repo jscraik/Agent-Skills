@@ -1,24 +1,24 @@
 {
-  "generated_at": "2026-03-02T10:19:24Z",
+  "generated_at": "2026-03-02T12:59:41Z",
   "runs_root": "/Users/jamiecraik/dev/agent-skills/artifacts/skill-graphs/runs",
   "counts": {
     "compliant": 0,
-    "missing_mandatory": 47,
-    "legacy_partial": 0,
+    "missing_mandatory": 45,
+    "legacy_partial": 2,
     "empty": 0
   },
   "total_runs": 47,
   "run_status_counts": {
     "compliant": 0,
-    "missing_mandatory": 47,
-    "legacy_partial": 0,
+    "missing_mandatory": 45,
+    "legacy_partial": 2,
     "empty": 0
   },
   "compliance_rate": 0.0,
   "runs": [
     {
       "run_dir": "artifacts/skill-graphs/runs/run_001",
-      "status": "missing_mandatory",
+      "status": "legacy_partial",
       "required_files": [
         "capture_record.json",
         "events.jsonl",
@@ -30,28 +30,28 @@
       ],
       "missing_files": [
         "capture_record.json",
-        "events.jsonl",
         "evidence_packet.json",
         "iteration_journal.jsonl",
         "lesson_candidates.json",
         "promotion_decision.json"
       ],
       "present_files": [
+        "events.jsonl",
         "run.json"
       ],
       "promotion_state": null,
       "auto_capture_enabled": true,
-      "terminal_status": "failed",
-      "stop_reason": "evaluator_conflict",
+      "terminal_status": "passed",
+      "stop_reason": "approval_granted",
       "blocker_code": null,
       "notes": [
-        "terminal_status=failed",
-        "stop_reason=evaluator_conflict"
+        "terminal_status=passed",
+        "stop_reason=approval_granted"
       ]
     },
     {
       "run_dir": "artifacts/skill-graphs/runs/run_002",
-      "status": "missing_mandatory",
+      "status": "legacy_partial",
       "required_files": [
         "capture_record.json",
         "events.jsonl",
@@ -59,29 +59,27 @@
         "iteration_journal.jsonl",
         "lesson_candidates.json",
         "promotion_decision.json",
-        "run.json",
-        "run_blocker.json"
+        "run.json"
       ],
       "missing_files": [
         "capture_record.json",
-        "events.jsonl",
         "evidence_packet.json",
         "iteration_journal.jsonl",
         "lesson_candidates.json",
-        "promotion_decision.json",
-        "run_blocker.json"
+        "promotion_decision.json"
       ],
       "present_files": [
+        "events.jsonl",
         "run.json"
       ],
       "promotion_state": null,
       "auto_capture_enabled": true,
-      "terminal_status": "failed",
-      "stop_reason": "policy_failed",
+      "terminal_status": "passed",
+      "stop_reason": "approval_granted",
       "blocker_code": null,
       "notes": [
-        "terminal_status=failed",
-        "stop_reason=policy_failed"
+        "terminal_status=passed",
+        "stop_reason=approval_granted"
       ]
     },
     {

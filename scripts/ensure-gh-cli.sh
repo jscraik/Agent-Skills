@@ -53,7 +53,7 @@ manual_install_hint() {
   local os="${1:-unknown}"
   echo ""
   echo "[WARN] Automatic installation failed or package manager unavailable."
-  echo "You can install the GitHub CLI manually with one of the following:" 
+  echo "You can install the GitHub CLI manually with one of the following:"
   echo "- macOS: brew install gh"
   echo "- Ubuntu/Debian: sudo apt-get update && sudo apt-get install -y gh"
   echo "- Fedora/RHEL: sudo dnf install -y gh"

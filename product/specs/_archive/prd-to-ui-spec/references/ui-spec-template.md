@@ -5,7 +5,7 @@
 
 ## 0) UI Summary
 
-One-sentence UI intent.  
+One-sentence UI intent.
 Evidence:
 
 ## 1) Design Tokens (aStudio)

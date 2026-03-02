@@ -126,4 +126,3 @@ The agent is capable of extraordinary work in this domain. Use judgment, adapt t
 ## Scripts
 - `scripts/analyze_seo.py`
 - `scripts/generate_sitemap.py`
-

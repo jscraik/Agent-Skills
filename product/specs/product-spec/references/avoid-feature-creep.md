@@ -199,7 +199,7 @@ Before closing an AI coding session:
 At the end of each day working with AI assistants:
 ```
 1. Features completed today: [list]
-2. Scope additions today: [list]  
+2. Scope additions today: [list]
 3. Was each addition validated? [yes/no]
 4. Tomorrow's focus: [single item]
 ```
@@ -294,4 +294,3 @@ Every feature you don't build is:
 The best products aren't the ones with the most features. They're the ones that do the right things exceptionally well.
 
 *"Perfection is achieved not when there is nothing more to add, but when there is nothing left to take away."* - Antoine de Saint-Exupéry
-

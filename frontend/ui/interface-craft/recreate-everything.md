@@ -23,7 +23,7 @@ Best for skill building and technique discovery, not production-hardening.
 
 No shortcuts to learning: build it, fail, iterate, learn.
 
-Target a **single learning objective** per recreation attempt.  
+Target a **single learning objective** per recreation attempt.
 Do not over-polish if the objective is already met.
 
 ## Workflow

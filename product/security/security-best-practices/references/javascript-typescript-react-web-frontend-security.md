@@ -977,9 +977,9 @@ Sanitizer reference:
 [14]: https://legacy.reactjs.org/docs/introducing-jsx.html "Introducing JSX – React"
 [15]: https://www.w3.org/TR/trusted-types/ "Trusted Types"
 [16]: https://datatracker.ietf.org/doc/html/draft-ietf-oauth-browser-based-apps "
-            
+
                 draft-ietf-oauth-browser-based-apps-26
-            
+
         "
 [17]: https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Attributes/rel "HTML attribute: rel - HTML | MDN"
 [18]: https://developer.mozilla.org/en-US/docs/Web/Security/Defenses/Secure_Contexts "Secure contexts - Security | MDN"

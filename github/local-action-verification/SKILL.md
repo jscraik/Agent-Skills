@@ -84,7 +84,7 @@ act_output.log
 ## Examples
 - "Set up local GitHub Actions verification for this repository."
 - "Add act scripts and AGENTS.md instructions so Jules can run CI locally."
-- "Install local verification tooling and document how to run workflow job test." 
+- "Install local verification tooling and document how to run workflow job test."
 
 ## Troubleshooting
 - Docker not running: start the Docker daemon and re-run.

@@ -54,7 +54,7 @@ cases:
     category: edge
     should_trigger: true
     prepend_skill: false
-    prompt: "Fix our design system quickly." 
+    prompt: "Fix our design system quickly."
     acceptance:
       - type: regex
         value: "(?i)(clarify|which area|scope|component)"

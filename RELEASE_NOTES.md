@@ -1,7 +1,7 @@
 # Release Notes
 
-**Repository:** `/Users/jamiecraik/dev/agent-skills`  
-**Since tag:** `repoprompt-skill-v1.0.0`  
+**Repository:** `/Users/jamiecraik/dev/agent-skills`
+**Since tag:** `repoprompt-skill-v1.0.0`
 **Generated:** 2026-02-24 18:13 UTC
 
 ## Table of Contents

@@ -99,7 +99,7 @@ knowledge_graph_profile: references/task-profile.json
   - Explicit: type `$<skill-name>` in the composer and select the skill.
   - Slash menu: type `/` and confirm the enabled skill appears in the list.
 - Test a “near miss” prompt to ensure it doesn’t trigger when it shouldn’t (tight `description`).
- 
+
 If you created a deprecated custom prompt:
 - Restart Codex and confirm `/prompts:<name>` appears in the slash menu.
 

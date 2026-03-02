@@ -60,7 +60,7 @@ export function UserProfileForm() {
   function onSubmit(values: FormValues) {
     // In a real app, send to API
     console.log(values)
-    
+
     toast({
       title: "Profile updated",
       description: "Your profile has been successfully updated.",
@@ -156,18 +156,18 @@ export function UserProfileForm() {
 
 /**
  * Key Patterns Demonstrated:
- * 
+ *
  * 1. Form Composition: Using shadcn/ui's Form components with react-hook-form
  * 2. Validation: Zod schema for type-safe validation
  * 3. Error Handling: Automatic error messages via FormMessage
  * 4. Accessibility: All fields properly labeled with descriptions
  * 5. Type Safety: TypeScript types inferred from Zod schema
- * 
+ *
  * Required Dependencies:
  * - react-hook-form
  * - @hookform/resolvers
  * - zod
- * 
+ *
  * Installation:
  * npx shadcn@latest add form
  * npx shadcn@latest add input

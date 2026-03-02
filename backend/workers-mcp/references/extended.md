@@ -118,4 +118,3 @@ See `references/ops-and-structure.md` for testing commands, troubleshooting, and
 ## Anti-patterns
 - Inventing results or skipping validation steps.
 - Proceeding without required inputs or scope confirmation.
-

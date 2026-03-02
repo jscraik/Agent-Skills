@@ -9,7 +9,7 @@ metadata:
 
 ## Prerequisites
 
-First, the @remotion/lottie package needs to be installed.  
+First, the @remotion/lottie package needs to be installed.
 If it is not, use the following command:
 
 ```bash
@@ -65,4 +65,3 @@ Lottie supports the `style` prop to allow styles and animations:
 ```tsx
 return <Lottie animationData={animationData} style={{width: 400, height: 400}} />;
 ```
-

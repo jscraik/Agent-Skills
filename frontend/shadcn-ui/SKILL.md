@@ -175,7 +175,7 @@ Edit your Tailwind config and CSS variables in `app/globals.css`:
     --primary: 221.2 83.2% 53.3%;
     /* ... more variables */
   }
-  
+
   .dark {
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
@@ -221,10 +221,10 @@ Create wrapper components in `components/` (not `components/ui/`):
 import { Button } from "@/components/ui/button"
 import { Loader2 } from "lucide-react"
 
-export function LoadingButton({ 
-  loading, 
-  children, 
-  ...props 
+export function LoadingButton({
+  loading,
+  children,
+  ...props
 }: ButtonProps & { loading?: boolean }) {
   return (
     <Button disabled={loading} {...props}>

@@ -376,7 +376,7 @@ Required:
 
 IMPORTANT NOTE:
 
-* If authentication is done via `Authorization: Bearer ...` headers (and not cookies), classic browser CSRF is typically not applicable; 
+* If authentication is done via `Authorization: Bearer ...` headers (and not cookies), classic browser CSRF is typically not applicable;
 
 Insecure patterns:
 

@@ -69,7 +69,7 @@ fi
 # Check if globals.css or equivalent exists
 if [ -f "src/index.css" ] || [ -f "src/globals.css" ] || [ -f "app/globals.css" ]; then
     echo -e "${GREEN}✓${NC} Global CSS file found"
-    
+
     # Check for Tailwind directives
     CSS_FILE="$(fd -a -t f '^(globals|index)\.css$' . | head -n 1)"
     if rg -q "@tailwind base" "$CSS_FILE"; then
@@ -81,7 +81,7 @@ if [ -f "src/index.css" ] || [ -f "src/globals.css" ] || [ -f "app/globals.css" 
         echo "  @tailwind components;"
         echo "  @tailwind utilities;"
     fi
-    
+
     # Check for CSS variables
     if rg -q "^:root" "$CSS_FILE" || rg -q "@layer base" "$CSS_FILE"; then
         echo -e "${GREEN}✓${NC} CSS variables defined"
@@ -96,7 +96,7 @@ fi
 # Check if components/ui directory exists
 if [ -d "src/components/ui" ] || [ -d "components/ui" ]; then
     echo -e "${GREEN}✓${NC} components/ui directory exists"
-    
+
     # Count components
     COMPONENT_COUNT=$(fd -a -t f '.+\.(tsx|jsx)$' . | rg '/components/ui/' | wc -l | tr -d ' ')
     echo -e "  ${COMPONENT_COUNT} components installed"
@@ -108,7 +108,7 @@ fi
 # Check if lib/utils exists
 if [ -f "src/lib/utils.ts" ] || [ -f "lib/utils.ts" ]; then
     echo -e "${GREEN}✓${NC} lib/utils.ts exists"
-    
+
     # Check for cn function
     UTILS_FILE=$(fd -a -t f 'utils\.ts$' . | rg '/lib/' | head -n 1)
     if rg -q "export function cn" "$UTILS_FILE"; then
@@ -124,11 +124,11 @@ fi
 if [ -f "package.json" ]; then
     echo ""
     echo "📦 Checking dependencies..."
-    
+
     # Required dependencies
     REQUIRED_DEPS=("react" "tailwindcss")
     RECOMMENDED_DEPS=("class-variance-authority" "clsx" "tailwind-merge" "tailwindcss-animate")
-    
+
     for dep in "${REQUIRED_DEPS[@]}"; do
         if rg -q "\"$dep\"" package.json; then
             echo -e "${GREEN}✓${NC} $dep installed"
@@ -136,7 +136,7 @@ if [ -f "package.json" ]; then
             echo -e "${RED}✗${NC} $dep not installed"
         fi
     done
-    
+
     echo ""
     echo "Recommended dependencies:"
     for dep in "${RECOMMENDED_DEPS[@]}"; do

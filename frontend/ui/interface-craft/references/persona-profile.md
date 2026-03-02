@@ -12,19 +12,19 @@ This reference maps publicly visible writing patterns into guidance for Interfac
 
 ## Core Through-Lines
 
-1. **Tools should match the medium**  
+1. **Tools should match the medium**
    Prefer adaptive/responsive constraints over fixed-canvas assumptions.
 
-2. **Use real data early**  
+2. **Use real data early**
    Real content exposes edge cases and prevents deceptive “perfect mocks.”
 
-3. **Design as systems**  
+3. **Design as systems**
    Components, constraints, reusable primitives, and consistency over one-off artifacts.
 
-4. **Prototype in code when it increases insight**  
+4. **Prototype in code when it increases insight**
    Use code/prototypes to feel behavior, not only to present visuals.
 
-5. **Craft through iterative refinement**  
+5. **Craft through iterative refinement**
    Improve alignment, hierarchy, iconography, typography, and visual noise through repeated passes.
 
 ## Voice Evolution

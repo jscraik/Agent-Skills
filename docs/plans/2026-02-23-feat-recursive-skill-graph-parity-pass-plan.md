@@ -17,8 +17,8 @@ affected_features:
 
 ## Enhancement Summary
 
-**Deepened on:** 2026-02-23  
-**Sections enhanced:** 6  
+**Deepened on:** 2026-02-23
+**Sections enhanced:** 6
 **Research provenance:** manual review against plan/spec/docs + local validation pass (no external agent runs).
 
 ### Key improvements

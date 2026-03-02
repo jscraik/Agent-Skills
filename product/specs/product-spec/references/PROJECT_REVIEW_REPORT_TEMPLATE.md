@@ -1,9 +1,9 @@
 # Project Review Report: <Project Name>
 
-**Owner:** <name>  
-**Date:** YYYY-MM-DD  
-**Repo:** <link/path>  
-**Audience:** solo dev | stakeholders | team  
+**Owner:** <name>
+**Date:** YYYY-MM-DD
+**Repo:** <link/path>
+**Audience:** solo dev | stakeholders | team
 **Inputs reviewed:** README | PRD | Tech Spec | issues | metrics | user feedback | codebase
 
 > Evidence rule: Every paragraph must end with an `Evidence:` line or `Evidence gap:` line. Use file paths/links; summarize all gaps and sources in the Evidence sections.

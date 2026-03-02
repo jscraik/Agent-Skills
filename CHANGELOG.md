@@ -71,4 +71,3 @@ All notable changes for this repository are documented in this file.
 - `2026-02-23` [cfb3def] Harden skill-creator security gates and eval tooling
 - `2026-02-23` [a333f4a] Add claude-md skill and refresh standards references
 - `2026-02-22` [0d2e72c] Add process skills and harden skill-creator workflows
-

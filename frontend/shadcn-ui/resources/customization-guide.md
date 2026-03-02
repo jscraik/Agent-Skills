@@ -37,10 +37,10 @@ To match your brand, update the primary color:
 :root {
   /* Original blue */
   --primary: 221.2 83.2% 53.3%;
-  
+
   /* Change to brand purple */
   --primary: 270 91% 65%;
-  
+
   /* Adjust foreground for contrast */
   --primary-foreground: 0 0% 100%;
 }
@@ -66,19 +66,19 @@ Start with your primary brand color, then derive other colors:
   /* 1. Primary brand color */
   --primary: 230 90% 60%;
   --primary-foreground: 0 0% 100%;
-  
+
   /* 2. Lighter variant for secondary */
   --secondary: 230 30% 95%;
   --secondary-foreground: 230 90% 30%;
-  
+
   /* 3. Subtle accent (shift hue slightly) */
   --accent: 200 90% 60%;
   --accent-foreground: 0 0% 100%;
-  
+
   /* 4. Muted backgrounds (low saturation) */
   --muted: 230 20% 96%;
   --muted-foreground: 230 20% 40%;
-  
+
   /* 5. Keep destructive red-based */
   --destructive: 0 84% 60%;
   --destructive-foreground: 0 0% 100%;
@@ -246,11 +246,11 @@ interface LoadingButtonProps extends ButtonProps {
   loading?: boolean
 }
 
-export function LoadingButton({ 
-  loading, 
-  children, 
+export function LoadingButton({
+  loading,
+  children,
   disabled,
-  ...props 
+  ...props
 }: LoadingButtonProps) {
   return (
     <Button disabled={loading || disabled} {...props}>
@@ -288,8 +288,8 @@ Import fonts in your layout:
 import { Inter, Poppins } from 'next/font/google'
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' })
-const poppins = Poppins({ 
-  weight: ['600', '700'], 
+const poppins = Poppins({
+  weight: ['600', '700'],
   subsets: ['latin'],
   variable: '--font-heading',
 })
@@ -346,13 +346,13 @@ Customize roundedness globally:
 /* globals.css */
 :root {
   --radius: 0.5rem;  /* Default (8px) */
-  
+
   /* More rounded */
   --radius: 1rem;    /* 16px */
-  
+
   /* Sharp edges */
   --radius: 0;       /* No rounding */
-  
+
   /* Very rounded */
   --radius: 1.5rem;  /* 24px */
 }

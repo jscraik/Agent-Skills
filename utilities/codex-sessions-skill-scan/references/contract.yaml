@@ -20,4 +20,3 @@ non_goals:
 risks:
   - "Session logs may contain sensitive information; mitigation: keep output to short, redacted snippets and avoid copying secrets."
   - "Over-eager auto-fixes could change intended behavior; mitigation: propose minimal patches and require confirmation before edits."
-

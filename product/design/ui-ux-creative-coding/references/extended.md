@@ -84,7 +84,7 @@ Deliverables:
 
 # Implementation guardrails (summary)
 
-Accessibility, performance, and quality baselines are mandatory.  
+Accessibility, performance, and quality baselines are mandatory.
 See `references/guardrails.md` for the full checklists and examples.
 
 ---
@@ -138,4 +138,3 @@ The agent is capable of extraordinary work in this domain. Use judgment, adapt t
 - `scripts/scaffold_component.mjs`
 - `scripts/skill_lint.mjs`
 - `scripts/tokens_to_tailwind_theme.mjs`
-

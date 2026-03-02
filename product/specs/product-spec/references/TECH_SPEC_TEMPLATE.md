@@ -1,12 +1,12 @@
 # Technical Specification: <System / Feature Name>
 
-**Owner:** <name>  
-**Status:** Draft | In Review | Approved  
-**Last updated:** YYYY-MM-DD  
-**Related PRD:** <link or "N/A">  
-**Repo / Tracking:** <issue/epic link>  
-**Reviewers:** <names/roles>  
-**Release target:** <date or "TBD">  
+**Owner:** <name>
+**Status:** Draft | In Review | Approved
+**Last updated:** YYYY-MM-DD
+**Related PRD:** <link or "N/A">
+**Repo / Tracking:** <issue/epic link>
+**Reviewers:** <names/roles>
+**Release target:** <date or "TBD">
 
 > Evidence rule: Every paragraph must end with an `Evidence:` line or `Evidence gap:` line. Use file paths/links; summarize all gaps and sources in the Evidence sections.
 
@@ -362,10 +362,10 @@ erDiagram
 | throughput   |   <rps> | <where measured> |
 
 ## 16b) SLOs and Error Budget (Required or N/A with reason)
-- SLIs chosen: <list>  
-- SLO targets: <targets>  
-- Error budget window: <e.g., 30 days>  
-- Error budget policy: actions at 25/50/75/100% burn (e.g., pause launches, incident, rollback)  
+- SLIs chosen: <list>
+- SLO targets: <targets>
+- Error budget window: <e.g., 30 days>
+- Error budget policy: actions at 25/50/75/100% burn (e.g., pause launches, incident, rollback)
 
 ---
 

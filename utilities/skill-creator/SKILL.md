@@ -8,7 +8,7 @@ knowledge_graph_profile: references/task-profile.json
 
 This skill helps you design, author, validate, and package high-quality skills.
 
-**Version**: 1.8.0  
+**Version**: 1.8.0
 **Last updated**: 2026-02-26
 
 ## Table of Contents
@@ -36,12 +36,12 @@ This skill helps you design, author, validate, and package high-quality skills.
 
 ## Working agreement (skills + shell + compaction)
 
-- Follow the repo's `AGENTS.md` (treat it as a map, not a megadoc). 
+- Follow the repo's `AGENTS.md` (treat it as a map, not a megadoc).
 - For long-running work: also follow `~/.codex/instructions/shell-skills-compaction.md` (or a repo-local copy).
 - Use an artifact boundary:
   - Local Codex CLI: write deliverables to `./artifacts/`
-  - Hosted shell: write deliverables to `/mnt/data/` 
-- After major milestones, write a short status note to an artifact (e.g., `./artifacts/STATUS.md`) so the thread can be compacted safely. 
+  - Hosted shell: write deliverables to `/mnt/data/`
+- After major milestones, write a short status note to an artifact (e.g., `./artifacts/STATUS.md`) so the thread can be compacted safely.
 
 ## Scope and triggers
 
@@ -72,7 +72,7 @@ Default to `create`/`improve`; use `benchmark-lite` only when the user asks to c
 - 3–10 example user prompts:
   - 2–5 happy-path prompts
   - 1–3 edge-cases
-  - 1–3 “should NOT trigger” prompts (negative examples) 
+  - 1–3 “should NOT trigger” prompts (negative examples)
 - Target environment(s): `codex`, `claude`, or `portable` subset.
 - Any required assets, schemas, APIs, CLIs, or “house style” constraints.
 - Compatibility posture (default: canonical-only for unreleased/greenfield projects; add backwards compatibility only when explicitly required).
@@ -129,7 +129,7 @@ If the request is out of scope:
 ### Humans steer. Agents execute.
 
 Your goal is leverage: translate vague intent into a workflow the agent can execute repeatedly.
-When something fails, the fix is almost never “try harder”—it’s usually missing scaffolding, missing constraints, or missing feedback loops. 
+When something fails, the fix is almost never “try harder”—it’s usually missing scaffolding, missing constraints, or missing feedback loops.
 
 ### Keep SKILL.md short and treat it as a map
 
@@ -138,14 +138,14 @@ Context is scarce. Treat `SKILL.md` as the high-signal “table of contents,” 
 - `scripts/` (deterministic helpers)
 - `assets/` (templates/boilerplate)
 
-This matches the “AGENTS.md as table of contents” approach: point to structured sources of truth instead of growing a single blob. 
+This matches the “AGENTS.md as table of contents” approach: point to structured sources of truth instead of growing a single blob.
 
 ### Descriptions are routing logic
 
 The `description` is effectively the model’s decision boundary. It should be concrete about:
 - Use-when vs don’t-use-when
 - Outputs/artifacts
-- Success criteria 
+- Success criteria
 
 ### Default compatibility posture
 
@@ -154,20 +154,20 @@ The `description` is effectively the model’s decision boundary. It should be c
 
 ### Put templates/examples inside the skill
 
-Do not cram templates into system prompts. Put them inside the skill so they load only when needed. 
+Do not cram templates into system prompts. Put them inside the skill so they load only when needed.
 
 ### Design for long runs
 
 Plan for multi-step continuity:
 - Reuse the same environment/container when you want stable deps and cached intermediate files.
-- Use compaction as a default long-run primitive, not an emergency fallback. 
+- Use compaction as a default long-run primitive, not an emergency fallback.
 
 ### Treat skills + networking as high-risk
 
 Default posture:
 - Skills: allowed
 - Shell: allowed
-- Network: enabled only when required, behind strict allowlists, and never echo secrets. 
+- Network: enabled only when required, behind strict allowlists, and never echo secrets.
 
 ### Environment compatibility notes (Codex-first)
 
@@ -184,7 +184,7 @@ Skip steps only with a clear reason.
 - Confirm where the skill lives:
   - Repo: `.agents/skills/<skill-name>/`
   - User: `~/.agents/skills/<skill-name>/`
-- Confirm artifact boundary (local `./artifacts/` vs hosted `/mnt/data/`). 
+- Confirm artifact boundary (local `./artifacts/` vs hosted `/mnt/data/`).
 
 ### 1) Lock down triggers early (with negative examples)
 
@@ -192,7 +192,7 @@ Skip steps only with a clear reason.
 - Ensure the `description` contains:
   - trigger keywords
   - explicit “don’t use when …” near-misses
-  - output artifacts and success criteria 
+  - output artifacts and success criteria
 - Encode compatibility stance in the trigger boundary: default to canonical-only for unreleased work; require explicit language to trigger compatibility-preserving outputs.
 - For non-trivial skills, write `references/evals.yaml` early (RED → GREEN → REFACTOR).
 
@@ -234,14 +234,14 @@ Then delete any unused folders and example files.
 
 Frontmatter:
 - `name`: kebab-case, matches folder name.
-- `description`: **single line**; WHAT + WHEN + outputs + success criteria; include negative triggers. 
+- `description`: **single line**; WHAT + WHEN + outputs + success criteria; include negative triggers.
 - Prefer minimal frontmatter (default: only `name` + `description`).
 
 Body:
 - Include a short Principles section before the workflow.
 - Keep the workflow minimal and reliable.
-- Link to `references/` instead of pasting long docs (progressive disclosure). 
-- Store templates/examples in the skill bundle, not in prompts. 
+- Link to `references/` instead of pasting long docs (progressive disclosure).
+- Store templates/examples in the skill bundle, not in prompts.
 - Include the decision feedback protocol block (`decision-feedback-protocol:v2`) unless a stronger repo-specific equivalent already exists.
 
 ### 5) Add resources (as needed)
@@ -289,7 +289,7 @@ python scripts/package_skill.py <path/to/skill-folder> dist/
 
 When a skill includes executable code (`scripts/` or containers):
 
-- **Offline by default.** If network is required, gate behind `--allow-network` and document allowed domains. 
+- **Offline by default.** If network is required, gate behind `--allow-network` and document allowed domains.
 - **Never echo secrets** (no `os.environ`, no token values).
 - **Destructive actions require explicit confirmation**:
   - Prefer `--dry-run` by default
@@ -297,10 +297,10 @@ When a skill includes executable code (`scripts/` or containers):
 
 ## What to avoid
 
-- Bloating `AGENTS.md` or `SKILL.md` with encyclopedic content—keep them as maps to deeper sources of truth. 
-- Writing marketing-style descriptions; treat them as routing logic. 
-- Putting templates/examples in system prompts; put them inside the skill. 
-- Assuming network access; keep allowlists tight and explicit. 
+- Bloating `AGENTS.md` or `SKILL.md` with encyclopedic content—keep them as maps to deeper sources of truth.
+- Writing marketing-style descriptions; treat them as routing logic.
+- Putting templates/examples in system prompts; put them inside the skill.
+- Assuming network access; keep allowlists tight and explicit.
 - Printing logs that could contain secrets.
 - Adding backward-compatibility work by default when the project is unreleased/greenfield.
 

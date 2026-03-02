@@ -48,7 +48,7 @@ brAInwav - software engineering
 
 <br clear="left" />
 
-**brAInwav**  
+**brAInwav**
 _from demo to duty_
 ```
 

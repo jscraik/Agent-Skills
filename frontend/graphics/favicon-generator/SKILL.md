@@ -75,7 +75,7 @@ Every response must include these headings:
 The difference between a mediocre favicon and a great one isn't complexity—it's **polish**. Great favicons have:
 
 - **Depth**: Subtle shadows that lift the icon off the surface
-- **Lighting**: Highlights and gradients that create dimensionality  
+- **Lighting**: Highlights and gradients that create dimensionality
 - **Texture**: Optional noise/grain that adds organic feel
 - **Precision**: Optical centering, proper padding, crisp edges
 
@@ -164,8 +164,8 @@ SVG_TEMPLATE = """<svg xmlns="http://www.w3.org/2000/svg" width="{size}" height=
     </linearGradient>
   </defs>
   <rect width="{size}" height="{size}" rx="{radius}" fill="url(#bg)"/>
-  <g transform="translate({offset}, {offset}) scale({scale})" 
-     stroke="#ffffff" stroke-width="2" fill="none" 
+  <g transform="translate({offset}, {offset}) scale({scale})"
+     stroke="#ffffff" stroke-width="2" fill="none"
      stroke-linecap="round" stroke-linejoin="round">
     <!-- Exact Lucide PackagePlus paths -->
     <path d="M16 16h6"/>
@@ -233,7 +233,7 @@ Open in browser for real-time preview and customization:
 
 **Best for**: Quick iteration, visual exploration, client demos
 
-### Tool 2: Python CLI Pipeline  
+### Tool 2: Python CLI Pipeline
 **File**: `scripts/generate_favicon.py`
 
 Command-line generation with Pillow:

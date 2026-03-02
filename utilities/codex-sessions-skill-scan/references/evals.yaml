@@ -16,4 +16,3 @@ cases:
       - not_contains: "api_key="
       - not_contains: "bearer "
       - not_contains: "token="
-

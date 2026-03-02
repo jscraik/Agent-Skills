@@ -116,15 +116,15 @@ def list_procs(
             proc.cpu_percent()
         except (psutil.NoSuchProcess, psutil.AccessDenied):
             pass
-    
+
     time.sleep(0.1)  # Brief pause for CPU measurement
-    
+
     procs = []
     for proc in psutil.process_iter():
         info = get_process_info(proc)
         if info:
             procs.append(info)
-    
+
     # Sort
     sort_keys = {
         "cpu": lambda x: x["cpu"],
@@ -134,10 +134,10 @@ def list_procs(
         "pid": lambda x: x["pid"],
     }
     procs.sort(key=sort_keys.get(sort, sort_keys["cpu"]), reverse=sort != "name")
-    
+
     if not all_procs:
         procs = procs[:limit]
-    
+
     table = Table(title=f"Processes (sorted by {sort})")
     table.add_column("PID", style="cyan", justify="right")
     table.add_column("Name", style="bold")
@@ -146,7 +146,7 @@ def list_procs(
     table.add_column("Memory", justify="right")
     table.add_column("User", style="dim")
     table.add_column("Command", style="dim", max_width=40)
-    
+
     for p in procs:
         cpu_style = "red" if p["cpu"] > 50 else "yellow" if p["cpu"] > 20 else ""
         mem_style = "red" if p["mem"] > 10 else "yellow" if p["mem"] > 5 else ""
@@ -159,7 +159,7 @@ def list_procs(
             safe_name(p.get("user"))[:10],
             p["cmdline"][:40] if p["cmdline"] else "-",
         )
-    
+
     console.print(table)
 
 
@@ -176,13 +176,13 @@ def top(
         except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
             pass
     time.sleep(0.2)
-    
+
     procs = []
     for proc in psutil.process_iter():
         info = get_process_info(proc)
         if info:
             procs.append(info)
-    
+
     sort_keys = {
         "cpu": lambda x: x["cpu"],
         "mem": lambda x: x["mem"],
@@ -190,13 +190,13 @@ def top(
     }
     procs.sort(key=sort_keys.get(type_, sort_keys["cpu"]), reverse=True)
     procs = procs[:limit]
-    
+
     title = {"cpu": "🔥 Top CPU Consumers", "mem": "🧠 Top Memory Consumers", "disk": "💾 Top Disk I/O"}
-    
+
     table = Table(title=title.get(type_, f"Top by {type_}"))
     table.add_column("PID", style="cyan", justify="right")
     table.add_column("Name", style="bold")
-    
+
     if type_ == "cpu":
         table.add_column("CPU%", justify="right", style="red")
     elif type_ == "mem":
@@ -205,9 +205,9 @@ def top(
     else:
         table.add_column("Read", justify="right")
         table.add_column("Write", justify="right", style="red")
-    
+
     table.add_column("User", style="dim")
-    
+
     for p in procs:
         if type_ == "cpu":
             table.add_row(str(p["pid"]), safe_name(p["name"]), f"{p['cpu']:.1f}%", p["user"])
@@ -215,7 +215,7 @@ def top(
             table.add_row(str(p["pid"]), safe_name(p["name"]), f"{p['mem']:.1f}%", format_bytes(p["mem_bytes"]), p["user"])
         else:
             table.add_row(str(p["pid"]), safe_name(p["name"]), format_bytes(p["read_bytes"]), format_bytes(p["write_bytes"]), p["user"])
-    
+
     console.print(table)
 
 
@@ -227,11 +227,11 @@ def info(pid: int = typer.Argument(..., help="Process ID")):
     except psutil.NoSuchProcess:
         console.print(f"[red]Process {pid} not found[/red]")
         raise typer.Exit(1) from None
-    
+
     try:
         proc.cpu_percent()
         time.sleep(0.1)
-        
+
         with proc.oneshot():
             name = proc.name()
             cmdline = " ".join(proc.cmdline()) or "-"
@@ -242,7 +242,7 @@ def info(pid: int = typer.Argument(..., help="Process ID")):
             created = datetime.fromtimestamp(proc.create_time())
             parent = proc.parent()
             children = proc.children()
-            
+
             # Panel with basic info
             info_text = f"""[bold]Name:[/bold] {name}
 [bold]PID:[/bold] {pid}
@@ -258,9 +258,9 @@ def info(pid: int = typer.Argument(..., help="Process ID")):
 
 [bold]Command:[/bold]
 {cmdline[:200]}"""
-            
+
             console.print(Panel(info_text, title=f"Process {pid}: {name}"))
-            
+
             # Open files
             try:
                 files = proc.open_files()
@@ -272,7 +272,7 @@ def info(pid: int = typer.Argument(..., help="Process ID")):
                         console.print(f"  ... and {len(files) - 10} more")
             except psutil.AccessDenied:
                 console.print("\n[dim]Open files: Access denied[/dim]")
-            
+
             # Network connections
             try:
                 conns = proc.net_connections()
@@ -286,7 +286,7 @@ def info(pid: int = typer.Argument(..., help="Process ID")):
                         console.print(f"  ... and {len(conns) - 10} more")
             except psutil.AccessDenied:
                 console.print("\n[dim]Network connections: Access denied[/dim]")
-            
+
             # Children
             if children:
                 console.print(f"\n[bold]Child Processes ({len(children)}):[/bold]")
@@ -295,7 +295,7 @@ def info(pid: int = typer.Argument(..., help="Process ID")):
                         console.print(f"  {child.pid}: {child.name()}")
                     except (psutil.NoSuchProcess, psutil.AccessDenied):
                         pass
-                        
+
     except psutil.AccessDenied:
         console.print(f"[red]Access denied to process {pid}[/red]")
         raise typer.Exit(1) from None
@@ -314,17 +314,17 @@ def find(name: str = typer.Argument(..., help="Process name to search")):
                 found.append(proc.info)
         except (psutil.NoSuchProcess, psutil.AccessDenied):
             pass
-    
+
     if not found:
         console.print(f"[yellow]No processes found matching '{name}'[/yellow]")
         return
-    
+
     table = Table(title=f"Processes matching '{name}'")
     table.add_column("PID", style="cyan")
     table.add_column("Name", style="bold")
     table.add_column("CPU%", justify="right")
     table.add_column("Mem%", justify="right")
-    
+
     for p in found:
         table.add_row(
             str(p['pid']),
@@ -332,7 +332,7 @@ def find(name: str = typer.Argument(..., help="Process name to search")):
             f"{safe_percent(p.get('cpu_percent')):.1f}",
             f"{safe_percent(p.get('memory_percent')):.1f}",
         )
-    
+
     console.print(table)
     console.print(f"\n[dim]Found {len(found)} process(es)[/dim]")
 
@@ -344,7 +344,7 @@ def ports(
 ):
     """Show port bindings and which processes are using them."""
     connections = []
-    
+
     for proc in psutil.process_iter(['pid', 'name']):
         try:
             for conn in proc.net_connections():
@@ -363,10 +363,10 @@ def ports(
                     })
         except (psutil.NoSuchProcess, psutil.AccessDenied):
             pass
-    
+
     # Sort by port
     connections.sort(key=lambda x: x["port"])
-    
+
     # Dedupe for listening
     if listening:
         seen = set()
@@ -377,14 +377,14 @@ def ports(
                 seen.add(key)
                 unique.append(c)
         connections = unique
-    
+
     if not connections:
         msg = "No connections found"
         if port:
             msg += f" on port {port}"
         console.print(f"[yellow]{msg}[/yellow]")
         return
-    
+
     table = Table(title="Port Bindings" + (f" (port {port})" if port else ""))
     table.add_column("Port", style="cyan", justify="right")
     table.add_column("IP", style="dim")
@@ -392,7 +392,7 @@ def ports(
     table.add_column("PID", justify="right")
     table.add_column("Process", style="bold")
     table.add_column("Remote", style="dim")
-    
+
     for c in connections[:50]:
         status_style = "green" if c["status"] == "LISTEN" else "yellow" if c["status"] == "ESTABLISHED" else ""
         table.add_row(
@@ -403,10 +403,10 @@ def ports(
             c["name"],
             c["remote"],
         )
-    
+
     if len(connections) > 50:
         console.print(f"[dim]Showing 50 of {len(connections)} connections[/dim]")
-    
+
     console.print(table)
 
 
@@ -420,10 +420,10 @@ def kill(
     if not pid and not name:
         console.print("[red]Provide either a PID or --name[/red]")
         raise typer.Exit(1) from None
-    
+
     sig = signal.SIGKILL if force else signal.SIGTERM
     sig_name = "SIGKILL" if force else "SIGTERM"
-    
+
     if pid:
         try:
             proc = psutil.Process(pid)
@@ -436,7 +436,7 @@ def kill(
         except psutil.AccessDenied:
             console.print("[red]Access denied - try with sudo[/red]")
             raise typer.Exit(1) from None
-    
+
     if name:
         killed = 0
         for proc in psutil.process_iter(['pid', 'name']):
@@ -449,7 +449,7 @@ def kill(
                 killed += 1
             except (psutil.NoSuchProcess, psutil.AccessDenied):
                 pass
-        
+
         if killed == 0:
             console.print(f"[yellow]No processes found matching '{name}'[/yellow]")
         else:
@@ -463,14 +463,14 @@ def summary():
     cpu_percent = psutil.cpu_percent(interval=0.5)
     cpu_count = psutil.cpu_count()
     load = psutil.getloadavg()
-    
+
     # Memory
     mem = psutil.virtual_memory()
     swap = psutil.swap_memory()
-    
+
     # Disk
     disk = psutil.disk_usage('/')
-    
+
     # Build summary
     summary_text = f"""[bold cyan]CPU[/bold cyan]
   Usage: {cpu_percent}% ({cpu_count} cores)
@@ -487,9 +487,9 @@ def summary():
 
 [bold cyan]Processes[/bold cyan]
   Total: {len(list(psutil.process_iter()))}"""
-    
+
     console.print(Panel(summary_text, title="System Summary"))
-    
+
     # Top 5 by CPU
     console.print("\n[bold]Top 5 by CPU:[/bold]")
     procs = []
@@ -512,13 +512,13 @@ def watch(
 ):
     """Watch system resources in real-time with alerts."""
     console.print(f"[dim]Watching... (Ctrl+C to stop, alerts at CPU>{alert_cpu}%, Mem>{alert_mem}%)[/dim]\n")
-    
+
     try:
         while True:
             # Get current stats
             cpu = psutil.cpu_percent(interval=0.1)
             mem = psutil.virtual_memory()
-            
+
             # Get top processes
             procs = []
             for proc in psutil.process_iter(['pid', 'name', 'cpu_percent', 'memory_percent']):
@@ -527,38 +527,38 @@ def watch(
                 except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
                     pass
             procs.sort(key=lambda x: x['cpu_percent'] or 0, reverse=True)
-            
+
             # Build display
             table = Table(title=f"System Monitor - {datetime.now().strftime('%H:%M:%S')}")
             table.add_column("Metric", style="bold")
             table.add_column("Value", justify="right")
             table.add_column("Status")
-            
+
             cpu_status = "[red]⚠️ HIGH[/red]" if cpu > alert_cpu else "[green]OK[/green]"
             mem_status = "[red]⚠️ HIGH[/red]" if mem.percent > alert_mem else "[green]OK[/green]"
-            
+
             table.add_row("CPU", f"{cpu:.1f}%", cpu_status)
             table.add_row("Memory", f"{mem.percent:.1f}%", mem_status)
             table.add_row("Processes", str(len(procs)), "")
-            
+
             console.clear()
             console.print(table)
-            
+
             # Top 5 processes
             console.print("\n[bold]Top Processes:[/bold]")
             for p in procs[:5]:
                 cpu_value = safe_percent(p.get('cpu_percent'))
                 cpu_style = "red" if cpu_value > 50 else ""
                 console.print(f"  {p['pid']:>6}  {safe_name(p.get('name')):<25} [{cpu_style}]{cpu_value:.1f}%[/]")
-            
+
             # Alerts
             if cpu > alert_cpu:
                 console.print(f"\n[red bold]⚠️ CPU ALERT: {cpu:.1f}% > {alert_cpu}%[/red bold]")
             if mem.percent > alert_mem:
                 console.print(f"\n[red bold]⚠️ MEMORY ALERT: {mem.percent:.1f}% > {alert_mem}%[/red bold]")
-            
+
             time.sleep(interval)
-            
+
     except KeyboardInterrupt:
         console.print("\n[dim]Stopped watching[/dim]")
 

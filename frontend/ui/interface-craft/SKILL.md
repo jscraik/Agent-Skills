@@ -66,13 +66,13 @@ Use conceptual range when the core solution may be wrong. Once a direction is ch
 
 ## Try It Out
 
-- **Build and tune a component**  
+- **Build and tune a component**
   “Build a notification toast that slides in from the top with a spring animation. Add DialKit controls for spring, opacity, and vertical offset so I can tune it in real time.”
 
-- **Get a design critique**  
+- **Get a design critique**
   “Review the settings page component for design quality. Look at hierarchy, spacing, color usage, and interaction patterns. What would you improve?”
 
-- **Choreograph a complex animation**  
+- **Choreograph a complex animation**
   “Create a page transition where the old content fades out, then the new content slides up with staggered children. Use the storyboard animation pattern for sequencing and add DialKit controls for each timing value.”
 
 ## Sub-Skill Routing

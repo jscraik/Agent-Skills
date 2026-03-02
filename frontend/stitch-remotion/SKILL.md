@@ -273,7 +273,7 @@ const Hotspot = ({x, y, label}) => {
     fps: 30,
     config: {damping: 10, stiffness: 100}
   });
-  
+
   return (
     <div style={{
       position: 'absolute',
@@ -391,7 +391,7 @@ Show step-by-step user journey:
 
 **User prompt:**
 ```
-Look up the screens in my Stitch project "Calculator App" and build a remotion video 
+Look up the screens in my Stitch project "Calculator App" and build a remotion video
 that shows a walkthrough of the screens.
 ```
 

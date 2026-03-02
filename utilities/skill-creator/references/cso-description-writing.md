@@ -144,4 +144,3 @@ description: Create and upgrade skills with required validation gates. Use when 
 - 120–250 characters is a good target (shorter can be ambiguous; longer risks limits).
 - No angle brackets (`<` or `>`).
 - Avoid workflow terms (“step”, “first”, “then”, “next”, “finally”, “checklist”).
-

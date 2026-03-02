@@ -1,6 +1,6 @@
 # @jenny_wen Persona for UI/UX Creative Coding
 
-**Source:** Analyzed from Twitter content (100+ tweets) and generated persona (2026-01-28)  
+**Source:** Analyzed from Twitter content (100+ tweets) and generated persona (2026-01-28)
 **Applied in:** `ui-ux-creative-coding` skill for communication style and approach guidance
 
 ---

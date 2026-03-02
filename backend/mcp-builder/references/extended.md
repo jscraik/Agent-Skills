@@ -103,4 +103,3 @@
 ## Anti-patterns
 - Inventing results or skipping validation steps.
 - Proceeding without required inputs or scope confirmation.
-

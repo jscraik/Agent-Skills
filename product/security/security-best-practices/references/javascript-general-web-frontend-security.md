@@ -182,7 +182,7 @@ False positive notes:
 
 ### JS-XSS-002: Avoid `document.write` / `document.writeln` (XSS + document clobbering hazards)
 
-Severity: Critical if you can prove attacker-controlled input can reach these APIs; otherwise Medium 
+Severity: Critical if you can prove attacker-controlled input can reach these APIs; otherwise Medium
 
 Required:
 

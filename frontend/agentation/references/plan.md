@@ -22,4 +22,3 @@ Upgrade the `agentation` skill so it reliably handles real-world setup issues ob
 - Includes concrete mitigation for `EADDRINUSE`.
 - Includes timeout-aware success rule for automation status.
 - Local validators pass in `~/dev/agent-skills`.
-

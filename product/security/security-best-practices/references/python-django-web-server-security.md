@@ -641,7 +641,7 @@ NOTE:
 
 ### DJANGO-CSP-001: Deploy a Content Security Policy (CSP) as defense-in-depth
 
-Severity: Medium (High for apps rendering untrusted content) 
+Severity: Medium (High for apps rendering untrusted content)
 
 NOTE: It is most important to set the CSP's script-src. All other directives are not as important and can generally be excluded for the ease of development.
 

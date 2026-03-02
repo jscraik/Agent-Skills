@@ -16,4 +16,3 @@ Purpose: keep the SKILL.md lean and put any longer “why” notes here.
 
 - Prefer narrow, explainable rules with clear justifications.
 - Avoid allow-rules that wrap complex shell scripts (e.g. `zsh -lc "<script>"`), because they can hide multiple actions when splitting is not possible.
-

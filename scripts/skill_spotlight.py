@@ -27,24 +27,24 @@ def get_skill_mod_time(skill_name: str) -> str:
 def analyze_failures() -> dict:
     """Analyze failure patterns from runs."""
     skill_failures = {}
-    
+
     if not RUNS_ROOT.exists():
         return skill_failures
-    
+
     for run_dir in RUNS_ROOT.iterdir():
         if not run_dir.is_dir() or not run_dir.name.startswith("run_"):
             continue
-        
+
         run_json = run_dir / "run.json"
         if not run_json.exists():
             continue
-        
+
         try:
             data = json.loads(run_json.read_text())
             skill = data.get("scope_skill", "unknown")
             status = data.get("terminal_status", "")
             stop_reason = data.get("stop_reason", "")
-            
+
             if status == "failed" or stop_reason in {"policy_failed", "evaluator_conflict"}:
                 if skill not in skill_failures:
                     skill_failures[skill] = {"count": 0, "reasons": []}
@@ -52,13 +52,13 @@ def analyze_failures() -> dict:
                 skill_failures[skill]["reasons"].append(stop_reason)
         except:
             continue
-    
+
     return skill_failures
 
 def pick_spotlight() -> dict:
     """Pick a skill to spotlight."""
     failures = analyze_failures()
-    
+
     if failures:
         # Pick skill with most failures
         skill = max(failures.keys(), key=lambda s: failures[s]["count"])
@@ -68,7 +68,7 @@ def pick_spotlight() -> dict:
             "reasons": list(set(failures[skill]["reasons"])),
             "action": "Review trigger phrases and confidence thresholds"
         }
-    
+
     # Fallback: pick a random skill that hasn't been modified recently
     skills = [d.name for d in SKILLS_ROOT.iterdir() if d.is_dir() and (d / "SKILL.md").exists()]
     if skills:
@@ -79,13 +79,13 @@ def pick_spotlight() -> dict:
             "reasons": [],
             "action": "Review and validate skill documentation"
         }
-    
+
     return {"skill": "none", "signal": "No skills found", "reasons": [], "action": "N/A"}
 
 def main():
     spotlight = pick_spotlight()
     mod_time = get_skill_mod_time(spotlight["skill"])
-    
+
     print(f"## Skill Spotlight (Auto-Generated)")
     print(f"- **Skill**: {spotlight['skill']}")
     print(f"- **Last modified**: {mod_time}")

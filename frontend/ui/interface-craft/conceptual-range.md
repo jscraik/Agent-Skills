@@ -23,7 +23,7 @@ Use this before deep polish when confidence in the core concept is low.
 
 ## Core Rule
 
-**Variants are not range.**  
+**Variants are not range.**
 If all options are slight variations of one pattern, range has not been achieved.
 
 Minimum bar: produce at least **3 structurally different concepts**.

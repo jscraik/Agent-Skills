@@ -130,7 +130,7 @@ export default {
       const sandbox = getSandbox(env.Sandbox, 'realtime');
       return await sandbox.wsConnect(request, 8080);
     }
-    
+
     return new Response('Not a WebSocket request', { status: 400 });
   }
 };
@@ -194,5 +194,3 @@ try {
 
 // Retry pattern (see gotchas.md for full implementation)
 ```
-
-

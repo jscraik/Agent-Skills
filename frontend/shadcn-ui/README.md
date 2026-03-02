@@ -128,12 +128,12 @@ npx shadcn@latest add button
 
 shadcn/ui provides 50+ components including:
 
-**Layout**: Accordion, Card, Separator, Tabs, Collapsible  
-**Forms**: Button, Input, Label, Checkbox, Radio Group, Select, Textarea  
-**Data Display**: Table, Badge, Avatar, Progress, Skeleton  
-**Overlays**: Dialog, Sheet, Popover, Tooltip, Dropdown Menu  
-**Navigation**: Navigation Menu, Tabs, Breadcrumb, Pagination  
-**Feedback**: Alert, Alert Dialog, Toast, Command  
+**Layout**: Accordion, Card, Separator, Tabs, Collapsible
+**Forms**: Button, Input, Label, Checkbox, Radio Group, Select, Textarea
+**Data Display**: Table, Badge, Avatar, Progress, Skeleton
+**Overlays**: Dialog, Sheet, Popover, Tooltip, Dropdown Menu
+**Navigation**: Navigation Menu, Tabs, Breadcrumb, Pagination
+**Feedback**: Alert, Alert Dialog, Toast, Command
 
 Plus complete **Blocks** like:
 - Authentication forms

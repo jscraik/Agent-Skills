@@ -1,25 +1,25 @@
 # Extended Guidance
 
-   
+
 3. [Selects approach]
    - Option A: Match brand icon (PackagePlus) → Extract paths from lucide-react
    - Option B: Use letter "F" (distinctive, good at small sizes)
    - Decision: Use PackagePlus to match brand identity
    - Style: "Modern" (professional SaaS)
    - Colors: Use brand indigo
-   
+
 4. [Extracts icon paths]
    - Reads: node_modules/lucide-react/dist/esm/icons/package-plus.js
    - Extracts SVG paths and converts 24x24 → 32x32
-   
+
 5. [Generates with Python script]
    python generate_packageplus_favicon.py --output ./public/
-   
+
 6. [Integrates with Next.js]
    Updates app/layout.tsx with metadata.icons
-   
+
 7. [Delivers]
-   "Created favicon suite matching your PackagePlus brand icon. 
+   "Created favicon suite matching your PackagePlus brand icon.
    The favicon now matches your Header logo exactly—check the browser tab preview."
 ```
 
@@ -32,27 +32,27 @@ Claude:
 1. [Discovers existing icons]
    - Searches: rg "Icon|Logo" --type tsx
    - Finds: No existing brand icons, new project
-   
+
 2. [Considers personality]
    - Developer audience → technical, minimal
    - CLI context → terminal icon fits well
-   
+
 3. [Selects approach]
    - Content: Terminal icon from Lucide (extract actual paths)
    - Style: "Minimal" (dark, understated)
    - Effects: Subtle shadow, slight noise
-   
+
 4. [Extracts Terminal icon paths]
    - Reads: node_modules/lucide-react/dist/esm/icons/terminal.js
    - Converts paths to favicon coordinate system
-   
+
 5. [Opens HTML generator for preview]
    Shows user the terminal icon in minimal style
-   
+
 6. [Adjusts based on feedback]
    User: "Can we make it more techy?"
    → Switches to "Neon" style with cyan glow
-   
+
 7. [Generates final suite]
    Downloads all sizes, integrates with project
 ```
@@ -67,15 +67,15 @@ Claude:
    - Content: Rocket icon (not emoji for consistency)
    - Style: "Vibrant" (pink→orange, energetic)
    - Effects: Strong shadow, highlight, no noise
-   
+
 2. [Previews in context]
    Shows browser tab mockup, bookmark bar
-   
+
 3. [Generates]
    Full suite with all sizes
-   
+
 4. [Delivers with context]
-   "Here's your rocket favicon in vibrant colors. The icon 
+   "Here's your rocket favicon in vibrant colors. The icon
    stays crisp even at 16px. I've included the apple-touch-icon
    for when users add to their phone home screen."
 ```

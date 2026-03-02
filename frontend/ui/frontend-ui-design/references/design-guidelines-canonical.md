@@ -1,7 +1,7 @@
 # Design Guidelines (canonical, all projects)
-Last updated: 2026-01-12  
-Audience: Developers (beginner–intermediate)  
-Scope: Task-focused instructions; applies to ChatGPT widgets and standalone apps across *all* projects.  
+Last updated: 2026-01-12
+Audience: Developers (beginner–intermediate)
+Scope: Task-focused instructions; applies to ChatGPT widgets and standalone apps across *all* projects.
 Owner/Review cadence: TBD
 
 > Use this as the canonical reference. Load when working on shared UI/UX or aligning any project to the common token/system. For a quick summary see `design-guidelines-summary.md`.

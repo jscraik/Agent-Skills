@@ -202,7 +202,7 @@ RGB gradients can produce muddy intermediate colors. For better results:
 function blendColorsHsl(color1, color2, ratio) {
   const hsl1 = hexToHsl(color1);
   const hsl2 = hexToHsl(color2);
-  
+
   return hslToHex({
     h: hsl1.h + (hsl2.h - hsl1.h) * ratio,
     s: hsl1.s + (hsl2.s - hsl1.s) * ratio,
@@ -308,4 +308,3 @@ def fast_noise(size, intensity):
 **Symptom**: Shadow appears clipped at edges.
 **Cause**: Shadow extends beyond canvas bounds.
 **Fix**: Add padding, or offset shadow inward.
-

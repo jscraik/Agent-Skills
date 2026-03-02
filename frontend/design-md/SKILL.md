@@ -50,7 +50,7 @@ To analyze a Stitch project, you must retrieve screen metadata and design assets
    - Review screen titles to identify the target screen (e.g., "Home", "Landing Page")
    - Extract the Screen ID from the screen's `name` field
 
-4. **Metadata fetch**: 
+4. **Metadata fetch**:
    - Call `[prefix]:get_screen` with both `projectId` and `screenId` (both as numeric IDs only)
    - This returns the complete screen object including:
      - `screenshot.downloadUrl` - Visual reference of the design

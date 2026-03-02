@@ -21,7 +21,7 @@ Use when users ask to:
 
 ## Core Principle
 
-Do not solve everything in one pass.  
+Do not solve everything in one pass.
 Pick one question, build the smallest artifact that answers it, then decide what to do next.
 
 ## Workflow

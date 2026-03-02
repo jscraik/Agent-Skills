@@ -40,4 +40,3 @@ examples:
   failure_mode:
     input: "Deploy my app"
     expected_output: "Declines as out of scope and redirects to a different workflow."
-

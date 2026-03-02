@@ -50,8 +50,8 @@ Wrappers can add extra sections, but the kernel always outputs:
 
 ### B) Pyramid summary (answer-first)
 
-1) Main decision (1 sentence)  
-2) 3 key reasons / drivers  
+1) Main decision (1 sentence)
+2) 3 key reasons / drivers
 3) Evidence/examples (scenarios, IO pairs, repro steps, constraints)
 
 ### C) Scope + non-goals

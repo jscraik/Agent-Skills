@@ -291,7 +291,7 @@ export function DataTableExample() {
 
 /**
  * Key Patterns Demonstrated:
- * 
+ *
  * 1. TanStack Table Integration: Using @tanstack/react-table with shadcn/ui
  * 2. Sorting: Click headers to sort ascending/descending
  * 3. Filtering: Text input to filter table data
@@ -299,11 +299,11 @@ export function DataTableExample() {
  * 5. Pagination: Built-in pagination controls
  * 6. Row Actions: Dropdown menu per row for context actions
  * 7. Responsive Design: Table adapts to different screen sizes
- * 
+ *
  * Required Dependencies:
  * - @tanstack/react-table
  * - lucide-react
- * 
+ *
  * Installation:
  * npx shadcn@latest add table
  * npx shadcn@latest add button

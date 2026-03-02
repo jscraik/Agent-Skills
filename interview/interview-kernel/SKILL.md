@@ -219,9 +219,9 @@ If something can be answered by quick discovery (reading configs/spec), do that 
 
 Set and track the current intent:
 
-- **DISCOVER**: gather missing facts  
+- **DISCOVER**: gather missing facts
   - Question types: “what is / what happens / give one example”
-- **DECIDE**: force explicit choices where multiple viable paths exist  
+- **DECIDE**: force explicit choices where multiple viable paths exist
   - Question types: multiple-choice tradeoffs, scope boundaries, acceptance criteria format
 
 **Rule:** If multiple plausible implementations remain, switch to **DECIDE** until a path is chosen.

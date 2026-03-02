@@ -355,7 +355,7 @@ Components will be added to `src/components/ui/` by default.
 2. **Test a simple component**:
    ```tsx
    import { Button } from "@/components/ui/button"
-   
+
    export default function App() {
      return <Button>Click me</Button>
    }
@@ -378,7 +378,7 @@ Components will be added to `src/components/ui/` by default.
 
 ### Styles not applying
 
-**Solution**: 
+**Solution**:
 - Ensure `globals.css` is imported in your app entry point
 - Verify Tailwind config `content` paths include your files
 - Check CSS variables are defined in `globals.css`

@@ -21,7 +21,7 @@ Provide a repeatable decision workflow to choose the right Codex primitive (Skil
 - You want a reusable, cross-project decision framework.
 
 ## Quick use
-1) Run the workflow below.  
+1) Run the workflow below.
 2) Output must follow the required format block.
 
 ## Decision workflow

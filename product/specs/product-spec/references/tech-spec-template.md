@@ -47,8 +47,8 @@
 - Known gaps, phased improvements, experiments.
 
 ## Visuals
-- Required: architecture diagram.  
-- Required for stateful components: state diagrams.  
+- Required: architecture diagram.
+- Required for stateful components: state diagrams.
 - Optional: sequence diagrams for key flows; deployment topology.
 
 ## Diagram Rendering Plan (if needed)

@@ -24,8 +24,8 @@ Common mistakes when creating skills and how to avoid them.
 - Limits adaptation to context
 - Results in "AI slop" aesthetics
 
-**Severity**: High  
-**Detection signals**: repeated fixed headings, heavy placeholders, “ALWAYS use this exact structure”  
+**Severity**: High
+**Detection signals**: repeated fixed headings, heavy placeholders, “ALWAYS use this exact structure”
 **Remediation**: use philosophy-patterns.md (principles/mental model) + variation-patterns.md (explicit variation)
 
 **Example**:
@@ -58,8 +58,8 @@ Structure your document based on the content and audience:
 - Lacks principled decision-making
 - Follows rules blindly without understanding
 
-**Severity**: Medium  
-**Detection signals**: checklists without rationale, “do X” rules with no “why”  
+**Severity**: Medium
+**Detection signals**: checklists without rationale, “do X” rules with no “why”
 **Remediation**: add philosophy-patterns.md (principles) before procedures
 
 **Example**:
@@ -95,8 +95,8 @@ With this foundation, review code systematically...
 - Doesn't prevent common mistakes
 - Adds tokens without adding value
 
-**Severity**: High  
-**Detection signals**: generic verbs, no file paths/commands, no domain terms  
+**Severity**: High
+**Detection signals**: generic verbs, no file paths/commands, no domain terms
 **Remediation**: add concrete examples, constraints, and domain-specific checks
 
 **Example**:
@@ -129,8 +129,8 @@ Test thoroughly.
 - Produces inappropriate solutions
 - Fails to adapt to constraints
 
-**Severity**: High  
-**Detection signals**: “always/never” rules without conditional clauses  
+**Severity**: High
+**Detection signals**: “always/never” rules without conditional clauses
 **Remediation**: add context-conditional guidance and decision criteria
 
 **Example**:
@@ -171,8 +171,8 @@ Choose architecture based on context:
 - Adds complexity without value
 - Slows down simple tasks
 
-**Severity**: Medium  
-**Detection signals**: extremely long SKILL.md, many sections for simple tasks  
+**Severity**: Medium
+**Detection signals**: extremely long SKILL.md, many sections for simple tasks
 **Remediation**: split into references/, keep SKILL.md concise
 
 **Example**:
@@ -212,8 +212,8 @@ Adapt based on context. Professional emails are more formal, internal emails can
 - Inconsistent quality
 - Lacks necessary structure
 
-**Severity**: High  
-**Detection signals**: complex domain with no workflow, no validation gates  
+**Severity**: High
+**Detection signals**: complex domain with no workflow, no validation gates
 **Remediation**: add workflows.md gates, validation steps, and references
 
 **Example**:
@@ -257,8 +257,8 @@ See references/financial-modeling-standards.md for detailed guidelines
 - Predictable, boring outputs
 - Generic "AI aesthetic"
 
-**Severity**: Medium  
-**Detection signals**: repeated aesthetic choices across outputs; default fonts/colors  
+**Severity**: Medium
+**Detection signals**: repeated aesthetic choices across outputs; default fonts/colors
 **Remediation**: add explicit variation rules and anti-convergence warnings
 
 **Example**:
@@ -301,8 +301,8 @@ Choose fonts based on brand and purpose. Vary your choices:
 - Confusing which is authoritative
 - Inefficient progressive disclosure
 
-**Severity**: Medium  
-**Detection signals**: duplicate paragraphs in SKILL.md and references/  
+**Severity**: Medium
+**Detection signals**: duplicate paragraphs in SKILL.md and references/
 **Remediation**: keep SKILL.md lean; move bulk to references/
 
 **Example**:
@@ -341,8 +341,8 @@ Quick start:
 - No warnings about fragile areas
 - Missing critical "don't" knowledge
 
-**Severity**: High  
-**Detection signals**: no “do not/never” guidance in fragile domains  
+**Severity**: High
+**Detection signals**: no “do not/never” guidance in fragile domains
 **Remediation**: add explicit negative guidance and safety constraints
 
 **Example**:
@@ -383,8 +383,8 @@ Write efficient queries:
 - Less creative exploration
 - Convergence on safe choices
 
-**Severity**: Medium  
-**Detection signals**: no variation rules in skills that generate creative outputs  
+**Severity**: Medium
+**Detection signals**: no variation rules in skills that generate creative outputs
 **Remediation**: add variation-patterns.md instructions and anti-convergence checks
 
 **Example**:
