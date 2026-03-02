@@ -65,12 +65,17 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - `gh-workflow` — Consolidated GitHub lifecycle skill for agents and users: intake, issue fixing, PR prep, review request/reception, review comment handling, CI diagnosis, and server-side merge via gh. Use when requests involve GitHub issues/PRs/checks/merge operations.
 - `local-action-verification` — Use when the user asks to validate GitHub Actions locally with act; output setup guidance, AGENTS.md instructions, and fail-fast checks before push or PR.
 
+## Github — Greptile
+
+- `check-pr` — Use when a user asks to review a GitHub pull request before merge (or asks how to set up Greptile prerequisites) and return a policy-gated readiness view with check status and remediation priority.
+- `greploop` — Use when a user wants a closed-loop PR hardening pass (or asks how to set up Greptile loop prerequisites): run policy-gated review/fix iterations toward high-confidence, merge-safe output.
+
 ## Interview
 
 - `architecture-interview` — Plan and review architecture decisions via a structured interview and ADR output. Use when choosing between system design alternatives.
 - `bug-interview` — Analyze and review bug reports to capture repro, evidence, and the next smallest diagnostic step. Use when a bug report lacks clear reproduction.
 - `deep-interview` — Deep, gap-filling interview that enhances an existing doc/spec (preferred) or explores a topic. Use when deepening PRDs, ADRs, tickets, notes, or draft specs; if given a doc path, update it in-place with Delta/Interview Insights and an approval gate.
-- `interview-kernel` — Core interview engine enforcing strict discovery/decision gating with externalized state, decisions, assumptions, and an approval gate. Use when building interview wrapper skills.
+- `interview-kernel` — INTERNAL ENGINE - Core interview engine for wrapper skills. Do NOT invoke directly. Use interview-me, deep-interview, architecture-interview, bug-interview, or pm-interview instead.
 - `interview-me` — Interactive, multiple-choice interview for requirements discovery and spec clarification; turns an underspecified idea (or draft spec) into an execution-ready spec with decisions, assumptions, acceptance criteria, and approval. Use when a user asks to 'interview me', clarify scope, or refine a draft spec.
 - `pm-interview` — Plan and review product scope, value, metrics, and rollout via a structured interview. Use when product direction or scope must be clarified.
 
@@ -173,11 +178,6 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - `agent-native-architecture` — Design or review agent-native application architecture for Codex-based workflows. Use when planning parity between UI and agent actions, primitive tool design, execution-loop completion signals, context injection, and safe rollout/rollback for agent-driven products.
 - `tech-spec` — Create implementation-ready technical planning artifacts from an existing tech spec. Use when you need one focused mode: data_spec, migration_plan, ops_spec, or performance_plan.
 
-## Skills — Greptile
-
-- `check-pr` — Use when a user asks to review a GitHub pull request before merge (or asks how to set up Greptile prerequisites) and return a policy-gated readiness view with check status and remediation priority.
-- `greploop` — Use when a user wants a closed-loop PR hardening pass (or asks how to set up Greptile loop prerequisites): run policy-gated review/fix iterations toward high-confidence, merge-safe output.
-
 ## Utilities
 
 - `1password` — Plan, validate, and use 1Password CLI setup for secret injection and auth. Use when tasks need 1Password CLI usage, secret references, op run/read/inject, or provisioning secrets via env vars/.env files and scripts.
@@ -189,7 +189,6 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - `codex-agent-creator` — Create and install Codex custom multi-agent roles when the user asks to add, update, or troubleshoot role entries under agents with a role config file.
 - `codex-home-audit` — Audit and improve a Codex home directory (AGENTS.md, USER_PROFILE, instructions/, rules/, config.toml) when you want a dated report of risks, duplication, and recommended cleanups.
 - `codex-sessions-skill-scan` — Daily skill health scan: analyze ~/.codex/sessions plus per-repo session logs under ~/dev (default last 1 day) and summarize skill invocations + likely failures for personal skills in ~/dev/agent-skills (missing paths, tool failures, complex-task word triggers). Optional: include best-effort local OTel signals.
-- `diagram-cli` — Generate architecture diagrams, dependency graphs, and architecture tests from source code using diagram-cli. Use when analyzing repo structure, validating import rules, creating Mermaid diagrams, or running PR architecture impact analysis. Avoid for image generation, flowchart drawing, or general diagramming not related to code analysis.
 - `executing-plans` — Validate and execute written implementation plans in verified batches with checkpoints. Use when a plan already exists and work must proceed task-by-task.
 - `fix-mise` — Diagnose and resolve mise trust/setup failures for local toolchains. Use when the user reports mise trust errors, missing runtimes, or broken mise-managed commands.
 - `insight-report` — Generate a high-fidelity Codex usage insights HTML report from local Codex session data when asked for "insights report", "usage report", or "analyze my Codex sessions".

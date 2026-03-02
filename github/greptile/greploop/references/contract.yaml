@@ -1,0 +1,38 @@
+schema_version: "1.1"
+purpose: |
+  Run a bounded autonomous review-fix loop for a PR by triggering review signals,
+  addressing actionable feedback, re-running checks, and repeating until merge confidence
+  targets are reached or stop conditions are triggered.
+triggers:
+  - User asks to iteratively address Greptile feedback until readiness thresholds are met.
+  - User requests PR hardening with a bounded automation loop.
+  - User asks for a confidence-based loop completion signal (for example 5/5 and zero comments).
+  - User asks for policy-gated review automation before merge.
+  - User asks to set up or verify loop prerequisites (MCP/auth/.greptile context) before running iterations.
+inputs:
+  - PR number (optional; default resolved from current branch).
+  - Optional max-iteration setting and confidence target.
+  - Setup context (optional): API key wiring, MCP endpoint/header, and repository governance files.
+  - Organizational policy context: independent validation and strictness/confidence governance rules.
+  - Repository/branch context with GitHub CLI authentication state.
+outputs:
+  - Policy gate summary (`policy_gate_status`, blockers, and governance next actions).
+  - Iteration-by-iteration confidence summary.
+  - List of resolved and remaining comments.
+  - Setup blocker checklist when loop prerequisites are not met.
+  - Stopping reason (target reached, max iterations, user stop, blocker).
+non_goals:
+  - Non-PR wide refactors unrelated to the requested review loop.
+  - Infinite retries without explicit escalation.
+  - Full platform provisioning outside review-loop prerequisites.
+  - Auto-deployment or release actions.
+risks:
+  - Stale review state if iterations are run without check completion.
+  - Applying broad fixes to ambiguous comments.
+  - Scope creep if non-actionable feedback is handled as blocking.
+guardrails:
+  - Enforce bounded iterations by default (max 5).
+  - Require confirmed context (auth + PR target) before making edits.
+  - Run policy gate checks before loop start and at each iteration.
+  - Stop immediately when independent-validation or `.greptile/` governance checks fail.
+  - Do not continue when checks are failing outside requested scope.
