@@ -60,14 +60,38 @@ Configuration file: `.diagramrc` (excludes `node_modules`, test files, build art
 Run these commands from the repository root:
 
 ```bash
-# Sync skills and regenerate index
-bash scripts/sync_skills.sh
+# Show status overview
+just status
 
-# Run all validations (plans, skill graphs, docs)
-bash scripts/validate_all.sh
+# Run all validations
+just validate
 
-# Generate architecture diagrams
-diagram generate . --output artifacts/diagram.mmd
+# Diagnose skills
+just diagnose
+
+# Run CI checks locally
+just ci-local
+```
+
+### Using Just (Task Runner)
+
+This project uses `just` for common tasks. Available commands:
+
+```bash
+just --list          # Show all commands
+just status          # Quick status overview
+just validate        # Run all validation
+just diagnose        # Diagnose all skills
+just genome-loop     # Run genome loop (dry-run)
+just lint             # Run pre-commit hooks
+```
+
+### Creating New Skills
+
+Use the skill template when creating new skills:
+
+```bash
+cp templates/SKILL.md.template <category>/<skill-name>/SKILL.md
 ```
 
 ### Validation

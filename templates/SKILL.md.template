@@ -1,0 +1,47 @@
+# Skill Template
+
+Use this template when creating new skills. Copy and customize.
+
+---
+
+---
+name: skill-name-here
+description: One-line description for skill discovery (max 80 chars)
+metadata:
+  category: utilities | product | github | interview | utilities
+  tags: [tag1, tag2]
+---
+
+# [Skill Name]
+
+[One paragraph explaining what this skill does and when to use it]
+
+## When to use
+
+- Use case 1
+- Use case 2
+- Use case 3
+
+## Procedure
+
+1. Step one
+2. Step two
+3. Step three
+
+## Outputs
+
+- What this skill produces
+
+## Constraints
+
+- Limitation 1
+- Limitation 2
+
+## Examples
+
+- "Example prompt 1"
+- "Example prompt 2"
+
+## References
+
+- [Link to relevant docs](/docs/path)
