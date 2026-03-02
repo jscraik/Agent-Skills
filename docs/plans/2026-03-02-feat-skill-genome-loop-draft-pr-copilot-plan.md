@@ -1,8 +1,9 @@
 ---
 title: feat: Skill Genome Loop Draft PR Copilot
 type: feat
-status: active
+status: completed
 date: 2026-03-02
+completed: 2026-03-02
 origin: docs/brainstorms/2026-03-01-skill-genome-loop-brainstorm.md
 deepened: 2026-03-02
 research_agents: 10

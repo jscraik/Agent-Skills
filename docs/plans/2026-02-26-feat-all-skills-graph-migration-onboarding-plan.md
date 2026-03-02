@@ -1,8 +1,9 @@
 ---
 title: feat: All-Skills Knowledge Graph Migration + Onboarding
 type: feat
-status: active
+status: completed
 date: 2026-02-26
+completed: 2026-03-02
 origin: docs/brainstorms/2026-02-24-skill-graph-live-auto-learning-brainstorm.md
 ---
 
