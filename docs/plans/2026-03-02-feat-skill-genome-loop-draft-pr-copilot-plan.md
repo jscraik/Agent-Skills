@@ -423,28 +423,28 @@ Keep `SKILL.md` routing semantics aligned with `references/task-profile.json` an
 
 ### Core Requirements
 
-- [ ] Nightly workflow writes candidate artifacts to `artifacts/skill-graphs/telemetry/candidates.jsonl` (append-only, single file).
-- [ ] Candidate schema includes: `skill_path`, `proposed_change_type`, `composite_score`, `window_id`, `decision_reason`, `candidate_id`, `window_count`, `redaction_passed`.
-- [ ] "High-confidence" means:
-  - [ ] `composite_score >= 0.82`
-  - [ ] repeated signal in at least 2 decision windows
-- [ ] Draft PR candidates are limited to one skill per candidate and maximum 3 changed files.
-- [ ] Max 10 draft candidates emitted per nightly run.
-- [ ] No autonomous apply/merge path exists in MVP (see brainstorm).
-- [ ] Candidate outputs pass privacy constraints using comprehensive `SECRET_PATTERNS` from `validate_recursive_promotion.py:62-69`.
-- [ ] **P1 FIX**: Rollout mode check at startup (`off`/`observe_only`/`active`).
-- [ ] **P1 FIX**: Kill-switch check at startup (abort if `kill-switch.txt` exists).
-- [ ] **P1 FIX**: Fail-closed on redaction failure (candidates with `redaction_passed=False` are not emitted).
-- [ ] Runbook updates document rollback, kill-switch, and reviewer decision flow.
-- [ ] Validation suite passes for docs links and artifact-parity expectations.
+- [x] Nightly workflow writes candidate artifacts to `artifacts/skill-graphs/telemetry/candidates.jsonl` (append-only, single file).
+- [x] Candidate schema includes: `skill_path`, `proposed_change_type`, `composite_score`, `window_id`, `decision_reason`, `candidate_id`, `window_count`, `redaction_passed`.
+- [x] "High-confidence" means:
+  - [x] `composite_score >= 0.82`
+  - [x] repeated signal in at least 2 decision windows
+- [x] Draft PR candidates are limited to one skill per candidate and maximum 3 changed files.
+- [x] Max 10 draft candidates emitted per nightly run.
+- [x] No autonomous apply/merge path exists in MVP (see brainstorm).
+- [x] Candidate outputs pass privacy constraints using comprehensive `SECRET_PATTERNS` from `validate_recursive_promotion.py:62-69`.
+- [x] **P1 FIX**: Rollout mode check at startup (`off`/`observe_only`/`active`).
+- [x] **P1 FIX**: Kill-switch check at startup (abort if `kill-switch.txt` exists).
+- [x] **P1 FIX**: Fail-closed on redaction failure (candidates with `redaction_passed=False` are not emitted).
+- [x] Runbook updates document rollback, kill-switch, and reviewer decision flow.
+- [x] Validation suite passes for docs links and artifact-parity expectations.
 
 ### Research-Derived Requirements
 
-- [ ] **Idempotency**: Deterministic candidate IDs via `sha256(skill_path|window_id|change_type)[:16]`
-- [ ] **Atomic writes**: Use temp file + rename pattern for artifact updates
+- [x] **Idempotency**: Deterministic candidate IDs via `sha256(skill_path|window_id|change_type)[:16]`
+- [x] **Atomic writes**: Use temp file + rename pattern for artifact updates
 - [ ] **Advisory lock**: `.lock` file in candidates directory during generation
-- [ ] **Incremental processing**: Watermark-based discovery of new runs only
-- [ ] **Schema version**: `schema_version: "1.0"` in all candidate artifacts
+- [x] **Incremental processing**: Watermark-based discovery of new runs only
+- [x] **Schema version**: `schema_version: "1.0"` in all candidate artifacts
 - [ ] **Per-skill cooldown**: 2-window backoff after rejection
 
 ---
