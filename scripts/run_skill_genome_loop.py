@@ -337,10 +337,17 @@ def generate_candidate_id(skill_path: str, window_id: str, change_type: str) -> 
 def build_candidates(
     signals: Dict[str, float],
     artifacts: List[Dict[str, Any]],
+    all_artifacts: Optional[List[Dict[str, Any]]] = None,
 ) -> List[Dict[str, Any]]:
-    """Build candidate change proposals with deterministic IDs."""
+    """Build candidate change proposals with deterministic IDs.
+
+    P1 FIX: all_artifacts provides historical context for window_count,
+    ensuring the MIN_WINDOWS >= 2 gate works correctly with incremental processing.
+    """
     candidates = []
     window_id = current_window()
+    # P1 FIX: Use all_artifacts for window_count if provided
+    window_count_artifacts = all_artifacts if all_artifacts is not None else artifacts
 
     for skill_path, confusion_score in signals.items():
         # Only consider skills with meaningful confusion
@@ -357,7 +364,8 @@ def build_candidates(
 
         representative = skill_artifacts[0]
         composite_score = compute_composite_score(confusion_score, representative)
-        window_count = get_window_count(skill_path, artifacts)
+        # P1 FIX: Use all_artifacts for window_count (historical context)
+        window_count = get_window_count(skill_path, window_count_artifacts)
 
         # Determine change type based on signals
         change_type = "trigger_rule_review"
@@ -529,12 +537,19 @@ def main() -> int:
 
     artifacts = [load_run_artifacts(r) for r in runs]
 
+    # P1 FIX: Load ALL artifacts for window_count (historical context)
+    # This ensures the MIN_WINDOWS >= 2 gate works correctly with incremental processing
+    all_runs = discover_runs(runs_root, since_watermark=None)  # No filter
+    all_artifacts = [load_run_artifacts(r) for r in all_runs]
+    log(f"Loaded {len(all_artifacts)} total artifacts for window_count computation")
+
     # Compute signals
     signals = compute_routing_confusion(artifacts)
     log(f"Computed routing confusion for {len(signals)} skills")
 
     # Build candidates
-    candidates = build_candidates(signals, artifacts)
+    # P1 FIX: Pass all_artifacts for window_count (historical context)
+    candidates = build_candidates(signals, artifacts, all_artifacts=all_artifacts)
     log(f"Generated {len(candidates)} raw candidates")
 
     # Apply confidence gate
@@ -549,6 +564,11 @@ def main() -> int:
     log(f"Candidates passing redaction: {len(passed_redaction)}, capped: {len(capped)}")
 
     # Handle modes
+    # P2 FIX: Check dry_run FIRST to prevent any writes in dry-run mode
+    if args.dry_run:
+        log(f"DRY_RUN: Would write {len(capped)} candidates (no stats written)")
+        return 0
+
     if rollout_mode == "observe_only":
         log(f"OBSERVE_ONLY: Would emit {len(capped)} candidates")
         write_processing_stats(
@@ -560,17 +580,23 @@ def main() -> int:
         )
         return 0
 
-    if args.dry_run:
-        log(f"DRY_RUN: Would write {len(capped)} candidates (no stats written)")
-        # P2 FIX: Skip stats writes in dry-run mode to avoid mutating state
-        return 0
-
     # Write candidates
     emitted = append_candidates(capped)
     log(f"Emitted {emitted} candidates to {CANDIDATES_PATH}")
 
-    # Update watermark and stats
-    write_watermark(datetime.now(timezone.utc).isoformat())
+    # P1 FIX: Use max started_at from processed runs as watermark (not wall-clock time)
+    # This prevents dropping late-arriving artifacts that started before this job
+    # but were written after it finished
+    max_started_at = None
+    for artifact in artifacts:
+        started_at = artifact.get("run", {}).get("started_at", "")
+        if started_at:
+            if max_started_at is None or started_at > max_started_at:
+                max_started_at = started_at
+
+    if max_started_at:
+        write_watermark(max_started_at)
+        log(f"Updated watermark to: {max_started_at}")
     write_processing_stats(
         len(candidates),
         len(high_conf),
