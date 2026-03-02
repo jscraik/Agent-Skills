@@ -55,21 +55,52 @@ Select one mode explicitly from user intent; default to `full_lifecycle` when mu
 
 1. `gh` exists and is authenticated (`gh auth status`).
 2. Repository context is resolved (`gh repo view --json nameWithOwner`).
-3. PR context is resolved when needed (`gh pr view --json number,url,headRefName,baseRefName,state`).
-4. For merge mode, check state/branch protection status is known.
+3. **Git state is clean or understood** (`git status` shows expected branch, no unexpected conflicts).
+4. PR context is resolved when needed (`gh pr view --json number,url,headRefName,baseRefName,state`).
+5. For merge mode, check state/branch protection status is known.
+
+**Precondition verification commands:**
+```bash
+# Always run before git operations
+git status
+git log --oneline -3
+git branch -vv
+```
 
 If any precondition fails, return `status=blocked` with remediation.
 
 ## Default behaviors
 
+### Verification Requirements (ALL Git Operations)
+
+After ANY git operation (commit, push, merge, rebase), ALWAYS run verification and include output in response:
+
+```bash
+# Post-operation verification (required)
+git status && git log --oneline -5 && git branch -vv
+
+# For merges/rebases, also check for conflict markers
+grep -r '<<<<<<<' . --include='*.ts' --include='*.tsx' --include='*.js' --include='*.json' 2>/dev/null || echo 'No conflict markers found'
+```
+
+**Do not report success until verification confirms clean state.**
+
 ### Merge defaults (`pr_merge_server`)
 
+- Pre-merge verification:
+  - Check `git status` for working tree clean
+  - Verify `gh pr view <pr>` shows mergeable state
+  - Confirm all required checks passing via `gh pr checks <pr>`
 - Primary command:
   - `gh pr merge <pr> --squash --delete-branch --auto`
 - Fallback if auto-merge unsupported and checks already passing:
   - `gh pr merge <pr> --squash --delete-branch`
 - If auto-merge unsupported and checks are not passing:
   - Block and return required next action.
+- **Post-merge verification (required):**
+  - `git log --oneline -3` to confirm merge commit
+  - `git status` to confirm working tree clean
+  - `git branch -vv` to confirm branch deleted (if --delete-branch used)
 
 ### CI diagnosis scope (`ci_diagnose`)
 
@@ -103,23 +134,56 @@ Also provide a concise human-readable summary.
 
 1. Resolve mode from request.
 2. Run `intake` gates (auth/repo/pr discovery).
+   - Verify `gh auth status` succeeds
+   - Verify `gh repo view --json nameWithOwner` resolves
+   - Verify `git status` shows expected branch context
 3. Execute mode-specific workflow:
    - `issue_fix`: inspect issue, implement minimal fix, run checks, summarize evidence.
-   - `pr_prepare`: branch prep, stage intended files, commit, push, create draft PR.
+   - `pr_prepare`: branch prep, stage intended files, commit, **verify with git status/log**, push, create draft PR.
    - `pr_request_review`: gather readiness evidence, produce review request summary, and propose reviewer focus points.
    - `pr_receive_review`: classify feedback, ask clarifying questions when needed, and apply only validated changes.
    - `pr_review_comments`: list threads, apply scoped fixes, map each fix to evidence.
    - `ci_diagnose`: inspect failing checks, summarize first actionable failure.
-   - `pr_merge_server`: apply merge defaults/fallback and report final merge status.
+   - `pr_merge_server`: apply merge defaults/fallback, **verify merge succeeded with git log/status**, report final status.
    - `full_lifecycle`: chain `intake -> issue_fix -> pr_prepare -> pr_request_review -> pr_receive_review -> pr_review_comments -> ci_diagnose -> pr_merge_server`.
-4. Return contract + human summary.
+4. **Post-operation verification (all modes)**:
+   - Run `git status && git log --oneline -5 && git branch -vv`
+   - Include verification output in response
+5. Return contract + human summary.
 
 ## Failure handling
 
+### Authentication Issues
 - Missing auth -> `blocked` + `gh auth login` remediation.
+
+### Git State Issues
+- **Misunderstood merge state**: If `git status` shows unmerged paths or conflicts exist, STOP and report actual state before proceeding.
+- **Complex git situation**: If `git log --oneline --graph --left-right main...HEAD` shows unexpected divergence, ask user for guidance before resolving.
+- **Working tree not clean**: If `git status` shows uncommitted changes before an operation, either commit/stash them or ask user how to proceed.
+
+### PR Context Issues
 - No current-branch PR and no PR provided -> `blocked` + request PR identifier.
 - Merge requested with failing checks and no auto-merge path -> `blocked` + required checks to clear.
 - External CI failure only -> `in_progress` or `blocked` with provider URL evidence.
+
+## Troubleshooting Guide
+
+### "Merge reported success but changes not on main"
+1. Run `git log --oneline main -5` to verify merge commit exists
+2. Run `git status` to check for incomplete merge state
+3. Check `gh pr view <pr> --json state` to confirm PR is actually merged
+4. If merge commit missing, the merge may have failed silently - investigate gh output
+
+### "git status shows unmerged paths after rebase/merge"
+1. List conflicted files: `git diff --name-only --diff-filter=U`
+2. Check for conflict markers: `grep -r '<<<<<<<' . --include='*.ts' --include='*.tsx' 2>/dev/null`
+3. Do NOT report success - ask user to resolve conflicts or abort with `git rebase --abort` / `git merge --abort`
+
+### "Auth errors but gh auth status shows logged in"
+1. Check shell environment: `env | grep -i GITHUB_TOKEN`
+2. Verify no placeholder values in shell config: `grep -r 'your-token-here\|placeholder' ~/.zshenv ~/.zshrc ~/.bashrc 2>/dev/null`
+3. Test direct API call: `gh api user -q '.login'`
+4. If env var issues, ask user to check 1Password CLI integration: `op account list`
 
 ## Validation
 
