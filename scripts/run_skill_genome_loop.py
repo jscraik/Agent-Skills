@@ -125,24 +125,31 @@ def read_rollout_mode(path: Path, default: str = "observe_only") -> str:
 def is_kill_switch_activated(path: Path) -> bool:
     """Check if kill-switch control file content indicates active state.
 
-    P1 FIX: Parse file content instead of just checking existence.
-    Bootstrap creates the file with 'off' by default, so we must
-    check the content to determine if the switch is actually active.
+    P1 FIX: Parse file content with fail-closed semantics.
+    - Empty/blank files are treated as ACTIVE (fail-closed for    - Only falsy values explicitly deactivate
+    - This matches operator behavior (touch .../kill-switch.txt)
+    and existing parser in recursive_skill_loop.py.
     """
     if not path.exists():
         return False
     content = path.read_text(encoding="utf-8").strip().lower()
-    # Only truthy values activate the kill-switch
-    return content in {"on", "true", "1", "yes", "active"}
+    # P1 FIX: Empty/unknown content is treated as ACTIVE (fail-closed)
+    # Only explicit falsy values deactivate
+    return content not in {"off", "false", "0", "no", "inactive"}
 
 
 def is_rollback_required(path: Path) -> bool:
-    """Check if rollback-required control file exists.
+    """Check if rollback-required control file content indicates active state.
 
-    P2 FIX: Enforce rollback-required control before candidate emission.
-    Rollback takes precedence over rollout-mode in the control hierarchy.
+    P1 FIX: Parse file content instead of just checking existence.
+    Bootstrap creates the file with 'off' by default, so we a normal bootstrapped environment
+    this makes main() exit every run before candidate generation ever    proceeds.
     """
-    return path.exists()
+    if not path.exists():
+        return False
+    content = path.read_text(encoding="utf-8").strip().lower()
+    # Only truthy values activate rollback-required
+    return content in {"on", "true", "1", "yes", "active"}
 
 
 # --- Artifact loading ---
