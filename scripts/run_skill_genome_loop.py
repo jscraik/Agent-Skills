@@ -392,12 +392,13 @@ def write_processing_stats(
     candidates_high_conf: int,
     candidates_emitted: int,
     emitted: int = 0,
+    runs_processed: int = 0,  # P2 FIX: Actually track runs
 ) -> None:
     """Write processing stats for observability."""
     stats = {
         "window_id": current_window(),
         "processing_timestamp": datetime.now(timezone.utc).isoformat(),
-        "runs_processed": 0,  # Updated by caller if needed
+        "runs_processed": runs_processed,  # P2 FIX: Now tracked properly
         "candidates_raw": candidates_raw,
         "candidates_high_confidence": candidates_high_conf,
         "candidates_emitted": candidates_emitted,
@@ -411,17 +412,40 @@ def write_processing_stats(
 
 
 def append_candidates(candidates: List[Dict[str, Any]]) -> int:
-    """Append candidates to JSONL file atomically."""
+    """Append candidates to JSONL file atomically with deduplication.
+
+    P1 FIX: Deduplicate by candidate_id before appending to prevent
+    duplicate records when rerunning on the same artifact set.
+    """
     if not candidates:
         return 0
 
     CANDIDATES_PATH.parent.mkdir(parents=True, exist_ok=True)
 
+    # P1 FIX: Read existing candidate IDs for deduplication
+    existing_ids: Set[str] = set()
+    if CANDIDATES_PATH.exists():
+        for line in CANDIDATES_PATH.read_text(encoding="utf-8").splitlines():
+            try:
+                existing = json.loads(line)
+                existing_ids.add(existing.get("candidate_id", ""))
+            except json.JSONDecodeError:
+                continue
+
+    # Filter out duplicates
+    new_candidates = [
+        c for c in candidates
+        if c.get("candidate_id") not in existing_ids
+    ]
+
+    if not new_candidates:
+        return 0
+
     with open(CANDIDATES_PATH, "a", encoding="utf-8") as f:
-        for c in candidates:
+        for c in new_candidates:
             f.write(json.dumps(c, sort_keys=True) + "\n")
 
-    return len(candidates)
+    return len(new_candidates)
 
 
 # --- Main entry point ---
@@ -483,6 +507,7 @@ def main() -> int:
             len(high_conf),
             len(capped),
             emitted=0,
+            runs_processed=len(runs),  # P2 FIX
         )
         return 0
 
@@ -493,6 +518,7 @@ def main() -> int:
             len(high_conf),
             len(capped),
             emitted=0,
+            runs_processed=len(runs),  # P2 FIX
         )
         return 0
 
@@ -507,6 +533,7 @@ def main() -> int:
         len(high_conf),
         len(capped),
         emitted=emitted,
+        runs_processed=len(runs),  # P2 FIX
     )
 
     return 0
