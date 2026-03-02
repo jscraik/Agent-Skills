@@ -1,6 +1,7 @@
 # Agent Skills
 
-This repository is the source of truth for Codex and agent skills.
+<!-- Skill count: 133 | Genome: active -->
+**The source of truth for Codex and agent skills.**
 
 If you are new here:
 
