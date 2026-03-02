@@ -7,11 +7,13 @@ echo ""
 
 # 1. Plan graph validation
 echo "📊 Validating plan graphs..."
-./scripts/validate_plan_graphs.sh 2>/dev/null || echo "  ⚠️  Plan graph validation had issues"
+if ! ./scripts/validate_plan_graphs.sh 2>&1; then
+  echo "  ⚠️  Plan graph validation had issues (see above for details)"
+fi
 
 # 2. Recursive skill graph artifacts
 echo "🔄 Verifying skill graph artifacts..."
-python3 scripts/verify_recursive_skill_graph_artifacts.py 2>/dev/null || echo "  ⚠️  Artifact verification had issues"
+python3 scripts/verify_recursive_skill_graph_artifacts.py --quiet 2>/dev/null || echo "  ⚠️  Artifact verification had issues"
 
 # 3. Docs lint
 echo "📚 Running docs lint..."

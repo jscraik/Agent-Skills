@@ -42,15 +42,21 @@ while IFS= read -r path; do
 done < <(find docs/plans -maxdepth 1 -type f -name '*.md' | sort)
 
 status=0
+failed_plans=()
 for path in "${paths[@]}"; do
   echo "[plan-graph] lint $path"
-  if ! python3 "$LINTER" "$path"; then
+  if ! python3 "$LINTER" "$path" 2>&1; then
     status=1
+    failed_plans+=("$path")
   fi
 done
 
 if [[ "$status" -ne 0 ]]; then
-  echo "[plan-graph] one or more plan files failed lint" >&2
+  echo "" >&2
+  echo "[plan-graph] ⚠️  ${#failed_plans[@]} plan file(s) need task graphs:" >&2
+  for fp in "${failed_plans[@]}"; do
+    echo "  - $fp" >&2
+  done
   exit "$status"
 fi
 

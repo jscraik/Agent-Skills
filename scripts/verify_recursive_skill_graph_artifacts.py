@@ -109,6 +109,11 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Emit per-run control-state check summary in manifest",
     )
+    p.add_argument(
+        "--quiet",
+        action="store_true",
+        help="Only output summary counts, not full run details",
+    )
     return p.parse_args()
 
 
@@ -418,10 +423,18 @@ def main() -> int:
     if args.strict:
         non_compliant = [audit for audit in audits if audit.status != "compliant"]
         if non_compliant:
-            print(json.dumps(make_manifest(audits, run_state_check=args.run_state_check), indent=2))
+            if args.quiet:
+                print(json.dumps({k: v for k, v in manifest.items() if k != "runs"}, indent=2))
+            else:
+                print(json.dumps(make_manifest(audits, run_state_check=args.run_state_check), indent=2))
             return 3
 
-    print(json.dumps(manifest, indent=2))
+    if args.quiet:
+        # Only output summary, not full run details
+        output = {k: v for k, v in manifest.items() if k != "runs"}
+        print(json.dumps(output, indent=2))
+    else:
+        print(json.dumps(manifest, indent=2))
     return 0
 
 
