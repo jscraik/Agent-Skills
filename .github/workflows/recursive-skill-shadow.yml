@@ -50,7 +50,7 @@ jobs:
             --report-json /tmp/docs-lint-shadow.json
 
       - name: Upload shadow artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: recursive-skill-shadow-artifacts
           path: |
