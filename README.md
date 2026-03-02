@@ -182,6 +182,22 @@ python3 scripts/docs_lint.py --mode warn --config docs-policy.json
 
 ## Troubleshooting
 
+### Skill not loading in Codex or Claude Code
+
+Run the diagnostic tool:
+
+```bash
+python3 scripts/diagnose_skill.py <skill-name>
+# Or check all skills:
+python3 scripts/diagnose_skill.py --all
+```
+
+Common causes:
+
+- **Nested `.git` directory**: Skills with their own `.git` folder break discovery. Remove it: `rm -rf skills/<name>/.git`
+- **Missing symlink**: Re-run `bash scripts/sync_skills.sh`
+- **Invalid SKILL.md**: Ensure YAML frontmatter has `name:` and `description:`
+
 ### `docs_lint.py` reports link errors
 
 - Ensure internal docs links start with `/` (for example, `/docs/deployment`).
