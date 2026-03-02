@@ -1,21 +1,89 @@
 {
-  "generated_at": "2026-02-26T18:45:22Z",
+  "generated_at": "2026-03-02T10:19:24Z",
   "runs_root": "/Users/jamiecraik/dev/agent-skills/artifacts/skill-graphs/runs",
   "counts": {
     "compliant": 0,
-    "missing_mandatory": 37,
+    "missing_mandatory": 47,
     "legacy_partial": 0,
     "empty": 0
   },
-  "total_runs": 37,
+  "total_runs": 47,
   "run_status_counts": {
     "compliant": 0,
-    "missing_mandatory": 37,
+    "missing_mandatory": 47,
     "legacy_partial": 0,
     "empty": 0
   },
   "compliance_rate": 0.0,
   "runs": [
+    {
+      "run_dir": "artifacts/skill-graphs/runs/run_001",
+      "status": "missing_mandatory",
+      "required_files": [
+        "capture_record.json",
+        "events.jsonl",
+        "evidence_packet.json",
+        "iteration_journal.jsonl",
+        "lesson_candidates.json",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "missing_files": [
+        "capture_record.json",
+        "events.jsonl",
+        "evidence_packet.json",
+        "iteration_journal.jsonl",
+        "lesson_candidates.json",
+        "promotion_decision.json"
+      ],
+      "present_files": [
+        "run.json"
+      ],
+      "promotion_state": null,
+      "auto_capture_enabled": true,
+      "terminal_status": "failed",
+      "stop_reason": "evaluator_conflict",
+      "blocker_code": null,
+      "notes": [
+        "terminal_status=failed",
+        "stop_reason=evaluator_conflict"
+      ]
+    },
+    {
+      "run_dir": "artifacts/skill-graphs/runs/run_002",
+      "status": "missing_mandatory",
+      "required_files": [
+        "capture_record.json",
+        "events.jsonl",
+        "evidence_packet.json",
+        "iteration_journal.jsonl",
+        "lesson_candidates.json",
+        "promotion_decision.json",
+        "run.json",
+        "run_blocker.json"
+      ],
+      "missing_files": [
+        "capture_record.json",
+        "events.jsonl",
+        "evidence_packet.json",
+        "iteration_journal.jsonl",
+        "lesson_candidates.json",
+        "promotion_decision.json",
+        "run_blocker.json"
+      ],
+      "present_files": [
+        "run.json"
+      ],
+      "promotion_state": null,
+      "auto_capture_enabled": true,
+      "terminal_status": "failed",
+      "stop_reason": "policy_failed",
+      "blocker_code": null,
+      "notes": [
+        "terminal_status=failed",
+        "stop_reason=policy_failed"
+      ]
+    },
     {
       "run_dir": "artifacts/skill-graphs/runs/run_20260220T144703Z_425b7a",
       "status": "missing_mandatory",
@@ -48,8 +116,7 @@
       "notes": [
         "terminal_status=failed",
         "stop_reason=budget_exhausted"
-      ],
-      "event_blocker_codes": []
+      ]
     },
     {
       "run_dir": "artifacts/skill-graphs/runs/run_20260220T144710Z_425b7a",
@@ -83,8 +150,7 @@
       "notes": [
         "terminal_status=passed",
         "stop_reason=pass"
-      ],
-      "event_blocker_codes": []
+      ]
     },
     {
       "run_dir": "artifacts/skill-graphs/runs/run_20260220T144736Z_425b7a",
@@ -118,8 +184,7 @@
       "notes": [
         "terminal_status=passed",
         "stop_reason=pass"
-      ],
-      "event_blocker_codes": []
+      ]
     },
     {
       "run_dir": "artifacts/skill-graphs/runs/run_20260220T150021Z_518880",
@@ -153,8 +218,7 @@
       "notes": [
         "terminal_status=passed",
         "stop_reason=pass"
-      ],
-      "event_blocker_codes": []
+      ]
     },
     {
       "run_dir": "artifacts/skill-graphs/runs/run_20260220T150021Z_82ecf7",
@@ -188,8 +252,7 @@
       "notes": [
         "terminal_status=passed",
         "stop_reason=pass"
-      ],
-      "event_blocker_codes": []
+      ]
     },
     {
       "run_dir": "artifacts/skill-graphs/runs/run_20260220T150021Z_9b592b",
@@ -223,8 +286,7 @@
       "notes": [
         "terminal_status=passed",
         "stop_reason=pass"
-      ],
-      "event_blocker_codes": []
+      ]
     },
     {
       "run_dir": "artifacts/skill-graphs/runs/run_20260220T150021Z_bb9acb",
@@ -258,8 +320,7 @@
       "notes": [
         "terminal_status=passed",
         "stop_reason=pass"
-      ],
-      "event_blocker_codes": []
+      ]
     },
     {
       "run_dir": "artifacts/skill-graphs/runs/run_20260220T195545Z_8799c2",
@@ -292,8 +353,7 @@
       "notes": [
         "terminal_status=passed",
         "stop_reason=pass"
-      ],
-      "event_blocker_codes": []
+      ]
     },
     {
       "run_dir": "artifacts/skill-graphs/runs/run_20260224T175736Z_331545",
@@ -319,8 +379,7 @@
       "blocker_code": null,
       "notes": [
         "run.json is missing or unreadable"
-      ],
-      "event_blocker_codes": []
+      ]
     },
     {
       "run_dir": "artifacts/skill-graphs/runs/run_20260224T175736Z_518880",
@@ -346,8 +405,7 @@
       "blocker_code": null,
       "notes": [
         "run.json is missing or unreadable"
-      ],
-      "event_blocker_codes": []
+      ]
     },
     {
       "run_dir": "artifacts/skill-graphs/runs/run_20260224T175736Z_5ca1db",
@@ -373,8 +431,7 @@
       "blocker_code": null,
       "notes": [
         "run.json is missing or unreadable"
-      ],
-      "event_blocker_codes": []
+      ]
     },
     {
       "run_dir": "artifacts/skill-graphs/runs/run_20260224T175736Z_82ecf7",
@@ -400,8 +457,7 @@
       "blocker_code": null,
       "notes": [
         "run.json is missing or unreadable"
-      ],
-      "event_blocker_codes": []
+      ]
     },
     {
       "run_dir": "artifacts/skill-graphs/runs/run_20260224T175736Z_8786fa",
@@ -427,8 +483,7 @@
       "blocker_code": null,
       "notes": [
         "run.json is missing or unreadable"
-      ],
-      "event_blocker_codes": []
+      ]
     },
     {
       "run_dir": "artifacts/skill-graphs/runs/run_20260224T175736Z_9b592b",
@@ -454,8 +509,7 @@
       "blocker_code": null,
       "notes": [
         "run.json is missing or unreadable"
-      ],
-      "event_blocker_codes": []
+      ]
     },
     {
       "run_dir": "artifacts/skill-graphs/runs/run_20260224T175736Z_bb9acb",
@@ -481,8 +535,7 @@
       "blocker_code": null,
       "notes": [
         "run.json is missing or unreadable"
-      ],
-      "event_blocker_codes": []
+      ]
     },
     {
       "run_dir": "artifacts/skill-graphs/runs/run_20260224T175736Z_e5ee22",
@@ -508,8 +561,7 @@
       "blocker_code": null,
       "notes": [
         "run.json is missing or unreadable"
-      ],
-      "event_blocker_codes": []
+      ]
     },
     {
       "run_dir": "artifacts/skill-graphs/runs/run_20260226T171034662912Z_83cb58_213e8147",
@@ -535,8 +587,7 @@
       "blocker_code": null,
       "notes": [
         "run.json is missing or unreadable"
-      ],
-      "event_blocker_codes": []
+      ]
     },
     {
       "run_dir": "artifacts/skill-graphs/runs/run_20260226T171034705740Z_0f1548_213f68e1",
@@ -562,8 +613,7 @@
       "blocker_code": null,
       "notes": [
         "run.json is missing or unreadable"
-      ],
-      "event_blocker_codes": []
+      ]
     },
     {
       "run_dir": "artifacts/skill-graphs/runs/run_20260226T171034749921Z_181f31_21400397",
@@ -589,8 +639,7 @@
       "blocker_code": null,
       "notes": [
         "run.json is missing or unreadable"
-      ],
-      "event_blocker_codes": []
+      ]
     },
     {
       "run_dir": "artifacts/skill-graphs/runs/run_20260226T171034792213Z_2f18b9_21410f9b",
@@ -616,8 +665,7 @@
       "blocker_code": null,
       "notes": [
         "run.json is missing or unreadable"
-      ],
-      "event_blocker_codes": []
+      ]
     },
     {
       "run_dir": "artifacts/skill-graphs/runs/run_20260226T171034837284Z_e3a8be_214254d5",
@@ -643,8 +691,7 @@
       "blocker_code": null,
       "notes": [
         "run.json is missing or unreadable"
-      ],
-      "event_blocker_codes": []
+      ]
     },
     {
       "run_dir": "artifacts/skill-graphs/runs/run_20260226T171034887760Z_2d4047_2144e0f0",
@@ -670,8 +717,7 @@
       "blocker_code": null,
       "notes": [
         "run.json is missing or unreadable"
-      ],
-      "event_blocker_codes": []
+      ]
     },
     {
       "run_dir": "artifacts/skill-graphs/runs/run_20260226T171034943960Z_cf5698_2145c964",
@@ -697,8 +743,7 @@
       "blocker_code": null,
       "notes": [
         "run.json is missing or unreadable"
-      ],
-      "event_blocker_codes": []
+      ]
     },
     {
       "run_dir": "artifacts/skill-graphs/runs/run_20260226T171034985085Z_18e3f9_214933e4",
@@ -724,8 +769,7 @@
       "blocker_code": null,
       "notes": [
         "run.json is missing or unreadable"
-      ],
-      "event_blocker_codes": []
+      ]
     },
     {
       "run_dir": "artifacts/skill-graphs/runs/run_20260226T171035025129Z_0712e1_214a22b7",
@@ -751,8 +795,7 @@
       "blocker_code": null,
       "notes": [
         "run.json is missing or unreadable"
-      ],
-      "event_blocker_codes": []
+      ]
     },
     {
       "run_dir": "artifacts/skill-graphs/runs/run_20260226T171035065451Z_327cdb_214b6a52",
@@ -778,8 +821,7 @@
       "blocker_code": null,
       "notes": [
         "run.json is missing or unreadable"
-      ],
-      "event_blocker_codes": []
+      ]
     },
     {
       "run_dir": "artifacts/skill-graphs/runs/run_20260226T171035105378Z_4b845e_214c6433",
@@ -805,8 +847,7 @@
       "blocker_code": null,
       "notes": [
         "run.json is missing or unreadable"
-      ],
-      "event_blocker_codes": []
+      ]
     },
     {
       "run_dir": "artifacts/skill-graphs/runs/run_20260226T171035145117Z_2d867d_214d8055",
@@ -832,8 +873,7 @@
       "blocker_code": null,
       "notes": [
         "run.json is missing or unreadable"
-      ],
-      "event_blocker_codes": []
+      ]
     },
     {
       "run_dir": "artifacts/skill-graphs/runs/run_20260226T171439728483Z_9b592b_3e51d322",
@@ -859,8 +899,7 @@
       "blocker_code": null,
       "notes": [
         "run.json is missing or unreadable"
-      ],
-      "event_blocker_codes": []
+      ]
     },
     {
       "run_dir": "artifacts/skill-graphs/runs/run_20260226T171439820489Z_8786fa_3e640051",
@@ -886,8 +925,7 @@
       "blocker_code": null,
       "notes": [
         "run.json is missing or unreadable"
-      ],
-      "event_blocker_codes": []
+      ]
     },
     {
       "run_dir": "artifacts/skill-graphs/runs/run_20260226T171439910572Z_518880_3e6ae292",
@@ -913,8 +951,7 @@
       "blocker_code": null,
       "notes": [
         "run.json is missing or unreadable"
-      ],
-      "event_blocker_codes": []
+      ]
     },
     {
       "run_dir": "artifacts/skill-graphs/runs/run_20260226T171439998828Z_331545_3e6cdb11",
@@ -940,8 +977,7 @@
       "blocker_code": null,
       "notes": [
         "run.json is missing or unreadable"
-      ],
-      "event_blocker_codes": []
+      ]
     },
     {
       "run_dir": "artifacts/skill-graphs/runs/run_20260226T171440087620Z_bb9acb_3e6fbddf",
@@ -967,8 +1003,7 @@
       "blocker_code": null,
       "notes": [
         "run.json is missing or unreadable"
-      ],
-      "event_blocker_codes": []
+      ]
     },
     {
       "run_dir": "artifacts/skill-graphs/runs/run_20260226T171440175092Z_5ca1db_3e71dcb4",
@@ -994,8 +1029,7 @@
       "blocker_code": null,
       "notes": [
         "run.json is missing or unreadable"
-      ],
-      "event_blocker_codes": []
+      ]
     },
     {
       "run_dir": "artifacts/skill-graphs/runs/run_20260226T171440265063Z_82ecf7_3e74e6fc",
@@ -1021,8 +1055,7 @@
       "blocker_code": null,
       "notes": [
         "run.json is missing or unreadable"
-      ],
-      "event_blocker_codes": []
+      ]
     },
     {
       "run_dir": "artifacts/skill-graphs/runs/run_20260226T171440352137Z_e5ee22_3e76d9f5",
@@ -1048,8 +1081,7 @@
       "blocker_code": null,
       "notes": [
         "run.json is missing or unreadable"
-      ],
-      "event_blocker_codes": []
+      ]
     },
     {
       "run_dir": "artifacts/skill-graphs/runs/run_20260226T173403662298Z_83cb58_14467814",
@@ -1075,8 +1107,215 @@
       "blocker_code": null,
       "notes": [
         "run.json is missing or unreadable"
+      ]
+    },
+    {
+      "run_dir": "artifacts/skill-graphs/runs/run_20260226T215859312118Z_9b592b_103cdd32",
+      "status": "missing_mandatory",
+      "required_files": [
+        "events.jsonl",
+        "iteration_journal.jsonl",
+        "promotion_decision.json",
+        "run.json"
       ],
-      "event_blocker_codes": []
+      "missing_files": [
+        "iteration_journal.jsonl",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "present_files": [
+        "events.jsonl"
+      ],
+      "promotion_state": null,
+      "auto_capture_enabled": null,
+      "terminal_status": null,
+      "stop_reason": null,
+      "blocker_code": null,
+      "notes": [
+        "run.json is missing or unreadable"
+      ]
+    },
+    {
+      "run_dir": "artifacts/skill-graphs/runs/run_20260226T215859392008Z_8786fa_103d1005",
+      "status": "missing_mandatory",
+      "required_files": [
+        "events.jsonl",
+        "iteration_journal.jsonl",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "missing_files": [
+        "iteration_journal.jsonl",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "present_files": [
+        "events.jsonl"
+      ],
+      "promotion_state": null,
+      "auto_capture_enabled": null,
+      "terminal_status": null,
+      "stop_reason": null,
+      "blocker_code": null,
+      "notes": [
+        "run.json is missing or unreadable"
+      ]
+    },
+    {
+      "run_dir": "artifacts/skill-graphs/runs/run_20260226T215859471269Z_518880_103d6e29",
+      "status": "missing_mandatory",
+      "required_files": [
+        "events.jsonl",
+        "iteration_journal.jsonl",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "missing_files": [
+        "iteration_journal.jsonl",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "present_files": [
+        "events.jsonl"
+      ],
+      "promotion_state": null,
+      "auto_capture_enabled": null,
+      "terminal_status": null,
+      "stop_reason": null,
+      "blocker_code": null,
+      "notes": [
+        "run.json is missing or unreadable"
+      ]
+    },
+    {
+      "run_dir": "artifacts/skill-graphs/runs/run_20260226T215859550724Z_331545_103d8db1",
+      "status": "missing_mandatory",
+      "required_files": [
+        "events.jsonl",
+        "iteration_journal.jsonl",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "missing_files": [
+        "iteration_journal.jsonl",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "present_files": [
+        "events.jsonl"
+      ],
+      "promotion_state": null,
+      "auto_capture_enabled": null,
+      "terminal_status": null,
+      "stop_reason": null,
+      "blocker_code": null,
+      "notes": [
+        "run.json is missing or unreadable"
+      ]
+    },
+    {
+      "run_dir": "artifacts/skill-graphs/runs/run_20260226T215859630517Z_bb9acb_103dbbdd",
+      "status": "missing_mandatory",
+      "required_files": [
+        "events.jsonl",
+        "iteration_journal.jsonl",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "missing_files": [
+        "iteration_journal.jsonl",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "present_files": [
+        "events.jsonl"
+      ],
+      "promotion_state": null,
+      "auto_capture_enabled": null,
+      "terminal_status": null,
+      "stop_reason": null,
+      "blocker_code": null,
+      "notes": [
+        "run.json is missing or unreadable"
+      ]
+    },
+    {
+      "run_dir": "artifacts/skill-graphs/runs/run_20260226T215859706498Z_5ca1db_103dddcb",
+      "status": "missing_mandatory",
+      "required_files": [
+        "events.jsonl",
+        "iteration_journal.jsonl",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "missing_files": [
+        "iteration_journal.jsonl",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "present_files": [
+        "events.jsonl"
+      ],
+      "promotion_state": null,
+      "auto_capture_enabled": null,
+      "terminal_status": null,
+      "stop_reason": null,
+      "blocker_code": null,
+      "notes": [
+        "run.json is missing or unreadable"
+      ]
+    },
+    {
+      "run_dir": "artifacts/skill-graphs/runs/run_20260226T215859781607Z_82ecf7_103e0e6f",
+      "status": "missing_mandatory",
+      "required_files": [
+        "events.jsonl",
+        "iteration_journal.jsonl",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "missing_files": [
+        "iteration_journal.jsonl",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "present_files": [
+        "events.jsonl"
+      ],
+      "promotion_state": null,
+      "auto_capture_enabled": null,
+      "terminal_status": null,
+      "stop_reason": null,
+      "blocker_code": null,
+      "notes": [
+        "run.json is missing or unreadable"
+      ]
+    },
+    {
+      "run_dir": "artifacts/skill-graphs/runs/run_20260226T215859856033Z_e5ee22_103e2d9f",
+      "status": "missing_mandatory",
+      "required_files": [
+        "events.jsonl",
+        "iteration_journal.jsonl",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "missing_files": [
+        "iteration_journal.jsonl",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "present_files": [
+        "events.jsonl"
+      ],
+      "promotion_state": null,
+      "auto_capture_enabled": null,
+      "terminal_status": null,
+      "stop_reason": null,
+      "blocker_code": null,
+      "notes": [
+        "run.json is missing or unreadable"
+      ]
     }
   ],
   "prune_empty": {
@@ -1084,5 +1323,5 @@
     "dry_run": false,
     "actions": {}
   },
-  "status": "fail"
+  "status": "ok"
 }
