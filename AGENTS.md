@@ -17,6 +17,7 @@ This repository is the canonical source of Codex skills, docs, and agent workflo
 - [Non-standard build/typecheck commands](#non-standard-buildtypecheck-commands)
 - [Tooling essentials](#tooling-essentials)
 - [Shell script conventions](#shell-script-conventions)
+- [Validation and Diagnostics](#validation-and-diagnostics)
 - [Global instructions discovery order](#global-instructions-discovery-order)
 - [Documentation map](#documentation-map)
 - [Planning](#planning)
@@ -52,6 +53,11 @@ This repository is the canonical source of Codex skills, docs, and agent workflo
 - In package-based subdirectories, use declared scripts (for example `typecheck`, `build`, or `test`) from that package’s own `package.json`.
 
 ## Tooling essentials
+- **Task runner**: Use `just` for common tasks (`just --list` to see all commands).
+  - `just status` — Quick repo health overview
+  - `just validate` — Run all validation
+  - `just diagnose` — Diagnose all skills
+  - `just ci-local` — Run CI checks locally
 - Run shell commands with `zsh -lc` (fallback to `bash -lc` when `zsh` is unavailable).
 - Prefer `rg`, `fd`, and `jq`.
 - Read `~/.codex/instructions/tooling.md` before choosing tools.
@@ -62,6 +68,11 @@ This repository is the canonical source of Codex skills, docs, and agent workflo
 - Validate script syntax with `bash -n script.sh`.
 - Run `shellcheck` on wrapper scripts when available in repo workflow.
 - Keep shell scripts deterministic; avoid hidden environment assumptions.
+
+## Validation and Diagnostics
+- Run `just validate` or `bash scripts/validate_all.sh` for full validation.
+- Diagnose skill loading issues: `python3 scripts/diagnose_skill.py <skill-name>` or `--all`.
+- Pre-commit hooks: `prek run --all-files` (nested .git detection, skill diagnostics, docs lint).
 
 ## Global instructions discovery order
 1. `~/.codex/AGENTS.md`
