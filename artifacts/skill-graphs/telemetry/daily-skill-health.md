@@ -14,3 +14,10 @@
 - Uplift promotion decisions: `pass=0` `hold=0` `insufficient_data=0`
 - Uplift auto-apply decisions: `pass=0` `hold=0` `insufficient_data=0`
 - Event envelope errors: `0`
+
+## Skill Spotlight (Auto-Generated)
+- **Skill**: interview-kernel
+- **Last modified**: 2026-03-01
+- **Signal**: 2 failed run(s)
+- **Failure reasons**: policy_failed, evaluator_conflict
+- **Suggested action**: Review trigger phrases and confidence thresholds
