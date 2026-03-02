@@ -141,15 +141,17 @@ def is_kill_switch_activated(path: Path) -> bool:
 def is_rollback_required(path: Path) -> bool:
     """Check if rollback-required control file content indicates active state.
 
-    P1 FIX: Parse file content instead of just checking existence.
-    Bootstrap creates the file with 'off' by default, so we a normal bootstrapped environment
-    this makes main() exit every run before candidate generation ever    proceeds.
+    P1 FIX: Parse file content with fail-closed semantics.
+    - Empty/blank files are treated as ACTIVE (fail-closed)
+    - Only falsy values explicitly deactivate
+    - This matches the documented control posture and existing parser behavior.
     """
     if not path.exists():
         return False
     content = path.read_text(encoding="utf-8").strip().lower()
-    # Only truthy values activate rollback-required
-    return content in {"on", "true", "1", "yes", "active"}
+    # P1 FIX: Empty/unknown content is treated as ACTIVE (fail-closed)
+    # Only explicit falsy values deactivate
+    return content not in {"off", "false", "0", "no", "inactive"}
 
 
 # --- Artifact loading ---
@@ -166,8 +168,12 @@ def load_json(path: Path) -> Optional[Dict[str, Any]]:
     return None
 
 
-def discover_runs(runs_root: Path) -> List[Path]:
-    """Discover all run directories with required artifacts."""
+def discover_runs(runs_root: Path, since_watermark: Optional[str] = None) -> List[Path]:
+    """Discover all run directories with required artifacts.
+
+    P1 FIX: Filter runs by watermark to avoid reprocessing historical artifacts.
+    Only returns runs with started_at timestamp after the watermark.
+    """
     runs = []
     if not runs_root.exists():
         return runs
@@ -180,6 +186,13 @@ def discover_runs(runs_root: Path) -> List[Path]:
         missing = [f for f in REQUIRED_RUN_FILES if not (run_dir / f).exists()]
         if missing:
             continue
+
+        # P1 FIX: Filter by watermark if provided
+        if since_watermark:
+            run_json = load_json(run_dir / "run.json") or {}
+            started_at = run_json.get("started_at", "")
+            if started_at and started_at <= since_watermark:
+                continue
 
         runs.append(run_dir)
 
@@ -505,8 +518,13 @@ def main() -> int:
 
     log(f"Starting skill genome loop (mode={rollout_mode})")
 
+    # P1 FIX: Read watermark for incremental processing
+    watermark = read_watermark()
+    if watermark:
+        log(f"Processing runs since watermark: {watermark}")
+
     # Load artifacts
-    runs = discover_runs(runs_root)
+    runs = discover_runs(runs_root, since_watermark=watermark)
     log(f"Discovered {len(runs)} valid runs")
 
     artifacts = [load_run_artifacts(r) for r in runs]
@@ -543,14 +561,8 @@ def main() -> int:
         return 0
 
     if args.dry_run:
-        log(f"DRY_RUN: Would write {len(capped)} candidates")
-        write_processing_stats(
-            len(candidates),
-            len(high_conf),
-            len(capped),
-            emitted=0,
-            runs_processed=len(runs),  # P2 FIX
-        )
+        log(f"DRY_RUN: Would write {len(capped)} candidates (no stats written)")
+        # P2 FIX: Skip stats writes in dry-run mode to avoid mutating state
         return 0
 
     # Write candidates
