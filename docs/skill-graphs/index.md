@@ -1,6 +1,6 @@
 # Skill Graphs (Recursive Improvement)
 
-This section defines the MVP contracts and operating workflows for the recursive skill self-improvement loop:
+This section defines the MVP contracts and operating workflows for the recursive skill self-improvement loop
 
 `generate -> evaluate -> diagnose -> improve -> re-score`
 
@@ -24,6 +24,24 @@ Execution model shorthand:
 
 - **Historical pilot baseline:** Phases 1-3 + Phase 4 capture controls.
 - **Current migration:** all-skills onboarding via wave model (`wave-0-controls -> wave-1-manual -> wave-2-co-pilot`).
+- **Migration complete:** All 116 active skills onboarded with valid profiles.
+
+## Skill Genome Loop
+
+- [Runbook](/docs/skill-graphs/runbooks/skill-genome-loop.md)
+- [Telemetry Health](/docs/skill-graphs/telemetry/daily-skill-health.md)
+- Controls: `artifacts/skill-graphs/controls/`
+- Candidates: `artifacts/skill-graphs/telemetry/candidates.jsonl`
+
+The Skill Genome Loop is a nightly batch process that:
+1. Ingests run/session artifacts from the recursive skill loop
+2. Computes routing confusion and outcome quality signals per skill
+3. Emits high-confidence, human-gated draft PR candidates for skill-definition improvements
+
+**Execution:**
+- **Schedule:** Nightly at 4:00 AM UTC (cron)
+- **Mode:** Controlled via `rollout-mode.txt` (`off | observe_only | active`)
+- **Review:** Human gate via `review_candidates.py` before candidates are finalized
 
 ## MVP Scope (Phases 1-3) + Phase 4 capture baseline
 

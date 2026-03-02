@@ -12,15 +12,102 @@ If you are new here:
 - Keep one canonical skill library.
 - Generate a flat symlink view in `/skills` for tool loaders.
 - Maintain clear documentation contracts for contributors.
+- Run nightly skill improvement analysis via the Skill Genome Loop.
+
+## Skill Genome Loop
+
+The Skill Genome Loop analyzes skill usage patterns and identifies improvement candidates through a human-gated review process:
+
+```bash
+# Run the genome loop
+python3 scripts/run_skill_genome_loop.py
+
+# Review pending candidates
+python3 scripts/review_candidates.py --list
+
+# Approve a candidate
+python3 scripts/review_candidates.py --approve <candidate_id>
+```
+
+**Key features:**
+- Nightly cron job (4:00 AM UTC) for automated analysis
+- Human review gate for all improvement candidates
+- Fail-closed controls (kill-switch, rollback, rollout-mode)
+- Confidence gating (composite_score >= 0.82, window count >= 2)
+
+**See also:** [Skill Genome Loop Runbook](/docs/skill-graphs/runbooks/skill-genome-loop.md)
+
+## Architecture Diagrams
+
+Generate architecture diagrams using `@brainwav/diagram`:
+
+```bash
+# Install globally
+npm i -g @brainwav/diagram
+
+# Analyze codebase
+diagram analyze .
+
+# Generate diagram
+diagram generate . --output diagram.mmd
+```
+
+Configuration file: `.diagramrc` (excludes `node_modules`, test files, build artifacts)
 
 ## Quickstart
 
 Run these commands from the repository root:
 
 ```bash
+# Sync skills and regenerate index
 bash scripts/sync_skills.sh
-python3 scripts/docs_lint.py --mode warn --config docs-policy.json
+
+# Run all validations (plans, skill graphs, docs)
+bash scripts/validate_all.sh
+
+# Generate architecture diagrams
+diagram generate . --output artifacts/diagram.mmd
 ```
+
+### Validation
+
+The consolidated validation script runs all checks:
+
+```bash
+bash scripts/validate_all.sh
+```
+
+This validates:
+- Plan task graphs (dependency checking)
+- Skill graph artifact compliance
+- Documentation structure and links
+
+## Skill Genome Loop
+
+Nightly batch process for skill improvement candidates:
+
+```bash
+# Run genome loop manually
+python3 scripts/run_skill_genome_loop.py
+
+# Review pending candidates
+python3 scripts/review_candidates.py --list
+
+# Approve/reject candidates
+python3 scripts/review_candidates.py --approve <id>
+python3 scripts/review_candidates.py --reject <id>
+```
+
+**Controls:**
+- `artifacts/skill-graphs/controls/rollout-mode.txt` — `off | observe_only | active`
+- `artifacts/skill-graphs/controls/kill-switch.txt` — Emergency stop (file exists = stop)
+
+**Outputs:**
+- `artifacts/skill-graphs/telemetry/pending-candidates.jsonl` — Awaiting review
+- `artifacts/skill-graphs/telemetry/candidates.jsonl` — Approved candidates
+- `logs/genome-loop.log` — Execution logs
+
+**Documentation:** [Skill Genome Loop Runbook](/docs/skill-graphs/runbooks/skill-genome-loop.md)
 
 ## Verify your setup
 
