@@ -1,0 +1,39 @@
+name: Feature Request
+description: Propose a new skill, workflow improvement, or governance enhancement
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem / Motivation
+      description: What friction are you trying to remove?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed change
+      description: Describe the desired behavior and where it should live
+      placeholder: "Skill path, scripts touched, and expected workflow impact."
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: How should we validate this is done?
+      placeholder: |
+        - [ ] `bash scripts/validate_all.sh` passes
+        - [ ] `python3 scripts/diagnose_skill.py --all` passes
+    validations:
+      required: false
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Any other approaches reviewed?
+    validations:
+      required: false

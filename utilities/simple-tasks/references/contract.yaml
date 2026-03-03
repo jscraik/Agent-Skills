@@ -1,0 +1,18 @@
+purpose: >
+  Define expected behavior for simple-tasks to install a lightweight local task workflow
+  using scripts/task.sh with tasks/TASKS.md as the canonical backlog.
+schema_version: 1.0
+triggers:
+  - user asks for local lightweight task tracking in a repo
+  - user asks to install or upgrade scripts/task.sh workflow
+inputs:
+  - project path and install mode, optionally dry-run
+outputs:
+  - installed task script and canonical markdown task files
+  - working task commands for claim/status/summary flow
+non_goals:
+  - replacing external multi-team issue tracking platforms
+  - broad project management automation beyond local workflow
+risks:
+  - task-state drift if canonical file is not used; mitigated by workflow guidance
+  - sensitive data leaks in task notes; mitigated by redaction requirements

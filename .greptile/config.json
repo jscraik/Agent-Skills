@@ -1,0 +1,42 @@
+{
+  "version": "1.0",
+  "strictness": 2,
+  "fileChangeLimit": 300,
+  "commentTypes": [
+    "bug-risk",
+    "security",
+    "architecture",
+    "maintainability"
+  ],
+  "enableCrossFileGraphQueries": true,
+  "requireIndependentValidation": true,
+  "confidence": {
+    "minMergeScore": 4,
+    "targetScore": 5
+  },
+  "rules": [
+    {
+      "id": "no-main-direct-push",
+      "glob": "**/*",
+      "description": "No direct push to main; all changes flow through reviewed PRs.",
+      "severity": "high"
+    },
+    {
+      "id": "skill-doc-link-style",
+      "glob": "**/*.md",
+      "description": "Internal documentation links should use full root paths without trailing slash.",
+      "severity": "medium"
+    },
+    {
+      "id": "skill-metadata-required",
+      "glob": "**/SKILL.md",
+      "description": "Every skill must preserve valid frontmatter with name and description.",
+      "severity": "high"
+    }
+  ],
+  "ignorePatterns": [
+    "artifacts/**",
+    "node_modules/**",
+    "skills/**"
+  ]
+}

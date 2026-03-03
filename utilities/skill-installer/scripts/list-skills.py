@@ -42,15 +42,19 @@ def _skills_root() -> str:
     return os.path.expanduser("~/dev/agent-skills")
 
 
-def _installed_skills() -> set[str]:
+def _installed_skills() -> dict[str, list[str]]:
     root = Path(_skills_root())
     if not root.is_dir():
-        return set()
-    entries: set[str] = set()
+        return {}
+    entries: dict[str, list[str]] = {}
     for skill_md in root.rglob("SKILL.md"):
         if ".git" in skill_md.parts:
             continue
-        entries.add(skill_md.parent.name)
+        skill_name = skill_md.parent.name
+        location = str(skill_md.parent.relative_to(root)).replace("\\", "/")
+        entries.setdefault(skill_name, []).append(location)
+    for locations in entries.values():
+        locations.sort()
     return entries
 
 
@@ -97,12 +101,24 @@ def main(argv: list[str]) -> int:
         installed = _installed_skills()
         if args.format == "json":
             payload = [
-                {"name": name, "installed": name in installed} for name in skills
+                {
+                    "name": name,
+                    "installed": name in installed,
+                    "locations": installed.get(name, []),
+                }
+                for name in skills
             ]
             print(json.dumps(payload))
         else:
             for idx, name in enumerate(skills, start=1):
-                suffix = " (already installed)" if name in installed else ""
+                locations = installed.get(name, [])
+                if locations:
+                    if len(locations) == 1:
+                        suffix = f" (already installed: {locations[0]})"
+                    else:
+                        suffix = f" (already installed: {', '.join(locations)})"
+                else:
+                    suffix = ""
                 print(f"{idx}. {name}{suffix}")
         return 0
     except ListError as exc:

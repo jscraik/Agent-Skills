@@ -1,0 +1,87 @@
+name: Harness PR Pipeline
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  pr-template:
+    name: pr-template
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate PR template completion
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = context.payload.pull_request?.body ?? '';
+            const errors = [];
+
+            if (body.trim().length === 0) {
+              errors.push('PR body is empty. Fill out the PR template.');
+            }
+
+            const requiredSections = ['## Summary', '## Checklist', '## Release notes'];
+            for (const section of requiredSections) {
+              if (!body.includes(section)) {
+                errors.push(`Missing required section: ${section}`);
+              }
+            }
+
+            if (/\[PROMPT:/i.test(body)) {
+              errors.push('PR body still contains template prompt placeholders.');
+            }
+
+            if (errors.length > 0) {
+              core.setFailed(errors.join('\n'));
+            }
+
+  repo-validate:
+    name: repo-validate
+    needs: [pr-template]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Run repo validation
+        run: bash scripts/validate_all.sh
+
+      - name: Run skill diagnostics
+        run: python3 scripts/diagnose_skill.py --all
+
+      - name: Run docs lint
+        run: python3 scripts/docs_lint.py --mode warn --config docs-policy.json
+
+  harness-preflight:
+    name: harness-preflight
+    needs: [repo-validate]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: Install coding-harness
+        run: npm install -g @brainwav/coding-harness@latest
+
+      - name: Run harness preflight gate
+        run: |
+          CHANGED_FILES="$(git diff --name-only "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}" | paste -sd, -)"
+          if [ -z "$CHANGED_FILES" ]; then
+            CHANGED_FILES="README.md"
+          fi
+          harness preflight-gate \
+            --contract harness.contract.json \
+            --files "$CHANGED_FILES" \
+            --max-tier high \
+            --json

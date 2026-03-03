@@ -1,0 +1,18 @@
+purpose: >
+  Define expected behavior for xcode-makefiles to install deterministic Makefile-based
+  build/test/run tooling for iOS and macOS projects with AGENT_NAME isolation.
+schema_version: 1.0
+triggers:
+  - user requests reproducible Xcode CLI build tooling
+  - user requests make targets and scripts added to an existing Xcode project
+inputs:
+  - project path, app name, platform, and optional install flags
+outputs:
+  - installed makefile/scripts toolkit and runnable build/test/run targets
+  - agent-isolated build directories under build/
+non_goals:
+  - full app scaffolding and template generation
+  - modifying unrelated project modules outside requested install scope
+risks:
+  - platform misconfiguration causing failed builds; mitigated by required flags + diagnose
+  - logging sensitive values; mitigated by default redaction guidance

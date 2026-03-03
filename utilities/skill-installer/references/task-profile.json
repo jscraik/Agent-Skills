@@ -12,31 +12,52 @@
     "max_iterations": 4,
     "max_elapsed_ms": 120000,
     "max_tokens": 12000,
-    "no_improvement_escalation_limit": 2
+    "no_improvement_escalation_limit": 2,
+    "deconflict_advisory_threshold": 0.2,
+    "deconflict_block_threshold": 0.45
   },
   "criteria": [
     {
       "id": "clarity",
       "label": "Instructional clarity",
       "threshold": 0.72,
-      "weight": 0.34,
+      "weight": 0.28,
       "critical": true
     },
     {
       "id": "specificity",
       "label": "Concrete implementation detail",
       "threshold": 0.68,
-      "weight": 0.33,
+      "weight": 0.26,
       "critical": true
     },
     {
       "id": "safety",
       "label": "Safety/compliance compliance",
       "threshold": 0.85,
-      "weight": 0.33,
+      "weight": 0.26,
+      "critical": true
+    },
+    {
+      "id": "deconflict_quality",
+      "label": "Overlap detection + merge-first quality",
+      "threshold": 0.7,
+      "weight": 0.2,
       "critical": true
     }
   ],
+  "knowledge_graph": {
+    "enabled": true,
+    "artifact_glob": "artifacts/deconflict/report-*.json",
+    "node_types": [
+      "candidate_skill",
+      "installed_skill"
+    ],
+    "edge_types": [
+      "overlaps_with",
+      "same_job_candidate"
+    ]
+  },
   "delegation": {
     "mode": "manual",
     "human_baseline_minutes": 60.0,

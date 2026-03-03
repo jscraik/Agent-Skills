@@ -1,0 +1,30 @@
+# Prek configuration for agent-skills
+# Run: prek install && prek run --all-files
+
+[default_install_hook_types]
+pre_commit = true
+
+[[repos]]
+repo = "local"
+
+[[repos.hooks]]
+id = "validate-all"
+name = "Validate all"
+entry = "bash scripts/validate_all.sh"
+language = "system"
+pass_filenames = false
+
+[[repos.hooks]]
+id = "diagnose-skills"
+name = "Diagnose skills"
+entry = "python3 scripts/diagnose_skill.py --all"
+language = "system"
+pass_filenames = false
+
+[[repos.hooks]]
+id = "docs-lint"
+name = "Docs lint"
+entry = "python3 scripts/docs_lint.py --mode warn --config docs-policy.json"
+language = "system"
+pass_filenames = false
+stages = ["pre-push"]

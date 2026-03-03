@@ -5,6 +5,11 @@ usage() {
   cat <<'USAGE'
 Usage:
   validate_role.sh --role-name NAME --config PATH --role-config PATH --schema PATH
+
+Optional assertions:
+  --expect-max-threads N
+  --expect-max-depth N
+  --expect-job-max-runtime-seconds N
 USAGE
 }
 
@@ -12,6 +17,9 @@ role_name=""
 config_path=""
 role_config_path=""
 schema_path=""
+expect_max_threads=""
+expect_max_depth=""
+expect_job_max_runtime_seconds=""
 
 require_option_value() {
   local opt="$1"
@@ -36,6 +44,15 @@ while [[ $# -gt 0 ]]; do
     --schema)
       require_option_value "$1" "${2:-}"
       schema_path="$2"; shift 2 ;;
+    --expect-max-threads)
+      require_option_value "$1" "${2:-}"
+      expect_max_threads="$2"; shift 2 ;;
+    --expect-max-depth)
+      require_option_value "$1" "${2:-}"
+      expect_max_depth="$2"; shift 2 ;;
+    --expect-job-max-runtime-seconds)
+      require_option_value "$1" "${2:-}"
+      expect_job_max_runtime_seconds="$2"; shift 2 ;;
     -h|--help)
       usage; exit 0 ;;
     *)
@@ -50,6 +67,19 @@ if [[ -z "$role_name" || -z "$config_path" || -z "$role_config_path" || -z "$sch
   usage
   exit 2
 fi
+
+for pair in \
+  "expect_max_threads:$expect_max_threads" \
+  "expect_max_depth:$expect_max_depth" \
+  "expect_job_max_runtime_seconds:$expect_job_max_runtime_seconds"
+do
+  key="${pair%%:*}"
+  value="${pair#*:}"
+  if [[ -n "$value" ]] && ! [[ "$value" =~ ^[0-9]+$ ]]; then
+    echo "Invalid --${key//_/-} value (expected integer): $value" >&2
+    exit 1
+  fi
+done
 
 if ! command -v jq >/dev/null 2>&1; then
   echo "Missing dependency: jq" >&2
@@ -97,5 +127,29 @@ for required_key in model model_reasoning_effort developer_instructions; do
     exit 1
   fi
 done
+
+if [[ -n "$expect_max_threads" ]]; then
+  actual="$(yq -p=toml -o=json '.agents.max_threads' "$config_path")"
+  if [[ "$actual" != "$expect_max_threads" ]]; then
+    echo "Expected agents.max_threads=$expect_max_threads but found $actual" >&2
+    exit 1
+  fi
+fi
+
+if [[ -n "$expect_max_depth" ]]; then
+  actual="$(yq -p=toml -o=json '.agents.max_depth' "$config_path")"
+  if [[ "$actual" != "$expect_max_depth" ]]; then
+    echo "Expected agents.max_depth=$expect_max_depth but found $actual" >&2
+    exit 1
+  fi
+fi
+
+if [[ -n "$expect_job_max_runtime_seconds" ]]; then
+  actual="$(yq -p=toml -o=json '.agents.job_max_runtime_seconds' "$config_path")"
+  if [[ "$actual" != "$expect_job_max_runtime_seconds" ]]; then
+    echo "Expected agents.job_max_runtime_seconds=$expect_job_max_runtime_seconds but found $actual" >&2
+    exit 1
+  fi
+fi
 
 echo "Role validation passed for '$role_name'."

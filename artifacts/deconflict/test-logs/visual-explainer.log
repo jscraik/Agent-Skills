@@ -1,0 +1,27 @@
+Deconflict advisory: 'visual-explainer-nicobailon' matched installed skills by overlap >= 20% or same-job intent similarity.
+Policy thresholds: advisory=20%, block=45% | block candidates=1
+Top overlap matches:
+  - /Users/jamiecraik/dev/agent-skills/utilities/visual-explainer (overall=58%, text=61%, commands=73%, intent=59%, harness=0%) [same-job] [block] [confidence=high]
+    shared terms: 2-3, 2-4, 3-5, about, absolute, absorb, abstract, accent, accent-tinted, accents
+    improvement idea: Candidate has install/validation commands not in current skill: `--slides`, `./references/slide-patterns.md`.
+    improvement idea: Candidate adds intent/trigger coverage terms: 0369a1, 06b6d4, 0891b2, 10-12, 100dvh, 13-slide.
+    merge proposal: /Users/jamiecraik/dev/agent-skills/artifacts/deconflict/proposals/visual-explainer-nicobailon__into__visual-explainer.md
+Deconflict notes:
+  - harness: no overlap hits found; using lexical fallback weights
+Merge-plan (advisory, no filesystem changes):
+  1) Compare Scope/Triggers and Deliverables.
+  2) Preserve stricter validation and safety gates.
+  3) Fold missing capabilities into the existing skill.
+  4) Re-run quick_validate, skill_gate, analyze_skill, and openclaw_skill_guard.
+Dry-run note: real install would pause at block threshold without explicit confirmation.
+Warning: Potential prompt-injection or risky command patterns detected:
+  - [HIGH] CHANGELOG.md: High-risk control language
+  - [LOW] banner.png: skipped large file (>1MB) from risk scan
+  - [HIGH] SKILL.md: High-risk control language
+  - [HIGH] references/libraries.md: Prompt override language
+  - [HIGH] references/libraries.md: High-risk control language
+  - [HIGH] prompts/plan-review.md: Prompt override language
+Dry-run continuing despite warnings.
+Deconflict artifact: /Users/jamiecraik/dev/agent-skills/artifacts/deconflict/test-visual-explainer.json
+DRY-RUN: would install visual-explainer-nicobailon to /Users/jamiecraik/dev/agent-skills/deconflict-test/visual-explainer-nicobailon
+DRY-RUN PASS: visual-explainer-nicobailon would install to /Users/jamiecraik/dev/agent-skills/deconflict-test/visual-explainer-nicobailon

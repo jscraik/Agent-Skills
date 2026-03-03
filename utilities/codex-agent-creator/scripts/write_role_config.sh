@@ -17,6 +17,9 @@ Developer instructions (choose one):
   --developer-instructions-file PATH
 
 Optional:
+  --reasoning-summary auto|concise|detailed|none
+  --verbosity low|medium|high
+  --personality none|friendly|pragmatic
   --sandbox-mode read-only|workspace-write|danger-full-access
   --network-access true|false                (for workspace-write)
   --writable-roots path1,path2               (for workspace-write)
@@ -38,6 +41,9 @@ sandbox_mode=""
 network_access=""
 writable_roots_csv=""
 web_search=""
+reasoning_summary=""
+model_verbosity=""
+personality=""
 mcp_clear="false"
 mcp_enable_csv=""
 mcp_disable_csv=""
@@ -74,6 +80,15 @@ while [[ $# -gt 0 ]]; do
     --sandbox-mode)
       require_option_value "$1" "${2:-}"
       sandbox_mode="$2"; shift 2 ;;
+    --reasoning-summary)
+      require_option_value "$1" "${2:-}"
+      reasoning_summary="$2"; shift 2 ;;
+    --verbosity)
+      require_option_value "$1" "${2:-}"
+      model_verbosity="$2"; shift 2 ;;
+    --personality)
+      require_option_value "$1" "${2:-}"
+      personality="$2"; shift 2 ;;
     --network-access)
       require_option_value "$1" "${2:-}"
       network_access="$2"; shift 2 ;;
@@ -131,6 +146,33 @@ if [[ -n "$web_search" ]]; then
   esac
 fi
 
+if [[ -n "$reasoning_summary" ]]; then
+  case "$reasoning_summary" in
+    auto|concise|detailed|none) ;;
+    *)
+      echo "Invalid --reasoning-summary value: $reasoning_summary" >&2
+      exit 1 ;;
+  esac
+fi
+
+if [[ -n "$model_verbosity" ]]; then
+  case "$model_verbosity" in
+    low|medium|high) ;;
+    *)
+      echo "Invalid --verbosity value: $model_verbosity" >&2
+      exit 1 ;;
+  esac
+fi
+
+if [[ -n "$personality" ]]; then
+  case "$personality" in
+    none|friendly|pragmatic) ;;
+    *)
+      echo "Invalid --personality value: $personality" >&2
+      exit 1 ;;
+  esac
+fi
+
 if [[ -n "$network_access" ]]; then
   case "$network_access" in
     true|false) ;;
@@ -183,6 +225,18 @@ config_json="$(jq -n \
 
 if [[ -n "$sandbox_mode" ]]; then
   config_json="$(printf '%s' "$config_json" | jq --arg SANDBOX_MODE "$sandbox_mode" '.sandbox_mode = $SANDBOX_MODE')"
+fi
+
+if [[ -n "$reasoning_summary" ]]; then
+  config_json="$(printf '%s' "$config_json" | jq --arg REASONING_SUMMARY "$reasoning_summary" '.model_reasoning_summary = $REASONING_SUMMARY')"
+fi
+
+if [[ -n "$model_verbosity" ]]; then
+  config_json="$(printf '%s' "$config_json" | jq --arg MODEL_VERBOSITY "$model_verbosity" '.model_verbosity = $MODEL_VERBOSITY')"
+fi
+
+if [[ -n "$personality" ]]; then
+  config_json="$(printf '%s' "$config_json" | jq --arg PERSONALITY "$personality" '.personality = $PERSONALITY')"
 fi
 
 if [[ -n "$network_access" ]]; then

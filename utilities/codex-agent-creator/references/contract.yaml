@@ -3,15 +3,18 @@ purpose: >
 schema_version: 1.0
 triggers:
   - user asks to create, update, or troubleshoot a custom agent role
+  - user asks to tune multi-agent concurrency/runtime limits for agent fan-out jobs
 inputs:
   - model
   - model_reasoning_effort
   - developer_instructions
   - install scope (global or project)
   - role name, description, and role config file path
+  - optional global limits: agents.max_threads, agents.max_depth, agents.job_max_runtime_seconds
 outputs:
   - updated role config file
   - updated config.toml role declaration
+  - optional updated [agents] global limits
   - validation result summary
 non_goals:
   - editing unrelated codex config sections
@@ -19,3 +22,4 @@ non_goals:
 risks:
   - unsupported role keys; mitigated by schema/key validation
   - path mistakes; mitigated by explicit path confirmation
+  - over-constraining agent runtime globally; mitigated by explicit user confirmation before setting limits

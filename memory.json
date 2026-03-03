@@ -1,0 +1,30 @@
+{
+  "repo": "agent-skills",
+  "session_id": "bootstrap/agent-skills",
+  "preamble": {
+    "bootstrap": true,
+    "search": true
+  },
+  "entries": [
+    {
+      "level": "observation",
+      "content": "Harness optional components initialized and tailored for agent-skills.",
+      "tags": [
+        "repo:agent-skills",
+        "area:harness",
+        "type:setup"
+      ],
+      "session_id": "bootstrap/agent-skills",
+      "source": "harness init + repo tailoring",
+      "observed_at": "2026-03-03T13:26:07Z"
+    }
+  ],
+  "closeout": {
+    "forjamie_updated": true,
+    "date": "2026-03-03T13:26:07Z"
+  },
+  "meta": {
+    "created_at": "2026-03-03T13:26:07Z",
+    "version": "1.0"
+  }
+}

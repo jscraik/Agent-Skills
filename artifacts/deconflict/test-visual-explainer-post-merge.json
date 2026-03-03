@@ -1,0 +1,120 @@
+{
+  "engine": "auto",
+  "generated_at": "2026-03-03T18:25:41.127184+00:00",
+  "knowledge_graph": {
+    "edges": [
+      {
+        "block_recommended": true,
+        "confidence": "high",
+        "improvement_hints": [
+          "Candidate adds intent/trigger coverage terms: 0369a1, 06b6d4, 0891b2, 10-12, 100dvh, 13-slide."
+        ],
+        "source": "skill:/private/tmp/codex/skill-install-6xrn6lib/visual-explainer-main",
+        "target": "skill:/Users/jamiecraik/dev/agent-skills/utilities/visual-explainer",
+        "type": "same_job_candidate",
+        "weight": 0.64253407037945
+      }
+    ],
+    "nodes": [
+      {
+        "id": "skill:/private/tmp/codex/skill-install-6xrn6lib/visual-explainer-main",
+        "name": "visual-explainer-nicobailon",
+        "path": "/private/tmp/codex/skill-install-6xrn6lib/visual-explainer-main",
+        "type": "candidate_skill"
+      },
+      {
+        "id": "skill:/Users/jamiecraik/dev/agent-skills/utilities/visual-explainer",
+        "name": "visual-explainer",
+        "path": "/Users/jamiecraik/dev/agent-skills/utilities/visual-explainer",
+        "type": "installed_skill"
+      }
+    ]
+  },
+  "knowledge_graph_profile": "utilities/skill-installer/references/task-profile.json",
+  "mode": "dry-run",
+  "schema_version": "1.1",
+  "skills": [
+    {
+      "candidate_source_dir": "/private/tmp/codex/skill-install-6xrn6lib/visual-explainer-main",
+      "deconflict_matches": [
+        {
+          "block_recommended": true,
+          "command_score": 1.0,
+          "confidence": "high",
+          "harness_score": 0.0,
+          "improvement_hints": [
+            "Candidate adds intent/trigger coverage terms: 0369a1, 06b6d4, 0891b2, 10-12, 100dvh, 13-slide."
+          ],
+          "intent_score": 0.6253036633951994,
+          "path": "/Users/jamiecraik/dev/agent-skills/utilities/visual-explainer",
+          "proposal_path": "/Users/jamiecraik/dev/agent-skills/artifacts/deconflict/proposals/visual-explainer-nicobailon__into__visual-explainer.md",
+          "same_job": true,
+          "score": 0.64253407037945,
+          "shared_terms": [
+            "2-3",
+            "2-4",
+            "3-5",
+            "about",
+            "absolute",
+            "absorb",
+            "abstract",
+            "accent",
+            "accent-tinted",
+            "accents"
+          ],
+          "token_score": 0.6208304969366917
+        }
+      ],
+      "deconflict_notes": [
+        "harness: no overlap hits found; using lexical fallback weights"
+      ],
+      "destination_dir": "/Users/jamiecraik/dev/agent-skills/deconflict-test/visual-explainer-nicobailon",
+      "risk_warnings": [
+        {
+          "message": "High-risk control language",
+          "severity": "high",
+          "source": "CHANGELOG.md"
+        },
+        {
+          "message": "skipped large file (>1MB) from risk scan",
+          "severity": "low",
+          "source": "banner.png"
+        },
+        {
+          "message": "High-risk control language",
+          "severity": "high",
+          "source": "SKILL.md"
+        },
+        {
+          "message": "Prompt override language",
+          "severity": "high",
+          "source": "references/libraries.md"
+        },
+        {
+          "message": "High-risk control language",
+          "severity": "high",
+          "source": "references/libraries.md"
+        },
+        {
+          "message": "Prompt override language",
+          "severity": "high",
+          "source": "prompts/plan-review.md"
+        }
+      ],
+      "skill_name": "visual-explainer-nicobailon",
+      "status": "dry-run-pass"
+    }
+  ],
+  "source": {
+    "owner": "nicobailon",
+    "paths": [
+      "."
+    ],
+    "ref": "main",
+    "repo": "visual-explainer"
+  },
+  "thresholds": {
+    "advisory": 0.2,
+    "block": 0.45
+  }
+}

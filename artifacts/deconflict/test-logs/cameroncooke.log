@@ -1,0 +1,30 @@
+Deconflict note: harness: no overlap hits found; using lexical fallback weights
+Deconflict advisory: 'pr-comment-resolution' matched installed skills by overlap >= 20% or same-job intent similarity.
+Policy thresholds: advisory=20%, block=45% | block candidates=0
+Top overlap matches:
+  - /Users/jamiecraik/dev/agent-skills/frontend/stitch-remotion (overall=20%, text=10%, commands=50%, intent=22%, harness=0%) [confidence=low]
+    shared terms: agent, always, apply, available, bash, best, brief, build, checks, code
+Deconflict notes:
+  - harness: no overlap hits found; using lexical fallback weights
+Merge-plan (advisory, no filesystem changes):
+  1) Compare Scope/Triggers and Deliverables.
+  2) Preserve stricter validation and safety gates.
+  3) Fold missing capabilities into the existing skill.
+  4) Re-run quick_validate, skill_gate, analyze_skill, and openclaw_skill_guard.
+Dry-run note: real install would proceed unless user chooses merge-first.
+Warning: Potential prompt-injection or risky command patterns detected:
+  - [HIGH] SKILL.md: High-risk control language
+Dry-run continuing despite warnings.
+Deconflict artifact: /Users/jamiecraik/dev/agent-skills/artifacts/deconflict/test-cameroncooke.json
+DRY-RUN: would install agent-change-walkthrough to /Users/jamiecraik/dev/agent-skills/deconflict-test/agent-change-walkthrough
+DRY-RUN: would install changelog-updater to /Users/jamiecraik/dev/agent-skills/deconflict-test/changelog-updater
+DRY-RUN: would install pr-comment-resolution to /Users/jamiecraik/dev/agent-skills/deconflict-test/pr-comment-resolution
+DRY-RUN: would install pr-learning to /Users/jamiecraik/dev/agent-skills/deconflict-test/pr-learning
+DRY-RUN: would install reconcile-merge-conflicts to /Users/jamiecraik/dev/agent-skills/deconflict-test/reconcile-merge-conflicts
+DRY-RUN: would install release-tweet to /Users/jamiecraik/dev/agent-skills/deconflict-test/release-tweet
+DRY-RUN PASS: agent-change-walkthrough would install to /Users/jamiecraik/dev/agent-skills/deconflict-test/agent-change-walkthrough
+DRY-RUN PASS: changelog-updater would install to /Users/jamiecraik/dev/agent-skills/deconflict-test/changelog-updater
+DRY-RUN PASS: pr-comment-resolution would install to /Users/jamiecraik/dev/agent-skills/deconflict-test/pr-comment-resolution
+DRY-RUN PASS: pr-learning would install to /Users/jamiecraik/dev/agent-skills/deconflict-test/pr-learning
+DRY-RUN PASS: reconcile-merge-conflicts would install to /Users/jamiecraik/dev/agent-skills/deconflict-test/reconcile-merge-conflicts
+DRY-RUN PASS: release-tweet would install to /Users/jamiecraik/dev/agent-skills/deconflict-test/release-tweet

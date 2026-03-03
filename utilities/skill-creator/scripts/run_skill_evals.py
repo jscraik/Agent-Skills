@@ -2,12 +2,12 @@
 """
 run_skill_evals.py
 
-Run evaluation cases for a Codex skill using Codex CLI and/or Claude Code CLI.
+Run evaluation cases for a Codex skill using Codex CLI, Claude Code (Kimi/Zai), and/or Gemini CLI.
 
 Capabilities:
 - Loads SKILL.md -> skill name
 - Loads references/evals.yaml (v1 compatible; v2 fields optional)
-- Per case, runs one runner (`--runner`) or both (`--dual-run`)
+- Per case, runs one runner (`--runner`), dual legacy mode (`--dual-run`), or explicit multi-runner list (`--runners`)
 - Captures final output and optional Codex JSONL traces
 - Applies acceptance assertions (text and JSON)
 - Applies deterministic Codex trace checks (tier 1 hard / tier 2 budgets)
@@ -29,6 +29,7 @@ import datetime as dt
 import json
 import os
 import re
+import shlex
 import subprocess as sp
 import sys
 from dataclasses import dataclass
@@ -62,21 +63,32 @@ from deterministic_trace_checks import evaluate_trace, load_jsonl_events  # noqa
 
 _FM_DELIM = re.compile(r"^\s*---\s*$")
 _CODEX_HELP_CACHE: Dict[str, Optional[str]] = {}
+_RUNNER_CHOICES = ["codex", "claude-kimi", "claude-zai", "gemini"]
 
 # Script-level options (used to disambiguate `--codex-arg --foo` intent).
 _SCRIPT_OPTIONS: Set[str] = {
     "--runner",
+    "--runners",
     "--dual-run",
     "--workspace",
     "--sandbox",
     "--ask-for-approval",
     "--model",
     "--profile",
+    "--codex-fallback-profile",
     "--codex-home",
     "--codex-bin",
     "--claude-bin",
+    "--gemini-bin",
     "--claude-output-format",
+    "--gemini-output-format",
+    "--claude-settings",
+    "--claude-kimi-settings",
+    "--claude-zai-settings",
+    "--claude-kimi-command",
+    "--claude-zai-command",
     "--claude-arg",
+    "--gemini-arg",
     "--capture-jsonl",
     "--reports-dir",
     "--scorecard-out",
@@ -498,69 +510,86 @@ def run_codex_exec(
     jsonl_path: Optional[Path],
     codex_bin: Optional[Path],
     extra_codex_args: Optional[List[str]] = None,
+    fallback_profile: Optional[str] = None,
 ) -> Tuple[int, str, str, List[str]]:
     warnings: List[str] = []
-    cmd = _codex_exec_prefix(codex_bin)
-
-    cmd.extend(["--sandbox", sandbox])
-
-    if ask_for_approval:
-        supports = _codex_supports_exec_flag(codex_bin, "--ask-for-approval")
-        if supports is False:
-            warnings.append(
-                "Codex CLI does not support --ask-for-approval; running without it. "
-                "Upgrade Codex CLI if you need this flag."
-            )
-        else:
-            cmd.extend(["--ask-for-approval", ask_for_approval])
-
-    cmd.extend([
-        "--output-last-message",
-        str(output_last_message_path),
-    ])
-
-    if extra_codex_args:
-        cmd.extend(extra_codex_args)
-
-    if profile:
-        cmd.extend(["--profile", profile])
-    if model:
-        cmd.extend(["--model", model])
-    if output_schema_path:
-        cmd.extend(["--output-schema", str(output_schema_path)])
-
-    if jsonl_path:
-        cmd.append("--json")
-
-    cmd.append("-")
-
     env = os.environ.copy()
     if codex_home:
         env["CODEX_HOME"] = str(codex_home)
     if codex_bin:
         env["PATH"] = f"{codex_bin.parent}{os.pathsep}{env.get('PATH', '')}"
 
-    timeout = float(os.environ.get("CODEX_EVAL_TIMEOUT_SEC", "60"))
+    timeout = _eval_timeout_seconds()
 
-    try:
-        proc = sp.run(
-            cmd,
-            input=prompt,
-            text=True,
-            capture_output=True,
-            env=env,
-            cwd=workspace_root,
-            timeout=timeout,
+    def _invoke(effective_profile: Optional[str]) -> Tuple[int, str, str]:
+        cmd = _codex_exec_prefix(codex_bin)
+        cmd.extend(["--sandbox", sandbox])
+
+        if ask_for_approval:
+            supports = _codex_supports_exec_flag(codex_bin, "--ask-for-approval")
+            if supports is False:
+                warnings.append(
+                    "Codex CLI does not support --ask-for-approval; running without it. "
+                    "Upgrade Codex CLI if you need this flag."
+                )
+            else:
+                cmd.extend(["--ask-for-approval", ask_for_approval])
+
+        cmd.extend([
+            "--output-last-message",
+            str(output_last_message_path),
+        ])
+
+        if extra_codex_args:
+            cmd.extend(extra_codex_args)
+
+        if effective_profile:
+            cmd.extend(["--profile", effective_profile])
+        if model:
+            cmd.extend(["--model", model])
+        if output_schema_path:
+            cmd.extend(["--output-schema", str(output_schema_path)])
+
+        if jsonl_path:
+            cmd.append("--json")
+
+        cmd.append("-")
+
+        try:
+            proc = sp.run(
+                cmd,
+                input=prompt,
+                text=True,
+                capture_output=True,
+                env=env,
+                cwd=workspace_root,
+                timeout=timeout,
+            )
+        except FileNotFoundError:
+            return 127, "", "codex CLI not found on PATH. Install it (for example: npm i -g @openai/codex)."
+        except sp.TimeoutExpired:
+            return 124, "", f"codex exec timed out after {timeout} seconds."
+
+        if jsonl_path:
+            jsonl_path.write_text(proc.stdout, encoding="utf-8")
+
+        return proc.returncode, proc.stdout, proc.stderr
+
+    rc, stdout, stderr = _invoke(profile)
+
+    if (
+        rc != 0
+        and fallback_profile
+        and fallback_profile != profile
+        and _is_codex_reasoning_summary_unsupported(f"{stderr}\n{stdout}")
+    ):
+        warnings.append(
+            "Codex rejected reasoning.summary for the active profile/model; "
+            f"retrying with fallback profile `{fallback_profile}`."
         )
-    except FileNotFoundError:
-        return 127, "", "codex CLI not found on PATH. Install it (for example: npm i -g @openai/codex).", warnings
-    except sp.TimeoutExpired:
-        return 124, "", f"codex exec timed out after {timeout} seconds.", warnings
+        rc, stdout, stderr = _invoke(fallback_profile)
 
-    if jsonl_path:
-        jsonl_path.write_text(proc.stdout, encoding="utf-8")
-
-    return proc.returncode, proc.stdout, proc.stderr, warnings
+    return rc, stdout, stderr, warnings
 
 
 def run_claude_exec(
@@ -570,18 +599,30 @@ def run_claude_exec(
     output_last_message_path: Path,
     claude_bin: Optional[Path],
     output_format: str,
+    settings_path: Optional[Path],
+    cli_command: Optional[str],
     extra_claude_args: Optional[List[str]] = None,
 ) -> Tuple[int, str, str]:
-    if claude_bin:
-        cmd = [str(claude_bin), "-p"]
-    else:
-        cmd = ["claude", "-p"]
+    command_name = (cli_command or "").strip() or "claude"
+    use_shell_function = command_name != "claude"
 
-    cmd.extend(["--output-format", output_format])
+    base_args: List[str] = [command_name, "-p"]
+    if settings_path:
+        base_args.extend(["--settings", str(settings_path)])
+    base_args.extend(["--output-format", output_format])
     if extra_claude_args:
-        cmd.extend(extra_claude_args)
+        base_args.extend(extra_claude_args)
 
-    timeout = float(os.environ.get("CODEX_EVAL_TIMEOUT_SEC", "60"))
+    if use_shell_function:
+        command_str = " ".join(shlex.quote(x) for x in base_args)
+        cmd = ["zsh", "-ic", command_str]
+    else:
+        if claude_bin:
+            cmd = [str(claude_bin), *base_args[1:]]
+        else:
+            cmd = base_args
+
+    timeout = _eval_timeout_seconds()
 
     try:
         proc = sp.run(
@@ -593,6 +634,8 @@ def run_claude_exec(
             timeout=timeout,
         )
     except FileNotFoundError:
+        if use_shell_function:
+            return 127, "", f"{command_name} is not available in interactive zsh. Check your shell setup."
         return 127, "", "claude CLI not found on PATH. Install Claude Code CLI and ensure it is on PATH."
     except sp.TimeoutExpired:
         return 124, "", f"claude headless timed out after {timeout} seconds."
@@ -614,31 +657,95 @@ def run_claude_exec(
     return proc.returncode, stdout, stderr
 
 
+def run_gemini_exec(
+    *,
+    workspace_root: Path,
+    prompt: str,
+    output_last_message_path: Path,
+    gemini_bin: Optional[Path],
+    output_format: str,
+    extra_gemini_args: Optional[List[str]] = None,
+) -> Tuple[int, str, str]:
+    if gemini_bin:
+        cmd = [str(gemini_bin)]
+    else:
+        cmd = ["gemini"]
+
+    cmd.extend(["--prompt", prompt, "--output-format", output_format])
+    if extra_gemini_args:
+        cmd.extend(extra_gemini_args)
+
+    timeout = _eval_timeout_seconds()
+
+    try:
+        proc = sp.run(
+            cmd,
+            text=True,
+            capture_output=True,
+            cwd=workspace_root,
+            timeout=timeout,
+        )
+    except FileNotFoundError:
+        return 127, "", "gemini CLI not found on PATH. Install Gemini CLI and ensure it is on PATH."
+    except sp.TimeoutExpired:
+        return 124, "", f"gemini headless timed out after {timeout} seconds."
+
+    output_last_message_path.write_text(proc.stdout or "", encoding="utf-8")
+    return proc.returncode, proc.stdout or "", proc.stderr or ""
+
+
+def _eval_timeout_seconds() -> float:
+    raw = os.environ.get("SKILL_EVAL_TIMEOUT_SEC")
+    if raw is None:
+        raw = os.environ.get("CODEX_EVAL_TIMEOUT_SEC", "60")
+    return float(raw)
+
+
 def _safe_slug(value: str) -> str:
     return re.sub(r"[^A-Za-z0-9_.-]+", "-", value).strip("-") or "case"
 
 
 def _rewrite_dash_prefixed_codex_args(argv: Sequence[str]) -> List[str]:
     """
-    Allow ergonomic `--codex-arg --flag` usage by rewriting it to
-    `--codex-arg=--flag` before argparse runs.
+    Allow ergonomic `--*-arg --flag` usage by rewriting it to
+    `--*-arg=--flag` before argparse runs.
 
     We only rewrite when the next token is not a known script option.
     """
     out: List[str] = []
     i = 0
     n = len(argv)
+    rewritable = {"--codex-arg", "--claude-arg", "--gemini-arg"}
     while i < n:
         tok = argv[i]
-        if tok == "--codex-arg" and i + 1 < n:
+        if tok in rewritable and i + 1 < n:
             nxt = argv[i + 1]
             if nxt.startswith("-") and nxt not in _SCRIPT_OPTIONS:
-                out.append(f"--codex-arg={nxt}")
+                out.append(f"{tok}={nxt}")
                 i += 2
                 continue
         out.append(tok)
         i += 1
     return out
+
+
+def _parse_runners(raw: Sequence[str]) -> List[str]:
+    expanded: List[str] = []
+    for item in raw:
+        for piece in str(item).split(","):
+            token = piece.strip()
+            if token:
+                expanded.append(token)
+
+    if not expanded:
+        raise ValueError("--runners provided but no runner names were parsed.")
+
+    invalid = [x for x in expanded if x not in _RUNNER_CHOICES]
+    if invalid:
+        raise ValueError(
+            f"Invalid runner(s): {', '.join(invalid)}. Allowed: {', '.join(_RUNNER_CHOICES)}."
+        )
+    return expanded
 
 
 def _codex_exec_prefix(codex_bin: Optional[Path]) -> List[str]:
@@ -683,6 +790,11 @@ def _is_codex_untrusted_repo_error(stderr_text: str) -> bool:
     return ("not inside a trusted directory" in low) and ("skip-git-repo-check" in low)
 
 
+def _is_codex_reasoning_summary_unsupported(stderr_text: str) -> bool:
+    low = (stderr_text or "").lower()
+    return ("unsupported parameter" in low) and ("reasoning.summary" in low)
+
+
 def _has_skip_git_repo_check(extra_codex_args: Optional[Sequence[str]]) -> bool:
     if not extra_codex_args:
         return False
@@ -692,12 +804,21 @@ def _has_skip_git_repo_check(extra_codex_args: Optional[Sequence[str]]) -> bool:
 def build_arg_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         prog="run_skill_evals.py",
-        description="Run skill evals using Codex CLI and/or Claude Code CLI.",
+        description="Run skill evals using Codex, Claude Code (Kimi/Zai), and/or Gemini CLI runners.",
     )
     p.add_argument("path", help="Path to a skill directory or SKILL.md.")
 
-    p.add_argument("--runner", choices=["codex", "claude"], default="claude", help="Single-run mode runner.")
-    p.add_argument("--dual-run", action="store_true", help="Run both Codex and Claude for every eval case.")
+    p.add_argument("--runner", choices=_RUNNER_CHOICES, default="codex", help="Single-run mode runner.")
+    p.add_argument(
+        "--runners",
+        action="append",
+        default=[],
+        help=(
+            "Explicit runner list (repeatable or comma-separated). "
+            "Examples: --runners codex,claude-kimi --runners gemini"
+        ),
+    )
+    p.add_argument("--dual-run", action="store_true", help="Run both Codex and Claude-Kimi for every eval case.")
 
     p.add_argument("--workspace", default=None, help="Workspace root to run commands in (defaults to repo root guess).")
     p.add_argument("--sandbox", default="read-only", choices=["read-only", "workspace-write", "danger-full-access"])
@@ -709,9 +830,18 @@ def build_arg_parser() -> argparse.ArgumentParser:
     )
     p.add_argument("--model", default=None, help="Override model for codex exec.")
     p.add_argument("--profile", default=None, help="Codex config profile name.")
+    p.add_argument(
+        "--codex-fallback-profile",
+        default="d",
+        help=(
+            "Auto-retry profile for Codex when active profile/model rejects reasoning.summary "
+            "(default: d). Set empty string to disable."
+        ),
+    )
     p.add_argument("--codex-home", default=None, help="Set CODEX_HOME (useful for repo-scoped .codex).")
     p.add_argument("--codex-bin", default=None, help="Override codex CLI path.")
     p.add_argument("--claude-bin", default=None, help="Override claude CLI path.")
+    p.add_argument("--gemini-bin", default=None, help="Override gemini CLI path.")
     p.add_argument(
         "--claude-output-format",
         choices=["text", "json"],
@@ -719,10 +849,47 @@ def build_arg_parser() -> argparse.ArgumentParser:
         help="Claude output format (default: text).",
     )
     p.add_argument(
+        "--gemini-output-format",
+        choices=["text", "json", "stream-json"],
+        default="text",
+        help="Gemini output format (default: text).",
+    )
+    p.add_argument(
+        "--claude-settings",
+        default=None,
+        help="DEPRECATED: plain `claude` runner was removed. Use --claude-kimi-settings / --claude-zai-settings.",
+    )
+    p.add_argument(
+        "--claude-kimi-settings",
+        default="kimi_settings.json",
+        help="Settings JSON used by runner `claude-kimi` (default: kimi_settings.json).",
+    )
+    p.add_argument(
+        "--claude-zai-settings",
+        default="zai_settings.json",
+        help="Settings JSON used by runner `claude-zai` (default: zai_settings.json).",
+    )
+    p.add_argument(
+        "--claude-kimi-command",
+        default="claude-kimi",
+        help="Interactive shell command used for runner `claude-kimi` (default: claude-kimi).",
+    )
+    p.add_argument(
+        "--claude-zai-command",
+        default="claude-zai",
+        help="Interactive shell command used for runner `claude-zai` (default: claude-zai).",
+    )
+    p.add_argument(
         "--claude-arg",
         action="append",
         default=[],
-        help="Extra flag to pass to claude CLI (repeatable).",
+        help="Extra flag to pass to claude CLI (repeatable; supports `--claude-arg --flag`).",
+    )
+    p.add_argument(
+        "--gemini-arg",
+        action="append",
+        default=[],
+        help="Extra flag to pass to gemini CLI (repeatable; supports `--gemini-arg --flag`).",
     )
     p.add_argument(
         "--capture-jsonl",
@@ -762,6 +929,13 @@ def _guess_repo_root(start: Path) -> Path:
     return start
 
 
+def _resolve_path(path_like: str, *, base: Path) -> Path:
+    p = Path(path_like).expanduser()
+    if p.is_absolute():
+        return p.resolve()
+    return (base / p).resolve()
+
+
 def _extract_min_rubric_score(budgets: Optional[Dict[str, Any]]) -> Optional[float]:
     if not budgets:
         return None
@@ -798,8 +972,15 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     normalized_argv = _rewrite_dash_prefixed_codex_args(raw_argv)
     args = build_arg_parser().parse_args(normalized_argv)
 
-    if args.dual_run and not args.capture_jsonl:
-        print("ERROR: --dual-run requires --capture-jsonl for deterministic Codex checks.", file=sys.stderr)
+    if args.dual_run and args.runners:
+        print("ERROR: --dual-run cannot be combined with --runners. Choose one mode.", file=sys.stderr)
+        return 1
+    if args.claude_settings:
+        print(
+            "ERROR: --claude-settings is deprecated because plain `claude` runner was removed. "
+            "Use --claude-kimi-settings or --claude-zai-settings.",
+            file=sys.stderr,
+        )
         return 1
 
     skill_md = _resolve_skill_md_path(args.path)
@@ -827,6 +1008,60 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     if claude_bin and not claude_bin.exists():
         print(f"ERROR: --claude-bin not found: {claude_bin}", file=sys.stderr)
         return 1
+    gemini_bin = Path(args.gemini_bin).expanduser() if args.gemini_bin else None
+    if gemini_bin and not gemini_bin.exists():
+        print(f"ERROR: --gemini-bin not found: {gemini_bin}", file=sys.stderr)
+        return 1
+
+    if args.runners:
+        try:
+            selected_runners = _parse_runners(args.runners)
+        except ValueError as exc:
+            print(f"ERROR: {exc}", file=sys.stderr)
+            return 1
+    elif args.dual_run:
+        selected_runners = ["codex", "claude-kimi"]
+    else:
+        selected_runners = [args.runner]
+    codex_fallback_profile = str(args.codex_fallback_profile or "").strip() or None
+    claude_kimi_command = str(args.claude_kimi_command or "").strip() or "claude-kimi"
+    claude_zai_command = str(args.claude_zai_command or "").strip() or "claude-zai"
+
+    if "codex" in selected_runners and args.dual_run and not args.capture_jsonl:
+        print("ERROR: --dual-run requires --capture-jsonl for deterministic Codex checks.", file=sys.stderr)
+        return 1
+
+    claude_kimi_settings: Optional[Path] = None
+    if "claude-kimi" in selected_runners:
+        if claude_kimi_command == "claude":
+            claude_kimi_settings = _resolve_path(args.claude_kimi_settings, base=workspace_root)
+            if not claude_kimi_settings.exists():
+                print(
+                    f"ERROR: claude-kimi settings file not found: {claude_kimi_settings} "
+                    "(override with --claude-kimi-settings)",
+                    file=sys.stderr,
+                )
+                return 1
+        else:
+            candidate = _resolve_path(args.claude_kimi_settings, base=workspace_root)
+            if candidate.exists():
+                claude_kimi_settings = candidate
+
+    claude_zai_settings: Optional[Path] = None
+    if "claude-zai" in selected_runners:
+        if claude_zai_command == "claude":
+            claude_zai_settings = _resolve_path(args.claude_zai_settings, base=workspace_root)
+            if not claude_zai_settings.exists():
+                print(
+                    f"ERROR: claude-zai settings file not found: {claude_zai_settings} "
+                    "(override with --claude-zai-settings)",
+                    file=sys.stderr,
+                )
+                return 1
+        else:
+            candidate = _resolve_path(args.claude_zai_settings, base=workspace_root)
+            if candidate.exists():
+                claude_zai_settings = candidate
 
     reports_root = Path(args.reports_dir).expanduser().resolve() / skill_name
     reports_root.mkdir(parents=True, exist_ok=True)
@@ -846,7 +1081,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         print("ERROR: unable to allocate unique report directory run_id", file=sys.stderr)
         return 1
 
-    selected_runners = ["codex", "claude"] if args.dual_run else [args.runner]
     preflight_warnings: List[str] = []
     if "codex" in selected_runners:
         if not (workspace_root / ".git").exists() and not _has_skip_git_repo_check(args.codex_arg):
@@ -861,7 +1095,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "skill": skill_name,
         "skill_path": str(skill_dir),
         "workspace_root": str(workspace_root),
-        "runner_mode": "dual" if args.dual_run else args.runner,
+        "runner_mode": ",".join(selected_runners),
         "tier2_mode": args.tier2_mode,
         "run_id": run_id,
         "cases": [],
@@ -904,16 +1138,34 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             output_path = runner_dir / "output_last_message.txt"
             jsonl_path = (runner_dir / "codex_events.jsonl") if (runner_name == "codex" and args.capture_jsonl) else None
 
-            if runner_name == "claude":
+            if runner_name in {"claude-kimi", "claude-zai"}:
+                if runner_name == "claude-kimi":
+                    runner_settings = claude_kimi_settings
+                    runner_command = claude_kimi_command
+                elif runner_name == "claude-zai":
+                    runner_settings = claude_zai_settings
+                    runner_command = claude_zai_command
                 rc, stdout, stderr = run_claude_exec(
                     workspace_root=workspace_root,
                     prompt=composed_prompt,
                     output_last_message_path=output_path,
                     claude_bin=claude_bin,
                     output_format=args.claude_output_format,
+                    settings_path=runner_settings,
+                    cli_command=runner_command,
                     extra_claude_args=args.claude_arg or None,
                 )
                 runner_exec_warnings: List[str] = []
+            elif runner_name == "gemini":
+                rc, stdout, stderr = run_gemini_exec(
+                    workspace_root=workspace_root,
+                    prompt=composed_prompt,
+                    output_last_message_path=output_path,
+                    gemini_bin=gemini_bin,
+                    output_format=args.gemini_output_format,
+                    extra_gemini_args=args.gemini_arg or None,
+                )
+                runner_exec_warnings = []
             else:
                 rc, stdout, stderr, runner_exec_warnings = run_codex_exec(
                     workspace_root=workspace_root,
@@ -928,6 +1180,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                     jsonl_path=jsonl_path,
                     codex_bin=codex_bin,
                     extra_codex_args=args.codex_arg or None,
+                    fallback_profile=codex_fallback_profile,
                 )
 
             (runner_dir / "stderr.txt").write_text(stderr or "", encoding="utf-8")
@@ -1003,11 +1256,18 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                     runner_tier1_failures.append(f"expected JSON output (schema used), but parsing failed: {e}")
                 else:
                     used_json_assertions = True
-            elif runner_name == "claude" and args.claude_output_format == "json":
+            elif runner_name in {"claude-kimi", "claude-zai"} and args.claude_output_format == "json":
                 try:
                     parsed_json = json.loads(output_text)
                 except Exception as e:  # noqa: BLE001
                     runner_tier1_failures.append(f"expected JSON output (Claude json format), but parsing failed: {e}")
+                else:
+                    used_json_assertions = True
+            elif runner_name == "gemini" and args.gemini_output_format == "json":
+                try:
+                    parsed_json = json.loads(output_text)
+                except Exception as e:  # noqa: BLE001
+                    runner_tier1_failures.append(f"expected JSON output (Gemini json format), but parsing failed: {e}")
                 else:
                     used_json_assertions = True
 

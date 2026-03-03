@@ -1,0 +1,49 @@
+name: Greptile Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, review_requested]
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+  pull-requests: read
+  checks: write
+  statuses: write
+
+jobs:
+  greptile-review:
+    name: Greptile Review
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'pull_request' ||
+      (github.event_name == 'issue_comment' && github.event.issue.pull_request)
+    steps:
+      - name: Ensure Greptile config exists
+        run: |
+          test -f .greptile/config.json
+          test -f .greptile/files.json
+          test -f .greptile/rules.md
+
+      - name: Create neutral check while waiting for bot review
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const sha = context.payload.pull_request?.head?.sha;
+            if (!sha) {
+              core.info("No pull_request SHA in payload; skipping check run creation.");
+              return;
+            }
+            await github.rest.checks.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              name: "Greptile Review",
+              head_sha: sha,
+              status: "completed",
+              conclusion: "neutral",
+              output: {
+                title: "Greptile Review Pending",
+                summary: "Workflow is configured. Awaiting Greptile bot review comment."
+              }
+            });

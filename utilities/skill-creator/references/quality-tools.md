@@ -23,14 +23,40 @@ Outputs:
 ```
 
 Use when:
-- running eval cases from references/evals.yaml with Codex and/or Claude runners
+- running eval cases from references/evals.yaml with Codex, Claude (Kimi/Zai), and/or Gemini runners
 - capturing final output and applying acceptance assertions
 - generating scorecards for CI/regression tracking
 
 Notes:
+- Single runner:
+  - `--runner codex|claude-kimi|claude-zai|gemini`
+- Explicit multi-runner matrix (recommended for model parity checks):
+  - `--runners codex,claude-kimi,claude-zai,gemini`
+  - or repeat: `--runners codex --runners claude-kimi --runners gemini`
 - For cross-runner coverage, use dual-run mode:
   - `--dual-run --capture-jsonl`
 - `--capture-jsonl` is required for deterministic Codex trace checks and dual-run mode.
+- Codex profile compatibility fallback (enabled by default):
+  - `--codex-fallback-profile d`
+  - This auto-retries when the active Codex profile/model rejects `reasoning.summary` (for example Spark profile mismatches).
+- Claude provider routing best-practice:
+  - Plain `claude` runner is removed; use explicit provider runners only:
+    - `claude-kimi`
+    - `claude-zai`
+  - Runner execution prefers interactive wrapper commands by default:
+    - `claude-kimi` command for `claude-kimi`
+    - `claude-zai` command for `claude-zai`
+  - Override command names when needed:
+    - `--claude-kimi-command <cmd>`
+    - `--claude-zai-command <cmd>`
+  - Use first-class settings flags:
+    - `--claude-kimi-settings kimi_settings.json`
+    - `--claude-zai-settings zai_settings.json`
+- Runner role policy for agents (what to use what for):
+  - `codex`: baseline deterministic checks, JSONL trace capture, and tiered gates.
+  - `claude-kimi`: primary alternative reasoning pass and quality comparison.
+  - `claude-zai`: adversarial/edge-case second opinion and disagreement detection.
+  - `gemini`: breadth/variance pass to detect rubric blind spots.
 - Tiered gating:
   - `--tier2-mode warn` (default): style/efficiency findings are non-blocking
   - `--tier2-mode fail`: style/efficiency findings fail the run
@@ -41,7 +67,7 @@ Notes:
 - Keep `--sandbox read-only` unless the eval requires edits.
 - If Codex evals time out during MCP startup, increase the subprocess timeout via:
   - `CODEX_EVAL_TIMEOUT_SEC=600` (or higher)
-- If you run Claude evals (`--runner claude`), Claude Code must be authenticated. If you see `Not logged in · Please run /login`, open an interactive Claude session and run `/login` (or use `claude setup-token`).
+- If you run Claude evals (`--runner claude-kimi` or `--runner claude-zai`), Claude Code must be authenticated. If you see `Not logged in · Please run /login`, open an interactive Claude session and run `/login` (or use `claude setup-token`).
 
 Outputs:
 - PASS/FAIL per case with report artifacts under artifacts/reports/skills/

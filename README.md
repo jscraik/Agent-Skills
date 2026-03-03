@@ -181,7 +181,19 @@ If either check fails, use the troubleshooting section below.
   - `~/.agents/skills`
   - `~/.codex/skills`
   - `~/.gemini/antigravity/skills`
+  - `~/.gemini/skills`
   - `~/.antigravity/skills`
+
+Run this command to verify all skill entrypoints at once:
+
+```bash
+bash scripts/sync_skills.sh
+for d in ~/.agents/skills ~/.claude/skills ~/.gemini/antigravity/skills ~/.gemini/skills; do
+  echo "== $d =="
+  fd --max-depth 1 --type l . "$d" | wc -l
+done
+python3 scripts/diagnose_skill.py --all
+```
 
 ## Deprecations (Wave 1)
 

@@ -8,6 +8,7 @@ triggers:
   - user asks for reusable, shareable instructions or implicit invocation
   - user asks to create or update a skill under .agents/skills
   - user explicitly asks to create a /prompts:<name> custom prompt (deprecated)
+  - user asks to audit or improve existing prompts without full rewrites
 inputs:
   - skill name (kebab-case)
   - one-line description (with trigger boundaries)
@@ -15,14 +16,18 @@ inputs:
   - skill scope (repo vs user) and target path
   - optional references/assets/agents/openai.yaml needs
   - safety constraints (what must not happen)
+  - optional audit scope + strictness (default patch-only, no rewrites)
 outputs:
   - a skill folder path under .agents/skills/<skill-name>/ (or ~/.agents/skills/<skill-name>/)
   - SKILL.md content (front matter + instructions) or a minimal patch/diff description
   - invocation example (explicit $skill-name, plus note about implicit invocation)
   - optional (only when requested): a Markdown prompt file path under ~/.codex/prompts/<name>.md
+  - for audits: prioritized scorecard (P0/P1/P2) plus file:line patch suggestions
 non_goals:
   - using deprecated custom prompts as the default primitive when a skill is appropriate
   - storing secrets or credentials in prompt files
+  - rewriting entire prompt libraries when minimal patches are sufficient
 risks:
   - accidental overwrite of existing SKILL.md content; mitigated by checking for existing files and requiring explicit overwrite intent
   - misuse for destructive operations; mitigated by safety constraints and recommending skills for gated workflows
+  - over-editing during audits; mitigated by patch-first policy and explicit rewrite opt-in

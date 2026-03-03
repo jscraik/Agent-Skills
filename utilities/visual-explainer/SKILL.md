@@ -11,6 +11,7 @@ Generate self-contained HTML files for technical diagrams, visualizations, and d
 ## When to Use
 
 Use this skill when a request needs a visual artifact (diagram, architecture explainer, plan review, comparison table, timeline, dashboard, or recap) instead of plain text.
+Use slide mode when the user explicitly asks for a deck (`--slides`, `/generate-slides`, or "make this a slide deck").
 
 ## Philosophy
 
@@ -67,6 +68,7 @@ Vary the choice each time. If the last diagram was dark and technical, make the 
 - For text-heavy architecture overviews (card content matters more than topology): read `./templates/architecture.html`
 - For flowcharts, sequence diagrams, ER, state machines, mind maps: read `./templates/mermaid-flowchart.html`
 - For data tables, comparisons, audits, feature matrices: read `./templates/data-table.html`
+- For slide-deck output (explicitly requested): read `./templates/slide-deck.html` and `./references/slide-patterns.md`
 
 **For CSS/layout patterns and SVG connectors**, read `./references/css-patterns.md`.
 
@@ -213,6 +215,23 @@ Vertical or horizontal timeline with a central line (CSS pseudo-element). Phase 
 ### Dashboard / Metrics Overview
 Card grid layout. Hero numbers large and prominent. Sparklines via inline SVG `<polyline>`. Progress bars via CSS `linear-gradient` on a div. For real charts (bar, line, pie), use **Chart.js via CDN** (see `./references/libraries.md`). KPI cards with trend indicators (up/down arrows, percentage deltas).
 
+### Implementation Plans
+For implementation plans and technical proposals, optimize for understanding over code volume.
+
+- Show file/function structure with short descriptions instead of dumping full files.
+- Include only key snippets (the few lines that explain the core logic).
+- Use collapsible sections for secondary detail.
+- Present: purpose, flow, file structure, key implementation details, interface summary, usage examples.
+
+## Slide Deck Mode
+
+Slide mode is opt-in only. Generate a slide deck when the user explicitly requests it (`--slides`, `/generate-slides`, or equivalent wording).
+
+- Before generating slides, read `./references/slide-patterns.md` and `./templates/slide-deck.html`.
+- Keep content complete: slides must cover all sections/decisions from the source, not a shortened subset.
+- Use slide-native composition (Title, Divider, Content, Split, Diagram, Dashboard, Table, Code, Quote, Full-Bleed) and add slides rather than over-compressing.
+- Prefer visual hierarchy and pacing; avoid turning long-scroll page sections into overloaded single slides.
+
 ## File Structure
 
 Every diagram is a single self-contained `.html` file. No external assets except CDN links (fonts, optional libraries). Structure:
@@ -244,6 +263,7 @@ Before delivering, verify:
 - **The swap test**: Would replacing your fonts and colors with a generic dark theme make this indistinguishable from a template? If yes, push the aesthetic further.
 - **Both themes**: Toggle your OS between light and dark mode. Both should look intentional, not broken.
 - **Information completeness**: Does the diagram actually convey what the user asked for? Pretty but incomplete is a failure.
+- **Slide completeness (when in slide mode)**: Every source section/decision/spec point appears in the deck; no silent content drops.
 - **No overflow**: Resize the browser to different widths. No content should clip or escape its container. Every grid and flex child needs `min-width: 0`. Side-by-side panels need `overflow-wrap: break-word`. Never use `display: flex` on `<li>` for marker characters — it creates anonymous flex items that can't shrink, causing lines with many inline `<code>` badges to overflow. Use absolute positioning for markers instead. See the Overflow Protection section in `./references/css-patterns.md`.
 - **Mermaid zoom controls**: Every `.mermaid-wrap` container must have zoom controls (+/−/reset buttons), Ctrl/Cmd+scroll zoom, and click-and-drag panning. Complex diagrams render too small without them. The cursor should change to `grab` when zoomed in and `grabbing` while dragging. See `./references/css-patterns.md` for the full pattern.
 - **File opens cleanly**: No console errors, no broken font loads, no layout shifts.
@@ -258,12 +278,14 @@ Before delivering, verify:
 - "Create a visual architecture explainer for this service and open it in my browser."
 - "Turn this deployment plan into a timeline-style HTML explainer under `~/.agent/diagrams/`."
 - "Convert this feature comparison table into a polished HTML page instead of ASCII."
+- "Generate a slide deck version of this plan (`--slides`) and keep all sections."
 
 ## Anti-Patterns to Avoid
 
 - ❌ Reusing the same generic dark theme every time.
 - ❌ Falling back to terminal ASCII tables when an HTML table is appropriate.
 - ❌ Shipping visuals that are pretty but miss required content or relationships.
+- ❌ Using slide mode to summarize away source content that should be preserved.
 - ❌ Skipping responsive and overflow checks before delivery.
 
 ## Remember

@@ -1,0 +1,20 @@
+purpose: >
+  Define expected behavior for app-creator to scaffold or adopt iOS/macOS projects,
+  optionally installing xcode-makefiles and simple-tasks.
+schema_version: 1.0
+triggers:
+  - user asks to scaffold a new iOS/macOS app from templates
+  - user asks to adopt app tooling into an existing project
+inputs:
+  - project mode (new or adopt)
+  - app metadata for new mode (name, bundle id, platform, framework, output dir)
+  - optional subskill selection and git onboarding flags
+outputs:
+  - scaffolded or updated project with selected subskills installed
+  - exact next-step commands for local build/run flow
+non_goals:
+  - replacing existing product architecture or app logic not requested by user
+  - force-overwriting unrelated files without explicit instruction
+risks:
+  - destructive file changes if mode/paths are incorrect; mitigated by dry-run and validation
+  - leaking sensitive values in logs; mitigated by default redaction

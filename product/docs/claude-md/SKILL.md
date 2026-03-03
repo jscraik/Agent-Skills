@@ -116,6 +116,18 @@ Use the failure-mode template verbatim for out-of-scope requests.
 - Keep always-on files concise; move occasional or domain-specific workflows to skills.
 - Do not hardcode npm/pnpm/yarn/bun command examples without repo evidence.
 
+## Git Operations
+- Before reporting merge success, verify state with `git status` and `git log --oneline -5`; never claim merge completion without explicit confirmation.
+- After any `git commit`, `git push`, or merge action, run `git log --oneline -3` and `git status` before proceeding.
+
+## Planning and Design
+### Plan Decomposition
+- Start plans from a minimal v1 that delivers core value, then add advanced features only if needed.
+- Ask: "What's the smallest version that delivers value?"
+
+## Debugging
+- For any task involving external API keys (for example Kimi, 1Password, etc.), run `env | grep -i <key_name>` and `echo $<VAR>` first; only proceed after those checks.
+
 ## Workflow
 
 1) Discover instruction topology
@@ -229,6 +241,15 @@ Insert this section in CLAUDE.md when injected:
 - Fix TypeScript errors and lint issues before marking tasks complete.
 - Ensure test isolation - tests should not depend on execution order.
 ```
+
+## Code Quality
+### Bug Hunt Protocol
+- When user says "find bugs" or "bug hunt", systematically analyze:
+  1. calculation logic edge cases,
+  2. null/undefined handling,
+  3. async/await patterns,
+  4. resource cleanup,
+  and report every issue with severity and file location.
 
 ## Plan Review Guidelines (injectable block, conditional)
 

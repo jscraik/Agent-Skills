@@ -17,9 +17,13 @@ knowledge_graph_profile: references/task-profile.json
 - [Required inputs](#required-inputs)
 - [Deliverables](#deliverables)
 - [Constraints](#constraints)
+- [Git Operations](#git-operations)
 - [Workflow](#workflow)
+- [Planning and Design](#planning-and-design)
+- [Debugging](#debugging)
 - [Required sections (root GEMINI.md)](#required-sections-root-geminimd)
 - [Flaky Test Artifact Capture (injectable block, conditional)](#flaky-test-artifact-capture-injectable-block-conditional)
+- [Code Quality](#code-quality)
 - [Code Quality Standards (injectable block, conditional)](#code-quality-standards-injectable-block-conditional)
 - [Plan Review Guidelines (injectable block, conditional)](#plan-review-guidelines-injectable-block-conditional)
 - [Shell Script Conventions (injectable block, conditional)](#shell-script-conventions-injectable-block-conditional)
@@ -151,6 +155,16 @@ Use the failure-mode template verbatim for out-of-scope requests.
 - Redact sensitive/PII/credential-like content by default and avoid adding secrets, tokens, keys, or private identifiers.
 - Do not hardcode npm/pnpm/yarn/bun command examples without repo evidence.
 
+## Git Operations
+- Before reporting merge success, always verify state with:
+  - `git status`
+  - `git log --oneline -5`
+  - Never report merged completion without confirmation from these commands.
+- After any `git commit`, `git push`, or merge action, run:
+  - `git log --oneline -3`
+  - `git status`
+  - and confirm repository state matches requested outcome.
+
 ## Workflow
 
 1) Discover existing context topology
@@ -196,6 +210,17 @@ Use the failure-mode template verbatim for out-of-scope requests.
 - Redact secrets/PII by default and avoid including tokens or credentials.
 - If all three files exist and overlap is requested, verify `CLAUDE.md` and `AGENTS.md` references still align to shared canonical guidance and are not duplicated.
 
+## Planning and Design
+### Plan Decomposition
+- For plans derived from technical review feedback (including DHH-style reviews), start with the minimal v1 version first, then add complexity.
+- Ask: "What's the smallest version that delivers value?"
+
+## Debugging
+- For auth/key-related tasks (including Kimi, 1Password, etc.), start by checking environment variables:
+  - `env | grep -i <key_name>`
+  - `echo $<VAR>`
+  - before assuming external key configuration is correct.
+
 ## Required sections (root GEMINI.md)
 
 - Project summary (one sentence).
@@ -233,6 +258,15 @@ Insert this section in GEMINI.md for test repos:
 - Optional targeted modes: `unit`, `integration`, `e2e`.
 - Keep artifact filenames stable (no timestamps in filenames) for cross-run comparison.
 ```
+
+## Code Quality
+### Bug Hunt Protocol
+- When user says "find bugs" or "bug hunt", systematically analyze:
+  1. calculation logic for edge cases,
+  2. null/undefined handling,
+  3. async/await patterns,
+  4. resource cleanup.
+- Report all findings with severity and file locations.
 
 ## Code Quality Standards (injectable block, conditional)
 

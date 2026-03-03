@@ -1,0 +1,41 @@
+name: Security Vulnerability
+description: Report a security issue in scripts, workflows, or automation guidance
+labels: [security, critical]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ⚠️ For critical issues, use private disclosure channels instead of public details.
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Vulnerability summary
+      description: High-level description of the issue
+    validations:
+      required: true
+
+  - type: textarea
+    id: affected
+    attributes:
+      label: Affected paths
+      description: Files, scripts, skills, or workflows impacted
+      placeholder: "e.g. scripts/sync_skills.sh, .github/workflows/docs-governance.yml"
+    validations:
+      required: true
+
+  - type: textarea
+    id: impact
+    attributes:
+      label: Impact
+      description: What can an attacker do?
+    validations:
+      required: true
+
+  - type: textarea
+    id: mitigation
+    attributes:
+      label: Suggested mitigation
+      description: Any fix recommendations (optional)
+    validations:
+      required: false

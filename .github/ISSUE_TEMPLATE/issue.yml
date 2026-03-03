@@ -1,0 +1,53 @@
+name: Bug Report
+description: Report incorrect behavior in skills, scripts, docs lint, or sync workflows
+labels: [bug]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What is broken?
+      placeholder: "Which skill/script failed and what happened?"
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Exact commands and paths used
+      placeholder: |
+        1. Run `bash scripts/sync_skills.sh`
+        2. Run `python3 scripts/diagnose_skill.py --all`
+        3. Observe ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What should happen instead?
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      value: |
+        - OS:
+        - Shell:
+        - Python:
+        - Node:
+        - Harness:
+    validations:
+      required: false
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / evidence
+      description: Include command output or artifact paths
+    validations:
+      required: false

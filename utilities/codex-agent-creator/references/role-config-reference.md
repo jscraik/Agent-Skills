@@ -1,29 +1,32 @@
-# Role Config Reference
+# Role Config Reference (Codex Multi-Agent, March 2026)
 
-## Source Baseline (Pinned)
+## Table of Contents
+- [Canonical sources](#canonical-sources)
+- [Validation baseline](#validation-baseline)
+- [Role declaration shape in `config.toml`](#role-declaration-shape-in-configtoml)
+- [Global multi-agent controls](#global-multi-agent-controls)
+- [Role `config_file` shape](#role-config_file-shape)
+- [Runtime behavior that affects role design](#runtime-behavior-that-affects-role-design)
+- [Configuration categories with examples](#configuration-categories-with-examples)
+- [Inheritance rule of thumb](#inheritance-rule-of-thumb)
 
-This skill was installed from:
+## Canonical sources
 
-- `am-will/codex-skills` commit `21b613ea28df6c8bf2f2a452ed07ef1f96f53184`
-- Skill path: `skills/codex-agent-creator`
-- Companion role pack examples: `agents/`
+- Codex config reference: <https://developers.openai.com/codex/config-reference/>
+- Codex multi-agent guide: <https://developers.openai.com/codex/multi-agent/>
+- Codex multi-agent concepts: <https://developers.openai.com/codex/concepts/multi-agents/>
+- Canonical config schema URL: <https://developers.openai.com/codex/config-schema.json>
 
-## Canonical Validation Inputs
+## Validation baseline
 
-Use the active Codex `config.schema.json` for top-level key validation.
-
-Typical locations:
-
-- Local Codex source checkout: `codex-rs/core/config.schema.json`
-- If you keep multiple Codex repos, use the one matching your installed Codex build.
+Use the active Codex schema (`config-schema.json`) for top-level role-config validation.
 
 The role creator scripts validate:
+1. `[agents.<role>]` key shape in target `config.toml`
+2. required role-config fields (`model`, `model_reasoning_effort`, `developer_instructions`)
+3. top-level role-config keys against schema
 
-1. `[agents.<role>]` key shape in the target `config.toml`
-2. required role-config fields
-3. top-level role-config keys against `config.schema.json`
-
-## Role Declaration Shape (`~/.codex/config.toml`)
+## Role declaration shape in `config.toml`
 
 ```toml
 [agents.researcher]
@@ -36,12 +39,29 @@ config_file = "~/.codex/agents/researcher.toml"
 - `description`
 - `config_file`
 
-Anything else under `[agents.<role>]` is unsupported.
+Unknown fields under `[agents.<role>]` are rejected.
 
-## Role `config_file` Shape
+## Global multi-agent controls
 
-Role `config_file` is parsed as a full config layer.
-Top-level keys must be valid top-level keys from `config.schema.json`.
+These belong under `[agents]` in main config (not inside role `config_file`):
+
+- `agents.max_threads`
+- `agents.max_depth`
+- `agents.job_max_runtime_seconds`
+
+Example:
+
+```toml
+[agents]
+max_threads = 6
+max_depth = 1
+job_max_runtime_seconds = 1800
+```
+
+## Role `config_file` shape
+
+Role `config_file` is parsed as a full config layer.  
+Top-level keys must match schema keys.
 
 ### Minimum policy for this skill
 
@@ -51,33 +71,38 @@ Require these fields in every role config:
 - `model_reasoning_effort`
 - `developer_instructions`
 
-Do not add optional keys (sandbox, `web_search`, `mcp_servers`, or others) unless explicitly requested by the user.
+Do not add optional keys (`sandbox_mode`, `web_search`, `mcp_servers`, `apps`, etc.) unless explicitly requested.
 
-Recommended default profile (when user does not specify):
+Recommended default profile (if user does not specify):
 
-- `model = "gpt-5.3-codex"`
+- `model = "gpt-5-codex"`
 - `model_reasoning_effort = "medium"`
 
 ### Useful enums
 
 - `model_reasoning_effort`: `none|minimal|low|medium|high|xhigh`
+- `model_reasoning_summary`: `auto|concise|detailed|none`
+- `model_verbosity`: `low|medium|high`
+- `personality`: `none|friendly|pragmatic`
 - `sandbox_mode`: `read-only|workspace-write|danger-full-access`
 - `web_search`: `disabled|cached|live`
 
-## Runtime Merge Notes
+## Runtime behavior that affects role design
 
-- Spawn starts from parent turn config.
-- Role config file is merged as a config layer.
-- Spawn-time constraints can still apply (for example, approval policy set by runtime).
+- Spawn starts from parent turn runtime settings.
+- Role config is merged as an additional config layer.
+- Parent runtime overrides still apply (sandbox/approval settings set interactively or by run mode).
+- Relative `config_file` paths resolve from the `config.toml` that declares the role.
+- If role config fails to load, spawns can fail until fixed.
 
-Practical implication: role config can tune model/sandbox/tools/etc., but runtime-enforced overrides still win.
+Practical implication: keep role instructions narrow and deterministic, and do not rely on role config to sidestep runtime safety settings.
 
-## Configuration Categories With Examples
+## Configuration categories with examples
 
 ### 1) Minimal role (recommended default)
 
 ```toml
-model = "gpt-5.3-codex"
+model = "gpt-5-codex"
 model_reasoning_effort = "medium"
 developer_instructions = """
 You are a focused implementation assistant.
@@ -88,9 +113,9 @@ Work only in requested files, validate changes, and report exact evidence.
 ### 2) Model/reasoning/style knobs
 
 ```toml
-model = "gpt-5.3-codex"
+model = "gpt-5-codex"
 model_reasoning_effort = "high"
-model_reasoning_summary = "detailed"
+model_reasoning_summary = "concise"
 model_verbosity = "high"
 personality = "pragmatic"
 developer_instructions = "..."
@@ -102,31 +127,27 @@ developer_instructions = "..."
 sandbox_mode = "workspace-write"
 
 [sandbox_workspace_write]
-network_access = true
+network_access = false
 writable_roots = ["/absolute/path/to/repo"]
 ```
 
 ### 4) Search and feature toggles
 
 ```toml
-web_search = "cached"
+web_search = "disabled"
 
 [features]
+shell_tool = true
 memory_tool = false
-shell_tool = false
 ```
 
 ### 5) MCP server controls (basic and rich)
-
-Basic enable/disable:
 
 ```toml
 [mcp_servers.linear]
 enabled = true
 required = false
 ```
-
-Rich server definition:
 
 ```toml
 [mcp_servers.linear]
@@ -147,8 +168,8 @@ enabled = true
 enabled = false
 ```
 
-## Inheritance Rule Of Thumb
+## Inheritance rule of thumb
 
 - Configure only what must differ from parent.
 - Leave everything else omitted to inherit.
-- Prefer minimal role config unless user explicitly requests stronger constraints.
+- Keep role configs minimal unless stronger constraints are explicitly requested.

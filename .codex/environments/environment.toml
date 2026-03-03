@@ -7,6 +7,12 @@ script = '''
 set -euo pipefail
 
 echo "[codex] setup: /Users/jamiecraik/dev/agent-skills"
+for bin in rg fd jq harness; do
+  command -v "$bin" >/dev/null || {
+    echo "[codex] missing required tool: $bin"
+    exit 1
+  }
+done
 '''
 
 [[actions]]
@@ -47,6 +53,16 @@ set -euo pipefail
 
 cd /Users/jamiecraik/dev/agent-skills
 bash ~/.codex/scripts/verify-work.sh
+'''
+
+[[actions]]
+name = "Harness preflight"
+icon = "test"
+command = '''
+set -euo pipefail
+
+cd /Users/jamiecraik/dev/agent-skills
+harness preflight-gate --strict --json
 '''
 
 [[actions]]

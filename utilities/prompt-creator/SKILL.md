@@ -6,11 +6,25 @@ knowledge_graph_profile: references/task-profile.json
 
 # Prompt Creator (Codex skills-first)
 
+## Table of Contents
+- [Scope and triggers](#scope-and-triggers)
+- [Required inputs](#required-inputs)
+- [Deliverables](#deliverables)
+- [Philosophy](#philosophy)
+- [Gold prompt standard (Mar 2026 baseline)](#gold-prompt-standard-mar-2026-baseline)
+- [Procedure](#procedure)
+- [Validation](#validation)
+- [Anti-patterns](#anti-patterns)
+- [Constraints](#constraints)
+- [Examples](#examples)
+- [References](#references)
+
 ## Scope and triggers
 - You want a **shareable, reusable** workflow that your team can commit to a repo and Codex can invoke **implicitly** (based on `description`) or **explicitly** (by typing `$...`). Skills are the recommended primitive.
 - You want a reusable workflow that also shows up in the **slash command menu** (enabled skills appear there too).
 - You have an existing skill under `.agents/skills/**` and want to refine scope, inputs, safety constraints, or examples.
 - You’re deciding between **skills vs deprecated custom prompts** and want a short recommendation.
+- You want a **prompt quality audit** of existing prompt files with prioritized, minimal-diff improvements (no full rewrites unless explicitly requested).
 
 > Note: Codex docs mark “custom prompts” as **deprecated** and recommend using **skills** for reusable instructions that Codex can invoke explicitly or implicitly. Only use `~/.codex/prompts` when you explicitly want `/prompts:<name>` local-only slash commands.
 
@@ -27,6 +41,7 @@ knowledge_graph_profile: references/task-profile.json
   - `agents/openai.yaml` for UI metadata and dependencies (MCP tools)
 - (Optional) If you explicitly want `/prompts:<name>`: a custom prompt name + body + placeholders.
 - Safety constraints: anything that must *not* happen (no deletes, no deploys, no secrets, etc.).
+- For prompt audits: target paths/globs, change strictness (advice-only vs patch-ready), and whether rewrites are prohibited (default: no rewrites).
 
 ## Deliverables
 - A skill folder containing a `SKILL.md` file at one of:
@@ -38,17 +53,33 @@ knowledge_graph_profile: references/task-profile.json
 - Optional (only when requested): a deprecated custom prompt file at `~/.codex/prompts/<name>.md` for `/prompts:<name>`.
 - **Always include the full proposed file contents** for any new/updated `SKILL.md` (and `~/.codex/prompts/*.md` if applicable) inside fenced code blocks so the user can copy/paste if Codex can’t write files in the current sandbox.
 - For created/updated skills, include a short OpenClaw-style readiness + security summary (critical/warn/info).
+- For audits, include a prioritized scorecard (P0/P1/P2), concrete file:line improvements, and minimal patch snippets.
 
 ## Philosophy
 - Prefer **skills** for anything shareable, multi-step, or policy-heavy.
 - Keep skills small and single-purpose; push depth into `references/` (progressive disclosure).
 - Safety-by-default: prompts must not smuggle destructive behavior or secrets.
 
+## Gold prompt standard (Mar 2026 baseline)
+Use this rubric for all new prompts and audits:
+1) **Clear task contract**: objective, scope, non-goals, and stop conditions are explicit.
+2) **Context control**: trusted context is separated from user-provided text with clear delimiters.
+3) **Structured outputs**: required output schema/sections are explicit and testable.
+4) **Examples + near-misses**: include at least one positive and one negative trigger pattern.
+5) **Safety + uncertainty behavior**: define what to do when inputs are ambiguous, unsafe, or missing.
+6) **Evidence-first workflow**: require retrieval/citations for time-sensitive or externally sourced claims.
+7) **Eval-ready wording**: prompts are written so acceptance checks can be encoded in `references/evals.yaml`.
+8) **Minimal-diff maintenance**: prefer small patch suggestions over full rewrites unless the user asks for rewrite mode.
+
 ## Procedure
 0) **If the user is only asking “what should I use?”**
    - Answer directly in 1–2 sentences.
    - Do **not** run commands or attempt file writes.
    - If they want `/prompts:<name>`, say: “Use `~/.codex/prompts/<name>.md` (custom prompts are deprecated).”
+
+0.5) **If the user asks for latest standards**
+   - Verify guidance against current official docs before final recommendations.
+   - Date-stamp recommendations (for example: “validated March 3, 2026”).
 
 1) **Default to a repo skill**
    - Create the folder:
@@ -76,14 +107,21 @@ knowledge_graph_profile: references/task-profile.json
    - In your response, **include the full `SKILL.md` contents** in a fenced code block (even if you also write it to disk).
 2) **Make implicit invocation reliable**
    - Put clear trigger keywords + boundaries in the `description` line.
+   - Include at least one explicit near-miss (“do not trigger when …”) boundary.
 3) **Add guardrails**
    - Add explicit “do not” constraints in the instructions (no deploys, no secrets, etc.).
+   - Specify behavior when required context is missing (ask targeted question vs fail safely).
 4) **Never claim you wrote files unless verified**
    - If you edit/create files, verify with a directory listing (for example: `ls -la .agents/skills/<skill-name>`).
    - If you cannot write due to sandboxing or permissions, say so and provide the exact file contents instead.
 5) **(Optional) Add supporting resources**
    - `references/` for longer docs and checklists.
    - `agents/openai.yaml` if you need UI metadata or MCP dependencies.
+5.5) **Audit existing prompts without rewrites (default maintenance mode)**
+   - Inventory prompt files in scope.
+   - Score each file against the gold rubric (P0/P1/P2).
+   - Propose minimal diffs (specific lines/sections) first.
+   - Only propose full rewrites if the user explicitly opts in.
 6) **Only if you explicitly want `/prompts:<name>`**
    - Use a custom prompt in `~/.codex/prompts/` (**deprecated**). Prefer this only for local, explicit shortcuts.
    - Custom prompts must be top-level `*.md` files under `~/.codex/prompts/` (Codex ignores non-Markdown files and subdirectories).
@@ -92,6 +130,9 @@ knowledge_graph_profile: references/task-profile.json
 ## Validation
 - Fail fast: if validation fails, stop and fix the smallest issue before continuing.
 - For any new/updated skill folder, run:
+  - `~/.venvs/pyyaml/bin/python utilities/skill-creator/scripts/quick_validate.py <skill-dir>`
+  - `~/.venvs/pyyaml/bin/python utilities/skill-creator/scripts/skill_gate.py <skill-dir>`
+  - `~/.venvs/pyyaml/bin/python utilities/skill-creator/scripts/analyze_skill.py <skill-dir>`
   - `~/.venvs/pyyaml/bin/python utilities/skill-creator/scripts/openclaw_skill_guard.py <skill-dir> --mode both`
 - If critical findings appear, do not recommend enablement until fixed or explicitly approved.
 - Restart Codex if your new/updated skill doesn’t appear.
@@ -99,6 +140,7 @@ knowledge_graph_profile: references/task-profile.json
   - Explicit: type `$<skill-name>` in the composer and select the skill.
   - Slash menu: type `/` and confirm the enabled skill appears in the list.
 - Test a “near miss” prompt to ensure it doesn’t trigger when it shouldn’t (tight `description`).
+- For audit mode, include at least one sampled “no rewrite” case and assert recommendations are patch-sized.
 
 If you created a deprecated custom prompt:
 - Restart Codex and confirm `/prompts:<name>` appears in the slash menu.
@@ -153,6 +195,7 @@ Open a draft PR on the same branch. Use $PR_TITLE when supplied; otherwise write
 ## References
 - `references/contract.yaml` (output contract)
 - `references/evals.yaml` (trigger + acceptance checks)
+- `references/prompt-quality-standard-2026-03.md` (gold-standard audit rubric and checklist)
 - If you extend this skill to emit a machine-checkable output contract, include `schema_version` in that contract.
 
 <!-- skill-score-boost-v1 -->

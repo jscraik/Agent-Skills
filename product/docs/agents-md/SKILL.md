@@ -153,6 +153,18 @@ Use the failure-mode template verbatim for out-of-scope requests.
 - Do not add legacy shims, adapter layers, dual-write paths, or backwards-compatibility promises unless the user explicitly requires compatibility.
 - Do not hardcode npm/pnpm/yarn/bun command examples without repo evidence.
 
+## Git Operations
+- Before reporting merge success or task completion, verify state with `git status` and `git log --oneline -5`; never claim "merged" without explicit confirmation.
+- After any `git commit`, `git push`, or merge action, run `git log --oneline -3` and `git status` before proceeding.
+
+## Planning and Design
+### Plan Decomposition
+- When implementing plans from reviews (including DHH-style or technical feedback), start with the minimal v1 that delivers core value first.
+- Ask: "What's the smallest version that delivers value?"
+
+## Debugging
+- For auth-related tasks (including 1Password, Kimi, or other external keys), first run `env | grep -i <key_name>` and `echo $<VAR>` before assuming configuration is correct.
+
 ## Workflow
 
 1) Discover repo facts
@@ -310,6 +322,15 @@ Insert this section when injected:
 - Avoid over-engineering - prefer simple solutions over comprehensive ones.
 - Scale back ambition if initial plan feels too large.
 ```
+
+## Code Quality
+### Bug Hunt Protocol
+- When a user says "find bugs" or "bug hunt", systematically analyze:
+  1. calculation logic for edge cases,
+  2. null/undefined handling,
+  3. async/await patterns,
+  4. resource cleanup.
+- Report findings with severity and exact file locations.
 
 ## Shell Script Conventions (injectable block, conditional)
 

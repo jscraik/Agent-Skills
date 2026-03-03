@@ -1,0 +1,85 @@
+{
+  "engine": "auto",
+  "generated_at": "2026-03-03T13:51:13.818129+00:00",
+  "knowledge_graph": {
+    "edges": [
+      {
+        "block_recommended": false,
+        "confidence": "low",
+        "improvement_hints": [],
+        "source": "skill:/private/tmp/codex/skill-install-djuhnhsj/skills-best-practices-main/skill",
+        "target": "skill:/Users/jamiecraik/dev/agent-skills/utilities/skill-creator",
+        "type": "overlaps_with",
+        "weight": 0.22424555103272867
+      }
+    ],
+    "nodes": [
+      {
+        "id": "skill:/private/tmp/codex/skill-install-djuhnhsj/skills-best-practices-main/skill",
+        "name": "skills-best-practices-mgechev",
+        "path": "/private/tmp/codex/skill-install-djuhnhsj/skills-best-practices-main/skill",
+        "type": "candidate_skill"
+      },
+      {
+        "id": "skill:/Users/jamiecraik/dev/agent-skills/utilities/skill-creator",
+        "name": "skill-creator",
+        "path": "/Users/jamiecraik/dev/agent-skills/utilities/skill-creator",
+        "type": "installed_skill"
+      }
+    ]
+  },
+  "knowledge_graph_profile": "utilities/skill-installer/references/task-profile.json",
+  "mode": "dry-run",
+  "schema_version": "1.1",
+  "skills": [
+    {
+      "candidate_source_dir": "/private/tmp/codex/skill-install-djuhnhsj/skills-best-practices-main/skill",
+      "deconflict_matches": [
+        {
+          "block_recommended": false,
+          "command_score": 0.5,
+          "confidence": "low",
+          "harness_score": 0.0,
+          "improvement_hints": [],
+          "intent_score": 0.43473368342085555,
+          "path": "/Users/jamiecraik/dev/agent-skills/utilities/skill-creator",
+          "proposal_path": null,
+          "same_job": false,
+          "score": 0.22424555103272867,
+          "shared_terms": [
+            "against",
+            "agent",
+            "api",
+            "assets",
+            "block",
+            "boilerplate",
+            "build",
+            "bundle",
+            "checklist",
+            "cli"
+          ],
+          "token_score": 0.08284023668639054
+        }
+      ],
+      "deconflict_notes": [
+        "harness: no overlap hits found; using lexical fallback weights"
+      ],
+      "destination_dir": "/Users/jamiecraik/dev/agent-skills/deconflict-test/skills-best-practices-mgechev",
+      "risk_warnings": [],
+      "skill_name": "skills-best-practices-mgechev",
+      "status": "dry-run-pass"
+    }
+  ],
+  "source": {
+    "owner": "mgechev",
+    "paths": [
+      "skill"
+    ],
+    "ref": "main",
+    "repo": "skills-best-practices"
+  },
+  "thresholds": {
+    "advisory": 0.2,
+    "block": 0.45
+  }
+}

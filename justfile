@@ -13,6 +13,10 @@ status:
 validate:
     ./scripts/validate_all.sh
 
+# Run coding-harness preflight checks
+harness-check:
+    harness preflight-gate --strict --contract harness.contract.json --json
+
 # Diagnose all skills
 diagnose:
     python3 scripts/diagnose_skill.py --all
@@ -36,6 +40,14 @@ install-cron:
 # Run docs lint
 docs-lint:
     python3 scripts/docs_lint.py --mode warn --config docs-policy.json
+
+# Smoke test visual-explainer slide generation (opens browser)
+smoke-slides source='/Users/jamiecraik/dev/agent-skills/docs/plans/2026-03-02-feat-skill-genome-loop-draft-pr-copilot-plan.md':
+    python3 utilities/visual-explainer/scripts/smoke_generate_slides.py --source {{source}}
+
+# Smoke test visual-explainer slide generation without opening browser
+smoke-slides-no-open source='/Users/jamiecraik/dev/agent-skills/docs/plans/2026-03-02-feat-skill-genome-loop-draft-pr-copilot-plan.md':
+    python3 utilities/visual-explainer/scripts/smoke_generate_slides.py --no-open --source {{source}}
 
 # Run pre-commit hooks on all files
 lint:

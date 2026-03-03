@@ -54,11 +54,12 @@ If you have [surf-cli](https://github.com/nicobailon/surf-cli) installed, the sk
 
 The agent loads the skill when you mention diagrams, architecture, flowcharts, schemas, or visualizations. It also kicks in automatically when it's about to dump a complex table in the terminal (4+ rows or 3+ columns) — it renders HTML instead and opens it in the browser. Output goes to `~/.agent/diagrams/`.
 
-The skill ships with five prompt templates:
+The skill ships with six prompt templates:
 
 | Command | What it does |
 |---------|-------------|
 | `/generate-web-diagram` | Generate an HTML diagram for any topic |
+| `/generate-slides` | Generate a complete slide-deck HTML explainer (full coverage, no silent content drops) |
 | `/diff-review` | Visual diff review with architecture comparison, code review, decision log |
 | `/plan-review` | Compare a plan against the codebase with risk assessment |
 | `/project-recap` | Mental model snapshot for context-switching back to a project |
@@ -79,6 +80,12 @@ It generates a full page with before/after architecture diagrams, KPI dashboard,
 
 ```
 /plan-review ~/docs/refactor-plan.md
+```
+
+`/generate-slides` is for explicit deck output. Use it when you want the same technical depth as the page view, but structured as slide-native pacing:
+
+```
+/generate-slides ~/docs/refactor-plan.md
 ```
 
 `/project-recap` is designed for context-switching back to a project after days away. It scans recent git activity and produces an architecture snapshot, decision log, and cognitive debt hotspots. `/fact-check` takes any document that makes claims about code and verifies every one of them.

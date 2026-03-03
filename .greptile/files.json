@@ -1,0 +1,33 @@
+{
+  "contextFiles": [
+    {
+      "path": "AGENTS.md",
+      "role": "repository governance contract"
+    },
+    {
+      "path": "harness.contract.json",
+      "role": "harness policy contract"
+    },
+    {
+      "path": "README.md",
+      "role": "canonical repository overview"
+    },
+    {
+      "path": "scripts/validate_all.sh",
+      "role": "primary validation entrypoint"
+    },
+    {
+      "path": "scripts/diagnose_skill.py",
+      "role": "skill diagnostics entrypoint"
+    }
+  ],
+  "apiSpecs": [
+    "scripts/**/*.py",
+    "scripts/**/*.sh"
+  ],
+  "schemaFiles": [
+    "templates/**/*.yaml",
+    "docs-policy.json",
+    "harness.contract.json"
+  ]
+}
