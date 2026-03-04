@@ -19,26 +19,10 @@ The Skill Genome Loop is a nightly batch process that:
 python3 scripts/run_skill_genome_loop.py --dry-run
 
 # Run with forced mode (override control file)
-python3 scripts/run_skill_genome_loop.py --force-mode active
+python3 scripts/run_skill_genome_loop.py --force-mode observe_only
 
-# View pending candidates (awaiting review)
-python3 scripts/review_candidates.py --list
-
-# Interactive review of pending candidates
-python3 scripts/review_candidates.py
-
-# Approve/reject specific candidates
-python3 scripts/review_candidates.py --approve <candidate_id>
-python3 scripts/review_candidates.py --reject <candidate_id>
-
-# Approve all pending (use with caution)
-python3 scripts/review_candidates.py --approve-all
-
-# View approved candidates
+# View candidates
 cat artifacts/skill-graphs/telemetry/candidates.jsonl | jq .
-
-# View rejected candidates
-cat artifacts/skill-graphs/telemetry/rejected-candidates.jsonl | jq .
 
 # View processing stats
 cat artifacts/skill-graphs/telemetry/skill-genome-processing-stats.json | jq .
@@ -166,71 +150,7 @@ All candidates are processed through:
 
 ## Reviewer Decision Flow
 
-### Human Review Gate
-
-Candidates are **not** emitted directly to `candidates.jsonl`. Instead, they go through a human review gate:
-
-```
-Genome Loop → pending-candidates.jsonl → review_candidates.py → candidates.jsonl
-                                            ↓
-                                     rejected-candidates.jsonl
-```
-
-**Why**: Prevents automated emission of unreviewed skill changes, ensuring human oversight.
-
-### 1. View Pending Candidates
-
-```bash
-# List all pending candidates
-python3 scripts/review_candidates.py --list
-
-# Output example:
-# === Pending Candidates (2) ===
-#
-# [1] Candidate: ca41c34123dc8295
-#     Skill: interview-kernel
-#     Score: 0.85
-#     Windows: 2
-#     Reason: Routing confusion detected (100.0%)
-#     Created: 2026-03-02T10:25:06.111815+00:00
-```
-
-### 2. Interactive Review
-
-```bash
-python3 scripts/review_candidates.py
-```
-
-Commands during interactive review:
-- `a` - Approve current candidate
-- `r` - Reject current candidate
-- `s` - Skip (leave pending for later)
-- `q` - Quit (remaining stay pending)
-- `A` - Approve all remaining
-- `R` - Reject all remaining
-
-### 3. Single-Command Actions
-
-```bash
-# Approve by ID
-python3 scripts/review_candidates.py --approve ca41c34123dc8295
-
-# Reject by ID
-python3 scripts/review_candidates.py --reject ca41c34123dc8295
-
-# Approve all pending (use with caution)
-python3 scripts/review_candidates.py --approve-all
-```
-
-### 4. Review Outcomes
-
-| Action | Destination | Fields Added |
-|--------|-------------|--------------|
-| Approve | `candidates.jsonl` | `review_status: approved`, `reviewed_at` |
-| Reject | `rejected-candidates.jsonl` | `review_status: rejected`, `reviewed_at` |
-| Skip | Stays in `pending-candidates.jsonl` | None |
-
-### 5. View Candidates (Legacy)
+### 1. View Candidates
 
 ```bash
 # View all candidates
@@ -349,23 +269,6 @@ python3 scripts/run_skill_genome_loop.py --dry-run
 **Action**: Review candidate source data for leaked secrets
 **Prevention**: Check upstream artifact generation
 
-### No Pending Candidates to Review
-
-**Cause**: Genome loop not run, or all candidates already reviewed
-**Fix**:
-```bash
-# Run genome loop to generate candidates
-python3 scripts/run_skill_genome_loop.py --force-mode active
-
-# Check pending
-python3 scripts/review_candidates.py --list
-```
-
-### Candidate Already Reviewed
-
-**Cause**: Candidate ID already in `candidates.jsonl` or `rejected-candidates.jsonl`
-**Fix**: Each candidate can only be reviewed once. Check destination files.
-
 ---
 
 ## Scheduled Execution
@@ -384,65 +287,3 @@ For nightly cron execution:
 - **Plan**: `docs/plans/2026-03-02-feat-skill-genome-loop-draft-pr-copilot-plan.md`
 - **Brainstorm**: `docs/brainstorms/2026-03-01-skill-genome-loop-brainstorm.md`
 - **Kill-Switch Runbook**: `docs/skill-graphs/runbooks/kill-switch-and-escalation.md`
-
----
-
-## Cron Job Setup
-
-### Installation
-
-```bash
-# Install the cron job (runs daily at 4:00 AM UTC)
-./scripts/install_cron.sh
-
-# Verify installation
-crontab -l | grep genome
-
-# View logs
-tail -f logs/genome-loop.log
-```
-
-### Manual Cron Setup
-
-If you prefer manual installation:
-
-```bash
-# Add to crontab
-crontab -e
-
-# Add this line:
-0 4 * * * /Users/jamiecraik/dev/agent-skills/scripts/cron_genome_loop.sh >> /Users/jamiecraik/dev/agent-skills/logs/genome-loop.log 2>&1
-```
-
-### Cron Job Features
-
-- **Schedule**: Daily at 4:00 AM UTC
-- **Logging**: All output to `logs/genome-loop.log`
-- **Notifications**: Pending candidate count logged (Slack hook optional)
-- **Error handling**: Non-zero exit codes logged for debugging
-
-### Log Rotation
-
-Add logrotate config:
-
-```bash
-# /etc/logrotate.d/agent-skills-genome
-/Users/jamiecraik/dev/agent-skills/logs/genome-loop.log {
-    daily
-    rotate 7
-    compress
-    missingok
-    notifempty
-}
-```
-
-### Remove Cron Job
-
-```bash
-# Edit crontab
-crontab -e
-
-# Delete the genome-loop line
-# OR remove the file:
-rm scripts/cron_genome_loop.sh
-```

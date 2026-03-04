@@ -72,4 +72,3 @@ environment.toml
 artifacts/skill-graphs/telemetry/candidates.jsonl
 artifacts/skill-graphs/telemetry/skill-genome-processing-stats.json
 artifacts/skill-graphs/telemetry/.genome-watermark
-logs/

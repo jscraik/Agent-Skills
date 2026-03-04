@@ -29,7 +29,6 @@ from typing import Any, Dict, Iterator, List, Optional, Set
 
 # Configuration
 CANDIDATES_PATH = Path("artifacts/skill-graphs/telemetry/candidates.jsonl")
-PENDING_CANDIDATES_PATH = Path("artifacts/skill-graphs/telemetry/pending-candidates.jsonl")
 RUNS_ROOT = Path("artifacts/skill-graphs/runs")
 CONTROLS_ROOT = Path("artifacts/skill-graphs/controls")
 STATS_PATH = Path("artifacts/skill-graphs/telemetry/skill-genome-processing-stats.json")
@@ -459,29 +458,21 @@ def write_processing_stats(
         temp_path.write_text(json.dumps(stats, indent=2), encoding="utf-8")
 
 
-def append_candidates(candidates: List[Dict[str, Any]], output_path: Optional[Path] = None) -> int:
+def append_candidates(candidates: List[Dict[str, Any]]) -> int:
     """Append candidates to JSONL file atomically with deduplication.
 
     P1 FIX: Deduplicate by candidate_id before appending to prevent
     duplicate records when rerunning on the same artifact set.
-
-    Args:
-        candidates: List of candidate dicts to append
-        output_path: Path to write to (defaults to CANDIDATES_PATH)
-
-    Returns:
-        Number of candidates written
     """
     if not candidates:
         return 0
 
-    target_path = output_path or CANDIDATES_PATH
-    target_path.parent.mkdir(parents=True, exist_ok=True)
+    CANDIDATES_PATH.parent.mkdir(parents=True, exist_ok=True)
 
     # P1 FIX: Read existing candidate IDs for deduplication
     existing_ids: Set[str] = set()
-    if target_path.exists():
-        for line in target_path.read_text(encoding="utf-8").splitlines():
+    if CANDIDATES_PATH.exists():
+        for line in CANDIDATES_PATH.read_text(encoding="utf-8").splitlines():
             try:
                 existing = json.loads(line)
                 existing_ids.add(existing.get("candidate_id", ""))
@@ -497,7 +488,7 @@ def append_candidates(candidates: List[Dict[str, Any]], output_path: Optional[Pa
     if not new_candidates:
         return 0
 
-    with open(target_path, "a", encoding="utf-8") as f:
+    with open(CANDIDATES_PATH, "a", encoding="utf-8") as f:
         for c in new_candidates:
             f.write(json.dumps(c, sort_keys=True) + "\n")
 
@@ -589,10 +580,9 @@ def main() -> int:
         )
         return 0
 
-    # Write candidates to PENDING for human review (active mode)
-    emitted = append_candidates(capped, output_path=PENDING_CANDIDATES_PATH)
-    log(f"Queued {emitted} candidates for human review: {PENDING_CANDIDATES_PATH}")
-    log("Run 'python3 scripts/review_candidates.py' to approve/reject pending candidates")
+    # Write candidates
+    emitted = append_candidates(capped)
+    log(f"Emitted {emitted} candidates to {CANDIDATES_PATH}")
 
     # P1 FIX: Use max started_at from processed runs as watermark (not wall-clock time)
     # This prevents dropping late-arriving artifacts that started before this job
