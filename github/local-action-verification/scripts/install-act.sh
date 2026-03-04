@@ -96,8 +96,7 @@ trap 'rm -rf "$TMP_DIR"' EXIT
 CHECKSUMS_TXT="${TMP_DIR}/checksums.txt"
 EXTRACT_DIR="${TMP_DIR}/extract"
 
-read -r ACT_TAG ASSET_URL CHECKSUMS_URL <<EOF
-$(python3 - "$ASSET_OS" "$ARCH" <<'PY'
+read -r ACT_TAG ASSET_URL CHECKSUMS_URL < <(python3 - "$ASSET_OS" "$ARCH" <<'PY'
 import json
 import sys
 import urllib.request
@@ -132,7 +131,7 @@ if not tag or not asset_url or not checksums_url:
 
 print(f"{tag} {asset_url} {checksums_url}")
 PY
-EOF
+)
 
 if [[ -z "${ACT_TAG:-}" || -z "${ASSET_URL:-}" || -z "${CHECKSUMS_URL:-}" ]]; then
   echo "❌ Failed to resolve act release asset/checksum URLs from GitHub Releases."

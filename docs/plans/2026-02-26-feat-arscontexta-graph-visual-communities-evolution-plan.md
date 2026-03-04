@@ -3,6 +3,7 @@ title: feat: Ars Contexta Graph Visual + Communities + Evolution
 type: feat
 status: completed
 date: 2026-02-26
+
 ---
 
 # feat: Ars Contexta Graph Visual + Communities + Evolution
@@ -32,6 +33,7 @@ date: 2026-02-26
 - [Enhancement Summary](#enhancement-summary)
 - [Plan Execution Update](#plan-execution-update)
 - [Section Manifest](#section-manifest)
+- [Task Graph (id / depends_on)](#task-graph-id--depends_on)
 - [Overview](#overview)
 - [Problem Statement / Motivation](#problem-statement--motivation)
 - [Proposed Solution](#proposed-solution)
@@ -79,6 +81,26 @@ Section 13: Test Scenarios — add parser, schema, and behavior tests for dry-ru
 Section 14: Documentation-backed updates — ensure recommendations are linked to versioned docs and reproducible references.
 
 Section 15: Sources & References — record all evidence and keep internal/external references current.
+
+## Task Graph (id / depends_on)
+```yaml
+tasks:
+  - id: G1
+    title: Define /graph visual, communities, and evolution contracts and CLI envelope.
+    depends_on: []
+  - id: G2
+    title: Implement deterministic graph artifact indexing and render pipelines.
+    depends_on: [G1]
+  - id: G3
+    title: Ship vault integration scripts and verification for parse/build/render stages.
+    depends_on: [G2]
+  - id: G4
+    title: Add rollback-safe writes, output hygiene, and empty-case handling.
+    depends_on: [G3]
+  - id: G5
+    title: Publish docs/tests for the new /graph operations and monitorability.
+    depends_on: [G4]
+```
 
 
 ## Overview

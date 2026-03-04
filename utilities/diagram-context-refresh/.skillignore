@@ -1,0 +1,3 @@
+# Ignore adversarial eval text for prompt-injection pattern scans.
+# Security coverage checks still read references/evals.yaml directly.
+references/evals.yaml

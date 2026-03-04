@@ -8,20 +8,26 @@ triggers:
   - user reports mise trust errors
   - commands fail because mise-managed tools are unavailable
   - user asks to repair local mise configuration
+  - user asks for global mise config upkeep (`~/.config/mise/config.toml`) while resolving trust/runtime issues
 
 inputs:
   - failing command/error output
   - path to repo or directory with mise config
+  - global mise config path (typically `~/.config/mise/config.toml`)
   - optional expected runtime versions
+  - explicit permission/confirmation for global toolchain edits when intent is not explicit
 
 outputs:
   - diagnosed root cause and remediation actions
   - verification evidence from mise checks and retried command
+  - global configuration update result and backup metadata when updates are made
+  - explicit confirmation requirement and decision log when global edits are requested but ambiguous
   - clear unresolved blocker summary when full recovery is not possible
 
 non_goals:
   - unrelated environment refactors outside mise scope
   - claiming recovery without rerunning verification commands
+  - unrelated global toolchain policy changes
 
 risks:
   - over-broad trust actions; mitigated by path-scoped trust steps
@@ -31,6 +37,9 @@ examples:
   happy_path:
     input: "mise says config is untrusted in this repo"
     expected_output: "trust updated, doctor passes, command works"
+  confirmation_path:
+    input: "make sure my global config matches"
+    expected_output: "asks for confirmation if versions or scope are ambiguous"
   edge_case:
     input: "multiple nested mise configs conflict"
     expected_output: "documented scope resolution and targeted trust actions"

@@ -30,7 +30,7 @@ Thumbnail (Visual Hook) + Title (Verbal Promise) = Irresistible Curiosity Gap
 
 ## Interactive Discovery: Clarifying Questions
 
-Before generating titles and thumbnails, use the **AskUserQuestion** tool to gather context that shapes the output. This ensures recommendations are tailored to the creator's specific needs rather than generic advice.
+Before generating titles and thumbnails, use `default_mode_request_user_input` to gather context that shapes the output. This ensures recommendations are tailored to the creator's specific needs rather than generic advice.
 
 ### When to Ask Questions
 
@@ -47,7 +47,7 @@ Before generating titles and thumbnails, use the **AskUserQuestion** tool to gat
 
 ### Clarifying Question Flow
 
-Use AskUserQuestion to gather essential context through targeted questions. Ask 2-4 questions maximum per interaction to avoid overwhelming the user.
+Use `default_mode_request_user_input` to gather essential context through targeted questions. Ask 2-4 questions maximum per interaction to avoid overwhelming the user.
 
 #### Question Set 1: Content Context
 
@@ -172,7 +172,7 @@ After gathering answers, apply them directly to title/thumbnail generation:
 
 **User provides:** "I made a video about why I switched from React to Vue after 5 years. Can you help with the title and thumbnail?"
 
-**Claude uses AskUserQuestion:**
+**Claude uses default_mode_request_user_input:**
 
 ```
 Questions to ask in first call:
@@ -663,10 +663,10 @@ Title: "The Database Decision That Scales with Your Startup"
 
 ### Step 1: Gather Context via Interactive Questions
 
-Before analyzing content, use AskUserQuestion to understand constraints:
+Before analyzing content, use `default_mode_request_user_input` to understand constraints:
 
 ```
-Use AskUserQuestion with these questions:
+Use `default_mode_request_user_input` with these questions:
 
 Question 1:
 - question: "What type of video is this?"
@@ -715,7 +715,7 @@ Read transcript/content and identify:
 
 ### Step 3: Apply Context to Pattern Selection
 
-Based on AskUserQuestion answers, select appropriate patterns:
+Based on `default_mode_request_user_input` answers, select appropriate patterns:
 
 | Content Type | Preferred Title Patterns | Preferred Thumbnail Patterns |
 |--------------|-------------------------|------------------------------|
@@ -835,7 +835,7 @@ The best YouTube titles and thumbnails:
 - Adapt to content type and audience context
 
 **The Interactive Workflow:**
-1. **Ask first** — Use AskUserQuestion to gather context before generating
+1. **Ask first** — Use `default_mode_request_user_input` to gather context before generating
 2. **Tailor output** — Apply answers to select appropriate patterns
 3. **Explain choices** — Help users understand why recommendations fit their needs
 

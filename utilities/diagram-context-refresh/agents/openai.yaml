@@ -1,0 +1,4 @@
+interface:
+  display_name: "Diagram Context Refresh"
+  short_description: "Refresh Mermaid context packs from repository code"
+  default_prompt: "Use $diagram-context-refresh to regenerate architecture diagrams and sync .diagram/context/diagram-context.md."

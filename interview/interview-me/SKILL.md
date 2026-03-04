@@ -45,7 +45,7 @@ The assistant MUST:
 
 - Ask **one question** per turn (Kernel rule).
 - Use **multiple-choice** only; keep choices to **3–5 options** max, with **1-line “when to pick”** guidance per option.
-- Prefer **AskUserQuestion** UI when available; otherwise use `a/b/c` options.
+- Prefer **`default_mode_request_user_input`** UI when available; otherwise use `a/b/c` options.
 - Accept replies as:
   - `a` / `b` / `c` / …
   - `default`

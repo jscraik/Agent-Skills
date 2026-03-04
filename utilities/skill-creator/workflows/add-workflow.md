@@ -9,7 +9,8 @@
 <process>
 ## Step 1: Select the Skill
 
-**DO NOT use AskUserQuestion** - there may be many skills.
+For large skill lists, do not force `default_mode_request_user_input` selection UIs.
+Use a numbered list in chat and ask for number/name.
 
 ```bash
 ls ~/.claude/skills/
@@ -34,7 +35,13 @@ Report current structure to user.
 
 ## Step 3: Gather Workflow Requirements
 
-Ask using AskUserQuestion or direct question:
+Ask using `default_mode_request_user_input` when it improves clarity; otherwise ask directly.
+Question quality contract:
+- 2-4 options, recommended first
+- one-sentence tradeoff per option
+- stable option IDs for follow-up references
+
+Prompts to cover:
 - What should this workflow do?
 - When would someone use it vs existing workflows?
 - What references would it need?

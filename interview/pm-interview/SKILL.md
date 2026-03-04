@@ -19,7 +19,7 @@ Kernel-enforced: Question validity gate, DISCOVER vs DECIDE intent switch, Decis
 
 ## Interaction notes
 
-- Must use AskUserQuestion-style multiple choice (3–5 options, include a recommended default).
+- Must use `default_mode_request_user_input` multiple choice (3–5 options, include a recommended default).
 - In Delta mode (existing PRD/notes), do not re-ask settled decisions; fill gaps and force tradeoffs.
 
 ## User profile alignment (Jamie)

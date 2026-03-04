@@ -18,7 +18,7 @@ Kernel-enforced: Question validity gate, DISCOVER vs DECIDE intent switch, Decis
 
 ## Interaction notes
 
-- Must use AskUserQuestion-style multiple choice (3–5 options, include a recommended default).
+- Must use `default_mode_request_user_input` multiple choice (3–5 options, include a recommended default).
 - In Delta mode (existing bug report/ticket), extract what’s already known first; only ask what’s missing to repro or run the next experiment.
 - Avoid broad log/data dumps without a hypothesis.
 

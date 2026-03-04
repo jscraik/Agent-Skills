@@ -17,7 +17,7 @@ import argparse
 import re
 import sys
 from pathlib import Path
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List
 
 try:
     import yaml

@@ -27,7 +27,6 @@ import argparse
 import json
 import re
 import sys
-import textwrap
 from dataclasses import dataclass
 from enum import IntEnum
 from pathlib import Path
@@ -207,8 +206,9 @@ def score_frontmatter(doc: SkillDoc) -> CategoryResult:
 
 
     # Prefer minimal frontmatter: keep it to `name` + `description`.
+    # `knowledge_graph_profile` is an allowed repo-level standard binding.
     # Put UI metadata and tool dependencies in agents/openai.yaml instead.
-    extra_keys = sorted(set(fm.keys()) - {"name", "description"})
+    extra_keys = sorted(set(fm.keys()) - {"name", "description", "knowledge_graph_profile"})
     if extra_keys:
         findings.append(
             Finding(
@@ -372,7 +372,6 @@ def score_organization(body: str) -> CategoryResult:
     max_score = 10
 
     headers = _extract_headers(body)
-    h2s = _extract_h2_titles(body)
 
     if len(headers) >= 5:
         score += 6

@@ -17,9 +17,9 @@ from __future__ import annotations
 
 import argparse
 import colorsys
+import os
 import math
 import struct
-import zlib
 from io import BytesIO
 from pathlib import Path
 from typing import Literal
@@ -230,7 +230,7 @@ def render_lucide_icon(
         PIL Image with the rendered icon, or None if cairosvg not available
     """
     if not HAS_CAIROSVG:
-        print(f"Warning: cairosvg not available. Install with: pip install cairosvg")
+        print("Warning: cairosvg not available. Install with: pip install cairosvg")
         print("         Also need native cairo: brew install cairo")
         return None
 
@@ -302,9 +302,11 @@ def adjust_brightness(
     color: tuple[int, int, int], factor: float
 ) -> tuple[int, int, int]:
     """Adjust color brightness (factor > 1 = lighter, < 1 = darker)."""
-    h, l, s = colorsys.rgb_to_hls(color[0] / 255, color[1] / 255, color[2] / 255)
-    l = max(0, min(1, l * factor))
-    r, g, b = colorsys.hls_to_rgb(h, l, s)
+    hue, lightness, saturation = colorsys.rgb_to_hls(
+        color[0] / 255, color[1] / 255, color[2] / 255
+    )
+    lightness = max(0, min(1, lightness * factor))
+    r, g, b = colorsys.hls_to_rgb(hue, lightness, saturation)
     return (int(r * 255), int(g * 255), int(b * 255))
 
 
@@ -432,8 +434,6 @@ def apply_drop_shadow(
     shadow_offset = int(size * offset * intensity)
     shadow_blur = int(size * blur * intensity)
 
-    # Create shadow from alpha channel
-    shadow = Image.new("RGBA", img.size, (0, 0, 0, 0))
     shadow_alpha = img.split()[3]
 
     # Offset and blur the shadow
@@ -713,8 +713,6 @@ def generate_favicon(
 
     # Drop shadow (applied last, affects whole icon)
     if shadow_intensity > 0 and size >= 32:
-        # Create a version with shadow
-        shadow_canvas = Image.new("RGBA", (size, size), (0, 0, 0, 0))
         img = apply_drop_shadow(img, shadow_intensity * 0.5)
 
     return img
@@ -786,13 +784,13 @@ def generate_favicon_suite(
         ],
     )
     generated_files.append(ico_path)
-    print(f"  ✓ Generated favicon.ico")
+    print("  ✓ Generated favicon.ico")
 
     # Generate SVG
     svg_path = os.path.join(output_dir, "favicon.svg")
     create_svg_file(svg_path, letter, settings)
     generated_files.append(svg_path)
-    print(f"  ✓ Generated favicon.svg")
+    print("  ✓ Generated favicon.svg")
 
     return generated_files
 
@@ -860,13 +858,13 @@ def generate_lucide_favicon_suite(
     if all(ico_images):
         create_ico_file(ico_path, ico_images)
         generated_files.append(ico_path)
-        print(f"  ✓ Generated favicon.ico")
+        print("  ✓ Generated favicon.ico")
 
     # Generate SVG with actual Lucide paths
     svg_path = os.path.join(output_dir, "favicon.svg")
     create_lucide_svg_file(svg_path, icon_name, settings)
     generated_files.append(svg_path)
-    print(f"  ✓ Generated favicon.svg")
+    print("  ✓ Generated favicon.svg")
 
     return generated_files
 
@@ -1089,10 +1087,10 @@ Available icons: """ + ", ".join(LUCIDE_ICONS.keys()) + """
     # Validate: must have either --letter or --lucide
     if not args.letter and not args.lucide:
         args.letter = "A"  # Default
-
-    print(f"\n🎨 Pro Favicon Generator")
-    print(f"{'=' * 40}")
-
+    
+    print("\n🎨 Pro Favicon Generator")
+    print("=" * 40)
+    
     if args.lucide:
         print(f"Lucide Icon: {args.lucide}")
         if not HAS_CAIROSVG:

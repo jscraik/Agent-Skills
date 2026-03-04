@@ -13,14 +13,22 @@ This repository is the canonical source of Codex skills, docs, and agent workflo
 
 ## Table of Contents
 - [Required essentials](#required-essentials)
+- [Output Paths](#output-paths)
 - [Package-manager command map](#package-manager-command-map)
 - [Non-standard build/typecheck commands](#non-standard-buildtypecheck-commands)
+- [Testing Standards](#testing-standards)
 - [Tooling essentials](#tooling-essentials)
 - [Shell script conventions](#shell-script-conventions)
-- [Validation and Diagnostics](#validation-and-diagnostics)
+- [TypeScript Configuration](#typescript-configuration)
 - [Global instructions discovery order](#global-instructions-discovery-order)
 - [Documentation map](#documentation-map)
 - [Planning](#planning)
+- [Development Workflow](#development-workflow)
+- [Code Quality Checks](#code-quality-checks)
+- [Git & PR Workflow](#git--pr-workflow)
+- [PR Workflow](#pr-workflow)
+- [MCP & External Tools](#mcp--external-tools)
+- [MCP Server Configuration](#mcp-server-configuration)
 - [Agent-First Scaffold Contract](#agent-first-scaffold-contract-managed-by-codex)
 
 ## Required essentials
@@ -28,6 +36,10 @@ This repository is the canonical source of Codex skills, docs, and agent workflo
 - Package manager: none for the repository root (configuration-only).
 - Non-standard build/typecheck commands: none at repository root.
 - Compatibility posture: canonical-only.
+
+## Output Paths
+- Before generating files, verify output paths against `package.json` and package script/config output settings.
+- Prefer configured output directories from scripts/config over hardcoded paths when generating artifacts.
 
 ## Package-manager command map
 - Root (configuration-only): install/run/exec are not observed at root.
@@ -52,6 +64,13 @@ This repository is the canonical source of Codex skills, docs, and agent workflo
 - This repository is configuration/content oriented; no root build or typecheck commands are defined here.
 - In package-based subdirectories, use declared scripts (for example `typecheck`, `build`, or `test`) from that package’s own `package.json`.
 
+## Testing Standards
+- Run full test suite before committing (for example `npm test`, `pytest`, or the detected package-native equivalent in that package).
+- Ensure all tests pass after multi-file changes.
+- Fix test isolation issues immediately; mock async operations properly.
+- For auth-related, CLI-related, or async code changes, run the full test suite.
+- For CLI tests calling `process.exit`, mock exit calls to prevent hangs.
+
 ## Tooling essentials
 - **Task runner**: Use `just` for common tasks (`just --list` to see all commands).
   - `just status` — Quick repo health overview
@@ -68,6 +87,11 @@ This repository is the canonical source of Codex skills, docs, and agent workflo
 - Validate script syntax with `bash -n script.sh`.
 - Run `shellcheck` on wrapper scripts when available in repo workflow.
 - Keep shell scripts deterministic; avoid hidden environment assumptions.
+- Prefer `[ -e ]` over `[ -f ]` for file-existence checks to cover named pipes and special files.
+
+## TypeScript Configuration
+- TypeScript strict mode is enabled where applicable. Guard property access with null/undefined checks.
+- Run `pnpm typecheck` after significant TypeScript edits (or use the project’s native typecheck command).
 
 ## Validation and Diagnostics
 - Run `just validate` or `bash scripts/validate_all.sh` for full validation.
@@ -98,6 +122,30 @@ This repository is the canonical source of Codex skills, docs, and agent workflo
 - For complex implementation work or architecture work, keep planning artifacts in `.agent/PLANS.md` with task `id`/`depends_on` checks.
 - Validate plan files with `python3 ~/.codex/scripts/plan-graph-lint.py <plan-file>`.
 
+## Development Workflow
+- Applies to codex-maintained source changes across package-specific areas.
+
+## Code Quality Checks
+- Run TypeScript type check (`tsc --noEmit`) after code changes in TypeScript packages where applicable.
+- Run linter before committing.
+- Fix all TypeScript errors and lint issues before tasks are marked complete.
+
+## Git & PR Workflow
+- For Codex-guided reviews and merge tasks, use the checks below.
+
+## PR Workflow
+- When working on PRs, check all review comments before marking complete.
+- After fixing review comments, re-verify PR state on GitHub before reporting success.
+- Handle merge conflicts directly on GitHub, not just locally.
+- For full thread audits, run `gh pr view <PR_NUMBER> --comments` and verify each comment status before completion.
+
+## MCP & External Tools
+- Use the same command discipline for internal and external MCP integrations.
+
+## MCP Server Configuration
+- Register MCP servers with `claude mcp add <name> -- <command>` using correct argument separation.
+- For 1Password integrations, use `[ -e ]` instead of `[ -f ]` so named pipes are handled correctly.
+
 <!-- AGENT-FIRST-SCAFFOLD:START -->
 ## Agent-First Scaffold Contract (managed by ~/.codex)
 
@@ -120,7 +168,6 @@ Repo-level requirements:
 State model: `S0 -> S1 -> S2 -> S3 -> S4 -> S5` with rollback to `Sx` on critical governance events.
 <!-- AGENT-FIRST-SCAFFOLD:END -->
 
-## Mandatory workflow snippet
-1. Explore project first, then invoke skill.
-2. IMPORTANT: Prefer retrieval-led reasoning over pre-training-led reasoning for any React, Tauri, Apps-SDK-ui, Tailwind, Vite, Storybook + Chat Widget tasks.
-3. Add a Table of Contents for docs.
+## Repository preflight helper
+- Use `scripts/codex-preflight.sh` before multi-step, destructive, or path-sensitive workflows.
+- Source it with `source scripts/codex-preflight.sh` and run `preflight_repo` (or `preflight_js`, `preflight_py`, `preflight_rust`) as a guard before changing repo state.

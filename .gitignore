@@ -24,9 +24,11 @@ skills-antigravity/
 .venv-skill-creator/
 .tmp/
 .temp/
+node_modules/
 
 # Generated skill views
 skills/
+skills-antigravity/
 
 # Generated artifacts
 artifacts/dist/

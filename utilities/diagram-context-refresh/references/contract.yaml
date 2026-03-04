@@ -1,0 +1,25 @@
+purpose: >
+  Define expected behavior for refreshing Mermaid diagram artifacts and compacting
+  them into one shared AI context pack for Codex and Claude.
+schema_version: 1.1
+triggers:
+  - user asks to refresh architecture context from code
+  - user asks to automate Mermaid context updates
+  - user asks to keep Codex and Claude diagram context synchronized
+inputs:
+  - repository root path
+  - refresh mode (dry-run, manual, silent-on-open, or ci-only)
+  - CI refresh preference (enabled or disabled)
+outputs:
+  - preflight readiness result (pass/fail + actionable checks)
+  - .diagram/*.mmd
+  - .diagram/context/diagram-context.md
+  - .diagram/context/diagram-context.meta.json
+  - optional shell hook install instructions
+  - optional PR-merge workflow instructions
+non_goals:
+  - hand-editing generated Mermaid/context outputs
+  - introducing non-diagram architecture docs as replacements
+risks:
+  - stale context from skipped refresh; mitigated by cooldown-aware auto refresh and CI fallback
+  - malformed metadata; mitigated by jq validation checks

@@ -52,7 +52,7 @@ Good answers to these questions shape effective scripts.
 
 ## Interactive Discovery
 
-Before writing, use **AskUserQuestion** to understand the creator's specific needs and source material.
+Before writing, use **`default_mode_request_user_input`** to understand the creator's specific needs and source material.
 
 ### When to Ask Questions
 

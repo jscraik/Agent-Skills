@@ -6,7 +6,114 @@ name = "config local environment"
 script = '''
 set -euo pipefail
 
-echo "[codex] setup: /Users/jamiecraik/dev/config"
+echo "[codex] setup: /Users/jamiecraik/dev/agent-skills"
+'''
 
-echo "[codex] no known setup step for this repository"
+[[actions]]
+name = "Sync skills"
+icon = "tool"
+command = '''
+set -euo pipefail
+
+cd /Users/jamiecraik/dev/agent-skills
+bash scripts/sync_skills.sh
+'''
+
+[[actions]]
+name = "Docs lint"
+icon = "debug"
+command = '''
+set -euo pipefail
+
+cd /Users/jamiecraik/dev/agent-skills
+python3 scripts/docs_lint.py --mode warn --config docs-policy.json
+'''
+
+[[actions]]
+name = "Validate plan graph"
+icon = "debug"
+command = '''
+set -euo pipefail
+
+cd /Users/jamiecraik/dev/agent-skills
+python3 ~/.codex/scripts/plan-graph-lint.py .agent/PLANS.md
+'''
+
+[[actions]]
+name = "Install Python deps for image/favicons"
+icon = "tool"
+command = '''
+set -euo pipefail
+
+cd /Users/jamiecraik/dev/agent-skills
+
+mise install pipx:openai
+
+if command -v uv >/dev/null 2>&1; then
+  uv pip install openai pillow cairosvg
+else
+  python3 -m pip install openai pillow cairosvg
+fi
+'''
+
+[[actions]]
+name = "Canonical verification"
+icon = "tool"
+command = '''
+set -euo pipefail
+
+cd /Users/jamiecraik/dev/agent-skills
+bash ~/.codex/scripts/verify-work.sh
+'''
+
+[[actions]]
+name = "Install automate-github-issues deps"
+icon = "tool"
+command = '''
+set -euo pipefail
+
+cd /Users/jamiecraik/dev/agent-skills/github/automate-github-issues
+npm ci
+'''
+
+[[actions]]
+name = "Typecheck automate-github-issues"
+icon = "debug"
+command = '''
+set -euo pipefail
+
+cd /Users/jamiecraik/dev/agent-skills/github/automate-github-issues
+npm run typecheck
+'''
+
+[[actions]]
+name = "Install react-components deps"
+icon = "tool"
+command = '''
+set -euo pipefail
+
+cd /Users/jamiecraik/dev/agent-skills/frontend/react-components
+npm ci
+'''
+
+[[actions]]
+name = "Validate react-components"
+icon = "debug"
+command = '''
+set -euo pipefail
+
+cd /Users/jamiecraik/dev/agent-skills/frontend/react-components
+echo "[codex] setup: /Users/jamiecraik/dev/agent-skills/frontend/react-components"
+npm run validate
+
+'''
+
+[[actions]]
+name = "Install video-transcript deps"
+icon = "tool"
+command = '''
+set -euo pipefail
+
+cd /Users/jamiecraik/dev/agent-skills/utilities/video-transcript-downloader
+npm ci
 '''

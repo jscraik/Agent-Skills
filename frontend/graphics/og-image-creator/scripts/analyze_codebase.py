@@ -13,7 +13,7 @@ import json
 import re
 import argparse
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional
 
 def detect_framework(project_path: Path) -> str:
     """Detect the framework used in the project."""
@@ -396,7 +396,7 @@ def main():
     print("\nSummary:")
     print(f"  Framework: {analysis['framework']}")
     print(f"  Routes: {len(analysis['routes'])}")
-    print(f"  Page types:")
+    print("  Page types:")
 
     type_counts = {}
     for route in analysis['routes']:

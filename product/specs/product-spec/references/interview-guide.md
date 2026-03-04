@@ -37,4 +37,4 @@ Cover every area thoroughly; ask probing follow-ups and challenge assumptions.
 ## Success Criteria
 - Metrics that prove success; minimum viable outcome; what “exceeds expectations” looks like.
 
-Interview rules: use multiple `AskUserQuestion` turns; do not accept vague answers; surface contradictions; ask about unstated but likely requirements (security, analytics, operability).
+Interview rules: use multiple `default_mode_request_user_input` turns; do not accept vague answers; surface contradictions; ask about unstated but likely requirements (security, analytics, operability).

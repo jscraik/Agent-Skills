@@ -92,7 +92,7 @@ ELAPSED=0
 
 # Poll log file while process is running
 while kill -0 "$ACT_PID" 2>/dev/null; do
-  if [ $ELAPSED -ge $TIMEOUT ]; then
+  if [ "$ELAPSED" -ge "$TIMEOUT" ]; then
     echo ""
     echo "⏰ Timeout reached (${TIMEOUT}s). Killing act process..."
     kill "$ACT_PID" 2>/dev/null || true
@@ -123,7 +123,7 @@ cat "$LOG_FILE"
 echo "--- End Log ---"
 echo ""
 
-if [ $EXIT_CODE -eq 0 ]; then
+if [ "$EXIT_CODE" -eq 0 ]; then
   echo "✅ Local GitHub Actions passed."
   exit 0
 else

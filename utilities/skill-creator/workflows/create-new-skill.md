@@ -18,12 +18,40 @@
 **If user just invoked skill without context:**
 → Ask what they want to build
 
-### Using AskUserQuestion
+### Using default_mode_request_user_input
 
-Ask 2-4 domain-specific questions based on actual gaps. Each question should:
-- Have specific options with descriptions
-- Focus on scope, complexity, outputs, boundaries
-- NOT ask things obvious from context
+Use `default_mode_request_user_input` when available; otherwise use direct `a/b/c` questions in chat.
+
+Discovery protocol (adaptive, gap-only):
+- Ask one topic round at a time: Goal/Name -> Trigger -> Process -> Inputs/Outputs/Dependencies -> Guardrails/Edge Cases -> Confirmation.
+- Skip rounds already answered by the user.
+- Ask 1-2 questions per turn (max 4 turns total) unless user asks for deeper discovery.
+- Stop asking once remaining unknowns are non-blocking.
+
+Question quality contract (required):
+- 2-4 options per question.
+- Recommended option first.
+- One-sentence tradeoff/impact per option.
+- Stable option IDs (snake_case) so later steps can reference choices.
+- Focus on scope, complexity, outputs, and boundaries only; do not ask obvious questions.
+
+`default_mode_request_user_input` payload shape (required when tool is available):
+```yaml
+id: snake_case_question_id
+question: "Single focused question"
+options:
+  - id: recommended_option_id
+    label: "Recommended label"
+    description: "One-sentence tradeoff"
+  - id: alternate_option_id
+    label: "Alternate label"
+    description: "One-sentence tradeoff"
+```
+
+Fallback if tool is unavailable:
+- Ask the same question in plain chat with `a/b/c` options.
+- Keep option IDs in parentheses so later steps can reference selections deterministically.
+- Continue the same round flow; do not switch to open-ended questions.
 
 Example questions:
 - "What specific operations should this skill handle?" (with options based on domain)
@@ -40,6 +68,28 @@ Options:
 2. **Ask more questions** - There are more details to clarify
 3. **Let me add details** - I want to provide additional context
 
+Proceed only when either:
+- user explicitly selects proceed, or
+- confidence is high enough to build safely (target ~95%) and unresolved gaps are non-blocking.
+- hard stop reached (4 turns); in that case, proceed with explicit assumptions listed in the summary.
+
+Before moving to Step 2+, provide a concise discovery summary:
+
+```markdown
+## Skill Summary: [name]
+
+**Goal:** [one sentence]
+**Trigger:** `/name` + [natural language phrases]
+**Arguments:** [accepted args, or "none"]
+**Process:** [3-7 numbered steps]
+**Inputs:** [files/data/services]
+**Outputs:** [artifacts + location]
+**Dependencies:** [scripts/APIs/tools/references]
+**Guardrails:** [boundaries + failure modes]
+```
+
+Ask: "Does this capture it? Anything to add or change?"
+
 ### Lock down triggers + description (CSO)
 
 Before writing the skill body, draft the `description:` using **WHAT + WHEN** (but *no workflow*). Use:
@@ -48,7 +98,7 @@ Before writing the skill body, draft the `description:` using **WHAT + WHEN** (b
 
 ## Step 2: Research Trigger (If External API)
 
-**When external service detected**, ask using AskUserQuestion:
+**When external service detected**, ask via `default_mode_request_user_input` (or `a/b` fallback if unavailable):
 "This involves [service name] API. Would you like me to research current endpoints and patterns before building?"
 
 Options:

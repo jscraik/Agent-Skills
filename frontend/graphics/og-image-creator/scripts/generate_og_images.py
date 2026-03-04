@@ -217,7 +217,7 @@ def is_dark_color(hex_color: str) -> bool:
         luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
 
         return luminance < 0.5
-    except:
+    except (TypeError, ValueError):
         return False
 
 async def generate_og_image(html: str, output_path: Path):

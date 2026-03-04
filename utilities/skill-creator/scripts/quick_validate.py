@@ -50,7 +50,14 @@ TARGET_DESCRIPTION_LIMITS = {"portable": 1024, "codex": 500, "claude": 1024}
 STRICT_ALLOWED_KEYS = {"name", "description"}
 
 # In compat mode, allow a small set of common optional keys.
-COMPAT_ALLOWED_KEYS = {"name", "description", "license", "allowed-tools", "metadata"}
+COMPAT_ALLOWED_KEYS = {
+    "name",
+    "description",
+    "license",
+    "allowed-tools",
+    "metadata",
+    "knowledge_graph_profile",
+}
 
 _FRONTMATTER_DELIM_RE = re.compile(r"^\s*---\s*$")
 

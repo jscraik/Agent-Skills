@@ -430,6 +430,109 @@ def _severity_to_level(severity: str, *, fail_on_high: bool) -> Level:
     return Level.WARN
 
 
+_DEFAULT_PI_EXPECTED_PATH_PATTERNS = (
+    "assets/**",
+    "examples/**",
+    "references/evals*.yaml",
+    "references/evals-v2-migration.md",
+    "references/destructive-commands.rules",
+    "references/api-security.md",
+    "references/best-practices.md",
+    "references/core-principles.md",
+    "references/composability.md",
+    "references/extended.md",
+    "references/governance-and-style.md",
+    "references/philosophy-patterns.md",
+    "references/security-hardening.md",
+    "references/prompt-injection-expected-context.json",
+    "scripts/skill_gate.py",
+    "scripts/openclaw_skill_guard.py",
+    "scripts/recursive_skill_loop.py",
+    "scripts/generate_pressure_tests.py",
+    "scripts/migrate_evals_v2.py",
+    "scripts/run_skill_evals.py",
+    "scripts/run_skill_graph_smoke.py",
+    "workflows/create-new-skill.md",
+)
+
+_DEFAULT_PI_CONTEXT_SIGNALS = (
+    "prompt injection",
+    "adversarial",
+    "jailbreak",
+    "forbidden_commands",
+    "security coverage",
+    "red team",
+    "regex",
+    "re.compile(",
+    "pattern",
+)
+
+_DEFAULT_PI_SKIP_BINARY_GLOBS = ("assets/**",)
+
+
+def _load_expected_pi_context(
+    skill_dir: Path,
+) -> Tuple[List[str], List[str], List[str], List[Finding]]:
+    findings: List[Finding] = []
+    cfg_path = skill_dir / "references" / "prompt-injection-expected-context.json"
+    if not cfg_path.exists():
+        return (
+            list(_DEFAULT_PI_EXPECTED_PATH_PATTERNS),
+            list(_DEFAULT_PI_CONTEXT_SIGNALS),
+            list(_DEFAULT_PI_SKIP_BINARY_GLOBS),
+            findings,
+        )
+
+    try:
+        raw = json.loads(cfg_path.read_text(encoding="utf-8"))
+        if not isinstance(raw, dict):
+            raise ValueError("expected object")
+        raw_paths = raw.get("path_patterns", _DEFAULT_PI_EXPECTED_PATH_PATTERNS)
+        raw_signals = raw.get("context_signals", _DEFAULT_PI_CONTEXT_SIGNALS)
+        raw_binary = raw.get("skip_binary_globs", _DEFAULT_PI_SKIP_BINARY_GLOBS)
+
+        if not isinstance(raw_paths, list) or not all(isinstance(x, str) and x.strip() for x in raw_paths):
+            raise ValueError("path_patterns must be a non-empty string list")
+        if not isinstance(raw_signals, list) or not all(isinstance(x, str) and x.strip() for x in raw_signals):
+            raise ValueError("context_signals must be a non-empty string list")
+        if not isinstance(raw_binary, list) or not all(isinstance(x, str) and x.strip() for x in raw_binary):
+            raise ValueError("skip_binary_globs must be a non-empty string list")
+
+        return list(raw_paths), list(raw_signals), list(raw_binary), findings
+    except Exception as exc:
+        findings.append(
+            Finding(
+                Level.WARN,
+                "PI_EXPECTED_CONTEXT_CONFIG",
+                f"Failed to load expected PI context config; using defaults ({exc}).",
+                evidence=str(cfg_path.relative_to(skill_dir)),
+            )
+        )
+        return (
+            list(_DEFAULT_PI_EXPECTED_PATH_PATTERNS),
+            list(_DEFAULT_PI_CONTEXT_SIGNALS),
+            list(_DEFAULT_PI_SKIP_BINARY_GLOBS),
+            findings,
+        )
+
+
+def _is_expected_pi_context(
+    code: str,
+    rel_path: str,
+    text: str,
+    path_patterns: Sequence[str],
+    context_signals: Sequence[str],
+) -> bool:
+    rel = rel_path.replace("\\", "/")
+    if any(fnmatch.fnmatch(rel, pat) for pat in path_patterns):
+        return True
+
+    lower = text.lower()
+    if code.startswith("PI_") and any(sig in lower for sig in context_signals):
+        return True
+    return False
+
+
 def check_codex_frontmatter(doc: SkillDoc, *, min_desc_len: int) -> List[Finding]:
     fm = doc.frontmatter
     out: List[Finding] = []
@@ -831,6 +934,8 @@ def check_prompt_injection_signals(skill_dir: Path, doc: SkillDoc, *, pi_high_fa
     out.extend(config_findings)
     allowlist, blocklist, local_findings = _load_allow_block_patterns()
     out.extend(local_findings)
+    expected_paths, context_signals, skip_binary_globs, expected_findings = _load_expected_pi_context(skill_dir)
+    out.extend(expected_findings)
 
     def _scan(text: str, evidence: str) -> None:
         for pattern, message, severity in blocklist:
@@ -839,6 +944,8 @@ def check_prompt_injection_signals(skill_dir: Path, doc: SkillDoc, *, pi_high_fa
 
         for code, pattern, message, severity in patterns:
             if any(allow.search(evidence) for allow in allowlist):
+                continue
+            if _is_expected_pi_context(code, evidence, text, expected_paths, context_signals):
                 continue
             if pattern.search(text):
                 out.append(Finding(_severity_to_level(severity, fail_on_high=pi_high_fail), code, f"[{severity}] {message}", evidence=evidence))
@@ -851,6 +958,8 @@ def check_prompt_injection_signals(skill_dir: Path, doc: SkillDoc, *, pi_high_fa
         if path.name == "prompt-injection-patterns.json":
             continue
         if not is_text:
+            if any(fnmatch.fnmatch(rel_path, pat) for pat in skip_binary_globs):
+                continue
             out.append(Finding(
                 Level.WARN,
                 "PI_BINARY_ATTACHMENT",
@@ -1082,8 +1191,8 @@ def check_repo_references(doc: SkillDoc) -> List[Finding]:
     return out
 
 
-def _lvl_name(l: Level) -> str:
-    return {Level.INFO: "INFO", Level.WARN: "WARN", Level.FAIL: "FAIL"}[l]
+def _lvl_name(level: Level) -> str:
+    return {Level.INFO: "INFO", Level.WARN: "WARN", Level.FAIL: "FAIL"}[level]
 
 
 def run_gate(

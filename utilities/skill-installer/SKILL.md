@@ -52,6 +52,11 @@ knowledge_graph_profile: references/task-profile.json
 - User confirmation for overwrites or updates.
 - For curated installs, accept a single skill name (`--skill`) when path is omitted.
 
+### Codex ask-questions collection (required)
+- In Codex Plan mode, use `request_user_input` for missing install decisions (source, destination, overwrite/update consent) when a compact multiple-choice prompt fits.
+- In Codex Default mode (or when `request_user_input` is unavailable), ask direct numbered questions in chat and wait for explicit confirmation before writes.
+- Do not install or overwrite until required decisions are explicitly confirmed.
+
 ## Deliverables
 - Installed skill directory under a category folder (e.g., `~/dev/agent-skills/utilities/<skill-name>`) or an override path.
 - A summary of what was installed and from where.
