@@ -1,0 +1,38 @@
+flowchart TD
+  UserRequest["User request"]
+  Decision{Record exists?}
+  condition_based_waiting_example_ac329690["condition-based-waiting-example"]
+  UserRequest --> condition_based_waiting_example_ac329690
+  condition_based_waiting_example_ac329690 --> condition_based_waiting_example_ac329690_result["result"]
+  tool_template_74b2d502["tool-template"]
+  UserRequest --> tool_template_74b2d502
+  tool_template_74b2d502 --> tool_template_74b2d502_result["result"]
+  git_9a881b9b["git"]
+  UserRequest --> git_9a881b9b
+  git_9a881b9b --> git_9a881b9b_result["result"]
+  webidl_d_8886e385["webidl.d"]
+  UserRequest --> webidl_d_8886e385
+  webidl_d_8886e385 --> webidl_d_8886e385_result["result"]
+  formdata_d_49123c71["formdata.d"]
+  UserRequest --> formdata_d_49123c71
+  formdata_d_49123c71 --> formdata_d_49123c71_result["result"]
+  file_d_142c246c["file.d"]
+  UserRequest --> file_d_142c246c
+  file_d_142c246c --> file_d_142c246c_result["result"]
+  types_d_1_1c38f70f["types.d"]
+  UserRequest --> types_d_1_1c38f70f
+  types_d_1_1c38f70f --> types_d_1_1c38f70f_result["result"]
+  standard_schema_d_8076d7a7["standard-schema.d"]
+  UserRequest --> standard_schema_d_8076d7a7
+  standard_schema_d_8076d7a7 --> standard_schema_d_8076d7a7_result["result"]
+  util_d_1_42d33162["util.d"]
+  UserRequest --> util_d_1_42d33162
+  util_d_1_42d33162 --> util_d_1_42d33162_result["result"]
+  options_d_ae5597a4["options.d"]
+  UserRequest --> options_d_ae5597a4
+  options_d_ae5597a4 --> options_d_ae5597a4_result["result"]
+  index_d_16_7c8e7987["index.d"]
+  UserRequest --> index_d_16_7c8e7987
+  index_d_16_7c8e7987 --> index_d_16_7c8e7987_result["result"]
+  classDef dbNode fill:#0ea5e9,color:#fff
+  classDef decisionNode fill:#0284c7,color:#fff

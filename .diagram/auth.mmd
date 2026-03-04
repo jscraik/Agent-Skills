@@ -1,0 +1,16 @@
+flowchart TD
+  Request["Authentication request"]
+  Boundary{"Auth Boundary"}
+  Request --> Boundary
+  tool_template_74b2d502["tool-template"]
+  Boundary --> tool_template_74b2d502
+  analyze_issues_217eec6e["analyze-issues"]
+  Boundary --> analyze_issues_217eec6e
+  internals_d_b31c6711["internals.d"]
+  Boundary --> internals_d_b31c6711
+  index_test_d_1_e909297c["index.test-d"]
+  Boundary --> index_test_d_1_e909297c
+  index_d_3_80f852c0["index.d"]
+  Boundary --> index_d_3_80f852c0
+  tsd_b4d5d517[("tsd")]
+  classDef authNode fill:#7c3aed,color:#fff

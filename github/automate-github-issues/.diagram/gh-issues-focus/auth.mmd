@@ -1,0 +1,7 @@
+flowchart TD
+  Request["Authentication request"]
+  Boundary{"Auth Boundary"}
+  Request --> Boundary
+  analyze_issues_217eec6e["analyze-issues"]
+  Boundary --> analyze_issues_217eec6e
+  classDef authNode fill:#7c3aed,color:#fff

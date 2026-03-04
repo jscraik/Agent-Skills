@@ -1,0 +1,87 @@
+{
+  "generatedAt": "2026-03-03T21:17:49.733Z",
+  "rootPath": "/Users/jamiecraik/dev/agent-skills/github/automate-github-issues",
+  "diagramDir": ".diagram/gh-issues-focus",
+  "diagrams": [
+    {
+      "type": "architecture",
+      "file": "architecture.mmd",
+      "outputPath": ".diagram/gh-issues-focus/architecture.mmd",
+      "lines": 18,
+      "bytes": 581,
+      "isPlaceholder": false
+    },
+    {
+      "type": "sequence",
+      "file": "sequence.mmd",
+      "outputPath": ".diagram/gh-issues-focus/sequence.mmd",
+      "lines": 2,
+      "bytes": 58,
+      "isPlaceholder": true
+    },
+    {
+      "type": "dependency",
+      "file": "dependency.mmd",
+      "outputPath": ".diagram/gh-issues-focus/dependency.mmd",
+      "lines": 18,
+      "bytes": 987,
+      "isPlaceholder": false
+    },
+    {
+      "type": "class",
+      "file": "class.mmd",
+      "outputPath": ".diagram/gh-issues-focus/class.mmd",
+      "lines": 2,
+      "bytes": 38,
+      "isPlaceholder": true
+    },
+    {
+      "type": "flow",
+      "file": "flow.mmd",
+      "outputPath": ".diagram/gh-issues-focus/flow.mmd",
+      "lines": 20,
+      "bytes": 734,
+      "isPlaceholder": false
+    },
+    {
+      "type": "database",
+      "file": "database.mmd",
+      "outputPath": ".diagram/gh-issues-focus/database.mmd",
+      "lines": 8,
+      "bytes": 261,
+      "isPlaceholder": false
+    },
+    {
+      "type": "user",
+      "file": "user.mmd",
+      "outputPath": ".diagram/gh-issues-focus/user.mmd",
+      "lines": 5,
+      "bytes": 143,
+      "isPlaceholder": false
+    },
+    {
+      "type": "events",
+      "file": "events.mmd",
+      "outputPath": ".diagram/gh-issues-focus/events.mmd",
+      "lines": 2,
+      "bytes": 57,
+      "isPlaceholder": true
+    },
+    {
+      "type": "auth",
+      "file": "auth.mmd",
+      "outputPath": ".diagram/gh-issues-focus/auth.mmd",
+      "lines": 7,
+      "bytes": 226,
+      "isPlaceholder": false
+    },
+    {
+      "type": "security",
+      "file": "security.mmd",
+      "outputPath": ".diagram/gh-issues-focus/security.mmd",
+      "lines": 23,
+      "bytes": 811,
+      "isPlaceholder": false
+    }
+  ]
+}

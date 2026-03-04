@@ -1,0 +1,2329 @@
+{
+  "rootPath": "/Users/jamiecraik/dev/agent-skills",
+  "components": [
+    {
+      "name": "condition-based-waiting-example",
+      "originalName": "condition-based-waiting-example",
+      "filePath": "utilities/systematic-debugging/condition-based-waiting-example.ts",
+      "type": "function",
+      "imports": [],
+      "roleTags": [
+        "database"
+      ],
+      "directory": "utilities/systematic-debugging",
+      "dependencies": []
+    },
+    {
+      "name": "render",
+      "originalName": "render",
+      "filePath": "utilities/beautiful-mermaid/scripts/render.ts",
+      "type": "file",
+      "imports": [
+        {
+          "path": "node:fs",
+          "line": 18
+        },
+        {
+          "path": "node:path",
+          "line": 19
+        },
+        {
+          "path": "node:child_process",
+          "line": 161
+        },
+        {
+          "path": "node:child_process",
+          "line": 167
+        }
+      ],
+      "roleTags": [
+        "general"
+      ],
+      "directory": "utilities/beautiful-mermaid/scripts",
+      "dependencies": []
+    },
+    {
+      "name": "create-html",
+      "originalName": "create-html",
+      "filePath": "utilities/beautiful-mermaid/scripts/create-html.ts",
+      "type": "file",
+      "imports": [
+        {
+          "path": "node:fs",
+          "line": 15
+        },
+        {
+          "path": "node:path",
+          "line": 16
+        }
+      ],
+      "roleTags": [
+        "general"
+      ],
+      "directory": "utilities/beautiful-mermaid/scripts",
+      "dependencies": []
+    },
+    {
+      "name": "types",
+      "originalName": "types",
+      "filePath": "github/automate-github-issues/scripts/types.ts",
+      "type": "module",
+      "imports": [],
+      "roleTags": [
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/scripts",
+      "dependencies": []
+    },
+    {
+      "name": "fleet-plan",
+      "originalName": "fleet-plan",
+      "filePath": "github/automate-github-issues/scripts/fleet-plan.ts",
+      "type": "file",
+      "imports": [
+        {
+          "path": "@google/jules-sdk",
+          "line": 15
+        },
+        {
+          "path": "./prompts/analyze-issues.js",
+          "line": 16
+        },
+        {
+          "path": "./github/markdown.js",
+          "line": 17
+        },
+        {
+          "path": "./github/git.js",
+          "line": 18
+        }
+      ],
+      "roleTags": [
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/scripts",
+      "dependencies": []
+    },
+    {
+      "name": "fleet-merge",
+      "originalName": "fleet-merge",
+      "filePath": "github/automate-github-issues/scripts/fleet-merge.ts",
+      "type": "file",
+      "imports": [
+        {
+          "path": "node:path",
+          "line": 15
+        },
+        {
+          "path": "node:fs/promises",
+          "line": 16
+        },
+        {
+          "path": "find-up",
+          "line": 17
+        },
+        {
+          "path": "./github/git.js",
+          "line": 19
+        },
+        {
+          "path": "@google/jules-sdk",
+          "line": 20
+        }
+      ],
+      "roleTags": [
+        "user",
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/scripts",
+      "dependencies": []
+    },
+    {
+      "name": "fleet-dispatch",
+      "originalName": "fleet-dispatch",
+      "filePath": "github/automate-github-issues/scripts/fleet-dispatch.ts",
+      "type": "file",
+      "imports": [
+        {
+          "path": "node:path",
+          "line": 15
+        },
+        {
+          "path": "node:fs/promises",
+          "line": 16
+        },
+        {
+          "path": "find-up",
+          "line": 17
+        },
+        {
+          "path": "@google/jules-sdk",
+          "line": 19
+        },
+        {
+          "path": "./github/git.js",
+          "line": 20
+        }
+      ],
+      "roleTags": [
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/scripts",
+      "dependencies": []
+    },
+    {
+      "name": "fleet-analyze",
+      "originalName": "fleet-analyze",
+      "filePath": "github/automate-github-issues/scripts/fleet-analyze.ts",
+      "type": "file",
+      "imports": [
+        {
+          "path": "./github/markdown.js",
+          "line": 15
+        }
+      ],
+      "roleTags": [
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/scripts",
+      "dependencies": []
+    },
+    {
+      "name": "tool-template",
+      "originalName": "tool-template",
+      "filePath": "backend/workers-mcp/assets/tool-template.ts",
+      "type": "module",
+      "imports": [],
+      "roleTags": [
+        "auth",
+        "database",
+        "security"
+      ],
+      "directory": "backend/workers-mcp/assets",
+      "dependencies": []
+    },
+    {
+      "name": "api-error-envelope",
+      "originalName": "api-error-envelope",
+      "filePath": "product/design/ui-ux-creative-coding/assets/api-error-envelope.ts",
+      "type": "module",
+      "imports": [
+        {
+          "path": "zod",
+          "line": 1
+        }
+      ],
+      "roleTags": [
+        "user"
+      ],
+      "directory": "product/design/ui-ux-creative-coding/assets",
+      "dependencies": []
+    },
+    {
+      "name": "bootstrap",
+      "originalName": "bootstrap",
+      "filePath": "github/automate-github-issues/scripts/prompts/bootstrap.ts",
+      "type": "module",
+      "imports": [
+        {
+          "path": "./analyze-issues.js",
+          "line": 16
+        },
+        {
+          "path": "../github/git.js",
+          "line": 17
+        }
+      ],
+      "roleTags": [
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/scripts/prompts",
+      "dependencies": []
+    },
+    {
+      "name": "analyze-issues",
+      "originalName": "analyze-issues",
+      "filePath": "github/automate-github-issues/scripts/prompts/analyze-issues.ts",
+      "type": "function",
+      "imports": [],
+      "roleTags": [
+        "auth",
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/scripts/prompts",
+      "dependencies": []
+    },
+    {
+      "name": "markdown",
+      "originalName": "markdown",
+      "filePath": "github/automate-github-issues/scripts/github/markdown.ts",
+      "type": "module",
+      "imports": [
+        {
+          "path": "./issues.js",
+          "line": 15
+        },
+        {
+          "path": "./git.js",
+          "line": 16
+        }
+      ],
+      "roleTags": [
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/scripts/github",
+      "dependencies": []
+    },
+    {
+      "name": "issues",
+      "originalName": "issues",
+      "filePath": "github/automate-github-issues/scripts/github/issues.ts",
+      "type": "module",
+      "imports": [
+        {
+          "path": "octokit",
+          "line": 15
+        },
+        {
+          "path": "./cache-plugin.js",
+          "line": 16
+        },
+        {
+          "path": "./git.js",
+          "line": 17
+        }
+      ],
+      "roleTags": [
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/scripts/github",
+      "dependencies": []
+    },
+    {
+      "name": "git",
+      "originalName": "git",
+      "filePath": "github/automate-github-issues/scripts/github/git.ts",
+      "type": "function",
+      "imports": [
+        {
+          "path": "node:fs/promises",
+          "line": 15
+        },
+        {
+          "path": "node:path",
+          "line": 16
+        }
+      ],
+      "roleTags": [
+        "database",
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/scripts/github",
+      "dependencies": []
+    },
+    {
+      "name": "cache-plugin",
+      "originalName": "cache-plugin",
+      "filePath": "github/automate-github-issues/scripts/github/cache-plugin.ts",
+      "type": "function",
+      "imports": [],
+      "roleTags": [
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/scripts/github",
+      "dependencies": []
+    },
+    {
+      "name": "index.d",
+      "originalName": "index.d",
+      "filePath": "github/automate-github-issues/node_modules/zod/index.d.ts",
+      "type": "module",
+      "imports": [
+        {
+          "path": "./v3/external.js",
+          "line": 1
+        }
+      ],
+      "roleTags": [
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/node_modules/zod",
+      "dependencies": []
+    },
+    {
+      "name": "index.d_1",
+      "originalName": "index.d",
+      "filePath": "github/automate-github-issues/node_modules/unicorn-magic/index.d.ts",
+      "type": "function",
+      "imports": [
+        {
+          "path": "unicorn-magic",
+          "line": 6
+        },
+        {
+          "path": "node:path",
+          "line": 22
+        },
+        {
+          "path": "unicorn-magic",
+          "line": 23
+        }
+      ],
+      "roleTags": [
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/node_modules/unicorn-magic",
+      "dependencies": []
+    },
+    {
+      "name": "internals.d",
+      "originalName": "internals.d",
+      "filePath": "github/automate-github-issues/node_modules/universal-github-app-jwt/internals.d.ts",
+      "type": "module",
+      "imports": [],
+      "roleTags": [
+        "auth",
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/node_modules/universal-github-app-jwt",
+      "dependencies": []
+    },
+    {
+      "name": "index.test-d",
+      "originalName": "index.test-d",
+      "filePath": "github/automate-github-issues/node_modules/universal-github-app-jwt/index.test-d.ts",
+      "type": "module",
+      "imports": [
+        {
+          "path": "tsd",
+          "line": 1
+        },
+        {
+          "path": ".",
+          "line": 2
+        }
+      ],
+      "roleTags": [
+        "auth",
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/node_modules/universal-github-app-jwt",
+      "dependencies": []
+    },
+    {
+      "name": "index.d_2",
+      "originalName": "index.d",
+      "filePath": "github/automate-github-issues/node_modules/universal-github-app-jwt/index.d.ts",
+      "type": "function",
+      "imports": [],
+      "roleTags": [
+        "auth",
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/node_modules/universal-github-app-jwt",
+      "dependencies": []
+    },
+    {
+      "name": "index.test-d_1",
+      "originalName": "index.test-d",
+      "filePath": "github/automate-github-issues/node_modules/universal-user-agent/index.test-d.ts",
+      "type": "file",
+      "imports": [
+        {
+          "path": "tsd",
+          "line": 1
+        },
+        {
+          "path": "./index.js",
+          "line": 3
+        }
+      ],
+      "roleTags": [
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/node_modules/universal-user-agent",
+      "dependencies": []
+    },
+    {
+      "name": "index.d_3",
+      "originalName": "index.d",
+      "filePath": "github/automate-github-issues/node_modules/universal-user-agent/index.d.ts",
+      "type": "function",
+      "imports": [],
+      "roleTags": [
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/node_modules/universal-user-agent",
+      "dependencies": []
+    },
+    {
+      "name": "websocket.d",
+      "originalName": "websocket.d",
+      "filePath": "github/automate-github-issues/node_modules/undici-types/websocket.d.ts",
+      "type": "module",
+      "imports": [
+        {
+          "path": "./dispatcher",
+          "line": 11
+        },
+        {
+          "path": "./fetch",
+          "line": 12
+        }
+      ],
+      "roleTags": [
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/node_modules/undici-types",
+      "dependencies": []
+    },
+    {
+      "name": "webidl.d",
+      "originalName": "webidl.d",
+      "filePath": "github/automate-github-issues/node_modules/undici-types/webidl.d.ts",
+      "type": "module",
+      "imports": [],
+      "roleTags": [
+        "database",
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/node_modules/undici-types",
+      "dependencies": []
+    },
+    {
+      "name": "util.d",
+      "originalName": "util.d",
+      "filePath": "github/automate-github-issues/node_modules/undici-types/util.d.ts",
+      "type": "function",
+      "imports": [],
+      "roleTags": [
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/node_modules/undici-types",
+      "dependencies": []
+    },
+    {
+      "name": "retry-handler.d",
+      "originalName": "retry-handler.d",
+      "filePath": "github/automate-github-issues/node_modules/undici-types/retry-handler.d.ts",
+      "type": "module",
+      "imports": [
+        {
+          "path": "./dispatcher",
+          "line": 1
+        }
+      ],
+      "roleTags": [
+        "user",
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/node_modules/undici-types",
+      "dependencies": []
+    },
+    {
+      "name": "retry-agent.d",
+      "originalName": "retry-agent.d",
+      "filePath": "github/automate-github-issues/node_modules/undici-types/retry-agent.d.ts",
+      "type": "class",
+      "imports": [
+        {
+          "path": "./dispatcher",
+          "line": 1
+        },
+        {
+          "path": "./retry-handler",
+          "line": 2
+        }
+      ],
+      "roleTags": [
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/node_modules/undici-types",
+      "dependencies": []
+    },
+    {
+      "name": "readable.d",
+      "originalName": "readable.d",
+      "filePath": "github/automate-github-issues/node_modules/undici-types/readable.d.ts",
+      "type": "class",
+      "imports": [
+        {
+          "path": "stream",
+          "line": 1
+        },
+        {
+          "path": "buffer",
+          "line": 2
+        }
+      ],
+      "roleTags": [
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/node_modules/undici-types",
+      "dependencies": []
+    },
+    {
+      "name": "proxy-agent.d",
+      "originalName": "proxy-agent.d",
+      "filePath": "github/automate-github-issues/node_modules/undici-types/proxy-agent.d.ts",
+      "type": "class",
+      "imports": [
+        {
+          "path": "./agent",
+          "line": 1
+        },
+        {
+          "path": "./connector",
+          "line": 2
+        },
+        {
+          "path": "./dispatcher",
+          "line": 3
+        },
+        {
+          "path": "./header",
+          "line": 4
+        }
+      ],
+      "roleTags": [
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/node_modules/undici-types",
+      "dependencies": []
+    },
+    {
+      "name": "pool.d",
+      "originalName": "pool.d",
+      "filePath": "github/automate-github-issues/node_modules/undici-types/pool.d.ts",
+      "type": "class",
+      "imports": [
+        {
+          "path": "./client",
+          "line": 1
+        },
+        {
+          "path": "./pool-stats",
+          "line": 2
+        },
+        {
+          "path": "url",
+          "line": 3
+        },
+        {
+          "path": "./dispatcher",
+          "line": 4
+        }
+      ],
+      "roleTags": [
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/node_modules/undici-types",
+      "dependencies": []
+    },
+    {
+      "name": "pool-stats.d",
+      "originalName": "pool-stats.d",
+      "filePath": "github/automate-github-issues/node_modules/undici-types/pool-stats.d.ts",
+      "type": "module",
+      "imports": [
+        {
+          "path": "./pool",
+          "line": 1
+        }
+      ],
+      "roleTags": [
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/node_modules/undici-types",
+      "dependencies": []
+    },
+    {
+      "name": "patch.d",
+      "originalName": "patch.d",
+      "filePath": "github/automate-github-issues/node_modules/undici-types/patch.d.ts",
+      "type": "module",
+      "imports": [],
+      "roleTags": [
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/node_modules/undici-types",
+      "dependencies": []
+    },
+    {
+      "name": "mock-pool.d",
+      "originalName": "mock-pool.d",
+      "filePath": "github/automate-github-issues/node_modules/undici-types/mock-pool.d.ts",
+      "type": "class",
+      "imports": [
+        {
+          "path": "./pool",
+          "line": 1
+        },
+        {
+          "path": "./mock-agent",
+          "line": 2
+        },
+        {
+          "path": "./mock-interceptor",
+          "line": 3
+        },
+        {
+          "path": "./dispatcher",
+          "line": 4
+        }
+      ],
+      "roleTags": [
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/node_modules/undici-types",
+      "dependencies": []
+    },
+    {
+      "name": "mock-interceptor.d",
+      "originalName": "mock-interceptor.d",
+      "filePath": "github/automate-github-issues/node_modules/undici-types/mock-interceptor.d.ts",
+      "type": "class",
+      "imports": [
+        {
+          "path": "./header",
+          "line": 1
+        },
+        {
+          "path": "./dispatcher",
+          "line": 2
+        },
+        {
+          "path": "./fetch",
+          "line": 3
+        }
+      ],
+      "roleTags": [
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/node_modules/undici-types",
+      "dependencies": []
+    },
+    {
+      "name": "mock-errors.d",
+      "originalName": "mock-errors.d",
+      "filePath": "github/automate-github-issues/node_modules/undici-types/mock-errors.d.ts",
+      "type": "class",
+      "imports": [
+        {
+          "path": "./errors",
+          "line": 1
+        }
+      ],
+      "roleTags": [
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/node_modules/undici-types",
+      "dependencies": []
+    },
+    {
+      "name": "mock-client.d",
+      "originalName": "mock-client.d",
+      "filePath": "github/automate-github-issues/node_modules/undici-types/mock-client.d.ts",
+      "type": "class",
+      "imports": [
+        {
+          "path": "./client",
+          "line": 1
+        },
+        {
+          "path": "./dispatcher",
+          "line": 2
+        },
+        {
+          "path": "./mock-agent",
+          "line": 3
+        },
+        {
+          "path": "./mock-interceptor",
+          "line": 4
+        }
+      ],
+      "roleTags": [
+        "user",
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/node_modules/undici-types",
+      "dependencies": []
+    },
+    {
+      "name": "mock-agent.d",
+      "originalName": "mock-agent.d",
+      "filePath": "github/automate-github-issues/node_modules/undici-types/mock-agent.d.ts",
+      "type": "class",
+      "imports": [
+        {
+          "path": "./agent",
+          "line": 1
+        },
+        {
+          "path": "./dispatcher",
+          "line": 2
+        },
+        {
+          "path": "./mock-interceptor",
+          "line": 3
+        }
+      ],
+      "roleTags": [
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/node_modules/undici-types",
+      "dependencies": []
+    },
+    {
+      "name": "interceptors.d",
+      "originalName": "interceptors.d",
+      "filePath": "github/automate-github-issues/node_modules/undici-types/interceptors.d.ts",
+      "type": "function",
+      "imports": [
+        {
+          "path": "./dispatcher",
+          "line": 1
+        },
+        {
+          "path": "./retry-handler",
+          "line": 2
+        }
+      ],
+      "roleTags": [
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/node_modules/undici-types",
+      "dependencies": []
+    },
+    {
+      "name": "index.d_4",
+      "originalName": "index.d",
+      "filePath": "github/automate-github-issues/node_modules/undici-types/index.d.ts",
+      "type": "module",
+      "imports": [
+        {
+          "path": "./global-dispatcher",
+          "line": 2
+        },
+        {
+          "path": "./global-origin",
+          "line": 3
+        },
+        {
+          "path": "./handlers",
+          "line": 5
+        },
+        {
+          "path": "./balanced-pool",
+          "line": 7
+        },
+        {
+          "path": "./env-http-proxy-agent",
+          "line": 17
+        },
+        {
+          "path": "./api",
+          "line": 20
+        },
+        {
+          "path": "./interceptors",
+          "line": 21
+        },
+        {
+          "path": "./dispatcher",
+          "line": 40
+        },
+        {
+          "path": "./pool",
+          "line": 41
+        },
+        {
+          "path": "./handlers",
+          "line": 42
+        },
+        {
+          "path": "./handlers",
+          "line": 43
+        },
+        {
+          "path": "./retry-handler",
+          "line": 44
+        },
+        {
+          "path": "./interceptors",
+          "line": 45
+        },
+        {
+          "path": "./balanced-pool",
+          "line": 46
+        },
+        {
+          "path": "./client",
+          "line": 47
+        },
+        {
+          "path": "./connector",
+          "line": 48
+        },
+        {
+          "path": "./errors",
+          "line": 49
+        },
+        {
+          "path": "./agent",
+          "line": 50
+        },
+        {
+          "path": "./global-dispatcher",
+          "line": 51
+        },
+        {
+          "path": "./global-dispatcher",
+          "line": 52
+        },
+        {
+          "path": "./api",
+          "line": 53
+        },
+        {
+          "path": "./api",
+          "line": 54
+        },
+        {
+          "path": "./api",
+          "line": 55
+        },
+        {
+          "path": "./api",
+          "line": 56
+        },
+        {
+          "path": "./api",
+          "line": 57
+        },
+        {
+          "path": "./mock-client",
+          "line": 58
+        },
+        {
+          "path": "./mock-pool",
+          "line": 59
+        },
+        {
+          "path": "./mock-agent",
+          "line": 60
+        },
+        {
+          "path": "./mock-errors",
+          "line": 61
+        },
+        {
+          "path": "./fetch",
+          "line": 62
+        },
+        {
+          "path": "./fetch",
+          "line": 63
+        },
+        {
+          "path": "./fetch",
+          "line": 64
+        },
+        {
+          "path": "./fetch",
+          "line": 65
+        },
+        {
+          "path": "./formdata",
+          "line": 66
+        },
+        {
+          "path": "./file",
+          "line": 67
+        },
+        {
+          "path": "./filereader",
+          "line": 68
+        },
+        {
+          "path": "./cache",
+          "line": 69
+        },
+        {
+          "path": "./interceptors",
+          "line": 70
+        }
+      ],
+      "roleTags": [
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/node_modules/undici-types",
+      "dependencies": []
+    },
+    {
+      "name": "header.d",
+      "originalName": "header.d",
+      "filePath": "github/automate-github-issues/node_modules/undici-types/header.d.ts",
+      "type": "module",
+      "imports": [],
+      "roleTags": [
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/node_modules/undici-types",
+      "dependencies": []
+    },
+    {
+      "name": "handlers.d",
+      "originalName": "handlers.d",
+      "filePath": "github/automate-github-issues/node_modules/undici-types/handlers.d.ts",
+      "type": "module",
+      "imports": [
+        {
+          "path": "./dispatcher",
+          "line": 1
+        }
+      ],
+      "roleTags": [
+        "user",
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/node_modules/undici-types",
+      "dependencies": []
+    },
+    {
+      "name": "global-origin.d",
+      "originalName": "global-origin.d",
+      "filePath": "github/automate-github-issues/node_modules/undici-types/global-origin.d.ts",
+      "type": "module",
+      "imports": [],
+      "roleTags": [
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/node_modules/undici-types",
+      "dependencies": []
+    },
+    {
+      "name": "global-dispatcher.d",
+      "originalName": "global-dispatcher.d",
+      "filePath": "github/automate-github-issues/node_modules/undici-types/global-dispatcher.d.ts",
+      "type": "module",
+      "imports": [
+        {
+          "path": "./dispatcher",
+          "line": 1
+        }
+      ],
+      "roleTags": [
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/node_modules/undici-types",
+      "dependencies": []
+    },
+    {
+      "name": "formdata.d",
+      "originalName": "formdata.d",
+      "filePath": "github/automate-github-issues/node_modules/undici-types/formdata.d.ts",
+      "type": "module",
+      "imports": [
+        {
+          "path": "./file",
+          "line": 4
+        },
+        {
+          "path": "./fetch",
+          "line": 5
+        }
+      ],
+      "roleTags": [
+        "user",
+        "database",
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/node_modules/undici-types",
+      "dependencies": []
+    },
+    {
+      "name": "filereader.d",
+      "originalName": "filereader.d",
+      "filePath": "github/automate-github-issues/node_modules/undici-types/filereader.d.ts",
+      "type": "class",
+      "imports": [
+        {
+          "path": "buffer",
+          "line": 3
+        },
+        {
+          "path": "./patch",
+          "line": 4
+        }
+      ],
+      "roleTags": [
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/node_modules/undici-types",
+      "dependencies": []
+    },
+    {
+      "name": "file.d",
+      "originalName": "file.d",
+      "filePath": "github/automate-github-issues/node_modules/undici-types/file.d.ts",
+      "type": "class",
+      "imports": [
+        {
+          "path": "buffer",
+          "line": 4
+        }
+      ],
+      "roleTags": [
+        "user",
+        "database",
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/node_modules/undici-types",
+      "dependencies": []
+    },
+    {
+      "name": "fetch.d",
+      "originalName": "fetch.d",
+      "filePath": "github/automate-github-issues/node_modules/undici-types/fetch.d.ts",
+      "type": "class",
+      "imports": [
+        {
+          "path": "buffer",
+          "line": 5
+        },
+        {
+          "path": "url",
+          "line": 6
+        },
+        {
+          "path": "stream/web",
+          "line": 7
+        },
+        {
+          "path": "./formdata",
+          "line": 8
+        },
+        {
+          "path": "./dispatcher",
+          "line": 10
+        },
+        {
+          "path": "@fastify/busboy",
+          "line": 42
+        },
+        {
+          "path": "node:stream",
+          "line": 43
+        }
+      ],
+      "roleTags": [
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/node_modules/undici-types",
+      "dependencies": []
+    },
+    {
+      "name": "eventsource.d",
+      "originalName": "eventsource.d",
+      "filePath": "github/automate-github-issues/node_modules/undici-types/eventsource.d.ts",
+      "type": "module",
+      "imports": [
+        {
+          "path": "./websocket",
+          "line": 1
+        },
+        {
+          "path": "./dispatcher",
+          "line": 2
+        }
+      ],
+      "roleTags": [
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/node_modules/undici-types",
+      "dependencies": []
+    },
+    {
+      "name": "errors.d",
+      "originalName": "errors.d",
+      "filePath": "github/automate-github-issues/node_modules/undici-types/errors.d.ts",
+      "type": "class",
+      "imports": [
+        {
+          "path": "./header",
+          "line": 1
+        },
+        {
+          "path": "./client",
+          "line": 2
+        }
+      ],
+      "roleTags": [
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/node_modules/undici-types",
+      "dependencies": []
+    },
+    {
+      "name": "env-http-proxy-agent.d",
+      "originalName": "env-http-proxy-agent.d",
+      "filePath": "github/automate-github-issues/node_modules/undici-types/env-http-proxy-agent.d.ts",
+      "type": "class",
+      "imports": [
+        {
+          "path": "./agent",
+          "line": 1
+        },
+        {
+          "path": "./dispatcher",
+          "line": 2
+        }
+      ],
+      "roleTags": [
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/node_modules/undici-types",
+      "dependencies": []
+    },
+    {
+      "name": "dispatcher.d",
+      "originalName": "dispatcher.d",
+      "filePath": "github/automate-github-issues/node_modules/undici-types/dispatcher.d.ts",
+      "type": "class",
+      "imports": [
+        {
+          "path": "url",
+          "line": 1
+        },
+        {
+          "path": "stream",
+          "line": 2
+        },
+        {
+          "path": "events",
+          "line": 3
+        },
+        {
+          "path": "buffer",
+          "line": 4
+        },
+        {
+          "path": "./header",
+          "line": 5
+        },
+        {
+          "path": "./readable",
+          "line": 6
+        },
+        {
+          "path": "./formdata",
+          "line": 7
+        },
+        {
+          "path": "./errors",
+          "line": 8
+        }
+      ],
+      "roleTags": [
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/node_modules/undici-types",
+      "dependencies": []
+    },
+    {
+      "name": "diagnostics-channel.d",
+      "originalName": "diagnostics-channel.d",
+      "filePath": "github/automate-github-issues/node_modules/undici-types/diagnostics-channel.d.ts",
+      "type": "module",
+      "imports": [
+        {
+          "path": "net",
+          "line": 1
+        },
+        {
+          "path": "url",
+          "line": 2
+        },
+        {
+          "path": "./connector",
+          "line": 3
+        },
+        {
+          "path": "./dispatcher",
+          "line": 4
+        }
+      ],
+      "roleTags": [
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/node_modules/undici-types",
+      "dependencies": []
+    },
+    {
+      "name": "cookies.d",
+      "originalName": "cookies.d",
+      "filePath": "github/automate-github-issues/node_modules/undici-types/cookies.d.ts",
+      "type": "function",
+      "imports": [],
+      "roleTags": [
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/node_modules/undici-types",
+      "dependencies": []
+    },
+    {
+      "name": "content-type.d",
+      "originalName": "content-type.d",
+      "filePath": "github/automate-github-issues/node_modules/undici-types/content-type.d.ts",
+      "type": "function",
+      "imports": [],
+      "roleTags": [
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/node_modules/undici-types",
+      "dependencies": []
+    },
+    {
+      "name": "connector.d",
+      "originalName": "connector.d",
+      "filePath": "github/automate-github-issues/node_modules/undici-types/connector.d.ts",
+      "type": "module",
+      "imports": [
+        {
+          "path": "tls",
+          "line": 1
+        },
+        {
+          "path": "net",
+          "line": 2
+        }
+      ],
+      "roleTags": [
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/node_modules/undici-types",
+      "dependencies": []
+    },
+    {
+      "name": "client.d",
+      "originalName": "client.d",
+      "filePath": "github/automate-github-issues/node_modules/undici-types/client.d.ts",
+      "type": "class",
+      "imports": [
+        {
+          "path": "url",
+          "line": 1
+        },
+        {
+          "path": "tls",
+          "line": 2
+        },
+        {
+          "path": "./dispatcher",
+          "line": 3
+        },
+        {
+          "path": "./connector",
+          "line": 4
+        }
+      ],
+      "roleTags": [
+        "user",
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/node_modules/undici-types",
+      "dependencies": []
+    },
+    {
+      "name": "cache.d",
+      "originalName": "cache.d",
+      "filePath": "github/automate-github-issues/node_modules/undici-types/cache.d.ts",
+      "type": "module",
+      "imports": [],
+      "roleTags": [
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/node_modules/undici-types",
+      "dependencies": []
+    },
+    {
+      "name": "balanced-pool.d",
+      "originalName": "balanced-pool.d",
+      "filePath": "github/automate-github-issues/node_modules/undici-types/balanced-pool.d.ts",
+      "type": "class",
+      "imports": [
+        {
+          "path": "./pool",
+          "line": 1
+        },
+        {
+          "path": "./dispatcher",
+          "line": 2
+        },
+        {
+          "path": "url",
+          "line": 3
+        }
+      ],
+      "roleTags": [
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/node_modules/undici-types",
+      "dependencies": []
+    },
+    {
+      "name": "api.d",
+      "originalName": "api.d",
+      "filePath": "github/automate-github-issues/node_modules/undici-types/api.d.ts",
+      "type": "module",
+      "imports": [
+        {
+          "path": "url",
+          "line": 1
+        },
+        {
+          "path": "stream",
+          "line": 2
+        },
+        {
+          "path": "./dispatcher",
+          "line": 3
+        }
+      ],
+      "roleTags": [
+        "user",
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/node_modules/undici-types",
+      "dependencies": []
+    },
+    {
+      "name": "agent.d",
+      "originalName": "agent.d",
+      "filePath": "github/automate-github-issues/node_modules/undici-types/agent.d.ts",
+      "type": "class",
+      "imports": [
+        {
+          "path": "url",
+          "line": 1
+        },
+        {
+          "path": "./pool",
+          "line": 2
+        },
+        {
+          "path": "./dispatcher",
+          "line": 3
+        }
+      ],
+      "roleTags": [
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/node_modules/undici-types",
+      "dependencies": []
+    },
+    {
+      "name": "index.d_5",
+      "originalName": "index.d",
+      "filePath": "github/automate-github-issues/node_modules/yocto-queue/index.d.ts",
+      "type": "module",
+      "imports": [
+        {
+          "path": "yocto-queue",
+          "line": 14
+        }
+      ],
+      "roleTags": [
+        "user",
+        "events",
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/node_modules/yocto-queue",
+      "dependencies": []
+    },
+    {
+      "name": "toad-cache.d",
+      "originalName": "toad-cache.d",
+      "filePath": "github/automate-github-issues/node_modules/toad-cache/toad-cache.d.ts",
+      "type": "class",
+      "imports": [],
+      "roleTags": [
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/node_modules/toad-cache",
+      "dependencies": []
+    },
+    {
+      "name": "index.d_6",
+      "originalName": "index.d",
+      "filePath": "github/automate-github-issues/node_modules/path-exists/index.d.ts",
+      "type": "function",
+      "imports": [
+        {
+          "path": "path-exists",
+          "line": 9
+        },
+        {
+          "path": "path-exists",
+          "line": 25
+        }
+      ],
+      "roleTags": [
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/node_modules/path-exists",
+      "dependencies": []
+    },
+    {
+      "name": "index.d_7",
+      "originalName": "index.d",
+      "filePath": "github/automate-github-issues/node_modules/p-locate/index.d.ts",
+      "type": "function",
+      "imports": [
+        {
+          "path": "path-exists",
+          "line": 30
+        },
+        {
+          "path": "p-locate",
+          "line": 31
+        }
+      ],
+      "roleTags": [
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/node_modules/p-locate",
+      "dependencies": []
+    },
+    {
+      "name": "index.d_8",
+      "originalName": "index.d",
+      "filePath": "github/automate-github-issues/node_modules/p-limit/index.d.ts",
+      "type": "function",
+      "imports": [],
+      "roleTags": [
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/node_modules/p-limit",
+      "dependencies": []
+    },
+    {
+      "name": "index.d_9",
+      "originalName": "index.d",
+      "filePath": "github/automate-github-issues/node_modules/locate-path/index.d.ts",
+      "type": "function",
+      "imports": [
+        {
+          "path": "locate-path",
+          "line": 52
+        },
+        {
+          "path": "locate-path",
+          "line": 77
+        }
+      ],
+      "roleTags": [
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/node_modules/locate-path",
+      "dependencies": []
+    },
+    {
+      "name": "index.d_10",
+      "originalName": "index.d",
+      "filePath": "github/automate-github-issues/node_modules/find-up/index.d.ts",
+      "type": "function",
+      "imports": [
+        {
+          "path": "locate-path",
+          "line": 1
+        },
+        {
+          "path": "find-up",
+          "line": 37
+        },
+        {
+          "path": "node:path",
+          "line": 56
+        },
+        {
+          "path": "find-up",
+          "line": 57
+        },
+        {
+          "path": "find-up",
+          "line": 86
+        },
+        {
+          "path": "node:path",
+          "line": 105
+        },
+        {
+          "path": "find-up",
+          "line": 106
+        },
+        {
+          "path": "find-up",
+          "line": 136
+        },
+        {
+          "path": "node:path",
+          "line": 155
+        },
+        {
+          "path": "find-up",
+          "line": 156
+        },
+        {
+          "path": "find-up",
+          "line": 186
+        },
+        {
+          "path": "node:path",
+          "line": 205
+        },
+        {
+          "path": "find-up",
+          "line": 206
+        },
+        {
+          "path": "find-up",
+          "line": 225
+        },
+        {
+          "path": "find-up",
+          "line": 241
+        }
+      ],
+      "roleTags": [
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/node_modules/find-up",
+      "dependencies": []
+    },
+    {
+      "name": "test",
+      "originalName": "test",
+      "filePath": "github/automate-github-issues/node_modules/bottleneck/test.ts",
+      "type": "file",
+      "imports": [
+        {
+          "path": "bottleneck",
+          "line": 3
+        },
+        {
+          "path": "assert",
+          "line": 4
+        }
+      ],
+      "roleTags": [
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/node_modules/bottleneck",
+      "dependencies": []
+    },
+    {
+      "name": "bottleneck.d",
+      "originalName": "bottleneck.d",
+      "filePath": "github/automate-github-issues/node_modules/bottleneck/bottleneck.d.ts",
+      "type": "class",
+      "imports": [
+        {
+          "path": "ioredis",
+          "line": 81
+        },
+        {
+          "path": "redis",
+          "line": 180
+        },
+        {
+          "path": "ioredis",
+          "line": 199
+        }
+      ],
+      "roleTags": [
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/node_modules/bottleneck",
+      "dependencies": []
+    },
+    {
+      "name": "index.d_11",
+      "originalName": "index.d",
+      "filePath": "github/automate-github-issues/node_modules/before-after-hook/index.d.ts",
+      "type": "module",
+      "imports": [],
+      "roleTags": [
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/node_modules/before-after-hook",
+      "dependencies": []
+    },
+    {
+      "name": "fsevents.d",
+      "originalName": "fsevents.d",
+      "filePath": "github/automate-github-issues/node_modules/fsevents/fsevents.d.ts",
+      "type": "module",
+      "imports": [],
+      "roleTags": [
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/node_modules/fsevents",
+      "dependencies": []
+    },
+    {
+      "name": "utils.d",
+      "originalName": "utils.d",
+      "filePath": "utilities/video-transcript-downloader/node_modules/youtube-transcript-plus/dist/utils.d.ts",
+      "type": "module",
+      "imports": [
+        {
+          "path": "./types",
+          "line": 1
+        }
+      ],
+      "roleTags": [
+        "general"
+      ],
+      "directory": "utilities/video-transcript-downloader/node_modules/youtube-transcript-plus/dist",
+      "dependencies": []
+    },
+    {
+      "name": "types.d",
+      "originalName": "types.d",
+      "filePath": "utilities/video-transcript-downloader/node_modules/youtube-transcript-plus/dist/types.d.ts",
+      "type": "module",
+      "imports": [],
+      "roleTags": [
+        "general"
+      ],
+      "directory": "utilities/video-transcript-downloader/node_modules/youtube-transcript-plus/dist",
+      "dependencies": []
+    },
+    {
+      "name": "index.d_12",
+      "originalName": "index.d",
+      "filePath": "utilities/video-transcript-downloader/node_modules/youtube-transcript-plus/dist/index.d.ts",
+      "type": "module",
+      "imports": [
+        {
+          "path": "./types",
+          "line": 1
+        }
+      ],
+      "roleTags": [
+        "general"
+      ],
+      "directory": "utilities/video-transcript-downloader/node_modules/youtube-transcript-plus/dist",
+      "dependencies": []
+    },
+    {
+      "name": "errors.d_1",
+      "originalName": "errors.d",
+      "filePath": "utilities/video-transcript-downloader/node_modules/youtube-transcript-plus/dist/errors.d.ts",
+      "type": "class",
+      "imports": [],
+      "roleTags": [
+        "general"
+      ],
+      "directory": "utilities/video-transcript-downloader/node_modules/youtube-transcript-plus/dist",
+      "dependencies": []
+    },
+    {
+      "name": "constants.d",
+      "originalName": "constants.d",
+      "filePath": "utilities/video-transcript-downloader/node_modules/youtube-transcript-plus/dist/constants.d.ts",
+      "type": "module",
+      "imports": [],
+      "roleTags": [
+        "general"
+      ],
+      "directory": "utilities/video-transcript-downloader/node_modules/youtube-transcript-plus/dist",
+      "dependencies": []
+    },
+    {
+      "name": "visit.d",
+      "originalName": "visit.d",
+      "filePath": "github/automate-github-issues/node_modules/yaml/dist/visit.d.ts",
+      "type": "module",
+      "imports": [],
+      "roleTags": [
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/node_modules/yaml/dist",
+      "dependencies": []
+    },
+    {
+      "name": "util.d_1",
+      "originalName": "util.d",
+      "filePath": "github/automate-github-issues/node_modules/yaml/dist/util.d.ts",
+      "type": "module",
+      "imports": [],
+      "roleTags": [
+        "database",
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/node_modules/yaml/dist",
+      "dependencies": []
+    },
+    {
+      "name": "test-events.d",
+      "originalName": "test-events.d",
+      "filePath": "github/automate-github-issues/node_modules/yaml/dist/test-events.d.ts",
+      "type": "module",
+      "imports": [],
+      "roleTags": [
+        "events",
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/node_modules/yaml/dist",
+      "dependencies": []
+    },
+    {
+      "name": "public-api.d",
+      "originalName": "public-api.d",
+      "filePath": "github/automate-github-issues/node_modules/yaml/dist/public-api.d.ts",
+      "type": "module",
+      "imports": [
+        {
+          "path": "./compose/composer",
+          "line": 1
+        },
+        {
+          "path": "./doc/Document",
+          "line": 4
+        }
+      ],
+      "roleTags": [
+        "user",
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/node_modules/yaml/dist",
+      "dependencies": []
+    },
+    {
+      "name": "options.d",
+      "originalName": "options.d",
+      "filePath": "github/automate-github-issues/node_modules/yaml/dist/options.d.ts",
+      "type": "module",
+      "imports": [],
+      "roleTags": [
+        "user",
+        "database",
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/node_modules/yaml/dist",
+      "dependencies": []
+    },
+    {
+      "name": "log.d",
+      "originalName": "log.d",
+      "filePath": "github/automate-github-issues/node_modules/yaml/dist/log.d.ts",
+      "type": "module",
+      "imports": [],
+      "roleTags": [
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/node_modules/yaml/dist",
+      "dependencies": []
+    },
+    {
+      "name": "index.d_13",
+      "originalName": "index.d",
+      "filePath": "github/automate-github-issues/node_modules/yaml/dist/index.d.ts",
+      "type": "module",
+      "imports": [],
+      "roleTags": [
+        "database",
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/node_modules/yaml/dist",
+      "dependencies": []
+    },
+    {
+      "name": "errors.d_2",
+      "originalName": "errors.d",
+      "filePath": "github/automate-github-issues/node_modules/yaml/dist/errors.d.ts",
+      "type": "class",
+      "imports": [],
+      "roleTags": [
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/node_modules/yaml/dist",
+      "dependencies": []
+    },
+    {
+      "name": "cli.d",
+      "originalName": "cli.d",
+      "filePath": "github/automate-github-issues/node_modules/yaml/dist/cli.d.ts",
+      "type": "class",
+      "imports": [],
+      "roleTags": [
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/node_modules/yaml/dist",
+      "dependencies": []
+    },
+    {
+      "name": "index.d_14",
+      "originalName": "index.d",
+      "filePath": "github/automate-github-issues/node_modules/zod/v4/index.d.ts",
+      "type": "module",
+      "imports": [
+        {
+          "path": "./classic/index.js",
+          "line": 1
+        }
+      ],
+      "roleTags": [
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/node_modules/zod/v4",
+      "dependencies": []
+    },
+    {
+      "name": "index.d_15",
+      "originalName": "index.d",
+      "filePath": "github/automate-github-issues/node_modules/zod/v4-mini/index.d.ts",
+      "type": "module",
+      "imports": [],
+      "roleTags": [
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/node_modules/zod/v4-mini",
+      "dependencies": []
+    },
+    {
+      "name": "index",
+      "originalName": "index",
+      "filePath": "github/automate-github-issues/node_modules/zod/src/index.ts",
+      "type": "module",
+      "imports": [
+        {
+          "path": "./v3/external.js",
+          "line": 1
+        }
+      ],
+      "roleTags": [
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/node_modules/zod/src",
+      "dependencies": []
+    },
+    {
+      "name": "types.d_1",
+      "originalName": "types.d",
+      "filePath": "github/automate-github-issues/node_modules/zod/v3/types.d.ts",
+      "type": "class",
+      "imports": [
+        {
+          "path": "./ZodError.js",
+          "line": 1
+        },
+        {
+          "path": "./helpers/errorUtil.js",
+          "line": 3
+        },
+        {
+          "path": "./helpers/parseUtil.js",
+          "line": 4
+        },
+        {
+          "path": "./helpers/util.js",
+          "line": 7
+        }
+      ],
+      "roleTags": [
+        "database",
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/node_modules/zod/v3",
+      "dependencies": []
+    },
+    {
+      "name": "standard-schema.d",
+      "originalName": "standard-schema.d",
+      "filePath": "github/automate-github-issues/node_modules/zod/v3/standard-schema.d.ts",
+      "type": "module",
+      "imports": [],
+      "roleTags": [
+        "database",
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/node_modules/zod/v3",
+      "dependencies": []
+    },
+    {
+      "name": "index.d_16",
+      "originalName": "index.d",
+      "filePath": "github/automate-github-issues/node_modules/zod/v3/index.d.ts",
+      "type": "module",
+      "imports": [
+        {
+          "path": "./external.js",
+          "line": 1
+        }
+      ],
+      "roleTags": [
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/node_modules/zod/v3",
+      "dependencies": []
+    },
+    {
+      "name": "external.d",
+      "originalName": "external.d",
+      "filePath": "github/automate-github-issues/node_modules/zod/v3/external.d.ts",
+      "type": "module",
+      "imports": [],
+      "roleTags": [
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/node_modules/zod/v3",
+      "dependencies": []
+    },
+    {
+      "name": "errors.d_3",
+      "originalName": "errors.d",
+      "filePath": "github/automate-github-issues/node_modules/zod/v3/errors.d.ts",
+      "type": "module",
+      "imports": [
+        {
+          "path": "./locales/en.js",
+          "line": 2
+        }
+      ],
+      "roleTags": [
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/node_modules/zod/v3",
+      "dependencies": []
+    },
+    {
+      "name": "ZodError.d",
+      "originalName": "ZodError.d",
+      "filePath": "github/automate-github-issues/node_modules/zod/v3/ZodError.d.ts",
+      "type": "class",
+      "imports": [
+        {
+          "path": "./helpers/util.js",
+          "line": 2
+        }
+      ],
+      "roleTags": [
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/node_modules/zod/v3",
+      "dependencies": []
+    },
+    {
+      "name": "types-Cxp8y2TL.d",
+      "originalName": "types-Cxp8y2TL.d",
+      "filePath": "github/automate-github-issues/node_modules/tsx/dist/types-Cxp8y2TL.d.ts",
+      "type": "module",
+      "imports": [],
+      "roleTags": [
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/node_modules/tsx/dist",
+      "dependencies": []
+    },
+    {
+      "name": "version.d",
+      "originalName": "version.d",
+      "filePath": "github/automate-github-issues/node_modules/octokit/dist-types/version.d.ts",
+      "type": "module",
+      "imports": [],
+      "roleTags": [
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/node_modules/octokit/dist-types",
+      "dependencies": []
+    },
+    {
+      "name": "octokit.d",
+      "originalName": "octokit.d",
+      "filePath": "github/automate-github-issues/node_modules/octokit/dist-types/octokit.d.ts",
+      "type": "module",
+      "imports": [
+        {
+          "path": "@octokit/core",
+          "line": 1
+        },
+        {
+          "path": "@octokit/core/types",
+          "line": 4
+        },
+        {
+          "path": "@octokit/plugin-paginate-rest",
+          "line": 5
+        },
+        {
+          "path": "@octokit/plugin-paginate-graphql",
+          "line": 6
+        },
+        {
+          "path": "@octokit/request-error",
+          "line": 8
+        }
+      ],
+      "roleTags": [
+        "user",
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/node_modules/octokit/dist-types",
+      "dependencies": []
+    },
+    {
+      "name": "index.d_17",
+      "originalName": "index.d",
+      "filePath": "github/automate-github-issues/node_modules/octokit/dist-types/index.d.ts",
+      "type": "module",
+      "imports": [],
+      "roleTags": [
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/node_modules/octokit/dist-types",
+      "dependencies": []
+    },
+    {
+      "name": "app.d",
+      "originalName": "app.d",
+      "filePath": "github/automate-github-issues/node_modules/octokit/dist-types/app.d.ts",
+      "type": "module",
+      "imports": [
+        {
+          "path": "@octokit/app",
+          "line": 1
+        },
+        {
+          "path": "@octokit/oauth-app",
+          "line": 2
+        },
+        {
+          "path": "@octokit/core",
+          "line": 4
+        },
+        {
+          "path": "@octokit/plugin-paginate-rest",
+          "line": 5
+        },
+        {
+          "path": "@octokit/plugin-paginate-graphql",
+          "line": 6
+        },
+        {
+          "path": "@octokit/request-error",
+          "line": 8
+        },
+        {
+          "path": "@octokit/webhooks",
+          "line": 11
+        },
+        {
+          "path": "@octokit/core",
+          "line": 12
+        },
+        {
+          "path": "@octokit/plugin-paginate-rest",
+          "line": 13
+        },
+        {
+          "path": "@octokit/plugin-paginate-graphql",
+          "line": 14
+        },
+        {
+          "path": "@octokit/request-error",
+          "line": 16
+        },
+        {
+          "path": "@octokit/core",
+          "line": 22
+        },
+        {
+          "path": "@octokit/plugin-paginate-rest",
+          "line": 23
+        },
+        {
+          "path": "@octokit/plugin-paginate-graphql",
+          "line": 24
+        },
+        {
+          "path": "@octokit/request-error",
+          "line": 26
+        },
+        {
+          "path": "@octokit/app",
+          "line": 30
+        },
+        {
+          "path": "@octokit/plugin-paginate-rest",
+          "line": 31
+        },
+        {
+          "path": "@octokit/plugin-paginate-graphql",
+          "line": 32
+        },
+        {
+          "path": "@octokit/request-error",
+          "line": 34
+        },
+        {
+          "path": "@octokit/app",
+          "line": 37
+        },
+        {
+          "path": "@octokit/plugin-paginate-rest",
+          "line": 38
+        },
+        {
+          "path": "@octokit/plugin-paginate-graphql",
+          "line": 39
+        },
+        {
+          "path": "@octokit/request-error",
+          "line": 41
+        },
+        {
+          "path": "@octokit/app",
+          "line": 44
+        },
+        {
+          "path": "@octokit/plugin-paginate-rest",
+          "line": 45
+        },
+        {
+          "path": "@octokit/plugin-paginate-graphql",
+          "line": 46
+        },
+        {
+          "path": "@octokit/request-error",
+          "line": 48
+        },
+        {
+          "path": "@octokit/app",
+          "line": 51
+        },
+        {
+          "path": "@octokit/oauth-app",
+          "line": 63
+        },
+        {
+          "path": "@octokit/core",
+          "line": 64
+        },
+        {
+          "path": "@octokit/plugin-paginate-rest",
+          "line": 65
+        },
+        {
+          "path": "@octokit/plugin-paginate-graphql",
+          "line": 66
+        },
+        {
+          "path": "@octokit/request-error",
+          "line": 68
+        },
+        {
+          "path": "@octokit/core",
+          "line": 72
+        },
+        {
+          "path": "@octokit/plugin-paginate-rest",
+          "line": 73
+        },
+        {
+          "path": "@octokit/plugin-paginate-graphql",
+          "line": 74
+        },
+        {
+          "path": "@octokit/request-error",
+          "line": 76
+        },
+        {
+          "path": "@octokit/oauth-app",
+          "line": 79
+        },
+        {
+          "path": "@octokit/oauth-app",
+          "line": 80
+        },
+        {
+          "path": "@octokit/oauth-app",
+          "line": 81
+        },
+        {
+          "path": "@octokit/oauth-app",
+          "line": 82
+        },
+        {
+          "path": "@octokit/oauth-app",
+          "line": 83
+        },
+        {
+          "path": "@octokit/oauth-app",
+          "line": 84
+        },
+        {
+          "path": "@octokit/oauth-app",
+          "line": 85
+        },
+        {
+          "path": "@octokit/oauth-app",
+          "line": 86
+        },
+        {
+          "path": "@octokit/oauth-app",
+          "line": 87
+        }
+      ],
+      "roleTags": [
+        "user",
+        "auth",
+        "integrations"
+      ],
+      "directory": "github/automate-github-issues/node_modules/octokit/dist-types",
+      "dependencies": []
+    }
+  ],
+  "entryPoints": [
+    "github/automate-github-issues/node_modules/zod/src/index.ts"
+  ],
+  "languages": {
+    "typescript": 100
+  },
+  "directories": [
+    "backend/workers-mcp/assets",
+    "github/automate-github-issues/node_modules/before-after-hook",
+    "github/automate-github-issues/node_modules/bottleneck",
+    "github/automate-github-issues/node_modules/find-up",
+    "github/automate-github-issues/node_modules/fsevents",
+    "github/automate-github-issues/node_modules/locate-path",
+    "github/automate-github-issues/node_modules/octokit/dist-types",
+    "github/automate-github-issues/node_modules/p-limit",
+    "github/automate-github-issues/node_modules/p-locate",
+    "github/automate-github-issues/node_modules/path-exists",
+    "github/automate-github-issues/node_modules/toad-cache",
+    "github/automate-github-issues/node_modules/tsx/dist",
+    "github/automate-github-issues/node_modules/undici-types",
+    "github/automate-github-issues/node_modules/unicorn-magic",
+    "github/automate-github-issues/node_modules/universal-github-app-jwt",
+    "github/automate-github-issues/node_modules/universal-user-agent",
+    "github/automate-github-issues/node_modules/yaml/dist",
+    "github/automate-github-issues/node_modules/yocto-queue",
+    "github/automate-github-issues/node_modules/zod",
+    "github/automate-github-issues/node_modules/zod/src",
+    "github/automate-github-issues/node_modules/zod/v3",
+    "github/automate-github-issues/node_modules/zod/v4",
+    "github/automate-github-issues/node_modules/zod/v4-mini",
+    "github/automate-github-issues/scripts",
+    "github/automate-github-issues/scripts/github",
+    "github/automate-github-issues/scripts/prompts",
+    "product/design/ui-ux-creative-coding/assets",
+    "utilities/beautiful-mermaid/scripts",
+    "utilities/systematic-debugging",
+    "utilities/video-transcript-downloader/node_modules/youtube-transcript-plus/dist"
+  ]
+}
