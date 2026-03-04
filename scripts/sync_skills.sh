@@ -427,19 +427,26 @@ HEADER
 
   # Output categories and skills in deterministic order
   while IFS= read -r cat_file; do
-    category="$(echo "$cat_file" | tr '_' '/' | sed 's|/| — |g; s|-| |g; s|_| |g')"
+    category="${cat_file//_/\/}"
+    category="${category//\// — }"
+    category="${category//-/ }"
+    category="${category//_/ }"
+    category="${category% }"
     # Capitalize each word
-    category_display=""
+    capitalized_category=""
     for word in $category; do
       first="$(echo "$word" | cut -c1 | tr '[:lower:]' '[:upper:]')"
       rest="$(echo "$word" | cut -c2-)"
-      category_display="$category_display$first$rest "
+      capitalized_category="$capitalized_category$first$rest "
     done
 
-    echo "## $(echo "$category_display" | sed 's/ *$//')" >> "$index_file"
-    echo "" >> "$index_file"
-    sort "$temp_dir/$cat_file" >> "$index_file"
-    echo "" >> "$index_file"
+    capitalized_category="${capitalized_category% }"
+    {
+      echo "## $capitalized_category"
+      echo ""
+      sort "$temp_dir/$cat_file"
+      echo ""
+    } >> "$index_file"
   done < <(cd "$temp_dir" && find . -mindepth 1 -maxdepth 1 -type f -print | sed 's|^\./||' | sort)
 }
 
@@ -463,15 +470,22 @@ remove_legacy_symlink "$HOME/.cursor/skills"
 sync_user_skills() {
   local source_dir="$1"
   local target_dir="$2"
+  local force="${3:-0}"
   mkdir -p "$(dirname "$target_dir")"
   if [ -L "$target_dir" ]; then
     # Update existing symlink
     ln -sfn "$source_dir" "$target_dir"
     echo "[OK] Updated symlink: $target_dir -> $source_dir"
   elif [ -e "$target_dir" ] && [ ! -L "$target_dir" ]; then
-    # Exists but is not a symlink - warn and skip
-    echo "[WARN] $target_dir exists but is not a symlink (skipping)"
-    echo "       Remove it manually to enable automatic sync: rm -rf $target_dir"
+    if [ "$force" = "1" ]; then
+      rm -rf "$target_dir"
+      ln -s "$source_dir" "$target_dir"
+      echo "[OK] Replaced existing path with symlink: $target_dir -> $source_dir"
+    else
+      # Exists but is not a symlink - warn and skip
+      echo "[WARN] $target_dir exists but is not a symlink (skipping)"
+      echo "       Remove it manually to enable automatic sync: rm -rf $target_dir"
+    fi
   else
     # Create new symlink
     ln -s "$source_dir" "$target_dir"
@@ -483,8 +497,8 @@ sync_user_skills() {
 sync_user_skills "$skills_dir" "$HOME/.claude/skills"
 sync_user_skills "$skills_dir" "$HOME/.agents/skills"
 sync_user_skills "$skills_dir" "$HOME/.codex/skills"
-sync_user_skills "$antigravity_skills_dir" "$HOME/.gemini/antigravity/skills"
-sync_user_skills "$antigravity_skills_dir" "$HOME/.gemini/skills"
+sync_user_skills "$antigravity_skills_dir" "$HOME/.gemini/antigravity/skills" 1
+sync_user_skills "$antigravity_skills_dir" "$HOME/.gemini/skills" 1
 sync_user_skills "$antigravity_skills_dir" "$HOME/.antigravity/skills"
 
 chmod +x "$repo_root/scripts/sync_skills.sh"
