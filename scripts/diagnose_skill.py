@@ -146,22 +146,28 @@ def check_skill_index(skill_name: str) -> DiagnosticResult:
 
 
 def check_task_profile(skill_dir: Path) -> DiagnosticResult:
-    """Check if task profile exists if referenced in frontmatter."""
+    """Check if task profile exists via legacy binding or implicit default path."""
     skill_md = skill_dir / "SKILL.md"
     content = skill_md.read_text(encoding="utf-8")
 
-    # Check for knowledge_graph_profile reference
+    # Legacy explicit binding (non-official frontmatter key).
     profile_match = re.search(r"^knowledge_graph_profile:\s*(.+)$", content, re.MULTILINE)
-    if not profile_match:
-        return DiagnosticResult("task profile", "skip", "No task profile referenced")
+    if profile_match:
+        profile_path = profile_match.group(1).strip()
+        full_path = skill_dir / profile_path
 
-    profile_path = profile_match.group(1).strip()
-    full_path = skill_dir / profile_path
+        if not full_path.exists():
+            return DiagnosticResult("task profile", "warn", f"Referenced profile not found: {profile_path}")
 
-    if not full_path.exists():
-        return DiagnosticResult("task profile", "warn", f"Referenced profile not found: {profile_path}")
+        return DiagnosticResult("task profile", "pass", f"Task profile exists (legacy binding): {profile_path}")
 
-    return DiagnosticResult("task profile", "pass", f"Task profile exists: {profile_path}")
+    # Official/frontmatter-minimal path: profile is discovered by convention.
+    default_rel = "references/task-profile.json"
+    default_path = skill_dir / default_rel
+    if default_path.exists():
+        return DiagnosticResult("task profile", "pass", f"Task profile exists (implicit path): {default_rel}")
+
+    return DiagnosticResult("task profile", "skip", "No task profile found (neither legacy binding nor implicit path)")
 
 
 def diagnose_skill(skill_name: str) -> List[DiagnosticResult]:

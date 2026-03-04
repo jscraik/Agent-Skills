@@ -1,0 +1,4 @@
+legacy_frontmatter:
+  user-invocable: true
+  context: fork
+  model: sonnet

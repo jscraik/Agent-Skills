@@ -1,7 +1,6 @@
 ---
 name: gemini-md
 description: "Use when a user asks to create, update, or review Gemini CLI context (`GEMINI.md`) and memory workflows; emit merge-safe edits that preserve existing guidance while adding what is missing for in-scope tasks."
-knowledge_graph_profile: references/task-profile.json
 ---
 
 # Gemini Md

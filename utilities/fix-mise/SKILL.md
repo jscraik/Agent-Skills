@@ -1,7 +1,6 @@
 ---
 name: fix-mise
 description: Diagnose and repair mise trust/runtime failures and reconcile `~/.config/mise/config.toml` with required versions; use when commands fail due to trust blockers or stale tool config.
-knowledge_graph_profile: references/task-profile.json
 ---
 
 # Fix Mise Trust Errors

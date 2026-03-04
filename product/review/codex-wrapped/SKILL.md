@@ -3,7 +3,6 @@ name: codex-wrapped
 description: Generate a Codex/Claude Code usage recap from local logs, including last
   30 days, last 7 days, and all-time stats. Use when the user asks for a usage summary,
   activity recap, or coding activity report.
-knowledge_graph_profile: references/task-profile.json
 ---
 
 # Codex Wrapped

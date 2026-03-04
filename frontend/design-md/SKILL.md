@@ -6,7 +6,6 @@ allowed-tools:
   - "Read"
   - "Write"
   - "web_fetch"
-knowledge_graph_profile: references/task-profile.json
 ---
 
 # Stitch DESIGN.md Skill

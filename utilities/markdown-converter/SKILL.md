@@ -1,7 +1,6 @@
 ---
 name: markdown-converter
 description: "Convert source files into Markdown outputs using the bundled converter workflow. Use when a user asks to transform documents, notes, or technical files into clean Markdown format."
-knowledge_graph_profile: references/task-profile.json
 ---
 
 # Markdown Converter

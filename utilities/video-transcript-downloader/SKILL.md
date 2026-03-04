@@ -2,7 +2,6 @@
 name: video-transcript-downloader
 description: Extract, summarize, and download video/audio/subtitles using yt-dlp/ffmpeg.
   Use when the user requests downloads or transcripts.
-knowledge_graph_profile: references/task-profile.json
 ---
 
 # Video Transcript Downloader

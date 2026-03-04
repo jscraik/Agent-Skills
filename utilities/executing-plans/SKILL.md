@@ -1,7 +1,6 @@
 ---
 name: executing-plans
 description: "Validate and execute written implementation plans in verified batches with checkpoints. Use when a plan already exists and work must proceed task-by-task."
-knowledge_graph_profile: references/task-profile.json
 ---
 
 # Executing Plans

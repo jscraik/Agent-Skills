@@ -1,7 +1,6 @@
 ---
 name: codex-agent-creator
 description: Create and install Codex custom multi-agent roles when the user asks to add, update, or troubleshoot role entries under agents with a role config file.
-knowledge_graph_profile: references/task-profile.json
 ---
 
 # Codex Agent Creator

@@ -1,0 +1,6 @@
+legacy_frontmatter:
+  version: '1.0'
+  generated_from: arscontexta-v1.6
+  user-invocable: true
+  context: fork
+  argument-hint: N [--parallel] [--batch id] [--type extract] [--dry-run] — N = number of tasks to process

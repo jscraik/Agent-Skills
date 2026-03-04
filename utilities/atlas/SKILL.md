@@ -1,7 +1,6 @@
 ---
 name: "atlas"
 description: "macOS-only AppleScript control for the ChatGPT Atlas desktop app. Use only when the user explicitly asks to control Atlas tabs/bookmarks/history on macOS and the \"ChatGPT Atlas\" app is installed; do not trigger for general browser tasks or non-macOS environments."
-knowledge_graph_profile: references/task-profile.json
 ---
 
 

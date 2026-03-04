@@ -1,0 +1,7 @@
+legacy_frontmatter:
+  version: '1.1'
+  generated_from: arscontexta-v1.6
+  user-invocable: true
+  context: fork
+  model: sonnet
+  argument-hint: '[operation] [target] — operations: health, triangles, bridges, clusters, hubs, siblings, forward, backward, query'

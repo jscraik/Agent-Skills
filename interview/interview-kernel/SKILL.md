@@ -3,7 +3,6 @@ name: interview-kernel
 description: INTERNAL ENGINE - Core interview engine for wrapper skills. Do NOT invoke
   directly. Use interview-me, deep-interview, architecture-interview, bug-interview,
   or pm-interview instead.
-knowledge_graph_profile: references/task-profile.json
 ---
 
 # Interview Kernel (v2)

@@ -3,7 +3,6 @@ name: release
 description: Create and publish a new project release (semver) when you need to cut
   a main-branch, clean-tree release via just release X.Y.Z for Cargo publish and git
   tag creation.
-knowledge_graph_profile: references/task-profile.json
 ---
 
 # Release

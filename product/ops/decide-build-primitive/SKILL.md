@@ -3,7 +3,6 @@ name: decide-build-primitive
 description: Analyze and decide the right Codex primitive (Skill, Custom Prompt, or
   Agent automation) for a capability. Use this when you need to plan how to package
   or automate a workflow.
-knowledge_graph_profile: references/task-profile.json
 ---
 
 # Decide Build Primitive

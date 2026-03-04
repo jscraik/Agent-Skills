@@ -3,7 +3,6 @@ name: codex-ui-kit-installer
 description: Scaffold and install codex-ui-kit assets, prompts, and optional config
   into an existing repo. Use when adding or refreshing codex-ui-kit folders and wiring
   prompts.
-knowledge_graph_profile: references/task-profile.json
 ---
 
 # Codex UI Kit Installer

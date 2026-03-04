@@ -2,7 +2,6 @@
 name: context7
 description: Extract current library documentation via Context7 when users need up-to-date
   API details, version checks, or dependency troubleshooting for external libraries.
-knowledge_graph_profile: references/task-profile.json
 ---
 
 # Context7 Documentation Fetcher

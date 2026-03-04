@@ -1,7 +1,6 @@
 ---
 name: chatgpt-apps-production-checklist
 description: "Turn ChatGPT Apps implementation work into a production-ready checklist with concrete tasks, tests, widget changes, and tool-result patterns mapped by priority (P0/P1/P2). Use when designing or hardening Apps SDK products for shipping; do not use for generic web-only apps, static code review, or non-ChatGPT integration planning."
-knowledge_graph_profile: references/task-profile.json
 ---
 
 # chatgpt-apps-production-checklist

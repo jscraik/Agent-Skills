@@ -1,7 +1,6 @@
 ---
 name: check-pr
 description: Use when a user asks to review a GitHub pull request before merge (or asks how to set up Greptile prerequisites) and return a policy-gated readiness view with check status and remediation priority.
-knowledge_graph_profile: references/task-profile.json
 ---
 
 # Check PR

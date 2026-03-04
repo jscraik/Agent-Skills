@@ -1,7 +1,6 @@
 ---
 name: docs-expert
 description: "Co-author and QA GitHub repository documentation (README, docs, runbooks, community health files); use when auditing/upgrading repo docs and delivering a checklist + PR-ready edits; do not use for PRDs/specs."
-knowledge_graph_profile: references/task-profile.json
 ---
 
 # docs-expert (Repository Documentation)

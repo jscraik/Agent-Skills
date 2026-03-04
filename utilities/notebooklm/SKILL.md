@@ -1,7 +1,6 @@
 ---
 name: notebooklm
 description: Use when a user asks to interact with Google NotebookLM from this environment — to query notebooks, manage sources/notebooks, or generate audio/video overviews. Do not use for general web/chat questions unrelated to NotebookLM.
-knowledge_graph_profile: references/task-profile.json
 ---
 
 # NotebookLM Research Assistant Skill

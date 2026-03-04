@@ -3,7 +3,6 @@ name: tech-spec
 description: 'Create implementation-ready technical planning artifacts from an existing
   tech spec. Use when you need one focused mode: data_spec, migration_plan, ops_spec,
   or performance_plan.'
-knowledge_graph_profile: references/task-profile.json
 ---
 
 # Tech Spec (Canonical)

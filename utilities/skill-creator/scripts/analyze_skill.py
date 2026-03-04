@@ -205,16 +205,15 @@ def score_frontmatter(doc: SkillDoc) -> CategoryResult:
     desc = fm.get("description")
 
 
-    # Prefer minimal frontmatter: keep it to `name` + `description`.
-    # `knowledge_graph_profile` is an allowed repo-level standard binding.
-    # Put UI metadata and tool dependencies in agents/openai.yaml instead.
-    extra_keys = sorted(set(fm.keys()) - {"name", "description", "knowledge_graph_profile"})
+    # Prefer minimal official frontmatter: `name` + `description`.
+    # Optional official keys are allowed but should remain minimal.
+    extra_keys = sorted(set(fm.keys()) - {"name", "description", "license", "allowed-tools", "metadata"})
     if extra_keys:
         findings.append(
             Finding(
                 "Frontmatter",
                 -2,
-                f"⚠️ Extra frontmatter keys present: {', '.join(extra_keys)}. Prefer minimal frontmatter; use `agents/openai.yaml` for UI metadata.",
+                f"⚠️ Extra/non-official frontmatter keys present: {', '.join(extra_keys)}. Prefer official minimal frontmatter; use `agents/openai.yaml` for tool/UI metadata.",
             )
         )
         score -= 2
@@ -232,11 +231,26 @@ def score_frontmatter(doc: SkillDoc) -> CategoryResult:
 
     # name (0..10)
     if isinstance(name, str) and name.strip():
-        if "\n" not in name and "\r" not in name and len(name) <= 100:
+        if (
+            "\n" not in name
+            and "\r" not in name
+            and len(name) <= 64
+            and bool(re.fullmatch(r"[a-z0-9-]+", name))
+            and not name.startswith("-")
+            and not name.endswith("-")
+            and "--" not in name
+        ):
             score += 10
             findings.append(Finding("Frontmatter", 10, "✅ `name` present and valid."))
         else:
-            findings.append(Finding("Frontmatter", 0, "❌ `name` must be single-line and <= 100 chars.", Severity.FAIL))
+            findings.append(
+                Finding(
+                    "Frontmatter",
+                    0,
+                    "❌ `name` must be single-line, <= 64 chars, and hyphen-case (lowercase letters/digits/hyphens).",
+                    Severity.FAIL,
+                )
+            )
     else:
         findings.append(Finding("Frontmatter", 0, "❌ Missing/invalid `name`.", Severity.FAIL))
 
@@ -244,8 +258,8 @@ def score_frontmatter(doc: SkillDoc) -> CategoryResult:
     if isinstance(desc, str) and desc.strip():
         if "\n" in desc or "\r" in desc:
             findings.append(Finding("Frontmatter", 0, "❌ `description` must be single-line.", Severity.FAIL))
-        elif len(desc) > 500:
-            findings.append(Finding("Frontmatter", 0, "❌ `description` must be <= 500 chars.", Severity.FAIL))
+        elif len(desc) > 1024:
+            findings.append(Finding("Frontmatter", 0, "❌ `description` must be <= 1024 chars.", Severity.FAIL))
         else:
             # Points for clarity + trigger language
             dlen = len(desc.strip())

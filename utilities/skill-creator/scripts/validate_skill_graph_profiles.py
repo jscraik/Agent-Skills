@@ -13,6 +13,7 @@ from typing import Any, Dict, Iterable, List, Optional
 
 ROOT = Path(__file__).resolve().parents[3]
 COCKPIT_MODES = {"autopilot", "co-pilot", "manual"}
+DEFAULT_PROFILE_REL_PATH = "references/task-profile.json"
 EXCLUDED_PREFIXES = (
     "skills/.system/",
     "utilities/recon-workbench/assets/template/.codex/skills/",
@@ -290,7 +291,8 @@ def main() -> int:
     profile_rows: List[Dict[str, Any]] = []
     invalid_count = 0
     missing_profile_count = 0
-    missing_binding_count = 0
+    missing_legacy_binding_count = 0
+    invalid_legacy_binding_count = 0
     wave_counts: Dict[str, int] = {"wave-1-manual": 0, "wave-2-co-pilot": 0}
 
     manual_total = 0
@@ -319,9 +321,19 @@ def main() -> int:
                 validate_profile(entry, payload, errors)
 
         binding = parse_frontmatter_binding(entry.skill_md)
-        if binding != "references/task-profile.json":
-            missing_binding_count += 1
-            add_error(errors, "SKILL.md missing `knowledge_graph_profile: references/task-profile.json`")
+        binding_mode = "implicit-default"
+        resolved_binding = DEFAULT_PROFILE_REL_PATH
+        if binding:
+            binding_mode = "legacy-frontmatter"
+            resolved_binding = binding
+            if binding != DEFAULT_PROFILE_REL_PATH:
+                invalid_legacy_binding_count += 1
+                add_error(
+                    errors,
+                    f"legacy knowledge_graph_profile must equal `{DEFAULT_PROFILE_REL_PATH}` when present",
+                )
+        else:
+            missing_legacy_binding_count += 1
 
         if errors:
             invalid_count += 1
@@ -337,6 +349,8 @@ def main() -> int:
                 "scope_skill": entry.relative_skill_dir,
                 "wave": entry.wave,
                 "profile_path": entry.profile_path.relative_to(repo_root).as_posix(),
+                "profile_binding": resolved_binding,
+                "profile_binding_mode": binding_mode,
                 "delegation_mode": entry.expected_mode,
                 "status": "valid" if not errors else "invalid",
                 "errors": errors,
@@ -355,7 +369,11 @@ def main() -> int:
             "valid_count": len(entries) - invalid_count,
             "invalid_count": invalid_count,
             "missing_profile_count": missing_profile_count,
-            "missing_binding_count": missing_binding_count,
+            # Backward-compat: legacy binding is now optional (official posture).
+            # Keep this as 0 so existing gates that treat it as an error signal do not trip.
+            "missing_binding_count": 0,
+            "missing_legacy_binding_count": missing_legacy_binding_count,
+            "invalid_binding_count": invalid_legacy_binding_count,
             "wave_counts": wave_counts,
         },
         "skills": profile_rows,
@@ -521,7 +539,9 @@ def main() -> int:
                 "active_skill_count": len(entries),
                 "invalid_profiles": invalid_count,
                 "missing_profiles": missing_profile_count,
-                "missing_bindings": missing_binding_count,
+                "missing_bindings": 0,
+                "missing_legacy_bindings": missing_legacy_binding_count,
+                "invalid_bindings": invalid_legacy_binding_count,
                 "wave_0_ready": wave0_ready,
                 "wave_1_ready": wave1_ready,
                 "wave_2_ready": wave2_ready,

@@ -2,7 +2,6 @@
 name: pm-interview
 description: Plan and review product scope, value, metrics, and rollout via a structured
   interview. Use when product direction or scope must be clarified.
-knowledge_graph_profile: references/task-profile.json
 ---
 
 # pm-interview (wrapper)

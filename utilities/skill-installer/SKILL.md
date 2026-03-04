@@ -1,7 +1,6 @@
 ---
 name: skill-installer
 description: Plan and install skills into a Codex skills directory from curated or repo sources; use when a user asks to list available skills, install/update a skill, or validate a source before installation.
-knowledge_graph_profile: references/task-profile.json
 ---
 
 # Skill Installer

@@ -3,7 +3,6 @@ name: repoprompt
 description: Plan and guide Repo Prompt integration and usage in AI coding workflows.
   Use when integrating Repo Prompt with editors/agents or when needing MCP/CLI tool
   guidance.
-knowledge_graph_profile: references/task-profile.json
 ---
 
 # Repo Prompt Integration

@@ -2,7 +2,6 @@
 name: mkit-builder
 description: Create MCP servers with OAuth, billing/licensing, and Apps SDK UI integration.
   Use when you need enterprise-grade MCP patterns beyond the standard MCP builder.
-knowledge_graph_profile: references/task-profile.json
 ---
 
 # MCP Server Development Guide (Gold Standard, Dec 2025)

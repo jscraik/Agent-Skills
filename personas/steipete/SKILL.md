@@ -1,7 +1,6 @@
 ---
 name: steipete
 description: "Generate @steipete-inspired guidance for agentic engineering, AI dev tooling, and open-source shipping. Use when users explicitly ask for @steipete’s perspective on shipping and tooling tradeoffs."
-knowledge_graph_profile: references/task-profile.json
 ---
 
 # Persona Skill — @steipete

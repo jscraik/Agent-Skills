@@ -5,7 +5,6 @@ description: Build or adapt Oak Curriculum API driven learning experiences, espe
   Oak API endpoints, curriculum data (subjects, units, lessons, quizzes, search),
   or when translating Oak content into adaptive learning activities with age-appropriate
   guardrails and compliance reminders.
-knowledge_graph_profile: references/task-profile.json
 ---
 
 # Oak API

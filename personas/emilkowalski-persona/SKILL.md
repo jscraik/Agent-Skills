@@ -1,7 +1,6 @@
 ---
 name: emilkowalski-persona
 description: "Generate @emilkowalski-inspired responses for design-engineering decisions on UI feel, motion quality, performance, accessibility, and developer experience. Use when users explicitly ask for @emilkowalski's perspective."
-knowledge_graph_profile: references/task-profile.json
 ---
 
 # Persona Skill — Emil Kowalski (Design Engineer, UI Motion)

@@ -1,7 +1,6 @@
 ---
 name: greploop
 description: "Use when a user wants a closed-loop PR hardening pass (or asks how to set up Greptile loop prerequisites): run policy-gated review/fix iterations toward high-confidence, merge-safe output."
-knowledge_graph_profile: references/task-profile.json
 ---
 
 # Greploop

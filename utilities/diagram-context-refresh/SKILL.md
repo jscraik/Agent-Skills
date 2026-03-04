@@ -1,7 +1,6 @@
 ---
 name: diagram-context-refresh
 description: Refresh Mermaid diagram context packs for Codex and Claude using diagram-cli. Use when the user asks to keep architecture context current, automate diagram refresh, or prepare AI-ready repo context from code.
-knowledge_graph_profile: references/task-profile.json
 ---
 
 # Diagram Context Refresh

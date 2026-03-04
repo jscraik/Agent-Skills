@@ -3,7 +3,6 @@ name: youtube-hooks-scripts
 description: Create high-retention hooks and full scripts for technical YouTube videos
   tailored to topic, audience, and length. Use when the user asks for a hook, outline,
   or full script.
-knowledge_graph_profile: references/task-profile.json
 ---
 
 # YouTube Hooks & Scripts

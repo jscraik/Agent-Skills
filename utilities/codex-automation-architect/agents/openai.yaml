@@ -1,0 +1,15 @@
+interface:
+  display_name: "Codex Automation Architect"
+  short_description: "Create/review/merge Codex automations with hardened validation"
+  default_prompt: "Design or audit Codex automations, run blocker/permission preflight, and return merge-ready recommendations with validation evidence."
+
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "openaiDeveloperDocs"
+      description: "OpenAI/Codex official docs MCP"
+      transport: "streamable_http"
+      url: "https://developers.openai.com/mcp"
+    - type: "mcp"
+      value: "codexRepo"
+      description: "Codex repository MCP for releases/docs/search grounding"

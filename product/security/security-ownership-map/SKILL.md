@@ -1,7 +1,6 @@
 ---
 name: "security-ownership-map"
 description: "Analyze git repositories to map security ownership (people-to-file), compute bus-factor and sensitive-code risk, and export CSV/JSON/graph artifacts for visualization. Use only when the user explicitly requests security-focused ownership analysis grounded in git history."
-knowledge_graph_profile: references/task-profile.json
 ---
 
 # Security Ownership Map

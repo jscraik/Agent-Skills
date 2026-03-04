@@ -1,7 +1,6 @@
 ---
 name: skill-creator
 description: "Create, revise, benchmark, and quality-gate Codex skills (SKILL.md + resources + evals + packaging). Use when the user asks to build/audit/improve a skill or skill-graph contract; do not use for unrelated feature coding."
-knowledge_graph_profile: references/task-profile.json
 ---
 
 # Skill Creator

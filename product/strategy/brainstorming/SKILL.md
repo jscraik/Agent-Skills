@@ -1,7 +1,6 @@
 ---
 name: brainstorming
 description: This skill should be used before implementing features, building components, or making changes. It guides exploring user intent, approaches, and design decisions before planning. Triggers on "let's brainstorm", "help me think through", "what should we build", "explore approaches", ambiguous feature requests, or when the user's request has multiple valid interpretations that need clarification.
-knowledge_graph_profile: references/task-profile.json
 ---
 
 # Brainstorming

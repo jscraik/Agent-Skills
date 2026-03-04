@@ -7,7 +7,6 @@ allowed-tools:
   - "Read"
   - "Write"
   - "Bash"
-knowledge_graph_profile: references/task-profile.json
 ---
 
 # Stitch Build Loop

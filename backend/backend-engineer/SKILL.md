@@ -3,7 +3,6 @@ name: backend-engineer
 description: Plan and review safe backend extensions for existing services (Cloudflare
   Workers + Hono primary). Use this skill when patching or adding backend features
   in an existing codebase.
-knowledge_graph_profile: references/task-profile.json
 ---
 
 # Backend Engineer

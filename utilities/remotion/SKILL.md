@@ -2,7 +2,6 @@
 name: remotion-best-practices
 description: Best-practice guidance for Remotion (React video). Use when building
   or reviewing Remotion compositions, timing, assets, audio, captions, or rendering.
-knowledge_graph_profile: references/task-profile.json
 ---
 
 # Remotion Best Practices

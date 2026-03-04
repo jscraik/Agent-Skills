@@ -1,7 +1,6 @@
 ---
 name: figma
 description: "Use this canonical Figma skill to extract design context/screenshots/assets with Figma MCP and build production-ready UI guidance. Use when requests include Figma URLs/node IDs, design-to-code implementation, or Figma MCP setup/troubleshooting."
-knowledge_graph_profile: references/task-profile.json
 ---
 
 # Figma MCP (Canonical)

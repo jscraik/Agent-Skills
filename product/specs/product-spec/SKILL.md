@@ -3,7 +3,6 @@ name: product-spec
 description: Create or review implementation-ready product specifications from ideas
   or existing docs. Use when you need a full PRD+UX+build plan pipeline or a focused
   mode (clarify_prd, ux_only, api_spec, arch_spec, testplan).
-knowledge_graph_profile: references/task-profile.json
 ---
 
 # Product Spec Skill

@@ -3,7 +3,6 @@ name: 1password
 description: Plan, validate, and use 1Password CLI setup for secret injection and
   auth. Use when tasks need 1Password CLI usage, secret references, op run/read/inject,
   or provisioning secrets via env vars/.env files and scripts.
-knowledge_graph_profile: references/task-profile.json
 ---
 
 # 1Password CLI

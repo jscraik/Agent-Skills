@@ -3,7 +3,6 @@ name: agents-md
 description: 'Refactor or create AGENTS.md using progressive disclosure: keep root
   minimal, split detailed instructions into linked docs, and flag contradictions/redundancy.
   Use when the user asks to create, update, or refactor AGENTS.md.'
-knowledge_graph_profile: references/task-profile.json
 ---
 
 # Agents Md

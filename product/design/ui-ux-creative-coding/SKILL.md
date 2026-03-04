@@ -1,8 +1,6 @@
 ---
 name: ui-ux-creative-coding
-description: "Use when UI work needs polished motion + implementation artifacts in React/Tauri (Tailwind v4, Radix, optional Three.js); deliver brief, component/motion plans, and validation notes; do not use for brand-only identity or full 3D/game builds."
-short-description: "Design and implementation guidance for React/Tauri UI polish, motion, and component delivery."
-knowledge_graph_profile: references/task-profile.json
+description: Use when UI work needs polished motion + implementation artifacts in React/Tauri (Tailwind v4, Radix, optional Three.js); deliver brief, component/motion plans, and validation notes; do not use for brand-only identity or full 3D/game builds.
 ---
 
 # UI/UX + Creative Coding Skill

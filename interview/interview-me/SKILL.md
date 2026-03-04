@@ -4,7 +4,6 @@ description: Interactive, multiple-choice interview for requirements discovery a
   spec clarification; turns an underspecified idea (or draft spec) into an execution-ready
   spec with decisions, assumptions, acceptance criteria, and approval. Use when a
   user asks to 'interview me', clarify scope, or refine a draft spec.
-knowledge_graph_profile: references/task-profile.json
 ---
 
 # interview-me (interactive front door)

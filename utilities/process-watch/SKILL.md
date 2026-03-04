@@ -3,7 +3,6 @@ name: process-watch
 description: Analyze system processes and resource usage to diagnose runaway CPU/memory/IO,
   identify culprits, and propose next diagnostic steps. Use when investigating performance
   spikes or leaks.
-knowledge_graph_profile: references/task-profile.json
 ---
 
 # Process Watch

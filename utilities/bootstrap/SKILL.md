@@ -1,7 +1,6 @@
 ---
 name: bootstrap
 description: Bootstrap a local development environment from a GitHub repository URL. Use when the user asks to clone a repo, install toolchains/dependencies, and validate a working dev setup automatically.
-knowledge_graph_profile: references/task-profile.json
 ---
 
 # Environment Bootstrap

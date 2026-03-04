@@ -4,7 +4,6 @@ description: Use this skill when the user asks to improve a Stitch prompt. It tr
 allowed-tools:
   - "Read"
   - "Write"
-knowledge_graph_profile: references/task-profile.json
 ---
 
 # Enhance Prompt for Stitch

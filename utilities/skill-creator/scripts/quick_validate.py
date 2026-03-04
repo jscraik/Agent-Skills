@@ -10,6 +10,7 @@ Checks:
 - Single-line name/description (no block scalars)
 - Length limits by target (portable/codex/claude)
 - Optional: strict mode enforces only name+description in frontmatter
+- Compat mode enforces OpenAI official frontmatter keys
 
 This is meant to be a *quick gate* before running deeper analysis/evals.
 
@@ -43,20 +44,19 @@ except ModuleNotFoundError:
     raise SystemExit(1)
 
 
-TARGET_NAME_LIMITS = {"portable": 64, "codex": 100, "claude": 64}
-TARGET_DESCRIPTION_LIMITS = {"portable": 1024, "codex": 500, "claude": 1024}
+TARGET_NAME_LIMITS = {"portable": 64, "codex": 64, "claude": 64}
+TARGET_DESCRIPTION_LIMITS = {"portable": 1024, "codex": 1024, "claude": 1024}
 
 # In strict mode, default to only the required fields.
 STRICT_ALLOWED_KEYS = {"name", "description"}
 
-# In compat mode, allow a small set of common optional keys.
+# In compat mode, allow OpenAI official frontmatter keys used by skills.
 COMPAT_ALLOWED_KEYS = {
     "name",
     "description",
     "license",
     "allowed-tools",
     "metadata",
-    "knowledge_graph_profile",
 }
 
 _FRONTMATTER_DELIM_RE = re.compile(r"^\s*---\s*$")
@@ -118,18 +118,15 @@ def fail(msg: str) -> None:
     raise SystemExit(1)
 
 
-def warn(msg: str) -> None:
-    print(f"[WARN] {msg}", file=sys.stderr)
-
-
 def validate_frontmatter(fm: Dict[str, Any], *, target: str, mode: str) -> None:
     allowed = STRICT_ALLOWED_KEYS if mode == "strict" else COMPAT_ALLOWED_KEYS
 
     unknown = sorted(set(fm.keys()) - allowed)
     if unknown:
-        if mode == "strict":
-            fail(f"Unknown frontmatter key(s) in strict mode: {', '.join(unknown)}. Allowed: {', '.join(sorted(allowed))}")
-        warn(f"Unknown frontmatter key(s): {', '.join(unknown)} (ignored by this validator).")
+        fail(
+            f"Unknown frontmatter key(s): {', '.join(unknown)}. "
+            f"Allowed ({mode} mode): {', '.join(sorted(allowed))}"
+        )
 
     name = fm.get("name")
     desc = fm.get("description")
@@ -140,8 +137,10 @@ def validate_frontmatter(fm: Dict[str, Any], *, target: str, mode: str) -> None:
         fail("`name` must be a single-line YAML scalar (no newlines).")
     if len(name) > TARGET_NAME_LIMITS[target]:
         fail(f"`name` too long: {len(name)} chars (max for {target}: {TARGET_NAME_LIMITS[target]}).")
-    if not re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", name.strip()):
-        warn("`name` is not kebab-case (recommended).")
+    if not re.fullmatch(r"[a-z0-9-]+", name.strip()):
+        fail("`name` must be hyphen-case: lowercase letters, digits, and hyphens only.")
+    if name.startswith("-") or name.endswith("-") or "--" in name:
+        fail("`name` cannot start/end with hyphen or contain consecutive hyphens.")
 
     if not isinstance(desc, str) or not desc.strip():
         fail("Frontmatter must include a non-empty string `description`.")
@@ -152,16 +151,20 @@ def validate_frontmatter(fm: Dict[str, Any], *, target: str, mode: str) -> None:
     if any(c in desc for c in ("<", ">")):
         fail("Angle brackets `<` or `>` are not allowed in description (escape or rephrase).")
 
-    # Soft checks: encourage routing-logic phrasing
-    if not re.search(r"\b(use when|when the user|when you|if the user)\b", desc, flags=re.IGNORECASE):
-        warn("Description may be too vague; consider including explicit trigger language (e.g., 'Use when ...').")
-
-
 def main(argv: Optional[Sequence[str]] = None) -> int:
     p = argparse.ArgumentParser(description="Quick-validate a skill's SKILL.md frontmatter.")
     p.add_argument("path", help="Path to a skill directory or SKILL.md file")
     p.add_argument("--target", choices=sorted(TARGET_NAME_LIMITS.keys()), default="codex", help="Target environment (controls length limits)")
-    p.add_argument("--mode", choices=["strict", "compat"], default="compat", help="Validation mode (default: compat). Strict allows only name+description; compat allows common extra keys.")
+    p.add_argument(
+        "--mode",
+        choices=["strict", "compat"],
+        default="compat",
+        help=(
+            "Validation mode (default: compat). "
+            "strict allows only name+description; "
+            "compat allows OpenAI official keys: name, description, license, allowed-tools, metadata."
+        ),
+    )
     args = p.parse_args(list(argv) if argv is not None else None)
 
     skill_md = resolve_skill_md_path(args.path)

@@ -12,6 +12,7 @@ from typing import Any, Dict, Iterable, List, Optional
 
 ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_RUBRIC_VERSION = "2026-02-26"
+DEFAULT_PROFILE_REL_PATH = "references/task-profile.json"
 
 EXCLUDED_PREFIXES = (
     "skills/.system/",
@@ -191,7 +192,17 @@ def load_existing_profile(path: Path) -> Optional[Dict[str, Any]]:
     return payload if isinstance(payload, dict) else None
 
 
-def upsert_knowledge_graph_profile_frontmatter(skill_md: Path) -> bool:
+def rewrite_knowledge_graph_profile_frontmatter(skill_md: Path, *, mode: str) -> bool:
+    """Handle legacy knowledge_graph_profile frontmatter binding.
+
+    Modes:
+      - legacy: ensure `knowledge_graph_profile: references/task-profile.json` exists
+      - remove: remove `knowledge_graph_profile:` if present
+      - keep: no change
+    """
+    if mode == "keep":
+        return False
+
     text = skill_md.read_text(encoding="utf-8")
     if not text.startswith("---\n"):
         return False
@@ -204,20 +215,29 @@ def upsert_knowledge_graph_profile_frontmatter(skill_md: Path) -> bool:
     body = text[end + 5 :]
     lines = frontmatter.splitlines()
 
-    target = "knowledge_graph_profile: references/task-profile.json"
+    target = f"knowledge_graph_profile: {DEFAULT_PROFILE_REL_PATH}"
     changed = False
-    found = False
-    for idx, line in enumerate(lines):
-        if line.strip().startswith("knowledge_graph_profile:"):
-            found = True
-            if line.strip() != target:
-                lines[idx] = target
-                changed = True
-            break
 
-    if not found:
-        lines.append(target)
-        changed = True
+    if mode == "legacy":
+        found = False
+        for idx, line in enumerate(lines):
+            if line.strip().startswith("knowledge_graph_profile:"):
+                found = True
+                if line.strip() != target:
+                    lines[idx] = target
+                    changed = True
+                break
+
+        if not found:
+            lines.append(target)
+            changed = True
+    elif mode == "remove":
+        retained = [line for line in lines if not line.strip().startswith("knowledge_graph_profile:")]
+        if len(retained) != len(lines):
+            lines = retained
+            changed = True
+    else:
+        raise ValueError(f"Unsupported mode: {mode}")
 
     if not changed:
         return False
@@ -330,9 +350,20 @@ def parse_args() -> argparse.Namespace:
         help="Path for onboarding checklist markdown (repo-relative)",
     )
     parser.add_argument(
+        "--frontmatter-profile-binding",
+        choices=["keep", "legacy", "remove"],
+        default="keep",
+        help=(
+            "Legacy knowledge_graph_profile handling in SKILL.md frontmatter. "
+            "`keep` (default): no frontmatter edits; "
+            "`legacy`: add/update knowledge_graph_profile binding; "
+            "`remove`: strip legacy binding for official frontmatter-only posture."
+        ),
+    )
+    parser.add_argument(
         "--skip-frontmatter-binding",
         action="store_true",
-        help="Do not update SKILL.md frontmatter with knowledge_graph_profile",
+        help="Deprecated alias. Equivalent to --frontmatter-profile-binding keep.",
     )
     return parser.parse_args()
 
@@ -361,9 +392,9 @@ def main() -> int:
         else:
             profile_updated += 1
 
-        if not args.skip_frontmatter_binding:
-            if upsert_knowledge_graph_profile_frontmatter(entry.skill_md):
-                frontmatter_updated += 1
+        binding_mode = "keep" if args.skip_frontmatter_binding else args.frontmatter_profile_binding
+        if rewrite_knowledge_graph_profile_frontmatter(entry.skill_md, mode=binding_mode):
+            frontmatter_updated += 1
 
     baseline_path = (repo_root / args.baseline_out).resolve()
     write_baseline(

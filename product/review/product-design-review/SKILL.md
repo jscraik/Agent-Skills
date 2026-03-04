@@ -3,7 +3,6 @@ name: product-design-review
 description: Deliver a user-centered UX critique across the full experience. Use for
   heuristic reviews and journey analysis (not file:line guideline compliance). Use
   when the user requests this capability.
-knowledge_graph_profile: references/task-profile.json
 ---
 
 # Product Design Review

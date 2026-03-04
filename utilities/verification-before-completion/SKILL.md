@@ -1,7 +1,6 @@
 ---
 name: verification-before-completion
 description: "Validate completion claims with fresh command evidence. Use when you are about to claim work is complete, fixed, or passing."
-knowledge_graph_profile: references/task-profile.json
 ---
 
 # Verification Before Completion

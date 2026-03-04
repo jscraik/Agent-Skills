@@ -1,7 +1,6 @@
 ---
 name: ui-visual-regression
 description: "Review and validate UI visual regression diffs (Storybook + Playwright capture + Argos) when snapshot changes or layout regressions appear."
-knowledge_graph_profile: references/task-profile.json
 ---
 
 # Ui Visual Regression

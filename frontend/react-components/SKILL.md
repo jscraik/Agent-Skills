@@ -1,13 +1,12 @@
 ---
-name: react:components
+name: react-components
 description: Use this skill when the user asks to convert Stitch screens into modular Vite/React components with validated structure, data extraction, and style-system alignment.
 allowed-tools:
-  - "stitch*:*"
-  - "Bash"
-  - "Read"
-  - "Write"
-  - "web_fetch"
-knowledge_graph_profile: references/task-profile.json
+- stitch*:*
+- Bash
+- Read
+- Write
+- web_fetch
 ---
 
 # Stitch to React Components

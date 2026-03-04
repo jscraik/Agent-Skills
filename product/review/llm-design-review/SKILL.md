@@ -1,7 +1,6 @@
 ---
 name: llm-design-review
 description: "Run a multidisciplinary design review for LLM-powered products and produce actionable risks, fixes, and evidence gaps across UX, architecture, safety, and ops. Use when a user asks for an AI product design review or pre-launch critique."
-knowledge_graph_profile: references/task-profile.json
 ---
 
 # LLM Design Review

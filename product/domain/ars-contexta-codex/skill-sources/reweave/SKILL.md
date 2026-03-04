@@ -1,9 +1,7 @@
 ---
 name: reweave
 description: Update old notes with new connections. The backward pass that /reflect doesn't do. Revisit existing notes that predate newer related content, add connections, sharpen claims, consider splits. Triggers on "/reweave", "/reweave [note]", "update old notes", "backward connections", "revisit notes".
-user-invocable: true
 allowed-tools: Read, Write, Edit, Grep, Glob, Bash, mcp__qmd__search, mcp__qmd__vector_search, mcp__qmd__deep_search, mcp__qmd__status
-context: fork
 ---
 
 ## Runtime Configuration (Step 0 — before any processing)
