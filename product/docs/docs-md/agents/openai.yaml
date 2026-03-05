@@ -1,0 +1,3 @@
+interface:
+  display_name: "Docs MD"
+  short_description: "Refactor Markdown docs into concise front-door pages plus linked detail docs."

@@ -1,0 +1,47 @@
+schema_version: "1.0"
+
+purpose: >
+  Define expected behavior and outputs for the docs-md skill, which
+  restructures Markdown documentation into progressive-disclosure form for human
+  and agent readers.
+
+triggers:
+  - user requests README, runbook, spec, or internal-doc cleanup via progressive disclosure
+  - user wants a large doc split into concise entry docs plus linked detail docs
+  - user wants docs easier for both humans and agents to understand
+
+inputs:
+  - target_doc_paths
+  - existing_doc_topology
+  - verified_repo_commands_and_paths
+  - primary_audience
+  - docs_root_convention
+  - compatibility_posture
+
+outputs:
+  - concise_front_door_doc_or_merge_safe_update
+  - linked_companion_doc_plan_or_files
+  - accurate_table_of_contents
+  - reader_map_for_front_door_vs_reference_docs
+  - contradictions_list_with_resolution_questions
+  - flag_for_deletion_list
+
+required_response_sections:
+  - "When to use"
+  - "Outputs"
+  - "Inputs"
+
+non_goals:
+  - proofreading-only edits
+  - AGENTS.md, CLAUDE.md, or GEMINI.md refactors handled by dedicated skills
+  - inventing commands, paths, or documentation trees
+
+risks:
+  - risk: fake_repo_facts
+    mitigation: verify commands and paths from source files; otherwise emit "not observed"
+  - risk: duplicate_doc_trees
+    mitigation: reuse the repo's existing docs root and avoid creating a competing one
+  - risk: unresolved_instruction_conflicts
+    mitigation: surface contradictions and ask which version should win
+  - risk: over-splitting
+    mitigation: keep the front door doc focused and move only deep or volatile details
