@@ -1,7 +1,7 @@
 ---
 title: feat: Intent-First Skill Router Scorecard (Top-3 + Confidence)
 type: feat
-status: active
+status: completed
 date: 2026-03-04
 origin: docs/brainstorms/2026-03-04-skill-router-brainstorm.md
 ---
@@ -336,19 +336,19 @@ Prioritize these first to reduce the highest-likelihood failure modes identified
 - [x] T11 — Update schema/runbook docs and validation wiring in repo scripts
 
 ## Acceptance Criteria
-- [ ] Router returns deterministic top-3 results for identical input and catalog version.
-- [ ] Each candidate includes confidence score and concise rationale.
-- [ ] CLI human output and `--json` output are schema-consistent.
-- [ ] Low-confidence and no-match states are explicit and non-crashing.
-- [ ] Non-interactive agent mode defaults to `observe_only`; auto-run only when explicit policy gate passes.
-- [ ] First-hit metrics are captured separately for human and agent actors.
-- [ ] Anti-gaming metrics are captured: override regret, correction latency, repeat misroute rate.
-- [ ] No telemetry record contains raw prompt/objective text or secret-like tokens.
-- [ ] If controls are missing/unreadable/invalid, routing mode fails closed to safe state.
-- [ ] High-risk skill recommendations require explicit confirmation.
-- [ ] Catalog freshness and metadata quality checks gate active routing mode.
-- [ ] Schema compatibility changes require schema version bump + validator update.
-- [ ] Docs include usage guidance, control hierarchy, and rollback procedure.
+- [x] Router returns deterministic top-3 results for identical input and catalog version.
+- [x] Each candidate includes confidence score and concise rationale.
+- [x] CLI human output and `--json` output are schema-consistent.
+- [x] Low-confidence and no-match states are explicit and non-crashing.
+- [x] Non-interactive agent mode defaults to `observe_only`; auto-run only when explicit policy gate passes.
+- [x] First-hit metrics are captured separately for human and agent actors.
+- [x] Anti-gaming metrics are captured: override regret, correction latency, repeat misroute rate.
+- [x] No telemetry record contains raw prompt/objective text or secret-like tokens.
+- [x] If controls are missing/unreadable/invalid, routing mode fails closed to safe state.
+- [x] High-risk skill recommendations require explicit confirmation.
+- [x] Catalog freshness and metadata quality checks gate active routing mode.
+- [x] Schema compatibility changes require schema version bump + validator update.
+- [x] Docs include usage guidance, control hierarchy, and rollback procedure.
 
 ## Success Metrics
 - **Primary KPI:** top-1 first-hit routing accuracy improves over baseline (see brainstorm: `docs/brainstorms/2026-03-04-skill-router-brainstorm.md`).
