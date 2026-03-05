@@ -7,8 +7,10 @@ import argparse
 import json
 import re
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, List, Tuple
+from uuid import uuid4
 
 from skill_catalog import SkillMeta, load_catalog
 from skill_router_schema import Candidate, build_router_result, validate_router_result
@@ -129,6 +131,44 @@ def render_human(result: Dict[str, object]) -> str:
     return "\n".join(lines)
 
 
+def build_route_event(
+    *,
+    result: Dict[str, object],
+    selected_rank: int | None = None,
+    correction_latency_ms: int | None = None,
+) -> Dict[str, object]:
+    candidates = result.get("top_candidates", [])
+    top1 = candidates[0] if candidates else {}
+    top1_confidence = float(top1.get("confidence", 0.0)) if isinstance(top1, dict) else 0.0
+
+    event = {
+        "event_id": str(uuid4()),
+        "event_ts": datetime.now(timezone.utc).isoformat(),
+        "event_type": "skill_router.route_decision",
+        "schema_version": result.get("schema_version"),
+        "catalog_version": result.get("catalog_version"),
+        "actor_type": result.get("actor_type"),
+        "policy_mode": result.get("policy_mode"),
+        "policy_decision": result.get("policy_decision"),
+        "requires_clarification": result.get("requires_clarification"),
+        "uncertainty_reasons": result.get("uncertainty_reasons", []),
+        "prompt_hash": result.get("prompt_hash"),
+        "top1_skill": top1.get("skill_name") if isinstance(top1, dict) else None,
+        "top1_confidence": top1_confidence,
+        "selected_rank": selected_rank,
+        "top1_chosen": selected_rank == 1 if selected_rank is not None else None,
+        "override_regret_flag": bool(selected_rank and selected_rank > 1 and top1_confidence >= 0.85),
+        "correction_latency_ms": correction_latency_ms,
+    }
+    return event
+
+
+def append_event(path: Path, event: Dict[str, object]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with open(path, "a", encoding="utf-8") as f:
+        f.write(json.dumps(event, sort_keys=True) + "\n")
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Deterministic skill router")
     parser.add_argument("--query", required=True, help="User request text")
@@ -147,6 +187,9 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--json", action="store_true", help="Output JSON")
     parser.add_argument("--catalog-version", default="skills-current")
+    parser.add_argument("--events-out", type=Path, help="Optional JSONL path for routing telemetry events")
+    parser.add_argument("--selected-rank", type=int, help="Optional selected candidate rank for feedback")
+    parser.add_argument("--correction-latency-ms", type=int, help="Optional latency between suggestion and correction")
     return parser.parse_args()
 
 
@@ -185,6 +228,14 @@ def main() -> int:
         print(json.dumps(result, indent=2))
     else:
         print(render_human(result))
+
+    if args.events_out:
+        event = build_route_event(
+            result=result,
+            selected_rank=args.selected_rank,
+            correction_latency_ms=args.correction_latency_ms,
+        )
+        append_event(args.events_out, event)
 
     return 0
 

@@ -9,7 +9,7 @@ import unittest
 from pathlib import Path
 
 from skill_catalog import discover_skills, load_catalog
-from skill_router import route
+from skill_router import build_route_event, route
 from skill_router_schema import build_router_result, validate_router_result
 
 
@@ -126,6 +126,32 @@ class SkillRouterTests(unittest.TestCase):
             _write_skill(root / "b" / "dup2", "same-skill", "Second description long enough for quality checks.")
             with self.assertRaises(ValueError):
                 load_catalog(root, strict=True)
+
+    def test_route_event_contains_guardrail_fields(self) -> None:
+        payload = {
+            "schema_version": "1.0",
+            "catalog_version": "abc123",
+            "actor_type": "agent",
+            "policy_mode": "co_pilot",
+            "policy_decision": "confirmation_required",
+            "requires_clarification": True,
+            "uncertainty_reasons": ["possible_multi_intent"],
+            "prompt_hash": "deadbeef",
+            "top_candidates": [
+                {
+                    "skill_name": "gh-fix-ci",
+                    "skill_path": "github/gh-fix-ci",
+                    "confidence": 0.9,
+                    "confidence_band": "high",
+                    "risk_tier": "medium",
+                    "rationale": ["keyword overlap=3"],
+                }
+            ],
+        }
+        event = build_route_event(result=payload, selected_rank=2, correction_latency_ms=1800)
+        self.assertEqual(event["top1_skill"], "gh-fix-ci")
+        self.assertFalse(event["top1_chosen"])
+        self.assertTrue(event["override_regret_flag"])
 
     def test_fixture_file_is_valid_json(self) -> None:
         fixture_path = Path(__file__).resolve().parent / "test_skill_router_fixtures.json"

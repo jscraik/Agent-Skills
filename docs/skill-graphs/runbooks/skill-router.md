@@ -15,7 +15,8 @@ Operate the deterministic intent-first skill router in safe modes while preservi
 python3 utilities/skill-creator/scripts/skill_router.py \
   --query "help me design a ChatGPT app" \
   --actor-type human \
-  --policy-mode observe_only
+  --policy-mode observe_only \
+  --events-out artifacts/skill-graphs/telemetry/skill-router-events.jsonl
 ```
 
 JSON mode:
@@ -24,7 +25,8 @@ python3 utilities/skill-creator/scripts/skill_router.py \
   --query "review PR checks and fix CI" \
   --actor-type agent \
   --policy-mode co_pilot \
-  --json
+  --json \
+  --events-out artifacts/skill-graphs/telemetry/skill-router-events.jsonl
 ```
 
 ## Control hierarchy
@@ -39,6 +41,7 @@ Unknown/invalid controls fail closed to safe state (`observe_only`).
 ```bash
 python3 scripts/verify_router_schema.py --input /tmp/router-result.json --fail-on-sensitive-fields
 python3 scripts/verify_skill_catalog_freshness.py --strict
+python3 scripts/skill_router_metrics.py --events artifacts/skill-graphs/telemetry/skill-router-events.jsonl --json
 ```
 
 Calibration profile (v1):
