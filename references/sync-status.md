@@ -1,6 +1,6 @@
 # Skills Sync Status
 
-**Canonical source**: `~/dev/agent-skills/skills`
+**Canonical source**: `~/dev/agent-skills/.agents/skills`
 
 ## Auto-synced paths
 
@@ -9,13 +9,13 @@ Running `scripts/sync_skills.sh` automatically creates/updates:
 | Tool | Path | Status |
 |------|------|--------|
 | **Claude Code** | `~/.claude/skills` | ✅ auto-synced |
-| **OpenAI Codex** | `~/.agent/skills` | ✅ auto-synced |
 | **OpenAI Agents/Codex** | `~/.agents/skills` | ✅ auto-synced |
+| **OpenAI Codex (compat)** | `~/.codex/skills` | ✅ auto-synced |
 
 ## Verification
 
 ```bash
 ls -la ~/.claude/skills | head -n 5
-ls -la ~/.agent/skills | head -n 5
 ls -la ~/.agents/skills | head -n 5
+ls -la ~/.codex/skills | head -n 5
 ```

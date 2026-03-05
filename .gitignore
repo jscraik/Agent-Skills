@@ -28,6 +28,7 @@ node_modules/
 
 # Generated skill views
 skills/
+skills
 skills-antigravity/
 
 # Generated artifacts
@@ -35,6 +36,7 @@ artifacts/dist/
 artifacts/build/dist/
 artifacts/reports/
 artifacts/sessions/
+artifacts/*-status-*.md
 artifacts/skill-validation*
 artifacts/run_skill_validation.sh
 /artifacts/ai/tmp/
@@ -58,6 +60,7 @@ FORJAMIE.md
 # Misc local throwaways
 *.skill
 product/Archive.zip
+logs/
 
 FORJAMIE.md
 

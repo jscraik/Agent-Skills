@@ -7,7 +7,7 @@ Usage:
 
 Checks:
     1. SKILL.md exists and has valid YAML frontmatter
-    2. Symlink exists in ~/.codex/skills/ and ~/.claude/skills/
+    2. Symlink exists in ~/.agents/skills/, ~/.codex/skills/, and ~/.claude/skills/
     3. Symlink points to correct location
     4. No nested .git directory (breaks skill discovery)
     5. Skill appears in root SKILL.md index
@@ -24,7 +24,7 @@ from pathlib import Path
 from typing import List, Optional
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-SKILLS_DIR = REPO_ROOT / "skills"
+SKILLS_DIR = REPO_ROOT / ".agents" / "skills"
 SKILL_INDEX = REPO_ROOT / "SKILL.md"
 
 CODEX_SKILLS = Path.home() / ".codex" / "skills"
@@ -52,7 +52,7 @@ def find_skill_dir(skill_name: str) -> Optional[Path]:
     for category_dir in REPO_ROOT.iterdir():
         if not category_dir.is_dir():
             continue
-        if category_dir.name.startswith(".") or category_dir.name in ("skills", "skills-system", "skills-antigravity"):
+        if category_dir.name.startswith(".") or category_dir.name in ("skills", "skills-system", "skills-antigravity", ".agents"):
             continue
         skill_path = category_dir / skill_name
         if skill_path.is_dir() and (skill_path / "SKILL.md").exists():

@@ -6,7 +6,7 @@
 2. Sync skill symlinks/index:
    - `~/dev/agent-skills/scripts/sync_skills.sh`
 3. Confirm skill appears in flat skills view:
-   - `~/dev/agent-skills/skills/agent-native-architecture`
+   - `~/dev/agent-skills/.agents/skills/agent-native-architecture`
 4. Verify explicit invocation in Codex:
    - `$agent-native-architecture ...`
 5. Run evals and validation gates before broad adoption.

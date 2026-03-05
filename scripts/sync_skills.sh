@@ -27,7 +27,7 @@ fi
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$repo_root"
 
-skills_dir="$repo_root/skills"
+skills_dir="$repo_root/.agents/skills"
 system_skills_dir="$repo_root/skills-system"
 antigravity_skills_dir="$repo_root/skills-antigravity"
 
@@ -389,7 +389,7 @@ generate_skill_index() {
   cat > "$index_file" << 'HEADER'
 # Agent Skills Index
 
-Canonical skills live in categorized folders below. Each tool loads skills via the flat symlink directory at `~/dev/agent-skills/skills`.
+Canonical skills live in categorized folders below. Each tool loads skills via the flat symlink directory at `~/dev/agent-skills/.agents/skills`.
 
 HEADER
 
@@ -494,6 +494,7 @@ sync_user_skills() {
 }
 
 # Sync to Claude Code, OpenAI Codex/Agents, and Gemini loaders.
+sync_user_skills "$skills_dir" "$repo_root/skills" 1
 sync_user_skills "$skills_dir" "$HOME/.claude/skills"
 sync_user_skills "$skills_dir" "$HOME/.agents/skills"
 sync_user_skills "$skills_dir" "$HOME/.codex/skills"

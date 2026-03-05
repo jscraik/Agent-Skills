@@ -11,7 +11,7 @@ If you are new here:
 ## What this repo is for
 
 - Keep one canonical skill library.
-- Generate a flat symlink view in `/skills` for tool loaders.
+- Generate a flat symlink view in `/.agents/skills` for tool loaders.
 - Maintain clear documentation contracts for contributors.
 - Run nightly skill improvement analysis via the Skill Genome Loop.
 
@@ -160,7 +160,9 @@ If either check fails, use the troubleshooting section below.
 ├── references/    # Shared reference contracts
 ├── templates/     # Shared contract/eval templates
 ├── reports/       # Generated scan summaries and data snapshots
-├── skills/        # Flat symlink directory (tooling entrypoint)
+├── .agents/       # Repo-local Codex skills root
+├── .agents/skills/ # Flat symlink directory (tooling entrypoint)
+├── skills -> .agents/skills  # Legacy compatibility symlink
 ├── skills-system/ # Bundled/system skills (kept out of flat view)
 └── SKILL.md       # Human-readable skills index
 ```
@@ -174,10 +176,10 @@ If either check fails, use the troubleshooting section below.
 ## How skills are loaded
 
 - Each skill lives in a category folder and includes a `SKILL.md` file.
-- `/skills` contains symlinks so tools can load one flat list.
+- `/.agents/skills` contains symlinks so tools can load one flat list.
 - `skills-system/` stores bundled/system skills and is excluded from the flat view.
 - `scripts/sync_skills.sh` refreshes symlinks and regenerates `/SKILL.md`.
-- The sync script links `/skills` into:
+- The sync script links `/.agents/skills` into:
   - `~/.agents/skills`
   - `~/.codex/skills`
   - `~/.gemini/antigravity/skills`
@@ -231,7 +233,7 @@ python3 scripts/diagnose_skill.py --all
 
 Common causes:
 
-- **Nested `.git` directory**: Skills with their own `.git` folder break discovery. Remove it: `rm -rf skills/<name>/.git`
+- **Nested `.git` directory**: Skills with their own `.git` folder break discovery. Remove it: `rm -rf .agents/skills/<name>/.git`
 - **Missing symlink**: Re-run `bash scripts/sync_skills.sh`
 - **Invalid SKILL.md**: Ensure YAML frontmatter has `name:` and `description:`
 

@@ -20,7 +20,7 @@ Exit codes:
   2  gate failed (one or more FAIL findings)
 
 Recommended CI:
-  ~/.venvs/pyyaml/bin/python utilities/skill-creator/scripts/skill_gate.py ~/dev/agent-skills/skills/<skill-name> --format json
+  ~/.venvs/pyyaml/bin/python utilities/skill-creator/scripts/skill_gate.py ~/dev/agent-skills/.agents/skills/<skill-name> --format json
 """
 
 from __future__ import annotations

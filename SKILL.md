@@ -168,7 +168,7 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 
 - `asymmetric-ideation-engine` — Generate 10 launchable asymmetric ideas by excavating a repository for hidden patterns. Use when users ask for radical non-incremental ideation from repo context; don't use for roadmap optimization, bug fixing, or routine prioritization. Outputs: structured idea set + artifact file. Success: all novelty constraints satisfied.
 - `brainstorming` — This skill should be used before implementing features, building components, or making changes. It guides exploring user intent, approaches, and design decisions before planning. Triggers on "let's brainstorm", "help me think through", "what should we build", "explore approaches", ambiguous feature requests, or when the user's request has multiple valid interpretations that need clarification.
-- `project-improvement-ideator` — Generate, score, and winnow project improvement ideas into a top 5 with impact/effort notes. Use when asked for roadmap ideas, prioritization, or improvement brainstorming.
+- `project-improvement-ideator` — Use when asked to generate and prioritize product or repository improvements: privately explore 100 pragmatic ideas, run a premortem, and return the 10 strongest opportunities with current-source-backed best-practice notes, implementation slices, and risk controls; do not use for bug fixing or generic brainstorming.
 
 ## Product — Tech
 
