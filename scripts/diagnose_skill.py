@@ -260,27 +260,33 @@ def diagnose_all_skills() -> int:
 
     total_fails = 0
     total_warns = 0
-    problem_skills: List[str] = []
+    failing_skills: List[str] = []
+    warning_skills: List[str] = []
 
     for skill_name in skill_names:
         results = diagnose_skill(skill_name)
         fails = sum(1 for r in results if r.status == "fail")
         warns = sum(1 for r in results if r.status == "warn")
 
-        if fails > 0 or warns > 0:
-            problem_skills.append(skill_name)
-            total_fails += fails
-            total_warns += warns
-
+        total_fails += fails
+        total_warns += warns
+        if fails > 0:
+            failing_skills.append(skill_name)
             symbol = "✗" if fails > 0 else "⚠"
             print(f"{symbol} {skill_name}: {fails} fail(s), {warns} warn(s)")
+        elif warns > 0:
+            warning_skills.append(skill_name)
+            print(f"⚠ {skill_name}: {fails} fail(s), {warns} warn(s)")
 
     print()
     print(f"Summary: {len(skill_names)} skills, {total_fails} failures, {total_warns} warnings")
 
-    if problem_skills:
-        print(f"\nSkills with issues: {', '.join(problem_skills)}")
+    if failing_skills:
+        print(f"\nSkills with failures: {', '.join(failing_skills)}")
         return 1
+
+    if warning_skills:
+        print(f"\nSkills with warnings: {', '.join(warning_skills)}")
 
     print("\n✅ All skills healthy")
     return 0
