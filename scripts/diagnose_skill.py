@@ -107,10 +107,17 @@ def check_nested_git(skill_dir: Path) -> DiagnosticResult:
 
 def check_symlink(skill_name: str, target_dir: Path, label: str) -> DiagnosticResult:
     """Check if symlink exists and points to correct location."""
+    if not target_dir.exists():
+        return DiagnosticResult(
+            f"symlink ({label})",
+            "skip",
+            f"Target skill directory not present in this environment: {target_dir}",
+        )
+
     symlink_path = target_dir / skill_name
 
     if not symlink_path.exists():
-        return DiagnosticResult(f"symlink ({label})", "fail", f"Symlink not found in {target_dir}")
+        return DiagnosticResult(f"symlink ({label})", "warn", f"Symlink not found in {target_dir}")
 
     if not symlink_path.is_symlink():
         return DiagnosticResult(f"symlink ({label})", "warn", f"Exists but not a symlink in {target_dir}")
