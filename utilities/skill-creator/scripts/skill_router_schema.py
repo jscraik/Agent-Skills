@@ -123,6 +123,11 @@ def decide_policy(
                 "policy_decision": "auto_select_top1",
                 "requires_clarification": False,
             }
+        if best_confidence >= ACTOR_THRESHOLDS["agent"]["confirm_min"] and normalized_mode == "co_pilot":
+            return {
+                "policy_decision": "suggest",
+                "requires_clarification": False,
+            }
         if best_confidence < ACTOR_THRESHOLDS["agent"]["confirm_min"]:
             return {
                 "policy_decision": "confirmation_required",
@@ -158,6 +163,7 @@ def build_router_result(
     catalog_version: str,
     candidates: Iterable[Candidate],
     uncertainty_reasons: Optional[List[str]] = None,
+    control_resolution: Optional[str] = None,
     schema_version: str = SCHEMA_VERSION,
 ) -> Dict[str, Any]:
     candidates_list = list(candidates)
@@ -193,6 +199,8 @@ def build_router_result(
             for c in candidates_list
         ],
     ).to_dict()
+    if control_resolution is not None:
+        result["control_resolution"] = control_resolution
 
     issues = validate_router_result(result, fail_on_sensitive_fields=True)
     if issues:

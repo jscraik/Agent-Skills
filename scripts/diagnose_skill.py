@@ -43,9 +43,10 @@ class DiagnosticResult:
 def find_skill_dir(skill_name: str) -> Optional[Path]:
     """Find skill directory by name, searching multiple locations."""
     # Check flat skills directory first
-    flat_path = SKILLS_DIR / skill_name
-    if flat_path.is_dir() and (flat_path / "SKILL.md").exists():
-        return flat_path
+    if SKILLS_DIR.is_dir():
+        flat_path = SKILLS_DIR / skill_name
+        if flat_path.is_dir() and (flat_path / "SKILL.md").exists():
+            return flat_path
 
     # Search category folders
     for category_dir in REPO_ROOT.iterdir():
@@ -238,9 +239,10 @@ def diagnose_all_skills() -> int:
     skill_names: List[str] = []
 
     # From flat skills directory
-    for item in SKILLS_DIR.iterdir():
-        if item.is_symlink() and (item / "SKILL.md").exists():
-            skill_names.append(item.name)
+    if SKILLS_DIR.is_dir():
+        for item in SKILLS_DIR.iterdir():
+            if item.is_symlink() and (item / "SKILL.md").exists():
+                skill_names.append(item.name)
 
     # From category directories
     for category_dir in REPO_ROOT.iterdir():

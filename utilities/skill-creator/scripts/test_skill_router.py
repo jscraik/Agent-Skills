@@ -11,7 +11,7 @@ from pathlib import Path
 from router_controls import resolve_rollout_mode
 from skill_catalog import discover_skills, load_catalog
 from skill_router import build_route_event, route
-from skill_router_schema import build_router_result, validate_router_result
+from skill_router_schema import Candidate, build_router_result, validate_router_result
 
 
 def _write_skill(path: Path, name: str, description: str) -> None:
@@ -28,6 +28,44 @@ def _write_skill(path: Path, name: str, description: str) -> None:
             ]
         ),
         encoding="utf-8",
+    )
+
+
+def _write_fixture_skills(root: Path) -> None:
+    _write_skill(
+        root / "security" / "security-threat-model",
+        "security-threat-model",
+        "Threat model repositories and identify abuse paths.",
+    )
+    _write_skill(
+        root / "github" / "gh-fix-ci",
+        "gh-fix-ci",
+        "Fix failing GitHub Actions checks and rerun CI.",
+    )
+    _write_skill(
+        root / "github" / "gh-workflow",
+        "gh-workflow",
+        "Manage GitHub pull requests and review workflow.",
+    )
+    _write_skill(
+        root / "frontend" / "interface-craft",
+        "interface-craft",
+        "Build polished React UI with motion and interaction quality.",
+    )
+    _write_skill(
+        root / "frontend" / "frontend-ui-design",
+        "frontend-ui-design",
+        "Create production-ready design systems and React UI components.",
+    )
+    _write_skill(
+        root / "product" / "ui-ux-creative-coding",
+        "ui-ux-creative-coding",
+        "Create polished motion-rich UI implementation artifacts.",
+    )
+    _write_skill(
+        root / "product" / "brainstorming",
+        "brainstorming",
+        "Explore feature scope and ambiguous product options.",
     )
 
 
@@ -102,6 +140,26 @@ class SkillRouterTests(unittest.TestCase):
             self.assertTrue(payload["requires_clarification"])
             self.assertEqual(payload["policy_decision"], "suggest_only")
 
+    def test_agent_co_pilot_suggests_when_confident_low_risk(self) -> None:
+        payload = build_router_result(
+            query="help improve CI reliability",
+            actor_type="agent",
+            policy_mode="co_pilot",
+            catalog_version="test",
+            candidates=[
+                Candidate(
+                    skill_name="gh-fix-ci",
+                    skill_path="github/gh-fix-ci",
+                    confidence=0.75,
+                    rationale=["keyword overlap=3"],
+                    risk_tier="low",
+                )
+            ],
+            uncertainty_reasons=[],
+        )
+        self.assertFalse(payload["requires_clarification"])
+        self.assertEqual(payload["policy_decision"], "suggest")
+
     def test_uncertainty_reasons_present_for_multi_intent(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -168,6 +226,45 @@ class SkillRouterTests(unittest.TestCase):
         content = json.loads(fixture_path.read_text(encoding="utf-8"))
         self.assertTrue(isinstance(content, list))
         self.assertGreaterEqual(len(content), 1)
+
+    def test_fixture_cases_are_exercised(self) -> None:
+        fixture_path = Path(__file__).resolve().parent / "test_skill_router_fixtures.json"
+        fixtures = json.loads(fixture_path.read_text(encoding="utf-8"))
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            _write_fixture_skills(root)
+            skills = discover_skills(root)
+
+            for fixture in fixtures:
+                query = fixture["query"]
+                candidates, reasons = route(query, skills, top_k=3)
+
+                with self.subTest(fixture=fixture["id"]):
+                    self.assertGreaterEqual(len(candidates), 1)
+
+                    expected_top = fixture.get("expected_top")
+                    if expected_top:
+                        self.assertEqual(candidates[0].skill_name, expected_top)
+
+                    expected_any_of = fixture.get("expected_any_of")
+                    if expected_any_of:
+                        self.assertIn(candidates[0].skill_name, expected_any_of)
+
+                    if fixture.get("expect_requires_clarification_for_agent"):
+                        payload = build_router_result(
+                            query=query,
+                            actor_type="agent",
+                            policy_mode="observe_only",
+                            catalog_version="test",
+                            candidates=candidates,
+                            uncertainty_reasons=reasons,
+                        )
+                        self.assertTrue(payload["requires_clarification"])
+
+                    expected_uncertainty_reason = fixture.get("expect_uncertainty_reason")
+                    if expected_uncertainty_reason:
+                        self.assertIn(expected_uncertainty_reason, reasons)
 
 
 if __name__ == "__main__":

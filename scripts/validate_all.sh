@@ -25,7 +25,7 @@ python3 scripts/verify_skill_catalog_freshness.py --strict 2>/dev/null || echo "
 
 # 5. Router schema guard (no input = contract script availability check)
 echo "🛡️  Verifying router schema tooling..."
-python3 scripts/verify_router_schema.py --fail-on-sensitive-fields 2>/dev/null || echo "  ⚠️  Router schema verification had issues"
+python3 scripts/verify_router_schema.py --fail-on-sensitive-fields < /dev/null 2>/dev/null || echo "  ⚠️  Router schema verification had issues"
 
 echo ""
 echo "✅ Validation complete"

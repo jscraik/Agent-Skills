@@ -14,7 +14,7 @@ from uuid import uuid4
 
 from router_controls import resolve_rollout_mode
 from skill_catalog import SkillMeta, load_catalog
-from skill_router_schema import Candidate, build_router_result, validate_router_result
+from skill_router_schema import Candidate, build_router_result
 
 TOKEN_RE = re.compile(r"[a-z0-9][a-z0-9_\-]{1,}")
 
@@ -223,15 +223,8 @@ def main() -> int:
         catalog_version=catalog.catalog_version if args.catalog_version == "skills-current" else args.catalog_version,
         candidates=candidates,
         uncertainty_reasons=uncertainty_reasons,
+        control_resolution=resolution.reason,
     )
-    result["control_resolution"] = resolution.reason
-
-    issues = validate_router_result(result, fail_on_sensitive_fields=True)
-    if issues:
-        print("Router result validation failed:", file=sys.stderr)
-        for issue in issues:
-            print(f"- {issue}", file=sys.stderr)
-        return 3
 
     if args.json:
         print(json.dumps(result, indent=2))
