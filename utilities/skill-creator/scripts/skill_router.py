@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Dict, List, Tuple
 from uuid import uuid4
 
+from router_controls import resolve_rollout_mode
 from skill_catalog import SkillMeta, load_catalog
 from skill_router_schema import Candidate, build_router_result, validate_router_result
 
@@ -181,6 +182,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--top-k", type=int, default=3)
     parser.add_argument("--repo-root", type=Path, default=Path(__file__).resolve().parents[3])
     parser.add_argument(
+        "--controls-dir",
+        type=Path,
+        help="Optional controls directory with kill-switch, rollback-required, and rollout-mode files",
+    )
+    parser.add_argument(
         "--allow-catalog-issues",
         action="store_true",
         help="Allow routing to continue when metadata quality checks fail",
@@ -195,6 +201,8 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> int:
     args = parse_args()
+
+    resolution = resolve_rollout_mode(args.controls_dir, args.policy_mode)
 
     try:
         catalog = load_catalog(args.repo_root, strict=not args.allow_catalog_issues)
@@ -211,11 +219,12 @@ def main() -> int:
     result = build_router_result(
         query=args.query,
         actor_type=args.actor_type,
-        policy_mode=args.policy_mode,
+        policy_mode=resolution.effective_mode,
         catalog_version=catalog.catalog_version if args.catalog_version == "skills-current" else args.catalog_version,
         candidates=candidates,
         uncertainty_reasons=uncertainty_reasons,
     )
+    result["control_resolution"] = resolution.reason
 
     issues = validate_router_result(result, fail_on_sensitive_fields=True)
     if issues:

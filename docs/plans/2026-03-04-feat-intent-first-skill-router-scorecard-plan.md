@@ -224,9 +224,11 @@ To reduce these failure modes, this plan now adds:
 - `scripts/verify_router_schema.py` (schema/telemetry contract verifier)
 - `scripts/verify_skill_catalog_freshness.py` (catalog freshness and metadata quality gates)
 - `scripts/skill_router_metrics.py` (first-hit + guardrail KPI aggregation)
+- `scripts/run_skill_router_rollback_drill.sh` (control-precedence rollback drill)
 - `docs/skill-graphs/schemas/skill-router.schema.md` (versioned contract)
 - `docs/skill-graphs/runbooks/skill-router.md` (operational runbook)
 - `docs/skill-graphs/telemetry/daily-skill-health.md` (metric additions)
+- `docs/skill-graphs/telemetry/skill-router-go-no-go-thresholds.md` (rollout go/no-go thresholds)
 
 ## Task Graph (id / depends_on)
 ```yaml
@@ -328,10 +330,10 @@ Prioritize these first to reduce the highest-likelihood failure modes identified
 - [x] T8 — Add routing telemetry event emission (`--events-out`) with redaction-safe payload
 - [x] T8A — Add anti-gaming metrics aggregation (`scripts/skill_router_metrics.py`)
 - [x] T9 — Enforce explicit agent execution defaults and policy gating
+- [x] T9A — Define rollout go/no-go thresholds + auto-downgrade policy artifacts
+- [x] T9B — Execute rollback drill + kill-switch propagation evidence capture (`scripts/run_skill_router_rollback_drill.sh`)
 - [x] T10 — Add integration/adversarial fixture coverage for determinism + contracts
 - [x] T11 — Update schema/runbook docs and validation wiring in repo scripts
-- [ ] T9A — Finalize rollout go/no-go thresholds + auto-downgrade policy artifacts (pending)
-- [ ] T9B — Execute rollback drill + kill-switch propagation evidence capture (pending)
 
 ## Acceptance Criteria
 - [ ] Router returns deterministic top-3 results for identical input and catalog version.
@@ -391,6 +393,7 @@ From premortem + technical review, carry forward for implementation-resolution:
 - `python3 scripts/verify_router_schema.py --fail-on-sensitive-fields`
 - `python3 scripts/verify_skill_catalog_freshness.py --strict`
 - `python3 scripts/skill_router_metrics.py --events artifacts/skill-graphs/telemetry/skill-router-events.jsonl --json`
+- `bash scripts/run_skill_router_rollback_drill.sh`
 - `bash scripts/validate_all.sh`
 
 ## Technical Review Deltas (2026-03-04)

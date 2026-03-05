@@ -57,3 +57,11 @@ If routing quality or safety guardrails regress:
 1. set rollout mode to `observe_only`
 2. activate kill-switch if needed
 3. run rollback drill checks and capture evidence
+
+Rollback drill command:
+```bash
+bash scripts/run_skill_router_rollback_drill.sh
+```
+
+Go/no-go thresholds:
+- `docs/skill-graphs/telemetry/skill-router-go-no-go-thresholds.md`

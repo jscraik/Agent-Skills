@@ -8,6 +8,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from router_controls import resolve_rollout_mode
 from skill_catalog import discover_skills, load_catalog
 from skill_router import build_route_event, route
 from skill_router_schema import build_router_result, validate_router_result
@@ -152,6 +153,15 @@ class SkillRouterTests(unittest.TestCase):
         self.assertEqual(event["top1_skill"], "gh-fix-ci")
         self.assertFalse(event["top1_chosen"])
         self.assertTrue(event["override_regret_flag"])
+
+    def test_control_precedence_kill_switch_overrides_active(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            controls = Path(tmp)
+            (controls / "rollout-mode.txt").write_text("active", encoding="utf-8")
+            (controls / "kill-switch.txt").write_text("on", encoding="utf-8")
+            resolution = resolve_rollout_mode(controls, "autopilot")
+            self.assertEqual(resolution.effective_mode, "observe_only")
+            self.assertEqual(resolution.reason, "kill_switch")
 
     def test_fixture_file_is_valid_json(self) -> None:
         fixture_path = Path(__file__).resolve().parent / "test_skill_router_fixtures.json"
