@@ -8,7 +8,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from skill_router import discover_skills, route
+from skill_catalog import discover_skills, load_catalog
+from skill_router import route
 from skill_router_schema import build_router_result, validate_router_result
 
 
@@ -37,7 +38,7 @@ class SkillRouterTests(unittest.TestCase):
             _write_skill(root / "product" / "brainstorming", "brainstorming", "Explore feature options before planning.")
 
             skills = discover_skills(root)
-            candidates = route("please run gh-fix-ci now", skills, top_k=3)
+            candidates, _reasons = route("please run gh-fix-ci now", skills, top_k=3)
 
             self.assertGreaterEqual(len(candidates), 1)
             self.assertEqual(candidates[0].skill_name, "gh-fix-ci")
@@ -49,8 +50,8 @@ class SkillRouterTests(unittest.TestCase):
             _write_skill(root / "frontend" / "frontend-ui-design", "frontend-ui-design", "Create production ready UI systems.")
 
             skills = discover_skills(root)
-            first = route("help me build polished react ui", skills, top_k=3)
-            second = route("help me build polished react ui", skills, top_k=3)
+            first, _reasons1 = route("help me build polished react ui", skills, top_k=3)
+            second, _reasons2 = route("help me build polished react ui", skills, top_k=3)
 
             self.assertEqual(
                 [c.skill_name for c in first],
@@ -67,13 +68,14 @@ class SkillRouterTests(unittest.TestCase):
             _write_skill(root / "github" / "gh-workflow", "gh-workflow", "Manage pull requests and issues.")
 
             skills = discover_skills(root)
-            candidates = route("review github pull request comments", skills, top_k=3)
+            candidates, reasons = route("review github pull request comments", skills, top_k=3)
             payload = build_router_result(
                 query="review github pull request comments",
                 actor_type="human",
                 policy_mode="observe_only",
                 catalog_version="test",
                 candidates=candidates,
+                uncertainty_reasons=reasons,
             )
 
             issues = validate_router_result(payload, fail_on_sensitive_fields=True)
@@ -87,16 +89,43 @@ class SkillRouterTests(unittest.TestCase):
             root = Path(tmp)
             _write_skill(root / "misc" / "brainstorming", "brainstorming", "Explore ambiguous feature ideas.")
             skills = discover_skills(root)
-            candidates = route("make this better", skills, top_k=3)
+            candidates, reasons = route("make this better", skills, top_k=3)
             payload = build_router_result(
                 query="make this better",
                 actor_type="agent",
                 policy_mode="observe_only",
                 catalog_version="test",
                 candidates=candidates,
+                uncertainty_reasons=reasons,
             )
             self.assertTrue(payload["requires_clarification"])
             self.assertEqual(payload["policy_decision"], "suggest_only")
+
+    def test_uncertainty_reasons_present_for_multi_intent(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            _write_skill(root / "github" / "gh-workflow", "gh-workflow", "Manage pull requests and issues.")
+            _write_skill(root / "product" / "brainstorming", "brainstorming", "Explore feature scope and options.")
+            skills = discover_skills(root)
+            candidates, reasons = route("review PR and brainstorm roadmap", skills, top_k=3)
+            payload = build_router_result(
+                query="review PR and brainstorm roadmap",
+                actor_type="human",
+                policy_mode="observe_only",
+                catalog_version="test",
+                candidates=candidates,
+                uncertainty_reasons=reasons,
+            )
+            self.assertIn("possible_multi_intent", payload["uncertainty_reasons"])
+            self.assertTrue(payload["requires_clarification"])
+
+    def test_catalog_strict_mode_raises_on_duplicates(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            _write_skill(root / "a" / "dup", "same-skill", "First description long enough for quality checks.")
+            _write_skill(root / "b" / "dup2", "same-skill", "Second description long enough for quality checks.")
+            with self.assertRaises(ValueError):
+                load_catalog(root, strict=True)
 
     def test_fixture_file_is_valid_json(self) -> None:
         fixture_path = Path(__file__).resolve().parent / "test_skill_router_fixtures.json"

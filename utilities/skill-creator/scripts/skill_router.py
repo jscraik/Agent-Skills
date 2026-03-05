@@ -7,83 +7,17 @@ import argparse
 import json
 import re
 import sys
-from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, Iterable, List, Tuple
+from typing import Dict, List, Tuple
 
+from skill_catalog import SkillMeta, load_catalog
 from skill_router_schema import Candidate, build_router_result, validate_router_result
-
-SKIP_DIRS = {
-    ".git",
-    "artifacts",
-    "node_modules",
-    "docs",
-    "templates",
-    "references",
-    "skills-system",
-    ".worktrees",
-}
 
 TOKEN_RE = re.compile(r"[a-z0-9][a-z0-9_\-]{1,}")
 
 
-@dataclass
-class SkillMeta:
-    name: str
-    description: str
-    skill_path: str
-
-
 def tokenize(text: str) -> List[str]:
     return TOKEN_RE.findall(text.lower())
-
-
-def parse_frontmatter(skill_file: Path) -> Tuple[str, str]:
-    content = skill_file.read_text(encoding="utf-8", errors="ignore")
-    lines = content.splitlines()
-    name = skill_file.parent.name
-    description = ""
-
-    if len(lines) > 2 and lines[0].strip() == "---":
-        idx = 1
-        while idx < len(lines) and lines[idx].strip() != "---":
-            line = lines[idx]
-            if line.startswith("name:"):
-                value = line.split(":", 1)[1].strip()
-                if value:
-                    name = value.strip("\"'")
-            if line.startswith("description:"):
-                value = line.split(":", 1)[1].strip()
-                description = value.strip("\"'")
-            idx += 1
-
-    if not description:
-        body = "\n".join(lines[10:40])
-        match = re.search(r"\n\s*[-*]?\s*(.+)", body)
-        if match:
-            description = match.group(1).strip()
-
-    return name, description
-
-
-def discover_skills(repo_root: Path) -> List[SkillMeta]:
-    skills: List[SkillMeta] = []
-    for skill_file in sorted(repo_root.rglob("SKILL.md")):
-        rel = skill_file.relative_to(repo_root)
-        if rel.as_posix() == "SKILL.md":
-            continue
-        if any(part in SKIP_DIRS for part in rel.parts):
-            continue
-
-        name, description = parse_frontmatter(skill_file)
-        skills.append(
-            SkillMeta(
-                name=name,
-                description=description,
-                skill_path=str(skill_file.parent.relative_to(repo_root)),
-            )
-        )
-    return skills
 
 
 def risk_tier(skill: SkillMeta) -> str:
@@ -135,9 +69,10 @@ def confidence_from_score(score: float) -> float:
     return min(1.0, round(score / 2.2, 4))
 
 
-def route(query: str, skills: Iterable[SkillMeta], top_k: int = 3) -> List[Candidate]:
+def route(query: str, skills: List[SkillMeta], top_k: int = 3) -> Tuple[List[Candidate], List[str]]:
     query_tokens = tokenize(query)
     ranked: List[Tuple[float, bool, SkillMeta, List[str]]] = []
+    uncertainty_reasons: List[str] = []
 
     for skill in skills:
         score, rationale, explicit = score_skill(query, query_tokens, skill)
@@ -165,7 +100,14 @@ def route(query: str, skills: Iterable[SkillMeta], top_k: int = 3) -> List[Candi
             )
         )
 
-    return candidates
+    if len(ranked) >= 2 and abs(ranked[0][0] - ranked[1][0]) < 0.08:
+        uncertainty_reasons.append("top_candidates_close_score")
+
+    lowered = query.lower()
+    if " and " in lowered or " or " in lowered:
+        uncertainty_reasons.append("possible_multi_intent")
+
+    return candidates, uncertainty_reasons
 
 
 def render_human(result: Dict[str, object]) -> str:
@@ -198,6 +140,11 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--top-k", type=int, default=3)
     parser.add_argument("--repo-root", type=Path, default=Path(__file__).resolve().parents[3])
+    parser.add_argument(
+        "--allow-catalog-issues",
+        action="store_true",
+        help="Allow routing to continue when metadata quality checks fail",
+    )
     parser.add_argument("--json", action="store_true", help="Output JSON")
     parser.add_argument("--catalog-version", default="skills-current")
     return parser.parse_args()
@@ -206,18 +153,25 @@ def parse_args() -> argparse.Namespace:
 def main() -> int:
     args = parse_args()
 
-    skills = discover_skills(args.repo_root)
-    if not skills:
+    try:
+        catalog = load_catalog(args.repo_root, strict=not args.allow_catalog_issues)
+    except ValueError as exc:
+        print("Catalog validation failed:", file=sys.stderr)
+        print(str(exc), file=sys.stderr)
+        return 4
+
+    if not catalog.skills:
         print("No skills discovered.", file=sys.stderr)
         return 2
 
-    candidates = route(args.query, skills, top_k=max(1, args.top_k))
+    candidates, uncertainty_reasons = route(args.query, catalog.skills, top_k=max(1, args.top_k))
     result = build_router_result(
         query=args.query,
         actor_type=args.actor_type,
         policy_mode=args.policy_mode,
-        catalog_version=args.catalog_version,
+        catalog_version=catalog.catalog_version if args.catalog_version == "skills-current" else args.catalog_version,
         candidates=candidates,
+        uncertainty_reasons=uncertainty_reasons,
     )
 
     issues = validate_router_result(result, fail_on_sensitive_fields=True)

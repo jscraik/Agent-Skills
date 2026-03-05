@@ -315,8 +315,13 @@ Prioritize these first to reduce the highest-likelihood failure modes identified
 - [x] T0C — Add catalog freshness + metadata quality validator (`scripts/verify_skill_catalog_freshness.py`)
 - [x] T1 — Define deterministic scorecard/tie-break implementation in router engine
 - [x] T1A — Add benchmark/adversarial fixture corpus (`test_skill_router_fixtures.json`)
-- [ ] T1B — Finalize calibration thresholds by actor type (pending)
-- [ ] T2+ — Remaining implementation and rollout tasks pending
+- [x] T1B — Finalize calibration thresholds by actor type (`ACTOR_THRESHOLDS` in `skill_router_schema.py`)
+- [x] T2 — Define versioned router output schema (human parity + JSON) via schema doc + `validate_router_result`
+- [x] T3 — Build canonical skill-catalog loader (`skill_catalog.py`)
+- [x] T3A — Add metadata quality + freshness gate checks before routing
+- [x] T4 — Implement deterministic scoring + stable ranking engine
+- [x] T5 — Implement rationale/confidence mapping + uncertainty-state handling
+- [ ] T6+ — Remaining rollout, telemetry, and broader integration tasks pending
 
 ## Acceptance Criteria
 - [ ] Router returns deterministic top-3 results for identical input and catalog version.

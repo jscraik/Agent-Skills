@@ -13,6 +13,15 @@ DEFAULT_CONFIDENCE_BANDS = {
     "high": 0.85,
     "medium": 0.65,
 }
+ACTOR_THRESHOLDS = {
+    "human": {
+        "clarify_max": 0.60,
+    },
+    "agent": {
+        "autopilot_min": 0.90,
+        "confirm_min": 0.70,
+    },
+}
 
 # Hard forbidden keys to avoid raw prompt/objective persistence.
 FORBIDDEN_KEYS = {
@@ -52,6 +61,7 @@ class RouterResult:
     policy_decision: str
     requires_clarification: bool
     prompt_hash: str
+    uncertainty_reasons: List[str]
     top_candidates: List[Dict[str, Any]]
 
     def to_dict(self) -> Dict[str, Any]:
@@ -78,6 +88,7 @@ def decide_policy(
     policy_mode: str,
     best_confidence: float,
     best_risk_tier: str,
+    uncertainty_reasons: Optional[List[str]] = None,
     bands: Optional[Dict[str, float]] = None,
 ) -> Dict[str, Any]:
     """Return policy decision with fail-safe defaults."""
@@ -92,6 +103,11 @@ def decide_policy(
 
     # Agent defaults remain safe unless explicitly elevated and low risk.
     if normalized_actor == "agent":
+        if uncertainty_reasons:
+            return {
+                "policy_decision": "confirmation_required",
+                "requires_clarification": True,
+            }
         if normalized_mode == "observe_only":
             return {
                 "policy_decision": "suggest_only",
@@ -102,10 +118,15 @@ def decide_policy(
                 "policy_decision": "confirmation_required",
                 "requires_clarification": True,
             }
-        if band == "high" and normalized_mode == "autopilot":
+        if best_confidence >= ACTOR_THRESHOLDS["agent"]["autopilot_min"] and normalized_mode == "autopilot":
             return {
                 "policy_decision": "auto_select_top1",
                 "requires_clarification": False,
+            }
+        if best_confidence < ACTOR_THRESHOLDS["agent"]["confirm_min"]:
+            return {
+                "policy_decision": "confirmation_required",
+                "requires_clarification": True,
             }
         return {
             "policy_decision": "confirmation_required",
@@ -113,7 +134,12 @@ def decide_policy(
         }
 
     # Humans default to suggestion + optional confirm.
-    if band == "low":
+    if uncertainty_reasons:
+        return {
+            "policy_decision": "clarify",
+            "requires_clarification": True,
+        }
+    if best_confidence <= ACTOR_THRESHOLDS["human"]["clarify_max"] or band == "low":
         return {
             "policy_decision": "clarify",
             "requires_clarification": True,
@@ -131,6 +157,7 @@ def build_router_result(
     policy_mode: str,
     catalog_version: str,
     candidates: Iterable[Candidate],
+    uncertainty_reasons: Optional[List[str]] = None,
     schema_version: str = SCHEMA_VERSION,
 ) -> Dict[str, Any]:
     candidates_list = list(candidates)
@@ -142,6 +169,7 @@ def build_router_result(
         policy_mode=policy_mode,
         best_confidence=best_confidence,
         best_risk_tier=best_risk_tier,
+        uncertainty_reasons=uncertainty_reasons or [],
     )
 
     result = RouterResult(
@@ -152,6 +180,7 @@ def build_router_result(
         policy_decision=policy["policy_decision"],
         requires_clarification=policy["requires_clarification"],
         prompt_hash=hash_prompt(query),
+        uncertainty_reasons=uncertainty_reasons or [],
         top_candidates=[
             {
                 "skill_name": c.skill_name,
@@ -205,6 +234,7 @@ def validate_router_result(result: Dict[str, Any], *, fail_on_sensitive_fields: 
         "policy_decision",
         "requires_clarification",
         "prompt_hash",
+        "uncertainty_reasons",
         "top_candidates",
     }
 
@@ -214,6 +244,40 @@ def validate_router_result(result: Dict[str, Any], *, fail_on_sensitive_fields: 
 
     if _contains_forbidden_key(result):
         issues.append("forbidden raw prompt/objective keys present")
+
+    if result.get("actor_type") not in {"human", "agent"}:
+        issues.append("actor_type must be human|agent")
+
+    if result.get("policy_mode") not in {"observe_only", "co_pilot", "autopilot"}:
+        issues.append("policy_mode must be observe_only|co_pilot|autopilot")
+
+    policy_decision = result.get("policy_decision")
+    if policy_decision not in {
+        "suggest",
+        "suggest_only",
+        "clarify",
+        "confirmation_required",
+        "auto_select_top1",
+    }:
+        issues.append("invalid policy_decision")
+
+    if not isinstance(result.get("requires_clarification"), bool):
+        issues.append("requires_clarification must be boolean")
+
+    if not isinstance(result.get("uncertainty_reasons"), list):
+        issues.append("uncertainty_reasons must be list")
+
+    candidates = result.get("top_candidates")
+    if not isinstance(candidates, list):
+        issues.append("top_candidates must be list")
+    else:
+        for idx, candidate in enumerate(candidates):
+            if not isinstance(candidate, dict):
+                issues.append(f"top_candidates[{idx}] must be object")
+                continue
+            for key in ("skill_name", "skill_path", "confidence", "confidence_band", "risk_tier", "rationale"):
+                if key not in candidate:
+                    issues.append(f"top_candidates[{idx}] missing {key}")
 
     if fail_on_sensitive_fields and _contains_sensitive_text(result):
         issues.append("sensitive value pattern detected in router payload")

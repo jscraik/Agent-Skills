@@ -18,5 +18,10 @@
     "id": "ambiguous-low-signal",
     "query": "make this better",
     "expect_requires_clarification_for_agent": true
+  },
+  {
+    "id": "multi-intent-query",
+    "query": "review this PR and plan the feature roadmap",
+    "expect_uncertainty_reason": "possible_multi_intent"
   }
 ]

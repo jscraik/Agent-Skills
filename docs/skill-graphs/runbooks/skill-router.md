@@ -41,6 +41,14 @@ python3 scripts/verify_router_schema.py --input /tmp/router-result.json --fail-o
 python3 scripts/verify_skill_catalog_freshness.py --strict
 ```
 
+Calibration profile (v1):
+- human: clarify when confidence `<= 0.60`
+- agent: confirm when confidence `< 0.70`, allow autopilot only when confidence `>= 0.90` and risk tier is low
+
+Uncertainty handling:
+- Router emits `uncertainty_reasons` (for example: `possible_multi_intent`, `top_candidates_close_score`)
+- Any uncertainty in agent mode forces confirmation behavior.
+
 ## Rollback
 If routing quality or safety guardrails regress:
 1. set rollout mode to `observe_only`

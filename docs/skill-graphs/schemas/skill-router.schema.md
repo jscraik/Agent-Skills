@@ -18,6 +18,7 @@ Versioned schema for deterministic skill-routing output consumed by humans and a
 - `policy_decision` (`suggest | suggest_only | clarify | confirmation_required | auto_select_top1`)
 - `requires_clarification` (boolean)
 - `prompt_hash` (string SHA-256)
+- `uncertainty_reasons` (string[])
 - `top_candidates` (array)
 
 ## Forbidden fields
@@ -42,3 +43,6 @@ Each candidate in `top_candidates` includes:
 - Agents default to safe behavior (`observe_only`) unless explicitly elevated.
 - Non-low-risk candidates cannot auto-run in agent mode.
 - Low-confidence routes must set `requires_clarification=true`.
+- Actor thresholds (v1 calibration):
+  - human: `clarify_max=0.60`
+  - agent: `confirm_min=0.70`, `autopilot_min=0.90`
