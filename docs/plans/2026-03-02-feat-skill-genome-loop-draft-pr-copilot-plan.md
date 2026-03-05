@@ -530,6 +530,27 @@ Keep `SKILL.md` routing semantics aligned with `references/task-profile.json` an
 
 ---
 
+
+## Task Graph (id / depends_on)
+```yaml
+tasks:
+  - id: G0
+    title: Establish stable artifact ingestion contract and redaction guardrails
+    depends_on: []
+  - id: G1
+    title: Build deterministic candidate scoring, dedupe, and confidence gates
+    depends_on: [G0]
+  - id: G2
+    title: Emit append-only candidates artifact with caps and fail-closed controls
+    depends_on: [G1]
+  - id: G3
+    title: Add operator review loop and telemetry for acceptance and suppression reasons
+    depends_on: [G2]
+  - id: G4
+    title: Publish rollback and kill-switch runbook updates with validation checks
+    depends_on: [G3]
+```
+
 ## Validation & Quality Gates
 
 ### Existing Recursive Artifacts Checks (Keep Green)
