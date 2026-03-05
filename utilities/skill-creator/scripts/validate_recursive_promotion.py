@@ -39,6 +39,19 @@ CONTROL_BLOCKER_REQUIRED_FILES = {
     "kill_switch_activated": {"run_blocker.json", "rollback_recommendation.json"},
     "evaluator_conflict": {"run_blocker.json"},
 }
+LEGACY_OPTIONAL_FILES = {
+    "promotion_decision.template.json",
+}
+LEGACY_LAYOUT_FILES = {
+    "run.json",
+    "iteration_journal.jsonl",
+    "promotion_decision.json",
+    "promotion_decision.template.json",
+}
+LEGACY_RELAXED_FILE_SETS = {
+    frozenset({"run.json", "iteration_journal.jsonl", "promotion_decision.json"}),
+    frozenset({"run.json", "iteration_journal.jsonl", "promotion_decision.json", "promotion_decision.template.json"}),
+}
 STOP_REASON_TO_BLOCKER: Dict[str, str] = {
     "policy_failed": "run_rollforward_blocked",
     "dependency_missing": "run_rollback_required",
@@ -284,6 +297,23 @@ def normalize_blocker_code(terminal_status: Optional[str], stop_reason: Optional
     return None
 
 
+def is_legacy_relaxed_layout(run: Dict[str, Any], decision: Dict[str, Any], artifact_files: Set[str]) -> bool:
+    run_version = str(run.get("schema_version", "")).strip() or "0"
+    decision_version = str(decision.get("schema_version", "")).strip() or "0"
+    if schema_version_at_least(run_version, "1.1") or schema_version_at_least(decision_version, "1.1"):
+        return False
+
+    runtime_controls = run.get("runtime_controls")
+    if isinstance(runtime_controls, dict) and runtime_controls:
+        return False
+
+    normalized_files = {name for name in artifact_files if name in LEGACY_LAYOUT_FILES and name not in LEGACY_OPTIONAL_FILES}
+    return frozenset(normalized_files) in {
+        frozenset(files - LEGACY_OPTIONAL_FILES)
+        for files in LEGACY_RELAXED_FILE_SETS
+    }
+
+
 def validate_event_rows(
     events: List[Dict[str, Any]],
     run_id: str,
@@ -379,6 +409,7 @@ def validate(args: argparse.Namespace) -> Dict[str, Any]:
         if args.decision_file
         else run_dir / "promotion_decision.json"
     )
+    artifact_files = {p.name for p in run_dir.glob("*") if p.is_file()}
 
     if str(decision_path) == str(run_json_path):
         add_warning(
@@ -393,7 +424,7 @@ def validate(args: argparse.Namespace) -> Dict[str, Any]:
         else str(decision_path)
     )
 
-    for required_file in (run_json_path, journal_path, events_path, decision_path):
+    for required_file in (run_json_path, journal_path, decision_path):
         if not required_file.exists():
             add_error(errors, "E_REQUIRED_ARTIFACT_MISSING", f"missing required file: {required_file.name}")
 
@@ -436,6 +467,17 @@ def validate(args: argparse.Namespace) -> Dict[str, Any]:
             report_path.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
         return report
 
+    legacy_relaxed_layout = is_legacy_relaxed_layout(run, decision, artifact_files)
+    if not events_path.exists():
+        if legacy_relaxed_layout:
+            add_warning(
+                warnings,
+                "W_LEGACY_EVENTS_FILE_MISSING",
+                "events.jsonl missing for legacy promotion layout; tolerated for historical run",
+            )
+        else:
+            add_error(errors, "E_REQUIRED_ARTIFACT_MISSING", "missing required file: events.jsonl")
+
     control_obj = run.get("runtime_controls", {}) if isinstance(run.get("runtime_controls"), dict) else {}
     auto_capture_enabled = bool(control_obj.get("auto_capture_enabled", True))
 
@@ -456,8 +498,10 @@ def validate(args: argparse.Namespace) -> Dict[str, Any]:
 
     expected_blocker = normalize_blocker_code(terminal_status, stop_reason)
 
-    required_artifacts = set(RUN_REQUIRED_FILES)
-    if auto_capture_enabled:
+    required_artifacts = {"run.json", "iteration_journal.jsonl", "promotion_decision.json"}
+    if not legacy_relaxed_layout:
+        required_artifacts.add("events.jsonl")
+    if auto_capture_enabled and not legacy_relaxed_layout:
         required_artifacts.update(CONTROL_CAPTURE_FILES)
 
     if blocker_code_run:
@@ -940,7 +984,7 @@ def validate(args: argparse.Namespace) -> Dict[str, Any]:
                     )
         except Exception as exc:
             add_error(errors, "E_EVENTS_JSONL_INVALID", f"invalid events.jsonl: {exc}")
-    elif not errors:
+    elif not errors and not legacy_relaxed_layout:
         add_error(errors, "E_EVENTS_FILE_MISSING", "events.jsonl missing")
 
     if blocker_code_run and expected_blocker and blocker_code_run != expected_blocker:
