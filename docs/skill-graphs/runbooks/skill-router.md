@@ -1,0 +1,48 @@
+# Skill Router Runbook
+
+## Table of Contents
+- [Purpose](#purpose)
+- [Usage](#usage)
+- [Control hierarchy](#control-hierarchy)
+- [Validation](#validation)
+- [Rollback](#rollback)
+
+## Purpose
+Operate the deterministic intent-first skill router in safe modes while preserving telemetry and redaction guarantees.
+
+## Usage
+```bash
+python3 utilities/skill-creator/scripts/skill_router.py \
+  --query "help me design a ChatGPT app" \
+  --actor-type human \
+  --policy-mode observe_only
+```
+
+JSON mode:
+```bash
+python3 utilities/skill-creator/scripts/skill_router.py \
+  --query "review PR checks and fix CI" \
+  --actor-type agent \
+  --policy-mode co_pilot \
+  --json
+```
+
+## Control hierarchy
+Apply controls in this order:
+1. kill-switch
+2. rollback-required
+3. rollout-mode
+
+Unknown/invalid controls fail closed to safe state (`observe_only`).
+
+## Validation
+```bash
+python3 scripts/verify_router_schema.py --input /tmp/router-result.json --fail-on-sensitive-fields
+python3 scripts/verify_skill_catalog_freshness.py --strict
+```
+
+## Rollback
+If routing quality or safety guardrails regress:
+1. set rollout mode to `observe_only`
+2. activate kill-switch if needed
+3. run rollback drill checks and capture evidence
