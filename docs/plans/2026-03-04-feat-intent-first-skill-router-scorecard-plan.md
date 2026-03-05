@@ -1,7 +1,7 @@
 ---
 title: feat: Intent-First Skill Router Scorecard (Top-3 + Confidence)
 type: feat
-status: active
+status: completed
 date: 2026-03-04
 origin: docs/brainstorms/2026-03-04-skill-router-brainstorm.md
 ---
@@ -22,6 +22,7 @@ origin: docs/brainstorms/2026-03-04-skill-router-brainstorm.md
 - [Planned File Map](#planned-file-map)
 - [Task Graph (id / depends_on)](#task-graph-id--depends_on)
 - [Risk-First Execution Order (Top 5)](#risk-first-execution-order-top-5)
+- [Execution Progress (2026-03-05)](#execution-progress-2026-03-05)
 - [Acceptance Criteria](#acceptance-criteria)
 - [Success Metrics](#success-metrics)
 - [Dependencies & Risks](#dependencies--risks)
@@ -216,14 +217,18 @@ To reduce these failure modes, this plan now adds:
 
 ## Planned File Map
 - `utilities/skill-creator/scripts/skill_router.py` (new router engine)
+- `utilities/skill-creator/scripts/skill_catalog.py` (canonical catalog loader + quality checks)
 - `utilities/skill-creator/scripts/skill_router_schema.py` (schema + confidence contract)
 - `utilities/skill-creator/scripts/test_skill_router.py` (determinism + edge-case tests)
 - `utilities/skill-creator/scripts/test_skill_router_fixtures.json` (ranking/adversarial fixtures)
 - `scripts/verify_router_schema.py` (schema/telemetry contract verifier)
 - `scripts/verify_skill_catalog_freshness.py` (catalog freshness and metadata quality gates)
+- `scripts/skill_router_metrics.py` (first-hit + guardrail KPI aggregation)
+- `scripts/run_skill_router_rollback_drill.sh` (control-precedence rollback drill)
 - `docs/skill-graphs/schemas/skill-router.schema.md` (versioned contract)
 - `docs/skill-graphs/runbooks/skill-router.md` (operational runbook)
 - `docs/skill-graphs/telemetry/daily-skill-health.md` (metric additions)
+- `docs/skill-graphs/telemetry/skill-router-go-no-go-thresholds.md` (rollout go/no-go thresholds)
 
 ## Task Graph (id / depends_on)
 ```yaml
@@ -307,20 +312,43 @@ Prioritize these first to reduce the highest-likelihood failure modes identified
 5. **T10** — Adversarial + contract roundtrip integration tests  
    Prevents cross-surface integration drift and missed edge cases before rollout.
 
+## Execution Progress (2026-03-05)
+- [x] T0 — Define router invocation contract + control-plane precedence checks
+- [x] T0A — Define privacy-safe telemetry schema (allowlist + forbidden fields + redaction invariants)
+- [x] T0B — Add versioned skill-router schema doc + validator integration scripts
+- [x] T0C — Add catalog freshness + metadata quality validator (`scripts/verify_skill_catalog_freshness.py`)
+- [x] T1 — Define deterministic scorecard/tie-break implementation in router engine
+- [x] T1A — Add benchmark/adversarial fixture corpus (`test_skill_router_fixtures.json`)
+- [x] T1B — Finalize calibration thresholds by actor type (`ACTOR_THRESHOLDS` in `skill_router_schema.py`)
+- [x] T2 — Define versioned router output schema (human parity + JSON) via schema doc + `validate_router_result`
+- [x] T3 — Build canonical skill-catalog loader (`skill_catalog.py`)
+- [x] T3A — Add metadata quality + freshness gate checks before routing
+- [x] T4 — Implement deterministic scoring + stable ranking engine
+- [x] T5 — Implement rationale/confidence mapping + uncertainty-state handling
+- [x] T6 — Implement CLI/report outputs with `--json` contract support
+- [x] T7 — Implement low-confidence/no-match style fallback behavior and clarify states
+- [x] T8 — Add routing telemetry event emission (`--events-out`) with redaction-safe payload
+- [x] T8A — Add anti-gaming metrics aggregation (`scripts/skill_router_metrics.py`)
+- [x] T9 — Enforce explicit agent execution defaults and policy gating
+- [x] T9A — Define rollout go/no-go thresholds + auto-downgrade policy artifacts
+- [x] T9B — Execute rollback drill + kill-switch propagation evidence capture (`scripts/run_skill_router_rollback_drill.sh`)
+- [x] T10 — Add integration/adversarial fixture coverage for determinism + contracts
+- [x] T11 — Update schema/runbook docs and validation wiring in repo scripts
+
 ## Acceptance Criteria
-- [ ] Router returns deterministic top-3 results for identical input and catalog version.
-- [ ] Each candidate includes confidence score and concise rationale.
-- [ ] CLI human output and `--json` output are schema-consistent.
-- [ ] Low-confidence and no-match states are explicit and non-crashing.
-- [ ] Non-interactive agent mode defaults to `observe_only`; auto-run only when explicit policy gate passes.
-- [ ] First-hit metrics are captured separately for human and agent actors.
-- [ ] Anti-gaming metrics are captured: override regret, correction latency, repeat misroute rate.
-- [ ] No telemetry record contains raw prompt/objective text or secret-like tokens.
-- [ ] If controls are missing/unreadable/invalid, routing mode fails closed to safe state.
-- [ ] High-risk skill recommendations require explicit confirmation.
-- [ ] Catalog freshness and metadata quality checks gate active routing mode.
-- [ ] Schema compatibility changes require schema version bump + validator update.
-- [ ] Docs include usage guidance, control hierarchy, and rollback procedure.
+- [x] Router returns deterministic top-3 results for identical input and catalog version.
+- [x] Each candidate includes confidence score and concise rationale.
+- [x] CLI human output and `--json` output are schema-consistent.
+- [x] Low-confidence and no-match states are explicit and non-crashing.
+- [x] Non-interactive agent mode defaults to `observe_only`; auto-run only when explicit policy gate passes.
+- [x] First-hit metrics are captured separately for human and agent actors.
+- [x] Anti-gaming metrics are captured: override regret, correction latency, repeat misroute rate.
+- [x] No telemetry record contains raw prompt/objective text or secret-like tokens.
+- [x] If controls are missing/unreadable/invalid, routing mode fails closed to safe state.
+- [x] High-risk skill recommendations require explicit confirmation.
+- [x] Catalog freshness and metadata quality checks gate active routing mode.
+- [x] Schema compatibility changes require schema version bump + validator update.
+- [x] Docs include usage guidance, control hierarchy, and rollback procedure.
 
 ## Success Metrics
 - **Primary KPI:** top-1 first-hit routing accuracy improves over baseline (see brainstorm: `docs/brainstorms/2026-03-04-skill-router-brainstorm.md`).
@@ -364,6 +392,8 @@ From premortem + technical review, carry forward for implementation-resolution:
 - `python3 scripts/docs_lint.py --mode warn --config docs-policy.json`
 - `python3 scripts/verify_router_schema.py --fail-on-sensitive-fields`
 - `python3 scripts/verify_skill_catalog_freshness.py --strict`
+- `python3 scripts/skill_router_metrics.py --events artifacts/skill-graphs/telemetry/skill-router-events.jsonl --json`
+- `bash scripts/run_skill_router_rollback_drill.sh`
 - `bash scripts/validate_all.sh`
 
 ## Technical Review Deltas (2026-03-04)

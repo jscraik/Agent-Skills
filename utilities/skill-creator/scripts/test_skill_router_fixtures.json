@@ -1,0 +1,27 @@
+[
+  {
+    "id": "explicit-mention",
+    "query": "Please run security-threat-model for this repository",
+    "expected_top": "security-threat-model"
+  },
+  {
+    "id": "github-workflow",
+    "query": "fix failing github actions checks and rerun ci",
+    "expected_top": "gh-fix-ci"
+  },
+  {
+    "id": "ui-design",
+    "query": "help me build a polished react ui with motion",
+    "expected_any_of": ["interface-craft", "frontend-ui-design", "ui-ux-creative-coding"]
+  },
+  {
+    "id": "ambiguous-low-signal",
+    "query": "make this better",
+    "expect_requires_clarification_for_agent": true
+  },
+  {
+    "id": "multi-intent-query",
+    "query": "review this PR and plan the feature roadmap",
+    "expect_uncertainty_reason": "possible_multi_intent"
+  }
+]

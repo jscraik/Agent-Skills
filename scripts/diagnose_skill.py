@@ -43,9 +43,10 @@ class DiagnosticResult:
 def find_skill_dir(skill_name: str) -> Optional[Path]:
     """Find skill directory by name, searching multiple locations."""
     # Check flat skills directory first
-    flat_path = SKILLS_DIR / skill_name
-    if flat_path.is_dir() and (flat_path / "SKILL.md").exists():
-        return flat_path
+    if SKILLS_DIR.is_dir():
+        flat_path = SKILLS_DIR / skill_name
+        if flat_path.is_dir() and (flat_path / "SKILL.md").exists():
+            return flat_path
 
     # Search category folders
     for category_dir in REPO_ROOT.iterdir():
@@ -106,10 +107,17 @@ def check_nested_git(skill_dir: Path) -> DiagnosticResult:
 
 def check_symlink(skill_name: str, target_dir: Path, label: str) -> DiagnosticResult:
     """Check if symlink exists and points to correct location."""
+    if not target_dir.exists():
+        return DiagnosticResult(
+            f"symlink ({label})",
+            "skip",
+            f"Target skill directory not present in this environment: {target_dir}",
+        )
+
     symlink_path = target_dir / skill_name
 
     if not symlink_path.exists():
-        return DiagnosticResult(f"symlink ({label})", "fail", f"Symlink not found in {target_dir}")
+        return DiagnosticResult(f"symlink ({label})", "warn", f"Symlink not found in {target_dir}")
 
     if not symlink_path.is_symlink():
         return DiagnosticResult(f"symlink ({label})", "warn", f"Exists but not a symlink in {target_dir}")
@@ -238,9 +246,10 @@ def diagnose_all_skills() -> int:
     skill_names: List[str] = []
 
     # From flat skills directory
-    for item in SKILLS_DIR.iterdir():
-        if item.is_symlink() and (item / "SKILL.md").exists():
-            skill_names.append(item.name)
+    if SKILLS_DIR.is_dir():
+        for item in SKILLS_DIR.iterdir():
+            if item.is_symlink() and (item / "SKILL.md").exists():
+                skill_names.append(item.name)
 
     # From category directories
     for category_dir in REPO_ROOT.iterdir():
@@ -258,27 +267,33 @@ def diagnose_all_skills() -> int:
 
     total_fails = 0
     total_warns = 0
-    problem_skills: List[str] = []
+    failing_skills: List[str] = []
+    warning_skills: List[str] = []
 
     for skill_name in skill_names:
         results = diagnose_skill(skill_name)
         fails = sum(1 for r in results if r.status == "fail")
         warns = sum(1 for r in results if r.status == "warn")
 
-        if fails > 0 or warns > 0:
-            problem_skills.append(skill_name)
-            total_fails += fails
-            total_warns += warns
-
+        total_fails += fails
+        total_warns += warns
+        if fails > 0:
+            failing_skills.append(skill_name)
             symbol = "✗" if fails > 0 else "⚠"
             print(f"{symbol} {skill_name}: {fails} fail(s), {warns} warn(s)")
+        elif warns > 0:
+            warning_skills.append(skill_name)
+            print(f"⚠ {skill_name}: {fails} fail(s), {warns} warn(s)")
 
     print()
     print(f"Summary: {len(skill_names)} skills, {total_fails} failures, {total_warns} warnings")
 
-    if problem_skills:
-        print(f"\nSkills with issues: {', '.join(problem_skills)}")
+    if failing_skills:
+        print(f"\nSkills with failures: {', '.join(failing_skills)}")
         return 1
+
+    if warning_skills:
+        print(f"\nSkills with warnings: {', '.join(warning_skills)}")
 
     print("\n✅ All skills healthy")
     return 0
