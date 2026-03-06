@@ -89,8 +89,8 @@ description: "Use when you need to install, validate, or maintain Ars Contexta p
 - Graph reference scripts (for generated `ops/scripts/graph/` parity): `/Users/jamiecraik/dev/agent-skills/product/domain/ars-contexta-codex/reference/scripts/graph/`
 
 ## AskQuestion parity
-When a canonical spec expects Claude AskQuestion-style interaction (`askquestiontool` or `default_mode_request_user_input`), use Codex `request_user_input` as the equivalent.
-Use this pattern for graph recommendation review: capture decision (`accepted|partial|rejected|deferred`), outcome (`good|neutral|bad|unknown`), and confidence (`high|medium|low`), then persist via graph feedback scripts.
+When a canonical spec expects Claude AskQuestion-style interaction (`askquestiontool` or `default_mode_request_user_input`), use Codex `request_user_input` as the canonical equivalent. Treat the older names as compatibility aliases only.
+For graph recommendation review, follow `/Users/jamiecraik/dev/agent-skills/docs/skill-graphs/question-lifecycle.md`: ask only after recommendations are shown, keep the prompt non-blocking, and capture decision (`accepted|partial|rejected|deferred`), outcome (`good|neutral|bad|unknown`), and confidence (`high|medium|low`) before persisting via graph feedback scripts.
 
 ## Validation checklist
 - Run checks in fail-fast order and stop at first failed gate.
@@ -117,7 +117,7 @@ You are capable of excellent parity work in this domain. These rules are here to
 
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**
-- For non-trivial outcomes, collect user feedback via AskQuestion parity (`request_user_input`) before closing the run.
+- If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after the result or recommendation is shown.
 - Capture: `decision` (`accepted|partial|rejected|deferred`), `outcome` (`good|neutral|bad|unknown`), and `confidence` (`high|medium|low`).
 - Persist with: `python3 utilities/skill-creator/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
 - The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.

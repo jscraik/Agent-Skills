@@ -173,7 +173,7 @@ Next step: <single request>
 
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**
-- For non-trivial outcomes, collect user feedback via AskQuestion parity (`request_user_input`) before closing the run.
+- If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.
 - Capture: `decision` (`accepted|partial|rejected|deferred`), `outcome` (`good|neutral|bad|unknown`), and `confidence` (`high|medium|low`).
 - Persist with: `python3 utilities/skill-creator/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
 - The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.

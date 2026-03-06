@@ -57,7 +57,7 @@ The interview must match `~/.codex/USER_PROFILE.md`:
 
 - Single-threaded, explicit, low cognitive load.
 - Always use **multiple-choice** questions (3–5 options) with a clear recommended default.
-- Prefer `default_mode_request_user_input` UI; otherwise use `a/b/c` options.
+- Prefer Codex `request_user_input`; treat `default_mode_request_user_input` as a historical alias from imported specs. Otherwise use `a/b/c` options.
 - If the user replies in free text, map to the closest option and confirm next turn.
 
 ## Kernel contract
@@ -87,10 +87,11 @@ Wrappers MUST NOT rewrite kernel rules.
 ## Operating rules (non-negotiable)
 
 1) **One question per turn.**
-- Optional override: if the user explicitly says `batch`, you may ask up to **3** questions in one `default_mode_request_user_input` call *for that turn only* and provide a reply key (e.g. `1a 2b 3c`). Default remains single-question.
+- Optional override: if the user explicitly says `batch`, you may ask up to **3** questions in one `request_user_input` call *for that turn only* and provide a reply key (e.g. `1a 2b 3c`). Default remains single-question.
 2) **No implementation.** No code edits, no refactors, no “final plan” that depends on unknowns.
 3) Allowed: **read-only discovery** (skim provided docs/configs/files) if it doesn’t commit to a direction.
-4) After every answer: update the **Interview Log** + add a one-line **Captured answer**.
+4) This kernel governs pre-execution discovery only. Post-run feedback timing is owned by `docs/skill-graphs/question-lifecycle.md` and must not be mixed into the interview flow.
+5) After every answer: update the **Interview Log** + add a one-line **Captured answer**.
 5) **Question budget**
    - `:quick` 3–5
    - `:standard` 5–10
@@ -245,14 +246,15 @@ Additionally, reject questions that are:
 
 ---
 
-## Question format (preferred: default_mode_request_user_input tool)
+## Question format (preferred: `request_user_input` tool)
 
-If the environment supports a `default_mode_request_user_input` UI, use it.
+If the environment supports Codex `request_user_input`, use it. Historical specs may still call this `default_mode_request_user_input`; treat that name as an alias only.
 
 ```yaml
-default_mode_request_user_input:
+request_user_input:
   questions:
     - header: "<Category>"
+      id: "<snake_case_id>"
       question: "<One thing>"
       options:
         - label: "<Option A> (Recommended)"
@@ -263,13 +265,11 @@ default_mode_request_user_input:
           description: "<When to pick this>"
         - label: "Not sure — you decide"
           description: "Let the assistant choose based on patterns; record as an assumption if it affects scope"
-      multiSelect: false
-Reply format: a / b / c / d (or "default")
 ```
 
 ### Fallback (plain text)
 
-If `default_mode_request_user_input` UI is not available, use:
+If `request_user_input` is not available, use:
 
 ```text
 Question: <one thing>
@@ -351,7 +351,8 @@ See `references/extended.md` for additional examples, workflows, and appendices.
 
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**
-- For non-trivial outcomes, collect user feedback via AskQuestion parity (`request_user_input`) before closing the run.
+- Do not ask for retrospective feedback inside the interview loop. This kernel is pre-execution only.
+- If the runtime enables post-run capture after synthesis delivery, emit a non-blocking `post_run_feedback` event via `request_user_input`.
 - Capture: `decision` (`accepted|partial|rejected|deferred`), `outcome` (`good|neutral|bad|unknown`), and `confidence` (`high|medium|low`).
 - Persist with: `python3 utilities/skill-creator/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
 - The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
