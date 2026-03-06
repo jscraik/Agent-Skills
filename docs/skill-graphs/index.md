@@ -14,6 +14,7 @@ Execution model shorthand:
 
 - [Schemas](/docs/skill-graphs/schemas/task-profile.schema.md)
 - [Knowledge graph model](/docs/skill-graphs/knowledge-graph-operating-model.md)
+- [Question lifecycle contract](/docs/skill-graphs/question-lifecycle.md)
 - [Workflows](/docs/skill-graphs/workflows/promotion-gate.md)
 - [Pilots](/docs/skill-graphs/pilots/ui-skills-shadow-results.md)
 - [Runbooks](/docs/skill-graphs/runbooks/kill-switch-and-escalation.md)

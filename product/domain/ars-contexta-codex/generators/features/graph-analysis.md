@@ -195,7 +195,7 @@ Use a recurring graph feedback loop so analysis compounds over time:
 
 This records snapshots, compares drift against prior runs, and generates prioritized actions you can feed back into `/reflect`, `/reweave`, and `/graph` follow-up operations.
 
-After acting on recommendations, collect user feedback (AskQuestion / `request_user_input`) and persist outcomes:
+After recommendations are shown or acted on, collect non-blocking `request_user_input` feedback and persist outcomes:
 
 ```bash
 ./ops/scripts/graph/record-feedback.sh . rec-001 accepted good high "Improved cross-topic retrieval"

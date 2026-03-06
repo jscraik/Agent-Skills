@@ -4,6 +4,7 @@
 
 - [Task profile schema](/docs/skill-graphs/schemas/task-profile.schema.md)
 - [Iteration journal schema](/docs/skill-graphs/schemas/iteration-journal.schema.md)
+- [Question event schema](/docs/skill-graphs/schemas/question-event.schema.md)
 - [Capture record schema](/docs/skill-graphs/schemas/capture-record.schema.md)
 - [Evidence packet schema](/docs/skill-graphs/schemas/evidence-packet.schema.md)
 - [Canonical lesson schema](/docs/skill-graphs/schemas/canonical-lesson.schema.md)

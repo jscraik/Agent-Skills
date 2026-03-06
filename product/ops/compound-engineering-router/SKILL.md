@@ -199,6 +199,6 @@ Negative controls:
 
 ## Decision feedback protocol
 <!-- decision-feedback-protocol:v2 -->
-- For non-trivial outcomes, collect user feedback via AskQuestion parity before closing the run.
+- If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.
 - Capture `decision`, `outcome`, and `confidence`.
 - Persist feedback with `python3 scripts/record_skill_feedback.py` when operating inside the skill-authoring environment.

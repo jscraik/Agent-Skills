@@ -69,7 +69,7 @@ Use this checklist before drafting or revising a recursive skill runbook.
 | Contract/doc | What the deck emphasizes | Current state | Gap / action |
 | --- | --- | --- | --- |
 | `docs/skill-graphs/schemas/task-profile.schema.md` | Cockpit mode vocabulary: `autopilot/co-pilot/manual` | Updated to canonical wording with compatibility note (`collaboration` -> `co-pilot`). | ✅ Updated plus legacy alias note. |
-| `utilities/skill-creator/references/skill-knowledge-graph.md` | Delegation rubric terms + explicit cockpit mapping | Uses `collaboration` term and broad rubric | ✅ Updated to explicit `autopilot / co-pilot / manual override` language with legacy note. |
+| `docs/skill-graphs/question-lifecycle.md` | Question timing, ownership, and post-run feedback boundaries | New canonical contract | ✅ Added runtime-owned question lifecycle contract. |
 | `docs/skill-graphs/knowledge-graph-operating-model.md` | Explicit architecture + invocation delegation framing | Mentions skills/tools/chef and optional delegation; no explicit deck-language terms | ✅ Added explicit architecture split + mode map + archetype mapping. |
 | `docs/skill-graphs/index.md` | Workflow archetypes (sequential/router/orchestrator) | Shows phase pipeline only | ✅ Added explicit mapping to deck archetypes. |
 | `docs/skill-graphs/workflows/promotion-gate.md` | Control gates + security + human gate before promotion | Has checks and reviewer gate but no explicit invocation-boundary section | ✅ Added explicit Invocation boundary checks section. |

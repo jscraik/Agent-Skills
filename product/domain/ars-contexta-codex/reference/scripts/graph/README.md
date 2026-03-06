@@ -77,7 +77,7 @@ Typical weekly command from vault root:
 
 ## User feedback capture (AskQuestion)
 
-After reviewing recommendations, collect user judgment with AskQuestion / `request_user_input`:
+After recommendations are shown, collect user judgment with non-blocking `request_user_input` feedback capture:
 
 1. Did you apply recommendation `rec-XXX`? (`accepted` | `partial` | `rejected` | `deferred`)
 2. Outcome quality? (`good` | `neutral` | `bad` | `unknown`)

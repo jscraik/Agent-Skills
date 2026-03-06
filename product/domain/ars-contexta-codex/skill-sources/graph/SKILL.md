@@ -562,7 +562,7 @@ If no arguments provided:
 
 ## Decision Quality Feedback (AskQuestion parity)
 
-When `feedback-loop.sh` outputs recommendations (`rec-XXX` IDs), collect user feedback with AskQuestion parity (`request_user_input`):
+When `feedback-loop.sh` outputs recommendations (`rec-XXX` IDs), collect non-blocking post-run feedback with `request_user_input` after the recommendations are shown:
 
 1. **Decision** — Was `rec-XXX` applied?
    - `accepted` / `partial` / `rejected` / `deferred`
