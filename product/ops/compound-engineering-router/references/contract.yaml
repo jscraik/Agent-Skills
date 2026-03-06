@@ -1,0 +1,59 @@
+schema_version: 1
+
+purpose: >
+  Route compound-engineering requests to the correct prompt, specialist review path,
+  or workflow-support meta-mode in the Codex config repository, with optional NotebookLM evidence enrichment.
+
+triggers:
+  - the user asks which compound-engineering stage to use
+  - the user wants the correct prompt plus background agents for brainstorm, spec, plan, work, review, technical review, or compound execution
+  - the user wants to route a PR, diff, spec, or plan into the workflow instead of executing it directly
+  - the user wants context compaction or guardrail extraction tied to the workflow
+
+inputs:
+  - user request, artifact, or target to route
+  - target repository context; default /Users/jamiecraik/dev/config
+  - enough routing signal to classify the request safely
+  - optional review focus such as architecture, security, performance, data, frontend, rails, python, or typescript
+  - optional NotebookLM enrichment request
+  - optional failure summary or state snapshot for meta-modes
+
+outputs:
+  - schema_version: 1 route or meta-mode brief
+  - selected route or meta-mode name
+  - prompt path when prompt-backed, otherwise an explicit no-prompt-path note
+  - concise route rationale
+  - required and optional agent fan-out lists
+  - NotebookLM usage notes when enrichment is used
+  - safeguards, validation gates, and the next recommended action
+
+non_goals:
+  - direct feature implementation
+  - duplicating the prompt pack or agent role configs
+  - generic NotebookLM querying without workflow-routing value
+  - replacing repo-local truth with external summaries
+
+risks:
+  - route ambiguity; mitigated by one concise clarification or candidate routes
+  - stale repo assumptions; mitigated by local prompt and role verification
+  - review under-scoping; mitigated by separate technical-review route and explicit specialist fan-out
+  - meta-mode confusion; mitigated by explicit no-prompt-path notes
+  - NotebookLM overreach; mitigated by keeping enrichment optional and secondary
+
+examples:
+  happy_path:
+    input: "Use the compound workflow to review this TypeScript PR deeply."
+    expected_output: >
+      Select technical-review, point to codex/prompts/technical_review.md,
+      recommend kieran-typescript-reviewer plus security or performance reviewers as applicable,
+      and list validation gates.
+  edge_case:
+    input: "Compact this thread so the next run can continue cleanly."
+    expected_output: >
+      Select context-compaction, state that there is no backing prompt path,
+      and return a compact continuation brief with the next step and blockers.
+  failure_mode:
+    input: "Implement the feature directly and skip the workflow."
+    expected_output: >
+      Explain that this skill is for routing or workflow support, not direct implementation,
+      and suggest the direct execution path instead.
