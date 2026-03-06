@@ -63,16 +63,23 @@ from deterministic_trace_checks import evaluate_trace, load_jsonl_events  # noqa
 
 _FM_DELIM = re.compile(r"^\s*---\s*$")
 _CODEX_HELP_CACHE: Dict[str, Optional[str]] = {}
-_RUNNER_CHOICES = ["codex", "claude-kimi", "claude-zai", "gemini"]
+_RUNNER_CHOICES = ["codex", "claude-kimi", "claude-zai", "gemini", "discovery-smoke"]
+_TIMEOUT_PROFILE_CHOICES = ["default", "codex-heavy", "discovery-heavy"]
 
 # Script-level options (used to disambiguate `--codex-arg --foo` intent).
 _SCRIPT_OPTIONS: Set[str] = {
+    "--list-cases",
     "--runner",
     "--runners",
     "--dual-run",
+    "--smoke",
+    "--case",
+    "--category",
     "--workspace",
     "--sandbox",
     "--ask-for-approval",
+    "--timeout-sec",
+    "--timeout-profile",
     "--model",
     "--profile",
     "--codex-fallback-profile",
@@ -170,6 +177,9 @@ class EvalCase:
     deterministic_checks: Optional[Dict[str, Any]] = None
     budgets: Optional[Dict[str, Any]] = None
     prepend_skill: bool = True
+    timeout_sec: Optional[float] = None
+    timeout_profile: Optional[str] = None
+    smoke_mode: Optional[str] = None
 
 
 _VALID_CATEGORIES = {"happy", "edge", "negative", "pressure"}
@@ -217,6 +227,30 @@ def load_evals(evals_path: Path) -> List[EvalCase]:
         if not isinstance(prepend_skill, bool):
             raise ValueError(f"Case #{i} `prepend_skill` must be boolean when provided.")
 
+        timeout_sec = c.get("timeout_sec")
+        if timeout_sec is not None:
+            try:
+                timeout_sec = float(timeout_sec)
+            except (TypeError, ValueError) as exc:
+                raise ValueError(f"Case #{i} `timeout_sec` must be numeric when provided.") from exc
+            if timeout_sec <= 0:
+                raise ValueError(f"Case #{i} `timeout_sec` must be > 0 when provided.")
+
+        timeout_profile = c.get("timeout_profile")
+        if timeout_profile is not None:
+            timeout_profile = str(timeout_profile).strip().lower()
+            if timeout_profile and timeout_profile not in _TIMEOUT_PROFILE_CHOICES:
+                raise ValueError(
+                    f"Case #{i} `timeout_profile` must be one of {_TIMEOUT_PROFILE_CHOICES}; "
+                    f"got {timeout_profile!r}."
+                )
+
+        smoke_mode = c.get("smoke_mode")
+        if smoke_mode is not None:
+            smoke_mode = str(smoke_mode).strip()
+            if not smoke_mode:
+                smoke_mode = None
+
         cases.append(
             EvalCase(
                 id=case_id,
@@ -229,6 +263,9 @@ def load_evals(evals_path: Path) -> List[EvalCase]:
                 deterministic_checks=deterministic_checks,
                 budgets=budgets,
                 prepend_skill=prepend_skill,
+                timeout_sec=timeout_sec,
+                timeout_profile=timeout_profile if timeout_profile else None,
+                smoke_mode=smoke_mode,
             )
         )
     return cases
@@ -509,6 +546,8 @@ def run_codex_exec(
     codex_home: Optional[Path],
     jsonl_path: Optional[Path],
     codex_bin: Optional[Path],
+    timeout_sec: Optional[float],
+    timeout_profile: str,
     extra_codex_args: Optional[List[str]] = None,
     fallback_profile: Optional[str] = None,
 ) -> Tuple[int, str, str, List[str]]:
@@ -519,7 +558,7 @@ def run_codex_exec(
     if codex_bin:
         env["PATH"] = f"{codex_bin.parent}{os.pathsep}{env.get('PATH', '')}"
 
-    timeout = _eval_timeout_seconds()
+    timeout = _eval_timeout_seconds(timeout_sec=timeout_sec, timeout_profile=timeout_profile)
 
     def _invoke(effective_profile: Optional[str]) -> Tuple[int, str, str]:
         cmd = _codex_exec_prefix(codex_bin)
@@ -601,6 +640,8 @@ def run_claude_exec(
     output_format: str,
     settings_path: Optional[Path],
     cli_command: Optional[str],
+    timeout_sec: Optional[float],
+    timeout_profile: str,
     extra_claude_args: Optional[List[str]] = None,
 ) -> Tuple[int, str, str]:
     command_name = (cli_command or "").strip() or "claude"
@@ -622,7 +663,7 @@ def run_claude_exec(
         else:
             cmd = base_args
 
-    timeout = _eval_timeout_seconds()
+    timeout = _eval_timeout_seconds(timeout_sec=timeout_sec, timeout_profile=timeout_profile)
 
     try:
         proc = sp.run(
@@ -664,6 +705,8 @@ def run_gemini_exec(
     output_last_message_path: Path,
     gemini_bin: Optional[Path],
     output_format: str,
+    timeout_sec: Optional[float],
+    timeout_profile: str,
     extra_gemini_args: Optional[List[str]] = None,
 ) -> Tuple[int, str, str]:
     if gemini_bin:
@@ -675,7 +718,7 @@ def run_gemini_exec(
     if extra_gemini_args:
         cmd.extend(extra_gemini_args)
 
-    timeout = _eval_timeout_seconds()
+    timeout = _eval_timeout_seconds(timeout_sec=timeout_sec, timeout_profile=timeout_profile)
 
     try:
         proc = sp.run(
@@ -694,11 +737,43 @@ def run_gemini_exec(
     return proc.returncode, proc.stdout or "", proc.stderr or ""
 
 
-def _eval_timeout_seconds() -> float:
+def _eval_timeout_seconds(
+    *,
+    timeout_sec: Optional[float],
+    timeout_profile: str,
+) -> float:
+    if timeout_sec is not None:
+        return float(timeout_sec)
+
     raw = os.environ.get("SKILL_EVAL_TIMEOUT_SEC")
     if raw is None:
-        raw = os.environ.get("CODEX_EVAL_TIMEOUT_SEC", "60")
-    return float(raw)
+        raw = os.environ.get("CODEX_EVAL_TIMEOUT_SEC")
+    if raw is not None and str(raw).strip():
+        return float(raw)
+
+    if timeout_profile == "codex-heavy":
+        return 180.0
+    if timeout_profile == "discovery-heavy":
+        return 300.0
+    return 60.0
+
+
+def _resolve_case_timeout(
+    case: EvalCase,
+    *,
+    cli_timeout_sec: Optional[float],
+    cli_timeout_profile: str,
+) -> Tuple[Optional[float], str]:
+    if cli_timeout_sec is not None:
+        return float(cli_timeout_sec), cli_timeout_profile
+
+    resolved_timeout_sec = case.timeout_sec if case.timeout_sec is not None else None
+    resolved_timeout_profile = cli_timeout_profile
+
+    if case.timeout_profile and cli_timeout_profile == "default":
+        resolved_timeout_profile = case.timeout_profile
+
+    return resolved_timeout_sec, resolved_timeout_profile
 
 
 def _safe_slug(value: str) -> str:
@@ -746,6 +821,52 @@ def _parse_runners(raw: Sequence[str]) -> List[str]:
             f"Invalid runner(s): {', '.join(invalid)}. Allowed: {', '.join(_RUNNER_CHOICES)}."
         )
     return expanded
+
+
+def _parse_csv_args(raw: Sequence[str]) -> List[str]:
+    expanded: List[str] = []
+    for item in raw:
+        for piece in str(item).split(","):
+            token = piece.strip()
+            if token:
+                expanded.append(token)
+    return expanded
+
+
+def _filter_cases(
+    cases: List[EvalCase],
+    *,
+    case_filters: Sequence[str],
+    categories: Sequence[str],
+) -> List[EvalCase]:
+    if not case_filters and not categories:
+        return cases
+
+    category_set = {c.lower() for c in categories if c}
+    invalid_categories = sorted(category_set - _VALID_CATEGORIES)
+    if invalid_categories:
+        raise ValueError(
+            f"Unknown category filter(s): {', '.join(invalid_categories)}. "
+            f"Allowed: {', '.join(sorted(_VALID_CATEGORIES))}."
+        )
+
+    case_terms = [term.lower() for term in case_filters if term]
+    filtered: List[EvalCase] = []
+    for case in cases:
+        haystack = f"{case.id} {case.name}".lower()
+        match_case = not case_terms or any(term in haystack for term in case_terms)
+        match_category = not category_set or ((case.category or "").lower() in category_set)
+        if match_case and match_category:
+            filtered.append(case)
+
+    if not filtered:
+        available = ", ".join(f"{c.id}({c.category or 'uncategorized'})" for c in cases)
+        raise ValueError(
+            "No eval cases matched the supplied filters. "
+            f"Available cases: {available}"
+        )
+
+    return filtered
 
 
 def _codex_exec_prefix(codex_bin: Optional[Path]) -> List[str]:
@@ -807,8 +928,18 @@ def build_arg_parser() -> argparse.ArgumentParser:
         description="Run skill evals using Codex, Claude Code (Kimi/Zai), and/or Gemini CLI runners.",
     )
     p.add_argument("path", help="Path to a skill directory or SKILL.md.")
+    p.add_argument(
+        "--list-cases",
+        action="store_true",
+        help="List available eval cases (respects --case/--category filters) and exit.",
+    )
 
     p.add_argument("--runner", choices=_RUNNER_CHOICES, default="codex", help="Single-run mode runner.")
+    p.add_argument(
+        "--smoke",
+        action="store_true",
+        help="Shortcut for `--runner discovery-smoke` for fast contract-level discovery smoke checks.",
+    )
     p.add_argument(
         "--runners",
         action="append",
@@ -819,6 +950,24 @@ def build_arg_parser() -> argparse.ArgumentParser:
         ),
     )
     p.add_argument("--dual-run", action="store_true", help="Run both Codex and Claude-Kimi for every eval case.")
+    p.add_argument(
+        "--case",
+        action="append",
+        default=[],
+        help=(
+            "Run only matching eval case ids/names (repeatable or comma-separated). "
+            "Substring match against case id and name."
+        ),
+    )
+    p.add_argument(
+        "--category",
+        action="append",
+        default=[],
+        help=(
+            "Run only evals in matching category (repeatable or comma-separated). "
+            f"Allowed: {', '.join(sorted(_VALID_CATEGORIES))}."
+        ),
+    )
 
     p.add_argument("--workspace", default=None, help="Workspace root to run commands in (defaults to repo root guess).")
     p.add_argument("--sandbox", default="read-only", choices=["read-only", "workspace-write", "danger-full-access"])
@@ -827,6 +976,21 @@ def build_arg_parser() -> argparse.ArgumentParser:
         default=None,
         choices=["untrusted", "on-failure", "on-request", "never"],
         help="Codex approval mode (optional; older codex versions may not support this flag).",
+    )
+    p.add_argument(
+        "--timeout-sec",
+        type=float,
+        default=None,
+        help="Per-runner subprocess timeout in seconds. Overrides env vars and timeout profile.",
+    )
+    p.add_argument(
+        "--timeout-profile",
+        choices=_TIMEOUT_PROFILE_CHOICES,
+        default="default",
+        help=(
+            "Timeout preset. `codex-heavy` raises the default timeout for slow Codex startup paths; "
+            "`discovery-heavy` is a longer preset for interview/discovery prompts."
+        ),
     )
     p.add_argument("--model", default=None, help="Override model for codex exec.")
     p.add_argument("--profile", default=None, help="Codex config profile name.")
@@ -967,6 +1131,201 @@ def _extract_require_overall_pass(budgets: Optional[Dict[str, Any]]) -> Optional
     return None
 
 
+def _print_case_listing(cases: Sequence[EvalCase]) -> None:
+    print("Available eval cases:")
+    for case in cases:
+        category = case.category or "uncategorized"
+        smoke = case.smoke_mode or "-"
+        timeout_profile = case.timeout_profile or "-"
+        timeout_sec = (
+            f"{case.timeout_sec:g}" if isinstance(case.timeout_sec, (int, float)) else "-"
+        )
+        print(
+            f"- {case.id} [{category}] "
+            f"(prepend_skill={str(case.prepend_skill).lower()}, smoke_mode={smoke}, "
+            f"timeout_profile={timeout_profile}, timeout_sec={timeout_sec})"
+        )
+        print(f"  name: {case.name}")
+
+
+def _contains_any(text: str, patterns: Sequence[str]) -> bool:
+    low = text.lower()
+    return any(p.lower() in low for p in patterns)
+
+
+def run_discovery_smoke(
+    *,
+    skill_md_path: Path,
+    skill_dir: Path,
+    case: EvalCase,
+    output_last_message_path: Path,
+) -> Tuple[int, str, str, List[str]]:
+    """
+    Fast, deterministic smoke check for discovery-first-turn behavior.
+
+    This bypasses external model execution and verifies that the skill contract
+    encodes the expected interview UX. It emits a contract-derived first-turn
+    response so normal acceptance assertions can run against it.
+    """
+
+    warnings: List[str] = [
+        "discovery-smoke emitted a contract-derived response; this is a fast smoke check, not live model behavior."
+    ]
+
+    skill_text = _read_text(skill_md_path)
+    discovery_ref = skill_dir / "references" / "discovery-interview.md"
+    discovery_text = _read_text(discovery_ref) if discovery_ref.exists() else ""
+
+    missing: List[str] = []
+    if "## Discovery interview" not in skill_text:
+        missing.append("SKILL.md missing discovery interview section")
+    if not _contains_any(
+        skill_text,
+        [
+            "ask one round at a time",
+            "one round at a time",
+        ],
+    ):
+        missing.append("SKILL.md missing one-round-at-a-time guidance")
+    if not _contains_any(
+        skill_text,
+        [
+            "plain-language question",
+            "plain language question",
+        ],
+    ):
+        missing.append("SKILL.md missing plain-language question guidance")
+    if not _contains_any(
+        skill_text,
+        [
+            "why the round matters",
+            "explain why the round matters",
+        ],
+    ):
+        missing.append("SKILL.md missing why-this-matters guidance")
+    if not _contains_any(
+        skill_text,
+        [
+            "avoid dumping the whole interview plan at once",
+        ],
+    ):
+        missing.append("SKILL.md missing no-full-plan-dump guidance")
+    if not discovery_text:
+        missing.append("discovery-interview.md not found")
+    else:
+        if "## Request user input mini-templates" not in discovery_text:
+            missing.append("discovery-interview.md missing mini-templates section")
+        if "## Copy paste payload examples" not in discovery_text:
+            missing.append("discovery-interview.md missing payload examples section")
+        if not _contains_any(
+            discovery_text,
+            [
+                "what should this skill help you do?",
+                "what kind of help should this skill provide?",
+            ],
+        ):
+            missing.append("discovery-interview.md missing intuitive round-1 question")
+
+    smoke_mode = case.smoke_mode or "discovery-round-one"
+
+    if smoke_mode == "discovery-round-one":
+        response = "\n".join(
+            [
+                "## Scope and triggers",
+                "- This request fits $skill-creator because it is about defining a new skill before implementation.",
+                "",
+                "## Required inputs",
+                "- Missing: the exact goal for the skill and the main problem it should solve every time.",
+                "- Why this matters: keeping the goal clear prevents scope creep and makes the later trigger and process design more reliable.",
+                "- Round 1 question: What should this skill help you do?",
+                "",
+                "## Deliverables",
+                "- After discovery confirms the goal, produce `SKILL.md` plus any needed `references/` files for the skill.",
+                "",
+                "## Failure mode",
+                "- Do not build the skill yet when the workflow is still underspecified; finish round 1 first.",
+            ]
+        )
+    elif smoke_mode == "discovery-round-six":
+        if "## Round 6: Confirmation" not in discovery_text:
+            missing.append("discovery-interview.md missing round-6 confirmation section")
+        if not _contains_any(
+            discovery_text,
+            [
+                "does this capture it",
+                "anything to add or change before i build it",
+            ],
+        ):
+            missing.append("discovery-interview.md missing explicit confirmation question guidance")
+        response = "\n".join(
+            [
+                "## Scope and triggers",
+                "- This request still fits $skill-creator because the discovery phase is finishing and the skill should not be built until the user confirms the summary.",
+                "",
+                "## Required inputs",
+                "- No major discovery gaps remain; this turn is for confirmation before building.",
+                "",
+                "## Deliverables",
+                "- Provide a compact skill summary and wait for confirmation before writing `SKILL.md`.",
+                "",
+                "## Failure mode",
+                "- Do not assume approval from silence; ask for confirmation before building.",
+                "",
+                "## Skill Summary: design-review-helper",
+                "",
+                "**Goal:** Help review long design review threads and turn them into actionable summaries.",
+                "**Trigger:** `/design-review-helper` plus natural requests about summarizing design review threads.",
+                "**Arguments:** thread link or pasted discussion",
+                "",
+                "**Process:**",
+                "1. Capture the goal and desired output.",
+                "2. Review the thread content.",
+                "3. Summarize key decisions, disagreements, and next actions.",
+                "4. Return a concise review artifact.",
+                "",
+                "**Inputs:** discussion text or link",
+                "**Outputs:** structured summary and action list",
+                "**Dependencies:** none required for the smoke example",
+                "**Guardrails:** avoid inventing decisions and do not build before confirmation",
+                "",
+                "Assumptions: this is a lightweight review helper and not an approval or merge tool.",
+                "",
+                "Does this capture it well enough for me to build?",
+                "Anything to add or change before I build it?",
+            ]
+        )
+    else:
+        response = "\n".join(
+            [
+                "## Scope and triggers",
+                "- Unsupported discovery smoke mode.",
+                "",
+                "## Required inputs",
+                "- Missing: a supported smoke mode.",
+                "",
+                "## Deliverables",
+                "- None until the smoke mode is corrected.",
+                "",
+                "## Failure mode",
+                "- Unsupported discovery smoke mode.",
+            ]
+        )
+    output_last_message_path.write_text(response, encoding="utf-8")
+
+    stderr = ""
+    if missing:
+        stderr = "discovery-smoke contract gaps: " + "; ".join(missing)
+        warnings.append(stderr)
+        return 2, response, stderr, warnings
+
+    if case.smoke_mode and case.smoke_mode not in {"discovery-round-one", "discovery-round-six"}:
+        msg = f"Unsupported smoke_mode for discovery-smoke runner: {case.smoke_mode}"
+        warnings.append(msg)
+        return 2, response, msg, warnings
+
+    return 0, response, stderr, warnings
+
+
 def main(argv: Optional[Sequence[str]] = None) -> int:
     raw_argv = list(argv) if argv is not None else sys.argv[1:]
     normalized_argv = _rewrite_dash_prefixed_codex_args(raw_argv)
@@ -974,6 +1333,15 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     if args.dual_run and args.runners:
         print("ERROR: --dual-run cannot be combined with --runners. Choose one mode.", file=sys.stderr)
+        return 1
+    if args.smoke and args.dual_run:
+        print("ERROR: --smoke cannot be combined with --dual-run.", file=sys.stderr)
+        return 1
+    if args.smoke and args.runners:
+        print("ERROR: --smoke cannot be combined with --runners. Use one shortcut or the explicit runner list.", file=sys.stderr)
+        return 1
+    if args.smoke and args.runner != "codex":
+        print("ERROR: --smoke cannot be combined with an explicit non-default --runner. Use one or the other.", file=sys.stderr)
         return 1
     if args.claude_settings:
         print(
@@ -997,6 +1365,17 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         return 1
 
     cases = load_evals(evals_path)
+    case_filters = _parse_csv_args(args.case)
+    category_filters = _parse_csv_args(args.category)
+    try:
+        cases = _filter_cases(cases, case_filters=case_filters, categories=category_filters)
+    except ValueError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 1
+
+    if args.list_cases:
+        _print_case_listing(cases)
+        return 0
 
     workspace_root = Path(args.workspace).expanduser().resolve() if args.workspace else _guess_repo_root(skill_dir)
     codex_home = Path(args.codex_home).expanduser().resolve() if args.codex_home else None
@@ -1021,6 +1400,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             return 1
     elif args.dual_run:
         selected_runners = ["codex", "claude-kimi"]
+    elif args.smoke:
+        selected_runners = ["discovery-smoke"]
     else:
         selected_runners = [args.runner]
     codex_fallback_profile = str(args.codex_fallback_profile or "").strip() or None
@@ -1098,6 +1479,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "runner_mode": ",".join(selected_runners),
         "tier2_mode": args.tier2_mode,
         "run_id": run_id,
+        "case_filters": case_filters,
+        "category_filters": category_filters,
+        "timeout_profile": args.timeout_profile,
+        "timeout_sec": _eval_timeout_seconds(timeout_sec=args.timeout_sec, timeout_profile=args.timeout_profile),
         "cases": [],
         "passed": True,
         "tier1_failures": 0,
@@ -1125,6 +1510,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         prompt_body = c.prompt.strip() + "\n"
         composed_prompt = f"${skill_name}\n\n{prompt_body}" if c.prepend_skill else prompt_body
         (case_dir / "prompt.txt").write_text(composed_prompt, encoding="utf-8")
+        case_timeout_sec, case_timeout_profile = _resolve_case_timeout(
+            c,
+            cli_timeout_sec=args.timeout_sec,
+            cli_timeout_profile=args.timeout_profile,
+        )
 
         case_tier1_failures: List[str] = []
         case_tier2_findings: List[str] = []
@@ -1153,6 +1543,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                     output_format=args.claude_output_format,
                     settings_path=runner_settings,
                     cli_command=runner_command,
+                    timeout_sec=case_timeout_sec,
+                    timeout_profile=case_timeout_profile,
                     extra_claude_args=args.claude_arg or None,
                 )
                 runner_exec_warnings: List[str] = []
@@ -1163,9 +1555,18 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                     output_last_message_path=output_path,
                     gemini_bin=gemini_bin,
                     output_format=args.gemini_output_format,
+                    timeout_sec=case_timeout_sec,
+                    timeout_profile=case_timeout_profile,
                     extra_gemini_args=args.gemini_arg or None,
                 )
                 runner_exec_warnings = []
+            elif runner_name == "discovery-smoke":
+                rc, stdout, stderr, runner_exec_warnings = run_discovery_smoke(
+                    skill_md_path=skill_md,
+                    skill_dir=skill_dir,
+                    case=c,
+                    output_last_message_path=output_path,
+                )
             else:
                 rc, stdout, stderr, runner_exec_warnings = run_codex_exec(
                     workspace_root=workspace_root,
@@ -1179,6 +1580,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                     codex_home=codex_home,
                     jsonl_path=jsonl_path,
                     codex_bin=codex_bin,
+                    timeout_sec=case_timeout_sec,
+                    timeout_profile=case_timeout_profile,
                     extra_codex_args=args.codex_arg or None,
                     fallback_profile=codex_fallback_profile,
                 )
@@ -1345,6 +1748,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             "category": c.category,
             "should_trigger": c.should_trigger,
             "prepend_skill": c.prepend_skill,
+            "timeout_profile": case_timeout_profile,
+            "timeout_sec": _eval_timeout_seconds(
+                timeout_sec=case_timeout_sec,
+                timeout_profile=case_timeout_profile,
+            ),
             "dir": str(case_dir),
             "runners": runner_records,
             "passed": case_pass,
@@ -1384,6 +1792,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         print(f"Reports: {reports_base}")
         print(f"Scorecard: {scorecard_path}")
         print(f"Runner mode: {summary['runner_mode']}")
+        if case_filters:
+            print(f"Case filters: {', '.join(case_filters)}")
+        if category_filters:
+            print(f"Category filters: {', '.join(category_filters)}")
+        print(f"Timeout profile: {args.timeout_profile}")
+        print(f"Timeout seconds: {summary['timeout_sec']}")
         print(f"Tier-2 mode: {args.tier2_mode}")
         for w in summary.get("preflight_warnings", []):
             print(f"WARNING: {w}")

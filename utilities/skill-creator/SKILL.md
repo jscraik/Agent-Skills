@@ -1,210 +1,172 @@
 ---
 name: skill-creator
-description: "Create, revise, benchmark, and quality-gate Codex skills (SKILL.md + resources + evals + packaging). Use when the user asks to build/audit/improve a skill or skill-graph contract; do not use for unrelated feature coding."
+description: "Create, revise, benchmark, and quality-gate Codex skills (SKILL.md plus scripts, references, evals, and packaging). Use this skill whenever the user asks to build, audit, improve, compare, or package a Codex skill or skill-graph contract; do not use it for unrelated feature coding."
 ---
 
 # Skill Creator
-
-This skill helps you design, author, validate, and package high-quality skills.
-
-**Version**: 1.8.0
-**Last updated**: 2026-02-26
+This skill designs, improves, validates, and packages high-quality Codex skills.
+**Version**: 1.9.1 · **Last updated**: 2026-03-06
 
 ## Table of Contents
-- [Working agreement (skills + shell + compaction)](#working-agreement-skills--shell--compaction)
+- [Working agreement](#working-agreement)
 - [Scope and triggers](#scope-and-triggers)
-- [Modes (conservative)](#modes-conservative)
-- [Required inputs](#required-inputs)
+- [Modes](#modes)
+- [Needed inputs](#needed-inputs)
+- [Discovery interview](#discovery-interview)
 - [Deliverables](#deliverables)
-- [Response format (required)](#response-format-required)
+- [Response format](#response-format)
 - [Operating principles](#operating-principles)
-- [Skill creation process (follow by default)](#skill-creation-process-follow-by-default)
-- [Script-backed security rules (required)](#script-backed-security-rules-required)
+- [Skill creation process](#skill-creation-process)
+- [Script-backed security rules](#script-backed-security-rules)
 - [What to avoid](#what-to-avoid)
 - [Constraints](#constraints)
 - [Validation](#validation)
 - [Examples](#examples)
-- [Skill test strategy by type](#skill-test-strategy-by-type)
-- [Reference map (skill-creator internal)](#reference-map-skill-creator-internal)
-- [Governance and style appendix](#governance-and-style-appendix)
+- [Reference map](#reference-map)
+- [Decision feedback protocol](#decision-feedback-protocol)
+- [Empowering execution style](#empowering-execution-style)
 
-## Working agreement (skills + shell + compaction)
-
-- Follow the repo's `AGENTS.md` (treat it as a map, not a megadoc).
-- For long-running work: also follow `~/.codex/instructions/shell-skills-compaction.md` (or a repo-local copy).
-- Use an artifact boundary:
-  - Local Codex CLI: write deliverables to `./artifacts/`
-  - Hosted shell: write deliverables to `/mnt/data/`
-- After major milestones, write a short status note to an artifact (e.g., `./artifacts/STATUS.md`) so the thread can be compacted safely.
+## Working agreement
+- Follow the repo `AGENTS.md`; treat it as a map, not a megadoc.
+- Keep the artifact boundary explicit:
+  - local Codex CLI -> `./artifacts/`
+  - hosted shell -> `/mnt/data/`
+- For long runs, write short status notes so compaction is safe.
+- For advisory or intake-only turns, do bounded preflight first; do not broad-scan the repo tree unless editing or repo-wide analysis is actually needed.
 
 ## Scope and triggers
-
 Use this skill to:
+- create a new skill;
+- improve an existing skill’s routing, workflow, or reliability;
+- audit a skill against repo standards and validators;
+- compare two skill variants;
+- package a validated skill for reuse;
+- improve skill-graph contracts tied to recursive workflow operations.
 
-- Create a new skill (instruction-only, script-backed, or router-style).
-- Revise an existing skill for better triggering, portability, or reliability.
-- Audit/upgrade a skill to meet “gold standard” structure, progressive disclosure, and validation.
-- Improve skill-knowledge graph contracts (schemas/workflows/telemetry) tied to recursive loop operations.
-- Package a skill into a distributable `.skill` archive.
+Do not use this skill for unrelated application features, generic debugging, or ordinary documentation tasks that do not create or improve a skill.
 
-## Modes (conservative)
+## Modes
+Choose the smallest mode that fits:
+- **create**: scaffold and author a new skill;
+- **improve**: tighten routing, workflow, safety, or portability;
+- **eval**: run validators and summarize findings;
+- **benchmark-lite**: compare variants with shared evals;
+- **graph**: refine skill-graph docs, contracts, or runtime metadata;
+- **package**: produce a distributable `.skill` archive.
 
-Select the smallest mode that matches user intent:
+Default to `create` or `improve`.
 
-- **create**: scaffold and author a new skill.
-- **improve**: revise an existing skill for routing quality, reliability, or safety.
-- **eval**: run quality checks/evals and summarize findings.
-- **benchmark-lite**: compare two variants with deterministic checks (`run_skill_evals.py --dual-run`) and report evidence.
-- **graph**: improve skill-graph docs/contracts and runtime metadata for learn/promotion loops.
-- **package**: produce a `.skill` archive once quality gates pass.
+## Needed inputs
+- skill goal;
+- 3-10 example prompts:
+  - 2-5 happy path,
+  - 1-3 edge cases,
+  - 1-3 should-not-trigger negatives;
+- target environment: `codex`, `claude`, or `portable`;
+- any needed tools, APIs, schemas, templates, or style rules;
+- compatibility posture;
+- if graph work is in scope, the profile/scope and intended graph outputs.
 
-Default to `create`/`improve`; use `benchmark-lite` only when the user asks to compare variants.
+If key details are missing, ask only the minimum questions needed to proceed safely.
 
-## Required inputs
+## Discovery interview
+When `create` or `improve` work is underspecified, run a round-based discovery interview before building.
 
-- Desired skill goal (what the user wants to accomplish).
-- 3–10 example user prompts:
-  - 2–5 happy-path prompts
-  - 1–3 edge-cases
-  - 1–3 “should NOT trigger” prompts (negative examples)
-- Target environment(s): `codex`, `claude`, or `portable` subset.
-- Any required assets, schemas, APIs, CLIs, or “house style” constraints.
-- Compatibility posture (default: canonical-only for unreleased/greenfield projects; add backwards compatibility only when explicitly required).
-- If graph work is requested: target profiles/scopes and desired graph outputs (schema/docs/runtime artifact updates).
-
-If any of the above are missing, ask only the minimum questions required to proceed safely.
+- Use Codex `request_user_input` first when a round fits into 1-3 short prompts.
+- Ask one round at a time and wait for the answer before moving on.
+- Skip rounds already answered by the thread; do not make the user restate known context.
+- Stop when you are about 95 percent confident you can build the skill safely.
+- Keep each round intuitive:
+  - start with one plain-language question,
+  - prefer concrete options over jargon,
+  - explain why the round matters in one short sentence,
+  - avoid dumping the whole interview plan at once.
+- Prefer the reusable `request_user_input` mini-templates and payload examples in `references/discovery-interview.md` unless the thread already suggests a better phrasing.
+- Before building, summarize the skill back to the user and ask for confirmation.
+- Use `references/discovery-interview.md` for the six-round default flow.
 
 ## Deliverables
+Produce what the request actually needs, usually from this set:
+- a skill folder with `SKILL.md`;
+- `scripts/`, `references/`, `assets/`, or `workflows/` when they materially help;
+- `agents/openai.yaml` when OpenAI or Codex UI or tool metadata is needed;
+- `references/contract.yaml` and `references/evals.yaml` for non-trivial skills;
+- `references/plan.md` for multi-step builds;
+- validator output, analyzer output, and an OpenClaw-style readiness summary;
+- a packaged `.skill` file when packaging is requested.
 
-Depending on the request, produce one or more of:
+For created or revised skills, keep decision-feedback instrumentation in scope:
+- include the `decision-feedback-protocol:v2` block in the skill when post-run feedback is relevant;
+- make feedback runtime-owned: if capture is enabled, emit a non-blocking `post_run_feedback` event after result delivery via Codex `request_user_input`;
+- keep feedback recordable with `scripts/record_skill_feedback.py`.
 
-- A skill folder containing:
-  - `SKILL.md` (required)
-  - `agents/openai.yaml` (recommended for OpenAI/Codex UI + MCP dependencies)
-  - `scripts/` (optional)
-  - `references/` (optional but recommended for non-trivial skills)
-  - `assets/` (optional)
-  - `workflows/` (optional for router-style skills)
-- `references/contract.yaml` (output contract) and `references/evals.yaml` (eval cases) when the skill is non-trivial.
-- For schema-bound outputs, require a top-level `schema_version` in the output contract/artifact examples.
-- `references/plan.md` (plan artifact) for non-trivial skill builds; store `$create-plan` output here when available.
-- A validation report (what passed/failed and what to fix).
-- An `analyze_skill.py` quality report for every validation run.
-- An operational-readiness + security-risk report (OpenClaw-style summary: critical/warn/info).
-- For graph-mode work: updated `docs/skill-graphs/*` contracts and any coupled runtime artifact/schema updates.
-- A packaged `.skill` file (optional).
-- Decision-feedback instrumentation in created/updated skills:
-  - Include the `decision-feedback-protocol:v2` block in `SKILL.md`.
-  - Ensure AskQuestion parity (`request_user_input`) is explicitly required for non-trivial outcomes.
-  - Ensure feedback records can be written with `scripts/record_skill_feedback.py` including subject tags.
-
-## Response format (required)
-
-Always start responses with these headings (no text before them):
+## Response format
+Start with these headings and no text before them:
 
 ## Scope and triggers
-- 1–3 bullets on when this skill applies (confirm scope).
+- confirm when the skill applies.
 
 ## Required inputs
-- List required inputs and ask targeted questions if needed.
+- list missing inputs or state what is already known.
 
 ## Deliverables
-- List deliverables you will produce.
+- list the files, checks, or artifacts you will produce.
 
 ## Failure mode
+- if the request is out of scope, say why and suggest the closest next step.
 
-If the request is out of scope:
-- Use the headings above.
-- Under **Required inputs**, explain what’s missing or why it’s out of scope.
-- Under **Deliverables**, propose the closest appropriate next step or skill.
+On the first response, stay compact: no deep implementation, no file scaffolding, and no validator dump unless the user asked for it or the inputs are already complete.
 
 ## Operating principles
-
 ### Humans steer. Agents execute.
+Translate vague intent into a repeatable workflow. When results are weak, fix the scaffolding, constraints, or feedback loop instead of pushing harder on the same draft.
 
-Your goal is leverage: translate vague intent into a workflow the agent can execute repeatedly.
-When something fails, the fix is almost never “try harder”—it’s usually missing scaffolding, missing constraints, or missing feedback loops.
-
-### Keep SKILL.md short and treat it as a map
-
-Context is scarce. Treat `SKILL.md` as the high-signal “table of contents,” and push depth into:
-- `references/` (system of record)
-- `scripts/` (deterministic helpers)
-- `assets/` (templates/boilerplate)
-
-This matches the “AGENTS.md as table of contents” approach: point to structured sources of truth instead of growing a single blob.
+### Keep SKILL.md as a map
+Keep route-critical guidance in `SKILL.md` and move depth into:
+- `references/` for the system of record,
+- `scripts/` for deterministic helpers,
+- `assets/` for templates and fixtures.
 
 ### Descriptions are routing logic
+The frontmatter `description` is the decision boundary. Make it concrete about:
+- when to use the skill;
+- when not to use it;
+- outputs and success criteria.
 
-The `description` is effectively the model’s decision boundary. It should be concrete about:
-- Use-when vs don’t-use-when
-- Outputs/artifacts
-- Success criteria
+Use `references/description-optimization.md` when routing quality is the main issue.
 
-### Default compatibility posture
+### Calibrate language to the user
+Use terms like `eval`, `assertion`, `benchmark`, and `JSON` only as freely as the user’s fluency supports. Briefly define specialized terms when needed.
 
-- For unreleased/greenfield projects, default to canonical implementations and guidance.
-- Do not add compatibility shims, adapter layers, migration bridges, or dual-write flows unless explicitly requested or required by an existing released contract.
+### Think in tradeoffs
+Ask three questions before you lock the design:
+- Why does this skill exist?
+- What evidence would change the workflow?
+- What should stay out of scope?
 
-### Put templates/examples inside the skill
+Vary examples, adapt the structure, and choose context-specific guidance. Avoid repetitive, generic, cookie-cutter instructions; converge only after evidence review.
 
-Do not cram templates into system prompts. Put them inside the skill so they load only when needed.
-
-### Design for long runs
-
-Plan for multi-step continuity:
-- Reuse the same environment/container when you want stable deps and cached intermediate files.
-- Use compaction as a default long-run primitive, not an emergency fallback.
-
-### Treat skills + networking as high-risk
-
-Default posture:
-- Skills: allowed
-- Shell: allowed
-- Network: enabled only when required, behind strict allowlists, and never echo secrets.
-
-### Environment compatibility notes (Codex-first)
-
-- Keep canonical behavior Codex-first unless the user explicitly asks for Claude-specific features.
-- Claude-only frontmatter fields (for example `disable-model-invocation`, `argument-hint`, `context: fork`) should be documented as optional compatibility notes, not default guidance.
-- Do not assume slash-command semantics in Codex unless explicitly requested.
-
-## Skill creation process (follow by default)
-
+## Skill creation process
 Skip steps only with a clear reason.
 
-### 0) Confirm target + artifact boundary
+### 0) Confirm target and boundary
+- confirm where the skill lives;
+- confirm the artifact boundary;
+- mine the current thread for demonstrated tools, steps, constraints, output shapes, and corrections before asking the user to restate them.
 
-- Confirm where the skill lives:
-  - Repo: `.agents/skills/<skill-name>/`
-  - User: `~/.agents/skills/<skill-name>/`
-- Confirm artifact boundary (local `./artifacts/` vs hosted `/mnt/data/`).
+### 1) Lock down triggers early
+- collect happy, edge, and negative prompts;
+- encode use-when, don’t-use-when, outputs, and success criteria in the `description`;
+- keep compatibility boundaries explicit;
+- for non-trivial skills, write `references/evals.yaml` early;
+- for trigger-tuning work, use `references/description-optimization.md`.
 
-### 1) Lock down triggers early (with negative examples)
-
-- Collect 3–10 prompts (happy, edge, and negative).
-- Ensure the `description` contains:
-  - trigger keywords
-  - explicit “don’t use when …” near-misses
-  - output artifacts and success criteria
-- Encode compatibility stance in the trigger boundary: default to canonical-only for unreleased work; require explicit language to trigger compatibility-preserving outputs.
-- For non-trivial skills, write `references/evals.yaml` early (RED → GREEN → REFACTOR).
-
-### 1.5) Immediate feedback loop (recommended)
-
-Do not wait for a “perfect” spec before testing:
-- Run 1–2 realistic prompts against the draft early.
-- Show concrete outputs/artifacts quickly.
-- Use observed failures to tighten triggers and constraints before expanding scope.
-- Keep loops short and evidence-backed; avoid speculative rewrites.
-
-### 2) Choose the skill structure
-
-- **Single-file**: one intent, one workflow, < ~200 lines.
-- **Router style**: multiple intents/workflows, heavy domain knowledge, or multiple output contracts.
+### 2) Choose the structure
+- **single-file** for one intent and one workflow;
+- **router-style** for multiple intents, heavy domain knowledge, or multiple output contracts.
 
 Router layout:
-```
+```text
 skill-name/
   SKILL.md
   workflows/
@@ -215,101 +177,65 @@ skill-name/
 ```
 
 ### 3) Scaffold the folder
-
-Use the initializer:
-
+Use:
 ```bash
 python scripts/init_skill.py <skill-name> --target codex --run-type instruction --path <output-dir>
 ```
 
-Then delete any unused folders and example files.
+Delete unused starter files immediately.
 
 ### 4) Author SKILL.md
+- keep frontmatter minimal: `name` plus `description`;
+- make `description` a single line with trigger boundary and success criteria;
+- keep the workflow lean and reliable;
+- link to references instead of pasting deep docs;
+- keep templates and examples inside the skill bundle, not in prompts.
 
-Frontmatter:
-- `name`: kebab-case, matches folder name.
-- `description`: **single line**; WHAT + WHEN + outputs + success criteria; include negative triggers.
-- Prefer minimal frontmatter (default: only `name` + `description`).
+### 5) Add resources only when they earn their keep
+- use `references/` for deep docs, schemas, contracts, and evals;
+- use `scripts/` for repeatable helpers;
+- use `assets/` for templates and fixtures.
 
-Body:
-- Include a short Principles section before the workflow.
-- Keep the workflow minimal and reliable.
-- Link to `references/` instead of pasting long docs (progressive disclosure).
-- Store templates/examples in the skill bundle, not in prompts.
-- Include the decision feedback protocol block (`decision-feedback-protocol:v2`) unless a stronger repo-specific equivalent already exists.
+If repeated eval runs recreate the same helper script, bundle it once in `scripts/` and reuse it.
 
-### 5) Add resources (as needed)
+### 6) Validate
+Run the core validators, fix the first failing gate, then rerun.
 
-- `references/`: schemas, style guides, evals, contracts, deep docs.
-- `scripts/`: deterministic helpers (token-efficient + repeatable).
-- `assets/`: templates, boilerplate, fixtures.
+### 6.5) Compare variants only when needed
+- run shared evals for baseline and candidate;
+- compare evidence and failure modes, not style alone;
+- when quality is subjective, prefer blind comparison before declaring a winner.
 
-Prefer relative paths so the skill works anywhere.
-
-### 6) Validate (fail fast)
-
-Stop at the first failed gate and fix it before proceeding.
-
-```bash
-~/.venvs/pyyaml/bin/python scripts/quick_validate.py <path/to/skill-folder>
-~/.venvs/pyyaml/bin/python scripts/skill_gate.py <path/to/skill-folder>
-~/.venvs/pyyaml/bin/python scripts/analyze_skill.py <path/to/skill-folder>
-```
-
-If the skill is **newly created** (mode `create`), evals are required before completion:
-
-```bash
-~/.venvs/pyyaml/bin/python scripts/run_skill_evals.py <path/to/skill-folder>
-```
-
-Optional expansion:
-- `scripts/run_skill_evals.py --dual-run --capture-jsonl` for cross-runner scorecards
-
-### 6.5) Optional A/B compare loop (conservative)
-
-Use this only when the user asks for optimization or variant comparison:
-1. Create baseline (`v1`) and candidate (`v2`) skill variants.
-2. Run shared eval prompts with `scripts/run_skill_evals.py --dual-run --capture-jsonl`.
-3. Compare pass/fail evidence + failure modes, not style preferences alone.
-4. Keep the better variant, then rerun core validators.
-
-### 7) Package (optional)
-
+### 7) Package only after quality gates pass
 ```bash
 python scripts/package_skill.py <path/to/skill-folder> dist/
 ```
 
-## Script-backed security rules (required)
-
-When a skill includes executable code (`scripts/` or containers):
-
-- **Offline by default.** If network is required, gate behind `--allow-network` and document allowed domains.
-- **Never echo secrets** (no `os.environ`, no token values).
-- **Destructive actions require explicit confirmation**:
-  - Prefer `--dry-run` by default
-  - Require `--confirm` / `--force` to execute
+## Script-backed security rules
+When the skill includes executable code:
+- default to offline behavior;
+- gate network use behind explicit flags and an allowed domains or host allowlist policy;
+- keep destructive actions behind dry-run or explicit confirmation;
+- never echo secrets or raw environment values.
 
 ## What to avoid
-
-- Bloating `AGENTS.md` or `SKILL.md` with encyclopedic content—keep them as maps to deeper sources of truth.
-- Writing marketing-style descriptions; treat them as routing logic.
-- Putting templates/examples in system prompts; put them inside the skill.
-- Assuming network access; keep allowlists tight and explicit.
-- Printing logs that could contain secrets.
-- Adding backward-compatibility work by default when the project is unreleased/greenfield.
+- NEVER pad `SKILL.md` with theory that belongs in `references/`.
+- DO NOT broaden the `description` until it overlaps with adjacent skills.
+- DON'T add scripts, network calls, or compatibility branches unless the workflow truly needs them.
+- Avoid marketing copy; treat the description as routing logic.
+- Avoid absolute paths and hidden environment assumptions when a relative path or explicit prerequisite will do.
 
 ## Constraints
-
-- Redact secrets/credentials/PII by default. Never print raw tokens or environment values.
-- Keep frontmatter valid and explicit (`name` + `description` as single-line scalars; use `agents/openai.yaml` for UI/dependency metadata).
-- Do not invent external facts; if uncertain, add a verification step.
-- For script-backed skills, default to offline behavior and require explicit confirmation for destructive actions.
-- Default to canonical implementations for unreleased/greenfield projects; only include backwards-compatibility requirements when explicitly requested.
+- Redact secrets, credentials, tokens, and PII by default.
+- Keep frontmatter valid and minimal.
+- Do not invent external facts; add a verification step when uncertain.
+- Default to canonical implementations for unreleased or greenfield work.
+- For schema-bound outputs, include `schema_version` in the contract or artifact example.
+- Use `docs/skill-graphs/question-lifecycle.md` for question timing and `docs/skill-graphs/knowledge-graph-operating-model.md` for graph-mode runtime boundaries instead of expanding them inline here.
 
 ## Validation
-
-Fail fast: stop at the first failed gate, fix it, and rerun.
-
+Fail fast: stop at the first failed gate, fix it, and rerun before continuing.
+Core validators:
 ```bash
 ~/.venvs/pyyaml/bin/python scripts/quick_validate.py <path/to/skill-folder>
 ~/.venvs/pyyaml/bin/python scripts/skill_gate.py <path/to/skill-folder>
@@ -317,8 +243,10 @@ Fail fast: stop at the first failed gate, fix it, and rerun.
 ~/.venvs/pyyaml/bin/python scripts/openclaw_skill_guard.py <path/to/skill-folder> --mode both
 ```
 
-Required for new skills:
-- `~/.venvs/pyyaml/bin/python scripts/run_skill_evals.py <path/to/skill-folder>`
+For new skills:
+```bash
+~/.venvs/pyyaml/bin/python scripts/run_skill_evals.py <path/to/skill-folder>
+```
 
 Optional deep checks:
 - `~/.venvs/pyyaml/bin/python scripts/run_skill_evals.py <path/to/skill-folder> --dual-run --capture-jsonl`
@@ -326,68 +254,28 @@ Optional deep checks:
 - `python3 scripts/skill_subject_scoreboard.py --workspace <workspace> --format table`
 
 ## Examples
+- “Create a new skill called `foo-bar` under `utilities/` with evals and an output contract.”
+- “Audit this skill’s trigger quality and tighten the description.”
+- “Compare two variants of this skill and keep the better one.”
 
-- “Create a new skill called `foo-bar` under `utilities/` with eval cases and an output contract.”
-- “Audit this skill for trigger quality and tighten the description so it routes correctly.”
-- “Fix validation failures (`quick_validate.py` / `skill_gate.py`) with the smallest safe patch and rerun gates.”
-
-## Skill test strategy by type
-
-Choose eval style by skill type:
-- **Discipline skills** (rules/process): pressure prompts + negative prompts to catch rationalizations.
-- **Technique skills** (how-to): application prompts that prove transfer to new scenarios.
-- **Pattern skills** (mental model): recognition + “when NOT to use” prompts.
-- **Reference skills** (docs/API): retrieval accuracy + correct application prompts.
-
-For each type, include at least one explicit trigger case and one clear non-trigger case.
-
-## Reference map (skill-creator internal)
-
+## Reference map
 Use these files when needed:
+- `references/discovery-interview.md` for round-by-round clarification;
+- `references/description-optimization.md` for trigger tuning;
+- `references/iteration-and-testing.md` for eval-driven refinement;
+- `references/quality-tools.md` for validator and eval interpretation;
+- `references/skill-structure.md` and `references/progressive-disclosure-patterns.md` for layout choices;
+- `references/security-hardening.md` for offline defaults and destructive-action gates;
+- `docs/skill-graphs/question-lifecycle.md` for question timing and post-run feedback behavior;
+- `docs/skill-graphs/knowledge-graph-operating-model.md` for graph-mode boundaries;
+- `references/examples.md`, `references/anti-patterns.md`, and `references/governance-and-style.md` for calibrated examples and deeper guidance.
 
-- `references/about-skills.md`: background on skills, intent, and structure.
-- `references/portable-skills.md`: strict subset for cross-platform portability.
-- `references/skill-structure.md`: router vs single-file patterns.
-- `references/progressive-disclosure-patterns.md`: how to split SKILL.md into references/scripts.
-- `references/quality-tools.md`: how to run validators/evals and interpret output.
-- `references/iteration-and-testing.md`: eval-driven iteration patterns.
-- `references/evals-v2-migration.md`: eval schema v2 fields, migration rules, and tiered gating.
-- `references/tiered-gating-policy.md`: week-by-week rollout policy and promotion rules for tier 2.
-- `references/security-hardening.md`: offline defaults, redaction, destructive action confirmations.
-- `references/skill-knowledge-graph.md`: skill/graph mental model + Cockpit Rule delegation mapping.
-- `references/examples.md`: calibrated examples for phrasing and structure.
-- `references/anti-patterns.md`: common failure modes + remediation patterns.
-- `references/governance-and-style.md`: deck alignment checklist, graph contract gap log, philosophy, anti-patterns, variation, and execution style.
+## Decision feedback protocol
+<!-- decision-feedback-protocol:v2 -->
+- Question timing is runtime-owned. Do not make the skill itself decide when feedback is asked.
+- If post-run feedback capture is enabled, emit a non-blocking `post_run_feedback` event via Codex `request_user_input` after result delivery.
+- Capture `decision`, `outcome`, and `confidence`.
+- Persist feedback with `python3 scripts/record_skill_feedback.py`.
 
-## Runtime injection boundary (graph mode)
-
-When a recursive run consumes injected lessons or external lesson suggestions:
-
-- Keep **decisioning** in SKILL/description only:
-  - `description` and SKILL body decide if graph mode runs and what boundaries apply.
-- Keep **execution** in scripts/tools only after gates pass:
-  - controls check passed,
-  - delegation rationale present,
-  - immutable IDs present.
-- Required invocation envelope inputs before tool use:
-  - `invocation_id`
-  - `objective_hash`
-  - `scope_skill`
-  - `scope_profile`
-  - `prompt_hash`
-- Before any file/command execution, redact/validate:
-  - strip secret-like tokens and credentials from `notes`, `feedback`, and notes,
-  - require redaction for any user-supplied free text.
-- Required artifact completeness before promotion review:
-  - `run.json`
-  - `capture_record.json` (if auto-capture enabled)
-  - `evidence_packet.json` (if capture enabled)
-  - `promotion_decision.json`
-
-## Governance and style appendix
-
-Keep SKILL.md concise and load deeper guidance only when needed:
-- Deck alignment checklist, graph contract gap report, and governance controls: `references/governance-and-style.md`
-- Philosophy/anti-patterns/variation/execution style: `references/governance-and-style.md`
-
-When revising this skill, prefer updating the appendix reference first and only keep route-critical instructions in SKILL.md.
+## Empowering execution style
+Be capable, creative, and willing to explore better options when evidence supports them. Enable the user to make safe choices by explaining tradeoffs clearly, then keep the implementation disciplined and auditable.
