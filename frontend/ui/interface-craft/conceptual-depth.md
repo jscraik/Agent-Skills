@@ -9,6 +9,8 @@ Take one chosen concept and iterate it through progressive quality levels until 
 - [Depth Spectrum](#depth-spectrum)
 - [Workflow](#workflow)
 - [Depth Tactics](#depth-tactics)
+- [Project-Backed Depth Moves](#project-backed-depth-moves)
+- [Copy-Ready Repo Snippet](#copy-ready-repo-snippet)
 - [Benchmark Rule](#benchmark-rule)
 - [Output Format](#output-format)
 
@@ -62,6 +64,40 @@ Goal: identify current level, then define concrete moves to the next level.
 - **Focus edge and error states** for uncommon care
 - **Layer modalities** when relevant (visual + motion + sound/haptics)
 
+## Project-Backed Depth Moves
+
+When translating depth recommendations into implementation, use at least one concrete pattern family:
+
+1. **DialKit depth moves** (`joshpuckett/dialkit`)
+   - expose live tuning controls before finalizing constants
+   - promote spring parameters (`visualDuration`, `bounce`) to named/tunable configuration
+   - keep action callbacks explicit (`onAction`) for testable behavior changes
+
+2. **Bloom depth moves** (`joshpuckett/bloom`)
+   - upgrade to compound composition for clarity (`Root`, `Container`, `Trigger`, `Content`, `Item`)
+   - harden controlled/uncontrolled parity (`open`, `onOpenChange`, `defaultOpen`)
+   - refine morph geometry with explicit direction/anchor/offset reasoning
+
+3. **Pasito depth moves** (`joshpuckett/pasito`)
+   - move repeated timing/sequence logic into headless hooks
+   - replace fixed style constants with CSS custom properties
+   - enforce reduced-motion and keyboard semantics as depth-level quality gates
+
+Reference index: `references/project-code-references.md`.
+
+## Copy-Ready Repo Snippet
+
+For implementation-oriented depth outputs, always include this compact block near the end:
+
+```md
+## Repo Pattern to Borrow
+- Source: [DialKit|Bloom|Pasito] ([file-or-readme reference])
+- Why now: [single sentence tied to quality level jump]
+- Apply in next pass: [smallest concrete implementation step]
+```
+
+Keep this block to 3 bullets max.
+
 ## Benchmark Rule
 
 Before claiming excellence:
@@ -95,4 +131,9 @@ Baseline first, innovation second.
 
 ## Validation Signals
 [how we know this reached the next level]
+
+## Repo Pattern to Borrow
+- Source: [DialKit|Bloom|Pasito] ([file-or-readme reference])
+- Why now: [single sentence tied to quality level jump]
+- Apply in next pass: [smallest concrete implementation step]
 ```
