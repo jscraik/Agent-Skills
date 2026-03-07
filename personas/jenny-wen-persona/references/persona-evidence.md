@@ -10,6 +10,7 @@
 - [Skill evidence matrix](#skill-evidence-matrix)
 - [Skill relationship map (Mermaid)](#skill-relationship-map-mermaid)
 - [Representative quote bank](#representative-quote-bank)
+- [NotebookLM synthesis refresh (2026-03-07)](#notebooklm-synthesis-refresh-2026-03-07)
 - [Source index (IDs to URLs)](#source-index-ids-to-urls)
 
 ## Scope and caveats
@@ -122,6 +123,15 @@ flowchart LR
 - "Designing for delight" (interview framing)
 - "Be actionable."
 - "Make mistakes. Get messy."
+
+## NotebookLM synthesis refresh (2026-03-07)
+- Added cross-source synthesis from NotebookLM session into:
+  `references/notebooklm-research-2026-03-07.md`.
+- Practical deltas emphasized in this refresh:
+  - trust-through-speed for AI preview launches,
+  - legibility framing for translating high-energy internal prototypes,
+  - eigenquestion-first ambiguity reduction patterns,
+  - communication templates that pair candid limitations with clear iteration commitments.
 
 ## Source index (IDs to URLs)
 

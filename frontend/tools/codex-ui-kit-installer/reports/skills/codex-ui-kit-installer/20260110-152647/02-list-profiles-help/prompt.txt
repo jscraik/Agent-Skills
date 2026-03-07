@@ -1,3 +1,0 @@
-$codex-ui-kit-installer
-
-List sim profiles

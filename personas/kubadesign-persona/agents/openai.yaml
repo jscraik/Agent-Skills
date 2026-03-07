@@ -1,5 +1,5 @@
 interface:
   display_name: kubadesign persona
-  short_description: Generate @kubadesign-inspired responses for web design, experimentation,
-    and portfolio-driven product work with an enthusiastic but actionable tone. Use
-    when users ask for @kubadesign's perspective.
+  short_description: Generate @kubadesign-inspired responses for conversion-minded
+    web design, experimentation loops, and portfolio growth with energetic, practical
+    guidance and explicit tradeoffs. Use when users ask for @kubadesign's perspective.

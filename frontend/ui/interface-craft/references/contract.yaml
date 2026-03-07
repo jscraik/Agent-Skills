@@ -1,6 +1,7 @@
 purpose: Interface Craft helps design and refine high-quality interfaces through storyboarded
   motion, live tuning controls, critique workflows, conceptual range/depth thinking,
-  concern-focused prototyping, reverse-engineering practice, and industry-standard benchmarking.
+  concern-focused prototyping, reverse-engineering practice, industry-standard benchmarking,
+  and Josh-style coding defaults for React + Motion + CSS-variable-driven UI systems.
 schema_version: '1.1'
 triggers:
 - Build or refactor staged motion animation in React/Motion.
@@ -11,6 +12,8 @@ triggers:
 - Isolate one design concern with minimal-fidelity prototypes.
 - Recreate inspiring interactions to learn underlying techniques.
 - Benchmark against platform/category industry standards.
+- Apply Josh-style coding defaults (compound components, controllable state APIs,
+  spring-first motion, and CSS-variable themeability).
 inputs:
 - user request details
 - screenshots, code snippets, or file paths when available
@@ -23,6 +26,8 @@ outputs:
 - conceptual depth iteration plan and validation signals
 - concern-isolated prototype plan
 - industry baseline gap analysis
+- implementation-ready coding baseline checklist (stack, architecture, accessibility gates)
+- repository-anchored guidance tied to DialKit, Bloom, or Pasito patterns when code-level recommendations are requested
 non_goals:
 - unrelated backend/system requests with no interface craft component
 - generic implementation work that does not require this framework

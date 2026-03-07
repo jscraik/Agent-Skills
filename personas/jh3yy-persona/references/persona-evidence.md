@@ -11,6 +11,7 @@
 - [Technique highlights: Sliders: Range Inputs in Disguise (2024-11-14)](#technique-highlights-sliders-range-inputs-in-disguise-2024-11-14)
 - [Technique highlights: The Path To Awesome CSS Easing With linear() (2023-09-22)](#technique-highlights-the-path-to-awesome-css-easing-with-linear-2023-09-22)
 - [Technique highlights: 3D CSS Flippy Snaps With React And GreenSock (2021-11-29)](#technique-highlights-3d-css-flippy-snaps-with-react-and-greensock-2021-11-29)
+- [CodePen pattern refresh (2026-03-06)](#codepen-pattern-refresh-2026-03-06)
 - [Skill evidence matrix](#skill-evidence-matrix)
 - [Notable code artifacts](#notable-code-artifacts)
 - [Code artifact catalog (C-series)](#code-artifact-catalog-c-series)
@@ -95,6 +96,17 @@
 - Uses CSS custom properties as a bridge between declarative styling and JS/React state (`--count`, `--x`, `--y`, image URLs), keeping visual logic mostly in CSS.
 - Applies GSAP `distribute` utilities for burst-like staggered motion and interaction polish, with explicit anti-spam interaction gating.
 - Calls out practical constraints (grid-size performance, browser differences), reinforcing “playful but production-aware” experimentation.
+
+## CodePen pattern refresh (2026-03-06)
+- Added a **12-demo reference bundle** from current CodePen work in:
+  `references/codepen-patterns-2026-03.md`.
+- This refresh strengthens “real-life code” coverage for:
+  - Anchor Positioning and `:has()` interaction patterns (`qEbVOMm`, `wvLvYWo`)
+  - Scroll-linked progressive enhancement with JS fallback (`MYgaaem`, `raebqbQ`)
+  - Native-control-first component work (`vEGobqb`)
+  - SVG/WebGL interaction craft (`PwzeRwy`, `azZbyRe`, `pvyZZmO`)
+  - Pointer-reactive CSS variable systems (`WbwyGBb`, `WbwZaNa`)
+- Retrieval note: in this environment, direct `codepen.io` fetches were Cloudflare-blocked; debug endpoints (`cdpn.io`) were used for code validation.
 
 ## Skill evidence matrix
 | Skill | Evidence |

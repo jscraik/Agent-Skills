@@ -60,7 +60,7 @@ cases:
         value: "references/emilkowalski-persona.md"
 
   - name: persona-multi-intertwined
-    prompt: "Use ui-ux-creative-coding and blend @benjitaylor, @jh3yy, @jenny_wen, and @emilkowalski for a dashboard refresh."
+    prompt: "Use ui-ux-creative-coding and blend @benjitaylor, @jh3yy, @jenny_wen, @emilkowalski, and @kubadesign for a dashboard refresh."
     acceptance:
       - type: contains
         value: "@benjitaylor"
@@ -70,6 +70,28 @@ cases:
         value: "@jenny_wen"
       - type: contains
         value: "@emilkowalski"
+      - type: contains
+        value: "@kubadesign"
+
+  - name: persona-kubadesign-marker
+    prompt: "Use ui-ux-creative-coding with @kubadesign guidance for a conversion-focused landing page redesign."
+    acceptance:
+      - type: contains
+        value: "@kubadesign"
+      - type: contains
+        value: "references/kubadesign-persona.md"
+      - type: regex
+        value: "(conversion|trust|demo|signup)"
+
+  - name: component-gallery-benchmark
+    prompt: "Use ui-ux-creative-coding and component.gallery to compare drawer patterns and choose one for React + Tailwind."
+    acceptance:
+      - type: regex
+        value: "(component\\.gallery|component gallery)"
+      - type: regex
+        value: "(compare|comparison|benchmark)"
+      - type: regex
+        value: "(tradeoff|why this pattern)"
 
   - name: concise-bullet-cap-request
     prompt: "Use ui-ux-creative-coding and include the standard headings. concise please."

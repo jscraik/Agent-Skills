@@ -8,6 +8,8 @@ A systematic critique workflow for interface quality. Start with noticing, then 
 - [When to Use](#when-to-use)
 - [Input Modes](#input-modes)
 - [Critique Workflow](#critique-workflow)
+- [Project-Anchored Critique Checks](#project-anchored-critique-checks)
+- [Copy-Ready Repo Snippet](#copy-ready-repo-snippet)
 - [What to Notice](#what-to-notice)
 - [Facets of Quality Lens](#facets-of-quality-lens)
 - [Output Format](#output-format)
@@ -87,6 +89,40 @@ Briefly classify current state:
 
 Then specify what must change to reach baseline before innovation.
 
+## Project-Anchored Critique Checks
+
+When implementation-level advice is requested, ground at least one recommendation in these project references:
+
+1. **DialKit reference checks**
+   - Confirm live-tunable controls are exposed for key motion and visual parameters.
+   - Look for typed config-driven control surfaces (not ad-hoc magic constants).
+   - Reference: `joshpuckett/dialkit` (`README.md`, `src/hooks/useDialKit.ts`, `src/components/DialRoot.tsx`).
+
+2. **Bloom reference checks**
+   - Confirm compound component structure and controllable/uncontrolled state parity.
+   - Validate morph choreography and keyboard/a11y behavior in interaction logic.
+   - Reference: `joshpuckett/bloom` (`packages/bloom/src/Root.tsx`, `Container.tsx`, `SubMenuTrigger.tsx`).
+
+3. **Pasito reference checks**
+   - Confirm CSS-variable theming over hardcoded tokens.
+   - Confirm headless logic hooks and reduced-motion safeguards.
+   - Reference: `joshpuckett/pasito` (`Stepper.tsx`, `useAutoPlay.ts`, `Stepper.css`).
+
+If no code artifact is provided, mark these as inferred and ask for a file path or snippet.
+
+## Copy-Ready Repo Snippet
+
+For implementation-oriented critique outputs, always include this compact block near the end:
+
+```md
+## Repo Pattern to Borrow
+- Source: [DialKit|Bloom|Pasito] ([file-or-readme reference])
+- Why: [single sentence tied to user problem]
+- Apply now: [smallest concrete change in this codebase]
+```
+
+Keep this block to 3 bullets max.
+
 ## What to Notice
 
 Use these prompts:
@@ -142,6 +178,11 @@ Use facets to make critique and planning explicit, not subjective.
 
 ## Industry Standard Gap
 [below/at/above baseline + required baseline fixes]
+
+## Repo Pattern to Borrow
+- Source: [DialKit|Bloom|Pasito] ([file-or-readme reference])
+- Why: [single sentence tied to user problem]
+- Apply now: [smallest concrete change in this codebase]
 ```
 
 ## Voice Rules

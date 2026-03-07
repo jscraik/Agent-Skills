@@ -84,6 +84,104 @@ cases:
       - type: regex
         value: "(?i)(recreate|learning objective|playground|iterate)"
 
+  - id: coding-tech-baseline
+    name: coding baseline guidance
+    category: edge
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Refactor this React menu with compound components, CSS variable theming, and DialKit spring controls."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "interface-craft"
+      - type: regex
+        value: "(?i)(compound component|css variable|dialkit|spring|visualduration|bounce)"
+
+  - id: critique-accessibility-order
+    name: critique order includes a11y gates
+    category: edge
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Use interface craft to critique this interaction with keyboard and reduced-motion checks first-class."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "interface-craft"
+      - type: regex
+        value: "(?i)(keyboard|aria|tabindex|reduced-motion|prefers-reduced-motion)"
+
+  - id: repo-anchored-guidance
+    name: repo anchored josh implementation guidance
+    category: edge
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Strengthen this UI guidance using concrete patterns from Pasito, DialKit, and Bloom."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "interface-craft"
+      - type: regex
+        value: "(?i)(pasito|dialkit|bloom)"
+      - type: regex
+        value: "(?i)(css variable|compound|spring|morph|useautoplay|usedialkit)"
+
+  - id: critique-repo-grounding
+    name: critique references project patterns
+    category: edge
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Critique this UI interaction and include concrete improvements grounded in Bloom and DialKit patterns."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "interface-craft"
+      - type: regex
+        value: "(?i)(bloom|dialkit)"
+      - type: regex
+        value: "(?i)(compound|openchange|spring|anchor|morph)"
+      - type: regex
+        value: "(?i)(repo pattern to borrow|source:)"
+
+  - id: depth-repo-grounding
+    name: depth iteration references pasito style architecture
+    category: edge
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Push this component from level 4 to 8 and use Pasito-style CSS variable theming and hook extraction guidance."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "interface-craft"
+      - type: regex
+        value: "(?i)(pasito|css variable|hook|reduced-motion|theme)"
+      - type: regex
+        value: "(?i)(repo pattern to borrow|apply in next pass|source:)"
+
+  - id: range-repo-grounding
+    name: conceptual range references project patterns
+    category: edge
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Give me three structurally different UI directions and ground one in Bloom morphing, one in DialKit tuning, and one in Pasito-style minimal theming."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "interface-craft"
+      - type: regex
+        value: "(?i)(bloom|dialkit|pasito)"
+      - type: regex
+        value: "(?i)(structurally different|direction|tradeoff)"
+      - type: regex
+        value: "(?i)(repo pattern to borrow|prototype first|source:)"
+
+  - id: component-gallery-reference
+    name: component gallery benchmark usage
+    category: edge
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Use interface-craft to benchmark this component against https://component.gallery and suggest adapted improvements."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "interface-craft"
+      - type: regex
+        value: "(?i)(component\\.gallery|component gallery)"
+      - type: regex
+        value: "(?i)(adapt|borrow|pattern|benchmark|reference notes)"
+
   - id: negative-backend-control
     name: negative backend control
     category: negative

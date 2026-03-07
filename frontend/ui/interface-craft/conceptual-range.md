@@ -9,6 +9,8 @@ Generate broad, structurally different solution directions before committing to 
 - [Core Rule](#core-rule)
 - [Workflow](#workflow)
 - [Range Expansion Tactics](#range-expansion-tactics)
+- [Project-Backed Range Moves](#project-backed-range-moves)
+- [Copy-Ready Repo Snippet](#copy-ready-repo-snippet)
 - [Output Format](#output-format)
 
 ## When to Use
@@ -58,6 +60,37 @@ Minimum bar: produce at least **3 structurally different concepts**.
 - **Set arbitrary count** — force 5/10/20 ideas to break local minima
 - **Optimize for a facet** — “what would a 10/10 crafted or inventive version look like?”
 
+## Project-Backed Range Moves
+
+When range exploration needs implementation realism, borrow at least one concrete pattern family:
+
+1. **DialKit range moves** (`joshpuckett/dialkit`)
+   - include one concept with live-tunable parameters as part of the interaction model
+   - vary where controls live (embedded, floating, contextual) and how much agency users get
+
+2. **Bloom range moves** (`joshpuckett/bloom`)
+   - include one concept based on morphing trigger-to-content transitions
+   - vary direction/anchor strategy to test different spatial mental models
+
+3. **Pasito range moves** (`joshpuckett/pasito`)
+   - include one concept that is tokenized via CSS variables and intentionally minimal in API
+   - vary logic split between headless hooks and visual components
+
+Reference index: `references/project-code-references.md`.
+
+## Copy-Ready Repo Snippet
+
+For implementation-oriented range outputs, include this compact block:
+
+```md
+## Repo Pattern to Borrow
+- Source: [DialKit|Bloom|Pasito] ([file-or-readme reference])
+- Why this direction: [single sentence tied to concept distinctiveness]
+- Prototype first: [smallest concrete slice to test]
+```
+
+Keep this block to 3 bullets max.
+
 ## Output Format
 
 ```md
@@ -80,4 +113,9 @@ Minimum bar: produce at least **3 structurally different concepts**.
 
 ## Recommended Next Prototype
 [which direction to test first + success signal]
+
+## Repo Pattern to Borrow
+- Source: [DialKit|Bloom|Pasito] ([file-or-readme reference])
+- Why this direction: [single sentence tied to concept distinctiveness]
+- Prototype first: [smallest concrete slice to test]
 ```

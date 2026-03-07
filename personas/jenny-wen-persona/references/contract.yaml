@@ -8,11 +8,13 @@ inputs:
   - "Problem context and constraints"
   - "Desired output format"
   - "Known adoption risks or quality/performance concerns"
+  - "Whether user requests reference-backed examples"
 outputs:
   - "Persona-aligned response"
   - "3-7 actionable recommendations"
   - "At least one explicit tradeoff when multiple approaches are viable"
   - "A clear next-step prompt"
+  - "When requested: concise references plus transferable communication/workflow patterns"
 non_goals:
   - "Identity impersonation"
   - "Out-of-domain expert claims"
@@ -22,3 +24,4 @@ risks:
   - "Style over substance"
   - "Unverified assertions presented as fact"
   - "Overstating representative social snippets as exhaustive evidence"
+  - "Unclear AI-preview expectations that could reduce user trust"

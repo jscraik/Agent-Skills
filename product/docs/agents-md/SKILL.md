@@ -2,7 +2,8 @@
 name: agents-md
 description: 'Refactor or create AGENTS.md using progressive disclosure: keep root
   minimal, split detailed instructions into linked docs, and flag contradictions/redundancy.
-  Use when the user asks to create, update, or refactor AGENTS.md.'
+  Use when the user asks to create, update, or refactor AGENTS.md, including
+  architecture-first onboarding guidance from diagram-cli artifacts.'
 ---
 
 # Agents Md
@@ -31,6 +32,9 @@ Mandatory snippet (include verbatim in guidance):
 2. IMPORTANT: Prefer retrieval-led reasoning over pre-training-led reasoning for any React, Tauri, Apps-SDK-ui, Tailwind, Vite, Storybook + Chat Widget tasks.
 3. Add a Table of Contents for docs.
 
+Architecture-first add-on (required unless the repo is truly tiny):
+- Before drafting AGENTS guidance, generate or read the repo architecture view from `diagram-cli` artifacts (`analyze` + manifest, typically under `.diagram/` or `artifacts/diagrams/`) and use it to ground routing and first-step guidance.
+
 ## Core Engineering Principles
 
 1. **Clarity over cleverness** — Prefer straightforward, maintainable instructions over elegant or complex phrasing.
@@ -58,6 +62,7 @@ Mandatory snippet (include verbatim in guidance):
 - The repo needs a short contributor guide for agents or humans.
 - The user requests “Repository Guidelines” content under 400 words.
 - The repo already has `AGENTS.md`, `CLAUDE.md`, and `GEMINI.md`, and the user asks to keep shared instruction guidance synchronized across them.
+- The user asks for better project understanding from the start, architecture-first onboarding, or explicit use of `diagram-cli` outputs in AGENTS guidance.
 
 ## Response format (required)
 - Always include all three sections in every response:
@@ -111,6 +116,7 @@ Use the failure-mode template verbatim for out-of-scope requests.
 - Existing AGENTS.md content (if present).
 - Verified commands and paths from the repo (README, docs, config files).
 - Package-manager signals from repo facts (`package.json#packageManager`, lockfiles, and existing command style in README/CI/docs).
+- Architecture evidence source (`.diagram` or `artifacts/diagrams` outputs, or a required `diagram-cli` run plan when artifacts are missing).
 - Any adjacent instruction files that may conflict (global or per-directory).
 - Whether Jamie's agent-first scaffold standard is requested (`~/.codex/instructions/agent-first-scaffold-spec.md`).
 - Compatibility posture (default: canonical-only for unreleased/greenfield repos; replace only when explicitly requested).
@@ -140,13 +146,13 @@ Use the failure-mode template verbatim for out-of-scope requests.
 - A contradictions list with a question for each conflict.
 - A “flag for deletion” list (redundant, vague, overly obvious).
 - A detected package-manager command map (`install`, `run`, optional `exec`) derived from repo evidence and reused across generated docs.
+- Architecture-aware bootstrap guidance that tells agents when and how to consume `diagram-cli` artifacts at the start of execution.
 - When requested: idempotent scaffold blocks for `AGENTS.md`, `.agent/PLANS.md`, and `README.md`.
 - Output contract schema_version: 1
 
 ## Constraints
 - Redact secrets/PII by default.
 - Do not invent commands, scripts, or paths.
-- Redact secrets and sensitive data by default.
 - Use ASCII only unless the repo already uses non-ASCII.
 - Do not add dependencies or tools.
 - Do not add legacy shims, adapter layers, dual-write paths, or backwards-compatibility promises unless the user explicitly requires compatibility.
@@ -167,6 +173,7 @@ Use the failure-mode template verbatim for out-of-scope requests.
 ## Workflow
 
 1) Discover repo facts
+- Generate architecture evidence first (or verify existing artifacts) before deep doc synthesis with `diagram analyze` + manifest gate (prefer installed `diagram`, fallback `npx --yes @brainwav/diagram`), and record uncertainty explicitly if gates fail.
 - Read README and `docs/` for real commands and structure.
 - Inspect config files (for example `pyproject.toml`, package scripts).
 - Determine canonical instruction root before generating files:
@@ -437,10 +444,6 @@ Rollout policy:
 
 - Offer two to three clear next-step options after drafting (accept, revise, or add missing info).
 - Call out unknowns explicitly and ask for confirmation before finalizing.
-- Encourage the user to prioritize sections when the scope is broad.
-- Empower the user to choose between a minimal or detailed guideline set.
-- Empower the user with explicit **choice and control** over scope, depth, and inserts before expanding.
-- Explicitly empower the user to defer optional inserts until core guidance is approved.
 - Ask whether to proceed with inserts when the global protocol is detected but optional.
 - Provide a one-sentence rationale for each recommended insert or deletion.
 
@@ -468,9 +471,8 @@ Rollout policy:
 - Expanding root `AGENTS.md` beyond 400 words without explicit user approval.
 - Creating a new `docs/agents` tree in Codex home/config repos where `instructions/` is canonical.
 - Skipping project exploration before applying or invoking the skill.
+- Skipping architecture evidence generation/inspection (`diagram-cli analyze` + manifest gate) before writing AGENTS routing guidance.
 - Adding a Table of Contents that does not match actual document headings.
-- Never proceed with contradictory instructions without asking which one wins.
-- Do not introduce new sections without confirming they are required for every task.
 - Avoid “one‑size‑fits‑all” templates that erase repo‑specific commands.
 - In scaffold mode, writing non-idempotent edits without marker blocks.
 - Omitting `~/.codex/instructions/agent-first-scaffold-spec.md` when Jamie standard is requested.
@@ -480,7 +482,6 @@ Rollout policy:
 - Mixing npm/pnpm/yarn/bun command examples in one output block or defaulting to npm without repository evidence.
 
 ## Example prompts that should trigger this skill
-
 - "Draft an AGENTS.md for this repo."
 - "Create a Repository Guidelines AGENTS.md under 400 words."
 - "Standardize our AGENTS.md using actual repo commands."

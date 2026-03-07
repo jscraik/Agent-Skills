@@ -1,6 +1,6 @@
 ---
 name: interface-craft
-description: Interface Craft by Josh Puckett helps build polished React interfaces with storyboard motion, live tuning controls, critique frameworks, and concept workflows; use when requests involve UI motion, critique, refinement, concept exploration, or interaction craft.
+description: Interface Craft by Josh Puckett helps build polished React interfaces with Motion + DialKit, CSS-variable theming, storyboard motion, and critique/range/depth workflows; use when requests involve UI motion, critique, refinement, concept exploration, or interaction craft.
 ---
 
 # Interface Craft
@@ -14,6 +14,8 @@ A toolkit for building polished, animated interfaces. Write motion like a script
 ## Table of Contents
 - [Skills](#skills)
 - [Quick Start](#quick-start)
+- [Tech + Coding Baseline](#tech--coding-baseline)
+- [Critique Order](#critique-order)
 - [Try It Out](#try-it-out)
 - [Sub-Skill Routing](#sub-skill-routing)
 - [Design Principles](#design-principles)
@@ -63,6 +65,27 @@ const params = useDialKit('Card', {
 ### Range → Depth
 Use conceptual range when the core solution may be wrong. Once a direction is chosen, use conceptual depth to push quality beyond “good enough.”
 
+## Tech + Coding Baseline
+
+Use these defaults unless the user asks for a different stack:
+
+1. **React + motion + DialKit** — use React for component composition, `motion` (Framer Motion) for non-trivial animation, and DialKit for live parameter tuning.
+2. **Compound components first** — structure complex widgets into modular parts (`Root`, `Container`, `Item`, `SubMenu`) instead of monolith components.
+3. **Expose controllable state** — support controlled props (`open`, `onOpenChange`, `value`, `onValueChange`) and keep internal orchestration inside hooks.
+4. **Render-prop state when useful** — pass active/selected state to children when it improves customization and removes brittle prop plumbing.
+5. **Theme with CSS variables** — avoid hardcoded tokens; use component-prefixed custom properties so teams can retheme safely.
+6. **Spring-first motion** — prefer spring physics with tunable `visualDuration` + `bounce`; use refined cubic-bezier fallback only when springs are not viable.
+7. **Keyboard + accessibility by default** — verify `tabIndex`, ARIA roles/states/labels, and test `prefers-reduced-motion` behavior before final polish.
+8. **Avoid black-box dependencies** — prefer small, transparent components where state and callbacks are interceptable.
+
+## Critique Order
+
+Run critique in this order for consistent Josh-style reviews:
+
+1. **Motion + polish** — assess sequence quality, spring feel, and “uncommon care” details first.
+2. **Accessibility + input modes** — confirm keyboard-first flow, ARIA correctness, and reduced-motion safety.
+3. **Architecture + theming** — verify component structure, state API clarity, and CSS-variable-driven customization.
+
 ## Try It Out
 
 - **Build and tune a component**
@@ -104,6 +127,8 @@ When the user invokes `/interface-craft`:
 11. **Meet the baseline, then innovate** — respect platform/category standards before deviation
 12. **Tools must match the medium** — favor adaptive, responsive, data-real workflows over static mock certainty
 13. **Design as systems** — components, constraints, and reusable primitives over one-off screens
+14. **Keyboard-first confidence** — treat keyboard and reduced-motion support as quality gates, not cleanup
+15. **Themeable by construction** — expose styling via CSS variables and avoid hardcoded visual tokens
 
 ## Reference Map
 
@@ -118,6 +143,9 @@ When the user invokes `/interface-craft`:
 - [Principles summary](references/josh-principles.md)
 - [Refinement case patterns](references/refinement-case-studies.md)
 - [Persona style + corpus synthesis](references/persona-profile.md)
+- [Project-backed code references (DialKit/Bloom/Pasito)](references/project-code-references.md)
+- [Coding defaults + critique tone cues](references/persona-profile.md#preferred-coding-tech-and-tooling)
+- [Component benchmark library](https://component.gallery)
 
 ## When to use
 
@@ -143,12 +171,14 @@ When the user invokes `/interface-craft`:
 - Structured critique and refinement plans, or implementation-ready motion/tuning snippets.
 - Ranked opportunities and tradeoffs grounded in user impact.
 - Workflow-specific artifacts (range options, depth ladder, baseline gap assessment, recreate plan).
+- For code-level guidance, include a compact **Repo Pattern to Borrow** block (source, rationale, smallest implementation step).
 
 ## Procedure
 
 1. Route to the correct sub-skill based on user intent and evidence available.
 2. Run the minimum workflow needed to answer the user’s request.
-3. Validate output against baseline quality and stated goals before finalizing.
+3. If the response includes implementation guidance, include one repo-grounded pattern from DialKit, Bloom, or Pasito using each sub-skill’s copy-ready snippet format.
+4. Validate output against baseline quality and stated goals before finalizing.
 
 ## Examples
 
@@ -168,6 +198,7 @@ When the user invokes `/interface-craft`:
 - Fail fast on missing context or blocked inputs.
 - Re-check that routing (storyboard/dialkit/critique/range/depth/concerns/recreate/standards) matches user intent.
 - For critique/range/depth outputs, prioritize structural and behavioral issues before visual polish.
+- For implementation guidance, verify a concrete **Repo Pattern to Borrow** block is present.
 
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**
