@@ -15,7 +15,6 @@
 node_modules/
 /node_modules/
 /**/node_modules/
-skills-antigravity/
 
 # Python/build artifacts
 **/__pycache__/
@@ -24,12 +23,11 @@ skills-antigravity/
 .venv-skill-creator/
 .tmp/
 .temp/
-node_modules/
 
-# Generated skill views
+# Generated skill views (symlink aggregation dirs)
 skills/
-skills
 skills-antigravity/
+sync-symlink/
 
 # Generated artifacts
 artifacts/dist/
@@ -61,14 +59,6 @@ FORJAMIE.md
 *.skill
 product/Archive.zip
 logs/
-
-FORJAMIE.md
-
-FORJAMIE.md
-
-FORJAMIE.md
-
-
 environment.toml
 
 # Skill Genome Loop runtime artifacts

@@ -34,6 +34,15 @@ antigravity_skills_dir="$repo_root/skills-antigravity"
 mkdir -p "$skills_dir"
 mkdir -p "$antigravity_skills_dir"
 
+# Remove legacy aggregation directories that could cause duplicate skills in IDE panels.
+# sync-symlink/ was created by an older version of this script under a different name.
+for legacy_dir in "$repo_root/sync-symlink"; do
+  if [ -d "$legacy_dir" ]; then
+    echo "Removing legacy skill aggregation dir: $legacy_dir"
+    rm -rf -- "$legacy_dir"
+  fi
+done
+
 cleanup_paths=()
 cleanup_on_exit() {
   local path=""
@@ -177,7 +186,7 @@ for skill_link in "$skills_dir"/*; do
   fi
 
   skill_name="$(basename "$skill_link")"
-  target_dir="$(cd "$skill_link" && pwd)"
+  target_dir="$(cd "$skill_link" && pwd -P)"
   ln -s "$target_dir" "$antigravity_skills_dir/$skill_name"
 done
 
