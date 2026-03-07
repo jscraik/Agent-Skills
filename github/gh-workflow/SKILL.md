@@ -179,7 +179,7 @@ Also provide a concise human-readable summary.
 3. Do NOT report success - ask user to resolve conflicts or abort with `git rebase --abort` / `git merge --abort`
 
 ### "Auth errors but gh auth status shows logged in"
-1. Check shell environment: `env | grep -i GITHUB_TOKEN`
+1. Check shell environment safely (without printing token): `if printenv GITHUB_TOKEN >/dev/null 2>&1; then echo "GITHUB_TOKEN is set"; else echo "GITHUB_TOKEN is not set"; fi`
 2. Verify no placeholder values in shell config: `grep -r 'your-token-here\|placeholder' ~/.zshenv ~/.zshrc ~/.bashrc 2>/dev/null`
 3. Test direct API call: `gh api user -q '.login'`
 4. If env var issues, ask user to check 1Password CLI integration: `op account list`
