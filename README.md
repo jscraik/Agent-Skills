@@ -1,6 +1,6 @@
 # Agent Skills
 
-<!-- Skill count: 133 | Genome: active -->
+<!-- Skill count: 142 | Genome: active -->
 **The source of truth for Codex and agent skills.**
 
 If you are new here:
@@ -31,6 +31,7 @@ python3 scripts/review_candidates.py --approve <candidate_id>
 ```
 
 **Key features:**
+
 - Nightly cron job (4:00 AM UTC) for automated analysis
 - Human review gate for all improvement candidates
 - Fail-closed controls (kill-switch, rollback, rollout-mode)
@@ -103,36 +104,10 @@ bash scripts/validate_all.sh
 ```
 
 This validates:
+
 - Plan task graphs (dependency checking)
 - Skill graph artifact compliance
 - Documentation structure and links
-
-## Skill Genome Loop
-
-Nightly batch process for skill improvement candidates:
-
-```bash
-# Run genome loop manually
-python3 scripts/run_skill_genome_loop.py
-
-# Review pending candidates
-python3 scripts/review_candidates.py --list
-
-# Approve/reject candidates
-python3 scripts/review_candidates.py --approve <id>
-python3 scripts/review_candidates.py --reject <id>
-```
-
-**Controls:**
-- `artifacts/skill-graphs/controls/rollout-mode.txt` — `off | observe_only | active`
-- `artifacts/skill-graphs/controls/kill-switch.txt` — Emergency stop (file exists = stop)
-
-**Outputs:**
-- `artifacts/skill-graphs/telemetry/pending-candidates.jsonl` — Awaiting review
-- `artifacts/skill-graphs/telemetry/candidates.jsonl` — Approved candidates
-- `logs/genome-loop.log` — Execution logs
-
-**Documentation:** [Skill Genome Loop Runbook](/docs/skill-graphs/runbooks/skill-genome-loop.md)
 
 ## Verify your setup
 
@@ -148,23 +123,35 @@ If either check fails, use the troubleshooting section below.
 ```text
 ~/dev/agent-skills/
 ├── auth/          # Authentication-focused skills
-├── personas/      # Persona-style response skills
-├── github/        # GitHub/DevOps workflows
-├── frontend/      # Frontend/UI patterns
-├── backend/       # Backend/Architecture/CLI
+├── backend/       # Backend, architecture, and CLI skills
+├── frontend/      # Frontend and UI skills
+│   ├── graphics/  # Image/video generation (imagegen, sora, threejs, etc.)
+│   ├── tools/     # Browser and design tooling (agentation, figma, stitch-*)
+│   ├── ui/        # UI component and motion skills (baseline-ui, remotion, shadcn, etc.)
+│   └── website/   # Web publishing skills (fixing-accessibility, fixing-metadata)
+├── github/        # GitHub and DevOps workflow skills
 ├── interview/     # Interview workflows and kernels
+├── ops/           # Operational and deployment skills
+├── personas/      # Persona-style response skills
 ├── product/       # Product specs, docs, planning
-├── design/        # PRD/spec templates and design references
-├── utilities/     # Utilities and helpers
+│   ├── content/   # Content production skills
+│   ├── docs/      # Documentation skills
+│   ├── domain/    # Domain-specific skills
+│   ├── ops/       # Product ops and decision skills
+│   ├── security/  # Security and compliance skills
+│   ├── specs/     # Specification skills
+│   └── strategy/  # Strategy and ideation skills
+├── utilities/     # General-purpose utilities and helpers
 ├── scripts/       # Repo-level helper scripts
 ├── references/    # Shared reference contracts
 ├── templates/     # Shared contract/eval templates
 ├── reports/       # Generated scan summaries and data snapshots
 ├── .agents/       # Repo-local Codex skills root
 ├── .agents/skills/ # Flat symlink directory (tooling entrypoint)
+├── skills-antigravity/ # Antigravity-compatible flat symlink projection
 ├── skills -> .agents/skills  # Legacy compatibility symlink
 ├── skills-system/ # Bundled/system skills (kept out of flat view)
-└── SKILL.md       # Human-readable skills index
+└── SKILL.md       # Human-readable skills index (auto-generated)
 ```
 
 ### Categorization rule of thumb
@@ -267,7 +254,7 @@ Common causes:
 - Non-scope: product-level feature specs and runtime API design docs.
 - Owner: repository maintainers (`@jscraik`).
 - Review cadence: every 90 days or after major workflow changes.
-- Last updated: 2026-02-18.
+- Last updated: 2026-03-07.
 
 ## Community health files
 
@@ -300,13 +287,13 @@ See `/LICENSE`.
 python3 ~/.codex/scripts/plan-graph-lint.py .agent/PLANS.md
 ```
 
-3. Run canonical verification:
+1. Run canonical verification:
 
 ```bash
 bash ~/.codex/scripts/verify-work.sh
 ```
 
-4. Follow scaffold policy:
+1. Follow scaffold policy:
 
 - `~/.codex/instructions/agent-first-scaffold-spec.md`
 <!-- AGENT-FIRST-WORKFLOW:END -->

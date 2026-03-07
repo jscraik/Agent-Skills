@@ -1,5 +1,5 @@
 ---
-name: better-auth-best-practices
+name: best-practices
 description: Review Better Auth setups and highlight secure integration best practices.
   Use for audits, config guidance, or debugging flows (not full implementation). Use
   when the user requests this capability.

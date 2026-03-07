@@ -15,6 +15,7 @@ SKIP_DIRS = {
     'docs',
     'skills',
     'skills-antigravity',
+    'skills-antigravity-test',
     'templates',
     'references',
     'skills-system',
