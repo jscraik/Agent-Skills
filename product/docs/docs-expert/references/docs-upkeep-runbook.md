@@ -20,6 +20,18 @@ Use this when maintaining docs over time.
 - Require owner approval for structural changes.
 - Review docs at least once per release.
 
+## Brand and visibility drift checks
+
+- Re-verify brand source-of-truth paths before major doc refreshes.
+- For public repos, review topics, social preview, and repository description when README meaningfully changes.
+- Reconfirm CODEOWNERS, SECURITY, and SUPPORT links remain valid.
+
+## AI-doc consistency checks
+
+- Keep agent-facing docs aligned with canonical human docs.
+- If optional `llms.txt` exists, refresh it when core docs/commands change.
+- Mark optional AI-only files clearly so maintainers do not mistake them for canonical policy docs.
+
 ## Metrics loop (Docs ROI)
 
 Use this to track whether docs are working.

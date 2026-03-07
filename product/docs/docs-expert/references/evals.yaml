@@ -43,6 +43,26 @@ cases:
       - type: contains
         value: "Brand"
 
+  - name: edge-brand-authority-precedence
+    prompt: "Use docs-expert to update docs, but follow brand guidance in docs/brand/official-guidelines.md and do not use fallback branding."
+    acceptance:
+      - type: contains
+        value: "brand source"
+      - type: contains
+        value: "official-guidelines.md"
+      - type: not_contains
+        value: "fallback branding applied by default"
+
+  - name: edge-github-visibility-pack
+    prompt: "Audit our public repo docs and include GitHub visibility checks."
+    acceptance:
+      - type: contains
+        value: "topics"
+      - type: contains
+        value: "social preview"
+      - type: contains
+        value: "description"
+
   - name: negative-prd-request
     prompt: "Write a PRD for our new onboarding flow."
     acceptance:
