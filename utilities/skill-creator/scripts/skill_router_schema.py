@@ -221,7 +221,7 @@ def _contains_sensitive_text(value: Any) -> bool:
 def _contains_forbidden_key(data: Any) -> bool:
     if isinstance(data, dict):
         for key, value in data.items():
-            if key in FORBIDDEN_KEYS:
+            if (key.lower() if isinstance(key, str) else key) in FORBIDDEN_KEYS:
                 return True
             if _contains_forbidden_key(value):
                 return True

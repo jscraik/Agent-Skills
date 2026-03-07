@@ -123,6 +123,25 @@ class SkillRouterTests(unittest.TestCase):
             self.assertNotIn("prompt_text", payload)
             self.assertIn("prompt_hash", payload)
 
+    def test_schema_rejects_case_variant_forbidden_fields(self) -> None:
+        """Mixed-case forbidden keys like 'Prompt' must be caught."""
+        base = {
+            "schema_version": "1.0",
+            "catalog_version": "abc123",
+            "actor_type": "human",
+            "policy_mode": "observe_only",
+            "policy_decision": "suggest",
+            "requires_clarification": False,
+            "prompt_hash": "deadbeef",
+            "uncertainty_reasons": [],
+            "top_candidates": [],
+        }
+        for bad_key in ("Prompt", "PROMPT", "Raw_Prompt", "RAW_PROMPT", "Objective"):
+            with self.subTest(bad_key=bad_key):
+                payload = {**base, bad_key: "raw text that should be blocked"}
+                issues = validate_router_result(payload, fail_on_sensitive_fields=True)
+                self.assertIn("forbidden raw prompt/objective keys present", issues)
+
     def test_agent_observe_only_requires_clarification(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
