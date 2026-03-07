@@ -27,6 +27,37 @@ require_option_value() {
   fi
 }
 
+# M-01: run_id must be a safe identifier — no path separators, dotdot, or
+# shell-special characters that could target unexpected artifact locations.
+validate_run_id() {
+  local id="$1"
+  if [[ ! "$id" =~ ^[A-Za-z0-9_][A-Za-z0-9_.\-]*$ ]]; then
+    echo "[promotion-gate] invalid --run-id '${id}': must match [A-Za-z0-9_][A-Za-z0-9_.\-]* (no path separators or special characters)" >&2
+    exit 2
+  fi
+  if [[ "$id" == *".."* || "$id" == *"/"* || "$id" == *"\\"* ]]; then
+    echo "[promotion-gate] invalid --run-id '${id}': path traversal sequences are not permitted" >&2
+    exit 2
+  fi
+}
+
+# H-02: resolved run directory must stay within the canonical runs subtree.
+# Prevents symlink attacks and user-controlled --run-dir values from escaping.
+confine_run_dir() {
+  local resolved_dir="$1"
+  local canonical_runs_dir
+  canonical_runs_dir="$(cd "${repo_root}/artifacts/skill-graphs/runs" 2>/dev/null && pwd || true)"
+  if [[ -z "$canonical_runs_dir" ]]; then
+    # Runs directory doesn't exist yet — verify at least repo_root is the prefix.
+    canonical_runs_dir="${repo_root}/artifacts/skill-graphs/runs"
+  fi
+  if [[ "$resolved_dir" != "${canonical_runs_dir}"/* && "$resolved_dir" != "$canonical_runs_dir" ]]; then
+    echo "[promotion-gate] run directory '${resolved_dir}' is outside the canonical runs subtree '${canonical_runs_dir}'" >&2
+    echo "[promotion-gate] set RECURSIVE_PROMOTION_ALLOW_RUN_DIR_OVERRIDE=1 only in tests" >&2
+    exit 2
+  fi
+}
+
 usage() {
   cat <<'USAGE'
 Usage: scripts/human_promote_recursive_run.sh [options]
@@ -121,6 +152,8 @@ if [[ -z "$run_dir" ]]; then
     echo "Either --run-id or --run-dir is required" >&2
     exit 2
   fi
+  # M-01: validate run_id format before constructing any path from it.
+  validate_run_id "$run_id"
   run_dir="artifacts/skill-graphs/runs/${run_id}"
 fi
 
@@ -131,6 +164,15 @@ write_blocker_and_exit() {
   now="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
   local blocker_path="$run_dir/run_blocker.json"
   local events_path="$run_dir/events.jsonl"
+
+  # M-03: run_blocker.json is write-once per run — the first blocking event is the
+  # forensic truth. If one already exists, log the conflict and exit without overwriting.
+  if [[ -f "$blocker_path" ]]; then
+    echo "[promotion-gate] run_blocker.json already exists (write-once protection); new code='${code}' message='${message}'" >&2
+    echo "[promotion-gate] existing blocker preserved at: $blocker_path" >&2
+    exit 3
+  fi
+
   python3 - "$run_json_path" "$blocker_path" "$events_path" "$code" "$message" "$reviewers" "$now" <<'PY'
 import fcntl
 import hashlib
@@ -221,6 +263,13 @@ run_dir="$(cd "$run_dir" 2>/dev/null && pwd || true)"
 if [[ -z "$run_dir" ]]; then
   echo "Run directory not found" >&2
   exit 2
+fi
+
+# H-02: confine resolved run directory to the canonical subtree, unless the
+# test-only override env var is explicitly set.
+allow_run_dir_override="${RECURSIVE_PROMOTION_ALLOW_RUN_DIR_OVERRIDE:-0}"
+if [[ "$allow_run_dir_override" != "1" && "$allow_run_dir_override" != "true" && "$allow_run_dir_override" != "TRUE" ]]; then
+  confine_run_dir "$run_dir"
 fi
 
 decision_path="$run_dir/promotion_decision.json"
@@ -368,8 +417,58 @@ gate['notes'] = note
 out.write_text(json.dumps(obj, indent=2, sort_keys=True) + '\n', encoding='utf-8')
 PY
 
+# ---------------------------------------------------------------------------
+# C-01 (option 1): HMAC-SHA256 decision signing
+# Sign the canonical JSON of the decision tmp file using PROMOTION_SIGNING_KEY.
+# The sig is written to <decision_tmp>.sig and verified by the validator before
+# any canonical lesson write occurs.
+#
+# If PROMOTION_SIGNING_KEY is unset:
+#   - PROMOTION_SIG_REQUIRED=1 (CI): hard-fail.
+#   - Otherwise (local/interactive): warn and skip signing.
+#
+# Migration path to option 2 (Ed25519) is documented in
+# docs/skill-graphs/governance/promotion-signing.md.
+# ---------------------------------------------------------------------------
+decision_sig_file="${decision_tmp}.sig"
+promotion_key="${PROMOTION_SIGNING_KEY:-}"
+sig_required="${PROMOTION_SIG_REQUIRED:-0}"
+
+if [[ -n "$promotion_key" ]]; then
+  python3 - "$decision_tmp" "$decision_sig_file" "$promotion_key" <<'PY'
+import hmac
+import json
+import sys
+from hashlib import sha256
+from pathlib import Path
+
+decision_path = Path(sys.argv[1])
+sig_path = Path(sys.argv[2])
+key = sys.argv[3].encode("utf-8")
+
+# Canonical form: sorted keys, no trailing whitespace variation
+obj = json.loads(decision_path.read_text(encoding="utf-8"))
+canonical = json.dumps(obj, sort_keys=True, separators=(",", ":")).encode("utf-8")
+mac = hmac.new(key, canonical, sha256).hexdigest()
+sig_path.write_text(f"hmac-sha256:{mac}\n", encoding="utf-8")
+print(f"[promotion-gate] decision signed → {sig_path}")
+PY
+  echo "[promotion-gate] HMAC-SHA256 signature written: $decision_sig_file"
+elif [[ "$sig_required" == "1" || "$sig_required" == "true" || "$sig_required" == "TRUE" ]]; then
+  echo "[promotion-gate] ERROR: PROMOTION_SIGNING_KEY is not set but PROMOTION_SIG_REQUIRED=1 — cannot sign decision" >&2
+  echo "[promotion-gate] Set PROMOTION_SIGNING_KEY from the GitHub secret 'PROMOTION_SIGNING_KEY' in CI." >&2
+  exit 2
+else
+  echo "[promotion-gate] WARNING: PROMOTION_SIGNING_KEY not set; decision will not be signed." >&2
+  echo "[promotion-gate] Set PROMOTION_SIG_REQUIRED=1 in CI to hard-fail on unsigned decisions." >&2
+fi
+
 validator="utilities/skill-creator/scripts/validate_recursive_promotion.py"
 validator_cmd=(python3 "$validator" --run-dir "$run_dir" --decision-file "$decision_tmp")
+
+if [[ -f "$decision_sig_file" ]]; then
+  validator_cmd+=(--decision-sig-file "$decision_sig_file")
+fi
 
 if [[ -n "$lesson_file" ]]; then
   validator_cmd+=(--lesson-file "$lesson_file")

@@ -19,6 +19,9 @@ on:
         required: false
         default: "warn"
 
+permissions:
+  contents: read
+
 jobs:
   structure-gate:
     runs-on: ubuntu-latest

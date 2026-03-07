@@ -1,0 +1,137 @@
+name: Security Scans
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    # Nightly at 02:00 UTC — catches new CVEs in dependencies without a code change
+    - cron: "0 2 * * *"
+
+permissions:
+  contents: read
+  security-events: write  # required for SARIF upload to GitHub Advanced Security
+
+jobs:
+  # ------------------------------------------------------------------
+  # Gitleaks — secrets detection
+  # L-01: no secrets-leak assertion in CI
+  # ------------------------------------------------------------------
+  gitleaks:
+    name: Gitleaks (secrets scan)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # full history so Gitleaks can diff commits
+
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Fail the workflow on any finding; set to "warn" to soft-fail
+          GITLEAKS_ENABLE_COMMENTS: "true"
+
+  # ------------------------------------------------------------------
+  # Semgrep — static analysis (Python + TypeScript + shell)
+  # Covers prompt-injection patterns not caught by the string-only scan
+  # ------------------------------------------------------------------
+  semgrep:
+    name: Semgrep (SAST)
+    runs-on: ubuntu-latest
+    container:
+      image: semgrep/semgrep
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run Semgrep (auto ruleset + secrets)
+        run: |
+          semgrep ci \
+            --config auto \
+            --config "p/secrets" \
+            --config "p/python" \
+            --config "p/typescript" \
+            --config "p/bash" \
+            --sarif --output semgrep.sarif \
+            --error
+        env:
+          # Set SEMGREP_APP_TOKEN if using Semgrep Cloud for dashboard/PR comments
+          SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN || '' }}
+
+      - name: Upload Semgrep SARIF to GitHub
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: semgrep.sarif
+          category: semgrep
+
+  # ------------------------------------------------------------------
+  # Trivy — dependency vulnerability scan (Python lockfiles, node_modules)
+  # ------------------------------------------------------------------
+  trivy:
+    name: Trivy (dependency CVE scan)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run Trivy (filesystem scan)
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: fs
+          scan-ref: .
+          format: sarif
+          output: trivy.sarif
+          severity: CRITICAL,HIGH
+          exit-code: "1"
+          ignore-unfixed: true
+
+      - name: Upload Trivy SARIF to GitHub
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy.sarif
+          category: trivy
+
+  # ------------------------------------------------------------------
+  # Canonical artifact pre-upload secrets check (L-01)
+  # Scans generated telemetry / canonical lesson artifacts for secret
+  # patterns before they are uploaded anywhere.
+  # ------------------------------------------------------------------
+  artifact-secret-check:
+    name: Artifact secrets pre-check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install Gitleaks
+        run: |
+          curl -sSfL https://github.com/gitleaks/gitleaks/releases/latest/download/gitleaks_$(uname -s)_$(uname -m).tar.gz \
+            | tar -xz -C /usr/local/bin gitleaks
+          chmod +x /usr/local/bin gitleaks
+
+      - name: Scan artifacts directory for secrets
+        run: |
+          if [ -d "artifacts" ]; then
+            gitleaks detect \
+              --source artifacts/ \
+              --no-git \
+              --redact \
+              --exit-code 1 \
+              --report-format json \
+              --report-path gitleaks-artifacts.json || {
+                echo "::error::Secret pattern detected in artifacts/ — review gitleaks-artifacts.json"
+                exit 1
+              }
+          else
+            echo "No artifacts/ directory — skipping."
+          fi
+
+      - name: Upload Gitleaks artifact report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gitleaks-artifacts-report
+          path: gitleaks-artifacts.json
+          retention-days: 7

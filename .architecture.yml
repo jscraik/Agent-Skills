@@ -1,0 +1,52 @@
+# Architecture rules for agent-skills
+# Run: npx --yes @brainwav/diagram test . --format console
+schema_version: 1
+
+rules:
+  # Core skill routing invariant: every invocation must pass through skill_gate
+  - id: skill_gate_reachable
+    description: skill_gate must be reachable from skill_router
+    type: reachability
+    from: skill_router
+    to: skill_gate
+    severity: error
+
+  # Guard layer must remain downstream of the router
+  - id: openclaw_guard_reachable
+    description: openclaw_skill_guard must be reachable from skill_router
+    type: reachability
+    from: skill_router
+    to: openclaw_skill_guard
+    severity: error
+
+  # Feedback loop must not bypass the gate
+  - id: record_feedback_after_gate
+    description: record_skill_feedback must be reachable only downstream of skill_gate
+    type: reachability
+    from: skill_gate
+    to: record_skill_feedback
+    severity: warning
+
+  # Fleet pipeline must maintain correct stage order
+  - id: fleet_stage_order
+    description: fleet_analyze must be reachable from fleet_plan inputs (pipeline order)
+    type: reachability
+    from: fleet_analyze
+    to: fleet_dispatch
+    severity: error
+
+  # NotebookLM browser automation must go through browser_utils (not raw patchright)
+  - id: browser_session_uses_utils
+    description: browser_session must depend on browser_utils (no raw patchright bypass)
+    type: dependency
+    source: browser_session
+    depends_on: browser_utils
+    severity: error
+
+  # sync_mcp must not depend on any browser automation subsystem
+  - id: sync_mcp_isolated
+    description: sync_mcp must not import from notebooklm browser subsystem
+    type: no_dependency
+    source: sync_mcp
+    must_not_depend_on: browser_session
+    severity: error

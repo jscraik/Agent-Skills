@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import hmac
 import json
 import os
 import re
@@ -105,6 +106,17 @@ def parse_args() -> argparse.Namespace:
         default=DEFAULT_POLICY_SIG_FILE,
         help="Policy signature file containing sha256(policy file)",
     )
+    # C-01: HMAC-SHA256 decision integrity
+    p.add_argument(
+        "--decision-sig-file",
+        help="Path to HMAC-SHA256 signature file for promotion_decision.json (written by human_promote_recursive_run.sh)",
+    )
+    p.add_argument(
+        "--require-sig",
+        action="store_true",
+        default=bool(os.environ.get("PROMOTION_SIG_REQUIRED", "").strip() in {"1", "true", "TRUE", "yes"}),
+        help="Hard-fail if no decision signature file is present (set via PROMOTION_SIG_REQUIRED=1 in CI)",
+    )
     p.add_argument("--write-report", help="Optional JSON output path for validation report")
     return p.parse_args()
 
@@ -202,6 +214,57 @@ def sha256_file(path: Path) -> str:
         for chunk in iter(lambda: f.read(65536), b""):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def verify_decision_hmac(
+    decision_path: Path,
+    sig_path: Path,
+    errors: List[Dict[str, str]],
+    warnings: List[Dict[str, str]],
+) -> bool:
+    """Verify the HMAC-SHA256 signature of a promotion decision file.
+
+    The key is read from the PROMOTION_SIGNING_KEY environment variable.  Uses
+    ``hmac.compare_digest`` for constant-time comparison to prevent timing
+    attacks.
+
+    Returns True if verification passed (or was skipped due to missing key).
+    Returns False and appends an error if verification fails.
+    """
+    key_raw = os.environ.get("PROMOTION_SIGNING_KEY", "").strip()
+    if not key_raw:
+        # Key not set — can't verify; the caller decides whether this is fatal.
+        return True
+
+    try:
+        sig_line = sig_path.read_text(encoding="utf-8").strip()
+    except OSError as exc:
+        add_error(errors, "E_DECISION_SIG_READ_FAILED", f"cannot read sig file: {exc}")
+        return False
+
+    if not sig_line.startswith("hmac-sha256:"):
+        add_error(errors, "E_DECISION_SIG_FORMAT", f"unexpected sig format (expected 'hmac-sha256:<hex>'): {sig_path}")
+        return False
+
+    recorded_mac = sig_line[len("hmac-sha256:"):].strip()
+    try:
+        obj = json.loads(decision_path.read_text(encoding="utf-8"))
+        canonical = json.dumps(obj, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    except Exception as exc:
+        add_error(errors, "E_DECISION_SIG_CANONICAL_FAILED", f"cannot canonicalise decision for sig check: {exc}")
+        return False
+
+    key = key_raw.encode("utf-8")
+    expected_mac = hmac.new(key, canonical, sha256).hexdigest()
+    if not hmac.compare_digest(recorded_mac, expected_mac):
+        add_error(
+            errors,
+            "E_DECISION_SIG_MISMATCH",
+            "HMAC-SHA256 signature mismatch — promotion_decision.json may have been tampered with",
+        )
+        return False
+
+    return True
 
 
 def scan_lesson_content(path: Path) -> Dict[str, List[str]]:
@@ -410,6 +473,23 @@ def validate(args: argparse.Namespace) -> Dict[str, Any]:
         else run_dir / "promotion_decision.json"
     )
     artifact_files = {p.name for p in run_dir.glob("*") if p.is_file()}
+
+    # C-01: Verify HMAC-SHA256 signature before any schema or policy checks.
+    sig_file_arg = getattr(args, "decision_sig_file", None)
+    require_sig = getattr(args, "require_sig", False)
+    if sig_file_arg:
+        sig_path = Path(sig_file_arg).expanduser().resolve()
+        if sig_path.exists() and decision_path.exists():
+            verify_decision_hmac(decision_path, sig_path, errors, warnings)
+        elif not sig_path.exists():
+            add_error(errors, "E_DECISION_SIG_MISSING", f"--decision-sig-file specified but not found: {sig_path}")
+    elif require_sig:
+        add_error(
+            errors,
+            "E_DECISION_SIG_MISSING",
+            "PROMOTION_SIG_REQUIRED=1 but no --decision-sig-file was provided",
+        )
+    # No sig file, no require_sig → backwards-compatible: validation proceeds without sig check.
 
     if str(decision_path) == str(run_json_path):
         add_warning(
