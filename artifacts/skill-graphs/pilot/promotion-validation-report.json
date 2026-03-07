@@ -1,6 +1,55 @@
 {
   "status": "ok",
-  "validated": 0,
+  "validated": 2,
   "failed": 0,
-  "results": []
+  "results": [
+    {
+      "validator": "recursive_promotion",
+      "run_id": "run_20260220T150021Z_518880",
+      "decision_file": "artifacts/skill-graphs/runs/run_20260220T150021Z_518880/promotion_decision.json",
+      "status": "ok",
+      "error_count": 0,
+      "warning_count": 3,
+      "errors": [],
+      "warnings": [
+        {
+          "code": "W_LEGACY_EVENTS_FILE_MISSING",
+          "message": "events.jsonl missing for legacy promotion layout; tolerated for historical run"
+        },
+        {
+          "code": "W_CONFIDENCE_MISSING",
+          "message": "confidence object missing (Phase-4 queue enrichment expected)"
+        },
+        {
+          "code": "W_COUNTERFACTUAL_MISSING",
+          "message": "counterfactual_uplift missing (legacy schema)"
+        }
+      ],
+      "decision": "approved"
+    },
+    {
+      "validator": "recursive_promotion",
+      "run_id": "run_20260220T195545Z_8799c2",
+      "decision_file": "artifacts/skill-graphs/runs/run_20260220T195545Z_8799c2/promotion_decision.json",
+      "status": "ok",
+      "error_count": 0,
+      "warning_count": 3,
+      "errors": [],
+      "warnings": [
+        {
+          "code": "W_LEGACY_EVENTS_FILE_MISSING",
+          "message": "events.jsonl missing for legacy promotion layout; tolerated for historical run"
+        },
+        {
+          "code": "W_CONFIDENCE_MISSING",
+          "message": "confidence object missing (Phase-4 queue enrichment expected)"
+        },
+        {
+          "code": "W_COUNTERFACTUAL_MISSING",
+          "message": "counterfactual_uplift missing (legacy schema)"
+        }
+      ],
+      "decision": "draft"
+    }
+  ]
 }

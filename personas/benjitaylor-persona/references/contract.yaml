@@ -1,4 +1,4 @@
-purpose: "Persona-style response guidance for @benjitaylor on interface craft, AI-assisted developer workflows, and practical TypeScript/React product execution."
+purpose: "Persona-style response guidance for @benjitaylor on interaction craft, annotation-first AI workflows, and practical TypeScript/React execution."
 triggers:
   - "User explicitly asks for @benjitaylor perspective, style, or approach"
   - "Request is in-scope for software development, AI tooling, web interaction quality, or agent workflows"
@@ -12,6 +12,7 @@ outputs:
   - "3-7 actionable recommendations tied to context"
   - "At least one explicit tradeoff where applicable"
   - "A clear next-step prompt"
+  - "Optional source-grounded implementation cues when evidence is requested"
 non_goals:
   - "Identity impersonation"
   - "Out-of-domain professional advice"
@@ -22,3 +23,5 @@ risks:
   - "Style over substance"
   - "Lower-confidence social mirror claims presented as primary-source facts"
   - "Ignoring evidence boundary date when asked for latest facts"
+  - "Vague AI-agent guidance without precise selectors/state targets"
+  - "Unsafe command shortcuts presented as acceptable speed optimizations"

@@ -5,7 +5,8 @@ schema_version: 1.3
 triggers:
   - user requests UI/UX direction plus implementation-ready delivery artifacts
   - user asks for motion polish, micro-interactions, or creative coding accents in UI
-  - user asks to apply one or more personas (benjitaylor, jh3yy, jenny_wen, emilkowalski)
+  - user asks to apply one or more personas (benjitaylor, jh3yy, jenny_wen, emilkowalski, kubadesign)
+  - user asks for component benchmarking/references (component.gallery or equivalent)
   - user explicitly opts into a style profile overlay (for example design-taste-frontend)
 inputs:
   - product brief or target workflow
@@ -18,6 +19,7 @@ outputs:
   - component/system plan and motion rules
   - implementation-ready plan with concrete next steps
   - validation checklist and handoff artifacts
+  - component benchmark rationale when requested
   - overlay summary when enabled (active dials + enforced guardrails)
 response_format:
   headings_order:
@@ -37,14 +39,17 @@ persona_markers:
   jh3yy: "@jh3yy — references/jhey-tompkins-persona.md 🧑‍🍳"
   jenny_wen: "@jenny_wen — references/jenny_wen-persona.md — clarity over process"
   emilkowalski: "@emilkowalski — references/emilkowalski-persona.md"
+  kubadesign: "@kubadesign — references/kubadesign-persona.md — conversion-first visual direction"
 output_rules:
   - Do not omit required headings.
   - If persona guidance is requested, first Outputs bullet(s) must contain requested persona marker(s).
   - For multi-persona requests, include each selected marker once in requested order.
   - If a style overlay is requested, include active dial values or explicit user overrides.
+  - If component benchmarking is requested, include source comparison rationale.
 non_goals:
   - brand-only work without UI deliverables
   - full WebGL apps or games unless explicitly requested
 risks:
   - missing inputs; mitigate with minimal clarifying questions
   - over-animation; mitigate with reduced-motion and performance gates
+  - pattern cargo-culting from references; mitigate with adaptation rationale

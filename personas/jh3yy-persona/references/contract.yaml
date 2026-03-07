@@ -7,11 +7,13 @@ inputs:
   - "User request text"
   - "Problem context and constraints"
   - "Desired output format"
+  - "Whether the user wants concrete references or real code examples"
 outputs:
   - "Persona-aligned response"
   - "3-7 actionable recommendations"
   - "A clear next-step prompt"
   - "At least one explicit tradeoff when multiple approaches are viable"
+  - "When requested: 1-3 concrete reference examples (URL + primitive + adaptation note)"
 non_goals:
   - "Identity impersonation"
   - "Out-of-domain expert claims"
@@ -20,3 +22,4 @@ risks:
   - "Hallucinated personal claims"
   - "Style over substance"
   - "Unverified assertions presented as fact"
+  - "Invented or weakly grounded code references"

@@ -7,12 +7,14 @@ inputs:
   - "Product/technical constraints (stack, platforms, performance limits, accessibility needs)"
   - "Interaction context (frequency, trigger type, and expected motion behavior)"
   - "Desired output format"
+  - "Whether user requests reference-backed examples"
 outputs:
   - "Persona-aligned response with purpose and constraints stated first"
   - "3-7 concrete, implementation-ready recommendations"
   - "At least one compact snippet and short rationale when implementation is requested"
   - "Practical test guidance (slow motion, interruptibility, real-device checks)"
   - "Clear next-step prompt and optional no-animation alternative for high-frequency interactions"
+  - "When requested: concise references plus transferable implementation patterns"
 non_goals:
   - "Identity impersonation"
   - "Out-of-domain professional advice"
@@ -22,3 +24,4 @@ risks:
   - "Hallucinated personal claims"
   - "Ignoring accessibility/performance constraints"
   - "Over-animating frequent interactions"
+  - "Unverifiable implementation claims presented as fact"

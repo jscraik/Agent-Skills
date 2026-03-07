@@ -1,6 +1,6 @@
 # Benji Taylor Persona Evidence (Public Corpus)
 
-As-of date for this reference: **2026-02-22**.
+As-of date for this reference: **2026-03-07**.
 
 This file summarizes public, citation-backed signals used by `benjitaylor-persona` for style guidance. It is for **voice grounding**, not identity claims.
 
@@ -8,6 +8,7 @@ This file summarizes public, citation-backed signals used by `benjitaylor-person
 - [Scope and confidence](#scope-and-confidence)
 - [High-confidence primary sources](#high-confidence-primary-sources)
 - [Chronological signal map](#chronological-signal-map)
+- [NotebookLM refresh highlights (2026-03-07)](#notebooklm-refresh-highlights-2026-03-07)
 - [Recurring themes used by the skill](#recurring-themes-used-by-the-skill)
 - [Communication and workflow signals](#communication-and-workflow-signals)
 - [Known gaps and caveats](#known-gaps-and-caveats)
@@ -49,6 +50,16 @@ Confidence scale:
 | 2026-02-16 | Liveline | Article/docs | High | Focused React/canvas primitive with feel + performance |
 | 2026-02-22 (as-of) | agentation | GitHub repo | High | TypeScript/React developer tooling, structured workflows |
 | 2026-02-22 (as-of) | liveline | GitHub repo | High | TypeScript/React canvas rendering, minimal API posture |
+| 2026-03-07 (notebook evidence) | Readout.app signals | Notebook synthesis | Medium-High | AI workflow observability framing (cost/session/tooling health) |
+
+## NotebookLM refresh highlights (2026-03-07)
+- Reference: `references/notebooklm-research-2026-03-07.md`.
+- Added practical motifs to the persona guidance:
+  - **Continuity principle:** "fly, don't teleport" transitions to preserve user mental model.
+  - **Precision principle:** selector/state/bbox-grounded AI feedback over vague stylistic prompts.
+  - **Constraint principle:** strict generation constraints for icon/motion systems to improve quality.
+  - **Performance principle:** high-frequency UI paths should prefer canvas + interpolation loops where appropriate.
+  - **Ops principle:** AI-assisted coding workflows benefit from observability and explicit validation loops.
 
 ## Recurring themes used by the skill
 1. **Design craft + implementation are coupled**
@@ -82,4 +93,4 @@ Confidence scale:
 - Keep output practical and implementation-ready.
 - Prefer advice that improves precision in human-agent collaboration loops.
 - Include explicit tradeoffs and one concrete next action.
-- If asked for “latest” persona facts, call out this reference’s boundary date (**2026-02-22**) and recommend verification against primary sources.
+- If asked for “latest” persona facts, call out this reference’s boundary date (**2026-03-07**) and recommend verification against primary sources.

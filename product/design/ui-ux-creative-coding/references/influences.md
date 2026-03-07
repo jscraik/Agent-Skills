@@ -1,72 +1,18 @@
-# Influences (Jan 2026)
+# Influences (Refresh 2026-03-07)
 
-This skill is inspired by the following design-engineering / creative-coding voices.
-Use these links as “study sets” when you need a fresh pattern or a polish reference.
+This skill centers on five explicit inspiration lenses plus component benchmarking.
 
-**How to use these notes:**
-- Pick **one influence** to lead the solution (voice + tradeoffs).
-- Use **Emil + Jhey** notes for motion/micro-interactions by default.
-- Cite the note files when explaining timing/easing or interaction decisions.
+## Core persona lenses
+- **@benjitaylor** — builder-first interaction polish and agent-loop precision
+- **@jh3yy** — platform-first CSS craft and accessible micro-interactions
+- **@jenny_wen** — adoption-aware product framing and clarity over process
+- **@emilkowalski** — motion discipline, interaction quality, and implementation rigor
+- **@kubadesign** — conversion-minded visual strategy and rapid iteration framing
 
-## @jh3yy (Jhey Tompkins)
-- Craft of UI: https://craftofui.com/
-- CodePen profile: https://codepen.io/jh3yy
-- X: https://x.com/jh3yy
+## Component benchmarking source
+- **component.gallery** — curated real-world component implementations for comparison and stack-fit reasoning
 
-Study focus:
-- Platform-first effects (CSS masks/filters/transforms)
-- Micro-interactions as tiny systems (states + timing + a11y)
-- Production‑ready craft: semantic elements first, avoid `<div role=button>`
-- CSS techniques to study: `anchor()` alignment + `@starting-style` for smoother enters
-- Reduce-motion and performance-first defaults
-
-## @PixalJanitor (Pixel Janitor / Derek Briggs)
-- X: https://x.com/PixalJanitor
-- (If you follow Shape FM): https://shape.fm/
-
-Study focus:
-- Design engineering mindset (systems that accelerate shipping)
-- Reusable primitives + constraints
-
-## @willking
-- X: https://x.com/willking
-
-Study focus:
-- “Vibe coding” workflows: fast variants → pick → refactor → ship
-- Using AI without letting quality drift
-
-## @emilkowalski
-- Animations course/site: https://animations.dev/
-- Sonner (toast): https://github.com/emilkowalski/sonner
-- Vaul (drawer): https://github.com/emilkowalski/vaul
-- X: https://x.com/emilkowalski_
-
-Study focus:
-- Motion as UX communication (not decoration)
-- Timing + easing as first-class design decisions
-- “Best animation is no animation” when clarity doesn’t improve
-- Consistent choreography across components
-- CSS-first building blocks (transforms, clip-path, filters)
-
-## @richtabor
-- Blog: https://rich.blog/
-- X: https://x.com/richtabor
-
-Study focus:
-- Product-minded design systems
-- Documentation and scalable patterns
-
-## @tomkrcha
-- X: https://x.com/tomkrcha
-
-Study focus:
-- Design↔code tool thinking
-- Keeping design intent and coded reality in tight feedback loops
-
-## @jenny_wen (Hatch 2025)
-- Hatch talk page: https://hatchconference.com/berlin2025/speakers/jenny-wen
-- “Don’t Trust the Process” essay: https://jennywen.notion.site/Don-t-trust-the-process-df9e56fe1e52402a8fbe7d1647dc11a6
-
-Study focus:
-- “Rewrite the process” mindset
-- Judgment + craft as differentiators
+## Quick usage
+1. Choose one primary lens (or use intertwined mode).
+2. If component choice is unclear, run a `component.gallery` benchmark pass.
+3. Convert influence signals into concrete implementation decisions and tradeoffs.

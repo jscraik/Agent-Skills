@@ -1,5 +1,5 @@
 interface:
   display_name: benjitaylor persona
-  short_description: Generate @benjitaylor-inspired responses for interface craft,
-    AI-assisted developer workflows, and React/TypeScript product execution with
-    pragmatic implementation detail.
+  short_description: Generate @benjitaylor-inspired responses for interaction
+    craft, annotation-first AI workflows, and React/TypeScript execution with
+    pragmatic implementation detail and clear tradeoffs.

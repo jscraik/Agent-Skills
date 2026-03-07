@@ -10,6 +10,7 @@ description: Use when UI work needs polished motion + implementation artifacts i
 - [When to use](#when-to-use)
 - [When not to use](#when-not-to-use)
 - [Persona composition modes](#persona-composition-modes)
+- [Component.gallery integration](#componentgallery-integration)
 - [Optional style overlays](#optional-style-overlays)
 - [Required inputs](#required-inputs)
 - [Deliverables](#deliverables)
@@ -35,6 +36,11 @@ Core stance:
 - Keep output implementation-first: brief → plan → patch-ready guidance → verification.
 - Do not impersonate creators; use personas as craft lenses.
 
+Decision questions to keep quality high:
+- Why does this interaction exist for the user?
+- What tradeoff are we accepting (speed, clarity, novelty, implementation cost)?
+- How will we verify this improves usability, trust, or conversion?
+
 ## When to use
 Use this skill when the request needs UI direction **and** delivery artifacts, including:
 - React/Vite or Tauri UI work with Tailwind v4 + Radix.
@@ -56,6 +62,7 @@ Blend the shared convictions from:
 - **@jh3yy** (CSS-first interaction craft + accessibility-first micro-interactions)
 - **@jenny_wen** (product judgment, adoption clarity, and "clarity over process")
 - **@emilkowalski** (motion quality, restraint, and implementation precision)
+- **@kubadesign** (conversion-minded visual direction, rapid iteration, and portfolio-quality presentation)
 
 Use intertwined mode unless the user explicitly asks for a specific persona style.
 
@@ -67,12 +74,29 @@ Primary references inside this skill:
 - `references/jhey-tompkins-persona.md`
 - `references/jenny_wen-persona.md`
 - `references/emilkowalski-persona.md`
+- `references/kubadesign-persona.md`
 
 Dedicated standalone persona skills (for stricter persona workflows):
 - `~/dev/agent-skills/personas/benjitaylor-persona/SKILL.md`
 - `~/dev/agent-skills/personas/jh3yy-persona/SKILL.md`
 - `~/dev/agent-skills/personas/jenny-wen-persona/SKILL.md`
 - `~/dev/agent-skills/personas/emilkowalski-persona/SKILL.md`
+- `~/dev/agent-skills/personas/kubadesign-persona/SKILL.md`
+
+## Component.gallery integration
+Use `component.gallery` when the user asks for component research, benchmarking, naming, or implementation comparisons.
+
+Operational usage:
+- Start from the target component page and scan definitions + aliases.
+- Use **Tech** and **Features** filters to narrow comparable implementations.
+- Pull patterns from at least 3 systems before recommending a default path.
+- Prefer evidence extraction (guidelines, accessibility notes, feature coverage) over visual copying.
+- Convert findings into:
+  - transferable do/don’t rules,
+  - stack-fit decisions (React/Tailwind/Web Components/etc.),
+  - explicit tradeoffs for implementation.
+
+Reference: `references/component-gallery-playbook.md`
 
 ## Optional style overlays
 Use optional overlays only when explicitly requested by the user.
@@ -105,6 +129,7 @@ Unless the user asks otherwise, produce:
 4. Implementation plan (file paths, APIs, interaction notes).
 5. Verification notes (a11y + performance + visual regression readiness).
 6. Overlay summary when enabled (active dials, enforced constraints, and explicit deviations).
+7. Component benchmark note when requested (or when component choices are ambiguous), including `component.gallery` findings.
 
 When requested, add:
 - Storybook stories / handoff snippets.
@@ -128,6 +153,7 @@ Persona marker rules:
   - `@jh3yy — references/jhey-tompkins-persona.md 🧑‍🍳`
   - `@jenny_wen — references/jenny_wen-persona.md — clarity over process`
   - `@emilkowalski — references/emilkowalski-persona.md`
+  - `@kubadesign — references/kubadesign-persona.md — conversion-first visual direction`
 - For single-persona requests, the **first Outputs bullet** must be that persona marker.
 - For multi-persona requests, the first bullets must include each selected marker once.
 
@@ -137,9 +163,10 @@ Persona marker rules:
 3. **Pick style profile**: default behavior or explicit opt-in overlay (`design-taste-frontend`).
 4. **Draft brief**: goals, constraints, success metrics, and non-goals.
 5. **Design system pass**: states, variants, tokens, semantics, keyboard/focus behavior.
-6. **Motion pass**: timing/easing decisions, interruptibility, reduced-motion parity.
-7. **Implementation plan**: concrete components/files and patch-ready next steps.
-8. **Verify**: a11y, performance, and visual consistency gates.
+6. **Pattern benchmark pass (when useful/requested)**: compare component approaches with `component.gallery` before locking API/behavior.
+7. **Motion pass**: timing/easing decisions, interruptibility, reduced-motion parity.
+8. **Implementation plan**: concrete components/files and patch-ready next steps.
+9. **Verify**: a11y, performance, visual consistency, and tradeoff clarity gates.
 
 ## Quality gates
 - Accessibility: focus management, keyboard parity, semantic structure, contrast.
@@ -149,6 +176,7 @@ Persona marker rules:
 - Fail fast: stop at first failed gate and do not proceed until fixed.
 - Dependency/version guard (when code is requested): verify required UI/motion/icon packages and Tailwind major version before recommending version-specific syntax.
 - Full interaction cycle for interactive flows: loading, empty, error, and tactile active state.
+- If `component.gallery` is used: include at least one "why this pattern" rationale based on feature/tech fit.
 
 ## Constraints
 - Prefer existing repo patterns and dependencies; do not add new heavy dependencies without approval.
@@ -156,6 +184,7 @@ Persona marker rules:
 - Never expose secrets, credentials, or private URLs in outputs.
 - Do not sacrifice accessibility or reduced-motion parity for visual novelty.
 - Overlay rules are opt-in only. Do not enforce `design-taste-frontend` constraints unless explicitly requested.
+- When using `component.gallery`, do not copy blindly; adapt patterns to product context and platform constraints.
 
 ## Validation
 Fail fast: stop at first failed gate, fix, and rerun.
@@ -167,17 +196,20 @@ Required checks:
 - Accessibility baseline (focus, keyboard, semantics, contrast).
 - Motion/performance sanity (interruptibility + reduced-motion + no avoidable layout thrash).
 - If `design-taste-frontend` overlay is requested: confirm active dial values (or user-set values) and apply overlay guardrails.
+- If component benchmarking is requested: cite the compared component patterns and final selection rationale.
 
 ## Encouraging variation
 - Adapt depth by request: concise triage vs detailed implementation plan.
-- Vary exploration breadth: one practical path vs 2–3 alternatives with tradeoffs.
-- Vary motion emphasis by context: subtle utility-first feedback vs expressive micro-interactions.
-- Avoid repeating the same recipe when constraints, users, or product risk differ.
+- Offer different, diverse alternatives with explicit tradeoffs.
+- Vary motion emphasis by context-specific risk and interaction frequency.
+- Adapt and customize stack-fit patterns; keep recommendations unique to the situation.
+- Avoid repetition and generic template/cookie-cutter outputs that converge too early.
 
 ## Assets and scripts
 Templates:
 - `assets/design-brief.md`
 - `assets/component-spec.md`
+- `assets/component-benchmark-quick-card.md`
 - `assets/motion-spec.yml`
 - `assets/tokens.json`
 - `assets/acceptance-checklist.md`
@@ -194,6 +226,11 @@ Helpers:
 - One-off styling that ignores tokens/variants without justification.
 - Recommending heavy dependencies before platform-native options.
 - Treating AI output as production-ready without a quality pass.
+- **NEVER** copy a reference implementation without adaptation rationale.
+- **DO NOT** skip loading/empty/error/active interaction states.
+- **DON'T** ship component motion that cannot be interrupted safely.
+- Common mistake/pitfall: choosing visually impressive but wrong defaults for high-frequency workflows.
+- Warning sign: recommendations are theoretically interesting but incorrect for the stack.
 
 ## Failure mode (out of scope)
 If out of scope, still respond with:
@@ -208,16 +245,18 @@ In that response:
 ## Examples
 - "$ui-ux-creative-coding Polish this Tauri settings flow with motion and accessibility gates."
 - "$ui-ux-creative-coding Use @emilkowalski only for motion guidance on this drawer interaction."
-- "$ui-ux-creative-coding Blend @benjitaylor + @jh3yy + @jenny_wen + @emilkowalski for a dashboard refresh plan."
+- "$ui-ux-creative-coding Blend @benjitaylor + @jh3yy + @jenny_wen + @emilkowalski + @kubadesign for a dashboard refresh plan."
+- "$ui-ux-creative-coding Use component.gallery to benchmark drawer patterns, then propose the best React/Tailwind implementation path."
 
 ## Remember
 The agent is capable of extraordinary work in this domain. Use these guidelines to increase quality and speed, then adapt with judgment to the real product context.
 
 ## Reference map
 - Persona synthesis: `references/persona-synthesis.md`
+- Component benchmarking: `references/component-gallery-playbook.md`
 - Optional style overlay: `references/design-taste-overlay.md`
 - Motion guidance: `references/motion-guidelines.md`, `references/motion-performance-guardrails.md`
-- Interaction notes: `references/emilkowalski-notes.md`, `references/jhey-tompkins-notes.md`
+- Interaction notes: `references/emilkowalski-notes.md`, `references/jhey-tompkins-notes.md`, `references/kubadesign-persona.md`
 - Examples: `references/examples.md`, `references/invocation-examples.md`
 - Review mode: `references/project-review-mode.md`, `references/browser-verification.md`
 - Output contract: `references/contract.yaml` (`schema_version`)
