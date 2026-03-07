@@ -7,6 +7,17 @@ If you are trying to find or use skills (not edit docs), start with:
 - Skills index: `/SKILL.md`
 - Repo overview: `/README.md`
 
+## Quick Links
+
+| What You Want | Where To Go |
+|---------------|-------------|
+| Add a new skill | [Guides: Recursive Skill Loop](/docs/guides/recursive-skill-loop.md) |
+| Understand the system | [Concepts](/docs/concepts) |
+| Look up a script/policy | [Reference](/docs/reference) |
+| Run the Skill Genome Loop | [Runbook](/docs/skill-graphs/runbooks/skill-genome-loop.md) |
+| Review governance policies | [Agents: Security & Governance](/docs/agents/06-security-and-governance.md) |
+| Troubleshoot skill loading | [README: Troubleshooting](/README.md#troubleshooting) |
+
 ## Sections
 
 - [Guides](/docs/guides) — step-by-step tasks (how to add, validate, and ship changes).
