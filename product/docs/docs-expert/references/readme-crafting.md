@@ -354,11 +354,11 @@ tool do-thing
 ## Critical Rules
 
 1. Lead with value, not installation - TL;DR before Quick Start.
-2. Curl one-liner above the fold - impatient users need an escape hatch.
+2. Fast start must still be safe - prefer package managers or verified checksummed downloads.
 3. Every feature claim needs an example - show, do not tell.
 4. Comparison tables beat prose - scannable beats readable.
 5. Be honest about limitations - builds trust, saves support time.
-6. Multiple installation paths - curl, package manager, source.
+6. Installation paths must be verified - include only methods the repo actually supports.
 7. Architecture diagrams for complex tools - ASCII art is fine.
 8. Troubleshooting section is mandatory - top 5 errors with fixes.
 
@@ -370,10 +370,11 @@ tool do-thing
 |--------------|---------|-----|
 | Installation-first README | Buries value proposition | Lead with TL;DR |
 | "This is a tool that..." | Passive, abstract | "Solves X by doing Y" |
+| `curl | bash` default install | Risky and hard to audit | Package manager or checksummed download path |
 | Screenshot-heavy | Breaks, does not copy-paste | ASCII + code blocks |
 | No examples | Abstract claims do not sell | Every feature -> example |
 | Hiding limitations | Users discover painfully | Honest Limitations section |
-| Single install method | Alienates users | curl + pkg manager + source |
+| Unverified install methods | Creates support burden | Only document tested install paths |
 | No troubleshooting | Support burden | Top 5 errors with fixes |
 | Outdated badges | Looks abandoned | Remove or keep current |
 
@@ -435,13 +436,14 @@ Before publishing:
 [] Hero section with illustration + badges + one-liner + quick install
 [] TL;DR with Problem/Solution/Feature table
 [] Quick example (5-10 commands)
-[] At least 3 installation methods documented
+[] Only verified and supported installation methods documented
 [] Every command has usage examples
 [] Architecture diagram for complex tools
 [] Comparison table vs at least 2 alternatives
 [] Troubleshooting section (top 5 errors)
 [] Honest Limitations section
 [] FAQ with 5+ questions
+[] Visibility metadata reviewed (topics, social preview, repo description)
 [] All code blocks are copy-paste ready
 [] No broken links or badges
 [] Consistent terminology throughout

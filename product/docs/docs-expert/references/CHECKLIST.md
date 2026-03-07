@@ -49,11 +49,26 @@
 - [ ] Changelog / release notes exist when the project is versioned (CHANGELOG.md or Releases guidance).
 - [ ] Ownership is discoverable (CODEOWNERS and/or “Maintainers” section in docs) when the project has multiple contributors.
 
+### GitHub visibility and trust signals (public repos)
+- [ ] Repository description clearly states value and audience.
+- [ ] Homepage URL points to canonical docs/site.
+- [ ] Relevant repository topics are configured.
+- [ ] Social preview image is configured and current.
+- [ ] CITATION metadata exists when citation is relevant (`CITATION.cff`).
+- [ ] Funding metadata exists when sponsorship is accepted (`.github/FUNDING.yml`).
+
 ### Brand compliance (when applicable)
+- [ ] Brand source-of-truth path is cited in the deliverable.
 - [ ] Root README includes the documentation signature (image or ASCII fallback).
 - [ ] Brand assets exist in `brand/` and match approved formats.
 - [ ] No watermark usage in README or technical docs.
 - [ ] Visual styling follows brand guidance only when requested.
+
+### AI-ready documentation (when applicable)
+- [ ] Human-facing docs remain authoritative and complete.
+- [ ] Agent-facing docs (for example `AGENTS.md`) do not contradict canonical docs.
+- [ ] Optional `llms.txt` is only added when requested and labeled as optional/emerging.
+- [ ] High-value workflows have retrieval-friendly headings and concise command examples.
 
 ### Evidence bundle
 - [ ] QA bootstrap output recorded when baseline files were installed.

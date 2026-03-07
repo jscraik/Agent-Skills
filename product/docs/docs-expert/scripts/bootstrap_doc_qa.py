@@ -53,20 +53,25 @@ tokens:
 
 BRAND_README_BASELINE = """# Brand Assets
 
-This folder stores documentation signature assets used by docs-expert.
+This folder stores repository brand assets and usage notes.
 
-## Required assets
-- brand-mark.webp
-- brand-mark@2x.webp
+## What to include
+- Official logo/mark assets approved by this repository's brand owner
+- Signature usage rules for README/docs (if applicable)
+- Accessibility notes for alt text and contrast
 
-## Optional assets
-- brand-mark.png
-- brand-mark@2x.png
+## Notes
+- Do not import fallback brand assets when official brand assets already exist.
 """
 
 BRAND_CONSTRAINTS_BASELINE = """# Branding Constraints
 
-- Use the documentation signature in root README when branding applies.
+- Source of truth order:
+  1) repository-specific brand guidelines
+  2) org-level brand docs
+  3) docs-expert fallback profile (only if approved)
+
+- Use the documentation signature in root README only when branding applies.
 - Do not use watermark overlays in technical docs.
 - Keep signature assets in this directory.
 """
@@ -143,12 +148,27 @@ def ensure_brand_baseline(
     apply: bool,
     force: bool,
     insert_signature: bool,
+    brand_profile: str,
     summary: dict[str, list[str]],
 ) -> None:
-    skill_root = Path(__file__).resolve().parent.parent
-    assets_dir = skill_root / "assets/brand"
     brand_dir = repo_root / "brand"
 
+    write_text(brand_dir / "README.md", BRAND_README_BASELINE, apply, force, summary)
+    write_text(brand_dir / "constraints.md", BRAND_CONSTRAINTS_BASELINE, apply, force, summary)
+
+    if brand_profile == "none":
+        summary["warnings"].append("Brand bootstrap skipped (--brand-profile none)")
+        return
+
+    if brand_profile == "repo":
+        if insert_signature:
+            summary["warnings"].append(
+                "Skipped README signature insertion in repo profile: signature content must come from official repo brand guidance."
+            )
+        return
+
+    skill_root = Path(__file__).resolve().parent.parent
+    assets_dir = skill_root / "assets/brand"
     for filename in (
         "brand-mark.webp",
         "brand-mark@2x.webp",
@@ -161,9 +181,6 @@ def ensure_brand_baseline(
             summary["warnings"].append(f"Missing skill asset: {src}")
             continue
         copy_asset(src, dst, apply, force, summary)
-
-    write_text(brand_dir / "README.md", BRAND_README_BASELINE, apply, force, summary)
-    write_text(brand_dir / "constraints.md", BRAND_CONSTRAINTS_BASELINE, apply, force, summary)
 
     if not insert_signature:
         return
@@ -204,6 +221,12 @@ def main() -> int:
     parser.add_argument("--skip-lint", action="store_true", help="Do not install lint baselines")
     parser.add_argument("--skip-brand", action="store_true", help="Do not install brand baselines")
     parser.add_argument(
+        "--brand-profile",
+        choices=("repo", "docs-expert", "none"),
+        default="repo",
+        help="Brand baseline mode: repo (default, neutral), docs-expert (fallback assets), or none.",
+    )
+    parser.add_argument(
         "--insert-readme-signature",
         action="store_true",
         help="Append docs signature snippet to README.md when missing",
@@ -231,12 +254,14 @@ def main() -> int:
             args.apply,
             args.force,
             args.insert_readme_signature,
+            args.brand_profile,
             summary,
         )
 
     print("Docs QA bootstrap")
     print(f"- Repo: {repo_root}")
     print(f"- Mode: {'apply' if args.apply else 'dry-run'}")
+    print(f"- Brand profile: {args.brand_profile}")
     print_section("Planned", summary["planned"])
     print_section("Created", summary["created"])
     print_section("Existing", summary["existing"])
