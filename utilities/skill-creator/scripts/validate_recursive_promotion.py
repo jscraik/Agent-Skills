@@ -547,9 +547,10 @@ def validate(args: argparse.Namespace) -> Dict[str, Any]:
             report_path.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
         return report
 
+    decision_state = str(decision.get("decision", "")).strip().lower()
     legacy_relaxed_layout = is_legacy_relaxed_layout(run, decision, artifact_files)
     if not events_path.exists():
-        if legacy_relaxed_layout:
+        if legacy_relaxed_layout and decision_state != "approved":
             add_warning(
                 warnings,
                 "W_LEGACY_EVENTS_FILE_MISSING",
@@ -578,8 +579,10 @@ def validate(args: argparse.Namespace) -> Dict[str, Any]:
 
     expected_blocker = normalize_blocker_code(terminal_status, stop_reason)
 
+    require_events_for_validation = decision_state == "approved" or bool(expected_blocker)
+
     required_artifacts = {"run.json", "iteration_journal.jsonl", "promotion_decision.json"}
-    if not legacy_relaxed_layout:
+    if not legacy_relaxed_layout or require_events_for_validation:
         required_artifacts.add("events.jsonl")
     if auto_capture_enabled and not legacy_relaxed_layout:
         required_artifacts.update(CONTROL_CAPTURE_FILES)
@@ -625,7 +628,6 @@ def validate(args: argparse.Namespace) -> Dict[str, Any]:
         errors,
     )
 
-    decision_state = str(decision.get("decision", "")).strip().lower()
     if decision_state not in ALLOWED_DECISIONS:
         add_error(errors, "E_INVALID_DECISION_STATE", f"invalid decision state: {decision_state}")
 
@@ -1064,7 +1066,7 @@ def validate(args: argparse.Namespace) -> Dict[str, Any]:
                     )
         except Exception as exc:
             add_error(errors, "E_EVENTS_JSONL_INVALID", f"invalid events.jsonl: {exc}")
-    elif not errors and not legacy_relaxed_layout:
+    elif not errors and (not legacy_relaxed_layout or require_events_for_validation):
         add_error(errors, "E_EVENTS_FILE_MISSING", "events.jsonl missing")
 
     if blocker_code_run and expected_blocker and blocker_code_run != expected_blocker:
