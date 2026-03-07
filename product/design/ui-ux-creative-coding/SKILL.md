@@ -77,7 +77,6 @@ Primary references inside this skill:
 - `references/kubadesign-persona.md`
 
 Dedicated standalone persona skills (for stricter persona workflows):
-Dedicated standalone persona skills (for stricter persona workflows):
 - `/personas/benjitaylor-persona/SKILL.md`
 - `/personas/jh3yy-persona/SKILL.md`
 - `/personas/jenny-wen-persona/SKILL.md`
