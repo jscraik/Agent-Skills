@@ -369,6 +369,27 @@ def make_manifest(audits: Sequence[ArtifactStatus], run_state_check: bool) -> Di
     return summary
 
 
+def _manifest_without_generated_at(payload: Dict[str, Any]) -> Dict[str, Any]:
+    snapshot = dict(payload)
+    snapshot.pop("generated_at", None)
+    return snapshot
+
+
+def _stabilize_generated_at(manifest: Dict[str, Any], manifest_path: Path) -> Dict[str, Any]:
+    """Keep generated_at stable when no substantive manifest fields changed."""
+    if not manifest_path.exists():
+        return manifest
+    try:
+        existing = json.loads(manifest_path.read_text(encoding="utf-8"))
+    except Exception:
+        return manifest
+    if _manifest_without_generated_at(existing) == _manifest_without_generated_at(manifest):
+        previous_generated_at = existing.get("generated_at")
+        if isinstance(previous_generated_at, str) and previous_generated_at:
+            manifest["generated_at"] = previous_generated_at
+    return manifest
+
+
 def run_prune_empty(audits: Sequence[ArtifactStatus], dry_run: bool) -> Dict[str, Any]:
     removals: Dict[str, Any] = {}
     for audit in audits:
@@ -412,8 +433,21 @@ def main() -> int:
         manifest["status"] = "ok"
 
     manifest_path.parent.mkdir(parents=True, exist_ok=True)
+    manifest = _stabilize_generated_at(manifest, manifest_path)
+    rendered_manifest = json.dumps(manifest, indent=2) + "\n"
     try:
-        manifest_path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+        if manifest_path.exists():
+            existing_text = manifest_path.read_text(encoding="utf-8")
+            if existing_text == rendered_manifest:
+                if args.quiet:
+                    output = {k: v for k, v in manifest.items() if k != "runs"}
+                    print(json.dumps(output, indent=2))
+                else:
+                    print(json.dumps(manifest, indent=2))
+                if args.strict and any(audit.status != "compliant" for audit in audits):
+                    return 3
+                return 0
+        manifest_path.write_text(rendered_manifest, encoding="utf-8")
     except Exception as exc:
         if args.exit_on_parse_error:
             print(f"failed to write manifest: {exc}", file=sys.stderr)
