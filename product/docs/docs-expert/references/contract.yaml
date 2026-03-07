@@ -3,9 +3,10 @@ purpose: >
 schema_version: 1.0
 triggers:
   - audit or upgrade repository documentation (README, docs, guides, runbooks)
+  - add or repair missing in-code documentation (JSDoc, DocC, config docs)
   - bring a repository up to GitHub community health expectations (community profile files)
   - perform a docs QA pass with an evidence bundle (when tooling exists)
-  - enforce brand-accurate docs using repo official guidelines before fallback profiles
+  - enforce BrAInwav brand signature/assets by default, while honoring repository-specific official brand overrides
   - improve public GitHub visibility signals (topics, social preview, metadata)
 inputs:
   - repo context (url or local path) and doc targets
@@ -17,11 +18,12 @@ outputs:
   - PR-ready documentation edits (Markdown)
   - doc audit summary (gaps + changes + what to verify)
   - checklist snapshot (including GitHub community health when repo-wide)
+  - writing-quality assessment against OpenAI-style skimmability/clarity/helpfulness principles
   - visibility snapshot (topics/social preview/metadata pass-fail-manual)
   - evidence bundle when tooling exists (lint/link/readability/brand checks)
 non_goals:
-  - writing PRDs/specs or architecture docs that are not repository documentation
-  - implementing product features or code changes (unless explicitly requested separately)
+  - requests with no documentation deliverable to create, audit, or improve
+  - implementing product features or code changes when documentation work is not in scope
 risks:
   - missing inputs; mitigated by clarifying questions and explicit assumptions
   - inaccurate steps (invented commands/paths/versions); mitigated by verifying against the repo

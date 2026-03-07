@@ -1,6 +1,6 @@
 ---
 name: docs-expert
-description: "Co-author and QA repository docs with brand-accurate guidance, GitHub visibility hardening, and AI-ready doc surfaces; use for README/docs/runbook/community-health upgrades with verifiable evidence bundles; do not use for PRDs/specs or feature implementation."
+description: "Use when asked to audit or rewrite repository docs (README, docs, runbooks, community-health files) or when code has missing in-code documentation (JSDoc/DocC/config docs): enforce official brand guidance, harden GitHub visibility signals, and deliver evidence-bundled docs QA."
 ---
 
 # docs-expert (Repository Documentation)
@@ -21,6 +21,7 @@ description: "Co-author and QA repository docs with brand-accurate guidance, Git
 
 ## When to use
 - You want to **write, rewrite, or audit** repo documentation (README, `/docs`, guides, runbooks).
+- You need to **add or improve missing in-code documentation** (JSDoc, DocC, config documentation).
 - You want a repo to meet **GitHub “community profile” / community health** expectations (README, LICENSE, CODE_OF_CONDUCT, CONTRIBUTING, SECURITY, SUPPORT, issue/PR templates).
 - You want **docs-as-code QA**: link sanity, structure, clarity, and “do not invent commands/paths/versions” verification.
 - You want **brand-accurate documentation** without repeatedly steering the agent.
@@ -28,7 +29,7 @@ description: "Co-author and QA repository docs with brand-accurate guidance, Git
 - You want **AI-consumable docs surfaces** for coding assistants while keeping human docs first.
 
 **Do not use when**
-- The request is primarily **product specs/PRDs**, architecture design, or code implementation.
+- The request has no clear documentation deliverable to produce or audit.
 
 ## Anti-pattern quick warnings
 Avoid these anti-patterns: do not start writing before audience/purpose are clear. Never fabricate commands, paths, or results. Do not impose fallback brand assets if repo-specific brand rules already exist.
@@ -103,6 +104,7 @@ Every response must include:
 2) **Outline first**
    - Fix navigation/TOC and reader questions before drafting.
 3) **Draft with evidence**
+   - Apply the explicit skimmability/writing/helpfulness gates in `references/docs-baseline.md`.
    - Keep examples minimal; include “Verify” and “Troubleshooting”.
 4) **Verify against the repo**
    - Cross-check scripts/paths/flags/versions; if you can’t verify, mark it as a TODO to confirm.
@@ -126,7 +128,9 @@ Use this section when the user asks to create, overhaul, or audit a README or RE
 
 ## Baseline practices (reference)
 
-For skimmability, risk capture, accessibility, and security guidance, use `references/docs-baseline.md`.
+For skimmability, risk capture, accessibility, and security guidance, use:
+- `references/docs-baseline.md`
+- `references/openai-doc-writing-principles.md`
 
 ## In-code documentation (reference)
 
@@ -189,13 +193,13 @@ When AI tooling support is in scope:
 ## Validation
 
 Run these when available and record results:
-- `python scripts/bootstrap_doc_qa.py --repo . --apply --brand-profile repo` to install missing QA baselines without forcing fallback branding.
+- `python scripts/bootstrap_doc_qa.py --repo . --apply --brand-profile docs-expert` to enforce BrAInwav baseline assets and README signature by default.
 - `vale <doc>` after `.vale.ini` is present.
 - `markdownlint-cli2 <doc> --config <config>` after markdownlint config is present.
 - Link checker if present.
 - `python scripts/check_readability.py <doc>` if available (default target: 45-70 Flesch Reading Ease).
-- `python scripts/check_brand_guidelines.py --repo . --docs <doc> --profile repo` when branding applies.
-- For fallback-brand mode only: `python scripts/check_brand_guidelines.py --repo . --docs <doc> --profile docs-expert`.
+- `python scripts/check_brand_guidelines.py --repo . --docs <doc> --profile docs-expert` when enforcing the BrAInwav guideline profile.
+- If a repository has its own official non-BrAInwav brand guidance, switch to `--profile repo` and provide explicit `--config`/brand parameters.
 
 Fail fast: if any validation fails, stop and report before continuing edits.
 If tooling is missing and bootstrap is not approved, state what is missing and why checks were skipped.
@@ -263,7 +267,9 @@ If you touch in-code documentation, also include Code Doc QA checklist results (
 - Brand guidelines: `references/BRAND_GUIDELINES.md`
 - Brand styling: `references/brand-styling.md`
 - Docs baseline practices: `references/docs-baseline.md`
+- OpenAI-style writing principles: `references/openai-doc-writing-principles.md`
 - Docs upkeep runbook: `references/docs-upkeep-runbook.md`
+- OpenAI docs quality guide: `https://developers.openai.com/cookbook/articles/what_makes_documentation_good/`
 - README deep dive: `references/readme-crafting.md`
 - README extended sections: `references/readme-section-templates.md`
 - Automation scripts: `scripts/bootstrap_doc_qa.py`, `scripts/check_brand_guidelines.py`, `scripts/check_readability.py`

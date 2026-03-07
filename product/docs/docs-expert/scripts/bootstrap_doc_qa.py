@@ -223,8 +223,8 @@ def main() -> int:
     parser.add_argument(
         "--brand-profile",
         choices=("repo", "docs-expert", "none"),
-        default="repo",
-        help="Brand baseline mode: repo (default, neutral), docs-expert (fallback assets), or none.",
+        default="docs-expert",
+        help="Brand baseline mode: docs-expert (default), repo (neutral/custom), or none.",
     )
     parser.add_argument(
         "--insert-readme-signature",
@@ -249,11 +249,12 @@ def main() -> int:
         ensure_lint_baseline(repo_root, args.apply, args.force, summary)
 
     if not args.skip_brand:
+        effective_insert_signature = args.insert_readme_signature or args.brand_profile == "docs-expert"
         ensure_brand_baseline(
             repo_root,
             args.apply,
             args.force,
-            args.insert_readme_signature,
+            effective_insert_signature,
             args.brand_profile,
             summary,
         )

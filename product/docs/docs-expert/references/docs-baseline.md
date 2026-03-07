@@ -14,6 +14,42 @@ Use this baseline unless the repository has stricter internal policy:
 - Repo-first brand governance (official repo standards before docs-expert fallback assets).
 - Optional AI-specific context files such as `llms.txt` only when explicitly requested by repo owners.
 
+Primary writing-rules reference:
+- `references/openai-doc-writing-principles.md`
+
+## OpenAI documentation quality gates (explicit)
+
+Apply these gates in audits and rewrites:
+
+### Make docs easy to skim
+- Split content into titled sections.
+- Prefer informative sentence-like headings over abstract nouns.
+- Include a table of contents for long or sectioned docs.
+- Keep paragraphs short; isolate critical points in one-sentence paragraphs where useful.
+- Start sections and paragraphs with standalone topic sentences.
+- Put topic words early in topic sentences.
+- Put takeaways before procedures.
+- Use bullets and tables frequently where they improve scanning.
+- Bold important text sparingly and intentionally.
+
+### Write well
+- Keep sentences simple; split long sentences.
+- Prefer unambiguous sentence structures.
+- Prefer right-branching phrasing when possible.
+- Avoid demonstrative pronouns across sentences when they reduce clarity.
+- Keep terminology, casing, and punctuation consistent.
+- Do not presume reader intent with phrases like “you probably want...”.
+
+### Be broadly helpful
+- Write simply for mixed language/experience audiences.
+- Avoid abbreviations unless expanded on first use.
+- Proactively include likely failure fixes.
+- Prefer specific, accurate terminology over insider jargon.
+- Keep examples general, minimal-dependency, and self-contained.
+- Prioritize high-value/common tasks.
+- Do not teach bad habits (especially secret handling).
+- Consider broad framing before narrow implementation details.
+
 ## Notes
 
 - Short description: Make docs skimmable, clear, and broadly helpful.
@@ -147,11 +183,11 @@ section that includes:
 
 ### 9) Bootstrap missing QA tooling (default)
 
-- Run `python scripts/bootstrap_doc_qa.py --repo . --apply --brand-profile repo` before lint and brand checks.
+- Run `python scripts/bootstrap_doc_qa.py --repo . --apply --brand-profile docs-expert` before lint and brand checks.
 - If `.vale.ini` is missing, install a local Vale baseline (`.vale.ini` and `.vale/styles/Docs/`).
 - If markdownlint config is missing, install `.markdownlint-cli2.yaml`.
-- If `brand/` or branding constraints are missing, install neutral brand governance stubs.
-- Install docs-expert fallback brand assets only in explicit `--brand-profile docs-expert` mode.
+- If `brand/` or branding constraints are missing, install BrAInwav baseline assets and constraints.
+- Use `--brand-profile repo` only when repository-specific official brand guidance overrides BrAInwav.
 - Record exactly which files were created and which files were already present.
 
 ### 10) Run doc linters (when available)
@@ -170,7 +206,7 @@ Use these commands in CI or pre-commit, adjusting paths to your repo:
 python /path/to/bootstrap_doc_qa.py --repo . --apply
 vale <doc>
 markdownlint-cli2 <doc> --config <config>
-python /path/to/check_brand_guidelines.py --repo . --docs <doc> --profile repo
+python /path/to/check_brand_guidelines.py --repo . --docs <doc> --profile docs-expert
 python /path/to/check_readability.py <doc>
 ```
 
@@ -211,3 +247,7 @@ Deviations (if any):
 - Writing without confirming audience and purpose.
 - Burying key decisions or risks in long prose.
 - Shipping drafts without a verification pass.
+
+## Use judgment when context demands it
+
+These rules are defaults, not strict dogma. Break a rule when a repository-specific constraint, audience need, or safety requirement clearly justifies it, and record the reason in the deliverable.
