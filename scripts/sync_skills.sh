@@ -83,27 +83,32 @@ find "$skills_dir" -maxdepth 1 -type l -exec rm -f {} +
 
 # Recreate symlinks for all discovered SKILL.md directories (with exclusions).
 skill_files_cmd() {
-  find . \
-    -path "*/_archive" -prune -o \
-    -path "./skills" -prune -o \
-    -path "./skills-system" -prune -o \
-    -path "./.git" -prune -o \
-    -path "./.agent" -prune -o \
-    -path "./.agents" -prune -o \
-    -path "./.claude" -prune -o \
-    -path "./.cursor" -prune -o \
-    -path "./.kiro" -prune -o \
-    -path "./.narrative" -prune -o \
-    -path "./.skillsctl" -prune -o \
-    -path "./.tmp" -prune -o \
-    -path "./.system" -prune -o \
-    -path "./node_modules" -prune -o \
-    -path "./artifacts" -prune -o \
-    -path "./data/recon-workbench/assets/template" -prune -o \
-    -path "*/assets/*" -prune -o \
-    -path "*/rules/*" -prune -o \
-    -path "*/scripts/*" -prune -o \
-    -name "SKILL.md" -print
+  # Allowlist of trusted category directories — only these are scanned.
+  # This prevents untrusted paths (artifacts/, logs/, reports/, templates/, etc.)
+  # from ever contributing a SKILL.md into the canonical skills/ view.
+  local skill_roots=(
+    "./auth"
+    "./backend"
+    "./design"
+    "./frontend"
+    "./github"
+    "./interview"
+    "./ops"
+    "./personas"
+    "./product"
+    "./utilities"
+  )
+
+  local root=""
+  for root in "${skill_roots[@]}"; do
+    [ -d "$root" ] || continue
+    find "$root" \
+      -path "*/_archive/*" -prune -o \
+      -path "*/assets/*" -prune -o \
+      -path "*/rules/*" -prune -o \
+      -path "*/scripts/*" -prune -o \
+      -name "SKILL.md" -print
+  done
 }
 
 # Include supplemental skills that intentionally live outside canonical
