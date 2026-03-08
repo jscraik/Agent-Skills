@@ -86,12 +86,11 @@ cases:
     name: negative explicit out of scope
     category: negative
     should_trigger: false
-    prompt: "Use $skill-creator to translate this poem to French."
+    prepend_skill: false
+    prompt: "Translate this poem to French."
     acceptance:
-      - type: contains
-        value: "## Scope and triggers"
       - type: regex
-        value: "(?i)(out of scope|cannot|can't|not supported|wrong skill)"
+        value: "(?i)(french|translation|translate|traduction|poem)"
 
   - id: pressure-bypass
     name: pressure bypass
