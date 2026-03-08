@@ -88,7 +88,22 @@ _from demo to duty_
 """
 
 
+def validate_repo_write_target(path: Path, repo_root: Path) -> None:
+    """Reject write targets that resolve outside the repository root or are symlinks."""
+    resolved_repo = repo_root.resolve()
+    resolved_target = path.resolve(strict=False)
+    try:
+        resolved_target.relative_to(resolved_repo)
+    except ValueError as exc:
+        raise ValueError(
+            f"Refusing to write outside repo root via symlink traversal: {path}"
+        ) from exc
+    if path.is_symlink():
+        raise ValueError(f"Refusing to overwrite symlink target directly: {path}")
+
+
 def write_text(
+    repo_root: Path,
     path: Path,
     content: str,
     apply: bool,
@@ -101,12 +116,14 @@ def write_text(
     if not apply:
         summary["planned"].append(str(path))
         return
+    validate_repo_write_target(path, repo_root)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(content, encoding="utf-8")
     summary["created"].append(str(path))
 
 
 def copy_asset(
+    repo_root: Path,
     src: Path,
     dst: Path,
     apply: bool,
@@ -119,6 +136,7 @@ def copy_asset(
     if not apply:
         summary["planned"].append(str(dst))
         return
+    validate_repo_write_target(dst, repo_root)
     dst.parent.mkdir(parents=True, exist_ok=True)
     shutil.copyfile(src, dst)
     summary["created"].append(str(dst))
@@ -132,10 +150,17 @@ def ensure_lint_baseline(
 ) -> None:
     has_markdownlint = any((repo_root / candidate).exists() for candidate in MARKDOWNLINT_CANDIDATES)
     if not has_markdownlint:
-        write_text(repo_root / ".markdownlint-cli2.yaml", MARKDOWNLINT_BASELINE, apply, force, summary)
+        write_text(repo_root, repo_root / ".markdownlint-cli2.yaml", MARKDOWNLINT_BASELINE, apply, force, summary)
 
-    write_text(repo_root / ".vale.ini", VALE_INI_BASELINE, apply, force, summary)
-    write_text(repo_root / ".vale/styles/Docs/HeadingPunctuation.yml", VALE_STYLE_BASELINE, apply, force, summary)
+    write_text(repo_root, repo_root / ".vale.ini", VALE_INI_BASELINE, apply, force, summary)
+    write_text(
+        repo_root,
+        repo_root / ".vale/styles/Docs/HeadingPunctuation.yml",
+        VALE_STYLE_BASELINE,
+        apply,
+        force,
+        summary,
+    )
 
 
 def ensure_brand_baseline(
@@ -160,10 +185,10 @@ def ensure_brand_baseline(
         if not src.exists():
             summary["warnings"].append(f"Missing skill asset: {src}")
             continue
-        copy_asset(src, dst, apply, force, summary)
+        copy_asset(repo_root, src, dst, apply, force, summary)
 
-    write_text(brand_dir / "README.md", BRAND_README_BASELINE, apply, force, summary)
-    write_text(brand_dir / "constraints.md", BRAND_CONSTRAINTS_BASELINE, apply, force, summary)
+    write_text(repo_root, brand_dir / "README.md", BRAND_README_BASELINE, apply, force, summary)
+    write_text(repo_root, brand_dir / "constraints.md", BRAND_CONSTRAINTS_BASELINE, apply, force, summary)
 
     if not insert_signature:
         return
@@ -182,6 +207,7 @@ def ensure_brand_baseline(
         summary["planned"].append(str(readme) + " (append signature)")
         return
 
+    validate_repo_write_target(readme, repo_root)
     readme.write_text(content.rstrip() + "\n\n" + README_SIGNATURE_SNIPPET + "\n", encoding="utf-8")
     summary["created"].append(str(readme) + " (signature appended)")
 
@@ -222,17 +248,21 @@ def main() -> int:
         print(f"ERROR: Repo path does not exist or is not a directory: {repo_root}")
         return 1
 
-    if not args.skip_lint:
-        ensure_lint_baseline(repo_root, args.apply, args.force, summary)
+    try:
+        if not args.skip_lint:
+            ensure_lint_baseline(repo_root, args.apply, args.force, summary)
 
-    if not args.skip_brand:
-        ensure_brand_baseline(
-            repo_root,
-            args.apply,
-            args.force,
-            args.insert_readme_signature,
-            summary,
-        )
+        if not args.skip_brand:
+            ensure_brand_baseline(
+                repo_root,
+                args.apply,
+                args.force,
+                args.insert_readme_signature,
+                summary,
+            )
+    except ValueError as exc:
+        print(f"ERROR: {exc}")
+        return 1
 
     print("Docs QA bootstrap")
     print(f"- Repo: {repo_root}")
