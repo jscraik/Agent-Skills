@@ -43,9 +43,26 @@ jobs:
       image: semgrep/semgrep
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Run Semgrep (auto ruleset + secrets)
+        shell: bash
         run: |
+          set -euo pipefail
+          base_ref="${{ github.base_ref }}"
+          if [ -z "${base_ref:-}" ]; then
+            base_ref="main"
+          fi
+          git fetch origin "${base_ref}:${base_ref}" --depth=1
+
+          mapfile -t changed_files < <(git diff --name-only --diff-filter=ACMR "${base_ref}...HEAD")
+          if [ "${#changed_files[@]}" -eq 0 ]; then
+            echo "No changed files to scan; writing empty semgrep.sarif"
+            printf '{"version":"2.1.0","runs":[]}\n' > semgrep.sarif
+            exit 0
+          fi
+
           semgrep scan \
             --error \
             --config auto \
@@ -54,7 +71,7 @@ jobs:
             --config "p/typescript" \
             --config "p/bash" \
             --sarif --output semgrep.sarif \
-            .
+            "${changed_files[@]}"
         env:
           # Set SEMGREP_APP_TOKEN if using Semgrep Cloud for dashboard/PR comments
           SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN || '' }}
