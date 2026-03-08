@@ -46,7 +46,7 @@ jobs:
 
       - name: Run Semgrep (auto ruleset + secrets)
         run: |
-          semgrep ci \
+          semgrep scan \
             --error \
             --config auto \
             --config "p/secrets" \
@@ -126,7 +126,7 @@ jobs:
             exit 1
           fi
           curl -sSfL "$asset_url" | tar -xz -C /usr/local/bin gitleaks
-          chmod +x /usr/local/bin gitleaks
+          chmod +x /usr/local/bin/gitleaks
 
       - name: Scan artifacts directory for secrets
         run: |
