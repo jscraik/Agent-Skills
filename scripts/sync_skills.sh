@@ -70,9 +70,9 @@ if [ -d "$skills_dir/.system" ]; then
   else
     # Fallback: remove target first, then move
     find "$system_skills_dir" -mindepth 1 -maxdepth 1 -exec rm -rf -- {} +
-    mv "$skills_dir"/.[!.]* "$system_skills_dir"/ 2>/dev/null || true
-    mv "$skills_dir"/..?* "$system_skills_dir"/ 2>/dev/null || true
-    mv "$skills_dir"/* "$system_skills_dir"/ 2>/dev/null || true
+    mv "$skills_dir/.system"/.[!.]* "$system_skills_dir"/ 2>/dev/null || true
+    mv "$skills_dir/.system"/..?* "$system_skills_dir"/ 2>/dev/null || true
+    mv "$skills_dir/.system"/* "$system_skills_dir"/ 2>/dev/null || true
     rmdir "$skills_dir/.system" 2>/dev/null || true
   fi
   fi
