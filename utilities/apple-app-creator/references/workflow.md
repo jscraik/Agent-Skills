@@ -27,7 +27,7 @@ Required dependency
 - XcodeGen is required by default for new scaffolding: `brew install xcodegen`
 
 Optional onboarding
-- Run `skills/app-creator/scripts/init.sh` for interactive prompts.
+- Run `skills/app-builder/scripts/init.sh` for interactive prompts.
 - Use `--no-prompt` with explicit flags for non-interactive flows.
 
 Adopt mode constraints

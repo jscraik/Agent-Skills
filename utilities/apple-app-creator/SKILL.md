@@ -1,5 +1,5 @@
 ---
-name: apple-app-creator
+name: apple-app-builder
 description: Orchestrate iOS/macOS app scaffolding and optional subskill adoption for existing projects. Use when users need a guided wizard to scaffold with XcodeGen and optionally install xcode-makefiles and simple-tasks.
 ---
 
@@ -21,7 +21,7 @@ description: Orchestrate iOS/macOS app scaffolding and optional subskill adoptio
 Use this skill when you want to:
 - scaffold a new iOS/macOS app with XcodeGen templates;
 - adopt tooling into an existing project without regenerating app code;
-- install app-creator subskills (`xcode-makefiles`, `simple-tasks`) with explicit flags.
+- install app-builder subskills (`xcode-makefiles`, `simple-tasks`) with explicit flags.
 
 ## Philosophy
 - Prefer reproducible scaffolding over ad-hoc manual setup.
@@ -56,9 +56,9 @@ Use this skill when you want to:
 Primary entrypoint:
 
 ```bash
-skills/app-creator/scripts/init.sh --project-mode new
+skills/app-builder/scripts/init.sh --project-mode new
 # or
-skills/app-creator/scripts/init.sh --project-mode adopt
+skills/app-builder/scripts/init.sh --project-mode adopt
 ```
 
 ## Validation
@@ -84,9 +84,9 @@ skills/app-creator/scripts/init.sh --project-mode adopt
 
 ## Examples
 ```bash
-skills/app-creator/scripts/init.sh --project-mode new
-skills/app-creator/scripts/init.sh --project-mode adopt --skip-simple-tasks
-skills/app-creator/scripts/init.sh --project-mode new --dry-run
+skills/app-builder/scripts/init.sh --project-mode new
+skills/app-builder/scripts/init.sh --project-mode adopt --skip-simple-tasks
+skills/app-builder/scripts/init.sh --project-mode new --dry-run
 ```
 
 ## Resources

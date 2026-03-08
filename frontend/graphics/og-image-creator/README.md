@@ -40,7 +40,7 @@ Creates OG images in `public/og/` directory based on the analysis.
 ## Structure
 
 ```
-og-image-creator/
+og-image-builder/
 ├── SKILL.md                          # Main skill instructions
 ├── scripts/
 │   ├── analyze_codebase.py          # Route discovery & brand extraction
