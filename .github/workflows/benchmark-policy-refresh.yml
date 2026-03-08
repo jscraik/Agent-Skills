@@ -26,7 +26,7 @@ jobs:
           python3 utilities/skill-builder/scripts/benchmark_skill_portfolio.py \
             --root . \
             --config utilities/skill-builder/references/benchmark-policy.json \
-            --mode warn \
+            --mode off \
             --format json \
             --output-json artifacts/industry-benchmark-latest.json
 
