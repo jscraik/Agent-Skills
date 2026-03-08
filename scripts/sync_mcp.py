@@ -105,9 +105,12 @@ def main():
         try:
             with open(ANTIGRAVITY_MCP_PATH, "r") as f:
                 existing_config = json.load(f)
-            print(f"Warning: Existing MCP config at {ANTIGRAVITY_MCP_PATH} is not valid JSON; starting from a fresh config.", file=sys.stderr)
+        except (json.JSONDecodeError, OSError) as e:
+            print(
+                f"Warning: Existing MCP config at {ANTIGRAVITY_MCP_PATH} is not valid JSON; starting from a fresh config. ({e})",
+                file=sys.stderr,
+            )
             existing_config = {}
-            pass
             
     existing_config["mcpServers"] = antigravity_mcp_config["mcpServers"]
     
