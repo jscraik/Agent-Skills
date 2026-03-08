@@ -28,6 +28,12 @@ class OpenClawSkillGuardTests(unittest.TestCase):
         findings = scan_source(src, "scripts/test.py")
         self.assertTrue(any(f.code == "security.env_harvesting" and f.level == "critical" for f in findings))
 
+    def test_detects_risky_calls_on_regex_lines(self) -> None:
+        # Dangerous call must not be suppressed just because re.compile appears on the same line.
+        src = "compiled = re.compile('x') ; os.system('echo hi')\n"
+        findings = scan_source(src, "scripts/test.py")
+        self.assertTrue(any(f.code == "security.os_system" for f in findings))
+
     def test_nested_repetition_guard(self) -> None:
         self.assertTrue(has_nested_repetition("(a+)+"))
         with self.assertRaises(ValueError):
