@@ -274,7 +274,7 @@ def write_baseline(
     payload: Dict[str, Any] = {
         "schema_version": "1.0",
         "generated_at": generated_at,
-        "repo_root": str(ROOT),
+        "repo_root": ".",
         "expected_active_skill_count": expected_count,
         "active_skill_count": len(skills),
         "excluded_prefixes": list(EXCLUDED_PREFIXES),
