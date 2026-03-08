@@ -21,7 +21,7 @@ EXCLUDED_PREFIXES = (
     "utilities/recon-workbench/assets/template/.codex/skills/",
 )
 ALLOWED_EXECUTABLES = {"python3"}
-ABSOLUTE_PATH_PATTERN = re.compile(r"(?P<path>/(?:[^\\s\"'`]|\\ )+)")
+ABSOLUTE_PATH_PATTERN = re.compile(r"(?P<path>(?<![A-Za-z0-9_.-])/(?:[^\s\"'`]|\\ )+)")
 
 
 def iso_now() -> str:
@@ -119,14 +119,15 @@ def _sanitize_absolute_match(raw_path: str, repo_root: Path) -> str:
 
 def _sanitize_lines(lines: List[str], repo_root: Path) -> List[str]:
     """Replace absolute paths with repo-relative paths or redacted placeholders."""
-    root_text = str(repo_root)
     sanitized: List[str] = []
     for line in lines:
-        replaced = line.replace(root_text, ".")
-
         def _replace(match: re.Match[str]) -> str:
-            return _sanitize_absolute_match(match.group("path"), repo_root)
+            mapped = _sanitize_absolute_match(match.group("path"), repo_root)
+            if mapped == "<redacted-absolute-path>":
+                return mapped
+            return f"./{mapped}"
 
+        replaced = line
         replaced = ABSOLUTE_PATH_PATTERN.sub(_replace, replaced)
         sanitized.append(replaced)
     return sanitized

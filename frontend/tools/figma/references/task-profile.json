@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "profile_id": "frontend-ui-figma",
-  "scope_skill": "frontend/ui/figma",
+  "profile_id": "frontend-tools-figma",
+  "scope_skill": "frontend/tools/figma",
   "scope_profile": "frontend",
   "rubric_version": "2026-02-26",
   "evaluator_version": "v1",

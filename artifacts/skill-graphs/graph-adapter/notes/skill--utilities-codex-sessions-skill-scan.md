@@ -1,0 +1,12 @@
+# skill--utilities-codex-sessions-skill-scan
+
+- scope_skill: `utilities/codex-sessions-skill-scan`
+- profile_id: `utilities-codex-sessions-skill-scan`
+- scope_profile: `utilities`
+- delegation_mode: `co-pilot`
+- wave: `wave-2-co-pilot`
+- halo: `no_recent_run_data`
+- promotion_badge: `none`
+- parity: `empty`
+
+Links: [[profile--utilities-codex-sessions-skill-scan]] [[wave--wave-2-co-pilot]]

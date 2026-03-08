@@ -46,18 +46,6 @@
       "critical": true
     }
   ],
-  "knowledge_graph": {
-    "enabled": true,
-    "artifact_glob": "artifacts/deconflict/report-*.json",
-    "node_types": [
-      "candidate_skill",
-      "installed_skill"
-    ],
-    "edge_types": [
-      "overlaps_with",
-      "same_job_candidate"
-    ]
-  },
   "delegation": {
     "mode": "manual",
     "human_baseline_minutes": 60.0,

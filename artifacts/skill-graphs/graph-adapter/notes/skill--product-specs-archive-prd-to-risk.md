@@ -1,0 +1,12 @@
+# skill--product-specs-archive-prd-to-risk
+
+- scope_skill: `product/specs/_archive/prd-to-risk`
+- profile_id: `product-specs-_archive-prd-to-risk`
+- scope_profile: `product`
+- delegation_mode: `co-pilot`
+- wave: `wave-2-co-pilot`
+- halo: `no_recent_run_data`
+- promotion_badge: `none`
+- parity: `empty`
+
+Links: [[profile--product-specs-archive-prd-to-risk]] [[wave--wave-2-co-pilot]]

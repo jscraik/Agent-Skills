@@ -1,13 +1,13 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-03-08T19:24:21Z",
+  "generated_at": "2026-03-08T19:30:12Z",
   "decision_date": "2026-03-08",
   "active_skill_count": 144,
   "expected_count": 144,
   "summary": {
-    "valid_count": 94,
-    "invalid_count": 50,
-    "missing_profile_count": 30,
+    "valid_count": 143,
+    "invalid_count": 1,
+    "missing_profile_count": 0,
     "missing_binding_count": 0,
     "missing_legacy_binding_count": 134,
     "invalid_binding_count": 0,
@@ -102,12 +102,8 @@
       "profile_binding": "references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
-      "status": "invalid",
-      "errors": [
-        "profile_id must equal `frontend-graphics-better-icons`",
-        "scope_skill must equal `frontend/graphics/better-icons`",
-        "scope_profile must equal `frontend`"
-      ]
+      "status": "valid",
+      "errors": []
     },
     {
       "skill_path": "frontend/graphics/favicon-generator/SKILL.md",
@@ -139,11 +135,8 @@
       "profile_binding": "references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
-      "status": "invalid",
-      "errors": [
-        "profile_id must equal `frontend-graphics-nano-banana-builder`",
-        "scope_skill must equal `frontend/graphics/nano-banana-builder`"
-      ]
+      "status": "valid",
+      "errors": []
     },
     {
       "skill_path": "frontend/graphics/og-image-creator/SKILL.md",
@@ -186,11 +179,8 @@
       "profile_binding": "references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
-      "status": "invalid",
-      "errors": [
-        "profile_id must equal `frontend-stitch-design-md`",
-        "scope_skill must equal `frontend/stitch-design-md`"
-      ]
+      "status": "valid",
+      "errors": []
     },
     {
       "skill_path": "frontend/stitch-enhance-prompt/SKILL.md",
@@ -200,11 +190,8 @@
       "profile_binding": "references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
-      "status": "invalid",
-      "errors": [
-        "profile_id must equal `frontend-stitch-enhance-prompt`",
-        "scope_skill must equal `frontend/stitch-enhance-prompt`"
-      ]
+      "status": "valid",
+      "errors": []
     },
     {
       "skill_path": "frontend/stitch-react-components/SKILL.md",
@@ -214,11 +201,8 @@
       "profile_binding": "references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
-      "status": "invalid",
-      "errors": [
-        "profile_id must equal `frontend-stitch-react-components`",
-        "scope_skill must equal `frontend/stitch-react-components`"
-      ]
+      "status": "valid",
+      "errors": []
     },
     {
       "skill_path": "frontend/tools/agent-trace-debug/SKILL.md",
@@ -239,11 +223,8 @@
       "profile_binding": "references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
-      "status": "invalid",
-      "errors": [
-        "profile_id must equal `frontend-tools-agentation`",
-        "scope_skill must equal `frontend/tools/agentation`"
-      ]
+      "status": "valid",
+      "errors": []
     },
     {
       "skill_path": "frontend/tools/figma/SKILL.md",
@@ -253,11 +234,8 @@
       "profile_binding": "references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
-      "status": "invalid",
-      "errors": [
-        "profile_id must equal `frontend-tools-figma`",
-        "scope_skill must equal `frontend/tools/figma`"
-      ]
+      "status": "valid",
+      "errors": []
     },
     {
       "skill_path": "frontend/tools/stitch-design-md/SKILL.md",
@@ -267,11 +245,8 @@
       "profile_binding": "references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
-      "status": "invalid",
-      "errors": [
-        "profile_id must equal `frontend-tools-stitch-design-md`",
-        "scope_skill must equal `frontend/tools/stitch-design-md`"
-      ]
+      "status": "valid",
+      "errors": []
     },
     {
       "skill_path": "frontend/tools/stitch-loop/SKILL.md",
@@ -281,11 +256,8 @@
       "profile_binding": "references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
-      "status": "invalid",
-      "errors": [
-        "profile_id must equal `frontend-tools-stitch-loop`",
-        "scope_skill must equal `frontend/tools/stitch-loop`"
-      ]
+      "status": "valid",
+      "errors": []
     },
     {
       "skill_path": "frontend/ui/baseline-ui/SKILL.md",
@@ -295,10 +267,8 @@
       "profile_binding": "references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
-      "status": "invalid",
-      "errors": [
-        "missing profile file `frontend/ui/baseline-ui/references/task-profile.json`"
-      ]
+      "status": "valid",
+      "errors": []
     },
     {
       "skill_path": "frontend/ui/design-system/SKILL.md",
@@ -319,10 +289,8 @@
       "profile_binding": "references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
-      "status": "invalid",
-      "errors": [
-        "missing profile file `frontend/ui/fixing-motion-performance/references/task-profile.json`"
-      ]
+      "status": "valid",
+      "errors": []
     },
     {
       "skill_path": "frontend/ui/frontend-ui-design/SKILL.md",
@@ -376,12 +344,8 @@
       "profile_binding": "references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
-      "status": "invalid",
-      "errors": [
-        "profile_id must equal `frontend-ui-remotion`",
-        "scope_skill must equal `frontend/ui/remotion`",
-        "scope_profile must equal `frontend`"
-      ]
+      "status": "valid",
+      "errors": []
     },
     {
       "skill_path": "frontend/ui/shadcn-ui/SKILL.md",
@@ -391,11 +355,8 @@
       "profile_binding": "references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
-      "status": "invalid",
-      "errors": [
-        "profile_id must equal `frontend-ui-shadcn-ui`",
-        "scope_skill must equal `frontend/ui/shadcn-ui`"
-      ]
+      "status": "valid",
+      "errors": []
     },
     {
       "skill_path": "frontend/ui/stitch-react-components/SKILL.md",
@@ -405,11 +366,8 @@
       "profile_binding": "references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
-      "status": "invalid",
-      "errors": [
-        "profile_id must equal `frontend-ui-stitch-react-components`",
-        "scope_skill must equal `frontend/ui/stitch-react-components`"
-      ]
+      "status": "valid",
+      "errors": []
     },
     {
       "skill_path": "frontend/ui/stitch-remotion/SKILL.md",
@@ -419,11 +377,8 @@
       "profile_binding": "references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
-      "status": "invalid",
-      "errors": [
-        "profile_id must equal `frontend-ui-stitch-remotion`",
-        "scope_skill must equal `frontend/ui/stitch-remotion`"
-      ]
+      "status": "valid",
+      "errors": []
     },
     {
       "skill_path": "frontend/ui/ui-ux-creative-coding/SKILL.md",
@@ -433,12 +388,8 @@
       "profile_binding": "references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
-      "status": "invalid",
-      "errors": [
-        "profile_id must equal `frontend-ui-ui-ux-creative-coding`",
-        "scope_skill must equal `frontend/ui/ui-ux-creative-coding`",
-        "scope_profile must equal `frontend`"
-      ]
+      "status": "valid",
+      "errors": []
     },
     {
       "skill_path": "frontend/ui/ui-visual-regression/SKILL.md",
@@ -470,10 +421,8 @@
       "profile_binding": "references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
-      "status": "invalid",
-      "errors": [
-        "missing profile file `frontend/website/fixing-accessibility/references/task-profile.json`"
-      ]
+      "status": "valid",
+      "errors": []
     },
     {
       "skill_path": "frontend/website/fixing-metadata/SKILL.md",
@@ -483,10 +432,8 @@
       "profile_binding": "references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
-      "status": "invalid",
-      "errors": [
-        "missing profile file `frontend/website/fixing-metadata/references/task-profile.json`"
-      ]
+      "status": "valid",
+      "errors": []
     },
     {
       "skill_path": "github/automate-github-issues/SKILL.md",
@@ -529,12 +476,8 @@
       "profile_binding": "references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
-      "status": "invalid",
-      "errors": [
-        "profile_id must equal `github-greptile-check-pr`",
-        "scope_skill must equal `github/greptile/check-pr`",
-        "scope_profile must equal `github`"
-      ]
+      "status": "valid",
+      "errors": []
     },
     {
       "skill_path": "github/greptile/greploop/SKILL.md",
@@ -544,12 +487,8 @@
       "profile_binding": "references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
-      "status": "invalid",
-      "errors": [
-        "profile_id must equal `github-greptile-greploop`",
-        "scope_skill must equal `github/greptile/greploop`",
-        "scope_profile must equal `github`"
-      ]
+      "status": "valid",
+      "errors": []
     },
     {
       "skill_path": "github/local-action-verification/SKILL.md",
@@ -691,11 +630,8 @@
       "profile_binding": "references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
-      "status": "invalid",
-      "errors": [
-        "profile_id must equal `personas-steipete-persona`",
-        "scope_skill must equal `personas/steipete-persona`"
-      ]
+      "status": "valid",
+      "errors": []
     },
     {
       "skill_path": "product/content/video-transcript-downloader/SKILL.md",
@@ -705,12 +641,8 @@
       "profile_binding": "references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
-      "status": "invalid",
-      "errors": [
-        "profile_id must equal `product-content-video-transcript-downloader`",
-        "scope_skill must equal `product/content/video-transcript-downloader`",
-        "scope_profile must equal `product`"
-      ]
+      "status": "valid",
+      "errors": []
     },
     {
       "skill_path": "product/content/youtube-hooks-scripts/SKILL.md",
@@ -786,10 +718,8 @@
       "profile_binding": "references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
-      "status": "invalid",
-      "errors": [
-        "missing profile file `product/docs/docs-md/references/task-profile.json`"
-      ]
+      "status": "valid",
+      "errors": []
     },
     {
       "skill_path": "product/docs/gemini-md/SKILL.md",
@@ -821,10 +751,8 @@
       "profile_binding": "references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
-      "status": "invalid",
-      "errors": [
-        "missing profile file `product/domain/arscontexta/references/task-profile.json`"
-      ]
+      "status": "valid",
+      "errors": []
     },
     {
       "skill_path": "product/domain/arscontexta/skill-sources/graph/SKILL.md",
@@ -834,10 +762,8 @@
       "profile_binding": "references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
-      "status": "invalid",
-      "errors": [
-        "missing profile file `product/domain/arscontexta/skill-sources/graph/references/task-profile.json`"
-      ]
+      "status": "valid",
+      "errors": []
     },
     {
       "skill_path": "product/domain/arscontexta/skill-sources/learn/SKILL.md",
@@ -847,10 +773,8 @@
       "profile_binding": "references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
-      "status": "invalid",
-      "errors": [
-        "missing profile file `product/domain/arscontexta/skill-sources/learn/references/task-profile.json`"
-      ]
+      "status": "valid",
+      "errors": []
     },
     {
       "skill_path": "product/domain/arscontexta/skill-sources/next/SKILL.md",
@@ -860,10 +784,8 @@
       "profile_binding": "references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
-      "status": "invalid",
-      "errors": [
-        "missing profile file `product/domain/arscontexta/skill-sources/next/references/task-profile.json`"
-      ]
+      "status": "valid",
+      "errors": []
     },
     {
       "skill_path": "product/domain/arscontexta/skill-sources/pipeline/SKILL.md",
@@ -873,10 +795,8 @@
       "profile_binding": "references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
-      "status": "invalid",
-      "errors": [
-        "missing profile file `product/domain/arscontexta/skill-sources/pipeline/references/task-profile.json`"
-      ]
+      "status": "valid",
+      "errors": []
     },
     {
       "skill_path": "product/domain/arscontexta/skill-sources/ralph/SKILL.md",
@@ -886,10 +806,8 @@
       "profile_binding": "references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
-      "status": "invalid",
-      "errors": [
-        "missing profile file `product/domain/arscontexta/skill-sources/ralph/references/task-profile.json`"
-      ]
+      "status": "valid",
+      "errors": []
     },
     {
       "skill_path": "product/domain/arscontexta/skill-sources/reduce/SKILL.md",
@@ -899,10 +817,8 @@
       "profile_binding": "references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
-      "status": "invalid",
-      "errors": [
-        "missing profile file `product/domain/arscontexta/skill-sources/reduce/references/task-profile.json`"
-      ]
+      "status": "valid",
+      "errors": []
     },
     {
       "skill_path": "product/domain/arscontexta/skill-sources/refactor/SKILL.md",
@@ -912,10 +828,8 @@
       "profile_binding": "references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
-      "status": "invalid",
-      "errors": [
-        "missing profile file `product/domain/arscontexta/skill-sources/refactor/references/task-profile.json`"
-      ]
+      "status": "valid",
+      "errors": []
     },
     {
       "skill_path": "product/domain/arscontexta/skill-sources/reflect/SKILL.md",
@@ -925,10 +839,8 @@
       "profile_binding": "references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
-      "status": "invalid",
-      "errors": [
-        "missing profile file `product/domain/arscontexta/skill-sources/reflect/references/task-profile.json`"
-      ]
+      "status": "valid",
+      "errors": []
     },
     {
       "skill_path": "product/domain/arscontexta/skill-sources/remember/SKILL.md",
@@ -938,10 +850,8 @@
       "profile_binding": "references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
-      "status": "invalid",
-      "errors": [
-        "missing profile file `product/domain/arscontexta/skill-sources/remember/references/task-profile.json`"
-      ]
+      "status": "valid",
+      "errors": []
     },
     {
       "skill_path": "product/domain/arscontexta/skill-sources/rethink/SKILL.md",
@@ -951,10 +861,8 @@
       "profile_binding": "references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
-      "status": "invalid",
-      "errors": [
-        "missing profile file `product/domain/arscontexta/skill-sources/rethink/references/task-profile.json`"
-      ]
+      "status": "valid",
+      "errors": []
     },
     {
       "skill_path": "product/domain/arscontexta/skill-sources/reweave/SKILL.md",
@@ -964,10 +872,8 @@
       "profile_binding": "references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
-      "status": "invalid",
-      "errors": [
-        "missing profile file `product/domain/arscontexta/skill-sources/reweave/references/task-profile.json`"
-      ]
+      "status": "valid",
+      "errors": []
     },
     {
       "skill_path": "product/domain/arscontexta/skill-sources/seed/SKILL.md",
@@ -977,10 +883,8 @@
       "profile_binding": "references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
-      "status": "invalid",
-      "errors": [
-        "missing profile file `product/domain/arscontexta/skill-sources/seed/references/task-profile.json`"
-      ]
+      "status": "valid",
+      "errors": []
     },
     {
       "skill_path": "product/domain/arscontexta/skill-sources/stats/SKILL.md",
@@ -990,10 +894,8 @@
       "profile_binding": "references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
-      "status": "invalid",
-      "errors": [
-        "missing profile file `product/domain/arscontexta/skill-sources/stats/references/task-profile.json`"
-      ]
+      "status": "valid",
+      "errors": []
     },
     {
       "skill_path": "product/domain/arscontexta/skill-sources/tasks/SKILL.md",
@@ -1003,10 +905,8 @@
       "profile_binding": "references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
-      "status": "invalid",
-      "errors": [
-        "missing profile file `product/domain/arscontexta/skill-sources/tasks/references/task-profile.json`"
-      ]
+      "status": "valid",
+      "errors": []
     },
     {
       "skill_path": "product/domain/arscontexta/skill-sources/validate/SKILL.md",
@@ -1016,10 +916,8 @@
       "profile_binding": "references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
-      "status": "invalid",
-      "errors": [
-        "missing profile file `product/domain/arscontexta/skill-sources/validate/references/task-profile.json`"
-      ]
+      "status": "valid",
+      "errors": []
     },
     {
       "skill_path": "product/domain/arscontexta/skill-sources/verify/SKILL.md",
@@ -1029,10 +927,8 @@
       "profile_binding": "references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
-      "status": "invalid",
-      "errors": [
-        "missing profile file `product/domain/arscontexta/skill-sources/verify/references/task-profile.json`"
-      ]
+      "status": "valid",
+      "errors": []
     },
     {
       "skill_path": "product/domain/arscontexta/skills/help/SKILL.md",
@@ -1042,10 +938,8 @@
       "profile_binding": "references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
-      "status": "invalid",
-      "errors": [
-        "missing profile file `product/domain/arscontexta/skills/help/references/task-profile.json`"
-      ]
+      "status": "valid",
+      "errors": []
     },
     {
       "skill_path": "product/domain/chatgpt-apps/SKILL.md",
@@ -1055,10 +949,8 @@
       "profile_binding": "references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
-      "status": "invalid",
-      "errors": [
-        "missing profile file `product/domain/chatgpt-apps/references/task-profile.json`"
-      ]
+      "status": "valid",
+      "errors": []
     },
     {
       "skill_path": "product/domain/chatgpt-apps-production-checklist/SKILL.md",
@@ -1101,10 +993,8 @@
       "profile_binding": "references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
-      "status": "invalid",
-      "errors": [
-        "missing profile file `product/ops/compound-engineering-router/references/task-profile.json`"
-      ]
+      "status": "valid",
+      "errors": []
     },
     {
       "skill_path": "product/ops/decide-build-primitive/SKILL.md",
@@ -1334,10 +1224,8 @@
       "profile_binding": "references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
-      "status": "invalid",
-      "errors": [
-        "missing profile file `skills-antigravity-test/ui-ux-creative-coding/references/task-profile.json`"
-      ]
+      "status": "valid",
+      "errors": []
     },
     {
       "skill_path": "utilities/1password/SKILL.md",
@@ -1380,10 +1268,8 @@
       "profile_binding": "references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
-      "status": "invalid",
-      "errors": [
-        "missing profile file `utilities/apple-app-creator/references/task-profile.json`"
-      ]
+      "status": "valid",
+      "errors": []
     },
     {
       "skill_path": "utilities/atlas/SKILL.md",
@@ -1459,11 +1345,8 @@
       "profile_binding": "references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
-      "status": "invalid",
-      "errors": [
-        "profile_id must equal `utilities-codex-prompt-creator`",
-        "scope_skill must equal `utilities/codex-prompt-creator`"
-      ]
+      "status": "valid",
+      "errors": []
     },
     {
       "skill_path": "utilities/codex-sessions-skill-scan/SKILL.md",
@@ -1484,10 +1367,8 @@
       "profile_binding": "references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
-      "status": "invalid",
-      "errors": [
-        "missing profile file `utilities/diagram-cli/references/task-profile.json`"
-      ]
+      "status": "valid",
+      "errors": []
     },
     {
       "skill_path": "utilities/diagram-context-refresh/SKILL.md",
@@ -1620,10 +1501,8 @@
       "profile_binding": "references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
-      "status": "invalid",
-      "errors": [
-        "missing profile file `utilities/simple-tasks/references/task-profile.json`"
-      ]
+      "status": "valid",
+      "errors": []
     },
     {
       "skill_path": "utilities/skill-builder/SKILL.md",
@@ -1721,10 +1600,8 @@
       "profile_binding": "references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
-      "status": "invalid",
-      "errors": [
-        "missing profile file `utilities/xcode-makefiles/references/task-profile.json`"
-      ]
+      "status": "valid",
+      "errors": []
     }
   ]
 }

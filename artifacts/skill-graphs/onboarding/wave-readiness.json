@@ -1,13 +1,13 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-03-08T19:24:21Z",
+  "generated_at": "2026-03-08T19:30:12Z",
   "decision_date": "2026-03-08",
   "summary": {
     "active_skill_count": 144,
     "manual_skill_count": 13,
     "co_pilot_skill_count": 131,
-    "profile_valid_count": 94,
-    "profile_invalid_count": 50,
+    "profile_valid_count": 143,
+    "profile_invalid_count": 1,
     "event_envelope_errors": 8,
     "approver_count": 2
   },
@@ -58,12 +58,12 @@
       },
       "coverage": {
         "total": 131,
-        "valid": 81
+        "valid": 130
       },
       "blockers": [
         {
           "code": "COPILOT_SKILL_VALIDATION",
-          "detail": "Co-pilot skills valid 81/131",
+          "detail": "Co-pilot skills valid 130/131",
           "owner": "unassigned",
           "due_date": null,
           "escalation_date": null

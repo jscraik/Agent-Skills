@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "profile_id": "frontend-design-md",
-  "scope_skill": "frontend/design-md",
+  "profile_id": "frontend-stitch-design-md",
+  "scope_skill": "frontend/stitch-design-md",
   "scope_profile": "frontend",
   "rubric_version": "2026-02-26",
   "evaluator_version": "v1",

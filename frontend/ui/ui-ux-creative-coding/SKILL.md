@@ -1,6 +1,8 @@
 ---
 name: ui-ux-creative-coding
 description: Use when UI work needs polished motion + implementation artifacts in React/Tauri (Tailwind v4, Radix, optional Three.js); deliver brief, component/motion plans, and validation notes; do not use for brand-only identity or full 3D/game builds.
+metadata:
+  short-description: UI polish workflow for React/Tauri with motion, accessibility, and implementation-ready validation guidance.
 ---
 
 # UI/UX + Creative Coding Skill
@@ -52,6 +54,7 @@ Use this skill when the request needs UI direction **and** delivery artifacts, i
 - Brand-only identity work with no UI deliverables.
 - Full 3D engines/games unless explicitly requested.
 - Open-ended visual ideation with no delivery constraints.
+- Backend-only architecture work (for example cursor pagination standards, websocket reconnect policy, or cross-tab session orchestration) unless explicitly tied to in-scope UI deliverables.
 
 ## Persona composition modes
 This skill supports both **intertwined** and **separate** persona usage.
@@ -117,6 +120,8 @@ Reference: `references/design-taste-overlay.md`
 - Stack + platform constraints (Tauri/React/Vite, Tailwind v4, Radix, optional Three.js).
 - Existing system constraints (tokens, components, patterns, content model).
 - Definition of done (a11y/perf/visual checks, acceptance criteria).
+- Interaction latency target for high-frequency actions (default: perceived feedback in <100ms).
+- Known performance hot paths (animation-heavy surfaces, dynamic media/canvas loading, or compute-heavy UI transforms).
 - Optional overlay selection (default none). If `design-taste-frontend` is active, confirm whether strict rules are hard requirements or strong defaults.
 
 If input is missing, ask only the minimum questions needed to proceed safely.
@@ -130,6 +135,7 @@ Unless the user asks otherwise, produce:
 5. Verification notes (a11y + performance + visual regression readiness).
 6. Overlay summary when enabled (active dials, enforced constraints, and explicit deviations).
 7. Component benchmark note when requested (or when component choices are ambiguous), including `component.gallery` findings.
+8. Measurable acceptance targets for interaction latency, animation properties, layout stability, and input validation timing.
 
 When requested, add:
 - Storybook stories / handoff snippets.
@@ -165,13 +171,18 @@ Persona marker rules:
 5. **Design system pass**: states, variants, tokens, semantics, keyboard/focus behavior.
 6. **Pattern benchmark pass (when useful/requested)**: compare component approaches with `component.gallery` before locking API/behavior.
 7. **Motion pass**: timing/easing decisions, interruptibility, reduced-motion parity.
-8. **Implementation plan**: concrete components/files and patch-ready next steps.
-9. **Verify**: a11y, performance, visual consistency, and tradeoff clarity gates.
+8. **Reliability pass**: isolate hot-path risks (main-thread compute, layout shifts, and event-order races).
+9. **Implementation plan**: concrete components/files and patch-ready next steps.
+10. **Verify**: a11y, performance, visual consistency, and tradeoff clarity gates.
 
 ## Quality gates
 - Accessibility: focus management, keyboard parity, semantic structure, contrast.
-- Motion safety: reduced-motion parity and interruptible transitions.
-- Performance: prefer transform/opacity; avoid layout thrash in high-frequency interactions.
+- Motion safety: reduced-motion parity, interruptible transitions, and transform/opacity-first animation properties.
+- Performance: avoid layout thrash in high-frequency interactions; move heavy UI compute off the main thread when it threatens frame budget.
+- Layout stability: reserve aspect ratio/space for dynamic media and Three.js canvases before load.
+- Interaction latency: high-frequency actions should render immediate optimistic feedback (target: <100ms perceived latency).
+- Event integrity: for custom overlay selection patterns, prevent blur/click race conditions (for example selecting on `onMouseDown` when blur order would otherwise swallow the action).
+- Input UX timing: validate text inputs on blur by default; validate discrete controls (checkbox/select/toggle) on change.
 - Regression readiness: Storybook states + visual review path (Argos or equivalent).
 - Fail fast: stop at first failed gate and do not proceed until fixed.
 - Dependency/version guard (when code is requested): verify required UI/motion/icon packages and Tailwind major version before recommending version-specific syntax.
@@ -183,6 +194,7 @@ Persona marker rules:
 - Keep recommendations incremental, testable, and patch-ready.
 - Never expose secrets, credentials, or private URLs in outputs.
 - Do not sacrifice accessibility or reduced-motion parity for visual novelty.
+- Keep scope frontend-first; do not introduce backend/infrastructure remediation unless the user explicitly asks for it.
 - Overlay rules are opt-in only. Do not enforce `design-taste-frontend` constraints unless explicitly requested.
 - When using `component.gallery`, do not copy blindly; adapt patterns to product context and platform constraints.
 
@@ -194,7 +206,8 @@ Required checks:
 - Response contract: `## When to use`, `## Inputs`, `## Outputs` in order.
 - Persona marker contract when persona overlays are requested.
 - Accessibility baseline (focus, keyboard, semantics, contrast).
-- Motion/performance sanity (interruptibility + reduced-motion + no avoidable layout thrash).
+- Motion/performance sanity (interruptibility + reduced-motion + transform/opacity-first animations + no avoidable layout thrash).
+- Measurable acceptance sanity (interaction feedback target, layout-stability safeguards, and input validation timing are explicit and testable).
 - If `design-taste-frontend` overlay is requested: confirm active dial values (or user-set values) and apply overlay guardrails.
 - If component benchmarking is requested: cite the compared component patterns and final selection rationale.
 
@@ -225,6 +238,10 @@ Helpers:
 - Shipping hover-only affordances without focus/keyboard parity.
 - One-off styling that ignores tokens/variants without justification.
 - Recommending heavy dependencies before platform-native options.
+- Animating layout-triggering properties (`width`, `height`, `margin`) in high-frequency UI motion.
+- Running compute-heavy transforms or data work on the main thread when a worker path is appropriate.
+- Wiring custom selectable overlays with `onClick` when blur order can prevent selection from applying.
+- Validating text fields aggressively on every keystroke when blur validation is the expected UX.
 - Treating AI output as production-ready without a quality pass.
 - **NEVER** copy a reference implementation without adaptation rationale.
 - **DO NOT** skip loading/empty/error/active interaction states.
