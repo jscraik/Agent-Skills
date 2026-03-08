@@ -2,11 +2,12 @@
 import sys
 import os
 import json
+import logging
 
 try:
     import tomli as tomllib
 except ModuleNotFoundError:
-    print("Error: Please install tomli if using Python < 3.11: pip install tomli")
+    logging.error("Error: Please install tomli if using Python < 3.11: pip install tomli")
     sys.exit(1)
 
 CODEX_CONFIG_PATH = os.path.expanduser("~/.codex/config.toml")
