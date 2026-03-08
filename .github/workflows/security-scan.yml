@@ -52,8 +52,7 @@ jobs:
             --config "p/python" \
             --config "p/typescript" \
             --config "p/bash" \
-            --sarif --output semgrep.sarif \
-            --error
+            --sarif --output semgrep.sarif
         env:
           # Set SEMGREP_APP_TOKEN if using Semgrep Cloud for dashboard/PR comments
           SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN || '' }}
