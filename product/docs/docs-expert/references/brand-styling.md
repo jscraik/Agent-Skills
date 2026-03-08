@@ -1,6 +1,7 @@
 # brAInwav Brand Styling
 
 Use this reference when visual formatting or styling artifacts are requested.
+This is a fallback profile for docs-expert; repository-specific official brand guidance takes precedence when available.
 
 ## Overview
 

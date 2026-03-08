@@ -1,7 +1,30 @@
 # Agent Skills
 
 <!-- Skill count: 133 | Genome: active -->
+
+<div align="center">
+
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Docs](https://img.shields.io/badge/docs-passing-brightgreen)](/docs)
+[![Skills](https://img.shields.io/badge/skills-133-blue)](/SKILL.md)
+
+</div>
+
 **The source of truth for Codex and agent skills.**
+
+## TL;DR
+
+**The Problem**: AI agents need consistent, reusable skills—but managing them across tools (Codex, Claude Code, Gemini) leads to duplication, drift, and maintenance burden.
+
+**The Solution**: A single canonical skill library that syncs to multiple agent runtimes via symlinks, with automated validation and a nightly self-improvement loop.
+
+| Feature | What It Does |
+|---------|--------------|
+| **Canonical skills** | 133 skills in one place, no duplication |
+| **Multi-tool sync** | Symlinks to Codex, Claude Code, Gemini, Antigravity |
+| **Automated validation** | Docs lint, skill diagnostics, plan graph checks |
+| **Skill Genome Loop** | Nightly analysis + human-gated improvement candidates |
+| **Fail-closed controls** | Kill-switch, rollout modes, confidence gating |
 
 If you are new here:
 
@@ -106,33 +129,6 @@ This validates:
 - Plan task graphs (dependency checking)
 - Skill graph artifact compliance
 - Documentation structure and links
-
-## Skill Genome Loop
-
-Nightly batch process for skill improvement candidates:
-
-```bash
-# Run genome loop manually
-python3 scripts/run_skill_genome_loop.py
-
-# Review pending candidates
-python3 scripts/review_candidates.py --list
-
-# Approve/reject candidates
-python3 scripts/review_candidates.py --approve <id>
-python3 scripts/review_candidates.py --reject <id>
-```
-
-**Controls:**
-- `artifacts/skill-graphs/controls/rollout-mode.txt` — `off | observe_only | active`
-- `artifacts/skill-graphs/controls/kill-switch.txt` — Emergency stop (file exists = stop)
-
-**Outputs:**
-- `artifacts/skill-graphs/telemetry/pending-candidates.jsonl` — Awaiting review
-- `artifacts/skill-graphs/telemetry/candidates.jsonl` — Approved candidates
-- `logs/genome-loop.log` — Execution logs
-
-**Documentation:** [Skill Genome Loop Runbook](/docs/skill-graphs/runbooks/skill-genome-loop.md)
 
 ## Verify your setup
 
@@ -253,6 +249,52 @@ Common causes:
 - Re-run `bash scripts/sync_skills.sh`.
 - Check write permissions for `~/.agents/skills`.
 
+## Limitations
+
+### What This Repo Does Not Do
+
+- **Runtime execution**: Skills are prompts/instructions, not executable code. Agents interpret them.
+- **Version pinning**: Skills evolve with the repo; there's no semantic versioning per skill.
+- **Cross-machine sync**: Symlinks are local. Use git to share skills across machines.
+- **Automatic conflict resolution**: When skills conflict, the agent must ask for clarification.
+
+### Known Constraints
+
+| Capability | Current State | Notes |
+|------------|---------------|-------|
+| Skill isolation | Per-folder | No sandboxing between skills |
+| Telemetry | Opt-in | Requires explicit logging setup |
+| Multi-language | English only | Skills are authored in English |
+
+## FAQ
+
+### How do I add a new skill?
+
+1. Create a folder under the appropriate category (e.g., `frontend/my-skill/`)
+2. Copy the template: `cp templates/SKILL.md.template frontend/my-skill/SKILL.md`
+3. Fill in the YAML frontmatter and skill content
+4. Run `bash scripts/sync_skills.sh` to register the skill
+
+### Why symlinks instead of copying?
+
+Symlinks ensure all tools see the same canonical skill content. Edits in one place propagate everywhere.
+
+### What's the difference between `/SKILL.md` and `/skills/`?
+
+- `/SKILL.md` — Human-readable index of all skills
+- `/.agents/skills/` — Symlink directory for tool loading
+
+### How do I disable the Skill Genome Loop?
+
+Create the kill-switch file:
+```bash
+touch artifacts/skill-graphs/controls/kill-switch.txt
+```
+
+### Can I use these skills with other AI tools?
+
+Yes. The skill format is plain Markdown. Any tool that can read Markdown prompts can use these skills.
+
 ## Support and security
 
 - Questions and usage help: `/SUPPORT.md`
@@ -267,7 +309,7 @@ Common causes:
 - Non-scope: product-level feature specs and runtime API design docs.
 - Owner: repository maintainers (`@jscraik`).
 - Review cadence: every 90 days or after major workflow changes.
-- Last updated: 2026-02-18.
+- Last updated: 2026-03-07.
 
 ## Community health files
 
@@ -310,3 +352,18 @@ bash ~/.codex/scripts/verify-work.sh
 
 - `~/.codex/instructions/agent-first-scaffold-spec.md`
 <!-- AGENT-FIRST-WORKFLOW:END -->
+
+---
+
+<img
+  src="./brand/brand-mark.webp"
+  srcset="./brand/brand-mark.webp 1x, ./brand/brand-mark@2x.webp 2x"
+  alt="brAInwav"
+  height="28"
+  align="left"
+/>
+
+<br clear="left" />
+
+**brAInwav**
+_from demo to duty_
