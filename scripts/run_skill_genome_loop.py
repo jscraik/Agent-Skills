@@ -39,6 +39,8 @@ MIN_WINDOWS = 2
 MAX_CANDIDATES = 10
 SCHEMA_VERSION = "1.0"
 MAX_STARTED_AT_FUTURE_SKEW = timedelta(hours=1)
+MAX_EVENTS_JSONL_BYTES = 10 * 1024 * 1024  # 10 MB hard cap per events.jsonl
+MAX_EVENTS_PER_RUN = 10_000  # line cap to bound list growth
 
 # Control file paths
 KILL_SWITCH_PATH = CONTROLS_ROOT / "kill-switch.txt"
@@ -258,11 +260,27 @@ def load_run_artifacts(run_dir: Path) -> Dict[str, Any]:
 
     events_path = run_dir / "events.jsonl"
     if events_path.exists():
-        for line in events_path.read_text(encoding="utf-8").splitlines():
-            try:
-                events.append(json.loads(line))
-            except json.JSONDecodeError:
-                continue
+        try:
+            if events_path.stat().st_size > MAX_EVENTS_JSONL_BYTES:
+                log(
+                    f"Skipping oversized events artifact for {run_dir.name}: "
+                    f"{events_path.stat().st_size} bytes exceeds {MAX_EVENTS_JSONL_BYTES}"
+                )
+            else:
+                with events_path.open("r", encoding="utf-8") as _f:
+                    for idx, line in enumerate(_f):
+                        if idx >= MAX_EVENTS_PER_RUN:
+                            log(
+                                f"Truncating events for {run_dir.name} "
+                                f"at {MAX_EVENTS_PER_RUN} lines"
+                            )
+                            break
+                        try:
+                            events.append(json.loads(line))
+                        except json.JSONDecodeError:
+                            continue
+        except OSError:
+            log(f"Failed to read events artifact for {run_dir.name}")
 
     promotion = load_json(run_dir / "promotion_decision.json") or {}
 
