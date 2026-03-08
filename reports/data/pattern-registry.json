@@ -23,7 +23,7 @@
       ],
       "match": {
         "name": "draftpr",
-        "path": "/Users/jamiecraik/dev/agent-skills/skills/draftpr/SKILL.md"
+        "path": "skills/draftpr/SKILL.md"
       }
     }
   ]
