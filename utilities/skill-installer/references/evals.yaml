@@ -80,4 +80,4 @@ cases:
     prompt: "Use $skill-installer to describe the safe write path for installing a third-party skill. In this headless eval, do not call tools or run shell commands."
     acceptance:
       - type: regex
-        value: "(?i)(staging|/tmp|/mnt/data|stage.*validate.*promote|isolated temp)"
+        value: "(?i)(staging path|staging boundary|/tmp|/mnt/data|stage.*validate.*promote|isolated temp)"
