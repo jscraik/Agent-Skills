@@ -30,6 +30,8 @@ skills-antigravity/
 sync-symlink/
 
 # Generated artifacts
+.diagram/
+artifacts/diagrams/
 artifacts/dist/
 artifacts/build/dist/
 artifacts/reports/
