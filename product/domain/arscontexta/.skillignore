@@ -1,13 +1,2 @@
-# Upstream corpus and templates contain intentional adversarial/command strings.
-# Exclude from prompt-injection heuristic scanning to reduce false positives.
-
-.claude-plugin/**
-generators/**
-hooks/**
-methodology/**
-platforms/**
-presets/**
-reference/**
-
-# Evals intentionally include attack-style prompts and risky command strings.
-references/evals.yaml
+# Security posture: keep prompt-injection/risk scans comprehensive for this skill.
+# Do not exclude source, references, or eval files from automated scanning.
