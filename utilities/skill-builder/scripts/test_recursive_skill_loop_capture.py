@@ -12,7 +12,7 @@ from pathlib import Path
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-SCRIPT_PATH = REPO_ROOT / "utilities" / "skill-creator" / "scripts" / "recursive_skill_loop.py"
+SCRIPT_PATH = REPO_ROOT / "utilities" / "skill-builder" / "scripts" / "recursive_skill_loop.py"
 PROFILE_PATH = (
     REPO_ROOT / "docs" / "skill-graphs" / "schemas" / "examples" / "ui-skills-profile.example.json"
 )

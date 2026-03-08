@@ -84,7 +84,7 @@ Map phase pipeline to deck archetypes:
 
 ## Validation checklist
 
-- `python3 utilities/skill-creator/scripts/test_recursive_skill_loop_capture.py`
-- `python3 utilities/skill-creator/scripts/test_validate_recursive_promotion.py`
-- `python3 utilities/skill-creator/scripts/validate_recursive_promotion.py --run-dir <run_dir>`
-- `python3 utilities/skill-creator/scripts/build_recursive_skill_shadow_report.py --runs-root artifacts/skill-graphs/runs --window-days 3`
+- `python3 utilities/skill-builder/scripts/test_recursive_skill_loop_capture.py`
+- `python3 utilities/skill-builder/scripts/test_validate_recursive_promotion.py`
+- `python3 utilities/skill-builder/scripts/validate_recursive_promotion.py --run-dir <run_dir>`
+- `python3 utilities/skill-builder/scripts/build_recursive_skill_shadow_report.py --runs-root artifacts/skill-graphs/runs --window-days 3`

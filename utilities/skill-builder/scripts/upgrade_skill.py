@@ -661,7 +661,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         print(
             "ERROR: PyYAML is required to run upgrade_skill.py.\n\n"
             "Fix:\n"
-            "  ~/.venvs/pyyaml/bin/python utilities/skill-creator/scripts/upgrade_skill.py <path/to/skill-dir-or-SKILL.md>\n",
+            "  ~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/upgrade_skill.py <path/to/skill-dir-or-SKILL.md>\n",
             file=sys.stderr,
         )
         return 1

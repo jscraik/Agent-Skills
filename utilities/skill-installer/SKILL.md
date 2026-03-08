@@ -69,7 +69,7 @@ description: Plan and install skills into a Codex skills directory from curated 
 - Post-install decision-feedback readiness check:
   - Verify installed `SKILL.md` contains `decision-feedback-protocol:v2` (or a stronger equivalent).
   - If missing, patch it and report that AskQuestion parity feedback capture was enabled.
-  - Verify the workspace can run subject analytics via `python3 utilities/skill-creator/scripts/skill_subject_scoreboard.py --workspace <workspace>`.
+  - Verify the workspace can run subject analytics via `python3 utilities/skill-builder/scripts/skill_subject_scoreboard.py --workspace <workspace>`.
 - For `--dry-run`, provide a compact plan summary instead of filesystem changes.
 
 ## Output contract
@@ -228,13 +228,13 @@ Use judgment, adapt to context, and push boundaries when appropriate.
 - Confirm AskQuestion checkpoints were executed for overwrite/deconflict/warning decisions.
 - For `--dry-run`, report source/risk summary and skip destination mutations/validation checks.
 - Run required checks on each installed target:
-  - `~/.venvs/pyyaml/bin/python utilities/skill-creator/scripts/quick_validate.py <installed-skill-dir>`
-  - `~/.venvs/pyyaml/bin/python utilities/skill-creator/scripts/skill_gate.py <installed-skill-dir>`
-  - `~/.venvs/pyyaml/bin/python utilities/skill-creator/scripts/analyze_skill.py <installed-skill-dir>`
-  - `~/.venvs/pyyaml/bin/python utilities/skill-creator/scripts/openclaw_skill_guard.py <installed-skill-dir> --mode both`
+  - `~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/quick_validate.py <installed-skill-dir>`
+  - `~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/skill_gate.py <installed-skill-dir>`
+  - `~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/analyze_skill.py <installed-skill-dir>`
+  - `~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/openclaw_skill_guard.py <installed-skill-dir> --mode both`
 - For installs that actually write files (non-dry-run):
   - If the skill is **new** (not an overwrite/update), run evals:
-  - `~/.venvs/pyyaml/bin/python utilities/skill-creator/scripts/run_skill_evals.py <installed-skill-dir>`
+  - `~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/run_skill_evals.py <installed-skill-dir>`
 - Run deconflict benchmark before changing scoring logic:
   - `~/.venvs/pyyaml/bin/python utilities/skill-installer/scripts/install-skill-from-github.py --run-deconflict-benchmark`
 - If critical findings exist, stop and ask for approval before enabling/using the skill.

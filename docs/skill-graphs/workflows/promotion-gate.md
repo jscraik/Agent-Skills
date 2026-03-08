@@ -98,7 +98,7 @@ bash scripts/human_promote_recursive_run.sh \
 Validate decision directly:
 
 ```bash
-python3 utilities/skill-creator/scripts/validate_recursive_promotion.py \
+python3 utilities/skill-builder/scripts/validate_recursive_promotion.py \
   --run-dir artifacts/skill-graphs/runs/<run_id> \
   --decision-file artifacts/skill-graphs/runs/<run_id>/promotion_decision.json \
   --lesson-file <path_to_lesson_file>

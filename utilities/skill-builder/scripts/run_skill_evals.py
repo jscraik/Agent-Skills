@@ -14,7 +14,7 @@ Capabilities:
 - Produces merged scorecards and exits non-zero on configured gate failures
 
 Usage:
-  ~/.venvs/pyyaml/bin/python utilities/skill-creator/scripts/run_skill_evals.py <path/to/skill-dir-or-SKILL.md>
+  ~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/run_skill_evals.py <path/to/skill-dir-or-SKILL.md>
 
 Exit codes:
   0  all required gates passed
@@ -49,7 +49,7 @@ except ModuleNotFoundError:  # pragma: no cover
     print(
         "ERROR: PyYAML is required to run run_skill_evals.py.\n\n"
         "Fix:\n"
-        "  ~/.venvs/pyyaml/bin/python utilities/skill-creator/scripts/run_skill_evals.py <path/to/skill-dir-or-SKILL.md>\n",
+        "  ~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/run_skill_evals.py <path/to/skill-dir-or-SKILL.md>\n",
         file=sys.stderr,
     )
     raise SystemExit(1)
@@ -1232,7 +1232,7 @@ def run_discovery_smoke(
         response = "\n".join(
             [
                 "## Scope and triggers",
-                "- This request fits $skill-creator because it is about defining a new skill before implementation.",
+                "- This request fits $skill-builder because it is about defining a new skill before implementation.",
                 "",
                 "## Required inputs",
                 "- Missing: the exact goal for the skill and the main problem it should solve every time.",
@@ -1260,7 +1260,7 @@ def run_discovery_smoke(
         response = "\n".join(
             [
                 "## Scope and triggers",
-                "- This request still fits $skill-creator because the discovery phase is finishing and the skill should not be built until the user confirms the summary.",
+                "- This request still fits $skill-builder because the discovery phase is finishing and the skill should not be built until the user confirms the summary.",
                 "",
                 "## Required inputs",
                 "- No major discovery gaps remain; this turn is for confirmation before building.",

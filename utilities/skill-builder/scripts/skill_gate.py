@@ -12,7 +12,7 @@ Enforces:
 - Basic safety hygiene (redaction language; fail-fast gating)
 
 Usage:
-  ~/.venvs/pyyaml/bin/python utilities/skill-creator/scripts/skill_gate.py <path/to/skill-dir-or-SKILL.md>
+  ~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/skill_gate.py <path/to/skill-dir-or-SKILL.md>
 
 Exit codes:
   0  pass
@@ -20,7 +20,7 @@ Exit codes:
   2  gate failed (one or more FAIL findings)
 
 Recommended CI:
-  ~/.venvs/pyyaml/bin/python utilities/skill-creator/scripts/skill_gate.py ~/dev/agent-skills/.agents/skills/<skill-name> --format json
+  ~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/skill_gate.py ~/dev/agent-skills/.agents/skills/<skill-name> --format json
 """
 
 from __future__ import annotations
@@ -49,9 +49,9 @@ except ModuleNotFoundError:  # pragma: no cover
     print(
         "ERROR: PyYAML is required to run skill_gate.py.\n\n"
         "Fix (recommended):\n"
-        "  ~/.venvs/pyyaml/bin/python utilities/skill-creator/scripts/skill_gate.py <path/to/skill-dir-or-SKILL.md>\n\n"
+        "  ~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/skill_gate.py <path/to/skill-dir-or-SKILL.md>\n\n"
         "Notes:\n"
-        "  - Do not use utilities/skill-creator/.venv/bin/python (this repo does not ship that venv).\n"
+        "  - Do not use utilities/skill-builder/.venv/bin/python (this repo does not ship that venv).\n"
         "  - If ~/.venvs/pyyaml doesn't exist, create a venv with PyYAML installed.",
         file=sys.stderr,
     )

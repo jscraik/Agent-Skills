@@ -4,8 +4,8 @@
   "cases": [
     {
       "id": "same_job_skill_creator_system",
-      "candidate": "utilities/skill-creator",
-      "existing": "skills/.system/skill-creator",
+      "candidate": "utilities/skill-builder",
+      "existing": "skills/.system/skill-builder",
       "expect_same_job": true,
       "expect_min_score": 0.18
     },
@@ -19,14 +19,14 @@
     {
       "id": "related_not_same_job_installer_creator",
       "candidate": "utilities/skill-installer",
-      "existing": "utilities/skill-creator",
+      "existing": "utilities/skill-builder",
       "expect_same_job": false,
       "expect_max_score": 0.55
     },
     {
       "id": "related_not_same_job_installer_prompt_creator",
       "candidate": "utilities/skill-installer",
-      "existing": "utilities/prompt-creator",
+      "existing": "utilities/prompt-builder",
       "expect_same_job": false,
       "expect_max_score": 0.45
     }

@@ -13,8 +13,8 @@ dependencies: []
 Recursive loop buffers full iteration journal objects in memory and writes iteration_journal.jsonl only once at the end, increasing memory pressure for long runs and risking data loss on crash before flush.
 
 ## Findings
-- In /Users/jamiecraik/dev/agent-skills/utilities/skill-creator/scripts/recursive_skill_loop.py:766-797, each full journal entry is appended to in-memory journals list.
-- In /Users/jamiecraik/dev/agent-skills/utilities/skill-creator/scripts/recursive_skill_loop.py:977, iteration_journal.jsonl is written once at end from journals list.
+- In /Users/jamiecraik/dev/agent-skills/utilities/skill-builder/scripts/recursive_skill_loop.py:766-797, each full journal entry is appended to in-memory journals list.
+- In /Users/jamiecraik/dev/agent-skills/utilities/skill-builder/scripts/recursive_skill_loop.py:977, iteration_journal.jsonl is written once at end from journals list.
 - Each entry contains nested evaluation/diagnosis objects, causing memory growth with max_iterations and candidate size.
 
 ## Proposed Solutions
@@ -41,7 +41,7 @@ Recursive loop buffers full iteration journal objects in memory and writes itera
 
 ## Technical Details
 ### Affected files/components
-- `/Users/jamiecraik/dev/agent-skills/utilities/skill-creator/scripts/recursive_skill_loop.py`
+- `/Users/jamiecraik/dev/agent-skills/utilities/skill-builder/scripts/recursive_skill_loop.py`
 
 ## Acceptance Criteria
 - [ ] Loop memory growth is near-constant over increasing iteration counts.

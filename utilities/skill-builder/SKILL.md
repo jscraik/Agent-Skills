@@ -1,9 +1,9 @@
 ---
-name: skill-creator
+name: skill-builder
 description: "Create, revise, benchmark, and quality-gate Codex skills (SKILL.md plus scripts, references, evals, and packaging). Use this skill when the user asks to build, audit, improve, compare, or package a Codex skill or skill-graph contract; do not use it for unrelated app features, generic bug fixing, or routine docs edits."
 ---
 
-# Skill Creator
+# Skill Builder
 This skill designs, improves, validates, and packages high-quality Codex skills.
 **Version**: 1.10.0 · **Last updated**: 2026-03-07
 

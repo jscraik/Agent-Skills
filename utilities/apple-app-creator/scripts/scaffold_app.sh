@@ -366,9 +366,9 @@ apply_git_lifecycle() {
 
   local commit_message=""
   if [[ "$PROJECT_MODE" == "new" ]]; then
-    commit_message="chore: scaffold project with app-creator"
+    commit_message="chore: scaffold project with app-builder"
   else
-    commit_message="chore: install app-creator subskills"
+    commit_message="chore: install app-builder subskills"
   fi
 
   git -C "$OUTPUT" add -A

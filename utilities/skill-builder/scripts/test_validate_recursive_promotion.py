@@ -15,7 +15,7 @@ import unittest
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-VALIDATOR = REPO_ROOT / "utilities" / "skill-creator" / "scripts" / "validate_recursive_promotion.py"
+VALIDATOR = REPO_ROOT / "utilities" / "skill-builder" / "scripts" / "validate_recursive_promotion.py"
 
 
 def sha256_text(value: str) -> str:

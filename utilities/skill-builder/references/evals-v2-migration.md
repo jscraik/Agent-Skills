@@ -57,13 +57,13 @@ budgets:
 Run with:
 
 ```bash
-~/.venvs/pyyaml/bin/python utilities/skill-creator/scripts/run_skill_evals.py <skill> \
+~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/run_skill_evals.py <skill> \
   --dual-run --capture-jsonl --tier2-mode warn
 ```
 
 Promote to strict after soak:
 
 ```bash
-~/.venvs/pyyaml/bin/python utilities/skill-creator/scripts/run_skill_evals.py <skill> \
+~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/run_skill_evals.py <skill> \
   --dual-run --capture-jsonl --tier2-mode fail
 ```

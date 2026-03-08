@@ -13,10 +13,10 @@ Defaults:
 - No file writes unless --out is provided (and --overwrite if the file exists)
 
 Usage:
-  ~/.venvs/pyyaml/bin/python utilities/skill-creator/scripts/generate_pressure_tests.py <skill-dir-or-SKILL.md>
+  ~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/generate_pressure_tests.py <skill-dir-or-SKILL.md>
 
 Example:
-  ~/.venvs/pyyaml/bin/python utilities/skill-creator/scripts/generate_pressure_tests.py \\
+  ~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/generate_pressure_tests.py \\
     skills/my-skill \\
     --count 6 \\
     --pressures time,sunk_cost,authority,exhaustion \\

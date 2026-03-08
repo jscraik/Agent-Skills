@@ -23,7 +23,7 @@ import sys
 from pathlib import Path
 
 repo = Path.cwd()
-scripts_dir = repo / "utilities" / "skill-creator" / "scripts"
+scripts_dir = repo / "utilities" / "skill-builder" / "scripts"
 sys.path.insert(0, str(scripts_dir))
 
 from router_controls import resolve_rollout_mode

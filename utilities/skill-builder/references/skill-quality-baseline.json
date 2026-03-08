@@ -1,6 +1,6 @@
 {
   "allowed_structure_failures": [
-    ".agents/skills/.system/skill-creator",
+    ".agents/skills/.system/skill-builder",
     ".agents/skills/.system/skill-installer",
     ".agents/skills/.system/slides",
     ".agents/skills/.system/spreadsheets",

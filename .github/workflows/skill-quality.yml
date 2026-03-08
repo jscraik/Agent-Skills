@@ -6,7 +6,7 @@ on:
       - "**/SKILL.md"
       - "**/references/evals.yaml"
       - "**/references/contract.yaml"
-      - "utilities/skill-creator/scripts/**"
+      - "utilities/skill-builder/scripts/**"
       - "templates/evals.yaml"
   workflow_dispatch:
     inputs:
@@ -36,9 +36,9 @@ jobs:
         run: python -m pip install --upgrade pip pyyaml
       - name: Tier-1 structure gate (skill_gate)
         run: |
-          python utilities/skill-creator/scripts/run_repo_skill_quality.py \
+          python utilities/skill-builder/scripts/run_repo_skill_quality.py \
             --root . \
-            --baseline-file utilities/skill-creator/references/skill-quality-baseline.json \
+            --baseline-file utilities/skill-builder/references/skill-quality-baseline.json \
             --format text
 
   eval-baseline:
@@ -54,7 +54,7 @@ jobs:
         run: python -m pip install --upgrade pip pyyaml
       - name: Run dual-run evals (requires codex/claude binaries + auth)
         run: |
-          python utilities/skill-creator/scripts/run_repo_skill_quality.py \
+          python utilities/skill-builder/scripts/run_repo_skill_quality.py \
             --root . \
             --run-evals \
             --dual-run \
@@ -63,7 +63,7 @@ jobs:
             --format text
       - name: Build dashboard
         run: |
-          python utilities/skill-creator/scripts/build_skill_eval_dashboard.py \
+          python utilities/skill-builder/scripts/build_skill_eval_dashboard.py \
             --reports-root artifacts/reports/skills \
             --out-json artifacts/reports/skills/dashboard.json \
             --out-md artifacts/reports/skills/dashboard.md

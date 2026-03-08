@@ -164,11 +164,11 @@ If inputs are incomplete, ask only the minimum needed to proceed safely.
 ## Validation
 - Fail fast: stop at the first failed gate, fix it, then rerun.
 - Validate this skill with:
-  - `~/.venvs/pyyaml/bin/python utilities/skill-creator/scripts/quick_validate.py product/docs/docs-md`
-  - `~/.venvs/pyyaml/bin/python utilities/skill-creator/scripts/skill_gate.py product/docs/docs-md`
-  - `~/.venvs/pyyaml/bin/python utilities/skill-creator/scripts/analyze_skill.py product/docs/docs-md`
-  - `~/.venvs/pyyaml/bin/python utilities/skill-creator/scripts/openclaw_skill_guard.py product/docs/docs-md --mode both`
-  - `~/.venvs/pyyaml/bin/python utilities/skill-creator/scripts/run_skill_evals.py product/docs/docs-md`
+  - `~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/quick_validate.py product/docs/docs-md`
+  - `~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/skill_gate.py product/docs/docs-md`
+  - `~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/analyze_skill.py product/docs/docs-md`
+  - `~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/openclaw_skill_guard.py product/docs/docs-md --mode both`
+  - `~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/run_skill_evals.py product/docs/docs-md`
 - Validate each documentation refactor by checking headings, links, commands, and path existence.
 
 ## Anti-patterns
@@ -196,6 +196,6 @@ If inputs are incomplete, ask only the minimum needed to proceed safely.
 **Decision feedback protocol (required):**
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.
 - Capture: `decision` (`accepted|partial|rejected|deferred`), `outcome` (`good|neutral|bad|unknown`), and `confidence` (`high|medium|low`).
-- Persist with: `python3 utilities/skill-creator/scripts/record_skill_feedback.py --skill-path product/docs/docs-md/SKILL.md --decision <...> --outcome <...> --confidence <...> --notes "..."`.
+- Persist with: `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path product/docs/docs-md/SKILL.md --decision <...> --outcome <...> --confidence <...> --notes "..."`.
 - The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
 <!-- /decision-feedback-protocol -->

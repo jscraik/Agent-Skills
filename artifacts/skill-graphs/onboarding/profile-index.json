@@ -133,10 +133,10 @@
       "errors": []
     },
     {
-      "skill_path": "frontend/graphics/og-image-creator/SKILL.md",
-      "scope_skill": "frontend/graphics/og-image-creator",
+      "skill_path": "frontend/graphics/og-image-builder/SKILL.md",
+      "scope_skill": "frontend/graphics/og-image-builder",
       "wave": "wave-2-co-pilot",
-      "profile_path": "frontend/graphics/og-image-creator/references/task-profile.json",
+      "profile_path": "frontend/graphics/og-image-builder/references/task-profile.json",
       "delegation_mode": "co-pilot",
       "status": "valid",
       "errors": []
@@ -853,10 +853,10 @@
       "errors": []
     },
     {
-      "skill_path": "utilities/codex-agent-creator/SKILL.md",
-      "scope_skill": "utilities/codex-agent-creator",
+      "skill_path": "utilities/codex-agent-builder/SKILL.md",
+      "scope_skill": "utilities/codex-agent-builder",
       "wave": "wave-1-manual",
-      "profile_path": "utilities/codex-agent-creator/references/task-profile.json",
+      "profile_path": "utilities/codex-agent-builder/references/task-profile.json",
       "delegation_mode": "manual",
       "status": "valid",
       "errors": []
@@ -925,10 +925,10 @@
       "errors": []
     },
     {
-      "skill_path": "utilities/prompt-creator/SKILL.md",
-      "scope_skill": "utilities/prompt-creator",
+      "skill_path": "utilities/prompt-builder/SKILL.md",
+      "scope_skill": "utilities/prompt-builder",
       "wave": "wave-2-co-pilot",
-      "profile_path": "utilities/prompt-creator/references/task-profile.json",
+      "profile_path": "utilities/prompt-builder/references/task-profile.json",
       "delegation_mode": "co-pilot",
       "status": "valid",
       "errors": []
@@ -979,10 +979,10 @@
       "errors": []
     },
     {
-      "skill_path": "utilities/skill-creator/SKILL.md",
-      "scope_skill": "utilities/skill-creator",
+      "skill_path": "utilities/skill-builder/SKILL.md",
+      "scope_skill": "utilities/skill-builder",
       "wave": "wave-2-co-pilot",
-      "profile_path": "utilities/skill-creator/references/task-profile.json",
+      "profile_path": "utilities/skill-builder/references/task-profile.json",
       "delegation_mode": "co-pilot",
       "status": "valid",
       "errors": []

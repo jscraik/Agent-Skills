@@ -74,7 +74,7 @@ Use this checklist before drafting or revising a recursive skill runbook.
 | `docs/skill-graphs/index.md` | Workflow archetypes (sequential/router/orchestrator) | Shows phase pipeline only | ✅ Added explicit mapping to deck archetypes. |
 | `docs/skill-graphs/workflows/promotion-gate.md` | Control gates + security + human gate before promotion | Has checks and reviewer gate but no explicit invocation-boundary section | ✅ Added explicit Invocation boundary checks section. |
 | `docs/skill-graphs/runbooks/kill-switch-and-escalation.md` | Invocation gating hierarchy + safe rollback | Has control hierarchy; no direct link from SKILL to mandatory pre-run checks | ✅ Added mandatory pre-run invocation check section and cross-reference. |
-| `utilities/skill-creator/SKILL.md` | Dynamic injection and boundary-safe loading | Moved details to this appendix for compaction safety. | ✅ Appendix now carries extended governance details. |
+| `utilities/skill-builder/SKILL.md` | Dynamic injection and boundary-safe loading | Moved details to this appendix for compaction safety. | ✅ Appendix now carries extended governance details. |
 
 ## Philosophy and tradeoffs
 - Use this skill when consistent decision-making matters more than one-off execution because project context should drive the approach.

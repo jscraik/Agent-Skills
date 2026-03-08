@@ -111,7 +111,7 @@ while (($# > 0)); do
   esac
 done
 
-validator="utilities/skill-creator/scripts/validate_recursive_promotion.py"
+validator="utilities/skill-builder/scripts/validate_recursive_promotion.py"
 if [[ ! -f "$validator" ]]; then
   echo "Missing validator: $validator" >&2
   exit 2

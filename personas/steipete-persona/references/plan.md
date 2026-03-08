@@ -13,7 +13,7 @@ Upgrade the `steipete` persona skill using the 2024-2026 public corpus so routin
 7. Updated `references/contract.yaml` to encode sources, risks, and output requirements.
 
 ## Validation steps
-- `~/.venvs/pyyaml/bin/python utilities/skill-creator/scripts/quick_validate.py personas/steipete`
-- `~/.venvs/pyyaml/bin/python utilities/skill-creator/scripts/skill_gate.py personas/steipete`
-- `~/.venvs/pyyaml/bin/python utilities/skill-creator/scripts/openclaw_skill_guard.py personas/steipete --mode both`
-- Optional: `~/.venvs/pyyaml/bin/python utilities/skill-creator/scripts/analyze_skill.py personas/steipete`
+- `~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/quick_validate.py personas/steipete`
+- `~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/skill_gate.py personas/steipete`
+- `~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/openclaw_skill_guard.py personas/steipete --mode both`
+- Optional: `~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/analyze_skill.py personas/steipete`

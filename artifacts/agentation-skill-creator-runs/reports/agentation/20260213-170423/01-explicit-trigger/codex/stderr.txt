@@ -57,4 +57,4 @@ Reconnecting... 3/5 (stream disconnected before completion: The model `gpt-5.3-c
 Reconnecting... 4/5 (stream disconnected before completion: The model `gpt-5.3-codex` does not exist or you do not have access to it.)
 Reconnecting... 5/5 (stream disconnected before completion: The model `gpt-5.3-codex` does not exist or you do not have access to it.)
 ERROR: stream disconnected before completion: The model `gpt-5.3-codex` does not exist or you do not have access to it.
-Warning: no last agent message; wrote empty content to /Users/jamiecraik/dev/agent-skills/artifacts/agentation-skill-creator-runs/reports/agentation/20260213-170423/01-explicit-trigger/codex/output_last_message.txt
+Warning: no last agent message; wrote empty content to /Users/jamiecraik/dev/agent-skills/artifacts/agentation-skill-builder-runs/reports/agentation/20260213-170423/01-explicit-trigger/codex/output_last_message.txt

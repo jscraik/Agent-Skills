@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "profile_id": "utilities-skill-creator",
-  "scope_skill": "utilities/skill-creator",
+  "profile_id": "utilities-skill-builder",
+  "scope_skill": "utilities/skill-builder",
   "scope_profile": "utilities",
   "rubric_version": "2026-02-26",
   "evaluator_version": "v1",

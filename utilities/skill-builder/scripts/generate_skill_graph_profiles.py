@@ -26,7 +26,7 @@ MANUAL_SKILL_PATHS = {
     "utilities/1password",
     "utilities/agent-browser",
     "utilities/bootstrap",
-    "utilities/codex-agent-creator",
+    "utilities/codex-agent-builder",
     "utilities/fix-mise",
     "utilities/run-tests-and-write-artifacts",
     "utilities/skill-installer",

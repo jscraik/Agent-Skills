@@ -164,7 +164,7 @@ baseline_commit() {
   fi
 
   if ! (cd "$PROJECT_DIR" && git config user.email >/dev/null 2>&1); then
-    (cd "$PROJECT_DIR" && git config user.email "app-creator@local")
+    (cd "$PROJECT_DIR" && git config user.email "app-builder@local")
   fi
 
   if ! (cd "$PROJECT_DIR" && git config user.name >/dev/null 2>&1); then

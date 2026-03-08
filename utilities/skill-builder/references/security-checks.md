@@ -1,7 +1,7 @@
 # Skill security checks report
 
 Date: 2026-01-28
-Scope: skill-creator + skill-installer prompt-injection and attachment scanning
+Scope: skill-builder + skill-installer prompt-injection and attachment scanning
 
 ## Summary
 - Added warn-only prompt-injection and risky-command scanning for skill content.
@@ -15,22 +15,22 @@ Scope: skill-creator + skill-installer prompt-injection and attachment scanning
 - Added Claude headless runner support to `run_skill_evals.py` (default runner); Codex optional.
 
 ## Files updated
-- `utilities/skill-creator/scripts/skill_gate.py`
-- `utilities/skill-creator/scripts/run_skill_evals.py`
-- `utilities/skill-creator/SKILL.md`
-- `utilities/skill-creator/references/prompt-injection-patterns.json`
-- `utilities/skill-creator/references/evals.yaml`
+- `utilities/skill-builder/scripts/skill_gate.py`
+- `utilities/skill-builder/scripts/run_skill_evals.py`
+- `utilities/skill-builder/SKILL.md`
+- `utilities/skill-builder/references/prompt-injection-patterns.json`
+- `utilities/skill-builder/references/evals.yaml`
 - `utilities/skill-installer/scripts/install-skill-from-github.py`
 - `utilities/skill-installer/SKILL.md`
 - `utilities/skill-installer/references/prompt-injection-patterns.json`
 - `utilities/skill-installer/references/evals.yaml`
-- `utilities/skill-creator/references/security-checks.md`
+- `utilities/skill-builder/references/security-checks.md`
 
 ## Verification
 - `skill_gate.py` (warn-only findings, PASS)
 - `quick_validate.py` (PASS)
 - Interactive installer demo (A/B/C prompt)
-- Claude evals (skill-creator, timeout 180s): PASS (20260128-185229)
+- Claude evals (skill-builder, timeout 180s): PASS (20260128-185229)
 - Claude evals (skill-installer, timeout 180s): PASS (20260128-193416)
 
 ## Notes

@@ -1,5 +1,5 @@
 purpose: >
-  Define expected behavior for app-creator to scaffold or adopt iOS/macOS projects,
+  Define expected behavior for app-builder to scaffold or adopt iOS/macOS projects,
   optionally installing xcode-makefiles and simple-tasks.
 schema_version: 1.0
 triggers:

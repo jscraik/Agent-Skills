@@ -5,7 +5,7 @@ Use these scripts to upgrade skill quality before packaging.
 ## skill_gate.py
 
 ```bash
-~/.venvs/pyyaml/bin/python utilities/skill-creator/scripts/skill_gate.py <path/to/skill-folder>
+~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/skill_gate.py <path/to/skill-folder>
 ```
 
 Use when:
@@ -19,7 +19,7 @@ Outputs:
 ## run_skill_evals.py
 
 ```bash
-~/.venvs/pyyaml/bin/python utilities/skill-creator/scripts/run_skill_evals.py <path/to/skill-folder>
+~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/run_skill_evals.py <path/to/skill-folder>
 ```
 
 Use when:
@@ -76,7 +76,7 @@ Outputs:
 ## analyze_skill.py
 
 ```bash
-~/.venvs/pyyaml/bin/python utilities/skill-creator/scripts/analyze_skill.py <path/to/skill-folder>
+~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/analyze_skill.py <path/to/skill-folder>
 ```
 
 Use when:
@@ -90,7 +90,7 @@ Output:
 ## openclaw_skill_guard.py
 
 ```bash
-~/.venvs/pyyaml/bin/python utilities/skill-creator/scripts/openclaw_skill_guard.py <path/to/skill-folder> --mode both
+~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/openclaw_skill_guard.py <path/to/skill-folder> --mode both
 ```
 
 Use when:
@@ -104,7 +104,7 @@ Output:
 ## upgrade_skill.py
 
 ```bash
-~/.venvs/pyyaml/bin/python utilities/skill-creator/scripts/upgrade_skill.py <path/to/skill-folder>
+~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/upgrade_skill.py <path/to/skill-folder>
 ```
 
 Use when:
@@ -117,7 +117,7 @@ Output:
 ## generate_pressure_tests.py
 
 ```bash
-~/.venvs/pyyaml/bin/python utilities/skill-creator/scripts/generate_pressure_tests.py <path/to/skill-folder>
+~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/generate_pressure_tests.py <path/to/skill-folder>
 ```
 
 Use when:
@@ -132,7 +132,7 @@ Notes:
 ## migrate_evals_v2.py
 
 ```bash
-~/.venvs/pyyaml/bin/python utilities/skill-creator/scripts/migrate_evals_v2.py --root /absolute/repo --apply --normalize-existing
+~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/migrate_evals_v2.py --root /absolute/repo --apply --normalize-existing
 ```
 
 Use when:
@@ -142,7 +142,7 @@ Use when:
 ## ci_skill_quality_gate.py
 
 ```bash
-python utilities/skill-creator/scripts/ci_skill_quality_gate.py artifacts/reports/skills --tier2-mode warn
+python utilities/skill-builder/scripts/ci_skill_quality_gate.py artifacts/reports/skills --tier2-mode warn
 ```
 
 Use when:
@@ -152,7 +152,7 @@ Use when:
 ## build_skill_eval_dashboard.py
 
 ```bash
-python utilities/skill-creator/scripts/build_skill_eval_dashboard.py --reports-root artifacts/reports/skills
+python utilities/skill-builder/scripts/build_skill_eval_dashboard.py --reports-root artifacts/reports/skills
 ```
 
 Use when:
@@ -162,9 +162,9 @@ Use when:
 ## run_repo_skill_quality.py
 
 ```bash
-python utilities/skill-creator/scripts/run_repo_skill_quality.py \
+python utilities/skill-builder/scripts/run_repo_skill_quality.py \
   --root /absolute/repo \
-  --baseline-file utilities/skill-creator/references/skill-quality-baseline.json
+  --baseline-file utilities/skill-builder/references/skill-quality-baseline.json
 ```
 
 Use when:

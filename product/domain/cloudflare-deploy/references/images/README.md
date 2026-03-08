@@ -7,7 +7,7 @@
 **Need to:**
 - **Transform in Worker?** → [api.md](api.md#workers-binding-api-2026-primary-method) (Workers Binding API)
 - **Upload from Worker?** → [api.md](api.md#upload-from-worker) (REST API)
-- **Upload from client?** → [patterns.md](patterns.md#upload-from-client-direct-creator-upload) (Direct Creator Upload)
+- **Upload from client?** → [patterns.md](patterns.md#upload-from-client-direct-builder-upload) (Direct Creator Upload)
 - **Set up variants?** → [configuration.md](configuration.md#variants-configuration)
 - **Serve responsive images?** → [patterns.md](patterns.md#responsive-images)
 - **Add watermarks?** → [patterns.md](patterns.md#watermarking)
@@ -18,7 +18,7 @@
 **For building image upload/transform feature:**
 1. [configuration.md](configuration.md) - Setup Workers binding
 2. [api.md](api.md#workers-binding-api-2026-primary-method) - Learn transform API
-3. [patterns.md](patterns.md#upload-from-client-direct-creator-upload) - Direct upload pattern
+3. [patterns.md](patterns.md#upload-from-client-direct-builder-upload) - Direct upload pattern
 4. [gotchas.md](gotchas.md) - Check limits and errors
 
 **For URL-based transforms:**

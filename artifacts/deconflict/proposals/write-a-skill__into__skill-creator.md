@@ -1,7 +1,7 @@
-# Merge proposal: `write-a-skill` -> `skill-creator`
+# Merge proposal: `write-a-skill` -> `skill-builder`
 
 - Candidate: `/tmp/codex/skill-install-sz8wptmx/skills-main/write-a-skill`
-- Existing: `/Users/jamiecraik/dev/agent-skills/utilities/skill-creator`
+- Existing: `/Users/jamiecraik/dev/agent-skills/utilities/skill-builder`
 - Confidence: **medium**
 - Same-job: `True`
 - Score: `0.17` (text `0.09`, command `0.00`, intent `0.53`, harness `0.00`)

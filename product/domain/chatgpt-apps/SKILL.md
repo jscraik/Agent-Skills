@@ -233,7 +233,7 @@ For non-trivial outcomes, collect AskQuestion parity feedback (`request_user_inp
 - `decision`: `accepted|partial|rejected|deferred`
 - `outcome`: `good|neutral|bad|unknown`
 - `confidence`: `high|medium|low`
-Persist with `python3 utilities/skill-creator/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
+Persist with `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
 
 ## Philosophy
 

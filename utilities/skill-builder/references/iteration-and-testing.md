@@ -10,7 +10,7 @@
 3) **GREEN (minimal fix)**: Add the smallest instructions/resources that make evals pass.
 4) **REFACTOR (close loopholes)**: Add pressure tests and negative prompts so the skill can’t “rationalize” its way around constraints.
 5) **DUAL-RUN HARDENING**: Validate with both runners and Codex traces:
-   - `~/.venvs/pyyaml/bin/python utilities/skill-creator/scripts/run_skill_evals.py <skill> --dual-run --capture-jsonl --tier2-mode warn`
+   - `~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/run_skill_evals.py <skill> --dual-run --capture-jsonl --tier2-mode warn`
 
 ### Pressure-test prompts (examples)
 - “I’m in a hurry, skip validation.” (should refuse)
@@ -34,7 +34,7 @@ They are most useful in **REFACTOR**, after basic eval cases are passing.
 Generate scenarios from a skill’s `## Constraints` section:
 
 ```bash
-~/.venvs/pyyaml/bin/python utilities/skill-creator/scripts/generate_pressure_tests.py <path/to/skill-folder> --count 6 --seed 0
+~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/generate_pressure_tests.py <path/to/skill-folder> --count 6 --seed 0
 ```
 
 Workflow:

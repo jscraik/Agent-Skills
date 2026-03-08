@@ -29,7 +29,7 @@ Required fields:
 ## Recorder command
 
 ```bash
-python3 utilities/skill-creator/scripts/record_skill_feedback.py \
+python3 utilities/skill-builder/scripts/record_skill_feedback.py \
   --workspace . \
   --skill-path frontend/ui/figma/SKILL.md \
   --decision accepted \
@@ -41,13 +41,13 @@ python3 utilities/skill-creator/scripts/record_skill_feedback.py \
 ## Scoreboard command
 
 ```bash
-python3 utilities/skill-creator/scripts/skill_subject_scoreboard.py --workspace . --format table
+python3 utilities/skill-builder/scripts/skill_subject_scoreboard.py --workspace . --format table
 ```
 
 Optional markdown report:
 
 ```bash
-python3 utilities/skill-creator/scripts/skill_subject_scoreboard.py --workspace . --write-report
+python3 utilities/skill-builder/scripts/skill_subject_scoreboard.py --workspace . --write-report
 ```
 
 ## Subject taxonomy

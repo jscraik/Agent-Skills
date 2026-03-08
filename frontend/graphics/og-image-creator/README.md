@@ -40,7 +40,7 @@ Creates OG images in `public/og/` directory based on the analysis.
 ## Structure
 
 ```
-og-image-creator/
+og-image-builder/
 ├── SKILL.md                          # Main skill instructions
 ├── scripts/
 │   ├── analyze_codebase.py          # Route discovery & brand extraction
@@ -72,7 +72,7 @@ playwright install chromium
 
 ## Skill Quality Score
 
-**107/100** (Analyzed by skill-creator-plus)
+**107/100** (Analyzed by skill-builder-plus)
 
 - ✅ Strong philosophical foundation
 - ✅ Comprehensive anti-pattern guidance

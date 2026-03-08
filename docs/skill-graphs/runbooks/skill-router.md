@@ -12,7 +12,7 @@ Operate the deterministic intent-first skill router in safe modes while preservi
 
 ## Usage
 ```bash
-python3 utilities/skill-creator/scripts/skill_router.py \
+python3 utilities/skill-builder/scripts/skill_router.py \
   --query "help me design a ChatGPT app" \
   --actor-type human \
   --policy-mode observe_only \
@@ -21,7 +21,7 @@ python3 utilities/skill-creator/scripts/skill_router.py \
 
 JSON mode:
 ```bash
-python3 utilities/skill-creator/scripts/skill_router.py \
+python3 utilities/skill-builder/scripts/skill_router.py \
   --query "review PR checks and fix CI" \
   --actor-type agent \
   --policy-mode co_pilot \
