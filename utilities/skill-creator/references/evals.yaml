@@ -85,8 +85,7 @@ cases:
   - id: negative-explicit-out-of-scope
     name: negative explicit out of scope
     category: negative
-    should_trigger: true
-    prepend_skill: true
+    should_trigger: false
     prompt: "Use $skill-creator to translate this poem to French."
     acceptance:
       - type: contains
