@@ -125,6 +125,16 @@ def backfill_run(run_dir: Path, dry_run: bool = False, verbose: bool = False) ->
     events_path = run_dir / "events.jsonl"
     run_json_path = run_dir / "run.json"
 
+    # Never operate on symlinked run directories.
+    if run_dir.is_symlink():
+        print(f"✗ {run_dir.name}: run directory is a symlink (skipping)", file=sys.stderr)
+        return False
+
+    # Refuse to write to symlinked events files (including dangling symlinks).
+    if events_path.is_symlink():
+        print(f"✗ {run_dir.name}: events.jsonl is a symlink (skipping)", file=sys.stderr)
+        return False
+
     # Skip if events.jsonl already exists
     if events_path.exists():
         if verbose:
@@ -172,6 +182,8 @@ def find_runs_missing_events(runs_root: Path) -> List[Path]:
     missing: List[Path] = []
 
     for run_dir in runs_root.iterdir():
+        if run_dir.is_symlink():
+            continue
         if not run_dir.is_dir():
             continue
         if not (run_dir / "run.json").exists():
