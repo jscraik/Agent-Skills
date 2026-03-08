@@ -161,6 +161,10 @@ while IFS= read -r skill_path; do
   skill_dir="$(dirname "$skill_path")"
   skill_name="$(basename "$skill_dir")"
   skill_dir_abs="$repo_root/$skill_dir"
+  # Relative path from $skills_dir (.agents/skills/) back to the skill source.
+  # Strip the leading './' from skill_dir to get e.g. 'auth/create-auth',
+  # then prepend '../..' to escape .agents/skills/ back to repo root.
+  skill_dir_rel="../../${skill_dir#./}"
   if [ -e "$skills_dir/$skill_name" ]; then
     existing_dir="$(cd "$skills_dir/$skill_name" 2>/dev/null && pwd || true)"
     discovered_dir="$(cd "$skill_dir_abs" 2>/dev/null && pwd || true)"
@@ -169,10 +173,10 @@ while IFS= read -r skill_path; do
     if [ -n "$existing_dir" ] && [ "$existing_dir" = "$discovered_dir" ]; then
       continue
     fi
-    echo "Duplicate skill name: $skill_name (skip $skill_dir_abs)"
+    echo "Duplicate skill name: $skill_name (skip $skill_dir_rel)"
     continue
   fi
-  ln -s "$skill_dir_abs" "$skills_dir/$skill_name"
+  ln -s "$skill_dir_rel" "$skills_dir/$skill_name"
 done < <(all_skill_files_cmd)
 
 # Build a strict Antigravity-compatible projection:
@@ -191,8 +195,10 @@ for skill_link in "$skills_dir"/*; do
   fi
 
   skill_name="$(basename "$skill_link")"
-  target_dir="$(cd "$skill_link" && pwd -P)"
-  ln -s "$target_dir" "$antigravity_skills_dir/$skill_name"
+  # Relative path from skills-antigravity/ to .agents/skills/<name>.
+  # Both directories are immediate children of repo root, so one hop up suffices.
+  target_rel="../.agents/skills/$skill_name"
+  ln -s "$target_rel" "$antigravity_skills_dir/$skill_name"
 done
 
 # Regenerate root SKILL.md index dynamically from skill frontmatter.
