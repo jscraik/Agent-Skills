@@ -70,7 +70,7 @@ def rel_skill(root: Path, skill: Path) -> str:
         rel = skill.resolve().relative_to(root.resolve())
         text = str(rel)
         return "." if text == "" else text
-    except ValueError:
+    except (OSError, RuntimeError, ValueError):
         return str(skill)
 
 
@@ -110,7 +110,7 @@ def main() -> int:
                 baseline_obj = json.loads(baseline_path.read_text(encoding="utf-8"))
                 if isinstance(baseline_obj, dict) and isinstance(baseline_obj.get("allowed_structure_failures"), list):
                     baseline_allowed = [str(x) for x in baseline_obj["allowed_structure_failures"]]
-            except (json.JSONDecodeError, OSError):
+            except (json.JSONDecodeError, OSError, UnicodeDecodeError):
                 baseline_allowed = []
 
     if args.run_evals:
