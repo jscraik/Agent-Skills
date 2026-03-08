@@ -50,6 +50,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          git config --global --add safe.directory "$PWD"
           base_ref="${{ github.base_ref }}"
           if [ -z "${base_ref:-}" ]; then
             base_ref="main"
