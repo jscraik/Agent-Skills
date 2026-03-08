@@ -2,12 +2,34 @@ purpose: >
   Define expected behavior and outputs for this skill.
 schema_version: 1.0
 triggers:
-  - user requests the capability described in this skill
+  - user requests listing/installing/updating skills or validating an install source
+  - user asks for deconflict or dry-run install planning
 inputs:
-  - user request details
+  - install source (curated name, repo/path, or URL)
+  - install scope selection (REPO or USER destination root)
+  - destination or category
+  - overwrite/update consent
 outputs:
-  - primary response or artifact
+  - install summary with source and destination
+  - validation results (quick_validate, skill_gate, analyze_skill, openclaw_skill_guard)
+  - deterministic JSON block for non-trivial outcomes
+output_contract:
+  schema_version: "1.0"
+  required_fields:
+    - mode
+    - source
+    - destination
+    - scope
+    - actions
+    - risks
+    - validations
+    - repo_clean
+    - retry_rounds
+    - next_step
 non_goals:
-  - out-of-scope work
+  - unrelated application development
+  - generic debugging that does not involve skill installation
 risks:
-  - missing inputs; mitigated by clarifying questions
+  - missing decisions; mitigated by request_user_input confirmation gates
+  - untrusted source content; mitigated by security scan and risk blocking
+  - retry thrashing; mitigated by 3-round retry cap and blocker handoff

@@ -236,6 +236,10 @@ def _should_skip_match(_code: str, line_text: str) -> bool:
         return True
     if stripped.startswith("#"):
         return True
+    if _code in {"security.node_exec", "security.node_child_process"} and "re.compile(" in stripped:
+        # False-positive guard: regex pattern tables that mention node exec/spawn
+        # are detection definitions, not executable process launches.
+        return True
     return False
 
 

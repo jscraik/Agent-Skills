@@ -221,6 +221,7 @@ def verify_decision_hmac(
     sig_path: Path,
     errors: List[Dict[str, str]],
     warnings: List[Dict[str, str]],
+    require_key: bool = False,
 ) -> bool:
     """Verify the HMAC-SHA256 signature of a promotion decision file.
 
@@ -228,12 +229,24 @@ def verify_decision_hmac(
     ``hmac.compare_digest`` for constant-time comparison to prevent timing
     attacks.
 
-    Returns True if verification passed (or was skipped due to missing key).
+    When ``require_key`` is True (i.e. --require-sig was set), a missing or
+    empty PROMOTION_SIGNING_KEY is treated as a hard verification failure rather
+    than a silent skip.  This prevents a misconfigured runner from accepting any
+    sig file without actually verifying the MAC.
+
+    Returns True if verification passed.
     Returns False and appends an error if verification fails.
     """
     key_raw = os.environ.get("PROMOTION_SIGNING_KEY", "").strip()
     if not key_raw:
-        # Key not set — can't verify; the caller decides whether this is fatal.
+        if require_key:
+            add_error(
+                errors,
+                "E_DECISION_SIG_KEY_MISSING",
+                "PROMOTION_SIGNING_KEY is not set — cannot verify signature (--require-sig enforces key presence)",
+            )
+            return False
+        # Key not set and not required — skip silently (backwards-compatible).
         return True
 
     try:
@@ -480,7 +493,7 @@ def validate(args: argparse.Namespace) -> Dict[str, Any]:
     if sig_file_arg:
         sig_path = Path(sig_file_arg).expanduser().resolve()
         if sig_path.exists() and decision_path.exists():
-            verify_decision_hmac(decision_path, sig_path, errors, warnings)
+            verify_decision_hmac(decision_path, sig_path, errors, warnings, require_key=require_sig)
         elif not sig_path.exists():
             add_error(errors, "E_DECISION_SIG_MISSING", f"--decision-sig-file specified but not found: {sig_path}")
     elif require_sig:
