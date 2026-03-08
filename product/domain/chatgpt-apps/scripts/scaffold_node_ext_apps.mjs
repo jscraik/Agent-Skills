@@ -422,6 +422,30 @@ function createAppServer(): McpServer {
 
 const port = Number(process.env.PORT ?? "__PORT__");
 const MCP_PATH = "/mcp";
+const allowedOrigins = new Set(
+  (process.env.ALLOWED_ORIGINS ?? "http://localhost:3000,http://127.0.0.1:3000")
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean)
+);
+
+function setCorsHeaders(req, res) {
+  const origin = req.headers.origin;
+  if (!origin) {
+    return true;
+  }
+
+  if (!allowedOrigins.has(origin)) {
+    res.writeHead(403).end("Origin not allowed");
+    return false;
+  }
+
+  res.setHeader("Access-Control-Allow-Origin", origin);
+  res.setHeader("Vary", "Origin");
+  res.setHeader("Access-Control-Expose-Headers", "Mcp-Session-Id");
+  return true;
+}
+
 
 createServer(async (req, res) => {
   if (!req.url) {
@@ -433,11 +457,13 @@ createServer(async (req, res) => {
   const isMcpRoute = url.pathname === MCP_PATH || url.pathname.startsWith(MCP_PATH + "/");
 
   if (req.method === "OPTIONS" && isMcpRoute) {
+    if (!setCorsHeaders(req, res)) {
+      return;
+    }
+
     res.writeHead(204, {
-      "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Methods": "POST, GET, DELETE, OPTIONS",
       "Access-Control-Allow-Headers": "content-type, mcp-session-id",
-      "Access-Control-Expose-Headers": "Mcp-Session-Id",
     });
     res.end();
     return;
@@ -450,8 +476,9 @@ createServer(async (req, res) => {
 
   const transportMethods = new Set(["GET", "POST", "DELETE"]);
   if (isMcpRoute && req.method && transportMethods.has(req.method)) {
-    res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader("Access-Control-Expose-Headers", "Mcp-Session-Id");
+    if (!setCorsHeaders(req, res)) {
+      return;
+    }
 
     const server = createAppServer();
     const transport = new StreamableHTTPServerTransport({
