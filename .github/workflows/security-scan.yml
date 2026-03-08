@@ -65,14 +65,29 @@ jobs:
           fi
 
           semgrep scan \
-            --error \
             --config auto \
             --config "p/secrets" \
             --config "p/python" \
             --config "p/typescript" \
             --config "p/bash" \
             --sarif --output semgrep.sarif \
-            "${changed_files[@]}"
+            "${changed_files[@]}" || semgrep_status=$?
+
+          semgrep_status="${semgrep_status:-0}"
+          if [ ! -f semgrep.sarif ]; then
+            echo "::error::Semgrep did not produce semgrep.sarif (exit=${semgrep_status})"
+            exit "${semgrep_status}"
+          fi
+
+          findings_count="$(jq '[.runs[]?.results[]?] | length' semgrep.sarif)"
+          if [ "${findings_count}" -gt 0 ]; then
+            echo "::error::Semgrep found ${findings_count} finding(s)"
+            exit 1
+          fi
+
+          if [ "${semgrep_status}" -ne 0 ]; then
+            echo "Semgrep exited with status ${semgrep_status}, but no findings were present in SARIF."
+          fi
         env:
           # Set SEMGREP_APP_TOKEN if using Semgrep Cloud for dashboard/PR comments
           SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN || '' }}
