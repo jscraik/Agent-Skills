@@ -17,7 +17,6 @@
 import React from 'react';
 // Note for Agent: The '@' alias refers to the target project's src directory.
 // Ensure src/data/mockData.ts is created before generating this component.
-import { cardData } from '../data/mockData';
 
 /**
  * Gold Standard: ActivityCard
