@@ -1680,7 +1680,7 @@ def _emit_force_unsafe_audit(
     import fcntl
     import datetime
 
-    audit_dir = pathlib.Path.home() / ".local" / "share" / "agent-skills"
+    audit_dir = Path.home() / ".local" / "share" / "agent-skills"
     audit_path = audit_dir / "force-unsafe-audit.jsonl"
     record = {
         "ts": datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
