@@ -14,7 +14,7 @@ dependencies: []
 Validation treats missing promotion_approved event and missing run/events.jsonl as warnings rather than errors for approved decisions, allowing approvals without required audit evidence.
 
 ## Findings
-- In /Users/jamiecraik/dev/agent-skills/utilities/skill-creator/scripts/validate_recursive_promotion.py:354-364, missing promotion_approved event or missing events.jsonl appends warnings only.
+- In /Users/jamiecraik/dev/agent-skills/utilities/skill-builder/scripts/validate_recursive_promotion.py:354-364, missing promotion_approved event or missing events.jsonl appends warnings only.
 - Validator status remains ok when errors are empty (line 393), so CI can pass without required event evidence.
 - Docs state approved decisions must emit promotion_approved and run events in events.jsonl.
 
@@ -42,7 +42,7 @@ Validation treats missing promotion_approved event and missing run/events.jsonl 
 
 ## Technical Details
 ### Affected files/components
-- `/Users/jamiecraik/dev/agent-skills/utilities/skill-creator/scripts/validate_recursive_promotion.py`
+- `/Users/jamiecraik/dev/agent-skills/utilities/skill-builder/scripts/validate_recursive_promotion.py`
 - `/Users/jamiecraik/dev/agent-skills/scripts/validate_recursive_promotions.sh`
 - `/Users/jamiecraik/dev/agent-skills/docs/skill-graphs/telemetry/daily-outputs.md`
 

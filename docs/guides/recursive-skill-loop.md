@@ -19,7 +19,7 @@ This guide runs the MVP loop engine in bounded mode and emits auditable artifact
 ## Single run command
 
 ```bash
-python3 utilities/skill-creator/scripts/recursive_skill_loop.py \
+python3 utilities/skill-builder/scripts/recursive_skill_loop.py \
   --profile-file docs/skill-graphs/schemas/examples/ui-skills-profile.example.json \
   --objective "Improve UI skill response quality for traceable, safe outputs" \
   --out-root artifacts/skill-graphs/runs \

@@ -25,7 +25,7 @@ Execution model shorthand:
 
 - **Historical pilot baseline:** Phases 1-3 + Phase 4 capture controls.
 - **Current migration:** all-skills onboarding via wave model (`wave-0-controls -> wave-1-manual -> wave-2-co-pilot`).
-- **Migration complete:** All 116 active skills onboarded with valid profiles.
+- **Migration complete:** Canonical onboarding artifacts currently cover 112 active skills with valid profiles.
 
 ## Skill Genome Loop
 

@@ -141,9 +141,9 @@ Execute one consolidated implementation pass with a small rollout sequence:
 ## 1) Scope and boundaries
 
 ### In scope
-- `utilities/skill-creator/scripts/recursive_skill_loop.py`
-- `utilities/skill-creator/scripts/validate_recursive_promotion.py`
-- `utilities/skill-creator/scripts/build_recursive_skill_shadow_report.py`
+- `utilities/skill-builder/scripts/recursive_skill_loop.py`
+- `utilities/skill-builder/scripts/validate_recursive_promotion.py`
+- `utilities/skill-builder/scripts/build_recursive_skill_shadow_report.py`
 - `scripts/human_promote_recursive_run.sh`
 - `scripts/run_recursive_skill_shadow_cycle.sh`
 - `scripts/validate_recursive_promotions.sh`
@@ -464,9 +464,9 @@ tasks:
 - **Rollback-ready milestones:** create checkpoints after each milestone with artifact snapshots for easier partial rollback.
 
 ## 6) Verification command set
-- `python3 utilities/skill-creator/scripts/recursive_skill_loop.py --help`
+- `python3 utilities/skill-builder/scripts/recursive_skill_loop.py --help`
 - `bash scripts/run_recursive_skill_shadow_cycle.sh --runs-per-profile 1 --window-days 3`
-- `python3 utilities/skill-creator/scripts/build_recursive_skill_shadow_report.py --runs-root artifacts/skill-graphs/runs --window-days 3`
+- `python3 utilities/skill-builder/scripts/build_recursive_skill_shadow_report.py --runs-root artifacts/skill-graphs/runs --window-days 3`
 - `bash scripts/validate_recursive_promotions.sh --changed-only --base-sha HEAD~1 --head-sha HEAD`
 - `python3 ~/.codex/scripts/plan-graph-lint.py .agent/PLANS.md`
 - `bash ~/.codex/scripts/verify-work.sh`

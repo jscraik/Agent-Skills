@@ -306,8 +306,8 @@ Insert this section in CLAUDE.md when injected:
 ## Validation
 
 - Fail fast: stop at the first failed validation gate, fix it, then re-run.
-- Run `~/.venvs/pyyaml/bin/python utilities/skill-creator/scripts/quick_validate.py <skill>` if available.
-- Run `~/.venvs/pyyaml/bin/python utilities/skill-creator/scripts/skill_gate.py <skill>` and fix missing sections.
+- Run `~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/quick_validate.py <skill>` if available.
+- Run `~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/skill_gate.py <skill>` and fix missing sections.
 - If needed, consult `references/contract.yaml` and `references/evals.yaml`.
 - If validation scripts or paths are missing, state "not run (tooling not available)" and continue.
 
@@ -377,6 +377,6 @@ Insert this section in CLAUDE.md when injected:
 **Decision feedback protocol (required):**
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.
 - Capture: `decision` (`accepted|partial|rejected|deferred`), `outcome` (`good|neutral|bad|unknown`), and `confidence` (`high|medium|low`).
-- Persist with: `python3 utilities/skill-creator/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
+- Persist with: `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
 - The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
 <!-- /decision-feedback-protocol -->

@@ -30,7 +30,7 @@ Method:
 ## Missing-by-name skills and recommended action
 | Superpowers skill | Local equivalent today | Recommendation |
 |---|---|---|
-| `writing-skills` | `skill-creator` | **Do not import directly**. Keep `skill-creator` as canonical for Codex; optionally backport selected TDD-for-skills examples. |
+| `writing-skills` | `skill-builder` | **Do not import directly**. Keep `skill-builder` as canonical for Codex; optionally backport selected TDD-for-skills examples. |
 | `using-superpowers` | AGENTS + system behavior | **Do not import**. It is Claude-specific and conflicts with current Codex skill-invocation model. |
 | `writing-plans` | `product-spec`, `tech-spec`, `backend-engineer` | Add lightweight generic `writing-plans` skill or expand `product-spec` with an execution-handoff mode. |
 | `executing-plans` | partial via existing planning skills | Add dedicated execution-mode skill for plan runbooks with checkpoints and blocker handling. |

@@ -8,7 +8,7 @@
         "confidence": "low",
         "improvement_hints": [],
         "source": "skill:/private/tmp/codex/skill-install-c4ks1e9b/skills-main/write-a-skill",
-        "target": "skill:/Users/jamiecraik/dev/agent-skills/skills/.system/skill-creator",
+        "target": "skill:/Users/jamiecraik/dev/agent-skills/skills/.system/skill-builder",
         "type": "overlaps_with",
         "weight": 0.21808018140540833
       }
@@ -99,9 +99,9 @@
         "type": "candidate_skill"
       },
       {
-        "id": "skill:/Users/jamiecraik/dev/agent-skills/skills/.system/skill-creator",
-        "name": "skill-creator",
-        "path": "/Users/jamiecraik/dev/agent-skills/skills/.system/skill-creator",
+        "id": "skill:/Users/jamiecraik/dev/agent-skills/skills/.system/skill-builder",
+        "name": "skill-builder",
+        "path": "/Users/jamiecraik/dev/agent-skills/skills/.system/skill-builder",
         "type": "installed_skill"
       }
     ]
@@ -259,7 +259,7 @@
           "harness_score": 0.0,
           "improvement_hints": [],
           "intent_score": 0.5967281719611945,
-          "path": "/Users/jamiecraik/dev/agent-skills/skills/.system/skill-creator",
+          "path": "/Users/jamiecraik/dev/agent-skills/skills/.system/skill-builder",
           "proposal_path": null,
           "same_job": false,
           "score": 0.21808018140540833,

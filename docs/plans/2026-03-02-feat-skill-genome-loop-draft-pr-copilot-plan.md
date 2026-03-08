@@ -91,7 +91,7 @@ def load_json(path: Path) -> dict[str, Any] | None:
 ```
 
 **References:**
-- `/Users/jamiecraik/dev/agent-skills/utilities/skill-creator/scripts/recursive_skill_loop.py:292-356` (confidence scoring)
+- `/Users/jamiecraik/dev/agent-skills/utilities/skill-builder/scripts/recursive_skill_loop.py:292-356` (confidence scoring)
 - `/Users/jamiecraik/dev/agent-skills/scripts/verify_recursive_skill_graph_artifacts.py:35-40` (artifact loading)
 
 ---
@@ -161,7 +161,7 @@ Rejected alternatives:
 
 ### Leverage Existing Infrastructure
 
-- Reuse existing rollout controls and telemetry contracts (`off | observe_only | active`) instead of inventing a parallel control plane (`utilities/skill-creator/scripts/recursive_skill_loop.py:49`, `docs/guides/recursive-skill-loop.md:67`).
+- Reuse existing rollout controls and telemetry contracts (`off | observe_only | active`) instead of inventing a parallel control plane (`utilities/skill-builder/scripts/recursive_skill_loop.py:49`, `docs/guides/recursive-skill-loop.md:67`).
 - Preserve required artifact envelope and parity checks (`events.jsonl`, `promotion_decision.json`, capture artifacts) (`scripts/verify_recursive_skill_graph_artifacts.py:19-25`).
 - Maintain kill-switch and rollback precedence semantics (`docs/skill-graphs/runbooks/kill-switch-and-escalation.md:51`).
 - Treat data handling as high-risk: enforce redaction/allowlist-only evidence fields and avoid raw transcript persistence.
@@ -748,7 +748,7 @@ artifacts/skill-graphs/telemetry/
 ### Required Agent Tools (P0)
 
 ```python
-# utilities/skill-creator/scripts/promotion_decision_tool.py
+# utilities/skill-builder/scripts/promotion_decision_tool.py
 
 def promotion_decide(
     run_id: str,
@@ -773,7 +773,7 @@ Inject into agent system prompt:
 
 ## Available Actions
 - query_candidates: `python3 scripts/query_candidates.py --skill <path>`
-- promotion_decide: `python3 utilities/skill-creator/scripts/promotion_decision_tool.py ...`
+- promotion_decide: `python3 utilities/skill-builder/scripts/promotion_decision_tool.py ...`
 ```
 
 ### Candidate Schema Enhancement (for Agent Consumability)
@@ -826,7 +826,7 @@ candidates:
 - `docs/skill-graphs/pilots/2026-02-25-go-no-go-summary.md:12,17,22,43`
 - `artifacts/skill-graphs/telemetry/promotion-queue.md:3`
 - `scripts/verify_recursive_skill_graph_artifacts.py:19-25,242-272`
-- `utilities/skill-creator/scripts/recursive_skill_loop.py:49,1368-1461,292-356`
+- `utilities/skill-builder/scripts/recursive_skill_loop.py:49,1368-1461,292-356`
 - `docs/skill-graphs/runbooks/kill-switch-and-escalation.md:51`
 
 ### Institutional Learnings

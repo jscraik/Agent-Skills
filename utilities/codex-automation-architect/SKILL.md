@@ -100,11 +100,11 @@ Include these blocker remediations when relevant:
   - Check with `fd <filename> <root>` before reading.
 
 ## Headless cross-runner verification
-Use skill-creator parity lanes:
+Use skill-builder parity lanes:
 
 ```bash
 CODEX_EVAL_TIMEOUT_SEC=600 \
-~/.venvs/pyyaml/bin/python utilities/skill-creator/scripts/run_skill_evals.py \
+~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/run_skill_evals.py \
   utilities/codex-automation-architect \
   --runners codex,claude-kimi,claude-zai,gemini \
   --claude-kimi-command ck \
@@ -161,12 +161,12 @@ From `/Users/jamiecraik/dev/config/codex/instructions/tooling.md`:
 ## Validation gate
 Fail fast: stop at the first failed gate, fix, then rerun.
 
-- `~/.venvs/pyyaml/bin/python utilities/skill-creator/scripts/quick_validate.py utilities/codex-automation-architect`
-- `~/.venvs/pyyaml/bin/python utilities/skill-creator/scripts/skill_gate.py utilities/codex-automation-architect`
-- `~/.venvs/pyyaml/bin/python utilities/skill-creator/scripts/skill_gate.py utilities/codex-automation-architect --pi-high-fail`
-- `~/.venvs/pyyaml/bin/python utilities/skill-creator/scripts/analyze_skill.py utilities/codex-automation-architect`
+- `~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/quick_validate.py utilities/codex-automation-architect`
+- `~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/skill_gate.py utilities/codex-automation-architect`
+- `~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/skill_gate.py utilities/codex-automation-architect --pi-high-fail`
+- `~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/analyze_skill.py utilities/codex-automation-architect`
 - Optional:
-  - `~/.venvs/pyyaml/bin/python utilities/skill-creator/scripts/run_skill_evals.py utilities/codex-automation-architect --runners codex,claude-kimi,claude-zai,gemini ...`
+  - `~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/run_skill_evals.py utilities/codex-automation-architect --runners codex,claude-kimi,claude-zai,gemini ...`
 
 ## Encouraging variation
 - Adapt merge strategy by automation portfolio size and risk.
@@ -193,5 +193,5 @@ You are capable of extraordinary automation quality when you combine evidence, c
 **Decision feedback protocol (required):**
 - For non-trivial outcomes, collect user feedback via AskQuestion parity (`request_user_input`) before closing.
 - Capture: `decision` (`accepted|partial|rejected|deferred`), `outcome` (`good|neutral|bad|unknown`), `confidence` (`high|medium|low`).
-- Persist with: `python3 utilities/skill-creator/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
+- Persist with: `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
 <!-- /decision-feedback-protocol -->

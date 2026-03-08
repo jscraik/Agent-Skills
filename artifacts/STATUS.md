@@ -27,9 +27,9 @@
 - Updated contract/evals/openai metadata to reflect interaction-craft + agent-loop focus and boundary handling.
 
 ## Validation run
-- ✅ `~/.venvs/pyyaml/bin/python utilities/skill-creator/scripts/quick_validate.py personas/benjitaylor-persona`
-- ✅ `~/.venvs/pyyaml/bin/python utilities/skill-creator/scripts/skill_gate.py personas/benjitaylor-persona` (PASS with one non-blocking description warning)
-- ✅ `~/.venvs/pyyaml/bin/python utilities/skill-creator/scripts/openclaw_skill_guard.py personas/benjitaylor-persona --mode both` (0 critical, 0 warn, info only)
+- ✅ `~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/quick_validate.py personas/benjitaylor-persona`
+- ✅ `~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/skill_gate.py personas/benjitaylor-persona` (PASS with one non-blocking description warning)
+- ✅ `~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/openclaw_skill_guard.py personas/benjitaylor-persona --mode both` (0 critical, 0 warn, info only)
 - ✅ `/Users/jamiecraik/.codex/scripts/verify-work.sh --repo-root /Users/jamiecraik/dev/agent-skills` (pass)
 
 # Status — superpowers skill gap audit (2026-02-22)
@@ -54,9 +54,9 @@
 - Refreshed supporting references (`persona-synthesis.md`, `invocation-examples.md`).
 
 ## Validation run
-- ✅ `~/.venvs/pyyaml/bin/python utilities/skill-creator/scripts/quick_validate.py product/design/ui-ux-creative-coding`
-- ✅ `~/.venvs/pyyaml/bin/python utilities/skill-creator/scripts/skill_gate.py product/design/ui-ux-creative-coding` (PASS, expected binary-asset review warnings only)
-- ✅ `~/.venvs/pyyaml/bin/python utilities/skill-creator/scripts/openclaw_skill_guard.py product/design/ui-ux-creative-coding --mode both` (0 critical, 0 warn, info only)
+- ✅ `~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/quick_validate.py product/design/ui-ux-creative-coding`
+- ✅ `~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/skill_gate.py product/design/ui-ux-creative-coding` (PASS, expected binary-asset review warnings only)
+- ✅ `~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/openclaw_skill_guard.py product/design/ui-ux-creative-coding --mode both` (0 critical, 0 warn, info only)
 
 ## Notes
 - Maintained strict heading contract (`## When to use`, `## Inputs`, `## Outputs`) for downstream routing consistency.
@@ -168,10 +168,10 @@
 - User symlink updated and resolves correctly:
   - `/Users/jamiecraik/.agents/skills/design-system`
 
-# Status — skill-creator conservative merge + script consistency pass (2026-02-22)
+# Status — skill-builder conservative merge + script consistency pass (2026-02-22)
 
 ## Completed
-- Applied conservative merge improvements to `utilities/skill-creator/SKILL.md` from external inspirations:
+- Applied conservative merge improvements to `utilities/skill-builder/SKILL.md` from external inspirations:
   - Added table of contents and explicit conservative mode routing (`create`, `improve`, `eval`, `benchmark-lite`, `package`).
   - Added immediate feedback loop guidance.
   - Added optional A/B compare loop based on `run_skill_evals.py --dual-run`.
@@ -182,17 +182,17 @@
   - `scripts/upgrade_skill.py`: removed corresponding outdated high-priority “prohibited heading” suggestion.
 - Script reliability checks:
   - `python -m py_compile scripts/*.py` passed.
-  - `--help` smoke run passed for all skill-creator scripts.
+  - `--help` smoke run passed for all skill-builder scripts.
   - `verify-work.sh --repo-root /Users/jamiecraik/dev/agent-skills` passed.
 
 ## Validation notes
-- `upgrade_skill.py` on `utilities/skill-creator` now reports only one medium suggestion: conciseness (373 lines).
+- `upgrade_skill.py` on `utilities/skill-builder` now reports only one medium suggestion: conciseness (373 lines).
 - No failing gates introduced.
 
 ## Status — init_skill scaffold accuracy hardening (2026-02-22)
 
 ### Completed
-- Updated `utilities/skill-creator/scripts/init_skill.py` for conservative, compatible correctness improvements:
+- Updated `utilities/skill-builder/scripts/init_skill.py` for conservative, compatible correctness improvements:
   - Default target changed to `codex`.
   - `SKILL_TEMPLATE_SIMPLE` now includes gate-compatible headings (`When to use`, `Inputs`, `Outputs`) and fail-fast validation language.
   - `SKILL_TEMPLATE_ROUTER` now includes required sections (`When to use`, `Inputs`, `Outputs`, `Constraints and safety`, `Principles`, `Workflow`, `Validation`, `Examples`).
@@ -200,8 +200,8 @@
   - Next-step output numbering now stays contiguous regardless of run-type.
 
 ### Validation
-- `python -m py_compile utilities/skill-creator/scripts/*.py` passed.
-- `--help` smoke run passed for all scripts in `utilities/skill-creator/scripts/`.
+- `python -m py_compile utilities/skill-builder/scripts/*.py` passed.
+- `--help` smoke run passed for all scripts in `utilities/skill-builder/scripts/`.
 - Smoke scaffold checks on temp skills:
   - `quick_validate.py` passes on generated scaffold.
   - `analyze_skill.py` baseline improved (85/120 for fresh simple scaffold in smoke run).

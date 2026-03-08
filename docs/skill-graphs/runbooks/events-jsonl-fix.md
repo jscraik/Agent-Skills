@@ -12,7 +12,7 @@ The `recursive_skill_loop.py` script initially didn't write `events.jsonl` files
 
 ### 1. Backfill Script
 
-Created `utilities/skill-creator/scripts/backfill_missing_events.py` to reconstruct minimal events from `run.json` metadata:
+Created `utilities/skill-builder/scripts/backfill_missing_events.py` to reconstruct minimal events from `run.json` metadata:
 
 **Features:**
 - Reconstructs 3 event types: `run_initialized`, `run_state_changed`, and `failure_event` (for failed runs)
@@ -23,18 +23,18 @@ Created `utilities/skill-creator/scripts/backfill_missing_events.py` to reconstr
 **Usage:**
 ```bash
 # Dry run
-python3 utilities/skill-creator/scripts/backfill_missing_events.py --dry-run --verbose
+python3 utilities/skill-builder/scripts/backfill_missing_events.py --dry-run --verbose
 
 # Apply backfill
-python3 utilities/skill-creator/scripts/backfill_missing_events.py --verbose
+python3 utilities/skill-builder/scripts/backfill_missing_events.py --verbose
 
 # Verify all runs have events
-python3 utilities/skill-creator/scripts/backfill_missing_events.py
+python3 utilities/skill-builder/scripts/backfill_missing_events.py
 ```
 
 ### 2. Validation Tests
 
-Created `utilities/skill-creator/scripts/test_events_jsonl_required.py` to ensure:
+Created `utilities/skill-builder/scripts/test_events_jsonl_required.py` to ensure:
 - `events.jsonl` is in `RUN_REQUIRED_FILES`
 - All runs have `events.jsonl` files
 - Files have valid JSON Lines format
@@ -42,7 +42,7 @@ Created `utilities/skill-creator/scripts/test_events_jsonl_required.py` to ensur
 
 **Usage:**
 ```bash
-pytest utilities/skill-creator/scripts/test_events_jsonl_required.py -v
+pytest utilities/skill-builder/scripts/test_events_jsonl_required.py -v
 ```
 
 ## Results
@@ -77,7 +77,7 @@ All runs have events.jsonl ✓
 
 Regenerate telemetry reports after any batch of runs:
 ```bash
-python3 utilities/skill-creator/scripts/build_recursive_skill_shadow_report.py \
+python3 utilities/skill-builder/scripts/build_recursive_skill_shadow_report.py \
   --runs-root artifacts/skill-graphs/runs \
   --window-days 7 \
   --daily-health-md artifacts/skill-graphs/telemetry/daily-skill-health.md
@@ -112,12 +112,12 @@ Events are JSON Lines with the following structure:
 
 ## Files Modified
 
-1. `utilities/skill-creator/scripts/backfill_missing_events.py` - New
-2. `utilities/skill-creator/scripts/test_events_jsonl_required.py` - New
+1. `utilities/skill-builder/scripts/backfill_missing_events.py` - New
+2. `utilities/skill-builder/scripts/test_events_jsonl_required.py` - New
 3. `artifacts/skill-graphs/runs/run_20260220*/events.jsonl` - Backfilled (8 files)
 
 ## References
 
 - [Skill Knowledge Graph Operating Model](/docs/skill-graphs/knowledge-graph-operating-model.md)
 - [Daily Skill Health Telemetry](/artifacts/skill-graphs/telemetry/daily-skill-health.md)
-- [Recursive Skill Loop Script](/utilities/skill-creator/scripts/recursive_skill_loop.py)
+- [Recursive Skill Loop Script](/utilities/skill-builder/scripts/recursive_skill_loop.py)

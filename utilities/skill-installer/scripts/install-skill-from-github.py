@@ -1799,8 +1799,8 @@ def _choose_python() -> str:
 
 def _validator_scripts_root() -> Path:
     # .../utilities/skill-installer/scripts/install-skill-from-github.py
-    # -> .../utilities/skill-creator/scripts
-    scripts_root = Path(__file__).resolve().parents[2] / "skill-creator" / "scripts"
+    # -> .../utilities/skill-builder/scripts
+    scripts_root = Path(__file__).resolve().parents[2] / "skill-builder" / "scripts"
     if not scripts_root.exists():
         raise InstallError(f"Missing validator scripts directory: {scripts_root}")
     return scripts_root

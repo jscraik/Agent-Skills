@@ -463,7 +463,7 @@ else
   echo "[promotion-gate] Set PROMOTION_SIG_REQUIRED=1 in CI to hard-fail on unsigned decisions." >&2
 fi
 
-validator="utilities/skill-creator/scripts/validate_recursive_promotion.py"
+validator="utilities/skill-builder/scripts/validate_recursive_promotion.py"
 validator_cmd=(python3 "$validator" --run-dir "$run_dir" --decision-file "$decision_tmp")
 
 if [[ -f "$decision_sig_file" ]]; then

@@ -645,7 +645,7 @@ Synthesize and respond to user
 - For non-trivial outcomes, collect user feedback via `request_user_input` before closing.
 - Capture: `decision` (`accepted|partial|rejected|deferred`), `outcome` (`good|neutral|bad|unknown`), and `confidence` (`high|medium|low`).
 - Persist with:
-  `python3 utilities/skill-creator/scripts/record_skill_feedback.py --skill-path utilities/notebooklm/SKILL.md --decision <...> --outcome <...> --confidence <...> --notes "..."`.
+  `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path utilities/notebooklm/SKILL.md --decision <...> --outcome <...> --confidence <...> --notes "..."`.
 <!-- /decision-feedback-protocol -->
 
 ## Resources (Skill Structure)
