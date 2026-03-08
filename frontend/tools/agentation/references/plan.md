@@ -21,4 +21,4 @@ Upgrade the `agentation` skill so it reliably handles real-world setup issues ob
 - Workflow clearly distinguishes MCP health from webhook delivery.
 - Includes concrete mitigation for `EADDRINUSE`.
 - Includes timeout-aware success rule for automation status.
-- Local validators pass in `~/dev/agent-skills`.
+- Local validators pass in the repository root.
