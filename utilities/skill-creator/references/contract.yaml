@@ -1,13 +1,37 @@
 purpose: >
-  Define expected behavior and outputs for this skill.
-schema_version: 1.0
+  Define expected behavior, scope boundaries, and measurable outputs for skill-creator.
+schema_version: 1.1
 triggers:
-  - user requests the capability described in this skill
+  - user asks to create, improve, audit, compare, benchmark, or package a Codex skill
+  - user asks to tighten skill routing, validation gates, or safety contracts
 inputs:
-  - user request details
+  - mode selection (create, improve, eval, benchmark-lite, graph, package)
+  - skill objective and constraints
+  - target environment (codex, claude, portable)
+  - prompt coverage (happy, edge, should-not-trigger)
 outputs:
-  - primary response or artifact
+  - scoped response with required headings
+  - implementation plan or concrete file edits
+  - validator/eval evidence for non-trivial work
+  - deterministic JSON summary block for improve/eval/benchmark-lite responses
+output_contract:
+  schema_version: "1.0"
+  required_fields:
+    - mode
+    - skill_path
+    - findings
+    - validations
+    - next_step
+  optional_fields:
+    - ui_metadata
+    - trace_budget
+    - remediation
 non_goals:
-  - out-of-scope work
+  - unrelated app feature coding
+  - generic docs rewrites without skill workflow impact
+  - skipping validation for speed
 risks:
-  - missing inputs; mitigated by clarifying questions
+  - trigger ambiguity; mitigated by explicit use-when and should-not-trigger prompts
+  - frontmatter parser risk from XML-style angle brackets; mitigated by frontmatter sanitization checks
+  - quality drift from unbounded iteration; mitigated by retry caps and fail-fast validation gates
+  - Codex UX mismatch; mitigated by optional agents/openai.yaml generation when metadata is needed

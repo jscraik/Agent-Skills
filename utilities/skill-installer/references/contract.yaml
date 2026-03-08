@@ -20,6 +20,7 @@ output_contract:
     - source
     - destination
     - scope
+    - staging_path
     - actions
     - risks
     - validations
@@ -32,4 +33,5 @@ non_goals:
 risks:
   - missing decisions; mitigated by request_user_input confirmation gates
   - untrusted source content; mitigated by security scan and risk blocking
+  - unsafe direct writes from external sources; mitigated by isolated staging then promotion
   - retry thrashing; mitigated by 3-round retry cap and blocker handoff

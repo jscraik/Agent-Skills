@@ -547,6 +547,8 @@ def check_codex_frontmatter(doc: SkillDoc, *, min_desc_len: int) -> List[Finding
     else:
         if "\n" in name or "\r" in name:
             out.append(Finding(Level.FAIL, "FM_NAME_MULTILINE", "`name` must be single-line."))
+        if "<" in name or ">" in name:
+            out.append(Finding(Level.FAIL, "FM_NAME_XML_TAGS", "`name` must not include `<` or `>` characters."))
         if len(name) > 100:
             out.append(Finding(Level.FAIL, "FM_NAME_TOO_LONG", f"`name` too long ({len(name)} > 100)."))
         if not re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", name.strip()):
@@ -558,6 +560,8 @@ def check_codex_frontmatter(doc: SkillDoc, *, min_desc_len: int) -> List[Finding
 
     if "\n" in desc or "\r" in desc:
         out.append(Finding(Level.FAIL, "FM_DESC_MULTILINE", "`description` must be single-line."))
+    if "<" in desc or ">" in desc:
+        out.append(Finding(Level.FAIL, "FM_DESC_XML_TAGS", "`description` must not include `<` or `>` characters."))
     if len(desc) > 500:
         out.append(Finding(Level.FAIL, "FM_DESC_TOO_LONG", f"`description` too long ({len(desc)} > 500)."))
     if len(desc.strip()) < min_desc_len:

@@ -71,3 +71,13 @@ cases:
     acceptance:
       - type: regex
         value: "(?i)(git status --porcelain|repository cleanliness|allowlist)"
+
+  - id: edge-staging-boundary
+    name: edge staging boundary
+    category: edge
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Use $skill-installer to describe the safe write path for installing a third-party skill. In this headless eval, do not call tools or run shell commands."
+    acceptance:
+      - type: regex
+        value: "(?i)(staging|/tmp|/mnt/data|stage.*validate.*promote|isolated temp)"

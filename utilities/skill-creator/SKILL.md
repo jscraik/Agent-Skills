@@ -210,6 +210,7 @@ Delete unused starter files immediately.
 ### 4) Author SKILL.md
 - keep frontmatter minimal: `name` plus `description`;
 - make `description` a single line with trigger boundary and success criteria;
+- keep frontmatter parser-safe: avoid XML-style angle brackets (`<` or `>`) in `name`/`description`;
 - keep the workflow lean and reliable;
 - link to references instead of pasting deep docs;
 - keep templates and examples inside the skill bundle, not in prompts.
@@ -218,6 +219,7 @@ Delete unused starter files immediately.
 - use `references/` for deep docs, schemas, contracts, and evals;
 - use `scripts/` for repeatable helpers;
 - use `assets/` for templates and fixtures.
+- for Codex-native UX or tool wiring, add `agents/openai.yaml` with at least `display_name`, `short_description`, and policy-aware tool metadata.
 
 If repeated eval runs recreate the same helper script, bundle it once in `scripts/` and reuse it.
 
@@ -279,12 +281,14 @@ For new skills:
 
 Optional deep checks:
 - `~/.venvs/pyyaml/bin/python scripts/run_skill_evals.py <path/to/skill-folder> --dual-run --capture-jsonl`
+- `~/.venvs/pyyaml/bin/python scripts/deterministic_trace_checks.py <path/to/codex-run.jsonl> --budgets-json '{"max_total_tokens":4000,"max_duplicate_command_ratio":0.35}'`
 - `python3 scripts/record_skill_feedback.py --skill-path <path/to/skill-folder>/SKILL.md --decision accepted --outcome good --confidence high --notes "validation sample" --workspace <workspace>`
 - `python3 scripts/skill_subject_scoreboard.py --workspace <workspace> --format table`
 - `python3 - <<'PY'\nimport pathlib,re,sys\np=pathlib.Path(\"<path/to/skill-folder>\").resolve(); name=p.name\nok=bool(re.fullmatch(r\"[a-z0-9](?:-?[a-z0-9]){0,63}\", name))\nprint(\"OK\" if ok else \"FAIL\", name)\nsys.exit(0 if ok else 1)\nPY`
 
 ## Troubleshooting
 - Error: folder/name mismatch. Recovery: rename folder to match frontmatter `name`, then rerun validators.
+- Error: frontmatter contains `<` or `>` and fails parser safety. Recovery: replace angle brackets with plain-language wording, then rerun validators.
 - Error: repeated validator failure after 3 rounds. Recovery: halt, summarize failing gate output verbatim, and ask for a scoped decision.
 
 ## Examples
