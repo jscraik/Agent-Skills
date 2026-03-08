@@ -72,7 +72,7 @@ playwright install chromium
 
 ## Skill Quality Score
 
-**107/100** (Analyzed by skill-creator-plus)
+**107/100** (Analyzed by skill-builder-plus)
 
 - ✅ Strong philosophical foundation
 - ✅ Comprehensive anti-pattern guidance

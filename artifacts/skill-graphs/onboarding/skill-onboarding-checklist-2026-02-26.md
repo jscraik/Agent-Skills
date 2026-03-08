@@ -26,7 +26,7 @@
 | 11 | `frontend/enhance-prompt/SKILL.md` | `frontend/enhance-prompt/references/task-profile.json` | `co-pilot` | `wave-2-co-pilot` | `pending` | `unassigned` | `tbd` |
 | 12 | `frontend/graphics/favicon-generator/SKILL.md` | `frontend/graphics/favicon-generator/references/task-profile.json` | `co-pilot` | `wave-2-co-pilot` | `pending` | `unassigned` | `tbd` |
 | 13 | `frontend/graphics/imagegen/SKILL.md` | `frontend/graphics/imagegen/references/task-profile.json` | `co-pilot` | `wave-2-co-pilot` | `pending` | `unassigned` | `tbd` |
-| 14 | `frontend/graphics/og-image-creator/SKILL.md` | `frontend/graphics/og-image-creator/references/task-profile.json` | `co-pilot` | `wave-2-co-pilot` | `pending` | `unassigned` | `tbd` |
+| 14 | `frontend/graphics/og-image-builder/SKILL.md` | `frontend/graphics/og-image-builder/references/task-profile.json` | `co-pilot` | `wave-2-co-pilot` | `pending` | `unassigned` | `tbd` |
 | 15 | `frontend/graphics/sora/SKILL.md` | `frontend/graphics/sora/references/task-profile.json` | `co-pilot` | `wave-2-co-pilot` | `pending` | `unassigned` | `tbd` |
 | 16 | `frontend/graphics/threejs-builder/SKILL.md` | `frontend/graphics/threejs-builder/references/task-profile.json` | `co-pilot` | `wave-2-co-pilot` | `pending` | `unassigned` | `tbd` |
 | 17 | `frontend/react-components/SKILL.md` | `frontend/react-components/references/task-profile.json` | `co-pilot` | `wave-2-co-pilot` | `pending` | `unassigned` | `tbd` |
@@ -106,7 +106,7 @@
 | 91 | `utilities/atlas/SKILL.md` | `utilities/atlas/references/task-profile.json` | `co-pilot` | `wave-2-co-pilot` | `pending` | `unassigned` | `tbd` |
 | 92 | `utilities/beautiful-mermaid/SKILL.md` | `utilities/beautiful-mermaid/references/task-profile.json` | `co-pilot` | `wave-2-co-pilot` | `pending` | `unassigned` | `tbd` |
 | 93 | `utilities/bootstrap/SKILL.md` | `utilities/bootstrap/references/task-profile.json` | `manual` | `wave-1-manual` | `pending` | `unassigned` | `tbd` |
-| 94 | `utilities/codex-agent-creator/SKILL.md` | `utilities/codex-agent-creator/references/task-profile.json` | `manual` | `wave-1-manual` | `pending` | `unassigned` | `tbd` |
+| 94 | `utilities/codex-agent-builder/SKILL.md` | `utilities/codex-agent-builder/references/task-profile.json` | `manual` | `wave-1-manual` | `pending` | `unassigned` | `tbd` |
 | 95 | `utilities/codex-home-audit/SKILL.md` | `utilities/codex-home-audit/references/task-profile.json` | `co-pilot` | `wave-2-co-pilot` | `pending` | `unassigned` | `tbd` |
 | 96 | `utilities/codex-sessions-skill-scan/SKILL.md` | `utilities/codex-sessions-skill-scan/references/task-profile.json` | `co-pilot` | `wave-2-co-pilot` | `pending` | `unassigned` | `tbd` |
 | 97 | `utilities/executing-plans/SKILL.md` | `utilities/executing-plans/references/task-profile.json` | `co-pilot` | `wave-2-co-pilot` | `pending` | `unassigned` | `tbd` |
@@ -114,13 +114,13 @@
 | 99 | `utilities/insight-report/SKILL.md` | `utilities/insight-report/references/task-profile.json` | `co-pilot` | `wave-2-co-pilot` | `pending` | `unassigned` | `tbd` |
 | 100 | `utilities/markdown-converter/SKILL.md` | `utilities/markdown-converter/references/task-profile.json` | `co-pilot` | `wave-2-co-pilot` | `pending` | `unassigned` | `tbd` |
 | 101 | `utilities/process-watch/SKILL.md` | `utilities/process-watch/references/task-profile.json` | `co-pilot` | `wave-2-co-pilot` | `pending` | `unassigned` | `tbd` |
-| 102 | `utilities/prompt-creator/SKILL.md` | `utilities/prompt-creator/references/task-profile.json` | `co-pilot` | `wave-2-co-pilot` | `pending` | `unassigned` | `tbd` |
+| 102 | `utilities/prompt-builder/SKILL.md` | `utilities/prompt-builder/references/task-profile.json` | `co-pilot` | `wave-2-co-pilot` | `pending` | `unassigned` | `tbd` |
 | 103 | `utilities/recent-code-bugfix/SKILL.md` | `utilities/recent-code-bugfix/references/task-profile.json` | `co-pilot` | `wave-2-co-pilot` | `pending` | `unassigned` | `tbd` |
 | 104 | `utilities/recon-workbench/SKILL.md` | `utilities/recon-workbench/references/task-profile.json` | `co-pilot` | `wave-2-co-pilot` | `pending` | `unassigned` | `tbd` |
 | 105 | `utilities/remotion/SKILL.md` | `utilities/remotion/references/task-profile.json` | `co-pilot` | `wave-2-co-pilot` | `pending` | `unassigned` | `tbd` |
 | 106 | `utilities/repoprompt/SKILL.md` | `utilities/repoprompt/references/task-profile.json` | `co-pilot` | `wave-2-co-pilot` | `pending` | `unassigned` | `tbd` |
 | 107 | `utilities/run-tests-and-write-artifacts/SKILL.md` | `utilities/run-tests-and-write-artifacts/references/task-profile.json` | `manual` | `wave-1-manual` | `pending` | `unassigned` | `tbd` |
-| 108 | `utilities/skill-creator/SKILL.md` | `utilities/skill-creator/references/task-profile.json` | `co-pilot` | `wave-2-co-pilot` | `pending` | `unassigned` | `tbd` |
+| 108 | `utilities/skill-builder/SKILL.md` | `utilities/skill-builder/references/task-profile.json` | `co-pilot` | `wave-2-co-pilot` | `pending` | `unassigned` | `tbd` |
 | 109 | `utilities/skill-installer/SKILL.md` | `utilities/skill-installer/references/task-profile.json` | `manual` | `wave-1-manual` | `pending` | `unassigned` | `tbd` |
 | 110 | `utilities/systematic-debugging/SKILL.md` | `utilities/systematic-debugging/references/task-profile.json` | `co-pilot` | `wave-2-co-pilot` | `pending` | `unassigned` | `tbd` |
 | 111 | `utilities/test-driven-development/SKILL.md` | `utilities/test-driven-development/references/task-profile.json` | `co-pilot` | `wave-2-co-pilot` | `pending` | `unassigned` | `tbd` |

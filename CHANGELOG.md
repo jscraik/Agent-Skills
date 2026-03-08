@@ -40,9 +40,9 @@ All notable changes for this repository are documented in this file.
 - `2026-02-23` [babd8ac] Add Core Engineering Principles and Token Efficiency to agents-md
 - `2026-02-23` [5c89fe7] Enforce local-memory policy in codex-agent-creator defaults
 - `2026-02-23` [dda3450] Align worktree skill and harden skill-installer validation/security
-- `2026-02-23` [cfb3def] Harden skill-creator security gates and eval tooling
+- `2026-02-23` [cfb3def] Harden skill-builder security gates and eval tooling
 - `2026-02-23` [a333f4a] Add claude-md skill and refresh standards references
-- `2026-02-22` [0d2e72c] Add process skills and harden skill-creator workflows
+- `2026-02-22` [0d2e72c] Add process skills and harden skill-builder workflows
 ## Release Template (copy to next tagged release)
 ### Added
 
@@ -68,6 +68,6 @@ All notable changes for this repository are documented in this file.
 - `2026-02-23` [babd8ac] Add Core Engineering Principles and Token Efficiency to agents-md
 - `2026-02-23` [5c89fe7] Enforce local-memory policy in codex-agent-creator defaults
 - `2026-02-23` [dda3450] Align worktree skill and harden skill-installer validation/security
-- `2026-02-23` [cfb3def] Harden skill-creator security gates and eval tooling
+- `2026-02-23` [cfb3def] Harden skill-builder security gates and eval tooling
 - `2026-02-23` [a333f4a] Add claude-md skill and refresh standards references
-- `2026-02-22` [0d2e72c] Add process skills and harden skill-creator workflows
+- `2026-02-22` [0d2e72c] Add process skills and harden skill-builder workflows

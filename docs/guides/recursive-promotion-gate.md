@@ -47,7 +47,7 @@ bash scripts/human_promote_recursive_run.sh \
 ## Validate decision directly
 
 ```bash
-python3 utilities/skill-creator/scripts/validate_recursive_promotion.py \
+python3 utilities/skill-builder/scripts/validate_recursive_promotion.py \
   --run-dir artifacts/skill-graphs/runs/run_20260220T150021Z_518880 \
   --decision-file artifacts/skill-graphs/runs/run_20260220T150021Z_518880/promotion_decision.json \
   --lesson-file docs/skill-graphs/workflows/reviewer-rubric.md

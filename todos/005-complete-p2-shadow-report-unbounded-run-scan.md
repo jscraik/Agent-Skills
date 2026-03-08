@@ -13,7 +13,7 @@ dependencies: []
 Shadow report generation scans all run directories and fully parses journals before applying window filters, causing runtime and IO growth proportional to total historical runs.
 
 ## Findings
-- In /Users/jamiecraik/dev/agent-skills/utilities/skill-creator/scripts/build_recursive_skill_shadow_report.py:504-533, all run_* directories are loaded and parsed.
+- In /Users/jamiecraik/dev/agent-skills/utilities/skill-builder/scripts/build_recursive_skill_shadow_report.py:504-533, all run_* directories are loaded and parsed.
 - Window filtering happens later at lines 541-547, after full load.
 - load_jsonl uses read_text().splitlines() (lines 101-108), which reads full file into memory.
 
@@ -41,7 +41,7 @@ Shadow report generation scans all run directories and fully parses journals bef
 
 ## Technical Details
 ### Affected files/components
-- `/Users/jamiecraik/dev/agent-skills/utilities/skill-creator/scripts/build_recursive_skill_shadow_report.py`
+- `/Users/jamiecraik/dev/agent-skills/utilities/skill-builder/scripts/build_recursive_skill_shadow_report.py`
 
 ## Acceptance Criteria
 - [ ] Report generation scales with active window size rather than total historical run count.

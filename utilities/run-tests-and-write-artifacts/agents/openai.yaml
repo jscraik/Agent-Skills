@@ -1,7 +1,0 @@
-interface:
-  display_name: "Run Tests + Artifacts"
-  short_description: "Run tests with deterministic command routing and write evidence artifacts to /mnt/data"
-  default_prompt: "Run the project tests using this skill workflow, then produce /mnt/data artifacts and a concise pass/fail/blocked summary."
-
-policy:
-  allow_implicit_invocation: true

@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-02-26T18:55:06Z",
+  "generated_at": "2026-03-08T19:30:02Z",
   "runs_root": "artifacts/skill-graphs/runs",
   "pilot_profiles": [
     "ui-ux-creative-coding",
@@ -86,7 +86,16 @@
       "baseline window unavailable for delta KPIs"
     ]
   },
-  "event_envelope_errors": [],
+  "event_envelope_errors": [
+    "run_20260220T195545Z_8799c2: missing events.jsonl",
+    "run_20260220T150021Z_518880: missing events.jsonl",
+    "run_20260220T150021Z_82ecf7: missing events.jsonl",
+    "run_20260220T150021Z_9b592b: missing events.jsonl",
+    "run_20260220T150021Z_bb9acb: missing events.jsonl",
+    "run_20260220T144736Z_425b7a: missing events.jsonl",
+    "run_20260220T144710Z_425b7a: missing events.jsonl",
+    "run_20260220T144703Z_425b7a: missing events.jsonl"
+  ],
   "recent_runs": [
     {
       "run_id": "run_20260220T195545Z_8799c2",
@@ -312,7 +321,7 @@
       "generated": false
     },
     "daily_health_md": {
-      "path": "/Users/jamiecraik/dev/agent-skills/artifacts/skill-graphs/telemetry/daily-skill-health.md",
+      "path": "/Users/jamiecraik/dev/agent-skills/docs/skill-graphs/telemetry/daily-skill-health.md",
       "generated": true
     },
     "failure_patterns_jsonl": {

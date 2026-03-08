@@ -102,9 +102,9 @@
       "wave": "wave-2-co-pilot"
     },
     {
-      "skill_md": "frontend/graphics/og-image-creator/SKILL.md",
-      "skill_dir": "frontend/graphics/og-image-creator",
-      "profile_file": "frontend/graphics/og-image-creator/references/task-profile.json",
+      "skill_md": "frontend/graphics/og-image-builder/SKILL.md",
+      "skill_dir": "frontend/graphics/og-image-builder",
+      "profile_file": "frontend/graphics/og-image-builder/references/task-profile.json",
       "delegation_mode": "co-pilot",
       "wave": "wave-2-co-pilot"
     },
@@ -662,9 +662,9 @@
       "wave": "wave-1-manual"
     },
     {
-      "skill_md": "utilities/codex-agent-creator/SKILL.md",
-      "skill_dir": "utilities/codex-agent-creator",
-      "profile_file": "utilities/codex-agent-creator/references/task-profile.json",
+      "skill_md": "utilities/codex-agent-builder/SKILL.md",
+      "skill_dir": "utilities/codex-agent-builder",
+      "profile_file": "utilities/codex-agent-builder/references/task-profile.json",
       "delegation_mode": "manual",
       "wave": "wave-1-manual"
     },
@@ -718,9 +718,9 @@
       "wave": "wave-2-co-pilot"
     },
     {
-      "skill_md": "utilities/prompt-creator/SKILL.md",
-      "skill_dir": "utilities/prompt-creator",
-      "profile_file": "utilities/prompt-creator/references/task-profile.json",
+      "skill_md": "utilities/prompt-builder/SKILL.md",
+      "skill_dir": "utilities/prompt-builder",
+      "profile_file": "utilities/prompt-builder/references/task-profile.json",
       "delegation_mode": "co-pilot",
       "wave": "wave-2-co-pilot"
     },
@@ -760,9 +760,9 @@
       "wave": "wave-1-manual"
     },
     {
-      "skill_md": "utilities/skill-creator/SKILL.md",
-      "skill_dir": "utilities/skill-creator",
-      "profile_file": "utilities/skill-creator/references/task-profile.json",
+      "skill_md": "utilities/skill-builder/SKILL.md",
+      "skill_dir": "utilities/skill-builder",
+      "profile_file": "utilities/skill-builder/references/task-profile.json",
       "delegation_mode": "co-pilot",
       "wave": "wave-2-co-pilot"
     },

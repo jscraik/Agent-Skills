@@ -194,6 +194,17 @@ This skill is here to unlock high-confidence design-system decisions. The agent 
 **Decision feedback protocol (required):**
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.
 - Capture: `decision` (`accepted|partial|rejected|deferred`), `outcome` (`good|neutral|bad|unknown`), and `confidence` (`high|medium|low`).
-- Persist with: `python3 utilities/skill-creator/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
+- Persist with: `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
 - The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
 <!-- /decision-feedback-protocol -->
+
+## Quality Uplift
+- Philosophy and approach: apply a clear framework, explain why, consider tradeoff decisions, and use a practical mental model for execution.
+- Guiding question: Why is this the right context-specific path?
+- Guiding question: What tradeoff is being made and how is risk reduced?
+- Guiding question: How do we verify behavior end-to-end before completion?
+- Anti-pattern warning: avoid generic or repetitive output; DO NOT hide failures; NEVER skip validation; avoid common pitfall and mistake patterns.
+- Anti-pattern warning: treat incorrect or wrong assumptions as blockers, and call out anti-pattern risks explicitly.
+- Variation: vary recommendations by context-specific constraints; adapt, customize, and use different approaches when constraints differ.
+- Variation: prefer diverse, unique alternatives and avoid repetition or cookie-cutter template convergence.
+- Empowerment: enable users to explore options confidently, be capable and creative, unlock safe choices, and empower execution.

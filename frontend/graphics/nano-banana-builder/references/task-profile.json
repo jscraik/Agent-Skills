@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "profile_id": "frontend-tools-nano-banana-builder",
-  "scope_skill": "frontend/tools/nano-banana-builder",
+  "profile_id": "frontend-graphics-nano-banana-builder",
+  "scope_skill": "frontend/graphics/nano-banana-builder",
   "scope_profile": "frontend",
   "rubric_version": "2026-02-26",
   "evaluator_version": "v1",

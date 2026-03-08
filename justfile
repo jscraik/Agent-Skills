@@ -41,13 +41,13 @@ install-cron:
 docs-lint:
     python3 scripts/docs_lint.py --mode warn --config docs-policy.json
 
-# List skill-creator eval cases
-skill-creator-list-evals filters='':
-    ~/.venvs/pyyaml/bin/python utilities/skill-creator/scripts/run_skill_evals.py utilities/skill-creator --list-cases {{filters}}
+# List skill-builder eval cases
+skill-builder-list-evals filters='':
+    ~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/run_skill_evals.py utilities/skill-builder --list-cases {{filters}}
 
-# Run discovery smoke checks for skill-creator
-skill-creator-smoke cases='discovery-round-one,discovery-round-six':
-    ~/.venvs/pyyaml/bin/python utilities/skill-creator/scripts/run_skill_evals.py utilities/skill-creator --smoke --case {{cases}}
+# Run discovery smoke checks for skill-builder
+skill-builder-smoke cases='discovery-round-one,discovery-round-six':
+    ~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/run_skill_evals.py utilities/skill-builder --smoke --case {{cases}}
 
 # Smoke test visual-explainer slide generation (opens browser)
 smoke-slides source='/Users/jamiecraik/dev/agent-skills/docs/plans/2026-03-02-feat-skill-genome-loop-draft-pr-copilot-plan.md':

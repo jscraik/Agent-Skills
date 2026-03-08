@@ -1,0 +1,16 @@
+===== init_skill_dry_run =====
+Initializing skill: agentation
+   Location: /Users/jamiecraik/dev/agent-skills/artifacts/agentation-skill-builder-runs/init-skill-preview
+   Target: portable
+   Structure: simple
+   Run type: instruction
+   Resources: assets, references (auto-selected)
+   Dry run: enabled
+
+[DRY RUN] Would create:
+  /Users/jamiecraik/dev/agent-skills/artifacts/agentation-skill-builder-runs/init-skill-preview/agentation/
+  SKILL.md
+  assets/
+  references/
+  agents/openai.yaml
+EXIT_CODE=0

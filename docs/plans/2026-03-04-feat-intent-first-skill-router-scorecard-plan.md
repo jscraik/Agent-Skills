@@ -216,11 +216,11 @@ To reduce these failure modes, this plan now adds:
 - Add auto-downgrade triggers back to `observe_only` on safety/quality regressions.
 
 ## Planned File Map
-- `utilities/skill-creator/scripts/skill_router.py` (new router engine)
-- `utilities/skill-creator/scripts/skill_catalog.py` (canonical catalog loader + quality checks)
-- `utilities/skill-creator/scripts/skill_router_schema.py` (schema + confidence contract)
-- `utilities/skill-creator/scripts/test_skill_router.py` (determinism + edge-case tests)
-- `utilities/skill-creator/scripts/test_skill_router_fixtures.json` (ranking/adversarial fixtures)
+- `utilities/skill-builder/scripts/skill_router.py` (new router engine)
+- `utilities/skill-builder/scripts/skill_catalog.py` (canonical catalog loader + quality checks)
+- `utilities/skill-builder/scripts/skill_router_schema.py` (schema + confidence contract)
+- `utilities/skill-builder/scripts/test_skill_router.py` (determinism + edge-case tests)
+- `utilities/skill-builder/scripts/test_skill_router_fixtures.json` (ranking/adversarial fixtures)
 - `scripts/verify_router_schema.py` (schema/telemetry contract verifier)
 - `scripts/verify_skill_catalog_freshness.py` (catalog freshness and metadata quality gates)
 - `scripts/skill_router_metrics.py` (first-hit + guardrail KPI aggregation)

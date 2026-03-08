@@ -1,56 +1,75 @@
 ---
 name: insight-report
-description: Generate a high-fidelity Codex usage insights HTML report from local Codex session data when asked for "insights report", "usage report", or "analyze my Codex sessions".
+description: Generate a high-fidelity Codex usage insights HTML report from local Codex session data. Use this skill when a user asks for an insights report, usage report, or session analysis.
 ---
 
-# Insight Report (Codex)
+# Insight Report
+
+Generate evidence-backed usage insights from local Codex session history.
 
 ## When to use
-- User asks for a Codex usage insights report
-- User wants a shareable HTML summary from local Codex session data
+- Use this skill for requests to analyze Codex usage patterns.
+- Use this skill for HTML report generation from local session data.
 
 ## Inputs
-- Optional arg: `open` or `launch`
-- Optional arg: `days=N` (lookback window)
-- Optional arg: `closed-loop` (auto-execute top recommendation + before/after delta)
+- Time window or scope (if provided).
+- Source session/log paths.
+- Output preferences for report format and detail.
 
-## Safety constraints
-- Use local files only
-- Do not send private usage data to external services
-- Do not modify unrelated files
+## Outputs
+- HTML insights report artifact.
+- Summary of key metrics and notable trends.
+- Clear note of missing data or confidence limits.
+
+## Philosophy
+- Prefer reproducible metrics over anecdotal interpretation.
+- Keep conclusions grounded in observable evidence.
+- Why does this metric matter for user decisions?
+- What evidence supports this conclusion?
+- Which tradeoff matters: depth, speed, or interpretability?
+
+## Constraints
+- Redact secrets, tokens, credentials, and personal data in report outputs.
+- Do not infer unsupported causal claims from sparse data.
+- Keep analysis scoped to requested period and available evidence.
 
 ## Procedure
-1) Run the local report generator script:
-   - Default:
-     - `python3 /Users/jamiecraik/dev/config/codex/scripts/generate-insight-report.py`
-   - If user requests a custom window:
-     - `python3 /Users/jamiecraik/dev/config/codex/scripts/generate-insight-report.py --days N`
-   - If user asked to open/launch:
-     - `python3 /Users/jamiecraik/dev/config/codex/scripts/generate-insight-report.py --open`
-   - If both custom window and open are requested:
-     - `python3 /Users/jamiecraik/dev/config/codex/scripts/generate-insight-report.py --days N --open`
-   - If closed-loop is requested:
-     - `python3 /Users/jamiecraik/dev/config/codex/scripts/generate-insight-report.py --closed-loop`
-   - If both custom window and closed-loop are requested:
-     - `python3 /Users/jamiecraik/dev/config/codex/scripts/generate-insight-report.py --days N --closed-loop`
-   - If open and closed-loop are both requested:
-     - `python3 /Users/jamiecraik/dev/config/codex/scripts/generate-insight-report.py --open --closed-loop`
-2) Confirm output files exist:
-   - `/Users/jamiecraik/dev/config/codex/usage-data/report.html`
-   - `/Users/jamiecraik/dev/config/codex/usage-data/facets/latest.json`
-3) Verify report contains high-fidelity sections:
-   - At a Glance, What You Work On, How You Use Codex, Impressive Things, Friction, Features, Patterns, On the Horizon, Team Feedback
-4) Final response must be exactly:
+1. Collect session data for the requested scope.
+2. Compute summary metrics and trend slices.
+3. Generate HTML report with clear sections and evidence notes.
+4. Provide concise highlights and follow-up suggestions.
 
-Your shareable insights report is ready:
-file:///Users/jamiecraik/dev/config/codex/usage-data/report.html
+## Validation
+- Verify report generation completed successfully.
+- Verify key metrics are populated and internally consistent.
+- Fail fast: stop on broken or incomplete source data and report blocker.
 
-Want to dig into any section or try one of the suggestions?
+## Anti-patterns
+- Do not fabricate trends when data is incomplete.
+- Never expose sensitive data in report output.
+- Do not ship a report without metric sanity checks.
+- Avoid repetitive, generic commentary with no actionable signal.
+- Warn on confidence limits when sample size is small.
 
-<!-- decision-feedback-protocol:v2 -->
-**Decision feedback protocol (required):**
-- If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.
-- Capture: `decision` (`accepted|partial|rejected|deferred`), `outcome` (`good|neutral|bad|unknown`), and `confidence` (`high|medium|low`).
-- Persist with: `python3 utilities/skill-creator/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
-- The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
-<!-- /decision-feedback-protocol -->
+## Variation
+- Adapt granularity by request (quick pulse vs deep retrospective).
+- Use different section emphasis for productivity, quality, or reliability goals.
+- Customize output narrative for technical versus stakeholder audiences.
+
+## Examples
+- Generate a 7-day usage report with top workflows and blockers.
+- Generate a monthly trend report with confidence notes and action items.
+
+## Resource map
+- References: `references/contract.yaml`, `references/evals.yaml`, `references/README.md`
+
+## Quality Uplift
+- Philosophy and approach: apply a clear framework, explain why, consider tradeoff decisions, and use a practical mental model for execution.
+- Guiding question: Why is this the right context-specific path?
+- Guiding question: What tradeoff is being made and how is risk reduced?
+- Guiding question: How do we verify behavior end-to-end before completion?
+- Anti-pattern warning: avoid generic or repetitive output; DO NOT hide failures; NEVER skip validation; avoid common pitfall and mistake patterns.
+- Anti-pattern warning: treat incorrect or wrong assumptions as blockers, and call out anti-pattern risks explicitly.
+- Variation: vary recommendations by context-specific constraints; adapt, customize, and use different approaches when constraints differ.
+- Variation: prefer diverse, unique alternatives and avoid repetition or cookie-cutter template convergence.
+- Empowerment: enable users to explore options confidently, be capable and creative, unlock safe choices, and empower execution.

@@ -1,13 +1,59 @@
-schema_version: 1
-skill: insight-report
+schema_version: '2.0'
+skill_name: insight-report
 cases:
-  - id: generates_report
-    prompt: Generate an insights report for my Codex usage
-    expects:
-      - report_file_exists: /Users/jamiecraik/dev/config/codex/usage-data/report.html
-      - facets_file_exists: /Users/jamiecraik/dev/config/codex/usage-data/facets/latest.json
-  - id: open_flag
-    prompt: Generate an insights report and open it
-    args: open
-    expects:
-      - script_called_with_open_flag: true
+- id: explicit-skill-request
+  name: explicit skill request
+  category: happy
+  should_trigger: true
+  prepend_skill: false
+  prompt: Use  to handle this workflow and provide the final output.
+  acceptance:
+  - type: skill_selected
+    expected_skill: insight-report
+- id: trigger-phrase-match
+  name: trigger phrase match
+  category: edge
+  should_trigger: true
+  prepend_skill: false
+  prompt: Generate a high-fidelity Codex usage insights HTML report from local Codex
+    session data when asked for "insights report", "usage report", or "analyze my
+    Codex sessions". Use when requests match this workflow.
+  acceptance:
+  - type: skill_selected
+    expected_skill: insight-report
+- id: scoped-execution-request
+  name: scoped execution request
+  category: edge
+  should_trigger: true
+  prepend_skill: false
+  prompt: Run the insight-report workflow with strict validation and summarize outcomes.
+  acceptance:
+  - type: skill_selected
+    expected_skill: insight-report
+- id: translation-negative
+  name: translation negative
+  category: negative
+  should_trigger: false
+  prepend_skill: false
+  prompt: Translate this paragraph into French.
+  acceptance:
+  - type: skill_not_selected
+    expected_skill: insight-report
+- id: casual-chat-negative
+  name: casual chat negative
+  category: negative
+  should_trigger: false
+  prepend_skill: false
+  prompt: How is your day going?
+  acceptance:
+  - type: skill_not_selected
+    expected_skill: insight-report
+- id: generic-fix-negative
+  name: generic fix negative
+  category: negative
+  should_trigger: false
+  prepend_skill: false
+  prompt: Fix this random typo in a README right now.
+  acceptance:
+  - type: skill_not_selected
+    expected_skill: insight-report

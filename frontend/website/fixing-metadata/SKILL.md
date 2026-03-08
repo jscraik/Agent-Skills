@@ -151,11 +151,16 @@ Reference these guidelines when:
 - Advice without concrete snippet-level fixes.
 - Ignoring project conventions or introducing unrelated architecture changes.
 
+## Variation
+- Adapt checks for marketing pages, docs pages, and app routes because metadata priorities differ by page type.
+- Use different remediation depth for launch-critical SEO issues versus ongoing metadata hygiene.
+- Customize outputs for quick checklist-only reviews or patch-ready tag updates.
+
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.
 - Capture: `decision` (`accepted|partial|rejected|deferred`), `outcome` (`good|neutral|bad|unknown`), and `confidence` (`high|medium|low`).
-- Persist with: `python3 utilities/skill-creator/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes <notes>`.
+- Persist with: `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes <notes>`.
 - The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
 <!-- /decision-feedback-protocol -->
 
@@ -166,3 +171,12 @@ Reference these guidelines when:
 ## Notes
 - Contract: `references/contract.yaml`
 - Evals: `references/evals.yaml`
+
+## Execution quality
+- Philosophy: use a practical framework that balances speed, safety, and tradeoff clarity.
+- Approach: choose context-specific variation rather than generic cookie-cutter steps; adapt output to repository constraints.
+- Guiding question: Why is this the smallest safe change?
+- Guiding question: What tradeoff are we making and why?
+- Guiding question: How do we verify the result end-to-end?
+- Anti-patterns: DO NOT skip validation, NEVER hide failed checks, and avoid repetitive template-only output.
+- Empowerment: be capable, creative, and enable users to explore options with confidence.

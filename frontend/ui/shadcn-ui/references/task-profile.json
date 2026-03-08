@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "profile_id": "frontend-shadcn-ui",
-  "scope_skill": "frontend/shadcn-ui",
+  "profile_id": "frontend-ui-shadcn-ui",
+  "scope_skill": "frontend/ui/shadcn-ui",
   "scope_profile": "frontend",
   "rubric_version": "2026-02-26",
   "evaluator_version": "v1",

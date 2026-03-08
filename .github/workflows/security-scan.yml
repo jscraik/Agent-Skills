@@ -50,43 +50,50 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          rm -f semgrep.sarif
           git config --global --add safe.directory "$PWD"
-          base_ref="${{ github.base_ref }}"
-          if [ -z "${base_ref:-}" ]; then
-            base_ref="main"
-          fi
-          git fetch origin "${base_ref}:${base_ref}" --depth=1
+          semgrep_args=(
+            --config auto
+            --config "p/secrets"
+            --config "p/python"
+            --config "p/typescript"
+            --config "p/bash"
+            --exclude "artifacts/skill-graphs/**"
+            --sarif --output semgrep.sarif
+          )
 
-          mapfile -t changed_files < <(git diff --name-only --diff-filter=ACMR "${base_ref}...HEAD")
-          if [ "${#changed_files[@]}" -eq 0 ]; then
-            echo "No changed files to scan; writing empty semgrep.sarif"
-            printf '{"version":"2.1.0","runs":[]}\n' > semgrep.sarif
-            exit 0
-          fi
+          event_name="${{ github.event_name }}"
+          if [ "${event_name}" = "pull_request" ]; then
+            base_ref="${{ github.base_ref }}"
+            git fetch origin "${base_ref}:${base_ref}" --depth=1
 
-          semgrep scan \
-            --config auto \
-            --config "p/secrets" \
-            --config "p/python" \
-            --config "p/typescript" \
-            --config "p/bash" \
-            --sarif --output semgrep.sarif \
-            "${changed_files[@]}" || semgrep_status=$?
+            mapfile -t changed_files < <(git diff --name-only --diff-filter=ACMR "${base_ref}...HEAD")
+            if [ "${#changed_files[@]}" -eq 0 ]; then
+              echo "No changed files to scan in PR diff; writing empty semgrep.sarif"
+              printf '{"version":"2.1.0","runs":[]}\n' > semgrep.sarif
+              exit 0
+            fi
+
+            semgrep scan "${semgrep_args[@]}" -- "${changed_files[@]}" || semgrep_status=$?
+          else
+            semgrep scan "${semgrep_args[@]}" -- . || semgrep_status=$?
+          fi
 
           semgrep_status="${semgrep_status:-0}"
-          if [ ! -f semgrep.sarif ]; then
-            echo "::error::Semgrep did not produce semgrep.sarif (exit=${semgrep_status})"
+          if [ "${semgrep_status}" -ne 0 ]; then
+            echo "::error::Semgrep failed with exit status ${semgrep_status}"
             exit "${semgrep_status}"
+          fi
+
+          if [ ! -f semgrep.sarif ]; then
+            echo "::error::Semgrep did not produce semgrep.sarif"
+            exit 1
           fi
 
           findings_count="$(jq '[.runs[]?.results[]?] | length' semgrep.sarif)"
           if [ "${findings_count}" -gt 0 ]; then
             echo "::error::Semgrep found ${findings_count} finding(s)"
             exit 1
-          fi
-
-          if [ "${semgrep_status}" -ne 0 ]; then
-            echo "Semgrep exited with status ${semgrep_status}, but no findings were present in SARIF."
           fi
         env:
           # Set SEMGREP_APP_TOKEN if using Semgrep Cloud for dashboard/PR comments

@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Any, Dict, List
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-SCHEMA_LIB = REPO_ROOT / 'utilities' / 'skill-creator' / 'scripts'
+SCHEMA_LIB = REPO_ROOT / 'utilities' / 'skill-builder' / 'scripts'
 if str(SCHEMA_LIB) not in sys.path:
     sys.path.insert(0, str(SCHEMA_LIB))
 

@@ -14,7 +14,7 @@ dependencies: []
 Contract documents and enums include run_rollback_required, but loop execution paths do not currently emit that blocker code, limiting parity for rollback-specific automation logic.
 
 ## Findings
-- In /Users/jamiecraik/dev/agent-skills/utilities/skill-creator/scripts/recursive_skill_loop.py:47 and 335-341, run_rollback_required is defined and normalized.
+- In /Users/jamiecraik/dev/agent-skills/utilities/skill-builder/scripts/recursive_skill_loop.py:47 and 335-341, run_rollback_required is defined and normalized.
 - Search confirms no assignment path sets blocker_code to run_rollback_required in active control flow.
 - Docs reference this blocker in /Users/jamiecraik/dev/agent-skills/docs/skill-graphs/schemas/gate-contract.schema.md and telemetry outputs guide.
 
@@ -42,7 +42,7 @@ Contract documents and enums include run_rollback_required, but loop execution p
 
 ## Technical Details
 ### Affected files/components
-- `/Users/jamiecraik/dev/agent-skills/utilities/skill-creator/scripts/recursive_skill_loop.py`
+- `/Users/jamiecraik/dev/agent-skills/utilities/skill-builder/scripts/recursive_skill_loop.py`
 - `/Users/jamiecraik/dev/agent-skills/docs/skill-graphs/schemas/gate-contract.schema.md`
 - `/Users/jamiecraik/dev/agent-skills/docs/skill-graphs/telemetry/daily-outputs.md`
 

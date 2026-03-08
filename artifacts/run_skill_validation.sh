@@ -60,9 +60,9 @@ while IFS= read -r skill_md; do
   sg="PASS"
   oc="PASS"
 
-  "$python_bin" utilities/skill-creator/scripts/quick_validate.py "$skill_dir" >> "$log_file" 2>&1 || qv="FAIL"
-  "$python_bin" utilities/skill-creator/scripts/skill_gate.py "$skill_dir" >> "$log_file" 2>&1 || sg="FAIL"
-  "$python_bin" utilities/skill-creator/scripts/openclaw_skill_guard.py "$skill_dir" --mode both >> "$log_file" 2>&1 || oc="FAIL"
+  "$python_bin" utilities/skill-builder/scripts/quick_validate.py "$skill_dir" >> "$log_file" 2>&1 || qv="FAIL"
+  "$python_bin" utilities/skill-builder/scripts/skill_gate.py "$skill_dir" >> "$log_file" 2>&1 || sg="FAIL"
+  "$python_bin" utilities/skill-builder/scripts/openclaw_skill_guard.py "$skill_dir" --mode both >> "$log_file" 2>&1 || oc="FAIL"
 
   printf '%s\t%s\t%s\t%s\n' "$skill_dir" "$qv" "$sg" "$oc" >> "$results_tsv"
 done < "$skill_list"

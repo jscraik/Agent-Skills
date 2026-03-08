@@ -20,7 +20,7 @@ Standardize headless multi-runner evaluation for this skill using `run_skill_eva
 ## Canonical command
 ```bash
 CODEX_EVAL_TIMEOUT_SEC=600 \
-~/.venvs/pyyaml/bin/python utilities/skill-creator/scripts/run_skill_evals.py \
+~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/run_skill_evals.py \
   utilities/codex-automation-architect \
   --runners codex,claude-kimi,claude-zai,gemini \
   --claude-kimi-command ck \

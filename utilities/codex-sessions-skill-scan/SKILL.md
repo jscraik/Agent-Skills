@@ -71,8 +71,8 @@ If the user asks to apply fixes:
 2) Re-run skill gates (fail fast on first failure):
 ```bash
 cd ~/dev/agent-skills
-~/.venvs/pyyaml/bin/python utilities/skill-creator/scripts/quick_validate.py <skill-folder>
-~/.venvs/pyyaml/bin/python utilities/skill-creator/scripts/skill_gate.py <skill-folder>
+~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/quick_validate.py <skill-folder>
+~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/skill_gate.py <skill-folder>
 ```
 
 ## Guardrails (non-negotiable)
@@ -94,8 +94,8 @@ cd ~/dev/agent-skills
 - Fail fast: stop at the first failed gate, fix it, then re-run.
 - This skill’s scan script is stdlib-only; run it with `python3`.
 - When changing skill files, validate with:
-  - `~/.venvs/pyyaml/bin/python utilities/skill-creator/scripts/quick_validate.py utilities/codex-sessions-skill-scan`
-  - `~/.venvs/pyyaml/bin/python utilities/skill-creator/scripts/skill_gate.py utilities/codex-sessions-skill-scan`
+  - `~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/quick_validate.py utilities/codex-sessions-skill-scan`
+  - `~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/skill_gate.py utilities/codex-sessions-skill-scan`
 
 References used by skill-gate:
 - `references/contract.yaml`
@@ -138,6 +138,6 @@ References used by skill-gate:
 **Decision feedback protocol (required):**
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.
 - Capture: `decision` (`accepted|partial|rejected|deferred`), `outcome` (`good|neutral|bad|unknown`), and `confidence` (`high|medium|low`).
-- Persist with: `python3 utilities/skill-creator/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
+- Persist with: `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
 - The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
 <!-- /decision-feedback-protocol -->

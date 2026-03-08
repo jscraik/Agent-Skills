@@ -12,7 +12,7 @@ brainstorm: docs/brainstorms/2026-02-19-skill-graph-learning-loop-brainstorm.md
 
 **Deepened on:** 2026-02-19
 **Sections enhanced:** 13
-**Research agents/skills used:** agent-native-architecture, llm-design-review, docs-expert, product-spec, skill-creator, codex-sessions-skill-scan, security-best-practices, context7 validation, plus parallel review/research agents.
+**Research agents/skills used:** agent-native-architecture, llm-design-review, docs-expert, product-spec, skill-builder, codex-sessions-skill-scan, security-best-practices, context7 validation, plus parallel review/research agents.
 
 ### Key Improvements
 1. Added explicit **gate contract** and measurable **pilot scorecard** targets.
@@ -87,19 +87,19 @@ Found brainstorm from **2026-02-19**: `skill-graph-learning-loop`. Used as sourc
 ### Local repo findings (internal)
 - Skill indexing/sync conventions: `scripts/sync_skills.sh:126`
 - Existing lessons slot: `FORJAMIE.md:93`
-- Tiered gating model (`report-only -> warn -> fail`): `skills-system/skill-creator/references/tiered-gating-policy.md:5`
-- MUST/SHOULD/MAY rubric pattern: `skills-system/skill-creator/references/gold-skill-rubric.md:1`
+- Tiered gating model (`report-only -> warn -> fail`): `skills-system/skill-builder/references/tiered-gating-policy.md:5`
+- MUST/SHOULD/MAY rubric pattern: `skills-system/skill-builder/references/gold-skill-rubric.md:1`
 - Docs governance cutoff model: `docs-policy.json:2`
 - Task dependency graph convention: `.agent/PLANS.md:19`
 - Session-scan learning extraction precedent: `utilities/codex-sessions-skill-scan/scripts/scan_codex_sessions.py:5`
-- Eval scorecard/gate precedent: `utilities/skill-creator/scripts/run_skill_evals.py:14`
+- Eval scorecard/gate precedent: `utilities/skill-builder/scripts/run_skill_evals.py:14`
 
 ### Institutional learnings
 - `docs/solutions/` is not present; nearest alternatives:
   - `docs/reference/index.md`
   - `product/domain/chatgpt-apps-production-checklist/references/lessons-matrix.md:1`
   - Governance docs under `GOVERNANCE/`
-- Reusable pitfall: duplicate source-of-truth risk between mirrored skill-creator areas (`skills-system/...` and `utilities/...`).
+- Reusable pitfall: duplicate source-of-truth risk between mirrored skill-builder areas (`skills-system/...` and `utilities/...`).
 
 ### External research decision
 No framework-specific external dependency is required for this planning phase (validated). External references are included only for evaluation/gov best-practice hardening.
@@ -501,7 +501,7 @@ _Baseline protocol (applies to all KPIs unless noted):_
 
 ### Dependencies
 - Existing skill metadata/indexing conventions (`scripts/sync_skills.sh`).
-- Existing quality-gate and scorecard patterns (`utilities/skill-creator/scripts/*`).
+- Existing quality-gate and scorecard patterns (`utilities/skill-builder/scripts/*`).
 - Governance cadence and evidence requirements (`GOVERNANCE/*`, PR template).
 
 ### Risk register
@@ -527,10 +527,10 @@ _Baseline protocol (applies to all KPIs unless noted):_
 - `scripts/sync_skills.sh:126`
 - `FORJAMIE.md:93`
 - `.agent/PLANS.md:19`
-- `skills-system/skill-creator/references/tiered-gating-policy.md:5`
-- `skills-system/skill-creator/references/gold-skill-rubric.md:1`
+- `skills-system/skill-builder/references/tiered-gating-policy.md:5`
+- `skills-system/skill-builder/references/gold-skill-rubric.md:1`
 - `utilities/codex-sessions-skill-scan/scripts/scan_codex_sessions.py:5`
-- `utilities/skill-creator/scripts/run_skill_evals.py:14`
+- `utilities/skill-builder/scripts/run_skill_evals.py:14`
 - `docs-policy.json:2`
 
 ### External references

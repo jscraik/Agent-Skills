@@ -14,8 +14,8 @@ dependencies: []
 When run lock acquisition fails, the loop emits run_blocked/state/failure events in memory but returns before writing the updated events array back to events.jsonl.
 
 ## Findings
-- In /Users/jamiecraik/dev/agent-skills/utilities/skill-creator/scripts/recursive_skill_loop.py:583, events.jsonl is initially written with only run_initialized.
-- In /Users/jamiecraik/dev/agent-skills/utilities/skill-creator/scripts/recursive_skill_loop.py:585-636, lock-collision branch appends run_blocked, run_state_changed, and failure_event to memory then returns 5 without write_jsonl(events_path, events).
+- In /Users/jamiecraik/dev/agent-skills/utilities/skill-builder/scripts/recursive_skill_loop.py:583, events.jsonl is initially written with only run_initialized.
+- In /Users/jamiecraik/dev/agent-skills/utilities/skill-builder/scripts/recursive_skill_loop.py:585-636, lock-collision branch appends run_blocked, run_state_changed, and failure_event to memory then returns 5 without write_jsonl(events_path, events).
 - This violates telemetry contract expectations in /Users/jamiecraik/dev/agent-skills/docs/skill-graphs/telemetry/daily-outputs.md where blocked runs must be observable in events.jsonl.
 
 ## Proposed Solutions
@@ -42,7 +42,7 @@ When run lock acquisition fails, the loop emits run_blocked/state/failure events
 
 ## Technical Details
 ### Affected files/components
-- `/Users/jamiecraik/dev/agent-skills/utilities/skill-creator/scripts/recursive_skill_loop.py`
+- `/Users/jamiecraik/dev/agent-skills/utilities/skill-builder/scripts/recursive_skill_loop.py`
 - `/Users/jamiecraik/dev/agent-skills/docs/skill-graphs/telemetry/daily-outputs.md`
 
 ## Acceptance Criteria

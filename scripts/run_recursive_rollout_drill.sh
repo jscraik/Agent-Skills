@@ -9,7 +9,7 @@ controls_dir="${CONTROLS_DIR:-artifacts/skill-graphs/drills/controls}"
 report_json="${REPORT_JSON:-artifacts/skill-graphs/pilot/rollback-drill-report.json}"
 report_md="${REPORT_MD:-docs/skill-graphs/pilots/rollback-drill.md}"
 profile_file="${PROFILE_FILE:-docs/skill-graphs/schemas/examples/ui-skills-profile.example.json}"
-loop_script="utilities/skill-creator/scripts/recursive_skill_loop.py"
+loop_script="utilities/skill-builder/scripts/recursive_skill_loop.py"
 
 mkdir -p "$out_root" "$controls_dir" "$(dirname "$report_json")" "$(dirname "$report_md")"
 

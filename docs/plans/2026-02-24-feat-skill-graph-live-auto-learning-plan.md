@@ -207,8 +207,8 @@ tasks:
 
 Optional dry-run checks once implementation starts:
 - `bash scripts/run_recursive_skill_shadow_cycle.sh --runs-per-profile 1 --window-days 3`
-- `python3 utilities/skill-creator/scripts/build_recursive_skill_shadow_report.py --runs-root artifacts/skill-graphs/runs --window-days 3`
-- `python3 utilities/skill-creator/scripts/validate_recursive_promotion.py --runs-root artifacts/skill-graphs/runs --window-days 3`
+- `python3 utilities/skill-builder/scripts/build_recursive_skill_shadow_report.py --runs-root artifacts/skill-graphs/runs --window-days 3`
+- `python3 utilities/skill-builder/scripts/validate_recursive_promotion.py --runs-root artifacts/skill-graphs/runs --window-days 3`
 
 ## 8) Technical review deltas (2026-02-24)
 - Added hard dependency from rollout go/no-go path to counterfactual uplift gate readiness.

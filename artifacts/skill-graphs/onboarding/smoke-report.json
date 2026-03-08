@@ -1,9 +1,13 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-02-26T17:34:03Z",
+  "generated_at": "2026-03-08T19:32:26Z",
   "repo_root": ".",
   "dry_run": false,
   "profile_count": 1,
+  "planned_count": 0,
+  "executed_count": 1,
+  "executed_pass_count": 1,
+  "executed_fail_count": 0,
   "pass_count": 1,
   "fail_count": 0,
   "results": [
@@ -12,8 +16,8 @@
       "status": "accepted",
       "execution_status": "nonzero_exit",
       "exit_code": 2,
-      "run_id": "run_20260226T173403662298Z_83cb58_14467814",
-      "run_out_dir": "artifacts/skill-graphs/runs/run_20260226T173403662298Z_83cb58_14467814",
+      "run_id": "run_20260308T193226729897Z_83cb58_96448147",
+      "run_out_dir": "artifacts/skill-graphs/runs-smoke/run_20260308T193226729897Z_83cb58_96448147",
       "missing_artifacts": [],
       "artifact_details": {
         "terminal_status": "failed",
@@ -21,9 +25,9 @@
         "evidence_completeness": 0.8
       },
       "stdout_tail": [
-        "[recursive-loop] run_id=run_20260226T173403662298Z_83cb58_14467814",
+        "[recursive-loop] run_id=run_20260308T193226729897Z_83cb58_96448147",
         "[recursive-loop] status=failed stop_reason=budget_exhausted",
-        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260226T173403662298Z_83cb58_14467814"
+        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs-smoke/run_20260308T193226729897Z_83cb58_96448147"
       ],
       "stderr_tail": []
     }

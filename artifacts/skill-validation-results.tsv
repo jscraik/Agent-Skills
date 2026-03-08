@@ -10,7 +10,7 @@ skill	quick_validate	skill_gate	openclaw_guard
 ./frontend/agentation	PASS	PASS	PASS
 ./frontend/graphics/favicon-generator	PASS	FAIL	PASS
 ./frontend/graphics/imagegen	PASS	PASS	PASS
-./frontend/graphics/og-image-creator	PASS	PASS	PASS
+./frontend/graphics/og-image-builder	PASS	PASS	PASS
 ./frontend/graphics/sora	PASS	FAIL	PASS
 ./frontend/graphics/threejs-builder	PASS	FAIL	PASS
 ./frontend/seo/seo-optimizer	PASS	FAIL	PASS
@@ -81,12 +81,12 @@ skill	quick_validate	skill_gate	openclaw_guard
 ./utilities/codex-sessions-skill-scan	PASS	PASS	PASS
 ./utilities/markdown-converter	PASS	PASS	PASS
 ./utilities/process-watch	PASS	PASS	PASS
-./utilities/prompt-creator	PASS	PASS	PASS
+./utilities/prompt-builder	PASS	PASS	PASS
 ./utilities/recon-workbench	PASS	PASS	PASS
 ./utilities/remotion	PASS	PASS	PASS
 ./utilities/repoprompt	PASS	PASS	PASS
 ./utilities/run-tests-and-write-artifacts	PASS	PASS	PASS
-./utilities/skill-creator	PASS	PASS	FAIL
+./utilities/skill-builder	PASS	PASS	FAIL
 ./utilities/skill-installer	PASS	PASS	PASS
 ./utilities/systematic-debugging	PASS	FAIL	PASS
 ./utilities/video-transcript-downloader	PASS	PASS	PASS

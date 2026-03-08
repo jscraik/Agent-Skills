@@ -233,7 +233,7 @@ For non-trivial outcomes, collect AskQuestion parity feedback (`request_user_inp
 - `decision`: `accepted|partial|rejected|deferred`
 - `outcome`: `good|neutral|bad|unknown`
 - `confidence`: `high|medium|low`
-Persist with `python3 utilities/skill-creator/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
+Persist with `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
 
 ## Philosophy
 
@@ -298,3 +298,24 @@ Use judgment, be creative, and push boundaries when it improves outcomes safely.
 
 - "Use $chatgpt-apps with $openai-docs to scaffold a submission-ready app with React UI and an MCP server."
 - "Use $chatgpt-apps to refactor this tool-only app into a decoupled render/data architecture."
+
+## Folded Legacy Modes (Core60)
+<!-- core60-folded-modes:v1:start -->
+This skill owns legacy capability from retired skills. Use these modes when requests match prior behavior.
+
+- `agentation-integration` from `frontend/tools/agentation`: Use when a user wants to install, verify, or troubleshoot Agentation in React/Next.js/Vite/Tauri apps; this skill validates toolbar wirin...
+- `production-gate` from `product/domain/chatgpt-apps-production-checklist`: Turn ChatGPT Apps implementation work into a production-ready checklist with concrete tasks, tests, widget changes, and tool-result patte...
+
+Deep legacy details: `references/folded-legacy-modes-core60.md`.
+<!-- core60-folded-modes:v1:end -->
+
+## Quality Uplift
+- Philosophy and approach: apply a clear framework, explain why, consider tradeoff decisions, and use a practical mental model for execution.
+- Guiding question: Why is this the right context-specific path?
+- Guiding question: What tradeoff is being made and how is risk reduced?
+- Guiding question: How do we verify behavior end-to-end before completion?
+- Anti-pattern warning: avoid generic or repetitive output; DO NOT hide failures; NEVER skip validation; avoid common pitfall and mistake patterns.
+- Anti-pattern warning: treat incorrect or wrong assumptions as blockers, and call out anti-pattern risks explicitly.
+- Variation: vary recommendations by context-specific constraints; adapt, customize, and use different approaches when constraints differ.
+- Variation: prefer diverse, unique alternatives and avoid repetition or cookie-cutter template convergence.
+- Empowerment: enable users to explore options confidently, be capable and creative, unlock safe choices, and empower execution.

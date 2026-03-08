@@ -20,7 +20,7 @@ node_modules/
 **/__pycache__/
 .venv/
 .venv-skillpack/
-.venv-skill-creator/
+.venv-skill-builder/
 .tmp/
 .temp/
 
@@ -31,6 +31,7 @@ sync-symlink/
 
 # Generated artifacts
 .diagram/
+semgrep.sarif
 artifacts/diagrams/
 artifacts/dist/
 artifacts/build/dist/

@@ -89,8 +89,8 @@ if [[ ${#profiles[@]} -eq 0 ]]; then
 fi
 
 example_profile="docs/skill-graphs/schemas/examples/ui-skills-profile.example.json"
-loop_script="utilities/skill-creator/scripts/recursive_skill_loop.py"
-report_script="utilities/skill-creator/scripts/build_recursive_skill_shadow_report.py"
+loop_script="utilities/skill-builder/scripts/recursive_skill_loop.py"
+report_script="utilities/skill-builder/scripts/build_recursive_skill_shadow_report.py"
 shadow_md="docs/skill-graphs/pilots/ui-skills-shadow-results.md"
 readout_md="docs/skill-graphs/pilots/ui-skills-pilot-readout.md"
 dashboard_json="artifacts/skill-graphs/pilot/shadow-dashboard.json"

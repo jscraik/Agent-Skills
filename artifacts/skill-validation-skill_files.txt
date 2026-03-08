@@ -9,7 +9,7 @@
 ./frontend/agentation/SKILL.md
 ./frontend/graphics/favicon-generator/SKILL.md
 ./frontend/graphics/imagegen/SKILL.md
-./frontend/graphics/og-image-creator/SKILL.md
+./frontend/graphics/og-image-builder/SKILL.md
 ./frontend/graphics/sora/SKILL.md
 ./frontend/graphics/threejs-builder/SKILL.md
 ./frontend/seo/seo-optimizer/SKILL.md
@@ -80,12 +80,12 @@
 ./utilities/codex-sessions-skill-scan/SKILL.md
 ./utilities/markdown-converter/SKILL.md
 ./utilities/process-watch/SKILL.md
-./utilities/prompt-creator/SKILL.md
+./utilities/prompt-builder/SKILL.md
 ./utilities/recon-workbench/SKILL.md
 ./utilities/remotion/SKILL.md
 ./utilities/repoprompt/SKILL.md
 ./utilities/run-tests-and-write-artifacts/SKILL.md
-./utilities/skill-creator/SKILL.md
+./utilities/skill-builder/SKILL.md
 ./utilities/skill-installer/SKILL.md
 ./utilities/systematic-debugging/SKILL.md
 ./utilities/video-transcript-downloader/SKILL.md

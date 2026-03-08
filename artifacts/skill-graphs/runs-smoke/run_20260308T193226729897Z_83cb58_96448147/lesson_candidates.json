@@ -1,0 +1,61 @@
+{
+  "items": [
+    {
+      "advice": {
+        "summary": "Strengthen concrete examples, file-path specificity, and measurable checks.",
+        "weakest_criteria": [
+          "safety",
+          "specificity"
+        ]
+      },
+      "candidate_id": "candidate_7c45000429f6",
+      "confidence": {
+        "bucket": "low",
+        "calibration_bucket": "C3_low_confidence",
+        "evidence_completeness": 0.8,
+        "score": 0.48
+      },
+      "created_at": "2026-03-08T19:32:26Z",
+      "delegation_context": {
+        "agentic_cost_benefit": {
+          "ai_process_minutes": 15.0,
+          "human_baseline_minutes": 45.0,
+          "probability_of_success": 0.75,
+          "roi_signal": "positive",
+          "time_delta_minutes": 30.0
+        },
+        "mode": "co-pilot",
+        "rationale": "Co-pilot mode default: advisory guidance with controlled rollout and human oversight for promotions."
+      },
+      "evidence_refs": {
+        "events_path": "events.jsonl",
+        "evidence_packet_path": "evidence_packet.json",
+        "iteration_journal_path": "iteration_journal.jsonl"
+      },
+      "implementation": {
+        "positive_criterion_deltas": {
+          "safety": 0.072,
+          "specificity": 0.189
+        },
+        "summary": "Applied focused remediation for: safety, specificity"
+      },
+      "iteration_id": 1,
+      "outcome": {
+        "feedback_note": "smoke validation pass",
+        "feedback_status": "worked",
+        "quality_uplift": 0.082,
+        "stop_reason": "budget_exhausted",
+        "terminal_status": "failed"
+      },
+      "profile_id": "auth-best-practices",
+      "run_id": "run_20260308T193226729897Z_83cb58_96448147",
+      "schema_version": "1.0",
+      "scope_profile": "auth",
+      "scope_skill": "auth/best-practices",
+      "status": "candidate",
+      "title": "auth/best-practices remediation candidate (safety, specificity)"
+    }
+  ],
+  "run_id": "run_20260308T193226729897Z_83cb58_96448147",
+  "schema_version": "1.0"
+}

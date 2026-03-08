@@ -167,20 +167,20 @@ OpenClaw skill guard: imagegen
 Summary: 0 critical · 0 warn · 2 info
 INFO readiness.checked: Operational readiness checks completed
 INFO security.clean: No risky patterns detected in scanned scripts
-[12/91] ./frontend/graphics/og-image-creator
+[12/91] ./frontend/graphics/og-image-builder
 [OK] SKILL.md frontmatter looks valid.
-Skill: og-image-creator
-Path:  ./frontend/graphics/og-image-creator/SKILL.md
+Skill: og-image-builder
+Path:  ./frontend/graphics/og-image-builder/SKILL.md
 
 WARN FM_DESC_WORKFLOWY: Description looks workflow-like. Prefer outcome + trigger keywords in `description`; keep procedures in the body/references. | description: Generate authentic, brand-aligned Open Graph images by understanding your codebase first, then creating contextually appropriate images for each route using Playwright and your existing components.. Use when Use this skill when the task matches its description and triggers..
 WARN PATH_ABSOLUTE: Absolute paths detected; prefer repo-relative paths.
-WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/og-image-creator.png
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/og-image-builder.png
 WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | scripts/__pycache__/analyze_codebase.cpython-314.pyc
 WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | scripts/__pycache__/generate_og_images.cpython-314.pyc
 WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
 
 RESULT: PASS
-OpenClaw skill guard: og-image-creator
+OpenClaw skill guard: og-image-builder
 Summary: 0 critical · 0 warn · 2 info
 INFO readiness.checked: Operational readiness checks completed
 INFO security.clean: No risky patterns detected in scanned scripts
@@ -1807,15 +1807,15 @@ OpenClaw skill guard: process-watch
 Summary: 0 critical · 0 warn · 2 info
 INFO readiness.checked: Operational readiness checks completed
 INFO security.clean: No risky patterns detected in scanned scripts
-[83/91] ./utilities/prompt-creator
+[83/91] ./utilities/prompt-builder
 [OK] SKILL.md frontmatter looks valid.
-Skill: prompt-creator
-Path:  ./utilities/prompt-creator/SKILL.md
+Skill: prompt-builder
+Path:  ./utilities/prompt-builder/SKILL.md
 
-WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/prompt-creator.png
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/prompt-builder.png
 
 RESULT: PASS
-OpenClaw skill guard: prompt-creator
+OpenClaw skill guard: prompt-builder
 Summary: 0 critical · 0 warn · 2 info
 INFO readiness.checked: Operational readiness checks completed
 INFO security.no_scripts: No executable scripts found; static security scan skipped
@@ -1879,14 +1879,14 @@ OpenClaw skill guard: run-tests-and-write-artifacts
 Summary: 0 critical · 0 warn · 2 info
 INFO readiness.checked: Operational readiness checks completed
 INFO security.no_scripts: No executable scripts found; static security scan skipped
-[88/91] ./utilities/skill-creator
+[88/91] ./utilities/skill-builder
 [WARN] Description may be too vague; consider including explicit trigger language (e.g., 'Use when ...').
 [OK] SKILL.md frontmatter looks valid.
-Skill: skill-creator
-Path:  ./utilities/skill-creator/SKILL.md
+Skill: skill-builder
+Path:  ./utilities/skill-builder/SKILL.md
 
 WARN OUT_SCHEMA_VERSION_MISSING: Schema-bound outputs detected; consider including `schema_version` in the output contract.
-WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/skill-creator.png
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/skill-builder.png
 WARN PI_BLOCKLIST: [high] Explicit exfiltration directive | references/destructive-commands.rules
 WARN PI_BLOCKLIST: [high] Explicit exfiltration directive | references/extended.md
 WARN PI_BLOCKLIST: [high] Explicit exfiltration directive | references/prompt-injection-patterns.json
@@ -1903,7 +1903,7 @@ WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does
 WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | workflows/create-new-skill.md
 
 RESULT: PASS
-OpenClaw skill guard: skill-creator
+OpenClaw skill guard: skill-builder
 Summary: 1 critical · 12 warn · 1 info
 INFO readiness.checked: Operational readiness checks completed
 WARN security.network_usage: Matched pattern: \b(requests\.|fetch\(|axios\.|curl\b|httpx\.) (scripts/generate_pressure_tests.py:229)

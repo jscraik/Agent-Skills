@@ -1,0 +1,264 @@
+#!/usr/bin/env python3
+"""Repo-wide skill quality runner (tiered structure + optional eval scorecards)."""
+
+from __future__ import annotations
+
+import argparse
+import json
+import subprocess as sp
+import sys
+from pathlib import Path
+from typing import List
+
+
+def parse_args() -> argparse.Namespace:
+    p = argparse.ArgumentParser(description="Run repo-wide skill quality checks.")
+    p.add_argument("--root", default=".", help="Repo root")
+    p.add_argument("--reports-dir", default="artifacts/reports/skills", help="Scorecard output directory")
+    p.add_argument("--tier2-mode", choices=["warn", "fail", "off"], default="warn")
+    p.add_argument("--run-evals", action="store_true", help="Run run_skill_evals.py for each skill")
+    p.add_argument("--runner", default="codex", help="Single-run eval runner.")
+    p.add_argument("--runners", action="append", default=[], help="Explicit eval runner list (repeatable or comma-separated).")
+    p.add_argument("--dual-run", action="store_true", help="When running evals, execute Codex+Claude-Kimi dual-run")
+    p.add_argument("--codex-fallback-profile", default="d", help="Pass through to run_skill_evals.py codex fallback profile.")
+    p.add_argument("--capture-jsonl", action="store_true", help="When running evals, capture Codex JSONL")
+    p.add_argument("--sandbox", default="read-only", choices=["read-only", "workspace-write", "danger-full-access"])
+    p.add_argument(
+        "--claude-settings",
+        default=None,
+        help="DEPRECATED: plain `claude` runner was removed. Use --claude-kimi-settings / --claude-zai-settings.",
+    )
+    p.add_argument("--claude-kimi-settings", default=None, help="Path to pass through as --claude-kimi-settings.")
+    p.add_argument("--claude-zai-settings", default=None, help="Path to pass through as --claude-zai-settings.")
+    p.add_argument("--claude-kimi-command", default=None, help="Path/name to pass through as --claude-kimi-command.")
+    p.add_argument("--claude-zai-command", default=None, help="Path/name to pass through as --claude-zai-command.")
+    p.add_argument("--baseline-file", default=None, help="Optional baseline JSON of known structure failures.")
+    p.add_argument("--write-baseline", action="store_true", help="Write/update baseline JSON from current structure failures.")
+    p.add_argument(
+        "--benchmark-mode",
+        choices=["off", "warn", "fail"],
+        default="warn",
+        help="Portfolio benchmark enforcement mode.",
+    )
+    p.add_argument(
+        "--benchmark-config",
+        default="utilities/skill-builder/references/benchmark-policy.json",
+        help="Portfolio benchmark policy JSON path.",
+    )
+    p.add_argument(
+        "--benchmark-output-json",
+        default="artifacts/industry-benchmark-latest.json",
+        help="Where to write benchmark JSON output.",
+    )
+    p.add_argument("--format", choices=["text", "json"], default="text")
+    return p.parse_args()
+
+
+def find_skill_dirs(root: Path) -> List[Path]:
+    out: List[Path] = []
+    root_resolved = root.resolve()
+    for skill_md in root.rglob("SKILL.md"):
+        s = str(skill_md)
+        if "/.git/" in s or "/_archive/" in s or "/assets/template/.codex/skills/" in s:
+            continue
+        if any(part in skill_md.parts for part in {"artifacts", "reports", "templates"}):
+            continue
+        # Repo-root SKILL.md is often an index/readme, not a runnable skill.
+        if skill_md.parent.resolve() == root_resolved:
+            continue
+        out.append(skill_md.parent)
+    return sorted(set(out))
+
+
+def run_cmd(cmd: List[str], cwd: Path) -> sp.CompletedProcess[str]:
+    return sp.run(cmd, cwd=cwd, text=True, capture_output=True)
+
+
+def choose_python() -> str:
+    preferred = Path.home() / ".venvs" / "pyyaml" / "bin" / "python"
+    if preferred.exists():
+        return str(preferred)
+    return sys.executable
+
+
+def rel_skill(root: Path, skill: Path) -> str:
+    try:
+        rel = skill.resolve().relative_to(root.resolve())
+        text = str(rel)
+        return "." if text == "" else text
+    except (OSError, RuntimeError, ValueError):
+        return str(skill)
+
+
+def main() -> int:
+    args = parse_args()
+    if args.claude_settings:
+        print(
+            "ERROR: --claude-settings is deprecated because plain `claude` runner was removed. "
+            "Use --claude-kimi-settings or --claude-zai-settings.",
+            file=sys.stderr,
+        )
+        return 1
+    root = Path(args.root).expanduser().resolve()
+    scripts = root / "utilities" / "skill-builder" / "scripts"
+
+    skill_gate_py = scripts / "skill_gate.py"
+    run_evals_py = scripts / "run_skill_evals.py"
+    ci_gate_py = scripts / "ci_skill_quality_gate.py"
+    benchmark_py = scripts / "benchmark_skill_portfolio.py"
+    py = choose_python()
+
+    skills = find_skill_dirs(root)
+    structure_failures = []
+
+    for skill in skills:
+        proc = run_cmd([py, str(skill_gate_py), str(skill), "--format", "json"], root)
+        if proc.returncode != 0:
+            structure_failures.append({"skill": rel_skill(root, skill), "stdout": proc.stdout, "stderr": proc.stderr})
+
+    scorecards: List[Path] = []
+    eval_failures = []
+
+    baseline_allowed: List[str] = []
+    if args.baseline_file:
+        baseline_path = Path(args.baseline_file).expanduser().resolve()
+        if baseline_path.exists():
+            try:
+                baseline_obj = json.loads(baseline_path.read_text(encoding="utf-8"))
+                if isinstance(baseline_obj, dict) and isinstance(baseline_obj.get("allowed_structure_failures"), list):
+                    baseline_allowed = [str(x) for x in baseline_obj["allowed_structure_failures"]]
+            except (json.JSONDecodeError, OSError, UnicodeDecodeError):
+                baseline_allowed = []
+
+    if args.run_evals:
+        for skill in skills:
+            cmd = [
+                py,
+                str(run_evals_py),
+                str(skill),
+                "--runner",
+                args.runner,
+                "--codex-fallback-profile",
+                args.codex_fallback_profile,
+                "--reports-dir",
+                args.reports_dir,
+                "--tier2-mode",
+                args.tier2_mode,
+                "--sandbox",
+                args.sandbox,
+                "--scorecard-out",
+                str((root / args.reports_dir / skill.name / "latest-scorecard.json").resolve()),
+            ]
+            for runner in args.runners:
+                cmd.extend(["--runners", runner])
+            if args.dual_run:
+                cmd.append("--dual-run")
+            if args.capture_jsonl:
+                cmd.append("--capture-jsonl")
+            if args.claude_kimi_settings:
+                cmd.extend(["--claude-kimi-settings", args.claude_kimi_settings])
+            if args.claude_zai_settings:
+                cmd.extend(["--claude-zai-settings", args.claude_zai_settings])
+            if args.claude_kimi_command:
+                cmd.extend(["--claude-kimi-command", args.claude_kimi_command])
+            if args.claude_zai_command:
+                cmd.extend(["--claude-zai-command", args.claude_zai_command])
+
+            proc = run_cmd(cmd, root)
+            scorecard_path = (root / args.reports_dir / skill.name / "latest-scorecard.json").resolve()
+            if scorecard_path.exists():
+                scorecards.append(scorecard_path)
+
+            if proc.returncode != 0:
+                eval_failures.append({"skill": rel_skill(root, skill), "stdout": proc.stdout, "stderr": proc.stderr})
+
+    gate_result = None
+    if scorecards:
+        cmd = [py, str(ci_gate_py), "--tier2-mode", args.tier2_mode, "--format", "json"] + [str(p) for p in scorecards]
+        proc = run_cmd(cmd, root)
+        gate_result = json.loads(proc.stdout) if proc.stdout.strip() else None
+        if proc.returncode != 0:
+            eval_failures.append({"skill": "scorecard-gate", "stdout": proc.stdout, "stderr": proc.stderr})
+
+    current_structure_failures = [x["skill"] for x in structure_failures]
+    new_structure_failures = sorted(set(current_structure_failures) - set(baseline_allowed))
+    resolved_structure_failures = sorted(set(baseline_allowed) - set(current_structure_failures))
+
+    if args.write_baseline and args.baseline_file:
+        baseline_path = Path(args.baseline_file).expanduser().resolve()
+        baseline_path.parent.mkdir(parents=True, exist_ok=True)
+        baseline_payload = {
+            "allowed_structure_failures": sorted(set(current_structure_failures)),
+            "generated_by": "run_repo_skill_quality.py",
+        }
+        baseline_path.write_text(json.dumps(baseline_payload, indent=2, ensure_ascii=False), encoding="utf-8")
+
+    benchmark_result = None
+    benchmark_failed = False
+    if args.benchmark_mode != "off":
+        benchmark_cmd = [
+            py,
+            str(benchmark_py),
+            "--root",
+            str(root),
+            "--config",
+            str(args.benchmark_config),
+            "--mode",
+            args.benchmark_mode,
+            "--format",
+            "json",
+            "--output-json",
+            str(args.benchmark_output_json),
+        ]
+        proc = run_cmd(benchmark_cmd, root)
+        if proc.stdout.strip():
+            try:
+                benchmark_result = json.loads(proc.stdout)
+            except json.JSONDecodeError:
+                benchmark_result = {"parse_error": "invalid_json", "stdout": proc.stdout}
+        if proc.returncode != 0:
+            benchmark_failed = True
+            eval_failures.append(
+                {"skill": "portfolio-benchmark", "stdout": proc.stdout, "stderr": proc.stderr}
+            )
+
+    payload = {
+        "skills": len(skills),
+        "structure_failures": len(structure_failures),
+        "new_structure_failures": len(new_structure_failures),
+        "resolved_structure_failures": len(resolved_structure_failures),
+        "eval_failures": len(eval_failures),
+        "structure_failure_details": structure_failures,
+        "new_structure_failure_skills": new_structure_failures,
+        "resolved_structure_failure_skills": resolved_structure_failures,
+        "baseline_allowed_structure_failures": baseline_allowed,
+        "eval_failure_details": eval_failures,
+        "scorecards": [str(p) for p in scorecards],
+        "scorecard_gate": gate_result,
+        "benchmark_mode": args.benchmark_mode,
+        "benchmark_config": str(args.benchmark_config),
+        "benchmark_output_json": str(args.benchmark_output_json),
+        "benchmark_result": benchmark_result,
+        "benchmark_failed": benchmark_failed,
+        "passed": len(new_structure_failures) == 0 and len(eval_failures) == 0,
+    }
+
+    if args.format == "json":
+        print(json.dumps(payload, indent=2, ensure_ascii=False))
+    else:
+        print(f"Skills scanned: {payload['skills']}")
+        print(f"Structure failures: {payload['structure_failures']}")
+        if args.baseline_file:
+            print(f"New structure failures vs baseline: {payload['new_structure_failures']}")
+            print(f"Resolved structure failures vs baseline: {payload['resolved_structure_failures']}")
+        print(f"Eval failures: {payload['eval_failures']}")
+        if args.benchmark_mode != "off":
+            print(f"Benchmark mode: {payload['benchmark_mode']}")
+            print(f"Benchmark failed: {payload['benchmark_failed']}")
+        print(f"RESULT: {'PASS' if payload['passed'] else 'FAIL'}")
+
+    return 0 if payload["passed"] else 2
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

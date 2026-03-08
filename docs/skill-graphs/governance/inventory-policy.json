@@ -1,0 +1,22 @@
+{
+  "schema_version": "1.0",
+  "include_prefixes": [
+    ".agents/skills/.system/",
+    "auth/",
+    "backend/",
+    "frontend/",
+    "github/",
+    "interview/",
+    "personas/",
+    "product/",
+    "utilities/"
+  ],
+  "exclude_prefixes": [
+    "skills/.system/",
+    "utilities/recon-workbench/assets/template/.codex/skills/"
+  ],
+  "system_prefixes": [
+    ".agents/skills/.system/"
+  ],
+  "system_slice_mode": "separate"
+}

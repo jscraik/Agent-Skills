@@ -1,7 +1,7 @@
 Deconflict advisory: 'skills-best-practices-mgechev' matched installed skills by overlap >= 20% or same-job intent similarity.
 Policy thresholds: advisory=20%, block=45% | block candidates=0
 Top overlap matches:
-  - /Users/jamiecraik/dev/agent-skills/utilities/skill-creator (overall=22%, text=8%, commands=50%, intent=43%, harness=0%) [confidence=low]
+  - /Users/jamiecraik/dev/agent-skills/utilities/skill-builder (overall=22%, text=8%, commands=50%, intent=43%, harness=0%) [confidence=low]
     shared terms: against, agent, api, assets, block, boilerplate, build, bundle, checklist, cli
 Deconflict notes:
   - harness: no overlap hits found; using lexical fallback weights

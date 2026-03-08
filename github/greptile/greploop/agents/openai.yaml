@@ -1,3 +1,0 @@
-interface:
-  display_name: "Greptile Greploop"
-  short_description: "Run bounded policy-gated review-fix loops to confidence targets"

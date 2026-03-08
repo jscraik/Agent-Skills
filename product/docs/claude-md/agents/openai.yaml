@@ -1,7 +1,0 @@
-interface:
-  display_name: "Claude Md"
-  short_description: "Create and refactor concise CLAUDE.md guidance with progressive disclosure"
-  default_prompt: "Draft or refine CLAUDE.md with concise always-on rules, verified commands, and optional @ imports for deeper docs."
-
-policy:
-  allow_implicit_invocation: true

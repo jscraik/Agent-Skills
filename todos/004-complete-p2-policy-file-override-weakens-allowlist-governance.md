@@ -42,7 +42,7 @@ Policy and signature paths are user-overridable via CLI, and signature validatio
 ## Technical Details
 ### Affected files/components
 - `/Users/jamiecraik/dev/agent-skills/scripts/human_promote_recursive_run.sh`
-- `/Users/jamiecraik/dev/agent-skills/utilities/skill-creator/scripts/validate_recursive_promotion.py`
+- `/Users/jamiecraik/dev/agent-skills/utilities/skill-builder/scripts/validate_recursive_promotion.py`
 - `/Users/jamiecraik/dev/agent-skills/docs/skill-graphs/governance/recursive-loop-approvers.yaml`
 
 ## Acceptance Criteria

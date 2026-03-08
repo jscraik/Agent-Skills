@@ -180,11 +180,16 @@ Reference these guidelines when:
 - Advice without concrete snippet-level fixes.
 - Ignoring project conventions or introducing unrelated architecture changes.
 
+## Variation
+- Adapt review depth for quick lint triage, focused component audits, or full-page accessibility sweeps.
+- Use different fix strategies for static content, interactive widgets, and form-heavy screens.
+- Customize recommendation detail to match whether the user wants patch-ready edits or prioritized findings only.
+
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.
 - Capture: `decision` (`accepted|partial|rejected|deferred`), `outcome` (`good|neutral|bad|unknown`), and `confidence` (`high|medium|low`).
-- Persist with: `python3 utilities/skill-creator/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes <notes>`.
+- Persist with: `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes <notes>`.
 - The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
 <!-- /decision-feedback-protocol -->
 
@@ -195,3 +200,23 @@ Reference these guidelines when:
 ## Notes
 - Contract: `references/contract.yaml`
 - Evals: `references/evals.yaml`
+
+## Execution quality
+- Philosophy: use a practical framework that balances speed, safety, and tradeoff clarity.
+- Approach: choose context-specific variation rather than generic cookie-cutter steps; adapt output to repository constraints.
+- Guiding question: Why is this the smallest safe change?
+- Guiding question: What tradeoff are we making and why?
+- Guiding question: How do we verify the result end-to-end?
+- Anti-patterns: DO NOT skip validation, NEVER hide failed checks, and avoid repetitive template-only output.
+- Empowerment: be capable, creative, and enable users to explore options with confidence.
+
+## Quality Uplift
+- Philosophy and approach: apply a clear framework, explain why, consider tradeoff decisions, and use a practical mental model for execution.
+- Guiding question: Why is this the right context-specific path?
+- Guiding question: What tradeoff is being made and how is risk reduced?
+- Guiding question: How do we verify behavior end-to-end before completion?
+- Anti-pattern warning: avoid generic or repetitive output; DO NOT hide failures; NEVER skip validation; avoid common pitfall and mistake patterns.
+- Anti-pattern warning: treat incorrect or wrong assumptions as blockers, and call out anti-pattern risks explicitly.
+- Variation: vary recommendations by context-specific constraints; adapt, customize, and use different approaches when constraints differ.
+- Variation: prefer diverse, unique alternatives and avoid repetition or cookie-cutter template convergence.
+- Empowerment: enable users to explore options confidently, be capable and creative, unlock safe choices, and empower execution.

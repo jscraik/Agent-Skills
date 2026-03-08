@@ -2,7 +2,7 @@ Deconflict note: harness: no overlap hits found; using lexical fallback weights
 Deconflict advisory: 'write-a-skill' matched installed skills by overlap >= 20% or same-job intent similarity.
 Policy thresholds: advisory=20%, block=45% | block candidates=0
 Top overlap matches:
-  - /Users/jamiecraik/dev/agent-skills/skills/.system/skill-creator (overall=22%, text=14%, commands=0%, intent=60%, harness=0%) [confidence=low]
+  - /Users/jamiecraik/dev/agent-skills/skills/.system/skill-builder (overall=22%, text=14%, commands=0%, intent=60%, harness=0%) [confidence=low]
     shared terms: about, add, additional, advanced, agent, anything, based, build, bundled, cases
 Deconflict notes:
   - harness: no overlap hits found; using lexical fallback weights

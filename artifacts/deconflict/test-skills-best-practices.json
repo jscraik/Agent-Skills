@@ -8,7 +8,7 @@
         "confidence": "low",
         "improvement_hints": [],
         "source": "skill:/private/tmp/codex/skill-install-djuhnhsj/skills-best-practices-main/skill",
-        "target": "skill:/Users/jamiecraik/dev/agent-skills/utilities/skill-creator",
+        "target": "skill:/Users/jamiecraik/dev/agent-skills/utilities/skill-builder",
         "type": "overlaps_with",
         "weight": 0.22424555103272867
       }
@@ -21,9 +21,9 @@
         "type": "candidate_skill"
       },
       {
-        "id": "skill:/Users/jamiecraik/dev/agent-skills/utilities/skill-creator",
-        "name": "skill-creator",
-        "path": "/Users/jamiecraik/dev/agent-skills/utilities/skill-creator",
+        "id": "skill:/Users/jamiecraik/dev/agent-skills/utilities/skill-builder",
+        "name": "skill-builder",
+        "path": "/Users/jamiecraik/dev/agent-skills/utilities/skill-builder",
         "type": "installed_skill"
       }
     ]
@@ -42,7 +42,7 @@
           "harness_score": 0.0,
           "improvement_hints": [],
           "intent_score": 0.43473368342085555,
-          "path": "/Users/jamiecraik/dev/agent-skills/utilities/skill-creator",
+          "path": "/Users/jamiecraik/dev/agent-skills/utilities/skill-builder",
           "proposal_path": null,
           "same_job": false,
           "score": 0.22424555103272867,
