@@ -253,7 +253,6 @@ def main() -> int:
         ensure_lint_baseline(repo_root, args.apply, args.force, summary)
 
     if not args.skip_brand:
-        help="Brand baseline mode: docs-expert (default, inserts README signature), repo (neutral/custom), or none.",
         ensure_brand_baseline(
             repo_root,
             args.apply,
