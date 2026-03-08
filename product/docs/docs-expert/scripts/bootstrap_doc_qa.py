@@ -178,16 +178,12 @@ def ensure_brand_baseline(
 ) -> None:
     brand_dir = repo_root / "brand"
 
-    brand_dir = repo_root / "brand"
-
     if brand_profile == "none":
         summary["warnings"].append("Brand bootstrap skipped (--brand-profile none)")
         return
 
-    write_text(brand_dir / "README.md", BRAND_README_BASELINE, apply, force, summary)
-    write_text(brand_dir / "constraints.md", BRAND_CONSTRAINTS_BASELINE, apply, force, summary)
-
-    if brand_profile == "repo":
+    write_text(repo_root, brand_dir / "README.md", BRAND_README_BASELINE, apply, force, summary)
+    write_text(repo_root, brand_dir / "constraints.md", BRAND_CONSTRAINTS_BASELINE, apply, force, summary)
 
     if brand_profile == "repo":
         if insert_signature:
@@ -279,6 +275,7 @@ def main() -> int:
         ensure_lint_baseline(repo_root, args.apply, args.force, summary)
 
     if not args.skip_brand:
+        effective_insert_signature = args.insert_readme_signature or args.brand_profile == "docs-expert"
         ensure_brand_baseline(
             repo_root,
             args.apply,

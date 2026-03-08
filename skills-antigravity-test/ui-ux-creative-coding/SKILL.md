@@ -1,1 +1,1 @@
-/Users/jamiecraik/dev/agent-skills/frontend/ui/ui-ux-creative-coding/SKILL.md
+../../frontend/ui/ui-ux-creative-coding/SKILL.md

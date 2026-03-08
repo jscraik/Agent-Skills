@@ -43,17 +43,51 @@ jobs:
       image: semgrep/semgrep
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Run Semgrep (auto ruleset + secrets)
+        shell: bash
         run: |
-          semgrep ci \
-            --error \
+          set -euo pipefail
+          git config --global --add safe.directory "$PWD"
+          base_ref="${{ github.base_ref }}"
+          if [ -z "${base_ref:-}" ]; then
+            base_ref="main"
+          fi
+          git fetch origin "${base_ref}:${base_ref}" --depth=1
+
+          mapfile -t changed_files < <(git diff --name-only --diff-filter=ACMR "${base_ref}...HEAD")
+          if [ "${#changed_files[@]}" -eq 0 ]; then
+            echo "No changed files to scan; writing empty semgrep.sarif"
+            printf '{"version":"2.1.0","runs":[]}\n' > semgrep.sarif
+            exit 0
+          fi
+
+          semgrep scan \
             --config auto \
             --config "p/secrets" \
             --config "p/python" \
             --config "p/typescript" \
             --config "p/bash" \
-            --sarif --output semgrep.sarif
+            --sarif --output semgrep.sarif \
+            "${changed_files[@]}" || semgrep_status=$?
+
+          semgrep_status="${semgrep_status:-0}"
+          if [ ! -f semgrep.sarif ]; then
+            echo "::error::Semgrep did not produce semgrep.sarif (exit=${semgrep_status})"
+            exit "${semgrep_status}"
+          fi
+
+          findings_count="$(jq '[.runs[]?.results[]?] | length' semgrep.sarif)"
+          if [ "${findings_count}" -gt 0 ]; then
+            echo "::error::Semgrep found ${findings_count} finding(s)"
+            exit 1
+          fi
+
+          if [ "${semgrep_status}" -ne 0 ]; then
+            echo "Semgrep exited with status ${semgrep_status}, but no findings were present in SARIF."
+          fi
         env:
           # Set SEMGREP_APP_TOKEN if using Semgrep Cloud for dashboard/PR comments
           SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN || '' }}
@@ -107,9 +141,25 @@ jobs:
 
       - name: Install Gitleaks
         run: |
-          curl -sSfL https://github.com/gitleaks/gitleaks/releases/latest/download/gitleaks_$(uname -s)_$(uname -m).tar.gz \
-            | tar -xz -C /usr/local/bin gitleaks
-          chmod +x /usr/local/bin gitleaks
+          os="$(uname -s | tr '[:upper:]' '[:lower:]')"
+          arch="$(uname -m | tr '[:upper:]' '[:lower:]')"
+          case "$arch" in
+            x86_64|amd64) arch="x64" ;;
+            aarch64|arm64) arch="arm64" ;;
+          esac
+          asset_url="$(curl -fsSL https://api.github.com/repos/gitleaks/gitleaks/releases/latest \
+            | jq -r --arg os "$os" --arg arch "$arch" '
+                .assets[]
+                | .browser_download_url
+                | select(endswith("_" + $os + "_" + $arch + ".tar.gz"))
+              ' \
+            | head -n 1)"
+          if [ -z "$asset_url" ]; then
+            echo "::error::Unable to resolve gitleaks release asset for os=${os} arch=${arch}"
+            exit 1
+          fi
+          curl -sSfL "$asset_url" | tar -xz -C /usr/local/bin gitleaks
+          chmod +x /usr/local/bin/gitleaks
 
       - name: Scan artifacts directory for secrets
         run: |

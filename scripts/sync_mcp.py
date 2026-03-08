@@ -3,6 +3,8 @@ import sys
 import os
 import json
 import logging
+import re
+import shlex
 
 try:
     import tomli as tomllib
@@ -12,6 +14,11 @@ except ModuleNotFoundError:
 
 CODEX_CONFIG_PATH = os.path.expanduser("~/.codex/config.toml")
 ANTIGRAVITY_MCP_PATH = os.path.expanduser("~/.gemini/antigravity/mcp_config.json")
+ENV_VAR_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
+
+
+def is_valid_env_var_name(value):
+    return isinstance(value, str) and ENV_VAR_RE.fullmatch(value) is not None
 
 def load_codex_config():
     if not os.path.exists(CODEX_CONFIG_PATH):
@@ -24,9 +31,8 @@ def load_codex_config():
 def build_antigravity_config(codex_config):
     mcp_servers = {}
     
-    # We build an inline sh -c string to source your two .env files 
-    # and explicitly export variables before executing the MCP command.
-    wrapper = "set -a; [ -f ~/.codex/.env ] && . ~/.codex/.env >/dev/null 2>&1; [ -f ~/dev/config/.env ] && . ~/dev/config/.env >/dev/null 2>&1; set +a; exec "
+    # Source .env files and then execute the configured command safely.
+    wrapper = "set -a; [ -f ~/.codex/.env ] && . ~/.codex/.env >/dev/null 2>&1; [ -f ~/dev/config/.env ] && . ~/dev/config/.env >/dev/null 2>&1; set +a"
     
     servers = codex_config.get("mcp_servers", {})
     for server_name, config in servers.items():
@@ -37,40 +43,51 @@ def build_antigravity_config(codex_config):
         
         # 1. STDIO servers
         if "command" in config:
-            cmd = config["command"]
-            args = config.get("args", [])
-            
-            # Combine into a single executed string
-            full_exec = f'{cmd}'
-            for arg in args:
-                # Basic escaping for args
-                full_exec += f' "{arg}"'
-                
+            cmd = str(config["command"])
+            args = [str(arg) for arg in config.get("args", [])]
+
             mcp_obj["command"] = "sh"
             mcp_obj["args"] = [
                 "-c",
-                wrapper + full_exec
+                f"{wrapper}; exec \"$@\"",
+                "sync-mcp",
+                cmd,
+                *args,
             ]
             
         # 2. HTTP servers (Requires mcp-remote bridge for Antigravity)
         elif "url" in config:
-            url = config["url"]
-            full_exec = f'npx -y mcp-remote "{url}"'
+            url = str(config["url"])
+            script_lines = [
+                wrapper,
+                f"set -- npx -y mcp-remote {shlex.quote(url)}",
+            ]
             
             # Auth header (bearer_token_env_var)
             if "bearer_token_env_var" in config:
                 env_var = config["bearer_token_env_var"]
-                full_exec += f' --header "Authorization: Bearer ${env_var}"'
+                if is_valid_env_var_name(env_var):
+                    script_lines.append(
+                        f'set -- "$@" --header "Authorization: Bearer ${{{env_var}}}"'
+                    )
+                else:
+                    logging.warning("Skipping invalid bearer_token_env_var for %s", server_name)
                 
             # Auth header (env_http_headers)
             if "env_http_headers" in config:
                 for header_key, header_var in config["env_http_headers"].items():
-                    full_exec += f' --header "{header_key}: ${header_var}"'
+                    if is_valid_env_var_name(header_var):
+                        header_prefix = shlex.quote(f"{header_key}: ")
+                        script_lines.append(
+                            f'set -- "$@" --header {header_prefix}"${{{header_var}}}"'
+                        )
+                    else:
+                        logging.warning("Skipping invalid env_http_headers var for %s: %s", server_name, header_key)
             
             mcp_obj["command"] = "sh"
             mcp_obj["args"] = [
                 "-c",
-                wrapper + full_exec
+                "; ".join(script_lines + ['exec "$@"']),
             ]
         else:
             continue
@@ -88,7 +105,7 @@ def build_antigravity_config(codex_config):
     if "agentation" not in mcp_servers:
         mcp_servers["agentation"] = {
             "command": "sh",
-            "args": ["-c", wrapper + "npx -y agentation-mcp server"]
+            "args": ["-c", f"{wrapper}; exec npx -y agentation-mcp server"]
         }
 
     return {"mcpServers": mcp_servers}

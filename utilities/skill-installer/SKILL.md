@@ -49,6 +49,7 @@ description: Plan and install skills into a Codex skills directory from curated 
 
 ## Required inputs
 - Skill source (curated list, repo URL, or repo/path).
+- Installation scope (`REPO` or `USER`).
 - Destination path or `AGENT_SKILLS_HOME`/`CODEX_HOME` custom location.
 - User confirmation for overwrites or updates.
 - For curated installs, accept a single skill name (`--skill`) when path is omitted.
@@ -80,9 +81,13 @@ For non-trivial install/deconflict/dry-run outcomes, append a deterministic JSON
   "mode": "list|install|update|dry-run|deconflict",
   "source": "<repo-or-url-or-curated-name>",
   "destination": "<resolved-path>",
+  "scope": "REPO|USER",
+  "staging_path": "<tmp-or-mnt-data-path>",
   "actions": [{"type":"copy|merge|skip|warn","summary":"<one line>"}],
   "risks": [{"severity":"critical|warn|info","summary":"<one line>"}],
   "validations": [{"name":"quick_validate|skill_gate|analyze_skill|openclaw_skill_guard","result":"pass|warn|fail"}],
+  "repo_clean": true,
+  "retry_rounds": 0,
   "next_step": "<single next action>"
 }
 ```
@@ -99,6 +104,7 @@ For non-trivial install/deconflict/dry-run outcomes, append a deterministic JSON
 - Investigate output includes a macOS `open` helper and triage labels (docs-context / code-context / unknown).
 - Local allow/block config (not in repo) can customize matches: `~/.codex/skill-security/allow-block.json` or `CODEX_SKILL_SECURITY_CONFIG`.
 - Network allowlist policy: installer scripts may access only `api.github.com`, `github.com`, `raw.githubusercontent.com`, `codeload.github.com`, and `objects.githubusercontent.com` unless the user explicitly approves expansion.
+- Stage external fetches in an isolated temp boundary (`/tmp` or `/mnt/data`) and promote into the final skill destination only after security + validation checks pass.
 - Optional visual and fixture resources live in `assets/`; reference them when they materially improve install guidance.
 
 Helps install skills. By default these are from https://github.com/openai/skills/tree/main/skills/.curated, but users can also provide other locations.
@@ -235,6 +241,8 @@ Use judgment, adapt to context, and push boundaries when appropriate.
 - Keep `references/evals.yaml` security coverage: include at least one `category: negative`, one `category: pressure`, and deterministic forbidden-command checks for risky download, destructive shell, and exfiltration command families.
 - For write flows, validate repository cleanliness after install plan execution:
   - `git status --porcelain` should be empty or match the expected installed-skill path allowlist.
+- Confirm staged-to-final promotion details are reported:
+  - include the staging directory path and whether staging validations passed before copy/move to destination.
 - Verify decision-feedback protocol presence in each installed `SKILL.md`:
   - `rg -n \"decision-feedback-protocol:v2|Decision Quality Feedback|request_user_input\" <installed-skill-dir>/SKILL.md`
 
@@ -244,9 +252,9 @@ Use judgment, adapt to context, and push boundaries when appropriate.
 
 ## Procedure
 1) Clarify scope and inputs.
-2) Run discovery + optional deconflict scan.
+2) Resolve staging boundary and run discovery + optional deconflict scan.
 3) Use AskQuestion (`request_user_input`) for live decision gates.
-4) Execute the selected install/merge workflow.
+4) Execute the selected install/merge workflow (stage -> validate -> promote).
 5) Summarize outputs, ask for outcome feedback, and record it.
 
 ## Antipatterns
