@@ -5,6 +5,7 @@ Generates Video Overview with custom format, visual style, and instructions
 """
 
 import argparse
+import os
 import sys
 import re
 import time

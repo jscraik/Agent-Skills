@@ -5,6 +5,7 @@ Generates Audio Overview with custom prompts and downloads the audio file
 """
 
 import argparse
+import os
 import sys
 import re
 import time
