@@ -1,0 +1,73 @@
+name: benchmark-policy-refresh
+
+on:
+  schedule:
+    - cron: "0 7 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Build benchmark artifact
+        run: |
+          python3 utilities/skill-builder/scripts/benchmark_skill_portfolio.py \
+            --root . \
+            --config utilities/skill-builder/references/benchmark-policy.json \
+            --mode warn \
+            --format json \
+            --output-json artifacts/industry-benchmark-latest.json
+
+      - name: Refresh benchmark policy
+        env:
+          CONTEXT7_API_KEY: ${{ secrets.CONTEXT7_API_KEY }}
+        run: |
+          python3 utilities/skill-builder/scripts/refresh_benchmark_policy.py \
+            --root . \
+            --policy utilities/skill-builder/references/benchmark-policy.json \
+            --benchmark-json artifacts/industry-benchmark-latest.json \
+            --schedule-days 7 \
+            --require-context7 \
+            --apply \
+            --report-json artifacts/benchmark-policy-refresh-report.json \
+            --format text
+
+      - name: Upload refresh artifacts
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: benchmark-policy-refresh
+          path: |
+            artifacts/industry-benchmark-latest.json
+            artifacts/benchmark-policy-refresh-report.json
+
+      - name: Create pull request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: codex/benchmark-policy-refresh
+          delete-branch: true
+          commit-message: "chore: refresh benchmark policy baselines"
+          title: "chore: refresh benchmark policy baselines"
+          body: |
+            ## Summary
+            - refresh benchmark marker baselines from Context7 sources
+            - ratchet threshold gates from latest portfolio benchmark artifact
+            - update policy metadata (`validated_on`, notes)
+
+            ## Testing
+            - benchmark_skill_portfolio.py (warn)
+            - refresh_benchmark_policy.py (apply)
+          add-paths: |
+            utilities/skill-builder/references/benchmark-policy.json
