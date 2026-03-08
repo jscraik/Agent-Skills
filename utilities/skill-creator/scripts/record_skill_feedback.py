@@ -81,7 +81,16 @@ def main() -> int:
     args = parse_args()
     workspace = Path(args.workspace).expanduser().resolve()
     skill_path = Path(args.skill_path).expanduser().resolve()
-    log_path = (workspace / args.log_rel).resolve()
+    log_rel = Path(args.log_rel)
+    if log_rel.is_absolute():
+        raise SystemExit("--log-rel must be a relative path within --workspace")
+
+    log_path = (workspace / log_rel).resolve()
+    try:
+        log_path.relative_to(workspace)
+    except ValueError as exc:
+        raise SystemExit("Resolved --log-rel escapes --workspace") from exc
+
     log_path.parent.mkdir(parents=True, exist_ok=True)
 
     event = {
