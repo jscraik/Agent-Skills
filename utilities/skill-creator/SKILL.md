@@ -1,11 +1,11 @@
 ---
 name: skill-creator
-description: "Create, revise, benchmark, and quality-gate Codex skills (SKILL.md plus scripts, references, evals, and packaging). Use this skill whenever the user asks to build, audit, improve, compare, or package a Codex skill or skill-graph contract; do not use it for unrelated feature coding."
+description: "Create, revise, benchmark, and quality-gate Codex skills (SKILL.md plus scripts, references, evals, and packaging). Use this skill when the user asks to build, audit, improve, compare, or package a Codex skill or skill-graph contract; do not use it for unrelated app features, generic bug fixing, or routine docs edits."
 ---
 
 # Skill Creator
 This skill designs, improves, validates, and packages high-quality Codex skills.
-**Version**: 1.9.1 · **Last updated**: 2026-03-06
+**Version**: 1.10.0 · **Last updated**: 2026-03-07
 
 ## Table of Contents
 - [Working agreement](#working-agreement)
@@ -15,12 +15,15 @@ This skill designs, improves, validates, and packages high-quality Codex skills.
 - [Discovery interview](#discovery-interview)
 - [Deliverables](#deliverables)
 - [Response format](#response-format)
+- [Output contract](#output-contract)
 - [Operating principles](#operating-principles)
 - [Skill creation process](#skill-creation-process)
+- [Execution guardrails](#execution-guardrails)
 - [Script-backed security rules](#script-backed-security-rules)
 - [What to avoid](#what-to-avoid)
 - [Constraints](#constraints)
 - [Validation](#validation)
+- [Troubleshooting](#troubleshooting)
 - [Examples](#examples)
 - [Reference map](#reference-map)
 - [Decision feedback protocol](#decision-feedback-protocol)
@@ -31,6 +34,7 @@ This skill designs, improves, validates, and packages high-quality Codex skills.
 - Keep the artifact boundary explicit:
   - local Codex CLI -> `./artifacts/`
   - hosted shell -> `/mnt/data/`
+- Keep `SKILL.md` within a strict line budget (target <= 320 lines). If new depth is needed, move it to `references/` and link it.
 - For long runs, write short status notes so compaction is safe.
 - For advisory or intake-only turns, do bounded preflight first; do not broad-scan the repo tree unless editing or repo-wide analysis is actually needed.
 
@@ -82,6 +86,7 @@ When `create` or `improve` work is underspecified, run a round-based discovery i
   - explain why the round matters in one short sentence,
   - avoid dumping the whole interview plan at once.
 - Prefer the reusable `request_user_input` mini-templates and payload examples in `references/discovery-interview.md` unless the thread already suggests a better phrasing.
+- If discovery needs more than one round, prefer isolated discovery in a forked subagent context so the main thread stays compact.
 - Before building, summarize the skill back to the user and ask for confirmation.
 - Use `references/discovery-interview.md` for the six-round default flow.
 
@@ -116,6 +121,20 @@ Start with these headings and no text before them:
 - if the request is out of scope, say why and suggest the closest next step.
 
 On the first response, stay compact: no deep implementation, no file scaffolding, and no validator dump unless the user asked for it or the inputs are already complete.
+
+## Output contract
+For non-trivial `improve`, `eval`, or `benchmark-lite` responses, include a deterministic summary block after prose:
+
+```json
+{
+  "schema_version": "1.0",
+  "mode": "improve|eval|benchmark-lite",
+  "skill_path": "<path>",
+  "findings": [{"id":"<short-id>","priority":"P0|P1|P2","status":"open|fixed","summary":"<one line>"}],
+  "validations": [{"name":"<validator>","result":"pass|warn|fail"}],
+  "next_step": "<single next action>"
+}
+```
 
 ## Operating principles
 ### Humans steer. Agents execute.
@@ -152,6 +171,7 @@ Skip steps only with a clear reason.
 ### 0) Confirm target and boundary
 - confirm where the skill lives;
 - confirm the artifact boundary;
+- confirm `name` follows `^[a-z0-9](?:-?[a-z0-9]){0,63}$` and exactly matches the target folder name;
 - mine the current thread for demonstrated tools, steps, constraints, output shapes, and corrections before asking the user to restate them.
 
 ### 1) Lock down triggers early
@@ -159,6 +179,7 @@ Skip steps only with a clear reason.
 - encode use-when, don’t-use-when, outputs, and success criteria in the `description`;
 - keep compatibility boundaries explicit;
 - for non-trivial skills, write `references/evals.yaml` early;
+- enforce trigger coverage minimums in evals: at least 3 should-trigger prompts and 3 should-not-trigger prompts;
 - for trigger-tuning work, use `references/description-optimization.md`.
 
 ### 2) Choose the structure
@@ -175,6 +196,8 @@ skill-name/
   assets/
   agents/openai.yaml
 ```
+
+Keep support files one-level deep inside standard folders (`references/<file>`, `scripts/<file>`, `assets/<file>`). Avoid nested trees unless a validator requires them.
 
 ### 3) Scaffold the folder
 Use:
@@ -211,6 +234,11 @@ Run the core validators, fix the first failing gate, then rerun.
 python scripts/package_skill.py <path/to/skill-folder> dist/
 ```
 
+## Execution guardrails
+- Cap iterative fix loops at 3 rounds per failing gate; after round 3, stop and report blockers plus the smallest safe next step.
+- Do not repeat the same command unchanged more than twice; if it fails twice, change approach or halt.
+- Prefer deterministic helper scripts over free-form retries when the same failure repeats.
+
 ## Script-backed security rules
 When the skill includes executable code:
 - default to offline behavior;
@@ -231,6 +259,7 @@ When the skill includes executable code:
 - Do not invent external facts; add a verification step when uncertain.
 - Default to canonical implementations for unreleased or greenfield work.
 - For schema-bound outputs, include `schema_version` in the contract or artifact example.
+- Keep generated skill names and folder names aligned; do not finalize with a mismatch.
 - Use `docs/skill-graphs/question-lifecycle.md` for question timing and `docs/skill-graphs/knowledge-graph-operating-model.md` for graph-mode runtime boundaries instead of expanding them inline here.
 
 ## Validation
@@ -252,6 +281,11 @@ Optional deep checks:
 - `~/.venvs/pyyaml/bin/python scripts/run_skill_evals.py <path/to/skill-folder> --dual-run --capture-jsonl`
 - `python3 scripts/record_skill_feedback.py --skill-path <path/to/skill-folder>/SKILL.md --decision accepted --outcome good --confidence high --notes "validation sample" --workspace <workspace>`
 - `python3 scripts/skill_subject_scoreboard.py --workspace <workspace> --format table`
+- `python3 - <<'PY'\nimport pathlib,re,sys\np=pathlib.Path(\"<path/to/skill-folder>\").resolve(); name=p.name\nok=bool(re.fullmatch(r\"[a-z0-9](?:-?[a-z0-9]){0,63}\", name))\nprint(\"OK\" if ok else \"FAIL\", name)\nsys.exit(0 if ok else 1)\nPY`
+
+## Troubleshooting
+- Error: folder/name mismatch. Recovery: rename folder to match frontmatter `name`, then rerun validators.
+- Error: repeated validator failure after 3 rounds. Recovery: halt, summarize failing gate output verbatim, and ask for a scoped decision.
 
 ## Examples
 - “Create a new skill called `foo-bar` under `utilities/` with evals and an output contract.”

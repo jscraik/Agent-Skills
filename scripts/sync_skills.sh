@@ -34,6 +34,15 @@ antigravity_skills_dir="$repo_root/skills-antigravity"
 mkdir -p "$skills_dir"
 mkdir -p "$antigravity_skills_dir"
 
+# Remove legacy aggregation directories that could cause duplicate skills in IDE panels.
+# sync-symlink/ was created by an older version of this script under a different name.
+for legacy_dir in "$repo_root/sync-symlink"; do
+  if [ -d "$legacy_dir" ]; then
+    echo "Removing legacy skill aggregation dir: $legacy_dir"
+    rm -rf -- "$legacy_dir"
+  fi
+done
+
 cleanup_paths=()
 cleanup_on_exit() {
   local path=""
@@ -61,9 +70,9 @@ if [ -d "$skills_dir/.system" ]; then
   else
     # Fallback: remove target first, then move
     find "$system_skills_dir" -mindepth 1 -maxdepth 1 -exec rm -rf -- {} +
-    mv "$skills_dir"/.[!.]* "$system_skills_dir"/ 2>/dev/null || true
-    mv "$skills_dir"/..?* "$system_skills_dir"/ 2>/dev/null || true
-    mv "$skills_dir"/* "$system_skills_dir"/ 2>/dev/null || true
+    mv "$skills_dir/.system"/.[!.]* "$system_skills_dir"/ 2>/dev/null || true
+    mv "$skills_dir/.system"/..?* "$system_skills_dir"/ 2>/dev/null || true
+    mv "$skills_dir/.system"/* "$system_skills_dir"/ 2>/dev/null || true
     rmdir "$skills_dir/.system" 2>/dev/null || true
   fi
   fi
@@ -74,27 +83,32 @@ find "$skills_dir" -maxdepth 1 -type l -exec rm -f {} +
 
 # Recreate symlinks for all discovered SKILL.md directories (with exclusions).
 skill_files_cmd() {
-  find . \
-    -path "*/_archive" -prune -o \
-    -path "./skills" -prune -o \
-    -path "./skills-system" -prune -o \
-    -path "./.git" -prune -o \
-    -path "./.agent" -prune -o \
-    -path "./.agents" -prune -o \
-    -path "./.claude" -prune -o \
-    -path "./.cursor" -prune -o \
-    -path "./.kiro" -prune -o \
-    -path "./.narrative" -prune -o \
-    -path "./.skillsctl" -prune -o \
-    -path "./.tmp" -prune -o \
-    -path "./.system" -prune -o \
-    -path "./node_modules" -prune -o \
-    -path "./artifacts" -prune -o \
-    -path "./data/recon-workbench/assets/template" -prune -o \
-    -path "*/assets/*" -prune -o \
-    -path "*/rules/*" -prune -o \
-    -path "*/scripts/*" -prune -o \
-    -name "SKILL.md" -print
+  # Allowlist of trusted category directories — only these are scanned.
+  # This prevents untrusted paths (artifacts/, logs/, reports/, templates/, etc.)
+  # from ever contributing a SKILL.md into the canonical skills/ view.
+  local skill_roots=(
+    "./auth"
+    "./backend"
+    "./design"
+    "./frontend"
+    "./github"
+    "./interview"
+    "./ops"
+    "./personas"
+    "./product"
+    "./utilities"
+  )
+
+  local root=""
+  for root in "${skill_roots[@]}"; do
+    [ -d "$root" ] || continue
+    find "$root" \
+      -path "*/_archive/*" -prune -o \
+      -path "*/assets/*" -prune -o \
+      -path "*/rules/*" -prune -o \
+      -path "*/scripts/*" -prune -o \
+      -name "SKILL.md" -print
+  done
 }
 
 # Include supplemental skills that intentionally live outside canonical
@@ -147,6 +161,10 @@ while IFS= read -r skill_path; do
   skill_dir="$(dirname "$skill_path")"
   skill_name="$(basename "$skill_dir")"
   skill_dir_abs="$repo_root/$skill_dir"
+  # Relative path from $skills_dir (.agents/skills/) back to the skill source.
+  # Strip the leading './' from skill_dir to get e.g. 'auth/create-auth',
+  # then prepend '../..' to escape .agents/skills/ back to repo root.
+  skill_dir_rel="../../${skill_dir#./}"
   if [ -e "$skills_dir/$skill_name" ]; then
     existing_dir="$(cd "$skills_dir/$skill_name" 2>/dev/null && pwd || true)"
     discovered_dir="$(cd "$skill_dir_abs" 2>/dev/null && pwd || true)"
@@ -155,10 +173,10 @@ while IFS= read -r skill_path; do
     if [ -n "$existing_dir" ] && [ "$existing_dir" = "$discovered_dir" ]; then
       continue
     fi
-    echo "Duplicate skill name: $skill_name (skip $skill_dir_abs)"
+    echo "Duplicate skill name: $skill_name (skip $skill_dir_rel)"
     continue
   fi
-  ln -s "$skill_dir_abs" "$skills_dir/$skill_name"
+  ln -s "$skill_dir_rel" "$skills_dir/$skill_name"
 done < <(all_skill_files_cmd)
 
 # Build a strict Antigravity-compatible projection:
@@ -177,8 +195,10 @@ for skill_link in "$skills_dir"/*; do
   fi
 
   skill_name="$(basename "$skill_link")"
-  target_dir="$(cd "$skill_link" && pwd)"
-  ln -s "$target_dir" "$antigravity_skills_dir/$skill_name"
+  # Relative path from skills-antigravity/ to .agents/skills/<name>.
+  # Both directories are immediate children of repo root, so one hop up suffices.
+  target_rel="../.agents/skills/$skill_name"
+  ln -s "$target_rel" "$antigravity_skills_dir/$skill_name"
 done
 
 # Regenerate root SKILL.md index dynamically from skill frontmatter.

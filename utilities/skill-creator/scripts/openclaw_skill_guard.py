@@ -230,18 +230,15 @@ def _line_text(text: str, idx: int) -> str:
     return text[start:end]
 
 
-def _should_skip_match(code: str, line_text: str) -> bool:
+def _should_skip_match(_code: str, line_text: str) -> bool:
     stripped = line_text.strip()
     if not stripped:
         return True
     if stripped.startswith("#"):
         return True
-    # Avoid self-referential false positives from regex definition tables.
-    if "re.compile(" in line_text:
-        return True
-    if "compile_safe_regex(" in line_text:
-        return True
-    if code in {"security.network_usage", "security.node_child_process"} and "pattern" in stripped.lower():
+    if _code in {"security.node_exec", "security.node_child_process"} and "re.compile(" in stripped:
+        # False-positive guard: regex pattern tables that mention node exec/spawn
+        # are detection definitions, not executable process launches.
         return True
     return False
 

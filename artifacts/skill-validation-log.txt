@@ -1,7 +1,7 @@
 [1/91] ./auth/best-practices
 [OK] SKILL.md frontmatter looks valid.
 Skill: better-auth-best-practices
-Path:  /Users/jamiecraik/dev/agent-skills/auth/best-practices/SKILL.md
+Path:  ./auth/best-practices/SKILL.md
 
 WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/best-practices.png
 WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
@@ -14,7 +14,7 @@ INFO security.no_scripts: No executable scripts found; static security scan skip
 [2/91] ./auth/create-auth
 [OK] SKILL.md frontmatter looks valid.
 Skill: create-auth-skill
-Path:  /Users/jamiecraik/dev/agent-skills/auth/create-auth/SKILL.md
+Path:  ./auth/create-auth/SKILL.md
 
 WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/create-auth.png
 WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
@@ -28,7 +28,7 @@ INFO security.no_scripts: No executable scripts found; static security scan skip
 [WARN] Description may be too vague; consider including explicit trigger language (e.g., 'Use when ...').
 [OK] SKILL.md frontmatter looks valid.
 Skill: backend-engineer
-Path:  /Users/jamiecraik/dev/agent-skills/backend/backend-engineer/SKILL.md
+Path:  ./backend/backend-engineer/SKILL.md
 
 WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/backend-engineer.png
 WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
@@ -42,7 +42,7 @@ INFO security.no_scripts: No executable scripts found; static security scan skip
 [4/91] ./backend/cli-spec
 [OK] SKILL.md frontmatter looks valid.
 Skill: cli-spec
-Path:  /Users/jamiecraik/dev/agent-skills/backend/cli-spec/SKILL.md
+Path:  ./backend/cli-spec/SKILL.md
 
 FAIL SEC_ANTIPATTERNS_MISSING: Missing required section: antipatterns (add a ## heading).
 WARN OUT_SCHEMA_VERSION_MISSING: Schema-bound outputs detected; consider including `schema_version` in the output contract.
@@ -59,7 +59,7 @@ INFO security.no_scripts: No executable scripts found; static security scan skip
 [5/91] ./backend/mcp-builder
 [OK] SKILL.md frontmatter looks valid.
 Skill: mcp-builder
-Path:  /Users/jamiecraik/dev/agent-skills/backend/mcp-builder/SKILL.md
+Path:  ./backend/mcp-builder/SKILL.md
 
 FAIL SEC_ANTIPATTERNS_MISSING: Missing required section: antipatterns (add a ## heading).
 WARN OUT_SCHEMA_VERSION_MISSING: Schema-bound outputs detected; consider including `schema_version` in the output contract.
@@ -79,7 +79,7 @@ INFO security.clean: No risky patterns detected in scanned scripts
 [6/91] ./backend/mkit-builder
 [OK] SKILL.md frontmatter looks valid.
 Skill: mkit-builder
-Path:  /Users/jamiecraik/dev/agent-skills/backend/mkit-builder/SKILL.md
+Path:  ./backend/mkit-builder/SKILL.md
 
 WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/mkit-builder.png
 WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | SKILL.md
@@ -93,7 +93,7 @@ INFO security.clean: No risky patterns detected in scanned scripts
 [7/91] ./backend/workers-mcp
 [OK] SKILL.md frontmatter looks valid.
 Skill: workers-mcp
-Path:  /Users/jamiecraik/dev/agent-skills/backend/workers-mcp/SKILL.md
+Path:  ./backend/workers-mcp/SKILL.md
 
 FAIL SEC_ANTIPATTERNS_MISSING: Missing required section: antipatterns (add a ## heading).
 WARN OUT_SCHEMA_VERSION_MISSING: Schema-bound outputs detected; consider including `schema_version` in the output contract.
@@ -111,7 +111,7 @@ INFO security.clean: No risky patterns detected in scanned scripts
 [8/91] ./design/better-icons
 [OK] SKILL.md frontmatter looks valid.
 Skill: better-icons
-Path:  /Users/jamiecraik/dev/agent-skills/design/better-icons/SKILL.md
+Path:  ./design/better-icons/SKILL.md
 
 WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/better-icons.png
 WARN PI_OVERRIDE: [high] Potential prompt-injection override language detected; ensure this is not instructing the model to bypass system/developer instructions. | SKILL.md
@@ -125,7 +125,7 @@ INFO security.no_scripts: No executable scripts found; static security scan skip
 [9/91] ./frontend/agentation
 [OK] SKILL.md frontmatter looks valid.
 Skill: agentation
-Path:  /Users/jamiecraik/dev/agent-skills/frontend/agentation/SKILL.md
+Path:  ./frontend/agentation/SKILL.md
 
 
 RESULT: PASS
@@ -136,7 +136,7 @@ INFO security.no_scripts: No executable scripts found; static security scan skip
 [10/91] ./frontend/graphics/favicon-generator
 [OK] SKILL.md frontmatter looks valid.
 Skill: favicon-generator
-Path:  /Users/jamiecraik/dev/agent-skills/frontend/graphics/favicon-generator/SKILL.md
+Path:  ./frontend/graphics/favicon-generator/SKILL.md
 
 FAIL SEC_ANTIPATTERNS_MISSING: Missing required section: antipatterns (add a ## heading).
 WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .DS_Store
@@ -155,7 +155,7 @@ INFO security.clean: No risky patterns detected in scanned scripts
 [11/91] ./frontend/graphics/imagegen
 [OK] SKILL.md frontmatter looks valid.
 Skill: imagegen
-Path:  /Users/jamiecraik/dev/agent-skills/frontend/graphics/imagegen/SKILL.md
+Path:  ./frontend/graphics/imagegen/SKILL.md
 
 WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/imagegen.png
 WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | scripts/__pycache__/image_gen.cpython-314.pyc
@@ -170,7 +170,7 @@ INFO security.clean: No risky patterns detected in scanned scripts
 [12/91] ./frontend/graphics/og-image-creator
 [OK] SKILL.md frontmatter looks valid.
 Skill: og-image-creator
-Path:  /Users/jamiecraik/dev/agent-skills/frontend/graphics/og-image-creator/SKILL.md
+Path:  ./frontend/graphics/og-image-creator/SKILL.md
 
 WARN FM_DESC_WORKFLOWY: Description looks workflow-like. Prefer outcome + trigger keywords in `description`; keep procedures in the body/references. | description: Generate authentic, brand-aligned Open Graph images by understanding your codebase first, then creating contextually appropriate images for each route using Playwright and your existing components.. Use when Use this skill when the task matches its description and triggers..
 WARN PATH_ABSOLUTE: Absolute paths detected; prefer repo-relative paths.
@@ -187,7 +187,7 @@ INFO security.clean: No risky patterns detected in scanned scripts
 [13/91] ./frontend/graphics/sora
 [OK] SKILL.md frontmatter looks valid.
 Skill: sora
-Path:  /Users/jamiecraik/dev/agent-skills/frontend/graphics/sora/SKILL.md
+Path:  ./frontend/graphics/sora/SKILL.md
 
 FAIL SEC_CONSTRAINTS_MISSING: Missing required section: constraints (add a ## heading).
 FAIL SEC_INPUTS_MISSING: Missing required section: inputs (add a ## heading).
@@ -205,7 +205,7 @@ INFO security.clean: No risky patterns detected in scanned scripts
 [14/91] ./frontend/graphics/threejs-builder
 [OK] SKILL.md frontmatter looks valid.
 Skill: threejs-builder
-Path:  /Users/jamiecraik/dev/agent-skills/frontend/graphics/threejs-builder/SKILL.md
+Path:  ./frontend/graphics/threejs-builder/SKILL.md
 
 FAIL SAFE_REDACTION_REQUIRED: Constraints/Safety MUST mention redaction of secrets/sensitive data by default.
 FAIL SEC_CONSTRAINTS_MISSING: Missing required section: constraints (add a ## heading).
@@ -223,7 +223,7 @@ INFO security.no_scripts: No executable scripts found; static security scan skip
 [15/91] ./frontend/seo/seo-optimizer
 [OK] SKILL.md frontmatter looks valid.
 Skill: seo-optimizer
-Path:  /Users/jamiecraik/dev/agent-skills/frontend/seo/seo-optimizer/SKILL.md
+Path:  ./frontend/seo/seo-optimizer/SKILL.md
 
 FAIL SEC_ANTIPATTERNS_MISSING: Missing required section: antipatterns (add a ## heading).
 FAIL SEC_VALIDATION_MISSING: Missing required section: validation (add a ## heading).
@@ -242,7 +242,7 @@ INFO security.clean: No risky patterns detected in scanned scripts
 [WARN] Description may be too vague; consider including explicit trigger language (e.g., 'Use when ...').
 [OK] SKILL.md frontmatter looks valid.
 Skill: agent-trace-debug
-Path:  /Users/jamiecraik/dev/agent-skills/frontend/tools/agent-trace-debug/SKILL.md
+Path:  ./frontend/tools/agent-trace-debug/SKILL.md
 
 WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/agent-trace-debug.png
 WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
@@ -255,7 +255,7 @@ INFO security.no_scripts: No executable scripts found; static security scan skip
 [17/91] ./frontend/tools/codex-ui-kit-installer
 [OK] SKILL.md frontmatter looks valid.
 Skill: codex-ui-kit-installer
-Path:  /Users/jamiecraik/dev/agent-skills/frontend/tools/codex-ui-kit-installer/SKILL.md
+Path:  ./frontend/tools/codex-ui-kit-installer/SKILL.md
 
 WARN OUT_SCHEMA_VERSION_MISSING: Schema-bound outputs detected; consider including `schema_version` in the output contract.
 WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/bin/python
@@ -770,7 +770,7 @@ INFO security.clean: No risky patterns detected in scanned scripts
 [18/91] ./frontend/tools/nano-banana-builder
 [OK] SKILL.md frontmatter looks valid.
 Skill: nano-banana-builder
-Path:  /Users/jamiecraik/dev/agent-skills/frontend/tools/nano-banana-builder/SKILL.md
+Path:  ./frontend/tools/nano-banana-builder/SKILL.md
 
 FAIL SEC_PROCEDURE_MISSING: Missing required section: procedure (add a ## heading).
 FAIL SEC_VALIDATION_MISSING: Missing required section: validation (add a ## heading).
@@ -787,7 +787,7 @@ INFO security.no_scripts: No executable scripts found; static security scan skip
 [WARN] Description may be too vague; consider including explicit trigger language (e.g., 'Use when ...').
 [OK] SKILL.md frontmatter looks valid.
 Skill: figma-implement-design
-Path:  /Users/jamiecraik/dev/agent-skills/frontend/ui/figma-implement-design/SKILL.md
+Path:  ./frontend/ui/figma-implement-design/SKILL.md
 
 WARN OUT_SCHEMA_VERSION_MISSING: Schema-bound outputs detected; consider including `schema_version` in the output contract.
 WARN PATH_TRAVERSAL: Parent directory traversal (`../`) mentioned; avoid in references.
@@ -802,7 +802,7 @@ INFO security.no_scripts: No executable scripts found; static security scan skip
 [20/91] ./frontend/ui/figma
 [OK] SKILL.md frontmatter looks valid.
 Skill: figma
-Path:  /Users/jamiecraik/dev/agent-skills/frontend/ui/figma/SKILL.md
+Path:  ./frontend/ui/figma/SKILL.md
 
 WARN OUT_SCHEMA_VERSION_MISSING: Schema-bound outputs detected; consider including `schema_version` in the output contract.
 WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/figma.png
@@ -817,7 +817,7 @@ INFO security.no_scripts: No executable scripts found; static security scan skip
 [21/91] ./frontend/ui/frontend-ui-design
 [OK] SKILL.md frontmatter looks valid.
 Skill: frontend-ui-design
-Path:  /Users/jamiecraik/dev/agent-skills/frontend/ui/frontend-ui-design/SKILL.md
+Path:  ./frontend/ui/frontend-ui-design/SKILL.md
 
 FAIL SEC_ANTIPATTERNS_MISSING: Missing required section: antipatterns (add a ## heading).
 FAIL SEC_OUTPUTS_MISSING: Missing required section: outputs (add a ## heading).
@@ -834,7 +834,7 @@ WARN security.network_usage: Matched pattern: \b(requests\.|fetch\(|axios\.|curl
 [WARN] Unknown frontmatter key(s): argument-hint (ignored by this validator).
 [OK] SKILL.md frontmatter looks valid.
 Skill: interface-craft
-Path:  /Users/jamiecraik/dev/agent-skills/frontend/ui/interface-craft/SKILL.md
+Path:  ./frontend/ui/interface-craft/SKILL.md
 
 FAIL SAFE_REDACTION_REQUIRED: Constraints/Safety MUST mention redaction of secrets/sensitive data by default.
 FAIL SEC_CONSTRAINTS_MISSING: Missing required section: constraints (add a ## heading).
@@ -858,7 +858,7 @@ INFO security.no_scripts: No executable scripts found; static security scan skip
 [WARN] Description may be too vague; consider including explicit trigger language (e.g., 'Use when ...').
 [OK] SKILL.md frontmatter looks valid.
 Skill: vercel-react-best-practices
-Path:  /Users/jamiecraik/dev/agent-skills/frontend/ui/react-best-practices/SKILL.md
+Path:  ./frontend/ui/react-best-practices/SKILL.md
 
 WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .DS_Store
 WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/react-best-practices.png
@@ -871,7 +871,7 @@ INFO security.no_scripts: No executable scripts found; static security scan skip
 [24/91] ./frontend/ui/react-ui-patterns
 [OK] SKILL.md frontmatter looks valid.
 Skill: react-ui-patterns
-Path:  /Users/jamiecraik/dev/agent-skills/frontend/ui/react-ui-patterns/SKILL.md
+Path:  ./frontend/ui/react-ui-patterns/SKILL.md
 
 WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/react-ui-patterns.png
 WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | SKILL.md
@@ -885,7 +885,7 @@ INFO security.no_scripts: No executable scripts found; static security scan skip
 [25/91] ./frontend/ui/ui-visual-regression
 [OK] SKILL.md frontmatter looks valid.
 Skill: ui-visual-regression
-Path:  /Users/jamiecraik/dev/agent-skills/frontend/ui/ui-visual-regression/SKILL.md
+Path:  ./frontend/ui/ui-visual-regression/SKILL.md
 
 WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/ui-visual-regression.png
 WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | SKILL.md
@@ -899,7 +899,7 @@ INFO security.no_scripts: No executable scripts found; static security scan skip
 [26/91] ./frontend/ui/web-design-guidelines
 [OK] SKILL.md frontmatter looks valid.
 Skill: web-design-guidelines
-Path:  /Users/jamiecraik/dev/agent-skills/frontend/ui/web-design-guidelines/SKILL.md
+Path:  ./frontend/ui/web-design-guidelines/SKILL.md
 
 WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/web-design-guidelines.png
 
@@ -912,7 +912,7 @@ INFO security.no_scripts: No executable scripts found; static security scan skip
 [WARN] Description may be too vague; consider including explicit trigger language (e.g., 'Use when ...').
 [OK] SKILL.md frontmatter looks valid.
 Skill: gh-actions-fix
-Path:  /Users/jamiecraik/dev/agent-skills/github/gh-actions-fix/SKILL.md
+Path:  ./github/gh-actions-fix/SKILL.md
 
 WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/gh-actions-fix.png
 WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
@@ -928,7 +928,7 @@ WARN security.subprocess_usage: Matched pattern: \bsubprocess\. (scripts/inspect
 [WARN] Description may be too vague; consider including explicit trigger language (e.g., 'Use when ...').
 [OK] SKILL.md frontmatter looks valid.
 Skill: gh-address-comments
-Path:  /Users/jamiecraik/dev/agent-skills/github/gh-address-comments/SKILL.md
+Path:  ./github/gh-address-comments/SKILL.md
 
 WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/gh-address-comments.png
 WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
@@ -941,7 +941,7 @@ WARN security.subprocess_usage: Matched pattern: \bsubprocess\. (scripts/fetch_c
 [29/91] ./github/gh-fix-ci
 [OK] SKILL.md frontmatter looks valid.
 Skill: gh-fix-ci
-Path:  /Users/jamiecraik/dev/agent-skills/github/gh-fix-ci/SKILL.md
+Path:  ./github/gh-fix-ci/SKILL.md
 
 FAIL SAFE_REDACTION_REQUIRED: Constraints/Safety MUST mention redaction of secrets/sensitive data by default.
 FAIL SEC_CONSTRAINTS_MISSING: Missing required section: constraints (add a ## heading).
@@ -964,7 +964,7 @@ WARN security.subprocess_usage: Matched pattern: \bsubprocess\. (scripts/inspect
 [WARN] Description may be too vague; consider including explicit trigger language (e.g., 'Use when ...').
 [OK] SKILL.md frontmatter looks valid.
 Skill: gh-issue-fix
-Path:  /Users/jamiecraik/dev/agent-skills/github/gh-issue-fix/SKILL.md
+Path:  ./github/gh-issue-fix/SKILL.md
 
 WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/gh-issue-fix.png
 WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
@@ -978,7 +978,7 @@ INFO security.no_scripts: No executable scripts found; static security scan skip
 [WARN] Description may be too vague; consider including explicit trigger language (e.g., 'Use when ...').
 [OK] SKILL.md frontmatter looks valid.
 Skill: gh-pr-local
-Path:  /Users/jamiecraik/dev/agent-skills/github/gh-pr-local/SKILL.md
+Path:  ./github/gh-pr-local/SKILL.md
 
 WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/gh-pr-local.png
 WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
@@ -993,7 +993,7 @@ WARN security.network_usage: Matched pattern: \b(requests\.|fetch\(|axios\.|curl
 [32/91] ./github/gh-workflow
 [OK] SKILL.md frontmatter looks valid.
 Skill: gh-workflow
-Path:  /Users/jamiecraik/dev/agent-skills/github/gh-workflow/SKILL.md
+Path:  ./github/gh-workflow/SKILL.md
 
 WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/gh-workflow.png
 WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
@@ -1013,7 +1013,7 @@ WARN security.subprocess_usage: Matched pattern: \bsubprocess\. (scripts/fetch_c
 [WARN] Description may be too vague; consider including explicit trigger language (e.g., 'Use when ...').
 [OK] SKILL.md frontmatter looks valid.
 Skill: yeet
-Path:  /Users/jamiecraik/dev/agent-skills/github/yeet/SKILL.md
+Path:  ./github/yeet/SKILL.md
 
 WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/yeet.png
 
@@ -1025,7 +1025,7 @@ INFO security.no_scripts: No executable scripts found; static security scan skip
 [34/91] ./interview/architecture-interview
 [OK] SKILL.md frontmatter looks valid.
 Skill: architecture-interview
-Path:  /Users/jamiecraik/dev/agent-skills/interview/architecture-interview/SKILL.md
+Path:  ./interview/architecture-interview/SKILL.md
 
 WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/architecture-interview.png
 WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
@@ -1038,7 +1038,7 @@ INFO security.no_scripts: No executable scripts found; static security scan skip
 [35/91] ./interview/bug-interview
 [OK] SKILL.md frontmatter looks valid.
 Skill: bug-interview
-Path:  /Users/jamiecraik/dev/agent-skills/interview/bug-interview/SKILL.md
+Path:  ./interview/bug-interview/SKILL.md
 
 WARN FM_DESC_WORKFLOWY: Description looks workflow-like. Prefer outcome + trigger keywords in `description`; keep procedures in the body/references. | description: Analyze and review bug reports to capture repro, evidence, and the next smallest diagnostic step. Use when a bug report lacks clear reproduction.
 WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/bug-interview.png
@@ -1052,7 +1052,7 @@ INFO security.no_scripts: No executable scripts found; static security scan skip
 [36/91] ./interview/deep-interview
 [OK] SKILL.md frontmatter looks valid.
 Skill: deep-interview
-Path:  /Users/jamiecraik/dev/agent-skills/interview/deep-interview/SKILL.md
+Path:  ./interview/deep-interview/SKILL.md
 
 WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/deep-interview.png
 WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | SKILL.md
@@ -1066,7 +1066,7 @@ INFO security.no_scripts: No executable scripts found; static security scan skip
 [37/91] ./interview/interview-kernel
 [OK] SKILL.md frontmatter looks valid.
 Skill: interview-kernel
-Path:  /Users/jamiecraik/dev/agent-skills/interview/interview-kernel/SKILL.md
+Path:  ./interview/interview-kernel/SKILL.md
 
 FAIL SEC_CONSTRAINTS_MISSING: Missing required section: constraints (add a ## heading).
 FAIL SEC_INPUTS_MISSING: Missing required section: inputs (add a ## heading).
@@ -1086,7 +1086,7 @@ INFO security.no_scripts: No executable scripts found; static security scan skip
 [38/91] ./interview/interview-me
 [OK] SKILL.md frontmatter looks valid.
 Skill: interview-me
-Path:  /Users/jamiecraik/dev/agent-skills/interview/interview-me/SKILL.md
+Path:  ./interview/interview-me/SKILL.md
 
 WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/interview-me.png
 WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | SKILL.md
@@ -1100,7 +1100,7 @@ INFO security.no_scripts: No executable scripts found; static security scan skip
 [39/91] ./interview/pm-interview
 [OK] SKILL.md frontmatter looks valid.
 Skill: pm-interview
-Path:  /Users/jamiecraik/dev/agent-skills/interview/pm-interview/SKILL.md
+Path:  ./interview/pm-interview/SKILL.md
 
 WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/pm-interview.png
 WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | SKILL.md
@@ -1114,7 +1114,7 @@ INFO security.no_scripts: No executable scripts found; static security scan skip
 [40/91] ./personas/steipete
 [OK] SKILL.md frontmatter looks valid.
 Skill: steipete
-Path:  /Users/jamiecraik/dev/agent-skills/personas/steipete/SKILL.md
+Path:  ./personas/steipete/SKILL.md
 
 WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/steipete.png
 WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
@@ -1127,7 +1127,7 @@ INFO security.no_scripts: No executable scripts found; static security scan skip
 [41/91] ./product/content/youtube-hooks-scripts
 [OK] SKILL.md frontmatter looks valid.
 Skill: youtube-hooks-scripts
-Path:  /Users/jamiecraik/dev/agent-skills/product/content/youtube-hooks-scripts/SKILL.md
+Path:  ./product/content/youtube-hooks-scripts/SKILL.md
 
 WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/youtube-hooks-scripts.png
 WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
@@ -1140,7 +1140,7 @@ INFO security.no_scripts: No executable scripts found; static security scan skip
 [42/91] ./product/content/youtube-titles-thumbnails
 [OK] SKILL.md frontmatter looks valid.
 Skill: youtube-titles-thumbnails
-Path:  /Users/jamiecraik/dev/agent-skills/product/content/youtube-titles-thumbnails/SKILL.md
+Path:  ./product/content/youtube-titles-thumbnails/SKILL.md
 
 WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/youtube-titles-thumbnails.png
 WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
@@ -1153,7 +1153,7 @@ INFO security.no_scripts: No executable scripts found; static security scan skip
 [43/91] ./product/design/ui-ux-creative-coding
 [OK] SKILL.md frontmatter looks valid.
 Skill: ui-ux-creative-coding
-Path:  /Users/jamiecraik/dev/agent-skills/product/design/ui-ux-creative-coding/SKILL.md
+Path:  ./product/design/ui-ux-creative-coding/SKILL.md
 
 FAIL FM_DESC_WHAT_WHEN: Description MUST include WHAT the skill does and WHEN to use it (trigger contexts). | description: Creative-coding UI polish for Tauri+React (Tailwind v4, Radix, Three.js). Use when you need expressive motion craft or WebGL accents—not baseline UI system work.
 WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/ui-ux-creative-coding.png
@@ -1183,7 +1183,7 @@ INFO security.no_scripts: No executable scripts found; static security scan skip
 [44/91] ./product/docs/agents-md
 [OK] SKILL.md frontmatter looks valid.
 Skill: agents-md
-Path:  /Users/jamiecraik/dev/agent-skills/product/docs/agents-md/SKILL.md
+Path:  ./product/docs/agents-md/SKILL.md
 
 WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/agents-md.png
 WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | SKILL.md
@@ -1198,7 +1198,7 @@ INFO security.no_scripts: No executable scripts found; static security scan skip
 [WARN] Description may be too vague; consider including explicit trigger language (e.g., 'Use when ...').
 [OK] SKILL.md frontmatter looks valid.
 Skill: context7
-Path:  /Users/jamiecraik/dev/agent-skills/product/docs/context7/SKILL.md
+Path:  ./product/docs/context7/SKILL.md
 
 WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/context7.png
 WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
@@ -1211,7 +1211,7 @@ INFO security.clean: No risky patterns detected in scanned scripts
 [46/91] ./product/docs/docs-expert
 [OK] SKILL.md frontmatter looks valid.
 Skill: docs-expert
-Path:  /Users/jamiecraik/dev/agent-skills/product/docs/docs-expert/SKILL.md
+Path:  ./product/docs/docs-expert/SKILL.md
 
 WARN OUT_SCHEMA_VERSION_MISSING: Schema-bound outputs detected; consider including `schema_version` in the output contract.
 WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/brand/brand-mark.png
@@ -1232,7 +1232,7 @@ INFO security.clean: No risky patterns detected in scanned scripts
 [47/91] ./product/docs/openai-docs
 [OK] SKILL.md frontmatter looks valid.
 Skill: openai-docs
-Path:  /Users/jamiecraik/dev/agent-skills/product/docs/openai-docs/SKILL.md
+Path:  ./product/docs/openai-docs/SKILL.md
 
 FAIL SAFE_REDACTION_REQUIRED: Constraints/Safety MUST mention redaction of secrets/sensitive data by default.
 FAIL SEC_CONSTRAINTS_MISSING: Missing required section: constraints (add a ## heading).
@@ -1253,7 +1253,7 @@ INFO security.no_scripts: No executable scripts found; static security scan skip
 [48/91] ./product/domain/chatgpt-apps-production-checklist
 [OK] SKILL.md frontmatter looks valid.
 Skill: chatgpt-apps-production-checklist
-Path:  /Users/jamiecraik/dev/agent-skills/product/domain/chatgpt-apps-production-checklist/SKILL.md
+Path:  ./product/domain/chatgpt-apps-production-checklist/SKILL.md
 
 WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/chatgpt-apps-production-checklist.png
 
@@ -1265,7 +1265,7 @@ INFO security.no_scripts: No executable scripts found; static security scan skip
 [49/91] ./product/domain/cloudflare-deploy
 [OK] SKILL.md frontmatter looks valid.
 Skill: cloudflare-deploy
-Path:  /Users/jamiecraik/dev/agent-skills/product/domain/cloudflare-deploy/SKILL.md
+Path:  ./product/domain/cloudflare-deploy/SKILL.md
 
 FAIL FM_DESC_WHAT_WHEN: Description MUST include WHAT the skill does and WHEN to use it (trigger contexts). | description: Deploy applications and infrastructure to Cloudflare using Workers, Pages, and related platform services. Use when the user asks to deploy, host, publish, or set up a project on Cloudflare.
 FAIL SEC_CONSTRAINTS_MISSING: Missing required section: constraints (add a ## heading).
@@ -1285,7 +1285,7 @@ INFO security.no_scripts: No executable scripts found; static security scan skip
 [50/91] ./product/domain/oak-api
 [OK] SKILL.md frontmatter looks valid.
 Skill: oak-api
-Path:  /Users/jamiecraik/dev/agent-skills/product/domain/oak-api/SKILL.md
+Path:  ./product/domain/oak-api/SKILL.md
 
 WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .DS_Store
 WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/oak-api.png
@@ -1299,7 +1299,7 @@ INFO security.clean: No risky patterns detected in scanned scripts
 [51/91] ./product/ops/decide-build-primitive
 [OK] SKILL.md frontmatter looks valid.
 Skill: decide-build-primitive
-Path:  /Users/jamiecraik/dev/agent-skills/product/ops/decide-build-primitive/SKILL.md
+Path:  ./product/ops/decide-build-primitive/SKILL.md
 
 WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/decide-build-primitive.png
 WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | SKILL.md
@@ -1313,7 +1313,7 @@ INFO security.no_scripts: No executable scripts found; static security scan skip
 [52/91] ./product/ops/linear
 [OK] SKILL.md frontmatter looks valid.
 Skill: linear
-Path:  /Users/jamiecraik/dev/agent-skills/product/ops/linear/SKILL.md
+Path:  ./product/ops/linear/SKILL.md
 
 WARN OUT_SCHEMA_VERSION_MISSING: Schema-bound outputs detected; consider including `schema_version` in the output contract.
 WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/linear.png
@@ -1328,7 +1328,7 @@ INFO security.no_scripts: No executable scripts found; static security scan skip
 [53/91] ./product/ops/release
 [OK] SKILL.md frontmatter looks valid.
 Skill: release
-Path:  /Users/jamiecraik/dev/agent-skills/product/ops/release/SKILL.md
+Path:  ./product/ops/release/SKILL.md
 
 WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/release.png
 WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
@@ -1341,7 +1341,7 @@ INFO security.no_scripts: No executable scripts found; static security scan skip
 [54/91] ./product/review/codex-wrapped
 [OK] SKILL.md frontmatter looks valid.
 Skill: codex-wrapped
-Path:  /Users/jamiecraik/dev/agent-skills/product/review/codex-wrapped/SKILL.md
+Path:  ./product/review/codex-wrapped/SKILL.md
 
 FAIL SEC_VALIDATION_MISSING: Missing required section: validation (add a ## heading).
 WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/codex-wrapped.png
@@ -1356,7 +1356,7 @@ INFO security.clean: No risky patterns detected in scanned scripts
 [55/91] ./product/review/llm-design-review
 [OK] SKILL.md frontmatter looks valid.
 Skill: llm-design-review
-Path:  /Users/jamiecraik/dev/agent-skills/product/review/llm-design-review/SKILL.md
+Path:  ./product/review/llm-design-review/SKILL.md
 
 WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/llm-design-review.png
 WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | SKILL.md
@@ -1370,7 +1370,7 @@ INFO security.no_scripts: No executable scripts found; static security scan skip
 [56/91] ./product/review/product-design-review
 [OK] SKILL.md frontmatter looks valid.
 Skill: product-design-review
-Path:  /Users/jamiecraik/dev/agent-skills/product/review/product-design-review/SKILL.md
+Path:  ./product/review/product-design-review/SKILL.md
 
 WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/product-design-review.png
 WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | SKILL.md
@@ -1384,7 +1384,7 @@ INFO security.no_scripts: No executable scripts found; static security scan skip
 [57/91] ./product/security/security-best-practices
 [OK] SKILL.md frontmatter looks valid.
 Skill: security-best-practices
-Path:  /Users/jamiecraik/dev/agent-skills/product/security/security-best-practices/SKILL.md
+Path:  ./product/security/security-best-practices/SKILL.md
 
 FAIL SAFE_REDACTION_REQUIRED: Constraints/Safety MUST mention redaction of secrets/sensitive data by default.
 FAIL SEC_CONSTRAINTS_MISSING: Missing required section: constraints (add a ## heading).
@@ -1407,7 +1407,7 @@ INFO security.no_scripts: No executable scripts found; static security scan skip
 [58/91] ./product/security/security-ownership-map
 [OK] SKILL.md frontmatter looks valid.
 Skill: security-ownership-map
-Path:  /Users/jamiecraik/dev/agent-skills/product/security/security-ownership-map/SKILL.md
+Path:  ./product/security/security-ownership-map/SKILL.md
 
 FAIL SEC_CONSTRAINTS_MISSING: Missing required section: constraints (add a ## heading).
 FAIL SEC_OUTPUTS_MISSING: Missing required section: outputs (add a ## heading).
@@ -1432,7 +1432,7 @@ WARN security.subprocess_usage: Matched pattern: \bsubprocess\. (scripts/build_o
 [59/91] ./product/security/security-threat-model
 [OK] SKILL.md frontmatter looks valid.
 Skill: security-threat-model
-Path:  /Users/jamiecraik/dev/agent-skills/product/security/security-threat-model/SKILL.md
+Path:  ./product/security/security-threat-model/SKILL.md
 
 FAIL SEC_CONSTRAINTS_MISSING: Missing required section: constraints (add a ## heading).
 FAIL SEC_INPUTS_MISSING: Missing required section: inputs (add a ## heading).
@@ -1454,7 +1454,7 @@ INFO security.no_scripts: No executable scripts found; static security scan skip
 [WARN] Description may be too vague; consider including explicit trigger language (e.g., 'Use when ...').
 [OK] SKILL.md frontmatter looks valid.
 Skill: prd-clarifier
-Path:  /Users/jamiecraik/dev/agent-skills/product/specs/prd-clarifier/SKILL.md
+Path:  ./product/specs/prd-clarifier/SKILL.md
 
 WARN OUT_SCHEMA_VERSION_MISSING: Schema-bound outputs detected; consider including `schema_version` in the output contract.
 WARN PATH_TRAVERSAL: Parent directory traversal (`../`) mentioned; avoid in references.
@@ -1470,7 +1470,7 @@ INFO security.no_scripts: No executable scripts found; static security scan skip
 [WARN] Description may be too vague; consider including explicit trigger language (e.g., 'Use when ...').
 [OK] SKILL.md frontmatter looks valid.
 Skill: prd-to-api
-Path:  /Users/jamiecraik/dev/agent-skills/product/specs/prd-to-api/SKILL.md
+Path:  ./product/specs/prd-to-api/SKILL.md
 
 WARN OUT_SCHEMA_VERSION_MISSING: Schema-bound outputs detected; consider including `schema_version` in the output contract.
 WARN PATH_TRAVERSAL: Parent directory traversal (`../`) mentioned; avoid in references.
@@ -1486,7 +1486,7 @@ INFO security.no_scripts: No executable scripts found; static security scan skip
 [WARN] Description may be too vague; consider including explicit trigger language (e.g., 'Use when ...').
 [OK] SKILL.md frontmatter looks valid.
 Skill: prd-to-arch
-Path:  /Users/jamiecraik/dev/agent-skills/product/specs/prd-to-arch/SKILL.md
+Path:  ./product/specs/prd-to-arch/SKILL.md
 
 WARN OUT_SCHEMA_VERSION_MISSING: Schema-bound outputs detected; consider including `schema_version` in the output contract.
 WARN PATH_TRAVERSAL: Parent directory traversal (`../`) mentioned; avoid in references.
@@ -1502,7 +1502,7 @@ INFO security.no_scripts: No executable scripts found; static security scan skip
 [WARN] Description may be too vague; consider including explicit trigger language (e.g., 'Use when ...').
 [OK] SKILL.md frontmatter looks valid.
 Skill: prd-to-testplan
-Path:  /Users/jamiecraik/dev/agent-skills/product/specs/prd-to-testplan/SKILL.md
+Path:  ./product/specs/prd-to-testplan/SKILL.md
 
 WARN OUT_SCHEMA_VERSION_MISSING: Schema-bound outputs detected; consider including `schema_version` in the output contract.
 WARN PATH_TRAVERSAL: Parent directory traversal (`../`) mentioned; avoid in references.
@@ -1518,7 +1518,7 @@ INFO security.no_scripts: No executable scripts found; static security scan skip
 [WARN] Description may be too vague; consider including explicit trigger language (e.g., 'Use when ...').
 [OK] SKILL.md frontmatter looks valid.
 Skill: prd-to-ux
-Path:  /Users/jamiecraik/dev/agent-skills/product/specs/prd-to-ux/SKILL.md
+Path:  ./product/specs/prd-to-ux/SKILL.md
 
 WARN OUT_SCHEMA_VERSION_MISSING: Schema-bound outputs detected; consider including `schema_version` in the output contract.
 WARN PATH_TRAVERSAL: Parent directory traversal (`../`) mentioned; avoid in references.
@@ -1533,7 +1533,7 @@ INFO security.no_scripts: No executable scripts found; static security scan skip
 [65/91] ./product/specs/product-spec
 [OK] SKILL.md frontmatter looks valid.
 Skill: product-spec
-Path:  /Users/jamiecraik/dev/agent-skills/product/specs/product-spec/SKILL.md
+Path:  ./product/specs/product-spec/SKILL.md
 
 WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/product-spec.png
 WARN PI_COMMANDS: [medium] Command-like instructions detected; ensure commands are gated and safe. | scripts/render-diagrams.sh
@@ -1551,7 +1551,7 @@ INFO security.clean: No risky patterns detected in scanned scripts
 [66/91] ./product/strategy/asymmetric-ideation-engine
 [OK] SKILL.md frontmatter looks valid.
 Skill: asymmetric-ideation-engine
-Path:  /Users/jamiecraik/dev/agent-skills/product/strategy/asymmetric-ideation-engine/SKILL.md
+Path:  ./product/strategy/asymmetric-ideation-engine/SKILL.md
 
 
 RESULT: PASS
@@ -1562,7 +1562,7 @@ INFO security.clean: No risky patterns detected in scanned scripts
 [67/91] ./product/strategy/project-improvement-ideator
 [OK] SKILL.md frontmatter looks valid.
 Skill: project-improvement-ideator
-Path:  /Users/jamiecraik/dev/agent-skills/product/strategy/project-improvement-ideator/SKILL.md
+Path:  ./product/strategy/project-improvement-ideator/SKILL.md
 
 WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/project-improvement-ideator.png
 WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | SKILL.md
@@ -1576,7 +1576,7 @@ INFO security.no_scripts: No executable scripts found; static security scan skip
 [68/91] ./product/tech/agent-native-architecture
 [OK] SKILL.md frontmatter looks valid.
 Skill: agent-native-architecture
-Path:  /Users/jamiecraik/dev/agent-skills/product/tech/agent-native-architecture/SKILL.md
+Path:  ./product/tech/agent-native-architecture/SKILL.md
 
 WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/agent-native-architecture.png
 WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
@@ -1589,7 +1589,7 @@ INFO security.no_scripts: No executable scripts found; static security scan skip
 [69/91] ./product/tech/tech-spec
 [OK] SKILL.md frontmatter looks valid.
 Skill: tech-spec
-Path:  /Users/jamiecraik/dev/agent-skills/product/tech/tech-spec/SKILL.md
+Path:  ./product/tech/tech-spec/SKILL.md
 
 WARN OUT_SCHEMA_VERSION_MISSING: Schema-bound outputs detected; consider including `schema_version` in the output contract.
 WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/tech-spec.png
@@ -1604,7 +1604,7 @@ INFO security.no_scripts: No executable scripts found; static security scan skip
 [WARN] Description may be too vague; consider including explicit trigger language (e.g., 'Use when ...').
 [OK] SKILL.md frontmatter looks valid.
 Skill: tech-to-data
-Path:  /Users/jamiecraik/dev/agent-skills/product/tech/tech-to-data/SKILL.md
+Path:  ./product/tech/tech-to-data/SKILL.md
 
 WARN OUT_SCHEMA_VERSION_MISSING: Schema-bound outputs detected; consider including `schema_version` in the output contract.
 WARN PATH_TRAVERSAL: Parent directory traversal (`../`) mentioned; avoid in references.
@@ -1620,7 +1620,7 @@ INFO security.no_scripts: No executable scripts found; static security scan skip
 [WARN] Description may be too vague; consider including explicit trigger language (e.g., 'Use when ...').
 [OK] SKILL.md frontmatter looks valid.
 Skill: tech-to-migration
-Path:  /Users/jamiecraik/dev/agent-skills/product/tech/tech-to-migration/SKILL.md
+Path:  ./product/tech/tech-to-migration/SKILL.md
 
 WARN OUT_SCHEMA_VERSION_MISSING: Schema-bound outputs detected; consider including `schema_version` in the output contract.
 WARN PATH_TRAVERSAL: Parent directory traversal (`../`) mentioned; avoid in references.
@@ -1636,7 +1636,7 @@ INFO security.no_scripts: No executable scripts found; static security scan skip
 [WARN] Description may be too vague; consider including explicit trigger language (e.g., 'Use when ...').
 [OK] SKILL.md frontmatter looks valid.
 Skill: tech-to-ops
-Path:  /Users/jamiecraik/dev/agent-skills/product/tech/tech-to-ops/SKILL.md
+Path:  ./product/tech/tech-to-ops/SKILL.md
 
 WARN OUT_SCHEMA_VERSION_MISSING: Schema-bound outputs detected; consider including `schema_version` in the output contract.
 WARN PATH_TRAVERSAL: Parent directory traversal (`../`) mentioned; avoid in references.
@@ -1652,7 +1652,7 @@ INFO security.no_scripts: No executable scripts found; static security scan skip
 [WARN] Description may be too vague; consider including explicit trigger language (e.g., 'Use when ...').
 [OK] SKILL.md frontmatter looks valid.
 Skill: tech-to-performance
-Path:  /Users/jamiecraik/dev/agent-skills/product/tech/tech-to-performance/SKILL.md
+Path:  ./product/tech/tech-to-performance/SKILL.md
 
 WARN OUT_SCHEMA_VERSION_MISSING: Schema-bound outputs detected; consider including `schema_version` in the output contract.
 WARN PATH_TRAVERSAL: Parent directory traversal (`../`) mentioned; avoid in references.
@@ -1667,7 +1667,7 @@ INFO security.no_scripts: No executable scripts found; static security scan skip
 [74/91] ./utilities/1password
 [OK] SKILL.md frontmatter looks valid.
 Skill: 1password
-Path:  /Users/jamiecraik/dev/agent-skills/utilities/1password/SKILL.md
+Path:  ./utilities/1password/SKILL.md
 
 WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/1password.png
 WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
@@ -1681,7 +1681,7 @@ INFO security.no_scripts: No executable scripts found; static security scan skip
 [75/91] ./utilities/agent-browser
 [OK] SKILL.md frontmatter looks valid.
 Skill: agent-browser
-Path:  /Users/jamiecraik/dev/agent-skills/utilities/agent-browser/SKILL.md
+Path:  ./utilities/agent-browser/SKILL.md
 
 WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/agent-browser.png
 WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
@@ -1694,7 +1694,7 @@ INFO security.no_scripts: No executable scripts found; static security scan skip
 [76/91] ./utilities/alignment-checkpoint
 [OK] SKILL.md frontmatter looks valid.
 Skill: alignment-checkpoint
-Path:  /Users/jamiecraik/dev/agent-skills/utilities/alignment-checkpoint/SKILL.md
+Path:  ./utilities/alignment-checkpoint/SKILL.md
 
 WARN OUT_SCHEMA_VERSION_MISSING: Schema-bound outputs detected; consider including `schema_version` in the output contract.
 WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/alignment-checkpoint.png
@@ -1708,7 +1708,7 @@ INFO security.no_scripts: No executable scripts found; static security scan skip
 [77/91] ./utilities/atlas
 [OK] SKILL.md frontmatter looks valid.
 Skill: atlas
-Path:  /Users/jamiecraik/dev/agent-skills/utilities/atlas/SKILL.md
+Path:  ./utilities/atlas/SKILL.md
 
 FAIL FM_DESC_WHAT_WHEN: Description MUST include WHAT the skill does and WHEN to use it (trigger contexts). | description: macOS-only AppleScript control for the ChatGPT Atlas desktop app. Use only when the user explicitly asks to control Atlas tabs/bookmarks/history on macOS and the "ChatGPT Atlas" app is installed; do not trigger for general browser tasks or non-macOS environments.
 FAIL SAFE_REDACTION_REQUIRED: Constraints/Safety MUST mention redaction of secrets/sensitive data by default.
@@ -1732,7 +1732,7 @@ WARN security.subprocess_usage: Matched pattern: \bsubprocess\. (scripts/atlas_c
 [78/91] ./utilities/beautiful-mermaid
 [OK] SKILL.md frontmatter looks valid.
 Skill: beautiful-mermaid
-Path:  /Users/jamiecraik/dev/agent-skills/utilities/beautiful-mermaid/SKILL.md
+Path:  ./utilities/beautiful-mermaid/SKILL.md
 
 WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/beautiful-mermaid.png
 WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
@@ -1748,7 +1748,7 @@ WARN security.node_child_process: Matched pattern: \bnode:child_process\b|\bchil
 [79/91] ./utilities/codex-home-audit
 [OK] SKILL.md frontmatter looks valid.
 Skill: codex-home-audit
-Path:  /Users/jamiecraik/dev/agent-skills/utilities/codex-home-audit/SKILL.md
+Path:  ./utilities/codex-home-audit/SKILL.md
 
 WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/codex-home-audit.png
 WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | scripts/__pycache__/audit_codex_home.cpython-314.pyc
@@ -1765,7 +1765,7 @@ INFO security.clean: No risky patterns detected in scanned scripts
 [80/91] ./utilities/codex-sessions-skill-scan
 [OK] SKILL.md frontmatter looks valid.
 Skill: codex-sessions-skill-scan
-Path:  /Users/jamiecraik/dev/agent-skills/utilities/codex-sessions-skill-scan/SKILL.md
+Path:  ./utilities/codex-sessions-skill-scan/SKILL.md
 
 WARN OUT_SCHEMA_VERSION_MISSING: Schema-bound outputs detected; consider including `schema_version` in the output contract.
 WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/codex-sessions-skill-scan.png
@@ -1781,7 +1781,7 @@ INFO security.clean: No risky patterns detected in scanned scripts
 [81/91] ./utilities/markdown-converter
 [OK] SKILL.md frontmatter looks valid.
 Skill: markdown-converter
-Path:  /Users/jamiecraik/dev/agent-skills/utilities/markdown-converter/SKILL.md
+Path:  ./utilities/markdown-converter/SKILL.md
 
 WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/markdown-converter.png
 WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
@@ -1794,7 +1794,7 @@ INFO security.no_scripts: No executable scripts found; static security scan skip
 [82/91] ./utilities/process-watch
 [OK] SKILL.md frontmatter looks valid.
 Skill: process-watch
-Path:  /Users/jamiecraik/dev/agent-skills/utilities/process-watch/SKILL.md
+Path:  ./utilities/process-watch/SKILL.md
 
 WARN FM_DESC_WORKFLOWY: Description looks workflow-like. Prefer outcome + trigger keywords in `description`; keep procedures in the body/references. | description: Analyze system processes and resource usage to diagnose runaway CPU/memory/IO, identify culprits, and propose next diagnostic steps. Use when investigating performance spikes or leaks.
 WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/process-watch.png
@@ -1810,7 +1810,7 @@ INFO security.clean: No risky patterns detected in scanned scripts
 [83/91] ./utilities/prompt-creator
 [OK] SKILL.md frontmatter looks valid.
 Skill: prompt-creator
-Path:  /Users/jamiecraik/dev/agent-skills/utilities/prompt-creator/SKILL.md
+Path:  ./utilities/prompt-creator/SKILL.md
 
 WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/prompt-creator.png
 
@@ -1822,7 +1822,7 @@ INFO security.no_scripts: No executable scripts found; static security scan skip
 [84/91] ./utilities/recon-workbench
 [OK] SKILL.md frontmatter looks valid.
 Skill: recon-workbench
-Path:  /Users/jamiecraik/dev/agent-skills/utilities/recon-workbench/SKILL.md
+Path:  ./utilities/recon-workbench/SKILL.md
 
 WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/recon-workbench.png
 WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/reverse_engineering_techniques.pdf
@@ -1841,7 +1841,7 @@ INFO security.clean: No risky patterns detected in scanned scripts
 [85/91] ./utilities/remotion
 [OK] SKILL.md frontmatter looks valid.
 Skill: remotion-best-practices
-Path:  /Users/jamiecraik/dev/agent-skills/utilities/remotion/SKILL.md
+Path:  ./utilities/remotion/SKILL.md
 
 WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/remotion.png
 WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | rules/calculate-metadata.md
@@ -1855,7 +1855,7 @@ INFO security.no_scripts: No executable scripts found; static security scan skip
 [86/91] ./utilities/repoprompt
 [OK] SKILL.md frontmatter looks valid.
 Skill: repoprompt
-Path:  /Users/jamiecraik/dev/agent-skills/utilities/repoprompt/SKILL.md
+Path:  ./utilities/repoprompt/SKILL.md
 
 WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/repoprompt.png
 WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | SKILL.md
@@ -1869,7 +1869,7 @@ INFO security.no_scripts: No executable scripts found; static security scan skip
 [87/91] ./utilities/run-tests-and-write-artifacts
 [OK] SKILL.md frontmatter looks valid.
 Skill: run-tests-and-write-artifacts
-Path:  /Users/jamiecraik/dev/agent-skills/utilities/run-tests-and-write-artifacts/SKILL.md
+Path:  ./utilities/run-tests-and-write-artifacts/SKILL.md
 
 WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/run-tests-and-write-artifacts.png
 WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
@@ -1883,7 +1883,7 @@ INFO security.no_scripts: No executable scripts found; static security scan skip
 [WARN] Description may be too vague; consider including explicit trigger language (e.g., 'Use when ...').
 [OK] SKILL.md frontmatter looks valid.
 Skill: skill-creator
-Path:  /Users/jamiecraik/dev/agent-skills/utilities/skill-creator/SKILL.md
+Path:  ./utilities/skill-creator/SKILL.md
 
 WARN OUT_SCHEMA_VERSION_MISSING: Schema-bound outputs detected; consider including `schema_version` in the output contract.
 WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/skill-creator.png
@@ -1922,7 +1922,7 @@ WARN security.subprocess_usage: Matched pattern: \bsubprocess\. (scripts/run_rep
 [89/91] ./utilities/skill-installer
 [OK] SKILL.md frontmatter looks valid.
 Skill: skill-installer
-Path:  /Users/jamiecraik/dev/agent-skills/utilities/skill-installer/SKILL.md
+Path:  ./utilities/skill-installer/SKILL.md
 
 WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/skill-installer.png
 WARN PI_BLOCKLIST: [high] Explicit exfiltration directive | references/prompt-injection-patterns.json
@@ -1947,7 +1947,7 @@ WARN security.network_usage: Matched pattern: \b(requests\.|fetch\(|axios\.|curl
 [WARN] Description may be too vague; consider including explicit trigger language (e.g., 'Use when ...').
 [OK] SKILL.md frontmatter looks valid.
 Skill: systematic-debugging
-Path:  /Users/jamiecraik/dev/agent-skills/utilities/systematic-debugging/SKILL.md
+Path:  ./utilities/systematic-debugging/SKILL.md
 
 FAIL FM_DESC_WHAT_WHEN: Description MUST include WHAT the skill does and WHEN to use it (trigger contexts). | description: Use this skill when encountering bugs, test failures, regressions, or unexpected behavior to run a root-cause-first debugging workflow before proposing fixes or code changes.
 FAIL SEC_CONSTRAINTS_MISSING: Missing required section: constraints (add a ## heading).
@@ -1970,7 +1970,7 @@ INFO security.no_scripts: No executable scripts found; static security scan skip
 [91/91] ./utilities/video-transcript-downloader
 [OK] SKILL.md frontmatter looks valid.
 Skill: video-transcript-downloader
-Path:  /Users/jamiecraik/dev/agent-skills/utilities/video-transcript-downloader/SKILL.md
+Path:  ./utilities/video-transcript-downloader/SKILL.md
 
 WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | assets/video-transcript-downloader.png
 WARN PI_OVERRIDE: [high] Potential prompt-injection override language detected; ensure this is not instructing the model to bypass system/developer instructions. | scripts/vtd.js

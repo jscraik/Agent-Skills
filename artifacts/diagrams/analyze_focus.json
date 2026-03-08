@@ -1,5 +1,5 @@
 {
-  "rootPath": "/Users/jamiecraik/dev/agent-skills",
+  "rootPath": ".",
   "components": [
     {
       "name": "condition-based-waiting-example",

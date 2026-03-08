@@ -36,6 +36,26 @@ def discover_profiles(repo_root: Path) -> List[Path]:
     return out
 
 
+def _rel_or_redact(value: str, repo_root: Path) -> str:
+    """Return a repo-relative posix path, or redact absolute paths that escape the root."""
+    raw = value.strip()
+    if not raw:
+        return ""
+    candidate = Path(raw)
+    if candidate.is_absolute():
+        try:
+            return candidate.relative_to(repo_root).as_posix()
+        except ValueError:
+            return "<redacted-absolute-path>"
+    return raw
+
+
+def _sanitize_lines(lines: List[str], repo_root: Path) -> List[str]:
+    """Replace all occurrences of the absolute repo root with '.' in output lines."""
+    root_text = str(repo_root)
+    return [line.replace(root_text, ".") for line in lines]
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo-root", default=str(ROOT), help="Repository root")
@@ -182,7 +202,7 @@ def main() -> int:
                 {
                     "profile_path": rel_profile,
                     "status": "planned",
-                    "command": command,
+                    "command": _sanitize_lines(command, repo_root),
                 }
             )
             continue
@@ -214,11 +234,11 @@ def main() -> int:
                 "execution_status": execution_status,
                 "exit_code": completed.returncode,
                 "run_id": run_id,
-                "run_out_dir": out_dir,
+                "run_out_dir": _rel_or_redact(out_dir, repo_root),
                 "missing_artifacts": artifact_missing,
                 "artifact_details": artifact_details,
-                "stdout_tail": (completed.stdout or "").splitlines()[-8:],
-                "stderr_tail": (completed.stderr or "").splitlines()[-8:],
+                "stdout_tail": _sanitize_lines((completed.stdout or "").splitlines()[-8:], repo_root),
+                "stderr_tail": _sanitize_lines((completed.stderr or "").splitlines()[-8:], repo_root),
             }
         )
 
@@ -227,7 +247,7 @@ def main() -> int:
     report = {
         "schema_version": "1.0",
         "generated_at": iso_now(),
-        "repo_root": str(repo_root),
+        "repo_root": ".",
         "dry_run": bool(args.dry_run),
         "profile_count": len(results),
         "pass_count": pass_count,

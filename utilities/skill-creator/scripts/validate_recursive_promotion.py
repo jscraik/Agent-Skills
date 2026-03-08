@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import hmac
 import json
 import os
 import re
@@ -105,6 +106,17 @@ def parse_args() -> argparse.Namespace:
         default=DEFAULT_POLICY_SIG_FILE,
         help="Policy signature file containing sha256(policy file)",
     )
+    # C-01: HMAC-SHA256 decision integrity
+    p.add_argument(
+        "--decision-sig-file",
+        help="Path to HMAC-SHA256 signature file for promotion_decision.json (written by human_promote_recursive_run.sh)",
+    )
+    p.add_argument(
+        "--require-sig",
+        action="store_true",
+        default=bool(os.environ.get("PROMOTION_SIG_REQUIRED", "").strip() in {"1", "true", "TRUE", "yes"}),
+        help="Hard-fail if no decision signature file is present (set via PROMOTION_SIG_REQUIRED=1 in CI)",
+    )
     p.add_argument("--write-report", help="Optional JSON output path for validation report")
     return p.parse_args()
 
@@ -202,6 +214,70 @@ def sha256_file(path: Path) -> str:
         for chunk in iter(lambda: f.read(65536), b""):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def verify_decision_hmac(
+    decision_path: Path,
+    sig_path: Path,
+    errors: List[Dict[str, str]],
+    warnings: List[Dict[str, str]],
+    require_key: bool = False,
+) -> bool:
+    """Verify the HMAC-SHA256 signature of a promotion decision file.
+
+    The key is read from the PROMOTION_SIGNING_KEY environment variable.  Uses
+    ``hmac.compare_digest`` for constant-time comparison to prevent timing
+    attacks.
+
+    When ``require_key`` is True (i.e. --require-sig was set), a missing or
+    empty PROMOTION_SIGNING_KEY is treated as a hard verification failure rather
+    than a silent skip.  This prevents a misconfigured runner from accepting any
+    sig file without actually verifying the MAC.
+
+    Returns True if verification passed.
+    Returns False and appends an error if verification fails.
+    """
+    key_raw = os.environ.get("PROMOTION_SIGNING_KEY", "").strip()
+    if not key_raw:
+        if require_key:
+            add_error(
+                errors,
+                "E_DECISION_SIG_KEY_MISSING",
+                "PROMOTION_SIGNING_KEY is not set — cannot verify signature (--require-sig enforces key presence)",
+            )
+            return False
+        # Key not set and not required — skip silently (backwards-compatible).
+        return True
+
+    try:
+        sig_line = sig_path.read_text(encoding="utf-8").strip()
+    except OSError as exc:
+        add_error(errors, "E_DECISION_SIG_READ_FAILED", f"cannot read sig file: {exc}")
+        return False
+
+    if not sig_line.startswith("hmac-sha256:"):
+        add_error(errors, "E_DECISION_SIG_FORMAT", f"unexpected sig format (expected 'hmac-sha256:<hex>'): {sig_path}")
+        return False
+
+    recorded_mac = sig_line[len("hmac-sha256:"):].strip()
+    try:
+        obj = json.loads(decision_path.read_text(encoding="utf-8"))
+        canonical = json.dumps(obj, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    except Exception as exc:
+        add_error(errors, "E_DECISION_SIG_CANONICAL_FAILED", f"cannot canonicalise decision for sig check: {exc}")
+        return False
+
+    key = key_raw.encode("utf-8")
+    expected_mac = hmac.new(key, canonical, sha256).hexdigest()
+    if not hmac.compare_digest(recorded_mac, expected_mac):
+        add_error(
+            errors,
+            "E_DECISION_SIG_MISMATCH",
+            "HMAC-SHA256 signature mismatch — promotion_decision.json may have been tampered with",
+        )
+        return False
+
+    return True
 
 
 def scan_lesson_content(path: Path) -> Dict[str, List[str]]:
@@ -411,6 +487,23 @@ def validate(args: argparse.Namespace) -> Dict[str, Any]:
     )
     artifact_files = {p.name for p in run_dir.glob("*") if p.is_file()}
 
+    # C-01: Verify HMAC-SHA256 signature before any schema or policy checks.
+    sig_file_arg = getattr(args, "decision_sig_file", None)
+    require_sig = getattr(args, "require_sig", False)
+    if sig_file_arg:
+        sig_path = Path(sig_file_arg).expanduser().resolve()
+        if sig_path.exists() and decision_path.exists():
+            verify_decision_hmac(decision_path, sig_path, errors, warnings, require_key=require_sig)
+        elif not sig_path.exists():
+            add_error(errors, "E_DECISION_SIG_MISSING", f"--decision-sig-file specified but not found: {sig_path}")
+    elif require_sig:
+        add_error(
+            errors,
+            "E_DECISION_SIG_MISSING",
+            "PROMOTION_SIG_REQUIRED=1 but no --decision-sig-file was provided",
+        )
+    # No sig file, no require_sig → backwards-compatible: validation proceeds without sig check.
+
     if str(decision_path) == str(run_json_path):
         add_warning(
             warnings,
@@ -467,9 +560,10 @@ def validate(args: argparse.Namespace) -> Dict[str, Any]:
             report_path.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
         return report
 
+    decision_state = str(decision.get("decision", "")).strip().lower()
     legacy_relaxed_layout = is_legacy_relaxed_layout(run, decision, artifact_files)
     if not events_path.exists():
-        if legacy_relaxed_layout:
+        if legacy_relaxed_layout and decision_state != "approved":
             add_warning(
                 warnings,
                 "W_LEGACY_EVENTS_FILE_MISSING",
@@ -498,8 +592,10 @@ def validate(args: argparse.Namespace) -> Dict[str, Any]:
 
     expected_blocker = normalize_blocker_code(terminal_status, stop_reason)
 
+    require_events_for_validation = decision_state == "approved" or bool(expected_blocker)
+
     required_artifacts = {"run.json", "iteration_journal.jsonl", "promotion_decision.json"}
-    if not legacy_relaxed_layout:
+    if not legacy_relaxed_layout or require_events_for_validation:
         required_artifacts.add("events.jsonl")
     if auto_capture_enabled and not legacy_relaxed_layout:
         required_artifacts.update(CONTROL_CAPTURE_FILES)
@@ -545,7 +641,6 @@ def validate(args: argparse.Namespace) -> Dict[str, Any]:
         errors,
     )
 
-    decision_state = str(decision.get("decision", "")).strip().lower()
     if decision_state not in ALLOWED_DECISIONS:
         add_error(errors, "E_INVALID_DECISION_STATE", f"invalid decision state: {decision_state}")
 
@@ -984,7 +1079,7 @@ def validate(args: argparse.Namespace) -> Dict[str, Any]:
                     )
         except Exception as exc:
             add_error(errors, "E_EVENTS_JSONL_INVALID", f"invalid events.jsonl: {exc}")
-    elif not errors and not legacy_relaxed_layout:
+    elif not errors and (not legacy_relaxed_layout or require_events_for_validation):
         add_error(errors, "E_EVENTS_FILE_MISSING", "events.jsonl missing")
 
     if blocker_code_run and expected_blocker and blocker_code_run != expected_blocker:

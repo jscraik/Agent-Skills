@@ -23,6 +23,8 @@ from pathlib import Path
 from github_utils import github_request
 DEFAULT_REF = "main"
 CATEGORY_RE = re.compile(r"^[a-z0-9][a-z0-9-]*$")
+# Full 40-character hex SHA (git commit SHA).
+SHA_RE = re.compile(r"^[0-9a-f]{40}$", re.IGNORECASE)
 TEXT_EXTENSIONS = {
     ".md",
     ".txt",
@@ -271,6 +273,26 @@ def _normalize_severity(severity: str) -> str:
     if text not in {"low", "medium", "high"}:
         return "medium"
     return text
+
+
+def _validate_ref_is_pinned(ref: str, require_pinned: bool) -> list[RiskFinding]:
+    """Return a RiskFinding when ref is a mutable branch/tag rather than a full SHA.
+
+    When *require_pinned* is True this raises InstallError immediately so CI
+    pipelines can hard-fail without needing --on-warning=stop.
+    """
+    if SHA_RE.match(ref):
+        return []
+    message = (
+        f"Ref '{ref}' is a mutable branch or tag, not a pinned commit SHA. "
+        "A branch HEAD can change between resolution and install, meaning a "
+        "different version of the skill could be fetched than the one reviewed. "
+        "Use --ref <40-char-sha> to pin to an exact commit. "
+        "Pass --require-pinned-ref to hard-fail on mutable refs in CI."
+    )
+    if require_pinned:
+        raise InstallError(message)
+    return [RiskFinding(source="ref", message=message, severity="medium")]
 
 
 def _git_sparse_checkout(repo_url: str, ref: str, paths: list[str], dest_dir: str) -> str:
@@ -1643,6 +1665,46 @@ def _triage_warning(warning: RiskFinding) -> str:
     return "unknown"
 
 
+def _emit_force_unsafe_audit(
+    *,
+    skill_name: str,
+    skill_path: str,
+    warnings: list["RiskFinding"],
+    mode: str,
+) -> None:
+    """Append a timestamped audit record when --force-unsafe overrides a high-severity block.
+
+    Written to ~/.local/share/agent-skills/force-unsafe-audit.jsonl so that
+    override usage is never invisible. Failures are non-fatal.
+    """
+    import fcntl
+    import datetime
+
+    audit_dir = pathlib.Path.home() / ".local" / "share" / "agent-skills"
+    audit_path = audit_dir / "force-unsafe-audit.jsonl"
+    record = {
+        "ts": datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+        "mode": mode,
+        "skill_name": skill_name,
+        "skill_path": skill_path,
+        "findings": [
+            {"severity": w.severity, "rule": getattr(w, "rule", ""), "message": str(w)[:200]}
+            for w in warnings
+            if w.severity == "high"
+        ],
+    }
+    try:
+        audit_dir.mkdir(parents=True, exist_ok=True)
+        with audit_path.open("a", encoding="utf-8") as f:
+            fcntl.flock(f.fileno(), fcntl.LOCK_EX)
+            f.write(json.dumps(record, sort_keys=True) + "\n")
+            f.flush()
+            fcntl.flock(f.fileno(), fcntl.LOCK_UN)
+        print(f"[force-unsafe] override audited → {audit_path}", file=sys.stderr)
+    except Exception as exc:  # pragma: no cover
+        print(f"[force-unsafe] WARNING: audit log write failed ({exc}); continuing anyway.", file=sys.stderr)
+
+
 def _should_continue_after_warning(
     warnings: list[RiskFinding],
     *,
@@ -1660,6 +1722,8 @@ def _should_continue_after_warning(
         )
         return False
 
+    if has_high and force_unsafe:
+        _emit_force_unsafe_audit(skill_name=skill_name, skill_path=skill_path, warnings=warnings, mode="install")
     if mode == "continue":
         print(_format_warnings(warnings), file=sys.stderr)
         print("Warning: Review the skill files before installing. Continuing install.", file=sys.stderr)
@@ -1702,6 +1766,8 @@ def _should_proceed_in_dry_run(
             file=sys.stderr,
         )
         return False
+    if has_high and force_unsafe:
+        _emit_force_unsafe_audit(skill_name="<dry-run>", skill_path="", warnings=warnings, mode="dry-run")
     print(_format_warnings(warnings), file=sys.stderr)
     if mode == "stop":
         print("Dry-run stopped due to on-warning=stop.", file=sys.stderr)
@@ -1877,7 +1943,19 @@ def _parse_args(argv: list[str]) -> Args:
         nargs="+",
         help="Path(s) to skill(s) inside repo",
     )
-    parser.add_argument("--ref", default=DEFAULT_REF)
+    parser.add_argument(
+        "--ref",
+        default=DEFAULT_REF,
+        help="Git ref (branch, tag, or full 40-char commit SHA). Prefer a full SHA for reproducibility.",
+    )
+    parser.add_argument(
+        "--require-pinned-ref",
+        action="store_true",
+        help=(
+            "Hard-fail if --ref is a mutable branch or tag instead of a full 40-character "
+            "commit SHA. Recommended for CI/automation to ensure reproducible installs."
+        ),
+    )
     parser.add_argument("--dest", help="Destination skills directory")
     parser.add_argument(
         "--category",
@@ -1971,6 +2049,19 @@ def main(argv: list[str]) -> int:
             raise InstallError("No skill paths provided.")
         for path in source.paths:
             _validate_relative_path(path)
+
+        # Emit a medium-severity warning (or hard-fail with --require-pinned-ref)
+        # when the resolved ref is a mutable branch/tag rather than a pinned SHA.
+        ref_findings = _validate_ref_is_pinned(source.ref, getattr(args, "require_pinned_ref", False))
+        if ref_findings and not args.dry_run:
+            if not _should_continue_after_warning(
+                ref_findings,
+                mode=args.on_warning,
+                skill_name="<ref-check>",
+                skill_path="",
+                force_unsafe=args.force_unsafe,
+            ):
+                raise InstallError("Install stopped due to unpinned ref warning.")
 
         if args.dest:
             dest_root = args.dest

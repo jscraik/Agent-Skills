@@ -70,8 +70,32 @@ const sessions = JSON.parse(
 
 interface GitHubPR {
   number: number;
-  head: { ref: string };
+  head: {
+    ref: string;
+    repo: {
+      full_name: string;
+      fork: boolean;
+      owner: { login: string };
+    } | null;
+  };
   body: string | null;
+}
+
+/**
+ * Guard against spoofed PRs: only accept PRs whose head branch lives in the
+ * canonical OWNER/REPO (i.e. not from a fork or an external repository).
+ * Session IDs are visible in legitimate PR bodies/branches, so without this
+ * check an attacker could open a fork PR embedding a valid sessionId and have
+ * it merged automatically.
+ */
+function isTrustedFleetPR(pr: GitHubPR): boolean {
+  const headRepo = pr.head.repo;
+  if (!headRepo) return false;
+  return (
+    headRepo.full_name === `${OWNER}/${REPO}` &&
+    !headRepo.fork &&
+    headRepo.owner.login === OWNER
+  );
 }
 
 // Find open PRs created by fleet sessions
@@ -82,8 +106,10 @@ async function findFleetPRs() {
   const prMap = new Map<string, GitHubPR>();
   for (const session of sessions) {
     const matchingPR = pulls.find((pr: GitHubPR) =>
-      pr.head.ref.includes(session.sessionId) ||
-      pr.body?.includes(session.sessionId)
+      isTrustedFleetPR(pr) && (
+        pr.head.ref.includes(session.sessionId) ||
+        pr.body?.includes(session.sessionId)
+      )
     );
     if (matchingPR) {
       prMap.set(session.taskId, matchingPR);
@@ -174,8 +200,10 @@ async function redispatchTask(
     const pulls = (await res.json()) as GitHubPR[];
     const newPr = pulls.find(
       (pr: GitHubPR) =>
-        pr.head.ref.includes(session.id) ||
-        pr.body?.includes(session.id)
+        isTrustedFleetPR(pr) && (
+          pr.head.ref.includes(session.id) ||
+          pr.body?.includes(session.id)
+        )
     );
     if (newPr) {
       console.log(`  ✅ New PR #${newPr.number} found (${newPr.head.ref})`);

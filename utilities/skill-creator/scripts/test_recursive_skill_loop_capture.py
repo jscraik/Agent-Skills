@@ -288,6 +288,32 @@ class RecursiveLoopCaptureTests(unittest.TestCase):
         self.assertEqual(uplift.get("auto_apply_decision"), "insufficient_data")
         self.assertGreaterEqual(len(run_obj.get("injected_lessons", [])), 1)
 
+    def test_profile_id_rejects_path_traversal_values(self) -> None:
+        profile = json.loads(PROFILE_PATH.read_text(encoding="utf-8"))
+        profile["profile_id"] = "../../tmp/evil"
+
+        with tempfile.TemporaryDirectory(prefix="profile-id-") as tmp_dir:
+            tmp_path = Path(tmp_dir)
+            profile_path = tmp_path / "bad-profile.json"
+            out_root = tmp_path / "out"
+            profile_path.write_text(json.dumps(profile), encoding="utf-8")
+
+            cmd = [
+                sys.executable,
+                str(SCRIPT_PATH),
+                "--profile-file",
+                str(profile_path),
+                "--objective",
+                "Path traversal regression test.",
+                "--out-root",
+                str(out_root),
+            ]
+            proc = subprocess.run(cmd, cwd=REPO_ROOT, text=True, capture_output=True)
+
+            self.assertEqual(proc.returncode, 1)
+            self.assertIn("profile_id", proc.stderr)
+            self.assertFalse((out_root / "escape.lock").exists())
+
 
 if __name__ == "__main__":
     unittest.main()

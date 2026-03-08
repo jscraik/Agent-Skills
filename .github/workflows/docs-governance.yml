@@ -21,6 +21,9 @@ on:
       - ".github/workflows/docs-governance.yml"
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   docs-lint:
     runs-on: ubuntu-latest

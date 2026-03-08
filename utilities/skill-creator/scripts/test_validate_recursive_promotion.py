@@ -247,9 +247,88 @@ class ValidateRecursivePromotionTests(unittest.TestCase):
             self.assertIn("E_BLOCKER_ARTIFACT_MISSING", error_codes)
             self.assertIn("E_BLOCKER_EVENT_MISMATCH", error_codes)
 
-    def test_validator_tolerates_legacy_promotion_layout_without_events_or_capture(self) -> None:
+    def test_validator_tolerates_legacy_candidate_layout_without_events_or_capture(self) -> None:
         with tempfile.TemporaryDirectory(prefix="validate-promotion-") as tmpdir:
-            run_dir = Path(tmpdir) / "run-legacy-approved"
+            run_dir = Path(tmpdir) / "run-legacy-candidate"
+            run_dir.mkdir()
+
+            lesson_file = run_dir / "lesson.md"
+            lesson_file.write_text("Safe legacy lesson body.\n", encoding="utf-8")
+
+            (run_dir / "run.json").write_text(
+                json.dumps(
+                    {
+                        "schema_version": "1.0",
+                        "run_id": run_dir.name,
+                        "profile_id": "ui-ux-creative-coding",
+                        "terminal_status": "passed",
+                        "stop_reason": "pass",
+                        "prompt_hash": "hash-legacy",
+                        "scope_skill": "ui-ux-creative-coding",
+                        "scope_profile": "ui",
+                        "versions": {
+                            "rubric_version": "2026-02-19",
+                            "evaluator_version": "v1",
+                        },
+                        "counters": {"iterations_completed": 1},
+                        "finished_at": "2026-02-26T12:00:00Z",
+                    },
+                    indent=2,
+                ),
+                encoding="utf-8",
+            )
+            (run_dir / "iteration_journal.jsonl").write_text(
+                json.dumps(
+                    {
+                        "run_id": run_dir.name,
+                        "iteration_id": 1,
+                        "reevaluation_report": {
+                            "gate_decision": "pass",
+                            "non_regression_passed": True,
+                        },
+                    }
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            (run_dir / "promotion_decision.json").write_text(
+                json.dumps(
+                    {
+                        "schema_version": "1.0",
+                        "run_id": run_dir.name,
+                        "lesson_id": f"lesson_{run_dir.name}",
+                        "decision": "candidate",
+                        "reviewer_ids": ["jamie"],
+                        "expected_version": "v1",
+                        "lesson_source_path": str(lesson_file),
+                        "lesson_content_sha256": sha256_text(lesson_file.read_text(encoding="utf-8")),
+                        "gate_decision": {
+                            "runtime_gates_passed": True,
+                            "provenance_complete": True,
+                            "security_checklist_passed": True,
+                        },
+                        "provenance": {
+                            "prompt_hash": "hash-legacy",
+                            "rubric_version": "2026-02-19",
+                            "evaluator_version": "v1",
+                            "iteration_ids": [1],
+                        },
+                    },
+                    indent=2,
+                ),
+                encoding="utf-8",
+            )
+
+            report = self._run_script(run_dir, run_dir / "promotion_decision.json")
+            self.assertEqual(report["status"], "ok")
+            warning_codes = {item.get("code") for item in report.get("warnings", []) if isinstance(item, dict)}
+            self.assertIn("W_LEGACY_EVENTS_FILE_MISSING", warning_codes)
+            self.assertIn("W_COUNTERFACTUAL_MISSING", warning_codes)
+
+    def test_validator_requires_events_for_legacy_approved_decisions(self) -> None:
+        """Legacy mode must NOT suppress events.jsonl requirement for approved decisions."""
+        with tempfile.TemporaryDirectory(prefix="validate-promotion-") as tmpdir:
+            run_dir = Path(tmpdir) / "run-legacy-approved-missing-events"
             run_dir.mkdir()
 
             lesson_file = run_dir / "lesson.md"
@@ -318,12 +397,10 @@ class ValidateRecursivePromotionTests(unittest.TestCase):
                 ),
                 encoding="utf-8",
             )
-
+            # events.jsonl intentionally absent — must be caught even in legacy mode.
             report = self._run_script(run_dir, run_dir / "promotion_decision.json")
-            self.assertEqual(report["status"], "ok")
-            warning_codes = {item.get("code") for item in report.get("warnings", []) if isinstance(item, dict)}
-            self.assertIn("W_LEGACY_EVENTS_FILE_MISSING", warning_codes)
-            self.assertIn("W_COUNTERFACTUAL_MISSING", warning_codes)
+            self.assertEqual(report["status"], "fail")
+            self.assertIn("E_REQUIRED_ARTIFACT_MISSING", _to_row_error_codes(report))
 
 
 if __name__ == "__main__":

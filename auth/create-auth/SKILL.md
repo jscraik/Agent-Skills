@@ -1,5 +1,5 @@
 ---
-name: create-auth-skill
+name: create-auth
 description: Build Better Auth integrations for TS/JS apps with secure defaults. Use
   for implementation or migration work (not just review). Use when the user requests
   this capability.

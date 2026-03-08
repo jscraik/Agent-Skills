@@ -157,7 +157,14 @@ def ensure_gh_available(repo_root: Path) -> bool:
 
 def resolve_pr(pr_value: str | None, repo_root: Path) -> str | None:
     if pr_value:
-        return pr_value
+        normalized = normalize_pr_argument(pr_value)
+        if normalized is None:
+            print(
+                "Error: --pr must be a PR number (e.g. 123) or a GitHub pull request URL.",
+                file=sys.stderr,
+            )
+            return None
+        return normalized
     result = run_gh_command(["pr", "view", "--json", "number"], cwd=repo_root)
     if result.returncode != 0:
         message = (result.stderr or result.stdout or "").strip()
@@ -178,7 +185,7 @@ def resolve_pr(pr_value: str | None, repo_root: Path) -> str | None:
 def fetch_checks(pr_value: str, repo_root: Path) -> list[dict[str, Any]] | None:
     primary_fields = ["name", "state", "conclusion", "detailsUrl", "startedAt", "completedAt"]
     result = run_gh_command(
-        ["pr", "checks", pr_value, "--json", ",".join(primary_fields)],
+        ["pr", "checks", "--json", ",".join(primary_fields), "--", pr_value],
         cwd=repo_root,
     )
     if result.returncode != 0:
@@ -199,7 +206,7 @@ def fetch_checks(pr_value: str, repo_root: Path) -> list[dict[str, Any]] | None:
                 print("Error: no usable fields available for gh pr checks.", file=sys.stderr)
                 return None
             result = run_gh_command(
-                ["pr", "checks", pr_value, "--json", ",".join(selected_fields)],
+                ["pr", "checks", "--json", ",".join(selected_fields), "--", pr_value],
                 cwd=repo_root,
             )
             if result.returncode != 0:
@@ -218,6 +225,39 @@ def fetch_checks(pr_value: str, repo_root: Path) -> list[dict[str, Any]] | None:
         print("Error: unexpected checks JSON shape.", file=sys.stderr)
         return None
     return data
+
+
+def normalize_pr_argument(pr_value: str) -> str | None:
+    """Validate and normalise a user-supplied PR identifier.
+
+    Accepts:
+      - A bare PR number, e.g. "123" or "#123"
+      - A full GitHub pull-request URL, e.g.
+        "https://github.com/owner/repo/pull/123"
+
+    Returns the bare numeric string on success, or None if the value
+    does not match either pattern (e.g. starts with "-" or is a URL to
+    a different host).
+    """
+    candidate = pr_value.strip()
+    if not candidate:
+        return None
+
+    # Bare PR number, optionally prefixed with "#"
+    number_match = re.fullmatch(r"#?(\d+)", candidate)
+    if number_match:
+        return number_match.group(1)
+
+    # Full GitHub pull-request URL
+    url_match = re.match(
+        r"^https?://(?:www\.)?github\.com/[^/\s]+/[^/\s]+/pull/(\d+)(?:[/?#].*)?$",
+        candidate,
+        flags=re.IGNORECASE,
+    )
+    if url_match:
+        return url_match.group(1)
+
+    return None
 
 
 def is_failing(check: dict[str, Any]) -> bool:

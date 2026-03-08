@@ -23,7 +23,7 @@ import hashlib
 import json
 import re
 from contextlib import contextmanager
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Dict, Iterator, List, Optional, Set
 
@@ -38,6 +38,9 @@ MIN_CONFIDENCE = 0.82
 MIN_WINDOWS = 2
 MAX_CANDIDATES = 10
 SCHEMA_VERSION = "1.0"
+MAX_STARTED_AT_FUTURE_SKEW = timedelta(hours=1)
+MAX_EVENTS_JSONL_BYTES = 10 * 1024 * 1024  # 10 MB hard cap per events.jsonl
+MAX_EVENTS_PER_RUN = 10_000  # line cap to bound list growth
 
 # Control file paths
 KILL_SWITCH_PATH = CONTROLS_ROOT / "kill-switch.txt"
@@ -167,6 +170,40 @@ def load_json(path: Path) -> Optional[Dict[str, Any]]:
         return obj
     return None
 
+def parse_started_at(value: Any) -> Optional[datetime]:
+    """Parse and validate started_at from untrusted artifacts.
+
+    Returns a UTC-aware datetime when the value is a valid ISO-8601
+    timestamp that is not implausibly far in the future.  Any other
+    value (missing, non-string, bad format, no timezone, or beyond
+    now + MAX_STARTED_AT_FUTURE_SKEW) returns None.
+    """
+    if not isinstance(value, str) or not value.strip():
+        return None
+
+    normalized = value.strip()
+    if normalized.endswith("Z"):
+        normalized = f"{normalized[:-1]}+00:00"
+
+    try:
+        parsed = datetime.fromisoformat(normalized)
+    except ValueError:
+        return None
+
+    if parsed.tzinfo is None:
+        return None
+
+    parsed_utc = parsed.astimezone(timezone.utc)
+    if parsed_utc > datetime.now(timezone.utc) + MAX_STARTED_AT_FUTURE_SKEW:
+        return None
+
+    return parsed_utc
+
+
+def format_timestamp_utc(dt: datetime) -> str:
+    """Serialise a UTC datetime in canonical ISO-8601 form (e.g. 2026-03-07T22:00:00Z)."""
+    return dt.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
+
 
 def discover_runs(runs_root: Path, since_watermark: Optional[str] = None) -> List[Path]:
     """Discover all run directories with required artifacts.
@@ -178,6 +215,10 @@ def discover_runs(runs_root: Path, since_watermark: Optional[str] = None) -> Lis
     if not runs_root.exists():
         return runs
 
+    since_dt = parse_started_at(since_watermark) if since_watermark else None
+    if since_watermark and since_dt is None:
+        log("Ignoring invalid or implausible watermark value; processing all runs")
+
     for run_dir in sorted(runs_root.iterdir()):
         if not run_dir.is_dir() or not run_dir.name.startswith("run_"):
             continue
@@ -187,11 +228,11 @@ def discover_runs(runs_root: Path, since_watermark: Optional[str] = None) -> Lis
         if missing:
             continue
 
-        # P1 FIX: Filter by watermark if provided
-        if since_watermark:
+        # Filter by watermark if provided
+        if since_dt is not None:
             run_json = load_json(run_dir / "run.json") or {}
-            started_at = run_json.get("started_at", "")
-            if started_at and started_at <= since_watermark:
+            started_at = parse_started_at(run_json.get("started_at"))
+            if started_at is not None and started_at <= since_dt:
                 continue
 
         runs.append(run_dir)
@@ -219,11 +260,27 @@ def load_run_artifacts(run_dir: Path) -> Dict[str, Any]:
 
     events_path = run_dir / "events.jsonl"
     if events_path.exists():
-        for line in events_path.read_text(encoding="utf-8").splitlines():
-            try:
-                events.append(json.loads(line))
-            except json.JSONDecodeError:
-                continue
+        try:
+            if events_path.stat().st_size > MAX_EVENTS_JSONL_BYTES:
+                log(
+                    f"Skipping oversized events artifact for {run_dir.name}: "
+                    f"{events_path.stat().st_size} bytes exceeds {MAX_EVENTS_JSONL_BYTES}"
+                )
+            else:
+                with events_path.open("r", encoding="utf-8") as _f:
+                    for idx, line in enumerate(_f):
+                        if idx >= MAX_EVENTS_PER_RUN:
+                            log(
+                                f"Truncating events for {run_dir.name} "
+                                f"at {MAX_EVENTS_PER_RUN} lines"
+                            )
+                            break
+                        try:
+                            events.append(json.loads(line))
+                        except json.JSONDecodeError:
+                            continue
+        except OSError:
+            log(f"Failed to read events artifact for {run_dir.name}")
 
     promotion = load_json(run_dir / "promotion_decision.json") or {}
 
@@ -587,16 +644,17 @@ def main() -> int:
     # P1 FIX: Use max started_at from processed runs as watermark (not wall-clock time)
     # This prevents dropping late-arriving artifacts that started before this job
     # but were written after it finished
-    max_started_at = None
+    max_started_at: Optional[datetime] = None
     for artifact in artifacts:
-        started_at = artifact.get("run", {}).get("started_at", "")
-        if started_at:
+        started_at = parse_started_at(artifact.get("run", {}).get("started_at"))
+        if started_at is not None:
             if max_started_at is None or started_at > max_started_at:
                 max_started_at = started_at
 
-    if max_started_at:
-        write_watermark(max_started_at)
-        log(f"Updated watermark to: {max_started_at}")
+    if max_started_at is not None:
+        watermark_value = format_timestamp_utc(max_started_at)
+        write_watermark(watermark_value)
+        log(f"Updated watermark to: {watermark_value}")
     write_processing_stats(
         len(candidates),
         len(high_conf),

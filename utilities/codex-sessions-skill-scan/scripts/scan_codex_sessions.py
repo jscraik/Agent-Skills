@@ -119,7 +119,6 @@ class ComplexityHit:
     session_path: Path
     line_no: int
     term: str
-    snippet: str
 
 
 @dataclass(frozen=True)
@@ -478,7 +477,6 @@ def scan(
                                         session_path=fpath,
                                         line_no=i,
                                         term=term,
-                                        snippet=_safe_snippet(text, limit=240),
                                     )
                                 )
 
@@ -583,7 +581,6 @@ def render_report(
             lines.append(
                 f"- `{hit.session_path.name}:{hit.line_no}` matched `{hit.term}` — Reminder: treat as a multi-step task."
             )
-            lines.append(f"  - sample: `{hit.snippet}`")
         lines.append("")
 
     if include_otel:
@@ -698,7 +695,7 @@ def main(argv: list[str]) -> int:
     parser.add_argument(
         "--include-dev-project-sessions",
         action="store_true",
-        default=True,
+        default=False,
         help=(
             "Also scan per-project .codex/sessions directories discovered under --projects-root. "
             "Use this to include sessions for any repo under ~/dev."

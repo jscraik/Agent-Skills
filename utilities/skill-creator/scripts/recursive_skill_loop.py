@@ -27,6 +27,7 @@ import json
 import math
 import os
 import random
+import re
 import sys
 import time
 from dataclasses import dataclass
@@ -814,9 +815,17 @@ def load_profile(path: Path) -> Profile:
         rationale=rationale[:500],
     )
 
+    profile_id = str(obj["profile_id"]).strip()
+    if not re.fullmatch(r"[A-Za-z0-9._-]+", profile_id):
+        raise ValueError(
+            "Profile profile_id must contain only letters, numbers, dot, underscore, or hyphen"
+        )
+    if profile_id in {".", ".."}:
+        raise ValueError("Profile profile_id cannot be . or ..")
+
     return Profile(
         schema_version=str(obj["schema_version"]),
-        profile_id=str(obj["profile_id"]),
+        profile_id=profile_id,
         scope_skill=str(obj["scope_skill"]),
         scope_profile=str(obj["scope_profile"]),
         rubric_version=str(obj["rubric_version"]),

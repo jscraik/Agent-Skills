@@ -462,9 +462,10 @@ _DEFAULT_PI_CONTEXT_SIGNALS = (
     "forbidden_commands",
     "security coverage",
     "red team",
-    "regex",
-    "re.compile(",
-    "pattern",
+    # NOTE: generic terms like "regex", "re.compile(" and "pattern" were
+    # removed – they are too common in ordinary skill content and can be
+    # trivially planted to suppress PI_* findings. Expected-PI context is
+    # now scoped to path patterns only (see _is_expected_pi_context).
 )
 
 _DEFAULT_PI_SKIP_BINARY_GLOBS = ("assets/**",)
@@ -527,9 +528,10 @@ def _is_expected_pi_context(
     if any(fnmatch.fnmatch(rel, pat) for pat in path_patterns):
         return True
 
-    lower = text.lower()
-    if code.startswith("PI_") and any(sig in lower for sig in context_signals):
-        return True
+    # Content-signal bypass removed: generic terms like "pattern" or "regex"
+    # are easily planted to suppress PI_* findings in arbitrary files.
+    # Expected PI context is now path-scoped only.
+    _ = (code, text, context_signals)
     return False
 
 

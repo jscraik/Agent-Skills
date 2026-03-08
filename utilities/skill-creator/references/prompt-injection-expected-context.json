@@ -11,6 +11,8 @@
     "references/composability.md",
     "references/extended.md",
     "references/governance-and-style.md",
+    "references/feedback-analytics.md",
+    "references/quality-tools.md",
     "references/philosophy-patterns.md",
     "references/security-hardening.md",
     "references/prompt-injection-expected-context.json",
@@ -21,6 +23,7 @@
     "scripts/migrate_evals_v2.py",
     "scripts/run_skill_evals.py",
     "scripts/run_skill_graph_smoke.py",
+    "scripts/record_skill_feedback.py",
     "workflows/create-new-skill.md"
   ],
   "context_signals": [
