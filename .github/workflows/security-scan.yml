@@ -46,14 +46,15 @@ jobs:
 
       - name: Run Semgrep (auto ruleset + secrets)
         run: |
-          semgrep ci \
+          semgrep scan \
             --error \
             --config auto \
             --config "p/secrets" \
             --config "p/python" \
             --config "p/typescript" \
             --config "p/bash" \
-            --sarif --output semgrep.sarif
+            --sarif --output semgrep.sarif \
+            .
         env:
           # Set SEMGREP_APP_TOKEN if using Semgrep Cloud for dashboard/PR comments
           SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN || '' }}
@@ -107,8 +108,24 @@ jobs:
 
       - name: Install Gitleaks
         run: |
-          curl -sSfL https://github.com/gitleaks/gitleaks/releases/latest/download/gitleaks_$(uname -s)_$(uname -m).tar.gz \
-            | tar -xz -C /usr/local/bin gitleaks
+          os="$(uname -s | tr '[:upper:]' '[:lower:]')"
+          arch="$(uname -m | tr '[:upper:]' '[:lower:]')"
+          case "$arch" in
+            x86_64|amd64) arch="x64" ;;
+            aarch64|arm64) arch="arm64" ;;
+          esac
+          asset_url="$(curl -fsSL https://api.github.com/repos/gitleaks/gitleaks/releases/latest \
+            | jq -r --arg os "$os" --arg arch "$arch" '
+                .assets[]
+                | .browser_download_url
+                | select(endswith("_" + $os + "_" + $arch + ".tar.gz"))
+              ' \
+            | head -n 1)"
+          if [ -z "$asset_url" ]; then
+            echo "::error::Unable to resolve gitleaks release asset for os=${os} arch=${arch}"
+            exit 1
+          fi
+          curl -sSfL "$asset_url" | tar -xz -C /usr/local/bin gitleaks
           chmod +x /usr/local/bin gitleaks
 
       - name: Scan artifacts directory for secrets
