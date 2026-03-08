@@ -95,7 +95,7 @@ def interactive_review() -> int:
 
     for i, c in enumerate(candidates):
         while True:
-            choice = input(f"\n[{i + 1}/{len(candidates)}] Approve {c.get('candidate_id', '?')}? [a/r/s/q/A/R]: ").strip().lower()
+            choice = input(f"\n[{i + 1}/{len(candidates)}] Approve {c.get('candidate_id', '?')}? [a/r/s/q/A/R]: ").strip()
 
             if choice == "a":
                 approved.append(c)
