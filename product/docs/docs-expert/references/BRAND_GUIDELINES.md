@@ -10,6 +10,8 @@ license: Complete terms in LICENSE.txt
 
 Use this reference to apply BrAInwav's brand identity consistently across software repositories and supporting artifacts. This is intended to support clarity, provenance, and readability in developer workflows (not marketing).
 
+This document is the `docs-expert` fallback brand profile. If a target repository has its own official brand guidance, that repository guidance takes precedence.
+
 **Keywords**: branding, corporate identity, visual identity, documentation signature, styling, brand colors, typography, brAInwav, visual formatting, visual design, provenance
 
 ## Documentation Signature (Recommended)
@@ -32,6 +34,7 @@ brAInwav - software engineering
 - Do not reword the tagline.
 - Do not place signatures inside technical sections or between headings.
 - Do not use watermarks in READMEs or technical docs.
+- Do not apply this fallback profile when a repository already defines official brand rules.
 
 ### README Footer Snippet (WebP + Text)
 
@@ -154,6 +157,7 @@ If you include a mark, keep it minimal and documentation-safe.
 
 To keep documentation consistent across repos, enforce the brand rules in process and automation:
 
+- **Precedence check first**: Verify repo-specific brand standards before applying this fallback profile.
 - **Templates**: Start new docs from the standard templates in `assets/` (README, doc, and agents templates). Update templates when guidelines change.
 - **Review checklist**: Require the Doc QA checklist to pass in doc PR reviews.
 - **CI linting**: Run markdownlint/vale (if present) plus a custom check that verifies:

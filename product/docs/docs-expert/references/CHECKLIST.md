@@ -1,8 +1,11 @@
 ## Doc QA checklist (docs-expert)
 
+Reference:
+- `references/openai-doc-writing-principles.md`
+
 ### Structure and navigation
 - [ ] Title states the doc's purpose (not a vague label).
-- [ ] Headings are informative sentences where possible.
+- [ ] Headings are informative sentences where possible (not abstract nouns like "Results").
 - [ ] Table of contents exists if the doc is long/sectioned.
 - [ ] Reader can find: prerequisites -> quickstart -> common tasks -> troubleshooting.
 
@@ -16,6 +19,7 @@
 ### Clarity and style
 - [ ] Sentences are simple and unambiguous.
 - [ ] No fragile "this/that" references across sentences; nouns are explicit.
+- [ ] Left-branching sentences are minimized when a right-branching rewrite is clearer.
 - [ ] Consistent terminology/casing across the doc.
 - [ ] No mind-reading phrases ("you probably want...", "now you'll...").
 
@@ -24,6 +28,7 @@
 - [ ] Likely setup pitfalls are addressed (env vars, permissions, ports, PATH).
 - [ ] Code examples are minimal, self-contained, and reusable.
 - [ ] Security hygiene is correct (no secrets in code; safe defaults).
+- [ ] Coverage prioritizes common/high-value tasks before rare edge cases.
 
 ### Correctness and verification
 - [ ] Steps match repo reality (scripts/configs/paths verified).
@@ -49,11 +54,27 @@
 - [ ] Changelog / release notes exist when the project is versioned (CHANGELOG.md or Releases guidance).
 - [ ] Ownership is discoverable (CODEOWNERS and/or “Maintainers” section in docs) when the project has multiple contributors.
 
+### GitHub visibility and trust signals (public repos)
+- [ ] Repository description clearly states value and audience.
+- [ ] Homepage URL points to canonical docs/site.
+- [ ] Relevant repository topics are configured.
+- [ ] Social preview image is configured and current.
+- [ ] CITATION metadata exists when citation is relevant (`CITATION.cff`).
+- [ ] Funding metadata exists when sponsorship is accepted (`.github/FUNDING.yml`).
+
 ### Brand compliance (when applicable)
+- [ ] Brand source-of-truth path is cited in the deliverable.
 - [ ] Root README includes the documentation signature (image or ASCII fallback).
+- [ ] Signature text uses approved BrAInwav wording; tagline remains exactly "from demo to duty".
 - [ ] Brand assets exist in `brand/` and match approved formats.
 - [ ] No watermark usage in README or technical docs.
 - [ ] Visual styling follows brand guidance only when requested.
+
+### AI-ready documentation (when applicable)
+- [ ] Human-facing docs remain authoritative and complete.
+- [ ] Agent-facing docs (for example `AGENTS.md`) do not contradict canonical docs.
+- [ ] Optional `llms.txt` is only added when requested and labeled as optional/emerging.
+- [ ] High-value workflows have retrieval-friendly headings and concise command examples.
 
 ### Evidence bundle
 - [ ] QA bootstrap output recorded when baseline files were installed.
@@ -61,3 +82,10 @@
 - [ ] Brand check output recorded when branding applies.
 - [ ] Readability output recorded when available.
 - [ ] Checklist snapshot included with the deliverable.
+
+### OpenAI writing-principles coverage
+- [ ] Headings and topic sentences are strong enough that the doc is skimmable without full reading.
+- [ ] Takeaways appear before lengthy procedures.
+- [ ] Terminology is explicit and not jargon-heavy for mixed audiences.
+- [ ] Examples are self-contained and avoid unsafe habits.
+- [ ] Any intentional rule-break is documented with rationale and tradeoff.

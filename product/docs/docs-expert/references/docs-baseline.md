@@ -4,6 +4,52 @@
 
 Produce documentation that gets useful information into a reader's head quickly, with minimal cognitive load, and with practical paths to success (examples plus troubleshooting).
 
+## Standards snapshot (as of March 2026)
+
+Use this baseline unless the repository has stricter internal policy:
+
+- OpenAI Cookbook documentation guidance (clarity, skimmability, consistency, broad helpfulness).
+- GitHub community profile and repository health files.
+- GitHub discoverability signals (topics, repository metadata, social preview).
+- Repo-first brand governance (official repo standards before docs-expert fallback assets).
+- Optional AI-specific context files such as `llms.txt` only when explicitly requested by repo owners.
+
+Primary writing-rules reference:
+- `references/openai-doc-writing-principles.md`
+
+## OpenAI documentation quality gates (explicit)
+
+Apply these gates in audits and rewrites:
+
+### Make docs easy to skim
+- Split content into titled sections.
+- Prefer informative sentence-like headings over abstract nouns.
+- Include a table of contents for long or sectioned docs.
+- Keep paragraphs short; isolate critical points in one-sentence paragraphs where useful.
+- Start sections and paragraphs with standalone topic sentences.
+- Put topic words early in topic sentences.
+- Put takeaways before procedures.
+- Use bullets and tables frequently where they improve scanning.
+- Bold important text sparingly and intentionally.
+
+### Write well
+- Keep sentences simple; split long sentences.
+- Prefer unambiguous sentence structures.
+- Prefer right-branching phrasing when possible.
+- Avoid demonstrative pronouns across sentences when they reduce clarity.
+- Keep terminology, casing, and punctuation consistent.
+- Do not presume reader intent with phrases like “you probably want...”.
+
+### Be broadly helpful
+- Write simply for mixed language/experience audiences.
+- Avoid abbreviations unless expanded on first use.
+- Proactively include likely failure fixes.
+- Prefer specific, accurate terminology over insider jargon.
+- Keep examples general, minimal-dependency, and self-contained.
+- Prioritize high-value/common tasks.
+- Do not teach bad habits (especially secret handling).
+- Consider broad framing before narrow implementation details.
+
 ## Notes
 
 - Short description: Make docs skimmable, clear, and broadly helpful.
@@ -17,6 +63,8 @@ Produce documentation that gets useful information into a reader's head quickly,
 2. Audience: beginner vs experienced; known prerequisites.
 3. Primary job-to-be-done: what the reader is trying to do.
 4. Constraints: supported platforms, required versions, security/compliance requirements.
+5. Brand source of truth: exact path(s) or URL(s) for official brand guidance.
+6. Visibility scope: internal/private vs public OSS.
 
 If the user did not provide these, infer from repo context (existing docs, package.json, tool configs) and state assumptions explicitly.
 
@@ -36,6 +84,27 @@ If the user did not provide these, infer from repo context (existing docs, packa
 - Identify the canonical doc surface(s): README, /docs, /guides, /runbooks, /api, etc.
 - Do not rewrite everything. Pick the smallest set of files that solves the user task.
 - If the task is repo-wide, also capture **GitHub community health** gaps (README, LICENSE, CONTRIBUTING, CODE_OF_CONDUCT, SECURITY, SUPPORT, issue/PR templates). Use `references/CHECKLIST.md`.
+
+### 1b) Resolve brand authority before writing
+
+Use this precedence order:
+
+1. User-provided official brand docs for the target repo.
+2. Brand docs inside the target repo (`brand/*`, `docs/brand/*`, design tokens docs).
+3. Organization-level standards linked by the repo.
+4. `docs-expert` fallback brand profile only when 1-3 do not exist and fallback mode is approved.
+
+Never overwrite official repo brand assets with fallback defaults.
+
+### 1c) Scope visibility and trust signals (public repos)
+
+When docs are public-facing, verify:
+
+- Repository description and homepage URL.
+- Repository topics.
+- Social preview image.
+- Ownership/security/support paths (CODEOWNERS, SECURITY, SUPPORT).
+- Optional metadata when relevant (`CITATION.cff`, `FUNDING.yml`, release/changelog guidance).
 
 ### 1a) Capture doc requirements
 
@@ -114,10 +183,11 @@ section that includes:
 
 ### 9) Bootstrap missing QA tooling (default)
 
-- Run `python scripts/bootstrap_doc_qa.py --repo . --apply` before lint and brand checks.
+- Run `python scripts/bootstrap_doc_qa.py --repo . --apply --brand-profile docs-expert` before lint and brand checks.
 - If `.vale.ini` is missing, install a local Vale baseline (`.vale.ini` and `.vale/styles/Docs/`).
 - If markdownlint config is missing, install `.markdownlint-cli2.yaml`.
-- If `brand/` or branding constraints are missing, install baseline brand assets and `brand/README.md`.
+- If `brand/` or branding constraints are missing, install BrAInwav baseline assets and constraints.
+- Use `--brand-profile repo` only when repository-specific official brand guidance overrides BrAInwav.
 - Record exactly which files were created and which files were already present.
 
 ### 10) Run doc linters (when available)
@@ -136,7 +206,7 @@ Use these commands in CI or pre-commit, adjusting paths to your repo:
 python /path/to/bootstrap_doc_qa.py --repo . --apply
 vale <doc>
 markdownlint-cli2 <doc> --config <config>
-python /path/to/check_brand_guidelines.py --repo . --docs <doc>
+python /path/to/check_brand_guidelines.py --repo . --docs <doc> --profile docs-expert
 python /path/to/check_readability.py <doc>
 ```
 
@@ -157,7 +227,9 @@ Standards mapping:
 - Accessibility and inclusive language basics
 - Security and privacy guidance for sensitive info
 - GitHub repository community health basics (when repo-wide documentation is in scope)
+- GitHub visibility/discoverability metadata (for public repos)
 - Brand compliance (when branding or README signature applies)
+- AI-ready documentation consistency (when agent-facing docs are in scope)
 
 Automated checks (if available):
 - markdownlint, vale, link check (list commands run)
@@ -175,3 +247,7 @@ Deviations (if any):
 - Writing without confirming audience and purpose.
 - Burying key decisions or risks in long prose.
 - Shipping drafts without a verification pass.
+
+## Use judgment when context demands it
+
+These rules are defaults, not strict dogma. Break a rule when a repository-specific constraint, audience need, or safety requirement clearly justifies it, and record the reason in the deliverable.
