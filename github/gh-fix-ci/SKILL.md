@@ -145,3 +145,16 @@ Usage examples:
 - Persist with: `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
 - The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
 <!-- /decision-feedback-protocol -->
+
+## Folded Legacy Modes (Core60)
+<!-- core60-folded-modes:v1:start -->
+This skill owns legacy capability from retired skills. Use these modes when requests match prior behavior.
+
+- `local-ci-repro` from `github/local-action-verification`: Use when the user asks to validate GitHub Actions locally with act; output setup guidance, AGENTS.md instructions, and fail-fast checks b...
+
+Deep legacy details: `references/folded-legacy-modes-core60.md`.
+<!-- core60-folded-modes:v1:end -->
+
+## GitHub Actions security baseline
+- Pin actions to a full-length commit SHA for third-party actions.
+- Apply explicit least-privilege `permissions` for each workflow and job scope.

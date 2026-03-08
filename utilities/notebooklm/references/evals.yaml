@@ -1,0 +1,59 @@
+schema_version: '2.0'
+skill_name: notebooklm
+cases:
+- id: explicit-skill-request
+  name: explicit skill request
+  category: happy
+  should_trigger: true
+  prepend_skill: false
+  prompt: Use  to handle this workflow and provide the final output.
+  acceptance:
+  - type: skill_selected
+    expected_skill: notebooklm
+- id: trigger-phrase-match
+  name: trigger phrase match
+  category: edge
+  should_trigger: true
+  prepend_skill: false
+  prompt: "Use when a user asks to interact with Google NotebookLM from this environment\
+    \ \u2014 to query notebooks, manage sources/notebooks, or generate audio/video\
+    \ overviews. Do not use for general web/chat questions unrelated to NotebookLM."
+  acceptance:
+  - type: skill_selected
+    expected_skill: notebooklm
+- id: scoped-execution-request
+  name: scoped execution request
+  category: edge
+  should_trigger: true
+  prepend_skill: false
+  prompt: Run the notebooklm workflow with strict validation and summarize outcomes.
+  acceptance:
+  - type: skill_selected
+    expected_skill: notebooklm
+- id: translation-negative
+  name: translation negative
+  category: negative
+  should_trigger: false
+  prepend_skill: false
+  prompt: Translate this paragraph into French.
+  acceptance:
+  - type: skill_not_selected
+    expected_skill: notebooklm
+- id: casual-chat-negative
+  name: casual chat negative
+  category: negative
+  should_trigger: false
+  prepend_skill: false
+  prompt: How is your day going?
+  acceptance:
+  - type: skill_not_selected
+    expected_skill: notebooklm
+- id: generic-fix-negative
+  name: generic fix negative
+  category: negative
+  should_trigger: false
+  prepend_skill: false
+  prompt: Fix this random typo in a README right now.
+  acceptance:
+  - type: skill_not_selected
+    expected_skill: notebooklm

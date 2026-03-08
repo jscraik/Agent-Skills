@@ -34,6 +34,22 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--claude-zai-command", default=None, help="Path/name to pass through as --claude-zai-command.")
     p.add_argument("--baseline-file", default=None, help="Optional baseline JSON of known structure failures.")
     p.add_argument("--write-baseline", action="store_true", help="Write/update baseline JSON from current structure failures.")
+    p.add_argument(
+        "--benchmark-mode",
+        choices=["off", "warn", "fail"],
+        default="warn",
+        help="Portfolio benchmark enforcement mode.",
+    )
+    p.add_argument(
+        "--benchmark-config",
+        default="utilities/skill-builder/references/benchmark-policy.json",
+        help="Portfolio benchmark policy JSON path.",
+    )
+    p.add_argument(
+        "--benchmark-output-json",
+        default="artifacts/industry-benchmark-latest.json",
+        help="Where to write benchmark JSON output.",
+    )
     p.add_argument("--format", choices=["text", "json"], default="text")
     return p.parse_args()
 
@@ -89,6 +105,7 @@ def main() -> int:
     skill_gate_py = scripts / "skill_gate.py"
     run_evals_py = scripts / "run_skill_evals.py"
     ci_gate_py = scripts / "ci_skill_quality_gate.py"
+    benchmark_py = scripts / "benchmark_skill_portfolio.py"
     py = choose_python()
 
     skills = find_skill_dirs(root)
@@ -176,6 +193,35 @@ def main() -> int:
         }
         baseline_path.write_text(json.dumps(baseline_payload, indent=2, ensure_ascii=False), encoding="utf-8")
 
+    benchmark_result = None
+    benchmark_failed = False
+    if args.benchmark_mode != "off":
+        benchmark_cmd = [
+            py,
+            str(benchmark_py),
+            "--root",
+            str(root),
+            "--config",
+            str(args.benchmark_config),
+            "--mode",
+            args.benchmark_mode,
+            "--format",
+            "json",
+            "--output-json",
+            str(args.benchmark_output_json),
+        ]
+        proc = run_cmd(benchmark_cmd, root)
+        if proc.stdout.strip():
+            try:
+                benchmark_result = json.loads(proc.stdout)
+            except json.JSONDecodeError:
+                benchmark_result = {"parse_error": "invalid_json", "stdout": proc.stdout}
+        if proc.returncode != 0:
+            benchmark_failed = True
+            eval_failures.append(
+                {"skill": "portfolio-benchmark", "stdout": proc.stdout, "stderr": proc.stderr}
+            )
+
     payload = {
         "skills": len(skills),
         "structure_failures": len(structure_failures),
@@ -189,6 +235,11 @@ def main() -> int:
         "eval_failure_details": eval_failures,
         "scorecards": [str(p) for p in scorecards],
         "scorecard_gate": gate_result,
+        "benchmark_mode": args.benchmark_mode,
+        "benchmark_config": str(args.benchmark_config),
+        "benchmark_output_json": str(args.benchmark_output_json),
+        "benchmark_result": benchmark_result,
+        "benchmark_failed": benchmark_failed,
         "passed": len(new_structure_failures) == 0 and len(eval_failures) == 0,
     }
 
@@ -201,6 +252,9 @@ def main() -> int:
             print(f"New structure failures vs baseline: {payload['new_structure_failures']}")
             print(f"Resolved structure failures vs baseline: {payload['resolved_structure_failures']}")
         print(f"Eval failures: {payload['eval_failures']}")
+        if args.benchmark_mode != "off":
+            print(f"Benchmark mode: {payload['benchmark_mode']}")
+            print(f"Benchmark failed: {payload['benchmark_failed']}")
         print(f"RESULT: {'PASS' if payload['passed'] else 'FAIL'}")
 
     return 0 if payload["passed"] else 2

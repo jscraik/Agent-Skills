@@ -285,3 +285,12 @@ The agent is capable of extraordinary work in this domain. Use these guidelines 
 - Persist with: `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
 - The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
 <!-- /decision-feedback-protocol -->
+
+## Folded Legacy Modes (Core60)
+<!-- core60-folded-modes:v1:start -->
+This skill owns legacy capability from retired skills. Use these modes when requests match prior behavior.
+
+- `craft-profile` from `frontend/ui/interface-craft`: Interface Craft by Josh Puckett helps build polished React interfaces with Motion + DialKit, CSS-variable theming, storyboard motion, and...
+
+Deep legacy details: `references/folded-legacy-modes-core60.md`.
+<!-- core60-folded-modes:v1:end -->

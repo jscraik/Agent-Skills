@@ -134,3 +134,12 @@ Required gates:
 - Persist with: `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
 - The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
 <!-- /decision-feedback-protocol -->
+
+## Execution quality
+- Philosophy: use a practical framework that balances speed, safety, and tradeoff clarity.
+- Approach: choose context-specific variation rather than generic cookie-cutter steps; adapt output to repository constraints.
+- Guiding question: Why is this the smallest safe change?
+- Guiding question: What tradeoff are we making and why?
+- Guiding question: How do we verify the result end-to-end?
+- Anti-patterns: DO NOT skip validation, NEVER hide failed checks, and avoid repetitive template-only output.
+- Empowerment: be capable, creative, and enable users to explore options with confidence.

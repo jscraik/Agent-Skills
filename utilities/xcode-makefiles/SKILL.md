@@ -82,6 +82,11 @@ skills/xcode-makefiles/scripts/install.sh \
 - Mixing manual edits and installer output without re-running diagnostics.
 - Treating `AGENT_NAME` as optional for shared multi-agent workflows.
 
+## Variation
+- Adapt install mode by context: first-time scaffold, upgrade-only, or diagnostics-only run.
+- Use different validation depth for local prototyping versus CI-grade reproducibility.
+- Customize platform targeting (iOS, macOS, or both) while preserving strict make-based guardrails.
+
 ## Examples
 ```bash
 skills/xcode-makefiles/scripts/install.sh --project-dir /tmp/demo --app-name Demo --platform ios --dry-run
@@ -98,3 +103,12 @@ skills/xcode-makefiles/scripts/install.sh --project-dir /tmp/demo --app-name Dem
 - Capture: decision (accepted|partial|rejected|deferred), outcome (good|neutral|bad|unknown), and confidence (high|medium|low).
 - Persist feedback with python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "...".
 <!-- /decision-feedback-protocol -->
+
+## Execution quality
+- Philosophy: use a practical framework that balances speed, safety, and tradeoff clarity.
+- Approach: choose context-specific variation rather than generic cookie-cutter steps; adapt output to repository constraints.
+- Guiding question: Why is this the smallest safe change?
+- Guiding question: What tradeoff are we making and why?
+- Guiding question: How do we verify the result end-to-end?
+- Anti-patterns: DO NOT skip validation, NEVER hide failed checks, and avoid repetitive template-only output.
+- Empowerment: be capable, creative, and enable users to explore options with confidence.

@@ -18,6 +18,7 @@ Better Auth is a TypeScript-first, framework-agnostic auth framework supporting 
 - Security first: defaults should be safe, explicit, and least-privilege.
 - Prefer minimal viable configuration, then layer features.
 - Validate with real flows, not just configuration checks.
+- Align auth risk review with `OWASP Top 10:2025` (especially auth/session and access-control classes).
 
 ## Scope and triggers
 
@@ -283,3 +284,7 @@ Use these when the user asks for focused help on specific tasks:
 - Persist with: `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
 - The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
 <!-- /decision-feedback-protocol -->
+
+## Security baseline (OWASP)
+- Map recommendations to the OWASP Top 10 categories and call out category coverage in findings.
+- Require explicit mitigation notes for injection, broken access control, security misconfiguration, and sensitive data exposure.

@@ -1,0 +1,8 @@
+[OK] Updated symlink: /Users/jamiecraik/dev/agent-skills/skills -> /Users/jamiecraik/dev/agent-skills/.agents/skills
+[OK] Updated symlink: /Users/jamiecraik/.claude/skills -> /Users/jamiecraik/dev/agent-skills/.agents/skills
+[OK] Updated symlink: /Users/jamiecraik/.agents/skills -> /Users/jamiecraik/dev/agent-skills/.agents/skills
+[OK] Updated symlink: /Users/jamiecraik/.codex/skills -> /Users/jamiecraik/dev/agent-skills/.agents/skills
+[OK] Updated symlink: /Users/jamiecraik/.gemini/antigravity/skills -> /Users/jamiecraik/dev/agent-skills/skills-antigravity
+[OK] Updated symlink: /Users/jamiecraik/.gemini/skills -> /Users/jamiecraik/dev/agent-skills/skills-antigravity
+[OK] Updated symlink: /Users/jamiecraik/.antigravity/skills -> /Users/jamiecraik/dev/agent-skills/skills-antigravity
+Synced symlinks and regenerated SKILL.md.

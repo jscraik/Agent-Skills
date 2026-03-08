@@ -342,3 +342,17 @@ See `references/extended.md` for additional examples, workflows, and appendices.
 - Persist with: `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
 - The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
 <!-- /decision-feedback-protocol -->
+
+## Folded Legacy Modes (Core60)
+<!-- core60-folded-modes:v1:start -->
+This skill owns legacy capability from retired skills. Use these modes when requests match prior behavior.
+
+- `guideline-audit` from `frontend/ui/web-design-guidelines`: Review UI code against Web Interface Guidelines with file:line findings.
+
+Deep legacy details: `references/folded-legacy-modes-core60.md`.
+Additional Phase 4 folds: references/folded-legacy-modes-phase4.md.
+<!-- core60-folded-modes:v1:end -->
+
+## Modern baseline (March 2026)
+- React 19 and Next.js 16 are the baseline for new guidance and examples in this skill.
+- Tailwind CSS v4 and WCAG 2.2 compliance checks should be treated as default expectations.

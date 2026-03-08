@@ -1,13 +1,13 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-03-08T19:30:12Z",
+  "generated_at": "2026-03-08T21:53:03Z",
   "decision_date": "2026-03-08",
   "summary": {
-    "active_skill_count": 144,
-    "manual_skill_count": 13,
-    "co_pilot_skill_count": 131,
-    "profile_valid_count": 143,
-    "profile_invalid_count": 1,
+    "active_skill_count": 79,
+    "manual_skill_count": 9,
+    "co_pilot_skill_count": 70,
+    "profile_valid_count": 79,
+    "profile_invalid_count": 0,
     "event_envelope_errors": 8,
     "approver_count": 2
   },
@@ -36,8 +36,8 @@
         "wave_0_ready": false
       },
       "coverage": {
-        "total": 13,
-        "valid": 13
+        "total": 9,
+        "valid": 9
       },
       "blockers": [
         {
@@ -52,22 +52,15 @@
     "wave-2-co-pilot": {
       "ready": false,
       "checks": {
-        "co_pilot_profiles_valid": false,
+        "co_pilot_profiles_valid": true,
         "wave_1_ready": false,
         "event_envelope_errors_zero": false
       },
       "coverage": {
-        "total": 131,
-        "valid": 130
+        "total": 70,
+        "valid": 70
       },
       "blockers": [
-        {
-          "code": "COPILOT_SKILL_VALIDATION",
-          "detail": "Co-pilot skills valid 130/131",
-          "owner": "unassigned",
-          "due_date": null,
-          "escalation_date": null
-        },
         {
           "code": "WAVE1_NOT_READY",
           "detail": "Wave 2 blocked until Wave 1 manual onboarding passes",

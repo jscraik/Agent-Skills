@@ -381,3 +381,12 @@ See `references/extended.md` for additional examples, workflows, and appendices.
 - Persist with: `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
 - The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
 <!-- /decision-feedback-protocol -->
+
+## Folded Legacy Modes (Core60)
+<!-- core60-folded-modes:v1:start -->
+This skill owns legacy capability from retired skills. Use these modes when requests match prior behavior.
+
+- `enterprise-profile` from `backend/mkit-builder`: Create MCP servers with OAuth, billing/licensing, and Apps SDK UI integration.
+
+Deep legacy details: `references/folded-legacy-modes-core60.md`.
+<!-- core60-folded-modes:v1:end -->

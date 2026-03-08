@@ -366,3 +366,13 @@ From debugging sessions:
 - Persist with: `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
 - The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
 <!-- /decision-feedback-protocol -->
+
+## Folded Legacy Modes (Core60)
+<!-- core60-folded-modes:v1:start -->
+This skill owns legacy capability from retired skills. Use these modes when requests match prior behavior.
+
+- `recent-commit-lens` from `utilities/recent-code-bugfix`: Diagnose and fix a bug introduced by the current author within the last week. Use when a user asks for a proactive bugfix from their rece...
+
+Deep legacy details: `references/folded-legacy-modes-core60.md`.
+Additional Phase 4 folds: references/folded-legacy-modes-phase4.md.
+<!-- core60-folded-modes:v1:end -->

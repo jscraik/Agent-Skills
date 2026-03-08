@@ -159,17 +159,65 @@ Use when:
 - building baseline/regression dashboards from stored scorecards
 - tracking tier1/tier2 trend deltas over time
 
+## benchmark_skill_portfolio.py
+
+```bash
+python utilities/skill-builder/scripts/benchmark_skill_portfolio.py \
+  --root /absolute/repo \
+  --config utilities/skill-builder/references/benchmark-policy.json \
+  --mode warn \
+  --format text \
+  --output-json artifacts/industry-benchmark-latest.json
+```
+
+Use when:
+- enforcing portfolio marker distribution (not only single-skill pass/fail checks)
+- measuring cluster coverage for modern baselines (frontend, GitHub, Cloudflare, OpenAI, security, MCP)
+- generating benchmark artifacts that CI and local quality gates can read
+
+Notes:
+- `--mode warn` blocks on hard-fail conditions and reports warning conditions.
+- `--mode fail` blocks on both hard-fail and warning conditions (strict ratchet mode).
+- Keep policy changes in `references/benchmark-policy.json` under version control with a short rationale in the related PR.
+
+## refresh_benchmark_policy.py
+
+```bash
+python utilities/skill-builder/scripts/refresh_benchmark_policy.py \
+  --root /absolute/repo \
+  --policy utilities/skill-builder/references/benchmark-policy.json \
+  --benchmark-json artifacts/industry-benchmark-latest.json \
+  --schedule-days 7 \
+  --apply \
+  --report-json artifacts/benchmark-policy-refresh-report.json
+```
+
+Use when:
+- pulling version baselines from Context7 (for configured marker sources)
+- ratcheting benchmark thresholds from observed portfolio performance
+- keeping benchmark policy fresh in scheduled governance runs
+
+Notes:
+- Reads `CONTEXT7_API_KEY` by default (override with `--context7-env`).
+- Context pull is schedule-window aware (`--schedule-days`, override with `--force-context-refresh`).
+- Ratcheting is one-way only (tightens gates, never loosens).
+- Use `--require-context7` when you want missing key/API failures to hard-fail the run.
+
 ## run_repo_skill_quality.py
 
 ```bash
 python utilities/skill-builder/scripts/run_repo_skill_quality.py \
   --root /absolute/repo \
-  --baseline-file utilities/skill-builder/references/skill-quality-baseline.json
+  --baseline-file utilities/skill-builder/references/skill-quality-baseline.json \
+  --benchmark-mode warn \
+  --benchmark-config utilities/skill-builder/references/benchmark-policy.json \
+  --benchmark-output-json artifacts/industry-benchmark-latest.json
 ```
 
 Use when:
 - enforcing repo-wide structure gates with baseline-aware drift detection
 - running optional eval sweeps (`--run-evals --dual-run --capture-jsonl`)
+- enforcing portfolio benchmark policy in the same pass as structure/eval gates
 
 ## Contract and evals (gold standard)
 

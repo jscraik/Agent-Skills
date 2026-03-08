@@ -18,6 +18,7 @@ Guide for adding authentication to TypeScript/JavaScript applications using Bett
 - Start with secure defaults and minimal features.
 - Add one auth surface at a time, validate, then expand.
 - Prefer incremental migration over rewrites.
+- Keep implementation and review aligned to `OWASP Top 10:2025` expectations for auth and session controls.
 
 ## Scope and triggers
 
@@ -324,3 +325,7 @@ Add OAuth secrets as needed: `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`, `GOOGLE
 - Persist with: `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
 - The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
 <!-- /decision-feedback-protocol -->
+
+## Security baseline (OWASP)
+- Map recommendations to the OWASP Top 10 categories and call out category coverage in findings.
+- Require explicit mitigation notes for injection, broken access control, security misconfiguration, and sensitive data exposure.

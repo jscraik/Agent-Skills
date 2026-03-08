@@ -39,7 +39,15 @@ jobs:
           python utilities/skill-builder/scripts/run_repo_skill_quality.py \
             --root . \
             --baseline-file utilities/skill-builder/references/skill-quality-baseline.json \
+            --benchmark-mode warn \
+            --benchmark-config utilities/skill-builder/references/benchmark-policy.json \
+            --benchmark-output-json artifacts/industry-benchmark-latest.json \
             --format text
+      - name: Upload benchmark artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: skill-portfolio-benchmark
+          path: artifacts/industry-benchmark-latest.json
 
   eval-baseline:
     if: github.event_name == 'workflow_dispatch' && inputs.run_evals == 'true'
@@ -60,6 +68,9 @@ jobs:
             --dual-run \
             --capture-jsonl \
             --tier2-mode "${{ inputs.tier2_mode }}" \
+            --benchmark-mode warn \
+            --benchmark-config utilities/skill-builder/references/benchmark-policy.json \
+            --benchmark-output-json artifacts/industry-benchmark-latest.json \
             --format text
       - name: Build dashboard
         run: |
@@ -71,4 +82,6 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: skill-quality-reports
-          path: artifacts/reports/skills
+          path: |
+            artifacts/reports/skills
+            artifacts/industry-benchmark-latest.json

@@ -1,0 +1,822 @@
+{
+  "skills": [
+    {
+      "skill": "product/domain/arscontexta/skill-sources/graph",
+      "quick_validate": {
+        "exit": 0,
+        "fail_codes": [],
+        "warn_codes": []
+      },
+      "skill_gate": {
+        "exit": 2,
+        "fail_codes": [
+          "CONTRACT_MISSING",
+          "EVALS_MISSING",
+          "FM_DESC_WHAT_WHEN",
+          "PD_SKILLMD_TOO_LONG",
+          "SAFE_REDACTION_REQUIRED",
+          "SEC_ANTIPATTERNS_MISSING",
+          "SEC_CONSTRAINTS_MISSING",
+          "SEC_INPUTS_MISSING",
+          "SEC_OUTPUTS_MISSING",
+          "SEC_VALIDATION_MISSING",
+          "SEC_WHEN_TO_USE_MISSING"
+        ],
+        "warn_codes": [
+          "REPO_REFERENCES_UNREFERENCED",
+          "SEC_EXAMPLES_MISSING"
+        ]
+      },
+      "analyze_skill": {
+        "exit": 0,
+        "fail_codes": [],
+        "warn_codes": []
+      }
+    },
+    {
+      "skill": "product/domain/arscontexta/skill-sources/learn",
+      "quick_validate": {
+        "exit": 0,
+        "fail_codes": [],
+        "warn_codes": []
+      },
+      "skill_gate": {
+        "exit": 2,
+        "fail_codes": [
+          "CONTRACT_MISSING",
+          "EVALS_MISSING",
+          "FM_DESC_WHAT_WHEN",
+          "SAFE_REDACTION_REQUIRED",
+          "SEC_ANTIPATTERNS_MISSING",
+          "SEC_CONSTRAINTS_MISSING",
+          "SEC_INPUTS_MISSING",
+          "SEC_PHILOSOPHY_MISSING",
+          "SEC_VALIDATION_MISSING",
+          "SEC_WHEN_TO_USE_MISSING"
+        ],
+        "warn_codes": [
+          "PATH_ABSOLUTE",
+          "REPO_REFERENCES_UNREFERENCED",
+          "SEC_EXAMPLES_MISSING"
+        ]
+      },
+      "analyze_skill": {
+        "exit": 2,
+        "fail_codes": [],
+        "warn_codes": []
+      }
+    },
+    {
+      "skill": "product/domain/arscontexta/skill-sources/next",
+      "quick_validate": {
+        "exit": 0,
+        "fail_codes": [],
+        "warn_codes": []
+      },
+      "skill_gate": {
+        "exit": 2,
+        "fail_codes": [
+          "CONTRACT_MISSING",
+          "EVALS_MISSING",
+          "FM_DESC_WHAT_WHEN",
+          "SAFE_REDACTION_REQUIRED",
+          "SEC_CONSTRAINTS_MISSING",
+          "SEC_INPUTS_MISSING",
+          "SEC_OUTPUTS_MISSING",
+          "SEC_PHILOSOPHY_MISSING",
+          "SEC_VALIDATION_MISSING",
+          "SEC_WHEN_TO_USE_MISSING"
+        ],
+        "warn_codes": [
+          "FM_DESC_WORKFLOWY",
+          "PI_TOOL_CHAIN",
+          "REPO_REFERENCES_UNREFERENCED",
+          "SEC_EXAMPLES_MISSING"
+        ]
+      },
+      "analyze_skill": {
+        "exit": 0,
+        "fail_codes": [],
+        "warn_codes": []
+      }
+    },
+    {
+      "skill": "product/domain/arscontexta/skill-sources/pipeline",
+      "quick_validate": {
+        "exit": 0,
+        "fail_codes": [],
+        "warn_codes": []
+      },
+      "skill_gate": {
+        "exit": 2,
+        "fail_codes": [
+          "CONTRACT_MISSING",
+          "EVALS_MISSING",
+          "FM_DESC_WHAT_WHEN",
+          "SAFE_REDACTION_REQUIRED",
+          "SEC_ANTIPATTERNS_MISSING",
+          "SEC_INPUTS_MISSING",
+          "SEC_OUTPUTS_MISSING",
+          "SEC_PHILOSOPHY_MISSING",
+          "SEC_WHEN_TO_USE_MISSING"
+        ],
+        "warn_codes": [
+          "PATH_ABSOLUTE",
+          "REPO_REFERENCES_UNREFERENCED",
+          "SEC_EXAMPLES_MISSING"
+        ]
+      },
+      "analyze_skill": {
+        "exit": 2,
+        "fail_codes": [],
+        "warn_codes": []
+      }
+    },
+    {
+      "skill": "product/domain/arscontexta/skill-sources/ralph",
+      "quick_validate": {
+        "exit": 0,
+        "fail_codes": [],
+        "warn_codes": []
+      },
+      "skill_gate": {
+        "exit": 2,
+        "fail_codes": [
+          "CONTRACT_MISSING",
+          "EVALS_MISSING",
+          "FM_DESC_WHAT_WHEN",
+          "PD_SKILLMD_TOO_LONG",
+          "SAFE_REDACTION_REQUIRED",
+          "SEC_ANTIPATTERNS_MISSING",
+          "SEC_INPUTS_MISSING",
+          "SEC_OUTPUTS_MISSING",
+          "SEC_PHILOSOPHY_MISSING",
+          "SEC_WHEN_TO_USE_MISSING"
+        ],
+        "warn_codes": [
+          "REPO_REFERENCES_UNREFERENCED",
+          "SEC_EXAMPLES_MISSING",
+          "WF_FAIL_FAST_MISSING"
+        ]
+      },
+      "analyze_skill": {
+        "exit": 2,
+        "fail_codes": [],
+        "warn_codes": []
+      }
+    },
+    {
+      "skill": "product/domain/arscontexta/skill-sources/reduce",
+      "quick_validate": {
+        "exit": 0,
+        "fail_codes": [],
+        "warn_codes": []
+      },
+      "skill_gate": {
+        "exit": 2,
+        "fail_codes": [
+          "CONTRACT_MISSING",
+          "EVALS_MISSING",
+          "PD_SKILLMD_TOO_LONG",
+          "SAFE_REDACTION_REQUIRED",
+          "SEC_ANTIPATTERNS_MISSING",
+          "SEC_CONSTRAINTS_MISSING",
+          "SEC_INPUTS_MISSING",
+          "SEC_OUTPUTS_MISSING",
+          "SEC_WHEN_TO_USE_MISSING"
+        ],
+        "warn_codes": [
+          "PI_TOOL_CHAIN",
+          "REPO_REFERENCES_UNREFERENCED",
+          "SEC_EXAMPLES_MISSING"
+        ]
+      },
+      "analyze_skill": {
+        "exit": 0,
+        "fail_codes": [],
+        "warn_codes": []
+      }
+    },
+    {
+      "skill": "product/domain/arscontexta/skill-sources/refactor",
+      "quick_validate": {
+        "exit": 0,
+        "fail_codes": [],
+        "warn_codes": []
+      },
+      "skill_gate": {
+        "exit": 2,
+        "fail_codes": [
+          "CONTRACT_MISSING",
+          "EVALS_MISSING",
+          "SAFE_REDACTION_REQUIRED",
+          "SEC_ANTIPATTERNS_MISSING",
+          "SEC_CONSTRAINTS_MISSING",
+          "SEC_INPUTS_MISSING",
+          "SEC_OUTPUTS_MISSING",
+          "SEC_VALIDATION_MISSING",
+          "SEC_WHEN_TO_USE_MISSING"
+        ],
+        "warn_codes": [
+          "PATH_ABSOLUTE",
+          "REPO_REFERENCES_UNREFERENCED",
+          "SEC_EXAMPLES_MISSING"
+        ]
+      },
+      "analyze_skill": {
+        "exit": 0,
+        "fail_codes": [],
+        "warn_codes": []
+      }
+    },
+    {
+      "skill": "product/domain/arscontexta/skill-sources/reflect",
+      "quick_validate": {
+        "exit": 0,
+        "fail_codes": [],
+        "warn_codes": []
+      },
+      "skill_gate": {
+        "exit": 2,
+        "fail_codes": [
+          "CONTRACT_MISSING",
+          "EVALS_MISSING",
+          "PD_SKILLMD_TOO_LONG",
+          "SAFE_REDACTION_REQUIRED",
+          "SEC_ANTIPATTERNS_MISSING",
+          "SEC_INPUTS_MISSING",
+          "SEC_OUTPUTS_MISSING"
+        ],
+        "warn_codes": [
+          "PI_COMMANDS",
+          "REPO_REFERENCES_UNREFERENCED",
+          "SEC_EXAMPLES_MISSING",
+          "WF_FAIL_FAST_MISSING"
+        ]
+      },
+      "analyze_skill": {
+        "exit": 0,
+        "fail_codes": [],
+        "warn_codes": []
+      }
+    },
+    {
+      "skill": "product/domain/arscontexta/skill-sources/remember",
+      "quick_validate": {
+        "exit": 0,
+        "fail_codes": [],
+        "warn_codes": []
+      },
+      "skill_gate": {
+        "exit": 2,
+        "fail_codes": [
+          "CONTRACT_MISSING",
+          "EVALS_MISSING",
+          "PD_SKILLMD_TOO_LONG",
+          "SAFE_REDACTION_REQUIRED",
+          "SEC_CONSTRAINTS_MISSING",
+          "SEC_INPUTS_MISSING",
+          "SEC_OUTPUTS_MISSING",
+          "SEC_PHILOSOPHY_MISSING",
+          "SEC_VALIDATION_MISSING",
+          "SEC_WHEN_TO_USE_MISSING"
+        ],
+        "warn_codes": [
+          "REPO_REFERENCES_UNREFERENCED",
+          "SEC_EXAMPLES_MISSING"
+        ]
+      },
+      "analyze_skill": {
+        "exit": 0,
+        "fail_codes": [],
+        "warn_codes": []
+      }
+    },
+    {
+      "skill": "product/domain/arscontexta/skill-sources/rethink",
+      "quick_validate": {
+        "exit": 0,
+        "fail_codes": [],
+        "warn_codes": []
+      },
+      "skill_gate": {
+        "exit": 2,
+        "fail_codes": [
+          "CONTRACT_MISSING",
+          "EVALS_MISSING",
+          "PD_SKILLMD_TOO_LONG",
+          "SAFE_REDACTION_REQUIRED",
+          "SEC_ANTIPATTERNS_MISSING",
+          "SEC_INPUTS_MISSING",
+          "SEC_OUTPUTS_MISSING",
+          "SEC_VALIDATION_MISSING",
+          "SEC_WHEN_TO_USE_MISSING"
+        ],
+        "warn_codes": [
+          "PATH_ABSOLUTE",
+          "REPO_REFERENCES_UNREFERENCED",
+          "SEC_EXAMPLES_MISSING"
+        ]
+      },
+      "analyze_skill": {
+        "exit": 0,
+        "fail_codes": [],
+        "warn_codes": []
+      }
+    },
+    {
+      "skill": "product/domain/arscontexta/skill-sources/reweave",
+      "quick_validate": {
+        "exit": 0,
+        "fail_codes": [],
+        "warn_codes": []
+      },
+      "skill_gate": {
+        "exit": 2,
+        "fail_codes": [
+          "CONTRACT_MISSING",
+          "EVALS_MISSING",
+          "FM_DESC_WHAT_WHEN",
+          "PD_SKILLMD_TOO_LONG",
+          "SAFE_REDACTION_REQUIRED",
+          "SEC_ANTIPATTERNS_MISSING",
+          "SEC_INPUTS_MISSING",
+          "SEC_OUTPUTS_MISSING"
+        ],
+        "warn_codes": [
+          "PI_COMMANDS",
+          "REPO_REFERENCES_UNREFERENCED",
+          "SEC_EXAMPLES_MISSING",
+          "WF_FAIL_FAST_MISSING"
+        ]
+      },
+      "analyze_skill": {
+        "exit": 0,
+        "fail_codes": [],
+        "warn_codes": []
+      }
+    },
+    {
+      "skill": "product/domain/arscontexta/skill-sources/seed",
+      "quick_validate": {
+        "exit": 0,
+        "fail_codes": [],
+        "warn_codes": []
+      },
+      "skill_gate": {
+        "exit": 2,
+        "fail_codes": [
+          "CONTRACT_MISSING",
+          "EVALS_MISSING",
+          "SAFE_REDACTION_REQUIRED",
+          "SEC_ANTIPATTERNS_MISSING",
+          "SEC_INPUTS_MISSING",
+          "SEC_PHILOSOPHY_MISSING",
+          "SEC_PROCEDURE_MISSING",
+          "SEC_WHEN_TO_USE_MISSING"
+        ],
+        "warn_codes": [
+          "PATH_ABSOLUTE",
+          "REPO_REFERENCES_UNREFERENCED",
+          "SEC_EXAMPLES_MISSING",
+          "WF_FAIL_FAST_MISSING"
+        ]
+      },
+      "analyze_skill": {
+        "exit": 0,
+        "fail_codes": [],
+        "warn_codes": []
+      }
+    },
+    {
+      "skill": "product/domain/arscontexta/skill-sources/stats",
+      "quick_validate": {
+        "exit": 0,
+        "fail_codes": [],
+        "warn_codes": []
+      },
+      "skill_gate": {
+        "exit": 2,
+        "fail_codes": [
+          "CONTRACT_MISSING",
+          "EVALS_MISSING",
+          "FM_DESC_WHAT_WHEN",
+          "SAFE_REDACTION_REQUIRED",
+          "SEC_ANTIPATTERNS_MISSING",
+          "SEC_CONSTRAINTS_MISSING",
+          "SEC_INPUTS_MISSING",
+          "SEC_OUTPUTS_MISSING",
+          "SEC_VALIDATION_MISSING",
+          "SEC_WHEN_TO_USE_MISSING"
+        ],
+        "warn_codes": [
+          "REPO_REFERENCES_UNREFERENCED",
+          "SEC_EXAMPLES_MISSING"
+        ]
+      },
+      "analyze_skill": {
+        "exit": 0,
+        "fail_codes": [],
+        "warn_codes": []
+      }
+    },
+    {
+      "skill": "product/domain/arscontexta/skill-sources/tasks",
+      "quick_validate": {
+        "exit": 0,
+        "fail_codes": [],
+        "warn_codes": []
+      },
+      "skill_gate": {
+        "exit": 2,
+        "fail_codes": [
+          "CONTRACT_MISSING",
+          "EVALS_MISSING",
+          "FM_DESC_WHAT_WHEN",
+          "SAFE_REDACTION_REQUIRED",
+          "SEC_ANTIPATTERNS_MISSING",
+          "SEC_CONSTRAINTS_MISSING",
+          "SEC_INPUTS_MISSING",
+          "SEC_OUTPUTS_MISSING",
+          "SEC_VALIDATION_MISSING",
+          "SEC_WHEN_TO_USE_MISSING"
+        ],
+        "warn_codes": [
+          "PATH_ABSOLUTE",
+          "PI_TOOL_CHAIN",
+          "REPO_REFERENCES_UNREFERENCED",
+          "SEC_EXAMPLES_MISSING"
+        ]
+      },
+      "analyze_skill": {
+        "exit": 2,
+        "fail_codes": [],
+        "warn_codes": []
+      }
+    },
+    {
+      "skill": "product/domain/arscontexta/skill-sources/validate",
+      "quick_validate": {
+        "exit": 0,
+        "fail_codes": [],
+        "warn_codes": []
+      },
+      "skill_gate": {
+        "exit": 2,
+        "fail_codes": [
+          "CONTRACT_MISSING",
+          "EVALS_MISSING",
+          "SAFE_REDACTION_REQUIRED",
+          "SEC_ANTIPATTERNS_MISSING",
+          "SEC_INPUTS_MISSING",
+          "SEC_OUTPUTS_MISSING",
+          "SEC_PHILOSOPHY_MISSING",
+          "SEC_WHEN_TO_USE_MISSING"
+        ],
+        "warn_codes": [
+          "REPO_REFERENCES_UNREFERENCED",
+          "SEC_EXAMPLES_MISSING"
+        ]
+      },
+      "analyze_skill": {
+        "exit": 0,
+        "fail_codes": [],
+        "warn_codes": []
+      }
+    },
+    {
+      "skill": "product/domain/arscontexta/skill-sources/verify",
+      "quick_validate": {
+        "exit": 0,
+        "fail_codes": [],
+        "warn_codes": []
+      },
+      "skill_gate": {
+        "exit": 2,
+        "fail_codes": [
+          "CONTRACT_MISSING",
+          "EVALS_MISSING",
+          "PD_SKILLMD_TOO_LONG",
+          "SAFE_REDACTION_REQUIRED",
+          "SEC_ANTIPATTERNS_MISSING",
+          "SEC_INPUTS_MISSING",
+          "SEC_OUTPUTS_MISSING"
+        ],
+        "warn_codes": [
+          "REPO_REFERENCES_UNREFERENCED",
+          "SEC_EXAMPLES_MISSING",
+          "WF_FAIL_FAST_MISSING"
+        ]
+      },
+      "analyze_skill": {
+        "exit": 0,
+        "fail_codes": [],
+        "warn_codes": []
+      }
+    },
+    {
+      "skill": "product/domain/arscontexta/skills/help",
+      "quick_validate": {
+        "exit": 1,
+        "fail_codes": [],
+        "warn_codes": []
+      },
+      "skill_gate": {
+        "exit": 2,
+        "fail_codes": [
+          "CONTRACT_MISSING",
+          "EVALS_MISSING",
+          "FM_DESC_WHAT_WHEN",
+          "SAFE_REDACTION_REQUIRED",
+          "SEC_ANTIPATTERNS_MISSING",
+          "SEC_CONSTRAINTS_MISSING",
+          "SEC_INPUTS_MISSING",
+          "SEC_OUTPUTS_MISSING",
+          "SEC_PHILOSOPHY_MISSING",
+          "SEC_PROCEDURE_MISSING",
+          "SEC_VALIDATION_MISSING",
+          "SEC_WHEN_TO_USE_MISSING"
+        ],
+        "warn_codes": [
+          "FM_DESC_WORKFLOWY",
+          "PATH_ABSOLUTE",
+          "REPO_REFERENCES_UNREFERENCED",
+          "SEC_EXAMPLES_MISSING"
+        ]
+      },
+      "analyze_skill": {
+        "exit": 0,
+        "fail_codes": [],
+        "warn_codes": []
+      }
+    },
+    {
+      "skill": "utilities/insight-report",
+      "quick_validate": {
+        "exit": 0,
+        "fail_codes": [],
+        "warn_codes": []
+      },
+      "skill_gate": {
+        "exit": 2,
+        "fail_codes": [
+          "CONTRACT_KEYS_MISSING",
+          "EVALS_CASE_KEYS",
+          "EVALS_TOO_FEW",
+          "SAFE_REDACTION_REQUIRED",
+          "SEC_ANTIPATTERNS_MISSING",
+          "SEC_OUTPUTS_MISSING",
+          "SEC_PHILOSOPHY_MISSING",
+          "SEC_VALIDATION_MISSING"
+        ],
+        "warn_codes": [
+          "REPO_REFERENCES_UNREFERENCED",
+          "SEC_EVALS_COMMAND_GUARD_MISSING",
+          "SEC_EVALS_NEGATIVE_MISSING",
+          "SEC_EVALS_PI_CASE_MISSING",
+          "SEC_EVALS_PRESSURE_MISSING",
+          "SEC_EXAMPLES_MISSING"
+        ]
+      },
+      "analyze_skill": {
+        "exit": 2,
+        "fail_codes": [],
+        "warn_codes": []
+      }
+    },
+    {
+      "skill": "utilities/notebooklm",
+      "quick_validate": {
+        "exit": 0,
+        "fail_codes": [],
+        "warn_codes": []
+      },
+      "skill_gate": {
+        "exit": 2,
+        "fail_codes": [
+          "CONTRACT_MISSING",
+          "EVALS_MISSING",
+          "PD_SKILLMD_TOO_LONG",
+          "SEC_ANTIPATTERNS_MISSING",
+          "SEC_CONSTRAINTS_MISSING",
+          "SEC_INPUTS_MISSING",
+          "SEC_OUTPUTS_MISSING",
+          "SEC_PHILOSOPHY_MISSING",
+          "SEC_VALIDATION_MISSING"
+        ],
+        "warn_codes": [
+          "PI_BINARY_ATTACHMENT",
+          "PI_COMMANDS",
+          "PI_OBFUSCATION",
+          "PI_OVERRIDE",
+          "PI_TOOL_CHAIN",
+          "SAFE_UNTRUSTED_TO_COMMAND",
+          "SEC_EXAMPLES_MISSING"
+        ]
+      },
+      "analyze_skill": {
+        "exit": 0,
+        "fail_codes": [],
+        "warn_codes": []
+      }
+    },
+    {
+      "skill": "utilities/recon-workbench/assets/template/.codex/skills/dependency_doctor",
+      "quick_validate": {
+        "exit": 1,
+        "fail_codes": [],
+        "warn_codes": []
+      },
+      "skill_gate": {
+        "exit": 2,
+        "fail_codes": [
+          "CONTRACT_MISSING",
+          "EVALS_MISSING"
+        ],
+        "warn_codes": [
+          "FM_NAME_STYLE",
+          "SEC_EXAMPLES_MISSING"
+        ]
+      },
+      "analyze_skill": {
+        "exit": 0,
+        "fail_codes": [],
+        "warn_codes": []
+      }
+    },
+    {
+      "skill": "utilities/recon-workbench/assets/template/.codex/skills/interrogate",
+      "quick_validate": {
+        "exit": 0,
+        "fail_codes": [],
+        "warn_codes": []
+      },
+      "skill_gate": {
+        "exit": 2,
+        "fail_codes": [
+          "CONTRACT_MISSING",
+          "EVALS_MISSING"
+        ],
+        "warn_codes": [
+          "FM_DESC_WORKFLOWY",
+          "OUT_SCHEMA_VERSION_MISSING",
+          "PATH_TRAVERSAL",
+          "PI_TOOL_CHAIN",
+          "SEC_EXAMPLES_MISSING"
+        ]
+      },
+      "analyze_skill": {
+        "exit": 0,
+        "fail_codes": [],
+        "warn_codes": []
+      }
+    },
+    {
+      "skill": "utilities/recon-workbench/assets/template/.codex/skills/ios_sim_interrogate",
+      "quick_validate": {
+        "exit": 1,
+        "fail_codes": [],
+        "warn_codes": []
+      },
+      "skill_gate": {
+        "exit": 2,
+        "fail_codes": [
+          "CONTRACT_MISSING",
+          "EVALS_MISSING"
+        ],
+        "warn_codes": [
+          "FM_NAME_STYLE",
+          "SEC_EXAMPLES_MISSING"
+        ]
+      },
+      "analyze_skill": {
+        "exit": 0,
+        "fail_codes": [],
+        "warn_codes": []
+      }
+    },
+    {
+      "skill": "utilities/recon-workbench/assets/template/.codex/skills/macos_app_triage",
+      "quick_validate": {
+        "exit": 1,
+        "fail_codes": [],
+        "warn_codes": []
+      },
+      "skill_gate": {
+        "exit": 2,
+        "fail_codes": [
+          "CONTRACT_MISSING",
+          "EVALS_MISSING"
+        ],
+        "warn_codes": [
+          "FM_NAME_STYLE",
+          "SEC_EXAMPLES_MISSING"
+        ]
+      },
+      "analyze_skill": {
+        "exit": 0,
+        "fail_codes": [],
+        "warn_codes": []
+      }
+    },
+    {
+      "skill": "utilities/recon-workbench/assets/template/.codex/skills/oss_repo_map",
+      "quick_validate": {
+        "exit": 1,
+        "fail_codes": [],
+        "warn_codes": []
+      },
+      "skill_gate": {
+        "exit": 2,
+        "fail_codes": [
+          "CONTRACT_MISSING",
+          "EVALS_MISSING"
+        ],
+        "warn_codes": [
+          "FM_NAME_STYLE",
+          "SEC_EXAMPLES_MISSING"
+        ]
+      },
+      "analyze_skill": {
+        "exit": 0,
+        "fail_codes": [],
+        "warn_codes": []
+      }
+    },
+    {
+      "skill": "utilities/recon-workbench/assets/template/.codex/skills/report_compiler",
+      "quick_validate": {
+        "exit": 1,
+        "fail_codes": [],
+        "warn_codes": []
+      },
+      "skill_gate": {
+        "exit": 2,
+        "fail_codes": [
+          "CONTRACT_MISSING",
+          "EVALS_MISSING"
+        ],
+        "warn_codes": [
+          "FM_NAME_STYLE",
+          "SEC_EXAMPLES_MISSING"
+        ]
+      },
+      "analyze_skill": {
+        "exit": 0,
+        "fail_codes": [],
+        "warn_codes": []
+      }
+    },
+    {
+      "skill": "utilities/recon-workbench/assets/template/.codex/skills/web_app_interrogate",
+      "quick_validate": {
+        "exit": 1,
+        "fail_codes": [],
+        "warn_codes": []
+      },
+      "skill_gate": {
+        "exit": 2,
+        "fail_codes": [
+          "CONTRACT_MISSING",
+          "EVALS_MISSING"
+        ],
+        "warn_codes": [
+          "FM_DESC_WORKFLOWY",
+          "FM_NAME_STYLE",
+          "SEC_EXAMPLES_MISSING"
+        ]
+      },
+      "analyze_skill": {
+        "exit": 0,
+        "fail_codes": [],
+        "warn_codes": []
+      }
+    },
+    {
+      "skill": "utilities/recon-workbench/assets/template/.codex/skills/worst_case_interrogation",
+      "quick_validate": {
+        "exit": 1,
+        "fail_codes": [],
+        "warn_codes": []
+      },
+      "skill_gate": {
+        "exit": 2,
+        "fail_codes": [
+          "CONTRACT_MISSING",
+          "EVALS_MISSING"
+        ],
+        "warn_codes": [
+          "FM_DESC_WORKFLOWY",
+          "FM_NAME_STYLE",
+          "PI_TOOL_CHAIN",
+          "SEC_EXAMPLES_MISSING"
+        ]
+      },
+      "analyze_skill": {
+        "exit": 0,
+        "fail_codes": [],
+        "warn_codes": []
+      }
+    }
+  ]
+}

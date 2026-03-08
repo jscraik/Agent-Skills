@@ -169,3 +169,25 @@ You are capable of strong engineering judgment. Use this procedure as a confiden
 - “Run check-pr for PR 123 and tell me if any comments are blocking merge.”
 - “Run check-pr and include the organizational policy gate summary before any merge recommendation.”
 - “Check the PR without pushing changes and summarize what remains.”
+
+## Folded Legacy Modes (Core60)
+<!-- core60-folded-modes:v1:start -->
+This skill owns legacy capability from retired skills. Use these modes when requests match prior behavior.
+
+- `iterative-fix-loop` from `github/greptile/greploop`: Use when a user wants a closed-loop PR hardening pass (or asks how to set up Greptile loop prerequisites): run policy-gated review/fix it...
+
+Deep legacy details: `references/folded-legacy-modes-core60.md`.
+<!-- core60-folded-modes:v1:end -->
+
+## Execution quality
+- Philosophy: use a practical framework that balances speed, safety, and tradeoff clarity.
+- Approach: choose context-specific variation rather than generic cookie-cutter steps; adapt output to repository constraints.
+- Guiding question: Why is this the smallest safe change?
+- Guiding question: What tradeoff are we making and why?
+- Guiding question: How do we verify the result end-to-end?
+- Anti-patterns: DO NOT skip validation, NEVER hide failed checks, and avoid repetitive template-only output.
+- Empowerment: be capable, creative, and enable users to explore options with confidence.
+
+## GitHub Actions security baseline
+- Pin actions to a full-length commit SHA for third-party actions.
+- Apply explicit least-privilege `permissions` for each workflow and job scope.

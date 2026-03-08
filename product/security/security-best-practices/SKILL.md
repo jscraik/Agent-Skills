@@ -16,6 +16,7 @@ This information, if present, can be used to write new secure by default code, o
 - Prefer root-cause understanding over quick symptom patches.
 - Keep guidance evidence-based, explicit, and reproducible.
 - Optimize for decisions that reduce rework and operational risk.
+- Map web and API findings to `OWASP Top 10:2025` categories when reporting risk.
 
 ## Workflow
 
@@ -168,3 +169,17 @@ While TLS is important for production deployments, most development work will be
 - Persist with: `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
 - The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
 <!-- /decision-feedback-protocol -->
+
+## Folded Legacy Modes (Core60)
+<!-- core60-folded-modes:v1:start -->
+This skill owns legacy capability from retired skills. Use these modes when requests match prior behavior.
+
+- `ownership-risk-map` from `product/security/security-ownership-map`: Analyze git repositories to map security ownership (people-to-file), compute bus-factor and sensitive-code risk, and export CSV/JSON/grap...
+- `threat-model` from `product/security/security-threat-model`: Repository-grounded threat modeling that enumerates trust boundaries, assets, attacker capabilities, abuse paths, and mitigations, and wr...
+
+Deep legacy details: `references/folded-legacy-modes-core60.md`.
+<!-- core60-folded-modes:v1:end -->
+
+## Security baseline (OWASP)
+- Map recommendations to the OWASP Top 10 categories and call out category coverage in findings.
+- Require explicit mitigation notes for injection, broken access control, security misconfiguration, and sensitive data exposure.

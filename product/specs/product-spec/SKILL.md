@@ -209,3 +209,14 @@ Fail fast: **stop at the first failed gate and do not proceed**.
 - Persist with: `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
 - The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
 <!-- /decision-feedback-protocol -->
+
+## Folded Legacy Modes (Core60)
+<!-- core60-folded-modes:v1:start -->
+This skill owns legacy capability from retired skills. Use these modes when requests match prior behavior.
+
+- `asymmetric-ideas` from `product/strategy/asymmetric-ideation-engine`: Generate 10 launchable asymmetric ideas by excavating a repository for hidden patterns. Use when users ask for radical non-incremental id...
+- `ideation-prep` from `product/strategy/brainstorming`: This skill should be used before implementing features, building components, or making changes. It guides exploring user intent, approach...
+- `improvement-batch` from `product/strategy/project-improvement-ideator`: Use when asked to generate and prioritize product or repository improvements: privately explore 100 pragmatic ideas, run a premortem, and...
+
+Deep legacy details: `references/folded-legacy-modes-core60.md`.
+<!-- core60-folded-modes:v1:end -->

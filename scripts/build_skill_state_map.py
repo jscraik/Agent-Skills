@@ -12,8 +12,10 @@ and learning/change signals separated into four linked views:
 from __future__ import annotations
 
 import argparse
+import hashlib
 import html
 import json
+import math
 import re
 from collections import Counter, defaultdict
 from dataclasses import dataclass
@@ -23,10 +25,24 @@ from typing import Any, Dict, List, Optional, Sequence, Set, Tuple
 
 FALSY_CONTROL_VALUES = {"off", "false", "0", "no", "inactive"}
 ROLLOUT_MODES = {"off", "observe_only", "active"}
-EXCLUDED_PREFIXES = (
+DEFAULT_INVENTORY_POLICY = "docs/skill-graphs/governance/inventory-policy.json"
+INVENTORY_SLICE_MODES = {"separate", "exclude"}
+DEFAULT_INCLUDE_PREFIXES = (
+    ".agents/skills/.system/",
+    "auth/",
+    "backend/",
+    "frontend/",
+    "github/",
+    "interview/",
+    "personas/",
+    "product/",
+    "utilities/",
+)
+DEFAULT_EXCLUDE_PREFIXES = (
     "skills/.system/",
     "utilities/recon-workbench/assets/template/.codex/skills/",
 )
+DEFAULT_SYSTEM_PREFIXES = (".agents/skills/.system/",)
 CLASS_TOKEN_PATTERN = re.compile(r"[^a-z0-9_-]+")
 GRAPH_ADAPTER_ALLOWED_REL = Path("artifacts/skill-graphs/graph-adapter")
 GRAPH_ADAPTER_FILE_PREFIXES = (
@@ -36,6 +52,7 @@ GRAPH_ADAPTER_FILE_PREFIXES = (
     "run--",
     "decision--",
     "candidate--",
+    "blocker--",
 )
 MANUAL_SKILL_PATHS = {
     "github/gh-fix-ci",
@@ -125,6 +142,16 @@ class SkillNodeState:
     total_run_count: int
     queue_count: int
     top_queue_reason: str
+    blockers: List[str]
+    blocker_severity: str
+
+
+@dataclass(frozen=True)
+class InventoryPolicy:
+    include_prefixes: Tuple[str, ...]
+    exclude_prefixes: Tuple[str, ...]
+    system_prefixes: Tuple[str, ...]
+    system_slice_mode: str
 
 
 def parse_args() -> argparse.Namespace:
@@ -147,6 +174,17 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--profile-index",
         default="artifacts/skill-graphs/onboarding/profile-index.json",
+    )
+    parser.add_argument(
+        "--inventory-policy",
+        default=DEFAULT_INVENTORY_POLICY,
+        help="Inventory allowlist/exclude policy JSON (repo-relative)",
+    )
+    parser.add_argument(
+        "--system-slice-mode",
+        choices=sorted(INVENTORY_SLICE_MODES),
+        default=None,
+        help="Override inventory policy system handling: separate or exclude",
     )
     parser.add_argument(
         "--shadow-dashboard",
@@ -404,6 +442,87 @@ def _is_relative_to(path: Path, parent: Path) -> bool:
     return True
 
 
+def _normalize_prefixes(values: Sequence[Any]) -> Tuple[str, ...]:
+    out: List[str] = []
+    for value in values:
+        text = str(value).strip().replace("\\", "/")
+        if not text:
+            continue
+        if not text.endswith("/"):
+            text = text + "/"
+        out.append(text)
+    return tuple(dict.fromkeys(out))
+
+
+def _matches_prefix(value: str, prefixes: Sequence[str]) -> bool:
+    for prefix in prefixes:
+        needle = prefix.rstrip("/")
+        if value == needle or value.startswith(prefix):
+            return True
+    return False
+
+
+def load_inventory_policy(
+    repo_root: Path,
+    profile_index: Dict[str, Any],
+    raw_path: str,
+    system_slice_mode: Optional[str],
+) -> InventoryPolicy:
+    include_prefixes: Tuple[str, ...] = tuple()
+    exclude_prefixes: Tuple[str, ...] = tuple()
+    system_prefixes: Tuple[str, ...] = tuple()
+    configured_mode = "separate"
+
+    embedded = profile_index.get("inventory_policy")
+    if isinstance(embedded, dict):
+        include_prefixes = _normalize_prefixes(
+            embedded.get("include_prefixes", DEFAULT_INCLUDE_PREFIXES)
+        )
+        exclude_prefixes = _normalize_prefixes(
+            embedded.get("exclude_prefixes", DEFAULT_EXCLUDE_PREFIXES)
+        )
+        system_prefixes = _normalize_prefixes(
+            embedded.get("system_prefixes", DEFAULT_SYSTEM_PREFIXES)
+        )
+        configured_mode = str(embedded.get("system_slice_mode", "separate")).strip().lower()
+    else:
+        path = _path(repo_root, raw_path)
+        if path.exists():
+            try:
+                payload = json.loads(path.read_text(encoding="utf-8"))
+            except json.JSONDecodeError as exc:
+                raise RuntimeError(f"Invalid inventory policy JSON: {path}") from exc
+            if not isinstance(payload, dict):
+                raise RuntimeError(f"Inventory policy must be a JSON object: {path}")
+            include_prefixes = _normalize_prefixes(
+                payload.get("include_prefixes", DEFAULT_INCLUDE_PREFIXES)
+            )
+            exclude_prefixes = _normalize_prefixes(
+                payload.get("exclude_prefixes", DEFAULT_EXCLUDE_PREFIXES)
+            )
+            system_prefixes = _normalize_prefixes(
+                payload.get("system_prefixes", DEFAULT_SYSTEM_PREFIXES)
+            )
+            configured_mode = str(payload.get("system_slice_mode", "separate")).strip().lower()
+        else:
+            include_prefixes = _normalize_prefixes(DEFAULT_INCLUDE_PREFIXES)
+            exclude_prefixes = _normalize_prefixes(DEFAULT_EXCLUDE_PREFIXES)
+            system_prefixes = _normalize_prefixes(DEFAULT_SYSTEM_PREFIXES)
+
+    mode = (system_slice_mode or configured_mode).strip().lower()
+    if mode not in INVENTORY_SLICE_MODES:
+        raise RuntimeError(
+            f"inventory policy system_slice_mode must be one of {sorted(INVENTORY_SLICE_MODES)}: {mode!r}"
+        )
+
+    return InventoryPolicy(
+        include_prefixes=include_prefixes,
+        exclude_prefixes=exclude_prefixes,
+        system_prefixes=system_prefixes,
+        system_slice_mode=mode,
+    )
+
+
 def normalize_class_token(value: Any, fallback: str = "unknown") -> str:
     token = CLASS_TOKEN_PATTERN.sub("_", str(value).strip().lower()).strip("_")
     if not token:
@@ -415,6 +534,7 @@ def normalize_class_token(value: Any, fallback: str = "unknown") -> str:
 
 def canonical_profile_inventory(
     profile_index: Dict[str, Any],
+    inventory_policy: InventoryPolicy,
 ) -> Tuple[List[str], Dict[str, Dict[str, Any]]]:
     rows = profile_index.get("skills") if isinstance(profile_index.get("skills"), list) else []
     if not rows:
@@ -427,37 +547,71 @@ def canonical_profile_inventory(
         scope_skill = str(row.get("scope_skill", "")).strip()
         if not scope_skill:
             continue
-        if any(scope_skill.startswith(prefix.rstrip("/")) for prefix in EXCLUDED_PREFIXES):
+        if inventory_policy.include_prefixes and not _matches_prefix(
+            scope_skill, inventory_policy.include_prefixes
+        ):
+            continue
+        if _matches_prefix(scope_skill, inventory_policy.exclude_prefixes):
+            continue
+        if _matches_prefix(scope_skill, inventory_policy.system_prefixes) and (
+            inventory_policy.system_slice_mode == "exclude"
+        ):
             continue
         by_scope[scope_skill] = row
 
     if not by_scope:
         raise RuntimeError("profile-index.json does not contain canonical scope_skill entries.")
 
-    expected_count = _safe_int(profile_index.get("expected_count"))
-    if expected_count is not None and expected_count > 0 and len(by_scope) != expected_count:
-        raise RuntimeError(
-            f"Canonical inventory mismatch: expected_count={expected_count}, discovered={len(by_scope)}"
+    strict_count_check = True
+    embedded_policy = profile_index.get("inventory_policy")
+    if isinstance(embedded_policy, dict):
+        embedded_include = _normalize_prefixes(
+            embedded_policy.get("include_prefixes", inventory_policy.include_prefixes)
+        )
+        embedded_exclude = _normalize_prefixes(
+            embedded_policy.get("exclude_prefixes", inventory_policy.exclude_prefixes)
+        )
+        embedded_system = _normalize_prefixes(
+            embedded_policy.get("system_prefixes", inventory_policy.system_prefixes)
+        )
+        embedded_mode = str(
+            embedded_policy.get("system_slice_mode", inventory_policy.system_slice_mode)
+        ).strip().lower()
+        strict_count_check = (
+            embedded_include == inventory_policy.include_prefixes
+            and embedded_exclude == inventory_policy.exclude_prefixes
+            and embedded_system == inventory_policy.system_prefixes
+            and embedded_mode == inventory_policy.system_slice_mode
         )
 
-    active_count = _safe_int(profile_index.get("active_skill_count"))
-    if active_count is None:
-        summary = profile_index.get("summary") if isinstance(profile_index.get("summary"), dict) else {}
-        active_count = _safe_int(summary.get("active_skill_count")) if summary else None
-    if active_count is not None and active_count > 0 and len(by_scope) != active_count:
-        raise RuntimeError(
-            f"Canonical inventory mismatch: active_skill_count={active_count}, discovered={len(by_scope)}"
-        )
+    if strict_count_check:
+        expected_count = _safe_int(profile_index.get("expected_count"))
+        if expected_count is not None and expected_count > 0 and len(by_scope) != expected_count:
+            raise RuntimeError(
+                f"Canonical inventory mismatch: expected_count={expected_count}, discovered={len(by_scope)}"
+            )
+
+        active_count = _safe_int(profile_index.get("active_skill_count"))
+        if active_count is None:
+            summary = (
+                profile_index.get("summary") if isinstance(profile_index.get("summary"), dict) else {}
+            )
+            active_count = _safe_int(summary.get("active_skill_count")) if summary else None
+        if active_count is not None and active_count > 0 and len(by_scope) != active_count:
+            raise RuntimeError(
+                f"Canonical inventory mismatch: active_skill_count={active_count}, discovered={len(by_scope)}"
+            )
 
     return sorted(by_scope.keys()), by_scope
 
 
-def load_profiles(repo_root: Path, profile_index_path: Path, wave_readiness: Dict[str, Any]) -> List[SkillProfile]:
-    profile_index = load_json(profile_index_path)
-    if profile_index is None:
-        raise RuntimeError(f"Missing or invalid profile index: {profile_index_path}")
-
-    active_skill_dirs, profile_index_by_scope = canonical_profile_inventory(profile_index)
+def load_profiles(
+    repo_root: Path,
+    profile_index: Dict[str, Any],
+    wave_readiness: Dict[str, Any],
+    inventory_policy: InventoryPolicy,
+) -> List[SkillProfile]:
+    active_skill_dirs, profile_index_by_scope = canonical_profile_inventory(profile_index, inventory_policy)
     wave_map = wave_readiness.get("waves") if isinstance(wave_readiness.get("waves"), dict) else {}
 
     profiles: List[SkillProfile] = []
@@ -480,11 +634,17 @@ def load_profiles(repo_root: Path, profile_index_path: Path, wave_readiness: Dic
             if profile_obj
             else ""
         ) or scope_skill.replace("/", "-")
+        row_scope_profile = str(item.get("scope_profile", "")).strip()
+        is_system = _matches_prefix(scope_skill, inventory_policy.system_prefixes)
+        if is_system and inventory_policy.system_slice_mode == "separate":
+            fallback_scope_profile = "system"
+        else:
+            fallback_scope_profile = scope_skill.split("/", 1)[0]
         scope_profile = (
-            str(profile_obj.get("scope_profile", "")).strip()
-            if profile_obj
-            else ""
-        ) or scope_skill.split("/", 1)[0]
+            row_scope_profile
+            or (str(profile_obj.get("scope_profile", "")).strip() if profile_obj else "")
+            or fallback_scope_profile
+        )
         delegation = profile_obj.get("delegation") if isinstance(profile_obj, dict) and isinstance(profile_obj.get("delegation"), dict) else {}
         delegation_mode = str(
             delegation.get("mode", item.get("delegation_mode", fallback_mode))
@@ -774,10 +934,42 @@ def parse_candidates(path: Path, aliases: Dict[str, Dict[str, str]]) -> List[Can
     return out
 
 
+def build_wave_blocker_map(wave_readiness: Dict[str, Any]) -> Dict[str, List[str]]:
+    waves = wave_readiness.get("waves")
+    if not isinstance(waves, dict):
+        return {}
+
+    wave_name_map = {
+        "wave-0-controls": "wave-0-controls",
+        "wave-1-manual": "wave-1-manual",
+        "wave-2-co-pilot": "wave-2-co-pilot",
+    }
+    out: Dict[str, List[str]] = {}
+    for wave_key, canonical in wave_name_map.items():
+        wave_obj = waves.get(wave_key)
+        if not isinstance(wave_obj, dict):
+            continue
+        blockers = wave_obj.get("blockers")
+        if not isinstance(blockers, list):
+            continue
+        codes: List[str] = []
+        for blocker in blockers:
+            if not isinstance(blocker, dict):
+                continue
+            code = str(blocker.get("code", "")).strip()
+            if code:
+                codes.append(code)
+        if codes:
+            out[canonical] = sorted(set(codes))
+    return out
+
+
 def compute_skill_graph_degrees(
     profiles: Sequence[SkillProfile],
     runs_by_skill: Dict[str, List[RunEntry]],
     candidates: Sequence[CandidateRow],
+    queue_reason_by_skill: Dict[str, Counter[str]],
+    wave_blockers_by_wave: Dict[str, List[str]],
 ) -> Dict[str, int]:
     degrees: Dict[str, Set[str]] = defaultdict(set)
 
@@ -790,10 +982,14 @@ def compute_skill_graph_degrees(
         key = profile.scope_skill
         degrees[key].add(f"profile::{profile.profile_id}")
         degrees[key].add(f"wave::{profile.wave}")
+        for blocker_code in wave_blockers_by_wave.get(profile.wave, []):
+            degrees[key].add(f"wave_blocker::{blocker_code}")
         for run in runs_by_skill.get(key, []):
             degrees[key].add(f"run::{run.run_id}")
         for candidate in candidates_by_skill.get(key, []):
             degrees[key].add(f"candidate::{candidate.candidate_id}")
+        for queue_reason in queue_reason_by_skill.get(key, Counter()).keys():
+            degrees[key].add(f"queue_reason::{queue_reason}")
 
     return {k: len(v) for k, v in degrees.items()}
 
@@ -806,6 +1002,7 @@ def build_skill_states(
     decision_by_run: Dict[str, str],
     queue_rows: Sequence[Dict[str, str]],
     candidates: Sequence[CandidateRow],
+    wave_blockers_by_wave: Dict[str, List[str]],
 ) -> List[SkillNodeState]:
     runs_by_skill: Dict[str, List[RunEntry]] = defaultdict(list)
     recent_runs_by_skill: Dict[str, List[RunEntry]] = defaultdict(list)
@@ -835,7 +1032,13 @@ def build_skill_states(
         if candidate.skill_key:
             pressure_by_skill[candidate.skill_key] += max(candidate.composite_score, 0.0) * max(candidate.window_count, 1)
 
-    graph_degrees = compute_skill_graph_degrees(profiles, runs_by_skill, candidates)
+    graph_degrees = compute_skill_graph_degrees(
+        profiles,
+        runs_by_skill,
+        candidates,
+        queue_reason_by_skill,
+        wave_blockers_by_wave,
+    )
     max_degree = max(graph_degrees.values(), default=0)
     max_pressure = max(pressure_by_skill.values(), default=0.0)
 
@@ -885,6 +1088,27 @@ def build_skill_states(
         size_px = 16 + int(round(20 * composite))
         queue_counter = queue_reason_by_skill.get(profile.scope_skill, Counter())
         top_queue_reason = queue_counter.most_common(1)[0][0] if queue_counter else "none"
+        blockers: List[str] = []
+        blockers.extend(wave_blockers_by_wave.get(profile.wave, []))
+        if top_queue_reason and top_queue_reason not in {"none", "unknown"}:
+            blockers.append(f"QUEUE_{top_queue_reason}")
+        if parity in {"missing_mandatory", "legacy_partial", "empty"}:
+            blockers.append(f"PARITY_{parity}")
+        seen_blockers: Set[str] = set()
+        unique_blockers = []
+        for blocker in blockers:
+            if blocker in seen_blockers:
+                continue
+            seen_blockers.add(blocker)
+            unique_blockers.append(blocker)
+
+        blocker_severity = "none"
+        if unique_blockers:
+            blocker_severity = "moderate"
+        if any(code in {"EVENT_ENVELOPE_ERRORS", "PARITY_missing_mandatory"} for code in unique_blockers):
+            blocker_severity = "critical"
+        elif any(code.startswith("QUEUE_") or code == "PARITY_legacy_partial" for code in unique_blockers):
+            blocker_severity = "high"
 
         states.append(
             SkillNodeState(
@@ -900,6 +1124,8 @@ def build_skill_states(
                 total_run_count=len(all_runs),
                 queue_count=queue_by_skill.get(profile.scope_skill, 0),
                 top_queue_reason=top_queue_reason,
+                blockers=unique_blockers,
+                blocker_severity=blocker_severity,
             )
         )
 
@@ -1050,6 +1276,8 @@ def render_skill_map(
     grouped: Dict[str, List[SkillNodeState]],
 ) -> str:
     cluster_sections: List[str] = []
+    graph_nodes: List[str] = []
+    graph_positions: Dict[str, Tuple[float, float]] = {}
 
     mode_values = sorted({normalize_class_token(s.skill.delegation_mode) for s in states})
     wave_values = sorted({normalize_class_token(s.skill.wave) for s in states})
@@ -1057,90 +1285,150 @@ def render_skill_map(
     parity_values = sorted({normalize_class_token(s.parity_corner) for s in states})
     badge_values = sorted({normalize_class_token(s.promotion_badge) for s in states})
     queue_reason_values = sorted({normalize_class_token(s.top_queue_reason) for s in states})
+    blocker_values = sorted(
+        {
+            normalize_class_token(blocker)
+            for state in states
+            for blocker in (state.blockers or [])
+        }
+    )
+    blocker_severity_values = sorted({normalize_class_token(s.blocker_severity) for s in states})
+
+    def _graph_position(scope_skill: str, wave: str) -> Tuple[float, float]:
+        digest = hashlib.sha1(scope_skill.encode("utf-8")).hexdigest()
+        frac = int(digest[:8], 16) / 0xFFFFFFFF
+        wave_ring = {
+            "wave-0-controls": 0.20,
+            "wave-1-manual": 0.34,
+            "wave-2-co-pilot": 0.48,
+        }
+        ring = wave_ring.get(normalize_class_token(wave), 0.40)
+        angle = frac * (2.0 * math.pi)
+        x = 50.0 + (math.cos(angle) * ring * 60.0)
+        y = 50.0 + (math.sin(angle) * ring * 42.0)
+        return (round(x, 2), round(y, 2))
+
+    def _node_markup(state: SkillNodeState, *, layout_mode: str, graph_xy: Optional[Tuple[float, float]] = None) -> str:
+        halo = state.recent_halo
+        parity = state.parity_corner
+        badge = state.promotion_badge
+        mode = normalize_class_token(state.skill.delegation_mode)
+        wave = normalize_class_token(state.skill.wave)
+        halo_token = normalize_class_token(halo)
+        parity_token = normalize_class_token(parity)
+        badge_token = normalize_class_token(badge)
+        queue_reason = normalize_class_token(state.top_queue_reason)
+        wave_ready_token = "wave_ready" if state.skill.wave_ready else "wave_blocked"
+        profile_status = "present" if state.skill.profile_present else "missing"
+        latest_run = state.recent_run.run_id if state.recent_run else "n/a"
+        criteria_ids = [
+            str(c.get("id", "")).strip()
+            for c in state.skill.criteria
+            if str(c.get("id", "")).strip()
+        ]
+        blocker_codes = state.blockers or []
+        blocker_primary = blocker_codes[0] if blocker_codes else "none"
+        blocker_token = normalize_class_token(blocker_primary)
+        blocker_tokens: List[str] = []
+        for blocker_code in blocker_codes:
+            token = normalize_class_token(blocker_code)
+            if not token or token == "none" or token in blocker_tokens:
+                continue
+            blocker_tokens.append(token)
+        blocker_tokens_value = ",".join(blocker_tokens) if blocker_tokens else "none"
+        blocker_severity = normalize_class_token(state.blocker_severity or "none")
+        detail_payload = {
+            "scope_skill": state.skill.scope_skill,
+            "profile_id": state.skill.profile_id,
+            "scope_profile": state.skill.scope_profile,
+            "delegation_mode": state.skill.delegation_mode,
+            "wave": state.skill.wave,
+            "wave_ready": state.skill.wave_ready,
+            "recent_status": state.recent_halo,
+            "recent_run": latest_run,
+            "parity": state.parity_corner,
+            "promotion": state.promotion_badge,
+            "queue_count": state.queue_count,
+            "queue_reason": state.top_queue_reason,
+            "pilot_window_runs": state.recent_run_count,
+            "total_runs": state.total_run_count,
+            "profile_status": profile_status,
+            "thresholds": state.skill.thresholds,
+            "criteria_ids": criteria_ids,
+            "candidate_pressure": round(state.candidate_pressure, 3),
+            "centrality_score": round(state.centrality_score, 3),
+            "blockers": blocker_codes,
+            "blocker_severity": state.blocker_severity,
+        }
+        short_label = state.skill.scope_skill.split("/")[-1]
+        node_title = (
+            f"{state.skill.scope_skill} | mode={state.skill.delegation_mode} | wave={state.skill.wave} "
+            f"| recent={state.recent_halo} | parity={state.parity_corner} | promotion={state.promotion_badge} "
+            f"| blockers={','.join(blocker_codes) if blocker_codes else 'none'}"
+        )
+        style_bits = [f"--node-size:{state.node_size_px}px"]
+        if layout_mode == "graph" and graph_xy:
+            style_bits.append(f"--gx:{graph_xy[0]}%")
+            style_bits.append(f"--gy:{graph_xy[1]}%")
+        style_attr = "; ".join(style_bits)
+        blocker_display = str(len(blocker_codes)) if blocker_codes else "0"
+        primary_blocker_label = blocker_primary.replace("_", " ")
+
+        return (
+            f'<article class="skill-node mode-{mode} halo-{halo_token} parity-{parity_token} '
+            f'badge-{badge_token} blocker-{blocker_severity} blocker-code-{blocker_token} {wave_ready_token}" '
+            f'style="{style_attr}" '
+            f'data-skill-key="{escape(state.skill.scope_skill)}" '
+            f'data-layout="{escape(layout_mode)}" '
+            f'data-mode="{escape(mode)}" '
+            f'data-wave="{escape(wave)}" '
+            f'data-wave-ready="{escape(wave_ready_token)}" '
+            f'data-halo="{escape(halo_token)}" '
+            f'data-parity="{escape(parity_token)}" '
+            f'data-badge="{escape(badge_token)}" '
+            f'data-queue-reason="{escape(queue_reason)}" '
+            f'data-blocker="{escape(blocker_token)}" '
+            f'data-blockers="{escape(blocker_tokens_value)}" '
+            f'data-blocker-severity="{escape(blocker_severity)}" '
+            f'data-has-recent="{escape("yes" if state.recent_run else "no")}" '
+            f'data-detail="{escape(json.dumps(detail_payload, separators=(",", ":")))}" '
+            f'title="{escape(node_title)}" tabindex="0">'
+            '<div class="node-glyph">'
+            f'<span class="node-halo halo-{halo_token}" aria-hidden="true"></span>'
+            f'<span class="node-core mode-{mode}" aria-hidden="true"></span>'
+            f'<span class="node-corner parity-{parity_token}" aria-hidden="true"></span>'
+            f'<span class="node-badge badge-{badge_token}">{escape(badge[:1].upper() if badge != "none" else "-")}</span>'
+            f'<span class="node-blocker blocker-{blocker_severity}" title="{escape(primary_blocker_label)}">{escape(blocker_display)}</span>'
+            "</div>"
+            '<div class="node-labels">'
+            f"<h4>{escape(short_label)}</h4>"
+            f'<p class="node-sub">{escape(state.skill.profile_id)}</p>'
+            "</div>"
+            '<div class="node-metrics">'
+            f"<span>pilot {state.recent_run_count}</span>"
+            f"<span>total {state.total_run_count}</span>"
+            f"<span>queue {state.queue_count}</span>"
+            "</div>"
+            '<div class="node-tags">'
+            f'{render_chip(state.skill.delegation_mode, f"mode-{mode}")}'
+            f'{render_chip(state.skill.wave, "wave-ready" if state.skill.wave_ready else "wave-blocked")}'
+            f'{render_chip(f"parity:{parity}", f"parity-{parity_token}")}'
+            f'{render_chip(f"blocker:{blocker_primary}", f"blocker-{blocker_severity} blocker-code-{blocker_token}")}'
+            "</div>"
+            "</article>"
+        )
 
     for cluster, cluster_states in grouped.items():
         nodes: List[str] = []
         for state in cluster_states:
-            halo = state.recent_halo
-            parity = state.parity_corner
-            badge = state.promotion_badge
-            mode = normalize_class_token(state.skill.delegation_mode)
-            wave = normalize_class_token(state.skill.wave)
-            halo_token = normalize_class_token(halo)
-            parity_token = normalize_class_token(parity)
-            badge_token = normalize_class_token(badge)
-            queue_reason = normalize_class_token(state.top_queue_reason)
-            wave_ready_token = "wave_ready" if state.skill.wave_ready else "wave_blocked"
-            profile_status = "present" if state.skill.profile_present else "missing"
-            latest_run = state.recent_run.run_id if state.recent_run else "n/a"
-            criteria_ids = [
-                str(c.get("id", "")).strip()
-                for c in state.skill.criteria
-                if str(c.get("id", "")).strip()
-            ]
-            detail_payload = {
-                "scope_skill": state.skill.scope_skill,
-                "profile_id": state.skill.profile_id,
-                "scope_profile": state.skill.scope_profile,
-                "delegation_mode": state.skill.delegation_mode,
-                "wave": state.skill.wave,
-                "wave_ready": state.skill.wave_ready,
-                "recent_status": state.recent_halo,
-                "recent_run": latest_run,
-                "parity": state.parity_corner,
-                "promotion": state.promotion_badge,
-                "queue_count": state.queue_count,
-                "queue_reason": state.top_queue_reason,
-                "pilot_window_runs": state.recent_run_count,
-                "total_runs": state.total_run_count,
-                "profile_status": profile_status,
-                "thresholds": state.skill.thresholds,
-                "criteria_ids": criteria_ids,
-                "candidate_pressure": round(state.candidate_pressure, 3),
-                "centrality_score": round(state.centrality_score, 3),
-            }
-            short_label = state.skill.scope_skill.split("/")[-1]
-            node_title = (
-                f"{state.skill.scope_skill} | mode={state.skill.delegation_mode} | wave={state.skill.wave} "
-                f"| recent={state.recent_halo} | parity={state.parity_corner} | promotion={state.promotion_badge}"
-            )
-            nodes.append(
-                (
-                    f'<article class="skill-node mode-{mode} halo-{halo_token} parity-{parity_token} '
-                    f'badge-{badge_token} {wave_ready_token}" '
-                    f'style="--node-size:{state.node_size_px}px" '
-                    f'data-skill-key="{escape(state.skill.scope_skill)}" '
-                    f'data-mode="{escape(mode)}" '
-                    f'data-wave="{escape(wave)}" '
-                    f'data-wave-ready="{escape(wave_ready_token)}" '
-                    f'data-halo="{escape(halo_token)}" '
-                    f'data-parity="{escape(parity_token)}" '
-                    f'data-badge="{escape(badge_token)}" '
-                    f'data-queue-reason="{escape(queue_reason)}" '
-                    f'data-has-recent="{escape("yes" if state.recent_run else "no")}" '
-                    f'data-detail="{escape(json.dumps(detail_payload, separators=(",", ":")))}" '
-                    f'title="{escape(node_title)}" tabindex="0">'
-                    '<div class="node-glyph">'
-                    f'<span class="node-halo halo-{halo_token}" aria-hidden="true"></span>'
-                    f'<span class="node-core mode-{mode}" aria-hidden="true"></span>'
-                    f'<span class="node-corner parity-{parity_token}" aria-hidden="true"></span>'
-                    f'<span class="node-badge badge-{badge_token}">{escape(badge[:1].upper() if badge != "none" else "-")}</span>'
-                    "</div>"
-                    '<div class="node-labels">'
-                    f'<h4>{escape(short_label)}</h4>'
-                    f'<p class="node-sub">{escape(state.skill.profile_id)}</p>'
-                    "</div>"
-                    '<div class="node-metrics">'
-                    f'<span>pilot {state.recent_run_count}</span>'
-                    f'<span>total {state.total_run_count}</span>'
-                    f'<span>queue {state.queue_count}</span>'
-                    "</div>"
-                    '<div class="node-tags">'
-                    f'{render_chip(state.skill.delegation_mode, f"mode-{mode}")}'
-                    f'{render_chip(state.skill.wave, "wave-ready" if state.skill.wave_ready else "wave-blocked")}'
-                    f'{render_chip(f"parity:{parity}", f"parity-{parity_token}")}'
-                    "</div>"
-                    "</article>"
+            graph_xy = _graph_position(state.skill.scope_skill, state.skill.wave)
+            graph_positions[state.skill.scope_skill] = graph_xy
+            nodes.append(_node_markup(state, layout_mode="cluster"))
+            graph_nodes.append(
+                _node_markup(
+                    state,
+                    layout_mode="graph",
+                    graph_xy=graph_xy,
                 )
             )
 
@@ -1153,6 +1441,112 @@ def render_skill_map(
   </div>
 </details>
 """.strip()
+        )
+
+    def _edge_key(edge_type: str, source: str, target: str) -> Tuple[str, str, str]:
+        ordered = tuple(sorted([source, target]))
+        return (edge_type, ordered[0], ordered[1])
+
+    edge_map: Dict[Tuple[str, str, str], Dict[str, Any]] = {}
+
+    def _add_edge(edge_type: str, source: str, target: str, reason: str) -> None:
+        if source == target:
+            return
+        if source not in graph_positions or target not in graph_positions:
+            return
+        key = _edge_key(edge_type, source, target)
+        if key in edge_map:
+            edge_map[key]["weight"] = int(edge_map[key].get("weight", 1)) + 1
+            return
+        edge_map[key] = {
+            "type": edge_type,
+            "source": source,
+            "target": target,
+            "reason": reason,
+            "weight": 1,
+        }
+
+    by_profile: Dict[str, List[SkillNodeState]] = defaultdict(list)
+    by_wave: Dict[str, List[SkillNodeState]] = defaultdict(list)
+    by_blocker: Dict[str, List[SkillNodeState]] = defaultdict(list)
+    by_queue: Dict[str, List[SkillNodeState]] = defaultdict(list)
+    for state in states:
+        by_profile[state.skill.scope_profile].append(state)
+        by_wave[state.skill.wave].append(state)
+        for blocker in state.blockers:
+            by_blocker[blocker].append(state)
+        if state.top_queue_reason not in {"none", "unknown", ""}:
+            by_queue[state.top_queue_reason].append(state)
+
+    for profile, profile_states in by_profile.items():
+        sorted_states = sorted(profile_states, key=lambda s: s.skill.scope_skill)
+        for idx in range(len(sorted_states) - 1):
+            _add_edge(
+                "profile_chain",
+                sorted_states[idx].skill.scope_skill,
+                sorted_states[idx + 1].skill.scope_skill,
+                reason=f"profile:{profile}",
+            )
+
+    for wave, wave_states in by_wave.items():
+        sorted_states = sorted(
+            wave_states,
+            key=lambda s: (-s.centrality_score, s.skill.scope_skill),
+        )
+        for idx in range(min(len(sorted_states) - 1, 30)):
+            _add_edge(
+                "wave_chain",
+                sorted_states[idx].skill.scope_skill,
+                sorted_states[idx + 1].skill.scope_skill,
+                reason=f"wave:{wave}",
+            )
+
+    for blocker, blocker_states in by_blocker.items():
+        if len(blocker_states) < 2:
+            continue
+        anchor = sorted(blocker_states, key=lambda s: (-s.queue_count, s.skill.scope_skill))[0]
+        for state in sorted(blocker_states, key=lambda s: s.skill.scope_skill):
+            if state.skill.scope_skill == anchor.skill.scope_skill:
+                continue
+            _add_edge(
+                "blocker_star",
+                anchor.skill.scope_skill,
+                state.skill.scope_skill,
+                reason=f"blocker:{blocker}",
+            )
+
+    for reason, reason_states in by_queue.items():
+        if len(reason_states) < 2:
+            continue
+        sorted_states = sorted(reason_states, key=lambda s: s.skill.scope_skill)
+        for idx in range(min(len(sorted_states) - 1, 18)):
+            _add_edge(
+                "queue_chain",
+                sorted_states[idx].skill.scope_skill,
+                sorted_states[idx + 1].skill.scope_skill,
+                reason=f"queue:{reason}",
+            )
+
+    graph_edges_svg: List[str] = []
+    for edge in sorted(
+        edge_map.values(),
+        key=lambda e: (e["type"], e["source"], e["target"]),
+    ):
+        x1, y1 = graph_positions[edge["source"]]
+        x2, y2 = graph_positions[edge["target"]]
+        edge_type_token = normalize_class_token(edge["type"])
+        graph_edges_svg.append(
+            (
+                f'<line class="graph-edge type-{edge_type_token}" '
+                f'x1="{x1}" y1="{y1}" x2="{x2}" y2="{y2}" '
+                f'data-source-skill="{escape(edge["source"])}" '
+                f'data-target-skill="{escape(edge["target"])}" '
+                f'data-edge-type="{escape(edge_type_token)}" '
+                f'data-edge-reason="{escape(edge["reason"])}" '
+                f'data-layout="graph">'
+                f"<title>{escape(edge['reason'])}</title>"
+                "</line>"
+            )
         )
 
     def _render_options(values: Sequence[str], label_map: Optional[Dict[str, str]] = None) -> str:
@@ -1174,6 +1568,8 @@ def render_skill_map(
       <label>parity<select id="filter-parity">{_render_options(parity_values)}</select></label>
       <label>promotion<select id="filter-badge">{_render_options(badge_values)}</select></label>
       <label>queue reason<select id="filter-queue">{_render_options(queue_reason_values)}</select></label>
+      <label>blocker code<select id="filter-blocker">{_render_options(blocker_values)}</select></label>
+      <label>blocker severity<select id="filter-blocker-severity">{_render_options(blocker_severity_values)}</select></label>
       <label class="checkbox"><input id="filter-recent-only" type="checkbox" /> pilot coverage only</label>
     </div>
     <div class="control-row">
@@ -1183,9 +1579,22 @@ def render_skill_map(
         <button type="button" class="view-btn" data-view="learning">learning</button>
         <button type="button" class="view-btn" data-view="graph">graph overlay</button>
       </div>
+      <div class="layout-toggle" role="group" aria-label="layout mode">
+        <button type="button" class="layout-btn active" data-layout="cluster">cluster layout</button>
+        <button type="button" class="layout-btn" data-layout="graph">graph layout</button>
+      </div>
+      <fieldset class="edge-toggle" aria-label="edge type filters">
+        <legend>edges</legend>
+        <label><input type="checkbox" data-edge-type="profile_chain" checked />profile</label>
+        <label><input type="checkbox" data-edge-type="wave_chain" checked />wave</label>
+        <label><input type="checkbox" data-edge-type="blocker_star" checked />blocker</label>
+        <label><input type="checkbox" data-edge-type="queue_chain" checked />queue</label>
+      </fieldset>
       <button type="button" id="cluster-expand">expand clusters</button>
       <button type="button" id="cluster-collapse">collapse clusters</button>
+      <button type="button" id="reset-controls">reset view</button>
       <span id="visible-node-count" class="muted"></span>
+      <span id="visible-edge-count" class="muted"></span>
     </div>
   </div>
   <details open>
@@ -1195,6 +1604,7 @@ def render_skill_map(
       <li>Outer ring = latest pilot-window <code>terminal_status</code> (or <code>no_recent_run_data</code>).</li>
       <li>Top-right corner = parity status (<code>compliant</code>, <code>missing_mandatory</code>, <code>legacy_partial</code>, <code>empty</code>).</li>
       <li>Badge letter = promotion state (<code>A</code> approved, <code>D</code> draft, <code>C</code> candidate, <code>R</code> rejected, <code>-</code> none).</li>
+      <li>Bottom-left blocker bubble = blocker count with severity color; primary blocker appears as chip + filter.</li>
       <li>Node size = derived max(candidate pressure, relation centrality); explicitly derived, not canonical skill mastery.</li>
       <li>Source-state labels in Learning lane distinguish <code>missing</code> vs <code>empty</code> vs <code>present</code>.</li>
     </ul>
@@ -1203,6 +1613,16 @@ def render_skill_map(
     <h3>Skill detail</h3>
     <p class="muted">Select a skill node to inspect thresholds, criteria, queue bottlenecks, and run coverage.</p>
   </div>
+  <section id="graph-layout-board" class="graph-board card" hidden>
+    <h3>Graph constellation</h3>
+    <p class="muted">Deterministic radial placement by wave ring + skill hash for relationship-first scanning. Use filters to isolate blocked clusters.</p>
+    <div class="graph-stage">
+      <svg class="graph-edges" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+        {'\n        '.join(graph_edges_svg)}
+      </svg>
+      {'\n      '.join(graph_nodes)}
+    </div>
+  </section>
   {'\n  '.join(cluster_sections)}
 </section>
 """
@@ -1278,7 +1698,7 @@ def render_learning_lane(
     warning_counts: Dict[str, int],
     feedback: Dict[str, Any],
     graph_adapter_dir_display: str,
-    graph_adapter_files: int,
+    graph_adapter_stats: Dict[str, int],
     source_states: Dict[str, str],
 ) -> str:
     candidate_rows = sorted(
@@ -1327,6 +1747,9 @@ def render_learning_lane(
     feedback_outcomes = ", ".join(
         f"{k}={v}" for k, v in sorted((feedback.get("outcome_counts") or {}).items())
     ) or "n/a"
+    adapter_note_files = int(graph_adapter_stats.get("note_files", 0))
+    adapter_typed_nodes = int(graph_adapter_stats.get("typed_nodes", 0))
+    adapter_typed_edges = int(graph_adapter_stats.get("typed_edges", 0))
 
     source_items = "\n".join(
         f"<li>{escape(label)}: <strong class=\"source-{escape(state)}\">{escape(state)}</strong></li>"
@@ -1379,7 +1802,8 @@ def render_learning_lane(
         <li>latest feedback: <code>{escape(feedback.get('latest_recorded_at') or 'n/a')}</code></li>
         <li>decision counts: <code>{escape(feedback_decisions)}</code></li>
         <li>outcome counts: <code>{escape(feedback_outcomes)}</code></li>
-        <li>graph adapter notes: <strong>{graph_adapter_files}</strong> files at <code>{escape(graph_adapter_dir_display)}</code></li>
+        <li>graph adapter notes: <strong>{adapter_note_files}</strong> files at <code>{escape(graph_adapter_dir_display)}</code></li>
+        <li>typed graph export: <strong>{adapter_typed_nodes}</strong> nodes / <strong>{adapter_typed_edges}</strong> edges (<code>typed-graph.json</code>)</li>
       </ul>
       <p class="muted">Adapter preserves existing identifiers and emits wiki-link notes for Ars Contexta graph tooling without introducing a new business schema.</p>
     </article>
@@ -1469,6 +1893,33 @@ def render_html(
     .checkbox input {{ margin-right: 4px; }}
     .view-toggle {{ display: inline-flex; gap: 4px; }}
     .view-btn.active {{ border-color: var(--info); box-shadow: 0 0 0 1px rgba(99,168,255,0.35) inset; }}
+    .layout-toggle {{ display: inline-flex; gap: 4px; }}
+    .layout-btn.active {{ border-color: var(--warn); box-shadow: 0 0 0 1px rgba(247,191,73,0.35) inset; }}
+    .edge-toggle {{
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 4px 8px;
+      margin: 0;
+      min-height: 30px;
+    }}
+    .edge-toggle legend {{
+      font-size: 0.72rem;
+      color: var(--muted);
+      padding: 0 4px;
+      margin-right: 2px;
+    }}
+    .edge-toggle label {{
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      font-size: 0.72rem;
+      color: #c6def7;
+      white-space: nowrap;
+    }}
+    .edge-toggle input {{ margin: 0; }}
     .cluster {{ margin-top: 12px; border-top: 1px solid var(--border); padding-top: 10px; }}
     .cluster summary {{ cursor: pointer; list-style: none; }}
     .cluster summary::-webkit-details-marker {{ display: none; }}
@@ -1543,6 +1994,22 @@ def render_html(
       font-weight: 700;
       background: #0e2437;
     }}
+    .node-blocker {{
+      position: absolute;
+      left: -6px;
+      bottom: -6px;
+      width: 16px;
+      height: 16px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.57rem;
+      font-weight: 700;
+      background: #0f1f31;
+      color: #d9e6f7;
+    }}
     .node-labels h4 {{ margin: 0; font-size: 0.79rem; line-height: 1.2; }}
     .node-sub {{ margin: 0; color: var(--muted); font-size: 0.66rem; line-height: 1.15; }}
     .node-metrics {{ display: flex; gap: 6px; flex-wrap: wrap; font-size: 0.62rem; color: #bed7ff; }}
@@ -1562,10 +2029,67 @@ def render_html(
     .badge-candidate, .badge-candidate.node-badge {{ border-color: var(--warn); color: #ffefcc; }}
     .badge-rejected, .badge-rejected.node-badge {{ border-color: var(--bad); color: #ffe2df; }}
     .badge-none, .badge-none.node-badge {{ border-color: var(--neutral); color: #d9e0ef; }}
+    .blocker-critical, .blocker-critical.node-blocker {{ border-color: var(--bad); color: #ffe2df; }}
+    .blocker-high, .blocker-high.node-blocker {{ border-color: var(--warn); color: #fff0cc; }}
+    .blocker-moderate, .blocker-moderate.node-blocker {{ border-color: var(--info); color: #dfeeff; }}
+    .blocker-none, .blocker-none.node-blocker {{ border-color: var(--neutral); color: #d9e0ef; }}
     .parity-compliant {{ border-color: var(--ok); background: rgba(46,207,143,0.25); }}
     .parity-missing_mandatory {{ border-color: var(--bad); background: rgba(255,125,118,0.3); }}
     .parity-legacy_partial {{ border-color: var(--warn); background: rgba(247,191,73,0.3); }}
     .parity-empty {{ border-color: var(--neutral); background: rgba(138,161,191,0.25); }}
+    .graph-board {{ margin-top: 14px; }}
+    .graph-stage {{
+      position: relative;
+      min-height: 720px;
+      border: 1px dashed var(--border);
+      border-radius: 12px;
+      background:
+        radial-gradient(circle at center, rgba(138,161,191,0.12) 0 1px, transparent 1px),
+        radial-gradient(circle at center, rgba(99,168,255,0.07) 0%, rgba(16,35,55,0.85) 64%);
+      background-size: 14px 14px, cover;
+      overflow: hidden;
+    }}
+    .graph-edges {{
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      pointer-events: none;
+    }}
+    .graph-edge {{
+      stroke: rgba(157, 192, 222, 0.25);
+      stroke-width: 0.25;
+      vector-effect: non-scaling-stroke;
+      transition: opacity 120ms ease, stroke 120ms ease, stroke-width 120ms ease;
+    }}
+    .graph-edge.type-profile_chain {{ stroke: rgba(99,168,255,0.35); }}
+    .graph-edge.type-wave_chain {{ stroke: rgba(46,207,143,0.30); }}
+    .graph-edge.type-blocker_star {{ stroke: rgba(255,125,118,0.36); }}
+    .graph-edge.type-queue_chain {{ stroke: rgba(247,191,73,0.33); }}
+    .graph-edge.is-muted {{ opacity: 0.08; }}
+    .graph-edge.is-selected {{
+      opacity: 0.95;
+      stroke: #ffe7a8;
+      stroke-width: 0.48;
+    }}
+    .graph-stage .skill-node[data-layout="graph"] {{
+      position: absolute;
+      left: var(--gx);
+      top: var(--gy);
+      transform: translate(-50%, -50%);
+      width: min(220px, 24vw);
+      min-height: 120px;
+      z-index: 2;
+    }}
+    .graph-stage .skill-node[data-layout="graph"]:hover,
+    .graph-stage .skill-node[data-layout="graph"]:focus {{
+      transform: translate(-50%, -50%) translateY(-1px);
+    }}
+    body[data-layout="cluster"] #graph-layout-board {{ display: none; }}
+    body[data-layout="graph"] .cluster {{ display: none; }}
+    body[data-layout="graph"] #cluster-expand,
+    body[data-layout="graph"] #cluster-collapse {{ opacity: 0.45; pointer-events: none; }}
     .node-detail pre {{
       margin: 0;
       white-space: pre-wrap;
@@ -1609,7 +2133,7 @@ def render_html(
     }}
   </style>
 </head>
-<body data-view="operational">
+<body data-view="operational" data-layout="cluster">
   <div class="wrap">
     <h1>Recursive Skill Graph State Map</h1>
     <p class="muted">Generated at {escape(generated_at)} UTC. This view intentionally separates onboarding readiness, runtime controls, pilot operational health, and learning/promotion maturity.</p>
@@ -1623,11 +2147,13 @@ def render_html(
   <script>
     (function () {{
       const nodes = Array.from(document.querySelectorAll(".skill-node"));
+      const graphEdges = Array.from(document.querySelectorAll(".graph-edge"));
       const runRows = Array.from(document.querySelectorAll(".run-lane tbody tr"));
       const candidateRows = Array.from(document.querySelectorAll(".learning-lane tbody tr[data-skill-key]"));
       const queueItems = Array.from(document.querySelectorAll(".learning-lane li[data-skill-key]"));
       const detail = document.getElementById("node-detail");
       const visibleNodeCount = document.getElementById("visible-node-count");
+      const visibleEdgeCount = document.getElementById("visible-edge-count");
       const filters = {{
         mode: document.getElementById("filter-mode"),
         wave: document.getElementById("filter-wave"),
@@ -1635,13 +2161,20 @@ def render_html(
         parity: document.getElementById("filter-parity"),
         badge: document.getElementById("filter-badge"),
         queue: document.getElementById("filter-queue"),
+        blocker: document.getElementById("filter-blocker"),
+        blockerSeverity: document.getElementById("filter-blocker-severity"),
         recentOnly: document.getElementById("filter-recent-only"),
       }};
+      const edgeTypeControls = Array.from(document.querySelectorAll(".edge-toggle input[data-edge-type]"));
       const viewButtons = Array.from(document.querySelectorAll(".view-btn"));
+      const layoutButtons = Array.from(document.querySelectorAll(".layout-btn"));
       const clusterBlocks = Array.from(document.querySelectorAll(".cluster"));
+      const graphLayoutBoard = document.getElementById("graph-layout-board");
       const expandBtn = document.getElementById("cluster-expand");
       const collapseBtn = document.getElementById("cluster-collapse");
+      const resetControlsBtn = document.getElementById("reset-controls");
       let selectedSkill = "";
+      const UI_STATE_STORAGE_KEY = "skill-state-map-ui-v1";
       const esc = (value) =>
         String(value ?? "")
           .replace(/&/g, "&amp;")
@@ -1649,6 +2182,166 @@ def render_html(
           .replace(/>/g, "&gt;")
           .replace(/"/g, "&quot;")
           .replace(/'/g, "&#39;");
+
+      function setActiveButton(buttons, value, attrName) {{
+        buttons.forEach((btn) => {{
+          const match = (btn.dataset[attrName] || "") === value;
+          btn.classList.toggle("active", match);
+        }});
+      }}
+
+      function collectUiState() {{
+        return {{
+          view: document.body.dataset.view || "operational",
+          layout: document.body.dataset.layout || "cluster",
+          filters: {{
+            mode: filters.mode?.value || "all",
+            wave: filters.wave?.value || "all",
+            halo: filters.halo?.value || "all",
+            parity: filters.parity?.value || "all",
+            badge: filters.badge?.value || "all",
+            queue: filters.queue?.value || "all",
+            blocker: filters.blocker?.value || "all",
+            blockerSeverity: filters.blockerSeverity?.value || "all",
+            recentOnly: !!filters.recentOnly?.checked,
+          }},
+          edges: edgeTypeControls
+            .filter((checkbox) => checkbox.checked)
+            .map((checkbox) => checkbox.dataset.edgeType || "")
+            .filter(Boolean)
+            .sort(),
+        }};
+      }}
+
+      function readLocalUiState() {{
+        try {{
+          const raw = window.localStorage.getItem(UI_STATE_STORAGE_KEY);
+          if (!raw) return null;
+          const parsed = JSON.parse(raw);
+          return parsed && typeof parsed === "object" ? parsed : null;
+        }} catch (err) {{
+          return null;
+        }}
+      }}
+
+      function writeLocalUiState(state) {{
+        try {{
+          window.localStorage.setItem(UI_STATE_STORAGE_KEY, JSON.stringify(state));
+        }} catch (err) {{
+          // best-effort persistence
+        }}
+      }}
+
+      function readUrlUiState() {{
+        try {{
+          const params = new URLSearchParams(window.location.search || "");
+          const edges = (params.get("edges") || "")
+            .split(",")
+            .map((token) => token.trim())
+            .filter(Boolean);
+          return {{
+            view: params.get("view") || undefined,
+            layout: params.get("layout") || undefined,
+            filters: {{
+              mode: params.get("mode") || undefined,
+              wave: params.get("wave") || undefined,
+              halo: params.get("halo") || undefined,
+              parity: params.get("parity") || undefined,
+              badge: params.get("badge") || undefined,
+              queue: params.get("queue") || undefined,
+              blocker: params.get("blocker") || undefined,
+              blockerSeverity: params.get("blockerSeverity") || undefined,
+              recentOnly: params.get("recentOnly") === null ? undefined : params.get("recentOnly") === "1",
+            }},
+            edges: edges.length ? edges : undefined,
+          }};
+        }} catch (err) {{
+          return null;
+        }}
+      }}
+
+      function applyUiState(state) {{
+        if (!state || typeof state !== "object") return;
+        const view = state.view || document.body.dataset.view || "operational";
+        const layout = state.layout || document.body.dataset.layout || "cluster";
+        document.body.dataset.view = view;
+        document.body.dataset.layout = layout;
+        setActiveButton(viewButtons, view, "view");
+        setActiveButton(layoutButtons, layout, "layout");
+
+        const patchSelect = (control, value) => {{
+          if (!control || value == null) return;
+          const wanted = String(value);
+          const hasOption = Array.from(control.options || []).some((opt) => opt.value === wanted);
+          control.value = hasOption ? wanted : "all";
+        }};
+        const f = state.filters || {{}};
+        patchSelect(filters.mode, f.mode);
+        patchSelect(filters.wave, f.wave);
+        patchSelect(filters.halo, f.halo);
+        patchSelect(filters.parity, f.parity);
+        patchSelect(filters.badge, f.badge);
+        patchSelect(filters.queue, f.queue);
+        patchSelect(filters.blocker, f.blocker);
+        patchSelect(filters.blockerSeverity, f.blockerSeverity);
+        if (filters.recentOnly && typeof f.recentOnly === "boolean") {{
+          filters.recentOnly.checked = f.recentOnly;
+        }}
+
+        if (Array.isArray(state.edges) && state.edges.length) {{
+          const enabled = new Set(state.edges.map((token) => String(token)));
+          edgeTypeControls.forEach((checkbox) => {{
+            checkbox.checked = enabled.has(checkbox.dataset.edgeType || "");
+          }});
+        }}
+      }}
+
+      function writeUrlUiState(state) {{
+        try {{
+          const url = new URL(window.location.href);
+          const params = url.searchParams;
+          const s = state || collectUiState();
+          params.set("view", s.view || "operational");
+          params.set("layout", s.layout || "cluster");
+          params.set("mode", s.filters?.mode || "all");
+          params.set("wave", s.filters?.wave || "all");
+          params.set("halo", s.filters?.halo || "all");
+          params.set("parity", s.filters?.parity || "all");
+          params.set("badge", s.filters?.badge || "all");
+          params.set("queue", s.filters?.queue || "all");
+          params.set("blocker", s.filters?.blocker || "all");
+          params.set("blockerSeverity", s.filters?.blockerSeverity || "all");
+          params.set("recentOnly", s.filters?.recentOnly ? "1" : "0");
+          const allEdgeTypes = edgeTypeControls.map((checkbox) => checkbox.dataset.edgeType).filter(Boolean).sort();
+          const enabledEdges = Array.isArray(s.edges) ? s.edges.slice().sort() : [];
+          if (
+            allEdgeTypes.length &&
+            enabledEdges.length === allEdgeTypes.length &&
+            enabledEdges.every((edge, idx) => edge === allEdgeTypes[idx])
+          ) {{
+            params.delete("edges");
+          }} else {{
+            params.set("edges", enabledEdges.join(","));
+          }}
+          window.history.replaceState(null, "", `${{url.pathname}}?${{params.toString()}}${{url.hash}}`);
+        }} catch (err) {{
+          // best-effort persistence
+        }}
+      }}
+
+      function persistUiState() {{
+        const state = collectUiState();
+        writeLocalUiState(state);
+        writeUrlUiState(state);
+      }}
+
+      function cloneUiState(state) {{
+        try {{
+          return JSON.parse(JSON.stringify(state));
+        }} catch (err) {{
+          return collectUiState();
+        }}
+      }}
 
       function showDetail(node) {{
         if (!detail) return;
@@ -1665,6 +2358,7 @@ def render_html(
           return;
         }}
         const criteriaText = (payload.criteria_ids && payload.criteria_ids.length) ? payload.criteria_ids.join(", ") : "n/a";
+        const blockersText = (payload.blockers && payload.blockers.length) ? payload.blockers.join(", ") : "none";
         const thresholdsText = payload.thresholds ? JSON.stringify(payload.thresholds) : "{{}}";
         detail.innerHTML = [
           "<h3>" + esc(payload.scope_skill) + "</h3>",
@@ -1676,6 +2370,7 @@ def render_html(
             "parity: " + esc(payload.parity) + "\\n" +
             "promotion: " + esc(payload.promotion) + "\\n" +
             "queue: " + esc(payload.queue_count) + " (top reason: " + esc(payload.queue_reason) + ")\\n" +
+            "blockers: " + esc(blockersText) + " (severity: " + esc(payload.blocker_severity || "none") + ")\\n" +
             "coverage: pilot=" + esc(payload.pilot_window_runs) + " total=" + esc(payload.total_runs) + "\\n" +
             "profile: " + esc(payload.profile_status) + "\\n" +
             "candidate_pressure: " + esc(payload.candidate_pressure) + "\\n" +
@@ -1692,6 +2387,18 @@ def render_html(
           node.classList.toggle("is-selected", !!active);
           node.classList.toggle("is-muted", !!selectedSkill && !active);
         }});
+        graphEdges.forEach((edge) => {{
+          if (!selectedSkill) {{
+            edge.classList.remove("is-selected");
+            edge.classList.remove("is-muted");
+            return;
+          }}
+          const connected =
+            edge.dataset.sourceSkill === selectedSkill ||
+            edge.dataset.targetSkill === selectedSkill;
+          edge.classList.toggle("is-selected", connected);
+          edge.classList.toggle("is-muted", !connected);
+        }});
         runRows.forEach((row) => {{
           row.classList.toggle("is-selected", !!selectedSkill && row.dataset.skillKey === selectedSkill);
         }});
@@ -1705,7 +2412,34 @@ def render_html(
 
       function matchesFilter(node, key, value) {{
         if (!value || value === "all") return true;
+        if (key === "blockers") {{
+          const blockerTokens = (node.dataset.blockers || "")
+            .split(",")
+            .map((item) => item.trim())
+            .filter(Boolean);
+          return blockerTokens.includes(value);
+        }}
         return node.dataset[key] === value;
+      }}
+
+      function inActiveLayout(node) {{
+        const layout = document.body.dataset.layout || "cluster";
+        return (node.dataset.layout || "cluster") === layout;
+      }}
+
+      function isSkillVisible(skillKey) {{
+        return nodes.some((node) =>
+          node.dataset.skillKey === skillKey &&
+          inActiveLayout(node) &&
+          !node.hidden
+        );
+      }}
+
+      function isEdgeTypeEnabled(edgeType) {{
+        if (!edgeType) return true;
+        if (!edgeTypeControls.length) return true;
+        const control = edgeTypeControls.find((item) => item.dataset.edgeType === edgeType);
+        return control ? !!control.checked : true;
       }}
 
       function applyFilters() {{
@@ -1718,17 +2452,41 @@ def render_html(
             matchesFilter(node, "parity", filters.parity?.value) &&
             matchesFilter(node, "badge", filters.badge?.value) &&
             matchesFilter(node, "queueReason", filters.queue?.value) &&
+            matchesFilter(node, "blockers", filters.blocker?.value) &&
+            matchesFilter(node, "blockerSeverity", filters.blockerSeverity?.value) &&
             (!filters.recentOnly?.checked || node.dataset.hasRecent === "yes");
-          node.hidden = !show;
-          if (show) visible += 1;
+          const activeLayout = inActiveLayout(node);
+          node.hidden = !show || !activeLayout;
+          if (show && activeLayout) visible += 1;
         }});
-        clusterBlocks.forEach((cluster) => {{
-          const clusterNodes = Array.from(cluster.querySelectorAll(".skill-node"));
-          const anyVisible = clusterNodes.some((node) => !node.hidden);
-          cluster.hidden = !anyVisible;
+        if ((document.body.dataset.layout || "cluster") === "cluster") {{
+          clusterBlocks.forEach((cluster) => {{
+            const clusterNodes = Array.from(cluster.querySelectorAll('.skill-node[data-layout="cluster"]'));
+            const anyVisible = clusterNodes.some((node) => !node.hidden);
+            cluster.hidden = !anyVisible;
+          }});
+          if (graphLayoutBoard) graphLayoutBoard.hidden = true;
+        }} else {{
+          clusterBlocks.forEach((cluster) => {{
+            cluster.hidden = true;
+          }});
+          if (graphLayoutBoard) graphLayoutBoard.hidden = false;
+        }}
+        graphEdges.forEach((edge) => {{
+          const isGraphLayout = (document.body.dataset.layout || "cluster") === "graph";
+          const show =
+            isGraphLayout &&
+            isEdgeTypeEnabled(edge.dataset.edgeType || "") &&
+            isSkillVisible(edge.dataset.sourceSkill || "") &&
+            isSkillVisible(edge.dataset.targetSkill || "");
+          edge.hidden = !show;
         }});
         if (visibleNodeCount) {{
           visibleNodeCount.textContent = visible + " visible nodes";
+        }}
+        if (visibleEdgeCount) {{
+          const visibleEdges = graphEdges.filter((edge) => !edge.hidden).length;
+          visibleEdgeCount.textContent = visibleEdges + " visible edges";
         }}
       }}
 
@@ -1747,7 +2505,19 @@ def render_html(
       }});
 
       Object.values(filters).forEach((el) => {{
-        if (el) el.addEventListener("change", applyFilters);
+        if (!el) return;
+        el.addEventListener("change", () => {{
+          applyFilters();
+          applySelection();
+          persistUiState();
+        }});
+      }});
+      edgeTypeControls.forEach((checkbox) => {{
+        checkbox.addEventListener("change", () => {{
+          applyFilters();
+          applySelection();
+          persistUiState();
+        }});
       }});
 
       viewButtons.forEach((btn) => {{
@@ -1755,6 +2525,18 @@ def render_html(
           viewButtons.forEach((item) => item.classList.remove("active"));
           btn.classList.add("active");
           document.body.dataset.view = btn.dataset.view || "operational";
+          persistUiState();
+        }});
+      }});
+
+      layoutButtons.forEach((btn) => {{
+        btn.addEventListener("click", () => {{
+          layoutButtons.forEach((item) => item.classList.remove("active"));
+          btn.classList.add("active");
+          document.body.dataset.layout = btn.dataset.layout || "cluster";
+          applyFilters();
+          applySelection();
+          persistUiState();
         }});
       }});
 
@@ -1769,8 +2551,38 @@ def render_html(
         }});
       }}
 
+      const DEFAULT_UI_STATE = collectUiState();
+      const localState = readLocalUiState();
+      const urlState = readUrlUiState();
+      const bootstrapState = cloneUiState(DEFAULT_UI_STATE);
+      if (localState && typeof localState === "object") {{
+        bootstrapState.view = localState.view || bootstrapState.view;
+        bootstrapState.layout = localState.layout || bootstrapState.layout;
+        bootstrapState.filters = Object.assign({{}}, bootstrapState.filters, localState.filters || {{}});
+        if (Array.isArray(localState.edges)) bootstrapState.edges = localState.edges;
+      }}
+      if (urlState && typeof urlState === "object") {{
+        if (urlState.view) bootstrapState.view = urlState.view;
+        if (urlState.layout) bootstrapState.layout = urlState.layout;
+        bootstrapState.filters = Object.assign({{}}, bootstrapState.filters, urlState.filters || {{}});
+        if (Array.isArray(urlState.edges)) bootstrapState.edges = urlState.edges;
+      }}
+      applyUiState(bootstrapState);
+
+      if (resetControlsBtn) {{
+        resetControlsBtn.addEventListener("click", () => {{
+          selectedSkill = "";
+          applyUiState(cloneUiState(DEFAULT_UI_STATE));
+          showDetail(null);
+          applyFilters();
+          applySelection();
+          persistUiState();
+        }});
+      }}
+
       applyFilters();
       applySelection();
+      persistUiState();
     }})();
   </script>
 </body>
@@ -1796,7 +2608,7 @@ def build_graph_adapter(
     states: Sequence[SkillNodeState],
     runs: Sequence[RunEntry],
     candidates: Sequence[CandidateRow],
-) -> int:
+) -> Dict[str, int]:
     allowed_root = (repo_root / GRAPH_ADAPTER_ALLOWED_REL).resolve()
     if not _is_relative_to(out_dir, allowed_root):
         raise RuntimeError(
@@ -1814,6 +2626,55 @@ def build_graph_adapter(
     skill_title: Dict[str, str] = {}
     profile_title: Dict[str, str] = {}
     wave_title: Dict[str, str] = {}
+    blocker_title: Dict[str, str] = {}
+
+    typed_nodes: Dict[str, Dict[str, Any]] = {}
+    typed_edges: Dict[Tuple[str, str, str], Dict[str, Any]] = {}
+
+    def add_typed_node(
+        node_id: str,
+        *,
+        node_type: str,
+        label: str,
+        metadata: Optional[Dict[str, Any]] = None,
+    ) -> None:
+        current = typed_nodes.get(node_id, {})
+        merged_metadata: Dict[str, Any] = {}
+        for source in [current.get("metadata"), metadata]:
+            if isinstance(source, dict):
+                merged_metadata.update(source)
+        typed_nodes[node_id] = {
+            "id": node_id,
+            "type": node_type,
+            "label": label,
+            "metadata": merged_metadata,
+        }
+
+    def add_typed_edge(
+        *,
+        edge_type: str,
+        source: str,
+        target: str,
+        weight: int = 1,
+        metadata: Optional[Dict[str, Any]] = None,
+    ) -> None:
+        key = (edge_type, source, target)
+        if key not in typed_edges:
+            typed_edges[key] = {
+                "type": edge_type,
+                "source": source,
+                "target": target,
+                "weight": max(weight, 1),
+                "metadata": metadata or {},
+            }
+            return
+        typed_edges[key]["weight"] = int(typed_edges[key].get("weight", 1)) + max(weight, 1)
+        if isinstance(metadata, dict):
+            merged = typed_edges[key].get("metadata")
+            if isinstance(merged, dict):
+                merged.update(metadata)
+            else:
+                typed_edges[key]["metadata"] = dict(metadata)
 
     runs_by_skill: Dict[str, List[RunEntry]] = defaultdict(list)
     for run in runs:
@@ -1830,6 +2691,61 @@ def build_graph_adapter(
         skill_title[skill_key] = f"skill--{slugify(skill_key)}"
         profile_title[skill_key] = f"profile--{slugify(state.skill.profile_id)}"
         wave_title[state.skill.wave] = f"wave--{slugify(state.skill.wave)}"
+        for blocker in state.blockers:
+            blocker_title[blocker] = f"blocker--{slugify(blocker)}"
+
+        add_typed_node(
+            skill_title[skill_key],
+            node_type="skill",
+            label=skill_key,
+            metadata={
+                "delegation_mode": state.skill.delegation_mode,
+                "wave": state.skill.wave,
+                "parity": state.parity_corner,
+                "promotion_badge": state.promotion_badge,
+                "blocker_severity": state.blocker_severity,
+            },
+        )
+        add_typed_node(
+            profile_title[skill_key],
+            node_type="profile",
+            label=state.skill.profile_id,
+            metadata={"scope_profile": state.skill.scope_profile},
+        )
+        add_typed_node(
+            wave_title[state.skill.wave],
+            node_type="wave",
+            label=state.skill.wave,
+            metadata={},
+        )
+        add_typed_edge(
+            edge_type="skill_profile",
+            source=skill_title[skill_key],
+            target=profile_title[skill_key],
+            metadata={"scope_skill": skill_key},
+        )
+        add_typed_edge(
+            edge_type="skill_wave",
+            source=skill_title[skill_key],
+            target=wave_title[state.skill.wave],
+            metadata={"scope_skill": skill_key},
+        )
+
+        for blocker in state.blockers:
+            blocker_id = blocker_title[blocker]
+            add_typed_node(
+                blocker_id,
+                node_type="blocker",
+                label=blocker,
+                metadata={"severity_hint": state.blocker_severity},
+            )
+            add_typed_edge(
+                edge_type="skill_blocker",
+                source=skill_title[skill_key],
+                target=blocker_id,
+                weight=max(state.queue_count, 1),
+                metadata={"scope_skill": skill_key},
+            )
 
     for state in states:
         skill_key = state.skill.scope_skill
@@ -1844,6 +2760,8 @@ def build_graph_adapter(
             f"- halo: `{sanitize_note_value(state.recent_halo)}`",
             f"- promotion_badge: `{sanitize_note_value(state.promotion_badge)}`",
             f"- parity: `{sanitize_note_value(state.parity_corner)}`",
+            f"- blockers: `{sanitize_note_value(','.join(state.blockers) if state.blockers else 'none')}`",
+            f"- blocker_severity: `{sanitize_note_value(state.blocker_severity)}`",
             "",
             f"Links: [[{profile_title[skill_key]}]] [[{wave_title[state.skill.wave]}]]",
         ]
@@ -1869,6 +2787,22 @@ def build_graph_adapter(
         )
         files_written += 1
 
+    for blocker, title in sorted(blocker_title.items(), key=lambda kv: kv[0]):
+        links = [
+            f"[[{skill_title[state.skill.scope_skill]}]]"
+            for state in states
+            if blocker in state.blockers
+        ]
+        content = [
+            f"# {title}",
+            "",
+            f"- blocker_code: `{sanitize_note_value(blocker)}`",
+            "",
+            *links,
+        ]
+        (out_dir / f"{title}.md").write_text("\n".join(content) + "\n", encoding="utf-8")
+        files_written += 1
+
     for wave, title in wave_title.items():
         links = [f"[[{skill_title[state.skill.scope_skill]}]]" for state in states if state.skill.wave == wave]
         content = [
@@ -1884,13 +2818,41 @@ def build_graph_adapter(
     decision_titles: Set[str] = set()
     for run in runs:
         run_title = f"run--{slugify(run.run_id)}"
+        add_typed_node(
+            run_title,
+            node_type="run",
+            label=run.run_id,
+            metadata={
+                "terminal_status": run.terminal_status or "n/a",
+                "parity": run.parity_status or "n/a",
+                "promotion_state": run.promotion_state or "none",
+            },
+        )
         links = []
         if run.skill_key and run.skill_key in skill_title:
             links.append(f"[[{skill_title[run.skill_key]}]]")
+            add_typed_edge(
+                edge_type="skill_run",
+                source=skill_title[run.skill_key],
+                target=run_title,
+                metadata={"run_id": run.run_id},
+            )
         if run.promotion_state:
             decision_title = f"decision--{slugify(run.run_id)}-{slugify(run.promotion_state)}"
             decision_titles.add(decision_title)
             links.append(f"[[{decision_title}]]")
+            add_typed_node(
+                decision_title,
+                node_type="decision",
+                label=run.promotion_state,
+                metadata={"run_id": run.run_id},
+            )
+            add_typed_edge(
+                edge_type="run_decision",
+                source=run_title,
+                target=decision_title,
+                metadata={"run_id": run.run_id},
+            )
 
         run_content = [
             f"# {run_title}",
@@ -1913,14 +2875,30 @@ def build_graph_adapter(
             "- entity: promotion-decision",
             "",
         ]
-        (out_dir / f"{title}.md").write_text("\n".join(content), encoding="utf-8")
+        (out_dir / f"{title}.md").write_text("\n".join(content) + "\n", encoding="utf-8")
         files_written += 1
 
     for candidate in candidates:
         candidate_title = f"candidate--{slugify(candidate.candidate_id)}"
+        add_typed_node(
+            candidate_title,
+            node_type="candidate",
+            label=candidate.candidate_id,
+            metadata={
+                "skill_raw": candidate.skill_raw,
+                "composite_score": round(candidate.composite_score, 3),
+                "window_count": candidate.window_count,
+            },
+        )
         links = []
         if candidate.skill_key and candidate.skill_key in skill_title:
             links.append(f"[[{skill_title[candidate.skill_key]}]]")
+            add_typed_edge(
+                edge_type="skill_candidate",
+                source=skill_title[candidate.skill_key],
+                target=candidate_title,
+                metadata={"decision_reason": candidate.decision_reason or "n/a"},
+            )
         content = [
             f"# {candidate_title}",
             "",
@@ -1935,7 +2913,27 @@ def build_graph_adapter(
         (out_dir / f"{candidate_title}.md").write_text("\n".join(content) + "\n", encoding="utf-8")
         files_written += 1
 
-    return files_written
+    typed_graph = {
+        "schema_version": "1.0",
+        "generated_at": _utc_iso_now(),
+        "counts": {
+            "nodes": len(typed_nodes),
+            "edges": len(typed_edges),
+            "note_files": files_written,
+        },
+        "nodes": sorted(typed_nodes.values(), key=lambda item: (item.get("type", ""), item.get("id", ""))),
+        "edges": sorted(
+            typed_edges.values(),
+            key=lambda item: (item.get("type", ""), item.get("source", ""), item.get("target", "")),
+        ),
+    }
+    (out_dir / "typed-graph.json").write_text(json.dumps(typed_graph, indent=2) + "\n", encoding="utf-8")
+
+    return {
+        "note_files": files_written,
+        "typed_nodes": len(typed_nodes),
+        "typed_edges": len(typed_edges),
+    }
 
 
 def main() -> int:
@@ -1973,14 +2971,22 @@ def main() -> int:
     runs_root = _path(repo_root, args.runs_root)
     feedback_log_path = _path(repo_root, args.feedback_log)
     graph_adapter_dir = _path(repo_root, args.graph_adapter_dir)
+    typed_graph_path = graph_adapter_dir / "typed-graph.json"
     out_html = _path(repo_root, args.out_html)
 
     wave_readiness = load_required_json(wave_readiness_path, "wave-readiness")
+    profile_index = load_required_json(profile_index_path, "profile-index")
     shadow_dashboard = load_required_json(shadow_dashboard_path, "shadow-dashboard")
     promotion_validation = load_required_json(promotion_validation_path, "promotion-validation")
     parity_manifest = load_required_json(parity_manifest_path, "parity-manifest")
+    inventory_policy = load_inventory_policy(
+        repo_root=repo_root,
+        profile_index=profile_index,
+        raw_path=args.inventory_policy,
+        system_slice_mode=args.system_slice_mode,
+    )
 
-    profiles = load_profiles(repo_root, profile_index_path, wave_readiness)
+    profiles = load_profiles(repo_root, profile_index, wave_readiness, inventory_policy)
     aliases = build_skill_alias_maps(profiles)
 
     runs = load_runs_from_dir(runs_root)
@@ -2048,13 +3054,14 @@ def main() -> int:
         decision_by_run=decision_by_run,
         queue_rows=queue_rows,
         candidates=candidates,
+        wave_blockers_by_wave=build_wave_blocker_map(wave_readiness),
     )
     grouped = group_nodes_by_cluster(states)
     run_lane_rows = build_run_lane(runs)
 
     artifact_metas = [
         artifact_meta("wave-readiness", wave_readiness_path, wave_readiness),
-        artifact_meta("profile-index", profile_index_path, load_json(profile_index_path)),
+        artifact_meta("profile-index", profile_index_path, profile_index),
         artifact_meta("shadow-dashboard", shadow_dashboard_path, shadow_dashboard),
         artifact_meta("daily-skill-health", daily_health_path, None),
         artifact_meta("promotion-queue", promotion_queue_path, None),
@@ -2063,9 +3070,9 @@ def main() -> int:
         artifact_meta("candidates", candidates_path, None),
     ]
 
-    graph_adapter_files = 0
+    graph_adapter_stats = {"note_files": 0, "typed_nodes": 0, "typed_edges": 0}
     if args.with_graph_adapter:
-        graph_adapter_files = build_graph_adapter(
+        graph_adapter_stats = build_graph_adapter(
             repo_root=repo_root,
             out_dir=graph_adapter_dir,
             states=states,
@@ -2073,6 +3080,10 @@ def main() -> int:
             candidates=candidates,
         )
     graph_adapter_note_files = len(list(graph_adapter_dir.glob("*.md"))) if graph_adapter_dir.exists() else 0
+    typed_graph_payload = load_json(typed_graph_path) if typed_graph_path.exists() else None
+    typed_graph_edges = (
+        len(typed_graph_payload.get("edges")) if isinstance(typed_graph_payload, dict) and isinstance(typed_graph_payload.get("edges"), list) else 0
+    )
     source_states = {
         "candidates.jsonl": classify_source_state(candidates_path, len(candidates)),
         "promotion-queue.md": classify_source_state(promotion_queue_path, len(queue_rows)),
@@ -2086,6 +3097,7 @@ def main() -> int:
         ),
         "feedback log": classify_source_state(feedback_log_path, int(feedback.get("events", 0))),
         "graph-adapter notes": classify_source_state(graph_adapter_dir, graph_adapter_note_files),
+        "typed-graph.json": classify_source_state(typed_graph_path, typed_graph_edges),
     }
 
     global_strip_html = render_global_strip(
@@ -2110,7 +3122,7 @@ def main() -> int:
         warning_counts=warning_counts,
         feedback=feedback,
         graph_adapter_dir_display=graph_adapter_dir_display,
-        graph_adapter_files=graph_adapter_files,
+        graph_adapter_stats=graph_adapter_stats,
         source_states=source_states,
     )
 
@@ -2132,7 +3144,9 @@ def main() -> int:
         "runs": len(run_lane_rows),
         "shadow_runs": len(shadow_run_ids),
         "candidate_rows": len(candidates),
-        "graph_adapter_files": graph_adapter_files,
+        "graph_adapter_files": graph_adapter_stats.get("note_files", 0),
+        "typed_graph_nodes": graph_adapter_stats.get("typed_nodes", 0),
+        "typed_graph_edges": graph_adapter_stats.get("typed_edges", 0),
         "health_decision": health.get("shadow_decision"),
     }
     print(json.dumps(summary, indent=2))
@@ -2141,3 +3155,6 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+    adapter_note_files = int(graph_adapter_stats.get("note_files", 0))
+    adapter_typed_nodes = int(graph_adapter_stats.get("typed_nodes", 0))
+    adapter_typed_edges = int(graph_adapter_stats.get("typed_edges", 0))

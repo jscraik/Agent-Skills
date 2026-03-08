@@ -307,3 +307,8 @@ See `references/extended.md` for additional examples, workflows, and appendices.
 - Persist with: `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
 - The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
 <!-- /decision-feedback-protocol -->
+
+## Folded Legacy Modes (Phase4)
+<!-- core75-folded-modes:v1:start -->
+Legacy folds are documented in references/folded-legacy-modes-phase4.md.
+<!-- core75-folded-modes:v1:end -->

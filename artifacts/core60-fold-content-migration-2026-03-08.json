@@ -1,0 +1,122 @@
+[
+  {
+    "dest": "backend/mcp-builder",
+    "status": "updated",
+    "modes": 1,
+    "ref": "backend/mcp-builder/references/folded-legacy-modes-core60.md"
+  },
+  {
+    "dest": "frontend/ui/frontend-ui-design",
+    "status": "updated",
+    "modes": 1,
+    "ref": "frontend/ui/frontend-ui-design/references/folded-legacy-modes-core60.md"
+  },
+  {
+    "dest": "frontend/ui/react-ui-patterns",
+    "status": "updated",
+    "modes": 1,
+    "ref": "frontend/ui/react-ui-patterns/references/folded-legacy-modes-core60.md"
+  },
+  {
+    "dest": "frontend/ui/ui-ux-creative-coding",
+    "status": "updated",
+    "modes": 1,
+    "ref": "frontend/ui/ui-ux-creative-coding/references/folded-legacy-modes-core60.md"
+  },
+  {
+    "dest": "frontend/ui/ui-visual-regression",
+    "status": "updated",
+    "modes": 1,
+    "ref": "frontend/ui/ui-visual-regression/references/folded-legacy-modes-core60.md"
+  },
+  {
+    "dest": "github/gh-fix-ci",
+    "status": "updated",
+    "modes": 1,
+    "ref": "github/gh-fix-ci/references/folded-legacy-modes-core60.md"
+  },
+  {
+    "dest": "github/gh-workflow",
+    "status": "updated",
+    "modes": 1,
+    "ref": "github/gh-workflow/references/folded-legacy-modes-core60.md"
+  },
+  {
+    "dest": "github/greptile/check-pr",
+    "status": "updated",
+    "modes": 1,
+    "ref": "github/greptile/check-pr/references/folded-legacy-modes-core60.md"
+  },
+  {
+    "dest": "interview/deep-interview",
+    "status": "updated",
+    "modes": 1,
+    "ref": "interview/deep-interview/references/folded-legacy-modes-core60.md"
+  },
+  {
+    "dest": "interview/interview-me",
+    "status": "updated",
+    "modes": 1,
+    "ref": "interview/interview-me/references/folded-legacy-modes-core60.md"
+  },
+  {
+    "dest": "product/docs/agents-md",
+    "status": "updated",
+    "modes": 2,
+    "ref": "product/docs/agents-md/references/folded-legacy-modes-core60.md"
+  },
+  {
+    "dest": "product/docs/docs-expert",
+    "status": "updated",
+    "modes": 1,
+    "ref": "product/docs/docs-expert/references/folded-legacy-modes-core60.md"
+  },
+  {
+    "dest": "product/domain/chatgpt-apps",
+    "status": "updated",
+    "modes": 2,
+    "ref": "product/domain/chatgpt-apps/references/folded-legacy-modes-core60.md"
+  },
+  {
+    "dest": "product/security/security-best-practices",
+    "status": "updated",
+    "modes": 2,
+    "ref": "product/security/security-best-practices/references/folded-legacy-modes-core60.md"
+  },
+  {
+    "dest": "product/specs/product-spec",
+    "status": "updated",
+    "modes": 3,
+    "ref": "product/specs/product-spec/references/folded-legacy-modes-core60.md"
+  },
+  {
+    "dest": "utilities/diagram-cli",
+    "status": "updated",
+    "modes": 1,
+    "ref": "utilities/diagram-cli/references/folded-legacy-modes-core60.md"
+  },
+  {
+    "dest": "utilities/skill-builder",
+    "status": "updated",
+    "modes": 2,
+    "ref": "utilities/skill-builder/references/folded-legacy-modes-core60.md"
+  },
+  {
+    "dest": "utilities/systematic-debugging",
+    "status": "updated",
+    "modes": 1,
+    "ref": "utilities/systematic-debugging/references/folded-legacy-modes-core60.md"
+  },
+  {
+    "dest": "utilities/test-driven-development",
+    "status": "updated",
+    "modes": 1,
+    "ref": "utilities/test-driven-development/references/folded-legacy-modes-core60.md"
+  },
+  {
+    "dest": "utilities/writing-plans",
+    "status": "updated",
+    "modes": 1,
+    "ref": "utilities/writing-plans/references/folded-legacy-modes-core60.md"
+  }
+]

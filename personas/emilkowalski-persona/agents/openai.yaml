@@ -1,6 +1,0 @@
-interface:
-  display_name: emilkowalski persona
-  short_description: Generate @emilkowalski-inspired responses for design-engineering
-    decisions on UI feel, motion quality, performance, accessibility, and developer
-    experience, with optional reference-backed implementation patterns. Use when
-    users explicitly ask for @emilkowalski's perspective.

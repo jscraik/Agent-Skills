@@ -281,6 +281,9 @@ For new skills:
 
 Optional deep checks:
 - `~/.venvs/pyyaml/bin/python scripts/run_skill_evals.py <path/to/skill-folder> --dual-run --capture-jsonl`
+- `python utilities/skill-builder/scripts/benchmark_skill_portfolio.py --root . --config utilities/skill-builder/references/benchmark-policy.json --mode warn --format text --output-json artifacts/industry-benchmark-latest.json`
+- `python utilities/skill-builder/scripts/refresh_benchmark_policy.py --root . --policy utilities/skill-builder/references/benchmark-policy.json --benchmark-json artifacts/industry-benchmark-latest.json --schedule-days 7 --report-json artifacts/benchmark-policy-refresh-report.json`
+- `python utilities/skill-builder/scripts/run_repo_skill_quality.py --root . --baseline-file utilities/skill-builder/references/skill-quality-baseline.json --benchmark-mode warn --benchmark-config utilities/skill-builder/references/benchmark-policy.json --benchmark-output-json artifacts/industry-benchmark-latest.json --format text`
 - `~/.venvs/pyyaml/bin/python scripts/deterministic_trace_checks.py <path/to/codex-run.jsonl> --budgets-json '{"max_total_tokens":4000,"max_duplicate_command_ratio":0.35}'`
 - `python3 scripts/record_skill_feedback.py --skill-path <path/to/skill-folder>/SKILL.md --decision accepted --outcome good --confidence high --notes "validation sample" --workspace <workspace>`
 - `python3 scripts/skill_subject_scoreboard.py --workspace <workspace> --format table`
@@ -317,3 +320,13 @@ Use these files when needed:
 
 ## Empowering execution style
 Be capable, creative, and willing to explore better options when evidence supports them. Enable the user to make safe choices by explaining tradeoffs clearly, then keep the implementation disciplined and auditable.
+
+## Folded Legacy Modes (Core60)
+<!-- core60-folded-modes:v1:start -->
+This skill owns legacy capability from retired skills. Use these modes when requests match prior behavior.
+
+- `install-distribute` from `utilities/skill-installer`: Plan and install skills into a Codex skills directory from curated or repo sources; use when a user asks to list available skills, instal...
+- `prompt-packaging` from `utilities/codex-prompt-creator`: Create or update reusable Codex skills under .agents/skills and optionally local ~/.codex/prompts shortcuts. Use when a user asks to buil...
+
+Deep legacy details: `references/folded-legacy-modes-core60.md`.
+<!-- core60-folded-modes:v1:end -->

@@ -243,3 +243,13 @@ Optional templates for consistent snapshots or fixture assets.
 - Persist with: `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
 - The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
 <!-- /decision-feedback-protocol -->
+
+## Folded Legacy Modes (Core60)
+<!-- core60-folded-modes:v1:start -->
+This skill owns legacy capability from retired skills. Use these modes when requests match prior behavior.
+
+- `trace-debug` from `frontend/tools/agent-trace-debug`: Analyze Agent Trace data flow when AIAttributionPanel shows empty/incorrect trace by tracing expected vs actual shapes across agentTraceS...
+
+Deep legacy details: `references/folded-legacy-modes-core60.md`.
+Additional Phase 4 folds: references/folded-legacy-modes-phase4.md.
+<!-- core60-folded-modes:v1:end -->

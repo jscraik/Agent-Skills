@@ -1,15 +1,23 @@
-schema_version: 1
-skill: insight-report
+schema_version: '1.0'
+purpose: Execute the insight-report workflow with clear boundaries and reproducible
+  outputs.
+triggers:
+- user explicitly requests insight-report
+- request semantics clearly match this workflow
+- a scoped, repeatable workflow is preferred over ad hoc guidance
+inputs:
+- user goal and constraints
+- target paths, tools, and runtime context
+- safety, privacy, and approval boundaries
 outputs:
-  - name: report_path
-    type: string
-    required: true
-    description: Absolute path to generated HTML report
-  - name: facets_path
-    type: string
-    required: true
-    description: Absolute path to generated facets JSON
-  - name: session_meta_path
-    type: string
-    required: true
-    description: Absolute path to generated session metadata directory
+- workflow result aligned to request
+- evidence-backed summary of actions taken
+- next-step guidance when follow-up work remains
+non_goals:
+- unrelated domain workflows
+- unsafe or policy-violating actions
+- fabricated evidence or unverifiable claims
+risks:
+- missing prerequisites can block execution
+- scope drift can reduce reliability
+- insufficient validation can hide regressions

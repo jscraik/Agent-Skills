@@ -1,0 +1,5 @@
+{
+  "ok": false,
+  "error": "missing_context7_api_key",
+  "context7_env": "CONTEXT7_API_KEY"
+}
