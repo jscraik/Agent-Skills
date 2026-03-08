@@ -47,6 +47,7 @@ jobs:
       - name: Run Semgrep (auto ruleset + secrets)
         run: |
           semgrep ci \
+            --error \
             --config auto \
             --config "p/secrets" \
             --config "p/python" \
