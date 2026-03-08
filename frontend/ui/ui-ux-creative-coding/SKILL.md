@@ -77,11 +77,11 @@ Primary references inside this skill:
 - `references/kubadesign-persona.md`
 
 Dedicated standalone persona skills (for stricter persona workflows):
-- `/personas/benjitaylor-persona/SKILL.md`
-- `/personas/jh3yy-persona/SKILL.md`
-- `/personas/jenny-wen-persona/SKILL.md`
-- `/personas/emilkowalski-persona/SKILL.md`
-- `/personas/kubadesign-persona/SKILL.md`
+- `personas/benjitaylor-persona/SKILL.md`
+- `personas/jh3yy-persona/SKILL.md`
+- `personas/jenny-wen-persona/SKILL.md`
+- `personas/emilkowalski-persona/SKILL.md`
+- `personas/kubadesign-persona/SKILL.md`
 
 ## Component.gallery integration
 Use `component.gallery` when the user asks for component research, benchmarking, naming, or implementation comparisons.
