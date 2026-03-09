@@ -75,10 +75,24 @@ echo "observe_only" > artifacts/skill-graphs/controls/rollout-mode.txt
 echo "off" > artifacts/skill-graphs/controls/rollout-mode.txt
 ```
 
+### Hard Gate Mode
+
+**Location**: `artifacts/skill-graphs/controls/hard-gate-mode.txt`
+
+Valid values:
+- `auto` - enforce `TR-04`/`TR-05` hard from Phase 3+ and `TR-06` hard from Phase 4+ (default)
+- `force_on` - enforce `TR-04`/`TR-05`/`TR-06` as hard gates immediately
+- `force_off` - non-production override only; requires incident ticket reference
+
+```bash
+# Set hard-gate mode to auto (default)
+echo "auto" > artifacts/skill-graphs/controls/hard-gate-mode.txt
+```
+
 ### Control Hierarchy
 
 ```
-kill-switch > rollback > rollout-mode > feature-switch
+kill-switch > rollback > rollout-mode > hard-gate-mode > feature-switch
 ```
 
 ---

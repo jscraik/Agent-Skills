@@ -99,7 +99,8 @@ Control-only states must remain compatible with the public terminal enums:
 
 - `run_rollforward_blocked` -> `terminal_status=failed`, `stop_reason=policy_failed`
 - `run_rollback_required` -> `terminal_status=failed`, `stop_reason=dependency_missing`
-- `run_aborted` -> `terminal_status=aborted`, `stop_reason=aborted`
+- `kill_switch_activated` -> `terminal_status=aborted`, `stop_reason=aborted`
+- `run_aborted` (legacy alias) -> normalize to `kill_switch_activated` before terminal mapping
 
 Migration guard:
 - Keep compatibility mapping until Phase-4 contract promotion explicitly updates public enums.

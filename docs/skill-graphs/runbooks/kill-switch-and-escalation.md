@@ -29,10 +29,13 @@ Runtime controls are file-based and fail-closed:
    - `artifacts/skill-graphs/controls/rollback-required.txt`
 2. Rollout mode:
    - `artifacts/skill-graphs/controls/rollout-mode.txt` with `off | observe_only | active`
-3. Feature kill switches:
+3. Gate enforcement mode:
+   - `artifacts/skill-graphs/controls/hard-gate-mode.txt` with `auto | force_on | force_off`
+   - default is `auto` when missing or invalid
+4. Feature kill switches:
    - `artifacts/skill-graphs/controls/auto_capture.disabled`
    - `artifacts/skill-graphs/controls/auto_apply.disabled`
-4. Per-skill kill switches:
+5. Per-skill kill switches:
    - `artifacts/skill-graphs/controls/skills/<scope_skill>/auto_capture.disabled`
    - `artifacts/skill-graphs/controls/skills/<scope_skill>/auto_apply.disabled`
 
@@ -48,7 +51,7 @@ Before changing rollout state or enabling auto-apply, run a pre-invocation check
 
 The promotion workflow references this as the mandatory gate in `docs/skill-graphs/workflows/promotion-gate.md`.
 
-Precedence: kill-switch/rollback controls override rollout mode; rollout mode then gates auto-capture and auto-apply.
+Precedence: kill-switch/rollback controls override rollout mode; rollout mode then gates hard-gate behavior and feature switches.
 
 ## Wave rollout safety model
 
