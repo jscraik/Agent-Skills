@@ -11,13 +11,15 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional
 
+from skill_graph_inventory import (
+    DEFAULT_INVENTORY_POLICY,
+    discover_inventory_skills,
+    load_inventory_policy,
+)
+
 ROOT = Path(__file__).resolve().parents[3]
 COCKPIT_MODES = {"autopilot", "co-pilot", "manual"}
 DEFAULT_PROFILE_REL_PATH = "references/task-profile.json"
-EXCLUDED_PREFIXES = (
-    "skills/.system/",
-    "utilities/recon-workbench/assets/template/.codex/skills/",
-)
 MANUAL_SKILL_PATHS = {
     "github/gh-fix-ci",
     "github/gh-workflow",
@@ -26,7 +28,8 @@ MANUAL_SKILL_PATHS = {
     "utilities/1password",
     "utilities/agent-browser",
     "utilities/bootstrap",
-    "utilities/codex-agent-builder",
+    "utilities/codex-agent-creator",
+    "utilities/diagram-context-refresh",
     "utilities/fix-mise",
     "utilities/run-tests-and-write-artifacts",
     "utilities/skill-installer",
@@ -40,6 +43,7 @@ class SkillEntry:
     skill_md: Path
     skill_dir: Path
     relative_skill_dir: str
+    inventory_slice: str
     profile_path: Path
     expected_mode: str
     wave: str
@@ -49,22 +53,24 @@ def iso_now() -> str:
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
 
-def is_active_skill(skill_md: Path, repo_root: Path) -> bool:
-    rel = skill_md.relative_to(repo_root).as_posix()
-    if rel == "SKILL.md":
-        return False
-    if any(rel.startswith(prefix) for prefix in EXCLUDED_PREFIXES):
-        return False
-    return True
-
-
-def discover_active_skills(repo_root: Path) -> List[SkillEntry]:
+def discover_active_skills(
+    repo_root: Path,
+    *,
+    inventory_policy_path: str,
+    system_slice_mode: Optional[str],
+) -> List[SkillEntry]:
+    policy = load_inventory_policy(
+        repo_root,
+        policy_rel_path=inventory_policy_path,
+        system_slice_mode_override=system_slice_mode,
+    )
     entries: List[SkillEntry] = []
-    for skill_md in sorted(repo_root.rglob("SKILL.md")):
-        if not is_active_skill(skill_md, repo_root):
+    for row in discover_inventory_skills(repo_root, policy):
+        if row.inventory_slice != "operational":
             continue
+        skill_md = row.skill_md
         skill_dir = skill_md.parent
-        rel_dir = skill_dir.relative_to(repo_root).as_posix()
+        rel_dir = row.relative_skill_dir
         mode = "manual" if rel_dir in MANUAL_SKILL_PATHS else "co-pilot"
         wave = "wave-1-manual" if mode == "manual" else "wave-2-co-pilot"
         entries.append(
@@ -72,6 +78,7 @@ def discover_active_skills(repo_root: Path) -> List[SkillEntry]:
                 skill_md=skill_md,
                 skill_dir=skill_dir,
                 relative_skill_dir=rel_dir,
+                inventory_slice=row.inventory_slice,
                 profile_path=skill_dir / "references" / "task-profile.json",
                 expected_mode=mode,
                 wave=wave,
@@ -266,13 +273,33 @@ def parse_args() -> argparse.Namespace:
         default=today,
         help="Decision date for wave readiness artifact",
     )
+    parser.add_argument(
+        "--inventory-policy",
+        default=DEFAULT_INVENTORY_POLICY,
+        help="Inventory allowlist/exclude policy JSON (repo-relative)",
+    )
+    parser.add_argument(
+        "--system-slice-mode",
+        choices=["exclude", "separate"],
+        default=None,
+        help="Override inventory policy system handling: separate or exclude",
+    )
     return parser.parse_args()
 
 
 def main() -> int:
     args = parse_args()
     repo_root = Path(args.repo_root).resolve()
-    entries = discover_active_skills(repo_root)
+    entries = discover_active_skills(
+        repo_root,
+        inventory_policy_path=args.inventory_policy,
+        system_slice_mode=args.system_slice_mode,
+    )
+    policy = load_inventory_policy(
+        repo_root,
+        policy_rel_path=args.inventory_policy,
+        system_slice_mode_override=args.system_slice_mode,
+    )
     generated_at = iso_now()
 
     if args.expected_count and len(entries) != args.expected_count:
@@ -365,6 +392,8 @@ def main() -> int:
         "decision_date": args.decision_date,
         "active_skill_count": len(entries),
         "expected_count": args.expected_count,
+        "inventory_policy": str(policy.source_path.relative_to(repo_root)),
+        "system_slice_mode": policy.system_slice_mode,
         "summary": {
             "valid_count": len(entries) - invalid_count,
             "invalid_count": invalid_count,

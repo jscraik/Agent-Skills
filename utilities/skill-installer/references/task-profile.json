@@ -46,6 +46,13 @@
       "critical": true
     }
   ],
+  "delegation": {
+    "mode": "manual",
+    "human_baseline_minutes": 60.0,
+    "ai_process_minutes": 20.0,
+    "probability_of_success": 0.68,
+    "rationale": "Manual mode required: high-impact side effects need explicit human sign-off before applying candidate lessons."
+  },
   "knowledge_graph": {
     "enabled": true,
     "artifact_glob": "artifacts/deconflict/report-*.json",
@@ -57,12 +64,5 @@
       "overlaps_with",
       "same_job_candidate"
     ]
-  },
-  "delegation": {
-    "mode": "manual",
-    "human_baseline_minutes": 60.0,
-    "ai_process_minutes": 20.0,
-    "probability_of_success": 0.68,
-    "rationale": "Manual mode required: high-impact side effects need explicit human sign-off before applying candidate lessons."
   }
 }

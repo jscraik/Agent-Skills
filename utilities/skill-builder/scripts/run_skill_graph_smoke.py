@@ -13,10 +13,6 @@ from typing import Dict, List, Tuple
 ROOT = Path(__file__).resolve().parents[3]
 SCRIPT_DIR = Path(__file__).resolve().parent
 RECURSIVE_LOOP_SCRIPT = SCRIPT_DIR / "recursive_skill_loop.py"
-EXCLUDED_PREFIXES = (
-    "skills/.system/",
-    "utilities/recon-workbench/assets/template/.codex/skills/",
-)
 ALLOWED_EXECUTABLES = {"python3"}
 
 
@@ -24,16 +20,38 @@ def iso_now() -> str:
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
 
-def discover_profiles(repo_root: Path) -> List[Path]:
+def discover_profiles_from_profile_index(repo_root: Path, profile_index_path: Path) -> List[Path]:
+    if not profile_index_path.exists():
+        raise FileNotFoundError(
+            f"Missing canonical profile index: {profile_index_path}. "
+            "Run validate_skill_graph_profiles.py first."
+        )
+
+    payload = json.loads(profile_index_path.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        raise ValueError(f"profile-index.json must be a JSON object: {profile_index_path}")
+
+    rows = payload.get("skills")
+    if not isinstance(rows, list) or not rows:
+        raise ValueError("profile-index.json is missing a non-empty skills[] inventory.")
+
     out: List[Path] = []
-    for skill_md in sorted(repo_root.rglob("SKILL.md")):
-        rel = skill_md.relative_to(repo_root).as_posix()
-        if rel == "SKILL.md" or any(rel.startswith(prefix) for prefix in EXCLUDED_PREFIXES):
+    seen: set[str] = set()
+    for row in rows:
+        if not isinstance(row, dict):
             continue
-        profile = skill_md.parent / "references" / "task-profile.json"
-        if profile.exists():
-            out.append(profile)
-    return out
+        status = str(row.get("status", "")).strip().lower()
+        profile_rel = str(row.get("profile_path", "")).strip()
+        if not profile_rel or status != "valid":
+            continue
+        profile_path = (repo_root / profile_rel).resolve()
+        rel_profile = profile_path.relative_to(repo_root).as_posix()
+        if rel_profile in seen:
+            continue
+        seen.add(rel_profile)
+        if profile_path.exists():
+            out.append(profile_path)
+    return sorted(out)
 
 
 def _rel_or_redact(value: str, repo_root: Path) -> str:
@@ -78,6 +96,11 @@ def parse_args() -> argparse.Namespace:
         "--lessons-jsonl",
         default="artifacts/skill-graphs/lessons/canonical-lessons.jsonl",
         help="Canonical lessons JSONL path",
+    )
+    parser.add_argument(
+        "--profile-index",
+        default="artifacts/skill-graphs/onboarding/profile-index.json",
+        help="Canonical profile index inventory source (repo-relative)",
     )
     parser.add_argument(
         "--limit",
@@ -158,8 +181,9 @@ def main() -> int:
     controls_dir = (repo_root / args.controls_dir).resolve()
     lessons_jsonl = (repo_root / args.lessons_jsonl).resolve()
     report_out = (repo_root / args.report_out).resolve()
+    profile_index_path = (repo_root / args.profile_index).resolve()
 
-    profiles = discover_profiles(repo_root)
+    profiles = discover_profiles_from_profile_index(repo_root, profile_index_path)
     if args.limit and args.limit > 0:
         profiles = profiles[: args.limit]
 
@@ -242,7 +266,9 @@ def main() -> int:
             }
         )
 
-    pass_count = sum(1 for item in results if item.get("status") in {"accepted", "planned"})
+    planned_count = sum(1 for item in results if item.get("status") == "planned")
+    executed_count = sum(1 for item in results if item.get("status") in {"accepted", "rejected"})
+    pass_count = sum(1 for item in results if item.get("status") == "accepted")
     fail_count = sum(1 for item in results if item.get("status") == "rejected")
     report = {
         "schema_version": "1.0",
@@ -250,6 +276,8 @@ def main() -> int:
         "repo_root": ".",
         "dry_run": bool(args.dry_run),
         "profile_count": len(results),
+        "planned_count": planned_count,
+        "executed_count": executed_count,
         "pass_count": pass_count,
         "fail_count": fail_count,
         "results": results,

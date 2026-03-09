@@ -19,6 +19,8 @@ DEFAULT_PILOT_PROFILES = [
     "react-ui-patterns",
 ]
 PILOT_PROFILES = list(DEFAULT_PILOT_PROFILES)
+CANONICAL_DAILY_HEALTH_DOC = "docs/skill-graphs/telemetry/daily-skill-health.md"
+LEGACY_DAILY_HEALTH_ARTIFACT = "artifacts/skill-graphs/telemetry/daily-skill-health.md"
 
 EVENT_TYPES = {
     "run_initialized",
@@ -121,6 +123,25 @@ def parse_args() -> argparse.Namespace:
 
 def parse_iso8601(value: str) -> datetime:
     return datetime.fromisoformat(value.replace("Z", "+00:00")).astimezone(timezone.utc)
+
+
+def enforce_daily_health_path_contract(repo_root: Path, daily_health_path: Path) -> None:
+    canonical = (repo_root / CANONICAL_DAILY_HEALTH_DOC).resolve()
+    if daily_health_path != canonical:
+        raise RuntimeError(
+            "Path divergence: --daily-health-md must resolve to "
+            f"{CANONICAL_DAILY_HEALTH_DOC} (got {daily_health_path})"
+        )
+
+    legacy = (repo_root / LEGACY_DAILY_HEALTH_ARTIFACT).resolve()
+    if canonical.exists() and legacy.exists():
+        canonical_text = canonical.read_text(encoding="utf-8")
+        legacy_text = legacy.read_text(encoding="utf-8")
+        if canonical_text != legacy_text:
+            raise RuntimeError(
+                "Path divergence: docs and artifacts daily health files differ "
+                f"({canonical} vs {legacy})."
+            )
 
 
 def safe_float(value: Any, default: float = 0.0) -> float:
@@ -966,6 +987,7 @@ def main() -> int:
     daily_health_path = Path(args.daily_health_md).expanduser().resolve()
     failure_patterns_path = Path(args.failure_patterns_jsonl).expanduser().resolve()
     promotion_queue_path = Path(args.promotion_queue_md).expanduser().resolve()
+    enforce_daily_health_path_contract(repo_root, daily_health_path)
 
     shadow_md_path.parent.mkdir(parents=True, exist_ok=True)
     readout_md_path.parent.mkdir(parents=True, exist_ok=True)

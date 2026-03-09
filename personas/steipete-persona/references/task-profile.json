@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "profile_id": "personas-steipete",
-  "scope_skill": "personas/steipete",
+  "profile_id": "personas-steipete-persona",
+  "scope_skill": "personas/steipete-persona",
   "scope_profile": "personas",
   "rubric_version": "2026-02-26",
   "evaluator_version": "v1",

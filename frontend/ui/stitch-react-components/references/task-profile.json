@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "profile_id": "frontend-react-components",
-  "scope_skill": "frontend/react-components",
+  "profile_id": "frontend-ui-stitch-react-components",
+  "scope_skill": "frontend/ui/stitch-react-components",
   "scope_profile": "frontend",
   "rubric_version": "2026-02-26",
   "evaluator_version": "v1",

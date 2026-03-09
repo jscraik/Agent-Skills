@@ -38,6 +38,7 @@ Primary triggers:
 - "help me route this into the workflow"
 - "should this be brainstorm/spec/plan/work/review?"
 - "use the compound engineering workflow"
+- "route this UI request with design and frontend agents"
 - "do a technical review"
 - "which prompt and agents should this use?"
 - "I have a task, PR, spec, or review ask and want the right workflow entrypoint"
@@ -126,6 +127,7 @@ Prompt-backed routes:
 - `plan` -> `codex/prompts/workflow-plan.md`
 - `deepen-plan` -> `codex/prompts/deepen-plan.md`
 - `work` -> `codex/prompts/workflow-work.md`
+- `ui-workflow` -> `codex/prompts/workflow-ui.md`
 - `review` -> `codex/prompts/workflow-review.md`
 - `technical-review` -> `codex/prompts/technical_review.md`
 - `compound` -> `codex/prompts/workflow-compound.md`
@@ -146,6 +148,12 @@ Meta-modes:
    - notebook 2 for context injection, planning mode, hooks, and drift recovery
    - notebook 3 for Codex operating patterns, review loops, doc gardening, and eval patterns
 8. End with the selected prompt path or meta-mode, route rationale, recommended agents, and validation gates.
+
+UI route fan-out defaults:
+- start with `ui-ux-design` for implementation-oriented UI planning and delivery
+- add `design-implementation-reviewer` when visual parity or implementation fidelity is requested
+- add `julik-frontend-races-reviewer` for async or motion-heavy UI interactions
+- add `kieran-typescript-reviewer` when TypeScript-heavy UI code quality is a core risk
 
 ## NotebookLM enrichment
 Use NotebookLM selectively; see `references/notebooklm-sources.md`.
