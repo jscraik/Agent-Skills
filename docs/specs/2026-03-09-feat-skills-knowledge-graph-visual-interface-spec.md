@@ -19,6 +19,7 @@ spec_depth: lite
 - [Core Domain Model](#core-domain-model)
 - [Main Flow / Lifecycle](#main-flow--lifecycle)
 - [Interfaces and Dependencies](#interfaces-and-dependencies)
+- [Authorization and Access Control](#authorization-and-access-control)
 - [Invariants / Safety Requirements](#invariants--safety-requirements)
 - [Failure Model and Recovery](#failure-model-and-recovery)
 - [Observability](#observability)
@@ -34,6 +35,7 @@ spec_depth: lite
 - Added explicit UI state transitions with allowed/disallowed edges and control-precedence behavior.
 - Added concrete retry, timeout, stale-lock, and degraded-mode recovery rules tied to existing runbooks.
 - Added hard validation gates for `TR-01..TR-06`, event-envelope completeness, and fail-fast operational checks.
+- Added service-local diagnostics authorization contract, control-write integrity rules, and rollback clear/re-entry requirements.
 - Locked v1 ingestion to canonical pipeline-composed outputs (no direct raw-artifact reads).
 - Closed v1 persona/export ambiguity with explicit defaults and a required decision-record artifact.
 
@@ -108,7 +110,7 @@ Allowed transitions:
 - `S2 -> S5 | S3 | S4`
 - `S3 -> S5 | S2 | S4`
 - `S5 -> S2 | S3 | S4`
-- `S4 -> S1` only after controls clear
+- `S4 -> S1` only after controls clear and the re-check trigger runs (automatic 30s poll or explicit operator "Re-check controls now" action)
 
 Disallowed transitions:
 - Any direct transition to `S2` that bypasses `S1`.
@@ -146,6 +148,11 @@ Step contract:
 6. Reduced motion lifecycle (cross-state)
 - Motion communicates focus/context only; when reduced motion is enabled, transitions become non-animated state changes with identical information content.
 
+7. Blocked-state recovery lifecycle (`S4 -> S1`)
+- While blocked, controls are re-evaluated on a 30s poll interval and on explicit operator re-check.
+- When blocking controls clear, transition to `S1_LOADING` must occur within 60s.
+- Re-entry from `S4` must replay full control precedence before any transition to `S2_READY`.
+
 ## Interfaces and Dependencies
 Primary local contracts:
 - `docs/skill-graphs/knowledge-graph-operating-model.md`
@@ -173,6 +180,28 @@ Implementation anchor (existing pipeline):
 - v1 ingestion contract: UI consumes canonical pipeline-composed outputs; direct raw artifact ingestion is out of scope.
 - v1 decision artifact: `docs/decisions/2026-03-09-skills-graph-ui-v1-decisions.md` is required input for persona/export defaults.
 
+## Authorization and Access Control
+Service-local authorization is required for all diagnostics export and runbook actions; global platform controls may be additive but are not sufficient by themselves.
+
+Identity and role model:
+- Identity source: authenticated operator identity resolved by the interface runtime before action dispatch.
+  - Accepted credentials must be signed and verified against an explicit issuer allowlist.
+  - Audience must match the interface service audience (`skill-graph-ui`).
+  - Time claims (`exp`, `nbf`, `iat`) must be validated with max clock skew tolerance of `60s`.
+  - Session TTL must be `<=8h`; revoked sessions must be denied within `60s` of revocation signal.
+- Roles: `viewer`, `operator`, `release-owner`.
+
+Permission matrix:
+- `view` graph/list/detail telemetry: `viewer|operator|release-owner`.
+- `refresh` and `re-check controls`: `operator|release-owner`.
+- `open runbook`: `viewer|operator|release-owner` via static runbook ID allowlist only.
+- `download diagnostics`: `operator|release-owner` only.
+
+Deny-by-default behavior:
+- Any unknown or missing role mapping must deny action and emit `ui_action_denied` with reason.
+- Unauthorized diagnostics requests must return a redacted denial payload and no filesystem path disclosure.
+- All diagnostics downloads must emit `ui_diagnostics_downloaded` audit events with actor role, artifact ID, and timestamp.
+
 ## Invariants / Safety Requirements
 - The interface must remain read-only against source artifacts and controls.
 - Control precedence is fail-closed and never overridden by UI preference.
@@ -187,15 +216,25 @@ Implementation anchor (existing pipeline):
   - max filter/search requests: `30` requests per minute per operator session.
   - max concurrent refresh attempts per session: `1` (single-flight).
   - over-budget requests are rejected with `over_budget` diagnostics and no partial execution.
-- Path-safety invariant: artifact reads are restricted to expected `docs/skill-graphs` and `artifacts/skill-graphs` sources after canonical path resolution.
+- Path-safety invariant: runtime artifact reads are restricted to canonical pipeline-composed outputs under `artifacts/skill-graphs/**`; `docs/skill-graphs/**` is validation/build-time reference only.
 - Path traversal/symlink invariant: `..` traversal and symlink-escape paths are rejected before read.
 - Path read integrity invariant: reads are TOCTOU-resistant (final path component opened with no-follow semantics and post-open inode/device verification inside allowed roots).
-- Refresh concurrency invariant: refresh uses single-flight dedupe while lock age is `<=60s`; only stale locks (`>60s`) are eligible for local release/retry.
+- Refresh concurrency invariant: refresh uses single-flight dedupe scoped to `(operator_session_id, interface_instance_id)` while lock age is `<=60s`; only stale locks (`>60s`) are eligible for local release/retry.
 - Rendering/logging invariant: untrusted artifact and user text must be context-encoded/escaped in UI and logs; raw HTML/script interpretation is disallowed.
 - Redaction invariant:
   - UI and standard logs expose only repo-relative artifact identifiers.
   - absolute paths are disallowed in UI and standard logs.
-  - absolute paths may appear only in restricted diagnostics exports for authorized operators.
+  - absolute paths may appear only in restricted diagnostics exports for authorized `operator|release-owner` roles.
+  - diagnostics export schema must enforce field allowlist, host-tokenized path presentation by default, encrypted-at-rest storage, and 24h TTL.
+- Runbook target invariant: runbook navigation resolves immutable runbook IDs from a static allowlist; raw URL/path execution is disallowed.
+- Snapshot integrity invariant: last-known-good fallback requires matching `run_id`, monotonic timestamp progression, and content-hash verification against source identity metadata.
+- Control-file integrity invariant:
+  - controls directory mode must be `0750` or stricter.
+  - control files (`kill-switch.txt`, `rollback-required.txt`, `rollout-mode.txt`, `hard-gate-mode.txt`) must be mode `0640` or stricter.
+  - control files must be owned by the rollout operator account (expected owner UID/GID from deployment config).
+  - control files must pass owner/mode checks before use.
+  - writes must be atomic (`temp -> fsync -> rename`) and recorded with actor identity.
+  - unresolved integrity failure forces `S4_BLOCKED`.
 - Hard-gate activation invariant:
   - source file: `artifacts/skill-graphs/controls/hard-gate-mode.txt`
   - allowed values: `auto|force_on|force_off`
@@ -214,13 +253,14 @@ Recovery behavior:
 - Missing mandatory artifact class: keep last-known-good data, mark section as degraded, show repo-relative missing path identifier.
 - Malformed payload: isolate failed data source, keep unaffected panels functional, emit parse error summary.
 - Join ambiguity: suppress ambiguous mappings, place impacted rows in an explicit `unmatched` bucket.
-- Control conflict: lock actionable affordances and show blocker code plus runbook link target.
+- Control conflict: lock actionable affordances and show blocker code plus allowlisted runbook ID target.
 - Refresh failure: preserve current render and expose retry control with timestamped failure reason.
-- Cold start without last-known-good snapshot: enter `S3_DEGRADED`, show `cold_start_no_snapshot`, and allow only `retry`, `open runbook`, and `download diagnostics`.
+- Cold start without last-known-good snapshot: enter `S3_DEGRADED`, show `cold_start_no_snapshot`, and allow only `retry`, `open runbook`, and role-authorized `download diagnostics`.
 - Missing `events.jsonl` or missing `run_state_changed`: treat as hard envelope-contract failure and force `S3_DEGRADED`; wave promotion remains blocked until resolved.
 - Blocked control path without `run_blocked` + non-null `blocker_code`: treat as contract violation and surface `telemetry_integrity_failed`.
-- Stale/replayed snapshot evidence: fail to `S3_DEGRADED` when freshness checks fail (non-monotonic timestamp/run-id, stale beyond threshold, or mismatched source identity where available).
-- Envelope escalation path: if envelope errors breach release escalation threshold (`>=3` consecutive runs or `>=10` errors in a 24h window), set `rollback-required` and re-evaluate controls to enter `S4_BLOCKED`.
+- Stale/replayed snapshot evidence: fail to `S3_DEGRADED` when freshness checks fail (non-monotonic timestamp/run-id, stale beyond threshold, mismatched source identity, or content-hash mismatch).
+- Envelope escalation path: if envelope errors breach release escalation threshold (`>=3` consecutive failing runs or `>=10` unique envelope-rule failures in rolling 24h), set `rollback-required` and re-evaluate controls to enter `S4_BLOCKED`. Unique failures are deduped by `(run_id, failing_rule, source_version)`.
+- Rollback clear/re-entry: after incident resolution, operators must clear blocking controls (`rollback-required` and/or `kill-switch`) via the approved atomic control-write path, with detector+release-owner approval (or documented emergency override), trigger control re-check, and verify `S4 -> S1 -> S2|S3` with envelope integrity passing before rollout can resume.
 
 Retry/timeout policy:
 - Retryable: transient read errors and stale snapshot conditions.
@@ -235,6 +275,7 @@ Abort vs retry:
 - Abort to `S4_BLOCKED` when kill-switch or rollback-required controls are active.
 - Remain in `S3_DEGRADED` for envelope/schema failures until corrected upstream, unless envelope escalation threshold is met.
 - Combined-failure precedence: when control blockers and envelope failures co-occur, `S4_BLOCKED` is primary state for action gating and `S3_DEGRADED` diagnostics remain visible as secondary context.
+- `S4` exit check cadence: evaluate blocker clearance every 30s and on explicit operator re-check; if controls clear, transition to `S1` must happen within 60s.
 
 ## Observability
 Required UI-visible telemetry:
@@ -251,18 +292,28 @@ Required logs/metrics for interface runtime:
 - `ui_join_ambiguity_detected` (alias key, affected rows count).
 - `ui_degraded_mode_entered` and `ui_degraded_mode_cleared`.
 - `ui_interaction_latency_ms` for select/filter/toggle events.
+- `ui_interaction_complete_ms` for select/filter/toggle state-commit completion.
 - `refresh_end_to_end_ms` measured from `refresh_requested` to `state_committed`.
 - `ui_accessibility_mode` (`reduced_motion_on|off`) to validate parity coverage.
 - `ui_control_precedence_evaluated` with final resolved state (`blocked|degraded|ready`) and reason.
 - `ui_event_envelope_contract_failed` with failing rule (`missing_events`, `missing_run_state_changed`, `missing_run_blocked_code`).
+- `ui_action_denied` and `ui_diagnostics_downloaded` for authorization/audit coverage.
 
 Metric semantics:
 - `ui_interaction_latency_ms` is measured from `interaction_start` to `next_paint_complete`.
 - `ui_interaction_latency_ms` dimensions: `action_type`, `fixture_size`, `device_class`, `reduced_motion`.
+- `ui_interaction_complete_ms` is measured from `interaction_start` to `state_committed`.
+- `ui_interaction_complete_ms` dimensions: `action_type`, `fixture_size`, `device_class`, `reduced_motion`.
 - `refresh_end_to_end_ms` dimensions: `fixture_size`, `device_class`, `refresh_result` (`success|fallback|blocked`).
 - Lab validation guard: `lab_min_samples=500` per high-frequency action type.
-- Runtime alert guard: `runtime_min_samples=200` per action class in the evaluation window.
+- Runtime alert guard (interaction metrics): `runtime_min_samples=200` per action class in the evaluation window.
+- Runtime alert guard (refresh metric): `runtime_min_samples=200` refresh events in the evaluation window.
 - Alert windows requiring percentile checks that miss runtime guard must emit `insufficient_data` and carry evaluation to the 24h window.
+
+Operational thresholds:
+- `ui_interaction_latency_ms`: p95 `<=100ms`, p99 `<=150ms`.
+- `ui_interaction_complete_ms`: p95 `<=150ms`, p99 `<=250ms`.
+- `refresh_end_to_end_ms`: p95 `<=6000ms`, p99 `<=6000ms` (hard deadline alignment).
 
 Operational SLO windows:
 - 7-day window for `TR-01`, `TR-02`, `TR-03`, `TR-04`.
@@ -286,6 +337,7 @@ Failure and recovery:
 - Simulate missing `run_state_changed` and validate hard envelope-contract failure path.
 - Simulate blocked path without `blocker_code` and validate integrity-failure state.
 - Simulate stale refresh lock and validate stale-lock recovery path.
+- Simulate rollback clear/re-entry sequence and validate `S4 -> S1 -> S2|S3` recovery with post-clear envelope checks.
 
 Accessibility and interaction:
 - Keyboard-only traversal across all primary panes and node detail actions.
@@ -293,13 +345,16 @@ Accessibility and interaction:
 - Reduced-motion parity test for all animated transitions.
 - Contrast and focus-visible checks across default/active/error/degraded states.
 - Verify safe read-only interactions remain available for unaffected panels in `S3_DEGRADED`.
+- Verify unauthorized diagnostics/export actions are denied with redacted responses and audit events.
+- Verify runbook navigation rejects unknown IDs and non-allowlisted URI schemes.
 
 Performance and responsiveness:
 - High-frequency selection/filter feedback under 100ms perceived latency.
 - High-frequency selection/filter/toggle feedback must meet p95 `<=100ms` and p99 `<=150ms` with lab/runtime sample guards.
+- High-frequency selection/filter/toggle completion must meet `ui_interaction_complete_ms` p95 `<=150ms` and p99 `<=250ms`.
 - No large layout shift during refresh or panel state transitions.
 - Large-inventory render test (all active skills) with acceptable interaction responsiveness.
-- Refresh lifecycle p95 remains within global end-to-end budget with parallel source fan-out.
+- Refresh lifecycle p95/p99 remain within the `6000ms` global end-to-end budget with parallel source fan-out.
 
 Operational validation:
 - Cross-check rendered metrics against `daily-skill-health.md` and `promotion-queue.md`.

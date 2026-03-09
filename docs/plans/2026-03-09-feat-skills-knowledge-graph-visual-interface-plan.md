@@ -19,6 +19,7 @@ research_agents: 3
 - Added an explicit pre-implementation decision-closure gate so unresolved spec questions are frozen before coding begins.
 - Pinned refresh/retry/stale-lock/staleness values to spec constants to prevent implementation drift.
 - Expanded validation coverage for disallowed transitions, envelope integrity variants, path-safety invariants, and partial degradation behavior.
+- Locked service-local diagnostics authorization, atomic control-write command path, and strict refresh hard-cap enforcement.
 - Tightened task dependencies so gate/HOLD rendering and rollout handoff require upstream state/evidence completeness.
 - Removed rollout-state and ownership ambiguities by tightening phase gates, owner map consistency, and rollback execution contracts.
 
@@ -86,6 +87,10 @@ Work:
 - Build plan fixture set for normal, degraded, and blocked snapshots.
 - Write and approve the v1 decision record at `docs/decisions/2026-03-09-skills-graph-ui-v1-decisions.md` (persona priority and export-tab scope).
 - Freeze v1 ingestion to pipeline-composed inputs only (no direct raw artifact ingestion).
+- Freeze unresolved defaults before implementation:
+  - service-local diagnostics authz contract (`viewer|operator|release-owner`) is mandatory.
+  - rollback control updates must use one canonical atomic control-write command path.
+  - refresh SLO hard cap is strict (`p95<=6000ms`, `p99<=6000ms`).
 - Capture precedence reconciliation notes where existing runtime checks differ in order (`kill-switch`, `rollback-required`, `rollout-mode`).
 - Confirm linked spec frontmatter is `status: active` before implementation sequencing starts.
 - Resolve and record named DRIs + backups for each gate owner role in the release checklist artifact.
@@ -247,7 +252,10 @@ tasks:
 - `docs/skill-graphs/runbooks/kill-switch-and-escalation.md`:
   - Treat as normative precedence source for blocker resolution.
 - `docs/skill-graphs/runbooks/skill-genome-loop.md`:
-  - Treat as approved control-write command source for rollback operations.
+  - Treat as operational rollback reference; execution must use canonical atomic writer path.
+- `scripts/write_skill_graph_controls_atomic.py`:
+  - Planned canonical control-write command for rollback/clear/re-entry operations.
+  - Enforce preflight (`controls path exists/writable`, owner/mode checks), atomic write semantics (`temp -> fsync -> rename`), and post-write tuple verification.
 - `artifacts/skill-graphs/controls/hard-gate-mode.txt`:
   - Canonical hard-gate activation source (`auto|force_on|force_off`, default `auto`).
 
@@ -277,8 +285,12 @@ Risks and mitigations:
   - Mitigation: canonical path (`realpath`) enforcement, symlink-escape rejection, traversal negative tests, and TOCTOU-resistant read checks.
 - Risk: leaking absolute filesystem paths through degraded diagnostics.
   - Mitigation: emit repo-relative identifiers in UI/standard logs; restrict absolute paths to authorized diagnostics exports only.
+- Risk: unauthorized diagnostics export access or missing authorization checks.
+  - Mitigation: service-local RBAC contract with deny-by-default behavior and audited export events.
 - Risk: stale/replayed telemetry snapshots misrepresent operational truth.
   - Mitigation: freshness invariants (monotonic timestamp/run-id and source hash when available) with fail-to-degraded behavior.
+- Risk: partial control writes leave contradictory rollout state.
+  - Mitigation: single canonical atomic control writer with preflight and post-write tuple assertions.
 - Risk: missing institutional `docs/solutions` history for this topic.
   - Mitigation: treat runbooks/spec/scripts as authoritative now and add a post-implementation `docs/solutions` entry.
 
@@ -305,7 +317,7 @@ Phase-gate command matrix:
   - artifact gate: parity output report and `TR-04`/`TR-05` evidence per hard-gate activation contract.
 - `Phase 3 -> Phase 4`:
   - run accessibility, reduced-motion, and performance SLO suites.
-  - artifact gate: `ui_interaction_latency_ms` and `refresh_end_to_end_ms` reports with sample-volume metadata.
+  - artifact gate: `ui_interaction_latency_ms`, `ui_interaction_complete_ms`, and `refresh_end_to_end_ms` reports with sample-volume metadata.
 - `Phase 4 -> Phase 5`:
   - verify gate panel parity and observability threshold checks.
   - artifact gate: gate panel snapshot + threshold evaluation report.
@@ -325,6 +337,7 @@ Unit/contract tests:
 - Output encoding and log-sanitization checks for untrusted artifact/user-provided text.
 - Redaction contract assertions for telemetry-sensitive fields.
 - Snapshot freshness and anti-replay checks (monotonic run/timestamp, stale payload downgrade behavior).
+- Service-local RBAC checks for diagnostics export and control re-check actions (deny-by-default on missing/unknown role).
 
 Integration tests:
 - End-to-end lifecycle transitions (`S0 -> S1 -> S2/S3/S4 -> S5 -> S2/S3/S4`).
@@ -336,12 +349,12 @@ Integration tests:
   - blocked path with missing `blocker_code`,
   - advisory gate fail with hard gate pass,
   - partial artifact corruption + join ambiguity.
-- Cold-start failure scenario with no last-known-good snapshot (`cold_start_no_snapshot`) with explicit action whitelist (`retry`, `open runbook`, `download diagnostics`) and all other actions blocked.
+- Cold-start failure scenario with no last-known-good snapshot (`cold_start_no_snapshot`) with explicit action whitelist (`retry`, `open runbook`, role-authorized `download diagnostics`) and all other actions blocked.
 - Partial degradation behavior where unaffected panels remain usable.
 - Atomic refresh behavior where snapshot state is single-version consistent or fully falls back to last-known-good.
 - Non-retryable operator-action scenarios (`invalid_control_contents`, `schema_version_incompatible`) verify no retry loop and explicit operator remediation path.
 - Concurrent refresh behavior:
-  - repeated refresh triggers while lock age `<=60s` must dedupe to a single active attempt.
+  - repeated refresh triggers while lock age `<=60s` must dedupe to a single active attempt per `(operator_session_id, interface_instance_id)` lock scope.
   - stale lock (`>60s`) release and one re-attempt path must be deterministic.
 
 Accessibility/performance tests:
@@ -352,11 +365,12 @@ Accessibility/performance tests:
   - completion metric: `ui_interaction_complete_ms` measured from `interaction_start` to `state_committed`.
   - required dimensions: `action_type`, `fixture_size`, `device_class`, `reduced_motion`.
   - `select/filter/toggle` p95 `<=100ms`, p99 `<=150ms`.
+  - completion SLO: `ui_interaction_complete_ms` p95 `<=150ms`, p99 `<=250ms`.
   - lab sample guard: `lab_min_samples=500` per action type on full-inventory fixtures.
 - Recovery timing assertions for refresh constants (`5s`, `250ms`, `500ms`, `60s`, `30m`).
 - Refresh SLO checks:
   - `refresh_end_to_end_ms` p95 `<=6000ms`.
-  - `refresh_end_to_end_ms` p99 `<=7500ms`.
+  - `refresh_end_to_end_ms` p99 `<=6000ms`.
   - metric semantics: measured from `refresh_requested` to `state_committed` with dimensions `fixture_size`, `device_class`, `refresh_result`.
   - source loads execute in parallel fan-out (not serial).
   - retries remain inside one global refresh-attempt budget.
@@ -365,7 +379,11 @@ Accessibility/performance tests:
   - stress fixtures at `2x` and `5x` synthesized node counts with proportional edge fan-out expansion.
   - stress history-depth fixtures at `2x` and `5x` run-history depth.
   - stress artifact-size fixtures at `2x` and `5x` file size envelopes.
-  - repeated refresh loop memory ceiling enforced (no unbounded heap/RSS growth).
+  - repeated refresh loop memory ceiling enforced with numeric gates:
+    - baseline fixture (`1x`): peak RSS `<=400MB`.
+    - stress fixture (`2x`): peak RSS `<=650MB`.
+    - stress fixture (`5x`): peak RSS `<=1200MB`.
+    - leak guard: peak RSS growth after 20 refresh loops `<=8%` versus loop-1 baseline for each fixture tier.
 
 Safety tests:
 - Untrusted filter/search input is never executed as instructions.
@@ -373,11 +391,13 @@ Safety tests:
   - payload sizes at `2047`, `2048`, `2049` bytes.
   - request rate at threshold and threshold+1 for `30 req/min/session`.
   - rejected requests emit `over_budget` diagnostics and perform no partial execution.
-- Artifact reads outside expected `docs/skill-graphs` and `artifacts/skill-graphs` paths are rejected and logged.
+- Artifact reads outside canonical pipeline-composed outputs under `artifacts/skill-graphs/**` are rejected and logged.
 - Symlink and traversal payloads cannot escape allowed roots.
 - TOCTOU-resistant path-read checks validate no symlink-swap escape between check/open and verify post-open inode/device constraints.
 - Rendered diagnostics and logs escape/sanitize untrusted payload strings (XSS/log injection payload suite).
 - Path exposure checks ensure UI and standard logs render only repo-relative identifiers; absolute paths allowed only in restricted diagnostics export.
+- Diagnostics export authorization tests validate role gating, deny-by-default behavior, redacted denial payloads, and audit event emission.
+- Runbook target tests verify immutable allowlisted runbook IDs and rejection of `javascript:`, `file://`, traversal, and external URL payloads.
 - Observability field parity golden tests verify presence of source version markers and learning telemetry counts.
 
 Validation commands:
@@ -409,7 +429,10 @@ Monitoring:
   - `ui_event_envelope_contract_failed`
   - `ui_degraded_mode_entered` / `ui_degraded_mode_cleared`
   - `ui_interaction_latency_ms`
+  - `ui_interaction_complete_ms`
   - `refresh_end_to_end_ms`
+  - `ui_action_denied`
+  - `ui_diagnostics_downloaded`
 - Track operational quality:
   - envelope error count,
   - HOLD reason distribution,
@@ -420,9 +443,13 @@ Monitoring thresholds and paging:
   - hold/escalate when p95 exceeds `100ms` for any high-frequency action class in a 1h window with `n>=200` samples per action class.
   - hold/escalate when p99 exceeds `150ms` for any high-frequency action class in a 1h window with `n>=200` samples per action class.
   - if `n<200` in 1h, mark `insufficient_data` and evaluate the 24h window before paging.
+- `ui_interaction_complete_ms`:
+  - hold/escalate when p95 exceeds `150ms` for any high-frequency action class in a 1h window with `n>=200` samples per action class.
+  - hold/escalate when p99 exceeds `250ms` for any high-frequency action class in a 1h window with `n>=200` samples per action class.
+  - if `n<200` in 1h, mark `insufficient_data` and evaluate the 24h window before paging.
 - `refresh_end_to_end_ms`:
   - hold/escalate when p95 exceeds `6000ms` in a 1h window with `n>=200` refresh samples.
-  - hold/escalate when p99 exceeds `7500ms` in a 1h window with `n>=200` refresh samples.
+  - hold/escalate when p99 exceeds `6000ms` in a 1h window with `n>=200` refresh samples.
   - if `n<200` in 1h, mark `insufficient_data` and evaluate the 24h window before paging.
 - `ui_join_ambiguity_detected`:
   - hold/escalate when either ambiguity rate rises by `>=2%` absolute or impacted-row count rises by `>=20%` versus the prior 7d baseline.
@@ -468,7 +495,13 @@ Rollout decision protocol:
 | `TR-04` evaluator consistency | `<=3%` | 7d | evaluation maintainer | release owner | release owner | Advisory in MVP; hard block Phase 3+ when `hard-gate-mode=auto|force_on` |
 | `TR-05` judge calibration | `>=80%` | 14d | evaluation maintainer | release owner | release owner | Advisory in MVP; hard block Phase 3+ when `hard-gate-mode=auto|force_on` |
 | `TR-06` promotion precision | `>=70%` | 14d | promotion owner | release owner | release owner | Hard block Phase 4+ when `hard-gate-mode=auto|force_on` |
-| Event envelope errors | `0` | current run + 7d trend | telemetry owner | release owner | release owner | Non-zero enters `S3_DEGRADED`; escalation threshold breach triggers `rollback-required` and `S4_BLOCKED` |
+| Event envelope errors | `0` hard requirement; escalation at `>=3` consecutive failing runs or `>=10` unique failures in rolling 24h | current run + 7d trend | telemetry owner | release owner | release owner | Non-zero enters `S3_DEGRADED`; escalation threshold breach triggers `rollback-required` and `S4_BLOCKED` |
+
+Event envelope aggregation semantics:
+- Unique failure key: `(run_id, failing_rule, source_version)`.
+- Consecutive-run counter resets after a fully passing run (`0` envelope errors).
+- 24h window is rolling (not fixed calendar) and evaluated at each run completion.
+- Escalation decisions must persist computed counters in the release evidence bundle.
 
 TR-03 mapping contract:
 - Lab numerator: validation-fixture runs where high-frequency interaction p95, refresh-end-to-end SLO, and retry-envelope constraints all pass.
@@ -491,13 +524,14 @@ Phase promotion gates:
   - `TR-04` and `TR-05` thresholds satisfied when `hard-gate-mode=auto|force_on`.
 - Phase 3 -> Phase 4:
   - performance SLO and accessibility parity checks green.
-  - `TR-04`, `TR-05`, and `TR-06` thresholds satisfied per hard-gate activation contract.
+  - `TR-04` and `TR-05` thresholds satisfied per hard-gate activation contract.
 - Phase 4 -> Phase 5:
   - gate panel parity and observability thresholds green.
-  - `TR-04`, `TR-05`, and `TR-06` remain passing (persistent hard-gate rule while in Phase 3+).
+  - `TR-04`, `TR-05`, and `TR-06` remain passing (persistent hard-gate rule while in Phase 4+).
 - Phase 5 -> rollout completion:
   - evidence bundle complete, rollback drill fresh, go/no-go approval recorded.
-  - any `TR-04`/`TR-05`/`TR-06` breach during Phase 3+/4+ reverts status to HOLD until resolved.
+  - any `TR-04`/`TR-05` breach during Phase 3+ reverts status to HOLD until resolved.
+  - any `TR-06` breach during Phase 4+ reverts status to HOLD until resolved.
 
 Required release evidence bundle:
 - Required artifacts:
@@ -513,22 +547,38 @@ Required release evidence bundle:
 Rollback execution matrix:
 | Trigger | Detection source | Max time to act | Command(s) | Detector | Approver | Executor | Post-rollback checks |
 |---|---|---|---|---|---|---|---|
-| Critical gate violation (`TR-02`/`TR-03`) | rollout decision protocol | 5 minutes | `touch artifacts/skill-graphs/controls/kill-switch.txt && echo \"off\" > artifacts/skill-graphs/controls/rollout-mode.txt` | release owner | release owner | release owner | verify `S4_BLOCKED`; verify `run_state_changed`/blocked envelope events; rerun validation bundle |
-| Promotion precision hard-gate violation (`TR-06`) | rollout decision protocol | 5 minutes | `touch artifacts/skill-graphs/controls/kill-switch.txt && echo \"off\" > artifacts/skill-graphs/controls/rollout-mode.txt` (after promotion owner raises incident) | promotion owner | release owner | release owner | verify `S4_BLOCKED`; verify `run_state_changed`/blocked envelope events; rerun validation bundle |
-| Envelope integrity failure spike | telemetry checks | 5 minutes | `touch artifacts/skill-graphs/controls/rollback-required.txt && echo \"off\" > artifacts/skill-graphs/controls/rollout-mode.txt` | telemetry owner | release owner | release owner | confirm `S4_BLOCKED`; confirm envelope errors trending to zero; verify no interactive/mutating affordances |
-| Operator-issued emergency rollback | incident channel | 5 minutes | `touch artifacts/skill-graphs/controls/kill-switch.txt && echo \"off\" > artifacts/skill-graphs/controls/rollout-mode.txt` | release owner backup | release owner backup | release owner backup | verify `S4_BLOCKED`; verify no interactive/mutating affordances |
+| Critical gate violation (`TR-02`) | rollout decision protocol | 5 minutes | `python3 scripts/write_skill_graph_controls_atomic.py --set kill-switch=on --set rollout-mode=off --reason "<incident>" --operator "<executor>" --approver "<approver>" --require-writable --verify` | release owner | release owner | release owner | verify `S4_BLOCKED`; verify `run_state_changed`/blocked envelope events; rerun validation bundle |
+| Promotion precision hard-gate violation (`TR-06`) | rollout decision protocol | 5 minutes | `python3 scripts/write_skill_graph_controls_atomic.py --set kill-switch=on --set rollout-mode=off --reason "<incident>" --operator "<executor>" --approver "<approver>" --require-writable --verify` (after promotion owner raises incident) | promotion owner | release owner | release owner | verify `S4_BLOCKED`; verify `run_state_changed`/blocked envelope events; rerun validation bundle |
+| Envelope integrity failure spike | telemetry checks | 5 minutes | `python3 scripts/write_skill_graph_controls_atomic.py --set rollback-required=on --set rollout-mode=off --reason "<incident>" --operator "<executor>" --approver "<approver>" --require-writable --verify` | telemetry owner | release owner | release owner | confirm `S4_BLOCKED`; confirm envelope errors trending to zero; verify no interactive/mutating affordances |
+| Operator-issued emergency rollback | incident channel | 5 minutes | `python3 scripts/write_skill_graph_controls_atomic.py --set kill-switch=on --set rollout-mode=off --reason "<incident>" --operator "<executor>" --approver "<approver>" --require-writable --verify` | release owner backup | release owner backup | release owner backup | verify `S4_BLOCKED`; verify no interactive/mutating affordances |
 
 Rollback control-write contract:
-- Approved command patterns are only the explicit control-file operations above, aligned to `docs/skill-graphs/runbooks/skill-genome-loop.md`.
+- Approved command path is only `python3 scripts/write_skill_graph_controls_atomic.py` (single canonical writer), aligned to `docs/skill-graphs/runbooks/skill-genome-loop.md`.
+- Every execution must run preflight checks (`controls path exists`, `controls path writable`, owner/mode valid) before write.
+- Required permission contract for preflight:
+  - controls directory mode `0750` or stricter.
+  - control file mode `0640` or stricter.
+  - owner UID/GID must match rollout operator account from deployment config.
+- Write semantics must be atomic (`temp -> fsync -> rename`) and verified as full control tuple after write.
 - Every rollback command execution must append operator identity, approver identity, incident link, and timestamp to `rollout-decision-log.md`.
 - `TR-06` and envelope-spike rollback paths require dual approval (detector + approver) before command execution unless emergency override is declared in the incident thread.
+- Emergency backup authority is valid only after takeover trigger or explicit emergency override is recorded in `rollout-decision-log.md` before control writes.
+
+Rollback clear and re-entry procedure:
+- Clear command (`rollback-required` path): `python3 scripts/write_skill_graph_controls_atomic.py --clear rollback-required --set rollout-mode=observe_only --reason "<resolution>" --operator "<executor>" --approver "<approver>" --require-writable --verify`.
+- Clear command (`kill-switch` path): `python3 scripts/write_skill_graph_controls_atomic.py --clear kill-switch --set rollout-mode=observe_only --reason "<resolution>" --operator "<executor>" --approver "<approver>" --require-writable --verify`.
+- Required approvals: detector + release owner (or documented emergency override chain).
+- Required verification sequence:
+  - trigger explicit control re-check (`S4 -> S1`) and verify transition within 60s.
+  - verify envelope contract pass (`ui_event_envelope_contract_failed == 0`) for the recovery run.
+  - verify gate protocol status is neither `rollback-required` nor `kill-switch-active` before restoring rollout mode.
 
 Post-release verification cadence:
 - `+5m`: smoke checks + envelope integrity + control precedence.
   - command: `python3 scripts/verify_recursive_skill_graph_artifacts.py --run-state-check --strict --manifest artifacts/skill-graphs/telemetry/releases/<ts>/manifest.json`.
   - pass/fail: non-zero exit or missing blocked/envelope events is immediate hold.
 - `+1h`: SLO and alert-threshold checks (latency, refresh, ambiguity, degraded frequency).
-  - command: `jq -e '.runtime_alerts_checked == true and .runtime_min_samples == 200 and .ui_interaction_latency_ms.p95 <= 100 and .ui_interaction_latency_ms.p99 <= 150 and .refresh_end_to_end_ms.p95 <= 6000 and .refresh_end_to_end_ms.p99 <= 7500' artifacts/skill-graphs/telemetry/releases/<ts>/telemetry-thresholds.json`.
+  - command: `jq -e '.runtime_alerts_checked == true and .runtime_min_samples == 200 and .ui_interaction_latency_ms.p95 <= 100 and .ui_interaction_latency_ms.p99 <= 150 and .ui_interaction_complete_ms.p95 <= 150 and .ui_interaction_complete_ms.p99 <= 250 and .refresh_end_to_end_ms.p95 <= 6000 and .refresh_end_to_end_ms.p99 <= 6000' artifacts/skill-graphs/telemetry/releases/<ts>/telemetry-thresholds.json`.
   - pass/fail: threshold breach with sufficient sample volume is hold/escalate.
 - `+24h`: full gate protocol review including trend windows and rollback-drill freshness.
   - command: `python3 scripts/verify_recursive_skill_graph_artifacts.py --run-state-check --strict --manifest artifacts/skill-graphs/telemetry/releases/<ts>/manifest.json && jq -e '.rollback_drill_age_days <= 14 and .release_status != \"hold\"' artifacts/skill-graphs/telemetry/releases/<ts>/rollout-summary.json`.
@@ -560,7 +610,7 @@ Pre-deploy artifact freshness gate:
 - [ ] TR gate panel and HOLD reasons match schema/runbook semantics.
 - [ ] Phase promotion gates explicitly enforce TR hard gates (`TR-04`, `TR-05`, `TR-06`) per hard-gate activation contract.
 - [ ] Combined-failure scenarios are included in integration tests.
-- [ ] `cold_start_no_snapshot` action whitelist is enforced (`retry`, `open runbook`, `download diagnostics`) and non-whitelisted actions are blocked.
+- [ ] `cold_start_no_snapshot` action whitelist is enforced (`retry`, `open runbook`, role-authorized `download diagnostics`) and non-whitelisted actions are blocked.
 - [ ] Envelope integrity variants (`missing_events`, `missing_run_state_changed`, `missing_run_blocked_code`) are tested.
 - [ ] `S5` exit branches (`S2|S3|S4`) and atomic refresh fallback behavior are tested.
 - [ ] Accessibility and reduced-motion parity tests are included.
@@ -569,8 +619,11 @@ Pre-deploy artifact freshness gate:
 - [ ] Path canonicalization, symlink escape rejection, and traversal rejection tests are included.
 - [ ] Redaction and output-encoding/log-sanitization tests are included.
 - [ ] UI and standard logs expose only repo-relative artifact identifiers; absolute paths are limited to restricted diagnostics exports.
+- [ ] Diagnostics export authorization is service-local, deny-by-default, and audited (`ui_action_denied`, `ui_diagnostics_downloaded`).
+- [ ] Runbook navigation uses immutable allowlisted IDs and rejects raw URL/path payloads.
 - [ ] Performance SLOs (`p95/p99` and refresh global budget) are measurable and enforced.
-- [ ] Rollback execution uses approved explicit control-file command patterns and records detector/approver/executor identities.
+- [ ] Rollback execution uses canonical atomic writer path (`scripts/write_skill_graph_controls_atomic.py`) with preflight + post-write verification.
+- [ ] Rollback clear and re-entry procedure covers both blocker sources (`rollback-required`, `kill-switch`) and is tested (`S4 -> S1 -> S2|S3` recovery path).
 - [ ] Rollout evidence bundle, accountability map, and rollback execution matrix are complete.
 - [ ] Release evidence bundle includes hash-valid `manifest.json` and immutable timestamped directory.
 - [ ] Rollout and monitoring checks are defined with concrete signals.
