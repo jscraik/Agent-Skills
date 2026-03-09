@@ -54,7 +54,7 @@ jobs:
             artifacts/benchmark-policy-refresh-report.json
 
       - name: Create pull request
-        uses: peter-evans/create-pull-request@v7
+        uses: peter-evans/create-pull-request@v8
         with:
           branch: codex/benchmark-policy-refresh
           delete-branch: true
