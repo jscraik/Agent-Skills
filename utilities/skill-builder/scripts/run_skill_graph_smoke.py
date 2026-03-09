@@ -5,7 +5,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import re
 import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
@@ -14,84 +13,45 @@ from typing import Dict, List, Tuple
 ROOT = Path(__file__).resolve().parents[3]
 SCRIPT_DIR = Path(__file__).resolve().parent
 RECURSIVE_LOOP_SCRIPT = SCRIPT_DIR / "recursive_skill_loop.py"
-DEFAULT_REPORT_OUT = Path("artifacts/skill-graphs/onboarding/smoke-report.json")
-DEFAULT_DRY_RUN_REPORT_OUT = Path("artifacts/skill-graphs/onboarding/smoke-report.dry-run.json")
-EXCLUDED_PREFIXES = (
-    "skills/.system/",
-    "utilities/recon-workbench/assets/template/.codex/skills/",
-)
 ALLOWED_EXECUTABLES = {"python3"}
-ABSOLUTE_PATH_PATTERN = re.compile(r"(?P<path>(?<![A-Za-z0-9_.-])/(?:[^\s\"'`]|\\ )+)")
 
 
 def iso_now() -> str:
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
 
-def load_json_dict(path: Path) -> Dict[str, object]:
-    obj = json.loads(path.read_text(encoding="utf-8"))
-    if not isinstance(obj, dict):
-        raise RuntimeError(f"Expected JSON object at {path}")
-    return obj
-
-
-def discover_profiles(repo_root: Path, profile_index_path: Path) -> List[Path]:
+def discover_profiles_from_profile_index(repo_root: Path, profile_index_path: Path) -> List[Path]:
     if not profile_index_path.exists():
-        raise RuntimeError(f"Missing profile index: {profile_index_path}")
+        raise FileNotFoundError(
+            f"Missing canonical profile index: {profile_index_path}. "
+            "Run validate_skill_graph_profiles.py first."
+        )
 
-    profile_index = load_json_dict(profile_index_path)
-    rows = profile_index.get("skills")
+    payload = json.loads(profile_index_path.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        raise ValueError(f"profile-index.json must be a JSON object: {profile_index_path}")
+
+    rows = payload.get("skills")
     if not isinstance(rows, list) or not rows:
-        raise RuntimeError(f"profile-index.json has no skills[] rows: {profile_index_path}")
+        raise ValueError("profile-index.json is missing a non-empty skills[] inventory.")
 
     out: List[Path] = []
-    missing: List[str] = []
     seen: set[str] = set()
-
     for row in rows:
         if not isinstance(row, dict):
             continue
-        status = str(row.get("status", "valid")).strip().lower()
-        if status not in {"valid", "active"}:
+        status = str(row.get("status", "")).strip().lower()
+        profile_rel = str(row.get("profile_path", "")).strip()
+        if not profile_rel or status != "valid":
             continue
-
-        scope_skill = str(row.get("scope_skill", "")).strip()
-        if not scope_skill:
+        profile_path = (repo_root / profile_rel).resolve()
+        rel_profile = profile_path.relative_to(repo_root).as_posix()
+        if rel_profile in seen:
             continue
-        if any(scope_skill.startswith(prefix.rstrip("/")) for prefix in EXCLUDED_PREFIXES):
-            continue
-
-        profile_rel = str(
-            row.get("profile_path", f"{scope_skill}/references/task-profile.json")
-        ).strip()
-        if not profile_rel:
-            continue
-        if profile_rel in seen:
-            continue
-        seen.add(profile_rel)
-
-        profile = (repo_root / profile_rel).resolve()
-        try:
-            rel_profile = profile.relative_to(repo_root)
-        except ValueError as exc:
-            raise RuntimeError(
-                f"profile-index references profile_path outside repo root: {profile_rel}"
-            ) from exc
-        if profile.exists():
-            out.append(profile)
-        else:
-            missing.append(rel_profile.as_posix())
-
-    if missing:
-        preview = ", ".join(sorted(missing)[:10])
-        raise RuntimeError(
-            f"Canonical profile-index references missing profile files ({len(missing)}): {preview}"
-        )
-
-    if not out:
-        raise RuntimeError("No runnable profiles discovered from canonical profile-index.")
-
-    return out
+        seen.add(rel_profile)
+        if profile_path.exists():
+            out.append(profile_path)
+    return sorted(out)
 
 
 def _rel_or_redact(value: str, repo_root: Path) -> str:
@@ -108,29 +68,10 @@ def _rel_or_redact(value: str, repo_root: Path) -> str:
     return raw
 
 
-def _sanitize_absolute_match(raw_path: str, repo_root: Path) -> str:
-    candidate = Path(raw_path)
-    try:
-        rel = candidate.relative_to(repo_root)
-    except ValueError:
-        return "<redacted-absolute-path>"
-    return rel.as_posix()
-
-
 def _sanitize_lines(lines: List[str], repo_root: Path) -> List[str]:
-    """Replace absolute paths with repo-relative paths or redacted placeholders."""
-    sanitized: List[str] = []
-    for line in lines:
-        def _replace(match: re.Match[str]) -> str:
-            mapped = _sanitize_absolute_match(match.group("path"), repo_root)
-            if mapped == "<redacted-absolute-path>":
-                return mapped
-            return f"./{mapped}"
-
-        replaced = line
-        replaced = ABSOLUTE_PATH_PATTERN.sub(_replace, replaced)
-        sanitized.append(replaced)
-    return sanitized
+    """Replace all occurrences of the absolute repo root with '.' in output lines."""
+    root_text = str(repo_root)
+    return [line.replace(root_text, ".") for line in lines]
 
 
 def parse_args() -> argparse.Namespace:
@@ -157,6 +98,11 @@ def parse_args() -> argparse.Namespace:
         help="Canonical lessons JSONL path",
     )
     parser.add_argument(
+        "--profile-index",
+        default="artifacts/skill-graphs/onboarding/profile-index.json",
+        help="Canonical profile index inventory source (repo-relative)",
+    )
+    parser.add_argument(
         "--limit",
         type=int,
         default=0,
@@ -172,16 +118,6 @@ def parse_args() -> argparse.Namespace:
         "--dry-run",
         action="store_true",
         help="Only print planned profile list and write report without executing runs",
-    )
-    parser.add_argument(
-        "--allow-dry-run-canonical-report",
-        action="store_true",
-        help="Allow --dry-run to overwrite canonical smoke-report.json",
-    )
-    parser.add_argument(
-        "--profile-index",
-        default="artifacts/skill-graphs/onboarding/profile-index.json",
-        help="Canonical profile index used for inventory selection",
     )
     return parser.parse_args()
 
@@ -245,12 +181,9 @@ def main() -> int:
     controls_dir = (repo_root / args.controls_dir).resolve()
     lessons_jsonl = (repo_root / args.lessons_jsonl).resolve()
     report_out = (repo_root / args.report_out).resolve()
-    canonical_report_out = (repo_root / DEFAULT_REPORT_OUT).resolve()
-    if args.dry_run and report_out == canonical_report_out and not args.allow_dry_run_canonical_report:
-        report_out = (repo_root / DEFAULT_DRY_RUN_REPORT_OUT).resolve()
     profile_index_path = (repo_root / args.profile_index).resolve()
 
-    profiles = discover_profiles(repo_root, profile_index_path)
+    profiles = discover_profiles_from_profile_index(repo_root, profile_index_path)
     if args.limit and args.limit > 0:
         profiles = profiles[: args.limit]
 
@@ -335,8 +268,8 @@ def main() -> int:
 
     planned_count = sum(1 for item in results if item.get("status") == "planned")
     executed_count = sum(1 for item in results if item.get("status") in {"accepted", "rejected"})
-    executed_pass_count = sum(1 for item in results if item.get("status") == "accepted")
-    executed_fail_count = sum(1 for item in results if item.get("status") == "rejected")
+    pass_count = sum(1 for item in results if item.get("status") == "accepted")
+    fail_count = sum(1 for item in results if item.get("status") == "rejected")
     report = {
         "schema_version": "1.0",
         "generated_at": iso_now(),
@@ -345,26 +278,15 @@ def main() -> int:
         "profile_count": len(results),
         "planned_count": planned_count,
         "executed_count": executed_count,
-        "executed_pass_count": executed_pass_count,
-        "executed_fail_count": executed_fail_count,
-        "pass_count": executed_pass_count,
-        "fail_count": executed_fail_count,
+        "pass_count": pass_count,
+        "fail_count": fail_count,
         "results": results,
     }
 
     report_out.parent.mkdir(parents=True, exist_ok=True)
     report_out.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
-    print(
-        json.dumps(
-            {
-                "report_out": _rel_or_redact(str(report_out), repo_root),
-                "planned_count": planned_count,
-                "executed_fail_count": executed_fail_count,
-            },
-            indent=2,
-        )
-    )
-    return 0 if executed_fail_count == 0 else 1
+    print(json.dumps({"report_out": str(report_out.relative_to(repo_root)), "fail_count": fail_count}, indent=2))
+    return 0 if fail_count == 0 else 1
 
 
 if __name__ == "__main__":

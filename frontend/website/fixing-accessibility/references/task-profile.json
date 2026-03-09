@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "profile_id": "frontend-website-fixing-accessibility",
-  "scope_skill": "frontend/website/fixing-accessibility",
+  "profile_id": "frontend-stitch-enhance-prompt",
+  "scope_skill": "frontend/stitch-enhance-prompt",
   "scope_profile": "frontend",
   "rubric_version": "2026-02-26",
   "evaluator_version": "v1",

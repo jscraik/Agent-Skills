@@ -79,11 +79,10 @@ Regenerate telemetry reports after any batch of runs:
 ```bash
 python3 utilities/skill-builder/scripts/build_recursive_skill_shadow_report.py \
   --runs-root artifacts/skill-graphs/runs \
-  --window-days 7 \
-  --daily-health-md artifacts/skill-graphs/telemetry/daily-skill-health.md
+  --window-days 7
 ```
 
-Check `artifacts/skill-graphs/telemetry/daily-skill-health.md` for:
+Check `docs/skill-graphs/telemetry/daily-skill-health.md` for:
 - Event envelope errors should be 0
 - Capture coverage should be 100%
 
@@ -119,5 +118,5 @@ Events are JSON Lines with the following structure:
 ## References
 
 - [Skill Knowledge Graph Operating Model](/docs/skill-graphs/knowledge-graph-operating-model.md)
-- [Daily Skill Health Telemetry](/artifacts/skill-graphs/telemetry/daily-skill-health.md)
+- [Daily Skill Health Telemetry](/docs/skill-graphs/telemetry/daily-skill-health.md)
 - [Recursive Skill Loop Script](/utilities/skill-builder/scripts/recursive_skill_loop.py)

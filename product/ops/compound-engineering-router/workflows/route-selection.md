@@ -19,6 +19,7 @@ Choose the smallest correct workflow route for a compound-engineering request.
 | plan | A spec is ready and the next need is execution planning. | `codex/prompts/workflow-plan.md` | research roles plus `spec-flow-analyzer` |
 | deepen-plan | A plan exists but needs stronger sequencing, gates, or validation coverage. | `codex/prompts/deepen-plan.md` | research roles |
 | work | The spec and plan are sufficiently ready for implementation. | `codex/prompts/workflow-work.md` | usually none by default |
+| ui-workflow | The request is UI-first and should combine design-system rigor plus creative interaction planning before route handoff. | `codex/prompts/workflow-ui.md` | `ui-ux-design`, optional `design-implementation-reviewer`, optional frontend risk reviewers |
 | review | The need is broad readiness, synthesis, go-no-go, or package-level review. | `codex/prompts/workflow-review.md` | reviewer mix based on risk areas |
 | technical-review | The need is a deep engineering critique of code, diff, PR, or branch. | `codex/prompts/technical_review.md` | specialist reviewers by language or risk area |
 | compound | The user wants a multi-stage orchestration or is unsure but clearly needs coordinated workflow help. | `codex/prompts/workflow-compound.md` | research roles plus optional specialized reviewers |

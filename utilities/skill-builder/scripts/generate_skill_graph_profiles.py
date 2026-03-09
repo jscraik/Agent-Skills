@@ -8,29 +8,17 @@ import json
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
+from typing import Any, Dict, Iterable, List, Optional
+
+from skill_graph_inventory import (
+    DEFAULT_INVENTORY_POLICY,
+    discover_inventory_skills,
+    load_inventory_policy,
+)
 
 ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_RUBRIC_VERSION = "2026-02-26"
 DEFAULT_PROFILE_REL_PATH = "references/task-profile.json"
-DEFAULT_INVENTORY_POLICY = "docs/skill-graphs/governance/inventory-policy.json"
-INVENTORY_SLICE_MODES = {"separate", "exclude"}
-DEFAULT_INCLUDE_PREFIXES = (
-    ".agents/skills/.system/",
-    "auth/",
-    "backend/",
-    "frontend/",
-    "github/",
-    "interview/",
-    "personas/",
-    "product/",
-    "utilities/",
-)
-DEFAULT_EXCLUDE_PREFIXES = (
-    "skills/.system/",
-    "utilities/recon-workbench/assets/template/.codex/skills/",
-)
-DEFAULT_SYSTEM_PREFIXES = (".agents/skills/.system/",)
 MANUAL_SKILL_PATHS = {
     "github/gh-fix-ci",
     "github/gh-workflow",
@@ -39,7 +27,8 @@ MANUAL_SKILL_PATHS = {
     "utilities/1password",
     "utilities/agent-browser",
     "utilities/bootstrap",
-    "utilities/codex-agent-builder",
+    "utilities/codex-agent-creator",
+    "utilities/diagram-context-refresh",
     "utilities/fix-mise",
     "utilities/run-tests-and-write-artifacts",
     "utilities/skill-installer",
@@ -53,115 +42,52 @@ class SkillEntry:
     skill_md: Path
     skill_dir: Path
     relative_skill_dir: str
+    inventory_slice: str
     profile_path: Path
     wave: str
     delegation_mode: str
-    scope_profile: str
-    inventory_class: str
-
-
-@dataclass(frozen=True)
-class InventoryPolicy:
-    include_prefixes: Tuple[str, ...]
-    exclude_prefixes: Tuple[str, ...]
-    system_prefixes: Tuple[str, ...]
-    system_slice_mode: str
 
 
 def now_iso() -> str:
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
 
-def _normalize_prefixes(values: Sequence[Any]) -> Tuple[str, ...]:
-    out: List[str] = []
-    for value in values:
-        text = str(value).strip().replace("\\", "/")
-        if not text:
-            continue
-        if not text.endswith("/"):
-            text = text + "/"
-        out.append(text)
-    return tuple(dict.fromkeys(out))
-
-
-def _matches_prefix(value: str, prefixes: Sequence[str]) -> bool:
-    for prefix in prefixes:
-        needle = prefix.rstrip("/")
-        if value == needle or value.startswith(prefix):
-            return True
-    return False
-
-
-def load_inventory_policy(repo_root: Path, raw_path: str, system_slice_mode: Optional[str]) -> InventoryPolicy:
-    path = (repo_root / raw_path).resolve()
-    if not path.exists():
-        raise RuntimeError(f"Missing inventory policy file: {path}")
-    try:
-        payload = json.loads(path.read_text(encoding="utf-8"))
-    except json.JSONDecodeError as exc:
-        raise RuntimeError(f"Invalid inventory policy JSON: {path}") from exc
-    if not isinstance(payload, dict):
-        raise RuntimeError(f"Inventory policy must be a JSON object: {path}")
-
-    include_prefixes = _normalize_prefixes(payload.get("include_prefixes", DEFAULT_INCLUDE_PREFIXES))
-    exclude_prefixes = _normalize_prefixes(payload.get("exclude_prefixes", DEFAULT_EXCLUDE_PREFIXES))
-    system_prefixes = _normalize_prefixes(payload.get("system_prefixes", DEFAULT_SYSTEM_PREFIXES))
-    configured_mode = str(payload.get("system_slice_mode", "separate")).strip().lower()
-    mode = (system_slice_mode or configured_mode).strip().lower()
-    if mode not in INVENTORY_SLICE_MODES:
-        raise RuntimeError(
-            f"inventory policy system_slice_mode must be one of {sorted(INVENTORY_SLICE_MODES)}: {mode!r}"
-        )
-
-    return InventoryPolicy(
-        include_prefixes=include_prefixes,
-        exclude_prefixes=exclude_prefixes,
-        system_prefixes=system_prefixes,
-        system_slice_mode=mode,
+def discover_active_skills(
+    repo_root: Path,
+    *,
+    inventory_policy_path: str,
+    system_slice_mode: Optional[str],
+) -> List[SkillEntry]:
+    policy = load_inventory_policy(
+        repo_root,
+        policy_rel_path=inventory_policy_path,
+        system_slice_mode_override=system_slice_mode,
     )
-
-
-def is_active_skill(skill_md: Path, repo_root: Path, policy: InventoryPolicy) -> bool:
-    rel = skill_md.relative_to(repo_root).as_posix()
-    if rel == "SKILL.md":
-        return False
-    if policy.include_prefixes and not _matches_prefix(rel, policy.include_prefixes):
-        return False
-    if _matches_prefix(rel, policy.exclude_prefixes):
-        return False
-    return True
-
-
-def discover_active_skills(repo_root: Path, policy: InventoryPolicy) -> List[SkillEntry]:
     entries: List[SkillEntry] = []
-    for skill_md in sorted(repo_root.rglob("SKILL.md")):
-        if not is_active_skill(skill_md, repo_root, policy):
+    for row in discover_inventory_skills(repo_root, policy):
+        if row.inventory_slice != "operational":
             continue
+        skill_md = row.skill_md
         skill_dir = skill_md.parent
-        rel_dir = skill_dir.relative_to(repo_root).as_posix()
-        is_system = _matches_prefix(rel_dir, policy.system_prefixes)
-        if is_system and policy.system_slice_mode == "exclude":
-            continue
+        rel_dir = row.relative_skill_dir
         mode = "manual" if rel_dir in MANUAL_SKILL_PATHS else "co-pilot"
         wave = "wave-1-manual" if mode == "manual" else "wave-2-co-pilot"
-        scope_profile = "system" if is_system and policy.system_slice_mode == "separate" else rel_dir.split("/", 1)[0]
-        inventory_class = "system" if is_system else "standard"
         entries.append(
             SkillEntry(
                 skill_md=skill_md,
                 skill_dir=skill_dir,
                 relative_skill_dir=rel_dir,
+                inventory_slice=row.inventory_slice,
                 profile_path=skill_dir / "references" / "task-profile.json",
                 wave=wave,
                 delegation_mode=mode,
-                scope_profile=scope_profile,
-                inventory_class=inventory_class,
             )
         )
     return entries
 
 
 def build_default_profile(entry: SkillEntry, rubric_version: str) -> Dict[str, Any]:
+    scope_profile = entry.relative_skill_dir.split("/", 1)[0]
     if entry.delegation_mode == "manual":
         human_baseline_minutes = 60.0
         ai_process_minutes = 20.0
@@ -183,7 +109,7 @@ def build_default_profile(entry: SkillEntry, rubric_version: str) -> Dict[str, A
         "schema_version": "1.0",
         "profile_id": entry.relative_skill_dir.replace("/", "-"),
         "scope_skill": entry.relative_skill_dir,
-        "scope_profile": entry.scope_profile,
+        "scope_profile": scope_profile,
         "rubric_version": rubric_version,
         "evaluator_version": "v1",
         "persona_set_id": "default-v1",
@@ -258,6 +184,12 @@ def merge_existing(existing: Dict[str, Any], defaults: Dict[str, Any]) -> Dict[s
             mode = "co-pilot"
         merged_delegation["mode"] = mode or defaults["delegation"]["mode"]
         merged["delegation"] = merged_delegation
+
+    # Preserve non-canonical extension fields (for example knowledge_graph blocks)
+    # while still emitting canonical profile_id/scope_* keys from defaults.
+    for key, value in existing.items():
+        if key not in merged:
+            merged[key] = value
 
     return merged
 
@@ -338,7 +270,8 @@ def write_baseline(
     generated_at: str,
     entries: Iterable[SkillEntry],
     expected_count: Optional[int],
-    policy: InventoryPolicy,
+    inventory_policy: str,
+    system_slice_mode: str,
 ) -> None:
     skills = []
     for entry in entries:
@@ -349,8 +282,6 @@ def write_baseline(
                 "profile_file": entry.profile_path.relative_to(ROOT).as_posix(),
                 "delegation_mode": entry.delegation_mode,
                 "wave": entry.wave,
-                "scope_profile": entry.scope_profile,
-                "inventory_class": entry.inventory_class,
             }
         )
 
@@ -360,12 +291,8 @@ def write_baseline(
         "repo_root": ".",
         "expected_active_skill_count": expected_count,
         "active_skill_count": len(skills),
-        "inventory_policy": {
-            "include_prefixes": list(policy.include_prefixes),
-            "exclude_prefixes": list(policy.exclude_prefixes),
-            "system_prefixes": list(policy.system_prefixes),
-            "system_slice_mode": policy.system_slice_mode,
-        },
+        "inventory_policy": inventory_policy,
+        "system_slice_mode": system_slice_mode,
         "excluded_root_skill": "SKILL.md",
         "skills": skills,
     }
@@ -424,7 +351,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--expected-count",
         type=int,
-        default=0,
+        default=116,
         help="Expected number of active skills. Set 0 to disable assertion.",
     )
     parser.add_argument(
@@ -460,7 +387,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--system-slice-mode",
-        choices=sorted(INVENTORY_SLICE_MODES),
+        choices=["exclude", "separate"],
         default=None,
         help="Override inventory policy system handling: separate or exclude",
     )
@@ -470,8 +397,16 @@ def parse_args() -> argparse.Namespace:
 def main() -> int:
     args = parse_args()
     repo_root = Path(args.repo_root).resolve()
-    policy = load_inventory_policy(repo_root, args.inventory_policy, args.system_slice_mode)
-    entries = discover_active_skills(repo_root, policy)
+    entries = discover_active_skills(
+        repo_root,
+        inventory_policy_path=args.inventory_policy,
+        system_slice_mode=args.system_slice_mode,
+    )
+    policy = load_inventory_policy(
+        repo_root,
+        policy_rel_path=args.inventory_policy,
+        system_slice_mode_override=args.system_slice_mode,
+    )
     if args.expected_count and len(entries) != args.expected_count:
         raise SystemExit(
             f"ERROR: active skill count mismatch. expected={args.expected_count} actual={len(entries)}"
@@ -502,7 +437,8 @@ def main() -> int:
         generated_at=generated_at,
         entries=entries,
         expected_count=args.expected_count if args.expected_count > 0 else None,
-        policy=policy,
+        inventory_policy=str(policy.source_path.relative_to(repo_root)),
+        system_slice_mode=policy.system_slice_mode,
     )
 
     checklist_path = (repo_root / args.checklist_out).resolve()
@@ -515,7 +451,6 @@ def main() -> int:
                 "profiles_created": profile_new,
                 "profiles_updated": profile_updated,
                 "frontmatter_updated": frontmatter_updated,
-                "system_slice_mode": policy.system_slice_mode,
                 "baseline_out": str(baseline_path.relative_to(repo_root)),
                 "checklist_out": str(checklist_path.relative_to(repo_root)),
             },

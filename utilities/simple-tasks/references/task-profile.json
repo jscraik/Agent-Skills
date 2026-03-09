@@ -1,8 +1,8 @@
 {
   "schema_version": "1.0",
-  "profile_id": "utilities-simple-tasks",
-  "scope_skill": "utilities/simple-tasks",
-  "scope_profile": "utilities",
+  "profile_id": "personas-steipete-persona",
+  "scope_skill": "personas/steipete-persona",
+  "scope_profile": "personas",
   "rubric_version": "2026-02-26",
   "evaluator_version": "v1",
   "persona_set_id": "default-v1",

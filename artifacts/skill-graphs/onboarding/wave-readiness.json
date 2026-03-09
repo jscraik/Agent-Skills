@@ -1,12 +1,12 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-03-08T21:53:03Z",
+  "generated_at": "2026-03-08T23:42:13Z",
   "decision_date": "2026-03-08",
   "summary": {
-    "active_skill_count": 79,
-    "manual_skill_count": 9,
-    "co_pilot_skill_count": 70,
-    "profile_valid_count": 79,
+    "active_skill_count": 114,
+    "manual_skill_count": 14,
+    "co_pilot_skill_count": 100,
+    "profile_valid_count": 114,
     "profile_invalid_count": 0,
     "event_envelope_errors": 8,
     "approver_count": 2
@@ -36,8 +36,8 @@
         "wave_0_ready": false
       },
       "coverage": {
-        "total": 9,
-        "valid": 9
+        "total": 14,
+        "valid": 14
       },
       "blockers": [
         {
@@ -57,8 +57,8 @@
         "event_envelope_errors_zero": false
       },
       "coverage": {
-        "total": 70,
-        "valid": 70
+        "total": 100,
+        "valid": 100
       },
       "blockers": [
         {
