@@ -168,7 +168,7 @@ if HAS_OPTIONAL_DEPS:
         remote: str = typer.Option("upstream", "--remote", "-r", help="Remote name"),
     ):
         """Fetch a PR branch locally."""
-        repo = validate_repo_slug(repo)
+        _repo = validate_repo_slug(repo)
         pr_number = validate_pr_number(pr_number)
         remote = validate_remote_name(remote)
         branch_name = validate_branch_name(branch or f"pr/{pr_number}")
