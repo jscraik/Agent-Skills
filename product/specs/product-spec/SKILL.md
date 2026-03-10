@@ -17,6 +17,13 @@ Use this skill to **plan** a product: turn an idea (or existing docs) into imple
 - **Decision quality over length:** include only sections that change decisions.
 - **Fail fast on weak evidence:** call out `Evidence gap:` explicitly instead of inventing facts.
 
+## Standards snapshot (March 2026)
+
+- Prefer repo truth, current docs, and cited evidence over generic planning templates.
+- Keep outputs implementation-ready: named owners, success metrics, validation gates, and explicit non-goals.
+- Use concise clarifying questions, then move quickly into concrete artifacts.
+- Default to Mermaid for architecture or flow diagrams when diagrams materially improve decision quality.
+
 ## Scope and triggers
 Use this skill when you need one of the following modes:
 
@@ -66,6 +73,7 @@ Evidence discipline:
 Contract:
 
 - Output contract: `references/contract.yaml` (`schema_version` included for contract-bound artifacts).
+- For multi-artifact runs, keep cross-file assumptions aligned and reuse the same success metrics, owner model, and scope language across every output.
 
 ## Procedure
 
@@ -80,6 +88,7 @@ Contract:
 - Ask one high-value question at a time in interview/review flows.
 - For long drafts, deliver in 200–300 word chunks and confirm before continuing.
 - Offer 2–3 tradeoff options when multiple valid paths exist.
+- If the request already includes enough evidence to draft safely, skip extra questioning and move straight to the first artifact.
 
 ### 3) Execute mode workflow
 
@@ -134,6 +143,12 @@ Additional references:
 - `references/finalize.md`
 - `references/ralph-loop.md`
 - `references/avoid-feature-creep.md`
+
+### 5) Gold-standard checks before completion
+
+- Confirm every artifact answers: what problem, for whom, why now, how success is measured, and what is explicitly out of scope.
+- Confirm execution-facing sections are concrete enough that an engineer could start without a second planning round.
+- If confidence is low, name the uncertainty and stop with a sharper next question instead of padding the spec.
 
 ## Validation
 
@@ -215,7 +230,6 @@ Fail fast: **stop at the first failed gate and do not proceed**.
 This skill owns legacy capability from retired skills. Use these modes when requests match prior behavior.
 
 - `asymmetric-ideas` from `product/strategy/asymmetric-ideation-engine`: Generate 10 launchable asymmetric ideas by excavating a repository for hidden patterns. Use when users ask for radical non-incremental id...
-- `ideation-prep` from `product/strategy/brainstorming`: This skill should be used before implementing features, building components, or making changes. It guides exploring user intent, approach...
 - `improvement-batch` from `product/strategy/project-improvement-ideator`: Use when asked to generate and prioritize product or repository improvements: privately explore 100 pragmatic ideas, run a premortem, and...
 
 Deep legacy details: `references/folded-legacy-modes-core60.md`.

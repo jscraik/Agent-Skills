@@ -1,41 +1,18 @@
-# Skill Output Contract
-# Copy this file to your skill's references/ directory and customize for your skill.
-
 schema_version: "1.0"
-
-purpose: >
-  Define expected behavior and outputs for this skill.
-  Replace this with a specific description of what this skill accomplishes.
-
+purpose: Build Stitch-to-Remotion walkthrough video workflows from screen assets with validated preview and render guidance.
 triggers:
-  - user requests the capability described in this skill
-  - specific keywords or patterns that should activate this skill
-
+  - user requests turning Stitch screens into a walkthrough or demo video
+  - user requests Remotion composition or render output from Stitch assets
 inputs:
-  - user request details
-  - relevant files or context
-  - any required parameters
-
+  - Stitch project or screen identifiers
+  - desired walkthrough order and output format
+  - existing Remotion project context or permission to scaffold one
 outputs:
-  - primary response or artifact
-  - expected format (markdown, JSON, etc.)
-  - success indicators
-
+  - Remotion composition files and supporting assets
+  - preview or render output path plus validation notes
 non_goals:
-  - out-of-scope work not covered by this skill
-  - capabilities explicitly excluded
-
+  - full video-production strategy unrelated to Stitch assets
+  - inventing unsupported screens or product flows
 risks:
-  - missing inputs; mitigated by clarifying questions
-  - potential misinterpretation; mitigated by explicit confirmation
-
-examples:
-  happy_path:
-    input: "Typical user request"
-    expected_output: "Expected skill response"
-  edge_case:
-    input: "Unusual but valid request"
-    expected_output: "How skill should handle it"
-  failure_mode:
-    input: "Out of scope or invalid request"
-    expected_output: "Skill should decline gracefully"
+  - missing Stitch assets can block composition work
+  - unreadable overlays or pacing issues can undermine the walkthrough

@@ -7,9 +7,32 @@ description: Bootstrap a local development environment from a GitHub repository 
 
 Create a working local dev environment from a repository with reproducible setup steps and verification output.
 
+## Table of Contents
+- [When to Use](#when-to-use)
+- [Standards snapshot](#standards-snapshot-march-2026)
+- [Philosophy](#philosophy)
+- [Inputs](#inputs)
+- [Procedure](#procedure)
+- [Outputs](#outputs)
+- [Failure mode](#failure-mode)
+- [Constraints](#constraints)
+- [Validation](#validation)
+- [Anti-patterns](#anti-patterns)
+- [Variation](#variation)
+- [Usage](#usage)
+- [Example Output](#example-output)
+- [Troubleshooting](#troubleshooting)
+- [Decision feedback protocol](#decision-feedback-protocol)
+
 ## When to Use
 
 Use this skill when the user asks to quickly stand up a new repo locally, reproduce onboarding setup, or validate that a project can run from a clean environment.
+
+## Standards snapshot (March 2026)
+- Prefer deterministic bootstrap over one-off shell folklore.
+- Detect the stack before installing dependencies or activating toolchains.
+- Use repo-native setup and validation commands when they exist.
+- Record what succeeded, what was skipped, and the first blocking step if bootstrap does not finish cleanly.
 
 ## Philosophy
 
@@ -38,6 +61,9 @@ Use this skill when the user asks to quickly stand up a new repo locally, reprod
 - Bootstrapped local repository ready for development (or clear failure report).
 - Concise setup summary (commands executed, detected stack, verification result).
 - Follow-up artifact (`SETUP.md` or `SETUP_FAILED.md`) with reproducible instructions.
+
+## Failure mode
+If clone, toolchain activation, dependency install, or the first runnable health check fails, stop at that blocker, capture the exact outcome, and leave a documented partial state rather than claiming a successful bootstrap.
 
 ## Constraints
 
@@ -107,6 +133,7 @@ If bootstrap fails:
 2. Review first failing command and remediation notes.
 3. Re-run with explicit toolchain versions if auto-detection was ambiguous.
 
+## Decision feedback protocol
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.
@@ -114,23 +141,3 @@ If bootstrap fails:
 - Persist with: `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
 - The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
 <!-- /decision-feedback-protocol -->
-
-## Execution quality
-- Philosophy: use a practical framework that balances speed, safety, and tradeoff clarity.
-- Approach: choose context-specific variation rather than generic cookie-cutter steps; adapt output to repository constraints.
-- Guiding question: Why is this the smallest safe change?
-- Guiding question: What tradeoff are we making and why?
-- Guiding question: How do we verify the result end-to-end?
-- Anti-patterns: DO NOT skip validation, NEVER hide failed checks, and avoid repetitive template-only output.
-- Empowerment: be capable, creative, and enable users to explore options with confidence.
-
-## Quality Uplift
-- Philosophy and approach: apply a clear framework, explain why, consider tradeoff decisions, and use a practical mental model for execution.
-- Guiding question: Why is this the right context-specific path?
-- Guiding question: What tradeoff is being made and how is risk reduced?
-- Guiding question: How do we verify behavior end-to-end before completion?
-- Anti-pattern warning: avoid generic or repetitive output; DO NOT hide failures; NEVER skip validation; avoid common pitfall and mistake patterns.
-- Anti-pattern warning: treat incorrect or wrong assumptions as blockers, and call out anti-pattern risks explicitly.
-- Variation: vary recommendations by context-specific constraints; adapt, customize, and use different approaches when constraints differ.
-- Variation: prefer diverse, unique alternatives and avoid repetition or cookie-cutter template convergence.
-- Empowerment: enable users to explore options confidently, be capable and creative, unlock safe choices, and empower execution.

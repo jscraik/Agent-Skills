@@ -1,13 +1,17 @@
-purpose: >
-  Define expected behavior and outputs for this skill.
 schema_version: 1.0
+purpose: Review and stabilize UI visual regression workflows across Storybook, Playwright, and Argos.
 triggers:
-  - user requests the capability described in this skill
+  - User asks to investigate visual diffs or snapshot regressions.
+  - Storybook or Argos changes need classification or stabilization.
 inputs:
-  - user request details
+  - Diff surface, artifacts, or failing workflow stage.
+  - Repo commands or known snapshot pipeline details.
 outputs:
-  - primary response or artifact
+  - Diff classification and minimal next-step fix plan.
+  - Evidence-backed summary of build, capture, and review state.
 non_goals:
-  - out-of-scope work
+  - Creative redesign work unrelated to regression review.
+  - Blind baseline approval without intent verification.
 risks:
-  - missing inputs; mitigated by clarifying questions
+  - Flaky capture conditions can masquerade as UI regressions.
+  - Broken build or story inventory can invalidate diff conclusions.

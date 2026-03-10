@@ -1,295 +1,105 @@
 ---
 name: og-image-builder
-description: "Generate brand-aligned Open Graph images for existing routes by inspecting a web codebase and rendering assets with Playwright components. Use when a user asks for route-specific OG image generation or refresh in an existing app."
+description: Generate brand-aligned Open Graph images for existing routes by inspecting a web codebase and rendering assets with Playwright components. Use when a user asks for route-specific OG image generation or refresh in an existing app.
 ---
 
-# OG Image Creator
+# OG Image Builder
 
-Generate authentic, brand-aligned Open Graph images by understanding your codebase first, then creating contextually appropriate images for each route using Playwright and your existing components.
+Generate route-aware social preview images that feel native to the product instead of generic social card templates.
 
-## Philosophy: Authentic Over Template
+## Table of Contents
+- [Standards snapshot](#standards-snapshot)
+- [When to use](#when-to-use)
+- [Required inputs](#required-inputs)
+- [Deliverables](#deliverables)
+- [Failure mode](#failure-mode)
+- [Workflow](#workflow)
+- [Validation](#validation)
+- [References](#references)
 
-**Before generating OG images, ask**:
-- What is the brand identity of this site (colors, fonts, logo, design language)?
-- What routes/pages exist and what are their purposes?
-- What components and assets can be reused for consistency?
-- What page types need different visual treatments?
+## Standards snapshot
+- Study the codebase first; OG images should inherit the product's visual language.
+- Prefer scripted generation and route discovery over one-off image editing.
+- Use actual page metadata, titles, and descriptions rather than placeholders.
+- Keep outputs compatible with common OG consumers: 1200x630, stable URLs, reasonable file size.
 
-**Core principles**:
-1. **Study before generate**: Understand the codebase structure, routing, and brand before creating anything
-2. **Authenticity over templates**: Use actual brand colors, fonts, and components—not generic social card templates
-3. **Context-aware design**: Landing pages, articles, products, and docs need different visual approaches
-4. **Smart automation**: Auto-detect routes and extract brand, but allow user customization
-
-## Workflow
-
-### 1. Discover and Analyze
-
-**Route discovery**:
-- Analyze project structure to determine framework (Next.js, Astro, React, etc.)
-- Auto-detect routes based on framework conventions:
-  - Next.js: `app/*/page.tsx` or `pages/*.tsx`
-  - Astro: `src/pages/*.astro`
-  - React Router: Analyze route configuration
-- Extract route metadata (title, description) from pages
-- Categorize page types (landing, article, product, about, etc.)
-
-**Brand extraction**:
-- Find logo/icon files (SVG preferred)
-- Extract color palette from CSS/Tailwind config
-- Identify primary fonts from stylesheets or config
-- Capture design patterns from existing components
-
-Use `scripts/analyze_codebase.py` to automate discovery.
-
-### 2. Design Strategy
-
-**Determine appropriate layouts per page type**:
-- **Landing pages**: Bold, minimal, emphasize value proposition
-- **Articles/Blog posts**: Title + excerpt, date/author if relevant
-- **Product pages**: Product name, key feature, visual if available
-- **Documentation**: Topic + description, organized/structured feel
-- **About/Company**: Brand-forward, professional
-
-**Layout principles**:
-- Generous whitespace (avoid clutter)
-- High contrast for readability when shared
-- Brand colors as accents, not overwhelming
-- Typography hierarchy that matches site
-- 1200x630px (standard OG dimensions)
-
-### 3. Generate Images
-
-**Component-based generation**:
-- Reuse React components when possible for consistency
-- Use Playwright to render components to images
-- Apply brand colors, fonts, and assets
-- Inject actual page metadata (not placeholders)
-
-**Technical approach**:
-1. Create minimal HTML template with brand styles
-2. For each route, generate page-specific markup
-3. Use Playwright to capture screenshot at 1200x630
-4. Save to `public/og/` or appropriate static directory
-5. Update page metadata to reference OG image
-
-Use `scripts/generate_og_images.py` for automation.
-
-### 4. Verify and Optimize
-
-- Validate OG image metadata in HTML
-- Test with OG preview tools (opengraph.xyz, linkedin inspector)
-- Ensure file sizes are reasonable (<200KB preferred)
-- Check image appearance at different scales
-
-## Framework-Specific Guidance
-
-### Next.js
-
-**App Router**:
-```tsx
-// app/page.tsx
-export const metadata = {
-  openGraph: {
-    images: ['/og/home.png'],
-  },
-}
-```
-
-**Pages Router**:
-```tsx
-// pages/index.tsx
-<Head>
-  <meta property="og:image" content="/og/home.png" />
-</Head>
-```
-
-**Dynamic OG images**: Consider Next.js OG Image Generation (`@vercel/og`) for dynamic content, but use static generation for brand consistency.
-
-### Astro
-
-```astro
----
-// src/pages/index.astro
-const ogImage = '/og/home.png';
----
-<head>
-  <meta property="og:image" content={ogImage} />
-</head>
-```
-
-### React SPAs
-
-Add OG tags to `public/index.html` or use react-helmet:
-```jsx
-<Helmet>
-  <meta property="og:image" content="/og/home.png" />
-</Helmet>
-```
-
-## Anti-Patterns to Avoid
-
-❌ **Generic templates**: Don't use stock social card templates that ignore the site's brand
-- Why bad: Creates disconnect between site and social sharing experience
-- Better: Extract actual brand colors, fonts, and use them consistently
-
-❌ **One size fits all**: Don't use the same OG image design for every page type
-- Why bad: Misses opportunity for context-appropriate presentation
-- Better: Different layouts for landing, articles, products, etc.
-
-❌ **Placeholder content**: Don't use "Lorem ipsum" or generic text
-- Why bad: Defeats the purpose of preview images
-- Better: Use actual page titles and descriptions from metadata
-
-❌ **Overcrowding**: Don't cram too much text, too many images, or complex layouts
-- Why bad: Illegible when scaled down in social feeds
-- Better: Focus on 1-2 key elements with generous whitespace
-
-❌ **Ignoring components**: Don't create OG images from scratch if components exist
-- Why bad: Breaks visual consistency with the site
-- Better: Reuse button styles, card layouts, typography from components
-
-❌ **Manual generation**: Don't create OG images one by one manually
-- Why bad: Not scalable, hard to maintain consistency
-- Better: Script the generation process to handle all routes
-
-## Variation Guidance
-
-**IMPORTANT**: OG images should vary based on page context, not converge on a single design.
-
-**Dimensions to vary**:
-- **Layout**: Centered vs left-aligned, single vs split column, text vs visual focus
-- **Color emphasis**: Primary brand color vs neutral, gradient vs solid
-- **Content hierarchy**: Large title vs balanced title+description
-- **Visual elements**: Logo size/placement, decorative elements, icons
-- **Typography**: Size ratios, weight distribution, font pairing
-
-**Avoid converging on**:
-- Same gradient background for everything
-- Identical "title + logo" layout
-- Single font size ratio
-- Fixed logo position
-
-**Context drives variation**:
-- Technical docs → Clean, organized, icon-based
-- Marketing landing → Bold, colorful, value-focused
-- Blog articles → Reader-friendly, author/date context
-- Product pages → Visual product emphasis
-
-## Technical Requirements
-
-**Dependencies** (install as needed):
-```bash
-npm install playwright sharp
-# or
-pip install playwright Pillow
-```
-
-**Playwright setup**:
-```bash
-playwright install chromium
-```
-
-**File structure**:
-```
-project/
-├── public/og/          # Generated OG images
-│   ├── home.png
-│   ├── about.png
-│   └── ...
-└── scripts/            # Generation scripts
-    ├── analyze_codebase.py
-    └── generate_og_images.py
-```
-
-## Remember
-
-**OG images are an extension of your brand, not generic social cards.**
-
-Study the codebase to understand the design language. Extract the brand identity. Use actual components and content. Create contextually appropriate images that feel native to the site.
-
-When someone shares your page, the OG image should feel like a natural preview—not a template slapped on top.
-
-**You're capable of creating sophisticated, brand-aligned OG images that enhance rather than undermine the site's identity.**
-
-## Scope and triggers
-- Use this skill when the task matches its description and triggers.
-- If the request is outside scope, route to the referenced skill.
-
+## When to use
+- A site or app needs route-specific Open Graph images.
+- Existing OG images are generic, missing, or visually disconnected from the product.
+- The user wants a scripted workflow that can regenerate assets after content changes.
+- A codebase already has components, colors, and assets worth reusing in the OG system.
 
 ## Required inputs
-- User request details and any relevant files/links.
-
+- Target repo or page set to inspect.
+- Framework context if already known: Next.js, Astro, React Router, or similar.
+- Output preference:
+  - static asset generation;
+  - metadata wiring only;
+  - or both.
+- Any branding constraints such as logo usage, typography, or page-type distinctions.
 
 ## Deliverables
-- A structured response or artifact appropriate to the skill.
-- Include `schema_version: 1` if outputs are contract-bound.
+- Generated OG image assets in the correct static output location.
+- A short route map covering which pages received which visual treatment.
+- Minimal metadata wiring notes or code updates when requested.
+- A concise explanation of any pages intentionally grouped into shared templates.
 
+## Philosophy
+- Brand alignment beats generic polish.
+- Route-aware templates are better than a single overfit social card.
+- Scripted generation is the default because OG assets need maintenance, not one-off artistry.
+
+## Failure mode
+- If the task is primarily about metadata tags rather than image generation, route to the metadata skill.
+- If there is no accessible repo or page context, stop before inventing brand treatments.
+- If the user wants illustration or marketing design from scratch rather than repo-grounded social cards, say so and redirect accordingly.
 
 ## Constraints
-- Redact secrets/PII by default.
-- Avoid destructive operations without explicit user direction.
+- Redact secrets, unpublished URLs, and internal environment details by default in generated previews and notes.
+- Do not replace metadata patterns wholesale when the user only asked for image generation.
+- Keep outputs tied to real routes and brand assets that exist in the project.
 
-
-## Validation
-- Run any relevant checks or scripts when available.
-- Fail fast and report errors before proceeding.
-
+## Workflow
+1. Discover the framework and route structure.
+2. Extract brand signals:
+   - logo and icons;
+   - palette;
+   - fonts;
+   - recurring layout motifs.
+3. Group routes into sensible page types such as landing, docs, article, product, or company.
+4. Use the bundled scripts for repeatable generation:
+   - `scripts/analyze_codebase.py`
+   - `scripts/generate_og_images.py`
+5. Reuse existing components or design primitives where possible.
+6. Generate page-specific or template-shared OG images with real content.
+7. Wire or verify metadata references only after the image outputs are stable.
 
 ## Anti-patterns
-- Avoid vague guidance without concrete steps.
-- Do not invent results or commands.
-## Procedure
-1) Clarify scope and inputs.
-2) Execute the core workflow.
-3) Summarize outputs and next steps.
+- Using the same template for landing pages, docs, and articles without checking context.
+- Filling OG cards with placeholder copy or dev-only URLs.
+- Rebuilding brand language from scratch when the repo already exposes usable components and tokens.
 
-## Antipatterns
-- Do not add features outside the agreed scope.
+## Validation
+- Fail fast: stop at the first broken asset path, route mismatch, or metadata reference instead of compensating with placeholders.
+- Confirm generated images are 1200x630 unless the target stack has a deliberate alternative.
+- Ensure OG image URLs and metadata point to real assets, not localhost or dev-only paths.
+- Check at least one sample per page type for legibility and brand fit.
+- Keep file sizes reasonable for social crawlers and preview loading.
 
 ## Examples
-- "Provide a concise response for this task."
-- "Follow the workflow and summarize outputs."
+- "Generate OG images for our marketing pages by reusing the current homepage branding."
+- "Audit our docs OG cards and make them look like the product instead of generic gradients."
+- "Set up a repeatable workflow that regenerates OG images for article pages from metadata."
 
 ## References
-- `references/best-practices.md`
-- `references/contract.yaml`
-- `references/evals.yaml`
-- `references/framework-workflows.md`
-- `references/og-specifications.md`
-
-<!-- skill-score-boost-v1 -->
-## Philosophy and tradeoffs
-- Use this skill when consistent decision-making matters more than one-off execution because project context should drive the approach.
-- Principle and mindset: prioritize tradeoffs and constraints over rigid checklists; understand why each step exists.
-- Ask this to keep outcomes robust: Why is this the right default, and what could change this outcome?
-- How do we adapt if constraints shift?
-- What evidence is needed before choosing one path over another?
-
-## Anti-patterns and caveats
-- Avoid applying this playbook generically without checking repository-specific context.
-- **NEVER** skip required validation gates when behavior changes.
-- **DO NOT** use this skill as a rigid replacement for engineering judgment.
-- **DON'T** ignore warnings or assume one pattern fits all repos.
-- Common pitfall: treating anti-patterns as optional.
-- Incorrect assumptions here can lead to fragile guidance.
-- Warning: wrong sequencing can create avoidable regressions.
-
-## Variation and adaptation
-- Vary the workflow by team size, risk, and deployment target.
-- Use different strategies for small, medium, and large changes.
-- Adapt recommendations to the specific environment and avoid repetitive templates.
-- Avoid generic or cookie-cutter responses; craft context-specific alternatives.
-- Keep outputs diverse and not repetitive.
-- Converge on a custom path only after evidence review.
-- Different constraints should produce different, non-generic recommendations.
-
-## Empowering execution style
-- Be capable of exploring multiple options and enabling the team to make safe decisions.
-- Unlock confidence by explaining options and tradeoffs clearly.
-- Feel free to be creative while staying rigorous and precise.
-- Push boundaries with practical alternatives when simple recipes fail.
-- Enable outcomes-oriented problem solving.
+- Contract: `references/contract.yaml`
+- Evals: `references/evals.yaml`
+- Best practices: `references/best-practices.md`
+- Framework workflows: `references/framework-workflows.md`
+- OG specs: `references/og-specifications.md`
+- Scripts: `scripts/analyze_codebase.py`, `scripts/generate_og_images.py`
+- README: `README.md`
+- Asset preview: `assets/og-image-creator.png`
 
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**

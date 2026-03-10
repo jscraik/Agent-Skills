@@ -1,0 +1,3 @@
+interface:
+  display_name: "Agentation"
+  short_description: "Install, verify, and troubleshoot Agentation integration (UI wiring, MCP health, webhook delivery, and optional annotation autopilot) in React/Next.js/Vite/Tauri projects."

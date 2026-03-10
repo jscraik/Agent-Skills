@@ -3,123 +3,84 @@ name: fix-mise
 description: Diagnose and repair mise trust/runtime failures and reconcile `~/.config/mise/config.toml` with required versions; use when commands fail due to trust blockers or stale tool config.
 ---
 
-# Fix Mise Trust Errors
+# Fix Mise
 
-Systematically resolve mise trust and runtime availability issues.
+Diagnose and repair `mise` trust, runtime, and version-drift failures with the smallest safe change set.
 
-## When to Use
+## Standards snapshot (March 2026)
+- Diagnose the actual trust or runtime blocker before changing config.
+- Prefer project-local fixes first and global config edits only when required.
+- Treat `mise doctor`, `mise list`, and retrying the failing command as mandatory verification.
+- Keep any global config change explicit, backed up, and easy to audit.
 
-Use this skill when commands fail due to untrusted mise config, missing mise-managed tools, or environment activation problems.
+## When to use
+- Commands fail because of untrusted `mise` config.
+- Required runtimes are missing or stale.
+- `~/.config/mise/config.toml` or project `mise` files are out of sync with expected tool versions.
+
+## When not to use
+- The failure is unrelated to `mise`.
+- The user wants a broad toolchain upgrade with no actual `mise` blocker.
+- The issue is generic shell configuration with no `mise` trust or runtime involvement.
+
+## Required inputs
+- The failing command or error output.
+- The repo or directory containing `mise` configuration.
+- Optional expected tool versions or target global config.
+
+## Deliverables
+- Root-cause summary of the `mise` failure.
+- The exact remediation path taken or recommended.
+- Verification evidence showing whether the original command now works.
+- If global config changed, the path and backup details.
 
 ## Philosophy
-
-- Identify root cause before applying broad fixes.
-- Prefer smallest safe remediation that restores expected tooling.
-- Leave the environment easier to verify after repair.
-- Keep global tool configuration current by making any needed updates explicit and auditable.
-
-## Inputs
-
-- Error output that references mise trust/runtime issues.
-- Repository or directory containing mise configuration (`mise.toml`, `.tool-versions`, etc.).
-- Optional global configuration target (`$HOME/.config/mise/config.toml`).
-- Optional expected tool/runtime versions.
-- Evidence of scope ambiguity (e.g., conflicting project/global expectations or request scope not explicit).
-
-## References
-
-- `references/contract.yaml`
-- `references/task-profile.json`
-- `references/evals.yaml`
-- Output schema version: `schema_version: "1.0"` in `references/contract.yaml`
-
-## Examples
-
-- Untrusted config file in a repo and trust check fails: run `mise trust <path>`, `mise doctor`, then retry.
-- `~/.config/mise/config.toml` lacks a required tool/version: run `mise use -g` for that tool/version, `mise install`, then verify.
-- Stale global tool entries are present (`mise outdated`): if the user requested dependency refresh, run `mise outdated` and `mise upgrade` explicitly, then re-check state.
-- User asks “fix global tools” but does not specify versions: confirm required versions before running global update and log a pending-confirmation step if unknown.
-
-## Variation
-
-- Prefer minimal intervention first in project-local scope, then expand to global updates only when required.
-- If `~/.config/mise/config.toml` is out of sync, choose the least-disruptive change path:
-  - request confirmation for ambiguous edits,
-  - otherwise apply scoped `mise use -g` / `mise install` updates with backups.
-- If a tool is unavailable in the global backend, avoid forcing global rollback and route via a targeted install/fallback plan.
-
-## Procedure (canonical-first)
-
-1. Capture failure context and identify all active config scopes:
-   - project/local configs (`mise.toml`, `.tool-versions`, nested configs),
-   - workspace/global config (`$HOME/.config/mise/config.toml` or equivalent on this system).
-2. Trust exactly the untrusted config files discovered in step 1 using `mise trust <path>`.
-3. For any trust/runtime blocker tied to missing tools, reconcile versions:
-   - update global config for required tools using scoped `mise use -g <tool>@<version>` (or your project-standard install flow),
-   - run `mise sync` / `mise install` to install anything still missing.
-4. Reconcile tool drift in scope if requested:
-   - run `mise outdated` and record stale entries.
-   - if stale entries are present and dependency refresh was requested/confirmed, run `mise upgrade` and re-run `mise outdated`.
-5. Re-run trust/runtimes checks (`mise doctor`) and confirm all expected tools are installed (`mise list` plus `which <tool>` checks where relevant).
-6. Retry the original failing command.
-7. If global trust/config changes were required, verify they are persisted and safe:
-   - keep a timestamped backup of `~/.config/mise/config.toml` before writing,
-   - confirm file contents contain only intended tool entry updates.
-
-## Outputs
-
-- Root-cause summary of the mise failure.
-- Remediation actions taken (trust/install/sync steps).
-- Verification result showing whether the original command now succeeds.
-- Global `mise.toml` update result (`path`, entries added/updated, backup location if changed).
+- Small, proven `mise` fixes beat broad shell surgery.
+- Trust only the config that is actually in scope.
+- A repair is not complete until the original command is retried.
 
 ## Constraints
+- Redact secrets and sensitive environment details by default.
+- Avoid destructive global cleanup unless the user explicitly asks for it.
+- Request confirmation before ambiguous edits to `~/.config/mise/config.toml`.
 
-- Redact secrets and sensitive data by default in diagnostics and command output.
-- Avoid destructive global cleanup unless explicitly requested by the user.
-- Keep fixes scoped to the relevant project/environment first.
-- If global updates are needed and user intent is ambiguous, request explicit confirmation before editing `~/.config/mise/config.toml`.
+## Workflow
+1. Capture the failing command and identify the active `mise` config scopes.
+2. Trust the specific config files causing the blocker.
+3. Reconcile missing tools or stale versions with the smallest scoped change.
+4. Run `mise doctor`, `mise list`, and other relevant checks.
+5. Retry the original failing command.
+6. If global config changed, confirm only the intended entries were updated.
+
+## Tooling and references
+- Prefer:
+  - `mise doctor`
+  - `mise list`
+  - `mise trust <path>`
+  - `mise use -g <tool>@<version>`
+  - `mise install`
+  - `mise outdated`
+  - `mise upgrade`
+- Reference files:
+  - `references/contract.yaml`
+  - `references/evals.yaml`
+  - `references/task-profile.json`
 
 ## Validation
-
-- `mise doctor` reports no blocking trust/runtime errors.
-- `mise list` (or equivalent) reflects required tool availability.
-- `mise outdated` is clean after any requested upgrade flow (or stale drift is logged and handled with user confirmation).
-- Original failing command is retried and outcome is recorded.
-- Fail fast on unresolved blockers with explicit next steps.
+- Verify `mise doctor` reports no blocking trust or runtime failures.
+- Verify required tools appear in `mise list`.
+- Verify the original failing command was retried and its outcome recorded.
+- Fail fast at the first unresolved blocker.
 
 ## Anti-patterns
+- Trusting broad paths without identifying the triggering config.
+- Declaring success without retrying the failing command.
+- Mixing unrelated shell or package-manager changes into the fix.
 
-- Blindly trusting broad paths without identifying the triggering config.
-- Marking issue resolved without re-running the failing command.
-- Mixing unrelated shell/tooling changes into the fix workflow.
+## Examples
+- Fix this untrusted `mise.toml` so the command can run again.
+- Reconcile my global `mise` config with the required tool version.
+- Diagnose why `mise` says the runtime is missing even though the repo has config.
 
-## Quick Runbook
-
-1. Identify untrusted config path.
-2. Run `mise trust <path>`.
-3. Run `mise doctor`.
-4. Reconcile global tool entries as needed with `mise use -g` and `mise install`.
-5. If dependency refresh is requested, run `mise outdated` then `mise upgrade`.
-6. Confirm runtime/tool presence via `mise list` (and rerun `mise outdated` after upgrades).
-7. Retry the failing command.
-
-## Execution quality
-- Philosophy: use a practical framework that balances speed, safety, and tradeoff clarity.
-- Approach: choose context-specific variation rather than generic cookie-cutter steps; adapt output to repository constraints.
-- Guiding question: Why is this the smallest safe change?
-- Guiding question: What tradeoff are we making and why?
-- Guiding question: How do we verify the result end-to-end?
-- Anti-patterns: DO NOT skip validation, NEVER hide failed checks, and avoid repetitive template-only output.
-- Empowerment: be capable, creative, and enable users to explore options with confidence.
-
-## Quality Uplift
-- Philosophy and approach: apply a clear framework, explain why, consider tradeoff decisions, and use a practical mental model for execution.
-- Guiding question: Why is this the right context-specific path?
-- Guiding question: What tradeoff is being made and how is risk reduced?
-- Guiding question: How do we verify behavior end-to-end before completion?
-- Anti-pattern warning: avoid generic or repetitive output; DO NOT hide failures; NEVER skip validation; avoid common pitfall and mistake patterns.
-- Anti-pattern warning: treat incorrect or wrong assumptions as blockers, and call out anti-pattern risks explicitly.
-- Variation: vary recommendations by context-specific constraints; adapt, customize, and use different approaches when constraints differ.
-- Variation: prefer diverse, unique alternatives and avoid repetition or cookie-cutter template convergence.
-- Empowerment: enable users to explore options confidently, be capable and creative, unlock safe choices, and empower execution.
+## Remember
+If the original command was not retried, the `mise` fix is still only a theory.

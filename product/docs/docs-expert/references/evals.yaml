@@ -115,6 +115,28 @@ cases:
       - type: contains
         value: "description"
 
+  - name: happy-procedure-writing-modern-rules
+    category: happy
+    prompt: "Rewrite this setup guide to modern documentation standards: keep one action per step, say where to do the action, and add a verification point after risky steps."
+    acceptance:
+      - type: contains
+        value: "verification"
+      - type: contains
+        value: "one action per step"
+      - type: contains
+        value: "where"
+
+  - name: edge-accessibility-and-directional-language
+    category: edge
+    prompt: "Audit our docs for accessibility issues. Remove directional language like above/below, ensure captions and alt text are called out, and make the guidance work without images."
+    acceptance:
+      - type: contains
+        value: "directional language"
+      - type: contains
+        value: "alt text"
+      - type: contains
+        value: "without images"
+
   - name: negative-no-documentation-deliverable
     category: negative
     should_trigger: false

@@ -12,6 +12,39 @@ artifacts and validation.
 When you respond while this skill is active, answer with sections titled exactly:
 **Outputs** and **Procedure** (and include authorization notes).
 
+## Table of Contents
+- [Standards snapshot](#standards-snapshot-march-2026)
+- [Scope and triggers](#scope-and-triggers)
+- [Philosophy](#philosophy)
+- [Constraints](#constraints-non-negotiable)
+- [Compliance](#compliance-recon-workbench-repo)
+- [Entrypoints](#entrypoints-recon-workbench-repo)
+- [Target kinds](#target-kinds)
+- [Probe Sets](#probe-sets)
+- [Escalation Levels](#escalation-levels)
+- [Scope Configuration](#scope-configuration)
+- [Required inputs](#required-inputs)
+- [Deliverables](#deliverables)
+- [Failure mode](#failure-mode)
+- [Procedure](#procedure)
+- [Validation](#validation)
+- [Escalation Ladder](#escalation-ladder-worst-case-path)
+- [Evidence Discipline](#evidence-discipline)
+- [Build Mode](#build-mode-tooling-design)
+- [Inspect Mode](#inspect-mode-evidence-collection)
+- [Variation Rules](#variation-rules)
+- [Empowerment Principles](#empowerment-principles)
+- [Anti-Patterns to Avoid](#anti-patterns-to-avoid)
+- [Examples](#examples)
+- [Decision feedback protocol](#decision-feedback-protocol)
+- [Remember](#remember)
+
+## Standards snapshot (March 2026)
+- Authorization and scope evidence are mandatory before any target-specific interrogation.
+- Treat run artifacts and evidence paths as the source of truth; uncited claims are hypotheses.
+- Start read-only, escalate only with explicit justification, and stop on circumvention pressure.
+- Keep outputs deterministic, redact sensitive material by default, and validate findings before summarizing them.
+
 ## Scope and triggers
 - Running rwb CLI flows (`doctor`, `authorize`, `plan`, `run`, `summarize`, `manifest`, `validate`, `reconcile`).
 - Designing/updating probe catalogs, schemas, or validation scripts.
@@ -118,6 +151,9 @@ require_authorization: true
 - `derived/report.json` - Machine-readable report (when generated); include `schema_version` when schema-bound
 
 Schema source of truth in the repo: `config/schemas/` (e.g. `config/schemas/findings.v2.schema.json`).
+
+## Failure mode
+If authorization is missing, scope is unclear, evidence validation fails, or the requested workflow would require circumvention or out-of-scope escalation, stop immediately, report the exact blocker, and refuse to manufacture findings.
 
 ## Procedure
 
@@ -267,39 +303,7 @@ The agent is capable of extraordinary work in this domain. Use judgment, adapt t
 ## Extended guidance
 See `references/extended.md` for additional examples, workflows, and appendices.
 
-<!-- skill-score-boost-v1 -->
-## Philosophy and tradeoffs
-- Use this skill when consistent decision-making matters more than one-off execution because project context should drive the approach.
-- Principle and mindset: prioritize tradeoffs and constraints over rigid checklists; understand why each step exists.
-- Ask this to keep outcomes robust: Why is this the right default, and what could change this outcome?
-- How do we adapt if constraints shift?
-- What evidence is needed before choosing one path over another?
-
-## Anti-patterns and caveats
-- Avoid applying this playbook generically without checking repository-specific context.
-- **NEVER** skip required validation gates when behavior changes.
-- **DO NOT** use this skill as a rigid replacement for engineering judgment.
-- **DON'T** ignore warnings or assume one pattern fits all repos.
-- Common pitfall: treating anti-patterns as optional.
-- Incorrect assumptions here can lead to fragile guidance.
-- Warning: wrong sequencing can create avoidable regressions.
-
-## Variation and adaptation
-- Vary the workflow by team size, risk, and deployment target.
-- Use different strategies for small, medium, and large changes.
-- Adapt recommendations to the specific environment and avoid repetitive templates.
-- Avoid generic or cookie-cutter responses; craft context-specific alternatives.
-- Keep outputs diverse and not repetitive.
-- Converge on a custom path only after evidence review.
-- Different constraints should produce different, non-generic recommendations.
-
-## Empowering execution style
-- Be capable of exploring multiple options and enabling the team to make safe decisions.
-- Unlock confidence by explaining options and tradeoffs clearly.
-- Feel free to be creative while staying rigorous and precise.
-- Push boundaries with practical alternatives when simple recipes fail.
-- Enable outcomes-oriented problem solving.
-
+## Decision feedback protocol
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.

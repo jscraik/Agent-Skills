@@ -8,6 +8,7 @@ metadata:
 # UI/UX + Creative Coding Skill
 
 ## Table of Contents
+- [Standards snapshot](#standards-snapshot)
 - [Philosophy and scope](#philosophy-and-scope)
 - [When to use](#when-to-use)
 - [When not to use](#when-not-to-use)
@@ -28,6 +29,12 @@ metadata:
 - [Examples](#examples)
 - [Remember](#remember)
 - [Reference map](#reference-map)
+
+## Standards snapshot (March 2026)
+- Keep React/Vite and Tauri advice grounded in production implementation, not moodboard-only direction.
+- Use Tailwind v4 and existing Radix-friendly patterns when they fit the host codebase.
+- Treat accessibility, reduced-motion parity, performance, and interaction reliability as equal partners to visual ambition.
+- Use Three.js or WebGL accents only when they improve the product experience and survive fallback review.
 
 ## Philosophy and scope
 This skill turns vague UI polish requests into shippable implementation guidance.
@@ -210,6 +217,7 @@ Required checks:
 - Measurable acceptance sanity (interaction feedback target, layout-stability safeguards, and input validation timing are explicit and testable).
 - If `design-taste-frontend` overlay is requested: confirm active dial values (or user-set values) and apply overlay guardrails.
 - If component benchmarking is requested: cite the compared component patterns and final selection rationale.
+- Reuse bundled `references/`, `scripts/`, `agents/`, and `assets/` helpers when they improve fidelity or reduce repeated setup work.
 
 ## Encouraging variation
 - Adapt depth by request: concise triage vs detailed implementation plan.
@@ -258,6 +266,10 @@ If out of scope, still respond with:
 In that response:
 - State why it is out of scope.
 - Offer 1–2 adjacent next-best workflows.
+
+## Examples
+- "Polish this dashboard interaction model with motion, accessibility, and a patch-ready plan."
+- "Design a high-craft onboarding flow for React with reduced-motion parity and clear performance guardrails."
 
 ## Examples
 - "$ui-ux-creative-coding Polish this Tauri settings flow with motion and accessibility gates."

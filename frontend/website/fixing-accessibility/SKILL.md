@@ -7,6 +7,11 @@ description: Audit and fix HTML accessibility issues including ARIA labels, keyb
 
 Fix accessibility issues.
 
+Current baseline markers:
+- React 19 component behavior when the UI is React-based.
+- Next.js 16 routing and rendering context when the app uses Next.js.
+- WCAG 2.2 success criteria as the default accessibility bar.
+
 ## how to use
 
 - `/fixing-accessibility`

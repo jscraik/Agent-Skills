@@ -7,50 +7,71 @@ description: Generate multiple SEO/CTR-optimized YouTube title and thumbnail tex
 
 # YouTube Titles & Thumbnails
 
-Purpose: Deliver the core outputs for this skill. The full guidance lives in `references/full-guide.md`.
+## Table of Contents
+- [Scope and triggers](#scope-and-triggers)
+- [Required inputs](#required-inputs)
+- [Deliverables](#deliverables)
+- [Failure mode](#failure-mode)
+- [Standards snapshot](#standards-snapshot-march-2026)
+- [Workflow](#workflow)
+- [Validation](#validation)
+- [Anti-patterns](#anti-patterns)
+- [Decision feedback protocol](#decision-feedback-protocol)
+
+Deliver strong YouTube title and thumbnail-copy options with clear positioning tradeoffs. The deeper craft guidance lives in `references/full-guide.md`.
 
 ## Scope and triggers
-- Use when asked for high-performing YouTube titles and thumbnail text.
-- For broader product/PRD work, route to `product-spec`.
+- Use when asked for high-performing YouTube titles, packaging angles, or thumbnail text.
+- Use it when the user wants differentiated options they can test, not a full script.
+- Route broader product or PRD work to `product-spec`.
 
 ## Required inputs
-- Topic, audience, and any provided transcript/notes.
+- topic
+- audience
+- any transcript, notes, or positioning constraints
+- whether thumbnail text is also needed
 
 ## Deliverables
-- Requested deliverable (hooks/scripts or titles/thumbnail text).
-- Include `schema_version: 1` if you return a structured schema.
+- multiple title options with meaningful variation
+- paired thumbnail text ideas when requested
+- concise rationale explaining angle, audience fit, and risk of overclaim
+
+## Failure mode
+If the topic or audience is too vague to create differentiated packaging, ask for the smallest missing detail rather than generating interchangeable options.
+
+## Standards snapshot (March 2026)
+- Optimize for click-through without damaging trust or misrepresenting the content.
+- Generate meaningfully different packaging angles rather than shallow word swaps.
+- Keep technical specificity when it improves audience targeting.
+- Avoid invented metrics, fake controversy, and generic growth-hack language.
 
 ## Constraints
-- Redact secrets/PII by default.
-- Do not invent metrics or claims; ask for missing facts.
+- Redact secrets, tokens, credentials, and sensitive data by default.
+- Do not invent metrics, outcomes, or controversy hooks the content cannot support.
+- Keep options concise enough to be usable as real packaging candidates.
+
+## Workflow
+1. Identify the audience, promise, and core novelty of the video.
+2. Generate multiple packaging angles such as speed, surprise, transformation, or hard-earned lesson.
+3. Pair each title with thumbnail text only when that improves the package.
+4. Call out which options are safest, boldest, and most technically targeted.
 
 ## Validation
 - Confirm tone, audience fit, and length constraints.
 - Fail fast if key inputs are missing.
+- Confirm each option is distinct enough to test.
+- Confirm the packaging does not promise something the video cannot substantiate.
 
 ## Anti-patterns
 - Overlong outputs that ignore format limits.
 - Generic suggestions not tied to the topic.
-
-## Philosophy
-- Favor clarity, explicit tradeoffs, and verifiable outputs.
-- Encourage variation: adapt steps for different contexts and enable creative exploration.
-
-## Procedure
-1) Clarify scope and inputs.
-2) Execute the core workflow.
-3) Summarize outputs and next steps.
-- If context differs, customize steps to fit the situation.
-
-## Antipatterns
-- Do not add features outside the agreed scope.
+- Producing a dozen near-duplicate titles with no real angle change.
+- Packaging that reads like bait instead of a credible technical promise.
 
 ## Examples
-- "Provide a concise response for this task."
-- "Follow the workflow and summarize outputs."
-
-## Remember
-The agent is capable of extraordinary work in this domain. Use judgment, adapt to context, and push boundaries when appropriate.
+- "Give me 10 title options for this developer tooling video."
+- "Pair thumbnail text with three strong title angles."
+- "Create safer and bolder packaging options for this technical tutorial."
 
 <!-- skill-score-boost-v1 -->
 ## Philosophy and tradeoffs
@@ -85,6 +106,7 @@ The agent is capable of extraordinary work in this domain. Use judgment, adapt t
 - Push boundaries with practical alternatives when simple recipes fail.
 - Enable outcomes-oriented problem solving.
 
+## Decision feedback protocol
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.

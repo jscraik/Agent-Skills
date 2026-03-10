@@ -1,392 +1,90 @@
 ---
 name: mcp-builder
-description: Create general-purpose MCP servers and tool schemas for standard integrations.
-  Use when building MCP services without OAuth/billing/Apps UI requirements.
+description: Create general-purpose MCP servers and tool schemas for standard integrations. Use when building MCP services without OAuth/billing/Apps UI requirements.
 ---
 
-# MCP Server Development Guide (Gold Standard, Dec 2025)
+# MCP Builder
 
-Avoid skipping validation steps or inventing results.
+## Table of Contents
+- [Standards snapshot](#standards-snapshot)
+- [When to use](#when-to-use)
+- [When not to use](#when-not-to-use)
+- [Required inputs](#required-inputs)
+- [Deliverables](#deliverables)
+- [Philosophy](#philosophy)
+- [Workflow](#workflow)
+- [Validation](#validation)
+- [Constraints](#constraints)
+- [Anti-patterns](#anti-patterns)
+- [Examples](#examples)
+- [Remember](#remember)
 
-
-## Compliance
-- Check against GOLD Industry Standards guide in ~/.codex/AGENTS.override.md
-
-## Overview
-
-Create MCP (Model Context Protocol) servers that enable LLMs to interact with external services through well-designed tools, resources, and prompts. The quality of an MCP server is measured by how well it enables LLMs to accomplish real-world tasks safely, reliably, and with predictable outputs.
+## Standards snapshot (March 2026)
+- Follow the Model Context Protocol line represented by the 2025-06-18 baseline and 2025-11-25 release lineage when examples differ.
+- Treat `inputSchema`, `outputSchema`, and structured outputs as product surface, not optional extras.
+- Default to safe, discoverable, composable tools before adding workflow-heavy abstractions.
 
 ## When to use
+- Build or extend an MCP server for a standard integration.
+- Design tools, resources, or prompts for a service that does not need OAuth, billing, or Apps SDK UI.
+- Review an existing MCP server for schema quality, discoverability, safety, or protocol fit.
 
-- Use when you need to **build or extend an MCP server** (tools/resources/prompts) for a standard integration.
-- Do **not** use when you need OAuth + billing/licensing + Apps SDK UI integration (use `mkit-builder` instead).
+## When not to use
+- Workers-hosted, auth-heavy, or billing-aware MCP products. Use [`workers-mcp`](/Users/jamiecraik/dev/agent-skills/backend/workers-mcp/SKILL.md) when that operational surface matters.
+- ChatGPT Apps SDK apps or widget/UI-integrated experiences.
+- Generic backend work with no MCP contract in scope.
 
-## Inputs
+## Required inputs
+- Target service and auth method.
+- Transport choice: stdio or Streamable HTTP.
+- Candidate tool list and intended schemas.
+- Constraints: rate limits, network access, data sensitivity, pagination, retries, and hosting environment.
 
-- Target service (what you’re integrating) + auth method.
-- Transport: stdio vs streamable HTTP (and where it runs).
-- Tool list (verbs) + required schemas (inputs/outputs).
-- Constraints: offline vs network, rate limits, and PII handling requirements.
-
-## Outputs
-
-- MCP server scaffold + tool schemas (`inputSchema`/`outputSchema`) and structured outputs.
-- Minimal smoke test instructions (Inspector / sample calls).
-- Risks + constraints (auth, retries, rate limits, redaction).
+## Deliverables
+- MCP server plan or scaffold shape.
+- Tool/resource/prompt surface with naming, schema, and safety expectations.
+- Verification plan using Inspector, sample calls, or contract tests.
+- Risks and rollout notes for auth, retries, redaction, and backward compatibility.
 
 ## Philosophy
+- Safe defaults first: read-only and idempotent until proven otherwise.
+- Structured outputs beat prose blobs.
+- Tool names should be obvious enough that another agent can find them without tribal knowledge.
+- Prefer comprehensive, composable coverage before inventing narrow one-off helpers.
 
-- Prefer **safe defaults**: read-only, idempotent, explicit confirmation for destructive tools.
-- Prefer **structured outputs** over prose: stable fields + JSON schema.
-- Make tools discoverable: clear names and concise descriptions.
-
-## Procedure
-
-1) Clarify the integration scope (service, auth, transport, deployment).
-2) Design tool surface area (naming, schemas, pagination, error model).
-3) Implement tools with safe retry/idempotency semantics.
-4) Validate with MCP Inspector and contract tests/golden snapshots when available.
+## Workflow
+1. Clarify service scope, transport, and runtime boundary.
+2. Define the tool surface with stable nouns, verbs, and schema contracts.
+3. Decide what should be a tool, resource, or prompt instead of collapsing everything into one layer.
+4. Encode pagination, filtering, and error semantics explicitly.
+5. Keep auth least-privilege and redaction requirements visible from the first draft.
+6. Validate with Inspector or equivalent sample calls before claiming the server is usable.
+7. Add regression checks for schemas and representative outputs when the server is non-trivial.
 
 ## Validation
-
-- Fail fast: stop at the first broken schema/handler and fix before adding more tools.
-- Verify no secrets are printed and outputs redact sensitive data by default.
-
-## Anti-patterns
-
-- Returning huge unstructured blobs when a schema is possible.
-- Shipping destructive tools without explicit confirmation and rollback guidance.
+- Verify every public tool has a valid `inputSchema` and, when appropriate, an `outputSchema`.
+- Verify `structuredContent` matches the documented contract.
+- Verify destructive or stateful tools are explicitly marked and gated.
+- Verify the skill uses bundled `references/` and `scripts/` helpers when the folder provides them.
+- Reuse any skill `assets/` scaffolds rather than inventing parallel templates.
 
 ## Constraints
-
-- Do not print secrets/tokens/PII; redact by default.
-- Prefer least privilege for auth scopes and credentials.
-
----
-
-# Gold Standard Checklist (Compact)
-
-- Protocol compliance: latest spec, JSON Schema 2020-12, streamable HTTP or stdio
-- Structured outputs: `outputSchema` + `structuredContent` + text JSON fallback
-- Discoverability: consistent tool names, concise descriptions, `title`/`icons`
-- Safety: read-only defaults, precise annotations, clear errors, strict auth
-- Data quality: stable field names, pagination, filtering, and resource links
-- Testability: schema contract tests, golden snapshots, inspector validation
-
----
-
-# Process
-
-## 🚀 High-Level Workflow
-
-Creating a high-quality MCP server involves four main phases:
-
-### Phase 0: Review & Fix Existing Implementations
-
-Use this phase when the user asks to audit an MCP server, identify bugs, or propose fixes.
-
-**Scope first:**
-- Identify the stack: TypeScript SDK or FastMCP (https://github.com/punkpeye/fastmcp)
-- Confirm transport (streamable HTTP vs stdio) and deployment target
-- List current tools, resources, and prompts and compare to intended use cases
-
-**Common bug patterns to check:**
-- Missing/invalid `inputSchema` or `outputSchema` (not JSON Schema 2020-12)
-- `structuredContent` missing or not matching `outputSchema`
-- Tool annotations incorrect (readOnly/destructive/idempotent/openWorld)
-- Pagination and filtering inconsistencies across list tools
-- Auth bypasses (tokens accepted without `aud`/`iss` validation)
-- Widget rendering issues (wrong `mimeType`, missing template URI, CSP blocked)
-- Stale UI bundles due to cache and unchanged template URI
-
-**Fix workflow:**
-1) Reproduce with MCP Inspector or a minimal tool call
-2) Add or correct schema contracts and structured outputs
-3) Align tool metadata for discoverability and safety
-4) Add regression tests (schema contract + golden snapshots)
-
-**Gold standard checklist:**
-- Use [🧪 Review & Fix Checklist](./reference/review_fix_checklist.md) as the baseline for 2025 compliance.
-- Use [🛠 Review & Fix Recipes](./reference/review_fix_recipes.md) for diagnosis and fixes.
-- Use [🧭 Common Fixes Matrix](./reference/common_fixes_matrix.md) for quick triage.
-- Use [🧱 Apps SDK Requirements](./reference/apps_sdk_requirements.md) for ChatGPT Apps-specific compliance.
-- If Apps SDK is in scope, run an explicit Apps SDK audit (see below).
-
-**Apps SDK audit (quick):**
-- `/mcp` public HTTPS, Streamable HTTP preferred, SSE legacy only
-- `text/html+skybridge` templates and `_meta["openai/outputTemplate"]`
-- CSP set and minimal; widget data split (`structuredContent` vs `_meta`)
-- Tool handlers idempotent and safe on retry
-
-### Phase 1: Deep Research and Planning
-
-#### 1.1 Understand Modern MCP Design (2025+)
-
-**API Coverage vs. Workflow Tools:**
-Balance comprehensive API endpoint coverage with specialized workflow tools. Workflow tools can be more convenient for specific tasks, while comprehensive coverage gives agents flexibility to compose operations. Performance varies by client—some clients benefit from code execution that combines basic tools, while others work better with higher-level workflows. When uncertain, prioritize comprehensive API coverage.
-
-**Tool Naming and Discoverability:**
-Clear, descriptive tool names help agents find the right tools quickly. Use consistent prefixes (e.g., `github_create_issue`, `github_list_repos`) and action-oriented naming.
-
-**Context Management:**
-Agents benefit from concise tool descriptions and the ability to filter/paginate results. Design tools that return focused, relevant data. Some clients support code execution which can help agents filter and process data efficiently.
-
-**Actionable Error Messages:**
-Error messages should guide agents toward solutions with specific suggestions and next steps.
-
-**First-class Outputs:**
-Prefer structured outputs with schemas and provide a text fallback for compatibility. Favor stable, machine-consumable fields over free-form text when possible.
-
-**Resources and Prompts:**
-Use resources for read-only data and prompts for reusable interaction patterns. Tools should do the minimum work needed and delegate context to resources where possible.
-
-#### 1.2 Study MCP Protocol Documentation (Latest Spec)
-
-**Navigate the MCP specification:**
-
-Start with the sitemap to find relevant pages: `https://modelcontextprotocol.io/sitemap.xml`
-
-Then fetch specific pages with `.md` suffix for markdown format (e.g., `https://modelcontextprotocol.io/specification/draft.md`).
-
-Key pages to review (latest revision first):
-- Specification overview and architecture
-- Transport mechanisms (streamable HTTP, stdio)
-- Tool, resource, and prompt definitions
-- Authorization (OAuth 2.1, Protected Resource Metadata, Resource Indicators, PKCE)
-
-#### 1.3 Study Framework Documentation
-
-**Recommended stack:**
-- **Language**: TypeScript (high-quality SDK support and good compatibility in many execution environments e.g. MCPB. Plus AI models are good at generating TypeScript code, benefiting from its broad usage, static typing and good linting tools)
-- **Transport**: Streamable HTTP for remote servers, using stateless JSON (simpler to scale and maintain, as opposed to stateful sessions and streaming responses). stdio for local servers. Use SSE only for backwards compatibility.
-
-**Load framework documentation:**
-
-- **MCP Best Practices**: [📋 View Best Practices](./reference/mcp_best_practices.md) - Core guidelines (updated for 2025 spec)
-
-**For TypeScript (recommended):**
-- **TypeScript SDK**: Use WebFetch to load `https://raw.githubusercontent.com/modelcontextprotocol/typescript-sdk/main/README.md`
-- [⚡ TypeScript Guide](./reference/node_mcp_server.md) - TypeScript patterns and examples
-
-**For Python:**
-- **Python SDK**: Use WebFetch to load `https://raw.githubusercontent.com/modelcontextprotocol/python-sdk/main/README.md`
-- [🐍 Python Guide](./reference/python_mcp_server.md) - Python patterns and examples
-
-**UI (optional, separate from Apps SDK):**
-- **MCP UI**: `https://github.com/MCP-UI-Org/mcp-ui.git` (optional UI components/patterns, not required for Apps SDK)
-- [🧭 MCP UI vs Apps SDK](./reference/mcp_ui_vs_apps_sdk.md) - when to use each
-
-#### 1.4 Plan Your Implementation
-
-**Understand the API:**
-Review the service's API documentation to identify key endpoints, authentication requirements, and data models. Use web search and WebFetch as needed.
-
-**Tool Selection:**
-Prioritize comprehensive API coverage. List endpoints to implement, starting with the most common operations.
-
-**Auth Plan (HTTP servers):**
-If the server is HTTP-based and requires auth, design for OAuth 2.1 with Protected Resource Metadata discovery and Resource Indicators. Plan for PKCE, short-lived tokens, and strict audience validation. Avoid token passthrough.
-
-**Auth0 Implementation:**
-Use [🔐 Auth + Security (Auth0)](./reference/auth_security_auth0.md) for concrete setup steps, validation rules, and token handling patterns.
-
----
-
-### Phase 2: Implementation
-
-#### 2.1 Set Up Project Structure
-
-See language-specific guides for project setup:
-- [⚡ TypeScript Guide](./reference/node_mcp_server.md) - Project structure, package.json, tsconfig.json
-- [🐍 Python Guide](./reference/python_mcp_server.md) - Module organization, dependencies
-
-#### 2.2 Implement Core Infrastructure
-
-Create shared utilities:
-- API client with authentication
-- Error handling helpers
-- Response formatting (JSON/Markdown)
-- Pagination support
-
-#### 2.3 Implement Tools
-
-For each tool:
-
-**Input Schema:**
-- Use Zod (TypeScript) or Pydantic (Python)
-- Include constraints and clear descriptions
-- Add examples in field descriptions
-- Ensure `inputSchema` is a valid JSON Schema object. For tools with no params, use `{ "type": "object", "additionalProperties": false }`.
-
-**Output Schema:**
-- Define `outputSchema` where possible for structured data
-- Use `structuredContent` in tool responses (TypeScript SDK feature)
-- Helps clients understand and process tool outputs
-- For compatibility, return serialized JSON in a TextContent block alongside `structuredContent`
-
-**Tool Description:**
-- Concise summary of functionality
-- Parameter descriptions
-- Return type schema
-- Consider `title` and `icons` for display in UIs
-
-**Implementation:**
-- Async/await for I/O operations
-- Proper error handling with actionable messages
-- Support pagination where applicable
-- Return both text content and structured data when using modern SDKs
-- Use resource links or embedded resources when a tool naturally returns documents or files
-
-**Annotations:**
-- `readOnlyHint`: true/false
-- `destructiveHint`: true/false
-- `idempotentHint`: true/false
-- `openWorldHint`: true/false
-
-**Capabilities (Optional but Modern):**
-- Sampling: server-side tools can request client LLM completions for assistive workflows
-- Elicitation: form and URL-based user input flows for secure data capture
-- Tasks: long-running operations with resumable/pollable execution
-
----
-
-### Phase 3: Review and Test
-
-#### 3.1 Code Quality
-
-Review for:
-- No duplicated code (DRY principle)
-- Consistent error handling
-- Full type coverage
-- Clear tool descriptions
-
-#### 3.2 Build and Test
-
-**TypeScript:**
-- Run `npm run build` to verify compilation
-- Test with MCP Inspector: `npx @modelcontextprotocol/inspector`
-
-**Python:**
-- Verify syntax: `python -m py_compile your_server.py`
-- Test with MCP Inspector
-
-See language-specific guides for detailed testing approaches and quality checklists. Add contract tests for JSON Schema input/output and golden snapshots for structuredContent.
-
----
-
-### Phase 4: Create Evaluations
-
-After implementing your MCP server, create comprehensive evaluations to test its effectiveness.
-
-**Load [✅ Evaluation Guide](./reference/evaluation.md) for complete evaluation guidelines.**
-
-#### 4.1 Understand Evaluation Purpose
-
-Use evaluations to test whether LLMs can effectively use your MCP server to answer realistic, complex questions.
-
-#### 4.2 Create 10 Evaluation Questions
-
-To create effective evaluations, follow the process outlined in the evaluation guide:
-
-1. **Tool Inspection**: List available tools and understand their capabilities
-2. **Content Exploration**: Use READ-ONLY operations to explore available data
-3. **Question Generation**: Create 10 complex, realistic questions
-4. **Answer Verification**: Solve each question yourself to verify answers
-
-#### 4.3 Evaluation Requirements
-
-Ensure each question is:
-- **Independent**: Not dependent on other questions
-- **Read-only**: Only non-destructive operations required
-- **Complex**: Requiring multiple tool calls and deep exploration
-- **Realistic**: Based on real use cases humans would care about
-- **Verifiable**: Single, clear answer that can be verified by string comparison
-- **Stable**: Answer won't change over time
-
-#### 4.4 Output Format
-
-Create an XML file with this structure:
-
-```xml
-<evaluation>
-  <qa_pair>
-    <question>Find discussions about AI model launches with animal codenames. One model needed a specific safety designation that uses the format ASL-X. What number X was being determined for the model named after a spotted wild cat?</question>
-    <answer>3</answer>
-  </qa_pair>
-<!-- More qa_pairs... -->
-</evaluation>
-```
-
----
-
-# Reference Files
-
-## 📚 Documentation Library
-
-Load these resources as needed during development:
-
-## Variation
-- Vary tone, depth, and structure based on context.
-- Avoid repeating the same outline across outputs.
+- Do not print secrets, tokens, or sensitive data; redact by default.
+- Prefer least-privilege auth scopes and narrow host/network access.
+- Do not describe unsupported protocol behavior as if it already exists.
+- Avoid returning massive unstructured payloads when schemas or focused outputs are viable.
+
+## Anti-patterns
+- Tool surfaces that hide multiple unrelated actions behind one vague command.
+- Shipping destructive tools without explicit confirmation and rollback guidance.
+- Treating schema validation as something to do after implementation.
+- Optimizing for one demo path while making real-world discovery and composability worse.
+
+## Examples
+- "Design an MCP server for a task tracker with list, get, create, and search tools."
+- "Review this MCP server and tell me where the schemas and structured outputs are weak."
 
 ## Remember
-The agent is capable of extraordinary work in this domain. Use judgment, adapt to context, and push boundaries when appropriate.
-
-## Scripts
-- `scripts/connections.py`
-- `scripts/evaluation.py`
-- `scripts/example_evaluation.xml`
-- `scripts/requirements.txt`
-
-## Extended guidance
-See `references/extended.md` for additional examples, workflows, and appendices.
-
-<!-- skill-score-boost-v1 -->
-## Philosophy and tradeoffs
-- Use this skill when consistent decision-making matters more than one-off execution because project context should drive the approach.
-- Principle and mindset: prioritize tradeoffs and constraints over rigid checklists; understand why each step exists.
-- Ask this to keep outcomes robust: Why is this the right default, and what could change this outcome?
-- How do we adapt if constraints shift?
-- What evidence is needed before choosing one path over another?
-
-## Anti-patterns and caveats
-- Avoid applying this playbook generically without checking repository-specific context.
-- **NEVER** skip required validation gates when behavior changes.
-- **DO NOT** use this skill as a rigid replacement for engineering judgment.
-- **DON'T** ignore warnings or assume one pattern fits all repos.
-- Common pitfall: treating anti-patterns as optional.
-- Incorrect assumptions here can lead to fragile guidance.
-- Warning: wrong sequencing can create avoidable regressions.
-
-## Variation and adaptation
-- Vary the workflow by team size, risk, and deployment target.
-- Use different strategies for small, medium, and large changes.
-- Adapt recommendations to the specific environment and avoid repetitive templates.
-- Avoid generic or cookie-cutter responses; craft context-specific alternatives.
-- Keep outputs diverse and not repetitive.
-- Converge on a custom path only after evidence review.
-- Different constraints should produce different, non-generic recommendations.
-
-## Empowering execution style
-- Be capable of exploring multiple options and enabling the team to make safe decisions.
-- Unlock confidence by explaining options and tradeoffs clearly.
-- Feel free to be creative while staying rigorous and precise.
-- Push boundaries with practical alternatives when simple recipes fail.
-- Enable outcomes-oriented problem solving.
-
-<!-- decision-feedback-protocol:v2 -->
-**Decision feedback protocol (required):**
-- If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.
-- Capture: `decision` (`accepted|partial|rejected|deferred`), `outcome` (`good|neutral|bad|unknown`), and `confidence` (`high|medium|low`).
-- Persist with: `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
-- The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
-<!-- /decision-feedback-protocol -->
-
-## Folded Legacy Modes (Core60)
-<!-- core60-folded-modes:v1:start -->
-This skill owns legacy capability from retired skills. Use these modes when requests match prior behavior.
-
-- `enterprise-profile` from `backend/mkit-builder`: Create MCP servers with OAuth, billing/licensing, and Apps SDK UI integration.
-
-Deep legacy details: `references/folded-legacy-modes-core60.md`.
-<!-- core60-folded-modes:v1:end -->
+- Good MCP servers are easy to discover, easy to trust, and easy to compose.
+- Schema discipline is part of usability.
+- The smallest good server is the one another agent can call correctly on the first try.

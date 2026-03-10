@@ -1,41 +1,27 @@
-# Skill Output Contract
-# Copy this file to your skill's references/ directory and customize for your skill.
-
 schema_version: "1.0"
-
+name: shadcn-ui
 purpose: >
-  Define expected behavior and outputs for this skill.
-  Replace this with a specific description of what this skill accomplishes.
-
+  Guide setup, installation, customization, and troubleshooting for shadcn/ui
+  components in existing projects while preserving project ownership,
+  accessibility, and token alignment.
 triggers:
-  - user requests the capability described in this skill
-  - specific keywords or patterns that should activate this skill
-
+  - Need to initialize or verify shadcn/ui in a repo.
+  - Need to add or customize a shadcn/ui component or registry item.
+  - Need troubleshooting guidance for shadcn/ui configuration, imports, or theming.
 inputs:
-  - user request details
-  - relevant files or context
-  - any required parameters
-
+  - Target repo or project path.
+  - Framework and styling context.
+  - Requested component, block, or customization goal.
+  - Any accessibility or theming constraints.
 outputs:
-  - primary response or artifact
-  - expected format (markdown, JSON, etc.)
-  - success indicators
-
+  - Setup or integration guidance.
+  - Required config, dependency, and file-placement changes.
+  - Validation steps for the resulting component integration.
 non_goals:
-  - out-of-scope work not covered by this skill
-  - capabilities explicitly excluded
-
+  - Full design-system rewrites unrelated to shadcn/ui.
+  - Generic frontend work with no shadcn/ui angle.
+  - Forcing installation when the host repo is not ready.
 risks:
-  - missing inputs; mitigated by clarifying questions
-  - potential misinterpretation; mitigated by explicit confirmation
-
-examples:
-  happy_path:
-    input: "Typical user request"
-    expected_output: "Expected skill response"
-  edge_case:
-    input: "Unusual but valid request"
-    expected_output: "How skill should handle it"
-  failure_mode:
-    input: "Out of scope or invalid request"
-    expected_output: "Skill should decline gracefully"
+  - Installing components into a repo without matching Tailwind or alias setup.
+  - Breaking accessibility when customizing primitives or variants.
+  - Drifting from token usage into hardcoded visual values.

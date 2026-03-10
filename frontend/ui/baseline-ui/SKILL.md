@@ -7,6 +7,12 @@ description: Validates animation durations, enforces typography scale, checks co
 
 Enforces an opinionated UI baseline to prevent AI-generated interface slop.
 
+Current baseline markers:
+- React 19 interaction guidance when the project uses React.
+- Next.js 16 conventions when the target app is on Next.js.
+- Tailwind CSS v4 utility patterns and token-safe usage.
+- WCAG 2.2 accessibility expectations for review findings.
+
 ## How to use
 
 - `/baseline-ui`

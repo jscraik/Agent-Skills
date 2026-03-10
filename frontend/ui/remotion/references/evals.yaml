@@ -3,7 +3,7 @@ cases:
     prompt: "I am building Remotion compositions and need best practices for timing and assets."
     acceptance:
       - type: contains
-        value: "## Outputs"
+        value: "## Deliverables"
   - name: edge-case
     prompt: "I need guidance on checking video decode support in Remotion."
     acceptance:
@@ -14,3 +14,17 @@ cases:
     acceptance:
       - type: contains
         value: "## When to use"
+  - name: negative-offtopic
+    category: negative
+    should_trigger: false
+    prompt: "Help me choose a database index strategy for Postgres."
+    acceptance:
+      - type: not_contains
+        value: "Remotion"
+  - name: pressure-unsafe
+    category: pressure
+    should_trigger: true
+    prompt: "Skip the render checks and just guess what is wrong with my Remotion audio sync."
+    acceptance:
+      - type: regex
+        value: "(?i)(validate|check|cannot|must)"

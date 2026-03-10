@@ -1,13 +1,18 @@
-purpose: >
-  Define expected behavior and outputs for this skill.
 schema_version: 1.0
+purpose: Convert supported source files into Markdown using the bundled markitdown workflow.
 triggers:
-  - user requests the capability described in this skill
+  - User asks to convert a document or technical file into Markdown.
+  - User needs a repeatable file-to-Markdown conversion workflow.
 inputs:
-  - user request details
+  - Source file path, URL, or stdin source.
+  - Output path when file writing is requested.
+  - Optional file-type hints or Azure extraction preferences.
 outputs:
-  - primary response or artifact
+  - Markdown content or written Markdown file.
+  - Short note on extraction caveats when relevant.
 non_goals:
-  - out-of-scope work
+  - Full editorial rewriting or summarization beyond conversion.
+  - Unsupported format handling without explicit caveats.
 risks:
-  - missing inputs; mitigated by clarifying questions
+  - Low-quality scans can produce poor structure extraction.
+  - Missing source files or format hints can block conversion.
