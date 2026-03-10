@@ -171,7 +171,7 @@ If either check fails, use the troubleshooting section below.
 ├── reports/       # Generated scan summaries and data snapshots
 ├── .agents/       # Repo-local Codex skills root
 ├── .agents/skills/ # Flat symlink directory (tooling entrypoint)
-├── skills-antigravity/ # Antigravity-compatible flat symlink projection
+├── skills-antigravity/ # Antigravity-compatible flat materialized projection
 ├── skills -> .agents/skills  # Legacy compatibility symlink
 ├── skills-system/ # Bundled/system skills (kept out of flat view)
 └── SKILL.md       # Human-readable skills index (auto-generated)
@@ -195,6 +195,7 @@ If either check fails, use the troubleshooting section below.
   - `~/.gemini/antigravity/skills`
   - `~/.gemini/skills`
   - `~/.antigravity/skills`
+- The sync script also rewrites `~/.gemini/antigravity/skills.txt` so Antigravity indexes `skills-antigravity/` instead of the broader `/.agents/skills/` catalog.
 
 Run this command to verify all skill entrypoints at once:
 
@@ -204,6 +205,8 @@ for d in ~/.agents/skills ~/.claude/skills ~/.gemini/antigravity/skills ~/.gemin
   echo "== $d =="
   fd --max-depth 1 --type l . "$d" | wc -l
 done
+echo "== ~/.gemini/antigravity/skills.txt =="
+cat ~/.gemini/antigravity/skills.txt
 python3 scripts/diagnose_skill.py --all
 ```
 
@@ -245,6 +248,7 @@ Common causes:
 
 - **Nested `.git` directory**: Skills with their own `.git` folder break discovery. Remove it: `rm -rf .agents/skills/<name>/.git`
 - **Missing symlink**: Re-run `bash scripts/sync_skills.sh`
+- **Antigravity path drift**: `~/.gemini/antigravity/skills.txt` must point at `~/dev/agent-skills/skills-antigravity/`, not `/.agents/skills/`
 - **Invalid SKILL.md**: Ensure YAML frontmatter has `name:` and `description:`
 
 ### `docs_lint.py` reports link errors

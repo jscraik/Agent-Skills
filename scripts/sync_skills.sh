@@ -30,6 +30,7 @@ cd "$repo_root"
 skills_dir="$repo_root/.agents/skills"
 system_skills_dir="$repo_root/skills-system"
 antigravity_skills_dir="$repo_root/skills-antigravity"
+antigravity_skills_txt="$HOME/.gemini/antigravity/skills.txt"
 
 mkdir -p "$skills_dir"
 mkdir -p "$antigravity_skills_dir"
@@ -182,9 +183,9 @@ done < <(all_skill_files_cmd)
 # Build a strict Antigravity-compatible projection:
 # - flat first-level skill folders only
 # - each folder must contain SKILL.md
+# - each entry must be a real directory, not a symlink
 # This avoids loader confusion from metadata folders like .system/ or helper repos.
-find "$antigravity_skills_dir" -mindepth 1 -maxdepth 1 -type l -exec rm -f {} +
-find "$antigravity_skills_dir" -mindepth 1 -maxdepth 1 -type f -exec rm -f {} +
+find "$antigravity_skills_dir" -mindepth 1 -maxdepth 1 -exec rm -rf -- {} +
 
 for skill_link in "$skills_dir"/*; do
   if [ ! -L "$skill_link" ]; then
@@ -195,10 +196,22 @@ for skill_link in "$skills_dir"/*; do
   fi
 
   skill_name="$(basename "$skill_link")"
-  # Relative path from skills-antigravity/ to .agents/skills/<name>.
-  # Both directories are immediate children of repo root, so one hop up suffices.
-  target_rel="../.agents/skills/$skill_name"
-  ln -s "$target_rel" "$antigravity_skills_dir/$skill_name"
+  target_dir="$antigravity_skills_dir/$skill_name"
+  mkdir -p "$target_dir"
+
+  if command -v rsync >/dev/null 2>&1; then
+    rsync -a \
+      --delete \
+      --exclude '.git' \
+      --exclude 'node_modules' \
+      --exclude '__pycache__' \
+      "$skill_link/" "$target_dir/"
+  else
+    rm -rf -- "$target_dir"
+    mkdir -p "$target_dir"
+    cp -R "$skill_link"/. "$target_dir"/
+    rm -rf -- "$target_dir/.git" "$target_dir/node_modules" "$target_dir/__pycache__"
+  fi
 done
 
 # Regenerate root SKILL.md index dynamically from skill frontmatter.
@@ -513,6 +526,15 @@ sync_user_skills() {
   fi
 }
 
+sync_skill_path_file() {
+  local source_dir="$1"
+  local target_file="$2"
+  local rendered_dir="${source_dir%/}/"
+  mkdir -p "$(dirname "$target_file")"
+  printf '%s\n' "$rendered_dir" > "$target_file"
+  echo "[OK] Wrote skill path file: $target_file -> $rendered_dir"
+}
+
 # Sync to Claude Code, OpenAI Codex/Agents, and Gemini loaders.
 sync_user_skills "$skills_dir" "$repo_root/skills" 1
 sync_user_skills "$skills_dir" "$HOME/.claude/skills"
@@ -521,6 +543,7 @@ sync_user_skills "$skills_dir" "$HOME/.codex/skills"
 sync_user_skills "$antigravity_skills_dir" "$HOME/.gemini/antigravity/skills" 1
 sync_user_skills "$antigravity_skills_dir" "$HOME/.gemini/skills" 1
 sync_user_skills "$antigravity_skills_dir" "$HOME/.antigravity/skills"
+sync_skill_path_file "$antigravity_skills_dir" "$antigravity_skills_txt"
 
 chmod +x "$repo_root/scripts/sync_skills.sh"
 

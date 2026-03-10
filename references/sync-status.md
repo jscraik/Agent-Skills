@@ -2,6 +2,8 @@
 
 **Canonical source**: `~/dev/agent-skills/.agents/skills`
 
+**Antigravity source**: `~/dev/agent-skills/skills-antigravity`
+
 ## Auto-synced paths
 
 Running `scripts/sync_skills.sh` automatically creates/updates:
@@ -11,6 +13,10 @@ Running `scripts/sync_skills.sh` automatically creates/updates:
 | **Claude Code** | `~/.claude/skills` | ✅ auto-synced |
 | **OpenAI Agents/Codex** | `~/.agents/skills` | ✅ auto-synced |
 | **OpenAI Codex (compat)** | `~/.codex/skills` | ✅ auto-synced |
+| **Antigravity** | `~/.gemini/antigravity/skills` | ✅ auto-synced |
+| **Antigravity (alt)** | `~/.gemini/skills` | ✅ auto-synced |
+| **Antigravity (legacy)** | `~/.antigravity/skills` | ✅ auto-synced |
+| **Antigravity path file** | `~/.gemini/antigravity/skills.txt` | ✅ auto-synced |
 
 ## Verification
 
@@ -18,4 +24,6 @@ Running `scripts/sync_skills.sh` automatically creates/updates:
 ls -la ~/.claude/skills | head -n 5
 ls -la ~/.agents/skills | head -n 5
 ls -la ~/.codex/skills | head -n 5
+ls -la ~/.gemini/antigravity/skills | head -n 5
+cat ~/.gemini/antigravity/skills.txt
 ```

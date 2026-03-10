@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Diagnose why a skill isn't loading in Codex or Claude Code.
+"""Diagnose why a skill isn't loading in Codex, Claude Code, or Antigravity.
 
 Usage:
     python3 scripts/diagnose_skill.py <skill-name>
@@ -7,11 +7,12 @@ Usage:
 
 Checks:
     1. SKILL.md exists and has valid YAML frontmatter
-    2. Symlink exists in ~/.agents/skills/, ~/.codex/skills/, and ~/.claude/skills/
+    2. Symlink exists in the expected loader directories
     3. Symlink points to correct location
-    4. No nested .git directory (breaks skill discovery)
-    5. Skill appears in root SKILL.md index
-    6. Task profile exists if referenced
+    4. Antigravity skills.txt points at the strict flat Antigravity catalog
+    5. No nested .git directory (breaks skill discovery)
+    6. Skill appears in root SKILL.md index
+    7. Task profile exists if referenced
 """
 
 from __future__ import annotations
@@ -30,6 +31,11 @@ SKILL_INDEX = REPO_ROOT / "SKILL.md"
 CODEX_SKILLS = Path.home() / ".codex" / "skills"
 CLAUDE_SKILLS = Path.home() / ".claude" / "skills"
 AGENTS_SKILLS = Path.home() / ".agents" / "skills"
+ANTIGRAVITY_SKILLS = Path.home() / ".gemini" / "antigravity" / "skills"
+GEMINI_SKILLS = Path.home() / ".gemini" / "skills"
+LEGACY_ANTIGRAVITY_SKILLS = Path.home() / ".antigravity" / "skills"
+ANTIGRAVITY_SKILLS_TXT = Path.home() / ".gemini" / "antigravity" / "skills.txt"
+ANTIGRAVITY_EXPECTED_ROOT = REPO_ROOT / "skills-antigravity"
 
 
 @dataclass
@@ -105,8 +111,8 @@ def check_nested_git(skill_dir: Path) -> DiagnosticResult:
     return DiagnosticResult("nested .git", "pass", "No nested .git directory")
 
 
-def check_symlink(skill_name: str, target_dir: Path, label: str) -> DiagnosticResult:
-    """Check if symlink exists and points to correct location."""
+def check_symlink(skill_name: str, target_dir: Path, label: str, allow_real_dir: bool = False) -> DiagnosticResult:
+    """Check if a skill entry exists and points to the expected location."""
     if not target_dir.exists():
         return DiagnosticResult(
             f"symlink ({label})",
@@ -120,6 +126,8 @@ def check_symlink(skill_name: str, target_dir: Path, label: str) -> DiagnosticRe
         return DiagnosticResult(f"symlink ({label})", "warn", f"Symlink not found in {target_dir}")
 
     if not symlink_path.is_symlink():
+        if allow_real_dir and symlink_path.is_dir() and (symlink_path / "SKILL.md").exists():
+            return DiagnosticResult(f"symlink ({label})", "pass", f"Directory entry OK in {target_dir}")
         return DiagnosticResult(f"symlink ({label})", "warn", f"Exists but not a symlink in {target_dir}")
 
     # Resolve symlink target
@@ -136,6 +144,39 @@ def check_symlink(skill_name: str, target_dir: Path, label: str) -> DiagnosticRe
         return DiagnosticResult(f"symlink ({label})", "fail", f"Cannot resolve symlink: {e}")
 
     return DiagnosticResult(f"symlink ({label})", "pass", f"Symlink OK in {target_dir}")
+
+
+def check_antigravity_skills_txt() -> DiagnosticResult:
+    """Check that Antigravity is pointed at the strict flat skills projection."""
+    if not ANTIGRAVITY_SKILLS_TXT.exists():
+        return DiagnosticResult(
+            "skills.txt (antigravity)",
+            "warn",
+            f"Antigravity skills path file not found: {ANTIGRAVITY_SKILLS_TXT}",
+        )
+
+    rendered = ANTIGRAVITY_SKILLS_TXT.read_text(encoding="utf-8").strip()
+    if not rendered:
+        return DiagnosticResult(
+            "skills.txt (antigravity)",
+            "warn",
+            f"Antigravity skills path file is empty: {ANTIGRAVITY_SKILLS_TXT}",
+        )
+
+    expected = str(ANTIGRAVITY_EXPECTED_ROOT) + "/"
+    if rendered != expected:
+        return DiagnosticResult(
+            "skills.txt (antigravity)",
+            "warn",
+            f"Antigravity points at {rendered}",
+            f"Expected {expected}. Run `bash scripts/sync_skills.sh` to repair it.",
+        )
+
+    return DiagnosticResult(
+        "skills.txt (antigravity)",
+        "pass",
+        f"Antigravity path file points at {expected}",
+    )
 
 
 def check_skill_index(skill_name: str) -> DiagnosticResult:
@@ -196,6 +237,10 @@ def diagnose_skill(skill_name: str) -> List[DiagnosticResult]:
     results.append(check_symlink(skill_name, CODEX_SKILLS, "codex"))
     results.append(check_symlink(skill_name, CLAUDE_SKILLS, "claude"))
     results.append(check_symlink(skill_name, AGENTS_SKILLS, "agents"))
+    results.append(check_symlink(skill_name, ANTIGRAVITY_SKILLS, "antigravity", allow_real_dir=True))
+    results.append(check_symlink(skill_name, GEMINI_SKILLS, "gemini", allow_real_dir=True))
+    results.append(check_symlink(skill_name, LEGACY_ANTIGRAVITY_SKILLS, "legacy-antigravity", allow_real_dir=True))
+    results.append(check_antigravity_skills_txt())
     results.append(check_skill_index(skill_name))
     results.append(check_task_profile(skill_dir))
 
