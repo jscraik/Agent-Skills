@@ -4,7 +4,6 @@ description: Use when a user wants to install, verify, or troubleshoot Agentatio
 ---
 
 # Agentation Integration + Live Annotation Automation
-
 Set up or verify Agentation so live annotations are reliably captured and can trigger implementation/review automation.
 
 ## Table of Contents
@@ -14,12 +13,13 @@ Set up or verify Agentation so live annotations are reliably captured and can tr
 - [Philosophy](#philosophy)
 - [Preflight](#preflight)
 - [Workflow](#workflow)
+- [Self-driving compatibility](#self-driving-compatibility)
+- [State model](#state-model)
 - [Mode selection defaults](#mode-selection-defaults)
 - [Troubleshooting matrix](#troubleshooting-matrix)
 - [Constraints / Safety](#constraints--safety)
 - [Validation](#validation)
 - [Anti-patterns to avoid](#anti-patterns-to-avoid)
-- [Remember](#remember)
 - [Examples](#examples)
 - [References](#references)
 
@@ -47,8 +47,10 @@ Set up or verify Agentation so live annotations are reliably captured and can tr
   - dev-only UI wiring
   - MCP registration/health
   - webhook delivery
+  - watch-loop readiness and queue state when self-driving is requested
   - optional automation mode configuration (`autopilot` or `critique`)
 - Files changed (or explicit "no changes needed").
+- Machine-readable readiness output when script-backed validation is used.
 - Final run commands + where to inspect status/artifacts.
 
 ## Philosophy
@@ -58,6 +60,7 @@ Set up or verify Agentation so live annotations are reliably captured and can tr
 - Keep changes minimal, reversible, and scoped to Agentation workflow.
 - Prefer submit-driven automation (`submit`) over noisy per-annotation triggers.
 - Prefer critique-first rollout before enabling self-driving automation in a new repo.
+- Adapt the workflow to the framework and failure severity; keep remediation context-specific.
 
 ## Preflight
 
@@ -70,6 +73,7 @@ Before edits or runtime changes:
   - widget mount state
   - MCP connection state
   - webhook target and listener state
+  - pending annotation state and available MCP tool surface
   - current automation mode if any
 
 ## Workflow
@@ -211,6 +215,94 @@ Critical timeout rule:
 - A timed-out run must not be reported as success.
 - If `timedOut=true` for implementation/review/critique, final status should be `completed_with_issues` or `failed`.
 
+## Self-driving compatibility
+
+Match the current Agentation MCP workflow when the user is explicitly asking for hands-free or watch-loop behavior:
+
+### Claude skill install / alias compatibility
+
+- If the user is wiring the standalone self-driving skill expected by Agentation docs, keep this compatibility path available:
+  ```bash
+  ln -s "$(pwd)/skills/agentation-self-driving" ~/.claude/skills/agentation-self-driving
+  ```
+- If this repo's `agentation` skill is being used as the local equivalent, document that it must preserve the same operational contract even if the folder name differs.
+
+### Watch mode contract
+
+- If the user says `"watch mode"`, treat that as an instruction to poll annotations with `agentation_watch_annotations` in a loop.
+- For each returned annotation:
+  - acknowledge it immediately with `agentation_acknowledge` so the queue state is explicit;
+  - make the requested fix;
+  - resolve it with `agentation_resolve` and a concise summary of what changed;
+  - continue watching until the user says stop, timeout is reached, or the transport/auth layer fails.
+- De-duplicate annotations by stable annotation/session identifiers so the same item is not processed repeatedly.
+- If no annotations are pending, keep the loop lightweight and report idling rather than fabricating work.
+
+### Tooling expectations
+
+- Prefer `agentation_watch_annotations` for watch loops instead of ad hoc webhook polling when the MCP tool is available.
+- Use the exact MCP tools consistently so the Agentation session reflects real progress:
+  - `agentation_watch_annotations`
+  - `agentation_acknowledge`
+  - `agentation_resolve`
+  - `agentation_reply` when the workflow needs a non-terminal response
+  - `agentation_get_pending` / `agentation_get_all_pending` for queue inspection
+  - `agentation_get_session` / `agentation_list_sessions` for session-level debugging
+- If the exact tools are unavailable in the current client/runtime, report watch mode as partial or blocked rather than claiming full support.
+- Keep submit-driven automation (`submit`) as the default trigger for code-executing flows; only widen event scope when the user explicitly wants that behavior.
+
+### Stop conditions
+
+- Stop the watch loop when:
+  - the user says stop;
+  - configured timeout is reached;
+  - MCP auth/connection breaks;
+  - annotation acknowledge/resolve calls repeatedly fail;
+  - the annotation payload cannot be trusted or routed safely.
+- On stop, report:
+  - last successful annotation processed;
+  - current queue/idle state if known;
+  - exact blocker if the loop ended due to failure.
+
+## State model
+
+Keep these states distinct and report them separately:
+
+- **UI mount state**
+  - Is the Agentation widget mounted in the correct dev-only root?
+- **MCP state**
+  - Are Agentation MCP tools connected and callable?
+- **Webhook state**
+  - Does the configured webhook URL accept real `submit` traffic?
+- **Queue state**
+  - Are there pending annotations, and are they de-duplicated and acknowledged correctly?
+- **Runner state**
+  - Is the current mode `critique`, `autopilot`, or manual watch-loop processing?
+
+Blocked/partial reporting rules:
+- If auth or MCP registration prevents `agentation_watch_annotations`, report watch mode as blocked.
+- If MCP is healthy but there are no pending annotations, report idle/ready, not success on work.
+- If webhook smoke test passes but no real submit event was observed, report transport as partial.
+- If acknowledge succeeds but resolve repeatedly fails, report the loop as degraded and stop after bounded retries.
+
+Deep watch-loop behavior, transitions, and reporting expectations live in `references/watch-mode-state-machine.md`.
+
+### Script-backed readiness check
+When the user wants a deterministic readiness summary, prefer the bundled checker:
+
+```bash
+python3 scripts/check_watch_mode_readiness.py \
+  --project-root /absolute/path/to/app \
+  --mcp-tools agentation_watch_annotations,agentation_acknowledge,agentation_resolve \
+  --ui-mounted \
+  --dev-gated \
+  --pending-state idle \
+  --runner-state watch_mode \
+  --format json
+```
+
+Use it to prove the five state buckets without claiming more than the observed evidence supports.
+
 ## Mode selection defaults
 
 - Default to `critique` when:
@@ -230,11 +322,7 @@ Critical timeout rule:
 - MCP connection green.
 - Webhook URL set and reachable.
 - Submit event produces listener log entry.
-- Transport report identifies which layer was verified:
-  - UI mount
-  - MCP
-  - webhook
-  - automation mode
+- Transport report identifies which layer was verified: UI mount, MCP, webhook, automation mode.
 - If self-driving (`autopilot`) is enabled:
   - `latest-status.json` transitions (`webhook_received` -> running_* -> completed/failed)
   - new job artifact directory created
@@ -243,13 +331,6 @@ Critical timeout rule:
   - webhook response includes mode or equivalent indicator
   - `latest-status.json` contains `mode: critique`
   - `result.json` includes critique step summary and correct success/timeout handling
-
-## Encouraging variation
-
-- Vary framework-specific guidance by runtime context (Next.js App Router, Pages Router, Vite, or Tauri webview).
-- Adapt remediation depth to incident severity: quick wiring fixes first, then transport-level diagnostics, then automation hardening.
-- Offer different viable paths where tradeoffs exist (for example, port changes vs process cleanup, local listener vs project listener script).
-- Keep recommendations context-specific and avoid generic or cookie-cutter troubleshooting playbooks.
 
 ## Troubleshooting matrix
 
@@ -282,6 +363,11 @@ Critical timeout rule:
 - Verify listener receives a real or synthetic submit payload.
 - Verify framework-specific dev gating is correct for the runtime (`process.env.NODE_ENV` vs `import.meta.env.DEV`).
 - Verify selected mode status/artifacts are written and internally consistent.
+- Verify watch mode, when enabled, uses `agentation_watch_annotations` with explicit acknowledge -> fix -> resolve sequencing.
+- Verify the exact tool path is available: `agentation_watch_annotations`, `agentation_acknowledge`, and `agentation_resolve` at minimum for full watch-mode support.
+- Verify watch mode de-duplicates annotations and stops cleanly on timeout/user stop/transport failure.
+- Verify blocked/partial outcomes are reported honestly when the tool surface, queue state, or real submit evidence is incomplete.
+- Use `scripts/check_watch_mode_readiness.py` when you need a deterministic readiness artifact for the current app.
 - Run minimal repo checks relevant to edits (for example typecheck/tests where applicable).
 
 ## Anti-patterns to avoid
@@ -290,32 +376,20 @@ Critical timeout rule:
 - Debugging webhook failures as "websocket bugs" without checking MCP/webhook split.
 - Using `annotation.add` as trigger by default (too noisy for automated coding loops).
 - Mixing self-driving and critique expectations in one run without explicitly setting mode.
+- Claiming watch mode support without the acknowledge -> fix -> resolve loop contract.
 - Reporting "completed" when timeout flags indicate a failed run.
 - Enabling autopilot before critique mode and transport verification are stable.
 
-## Remember
-
-- You can unlock extraordinary reliability by keeping each gate explicit, verifiable, and observable.
-- Stay capable and adaptive: choose the safest path that matches the project's framework and operational constraints.
-- Enable practical outcomes by pairing precise diagnostics with minimal, reversible changes.
-
 ## Examples
-
 - "Set up Agentation in my Tauri + React app and make sure live submit annotations hit a local webhook."
 - "My MCP shows connected but no live annotation jobs are triggering, debug the transport path."
-- "Create/verify autopilot so submit annotations run implementation + review and write status files."
-- "Enable critique mode so submit annotations run critique command only and write critique artifacts."
 
 ## References
-
 - Output contract: `references/contract.yaml` (schema_version `1.1`)
 - Eval cases: `references/evals.yaml`
 - Implementation plan: `references/plan.md`
-
-## Notes
-
-- For local desktop iteration, keep webhook target local (`localhost`) unless remote ingestion is explicitly required.
-- If MCP registration was added/changed, restart the host client so new registrations are loaded.
+- Watch-loop state model: `references/watch-mode-state-machine.md`
+- Readiness checker: `scripts/check_watch_mode_readiness.py`
 
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**
