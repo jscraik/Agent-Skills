@@ -9,6 +9,7 @@ GitHub PR Tool - Fetch, preview, merge, and test PRs locally.
 
 import argparse
 import json
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -32,9 +33,46 @@ if HAS_OPTIONAL_DEPS:
     console = Console()
 
 
+REPO_SLUG_RE = re.compile(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
+REMOTE_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._/-]*$")
+BRANCH_RE = re.compile(r"^(?!/)(?!.*//)[A-Za-z0-9._/-]+$")
+
+
+def _exit(message: str) -> "typer.Exit | SystemExit":
+    if HAS_OPTIONAL_DEPS:
+        console.print(f"[red]{message}[/red]")
+        return typer.Exit(1)
+    print(message, file=sys.stderr)
+    return SystemExit(1)
+
+
+def validate_repo_slug(repo: str) -> str:
+    if not REPO_SLUG_RE.fullmatch(repo):
+        raise _exit(f"Invalid repo slug: {repo!r}. Expected owner/repo.")
+    return repo
+
+
+def validate_pr_number(pr_number: int) -> int:
+    if pr_number <= 0:
+        raise _exit(f"Invalid PR number: {pr_number}")
+    return pr_number
+
+
+def validate_remote_name(remote: str) -> str:
+    if not REMOTE_RE.fullmatch(remote):
+        raise _exit(f"Invalid git remote name: {remote!r}")
+    return remote
+
+
+def validate_branch_name(branch: str) -> str:
+    if not BRANCH_RE.fullmatch(branch) or branch.endswith(".lock") or ".." in branch or "@{" in branch:
+        raise _exit(f"Invalid branch name: {branch!r}")
+    return branch
+
+
 def run(cmd: list[str], check: bool = True, capture: bool = True) -> subprocess.CompletedProcess:
     """Run a command and return result."""
-    result = subprocess.run(cmd, capture_output=capture, text=True)
+    result = subprocess.run(cmd, capture_output=capture, text=True, shell=False)
     if check and result.returncode != 0:
         console.print(f"[red]Command failed:[/red] {' '.join(cmd)}")
         if result.stderr:
@@ -45,9 +83,11 @@ def run(cmd: list[str], check: bool = True, capture: bool = True) -> subprocess.
 
 def get_pr_info(repo: str, pr_number: int) -> dict:
     """Fetch PR details from GitHub."""
+    safe_repo = validate_repo_slug(repo)
+    safe_pr_number = validate_pr_number(pr_number)
     result = run([
-        "gh", "pr", "view", str(pr_number),
-        "--repo", repo,
+        "gh", "pr", "view", str(safe_pr_number),
+        "--repo", safe_repo,
         "--json", "title,author,state,headRefName,baseRefName,additions,deletions,files,statusCheckRollup,comments,url"
     ])
     return json.loads(result.stdout)
@@ -76,6 +116,8 @@ if HAS_OPTIONAL_DEPS:
         pr_number: int = typer.Argument(..., help="PR number"),
     ):
         """Preview a PR's details, files, and CI status."""
+        repo = validate_repo_slug(repo)
+        pr_number = validate_pr_number(pr_number)
         console.print(f"[blue]Fetching PR #{pr_number} from {repo}...[/blue]")
 
         pr = get_pr_info(repo, pr_number)
@@ -126,7 +168,10 @@ if HAS_OPTIONAL_DEPS:
         remote: str = typer.Option("upstream", "--remote", "-r", help="Remote name"),
     ):
         """Fetch a PR branch locally."""
-        branch_name = branch or f"pr/{pr_number}"
+        repo = validate_repo_slug(repo)
+        pr_number = validate_pr_number(pr_number)
+        remote = validate_remote_name(remote)
+        branch_name = validate_branch_name(branch or f"pr/{pr_number}")
 
         console.print(f"[blue]Fetching PR #{pr_number} from {remote}...[/blue]")
 
@@ -147,7 +192,10 @@ if HAS_OPTIONAL_DEPS:
         branch: Optional[str] = typer.Option(None, "--branch", "-b", help="Local branch name"),
     ):
         """Fetch and merge a PR into the current branch."""
-        branch_name = branch or f"pr/{pr_number}"
+        repo = validate_repo_slug(repo)
+        pr_number = validate_pr_number(pr_number)
+        remote = validate_remote_name(remote)
+        branch_name = validate_branch_name(branch or f"pr/{pr_number}")
 
         # Get PR info first
         console.print(f"[blue]Fetching PR #{pr_number} info...[/blue]")
@@ -188,7 +236,10 @@ if HAS_OPTIONAL_DEPS:
         remote: str = typer.Option("upstream", "--remote", "-r", help="Remote name"),
     ):
         """Full test cycle: fetch, merge, install, build, test."""
-        branch_name = f"pr/{pr_number}"
+        repo = validate_repo_slug(repo)
+        pr_number = validate_pr_number(pr_number)
+        remote = validate_remote_name(remote)
+        branch_name = validate_branch_name(f"pr/{pr_number}")
 
         # Get PR info
         console.print(f"[blue]Fetching PR #{pr_number} info...[/blue]")

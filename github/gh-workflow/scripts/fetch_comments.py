@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import subprocess
 import sys
 from typing import Any
@@ -92,12 +93,33 @@ query(
 }
 """
 
+OWNER_RE = re.compile(r"^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38}[A-Za-z0-9])?$")
+REPO_RE = re.compile(r"^[A-Za-z0-9._-]+$")
+
 
 def _run(cmd: list[str], stdin: str | None = None) -> str:
-    p = subprocess.run(cmd, input=stdin, capture_output=True, text=True)
+    p = subprocess.run(cmd, input=stdin, capture_output=True, text=True, shell=False)
     if p.returncode != 0:
         raise RuntimeError(f"Command failed: {' '.join(cmd)}\n{p.stderr}")
     return p.stdout
+
+
+def _validate_owner(owner: str) -> str:
+    if not OWNER_RE.fullmatch(owner):
+        raise RuntimeError(f"Invalid repository owner: {owner!r}")
+    return owner
+
+
+def _validate_repo(repo: str) -> str:
+    if not REPO_RE.fullmatch(repo) or repo.startswith("."):
+        raise RuntimeError(f"Invalid repository name: {repo!r}")
+    return repo
+
+
+def _validate_pr_number(number: int) -> int:
+    if number <= 0:
+        raise RuntimeError(f"Invalid pull request number: {number}")
+    return number
 
 
 def _run_json(cmd: list[str], stdin: str | None = None) -> dict[str, Any]:
@@ -145,6 +167,10 @@ def gh_api_graphql(
     Call `gh api graphql` using -F variables, avoiding JSON blobs with nulls.
     Query is passed via stdin using query=@- to avoid shell newline/quoting issues.
     """
+    safe_owner = _validate_owner(owner)
+    safe_repo = _validate_repo(repo)
+    safe_number = _validate_pr_number(number)
+
     cmd = [
         "gh",
         "api",
@@ -152,11 +178,11 @@ def gh_api_graphql(
         "-F",
         "query=@-",
         "-F",
-        f"owner={owner}",
+        f"owner={safe_owner}",
         "-F",
-        f"repo={repo}",
+        f"repo={safe_repo}",
         "-F",
-        f"number={number}",
+        f"number={safe_number}",
     ]
     if comments_cursor:
         cmd += ["-F", f"commentsCursor={comments_cursor}"]
@@ -247,7 +273,9 @@ def main() -> None:
     _ensure_gh_authenticated()
 
     if args.owner and args.repo and args.number is not None:
-        owner, repo, number = args.owner, args.repo, args.number
+        owner = _validate_owner(args.owner)
+        repo = _validate_repo(args.repo)
+        number = _validate_pr_number(args.number)
     else:
         try:
             owner, repo, number = get_current_pr_ref()

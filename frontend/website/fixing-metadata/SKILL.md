@@ -4,179 +4,89 @@ description: Audit and fix HTML metadata including titles, descriptions, canonic
 license: MIT
 ---
 
-## Workflow
+# Fixing Metadata
 
-1. Identify pages with missing or incorrect metadata (titles, descriptions, canonical, OG tags)
-2. Audit against the priority rules below — fix critical issues (duplicates, indexing) first
-3. Ensure title, description, canonical, and og:url all agree with each other
-4. Verify social cards render correctly on a real URL, not localhost
-5. Keep diffs minimal and scoped to metadata only — do not refactor unrelated code
-## when to apply
+Use this skill for precise metadata remediation, not broad SEO platform rewrites.
 
-Reference these guidelines when:
-- adding or changing page titles, descriptions, canonical, robots
-- implementing Open Graph or Twitter card metadata
-- setting favicons, app icons, manifest, theme-color
-- building shared SEO components or layout metadata defaults
-- adding structured data (JSON-LD)
-- changing locale, alternate languages, or canonical routing
-- shipping new pages, marketing pages, or shareable links
+## Table of Contents
+- [Standards snapshot](#standards-snapshot)
+- [When to use](#when-to-use)
+- [Required inputs](#required-inputs)
+- [Deliverables](#deliverables)
+- [Failure mode](#failure-mode)
+- [Priority order](#priority-order)
+- [Workflow](#workflow)
+- [Validation](#validation)
+- [References](#references)
 
-## rule categories by priority
-
-| priority | category | impact |
-|----------|----------|--------|
-| 1 | correctness and duplication | critical |
-| 2 | title and description | high |
-| 3 | canonical and indexing | high |
-| 4 | social cards | high |
-| 5 | icons and manifest | medium |
-| 6 | structured data | medium |
-| 7 | locale and alternates | low-medium |
-| 8 | tool boundaries | critical |
-
-## quick reference
-
-### 1. correctness and duplication (critical)
-
-- define metadata in one place per page, avoid competing systems
-- do not emit duplicate title, description, canonical, or robots tags
-- metadata must be deterministic, no random or unstable values
-- escape and sanitize any user-generated or dynamic strings
-- every page must have safe defaults for title and description
-
-### 2. title and description (high)
-
-- every page must have a title
-- use a consistent title format across the site
-- keep titles short and readable, avoid stuffing
-- shareable or searchable pages should have a meta description
-- descriptions must be plain text, no markdown or quote spam
-
-### 3. canonical and indexing (high)
-
-- canonical must point to the preferred URL for the page
-- use noindex only for private, duplicate, or non-public pages
-- robots meta must match actual access intent
-- previews or staging pages should be noindex by default when possible
-- paginated pages must have correct canonical behavior
-
-### 4. social cards (high)
-
-- shareable pages must set Open Graph title, description, and image
-- Open Graph and Twitter images must use absolute URLs
-- prefer correct image dimensions and stable aspect ratios
-- og:url must match the canonical URL
-- use a sensible og:type, usually website or article
-- set twitter:card appropriately, summary_large_image by default
-
-### 5. icons and manifest (medium)
-
-- include at least one favicon that works across browsers
-- include apple-touch-icon when relevant
-- manifest must be valid and referenced when used
-- set theme-color intentionally to avoid mismatched UI chrome
-- icon paths should be stable and cacheable
-
-### 6. structured data (medium)
-
-- do not add JSON-LD unless it clearly maps to real page content
-- JSON-LD must be valid and reflect what is actually rendered
-- do not invent ratings, reviews, prices, or organization details
-- prefer one structured data block per page unless required
-
-### 7. locale and alternates (low-medium)
-
-- set the html lang attribute correctly
-- set og:locale when localization exists
-- add hreflang alternates only when pages truly exist
-- localized pages must canonicalize correctly per locale
-
-### 8. tool boundaries (critical)
-
-- prefer minimal changes, do not refactor unrelated code
-- do not migrate frameworks or SEO libraries unless requested
-- follow the project's existing metadata pattern (Next.js metadata API, react-helmet, manual head, etc.)
-
-## review guidance
-
-- fix critical issues first (duplicates, canonical, indexing)
-- ensure title, description, canonical, and og:url agree
-- verify social cards on a real URL, not localhost
-- prefer stable, boring metadata over clever or dynamic
-- keep diffs minimal and scoped to metadata only
-
-
-## Philosophy
-- Keep fixes minimal, targeted, and reversible.
-- Prioritize accessibility, performance, and correctness over visual novelty.
-- Respect the existing project stack and conventions before introducing changes.
+## Standards snapshot
+- Metadata should be deterministic, minimal, and aligned with the project’s existing framework pattern.
+- Canonical URL, `og:url`, title, and description should agree unless there is a deliberate exception.
+- Prefer stable public URLs and production-safe defaults over clever dynamic metadata.
+- Keep changes scoped to metadata and related assets; do not widen into unrelated page refactors.
 
 ## When to use
-- Use this skill when the user asks to audit or fix the domain covered by this skill.
-- Use during UI review passes when quick, concrete remediation is needed.
+- A page or route is missing or misconfigured metadata.
+- The user needs an audit of titles, descriptions, canonical tags, robots directives, or social card tags.
+- A launch or shareability pass needs favicon, manifest, JSON-LD, or metadata verification.
+- A repo needs minimal targeted fixes for SEO or social preview correctness.
 
-## Inputs
-- Target file(s) or component scope to review.
-- Current stack context (framework, styling, and component primitives) when known.
-- Any explicit constraints from the user (for example: no refactors, minimal diff).
+## Required inputs
+- Target page, route, or file scope.
+- Framework context if known:
+  - Next.js metadata API;
+  - React Helmet;
+  - Astro head tags;
+  - manual HTML head management.
+- Any explicit constraints such as “metadata only” or “no refactors.”
+- The intended public URL or canonical host when metadata depends on environment config.
 
-## Outputs
-- Prioritized findings with exact snippets.
-- Why each issue matters (brief rationale).
-- Concrete code-level fix suggestions with minimal scope.
+## Deliverables
+- Prioritized findings or scoped metadata edits.
+- Minimal remediation guidance with exact tag or config fixes.
+- A short validation checklist covering search and social preview correctness.
 
-## Constraints / Safety
-- Do not refactor unrelated code.
-- Do not add dependencies or migrate frameworks unless explicitly requested.
-- Default to safe, standards-aligned fixes and preserve existing behavior.
+## Failure mode
+- If the user is really asking for OG image design, route to the OG image skill.
+- If the task needs a full marketing SEO strategy rather than metadata repair, say so and keep this skill narrowly scoped.
+- If the canonical host or public URL is unknown, stop before inventing production metadata.
 
-- Redact secrets, tokens, API keys, and PII by default.
+## Priority order
+1. Correctness and duplication
+2. Title and description
+3. Canonical and indexing
+4. Open Graph and Twitter cards
+5. Icons and manifest
+6. Structured data
+7. Locale and alternates
 
-## Procedure
-1. Confirm target scope and constraints.
-2. Audit against this skill rule set.
-3. Prioritize critical issues first.
-4. Provide minimal, concrete remediations.
-5. Re-check modified snippets for regressions.
+## Workflow
+1. Confirm the metadata surface and framework pattern already in use.
+2. Fix critical correctness issues first:
+   - duplicate tags;
+   - conflicting metadata sources;
+   - unstable or unsafe values.
+3. Align title, description, canonical URL, and `og:url`.
+4. Verify social card tags use absolute production-safe URLs.
+5. Add icons, manifest, or JSON-LD only when they map to real project assets and content.
+6. Keep the diff minimal and scoped to metadata-related files.
 
 ## Validation
-- Verify fixes preserve intended UX behavior.
-- Verify accessibility, performance, or metadata outcomes relevant to this skill.
-- Confirm recommendations are scoped and actionable.
-- Fail fast on ambiguous or unsafe changes and ask for clarification.
+- Confirm no duplicate title, description, canonical, or robots tags remain.
+- Ensure canonical and `og:url` target the same preferred public URL.
+- Verify OG and Twitter image URLs are absolute and point to real assets.
+- If JSON-LD is added, check that it reflects visible page content rather than invented data.
 
-## Anti-patterns
-- Large rewrites for small issues.
-- Advice without concrete snippet-level fixes.
-- Ignoring project conventions or introducing unrelated architecture changes.
-
-## Variation
-- Adapt checks for marketing pages, docs pages, and app routes because metadata priorities differ by page type.
-- Use different remediation depth for launch-critical SEO issues versus ongoing metadata hygiene.
-- Customize outputs for quick checklist-only reviews or patch-ready tag updates.
+## References
+- Contract: `references/contract.yaml`
+- Evals: `references/evals.yaml`
+- Task profile: `references/task-profile.json`
+- Agent metadata: `agents/internal.yaml`
 
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.
 - Capture: `decision` (`accepted|partial|rejected|deferred`), `outcome` (`good|neutral|bad|unknown`), and `confidence` (`high|medium|low`).
-- Persist with: `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes <notes>`.
+- Persist with: `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
 - The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
 <!-- /decision-feedback-protocol -->
-
-## Examples
-- Review one component and return only critical and high-impact fixes first.
-- Suggest minimal edits that preserve current stack and behavior.
-
-## Notes
-- Contract: `references/contract.yaml`
-- Evals: `references/evals.yaml`
-
-## Execution quality
-- Philosophy: use a practical framework that balances speed, safety, and tradeoff clarity.
-- Approach: choose context-specific variation rather than generic cookie-cutter steps; adapt output to repository constraints.
-- Guiding question: Why is this the smallest safe change?
-- Guiding question: What tradeoff are we making and why?
-- Guiding question: How do we verify the result end-to-end?
-- Anti-patterns: DO NOT skip validation, NEVER hide failed checks, and avoid repetitive template-only output.
-- Empowerment: be capable, creative, and enable users to explore options with confidence.

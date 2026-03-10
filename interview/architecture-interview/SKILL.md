@@ -9,6 +9,12 @@ description: Plan and review architecture decisions via a structured interview a
 Use **Interview Kernel** rules, state model, synthesis, and approval gate.
 Kernel-enforced: Question validity gate, DISCOVER vs DECIDE intent switch, Decisions table, and Assumptions register + approval.
 
+## Standards snapshot (March 2026)
+
+- Follow current global instructions from `~/.codex/AGENTS.md` and linked standards docs.
+- Keep the interview single-threaded and decision-first.
+- Optimize for architecture choices that can be verified through rollout, observability, and explicit tradeoffs.
+
 ## What this wrapper optimizes for
 
 - A clear, auditable architectural choice with explicit sacrifices
@@ -28,6 +34,7 @@ Follow `~/.codex/USER_PROFILE.md`: single-threaded, explicit steps, low cognitiv
 ## Philosophy
 
 - Architecture is decision-making under constraints; the goal is a clear, auditable tradeoff.
+- Favor the smallest architecture that satisfies the dominant constraint.
 
 ## Anti-patterns to avoid
 
@@ -115,6 +122,7 @@ Proposed (pending approval)
 ## Deliverables
 - Kernel synthesis + ADR Draft (Proposed).
 - Include `schema_version: 1` if outputs are contract-bound.
+- Make the tradeoff explicit: what is chosen, what is sacrificed, and how success will be verified.
 
 ## Constraints
 - Redact secrets/PII by default.

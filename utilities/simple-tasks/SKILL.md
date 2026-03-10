@@ -5,82 +5,75 @@ description: Install a fast local task workflow for single-project planning with
 
 # Simple Tasks
 
+Install a lightweight local task workflow for one repo without dragging in external issue tooling.
+
 ## Table of Contents
+- [Standards snapshot](#standards-snapshot)
 - [When to use](#when-to-use)
+- [Required inputs](#required-inputs)
+- [Deliverables](#deliverables)
 - [Philosophy](#philosophy)
-- [Inputs](#inputs)
-- [Outputs](#outputs)
-- [Procedure](#procedure)
-- [Validation](#validation)
-- [Constraints / Safety](#constraints--safety)
+- [Failure mode](#failure-mode)
+- [Constraints](#constraints)
+- [Workflow](#workflow)
 - [Anti-patterns](#anti-patterns)
+- [Validation](#validation)
 - [Examples](#examples)
-- [Resources](#resources)
+- [References](#references)
+
+## Standards snapshot
+- Keep task state local, explicit, and markdown-backed.
+- Preserve `tasks/TASKS.md` as the canonical source of truth.
+- Prefer dry-run before upgrades in repos with existing task conventions.
+- Optimize for fast daily execution rather than heavyweight planning systems.
 
 ## When to use
-Use this skill when you want:
-- quick local task tracking in a single project repo;
-- lightweight CLI task flow (`claim`, `done`, `next`, `summary`) without external issue tooling;
-- canonical markdown backlog in `tasks/TASKS.md` with optional detail notes.
+- The repo needs lightweight local task tracking.
+- The user wants `scripts/task.sh` commands such as `claim`, `done`, `status`, or `summary`.
+- A solo or agent-driven workflow needs a canonical markdown backlog without external sync.
+
+## Required inputs
+- `--project-dir PATH`
+- Optional `--mode install|upgrade`
+- Optional `--dry-run`
+
+## Deliverables
+- Installed or upgraded `scripts/task.sh` workflow.
+- Canonical task files under `tasks/`.
+- A short note on the main commands available after setup.
 
 ## Philosophy
-- Keep task management local, fast, and explicit.
-- Optimize for in-progress execution, not enterprise workflow complexity.
-- Preserve a single source of truth for task state.
+- Local task tracking should be fast enough to actually use.
+- The install should preserve clarity, not add another workflow layer.
+- Verification matters because task tooling breaks quietly when files drift.
 
-## Inputs
-- `--project-dir PATH` (required)
-- `--mode install|upgrade` (default `install`)
-- Optional: `--dry-run`
+## Failure mode
+- If the user needs multi-team issue management or external tracker sync, route to a project-management workflow instead.
+- If the repo already has a conflicting task system, stop and make that migration risk explicit.
+- If the project path is missing, pause before installing anything.
 
-## Outputs
-- Installed `scripts/task.sh` command interface.
-- Created/updated task files:
-  - `tasks/TASKS.md`
-  - `tasks/details/<id>.md` (optional per task)
-- Query commands and filters for status reporting.
-
-## Procedure
-1. Confirm target project path.
-2. Run dry-run if uncertain about existing task files.
-3. Install or upgrade simple-tasks scripts.
-4. Verify `scripts/task.sh` and `tasks/TASKS.md` exist.
-5. Run a status or summary command to validate output.
-
-Install command:
-
-```bash
-skills/simple-tasks/scripts/install.sh --project-dir /path/to/project
-```
-
-Supported task commands include:
-- `claim`, `done`, `status`, `next`, `plan`, `finished`
-- `upcoming`, `needs-planning`, `blocked`, `summary`, `learn`
-
-Supported filters include:
-- `--today`, `--last-24h`, `--last-week`, `--last-month`
-- `--days`, `--mine`, `--agent`, `--limit`
-
-## Validation
-- Ensure installer exits successfully and creates expected files.
-- Run `scripts/task.sh status` and `scripts/task.sh summary` at minimum.
-- Confirm updates are reflected in `tasks/TASKS.md`.
-- **Fail fast:** if install output is incomplete or task files are missing, stop and fix before use.
-
-## Constraints / Safety
+## Constraints
 - Redact secrets, tokens, credentials, API keys, and PII in task notes and shared logs.
-- Keep scope to local project task tracking; do not imply external ticket sync.
-- Use `--dry-run` before upgrades in repos with custom task file conventions.
+- Keep the scope to local project task tracking.
+- Do not imply external system sync that the workflow does not provide.
+
+## Workflow
+1. Confirm the target project path and whether this is install or upgrade.
+2. Run dry-run first when existing task files may already be present.
+3. Install or upgrade the task workflow.
+4. Verify `scripts/task.sh` and `tasks/TASKS.md` exist.
+5. Run a small command check such as `status` or `summary`.
 
 ## Anti-patterns
-- Using simple-tasks as a replacement for multi-team issue tracking systems.
-- Spreading task state across multiple markdown files without canonical `tasks/TASKS.md`.
-- Skipping validation commands after install.
+- Using this workflow as a substitute for multi-team issue tracking.
+- Spreading task state across unrelated markdown files.
+- Installing without checking whether the repo already has custom task conventions.
 
-## Variation
-- Adapt reporting depth for solo execution, pair sessions, or handoff to another agent.
-- Use different command subsets for setup-only, daily execution, or audit-only status checks.
-- Customize task-flow cadence to repository pace while keeping `tasks/TASKS.md` as the canonical source.
+## Validation
+- Fail fast: stop at the first incomplete install or missing canonical task file.
+- Ensure the installer exits successfully and creates expected files.
+- Run `scripts/task.sh status` and `scripts/task.sh summary` at minimum.
+- Confirm updates are reflected in `tasks/TASKS.md`.
 
 ## Examples
 ```bash
@@ -88,22 +81,14 @@ skills/simple-tasks/scripts/install.sh --project-dir /tmp/demo --dry-run
 skills/simple-tasks/scripts/install.sh --project-dir /tmp/demo --mode upgrade
 ```
 
-## Resources
-- `references/contract.yaml`
-- `references/evals.yaml`
+## References
+- Contract: `references/contract.yaml`
+- Evals: `references/evals.yaml`
 
 <!-- decision-feedback-protocol:v2 -->
-## Decision Quality Feedback
+**Decision feedback protocol (required):**
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.
-- Capture: decision (accepted|partial|rejected|deferred), outcome (good|neutral|bad|unknown), and confidence (high|medium|low).
-- Persist feedback with python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "...".
+- Capture: `decision` (`accepted|partial|rejected|deferred`), `outcome` (`good|neutral|bad|unknown`), and `confidence` (`high|medium|low`).
+- Persist with: `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
+- The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
 <!-- /decision-feedback-protocol -->
-
-## Execution quality
-- Philosophy: use a practical framework that balances speed, safety, and tradeoff clarity.
-- Approach: choose context-specific variation rather than generic cookie-cutter steps; adapt output to repository constraints.
-- Guiding question: Why is this the smallest safe change?
-- Guiding question: What tradeoff are we making and why?
-- Guiding question: How do we verify the result end-to-end?
-- Anti-patterns: DO NOT skip validation, NEVER hide failed checks, and avoid repetitive template-only output.
-- Empowerment: be capable, creative, and enable users to explore options with confidence.

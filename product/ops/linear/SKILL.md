@@ -5,13 +5,19 @@ description: "Manage Linear issues, projects, and docs through the Linear MCP wo
 
 # Linear
 
-## Compliance
-- Check against GOLD Industry Standards guide in ~/.codex/AGENTS.override.md
-
-
-## Overview
-
-This skill provides a structured workflow for managing issues, projects & team workflows in Linear. It ensures consistent integration with the Linear MCP server, which offers natural-language project management for issues, projects, documentation, and team collaboration.
+## Table of Contents
+- [Scope and triggers](#scope-and-triggers)
+- [Required inputs](#required-inputs)
+- [Deliverables](#deliverables)
+- [Failure mode](#failure-mode)
+- [Standards snapshot](#standards-snapshot-march-2026)
+- [Required workflow](#required-workflow)
+- [Available tools](#available-tools)
+- [Practical workflows](#practical-workflows)
+- [Troubleshooting](#troubleshooting)
+- [Validation](#validation)
+- [Anti-patterns to avoid](#anti-patterns-to-avoid)
+- [Decision feedback protocol](#decision-feedback-protocol)
 
 ## Philosophy
 - Prefer clarity and traceability over speed.
@@ -28,6 +34,7 @@ This skill provides a structured workflow for managing issues, projects & team w
 - When the user wants to read, create, or update Linear issues or projects.
 - When the user asks for triage, planning, or reporting inside Linear.
 - When the user needs documentation or comment updates in Linear.
+- When a durable summary of current Linear state is needed before any change is made.
 
 ## Required inputs
 - User intent (team, project, issue scope, and desired outcomes).
@@ -38,6 +45,20 @@ This skill provides a structured workflow for managing issues, projects & team w
 - Retrieved issue/project data or applied updates.
 - A concise summary of changes and any remaining gaps.
 - Follow-up actions or confirmations needed from the user.
+
+## Failure mode
+If the request is too ambiguous to safely write to Linear, stay read-only, summarize the missing decision, and ask for the smallest approval or identifier needed.
+
+## Standards snapshot (March 2026)
+- Read before write, and show the evidence that justifies any mutation.
+- Treat bulk updates as high-risk operations: preview grouping logic and impact before applying changes.
+- Prefer exact identifiers and explicit state transitions over fuzzy natural-language edits once mutation begins.
+- Preserve auditability: the user should be able to see what changed, why, and what still needs follow-up.
+
+## Constraints
+- Redact secrets, tokens, credentials, and sensitive data by default.
+- Avoid destructive or bulk updates without clear user direction.
+- Keep write scope explicit before mutating Linear state.
 
 ## Prerequisites
 - Linear MCP server must be connected and accessible via OAuth
@@ -76,6 +97,7 @@ Execute Linear MCP tool calls in logical batches:
 - Read first (list/get/search) to build context.
 - Create or update next (issues, projects, labels, comments) with all required fields.
 - For bulk operations, explain the grouping logic before applying changes.
+- If the write plan changes after reading context, pause and restate the new write scope before mutating anything.
 
 ### Step 4
 Summarize results, call out remaining gaps or blockers, and propose next actions (additional issues, label changes, assignments, or follow-up comments).
@@ -114,45 +136,22 @@ Documentation & Collaboration: `list_documents`, `get_document`, `search_documen
 - Missing Data: Refresh token, verify workspace access, check for archived projects, and confirm correct team selection.
 - Performance: Remember Linear API rate limits; batch bulk operations, use specific filters, or cache frequent queries.
 
-## Variation rules
-- Vary workflow depth by task type (triage vs planning vs reporting).
-- Use different batching strategies based on rate limits and volume.
-- Prefer read-only exploration when intent is ambiguous.
-
-## Empowerment principles
-- Empower users to approve bulk edits before applying.
-- Empower reviewers with clear summaries and change counts.
-
 ## Anti-patterns to avoid
 - Bulk editing without a preview or user confirmation.
 - Changing status/priority without rationale.
 - Writing comments that duplicate existing context.
+- Creating issues or project updates before checking whether an existing artifact already covers the need.
+- Treating approximate issue names as safe stand-ins for exact identifiers once writes begin.
 
 ## Example prompts
 - "Create a Linear issue for the login bug and assign it to me."
 - "Summarize open P1 bugs for the client team."
 - "Update the project timeline and add a status comment."
 
-## Remember
-
-The agent is capable of extraordinary work in this domain. These guidelines unlock that potential—they don't constrain it.
-Use judgment, adapt to context, and push boundaries when appropriate.
-
-## Constraints
-- Redact secrets/PII by default.
-- Avoid destructive operations without explicit user direction.
-
-
 ## Validation
-- Run any relevant checks or scripts when available.
-- Fail fast and report errors before proceeding.
-## Procedure
-1) Clarify scope and inputs.
-2) Execute the core workflow.
-3) Summarize outputs and next steps.
-
-## Antipatterns
-- Do not add features outside the agreed scope.
+- Confirm the final summary includes changed entities, unchanged blockers, and any user decisions still needed.
+- For bulk edits, confirm the number of affected items matches the stated plan.
+- Fail fast on auth, workspace, or identifier ambiguity before applying writes.
 
 ## References
 - `references/contract.yaml`
@@ -191,6 +190,7 @@ Use judgment, adapt to context, and push boundaries when appropriate.
 - Push boundaries with practical alternatives when simple recipes fail.
 - Enable outcomes-oriented problem solving.
 
+## Decision feedback protocol
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.

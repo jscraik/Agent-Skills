@@ -1,393 +1,105 @@
 ---
 name: favicon-generator
-description: Generate complete favicon/app icon suites with templates and assets.
-  Use when the user needs favicons or app icons for a web/app project.
+description: Generate complete favicon/app icon suites with templates and assets. Use when the user needs favicons or app icons for a web/app project.
 ---
 
-# Pro-Grade Favicon Generator
+# Favicon Generator
 
-Avoid skipping validation steps or inventing results.
+Create favicon and app-icon sets that match the actual product identity instead of inventing a disconnected mark.
 
+## Table of Contents
+- [Standards snapshot](#standards-snapshot)
+- [When to use](#when-to-use)
+- [Required inputs](#required-inputs)
+- [Deliverables](#deliverables)
+- [Failure mode](#failure-mode)
+- [Workflow](#workflow)
+- [Validation](#validation)
+- [References](#references)
 
-Create stunning, professional-quality favicons that stand alongside icons from Linear, Notion, Figma, and other polished apps.
+## Standards snapshot
+- Reuse the existing brand mark whenever possible.
+- Design for 16x16 and 32x32 first; if it fails there, it fails everywhere.
+- Prefer script-backed generation and repeatable outputs over hand-edited export drift.
+- Only add manifest and platform icons that the target app will actually use.
 
 ## When to use
+- The user needs a favicon suite for a website or web app.
+- The user needs browser icons plus optional PWA or app-style icon outputs.
+- A repo has branding in place but is missing a production-ready icon set.
+- Existing favicon assets are inconsistent, blurry, or incomplete and need replacement.
 
-- Use when you need a **favicon/app icon suite** for a web app or marketing site.
-- Use when you want output assets in multiple sizes (favicon.ico + PNGs) and a verified HTML snippet.
+## Required inputs
+- Brand source:
+  - existing logo SVG or PNG;
+  - a codebase icon already used as the product mark;
+  - or explicit direction that a fresh mark is needed.
+- Brand colors or the repo location where they can be derived.
+- Target outputs: web only, or also PWA and app-style icons.
+- Desired output path if the skill should write assets into a repo.
 
-## Inputs
-
-- Brand source: existing logo SVG/PNG, or a codebase icon (for example lucide icon name).
-- Brand colors (hex) and background preference (solid/gradient/transparent).
-- Target platforms: web only, or also PWA (manifest icons).
-
-## Outputs
-
-- `favicon.ico` and PNG icon set (common sizes).
-- `site.webmanifest` (if PWA icons are requested).
-- HTML `<link rel="icon" ...>` snippet for integration.
+## Deliverables
+- `favicon.ico` plus a PNG set for the requested sizes.
+- `site.webmanifest` if the user actually wants PWA-ready assets.
+- Integration guidance with the exact metadata or HTML references to wire in.
+- A short rationale when choosing one mark treatment over another.
 
 ## Philosophy
+- Reuse the product’s real mark before inventing a new one.
+- Favor clarity at tiny sizes over decorative detail.
+- Keep generation reproducible so future refreshes do not drift.
 
-- Match the existing brand first (reuse existing icon if present).
-- Optimize for clarity at 16×16 and 32×32; avoid thin strokes.
+## Failure mode
+- If the request is really about broader brand identity or logo design, pause and recommend a design skill first.
+- If the codebase already has a canonical icon and the user asks for something radically different, surface the brand-consistency tradeoff before generating.
+- If the source asset is too low quality for a clean export, say so and request a better source rather than masking it with effects.
 
-## Procedure
+## Constraints
+- Redact secrets, private URLs, and sensitive repo paths by default in examples and generated guidance.
+- Do not replace an existing canonical icon suite without making the overwrite explicit.
+- Keep the scope to favicon assets and the minimum metadata wiring needed.
 
-1) Discover existing brand icon(s) in the codebase.
-2) Choose a base mark + colors.
-3) Generate the icon set.
-4) Provide integration steps + quick visual sanity checks.
+## Workflow
+1. Discover whether the repo already has a canonical logo, mark, or icon.
+2. Confirm the real deployment target:
+   - browser favicon only;
+   - browser + Apple touch icon;
+   - browser + manifest/PWA set.
+3. Pick the simplest mark that survives tiny sizes:
+   - reduce fine detail;
+   - increase padding;
+   - avoid hairline strokes.
+4. Use the bundled generator workflow when creating assets:
+   - `scripts/generate_favicon.py`
+   - `scripts/generate_favicon.html`
+5. Keep decorative effects subtle and only if the mark stays legible at 16x16.
+6. Return the exact files created and the minimal integration changes needed.
 
-## Validation
-- Fail fast: stop at the first failed check and do not proceed.
-
-- Verify the 16×16 and 32×32 renders are legible.
-- Verify the HTML snippet references the generated files.
 ## Anti-patterns
-
-- Generating a new icon when the codebase already has a canonical logo/mark.
-- Using unsafe defaults (for example, hardcoding secrets into build steps).
-
-## Constraints
-
-- Do not embed secrets or private URLs in examples; use placeholders.
-
-## Required response headings
-Every response must include these headings:
-- `## When to use`
-- `## Inputs`
-
-## Cognitive Support / Plain-Language
-- Optimize for low cognitive load (TBI support): one task at a time, explicit steps.
-- Use plain language first; define jargon in parentheses.
-- Keep steps short and checklist-driven where possible.
-- Externalize state: decisions, assumptions, and the next step.
-- Provide ELI5 explanations for non-trivial logic.
-- Ask one question at a time; prefer multiple-choice when possible.
-
-- `## Outputs`
-
-## Philosophy: Favicons Are Miniature Design Artifacts
-
-The difference between a mediocre favicon and a great one isn't complexity—it's **polish**. Great favicons have:
-
-- **Depth**: Subtle shadows that lift the icon off the surface
-- **Lighting**: Highlights and gradients that create dimensionality
-- **Texture**: Optional noise/grain that adds organic feel
-- **Precision**: Optical centering, proper padding, crisp edges
-
-**Before generating, ask yourself**:
-1. What's the app's personality? (Playful, professional, technical, creative)
-2. What colors define the brand? (Extract from tailwind config, CSS, or ask)
-3. What level of polish is needed? (Quick prototype vs. production launch)
-
----
-
-## Workflow: Discover Existing Icons First
-
-**CRITICAL**: Before generating a favicon, always check what icons are already used in the codebase. The favicon should match your existing brand identity.
-
-### Step 1: Search for Icon Usage
-
-Search the codebase for icon imports and usage:
-
-```bash
-# Find lucide-react imports
-rg "from.*lucide-react" --type tsx --type ts
-
-# Find icon component usage
-rg "PackagePlus|Package|Icon" --type tsx --type ts
-
-# Check Header/Nav components (common icon locations)
-rg "Header|Nav|Logo" --type tsx
-```
-
-### Step 2: Identify Primary Brand Icons
-
-Look for:
-- **Logo icons**: Used in Header, navigation, or branding components
-- **Most frequently used icons**: Appear in multiple places
-- **Icon libraries**: lucide-react, react-icons, custom SVG components
-
-Example discovery:
-```
-Found in Header.tsx: PackagePlus from lucide-react
-Found in HomePage.tsx: PackagePlus, Package
-Primary brand icon: PackagePlus (used in logo/branding)
-```
-
-### Step 3: Extract Icon Paths
-
-If using lucide-react or similar libraries:
-
-1. **Locate icon definition**:
-   ```bash
-   cat node_modules/lucide-react/dist/esm/icons/package-plus.js
-   ```
-
-2. **Extract SVG paths** from the icon definition:
-   - Lucide icons use 24x24 viewBox
-   - Paths are defined as arrays: `["path", { d: "M..." }]`
-   - Copy the exact `d` attributes from each path
-
-3. **Use cairosvg for accurate rendering** (recommended):
-   ```bash
-   pip install cairosvg
-   brew install cairo  # required native library
-   ```
-
-   **Why cairosvg?** Pillow cannot render SVG bezier curves and arcs. Lucide icons
-   use arc commands (`a2 2 0 0 0...`) that only a proper SVG renderer can draw.
-
-### Step 4: Match Favicon to Brand Icon
-
-- **Same icon**: Use the exact icon from your brand (e.g., PackagePlus → PackagePlus favicon)
-- **Same colors**: Extract brand colors from Tailwind config or CSS variables
-- **Same style**: Match the visual style (minimal, vibrant, etc.)
-
-### Example: PackagePlus Favicon with cairosvg
-
-```python
-import cairosvg
-from PIL import Image
-from io import BytesIO
-
-# Actual Lucide PackagePlus paths (from node_modules/lucide-react/dist/esm/icons/package-plus.js)
-SVG_TEMPLATE = """<svg xmlns="http://www.w3.org/2000/svg" width="{size}" height="{size}" viewBox="0 0 {size} {size}">
-  <defs>
-    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#f97316"/>
-      <stop offset="100%" stop-color="#ef4444"/>
-    </linearGradient>
-  </defs>
-  <rect width="{size}" height="{size}" rx="{radius}" fill="url(#bg)"/>
-  <g transform="translate({offset}, {offset}) scale({scale})"
-     stroke="#ffffff" stroke-width="2" fill="none"
-     stroke-linecap="round" stroke-linejoin="round">
-    <!-- Exact Lucide PackagePlus paths -->
-    <path d="M16 16h6"/>
-    <path d="M19 13v6"/>
-    <path d="M21 10V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l2-1.14"/>
-    <path d="m7.5 4.27 9 5.15"/>
-    <polyline points="3.29 7 12 12 20.71 7"/>
-    <line x1="12" x2="12" y1="22" y2="12"/>
-  </g>
-</svg>"""
-
-def render_lucide_icon(size):
-    # Lucide uses 24x24, scale to fit in favicon with padding
-    scale = (size * 0.7) / 24
-    offset = size * 0.15
-    radius = int(size * 0.22)
-
-    svg = SVG_TEMPLATE.format(size=size, scale=scale, offset=offset, radius=radius)
-    png_data = cairosvg.svg2png(bytestring=svg.encode('utf-8'))
-    return Image.open(BytesIO(png_data)).convert('RGBA')
-```
-
-### Why This Matters
-
-- **Consistency**: Favicon matches your app's visual identity
-- **Brand recognition**: Users recognize your icon across contexts
-- **Professionalism**: Shows attention to detail and design coherence
-- **Avoids mismatch**: Prevents generating a favicon that doesn't match your actual logo
-
----
-
-### The Effects Stack
-
-Professional favicons are built in **layers**, not drawn flat:
-
-```
-┌─────────────────────────────────────┐
-│  Layer 6: Content (letter/icon)    │ ← With its own shadow
-│  Layer 5: Noise texture            │ ← Subtle grain for organic feel
-│  Layer 4: Highlight gradient       │ ← Top-lit shine effect
-│  Layer 3: Inner glow               │ ← Ambient light/shadow
-│  Layer 2: Background               │ ← Gradient or solid
-│  Layer 1: Drop shadow              │ ← Depth and lift
-└─────────────────────────────────────┘
-```
-
-Each layer is subtle. Combined, they create polish that's felt rather than seen.
-
----
-
-## Generation Tools
-
-This skill provides two complementary tools:
-
-### Tool 1: Interactive HTML Generator
-**File**: `scripts/generate_favicon_pro.html`
-
-Open in browser for real-time preview and customization:
-- 8 professional design templates
-- 18 Lucide icons + letter/emoji modes
-- Live effect adjustment (shadow, glow, highlight, noise)
-- All sizes preview (16px to 512px)
-- Context preview (browser tab, bookmarks)
-- Bulk download
-
-**Best for**: Quick iteration, visual exploration, client demos
-
-### Tool 2: Python CLI Pipeline
-**File**: `scripts/generate_favicon.py`
-
-Command-line generation with Pillow:
-```bash
-# Using a template
-python generate_favicon.py --letter A --style vibrant --output ./public/
-
-# Custom colors
-python generate_favicon.py --letter T --bg "#22c55e" --bg2 "#14b8a6" --output ./favicons/
-
-# Full control
-python generate_favicon.py --letter N --bg "#0f172a" --fg "#22d3ee" \
-  --shadow 0.6 --glow 0.5 --noise 0.04 --output ./icons/
-```
-
-**Best for**: CI/CD integration, batch generation, precise control
-
----
-
-## Design Templates
-
-Choose a template that matches the app's personality:
-
-| Template | Colors | Character | Best For |
-|----------|--------|-----------|----------|
-| **Modern** | Indigo → Purple | Clean, trustworthy | SaaS, productivity |
-| **Vibrant** | Pink → Orange | Energetic, bold | Consumer apps, social |
-| **Minimal** | Near-black | Understated, technical | Dev tools, utilities |
-| **Glass** | Blue → Cyan | Airy, modern | Dashboards, analytics |
-| **Neon** | Dark + Cyan glow | Futuristic, edgy | Gaming, creative tools |
-| **Warm** | Amber → Red | Friendly, approachable | Food, lifestyle, community |
-| **Forest** | Green → Teal | Natural, sustainable | Health, environment, finance |
-| **Mono** | White + Black | Minimal, adaptable | Any (works in any context) |
-
-### Template Selection Guide
-
-```
-App personality assessment:
-├── Professional/Enterprise → Minimal, Modern, Mono
-├── Consumer/Fun → Vibrant, Warm, Neon
-├── Technical/Developer → Minimal, Glass, Neon
-├── Health/Wellness → Forest, Warm
-└── Creative/Design → Vibrant, Glass, Modern
-```
-
----
-
-## Content Types
-
-### 1. Letter/Monogram (Default)
-Single letter or two-letter combination from app name.
-
-```
-"TaskFlow" → "T" or "TF"
-"Acme Corp" → "A" or "AC"
-```
-
-**Typography considerations**:
-- Single letters work better at small sizes
-- Choose distinctive letters (avoid O, I which lack character)
-- Font weight matters—bold reads better at 16px
-
-### 2. Icons (Lucide Integration)
-18 curated Lucide icons for common app types:
-
-| Icon | Use Case |
-|------|----------|
-| `rocket` | Startups, launch, speed |
-| `zap` | Performance, automation |
-| `star` | Favorites, ratings, premium |
-| `heart` | Health, favorites, social |
-| `code` | Developer tools, IDEs |
-| `box` | Packages, containers, storage |
-| `compass` | Navigation, exploration |
-| `flame` | Trending, hot, energy |
-| `globe` | International, web, browser |
-| `layers` | Design, stacks, organization |
-| `music` | Audio, media, entertainment |
-| `send` | Messaging, communication |
-| `shield` | Security, protection, trust |
-| `sparkles` | AI, magic, premium |
-| `sun` | Light mode, energy, positivity |
-| `target` | Goals, focus, precision |
-| `terminal` | CLI, developer, technical |
-| `wand` | Magic, automation, creative |
-
-### 3. Emoji
-Native emoji for playful, informal apps.
-
-```
-🚀 → Launch, speed, startups
-💡 → Ideas, innovation
-🔥 → Trending, hot
-✨ → Premium, magic
-```
-
-**Note**: Emoji rendering varies by OS—test on multiple platforms.
-
----
-
-## Effects Reference
-
-## Constraints
-- Redact secrets/PII by default.
-- Avoid destructive operations without explicit user direction.
-
-## Variation
-- Vary tone, depth, and structure based on context.
-- Avoid repeating the same outline across outputs.
-
-## Remember
-The agent is capable of extraordinary work in this domain. Use judgment, adapt to context, and push boundaries when appropriate.
-
-## Extended guidance
-See `references/extended.md` for additional examples, workflows, and appendices.
+- Designing a new icon when the app already has a clear product mark.
+- Using heavy effects to compensate for a weak base mark.
+- Shipping manifest or icon sizes the app will never reference.
 
 ## Validation
+- Fail fast: stop at the first failed gate and repair the source asset or output path before generating more variants.
+- Check the mark at 16x16, 32x32, and one large reference size before finalizing.
+- Confirm generated file names match the integration snippet.
+- If a manifest is included, ensure it references real output files.
+- If writing to a repo, keep changes scoped to icon assets and metadata wiring only.
 
-- Fail fast: stop at the first failed check and do not proceed. Re-run checks before continuing.
-- If a required input is missing, ask for it and pause.
-- Provide an explicit success/fail summary for each validation step.
+## Examples
+- "Generate a browser favicon set from the existing SVG logo and give me the exact tags to add."
+- "Refresh our PWA icons so they match the new app mark without touching unrelated branding."
+- "Audit our current favicon outputs and tell me which assets are missing or blurry."
 
-
-<!-- skill-score-boost-v1 -->
-## Philosophy and tradeoffs
-- Use this skill when consistent decision-making matters more than one-off execution because project context should drive the approach.
-- Principle and mindset: prioritize tradeoffs and constraints over rigid checklists; understand why each step exists.
-- Ask this to keep outcomes robust: Why is this the right default, and what could change this outcome?
-- How do we adapt if constraints shift?
-- What evidence is needed before choosing one path over another?
-
-## Anti-patterns and caveats
-- Avoid applying this playbook generically without checking repository-specific context.
-- **NEVER** skip required validation gates when behavior changes.
-- **DO NOT** use this skill as a rigid replacement for engineering judgment.
-- **DON'T** ignore warnings or assume one pattern fits all repos.
-- Common pitfall: treating anti-patterns as optional.
-- Incorrect assumptions here can lead to fragile guidance.
-- Warning: wrong sequencing can create avoidable regressions.
-
-## Variation and adaptation
-- Vary the workflow by team size, risk, and deployment target.
-- Use different strategies for small, medium, and large changes.
-- Adapt recommendations to the specific environment and avoid repetitive templates.
-- Avoid generic or cookie-cutter responses; craft context-specific alternatives.
-- Keep outputs diverse and not repetitive.
-- Converge on a custom path only after evidence review.
-- Different constraints should produce different, non-generic recommendations.
-
-## Empowering execution style
-- Be capable of exploring multiple options and enabling the team to make safe decisions.
-- Unlock confidence by explaining options and tradeoffs clearly.
-- Feel free to be creative while staying rigorous and precise.
-- Push boundaries with practical alternatives when simple recipes fail.
-- Enable outcomes-oriented problem solving.
+## References
+- Contract: `references/contract.yaml`
+- Evals: `references/evals.yaml`
+- Effects guidance: `references/effects-guide.md`
+- Extended guidance: `references/extended.md`
+- Extra notes: `references/extra.md`
+- Scripts: `scripts/generate_favicon.py`, `scripts/generate_favicon.html`
+- Asset preview: `assets/favicon-generator.png`
 
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**

@@ -6,134 +6,71 @@ description: Extract current library documentation via Context7 when users need 
 
 # Context7 Documentation Fetcher
 
-Retrieve current library documentation via Context7 API.
+## Table of Contents
+- [Scope and triggers](#scope-and-triggers)
+- [Required inputs](#required-inputs)
+- [Deliverables](#deliverables)
+- [Failure mode](#failure-mode)
+- [Standards snapshot](#standards-snapshot-march-2026)
+- [Workflow](#workflow)
+- [Validation](#validation)
+- [Anti-patterns](#anti-patterns)
+- [Decision feedback protocol](#decision-feedback-protocol)
 
-## Philosophy
+Retrieve current external library documentation via Context7 so implementation guidance is grounded in current docs instead of memory.
 
-- Prefer authoritative, current docs over memory or guesses.
-- Keep queries narrow and purposeful to reduce noise.
-- Validate version-specific details before implementation.
+## Scope and triggers
+- Use this skill when the user needs current external library or framework documentation.
+- Use it for API details, version checks, supported patterns, or dependency troubleshooting.
+- Do not use it for OpenAI platform docs; route those to `openai-docs`.
 
 ## Required inputs
-
-## Cognitive Support / Plain-Language
-- Optimize for low cognitive load (TBI support): one task at a time, explicit steps.
-- Use plain language first; define jargon in parentheses.
-- Keep steps short and checklist-driven where possible.
-- Externalize state: decisions, assumptions, and the next step.
-- Provide ELI5 explanations for non-trivial logic.
-- Ask one question at a time; prefer multiple-choice when possible.
-
-
-- Library name or product name.
-- Specific question or feature area (API, patterns, version behavior).
-- Desired output format (txt or md).
-- Token/length budget (optional).
+- library or product name
+- the specific question or implementation problem
+- version or environment constraints when known
 
 ## Deliverables
+- the resolved Context7 library id
+- targeted doc-backed guidance answering the user’s question
+- clarification only when the library or target version is genuinely ambiguous
 
-- Resolved library ID from Context7.
-- Targeted documentation snippets relevant to the query.
-- Clarifying questions if the query is ambiguous.
+## Failure mode
+If no good library match exists, say so clearly and ask for the minimum refinement needed instead of guessing.
 
-## Constraints
-
-- Never expose or echo `CONTEXT7_API_KEY`.
-- Redact secrets or sensitive data in outputs by default.
-- Avoid full-document dumps; return focused excerpts.
-- Prefer official docs and versioned guidance when available.
-
-## Authentication
-
-This skill requires a Context7 API key in `CONTEXT7_API_KEY`.
-
-Recommended setup options:
-1) Export it in your shell profile (global):
-
-```bash
-export CONTEXT7_API_KEY="your-context7-key"
-```
-
-2) Use a local `.env` file (per-repo):
-
-```bash
-cp skills/context7/.env.example .env
-set -a; source .env; set +a
-```
+## Standards snapshot (March 2026)
+- Resolve the library id first, then query docs with a specific implementation-shaped question.
+- Prefer the most authoritative and relevant library match, not just the first fuzzy hit.
+- Keep the answer tightly coupled to the user’s actual problem; avoid dumping generic docs.
+- If version drift matters, say whether the answer is version-scoped or best-effort current guidance.
 
 ## Workflow
+1. Use `mcp__context7__resolve-library-id` to identify the best library match.
+2. Pick the best match based on name, source reputation, version fit, and documentation coverage.
+3. Use `mcp__context7__query-docs` with a narrow, implementation-shaped question.
+4. Answer from the retrieved docs and say when a conclusion is an inference instead of a direct statement.
 
-Set `CODEX_HOME` to your Codex config directory (defaults to `~/.codex`).
-
-### 1. Search for the library
-
-```bash
-python3 "$CODEX_HOME/skills/context7/scripts/context7.py" search "<library-name>"
-```
-
-Example:
-```bash
-python3 "$CODEX_HOME/skills/context7/scripts/context7.py" search "next.js"
-```
-
-Returns library metadata including the `id` field needed for step 2.
-
-### 2. Fetch documentation context
-
-```bash
-python3 "$CODEX_HOME/skills/context7/scripts/context7.py" context "<library-id>" "<query>"
-```
-
-Example:
-```bash
-python3 ~/.codex/skills/context7/scripts/context7.py context "/vercel/next.js" "app router middleware"
-```
-
-Options:
-- `--type txt|md` - Output format (default: txt)
-- `--tokens N` - Limit response tokens
-
-## Quick Reference
-
-| Task | Command |
-|------|---------|
-| Find React docs | `search "react"` |
-| Get React hooks info | `context "/facebook/react" "useEffect cleanup"` |
-| Find Supabase | `search "supabase"` |
-| Get Supabase auth | `context "/supabase/supabase" "authentication row level security"` |
+## Constraints
+- Redact secrets, tokens, credentials, and sensitive data by default.
+- Never expose or echo `CONTEXT7_API_KEY`.
+- Treat network access as limited to the Context7 documentation service and the library metadata it returns.
+- Prefer focused excerpts over full-document dumps.
 
 ## Validation
-
-- Confirm the library ID matches the intended ecosystem before using results.
+- Confirm the library id matches the intended ecosystem before using results.
 - If results look stale or off-target, refine the query or re-run with a narrower scope.
 - Fail fast: stop at the first validation error and fix before continuing.
 - See `references/contract.yaml` and `references/evals.yaml` for required outputs and eval cases.
-- The output contract includes `schema_version` in `references/contract.yaml`.
-
-## Anti-Patterns
-
-- Guessing API behavior without checking current docs.
-- Using outdated versions or deprecated endpoints.
-- Sharing or logging API keys.
 
 ## Examples
+- "Find the current Next.js middleware docs."
+- "What is the latest Supabase auth guidance for RLS?"
+- "Check the current React guidance for effect cleanup."
 
-- “Find the latest Next.js middleware docs.”
-- “What is the current Supabase auth API for RLS?”
-
-## Scope and triggers
-
-- Before implementing any library-dependent feature
-- When unsure about current API signatures
-- For library version-specific behavior
-- To verify best practices and patterns
-
-## Variation
-- Vary tone, depth, and structure based on context.
-- Avoid repeating the same outline across outputs.
-
-## Remember
-The agent is capable of extraordinary work in this domain. Use judgment, adapt to context, and push boundaries when appropriate.
+## Anti-patterns
+- Guessing API behavior without checking current docs.
+- Using outdated versions or deprecated endpoints without calling that out.
+- Dumping large doc excerpts instead of answering the user’s actual question.
+- Treating a weak library match as authoritative.
 
 <!-- skill-score-boost-v1 -->
 ## Philosophy and tradeoffs
@@ -168,6 +105,7 @@ The agent is capable of extraordinary work in this domain. Use judgment, adapt t
 - Push boundaries with practical alternatives when simple recipes fail.
 - Enable outcomes-oriented problem solving.
 
+## Decision feedback protocol
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.

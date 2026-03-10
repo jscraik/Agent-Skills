@@ -1,184 +1,112 @@
 ---
 name: process-watch
-description: Analyze system processes and resource usage to diagnose runaway CPU/memory/IO,
-  identify culprits, and propose next diagnostic steps. Use when investigating performance
-  spikes or leaks.
+description: Analyze system processes and resource usage to diagnose runaway CPU/memory/IO, identify culprits, and propose next diagnostic steps. Use when investigating performance spikes or leaks.
 ---
 
 # Process Watch
 
-Comprehensive system process monitoring. Goes beyond basic `top` to show:
-- CPU & memory usage
-- Disk I/O per process
-- Network connections
-- Open files & handles
-- Port bindings
-- Process trees
+Diagnose process-level resource issues with the bundled process-watch workflow instead of relying on a single `top` snapshot.
 
-## Commands
+## Table of Contents
+- [Standards snapshot](#standards-snapshot)
+- [When to use](#when-to-use)
+- [Required inputs](#required-inputs)
+- [Deliverables](#deliverables)
+- [Philosophy](#philosophy)
+- [Failure mode](#failure-mode)
+- [Constraints](#constraints)
+- [Workflow](#workflow)
+- [Anti-patterns](#anti-patterns)
+- [Validation](#validation)
+- [Examples](#examples)
+- [References](#references)
 
-### List processes
-```bash
-process-watch list [--sort cpu|mem|disk|name] [--limit 20]
-```
+## Standards snapshot
+- Prefer evidence across CPU, memory, I/O, network, and process hierarchy before naming a culprit.
+- Capture enough context to explain what is happening now and what to inspect next.
+- Treat kill operations as explicit user-directed actions, not default remediation.
+- Keep platform differences explicit, especially where Windows support is partial.
 
-### Top resource consumers
-```bash
-process-watch top [--type cpu|mem|disk|net] [--limit 10]
-```
-
-### Process details
-```bash
-process-watch info <pid>
-# Shows: CPU, memory, open files, network connections, children, environment
-```
-
-### Find by name
-```bash
-process-watch find <name>
-# e.g., process-watch find chrome
-```
-
-### Port bindings
-```bash
-process-watch ports [--port 3000]
-# What's listening on which port?
-```
-
-### Network connections
-```bash
-process-watch net [--pid <pid>] [--established]
-```
-
-### Kill process
-```bash
-process-watch kill <pid> [--force]
-process-watch kill --name "chrome" [--force]
-```
-
-### Watch mode
-```bash
-process-watch watch [--interval 2] [--alert-cpu 80] [--alert-mem 90]
-# Continuous monitoring with threshold alerts
-```
-
-### System summary
-```bash
-process-watch summary
-# Quick overview: load, memory, disk, top processes
-```
-
-## Examples
-
-```bash
-# What's eating my CPU?
-process-watch top --type cpu
-
-# What's on port 3000?
-process-watch ports --port 3000
-
-# Details on a specific process
-process-watch info 1234
-
-# Kill all Chrome processes
-process-watch kill --name chrome
-
-# Watch with alerts
-process-watch watch --alert-cpu 90 --alert-mem 85
-```
-
-## Platform Support
-
-- **Desktop**: Full support
-- **Linux**: Full support
-- **Windows**: Partial (basic process list, no lsof equivalent)
-
-## Compliance
-- Check against GOLD Industry Standards guide in ~/.codex/AGENTS.override.md
-
-## Scope and triggers
-- Use this skill when the task matches its description and triggers.
-- If the request is outside scope, route to the referenced skill.
-
+## When to use
+- The user is investigating runaway CPU, memory growth, disk churn, or suspicious background work.
+- A port, process, or system resource spike needs process-level attribution.
+- The user needs a quick watch loop or summary of top offenders before deeper debugging.
 
 ## Required inputs
-- User request details and any relevant files/links.
-
+- The symptom or target:
+  - high CPU;
+  - memory leak suspicion;
+  - port collision;
+  - disk churn;
+  - network-heavy process.
+- Optional PID, process name, or port number.
+- Whether the task is diagnostic only or includes an explicit request to terminate a process.
 
 ## Deliverables
-- A structured response or artifact appropriate to the skill.
-- Include `schema_version: 1` if outputs are contract-bound.
-
-
-## Constraints
-- Redact secrets/PII by default.
-- Avoid destructive operations without explicit user direction.
-
-
-## Validation
-- Run any relevant checks or scripts when available.
-- Fail fast and report errors before proceeding.
-
+- A clear shortlist of suspected culprit processes.
+- Process evidence such as CPU, memory, network, file handles, or children.
+- Safe next-step guidance based on the observed signal.
 
 ## Philosophy
-- Favor clarity, explicit tradeoffs, and verifiable outputs.
+- Diagnose before acting.
+- Prefer multi-signal evidence over a single noisy metric.
+- Keep remediation proportional to the user’s request and system risk.
 
-- Encourage variation: adapt steps for different contexts and enable creative exploration.
+## Failure mode
+- If the issue is broader system tuning or app-level profiling rather than process inspection, route to a more specific debugging or performance workflow.
+- If the user wants destructive process termination without confirming target context, pause and make the impact explicit.
+- If the platform lacks the requested visibility, say what is unavailable rather than pretending the signal exists.
+
+## Constraints
+- Redact secrets, environment variables, and sensitive command-line arguments by default in outputs.
+- Do not kill or force-kill processes unless the user explicitly requests it.
+- Keep guidance scoped to local process diagnostics rather than unrelated system administration work.
+
+## Workflow
+1. Start with a summary or top view to identify likely offenders.
+2. Narrow into the specific process using PID, name, or port where possible.
+3. Inspect the strongest relevant details:
+   - CPU and memory;
+   - network connections;
+   - open files;
+   - child processes;
+   - port bindings.
+4. Decide whether the evidence suggests:
+   - a transient spike;
+   - a stable heavy process;
+   - a likely leak;
+   - or a collision or runaway background task.
+5. Recommend the smallest safe next step.
 
 ## Anti-patterns
-- Avoid vague guidance without concrete steps.
-- Do not invent results or commands.
-## Procedure
-1) Clarify scope and inputs.
-2) Execute the core workflow.
-3) Summarize outputs and next steps.
-- If context differs, customize steps to fit the situation.
+- Declaring a root cause from one `top` snapshot.
+- Killing processes reflexively when diagnostics are still incomplete.
+- Ignoring child-process trees, open ports, or I/O when CPU alone is inconclusive.
 
-## Antipatterns
-- Do not add features outside the agreed scope.
+## Validation
+- Fail fast: stop at the first unavailable command or unsupported platform capability and report that gap.
+- Verify the observed process identity matches the user’s target before recommending termination or escalation.
+- Cross-check at least two useful signals when accusing a process of runaway behavior.
 
-## Remember
-The agent is capable of extraordinary work in this domain. Use judgment, adapt to context, and push boundaries when appropriate.
+## Examples
+```bash
+# What's eating CPU?
+process-watch top --type cpu
 
-## Scripts
-- `scripts/process-watch.py`
+# What is listening on port 3000?
+process-watch ports --port 3000
+
+# Inspect a specific process
+process-watch info 1234
+
+# Watch with threshold alerts
+process-watch watch --interval 2 --alert-cpu 90 --alert-mem 85
+```
 
 ## References
-- `references/contract.yaml`
-- `references/evals.yaml`
-
-<!-- skill-score-boost-v1 -->
-## Philosophy and tradeoffs
-- Use this skill when consistent decision-making matters more than one-off execution because project context should drive the approach.
-- Principle and mindset: prioritize tradeoffs and constraints over rigid checklists; understand why each step exists.
-- Ask this to keep outcomes robust: Why is this the right default, and what could change this outcome?
-- How do we adapt if constraints shift?
-- What evidence is needed before choosing one path over another?
-
-## Anti-patterns and caveats
-- Avoid applying this playbook generically without checking repository-specific context.
-- **NEVER** skip required validation gates when behavior changes.
-- **DO NOT** use this skill as a rigid replacement for engineering judgment.
-- **DON'T** ignore warnings or assume one pattern fits all repos.
-- Common pitfall: treating anti-patterns as optional.
-- Incorrect assumptions here can lead to fragile guidance.
-- Warning: wrong sequencing can create avoidable regressions.
-
-## Variation and adaptation
-- Vary the workflow by team size, risk, and deployment target.
-- Use different strategies for small, medium, and large changes.
-- Adapt recommendations to the specific environment and avoid repetitive templates.
-- Avoid generic or cookie-cutter responses; craft context-specific alternatives.
-- Keep outputs diverse and not repetitive.
-- Converge on a custom path only after evidence review.
-- Different constraints should produce different, non-generic recommendations.
-
-## Empowering execution style
-- Be capable of exploring multiple options and enabling the team to make safe decisions.
-- Unlock confidence by explaining options and tradeoffs clearly.
-- Feel free to be creative while staying rigorous and precise.
-- Push boundaries with practical alternatives when simple recipes fail.
-- Enable outcomes-oriented problem solving.
+- Script: `scripts/process-watch.py`
+- Contract: `references/contract.yaml`
+- Evals: `references/evals.yaml`
 
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**

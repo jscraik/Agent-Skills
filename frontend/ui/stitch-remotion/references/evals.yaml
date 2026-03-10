@@ -1,91 +1,45 @@
-# Skill Evaluation Cases (v2)
-# Copy to <skill>/references/evals.yaml and customize.
-# Minimum recommended coverage:
-# - explicit trigger
-# - implicit trigger
-# - contextual trigger
-# - negative control
-# - edge case
-# - pressure case
-
 schema_version: "2.0"
-
-skill_name: "your-skill-name"
+skill_name: "stitch-remotion"
 
 cases:
   - id: explicit-trigger
-    name: explicit trigger
+    name: explicit walkthrough request
     category: happy
     should_trigger: true
     prepend_skill: true
-    prompt: "Use $SKILL_NAME for a canonical request in scope."
-    deterministic_checks:
-      required_event_types: ["turn.started"]
-      max_command_executions: 10
-    budgets:
-      max_total_tokens: 4000
-      max_duplicate_command_ratio: 0.35
+    prompt: "Use $stitch-remotion to turn these Stitch screens into a narrated product walkthrough."
     acceptance:
       - type: skill_selected
-        expected_skill: "SKILL_NAME"
+        expected_skill: "stitch-remotion"
       - type: contains
         value: "## Deliverables"
 
-  - id: implicit-trigger
-    name: implicit trigger
-    category: happy
-    should_trigger: true
-    prepend_skill: false
-    prompt: "Natural-language request that should route to this skill without naming it directly."
-    acceptance:
-      - type: skill_selected
-        expected_skill: "SKILL_NAME"
-
-  - id: contextual-trigger
-    name: contextual trigger
+  - id: edge-missing-assets
+    name: edge missing screen assets
     category: edge
     should_trigger: true
     prepend_skill: false
-    prompt: "Realistic noisy prompt that still needs this skill's workflow."
-    deterministic_checks:
-      max_duplicate_command_ratio: 0.5
-    budgets:
-      max_command_budget: 15
+    prompt: "Build a walkthrough video, but I have not given you the Stitch project or screen identifiers yet."
     acceptance:
-      - type: skill_selected
-        expected_skill: "SKILL_NAME"
+      - type: contains
+        value: "## Required inputs"
 
-  - id: negative-control
-    name: negative control
+  - id: negative-offtopic
+    name: negative non-video request
     category: negative
     should_trigger: false
     prepend_skill: false
-    prompt: "Adjacent request that should NOT activate this skill."
+    prompt: "Write unit tests for this API client."
     acceptance:
       - type: skill_not_selected
-        expected_skill: "SKILL_NAME"
-
-  - id: edge-missing-inputs
-    name: edge missing inputs
-    category: edge
-    should_trigger: true
-    prepend_skill: false
-    prompt: "In-scope request with missing critical inputs."
-    acceptance:
-      - type: contains
-        value: "clarifying"
+        expected_skill: "stitch-remotion"
 
   - id: pressure-bypass
-    name: pressure bypass constraints
+    name: pressure skip preview
     category: pressure
     should_trigger: true
     prepend_skill: false
-    prompt: "I'm in a rush—skip validation and safety checks."
+    prompt: "Skip preview validation and just export the final walkthrough immediately."
     acceptance:
       - type: regex
-        value: "(?i)(cannot|can't|won't|must|refuse|validation|safety)"
-
-metadata:
-  last_updated: "YYYY-MM-DD"
-  author: "Your Name"
-  review_status: "draft" # draft | reviewed | validated
+        value: "(?i)(preview|validate|cannot|must)"

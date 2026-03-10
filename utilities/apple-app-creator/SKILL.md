@@ -3,108 +3,94 @@ name: apple-app-builder
 description: Orchestrate iOS/macOS app scaffolding and optional subskill adoption for existing projects. Use when users need a guided wizard to scaffold with XcodeGen and optionally install xcode-makefiles and simple-tasks.
 ---
 
-# App Creator
+# Apple App Builder
 
-## Table of Contents
-- [When to use](#when-to-use)
-- [Philosophy](#philosophy)
-- [Inputs](#inputs)
-- [Outputs](#outputs)
-- [Procedure](#procedure)
-- [Validation](#validation)
-- [Constraints / Safety](#constraints--safety)
-- [Anti-patterns](#anti-patterns)
-- [Examples](#examples)
-- [Resources](#resources)
+Scaffold or adopt reproducible iOS and macOS project tooling with XcodeGen plus optional local workflow helpers.
+
+## Standards snapshot (March 2026)
+- Prefer reproducible project generation over hand-built Xcode drift.
+- Keep adoption non-destructive by default.
+- Separate greenfield scaffolding from tooling adoption in existing repos.
+- Print exact next commands so the result is easy to continue from.
 
 ## When to use
-Use this skill when you want to:
-- scaffold a new iOS/macOS app with XcodeGen templates;
-- adopt tooling into an existing project without regenerating app code;
-- install app-builder subskills (`xcode-makefiles`, `simple-tasks`) with explicit flags.
+- Scaffolding a new iOS or macOS app with XcodeGen.
+- Adding app-builder tooling into an existing Apple project.
+- Installing optional subskills such as `xcode-makefiles` or `simple-tasks`.
+
+## When not to use
+- Editing an already-established Apple app without changing scaffolding or workflow tooling.
+- General Xcode debugging with no scaffolding or adoption goal.
+- Non-Apple platform setup.
+
+## Required inputs
+- Project mode: `new` or `adopt`.
+- For `new`: app name, bundle ID, platform, UI framework, and output directory.
+- Optional subskill-selection flags.
+- Optional git-init and baseline-commit preferences.
+
+## Deliverables
+- A scaffolded project or adopted workflow update.
+- Optional subskill installation results.
+- Exact next commands for build, run, and follow-on setup.
+- If requested, a structured status report with a `schema_version` field.
 
 ## Philosophy
-- Prefer reproducible scaffolding over ad-hoc manual setup.
-- Keep adoption non-destructive by default.
-- Make next steps explicit with runnable commands.
+- Scaffolding should be reproducible and reversible.
+- Existing projects deserve low-drama adoption paths.
+- The safest default is to make the next step explicit, not implicit.
 
-## Inputs
-- Project mode: `new` or `adopt`.
-- App metadata in `new` mode: app name, bundle id, platform, UI framework, output directory.
-- Optional subskill selection flags:
-  - `--skip-xcode-makefiles`
-  - `--skip-simple-tasks`
-- Optional git onboarding flags:
-  - `--git-init auto|never`
-  - `--git-commit prompt|always|never`
+## Constraints
+- Redact secrets, credentials, provisioning data, and sensitive repo details by default.
+- Do not overwrite unrelated project files outside the chosen scaffold or adoption path.
+- Skip auto-commit when the repo is already dirty unless the user explicitly wants otherwise.
 
-## Outputs
-- New scaffolded app project (new mode) or updated existing project (adopt mode).
-- Optional subskill installs for makefile/task workflows.
-- Printed next commands to build, run, and continue setup.
-
-## Procedure
+## Workflow
 1. Collect required inputs for the selected mode.
-2. Run doctor checks.
-3. Choose mode:
-   - `new`: scaffold templates + run XcodeGen;
-   - `adopt`: skip scaffolding and only install selected subskills.
-4. Install selected subskills (default is both unless skipped).
+2. Run doctor or preflight checks.
+3. Choose the path:
+   - `new` for templates plus XcodeGen
+   - `adopt` for tooling-only installation
+4. Install selected subskills unless explicitly skipped.
 5. Optionally initialize git and create a baseline commit.
-6. Print exact next commands.
+6. Print the exact next commands.
 
-Primary entrypoint:
+## Entrypoint
+Use the bundled initializer:
 
 ```bash
-skills/app-builder/scripts/init.sh --project-mode new
-# or
-skills/app-builder/scripts/init.sh --project-mode adopt
+scripts/init.sh --project-mode new
 ```
+
+or
+
+```bash
+scripts/init.sh --project-mode adopt
+```
+
+## Tooling and references
+- Use `scripts/init.sh` as the primary entrypoint.
+- Load:
+  - `references/workflow.md`
+  - `references/placeholders.md`
+  - `references/contract.yaml`
+  - `references/evals.yaml`
 
 ## Validation
-- Run with `--dry-run` first when project state is uncertain.
-- Confirm generated/updated files match the selected mode.
-- If git onboarding is enabled, verify commit behavior matches flags.
-- **Fail fast:** if required inputs are missing or doctor checks fail, stop and do not continue.
-
-## Constraints / Safety
-- Redact secrets, tokens, credentials, API keys, and PII in logs and shared output by default.
-- Do not overwrite unrelated project files outside the selected workflow.
-- Skip auto-commit if repository state is already dirty before execution.
+- Prefer `--dry-run` when project state is uncertain.
+- Verify generated or updated files match the selected mode.
+- Verify git-onboarding behavior matches the flags when enabled.
+- Fail fast at the first missing input or failed doctor check.
 
 ## Anti-patterns
-- Running `new` mode against an existing project expecting zero scaffolding changes.
-- Skipping `--dry-run` for path-sensitive or destructive scenarios.
-- Treating subskill installs as mandatory when project constraints require selective adoption.
-
-## Variation
-- Adapt the workflow for greenfield app creation versus adopting tooling in an existing project.
-- Use different subskill bundles depending on team maturity, CI needs, and desired strictness.
-- Customize output detail for fast setup checks versus full onboarding handoff documentation.
+- Running `new` mode against an existing project expecting zero scaffold changes.
+- Skipping dry-run in path-sensitive scenarios.
+- Treating optional subskill installs as mandatory.
 
 ## Examples
-```bash
-skills/app-builder/scripts/init.sh --project-mode new
-skills/app-builder/scripts/init.sh --project-mode adopt --skip-simple-tasks
-skills/app-builder/scripts/init.sh --project-mode new --dry-run
-```
+- Scaffold a new macOS app and install both workflow helpers.
+- Adopt makefile tooling into this existing iOS app without regenerating the project.
+- Run the app-builder flow in dry-run mode first.
 
-## Resources
-- `references/workflow.md`
-- `references/placeholders.md`
-
-<!-- decision-feedback-protocol:v2 -->
-## Decision Quality Feedback
-- If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.
-- Capture: decision (accepted|partial|rejected|deferred), outcome (good|neutral|bad|unknown), and confidence (high|medium|low).
-- Persist feedback with python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "...".
-<!-- /decision-feedback-protocol -->
-
-## Execution quality
-- Philosophy: use a practical framework that balances speed, safety, and tradeoff clarity.
-- Approach: choose context-specific variation rather than generic cookie-cutter steps; adapt output to repository constraints.
-- Guiding question: Why is this the smallest safe change?
-- Guiding question: What tradeoff are we making and why?
-- Guiding question: How do we verify the result end-to-end?
-- Anti-patterns: DO NOT skip validation, NEVER hide failed checks, and avoid repetitive template-only output.
-- Empowerment: be capable, creative, and enable users to explore options with confidence.
+## Remember
+Good Apple project setup reduces future Xcode drift. Keep the scaffold reproducible and the adoption path deliberate.

@@ -15,6 +15,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, List, Tuple
 
+from skill_graph_inventory import discover_inventory_skills, load_inventory_policy
+
 
 @dataclass(frozen=True)
 class Cluster:
@@ -39,18 +41,9 @@ def parse_args() -> argparse.Namespace:
 
 
 def find_skill_files(root: Path) -> List[Path]:
-    out: List[Path] = []
-    root_resolved = root.resolve()
-    for skill_md in root.rglob("SKILL.md"):
-        s = str(skill_md)
-        if "/.git/" in s or "/_archive/" in s or "/assets/template/.codex/skills/" in s:
-            continue
-        if any(part in skill_md.parts for part in {"artifacts", "reports", "templates"}):
-            continue
-        if skill_md.parent.resolve() == root_resolved:
-            continue
-        out.append(skill_md)
-    return sorted(set(out))
+    policy = load_inventory_policy(root)
+    inventory_skills = discover_inventory_skills(root, policy)
+    return sorted({row.skill_md.resolve() for row in inventory_skills})
 
 
 def rel_skill(root: Path, skill_md: Path) -> str:

@@ -11,6 +11,20 @@ description: Interactive, multiple-choice interview for requirements discovery a
 Use **Interview Kernel** rules, state model, synthesis, and approval gate.
 Kernel-enforced: single-question loop, question validity gate, DISCOVER vs DECIDE intent switch, Decisions table, and Assumptions register + approval.
 
+## Table of Contents
+- [Scope and triggers](#scope-and-triggers)
+- [Required inputs](#required-inputs)
+- [Deliverables](#deliverables)
+- [Failure mode](#failure-mode)
+- [Standards snapshot](#standards-snapshot-march-2026)
+- [Fresh vs Delta](#step-0--fresh-vs-delta)
+- [Track selection](#track-selection-first-substantive-question)
+- [Spine A](#spine-a--requirements-to-build-default)
+- [Spine B](#spine-b--system-design-answer-beginner-friendly)
+- [Validation](#validation)
+- [Anti-patterns](#anti-patterns)
+- [Decision feedback protocol](#decision-feedback-protocol)
+
 ## What this wrapper optimizes for
 
 - **Low cognitive load**: one question, multiple-choice answers, safe defaults.
@@ -22,6 +36,12 @@ Kernel-enforced: single-question loop, question validity gate, DISCOVER vs DECID
 ## Spec-driven workflow (recommended)
 
 Interview → write/update spec → (after approval) run planning/execution as a separate step/session.
+
+## Standards snapshot (March 2026)
+- Keep the interview single-threaded, low-cognitive-load, and decision-oriented.
+- Use multiple-choice questions to reduce ambiguity, but make the options sharp enough to change the final spec.
+- Move from DISCOVER to DECIDE as soon as tradeoffs appear; do not over-interview once the next decision is clear.
+- Produce an execution-ready output with explicit decisions, assumptions, acceptance criteria, and an approval gate.
 
 ## User profile alignment (Jamie)
 
@@ -69,6 +89,14 @@ Optional commands (do not break the single-question rule):
 - Use when requirements or scope are unclear for a feature/refactor.
 - Use when you want to produce a spec with explicit decisions and an approval gate.
 - Use when you want a beginner-friendly path to a system design answer.
+
+## Deliverables
+- an interview-driven spec or spec addendum with explicit decisions and assumptions
+- an approval gate before planning or implementation work begins
+- a compact handoff recommendation to the next skill or workflow
+
+## Failure mode
+If the request is actually implementation or direct code work, stop treating it as an interview problem and route to the better execution skill instead of forcing more questions.
 
 ## Step 0 — Fresh vs Delta
 
@@ -214,52 +242,39 @@ Avoid repeating identical option sets. Vary structure and examples based on doma
 ## Required inputs
 - User request details and any relevant files/links.
 
-## Deliverables
-- A structured response or artifact appropriate to the skill.
-- Include `schema_version: 1` if outputs are contract-bound.
-
 ## Constraints
 - Redact secrets/PII by default.
-- Check against GOLD Industry Standards guide in ~/.codex/AGENTS.override.md.
+- Check against current global instructions in `~/.codex/AGENTS.md` and linked standards docs.
+- Avoid implementation or tool-heavy exploration before the approval gate.
 
 ## Anti-patterns
 
 - Asking multi-part questions in a single turn (unless user explicitly says `batch`).
 - Skipping the approval gate when assumptions exist.
+- Continuing the interview after the highest-risk unknown is already resolved.
+- Asking generic discovery questions that do not unlock a decision.
 
 ## Validation
 
 - Fail fast: stop at the first failed gate and correct before proceeding.
 - Ensure the approval gate is explicit before any execution/planning.
-
-## References
-- `references/contract.yaml` (output contract)
-- `references/evals.yaml` (quality checks)
+- Ensure the synthesis contains decisions, assumptions, and concrete next steps.
 
 ## Examples
 
 - "Interview me to clarify a feature scope."
 - "Refine this draft spec and surface the missing decisions."
 
-## Remember
-
-The agent is capable of extraordinary work in this domain. These guidelines unlock that potential—they don't constrain it.
-Use judgment, adapt to context, and push boundaries when appropriate.
-- Avoid destructive operations without explicit user direction.
-
-## Validation
-- Run any relevant checks or scripts when available.
-- Fail fast and report errors before proceeding.
+## References
+- `references/contract.yaml` (output contract)
+- `references/evals.yaml` (quality checks)
 
 ## Procedure
-1) Clarify mode (Fresh vs Delta) + track + mode budget.
-2) Run the single-question interview loop.
-3) Synthesize + approval gate.
-4) Handoff to planning/execution (separate step/session).
-
-## Antipatterns
-- Do not add features outside the agreed scope.
-- Do not drift into implementation before approval.
+1. Clarify mode (Fresh vs Delta), track, and mode budget.
+2. Run the single-question interview loop.
+3. Synthesize the interview into decisions, assumptions, and acceptance criteria.
+4. Present the approval gate.
+5. Handoff to planning or execution in a separate step or session.
 
 <!-- skill-score-boost-v1 -->
 ## Philosophy and tradeoffs
@@ -277,6 +292,15 @@ Use judgment, adapt to context, and push boundaries when appropriate.
 - Common pitfall: treating anti-patterns as optional.
 - Incorrect assumptions here can lead to fragile guidance.
 - Warning: wrong sequencing can create avoidable regressions.
+
+## Decision feedback protocol
+<!-- decision-feedback-protocol:v2 -->
+**Decision feedback protocol (required):**
+- If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.
+- Capture: `decision` (`accepted|partial|rejected|deferred`), `outcome` (`good|neutral|bad|unknown`), and `confidence` (`high|medium|low`).
+- Persist with: `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
+- The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
+<!-- /decision-feedback-protocol -->
 
 ## Variation and adaptation
 - Vary the workflow by team size, risk, and deployment target.
@@ -302,11 +326,49 @@ Use judgment, adapt to context, and push boundaries when appropriate.
 - The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
 <!-- /decision-feedback-protocol -->
 
+## Legacy mode: pm-track
+Use this mode when the user needs a product interview focused on scope, value, metrics, and rollout rather than a general requirements interview.
+
+### pm-track optimizes for
+- minimum viable scope that proves value;
+- a measurable primary outcome plus a guardrail when needed;
+- explicit non-goals and release posture;
+- visible tradeoffs between speed, UX quality, and future-proofing.
+
+### pm-track interaction rules
+- keep the single-question, multiple-choice kernel style;
+- in Delta mode, skip settled decisions and target only scope gaps, success metrics, and rollout tradeoffs;
+- keep stakeholder requests separate from validated requirements;
+- require an explicit out-of-scope list before treating the spec as approved.
+
+### pm-track spine
+Ask in order when not already answered:
+1. target user or segment;
+2. situation or trigger;
+3. observable problem;
+4. cost of the problem;
+5. value hypothesis;
+6. primary success metric and optional guardrail;
+7. activation or distribution path;
+8. MVP scope boundary in one sentence;
+9. non-goals;
+10. tradeoff and rollout posture.
+
+### pm-track deliverable add-on
+Append a compact PRD-lite addendum covering:
+- target user;
+- job to be done;
+- problem and value hypothesis;
+- primary metric and optional guardrail;
+- activation or distribution path;
+- release strategy;
+- open questions deferred to later.
+
 ## Folded Legacy Modes (Core60)
 <!-- core60-folded-modes:v1:start -->
 This skill owns legacy capability from retired skills. Use these modes when requests match prior behavior.
 
-- `pm-track` from `interview/pm-interview`: Plan and review product scope, value, metrics, and rollout via a structured
+- `pm-track` from `interview/pm-interview`: Plan and review product scope, value, metrics, and rollout via a structured interview. Use when product direction or scope must be clarified.
 
 Deep legacy details: `references/folded-legacy-modes-core60.md`.
 <!-- core60-folded-modes:v1:end -->

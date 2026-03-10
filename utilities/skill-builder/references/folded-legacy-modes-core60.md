@@ -15,6 +15,19 @@ This file captures legacy capabilities migrated from retired skills.
   - Guiding questions
   - Scope and triggers
   - Required inputs
+  - Deliverables
+  - Output contract
+  - Constraints / Safety
+  - Scripts
+  - Behavior and Options
+  - Validation
+  - Troubleshooting
+  - Procedure
+- Live guidance preserved in destination:
+  - explicit list/install/update/dry-run triggers
+  - overwrite and scope confirmation gates
+  - staged install plus risk and deconflict checks
+  - validator and post-install decision-feedback checks
 
 ## `prompt-packaging`
 - Source skill: `utilities/codex-prompt-creator`

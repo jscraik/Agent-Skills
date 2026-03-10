@@ -7,10 +7,32 @@ description: Manage, analyze, and generate Google NotebookLM workflows for noteb
 
 Operate NotebookLM workflows with script-backed execution and explicit verification.
 
+## Table of Contents
+- [When to use](#when-to-use)
+- [Standards snapshot](#standards-snapshot-march-2026)
+- [Inputs](#inputs)
+- [Outputs](#outputs)
+- [Failure mode](#failure-mode)
+- [Philosophy](#philosophy)
+- [Constraints](#constraints)
+- [Procedure](#procedure)
+- [Validation](#validation)
+- [Anti-patterns](#anti-patterns)
+- [Variation](#variation)
+- [Examples](#examples)
+- [Resource map](#resource-map)
+- [Decision feedback protocol](#decision-feedback-protocol)
+
 ## When to use
 - Use this skill for NotebookLM notebook/source management tasks.
 - Use this skill for question answering against notebook content.
 - Use this skill for audio/video overview generation requests.
+
+## Standards snapshot (March 2026)
+- Prefer script-backed NotebookLM operations over ad hoc browser choreography.
+- Verify notebook identity and target resources before mutating actions.
+- Treat auth, returned object IDs, and observable side effects as first-class validation gates.
+- Report blocked or partial outcomes explicitly instead of guessing NotebookLM state.
 
 ## Inputs
 - User objective and target notebook/source context.
@@ -21,6 +43,9 @@ Operate NotebookLM workflows with script-backed execution and explicit verificat
 - Completed NotebookLM action or clear blocked state.
 - Evidence summary of commands executed and validation checks.
 - Next action if additional user confirmation is required.
+
+## Failure mode
+If auth is stale, the target notebook/source cannot be identified, or the script result cannot be verified, stop at that blocker, report the exact failed gate, and do not fabricate a successful NotebookLM action.
 
 ## Philosophy
 - Prefer deterministic script execution over ad hoc browser actions.
@@ -66,13 +91,11 @@ Operate NotebookLM workflows with script-backed execution and explicit verificat
 - Scripts: `scripts/run.py`, `scripts/ask_question.py`, `scripts/add_source.py`, `scripts/video_generator.py`
 - References: `references/contract.yaml`, `references/evals.yaml`, `references/api_reference.md`, `references/troubleshooting.md`
 
-## Quality Uplift
-- Philosophy and approach: apply a clear framework, explain why, consider tradeoff decisions, and use a practical mental model for execution.
-- Guiding question: Why is this the right context-specific path?
-- Guiding question: What tradeoff is being made and how is risk reduced?
-- Guiding question: How do we verify behavior end-to-end before completion?
-- Anti-pattern warning: avoid generic or repetitive output; DO NOT hide failures; NEVER skip validation; avoid common pitfall and mistake patterns.
-- Anti-pattern warning: treat incorrect or wrong assumptions as blockers, and call out anti-pattern risks explicitly.
-- Variation: vary recommendations by context-specific constraints; adapt, customize, and use different approaches when constraints differ.
-- Variation: prefer diverse, unique alternatives and avoid repetition or cookie-cutter template convergence.
-- Empowerment: enable users to explore options confidently, be capable and creative, unlock safe choices, and empower execution.
+## Decision feedback protocol
+<!-- decision-feedback-protocol:v2 -->
+**Decision feedback protocol (required):**
+- If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.
+- Capture: `decision` (`accepted|partial|rejected|deferred`), `outcome` (`good|neutral|bad|unknown`), and `confidence` (`high|medium|low`).
+- Persist with: `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
+- The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
+<!-- /decision-feedback-protocol -->

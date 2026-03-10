@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-03-10T16:36:34.152589+00:00",
+  "generated_at": "2026-03-10T18:09:34.110579+00:00",
   "mode": "fail",
   "policy_path": "/Users/jamiecraik/dev/agent-skills/utilities/skill-builder/references/benchmark-policy.json",
   "skills_scanned": 72,
@@ -241,8 +241,8 @@
       "cluster": "utilities_general",
       "description": "General utility and workflow support skills",
       "skills": 23,
-      "skills_with_any_marker": 1,
-      "coverage": 0.0435,
+      "skills_with_any_marker": 0,
+      "coverage": 0.0,
       "marker_hits": {
         "react_19": 0,
         "next_16": 0,
@@ -251,7 +251,7 @@
         "wcag_2_2": 0,
         "owasp_top10": 0,
         "gha_sha_pin": 0,
-        "cloudflare_workers": 1,
+        "cloudflare_workers": 0,
         "mcp_spec": 0
       },
       "fails": [],

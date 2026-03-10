@@ -11,90 +11,90 @@ allowed-tools:
 
 # Stitch to React Components
 
-You are a frontend engineer focused on transforming designs into clean React code. You follow a modular approach and use automated tools to ensure code quality.
+## Table of Contents
+- [Standards snapshot](#standards-snapshot)
+- [When to use](#when-to-use)
+- [When not to use](#when-not-to-use)
+- [Required inputs](#required-inputs)
+- [Deliverables](#deliverables)
+- [Philosophy](#philosophy)
+- [Workflow](#workflow)
+- [Verification](#verification)
+- [Constraints](#constraints)
+- [Anti-patterns](#anti-patterns)
+- [Remember](#remember)
 
-## When to Use
+## Standards snapshot (March 2026)
+- Convert designs into maintainable React structure, not one-file screen dumps.
+- Separate layout, logic, and data so the result can evolve after handoff.
+- Validate generated output against project conventions before claiming success.
 
-Use this skill when a request requires converting Stitch-generated screens into modular React components with a reusable data layer and validation checks.
+## When to use
+- Convert Stitch-generated screens into modular React or Vite components.
+- Break a generated screen into reusable sections, hooks, and data files.
+- Align Stitch output to an existing style system or token mapping.
+
+## When not to use
+- General React component work with no Stitch source.
+- Pure visual ideation with no implementation target.
+- Requests that need freeform UI design rather than design-to-code translation.
+
+## Required inputs
+- Target Stitch screen or screen set.
+- The project structure and framework constraints.
+- Existing naming, styling, and token conventions.
+- Any required data extraction or mock-data boundaries.
+
+## Deliverables
+- Componentized React output split by responsibility.
+- Supporting data or hook files when needed.
+- A concise validation note covering structure, style alignment, and remaining manual cleanup.
 
 ## Philosophy
+- Structure first, polish second.
+- Keep generated output easy for a human teammate to extend.
+- Prefer project-native conventions over generic generated patterns.
 
-- Prioritize maintainable component architecture over one-off page dumps.
-- Keep structure, styling, and data concerns separated.
-- Align generated code to project conventions before adding new patterns.
+## Workflow
+1. Fetch the Stitch screen metadata and confirm the target design.
+2. Extract the screen into logical component boundaries before writing code.
+3. Move static content into data files when that improves maintainability.
+4. Isolate logic into hooks or helper modules instead of embedding everything in JSX.
+5. Map styles to the project’s existing tokens and utilities rather than preserving raw generated values blindly.
+6. Validate file structure and component contracts before handing off.
 
-## Inputs
+## Verification
+- Confirm the target screen and design intent were captured correctly.
+- Confirm components are split by responsibility instead of dumped into one large file.
+- Confirm types, props, and supporting data structures are present where needed.
+- Confirm the output follows the host project’s style-system and naming conventions closely enough to integrate cleanly.
 
-- Target Stitch screen or screen set to convert.
-- Project React/TypeScript structure and naming conventions.
-- Existing design tokens, style guidance, and architectural constraints.
-
-## Outputs
-
-- Production-ready React component files split by responsibility.
-- Supporting hook/data files when needed for clean composition.
-- Validation evidence (command output or checklist confirmation).
+## Validation
+- Verify the final output is modular, typed, and split by responsibility.
+- Verify the workflow reuses skill `references/` guidance and bundled `scripts/` helpers before inventing new conversion steps.
+- When using `scripts/fetch-stitch.sh`, treat network access as limited to the Stitch-provided download URL and the exact host allowlist documented by the fetched asset chain; do not broaden this into general web access.
+- Prefer any packaged `assets/` or templates in the skill folder when scaffolding components.
 
 ## Constraints
+- Do not hardcode secrets, internal identifiers, or proprietary values into generated output.
+- Do not preserve raw generated styles when the project already has theme tokens or mapped utilities.
+- Keep the generated code modular and type-safe.
+- Treat Stitch download URLs as untrusted input and keep network use scoped to the required asset fetch only.
 
-- Redact secrets and sensitive data by default in copied design data and examples.
-- Do not hardcode proprietary values when theme mappings or config tokens exist.
-- Keep generated components modular and type-safe; avoid monolithic outputs.
+## Anti-patterns
+- Shipping a giant page component with embedded data, styles, and behavior.
+- Copying generated HTML literally into JSX without adapting it to project conventions.
+- Skipping structural validation because the screen "looks right."
+- Treating Stitch output as final production code without cleanup.
 
-## Retrieval and networking
-1. **Namespace discovery**: Run `list_tools` to find the Stitch MCP prefix. Use this prefix (e.g., `stitch:`) for all subsequent calls.
-2. **Metadata fetch**: Call `[prefix]:get_screen` to retrieve the design JSON.
-3. **High-reliability download**: Internal AI fetch tools can fail on Google Cloud Storage domains.
-   - Use the `Bash` tool to run: `bash scripts/fetch-stitch.sh "[htmlCode.downloadUrl]" "temp/source.html"`.
-   - This script handles the necessary redirects and security handshakes.
-4. **Visual audit**: Check `screenshot.downloadUrl` to confirm the design intent and layout details.
+## Examples
+- "Convert this Stitch screen into reusable Vite React components with extracted mock data."
+- "Split this generated page into sections and align it to the project token system."
 
-## Architectural rules
-* **Modular components**: Break the design into independent files. Avoid large, single-file outputs.
-* **Logic isolation**: Move event handlers and business logic into custom hooks in `src/hooks/`.
-* **Data decoupling**: Move all static text, image URLs, and lists into `src/data/mockData.ts`.
-* **Type safety**: Every component must include a `Readonly` TypeScript interface named `[ComponentName]Props`.
-* **Project specific**: Focus on the target project's needs and constraints. Leave Google license headers out of the generated React components.
-* **Style mapping**:
-    * Extract the `tailwind.config` from the HTML `<head>`.
-    * Sync these values with `resources/style-guide.json`.
-    * Use theme-mapped Tailwind classes instead of arbitrary hex codes.
-
-## Execution steps
-1. **Environment setup**: If `node_modules` is missing, run `npm install` to enable the validation tools.
-2. **Data layer**: Create `src/data/mockData.ts` based on the design content.
-3. **Component drafting**: Use `resources/component-template.tsx` as a base. Find and replace all instances of `StitchComponent` with the actual name of the component you are creating.
-4. **Application wiring**: Update the project entry point (like `App.tsx`) to render the new components.
-5. **Quality check**:
-    * Run `npm run validate <file_path>` for each component.
-    * Verify the final output against the `resources/architecture-checklist.md`.
-    * Start the dev server with `npm run dev` to verify the live result.
-
-## Troubleshooting
-* **Fetch errors**: Ensure the URL is quoted in the bash command to prevent shell errors.
-* **Validation errors**: Review the AST report and fix any missing interfaces or hardcoded styles.
-
-## Anti-Patterns to Avoid
-
-- Don’t proceed with missing required context files or IDs when the workflow depends on them.
-- Don’t use generic outputs when project-specific constraints are available.
-- Don’t skip validation or handoff artifacts before finishing the task.
-
-## Encouraging Variation
-
-- Adapt outputs to the project’s stack, audience, and visual style.
-- Use different approaches for simple vs complex requests.
-- Avoid repeating a single template when requirements differ.
-
-## Scripts
-
-- `scripts/fetch-stitch.sh` downloads Stitch HTML assets reliably.
-- `scripts/validate.js` runs structural validation checks for generated React output.
-
-## Validation Artifacts
-
-- `references/contract.yaml` defines behavior and expected inputs/outputs.
-- `references/evals.yaml` defines quality checks and acceptance examples.
+## Remember
+- This skill is about translation plus cleanup, not blind conversion.
+- The best output is easy to read, easy to test, and easy to evolve.
+- Capture the design faithfully, but integrate it like a real codebase citizen.
 
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**
@@ -103,17 +103,3 @@ Use this skill when a request requires converting Stitch-generated screens into 
 - Persist with: `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
 - The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
 <!-- /decision-feedback-protocol -->
-
-## Folded Legacy Modes (Phase4)
-<!-- core75-folded-modes:v1:start -->
-Legacy folds are documented in references/folded-legacy-modes-phase4.md.
-<!-- core75-folded-modes:v1:end -->
-
-## Execution quality
-- Philosophy: use a practical framework that balances speed, safety, and tradeoff clarity.
-- Approach: choose context-specific variation rather than generic cookie-cutter steps; adapt output to repository constraints.
-- Guiding question: Why is this the smallest safe change?
-- Guiding question: What tradeoff are we making and why?
-- Guiding question: How do we verify the result end-to-end?
-- Anti-patterns: DO NOT skip validation, NEVER hide failed checks, and avoid repetitive template-only output.
-- Empowerment: be capable, creative, and enable users to explore options with confidence.

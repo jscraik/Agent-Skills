@@ -121,6 +121,46 @@
         "product/docs/context7",
         "product/domain/chatgpt-apps"
       ]
+    },
+    "backend_general": {
+      "description": "General backend and CLI design skills",
+      "include_prefixes": [
+        "backend/cli-spec"
+      ]
+    },
+    "interview": {
+      "description": "Interview and requirements discovery skills",
+      "include_prefixes": [
+        "interview/"
+      ]
+    },
+    "docs_content": {
+      "description": "Documentation and content skills",
+      "include_prefixes": [
+        "product/docs/",
+        "product/content/"
+      ]
+    },
+    "product_ops": {
+      "description": "Product strategy, planning, and operational workflow skills",
+      "include_prefixes": [
+        "product/ops/",
+        "product/strategy/",
+        "product/specs/"
+      ]
+    },
+    "product_domain": {
+      "description": "Product domain and integration-specific skills outside core app clusters",
+      "include_prefixes": [
+        "product/domain/arscontexta",
+        "product/domain/oak-api"
+      ]
+    },
+    "utilities_general": {
+      "description": "General utility and workflow support skills",
+      "include_prefixes": [
+        "utilities/"
+      ]
     }
   },
   "rules": {
@@ -214,6 +254,13 @@
       },
       "min_coverage_fail": 0.3,
       "min_coverage_warn": 0.5
+    },
+    "backend_general": {},
+    "interview": {},
+    "docs_content": {},
+    "product_ops": {},
+    "product_domain": {},
+    "utilities_general": {}
     }
   }
 }

@@ -7,50 +7,72 @@ description: Create high-retention hooks and full scripts for technical YouTube 
 
 # YouTube Hooks & Scripts
 
-Purpose: Deliver the core outputs for this skill. The full guidance lives in `references/full-guide.md`.
+## Table of Contents
+- [Scope and triggers](#scope-and-triggers)
+- [Required inputs](#required-inputs)
+- [Deliverables](#deliverables)
+- [Failure mode](#failure-mode)
+- [Standards snapshot](#standards-snapshot-march-2026)
+- [Workflow](#workflow)
+- [Validation](#validation)
+- [Anti-patterns](#anti-patterns)
+- [Decision feedback protocol](#decision-feedback-protocol)
+
+Deliver high-retention technical YouTube hooks, outlines, and scripts. The deeper craft guidance lives in `references/full-guide.md`.
 
 ## Scope and triggers
-- Use when asked for technical YouTube hooks and long-form scripts.
-- For broader product/PRD work, route to `product-spec`.
+- Use when asked for technical YouTube hooks, outlines, or long-form scripts.
+- Use it for packaging the story and teaching arc of a video, not for broader product planning.
+- Route broader product or PRD work to `product-spec`.
 
 ## Required inputs
-- Topic, audience, and any provided transcript/notes.
+- topic
+- audience
+- desired output shape: hooks, outline, or full script
+- runtime or length target when known
+- any transcript, notes, or claims that must be preserved
 
 ## Deliverables
-- Requested deliverable (hooks/scripts or titles/thumbnail text).
-- Include `schema_version: 1` if you return a structured schema.
+- the requested hook set, outline, or full script
+- framing matched to audience sophistication and video length
+- explicit notes where claims, examples, or metrics require user-provided evidence
+
+## Failure mode
+If the prompt lacks the core topic, audience, or target output shape, ask for the smallest missing detail instead of generating generic creator slop.
+
+## Standards snapshot (March 2026)
+- Optimize for retention without sacrificing technical accuracy.
+- Match the opening promise, structure, and payoff to the audience’s actual sophistication.
+- Prefer concrete curiosity gaps, earned authority, and clear viewer outcomes over hype.
+- Keep claims evidence-bound; do not invent benchmarks, timelines, or personal anecdotes.
 
 ## Constraints
-- Redact secrets/PII by default.
-- Do not invent metrics or claims; ask for missing facts.
+- Redact secrets, tokens, credentials, and sensitive data by default.
+- Do not invent metrics, user results, or unverifiable claims.
+- Keep outputs aligned to the requested format and audience sophistication.
+
+## Workflow
+1. Identify the requested output: hook options, outline, or full script.
+2. Anchor on topic, audience, runtime, and desired tone.
+3. Build a clear promise, narrative spine, and payoff sequence.
+4. Deliver concise variations when the user is choosing direction; deliver a full script only when that is the ask.
 
 ## Validation
 - Confirm tone, audience fit, and length constraints.
 - Fail fast if key inputs are missing.
+- Confirm the opening hook creates a clear curiosity gap without misleading the viewer.
+- Confirm the script payoff actually cashes the promise made in the opening.
 
 ## Anti-patterns
 - Overlong outputs that ignore format limits.
 - Generic suggestions not tied to the topic.
-
-## Philosophy
-- Favor clarity, explicit tradeoffs, and verifiable outputs.
-- Encourage variation: adapt steps for different contexts and enable creative exploration.
-
-## Procedure
-1) Clarify scope and inputs.
-2) Execute the core workflow.
-3) Summarize outputs and next steps.
-- If context differs, customize steps to fit the situation.
-
-## Antipatterns
-- Do not add features outside the agreed scope.
+- Hooks that overpromise and scripts that never deliver the promised insight.
+- Thumbnail-style sensationalism inside a script intended for trust-building technical content.
 
 ## Examples
-- "Provide a concise response for this task."
-- "Follow the workflow and summarize outputs."
-
-## Remember
-The agent is capable of extraordinary work in this domain. Use judgment, adapt to context, and push boundaries when appropriate.
+- "Give me five hook options for a technical video about Codex workflows."
+- "Turn these notes into a 10-minute tutorial script."
+- "Write an outline for a video aimed at senior TypeScript engineers."
 
 <!-- skill-score-boost-v1 -->
 ## Philosophy and tradeoffs
@@ -85,6 +107,7 @@ The agent is capable of extraordinary work in this domain. Use judgment, adapt t
 - Push boundaries with practical alternatives when simple recipes fail.
 - Enable outcomes-oriented problem solving.
 
+## Decision feedback protocol
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.

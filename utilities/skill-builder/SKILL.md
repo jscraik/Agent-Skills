@@ -38,6 +38,12 @@ This skill designs, improves, validates, and packages high-quality Codex skills.
 - For long runs, write short status notes so compaction is safe.
 - For advisory or intake-only turns, do bounded preflight first; do not broad-scan the repo tree unless editing or repo-wide analysis is actually needed.
 
+## Standards snapshot (March 2026)
+- Build skills as routing assets plus durable support files, not megadocs.
+- Prefer repo-validated workflow and benchmark evidence over aspirational wording.
+- Treat evals, contracts, and validator output as part of the product, not optional polish.
+- Keep the result implementable by another agent without hidden context.
+
 ## Scope and triggers
 Use this skill to:
 - create a new skill;
@@ -99,6 +105,7 @@ Produce what the request actually needs, usually from this set:
 - `references/plan.md` for multi-step builds;
 - validator output, analyzer output, and an OpenClaw-style readiness summary;
 - a packaged `.skill` file when packaging is requested.
+- a concise blocker summary when a skill cannot meet the quality bar in the current turn
 
 For created or revised skills, keep decision-feedback instrumentation in scope:
 - include the `decision-feedback-protocol:v2` block in the skill when post-run feedback is relevant;
@@ -240,6 +247,7 @@ python scripts/package_skill.py <path/to/skill-folder> dist/
 - Cap iterative fix loops at 3 rounds per failing gate; after round 3, stop and report blockers plus the smallest safe next step.
 - Do not repeat the same command unchanged more than twice; if it fails twice, change approach or halt.
 - Prefer deterministic helper scripts over free-form retries when the same failure repeats.
+- Keep benchmark and validation reruns scoped while iterating, then rerun repo-wide gates before claiming the portfolio is clean.
 
 ## Script-backed security rules
 When the skill includes executable code:
@@ -321,11 +329,49 @@ Use these files when needed:
 ## Empowering execution style
 Be capable, creative, and willing to explore better options when evidence supports them. Enable the user to make safe choices by explaining tradeoffs clearly, then keep the implementation disciplined and auditable.
 
+## Legacy mode: install-distribute
+Use this mode when the request is about listing, installing, updating, or validating skills from curated registries or GitHub sources rather than authoring the skill itself.
+
+### Install-distribute triggers
+- list curated skills or compare what is already installed;
+- install a skill from a curated registry, GitHub repo, or repo path;
+- update an installed skill safely with overwrite and deconflict checks;
+- dry-run a proposed install before writing files.
+
+### Install-distribute required inputs
+- source: curated skill name, repo URL, or repo path;
+- destination scope: `REPO` or `USER`;
+- target destination path or category;
+- overwrite/update consent when the destination already exists;
+- whether the user wants listing, dry-run, install, update, or deconflict analysis.
+
+Use `request_user_input` for missing install decisions when the turn fits in 1-3 short questions. Do not overwrite or promote files until the scope and overwrite decision are explicit.
+
+### Install-distribute operating rules
+- Prefer curated or verified sources and stage external fetches in `/tmp` or `/mnt/data`.
+- Keep installs auditable: source, ref, staging path, validations, and final destination should all be reported.
+- Run a risk scan before promotion and stop on high-severity findings unless the user explicitly approves continuation.
+- Use deconflict analysis when the target overlaps meaningfully with installed skills or appears to solve the same job.
+- For unclear requests, default to `list` or `dry-run` instead of mutating the workspace.
+
+### Install-distribute deliverables
+- installed or updated skill folder, or a dry-run plan if no writes occurred;
+- source summary, staging boundary, and any deconflict or risk findings;
+- validator results for each installed target;
+- restart reminder after successful install/update;
+- verification that the installed `SKILL.md` includes decision feedback instrumentation when relevant.
+
+### Install-distribute validation
+- run the installed skill through quick validation, skill gate, analyzer, and OpenClaw-style guard checks;
+- run evals for newly installed skills after write completion;
+- confirm the repo diff only contains expected skill-install paths;
+- stop and report blockers if a failing step repeats 3 times.
+
 ## Folded Legacy Modes (Core60)
 <!-- core60-folded-modes:v1:start -->
 This skill owns legacy capability from retired skills. Use these modes when requests match prior behavior.
 
-- `install-distribute` from `utilities/skill-installer`: Plan and install skills into a Codex skills directory from curated or repo sources; use when a user asks to list available skills, instal...
+- `install-distribute` from `utilities/skill-installer`: Plan and install skills into a Codex skills directory from curated or repo sources; use when a user asks to list available skills, install or update a skill, or validate a source before installation.
 - `prompt-packaging` from `utilities/codex-prompt-creator`: Create or update reusable Codex skills under .agents/skills and optionally local ~/.codex/prompts shortcuts. Use when a user asks to buil...
 
 Deep legacy details: `references/folded-legacy-modes-core60.md`.

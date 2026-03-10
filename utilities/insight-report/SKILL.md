@@ -5,71 +5,89 @@ description: Generate a high-fidelity Codex usage insights HTML report from loca
 
 # Insight Report
 
-Generate evidence-backed usage insights from local Codex session history.
+Generate evidence-backed HTML insight reports from local Codex session history without drifting into anecdotal storytelling.
+
+## Table of Contents
+- [Standards snapshot](#standards-snapshot)
+- [When to use](#when-to-use)
+- [Required inputs](#required-inputs)
+- [Deliverables](#deliverables)
+- [Philosophy](#philosophy)
+- [Failure mode](#failure-mode)
+- [Constraints](#constraints)
+- [Workflow](#workflow)
+- [Anti-patterns](#anti-patterns)
+- [Validation](#validation)
+- [Examples](#examples)
+- [References](#references)
+
+## Standards snapshot
+- Prefer reproducible metrics over narrative guesswork.
+- Keep confidence limits explicit when session coverage is partial or noisy.
+- Use HTML output when the request is for a report artifact, not just a quick summary.
+- Distinguish observed patterns from speculative causality.
 
 ## When to use
-- Use this skill for requests to analyze Codex usage patterns.
-- Use this skill for HTML report generation from local session data.
+- The user asks for an insights report, usage report, or session analysis from local Codex history.
+- The task needs a durable HTML artifact rather than a short terminal-only summary.
+- A time-bounded retrospective or workflow analysis is needed from session data.
 
-## Inputs
-- Time window or scope (if provided).
-- Source session/log paths.
-- Output preferences for report format and detail.
+## Required inputs
+- Time window, scope, or session subset if specified.
+- Source session or log paths when the workflow is not using default local locations.
+- Desired report detail level and any audience constraints.
 
-## Outputs
+## Deliverables
 - HTML insights report artifact.
-- Summary of key metrics and notable trends.
-- Clear note of missing data or confidence limits.
+- Summary of key metrics, notable patterns, and blockers.
+- Explicit note of missing data, uncertainty, or confidence limits.
 
 ## Philosophy
-- Prefer reproducible metrics over anecdotal interpretation.
-- Keep conclusions grounded in observable evidence.
-- Why does this metric matter for user decisions?
-- What evidence supports this conclusion?
-- Which tradeoff matters: depth, speed, or interpretability?
+- Metrics should support decisions, not decorate the report.
+- Interpret patterns conservatively when evidence is sparse.
+- Make the report easy to reopen, compare, and iterate on later.
+
+## Failure mode
+- If the user wants live operational remediation rather than retrospective analysis, route to the more appropriate diagnostic workflow.
+- If the source data is missing or incomplete, stop at evidence limitations instead of forcing conclusions.
+- If the request is really for prose rewriting, summarization, or editorial packaging, use a writing-oriented skill after the report data is gathered.
 
 ## Constraints
 - Redact secrets, tokens, credentials, and personal data in report outputs.
 - Do not infer unsupported causal claims from sparse data.
-- Keep analysis scoped to requested period and available evidence.
+- Keep analysis scoped to the requested period and available evidence.
 
-## Procedure
+## Workflow
 1. Collect session data for the requested scope.
 2. Compute summary metrics and trend slices.
-3. Generate HTML report with clear sections and evidence notes.
-4. Provide concise highlights and follow-up suggestions.
-
-## Validation
-- Verify report generation completed successfully.
-- Verify key metrics are populated and internally consistent.
-- Fail fast: stop on broken or incomplete source data and report blocker.
+3. Check for obvious evidence gaps or skew before interpreting results.
+4. Generate the HTML report with clear sections and confidence notes.
+5. Return concise highlights plus the artifact path and any follow-up suggestions.
 
 ## Anti-patterns
-- Do not fabricate trends when data is incomplete.
-- Never expose sensitive data in report output.
-- Do not ship a report without metric sanity checks.
-- Avoid repetitive, generic commentary with no actionable signal.
-- Warn on confidence limits when sample size is small.
+- Fabricating trends when the data is incomplete.
+- Hiding uncertainty behind polished charts or phrasing.
+- Shipping a report without metric sanity checks.
 
-## Variation
-- Adapt granularity by request (quick pulse vs deep retrospective).
-- Use different section emphasis for productivity, quality, or reliability goals.
-- Customize output narrative for technical versus stakeholder audiences.
+## Validation
+- Fail fast: stop on broken or incomplete source data and report the blocker.
+- Verify report generation completed successfully.
+- Verify key metrics are populated and internally consistent.
+- Confirm the final report distinguishes hard evidence from inference.
 
 ## Examples
 - Generate a 7-day usage report with top workflows and blockers.
 - Generate a monthly trend report with confidence notes and action items.
 
-## Resource map
-- References: `references/contract.yaml`, `references/evals.yaml`, `references/README.md`
+## References
+- Contract: `references/contract.yaml`
+- Evals: `references/evals.yaml`
+- README: `references/README.md`
 
-## Quality Uplift
-- Philosophy and approach: apply a clear framework, explain why, consider tradeoff decisions, and use a practical mental model for execution.
-- Guiding question: Why is this the right context-specific path?
-- Guiding question: What tradeoff is being made and how is risk reduced?
-- Guiding question: How do we verify behavior end-to-end before completion?
-- Anti-pattern warning: avoid generic or repetitive output; DO NOT hide failures; NEVER skip validation; avoid common pitfall and mistake patterns.
-- Anti-pattern warning: treat incorrect or wrong assumptions as blockers, and call out anti-pattern risks explicitly.
-- Variation: vary recommendations by context-specific constraints; adapt, customize, and use different approaches when constraints differ.
-- Variation: prefer diverse, unique alternatives and avoid repetition or cookie-cutter template convergence.
-- Empowerment: enable users to explore options confidently, be capable and creative, unlock safe choices, and empower execution.
+<!-- decision-feedback-protocol:v2 -->
+**Decision feedback protocol (required):**
+- If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.
+- Capture: `decision` (`accepted|partial|rejected|deferred`), `outcome` (`good|neutral|bad|unknown`), and `confidence` (`high|medium|low`).
+- Persist with: `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
+- The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
+<!-- /decision-feedback-protocol -->

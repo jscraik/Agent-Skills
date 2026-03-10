@@ -11,9 +11,29 @@ description: Deep, gap-filling interview that enhances an existing doc/spec (pre
 Use **Interview Kernel** rules, state model, synthesis, and approval gate.
 This wrapper is optimized for **enhancing what already exists** (draft specs, PRDs, ADRs, tickets, notes) by forcing missing decisions and surfacing hidden risks.
 
+## Table of Contents
+- [Scope and triggers](#scope-and-triggers)
+- [Required inputs](#required-inputs)
+- [Deliverables](#deliverables)
+- [Failure mode](#failure-mode)
+- [Standards snapshot](#standards-snapshot-march-2026)
+- [Detecting input type](#detecting-input-type)
+- [Interview focus](#interview-focus-what-deep-means-here)
+- [Round-by-round process](#round-by-round-process)
+- [Completion](#completion)
+- [Validation](#validation)
+- [Anti-patterns](#anti-patterns)
+- [Decision feedback protocol](#decision-feedback-protocol)
+
 ## Spec-driven workflow (recommended)
 
 Interview → update spec/doc → (after approval) run planning/execution as a separate step/session.
+
+## Standards snapshot (March 2026)
+- Default to Delta mode when a draft artifact already exists.
+- Focus on the missing decisions, contradictions, and failure modes most likely to break delivery later.
+- Preserve source documents and append insight rather than rewriting their intent unless the user explicitly asks for a deeper rewrite.
+- End with an approval gate and a concrete next step rather than an open-ended brainstorm.
 
 ## User profile alignment (Jamie)
 
@@ -34,6 +54,14 @@ Guiding questions:
 - Use when a draft spec, PRD, ADR, ticket, or notes exist but gaps remain.
 - Use when you need delta-mode enhancement rather than a greenfield interview.
 - Use when a file path is provided and you must update the source artifact.
+
+## Deliverables
+- an updated source doc with `Delta Insights` or `Interview Insights` when file input is provided
+- a structured summary with decisions, assumptions, risks, and next steps when the input is a topic
+- an explicit approval gate before planning or implementation work proceeds
+
+## Failure mode
+If there is no meaningful artifact to deepen and the user really needs a front-door discovery interview, route to `interview-me` instead of pretending this is a delta enhancement task.
 
 ## Variation
 
@@ -115,20 +143,18 @@ When complete:
 ## Required inputs
 - `$ARGUMENTS` (file path or topic) + any relevant links.
 
-## Deliverables
-- Updated spec/doc (if file input) OR a structured summary artifact (if topic input).
-- Include `schema_version: 1` if outputs are contract-bound.
-
 ## Constraints
 - Redact secrets/PII by default.
 - Avoid destructive operations without explicit user direction.
-- Check against GOLD Industry Standards guide in ~/.codex/AGENTS.override.md.
+- Check against current global instructions in `~/.codex/AGENTS.md` and linked standards docs.
+- Do not inject prose into code files unless the user explicitly asks for that behavior.
 
 ## Validation
 
 - Fail fast: stop at the first failed gate and correct before proceeding.
 - Ensure a Delta/Interview Insights section is added for file inputs.
 - Ensure decisions + assumptions are captured before approval.
+- Ensure the final output names the next highest-value unresolved question if one remains.
 
 ## Anti-patterns
 
@@ -144,17 +170,12 @@ When complete:
 - "Deepen this draft PRD in docs/feature-spec.md."
 - "Interrogate these notes and append Delta Insights to the same file."
 
-## Remember
-
-The agent is capable of extraordinary work in this domain. These guidelines unlock that potential—they don't constrain it.
-Use judgment, adapt to context, and push boundaries when appropriate.
-
 ## Procedure
-1) Detect input type (file vs topic).
-2) Read source material (if file) and pre-fill Interview Log (Delta mode).
-3) Run deep interview loop (kernel).
-4) Synthesize outputs, update doc if applicable.
-5) Approval gate + handoff to planning/execution.
+1. Detect input type (file vs topic).
+2. Read source material if a file is provided and pre-fill the interview log in Delta mode.
+3. Run the deep interview loop using the highest-leverage missing decision each round.
+4. Synthesize outputs and update the doc if applicable.
+5. Present the approval gate and handoff to planning or execution.
 
 Topic
 $ARGUMENTS
@@ -193,6 +214,7 @@ $ARGUMENTS
 - Push boundaries with practical alternatives when simple recipes fail.
 - Enable outcomes-oriented problem solving.
 
+## Decision feedback protocol
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.
@@ -201,11 +223,38 @@ $ARGUMENTS
 - The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
 <!-- /decision-feedback-protocol -->
 
-## Folded Legacy Modes (Core60)
-<!-- core60-folded-modes:v1:start -->
-This skill owns legacy capability from retired skills. Use these modes when requests match prior behavior.
+## Legacy mode: bug-track
+Use this mode when the user brings a bug report, ticket, or prod symptom that lacks a reliable repro or a clear next diagnostic step.
 
-- `bug-track` from `interview/bug-interview`: Analyze and review bug reports to capture repro, evidence, and the next
+### bug-track optimizes for
+- reliable repro or a plan to synthesize one;
+- evidence-driven narrowing instead of guessing;
+- the smallest next diagnostic experiment with clear signal value.
 
-Deep legacy details: `references/folded-legacy-modes-core60.md`.
-<!-- core60-folded-modes:v1:end -->
+### bug-track interaction rules
+- stay in Delta mode when a bug report or incident ticket already exists;
+- ask only for missing facts needed to confirm repro, severity, environment, or regression window;
+- avoid broad log or data dumps without a concrete hypothesis;
+- switch from DISCOVER to DECIDE only when choosing the next experiment.
+
+### bug-track spine
+Ask in order when needed:
+1. expected versus actual behavior;
+2. severity and workaround status;
+3. minimal repro steps;
+4. frequency;
+5. environment;
+6. evidence available;
+7. regression window;
+8. recent changes;
+9. minimal repro artifact;
+10. next diagnostic step.
+
+### bug-track deliverable add-on
+Append a compact triage addendum covering:
+- repro status;
+- suspected layer;
+- top hypotheses;
+- smallest next experiment;
+- instrumentation needed;
+- rollback or mitigation options.

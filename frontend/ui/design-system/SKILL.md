@@ -31,6 +31,12 @@ description: "Analyze and implement repository-grounded design-system work (toke
   - Local CLI: write outputs to `./artifacts/`
   - Hosted shell: write outputs to `/mnt/data/`
 
+Current baseline markers:
+- React 19 for component-layer guidance and stateful UI patterns.
+- Next.js 16 when the target surface is a Next.js app or widget shell.
+- Tailwind CSS v4 for utility and token usage guidance.
+- WCAG 2.2 AA for accessibility acceptance and QA.
+
 ## Scope and triggers
 - Use this skill when the user asks about design-system behavior, token usage, typography, spacing, iconography, theme variables, or UI styling consistency in this repo.
 - Use this skill when implementing or auditing changes touching `packages/tokens`, `packages/ui/src/styles`, `packages/ui/src/icons`, or design-system docs/stories.
