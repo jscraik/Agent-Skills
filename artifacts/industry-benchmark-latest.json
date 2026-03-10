@@ -1,81 +1,30 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-03-08T22:46:47.208081+00:00",
-  "mode": "warn",
+  "generated_at": "2026-03-10T16:36:34.152589+00:00",
+  "mode": "fail",
   "policy_path": "/Users/jamiecraik/dev/agent-skills/utilities/skill-builder/references/benchmark-policy.json",
-  "skills_scanned": 79,
-  "uncategorized_skills": [
-    ".agents/skills/.system/skill-creator",
-    ".agents/skills/.system/skill-installer",
-    ".agents/skills/.system/slides",
-    ".agents/skills/.system/spreadsheets",
-    "backend/cli-spec",
-    "interview/architecture-interview",
-    "interview/deep-interview",
-    "interview/interview-me",
-    "product/content/video-transcript-downloader",
-    "product/content/youtube-hooks-scripts",
-    "product/content/youtube-titles-thumbnails",
-    "product/docs/agents-md",
-    "product/docs/docs-expert",
-    "product/domain/arscontexta",
-    "product/domain/oak-api",
-    "product/ops/compound-engineering-router",
-    "product/ops/decide-build-primitive",
-    "product/ops/linear",
-    "product/ops/release",
-    "product/specs/product-spec",
-    "utilities/1password",
-    "utilities/agent-browser",
-    "utilities/alignment-checkpoint",
-    "utilities/apple-app-creator",
-    "utilities/atlas",
-    "utilities/beautiful-mermaid",
-    "utilities/bootstrap",
-    "utilities/codex-agent-creator",
-    "utilities/codex-home-audit",
-    "utilities/codex-sessions-skill-scan",
-    "utilities/diagram-cli",
-    "utilities/fix-mise",
-    "utilities/insight-report",
-    "utilities/markdown-converter",
-    "utilities/notebooklm",
-    "utilities/process-watch",
-    "utilities/recon-workbench",
-    "utilities/repoprompt",
-    "utilities/simple-tasks",
-    "utilities/skill-builder",
-    "utilities/systematic-debugging",
-    "utilities/using-git-worktrees",
-    "utilities/visual-explainer",
-    "utilities/writing-plans",
-    "utilities/xcode-makefiles"
-  ],
+  "skills_scanned": 72,
+  "uncategorized_skills": [],
   "cluster_results": [
     {
       "cluster": "frontend_ui",
       "description": "Frontend and UI implementation skills",
-      "skills": 20,
-      "skills_with_any_marker": 2,
-      "coverage": 0.1,
+      "skills": 19,
+      "skills_with_any_marker": 5,
+      "coverage": 0.2632,
       "marker_hits": {
-        "react_19": 1,
-        "next_16": 1,
-        "tailwind_v4": 2,
+        "react_19": 3,
+        "next_16": 3,
+        "tailwind_v4": 5,
         "responses_api": 0,
-        "wcag_2_2": 1,
+        "wcag_2_2": 3,
         "owasp_top10": 0,
         "gha_sha_pin": 0,
         "cloudflare_workers": 0,
         "mcp_spec": 0
       },
       "fails": [],
-      "warns": [
-        "distribution warn: `react_19` hits 1 < 2",
-        "distribution warn: `next_16` hits 1 < 2",
-        "distribution warn: `wcag_2_2` hits 1 < 2",
-        "coverage warn: 0.100 < 0.200"
-      ],
+      "warns": [],
       "pass": true
     },
     {
@@ -123,14 +72,14 @@
     {
       "cluster": "openai_apps",
       "description": "OpenAI and ChatGPT Apps skills",
-      "skills": 3,
-      "skills_with_any_marker": 1,
-      "coverage": 0.3333,
+      "skills": 2,
+      "skills_with_any_marker": 2,
+      "coverage": 1.0,
       "marker_hits": {
         "react_19": 0,
         "next_16": 0,
         "tailwind_v4": 0,
-        "responses_api": 1,
+        "responses_api": 2,
         "wcag_2_2": 0,
         "owasp_top10": 0,
         "gha_sha_pin": 0,
@@ -138,17 +87,15 @@
         "mcp_spec": 0
       },
       "fails": [],
-      "warns": [
-        "distribution warn: `responses_api` hits 1 < 2"
-      ],
+      "warns": [],
       "pass": true
     },
     {
       "cluster": "security",
       "description": "Security and auth skills",
-      "skills": 3,
+      "skills": 5,
       "skills_with_any_marker": 3,
-      "coverage": 1.0,
+      "coverage": 0.6,
       "marker_hits": {
         "react_19": 0,
         "next_16": 0,
@@ -179,19 +126,143 @@
         "owasp_top10": 0,
         "gha_sha_pin": 0,
         "cloudflare_workers": 1,
-        "mcp_spec": 1
+        "mcp_spec": 2
       },
       "fails": [],
-      "warns": [
-        "distribution warn: `mcp_spec` hits 1 < 2"
-      ],
+      "warns": [],
+      "pass": true
+    },
+    {
+      "cluster": "backend_general",
+      "description": "General backend and CLI design skills",
+      "skills": 1,
+      "skills_with_any_marker": 0,
+      "coverage": 0.0,
+      "marker_hits": {
+        "react_19": 0,
+        "next_16": 0,
+        "tailwind_v4": 0,
+        "responses_api": 0,
+        "wcag_2_2": 0,
+        "owasp_top10": 0,
+        "gha_sha_pin": 0,
+        "cloudflare_workers": 0,
+        "mcp_spec": 0
+      },
+      "fails": [],
+      "warns": [],
+      "pass": true
+    },
+    {
+      "cluster": "interview",
+      "description": "Interview and requirements discovery skills",
+      "skills": 3,
+      "skills_with_any_marker": 0,
+      "coverage": 0.0,
+      "marker_hits": {
+        "react_19": 0,
+        "next_16": 0,
+        "tailwind_v4": 0,
+        "responses_api": 0,
+        "wcag_2_2": 0,
+        "owasp_top10": 0,
+        "gha_sha_pin": 0,
+        "cloudflare_workers": 0,
+        "mcp_spec": 0
+      },
+      "fails": [],
+      "warns": [],
+      "pass": true
+    },
+    {
+      "cluster": "docs_content",
+      "description": "Documentation and content skills",
+      "skills": 5,
+      "skills_with_any_marker": 0,
+      "coverage": 0.0,
+      "marker_hits": {
+        "react_19": 0,
+        "next_16": 0,
+        "tailwind_v4": 0,
+        "responses_api": 0,
+        "wcag_2_2": 0,
+        "owasp_top10": 0,
+        "gha_sha_pin": 0,
+        "cloudflare_workers": 0,
+        "mcp_spec": 0
+      },
+      "fails": [],
+      "warns": [],
+      "pass": true
+    },
+    {
+      "cluster": "product_ops",
+      "description": "Product strategy, planning, and operational workflow skills",
+      "skills": 5,
+      "skills_with_any_marker": 0,
+      "coverage": 0.0,
+      "marker_hits": {
+        "react_19": 0,
+        "next_16": 0,
+        "tailwind_v4": 0,
+        "responses_api": 0,
+        "wcag_2_2": 0,
+        "owasp_top10": 0,
+        "gha_sha_pin": 0,
+        "cloudflare_workers": 0,
+        "mcp_spec": 0
+      },
+      "fails": [],
+      "warns": [],
+      "pass": true
+    },
+    {
+      "cluster": "product_domain",
+      "description": "Product domain and integration-specific skills outside core app clusters",
+      "skills": 1,
+      "skills_with_any_marker": 0,
+      "coverage": 0.0,
+      "marker_hits": {
+        "react_19": 0,
+        "next_16": 0,
+        "tailwind_v4": 0,
+        "responses_api": 0,
+        "wcag_2_2": 0,
+        "owasp_top10": 0,
+        "gha_sha_pin": 0,
+        "cloudflare_workers": 0,
+        "mcp_spec": 0
+      },
+      "fails": [],
+      "warns": [],
+      "pass": true
+    },
+    {
+      "cluster": "utilities_general",
+      "description": "General utility and workflow support skills",
+      "skills": 23,
+      "skills_with_any_marker": 1,
+      "coverage": 0.0435,
+      "marker_hits": {
+        "react_19": 0,
+        "next_16": 0,
+        "tailwind_v4": 0,
+        "responses_api": 0,
+        "wcag_2_2": 0,
+        "owasp_top10": 0,
+        "gha_sha_pin": 0,
+        "cloudflare_workers": 1,
+        "mcp_spec": 0
+      },
+      "fails": [],
+      "warns": [],
       "pass": true
     }
   ],
   "summary": {
-    "cluster_count": 6,
+    "cluster_count": 12,
     "fail_count": 0,
-    "warn_count": 6,
+    "warn_count": 0,
     "overall_pass": true
   }
 }

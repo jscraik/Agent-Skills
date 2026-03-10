@@ -1,0 +1,22 @@
+schema_version: "1.0"
+purpose: Route LLM evaluation-method requests to the correct local workflow with explicit prerequisite and trust-boundary guidance.
+triggers:
+  - user explicitly asks for eval design, audit, judge writing, evaluator validation, RAG evaluation, synthetic eval data, or review tooling
+  - request semantics clearly match an LLM evaluation workflow rather than generic testing or analytics
+  - a router skill is preferable to seven separate top-level skills for the same eval program
+inputs:
+  - user goal and current eval bottleneck
+  - available artifacts such as traces, labels, prompts, metrics, and configs
+  - environment and privacy constraints
+outputs:
+  - best-fit workflow recommendation
+  - short rationale and prerequisite callouts
+  - exact local workflow file to use next
+non_goals:
+  - generic product analytics or QA work
+  - unverifiable claims about evaluator trustworthiness
+  - unsafe handling of sensitive trace or annotation data
+risks:
+  - misrouting can waste effort on a downstream step before prerequisites exist
+  - sensitive trace or label data can leak if not handled carefully
+  - bundled upstream methods can overlap unless boundaries stay explicit
