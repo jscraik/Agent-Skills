@@ -53,7 +53,6 @@ jobs:
           rm -f semgrep.sarif
           git config --global --add safe.directory "$PWD"
           semgrep_args=(
-            --config auto
             --config "p/secrets"
             --config "p/python"
             --config "p/typescript"
@@ -61,6 +60,12 @@ jobs:
             --exclude "artifacts/skill-graphs/**"
             --sarif --output semgrep.sarif
           )
+
+          if [ -n "${SEMGREP_APP_TOKEN:-}" ]; then
+            semgrep_args=(--config auto "${semgrep_args[@]}")
+          else
+            echo "SEMGREP_APP_TOKEN is not set; skipping Semgrep auto ruleset."
+          fi
 
           event_name="${{ github.event_name }}"
           if [ "${event_name}" = "pull_request" ]; then
