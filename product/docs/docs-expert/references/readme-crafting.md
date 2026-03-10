@@ -2,6 +2,8 @@
 
 > Core insight: A README is a sales pitch, onboarding guide, and reference manual compressed into one document. Lead with value, prove with examples, document with precision.
 
+Treat all command snippets in this reference as placeholders or patterns. Verify package managers, URLs, versions, paths, and safety warnings against the target repository before publishing them.
+
 ## Why This Matters
 
 Most READMEs fail because they:
@@ -15,7 +17,7 @@ Great READMEs convert scanners into users in under 60 seconds.
 
 ---
 
-## The Exact Prompt - README Revision
+## README Revision Prompt Pattern
 
 ```text
 Read the current README.md and dramatically revise it following this structure:
@@ -36,7 +38,7 @@ Read the current README.md and dramatically revise it following this structure:
 
 Make it comprehensive but scannable. Use tables for comparisons.
 Show, do not tell. Every claim should have a concrete example.
-Use ultrathink.
+Reason deeply before drafting.
 ```
 
 ---

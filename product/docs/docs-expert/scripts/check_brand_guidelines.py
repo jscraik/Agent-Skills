@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check brand guideline compliance in a target repository.
+"""Audit brand-guideline compliance in a target repository.
 
 Profiles:
 - docs-expert (default): checks BrAInwav signature and required assets.
@@ -98,7 +98,7 @@ def check_signature(
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Check repository brand signature/assets and watermark rules.",
+        description="Audit repository brand signature/assets and watermark rules.",
     )
     parser.add_argument(
         "--repo",
@@ -149,7 +149,7 @@ def main() -> int:
     parser.add_argument(
         "--require-signature",
         action="store_true",
-        help="Fail if signature is missing.",
+        help="Return non-zero if the signature is missing.",
     )
     args = parser.parse_args()
 
