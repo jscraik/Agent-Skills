@@ -116,7 +116,7 @@ if HAS_OPTIONAL_DEPS:
         pr_number: int = typer.Argument(..., help="PR number"),
     ):
         """Preview a PR's details, files, and CI status."""
-        repo = validate_repo_slug(repo)
+        validate_repo_slug(repo)
         pr_number = validate_pr_number(pr_number)
         console.print(f"[blue]Fetching PR #{pr_number} from {repo}...[/blue]")
 
