@@ -5,7 +5,7 @@ description: Guide users through a structured workflow for co-authoring document
 
 # Doc Co-Authoring Workflow
 
-This reference provides a structured workflow for guiding users through collaborative document creation. Act as an active guide, walking users through three stages: Context Gathering, Refinement & Structure, and Reader Testing.
+This reference provides a structured workflow for guiding users through collaborative document creation. Use an active-guidance approach across three stages: Context Gathering, Refinement & Structure, and Reader Testing.
 
 ## When to Offer This Workflow
 

@@ -2,6 +2,8 @@
 
 Additional templates for specialized README sections.
 
+Treat command snippets in these templates as illustrative patterns, not publish-ready instructions. Verify paths, tool names, shell behavior, and destructive-step warnings against the target repository before keeping them.
+
 ---
 
 ## Performance Section
@@ -78,8 +80,8 @@ For tools handling sensitive data:
 ### Secure Deletion
 
 ```bash
-# WARNING: This deletes local data permanently. Verify the path before running.
-# Backup first if you might need these files later.
+# WARNING: This deletes local data permanently. Verify the path before publishing or running it.
+# Prefer a backup step first if readers might need these files later.
 ls -ld ~/.tool/
 rm -rf -- ~/.tool/
 
@@ -349,7 +351,8 @@ tool command
 
 ```bash
 # Add to ~/.bashrc
-eval "$(tool completions bash)"
+# Source generated completions only after verifying the tool output is trusted.
+source <(tool completions bash)
 
 # Or generate file
 tool completions bash > ~/.local/share/bash-completion/completions/tool
@@ -359,7 +362,8 @@ tool completions bash > ~/.local/share/bash-completion/completions/tool
 
 ```bash
 # Add to ~/.zshrc
-eval "$(tool completions zsh)"
+# Source generated completions only after verifying the tool output is trusted.
+source <(tool completions zsh)
 
 # Or generate file
 tool completions zsh > ~/.zfunc/_tool
@@ -374,7 +378,8 @@ tool completions fish > ~/.config/fish/completions/tool.fish
 ### PowerShell
 
 ```powershell
-tool completions powershell | Out-String | Invoke-Expression
+# Load generated completions only after verifying the output is trusted.
+tool completions powershell | Out-String | ForEach-Object { $_ }
 ```
 ````
 

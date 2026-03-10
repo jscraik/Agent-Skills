@@ -53,7 +53,7 @@ Use these as the baseline unless the repository has stricter internal policy:
 - Procedure writing: one action per step, goal-first where helpful, verification points when confidence matters, and links to canonical repeated procedures.
 - Accessibility and readability: avoid directional language, avoid color-only meaning, require descriptive headings/alt text/captions, and keep docs usable without images.
 - AI-ready docs surfaces: human-first structured docs with stable headings and explicit examples; add `llms.txt` only when repo owners explicitly want AI-specific context files.
-- Prefer the current global instruction chain from `~/.codex/AGENTS.md` over older override-file conventions.
+- Prefer the current global instruction flow from `~/.codex/AGENTS.md` over older legacy config-file conventions.
 - Use `references/industry-gold-standard-2026.md` when you need the current default rationale and quality bar.
 
 ## Documentation quality standard
@@ -84,20 +84,16 @@ Use this when the user wants help quickly and does not want the full three-stage
 7. Offer to switch to the full workflow if scope grows or ambiguity remains.
 
 ## Inputs
-- Repo context: link or local path; whether it’s public OSS vs internal.
-- Doc target(s): file path(s) or doc surface name (README, `/docs`, runbook).
-- Audience and experience level.
-- Constraints: platforms, versions, compliance requirements.
-- Brand source of truth: explicit guideline path(s), tokens, assets, and signature rules.
-- Existing content or links (if any).
+- Repo context and target surface: path/link plus README, `/docs`, runbook, or code-doc target.
+- Audience, experience level, and job-to-be-done.
+- Constraints that change the draft: platform, version, compliance, rollout risk.
+- Source material: existing content plus the brand/source-of-truth path if one exists.
 
 ## Cognitive Support / Plain-Language
 - Optimize for low cognitive load (TBI support): one task at a time, explicit steps.
 - Use plain language first; define jargon in parentheses.
-- Keep steps short and checklist-driven where possible.
-- Externalize state: decisions, assumptions, and the next step.
-- Provide ELI5 explanations for non-trivial logic.
-- Ask one question at a time; prefer multiple-choice when possible.
+- Keep steps short, externalize decisions/assumptions, and show the single next step.
+- Provide ELI5 explanations for non-trivial logic and ask one focused question at a time.
 
 ## Outputs
 - Updated Markdown docs (**PR-ready edits**).
@@ -107,6 +103,7 @@ Use this when the user wants help quickly and does not want the full three-stage
 
 ## Response format (required)
 Every response must include:
+- `schema_version` in any structured or schema-bound output
 - `## Inputs` (what you need / what’s missing)
 - `## Outputs` (what you will deliver or what you delivered)
 - `## Next step` (the single next action or question)
@@ -129,11 +126,11 @@ Every response must include:
 5) **Verify against the repo**
    - Cross-check scripts/paths/flags/versions; if you can’t verify, mark it as a TODO to confirm.
 6) **Bootstrap and run doc QA tooling**
-   - Follow `references/docs-baseline.md` → “Bootstrap missing QA tooling” before linting.
+   - See `references/docs-baseline.md` → “Bootstrap missing QA tooling”, then lint.
    - If lint configs are missing, install the baseline configs first, then rerun lint.
    - If branding checks are required, prefer repo-owned brand policy/assets. Use docs-expert fallback assets only if no official brand policy exists and the user approves fallback mode.
 7) **Ship the evidence bundle**
-   - Checklist snapshot + commands run + key pass/fail outputs + what to do next.
+   - Checklist snapshot + validation steps run + key pass/fail outputs + what to do next.
 
 ## Full workflow (reference)
 
@@ -201,7 +198,7 @@ If visibility checks cannot be verified from local context, mark them as “manu
 When AI tooling support is in scope:
 
 - Keep stable headings and deterministic section names for retrieval.
-- Include concise “quick context” blocks (purpose, constraints, commands, failure modes).
+- Include concise “quick context” blocks (purpose, constraints, verified steps, failure modes).
 - Prefer small, linkable docs over one giant page.
 - Optional: add `llms.txt` only when the repo/site owners request AI-specific context files (this is an emerging proposal, not a universal requirement).
 - Keep machine-oriented files aligned with human docs to avoid contradiction drift.
@@ -217,7 +214,7 @@ When AI tooling support is in scope:
 
 ## Validation
 
-Run these when available and record results:
+Validation options to run when available and record:
 - `python scripts/bootstrap_doc_qa.py --repo . --apply --brand-profile docs-expert` to enforce BrAInwav baseline assets and README signature by default.
 - `vale <doc>` after `.vale.ini` is present.
 - `markdownlint-cli2 <doc> --config <config>` after markdownlint config is present.
@@ -246,7 +243,7 @@ Quick corrections:
 - Do not lead with installation when the reader needs value first; start with the problem, outcome, or quick example.
 - Do not use generic boilerplate; state audience, constraints, and concrete use cases.
 - Do not skip risks or rollback; add them when failure modes matter.
-- Do not override official repo branding with fallback assets; resolve and cite the real source of truth.
+- Do not replace official repo branding with fallback assets; resolve and cite the real source of truth.
 
 ## Examples
 
@@ -261,37 +258,15 @@ When you finish edits, include:
 1. Summary of changes.
 2. Doc QA checklist results.
 3. Open questions or facts needing confirmation.
-4. Brand compliance and GitHub visibility findings when in scope.
-5. Evidence bundle (lint, brand, readability, checklist).
-6. Code-doc QA results too if in-code documentation changed.
+4. Brand compliance, GitHub visibility, and evidence-bundle findings when in scope.
+5. Code-doc QA results too if in-code documentation changed.
 
 ## References and templates
 
-- Workflow and structure:
-  - `references/DOC_COAUTHORING.md`
-  - `references/document-types.md`
-  - `references/industry-gold-standard-2026.md`
-- QA and policy:
-  - `references/CHECKLIST.md`
-  - `references/CODE_DOC_CHECKLIST.md`
-  - `references/docs-baseline.md`
-  - `references/openai-doc-writing-principles.md`
-  - `references/docs-upkeep-runbook.md`
-- README and templates:
-  - `references/readme-crafting.md`
-  - `references/readme-section-templates.md`
-  - `assets/DOC_TEMPLATE.md`
-  - `assets/CODE_DOC_TEMPLATES.md`
-  - `assets/README_TEMPLATE.md`
-  - `assets/AGENTS_TEMPLATE.md`
-- Branding, validation, and contract:
-  - `references/BRAND_GUIDELINES.md`
-  - `references/brand-styling.md`
-  - `scripts/bootstrap_doc_qa.py`
-  - `scripts/check_brand_guidelines.py`
-  - `scripts/check_readability.py`
-  - `references/contract.yaml`
-  - `references/evals.yaml`
+- Workflow and routing: `references/DOC_COAUTHORING.md`, `references/document-types.md`, `references/industry-gold-standard-2026.md`
+- QA and policy: `references/CHECKLIST.md`, `references/CODE_DOC_CHECKLIST.md`, `references/docs-baseline.md`, `references/openai-doc-writing-principles.md`, `references/docs-upkeep-runbook.md`
+- README and templates: `references/readme-crafting.md`, `references/readme-section-templates.md`, `assets/DOC_TEMPLATE.md`, `assets/CODE_DOC_TEMPLATES.md`, `assets/README_TEMPLATE.md`, `assets/AGENTS_TEMPLATE.md`
+- Branding, validation, and contract: `references/BRAND_GUIDELINES.md`, `references/brand-styling.md`, `scripts/bootstrap_doc_qa.py`, `scripts/check_brand_guidelines.py`, `scripts/check_readability.py`, `references/contract.yaml`, `references/evals.yaml`
 
 ## Remember
 
@@ -302,34 +277,27 @@ Use judgment, adapt to context, and push boundaries when appropriate.
 ## Philosophy and tradeoffs
 - Use this skill when consistent decision-making matters more than one-off execution because project context should drive the approach.
 - Principle and mindset: prioritize tradeoffs and constraints over rigid checklists; understand why each step exists.
-- Ask this to keep outcomes robust: Why is this the right default, and what could change this outcome?
-- How do we adapt if constraints shift?
-- What evidence is needed before choosing one path over another?
+- Ask these to keep outcomes robust:
+- Why is this the right default?
+- What could change the recommendation?
+- What evidence would justify a different path?
 
 ## Anti-patterns and caveats
 - Avoid applying this playbook generically without checking repository-specific context.
 - **NEVER** skip required validation gates when behavior changes.
 - **DO NOT** use this skill as a rigid replacement for engineering judgment.
 - **DON'T** ignore warnings or assume one pattern fits all repos.
-- Common pitfall: treating anti-patterns as optional.
-- Incorrect assumptions here can lead to fragile guidance.
-- Warning: wrong sequencing can create avoidable regressions.
+- Common pitfalls: treating anti-patterns as optional and sequencing work so late corrections become expensive.
 
 ## Variation and adaptation
-- Vary the workflow by team size, risk, and deployment target.
-- Use different strategies for small, medium, and large changes.
-- Adapt recommendations to the specific environment and avoid repetitive templates.
-- Avoid generic or cookie-cutter responses; craft context-specific alternatives.
-- Keep outputs diverse and not repetitive.
-- Converge on a custom path only after evidence review.
-- Different constraints should produce different, non-generic recommendations.
+- Vary the workflow by team size, risk, deployment target, and doc type.
+- Adapt recommendations to the environment instead of repeating templates.
+- Different constraints should produce different, non-generic recommendations after evidence review.
 
 ## Empowering execution style
-- Be capable of exploring multiple options and enabling the team to make safe decisions.
-- Unlock confidence by explaining options and tradeoffs clearly.
-- Feel free to be creative while staying rigorous and precise.
-- Push boundaries with practical alternatives when simple recipes fail.
-- Enable outcomes-oriented problem solving.
+- Explore multiple options, explain tradeoffs clearly, and enable safe decisions.
+- Be creative when simple recipes fail, but stay rigorous and precise.
+- Aim for outcomes-oriented problem solving rather than template completion.
 
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**
