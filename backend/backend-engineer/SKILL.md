@@ -1,179 +1,121 @@
 ---
 name: backend-engineer
-description: Plan and review safe backend extensions for existing services (Cloudflare
-  Workers + Hono primary). Use this skill when patching or adding backend features
-  in an existing codebase.
+description: Plan and review safe backend extensions for existing services (Cloudflare Workers + Hono primary). Use this skill when patching or adding backend features in an existing codebase.
 ---
 
 # Backend Engineer
 
-## Compliance
-- Read and follow:
-  - `~/.codex/instructions/standards.md`
-  - `~/.codex/instructions/engineering-guidance.md`
-  - `~/.codex/instructions/CODESTYLE.md`
-  - `~/.codex/instructions/work-rules.md`
-- Apply Gold Industry Standard (baseline Jan 2026).
+## Table of Contents
+- [Standards snapshot](#standards-snapshot)
+- [When to use](#when-to-use)
+- [When not to use](#when-not-to-use)
+- [Required inputs](#required-inputs)
+- [Deliverables](#deliverables)
+- [Philosophy](#philosophy)
+- [Workflow](#workflow)
+- [Verification](#verification)
+- [Constraints](#constraints)
+- [Anti-patterns](#anti-patterns)
+- [Response format](#response-format)
+- [Remember](#remember)
 
-## Scope and triggers
-- Extending or patching an existing backend service safely.
-- You need an implementation playbook (steps + file plan + verification).
-- You want code-level guidance (snippets/pseudo-diffs), not just design.
-- Primary runtime is Cloudflare Workers + Hono, with integration to Rust/Tauri or TS/React clients.
+## Standards snapshot (March 2026)
+- Treat the existing service contract as the source of truth.
+- Prefer the smallest reversible backend change that preserves auth, data integrity, and operational visibility.
+- Ship evidence, not guesses: concrete touch points, concrete checks, concrete rollback notes.
 
-## Out of Scope
-- Greenfield architecture or full backend design from scratch → use `backend-design` instead.
+## When to use
+- Add or change behavior in an existing backend service.
+- Patch API handlers, background jobs, webhooks, queues, storage access, or service integrations.
+- Review a proposed backend implementation for safety, contract fit, or rollout risk.
+- Extend Cloudflare Workers + Hono services, or adjacent backend modules that follow the same repo-first workflow.
+
+## When not to use
+- Greenfield system design or major architecture selection with no implementation target. Use a design or architecture skill instead.
+- Frontend-only UI work with no backend surface.
+- Pure incident triage with no code or contract change in scope.
 
 ## Required inputs
-## Cognitive Support / Plain-Language
-- Optimize for low cognitive load (TBI support): one task at a time, explicit steps.
-- Use plain language first; define jargon in parentheses.
-- Keep steps short and checklist-driven where possible.
-- Externalize state: decisions, assumptions, and the next step.
-- Provide ELI5 explanations for non-trivial logic.
-- Ask one question at a time; prefer multiple-choice when possible.
+- Target repo, service, route, or module.
+- Change request or bug report.
+- Constraints: auth, privacy, rate limits, data integrity, latency, compliance, rollout window.
+- Existing scripts, tests, and deployment expectations when available.
+- Acceptance criteria or observable success condition.
 
-- Feature/change request and target service/route/module.
-- Existing patterns, tests, and repo scripts.
-- Constraints: auth/compliance, performance, reliability, or data integrity.
-- Acceptance criteria (Given/When/Then preferred).
-- Deployment/runtime constraints (e.g., Workers limits, Auth0 flows).
+If inputs are incomplete, infer only low-risk defaults and call out the assumptions before implementation guidance.
 
 ## Deliverables
-- **Intent** (1–2 sentences).
-- **Plan** (3–7 steps, single-threaded).
-- **Patch summary** (files + what changes).
-- **Given/When/Then acceptance criteria**.
-- **Code-level guidance** (snippets or pseudo-diff when helpful).
-- **Verification commands** (lint/typecheck/tests) + expected outcomes.
-- **ELI5 explanation** for non-trivial logic.
-- **Risks / rollback** + follow-ups.
-- Include `schema_version: 1` when outputs are contract-bound.
+- A short intent statement.
+- A smallest-safe-change plan.
+- Concrete patch surface: files, contracts, tests, and rollout impact.
+- Given/When/Then acceptance criteria.
+- Verification commands with expected outcomes or an explicit "Not run" note.
+- Risks, rollback path, and follow-up work.
 
-## Response format (required)
+## Philosophy
+- Correctness before convenience.
+- Security before speed.
+- Existing contracts before new abstractions.
+- Observability before rollout.
+- Small diffs beat heroic rewrites.
+
+## Workflow
+1. Restate the backend objective, affected boundary, and success condition.
+2. Inspect current handlers, schemas, storage calls, tests, and deployment hooks with repo evidence.
+3. Identify the smallest change set that satisfies the request without expanding the public contract unnecessarily.
+4. Preserve or improve validation, auth checks, error shapes, and idempotency where relevant.
+5. Add or update tests near the changed boundary instead of relying on prose-only assurance.
+6. Document rollout risk: migrations, replay concerns, secrets, rate limits, or partial failure modes.
+7. Run focused verification first, then broader repo checks when the change is substantial.
+
+## Verification
+- Always include concrete verification commands.
+- Prefer repo-native checks first: targeted tests, lint, typecheck, and contract checks.
+- For runtime-facing changes, verify:
+  - input validation and failure paths,
+  - auth or authorization behavior,
+  - idempotency or duplicate-request handling for writes,
+  - logging and redaction behavior,
+  - backward compatibility for existing consumers.
+- If a command was not run, say why and what remains unverified.
+
+## Constraints
+- Never print secrets, tokens, raw credentials, or sensitive payloads.
+- Do not widen API contracts, scopes, or access paths silently.
+- Avoid speculative dependencies or framework churn unless the repo already uses them.
+- Treat destructive or stateful changes as opt-in and explain rollback clearly.
+
+## Validation
+- Verify the response includes file-level touch points, acceptance criteria, and concrete checks.
+- Verify risks and rollback are explicit for auth, persistence, money, or message-path changes.
+- Reference `references/` material when the repo provides backend-specific contracts or examples.
+- Reuse `assets/` scaffolds when the skill folder ships them instead of inventing parallel templates.
+
+## Anti-patterns
+- Large refactors disguised as "small backend fixes."
+- Changing response shapes without calling it out.
+- Adding write paths with no idempotency or validation story.
+- Logging entire request bodies, auth headers, or private records.
+- Skipping verification because the change "looks straightforward."
+- Providing abstract design advice when the user needs a file-level implementation path.
+
+## Examples
+- "Add an idempotent POST endpoint to an existing Hono service and tell me how to verify it."
+- "Review this Worker webhook patch for auth, retry, and rollback risk."
+
+## Response format
 Use these headings in order:
 1. `## Intent`
 2. `## Plan`
 3. `## Patch summary`
 4. `## Acceptance criteria (Given/When/Then)`
 5. `## Verification`
-6. `## ELI5 explanation`
-7. `## Risks / rollback`
-8. `## Next steps`
+6. `## Risks / rollback`
+7. `## Next step`
 
-If blocked, insert `## Questions` (max 2) and stop.
-
-## Principles
-- Correctness → security → reliability → performance → ergonomics (in that order).
-- Small, reversible changes; minimal diff.
-- Prefer existing repo conventions and tooling (mise, rg/fd/jq, repo scripts).
-- Ask before adding dependencies or changing system-wide settings.
-- Never expose secrets or log sensitive data.
-
-## Procedure
-1) Restate objective, constraints, and Given/When/Then acceptance criteria. Ask **max 2** clarifying questions if blocked.
-2) Inspect the repo with `rg`/`fd`; identify touch points, ownership boundaries, and existing tests.
-3) Draft the smallest safe implementation plan and file list. Call out stop conditions (migrations, auth changes, deploys).
-4) Provide code-level guidance (snippets/pseudo-diffs) aligned with repo style and runtime constraints.
-5) Provide verification commands (must be included every time). If not run, say **Not run** + reason.
-6) Provide an ELI5 explanation for any non-trivial logic or risk area.
-7) Document risks, rollback, and follow-ups.
-
-## Examples
-**Intent:** Add a safe, idempotent endpoint to extend an existing Workers + Hono API.
-
-**Plan:**
-1. Locate route + handler structure; confirm existing error format.
-2. Add handler with input validation and idempotency key.
-3. Update tests or add a new test for the new route.
-4. Run lint/typecheck/tests.
-
-**Acceptance criteria (GWT):**
-- **Given** a valid payload, **When** POST /api/widgets is called, **Then** it returns 201 with the widget id.
-- **Given** the same idempotency key, **When** POST is repeated, **Then** it returns 200 with the same id.
-
-**Verification:**
-- `pnpm -s lint` (expect 0)
-- `pnpm -s typecheck` (expect 0)
-- `pnpm -s test` (expect 0)
-
-## Validation
-- Always include Given/When/Then acceptance criteria.
-- Always include verification commands.
-- If commands are not run, explicitly state why.
-- Maintain file/function size limits and type-safety requirements per CODESTYLE.
-- Fail fast: stop at the first failed validation gate, fix, and re-run.
-
-## Anti-patterns
-Avoid these anti-patterns (common mistakes/pitfalls). **NEVER** skip verification, and **DO NOT** ship changes without explicit safety checks:
-- Skipping verification steps or leaving them implicit.
-- Large refactors without explicit approval.
-- Unversioned or breaking API changes without a deprecation plan.
-- Unsafe defaults (wide-open CORS, plaintext secrets, unauthenticated admin paths).
-- No rollback plan or risk acknowledgment.
-- Writing handlers without input validation or schema checks.
-- Missing idempotency or replay protection for write endpoints.
-- Swallowing errors or logging sensitive payloads.
-- Adding dependencies or changing lockfiles without approval.
-- Shipping changes that cross service boundaries without an explicit contract.
-- WARNING: incorrect status codes, wrong error shapes, or silent failures that hide bugs.
-
-## Encouraging Variation
-**IMPORTANT:** Outputs should vary based on context. Avoid converging on a single “favorite” pattern:
-- Adapt to the specific runtime and constraints.
-- Use different examples per domain (payments, analytics, AI tooling, internal ops).
-- No two outputs should be identical unless requirements are identical.
+If blocked by missing critical information, insert `## Questions` before `## Plan` and keep it to the minimum needed to proceed safely.
 
 ## Remember
-The agent is capable of extraordinary work in this domain. These guidelines unlock that potential—they don’t constrain it. Use judgment, adapt to context, and push boundaries when appropriate.
-
-## Constraints
-- Redact secrets/PII by default.
-- Do not add dependencies without explicit user approval.
-- Use `zsh -lc` for commands to ensure mise PATH is loaded.
-- Use `rg`/`fd`/`jq` for search and parsing.
-
-## Resources
-- Deep design checklists (when needed):
-  - `~/dev/agent-skills/backend/backend-design/references/`
-
-<!-- skill-score-boost-v1 -->
-## Philosophy and tradeoffs
-- Use this skill when consistent decision-making matters more than one-off execution because project context should drive the approach.
-- Principle and mindset: prioritize tradeoffs and constraints over rigid checklists; understand why each step exists.
-- Ask this to keep outcomes robust: Why is this the right default, and what could change this outcome?
-- How do we adapt if constraints shift?
-- What evidence is needed before choosing one path over another?
-
-## Anti-patterns and caveats
-- Avoid applying this playbook generically without checking repository-specific context.
-- **NEVER** skip required validation gates when behavior changes.
-- **DO NOT** use this skill as a rigid replacement for engineering judgment.
-- **DON'T** ignore warnings or assume one pattern fits all repos.
-- Common pitfall: treating anti-patterns as optional.
-- Incorrect assumptions here can lead to fragile guidance.
-- Warning: wrong sequencing can create avoidable regressions.
-
-## Variation and adaptation
-- Vary the workflow by team size, risk, and deployment target.
-- Use different strategies for small, medium, and large changes.
-- Adapt recommendations to the specific environment and avoid repetitive templates.
-- Avoid generic or cookie-cutter responses; craft context-specific alternatives.
-- Keep outputs diverse and not repetitive.
-- Converge on a custom path only after evidence review.
-- Different constraints should produce different, non-generic recommendations.
-
-## Empowering execution style
-- Be capable of exploring multiple options and enabling the team to make safe decisions.
-- Unlock confidence by explaining options and tradeoffs clearly.
-- Feel free to be creative while staying rigorous and precise.
-- Push boundaries with practical alternatives when simple recipes fail.
-- Enable outcomes-oriented problem solving.
-
-<!-- decision-feedback-protocol:v2 -->
-**Decision feedback protocol (required):**
-- If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.
-- Capture: `decision` (`accepted|partial|rejected|deferred`), `outcome` (`good|neutral|bad|unknown`), and `confidence` (`high|medium|low`).
-- Persist with: `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
-- The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
-<!-- /decision-feedback-protocol -->
+- Work from the real repo surface, not a generic backend template.
+- Make risks explicit when touching auth, money, messages, or persistent state.
+- Leave the next engineer with a clear verification and rollback story.

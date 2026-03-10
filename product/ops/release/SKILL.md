@@ -7,8 +7,16 @@ description: Create and publish a new project release (semver) when you need to 
 
 # Release
 
-## Compliance
-- Follow the Gold Industry Standard and repo release policies.
+## Table of Contents
+- [Scope and triggers](#scope-and-triggers)
+- [Required inputs](#required-inputs)
+- [Deliverables](#deliverables)
+- [Failure mode](#failure-mode)
+- [Standards snapshot](#standards-snapshot-march-2026)
+- [Procedure](#procedure)
+- [Validation](#validation)
+- [Anti-patterns](#anti-patterns)
+- [Decision feedback protocol](#decision-feedback-protocol)
 
 ## Scope and triggers
 - You need to ship a new version using `just release X.Y.Z`.
@@ -25,6 +33,15 @@ description: Create and publish a new project release (semver) when you need to 
 - A completed release run (or a clear stop with error context).
 - A new version commit + tag (created by `just release`).
 - Confirmation that publish/tag steps were invoked.
+
+## Failure mode
+If any precondition fails, stop before the release command, report the exact blocker, and leave the repo unchanged rather than improvising around policy or credential problems.
+
+## Standards snapshot (March 2026)
+- Releases are high-risk mutating operations: verify branch, cleanliness, credentials, and version ordering before any write.
+- Prefer a single canonical release path over manual patchwork unless the user explicitly requests recovery from a failed release.
+- Keep evidence explicit: current version, target version, branch state, tree state, and tag state should all be visible in the reasoning.
+- Never retry a failed release command blindly; diagnose first, then resume with intent.
 
 ## Principles
 - Validate before action: semver and version ordering come first.
@@ -43,6 +60,7 @@ description: Create and publish a new project release (semver) when you need to 
 4) Run the release.
    - `just release X.Y.Z`
 5) If any step fails, stop and report the error without retrying blindly.
+6) After success, summarize the exact version shipped and the release artifacts created.
 
 ## Examples
 ```bash
@@ -54,6 +72,7 @@ just release 1.4.2
 - `git status -sb` shows clean tree and `main` before running.
 - `git tag --list "vX.Y.Z"` returns nothing before release.
 - `just release X.Y.Z` completes without errors.
+- The final state includes the new tag and a clean post-release tree unless the repo's release process intentionally leaves generated changes.
 
 ## Anti-patterns
 - Releasing from a dirty working tree or non-`main` branch.
@@ -64,16 +83,6 @@ just release 1.4.2
 - Redact secrets/PII by default.
 - Keep `name` and `description` single-line YAML scalars (quote if needed).
 - Do not add new dependencies without explicit user approval.
-
-## Resources (optional)
-- `references/evals.yaml`
-
-## Variation
-- Vary tone, depth, and structure based on context.
-- Avoid repeating the same outline across outputs.
-
-## Remember
-The agent is capable of extraordinary work in this domain. Use judgment, adapt to context, and push boundaries when appropriate.
 
 <!-- skill-score-boost-v1 -->
 ## Philosophy and tradeoffs
@@ -108,6 +117,7 @@ The agent is capable of extraordinary work in this domain. Use judgment, adapt t
 - Push boundaries with practical alternatives when simple recipes fail.
 - Enable outcomes-oriented problem solving.
 
+## Decision feedback protocol
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.

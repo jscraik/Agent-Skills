@@ -10,371 +10,106 @@ allowed-tools:
   - "web_fetch"
 ---
 
-# shadcn/ui Component Integration
+# shadcn/ui Integration
 
-You are a frontend engineer specialized in building applications with shadcn/ui—a collection of beautifully designed, accessible, and customizable components built with Radix UI or Base UI and Tailwind CSS. You help developers discover, integrate, and customize components following best practices.
+Use shadcn/ui as a code-ownership workflow, not as a drop-in component dependency.
 
-## When to Use
+## Table of Contents
+- [Standards snapshot](#standards-snapshot)
+- [When to use](#when-to-use)
+- [Required inputs](#required-inputs)
+- [Deliverables](#deliverables)
+- [Failure mode](#failure-mode)
+- [Workflow](#workflow)
+- [Validation](#validation)
+- [References](#references)
 
-Use this skill when a task requires adding, configuring, customizing, or troubleshooting shadcn/ui components or registries in a project.
+## Standards snapshot
+- Treat shadcn/ui as source code copied into the repo, owned by the project team.
+- Prefer the current shadcn CLI workflow and registry-aware install path over manual copy-paste unless the repo requires it.
+- Keep Tailwind v4, design tokens, accessibility, and project-local component composition aligned with the host app.
+- Customize through project wrappers and token-aware variants rather than forking primitives blindly.
 
-## Inputs
+## When to use
+- The user wants to install, add, customize, or troubleshoot shadcn/ui components.
+- A repo uses or plans to use `components.json`, registries, or copied component source under `components/ui/`.
+- You need to compare registry options or integrate a block into an existing design system.
+- A shadcn setup needs verification or migration guidance.
 
-- Target project context (framework, Tailwind setup, existing component architecture).
-- Desired shadcn/ui components, blocks, or customization goals.
-- Constraints such as accessibility, theming, and runtime expectations.
+## Required inputs
+- Target repo or project path.
+- Framework and styling context:
+  - React or Next.js;
+  - Tailwind setup;
+  - alias conventions;
+  - server/client boundaries.
+- The components or blocks the user wants.
+- Any constraints on theming, accessibility, bundle size, or visual consistency.
 
-## Procedure
+## Deliverables
+- Clear setup or integration guidance grounded in the existing project.
+- The chosen shadcn components or registry items, plus customization notes.
+- Any required dependency, config, or file-placement changes.
+- A concise validation checklist covering install success and UI safety.
 
-1. Validate project readiness and shadcn configuration.
-2. Discover appropriate components/blocks from the catalog or registry.
-3. Install or integrate components with required dependencies.
-4. Apply project-specific customization and accessibility checks.
-5. Verify with local build/test commands and document follow-up steps.
+## Philosophy
+- Treat shadcn/ui as owned source code, not a black-box dependency.
+- Prefer the smallest install and customization path that matches the host repo.
+- Keep accessibility and token alignment intact while adapting components.
 
-## Outputs
-
-- Integrated or updated shadcn/ui components and supporting configuration.
-- Clear customization notes for maintainers.
-- Verification summary with any unresolved blockers.
+## Failure mode
+- If the task is a general design-system rewrite, route to a broader frontend or design-system skill.
+- If the repo is not ready for shadcn/ui yet, stop at readiness guidance instead of forcing installation.
+- If the user asks for opaque wrapper abstractions that weaken ownership, call out that tradeoff before proceeding.
 
 ## Constraints
+- Redact secrets, local environment paths, and private registry details by default in outputs.
+- Do not force shadcn/ui into repos that lack the prerequisite Tailwind or alias setup.
+- Keep customization scoped to the requested component path and related config.
 
-- Redact secrets and sensitive data by default in logs, examples, and config snippets.
-- Prefer project-local component ownership over opaque external abstractions.
-- Preserve accessibility guarantees when customizing primitives and variants.
+## Workflow
+1. Check project readiness first:
+   - framework support;
+   - Tailwind presence;
+   - path aliases;
+   - `components.json` state.
+2. Choose the smallest installation path that matches the repo:
+   - `npx shadcn@latest init` for setup;
+   - `npx shadcn@latest add <component>` for direct component install;
+   - registry discovery only when the request needs it.
+3. Prefer copied source in `components/ui/` and keep project-specific wrappers outside that folder.
+4. Use the bundled references for setup, migration, and customization rather than re-explaining everything from memory.
+5. Preserve accessibility and token alignment when editing variants or markup.
+6. End with exact local checks the repo should pass next.
 
-## Core Principles
+## Anti-patterns
+- Treating copied components as if they were still vendor-owned and off-limits.
+- Dropping custom wrappers into `components/ui/` instead of the project’s own layer.
+- Hardcoding visual values that bypass the repo’s token system.
 
-shadcn/ui is **not a component library**—it's a collection of reusable components that you copy into your project. This gives you:
-- **Full ownership**: Components live in your codebase, not node_modules
-- **Complete customization**: Modify styling, behavior, and structure freely, including choosing between Radix UI or Base UI primitives
-- **No version lock-in**: Update components selectively at your own pace
-- **Zero runtime overhead**: No library bundle, just the code you need
-
-## Component Discovery and Installation
-
-### 1. Browse Available Components
-
-Use the shadcn MCP tools to explore the component catalog and Registry Directory:
-- **List all components**: Use `list_components` to see the complete catalog
-- **Get component metadata**: Use `get_component_metadata` to understand props, dependencies, and usage
-- **View component demos**: Use `get_component_demo` to see implementation examples
-
-### 2. Component Installation
-
-There are two approaches to adding components:
-
-**A. Direct Installation (Recommended)**
-```bash
-npx shadcn@latest add [component-name]
-```
-
-This command:
-- Downloads the component source code (adapting to your config: Radix vs Base UI)
-- Installs required dependencies
-- Places files in `components/ui/`
-- Updates your `components.json` config
-
-**B. Manual Integration**
-1. Use `get_component` to retrieve the source code
-2. Create the file in `components/ui/[component-name].tsx`
-3. Install peer dependencies manually
-4. Adjust imports if needed
-
-### 3. Registry and Custom Registries
-
-If working with a custom registry (defined in `components.json`) or exploring the Registry Directory:
-- Use `get_project_registries` to list available registries
-- Use `list_items_in_registries` to see registry-specific components
-- Use `view_items_in_registries` for detailed component information
-- Use `search_items_in_registries` to find specific components
-
-## Project Setup
-
-### Initial Configuration
-
-For **new projects**, use the `create` command to customize everything (style, fonts, component library):
-
-```bash
-npx shadcn@latest create
-```
-
-For **existing projects**, initialize configuration:
-
-```bash
-npx shadcn@latest init
-```
-
-This creates `components.json` with your configuration:
-- **style**: default, new-york (classic) OR choose new visual styles like Vega, Nova, Maia, Lyra, Mira
-- **baseColor**: slate, gray, zinc, neutral, stone
-- **cssVariables**: true/false for CSS variable usage
-- **tailwind config**: paths to Tailwind files
-- **aliases**: import path shortcuts
-- **rsc**: Use React Server Components (yes/no)
-- **rtl**: Enable RTL support (optional)
-
-### Required Dependencies
-
-shadcn/ui components require:
-- **React** (18+)
-- **Tailwind CSS** (3.0+)
-- **Primitives**: Radix UI OR Base UI (depending on your choice)
-- **class-variance-authority** (for variant styling)
-- **clsx** and **tailwind-merge** (for class composition)
-
-## Component Architecture
-
-### File Structure
-```
-src/
-├── components/
-│   ├── ui/              # shadcn components
-│   │   ├── button.tsx
-│   │   ├── card.tsx
-│   │   └── dialog.tsx
-│   └── [custom]/        # your composed components
-│       └── user-card.tsx
-├── lib/
-│   └── utils.ts         # cn() utility
-└── app/
-    └── page.tsx
-```
-
-### The `cn()` Utility
-
-All shadcn components use the `cn()` helper for class merging:
-
-```typescript
-import { clsx, type ClassValue } from "clsx"
-import { twMerge } from "tailwind-merge"
-
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
-}
-```
-
-This allows you to:
-- Override default styles without conflicts
-- Conditionally apply classes
-- Merge Tailwind classes intelligently
-
-## Customization Best Practices
-
-### 1. Theme Customization
-
-Edit your Tailwind config and CSS variables in `app/globals.css`:
-
-```css
-@layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --primary: 221.2 83.2% 53.3%;
-    /* ... more variables */
-  }
-
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    /* ... dark mode overrides */
-  }
-}
-```
-
-### 2. Component Variants
-
-Use `class-variance-authority` (cva) for variant logic:
-
-```typescript
-import { cva } from "class-variance-authority"
-
-const buttonVariants = cva(
-  "inline-flex items-center justify-center rounded-md",
-  {
-    variants: {
-      variant: {
-        default: "bg-primary text-primary-foreground",
-        outline: "border border-input",
-      },
-      size: {
-        default: "h-10 px-4 py-2",
-        sm: "h-9 rounded-md px-3",
-      },
-    },
-    defaultVariants: {
-      variant: "default",
-      size: "default",
-    },
-  }
-)
-```
-
-### 3. Extending Components
-
-Create wrapper components in `components/` (not `components/ui/`):
-
-```typescript
-// components/custom-button.tsx
-import { Button } from "@/components/ui/button"
-import { Loader2 } from "lucide-react"
-
-export function LoadingButton({
-  loading,
-  children,
-  ...props
-}: ButtonProps & { loading?: boolean }) {
-  return (
-    <Button disabled={loading} {...props}>
-      {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-      {children}
-    </Button>
-  )
-}
-```
-
-## Blocks and Complex Components
-
-shadcn/ui provides complete UI blocks (authentication forms, dashboards, etc.):
-
-1. **List available blocks**: Use `list_blocks` with optional category filter
-2. **Get block source**: Use `get_block` with the block name
-3. **Install blocks**: Many blocks include multiple component files
-
-Blocks are organized by category:
-- **calendar**: Calendar interfaces
-- **dashboard**: Dashboard layouts
-- **login**: Authentication flows
-- **sidebar**: Navigation sidebars
-- **products**: E-commerce components
-
-## Accessibility
-
-All shadcn/ui components are built on Radix UI primitives, ensuring:
-- **Keyboard navigation**: Full keyboard support out of the box
-- **Screen reader support**: Proper ARIA attributes
-- **Focus management**: Logical focus flow
-- **Disabled states**: Proper disabled and aria-disabled handling
-
-When customizing, maintain accessibility:
-- Keep ARIA attributes
-- Preserve keyboard handlers
-- Test with screen readers
-- Maintain focus indicators
-
-## Common Patterns
-
-### Form Building
-```typescript
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-
-// Use with react-hook-form for validation
-import { useForm } from "react-hook-form"
-```
-
-### Dialog/Modal Patterns
-```typescript
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
-```
-
-### Data Display
-```typescript
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
-```
-
-## Troubleshooting
-
-### Import Errors
-- Check `components.json` for correct alias configuration
-- Verify `tsconfig.json` includes the `@` path alias:
-  ```json
-  {
-    "compilerOptions": {
-      "paths": {
-        "@/*": ["./src/*"]
-      }
-    }
-  }
-  ```
-
-### Style Conflicts
-- Ensure Tailwind CSS is properly configured
-- Check that `globals.css` is imported in your root layout
-- Verify CSS variable names match between components and theme
-
-### Missing Dependencies
-- Run component installation via CLI to auto-install deps
-- Manually check `package.json` for required Radix UI packages
-- Use `get_component_metadata` to see dependency lists
-
-### Version Compatibility
-- shadcn/ui v4 requires React 18+ and Next.js 13+ (if using Next.js)
-- Some components require specific Radix UI versions
-- Check documentation for breaking changes between versions
-
-## Validation and Quality
-
-Before committing components:
-1. **Type check**: Run `tsc --noEmit` to verify TypeScript
-2. **Lint**: Run your linter to catch style issues
-3. **Test accessibility**: Use tools like axe DevTools
-4. **Visual QA**: Test in light and dark modes
-5. **Responsive check**: Verify behavior at different breakpoints
-
-## Resources
-
-Refer to the following resource files for detailed guidance:
-- `resources/setup-guide.md` - Step-by-step project initialization
-- `resources/component-catalog.md` - Complete component reference
-- `resources/customization-guide.md` - Theming and variant patterns
-- `resources/migration-guide.md` - Upgrading from other UI libraries
+## Validation
+- Fail fast: stop at the first missing prerequisite or broken import before adding more components.
+- Verify the component lands in the expected repo location and imports resolve cleanly.
+- Confirm required dependencies and config changes are present, not implied.
+- Check keyboard interaction, focus behavior, and semantic markup after customization.
+- If the repo uses theme tokens, ensure the component respects them instead of hardcoded visual values.
 
 ## Examples
+- "Add shadcn dialog and command components to this Next.js app and keep the existing token system."
+- "Check whether this repo is actually ready for shadcn/ui before we install anything."
+- "Migrate this older component variant to the current shadcn pattern without breaking accessibility."
 
-See the `examples/` directory for:
-- Complete component implementations
-- Form patterns with validation
-- Dashboard layouts
-- Authentication flows
-- Data table implementations
-
-## Anti-Patterns to Avoid
-
-- Don’t proceed with missing required context files or IDs when the workflow depends on them.
-- Don’t use generic outputs when project-specific constraints are available.
-- Don’t skip validation or handoff artifacts before finishing the task.
-
-## Encouraging Variation
-
-- Adapt outputs to the project’s stack, audience, and visual style.
-- Use different approaches for simple vs complex requests.
-- Avoid repeating a single template when requirements differ.
-
-## Scripts
-
-- `scripts/verify-setup.sh` verifies local shadcn/ui setup before component integration.
-
-## Validation Artifacts
-
-- `references/contract.yaml` defines behavior and expected inputs/outputs.
-- `references/evals.yaml` defines quality checks and acceptance examples.
+## References
+- Contract: `references/contract.yaml`
+- Evals: `references/evals.yaml`
+- Task profile: `references/task-profile.json`
+- Setup guide: `resources/setup-guide.md`
+- Customization guide: `resources/customization-guide.md`
+- Migration guide: `resources/migration-guide.md`
+- Component catalog: `resources/component-catalog.md`
+- Examples: `examples/auth-layout.tsx`, `examples/data-table.tsx`, `examples/form-pattern.tsx`
+- Setup verifier: `scripts/verify-setup.sh`
+- README: `README.md`
 
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**
@@ -383,23 +118,3 @@ See the `examples/` directory for:
 - Persist with: `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
 - The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
 <!-- /decision-feedback-protocol -->
-
-## Execution quality
-- Philosophy: use a practical framework that balances speed, safety, and tradeoff clarity.
-- Approach: choose context-specific variation rather than generic cookie-cutter steps; adapt output to repository constraints.
-- Guiding question: Why is this the smallest safe change?
-- Guiding question: What tradeoff are we making and why?
-- Guiding question: How do we verify the result end-to-end?
-- Anti-patterns: DO NOT skip validation, NEVER hide failed checks, and avoid repetitive template-only output.
-- Empowerment: be capable, creative, and enable users to explore options with confidence.
-
-## Quality Uplift
-- Philosophy and approach: apply a clear framework, explain why, consider tradeoff decisions, and use a practical mental model for execution.
-- Guiding question: Why is this the right context-specific path?
-- Guiding question: What tradeoff is being made and how is risk reduced?
-- Guiding question: How do we verify behavior end-to-end before completion?
-- Anti-pattern warning: avoid generic or repetitive output; DO NOT hide failures; NEVER skip validation; avoid common pitfall and mistake patterns.
-- Anti-pattern warning: treat incorrect or wrong assumptions as blockers, and call out anti-pattern risks explicitly.
-- Variation: vary recommendations by context-specific constraints; adapt, customize, and use different approaches when constraints differ.
-- Variation: prefer diverse, unique alternatives and avoid repetition or cookie-cutter template convergence.
-- Empowerment: enable users to explore options confidently, be capable and creative, unlock safe choices, and empower execution.

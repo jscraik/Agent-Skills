@@ -1,290 +1,107 @@
 ---
 name: best-practices
-description: Review Better Auth setups and highlight secure integration best practices.
-  Use for audits, config guidance, or debugging flows (not full implementation). Use
-  when the user requests this capability.
+description: Review Better Auth setups and highlight secure integration best practices. Use for audits, config guidance, or debugging flows (not full implementation). Use when the user requests this capability.
 ---
 
-# Better Auth Integration Guide
+# Better Auth Best Practices
 
-**Always consult [better-auth.com/docs](https://better-auth.com/docs) for code examples and latest API.**
+Review Better Auth integrations for secure defaults, configuration quality, and production-readiness without taking over full implementation.
 
-Better Auth is a TypeScript-first, framework-agnostic auth framework supporting email/password, OAuth, magic links, passkeys, and more via plugins.
-
----
+## Standards snapshot (March 2026)
+- Use Better Auth’s current docs as the syntax source of truth, but keep repo-local findings grounded in the actual integration.
+- Audit the real risk surfaces first: secrets, session handling, account linking, CSRF and origin checks, provider configuration, and plugin sprawl.
+- Align review output to `OWASP Top 10:2025`, especially auth, session, and access-control risks.
+- Prefer the smallest safe change set over broad auth redesign advice.
 
 ## Philosophy
+- Review the real integration, not an imagined ideal architecture.
+- Prioritize findings that materially reduce auth and session risk.
+- Prefer small, testable remediations over broad rewrites.
 
-- Security first: defaults should be safe, explicit, and least-privilege.
-- Prefer minimal viable configuration, then layer features.
-- Validate with real flows, not just configuration checks.
-- Align auth risk review with `OWASP Top 10:2025` (especially auth/session and access-control classes).
+## When to use
+- Auditing an existing Better Auth setup for security gaps.
+- Reviewing configuration choices, plugins, providers, or session behavior.
+- Debugging auth flows, cookie/session handling, or deployment hardening.
 
-## Scope and triggers
-
-- You are adding Better Auth to a TS/JS application.
-- You need to configure plugins or providers.
-- You are debugging auth flows or session handling.
+## When not to use
+- Building a new Better Auth integration from scratch.
+- Migrating an app to Better Auth with code changes as the primary task.
+- Reviewing a non-Better-Auth authentication stack.
 
 ## Required inputs
-
 - Framework and runtime context.
-- Database adapter choice.
-- Auth features (email/password, OAuth, passkeys, etc.).
-- Plugin list and provider credentials (redacted).
+- Database adapter or storage choice.
+- Enabled auth features such as email/password, OAuth, passkeys, or organization flows.
+- Current config, plugin list, and redacted provider details.
 
 ## Deliverables
+- A prioritized findings summary with risks, rationale, and suggested fixes.
+- Recommended config changes and expected file locations.
+- Verification steps for secure deployment and flow testing.
+- If requested, a structured status report with a `schema_version` field.
 
-- Recommended config changes and file locations.
-- CLI commands for schema and plugin updates.
-- Checklist for secure deployment.
+## Constraints
+- Redact secrets, tokens, provider credentials, and sensitive user data by default.
+- Do not recommend auth-flow changes without tying them to a concrete risk or failure mode.
+- Keep guidance scoped to Better Auth rather than generic auth theory.
 
-## Constraints / Safety
+## Failure mode
+- If the integration details are missing, ask for the specific config or file context instead of offering generic auth advice.
+- If the task is actually implementation or migration, route to `create-auth` instead of stretching this skill.
+- If a claimed issue depends on undocumented behavior, verify against the official Better Auth docs before stating it as fact.
 
-- Redact secrets, tokens, and private URLs by default.
-- Do not change auth flows without explicit approval.
-- Never log or paste secrets into code or output.
+## Workflow
+1. Identify the framework, runtime, adapter, and current auth surface.
+2. Review configured providers, plugins, and environment-variable handling.
+3. Check session storage, cookie settings, trusted origins, CSRF and origin controls, and account-linking behavior.
+4. Map the meaningful risks to a small, prioritized findings list.
+5. Return the minimal safe remediation set plus verification steps.
 
-## Variation
+## Security review areas
+- Environment handling:
+  - `BETTER_AUTH_SECRET`
+  - `BETTER_AUTH_URL`
+  - provider secrets
+- Core config:
+  - `baseURL`
+  - `secret`
+  - `trustedOrigins`
+  - `rateLimit`
+- Session behavior:
+  - cookie mode
+  - secondary storage
+  - session persistence
+  - expiry and refresh settings
+- Provider and plugin safety:
+  - account linking
+  - plugin scope
+  - passkey, 2FA, magic-link, or SSO configuration
 
-- Adapt to framework (Next.js, SvelteKit, Express).
-- Adapt to adapter (Prisma, Drizzle, raw DB client).
-- Prefer incremental migration for existing auth.
-
-## Procedure
-
-1. Identify framework/runtime and current auth state.
-2. Review configured providers/plugins and adapters.
-3. Check env vars and core config for secure defaults.
-4. Validate session storage/cookie settings.
-5. Provide the minimal change set with verification steps.
-
-## Anti-Patterns
-
-- Disabling CSRF/origin checks without a clear mitigation.
-- Mixing auth providers without reviewing account linking.
-- Skipping migrations after adding plugins.
+## Tooling and references
+- Use [better-auth.com/docs](https://better-auth.com/docs) for current syntax and option semantics.
+- Load repo references as needed:
+  - `references/providers.md`
+  - `references/explain-error.md`
+  - `references/contract.yaml`
+  - `references/evals.yaml`
+- Use assets only when the user needs packaged reference material or supporting visuals from `assets/`.
 
 ## Validation
+- Verify the findings are tied to the actual config, not a generic checklist.
+- Verify sign-in, sign-out, and session persistence behavior in a non-production environment when runtime testing is available.
+- Verify every recommended change has a clear reason and a verification path.
+- Fail fast at the first missing context that would change the audit outcome.
 
-- Run a full sign-in/sign-out flow in a non-prod environment.
-- Verify session behavior (DB vs cookie cache).
-- Fail fast: stop at the first failed check and fix before continuing.
+## Anti-patterns
+- Recommending blanket auth redesigns when a few settings are the real issue.
+- Disabling CSRF or origin checks without a documented mitigation.
+- Ignoring account-linking implications when multiple providers are enabled.
+- Treating plugin installation as safe without reviewing its new data or session surfaces.
 
 ## Examples
-
-- "Audit my Better Auth config for security gaps."
-- "Review my plugin list and session settings."
+- Audit my Better Auth config for security gaps.
+- Review my session settings and tell me what is risky.
+- Check whether this Better Auth plugin setup is production-safe.
 
 ## Remember
-
-The agent is capable of extraordinary work in this domain. These guidelines unlock that potential—they don't constrain it.
-Use judgment, adapt to context, and push boundaries when appropriate.
-
-## Quick Reference
-
-### Environment Variables
-- `BETTER_AUTH_SECRET` - Encryption secret (min 32 chars). Generate: `openssl rand -base64 32`
-- `BETTER_AUTH_URL` - Base URL (e.g., `https://example.com`)
-
-Only define `baseURL`/`secret` in config if env vars are NOT set.
-
-### File Location
-CLI looks for `auth.ts` in: `./`, `./lib`, `./utils`, or under `./src`. Use `--config` for custom path.
-
-### CLI Commands
-- `npx @better-auth/cli@latest migrate` - Apply schema (built-in adapter)
-- `npx @better-auth/cli@latest generate` - Generate schema for Prisma/Drizzle
-- `npx @better-auth/cli mcp --cursor` - Add MCP to AI tools
-
-**Re-run after adding/changing plugins.**
-
----
-
-## Core Config Options
-
-| Option | Notes |
-|--------|-------|
-| `appName` | Optional display name |
-| `baseURL` | Only if `BETTER_AUTH_URL` not set |
-| `basePath` | Default `/api/auth`. Set `/` for root. |
-| `secret` | Only if `BETTER_AUTH_SECRET` not set |
-| `database` | Required for most features. See adapters docs. |
-| `secondaryStorage` | Redis/KV for sessions & rate limits |
-| `emailAndPassword` | `{ enabled: true }` to activate |
-| `socialProviders` | `{ google: { clientId, clientSecret }, ... }` |
-| `plugins` | Array of plugins |
-| `trustedOrigins` | CSRF whitelist |
-
----
-
-## Database
-
-**Direct connections:** Pass `pg.Pool`, `mysql2` pool, `better-sqlite3`, or `bun:sqlite` instance.
-
-**ORM adapters:** Import from `better-auth/adapters/drizzle`, `better-auth/adapters/prisma`, `better-auth/adapters/mongodb`.
-
-**Critical:** Better Auth uses adapter model names, NOT underlying table names. If Prisma model is `User` mapping to table `users`, use `modelName: "user"` (Prisma reference), not `"users"`.
-
----
-
-## Session Management
-
-**Storage priority:**
-1. If `secondaryStorage` defined → sessions go there (not DB)
-2. Set `session.storeSessionInDatabase: true` to also persist to DB
-3. No database + `cookieCache` → fully stateless mode
-
-**Cookie cache strategies:**
-- `compact` (default) - Base64url + HMAC. Smallest.
-- `jwt` - Standard JWT. Readable but signed.
-- `jwe` - Encrypted. Maximum security.
-
-**Key options:** `session.expiresIn` (default 7 days), `session.updateAge` (refresh interval), `session.cookieCache.maxAge`, `session.cookieCache.version` (change to invalidate all sessions).
-
----
-
-## User & Account Config
-
-**User:** `user.modelName`, `user.fields` (column mapping), `user.additionalFields`, `user.changeEmail.enabled` (disabled by default), `user.deleteUser.enabled` (disabled by default).
-
-**Account:** `account.modelName`, `account.accountLinking.enabled`, `account.storeAccountCookie` (for stateless OAuth).
-
-**Required for registration:** `email` and `name` fields.
-
----
-
-## Email Flows
-
-- `emailVerification.sendVerificationEmail` - Must be defined for verification to work
-- `emailVerification.sendOnSignUp` / `sendOnSignIn` - Auto-send triggers
-- `emailAndPassword.sendResetPassword` - Password reset email handler
-
----
-
-## Security
-
-**In `advanced`:**
-- `useSecureCookies` - Force HTTPS cookies
-- `disableCSRFCheck` - ⚠️ Security risk
-- `disableOriginCheck` - ⚠️ Security risk
-- `crossSubDomainCookies.enabled` - Share cookies across subdomains
-- `ipAddress.ipAddressHeaders` - Custom IP headers for proxies
-- `database.generateId` - Custom ID generation or `"serial"`/`"uuid"`/`false`
-
-**Rate limiting:** `rateLimit.enabled`, `rateLimit.window`, `rateLimit.max`, `rateLimit.storage` ("memory" | "database" | "secondary-storage").
-
----
-
-## Hooks
-
-**Endpoint hooks:** `hooks.before` / `hooks.after` - Array of `{ matcher, handler }`. Use `createAuthMiddleware`. Access `ctx.path`, `ctx.context.returned` (after), `ctx.context.session`.
-
-**Database hooks:** `databaseHooks.user.create.before/after`, same for `session`, `account`. Useful for adding default values or post-creation actions.
-
-**Hook context (`ctx.context`):** `session`, `secret`, `authCookies`, `password.hash()`/`verify()`, `adapter`, `internalAdapter`, `generateId()`, `tables`, `baseURL`.
-
----
-
-## Plugins
-
-**Import from dedicated paths for tree-shaking:**
-```
-import { twoFactor } from "better-auth/plugins/two-factor"
-```
-NOT `from "better-auth/plugins"`.
-
-**Popular plugins:** `twoFactor`, `organization`, `passkey`, `magicLink`, `emailOtp`, `username`, `phoneNumber`, `admin`, `apiKey`, `bearer`, `jwt`, `multiSession`, `sso`, `oauthProvider`, `oidcProvider`, `openAPI`, `genericOAuth`.
-
-Client plugins go in `createAuthClient({ plugins: [...] })`.
-
----
-
-## Client
-
-Import from: `better-auth/client` (vanilla), `better-auth/react`, `better-auth/vue`, `better-auth/svelte`, `better-auth/solid`.
-
-Key methods: `signUp.email()`, `signIn.email()`, `signIn.social()`, `signOut()`, `useSession()`, `getSession()`, `revokeSession()`, `revokeSessions()`.
-
----
-
-## Type Safety
-
-Infer types: `typeof auth.$Infer.Session`, `typeof auth.$Infer.Session.user`.
-
-For separate client/server projects: `createAuthClient<typeof auth>()`.
-
----
-
-## Common Gotchas
-
-1. **Model vs table name** - Config uses ORM model name, not DB table name
-2. **Plugin schema** - Re-run CLI after adding plugins
-3. **Secondary storage** - Sessions go there by default, not DB
-4. **Cookie cache** - Custom session fields NOT cached, always re-fetched
-5. **Stateless mode** - No DB = session in cookie only, logout on cache expiry
-6. **Change email flow** - Sends to current email first, then new email
-
----
-
-## Command Playbooks
-
-Use these when the user asks for focused help on specific tasks:
-
-- **Explain Better Auth errors**: Read `references/explain-error.md` for a structured, production-grade error explanation and handling response.
-- **Provider configuration**: Read `references/providers.md` for provider-specific configuration guidance and examples.
-
----
-
-## Resources
-
-- [Docs](https://better-auth.com/docs)
-- [Options Reference](https://better-auth.com/docs/reference/options)
-- [LLMs.txt](https://better-auth.com/llms.txt)
-- [GitHub](https://github.com/better-auth/better-auth)
-- [Init Options Source](https://github.com/better-auth/better-auth/blob/main/packages/core/src/types/init-options.ts)
-
-<!-- skill-score-boost-v1 -->
-## Philosophy and tradeoffs
-- Use this skill when consistent decision-making matters more than one-off execution because project context should drive the approach.
-- Principle and mindset: prioritize tradeoffs and constraints over rigid checklists; understand why each step exists.
-- Ask this to keep outcomes robust: Why is this the right default, and what could change this outcome?
-- How do we adapt if constraints shift?
-- What evidence is needed before choosing one path over another?
-
-## Anti-patterns and caveats
-- Avoid applying this playbook generically without checking repository-specific context.
-- **NEVER** skip required validation gates when behavior changes.
-- **DO NOT** use this skill as a rigid replacement for engineering judgment.
-- **DON'T** ignore warnings or assume one pattern fits all repos.
-- Common pitfall: treating anti-patterns as optional.
-- Incorrect assumptions here can lead to fragile guidance.
-- Warning: wrong sequencing can create avoidable regressions.
-
-## Variation and adaptation
-- Vary the workflow by team size, risk, and deployment target.
-- Use different strategies for small, medium, and large changes.
-- Adapt recommendations to the specific environment and avoid repetitive templates.
-- Avoid generic or cookie-cutter responses; craft context-specific alternatives.
-- Keep outputs diverse and not repetitive.
-- Converge on a custom path only after evidence review.
-- Different constraints should produce different, non-generic recommendations.
-
-## Empowering execution style
-- Be capable of exploring multiple options and enabling the team to make safe decisions.
-- Unlock confidence by explaining options and tradeoffs clearly.
-- Feel free to be creative while staying rigorous and precise.
-- Push boundaries with practical alternatives when simple recipes fail.
-- Enable outcomes-oriented problem solving.
-
-<!-- decision-feedback-protocol:v2 -->
-**Decision feedback protocol (required):**
-- If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.
-- Capture: `decision` (`accepted|partial|rejected|deferred`), `outcome` (`good|neutral|bad|unknown`), and `confidence` (`high|medium|low`).
-- Persist with: `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
-- The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
-<!-- /decision-feedback-protocol -->
-
-## Security baseline (OWASP)
-- Map recommendations to the OWASP Top 10 categories and call out category coverage in findings.
-- Require explicit mitigation notes for injection, broken access control, security misconfiguration, and sensitive data exposure.
+Stay specific. A good auth review is concrete, prioritized, and verifiable, not a wall of generic security advice.

@@ -31,6 +31,12 @@ description: "Route Codex compound-engineering requests to the correct workflow 
 - Route to existing prompts and configured agents instead of duplicating their instructions.
 - Use NotebookLM only as optional evidence enrichment, not as a substitute for repo truth.
 
+## Standards snapshot (March 2026)
+- Prefer routing to the smallest safe workflow stage, not the most elaborate one.
+- Verify prompt paths, agent role names, and config presence before recommending them.
+- Make the handoff executable: one route, one rationale, one next step, and explicit safeguards.
+- Treat context compaction and guardrail extraction as first-class operational modes, not fallback dumping grounds.
+
 ## Scope and triggers
 Use this skill when the user wants to enter or steer the compound-engineering workflow and needs help choosing the correct stage, review mode, or workflow-support meta-mode.
 
@@ -70,6 +76,7 @@ Non-triggers:
   - safeguards and validation gates
   - optional NotebookLM-derived heuristics
 - a refusal or clarification when the request is outside scope or too ambiguous
+- when relevant, a short "why not the nearby alternatives" note so the next run does not re-open the same routing debate
 
 ## Failure mode
 If the request is out of scope, do not force a route. Say why, name the closest next step, and point to the better skill or direct execution path.
@@ -148,6 +155,7 @@ Meta-modes:
    - notebook 2 for context injection, planning mode, hooks, and drift recovery
    - notebook 3 for Codex operating patterns, review loops, doc gardening, and eval patterns
 8. End with the selected prompt path or meta-mode, route rationale, recommended agents, and validation gates.
+9. If the route depends on missing repo assets, stop with a precise blocker instead of suggesting an imaginary path.
 
 UI route fan-out defaults:
 - start with `ui-ux-design` for implementation-oriented UI planning and delivery

@@ -7,9 +7,23 @@ description: Audit and improve a Codex home directory (AGENTS.md, USER_PROFILE, 
 
 Produce a dated Markdown audit report for a Codex home directory (default: `$CODEX_HOME` / `~/.codex`) and print a short summary. The skill is report-first: it should not apply changes unless the user explicitly asks.
 
+## Table of Contents
+- [Scope and triggers](#scope-and-triggers)
+- [Required inputs](#required-inputs)
+- [Standards snapshot](#standards-snapshot-march-2026)
+- [Deliverables](#deliverables)
+- [Procedure](#procedure)
+- [Validation](#validation)
+- [Constraints / Safety](#constraints--safety)
+- [Anti-patterns](#anti-patterns)
+- [Philosophy](#philosophy)
+- [Example prompts](#example-prompts)
+- [Resources](#resources)
+- [Decision feedback protocol](#decision-feedback-protocol)
+
 ## Scope and triggers
 Use this skill when you want to:
-- Audit a Codex home folder for **instruction precedence issues** (e.g. `AGENTS.override.md` shadowing `AGENTS.md`).
+- Audit a Codex home folder for **instruction precedence issues** (for example stale shadow files or conflicting guidance around `AGENTS.md`).
 - Identify **duplication/drift** across `AGENTS*` and `USER_PROFILE*`.
 - Verify `instructions/global.md` is safe/reliable (no stray code fences, no mojibake).
 - Review `.rules` for **bypass risks** (especially `zsh -lc "<script>"` patterns) and missing guardrails.
@@ -22,6 +36,12 @@ Use this skill when you want to:
 Assumptions:
 - You should **not** print secrets. Do not output `.env` contents or environment variables beyond key names.
 - File reads should be targeted; prefer metadata + small excerpts.
+
+## Standards snapshot (March 2026)
+- Treat the Codex home as an instruction and policy control plane, not a generic dotfiles folder.
+- Audit precedence, duplication, and rule safety before proposing cleanup.
+- Keep the default mode report-only; implementation should be a separate explicit step.
+- Prefer enforceable guardrails and small reversible fixes over sprawling prose reshuffles.
 
 ## Deliverables
 - A dated Markdown report written to the output directory.
@@ -39,7 +59,7 @@ Assumptions:
 ## Validation
 
 Fail fast:
-- If the script cannot find `config.toml`, `rules/`, or `AGENTS.md`/`AGENTS.override.md` in the target home, stop and report what’s missing.
+- If the script cannot find `config.toml`, `rules/`, or `AGENTS.md` in the target home, stop and report what’s missing.
 - If the report cannot be written, stop and return a non-zero exit status.
 
 Recommended checks after updates:
@@ -70,7 +90,7 @@ Minimize drift by:
 1. “Audit my ~/.codex setup and tell me what to fix first.”
 2. “Why are my instructions duplicating? Diagnose drift and propose a cleanup.”
 3. “Move recurring command guidance into rules where possible.”
-4. “AGENTS.override.md is shadowing AGENTS.md—help me clean this up safely.”
+4. “A stale shadow instruction file is conflicting with AGENTS.md—help me clean this up safely.”
 5. “Tighten rules so grep is blocked and find requires a prompt.”
 6. “Generate a dated report I can paste into a ticket.”
 7. “Do not implement—report only.”
@@ -83,39 +103,7 @@ Minimize drift by:
 - `scripts/run.sh` — wrapper that runs the audit script using `zsh -lc`.
 - `references/codex-rules-notes.md` — short notes about Codex rules behavior and local conventions.
 
-<!-- skill-score-boost-v1 -->
-## Philosophy and tradeoffs
-- Use this skill when consistent decision-making matters more than one-off execution because project context should drive the approach.
-- Principle and mindset: prioritize tradeoffs and constraints over rigid checklists; understand why each step exists.
-- Ask this to keep outcomes robust: Why is this the right default, and what could change this outcome?
-- How do we adapt if constraints shift?
-- What evidence is needed before choosing one path over another?
-
-## Anti-patterns and caveats
-- Avoid applying this playbook generically without checking repository-specific context.
-- **NEVER** skip required validation gates when behavior changes.
-- **DO NOT** use this skill as a rigid replacement for engineering judgment.
-- **DON'T** ignore warnings or assume one pattern fits all repos.
-- Common pitfall: treating anti-patterns as optional.
-- Incorrect assumptions here can lead to fragile guidance.
-- Warning: wrong sequencing can create avoidable regressions.
-
-## Variation and adaptation
-- Vary the workflow by team size, risk, and deployment target.
-- Use different strategies for small, medium, and large changes.
-- Adapt recommendations to the specific environment and avoid repetitive templates.
-- Avoid generic or cookie-cutter responses; craft context-specific alternatives.
-- Keep outputs diverse and not repetitive.
-- Converge on a custom path only after evidence review.
-- Different constraints should produce different, non-generic recommendations.
-
-## Empowering execution style
-- Be capable of exploring multiple options and enabling the team to make safe decisions.
-- Unlock confidence by explaining options and tradeoffs clearly.
-- Feel free to be creative while staying rigorous and precise.
-- Push boundaries with practical alternatives when simple recipes fail.
-- Enable outcomes-oriented problem solving.
-
+## Decision feedback protocol
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.

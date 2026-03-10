@@ -5,103 +5,94 @@ description: "Create execution-ready implementation plans with task sequencing a
 
 # Writing Plans
 
-## Table of Contents
-- [Usage triggers](#usage-triggers)
-- [Required context and assumptions](#required-context-and-assumptions)
-- [Deliverables and results](#deliverables-and-results)
-- [Workflow](#workflow)
-- [Validation](#validation)
-- [Anti-patterns](#anti-patterns)
-- [Constraints and safety](#constraints-and-safety)
-- [Philosophy](#philosophy)
-- [Variation and adaptation](#variation-and-adaptation)
-- [Empowering execution style](#empowering-execution-style)
-- [Examples](#examples)
-- [References](#references)
+Create execution-ready plans that another agent can run without guessing.
 
-## Usage triggers
-Use this skill when:
+## Standards snapshot (March 2026)
+- Planning is a delivery tool, not ceremony.
+- Every task should have a concrete outcome, target files, and a verification step.
+- Keep the plan small enough to execute in batches but explicit enough to survive handoff.
+- Surface hidden assumptions before implementation starts.
+
+## When to use
 - Scope is clear enough to plan but too large for one-step implementation.
-- You need deterministic task sequencing and checkpoints.
-- Another agent or session may execute from your plan.
+- Work needs deterministic sequencing, checkpoints, or handoff to another agent or later session.
+- Requirements exist, but execution order and verification still need to be made explicit.
 
-Do not use when problem framing is still ambiguous (use a discovery/interview skill first).
+## When not to use
+- The problem is still ambiguous and needs discovery or brainstorming first.
+- The task is small enough to execute directly without a plan artifact.
+- The user needs a product spec or research memo rather than an implementation sequence.
 
-## Required context and assumptions
-- Requirements/spec or explicit user goal.
+## Required inputs
+- Requirements, spec, or explicit user goal.
 - Repository context and likely impacted areas.
-- Constraints (timeline, risk tolerance, rollout expectations).
+- Constraints such as timeline, rollout risk, approvals, or compatibility expectations.
 
-## Deliverables and results
-- Implementation plan with ordered tasks.
-- Per-task file targets and expected checks.
-- Explicit handoff notes for execution.
+## Deliverables
+- An implementation plan with ordered tasks.
+- Per-task target files or work areas.
+- Per-task verification commands or checks.
+- Clear handoff notes covering assumptions, checkpoints, and the next execution mode.
+- When a structured status report is requested, include a `schema_version` field in the returned payload.
+
+## Failure mode
+- If critical scope decisions are still unresolved, stop and name them instead of pretending the sequence is settled.
+- If a task cannot be tied to a file target or verification step, the plan is not ready.
+- If the user only needs exploration, route to brainstorming or interview work instead of overcommitting to execution detail.
 
 ## Workflow
-1. **Frame objective and assumptions**
-   - One-paragraph goal and boundaries.
-2. **Decompose into smallest safe tasks**
-   - Prefer 2-15 minute steps.
-3. **Attach concrete file targets**
-   - Create/modify/test paths for each task.
-4. **Embed verification per task**
-   - What command proves task completion.
-5. **Define checkpoints**
-   - Where to pause for feedback before continuing.
-6. **Prepare execution handoff**
-   - Clarify next mode: execute now or execute later.
+1. Frame the goal, boundary, and assumptions in a short opening summary.
+2. Decompose the work into the smallest safe tasks, usually 2-15 minute execution steps.
+3. Attach concrete file targets, systems, or work areas to each task.
+4. Add the command or check that proves each task is done.
+5. Insert checkpoints where feedback, rollout approval, or risk review should happen.
+6. End with a clear handoff: execute now, execute later, or revisit scope first.
 
 ## Validation
-Fail fast: **stop at the first failed gate** and revise the plan.
-
-Required gates:
-1. Every task maps to a clear outcome.
-2. Every task has at least one verification command.
-3. Plan has no hidden prerequisites.
-4. Handoff path is explicit (executor can run without guessing).
+- Every task maps to a clear outcome.
+- Every task has at least one verification command or check.
+- The plan has no hidden prerequisites.
+- The execution or handoff path is explicit.
+- Fail fast at the first missing task outcome, target, or verification step.
 
 ## Anti-patterns
-- Vague tasks like "improve" or "clean up" without acceptance criteria.
+- Vague tasks like "improve" or "clean up" with no acceptance criteria.
 - Missing file paths or missing verification commands.
-- Oversized tasks that bundle multiple behavioral changes.
-- Planning compatibility work that was not requested.
-- **NEVER** leave a task without a verification command.
-- **DO NOT** hide assumptions that executors need to know.
-- **DON'T** pad plans with generic steps that add no signal.
+- Oversized tasks that bundle multiple behavior changes.
+- Padding the plan with generic steps that add no signal.
+- Hiding assumptions the executor needs to know.
 
-## Constraints and safety
-- Redact secrets/tokens/PII in examples and artifacts.
-- Keep scope canonical by default; add compatibility only when requested.
+## Constraints
+- Redact secrets, tokens, and sensitive material in examples and artifacts.
+- Keep scope canonical by default and add compatibility work only when requested.
 - Do not execute destructive commands while planning.
 
 ## Philosophy
 - Planning is risk reduction, not ceremony.
-- High-signal steps outperform long prose.
-- Plans should be executable by someone with zero local context.
-- Why this method? It exposes uncertainty before implementation cost grows.
-- What tradeoff matters most: planning depth or delivery speed?
-- Which dependency assumption could break execution first?
+- High-signal steps beat long prose.
+- A plan should be executable by someone with zero local context.
+- Good plans expose uncertainty before implementation cost grows.
 
-## Variation and adaptation
-- Vary task granularity by risk: different step sizes for migrations, bugfixes, and UI tweaks.
-- Adapt plan shape to context-specific constraints such as compliance, rollout windows, or team size.
-- Customize checkpoint cadence to user preference rather than using one repetitive cadence.
-- Use different evidence formats for technical implementers versus product stakeholders.
-- Avoid generic cookie-cutter plans when repo conventions require unique sequencing.
-
-## Empowering execution style
-- You are capable of turning ambiguity into clear, actionable sequences.
-- This process unlocks faster execution because decisions are front-loaded.
-- Explore alternative breakdowns when a different structure reduces risk.
-- Enable confident handoff by making every task explicit and verifiable.
+## Variation
+- Use tighter, shorter tasks for risky migrations and looser batching for low-risk cleanup.
+- Increase checkpoint density when rollout, compliance, or coordination risk is high.
+- Adapt the evidence format to the executor: command-focused for engineers, milestone-focused for broader stakeholders.
 
 ## Examples
-- "Create a task-by-task plan to add optimistic UI updates to this feature."
-- "Break this migration spec into implementation steps with checks."
+- Create a task-by-task plan to add optimistic UI updates to this feature.
+- Break this migration spec into implementation steps with checks.
+- Turn this approved PRD into an execution plan with file targets and validation commands.
 
 ## References
 - `references/contract.yaml`
 - `references/evals.yaml`
+- `references/folded-legacy-modes-core60.md`
+- `references/folded-legacy-modes-phase4.md`
+
+## Folded legacy mode
+This skill also owns legacy execution-planning behavior from retired folds.
+
+- `execute` from `utilities/executing-plans`: use when a plan already exists and the immediate job is to validate and execute it in verified batches with checkpoints.
 
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**
@@ -110,13 +101,3 @@ Required gates:
 - Persist with: `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
 - The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
 <!-- /decision-feedback-protocol -->
-
-## Folded Legacy Modes (Core60)
-<!-- core60-folded-modes:v1:start -->
-This skill owns legacy capability from retired skills. Use these modes when requests match prior behavior.
-
-- `execute` from `utilities/executing-plans`: Validate and execute written implementation plans in verified batches with checkpoints. Use when a plan already exists and work must proc...
-
-Deep legacy details: `references/folded-legacy-modes-core60.md`.
-Additional Phase 4 folds: references/folded-legacy-modes-phase4.md.
-<!-- core60-folded-modes:v1:end -->

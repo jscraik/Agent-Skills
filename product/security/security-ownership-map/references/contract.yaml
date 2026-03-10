@@ -1,0 +1,15 @@
+purpose: Analyze git repositories to map security ownership (people-to-file), compute
+  bus-factor and sensitive-code risk, and export CSV/JSON/graph artifacts for visualization.
+  Use only when the user explicitly requests security-focused ownership analysis grounded
+  in git history.
+schema_version: '1.0'
+triggers:
+- When requests match security-ownership-map scope and intent.
+inputs:
+- user request details
+outputs:
+- structured response or artifacts defined by the skill
+non_goals:
+- out-of-scope requests outside the skill boundary
+risks:
+- missing context; mitigated by clarifying questions and explicit assumptions

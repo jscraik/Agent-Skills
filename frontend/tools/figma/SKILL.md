@@ -7,6 +7,26 @@ description: "Use this canonical Figma skill to extract design context/screensho
 
 This is the canonical Figma workflow skill. It supports both extraction and implementation flows through explicit modes.
 
+## Table of Contents
+- [Standards snapshot](#standards-snapshot)
+- [Philosophy](#philosophy)
+- [Scope and triggers](#scope-and-triggers)
+- [Required inputs](#required-inputs)
+- [Deliverables](#deliverables)
+- [Failure mode](#failure-mode)
+- [Procedure](#procedure)
+- [Validation](#validation)
+- [Anti-patterns](#anti-patterns)
+- [Constraints](#constraints)
+- [Examples](#examples)
+- [References](#references)
+
+## Standards snapshot
+- Gather structured context and screenshot evidence before implementation claims.
+- Prefer project components and tokens over raw generated code.
+- Keep MCP recovery steps minimal and mode-specific.
+- Do not claim parity until the design evidence has been checked against the implementation.
+
 ## Philosophy
 
 - One canonical workflow prevents divergence and stale instructions.
@@ -49,6 +69,11 @@ Desktop MCP note:
 - `extract_context`: node metadata, design context, screenshot, asset list.
 - `implement_design`: production-ready implementation guidance/code aligned with project conventions.
 - `troubleshoot`: root cause summary + fix steps.
+
+## Failure mode
+- If there is no usable Figma URL, node selection, or MCP access path, stop before claiming extraction or implementation progress.
+- If the task is broader product design strategy rather than Figma extraction or translation, route to the more appropriate design skill.
+- If the project context is missing for implementation work, stay in extraction mode until enough repo context exists.
 
 ## Procedure
 

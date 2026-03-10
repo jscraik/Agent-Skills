@@ -1,169 +1,113 @@
 ---
 name: oak-api
-description: Build or adapt Oak Curriculum API driven learning experiences, especially
-  for child-facing, interactive ChatGPT Apps SDK workflows. Use when working with
-  Oak API endpoints, curriculum data (subjects, units, lessons, quizzes, search),
-  or when translating Oak content into adaptive learning activities with age-appropriate
-  guardrails and compliance reminders.
+description: Build or adapt Oak Curriculum API driven learning experiences, especially for child-facing, interactive ChatGPT Apps SDK workflows. Use when working with Oak API endpoints, curriculum data (subjects, units, lessons, quizzes, search), or when translating Oak content into adaptive learning activities with age-appropriate guardrails and compliance reminders.
 ---
 
 # Oak API
 
-## Overview
-Use this skill to turn Oak Curriculum API content into engaging, interactive learning experiences. Default output is recommendations and step-by-step workflows, not code, unless the user explicitly asks for implementation details. Treat text-only guidance as non-significant and do not read or modify files unless explicitly asked.
+Turn Oak Curriculum API content into age-appropriate learning flows, endpoint maps, or implementation guidance without losing compliance and learner-safety constraints.
 
-## Scope and triggers
-- Turning Oak API curriculum data into a learner-centered flow.
-- Designing adaptive lesson experiences for children using Oak content.
-- Mapping Oak data (subjects, units, lessons, quizzes) into activities.
-- Answering questions about Oak API endpoints, limits, and terms.
+## Standards snapshot (March 2026)
+- Prioritize learner safety, age fit, and clarity before clever product mechanics.
+- Treat Oak content as a factual backbone, not something to dump verbatim into the chat.
+- Keep compliance explicit: attribution, rate limits, API-key handling, and no implied endorsement.
+- Default to recommendations and flows first; move into code only when the user asks for implementation.
 
 ## Philosophy
-- Prioritize learner safety, clarity, and age-appropriate tone.
-- Treat Oak content as a factual backbone, not a script to read verbatim.
-- Prefer small, testable learning steps with explicit checks.
+- Learner safety and clarity outrank novelty.
+- Use Oak as structured curriculum evidence, not as copy to repeat wholesale.
+- Keep outputs actionable for tutors, parents, teachers, or app builders.
+
+## When to use
+- Designing learner-facing experiences from Oak Curriculum content.
+- Mapping Oak subjects, units, lessons, quizzes, or search results into a learning flow.
+- Answering endpoint, content-coverage, licensing, or usage-limit questions about Oak API.
+- Adapting Oak data for child-facing ChatGPT Apps or similar interactive experiences.
+
+## When not to use
+- Building generic educational content that does not depend on Oak data.
+- Returning large chunks of Oak material verbatim.
+- Discussing unrelated API design with no Oak endpoint or curriculum context.
 
 ## Required inputs
-- Age range and learner context (classroom, home, tutoring).
-- Subject, key stage, year group, and learning goals. If a key stage is provided (e.g., KS2/KS3), infer the typical age range and proceed.
-- Desired interaction style (explain, practice, quiz, project).
-- Constraints (time, materials, accessibility needs).
+- Age range and learner context.
+- Subject, key stage, year group, or learning goal.
+- Desired interaction style such as explain, practice, quiz, or project.
+- Constraints such as time, materials, accessibility needs, or implementation target.
 
 ## Deliverables
-- A step-by-step learning flow with checks and pitfalls.
-- A minimal content map: Oak endpoints + selected lesson IDs.
-- If asked: code snippets or Apps SDK integration guidance.
-
-### Output format (required)
-- Include a line starting with `Age range:`.
-- Include a section titled `Step-by-step flow:` with ordered steps.
-- Include a section titled `Compliance checklist:` and include the exact attribution statement: `Contains public sector information licensed under the Open Government Licence v3.0`.
-- For endpoint mapping requests, include lines: `List endpoints:`, `Unit endpoints:`, `Pagination: offset, limit`, and `Rate limit: 1000 requests per hour per user.`
+- A step-by-step learning flow or endpoint-backed content map.
+- Selected Oak endpoint groupings and lesson or unit identifiers when relevant.
+- A compliance checklist including attribution and usage reminders.
+- If requested, code or Apps SDK integration guidance.
 
 ## Constraints
-- Always request age range early and avoid PII.
-- Keep language age-appropriate and short.
-- Include OGL attribution and terms reminders.
-- Respect rate limits and safe API usage.
-- Use API keys via env vars; never log secrets.
+- Redact API keys, tokens, and any sensitive learner or classroom details by default.
+- Keep network usage explicit and limited to Oak API hosts when `scripts/oak_api_fetch.py` is used.
+- Do not imply endorsement by Oak or omit the required licensing and rate-limit reminders.
 
-## Anti-patterns
-- Do not dump full Oak content verbatim into the chat.
-- Do not skip age-appropriate framing or safeguards.
-- Do not imply Oak endorsement.
-- Do not invent endpoints or undocumented parameters.
+## Required output markers
+- Include a line beginning with `Age range:`
+- Include a section titled `Step-by-step flow:`
+- Include a section titled `Compliance checklist:`
+- Include the exact attribution line:
+  - `Contains public sector information licensed under the Open Government Licence v3.0`
+- For endpoint mapping requests, include:
+  - `List endpoints:`
+  - `Unit endpoints:`
+  - `Pagination: offset, limit`
+  - `Rate limit: 1000 requests per hour per user.`
+
+## Failure mode
+- If age range or subject context is missing, stop and say: `Missing inputs: age range, key stage, subject.`
+- If endpoint details are unclear, load the relevant references before answering.
+- If the task drifts into implementation without compliance or age context, restore those constraints before proceeding.
 
 ## Workflow
+1. Collect age range, subject, key stage, goals, and constraints.
+2. Confirm learner-safety and no-PII boundaries.
+3. Use list and search references to identify the right content sequence.
+4. Select units, lessons, or quiz structures and turn them into explain -> practice -> check flows.
+5. Adapt tone and pacing for the age band.
+6. End with compliance reminders and optional implementation next steps.
 
-### 1) Intake and guardrails
-- Collect: age range, subject, key stage, goals, constraints.
-- Confirm safety: no PII, no sensitive content, age fit.
+## Compliance checklist
+- Include the required OGL attribution statement.
+- Respect the rate limit: `1000 requests per hour per user.`
+- Do not imply Oak endorsement.
+- Use API keys via environment variables and never log them.
 
-### 2) Curriculum discovery
-- Use lists and search endpoints to identify sequences, units, lessons.
-- Validate key stage and subject coverage.
-
-### 3) Lesson selection
-- Use unit/lesson endpoints to select lesson IDs and metadata.
-- Pull summaries, overviews, and assets as needed.
-
-### 4) Activity design
-- Convert lesson content into interactive steps: explain -> practice -> check.
-- Use quiz endpoints to seed questions; rephrase for age.
-
-### 5) Adaptive loop
-- Track performance and adjust difficulty and hints.
-- Offer remediation or stretch tasks.
-
-### 6) Delivery and next steps
-- Provide a concise session plan, materials list, and follow-ups.
-- Offer to generate code or Apps SDK integration if requested.
-
-## Examples
-- "Create a KS2 maths session on fractions using Oak lessons."
-- "Find a Year 7 computing unit and turn it into a 20-minute interactive flow."
-- "Map quiz questions into an adaptive practice loop for KS4 science."
+## Tooling and references
+- Load only the Oak references needed for the current request:
+  - `references/api-overview.md`
+  - `references/endpoints-overview.md`
+  - `references/lists.md`
+  - `references/lesson-data.md`
+  - `references/unit-curriculum-data.md`
+  - `references/quiz-questions.md`
+  - `references/search.md`
+  - `references/api-limits.md`
+  - `references/terms.md`
+  - `references/apps-sdk.md`
+- Use `scripts/oak_api_fetch.py` when authenticated fetches are required.
+- Use assets only when the task needs packaged Oak-specific visuals or supporting materials from `assets/`.
 
 ## Validation
-- If age range or subject is missing, respond with: `Missing inputs: age range, key stage, subject.` and stop. Do not propose /interview-me.
-- If endpoints are unclear, load the relevant references before responding.
-- If terms or limits are at risk, surface the compliance checklist.
+- Verify age range, subject, and key-stage context are present.
+- Verify compliance statements and rate-limit reminders are included.
+- Verify endpoint claims come from the Oak reference files rather than memory.
+- Fail fast at the first missing educational or compliance prerequisite.
 
-## Compliance checklist (always include)
-- Use exact attribution statement: `Contains public sector information licensed under the Open Government Licence v3.0`.
-- Respect rate limits (1000 requests per hour per user).
-- Do not imply Oak endorsement.
-- Use API keys securely (env vars; no logging).
+## Anti-patterns
+- Dumping Oak lesson content verbatim.
+- Skipping age-appropriate framing.
+- Inventing undocumented endpoints or parameters.
+- Treating Oak content like unrestricted generic curriculum text.
 
-## Apps SDK guidance
-- If UI or Apps SDK implementation is requested, use `~/dev/aStudio` as the design system.
-- Fetch the latest Apps SDK docs via the `openaiDeveloperDocs` MCP server.
-
-## References (load as needed)
-- `references/api-overview.md` - high-level API overview and example endpoints.
-- `references/api-limits.md` - rate limits and licensing.
-- `references/versioning.md` - versioning and changelog endpoints.
-- `references/terms.md` - attribution and compliance requirements.
-- `references/content-coverage.md` - subjects and key stages coverage.
-- `references/glossary.md` - term definitions.
-- `references/ontology-diagrams.md` - programme factors and relationships.
-- `references/data-examples.md` - programme and subject category examples.
-- `references/endpoints-overview.md` - endpoint groups.
-- `references/lists.md` - list endpoints.
-- `references/lesson-data.md` - lesson detail endpoints.
-- `references/unit-curriculum-data.md` - unit and curriculum endpoints.
-- `references/quiz-questions.md` - quiz question endpoints and filters.
-- `references/search.md` - search endpoints and parameters.
-- `references/learning-flows.md` - age-banded example flows.
-- `references/apps-sdk.md` - Apps SDK fetching rules.
-
-## Scripts
-- `scripts/oak_api_fetch.py` - authenticated fetch helper with offset/limit pagination.
-
-## Variation
-- Vary tone, depth, and structure based on context.
-- Avoid repeating the same outline across outputs.
+## Examples
+- Create a KS2 maths session on fractions using Oak lessons.
+- Find a Year 7 computing unit and turn it into a 20-minute interactive flow.
+- Map Oak quiz questions into an adaptive KS4 science practice loop.
 
 ## Remember
-The agent is capable of extraordinary work in this domain. Use judgment, adapt to context, and push boundaries when appropriate.
-
-<!-- skill-score-boost-v1 -->
-## Philosophy and tradeoffs
-- Use this skill when consistent decision-making matters more than one-off execution because project context should drive the approach.
-- Principle and mindset: prioritize tradeoffs and constraints over rigid checklists; understand why each step exists.
-- Ask this to keep outcomes robust: Why is this the right default, and what could change this outcome?
-- How do we adapt if constraints shift?
-- What evidence is needed before choosing one path over another?
-
-## Anti-patterns and caveats
-- Avoid applying this playbook generically without checking repository-specific context.
-- **NEVER** skip required validation gates when behavior changes.
-- **DO NOT** use this skill as a rigid replacement for engineering judgment.
-- **DON'T** ignore warnings or assume one pattern fits all repos.
-- Common pitfall: treating anti-patterns as optional.
-- Incorrect assumptions here can lead to fragile guidance.
-- Warning: wrong sequencing can create avoidable regressions.
-
-## Variation and adaptation
-- Vary the workflow by team size, risk, and deployment target.
-- Use different strategies for small, medium, and large changes.
-- Adapt recommendations to the specific environment and avoid repetitive templates.
-- Avoid generic or cookie-cutter responses; craft context-specific alternatives.
-- Keep outputs diverse and not repetitive.
-- Converge on a custom path only after evidence review.
-- Different constraints should produce different, non-generic recommendations.
-
-## Empowering execution style
-- Be capable of exploring multiple options and enabling the team to make safe decisions.
-- Unlock confidence by explaining options and tradeoffs clearly.
-- Feel free to be creative while staying rigorous and precise.
-- Push boundaries with practical alternatives when simple recipes fail.
-- Enable outcomes-oriented problem solving.
-
-<!-- decision-feedback-protocol:v2 -->
-**Decision feedback protocol (required):**
-- If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.
-- Capture: `decision` (`accepted|partial|rejected|deferred`), `outcome` (`good|neutral|bad|unknown`), and `confidence` (`high|medium|low`).
-- Persist with: `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
-- The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
-<!-- /decision-feedback-protocol -->
+The best Oak output is structured, age-aware, compliant, and easy to turn into a real learning session.

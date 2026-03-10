@@ -5,343 +5,94 @@ description: "Build web applications that use Google's Nano Banana image APIs fo
 
 # Nano Banana Builder
 
-## Remember
-The agent is capable of extraordinary work in this domain. Use judgment, adapt to context, and push boundaries when appropriate.
-
-
-Build production-ready web applications powered by Google's Nano Banana image generation APIs—creating everything from simple text-to-image generators to sophisticated iterative editors with multi-turn conversation.
-
----
-
-## CRITICAL: Exact Model Names
-
-**Use ONLY these exact model strings. Do not invent, guess, or add date suffixes.**
-
-| Model String (use exactly) | Alias | Use Case |
-|---------------------------|-------|----------|
-| `gemini-2.5-flash-image` | Nano Banana | Fast iterations, drafts, high volume |
-| `gemini-3-pro-image-preview` | Nano Banana Pro | Quality output, text rendering, 2K |
-
-**Common mistakes to avoid:**
-- ❌ `gemini-2.5-flash-preview-05-20` — wrong, date suffixes are for text models
-- ❌ `gemini-2.5-pro-image` — wrong, 2.5 Pro doesn't do image generation
-- ❌ `gemini-3-flash-image` — wrong, doesn't exist
-- ❌ `gemini-pro-vision` — wrong, that's for image *input*, not generation
-
-**The only valid image generation models are `gemini-2.5-flash-image` and `gemini-3-pro-image-preview`.**
-
----
-
-## Philosophy: Conversational Image Generation
-
-Nano Banana isn't just another image API—it's **conversational by design**. The core insight is that image generation works best as a dialogue, not a one-shot prompt.
-
-**Think of it as working with an AI art director**:
-- **Iterative refinement** → Build up images through conversation, not perfection in one prompt
-- **Context awareness** → The model "remembers" previous generations and edits
-- **Natural language editing** → Describe changes conversationally, not with parameters
-
-### Before Building, Ask
-
-- **What's the primary use case?** Text-to-image generation? Image editing? Multi-image composition? Style transfer?
-- **Which model fits the need?** Nano Banana (speed/iterations) or Nano Banana Pro (quality/complex prompts)?
-- **What's the user journey?** Single generation? Iterative refinement? Gallery browsing?
-- **What are production constraints?** Rate limits? Storage? Cost per image? User volume?
-
-### Core Principles
-
-1. **Conversation over configuration**: Leverage Nano Banana's iterative editing rather than complex parameter UIs
-2. **Model selection matters**: Use `gemini-2.5-flash-image` for speed/iterations, `gemini-3-pro-image-preview` for quality/complexity
-3. **State as conversation history**: Track generations as chat messages to enable multi-turn editing
-4. **Rate limit awareness**: Image generation has strict quotas—implement queuing and caching
-5. **Storage strategy**: Store generated images (Vercel Blob/S3), not just inline base64
-
-### Model Selection Framework
-
-Choose based on use case:
-
-| Use Case | Model | Why |
-|----------|-------|-----|
-| Rapid iterations, drafts | `gemini-2.5-flash-image` | Fast (2-5s), lower cost per image |
-| Final output, quality | `gemini-3-pro-image-preview` | Superior quality, thinking, text rendering |
-| Text-heavy images | `gemini-3-pro-image-preview` | Best typography, 2K resolution |
-| Multi-turn editing | Either | Both support conversational editing |
-| High volume | `gemini-2.5-flash-image` | Lower cost, faster throughput |
-
----
-
-## Quick Start
-
-### Basic Server Action
-
-```typescript
-// app/actions/generate.ts
-'use server'
-
-import { google } from '@ai-sdk/google'
-import { generateText } from 'ai'
-
-export async function generateImage(prompt: string) {
-  const result = await generateText({
-    model: google('gemini-2.5-flash-image'),
-    prompt,
-    providerOptions: {
-      google: {
-        responseModalities: ['IMAGE'],
-        imageConfig: { aspectRatio: '16:9' }
-      }
-    }
-  })
-
-  return result.files[0] // { base64, uint8Array, mediaType }
-}
-```
-
-### Client Component with useChat
-
-```typescript
-// app/components/ImageGenerator.tsx
-'use client'
-
-import { useChat } from '@ai-sdk/react'
-
-export function ImageGenerator() {
-  const { append, messages, isLoading } = useChat({
-    api: '/api/generate'
-  })
-
-  return (
-    <div>
-      {messages.map(m => (
-        <div key={m.id}>
-          {m.parts?.map((part, i) =>
-            part.type === 'image' && (
-              <img key={i} src={part.url} alt="Generated" />
-            )
-          )}
-        </div>
-      ))}
-
-      <button
-        disabled={isLoading}
-        onClick={() => append({
-          role: 'user',
-          content: 'A futuristic cityscape at dusk'
-        })}
-      >
-        Generate
-      </button>
-    </div>
-  )
-}
-```
-
----
-
-## Advanced Implementation
-
-For complete implementations including:
-- **Server Actions** with model selection, storage, and error handling
-- **API Routes** with streaming responses
-- **Client Components** with iterative editing and galleries
-- **Advanced Patterns** like multi-image composition and batch generation
-
-See **references/advanced-patterns.md**
-
----
-
-## Configuration & Operations
-
-For detailed configuration and operational concerns:
-- **Provider Options** (responseModalities, imageConfig, thinkingConfig)
-- **Storage Strategy** (Vercel Blob, S3/R2 implementations)
-- **Rate Limiting** (Upstash Redis patterns, quota management)
-- **Cost Optimization** strategies
-
-See **references/configuration.md**
-
----
-
-## Anti-Patterns to Avoid
-
-❌ **Inventing model names or adding date suffixes**:
-Why wrong: Image generation models have specific names; date suffixes like `-preview-05-20` are for text models only
-Better: Use exactly `gemini-2.5-flash-image` or `gemini-3-pro-image-preview` — no variations
-
-❌ **Using Gemini 2.5 Pro for images**:
-Why wrong: Gemini 2.5 Pro doesn't generate images directly
-Better: Use `gemini-2.5-flash-image` or `gemini-3-pro-image-preview`
-
-❌ **Storing only base64 in database**:
-Why wrong: Blobs database, expensive storage, slow retrieval
-Better: Store in object storage (Vercel Blob/S3), save URL only
-
-❌ **No rate limit handling**:
-Why wrong: Will hit 429 errors in production, poor UX
-Better: Implement rate limiting with user-friendly error messages
-
-❌ **Ignoring multi-turn context**:
-Why wrong: Wastes Nano Banana's conversational editing strength
-Better: Track chat history for iterative refinement
-
-❌ **Hardcoding API keys client-side**:
-Why wrong: Exposes credentials, security risk
-Better: Use server actions / API routes with environment variables
-
-❌ **Using wrong aspect ratio**:
-Why wrong: 21:9 on 1:1 request wastes tokens, unexpected crop
-Better: Match aspect ratio to intended use case
-
-❌ **No loading states**:
-Why wrong: Image generation takes 5-30s, users think it's broken
-Better: Show progress indicators and estimated wait time
-
-❌ **Generating on every keystroke**:
-Why wrong: Wastes quota, slow response
-Better: Debounce prompts, require explicit action
-
----
-
-## Variation Guidance
-
-**IMPORTANT**: Every app should feel uniquely designed for its specific purpose.
-
-**Vary across dimensions**:
-- **UI Style**: Minimal, brutalist, playful, professional, dark, light
-- **Color Scheme**: Warm, cool, monochrome, vibrant, muted
-- **Layout**: Single page, multi-step wizard, sidebar, grid, list
-- **Interaction**: Click-to-generate, drag-and-drop, real-time typing, batch
-
-**Avoid overused patterns**:
-- ❌ Default Tailwind purple gradients
-- ❌ Generic "AI startup" aesthetic
-- ❌ Same component libraries for every project
-- ❌ Inter/Roboto fonts without thought
-
-**Context should drive design**:
-- **Meme generator** → Bold, fun, casual
-- **Product mockup tool** → Clean, professional, grid-based
-- **Art exploration** → Gallery-first, visual-heavy
-- **Brand asset creator** → Polished, template-guided
-
----
-
-## Environment Setup
-
-```bash
-# .env.local
-GEMINI_API_KEY=your_api_key_here
-
-# For Vercel Blob storage
-BLOB_READ_WRITE_TOKEN=your_vercel_token
-
-# For S3 (optional)
-S3_BUCKET=your-bucket
-S3_ENDPOINT=https://your-endpoint.r2.cloudflarestorage.com
-S3_ACCESS_KEY_ID=your_key
-S3_SECRET_ACCESS_KEY=your_secret
-
-# For Upstash rate limiting (optional)
-UPSTASH_REDIS_REST_URL=your_url
-UPSTASH_REDIS_REST_TOKEN=your_token
-```
-
-```bash
-# Install dependencies
-npm install @ai-sdk/google ai @ai-sdk/react @vercel/blob
-
-# Or if using separate packages
-npm install google-genai
-```
-
----
-
-## Remember
-
-**Nano Banana enables conversational image generation that feels like working with a creative partner, not a tool.**
-
-The best apps:
-- Leverage multi-turn editing for refinement
-- Choose models intentionally (speed vs quality)
-- Handle rate limits gracefully
-- Store images efficiently
-- Provide great loading states
-- Feel uniquely designed for their purpose
-
-You're building more than an image generator—you're creating a creative experience. Design it thoughtfully.
-
-## Scope and triggers
-- Use this skill when the task matches its description and triggers.
-- If the request is outside scope, route to the referenced skill.
-
+## Table of Contents
+- [Standards snapshot](#standards-snapshot)
+- [When to use](#when-to-use)
+- [When not to use](#when-not-to-use)
+- [Required inputs](#required-inputs)
+- [Deliverables](#deliverables)
+- [Model baseline](#model-baseline)
+- [Philosophy](#philosophy)
+- [Workflow](#workflow)
+- [Validation](#validation)
+- [Constraints](#constraints)
+- [Anti-patterns](#anti-patterns)
+- [Examples](#examples)
+- [Remember](#remember)
+
+## Standards snapshot (March 2026)
+- Treat Nano Banana apps as conversational image systems, not single-shot prompt forms with branding on top.
+- Keep model choice explicit because speed, quality, cost, and editing behavior differ materially.
+- Design for iteration history, storage, and quota handling from the start.
+
+## When to use
+- Prototype or ship an app that uses Nano Banana image generation or editing APIs.
+- Design a multi-turn image workflow with conversational refinement.
+- Review a Nano Banana product flow for model fit, storage, or iteration architecture.
+
+## When not to use
+- One-off image generation with no app or workflow design in scope.
+- OpenAI image tooling; use the repo’s OpenAI image skill for that surface.
+- Generic frontend work unrelated to generative image product flows.
 
 ## Required inputs
-- User request details and any relevant files/links.
-
+- Product goal and user flow.
+- Model expectations: speed-first or quality-first.
+- Storage and persistence plan for outputs and conversation history.
+- Platform and stack constraints.
+- Cost, rate-limit, and concurrency expectations.
 
 ## Deliverables
-- A structured response or artifact appropriate to the skill.
-- Include `schema_version: 1` if outputs are contract-bound.
+- Product and architecture guidance for the Nano Banana flow.
+- Model-selection rationale.
+- State, storage, and iteration design notes.
+- Validation and rollout guidance for quotas, edits, and asset persistence.
 
+## Model baseline
+Use only these image-generation model strings:
+- `gemini-2.5-flash-image`
+- `gemini-3-pro-image-preview`
 
-## Constraints
-- Redact secrets/PII by default.
-- Avoid destructive operations without explicit user direction.
-## Examples
-- "Provide a concise response for this task."
-- "Follow the workflow and summarize outputs."
-## Extended guidance
-See `references/extended.md` for additional examples, workflows, and appendices.
+Do not invent alternate names or date-suffixed variants.
 
-## Procedure
+## Philosophy
+- Conversation over over-configured control panels.
+- Iteration history is part of the product.
+- Fast drafts and final-quality outputs are different jobs and should be designed that way.
 
-1. Verify scope and constraints before taking action.
-2. Execute the minimal safe path first.
-3. Validate intermediate state before making changes.
+## Workflow
+1. Identify whether the app centers on generation, iterative editing, composition, or mixed workflows.
+2. Choose the model intentionally:
+  - `gemini-2.5-flash-image` for faster iteration and higher-throughput drafts.
+  - `gemini-3-pro-image-preview` for higher-fidelity or text-heavy output.
+3. Design conversation state and image persistence together so edits remain traceable.
+4. Plan for storage of generated assets outside transient response payloads.
+5. Add rate-limit, retry, and queue behavior before pretending the product is production-ready.
+6. Validate the primary user loop end to end: prompt, generation, refinement, persistence, and recall.
 
 ## Validation
+- Verify the proposed model name is one of the supported Nano Banana image models.
+- Verify the design handles iterative refinement instead of only a one-shot generation path.
+- Verify storage, caching, and asset persistence are explicit.
+- Reuse bundled `references/`, `scripts/`, or `assets/` guidance when the skill folder provides them.
 
-- Fail fast: stop at the first failed check and do not continue.
-- Re-run the required checks before proceeding to the next step.
-- Report any failed check and requested follow-up actions clearly.
+## Constraints
+- Do not invent unsupported model names or capabilities.
+- Do not treat base64-in-response as a durable storage strategy for production.
+- Keep credentials, tokens, and sensitive user images redacted by default in examples and logs.
+- Make cost and quota assumptions explicit before recommending architecture.
 
-<!-- skill-score-boost-v1 -->
-## Philosophy and tradeoffs
-- Use this skill when consistent decision-making matters more than one-off execution because project context should drive the approach.
-- Principle and mindset: prioritize tradeoffs and constraints over rigid checklists; understand why each step exists.
-- Ask this to keep outcomes robust: Why is this the right default, and what could change this outcome?
-- How do we adapt if constraints shift?
-- What evidence is needed before choosing one path over another?
+## Anti-patterns
+- Building a conversational image product with no conversation state.
+- Picking a model by vibe instead of latency, quality, and cost tradeoffs.
+- Designing editing flows that discard prior image context every turn.
+- Treating generated assets as temporary blobs with no persistence plan.
 
-## Anti-patterns and caveats
-- Avoid applying this playbook generically without checking repository-specific context.
-- **NEVER** skip required validation gates when behavior changes.
-- **DO NOT** use this skill as a rigid replacement for engineering judgment.
-- **DON'T** ignore warnings or assume one pattern fits all repos.
-- Common pitfall: treating anti-patterns as optional.
-- Incorrect assumptions here can lead to fragile guidance.
-- Warning: wrong sequencing can create avoidable regressions.
+## Examples
+- "Design a Nano Banana app for iterative product-shot refinement."
+- "Choose between the two supported image models for a high-volume draft workflow."
 
-## Variation and adaptation
-- Vary the workflow by team size, risk, and deployment target.
-- Use different strategies for small, medium, and large changes.
-- Adapt recommendations to the specific environment and avoid repetitive templates.
-- Avoid generic or cookie-cutter responses; craft context-specific alternatives.
-- Keep outputs diverse and not repetitive.
-- Converge on a custom path only after evidence review.
-- Different constraints should produce different, non-generic recommendations.
-
-## Empowering execution style
-- Be capable of exploring multiple options and enabling the team to make safe decisions.
-- Unlock confidence by explaining options and tradeoffs clearly.
-- Feel free to be creative while staying rigorous and precise.
-- Push boundaries with practical alternatives when simple recipes fail.
-- Enable outcomes-oriented problem solving.
-
-<!-- decision-feedback-protocol:v2 -->
-**Decision feedback protocol (required):**
-- If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.
-- Capture: `decision` (`accepted|partial|rejected|deferred`), `outcome` (`good|neutral|bad|unknown`), and `confidence` (`high|medium|low`).
-- Persist with: `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
-- The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
-<!-- /decision-feedback-protocol -->
+## Remember
+- The core product loop is generate, inspect, refine, persist.
+- Good Nano Banana products make iteration feel natural, not bolted on.
+- A realistic storage and quota story is part of the feature, not follow-up work.

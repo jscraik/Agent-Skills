@@ -5,189 +5,100 @@ description: Use when a user asks to review a GitHub pull request before merge (
 
 # Check PR
 
-## Table of Contents
-- [When to use](#when-to-use)
-- [Inputs](#inputs)
-- [Greptile umbrella policy](#greptile-umbrella-policy)
-- [Setup (how to configure Greptile)](#setup-how-to-configure-greptile)
-- [Procedure](#procedure)
-- [Outputs](#outputs)
-- [Validation](#validation)
-- [Anti-patterns](#anti-patterns)
-- [Constraints](#constraints)
-- [Philosophy](#philosophy)
-- [Variation](#variation)
-- [Remember](#remember)
-- [Examples](#examples)
+Run a policy-gated PR readiness review using GitHub plus Greptile setup and review signals.
 
-## When to use
-Use this skill when a contributor wants an automated PR readiness check for GitHub pull requests. Trigger it when they want to:
-
-- verify status checks are complete,
-- inspect unresolved review feedback,
-- classify issues into action required vs informational,
-- verify organizational policy compliance before merge,
-- and optionally prepare fixes or resolution steps before merge.
-
-Do not use it for unrelated project planning or non-PR code reviews.
-
-## Inputs
-- Optional PR number from the user.
-- If PR number is omitted, detect and use the current branch PR (`gh pr view`).
-- Optional repository and branch context (required only when auto-detection cannot resolve the PR).
-- Optional setup-only intent (`setup`, `verify setup`, `fix auth`, or `configure MCP`).
-- Repository must have GitHub CLI auth for check/fetch operations.
-
-## Greptile umbrella policy
-This skill is governed by the Greptile umbrella policy and must run its runtime policy gate on every execution.
-
-Required references:
-- [Setup and governance](references/setup.md)
-- [Organizational review policy](references/organizational-review-policy.md)
-
-## Setup (how to configure Greptile)
-Run this setup before the first use in a repo, or whenever auth/config changes.
-
-1. Verify GitHub CLI auth:
-   - `gh auth status`
-2. Configure Greptile MCP in your agent/IDE:
-   - Server URL: `https://api.greptile.com/mcp`
-   - Authorization header: `Bearer <GREPTILE_API_KEY>`
-3. Ensure `GREPTILE_API_KEY` is available to the runtime environment.
-4. Verify MCP access by listing context:
-   - `list_custom_context`
-5. Configure repository context with directory-scoped `.greptile/` files:
-   - `.greptile/config.json`
-   - `.greptile/rules.md`
-   - `.greptile/files.json` (mandatory for schema/API context)
-
-For complete setup policy and examples, see:
-- [Greptile setup and governance](references/setup.md)
-- [Organizational review policy](references/organizational-review-policy.md)
-
-## Procedure
-0. Run setup preflight checks + umbrella policy gate.
-   - If setup is missing, return `blocked` with an exact missing-step checklist and stop.
-   - Run the runtime policy gate from `references/organizational-review-policy.md`.
-   - Confirm independent validation (coding and reviewing roles are not the same actor).
-   - Confirm `.greptile/config.json`, `.greptile/rules.md`, and `.greptile/files.json` are available for relevant scope.
-   - If any policy gate fails, return `blocked` with `policy_gate_status` and blockers.
-1. Resolve scope.
-   - If a PR number is supplied, use it.
-   - Otherwise run `gh pr view --json number -q .number` from the current branch and confirm the PR context.
-2. Poll terminal status state before classification.
-   - Check status checks using `gh pr checks <PR_NUMBER> --json ...` and wait for terminal states.
-   - If checks are in `PENDING`/`IN_PROGRESS`, wait and re-check until completion.
-3. Collect review surface area.
-   - Fetch PR metadata (`gh pr view`) and inline review comments (`gh pr view --json comments`, `gh api ... comments`).
-   - Fetch PR comments and check thread resolution state when needed.
-4. Classify each finding into:
-   - actionable (requires edit/CI updates),
-   - informational (context/fyi),
-   - already addressed.
-5. Summarize results in a table with severity and next action.
-   - Include confidence-action mapping (5/5 merge-ready, 4/5 minor polish, 3/5 or below rework required).
-6. Recommend optional fixes.
-   - Ask before making edits.
-   - If confirmed, patch files, re-run focused checks, and push one clean commit.
-7. If requested, close addressed or informational threads by GraphQL mutation.
-
-## Outputs
-Return one concise Markdown report with:
-- PR title, branch, state, and check status,
-- `policy_gate_status` (`pass`/`blocked`) plus blocker list,
-- prioritized issue list by severity,
-- actionable vs informational breakdown,
-- recommended next commands/fixes,
-- confidence note when data is incomplete,
-- when setup is incomplete, a setup-blocker checklist (auth, MCP, and `.greptile/` requirements).
-
-Also include safe resolution guidance:
-- Explicitly list items to fix vs ignore.
-- Mention unresolved-thread IDs before attempting any mutation commands.
-
-Safe output example:
-
-```text
-PR #123 · in_progress
-Policy gate: pass
-Checks: 12/12 complete (1 failing)
-Actionable: 2 | Informational: 4 | Resolved: 1
-Top priorities: security lint failure, unaddressed type error comment
-Suggested next step: address code issues, re-run checks, rerun /check-pr
-```
-
-## Validation
-- Fail fast on any missing required input or invalid target context.
-- Fail fast on setup preflight failures (missing auth, missing MCP, or missing API key wiring).
-- Fail fast on policy gate violations (independent validation, required `.greptile/` files, or precedence violations).
-- If critical checks are failing, stop and surface exact failing checks before suggesting fix automation.
-- Do not proceed to edit/resolve threads until PR context and check-state are confirmed.
-
-Reference material:
-- [GraphQL helpers](references/graphql-queries.md)
-- [Setup and governance](references/setup.md)
-- [Organizational review policy](references/organizational-review-policy.md)
-- [Strategic roadmap and governance context](references/greptile-strategic-code-review.md)
-
-## Anti-patterns
-- Do not claim “ready to merge” while checks are pending.
-- Do not close review threads blindly without confirming fix context.
-- Do not assume comments from Greptile are the only blocking signal; include all active reviewers and CI checks.
-- Do not skip independent-validation checks.
-- Do not run destructive Git operations during review triage.
-
-## Constraints
-- Avoid logging secrets, tokens, or environment values.
-- Avoid absolute file paths in command examples; use repo-relative paths.
-- Require explicit user confirmation before making edits or pushing commits.
-- Never run commands that remove repository state (`git reset --hard`, working-tree cleanup operations) without explicit, explicit confirmation.
-- If no PR context is discoverable, fail fast with a single clear ask:
-  - “No PR detected on this branch. Share repo and PR number.”
+## Standards snapshot (March 2026)
+- Review readiness is a governance decision, not just a lint summary.
+- Always run the Greptile setup and policy gate before classifying the PR.
+- Separate actionable, informational, and already-addressed items clearly.
+- Do not recommend merge while checks are pending or the policy gate is blocked.
+- Keep GitHub Actions workflow guidance pinned to full commit SHAs for third-party actions with least-privilege `permissions`.
 
 ## Philosophy
-PR readiness is not just lint compliance; it is a systems-level confidence process.
-This skill balances signal over noise by separating governance, infrastructure failures, reviewer intent, and code-level blockers.
-Use it iteratively: rerun after each fix block until only informational items remain.
+- Readiness is a confidence decision built from governance, CI, and reviewer signal.
+- Separate setup blockers from code blockers so the next action stays obvious.
+- Prefer explicit classifications over vague "looks good" summaries.
 
-## Variation
+## When to use
+- Reviewing a GitHub PR before merge.
+- Verifying Greptile setup and policy prerequisites for a repo.
+- Summarizing unresolved PR comments, checks, and review blockers.
 
-Adapt output shape to the request context:
+## When not to use
+- Performing broad GitHub workflow operations unrelated to PR readiness.
+- Fixing code before the user asks for changes.
+- Running a generic code review without Greptile or governance context.
 
-- For blocked policy/setup failures, return blockers first and skip non-essential niceties.
-- For blocked check-failures, return blockers first and skip non-essential niceties.
-- For routine review triage, keep summaries concise and action-oriented.
-- For planning conversations, include practical escalation paths instead of strict command detail.
-- Keep wording and emphasis context-sensitive rather than templated.
+## Required inputs
+- PR number or current-branch PR context.
+- Repo context when auto-detection cannot resolve it.
+- GitHub CLI auth plus Greptile access when review data is needed.
+- Setup-only intent when the user only wants prerequisite verification.
 
-## Remember
+## Deliverables
+- PR title, branch, state, and check status.
+- `policy_gate_status` with explicit blockers when setup or governance fails.
+- A prioritized list of actionable, informational, and resolved items.
+- Recommended next actions and confidence note when data is incomplete.
+- If requested, a structured status report with a `schema_version` field.
 
-You are capable of strong engineering judgment. Use this procedure as a confidence framework, then apply contextual expertise to choose the smallest safe action.
+## Constraints
+- Redact secrets, tokens, credentials, and sensitive review data by default.
+- Do not close threads or recommend merge while policy or check gates are unresolved.
+- Do not broaden into implementation work until the user asks for it.
 
-## Examples
-- “Use check-pr on this branch and report unresolved comments before I request review.”
-- “Run check-pr for PR 123 and tell me if any comments are blocking merge.”
-- “Run check-pr and include the organizational policy gate summary before any merge recommendation.”
-- “Check the PR without pushing changes and summarize what remains.”
+## Failure mode
+- If auth, MCP access, API key wiring, or required `.greptile/` files are missing, stop with a setup-blocker checklist.
+- If no PR context is discoverable, stop with a single clear request for repo and PR number.
+- If critical checks are still pending, stop classification at "not ready" rather than implying merge-readiness.
 
-## Folded Legacy Modes (Core60)
-<!-- core60-folded-modes:v1:start -->
-This skill owns legacy capability from retired skills. Use these modes when requests match prior behavior.
+## Greptile policy gate
+- Run the setup preflight from `references/setup.md`.
+- Apply the runtime policy gate from `references/organizational-review-policy.md`.
+- Confirm independent validation and required `.greptile/` repo files.
+- Return `policy_gate_status=blocked` if any gate fails.
 
-- `iterative-fix-loop` from `github/greptile/greploop`: Use when a user wants a closed-loop PR hardening pass (or asks how to set up Greptile loop prerequisites): run policy-gated review/fix it...
+## Workflow
+1. Run setup preflight and the umbrella policy gate.
+2. Resolve the PR scope from user input or the current branch.
+3. Poll checks until terminal states are known.
+4. Collect PR metadata, review comments, and thread state.
+5. Classify each item as actionable, informational, or already addressed.
+6. Return a prioritized readiness summary and recommended next steps.
+7. Only suggest edits or thread-resolution actions after the user asks for them.
 
-Deep legacy details: `references/folded-legacy-modes-core60.md`.
-<!-- core60-folded-modes:v1:end -->
-
-## Execution quality
-- Philosophy: use a practical framework that balances speed, safety, and tradeoff clarity.
-- Approach: choose context-specific variation rather than generic cookie-cutter steps; adapt output to repository constraints.
-- Guiding question: Why is this the smallest safe change?
-- Guiding question: What tradeoff are we making and why?
-- Guiding question: How do we verify the result end-to-end?
-- Anti-patterns: DO NOT skip validation, NEVER hide failed checks, and avoid repetitive template-only output.
-- Empowerment: be capable, creative, and enable users to explore options with confidence.
+## Tooling and references
+- Use GitHub CLI for PR and check context.
+- Use Greptile MCP only after the setup gate passes.
+- Reference files:
+  - `references/setup.md`
+  - `references/organizational-review-policy.md`
+  - `references/graphql-queries.md`
+  - `references/greptile-strategic-code-review.md`
+  - `references/contract.yaml`
+  - `references/evals.yaml`
+  - `references/folded-legacy-modes-core60.md`
 
 ## GitHub Actions security baseline
-- Pin actions to a full-length commit SHA for third-party actions.
-- Apply explicit least-privilege `permissions` for each workflow and job scope.
+- Pin actions to a full-length commit SHA.
+- Apply least-privilege `permissions` for workflows and jobs.
+
+## Validation
+- Verify setup preflight and policy-gate status before reviewing the PR.
+- Verify check state is terminal before recommending merge readiness.
+- Verify each reported blocker maps to a real thread, comment, check, or policy requirement.
+- Fail fast at the first missing prerequisite.
+
+## Anti-patterns
+- Declaring "ready to merge" while checks are pending.
+- Closing review threads blindly.
+- Treating Greptile comments as the only source of blocking signal.
+- Skipping independent-validation requirements.
+
+## Examples
+- Run check-pr on this branch and tell me what still blocks merge.
+- Verify Greptile setup for this repo before I request review.
+- Review PR 123 and classify actionable vs informational comments.
+
+## Remember
+PR readiness is a confidence judgment. Keep governance, checks, and reviewer intent separate so the next action is obvious.

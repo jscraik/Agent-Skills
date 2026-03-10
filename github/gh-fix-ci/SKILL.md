@@ -1,160 +1,95 @@
 ---
-name: "gh-fix-ci"
-description: "Use when a user asks to debug or fix failing GitHub PR checks that run in GitHub Actions; use `gh` to inspect checks and logs, summarize failure context, draft a fix plan, and implement only after explicit approval. Treat external providers (for example Buildkite) as out of scope and report only the details URL."
+name: gh-fix-ci
+description: Use when a user asks to debug or fix failing GitHub PR checks that run in GitHub Actions; use `gh` to inspect checks and logs, summarize failure context, draft a fix plan, and implement only after explicit approval. Treat external providers (for example Buildkite) as out of scope and report only the details URL.
 ---
 
+# GH Fix CI
 
-# Gh Pr Checks Plan Fix
+Diagnose failing GitHub Actions checks on a PR, surface the first actionable failure, and only implement a fix after explicit approval.
 
-## Overview
-
-Use gh to locate failing PR checks, fetch GitHub Actions logs for actionable failures, summarize the failure snippet, then propose a fix plan and implement after explicit approval.
-- If a plan-oriented skill (for example `create-plan`) is available, use it; otherwise draft a concise plan inline and request approval before implementing.
-
-Prereq: authenticate with the standard GitHub CLI once (for example, run `gh auth login`), then confirm with `gh auth status` (repo + workflow scopes are typically required).
+## Standards snapshot (March 2026)
+- Root cause beats symptom patching.
+- GitHub Actions failures need run, job, and log evidence before proposing code changes.
+- Keep non-GitHub providers link-only unless the user explicitly asks for broader provider work.
+- Separate diagnosis, plan, approval, and implementation clearly.
+- Preserve the GitHub Actions security baseline: pin third-party actions to a full commit SHA and use least-privilege `permissions`.
 
 ## Philosophy
-
-- Prefer root-cause understanding over quick symptom patches.
-- Keep guidance evidence-based, explicit, and reproducible.
-- Optimize for decisions that reduce rework and operational risk.
-
-## Required inputs
-- `repo`: path inside the repo (default `.`)
-- `pr`: PR number or URL (optional; defaults to current branch PR)
-- `gh` authentication for the repo host
-
-## Quick start
-
-- `python "<path-to-skill>/scripts/inspect_pr_checks.py" --repo "." --pr "<number-or-url>"`
-- Add `--json` if you want machine-friendly output for summarization.
-
-## Workflow
-
-1. Verify gh authentication.
-   - Run `gh auth status` in the repo.
-   - If unauthenticated, ask the user to run `gh auth login` (ensuring repo + workflow scopes) before proceeding.
-2. Resolve the PR.
-   - Prefer the current branch PR: `gh pr view --json number,url`.
-   - If the user provides a PR number or URL, use that directly.
-3. Inspect failing checks (GitHub Actions only).
-   - Preferred: run the bundled script (handles gh field drift and job-log fallbacks):
-     - `python "<path-to-skill>/scripts/inspect_pr_checks.py" --repo "." --pr "<number-or-url>"`
-     - Add `--json` for machine-friendly output.
-   - Manual fallback:
-     - `gh pr checks <pr> --json name,state,bucket,link,startedAt,completedAt,workflow`
-       - If a field is rejected, rerun with the available fields reported by `gh`.
-     - For each failing check, extract the run id from `detailsUrl` and run:
-       - `gh run view <run_id> --json name,workflowName,conclusion,status,url,event,headBranch,headSha`
-       - `gh run view <run_id> --log`
-     - If the run log says it is still in progress, fetch job logs directly:
-       - `gh api "/repos/<owner>/<repo>/actions/jobs/<job_id>/logs" > "<path>"`
-4. Scope non-GitHub Actions checks.
-   - If `detailsUrl` is not a GitHub Actions run, label it as external and only report the URL.
-   - Do not attempt Buildkite or other providers; keep the workflow lean.
-5. Summarize failures for the user.
-   - Provide the failing check name, run URL (if any), and a concise log snippet.
-   - Call out missing logs explicitly.
-6. Create a plan.
-   - Use the `create-plan` skill to draft a concise plan and request approval.
-7. Implement after approval.
-   - Apply the approved plan, summarize diffs/tests, and ask about opening a PR.
-8. Recheck status.
-   - After changes, suggest re-running the relevant tests and `gh pr checks` to confirm.
-
-## Bundled Resources
-
-### scripts/inspect_pr_checks.py
-
-Fetch failing PR checks, pull GitHub Actions logs, and extract a failure snippet. Exits non-zero when failures remain so it can be used in automation.
-
-Usage examples:
-- `python "<path-to-skill>/scripts/inspect_pr_checks.py" --repo "." --pr "123"`
-- `python "<path-to-skill>/scripts/inspect_pr_checks.py" --repo "." --pr "https://github.com/org/repo/pull/123" --json`
-- `python "<path-to-skill>/scripts/inspect_pr_checks.py" --repo "." --max-lines 200 --context 40`
-
-## Anti-patterns
-
-- Skipping investigation and jumping directly to fixes.
-- Making claims without evidence, logs, or reproducible steps.
-- Mixing unrelated workstreams in a single execution path.
-
-## Constraints / Safety
-
-- Redact secrets, tokens, credentials, and PII by default; never echo raw environment values.
-- Prefer safe defaults and avoid irreversible changes without explicit confirmation.
-
-## Outputs
-
-- A concrete next-step response with explicit, reproducible actions.
-- A short verification checklist and caveats for the user.
-
-## Validation
-
-- Fail fast: stop at the first failed check and do not continue.
-- Re-run the required checks before proceeding to the next step.
-- Report any failed check and requested follow-up actions clearly.
+- Diagnosis should reduce uncertainty before any code change is proposed.
+- Prefer the first actionable failure over exhaustive but noisy log summaries.
+- Keep the CI fix path narrow and reversible.
 
 ## When to use
+- A user asks to inspect or fix failing GitHub PR checks backed by GitHub Actions.
+- A PR is blocked on CI and the next step is log-backed diagnosis.
+- The user wants a remediation plan before code changes are made.
 
-- Use this skill when the request matches the skill's intent and scope.
-- Do not use it when a different domain or higher-privilege workflow is required.
+## When not to use
+- The failure is from Buildkite or another external provider and only the details URL is available.
+- The user wants a full GitHub workflow lifecycle instead of CI diagnosis specifically.
+- The task is local test debugging with no GitHub Actions context.
 
-## Constraints / Safety
+## Required inputs
+- Repository path, or the current repo if it is unambiguous.
+- PR number or URL when it cannot be discovered from the current branch.
+- `gh` authentication with access to the repo and workflow data.
 
-- Redact secrets, tokens, credentials, and PII by default; never echo raw environment values.
-- Prefer safe defaults and avoid irreversible changes without explicit confirmation.
+## Deliverables
+- The failing check name, run URL, and first actionable failure snippet.
+- A concise diagnosis summary and a proposed fix plan.
+- Clear blocking notes when logs, auth, or provider access are missing.
+- If requested, a structured status report with a `schema_version` field.
 
-<!-- skill-score-boost-v1 -->
-## Philosophy and tradeoffs
-- Use this skill when consistent decision-making matters more than one-off execution because project context should drive the approach.
-- Principle and mindset: prioritize tradeoffs and constraints over rigid checklists; understand why each step exists.
-- Ask this to keep outcomes robust: Why is this the right default, and what could change this outcome?
-- How do we adapt if constraints shift?
-- What evidence is needed before choosing one path over another?
+## Constraints
+- Redact secrets, tokens, credentials, and sensitive log data by default.
+- Do not claim a fix is correct without log-backed reasoning.
+- Do not treat external CI providers as GitHub Actions unless the user explicitly broadens scope.
 
-## Anti-patterns and caveats
-- Avoid applying this playbook generically without checking repository-specific context.
-- **NEVER** skip required validation gates when behavior changes.
-- **DO NOT** use this skill as a rigid replacement for engineering judgment.
-- **DON'T** ignore warnings or assume one pattern fits all repos.
-- Common pitfall: treating anti-patterns as optional.
-- Incorrect assumptions here can lead to fragile guidance.
-- Warning: wrong sequencing can create avoidable regressions.
+## Failure mode
+- If `gh` auth is missing, stop with the exact remediation step.
+- If there is no PR context, stop and ask for the PR number or URL.
+- If the failing check is not GitHub Actions, report the provider and details URL only.
+- If logs are unavailable or still pending, report that state instead of guessing.
 
-## Variation and adaptation
-- Vary the workflow by team size, risk, and deployment target.
-- Use different strategies for small, medium, and large changes.
-- Adapt recommendations to the specific environment and avoid repetitive templates.
-- Avoid generic or cookie-cutter responses; craft context-specific alternatives.
-- Keep outputs diverse and not repetitive.
-- Converge on a custom path only after evidence review.
-- Different constraints should produce different, non-generic recommendations.
+## Workflow
+1. Verify `gh` authentication.
+2. Resolve the PR from user input or the current branch.
+3. Inspect failing checks, preferring the bundled script.
+4. Pull the first actionable GitHub Actions log evidence.
+5. Summarize the failure and propose the smallest safe fix plan.
+6. Only implement after explicit approval.
+7. Recheck the relevant status after changes.
 
-## Empowering execution style
-- Be capable of exploring multiple options and enabling the team to make safe decisions.
-- Unlock confidence by explaining options and tradeoffs clearly.
-- Feel free to be creative while staying rigorous and precise.
-- Push boundaries with practical alternatives when simple recipes fail.
-- Enable outcomes-oriented problem solving.
-
-<!-- decision-feedback-protocol:v2 -->
-**Decision feedback protocol (required):**
-- If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.
-- Capture: `decision` (`accepted|partial|rejected|deferred`), `outcome` (`good|neutral|bad|unknown`), and `confidence` (`high|medium|low`).
-- Persist with: `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
-- The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
-<!-- /decision-feedback-protocol -->
-
-## Folded Legacy Modes (Core60)
-<!-- core60-folded-modes:v1:start -->
-This skill owns legacy capability from retired skills. Use these modes when requests match prior behavior.
-
-- `local-ci-repro` from `github/local-action-verification`: Use when the user asks to validate GitHub Actions locally with act; output setup guidance, AGENTS.md instructions, and fail-fast checks b...
-
-Deep legacy details: `references/folded-legacy-modes-core60.md`.
-<!-- core60-folded-modes:v1:end -->
+## Tooling and references
+- Prefer `scripts/inspect_pr_checks.py` for durable check and log inspection.
+- Use `gh pr checks`, `gh run view`, and direct Actions job log fetches as fallback.
+- Reference files:
+  - `references/contract.yaml`
+  - `references/evals.yaml`
+  - `references/folded-legacy-modes-core60.md`
+  - `agents/openai.yaml`
+- Use assets only when the task calls for bundled GH-specific support material from `assets/`.
 
 ## GitHub Actions security baseline
-- Pin actions to a full-length commit SHA for third-party actions.
-- Apply explicit least-privilege `permissions` for each workflow and job scope.
+- Pin actions to a full-length commit SHA.
+- Use explicit least-privilege `permissions` for each workflow and job.
+
+## Validation
+- Verify auth, PR context, and run context before diagnosing.
+- Verify the reported failure comes from actual run evidence, not inference.
+- Verify the proposed fix plan addresses the first real blocker.
+- Fail fast at the first missing prerequisite.
+
+## Anti-patterns
+- Jumping from red CI to speculative fixes without log evidence.
+- Treating external CI providers like GitHub Actions when only a URL is available.
+- Mixing unrelated cleanup work into a CI fix path.
+- Claiming success before checks rerun or the user explicitly accepts the residual risk.
+
+## Examples
+- Show me why this PR’s GitHub Actions checks are failing.
+- Pull the first actionable failure from PR 123 and propose a fix.
+- Diagnose this failing Actions run but do not change code yet.
+
+## Remember
+CI diagnosis should narrow the problem, not widen the scope. Pull the evidence first, then earn the fix.

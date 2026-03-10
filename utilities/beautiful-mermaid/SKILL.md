@@ -1,269 +1,90 @@
 ---
 name: beautiful-mermaid
-description: Render Mermaid diagrams to SVG and PNG with Beautiful Mermaid. Use when
-  the user asks to render or convert Mermaid diagrams into images.
+description: Render Mermaid diagrams to SVG and PNG with Beautiful Mermaid. Use when the user asks to render or convert Mermaid diagrams into images.
 ---
 
-# Beautiful Mermaid Diagram Rendering
+# Beautiful Mermaid
 
-Render Mermaid diagrams as SVG and PNG images using the Beautiful Mermaid library.
+## Table of Contents
+- [Standards snapshot](#standards-snapshot)
+- [When to use](#when-to-use)
+- [When not to use](#when-not-to-use)
+- [Required inputs](#required-inputs)
+- [Deliverables](#deliverables)
+- [Philosophy](#philosophy)
+- [Workflow](#workflow)
+- [Verification](#verification)
+- [Constraints](#constraints)
+- [Anti-patterns](#anti-patterns)
+- [Remember](#remember)
 
-## Philosophy
-- Favor deterministic, high-quality renders over quick hacks.
-- Keep the workflow minimal and reproducible.
-- Never auto-install dependencies without explicit approval.
+## Standards snapshot (March 2026)
+- Prefer deterministic local rendering over screenshots of random web renderers.
+- Produce clean SVG first, then PNG only when requested or clearly useful.
+- Treat Mermaid syntax validation as part of the workflow, not an afterthought.
 
-## Scope and triggers
-- The user provides Mermaid code and wants SVG/PNG outputs.
-- The user describes a diagram and wants it rendered as Mermaid images.
-- The user needs high-resolution diagram assets for docs or slides.
+## When to use
+- Render Mermaid source into SVG or PNG assets.
+- Convert a described diagram into Mermaid and then render it.
+- Produce diagram images for docs, presentations, or implementation walkthroughs.
+
+## When not to use
+- Freeform illustration or design work with no Mermaid or diagram-rendering need.
+- Remote browsing workflows that do not need local diagram assets.
+- Requests to auto-install new tooling without approval.
 
 ## Required inputs
-- Mermaid code (string) or a path to a `.mmd` file.
-- Output base name (without extension).
-- Theme selection (optional; default `default`).
-- Whether PNG capture is required (default: yes).
+- Mermaid source or a clear enough diagram description to generate it.
+- Output base name or destination path.
+- Theme preference, if any.
+- Whether PNG output is required in addition to SVG.
 
 ## Deliverables
-- `<output>.svg` (vector output).
-- `<output>.png` (high-resolution screenshot) when PNG capture is requested.
-- Notes on theme and any constraints applied.
+- Rendered SVG output.
+- PNG output when requested.
+- Notes on theme, syntax fixes, and any rendering limitations.
 
-## Constraints / Safety
-- Redact or avoid sensitive data in diagram content by default.
-- Do not auto-install dependencies unless explicitly approved (`--allow-install`).
-- Prefer installed runtimes/tools; avoid `npx` downloads without approval.
-- Use local file paths for agent-browser; do not open remote URLs.
-- Only remove intermediary files with explicit confirmation.
-
-## Validation
-- Verify SVG exists and is non-empty.
-- If PNG capture is requested, confirm the PNG exists and is readable.
-- Fail fast on missing inputs or unsupported themes.
-
-## Anti-patterns
-- Rendering diagrams that include secrets or tokens.
-- Running install commands without approval.
-- Capturing screenshots of remote pages or sensitive content.
-- Deleting files without confirmation.
-
-## Examples
-- "Render this Mermaid sequence diagram to SVG and PNG."
-- "Create a flowchart diagram image from this description."
-- "Use the tokyo-night theme and output to onboarding-diagram."
-
-## Dependencies
-
-This skill requires the `agent-browser` skill for PNG rendering. Load it before proceeding with PNG capture.
-
-Runtime notes:
-- Prefer runtimes/tools that are already installed (bun, tsx, deno).
-- Avoid auto-installing dependencies unless explicitly approved.
-
-## Supported Diagram Types
-
-- **Flowchart** - Process flows, decision trees, CI/CD pipelines
-- **Sequence** - API calls, OAuth flows, database transactions
-- **State** - State machines, connection lifecycles
-- **Class** - UML class diagrams, design patterns
-- **Entity-Relationship** - Database schemas, data models
-
-## Available Themes
-
-Default, Dracula, Solarized, Zinc Dark, Tokyo Night, Tokyo Night Storm, Tokyo Night Light, Catppuccin Latte, Nord, Nord Light, GitHub Dark, GitHub Light, One Dark.
-
-If no theme is specified, use `default`.
-
-## Common Syntax Patterns
-
-### Flowchart Edge Labels
-
-Use pipe syntax for edge labels:
-
-```mermaid
-A -->|label| B
-A ---|label| B
-```
-
-Avoid space-dash syntax which can cause incomplete renders:
-
-```mermaid
-A -- label --> B   # May cause issues
-```
-
-### Node Labels with Special Characters
-
-Wrap labels containing special characters in quotes:
-
-```mermaid
-A["Label with (parens)"]
-B["Label with / slash"]
-```
+## Philosophy
+- The source diagram is the contract.
+- Fix syntax deliberately and visibly when needed.
+- Keep rendering reproducible and local.
 
 ## Workflow
+1. Confirm or generate valid Mermaid source.
+2. Normalize any syntax that is likely to render poorly or ambiguously.
+3. Render SVG first with the local renderer.
+4. Render PNG only when requested or when a raster artifact is clearly needed.
+5. Verify the outputs exist and reflect the intended structure before handing off.
 
-### Step 1: Generate or Validate Mermaid Code
+## Verification
+- Confirm the Mermaid source is syntactically valid enough to render.
+- Confirm the SVG exists and is non-empty.
+- If PNG was requested, confirm it exists and is readable.
+- Confirm the rendered diagram does not expose secrets or sensitive internal data accidentally.
 
-If the user provides a description rather than code, generate valid Mermaid syntax. Consult `references/mermaid-syntax.md` for full syntax details.
+## Validation
+- Verify the source Mermaid is valid before claiming rendering success.
+- Verify the skill uses bundled `scripts/` helpers and relevant `references/` syntax guidance instead of improvised render flows.
+- Reuse any packaged `assets/` templates when the user needs a diagram scaffold rather than starting from scratch.
 
-### Step 2: Render SVG
+## Constraints
+- Redact secrets and sensitive data by default in Mermaid source, examples, and rendered outputs.
+- Do not auto-install dependencies without explicit approval.
+- Prefer local file-based rendering over remote render services.
+- Use bounded, intentional output paths and avoid deleting intermediates unless that cleanup is agreed.
+- Treat Mermaid source as untrusted input when passing it through the renderer and keep argument handling explicit.
 
-Run the rendering script to produce an SVG file:
+## Anti-patterns
+- Rendering diagrams with secrets, credentials, or private tokens embedded.
+- Treating Mermaid generation and rendering as the same step without validating the syntax.
+- Using remote screenshot flows when the local renderer is the right tool.
+- Returning only a screenshot when SVG was possible and more useful.
 
-```bash
-bun run scripts/render.ts --code "graph TD; A-->B" --output diagram --theme default
-```
-
-Or from a file:
-
-```bash
-bun run scripts/render.ts --input diagram.mmd --output diagram --theme tokyo-night
-```
-
-Alternative runtimes:
-```bash
-npx tsx scripts/render.ts --code "..." --output diagram
-deno run --allow-read --allow-write --allow-net scripts/render.ts --code "..." --output diagram
-```
-
-If dependencies are missing, install them explicitly or re-run with `--allow-install`:
-```bash
-bun run scripts/render.ts --code "..." --output diagram --allow-install
-```
-
-This produces `<output>.svg` in the current working directory.
-
-### Step 3: Create HTML Wrapper
-
-Run the HTML wrapper script to prepare for screenshot:
-
-```bash
-bun run scripts/create-html.ts --svg diagram.svg --output diagram.html
-```
-
-This creates a minimal HTML file that displays the SVG with proper padding and background.
-
-### Step 4: Capture High-Resolution PNG with agent-browser
-
-Use the agent-browser CLI to capture a high-quality screenshot. Refer to the `agent-browser` skill for full CLI documentation.
-
-```bash
-# Set 4K viewport for high-resolution capture
-agent-browser set viewport 3840 2160
-
-# Open the HTML wrapper
-agent-browser open "file://$(pwd)/diagram.html"
-
-# Wait for render to complete
-agent-browser wait 1000
-
-# Capture full-page screenshot
-agent-browser screenshot --full diagram.png
-
-# Close browser
-agent-browser close
-```
-
-For even higher resolution on complex diagrams, increase the viewport further or use the `--padding` option when creating the HTML wrapper to give the diagram more space.
-
-### Step 5: Clean Up Intermediary Files
-
-After rendering, remove all intermediary files. Only the final `.svg` and `.png` should remain.
-
-Files to clean up:
-- The HTML wrapper file (e.g., `diagram.html`)
-- Any temporary `.mmd` files created to hold diagram code
-- Any other files created during the rendering process
-
-```bash
-rm diagram.html
-```
-
-If a temporary `.mmd` file was created, remove it as well.
-
-## Output files (details)
-
-By default, both outputs are produced:
-- **SVG**: Vector format, infinitely scalable, small file size.
-- **PNG**: High-resolution raster captured at 4K (3840×2160) viewport with minimum 1200px diagram width.
-
-Files are saved to the current working directory unless the user explicitly specifies a different path.
-
-## Theme Selection Guide
-
-| Theme | Background | Best For |
-|-------|------------|----------|
-| default | Light grey | General use |
-| dracula | Dark purple | Dark mode preference |
-| tokyo-night | Dark blue | Modern dark aesthetic |
-| tokyo-night-storm | Darker blue | Higher contrast |
-| nord | Dark arctic | Muted, calm visuals |
-| nord-light | Light arctic | Light mode with soft tones |
-| github-dark | GitHub dark | Matches GitHub UI |
-| github-light | GitHub light | Matches GitHub UI |
-| catppuccin-latte | Warm light | Soft pastel aesthetic |
-| solarized | Tan/cream | Solarized colour scheme |
-| one-dark | Atom dark | Atom editor aesthetic |
-| zinc-dark | Neutral dark | Minimal, no colour bias |
-
-## Troubleshooting
-
-### Theme not applied
-
-Check the render script output for the `bg` and `fg` values, or inspect the SVG's opening tag for `--bg` and `--fg` CSS custom properties.
-
-### Diagram appears cut off or incomplete
-
-- Check edge label syntax — use `-->|label|` pipe notation, not `-- label -->`
-- Verify all node IDs are unique
-- Check for unclosed brackets in node labels
-
-### Render produces empty or malformed SVG
-
-- Validate Mermaid syntax at https://mermaid.live before rendering
-- Check for special characters that need escaping (wrap in quotes)
-- Ensure flowchart direction is specified (`graph TD`, `graph LR`, etc.)
+## Examples
+- "Render this sequence diagram to SVG and PNG using the Tokyo Night theme."
+- "Turn this architecture description into Mermaid first, then render it locally."
 
 ## Remember
-The agent is capable of extraordinary work in this domain. Use judgment, adapt to context, and push boundaries when appropriate.
-
-<!-- skill-score-boost-v1 -->
-## Philosophy and tradeoffs
-- Use this skill when consistent decision-making matters more than one-off execution because project context should drive the approach.
-- Principle and mindset: prioritize tradeoffs and constraints over rigid checklists; understand why each step exists.
-- Ask this to keep outcomes robust: Why is this the right default, and what could change this outcome?
-- How do we adapt if constraints shift?
-- What evidence is needed before choosing one path over another?
-
-## Anti-patterns and caveats
-- Avoid applying this playbook generically without checking repository-specific context.
-- **NEVER** skip required validation gates when behavior changes.
-- **DO NOT** use this skill as a rigid replacement for engineering judgment.
-- **DON'T** ignore warnings or assume one pattern fits all repos.
-- Common pitfall: treating anti-patterns as optional.
-- Incorrect assumptions here can lead to fragile guidance.
-- Warning: wrong sequencing can create avoidable regressions.
-
-## Variation and adaptation
-- Vary the workflow by team size, risk, and deployment target.
-- Use different strategies for small, medium, and large changes.
-- Adapt recommendations to the specific environment and avoid repetitive templates.
-- Avoid generic or cookie-cutter responses; craft context-specific alternatives.
-- Keep outputs diverse and not repetitive.
-- Converge on a custom path only after evidence review.
-- Different constraints should produce different, non-generic recommendations.
-
-## Empowering execution style
-- Be capable of exploring multiple options and enabling the team to make safe decisions.
-- Unlock confidence by explaining options and tradeoffs clearly.
-- Feel free to be creative while staying rigorous and precise.
-- Push boundaries with practical alternatives when simple recipes fail.
-- Enable outcomes-oriented problem solving.
-
-<!-- decision-feedback-protocol:v2 -->
-**Decision feedback protocol (required):**
-- If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.
-- Capture: `decision` (`accepted|partial|rejected|deferred`), `outcome` (`good|neutral|bad|unknown`), and `confidence` (`high|medium|low`).
-- Persist with: `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
-- The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
-<!-- /decision-feedback-protocol -->
+- SVG is the primary artifact; PNG is a convenience artifact.
+- Good diagram rendering starts with good Mermaid source.
+- When something fails, report the syntax or runtime issue precisely so the next pass is easy.

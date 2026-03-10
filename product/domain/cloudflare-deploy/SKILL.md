@@ -5,305 +5,123 @@ description: Deploy applications and infrastructure to Cloudflare using Workers,
 
 # Cloudflare Deploy
 
-Consolidated skill for building on the Cloudflare platform. Use decision trees below to find the right product, then load detailed references.
+Route deployment and platform setup work to the correct Cloudflare product with authenticated, product-aware guidance.
 
-## Prerequisites
-
-- When sandboxing blocks the deployment network calls, rerun with `sandbox_permissions=require_escalated`.
-- The deployment might take a few minutes. Use appropriate timeout values.
-
-## Authentication (Required Before Deploy)
-
-Verify auth before `wrangler deploy`, `wrangler pages deploy`, or `npm run deploy`:
-
-```bash
-npx wrangler whoami    # Shows account if authenticated
-```
-
-Not authenticated? → `references/wrangler/auth.md`
-- Interactive/local: `wrangler login` (one-time OAuth)
-- CI/CD: Set `CLOUDFLARE_API_TOKEN` env var
-
-## Quick Decision Trees
-
-### "I need to run code"
-
-```
-Need to run code?
-├─ Serverless functions at the edge → workers/
-├─ Full-stack web app with Git deploys → pages/
-├─ Stateful coordination/real-time → durable-objects/
-├─ Long-running multi-step jobs → workflows/
-├─ Run containers → containers/
-├─ Multi-tenant (customers deploy code) → workers-for-platforms/
-├─ Scheduled tasks (cron) → cron-triggers/
-├─ Lightweight edge logic (modify HTTP) → snippets/
-├─ Process Worker execution events (logs/observability) → tail-workers/
-└─ Optimize latency to backend infrastructure → smart-placement/
-```
-
-### "I need to store data"
-
-```
-Need storage?
-├─ Key-value (config, sessions, cache) → kv/
-├─ Relational SQL → d1/ (SQLite) or hyperdrive/ (existing Postgres/MySQL)
-├─ Object/file storage (S3-compatible) → r2/
-├─ Message queue (async processing) → queues/
-├─ Vector embeddings (AI/semantic search) → vectorize/
-├─ Strongly-consistent per-entity state → durable-objects/ (DO storage)
-├─ Secrets management → secrets-store/
-├─ Streaming ETL to R2 → pipelines/
-└─ Persistent cache (long-term retention) → cache-reserve/
-```
-
-### "I need AI/ML"
-
-```
-Need AI?
-├─ Run inference (LLMs, embeddings, images) → workers-ai/
-├─ Vector database for RAG/search → vectorize/
-├─ Build stateful AI agents → agents-sdk/
-├─ Gateway for any AI provider (caching, routing) → ai-gateway/
-└─ AI-powered search widget → ai-search/
-```
-
-### "I need networking/connectivity"
-
-```
-Need networking?
-├─ Expose local service to internet → tunnel/
-├─ TCP/UDP proxy (non-HTTP) → spectrum/
-├─ WebRTC TURN server → turn/
-├─ Private network connectivity → network-interconnect/
-├─ Optimize routing → argo-smart-routing/
-├─ Optimize latency to backend (not user) → smart-placement/
-└─ Real-time video/audio → realtimekit/ or realtime-sfu/
-```
-
-### "I need security"
-
-```
-Need security?
-├─ Web Application Firewall → waf/
-├─ DDoS protection → ddos/
-├─ Bot detection/management → bot-management/
-├─ API protection → api-shield/
-├─ CAPTCHA alternative → turnstile/
-└─ Credential leak detection → waf/ (managed ruleset)
-```
-
-### "I need media/content"
-
-```
-Need media?
-├─ Image optimization/transformation → images/
-├─ Video streaming/encoding → stream/
-├─ Browser automation/screenshots → browser-rendering/
-└─ Third-party script management → zaraz/
-```
-
-### "I need infrastructure-as-code"
-
-```
-Need IaC? → pulumi/ (Pulumi), terraform/ (Terraform), or api/ (REST API)
-```
-
-## Product Index
-
-### Compute & Runtime
-| Product | Reference |
-|---------|-----------|
-| Workers | `references/workers/` |
-| Pages | `references/pages/` |
-| Pages Functions | `references/pages-functions/` |
-| Durable Objects | `references/durable-objects/` |
-| Workflows | `references/workflows/` |
-| Containers | `references/containers/` |
-| Workers for Platforms | `references/workers-for-platforms/` |
-| Cron Triggers | `references/cron-triggers/` |
-| Tail Workers | `references/tail-workers/` |
-| Snippets | `references/snippets/` |
-| Smart Placement | `references/smart-placement/` |
-
-### Storage & Data
-| Product | Reference |
-|---------|-----------|
-| KV | `references/kv/` |
-| D1 | `references/d1/` |
-| R2 | `references/r2/` |
-| Queues | `references/queues/` |
-| Hyperdrive | `references/hyperdrive/` |
-| DO Storage | `references/do-storage/` |
-| Secrets Store | `references/secrets-store/` |
-| Pipelines | `references/pipelines/` |
-| R2 Data Catalog | `references/r2-data-catalog/` |
-| R2 SQL | `references/r2-sql/` |
-
-### AI & Machine Learning
-| Product | Reference |
-|---------|-----------|
-| Workers AI | `references/workers-ai/` |
-| Vectorize | `references/vectorize/` |
-| Agents SDK | `references/agents-sdk/` |
-| AI Gateway | `references/ai-gateway/` |
-| AI Search | `references/ai-search/` |
-
-### Networking & Connectivity
-| Product | Reference |
-|---------|-----------|
-| Tunnel | `references/tunnel/` |
-| Spectrum | `references/spectrum/` |
-| TURN | `references/turn/` |
-| Network Interconnect | `references/network-interconnect/` |
-| Argo Smart Routing | `references/argo-smart-routing/` |
-| Workers VPC | `references/workers-vpc/` |
-
-### Security
-| Product | Reference |
-|---------|-----------|
-| WAF | `references/waf/` |
-| DDoS Protection | `references/ddos/` |
-| Bot Management | `references/bot-management/` |
-| API Shield | `references/api-shield/` |
-| Turnstile | `references/turnstile/` |
-
-### Media & Content
-| Product | Reference |
-|---------|-----------|
-| Images | `references/images/` |
-| Stream | `references/stream/` |
-| Browser Rendering | `references/browser-rendering/` |
-| Zaraz | `references/zaraz/` |
-
-### Real-Time Communication
-| Product | Reference |
-|---------|-----------|
-| RealtimeKit | `references/realtimekit/` |
-| Realtime SFU | `references/realtime-sfu/` |
-
-### Developer Tools
-| Product | Reference |
-|---------|-----------|
-| Wrangler | `references/wrangler/` |
-| Miniflare | `references/miniflare/` |
-| C3 | `references/c3/` |
-| Observability | `references/observability/` |
-| Analytics Engine | `references/analytics-engine/` |
-| Web Analytics | `references/web-analytics/` |
-| Sandbox | `references/sandbox/` |
-| Workerd | `references/workerd/` |
-| Workers Playground | `references/workers-playground/` |
-
-### Infrastructure as Code
-| Product | Reference |
-|---------|-----------|
-| Pulumi | `references/pulumi/` |
-| Terraform | `references/terraform/` |
-| API | `references/api/` |
-
-### Other Services
-| Product | Reference |
-|---------|-----------|
-| Email Routing | `references/email-routing/` |
-| Email Workers | `references/email-workers/` |
-| Static Assets | `references/static-assets/` |
-| Bindings | `references/bindings/` |
-| Cache Reserve | `references/cache-reserve/` |
-
-## Troubleshooting
-
-### Escalated Network Access
-
-If deployment fails due to network issues (timeouts, DNS errors, connection resets), rerun the deploy with escalated permissions (use `sandbox_permissions=require_escalated`). The deploy requires escalated network access when sandbox networking blocks outbound requests.
-
-Example guidance to the user:
-
-```
-The deploy needs escalated network access to deploy to Cloudflare. I can rerun the command with escalated permissions—want me to proceed?
-```
+## Standards snapshot (March 2026)
+- Choose the Cloudflare product based on runtime, state, and delivery needs before giving commands.
+- Verify authentication before any deploy or publish instruction.
+- Keep product routing explicit: Workers, Pages, Durable Objects, D1, R2, Queues, AI, and networking all have different operating models.
+- Prefer the narrowest correct product path over platform-general advice.
 
 ## Philosophy
-
-- Prefer root-cause understanding over quick symptom patches.
-- Keep guidance evidence-based, explicit, and reproducible.
-- Optimize for decisions that reduce rework and operational risk.
-
-## Anti-patterns
-
-- Skipping investigation and jumping directly to fixes.
-- Making claims without evidence, logs, or reproducible steps.
-- Mixing unrelated workstreams in a single execution path.
-
-## Constraints / Safety
-
-- Redact secrets, tokens, credentials, and PII by default; never echo raw environment values.
-- Prefer safe defaults and avoid irreversible changes without explicit confirmation.
-
-## Inputs
-
-- User task context and target environment.
-- Relevant constraints, permissions, and preferences required to execute safely.
-
-## Outputs
-
-- A concrete next-step response with explicit, reproducible actions.
-- A short verification checklist and caveats for the user.
-
-## Procedure
-
-1. Verify scope and constraints before taking action.
-2. Execute the minimal safe path first.
-3. Validate intermediate state before making changes.
-
-## Validation
-
-- Fail fast: stop at the first failed check and do not continue.
-- Re-run the required checks before proceeding to the next step.
-- Report any failed check and requested follow-up actions clearly.
+- Route first, then recommend commands.
+- Cloudflare advice should be product-specific, not platform-generic.
+- Authenticated, minimal next steps beat sprawling platform tours.
 
 ## When to use
+- Deploying or publishing a project on Cloudflare.
+- Choosing between Cloudflare platform products for a new deployment.
+- Setting up runtime, storage, AI, networking, or security components on Cloudflare.
 
-- Use this skill when the request matches the skill's intent and scope.
-- Do not use it when a different domain or higher-privilege workflow is required.
+## When not to use
+- Working on non-Cloudflare deployment targets.
+- Performing framework implementation work with no deployment or platform decision.
+- Troubleshooting unrelated hosting providers.
 
-<!-- skill-score-boost-v1 -->
-## Philosophy and tradeoffs
-- Use this skill when consistent decision-making matters more than one-off execution because project context should drive the approach.
-- Principle and mindset: prioritize tradeoffs and constraints over rigid checklists; understand why each step exists.
-- Ask this to keep outcomes robust: Why is this the right default, and what could change this outcome?
-- How do we adapt if constraints shift?
-- What evidence is needed before choosing one path over another?
+## Required inputs
+- The deployment goal: host, publish, route traffic, store data, run AI, or secure an app.
+- The app shape: static site, full-stack app, edge function, workflow, container, or multi-tenant platform.
+- Current repo or project context.
+- Available Cloudflare auth and account context.
 
-## Anti-patterns and caveats
-- Avoid applying this playbook generically without checking repository-specific context.
-- **NEVER** skip required validation gates when behavior changes.
-- **DO NOT** use this skill as a rigid replacement for engineering judgment.
-- **DON'T** ignore warnings or assume one pattern fits all repos.
-- Common pitfall: treating anti-patterns as optional.
-- Incorrect assumptions here can lead to fragile guidance.
-- Warning: wrong sequencing can create avoidable regressions.
+## Deliverables
+- A product route recommendation or a deployment path.
+- Exact next-step references for the chosen product family.
+- Auth and prerequisite checks before deploy commands.
+- If requested, a structured status report with a `schema_version` field.
 
-## Variation and adaptation
-- Vary the workflow by team size, risk, and deployment target.
-- Use different strategies for small, medium, and large changes.
-- Adapt recommendations to the specific environment and avoid repetitive templates.
-- Avoid generic or cookie-cutter responses; craft context-specific alternatives.
-- Keep outputs diverse and not repetitive.
-- Converge on a custom path only after evidence review.
-- Different constraints should produce different, non-generic recommendations.
+## Constraints
+- Redact secrets, API tokens, account identifiers, and sensitive deployment details by default.
+- Do not imply a deploy was executed when auth, network, or policy blocked it.
+- Do not mix guidance across incompatible Cloudflare product families.
 
-## Empowering execution style
-- Be capable of exploring multiple options and enabling the team to make safe decisions.
-- Unlock confidence by explaining options and tradeoffs clearly.
-- Feel free to be creative while staying rigorous and precise.
-- Push boundaries with practical alternatives when simple recipes fail.
-- Enable outcomes-oriented problem solving.
+## Failure mode
+- If auth is missing, stop with the exact `wrangler` preflight needed.
+- If the product category is unclear, route to the smallest decision tree instead of guessing.
+- If network or sandbox policy blocks deploy execution, report that blocker explicitly rather than implying the deploy was attempted.
 
-<!-- decision-feedback-protocol:v2 -->
-**Decision feedback protocol (required):**
-- If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.
-- Capture: `decision` (`accepted|partial|rejected|deferred`), `outcome` (`good|neutral|bad|unknown`), and `confidence` (`high|medium|low`).
-- Persist with: `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
-- The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
-<!-- /decision-feedback-protocol -->
+## Authentication preflight
+Run before `wrangler deploy`, `wrangler pages deploy`, or equivalent project commands:
+
+```bash
+npx wrangler whoami
+```
+
+If unauthenticated:
+- local interactive flow: `wrangler login`
+- CI or automation: provide `CLOUDFLARE_API_TOKEN`
+
+## Routing workflow
+1. Determine whether the need is compute, storage, AI, networking, security, media, or IaC.
+2. Choose the specific Cloudflare product family.
+3. Load the relevant reference subtree for that product.
+4. Verify auth and product-specific prerequisites.
+5. Return the exact next deploy or setup steps for that path.
+
+## Product routing
+- Compute and runtime:
+  - `references/workers/`
+  - `references/pages/`
+  - `references/durable-objects/`
+  - `references/workflows/`
+  - `references/containers/`
+- Storage and data:
+  - `references/kv/`
+  - `references/d1/`
+  - `references/r2/`
+  - `references/queues/`
+  - `references/hyperdrive/`
+- AI and ML:
+  - `references/workers-ai/`
+  - `references/vectorize/`
+  - `references/agents-sdk/`
+  - `references/ai-gateway/`
+- Networking and security:
+  - `references/tunnel/`
+  - `references/spectrum/`
+  - `references/turnstile/`
+  - `references/waf/`
+  - `references/api-shield/`
+- IaC and tooling:
+  - `references/wrangler/`
+  - `references/terraform/`
+  - `references/pulumi/`
+  - `references/miniflare/`
+
+## Tooling and references
+- Use `wrangler` as the primary operator surface when command execution is in scope.
+- Load only the product references needed for the current route.
+- Core reference files:
+  - `references/contract.yaml`
+  - `references/evals.yaml`
+  - `agents/openai.yaml`
+
+## Validation
+- Verify the selected product family matches the user’s actual deployment need.
+- Verify auth and prerequisite state before deploy instructions.
+- Verify the response names the right reference subtree for follow-on detail.
+- Fail fast at the first auth or product-selection blocker.
+
+## Anti-patterns
+- Recommending Workers for every Cloudflare task by default.
+- Mixing platform setup guidance across incompatible product families.
+- Giving deploy commands before checking auth.
+- Claiming deploy execution when sandbox or network policy prevented it.
+
+## Examples
+- Which Cloudflare product should I use for this edge API plus queue pipeline?
+- Help me deploy this app to Pages and wire the right storage products.
+- I need Cloudflare-hosted AI inference plus vector search. What should I set up?
+
+## Remember
+Cloudflare is a platform family, not one product. Route first, then go deep.

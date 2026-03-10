@@ -9,251 +9,84 @@ allowed-tools:
   - "Bash"
 ---
 
-# Stitch Build Loop
+# Stitch Loop
 
-You are an **autonomous frontend builder** participating in an iterative site-building loop. Your goal is to generate a page using Stitch, integrate it into the site, and prepare instructions for the next iteration.
+Run a baton-driven Stitch website build loop where each pass produces one coherent page and a valid next step.
 
-## When to Use
+## Table of Contents
+- [Standards snapshot](#standards-snapshot)
+- [When to use](#when-to-use)
+- [Required inputs](#required-inputs)
+- [Deliverables](#deliverables)
+- [Philosophy](#philosophy)
+- [Failure mode](#failure-mode)
+- [Constraints](#constraints)
+- [Workflow](#workflow)
+- [Anti-patterns](#anti-patterns)
+- [Validation](#validation)
+- [References](#references)
 
-Use this skill when the user wants iterative, baton-driven site generation where each pass produces one page and queues the next task.
+## Standards snapshot
+- Each iteration must end with a valid refreshed baton.
+- Preserve site continuity by consulting `SITE.md` and `DESIGN.md` before generation.
+- Prefer one page per pass and keep integration deterministic.
+- Verify visual output when the browser toolchain is available.
 
-## Philosophy
+## When to use
+- The user wants iterative autonomous website building with Stitch.
+- The workflow is baton-driven through `next-prompt.md`.
+- Each run should generate one page, integrate it, and queue the next task.
 
-- Keep each iteration small, testable, and handoff-ready.
-- Preserve design-system consistency across every generated page.
-- Optimize for continuity: never end an iteration without a valid next baton.
-
-## Inputs
-
-- `next-prompt.md` baton with a target `page` and prompt body.
-- Project context files (`SITE.md`, `DESIGN.md`, optional `stitch.json`).
+## Required inputs
+- A valid `next-prompt.md` baton with a `page` field.
+- Project context files such as `SITE.md`, `DESIGN.md`, and optionally `stitch.json`.
 - Access to Stitch MCP tools and optional browser verification tools.
 
-## Procedure
+## Deliverables
+- Integrated page artifact for the current baton target.
+- Updated state docs such as `SITE.md` and the next baton.
+- Optional verification screenshots or notes when browser checks run.
 
-1. Read the baton and resolve the target page/task.
-2. Validate context files and sitemap state to avoid duplicate generation.
-3. Generate and retrieve Stitch assets for the page.
-4. Integrate output into site structure and wire navigation.
-5. Update `SITE.md` plus a new `next-prompt.md` baton before finishing.
+## Philosophy
+- Small, handoff-ready iterations scale better than broad autonomous sweeps.
+- Baton continuity matters as much as page output.
+- Generated pages should inherit the project’s design system rather than drifting per run.
 
-## Outputs
-
-- Integrated page artifact in the site public directory.
-- Updated planning/state docs (`SITE.md` and next baton).
-- Optional verification screenshots/logs when browser checks run.
+## Failure mode
+- If the baton is missing, malformed, or lacks a target page, stop before generation.
+- If required context files are absent, pause and report the missing project state.
+- If the user wants one-off Stitch generation rather than iterative baton flow, use a more direct Stitch workflow instead.
 
 ## Constraints
-
 - Redact secrets and sensitive data by default in prompts, logs, and exported notes.
 - Do not skip baton refresh; loop continuity is mandatory.
-- Do not regenerate existing sitemap-complete pages unless explicitly asked.
+- Do not regenerate sitemap-complete pages unless explicitly asked.
 
-## Overview
+## Workflow
+1. Read `next-prompt.md` and resolve the current target page.
+2. Read `SITE.md` and `DESIGN.md` before generating anything.
+3. Confirm the target page is not already complete in the sitemap.
+4. Generate the page with Stitch and retrieve the resulting HTML and screenshot assets.
+5. Integrate the page into the site structure and wire navigation.
+6. Update `SITE.md` and write the next valid baton before finishing.
+7. If browser verification is available, compare the integrated page against the generated output and capture evidence.
 
-The Build Loop pattern enables continuous, autonomous website development through a "baton" system. Each iteration:
-1. Reads the current task from a baton file (`next-prompt.md`)
-2. Generates a page using Stitch MCP tools
-3. Integrates the page into the site structure
-4. Writes the next task to the baton file for the next iteration
+## Anti-patterns
+- Ending an iteration without a valid new baton.
+- Recreating pages that already exist in the sitemap.
+- Leaving placeholder navigation links after integration.
 
-## Prerequisites
+## Validation
+- Fail fast: stop at the first invalid baton, missing context file, or broken Stitch generation step.
+- Verify the current page was integrated into the expected site location.
+- Verify `SITE.md` and `next-prompt.md` were both updated.
+- If browser verification runs, confirm the rendered page is close enough to the generated reference to continue the loop safely.
 
-**Required:**
-- Access to the Stitch MCP Server
-- A Stitch project (existing or will be created)
-- A `DESIGN.md` file (generate one using the `design-md` skill if needed)
-- A `SITE.md` file documenting the site vision and roadmap
-
-**Optional:**
-- Chrome DevTools MCP Server — enables visual verification of generated pages
-
-## The Baton System
-
-The `next-prompt.md` file acts as a relay baton between iterations:
-
-```markdown
----
-page: about
----
-A page describing how jules.top tracking works.
-
-**DESIGN SYSTEM (REQUIRED):**
-[Copy from DESIGN.md Section 6]
-
-**Page Structure:**
-1. Header with navigation
-2. Explanation of tracking methodology
-3. Footer with links
-```
-
-**Critical rules:**
-- The `page` field in YAML frontmatter determines the output filename
-- The prompt content must include the design system block from `DESIGN.md`
-- You MUST update this file before completing your work to continue the loop
-
-## Execution Protocol
-
-### Step 1: Read the Baton
-
-Parse `next-prompt.md` to extract:
-- **Page name** from the `page` frontmatter field
-- **Prompt content** from the markdown body
-
-### Step 2: Consult Context Files
-
-Before generating, read these files:
-
-| File | Purpose |
-|------|---------|
-| `SITE.md` | Site vision, **Stitch Project ID**, existing pages (sitemap), roadmap |
-| `DESIGN.md` | Required visual style for Stitch prompts |
-
-**Important checks:**
-- Section 4 (Sitemap) — Do NOT recreate pages that already exist
-- Section 5 (Roadmap) — Pick tasks from here if backlog exists
-- Section 6 (Creative Freedom) — Ideas for new pages if roadmap is empty
-
-### Step 3: Generate with Stitch
-
-Use the Stitch MCP tools to generate the page:
-
-1. **Discover namespace**: Run `list_tools` to find the Stitch MCP prefix
-2. **Get or create project**:
-   - If `stitch.json` exists, use the `projectId` from it
-   - Otherwise, call `[prefix]:create_project` and save the ID to `stitch.json`
-3. **Generate screen**: Call `[prefix]:generate_screen_from_text` with:
-   - `projectId`: The project ID
-   - `prompt`: The full prompt from the baton (including design system block)
-   - `deviceType`: `DESKTOP` (or as specified)
-4. **Retrieve assets**: Call `[prefix]:get_screen` to get:
-   - `htmlCode.downloadUrl` — Download and save as `queue/{page}.html`
-   - `screenshot.downloadUrl` — Download and save as `queue/{page}.png`
-
-### Step 4: Integrate into Site
-
-1. Move generated HTML from `queue/{page}.html` to `site/public/{page}.html`
-2. Fix any asset paths to be relative to the public folder
-3. Update navigation:
-   - Find existing placeholder links (e.g., `href="#"`) and wire them to the new page
-   - Add the new page to the global navigation if appropriate
-4. Ensure consistent headers/footers across all pages
-
-### Step 4.5: Visual Verification (Optional)
-
-If the **Chrome DevTools MCP Server** is available, verify the generated page:
-
-1. **Check availability**: Run `list_tools` to see if `chrome*` tools are present
-2. **Start dev server**: Use Bash to start a local server (e.g., `npx serve site/public`)
-3. **Navigate to page**: Call `[chrome_prefix]:navigate` to open `http://localhost:3000/{page}.html`
-4. **Capture screenshot**: Call `[chrome_prefix]:screenshot` to capture the rendered page
-5. **Visual comparison**: Compare against the Stitch screenshot (`queue/{page}.png`) for fidelity
-6. **Stop server**: Terminate the dev server process
-
-> **Note:** This step is optional. If Chrome DevTools MCP is not installed, skip to Step 5.
-
-### Step 5: Update Site Documentation
-
-Modify `SITE.md`:
-- Add the new page to Section 4 (Sitemap) with `[x]`
-- Remove any idea you consumed from Section 6 (Creative Freedom)
-- Update Section 5 (Roadmap) if you completed a backlog item
-
-### Step 6: Prepare the Next Baton (Critical)
-
-**You MUST update `next-prompt.md` before completing.** This keeps the loop alive.
-
-1. **Decide the next page**:
-   - Check `SITE.md` Section 5 (Roadmap) for pending items
-   - If empty, pick from Section 6 (Creative Freedom)
-   - Or invent something new that fits the site vision
-2. **Write the baton** with proper YAML frontmatter:
-
-```markdown
----
-page: achievements
----
-A competitive achievements page showing developer badges and milestones.
-
-**DESIGN SYSTEM (REQUIRED):**
-[Copy the entire design system block from DESIGN.md]
-
-**Page Structure:**
-1. Header with title and navigation
-2. Badge grid showing unlocked/locked states
-3. Progress bars for milestone tracking
-```
-
-## File Structure Reference
-
-```
-project/
-├── next-prompt.md      # The baton — current task
-├── stitch.json         # Stitch project ID (persist this!)
-├── DESIGN.md           # Visual design system (from design-md skill)
-├── SITE.md             # Site vision, sitemap, roadmap
-├── queue/              # Staging area for Stitch output
-│   ├── {page}.html
-│   └── {page}.png
-└── site/public/        # Production pages
-    ├── index.html
-    └── {page}.html
-```
-
-## Orchestration Options
-
-The loop can be driven by different orchestration layers:
-
-| Method | How it works |
-|--------|--------------|
-| **CI/CD** | GitHub Actions triggers on `next-prompt.md` changes |
-| **Human-in-loop** | Developer reviews each iteration before continuing |
-| **Agent chains** | One agent dispatches to another (e.g., Jules API) |
-| **Manual** | Developer runs the agent repeatedly with the same repo |
-
-The skill is orchestration-agnostic — focus on the pattern, not the trigger mechanism.
-
-## Design System Integration
-
-This skill works best with the `design-md` skill:
-
-1. **First time setup**: Generate `DESIGN.md` using the `design-md` skill from an existing Stitch screen
-2. **Every iteration**: Copy Section 6 ("Design System Notes for Stitch Generation") into your baton prompt
-3. **Consistency**: All generated pages will share the same visual language
-
-## Common Pitfalls
-
-- ❌ Forgetting to update `next-prompt.md` (breaks the loop)
-- ❌ Recreating a page that already exists in the sitemap
-- ❌ Not including the design system block in the prompt
-- ❌ Leaving placeholder links (`href="#"`) instead of wiring real navigation
-- ❌ Forgetting to persist `stitch.json` after creating a new project
-
-## Troubleshooting
-
-| Issue | Solution |
-|-------|----------|
-| Stitch generation fails | Check that the prompt includes the design system block |
-| Inconsistent styles | Ensure DESIGN.md is up-to-date and copied correctly |
-| Loop stalls | Verify `next-prompt.md` was updated with valid frontmatter |
-| Navigation broken | Check all internal links use correct relative paths |
-
-## Anti-Patterns to Avoid
-
-- Don’t proceed with missing required context files or IDs when the workflow depends on them.
-- Don’t use generic outputs when project-specific constraints are available.
-- Don’t skip validation or handoff artifacts before finishing the task.
-
-## Encouraging Variation
-
-- Adapt outputs to the project’s stack, audience, and visual style.
-- Use different approaches for simple vs complex requests.
-- Avoid repeating a single template when requirements differ.
-
-## Validation Artifacts
-
-- `references/contract.yaml` defines behavior and expected inputs/outputs.
-- `references/evals.yaml` defines quality checks and acceptance examples.
+## References
+- Contract: `references/contract.yaml`
+- Evals: `references/evals.yaml`
+- Baton file: `next-prompt.md`
+- Project state: `SITE.md`, `DESIGN.md`, `stitch.json`
 
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**
@@ -262,17 +95,3 @@ This skill works best with the `design-md` skill:
 - Persist with: `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
 - The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
 <!-- /decision-feedback-protocol -->
-
-## Folded Legacy Modes (Phase4)
-<!-- core75-folded-modes:v1:start -->
-Legacy folds are documented in references/folded-legacy-modes-phase4.md.
-<!-- core75-folded-modes:v1:end -->
-
-## Execution quality
-- Philosophy: use a practical framework that balances speed, safety, and tradeoff clarity.
-- Approach: choose context-specific variation rather than generic cookie-cutter steps; adapt output to repository constraints.
-- Guiding question: Why is this the smallest safe change?
-- Guiding question: What tradeoff are we making and why?
-- Guiding question: How do we verify the result end-to-end?
-- Anti-patterns: DO NOT skip validation, NEVER hide failed checks, and avoid repetitive template-only output.
-- Empowerment: be capable, creative, and enable users to explore options with confidence.

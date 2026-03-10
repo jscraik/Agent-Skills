@@ -5,8 +5,31 @@ description: "Daily skill health scan: analyze ~/.codex/sessions plus per-repo s
 
 # Codex Sessions Skill Scan
 
+## Table of Contents
+- [Overview](#overview)
+- [Standards snapshot](#standards-snapshot-march-2026)
+- [Scope and triggers](#scope-and-triggers)
+- [Quick start](#quick-start-daily)
+- [Philosophy](#philosophy)
+- [Required inputs](#required-inputs)
+- [Deliverables](#deliverables)
+- [Constraints](#constraints)
+- [Reliability hardening](#reliability-hardening-from-recurring-failures)
+- [Procedure](#procedure)
+- [Guardrails](#guardrails-non-negotiable)
+- [Anti-patterns](#anti-patterns)
+- [Examples](#examples)
+- [Validation](#validation)
+- [Decision feedback protocol](#decision-feedback-protocol)
+
 ## Overview
 This skill runs a **daily scan** over Codex session logs (global `~/.codex/sessions` and per-repo sessions under `~/dev`) to catch repeated “paper cuts” when using skills (broken file paths, missing scripts, validation commands that don’t run) and produces a short report + suggested fixes. It also highlights user words that often indicate complex tasks and adds a step-by-step reminder.
+
+## Standards snapshot (March 2026)
+- Keep the scan evidence-first, bounded, and safe for local session analysis.
+- Treat personal-skill regressions, stale paths, and broken validation commands as the main output classes.
+- Preserve privacy by default: summarize failures without replaying full sessions.
+- Keep the workflow read-only unless the user explicitly asks for a patch follow-up.
 
 ## Scope and triggers
 - “Scan yesterday’s Codex sessions for skill failures (personal skills only).”
@@ -101,39 +124,7 @@ References used by skill-gate:
 - `references/contract.yaml`
 - `references/evals.yaml`
 
-<!-- skill-score-boost-v1 -->
-## Philosophy and tradeoffs
-- Use this skill when consistent decision-making matters more than one-off execution because project context should drive the approach.
-- Principle and mindset: prioritize tradeoffs and constraints over rigid checklists; understand why each step exists.
-- Ask this to keep outcomes robust: Why is this the right default, and what could change this outcome?
-- How do we adapt if constraints shift?
-- What evidence is needed before choosing one path over another?
-
-## Anti-patterns and caveats
-- Avoid applying this playbook generically without checking repository-specific context.
-- **NEVER** skip required validation gates when behavior changes.
-- **DO NOT** use this skill as a rigid replacement for engineering judgment.
-- **DON'T** ignore warnings or assume one pattern fits all repos.
-- Common pitfall: treating anti-patterns as optional.
-- Incorrect assumptions here can lead to fragile guidance.
-- Warning: wrong sequencing can create avoidable regressions.
-
-## Variation and adaptation
-- Vary the workflow by team size, risk, and deployment target.
-- Use different strategies for small, medium, and large changes.
-- Adapt recommendations to the specific environment and avoid repetitive templates.
-- Avoid generic or cookie-cutter responses; craft context-specific alternatives.
-- Keep outputs diverse and not repetitive.
-- Converge on a custom path only after evidence review.
-- Different constraints should produce different, non-generic recommendations.
-
-## Empowering execution style
-- Be capable of exploring multiple options and enabling the team to make safe decisions.
-- Unlock confidence by explaining options and tradeoffs clearly.
-- Feel free to be creative while staying rigorous and precise.
-- Push boundaries with practical alternatives when simple recipes fail.
-- Enable outcomes-oriented problem solving.
-
+## Decision feedback protocol
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.

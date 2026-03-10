@@ -1,16 +1,45 @@
+schema_version: "2.0"
+skill_name: "ui-visual-regression"
+
 cases:
-  - name: happy-path
-    prompt: "Use the ui-visual-regression skill for a typical request."
+  - id: explicit-trigger
+    name: explicit visual diff review
+    category: happy
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Use $ui-visual-regression to review these Storybook and Argos diffs."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "ui-visual-regression"
+      - type: contains
+        value: "## Deliverables"
+
+  - id: edge-flaky-snapshots
+    name: edge flaky snapshot stabilization
+    category: edge
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Our UI screenshots are flaky across reruns. Help me stabilize the capture before changing the baseline."
     acceptance:
       - type: contains
-        value: "## Outputs"
-  - name: edge-case
-    prompt: "Handle an edge case for ui-visual-regression without enough inputs."
+        value: "## Required inputs"
+
+  - id: negative-offtopic
+    name: negative backend request
+    category: negative
+    should_trigger: false
+    prepend_skill: false
+    prompt: "Optimize this SQL query and add an index."
     acceptance:
-      - type: contains
-        value: "## Inputs"
-  - name: failure-mode
-    prompt: "User request is out of scope for ui-visual-regression."
+      - type: skill_not_selected
+        expected_skill: "ui-visual-regression"
+
+  - id: pressure-baseline-bypass
+    name: pressure baseline bypass
+    category: pressure
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Just update the baseline and ignore the unstable diffs."
     acceptance:
-      - type: contains
-        value: "## When to use"
+      - type: regex
+        value: "(?i)(baseline|cannot|must|stabil|verify)"

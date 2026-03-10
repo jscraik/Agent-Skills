@@ -1,0 +1,5 @@
+interface:
+  display_name: Test Driven Development
+  short_description: Create test-first Red-Green-Refactor delivery for behavior…
+policy:
+  allow_implicit_invocation: false

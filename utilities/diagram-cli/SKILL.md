@@ -8,20 +8,25 @@ description: Generate, validate, and refresh @brainwav/diagram architecture arti
 Use this skill to turn a codebase into architecture evidence (diagrams + manifest + concise interpretation) with reproducible commands.
 
 ## Table of Contents
+- [Standards snapshot](#standards-snapshot-march-2026)
 - [Philosophy](#philosophy)
 - [When to use](#when-to-use)
 - [Inputs](#inputs)
 - [Outputs](#outputs)
+- [Failure mode](#failure-mode)
 - [Procedure](#procedure)
 - [Validation](#validation)
 - [Anti-patterns](#anti-patterns)
 - [Constraints](#constraints)
 - [Examples](#examples)
 - [References](#references)
-- [Philosophy and tradeoffs](#philosophy-and-tradeoffs)
-- [Anti-patterns and caveats](#anti-patterns-and-caveats)
-- [Variation and adaptation](#variation-and-adaptation)
-- [Empowering execution style](#empowering-execution-style)
+- [Decision feedback protocol](#decision-feedback-protocol)
+
+## Standards snapshot (March 2026)
+- Generate architecture artifacts first, then interpret them with explicit evidence.
+- Use manifest gates and placeholder detection before trusting diagram output.
+- Treat context-pack refresh as a reproducible artifact job, not a narrative-only summary step.
+- Prefer deterministic local commands and path-stable outputs so reruns are diffable in CI and review.
 
 ## Philosophy
 
@@ -68,6 +73,9 @@ Optional:
   - suggested next inspection steps.
 - Updated context pack when requested (for repos that maintain one).
 - If structured JSON output is requested, include top-level `schema_version: 1`.
+
+## Failure mode
+If `analyze`, diagram generation, manifest validation, or context-pack refresh fails, stop at the first broken gate, report the exact command/artifact failure, and do not present architecture conclusions as trusted evidence.
 
 ## Procedure
 
@@ -158,37 +166,12 @@ Minimum checks:
 - [diagram-cli repository](https://github.com/jscraik/diagram-cli)
 - [Mermaid documentation](https://mermaid.js.org/)
 
-<!-- skill-score-boost-v1 -->
-## Philosophy and tradeoffs
-- Use this skill when evidence-backed architecture understanding matters more than speculative code reading.
-- Prioritize reproducibility, then coverage, then visual polish.
-- Trade speed for fidelity only when the user explicitly asks for a lightweight pass.
-
-## Anti-patterns and caveats
-- Do not bypass manifest validation under deadline pressure.
-- Do not claim architectural certainty from partial or placeholder outputs.
-- Do not collapse distinct concerns (dependency, auth, security) into one vague summary.
-
-## Variation and adaptation
-- For small repos: run full `all` sweep and concise summary.
-- For large repos: narrow patterns/focus first, then expand iteratively.
-- For CI: prefer `.diagram` outputs + machine-checkable manifest gates.
-- Use different, context-specific summary depth for onboarding vs incident triage vs compliance audits.
-- Customize outputs for each audience; avoid repetitive, generic, cookie-cutter briefs.
-- Keep recommendations diverse and unique, then converge on the highest-leverage next action.
-
-## Empowering execution style
-- Be explicit about confidence and uncertainty.
-- Show users exactly which artifacts support each architectural claim.
-- Suggest the next highest-leverage follow-up command.
-- Enable exploration: propose one safe deep-dive and one fast-check option.
-- Empower users to challenge assumptions with evidence-first iteration.
-
 ## Remember
 - The agent is capable of extraordinary work in this domain.
 - These guardrails unlock creative, innovative analysis—they do not constrain judgment.
 - Explore options, then push boundaries safely with evidence-backed decisions.
 
+## Decision feedback protocol
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.

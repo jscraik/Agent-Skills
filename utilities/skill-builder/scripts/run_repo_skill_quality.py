@@ -10,6 +10,8 @@ import sys
 from pathlib import Path
 from typing import List
 
+from skill_graph_inventory import discover_inventory_skills, load_inventory_policy
+
 
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Run repo-wide skill quality checks.")
@@ -55,19 +57,9 @@ def parse_args() -> argparse.Namespace:
 
 
 def find_skill_dirs(root: Path) -> List[Path]:
-    out: List[Path] = []
-    root_resolved = root.resolve()
-    for skill_md in root.rglob("SKILL.md"):
-        s = str(skill_md)
-        if "/.git/" in s or "/_archive/" in s or "/assets/template/.codex/skills/" in s:
-            continue
-        if any(part in skill_md.parts for part in {"artifacts", "reports", "templates"}):
-            continue
-        # Repo-root SKILL.md is often an index/readme, not a runnable skill.
-        if skill_md.parent.resolve() == root_resolved:
-            continue
-        out.append(skill_md.parent)
-    return sorted(set(out))
+    policy = load_inventory_policy(root)
+    inventory_skills = discover_inventory_skills(root, policy)
+    return sorted({row.skill_md.parent.resolve() for row in inventory_skills})
 
 
 def run_cmd(cmd: List[str], cwd: Path) -> sp.CompletedProcess[str]:

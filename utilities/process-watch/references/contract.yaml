@@ -1,13 +1,17 @@
-purpose: >
-  Define expected behavior and outputs for this skill.
 schema_version: 1.0
+purpose: Diagnose process-level resource issues using the bundled process-watch workflow.
 triggers:
-  - user requests the capability described in this skill
+  - User asks what process is consuming CPU, memory, disk, network, or a port.
+  - User needs process-level monitoring or culprit identification.
 inputs:
-  - user request details
+  - Symptom, PID, process name, or port number.
+  - Whether diagnostics only or termination is requested.
 outputs:
-  - primary response or artifact
+  - Culprit shortlist with supporting process evidence.
+  - Safe next-step guidance.
 non_goals:
-  - out-of-scope work
+  - Broad system tuning unrelated to process diagnosis.
+  - Destructive process termination without explicit direction.
 risks:
-  - missing inputs; mitigated by clarifying questions
+  - Single-snapshot conclusions can be misleading.
+  - Sensitive command-line or environment data may appear in process details.

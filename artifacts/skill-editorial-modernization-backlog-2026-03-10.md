@@ -1,0 +1,221 @@
+# Skill Editorial Modernization Backlog (2026-03-10)
+
+## Status
+
+- Benchmark inventory alignment fixed: the quality runner and benchmark script now use the shared inventory policy, so hidden `.agents/skills/.system/*` skills no longer pollute portfolio gates.
+- Canonical benchmark output now reports `uncategorized_skills: []` for the operational skill portfolio.
+- Hard quality gates are being rerun after the inventory-alignment patch and the latest Batch B/C follow-up edits.
+
+## Upgraded in this phase
+
+- `frontend/tools/playwright-interactive`
+- `frontend/tools/agentation`
+- `frontend/ui/react-ui-patterns`
+- `frontend/ui/frontend-ui-design`
+- `frontend/ui/baseline-ui`
+- `frontend/website/fixing-accessibility`
+- `frontend/ui/design-system`
+- `product/domain/chatgpt-apps`
+- `product/security/security-threat-model`
+- `product/security/security-ownership-map`
+- `backend/mcp-builder`
+- `backend/workers-mcp`
+- `interview/architecture-interview`
+- `product/docs/docs-expert`
+- `product/docs/openai-docs`
+- `product/docs/context7`
+- `product/specs/product-spec`
+- `product/ops/compound-engineering-router`
+- `product/ops/decide-build-primitive`
+- `product/ops/linear`
+- `product/ops/release`
+- `product/content/video-transcript-downloader`
+- `product/content/youtube-hooks-scripts`
+- `product/content/youtube-titles-thumbnails`
+- `utilities/systematic-debugging`
+- `utilities/repoprompt`
+- `utilities/bootstrap`
+- `utilities/codex-home-audit`
+- `utilities/codex-sessions-skill-scan`
+- `utilities/notebooklm`
+- `utilities/diagram-cli`
+- `utilities/recon-workbench`
+- `product/docs/agents-md`
+- `frontend/graphics/better-icons`
+- `frontend/graphics/favicon-generator`
+- `frontend/graphics/og-image-creator`
+- `frontend/ui/remotion`
+- `frontend/ui/shadcn-ui`
+- `frontend/website/fixing-metadata`
+- `utilities/insight-report`
+- `utilities/markdown-converter`
+- `utilities/process-watch`
+- `frontend/ui/ui-visual-regression`
+- `frontend/tools/figma`
+- `utilities/simple-tasks`
+- `utilities/xcode-makefiles`
+- `frontend/ui/stitch-remotion`
+- `frontend/tools/stitch-loop`
+- `product/security/security-best-practices`
+- `utilities/evals-router`
+- `utilities/visual-explainer`
+- `utilities/slides`
+- `utilities/spreadsheet`
+- `utilities/writing-plans`
+- `auth/best-practices`
+- `auth/create-auth`
+- `github/gh-fix-ci`
+- `github/gh-workflow`
+- `github/greptile/check-pr`
+- `product/domain/cloudflare-deploy`
+- `product/domain/oak-api`
+- `product/strategy/brainstorming`
+- `utilities/1password`
+- `utilities/agent-browser`
+- `utilities/apple-app-creator`
+- `utilities/fix-mise`
+- `utilities/codex-automation-architect`
+
+## Next editorial batches
+
+### Batch A: Product and planning wrappers
+- `product/specs/product-spec`
+- `product/ops/compound-engineering-router`
+- `product/ops/decide-build-primitive`
+- `product/ops/linear`
+- `product/ops/release`
+- Goal:
+  - align wording to current instruction chain
+  - reduce stale “gold standard” date language
+  - tighten outputs and verification wording
+- Status: completed on 2026-03-10
+
+### Batch B: Interview and requirements skills
+- `interview/interview-me`
+- `interview/deep-interview`
+- Goal:
+  - sharpen March 2026 standards framing
+  - reduce legacy wrapper feel
+  - keep the specialized tracks concise and explicit
+- Status: completed on 2026-03-10
+
+### Batch C: Utility workflow skills
+- `utilities/verification-before-completion`
+- `utilities/test-driven-development`
+- `utilities/alignment-checkpoint`
+- `utilities/skill-builder`
+- `utilities/repoprompt`
+- Goal:
+  - unify evidence-first wording
+  - remove stale governance references
+  - improve consistency of required outputs and fail-fast validation
+- Completed in this pass:
+  - `utilities/verification-before-completion`
+  - `utilities/test-driven-development`
+  - `utilities/alignment-checkpoint`
+  - `utilities/skill-builder`
+  - `utilities/repoprompt`
+- Status: completed on 2026-03-10
+
+### Batch D: Utility platform and automation skills
+- `utilities/bootstrap`
+- `utilities/codex-home-audit`
+- `utilities/codex-sessions-skill-scan`
+- `utilities/diagram-cli`
+- `utilities/notebooklm`
+- `utilities/recon-workbench`
+- Goal:
+  - modernize standards framing
+  - tighten prerequisites and artifact contracts
+  - make route-vs-non-route boundaries clearer
+- Completed in this pass:
+  - `utilities/bootstrap`
+  - `utilities/codex-home-audit`
+  - `utilities/codex-sessions-skill-scan`
+  - `utilities/notebooklm`
+  - `utilities/diagram-cli`
+  - `utilities/recon-workbench`
+- Status: completed on 2026-03-10
+
+### Batch E: Docs and content skills
+- `product/docs/agents-md`
+- `product/docs/openai-docs`
+- `product/docs/context7`
+- `product/content/video-transcript-downloader`
+- `product/content/youtube-hooks-scripts`
+- `product/content/youtube-titles-thumbnails`
+- Goal:
+  - update brand and governance references
+  - standardize deliverables and evidence expectations
+- Status: in progress on 2026-03-10
+- Completed in this pass:
+  - `product/docs/openai-docs`
+  - `product/docs/context7`
+  - `product/content/video-transcript-downloader`
+  - `product/content/youtube-hooks-scripts`
+  - `product/content/youtube-titles-thumbnails`
+- Remaining:
+  - `product/docs/agents-md`
+- Status: completed on 2026-03-10
+
+## Notes
+
+- Benchmark completeness is fixed; uncategorized skills are now `0`.
+- Remaining work is deeper editorial quality uplift across the long tail, not a current benchmark or validator blocker.
+- Latest long-tail graphics/UI pass tightened:
+  - `frontend/graphics/better-icons`
+  - `frontend/graphics/favicon-generator`
+  - `frontend/graphics/og-image-creator`
+  - `frontend/ui/remotion`
+  - `frontend/ui/shadcn-ui`
+  - `frontend/website/fixing-metadata`
+- Latest utility/frontend wrapper pass tightened:
+  - `utilities/insight-report`
+  - `utilities/markdown-converter`
+  - `utilities/process-watch`
+  - `frontend/ui/ui-visual-regression`
+  - `frontend/tools/figma`
+- Latest loop/platform/security pass tightened:
+  - `utilities/simple-tasks`
+  - `utilities/xcode-makefiles`
+  - `frontend/ui/stitch-remotion`
+  - `frontend/tools/stitch-loop`
+  - `product/security/security-best-practices`
+- Latest planning/visualization pass tightened:
+  - `utilities/evals-router`
+  - `utilities/visual-explainer`
+  - `utilities/slides`
+  - `utilities/spreadsheet`
+  - `utilities/writing-plans`
+- Latest auth/github/domain pass tightened:
+  - `auth/best-practices`
+  - `auth/create-auth`
+  - `github/gh-fix-ci`
+  - `github/gh-workflow`
+  - `github/greptile/check-pr`
+  - `product/domain/cloudflare-deploy`
+  - `product/domain/oak-api`
+  - `product/strategy/brainstorming`
+- Latest utility operator pass tightened:
+  - `utilities/1password`
+  - `utilities/agent-browser`
+  - `utilities/apple-app-creator`
+  - `utilities/fix-mise`
+  - `utilities/codex-automation-architect`
+- Latest backend/rendering pass tightened:
+  - `backend/backend-engineer`
+  - `backend/cli-spec`
+  - `frontend/graphics/imagegen`
+  - `frontend/graphics/threejs-builder`
+  - `frontend/stitch-react-components`
+  - `utilities/atlas`
+  - `utilities/beautiful-mermaid`
+- Latest protocol/media parity pass tightened:
+  - `backend/mcp-builder`
+  - `backend/workers-mcp`
+  - `product/domain/arscontexta`
+  - `frontend/graphics/nano-banana-builder`
+  - `frontend/graphics/sora`
+- Latest frontend design pass tightened:
+  - `frontend/ui/frontend-ui-design`
+  - `frontend/ui/ui-ux-creative-coding`

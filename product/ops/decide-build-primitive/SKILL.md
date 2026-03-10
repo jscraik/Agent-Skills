@@ -7,43 +7,82 @@ description: Analyze and decide the right Codex primitive (Skill, Custom Prompt,
 
 # Decide Build Primitive
 
-## Compliance
-- Check against GOLD Industry Standards guide in ~/.codex/AGENTS.override.md
-- Check against GOLD Industry Standards guide in `~/.codex/AGENTS.override.md`.
+## Table of Contents
+- [Scope and triggers](#scope-and-triggers)
+- [Required inputs](#required-inputs)
+- [Deliverables](#deliverables)
+- [Failure mode](#failure-mode)
+- [Standards snapshot](#standards-snapshot-march-2026)
+- [Decision workflow](#decision-workflow)
+- [Decision heuristics](#decision-heuristics)
+- [Output format](#output-format-strict)
+- [Validation](#validation)
+- [Anti-patterns](#anti-patterns)
+- [Examples](#examples)
+- [Decision feedback protocol](#decision-feedback-protocol)
 
-## Purpose
-Provide a repeatable decision workflow to choose the right Codex primitive (Skill vs Custom Prompt vs Agent/automation) for any requested capability.
+## Scope and triggers
+- Use this skill when the user asks how to package, automate, or operationalize a Codex capability.
+- Use it when the decision is between a reusable `SKILL`, a `CUSTOM_PROMPT`, or an `AGENT_AUTOMATION`.
+- Use it when the team needs a durable recommendation with tradeoffs, not just a gut-feel answer.
 
-## When to run
-- User asks how to implement/package/structure a capability in Codex.
-- You need to choose between Skill, Custom Prompt, or autonomous Agent/`codex exec`.
-- You want a reusable, cross-project decision framework.
+## Required inputs
+- the capability to package or automate
+- expected inputs and outputs
+- who triggers it and how often
+- whether it must run interactively, delegated, or autonomously
+- any repo, compliance, environment, or portability constraints
 
-## Quick use
-1) Run the workflow below.
-2) Output must follow the required format block.
+If one of these is missing, ask only the smallest question needed to choose safely.
+
+## Deliverables
+- a single recommendation using the strict output block below
+- the primary reason and supporting factors behind the choice
+- implementation notes grounded in the chosen primitive
+- an explicit hybrid recommendation only when the capability genuinely spans layers
+
+## Failure mode
+If the request is not actually a packaging decision, say so briefly and route to the better skill or direct execution path instead of forcing a primitive choice.
+
+## Standards snapshot (March 2026)
+- Prefer the smallest primitive that preserves clarity, reliability, and reuse.
+- Optimize for how the capability will actually be invoked in production workflows, not how it was first described.
+- Distinguish human-guidance assets from autonomous execution assets; do not blur them just because both can automate work.
+- Make the tradeoff legible enough that another agent would make the same decision from the same evidence.
 
 ## Decision workflow
-### Step 1 – Clarify (only ask what’s missing)
-- What is being built? Inputs? Outputs? Where/when used?
-- Required interaction model: interactive vs delegated vs autonomous?
-- Any repo- or domain-specific constraints?
+### Step 1: Clarify the job to be done
+- What is being built, and what outcome should it reliably produce?
+- Who triggers it: a human in-chat, an explicit operator, or a scheduler/automation?
+- Does it need repo/chat context to work well, or should it run in isolation?
+- Is the capability a reusable method, a deterministic prompt macro, or an autonomous workflow?
 
-### Step 2 – Evaluate axes
-- **Duration & Autonomy**: <5m / 5–15m / 30m+; human-in-loop vs delegated vs autonomous.
-- **Context Sensitivity**: Does prior chat/repo help? Is clean-slate required?
-- **Invocation Style**: Should it be implicitly triggerable? Must it be explicitly invoked? Who drives execution?
-- **Complexity & Scope**: Single capability vs multi-step workflow vs orchestration; number of decision points.
-- **Portability**: Cross-project reusable vs repo-specific vs environment-bound.
-- **Output Needs**: Guidance only vs documentation/artifacts vs code/diffs/CI outputs.
-- **Governance/CI Fit**: Need for repeatable checks, packaging, or later automation hooks.
+### Step 2: Evaluate the six decision axes
+- **Autonomy and runtime length:** seconds with a human present, bounded delegated run, or long autonomous lane.
+- **Context dependence:** benefits from current thread/repo context versus clean-slate execution.
+- **Invocation style:** implicitly triggerable, explicitly invoked, or scheduled/event-driven.
+- **Workflow complexity:** single reasoning surface, multi-step method, or orchestration with checkpoints and artifacts.
+- **Portability:** reusable across repos versus repo-bound or environment-bound.
+- **Operational burden:** needs logs, retries, budgets, telemetry, packaging, or CI integration.
 
-### Step 3 – Decide
-- **Choose SKILL when**: reusable across projects; methodology/checklist/decision logic; benefits from context; lightweight–moderate workflow; implicit triggering valuable.
-- **Choose CUSTOM_PROMPT when**: personal/one-off macro; deterministic expansion; explicit invocation is fine; not intended for sharing/enforcement.
-- **Choose AGENT_AUTOMATION when**: long-running or autonomous; clean isolation needed; produces structured artifacts/CI tasks; belongs in scripts/pipelines.
+### Step 3: Choose the primitive
+- **Choose `SKILL` when** the capability is a reusable method, decision framework, or bounded workflow that benefits from current context and implicit routing.
+- **Choose `CUSTOM_PROMPT` when** the capability is a personal or team macro, mostly prompt-shaped, explicitly invoked, and not worth full skill packaging.
+- **Choose `AGENT_AUTOMATION` when** the capability is autonomous, scheduled, long-running, or operationally heavy enough to need isolation, structured outputs, logging, or retry policy.
 
-### Step 4 – Output (strict format)
+### Step 4: Check for a justified hybrid
+- Recommend a hybrid only when two layers have different jobs.
+- Common valid hybrid: `SKILL` for human-guided setup or review plus `AGENT_AUTOMATION` for recurring execution.
+- Reject fake hybrids that only hide indecision.
+
+## Decision heuristics
+- If the value is mostly in routing, checklists, and structured judgment, bias toward `SKILL`.
+- If the value is mostly in a reusable phrasing pattern with little surrounding workflow, bias toward `CUSTOM_PROMPT`.
+- If the value is mostly in unattended execution, artifact production, or repeated runs, bias toward `AGENT_AUTOMATION`.
+- If governance, telemetry, retries, or budget controls are core to success, that is strong evidence for `AGENT_AUTOMATION`.
+- If cross-repo reuse with light operational overhead is the main goal, that is strong evidence for `SKILL`.
+
+## Output format (strict)
 Return exactly:
 ```
 DECISION: [SKILL | CUSTOM_PROMPT | AGENT_AUTOMATION]
@@ -53,65 +92,38 @@ IMPLEMENTATION NOTES:
 POTENTIAL HYBRID:
 ```
 
-### Step 5 – Follow-ups
-- If AGENT_AUTOMATION: note entrypoint, guardrails, timeout/budget, logging/telemetry.
-- If SKILL: outline triggers and any scripts/references/assets to include.
-- If CUSTOM_PROMPT: note audience/scope and limitations.
+Follow-up expectations:
+- If `AGENT_AUTOMATION`, note entrypoint, guardrails, timeout or budget, logging, and failure handling.
+- If `SKILL`, note triggers plus any scripts, references, assets, or evals that should exist.
+- If `CUSTOM_PROMPT`, note audience, scope boundary, and why full packaging would be overkill.
+
+## Constraints
+- Redact secrets, tokens, credentials, and sensitive data by default.
+- Do not recommend destructive or autonomous execution paths without clear operational justification.
+- Keep recommendations grounded in the current request rather than generic platform folklore.
 
 ## References
 - `references/contract.yaml` — purpose, triggers, inputs/outputs, non-goals, risks.
 - `references/evals.yaml` — evaluation cases to validate triggering and outputs.
 
-## Scope and triggers
-- Use this skill when the task matches its description and triggers.
-- If the request is outside scope, route to the referenced skill.
-
-
-## Required inputs
-- User request details and any relevant files/links.
-
-
-## Deliverables
-- A structured response or artifact appropriate to the skill.
-- Include `schema_version: 1` if outputs are contract-bound.
-
-
-## Constraints
-- Redact secrets/PII by default.
-- Avoid destructive operations without explicit user direction.
-
-
 ## Validation
-- Run any relevant checks or scripts when available.
-- Fail fast and report errors before proceeding.
-
-
-## Philosophy
-- Favor clarity, explicit tradeoffs, and verifiable outputs.
-
+- Verify the chosen primitive actually matches invocation style, autonomy, and operational burden.
+- Verify the recommendation could be implemented without immediately collapsing into one of the other primitives.
+- Fail fast on ambiguous evidence; name the missing fact instead of pretending certainty.
 
 ## Anti-patterns
-- Avoid vague guidance without concrete steps.
-- Do not invent results or commands.
-## Procedure
-1) Clarify scope and inputs.
-2) Execute the core workflow.
-3) Summarize outputs and next steps.
-
-## Antipatterns
-- Do not add features outside the agreed scope.
+- Choosing `AGENT_AUTOMATION` just because the task sounds impressive.
+- Choosing `CUSTOM_PROMPT` for something that clearly needs reusable evals, references, or implicit routing.
+- Choosing `SKILL` for unattended or scheduler-driven work that really needs an automation contract.
+- Returning a hybrid because the decision is unclear.
+- Inventing operational details or governance requirements that were never evidenced.
 
 ## Examples
 
 - "Should this be a Skill or a custom prompt?"
 - "Choose between agent automation vs skill for a long-running workflow."
-
-## Variation
-- Vary tone, depth, and structure based on context.
-- Avoid repeating the same outline across outputs.
-
-## Remember
-The agent is capable of extraordinary work in this domain. Use judgment, adapt to context, and push boundaries when appropriate.
+- "We use this every week across repos; should it be a skill or an automation?"
+- "This is a one-off review macro for me; do I really need a skill?"
 
 <!-- skill-score-boost-v1 -->
 ## Philosophy and tradeoffs
@@ -146,6 +158,7 @@ The agent is capable of extraordinary work in this domain. Use judgment, adapt t
 - Push boundaries with practical alternatives when simple recipes fail.
 - Enable outcomes-oriented problem solving.
 
+## Decision feedback protocol
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.

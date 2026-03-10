@@ -1,41 +1,19 @@
-# Skill Output Contract
-# Copy this file to your skill's references/ directory and customize for your skill.
-
 schema_version: "1.0"
-
-purpose: >
-  Define expected behavior and outputs for this skill.
-  Replace this with a specific description of what this skill accomplishes.
-
+purpose: Execute baton-driven iterative Stitch website generation with mandatory state refresh after each pass.
 triggers:
-  - user requests the capability described in this skill
-  - specific keywords or patterns that should activate this skill
-
+  - user requests iterative autonomous website building with Stitch
+  - request includes or implies baton-based multi-pass page generation
 inputs:
-  - user request details
-  - relevant files or context
-  - any required parameters
-
+  - next-prompt.md baton
+  - project state files such as SITE.md, DESIGN.md, and optional stitch.json
+  - Stitch MCP access and optional browser verification access
 outputs:
-  - primary response or artifact
-  - expected format (markdown, JSON, etc.)
-  - success indicators
-
+  - integrated page artifact
+  - updated SITE.md and next-prompt.md baton
+  - optional verification evidence
 non_goals:
-  - out-of-scope work not covered by this skill
-  - capabilities explicitly excluded
-
+  - one-off Stitch page generation without baton continuity
+  - regeneration of already-complete pages without explicit request
 risks:
-  - missing inputs; mitigated by clarifying questions
-  - potential misinterpretation; mitigated by explicit confirmation
-
-examples:
-  happy_path:
-    input: "Typical user request"
-    expected_output: "Expected skill response"
-  edge_case:
-    input: "Unusual but valid request"
-    expected_output: "How skill should handle it"
-  failure_mode:
-    input: "Out of scope or invalid request"
-    expected_output: "Skill should decline gracefully"
+  - loop stalls if the baton is not refreshed
+  - duplicate generation can occur if sitemap state is ignored

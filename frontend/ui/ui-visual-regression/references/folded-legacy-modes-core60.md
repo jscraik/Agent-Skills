@@ -15,3 +15,12 @@ This file captures legacy capabilities migrated from retired skills.
   - Philosophy
   - Guardrails (must follow)
   - Procedure (exact sequence)
+  - Report template
+  - Common failure patterns
+  - Validation
+  - Constraints
+- Live guidance preserved in destination:
+  - consumer -> store -> API tracing order
+  - shape-only instrumentation rules
+  - first-divergence-point reporting contract
+  - no-fix-yet debugging posture unless explicitly requested

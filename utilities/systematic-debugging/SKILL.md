@@ -9,6 +9,12 @@ description: "Use this skill when encountering bugs, test failures, regressions,
 
 Random fixes waste time and create new bugs. Quick patches mask underlying issues.
 
+## Standards snapshot (March 2026)
+
+- Follow current global instructions from `~/.codex/AGENTS.md` and linked standards docs.
+- Prefer evidence captured from the current environment over assumptions or stale logs.
+- Treat root-cause isolation and verification as required gates before claiming a fix.
+
 **Core principle:** ALWAYS find root cause before attempting fixes. Symptom fixes are failure.
 
 **Violating the letter of this process is violating the spirit of debugging.**
@@ -41,6 +47,7 @@ Use for ANY technical issue:
 - Issue seems simple (simple bugs have root causes too)
 - You're in a hurry (rushing guarantees rework)
 - Manager wants it fixed NOW (systematic is faster than thrashing)
+- The failure seems "probably environmental" without evidence
 
 ## The Four Phases
 

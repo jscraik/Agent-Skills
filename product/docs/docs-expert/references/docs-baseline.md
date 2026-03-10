@@ -183,7 +183,7 @@ section that includes:
 
 ### 9) Bootstrap missing QA tooling (default)
 
-- Run `python scripts/bootstrap_doc_qa.py --repo . --apply --brand-profile docs-expert` before lint and brand checks.
+- Preferred bootstrap step: `python scripts/bootstrap_doc_qa.py --repo . --apply --brand-profile docs-expert` before lint and brand checks.
 - If `.vale.ini` is missing, install a local Vale baseline (`.vale.ini` and `.vale/styles/Docs/`).
 - If markdownlint config is missing, install `.markdownlint-cli2.yaml`.
 - If `brand/` or branding constraints are missing, install BrAInwav baseline assets and constraints.
@@ -200,7 +200,7 @@ section that includes:
 
 ### 10a) Automation hooks (optional)
 
-Use these commands in CI or pre-commit, adjusting paths to your repo:
+Example CI or pre-commit snippets, adjusted to your repo:
 
 ```sh
 python /path/to/bootstrap_doc_qa.py --repo . --apply

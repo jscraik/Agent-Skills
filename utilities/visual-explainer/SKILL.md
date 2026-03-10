@@ -7,6 +7,12 @@ description: Generate beautiful, self-contained HTML pages that visually explain
 
 Generate self-contained HTML files for technical diagrams, visualizations, and data tables. Always open the result in the browser. Never fall back to ASCII art when this skill is loaded.
 
+## Standards snapshot (March 2026)
+- Treat the HTML artifact as the product, not an optional attachment to the chat reply.
+- Prefer explanation-first layouts: make the user’s decision, comparison, or system model obvious at a glance.
+- Use repo-bundled templates and reference patterns before inventing a fresh structure.
+- If the content wants a browser artifact, do not regress to terminal tables or ASCII diagrams.
+
 ## When to Use
 
 Use this skill when a request needs a visual artifact (diagram, architecture explainer, plan review, comparison table, timeline, dashboard, or recap) instead of plain text.
@@ -271,6 +277,7 @@ Before delivering, verify:
 
 - If supporting scripts require YAML-aware tooling, run them with `~/.venvs/pyyaml/bin/python` (not system `python`).
 - If `PyYAML` is missing, fail fast with an explicit fix command instead of retrying ambiguous interpreters.
+- If the right artifact is still unclear after reading the source material, stop and choose the diagram type before writing HTML.
 
 ## Example prompts
 
@@ -286,10 +293,11 @@ Before delivering, verify:
 - ❌ Shipping visuals that are pretty but miss required content or relationships.
 - ❌ Using slide mode to summarize away source content that should be preserved.
 - ❌ Skipping responsive and overflow checks before delivery.
+- ❌ Treating templates as finished designs instead of starting points.
 
 ## Remember
 
-The agent is capable of extraordinary work in this domain. These guidelines unlock that potential—they don’t constrain it. Use judgment, adapt to context, and push boundaries when appropriate.
+Make the browser artifact earn its keep. If it is not clearer, easier to scan, and easier to reopen than a text reply, it needs another pass.
 
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**

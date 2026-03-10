@@ -1,328 +1,90 @@
 ---
 name: agent-browser
-description: Use this skill to extract page state and automate web interactions with
-  the agent-browser CLI (navigate, snapshot, click, fill, screenshot). Use this when
-  you need deterministic browser automation or scraping via ref-based elements.
+description: Use this skill to extract page state and automate web interactions with the agent-browser CLI (navigate, snapshot, click, fill, screenshot). Use this when you need deterministic browser automation or scraping via ref-based elements.
 ---
 
-# agent-browser: CLI Browser Automation
+# Agent Browser
 
-Vercel's headless browser automation CLI designed for AI agents. Uses ref-based selection (@e1, @e2) from accessibility snapshots.
+Use the `agent-browser` CLI for deterministic browser automation through accessibility snapshots and ref-based interaction.
 
-## Philosophy
+## Standards snapshot (March 2026)
+- Prefer snapshot-driven refs over brittle selectors.
+- Re-snapshot after navigation or meaningful DOM changes.
+- Keep browser actions observable: every click, fill, or wait should have a verification point.
+- Use isolated sessions when parallel flows or risky state changes would interfere with each other.
 
-- Prefer accessibility-first selectors (refs) for stability.
-- Re-snapshot after navigation or DOM changes.
-- Keep actions minimal and observable.
+## When to use
+- Interacting with live web pages or forms through the CLI.
+- Capturing screenshots, PDFs, or structured snapshots.
+- Scraping or validating page state with deterministic steps.
 
-## Scope and triggers
-
-- You need to interact with live web pages or forms.
-- You need screenshots or PDFs of UI states.
-- You need to scrape data with deterministic steps.
+## When not to use
+- Browser tasks that require a different sanctioned browser automation surface.
+- Long destructive flows against production systems.
+- Generic browsing with no need for deterministic automation or snapshots.
 
 ## Required inputs
-
-## Cognitive Support / Plain-Language
-- Optimize for low cognitive load (TBI support): one task at a time, explicit steps.
-- Use plain language first; define jargon in parentheses.
-- Keep steps short and checklist-driven where possible.
-- Externalize state: decisions, assumptions, and the next step.
-- Provide ELI5 explanations for non-trivial logic.
-- Ask one question at a time; prefer multiple-choice when possible.
-
-
-- Target URL(s).
-- Desired interactions (click/fill/scroll).
-- Output artifacts (screenshots, PDFs, extracted text).
+- Target URL or session context.
+- Intended actions such as open, click, fill, wait, or extract.
+- Desired output artifacts such as text, screenshots, PDFs, or JSON snapshots.
 
 ## Deliverables
+- Verified action results and page-state evidence.
+- Saved artifacts when requested.
+- Extracted content or next-step instructions based on snapshot evidence.
+- If requested, a structured status report with a `schema_version` field.
 
-- Action results and snapshots.
-- Saved artifacts (png/pdf) when requested.
-- Extracted content for further processing.
+## Philosophy
+- Accessibility-first refs are the default because they are more stable than ad hoc selectors.
+- Browser automation should be incremental and verifiable.
+- Minimal sequences with checkpoints are safer than long speculative chains.
 
-## Constraints / Safety
+## Constraints
+- Redact secrets, tokens, session identifiers, and private URLs in logs and outputs by default.
+- Avoid interacting with sensitive accounts or destructive controls without explicit approval.
+- Reconfirm page state after any action that may have changed the DOM.
 
-- Redact secrets, tokens, and private URLs in logs.
-- Avoid interacting with sensitive accounts without explicit approval.
-- Do not run destructive actions on production systems.
+## Workflow
+1. Verify `agent-browser` is installed and usable.
+2. Open the target URL or attach to the named session.
+3. Run `snapshot -i`, preferably with `--json` when parsing matters.
+4. Interact using refs such as `@e1`, `@e2`, and re-snapshot after changes.
+5. Save screenshots, PDFs, or extracted text when requested.
+6. Stop at the first failed step and inspect the updated snapshot before continuing.
 
-## Variation
+## Core pattern
+1. `open`
+2. `snapshot -i`
+3. `click` or `fill` using refs
+4. `wait` if needed
+5. `snapshot -i` again
 
-- Use refs for deterministic steps; use semantic locators when refs are unstable.
-- Use `--session` for parallel flows when isolation is required.
-- Prefer JSON snapshots for parsing and automation.
-
-## Anti-Patterns
-
-- Clicking without a fresh snapshot after navigation.
-- Using brittle selectors when refs are available.
-- Running long sequences without verification checkpoints.
+## Tooling and references
+- Use `agent-browser` as the primary operator surface.
+- Prefer `snapshot -i --json` for parseable automation steps.
+- Use session isolation when parallel browser flows are needed.
+- Reference files:
+  - `references/contract.yaml`
+  - `references/evals.yaml`
+  - `references/task-profile.json`
+- Use assets only when the task benefits from bundled browser skill materials in `assets/`.
 
 ## Validation
+- Verify installation before use.
+- Verify each meaningful step with a fresh snapshot or expected page-state change.
+- Verify saved artifacts exist when requested.
+- Fail fast at the first broken browser step.
 
-- Confirm each step with a snapshot or expected UI change.
-- Fail fast: stop at the first failed step and fix before continuing.
-- See `references/contract.yaml` (schema_version: 1) and `references/evals.yaml`.
-
-## Remember
-
-The agent is capable of extraordinary work in this domain. These guidelines unlock that potential—they don't constrain it.
-Use judgment, adapt to context, and push boundaries when appropriate.
-
-## Setup Check
-
-```bash
-# Check installation
-command -v agent-browser >/dev/null 2>&1 && echo "Installed" || echo "NOT INSTALLED - run: npm install -g agent-browser && agent-browser install"
-```
-
-### Install if needed
-
-```bash
-npm install -g agent-browser
-agent-browser install  # Downloads Chromium
-```
-
-## Core Workflow
-
-**The snapshot + ref pattern is optimal for LLMs:**
-
-1. **Navigate** to URL
-2. **Snapshot** to get interactive elements with refs
-3. **Interact** using refs (@e1, @e2, etc.)
-4. **Re-snapshot** after navigation or DOM changes
-
-```bash
-# Step 1: Open URL
-agent-browser open https://example.com
-
-# Step 2: Get interactive elements with refs
-agent-browser snapshot -i --json
-
-# Step 3: Interact using refs
-agent-browser click @e1
-agent-browser fill @e2 "search query"
-
-# Step 4: Re-snapshot after changes
-agent-browser snapshot -i
-```
-
-## Key Commands
-
-### Navigation
-
-```bash
-agent-browser open <url>       # Navigate to URL
-agent-browser back             # Go back
-agent-browser forward          # Go forward
-agent-browser reload           # Reload page
-agent-browser close            # Close browser
-```
-
-### Snapshots (Essential for AI)
-
-```bash
-agent-browser snapshot              # Full accessibility tree
-agent-browser snapshot -i           # Interactive elements only (recommended)
-agent-browser snapshot -i --json    # JSON output for parsing
-agent-browser snapshot -c           # Compact (remove empty elements)
-agent-browser snapshot -d 3         # Limit depth
-```
-
-### Interactions
-
-```bash
-agent-browser click @e1                    # Click element
-agent-browser dblclick @e1                 # Double-click
-agent-browser fill @e1 "text"              # Clear and fill input
-agent-browser type @e1 "text"              # Type without clearing
-agent-browser press Enter                  # Press key
-agent-browser hover @e1                    # Hover element
-agent-browser check @e1                    # Check checkbox
-agent-browser uncheck @e1                  # Uncheck checkbox
-agent-browser select @e1 "option"          # Select dropdown option
-agent-browser scroll down 500              # Scroll (up/down/left/right)
-agent-browser scrollintoview @e1           # Scroll element into view
-```
-
-### Get Information
-
-```bash
-agent-browser get text @e1          # Get element text
-agent-browser get html @e1          # Get element HTML
-agent-browser get value @e1         # Get input value
-agent-browser get attr href @e1     # Get attribute
-agent-browser get title             # Get page title
-agent-browser get url               # Get current URL
-agent-browser get count "button"    # Count matching elements
-```
-
-### Screenshots & PDFs
-
-```bash
-agent-browser screenshot                      # Viewport screenshot
-agent-browser screenshot --full               # Full page
-agent-browser screenshot output.png           # Save to file
-agent-browser screenshot --full output.png    # Full page to file
-agent-browser pdf output.pdf                  # Save as PDF
-```
-
-### Wait
-
-```bash
-agent-browser wait @e1              # Wait for element
-agent-browser wait 2000             # Wait milliseconds
-agent-browser wait "text"           # Wait for text to appear
-```
-
-## Semantic Locators (Alternative to Refs)
-
-```bash
-agent-browser find role button click --name "Submit"
-agent-browser find text "Sign up" click
-agent-browser find label "Email" fill "user@example.com"
-agent-browser find placeholder "Search..." fill "query"
-```
-
-## Sessions (Parallel Browsers)
-
-```bash
-# Run multiple independent browser sessions
-agent-browser --session browser1 open https://site1.com
-agent-browser --session browser2 open https://site2.com
-
-# List active sessions
-agent-browser session list
-```
+## Anti-patterns
+- Clicking without a fresh snapshot after navigation.
+- Using brittle selectors when refs are available.
+- Running long sequences with no verification checkpoints.
+- Treating a changed DOM like a stable continuation of the previous step.
 
 ## Examples
+- Open this site, search for a result, and capture the page state.
+- Use refs to fill this form and save a screenshot of the confirmation screen.
+- Extract the visible text from this page using snapshot evidence.
 
-### Login Flow
-
-```bash
-agent-browser open https://app.example.com/login
-agent-browser snapshot -i
-# Output shows: textbox "Email" [ref=e1], textbox "Password" [ref=e2], button "Sign in" [ref=e3]
-agent-browser fill @e1 "user@example.com"
-agent-browser fill @e2 "password123"
-agent-browser click @e3
-agent-browser wait 2000
-agent-browser snapshot -i  # Verify logged in
-```
-
-### Search and Extract
-
-```bash
-agent-browser open https://news.ycombinator.com
-agent-browser snapshot -i --json
-# Parse JSON to find story links
-agent-browser get text @e12  # Get headline text
-agent-browser click @e12     # Click to open story
-```
-
-### Form Filling
-
-```bash
-agent-browser open https://forms.example.com
-agent-browser snapshot -i
-agent-browser fill @e1 "John Doe"
-agent-browser fill @e2 "john@example.com"
-agent-browser select @e3 "United States"
-agent-browser check @e4  # Agree to terms
-agent-browser click @e5  # Submit button
-agent-browser screenshot confirmation.png
-```
-
-### Debug Mode
-
-```bash
-# Run with visible browser window
-agent-browser --headed open https://example.com
-agent-browser --headed snapshot -i
-agent-browser --headed click @e1
-```
-
-## JSON Output
-
-Add `--json` for structured output:
-
-```bash
-agent-browser snapshot -i --json
-```
-
-Returns:
-```json
-{
-  "success": true,
-  "data": {
-    "refs": {
-      "e1": {"name": "Submit", "role": "button"},
-      "e2": {"name": "Email", "role": "textbox"}
-    },
-    "snapshot": "- button \"Submit\" [ref=e1]\n- textbox \"Email\" [ref=e2]"
-  }
-}
-```
-
-## vs Playwright MCP
-
-| Feature | agent-browser (CLI) | Playwright MCP |
-|---------|---------------------|----------------|
-| Interface | Bash commands | MCP tools |
-| Selection | Refs (@e1) | Refs (e1) |
-| Output | Text/JSON | Tool responses |
-| Parallel | Sessions | Tabs |
-| Best for | Quick automation | Tool integration |
-
-Use agent-browser when:
-- You prefer Bash-based workflows
-- You want simpler CLI commands
-- You need quick one-off automation
-
-Use Playwright MCP when:
-- You need deep MCP tool integration
-- You want tool-based responses
-- You're building complex automation
-
-<!-- skill-score-boost-v1 -->
-## Philosophy and tradeoffs
-- Use this skill when consistent decision-making matters more than one-off execution because project context should drive the approach.
-- Principle and mindset: prioritize tradeoffs and constraints over rigid checklists; understand why each step exists.
-- Ask this to keep outcomes robust: Why is this the right default, and what could change this outcome?
-- How do we adapt if constraints shift?
-- What evidence is needed before choosing one path over another?
-
-## Anti-patterns and caveats
-- Avoid applying this playbook generically without checking repository-specific context.
-- **NEVER** skip required validation gates when behavior changes.
-- **DO NOT** use this skill as a rigid replacement for engineering judgment.
-- **DON'T** ignore warnings or assume one pattern fits all repos.
-- Common pitfall: treating anti-patterns as optional.
-- Incorrect assumptions here can lead to fragile guidance.
-- Warning: wrong sequencing can create avoidable regressions.
-
-## Variation and adaptation
-- Vary the workflow by team size, risk, and deployment target.
-- Use different strategies for small, medium, and large changes.
-- Adapt recommendations to the specific environment and avoid repetitive templates.
-- Avoid generic or cookie-cutter responses; craft context-specific alternatives.
-- Keep outputs diverse and not repetitive.
-- Converge on a custom path only after evidence review.
-- Different constraints should produce different, non-generic recommendations.
-
-## Empowering execution style
-- Be capable of exploring multiple options and enabling the team to make safe decisions.
-- Unlock confidence by explaining options and tradeoffs clearly.
-- Feel free to be creative while staying rigorous and precise.
-- Push boundaries with practical alternatives when simple recipes fail.
-- Enable outcomes-oriented problem solving.
-
-<!-- decision-feedback-protocol:v2 -->
-**Decision feedback protocol (required):**
-- If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.
-- Capture: `decision` (`accepted|partial|rejected|deferred`), `outcome` (`good|neutral|bad|unknown`), and `confidence` (`high|medium|low`).
-- Persist with: `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
-- The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
-<!-- /decision-feedback-protocol -->
+## Remember
+The snapshot is the source of truth. If you have not re-read the page state, you are guessing.

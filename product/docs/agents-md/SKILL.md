@@ -7,10 +7,33 @@ description: "Refactor or create AGENTS.md using progressive disclosure: keep ro
 
 Create and maintain concise, high-signal AGENTS guidance with progressive disclosure.
 
+## Table of Contents
+- [When to use](#when-to-use)
+- [Standards snapshot](#standards-snapshot-march-2026)
+- [Inputs](#inputs)
+- [Outputs](#outputs)
+- [Failure mode](#failure-mode)
+- [Philosophy](#philosophy)
+- [Constraints](#constraints)
+- [Procedure](#procedure)
+- [Validation](#validation)
+- [Anti-patterns](#anti-patterns)
+- [Variation](#variation)
+- [Mandatory workflow snippet](#mandatory-workflow-snippet)
+- [Examples](#examples)
+- [Resource map](#resource-map)
+- [Decision feedback protocol](#decision-quality-feedback)
+
 ## When to use
 - Use this skill when the user asks to create or update `AGENTS.md`.
 - Use this skill when AGENTS docs are too large, duplicated, or contradictory.
 - Use this skill when instruction routing needs to be split into linked files.
+
+## Standards snapshot (March 2026)
+- Keep root `AGENTS.md` minimal and route depth into linked docs.
+- Base commands, paths, and conventions on verified repo evidence only.
+- Treat contradiction detection and instruction precedence as first-class outputs.
+- Prefer progressive disclosure over megadoc accumulation.
 
 ## Inputs
 - Target repository root path.
@@ -23,6 +46,9 @@ Create and maintain concise, high-signal AGENTS guidance with progressive disclo
 - Linked category docs for deeper instructions.
 - Contradiction list and deletion candidates.
 - Evidence-backed command map and validation notes.
+
+## Failure mode
+If command truth, path ownership, or instruction precedence cannot be verified, stop at that contradiction, state the conflict clearly, and request a decision instead of writing speculative AGENTS guidance.
 
 ## Philosophy
 - Prefer concise, verifiable guidance over comprehensive prose.
@@ -83,14 +109,3 @@ Create and maintain concise, high-signal AGENTS guidance with progressive disclo
 - Capture `decision`, `outcome`, and `confidence`.
 - Persist with `python3 utilities/skill-builder/scripts/record_skill_feedback.py`.
 <!-- /decision-feedback-protocol -->
-
-## Quality Uplift
-- Philosophy and approach: apply a clear framework, explain why, consider tradeoff decisions, and use a practical mental model for execution.
-- Guiding question: Why is this the right context-specific path?
-- Guiding question: What tradeoff is being made and how is risk reduced?
-- Guiding question: How do we verify behavior end-to-end before completion?
-- Anti-pattern warning: avoid generic or repetitive output; DO NOT hide failures; NEVER skip validation; avoid common pitfall and mistake patterns.
-- Anti-pattern warning: treat incorrect or wrong assumptions as blockers, and call out anti-pattern risks explicitly.
-- Variation: vary recommendations by context-specific constraints; adapt, customize, and use different approaches when constraints differ.
-- Variation: prefer diverse, unique alternatives and avoid repetition or cookie-cutter template convergence.
-- Empowerment: enable users to explore options confidently, be capable and creative, unlock safe choices, and empower execution.

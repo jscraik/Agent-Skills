@@ -8,6 +8,10 @@ description: Build, scaffold, refactor, and troubleshoot ChatGPT Apps SDK applic
 
 Scaffold ChatGPT Apps SDK apps with a docs-first, example-first workflow.
 
+Current baseline markers:
+- Prefer the OpenAI Responses API when current docs indicate it is the supported baseline for the target integration.
+- Align MCP server behavior with the Model Context Protocol baseline represented by the 2025-06-18 specification line and 2025-11-25 release lineage.
+
 Primary outputs:
 - app archetype and architecture choice
 - tool plan (schemas + annotations + metadata)
@@ -303,7 +307,6 @@ Use judgment, be creative, and push boundaries when it improves outcomes safely.
 <!-- core60-folded-modes:v1:start -->
 This skill owns legacy capability from retired skills. Use these modes when requests match prior behavior.
 
-- `agentation-integration` from `frontend/tools/agentation`: Use when a user wants to install, verify, or troubleshoot Agentation in React/Next.js/Vite/Tauri apps; this skill validates toolbar wirin...
 - `production-gate` from `product/domain/chatgpt-apps-production-checklist`: Turn ChatGPT Apps implementation work into a production-ready checklist with concrete tasks, tests, widget changes, and tool-result patte...
 
 Deep legacy details: `references/folded-legacy-modes-core60.md`.
