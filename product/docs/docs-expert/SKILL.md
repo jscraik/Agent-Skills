@@ -31,9 +31,6 @@ description: "Use when asked to audit or rewrite repository docs (README, docs, 
 **Do not use when**
 - The request has no clear documentation deliverable to produce or audit.
 
-## Anti-pattern quick warnings
-Avoid these anti-patterns: do not start writing before audience/purpose are clear. Never fabricate commands, paths, or results. Do not impose fallback brand assets if repo-specific brand rules already exist.
-
 This skill provides a structured workflow for **collaborative doc creation and repo doc QA**. Default approach: inventory → outline → draft → verify against repo → ship evidence bundle.
 
 ## Philosophy
@@ -55,9 +52,7 @@ Use these as the baseline unless the repository has stricter internal policy:
 - Reader-first information architecture: separate tutorials, how-to guides, reference, and explanation instead of mixing user needs into one page.
 - Procedure writing: one action per step, goal-first where helpful, verification points when confidence matters, and links to canonical repeated procedures.
 - Accessibility and readability: avoid directional language, avoid color-only meaning, require descriptive headings/alt text/captions, and keep docs usable without images.
-- AI-ready docs surfaces:
-  - human-first structured docs with stable headings and explicit examples;
-  - optional `llms.txt` support when the repo/site wants AI-specific context (treat this as an emerging proposal, not a mandatory standard).
+- AI-ready docs surfaces: human-first structured docs with stable headings and explicit examples; add `llms.txt` only when repo owners explicitly want AI-specific context files.
 - Prefer the current global instruction chain from `~/.codex/AGENTS.md` over older override-file conventions.
 - Use `references/industry-gold-standard-2026.md` when you need the current default rationale and quality bar.
 
@@ -106,11 +101,9 @@ Use this when the user wants help quickly and does not want the full three-stage
 
 ## Outputs
 - Updated Markdown docs (**PR-ready edits**).
-- A **doc audit summary** (what changed, what’s still unknown, and what to verify).
-- A **GitHub community health checklist** snapshot when repo-wide documentation is in scope (see `references/CHECKLIST.md`).
-- A **GitHub visibility snapshot** (topics, social preview, description/homepage, ownership/funding/citation metadata when in scope).
-- A **QA bootstrap summary** documenting files auto-installed when lint/brand baselines were missing.
-- Evidence bundle when tooling exists (lint outputs, readability output, checklist snapshot, brand check output, visibility checks).
+- A **doc audit summary** with what changed, what is still unknown, and what to verify.
+- Community-health, GitHub visibility, and brand findings when they are in scope.
+- A QA bootstrap summary plus an evidence bundle when tooling exists.
 
 ## Response format (required)
 Every response must include:
