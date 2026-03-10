@@ -144,7 +144,7 @@
       "min_hits_warn": {
         "react_19": 2,
         "next_16": 2,
-        "tailwind_v4": 2,
+        "tailwind_v4": 3,
         "wcag_2_2": 2
       },
       "min_coverage_fail": 0.1,
@@ -158,7 +158,7 @@
         "gha_sha_pin": 3
       },
       "min_hits_warn": {
-        "gha_sha_pin": 3
+        "gha_sha_pin": 4
       },
       "min_coverage_fail": 0.55,
       "min_coverage_warn": 1.0
