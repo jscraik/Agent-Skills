@@ -251,7 +251,13 @@ def discover_nodes(
         if not scope_skill:
             continue
         profile_path_rel = str(row.get("profile_path", "")).strip()
+        if not profile_path_rel:
+            continue
         profile_path = (repo_root / profile_path_rel).resolve()
+        try:
+            profile_path.relative_to(repo_root)
+        except ValueError:
+            continue
         profile_obj = read_json(profile_path, {})
         if not isinstance(profile_obj, dict):
             profile_obj = {}
