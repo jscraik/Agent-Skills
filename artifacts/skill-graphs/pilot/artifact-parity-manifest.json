@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-03-11T11:07:22Z",
+  "generated_at": "2026-03-11T14:56:49Z",
   "runs_root": "/Users/jamiecraik/dev/agent-skills/artifacts/skill-graphs/runs",
   "counts": {
     "compliant": 0,
@@ -53,8 +53,7 @@
       "waiver_reason": "Historical seed run predates the mandatory recursive capture envelope and is preserved as original evidence.",
       "waiver_id": "historical-run-001",
       "waiver_approved_by": "jamiecraik",
-      "waiver_created_at": "2026-03-11T00:00:00Z",
-      "event_blocker_codes": []
+      "waiver_created_at": "2026-03-11T00:00:00Z"
     },
     {
       "run_dir": "artifacts/skill-graphs/runs/run_002",
@@ -92,8 +91,7 @@
       "waiver_reason": "Historical seed run predates the mandatory recursive capture envelope and is preserved as original evidence.",
       "waiver_id": "historical-run-002",
       "waiver_approved_by": "jamiecraik",
-      "waiver_created_at": "2026-03-11T00:00:00Z",
-      "event_blocker_codes": []
+      "waiver_created_at": "2026-03-11T00:00:00Z"
     },
     {
       "run_dir": "artifacts/skill-graphs/runs/run_20260220T144703Z_425b7a",
@@ -132,8 +130,7 @@
       "waiver_reason": "Legacy partial run created before capture/evidence packet files became required.",
       "waiver_id": "historical-run-20260220t144703z-425b7a",
       "waiver_approved_by": "jamiecraik",
-      "waiver_created_at": "2026-03-11T00:00:00Z",
-      "event_blocker_codes": []
+      "waiver_created_at": "2026-03-11T00:00:00Z"
     },
     {
       "run_dir": "artifacts/skill-graphs/runs/run_20260220T144710Z_425b7a",
@@ -172,8 +169,7 @@
       "waiver_reason": "Legacy partial run created before capture/evidence packet files became required.",
       "waiver_id": "historical-run-20260220t144710z-425b7a",
       "waiver_approved_by": "jamiecraik",
-      "waiver_created_at": "2026-03-11T00:00:00Z",
-      "event_blocker_codes": []
+      "waiver_created_at": "2026-03-11T00:00:00Z"
     },
     {
       "run_dir": "artifacts/skill-graphs/runs/run_20260220T144736Z_425b7a",
@@ -212,8 +208,7 @@
       "waiver_reason": "Legacy partial run created before capture/evidence packet files became required.",
       "waiver_id": "historical-run-20260220t144736z-425b7a",
       "waiver_approved_by": "jamiecraik",
-      "waiver_created_at": "2026-03-11T00:00:00Z",
-      "event_blocker_codes": []
+      "waiver_created_at": "2026-03-11T00:00:00Z"
     },
     {
       "run_dir": "artifacts/skill-graphs/runs/run_20260220T150021Z_518880",
@@ -252,8 +247,7 @@
       "waiver_reason": "Historical transition run preserved as-is during parity migration; envelope was incomplete at capture time.",
       "waiver_id": "historical-run-20260220t150021z-518880",
       "waiver_approved_by": "jamiecraik",
-      "waiver_created_at": "2026-03-11T00:00:00Z",
-      "event_blocker_codes": []
+      "waiver_created_at": "2026-03-11T00:00:00Z"
     },
     {
       "run_dir": "artifacts/skill-graphs/runs/run_20260220T150021Z_82ecf7",
@@ -292,8 +286,7 @@
       "waiver_reason": "Legacy partial run created before capture/evidence packet files became required.",
       "waiver_id": "historical-run-20260220t150021z-82ecf7",
       "waiver_approved_by": "jamiecraik",
-      "waiver_created_at": "2026-03-11T00:00:00Z",
-      "event_blocker_codes": []
+      "waiver_created_at": "2026-03-11T00:00:00Z"
     },
     {
       "run_dir": "artifacts/skill-graphs/runs/run_20260220T150021Z_9b592b",
@@ -332,8 +325,7 @@
       "waiver_reason": "Legacy partial run created before capture/evidence packet files became required.",
       "waiver_id": "historical-run-20260220t150021z-9b592b",
       "waiver_approved_by": "jamiecraik",
-      "waiver_created_at": "2026-03-11T00:00:00Z",
-      "event_blocker_codes": []
+      "waiver_created_at": "2026-03-11T00:00:00Z"
     },
     {
       "run_dir": "artifacts/skill-graphs/runs/run_20260220T150021Z_bb9acb",
@@ -372,8 +364,7 @@
       "waiver_reason": "Legacy partial run created before capture/evidence packet files became required.",
       "waiver_id": "historical-run-20260220t150021z-bb9acb",
       "waiver_approved_by": "jamiecraik",
-      "waiver_created_at": "2026-03-11T00:00:00Z",
-      "event_blocker_codes": []
+      "waiver_created_at": "2026-03-11T00:00:00Z"
     },
     {
       "run_dir": "artifacts/skill-graphs/runs/run_20260220T195545Z_8799c2",
@@ -411,8 +402,7 @@
       "waiver_reason": "Historical transition run preserved as-is during parity migration; envelope was incomplete at capture time.",
       "waiver_id": "historical-run-20260220t195545z-8799c2",
       "waiver_approved_by": "jamiecraik",
-      "waiver_created_at": "2026-03-11T00:00:00Z",
-      "event_blocker_codes": []
+      "waiver_created_at": "2026-03-11T00:00:00Z"
     }
   ],
   "prune_empty": {

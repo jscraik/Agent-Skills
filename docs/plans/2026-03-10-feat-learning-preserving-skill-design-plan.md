@@ -19,6 +19,7 @@ deepened: 2026-03-10
 - Tightened the metadata and validator phase with a clear decision fork: extend `references/task-profile.json` safely or stop and use a bounded companion artifact.
 - Expanded rollout guidance with concrete gate commands, partial-vs-blocked handling, and a short post-implementation review cadence.
 - Added an evidence-path section so implementers know which docs, pilot files, and validators must stay in sync.
+- Added a no-regression execution contract: canonical pilot targets are fixed, every candidate change must beat a recorded five-gate baseline, and checklist advancement is blocked until that bar is met.
 
 ## Table of Contents
 - [Enhancement Summary](#enhancement-summary)
@@ -50,6 +51,13 @@ Execution rules:
 - do not edit pilot skill behavior before Phase 0 baseline evidence exists
 - do not let posture metadata mutate or shadow `delegation.mode`
 - treat missing eval or telemetry support as a rollout hold, not a documentation follow-up
+- treat git-history baseline recovery as the first safe fallback when a pilot-skill rewrite degrades quality gates
+- keep canonical validation targets explicit:
+  - `utilities/skill-builder`
+  - `frontend/tools/agentation`
+  - `utilities/systematic-debugging`
+  - `interview/interview-me`
+- do not treat `.agents/skills/*` mirrors as gold-bar pilot targets unless they carry the same validator-grade support files as the canonical skill path
 
 ## Origin Traceability
 
@@ -117,16 +125,29 @@ Work:
   - `python3 scripts/diagnose_skill.py interview-me`
 - Confirm each pilot skill currently has both `references/task-profile.json` and `references/evals.yaml` before metadata design begins.
 - Persist a dated baseline snapshot bundle for each pilot (`SKILL.md`, `references/task-profile.json`, `references/evals.yaml`, plus raw diagnostics) for replayability and evidence diffs.
+- Record a per-pilot no-regression matrix before any edits:
+  - `quick_validate`
+  - `skill_gate`
+  - `analyze_skill`
+  - `openclaw_skill_guard`
+  - `run_skill_evals`
+- Store the baseline matrix alongside the pilot evidence bundle so every later rerun can be compared mechanically against the original bar.
+- For `frontend/tools/agentation`, record the upstream compatibility anchors used for future comparisons:
+  - `npx skills add benjitaylor/agentation`
+  - `ln -s "$(pwd)/skills/agentation-self-driving" ~/.claude/skills/agentation-self-driving`
+- Record the current public-web evidence source for Agentation separately from repo history. If the public site is unavailable, parked, or otherwise non-authoritative, mark the web evidence as blocked instead of silently replacing it with unstated assumptions.
 
 Exit criteria:
 - Pilot skill list is frozen.
 - Baseline files and validation commands are recorded.
 - No unresolved contract-level ambiguity remains about posture vocabulary or pilot scope.
 - All four pilot skills pass baseline diagnostics with no missing-profile warnings.
+- All four pilot skills have a recorded five-gate baseline matrix that later edits can be compared against.
 
 Hold rules:
 - If any pilot skill is missing baseline metadata or eval files, stop before Phase 1 and resolve the pilot surface mismatch first.
 - If the linked spec changes materially during baseline capture, restart Phase 0 and re-freeze scope.
+- If a pilot skill does not have a trustworthy historical or current baseline, do not start improvements for that skill until the missing baseline evidence is reconstructed.
 
 ### Phase 1: Repo-Level Contract and Authoring Surface
 
@@ -225,20 +246,28 @@ Objective: update each pilot skill to declare posture support and behavior expec
 Work:
 - Update `utilities/skill-builder` first to establish the standards-setting pattern other pilot skills should follow.
 - Update `frontend/tools/agentation` second to distinguish throughput-first autopilot behavior from learning-preserving guidance without weakening its execution contract.
+- For `frontend/tools/agentation`, treat both source families as required inputs before any wording change is accepted:
+  - public workflow/install compatibility sources captured in `frontend/tools/agentation/references/public-sources.md`
+  - local annotation-format and output-contract sources captured in `frontend/tools/agentation/references/annotation-format.md`
 - Update `utilities/systematic-debugging` third to reflect `learn` and `guided` posture expectations for diagnosis-heavy work.
 - Update `interview/interview-me` last to reinforce posture-aware clarification and explain-back behavior where relevant.
 - Keep each skill’s routing and existing core scope intact.
+- Change one pilot skill at a time and finish its full validation comparison before editing the next pilot skill.
+- Keep prose/routing changes separate from harness, validator, or telemetry changes so regressions can be attributed cleanly.
 - After each pilot skill update:
   - run `python3 scripts/diagnose_skill.py <skill-name>`
   - rerun `python3 scripts/docs_lint.py --mode warn --config docs-policy.json` if the change touches shared docs or linked references
+  - rerun the full five-gate matrix for that skill and compare it to the Phase 0 baseline before moving on
 
 Exit criteria:
 - All four pilot skills declare posture support consistently.
 - No pilot skill redefines delegation/runtime mode.
 - Execution-first warnings are explicit where required by the spec.
+- No pilot skill lands below its Phase 0 five-gate baseline.
 
 Hold rules:
 - If one pilot skill requires posture semantics that contradict the repo-level definition, stop propagation and resolve the contract before continuing to the next skill.
+- If any pilot skill regresses on any of the five gates relative to its recorded baseline, restore the last acceptable version before attempting another improvement round.
 
 ### Phase 4: Evaluation Coverage
 
@@ -258,6 +287,10 @@ Work:
   - `python3 utilities/skill-builder/scripts/run_skill_evals.py utilities/skill-builder --runner codex`
   - `python3 utilities/skill-builder/scripts/run_skill_evals.py frontend/tools/agentation --runner codex`
   - `python3 utilities/skill-builder/scripts/run_skill_evals.py utilities/systematic-debugging --runner codex`
+- Merge-bar rule for pilot skill changes:
+  - a skill change is only acceptable when `quick_validate`, `skill_gate`, `analyze_skill`, `openclaw_skill_guard`, and `run_skill_evals` are all acceptable versus that skill's recorded baseline
+  - acceptable means pass-for-pass parity and no analyzer score regression unless an explicitly approved tradeoff is documented in the rollout note
+  - checklist item `703` stays unchecked until the full pilot validation set is green and baseline comparisons are attached
   - `python3 utilities/skill-builder/scripts/run_skill_evals.py interview/interview-me --runner codex`
 
 Exit criteria:
@@ -478,8 +511,12 @@ tasks:
   - pilot metadata declaration
 - `frontend/tools/agentation/SKILL.md`
   - pilot skill contract update
+- `frontend/tools/agentation/references/annotation-format.md`
+  - local durable summary of Agentation annotation lifecycle, event envelope, and copied-output contract
 - `frontend/tools/agentation/references/evals.yaml`
   - pilot eval extension
+- `frontend/tools/agentation/references/public-sources.md`
+  - dated trust-ranked public source memo for install, MCP, webhook, and self-driving compatibility claims
 - `frontend/tools/agentation/references/task-profile.json`
   - pilot metadata declaration
 - `utilities/systematic-debugging/SKILL.md`
@@ -713,3 +750,5 @@ Migration notes:
 - [Promotion gate workflow](/Users/jamiecraik/dev/agent-skills/docs/skill-graphs/workflows/promotion-gate.md)
 - [Validation guidance](/Users/jamiecraik/dev/agent-skills/docs/agents/04-validation.md)
 - [Skill template](/Users/jamiecraik/dev/agent-skills/templates/SKILL.md.template)
+- [Agentation annotation-format reference](/Users/jamiecraik/dev/agent-skills/frontend/tools/agentation/references/annotation-format.md)
+- [Agentation public sources memo](/Users/jamiecraik/dev/agent-skills/frontend/tools/agentation/references/public-sources.md)

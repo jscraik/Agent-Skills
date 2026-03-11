@@ -1,6 +1,6 @@
 ---
 name: agentation
-description: Use when a user wants to install, verify, or troubleshoot Agentation in a React 18+ app; this skill validates dev-only root mounting, `endpoint` and `webhookUrl` wiring, MCP setup via `add-mcp` and `doctor`, and current hands-free workflows (watch mode, critique mode, self-driving).
+description: Use when a user wants to install, verify, or troubleshoot Agentation in React/Next.js/Vite/Tauri apps; this skill validates dev-only root mounting, `endpoint` and `webhookUrl` wiring, MCP setup via `add-mcp` and `doctor`, and current hands-free workflows (watch mode, critique mode, self-driving).
 ---
 
 # Agentation Integration + Live Annotation Workflows
@@ -12,6 +12,7 @@ Set up or verify Agentation so live annotations are captured reliably and the cu
 - [Deliverables](#deliverables)
 - [Philosophy](#philosophy)
 - [LearningPosture compatibility](#learningposture-compatibility)
+- [First response contract](#first-response-contract)
 - [Preflight](#preflight)
 - [Workflow](#workflow)
 - [State model](#state-model)
@@ -20,15 +21,18 @@ Set up or verify Agentation so live annotations are captured reliably and the cu
 - [Constraints / Safety](#constraints--safety)
 - [Validation](#validation)
 - [Anti-patterns to avoid](#anti-patterns-to-avoid)
+- [Remember](#remember)
 - [Examples](#examples)
 - [References](#references)
 
 ## Usage triggers
 
-- User asks to add or verify Agentation in a React 18+ app.
+- User asks to add or verify Agentation in a frontend app (Next.js, Vite, React, Tauri webview).
 - User reports "websocket not working", "annotations are not reaching the agent", or "webhooks are not firing".
 - User wants annotation submit events, watch mode, critique mode, or self-driving workflows wired correctly.
-- User needs to debug MCP setup, React component detection, or live annotation delivery.
+- User wants the original published self-driving compatibility route preserved.
+- User needs to debug MCP setup, `endpoint`/session visibility, or live annotation delivery.
+- User expects mobile Safari or another mobile QA flow to work with Agentation.
 
 ## Requirements
 
@@ -37,14 +41,14 @@ Set up or verify Agentation so live annotations are captured reliably and the cu
 - Runtime/framework context:
   - Next.js App Router (`app/layout.*`)
   - Next.js Pages Router (`pages/_app.*`)
-  - Client-side React root (`src/App.*`, `src/main.*`, or equivalent)
+  - Vite/React/Tauri root (`src/App.*`, `src/main.*`, or equivalent)
 - Local app URL for annotation capture.
 - Permission to run local CLI commands for MCP setup and validation.
 
 Notes:
 - Current public docs describe Agentation as a React 18+ component that works with Next.js and SSR/SSG frameworks like Remix and Astro. Vite and other client-side React roots are also reflected in current changelog coverage.
 - Tauri webviews are not called out explicitly in the public docs; handle them using the same root-mount pattern as other client-side React shells and report that nuance honestly.
-- Agentation is currently documented as desktop-only.
+- Agentation is currently documented as desktop-only, so mobile requests should be answered with that limit instead of claiming support.
 
 ## Deliverables
 
@@ -65,17 +69,29 @@ Notes:
 - Keep guidance aligned to the current public Agentation contract, not older local conventions.
 - Distinguish UI mount, `endpoint` sync, MCP tools, and `webhookUrl` delivery as separate layers.
 - Prefer `submit` for code-executing automation unless the user explicitly wants noisier per-annotation hooks.
-- Prefer critique mode before self-driving mode in a new repo.
+- Prefer critique mode before self-driving in a new repo.
 - Report partial and blocked states honestly; do not claim success from a synthetic test alone.
+- Keep install and workflow claims aligned with `references/public-sources.md`.
+- Keep lifecycle, schema, and copied-output claims aligned with `references/annotation-format.md`.
 
 ## LearningPosture compatibility
 
 - This skill should remain in `co-pilot` runtime posture and preserve current Agentation behavior.
 - Add posture-aware execution as follows:
-  - `learn`: explain what each integration step changes and why before patching anything.
-  - `guided`: provide explicit handoff checkpoints (verify endpoint, MCP, webhook, watch mode) and stop at each gate.
+  - `learn`: explain what each integration layer changes and why before patching anything.
+  - `guided`: provide explicit handoff checkpoints (verify root mount, `endpoint`, MCP, `webhookUrl`, and watch mode) and stop at each gate.
   - `execute`: proceed with approved installs/config edits after preflight and safety gates pass.
-- For `execute`, never skip end-to-end checks (`doctor`, webhook real submit, and watch-mode validation) when requested.
+- For `execute`, never skip end-to-end checks (`doctor`, real-submit webhook verification, and watch-mode validation) when requested.
+
+## First response contract
+
+- Keep the first response short: name the framework/runtime and the specific layer being verified (`ui`, `endpoint`, `MCP`, `webhook`, or `mode`).
+- For install/setup requests, explicitly say Agentation stays development-only and mention the right dev gate (`process.env.NODE_ENV` or `import.meta.env.DEV`).
+- For MCP requests, explicitly mention `add-mcp`, `init`, `doctor`, or equivalent MCP-health verification before suggesting deeper fixes.
+- For webhook requests, explicitly mention `webhookUrl` and `submit` delivery rather than calling everything a generic websocket issue.
+- If the question is about lifecycle or copied output, anchor the answer to `references/annotation-format.md` instead of improvising new status or output vocabulary.
+- Preserve the documented lifecycle states (`pending`, `acknowledged`, `resolved`, `dismissed`) and threaded replies when describing how annotations move through the workflow.
+- When copied output is relevant, mention the stable agent-facing details it should preserve: selector/path, nearby text, React/source context when available, and markdown structure that stays machine-tractable.
 
 ## Preflight
 
@@ -83,6 +99,7 @@ Before edits or runtime changes:
 - detect the framework and correct root integration file;
 - detect the package manager from the lockfile instead of assuming `npm`;
 - confirm whether the app is using local callbacks, `webhookUrl`, MCP sync, or a mix;
+- confirm whether the user wants verification only, watch mode, critique mode, or self-driving;
 - capture the current transport shape:
   - widget mount state
   - `endpoint` state and server reachability
@@ -117,11 +134,12 @@ Before edits or runtime changes:
   ```tsx
   import { Agentation } from "agentation";
   ```
-- Keep it development-only. The public install docs show `NODE_ENV` gating:
+- Keep it development-only:
+  - Next.js / Node runtimes:
   ```tsx
   {process.env.NODE_ENV === "development" && <Agentation />}
   ```
-- In Vite-style repos, use the runtime's native dev flag if the project already standardizes on it:
+  - Vite / Tauri webview:
   ```tsx
   {import.meta.env.DEV && <Agentation />}
   ```
@@ -152,7 +170,7 @@ Current public MCP flow:
 Server notes:
 - Default port is `4747`.
 - The docs expose `--port <port>` for overrides.
-- If an agent config was changed, restart the agent client before claiming the tools are available.
+- If an agent config was changed, restart the host client before claiming the tools are available.
 
 ### 5) Verify `endpoint` sync separately from webhooks
 
@@ -203,7 +221,7 @@ Expected:
 - HTTP `200`, `201`, or the listener's documented success code
 - listener log entry or stored payload
 
-After the synthetic POST passes, verify a real in-app `submit` event before reporting webhook transport as complete.
+After the synthetic POST passes, verify a real in-app `submit` event before reporting webhook transport as complete. If only the smoke test passed, report transport as `partial`, not complete.
 
 ### 7) Use callbacks when the user wants in-app handling
 
@@ -249,7 +267,7 @@ Do not force a webhook when a local callback is the simpler and more reliable fi
   ```
 - If this local `agentation` skill is used as the equivalent, preserve the same operational contract even if the folder name differs.
 - Treat the `npx skills add benjitaylor/agentation` route as an upstream compatibility path, not as a replacement for the current MCP setup flow.
-- Treat self-driving as a workflow contract, not as an `AGENTATION_MODE=autopilot` env convention unless the target repo independently implements that layer.
+- Treat self-driving as a workflow contract, not as an undocumented env convention unless the target repo independently implements that layer.
 
 ### 9) Port collisions and server debugging
 
@@ -282,10 +300,11 @@ Keep these states distinct and report them separately:
   - Is the workflow manual, watch mode, critique mode, or self-driving?
 
 Blocked / partial reporting:
-- If MCP registration or auth is broken, report watch mode as blocked.
-- If only a synthetic webhook POST passed, report webhook transport as partial.
+- If MCP registration or auth is broken, report watch mode as `blocked`.
+- If only a synthetic webhook POST passed, report webhook transport as `partial`.
 - If the tools connect but there are no pending annotations, report `idle`, not `completed`.
 - If acknowledge succeeds but resolve or dismiss repeatedly fails, report the loop as degraded and stop after bounded retries.
+- If watch-mode tools are unavailable, report the workflow as `blocked` or `partial`, not complete.
 
 Deep watch-loop behavior and transitions live in `references/watch-mode-state-machine.md`.
 
@@ -343,9 +362,11 @@ Use it to prove the five state buckets without claiming more than the observed e
 - **Symptom:** annotations exist in the browser but the agent cannot see them
   - **Fix:** check `endpoint` reachability and MCP sync before debugging webhooks.
 - **Symptom:** webhook listener receives synthetic posts but no real browser events
-  - **Fix:** verify the component has `webhookUrl` set and confirm Auto-Send or manual `Send Annotations` was actually used.
+  - **Fix:** verify the component has `webhookUrl` set and confirm Auto-Send or manual `Send Annotations` was actually used; report the state as `partial` until a real submit arrives.
 - **Symptom:** watch mode keeps waking on the same item
   - **Fix:** de-duplicate by annotation ID and session ID before processing.
+- **Symptom:** watch-mode tooling is incomplete
+  - **Fix:** report `blocked` or `partial` when `agentation_acknowledge`, `agentation_resolve`, or `agentation_dismiss` is unavailable.
 - **Symptom:** an annotation should not be fixed automatically
   - **Fix:** use `agentation_reply` to clarify or `agentation_dismiss` with a reason.
 - **Symptom:** user expects mobile support
@@ -381,21 +402,29 @@ Use it to prove the five state buckets without claiming more than the observed e
   - `agentation_watch_annotations`
 - Verify blocked and partial outcomes are reported honestly when real submit traffic, queue state, or tool availability is incomplete.
 - Use `scripts/check_watch_mode_readiness.py` when a deterministic artifact is helpful.
+- Re-check `references/annotation-format.md` before changing claims about annotation lifecycle, status transitions, threaded replies, or copied-output structure.
+- Re-check `references/public-sources.md` before changing claims about install flow, MCP setup, webhook flow, or self-driving compatibility.
 - Run minimal repo checks relevant to the edits.
 
 ## Anti-patterns to avoid
 
 - Treating `endpoint`, MCP, and `webhookUrl` as the same system.
-- Forcing old local env conventions like `AGENTATION_MODE=autopilot` when the target repo does not implement them.
+- Forcing undocumented env conventions onto repos that do not implement them.
 - Assuming Next.js-only integration in every React app.
 - Debugging webhook failures as generic "websocket bugs" without checking which transport layer is broken.
 - Using `annotation.add` as the default trigger for code-changing automation.
 - Claiming self-driving support without a real annotate -> fix -> resolve proof.
-- Reporting `completed` when the workflow is only `idle`, `synthetic_only`, or blocked.
+- Reporting `completed` when the workflow is only `idle`, `synthetic_only`, `partial`, or blocked.
+
+## Remember
+
+- Keep each gate explicit, verifiable, and observable.
+- Stay capable and adaptive: choose the safest path that matches the project's framework and operational constraints.
+- Enable practical outcomes by pairing precise diagnostics with minimal, reversible changes.
 
 ## Examples
 
-- "Set up Agentation in my React app and make sure the toolbar only loads in development."
+- "Set up Agentation in my Tauri + React app and make sure live submit annotations hit a local webhook."
 - "My MCP is connected but the agent cannot see new annotations. Debug the `endpoint` path."
 - "Make sure `submit` webhooks from Agentation hit my local listener."
 - "When I say watch mode, keep processing annotations until I tell you to stop."
@@ -403,11 +432,18 @@ Use it to prove the five state buckets without claiming more than the observed e
 
 ## References
 
-- Output contract: `references/contract.yaml`
+- Output contract: `references/contract.yaml` (schema_version `1.1`)
 - Eval cases: `references/evals.yaml`
 - Implementation plan: `references/plan.md`
 - Watch-loop state model: `references/watch-mode-state-machine.md`
 - Readiness checker: `scripts/check_watch_mode_readiness.py`
+- Annotation format and output contract: `references/annotation-format.md`
+- Public install and workflow sources: `references/public-sources.md`
+
+## Notes
+
+- For local desktop iteration, keep webhook targets local (`localhost`) unless remote ingestion is explicitly required.
+- If MCP registration was added or changed, restart the host client so new registrations are loaded.
 
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**
