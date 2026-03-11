@@ -1,140 +1,201 @@
-# Promotion Gate Workflow (MVP)
+# PGW: Promotion Gate Workflow
 
 Canonical promotions are human-gated and must include provenance + security evidence.
 
-## Table of Contents
+---
 
-- [Inputs](#inputs)
-- [Onboarding preconditions (all-skills migration)](#onboarding-preconditions-all-skills-migration)
-- [Gate checks](#gate-checks)
-- [Invocation boundary checks](#invocation-boundary-checks)
-- [Decision states](#decision-states)
-- [Commands](#commands)
-- [CI enforcement](#ci-enforcement)
-- [Output artifact](#output-artifact)
+## ABBREVIATION MAP
 
-## Inputs
+| Abbr | Meaning |
+|------|---------|
+| PD | `promotion_decision.json` |
+| IJ | `iteration_journal.jsonl` |
+| RUN | `run.json` |
+| AR | `artifacts/skill-graphs/runs/` |
+| CTRL | Runtime controls (kill-switch, rollback, mode) |
+| EP | Evidence packet |
+| LS | Lesson source |
+| T+ | Threshold passed |
+| T- | Threshold failed |
+| 2A | Two approvers required |
+| 1A | One approver sufficient |
+| D/R/C/A | Draft → Rejected / Candidate / Approved |
 
-- `run.json`
-- `iteration_journal.jsonl`
-- candidate lesson payload
-- reviewer identity
+---
 
-## Onboarding preconditions (all-skills migration)
+## STATE MACHINE
 
-Before wave promotion is allowed, verify:
+```mermaid
+stateDiagram-v2
+    [*] --> DRAFT : run completes
 
-1. **Per-skill profile presence**
-   - `<skill>/references/task-profile.json` exists for every in-scope skill.
-   - Profile validates required fields (`schema_version`, `profile_id`, `scope_skill`, `scope_profile`, `criteria[]`, `thresholds`, `delegation`).
-2. **SKILL binding presence**
-   - Every in-scope `SKILL.md` includes:
-     - `knowledge_graph_profile: references/task-profile.json`
-3. **Wave model sequencing**
-   - `wave-0-controls` (control precedence + telemetry integrity) must pass before `wave-1-manual`.
-   - `wave-1-manual` must pass before `wave-2-co-pilot`.
-4. **Governance capacity**
-   - Approver policy must include at least 2 approvers before wave promotion.
-5. **Telemetry envelope integrity**
-   - Decision window must report zero missing `events.jsonl` envelopes.
+    DRAFT --> REJECTED : gate T- || CTRL.block
+    DRAFT --> CANDIDATE : gate T+ && CTRL.allow && 1A
 
-## Gate checks
+    CANDIDATE --> REJECTED : review T- || CTRL.block
+    CANDIDATE --> APPROVED : review T+ && CTRL.allow && 2A
 
-1. **Runtime gate completeness**
-   - Run has terminal status.
-   - Stop reason is explicit.
-2. **Evidence completeness**
-   - Latest iteration includes evaluation + re-evaluation + criterion deltas.
-3. **Provenance integrity**
-   - Required immutable fields present (`schema_version`, `rubric_version`, `evaluator_version`, `persona_set_id`, `prompt_hash`).
-4. **Security/privacy**
-   - No secrets/PII in lesson body or attached logs.
-   - Approved decisions must include lesson scan evidence (`lesson_source_path` + `lesson_content_sha256`).
-   - Retention + redaction policy acknowledged.
-5. **Reviewer checklist**
-   - At least one authorized reviewer signs off.
-   - Wave promotion decisions require two approvers from the allowlist.
+    APPROVED --> [*] : emit event
+    REJECTED --> [*] : log reason
 
-## Invocation boundary checks
+    state "GATE CHECKS" as GATE {
+        [*] --> runtime : RUN.terminal?
+        runtime --> evidence : IJ.eval+reeval+delta?
+        evidence --> provenance : EP.immutable_fields?
+        provenance --> security : LS.secrets_clean?
+        security --> reviewer : 1A.signed?
+        reviewer --> [*] : T+ / T-
+    }
 
-Before creating/validating a promotion decision, verify:
+    state "CTRL GUARDS" as CTRL {
+        killswitch : kill-switch.txt absent?
+        rollback : rollback-required.txt absent?
+        mode : rollout-mode valid?
+        killswitch --> rollback
+        rollback --> mode
+    }
+```
 
-1. **Control files present and parsed**
-   - `kill-switch.txt` (global kill switch)
-   - `rollback-required.txt` (rollback requirement)
-   - `rollout-mode.txt` or equivalent `--rollout-mode` override
-   - auto_capture / auto_apply switches (`auto_capture.disabled`, `auto_apply.disabled`, plus per-skill switches when used)
-2. **Invocation envelope completeness**
-   - capture record contains:
-     - `invocation_id`
-     - `invocation_envelope.actor_id`
-     - `invocation_envelope.rollout_mode` / `auto_capture_enabled` / `auto_apply_enabled`
-   - run object records:
-     - `runtime_controls`
-     - `control_reasons` (or equivalent rationale field)
-3. **Network + execution isolation assumptions**
-   - confirm recursive run used isolated profile-scoped execution and explicit allowlist (if any external fetches occurred).
-   - confirm destructive or side-effect commands had explicit run-mode guards and confirmation.
+---
 
-## Decision states
+## GATE CHECKLIST (G1-G8)
 
-- `draft` -> `candidate` -> `approved`
-- `draft` -> `rejected`
-- `candidate` -> `rejected`
+| ID | CHECK | T+ CONDITION |
+|----|-------|--------------|
+| G1_RUNTIME | RUN.status terminal | ∈ {completed, stopped} |
+| G2_STOP | RUN.stop_reason explicit | ≠ null |
+| G3_EVIDENCE | IJ.latest has eval+reeval | eval_ts && reeval_ts present |
+| G4_DELTA | IJ.criterion_delta non-empty | delta[] length > 0 |
+| G5_PROV | EP.immutable_fields present | schema+rubric+evaluator+persona |
+| G6_SEC | LS.body no secrets/PII | scan.pass && sha256 recorded |
+| G7_REVIEW | PD.reviewer_ids[] | wave0-1: 1A \| wave2+: 2A |
+| G8_CTRL | CTRL.snapshot valid | mode∈{shadow,canary,live} |
 
-## Commands
+---
 
-Approve run:
+## CONTROL FILE MATRIX
+
+| FILE | PRESENCE | ACTION |
+|------|----------|--------|
+| `kill-switch.txt` | ABSENT | Continue |
+| `kill-switch.txt` | PRESENT | EXIT 1 (global halt) |
+| `rollback-required.txt` | ABSENT | Continue |
+| `rollback-required.txt` | PRESENT | Rollback mode (auto-decline) |
+| `rollout-mode.txt` | shadow | Log only, no apply |
+| `rollout-mode.txt` | canary | Limited apply + monitor |
+| `rollout-mode.txt` | live | Full apply |
+| `auto_capture.disabled` | PRESENT | Skip auto-lesson-extract |
+| `auto_apply.disabled` | PRESENT | Skip auto-promote |
+
+---
+
+## INVOCATION BOUNDARY (Pre-flight)
+
+```python
+def invoke_boundary():
+    assert CTRL.killswitch_absent, "GLOBAL_KILL"
+    assert CTRL.rollback_absent, "ROLLBACK_MODE"
+    assert INV.id, "INVOCATION_ID_REQUIRED"
+    assert INV.actor, "ACTOR_REQUIRED"
+    assert INV.mode in {shadow,canary,live}, "INVALID_MODE"
+    assert RUN.isolation == "profile-scoped", "ISOLATION_FAIL"
+    return True
+```
+
+---
+
+## ONBOARDING PRECONDITIONS
+
+| ID | CHECK | T+ CONDITION |
+|----|-------|--------------|
+| OB1 | Profile presence | `<skill>/references/task-profile.json` exists |
+| OB2 | Profile schema | `schema_version` + `profile_id` + `scope_skill` + `criteria[]` + `thresholds` |
+| OB3 | SKILL binding | `knowledge_graph_profile: references/task-profile.json` in SKILL.md |
+| OB4 | Wave sequencing | w0-controls → w1-manual → w2-co-pilot (sequential) |
+| OB5 | Governance capacity | ≥2 approvers in policy for wave promotion |
+| OB6 | Telemetry integrity | zero missing `events.jsonl` envelopes |
+
+---
+
+## COMMANDS
 
 ```bash
+# Approve run
 bash scripts/human_promote_recursive_run.sh \
   --run-id <run_id> \
   --lesson-id <lesson_id> \
   --reviewer <reviewer_id> \
   --expected-version <version_token> \
   --lesson-file <path_to_lesson_file>
-```
 
-Validate decision directly:
-
-```bash
+# Validate decision
 python3 utilities/skill-builder/scripts/validate_recursive_promotion.py \
   --run-dir artifacts/skill-graphs/runs/<run_id> \
   --decision-file artifacts/skill-graphs/runs/<run_id>/promotion_decision.json \
   --lesson-file <path_to_lesson_file>
+
+# CI validation
+bash scripts/validate_recursive_promotions.sh \
+  --changed-only --base-sha <base_sha> --head-sha <head_sha>
 ```
 
-## CI enforcement
+---
 
-Promotion artifacts are validated in CI by:
+## CI TRIGGER
 
-```bash
-bash scripts/validate_recursive_promotions.sh --changed-only --base-sha <base_sha> --head-sha <head_sha>
+```yaml
+on:
+  pr: [AR/**/PD.json, AR/**/IJ.jsonl, AR/**/RUN.json]
+  manual: workflow_dispatch
+
+jobs:
+  validate:
+    if: files_changed ∩ {PD, IJ, RUN} ≠ ∅
+    steps:
+      - checkout@full-history
+      - python@3.12
+      - run: validate_recursive_promotions.sh --changed-only --strict-runs
+      - upload: promotion-validation-report.json
 ```
 
-Workflow: `.github/workflows/recursive-promotion-gate.yml`.
+Workflow: `.github/workflows/recursive-promotion-gate.yml`
 
-## Output artifact
+---
 
-`promotion_decision.json` must include:
+## PD SCHEMA (Compact)
 
-- `decision`: `approved|rejected|candidate|draft`
-- `reviewer_ids[]`
-- `gate_decision` summary
-- `expected_version`
-- security checklist fields
-- provenance references (`run_id`, `iteration_ids`, `prompt_hash`)
-- `lesson_source_path` and `lesson_content_sha256` for approved decisions
-- confidence contract fields (`confidence.score`, `confidence.bucket`, `confidence.calibration_bucket`)
-- evidence completeness linkage (`evidence_packet.evidence_packet_id`, `evidence_packet.completeness_score`)
-- draft candidate payload(s) in `lesson_candidates[]` for queueing/reviewer triage
-- retrieval attribution in `injected_lesson_ids[]` for traceability
-- runtime control snapshot in `runtime_controls{rollout_mode, auto_capture_enabled, auto_apply_enabled}` for rollback audits
-- counterfactual uplift contract: `counterfactual_uplift{treatment_outcome, control_outcome, uplift_delta, uplift_confidence_band, sample_size, match_quality_metrics, promotion_decision, auto_apply_decision}`
+```json
+{
+  "d": "approved|rejected|candidate|draft",
+  "rids": ["reviewer1", "reviewer2"],
+  "gd": "gate_summary",
+  "ver": "expected_version_token",
+  "sec": {"ls_path": "...", "ls_sha256": "..."},
+  "conf": {"s": 0.92, "b": "high", "cb": "calibrated"},
+  "ev": {"ep_id": "...", "comp": 0.95},
+  "ctrl": {"mode": "canary", "cap": true, "aap": false},
+  "cuf": {"treat": 0.85, "ctrl": 0.72, "delta": 0.13, "n": 100}
+}
+```
 
-Approved promotions emit a deduplicated `promotion_approved` event in `run/events.jsonl`.
+| FIELD | DESCRIPTION |
+|-------|-------------|
+| `d` | Decision state (D/R/C/A) |
+| `rids` | Reviewer IDs (1A or 2A per wave) |
+| `gd` | Gate decision summary |
+| `ver` | Expected version token |
+| `sec` | Security: lesson path + SHA256 |
+| `conf` | Confidence: score, bucket, calibration |
+| `ev` | Evidence: packet ID, completeness |
+| `ctrl` | Controls: mode, auto_capture, auto_apply |
+| `cuf` | Counterfactual uplift: treatment, control, delta, n |
 
-Related:
+Approved promotions emit `promotion_approved` event in `run/events.jsonl`.
+
+---
+
+## RELATED
+
 - [Reviewer rubric](/docs/skill-graphs/workflows/reviewer-rubric.md)
 - [Human promotion guide](/docs/guides/recursive-promotion-gate.md)
 - [Canonical lesson schema](/docs/skill-graphs/schemas/canonical-lesson.schema.md)
