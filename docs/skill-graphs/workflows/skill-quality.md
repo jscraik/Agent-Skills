@@ -184,6 +184,6 @@ Workflow: `.github/workflows/skill-quality.yml`
 
 ## RELATED
 
-- [Skill builder scripts](/utilities/skill-builder/scripts/)
+- [Skill builder scripts](/utilities/skill-builder/scripts)
 - [Benchmark policy](/utilities/skill-builder/references/benchmark-policy.json)
 - [Skill quality baseline](/utilities/skill-builder/references/skill-quality-baseline.json)
