@@ -10,41 +10,67 @@
 
 </div>
 
-**The source of truth for Codex and agent skills.**
+**Production-grade skill library for AI agents.** 133 validated skills that work across Codex, Claude Code, Gemini, and Antigravity—with automated quality gates, visual outputs, and a self-improving feedback loop.
 
-## TL;DR
+## Why this exists
 
-**The Problem**: AI agents need consistent, reusable skills—but managing them across tools (Codex, Claude Code, Gemini) leads to duplication, drift, and maintenance burden.
+Building reliable AI agents requires more than good prompts. It requires:
 
-**The Solution**: A single canonical skill library that syncs to multiple agent runtimes via symlinks, with automated validation and a nightly self-improvement loop.
+- **Consistent execution** — skills that behave predictably across tools
+- **Quality at scale** — validation that catches issues before they reach users
+- **Continuous improvement** — learning from usage patterns, not just manual updates
+- **Visual communication** — artifacts that humans can actually review and trust
 
-| Feature | What It Does |
-|---------|--------------|
-| **Canonical skills** | 133 skills in one place, no duplication |
-| **Multi-tool sync** | Symlinks to Codex, Claude Code, Gemini, Antigravity |
-| **Automated validation** | Docs lint, skill diagnostics, plan graph checks |
-| **Skill Genome Loop** | Nightly analysis + human-gated improvement candidates |
-| **Fail-closed controls** | Kill-switch, rollout modes, confidence gating |
+This repository solves all four.
 
-If you are new here:
+---
 
-1. Start with `/SKILL.md` (skills index).
-2. Then read `/docs/index.md` (contributor docs).
+## What you get
 
-## What this repo is for
+### 1. Cross-Runtime Skills (133 and counting)
 
-- Keep one canonical skill library.
-- Generate a flat symlink view in `/.agents/skills` for tool loaders.
-- Maintain clear documentation contracts for contributors.
-- Run nightly skill improvement analysis via the Skill Genome Loop.
+One canonical skill library, automatically projected to multiple agent runtimes:
 
-## Skill Genome Loop
+| Runtime | Location | Format |
+|---------|----------|--------|
+| **Codex** | `~/.codex/skills/` | Native skill format |
+| **Claude Code** | `~/.claude/skills/` | Native skill format |
+| **Gemini** | `~/.gemini/skills/` | Native skill format |
+| **Antigravity** | `~/.gemini/antigravity/skills.txt` | Flat list index |
 
-The Skill Genome Loop analyzes skill usage patterns and identifies improvement candidates through a human-gated review process:
+**How it works**: Skills live in categorized folders (`frontend/`, `backend/`, `product/`, etc.). Running `just sync` creates symlinks to all runtime directories and regenerates the skill index. Edit once, propagate everywhere.
+
+### 2. Visual-First Outputs
+
+Skip the ASCII tables. These skills generate browser-native artifacts:
+
+- **`visual-explainer`** — Self-contained HTML pages for architecture diagrams, comparisons, and data tables
+- **`diagram-cli`** — Mermaid-based architecture diagrams with automatic context packs
+- **`slides`** — Presentation-ready slide decks from markdown source
+
+**Rule**: If a table has 4+ rows or 3+ columns, render it as HTML. Always.
+
+### 3. Industrial-Grade Validation
+
+11 CI workflows catch issues before they reach production:
+
+| Workflow | What it validates |
+|----------|-------------------|
+| `skill-quality` | Skill structure, evals, contracts, industry benchmarks |
+| `recursive-promotion-gate` | Skill graph artifact compliance |
+| `docs-governance` | Link integrity, policy conformance |
+| `security-scan` | CodeQL, Semgrep, Trivy CVE scanning |
+| `codeql` | Static analysis for Python/TypeScript |
+
+**Local verification**: `just validate` runs the same checks locally.
+
+### 4. Self-Improving Skill Genome
+
+The Skill Genome Loop analyzes usage patterns and proposes improvements through a human-gated workflow:
 
 ```bash
-# Run the genome loop
-python3 scripts/run_skill_genome_loop.py
+# Run analysis (dry-run)
+just genome-loop
 
 # Review pending candidates
 python3 scripts/review_candidates.py --list
@@ -53,356 +79,198 @@ python3 scripts/review_candidates.py --list
 python3 scripts/review_candidates.py --approve <candidate_id>
 ```
 
-**Key features:**
+**Safety controls**:
+- Kill-switch: `touch artifacts/skill-graphs/controls/kill-switch.txt`
+- Rollout modes: shadow → canary → live
+- Confidence gating: composite_score ≥ 0.82, window count ≥ 2
+- Human approval required for all changes
 
-- Nightly cron job (4:00 AM UTC) for automated analysis
-- Human review gate for all improvement candidates
-- Fail-closed controls (kill-switch, rollback, rollout-mode)
-- Confidence gating (composite_score >= 0.82, window count >= 2)
-
-**See also:** [Skill Genome Loop Runbook](/docs/skill-graphs/runbooks/skill-genome-loop.md)
-
-## Architecture Diagrams
-
-Generate architecture diagrams using `@brainwav/diagram`:
-
-```bash
-# Install globally
-npm i -g @brainwav/diagram
-
-# Analyze codebase
-diagram analyze .
-
-# Generate diagram
-diagram generate . --output diagram.mmd
-```
-
-Configuration file: `.diagramrc` (excludes `node_modules`, test files, build artifacts)
-
-## Learning-preserving pilot (pilot-only)
-
-This repo includes a pilot for learning-preserving behavior on four skills:
-
-- `utilities/skill-builder`
-- `frontend/tools/agentation`
-- `utilities/systematic-debugging`
-- `interview/interview-me`
-
-The pilot defines `LearningPosture` as a second axis to `delegation.mode`:
-
-- Canonical `delegation.mode` remains `autopilot | co-pilot | manual`.
-- Canonical `LearningPosture` values are `learn`, `guided`, and `execute`.
-- `autopilot + learn` is blocked; `autopilot + guided` is degraded.
-
-See the repo-level contract and summary artifacts for the latest status:
-
-- [Skill Graphs](/docs/skill-graphs)
-- [Learning-preserving conformance summary](/artifacts/skill-graphs/pilot/learning-posture-pilot-conformance-summary.json)
-- [Pilot metadata decision artifact](/artifacts/skill-graphs/pilot/learning-posture-metadata-home-decision.json)
+---
 
 ## Quickstart
 
-Run these commands from the repository root:
-
 ```bash
-# Show status overview
+# Show system status
 just status
 
 # Run all validations
 just validate
 
-# Diagnose skills
+# Diagnose skill health
 just diagnose
 
-# Run CI checks locally
-just ci-local
+# Sync skills to all runtime directories
+just sync
+
+# Create a new skill from template
+cp templates/SKILL.md.template frontend/my-skill/SKILL.md
 ```
 
-### Using Just (Task Runner)
-
-This project uses `just` for common tasks. Available commands:
+### Available commands
 
 ```bash
 just --list          # Show all commands
-just status          # Quick status overview
-just validate        # Run all validation
-just diagnose        # Diagnose all skills
-just genome-loop     # Run genome loop (dry-run)
-just lint             # Run pre-commit hooks
+just count-skills    # Count active skills
+just docs-lint       # Check documentation
+just smoke-slides    # Test visual explainer
 ```
 
-### Creating New Skills
-
-Use the skill template when creating new skills:
-
-```bash
-cp templates/SKILL.md.template <category>/<skill-name>/SKILL.md
-```
-
-### Validation
-
-The consolidated validation script runs all checks:
-
-```bash
-bash scripts/validate_all.sh
-```
-
-This validates:
-
-- Plan task graphs (dependency checking)
-- Skill graph artifact compliance
-- Documentation structure and links
-
-## Verify your setup
-
-You should see:
-
-- `scripts/sync_skills.sh` completes without errors and updates `/SKILL.md`.
-- `docs_lint.py` reports `errors=0` for docs structure and links.
-
-If either check fails, use the troubleshooting section below.
+---
 
 ## Repository layout
 
 ```text
 ~/dev/agent-skills/
-├── auth/          # Authentication-focused skills
-├── backend/       # Backend, architecture, and CLI skills
-├── frontend/      # Frontend and UI skills
-│   ├── graphics/  # Image/video generation (imagegen, sora, threejs, etc.)
-│   ├── tools/     # Browser and design tooling (agentation, figma, stitch-*)
-│   ├── ui/        # UI component and motion skills (baseline-ui, remotion, shadcn, etc.)
-│   └── website/   # Web publishing skills (fixing-accessibility, fixing-metadata)
-├── github/        # GitHub and DevOps workflow skills
-├── interview/     # Interview workflows and kernels
-├── ops/           # Operational and deployment skills
-├── personas/      # Persona-style response skills
-├── product/       # Product specs, docs, planning
-│   ├── content/   # Content production skills
-│   ├── docs/      # Documentation skills
-│   ├── domain/    # Domain-specific skills
-│   ├── ops/       # Product ops and decision skills
-│   ├── security/  # Security and compliance skills
-│   ├── specs/     # Specification skills
-│   └── strategy/  # Strategy and ideation skills
-├── utilities/     # General-purpose utilities and helpers
-├── scripts/       # Repo-level helper scripts
-├── references/    # Shared reference contracts
-├── templates/     # Shared contract/eval templates
-├── reports/       # Generated scan summaries and data snapshots
-├── .agents/       # Repo-local Codex skills root
-├── .agents/skills/ # Flat symlink directory (tooling entrypoint)
-├── skills-antigravity/ # Antigravity-compatible flat materialized projection
-├── skills -> .agents/skills  # Legacy compatibility symlink
-├── skills-system/ # Bundled/system skills (kept out of flat view)
-└── SKILL.md       # Human-readable skills index (auto-generated)
+├── auth/               # Authentication-focused skills
+├── backend/            # Backend, architecture, CLI skills
+├── frontend/           # Frontend and UI skills
+│   ├── graphics/       # Image/video generation
+│   ├── tools/          # Browser and design tooling
+│   ├── ui/             # UI component and motion skills
+│   └── website/        # Web publishing skills
+├── github/             # GitHub and DevOps workflow skills
+├── interview/          # Interview workflows
+├── ops/                # Operational and deployment skills
+├── product/            # Product specs, docs, planning
+├── utilities/          # General-purpose utilities
+├── .agents/skills/     # Flat symlink directory (tool entrypoint)
+├── skills-antigravity/ # Antigravity-compatible projection
+├── scripts/            # Repo-level tooling
+├── references/         # Shared contracts (evals.yaml, contract.yaml)
+└── templates/          # Skill templates
 ```
 
-### Categorization rule of thumb
+### Categorization rule
 
-- Put each active skill under the closest domain folder above.
-- Keep `scripts/` and `references/` inside each skill folder when they are skill-specific.
-- Keep root `scripts/`, `references/`, and `templates/` for shared repo-wide tooling only.
+Put skills under the closest domain folder. Skills are self-contained with their own `references/` and `scripts/` when needed.
 
-## How skills are loaded
+---
 
-- Each skill lives in a category folder and includes a `SKILL.md` file.
-- `/.agents/skills` contains symlinks so tools can load one flat list.
-- `skills-system/` stores bundled/system skills and is excluded from the flat view.
-- `scripts/sync_skills.sh` refreshes symlinks and regenerates `/SKILL.md`.
-- The sync script links `/.agents/skills` into:
-  - `~/.agents/skills`
-  - `~/.codex/skills`
-  - `~/.gemini/antigravity/skills`
-  - `~/.gemini/skills`
-  - `~/.antigravity/skills`
-- The sync script also rewrites `~/.gemini/antigravity/skills.txt` so Antigravity indexes `skills-antigravity/` instead of the broader `/.agents/skills/` catalog.
+## How skills work
 
-Run this command to verify all skill entrypoints at once:
+### Structure
+
+Each skill is a folder containing:
+
+```text
+skill-name/
+├── SKILL.md              # Main skill definition (YAML frontmatter + markdown)
+├── references/           # Optional: evals.yaml, contract.yaml, task-profile.json
+└── scripts/              # Optional: supporting scripts
+```
+
+### YAML frontmatter (required)
+
+```yaml
+---
+name: skill-name
+description: "One-line description (max 80 chars)"
+metadata:
+  category: frontend | backend | product | utilities
+  tags: [tag1, tag2]
+---
+```
+
+### Learning Posture (pilot)
+
+Four skills support a novel execution mode that adds a learning dimension to delegation:
+
+| Posture | Behavior |
+|---------|----------|
+| `learn` | Explain alternatives, assumptions, and risks first |
+| `guided` | Propose concrete improvements, require checkpoint confirmation |
+| `execute` | Apply agreed changes after safety gates pass |
+
+Pilot skills: `skill-builder`, `agentation`, `systematic-debugging`, `interview-me`
+
+---
+
+## Creating a skill
 
 ```bash
-bash scripts/sync_skills.sh
-for d in ~/.agents/skills ~/.claude/skills ~/.gemini/antigravity/skills ~/.gemini/skills; do
-  echo "== $d =="
-  fd --max-depth 1 --type l . "$d" | wc -l
-done
-echo "== ~/.gemini/antigravity/skills.txt =="
-cat ~/.gemini/antigravity/skills.txt
-python3 scripts/diagnose_skill.py --all
+# 1. Create folder and copy template
+mkdir -p frontend/my-skill
+cp templates/SKILL.md.template frontend/my-skill/SKILL.md
+
+# 2. Edit SKILL.md with your content
+# 3. Run validation
+just validate
+
+# 4. Sync to runtime directories
+just sync
+
+# 5. Test the skill
+python3 scripts/diagnose_skill.py my-skill
 ```
 
-## Deprecations (Wave 1)
-
-Wave 1 deprecated aliases were retired early and removed from the repository on **2026-02-24**.
-
-Canonical replacements:
-
-- `product-spec` with modes: `full_pipeline`, `clarify_prd`, `ux_only`, `api_spec`, `arch_spec`, `testplan`
-- `tech-spec` with modes: `data_spec`, `migration_plan`, `ops_spec`, `performance_plan`
-- `figma` with modes: `setup`, `extract_context`, `implement_design`, `troubleshoot`
-
-## Docs governance
-
-- Contributor contract: `/CONTRIBUTING.md`
-- Docs policy config: `/docs-policy.json`
-- CI workflow: `/.github/workflows/docs-governance.yml`
-
-Local check:
-
-```bash
-python3 scripts/docs_lint.py --mode warn --config docs-policy.json
-```
+---
 
 ## Troubleshooting
 
-### Skill not loading in Codex or Claude Code
-
-Run the diagnostic tool:
+### Skill not loading
 
 ```bash
+# Run diagnostics
 python3 scripts/diagnose_skill.py <skill-name>
-# Or check all skills:
-python3 scripts/diagnose_skill.py --all
+
+# Common fixes:
+# - Remove nested .git: rm -rf .agents/skills/<name>/.git
+# - Re-sync: just sync
+# - Check YAML frontmatter has 'name:' and 'description:'
 ```
 
-Common causes:
+### Validation failures
 
-- **Nested `.git` directory**: Skills with their own `.git` folder break discovery. Remove it: `rm -rf .agents/skills/<name>/.git`
-- **Missing symlink**: Re-run `bash scripts/sync_skills.sh`
-- **Antigravity path drift**: `~/.gemini/antigravity/skills.txt` must point at `~/dev/agent-skills/skills-antigravity/`, not `/.agents/skills/`
-- **Invalid SKILL.md**: Ensure YAML frontmatter has `name:` and `description:`
-
-### `docs_lint.py` reports link errors
-
-- Ensure internal docs links start with `/` (for example, `/docs/deployment`).
-- Remove trailing slashes from internal docs links.
-- Re-run `python3 scripts/docs_lint.py --mode warn --config docs-policy.json`.
-
-### `SKILL.md` did not update
-
-- Re-run `bash scripts/sync_skills.sh`.
-- Confirm the target skill folder contains `SKILL.md`.
-
-### Symlink targets are missing
-
-- Re-run `bash scripts/sync_skills.sh`.
-- Check write permissions for `~/.agents/skills`.
-
-## Limitations
-
-### What This Repo Does Not Do
-
-- **Runtime execution**: Skills are prompts/instructions, not executable code. Agents interpret them.
-- **Version pinning**: Skills evolve with the repo; there's no semantic versioning per skill.
-- **Cross-machine sync**: Symlinks are local. Use git to share skills across machines.
-- **Automatic conflict resolution**: When skills conflict, the agent must ask for clarification.
-
-### Known Constraints
-
-| Capability | Current State | Notes |
-|------------|---------------|-------|
-| Skill isolation | Per-folder | No sandboxing between skills |
-| Telemetry | Opt-in | Requires explicit logging setup |
-| Multi-language | English only | Skills are authored in English |
-
-## FAQ
-
-### How do I add a new skill?
-
-1. Create a folder under the appropriate category (e.g., `frontend/my-skill/`)
-2. Copy the template: `cp templates/SKILL.md.template frontend/my-skill/SKILL.md`
-3. Fill in the YAML frontmatter and skill content
-4. Run `bash scripts/sync_skills.sh` to register the skill
-
-### Why symlinks instead of copying?
-
-Symlinks ensure all tools see the same canonical skill content. Edits in one place propagate everywhere.
-
-### What's the difference between `/SKILL.md` and `/skills/`?
-
-- `/SKILL.md` — Human-readable index of all skills
-- `/.agents/skills/` — Symlink directory for tool loading
-
-### How do I disable the Skill Genome Loop?
-
-Create the kill-switch file:
 ```bash
-touch artifacts/skill-graphs/controls/kill-switch.txt
+# Docs lint
+python3 scripts/docs_lint.py --mode warn --config docs-policy.json
+
+# Plan graph validation
+python3 ~/.codex/scripts/plan-graph-lint.py .agent/PLANS.md
 ```
 
-### Can I use these skills with other AI tools?
+---
 
-Yes. The skill format is plain Markdown. Any tool that can read Markdown prompts can use these skills.
+## Documentation
 
-## Support and security
+- **[Skills index](/SKILL.md)** — Browse all 133 skills
+- **[Contributor docs](/docs/index.md)** — How to add and validate skills
+- **[Skill Genome runbook](/docs/skill-graphs/runbooks/skill-genome-loop.md)** — Operating the improvement loop
 
-- Questions and usage help: `/SUPPORT.md`
-- Security vulnerability reporting: `/SECURITY.md`
-- Contribution process: `/CONTRIBUTING.md`
-- Code of conduct: `/CODE_OF_CONDUCT.md`
+---
 
-## Documentation requirements
+## Limits and constraints
 
-- Audience: contributors maintaining or adding skills.
-- Scope: repo structure, skill lifecycle, docs governance, and contributor workflows.
-- Non-scope: product-level feature specs and runtime API design docs.
-- Owner: repository maintainers (`@jscraik`).
-- Review cadence: every 90 days or after major workflow changes.
-- Last updated: 2026-03-07.
+| Capability | Current State |
+|------------|---------------|
+| Skill isolation | Per-folder (no sandboxing between skills) |
+| Versioning | Repo-level only (no per-skills semver) |
+| Language | English only |
+| Sync | Local symlinks (use git for cross-machine sync) |
 
-## Community health files
+---
 
-- `/README.md`
-- `/LICENSE`
-- `/CONTRIBUTING.md`
-- `/CODE_OF_CONDUCT.md`
-- `/SECURITY.md`
-- `/SUPPORT.md`
-- `/.github/ISSUE_TEMPLATE`
-- `/.github/PULL_REQUEST_TEMPLATE.md`
-- `/CODEOWNERS`
+## Governance
 
-Release notes policy:
+- **License**: Apache 2.0 ([LICENSE](/LICENSE))
+- **Contributing**: See [CONTRIBUTING.md](/CONTRIBUTING.md)
+- **Security**: See [SECURITY.md](/SECURITY.md)
+- **Code of Conduct**: See [CODE_OF_CONDUCT.md](/CODE_OF_CONDUCT.md)
 
-- This repository is not currently published with semantic version tags.
-- Use pull requests and commit history as the source of change tracking.
+---
 
-## License
+<div align="center">
 
-See `/LICENSE`.
+**brAInwav** — _from demo to duty_
+
+</div>
+
+---
 
 <!-- AGENT-FIRST-WORKFLOW:START -->
 ## Agent-first workflow
 
-1. Create or update an implementation plan using `.agent/PLANS.md`.
-2. Validate the plan graph:
-
-```bash
-python3 ~/.codex/scripts/plan-graph-lint.py .agent/PLANS.md
-```
-
-1. Run canonical verification:
-
-```bash
-bash ~/.codex/scripts/verify-work.sh
-```
-
-1. Follow scaffold policy:
-
-- `~/.codex/instructions/agent-first-scaffold-spec.md`
+1. Create or update a plan in `.agent/PLANS.md`
+2. Validate: `python3 ~/.codex/scripts/plan-graph-lint.py .agent/PLANS.md`
+3. Verify: `bash ~/.codex/scripts/verify-work.sh`
 <!-- AGENT-FIRST-WORKFLOW:END -->
-
----
-
-<img
-  src="./brand/brand-mark.webp"
-  srcset="./brand/brand-mark.webp 1x, ./brand/brand-mark@2x.webp 2x"
-  alt="brAInwav"
-  height="28"
-  align="left"
-/>
-
-<br clear="left" />
-
-**brAInwav**
-_from demo to duty_
