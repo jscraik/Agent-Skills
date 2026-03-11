@@ -97,6 +97,10 @@ If command truth, path ownership, or instruction precedence cannot be verified, 
   If auth fails, require auth-layer debugging before operation retries.
 - When git safety guidance is requested, require explicit pre-operation briefing for rebasing 5+ commits, merge conflict resolution, and force-pushes, including branch state, strategy with risks, alternatives, and user confirmation.
 - When validation guidance is requested for config-sensitive files (for example `package.json`, CI workflows, `settings.json`, config files), require running applicable validation commands and reporting pass status before commit.
+- When command preflight guidance is requested, preserve explicit `exec_command` preflight rules: run shell via `zsh -lc`, use `which` before `mise` installs, and verify destructive-operation paths with `fd` before execution.
+- When policy guidance is requested, include sandbox tuning rules that review rejected patterns, whitelist safe frequent commands, and keep strict controls for destructive operations.
+- When MCP workflow guidance is requested, require `codex mcp list` before implementation and require fixing missing server setup first.
+- When delivery workflow guidance is requested, require separate implementation and verification `codex exec` workflows, and require `codex review --uncommitted` before merge.
 
 ## Anti-patterns
 - Do not dump full policy documents into root AGENTS.
