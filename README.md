@@ -85,6 +85,13 @@ python3 scripts/review_candidates.py --approve <candidate_id>
 - Confidence gating: composite_score ≥ 0.82, window count ≥ 2
 - Human approval required for all changes
 
+**Operations**:
+```bash
+just spotlight          # Show skill needing attention today
+just subject-scoreboard # View quality by domain (ui/backend/security)
+just rollout-drill      # Test kill-switch and rollback behavior
+```
+
 ---
 
 ## Quickstart
@@ -109,10 +116,16 @@ cp templates/SKILL.md.template frontend/my-skill/SKILL.md
 ### Available commands
 
 ```bash
-just --list          # Show all commands
-just count-skills    # Count active skills
-just docs-lint       # Check documentation
-just smoke-slides    # Test visual explainer
+just --list               # Show all commands
+just count-skills         # Count active skills
+just docs-lint            # Check documentation
+just smoke-slides         # Test visual explainer
+just spotlight            # Daily skill health spotlight
+just subject-scoreboard   # Domain-level quality metrics
+just rollout-drill        # Resilience testing (kill-switch, rollback)
+just install-cron         # Set up nightly automation
+just watch-readiness      # Check Agentation watch-mode readiness
+just router-metrics       # Analyze router telemetry
 ```
 
 ---

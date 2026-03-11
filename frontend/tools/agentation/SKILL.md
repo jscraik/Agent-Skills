@@ -20,6 +20,7 @@ Set up or verify Agentation so live annotations are captured reliably and the cu
 - [Troubleshooting matrix](#troubleshooting-matrix)
 - [Constraints / Safety](#constraints--safety)
 - [Validation](#validation)
+- [Eval shard layout](#eval-shard-layout)
 - [Anti-patterns to avoid](#anti-patterns-to-avoid)
 - [Remember](#remember)
 - [Examples](#examples)
@@ -405,6 +406,26 @@ Use it to prove the five state buckets without claiming more than the observed e
 - Re-check `references/annotation-format.md` before changing claims about annotation lifecycle, status transitions, threaded replies, or copied-output structure.
 - Re-check `references/public-sources.md` before changing claims about install flow, MCP setup, webhook flow, or self-driving compatibility.
 - Run minimal repo checks relevant to the edits.
+
+## Eval shard layout
+
+Keep Agentation evals in three lanes so heavy diagnostic cases do not distort routing or safety signals.
+
+- **Shard A: fast integration and workflow checks**
+  - Use for install/setup, webhook delivery, watch mode, critique mode, lifecycle, copied output, self-driving compatibility, and documented support limits.
+  - This is the default quick-regression lane.
+- **Shard B: heavy diagnostic checks**
+  - Use for cases that routinely spend significant budget on environment inspection or cross-layer diagnosis.
+  - Current heavy cases are `mcp-doctor-flow` and `endpoint-triage`.
+  - Treat isolated passes as provisional until the same cases reproduce in the heavy shard.
+- **Shard C: posture, pressure, and negative controls**
+  - Use for learning-preserving posture, prompt-injection resistance, synthetic-only honesty, tool-gap reporting, and should-not-trigger checks.
+  - Keep these separate from transport-heavy cases so routing and safety regressions stay easy to spot.
+
+When the suite is unstable, debug in this order:
+- Run Shard A first to confirm the general routing and transport contract still holds.
+- Run Shard B next to measure heavy diagnostic behavior under a larger budget.
+- Run Shard C last to confirm posture and safety boundaries did not regress while tuning the other shards.
 
 ## Anti-patterns to avoid
 
