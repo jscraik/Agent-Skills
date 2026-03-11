@@ -6,145 +6,104 @@ schema_version: 1
 
 This repository is the canonical source of Codex skills, docs, and agent workflow instructions.
 
-## References (informational)
-- Global protocol: ~/.codex/AGENTS.md
-- Security and standards baseline: ~/.codex/instructions/standards.md
-- RVCP source of truth: ~/.codex/instructions/rvcp-common.md
-
 ## Table of Contents
+- [Mandatory workflow snippet](#mandatory-workflow-snippet)
 - [Required essentials](#required-essentials)
-- [Output Paths](#output-paths)
-- [Package-manager command map](#package-manager-command-map)
-- [Non-standard build/typecheck commands](#non-standard-buildtypecheck-commands)
-- [Testing Standards](#testing-standards)
-- [Tooling essentials](#tooling-essentials)
-- [Shell script conventions](#shell-script-conventions)
-- [TypeScript Configuration](#typescript-configuration)
-- [Global instructions discovery order](#global-instructions-discovery-order)
+- [Command preflight](#command-preflight)
+- [Verification default](#verification-default)
+- [Instruction routing](#instruction-routing)
 - [Documentation map](#documentation-map)
-- [Planning](#planning)
-- [Development Workflow](#development-workflow)
-- [Code Quality Checks](#code-quality-checks)
-- [Git & PR Workflow](#git--pr-workflow)
-- [PR Workflow](#pr-workflow)
-- [MCP & External Tools](#mcp--external-tools)
-- [MCP Server Configuration](#mcp-server-configuration)
+- [Git workflow](#git-workflow)
+- [External integrations](#external-integrations)
+- [Communication and file operations](#communication-and-file-operations)
+- [Learnings](#learnings)
+- [References (informational)](#references-informational)
 - [Agent-First Scaffold Contract](#agent-first-scaffold-contract-managed-by-codex)
+- [Repository preflight helper](#repository-preflight-helper)
+
+## Mandatory workflow snippet
+
+1. Explore project first, then invoke skill.
+2. IMPORTANT: Prefer retrieval-led reasoning over pre-training-led reasoning for any React, Tauri, Apps-SDK-ui, Tailwind, Vite, Storybook + Chat Widget tasks.
+3. Add a Table of Contents for docs.
 
 ## Required essentials
-- Project description: one sentence, above.
-- Package manager: none for the repository root (configuration-only).
+- Package manager: none at repository root (configuration-focused repo).
 - Non-standard build/typecheck commands: none at repository root.
 - Compatibility posture: canonical-only.
+- Keep communication single-threaded by default.
 
-## Output Paths
-- Before generating files, verify output paths against `package.json` and package script/config output settings.
-- Prefer configured output directories from scripts/config over hardcoded paths when generating artifacts.
+## Command preflight
 
-## Package-manager command map
-- Root (configuration-only): install/run/exec are not observed at root.
-- Use repository-verified root commands:
+- Run shell commands with `zsh -lc` (fallback to `bash -lc` only when `zsh` is unavailable or script internals require bash).
+- Confirm `pwd` is `/Users/jamiecraik/dev/agent-skills` before edits.
+- Confirm required binaries for the task (`rg`, `fd`, `jq`, plus repo-specific tools).
+- Use `which` before any `mise` tooling installs.
+- Confirm target paths exist before editing and visually verify paths with `fd` before destructive operations.
+- Fail fast if a required check is missing.
+
+## Verification default
+
+- Prefer one-shot, auditable commands.
+- Run focused validation after each edit batch and broader validation before finalizing.
+- Default root checks:
   - `bash scripts/sync_skills.sh`
   - `python3 scripts/docs_lint.py --mode warn --config docs-policy.json`
-- Per directory, from lockfile evidence:
-  - `github/automate-github-issues/` has `package-lock.json` (npm). Use:
-    - install: `npm --prefix github/automate-github-issues install`
-    - run: `npm --prefix github/automate-github-issues run <script>`
-    - exec: `npm --prefix github/automate-github-issues exec <bin>`
-  - `frontend/react-components/` has `package-lock.json` (npm). Use:
-    - install: `npm --prefix frontend/react-components install`
-    - run: `npm --prefix frontend/react-components run <script>`
-    - exec: `npm --prefix frontend/react-components exec <bin>`
-  - `utilities/video-transcript-downloader/` has `package-lock.json` (npm). Use:
-    - install: `npm --prefix utilities/video-transcript-downloader install`
-    - run: `npm --prefix utilities/video-transcript-downloader run <script>`
-    - exec: `npm --prefix utilities/video-transcript-downloader exec <bin>`
+  - `just validate` (or `bash scripts/validate_all.sh`) for full repo gates
+- After config-sensitive changes (`package.json`, CI workflows, `settings.json`, related config files), run applicable validation and confirm passing status before commit.
+- For implementation work, run separate implementation and verification workflows, then run `codex review --uncommitted` before merge.
 
-## Non-standard build/typecheck commands
-- This repository is configuration/content oriented; no root build or typecheck commands are defined here.
-- In package-based subdirectories, use declared scripts (for example `typecheck`, `build`, or `test`) from that package’s own `package.json`.
+## Instruction routing
 
-## Testing Standards
-- Run full test suite before committing (for example `npm test`, `pytest`, or the detected package-native equivalent in that package).
-- Ensure all tests pass after multi-file changes.
-- Fix test isolation issues immediately; mock async operations properly.
-- For auth-related, CLI-related, or async code changes, run the full test suite.
-- For CLI tests calling `process.exit`, mock exit calls to prevent hangs.
-
-## Tooling essentials
-- **Task runner**: Use `just` for common tasks (`just --list` to see all commands).
-  - `just status` — Quick repo health overview
-  - `just validate` — Run all validation
-  - `just diagnose` — Diagnose all skills
-  - `just ci-local` — Run CI checks locally
-- Run shell commands with `zsh -lc` (fallback to `bash -lc` when `zsh` is unavailable).
-- Prefer `rg`, `fd`, and `jq`.
-- Read `~/.codex/instructions/tooling.md` before choosing tools.
-- Use repository-verified paths from README, `docs/`, and scripts.
-- Do not add dependencies or system settings without user approval.
-
-## Shell Script Conventions
-- Validate script syntax with `bash -n script.sh`.
-- Run `shellcheck` on wrapper scripts when available in repo workflow.
-- Keep shell scripts deterministic; avoid hidden environment assumptions.
-- Prefer `[ -e ]` over `[ -f ]` for file-existence checks to cover named pipes and special files.
-
-## TypeScript Configuration
-- TypeScript strict mode is enabled where applicable. Guard property access with null/undefined checks.
-- Run `pnpm typecheck` after significant TypeScript edits (or use the project’s native typecheck command).
-
-## Validation and Diagnostics
-- Run `just validate` or `bash scripts/validate_all.sh` for full validation.
-- Diagnose skill loading issues: `python3 scripts/diagnose_skill.py <skill-name>` or `--all`.
-- Pre-commit hooks: `prek run --all-files` (nested .git detection, skill diagnostics, docs lint).
-
-## Global instructions discovery order
-1. `~/.codex/AGENTS.md`
-2. Repository root `AGENTS.md`
-3. Linked instruction files (`README.md`, `.agent/PLANS.md`, `docs/agents/*.md`)
-4. Ask before changing behavior when instructions conflict.
+1. `/Users/jamiecraik/.codex/AGENTS.md`
+2. Repository `AGENTS.md` (this file)
+3. `/Users/jamiecraik/dev/agent-skills/docs/agents/README.md`
+4. Linked docs under `docs/agents/`
+5. If instructions conflict, pause and ask which one wins.
 
 ## Documentation map
-### Table of Contents
-- [01-instruction-map](docs/agents/01-instruction-map.md)
-- [02-tooling-policy](docs/agents/02-tooling-policy.md)
-- [03-local-memory](docs/agents/03-local-memory.md)
-- [04-validation-and-checks](docs/agents/04-validation.md)
-- [05-contradictions-and-cleanup](docs/agents/05-contradictions-and-cleanup.md)
-- [06-security-and-governance](docs/agents/06-security-and-governance.md)
-- [07a-role-governance](docs/agents/07a-role-governance.md)
-- [07b-agent-governance](docs/agents/07b-agent-governance.md)
-- [08-release-and-change-control](docs/agents/08-release-and-change-control.md)
-- [09-audit-trail-policy](docs/agents/09-audit-trail-policy.md)
-- [10-agent-testing-gates](docs/agents/10-agent-testing-gates.md)
 
-## Planning
-- For complex implementation work or architecture work, keep planning artifacts in `.agent/PLANS.md` with task `id`/`depends_on` checks.
-- Validate plan files with `python3 ~/.codex/scripts/plan-graph-lint.py <plan-file>`.
+- Use [`docs/agents/README.md`](docs/agents/README.md) as the front door.
+- Keep root guidance minimal and move deep policy into linked docs.
+- Maintain contradiction tracking in [`docs/agents/05-contradictions-and-cleanup.md`](docs/agents/05-contradictions-and-cleanup.md).
 
-## Development Workflow
-- Applies to codex-maintained source changes across package-specific areas.
+## Git workflow
 
-## Code Quality Checks
-- Run TypeScript type check (`tsc --noEmit`) after code changes in TypeScript packages where applicable.
-- Run linter before committing.
-- Fix all TypeScript errors and lint issues before tasks are marked complete.
+- For rebase of 5+ commits, merge-conflict workflows, or force-pushes, pause and present:
+  1. Current branch state.
+  2. Proposed strategy and risks.
+  3. Alternative approaches.
+  4. User confirmation before proceeding.
+- Never assume there are no conflicts without verification.
+- Re-check PR comments and checks before reporting completion.
 
-## Git & PR Workflow
-- For Codex-guided reviews and merge tasks, use the checks below.
+## External integrations
 
-## PR Workflow
-- When working on PRs, check all review comments before marking complete.
-- After fixing review comments, re-verify PR state on GitHub before reporting success.
-- Handle merge conflicts directly on GitHub, not just locally.
-- For full thread audits, run `gh pr view <PR_NUMBER> --comments` and verify each comment status before completion.
+- Run `codex mcp list` before MCP-dependent implementation.
+- Before external API or MCP operations, run this preflight in order:
+  1. Verify env vars resolve (not placeholders).
+  2. Verify 1Password session (`op account list`).
+  3. Run a simple connectivity check.
+  4. Then proceed with full operations.
+- If auth fails, debug the auth layer before retrying operations.
 
-## MCP & External Tools
-- Use the same command discipline for internal and external MCP integrations.
+## Communication and file operations
 
-## MCP Server Configuration
-- Register MCP servers with `claude mcp add <name> -- <command>` using correct argument separation.
-- For 1Password integrations, use `[ -e ]` instead of `[ -f ]` so named pipes are handled correctly.
+- When the user names a tool or skill, verify it exists before choosing fallback behavior.
+- Verify file paths against documentation before commit (for example `.diagram/`).
+
+## Learnings
+
+- Read `~/.codex/instructions/Learnings.md` at session start.
+- After bugs/tool failures/extra-effort fixes, append concise entries using:
+  - `**YYYY-MM-DD [Codex]:** <problem> -> <fix>`
+
+## References (informational)
+
+- Global protocol: `/Users/jamiecraik/.codex/AGENTS.md`
+- Security baseline: `/Users/jamiecraik/.codex/instructions/standards.md`
+- RVCP source of truth: `/Users/jamiecraik/.codex/instructions/rvcp-common.md`
+- Repository overview: `/Users/jamiecraik/dev/agent-skills/README.md`
 
 <!-- AGENT-FIRST-SCAFFOLD:START -->
 ## Agent-First Scaffold Contract (managed by ~/.codex)
@@ -169,5 +128,8 @@ State model: `S0 -> S1 -> S2 -> S3 -> S4 -> S5` with rollback to `Sx` on critica
 <!-- AGENT-FIRST-SCAFFOLD:END -->
 
 ## Repository preflight helper
+
 - Use `scripts/codex-preflight.sh` before multi-step, destructive, or path-sensitive workflows.
-- Source it with `source scripts/codex-preflight.sh` and run `preflight_repo` (or `preflight_js`, `preflight_py`, `preflight_rust`) as a guard before changing repo state.
+- Run with bash internals:
+  - `bash -lc "source /Users/jamiecraik/dev/agent-skills/scripts/codex-preflight.sh && preflight_repo"`
+- If the script is unavailable, run the manual preflight checklist above.

@@ -9,6 +9,7 @@
 2. `python3 scripts/docs_lint.py --mode warn --config docs-policy.json`
 3. `python3 ~/.codex/scripts/plan-graph-lint.py .agent/PLANS.md` (if plans touched)
 4. `bash ~/.codex/scripts/verify-work.sh`
+5. `codex review --uncommitted` before merge
 
 ## Failure policy
 - Fail fast.
