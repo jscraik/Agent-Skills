@@ -9,6 +9,7 @@ import hmac
 import json
 import os
 import re
+import sys
 from hashlib import sha256
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set
@@ -280,15 +281,16 @@ def verify_decision_hmac(
     return True
 
 
-def scan_lesson_content(path: Path) -> Dict[str, List[str]]:
+def scan_lesson_content(path: Path) -> Dict[str, Any]:
     text = path.read_text(encoding="utf-8", errors="replace")
-    secret_hits: List[str] = []
+    secret_hit_count: int = 0
     pii_hits: List[str] = []
 
     for idx, line in enumerate(text.splitlines(), start=1):
         for pattern in SECRET_PATTERNS:
             if pattern.search(line):
-                secret_hits.append(f"line {idx}: secret-like token")
+                # Increment a counter instead of recording potentially sensitive context.
+                secret_hit_count += 1
                 break
 
         for match in EMAIL_PATTERN.findall(line):
@@ -297,7 +299,7 @@ def scan_lesson_content(path: Path) -> Dict[str, List[str]]:
                 continue
             pii_hits.append(f"line {idx}: email-like identifier '{match}'")
 
-    return {"secret_hits": secret_hits, "pii_hits": pii_hits}
+    return {"secret_hit_count": secret_hit_count, "pii_hits": pii_hits}
 
 
 def load_policy(policy_file: Path, sig_file: Path) -> Dict[str, Any]:
@@ -1108,8 +1110,13 @@ def validate(args: argparse.Namespace) -> Dict[str, Any]:
         )
         if lesson_file and lesson_file.exists():
             scan = scan_lesson_content(lesson_file)
-            for message in scan["secret_hits"]:
-                add_error(errors, "E_LESSON_SECRET", f"lesson security check failed: {message}")
+            secret_hit_count = int(scan.get("secret_hit_count", 0))
+            if secret_hit_count > 0:
+                add_error(
+                    errors,
+                    "E_LESSON_SECRET",
+                    "lesson security check failed: secret-like tokens detected in lesson content",
+                )
             for message in scan["pii_hits"]:
                 add_warning(warnings, "W_LESSON_PII", f"lesson privacy warning: {message}")
 
@@ -1151,7 +1158,8 @@ def main() -> int:
         )
         return 1
 
-    print(json.dumps(report))
+    # Only write report to disk when explicitly requested to avoid leaking
+    # sensitive data (file paths, errors) to logs or console output.
     if args.write_report:
         report_path = Path(args.write_report).expanduser().resolve()
         report_path.parent.mkdir(parents=True, exist_ok=True)

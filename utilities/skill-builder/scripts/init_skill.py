@@ -180,7 +180,7 @@ Prefer pointers over pasted docs.
 
 PYTHON_RUNNER_TEMPLATE = '''#!/usr/bin/env python3
 """
-scripts/run.py — script entrypoint scaffold for {skill_name}
+scripts/run.py — script entrypoint scaffold for %(skill_name)s
 
 Security / safety baseline:
 - Offline by default. If networking is required, gate behind --allow-network and document allowed domains.
@@ -204,7 +204,7 @@ def require_confirm(*, confirm: bool, dry_run: bool, message: str) -> None:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Skill helper entrypoint for {skill_name}")
+    parser = argparse.ArgumentParser(description="Skill helper entrypoint for %(skill_name)s")
     parser.add_argument("--dry-run", action="store_true", help="Preview intended actions without making changes")
     parser.add_argument("--confirm", action="store_true", help="Required to run destructive actions (delete/overwrite/remote writes)")
     parser.add_argument("--allow-network", action="store_true", help="Opt-in to network operations (default: offline)")
@@ -417,7 +417,7 @@ def init_skill(
         scripts_dir.mkdir(exist_ok=True)
         run_py = scripts_dir / "run.py"
         if not run_py.exists():
-            run_py.write_text(PYTHON_RUNNER_TEMPLATE.format(skill_name=skill_name), encoding="utf-8")
+            run_py.write_text(PYTHON_RUNNER_TEMPLATE % {"skill_name": skill_name}, encoding="utf-8")
             try:
                 run_py.chmod(run_py.stat().st_mode | 0o111)
             except Exception:

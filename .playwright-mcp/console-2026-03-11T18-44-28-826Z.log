@@ -1,0 +1,13 @@
+[    1990ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ https://github.com/jscraik/Agent-Skills/issues/48/edit_form?textarea_id=issue-4058750127-body&comment_context=:0
+[    2466ms] [ERROR] Error: Not connected to alive
+    at i (https://github.githubassets.com/assets/11969-66d44a3037bfb35f.js:2:3346)
+    at https://github.githubassets.com/assets/11969-66d44a3037bfb35f.js:2:6028 @ https://github.githubassets.com/assets/11969-66d44a3037bfb35f.js:1
+[    2466ms] [ERROR] Error: Not connected to alive
+    at i (https://github.githubassets.com/assets/11969-66d44a3037bfb35f.js:2:3346)
+    at https://github.githubassets.com/assets/11969-66d44a3037bfb35f.js:2:6028 @ https://github.githubassets.com/assets/11969-66d44a3037bfb35f.js:1
+[    2467ms] [ERROR] Error: Not connected to alive
+    at i (https://github.githubassets.com/assets/11969-66d44a3037bfb35f.js:2:3346)
+    at https://github.githubassets.com/assets/11969-66d44a3037bfb35f.js:2:6028 @ https://github.githubassets.com/assets/11969-66d44a3037bfb35f.js:1
+[    8613ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ https://github.com/jscraik/Agent-Skills/security/code-scanning/related-location?commit_oid=13decaf1a06693f665a62bae2c414d94852943b8&end_column=47&end_line=1112&file_path=utilities%2Fskill-builder%2Fscripts%2Fvalidate_recursive_promotion.py&start_column=28&start_line=1112:0
+[   13433ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ https://github.com/jscraik/Agent-Skills/security/code-scanning/related-location?commit_oid=13decaf1a06693f665a62bae2c414d94852943b8&end_column=47&end_line=1112&file_path=utilities%2Fskill-builder%2Fscripts%2Fvalidate_recursive_promotion.py&start_column=28&start_line=1112:0
+[   13641ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ https://github.com/jscraik/Agent-Skills/security/code-scanning/related-location?commit_oid=13decaf1a06693f665a62bae2c414d94852943b8&end_column=47&end_line=1112&file_path=utilities%2Fskill-builder%2Fscripts%2Fvalidate_recursive_promotion.py&start_column=28&start_line=1112:0

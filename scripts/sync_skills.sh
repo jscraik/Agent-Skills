@@ -174,8 +174,15 @@ while IFS= read -r skill_path; do
     if [ -n "$existing_dir" ] && [ "$existing_dir" = "$discovered_dir" ]; then
       continue
     fi
-    echo "Duplicate skill name: $skill_name (skip $skill_dir_rel)"
-    continue
+    # Canonical category-folder skills win precedence over stale/generated flat
+    # copies so the loader view stays aligned with the source-of-truth skill.
+    if [ -d "$skills_dir/$skill_name" ] && [ "${skill_dir#./.agents/skills/}" = "$skill_dir" ]; then
+      echo "Replacing conflicting flat skill dir: $skill_name -> $skill_dir_rel"
+      rm -rf -- "$skills_dir/$skill_name"
+    else
+      echo "Duplicate skill name: $skill_name (skip $skill_dir_rel)"
+      continue
+    fi
   fi
   ln -s "$skill_dir_rel" "$skills_dir/$skill_name"
 done < <(all_skill_files_cmd)

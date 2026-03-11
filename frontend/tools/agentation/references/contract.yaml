@@ -4,7 +4,9 @@ purpose: >
   Install, verify, and troubleshoot Agentation in React 18+ apps using the
   current public contract: dev-only root mount, optional `endpoint` sync,
   optional `webhookUrl` delivery, MCP health via `add-mcp` and `doctor`, and
-  hands-free workflows (watch mode, critique mode, self-driving).
+  hands-free workflows (watch mode, critique mode, self-driving), while keeping
+  annotation lifecycle and copied-output guidance aligned with the portable
+  Annotation Format Schema reference.
 
 triggers:
   - User asks to install or verify Agentation in a React app.
@@ -22,6 +24,7 @@ outputs:
   - Explicit state report for UI mount, server, MCP, webhook, queue, and runner mode.
   - Optional machine-readable readiness artifact from the bundled watch-mode checker.
   - Compatibility note when the user wants the upstream skill route (`npx skills add benjitaylor/agentation`).
+  - AFS-aligned note when lifecycle or output-format expectations are relevant (`pending|acknowledged|resolved|dismissed`, threaded replies, structured markdown copy output).
   - File edits performed or explicit no-op statement.
 
 non_goals:

@@ -1084,7 +1084,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
     p.add_argument(
         "--capture-jsonl",
         action="store_true",
-        help="Capture Codex JSONL event stream (--json). Required for --dual-run.",
+        help="Capture Codex JSONL event stream (--json). Auto-enabled when deterministic checks or budgets are present; required for --dual-run.",
     )
     p.add_argument("--reports-dir", default="artifacts/reports/skills", help="Base directory for eval reports.")
     p.add_argument("--scorecard-out", default=None, help="Optional explicit path for merged scorecard JSON.")
@@ -1434,7 +1434,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     claude_kimi_command = str(args.claude_kimi_command or "").strip() or "claude-kimi"
     claude_zai_command = str(args.claude_zai_command or "").strip() or "claude-zai"
 
-    if "codex" in selected_runners and args.dual_run and not args.capture_jsonl:
+    capture_jsonl = bool(
+        args.capture_jsonl or any((c.deterministic_checks or c.budgets) for c in cases)
+    )
+
+    if "codex" in selected_runners and args.dual_run and not capture_jsonl:
         print("ERROR: --dual-run requires --capture-jsonl for deterministic Codex checks.", file=sys.stderr)
         return 1
 
@@ -1509,6 +1513,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "category_filters": category_filters,
         "timeout_profile": args.timeout_profile,
         "timeout_sec": _eval_timeout_seconds(timeout_sec=args.timeout_sec, timeout_profile=args.timeout_profile),
+        "capture_jsonl": capture_jsonl,
         "cases": [],
         "passed": True,
         "tier1_failures": 0,
@@ -1552,7 +1557,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             runner_dir.mkdir(parents=True, exist_ok=True)
 
             output_path = runner_dir / "output_last_message.txt"
-            jsonl_path = (runner_dir / "codex_events.jsonl") if (runner_name == "codex" and args.capture_jsonl) else None
+            jsonl_path = (runner_dir / "codex_events.jsonl") if (runner_name == "codex" and capture_jsonl) else None
 
             if runner_name in {"claude-kimi", "claude-zai"}:
                 if runner_name == "claude-kimi":
