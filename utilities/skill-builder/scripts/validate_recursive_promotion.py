@@ -1158,8 +1158,8 @@ def main() -> int:
         )
         return 1
 
-    # Output report to stderr to avoid exposing sensitive data in stdout pipes
-    sys.stderr.write(json.dumps(report) + "\n")
+    # Only write report to disk when explicitly requested to avoid leaking
+    # sensitive data (file paths, errors) to logs or console output.
     if args.write_report:
         report_path = Path(args.write_report).expanduser().resolve()
         report_path.parent.mkdir(parents=True, exist_ok=True)
