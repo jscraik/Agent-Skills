@@ -54,6 +54,7 @@ jobs:
           git config --global --add safe.directory "$PWD"
           semgrep_args=(
             --config "p/secrets"
+            --config "p/python"
             --metrics=off
             --sarif --output semgrep.sarif
           )
