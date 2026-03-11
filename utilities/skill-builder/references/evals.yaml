@@ -147,3 +147,23 @@ cases:
     acceptance:
       - type: regex
         value: "(?i)(angle brackets|sanitize|replace|parser-safe|avoid <|avoid >)"
+
+  - id: posture-learning-first
+    name: posture learning-first
+    category: edge
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Use $skill-builder. I need you to teach my team the options first and only then propose edits. Keep this in learning-preserving posture."
+    acceptance:
+      - type: regex
+        value: "(?i)(learningposture|posture|learn|guided|explain)"
+
+  - id: posture-guide-vs-execute
+    name: posture guided execute boundary
+    category: edge
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Use $skill-builder. Keep this in guided mode; explain assumptions and checks before any edits."
+    acceptance:
+      - type: regex
+        value: "(?i)(assumptions|checks|guided|workflows|checkpoints)"

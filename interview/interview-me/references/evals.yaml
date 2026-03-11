@@ -19,6 +19,28 @@ cases:
     acceptance:
       - type: contains
         value: "SLO ("
+
+  - id: posture-learn-default
+    name: posture learn default
+    category: edge
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Use interview-me in learn posture to clarify goals first. Ask one question and explain why each question matters."
+    acceptance:
+      - type: contains
+        value: "Why this matters"
+      - type: regex
+        value: "(?i)(one question|multiple-choice|posture|learn|assumption)"
+
+  - id: posture-guided-gate
+    name: posture guided decision gate
+    category: edge
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Use interview-me in guided posture and keep the interaction to decision gates with explicit assumptions and approval before execution."
+    acceptance:
+      - type: regex
+        value: "(?i)(assumptions|approval|decision|guided)"
   - name: uiux-persona-detection
     prompt: "Interview me about UI polish and micro-interactions for a new component."
     acceptance:

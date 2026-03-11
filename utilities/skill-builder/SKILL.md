@@ -13,6 +13,7 @@ This skill designs, improves, validates, and packages high-quality Codex skills.
 - [Modes](#modes)
 - [Needed inputs](#needed-inputs)
 - [Discovery interview](#discovery-interview)
+- [LearningPosture compatibility](#learningposture-compatibility)
 - [Deliverables](#deliverables)
 - [Response format](#response-format)
 - [Output contract](#output-contract)
@@ -54,6 +55,18 @@ Use this skill to:
 - improve skill-graph contracts tied to recursive workflow operations.
 
 Do not use this skill for unrelated application features, generic debugging, or ordinary documentation tasks that do not create or improve a skill.
+
+## LearningPosture compatibility
+
+This skill must preserve existing `delegation.mode` semantics while supporting posture-aware guidance via `learning_posture` metadata.
+
+- Supported posture modes:
+  - `learn`: explain alternatives, assumptions, and risks first before proposing edits.
+  - `guided`: propose concrete improvements, keep the user in the loop, and require explicit progression checkpoints.
+  - `execute`: apply agreed changes only after scope, inputs, and safety gates are present.
+- Default posture for this skill is `guided`.
+- Explicit `learn` posture requests should delay output-only behavior and increase explanation depth.
+- For execution requests, the skill should still preserve the advisory safety bar and never remove existing human checkpoint gates from the spec.
 
 ## Modes
 Choose the smallest mode that fits:

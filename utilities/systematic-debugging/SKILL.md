@@ -25,6 +25,15 @@ Random fixes waste time and create new bugs. Quick patches mask underlying issue
 NO FIXES WITHOUT ROOT CAUSE INVESTIGATION FIRST
 ```
 
+## LearningPosture compatibility
+
+- This skill supports posture-aware debugging responses without changing existing `delegation.mode`.
+- `learn` posture: explain the hypothesis, data-collection plan, and validation steps before proposing code edits.
+- `guided` posture: provide bounded fix plan with explicit checkpoint questions and verification commands.
+- `execute` posture: apply a single minimal change only after evidence gates pass and root cause is confirmed.
+- Default posture for this skill remains `learn` (from task-profile metadata), so explanation-first responses are the expected default.
+- Defer execution behavior changes until user confirms risk and rollback expectations.
+
 If you haven't completed Phase 1, you cannot propose fixes.
 
 ## Scope and triggers

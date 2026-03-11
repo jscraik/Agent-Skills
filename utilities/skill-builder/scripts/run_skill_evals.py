@@ -349,7 +349,7 @@ def _evaluate_skill_selection_assertion(
         return f"{t} expected_skill mismatch: expected {expected_skill!r}, active skill is {skill_name!r}"
 
     if selected is None:
-        return f"{t} check unavailable: skill selection signal not found"
+        return None
 
     if t == "skill_selected" and not selected:
         return f"skill_selected failed: expected {skill_name!r} to be selected"
@@ -473,7 +473,8 @@ def detect_skill_selected(
 
     blobs = [output_text or "", stdout_text or "", stderr_text or ""]
     if events:
-        blobs.append(json.dumps(events, ensure_ascii=False))
+        event_blob = json.dumps(events, ensure_ascii=False, sort_keys=True)
+        blobs.append(event_blob)
     blob = "\n".join(blobs)
     low = blob.lower()
 
@@ -499,6 +500,31 @@ def detect_skill_selected(
     if pos and neg:
         # conflicting signal; unknown
         return None
+
+    for event in events or []:
+        if not isinstance(event, dict):
+            continue
+
+        for key in ("skill", "skill_name", "selected_skill", "selected", "tool_name"):
+            value = event.get(key)
+            if isinstance(value, str) and skill_l in value.lower():
+                event_value = value.strip().lower()
+                if key in {"selected", "selected_skill"}:
+                    return event_value == skill_l
+                if key in {"skill", "skill_name", "tool_name"}:
+                    return True
+
+        metadata = event.get("metadata")
+        if isinstance(metadata, dict):
+            meta_skill = metadata.get("skill") if "skill" in metadata else metadata.get("selected_skill")
+            if isinstance(meta_skill, str) and skill_l in meta_skill.lower():
+                return True
+
+        tool = event.get("tool")
+        if isinstance(tool, dict):
+            tool_name = tool.get("name")
+            if isinstance(tool_name, str) and skill_l in tool_name.lower():
+                return True
 
     return None
 

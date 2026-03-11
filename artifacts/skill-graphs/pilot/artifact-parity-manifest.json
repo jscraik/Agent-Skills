@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-03-08T23:55:12Z",
+  "generated_at": "2026-03-11T10:57:58Z",
   "runs_root": "/Users/jamiecraik/dev/agent-skills/artifacts/skill-graphs/runs",
   "counts": {
     "compliant": 0,
@@ -15,10 +15,12 @@
     "empty": 0
   },
   "compliance_rate": 0.0,
+  "waived_non_compliant": 10,
   "runs": [
     {
       "run_dir": "artifacts/skill-graphs/runs/run_001",
       "status": "missing_mandatory",
+      "waived": true,
       "required_files": [
         "capture_record.json",
         "events.jsonl",
@@ -47,11 +49,16 @@
       "notes": [
         "terminal_status=passed",
         "stop_reason=approval_granted"
-      ]
+      ],
+      "waiver_reason": "Historical seed run predates the mandatory recursive capture envelope and is preserved as original evidence.",
+      "waiver_id": "historical-run-001",
+      "waiver_approved_by": "jamiecraik",
+      "waiver_created_at": "2026-03-11T00:00:00Z"
     },
     {
       "run_dir": "artifacts/skill-graphs/runs/run_002",
       "status": "missing_mandatory",
+      "waived": true,
       "required_files": [
         "capture_record.json",
         "events.jsonl",
@@ -80,11 +87,16 @@
       "notes": [
         "terminal_status=passed",
         "stop_reason=approval_granted"
-      ]
+      ],
+      "waiver_reason": "Historical seed run predates the mandatory recursive capture envelope and is preserved as original evidence.",
+      "waiver_id": "historical-run-002",
+      "waiver_approved_by": "jamiecraik",
+      "waiver_created_at": "2026-03-11T00:00:00Z"
     },
     {
       "run_dir": "artifacts/skill-graphs/runs/run_20260220T144703Z_425b7a",
       "status": "legacy_partial",
+      "waived": true,
       "required_files": [
         "capture_record.json",
         "events.jsonl",
@@ -114,11 +126,16 @@
       "notes": [
         "terminal_status=failed",
         "stop_reason=budget_exhausted"
-      ]
+      ],
+      "waiver_reason": "Legacy partial run created before capture/evidence packet files became required.",
+      "waiver_id": "historical-run-20260220t144703z-425b7a",
+      "waiver_approved_by": "jamiecraik",
+      "waiver_created_at": "2026-03-11T00:00:00Z"
     },
     {
       "run_dir": "artifacts/skill-graphs/runs/run_20260220T144710Z_425b7a",
       "status": "legacy_partial",
+      "waived": true,
       "required_files": [
         "capture_record.json",
         "events.jsonl",
@@ -148,11 +165,16 @@
       "notes": [
         "terminal_status=passed",
         "stop_reason=pass"
-      ]
+      ],
+      "waiver_reason": "Legacy partial run created before capture/evidence packet files became required.",
+      "waiver_id": "historical-run-20260220t144710z-425b7a",
+      "waiver_approved_by": "jamiecraik",
+      "waiver_created_at": "2026-03-11T00:00:00Z"
     },
     {
       "run_dir": "artifacts/skill-graphs/runs/run_20260220T144736Z_425b7a",
       "status": "legacy_partial",
+      "waived": true,
       "required_files": [
         "capture_record.json",
         "events.jsonl",
@@ -182,11 +204,16 @@
       "notes": [
         "terminal_status=passed",
         "stop_reason=pass"
-      ]
+      ],
+      "waiver_reason": "Legacy partial run created before capture/evidence packet files became required.",
+      "waiver_id": "historical-run-20260220t144736z-425b7a",
+      "waiver_approved_by": "jamiecraik",
+      "waiver_created_at": "2026-03-11T00:00:00Z"
     },
     {
       "run_dir": "artifacts/skill-graphs/runs/run_20260220T150021Z_518880",
       "status": "missing_mandatory",
+      "waived": true,
       "required_files": [
         "capture_record.json",
         "events.jsonl",
@@ -216,11 +243,16 @@
       "notes": [
         "terminal_status=passed",
         "stop_reason=pass"
-      ]
+      ],
+      "waiver_reason": "Historical transition run preserved as-is during parity migration; envelope was incomplete at capture time.",
+      "waiver_id": "historical-run-20260220t150021z-518880",
+      "waiver_approved_by": "jamiecraik",
+      "waiver_created_at": "2026-03-11T00:00:00Z"
     },
     {
       "run_dir": "artifacts/skill-graphs/runs/run_20260220T150021Z_82ecf7",
       "status": "legacy_partial",
+      "waived": true,
       "required_files": [
         "capture_record.json",
         "events.jsonl",
@@ -250,11 +282,16 @@
       "notes": [
         "terminal_status=passed",
         "stop_reason=pass"
-      ]
+      ],
+      "waiver_reason": "Legacy partial run created before capture/evidence packet files became required.",
+      "waiver_id": "historical-run-20260220t150021z-82ecf7",
+      "waiver_approved_by": "jamiecraik",
+      "waiver_created_at": "2026-03-11T00:00:00Z"
     },
     {
       "run_dir": "artifacts/skill-graphs/runs/run_20260220T150021Z_9b592b",
       "status": "legacy_partial",
+      "waived": true,
       "required_files": [
         "capture_record.json",
         "events.jsonl",
@@ -284,11 +321,16 @@
       "notes": [
         "terminal_status=passed",
         "stop_reason=pass"
-      ]
+      ],
+      "waiver_reason": "Legacy partial run created before capture/evidence packet files became required.",
+      "waiver_id": "historical-run-20260220t150021z-9b592b",
+      "waiver_approved_by": "jamiecraik",
+      "waiver_created_at": "2026-03-11T00:00:00Z"
     },
     {
       "run_dir": "artifacts/skill-graphs/runs/run_20260220T150021Z_bb9acb",
       "status": "legacy_partial",
+      "waived": true,
       "required_files": [
         "capture_record.json",
         "events.jsonl",
@@ -318,11 +360,16 @@
       "notes": [
         "terminal_status=passed",
         "stop_reason=pass"
-      ]
+      ],
+      "waiver_reason": "Legacy partial run created before capture/evidence packet files became required.",
+      "waiver_id": "historical-run-20260220t150021z-bb9acb",
+      "waiver_approved_by": "jamiecraik",
+      "waiver_created_at": "2026-03-11T00:00:00Z"
     },
     {
       "run_dir": "artifacts/skill-graphs/runs/run_20260220T195545Z_8799c2",
       "status": "missing_mandatory",
+      "waived": true,
       "required_files": [
         "capture_record.json",
         "events.jsonl",
@@ -351,7 +398,11 @@
       "notes": [
         "terminal_status=passed",
         "stop_reason=pass"
-      ]
+      ],
+      "waiver_reason": "Historical transition run preserved as-is during parity migration; envelope was incomplete at capture time.",
+      "waiver_id": "historical-run-20260220t195545z-8799c2",
+      "waiver_approved_by": "jamiecraik",
+      "waiver_created_at": "2026-03-11T00:00:00Z"
     }
   ],
   "prune_empty": {
@@ -359,5 +410,6 @@
     "dry_run": false,
     "actions": {}
   },
+  "waiver_file": "artifacts/skill-graphs/pilot/artifact-parity-waivers.json",
   "status": "ok"
 }

@@ -6,6 +6,14 @@
   "rubric_version": "2026-02-26",
   "evaluator_version": "v1",
   "persona_set_id": "default-v1",
+  "learning_posture": {
+    "supported": [
+      "learn",
+      "guided",
+      "execute"
+    ],
+    "default": "guided"
+  },
   "thresholds": {
     "stability_consecutive_passes": 1,
     "critical_non_regression": true,

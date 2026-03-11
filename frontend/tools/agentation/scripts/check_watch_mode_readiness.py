@@ -41,6 +41,7 @@ FULL_WATCH_TOOLS = {
 
 OPTIONAL_WATCH_TOOLS = {
     "agentation_reply",
+    "agentation_dismiss",
     "agentation_get_pending",
     "agentation_get_all_pending",
     "agentation_get_session",
@@ -63,7 +64,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--runner-state",
-        choices=["manual", "critique", "autopilot", "watch_mode", "stopped"],
+        choices=["manual", "critique", "self_driving", "autopilot", "watch_mode", "stopped"],
         default="manual",
     )
     parser.add_argument("--ui-mounted", action="store_true", help="Agentation widget confirmed mounted")
@@ -124,6 +125,7 @@ def build_report(args: argparse.Namespace) -> dict[str, Any]:
     project_root = Path(args.project_root).expanduser().resolve()
     framework, root_file = detect_framework(project_root)
     package_json = load_package_json(project_root)
+    runner_state = "self_driving" if args.runner_state == "autopilot" else args.runner_state
 
     declared_tools = {tool.strip() for tool in args.mcp_tools.split(",") if tool.strip()}
     full_watch_ready = FULL_WATCH_TOOLS.issubset(declared_tools)
@@ -186,7 +188,7 @@ def build_report(args: argparse.Namespace) -> dict[str, Any]:
             "mcp": mcp_state,
             "webhook": webhook_state,
             "queue": args.pending_state,
-            "runner": args.runner_state,
+            "runner": runner_state,
         },
         "tooling": {
             "declared_watch_tools": sorted(declared_tools),

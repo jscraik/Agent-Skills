@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Learning Posture Pilot Conformance Summary",
+  "description": "Machine-readable summary for learning-preserving pilot rollout conformance.",
+  "type": "object",
+  "required": [
+    "pilot_version",
+    "generated_at",
+    "overall_state",
+    "pilot_skills"
+  ],
+  "properties": {
+    "pilot_version": {
+      "type": "string",
+      "pattern": "^v\\d+\\.\\d+\\.\\d+$"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "overall_state": {
+      "type": "string",
+      "enum": ["pass", "partial", "blocked"]
+    },
+    "pilot_skills": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "skill",
+          "declared_posture",
+          "selected_posture",
+          "eval_state",
+          "telemetry_state",
+          "conformance_state",
+          "interaction_pattern_tags",
+          "warnings"
+        ],
+        "properties": {
+          "skill": {
+            "type": "string"
+          },
+          "declared_posture": {
+            "type": "string"
+          },
+          "selected_posture": {
+            "type": "string"
+          },
+          "eval_state": {
+            "type": "string",
+            "enum": ["pass", "partial", "blocked", "not_run"]
+          },
+          "telemetry_state": {
+            "type": "string",
+            "enum": ["pass", "partial", "blocked", "not_run"]
+          },
+          "conformance_state": {
+            "type": "string",
+            "enum": ["pass", "partial", "blocked"]
+          },
+          "interaction_pattern_tags": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "conceptual_inquiry",
+                "explain_then_generate",
+                "generate_then_explain",
+                "full_delegation",
+                "ai_led_debugging"
+              ]
+            }
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

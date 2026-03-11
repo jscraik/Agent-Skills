@@ -5,8 +5,9 @@ from __future__ import annotations
 
 import argparse
 import re
+import json
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 SKIP_DIRS = {
     '.git',
@@ -21,6 +22,65 @@ SKIP_DIRS = {
     'skills-system',
     '.worktrees',
 }
+
+PILOT_SKILL_PROFILE_PATHS = {
+    "utilities/skill-builder",
+    "frontend/tools/agentation",
+    "utilities/systematic-debugging",
+    "interview/interview-me",
+}
+LEARNING_POSTURE_VALUES = {"learn", "guided", "execute"}
+AUTOPILOT_DEGRADED_ACCEPTED = "degraded_pairings_acknowledged"
+def parse_json(path: Path) -> Optional[Dict[str, Any]]:
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return None
+    return payload if isinstance(payload, dict) else None
+
+
+def validate_learning_posture_profile(profile: Dict[str, Any], issues: List[str]) -> None:
+    learning_posture = profile.get("learning_posture")
+    if not isinstance(learning_posture, dict):
+        issues.append("pilot skill missing required task-profile learning_posture block")
+        return
+
+    supported = learning_posture.get("supported")
+    if not isinstance(supported, list) or not supported:
+        issues.append("learning_posture.supported must be a non-empty list")
+        return
+
+    clean_supported = []
+    for item in supported:
+        posture = str(item).strip()
+        if posture not in LEARNING_POSTURE_VALUES:
+            issues.append(f"learning_posture.supported contains invalid value: `{posture}`")
+        else:
+            clean_supported.append(posture)
+
+    default = str(learning_posture.get("default", "")).strip()
+    if default not in LEARNING_POSTURE_VALUES:
+        issues.append("learning_posture.default must be learn|guided|execute")
+    elif default not in clean_supported:
+        issues.append("learning_posture.default must be included in learning_posture.supported")
+
+    delegation_mode = str(profile.get("delegation", {}).get("mode", "")).strip().lower()
+    if delegation_mode == "autopilot":
+        if "learn" in clean_supported:
+            issues.append("invalid posture/mode pairing: autopilot cannot support learn")
+        if "guided" in clean_supported:
+            acknowledged = learning_posture.get(AUTOPILOT_DEGRADED_ACCEPTED)
+            if not isinstance(acknowledged, list) or not acknowledged:
+                issues.append(
+                    "autopilot + guided is degraded and requires explicit "
+                    "degraded_pairings_acknowledged entries"
+                )
+    elif delegation_mode in {"manual", "co-pilot"}:
+        return
+    elif delegation_mode:
+        issues.append(f"delegation.mode must be autopilot | co-pilot | manual, found `{delegation_mode}`")
+    else:
+        issues.append("delegation.mode missing while validating pilot learning_posture constraints")
 
 
 def discover_skill_files(repo_root: Path) -> List[Path]:
@@ -54,7 +114,7 @@ def parse_frontmatter(path: Path) -> Dict[str, str]:
     return result
 
 
-def check_file(path: Path) -> List[str]:
+def check_file(path: Path, repo_root: Path) -> List[str]:
     issues: List[str] = []
     fm = parse_frontmatter(path)
     if not fm:
@@ -72,6 +132,22 @@ def check_file(path: Path) -> List[str]:
 
     if desc and not re.search(r'[a-zA-Z]', desc):
         issues.append('description appears invalid')
+
+    skill_dir = path.relative_to(repo_root).as_posix().removesuffix('/SKILL.md')
+    if skill_dir in PILOT_SKILL_PROFILE_PATHS:
+        profile_path_str = fm.get("knowledge_graph_profile", "").strip()
+        if profile_path_str:
+            profile_path = (path.parent / profile_path_str).resolve()
+        else:
+            profile_path = path.parent / "references/task-profile.json"
+        if not profile_path.exists():
+            issues.append("pilot skill missing references/task-profile.json")
+        else:
+            profile_payload = parse_json(profile_path)
+            if profile_payload is None:
+                issues.append(f"pilot task-profile parse failed: {profile_path}")
+            else:
+                validate_learning_posture_profile(profile_payload, issues)
 
     return issues
 
@@ -92,7 +168,7 @@ def main() -> int:
     names_seen: Dict[str, List[Path]] = {}
 
     for skill_file in skill_files:
-        issues = check_file(skill_file)
+        issues = check_file(skill_file, repo_root)
         if issues:
             issues_found.append((skill_file, issues))
 

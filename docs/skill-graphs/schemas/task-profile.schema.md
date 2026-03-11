@@ -7,6 +7,7 @@ Defines runtime configuration for a loop run.
 - [Required fields](#required-fields)
 - [Field definitions](#field-definitions)
 - [Delegation block (required for onboarding)](#delegation-block-required-for-onboarding)
+- [LearningPosture extension (pilot-only)](#learningposture-extension-pilot-only)
 - [Example](#example)
 
 ## Required fields
@@ -45,6 +46,12 @@ criteria:
     threshold: float                    # 0..1
     weight: float                       # 0..1
     critical: bool
+learning_posture:                       # optional pilot extension
+  supported: [learn, guided, execute]   # supported postures for this pilot skill
+  default: learn|guided|execute          # fallback posture when selection is unset
+  degraded_pairings_acknowledged:        # required only when enabling degraded pairings
+    - posture: string                   # example: guided
+      rationale: string
 delegation:                             # required Cockpit Rule context for onboarding
   mode: string                          # autopilot | co-pilot | manual
                                         # legacy compatibility: collaboration -> co-pilot
@@ -60,6 +67,23 @@ delegation:                             # required Cockpit Rule context for onbo
 Autopilot/Co-pilot/Manual override decisions and agentic cost-benefit assumptions.
 `mode` must be emitted canonically as `autopilot`, `co-pilot`, or `manual`.
 Legacy `collaboration` may be read for compatibility, but new profiles must not emit it.
+
+## LearningPosture extension (pilot-only)
+
+`learning_posture` is a pilot-only extension for learning-preserving behavior.
+It is additive and must remain separate from `delegation.mode`.
+
+Supported values:
+
+- `learn`
+- `guided`
+- `execute`
+
+Compatibility expectations:
+
+- `autopilot + learn` is invalid in pilot scope.
+- `autopilot + guided` is degraded and must set `degraded_pairings_acknowledged` only when explicitly intended.
+- `manual` and `co-pilot` may support all three values.
 
 ## Example
 

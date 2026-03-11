@@ -27,6 +27,29 @@ Execution model shorthand:
 - **Current migration:** all-skills onboarding via wave model (`wave-0-controls -> wave-1-manual -> wave-2-co-pilot`).
 - **Migration complete:** Canonical onboarding artifacts currently cover 112 active skills with valid profiles.
 
+## LearningPosture (pilot contract)
+
+The learning-preserving pilot adds one bounded, additive dimension:
+
+- `LearningPosture` values are `learn | guided | execute`.
+- `LearningPosture` is explicit and separate from `delegation.mode`.
+- `delegation.mode` remains canonical `autopilot | co-pilot | manual`.
+- For this pilot, `autopilot + learn` is disallowed and `autopilot + guided` is treated as degraded.
+- `manual` and `co-pilot` may support `learn`, `guided`, and `execute`.
+
+Canonical source of truth:
+
+- Repository-level declaration: this document plus pilot profile metadata in `references/task-profile.json`.
+- Pilot conformance summary: `artifacts/skill-graphs/pilot/learning-posture-pilot-conformance-summary.json`.
+
+Authoring contract for pilot skills:
+
+- `references/task-profile.json` must include a `learning_posture` block with:
+  - `supported`: list of allowed values (`learn`, `guided`, `execute`)
+  - `default`: default posture for unscoped runs (`learn | guided | execute`)
+- Validators treat missing `learning_posture` on pilot skills as a hard conformance failure.
+- Pairing matrix is explicit and evaluated in repository-level checks (not at runtime in v1).
+
 ## Skill Genome Loop
 
 - [Runbook](/docs/skill-graphs/runbooks/skill-genome-loop.md)

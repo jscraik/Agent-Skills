@@ -17,6 +17,7 @@ Create and maintain concise, high-signal AGENTS guidance with progressive disclo
 - [Constraints](#constraints)
 - [Procedure](#procedure)
 - [Validation](#validation)
+- [Shared guidance propagation](#shared-guidance-propagation)
 - [Anti-patterns](#anti-patterns)
 - [Variation](#variation)
 - [Mandatory workflow snippet](#mandatory-workflow-snippet)
@@ -77,6 +78,25 @@ If command truth, path ownership, or instruction precedence cannot be verified, 
 - Confirm file paths exist and links resolve.
 - Confirm no contradictory instructions remain unresolved.
 - Fail fast: stop at first critical contradiction and request decision.
+
+## Shared guidance propagation
+- When a user asks to add guidance under named AGENTS sections, place it in the canonical AGENTS file for that repo scope and update that file's Table of Contents.
+- If the named section does not exist, create it with concise, action-oriented bullets instead of scattering equivalent guidance across multiple unrelated files.
+- Keep cross-repo guidance consistent by mirroring durable section-level rules in this skill when they affect how AGENTS refactors should be performed.
+- For section-level additions touching operational safety, preserve explicit checks for:
+  - quality validation after config/CI/dependency edits,
+  - external tool authentication readiness (including 1Password/env cache checks),
+  - git-history risk escalation before complex rebase/conflict workflows,
+  - tool/skill existence verification before fallback assumptions,
+  - exact path verification against documented locations before commit.
+- When external integration guidance is requested, preserve a strict preflight order:
+  1. env vars resolved,
+  2. `op account list` succeeds,
+  3. simple MCP/API connectivity check,
+  4. then full operations.
+  If auth fails, require auth-layer debugging before operation retries.
+- When git safety guidance is requested, require explicit pre-operation briefing for rebasing 5+ commits, merge conflict resolution, and force-pushes, including branch state, strategy with risks, alternatives, and user confirmation.
+- When validation guidance is requested for config-sensitive files (for example `package.json`, CI workflows, `settings.json`, config files), require running applicable validation commands and reporting pass status before commit.
 
 ## Anti-patterns
 - Do not dump full policy documents into root AGENTS.

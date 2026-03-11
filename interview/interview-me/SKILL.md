@@ -17,6 +17,7 @@ Kernel-enforced: single-question loop, question validity gate, DISCOVER vs DECID
 - [Deliverables](#deliverables)
 - [Failure mode](#failure-mode)
 - [Standards snapshot](#standards-snapshot-march-2026)
+- [LearningPosture compatibility](#learningposture-compatibility)
 - [Fresh vs Delta](#step-0--fresh-vs-delta)
 - [Track selection](#track-selection-first-substantive-question)
 - [Spine A](#spine-a--requirements-to-build-default)
@@ -42,6 +43,15 @@ Interview → write/update spec → (after approval) run planning/execution as a
 - Use multiple-choice questions to reduce ambiguity, but make the options sharp enough to change the final spec.
 - Move from DISCOVER to DECIDE as soon as tradeoffs appear; do not over-interview once the next decision is clear.
 - Produce an execution-ready output with explicit decisions, assumptions, acceptance criteria, and an approval gate.
+
+## LearningPosture compatibility
+
+- This wrapper stays single-question, multi-choice, and approval-gated.
+- Posture semantics mapped to interview flow:
+  - `learn`: one-question, one-decision-at-a-time clarification with rationale.
+  - `guided`: constrained branching with explicit assumptions and risks before moving to the next spine.
+  - `execute`: only after approval; hand off to planning/execution, never code in this wrapper.
+- Default posture is `learn`, which keeps scope and risk articulation explicit before branching.
 
 ## User profile alignment (Jamie)
 

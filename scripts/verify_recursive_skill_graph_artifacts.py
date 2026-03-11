@@ -31,6 +31,7 @@ REQUIRED_OPTIONAL_BLOCKER_FILES: Dict[str, Set[str]] = {
     "evaluator_conflict": {"run_blocker.json"},
 }
 DEFAULT_MANIFEST = "artifacts/skill-graphs/pilot/artifact-parity-manifest.json"
+DEFAULT_WAIVER_FILE = "artifacts/skill-graphs/pilot/artifact-parity-waivers.json"
 
 LEGACY_RUN_FILE_SETS = {
     frozenset({"run.json", "iteration_journal.jsonl"}),
@@ -83,6 +84,11 @@ def parse_args() -> argparse.Namespace:
         "--manifest",
         default=DEFAULT_MANIFEST,
         help="Output manifest JSON path",
+    )
+    p.add_argument(
+        "--waiver-file",
+        default=DEFAULT_WAIVER_FILE,
+        help="Optional JSON file listing explicit waivers for historical non-compliant runs",
     )
     p.add_argument(
         "--dry-run",
@@ -345,13 +351,57 @@ def summarize_audits(audits: Sequence[ArtifactStatus]) -> Dict[str, Any]:
     }
 
 
-def make_manifest(audits: Sequence[ArtifactStatus], run_state_check: bool) -> Dict[str, Any]:
+def load_waivers(path: Path) -> Dict[str, Dict[str, Any]]:
+    payload = load_json(path)
+    if not payload:
+        return {}
+    rows = payload.get("waived_runs")
+    if not isinstance(rows, list):
+        return {}
+
+    waivers: Dict[str, Dict[str, Any]] = {}
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        run_dir = str(row.get("run_dir", "")).strip()
+        if not run_dir:
+            continue
+        waivers[run_dir] = row
+    return waivers
+
+
+def resolve_waiver(audit: ArtifactStatus, waivers: Dict[str, Dict[str, Any]]) -> Optional[Dict[str, Any]]:
+    candidates = [audit.run_dir_relative, str(audit.run_dir), audit.run_dir.name]
+    for key in candidates:
+        waiver = waivers.get(key)
+        if not waiver:
+            continue
+        allowed = waiver.get("allowed_statuses")
+        if isinstance(allowed, list) and allowed:
+            allowed_values = {str(item).strip() for item in allowed}
+            if audit.status not in allowed_values:
+                continue
+        return waiver
+    return None
+
+
+def make_manifest(
+    audits: Sequence[ArtifactStatus],
+    run_state_check: bool,
+    waivers: Dict[str, Dict[str, Any]],
+) -> Dict[str, Any]:
     summary = summarize_audits(audits)
+    summary["waived_non_compliant"] = 0
     runs_payload: List[Dict[str, Any]] = []
     for audit in audits:
+        waiver = resolve_waiver(audit, waivers)
+        waived = audit.status != "compliant" and waiver is not None
+        if waived:
+            summary["waived_non_compliant"] += 1
         entry: Dict[str, Any] = {
             "run_dir": audit.run_dir_relative,
             "status": audit.status,
+            "waived": waived,
             "required_files": audit.required,
             "missing_files": audit.missing,
             "present_files": audit.present,
@@ -362,6 +412,11 @@ def make_manifest(audits: Sequence[ArtifactStatus], run_state_check: bool) -> Di
             "blocker_code": audit.blocker_code,
             "notes": audit.notes,
         }
+        if waived:
+            entry["waiver_reason"] = waiver.get("reason")
+            entry["waiver_id"] = waiver.get("waiver_id")
+            entry["waiver_approved_by"] = waiver.get("approved_by")
+            entry["waiver_created_at"] = waiver.get("created_at")
         if run_state_check:
             entry["event_blocker_codes"] = sorted(audit.event_blocker_codes)
         runs_payload.append(entry)
@@ -409,6 +464,7 @@ def run_prune_empty(audits: Sequence[ArtifactStatus], dry_run: bool) -> Dict[str
 def main() -> int:
     args = parse_args()
     run_dirs = scan_run_dirs(args.run_dir, args.runs_root)
+    waivers = load_waivers(Path(args.waiver_file))
 
     audits = [classify_run_dir(run_dir) for run_dir in run_dirs]
     removals = run_prune_empty(audits, dry_run=args.dry_run) if args.prune_empty else {}
@@ -420,15 +476,23 @@ def main() -> int:
             if state:
                 audit.notes.append(f"prune_empty={state}")
 
-    manifest = make_manifest(audits, run_state_check=args.run_state_check)
+    manifest = make_manifest(audits, run_state_check=args.run_state_check, waivers=waivers)
     manifest["prune_empty"] = {
         "enabled": bool(args.prune_empty),
         "dry_run": bool(args.dry_run),
         "actions": removals,
     }
+    manifest["waiver_file"] = args.waiver_file if waivers else None
 
     if args.strict:
-        manifest["status"] = ("ok" if all(audit.status == "compliant" for audit in audits) else "fail")
+        manifest["status"] = (
+            "ok"
+            if all(
+                audit.status == "compliant" or resolve_waiver(audit, waivers) is not None
+                for audit in audits
+            )
+            else "fail"
+        )
     else:
         manifest["status"] = "ok"
 
@@ -444,7 +508,10 @@ def main() -> int:
                     print(json.dumps(output, indent=2))
                 else:
                     print(json.dumps(manifest, indent=2))
-                if args.strict and any(audit.status != "compliant" for audit in audits):
+                if args.strict and any(
+                    audit.status != "compliant" and resolve_waiver(audit, waivers) is None
+                    for audit in audits
+                ):
                     return 3
                 return 0
         manifest_path.write_text(rendered_manifest, encoding="utf-8")
@@ -455,12 +522,21 @@ def main() -> int:
         raise
 
     if args.strict:
-        non_compliant = [audit for audit in audits if audit.status != "compliant"]
+        non_compliant = [
+            audit
+            for audit in audits
+            if audit.status != "compliant" and resolve_waiver(audit, waivers) is None
+        ]
         if non_compliant:
             if args.quiet:
                 print(json.dumps({k: v for k, v in manifest.items() if k != "runs"}, indent=2))
             else:
-                print(json.dumps(make_manifest(audits, run_state_check=args.run_state_check), indent=2))
+                print(
+                    json.dumps(
+                        make_manifest(audits, run_state_check=args.run_state_check, waivers=waivers),
+                        indent=2,
+                    )
+                )
             return 3
 
     if args.quiet:

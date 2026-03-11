@@ -79,6 +79,27 @@ diagram generate . --output diagram.mmd
 
 Configuration file: `.diagramrc` (excludes `node_modules`, test files, build artifacts)
 
+## Learning-preserving pilot (pilot-only)
+
+This repo includes a pilot for learning-preserving behavior on four skills:
+
+- `utilities/skill-builder`
+- `frontend/tools/agentation`
+- `utilities/systematic-debugging`
+- `interview/interview-me`
+
+The pilot defines `LearningPosture` as a second axis to `delegation.mode`:
+
+- Canonical `delegation.mode` remains `autopilot | co-pilot | manual`.
+- Canonical `LearningPosture` values are `learn`, `guided`, and `execute`.
+- `autopilot + learn` is blocked; `autopilot + guided` is degraded.
+
+See the repo-level contract and summary artifacts for the latest status:
+
+- [Skill Graphs](/docs/skill-graphs)
+- [Learning-preserving conformance summary](/artifacts/skill-graphs/pilot/learning-posture-pilot-conformance-summary.json)
+- [Pilot metadata decision artifact](/artifacts/skill-graphs/pilot/learning-posture-metadata-home-decision.json)
+
 ## Quickstart
 
 Run these commands from the repository root:

@@ -1,24 +1,25 @@
 # Agentation skill update plan
 
 ## Objective
-Upgrade the `agentation` skill so it reliably handles real-world setup issues observed in desktop/web projects:
-- MCP vs webhook transport confusion (often called "websocket issues").
-- Local listener port collisions (`EADDRINUSE`).
-- Submit-driven automation and timeout-safe completion semantics.
+Realign the `agentation` skill with the current public Agentation surface:
+- React 18+ root install and dev-only mount.
+- MCP setup via `add-mcp`, `init`, `doctor`, and the default server on `localhost:4747`.
+- `endpoint` and `webhookUrl` as the primary integration props.
+- Current hands-free workflows: watch mode, critique mode, and self-driving.
 
 ## Task graph
 
-- **T1 (depends_on: [])** — Draft new skill workflow for multi-framework support (Next.js + Vite/Tauri) and transport triage.
-- **T2 (depends_on: [T1])** — Add webhook + listener troubleshooting steps, including deterministic port collision recovery.
-- **T3 (depends_on: [T1])** — Add annotation-to-autopilot automation guidance (implementation + review + status artifacts + refresh/notifications).
-- **T4 (depends_on: [T2, T3])** — Update `references/contract.yaml` with new scope, risks, and guardrails.
-- **T5 (depends_on: [T2, T3])** — Update `references/evals.yaml` with happy/edge/pressure/negative tests covering new behavior.
-- **T6 (depends_on: [T4, T5])** — Run `quick_validate.py` then `skill_gate.py`; fail-fast and fix first failing gate.
+- **T1 (depends_on: [])** — Replace outdated env-script automation assumptions with docs-backed workflow guidance.
+- **T2 (depends_on: [T1])** — Align webhook guidance to `webhookUrl`, current event types, and real `submit` verification.
+- **T3 (depends_on: [T1])** — Align MCP guidance to `add-mcp`, `init`, `doctor`, current tool names, and `endpoint` debugging.
+- **T4 (depends_on: [T2, T3])** — Update watch-mode state and readiness checker terminology (`self_driving` vs legacy `autopilot`).
+- **T5 (depends_on: [T2, T3, T4])** — Refresh contract, evals, and metadata to match the current public site plus the original upstream skill compatibility route.
+- **T6 (depends_on: [T5])** — Run focused skill validation plus broader docs validation and fix the first failing gate.
 
 ## Acceptance criteria
 
-- Skill description triggers on Agentation install/verify/troubleshoot and automation setup prompts.
-- Workflow clearly distinguishes MCP health from webhook delivery.
-- Includes concrete mitigation for `EADDRINUSE`.
-- Includes timeout-aware success rule for automation status.
-- Local validators pass in the repository root.
+- Skill description routes to current Agentation integration and workflow tasks.
+- Workflow distinguishes UI mount, `endpoint`, MCP, and `webhookUrl`.
+- Current MCP commands and tool names are documented accurately.
+- Critique and self-driving are described as workflow modes, not undocumented env toggles.
+- Validation passes for the revised skill package.

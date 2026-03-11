@@ -28,6 +28,14 @@ metadata:
 2. Step two
 3. Step three
 
+## LearningPosture (pilot-aware authoring)
+
+- For pilot skills, define posture support in `references/task-profile.json` using a top-level `learning_posture` block:
+  - `supported`: allowed values (`learn`, `guided`, `execute`)
+  - `default`: default posture for this skill
+- Keep `learning_posture` additive only; do not encode posture into `delegation.mode`.
+- Keep behavior differences by posture explicit in the skill contract body.
+
 ## Outputs
 
 - What this skill produces
