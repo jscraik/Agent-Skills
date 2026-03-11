@@ -67,6 +67,7 @@ jobs:
             git fetch origin "${base_ref}:${base_ref}" --depth=1
 
             mapfile -t changed_files < <(git diff --name-only --diff-filter=ACMR "${base_ref}...HEAD")
+            echo "Changed files count: ${#changed_files[@]}"
 
             # Filter to only existing files (defensive against git diff oddities)
             existing_files=()
@@ -78,12 +79,14 @@ jobs:
               fi
             done
 
+            echo "Existing files count: ${#existing_files[@]}"
             if [ "${#existing_files[@]}" -eq 0 ]; then
               echo "No changed files to scan in PR diff; writing empty semgrep.sarif"
               printf '{"version":"2.1.0","runs":[]}\n' > semgrep.sarif
               exit 0
             fi
 
+            echo "Running: semgrep scan ${semgrep_args[*]} -- ${existing_files[*]}"
             semgrep scan "${semgrep_args[@]}" -- "${existing_files[@]}" || semgrep_status=$?
           else
             semgrep scan "${semgrep_args[@]}" -- . || semgrep_status=$?
