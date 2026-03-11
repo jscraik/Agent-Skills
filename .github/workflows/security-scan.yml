@@ -61,12 +61,6 @@ jobs:
             --sarif --output semgrep.sarif
           )
 
-          if [ -n "${SEMGREP_APP_TOKEN:-}" ]; then
-            semgrep_args=(--config auto "${semgrep_args[@]}")
-          else
-            echo "SEMGREP_APP_TOKEN is not set; skipping Semgrep auto ruleset."
-          fi
-
           event_name="${{ github.event_name }}"
           if [ "${event_name}" = "pull_request" ]; then
             base_ref="${{ github.base_ref }}"
@@ -111,9 +105,6 @@ jobs:
             echo "::error::Semgrep found ${findings_count} finding(s)"
             exit 1
           fi
-        env:
-          # Set SEMGREP_APP_TOKEN if using Semgrep Cloud for dashboard/PR comments
-          SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN || '' }}
 
       - name: Upload Semgrep SARIF to GitHub
         if: always()
