@@ -9,6 +9,7 @@ import hmac
 import json
 import os
 import re
+import sys
 from hashlib import sha256
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set
@@ -1151,7 +1152,8 @@ def main() -> int:
         )
         return 1
 
-    print(json.dumps(report))
+    # Output report to stderr to avoid exposing sensitive data in stdout pipes
+    sys.stderr.write(json.dumps(report) + "\n")
     if args.write_report:
         report_path = Path(args.write_report).expanduser().resolve()
         report_path.parent.mkdir(parents=True, exist_ok=True)
