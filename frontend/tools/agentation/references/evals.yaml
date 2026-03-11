@@ -7,6 +7,7 @@ cases:
     category: happy
     should_trigger: true
     prepend_skill: true
+    timeout_profile: codex-heavy
     prompt: "Use $agentation to add Agentation to my React 18 app and keep it development-only."
     acceptance:
       - type: skill_selected
@@ -19,6 +20,7 @@ cases:
     category: happy
     should_trigger: true
     prepend_skill: false
+    timeout_sec: 300
     prompt: "My agent doesn't expose any Agentation tools. Fix the MCP setup and verify it correctly."
     acceptance:
       - type: skill_selected
@@ -31,6 +33,7 @@ cases:
     category: happy
     should_trigger: true
     prepend_skill: false
+    timeout_profile: codex-heavy
     prompt: "The toolbar is visible but the agent cannot see sessions or pending annotations. Debug it."
     acceptance:
       - type: skill_selected
@@ -43,6 +46,7 @@ cases:
     category: edge
     should_trigger: true
     prepend_skill: false
+    timeout_sec: 300
     prompt: "Make sure Agentation submit events reach my local webhook listener."
     acceptance:
       - type: skill_selected
