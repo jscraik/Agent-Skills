@@ -57,7 +57,7 @@ jobs:
             --config "p/python"
             --config "p/typescript"
             --config "p/bash"
-            --exclude "artifacts/skill-graphs/**"
+            --metrics=off
             --sarif --output semgrep.sarif
           )
 
