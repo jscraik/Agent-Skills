@@ -487,10 +487,7 @@ def main() -> int:
     if args.strict:
         manifest["status"] = (
             "ok"
-            if all(
-                audit.status == "compliant" or resolve_waiver(audit, waivers) is not None
-                for audit in audits
-            )
+            if all(audit.status == "compliant" for audit in audits)
             else "fail"
         )
     else:
@@ -508,10 +505,7 @@ def main() -> int:
                     print(json.dumps(output, indent=2))
                 else:
                     print(json.dumps(manifest, indent=2))
-                if args.strict and any(
-                    audit.status != "compliant" and resolve_waiver(audit, waivers) is None
-                    for audit in audits
-                ):
+                if args.strict and any(audit.status != "compliant" for audit in audits):
                     return 3
                 return 0
         manifest_path.write_text(rendered_manifest, encoding="utf-8")
@@ -522,11 +516,7 @@ def main() -> int:
         raise
 
     if args.strict:
-        non_compliant = [
-            audit
-            for audit in audits
-            if audit.status != "compliant" and resolve_waiver(audit, waivers) is None
-        ]
+        non_compliant = [audit for audit in audits if audit.status != "compliant"]
         if non_compliant:
             if args.quiet:
                 print(json.dumps({k: v for k, v in manifest.items() if k != "runs"}, indent=2))

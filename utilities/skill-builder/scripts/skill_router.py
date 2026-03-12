@@ -16,6 +16,9 @@ from router_controls import resolve_rollout_mode
 from skill_catalog import SkillMeta, load_catalog
 from skill_router_schema import Candidate, build_router_result
 
+# OpenClaw guard integration for high-risk skills
+from openclaw_skill_guard import readiness_checks, security_checks
+
 TOKEN_RE = re.compile(r"[a-z0-9][a-z0-9_\-]{1,}")
 
 
@@ -129,6 +132,13 @@ def render_human(result: Dict[str, object]) -> str:
         )
         lines.append(f"   rationale: {', '.join(candidate['rationale'])}")
 
+    guard_violations = result.get("guard_violations")
+    if guard_violations:
+        lines.append("")
+        lines.append("GUARD VIOLATIONS (blocking):")
+        for v in guard_violations:
+            lines.append(f"  ⚠ {v}")
+
     return "\n".join(lines)
 
 
@@ -168,6 +178,34 @@ def append_event(path: Path, event: Dict[str, object]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with open(path, "a", encoding="utf-8") as f:
         f.write(json.dumps(event, sort_keys=True) + "\n")
+
+
+def evaluate_guardrails(skill: SkillMeta, repo_root: Path) -> List[str]:
+    """Run OpenClaw guard checks on high-risk skills before routing.
+
+    Returns list of critical findings that should block or warn about the route.
+    """
+    # Only guard high-risk skills
+    if risk_tier(skill) != "high":
+        return []
+
+    skill_dir = repo_root / skill.skill_path
+    if not skill_dir.exists():
+        return []
+
+    findings: List[str] = []
+
+    # Run readiness checks
+    for finding in readiness_checks(skill_dir):
+        if finding.level == "critical":
+            findings.append(f"[{finding.code}] {finding.message}")
+
+    # Run security checks (limited scope for performance)
+    for finding in security_checks(skill_dir, max_files=100, max_file_bytes=1024 * 1024):
+        if finding.level == "critical":
+            findings.append(f"[{finding.code}] {finding.message}")
+
+    return findings
 
 
 def parse_args() -> argparse.Namespace:
@@ -216,6 +254,17 @@ def main() -> int:
         return 2
 
     candidates, uncertainty_reasons = route(args.query, catalog.skills, top_k=max(1, args.top_k))
+
+    # OpenClaw guard: check high-risk skills before routing
+    guard_violations: List[str] = []
+    if candidates:
+        skill_map = {s.name: s for s in catalog.skills}
+        top_skill = skill_map.get(candidates[0].skill_name)
+        if top_skill:
+            guard_violations = evaluate_guardrails(top_skill, args.repo_root)
+            if guard_violations:
+                uncertainty_reasons.append("guardrail_violations")
+
     result = build_router_result(
         query=args.query,
         actor_type=args.actor_type,
@@ -225,6 +274,10 @@ def main() -> int:
         uncertainty_reasons=uncertainty_reasons,
         control_resolution=resolution.reason,
     )
+
+    # Add guard violations to result for transparency
+    if guard_violations:
+        result["guard_violations"] = guard_violations
 
     if args.json:
         print(json.dumps(result, indent=2))

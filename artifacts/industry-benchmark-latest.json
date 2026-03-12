@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-03-10T19:12:54.276660+00:00",
-  "mode": "fail",
+  "generated_at": "2026-03-11T19:56:49.893121+00:00",
+  "mode": "warn",
   "policy_path": "/Users/jamiecraik/dev/agent-skills/utilities/skill-builder/references/benchmark-policy.json",
   "skills_scanned": 72,
   "uncategorized_skills": [],
@@ -45,7 +45,9 @@
         "mcp_spec": 0
       },
       "fails": [],
-      "warns": [],
+      "warns": [
+        "distribution warn: `gha_sha_pin` hits 3 < 4"
+      ],
       "pass": true
     },
     {
@@ -108,7 +110,9 @@
         "mcp_spec": 0
       },
       "fails": [],
-      "warns": [],
+      "warns": [
+        "coverage warn: 0.600 < 0.650"
+      ],
       "pass": true
     },
     {
@@ -262,7 +266,7 @@
   "summary": {
     "cluster_count": 12,
     "fail_count": 0,
-    "warn_count": 0,
+    "warn_count": 2,
     "overall_pass": true
   }
 }

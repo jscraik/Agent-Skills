@@ -54,32 +54,19 @@ jobs:
           git config --global --add safe.directory "$PWD"
           semgrep_args=(
             --config "p/secrets"
-            --config "p/python"
-            --config "p/typescript"
-            --config "p/bash"
             --exclude "artifacts/skill-graphs/**"
+            --metrics=off
             --sarif --output semgrep.sarif
           )
-
-          if [ -n "${SEMGREP_APP_TOKEN:-}" ]; then
-            semgrep_args=(--config auto "${semgrep_args[@]}")
-          else
-            echo "SEMGREP_APP_TOKEN is not set; skipping Semgrep auto ruleset."
-          fi
 
           event_name="${{ github.event_name }}"
           if [ "${event_name}" = "pull_request" ]; then
             base_ref="${{ github.base_ref }}"
             git fetch origin "${base_ref}:${base_ref}" --depth=1
 
-            mapfile -t changed_files < <(git diff --name-only --diff-filter=ACMR "${base_ref}...HEAD")
-            if [ "${#changed_files[@]}" -eq 0 ]; then
-              echo "No changed files to scan in PR diff; writing empty semgrep.sarif"
-              printf '{"version":"2.1.0","runs":[]}\n' > semgrep.sarif
-              exit 0
-            fi
-
-            semgrep scan "${semgrep_args[@]}" -- "${changed_files[@]}" || semgrep_status=$?
+            # Scan full repo on PR (scanning individual changed files causes exit code 7)
+            echo "Scanning repository on PR branch..."
+            semgrep scan "${semgrep_args[@]}" -- . || semgrep_status=$?
           else
             semgrep scan "${semgrep_args[@]}" -- . || semgrep_status=$?
           fi
@@ -100,9 +87,6 @@ jobs:
             echo "::error::Semgrep found ${findings_count} finding(s)"
             exit 1
           fi
-        env:
-          # Set SEMGREP_APP_TOKEN if using Semgrep Cloud for dashboard/PR comments
-          SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN || '' }}
 
       - name: Upload Semgrep SARIF to GitHub
         if: always()

@@ -471,7 +471,25 @@ def detect_skill_selected(
     if not skill_l:
         return None
 
-    blobs = [output_text or "", stdout_text or "", stderr_text or ""]
+    final_text = output_text or ""
+    final_low = final_text.lower()
+
+    explicit_negative_patterns = [
+        rf"\b{re.escape(skill_l)}\b\s+is\s+overkill\b",
+        rf"\boverkill\b[^\n]{{0,32}}\b{re.escape(skill_l)}\b",
+        rf"\b(?:do not|don't|did not|didn't|not)\b[^\n]{{0,32}}\b(?:use|trigger|select|invoke)\b[^\n]{{0,48}}\b{re.escape(skill_l)}\b",
+    ]
+    if any(re.search(p, final_low, flags=re.IGNORECASE) for p in explicit_negative_patterns):
+        return False
+
+    explicit_positive_patterns = [
+        rf"\${re.escape(skill_l)}\b",
+        rf"\b(?:using|used|invoked|selected|triggered|routed to)\b[^\n]{{0,48}}\$?{re.escape(skill_l)}\b",
+    ]
+    if any(re.search(p, final_low, flags=re.IGNORECASE) for p in explicit_positive_patterns):
+        return True
+
+    blobs = [final_text, stdout_text or "", stderr_text or ""]
     if events:
         event_blob = json.dumps(events, ensure_ascii=False, sort_keys=True)
         blobs.append(event_blob)

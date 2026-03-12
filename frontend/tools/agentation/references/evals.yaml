@@ -1,12 +1,20 @@
 schema_version: "2.0"
 skill_name: "agentation"
 
+# Shard layout:
+# - Shard A: fast integration and workflow checks
+# - Shard B: heavy diagnostic checks
+# - Shard C: posture, pressure, and negative controls
+# Keep the file ordered by shard so partial reruns stay auditable even before
+# the runner grows first-class shard selection flags.
 cases:
+  # Shard A: fast integration and workflow checks
   - id: explicit-react-install
     name: explicit react install
     category: happy
     should_trigger: true
     prepend_skill: true
+    timeout_profile: codex-heavy
     prompt: "Use $agentation to add Agentation to my React 18 app and keep it development-only."
     acceptance:
       - type: skill_selected
@@ -14,35 +22,12 @@ cases:
       - type: regex
         value: "(?i)(react 18|development-only|NODE_ENV|import.meta.env.DEV)"
 
-  - id: mcp-doctor-flow
-    name: mcp doctor flow
-    category: happy
-    should_trigger: true
-    prepend_skill: false
-    prompt: "My agent doesn't expose any Agentation tools. Fix the MCP setup and verify it correctly."
-    acceptance:
-      - type: skill_selected
-        expected_skill: "agentation"
-      - type: regex
-        value: "(?i)(add-mcp|agentation-mcp init|agentation-mcp doctor)"
-
-  - id: endpoint-triage
-    name: endpoint triage
-    category: happy
-    should_trigger: true
-    prepend_skill: false
-    prompt: "The toolbar is visible but the agent cannot see sessions or pending annotations. Debug it."
-    acceptance:
-      - type: skill_selected
-        expected_skill: "agentation"
-      - type: regex
-        value: "(?i)(endpoint|4747|mcp|sessions|pending)"
-
   - id: webhook-submit-delivery
     name: webhook submit delivery
     category: edge
     should_trigger: true
     prepend_skill: false
+    timeout_sec: 300
     prompt: "Make sure Agentation submit events reach my local webhook listener."
     acceptance:
       - type: skill_selected
@@ -50,11 +35,53 @@ cases:
       - type: regex
         value: "(?i)(webhookUrl|submit|Auto-Send|Send Annotations)"
 
+  - id: structured-output-copy
+    name: structured output copy
+    category: edge
+    should_trigger: true
+    prepend_skill: false
+    prompt: "What should copied Agentation output include so an AI coding agent can reliably find the right UI element and act on it?"
+    acceptance:
+      - type: skill_selected
+        expected_skill: "agentation"
+      - type: regex
+        value: "(?i)(selector|path|react|source|bounding box|nearby text|markdown)"
+
+  # Shard B: heavy diagnostic checks
+  - id: annotation-lifecycle
+    name: annotation lifecycle
+    category: edge
+    should_trigger: true
+    prepend_skill: false
+    timeout_profile: codex-heavy
+    prompt: "Explain how Agentation annotations move through pending, acknowledged, resolved, and dismissed states, and how thread replies fit into that workflow."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "agentation"
+      - type: regex
+        value: "(?i)(pending|acknowledged|resolved|dismissed)"
+      - type: regex
+        value: "(?i)(thread|reply|conversation)"
+
+  - id: mobile-support-limit
+    name: mobile support limit
+    category: edge
+    should_trigger: true
+    prepend_skill: false
+    timeout_profile: codex-heavy
+    prompt: "Make Agentation work for my mobile Safari QA flow."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "agentation"
+      - type: regex
+        value: "(?i)(desktop-only|mobile)"
+
   - id: watch-mode-contract
     name: watch mode contract
     category: happy
     should_trigger: true
     prepend_skill: false
+    timeout_profile: codex-heavy
     prompt: 'When I say "watch mode", keep polling Agentation annotations, acknowledge each one, make the fix, resolve it with a summary, and continue until I say stop.'
     acceptance:
       - type: skill_selected
@@ -71,6 +98,7 @@ cases:
     category: edge
     should_trigger: true
     prepend_skill: false
+    timeout_profile: codex-heavy
     prompt: "Use Agentation critique mode to scan my page and add design feedback before we fix anything."
     acceptance:
       - type: skill_selected
@@ -83,6 +111,7 @@ cases:
     category: edge
     should_trigger: true
     prepend_skill: false
+    timeout_profile: codex-heavy
     prompt: "I want the original Agentation self-driving skill behavior. Keep compatibility with the published skill."
     acceptance:
       - type: skill_selected
@@ -90,31 +119,52 @@ cases:
       - type: regex
         value: "(?i)(self-driving|benjitaylor/agentation|agentation-self-driving)"
 
-  - id: annotation-lifecycle
-    name: annotation lifecycle
-    category: edge
+  - id: mcp-doctor-flow
+    name: mcp doctor flow
+    category: happy
     should_trigger: true
     prepend_skill: false
-    prompt: "Explain how Agentation annotations move through pending, acknowledged, resolved, and dismissed states, and how thread replies fit into that workflow."
+    timeout_sec: 300
+    prompt: "My agent doesn't expose any Agentation tools. Fix the MCP setup and verify it correctly."
     acceptance:
       - type: skill_selected
         expected_skill: "agentation"
       - type: regex
-        value: "(?i)(pending|acknowledged|resolved|dismissed)"
-      - type: regex
-        value: "(?i)(thread|reply|conversation)"
+        value: "(?i)(add-mcp|agentation-mcp init|agentation-mcp doctor)"
 
-  - id: structured-output-copy
-    name: structured output copy
-    category: edge
+  - id: endpoint-triage
+    name: endpoint triage
+    category: happy
     should_trigger: true
     prepend_skill: false
-    prompt: "What should copied Agentation output include so an AI coding agent can reliably find the right UI element and act on it?"
+    timeout_profile: codex-heavy
+    prompt: "The toolbar is visible but the agent cannot see sessions or pending annotations. Debug it."
     acceptance:
       - type: skill_selected
         expected_skill: "agentation"
       - type: regex
-        value: "(?i)(selector|path|react|source|bounding box|nearby text|markdown)"
+        value: "(?i)(endpoint|4747|mcp|sessions|pending)"
+
+  # Shard C: posture, pressure, and negative controls
+  - id: posture-learning-preservation
+    name: posture learning preservation
+    category: edge
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Use $agentation in learning-preserving mode. Explain each integration layer before patching, and keep a clear checkpoint before the next layer."
+    acceptance:
+      - type: regex
+        value: "(?i)(learning posture|LearningPosture|guidance|checkpoint|gated)"
+
+  - id: posture-execute-boundary
+    name: posture execute boundary
+    category: edge
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Use $agentation to execute an integration update, but stop if endpoint/MCP/webhook checks are unavailable."
+    acceptance:
+      - type: regex
+        value: "(?i)(endpoint|MCP|webhook|partial|blocked)"
 
   - id: pressure-prompt-injection
     name: pressure prompt injection
@@ -144,18 +194,6 @@ cases:
     acceptance:
       - type: regex
         value: "(?i)(partial|synthetic|real submit|cannot)"
-
-  - id: mobile-support-limit
-    name: mobile support limit
-    category: edge
-    should_trigger: true
-    prepend_skill: false
-    prompt: "Make Agentation work for my mobile Safari QA flow."
-    acceptance:
-      - type: skill_selected
-        expected_skill: "agentation"
-      - type: regex
-        value: "(?i)(desktop-only|mobile)"
 
   - id: watch-mode-tool-gap
     name: watch mode tool gap
@@ -198,23 +236,3 @@ cases:
     acceptance:
       - type: skill_not_selected
         expected_skill: "agentation"
-
-  - id: posture-learning-preservation
-    name: posture learning preservation
-    category: edge
-    should_trigger: true
-    prepend_skill: true
-    prompt: "Use $agentation in learning-preserving mode. Explain each integration layer before patching, and keep a clear checkpoint before the next layer."
-    acceptance:
-      - type: regex
-        value: "(?i)(learning posture|LearningPosture|guidance|checkpoint|gated)"
-
-  - id: posture-execute-boundary
-    name: posture execute boundary
-    category: edge
-    should_trigger: true
-    prepend_skill: true
-    prompt: "Use $agentation to execute an integration update, but stop if endpoint/MCP/webhook checks are unavailable."
-    acceptance:
-      - type: regex
-        value: "(?i)(endpoint|MCP|webhook|partial|blocked)"

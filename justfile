@@ -72,3 +72,25 @@ count-skills:
 # Run CI checks locally
 ci-local:
     ./scripts/validate_all.sh && python3 scripts/diagnose_skill.py --all && python3 scripts/docs_lint.py --mode warn --config docs-policy.json
+
+# Generate skill spotlight for daily health report (shows skills needing attention)
+spotlight:
+    python3 scripts/skill_spotlight.py
+
+# Generate subject-level scoreboard from skill feedback (ui, backend, security, etc.)
+subject-scoreboard:
+    python3 utilities/skill-builder/scripts/skill_subject_scoreboard.py --write-report
+
+# Run rollback drill scenarios for resilience testing (kill-switch, rollout modes)
+rollout-drill:
+    bash scripts/run_recursive_rollout_drill.sh
+
+# Check Agentation watch-mode readiness for a project
+watch-readiness project-root='.':
+    python3 frontend/tools/agentation/scripts/check_watch_mode_readiness.py \
+        --project-root {{project-root}} \
+        --format json
+
+# Analyze router telemetry metrics (first-hit rates, guardrail performance)
+router-metrics events='artifacts/skill-graphs/telemetry/route-events.jsonl':
+    python3 scripts/skill_router_metrics.py --events {{events}} --json

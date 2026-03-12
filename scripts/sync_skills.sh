@@ -33,7 +33,28 @@ antigravity_skills_dir="$repo_root/skills-antigravity"
 antigravity_skills_txt="$HOME/.gemini/antigravity/skills.txt"
 
 mkdir -p "$skills_dir"
+
+# Security guard: never operate on a symlinked antigravity catalog path.
+if [ -L "$antigravity_skills_dir" ]; then
+  echo "Refusing to use symlinked path: $antigravity_skills_dir" >&2
+  exit 1
+fi
+if [ -e "$antigravity_skills_dir" ] && [ ! -d "$antigravity_skills_dir" ]; then
+  echo "Refusing to use non-directory path: $antigravity_skills_dir" >&2
+  exit 1
+fi
 mkdir -p "$antigravity_skills_dir"
+if [ -L "$antigravity_skills_dir" ]; then
+  echo "Refusing to use symlinked path: $antigravity_skills_dir" >&2
+  exit 1
+fi
+
+repo_root_real="$(cd "$repo_root" && pwd -P)"
+antigravity_skills_dir_real="$(cd "$antigravity_skills_dir" && pwd -P)"
+if [ "$antigravity_skills_dir_real" != "$repo_root_real/skills-antigravity" ]; then
+  echo "Refusing to use unexpected antigravity path: $antigravity_skills_dir_real" >&2
+  exit 1
+fi
 
 # Remove legacy aggregation directories that could cause duplicate skills in IDE panels.
 # sync-symlink/ was created by an older version of this script under a different name.
