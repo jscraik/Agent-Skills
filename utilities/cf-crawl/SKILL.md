@@ -1,6 +1,6 @@
 ---
 name: cf-crawl
-description: Crawl websites with Cloudflare Browser Rendering's /crawl API and export markdown or JSON results locally. Use when a user needs an authenticated Cloudflare crawl job started, monitored, filtered, or saved from a starting URL; do not use for generic scraping outside Cloudflare or when Cloudflare auth is unavailable.
+description: Crawl websites with Cloudflare Browser Rendering's /crawl API and export markdown or JSON results locally. Use when a user needs an authenticated Cloudflare crawl job started, monitored, or exported; do not use it for generic scraping or browser automation outside Cloudflare.
 ---
 
 # Cloudflare Crawl
@@ -27,8 +27,9 @@ description: Crawl websites with Cloudflare Browser Rendering's /crawl API and e
 
 ## Standards snapshot
 - Route only Cloudflare Browser Rendering crawl work here.
+- Require a Cloudflare API token with `Browser Rendering Edit` permission.
 - Verify Cloudflare auth before any live API call.
-- Prefer bounded crawl jobs with explicit limits, include patterns, and output paths.
+- Prefer bounded crawl jobs with explicit limits, include/exclude boundaries, and output paths.
 - Export results locally with source URLs preserved so later agents can audit provenance.
 - Vary response shape by action (`start`, `status`, `export`) instead of reusing one generic template.
 
@@ -36,7 +37,7 @@ description: Crawl websites with Cloudflare Browser Rendering's /crawl API and e
 - Crawl a documentation site, knowledge base, or other web property through Cloudflare's `/crawl` API.
 - Start a new crawl job, poll an existing job, or export finished crawl records.
 - Save crawl results as markdown or JSON for later local analysis.
-- Tune include or exclude patterns, crawl depth, render behavior, or export layout.
+- Tune include/exclude controls, crawl depth, render behavior, and export layout.
 
 ## When not to use
 - Generic scraping that should use Playwright, `agent-browser`, or a one-off HTTP fetch instead.
@@ -46,10 +47,21 @@ description: Crawl websites with Cloudflare Browser Rendering's /crawl API and e
 - Requests to scrape private or unauthorized targets.
 
 ## Required inputs
-- Requested action: `start`, `status`, or `export`.
+- Requested action: `start`, `status`, `export`, or `cancel`.
 - Target URL for new jobs or an existing crawl job ID.
 - Desired output format: markdown, JSON, or both.
-- Crawl bounds: page limit, depth, include or exclude patterns, render mode, and output directory.
+- Crawl bounds and behavior (if provided):
+  - `limit` (max pages).
+  - `depth` (max crawl depth).
+  - `source` (`all`, `sitemaps`, `links`).
+  - `render` mode (`true` default, `false` for fast static fetch).
+  - `formats` (`html`, `markdown`, `json`).
+  - `options` for discovery scope:
+    - `includePatterns`, `excludePatterns`
+    - `includeExternalLinks`, `includeSubdomains`
+  - cache/rerun controls: `maxAge`, `modifiedSince`
+  - JSON extraction tuning: `jsonOptions`.
+  - optional runtime overrides such as `userAgent`, `rejectResourceTypes`, `gotoOptions`, `waitForSelector`, `authenticate`, `setExtraHTTPHeaders`.
 - Export preferences: per-page files only or per-page plus merged digest.
 - Cloudflare auth context: `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN`.
 
@@ -104,16 +116,25 @@ Contract rules:
 - Use `status: unknown` when a network or auth failure prevents status resolution.
 - Keep `blocker` short and actionable, for example `missing CLOUDFLARE_API_TOKEN`.
 
+Create responses are returned as:
+
+```json
+{"success": true, "result": "<crawl-job-id>"}
+```
+
+Treat `result` as a job ID string (not an object) in both parsing logic and user-facing summaries.
+
 ## Philosophy
-- Keep Cloudflare crawl work explicit, bounded, and reversible.
+- Keep crawl jobs bounded, authenticated, and auditable.
 - Prefer provenance-rich local exports over one-line success claims.
-- Route away quickly when the request is really browser automation, deployment, or a single HTTP fetch.
+- Route away quickly when the request is browser automation, deployment, or a single HTTP fetch.
 
 ## Authentication preflight
 1. Check whether `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN` are already set and non-placeholder values.
 2. If either value is missing, inspect `.env`, `.env.local`, and `~/.env` in that order.
 3. Parse only the two required keys; never `eval` untrusted `.env` content.
-4. Confirm the API token is intended for Browser Rendering access before issuing `POST` or `GET` calls.
+4. Confirm the token scope is intended for Browser Rendering access before issuing `POST` or `GET` calls.
+5. If a crawl request returns `Authentication error`, treat that as a token-permission blocker and stop.
 
 Safe parse shape:
 
@@ -145,16 +166,18 @@ PY
 If credentials are still missing, stop and ask the user to provide them through their environment or an approved secrets workflow.
 
 ## Workflow
-1. Confirm whether the user wants to start a new crawl, inspect an existing job, or export prior results.
+1. Confirm whether the user wants to start a new crawl, inspect an existing job, cancel a job, or export prior results.
 2. Normalize the action plan:
-   - `start`: requires `target_url`, `limit`, `formats`, and optional scope patterns.
+- `start`: requires `target_url`.
    - `status`: requires `job_id`.
-   - `export`: requires `job_id`, `output_dir`, and output format.
+- `cancel`: requires `job_id` (and optional confirmation language before performing destructive operations).
+- `export`: requires `job_id`, `output_dir`, and output format.
 3. Normalize crawl defaults:
-   - default to markdown output unless the user explicitly wants JSON.
-   - set an explicit page `limit`.
+   - default output `formats` to `html` unless the user explicitly asks for markdown or JSON.
+   - set an explicit page `limit` (Cloudflare default is 10).
    - use `render: false` for clearly static sites when speed and browser-budget efficiency matter.
-   - add include or exclude patterns only when the user names clear boundaries.
+   - default `source` to `all` unless user asks otherwise.
+   - add include/exclude controls only when the user names clear boundaries.
 4. Start a crawl job with Cloudflare's Browser Rendering create endpoint when action is `start`:
 
 ```bash
@@ -165,12 +188,22 @@ curl -sS -X POST \
   -d '{
     "url": "https://example.com/docs",
     "limit": 25,
+    "depth": 3,
     "formats": ["markdown"],
-    "render": true
+    "render": false,
+    "source": "all",
+    "maxAge": 86400,
+    "modifiedSince": 1704067200,
+    "options": {
+      "includeExternalLinks": true,
+      "includeSubdomains": false,
+      "includePatterns": ["https://docs.cloudflare.com/**"],
+      "excludePatterns": ["https://developers.cloudflare.com/changelog/**"]
+    }
   }'
 ```
 
-5. Poll the crawl job when action is `status` or `export` until the status reaches a terminal state. Cloudflare documents terminal outcomes including `completed`, `errored`, `cancelled_due_to_limits`, `cancelled_due_to_timeout`, and `cancelled_by_user`.
+5. Poll the crawl job when action is `status` or `export` until the status reaches a terminal state.
 
 ```bash
 curl -sS \
@@ -178,16 +211,37 @@ curl -sS \
   -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}"
 ```
 
-6. When exporting results, page through the records endpoint with `status=completed` and the returned `cursor` until no cursor remains.
+To inspect category-specific results (for example skipped URLs or disallowed URLs), pass `status` in the request and paginate with `cursor`.
+
+```bash
+curl -sS \
+  "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/browser-rendering/crawl/${JOB_ID}?status=skipped&cursor=${CURSOR}" \
+  -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}"
+```
+
+6. Pull final export records with status filtering and cursor pagination (for example `status=completed`, `status=skipped`, `status=disallowed`, `status=errored`, `status=cancelled`).
 7. Save each completed page to a bounded local directory. Include the source URL in the file header, use deterministic filenames, and surface any disallowed, skipped, errored, or cancelled records in the summary even if they are not written as markdown.
 8. Deterministic filename pattern: `<zero-padded-index>-<slug>-<hash8>.md` where `hash8` is a short hash of the source URL.
-9. If the user wants a merged artifact, concatenate the exported markdown files after individual files exist; keep the per-page files as the auditable source of truth unless the user asks to remove them.
+9. If the user wants a merged artifact, concatenate the exported markdown files after per-page files exist; keep the per-page files as the auditable source of truth unless the user asks to remove them.
+10. To cancel a running crawl, require explicit confirmation and use the official cancellation endpoint for that `job_id` if available in the target API version.
+
+### Optional parameter behavior (as documented)
+- `formats` accepts `html`, `markdown`, and `json`; defaults are documented in the endpoint response. If unspecified, `formats` defaults to `["html"]`.
+- `source` accepts `all`, `sitemaps`, or `links`.
+- `excludePatterns` has priority over `includePatterns`.
+- `limit` defaults to `10` and currently documents an upper bound of `100000`.
+- `depth` defaults to `100000`.
+- `modifiedSince` and `maxAge` let you constrain recrawl windows.
+- `jsonOptions` applies when requesting JSON format and must be passed with the `formats` array.
+- `maxAge` can be used with `modifiedSince` to constrain recrawl windows for incremental captures.
+- `render: false` is a deliberate speed/quality tradeoff: faster but without browser DOM rendering behavior.
+- `status` filters may include `queued`, `running`, `completed`, `disallowed`, `skipped`, `errored`, and `cancelled`.
 
 ## Verification
 - Verify both Cloudflare environment variables are resolved before live API calls.
 - Verify the requested crawl bounds are explicit enough to avoid an accidental site-wide crawl.
 - Verify job status with a fresh `GET` before claiming completion.
-- Verify exported files exist, are non-empty, and retain their source URL metadata.
+- Verify exported files exist, are non-empty, and retain source URL metadata.
 - Verify the final report includes completed totals plus any skipped, disallowed, errored, or cancelled counts.
 - Verify structured output includes `schema_version` when JSON contract output is requested.
 
@@ -222,7 +276,10 @@ curl -sS \
 - `references/contract.yaml`
 - `references/evals.yaml`
 - `references/discovery-interview.md`
-- Cloudflare docs for Browser Rendering crawl workflows and API reference.
+- Cloudflare docs for Browser Rendering crawl workflows and API reference:
+  - https://developers.cloudflare.com/browser-rendering/rest-api/crawl-endpoint/
+  - https://developers.cloudflare.com/browser-rendering/rest-api/crawl-endpoint/#optional-parameters
+  - https://developers.cloudflare.com/api/resources/browser_rendering/subresources/crawl/methods/create/
 
 ## Decision feedback protocol
 <!-- decision-feedback-protocol:v2 -->
@@ -234,3 +291,5 @@ curl -sS \
 - Keep crawl jobs bounded, authenticated, and auditable.
 - Prefer precise export summaries over vague "crawl succeeded" claims.
 - When the request is not actually about Cloudflare crawl jobs, route away instead of stretching the skill.
+
+The agent is capable and can still apply judgment in edge cases where policy allows adaptation.
