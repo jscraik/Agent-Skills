@@ -49,7 +49,7 @@ class ValidateRecursivePromotionTests(unittest.TestCase):
             text=True,
         )
         self.assertNotEqual(proc.stdout.strip(), "", msg=proc.stderr)
-        return json.loads(proc.stdout.strip().splitlines()[-1])
+        return json.loads(proc.stdout.strip())
 
     def _build_run(
         self,

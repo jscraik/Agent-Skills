@@ -1158,8 +1158,11 @@ def main() -> int:
         )
         return 1
 
-    # Only write report to disk when explicitly requested to avoid leaking
-    # sensitive data (file paths, errors) to logs or console output.
+    # Write report to stdout as single-line JSON for JSONL compatibility
+    # (consumers parse stdout with splitlines() + json.loads(line))
+    print(json.dumps(report, separators=(",", ":")))
+
+    # Also write to disk when explicitly requested (with pretty formatting)
     if args.write_report:
         report_path = Path(args.write_report).expanduser().resolve()
         report_path.parent.mkdir(parents=True, exist_ok=True)
