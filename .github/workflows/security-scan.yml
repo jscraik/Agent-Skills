@@ -52,6 +52,7 @@ jobs:
           set -euo pipefail
           rm -f semgrep.sarif
           git config --global --add safe.directory "$PWD"
+          # Note: p/default finds 12+ findings; using p/secrets until findings addressed
           semgrep_args=(
             --config "p/secrets"
             --exclude "artifacts/skill-graphs/**"
