@@ -1,0 +1,86 @@
+schema_version: 1
+name: cf-crawl
+purpose: Start, monitor, and export Cloudflare Browser Rendering crawl jobs for bounded website ingestion with auditable local artifacts.
+triggers:
+  - User asks to crawl a site with Cloudflare Browser Rendering.
+  - User asks to poll a Cloudflare crawl job or export crawl results.
+  - User asks for markdown or JSON crawl output saved locally from Cloudflare's /crawl API.
+inputs:
+  - name: action
+    type: enum
+    values: [start, status, export]
+    description: Requested crawl operation.
+  - name: target_url
+    type: string
+    description: Starting URL for a new crawl job.
+  - name: job_id
+    type: string
+    description: Existing Cloudflare crawl job ID when polling or exporting.
+  - name: output_format
+    type: string
+    description: markdown, json, or both.
+  - name: limit
+    type: integer
+    description: Requested maximum page count for the crawl.
+  - name: depth
+    type: integer
+    description: Optional crawl depth when the user provides it.
+  - name: render
+    type: boolean
+    description: Render mode for crawl pages.
+  - name: include_patterns
+    type: array
+    description: Optional include patterns for crawl scope.
+  - name: exclude_patterns
+    type: array
+    description: Optional exclude patterns for crawl scope.
+  - name: output_dir
+    type: string
+    description: Destination directory for exported crawl records.
+  - name: merge_digest
+    type: boolean
+    description: Whether to create a merged markdown digest after per-page export.
+  - name: auth_context
+    type: object
+    description: Requires CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN.
+outputs:
+  - name: action_plan
+    type: string
+    description: Exact launch, poll, or export steps chosen for the request.
+  - name: status_summary
+    type: string
+    description: Status counts and any blockers or limitations.
+  - name: structured_summary
+    type: object
+    description: Optional JSON summary when the user requests structured output.
+    schema:
+      schema_version: 1
+      action: start|status|export
+      job_id: string|null
+      status: queued|running|completed|errored|cancelled_due_to_limits|cancelled_due_to_timeout|cancelled_by_user|unknown
+      counts:
+        completed: integer
+        skipped: integer
+        disallowed: integer
+        errored: integer
+        cancelled: integer
+      output_path: string|null
+      blocker: string|null
+      next_step: string
+  - name: output_path
+    type: string
+    description: Directory or merged file path for exported results.
+success_criteria:
+  - Auth preflight is completed before live API execution.
+  - Crawl bounds are explicit before start actions.
+  - Export summaries include completed plus skipped or disallowed or errored or cancelled counts.
+  - Structured outputs include schema_version when requested.
+non_goals:
+  - Generic scraping outside Cloudflare Browser Rendering.
+  - Cloudflare deploy or product-selection guidance unrelated to crawl jobs.
+  - Browser click-path automation or login scripting.
+  - UI cloning, visual replication, or brand adaptation planning (route to ui-cloner).
+risks:
+  - Missing or under-scoped Cloudflare credentials.
+  - Accidental over-broad crawls without explicit limits or patterns.
+  - Exporting private or unauthorized content.

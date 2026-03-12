@@ -297,7 +297,8 @@ def scan_lesson_content(path: Path) -> Dict[str, Any]:
             lower = match.lower()
             if lower.endswith("@example.com") or lower.endswith("@test.com"):
                 continue
-            pii_hits.append(f"line {idx}: email-like identifier '{match}'")
+            # Do not record the exact identifier to avoid logging PII in clear text.
+            pii_hits.append(f"line {idx}: email-like identifier detected")
 
     return {"secret_hit_count": secret_hit_count, "pii_hits": pii_hits}
 
@@ -1158,8 +1159,11 @@ def main() -> int:
         )
         return 1
 
-    # Only write report to disk when explicitly requested to avoid leaking
-    # sensitive data (file paths, errors) to logs or console output.
+    # Write report to stdout as single-line JSON for JSONL compatibility
+    # (consumers parse stdout with splitlines() + json.loads(line))
+    print(json.dumps(report, separators=(",", ":")))
+
+    # Also write to disk when explicitly requested (with pretty formatting)
     if args.write_report:
         report_path = Path(args.write_report).expanduser().resolve()
         report_path.parent.mkdir(parents=True, exist_ok=True)

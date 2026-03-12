@@ -1,0 +1,4 @@
+interface:
+  display_name: "Cloudflare Crawl"
+  short_description: "Run Cloudflare Browser Rendering crawl jobs and export their results locally."
+  default_prompt: "Crawl https://developers.cloudflare.com/workers/ to markdown with a 25-page limit and save the results under .crawl-output/workers."

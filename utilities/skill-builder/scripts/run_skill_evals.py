@@ -1452,6 +1452,16 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     claude_kimi_command = str(args.claude_kimi_command or "").strip() or "claude-kimi"
     claude_zai_command = str(args.claude_zai_command or "").strip() or "claude-zai"
 
+    # Smoke-profile routing:
+    # - For discovery-smoke runs, prefer cases that declare a smoke_mode.
+    # - For live/model runners, ignore smoke-only discovery contract cases.
+    smoke_runners_only = bool(selected_runners) and all(r == "discovery-smoke" for r in selected_runners)
+    has_smoke_cases = any(c.smoke_mode for c in cases)
+    if smoke_runners_only and has_smoke_cases:
+        cases = [c for c in cases if c.smoke_mode]
+    elif not smoke_runners_only and has_smoke_cases:
+        cases = [c for c in cases if not c.smoke_mode]
+
     capture_jsonl = bool(
         args.capture_jsonl or any((c.deterministic_checks or c.budgets) for c in cases)
     )

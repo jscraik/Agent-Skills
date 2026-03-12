@@ -1,0 +1,7 @@
+interface:
+  display_name: "UI Cloner"
+  short_description: "Create implementation-ready UI replication plans from a reference website URL."
+  default_prompt: "Analyze this URL for a high-fidelity replication plan adapted to my brand constraints."
+
+policy:
+  allow_implicit_invocation: true

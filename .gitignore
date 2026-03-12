@@ -60,7 +60,8 @@ reports/data/candidates.json
 *.rej
 
 # Internal docs (do not commit)
-FORJAMIE.md
+/FORJAMIE.md
+FORJAMIE-*.md
 
 # Misc local throwaways
 *.skill
