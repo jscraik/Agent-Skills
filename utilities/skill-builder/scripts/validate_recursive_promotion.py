@@ -297,7 +297,8 @@ def scan_lesson_content(path: Path) -> Dict[str, Any]:
             lower = match.lower()
             if lower.endswith("@example.com") or lower.endswith("@test.com"):
                 continue
-            pii_hits.append(f"line {idx}: email-like identifier '{match}'")
+            # Do not record the exact identifier to avoid logging PII in clear text.
+            pii_hits.append(f"line {idx}: email-like identifier detected")
 
     return {"secret_hit_count": secret_hit_count, "pii_hits": pii_hits}
 
