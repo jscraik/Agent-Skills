@@ -1,0 +1,30 @@
+purpose: Build focused Codex plugin packages and safely convert external plugin sources into Codex-compatible structures.
+
+triggers:
+  - User asks to scaffold a plugin package with selected surfaces.
+  - User asks to convert a Claude plugin into Codex-compatible layout.
+  - User asks to validate plugin-owned skills with skill-builder validators.
+
+inputs:
+  - plugin_name
+  - destination_path
+  - requested_surfaces
+  - source_url_or_path
+  - source_ref
+  - validation_depth
+
+outputs:
+  - plugin_package_path
+  - changed_files
+  - validation_summary
+  - assumptions_and_risks
+
+non_goals:
+  - Build unrelated product features outside plugin packaging.
+  - Claim full schema parity without source verification.
+  - Execute arbitrary scripts from untrusted downloaded sources.
+
+risks:
+  - Over-broad plugin scope in first pass.
+  - Unsafe conversion assumptions from incomplete source metadata.
+  - False confidence if plugin-owned skills are not validated.
