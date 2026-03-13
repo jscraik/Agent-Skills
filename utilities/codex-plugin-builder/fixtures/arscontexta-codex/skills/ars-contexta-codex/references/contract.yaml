@@ -1,0 +1,29 @@
+purpose: Provide a Codex-first Ars Contexta operator skill for setup orientation, health triage, and next-command routing.
+
+triggers:
+  - User asks how to use Ars Contexta in Codex.
+  - User asks for next command recommendations in an Ars Contexta vault.
+  - User asks for a lightweight vault health or queue triage pass.
+
+inputs:
+  - vault_root_path
+  - user_goal
+  - command_preference
+  - known_command_name_optional
+
+outputs:
+  - vault_state
+  - top_signals
+  - recommended_next_commands
+  - blockers_and_assumptions
+  - schema_version
+
+non_goals:
+  - Full vault generation automation.
+  - Unsafe script execution from copied documentation snippets.
+  - Claiming complete upstream command parity in first pass.
+
+risks:
+  - Missing vault artifacts can lead to overconfident guidance.
+  - Upstream Claude-specific semantics may not map one-to-one to Codex.
+  - Optional semantic search can create degraded but still valid guidance paths.

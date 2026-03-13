@@ -13,6 +13,8 @@ Build safe, focused plugin packages for Codex workflows.
 - [Core philosophy](#core-philosophy)
 - [Workflow](#workflow)
 - [Validation](#validation)
+- [Plugin contract](#plugin-contract)
+- [Hook contract](#hook-contract)
 - [Constraints and safety](#constraints-and-safety)
 - [Anti-patterns](#anti-patterns)
 - [Examples](#examples)
@@ -23,7 +25,8 @@ Use this skill when the request is to:
 - scaffold a new Codex plugin package;
 - inspect an external plugin source before conversion;
 - convert a Claude-oriented plugin shape into a Codex-compatible package;
-- add plugin-owned skill surfaces such as `skills/`, `prompts/`, `hooks/`, `agents/`, `.app.json`, or `.mcp.json`;
+- add plugin-owned surfaces such as `skills/`, `hooks/`, `prompts` (optional), `agents` (optional), `.app.json`, or `.mcp.json`;
+- include package docs `README.md` and `LICENSE` in every plugin package;
 - validate plugin-owned skills with the `skill-builder` validator suite.
 
 Do not use this skill for:
@@ -33,7 +36,12 @@ Do not use this skill for:
 
 ## Required inputs
 - plugin name and destination path;
+- default destination policy: if destination is not explicitly requested, write plugin packages to repo-root `plugins/<plugin-name>/`;
 - requested surfaces for first pass:
+  - required:
+    - `.codex-plugin/plugin.json`,
+    - `README.md`,
+    - `LICENSE`,
   - `skills`,
   - `prompts`,
   - `hooks`,
@@ -55,6 +63,9 @@ If key inputs are missing, ask only the smallest set of clarifying questions nee
 Produce only what the request needs:
 - plugin package folder with `SKILL.md` or plugin-owned assets;
 - `references/contract.yaml` and `references/evals.yaml` for non-trivial behavior;
+- `references/plugin-contract.md` whenever packaging rules or manifest fields are in scope;
+- `references/hooks-contract.md` whenever `hooks/` is requested or converted;
+- fixture examples under `fixtures/` for conversion templates and regression checks;
 - optional helper docs in `references/` when conversion assumptions are non-obvious;
 - validator and readiness summary for plugin-owned skills.
 
@@ -91,11 +102,20 @@ Key principles:
   - ambiguous metadata.
 
 3. Scaffold package layout.
-- Create only needed directories:
+- Default package root to repo-root `plugins/<plugin-name>/` unless the user explicitly requests another destination.
+- Enforce required root surfaces first:
+  - `.codex-plugin/plugin.json`,
+  - `README.md`,
+  - `LICENSE`.
+- Create only needed optional directories/files:
   - `skills/`,
-  - `prompts/`,
-  - `hooks/`,
-  - `agents/`,
+  - `prompts/` (optional),
+  - `hooks/` or `hooks.json`,
+  - `agents/` (optional),
+  - `scripts/` (optional),
+  - `assets/` (optional),
+  - `.mcp.json` (optional),
+  - `.app.json` (optional),
   - `references/`.
 - Keep one-level-deep support files unless a validator requires deeper nesting.
 
@@ -103,12 +123,22 @@ Key principles:
 - Map source concepts into Codex-friendly structure using documented assumptions.
 - Keep placeholder-first metadata when parity is uncertain.
 - Mark inferred fields clearly so follow-up hardening is easy.
+- When `hooks/` is in scope, map against `references/hooks-contract.md` and separate:
+  - verified behavior backed by Codex sources,
+  - provisional behavior that still needs runtime confirmation.
 
 5. Validate plugin-owned skills.
 - Run the same skill-builder validators against each plugin-owned skill under `skills/`.
 - Report pass, warn, fail status by validator and path.
 
-6. Summarize plus next step.
+6. Validate plugin contract.
+- Validate `.codex-plugin/plugin.json` exists and includes required metadata from `references/plugin-contract.md`.
+- Validate hook implementation shape when hooks are requested:
+  - event buckets and handler type support,
+  - supported vs provisional fields are clearly separated.
+- Validate optional surfaces only when requested (`prompts`, `agents`, `.app.json`, `.mcp.json`).
+
+7. Summarize plus next step.
 - Return what changed, what was validated, and one next action.
 
 ## Validation
@@ -136,7 +166,34 @@ just validate
 
 If full `just validate` fails due to known unrelated baseline issues, report them as pre-existing blockers rather than new regressions.
 
+## Plugin contract
+When packaging plugins, treat `references/plugin-contract.md` as mandatory.
+
+Required behavior:
+- always emit `.codex-plugin/plugin.json`;
+- always emit `README.md` and `LICENSE`;
+- include required manifest metadata:
+  - `name`,
+  - `version`,
+  - `description`,
+  - `license`,
+  - `surfaces`;
+- include integration metadata when present:
+  - `.mcp.json` wiring details,
+  - `.app.json` app-level details;
+- keep `prompts` and `agents` optional unless explicitly requested.
+
+## Hook contract
+When plugin work includes `hooks/`, treat `references/hooks-contract.md` as mandatory grounding.
+
+Required behavior:
+- use the codified event and handler model from the official Codex hooks runtime;
+- align examples to currently supported handler types;
+- mark unsupported or provisional fields explicitly instead of presenting them as stable;
+- keep hook conversion notes auditable with source file links and short evidence notes.
+
 ## Constraints and safety
+- store generated plugin packages under repo-root `plugins/` by default;
 - default to offline-safe behavior for conversion workflows;
 - never execute untrusted downloaded scripts during inspection;
 - redact secrets, tokens, credentials, and personal data by default;

@@ -8,6 +8,7 @@ cases:
     acceptance:
       - Response confirms `codex-plugin-builder` applies.
       - Workflow keeps scope narrow and does not over-bundle.
+      - Response requires `.codex-plugin/plugin.json`, `README.md`, and `LICENSE`.
       - Validation commands for plugin-owned skills are included.
 
   - id: cpb-happy-02
@@ -19,6 +20,7 @@ cases:
       - Inspection and staging are described before mutation.
       - Conversion assumptions are explicit and auditable.
       - Safety constraints mention untrusted script handling.
+      - Response validates manifest metadata and integration files.
 
   - id: cpb-negative-01
     name: Out of scope app feature request
@@ -53,3 +55,5 @@ cases:
     acceptance:
       - Response narrows to smallest viable package boundary.
       - Response recommends first pass with 2-3 focused surfaces.
+      - Response keeps `prompts` and `agents` optional unless explicitly requested.
+      - Response references `references/hooks-contract.md` when hooks are requested.

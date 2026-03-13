@@ -8,6 +8,8 @@ triggers:
 inputs:
   - plugin_name
   - destination_path
+  - destination_default: plugins/<plugin-name>
+  - required_root_surfaces: [.codex-plugin/plugin.json, README.md, LICENSE]
   - requested_surfaces
   - source_url_or_path
   - source_ref
@@ -15,9 +17,15 @@ inputs:
 
 outputs:
   - plugin_package_path
+  - manifest_validation_summary
+  - integration_file_summary
+  - hooks_validation_summary
   - changed_files
   - validation_summary
   - assumptions_and_risks
+  - verified_hooks_behavior
+  - provisional_hooks_behavior
+  - hook_conversion_assumptions
 
 non_goals:
   - Build unrelated product features outside plugin packaging.
@@ -28,3 +36,4 @@ risks:
   - Over-broad plugin scope in first pass.
   - Unsafe conversion assumptions from incomplete source metadata.
   - False confidence if plugin-owned skills are not validated.
+  - Presenting provisional hooks behavior as stable without source-backed evidence.
