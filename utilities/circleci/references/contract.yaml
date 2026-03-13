@@ -1,0 +1,88 @@
+schema_version: "1.1"
+name: circleci
+description: "Use this skill to migrate from GitHub Actions to CircleCI and enforce best-practice CircleCI design for testing, orchestration, deployment, optimization, security, and policy."
+philosophy: >
+  Prefer auditable, low-risk CircleCI migrations with explicit rollout gates, clear ownership, and explicit security boundaries.
+constraints:
+  - Scope is limited to CircleCI architecture guidance and local CLI workflow enablement.
+  - Do not provide vendor-agnostic infrastructure changes outside CircleCI migration scope.
+  - Do not provide browser automation instructions or non-CircleCI CI platform operations.
+  - Always request missing deployment context (approvals, rollback, targets, owners) before production plans.
+
+purpose: >
+  Produce reliable, auditable guidance for adopting CircleCI as-of current docs in this skill,
+  including migration path design, workflow architecture, deploy/release controls, secret hygiene,
+  policy checks, and local developer tooling setup.
+
+triggers:
+  - "migrate from github actions to circleci"
+  - "circleci migration"
+  - "circleci workflow orchestration"
+  - "circleci testing or build matrix"
+  - "circleci release|promotion|rollback"
+  - "circleci security contexts or secret policy"
+  - "circleci cli or circleci setup"
+  - "circleci gold standard or reference pack"
+
+inputs:
+  - project scope and target environments
+  - migration or workflow scope token (migrate, orchestrate, testing, deploy, optimize, security, config_policy, integration, toolkit)
+  - output type (migration_plan, reference_pack, gold_standard, checklist, or advice)
+  - existing CircleCI config files (`/.circleci/config.yml`) when available
+  - existing CI source URLs, deployment targets, and approval model
+  - compliance level and rollback constraints
+
+outputs:
+  - name: migration_plan
+    type: markdown
+    min_sections:
+      - scope
+      - phased plan
+      - risk matrix
+      - required gates
+      - validation commands
+      - owners and next step
+  - name: gold_standard
+    type: markdown
+    min_sections:
+      - workflow design
+      - jobs and resources
+      - security and secrets
+      - deployment policy
+      - optimization
+      - policy-as-code checks
+  - name: reference_pack
+    type: markdown
+    min_sections:
+      - source files and URLs
+      - crawl timestamps
+      - version assumptions
+
+non_goals:
+  - single-job click-by-click UI or browser debugging
+  - managed-host deployment to providers not tied to CircleCI workflow design
+  - secrets exfiltration or raw credential disclosure
+
+risks:
+  - missing context inputs -> mitigated by clarifying questions before final plan
+  - stale docs -> mitigated by local crawl timestamps and `cf-crawl` refresh workflow
+  - policy mismatch -> mitigated by explicit gate and review criteria
+
+examples:
+  happy_path:
+    input: "Migrate this repo from GitHub Actions to CircleCI and propose a gold standard rollout."
+    expected_output: "Phase migration plan with tests, deploy gates, context strategy, and validation."
+  edge_case:
+    input: "I only want a security-focused CircleCI config review with contexts and policy suggestions."
+    expected_output: "Checklist with secret strategy, policy checks, and rollback conditions."
+  failure_mode:
+    input: "I need this done without asking for environment details."
+    expected_output: "Skill refuses to fabricate and asks for missing scope and risk constraints."
+
+metadata:
+  author: "skills-team"
+  last_updated: "2026-03-13"
+  review_status: "draft"
+  source_of_truth:
+    - "references/raw-docs-md/*"
+    - "references/cf-crawl/*"
