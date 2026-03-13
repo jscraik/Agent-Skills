@@ -1,0 +1,59 @@
+{
+  "fetched_at": "2026-03-13",
+  "documents": [
+    {
+      "url": "https://circleci.com/docs/guides/",
+      "file": "raw-docs-md/docs-guides.md",
+      "slug": "docs-guides",
+      "bytes": 40702
+    },
+    {
+      "url": "https://circleci.com/docs/guides/migrate/migrating-from-github/",
+      "file": "raw-docs-md/docs-guides-migrate-migrating-from-github.md",
+      "slug": "docs-guides-migrate-migrating-from-github",
+      "bytes": 45119
+    },
+    {
+      "url": "https://circleci.com/docs/guides/getting-started/first-steps/",
+      "file": "raw-docs-md/docs-guides-getting-started-first-steps.md",
+      "slug": "docs-guides-getting-started-first-steps",
+      "bytes": 45248
+    },
+    {
+      "url": "https://circleci.com/docs/guides/orchestrate/workflows/",
+      "file": "raw-docs-md/docs-guides-orchestrate-workflows.md",
+      "slug": "docs-guides-orchestrate-workflows",
+      "bytes": 37073
+    },
+    {
+      "url": "https://circleci.com/docs/guides/deploy/deploy-to-aws/",
+      "file": "raw-docs-md/docs-guides-deploy-deploy-to-aws.md",
+      "slug": "docs-guides-deploy-deploy-to-aws",
+      "bytes": 48933
+    },
+    {
+      "url": "https://circleci.com/docs/guides/security/security-overview/",
+      "file": "raw-docs-md/docs-guides-security-security-overview.md",
+      "slug": "docs-guides-security-security-overview",
+      "bytes": 40733
+    },
+    {
+      "url": "https://circleci.com/docs/guides/security/contexts/",
+      "file": "raw-docs-md/docs-guides-security-contexts.md",
+      "slug": "docs-guides-security-contexts",
+      "bytes": 82575
+    },
+    {
+      "url": "https://circleci.com/docs/guides/toolkit/local-cli/",
+      "file": "raw-docs-md/docs-guides-toolkit-local-cli.md",
+      "slug": "docs-guides-toolkit-local-cli",
+      "bytes": 51473
+    },
+    {
+      "url": "https://circleci.com/docs/reference/configuration-reference/",
+      "file": "raw-docs-md/docs-reference-configuration-reference.md",
+      "slug": "docs-reference-configuration-reference",
+      "bytes": 97003
+    }
+  ]
+}

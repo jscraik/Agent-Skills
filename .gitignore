@@ -41,6 +41,7 @@ artifacts/*-status-*.md
 artifacts/skill-validation*
 artifacts/skill_validation_*
 artifacts/run_skill_validation.sh
+artifacts/skill-graphs/drills/
 reports/20*.md
 reports/data/pattern-registry.json
 reports/data/candidates.json
@@ -73,3 +74,5 @@ environment.toml
 artifacts/skill-graphs/telemetry/candidates.jsonl
 artifacts/skill-graphs/telemetry/skill-genome-processing-stats.json
 artifacts/skill-graphs/telemetry/.genome-watermark
+
+artifacts/policy/

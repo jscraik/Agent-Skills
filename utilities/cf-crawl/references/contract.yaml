@@ -1,14 +1,15 @@
 schema_version: 1
 name: cf-crawl
-purpose: Start, monitor, and export Cloudflare Browser Rendering crawl jobs for bounded website ingestion with auditable local artifacts.
+purpose: Start, monitor, export, and cancel Cloudflare Browser Rendering crawl jobs for bounded website ingestion with auditable local artifacts.
 triggers:
   - User asks to crawl a site with Cloudflare Browser Rendering.
   - User asks to poll a Cloudflare crawl job or export crawl results.
   - User asks for markdown or JSON crawl output saved locally from Cloudflare's /crawl API.
+  - User requests cancellation of an active Cloudflare crawl job.
 inputs:
   - name: action
     type: enum
-    values: [start, status, export]
+    values: [start, status, export, cancel]
     description: Requested crawl operation.
   - name: target_url
     type: string
@@ -18,22 +19,63 @@ inputs:
     description: Existing Cloudflare crawl job ID when polling or exporting.
   - name: output_format
     type: string
-    description: markdown, json, or both.
+    description: html, markdown, json, or both.
+  - name: source
+    type: enum
+    values: [all, sitemaps, links]
+    description: Crawl source strategy.
   - name: limit
     type: integer
     description: Requested maximum page count for the crawl.
   - name: depth
     type: integer
-    description: Optional crawl depth when the user provides it.
+    description: Crawl depth when the user provides it.
   - name: render
     type: boolean
     description: Render mode for crawl pages.
+  - name: status
+    type: enum
+    values: [queued, running, completed, disallowed, skipped, errored, cancelled]
+    description: Status filter to retrieve a specific result class.
   - name: include_patterns
     type: array
     description: Optional include patterns for crawl scope.
   - name: exclude_patterns
     type: array
     description: Optional exclude patterns for crawl scope.
+  - name: include_external_links
+    type: boolean
+    description: Include externally linked URLs during crawl.
+  - name: include_subdomains
+    type: boolean
+    description: Include subdomains during crawl.
+  - name: max_age
+    type: integer
+    description: Recrawl age window in seconds.
+  - name: modified_since
+    type: integer
+    description: Unix timestamp for recrawl cutoff.
+  - name: json_options
+    type: object
+    description: Format settings when requesting JSON output.
+  - name: user_agent
+    type: string
+    description: Optional user-agent override.
+  - name: reject_resource_types
+    type: array
+    description: Resource types to block during crawl navigation.
+  - name: goto_options
+    type: object
+    description: Browser navigation options for render mode.
+  - name: wait_for_selector
+    type: string
+    description: Optional selector to wait for before capturing a page.
+  - name: authenticate
+    type: object
+    description: Optional authentication payload for protected origins.
+  - name: set_extra_http_headers
+    type: object
+    description: Optional additional request headers for crawl traffic.
   - name: output_dir
     type: string
     description: Destination directory for exported crawl records.
@@ -64,6 +106,7 @@ outputs:
         disallowed: integer
         errored: integer
         cancelled: integer
+        queued: integer
       output_path: string|null
       blocker: string|null
       next_step: string

@@ -3,7 +3,7 @@
 Use this only when required inputs are missing.
 
 ## Intuitive round-1 question
-- Question: "Do you want to start a new crawl, check status, or export an existing job?"
+- Question: "Do you want to start a new crawl, check status, cancel a running crawl, or export an existing job?"
 - Why this matters: action type determines whether we need a target URL or a job ID.
 - Generic fallback phrasing for shared discovery harnesses: "What should this skill help you do?"
 
