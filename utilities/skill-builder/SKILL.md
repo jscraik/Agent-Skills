@@ -44,6 +44,8 @@ This skill designs, improves, validates, and packages high-quality Codex skills.
 - Prefer repo-validated workflow and benchmark evidence over aspirational wording.
 - Treat evals, contracts, and validator output as part of the product, not optional polish.
 - Keep the result implementable by another agent without hidden context.
+- Start with the smallest package boundary and 2-3 focused surfaces on a first pass.
+- Avoid sprawling scope by keeping first-pass plans narrow until evidence justifies expansion.
 
 ## Scope and triggers
 Use this skill to:
@@ -316,9 +318,9 @@ Optional deep checks:
 - Error: repeated validator failure after 3 rounds. Recovery: halt, summarize failing gate output verbatim, and ask for a scoped decision.
 
 ## Examples
-- “Create a new skill called `foo-bar` under `utilities/` with evals and an output contract.”
-- “Audit this skill’s trigger quality and tighten the description.”
-- “Compare two variants of this skill and keep the better one.”
+- “When the user asks to create a new release-note helper skill under `utilities/`, scaffold it with evals, contract, and an output contract.”
+- “Can you audit this skill’s trigger quality and tighten the description so it routes cleanly?”
+- “Help me compare two skill variants with the same eval suite and keep the higher-signal version.”
 
 ## Reference map
 Use these files when needed:

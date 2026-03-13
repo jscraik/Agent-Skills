@@ -4,7 +4,7 @@ cases:
     name: Scaffold focused plugin package
     category: happy
     should_trigger: true
-    prompt: "Create a repo-local plugin package with skills and prompts only, and keep it to a first-pass minimal boundary."
+    prompt: "Can you scaffold a repo-local plugin package with skills and prompts only, and keep it to a first-pass minimal boundary?"
     acceptance:
       - Response confirms `codex-plugin-builder` applies.
       - Workflow keeps scope narrow and does not over-bundle.
@@ -49,7 +49,7 @@ cases:
     name: Broad request that needs narrowing
     category: edge
     should_trigger: true
-    prompt: "Make one plugin that handles skills, agents, hooks, prompts, apps, and MCP end to end in one go."
+    prompt: "Can you make one plugin that handles skills, agents, hooks, prompts, apps, and MCP end to end in one go?"
     acceptance:
       - Response narrows to smallest viable package boundary.
       - Response recommends first pass with 2-3 focused surfaces.

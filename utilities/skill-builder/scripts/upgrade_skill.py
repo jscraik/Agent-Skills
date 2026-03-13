@@ -186,6 +186,73 @@ def _iter_files(skill_dir: Path, rel_dir: str) -> List[Path]:
     return sorted([c for c in p.rglob("*") if c.is_file()])
 
 
+def _extract_h2_blocks(body: str) -> List[Tuple[str, str]]:
+    matches = list(re.finditer(r"(?m)^##\s+(.+?)\s*$", body))
+    blocks: List[Tuple[str, str]] = []
+    for i, match in enumerate(matches):
+        title = _norm(match.group(1))
+        start = match.end()
+        end = matches[i + 1].start() if i + 1 < len(matches) else len(body)
+        blocks.append((title, body[start:end].strip()))
+    return blocks
+
+
+def _find_section_text(body: str, aliases: Sequence[str]) -> str:
+    for title, text in _extract_h2_blocks(body):
+        if any(alias.lower() in title for alias in aliases):
+            return text
+    return ""
+
+
+def _research_surface_count(text: str) -> int:
+    patterns = [
+        r"\bskills?\b",
+        r"\bagents?\b",
+        r"\bhooks?\b",
+        r"\bprompts?\b",
+        r"\bplugins?\b",
+        r"\bapps?\b",
+        r"\bmcp(?:s| servers?)?\b",
+    ]
+    return sum(1 for pattern in patterns if re.search(pattern, text, flags=re.IGNORECASE))
+
+
+def _focus_language_count(text: str) -> int:
+    phrases = [
+        "smallest package",
+        "smallest viable",
+        "smallest boundary",
+        "focused",
+        "narrow",
+        "2-3",
+        "2–3",
+        "2 to 3",
+        "first pass",
+        "start with",
+        "limit scope",
+        "avoid sprawling",
+        "package boundary",
+        "keep scope tight",
+    ]
+    return sum(1 for phrase in phrases if phrase in text.lower())
+
+
+def _load_eval_cases(skill_dir: Path) -> List[Dict[str, Any]]:
+    evals_path = skill_dir / "references" / "evals.yaml"
+    if yaml is None or not evals_path.exists():
+        return []
+    try:
+        obj = yaml.safe_load(evals_path.read_text(encoding="utf-8"))
+    except Exception:
+        return []
+    if not isinstance(obj, dict):
+        return []
+    cases = obj.get("cases", [])
+    if not isinstance(cases, list):
+        return []
+    return [case for case in cases if isinstance(case, dict)]
+
+
 def generate_suggestions(doc: SkillDoc, *, min_description_len: int = 120) -> List[Suggestion]:
     fm = doc.frontmatter
     body = doc.body
@@ -506,6 +573,29 @@ def generate_suggestions(doc: SkillDoc, *, min_description_len: int = 120) -> Li
                 priority=Priority.LOW,
                 message="Consider adding 2–3 example prompts that should trigger this skill.",
             )
+        else:
+            examples_text = _find_section_text(body, ["examples", "example prompts"])
+            examples = re.findall(r"(?m)^\s*(?:[-*]|\d+\.)\s+.+$", examples_text)
+            quoted_examples = re.findall(r'`[^`]{10,}`|"[^"\n]{10,}"', examples_text)
+            if len(examples) + len(quoted_examples) < 2:
+                add(
+                    rule="body.examples.too_thin",
+                    category="Examples",
+                    priority=Priority.MEDIUM,
+                    message="Expand the examples section to include 2–3 realistic user-style prompts or worked examples.",
+                    rationale="Research-backed skill routing is stronger when examples look like real user requests instead of abstract placeholders.",
+                )
+
+            realism_signals = ("when the user asks", "user says", "github", "convert", "validate", "inspect", "migrate")
+            realism_hits = sum(1 for signal in realism_signals if signal in examples_text.lower())
+            if realism_hits == 0:
+                add(
+                    rule="body.examples.synthetic",
+                    category="Examples",
+                    priority=Priority.MEDIUM,
+                    message="Rewrite examples to sound like realistic user requests rather than template labels.",
+                    rationale="Concrete, natural-language examples improve routing and reduce overfitting to synthetic phrasing.",
+                )
 
         if not _has_any(body, ["constraints", "do not", "never", "refuse", "safety"]):
             add(
@@ -539,6 +629,51 @@ def generate_suggestions(doc: SkillDoc, *, min_description_len: int = 120) -> Li
                 priority=Priority.LOW,
                 message=f"You have `{rel_dir}/` files but SKILL.md doesn't reference them.",
                 rationale="Linking on-disk resources keeps SKILL.md shorter and more maintainable.",
+            )
+
+    corpus = f"{description or ''}\n{body}"
+    surfaces = _research_surface_count(corpus)
+    focus_signals = _focus_language_count(corpus)
+    if surfaces >= 4 and focus_signals <= 1:
+        add(
+            rule="repo.focus.overbundled",
+            category="Scope",
+            priority=Priority.MEDIUM,
+            message="Narrow the first-pass package boundary or state explicit scope limits such as 'start with 2-3 focused surfaces'.",
+            rationale="Research on skill usefulness favors smaller, targeted bundles over sprawling multi-surface packages.",
+        )
+
+    cases = _load_eval_cases(skill_dir)
+    skill_name = name.strip().lower() if isinstance(name, str) else ""
+    trigger_cases = [
+        case for case in cases
+        if case.get("should_trigger") is not False and str(case.get("category", "")).strip().lower() != "negative"
+    ]
+    if trigger_cases and skill_name:
+        leaky = 0
+        realistic = 0
+        for case in trigger_cases:
+            prompt = str(case.get("prompt", "")).strip().lower()
+            if skill_name in prompt:
+                leaky += 1
+            if any(token in prompt for token in ("please", "can you", "help me", "github", "convert", "validate", "build", "inspect")):
+                realistic += 1
+
+        if leaky / len(trigger_cases) > 0.5:
+            add(
+                rule="evals.prompts.leaky",
+                category="Evals",
+                priority=Priority.MEDIUM,
+                message="Rewrite positive eval prompts so most do not mention the skill name directly.",
+                rationale="Leaky prompts can make evals look good without proving real-world routing quality.",
+            )
+        if realistic / len(trigger_cases) < 0.34:
+            add(
+                rule="evals.prompts.unrealistic",
+                category="Evals",
+                priority=Priority.MEDIUM,
+                message="Make more eval prompts read like realistic user requests instead of benchmark labels.",
+                rationale="Natural prompts are a better proxy for real skill invocation behavior.",
             )
 
     # Deterministic ordering: priority desc then category then rule
