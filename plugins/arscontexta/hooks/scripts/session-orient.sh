@@ -43,13 +43,19 @@ if [ -n "$SESSION_ID" ] && [ "$(bash "$READ_CONFIG" "session_capture" "true")" =
   fi
 
   # Write current session
-  cat > ops/sessions/current.json << EOF
+  # Write current session
+  if command -v jq &>/dev/null; then
+    jq -n --arg id "$SESSION_ID" --arg ts "$TIMESTAMP" \
+      '{"id": $id, "started": $ts, "status": "active"}' > ops/sessions/current.json
+  else
+    cat > ops/sessions/current.json << EOF
 {
   "id": "$SESSION_ID",
   "started": "$TIMESTAMP",
   "status": "active"
 }
 EOF
+  fi
 
   # Git commit if enabled
   if [ "$(bash "$READ_CONFIG" "git" "true")" = "true" ] && git rev-parse --is-inside-work-tree &>/dev/null; then
