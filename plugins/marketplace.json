@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "name": "openai-curated",
+  "plugins": [
+    {
+      "name": "arscontexta",
+      "source": {
+        "source": "local",
+        "path": "./plugins/arscontexta"
+      },
+      "installPolicy": "AVAILABLE",
+      "authPolicy": "ON_INSTALL",
+      "category": "Productivity"
+    }
+  ]
+}

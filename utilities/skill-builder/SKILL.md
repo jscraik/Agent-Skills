@@ -44,6 +44,8 @@ This skill designs, improves, validates, and packages high-quality Codex skills.
 - Prefer repo-validated workflow and benchmark evidence over aspirational wording.
 - Treat evals, contracts, and validator output as part of the product, not optional polish.
 - Keep the result implementable by another agent without hidden context.
+- Start with the smallest package boundary and 2-3 focused surfaces on a first pass.
+- Avoid sprawling scope by keeping first-pass plans narrow until evidence justifies expansion.
 
 ## Scope and triggers
 Use this skill to:
@@ -316,9 +318,9 @@ Optional deep checks:
 - Error: repeated validator failure after 3 rounds. Recovery: halt, summarize failing gate output verbatim, and ask for a scoped decision.
 
 ## Examples
-- “Create a new skill called `foo-bar` under `utilities/` with evals and an output contract.”
-- “Audit this skill’s trigger quality and tighten the description.”
-- “Compare two variants of this skill and keep the better one.”
+- “When the user asks to create a new release-note helper skill under `utilities/`, scaffold it with evals, contract, and an output contract.”
+- “Can you audit this skill’s trigger quality and tighten the description so it routes cleanly?”
+- “Help me compare two skill variants with the same eval suite and keep the higher-signal version.”
 
 ## Reference map
 Use these files when needed:
@@ -331,6 +333,7 @@ Use these files when needed:
 - `docs/skill-graphs/question-lifecycle.md` for question timing and post-run feedback behavior;
 - `docs/skill-graphs/knowledge-graph-operating-model.md` for graph-mode boundaries;
 - `references/examples.md`, `references/anti-patterns.md`, and `references/governance-and-style.md` for calibrated examples and deeper guidance.
+- `../codex-plugin-builder/references/plugin-contract.md` and `../codex-plugin-builder/scripts/plugin_builder.py` when validating plugin-owned skills or enforcing plugin manifest and marketplace contracts.
 
 ## Decision feedback protocol
 <!-- decision-feedback-protocol:v2 -->
@@ -365,7 +368,14 @@ Use `request_user_input` for missing install decisions when the turn fits in 1-3
 - Keep installs auditable: source, ref, staging path, validations, and final destination should all be reported.
 - Run a risk scan before promotion and stop on high-severity findings unless the user explicitly approves continuation.
 - Use deconflict analysis when the target overlaps meaningfully with installed skills or appears to solve the same job.
+- For plugin installs or Claude-to-Codex plugin conversions, run local plugin deconflict analysis first:
+  - `python3 utilities/codex-plugin-builder/scripts/plugin_builder.py inspect-local <plugin-name> --path plugins`
+  - prefer merge, fold, or improvement work when an existing local plugin already covers the intended job.
 - For unclear requests, default to `list` or `dry-run` instead of mutating the workspace.
+- For Claude-to-Codex plugin conversion during install runs, enforce terminology mapping:
+  - `.claude-plugin/plugin.json` -> `.codex-plugin/plugin.json`
+  - `commands/` and slash-command wording -> `prompts/`
+  - reject legacy Claude runtime markers in final Codex package paths.
 
 ### Install-distribute deliverables
 - installed or updated skill folder, or a dry-run plan if no writes occurred;
@@ -379,6 +389,8 @@ Use `request_user_input` for missing install decisions when the turn fits in 1-3
 - run evals for newly installed skills after write completion;
 - confirm the repo diff only contains expected skill-install paths;
 - stop and report blockers if a failing step repeats 3 times.
+- for plugin installs/conversions, run:
+  - `python3 utilities/codex-plugin-builder/scripts/plugin_builder.py validate <path/to/plugin> --require-marketplace --marketplace-path .agents/plugins/marketplace.json`
 
 ## Folded Legacy Modes (Core60)
 <!-- core60-folded-modes:v1:start -->

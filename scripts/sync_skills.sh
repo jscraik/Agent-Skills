@@ -6,7 +6,7 @@ usage() {
 Usage:
   scripts/sync_skills.sh
 
-Regenerates skill symlinks and SKILL.md index for this repository.
+Regenerates skill/plugin symlinks and SKILL.md index for this repository.
 USAGE
 }
 
@@ -28,11 +28,13 @@ repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$repo_root"
 
 skills_dir="$repo_root/.agents/skills"
+plugins_dir="$repo_root/plugins"
 system_skills_dir="$repo_root/skills-system"
 antigravity_skills_dir="$repo_root/skills-antigravity"
 antigravity_skills_txt="$HOME/.gemini/antigravity/skills.txt"
 
 mkdir -p "$skills_dir"
+mkdir -p "$plugins_dir"
 
 # Security guard: never operate on a symlinked antigravity catalog path.
 if [ -L "$antigravity_skills_dir" ]; then
@@ -565,8 +567,10 @@ sync_skill_path_file() {
 
 # Sync to Claude Code, OpenAI Codex/Agents, and Gemini loaders.
 sync_user_skills "$skills_dir" "$repo_root/skills" 1
+sync_user_skills "$plugins_dir" "$repo_root/.agents/plugins" 1
 sync_user_skills "$skills_dir" "$HOME/.claude/skills"
 sync_user_skills "$skills_dir" "$HOME/.agents/skills"
+sync_user_skills "$plugins_dir" "$HOME/.agents/plugins"
 sync_user_skills "$skills_dir" "$HOME/.codex/skills"
 sync_user_skills "$antigravity_skills_dir" "$HOME/.gemini/antigravity/skills" 1
 sync_user_skills "$antigravity_skills_dir" "$HOME/.gemini/skills" 1

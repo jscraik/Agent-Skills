@@ -212,6 +212,39 @@ def _iter_files(skill_dir: Path, rel_dir: str) -> List[Path]:
     return sorted([c for c in p.rglob("*") if c.is_file()])
 
 
+def _research_surface_count(text: str) -> int:
+    patterns = [
+        r"\bskills?\b",
+        r"\bagents?\b",
+        r"\bhooks?\b",
+        r"\bprompts?\b",
+        r"\bplugins?\b",
+        r"\bapps?\b",
+        r"\bmcp(?:s| servers?)?\b",
+    ]
+    return sum(1 for pattern in patterns if re.search(pattern, text, flags=re.IGNORECASE))
+
+
+def _focus_language_count(text: str) -> int:
+    phrases = [
+        "smallest package",
+        "smallest viable",
+        "smallest boundary",
+        "focused",
+        "narrow",
+        "2-3",
+        "2–3",
+        "2 to 3",
+        "first pass",
+        "start with",
+        "limit scope",
+        "avoid sprawling",
+        "package boundary",
+        "keep scope tight",
+    ]
+    return sum(1 for phrase in phrases if phrase in text.lower())
+
+
 _TEXT_EXTENSIONS = {
     ".md",
     ".txt",
@@ -1083,6 +1116,112 @@ def check_security_eval_coverage(skill_dir: Path, *, require_security_evals: boo
     return out
 
 
+def check_research_scope_focus(doc: SkillDoc) -> List[Finding]:
+    out: List[Finding] = []
+    corpus = f"{doc.frontmatter.get('description', '')}\n{doc.body}"
+    surfaces = _research_surface_count(corpus)
+    focus_signals = _focus_language_count(corpus)
+
+    if surfaces >= 6 and focus_signals == 0:
+        out.append(Finding(
+            Level.WARN,
+            "RESEARCH_SCOPE_OVERBUNDLED",
+            "Skill/package scope looks broad across many surfaces without explicit narrowing guidance. Prefer the smallest viable package boundary first.",
+            evidence=f"surfaces={surfaces}",
+        ))
+    elif surfaces >= 4 and focus_signals <= 1:
+        out.append(Finding(
+            Level.WARN,
+            "RESEARCH_SCOPE_BROAD",
+            "Skill/package scope may be too broad for a first pass. Add explicit guidance like 'start with 2-3 focused surfaces' or 'keep scope tight'.",
+            evidence=f"surfaces={surfaces}",
+        ))
+
+    return out
+
+
+def check_research_example_quality(doc: SkillDoc) -> List[Finding]:
+    out: List[Finding] = []
+    examples_text = _find_section_text(doc.body, ["examples", "example prompts"])
+    if not examples_text:
+        return out
+
+    examples = re.findall(r"(?m)^\s*(?:[-*]|\d+\.)\s+.+$", examples_text)
+    quoted_examples = re.findall(r'`[^`]{10,}`|"[^"\n]{10,}"', examples_text)
+    if len(examples) + len(quoted_examples) < 2:
+        out.append(Finding(
+            Level.WARN,
+            "RESEARCH_EXAMPLES_THIN",
+            "Examples section is present but thin. Add 2-3 realistic trigger prompts or worked examples.",
+            evidence="## Examples",
+        ))
+
+    realism_signals = ("when the user asks", "user says", "github", "convert", "validate", "inspect", "migrate")
+    realism_hits = sum(1 for signal in realism_signals if signal in examples_text.lower())
+    if realism_hits == 0:
+        out.append(Finding(
+            Level.WARN,
+            "RESEARCH_EXAMPLES_SYNTHETIC",
+            "Examples look abstract or template-like. Prefer realistic user requests and concrete workflows.",
+            evidence="## Examples",
+        ))
+
+    return out
+
+
+def check_research_eval_prompt_realism(doc: SkillDoc) -> List[Finding]:
+    out: List[Finding] = []
+    skill_dir = doc.path.parent
+    evals_path = skill_dir / "references" / "evals.yaml"
+    if not evals_path.exists():
+        return out
+
+    try:
+        obj = yaml.safe_load(evals_path.read_text(encoding="utf-8"))
+    except Exception as exc:  # noqa: BLE001
+        out.append(Finding(Level.WARN, "RESEARCH_EVALS_PARSE", f"Could not parse evals.yaml for realism checks: {exc}"))
+        return out
+
+    if not isinstance(obj, dict) or not isinstance(obj.get("cases"), list):
+        return out
+
+    skill_name = str(doc.frontmatter.get("name", "")).strip().lower()
+    cases = [case for case in obj["cases"] if isinstance(case, dict)]
+    trigger_cases = [
+        case for case in cases
+        if case.get("should_trigger") is not False and str(case.get("category", "")).strip().lower() != "negative"
+    ]
+    if not trigger_cases:
+        return out
+
+    leaky = 0
+    realistic = 0
+    for case in trigger_cases:
+        prompt = str(case.get("prompt", "")).strip().lower()
+        if skill_name and skill_name in prompt:
+            leaky += 1
+        if any(token in prompt for token in ("please", "can you", "help me", "github", "convert", "validate", "build", "inspect")):
+            realistic += 1
+
+    if leaky / len(trigger_cases) > 0.5:
+        out.append(Finding(
+            Level.WARN,
+            "RESEARCH_EVALS_LEAKY",
+            "Most positive eval prompts mention the skill name directly. Prefer natural user phrasing to test real routing behavior.",
+            evidence=f"leaky={leaky}/{len(trigger_cases)}",
+        ))
+
+    if realistic / len(trigger_cases) < 0.34:
+        out.append(Finding(
+            Level.WARN,
+            "RESEARCH_EVALS_UNREALISTIC",
+            "Positive eval prompts look synthetic. Rewrite more prompts as realistic user utterances.",
+            evidence=f"realistic={realistic}/{len(trigger_cases)}",
+        ))
+
+    return out
+
+
 
 def check_contract_and_evals(skill_dir: Path, *, require_contract: bool, require_evals: bool) -> List[Finding]:
     out: List[Finding] = []
@@ -1229,6 +1368,9 @@ def run_gate(
     findings.extend(check_script_security(skill_dir, doc))
     findings.extend(check_prompt_injection_signals(skill_dir, doc, pi_high_fail=pi_high_fail))
     findings.extend(check_security_eval_coverage(skill_dir, require_security_evals=require_security_evals))
+    findings.extend(check_research_scope_focus(doc))
+    findings.extend(check_research_example_quality(doc))
+    findings.extend(check_research_eval_prompt_realism(doc))
     findings.extend(check_contract_and_evals(skill_dir, require_contract=require_contract, require_evals=require_evals))
     findings.extend(check_repo_references(doc))
 

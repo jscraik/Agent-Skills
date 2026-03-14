@@ -191,6 +191,73 @@ def _iter_files(skill_dir: Path, rel_dir: str) -> List[Path]:
     return sorted([c for c in p.rglob("*") if c.is_file()])
 
 
+def _extract_h2_blocks(body: str) -> List[Tuple[str, str]]:
+    matches = list(re.finditer(r"(?m)^##\s+(.+?)\s*$", body))
+    blocks: List[Tuple[str, str]] = []
+    for i, match in enumerate(matches):
+        title = match.group(1).strip().lower()
+        start = match.end()
+        end = matches[i + 1].start() if i + 1 < len(matches) else len(body)
+        blocks.append((title, body[start:end].strip()))
+    return blocks
+
+
+def _find_section_text(body: str, aliases: Sequence[str]) -> str:
+    for title, text in _extract_h2_blocks(body):
+        if any(alias.lower() in title for alias in aliases):
+            return text
+    return ""
+
+
+def _research_surface_count(text: str) -> int:
+    patterns = [
+        r"\bskills?\b",
+        r"\bagents?\b",
+        r"\bhooks?\b",
+        r"\bprompts?\b",
+        r"\bplugins?\b",
+        r"\bapps?\b",
+        r"\bmcp(?:s| servers?)?\b",
+    ]
+    return sum(1 for pattern in patterns if re.search(pattern, text, flags=re.IGNORECASE))
+
+
+def _focus_language_count(text: str) -> int:
+    phrases = [
+        "smallest package",
+        "smallest viable",
+        "smallest boundary",
+        "focused",
+        "narrow",
+        "2-3",
+        "2–3",
+        "2 to 3",
+        "first pass",
+        "start with",
+        "limit scope",
+        "avoid sprawling",
+        "package boundary",
+        "keep scope tight",
+    ]
+    return sum(1 for phrase in phrases if phrase in text.lower())
+
+
+def _load_eval_cases(skill_dir: Path) -> List[Dict[str, Any]]:
+    evals_path = skill_dir / "references" / "evals.yaml"
+    if yaml is None or not evals_path.exists():
+        return []
+    try:
+        obj = yaml.safe_load(evals_path.read_text(encoding="utf-8"))
+    except Exception:
+        return []
+    if not isinstance(obj, dict):
+        return []
+    cases = obj.get("cases", [])
+    if not isinstance(cases, list):
+        return []
+    return [case for case in cases if isinstance(case, dict)]
+
+
 # -----------------------------
 # Scoring checks
 # -----------------------------
@@ -517,6 +584,134 @@ def score_repo_integration(doc: SkillDoc) -> CategoryResult:
     return CategoryResult("Repo Integration", min(score, max_score), max_score, findings)
 
 
+def score_bundle_focus(doc: SkillDoc) -> CategoryResult:
+    findings: List[Finding] = []
+    max_score = 15
+    score = 0
+
+    body = doc.body
+    desc = str(doc.frontmatter.get("description", ""))
+    corpus = f"{desc}\n{body}"
+
+    surfaces = _research_surface_count(corpus)
+    focus_signals = _focus_language_count(corpus)
+
+    if surfaces <= 3:
+        score += 9
+        findings.append(Finding("Research: Scope", 9, f"✅ Focused capability surface ({surfaces} major surface(s) mentioned)."))
+    elif surfaces <= 5:
+        score += 5
+        findings.append(Finding("Research: Scope", 5, f"⚠️ Moderately broad capability surface ({surfaces} major surface(s)).", Severity.WARN))
+    else:
+        findings.append(Finding("Research: Scope", 0, f"⚠️ Broad capability surface ({surfaces} major surface(s)); tighten first-pass scope.", Severity.WARN))
+
+    if focus_signals >= 3:
+        score += 6
+        findings.append(Finding("Research: Scope", 6, "✅ Explicit focus language encourages narrow first-pass packaging."))
+    elif focus_signals >= 1:
+        score += 3
+        findings.append(Finding("Research: Scope", 3, "⚠️ Some focus language present; make package-boundary guidance more explicit.", Severity.WARN))
+    else:
+        findings.append(Finding("Research: Scope", 0, "⚠️ Missing explicit narrow-scope guidance such as smallest package or 2-3 modules.", Severity.WARN))
+
+    return CategoryResult("Research: Scope Focus", min(score, max_score), max_score, findings)
+
+
+def score_example_quality(doc: SkillDoc) -> CategoryResult:
+    findings: List[Finding] = []
+    max_score = 15
+    score = 0
+
+    examples_text = _find_section_text(doc.body, ["examples", "example prompts"])
+    examples = re.findall(r"(?m)^\s*(?:[-*]|\d+\.)\s+.+$", examples_text)
+    quoted_examples = re.findall(r'`[^`]{10,}`|"[^"\n]{10,}"', examples_text)
+    realistic_signals = [
+        "when the user asks",
+        "user says",
+        "github",
+        "convert",
+        "validate",
+        "inspect",
+        "scaffold",
+        "migrate",
+    ]
+    realism_hits = sum(1 for signal in realistic_signals if signal in examples_text.lower())
+
+    if len(examples) >= 3 or len(quoted_examples) >= 3:
+        score += 10
+        findings.append(Finding("Research: Examples", 10, "✅ Includes multiple worked examples or realistic trigger prompts."))
+    elif len(examples) >= 2 or len(quoted_examples) >= 2:
+        score += 7
+        findings.append(Finding("Research: Examples", 7, "⚠️ Example coverage is decent; one more realistic example would strengthen routing.", Severity.WARN))
+    elif examples_text:
+        score += 3
+        findings.append(Finding("Research: Examples", 3, "⚠️ Examples section exists but is thin; add 2-3 realistic prompts.", Severity.WARN))
+    else:
+        findings.append(Finding("Research: Examples", 0, "⚠️ No concrete examples detected; add realistic trigger prompts.", Severity.WARN))
+
+    if realism_hits >= 3:
+        score += 5
+        findings.append(Finding("Research: Examples", 5, "✅ Examples appear grounded in real user requests and workflows."))
+    elif realism_hits >= 1:
+        score += 3
+        findings.append(Finding("Research: Examples", 3, "⚠️ Some realism signals found; prefer more natural user-style prompts.", Severity.WARN))
+
+    return CategoryResult("Research: Example Quality", min(score, max_score), max_score, findings)
+
+
+def score_eval_prompt_realism(doc: SkillDoc) -> CategoryResult:
+    findings: List[Finding] = []
+    max_score = 15
+    score = 0
+
+    skill_dir = doc.skill_md_path.parent
+    cases = _load_eval_cases(skill_dir)
+    if not cases:
+        findings.append(Finding("Research: Evals", 0, "⚠️ No eval cases parsed for realism scoring.", Severity.WARN))
+        return CategoryResult("Research: Eval Realism", score, max_score, findings)
+
+    skill_name = str(doc.frontmatter.get("name", "")).strip().lower()
+    trigger_cases = [
+        case for case in cases
+        if case.get("should_trigger") is not False and str(case.get("category", "")).strip().lower() != "negative"
+    ]
+    if not trigger_cases:
+        findings.append(Finding("Research: Evals", 0, "⚠️ No positive trigger evals detected for realism scoring.", Severity.WARN))
+        return CategoryResult("Research: Eval Realism", score, max_score, findings)
+
+    leaky = 0
+    realistic = 0
+    for case in trigger_cases:
+        prompt = str(case.get("prompt", "")).strip().lower()
+        if skill_name and skill_name in prompt:
+            leaky += 1
+        if any(token in prompt for token in ("please", "can you", "help me", "github", "convert", "validate", "build", "inspect")):
+            realistic += 1
+
+    leak_ratio = leaky / len(trigger_cases)
+    realism_ratio = realistic / len(trigger_cases)
+
+    if leak_ratio == 0:
+        score += 8
+        findings.append(Finding("Research: Evals", 8, "✅ Positive eval prompts avoid explicit skill-name leakage."))
+    elif leak_ratio <= 0.33:
+        score += 5
+        findings.append(Finding("Research: Evals", 5, f"⚠️ Limited skill-name leakage in eval prompts ({leaky}/{len(trigger_cases)}).", Severity.WARN))
+    else:
+        findings.append(Finding("Research: Evals", 0, f"⚠️ Many eval prompts leak the skill name ({leaky}/{len(trigger_cases)}). Prefer natural user phrasing.", Severity.WARN))
+
+    if realism_ratio >= 0.67:
+        score += 7
+        findings.append(Finding("Research: Evals", 7, "✅ Eval prompts mostly read like realistic user requests."))
+    elif realism_ratio >= 0.34:
+        score += 4
+        findings.append(Finding("Research: Evals", 4, "⚠️ Some eval prompts feel realistic; keep reducing benchmark-only phrasing.", Severity.WARN))
+    else:
+        findings.append(Finding("Research: Evals", 0, "⚠️ Eval prompts look synthetic; rewrite more cases as realistic user utterances.", Severity.WARN))
+
+    return CategoryResult("Research: Eval Realism", min(score, max_score), max_score, findings)
+
+
 # -----------------------------
 # Reporting
 # -----------------------------
@@ -605,6 +800,9 @@ def analyze(doc: SkillDoc) -> Tuple[int, int, List[CategoryResult]]:
     results.append(score_empowerment(doc.body))
     results.append(score_conciseness(doc))
     results.append(score_repo_integration(doc))
+    results.append(score_bundle_focus(doc))
+    results.append(score_example_quality(doc))
+    results.append(score_eval_prompt_realism(doc))
 
     total = sum(r.score for r in results)
     max_total = sum(r.max_score for r in results)

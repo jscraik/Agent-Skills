@@ -1,5 +1,5 @@
 ---
-name: "ars-contexta-codex"
+name: "arscontexta"
 description: "Use when you need to install, validate, or maintain Ars Contexta parity in Codex; mirrors skills/prompts/agents/automations and returns a parity report with any Codex-vs-Claude deltas."
 ---
 
@@ -101,7 +101,7 @@ For graph recommendation review, follow `/Users/jamiecraik/dev/agent-skills/docs
 ## Validation
 - Run checks in fail-fast order and stop at first failed gate.
 - Prompt files resolve valid canonical paths.
-- `[$ars-contexta-codex](...)` links point to this `SKILL.md`.
+- `[$arscontexta](...)` links point to this `SKILL.md`.
 - Ars Contexta agent role files exist and are registered in Codex config.
 - Ars Contexta automation TOMLs exist and are syntactically valid.
 - launchd status script reports expected Ars Contexta jobs.
