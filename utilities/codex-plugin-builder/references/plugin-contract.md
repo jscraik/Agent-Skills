@@ -7,6 +7,21 @@ Use this contract to keep plugin scaffolds and conversions aligned with the enfo
 - `README.md` (required)
 - `LICENSE` (required)
 
+## Required support surfaces
+- `references/operational-spec.md` (required)
+- `references/deconflict-report.md` (recommended when overlap review finds an exact or similar sibling plugin)
+
+`references/operational-spec.md` must provide:
+- a transition table as the source of truth;
+- explicit failure states for validation, blocked, policy, timeout, system, and plugin failures;
+- a Mermaid diagram derived strictly from the transition table;
+- plugin contract metadata, plugin registry, capability map, idempotency, invariants, dry-run simulation, transition tracing, and log fields.
+
+## Deconflict review
+- Before creating a new plugin package, compare it against the existing local plugin directory.
+- Prefer merge, fold, or improvement work when an existing package already serves the same job.
+- Treat unexplained duplicate-intent packages as a packaging smell even when the manifest is otherwise valid.
+
 ## Optional package surfaces
 - `skills/`
 - `hooks/` or `hooks.json`
@@ -153,10 +168,25 @@ Use this contract to keep plugin scaffolds and conversions aligned with the enfo
 ## Enforced script commands
 
 ```bash
+python3 utilities/codex-plugin-builder/scripts/plugin_builder.py inspect-source <path/to/source-repo-or-plugin>
+python3 utilities/codex-plugin-builder/scripts/plugin_builder.py inspect-local <plugin-name> --path plugins
 python3 utilities/codex-plugin-builder/scripts/plugin_builder.py scaffold <plugin-name> --path plugins --with-marketplace
+python3 utilities/codex-plugin-builder/scripts/plugin_builder.py scaffold <plugin-name> --path plugins --from-source-path <path/to/source-repo-or-plugin> --with-marketplace
 python3 utilities/codex-plugin-builder/scripts/plugin_builder.py validate <path/to/plugin> --require-marketplace --marketplace-path .agents/plugins/marketplace.json
 python3 utilities/codex-plugin-builder/scripts/plugin_builder.py validate <path/to/plugin> --show-terminology-map
 ```
+
+## Source inspection support
+
+Use `inspect-source` before conversion when the input may be:
+- a marketplace repo with nested plugins;
+- a provider-converter repo with multiple manifest formats;
+- a plugin that declares custom paths for `commands`, `skills`, `agents`, `hooks`, or `mcpServers`;
+- a plugin that embeds `mcpServers` inline instead of using only `./.mcp.json`.
+
+Use `scaffold --from-source-path ...` when you want the scaffold to auto-create likely Codex surfaces from the inspected source plugin root.
+The scaffold also emits `references/operational-spec.md` for every plugin package it creates.
+When overlap review is relevant, the scaffold also emits `references/deconflict-report.md`.
 
 ## Claude-to-Codex conversion requirement
 

@@ -26,6 +26,7 @@ Use this skill when the request is to:
 - scaffold a new Codex plugin package;
 - inspect an external plugin source before conversion;
 - convert a Claude-oriented plugin shape into a Codex-compatible package;
+- compare a proposed plugin against existing local plugins before deciding whether to merge, fold, improve, or create;
 - add plugin-owned surfaces such as `skills/`, `hooks/`, `prompts` (optional), `agents` (optional), `.app.json`, or `.mcp.json`;
 - include package docs `README.md` and `LICENSE` in every plugin package;
 - validate plugin-owned skills with the `skill-builder` validator suite.
@@ -65,7 +66,13 @@ Produce only what the request needs:
 - plugin package folder with `SKILL.md` or plugin-owned assets;
 - `references/contract.yaml` and `references/evals.yaml` for non-trivial behavior;
 - `references/plugin-contract.md` whenever packaging rules or manifest fields are in scope;
+- `references/operational-spec.md` for every plugin package the builder creates or converts;
+- `references/deconflict-report.md` when the builder compares the candidate against existing local plugins and merge-or-fold analysis is relevant;
 - `references/hooks-contract.md` whenever `hooks/` is requested or converted;
+- `references/arscontexta-conversion-map.md` when the source plugin is Ars Contexta or similarly mixes package assets, generated runtime outputs, and migration-only platform files;
+- `references/compound-engineering-comparison.md` when the source repo is marketplace-style, contains multiple plugins, or ships provider-conversion tooling and provider-specific manifests;
+- `references/superpowers-comparison.md` when the source repo already ships Codex-native install docs, deprecated command shims, or provider-multiplexed hook wrappers;
+- `references/arscontexta-operational-spec.md`, `references/compound-engineering-operational-spec.md`, or source-specific equivalents when comparison work needs a source-backed runtime model;
 - fixture examples under `fixtures/` for conversion templates and regression checks;
 - optional helper docs in `references/` when conversion assumptions are non-obvious;
 - validator and readiness summary for plugin-owned skills.
@@ -79,6 +86,9 @@ Key principles:
 - focused beats sprawling:
   - start with 2-3 high-value surfaces;
   - avoid claiming every capability in one draft;
+- improve before duplicate:
+  - check the local plugin directory for exact or similar packages first;
+  - prefer merge, fold, or capability expansion when an existing plugin already covers the job;
 - deterministic over aspirational:
   - verify with contracts, evals, and validator output;
   - do not rely on "looks good" judgment alone;
@@ -97,19 +107,45 @@ Key principles:
   - URL/path,
   - selected ref or commit,
   - expected plugin subdirectory.
+- Determine whether the source is:
+  - a single plugin package,
+  - a marketplace repo containing multiple plugins,
+  - or a converter repo that also ships plugin payloads.
+- Resolve the real plugin root before inventorying surfaces.
+- Inspect manifest-declared custom paths before assuming defaults for `commands`, `skills`, `agents`, `hooks`, or `mcp`.
+- Inspect sibling provider metadata such as `.cursor-plugin/` as migration references, not as Codex runtime surfaces.
 - Identify risky content before conversion:
   - hidden scripts,
   - unsafe command snippets,
-  - ambiguous metadata.
+  - ambiguous metadata,
+  - inline MCP definitions that diverge from `.mcp.json`,
+  - repo-maintainer command surfaces that are not actually part of the plugin payload,
+  - deprecated command shims that should not become fresh Codex prompts,
+  - native Codex install docs that already describe a non-plugin skill-discovery lane,
+  - provider-specific hook wrappers or env vars that should not be copied verbatim into Codex hooks.
 
-3. Scaffold package layout.
+3. Run local deconflict review before creating a new package.
+- Inspect the target plugin directory for exact or similar local plugins.
+- Treat this as the plugin equivalent of `skill-builder` install-distribute deconflict analysis.
+- Prefer script-backed inspection:
+  - `python3 utilities/codex-plugin-builder/scripts/plugin_builder.py inspect-local <plugin-name> --path plugins`
+- If overlap is detected, prefer:
+  - updating the existing plugin,
+  - folding the new capability into the existing plugin,
+  - or documenting why a distinct package is still justified.
+
+4. Scaffold package layout.
 - Default package root to repo-root `plugins/<plugin-name>/` unless the user explicitly requests another destination.
 - Enforce required root surfaces first:
   - `.codex-plugin/plugin.json`,
   - `README.md`,
   - `LICENSE`.
+- Always emit `references/operational-spec.md` as a compact runtime contract for the created or converted plugin package.
+- Emit `references/deconflict-report.md` so merge-vs-new-package reasoning stays auditable.
 - Prefer script-backed scaffolding for deterministic output:
   - `python3 utilities/codex-plugin-builder/scripts/plugin_builder.py scaffold <plugin-name> --path plugins --with-marketplace`.
+- If overlap exists and a fresh package is still intentional, require explicit continuation:
+  - rerun with `--allow-overlap`.
 - Create only needed optional directories/files:
   - `skills/`,
   - `prompts/` (optional),
@@ -122,23 +158,43 @@ Key principles:
   - `references/`.
 - Keep one-level-deep support files unless a validator requires deeper nesting.
 
-4. Convert with explicit mapping.
+5. Convert with explicit mapping.
 - Map source concepts into Codex-friendly structure using documented assumptions.
 - Apply terminology mapping from `references/terminology-map.md`:
   - `.claude-plugin/plugin.json` -> `.codex-plugin/plugin.json`
   - `commands/` and slash-command language -> `prompts/`
+- Treat command mapping as semantic, not mechanical:
+  - if the source artifact is actually a durable workflow skill, keep or convert it into `skills/`;
+  - if it is entrypoint-only prompt content, convert it into `prompts/`;
+  - if the target UX benefits from both, document the fan-out explicitly.
+- If a source command is explicitly deprecated and only redirects users to a skill, do not preserve it as a first-class Codex prompt unless the user asks for backward-compatibility shims.
+- When the source looks like Ars Contexta or another generator-heavy plugin, explicitly separate:
+  - package-owned plugin surfaces,
+  - generated runtime outputs,
+  - migration-only or provisional behavior.
+- When the source already ships `.codex/INSTALL.md` or `docs/README.codex.md`, record whether the repo already supports Codex via native skill discovery and whether conversion to a plugin package is additive or redundant.
 - Keep placeholder-first metadata when parity is uncertain.
 - Mark inferred fields clearly so follow-up hardening is easy.
 - When `hooks/` is in scope, map against `references/hooks-contract.md` and separate:
   - verified behavior backed by Codex sources,
   - provisional behavior that still needs runtime confirmation.
+- Preserve hook intent, not provider glue:
+  - rewrite provider-specific output multiplexing into the Codex hook contract;
+  - do not carry `CLAUDE_PLUGIN_ROOT`, Cursor-only payload fields, or cross-platform `.cmd` wrappers into Codex without a clear Codex runtime need.
 
-5. Validate plugin-owned skills.
+6. Validate plugin-owned skills.
 - Run the same skill-builder validators against each plugin-owned skill under `skills/`.
 - Report pass, warn, fail status by validator and path.
 
-6. Validate plugin contract.
+7. Validate plugin contract.
 - Validate `.codex-plugin/plugin.json` exists and includes required metadata from `references/plugin-contract.md`.
+- Validate `references/operational-spec.md` exists and matches the compact runtime-spec contract:
+  - transition table is the source of truth,
+  - Mermaid diagram is derived from the same transitions,
+  - failures terminate in explicit fail states.
+- Validate deconflict posture:
+  - when an exact or similar local plugin exists, require `references/deconflict-report.md`;
+  - treat unexplained duplicate-intent packages as a blocker until merge/fold/improve reasoning is explicit.
 - Validate plugin and marketplace JSON contract with script-backed checks:
   - `python3 utilities/codex-plugin-builder/scripts/plugin_builder.py validate <path/to/plugin> --require-marketplace --marketplace-path .agents/plugins/marketplace.json`
 - Validate hook implementation shape when hooks are requested:
@@ -146,7 +202,7 @@ Key principles:
   - supported vs provisional fields are clearly separated.
 - Validate optional surfaces only when requested (`prompts`, `agents`, `.app.json`, `.mcp.json`).
 
-7. Summarize plus next step.
+8. Summarize plus next step.
 - Return what changed, what was validated, and one next action.
 
 ## Validation
@@ -159,6 +215,7 @@ Core checks for plugin-owned skills:
 ~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/analyze_skill.py <path/to/plugin>/skills/<skill-name>
 ~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/openclaw_skill_guard.py <path/to/plugin>/skills/<skill-name> --mode both
 python3 utilities/codex-plugin-builder/scripts/plugin_builder.py validate <path/to/plugin> --require-marketplace --marketplace-path .agents/plugins/marketplace.json
+python3 utilities/codex-plugin-builder/scripts/plugin_builder.py inspect-local <plugin-name> --path plugins
 ```
 
 Optional eval depth:
@@ -181,6 +238,9 @@ When packaging plugins, treat `references/plugin-contract.md` as mandatory.
 Required behavior:
 - always emit `.codex-plugin/plugin.json`;
 - always emit `README.md` and `LICENSE`;
+- always emit `references/operational-spec.md`;
+- run local deconflict review before shipping a new plugin package;
+- emit `references/deconflict-report.md` when overlap review is relevant;
 - include required manifest metadata:
   - `name`,
   - `version`,

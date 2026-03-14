@@ -368,6 +368,9 @@ Use `request_user_input` for missing install decisions when the turn fits in 1-3
 - Keep installs auditable: source, ref, staging path, validations, and final destination should all be reported.
 - Run a risk scan before promotion and stop on high-severity findings unless the user explicitly approves continuation.
 - Use deconflict analysis when the target overlaps meaningfully with installed skills or appears to solve the same job.
+- For plugin installs or Claude-to-Codex plugin conversions, run local plugin deconflict analysis first:
+  - `python3 utilities/codex-plugin-builder/scripts/plugin_builder.py inspect-local <plugin-name> --path plugins`
+  - prefer merge, fold, or improvement work when an existing local plugin already covers the intended job.
 - For unclear requests, default to `list` or `dry-run` instead of mutating the workspace.
 - For Claude-to-Codex plugin conversion during install runs, enforce terminology mapping:
   - `.claude-plugin/plugin.json` -> `.codex-plugin/plugin.json`
