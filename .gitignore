@@ -16,6 +16,10 @@
 node_modules/
 /node_modules/
 /**/node_modules/
+.eslintcache
+.stylelintcache
+.markdownlint-cli2-cache/
+.biome-cache/
 
 # Python/build artifacts
 **/__pycache__/
