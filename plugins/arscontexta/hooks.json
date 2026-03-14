@@ -6,26 +6,19 @@
         "hooks": [
           {
             "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/session-orient.sh",
+            "command": "${CODEX_PLUGIN_ROOT}/hooks/scripts/session-orient.sh",
             "timeout": 10
           }
         ]
       }
     ],
-    "PostToolUse": [
+    "Stop": [
       {
-        "matcher": "Write",
         "hooks": [
           {
             "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/write-validate.sh",
+            "command": "${CODEX_PLUGIN_ROOT}/hooks/scripts/auto-commit.sh",
             "timeout": 5
-          },
-          {
-            "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/auto-commit.sh",
-            "timeout": 5,
-            "async": true
           }
         ]
       }
