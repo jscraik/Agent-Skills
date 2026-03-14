@@ -16,10 +16,10 @@ Choose the smallest correct workflow route for a compound-engineering request.
 | brainstorm | The request is still exploratory or has multiple valid shapes. | `codex/prompts/workflow-brainstorm.md` | `repo-research-analyst`, `learnings-researcher` |
 | spec | The user needs an implementation-ready spec from a rough idea. | `codex/prompts/workflow-spec.md` | `repo-research-analyst`, `learnings-researcher`, optional research roles |
 | deepen-spec | A spec exists but lacks rigor, edge cases, or operational detail. | `codex/prompts/deepen-spec.md` | `repo-research-analyst`, `learnings-researcher`, optional research roles |
-| plan | A spec is ready and the next need is execution planning. | `codex/prompts/workflow-plan.md` | research roles plus `spec-flow-analyzer` |
-| deepen-plan | A plan exists but needs stronger sequencing, gates, or validation coverage. | `codex/prompts/deepen-plan.md` | research roles |
-| work | The spec and plan are sufficiently ready for implementation. | `codex/prompts/workflow-work.md` | usually none by default |
-| ui-workflow | The request is UI-first and should combine design-system rigor plus creative interaction planning before route handoff. | `codex/prompts/workflow-ui.md` | `ui-ux-design`, optional `design-implementation-reviewer`, optional frontend risk reviewers |
+| plan | A spec is ready and the next need is execution planning, including test mode, tracer-bullet-first decisions, and validation gates. | `codex/prompts/workflow-plan.md` | research roles plus `spec-flow-analyzer` |
+| deepen-plan | A plan exists but needs stronger sequencing, gates, TDD declarations, or validation coverage. | `codex/prompts/deepen-plan.md` | research roles |
+| work | The spec and plan are sufficiently ready for implementation, and the TDD/tracer-bullet contract is explicit enough to execute safely. Default to one supervisor agent owning the lane. | `codex/prompts/workflow-work.md` | usually none by default; bounded internal reviewers only if justified |
+| ui-workflow | The request is UI-first and should use prototype-first interface planning, then hand off into spec/plan/work with explicit validation and TDD expectations for behavior changes. | `codex/prompts/workflow-ui.md` | `ui-ux-design`, optional bounded reviewers for parity or frontend risk |
 | review | The need is broad readiness, synthesis, go-no-go, or package-level review. | `codex/prompts/workflow-review.md` | reviewer mix based on risk areas |
 | technical-review | The need is a deep engineering critique of code, diff, PR, or branch. | `codex/prompts/technical_review.md` | specialist reviewers by language or risk area |
 | compound | The user wants a multi-stage orchestration or is unsure but clearly needs coordinated workflow help. | `codex/prompts/workflow-compound.md` | research roles plus optional specialized reviewers |
@@ -52,6 +52,8 @@ Every routed result should include:
 - prompt path when prompt-backed, otherwise an explicit no-prompt-path note
 - route rationale
 - exact specialist agents if applicable
+- execution posture: one supervisor agent by default, with any additional roles called out as bounded internal support
 - safeguards
 - validation gates
+- TDD / tracer-bullet expectation when the route points toward implementation work
 - next recommended action

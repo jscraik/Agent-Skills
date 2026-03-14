@@ -36,6 +36,8 @@ description: "Route Codex compound-engineering requests to the correct workflow 
 - Verify prompt paths, agent role names, and config presence before recommending them.
 - Make the handoff executable: one route, one rationale, one next step, and explicit safeguards.
 - Treat context compaction and guardrail extraction as first-class operational modes, not fallback dumping grounds.
+- For behavior-changing implementation lanes, prefer plans and work prompts that enforce TDD, tracer bullets, and public-interface validation rather than generic "write tests" advice.
+- Default to one supervisor agent owning the task end-to-end; recommend specialist roles only as bounded internal support when they clearly reduce risk or cycle time.
 
 ## Scope and triggers
 Use this skill when the user wants to enter or steer the compound-engineering workflow and needs help choosing the correct stage, review mode, or workflow-support meta-mode.
@@ -73,7 +75,9 @@ Non-triggers:
   - route rationale
   - prompt path or explicit meta-mode name
   - agent fan-out
+  - execution posture
   - safeguards and validation gates
+  - TDD / tracer-bullet obligations when the selected route leads toward implementation
   - optional NotebookLM-derived heuristics
 - a refusal or clarification when the request is outside scope or too ambiguous
 - when relevant, a short "why not the nearby alternatives" note so the next run does not re-open the same routing debate
@@ -95,6 +99,7 @@ If the route is ambiguous after one concise question, stop and surface the small
 - Keep prompts canonical and specialist roles exact.
 - Prefer explicit safeguards and validation gates over vague recommendations.
 - Turn repeated failure patterns into durable workflow improvements.
+- Optimize for low operator load: Jamie should not need to manually coordinate multiple top-level agents for routine work.
 
 Guiding questions:
 - Is this really a stage-selection problem, or is it a meta-mode problem?
@@ -110,6 +115,7 @@ Guiding questions:
 - When context is bloated, prefer `context-compaction` over forcing another route explanation.
 - When a lesson should become reusable repo guidance, prefer `guardrail-extract` over ad hoc advice.
 - Avoid cookie-cutter outputs; different starting states should produce meaningfully different route briefs.
+- Prefer a single execution owner even when multiple specialist reviewers are recommended.
 
 ## Empowerment principles
 - Empower the user with a clear next action, not just a label.
@@ -155,7 +161,10 @@ Meta-modes:
    - notebook 2 for context injection, planning mode, hooks, and drift recovery
    - notebook 3 for Codex operating patterns, review loops, doc gardening, and eval patterns
 8. End with the selected prompt path or meta-mode, route rationale, recommended agents, and validation gates.
-9. If the route depends on missing repo assets, stop with a precise blocker instead of suggesting an imaginary path.
+9. When routing to `ui-workflow`, call out whether the UI task is prototype-first, brownfield refinement, or implementation-ready, and make the downstream handoff route explicit.
+10. When routing to `plan`, `deepen-plan`, `ui-workflow`, or `work` for behavior-changing tasks, call out the expected TDD/tracer-bullet contract explicitly so later runs do not silently downgrade it.
+11. If the route depends on missing repo assets, stop with a precise blocker instead of suggesting an imaginary path.
+12. When recommending any agents beyond the main lane owner, state that they are internal bounded support and not peer operators Jamie is expected to coordinate manually.
 
 UI route fan-out defaults:
 - start with `ui-ux-design` for implementation-oriented UI planning and delivery
@@ -184,6 +193,7 @@ Do not use NotebookLM to override repo-local truth about:
 - for meta-modes, verify that the output explicitly says no backing prompt file applies
 - keep route reasoning explicit and short
 - fail fast on missing prompt files or mismatched role names
+- verify the route brief does not imply unnecessary multi-agent orchestration for routine work
 
 ## Anti-patterns
 - do not collapse `technical-review` into generic `review`
@@ -193,6 +203,8 @@ Do not use NotebookLM to override repo-local truth about:
 - do not over-ask; one route question maximum before choosing or surfacing candidates
 - do not pretend a meta-mode has a prompt path when it does not
 - do not leave the user with only a classification and no next action
+- do not route behavior-changing work into plan or work without mentioning the TDD/tracer-bullet expectation
+- do not equate "more agents" with a better route
 
 ## Examples
 Happy-path examples:
