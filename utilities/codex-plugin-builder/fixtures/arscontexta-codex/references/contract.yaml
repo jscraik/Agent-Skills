@@ -18,5 +18,5 @@ assumptions:
   - Semantic search integration is optional and may be absent in target vaults.
 outputs:
   plugin_package_path: utilities/codex-plugin-builder/fixtures/arscontexta-codex
-  primary_skill: skills/ars-contexta-codex/SKILL.md
+  primary_skill: skills/arscontexta/SKILL.md
   starter_prompt: prompts/arscontexta-quickstart.md

@@ -3,10 +3,10 @@
   "name": "openai-curated",
   "plugins": [
     {
-      "name": "arscontexta-codex",
+      "name": "arscontexta",
       "source": {
         "source": "local",
-        "path": "./plugins/arscontexta-codex"
+        "path": "./plugins/arscontexta"
       },
       "installPolicy": "AVAILABLE",
       "authPolicy": "ON_INSTALL",
