@@ -10,6 +10,8 @@ inputs:
   - destination_path
   - destination_default: plugins/<plugin-name>
   - required_root_surfaces: [.codex-plugin/plugin.json, README.md, LICENSE]
+  - required_manifest_fields: [name, version, description, author, homepage, repository, license, keywords, skills, hooks, mcpServers, apps, interface]
+  - required_marketplace_fields: [name, source.source, source.path, installPolicy, authPolicy, category]
   - requested_surfaces
   - source_url_or_path
   - source_ref
@@ -17,9 +19,12 @@ inputs:
 
 outputs:
   - plugin_package_path
+  - script_validation_summary
+  - terminology_mapping_summary
   - manifest_validation_summary
   - integration_file_summary
   - hooks_validation_summary
+  - marketplace_validation_summary
   - changed_files
   - validation_summary
   - assumptions_and_risks
@@ -35,5 +40,7 @@ non_goals:
 risks:
   - Over-broad plugin scope in first pass.
   - Unsafe conversion assumptions from incomplete source metadata.
+  - Claude terminology leakage (`commands/`, `.claude-plugin`) into Codex runtime paths.
   - False confidence if plugin-owned skills are not validated.
+  - Marketplace entry drift (missing install/auth/category policy fields).
   - Presenting provisional hooks behavior as stable without source-backed evidence.

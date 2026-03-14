@@ -15,6 +15,7 @@ Build safe, focused plugin packages for Codex workflows.
 - [Validation](#validation)
 - [Plugin contract](#plugin-contract)
 - [Hook contract](#hook-contract)
+- [Terminology mapping](#terminology-mapping)
 - [Constraints and safety](#constraints-and-safety)
 - [Anti-patterns](#anti-patterns)
 - [Examples](#examples)
@@ -107,6 +108,8 @@ Key principles:
   - `.codex-plugin/plugin.json`,
   - `README.md`,
   - `LICENSE`.
+- Prefer script-backed scaffolding for deterministic output:
+  - `python3 utilities/codex-plugin-builder/scripts/plugin_builder.py scaffold <plugin-name> --path plugins --with-marketplace`.
 - Create only needed optional directories/files:
   - `skills/`,
   - `prompts/` (optional),
@@ -121,6 +124,9 @@ Key principles:
 
 4. Convert with explicit mapping.
 - Map source concepts into Codex-friendly structure using documented assumptions.
+- Apply terminology mapping from `references/terminology-map.md`:
+  - `.claude-plugin/plugin.json` -> `.codex-plugin/plugin.json`
+  - `commands/` and slash-command language -> `prompts/`
 - Keep placeholder-first metadata when parity is uncertain.
 - Mark inferred fields clearly so follow-up hardening is easy.
 - When `hooks/` is in scope, map against `references/hooks-contract.md` and separate:
@@ -133,6 +139,8 @@ Key principles:
 
 6. Validate plugin contract.
 - Validate `.codex-plugin/plugin.json` exists and includes required metadata from `references/plugin-contract.md`.
+- Validate plugin and marketplace JSON contract with script-backed checks:
+  - `python3 utilities/codex-plugin-builder/scripts/plugin_builder.py validate <path/to/plugin> --require-marketplace --marketplace-path .agents/plugins/marketplace.json`
 - Validate hook implementation shape when hooks are requested:
   - event buckets and handler type support,
   - supported vs provisional fields are clearly separated.
@@ -150,6 +158,7 @@ Core checks for plugin-owned skills:
 ~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/skill_gate.py <path/to/plugin>/skills/<skill-name>
 ~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/analyze_skill.py <path/to/plugin>/skills/<skill-name>
 ~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/openclaw_skill_guard.py <path/to/plugin>/skills/<skill-name> --mode both
+python3 utilities/codex-plugin-builder/scripts/plugin_builder.py validate <path/to/plugin> --require-marketplace --marketplace-path .agents/plugins/marketplace.json
 ```
 
 Optional eval depth:
@@ -176,11 +185,25 @@ Required behavior:
   - `name`,
   - `version`,
   - `description`,
+  - `author`,
+  - `homepage`,
+  - `repository`,
   - `license`,
-  - `surfaces`;
+  - `keywords`,
+  - `skills`,
+  - `hooks`,
+  - `mcpServers`,
+  - `apps`,
+  - `interface`;
 - include integration metadata when present:
   - `.mcp.json` wiring details,
   - `.app.json` app-level details;
+- marketplace entries must include:
+  - `source.source = "local"`,
+  - `source.path = "./plugins/<plugin-name>"`,
+  - `installPolicy`,
+  - `authPolicy`,
+  - `category`;
 - keep `prompts` and `agents` optional unless explicitly requested.
 
 ## Hook contract
@@ -191,6 +214,14 @@ Required behavior:
 - align examples to currently supported handler types;
 - mark unsupported or provisional fields explicitly instead of presenting them as stable;
 - keep hook conversion notes auditable with source file links and short evidence notes.
+
+## Terminology mapping
+When converting Claude-oriented plugins, use `references/terminology-map.md` as a required check.
+
+Required behavior:
+- do not ship converted plugins with Claude package markers (`.claude-plugin` or `commands/`) as runtime surfaces;
+- ensure codex prompts use `prompts/` and plugin docs use prompt wording, not slash-command wording;
+- keep shared surfaces (`skills`, `hooks`, `agents`, `.mcp.json`, `.app.json`) in Codex-compatible structure.
 
 ## Constraints and safety
 - store generated plugin packages under repo-root `plugins/` by default;

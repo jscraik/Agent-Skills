@@ -9,6 +9,7 @@ cases:
       - Response confirms `codex-plugin-builder` applies.
       - Workflow keeps scope narrow and does not over-bundle.
       - Response requires `.codex-plugin/plugin.json`, `README.md`, and `LICENSE`.
+      - Response enforces `plugin.json` fields from `references/plugin-contract.md` instead of free-form metadata.
       - Validation commands for plugin-owned skills are included.
 
   - id: cpb-happy-02
@@ -20,7 +21,8 @@ cases:
       - Inspection and staging are described before mutation.
       - Conversion assumptions are explicit and auditable.
       - Safety constraints mention untrusted script handling.
-      - Response validates manifest metadata and integration files.
+      - Response validates manifest metadata, integration files, and marketplace policy fields.
+      - Response maps Claude `commands/` terminology to Codex `prompts/`.
 
   - id: cpb-negative-01
     name: Out of scope app feature request
@@ -57,3 +59,5 @@ cases:
       - Response recommends first pass with 2-3 focused surfaces.
       - Response keeps `prompts` and `agents` optional unless explicitly requested.
       - Response references `references/hooks-contract.md` when hooks are requested.
+      - Response still enforces required docs (`README.md`, `LICENSE`) and marketplace policy metadata when marketplace is requested.
+      - Response references `references/terminology-map.md` for Claude-to-Codex term normalization.

@@ -333,6 +333,7 @@ Use these files when needed:
 - `docs/skill-graphs/question-lifecycle.md` for question timing and post-run feedback behavior;
 - `docs/skill-graphs/knowledge-graph-operating-model.md` for graph-mode boundaries;
 - `references/examples.md`, `references/anti-patterns.md`, and `references/governance-and-style.md` for calibrated examples and deeper guidance.
+- `../codex-plugin-builder/references/plugin-contract.md` and `../codex-plugin-builder/scripts/plugin_builder.py` when validating plugin-owned skills or enforcing plugin manifest and marketplace contracts.
 
 ## Decision feedback protocol
 <!-- decision-feedback-protocol:v2 -->
@@ -368,6 +369,10 @@ Use `request_user_input` for missing install decisions when the turn fits in 1-3
 - Run a risk scan before promotion and stop on high-severity findings unless the user explicitly approves continuation.
 - Use deconflict analysis when the target overlaps meaningfully with installed skills or appears to solve the same job.
 - For unclear requests, default to `list` or `dry-run` instead of mutating the workspace.
+- For Claude-to-Codex plugin conversion during install runs, enforce terminology mapping:
+  - `.claude-plugin/plugin.json` -> `.codex-plugin/plugin.json`
+  - `commands/` and slash-command wording -> `prompts/`
+  - reject legacy Claude runtime markers in final Codex package paths.
 
 ### Install-distribute deliverables
 - installed or updated skill folder, or a dry-run plan if no writes occurred;
@@ -381,6 +386,8 @@ Use `request_user_input` for missing install decisions when the turn fits in 1-3
 - run evals for newly installed skills after write completion;
 - confirm the repo diff only contains expected skill-install paths;
 - stop and report blockers if a failing step repeats 3 times.
+- for plugin installs/conversions, run:
+  - `python3 utilities/codex-plugin-builder/scripts/plugin_builder.py validate <path/to/plugin> --require-marketplace --marketplace-path .agents/plugins/marketplace.json`
 
 ## Folded Legacy Modes (Core60)
 <!-- core60-folded-modes:v1:start -->
