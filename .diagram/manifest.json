@@ -1,14 +1,14 @@
 {
-  "generatedAt": "2026-03-03T21:14:57.582Z",
-  "rootPath": ".",
+  "generatedAt": "2026-03-15T18:59:36.033Z",
+  "rootPath": "/Users/jamiecraik/dev/Agent-Skills",
   "diagramDir": ".diagram",
   "diagrams": [
     {
       "type": "architecture",
       "file": "architecture.mmd",
       "outputPath": ".diagram/architecture.mmd",
-      "lines": 162,
-      "bytes": 7972,
+      "lines": 184,
+      "bytes": 9523,
       "isPlaceholder": false
     },
     {
@@ -23,8 +23,8 @@
       "type": "dependency",
       "file": "dependency.mmd",
       "outputPath": ".diagram/dependency.mmd",
-      "lines": 117,
-      "bytes": 6168,
+      "lines": 607,
+      "bytes": 38056,
       "isPlaceholder": false
     },
     {
@@ -32,7 +32,7 @@
       "file": "class.mmd",
       "outputPath": ".diagram/class.mmd",
       "lines": 61,
-      "bytes": 2248,
+      "bytes": 2221,
       "isPlaceholder": false
     },
     {
@@ -40,47 +40,47 @@
       "file": "flow.mmd",
       "outputPath": ".diagram/flow.mmd",
       "lines": 20,
-      "bytes": 802,
+      "bytes": 924,
       "isPlaceholder": false
     },
     {
       "type": "database",
       "file": "database.mmd",
       "outputPath": ".diagram/database.mmd",
-      "lines": 38,
-      "bytes": 1729,
+      "lines": 74,
+      "bytes": 4607,
       "isPlaceholder": false
     },
     {
       "type": "user",
       "file": "user.mmd",
       "outputPath": ".diagram/user.mmd",
-      "lines": 31,
-      "bytes": 1075,
+      "lines": 69,
+      "bytes": 3118,
       "isPlaceholder": false
     },
     {
       "type": "events",
       "file": "events.mmd",
       "outputPath": ".diagram/events.mmd",
-      "lines": 6,
-      "bytes": 192,
+      "lines": 22,
+      "bytes": 1300,
       "isPlaceholder": false
     },
     {
       "type": "auth",
       "file": "auth.mmd",
       "outputPath": ".diagram/auth.mmd",
-      "lines": 16,
-      "bytes": 551,
+      "lines": 74,
+      "bytes": 2710,
       "isPlaceholder": false
     },
     {
       "type": "security",
       "file": "security.mmd",
       "outputPath": ".diagram/security.mmd",
-      "lines": 185,
-      "bytes": 6837,
+      "lines": 57,
+      "bytes": 2892,
       "isPlaceholder": false
     }
   ]
