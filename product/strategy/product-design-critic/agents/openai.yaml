@@ -1,0 +1,6 @@
+interface:
+  display_name: "Product Design Critic"
+  short_description: "Opinionated product UI/UX critique with trust and hierarchy focus"
+  default_prompt: "Use $product-design-critic to critique or shape product surfaces by anchoring on job-to-be-done, choosing an owning surface, clarifying hierarchy, and surfacing governance/trust implications before visual polish recommendations."
+policy:
+  allow_implicit_invocation: true

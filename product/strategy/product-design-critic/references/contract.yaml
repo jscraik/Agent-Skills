@@ -1,0 +1,49 @@
+schema_version: "1.0"
+skill_name: "product-design-critic"
+purpose: >
+  Provide opinionated product design critique and design-shaping guidance for software UI/UX
+  with explicit hierarchy, trust, and governance analysis.
+
+triggers:
+  - critique a product surface, workflow, card, panel, or chat UX
+  - improve product clarity, hierarchy, and interaction quality beyond visual polish
+  - pressure-test trust, approvals, provenance, and reversible control points
+  - compare competitor patterns and adapt reusable moves
+
+inputs:
+  - user goal and job-to-be-done context
+  - target surface or flow (described, linked, or shown)
+  - constraints and risk/stakes context when available
+  - optional competitor references
+
+outputs:
+  - format: markdown
+  - required_sections:
+      - Job to be done
+      - Surface model
+      - What is working
+      - What is weak or risky
+      - Recommended change
+      - Plain-language why this is the right call
+      - Governance and trust implications
+      - Competitor or pattern references, if relevant
+      - Standards and evidence references used
+  - success_indicators:
+      - recommendation is opinionated and tradeoffs are explicit
+      - hierarchy and owning surface are clear
+      - trust/governance cues are surfaced at decision points
+      - edge states are considered, not only the happy path
+      - high-stakes recommendations cite at least one normative source and one platform/system source
+
+non_goals:
+  - pure visual polish feedback without product judgment
+  - broad architecture or backend implementation planning
+  - generic brainstorming that avoids clear recommendations
+
+risks:
+  - risk: critique becomes aesthetic-only
+    mitigation: enforce job-to-be-done and hierarchy-first framing
+  - risk: trust-critical details are buried
+    mitigation: require governance analysis at decision moments
+  - risk: competitor copying instead of adaptation
+    mitigation: extract pattern rationale and adapt to the current job
