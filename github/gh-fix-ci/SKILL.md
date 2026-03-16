@@ -93,3 +93,15 @@ Diagnose failing GitHub Actions checks on a PR, surface the first actionable fai
 
 ## Remember
 CI diagnosis should narrow the problem, not widen the scope. Pull the evidence first, then earn the fix.
+
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[gh-workflow]] | Use for the full GitHub PR lifecycle — CI diagnosis is a single mode of this broader skill |
+| [[systematic-debugging]] | When CI logs reveal a root-cause bug that needs structured investigation |
+| [[verification-before-completion]] | Verify the fix passes CI before claiming the PR is ready |
+| [[circleci]] | When the CI failure is from CircleCI rather than GitHub Actions |
+
+**Topic map:** [[backend-platform]]
+

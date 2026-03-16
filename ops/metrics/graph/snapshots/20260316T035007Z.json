@@ -1,0 +1,170 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-03-16 03:50:07Z",
+  "notes_dir": "docs/skill-graphs/topic-maps",
+  "top_n": 20,
+  "pagerank": {
+    "meta": {
+      "mode": "pagerank",
+      "notes": "8",
+      "edges": "30",
+      "converged": "true",
+      "iterations": "15"
+    },
+    "rows": [
+      {
+        "rank": "1",
+        "score": "0.228618",
+        "in_degree": "7",
+        "out_degree": "5",
+        "note": "[[product-strategy]]"
+      },
+      {
+        "rank": "2",
+        "score": "0.199612",
+        "in_degree": "6",
+        "out_degree": "4",
+        "note": "[[backend-platform]]"
+      },
+      {
+        "rank": "3",
+        "score": "0.188594",
+        "in_degree": "6",
+        "out_degree": "3",
+        "note": "[[agent-ops]]"
+      },
+      {
+        "rank": "4",
+        "score": "0.155744",
+        "in_degree": "4",
+        "out_degree": "3",
+        "note": "[[security-ops]]"
+      },
+      {
+        "rank": "5",
+        "score": "0.127763",
+        "in_degree": "4",
+        "out_degree": "3",
+        "note": "[[frontend-ui]]"
+      },
+      {
+        "rank": "6",
+        "score": "0.059892",
+        "in_degree": "2",
+        "out_degree": "2",
+        "note": "[[content-publishing]]"
+      },
+      {
+        "rank": "7",
+        "score": "0.021027",
+        "in_degree": "1",
+        "out_degree": "3",
+        "note": "[[mobile-native]]"
+      },
+      {
+        "rank": "8",
+        "score": "0.018750",
+        "in_degree": "0",
+        "out_degree": "7",
+        "note": "[[index]]"
+      }
+    ]
+  },
+  "betweenness": {
+    "meta": {
+      "mode": "betweenness",
+      "notes": "8",
+      "edges": "21",
+      "normalized": "true"
+    },
+    "rows": [
+      {
+        "rank": "1",
+        "score": "0.115079",
+        "degree": "7",
+        "note": "[[index]]"
+      },
+      {
+        "rank": "2",
+        "score": "0.115079",
+        "degree": "7",
+        "note": "[[product-strategy]]"
+      },
+      {
+        "rank": "3",
+        "score": "0.035714",
+        "degree": "6",
+        "note": "[[agent-ops]]"
+      },
+      {
+        "rank": "4",
+        "score": "0.035714",
+        "degree": "6",
+        "note": "[[backend-platform]]"
+      },
+      {
+        "rank": "5",
+        "score": "0.031746",
+        "degree": "5",
+        "note": "[[frontend-ui]]"
+      },
+      {
+        "rank": "6",
+        "score": "0.000000",
+        "degree": "3",
+        "note": "[[content-publishing]]"
+      },
+      {
+        "rank": "7",
+        "score": "0.000000",
+        "degree": "4",
+        "note": "[[mobile-native]]"
+      },
+      {
+        "rank": "8",
+        "score": "0.000000",
+        "degree": "4",
+        "note": "[[security-ops]]"
+      }
+    ]
+  },
+  "communities": {
+    "meta": {
+      "mode": "fallback-label-propagation",
+      "notes": "8",
+      "edges": "21",
+      "communities": "1",
+      "quality_metric": "modularity",
+      "quality_score": "0.000000"
+    },
+    "rows": [
+      {
+        "community": "1",
+        "size": "8",
+        "members": "[[agent-ops]], [[backend-platform]], [[content-publishing]], [[frontend-ui]], [[index]], [[mobile-native]], [[product-strategy]], [[security-ops]]"
+      }
+    ]
+  },
+  "signals": {
+    "notes": 8,
+    "edges_directed": 30,
+    "edges_undirected": 21,
+    "community_count": 1,
+    "community_quality_score": 0.0,
+    "top_pagerank": [
+      "product-strategy",
+      "backend-platform",
+      "agent-ops",
+      "security-ops",
+      "frontend-ui"
+    ],
+    "top_bridges": [
+      "index",
+      "product-strategy",
+      "agent-ops",
+      "backend-platform",
+      "frontend-ui"
+    ],
+    "isolated_notes": []
+  }
+}

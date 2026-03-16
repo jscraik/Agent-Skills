@@ -213,6 +213,17 @@ When brainstorm output exists, planning should use it as input instead of redoin
 ## Remember
 Good brainstorming reduces ambiguity. If it is not narrowing the decision space, it is not doing its job.
 
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[interview-me]] | Use when the idea needs deeper requirements discovery beyond a quick brainstorm |
+| [[product-spec]] | Hand off the chosen direction to this skill to produce implementation-ready specs |
+| [[writing-plans]] | After spec is agreed, use to turn it into a sequenced execution plan |
+| [[architecture-interview]] | When the brainstorm reveals a significant architecture decision needing structured review |
+
+**Topic map:** [[product-strategy]]
+
 ## Decision feedback protocol
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**

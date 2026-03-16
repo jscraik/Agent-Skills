@@ -118,3 +118,16 @@ Use the canonical GitHub workflow path for issue, PR, review, CI, and merge work
 
 ## Remember
 GitHub workflow work is only complete when the repository state and the GitHub state agree.
+
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[gh-fix-ci]] | Focused CI diagnosis mode — use when the only task is debugging a failing Actions check |
+| [[verification-before-completion]] | Gate all merge claims with fresh `gh pr checks` and `git log` evidence |
+| [[systematic-debugging]] | When PR CI failures reveal a code-level bug that needs root-cause investigation |
+| [[release]] | After merging — use to cut the version tag and publish the release |
+| [[check-pr]] | Pre-merge policy review: readiness view with check status and remediation priority |
+
+**Topic map:** [[backend-platform]]
+

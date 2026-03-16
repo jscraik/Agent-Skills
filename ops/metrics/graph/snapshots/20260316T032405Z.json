@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-03-16 03:24:05Z",
+  "notes_dir": "skills",
+  "top_n": 20,
+  "pagerank": {
+    "meta": {
+      "mode": "pagerank",
+      "notes": "0",
+      "edges": "0",
+      "result": "no markdown notes found"
+    },
+    "rows": []
+  },
+  "betweenness": {
+    "meta": {
+      "mode": "betweenness",
+      "notes": "0",
+      "edges": "0",
+      "result": "no markdown notes found"
+    },
+    "rows": []
+  },
+  "communities": {
+    "meta": {
+      "mode": "leiden",
+      "notes": "0",
+      "edges": "0",
+      "communities": "0",
+      "result": "no markdown notes found"
+    },
+    "rows": []
+  },
+  "signals": {
+    "notes": 0,
+    "edges_directed": 0,
+    "edges_undirected": 0,
+    "community_count": 0,
+    "community_quality_score": 0.0,
+    "top_pagerank": [],
+    "top_bridges": [],
+    "isolated_notes": []
+  }
+}

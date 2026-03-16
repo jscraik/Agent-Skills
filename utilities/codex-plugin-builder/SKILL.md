@@ -321,3 +321,16 @@ If the request is out of scope:
   - `skill-builder` for standalone skill authoring,
   - `chatgpt-apps` for full Apps SDK implementations,
   - `mcp-builder` for MCP server development without plugin packaging.
+
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[skill-builder]] | Build and quality-gate the plugin-owned skills before packaging them here |
+| [[decide-build-primitive]] | Use before building to confirm a plugin is the right packaging choice |
+| [[verification-before-completion]] | Gate "plugin is done" with validator evidence before committing |
+| [[arscontexta]] | When packaging Ars Contexta surfaces into a Codex plugin |
+| [[mcp-builder]] | For standalone MCP server development without plugin packaging overhead |
+
+**Topic map:** [[agent-ops]]
+

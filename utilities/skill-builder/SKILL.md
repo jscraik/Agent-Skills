@@ -335,7 +335,20 @@ Use these files when needed:
 - `references/examples.md`, `references/anti-patterns.md`, and `references/governance-and-style.md` for calibrated examples and deeper guidance.
 - `../codex-plugin-builder/references/plugin-contract.md` and `../codex-plugin-builder/scripts/plugin_builder.py` when validating plugin-owned skills or enforcing plugin manifest and marketplace contracts.
 
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[codex-plugin-builder]] | Package a validated skill into a distributable plugin; runs after quality gates pass |
+| [[decide-build-primitive]] | Use before building to confirm a Skill is the right primitive vs a Prompt or Automation |
+| [[verification-before-completion]] | Gate any "skill is done" claim with fresh validator evidence |
+| [[evals-router]] | When the skill is an LLM eval workflow — use to design or audit the eval layer |
+| [[agents-md]] | When the new skill needs a corresponding AGENTS.md entry or routing update |
+
+**Topic map:** [[agent-ops]]
+
 ## Decision feedback protocol
+
 <!-- decision-feedback-protocol:v2 -->
 - Question timing is runtime-owned. Do not make the skill itself decide when feedback is asked.
 - If post-run feedback capture is enabled, emit a non-blocking `post_run_feedback` event via Codex `request_user_input` after result delivery.

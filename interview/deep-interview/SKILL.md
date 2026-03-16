@@ -214,6 +214,17 @@ $ARGUMENTS
 - Push boundaries with practical alternatives when simple recipes fail.
 - Enable outcomes-oriented problem solving.
 
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[interview-me]] | Use for fresh requirements discovery; use this skill for deepening existing drafts |
+| [[brainstorming]] | Use before this skill when the topic is still too vague for delta-mode enhancement |
+| [[product-spec]] | Hand the completed insights to product-spec for structured PRD/UX/arch artifacts |
+| [[architecture-interview]] | Use when deep-interview surfaces a major architectural tradeoff requiring structured review |
+
+**Topic map:** [[product-strategy]]
+
 ## Decision feedback protocol
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**

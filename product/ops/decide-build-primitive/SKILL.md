@@ -158,6 +158,17 @@ Follow-up expectations:
 - Push boundaries with practical alternatives when simple recipes fail.
 - Enable outcomes-oriented problem solving.
 
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[skill-builder]] | Use after `SKILL` decision is made to scaffold and quality-gate the skill |
+| [[codex-plugin-builder]] | Use after `SKILL` decision when the skill needs plugin packaging for distribution |
+| [[codex-automation-architect]] | Use after `AGENT_AUTOMATION` decision to design the automation contract |
+| [[compound-engineering-router]] | Use when the capability spans multiple workflow types and routing is unclear |
+
+**Topic map:** [[agent-ops]]
+
 ## Decision feedback protocol
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**
