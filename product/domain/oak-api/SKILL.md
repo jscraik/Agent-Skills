@@ -109,5 +109,16 @@ Turn Oak Curriculum API content into age-appropriate learning flows, endpoint ma
 - Find a Year 7 computing unit and turn it into a 20-minute interactive flow.
 - Map Oak quiz questions into an adaptive KS4 science practice loop.
 
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[chatgpt-apps]] | Build a ChatGPT App that surfaces Oak curriculum content |
+| [[mcp-builder]] | Expose Oak API as MCP tools for agent workflows |
+| [[product-spec]] | Spec the learning experience before implementing |
+| [[fixing-accessibility]] | Ensure Oak-powered UI meets accessibility requirements |
+
+**Topic map:** [[backend-platform]]
+
 ## Remember
 The best Oak output is structured, age-aware, compliant, and easy to turn into a real learning session.

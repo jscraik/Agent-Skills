@@ -98,6 +98,18 @@ Use the Remotion ruleset as a focused advisor for composition design, timing, as
 - Rules directory: `rules/`
 - Asset preview: `assets/remotion.png`
 
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[sora]] | Compare Remotion (code-driven) with Sora (AI-driven) video |
+| [[stitch-remotion]] | Generate Remotion compositions from Stitch screen assets |
+| [[imagegen]] | Generate still images to use as Remotion assets |
+| [[slides]] | Convert slide decks into Remotion video compositions |
+| [[video-transcript-downloader]] | Download reference transcripts before scripting Remotion narration |
+
+**Topic map:** [[frontend-ui]]
+
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.

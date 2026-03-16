@@ -184,6 +184,18 @@ Use judgment, adapt to context, and push boundaries when appropriate.
 - Push boundaries with practical alternatives when simple recipes fail.
 - Enable outcomes-oriented problem solving.
 
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[product-spec]] | Produce a detailed spec after the architecture is decided |
+| [[writing-plans]] | Convert ADR output into an implementation plan |
+| [[brainstorming]] | Explore options before the architecture interview |
+| [[security-threat-model]] | Run a threat model alongside architecture decisions |
+| [[diagram-cli]] | Generate architecture diagrams from ADR decisions |
+
+**Topic map:** [[product-strategy]]
+
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.

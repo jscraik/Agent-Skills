@@ -86,5 +86,16 @@ Use the `agent-browser` CLI for deterministic browser automation through accessi
 - Use refs to fill this form and save a screenshot of the confirmation screen.
 - Extract the visible text from this page using snapshot evidence.
 
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[playwright-interactive]] | Use for iterative UI automation when Playwright is better |
+| [[ui-visual-regression]] | Capture snapshots with agent-browser for regression checks |
+| [[fixing-accessibility]] | Probe ARIA and keyboard behaviour via browser automation |
+| [[agentation]] | Wire agent-browser actions into Agentation self-driving mode |
+
+**Topic map:** [[frontend-ui]]
+
 ## Remember
 The snapshot is the source of truth. If you have not re-read the page state, you are guessing.

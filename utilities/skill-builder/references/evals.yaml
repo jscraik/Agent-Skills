@@ -162,6 +162,40 @@ cases:
       - type: regex
         value: "(?i)(merge|fold|improve-existing|install-new)"
 
+  - id: native-unified-conformance
+    name: native unified conformance
+    category: edge
+    should_trigger: true
+    prepend_skill: true
+    prompt: "When creating a brand new native skill in skill-builder, apply the unified conformance flow so it is graded against the gold validators and the integrated upstream-style grading model without creating a separate standalone grading skill."
+    acceptance:
+      - type: regex
+        value: "(?i)(unified conformance|single conformance workflow|same workflow)"
+      - type: regex
+        value: "(?i)(create|improve|install-distribute)"
+      - type: regex
+        value: "(?i)(gold validators|quick_validate|skill_gate|analyze_skill|openclaw)"
+      - type: regex
+        value: "(?i)(do not split|not a standalone skill|inside skill-builder|built-in|integrated into skill-builder|part of skill-builder workflow)"
+
+  - id: imported-dual-grade
+    name: imported dual grade
+    category: edge
+    should_trigger: true
+    prepend_skill: true
+    prompt: "When installing an imported skill package that includes eval.yaml and graders, keep upstream checks but also run skill-builder gold validation and report both grades."
+    acceptance:
+      - type: regex
+        value: "(?i)(eval\\.yaml|grader|rubric|upstream)"
+      - type: regex
+        value: "(?i)(gold.*validator|skill_gate|quick_validate|analyze_skill|openclaw)"
+      - type: regex
+        value: "(?i)(both grades|dual-grade|report both|alongside)"
+      - type: regex
+        value: "(?i)(smoke|reliable|regression|trial tiers)"
+      - type: regex
+        value: "(?i)(score|details|checks|grader output schema)"
+
   - id: posture-learning-first
     name: posture learning-first
     category: edge

@@ -125,6 +125,18 @@ References used by skill-gate:
 - `references/evals.yaml`
 
 ## Decision feedback protocol
+
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[insight-report]] | Turn session scan findings into a polished usage report |
+| [[codex-home-audit]] | Run alongside a full home directory audit |
+| [[skill-builder]] | Act on skill failures discovered in the scan |
+| [[evals-router]] | Route evaluation work for under-performing skills |
+
+**Topic map:** [[agent-ops]]
+
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.

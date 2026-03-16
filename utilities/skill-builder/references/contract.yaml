@@ -8,11 +8,13 @@ inputs:
   - mode selection (create, improve, eval, benchmark-lite, graph, package, install-distribute)
   - skill objective and constraints
   - target environment (codex, claude, portable)
+  - conformance profile (native or imported)
   - prompt coverage (happy, edge, should-not-trigger)
 outputs:
   - scoped response with required headings
   - implementation plan or concrete file edits
   - validator/eval evidence for non-trivial work
+  - dual-grade evidence when upstream eval metadata is present (gold gates + upstream-grade pass)
   - deterministic JSON summary block for improve/eval/benchmark-lite responses
 output_contract:
   schema_version: "1.0"
@@ -26,10 +28,13 @@ output_contract:
     - ui_metadata
     - trace_budget
     - remediation
+    - conformance_profile
+    - upstream_grade
 non_goals:
   - unrelated app feature coding
   - generic docs rewrites without skill workflow impact
   - skipping validation for speed
+  - splitting grading into a separate standalone skill
 risks:
   - trigger ambiguity; mitigated by explicit use-when and should-not-trigger prompts
   - frontmatter parser risk from XML-style angle brackets; mitigated by frontmatter sanitization checks
@@ -37,3 +42,4 @@ risks:
   - Codex UX mismatch; mitigated by optional agents/openai.yaml generation when metadata is needed
   - duplicate/foldable installs; mitigated by mandatory full-scan deconflict across installed operational skills before any install/update write
   - false overlap from system/meta skills; mitigated by default exclusion of `.system` and creator/meta scaffolding skills (for example `skill-creator`) unless explicitly requested
+  - upstream/native grading drift; mitigated by unified conformance profiles that always run gold gates and optionally run upstream-grade checks when source metadata exists

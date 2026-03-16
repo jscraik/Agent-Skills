@@ -84,6 +84,17 @@ description: Build and validate simple, performant Three.js web apps using moder
 - "Build a rotating product cube with proper cleanup in React."
 - "Add a lightweight Three.js accent scene to an existing landing page."
 
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[ui-ux-creative-coding]] | Orchestrate Three.js alongside React motion for rich UI |
+| [[frontend-ui-design]] | Provide the design context Three.js scene should match |
+| [[visual-explainer]] | Embed Three.js scenes in HTML explainer pages |
+| [[agentation]] | Automate Three.js scene interactions for testing |
+
+**Topic map:** [[frontend-ui]]
+
 ## Remember
 - The first milestone is a correct frame on screen.
 - The second milestone is a stable, cleanly integrated scene.

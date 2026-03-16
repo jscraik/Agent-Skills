@@ -83,6 +83,17 @@ Use this skill for precise metadata remediation, not broad SEO platform rewrites
 - Task profile: `references/task-profile.json`
 - Agent metadata: `agents/internal.yaml`
 
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[fixing-accessibility]] | Fix ARIA and semantic HTML alongside metadata |
+| [[og-image-creator]] | Generate OG images that the metadata tags will reference |
+| [[favicon-generator]] | Add favicon tags alongside other head metadata |
+| [[cloudflare-deploy]] | Verify metadata is served correctly after Cloudflare deployment |
+
+**Topic map:** [[frontend-ui]]
+
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.

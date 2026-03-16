@@ -108,6 +108,18 @@ If the prompt lacks the core topic, audience, or target output shape, ask for th
 - Enable outcomes-oriented problem solving.
 
 ## Decision feedback protocol
+
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[youtube-titles-thumbnails]] | Create titles and thumbnails to pair with the script |
+| [[video-transcript-downloader]] | Study competitor transcripts before writing hooks |
+| [[product-spec]] | Spec the content series before scripting individual videos |
+| [[notebooklm]] | Use NotebookLM to generate audio overviews from scripts |
+
+**Topic map:** [[content-publishing]]
+
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.

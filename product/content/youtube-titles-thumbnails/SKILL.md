@@ -107,6 +107,18 @@ If the topic or audience is too vague to create differentiated packaging, ask fo
 - Enable outcomes-oriented problem solving.
 
 ## Decision feedback protocol
+
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[youtube-hooks-scripts]] | Pair with a hook and script for complete video packaging |
+| [[video-transcript-downloader]] | Research competitor videos before writing titles |
+| [[imagegen]] | Generate thumbnail concept images |
+| [[visual-explainer]] | Present A/B thumbnail options in a visual comparison page |
+
+**Topic map:** [[content-publishing]]
+
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.

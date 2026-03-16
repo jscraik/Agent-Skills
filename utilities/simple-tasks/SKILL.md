@@ -85,6 +85,17 @@ skills/simple-tasks/scripts/install.sh --project-dir /tmp/demo --mode upgrade
 - Contract: `references/contract.yaml`
 - Evals: `references/evals.yaml`
 
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[linear]] | Escalate to Linear when tasks need team-wide visibility |
+| [[writing-plans]] | Seed task list from a writing-plans implementation plan |
+| [[alignment-checkpoint]] | Capture approved action items as simple tasks |
+| [[verification-before-completion]] | Mark tasks done only after verification evidence |
+
+**Topic map:** [[agent-ops]]
+
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.

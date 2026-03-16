@@ -114,5 +114,17 @@ If a dependency is missing, report the exact install gap before continuing.
 - Update an existing deck’s copy and charts while preserving theme and layout.
 - Diagnose which slides overflow the canvas and fix the offending elements before delivery.
 
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[beautiful-mermaid]] | Embed high-quality Mermaid diagrams in slide decks |
+| [[visual-explainer]] | Use when a scrollable HTML page is better than slides |
+| [[remotion]] | Animate a slide deck as a Remotion video |
+| [[product-spec]] | Turn a product spec into a presentation deck |
+| [[imagegen]] | Generate illustrative images for slide backgrounds |
+
+**Topic map:** [[frontend-ui]]
+
 ## Remember
 Treat the deck like a product artifact. If it is not editable, reviewable, and reproducible, it is not done.

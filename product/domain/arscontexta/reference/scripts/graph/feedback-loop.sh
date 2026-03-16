@@ -42,6 +42,10 @@ COMMUNITIES_OUT="$RAW_DIR/communities.tsv"
 "$SCRIPT_DIR/betweenness.sh" "$NOTES_DIR" "$TOP_N" > "$BETWEENNESS_OUT"
 "$SCRIPT_DIR/find-communities-leiden.sh" "$NOTES_DIR" > "$COMMUNITIES_OUT"
 
+# ── Extract real skill-graph edges from See Also sections ────────────────────
+EDGES_OUT="$METRICS_DIR/skill-edges.json"
+python3 "$SCRIPT_DIR/extract-skill-edges.py" "$VAULT_ROOT" "$EDGES_OUT" || true
+
 SNAPSHOT_PATH="$SNAPSHOT_DIR/$STAMP.json"
 REPORT_PATH="$REPORT_DIR/$STAMP.md"
 RECOMMEND_PATH="$RECOMMEND_DIR/$STAMP.json"
@@ -326,8 +330,17 @@ cp "$SNAPSHOT_PATH" "$SNAPSHOT_DIR/latest.json"
 cp "$REPORT_PATH" "$REPORT_DIR/latest.md"
 cp "$RECOMMEND_PATH" "$RECOMMEND_DIR/latest.json"
 
+# ── Regenerate visual HTML graph if generator script is present ──────────────
+GRAPH_GEN="$VAULT_ROOT/scripts/gen-skill-graph.py"
+GRAPH_HTML="${HOME}/.agent/diagrams/skill-graph.html"
+if [[ -f "$GRAPH_GEN" ]] && [[ -f "$EDGES_OUT" ]]; then
+  python3 "$GRAPH_GEN" "$VAULT_ROOT" "$EDGES_OUT" "$GRAPH_HTML" || true
+  echo "graph:    $GRAPH_HTML"
+fi
+
 echo "feedback-loop: PASS"
 echo "snapshot: $SNAPSHOT_PATH"
 echo "report:   $REPORT_PATH"
 echo "actions:  $RECOMMEND_PATH"
+echo "edges:    ${EDGES_OUT}"
 echo "feedback: $FEEDBACK_LOG"

@@ -176,3 +176,15 @@ description: "Use this skill when the user asks for CircleCI migration, orchestr
 - "How should I set up orchestrate + test workflows for a monorepo?"
 - "What is the CircleCI best-practice pattern for secure secrets and integration control?"
 - "How do I install CircleCI CLI and run local validation?"
+
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[gh-fix-ci]] | Fix GitHub CI checks that complement CircleCI |
+| [[cloudflare-deploy]] | Deploy to Cloudflare as part of a CircleCI pipeline |
+| [[verification-before-completion]] | Verify pipeline output before marking complete |
+| [[backend-engineer]] | Wire backend deployments into CircleCI workflows |
+
+**Topic map:** [[backend-platform]]
+

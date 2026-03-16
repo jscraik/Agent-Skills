@@ -127,6 +127,17 @@ Required gates:
 - `references/evals.yaml`
 - `references/codex-claude-alignment.md`
 
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[gh-workflow]] | Manage PRs across multiple worktrees |
+| [[verification-before-completion]] | Verify each worktree independently before merging |
+| [[systematic-debugging]] | Debug issues isolated to a specific worktree |
+| [[writing-plans]] | Plan parallel workstreams across worktrees |
+
+**Topic map:** [[backend-platform]]
+
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.

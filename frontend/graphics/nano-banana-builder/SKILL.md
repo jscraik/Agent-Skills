@@ -92,6 +92,17 @@ Do not invent alternate names or date-suffixed variants.
 - "Design a Nano Banana app for iterative product-shot refinement."
 - "Choose between the two supported image models for a high-volume draft workflow."
 
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[imagegen]] | Use as fallback for static image generation outside Nano Banana |
+| [[sora]] | Follow image generation with AI video for richer content |
+| [[chatgpt-apps]] | Integrate Nano Banana image APIs into a ChatGPT App |
+| [[mcp-builder]] | Expose Nano Banana generation as MCP tools |
+
+**Topic map:** [[frontend-ui]]
+
 ## Remember
 - The core product loop is generate, inspect, refine, persist.
 - Good Nano Banana products make iteration feel natural, not bolted on.

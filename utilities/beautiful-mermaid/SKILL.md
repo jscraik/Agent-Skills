@@ -84,6 +84,17 @@ description: Render Mermaid diagrams to SVG and PNG with Beautiful Mermaid. Use 
 - "Render this sequence diagram to SVG and PNG using the Tokyo Night theme."
 - "Turn this architecture description into Mermaid first, then render it locally."
 
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[diagram-cli]] | Generate .mmd source files before rendering with Beautiful Mermaid |
+| [[visual-explainer]] | Embed rendered SVG outputs in HTML explainer pages |
+| [[docs-expert]] | Add rendered diagrams to repository documentation |
+| [[slides]] | Embed high-quality Mermaid renders in slide decks |
+
+**Topic map:** [[frontend-ui]]
+
 ## Remember
 - SVG is the primary artifact; PNG is a convenience artifact.
 - Good diagram rendering starts with good Mermaid source.

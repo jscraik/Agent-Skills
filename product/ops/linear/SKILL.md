@@ -191,6 +191,19 @@ Documentation & Collaboration: `list_documents`, `get_document`, `search_documen
 - Enable outcomes-oriented problem solving.
 
 ## Decision feedback protocol
+
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[writing-plans]] | Convert Linear issues into sequenced implementation plans |
+| [[gh-workflow]] | Link Linear issues to GitHub PRs during delivery |
+| [[simple-tasks]] | Use for lightweight local task tracking between Linear syncs |
+| [[alignment-checkpoint]] | Gate Linear issue creation behind intent alignment |
+| [[compound-engineering-router]] | Route compound work captured as Linear issues |
+
+**Topic map:** [[agent-ops]]
+
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.

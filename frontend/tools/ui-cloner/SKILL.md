@@ -169,6 +169,18 @@ Use this shape for `adaptation-map.json`:
 - `references/plan.md`
 
 ## Decision feedback protocol
+
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[stitch-loop]] | Feed cloned UI design into Stitch for iterative generation |
+| [[frontend-ui-design]] | Adapt the cloned design system to your brand |
+| [[design-system]] | Map cloned design tokens into your design system |
+| [[figma]] | Use Figma as the intermediate for cloned designs |
+
+**Topic map:** [[product-strategy]]
+
 <!-- decision-feedback-protocol:v2 -->
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event after result delivery.
 - Capture `decision`, `outcome`, and `confidence`.

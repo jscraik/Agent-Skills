@@ -299,6 +299,18 @@ Use judgment, adapt to context, and push boundaries when appropriate.
 - Be creative when simple recipes fail, but stay rigorous and precise.
 - Aim for outcomes-oriented problem solving rather than template completion.
 
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[agents-md]] | Apply docs-expert quality standards to AGENTS.md |
+| [[diagram-cli]] | Embed architecture diagrams in the documentation |
+| [[fixing-metadata]] | Fix meta tags on documentation pages |
+| [[visual-explainer]] | Create visual explainers to accompany written docs |
+| [[markdown-converter]] | Convert source material to markdown before polish |
+
+**Topic map:** [[product-strategy]]
+
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.

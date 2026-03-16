@@ -96,6 +96,18 @@ allowed-tools:
 - The best output is easy to read, easy to test, and easy to evolve.
 - Capture the design faithfully, but integrate it like a real codebase citizen.
 
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[stitch-loop]] | Generate the Stitch screens that this skill converts |
+| [[react-ui-patterns]] | Apply React composition patterns to converted components |
+| [[design-system]] | Align converted components with the design-system token layer |
+| [[figma]] | Use Figma context alongside Stitch for richer conversion |
+| [[baseline-ui]] | Validate converted components against baseline UI rules |
+
+**Topic map:** [[frontend-ui]]
+
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.

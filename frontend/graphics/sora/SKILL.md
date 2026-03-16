@@ -81,6 +81,17 @@ description: "Use when the user asks to generate, remix, poll, list, download, o
 - "Generate a 4-second Sora clip for a product teaser and download the video."
 - "Remix this Sora job but keep the shot and only change the lighting."
 
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[imagegen]] | Generate static images as storyboard reference before Sora |
+| [[remotion]] | Compare Sora (AI-driven) with Remotion (code-driven) for video |
+| [[nano-banana-builder]] | Use Nano Banana for images; Sora for the video component |
+| [[youtube-hooks-scripts]] | Script the video before generating with Sora |
+
+**Topic map:** [[frontend-ui]]
+
 ## Remember
 - Sora work is job-based, async, and stateful.
 - The handoff should always say what was created, where it was saved, and what prompt/flags produced it.

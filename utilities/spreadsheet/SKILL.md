@@ -131,5 +131,16 @@ If installation is not possible in the current environment, report the exact mis
 - Update an existing financial model without breaking formulas or style.
 - Render a spreadsheet for layout review before delivery.
 
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[markdown-converter]] | Convert spreadsheet data to markdown for documentation |
+| [[visual-explainer]] | Present spreadsheet data as a styled HTML table |
+| [[evals-router]] | Track evaluation results in a spreadsheet |
+| [[insight-report]] | Export session data to spreadsheet for analysis |
+
+**Topic map:** [[content-publishing]]
+
 ## Remember
 Spreadsheet work is only trustworthy when formulas, formatting, and rendered output all agree with the requested change.

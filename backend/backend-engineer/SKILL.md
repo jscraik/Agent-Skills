@@ -115,6 +115,18 @@ Use these headings in order:
 
 If blocked by missing critical information, insert `## Questions` before `## Plan` and keep it to the minimum needed to proceed safely.
 
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[cloudflare-deploy]] | Deploy the backend extension to Cloudflare Workers |
+| [[workers-mcp]] | Add MCP tooling to the backend surface |
+| [[mcp-builder]] | Build MCP server tools alongside the backend |
+| [[security-best-practices]] | Apply security hardening to new backend endpoints |
+| [[writing-plans]] | Plan backend extensions before implementing |
+
+**Topic map:** [[backend-platform]]
+
 ## Remember
 - Work from the real repo surface, not a generic backend template.
 - Make risks explicit when touching auth, money, messages, or persistent state.

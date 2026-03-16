@@ -93,6 +93,18 @@ Search, compare, and export Iconify icons without drifting into inconsistent ico
 - Task profile: `references/task-profile.json`
 - Asset preview: `assets/better-icons.png`
 
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[frontend-ui-design]] | Source icons for UI components being designed |
+| [[design-system]] | Integrate icon tokens into the design system |
+| [[figma]] | Export icons for use in Figma designs |
+| [[shadcn-ui]] | Add Iconify icons to shadcn/ui component projects |
+| [[favicon-generator]] | Use alongside favicon generation for icon-family consistency |
+
+**Topic map:** [[frontend-ui]]
+
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.

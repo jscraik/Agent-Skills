@@ -103,5 +103,16 @@ Review Better Auth integrations for secure defaults, configuration quality, and 
 - Review my session settings and tell me what is risky.
 - Check whether this Better Auth plugin setup is production-safe.
 
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[security-threat-model]] | Run a threat model before applying best practices |
+| [[security-ownership-map]] | Identify who owns the code being hardened |
+| [[create-auth]] | Apply auth-specific best practices during implementation |
+| [[1password]] | Manage secrets found during best practices review |
+
+**Topic map:** [[security-ops]]
+
 ## Remember
 Stay specific. A good auth review is concrete, prioritized, and verifiable, not a wall of generic security advice.

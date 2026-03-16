@@ -108,6 +108,17 @@ process-watch watch --interval 2 --alert-cpu 90 --alert-mem 85
 - Contract: `references/contract.yaml`
 - Evals: `references/evals.yaml`
 
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[systematic-debugging]] | Use alongside process-watch for root-cause diagnosis |
+| [[codex-home-audit]] | Check process health during a Codex home audit |
+| [[fix-mise]] | Diagnose mise shim CPU/memory issues via process-watch |
+| [[verification-before-completion]] | Confirm processes are healthy before marking work done |
+
+**Topic map:** [[mobile-native]]
+
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.

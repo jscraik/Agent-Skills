@@ -84,6 +84,18 @@ description: Create general-purpose MCP servers and tool schemas for standard in
 - "Design an MCP server for a task tracker with list, get, create, and search tools."
 - "Review this MCP server and tell me where the schemas and structured outputs are weak."
 
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[workers-mcp]] | Host the MCP server on Cloudflare when cloud deployment is needed |
+| [[chatgpt-apps]] | Connect the MCP server to a ChatGPT Apps SDK integration |
+| [[openai-docs]] | Use official MCP schema docs when designing tool schemas |
+| [[backend-engineer]] | Add MCP tools to an existing backend service |
+| [[security-best-practices]] | Apply security hardening to MCP server endpoints |
+
+**Topic map:** [[backend-platform]]
+
 ## Remember
 - Good MCP servers are easy to discover, easy to trust, and easy to compose.
 - Schema discipline is part of usability.

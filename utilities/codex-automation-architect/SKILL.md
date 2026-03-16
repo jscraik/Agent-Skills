@@ -92,5 +92,17 @@ Design, review, consolidate, and validate Codex automations with current Codex a
 - Review these six automations and tell me which ones should be merged.
 - Harden this automation for approval-restricted unattended execution.
 
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[codex-agent-creator]] | Create the agent role the automation will run under |
+| [[codex-plugin-builder]] | Package automations into a plugin for distribution |
+| [[decide-build-primitive]] | Confirm automation is the right primitive before building |
+| [[writing-plans]] | Plan the automation contract before implementing |
+| [[verification-before-completion]] | Validate automation output before declaring done |
+
+**Topic map:** [[agent-ops]]
+
 ## Remember
 An automation is production infrastructure. If its boundaries are unclear, it is not ready.

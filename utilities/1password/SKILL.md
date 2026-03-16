@@ -98,5 +98,17 @@ When interactive sign-in is required, use a fresh tmux-backed session and keep a
 - Verify my 1Password CLI setup and tell me why `op whoami` fails.
 - Show the safest way to inject secret references into this config file.
 
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[security-best-practices]] | Apply secret management best practices alongside 1Password |
+| [[create-auth]] | Inject credentials into authentication flows via 1Password |
+| [[cloudflare-deploy]] | Inject secrets into Cloudflare deployments via op run |
+| [[workers-mcp]] | Secure MCP server secrets with 1Password injection |
+| [[bootstrap]] | Provision dev environment secrets via 1Password during bootstrap |
+
+**Topic map:** [[security-ops]]
+
 ## Remember
 If the workflow would expose a secret unnecessarily, it is the wrong workflow.

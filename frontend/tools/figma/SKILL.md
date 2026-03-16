@@ -187,6 +187,18 @@ Fail fast: **stop at first failed prerequisite** (e.g., missing node ID, auth fa
 - Push boundaries with practical alternatives when simple recipes fail.
 - Enable outcomes-oriented problem solving.
 
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[design-system]] | Extract Figma tokens to drive the repository design system |
+| [[frontend-ui-design]] | Implement Figma designs as production-ready components |
+| [[stitch-react-components]] | Convert Figma/Stitch screens into modular React components |
+| [[better-icons]] | Source icons via Figma designs and export to Iconify |
+| [[og-image-creator]] | Use Figma designs as reference for OG image generation |
+
+**Topic map:** [[frontend-ui]]
+
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.

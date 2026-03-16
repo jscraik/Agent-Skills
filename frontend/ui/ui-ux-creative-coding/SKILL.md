@@ -290,6 +290,18 @@ The agent is capable of extraordinary work in this domain. Use these guidelines 
 - Review mode: `references/project-review-mode.md`, `references/browser-verification.md`
 - Output contract: `references/contract.yaml` (`schema_version`)
 
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[frontend-ui-design]] | Build the structural component before adding creative polish |
+| [[threejs-builder]] | Add Three.js 3D elements to creative UI work |
+| [[react-ui-patterns]] | Ground creative coding in solid React composition patterns |
+| [[baseline-ui]] | Validate animations against baseline motion duration rules |
+| [[design-system]] | Keep creative color and token choices aligned with the system |
+
+**Topic map:** [[frontend-ui]]
+
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.

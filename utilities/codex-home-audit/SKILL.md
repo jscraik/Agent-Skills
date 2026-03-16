@@ -104,6 +104,19 @@ Minimize drift by:
 - `references/codex-rules-notes.md` — short notes about Codex rules behavior and local conventions.
 
 ## Decision feedback protocol
+
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[agents-md]] | Refactor AGENTS.md based on audit findings |
+| [[codex-sessions-skill-scan]] | Run a skill health scan alongside the home audit |
+| [[insight-report]] | Generate a usage report to inform audit priorities |
+| [[verification-before-completion]] | Verify fixes before marking the audit complete |
+| [[fix-mise]] | Fix mise trust/runtime issues found during audit |
+
+**Topic map:** [[agent-ops]]
+
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.

@@ -84,6 +84,18 @@ description: Create and deploy production-ready MCP servers on Cloudflare Worker
 - "Design a Workers-hosted MCP server with Auth0, Stripe, and D1."
 - "Review this Workers MCP plan for deploy, auth, and rollback risk."
 
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[mcp-builder]] | Build the MCP server before deploying it on Workers |
+| [[cloudflare-deploy]] | Deploy the full Workers-hosted MCP stack |
+| [[chatgpt-apps]] | Connect the Workers MCP server to a ChatGPT App |
+| [[security-best-practices]] | Apply auth and security hardening to the MCP endpoint |
+| [[openai-docs]] | Reference MCP schema and tool definitions |
+
+**Topic map:** [[backend-platform]]
+
 ## Remember
 - Platform fit is part of product fit.
 - A production-ready Workers MCP server needs protocol discipline and operational discipline.

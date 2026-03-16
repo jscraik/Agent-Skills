@@ -81,6 +81,16 @@ description: macOS-only AppleScript control for the ChatGPT Atlas desktop app. U
 - "List my ChatGPT Atlas tabs and focus the tab on chatgpt.com."
 - "Search Atlas history for OpenAI docs from today only."
 
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[openai-docs]] | Reference official ChatGPT documentation for Atlas features |
+| [[agent-browser]] | Complement Atlas AppleScript control with browser automation |
+| [[notebooklm]] | Cross-reference Atlas conversations with NotebookLM notebooks |
+
+**Topic map:** [[mobile-native]]
+
 ## Remember
 - This skill is a precise tool, not a general browser hammer.
 - Atlas tasks should be explicit, bounded, and privacy-aware.

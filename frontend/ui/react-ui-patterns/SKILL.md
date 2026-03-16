@@ -257,6 +257,18 @@ Use judgment, adapt to context, and push boundaries when appropriate.
 - Push boundaries with practical alternatives when simple recipes fail.
 - Enable outcomes-oriented problem solving.
 
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[frontend-ui-design]] | Apply React patterns to components being designed |
+| [[shadcn-ui]] | Source Radix/shadcn primitives for React pattern implementations |
+| [[stitch-react-components]] | Use patterns when converting Stitch screens to React |
+| [[baseline-ui]] | Validate React component patterns against baseline rules |
+| [[ui-ux-creative-coding]] | Layer motion on top of React pattern scaffolds |
+
+**Topic map:** [[frontend-ui]]
+
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.

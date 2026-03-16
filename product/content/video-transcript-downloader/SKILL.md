@@ -160,6 +160,18 @@ ffmpeg -version | head -n 1
 - Enable outcomes-oriented problem solving.
 
 ## Decision feedback protocol
+
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[notebooklm]] | Feed transcripts to NotebookLM for summarisation |
+| [[markdown-converter]] | Convert transcript text to clean markdown |
+| [[youtube-hooks-scripts]] | Create scripts for videos whose transcripts you've studied |
+| [[youtube-titles-thumbnails]] | Package videos after reviewing competitor transcripts |
+
+**Topic map:** [[content-publishing]]
+
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.

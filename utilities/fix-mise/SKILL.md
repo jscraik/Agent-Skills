@@ -82,5 +82,16 @@ Diagnose and repair `mise` trust, runtime, and version-drift failures with the s
 - Reconcile my global `mise` config with the required tool version.
 - Diagnose why `mise` says the runtime is missing even though the repo has config.
 
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[bootstrap]] | Fix mise before retrying the bootstrap |
+| [[codex-home-audit]] | Address mise issues found during a home directory audit |
+| [[verification-before-completion]] | Confirm mise is healthy after the fix |
+| [[systematic-debugging]] | Debug root cause of mis trust or shim failures |
+
+**Topic map:** [[backend-platform]]
+
 ## Remember
 If the original command was not retried, the `mise` fix is still only a theory.

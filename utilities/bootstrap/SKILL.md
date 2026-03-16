@@ -134,6 +134,18 @@ If bootstrap fails:
 3. Re-run with explicit toolchain versions if auto-detection was ambiguous.
 
 ## Decision feedback protocol
+
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[fix-mise]] | Repair mise trust issues blocking the bootstrapped environment |
+| [[cloudflare-deploy]] | Deploy the bootstrapped project to Cloudflare |
+| [[gh-workflow]] | Set up GitHub PR workflow after bootstrap |
+| [[verification-before-completion]] | Verify the bootstrap is working before continuing |
+
+**Topic map:** [[backend-platform]]
+
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.

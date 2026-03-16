@@ -88,6 +88,17 @@ Run a baton-driven Stitch website build loop where each pass produces one cohere
 - Baton file: `next-prompt.md`
 - Project state: `SITE.md`, `DESIGN.md`, `stitch.json`
 
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[stitch-react-components]] | Convert Stitch outputs to React components |
+| [[stitch-remotion]] | Turn Stitch screens into narrated video walkthroughs |
+| [[ui-cloner]] | Clone a UI design into Stitch for iterative generation |
+| [[frontend-ui-design]] | Review and polish Stitch-generated UI |
+
+**Topic map:** [[frontend-ui]]
+
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.
