@@ -84,6 +84,17 @@ Generate evidence-backed HTML insight reports from local Codex session history w
 - Evals: `references/evals.yaml`
 - README: `references/README.md`
 
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[codex-sessions-skill-scan]] | Scan sessions first to gather data for the report |
+| [[codex-home-audit]] | Use report findings to prioritise home directory fixes |
+| [[evals-router]] | Route skill evals based on insight-report failure signals |
+| [[visual-explainer]] | Present report findings as an interactive HTML page |
+
+**Topic map:** [[agent-ops]]
+
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.

@@ -287,6 +287,19 @@ Use judgment, adapt to context, and push for the strongest practical improvement
 - Rubric: `references/improvement-rubric.md`
 
 ## Decision feedback protocol
+
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[product-spec]] | Produce a revised spec after high-leverage improvements are identified |
+| [[brainstorming]] | Brainstorm improvement ideas before running the improver |
+| [[architecture-interview]] | Validate architectural improvements via structured interview |
+| [[writing-plans]] | Convert approved improvements into an execution-ready plan |
+| [[security-threat-model]] | Include security improvements in the improvement scope |
+
+**Topic map:** [[product-strategy]]
+
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.

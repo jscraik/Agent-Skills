@@ -140,6 +140,18 @@ Current baseline markers:
 - Use different recommendation styles for new builds versus incremental refactors in existing UI code.
 - Customize checks by surface area: typography-heavy pages, animation-heavy interactions, or dense dashboards.
 
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[design-system]] | Apply design tokens that baseline-ui validates |
+| [[fixing-accessibility]] | Fix accessibility issues found during baseline-ui checks |
+| [[frontend-ui-design]] | Implement UI components that baseline-ui governs |
+| [[ui-visual-regression]] | Combine with visual regression to catch visual drift |
+| [[shadcn-ui]] | Validate shadcn/ui components against baseline rules |
+
+**Topic map:** [[frontend-ui]]
+
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.

@@ -196,6 +196,18 @@ rg -n "highContrast|--background|--foreground" packages/ui/src/styles/theme.css 
 ## Remember
 This skill is here to unlock high-confidence design-system decisions. The agent is capable of extraordinary work in this domain—use judgment, stay evidence-backed, and push boundaries with creative but safe options when multiple valid approaches exist.
 
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[baseline-ui]] | Validate UI components against design-system tokens |
+| [[frontend-ui-design]] | Implement components using design-system token layer |
+| [[figma]] | Extract Figma tokens as source of truth for the design system |
+| [[shadcn-ui]] | Adapt shadcn/ui to use design-system token aliases |
+| [[fixing-accessibility]] | Combine token changes with accessibility fixes |
+
+**Topic map:** [[frontend-ui]]
+
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.

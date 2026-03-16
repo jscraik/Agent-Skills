@@ -190,6 +190,18 @@ Reference these guidelines when:
 - Use different fix strategies for static content, interactive widgets, and form-heavy screens.
 - Customize recommendation detail to match whether the user wants patch-ready edits or prioritized findings only.
 
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[baseline-ui]] | Validate passing accessibility alongside baseline UI checks |
+| [[fixing-metadata]] | Fix semantic HTML and metadata alongside ARIA fixes |
+| [[frontend-ui-design]] | Apply accessibility constraints during component design |
+| [[playwright-interactive]] | Test keyboard and focus behaviour via Playwright |
+| [[design-system]] | Ensure token changes don't reduce colour contrast |
+
+**Topic map:** [[frontend-ui]]
+
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.

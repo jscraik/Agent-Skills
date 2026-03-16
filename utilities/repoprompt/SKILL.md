@@ -185,6 +185,18 @@ Read when needed:
 - references/legacy-prompts/ (legacy `rp-*` prompt variants consolidated under this skill)
 
 ## Decision feedback protocol
+
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[context7]] | Combine with Context7 for richer library context in prompts |
+| [[agents-md]] | Use Repo Prompt context packs alongside AGENTS.md |
+| [[compound-engineering-router]] | Feed repo context into compound engineering workflows |
+| [[writing-plans]] | Ground implementation plans with Repo Prompt context |
+
+**Topic map:** [[agent-ops]]
+
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.

@@ -292,6 +292,17 @@ Use `references/neo4j-import.md` when you need to load the CSVs into Neo4j. It i
 - Push boundaries with practical alternatives when simple recipes fail.
 - Enable outcomes-oriented problem solving.
 
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[security-threat-model]] | Use ownership map to assign threat model mitigations |
+| [[security-best-practices]] | Route best-practice remediation to the right owners |
+| [[recon-workbench]] | Correlate recon findings with ownership data |
+| [[gh-workflow]] | Create GitHub issues for identified owners |
+
+**Topic map:** [[security-ops]]
+
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.

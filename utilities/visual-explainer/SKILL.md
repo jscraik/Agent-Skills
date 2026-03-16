@@ -299,6 +299,17 @@ Before delivering, verify:
 
 Make the browser artifact earn its keep. If it is not clearer, easier to scan, and easier to reopen than a text reply, it needs another pass.
 
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[beautiful-mermaid]] | Render Mermaid diagrams for embedding in explainer pages |
+| [[diagram-cli]] | Generate .mmd architecture artifacts to embed |
+| [[slides]] | Use slides when presentation format is better than scroll |
+| [[design-system]] | Apply design-system tokens to visual explainer palettes |
+
+**Topic map:** [[frontend-ui]]
+
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.

@@ -172,6 +172,19 @@ Minimum checks:
 - Explore options, then push boundaries safely with evidence-backed decisions.
 
 ## Decision feedback protocol
+
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[visual-explainer]] | Render diagram artifacts as a polished HTML explainer |
+| [[beautiful-mermaid]] | Convert .mmd outputs to publication-quality SVG/PNG |
+| [[docs-expert]] | Embed diagrams into repository documentation |
+| [[writing-plans]] | Use architecture diagrams to ground implementation plans |
+| [[agents-md]] | Add diagram artifacts to AGENTS.md context packs |
+
+**Topic map:** [[agent-ops]]
+
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.

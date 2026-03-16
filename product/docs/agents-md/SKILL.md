@@ -127,6 +127,18 @@ If command truth, path ownership, or instruction precedence cannot be verified, 
 ## Resource map
 - References: `references/contract.yaml`, `references/evals.yaml`, `references/folded-legacy-modes-core60.md`, `references/task-profile.json`
 
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[skill-builder]] | Build new skills that will be registered in AGENTS.md |
+| [[codex-home-audit]] | Audit the full Codex home dir after AGENTS.md refactors |
+| [[codex-agent-creator]] | Create agent roles that AGENTS.md will reference |
+| [[docs-expert]] | Apply docs polish and community-health guidance to AGENTS.md |
+| [[compound-engineering-router]] | Route compound workflows referenced in AGENTS.md |
+
+**Topic map:** [[agent-ops]]
+
 <!-- decision-feedback-protocol:v2 -->
 ## Decision Quality Feedback
 - If post-run feedback capture is enabled, emit non-blocking `post_run_feedback` after result delivery.

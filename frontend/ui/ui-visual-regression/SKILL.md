@@ -99,6 +99,17 @@ Run a deterministic visual regression loop so we can separate expected UI change
 - Evals: `references/evals.yaml`
 - Argos notes: `references/argos-quickstart-notes.md`
 
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[playwright-interactive]] | Capture screenshots for regression via Playwright |
+| [[baseline-ui]] | Run baseline UI checks alongside visual regression |
+| [[agent-browser]] | Use agent-browser snapshots as regression inputs |
+| [[stitch-react-components]] | Catch visual regressions after Stitch-to-React conversion |
+
+**Topic map:** [[frontend-ui]]
+
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.

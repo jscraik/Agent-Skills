@@ -82,6 +82,17 @@ Turn Stitch screens into a maintainable Remotion walkthrough workflow instead of
 - Resources: `resources/screen-slide-template.tsx`, `resources/composition-checklist.md`
 - Examples: `examples/walkthrough/`
 
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[stitch-loop]] | Generate the Stitch screens that feed this skill |
+| [[remotion]] | For custom Remotion compositions beyond Stitch walkthroughs |
+| [[slides]] | Compare slide deck with Remotion video for the same content |
+| [[sora]] | Use Sora for AI-generated video alternative to Remotion |
+
+**Topic map:** [[frontend-ui]]
+
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.

@@ -102,6 +102,17 @@ uvx markitdown scan.pdf -d -e "https://your-resource.cognitiveservices.azure.com
 - Contract: `references/contract.yaml`
 - Evals: `references/evals.yaml`
 
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[docs-expert]] | Polish converted docs to meet repository quality standards |
+| [[visual-explainer]] | Present converted content as a visual HTML page |
+| [[spreadsheet]] | Convert tabular data alongside markdown conversion |
+| [[notebooklm]] | Feed converted markdown to NotebookLM for analysis |
+
+**Topic map:** [[content-publishing]]
+
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.

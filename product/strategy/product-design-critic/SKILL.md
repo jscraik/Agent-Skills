@@ -293,6 +293,17 @@ Adapt depth and tradeoff framing by context:
 This skill succeeds when the next design decision becomes clearer, more opinionated, and more trustworthy, not just more visually refined.
 
 ## Decision feedback protocol
+
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[product-spec]] | Critique the product surface after speccing, before build |
+| [[brainstorming]] | Explore design alternatives before critical review |
+| [[frontend-ui-design]] | Apply critique findings to UI component implementation |
+| [[interview-me]] | Run a requirements interview before critiquing the surface |
+| [[visual-explainer]] | Present critique findings as a visual explainer page |
+
 <!-- decision-feedback-protocol:v2 -->
 - Question timing is runtime-owned. Do not make the skill itself decide when feedback is asked.
 - If post-run feedback capture is enabled, emit a non-blocking `post_run_feedback` event via Codex `request_user_input` after result delivery.

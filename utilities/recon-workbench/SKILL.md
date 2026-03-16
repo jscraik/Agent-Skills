@@ -304,6 +304,18 @@ The agent is capable of extraordinary work in this domain. Use judgment, adapt t
 See `references/extended.md` for additional examples, workflows, and appendices.
 
 ## Decision feedback protocol
+
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[security-threat-model]] | Feed recon findings into the threat model |
+| [[security-ownership-map]] | Correlate recon findings with code ownership |
+| [[security-best-practices]] | Apply findings-driven best practices after recon |
+| [[systematic-debugging]] | Debug app behaviour discovered during recon |
+
+**Topic map:** [[security-ops]]
+
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.

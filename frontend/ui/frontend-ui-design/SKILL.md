@@ -87,6 +87,18 @@ description: Create and review production-ready UI systems/components with token
 - "Design a settings flow for a React app with accessible tabs and inline validation."
 - "Review this component set for token drift, focus behavior, and responsive gaps."
 
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[design-system]] | Ground component design in the token layer |
+| [[baseline-ui]] | Validate components against baseline UI rules after design |
+| [[figma]] | Use Figma designs as reference for implementation |
+| [[fixing-accessibility]] | Apply accessibility fixes during component design |
+| [[ui-ux-creative-coding]] | Add motion and creative polish to designed components |
+
+**Topic map:** [[frontend-ui]]
+
 ## Remember
 - Standard UI design work should feel production-ready, not pitch-deck-ready.
 - A complete state model is part of quality.

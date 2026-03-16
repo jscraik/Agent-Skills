@@ -226,6 +226,19 @@ Negative controls:
 - "Just answer this NotebookLM question."
 
 ## Decision feedback protocol
+
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[brainstorming]] | Start with brainstorming before routing to a compound workflow |
+| [[writing-plans]] | Generate the implementation plan the compound mode targets |
+| [[product-spec]] | Produce a spec before routing to the work or review mode |
+| [[architecture-interview]] | Route architecture decisions through the structured interview |
+| [[skill-builder]] | Build skills that compound workflows will invoke |
+
+**Topic map:** [[product-strategy]]
+
 <!-- decision-feedback-protocol:v2 -->
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.
 - Capture `decision`, `outcome`, and `confidence`.

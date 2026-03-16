@@ -133,6 +133,18 @@ Read only what you need:
 - Feel free to surface multiple documented paths when the docs support them.
 
 ## Decision feedback protocol
+
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[context7]] | Supplement with Context7 for non-OpenAI library docs |
+| [[mcp-builder]] | Use docs to correctly implement MCP tool schemas |
+| [[chatgpt-apps]] | Reference when building ChatGPT Apps SDK integrations |
+| [[workers-mcp]] | Use alongside Cloudflare Workers MCP docs |
+
+**Topic map:** [[agent-ops]]
+
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.

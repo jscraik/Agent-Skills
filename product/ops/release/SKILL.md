@@ -118,6 +118,18 @@ just release 1.4.2
 - Enable outcomes-oriented problem solving.
 
 ## Decision feedback protocol
+
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[gh-workflow]] | Manage the PR and merge lifecycle before cutting a release |
+| [[verification-before-completion]] | Validate all checks pass before tagging |
+| [[check-pr]] | Review the PR that triggers the release |
+| [[writing-plans]] | Plan the release checklist before executing |
+
+**Topic map:** [[backend-platform]]
+
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.

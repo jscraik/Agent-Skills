@@ -80,6 +80,19 @@ Choose the smallest mode that fits:
 - **package**: produce a distributable `.skill` archive.
 
 Default to `create` or `improve`.
+Treat `upgrade` requests as `improve`.
+
+## Unified conformance and grading
+Apply one conformance workflow across `create`, `improve`/`upgrade`, and `install-distribute`.
+
+- Keep this inside `skill-builder`; do not split this into a standalone grading skill.
+- Run gold gates on every skill:
+  - `quick_validate`, `skill_gate`, `analyze_skill`, and `openclaw_skill_guard`.
+- If upstream eval metadata exists (for example `eval.yaml`, grader scripts, or rubric files), run an upstream-grade pass in addition to gold gates.
+- Use conformance profiles:
+  - `native`: skill-builder gold standard is primary and required.
+  - `imported`: preserve upstream structure, add compatibility overlays as needed, and report both upstream-grade and gold-grade status.
+- Emit one decision per skill: `pass`, `warn`, or `fail`, with a short reason and next fix.
 
 ## Needed inputs
 - skill goal;
@@ -302,6 +315,11 @@ For new skills:
 ~/.venvs/pyyaml/bin/python scripts/run_skill_evals.py <path/to/skill-folder>
 ```
 
+Unified conformance rule:
+- `create` and `improve` runs must pass gold validators and evals before done.
+- `install-distribute` runs must execute gold validators and, when detected, upstream-grade checks from the imported package.
+- Never skip the gold validators even when upstream checks pass.
+
 Optional deep checks:
 - `~/.venvs/pyyaml/bin/python scripts/run_skill_evals.py <path/to/skill-folder> --dual-run --capture-jsonl`
 - `python utilities/skill-builder/scripts/benchmark_skill_portfolio.py --root . --config utilities/skill-builder/references/benchmark-policy.json --mode warn --format text --output-json artifacts/industry-benchmark-latest.json`
@@ -330,6 +348,7 @@ Use these files when needed:
 - `references/quality-tools.md` for validator and eval interpretation;
 - `references/skill-structure.md` and `references/progressive-disclosure-patterns.md` for layout choices;
 - `references/security-hardening.md` for offline defaults and destructive-action gates;
+- `references/imported-eval-interop.md` for preserving upstream eval semantics (skillgrade-style `eval.yaml`, grader schema, and CI threshold behavior) while still enforcing gold gates;
 - `docs/skill-graphs/question-lifecycle.md` for question timing and post-run feedback behavior;
 - `docs/skill-graphs/knowledge-graph-operating-model.md` for graph-mode boundaries;
 - `references/examples.md`, `references/anti-patterns.md`, and `references/governance-and-style.md` for calibrated examples and deeper guidance.
@@ -380,7 +399,10 @@ Use `request_user_input` for missing install decisions when the turn fits in 1-3
 - Prefer curated or verified sources and stage external fetches in `/tmp` or `/mnt/data`.
 - Keep installs auditable: source, ref, staging path, validations, and final destination should all be reported.
 - Run a risk scan before promotion and stop on high-severity findings unless the user explicitly approves continuation.
-- Use deconflict analysis when the target overlaps meaningfully with installed skills or appears to solve the same job.
+- Run deconflict analysis for every install/update request before any write. Do not rely on "looks overlapping" heuristics.
+- Deconflict scope must review all installed operational skills in the chosen destination scope (`REPO` or `USER`) and then decide: merge, fold, improve-existing, or install-new.
+- Exclude system/meta skills from default deconflict comparisons unless the user explicitly asks for system-skill work. Default exclusions include `.system` slices and creator/meta scaffolding skills such as `skill-creator`.
+- When imported skills include upstream eval contracts (for example `eval.yaml`, graders, or rubric files), preserve those files as source-of-truth for upstream grading. Do not rewrite them into a different format during install.
 - For plugin installs or Claude-to-Codex plugin conversions, run local plugin deconflict analysis first:
   - `python3 utilities/codex-plugin-builder/scripts/plugin_builder.py inspect-local <plugin-name> --path plugins`
   - prefer merge, fold, or improvement work when an existing local plugin already covers the intended job.
@@ -393,6 +415,8 @@ Use `request_user_input` for missing install decisions when the turn fits in 1-3
 ### Install-distribute deliverables
 - installed or updated skill folder, or a dry-run plan if no writes occurred;
 - source summary, staging boundary, and any deconflict or risk findings;
+- explicit deconflict decision record (`merge`, `fold`, `improve-existing`, or `install-new`) and why;
+- upstream eval interop note when present: profile presets, threshold behavior, grader weighting, and schema checks preserved from source package;
 - validator results for each installed target;
 - restart reminder after successful install/update;
 - verification that the installed `SKILL.md` includes decision feedback instrumentation when relevant.
@@ -400,6 +424,12 @@ Use `request_user_input` for missing install decisions when the turn fits in 1-3
 ### Install-distribute validation
 - run the installed skill through quick validation, skill gate, analyzer, and OpenClaw-style guard checks;
 - run evals for newly installed skills after write completion;
+- when imported source includes upstream eval contracts (for example `eval.yaml` or grader/rubric bundles), run upstream-grade checks and report those results alongside gold-gate results;
+- for skillgrade-style packages specifically, preserve and report upstream semantics:
+  - smoke/reliable/regression trial tiers;
+  - CI threshold behavior;
+  - grader weighting and deterministic/LLM rubric split;
+  - grader output JSON schema (`score`, `details`, optional `checks`).
 - confirm the repo diff only contains expected skill-install paths;
 - stop and report blockers if a failing step repeats 3 times.
 - for plugin installs/conversions, run:

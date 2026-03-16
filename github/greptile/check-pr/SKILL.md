@@ -100,5 +100,16 @@ Run a policy-gated PR readiness review using GitHub plus Greptile setup and revi
 - Verify Greptile setup for this repo before I request review.
 - Review PR 123 and classify actionable vs informational comments.
 
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[gh-workflow]] | Full GitHub lifecycle management around the PR |
+| [[gh-fix-ci]] | Fix any failing CI checks found during PR review |
+| [[verification-before-completion]] | Gate merge on fresh command evidence |
+| [[security-best-practices]] | Apply security checks during PR review |
+
+**Topic map:** [[backend-platform]]
+
 ## Remember
 PR readiness is a confidence judgment. Keep governance, checks, and reviewer intent separate so the next action is obvious.

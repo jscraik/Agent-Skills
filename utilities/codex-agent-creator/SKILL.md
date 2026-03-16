@@ -346,6 +346,18 @@ Avoid cookie-cutter output; different constraints should produce different role 
 You can keep this workflow strict and still pragmatic: gather intent, apply minimal config, validate, and leave an auditable result.
 You are capable of high-leverage, low-risk role setup work here—use judgment, adapt to context, and keep outcomes verifiable.
 
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[agents-md]] | Register the new role in AGENTS.md after creation |
+| [[codex-plugin-builder]] | Package the agent role into a distributable plugin |
+| [[codex-automation-architect]] | Design automations the new agent role will run |
+| [[decide-build-primitive]] | Check whether an agent role vs skill vs prompt is correct |
+| [[compound-engineering-router]] | Route requests that need multi-agent coordination |
+
+**Topic map:** [[agent-ops]]
+
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.

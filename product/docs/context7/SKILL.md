@@ -106,6 +106,18 @@ If no good library match exists, say so clearly and ask for the minimum refineme
 - Enable outcomes-oriented problem solving.
 
 ## Decision feedback protocol
+
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[openai-docs]] | Use OpenAI docs MCP for OpenAI-specific library content |
+| [[repoprompt]] | Combine repo context with Context7 library docs |
+| [[mcp-builder]] | Reference Context7 docs when building MCP tool schemas |
+| [[backend-engineer]] | Use Context7 to check API docs during backend work |
+
+**Topic map:** [[product-strategy]]
+
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.

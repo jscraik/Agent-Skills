@@ -92,5 +92,17 @@ scripts/init.sh --project-mode adopt
 - Adopt makefile tooling into this existing iOS app without regenerating the project.
 - Run the app-builder flow in dry-run mode first.
 
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[xcode-makefiles]] | Add reproducible CLI builds after scaffolding the app |
+| [[design-system]] | Apply design tokens to native UI components |
+| [[fixing-accessibility]] | Add UIAccessibility labels to native views |
+| [[recon-workbench]] | Audit the app binary and entitlements after creation |
+| [[simple-tasks]] | Track app build and release tasks locally |
+
+**Topic map:** [[mobile-native]]
+
 ## Remember
 Good Apple project setup reduces future Xcode drift. Keep the scaffold reproducible and the adoption path deliberate.

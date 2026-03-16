@@ -220,6 +220,17 @@ If a handle is stale, set only that handle back to `undefined` and rerun the nar
 - "Inspect my Electron window after a preload change and tell me whether I need reload or relaunch."
 - "Run a functional and visual QA pass without restarting the browser every time."
 
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[agent-browser]] | Use agent-browser for simpler ref-based interactions |
+| [[ui-visual-regression]] | Capture Playwright screenshots for regression baselines |
+| [[fixing-accessibility]] | Test keyboard navigation and focus via Playwright |
+| [[agentation]] | Wire Playwright automation into Agentation self-driving |
+
+**Topic map:** [[frontend-ui]]
+
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.

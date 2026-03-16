@@ -90,6 +90,17 @@ skills/xcode-makefiles/scripts/install.sh --project-dir /tmp/demo --app-name Dem
 - Contract: `references/contract.yaml`
 - Evals: `references/evals.yaml`
 
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[apple-app-creator]] | Install xcode-makefiles after scaffolding with apple-app-creator |
+| [[circleci]] | Integrate Make targets into CircleCI pipeline |
+| [[verification-before-completion]] | Verify Make targets build cleanly before completing |
+| [[recon-workbench]] | Audit Makefile build outputs for security |
+
+**Topic map:** [[mobile-native]]
+
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.

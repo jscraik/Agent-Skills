@@ -111,6 +111,18 @@ Use shadcn/ui as a code-ownership workflow, not as a drop-in component dependenc
 - Setup verifier: `scripts/verify-setup.sh`
 - README: `README.md`
 
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[react-ui-patterns]] | Apply React composition patterns to shadcn/ui components |
+| [[design-system]] | Override shadcn/ui tokens with design-system aliases |
+| [[baseline-ui]] | Validate shadcn/ui component usage against baseline rules |
+| [[fixing-accessibility]] | Fix accessibility issues in shadcn/ui interactive components |
+| [[figma]] | Use Figma designs as reference for shadcn/ui customisation |
+
+**Topic map:** [[frontend-ui]]
+
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.

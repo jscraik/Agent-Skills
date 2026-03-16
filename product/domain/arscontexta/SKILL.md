@@ -122,6 +122,17 @@ You are capable of excellent parity work in this domain. These rules are here to
 - Keep parity updates auditable and minimal.
 - Redact secrets, keys, tokens, and sensitive user data by default in logs/reports.
 
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[codex-plugin-builder]] | Package Ars Contexta surfaces into a Codex plugin |
+| [[agents-md]] | Verify Ars Contexta parity in AGENTS.md after sync |
+| [[codex-home-audit]] | Audit Codex home for Ars Contexta drift |
+| [[compound-engineering-router]] | Route complex Ars Contexta workflows to the right mode |
+
+**Topic map:** [[product-strategy]]
+
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after the result or recommendation is shown.

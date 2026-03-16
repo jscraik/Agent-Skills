@@ -123,5 +123,17 @@ If unauthenticated:
 - Help me deploy this app to Pages and wire the right storage products.
 - I need Cloudflare-hosted AI inference plus vector search. What should I set up?
 
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[workers-mcp]] | Deploy MCP server as part of the Cloudflare stack |
+| [[cf-crawl]] | Run Cloudflare Browser Rendering crawls on the deployed site |
+| [[backend-engineer]] | Extend the backend before deploying |
+| [[fixing-metadata]] | Fix OG/meta tags on deployed pages |
+| [[verification-before-completion]] | Verify deployment is healthy before completing |
+
+**Topic map:** [[backend-platform]]
+
 ## Remember
 Cloudflare is a platform family, not one product. Route first, then go deep.

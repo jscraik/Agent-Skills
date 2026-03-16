@@ -104,6 +104,17 @@ Use these headings in order:
 6. `## Safety rules`
 7. `## Verification`
 
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[writing-plans]] | Turn the CLI spec into an implementation plan |
+| [[test-driven-development]] | Write CLI acceptance tests from the spec |
+| [[docs-expert]] | Document the CLI surface after speccing it |
+| [[product-spec]] | Produce a broader product spec alongside the CLI spec |
+
+**Topic map:** [[backend-platform]]
+
 ## Remember
 - A good CLI spec reduces implementation churn later.
 - Optimize for the common path, but make failure and automation paths explicit.

@@ -466,6 +466,17 @@ When the suite is unstable, debug in this order:
 - For local desktop iteration, keep webhook targets local (`localhost`) unless remote ingestion is explicitly required.
 - If MCP registration was added or changed, restart the host client so new registrations are loaded.
 
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[agent-browser]] | Use agent-browser for deterministic ref-based element actions |
+| [[playwright-interactive]] | Use Playwright for iterative UI inspection alongside Agentation |
+| [[frontend-ui-design]] | Design the UI that Agentation will automate |
+| [[visual-explainer]] | Visualise Agentation workflow states as an HTML diagram |
+
+**Topic map:** [[frontend-ui]]
+
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.

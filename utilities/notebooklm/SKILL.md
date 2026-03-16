@@ -115,6 +115,18 @@ If auth is stale, the target notebook/source cannot be identified, or the script
 - References: `references/contract.yaml`, `references/evals.yaml`, `references/api_reference.md`, `references/troubleshooting.md`
 
 ## Decision feedback protocol
+
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[video-transcript-downloader]] | Download transcripts to feed as NotebookLM sources |
+| [[markdown-converter]] | Convert docs to markdown before uploading to NotebookLM |
+| [[insight-report]] | Feed session insights into NotebookLM for deeper analysis |
+| [[compound-engineering-router]] | Use NotebookLM evidence to inform compound workflow routing |
+
+**Topic map:** [[product-strategy]]
+
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.

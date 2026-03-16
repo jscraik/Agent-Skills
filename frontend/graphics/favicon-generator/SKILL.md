@@ -101,6 +101,17 @@ Create favicon and app-icon sets that match the actual product identity instead 
 - Scripts: `scripts/generate_favicon.py`, `scripts/generate_favicon.html`
 - Asset preview: `assets/favicon-generator.png`
 
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[fixing-metadata]] | Pair with metadata fixes to ensure correct favicon references |
+| [[design-system]] | Keep favicon palette consistent with design-system tokens |
+| [[og-image-creator]] | Generate OG images alongside favicons for complete brand suite |
+| [[cloudflare-deploy]] | Include favicon assets in Cloudflare Pages deployments |
+
+**Topic map:** [[frontend-ui]]
+
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.

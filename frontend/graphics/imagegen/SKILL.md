@@ -86,6 +86,18 @@ description: "Use when the user asks to generate or edit images via the OpenAI I
 - "Generate a transparent PNG product shot for a landing page."
 - "Edit this hero image to remove the background and keep the subject unchanged."
 
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[sora]] | Follow static image generation with AI video generation |
+| [[og-image-creator]] | Use generated images as OG image assets |
+| [[nano-banana-builder]] | Integrate imagegen into Nano Banana iterative editing flows |
+| [[youtube-titles-thumbnails]] | Generate thumbnail concept images for YouTube packaging |
+| [[visual-explainer]] | Embed generated images as hero banners in HTML explainers |
+
+**Topic map:** [[frontend-ui]]
+
 ## Remember
 - This skill is for execution, not generic image brainstorming.
 - When editing, protect invariants first and creative expansion second.

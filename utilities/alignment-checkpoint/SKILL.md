@@ -169,6 +169,19 @@ User: “Plan the migration—do NOT implement—preserve only.”
 Assistant: STASIS_RECORD → JSON → options → gate (no tools).
 
 ## Decision feedback protocol
+
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[interview-me]] | Follow with structured interview to clarify requirements |
+| [[brainstorming]] | Explore approaches once intent is aligned |
+| [[writing-plans]] | Move from approved intent to an execution-ready plan |
+| [[product-spec]] | Produce a spec once ambiguity is resolved |
+| [[decide-build-primitive]] | Decide the right primitive after intent is confirmed |
+
+**Topic map:** [[agent-ops]]
+
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.
