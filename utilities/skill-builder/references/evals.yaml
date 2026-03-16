@@ -148,6 +148,20 @@ cases:
       - type: regex
         value: "(?i)(angle brackets|sanitize|replace|parser-safe|avoid <|avoid >)"
 
+  - id: install-fullscan-deconflict
+    name: install full-scan deconflict
+    category: edge
+    should_trigger: true
+    prepend_skill: true
+    prompt: "I am installing a new skill and skill-creator keeps appearing in overlap results. In this first response, require full-scan deconflict against installed skills and exclude system or meta skills unless explicitly requested."
+    acceptance:
+      - type: regex
+        value: "(?i)(full[- ]scan|all installed skills|deconflict.*every install|mandatory deconflict)"
+      - type: regex
+        value: "(?i)(exclude.*skill-creator|skill-creator.*exclude|exclude.*system|system.*exclude)"
+      - type: regex
+        value: "(?i)(merge|fold|improve-existing|install-new)"
+
   - id: posture-learning-first
     name: posture learning-first
     category: edge

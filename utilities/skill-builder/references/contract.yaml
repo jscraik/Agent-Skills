@@ -5,7 +5,7 @@ triggers:
   - user asks to create, improve, audit, compare, benchmark, or package a Codex skill
   - user asks to tighten skill routing, validation gates, or safety contracts
 inputs:
-  - mode selection (create, improve, eval, benchmark-lite, graph, package)
+  - mode selection (create, improve, eval, benchmark-lite, graph, package, install-distribute)
   - skill objective and constraints
   - target environment (codex, claude, portable)
   - prompt coverage (happy, edge, should-not-trigger)
@@ -35,3 +35,5 @@ risks:
   - frontmatter parser risk from XML-style angle brackets; mitigated by frontmatter sanitization checks
   - quality drift from unbounded iteration; mitigated by retry caps and fail-fast validation gates
   - Codex UX mismatch; mitigated by optional agents/openai.yaml generation when metadata is needed
+  - duplicate/foldable installs; mitigated by mandatory full-scan deconflict across installed operational skills before any install/update write
+  - false overlap from system/meta skills; mitigated by default exclusion of `.system` and creator/meta scaffolding skills (for example `skill-creator`) unless explicitly requested

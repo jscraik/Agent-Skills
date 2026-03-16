@@ -380,7 +380,9 @@ Use `request_user_input` for missing install decisions when the turn fits in 1-3
 - Prefer curated or verified sources and stage external fetches in `/tmp` or `/mnt/data`.
 - Keep installs auditable: source, ref, staging path, validations, and final destination should all be reported.
 - Run a risk scan before promotion and stop on high-severity findings unless the user explicitly approves continuation.
-- Use deconflict analysis when the target overlaps meaningfully with installed skills or appears to solve the same job.
+- Run deconflict analysis for every install/update request before any write. Do not rely on "looks overlapping" heuristics.
+- Deconflict scope must review all installed operational skills in the chosen destination scope (`REPO` or `USER`) and then decide: merge, fold, improve-existing, or install-new.
+- Exclude system/meta skills from default deconflict comparisons unless the user explicitly asks for system-skill work. Default exclusions include `.system` slices and creator/meta scaffolding skills such as `skill-creator`.
 - For plugin installs or Claude-to-Codex plugin conversions, run local plugin deconflict analysis first:
   - `python3 utilities/codex-plugin-builder/scripts/plugin_builder.py inspect-local <plugin-name> --path plugins`
   - prefer merge, fold, or improvement work when an existing local plugin already covers the intended job.
@@ -393,6 +395,7 @@ Use `request_user_input` for missing install decisions when the turn fits in 1-3
 ### Install-distribute deliverables
 - installed or updated skill folder, or a dry-run plan if no writes occurred;
 - source summary, staging boundary, and any deconflict or risk findings;
+- explicit deconflict decision record (`merge`, `fold`, `improve-existing`, or `install-new`) and why;
 - validator results for each installed target;
 - restart reminder after successful install/update;
 - verification that the installed `SKILL.md` includes decision feedback instrumentation when relevant.

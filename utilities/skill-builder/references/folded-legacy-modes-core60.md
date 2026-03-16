@@ -26,7 +26,8 @@ This file captures legacy capabilities migrated from retired skills.
 - Live guidance preserved in destination:
   - explicit list/install/update/dry-run triggers
   - overwrite and scope confirmation gates
-  - staged install plus risk and deconflict checks
+  - staged install plus risk and mandatory full-scan deconflict checks
+  - default operational-scope deconflict (exclude `.system`/meta skills like `skill-creator` unless explicitly requested)
   - validator and post-install decision-feedback checks
 
 ## `prompt-packaging`
