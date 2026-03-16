@@ -303,6 +303,18 @@ Avoid repeating identical option sets. Vary structure and examples based on doma
 - Incorrect assumptions here can lead to fragile guidance.
 - Warning: wrong sequencing can create avoidable regressions.
 
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[deep-interview]] | Use after initial scoping — deep-interview fills gaps in an existing draft spec |
+| [[brainstorming]] | For lighter, less structured exploration before committing to interview format |
+| [[product-spec]] | Hand the approved spec from this skill to product-spec for full PRD elaboration |
+| [[writing-plans]] | After approval gate — turn the spec into an execution plan |
+| [[architecture-interview]] | Track C in this skill routes directly here for architecture decisions |
+
+**Topic map:** [[product-strategy]]
+
 ## Decision feedback protocol
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**

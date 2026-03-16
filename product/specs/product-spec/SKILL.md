@@ -217,6 +217,18 @@ Fail fast: **stop at the first failed gate and do not proceed**.
 - Push boundaries with practical alternatives when simple recipes fail.
 - Enable outcomes-oriented problem solving.
 
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[brainstorming]] | Use first when idea is unclear — brainstorm resolves direction, this skill writes the spec |
+| [[interview-me]] | Use for deep requirements discovery when the spec needs user-research grounding |
+| [[writing-plans]] | After spec approval, use to decompose the spec into an execution plan |
+| [[architecture-interview]] | Use when `arch_spec` mode reveals open design decisions needing review |
+| [[security-threat-model]] | Use on the resulting spec/API to identify and model security risks early |
+
+**Topic map:** [[product-strategy]]
+
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.

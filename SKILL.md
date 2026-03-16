@@ -108,6 +108,7 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 ## Product — Strategy
 
 - `brainstorming` — Use before planning or implementation when a request is ambiguous, has multiple valid approaches, or needs trade-off exploration. Clarify what to build, compare 2-3 approaches, and recommend a direction before moving into planning.
+- `product-design-critic` — Use this skill when the user asks to critique or shape a software product surface, workflow, card, panel, or chat UX. It analyzes and reviews product decisions with opinionated recommendations grounded in jobs-to-be-done, hierarchy, trust/governance cues, and explicit tradeoffs beyond visual polish.
 - `project-improver` — Analyze an existing project and design high-leverage improvements when the user wants stronger functionality, sharper product judgment, rigorous idea filtering, premortems, hybrid plan revisions, or immediate implementation of the best upgrades.
 
 ## Utilities

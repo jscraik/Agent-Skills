@@ -35,7 +35,10 @@ skills-antigravity/
 sync-symlink/
 
 # Generated artifacts
-.diagram/
+.diagram/*
+!.diagram/context/
+.diagram/context/refresh.log
+!.diagram/manifest.json
 semgrep.sarif
 artifacts/diagrams/
 artifacts/dist/

@@ -2,184 +2,188 @@ flowchart TD
   Untrusted["Untrusted input"]
   tool_template_74b2d502["tool-template"]
   Untrusted --> tool_template_74b2d502
-  analyze_issues_217eec6e["analyze-issues"]
-  Untrusted --> analyze_issues_217eec6e
-  internals_d_b31c6711["internals.d"]
-  Untrusted --> internals_d_b31c6711
-  index_test_d_1_e909297c["index.test-d"]
-  Untrusted --> index_test_d_1_e909297c
-  index_d_3_80f852c0["index.d"]
-  Untrusted --> index_d_3_80f852c0
-  types_8d846022["types"]
-  Untrusted --> types_8d846022
-  fleet_plan_7a1dd79c["fleet-plan"]
-  Untrusted --> fleet_plan_7a1dd79c
-  fleet_merge_0cb86c46["fleet-merge"]
-  Untrusted --> fleet_merge_0cb86c46
-  fleet_dispatch_1b54456c["fleet-dispatch"]
-  Untrusted --> fleet_dispatch_1b54456c
-  fleet_analyze_1a7bcc95["fleet-analyze"]
-  Untrusted --> fleet_analyze_1a7bcc95
-  markdown_bc18f706["markdown"]
-  Untrusted --> markdown_bc18f706
-  issues_02e3fe5a["issues"]
-  Untrusted --> issues_02e3fe5a
-  git_9a881b9b["git"]
-  Untrusted --> git_9a881b9b
-  cache_plugin_0c65b2dd["cache-plugin"]
-  Untrusted --> cache_plugin_0c65b2dd
-  bootstrap_333c04dd["bootstrap"]
-  Untrusted --> bootstrap_333c04dd
-  index_d_ec1aab9d["index.d"]
-  Untrusted --> index_d_ec1aab9d
-  index_d_1_0f747669["index.d"]
-  Untrusted --> index_d_1_0f747669
-  index_test_d_800599b6["index.test-d"]
-  Untrusted --> index_test_d_800599b6
-  index_d_2_58711ee2["index.d"]
-  Untrusted --> index_d_2_58711ee2
-  index_d_4_89c8e619["index.d"]
-  Untrusted --> index_d_4_89c8e619
-  websocket_d_71785948["websocket.d"]
-  Untrusted --> websocket_d_71785948
-  webidl_d_8886e385["webidl.d"]
-  Untrusted --> webidl_d_8886e385
-  util_d_e88b3cc0["util.d"]
-  Untrusted --> util_d_e88b3cc0
-  retry_handler_d_2d3d60a2["retry-handler.d"]
-  Untrusted --> retry_handler_d_2d3d60a2
-  retry_agent_d_c2b0b332["retry-agent.d"]
-  Untrusted --> retry_agent_d_c2b0b332
-  readable_d_44aac15f["readable.d"]
-  Untrusted --> readable_d_44aac15f
-  proxy_agent_d_dd4ecd18["proxy-agent.d"]
-  Untrusted --> proxy_agent_d_dd4ecd18
-  pool_d_29d28dba["pool.d"]
-  Untrusted --> pool_d_29d28dba
-  pool_stats_d_375610ab["pool-stats.d"]
-  Untrusted --> pool_stats_d_375610ab
-  patch_d_281b64a8["patch.d"]
-  Untrusted --> patch_d_281b64a8
-  mock_pool_d_e7d0fd28["mock-pool.d"]
-  Untrusted --> mock_pool_d_e7d0fd28
-  mock_interceptor_d_7fdd789e["mock-interceptor.d"]
-  Untrusted --> mock_interceptor_d_7fdd789e
-  mock_errors_d_f154d508["mock-errors.d"]
-  Untrusted --> mock_errors_d_f154d508
-  mock_client_d_27ba0321["mock-client.d"]
-  Untrusted --> mock_client_d_27ba0321
-  mock_agent_d_eab6f9dd["mock-agent.d"]
-  Untrusted --> mock_agent_d_eab6f9dd
-  interceptors_d_e13c1a86["interceptors.d"]
-  Untrusted --> interceptors_d_e13c1a86
-  index_d_5_5592465f["index.d"]
-  Untrusted --> index_d_5_5592465f
-  header_d_f8172c54["header.d"]
-  Untrusted --> header_d_f8172c54
-  handlers_d_acfb32c8["handlers.d"]
-  Untrusted --> handlers_d_acfb32c8
-  global_origin_d_f8f6fd66["global-origin.d"]
-  Untrusted --> global_origin_d_f8f6fd66
-  global_dispatcher_d_c04e6e71["global-dispatcher.d"]
-  Untrusted --> global_dispatcher_d_c04e6e71
-  formdata_d_49123c71["formdata.d"]
-  Untrusted --> formdata_d_49123c71
-  filereader_d_3146daf4["filereader.d"]
-  Untrusted --> filereader_d_3146daf4
-  file_d_142c246c["file.d"]
-  Untrusted --> file_d_142c246c
-  fetch_d_dd156bed["fetch.d"]
-  Untrusted --> fetch_d_dd156bed
-  eventsource_d_cb8474ca["eventsource.d"]
-  Untrusted --> eventsource_d_cb8474ca
-  errors_d_8c4228da["errors.d"]
-  Untrusted --> errors_d_8c4228da
-  env_http_proxy_agent_d_0d478388["env-http-proxy-agent.d"]
-  Untrusted --> env_http_proxy_agent_d_0d478388
-  dispatcher_d_98ad032f["dispatcher.d"]
-  Untrusted --> dispatcher_d_98ad032f
-  diagnostics_channel_d_f4fa59f7["diagnostics-channel.d"]
-  Untrusted --> diagnostics_channel_d_f4fa59f7
-  cookies_d_6a33675c["cookies.d"]
-  Untrusted --> cookies_d_6a33675c
-  content_type_d_6b4a96e0["content-type.d"]
-  Untrusted --> content_type_d_6b4a96e0
-  connector_d_1e6540f7["connector.d"]
-  Untrusted --> connector_d_1e6540f7
-  client_d_91d07758["client.d"]
-  Untrusted --> client_d_91d07758
-  cache_d_739412ae["cache.d"]
-  Untrusted --> cache_d_739412ae
-  balanced_pool_d_96157505["balanced-pool.d"]
-  Untrusted --> balanced_pool_d_96157505
-  api_d_aed6c350["api.d"]
-  Untrusted --> api_d_aed6c350
-  agent_d_4125eae9["agent.d"]
-  Untrusted --> agent_d_4125eae9
-  toad_cache_d_5066ab84["toad-cache.d"]
-  Untrusted --> toad_cache_d_5066ab84
-  index_d_6_b3a48dcc["index.d"]
-  Untrusted --> index_d_6_b3a48dcc
-  index_d_7_e94fec09["index.d"]
-  Untrusted --> index_d_7_e94fec09
-  index_d_8_b4d7aa95["index.d"]
-  Untrusted --> index_d_8_b4d7aa95
-  index_d_9_48e2613c["index.d"]
-  Untrusted --> index_d_9_48e2613c
-  fsevents_d_8b7caa6a["fsevents.d"]
-  Untrusted --> fsevents_d_8b7caa6a
-  index_d_10_ddffdcaf["index.d"]
-  Untrusted --> index_d_10_ddffdcaf
-  test_9f86d081["test"]
-  Untrusted --> test_9f86d081
-  bottleneck_d_00b7a483["bottleneck.d"]
-  Untrusted --> bottleneck_d_00b7a483
-  index_d_11_41a7b1d4["index.d"]
-  Untrusted --> index_d_11_41a7b1d4
-  index_d_13_9529d873["index.d"]
-  Untrusted --> index_d_13_9529d873
-  index_d_14_1b201971["index.d"]
-  Untrusted --> index_d_14_1b201971
-  index_1bc04b52["index"]
-  Untrusted --> index_1bc04b52
-  types_d_1_1c38f70f["types.d"]
-  Untrusted --> types_d_1_1c38f70f
-  standard_schema_d_8076d7a7["standard-schema.d"]
-  Untrusted --> standard_schema_d_8076d7a7
-  index_d_15_28020394["index.d"]
-  Untrusted --> index_d_15_28020394
-  external_d_27f10cad["external.d"]
-  Untrusted --> external_d_27f10cad
-  errors_d_2_557861e0["errors.d"]
-  Untrusted --> errors_d_2_557861e0
-  ZodError_d_b0b18420["ZodError.d"]
-  Untrusted --> ZodError_d_b0b18420
-  visit_d_60cfcab7["visit.d"]
-  Untrusted --> visit_d_60cfcab7
-  util_d_1_42d33162["util.d"]
-  Untrusted --> util_d_1_42d33162
-  test_events_d_4a22b2c9["test-events.d"]
-  Untrusted --> test_events_d_4a22b2c9
-  public_api_d_84787cea["public-api.d"]
-  Untrusted --> public_api_d_84787cea
-  options_d_ae5597a4["options.d"]
-  Untrusted --> options_d_ae5597a4
-  log_d_e56b4bda["log.d"]
-  Untrusted --> log_d_e56b4bda
-  index_d_16_7c8e7987["index.d"]
-  Untrusted --> index_d_16_7c8e7987
-  errors_d_3_ff288a89["errors.d"]
-  Untrusted --> errors_d_3_ff288a89
-  cli_d_db8e1126["cli.d"]
-  Untrusted --> cli_d_db8e1126
-  types_Cxp8y2TL_d_f30d6c98["types-Cxp8y2TL.d"]
-  Untrusted --> types_Cxp8y2TL_d_f30d6c98
-  typescript_d_5cd334d6["typescript.d"]
-  Untrusted --> typescript_d_5cd334d6
-  tsserverlibrary_d_919cec23["tsserverlibrary.d"]
-  Untrusted --> tsserverlibrary_d_919cec23
-  lib_webworker_iterable_d_35ac2e57["lib.webworker.iterable.d"]
-  Untrusted --> lib_webworker_iterable_d_35ac2e57
-  lib_webworker_importscripts_d_7a7b2929["lib.webworker.importscripts.d"]
-  Untrusted --> lib_webworker_importscripts_d_7a7b2929
+  tool_template_1_966768c3["tool-template"]
+  Untrusted --> tool_template_1_966768c3
+  verify_skill_catalog_freshness_a896cce8["verify_skill_catalog_freshness"]
+  Untrusted --> verify_skill_catalog_freshness_a896cce8
+  verify_router_schema_10b5c390["verify_router_schema"]
+  Untrusted --> verify_router_schema_10b5c390
+  verify_recursive_skill_graph_artifacts_62510fc1["verify_recursive_skill_graph_artifacts"]
+  Untrusted --> verify_recursive_skill_graph_artifacts_62510fc1
+  verify_question_lifecycle_contract_91025cb7["verify_question_lifecycle_contract"]
+  Untrusted --> verify_question_lifecycle_contract_91025cb7
+  test_verify_recursive_skill_graph_artifacts_d745a5ae["test_verify_recursive_skill_graph_artifacts"]
+  Untrusted --> test_verify_recursive_skill_graph_artifacts_d745a5ae
+  run_skill_genome_loop_ab174e95["run_skill_genome_loop"]
+  Untrusted --> run_skill_genome_loop_ab174e95
+  docs_lint_75ec99ae["docs_lint"]
+  Untrusted --> docs_lint_75ec99ae
+  build_skill_state_map_de83c93f["build_skill_state_map"]
+  Untrusted --> build_skill_state_map_de83c93f
+  validate_skill_graph_profiles_dac972b4["validate_skill_graph_profiles"]
+  Untrusted --> validate_skill_graph_profiles_dac972b4
+  validate_recursive_promotion_cb35db6c["validate_recursive_promotion"]
+  Untrusted --> validate_recursive_promotion_cb35db6c
+  test_skill_router_1b78daf2["test_skill_router"]
+  Untrusted --> test_skill_router_1b78daf2
+  test_openclaw_skill_guard_211fb499["test_openclaw_skill_guard"]
+  Untrusted --> test_openclaw_skill_guard_211fb499
+  skill_subject_scoreboard_ea503635["skill_subject_scoreboard"]
+  Untrusted --> skill_subject_scoreboard_ea503635
+  skill_router_c50379b5["skill_router"]
+  Untrusted --> skill_router_c50379b5
+  skill_graph_inventory_d67c61e6["skill_graph_inventory"]
+  Untrusted --> skill_graph_inventory_d67c61e6
+  skill_gate_1b2f3166["skill_gate"]
+  Untrusted --> skill_gate_1b2f3166
+  run_repo_skill_quality_7f7a10ff["run_repo_skill_quality"]
+  Untrusted --> run_repo_skill_quality_7f7a10ff
+  router_controls_a32cc79f["router_controls"]
+  Untrusted --> router_controls_a32cc79f
+  refresh_benchmark_policy_4dda5e84["refresh_benchmark_policy"]
+  Untrusted --> refresh_benchmark_policy_4dda5e84
+  recursive_skill_loop_aa940a84["recursive_skill_loop"]
+  Untrusted --> recursive_skill_loop_aa940a84
+  record_skill_feedback_75f2db5a["record_skill_feedback"]
+  Untrusted --> record_skill_feedback_75f2db5a
+  generate_skill_graph_profiles_d432f2ea["generate_skill_graph_profiles"]
+  Untrusted --> generate_skill_graph_profiles_d432f2ea
+  benchmark_skill_portfolio_43dd74df["benchmark_skill_portfolio"]
+  Untrusted --> benchmark_skill_portfolio_43dd74df
+  plugin_builder_e9cff287["plugin_builder"]
+  Untrusted --> plugin_builder_e9cff287
+  audit_codex_home_9c47a803["audit_codex_home"]
+  Untrusted --> audit_codex_home_9c47a803
+  sora_a4c745fa["sora"]
+  Untrusted --> sora_a4c745fa
+  validate_skill_graph_profiles_1_e0892d0f["validate_skill_graph_profiles"]
+  Untrusted --> validate_skill_graph_profiles_1_e0892d0f
+  validate_recursive_promotion_1_bc45160d["validate_recursive_promotion"]
+  Untrusted --> validate_recursive_promotion_1_bc45160d
+  test_skill_router_1_9a354ca8["test_skill_router"]
+  Untrusted --> test_skill_router_1_9a354ca8
+  test_openclaw_skill_guard_1_7c2a13f3["test_openclaw_skill_guard"]
+  Untrusted --> test_openclaw_skill_guard_1_7c2a13f3
+  skill_subject_scoreboard_1_d0314212["skill_subject_scoreboard"]
+  Untrusted --> skill_subject_scoreboard_1_d0314212
+  skill_router_1_aeb4bedb["skill_router"]
+  Untrusted --> skill_router_1_aeb4bedb
+  skill_graph_inventory_1_5039fbfd["skill_graph_inventory"]
+  Untrusted --> skill_graph_inventory_1_5039fbfd
+  skill_gate_1_94fb6889["skill_gate"]
+  Untrusted --> skill_gate_1_94fb6889
+  run_repo_skill_quality_1_8b14eef4["run_repo_skill_quality"]
+  Untrusted --> run_repo_skill_quality_1_8b14eef4
+  router_controls_1_0f3341a5["router_controls"]
+  Untrusted --> router_controls_1_0f3341a5
+  refresh_benchmark_policy_1_28d48340["refresh_benchmark_policy"]
+  Untrusted --> refresh_benchmark_policy_1_28d48340
+  recursive_skill_loop_1_c584be9a["recursive_skill_loop"]
+  Untrusted --> recursive_skill_loop_1_c584be9a
+  record_skill_feedback_1_4f0f4947["record_skill_feedback"]
+  Untrusted --> record_skill_feedback_1_4f0f4947
+  generate_skill_graph_profiles_1_38d0a308["generate_skill_graph_profiles"]
+  Untrusted --> generate_skill_graph_profiles_1_38d0a308
+  benchmark_skill_portfolio_1_c5e54948["benchmark_skill_portfolio"]
+  Untrusted --> benchmark_skill_portfolio_1_c5e54948
+  run_ownership_map_e4120ef7["run_ownership_map"]
+  Untrusted --> run_ownership_map_e4120ef7
+  query_ownership_61d5e843["query_ownership"]
+  Untrusted --> query_ownership_61d5e843
+  community_maintainers_498bebd5["community_maintainers"]
+  Untrusted --> community_maintainers_498bebd5
+  build_ownership_map_53db368d["build_ownership_map"]
+  Untrusted --> build_ownership_map_53db368d
+  oak_api_fetch_a0b53f3b["oak_api_fetch"]
+  Untrusted --> oak_api_fetch_a0b53f3b
+  image_gen_ad36dde7["image_gen"]
+  Untrusted --> image_gen_ad36dde7
+  check_brand_guidelines_ebe0aa6a["check_brand_guidelines"]
+  Untrusted --> check_brand_guidelines_ebe0aa6a
+  bootstrap_doc_qa_2db0bed6["bootstrap_doc_qa"]
+  Untrusted --> bootstrap_doc_qa_2db0bed6
+  audit_codex_home_1_b4fc56c4["audit_codex_home"]
+  Untrusted --> audit_codex_home_1_b4fc56c4
+  run_ownership_map_1_7b0bed20["run_ownership_map"]
+  Untrusted --> run_ownership_map_1_7b0bed20
+  query_ownership_1_1d217bbb["query_ownership"]
+  Untrusted --> query_ownership_1_1d217bbb
+  community_maintainers_1_2d95cd80["community_maintainers"]
+  Untrusted --> community_maintainers_1_2d95cd80
+  build_ownership_map_1_bb939757["build_ownership_map"]
+  Untrusted --> build_ownership_map_1_bb939757
+  oak_api_fetch_1_41850e0b["oak_api_fetch"]
+  Untrusted --> oak_api_fetch_1_41850e0b
+  check_brand_guidelines_1_72ab5c73["check_brand_guidelines"]
+  Untrusted --> check_brand_guidelines_1_72ab5c73
+  bootstrap_doc_qa_1_902ba7fb["bootstrap_doc_qa"]
+  Untrusted --> bootstrap_doc_qa_1_902ba7fb
+  sora_1_a455af61["sora"]
+  Untrusted --> sora_1_a455af61
+  image_gen_1_d075472d["image_gen"]
+  Untrusted --> image_gen_1_d075472d
+  build_graph_index_7aaca8ab["build_graph_index"]
+  Untrusted --> build_graph_index_7aaca8ab
+  _graph_lib_7ca77d9e["_graph_lib"]
+  Untrusted --> _graph_lib_7ca77d9e
+  auth_layout_716db075["auth-layout"]
+  Untrusted --> auth_layout_716db075
+  auth_layout_1_20956e9e["auth-layout"]
+  Untrusted --> auth_layout_1_20956e9e
+  test_sync_mcp_bc0aa8db["test_sync_mcp"]
+  Untrusted --> test_sync_mcp_bc0aa8db
+  sync_mcp_63bbc5df["sync_mcp"]
+  Untrusted --> sync_mcp_63bbc5df
+  openclaw_skill_guard_3dba2e87["openclaw_skill_guard"]
+  Untrusted --> openclaw_skill_guard_3dba2e87
+  deterministic_trace_checks_74950b39["deterministic_trace_checks"]
+  Untrusted --> deterministic_trace_checks_74950b39
+  browser_session_1ad989be["browser_session"]
+  Untrusted --> browser_session_1ad989be
+  auth_manager_d402d795["auth_manager"]
+  Untrusted --> auth_manager_d402d795
+  scan_codex_sessions_ab2978a6["scan_codex_sessions"]
+  Untrusted --> scan_codex_sessions_ab2978a6
+  correlate_multi_source_skill_failures_bb8c3a36["correlate_multi_source_skill_failures"]
+  Untrusted --> correlate_multi_source_skill_failures_bb8c3a36
+  openclaw_skill_guard_1_1a658fd4["openclaw_skill_guard"]
+  Untrusted --> openclaw_skill_guard_1_1a658fd4
+  deterministic_trace_checks_1_0a4a8ad7["deterministic_trace_checks"]
+  Untrusted --> deterministic_trace_checks_1_0a4a8ad7
+  browser_session_1_7bce9b11["browser_session"]
+  Untrusted --> browser_session_1_7bce9b11
+  auth_manager_1_f45ad268["auth_manager"]
+  Untrusted --> auth_manager_1_f45ad268
+  connections_1e5fac86["connections"]
+  Untrusted --> connections_1e5fac86
+  scan_codex_sessions_1_518bff22["scan_codex_sessions"]
+  Untrusted --> scan_codex_sessions_1_518bff22
+  correlate_multi_source_skill_failures_1_5d121587["correlate_multi_source_skill_failures"]
+  Untrusted --> correlate_multi_source_skill_failures_1_5d121587
+  connections_1_72396b07["connections"]
+  Untrusted --> connections_1_72396b07
+  setup_environment_cb611b05["setup_environment"]
+  Untrusted --> setup_environment_cb611b05
+  ask_question_2f5dd588["ask_question"]
+  Untrusted --> ask_question_2f5dd588
+  inspect_pr_checks_8eb8c9ba["inspect_pr_checks"]
+  Untrusted --> inspect_pr_checks_8eb8c9ba
+  github_pr_3e9d1c41["github-pr"]
+  Untrusted --> github_pr_3e9d1c41
+  fetch_comments_63be772c["fetch_comments"]
+  Untrusted --> fetch_comments_63be772c
+  inspect_pr_checks_1_9560c34e["inspect_pr_checks"]
+  Untrusted --> inspect_pr_checks_1_9560c34e
+  setup_environment_1_e33b563c["setup_environment"]
+  Untrusted --> setup_environment_1_e33b563c
+  ask_question_1_e6bb4d54["ask_question"]
+  Untrusted --> ask_question_1_e6bb4d54
+  inspect_pr_checks_2_fc066b4f["inspect_pr_checks"]
+  Untrusted --> inspect_pr_checks_2_fc066b4f
+  github_pr_1_18a80186["github-pr"]
+  Untrusted --> github_pr_1_18a80186
+  check_watch_mode_readiness_b521ad1b["check_watch_mode_readiness"]
+  Untrusted --> check_watch_mode_readiness_b521ad1b
+  check_watch_mode_readiness_1_11860954["check_watch_mode_readiness"]
+  Untrusted --> check_watch_mode_readiness_1_11860954
   classDef securityNode fill:#dc2626,color:#fff

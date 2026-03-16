@@ -168,7 +168,19 @@ Only load the reference files you need. Keep the final result concise, grounded,
 - Push boundaries with practical alternatives when simple recipes fail.
 - Enable outcomes-oriented problem solving.
 
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[security-best-practices]] | Run after threat modeling to get language-specific remediation guidance |
+| [[security-ownership-map]] | Use to identify which engineers are responsible for the highest-risk code areas |
+| [[recon-workbench]] | When authorized recon evidence is needed to ground the threat model |
+| [[architecture-interview]] | When the system design is still unclear — clarify before threat modeling |
+
+**Topic map:** [[security-ops]]
+
 <!-- decision-feedback-protocol:v2 -->
+
 **Decision feedback protocol (required):**
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.
 - Capture: `decision` (`accepted|partial|rejected|deferred`), `outcome` (`good|neutral|bad|unknown`), and `confidence` (`high|medium|low`).

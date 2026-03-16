@@ -1,5 +1,5 @@
 {
-  "rootPath": ".",
+  "rootPath": "/Users/jamiecraik/dev/Agent-Skills",
   "components": [
     {
       "name": "condition-based-waiting-example",
@@ -11,6 +11,18 @@
         "database"
       ],
       "directory": "utilities/systematic-debugging",
+      "dependencies": []
+    },
+    {
+      "name": "condition-based-waiting-example_1",
+      "originalName": "condition-based-waiting-example",
+      "filePath": "skills-antigravity/systematic-debugging/condition-based-waiting-example.ts",
+      "type": "function",
+      "imports": [],
+      "roleTags": [
+        "database"
+      ],
+      "directory": "skills-antigravity/systematic-debugging",
       "dependencies": []
     },
     {
@@ -64,132 +76,88 @@
       "dependencies": []
     },
     {
-      "name": "types",
-      "originalName": "types",
-      "filePath": "github/automate-github-issues/scripts/types.ts",
+      "name": "api-error-envelope",
+      "originalName": "api-error-envelope",
+      "filePath": "skills-antigravity/ui-ux-creative-coding/assets/api-error-envelope.ts",
       "type": "module",
-      "imports": [],
-      "roleTags": [
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/scripts",
-      "dependencies": []
-    },
-    {
-      "name": "fleet-plan",
-      "originalName": "fleet-plan",
-      "filePath": "github/automate-github-issues/scripts/fleet-plan.ts",
-      "type": "file",
       "imports": [
         {
-          "path": "@google/jules-sdk",
-          "line": 15
-        },
-        {
-          "path": "./prompts/analyze-issues.js",
-          "line": 16
-        },
-        {
-          "path": "./github/markdown.js",
-          "line": 17
-        },
-        {
-          "path": "./github/git.js",
-          "line": 18
+          "path": "zod",
+          "line": 1
         }
       ],
       "roleTags": [
-        "integrations"
+        "user"
       ],
-      "directory": "github/automate-github-issues/scripts",
-      "dependencies": []
-    },
-    {
-      "name": "fleet-merge",
-      "originalName": "fleet-merge",
-      "filePath": "github/automate-github-issues/scripts/fleet-merge.ts",
-      "type": "file",
-      "imports": [
-        {
-          "path": "node:path",
-          "line": 15
-        },
-        {
-          "path": "node:fs/promises",
-          "line": 16
-        },
-        {
-          "path": "find-up",
-          "line": 17
-        },
-        {
-          "path": "./github/git.js",
-          "line": 19
-        },
-        {
-          "path": "@google/jules-sdk",
-          "line": 20
-        }
-      ],
-      "roleTags": [
-        "user",
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/scripts",
-      "dependencies": []
-    },
-    {
-      "name": "fleet-dispatch",
-      "originalName": "fleet-dispatch",
-      "filePath": "github/automate-github-issues/scripts/fleet-dispatch.ts",
-      "type": "file",
-      "imports": [
-        {
-          "path": "node:path",
-          "line": 15
-        },
-        {
-          "path": "node:fs/promises",
-          "line": 16
-        },
-        {
-          "path": "find-up",
-          "line": 17
-        },
-        {
-          "path": "@google/jules-sdk",
-          "line": 19
-        },
-        {
-          "path": "./github/git.js",
-          "line": 20
-        }
-      ],
-      "roleTags": [
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/scripts",
-      "dependencies": []
-    },
-    {
-      "name": "fleet-analyze",
-      "originalName": "fleet-analyze",
-      "filePath": "github/automate-github-issues/scripts/fleet-analyze.ts",
-      "type": "file",
-      "imports": [
-        {
-          "path": "./github/markdown.js",
-          "line": 15
-        }
-      ],
-      "roleTags": [
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/scripts",
+      "directory": "skills-antigravity/ui-ux-creative-coding/assets",
       "dependencies": []
     },
     {
       "name": "tool-template",
+      "originalName": "tool-template",
+      "filePath": "skills-antigravity/workers-mcp/assets/tool-template.ts",
+      "type": "module",
+      "imports": [],
+      "roleTags": [
+        "auth",
+        "database",
+        "security"
+      ],
+      "directory": "skills-antigravity/workers-mcp/assets",
+      "dependencies": []
+    },
+    {
+      "name": "render_1",
+      "originalName": "render",
+      "filePath": "skills-antigravity/beautiful-mermaid/scripts/render.ts",
+      "type": "file",
+      "imports": [
+        {
+          "path": "node:fs",
+          "line": 18
+        },
+        {
+          "path": "node:path",
+          "line": 19
+        },
+        {
+          "path": "node:child_process",
+          "line": 161
+        },
+        {
+          "path": "node:child_process",
+          "line": 167
+        }
+      ],
+      "roleTags": [
+        "general"
+      ],
+      "directory": "skills-antigravity/beautiful-mermaid/scripts",
+      "dependencies": []
+    },
+    {
+      "name": "create-html_1",
+      "originalName": "create-html",
+      "filePath": "skills-antigravity/beautiful-mermaid/scripts/create-html.ts",
+      "type": "file",
+      "imports": [
+        {
+          "path": "node:fs",
+          "line": 15
+        },
+        {
+          "path": "node:path",
+          "line": 16
+        }
+      ],
+      "roleTags": [
+        "general"
+      ],
+      "directory": "skills-antigravity/beautiful-mermaid/scripts",
+      "dependencies": []
+    },
+    {
+      "name": "tool-template_1",
       "originalName": "tool-template",
       "filePath": "backend/workers-mcp/assets/tool-template.ts",
       "type": "module",
@@ -203,9 +171,9 @@
       "dependencies": []
     },
     {
-      "name": "api-error-envelope",
+      "name": "api-error-envelope_1",
       "originalName": "api-error-envelope",
-      "filePath": "product/design/ui-ux-creative-coding/assets/api-error-envelope.ts",
+      "filePath": "frontend/ui/ui-ux-creative-coding/assets/api-error-envelope.ts",
       "type": "module",
       "imports": [
         {
@@ -216,2114 +184,3341 @@
       "roleTags": [
         "user"
       ],
-      "directory": "product/design/ui-ux-creative-coding/assets",
+      "directory": "frontend/ui/ui-ux-creative-coding/assets",
       "dependencies": []
     },
     {
-      "name": "bootstrap",
-      "originalName": "bootstrap",
-      "filePath": "github/automate-github-issues/scripts/prompts/bootstrap.ts",
-      "type": "module",
+      "name": "storybook-story",
+      "originalName": "storybook-story",
+      "filePath": "skills-antigravity/ui-ux-creative-coding/assets/storybook-story.tsx",
+      "type": "component",
       "imports": [
         {
-          "path": "./analyze-issues.js",
-          "line": 16
-        },
-        {
-          "path": "../github/git.js",
-          "line": 17
-        }
-      ],
-      "roleTags": [
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/scripts/prompts",
-      "dependencies": []
-    },
-    {
-      "name": "analyze-issues",
-      "originalName": "analyze-issues",
-      "filePath": "github/automate-github-issues/scripts/prompts/analyze-issues.ts",
-      "type": "function",
-      "imports": [],
-      "roleTags": [
-        "auth",
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/scripts/prompts",
-      "dependencies": []
-    },
-    {
-      "name": "markdown",
-      "originalName": "markdown",
-      "filePath": "github/automate-github-issues/scripts/github/markdown.ts",
-      "type": "module",
-      "imports": [
-        {
-          "path": "./issues.js",
-          "line": 15
-        },
-        {
-          "path": "./git.js",
-          "line": 16
-        }
-      ],
-      "roleTags": [
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/scripts/github",
-      "dependencies": []
-    },
-    {
-      "name": "issues",
-      "originalName": "issues",
-      "filePath": "github/automate-github-issues/scripts/github/issues.ts",
-      "type": "module",
-      "imports": [
-        {
-          "path": "octokit",
-          "line": 15
-        },
-        {
-          "path": "./cache-plugin.js",
-          "line": 16
-        },
-        {
-          "path": "./git.js",
-          "line": 17
-        }
-      ],
-      "roleTags": [
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/scripts/github",
-      "dependencies": []
-    },
-    {
-      "name": "git",
-      "originalName": "git",
-      "filePath": "github/automate-github-issues/scripts/github/git.ts",
-      "type": "function",
-      "imports": [
-        {
-          "path": "node:fs/promises",
-          "line": 15
-        },
-        {
-          "path": "node:path",
-          "line": 16
-        }
-      ],
-      "roleTags": [
-        "database",
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/scripts/github",
-      "dependencies": []
-    },
-    {
-      "name": "cache-plugin",
-      "originalName": "cache-plugin",
-      "filePath": "github/automate-github-issues/scripts/github/cache-plugin.ts",
-      "type": "function",
-      "imports": [],
-      "roleTags": [
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/scripts/github",
-      "dependencies": []
-    },
-    {
-      "name": "index.d",
-      "originalName": "index.d",
-      "filePath": "github/automate-github-issues/node_modules/zod/index.d.ts",
-      "type": "module",
-      "imports": [
-        {
-          "path": "./v3/external.js",
-          "line": 1
-        }
-      ],
-      "roleTags": [
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/node_modules/zod",
-      "dependencies": []
-    },
-    {
-      "name": "index.d_1",
-      "originalName": "index.d",
-      "filePath": "github/automate-github-issues/node_modules/unicorn-magic/index.d.ts",
-      "type": "function",
-      "imports": [
-        {
-          "path": "unicorn-magic",
-          "line": 6
-        },
-        {
-          "path": "node:path",
-          "line": 22
-        },
-        {
-          "path": "unicorn-magic",
-          "line": 23
-        }
-      ],
-      "roleTags": [
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/node_modules/unicorn-magic",
-      "dependencies": []
-    },
-    {
-      "name": "internals.d",
-      "originalName": "internals.d",
-      "filePath": "github/automate-github-issues/node_modules/universal-github-app-jwt/internals.d.ts",
-      "type": "module",
-      "imports": [],
-      "roleTags": [
-        "auth",
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/node_modules/universal-github-app-jwt",
-      "dependencies": []
-    },
-    {
-      "name": "index.test-d",
-      "originalName": "index.test-d",
-      "filePath": "github/automate-github-issues/node_modules/universal-github-app-jwt/index.test-d.ts",
-      "type": "module",
-      "imports": [
-        {
-          "path": "tsd",
-          "line": 1
-        },
-        {
-          "path": ".",
+          "path": "@storybook/test",
           "line": 2
-        }
-      ],
-      "roleTags": [
-        "auth",
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/node_modules/universal-github-app-jwt",
-      "dependencies": []
-    },
-    {
-      "name": "index.d_2",
-      "originalName": "index.d",
-      "filePath": "github/automate-github-issues/node_modules/universal-github-app-jwt/index.d.ts",
-      "type": "function",
-      "imports": [],
-      "roleTags": [
-        "auth",
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/node_modules/universal-github-app-jwt",
-      "dependencies": []
-    },
-    {
-      "name": "index.test-d_1",
-      "originalName": "index.test-d",
-      "filePath": "github/automate-github-issues/node_modules/universal-user-agent/index.test-d.ts",
-      "type": "file",
-      "imports": [
-        {
-          "path": "tsd",
-          "line": 1
         },
         {
-          "path": "./index.js",
+          "path": "./my-component",
           "line": 3
         }
       ],
       "roleTags": [
-        "integrations"
+        "user"
       ],
-      "directory": "github/automate-github-issues/node_modules/universal-user-agent",
+      "directory": "skills-antigravity/ui-ux-creative-coding/assets",
       "dependencies": []
     },
     {
-      "name": "index.d_3",
-      "originalName": "index.d",
-      "filePath": "github/automate-github-issues/node_modules/universal-user-agent/index.d.ts",
-      "type": "function",
-      "imports": [],
-      "roleTags": [
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/node_modules/universal-user-agent",
-      "dependencies": []
-    },
-    {
-      "name": "websocket.d",
-      "originalName": "websocket.d",
-      "filePath": "github/automate-github-issues/node_modules/undici-types/websocket.d.ts",
-      "type": "module",
+      "name": "radix-wrapper",
+      "originalName": "radix-wrapper",
+      "filePath": "skills-antigravity/ui-ux-creative-coding/assets/radix-wrapper.tsx",
+      "type": "component",
       "imports": [
         {
-          "path": "./dispatcher",
+          "path": "react",
+          "line": 1
+        }
+      ],
+      "roleTags": [
+        "user",
+        "events"
+      ],
+      "directory": "skills-antigravity/ui-ux-creative-coding/assets",
+      "dependencies": []
+    },
+    {
+      "name": "screen-slide-template",
+      "originalName": "screen-slide-template",
+      "filePath": "skills-antigravity/stitch-remotion/resources/screen-slide-template.tsx",
+      "type": "component",
+      "imports": [
+        {
+          "path": "remotion",
+          "line": 1
+        },
+        {
+          "path": "remotion",
+          "line": 2
+        }
+      ],
+      "roleTags": [
+        "general"
+      ],
+      "directory": "skills-antigravity/stitch-remotion/resources",
+      "dependencies": []
+    },
+    {
+      "name": "WalkthroughComposition",
+      "originalName": "WalkthroughComposition",
+      "filePath": "skills-antigravity/stitch-remotion/examples/WalkthroughComposition.tsx",
+      "type": "component",
+      "imports": [
+        {
+          "path": "react",
+          "line": 1
+        },
+        {
+          "path": "remotion",
+          "line": 2
+        },
+        {
+          "path": "@remotion/transitions/fade",
+          "line": 3
+        },
+        {
+          "path": "@remotion/transitions/slide",
+          "line": 4
+        },
+        {
+          "path": "@remotion/transitions",
+          "line": 5
+        },
+        {
+          "path": "./ScreenSlide",
+          "line": 6
+        },
+        {
+          "path": "../screens.json",
+          "line": 7
+        }
+      ],
+      "roleTags": [
+        "general"
+      ],
+      "directory": "skills-antigravity/stitch-remotion/examples",
+      "dependencies": []
+    },
+    {
+      "name": "component-template",
+      "originalName": "component-template",
+      "filePath": "skills-antigravity/stitch-react-components/resources/component-template.tsx",
+      "type": "component",
+      "imports": [
+        {
+          "path": "react",
+          "line": 17
+        }
+      ],
+      "roleTags": [
+        "general"
+      ],
+      "directory": "skills-antigravity/stitch-react-components/resources",
+      "dependencies": []
+    },
+    {
+      "name": "gold-standard-card",
+      "originalName": "gold-standard-card",
+      "filePath": "skills-antigravity/stitch-react-components/examples/gold-standard-card.tsx",
+      "type": "component",
+      "imports": [
+        {
+          "path": "react",
+          "line": 17
+        },
+        {
+          "path": "../data/mockData",
+          "line": 20
+        }
+      ],
+      "roleTags": [
+        "database"
+      ],
+      "directory": "skills-antigravity/stitch-react-components/examples",
+      "dependencies": []
+    },
+    {
+      "name": "form-pattern",
+      "originalName": "form-pattern",
+      "filePath": "skills-antigravity/shadcn-ui/examples/form-pattern.tsx",
+      "type": "component",
+      "imports": [
+        {
+          "path": "@/components/ui/button",
+          "line": 6
+        },
+        {
+          "path": "@/components/ui/input",
+          "line": 16
+        },
+        {
+          "path": "@/components/ui/textarea",
+          "line": 24
+        },
+        {
+          "path": "@/components/ui/use-toast",
+          "line": 25
+        },
+        {
+          "path": "@hookform/resolvers/zod",
+          "line": 26
+        },
+        {
+          "path": "react-hook-form",
+          "line": 27
+        },
+        {
+          "path": "zod",
+          "line": 28
+        }
+      ],
+      "roleTags": [
+        "user"
+      ],
+      "directory": "skills-antigravity/shadcn-ui/examples",
+      "dependencies": []
+    },
+    {
+      "name": "data-table",
+      "originalName": "data-table",
+      "filePath": "skills-antigravity/shadcn-ui/examples/data-table.tsx",
+      "type": "component",
+      "imports": [
+        {
+          "path": "lucide-react",
+          "line": 17
+        },
+        {
+          "path": "react",
+          "line": 18
+        },
+        {
+          "path": "@/components/ui/button",
+          "line": 20
+        },
+        {
+          "path": "@/components/ui/input",
+          "line": 30
+        }
+      ],
+      "roleTags": [
+        "user",
+        "database"
+      ],
+      "directory": "skills-antigravity/shadcn-ui/examples",
+      "dependencies": []
+    },
+    {
+      "name": "auth-layout",
+      "originalName": "auth-layout",
+      "filePath": "skills-antigravity/shadcn-ui/examples/auth-layout.tsx",
+      "type": "component",
+      "imports": [
+        {
+          "path": "@/components/ui/button",
+          "line": 6
+        },
+        {
+          "path": "@/components/ui/input",
+          "line": 15
+        },
+        {
+          "path": "@/components/ui/label",
+          "line": 16
+        },
+        {
+          "path": "@/components/ui/tabs",
+          "line": 17
+        },
+        {
+          "path": "react",
+          "line": 18
+        }
+      ],
+      "roleTags": [
+        "user",
+        "auth"
+      ],
+      "directory": "skills-antigravity/shadcn-ui/examples",
+      "dependencies": []
+    },
+    {
+      "name": "component-template_1",
+      "originalName": "component-template",
+      "filePath": "frontend/stitch-react-components/resources/component-template.tsx",
+      "type": "component",
+      "imports": [
+        {
+          "path": "react",
+          "line": 17
+        }
+      ],
+      "roleTags": [
+        "user"
+      ],
+      "directory": "frontend/stitch-react-components/resources",
+      "dependencies": []
+    },
+    {
+      "name": "gold-standard-card_1",
+      "originalName": "gold-standard-card",
+      "filePath": "frontend/stitch-react-components/examples/gold-standard-card.tsx",
+      "type": "component",
+      "imports": [
+        {
+          "path": "react",
+          "line": 17
+        },
+        {
+          "path": "../data/mockData",
+          "line": 20
+        }
+      ],
+      "roleTags": [
+        "user",
+        "database"
+      ],
+      "directory": "frontend/stitch-react-components/examples",
+      "dependencies": []
+    },
+    {
+      "name": "text-animations-word-highlight",
+      "originalName": "text-animations-word-highlight",
+      "filePath": "skills-antigravity/remotion/rules/assets/text-animations-word-highlight.tsx",
+      "type": "component",
+      "imports": [
+        {
+          "path": "@remotion/google-fonts/Inter",
+          "line": 1
+        },
+        {
+          "path": "react",
+          "line": 2
+        }
+      ],
+      "roleTags": [
+        "general"
+      ],
+      "directory": "skills-antigravity/remotion/rules/assets",
+      "dependencies": []
+    },
+    {
+      "name": "text-animations-typewriter",
+      "originalName": "text-animations-typewriter",
+      "filePath": "skills-antigravity/remotion/rules/assets/text-animations-typewriter.tsx",
+      "type": "component",
+      "imports": [],
+      "roleTags": [
+        "general"
+      ],
+      "directory": "skills-antigravity/remotion/rules/assets",
+      "dependencies": []
+    },
+    {
+      "name": "charts-bar-chart",
+      "originalName": "charts-bar-chart",
+      "filePath": "skills-antigravity/remotion/rules/assets/charts-bar-chart.tsx",
+      "type": "component",
+      "imports": [
+        {
+          "path": "@remotion/google-fonts/Inter",
+          "line": 1
+        },
+        {
+          "path": "remotion",
+          "line": 2
+        }
+      ],
+      "roleTags": [
+        "general"
+      ],
+      "directory": "skills-antigravity/remotion/rules/assets",
+      "dependencies": []
+    },
+    {
+      "name": "storybook-story_1",
+      "originalName": "storybook-story",
+      "filePath": "frontend/ui/ui-ux-creative-coding/assets/storybook-story.tsx",
+      "type": "component",
+      "imports": [
+        {
+          "path": "@storybook/test",
+          "line": 2
+        },
+        {
+          "path": "./my-component",
+          "line": 3
+        }
+      ],
+      "roleTags": [
+        "user"
+      ],
+      "directory": "frontend/ui/ui-ux-creative-coding/assets",
+      "dependencies": []
+    },
+    {
+      "name": "radix-wrapper_1",
+      "originalName": "radix-wrapper",
+      "filePath": "frontend/ui/ui-ux-creative-coding/assets/radix-wrapper.tsx",
+      "type": "component",
+      "imports": [
+        {
+          "path": "react",
+          "line": 1
+        }
+      ],
+      "roleTags": [
+        "user",
+        "events"
+      ],
+      "directory": "frontend/ui/ui-ux-creative-coding/assets",
+      "dependencies": []
+    },
+    {
+      "name": "screen-slide-template_1",
+      "originalName": "screen-slide-template",
+      "filePath": "frontend/ui/stitch-remotion/resources/screen-slide-template.tsx",
+      "type": "component",
+      "imports": [
+        {
+          "path": "remotion",
+          "line": 1
+        },
+        {
+          "path": "remotion",
+          "line": 2
+        }
+      ],
+      "roleTags": [
+        "user"
+      ],
+      "directory": "frontend/ui/stitch-remotion/resources",
+      "dependencies": []
+    },
+    {
+      "name": "WalkthroughComposition_1",
+      "originalName": "WalkthroughComposition",
+      "filePath": "frontend/ui/stitch-remotion/examples/WalkthroughComposition.tsx",
+      "type": "component",
+      "imports": [
+        {
+          "path": "react",
+          "line": 1
+        },
+        {
+          "path": "remotion",
+          "line": 2
+        },
+        {
+          "path": "@remotion/transitions/fade",
+          "line": 3
+        },
+        {
+          "path": "@remotion/transitions/slide",
+          "line": 4
+        },
+        {
+          "path": "@remotion/transitions",
+          "line": 5
+        },
+        {
+          "path": "./ScreenSlide",
+          "line": 6
+        },
+        {
+          "path": "../screens.json",
+          "line": 7
+        }
+      ],
+      "roleTags": [
+        "user"
+      ],
+      "directory": "frontend/ui/stitch-remotion/examples",
+      "dependencies": []
+    },
+    {
+      "name": "form-pattern_1",
+      "originalName": "form-pattern",
+      "filePath": "frontend/ui/shadcn-ui/examples/form-pattern.tsx",
+      "type": "component",
+      "imports": [
+        {
+          "path": "@/components/ui/button",
+          "line": 6
+        },
+        {
+          "path": "@/components/ui/input",
+          "line": 16
+        },
+        {
+          "path": "@/components/ui/textarea",
+          "line": 24
+        },
+        {
+          "path": "@/components/ui/use-toast",
+          "line": 25
+        },
+        {
+          "path": "@hookform/resolvers/zod",
+          "line": 26
+        },
+        {
+          "path": "react-hook-form",
+          "line": 27
+        },
+        {
+          "path": "zod",
+          "line": 28
+        }
+      ],
+      "roleTags": [
+        "user"
+      ],
+      "directory": "frontend/ui/shadcn-ui/examples",
+      "dependencies": []
+    },
+    {
+      "name": "data-table_1",
+      "originalName": "data-table",
+      "filePath": "frontend/ui/shadcn-ui/examples/data-table.tsx",
+      "type": "component",
+      "imports": [
+        {
+          "path": "lucide-react",
+          "line": 17
+        },
+        {
+          "path": "react",
+          "line": 18
+        },
+        {
+          "path": "@/components/ui/button",
+          "line": 20
+        },
+        {
+          "path": "@/components/ui/input",
+          "line": 30
+        }
+      ],
+      "roleTags": [
+        "user",
+        "database"
+      ],
+      "directory": "frontend/ui/shadcn-ui/examples",
+      "dependencies": []
+    },
+    {
+      "name": "auth-layout_1",
+      "originalName": "auth-layout",
+      "filePath": "frontend/ui/shadcn-ui/examples/auth-layout.tsx",
+      "type": "component",
+      "imports": [
+        {
+          "path": "@/components/ui/button",
+          "line": 6
+        },
+        {
+          "path": "@/components/ui/input",
+          "line": 15
+        },
+        {
+          "path": "@/components/ui/label",
+          "line": 16
+        },
+        {
+          "path": "@/components/ui/tabs",
+          "line": 17
+        },
+        {
+          "path": "react",
+          "line": 18
+        }
+      ],
+      "roleTags": [
+        "user",
+        "auth"
+      ],
+      "directory": "frontend/ui/shadcn-ui/examples",
+      "dependencies": []
+    },
+    {
+      "name": "text-animations-word-highlight_1",
+      "originalName": "text-animations-word-highlight",
+      "filePath": "frontend/ui/remotion/rules/assets/text-animations-word-highlight.tsx",
+      "type": "component",
+      "imports": [
+        {
+          "path": "@remotion/google-fonts/Inter",
+          "line": 1
+        },
+        {
+          "path": "react",
+          "line": 2
+        }
+      ],
+      "roleTags": [
+        "user"
+      ],
+      "directory": "frontend/ui/remotion/rules/assets",
+      "dependencies": []
+    },
+    {
+      "name": "text-animations-typewriter_1",
+      "originalName": "text-animations-typewriter",
+      "filePath": "frontend/ui/remotion/rules/assets/text-animations-typewriter.tsx",
+      "type": "component",
+      "imports": [],
+      "roleTags": [
+        "user"
+      ],
+      "directory": "frontend/ui/remotion/rules/assets",
+      "dependencies": []
+    },
+    {
+      "name": "charts-bar-chart_1",
+      "originalName": "charts-bar-chart",
+      "filePath": "frontend/ui/remotion/rules/assets/charts-bar-chart.tsx",
+      "type": "component",
+      "imports": [
+        {
+          "path": "@remotion/google-fonts/Inter",
+          "line": 1
+        },
+        {
+          "path": "remotion",
+          "line": 2
+        }
+      ],
+      "roleTags": [
+        "user"
+      ],
+      "directory": "frontend/ui/remotion/rules/assets",
+      "dependencies": []
+    },
+    {
+      "name": "validate-commit-msg",
+      "originalName": "validate-commit-msg",
+      "filePath": "scripts/validate-commit-msg.js",
+      "type": "file",
+      "imports": [
+        {
+          "path": "node:child_process",
           "line": 11
         },
         {
-          "path": "./fetch",
+          "path": "node:fs",
           "line": 12
         }
       ],
       "roleTags": [
-        "integrations"
+        "general"
       ],
-      "directory": "github/automate-github-issues/node_modules/undici-types",
+      "directory": "scripts",
       "dependencies": []
     },
     {
-      "name": "webidl.d",
-      "originalName": "webidl.d",
-      "filePath": "github/automate-github-issues/node_modules/undici-types/webidl.d.ts",
-      "type": "module",
-      "imports": [],
-      "roleTags": [
-        "database",
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/node_modules/undici-types",
-      "dependencies": []
-    },
-    {
-      "name": "util.d",
-      "originalName": "util.d",
-      "filePath": "github/automate-github-issues/node_modules/undici-types/util.d.ts",
-      "type": "function",
-      "imports": [],
-      "roleTags": [
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/node_modules/undici-types",
-      "dependencies": []
-    },
-    {
-      "name": "retry-handler.d",
-      "originalName": "retry-handler.d",
-      "filePath": "github/automate-github-issues/node_modules/undici-types/retry-handler.d.ts",
-      "type": "module",
-      "imports": [
-        {
-          "path": "./dispatcher",
-          "line": 1
-        }
-      ],
-      "roleTags": [
-        "user",
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/node_modules/undici-types",
-      "dependencies": []
-    },
-    {
-      "name": "retry-agent.d",
-      "originalName": "retry-agent.d",
-      "filePath": "github/automate-github-issues/node_modules/undici-types/retry-agent.d.ts",
-      "type": "class",
-      "imports": [
-        {
-          "path": "./dispatcher",
-          "line": 1
-        },
-        {
-          "path": "./retry-handler",
-          "line": 2
-        }
-      ],
-      "roleTags": [
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/node_modules/undici-types",
-      "dependencies": []
-    },
-    {
-      "name": "readable.d",
-      "originalName": "readable.d",
-      "filePath": "github/automate-github-issues/node_modules/undici-types/readable.d.ts",
-      "type": "class",
-      "imports": [
-        {
-          "path": "stream",
-          "line": 1
-        },
-        {
-          "path": "buffer",
-          "line": 2
-        }
-      ],
-      "roleTags": [
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/node_modules/undici-types",
-      "dependencies": []
-    },
-    {
-      "name": "proxy-agent.d",
-      "originalName": "proxy-agent.d",
-      "filePath": "github/automate-github-issues/node_modules/undici-types/proxy-agent.d.ts",
-      "type": "class",
-      "imports": [
-        {
-          "path": "./agent",
-          "line": 1
-        },
-        {
-          "path": "./connector",
-          "line": 2
-        },
-        {
-          "path": "./dispatcher",
-          "line": 3
-        },
-        {
-          "path": "./header",
-          "line": 4
-        }
-      ],
-      "roleTags": [
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/node_modules/undici-types",
-      "dependencies": []
-    },
-    {
-      "name": "pool.d",
-      "originalName": "pool.d",
-      "filePath": "github/automate-github-issues/node_modules/undici-types/pool.d.ts",
-      "type": "class",
-      "imports": [
-        {
-          "path": "./client",
-          "line": 1
-        },
-        {
-          "path": "./pool-stats",
-          "line": 2
-        },
-        {
-          "path": "url",
-          "line": 3
-        },
-        {
-          "path": "./dispatcher",
-          "line": 4
-        }
-      ],
-      "roleTags": [
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/node_modules/undici-types",
-      "dependencies": []
-    },
-    {
-      "name": "pool-stats.d",
-      "originalName": "pool-stats.d",
-      "filePath": "github/automate-github-issues/node_modules/undici-types/pool-stats.d.ts",
-      "type": "module",
-      "imports": [
-        {
-          "path": "./pool",
-          "line": 1
-        }
-      ],
-      "roleTags": [
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/node_modules/undici-types",
-      "dependencies": []
-    },
-    {
-      "name": "patch.d",
-      "originalName": "patch.d",
-      "filePath": "github/automate-github-issues/node_modules/undici-types/patch.d.ts",
-      "type": "module",
-      "imports": [],
-      "roleTags": [
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/node_modules/undici-types",
-      "dependencies": []
-    },
-    {
-      "name": "mock-pool.d",
-      "originalName": "mock-pool.d",
-      "filePath": "github/automate-github-issues/node_modules/undici-types/mock-pool.d.ts",
-      "type": "class",
-      "imports": [
-        {
-          "path": "./pool",
-          "line": 1
-        },
-        {
-          "path": "./mock-agent",
-          "line": 2
-        },
-        {
-          "path": "./mock-interceptor",
-          "line": 3
-        },
-        {
-          "path": "./dispatcher",
-          "line": 4
-        }
-      ],
-      "roleTags": [
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/node_modules/undici-types",
-      "dependencies": []
-    },
-    {
-      "name": "mock-interceptor.d",
-      "originalName": "mock-interceptor.d",
-      "filePath": "github/automate-github-issues/node_modules/undici-types/mock-interceptor.d.ts",
-      "type": "class",
-      "imports": [
-        {
-          "path": "./header",
-          "line": 1
-        },
-        {
-          "path": "./dispatcher",
-          "line": 2
-        },
-        {
-          "path": "./fetch",
-          "line": 3
-        }
-      ],
-      "roleTags": [
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/node_modules/undici-types",
-      "dependencies": []
-    },
-    {
-      "name": "mock-errors.d",
-      "originalName": "mock-errors.d",
-      "filePath": "github/automate-github-issues/node_modules/undici-types/mock-errors.d.ts",
-      "type": "class",
-      "imports": [
-        {
-          "path": "./errors",
-          "line": 1
-        }
-      ],
-      "roleTags": [
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/node_modules/undici-types",
-      "dependencies": []
-    },
-    {
-      "name": "mock-client.d",
-      "originalName": "mock-client.d",
-      "filePath": "github/automate-github-issues/node_modules/undici-types/mock-client.d.ts",
-      "type": "class",
-      "imports": [
-        {
-          "path": "./client",
-          "line": 1
-        },
-        {
-          "path": "./dispatcher",
-          "line": 2
-        },
-        {
-          "path": "./mock-agent",
-          "line": 3
-        },
-        {
-          "path": "./mock-interceptor",
-          "line": 4
-        }
-      ],
-      "roleTags": [
-        "user",
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/node_modules/undici-types",
-      "dependencies": []
-    },
-    {
-      "name": "mock-agent.d",
-      "originalName": "mock-agent.d",
-      "filePath": "github/automate-github-issues/node_modules/undici-types/mock-agent.d.ts",
-      "type": "class",
-      "imports": [
-        {
-          "path": "./agent",
-          "line": 1
-        },
-        {
-          "path": "./dispatcher",
-          "line": 2
-        },
-        {
-          "path": "./mock-interceptor",
-          "line": 3
-        }
-      ],
-      "roleTags": [
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/node_modules/undici-types",
-      "dependencies": []
-    },
-    {
-      "name": "interceptors.d",
-      "originalName": "interceptors.d",
-      "filePath": "github/automate-github-issues/node_modules/undici-types/interceptors.d.ts",
-      "type": "function",
-      "imports": [
-        {
-          "path": "./dispatcher",
-          "line": 1
-        },
-        {
-          "path": "./retry-handler",
-          "line": 2
-        }
-      ],
-      "roleTags": [
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/node_modules/undici-types",
-      "dependencies": []
-    },
-    {
-      "name": "index.d_4",
-      "originalName": "index.d",
-      "filePath": "github/automate-github-issues/node_modules/undici-types/index.d.ts",
-      "type": "module",
-      "imports": [
-        {
-          "path": "./global-dispatcher",
-          "line": 2
-        },
-        {
-          "path": "./global-origin",
-          "line": 3
-        },
-        {
-          "path": "./handlers",
-          "line": 5
-        },
-        {
-          "path": "./balanced-pool",
-          "line": 7
-        },
-        {
-          "path": "./env-http-proxy-agent",
-          "line": 17
-        },
-        {
-          "path": "./api",
-          "line": 20
-        },
-        {
-          "path": "./interceptors",
-          "line": 21
-        },
-        {
-          "path": "./dispatcher",
-          "line": 40
-        },
-        {
-          "path": "./pool",
-          "line": 41
-        },
-        {
-          "path": "./handlers",
-          "line": 42
-        },
-        {
-          "path": "./handlers",
-          "line": 43
-        },
-        {
-          "path": "./retry-handler",
-          "line": 44
-        },
-        {
-          "path": "./interceptors",
-          "line": 45
-        },
-        {
-          "path": "./balanced-pool",
-          "line": 46
-        },
-        {
-          "path": "./client",
-          "line": 47
-        },
-        {
-          "path": "./connector",
-          "line": 48
-        },
-        {
-          "path": "./errors",
-          "line": 49
-        },
-        {
-          "path": "./agent",
-          "line": 50
-        },
-        {
-          "path": "./global-dispatcher",
-          "line": 51
-        },
-        {
-          "path": "./global-dispatcher",
-          "line": 52
-        },
-        {
-          "path": "./api",
-          "line": 53
-        },
-        {
-          "path": "./api",
-          "line": 54
-        },
-        {
-          "path": "./api",
-          "line": 55
-        },
-        {
-          "path": "./api",
-          "line": 56
-        },
-        {
-          "path": "./api",
-          "line": 57
-        },
-        {
-          "path": "./mock-client",
-          "line": 58
-        },
-        {
-          "path": "./mock-pool",
-          "line": 59
-        },
-        {
-          "path": "./mock-agent",
-          "line": 60
-        },
-        {
-          "path": "./mock-errors",
-          "line": 61
-        },
-        {
-          "path": "./fetch",
-          "line": 62
-        },
-        {
-          "path": "./fetch",
-          "line": 63
-        },
-        {
-          "path": "./fetch",
-          "line": 64
-        },
-        {
-          "path": "./fetch",
-          "line": 65
-        },
-        {
-          "path": "./formdata",
-          "line": 66
-        },
-        {
-          "path": "./file",
-          "line": 67
-        },
-        {
-          "path": "./filereader",
-          "line": 68
-        },
-        {
-          "path": "./cache",
-          "line": 69
-        },
-        {
-          "path": "./interceptors",
-          "line": 70
-        }
-      ],
-      "roleTags": [
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/node_modules/undici-types",
-      "dependencies": []
-    },
-    {
-      "name": "header.d",
-      "originalName": "header.d",
-      "filePath": "github/automate-github-issues/node_modules/undici-types/header.d.ts",
-      "type": "module",
-      "imports": [],
-      "roleTags": [
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/node_modules/undici-types",
-      "dependencies": []
-    },
-    {
-      "name": "handlers.d",
-      "originalName": "handlers.d",
-      "filePath": "github/automate-github-issues/node_modules/undici-types/handlers.d.ts",
-      "type": "module",
-      "imports": [
-        {
-          "path": "./dispatcher",
-          "line": 1
-        }
-      ],
-      "roleTags": [
-        "user",
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/node_modules/undici-types",
-      "dependencies": []
-    },
-    {
-      "name": "global-origin.d",
-      "originalName": "global-origin.d",
-      "filePath": "github/automate-github-issues/node_modules/undici-types/global-origin.d.ts",
-      "type": "module",
-      "imports": [],
-      "roleTags": [
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/node_modules/undici-types",
-      "dependencies": []
-    },
-    {
-      "name": "global-dispatcher.d",
-      "originalName": "global-dispatcher.d",
-      "filePath": "github/automate-github-issues/node_modules/undici-types/global-dispatcher.d.ts",
-      "type": "module",
-      "imports": [
-        {
-          "path": "./dispatcher",
-          "line": 1
-        }
-      ],
-      "roleTags": [
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/node_modules/undici-types",
-      "dependencies": []
-    },
-    {
-      "name": "formdata.d",
-      "originalName": "formdata.d",
-      "filePath": "github/automate-github-issues/node_modules/undici-types/formdata.d.ts",
-      "type": "module",
-      "imports": [
-        {
-          "path": "./file",
-          "line": 4
-        },
-        {
-          "path": "./fetch",
-          "line": 5
-        }
-      ],
-      "roleTags": [
-        "user",
-        "database",
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/node_modules/undici-types",
-      "dependencies": []
-    },
-    {
-      "name": "filereader.d",
-      "originalName": "filereader.d",
-      "filePath": "github/automate-github-issues/node_modules/undici-types/filereader.d.ts",
-      "type": "class",
-      "imports": [
-        {
-          "path": "buffer",
-          "line": 3
-        },
-        {
-          "path": "./patch",
-          "line": 4
-        }
-      ],
-      "roleTags": [
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/node_modules/undici-types",
-      "dependencies": []
-    },
-    {
-      "name": "file.d",
-      "originalName": "file.d",
-      "filePath": "github/automate-github-issues/node_modules/undici-types/file.d.ts",
-      "type": "class",
-      "imports": [
-        {
-          "path": "buffer",
-          "line": 4
-        }
-      ],
-      "roleTags": [
-        "user",
-        "database",
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/node_modules/undici-types",
-      "dependencies": []
-    },
-    {
-      "name": "fetch.d",
-      "originalName": "fetch.d",
-      "filePath": "github/automate-github-issues/node_modules/undici-types/fetch.d.ts",
-      "type": "class",
-      "imports": [
-        {
-          "path": "buffer",
-          "line": 5
-        },
-        {
-          "path": "url",
-          "line": 6
-        },
-        {
-          "path": "stream/web",
-          "line": 7
-        },
-        {
-          "path": "./formdata",
-          "line": 8
-        },
-        {
-          "path": "./dispatcher",
-          "line": 10
-        },
-        {
-          "path": "@fastify/busboy",
-          "line": 42
-        },
-        {
-          "path": "node:stream",
-          "line": 43
-        }
-      ],
-      "roleTags": [
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/node_modules/undici-types",
-      "dependencies": []
-    },
-    {
-      "name": "eventsource.d",
-      "originalName": "eventsource.d",
-      "filePath": "github/automate-github-issues/node_modules/undici-types/eventsource.d.ts",
-      "type": "module",
-      "imports": [
-        {
-          "path": "./websocket",
-          "line": 1
-        },
-        {
-          "path": "./dispatcher",
-          "line": 2
-        }
-      ],
-      "roleTags": [
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/node_modules/undici-types",
-      "dependencies": []
-    },
-    {
-      "name": "errors.d",
-      "originalName": "errors.d",
-      "filePath": "github/automate-github-issues/node_modules/undici-types/errors.d.ts",
-      "type": "class",
-      "imports": [
-        {
-          "path": "./header",
-          "line": 1
-        },
-        {
-          "path": "./client",
-          "line": 2
-        }
-      ],
-      "roleTags": [
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/node_modules/undici-types",
-      "dependencies": []
-    },
-    {
-      "name": "env-http-proxy-agent.d",
-      "originalName": "env-http-proxy-agent.d",
-      "filePath": "github/automate-github-issues/node_modules/undici-types/env-http-proxy-agent.d.ts",
-      "type": "class",
-      "imports": [
-        {
-          "path": "./agent",
-          "line": 1
-        },
-        {
-          "path": "./dispatcher",
-          "line": 2
-        }
-      ],
-      "roleTags": [
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/node_modules/undici-types",
-      "dependencies": []
-    },
-    {
-      "name": "dispatcher.d",
-      "originalName": "dispatcher.d",
-      "filePath": "github/automate-github-issues/node_modules/undici-types/dispatcher.d.ts",
-      "type": "class",
-      "imports": [
-        {
-          "path": "url",
-          "line": 1
-        },
-        {
-          "path": "stream",
-          "line": 2
-        },
-        {
-          "path": "events",
-          "line": 3
-        },
-        {
-          "path": "buffer",
-          "line": 4
-        },
-        {
-          "path": "./header",
-          "line": 5
-        },
-        {
-          "path": "./readable",
-          "line": 6
-        },
-        {
-          "path": "./formdata",
-          "line": 7
-        },
-        {
-          "path": "./errors",
-          "line": 8
-        }
-      ],
-      "roleTags": [
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/node_modules/undici-types",
-      "dependencies": []
-    },
-    {
-      "name": "diagnostics-channel.d",
-      "originalName": "diagnostics-channel.d",
-      "filePath": "github/automate-github-issues/node_modules/undici-types/diagnostics-channel.d.ts",
-      "type": "module",
-      "imports": [
-        {
-          "path": "net",
-          "line": 1
-        },
-        {
-          "path": "url",
-          "line": 2
-        },
-        {
-          "path": "./connector",
-          "line": 3
-        },
-        {
-          "path": "./dispatcher",
-          "line": 4
-        }
-      ],
-      "roleTags": [
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/node_modules/undici-types",
-      "dependencies": []
-    },
-    {
-      "name": "cookies.d",
-      "originalName": "cookies.d",
-      "filePath": "github/automate-github-issues/node_modules/undici-types/cookies.d.ts",
-      "type": "function",
-      "imports": [],
-      "roleTags": [
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/node_modules/undici-types",
-      "dependencies": []
-    },
-    {
-      "name": "content-type.d",
-      "originalName": "content-type.d",
-      "filePath": "github/automate-github-issues/node_modules/undici-types/content-type.d.ts",
-      "type": "function",
-      "imports": [],
-      "roleTags": [
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/node_modules/undici-types",
-      "dependencies": []
-    },
-    {
-      "name": "connector.d",
-      "originalName": "connector.d",
-      "filePath": "github/automate-github-issues/node_modules/undici-types/connector.d.ts",
-      "type": "module",
-      "imports": [
-        {
-          "path": "tls",
-          "line": 1
-        },
-        {
-          "path": "net",
-          "line": 2
-        }
-      ],
-      "roleTags": [
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/node_modules/undici-types",
-      "dependencies": []
-    },
-    {
-      "name": "client.d",
-      "originalName": "client.d",
-      "filePath": "github/automate-github-issues/node_modules/undici-types/client.d.ts",
-      "type": "class",
-      "imports": [
-        {
-          "path": "url",
-          "line": 1
-        },
-        {
-          "path": "tls",
-          "line": 2
-        },
-        {
-          "path": "./dispatcher",
-          "line": 3
-        },
-        {
-          "path": "./connector",
-          "line": 4
-        }
-      ],
-      "roleTags": [
-        "user",
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/node_modules/undici-types",
-      "dependencies": []
-    },
-    {
-      "name": "cache.d",
-      "originalName": "cache.d",
-      "filePath": "github/automate-github-issues/node_modules/undici-types/cache.d.ts",
-      "type": "module",
-      "imports": [],
-      "roleTags": [
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/node_modules/undici-types",
-      "dependencies": []
-    },
-    {
-      "name": "balanced-pool.d",
-      "originalName": "balanced-pool.d",
-      "filePath": "github/automate-github-issues/node_modules/undici-types/balanced-pool.d.ts",
-      "type": "class",
-      "imports": [
-        {
-          "path": "./pool",
-          "line": 1
-        },
-        {
-          "path": "./dispatcher",
-          "line": 2
-        },
-        {
-          "path": "url",
-          "line": 3
-        }
-      ],
-      "roleTags": [
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/node_modules/undici-types",
-      "dependencies": []
-    },
-    {
-      "name": "api.d",
-      "originalName": "api.d",
-      "filePath": "github/automate-github-issues/node_modules/undici-types/api.d.ts",
-      "type": "module",
-      "imports": [
-        {
-          "path": "url",
-          "line": 1
-        },
-        {
-          "path": "stream",
-          "line": 2
-        },
-        {
-          "path": "./dispatcher",
-          "line": 3
-        }
-      ],
-      "roleTags": [
-        "user",
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/node_modules/undici-types",
-      "dependencies": []
-    },
-    {
-      "name": "agent.d",
-      "originalName": "agent.d",
-      "filePath": "github/automate-github-issues/node_modules/undici-types/agent.d.ts",
-      "type": "class",
-      "imports": [
-        {
-          "path": "url",
-          "line": 1
-        },
-        {
-          "path": "./pool",
-          "line": 2
-        },
-        {
-          "path": "./dispatcher",
-          "line": 3
-        }
-      ],
-      "roleTags": [
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/node_modules/undici-types",
-      "dependencies": []
-    },
-    {
-      "name": "index.d_5",
-      "originalName": "index.d",
-      "filePath": "github/automate-github-issues/node_modules/yocto-queue/index.d.ts",
-      "type": "module",
-      "imports": [
-        {
-          "path": "yocto-queue",
-          "line": 14
-        }
-      ],
-      "roleTags": [
-        "user",
-        "events",
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/node_modules/yocto-queue",
-      "dependencies": []
-    },
-    {
-      "name": "toad-cache.d",
-      "originalName": "toad-cache.d",
-      "filePath": "github/automate-github-issues/node_modules/toad-cache/toad-cache.d.ts",
-      "type": "class",
-      "imports": [],
-      "roleTags": [
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/node_modules/toad-cache",
-      "dependencies": []
-    },
-    {
-      "name": "index.d_6",
-      "originalName": "index.d",
-      "filePath": "github/automate-github-issues/node_modules/path-exists/index.d.ts",
-      "type": "function",
-      "imports": [
-        {
-          "path": "path-exists",
-          "line": 9
-        },
-        {
-          "path": "path-exists",
-          "line": 25
-        }
-      ],
-      "roleTags": [
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/node_modules/path-exists",
-      "dependencies": []
-    },
-    {
-      "name": "index.d_7",
-      "originalName": "index.d",
-      "filePath": "github/automate-github-issues/node_modules/p-locate/index.d.ts",
-      "type": "function",
-      "imports": [
-        {
-          "path": "path-exists",
-          "line": 30
-        },
-        {
-          "path": "p-locate",
-          "line": 31
-        }
-      ],
-      "roleTags": [
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/node_modules/p-locate",
-      "dependencies": []
-    },
-    {
-      "name": "index.d_8",
-      "originalName": "index.d",
-      "filePath": "github/automate-github-issues/node_modules/p-limit/index.d.ts",
-      "type": "function",
-      "imports": [],
-      "roleTags": [
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/node_modules/p-limit",
-      "dependencies": []
-    },
-    {
-      "name": "index.d_9",
-      "originalName": "index.d",
-      "filePath": "github/automate-github-issues/node_modules/locate-path/index.d.ts",
-      "type": "function",
-      "imports": [
-        {
-          "path": "locate-path",
-          "line": 52
-        },
-        {
-          "path": "locate-path",
-          "line": 77
-        }
-      ],
-      "roleTags": [
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/node_modules/locate-path",
-      "dependencies": []
-    },
-    {
-      "name": "index.d_10",
-      "originalName": "index.d",
-      "filePath": "github/automate-github-issues/node_modules/find-up/index.d.ts",
-      "type": "function",
-      "imports": [
-        {
-          "path": "locate-path",
-          "line": 1
-        },
-        {
-          "path": "find-up",
-          "line": 37
-        },
-        {
-          "path": "node:path",
-          "line": 56
-        },
-        {
-          "path": "find-up",
-          "line": 57
-        },
-        {
-          "path": "find-up",
-          "line": 86
-        },
-        {
-          "path": "node:path",
-          "line": 105
-        },
-        {
-          "path": "find-up",
-          "line": 106
-        },
-        {
-          "path": "find-up",
-          "line": 136
-        },
-        {
-          "path": "node:path",
-          "line": 155
-        },
-        {
-          "path": "find-up",
-          "line": 156
-        },
-        {
-          "path": "find-up",
-          "line": 186
-        },
-        {
-          "path": "node:path",
-          "line": 205
-        },
-        {
-          "path": "find-up",
-          "line": 206
-        },
-        {
-          "path": "find-up",
-          "line": 225
-        },
-        {
-          "path": "find-up",
-          "line": 241
-        }
-      ],
-      "roleTags": [
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/node_modules/find-up",
-      "dependencies": []
-    },
-    {
-      "name": "test",
-      "originalName": "test",
-      "filePath": "github/automate-github-issues/node_modules/bottleneck/test.ts",
+      "name": "setup-git-hooks",
+      "originalName": "setup-git-hooks",
+      "filePath": "scripts/setup-git-hooks.js",
       "type": "file",
       "imports": [
         {
-          "path": "bottleneck",
+          "path": "node:fs",
+          "line": 11
+        },
+        {
+          "path": "node:path",
+          "line": 12
+        }
+      ],
+      "roleTags": [
+        "general"
+      ],
+      "directory": "scripts",
+      "dependencies": []
+    },
+    {
+      "name": "vtd",
+      "originalName": "vtd",
+      "filePath": "skills-antigravity/video-transcript-downloader/scripts/vtd.js",
+      "type": "file",
+      "imports": [
+        {
+          "path": "node:child_process",
+          "line": 2
+        },
+        {
+          "path": "node:fs",
           "line": 3
         },
         {
-          "path": "assert",
+          "path": "node:os",
           "line": 4
-        }
-      ],
-      "roleTags": [
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/node_modules/bottleneck",
-      "dependencies": []
-    },
-    {
-      "name": "bottleneck.d",
-      "originalName": "bottleneck.d",
-      "filePath": "github/automate-github-issues/node_modules/bottleneck/bottleneck.d.ts",
-      "type": "class",
-      "imports": [
-        {
-          "path": "ioredis",
-          "line": 81
         },
         {
-          "path": "redis",
-          "line": 180
+          "path": "node:path",
+          "line": 5
         },
         {
-          "path": "ioredis",
-          "line": 199
-        }
-      ],
-      "roleTags": [
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/node_modules/bottleneck",
-      "dependencies": []
-    },
-    {
-      "name": "index.d_11",
-      "originalName": "index.d",
-      "filePath": "github/automate-github-issues/node_modules/before-after-hook/index.d.ts",
-      "type": "module",
-      "imports": [],
-      "roleTags": [
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/node_modules/before-after-hook",
-      "dependencies": []
-    },
-    {
-      "name": "fsevents.d",
-      "originalName": "fsevents.d",
-      "filePath": "github/automate-github-issues/node_modules/fsevents/fsevents.d.ts",
-      "type": "module",
-      "imports": [],
-      "roleTags": [
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/node_modules/fsevents",
-      "dependencies": []
-    },
-    {
-      "name": "utils.d",
-      "originalName": "utils.d",
-      "filePath": "utilities/video-transcript-downloader/node_modules/youtube-transcript-plus/dist/utils.d.ts",
-      "type": "module",
-      "imports": [
-        {
-          "path": "./types",
-          "line": 1
-        }
-      ],
-      "roleTags": [
-        "general"
-      ],
-      "directory": "utilities/video-transcript-downloader/node_modules/youtube-transcript-plus/dist",
-      "dependencies": []
-    },
-    {
-      "name": "types.d",
-      "originalName": "types.d",
-      "filePath": "utilities/video-transcript-downloader/node_modules/youtube-transcript-plus/dist/types.d.ts",
-      "type": "module",
-      "imports": [],
-      "roleTags": [
-        "general"
-      ],
-      "directory": "utilities/video-transcript-downloader/node_modules/youtube-transcript-plus/dist",
-      "dependencies": []
-    },
-    {
-      "name": "index.d_12",
-      "originalName": "index.d",
-      "filePath": "utilities/video-transcript-downloader/node_modules/youtube-transcript-plus/dist/index.d.ts",
-      "type": "module",
-      "imports": [
-        {
-          "path": "./types",
-          "line": 1
-        }
-      ],
-      "roleTags": [
-        "general"
-      ],
-      "directory": "utilities/video-transcript-downloader/node_modules/youtube-transcript-plus/dist",
-      "dependencies": []
-    },
-    {
-      "name": "errors.d_1",
-      "originalName": "errors.d",
-      "filePath": "utilities/video-transcript-downloader/node_modules/youtube-transcript-plus/dist/errors.d.ts",
-      "type": "class",
-      "imports": [],
-      "roleTags": [
-        "general"
-      ],
-      "directory": "utilities/video-transcript-downloader/node_modules/youtube-transcript-plus/dist",
-      "dependencies": []
-    },
-    {
-      "name": "constants.d",
-      "originalName": "constants.d",
-      "filePath": "utilities/video-transcript-downloader/node_modules/youtube-transcript-plus/dist/constants.d.ts",
-      "type": "module",
-      "imports": [],
-      "roleTags": [
-        "general"
-      ],
-      "directory": "utilities/video-transcript-downloader/node_modules/youtube-transcript-plus/dist",
-      "dependencies": []
-    },
-    {
-      "name": "visit.d",
-      "originalName": "visit.d",
-      "filePath": "github/automate-github-issues/node_modules/yaml/dist/visit.d.ts",
-      "type": "module",
-      "imports": [],
-      "roleTags": [
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/node_modules/yaml/dist",
-      "dependencies": []
-    },
-    {
-      "name": "util.d_1",
-      "originalName": "util.d",
-      "filePath": "github/automate-github-issues/node_modules/yaml/dist/util.d.ts",
-      "type": "module",
-      "imports": [],
-      "roleTags": [
-        "database",
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/node_modules/yaml/dist",
-      "dependencies": []
-    },
-    {
-      "name": "test-events.d",
-      "originalName": "test-events.d",
-      "filePath": "github/automate-github-issues/node_modules/yaml/dist/test-events.d.ts",
-      "type": "module",
-      "imports": [],
-      "roleTags": [
-        "events",
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/node_modules/yaml/dist",
-      "dependencies": []
-    },
-    {
-      "name": "public-api.d",
-      "originalName": "public-api.d",
-      "filePath": "github/automate-github-issues/node_modules/yaml/dist/public-api.d.ts",
-      "type": "module",
-      "imports": [
-        {
-          "path": "./compose/composer",
-          "line": 1
+          "path": "node:url",
+          "line": 6
         },
         {
-          "path": "./doc/Document",
+          "path": "youtube-transcript-plus",
+          "line": 8
+        }
+      ],
+      "roleTags": [
+        "general"
+      ],
+      "directory": "skills-antigravity/video-transcript-downloader/scripts",
+      "dependencies": []
+    },
+    {
+      "name": "validate",
+      "originalName": "validate",
+      "filePath": "skills-antigravity/stitch-react-components/scripts/validate.js",
+      "type": "file",
+      "imports": [
+        {
+          "path": "@swc/core",
+          "line": 17
+        },
+        {
+          "path": "node:fs",
+          "line": 18
+        },
+        {
+          "path": "node:path",
+          "line": 19
+        }
+      ],
+      "roleTags": [
+        "general"
+      ],
+      "directory": "skills-antigravity/stitch-react-components/scripts",
+      "dependencies": []
+    },
+    {
+      "name": "validate_1",
+      "originalName": "validate",
+      "filePath": "frontend/stitch-react-components/scripts/validate.js",
+      "type": "file",
+      "imports": [
+        {
+          "path": "@swc/core",
+          "line": 17
+        },
+        {
+          "path": "node:fs",
+          "line": 18
+        },
+        {
+          "path": "node:path",
+          "line": 19
+        }
+      ],
+      "roleTags": [
+        "user"
+      ],
+      "directory": "frontend/stitch-react-components/scripts",
+      "dependencies": []
+    },
+    {
+      "name": "util",
+      "originalName": "util",
+      "filePath": "utilities/slides/assets/pptxgenjs_helpers/util.js",
+      "type": "module",
+      "imports": [],
+      "roleTags": [
+        "general"
+      ],
+      "directory": "utilities/slides/assets/pptxgenjs_helpers",
+      "dependencies": []
+    },
+    {
+      "name": "text",
+      "originalName": "text",
+      "filePath": "utilities/slides/assets/pptxgenjs_helpers/text.js",
+      "type": "module",
+      "imports": [
+        {
+          "path": "child_process",
           "line": 4
+        },
+        {
+          "path": "skia-canvas",
+          "line": 5
+        },
+        {
+          "path": "linebreak",
+          "line": 7
+        },
+        {
+          "path": "fontkit",
+          "line": 8
         }
       ],
       "roleTags": [
-        "user",
-        "integrations"
+        "general"
       ],
-      "directory": "github/automate-github-issues/node_modules/yaml/dist",
+      "directory": "utilities/slides/assets/pptxgenjs_helpers",
       "dependencies": []
     },
     {
-      "name": "options.d",
-      "originalName": "options.d",
-      "filePath": "github/automate-github-issues/node_modules/yaml/dist/options.d.ts",
+      "name": "svg",
+      "originalName": "svg",
+      "filePath": "utilities/slides/assets/pptxgenjs_helpers/svg.js",
       "type": "module",
       "imports": [],
       "roleTags": [
-        "user",
-        "database",
-        "integrations"
+        "general"
       ],
-      "directory": "github/automate-github-issues/node_modules/yaml/dist",
+      "directory": "utilities/slides/assets/pptxgenjs_helpers",
       "dependencies": []
     },
     {
-      "name": "log.d",
-      "originalName": "log.d",
-      "filePath": "github/automate-github-issues/node_modules/yaml/dist/log.d.ts",
-      "type": "module",
-      "imports": [],
-      "roleTags": [
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/node_modules/yaml/dist",
-      "dependencies": []
-    },
-    {
-      "name": "index.d_13",
-      "originalName": "index.d",
-      "filePath": "github/automate-github-issues/node_modules/yaml/dist/index.d.ts",
-      "type": "module",
-      "imports": [],
-      "roleTags": [
-        "database",
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/node_modules/yaml/dist",
-      "dependencies": []
-    },
-    {
-      "name": "errors.d_2",
-      "originalName": "errors.d",
-      "filePath": "github/automate-github-issues/node_modules/yaml/dist/errors.d.ts",
-      "type": "class",
-      "imports": [],
-      "roleTags": [
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/node_modules/yaml/dist",
-      "dependencies": []
-    },
-    {
-      "name": "cli.d",
-      "originalName": "cli.d",
-      "filePath": "github/automate-github-issues/node_modules/yaml/dist/cli.d.ts",
-      "type": "class",
-      "imports": [],
-      "roleTags": [
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/node_modules/yaml/dist",
-      "dependencies": []
-    },
-    {
-      "name": "index.d_14",
-      "originalName": "index.d",
-      "filePath": "github/automate-github-issues/node_modules/zod/v4/index.d.ts",
+      "name": "layout_builders",
+      "originalName": "layout_builders",
+      "filePath": "utilities/slides/assets/pptxgenjs_helpers/layout_builders.js",
       "type": "module",
       "imports": [
         {
-          "path": "./classic/index.js",
-          "line": 1
+          "path": "./text",
+          "line": 4
+        },
+        {
+          "path": "./image",
+          "line": 5
+        },
+        {
+          "path": "./layout",
+          "line": 6
         }
       ],
       "roleTags": [
-        "integrations"
+        "general"
       ],
-      "directory": "github/automate-github-issues/node_modules/zod/v4",
-      "dependencies": []
+      "directory": "utilities/slides/assets/pptxgenjs_helpers",
+      "dependencies": [
+        "text",
+        "image",
+        "layout"
+      ]
     },
     {
-      "name": "index.d_15",
-      "originalName": "index.d",
-      "filePath": "github/automate-github-issues/node_modules/zod/v4-mini/index.d.ts",
+      "name": "layout",
+      "originalName": "layout",
+      "filePath": "utilities/slides/assets/pptxgenjs_helpers/layout.js",
       "type": "module",
       "imports": [],
       "roleTags": [
-        "integrations"
+        "general"
       ],
-      "directory": "github/automate-github-issues/node_modules/zod/v4-mini",
+      "directory": "utilities/slides/assets/pptxgenjs_helpers",
+      "dependencies": []
+    },
+    {
+      "name": "latex",
+      "originalName": "latex",
+      "filePath": "utilities/slides/assets/pptxgenjs_helpers/latex.js",
+      "type": "module",
+      "imports": [
+        {
+          "path": "mathjax-full/js/mathjax.js",
+          "line": 11
+        },
+        {
+          "path": "mathjax-full/js/input/tex.js",
+          "line": 12
+        },
+        {
+          "path": "mathjax-full/js/output/svg.js",
+          "line": 13
+        },
+        {
+          "path": "mathjax-full/js/adaptors/liteAdaptor.js",
+          "line": 14
+        },
+        {
+          "path": "mathjax-full/js/handlers/html.js",
+          "line": 15
+        },
+        {
+          "path": "mathjax-full/js/input/tex/AllPackages.js",
+          "line": 16
+        }
+      ],
+      "roleTags": [
+        "user"
+      ],
+      "directory": "utilities/slides/assets/pptxgenjs_helpers",
       "dependencies": []
     },
     {
       "name": "index",
       "originalName": "index",
-      "filePath": "github/automate-github-issues/node_modules/zod/src/index.ts",
+      "filePath": "utilities/slides/assets/pptxgenjs_helpers/index.js",
       "type": "module",
       "imports": [
         {
-          "path": "./v3/external.js",
-          "line": 1
-        }
-      ],
-      "roleTags": [
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/node_modules/zod/src",
-      "dependencies": []
-    },
-    {
-      "name": "types.d_1",
-      "originalName": "types.d",
-      "filePath": "github/automate-github-issues/node_modules/zod/v3/types.d.ts",
-      "type": "class",
-      "imports": [
-        {
-          "path": "./ZodError.js",
-          "line": 1
-        },
-        {
-          "path": "./helpers/errorUtil.js",
-          "line": 3
-        },
-        {
-          "path": "./helpers/parseUtil.js",
-          "line": 4
-        },
-        {
-          "path": "./helpers/util.js",
-          "line": 7
-        }
-      ],
-      "roleTags": [
-        "database",
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/node_modules/zod/v3",
-      "dependencies": []
-    },
-    {
-      "name": "standard-schema.d",
-      "originalName": "standard-schema.d",
-      "filePath": "github/automate-github-issues/node_modules/zod/v3/standard-schema.d.ts",
-      "type": "module",
-      "imports": [],
-      "roleTags": [
-        "database",
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/node_modules/zod/v3",
-      "dependencies": []
-    },
-    {
-      "name": "index.d_16",
-      "originalName": "index.d",
-      "filePath": "github/automate-github-issues/node_modules/zod/v3/index.d.ts",
-      "type": "module",
-      "imports": [
-        {
-          "path": "./external.js",
-          "line": 1
-        }
-      ],
-      "roleTags": [
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/node_modules/zod/v3",
-      "dependencies": []
-    },
-    {
-      "name": "external.d",
-      "originalName": "external.d",
-      "filePath": "github/automate-github-issues/node_modules/zod/v3/external.d.ts",
-      "type": "module",
-      "imports": [],
-      "roleTags": [
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/node_modules/zod/v3",
-      "dependencies": []
-    },
-    {
-      "name": "errors.d_3",
-      "originalName": "errors.d",
-      "filePath": "github/automate-github-issues/node_modules/zod/v3/errors.d.ts",
-      "type": "module",
-      "imports": [
-        {
-          "path": "./locales/en.js",
-          "line": 2
-        }
-      ],
-      "roleTags": [
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/node_modules/zod/v3",
-      "dependencies": []
-    },
-    {
-      "name": "ZodError.d",
-      "originalName": "ZodError.d",
-      "filePath": "github/automate-github-issues/node_modules/zod/v3/ZodError.d.ts",
-      "type": "class",
-      "imports": [
-        {
-          "path": "./helpers/util.js",
-          "line": 2
-        }
-      ],
-      "roleTags": [
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/node_modules/zod/v3",
-      "dependencies": []
-    },
-    {
-      "name": "types-Cxp8y2TL.d",
-      "originalName": "types-Cxp8y2TL.d",
-      "filePath": "github/automate-github-issues/node_modules/tsx/dist/types-Cxp8y2TL.d.ts",
-      "type": "module",
-      "imports": [],
-      "roleTags": [
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/node_modules/tsx/dist",
-      "dependencies": []
-    },
-    {
-      "name": "version.d",
-      "originalName": "version.d",
-      "filePath": "github/automate-github-issues/node_modules/octokit/dist-types/version.d.ts",
-      "type": "module",
-      "imports": [],
-      "roleTags": [
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/node_modules/octokit/dist-types",
-      "dependencies": []
-    },
-    {
-      "name": "octokit.d",
-      "originalName": "octokit.d",
-      "filePath": "github/automate-github-issues/node_modules/octokit/dist-types/octokit.d.ts",
-      "type": "module",
-      "imports": [
-        {
-          "path": "@octokit/core",
-          "line": 1
-        },
-        {
-          "path": "@octokit/core/types",
-          "line": 4
-        },
-        {
-          "path": "@octokit/plugin-paginate-rest",
-          "line": 5
-        },
-        {
-          "path": "@octokit/plugin-paginate-graphql",
+          "path": "./text",
           "line": 6
         },
         {
-          "path": "@octokit/request-error",
+          "path": "./image",
+          "line": 7
+        },
+        {
+          "path": "./svg",
           "line": 8
+        },
+        {
+          "path": "./latex",
+          "line": 9
+        },
+        {
+          "path": "./code",
+          "line": 10
+        },
+        {
+          "path": "./layout",
+          "line": 11
+        },
+        {
+          "path": "./layout_builders",
+          "line": 12
+        },
+        {
+          "path": "./util",
+          "line": 13
+        }
+      ],
+      "roleTags": [
+        "general"
+      ],
+      "directory": "utilities/slides/assets/pptxgenjs_helpers",
+      "dependencies": [
+        "text",
+        "image",
+        "svg",
+        "latex",
+        "code",
+        "layout",
+        "layout_builders",
+        "util"
+      ]
+    },
+    {
+      "name": "image",
+      "originalName": "image",
+      "filePath": "utilities/slides/assets/pptxgenjs_helpers/image.js",
+      "type": "module",
+      "imports": [
+        {
+          "path": "fs",
+          "line": 4
+        }
+      ],
+      "roleTags": [
+        "general"
+      ],
+      "directory": "utilities/slides/assets/pptxgenjs_helpers",
+      "dependencies": []
+    },
+    {
+      "name": "code",
+      "originalName": "code",
+      "filePath": "utilities/slides/assets/pptxgenjs_helpers/code.js",
+      "type": "module",
+      "imports": [
+        {
+          "path": "fs",
+          "line": 4
+        },
+        {
+          "path": "prismjs",
+          "line": 5
+        }
+      ],
+      "roleTags": [
+        "general"
+      ],
+      "directory": "utilities/slides/assets/pptxgenjs_helpers",
+      "dependencies": []
+    },
+    {
+      "name": "util_1",
+      "originalName": "util",
+      "filePath": "skills-antigravity/slides/assets/pptxgenjs_helpers/util.js",
+      "type": "module",
+      "imports": [],
+      "roleTags": [
+        "general"
+      ],
+      "directory": "skills-antigravity/slides/assets/pptxgenjs_helpers",
+      "dependencies": []
+    },
+    {
+      "name": "text_1",
+      "originalName": "text",
+      "filePath": "skills-antigravity/slides/assets/pptxgenjs_helpers/text.js",
+      "type": "module",
+      "imports": [
+        {
+          "path": "child_process",
+          "line": 4
+        },
+        {
+          "path": "skia-canvas",
+          "line": 5
+        },
+        {
+          "path": "linebreak",
+          "line": 7
+        },
+        {
+          "path": "fontkit",
+          "line": 8
+        }
+      ],
+      "roleTags": [
+        "general"
+      ],
+      "directory": "skills-antigravity/slides/assets/pptxgenjs_helpers",
+      "dependencies": []
+    },
+    {
+      "name": "svg_1",
+      "originalName": "svg",
+      "filePath": "skills-antigravity/slides/assets/pptxgenjs_helpers/svg.js",
+      "type": "module",
+      "imports": [],
+      "roleTags": [
+        "general"
+      ],
+      "directory": "skills-antigravity/slides/assets/pptxgenjs_helpers",
+      "dependencies": []
+    },
+    {
+      "name": "layout_builders_1",
+      "originalName": "layout_builders",
+      "filePath": "skills-antigravity/slides/assets/pptxgenjs_helpers/layout_builders.js",
+      "type": "module",
+      "imports": [
+        {
+          "path": "./text",
+          "line": 4
+        },
+        {
+          "path": "./image",
+          "line": 5
+        },
+        {
+          "path": "./layout",
+          "line": 6
+        }
+      ],
+      "roleTags": [
+        "general"
+      ],
+      "directory": "skills-antigravity/slides/assets/pptxgenjs_helpers",
+      "dependencies": [
+        "text_1",
+        "image_1",
+        "layout_1"
+      ]
+    },
+    {
+      "name": "layout_1",
+      "originalName": "layout",
+      "filePath": "skills-antigravity/slides/assets/pptxgenjs_helpers/layout.js",
+      "type": "module",
+      "imports": [],
+      "roleTags": [
+        "general"
+      ],
+      "directory": "skills-antigravity/slides/assets/pptxgenjs_helpers",
+      "dependencies": []
+    },
+    {
+      "name": "latex_1",
+      "originalName": "latex",
+      "filePath": "skills-antigravity/slides/assets/pptxgenjs_helpers/latex.js",
+      "type": "module",
+      "imports": [
+        {
+          "path": "mathjax-full/js/mathjax.js",
+          "line": 11
+        },
+        {
+          "path": "mathjax-full/js/input/tex.js",
+          "line": 12
+        },
+        {
+          "path": "mathjax-full/js/output/svg.js",
+          "line": 13
+        },
+        {
+          "path": "mathjax-full/js/adaptors/liteAdaptor.js",
+          "line": 14
+        },
+        {
+          "path": "mathjax-full/js/handlers/html.js",
+          "line": 15
+        },
+        {
+          "path": "mathjax-full/js/input/tex/AllPackages.js",
+          "line": 16
+        }
+      ],
+      "roleTags": [
+        "user"
+      ],
+      "directory": "skills-antigravity/slides/assets/pptxgenjs_helpers",
+      "dependencies": []
+    },
+    {
+      "name": "index_1",
+      "originalName": "index",
+      "filePath": "skills-antigravity/slides/assets/pptxgenjs_helpers/index.js",
+      "type": "module",
+      "imports": [
+        {
+          "path": "./text",
+          "line": 6
+        },
+        {
+          "path": "./image",
+          "line": 7
+        },
+        {
+          "path": "./svg",
+          "line": 8
+        },
+        {
+          "path": "./latex",
+          "line": 9
+        },
+        {
+          "path": "./code",
+          "line": 10
+        },
+        {
+          "path": "./layout",
+          "line": 11
+        },
+        {
+          "path": "./layout_builders",
+          "line": 12
+        },
+        {
+          "path": "./util",
+          "line": 13
+        }
+      ],
+      "roleTags": [
+        "general"
+      ],
+      "directory": "skills-antigravity/slides/assets/pptxgenjs_helpers",
+      "dependencies": [
+        "text_1",
+        "image_1",
+        "svg_1",
+        "latex_1",
+        "code_1",
+        "layout_1",
+        "layout_builders_1",
+        "util_1"
+      ]
+    },
+    {
+      "name": "image_1",
+      "originalName": "image",
+      "filePath": "skills-antigravity/slides/assets/pptxgenjs_helpers/image.js",
+      "type": "module",
+      "imports": [
+        {
+          "path": "fs",
+          "line": 4
+        }
+      ],
+      "roleTags": [
+        "general"
+      ],
+      "directory": "skills-antigravity/slides/assets/pptxgenjs_helpers",
+      "dependencies": []
+    },
+    {
+      "name": "code_1",
+      "originalName": "code",
+      "filePath": "skills-antigravity/slides/assets/pptxgenjs_helpers/code.js",
+      "type": "module",
+      "imports": [
+        {
+          "path": "fs",
+          "line": 4
+        },
+        {
+          "path": "prismjs",
+          "line": 5
+        }
+      ],
+      "roleTags": [
+        "general"
+      ],
+      "directory": "skills-antigravity/slides/assets/pptxgenjs_helpers",
+      "dependencies": []
+    },
+    {
+      "name": "vtd_1",
+      "originalName": "vtd",
+      "filePath": "product/content/video-transcript-downloader/scripts/vtd.js",
+      "type": "file",
+      "imports": [
+        {
+          "path": "node:child_process",
+          "line": 2
+        },
+        {
+          "path": "node:fs",
+          "line": 3
+        },
+        {
+          "path": "node:os",
+          "line": 4
+        },
+        {
+          "path": "node:path",
+          "line": 5
+        },
+        {
+          "path": "node:url",
+          "line": 6
+        },
+        {
+          "path": "youtube-transcript-plus",
+          "line": 8
+        }
+      ],
+      "roleTags": [
+        "general"
+      ],
+      "directory": "product/content/video-transcript-downloader/scripts",
+      "dependencies": []
+    },
+    {
+      "name": "verify_skill_catalog_freshness",
+      "originalName": "verify_skill_catalog_freshness",
+      "filePath": "scripts/verify_skill_catalog_freshness.py",
+      "type": "file",
+      "imports": [
+        {
+          "path": "__future__",
+          "line": 4
+        },
+        {
+          "path": "argparse",
+          "line": 6
+        },
+        {
+          "path": "re",
+          "line": 7
+        },
+        {
+          "path": "json",
+          "line": 8
+        },
+        {
+          "path": "pathlib",
+          "line": 9
+        },
+        {
+          "path": "typing",
+          "line": 10
+        }
+      ],
+      "roleTags": [
+        "database",
+        "security"
+      ],
+      "directory": "scripts",
+      "dependencies": []
+    },
+    {
+      "name": "verify_router_schema",
+      "originalName": "verify_router_schema",
+      "filePath": "scripts/verify_router_schema.py",
+      "type": "file",
+      "imports": [
+        {
+          "path": "__future__",
+          "line": 4
+        },
+        {
+          "path": "argparse",
+          "line": 6
+        },
+        {
+          "path": "json",
+          "line": 7
+        },
+        {
+          "path": "sys",
+          "line": 8
+        },
+        {
+          "path": "pathlib",
+          "line": 9
+        },
+        {
+          "path": "typing",
+          "line": 10
+        },
+        {
+          "path": "skill_router_schema",
+          "line": 17
+        }
+      ],
+      "roleTags": [
+        "database",
+        "security"
+      ],
+      "directory": "scripts",
+      "dependencies": []
+    },
+    {
+      "name": "verify_recursive_skill_graph_artifacts",
+      "originalName": "verify_recursive_skill_graph_artifacts",
+      "filePath": "scripts/verify_recursive_skill_graph_artifacts.py",
+      "type": "file",
+      "imports": [
+        {
+          "path": "__future__",
+          "line": 4
+        },
+        {
+          "path": "argparse",
+          "line": 6
+        },
+        {
+          "path": "json",
+          "line": 7
+        },
+        {
+          "path": "sys",
+          "line": 8
+        },
+        {
+          "path": "dataclasses",
+          "line": 9
+        },
+        {
+          "path": "datetime",
+          "line": 10
+        },
+        {
+          "path": "pathlib",
+          "line": 11
+        },
+        {
+          "path": "typing",
+          "line": 12
+        }
+      ],
+      "roleTags": [
+        "events",
+        "security"
+      ],
+      "directory": "scripts",
+      "dependencies": []
+    },
+    {
+      "name": "verify_question_lifecycle_contract",
+      "originalName": "verify_question_lifecycle_contract",
+      "filePath": "scripts/verify_question_lifecycle_contract.py",
+      "type": "file",
+      "imports": [
+        {
+          "path": "__future__",
+          "line": 4
+        },
+        {
+          "path": "sys",
+          "line": 6
+        },
+        {
+          "path": "dataclasses",
+          "line": 7
+        },
+        {
+          "path": "pathlib",
+          "line": 8
+        }
+      ],
+      "roleTags": [
+        "database",
+        "events",
+        "security"
+      ],
+      "directory": "scripts",
+      "dependencies": []
+    },
+    {
+      "name": "test_verify_recursive_skill_graph_artifacts",
+      "originalName": "test_verify_recursive_skill_graph_artifacts",
+      "filePath": "scripts/test_verify_recursive_skill_graph_artifacts.py",
+      "type": "file",
+      "imports": [
+        {
+          "path": "__future__",
+          "line": 4
+        },
+        {
+          "path": "json",
+          "line": 6
+        },
+        {
+          "path": "subprocess",
+          "line": 7
+        },
+        {
+          "path": "sys",
+          "line": 8
+        },
+        {
+          "path": "tempfile",
+          "line": 9
+        },
+        {
+          "path": "unittest",
+          "line": 10
+        },
+        {
+          "path": "pathlib",
+          "line": 11
+        },
+        {
+          "path": "typing",
+          "line": 12
+        }
+      ],
+      "roleTags": [
+        "events",
+        "security"
+      ],
+      "directory": "scripts",
+      "dependencies": []
+    },
+    {
+      "name": "test_validate_recursive_promotions_script",
+      "originalName": "test_validate_recursive_promotions_script",
+      "filePath": "scripts/test_validate_recursive_promotions_script.py",
+      "type": "file",
+      "imports": [
+        {
+          "path": "__future__",
+          "line": 4
+        },
+        {
+          "path": "json",
+          "line": 6
+        },
+        {
+          "path": "subprocess",
+          "line": 7
+        },
+        {
+          "path": "shutil",
+          "line": 8
+        },
+        {
+          "path": "pathlib",
+          "line": 9
+        },
+        {
+          "path": "tempfile",
+          "line": 10
+        },
+        {
+          "path": "unittest",
+          "line": 11
+        }
+      ],
+      "roleTags": [
+        "database"
+      ],
+      "directory": "scripts",
+      "dependencies": []
+    },
+    {
+      "name": "test_sync_mcp",
+      "originalName": "test_sync_mcp",
+      "filePath": "scripts/test_sync_mcp.py",
+      "type": "file",
+      "imports": [
+        {
+          "path": "__future__",
+          "line": 15
+        },
+        {
+          "path": "json",
+          "line": 17
+        },
+        {
+          "path": "sys",
+          "line": 18
+        },
+        {
+          "path": "tempfile",
+          "line": 19
+        },
+        {
+          "path": "types",
+          "line": 20
+        },
+        {
+          "path": "unittest",
+          "line": 21
+        },
+        {
+          "path": "pathlib",
+          "line": 22
+        },
+        {
+          "path": "unittest.mock",
+          "line": 23
+        },
+        {
+          "path": "tomli",
+          "line": 26
+        },
+        {
+          "path": "tomllib",
+          "line": 37
+        },
+        {
+          "path": "tomli",
+          "line": 43
+        },
+        {
+          "path": "succeeds",
+          "line": 47
+        },
+        {
+          "path": "sync_mcp",
+          "line": 54
+        },
+        {
+          "path": "io",
+          "line": 250
+        },
+        {
+          "path": "contextlib",
+          "line": 251
         }
       ],
       "roleTags": [
         "user",
-        "integrations"
+        "auth"
       ],
-      "directory": "github/automate-github-issues/node_modules/octokit/dist-types",
+      "directory": "scripts",
       "dependencies": []
     },
     {
-      "name": "index.d_17",
-      "originalName": "index.d",
-      "filePath": "github/automate-github-issues/node_modules/octokit/dist-types/index.d.ts",
-      "type": "module",
-      "imports": [],
-      "roleTags": [
-        "integrations"
-      ],
-      "directory": "github/automate-github-issues/node_modules/octokit/dist-types",
-      "dependencies": []
-    },
-    {
-      "name": "app.d",
-      "originalName": "app.d",
-      "filePath": "github/automate-github-issues/node_modules/octokit/dist-types/app.d.ts",
-      "type": "module",
+      "name": "test_bootstrap_recursive_skill_graph_artifacts",
+      "originalName": "test_bootstrap_recursive_skill_graph_artifacts",
+      "filePath": "scripts/test_bootstrap_recursive_skill_graph_artifacts.py",
+      "type": "file",
       "imports": [
         {
-          "path": "@octokit/app",
-          "line": 1
-        },
-        {
-          "path": "@octokit/oauth-app",
-          "line": 2
-        },
-        {
-          "path": "@octokit/core",
+          "path": "__future__",
           "line": 4
         },
         {
-          "path": "@octokit/plugin-paginate-rest",
-          "line": 5
-        },
-        {
-          "path": "@octokit/plugin-paginate-graphql",
+          "path": "json",
           "line": 6
         },
         {
-          "path": "@octokit/request-error",
+          "path": "subprocess",
+          "line": 7
+        },
+        {
+          "path": "sys",
           "line": 8
         },
         {
-          "path": "@octokit/webhooks",
+          "path": "tempfile",
+          "line": 9
+        },
+        {
+          "path": "pathlib",
+          "line": 10
+        },
+        {
+          "path": "unittest",
+          "line": 12
+        }
+      ],
+      "roleTags": [
+        "user"
+      ],
+      "directory": "scripts",
+      "dependencies": []
+    },
+    {
+      "name": "sync_mcp",
+      "originalName": "sync_mcp",
+      "filePath": "scripts/sync_mcp.py",
+      "type": "file",
+      "imports": [
+        {
+          "path": "sys",
+          "line": 2
+        },
+        {
+          "path": "os",
+          "line": 3
+        },
+        {
+          "path": "json",
+          "line": 4
+        },
+        {
+          "path": "logging",
+          "line": 5
+        },
+        {
+          "path": "re",
+          "line": 6
+        },
+        {
+          "path": "shlex",
+          "line": 7
+        },
+        {
+          "path": "tomli",
+          "line": 10
+        },
+        {
+          "path": "a",
+          "line": 127
+        }
+      ],
+      "roleTags": [
+        "auth"
+      ],
+      "directory": "scripts",
+      "dependencies": []
+    },
+    {
+      "name": "skill_spotlight",
+      "originalName": "skill_spotlight",
+      "filePath": "scripts/skill_spotlight.py",
+      "type": "file",
+      "imports": [
+        {
+          "path": "json",
+          "line": 9
+        },
+        {
+          "path": "random",
+          "line": 10
+        },
+        {
+          "path": "pathlib",
           "line": 11
         },
         {
-          "path": "@octokit/core",
+          "path": "datetime",
           "line": 12
         },
         {
-          "path": "@octokit/plugin-paginate-rest",
-          "line": 13
+          "path": "runs.",
+          "line": 28
+        }
+      ],
+      "roleTags": [
+        "general"
+      ],
+      "directory": "scripts",
+      "dependencies": []
+    },
+    {
+      "name": "skill_router_metrics",
+      "originalName": "skill_router_metrics",
+      "filePath": "scripts/skill_router_metrics.py",
+      "type": "file",
+      "imports": [
+        {
+          "path": "__future__",
+          "line": 4
         },
         {
-          "path": "@octokit/plugin-paginate-graphql",
-          "line": 14
+          "path": "argparse",
+          "line": 6
         },
         {
-          "path": "@octokit/request-error",
+          "path": "json",
+          "line": 7
+        },
+        {
+          "path": "collections",
+          "line": 8
+        },
+        {
+          "path": "pathlib",
+          "line": 9
+        },
+        {
+          "path": "typing",
+          "line": 10
+        },
+        {
+          "path": "event",
+          "line": 92
+        }
+      ],
+      "roleTags": [
+        "user"
+      ],
+      "directory": "scripts",
+      "dependencies": []
+    },
+    {
+      "name": "run_skill_genome_loop",
+      "originalName": "run_skill_genome_loop",
+      "filePath": "scripts/run_skill_genome_loop.py",
+      "type": "file",
+      "imports": [
+        {
+          "path": "validate_recursive_promotion.py",
           "line": 16
         },
         {
-          "path": "@octokit/core",
+          "path": "__future__",
+          "line": 19
+        },
+        {
+          "path": "argparse",
+          "line": 21
+        },
+        {
+          "path": "hashlib",
           "line": 22
         },
         {
-          "path": "@octokit/plugin-paginate-rest",
+          "path": "json",
           "line": 23
         },
         {
-          "path": "@octokit/plugin-paginate-graphql",
+          "path": "re",
           "line": 24
         },
         {
-          "path": "@octokit/request-error",
+          "path": "contextlib",
+          "line": 25
+        },
+        {
+          "path": "datetime",
           "line": 26
         },
         {
-          "path": "@octokit/app",
-          "line": 30
+          "path": "pathlib",
+          "line": 27
         },
         {
-          "path": "@octokit/plugin-paginate-rest",
-          "line": 31
+          "path": "typing",
+          "line": 28
         },
         {
-          "path": "@octokit/plugin-paginate-graphql",
-          "line": 32
-        },
-        {
-          "path": "@octokit/request-error",
-          "line": 34
-        },
-        {
-          "path": "@octokit/app",
-          "line": 37
-        },
-        {
-          "path": "@octokit/plugin-paginate-rest",
-          "line": 38
-        },
-        {
-          "path": "@octokit/plugin-paginate-graphql",
-          "line": 39
-        },
-        {
-          "path": "@octokit/request-error",
-          "line": 41
-        },
-        {
-          "path": "@octokit/app",
-          "line": 44
-        },
-        {
-          "path": "@octokit/plugin-paginate-rest",
-          "line": 45
-        },
-        {
-          "path": "@octokit/plugin-paginate-graphql",
-          "line": 46
-        },
-        {
-          "path": "@octokit/request-error",
-          "line": 48
-        },
-        {
-          "path": "@octokit/app",
-          "line": 51
-        },
-        {
-          "path": "@octokit/oauth-app",
-          "line": 63
-        },
-        {
-          "path": "@octokit/core",
+          "path": "validate_recursive_promotion.py",
           "line": 64
         },
         {
-          "path": "@octokit/plugin-paginate-rest",
-          "line": 65
+          "path": "control",
+          "line": 111
         },
         {
-          "path": "@octokit/plugin-paginate-graphql",
-          "line": 66
+          "path": "control",
+          "line": 120
         },
         {
-          "path": "@octokit/request-error",
-          "line": 68
+          "path": "untrusted",
+          "line": 174
         },
         {
-          "path": "@octokit/core",
+          "path": "existing",
+          "line": 335
+        },
+        {
+          "path": "processed",
+          "line": 644
+        }
+      ],
+      "roleTags": [
+        "events",
+        "security"
+      ],
+      "directory": "scripts",
+      "dependencies": []
+    },
+    {
+      "name": "review_candidates",
+      "originalName": "review_candidates",
+      "filePath": "scripts/review_candidates.py",
+      "type": "file",
+      "imports": [
+        {
+          "path": "__future__",
+          "line": 15
+        },
+        {
+          "path": "argparse",
+          "line": 17
+        },
+        {
+          "path": "json",
+          "line": 18
+        },
+        {
+          "path": "datetime",
+          "line": 19
+        },
+        {
+          "path": "pathlib",
+          "line": 20
+        },
+        {
+          "path": "typing",
+          "line": 21
+        }
+      ],
+      "roleTags": [
+        "general"
+      ],
+      "directory": "scripts",
+      "dependencies": []
+    },
+    {
+      "name": "docs_lint",
+      "originalName": "docs_lint",
+      "filePath": "scripts/docs_lint.py",
+      "type": "file",
+      "imports": [
+        {
+          "path": "__future__",
+          "line": 4
+        },
+        {
+          "path": "argparse",
+          "line": 6
+        },
+        {
+          "path": "json",
+          "line": 7
+        },
+        {
+          "path": "os",
+          "line": 8
+        },
+        {
+          "path": "re",
+          "line": 9
+        },
+        {
+          "path": "subprocess",
+          "line": 10
+        },
+        {
+          "path": "sys",
+          "line": 11
+        },
+        {
+          "path": "dataclasses",
+          "line": 12
+        },
+        {
+          "path": "datetime",
+          "line": 13
+        },
+        {
+          "path": "pathlib",
+          "line": 14
+        },
+        {
+          "path": "typing",
+          "line": 15
+        }
+      ],
+      "roleTags": [
+        "security"
+      ],
+      "directory": "scripts",
+      "dependencies": []
+    },
+    {
+      "name": "diagnose_skill",
+      "originalName": "diagnose_skill",
+      "filePath": "scripts/diagnose_skill.py",
+      "type": "file",
+      "imports": [
+        {
+          "path": "__future__",
+          "line": 18
+        },
+        {
+          "path": "argparse",
+          "line": 20
+        },
+        {
+          "path": "re",
+          "line": 21
+        },
+        {
+          "path": "sys",
+          "line": 22
+        },
+        {
+          "path": "dataclasses",
+          "line": 23
+        },
+        {
+          "path": "pathlib",
+          "line": 24
+        },
+        {
+          "path": "typing",
+          "line": 25
+        }
+      ],
+      "roleTags": [
+        "general"
+      ],
+      "directory": "scripts",
+      "dependencies": []
+    },
+    {
+      "name": "build_skill_state_map",
+      "originalName": "build_skill_state_map",
+      "filePath": "scripts/build_skill_state_map.py",
+      "type": "file",
+      "imports": [
+        {
+          "path": "existing",
+          "line": 2
+        },
+        {
+          "path": "__future__",
+          "line": 12
+        },
+        {
+          "path": "argparse",
+          "line": 14
+        },
+        {
+          "path": "json",
+          "line": 15
+        },
+        {
+          "path": "re",
+          "line": 16
+        },
+        {
+          "path": "dataclasses",
+          "line": 17
+        },
+        {
+          "path": "datetime",
+          "line": 18
+        },
+        {
+          "path": "pathlib",
+          "line": 19
+        },
+        {
+          "path": "typing",
+          "line": 20
+        }
+      ],
+      "roleTags": [
+        "auth",
+        "database",
+        "events",
+        "security"
+      ],
+      "directory": "scripts",
+      "dependencies": []
+    },
+    {
+      "name": "build_learning_posture_pilot_summary",
+      "originalName": "build_learning_posture_pilot_summary",
+      "filePath": "scripts/build_learning_posture_pilot_summary.py",
+      "type": "file",
+      "imports": [
+        {
+          "path": "__future__",
+          "line": 4
+        },
+        {
+          "path": "argparse",
+          "line": 6
+        },
+        {
+          "path": "json",
+          "line": 7
+        },
+        {
+          "path": "datetime",
+          "line": 8
+        },
+        {
+          "path": "pathlib",
+          "line": 9
+        },
+        {
+          "path": "typing",
+          "line": 10
+        },
+        {
+          "path": "disk",
+          "line": 31
+        },
+        {
+          "path": "disk",
+          "line": 39
+        }
+      ],
+      "roleTags": [
+        "general"
+      ],
+      "directory": "scripts",
+      "dependencies": []
+    },
+    {
+      "name": "bootstrap_recursive_skill_graph_artifacts",
+      "originalName": "bootstrap_recursive_skill_graph_artifacts",
+      "filePath": "scripts/bootstrap_recursive_skill_graph_artifacts.py",
+      "type": "file",
+      "imports": [
+        {
+          "path": "__future__",
+          "line": 4
+        },
+        {
+          "path": "argparse",
+          "line": 6
+        },
+        {
+          "path": "json",
+          "line": 7
+        },
+        {
+          "path": "dataclasses",
+          "line": 8
+        },
+        {
+          "path": "datetime",
+          "line": 9
+        },
+        {
+          "path": "pathlib",
+          "line": 10
+        },
+        {
+          "path": "typing",
+          "line": 11
+        }
+      ],
+      "roleTags": [
+        "user"
+      ],
+      "directory": "scripts",
+      "dependencies": []
+    },
+    {
+      "name": "render_template",
+      "originalName": "render_template",
+      "filePath": "utilities/xcode-makefiles/scripts/render_template.py",
+      "type": "file",
+      "imports": [
+        {
+          "path": "argparse",
+          "line": 2
+        },
+        {
+          "path": "os",
+          "line": 3
+        },
+        {
+          "path": "shutil",
+          "line": 4
+        },
+        {
+          "path": "pathlib",
+          "line": 5
+        }
+      ],
+      "roleTags": [
+        "general"
+      ],
+      "directory": "utilities/xcode-makefiles/scripts",
+      "dependencies": []
+    },
+    {
+      "name": "smoke_generate_slides",
+      "originalName": "smoke_generate_slides",
+      "filePath": "utilities/visual-explainer/scripts/smoke_generate_slides.py",
+      "type": "file",
+      "imports": [
+        {
+          "path": "__future__",
+          "line": 4
+        },
+        {
+          "path": "argparse",
+          "line": 6
+        },
+        {
+          "path": "json",
+          "line": 7
+        },
+        {
+          "path": "re",
+          "line": 8
+        },
+        {
+          "path": "webbrowser",
+          "line": 9
+        },
+        {
+          "path": "dataclasses",
+          "line": 10
+        },
+        {
+          "path": "datetime",
+          "line": 11
+        },
+        {
+          "path": "pathlib",
+          "line": 12
+        },
+        {
+          "path": "markdown",
+          "line": 23
+        },
+        {
+          "path": "source",
+          "line": 86
+        }
+      ],
+      "roleTags": [
+        "general"
+      ],
+      "directory": "utilities/visual-explainer/scripts",
+      "dependencies": []
+    },
+    {
+      "name": "slides_test",
+      "originalName": "slides_test",
+      "filePath": "utilities/slides/scripts/slides_test.py",
+      "type": "file",
+      "imports": [
+        {
+          "path": "argparse",
+          "line": 3
+        },
+        {
+          "path": "sys",
+          "line": 4
+        },
+        {
+          "path": "tempfile",
+          "line": 5
+        },
+        {
+          "path": "os.path",
+          "line": 6
+        },
+        {
+          "path": "pathlib",
+          "line": 7
+        },
+        {
+          "path": "typing",
+          "line": 8
+        },
+        {
+          "path": "numpy",
+          "line": 10
+        },
+        {
+          "path": "render_slides",
+          "line": 16
+        },
+        {
+          "path": "PIL",
+          "line": 17
+        },
+        {
+          "path": "pptx",
+          "line": 18
+        },
+        {
+          "path": "pptx.dml.color",
+          "line": 19
+        },
+        {
+          "path": "pptx.enum.shapes",
+          "line": 20
+        },
+        {
+          "path": "pptx.util",
+          "line": 21
+        }
+      ],
+      "roleTags": [
+        "general"
+      ],
+      "directory": "utilities/slides/scripts",
+      "dependencies": []
+    },
+    {
+      "name": "render_slides",
+      "originalName": "render_slides",
+      "filePath": "utilities/slides/scripts/render_slides.py",
+      "type": "module",
+      "imports": [
+        {
+          "path": "argparse",
+          "line": 3
+        },
+        {
+          "path": "os",
+          "line": 4
+        },
+        {
+          "path": "re",
+          "line": 5
+        },
+        {
+          "path": "shutil",
+          "line": 6
+        },
+        {
+          "path": "subprocess",
+          "line": 7
+        },
+        {
+          "path": "tempfile",
+          "line": 8
+        },
+        {
+          "path": "xml.etree.ElementTree",
+          "line": 9
+        },
+        {
+          "path": "os",
+          "line": 10
+        },
+        {
+          "path": "os.path",
+          "line": 11
+        },
+        {
+          "path": "typing",
+          "line": 12
+        },
+        {
+          "path": "zipfile",
+          "line": 13
+        },
+        {
+          "path": "pdf2image",
+          "line": 15
+        },
+        {
+          "path": "OOXML",
+          "line": 32
+        },
+        {
+          "path": "PDF",
+          "line": 50
+        },
+        {
+          "path": "poppler",
+          "line": 78
+        }
+      ],
+      "roleTags": [
+        "user"
+      ],
+      "directory": "utilities/slides/scripts",
+      "dependencies": []
+    },
+    {
+      "name": "ensure_raster_image",
+      "originalName": "ensure_raster_image",
+      "filePath": "utilities/slides/scripts/ensure_raster_image.py",
+      "type": "file",
+      "imports": [
+        {
+          "path": "PowerPoint",
+          "line": 5
+        },
+        {
+          "path": "argparse",
+          "line": 29
+        },
+        {
+          "path": "gzip",
+          "line": 30
+        },
+        {
+          "path": "shutil",
+          "line": 31
+        },
+        {
+          "path": "os",
+          "line": 32
+        },
+        {
+          "path": "os.path",
+          "line": 33
+        },
+        {
+          "path": "subprocess",
+          "line": 34
+        }
+      ],
+      "roleTags": [
+        "general"
+      ],
+      "directory": "utilities/slides/scripts",
+      "dependencies": []
+    },
+    {
+      "name": "detect_font",
+      "originalName": "detect_font",
+      "filePath": "utilities/slides/scripts/detect_font.py",
+      "type": "file",
+      "imports": [
+        {
+          "path": "PPTX",
+          "line": 13
+        },
+        {
+          "path": "run",
+          "line": 14
+        },
+        {
+          "path": "fc",
+          "line": 40
+        },
+        {
+          "path": "render_slides",
+          "line": 59
+        },
+        {
+          "path": "argparse",
+          "line": 69
+        },
+        {
+          "path": "json",
+          "line": 70
+        },
+        {
+          "path": "os",
+          "line": 71
+        },
+        {
+          "path": "re",
           "line": 72
         },
         {
-          "path": "@octokit/plugin-paginate-rest",
+          "path": "shutil",
           "line": 73
         },
         {
-          "path": "@octokit/plugin-paginate-graphql",
+          "path": "subprocess",
           "line": 74
         },
         {
-          "path": "@octokit/request-error",
+          "path": "tempfile",
+          "line": 75
+        },
+        {
+          "path": "xml.etree.ElementTree",
           "line": 76
         },
         {
-          "path": "@octokit/oauth-app",
+          "path": "functools",
+          "line": 77
+        },
+        {
+          "path": "os.path",
+          "line": 78
+        },
+        {
+          "path": "zipfile",
           "line": 79
         },
         {
-          "path": "@octokit/oauth-app",
-          "line": 80
+          "path": "fontconfig",
+          "line": 128
         },
         {
-          "path": "@octokit/oauth-app",
-          "line": 81
+          "path": "XML",
+          "line": 590
+        }
+      ],
+      "roleTags": [
+        "user"
+      ],
+      "directory": "utilities/slides/scripts",
+      "dependencies": []
+    },
+    {
+      "name": "create_montage",
+      "originalName": "create_montage",
+      "filePath": "utilities/slides/scripts/create_montage.py",
+      "type": "file",
+      "imports": [
+        {
+          "path": "argparse",
+          "line": 3
         },
         {
-          "path": "@octokit/oauth-app",
-          "line": 82
+          "path": "re",
+          "line": 4
         },
         {
-          "path": "@octokit/oauth-app",
-          "line": 83
+          "path": "sys",
+          "line": 5
         },
         {
-          "path": "@octokit/oauth-app",
-          "line": 84
+          "path": "tempfile",
+          "line": 6
         },
         {
-          "path": "@octokit/oauth-app",
-          "line": 85
+          "path": "math",
+          "line": 7
         },
         {
-          "path": "@octokit/oauth-app",
-          "line": 86
+          "path": "os",
+          "line": 8
         },
         {
-          "path": "@octokit/oauth-app",
-          "line": 87
+          "path": "os.path",
+          "line": 9
+        },
+        {
+          "path": "pathlib",
+          "line": 10
+        },
+        {
+          "path": "typing",
+          "line": 11
+        },
+        {
+          "path": "ensure_raster_image",
+          "line": 17
+        },
+        {
+          "path": "PIL",
+          "line": 18
+        },
+        {
+          "path": "the",
+          "line": 215
+        }
+      ],
+      "roleTags": [
+        "general"
+      ],
+      "directory": "utilities/slides/scripts",
+      "dependencies": []
+    },
+    {
+      "name": "validate_skill_graph_profiles",
+      "originalName": "validate_skill_graph_profiles",
+      "filePath": "utilities/skill-builder/scripts/validate_skill_graph_profiles.py",
+      "type": "file",
+      "imports": [
+        {
+          "path": "__future__",
+          "line": 4
+        },
+        {
+          "path": "argparse",
+          "line": 6
+        },
+        {
+          "path": "json",
+          "line": 7
+        },
+        {
+          "path": "re",
+          "line": 8
+        },
+        {
+          "path": "dataclasses",
+          "line": 9
+        },
+        {
+          "path": "datetime",
+          "line": 10
+        },
+        {
+          "path": "pathlib",
+          "line": 11
+        },
+        {
+          "path": "typing",
+          "line": 12
+        },
+        {
+          "path": "skill_graph_inventory",
+          "line": 14
+        },
+        {
+          "path": "daily",
+          "line": 438
+        }
+      ],
+      "roleTags": [
+        "database",
+        "events",
+        "security"
+      ],
+      "directory": "utilities/skill-builder/scripts",
+      "dependencies": []
+    },
+    {
+      "name": "validate_recursive_promotion",
+      "originalName": "validate_recursive_promotion",
+      "filePath": "utilities/skill-builder/scripts/validate_recursive_promotion.py",
+      "type": "file",
+      "imports": [
+        {
+          "path": "__future__",
+          "line": 4
+        },
+        {
+          "path": "argparse",
+          "line": 6
+        },
+        {
+          "path": "hashlib",
+          "line": 7
+        },
+        {
+          "path": "hmac",
+          "line": 8
+        },
+        {
+          "path": "json",
+          "line": 9
+        },
+        {
+          "path": "os",
+          "line": 10
+        },
+        {
+          "path": "re",
+          "line": 11
+        },
+        {
+          "path": "sys",
+          "line": 12
+        },
+        {
+          "path": "hashlib",
+          "line": 13
+        },
+        {
+          "path": "pathlib",
+          "line": 14
+        },
+        {
+          "path": "typing",
+          "line": 15
+        },
+        {
+          "path": "exc",
+          "line": 182
+        },
+        {
+          "path": "the",
+          "line": 229
+        },
+        {
+          "path": "accepting",
+          "line": 235
+        }
+      ],
+      "roleTags": [
+        "auth",
+        "database",
+        "events",
+        "security"
+      ],
+      "directory": "utilities/skill-builder/scripts",
+      "dependencies": []
+    },
+    {
+      "name": "upgrade_skill",
+      "originalName": "upgrade_skill",
+      "filePath": "utilities/skill-builder/scripts/upgrade_skill.py",
+      "type": "file",
+      "imports": [
+        {
+          "path": "__future__",
+          "line": 25
+        },
+        {
+          "path": "argparse",
+          "line": 27
+        },
+        {
+          "path": "json",
+          "line": 28
+        },
+        {
+          "path": "re",
+          "line": 29
+        },
+        {
+          "path": "sys",
+          "line": 30
+        },
+        {
+          "path": "textwrap",
+          "line": 31
+        },
+        {
+          "path": "dataclasses",
+          "line": 32
+        },
+        {
+          "path": "enum",
+          "line": 33
+        },
+        {
+          "path": "pathlib",
+          "line": 34
+        },
+        {
+          "path": "typing",
+          "line": 35
+        },
+        {
+          "path": "yaml",
+          "line": 38
+        },
+        {
+          "path": "e",
+          "line": 129
+        }
+      ],
+      "roleTags": [
+        "events"
+      ],
+      "directory": "utilities/skill-builder/scripts",
+      "dependencies": []
+    },
+    {
+      "name": "test_validate_recursive_promotion",
+      "originalName": "test_validate_recursive_promotion",
+      "filePath": "utilities/skill-builder/scripts/test_validate_recursive_promotion.py",
+      "type": "file",
+      "imports": [
+        {
+          "path": "__future__",
+          "line": 4
+        },
+        {
+          "path": "hashlib",
+          "line": 6
+        },
+        {
+          "path": "json",
+          "line": 7
+        },
+        {
+          "path": "subprocess",
+          "line": 8
+        },
+        {
+          "path": "sys",
+          "line": 9
+        },
+        {
+          "path": "tempfile",
+          "line": 10
+        },
+        {
+          "path": "pathlib",
+          "line": 11
+        },
+        {
+          "path": "typing",
+          "line": 12
+        },
+        {
+          "path": "unittest",
+          "line": 14
+        }
+      ],
+      "roleTags": [
+        "events"
+      ],
+      "directory": "utilities/skill-builder/scripts",
+      "dependencies": []
+    },
+    {
+      "name": "test_skill_router",
+      "originalName": "test_skill_router",
+      "filePath": "utilities/skill-builder/scripts/test_skill_router.py",
+      "type": "file",
+      "imports": [
+        {
+          "path": "__future__",
+          "line": 4
+        },
+        {
+          "path": "json",
+          "line": 6
+        },
+        {
+          "path": "tempfile",
+          "line": 7
+        },
+        {
+          "path": "unittest",
+          "line": 8
+        },
+        {
+          "path": "pathlib",
+          "line": 9
+        },
+        {
+          "path": "router_controls",
+          "line": 11
+        },
+        {
+          "path": "skill_catalog",
+          "line": 12
+        },
+        {
+          "path": "skill_router",
+          "line": 13
+        },
+        {
+          "path": "skill_router_schema",
+          "line": 14
+        }
+      ],
+      "roleTags": [
+        "user",
+        "database",
+        "events",
+        "security"
+      ],
+      "directory": "utilities/skill-builder/scripts",
+      "dependencies": []
+    },
+    {
+      "name": "test_recursive_skill_loop_capture",
+      "originalName": "test_recursive_skill_loop_capture",
+      "filePath": "utilities/skill-builder/scripts/test_recursive_skill_loop_capture.py",
+      "type": "file",
+      "imports": [
+        {
+          "path": "__future__",
+          "line": 4
+        },
+        {
+          "path": "json",
+          "line": 6
+        },
+        {
+          "path": "subprocess",
+          "line": 7
+        },
+        {
+          "path": "sys",
+          "line": 8
+        },
+        {
+          "path": "tempfile",
+          "line": 9
+        },
+        {
+          "path": "unittest",
+          "line": 10
+        },
+        {
+          "path": "pathlib",
+          "line": 11
+        }
+      ],
+      "roleTags": [
+        "user"
+      ],
+      "directory": "utilities/skill-builder/scripts",
+      "dependencies": []
+    },
+    {
+      "name": "test_openclaw_skill_guard",
+      "originalName": "test_openclaw_skill_guard",
+      "filePath": "utilities/skill-builder/scripts/test_openclaw_skill_guard.py",
+      "type": "file",
+      "imports": [
+        {
+          "path": "__future__",
+          "line": 4
+        },
+        {
+          "path": "tempfile",
+          "line": 6
+        },
+        {
+          "path": "unittest",
+          "line": 7
+        },
+        {
+          "path": "pathlib",
+          "line": 8
+        },
+        {
+          "path": "openclaw_skill_guard",
+          "line": 10
+        }
+      ],
+      "roleTags": [
+        "auth",
+        "security"
+      ],
+      "directory": "utilities/skill-builder/scripts",
+      "dependencies": []
+    },
+    {
+      "name": "test_events_jsonl_required",
+      "originalName": "test_events_jsonl_required",
+      "filePath": "utilities/skill-builder/scripts/test_events_jsonl_required.py",
+      "type": "file",
+      "imports": [
+        {
+          "path": "json",
+          "line": 4
+        },
+        {
+          "path": "sys",
+          "line": 5
+        },
+        {
+          "path": "pathlib",
+          "line": 6
+        },
+        {
+          "path": "typing",
+          "line": 7
+        },
+        {
+          "path": "validate_recursive_promotion",
+          "line": 12
+        },
+        {
+          "path": "validate_recursive_promotion",
+          "line": 14
+        }
+      ],
+      "roleTags": [
+        "events"
+      ],
+      "directory": "utilities/skill-builder/scripts",
+      "dependencies": []
+    },
+    {
+      "name": "test_backfill_missing_events",
+      "originalName": "test_backfill_missing_events",
+      "filePath": "utilities/skill-builder/scripts/test_backfill_missing_events.py",
+      "type": "file",
+      "imports": [
+        {
+          "path": "__future__",
+          "line": 4
+        },
+        {
+          "path": "sys",
+          "line": 6
+        },
+        {
+          "path": "tempfile",
+          "line": 7
+        },
+        {
+          "path": "unittest",
+          "line": 8
+        },
+        {
+          "path": "pathlib",
+          "line": 9
+        },
+        {
+          "path": "backfill_missing_events",
+          "line": 13
+        }
+      ],
+      "roleTags": [
+        "events"
+      ],
+      "directory": "utilities/skill-builder/scripts",
+      "dependencies": []
+    },
+    {
+      "name": "skill_subject_scoreboard",
+      "originalName": "skill_subject_scoreboard",
+      "filePath": "utilities/skill-builder/scripts/skill_subject_scoreboard.py",
+      "type": "file",
+      "imports": [
+        {
+          "path": "__future__",
+          "line": 4
+        },
+        {
+          "path": "argparse",
+          "line": 6
+        },
+        {
+          "path": "json",
+          "line": 7
+        },
+        {
+          "path": "collections",
+          "line": 8
+        },
+        {
+          "path": "pathlib",
+          "line": 9
+        },
+        {
+          "path": "skill",
+          "line": 64
         }
       ],
       "roleTags": [
         "user",
         "auth",
-        "integrations"
+        "integrations",
+        "security"
       ],
-      "directory": "github/automate-github-issues/node_modules/octokit/dist-types",
+      "directory": "utilities/skill-builder/scripts",
+      "dependencies": []
+    },
+    {
+      "name": "skill_router_schema",
+      "originalName": "skill_router_schema",
+      "filePath": "utilities/skill-builder/scripts/skill_router_schema.py",
+      "type": "file",
+      "imports": [
+        {
+          "path": "__future__",
+          "line": 4
+        },
+        {
+          "path": "hashlib",
+          "line": 6
+        },
+        {
+          "path": "re",
+          "line": 7
+        },
+        {
+          "path": "dataclasses",
+          "line": 8
+        },
+        {
+          "path": "typing",
+          "line": 9
+        }
+      ],
+      "roleTags": [
+        "database"
+      ],
+      "directory": "utilities/skill-builder/scripts",
+      "dependencies": []
+    },
+    {
+      "name": "skill_router",
+      "originalName": "skill_router",
+      "filePath": "utilities/skill-builder/scripts/skill_router.py",
+      "type": "file",
+      "imports": [
+        {
+          "path": "__future__",
+          "line": 4
+        },
+        {
+          "path": "argparse",
+          "line": 6
+        },
+        {
+          "path": "json",
+          "line": 7
+        },
+        {
+          "path": "re",
+          "line": 8
+        },
+        {
+          "path": "sys",
+          "line": 9
+        },
+        {
+          "path": "datetime",
+          "line": 10
+        },
+        {
+          "path": "pathlib",
+          "line": 11
+        },
+        {
+          "path": "typing",
+          "line": 12
+        },
+        {
+          "path": "uuid",
+          "line": 13
+        },
+        {
+          "path": "router_controls",
+          "line": 15
+        },
+        {
+          "path": "skill_catalog",
+          "line": 16
+        },
+        {
+          "path": "skill_router_schema",
+          "line": 17
+        },
+        {
+          "path": "openclaw_skill_guard",
+          "line": 20
+        }
+      ],
+      "roleTags": [
+        "user",
+        "auth",
+        "database",
+        "events",
+        "security"
+      ],
+      "directory": "utilities/skill-builder/scripts",
+      "dependencies": []
+    },
+    {
+      "name": "skill_graph_inventory",
+      "originalName": "skill_graph_inventory",
+      "filePath": "utilities/skill-builder/scripts/skill_graph_inventory.py",
+      "type": "file",
+      "imports": [
+        {
+          "path": "__future__",
+          "line": 4
+        },
+        {
+          "path": "json",
+          "line": 6
+        },
+        {
+          "path": "dataclasses",
+          "line": 7
+        },
+        {
+          "path": "pathlib",
+          "line": 8
+        },
+        {
+          "path": "typing",
+          "line": 9
+        }
+      ],
+      "roleTags": [
+        "security"
+      ],
+      "directory": "utilities/skill-builder/scripts",
+      "dependencies": []
+    },
+    {
+      "name": "skill_gate",
+      "originalName": "skill_gate",
+      "filePath": "utilities/skill-builder/scripts/skill_gate.py",
+      "type": "file",
+      "imports": [
+        {
+          "path": "__future__",
+          "line": 26
+        },
+        {
+          "path": "argparse",
+          "line": 28
+        },
+        {
+          "path": "json",
+          "line": 29
+        },
+        {
+          "path": "re",
+          "line": 30
+        },
+        {
+          "path": "sys",
+          "line": 31
+        },
+        {
+          "path": "dataclasses",
+          "line": 32
+        },
+        {
+          "path": "enum",
+          "line": 33
+        },
+        {
+          "path": "fnmatch",
+          "line": 34
+        },
+        {
+          "path": "os",
+          "line": 35
+        },
+        {
+          "path": "pathlib",
+          "line": 36
+        },
+        {
+          "path": "typing",
+          "line": 37
+        },
+        {
+          "path": "yaml",
+          "line": 40
+        },
+        {
+          "path": "e",
+          "line": 135
+        },
+        {
+          "path": "SKILL.md.",
+          "line": 656
+        }
+      ],
+      "roleTags": [
+        "user",
+        "auth",
+        "database",
+        "events",
+        "security"
+      ],
+      "directory": "utilities/skill-builder/scripts",
+      "dependencies": []
+    },
+    {
+      "name": "skill_catalog",
+      "originalName": "skill_catalog",
+      "filePath": "utilities/skill-builder/scripts/skill_catalog.py",
+      "type": "file",
+      "imports": [
+        {
+          "path": "__future__",
+          "line": 4
+        },
+        {
+          "path": "hashlib",
+          "line": 6
+        },
+        {
+          "path": "json",
+          "line": 7
+        },
+        {
+          "path": "re",
+          "line": 8
+        },
+        {
+          "path": "dataclasses",
+          "line": 9
+        },
+        {
+          "path": "pathlib",
+          "line": 10
+        },
+        {
+          "path": "typing",
+          "line": 11
+        }
+      ],
+      "roleTags": [
+        "general"
+      ],
+      "directory": "utilities/skill-builder/scripts",
+      "dependencies": []
+    },
+    {
+      "name": "run_skill_graph_smoke",
+      "originalName": "run_skill_graph_smoke",
+      "filePath": "utilities/skill-builder/scripts/run_skill_graph_smoke.py",
+      "type": "file",
+      "imports": [
+        {
+          "path": "__future__",
+          "line": 4
+        },
+        {
+          "path": "argparse",
+          "line": 6
+        },
+        {
+          "path": "json",
+          "line": 7
+        },
+        {
+          "path": "subprocess",
+          "line": 8
+        },
+        {
+          "path": "datetime",
+          "line": 9
+        },
+        {
+          "path": "pathlib",
+          "line": 10
+        },
+        {
+          "path": "typing",
+          "line": 11
+        }
+      ],
+      "roleTags": [
+        "database"
+      ],
+      "directory": "utilities/skill-builder/scripts",
+      "dependencies": []
+    },
+    {
+      "name": "run_skill_evals",
+      "originalName": "run_skill_evals",
+      "filePath": "utilities/skill-builder/scripts/run_skill_evals.py",
+      "type": "file",
+      "imports": [
+        {
+          "path": "__future__",
+          "line": 25
+        },
+        {
+          "path": "argparse",
+          "line": 27
+        },
+        {
+          "path": "datetime",
+          "line": 28
+        },
+        {
+          "path": "json",
+          "line": 29
+        },
+        {
+          "path": "os",
+          "line": 30
+        },
+        {
+          "path": "re",
+          "line": 31
+        },
+        {
+          "path": "shlex",
+          "line": 32
+        },
+        {
+          "path": "subprocess",
+          "line": 33
+        },
+        {
+          "path": "sys",
+          "line": 34
+        },
+        {
+          "path": "dataclasses",
+          "line": 35
+        },
+        {
+          "path": "pathlib",
+          "line": 36
+        },
+        {
+          "path": "typing",
+          "line": 37
+        },
+        {
+          "path": "yaml",
+          "line": 40
+        },
+        {
+          "path": "deterministic_trace_checks",
+          "line": 62
+        },
+        {
+          "path": "exc",
+          "line": 235
+        },
+        {
+          "path": "runner",
+          "line": 465
+        },
+        {
+          "path": "silence",
+          "line": 1316
+        }
+      ],
+      "roleTags": [
+        "database",
+        "events"
+      ],
+      "directory": "utilities/skill-builder/scripts",
       "dependencies": []
     }
   ],
   "entryPoints": [
-    "github/automate-github-issues/node_modules/zod/src/index.ts"
+    "utilities/slides/assets/pptxgenjs_helpers/index.js",
+    "skills-antigravity/slides/assets/pptxgenjs_helpers/index.js"
   ],
   "languages": {
-    "typescript": 100
+    "typescript": 34,
+    "javascript": 24,
+    "python": 42
   },
   "directories": [
     "backend/workers-mcp/assets",
-    "github/automate-github-issues/node_modules/before-after-hook",
-    "github/automate-github-issues/node_modules/bottleneck",
-    "github/automate-github-issues/node_modules/find-up",
-    "github/automate-github-issues/node_modules/fsevents",
-    "github/automate-github-issues/node_modules/locate-path",
-    "github/automate-github-issues/node_modules/octokit/dist-types",
-    "github/automate-github-issues/node_modules/p-limit",
-    "github/automate-github-issues/node_modules/p-locate",
-    "github/automate-github-issues/node_modules/path-exists",
-    "github/automate-github-issues/node_modules/toad-cache",
-    "github/automate-github-issues/node_modules/tsx/dist",
-    "github/automate-github-issues/node_modules/undici-types",
-    "github/automate-github-issues/node_modules/unicorn-magic",
-    "github/automate-github-issues/node_modules/universal-github-app-jwt",
-    "github/automate-github-issues/node_modules/universal-user-agent",
-    "github/automate-github-issues/node_modules/yaml/dist",
-    "github/automate-github-issues/node_modules/yocto-queue",
-    "github/automate-github-issues/node_modules/zod",
-    "github/automate-github-issues/node_modules/zod/src",
-    "github/automate-github-issues/node_modules/zod/v3",
-    "github/automate-github-issues/node_modules/zod/v4",
-    "github/automate-github-issues/node_modules/zod/v4-mini",
-    "github/automate-github-issues/scripts",
-    "github/automate-github-issues/scripts/github",
-    "github/automate-github-issues/scripts/prompts",
-    "product/design/ui-ux-creative-coding/assets",
+    "frontend/stitch-react-components/examples",
+    "frontend/stitch-react-components/resources",
+    "frontend/stitch-react-components/scripts",
+    "frontend/ui/remotion/rules/assets",
+    "frontend/ui/shadcn-ui/examples",
+    "frontend/ui/stitch-remotion/examples",
+    "frontend/ui/stitch-remotion/resources",
+    "frontend/ui/ui-ux-creative-coding/assets",
+    "product/content/video-transcript-downloader/scripts",
+    "scripts",
+    "skills-antigravity/beautiful-mermaid/scripts",
+    "skills-antigravity/remotion/rules/assets",
+    "skills-antigravity/shadcn-ui/examples",
+    "skills-antigravity/slides/assets/pptxgenjs_helpers",
+    "skills-antigravity/stitch-react-components/examples",
+    "skills-antigravity/stitch-react-components/resources",
+    "skills-antigravity/stitch-react-components/scripts",
+    "skills-antigravity/stitch-remotion/examples",
+    "skills-antigravity/stitch-remotion/resources",
+    "skills-antigravity/systematic-debugging",
+    "skills-antigravity/ui-ux-creative-coding/assets",
+    "skills-antigravity/video-transcript-downloader/scripts",
+    "skills-antigravity/workers-mcp/assets",
     "utilities/beautiful-mermaid/scripts",
+    "utilities/skill-builder/scripts",
+    "utilities/slides/assets/pptxgenjs_helpers",
+    "utilities/slides/scripts",
     "utilities/systematic-debugging",
-    "utilities/video-transcript-downloader/node_modules/youtube-transcript-plus/dist"
+    "utilities/visual-explainer/scripts",
+    "utilities/xcode-makefiles/scripts"
   ]
 }

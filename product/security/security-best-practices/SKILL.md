@@ -106,7 +106,19 @@ Use language- and framework-specific security guidance to produce secure-by-defa
 - Evals: `references/evals.yaml`
 - Folded legacy modes: `references/folded-legacy-modes-core60.md`
 
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[security-threat-model]] | Run first to identify trust boundaries and threat model; this skill remediates specific findings |
+| [[security-ownership-map]] | Find who owns the highest-risk code after identifying findings |
+| [[create-auth]] | Security review often surfaces auth issues — use this for implementation |
+| [[1password]] | Findings involving secrets management — use for secure injection patterns |
+
+**Topic map:** [[security-ops]]
+
 <!-- decision-feedback-protocol:v2 -->
+
 **Decision feedback protocol (required):**
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.
 - Capture: `decision` (`accepted|partial|rejected|deferred`), `outcome` (`good|neutral|bad|unknown`), and `confidence` (`high|medium|low`).

@@ -302,6 +302,18 @@ These techniques are part of systematic debugging and available in this director
 - **test-driven-development** - For creating failing test case (Phase 4, Step 1)
 - **verification-before-completion** - Verify fix worked before claiming success
 
+## See Also
+
+| Skill | When to hand off |
+|---|---|
+| [[test-driven-development]] | Phase 4, Step 1: write the failing test that captures the root cause |
+| [[verification-before-completion]] | After implementing the fix — prove it works before claiming done |
+| [[evals-router]] | When the bug is in an LLM evaluation pipeline or judge prompt |
+| [[gh-fix-ci]] | When the failure is a broken GitHub Actions CI check |
+| [[writing-plans]] | When 3+ fixes have failed and you need to re-plan the approach |
+
+**Topic map:** [[agent-ops]]
+
 ## Real-World Impact
 
 From debugging sessions:

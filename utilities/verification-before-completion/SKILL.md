@@ -109,6 +109,17 @@ Required gates:
 - `references/contract.yaml`
 - `references/evals.yaml`
 
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[systematic-debugging]] | Run first to find root cause; use this skill to prove the fix worked |
+| [[test-driven-development]] | Write failing tests before fixing; this skill verifies they now pass |
+| [[gh-workflow]] | Gate PR merges: verification must pass before PR language is used |
+| [[evals-router]] | Verify LLM eval pipelines pass before claiming eval work is complete |
+
+**Topic map:** [[agent-ops]]
+
 ## Decision feedback protocol
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**
@@ -117,3 +128,4 @@ Required gates:
 - Persist with: `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
 - The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
 <!-- /decision-feedback-protocol -->
+

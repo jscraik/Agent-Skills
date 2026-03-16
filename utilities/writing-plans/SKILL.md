@@ -94,7 +94,20 @@ This skill also owns legacy execution-planning behavior from retired folds.
 
 - `execute` from `utilities/executing-plans`: use when a plan already exists and the immediate job is to validate and execute it in verified batches with checkpoints.
 
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[brainstorming]] | Use first when scope is still ambiguous — resolve approach before planning steps |
+| [[interview-me]] | Use when requirements need discovery; hand the spec output to this skill |
+| [[product-spec]] | Use for product-level specs; this skill turns the spec into an execution sequence |
+| [[verification-before-completion]] | Embed in the plan's final task to gate "done" claims |
+| [[systematic-debugging]] | When 3+ fix attempts fail, restart with this skill to re-plan the approach |
+
+**Topic map:** [[agent-ops]]
+
 <!-- decision-feedback-protocol:v2 -->
+
 **Decision feedback protocol (required):**
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.
 - Capture: `decision` (`accepted|partial|rejected|deferred`), `outcome` (`good|neutral|bad|unknown`), and `confidence` (`high|medium|low`).

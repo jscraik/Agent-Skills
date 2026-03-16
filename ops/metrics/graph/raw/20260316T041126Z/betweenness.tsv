@@ -1,0 +1,14 @@
+mode: betweenness
+notes: 8
+edges: 21
+normalized: true
+
+rank	score	degree	note
+1	0.115079	7	[[index]]
+2	0.115079	7	[[product-strategy]]
+3	0.035714	6	[[agent-ops]]
+4	0.035714	6	[[backend-platform]]
+5	0.031746	5	[[frontend-ui]]
+6	0.000000	3	[[content-publishing]]
+7	0.000000	4	[[mobile-native]]
+8	0.000000	4	[[security-ops]]

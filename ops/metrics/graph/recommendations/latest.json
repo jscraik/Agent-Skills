@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-03-16 04:11:27Z",
+  "snapshot": "20260316T041126Z.json",
+  "previous_snapshot": "20260316T035007Z.json",
+  "feedback_log": "/Users/jamiecraik/dev/Agent-Skills/ops/metrics/graph/feedback/decision-feedback.jsonl",
+  "feedback_schema": {
+    "decision": [
+      "accepted",
+      "partial",
+      "rejected",
+      "deferred"
+    ],
+    "outcome": [
+      "good",
+      "neutral",
+      "bad",
+      "unknown"
+    ],
+    "confidence": [
+      "high",
+      "medium",
+      "low"
+    ]
+  },
+  "insights": [
+    "Notes delta vs previous snapshot: +0",
+    "Community count delta: +0",
+    "Top-5 PageRank overlap: 1.00",
+    "Top-5 bridge overlap: 1.00"
+  ],
+  "recommendations": [
+    {
+      "id": "rec-001",
+      "priority": "low",
+      "action_key": "stable_state",
+      "action": "No urgent graph drift detected. Continue normal /reflect and /reweave cadence.",
+      "reason": "Current metrics are stable."
+    }
+  ]
+}
