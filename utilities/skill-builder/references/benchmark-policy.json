@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "description": "Portfolio benchmark policy for skill-builder marker coverage and distribution.",
-  "validated_on": "2026-03-09",
+  "validated_on": "2026-03-16",
   "validation_notes": [
     "React latest docs line is 19.x (latest listed 19.2).",
     "Next.js support policy lists 16.x as Active LTS.",
@@ -9,7 +9,8 @@
     "OWASP Top 10 current release line is 2025.",
     "MCP current protocol line in versioning docs is 2025-06-18, with 2025-11-25 release announced in protocol updates.",
     "Auto-refreshed via refresh_benchmark_policy.py on 2026-03-08.",
-    "Auto-refreshed via refresh_benchmark_policy.py on 2026-03-09."
+    "Auto-refreshed via refresh_benchmark_policy.py on 2026-03-09.",
+    "Auto-refreshed via refresh_benchmark_policy.py on 2026-03-16."
   ],
   "refresh_sources": [
     {
@@ -176,19 +177,19 @@
         "wcag_2_2"
       ],
       "min_hits_fail": {
-        "react_19": 1,
-        "next_16": 1,
-        "tailwind_v4": 2,
-        "wcag_2_2": 1
-      },
-      "min_hits_warn": {
         "react_19": 2,
         "next_16": 2,
         "tailwind_v4": 3,
         "wcag_2_2": 2
       },
-      "min_coverage_fail": 0.1,
-      "min_coverage_warn": 0.2
+      "min_hits_warn": {
+        "react_19": 3,
+        "next_16": 3,
+        "tailwind_v4": 4,
+        "wcag_2_2": 3
+      },
+      "min_coverage_fail": 0.15,
+      "min_coverage_warn": 0.25
     },
     "github": {
       "required_all": [
@@ -200,7 +201,7 @@
       "min_hits_warn": {
         "gha_sha_pin": 4
       },
-      "min_coverage_fail": 0.55,
+      "min_coverage_fail": 0.6,
       "min_coverage_warn": 1.0
     },
     "cloudflare_backend": {
@@ -213,33 +214,33 @@
       "min_hits_warn": {
         "cloudflare_workers": 2
       },
-      "min_coverage_fail": 0.3,
-      "min_coverage_warn": 0.5
+      "min_coverage_fail": 0.35,
+      "min_coverage_warn": 0.55
     },
     "openai_apps": {
       "required_all": [
         "responses_api"
       ],
       "min_hits_fail": {
-        "responses_api": 1
+        "responses_api": 2
       },
       "min_hits_warn": {
         "responses_api": 2
       },
-      "min_coverage_fail": 0.2,
-      "min_coverage_warn": 0.333
+      "min_coverage_fail": 0.25,
+      "min_coverage_warn": 0.383
     },
     "security": {
       "required_all": [
         "owasp_top10"
       ],
       "min_hits_fail": {
-        "owasp_top10": 2
+        "owasp_top10": 3
       },
       "min_hits_warn": {
         "owasp_top10": 3
       },
-      "min_coverage_fail": 0.35,
+      "min_coverage_fail": 0.4,
       "min_coverage_warn": 0.65
     },
     "mcp": {
@@ -247,13 +248,13 @@
         "mcp_spec"
       ],
       "min_hits_fail": {
-        "mcp_spec": 1
+        "mcp_spec": 2
       },
       "min_hits_warn": {
         "mcp_spec": 2
       },
-      "min_coverage_fail": 0.3,
-      "min_coverage_warn": 0.5
+      "min_coverage_fail": 0.35,
+      "min_coverage_warn": 0.55
     },
     "backend_general": {},
     "interview": {},
@@ -261,5 +262,5 @@
     "product_ops": {},
     "product_domain": {},
     "utilities_general": {}
-    }
   }
+}
