@@ -1,12 +1,13 @@
 ---
 name: codex-sessions-skill-scan
-description: "Daily skill health scan: analyze ~/.codex/sessions plus per-repo session logs under ~/dev (default last 1 day) and summarize skill invocations + likely failures for personal skills in ~/dev/agent-skills (missing paths, tool failures, complex-task word triggers). Optional: include best-effort local OTel signals."
+description: "Session-driven skill intelligence: run daily health scans over ~/.codex sessions to detect skill failures and, when requested, audit project-local skill coverage to recommend merge/fold/improve-existing/install-new decisions grounded in memory and rollout evidence."
 ---
 
 # Codex Sessions Skill Scan
 
 ## Table of Contents
 - [Overview](#overview)
+- [Modes](#modes)
 - [Standards snapshot](#standards-snapshot-march-2026)
 - [Scope and triggers](#scope-and-triggers)
 - [Quick start](#quick-start-daily)
@@ -23,7 +24,15 @@ description: "Daily skill health scan: analyze ~/.codex/sessions plus per-repo s
 - [Decision feedback protocol](#decision-feedback-protocol)
 
 ## Overview
-This skill runs a **daily scan** over Codex session logs (global `~/.codex/sessions` and per-repo sessions under `~/dev`) to catch repeated “paper cuts” when using skills (broken file paths, missing scripts, validation commands that don’t run) and produces a short report + suggested fixes. It also highlights user words that often indicate complex tasks and adds a step-by-step reminder.
+This skill has two complementary modes:
+- `health-scan`: daily scan over Codex sessions to catch skill paper cuts (broken paths, failing commands, stale references).
+- `project-audit`: targeted audit of project-local skills plus memory/rollout evidence to recommend `merge`, `fold`, `improve-existing`, or `install-new`.
+
+Both modes are evidence-first and privacy-aware.
+
+## Modes
+- `health-scan` (default): use for daily or incident-driven skill reliability checks.
+- `project-audit`: use when the user asks what skills a project needs or how to avoid duplicate skills.
 
 ## Standards snapshot (March 2026)
 - Keep the scan evidence-first, bounded, and safe for local session analysis.
@@ -35,6 +44,8 @@ This skill runs a **daily scan** over Codex session logs (global `~/.codex/sessi
 - “Scan yesterday’s Codex sessions for skill failures (personal skills only).”
 - “Why does `$some-skill` keep failing? Look at recent session logs and tell me what’s wrong.”
 - “Daily check: any broken skill references or validation commands in the last 24 hours?”
+- “Audit our project skills and tell me what should be merged/folded versus installed new.”
+- “Use MEMORY.md + rollout summaries to recommend which local skills to update first.”
 
 ## Quick start (daily)
 Run:
@@ -49,6 +60,7 @@ python3 utilities/codex-sessions-skill-scan/scripts/scan_codex_sessions.py --day
 - **Safety-first:** redact secrets; do not copy full transcripts.
 
 ## Required inputs
+- `mode`: `health-scan` or `project-audit` (default `health-scan`).
 - `--days <float>`: how far back to scan (default `1`).
 - `--sessions-root <path>`: where to scan (default `~/.codex/sessions`).
 - `--include-dev-project-sessions` (enabled by default): also scan per-project `.codex/sessions` under `~/dev`. Use `--no-include-dev-project-sessions` to disable.
@@ -57,10 +69,20 @@ python3 utilities/codex-sessions-skill-scan/scripts/scan_codex_sessions.py --day
 - `--include-otel-collector`: include summary from `~/.agents/otel-collector/data/processed/stats.json`.
 - `--otel-collector-stats <path>`: override collector stats path (default `~/.agents/otel-collector/data/processed/stats.json`).
 - `--codex-config-toml <path>`: path to read Codex `[otel]` endpoints from (default `~/.codex/config.toml`).
+- For `project-audit` mode:
+  - repository root/cwd;
+  - `$CODEX_HOME` (fallback `~/.codex`) memory and rollout paths;
+  - local skill paths (`.agents/skills`, `.codex/skills`, `skills`).
 
 ## Deliverables
 - A “daily skill health report” in Markdown (skills invoked, skills with issues, sample error snippets).
 - A list of *suggested fix patterns* (no changes applied).
+- For `project-audit` mode:
+  - existing skill inventory;
+  - suggested updates;
+  - suggested new skills only when distinct;
+  - ranked priority list;
+  - explicit deconflict decision: `merge|fold|improve-existing|install-new`.
 
 ## Constraints
 - Personal skills only: do not patch `skills-system/` or `.system` skills.
@@ -94,9 +116,18 @@ If the user asks to apply fixes:
 2) Re-run skill gates (fail fast on first failure):
 ```bash
 cd ~/dev/agent-skills
-~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/quick_validate.py <skill-folder>
-~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/skill_gate.py <skill-folder>
+python3 utilities/skill-builder/scripts/quick_validate.py <skill-folder>
+python3 utilities/skill-builder/scripts/skill_gate.py <skill-folder>
 ```
+
+### D) Project audit mode (read-first)
+1) Read project guidance (`AGENTS.md`, `README.md`, workflow docs).
+2) Resolve memory path from `$CODEX_HOME` (fallback `~/.codex`).
+3) Read in order: memory summary -> 1-3 rollout summaries -> raw sessions only if needed.
+4) Inventory project-local skills (`.agents/skills`, `.codex/skills`, `skills`).
+5) Run full-scan deconflict across installed operational skills.
+   Exclude `.system` and meta/creator scaffolding skills unless user explicitly requests them.
+6) Return decision record with one of: `merge`, `fold`, `improve-existing`, `install-new`.
 
 ## Guardrails (non-negotiable)
 - Personal skills only: do not patch `skills-system/` or `.system` skills.
@@ -107,18 +138,22 @@ cd ~/dev/agent-skills
 - Editing skills automatically just because the scan found an issue.
 - “Fixing” system skills (`skills-system/`, `.system`) when the user asked for personal skills only.
 - Copy/pasting full session logs into chat/issues (high risk for secrets/PII).
+- Recommending new skills from themes alone without repeated workflow evidence.
+- Skipping deconflict and proposing duplicate installs by default.
 
 ## Examples
 - “Scan my Codex sessions from the last day and tell me if any skills are failing. Personal skills only.”
 - “Why does `$product-spec` keep referencing missing files? Scan yesterday’s sessions and suggest the smallest fix.”
 - “Daily scan: any broken validation commands or missing paths from the last 24 hours?”
+- “Audit this project’s local skills and tell me what to fold versus install new.”
+- “Use rollout summaries and session evidence to prioritize skill updates.”
 
 ## Validation
 - Fail fast: stop at the first failed gate, fix it, then re-run.
 - This skill’s scan script is stdlib-only; run it with `python3`.
 - When changing skill files, validate with:
-  - `~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/quick_validate.py utilities/codex-sessions-skill-scan`
-  - `~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/skill_gate.py utilities/codex-sessions-skill-scan`
+  - `python3 utilities/skill-builder/scripts/quick_validate.py utilities/codex-sessions-skill-scan`
+  - `python3 utilities/skill-builder/scripts/skill_gate.py utilities/codex-sessions-skill-scan`
 
 References used by skill-gate:
 - `references/contract.yaml`

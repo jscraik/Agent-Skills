@@ -42,9 +42,16 @@ COMMUNITIES_OUT="$RAW_DIR/communities.tsv"
 "$SCRIPT_DIR/betweenness.sh" "$NOTES_DIR" "$TOP_N" > "$BETWEENNESS_OUT"
 "$SCRIPT_DIR/find-communities-leiden.sh" "$NOTES_DIR" > "$COMMUNITIES_OUT"
 
+# ── Compute session co-invocation weights ────────────────────────────────────
+WEIGHTS_SCRIPT="$VAULT_ROOT/scripts/compute-edge-weights.py"
+if [[ -f "$WEIGHTS_SCRIPT" ]]; then
+  python3 "$WEIGHTS_SCRIPT" "$VAULT_ROOT" || true
+fi
+
 # ── Extract real skill-graph edges from See Also sections ────────────────────
 EDGES_OUT="$METRICS_DIR/skill-edges.json"
 python3 "$SCRIPT_DIR/extract-skill-edges.py" "$VAULT_ROOT" "$EDGES_OUT" || true
+
 
 SNAPSHOT_PATH="$SNAPSHOT_DIR/$STAMP.json"
 REPORT_PATH="$REPORT_DIR/$STAMP.md"
