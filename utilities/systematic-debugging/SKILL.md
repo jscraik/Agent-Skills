@@ -387,6 +387,18 @@ From debugging sessions:
 - Push boundaries with practical alternatives when simple recipes fail.
 - Enable outcomes-oriented problem solving.
 
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[process-watch]] | Monitor system processes alongside root-cause debugging |
+| [[verification-before-completion]] | Validate the fix resolves the issue before marking complete |
+| [[fix-mise]] | Debug mise trust and runtime failures as a specific case |
+| [[gh-fix-ci]] | Debug GitHub CI failures as a specific debugging domain |
+| [[evals-router]] | Route to eval workflows when debugging LLM evaluation issues |
+
+**Topic map:** [[agent-ops]]
+
 <!-- decision-feedback-protocol:v2 -->
 **Decision feedback protocol (required):**
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.

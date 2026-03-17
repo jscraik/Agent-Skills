@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-03-16 23:01:34Z",
+  "generated_at": "2026-03-17 00:13:34Z",
   "node_count": 94,
-  "edge_count": 415,
+  "edge_count": 437,
   "nodes": [
     {
       "id": "skillgrade-graders",
-      "topic": "unknown"
+      "topic": "agent-ops"
     },
     {
       "id": "skillgrade-setup",
-      "topic": "unknown"
+      "topic": "agent-ops"
     },
     {
       "id": "best-practices",
@@ -238,7 +238,7 @@
     },
     {
       "id": "product-design-critic",
-      "topic": "unknown"
+      "topic": "product-strategy"
     },
     {
       "id": "project-improver",
@@ -1531,6 +1531,10 @@
       "to": "simple-tasks"
     },
     {
+      "from": "architecture-interview",
+      "to": "project-improver"
+    },
+    {
       "from": "atlas",
       "to": "openai-docs"
     },
@@ -1541,6 +1545,10 @@
     {
       "from": "atlas",
       "to": "notebooklm"
+    },
+    {
+      "from": "backend-engineer",
+      "to": "cli-spec"
     },
     {
       "from": "beautiful-mermaid",
@@ -1575,6 +1583,14 @@
       "to": "verification-before-completion"
     },
     {
+      "from": "brainstorming",
+      "to": "product-design-critic"
+    },
+    {
+      "from": "brainstorming",
+      "to": "project-improver"
+    },
+    {
       "from": "cf-crawl",
       "to": "cloudflare-deploy"
     },
@@ -1589,6 +1605,10 @@
     {
       "from": "cf-crawl",
       "to": "visual-explainer"
+    },
+    {
+      "from": "check-pr",
+      "to": "using-git-worktrees"
     },
     {
       "from": "circleci",
@@ -1703,6 +1723,14 @@
       "to": "evals-router"
     },
     {
+      "from": "compound-engineering-router",
+      "to": "project-improver"
+    },
+    {
+      "from": "create-auth",
+      "to": "best-practices"
+    },
+    {
       "from": "diagram-cli",
       "to": "visual-explainer"
     },
@@ -1755,6 +1783,22 @@
       "to": "systematic-debugging"
     },
     {
+      "from": "fixing-metadata",
+      "to": "create-auth"
+    },
+    {
+      "from": "frontend-ui-design",
+      "to": "product-design-critic"
+    },
+    {
+      "from": "gh-fix-ci",
+      "to": "using-git-worktrees"
+    },
+    {
+      "from": "gh-workflow",
+      "to": "using-git-worktrees"
+    },
+    {
       "from": "insight-report",
       "to": "codex-sessions-skill-scan"
     },
@@ -1769,6 +1813,10 @@
     {
       "from": "insight-report",
       "to": "visual-explainer"
+    },
+    {
+      "from": "interview-me",
+      "to": "product-design-critic"
     },
     {
       "from": "markdown-converter",
@@ -1787,6 +1835,10 @@
       "to": "notebooklm"
     },
     {
+      "from": "mcp-builder",
+      "to": "best-practices"
+    },
+    {
       "from": "notebooklm",
       "to": "video-transcript-downloader"
     },
@@ -1803,6 +1855,10 @@
       "to": "compound-engineering-router"
     },
     {
+      "from": "openai-docs",
+      "to": "atlas"
+    },
+    {
       "from": "process-watch",
       "to": "systematic-debugging"
     },
@@ -1817,6 +1873,14 @@
     {
       "from": "process-watch",
       "to": "verification-before-completion"
+    },
+    {
+      "from": "product-spec",
+      "to": "product-design-critic"
+    },
+    {
+      "from": "product-spec",
+      "to": "project-improver"
     },
     {
       "from": "recon-workbench",
@@ -2007,6 +2071,10 @@
       "to": "design-system"
     },
     {
+      "from": "workers-mcp",
+      "to": "best-practices"
+    },
+    {
       "from": "writing-plans",
       "to": "brainstorming"
     },
@@ -2041,6 +2109,26 @@
     {
       "from": "xcode-makefiles",
       "to": "recon-workbench"
+    },
+    {
+      "from": "agent-browser",
+      "to": "atlas"
+    },
+    {
+      "from": "apple-app-creator",
+      "to": "product-spec"
+    },
+    {
+      "from": "codex-home-audit",
+      "to": "process-watch"
+    },
+    {
+      "from": "fix-mise",
+      "to": "process-watch"
+    },
+    {
+      "from": "markdown-converter",
+      "to": "cf-crawl"
     }
   ]
 }

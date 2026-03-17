@@ -10,6 +10,8 @@ covers:
   - codex-tooling
   - debugging
   - task-management
+- [[skillgrade-graders]] — Author deterministic and LLM rubric graders for skillgrade evaluations.
+- [[skillgrade-setup]] — Set up and run skillgrade evaluation pipelines for Agent Skills.
 ---
 
 # Agent Ops
