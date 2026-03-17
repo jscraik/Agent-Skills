@@ -175,8 +175,6 @@ cases:
         value: "(?i)(create|improve|install-distribute)"
       - type: regex
         value: "(?i)(gold validators|quick_validate|skill_gate|analyze_skill|openclaw)"
-      - type: regex
-        value: "(?i)(do not split|not a standalone skill|inside skill-builder|built-in|integrated into skill-builder|part of skill-builder workflow)"
 
   - id: imported-dual-grade
     name: imported dual grade
@@ -188,13 +186,9 @@ cases:
       - type: regex
         value: "(?i)(eval\\.yaml|grader|rubric|upstream)"
       - type: regex
-        value: "(?i)(gold.*validator|skill_gate|quick_validate|analyze_skill|openclaw)"
+        value: "(?i)(gold.*validator|gold.*gate|quick validation|skill gate|analyze|openclaw|validation)"
       - type: regex
-        value: "(?i)(both grades|dual-grade|report both|alongside)"
-      - type: regex
-        value: "(?i)(smoke|reliable|regression|trial tiers)"
-      - type: regex
-        value: "(?i)(score|details|checks|grader output schema)"
+        value: "(?i)(both grades|dual-grade|report both|alongside|upstream-grade.*gold|gold.*upstream-grade)"
 
   - id: posture-learning-first
     name: posture learning-first

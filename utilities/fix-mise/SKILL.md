@@ -90,6 +90,7 @@ Diagnose and repair `mise` trust, runtime, and version-drift failures with the s
 | [[codex-home-audit]] | Address mise issues found during a home directory audit |
 | [[verification-before-completion]] | Confirm mise is healthy after the fix |
 | [[systematic-debugging]] | Debug root cause of mis trust or shim failures |
+| [[process-watch]] | Watch process health while diagnosing mise shim issues |
 
 **Topic map:** [[backend-platform]]
 

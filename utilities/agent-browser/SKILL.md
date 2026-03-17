@@ -94,6 +94,7 @@ Use the `agent-browser` CLI for deterministic browser automation through accessi
 | [[ui-visual-regression]] | Capture snapshots with agent-browser for regression checks |
 | [[fixing-accessibility]] | Probe ARIA and keyboard behaviour via browser automation |
 | [[agentation]] | Wire agent-browser actions into Agentation self-driving mode |
+| [[atlas]] | Use Atlas for macOS ChatGPT app control vs agent-browser for web |
 
 **Topic map:** [[frontend-ui]]
 

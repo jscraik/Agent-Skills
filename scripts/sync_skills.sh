@@ -105,6 +105,20 @@ fi
 # Remove stale symlinks only (keep any real files that might be intentional).
 find "$skills_dir" -maxdepth 1 -type l -exec rm -f {} +
 
+# Remove meta/internal skills from the flat runtime surface so they do not
+# appear as user-selectable skills in Codex.
+hidden_flat_skills=(
+  "skill-creator"
+  "skillgrade-graders"
+  "skillgrade-setup"
+)
+for hidden_skill in "${hidden_flat_skills[@]}"; do
+  if [ -e "$skills_dir/$hidden_skill" ]; then
+    rm -rf -- "$skills_dir/$hidden_skill"
+    echo "Removed hidden flat skill: $hidden_skill"
+  fi
+done
+
 # Recreate symlinks for all discovered SKILL.md directories (with exclusions).
 skill_files_cmd() {
   # Allowlist of trusted category directories — only these are scanned.

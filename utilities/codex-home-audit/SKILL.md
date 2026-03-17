@@ -114,6 +114,7 @@ Minimize drift by:
 | [[insight-report]] | Generate a usage report to inform audit priorities |
 | [[verification-before-completion]] | Verify fixes before marking the audit complete |
 | [[fix-mise]] | Fix mise trust/runtime issues found during audit |
+| [[process-watch]] | Check process resource usage during a home directory audit |
 
 **Topic map:** [[agent-ops]]
 

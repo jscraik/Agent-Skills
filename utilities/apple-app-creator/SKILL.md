@@ -101,6 +101,7 @@ scripts/init.sh --project-mode adopt
 | [[fixing-accessibility]] | Add UIAccessibility labels to native views |
 | [[recon-workbench]] | Audit the app binary and entitlements after creation |
 | [[simple-tasks]] | Track app build and release tasks locally |
+| [[product-spec]] | Spec the app feature set before scaffolding |
 
 **Topic map:** [[mobile-native]]
 

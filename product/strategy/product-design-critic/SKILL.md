@@ -304,6 +304,7 @@ This skill succeeds when the next design decision becomes clearer, more opiniona
 | [[interview-me]] | Run a requirements interview before critiquing the surface |
 | [[visual-explainer]] | Present critique findings as a visual explainer page |
 
+**Topic map:** [[product-strategy]]
 <!-- decision-feedback-protocol:v2 -->
 - Question timing is runtime-owned. Do not make the skill itself decide when feedback is asked.
 - If post-run feedback capture is enabled, emit a non-blocking `post_run_feedback` event via Codex `request_user_input` after result delivery.

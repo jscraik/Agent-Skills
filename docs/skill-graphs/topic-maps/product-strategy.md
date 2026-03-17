@@ -8,6 +8,7 @@ covers:
   - user-research
   - ideation
   - project-analysis
+- [[product-design-critic]] — Critique and shape a software product surface, workflow, card, panel, or chat UX with opinionated JTBD-grounded recommendations.
 ---
 
 # Product Strategy
