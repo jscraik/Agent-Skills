@@ -48,6 +48,8 @@ Current baseline markers:
 - MUST respect `safe-area-inset` for fixed elements
 - MUST show errors next to where the action happens
 - NEVER block paste in `input` or `textarea` elements
+- NEVER leave production-intent actions wired to `href="#"` or equivalent dead links unless placeholders were explicitly requested
+- MUST show an explicit active state for current page/location in navigation surfaces
 
 ## Animation
 
@@ -73,6 +75,7 @@ Current baseline markers:
 
 - MUST use a fixed `z-index` scale (no arbitrary `z-*`)
 - SHOULD use `size-*` for square elements instead of `w-*` + `h-*`
+- SHOULD align CTA/button baselines in comparable card rows (for example pricing/features) when cards are presented side-by-side
 
 ## Performance
 
@@ -134,6 +137,7 @@ Current baseline markers:
 - Large rewrites for small issues.
 - Advice without concrete snippet-level fixes.
 - Ignoring project conventions or introducing unrelated architecture changes.
+- Polishing visuals while leaving dead interactions, missing active navigation context, or misaligned comparison actions unfixed.
 
 ## Variation
 - Adapt enforcement depth for design-system implementation, component QA, or pre-release polish passes.

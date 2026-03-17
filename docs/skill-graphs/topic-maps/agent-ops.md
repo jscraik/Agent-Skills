@@ -12,6 +12,8 @@ covers:
   - task-management
 - [[skillgrade-graders]] — Author deterministic and LLM rubric graders for skillgrade evaluations.
 - [[skillgrade-setup]] — Set up and run skillgrade evaluation pipelines for Agent Skills.
+- [[skill-creator]] — Create or update skills that extend Codex capabilities with specialised workflows.
+- [[skill-installer]] — Install curated skills from openai/skills or GitHub repos into CODEX_HOME.
 ---
 
 # Agent Ops

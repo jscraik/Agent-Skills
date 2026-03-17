@@ -156,6 +156,7 @@ Start with these headings and no text before them:
 - if the request is out of scope, say why and suggest the closest next step.
 
 On the first response, stay compact: no deep implementation, no file scaffolding, and no validator dump unless the user asked for it or the inputs are already complete.
+For `install-distribute`, the first response must still explicitly state `deconflict-first` ordering, a capability overlap matrix, and an artifact-uplift scan across incoming `references/`, `assets/`, and `agents/` before any install decision.
 
 ## Output contract
 For non-trivial `improve`, `eval`, or `benchmark-lite` responses, include a deterministic summary block after prose:
@@ -400,6 +401,7 @@ Use `request_user_input` for missing install decisions when the turn fits in 1-3
 - Keep installs auditable: source, ref, staging path, validations, and final destination should all be reported.
 - Run deconflict-first preflight as step zero before import-quality validation:
   - build a capability overlap matrix (`incoming skill` vs `all installed operational skills` in the chosen scope);
+  - run an artifact-uplift scan across incoming `references/`, `assets/`, and `agents/` (when present) and map reusable improvements into overlapping installed skills;
   - emit one explicit decision (`merge|fold|improve-existing|install-new`) before any install/upgrade edits;
   - if `merge|fold|improve-existing`, do not proceed with `install-new` unless the user explicitly overrides.
 - Run a risk scan before promotion and stop on high-severity findings unless the user explicitly approves continuation.
@@ -421,6 +423,7 @@ Use `request_user_input` for missing install decisions when the turn fits in 1-3
 - source summary, staging boundary, and any deconflict or risk findings;
 - capability overlap matrix for install/update decisions (incoming vs existing operational skills);
 - explicit deconflict decision record (`merge`, `fold`, `improve-existing`, or `install-new`) and why;
+- artifact-uplift matrix (`incoming artifact` -> `target installed skill` -> `adopt|adapt|reject` with rationale), covering `references/`, `assets/`, and `agents/` when present;
 - upstream eval interop note when present: profile presets, threshold behavior, grader weighting, and schema checks preserved from source package;
 - validator results for each installed target;
 - restart reminder after successful install/update;
@@ -429,6 +432,7 @@ Use `request_user_input` for missing install decisions when the turn fits in 1-3
 ### Install-distribute validation
 - run the installed skill through quick validation, skill gate, analyzer, and OpenClaw-style guard checks;
 - run evals for newly installed skills after write completion;
+- when overlap leads to `merge|fold|improve-existing`, run validators on every touched installed skill after uplift changes;
 - when imported source includes upstream eval contracts (for example `eval.yaml` or grader/rubric bundles), run upstream-grade checks and report those results alongside gold-gate results;
 - for skillgrade-style packages specifically, preserve and report upstream semantics:
   - smoke/reliable/regression trial tiers;

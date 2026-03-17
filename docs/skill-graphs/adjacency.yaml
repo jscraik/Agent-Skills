@@ -3,10 +3,6 @@
 # Edit this file to add/change cross-skill links.
 # extract-skill-edges.py reads this as a seed.
 #
-# Format:
-#   skill-name:
-#     related-skill: "when to use together"
-#
 
 1password:
   bootstrap: Provision dev environment secrets via 1Password during bootstrap
@@ -478,12 +474,13 @@ stitch-remotion:
   sora: Use Sora for AI-generated video alternative to Remotion
   stitch-loop: Generate the Stitch screens that feed this skill
 systematic-debugging:
-  evals-router: Route to eval workflows when debugging LLM evaluation issues
-  fix-mise: Debug mise trust and runtime failures as a specific case
-  gh-fix-ci: Debug GitHub CI failures as a specific debugging domain
-  process-watch: Monitor system processes alongside root-cause debugging
-  verification-before-completion: Validate the fix resolves the issue before marking
-    complete
+  evals-router: When the bug is in an LLM evaluation pipeline or judge prompt
+  gh-fix-ci: When the failure is a broken GitHub Actions CI check
+  test-driven-development: 'Phase 4, Step 1: write the failing test that captures
+    the root cause'
+  verification-before-completion: After implementing the fix — prove it works before
+    claiming done
+  writing-plans: When 3+ fixes have failed and you need to re-plan the approach
 test-driven-development:
   evals-router: When the failing "test" is an LLM evaluation — route to the correct
     eval workflow

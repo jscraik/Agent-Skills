@@ -39,6 +39,33 @@ graph_json = json.dumps(data)
 node_count = data.get("node_count", len(data.get("nodes", [])))
 edge_count = data.get("edge_count", len(data.get("edges", [])))
 
+# Detect GitHub repo URL for SKILL.md links
+import subprocess as _sp
+try:
+    _remote = _sp.check_output(["git", "-C", str(ROOT), "remote", "get-url", "origin"],
+                               text=True, stderr=_sp.DEVNULL).strip()
+    _remote = _remote.rstrip(".git").replace("git@github.com:", "https://github.com/")
+    GITHUB_BASE = _remote + "/blob/main"
+except Exception:
+    GITHUB_BASE = "https://github.com/jscraik/Agent-Skills/blob/main"
+
+# Build skill->path map from SKILL.md locations
+_skill_paths: dict[str, str] = {}
+_seen_real: set[str] = set()
+for _md in sorted(ROOT.rglob("SKILL.md")):
+    _skill = _md.parts[-2] if len(_md.parts) >= 2 else None
+    _real  = str(_md.resolve())
+    if not _skill or _real in _seen_real:
+        continue
+    _seen_real.add(_real)
+    try:
+        _rel = _md.relative_to(ROOT)
+        _skill_paths[_skill] = f"{GITHUB_BASE}/{_rel}"
+    except ValueError:
+        pass
+
+skill_urls_json = json.dumps(_skill_paths)
+
 html = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -191,6 +218,7 @@ svg{{width:100%;height:100%}}
     <div id="db" class="db"></div>
     <div id="dnm" class="dnm"></div>
     <div id="dmt" class="dmt"></div>
+    <div id="dgithub" style="margin-bottom:10px"></div>
     <div class="ds">Connected Skills</div>
     <div id="dcc" class="dcc"></div>
   </div>
@@ -198,6 +226,7 @@ svg{{width:100%;height:100%}}
 <script src="https://d3js.org/d3.v7.min.js"></script>
 <script>
 const GRAPH={graph_json};
+const SKILL_URLS={skill_urls_json};
 const CLR={{
   "agent-ops":"#7c6af5","backend-platform":"#22d3b0",
   "content-publishing":"#f97316","frontend-ui":"#38bdf8",
@@ -297,7 +326,11 @@ function sel(id){{
   db.textContent=TLB[node.topic]||node.topic;db.style.cssText=`background:${{c}}20;color:${{c}};border-color:${{c}}44`;
   const stableTag=node.stability==="stable"?` <span style="font-size:10px;opacity:.7">★ stable hub</span>`:"";
   document.getElementById("dnm").innerHTML=node.id+stableTag;
-  document.getElementById("dmt").textContent=`${{conn.size}} connection${{conn.size!==1?"s":""}} · ${{node.topic}}`;
+  const inD=node.in_degree||0;const outD=node.out_degree||0;
+  document.getElementById("dmt").textContent=`${{conn.size}} connection${{conn.size!==1?"s":""}} · ${{node.topic}} · ↓${{inD}} in / ↑${{outD}} out`;
+  const ghEl=document.getElementById("dgithub");
+  const ghUrl=SKILL_URLS[node.id];
+  ghEl.innerHTML=ghUrl?`<a href="${{ghUrl}}" target="_blank" rel="noopener" style="font-size:11px;color:var(--text-dim);text-decoration:none;border:1px solid var(--border);padding:3px 10px;border-radius:6px;display:inline-block" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text-dim)'">Open SKILL.md ↗</a>`:"";
   const dcc=document.getElementById("dcc");dcc.innerHTML="";
   if(conn.size===0){{dcc.innerHTML='<span style="color:var(--text-muted);font-size:12px">No cross-skill links yet</span>';}}
   else{{;

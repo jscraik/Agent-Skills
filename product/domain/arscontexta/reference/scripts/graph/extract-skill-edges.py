@@ -127,6 +127,35 @@ edges = list(edge_map.values())
 # Sort edges by weight desc for readable JSON
 edges.sort(key=lambda e: -e.get("weight", 1.0))
 
+# ── Annotate nodes with in_degree, out_degree, stability ─────────────────────
+from collections import Counter as _Counter
+in_deg  = _Counter(e["to"]   for e in edges)
+out_deg = _Counter(e["from"] for e in edges)
+
+# Read stability from SKILL.md frontmatter
+import re as _re
+_FM  = _re.compile(r"^---\n(.*?)\n---", _re.DOTALL)
+_STA = _re.compile(r"^stability\s*:\s*(\S+)", _re.MULTILINE)
+_stability: dict[str, str] = {}
+for _md in VAULT_ROOT.rglob("SKILL.md"):
+    _skill = _md.parts[-2] if len(_md.parts) >= 2 else None
+    if not _skill or _skill in _stability:
+        continue
+    try:
+        _fm = _FM.match(_md.read_text(encoding="utf-8", errors="replace"))
+        if _fm:
+            _m = _STA.search(_fm.group(1))
+            if _m:
+                _stability[_skill] = _m.group(1)
+    except Exception:
+        pass
+
+for node in nodes:
+    node["in_degree"]  = in_deg.get(node["id"], 0)
+    node["out_degree"] = out_deg.get(node["id"], 0)
+    if node["id"] in _stability:
+        node["stability"] = _stability[node["id"]]
+
 result = {
     "schema_version": 2,
     "generated_at":   datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%SZ"),
