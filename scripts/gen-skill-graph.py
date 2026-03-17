@@ -233,8 +233,8 @@ function updL(tf){{
 }}
 updL(null);
 const svg=d3.select("#svg"),cw=document.getElementById("cw");
-const links=GRAPH.edges.map(e=>({{source:e.from,target:e.to}}));
-const nodes=GRAPH.nodes.map(n=>({{...n}}));
+const links=GRAPH.edges.map(function(e){{return {{source:e.from,target:e.to,weight:e.weight||1,desc:e.desc||""}};}}); 
+const nodes=GRAPH.nodes.map(function(n){{return Object.assign({{}},n);}});
 const co=Object.keys(TLB);
 function cp(t){{
   const i=co.indexOf(t),a=(i/co.length)*Math.PI*2-Math.PI/2;
@@ -245,7 +245,9 @@ nodes.forEach(n=>{{const p=cp(n.topic);n.x=p.x+(Math.random()-.5)*70;n.y=p.y+(Ma
 const zoom=d3.zoom().scaleExtent([0.08,5]).on("zoom",e=>g.attr("transform",e.transform));
 svg.call(zoom);
 const g=svg.append("g");
-const lk=g.append("g").selectAll("line").data(links).join("line").attr("class","link");
+const lk=g.append("g").selectAll("line").data(links).join("line").attr("class","link")
+  .attr("stroke-width",function(l){{return Math.min(3.5,0.6+l.weight*0.35);}})
+  .attr("stroke-opacity",function(l){{return Math.min(0.65,0.12+l.weight*0.1);}});
 const deg={{}};links.forEach(l=>{{deg[l.source]=(deg[l.source]||0)+1;deg[l.target]=(deg[l.target]||0)+1;}});
 const nd=g.append("g").selectAll("g").data(nodes).join("g").attr("class","node")
   .call(d3.drag()
@@ -254,11 +256,12 @@ const nd=g.append("g").selectAll("g").data(nodes).join("g").attr("class","node")
     .on("end",  (e,d)=>{{if(!e.active)sim.alphaTarget(0);d.fx=null;d.fy=null;}}))
   .on("click",(e,d)=>{{e.stopPropagation();sel(d.id);}});
 nd.append("circle")
-  .attr("r",d=>Math.max(5,Math.min(12,5+(deg[d.id]||0)*0.7)))
+  .attr("r",d=>Math.max(5,Math.min(14,5+(deg[d.id]||0)*0.7)))
   .attr("fill",d=>CLR[d.topic]||CLR.unknown)
   .attr("fill-opacity",0.82)
   .attr("stroke",d=>CLR[d.topic]||CLR.unknown)
-  .attr("stroke-opacity",0.45);
+  .attr("stroke-opacity",d=>d.stability==="stable"?0.9:0.45)
+  .attr("stroke-width",d=>d.stability==="stable"?3:1.5);
 nd.append("text").attr("dy",13).text(d=>d.id);
 function cf(alpha){{nodes.forEach(n=>{{const p=cp(n.topic);n.vx+=(p.x-n.x)*alpha*0.05;n.vy+=(p.y-n.y)*alpha*0.05;}});}}
 const sim=d3.forceSimulation(nodes)
@@ -292,16 +295,29 @@ function sel(id){{
   const c=CLR[node.topic]||CLR.unknown;
   const db=document.getElementById("db");
   db.textContent=TLB[node.topic]||node.topic;db.style.cssText=`background:${{c}}20;color:${{c}};border-color:${{c}}44`;
-  document.getElementById("dnm").textContent=node.id;
+  const stableTag=node.stability==="stable"?` <span style="font-size:10px;opacity:.7">★ stable hub</span>`:"";
+  document.getElementById("dnm").innerHTML=node.id+stableTag;
   document.getElementById("dmt").textContent=`${{conn.size}} connection${{conn.size!==1?"s":""}} · ${{node.topic}}`;
   const dcc=document.getElementById("dcc");dcc.innerHTML="";
   if(conn.size===0){{dcc.innerHTML='<span style="color:var(--text-muted);font-size:12px">No cross-skill links yet</span>';}}
-  else{{[...conn].sort().forEach(cid=>{{
-    const cn=nodes.find(n=>n.id===cid);
-    const btn=document.createElement("div");btn.className="cb";btn.textContent=cid;
-    if(cn)btn.style.borderColor=CLR[cn.topic]+"44";
-    btn.addEventListener("click",()=>sel(cid));dcc.appendChild(btn);
-  }});}}
+  else{{;
+    const weightMap={{}};
+    links.forEach(function(l){{
+      const s=typeof l.source==="object"?l.source.id:l.source;
+      const t=typeof l.target==="object"?l.target.id:l.target;
+      if(s===id||t===id){{const peer=s===id?t:s;weightMap[peer]={{w:l.weight,desc:l.desc||""}};}}
+    }});
+    [...conn].sort().forEach(function(cid){{
+      const cn=nodes.find(function(n){{return n.id===cid;}});
+      const ew=weightMap[cid]||{{w:1,desc:""}};
+      const btn=document.createElement("div");btn.className="cb";
+      btn.title=ew.desc;
+      const wBadge=ew.w>1.5?` <span style="font-size:9px;opacity:.6">${{ew.w.toFixed(1)}}×</span>`:"";
+      btn.innerHTML=cid+wBadge;
+      if(cn)btn.style.borderColor=CLR[cn.topic]+"44";
+      btn.addEventListener("click",function(){{sel(cid);}});dcc.appendChild(btn);
+    }});
+  }}
 }}
 function clrSel(){{
   sId=null;nd.classed("hl",false).classed("dim",false);lk.classed("hl",false);

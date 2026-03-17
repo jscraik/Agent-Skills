@@ -1,16 +1,20 @@
 {
-  "schema_version": 1,
-  "generated_at": "2026-03-17 00:13:34Z",
+  "schema_version": 2,
+  "generated_at": "2026-03-17 00:38:29Z",
   "node_count": 94,
-  "edge_count": 437,
+  "edge_count": 414,
   "nodes": [
     {
-      "id": "skillgrade-graders",
+      "id": "openai-docs",
       "topic": "agent-ops"
     },
     {
-      "id": "skillgrade-setup",
-      "topic": "agent-ops"
+      "id": "skill-creator",
+      "topic": "unknown"
+    },
+    {
+      "id": "skill-installer",
+      "topic": "unknown"
     },
     {
       "id": "best-practices",
@@ -179,10 +183,6 @@
     {
       "id": "docs-expert",
       "topic": "product-strategy"
-    },
-    {
-      "id": "openai-docs",
-      "topic": "agent-ops"
     },
     {
       "id": "arscontexta",
@@ -383,1752 +383,2490 @@
   ],
   "edges": [
     {
-      "from": "skillgrade-graders",
-      "to": "skillgrade-setup"
-    },
-    {
-      "from": "skillgrade-graders",
-      "to": "evals-router"
-    },
-    {
-      "from": "skillgrade-graders",
-      "to": "skill-builder"
-    },
-    {
-      "from": "skillgrade-graders",
-      "to": "test-driven-development"
-    },
-    {
-      "from": "skillgrade-setup",
-      "to": "skillgrade-graders"
-    },
-    {
-      "from": "skillgrade-setup",
-      "to": "evals-router"
-    },
-    {
-      "from": "skillgrade-setup",
-      "to": "skill-builder"
-    },
-    {
-      "from": "skillgrade-setup",
-      "to": "verification-before-completion"
-    },
-    {
       "from": "best-practices",
-      "to": "security-threat-model"
-    },
-    {
-      "from": "best-practices",
-      "to": "security-ownership-map"
-    },
-    {
-      "from": "best-practices",
-      "to": "create-auth"
-    },
-    {
-      "from": "best-practices",
-      "to": "1password"
+      "to": "create-auth",
+      "weight": 4.219,
+      "desc": "Apply auth-specific best practices during implementation"
     },
     {
       "from": "create-auth",
-      "to": "security-best-practices"
-    },
-    {
-      "from": "create-auth",
-      "to": "1password"
-    },
-    {
-      "from": "create-auth",
-      "to": "mcp-builder"
-    },
-    {
-      "from": "create-auth",
-      "to": "workers-mcp"
-    },
-    {
-      "from": "create-auth",
-      "to": "security-threat-model"
+      "to": "mcp-builder",
+      "weight": 4.219,
+      "desc": "Secure MCP server authentication using Better Auth"
     },
     {
       "from": "backend-engineer",
-      "to": "cloudflare-deploy"
-    },
-    {
-      "from": "backend-engineer",
-      "to": "workers-mcp"
-    },
-    {
-      "from": "backend-engineer",
-      "to": "mcp-builder"
-    },
-    {
-      "from": "backend-engineer",
-      "to": "security-best-practices"
-    },
-    {
-      "from": "backend-engineer",
-      "to": "writing-plans"
-    },
-    {
-      "from": "cli-spec",
-      "to": "writing-plans"
-    },
-    {
-      "from": "cli-spec",
-      "to": "test-driven-development"
-    },
-    {
-      "from": "cli-spec",
-      "to": "docs-expert"
-    },
-    {
-      "from": "cli-spec",
-      "to": "product-spec"
+      "to": "mcp-builder",
+      "weight": 4.219,
+      "desc": "Build MCP server tools alongside the backend"
     },
     {
       "from": "mcp-builder",
-      "to": "workers-mcp"
+      "to": "openai-docs",
+      "weight": 4.219,
+      "desc": "Use official MCP schema docs when designing tool schemas"
     },
     {
       "from": "mcp-builder",
-      "to": "chatgpt-apps"
-    },
-    {
-      "from": "mcp-builder",
-      "to": "openai-docs"
-    },
-    {
-      "from": "mcp-builder",
-      "to": "backend-engineer"
-    },
-    {
-      "from": "mcp-builder",
-      "to": "security-best-practices"
-    },
-    {
-      "from": "workers-mcp",
-      "to": "mcp-builder"
-    },
-    {
-      "from": "workers-mcp",
-      "to": "cloudflare-deploy"
-    },
-    {
-      "from": "workers-mcp",
-      "to": "chatgpt-apps"
-    },
-    {
-      "from": "workers-mcp",
-      "to": "security-best-practices"
-    },
-    {
-      "from": "workers-mcp",
-      "to": "openai-docs"
-    },
-    {
-      "from": "better-icons",
-      "to": "frontend-ui-design"
-    },
-    {
-      "from": "better-icons",
-      "to": "design-system"
-    },
-    {
-      "from": "better-icons",
-      "to": "figma"
-    },
-    {
-      "from": "better-icons",
-      "to": "shadcn-ui"
-    },
-    {
-      "from": "better-icons",
-      "to": "favicon-generator"
-    },
-    {
-      "from": "favicon-generator",
-      "to": "fixing-metadata"
-    },
-    {
-      "from": "favicon-generator",
-      "to": "design-system"
-    },
-    {
-      "from": "favicon-generator",
-      "to": "og-image-creator"
-    },
-    {
-      "from": "favicon-generator",
-      "to": "cloudflare-deploy"
-    },
-    {
-      "from": "imagegen",
-      "to": "sora"
-    },
-    {
-      "from": "imagegen",
-      "to": "og-image-creator"
-    },
-    {
-      "from": "imagegen",
-      "to": "nano-banana-builder"
-    },
-    {
-      "from": "imagegen",
-      "to": "youtube-titles-thumbnails"
-    },
-    {
-      "from": "imagegen",
-      "to": "visual-explainer"
-    },
-    {
-      "from": "nano-banana-builder",
-      "to": "imagegen"
-    },
-    {
-      "from": "nano-banana-builder",
-      "to": "sora"
-    },
-    {
-      "from": "nano-banana-builder",
-      "to": "chatgpt-apps"
-    },
-    {
-      "from": "nano-banana-builder",
-      "to": "mcp-builder"
-    },
-    {
-      "from": "og-image-creator",
-      "to": "fixing-metadata"
-    },
-    {
-      "from": "og-image-creator",
-      "to": "favicon-generator"
-    },
-    {
-      "from": "og-image-creator",
-      "to": "imagegen"
-    },
-    {
-      "from": "og-image-creator",
-      "to": "cloudflare-deploy"
-    },
-    {
-      "from": "sora",
-      "to": "imagegen"
-    },
-    {
-      "from": "sora",
-      "to": "remotion"
-    },
-    {
-      "from": "sora",
-      "to": "nano-banana-builder"
-    },
-    {
-      "from": "sora",
-      "to": "youtube-hooks-scripts"
-    },
-    {
-      "from": "threejs-builder",
-      "to": "ui-ux-creative-coding"
-    },
-    {
-      "from": "threejs-builder",
-      "to": "frontend-ui-design"
-    },
-    {
-      "from": "threejs-builder",
-      "to": "visual-explainer"
-    },
-    {
-      "from": "threejs-builder",
-      "to": "agentation"
-    },
-    {
-      "from": "stitch-react-components",
-      "to": "stitch-loop"
-    },
-    {
-      "from": "stitch-react-components",
-      "to": "react-ui-patterns"
-    },
-    {
-      "from": "stitch-react-components",
-      "to": "design-system"
-    },
-    {
-      "from": "stitch-react-components",
-      "to": "figma"
-    },
-    {
-      "from": "stitch-react-components",
-      "to": "baseline-ui"
-    },
-    {
-      "from": "agentation",
-      "to": "agent-browser"
-    },
-    {
-      "from": "agentation",
-      "to": "playwright-interactive"
-    },
-    {
-      "from": "agentation",
-      "to": "frontend-ui-design"
-    },
-    {
-      "from": "agentation",
-      "to": "visual-explainer"
-    },
-    {
-      "from": "figma",
-      "to": "design-system"
-    },
-    {
-      "from": "figma",
-      "to": "frontend-ui-design"
-    },
-    {
-      "from": "figma",
-      "to": "stitch-react-components"
-    },
-    {
-      "from": "figma",
-      "to": "better-icons"
-    },
-    {
-      "from": "figma",
-      "to": "og-image-creator"
-    },
-    {
-      "from": "playwright-interactive",
-      "to": "agent-browser"
-    },
-    {
-      "from": "playwright-interactive",
-      "to": "ui-visual-regression"
-    },
-    {
-      "from": "playwright-interactive",
-      "to": "fixing-accessibility"
-    },
-    {
-      "from": "playwright-interactive",
-      "to": "agentation"
-    },
-    {
-      "from": "stitch-loop",
-      "to": "stitch-react-components"
-    },
-    {
-      "from": "stitch-loop",
-      "to": "stitch-remotion"
-    },
-    {
-      "from": "stitch-loop",
-      "to": "ui-cloner"
-    },
-    {
-      "from": "stitch-loop",
-      "to": "frontend-ui-design"
-    },
-    {
-      "from": "ui-cloner",
-      "to": "stitch-loop"
-    },
-    {
-      "from": "ui-cloner",
-      "to": "frontend-ui-design"
-    },
-    {
-      "from": "ui-cloner",
-      "to": "design-system"
-    },
-    {
-      "from": "ui-cloner",
-      "to": "figma"
-    },
-    {
-      "from": "baseline-ui",
-      "to": "design-system"
-    },
-    {
-      "from": "baseline-ui",
-      "to": "fixing-accessibility"
-    },
-    {
-      "from": "baseline-ui",
-      "to": "frontend-ui-design"
-    },
-    {
-      "from": "baseline-ui",
-      "to": "ui-visual-regression"
-    },
-    {
-      "from": "baseline-ui",
-      "to": "shadcn-ui"
-    },
-    {
-      "from": "design-system",
-      "to": "baseline-ui"
-    },
-    {
-      "from": "design-system",
-      "to": "frontend-ui-design"
-    },
-    {
-      "from": "design-system",
-      "to": "figma"
-    },
-    {
-      "from": "design-system",
-      "to": "shadcn-ui"
-    },
-    {
-      "from": "design-system",
-      "to": "fixing-accessibility"
-    },
-    {
-      "from": "frontend-ui-design",
-      "to": "design-system"
-    },
-    {
-      "from": "frontend-ui-design",
-      "to": "baseline-ui"
-    },
-    {
-      "from": "frontend-ui-design",
-      "to": "figma"
-    },
-    {
-      "from": "frontend-ui-design",
-      "to": "fixing-accessibility"
-    },
-    {
-      "from": "frontend-ui-design",
-      "to": "ui-ux-creative-coding"
-    },
-    {
-      "from": "react-ui-patterns",
-      "to": "frontend-ui-design"
-    },
-    {
-      "from": "react-ui-patterns",
-      "to": "shadcn-ui"
-    },
-    {
-      "from": "react-ui-patterns",
-      "to": "stitch-react-components"
-    },
-    {
-      "from": "react-ui-patterns",
-      "to": "baseline-ui"
-    },
-    {
-      "from": "react-ui-patterns",
-      "to": "ui-ux-creative-coding"
-    },
-    {
-      "from": "remotion",
-      "to": "sora"
-    },
-    {
-      "from": "remotion",
-      "to": "stitch-remotion"
-    },
-    {
-      "from": "remotion",
-      "to": "imagegen"
-    },
-    {
-      "from": "remotion",
-      "to": "slides"
-    },
-    {
-      "from": "remotion",
-      "to": "video-transcript-downloader"
-    },
-    {
-      "from": "shadcn-ui",
-      "to": "react-ui-patterns"
-    },
-    {
-      "from": "shadcn-ui",
-      "to": "design-system"
-    },
-    {
-      "from": "shadcn-ui",
-      "to": "baseline-ui"
-    },
-    {
-      "from": "shadcn-ui",
-      "to": "fixing-accessibility"
-    },
-    {
-      "from": "shadcn-ui",
-      "to": "figma"
-    },
-    {
-      "from": "stitch-remotion",
-      "to": "stitch-loop"
-    },
-    {
-      "from": "stitch-remotion",
-      "to": "remotion"
-    },
-    {
-      "from": "stitch-remotion",
-      "to": "slides"
-    },
-    {
-      "from": "stitch-remotion",
-      "to": "sora"
-    },
-    {
-      "from": "ui-ux-creative-coding",
-      "to": "frontend-ui-design"
-    },
-    {
-      "from": "ui-ux-creative-coding",
-      "to": "threejs-builder"
-    },
-    {
-      "from": "ui-ux-creative-coding",
-      "to": "react-ui-patterns"
-    },
-    {
-      "from": "ui-ux-creative-coding",
-      "to": "baseline-ui"
-    },
-    {
-      "from": "ui-ux-creative-coding",
-      "to": "design-system"
-    },
-    {
-      "from": "ui-visual-regression",
-      "to": "playwright-interactive"
-    },
-    {
-      "from": "ui-visual-regression",
-      "to": "baseline-ui"
-    },
-    {
-      "from": "ui-visual-regression",
-      "to": "agent-browser"
-    },
-    {
-      "from": "ui-visual-regression",
-      "to": "stitch-react-components"
-    },
-    {
-      "from": "fixing-accessibility",
-      "to": "baseline-ui"
-    },
-    {
-      "from": "fixing-accessibility",
-      "to": "fixing-metadata"
-    },
-    {
-      "from": "fixing-accessibility",
-      "to": "frontend-ui-design"
-    },
-    {
-      "from": "fixing-accessibility",
-      "to": "playwright-interactive"
-    },
-    {
-      "from": "fixing-accessibility",
-      "to": "design-system"
-    },
-    {
-      "from": "fixing-metadata",
-      "to": "fixing-accessibility"
-    },
-    {
-      "from": "fixing-metadata",
-      "to": "og-image-creator"
-    },
-    {
-      "from": "fixing-metadata",
-      "to": "favicon-generator"
-    },
-    {
-      "from": "fixing-metadata",
-      "to": "cloudflare-deploy"
-    },
-    {
-      "from": "gh-fix-ci",
-      "to": "gh-workflow"
-    },
-    {
-      "from": "gh-fix-ci",
-      "to": "systematic-debugging"
-    },
-    {
-      "from": "gh-fix-ci",
-      "to": "verification-before-completion"
-    },
-    {
-      "from": "gh-fix-ci",
-      "to": "circleci"
-    },
-    {
-      "from": "gh-workflow",
-      "to": "gh-fix-ci"
-    },
-    {
-      "from": "gh-workflow",
-      "to": "verification-before-completion"
-    },
-    {
-      "from": "gh-workflow",
-      "to": "systematic-debugging"
-    },
-    {
-      "from": "gh-workflow",
-      "to": "release"
-    },
-    {
-      "from": "gh-workflow",
-      "to": "check-pr"
-    },
-    {
-      "from": "check-pr",
-      "to": "gh-workflow"
-    },
-    {
-      "from": "check-pr",
-      "to": "gh-fix-ci"
-    },
-    {
-      "from": "check-pr",
-      "to": "verification-before-completion"
-    },
-    {
-      "from": "check-pr",
-      "to": "security-best-practices"
-    },
-    {
-      "from": "architecture-interview",
-      "to": "product-spec"
-    },
-    {
-      "from": "architecture-interview",
-      "to": "writing-plans"
-    },
-    {
-      "from": "architecture-interview",
-      "to": "brainstorming"
-    },
-    {
-      "from": "architecture-interview",
-      "to": "security-threat-model"
-    },
-    {
-      "from": "architecture-interview",
-      "to": "diagram-cli"
-    },
-    {
-      "from": "deep-interview",
-      "to": "interview-me"
-    },
-    {
-      "from": "deep-interview",
-      "to": "brainstorming"
-    },
-    {
-      "from": "deep-interview",
-      "to": "product-spec"
-    },
-    {
-      "from": "deep-interview",
-      "to": "architecture-interview"
-    },
-    {
-      "from": "interview-me",
-      "to": "deep-interview"
-    },
-    {
-      "from": "interview-me",
-      "to": "brainstorming"
-    },
-    {
-      "from": "interview-me",
-      "to": "product-spec"
-    },
-    {
-      "from": "interview-me",
-      "to": "writing-plans"
-    },
-    {
-      "from": "interview-me",
-      "to": "architecture-interview"
-    },
-    {
-      "from": "video-transcript-downloader",
-      "to": "notebooklm"
-    },
-    {
-      "from": "video-transcript-downloader",
-      "to": "markdown-converter"
-    },
-    {
-      "from": "video-transcript-downloader",
-      "to": "youtube-hooks-scripts"
-    },
-    {
-      "from": "video-transcript-downloader",
-      "to": "youtube-titles-thumbnails"
-    },
-    {
-      "from": "youtube-hooks-scripts",
-      "to": "youtube-titles-thumbnails"
-    },
-    {
-      "from": "youtube-hooks-scripts",
-      "to": "video-transcript-downloader"
-    },
-    {
-      "from": "youtube-hooks-scripts",
-      "to": "product-spec"
-    },
-    {
-      "from": "youtube-hooks-scripts",
-      "to": "notebooklm"
-    },
-    {
-      "from": "youtube-titles-thumbnails",
-      "to": "youtube-hooks-scripts"
-    },
-    {
-      "from": "youtube-titles-thumbnails",
-      "to": "video-transcript-downloader"
-    },
-    {
-      "from": "youtube-titles-thumbnails",
-      "to": "imagegen"
-    },
-    {
-      "from": "youtube-titles-thumbnails",
-      "to": "visual-explainer"
+      "to": "backend-engineer",
+      "weight": 4.219,
+      "desc": "Add MCP tools to an existing backend service"
     },
     {
       "from": "agents-md",
-      "to": "skill-builder"
-    },
-    {
-      "from": "agents-md",
-      "to": "codex-home-audit"
-    },
-    {
-      "from": "agents-md",
-      "to": "codex-agent-creator"
-    },
-    {
-      "from": "agents-md",
-      "to": "docs-expert"
-    },
-    {
-      "from": "agents-md",
-      "to": "compound-engineering-router"
-    },
-    {
-      "from": "context7",
-      "to": "openai-docs"
-    },
-    {
-      "from": "context7",
-      "to": "repoprompt"
-    },
-    {
-      "from": "context7",
-      "to": "mcp-builder"
-    },
-    {
-      "from": "context7",
-      "to": "backend-engineer"
-    },
-    {
-      "from": "docs-expert",
-      "to": "agents-md"
-    },
-    {
-      "from": "docs-expert",
-      "to": "diagram-cli"
-    },
-    {
-      "from": "docs-expert",
-      "to": "fixing-metadata"
-    },
-    {
-      "from": "docs-expert",
-      "to": "visual-explainer"
-    },
-    {
-      "from": "docs-expert",
-      "to": "markdown-converter"
+      "to": "skill-builder",
+      "weight": 4.219,
+      "desc": "Build new skills that will be registered in AGENTS.md"
     },
     {
       "from": "openai-docs",
-      "to": "context7"
-    },
-    {
-      "from": "openai-docs",
-      "to": "mcp-builder"
-    },
-    {
-      "from": "openai-docs",
-      "to": "chatgpt-apps"
-    },
-    {
-      "from": "openai-docs",
-      "to": "workers-mcp"
-    },
-    {
-      "from": "arscontexta",
-      "to": "codex-plugin-builder"
-    },
-    {
-      "from": "arscontexta",
-      "to": "agents-md"
-    },
-    {
-      "from": "arscontexta",
-      "to": "codex-home-audit"
-    },
-    {
-      "from": "arscontexta",
-      "to": "compound-engineering-router"
-    },
-    {
-      "from": "chatgpt-apps",
-      "to": "mcp-builder"
-    },
-    {
-      "from": "chatgpt-apps",
-      "to": "workers-mcp"
-    },
-    {
-      "from": "chatgpt-apps",
-      "to": "openai-docs"
-    },
-    {
-      "from": "chatgpt-apps",
-      "to": "oak-api"
-    },
-    {
-      "from": "chatgpt-apps",
-      "to": "fixing-metadata"
-    },
-    {
-      "from": "cloudflare-deploy",
-      "to": "workers-mcp"
-    },
-    {
-      "from": "cloudflare-deploy",
-      "to": "cf-crawl"
-    },
-    {
-      "from": "cloudflare-deploy",
-      "to": "backend-engineer"
-    },
-    {
-      "from": "cloudflare-deploy",
-      "to": "fixing-metadata"
-    },
-    {
-      "from": "cloudflare-deploy",
-      "to": "verification-before-completion"
-    },
-    {
-      "from": "oak-api",
-      "to": "chatgpt-apps"
-    },
-    {
-      "from": "oak-api",
-      "to": "mcp-builder"
-    },
-    {
-      "from": "oak-api",
-      "to": "product-spec"
-    },
-    {
-      "from": "oak-api",
-      "to": "fixing-accessibility"
-    },
-    {
-      "from": "compound-engineering-router",
-      "to": "brainstorming"
-    },
-    {
-      "from": "compound-engineering-router",
-      "to": "writing-plans"
-    },
-    {
-      "from": "compound-engineering-router",
-      "to": "product-spec"
-    },
-    {
-      "from": "compound-engineering-router",
-      "to": "architecture-interview"
-    },
-    {
-      "from": "compound-engineering-router",
-      "to": "skill-builder"
+      "to": "mcp-builder",
+      "weight": 4.219,
+      "desc": "Use docs to correctly implement MCP tool schemas"
     },
     {
       "from": "decide-build-primitive",
-      "to": "skill-builder"
+      "to": "skill-builder",
+      "weight": 4.219,
+      "desc": "Use after `SKILL` decision is made to scaffold and quality-gate the skill"
+    },
+    {
+      "from": "evals-router",
+      "to": "skill-builder",
+      "weight": 4.219,
+      "desc": "When the eval workflow should be packaged as a reusable Codex skill"
+    },
+    {
+      "from": "skill-builder",
+      "to": "decide-build-primitive",
+      "weight": 4.219,
+      "desc": "Use before building to confirm a Skill is the right primitive vs a Prompt or Automation"
+    },
+    {
+      "from": "skill-builder",
+      "to": "evals-router",
+      "weight": 4.219,
+      "desc": "When the skill is an LLM eval workflow \u2014 use to design or audit the eval layer"
+    },
+    {
+      "from": "skill-builder",
+      "to": "agents-md",
+      "weight": 4.219,
+      "desc": "When the new skill needs a corresponding AGENTS.md entry or routing update"
     },
     {
       "from": "decide-build-primitive",
-      "to": "codex-plugin-builder"
+      "to": "codex-plugin-builder",
+      "weight": 4.135,
+      "desc": "Use after `SKILL` decision when the skill needs plugin packaging for distribution"
     },
     {
-      "from": "decide-build-primitive",
-      "to": "codex-automation-architect"
+      "from": "codex-plugin-builder",
+      "to": "skill-builder",
+      "weight": 4.135,
+      "desc": "Build and quality-gate the plugin-owned skills before packaging them here"
     },
     {
-      "from": "decide-build-primitive",
-      "to": "compound-engineering-router"
+      "from": "codex-plugin-builder",
+      "to": "decide-build-primitive",
+      "weight": 4.135,
+      "desc": "Use before building to confirm a plugin is the right packaging choice"
     },
     {
-      "from": "linear",
-      "to": "writing-plans"
+      "from": "codex-plugin-builder",
+      "to": "mcp-builder",
+      "weight": 4.135,
+      "desc": "For standalone MCP server development without plugin packaging overhead"
     },
     {
-      "from": "linear",
-      "to": "gh-workflow"
+      "from": "skill-builder",
+      "to": "codex-plugin-builder",
+      "weight": 4.135,
+      "desc": "Package a validated skill into a distributable plugin; runs after quality gates pass"
     },
     {
-      "from": "linear",
-      "to": "simple-tasks"
+      "from": "best-practices",
+      "to": "security-threat-model",
+      "weight": 4.091,
+      "desc": "Run a threat model before applying best practices"
     },
     {
-      "from": "linear",
-      "to": "alignment-checkpoint"
+      "from": "best-practices",
+      "to": "security-ownership-map",
+      "weight": 4.091,
+      "desc": "Identify who owns the code being hardened"
     },
     {
-      "from": "linear",
-      "to": "compound-engineering-router"
+      "from": "create-auth",
+      "to": "security-best-practices",
+      "weight": 4.091,
+      "desc": "Apply secure defaults during auth implementation"
     },
     {
-      "from": "release",
-      "to": "gh-workflow"
+      "from": "create-auth",
+      "to": "security-threat-model",
+      "weight": 4.091,
+      "desc": "Model auth attack surface before implementing"
     },
     {
-      "from": "release",
-      "to": "verification-before-completion"
+      "from": "backend-engineer",
+      "to": "security-best-practices",
+      "weight": 4.091,
+      "desc": "Apply security hardening to new backend endpoints"
     },
     {
-      "from": "release",
-      "to": "check-pr"
+      "from": "mcp-builder",
+      "to": "security-best-practices",
+      "weight": 4.091,
+      "desc": "Apply security hardening to MCP server endpoints"
     },
     {
-      "from": "release",
-      "to": "writing-plans"
-    },
-    {
-      "from": "security-best-practices",
-      "to": "security-threat-model"
-    },
-    {
-      "from": "security-best-practices",
-      "to": "security-ownership-map"
-    },
-    {
-      "from": "security-best-practices",
-      "to": "create-auth"
-    },
-    {
-      "from": "security-best-practices",
-      "to": "1password"
-    },
-    {
-      "from": "security-ownership-map",
-      "to": "security-threat-model"
-    },
-    {
-      "from": "security-ownership-map",
-      "to": "security-best-practices"
-    },
-    {
-      "from": "security-ownership-map",
-      "to": "recon-workbench"
-    },
-    {
-      "from": "security-ownership-map",
-      "to": "gh-workflow"
-    },
-    {
-      "from": "security-threat-model",
-      "to": "security-best-practices"
-    },
-    {
-      "from": "security-threat-model",
-      "to": "security-ownership-map"
-    },
-    {
-      "from": "security-threat-model",
-      "to": "recon-workbench"
-    },
-    {
-      "from": "security-threat-model",
-      "to": "architecture-interview"
-    },
-    {
-      "from": "product-spec",
-      "to": "brainstorming"
-    },
-    {
-      "from": "product-spec",
-      "to": "interview-me"
-    },
-    {
-      "from": "product-spec",
-      "to": "writing-plans"
-    },
-    {
-      "from": "product-spec",
-      "to": "architecture-interview"
-    },
-    {
-      "from": "product-spec",
-      "to": "security-threat-model"
-    },
-    {
-      "from": "brainstorming",
-      "to": "interview-me"
-    },
-    {
-      "from": "brainstorming",
-      "to": "product-spec"
-    },
-    {
-      "from": "brainstorming",
-      "to": "writing-plans"
-    },
-    {
-      "from": "brainstorming",
-      "to": "architecture-interview"
-    },
-    {
-      "from": "product-design-critic",
-      "to": "product-spec"
-    },
-    {
-      "from": "product-design-critic",
-      "to": "brainstorming"
-    },
-    {
-      "from": "product-design-critic",
-      "to": "frontend-ui-design"
-    },
-    {
-      "from": "product-design-critic",
-      "to": "interview-me"
-    },
-    {
-      "from": "product-design-critic",
-      "to": "visual-explainer"
-    },
-    {
-      "from": "project-improver",
-      "to": "product-spec"
-    },
-    {
-      "from": "project-improver",
-      "to": "brainstorming"
-    },
-    {
-      "from": "project-improver",
-      "to": "architecture-interview"
-    },
-    {
-      "from": "project-improver",
-      "to": "writing-plans"
-    },
-    {
-      "from": "project-improver",
-      "to": "security-threat-model"
-    },
-    {
-      "from": "1password",
-      "to": "security-best-practices"
-    },
-    {
-      "from": "1password",
-      "to": "create-auth"
-    },
-    {
-      "from": "1password",
-      "to": "cloudflare-deploy"
-    },
-    {
-      "from": "1password",
-      "to": "workers-mcp"
-    },
-    {
-      "from": "1password",
-      "to": "bootstrap"
-    },
-    {
-      "from": "agent-browser",
-      "to": "playwright-interactive"
-    },
-    {
-      "from": "agent-browser",
-      "to": "ui-visual-regression"
-    },
-    {
-      "from": "agent-browser",
-      "to": "fixing-accessibility"
-    },
-    {
-      "from": "agent-browser",
-      "to": "agentation"
-    },
-    {
-      "from": "alignment-checkpoint",
-      "to": "interview-me"
-    },
-    {
-      "from": "alignment-checkpoint",
-      "to": "brainstorming"
-    },
-    {
-      "from": "alignment-checkpoint",
-      "to": "writing-plans"
-    },
-    {
-      "from": "alignment-checkpoint",
-      "to": "product-spec"
-    },
-    {
-      "from": "alignment-checkpoint",
-      "to": "decide-build-primitive"
-    },
-    {
-      "from": "apple-app-creator",
-      "to": "xcode-makefiles"
-    },
-    {
-      "from": "apple-app-creator",
-      "to": "design-system"
-    },
-    {
-      "from": "apple-app-creator",
-      "to": "fixing-accessibility"
-    },
-    {
-      "from": "apple-app-creator",
-      "to": "recon-workbench"
-    },
-    {
-      "from": "apple-app-creator",
-      "to": "simple-tasks"
+      "from": "better-icons",
+      "to": "favicon-generator",
+      "weight": 4.091,
+      "desc": "Use alongside favicon generation for icon-family consistency"
     },
     {
       "from": "architecture-interview",
-      "to": "project-improver"
+      "to": "brainstorming",
+      "weight": 4.091,
+      "desc": "Explore options before the architecture interview"
+    },
+    {
+      "from": "interview-me",
+      "to": "brainstorming",
+      "weight": 4.091,
+      "desc": "For lighter, less structured exploration before committing to interview format"
+    },
+    {
+      "from": "interview-me",
+      "to": "architecture-interview",
+      "weight": 4.091,
+      "desc": "Track C in this skill routes directly here for architecture decisions"
+    },
+    {
+      "from": "security-best-practices",
+      "to": "security-threat-model",
+      "weight": 4.091,
+      "desc": "Run first to identify trust boundaries and threat model; this skill remediates specific findings"
+    },
+    {
+      "from": "security-best-practices",
+      "to": "security-ownership-map",
+      "weight": 4.091,
+      "desc": "Find who owns the highest-risk code after identifying findings"
+    },
+    {
+      "from": "security-best-practices",
+      "to": "create-auth",
+      "weight": 4.091,
+      "desc": "Security review often surfaces auth issues \u2014 use this for implementation"
+    },
+    {
+      "from": "security-ownership-map",
+      "to": "security-threat-model",
+      "weight": 4.091,
+      "desc": "Use ownership map to assign threat model mitigations"
+    },
+    {
+      "from": "security-ownership-map",
+      "to": "security-best-practices",
+      "weight": 4.091,
+      "desc": "Route best-practice remediation to the right owners"
+    },
+    {
+      "from": "security-threat-model",
+      "to": "security-best-practices",
+      "weight": 4.091,
+      "desc": "Run after threat modeling to get language-specific remediation guidance"
+    },
+    {
+      "from": "security-threat-model",
+      "to": "security-ownership-map",
+      "weight": 4.091,
+      "desc": "Use to identify which engineers are responsible for the highest-risk code areas"
+    },
+    {
+      "from": "brainstorming",
+      "to": "interview-me",
+      "weight": 4.091,
+      "desc": "Use when the idea needs deeper requirements discovery beyond a quick brainstorm"
+    },
+    {
+      "from": "brainstorming",
+      "to": "architecture-interview",
+      "weight": 4.091,
+      "desc": "When the brainstorm reveals a significant architecture decision needing structured review"
+    },
+    {
+      "from": "project-improver",
+      "to": "brainstorming",
+      "weight": 4.091,
+      "desc": "Brainstorm improvement ideas before running the improver"
+    },
+    {
+      "from": "backend-engineer",
+      "to": "cloudflare-deploy",
+      "weight": 4.045,
+      "desc": "Deploy the backend extension to Cloudflare Workers"
+    },
+    {
+      "from": "cli-spec",
+      "to": "docs-expert",
+      "weight": 4.045,
+      "desc": "Document the CLI surface after speccing it"
+    },
+    {
+      "from": "cli-spec",
+      "to": "product-spec",
+      "weight": 4.045,
+      "desc": "Produce a broader product spec alongside the CLI spec"
+    },
+    {
+      "from": "mcp-builder",
+      "to": "chatgpt-apps",
+      "weight": 4.045,
+      "desc": "Connect the MCP server to a ChatGPT Apps SDK integration"
+    },
+    {
+      "from": "better-icons",
+      "to": "design-system",
+      "weight": 4.045,
+      "desc": "Integrate icon tokens into the design system"
+    },
+    {
+      "from": "better-icons",
+      "to": "figma",
+      "weight": 4.045,
+      "desc": "Export icons for use in Figma designs"
+    },
+    {
+      "from": "favicon-generator",
+      "to": "cloudflare-deploy",
+      "weight": 4.045,
+      "desc": "Include favicon assets in Cloudflare Pages deployments"
+    },
+    {
+      "from": "nano-banana-builder",
+      "to": "chatgpt-apps",
+      "weight": 4.045,
+      "desc": "Integrate Nano Banana image APIs into a ChatGPT App"
+    },
+    {
+      "from": "og-image-creator",
+      "to": "cloudflare-deploy",
+      "weight": 4.045,
+      "desc": "Serve OG images via Cloudflare Pages after generation"
+    },
+    {
+      "from": "threejs-builder",
+      "to": "agentation",
+      "weight": 4.045,
+      "desc": "Automate Three.js scene interactions for testing"
+    },
+    {
+      "from": "agentation",
+      "to": "playwright-interactive",
+      "weight": 4.045,
+      "desc": "Use Playwright for iterative UI inspection alongside Agentation"
+    },
+    {
+      "from": "figma",
+      "to": "better-icons",
+      "weight": 4.045,
+      "desc": "Source icons via Figma designs and export to Iconify"
+    },
+    {
+      "from": "playwright-interactive",
+      "to": "agentation",
+      "weight": 4.045,
+      "desc": "Wire Playwright automation into Agentation self-driving"
+    },
+    {
+      "from": "fixing-metadata",
+      "to": "cloudflare-deploy",
+      "weight": 4.045,
+      "desc": "Verify metadata is served correctly after Cloudflare deployment"
+    },
+    {
+      "from": "gh-workflow",
+      "to": "check-pr",
+      "weight": 4.045,
+      "desc": "Pre-merge policy review: readiness view with check status and remediation priority"
+    },
+    {
+      "from": "check-pr",
+      "to": "gh-workflow",
+      "weight": 4.045,
+      "desc": "Full GitHub lifecycle management around the PR"
+    },
+    {
+      "from": "check-pr",
+      "to": "gh-fix-ci",
+      "weight": 4.045,
+      "desc": "Fix any failing CI checks found during PR review"
+    },
+    {
+      "from": "check-pr",
+      "to": "security-best-practices",
+      "weight": 4.045,
+      "desc": "Apply security checks during PR review"
+    },
+    {
+      "from": "architecture-interview",
+      "to": "security-threat-model",
+      "weight": 4.045,
+      "desc": "Run a threat model alongside architecture decisions"
+    },
+    {
+      "from": "deep-interview",
+      "to": "brainstorming",
+      "weight": 4.045,
+      "desc": "Use before this skill when the topic is still too vague for delta-mode enhancement"
+    },
+    {
+      "from": "deep-interview",
+      "to": "architecture-interview",
+      "weight": 4.045,
+      "desc": "Use when deep-interview surfaces a major architectural tradeoff requiring structured review"
+    },
+    {
+      "from": "agents-md",
+      "to": "docs-expert",
+      "weight": 4.045,
+      "desc": "Apply docs polish and community-health guidance to AGENTS.md"
+    },
+    {
+      "from": "docs-expert",
+      "to": "agents-md",
+      "weight": 4.045,
+      "desc": "Apply docs-expert quality standards to AGENTS.md"
+    },
+    {
+      "from": "openai-docs",
+      "to": "chatgpt-apps",
+      "weight": 4.045,
+      "desc": "Reference when building ChatGPT Apps SDK integrations"
+    },
+    {
+      "from": "chatgpt-apps",
+      "to": "mcp-builder",
+      "weight": 4.045,
+      "desc": "Build the underlying MCP server the Apps SDK connects to"
+    },
+    {
+      "from": "chatgpt-apps",
+      "to": "openai-docs",
+      "weight": 4.045,
+      "desc": "Reference official Apps SDK documentation"
+    },
+    {
+      "from": "chatgpt-apps",
+      "to": "fixing-metadata",
+      "weight": 4.045,
+      "desc": "Ensure App pages have correct meta and CSP headers"
+    },
+    {
+      "from": "cloudflare-deploy",
+      "to": "backend-engineer",
+      "weight": 4.045,
+      "desc": "Extend the backend before deploying"
+    },
+    {
+      "from": "cloudflare-deploy",
+      "to": "fixing-metadata",
+      "weight": 4.045,
+      "desc": "Fix OG/meta tags on deployed pages"
+    },
+    {
+      "from": "security-threat-model",
+      "to": "architecture-interview",
+      "weight": 4.045,
+      "desc": "When the system design is still unclear \u2014 clarify before threat modeling"
+    },
+    {
+      "from": "product-spec",
+      "to": "brainstorming",
+      "weight": 4.045,
+      "desc": "Use first when idea is unclear \u2014 brainstorm resolves direction, this skill writes the spec"
+    },
+    {
+      "from": "brainstorming",
+      "to": "product-spec",
+      "weight": 4.045,
+      "desc": "Hand off the chosen direction to this skill to produce implementation-ready specs"
+    },
+    {
+      "from": "project-improver",
+      "to": "architecture-interview",
+      "weight": 4.045,
+      "desc": "Validate architectural improvements via structured interview"
+    },
+    {
+      "from": "best-practices",
+      "to": "1password",
+      "weight": 1.0,
+      "desc": "Manage secrets found during best practices review"
+    },
+    {
+      "from": "create-auth",
+      "to": "1password",
+      "weight": 1.0,
+      "desc": "Inject auth secrets via 1Password CLI"
+    },
+    {
+      "from": "create-auth",
+      "to": "workers-mcp",
+      "weight": 1.0,
+      "desc": "Add auth to Workers-hosted MCP endpoints"
+    },
+    {
+      "from": "backend-engineer",
+      "to": "workers-mcp",
+      "weight": 1.0,
+      "desc": "Add MCP tooling to the backend surface"
+    },
+    {
+      "from": "backend-engineer",
+      "to": "writing-plans",
+      "weight": 1.0,
+      "desc": "Plan backend extensions before implementing"
+    },
+    {
+      "from": "cli-spec",
+      "to": "writing-plans",
+      "weight": 1.0,
+      "desc": "Turn the CLI spec into an implementation plan"
+    },
+    {
+      "from": "cli-spec",
+      "to": "test-driven-development",
+      "weight": 1.0,
+      "desc": "Write CLI acceptance tests from the spec"
+    },
+    {
+      "from": "mcp-builder",
+      "to": "workers-mcp",
+      "weight": 1.0,
+      "desc": "Host the MCP server on Cloudflare when cloud deployment is needed"
+    },
+    {
+      "from": "workers-mcp",
+      "to": "mcp-builder",
+      "weight": 1.0,
+      "desc": "Build the MCP server before deploying it on Workers"
+    },
+    {
+      "from": "workers-mcp",
+      "to": "cloudflare-deploy",
+      "weight": 1.0,
+      "desc": "Deploy the full Workers-hosted MCP stack"
+    },
+    {
+      "from": "workers-mcp",
+      "to": "chatgpt-apps",
+      "weight": 1.0,
+      "desc": "Connect the Workers MCP server to a ChatGPT App"
+    },
+    {
+      "from": "workers-mcp",
+      "to": "security-best-practices",
+      "weight": 1.0,
+      "desc": "Apply auth and security hardening to the MCP endpoint"
+    },
+    {
+      "from": "workers-mcp",
+      "to": "openai-docs",
+      "weight": 1.0,
+      "desc": "Reference MCP schema and tool definitions"
+    },
+    {
+      "from": "better-icons",
+      "to": "frontend-ui-design",
+      "weight": 1.0,
+      "desc": "Source icons for UI components being designed"
+    },
+    {
+      "from": "better-icons",
+      "to": "shadcn-ui",
+      "weight": 1.0,
+      "desc": "Add Iconify icons to shadcn/ui component projects"
+    },
+    {
+      "from": "favicon-generator",
+      "to": "fixing-metadata",
+      "weight": 1.0,
+      "desc": "Pair with metadata fixes to ensure correct favicon references"
+    },
+    {
+      "from": "favicon-generator",
+      "to": "design-system",
+      "weight": 1.0,
+      "desc": "Keep favicon palette consistent with design-system tokens"
+    },
+    {
+      "from": "favicon-generator",
+      "to": "og-image-creator",
+      "weight": 1.0,
+      "desc": "Generate OG images alongside favicons for complete brand suite"
+    },
+    {
+      "from": "imagegen",
+      "to": "sora",
+      "weight": 1.0,
+      "desc": "Follow static image generation with AI video generation"
+    },
+    {
+      "from": "imagegen",
+      "to": "og-image-creator",
+      "weight": 1.0,
+      "desc": "Use generated images as OG image assets"
+    },
+    {
+      "from": "imagegen",
+      "to": "nano-banana-builder",
+      "weight": 1.0,
+      "desc": "Integrate imagegen into Nano Banana iterative editing flows"
+    },
+    {
+      "from": "imagegen",
+      "to": "youtube-titles-thumbnails",
+      "weight": 1.0,
+      "desc": "Generate thumbnail concept images for YouTube packaging"
+    },
+    {
+      "from": "imagegen",
+      "to": "visual-explainer",
+      "weight": 1.0,
+      "desc": "Embed generated images as hero banners in HTML explainers"
+    },
+    {
+      "from": "nano-banana-builder",
+      "to": "imagegen",
+      "weight": 1.0,
+      "desc": "Use as fallback for static image generation outside Nano Banana"
+    },
+    {
+      "from": "nano-banana-builder",
+      "to": "sora",
+      "weight": 1.0,
+      "desc": "Follow image generation with AI video for richer content"
+    },
+    {
+      "from": "nano-banana-builder",
+      "to": "mcp-builder",
+      "weight": 1.0,
+      "desc": "Expose Nano Banana generation as MCP tools"
+    },
+    {
+      "from": "og-image-creator",
+      "to": "fixing-metadata",
+      "weight": 1.0,
+      "desc": "Wire generated OG images into correct meta tags"
+    },
+    {
+      "from": "og-image-creator",
+      "to": "favicon-generator",
+      "weight": 1.0,
+      "desc": "Generate OG images and favicons as a complete brand suite"
+    },
+    {
+      "from": "og-image-creator",
+      "to": "imagegen",
+      "weight": 1.0,
+      "desc": "Use imagegen for non-route-specific image generation"
+    },
+    {
+      "from": "sora",
+      "to": "imagegen",
+      "weight": 1.0,
+      "desc": "Generate static images as storyboard reference before Sora"
+    },
+    {
+      "from": "sora",
+      "to": "remotion",
+      "weight": 1.0,
+      "desc": "Compare Sora (AI-driven) with Remotion (code-driven) for video"
+    },
+    {
+      "from": "sora",
+      "to": "nano-banana-builder",
+      "weight": 1.0,
+      "desc": "Use Nano Banana for images; Sora for the video component"
+    },
+    {
+      "from": "sora",
+      "to": "youtube-hooks-scripts",
+      "weight": 1.0,
+      "desc": "Script the video before generating with Sora"
+    },
+    {
+      "from": "threejs-builder",
+      "to": "ui-ux-creative-coding",
+      "weight": 1.0,
+      "desc": "Orchestrate Three.js alongside React motion for rich UI"
+    },
+    {
+      "from": "threejs-builder",
+      "to": "frontend-ui-design",
+      "weight": 1.0,
+      "desc": "Provide the design context Three.js scene should match"
+    },
+    {
+      "from": "threejs-builder",
+      "to": "visual-explainer",
+      "weight": 1.0,
+      "desc": "Embed Three.js scenes in HTML explainer pages"
+    },
+    {
+      "from": "stitch-react-components",
+      "to": "stitch-loop",
+      "weight": 1.0,
+      "desc": "Generate the Stitch screens that this skill converts"
+    },
+    {
+      "from": "stitch-react-components",
+      "to": "react-ui-patterns",
+      "weight": 1.0,
+      "desc": "Apply React composition patterns to converted components"
+    },
+    {
+      "from": "stitch-react-components",
+      "to": "design-system",
+      "weight": 1.0,
+      "desc": "Align converted components with the design-system token layer"
+    },
+    {
+      "from": "stitch-react-components",
+      "to": "figma",
+      "weight": 1.0,
+      "desc": "Use Figma context alongside Stitch for richer conversion"
+    },
+    {
+      "from": "stitch-react-components",
+      "to": "baseline-ui",
+      "weight": 1.0,
+      "desc": "Validate converted components against baseline UI rules"
+    },
+    {
+      "from": "agentation",
+      "to": "agent-browser",
+      "weight": 1.0,
+      "desc": "Use agent-browser for deterministic ref-based element actions"
+    },
+    {
+      "from": "agentation",
+      "to": "frontend-ui-design",
+      "weight": 1.0,
+      "desc": "Design the UI that Agentation will automate"
+    },
+    {
+      "from": "agentation",
+      "to": "visual-explainer",
+      "weight": 1.0,
+      "desc": "Visualise Agentation workflow states as an HTML diagram"
+    },
+    {
+      "from": "figma",
+      "to": "design-system",
+      "weight": 1.0,
+      "desc": "Extract Figma tokens to drive the repository design system"
+    },
+    {
+      "from": "figma",
+      "to": "frontend-ui-design",
+      "weight": 1.0,
+      "desc": "Implement Figma designs as production-ready components"
+    },
+    {
+      "from": "figma",
+      "to": "stitch-react-components",
+      "weight": 1.0,
+      "desc": "Convert Figma/Stitch screens into modular React components"
+    },
+    {
+      "from": "figma",
+      "to": "og-image-creator",
+      "weight": 1.0,
+      "desc": "Use Figma designs as reference for OG image generation"
+    },
+    {
+      "from": "playwright-interactive",
+      "to": "agent-browser",
+      "weight": 1.0,
+      "desc": "Use agent-browser for simpler ref-based interactions"
+    },
+    {
+      "from": "playwright-interactive",
+      "to": "ui-visual-regression",
+      "weight": 1.0,
+      "desc": "Capture Playwright screenshots for regression baselines"
+    },
+    {
+      "from": "playwright-interactive",
+      "to": "fixing-accessibility",
+      "weight": 1.0,
+      "desc": "Test keyboard navigation and focus via Playwright"
+    },
+    {
+      "from": "stitch-loop",
+      "to": "stitch-react-components",
+      "weight": 1.0,
+      "desc": "Convert Stitch outputs to React components"
+    },
+    {
+      "from": "stitch-loop",
+      "to": "stitch-remotion",
+      "weight": 1.0,
+      "desc": "Turn Stitch screens into narrated video walkthroughs"
+    },
+    {
+      "from": "stitch-loop",
+      "to": "ui-cloner",
+      "weight": 1.0,
+      "desc": "Clone a UI design into Stitch for iterative generation"
+    },
+    {
+      "from": "stitch-loop",
+      "to": "frontend-ui-design",
+      "weight": 1.0,
+      "desc": "Review and polish Stitch-generated UI"
+    },
+    {
+      "from": "ui-cloner",
+      "to": "stitch-loop",
+      "weight": 1.0,
+      "desc": "Feed cloned UI design into Stitch for iterative generation"
+    },
+    {
+      "from": "ui-cloner",
+      "to": "frontend-ui-design",
+      "weight": 1.0,
+      "desc": "Adapt the cloned design system to your brand"
+    },
+    {
+      "from": "ui-cloner",
+      "to": "design-system",
+      "weight": 1.0,
+      "desc": "Map cloned design tokens into your design system"
+    },
+    {
+      "from": "ui-cloner",
+      "to": "figma",
+      "weight": 1.0,
+      "desc": "Use Figma as the intermediate for cloned designs"
+    },
+    {
+      "from": "baseline-ui",
+      "to": "design-system",
+      "weight": 1.0,
+      "desc": "Apply design tokens that baseline-ui validates"
+    },
+    {
+      "from": "baseline-ui",
+      "to": "fixing-accessibility",
+      "weight": 1.0,
+      "desc": "Fix accessibility issues found during baseline-ui checks"
+    },
+    {
+      "from": "baseline-ui",
+      "to": "frontend-ui-design",
+      "weight": 1.0,
+      "desc": "Implement UI components that baseline-ui governs"
+    },
+    {
+      "from": "baseline-ui",
+      "to": "ui-visual-regression",
+      "weight": 1.0,
+      "desc": "Combine with visual regression to catch visual drift"
+    },
+    {
+      "from": "baseline-ui",
+      "to": "shadcn-ui",
+      "weight": 1.0,
+      "desc": "Validate shadcn/ui components against baseline rules"
+    },
+    {
+      "from": "design-system",
+      "to": "baseline-ui",
+      "weight": 1.0,
+      "desc": "Validate UI components against design-system tokens"
+    },
+    {
+      "from": "design-system",
+      "to": "frontend-ui-design",
+      "weight": 1.0,
+      "desc": "Implement components using design-system token layer"
+    },
+    {
+      "from": "design-system",
+      "to": "figma",
+      "weight": 1.0,
+      "desc": "Extract Figma tokens as source of truth for the design system"
+    },
+    {
+      "from": "design-system",
+      "to": "shadcn-ui",
+      "weight": 1.0,
+      "desc": "Adapt shadcn/ui to use design-system token aliases"
+    },
+    {
+      "from": "design-system",
+      "to": "fixing-accessibility",
+      "weight": 1.0,
+      "desc": "Combine token changes with accessibility fixes"
+    },
+    {
+      "from": "frontend-ui-design",
+      "to": "design-system",
+      "weight": 1.0,
+      "desc": "Ground component design in the token layer"
+    },
+    {
+      "from": "frontend-ui-design",
+      "to": "baseline-ui",
+      "weight": 1.0,
+      "desc": "Validate components against baseline UI rules after design"
+    },
+    {
+      "from": "frontend-ui-design",
+      "to": "figma",
+      "weight": 1.0,
+      "desc": "Use Figma designs as reference for implementation"
+    },
+    {
+      "from": "frontend-ui-design",
+      "to": "fixing-accessibility",
+      "weight": 1.0,
+      "desc": "Apply accessibility fixes during component design"
+    },
+    {
+      "from": "frontend-ui-design",
+      "to": "ui-ux-creative-coding",
+      "weight": 1.0,
+      "desc": "Add motion and creative polish to designed components"
+    },
+    {
+      "from": "react-ui-patterns",
+      "to": "frontend-ui-design",
+      "weight": 1.0,
+      "desc": "Apply React patterns to components being designed"
+    },
+    {
+      "from": "react-ui-patterns",
+      "to": "shadcn-ui",
+      "weight": 1.0,
+      "desc": "Source Radix/shadcn primitives for React pattern implementations"
+    },
+    {
+      "from": "react-ui-patterns",
+      "to": "stitch-react-components",
+      "weight": 1.0,
+      "desc": "Use patterns when converting Stitch screens to React"
+    },
+    {
+      "from": "react-ui-patterns",
+      "to": "baseline-ui",
+      "weight": 1.0,
+      "desc": "Validate React component patterns against baseline rules"
+    },
+    {
+      "from": "react-ui-patterns",
+      "to": "ui-ux-creative-coding",
+      "weight": 1.0,
+      "desc": "Layer motion on top of React pattern scaffolds"
+    },
+    {
+      "from": "remotion",
+      "to": "sora",
+      "weight": 1.0,
+      "desc": "Compare Remotion (code-driven) with Sora (AI-driven) video"
+    },
+    {
+      "from": "remotion",
+      "to": "stitch-remotion",
+      "weight": 1.0,
+      "desc": "Generate Remotion compositions from Stitch screen assets"
+    },
+    {
+      "from": "remotion",
+      "to": "imagegen",
+      "weight": 1.0,
+      "desc": "Generate still images to use as Remotion assets"
+    },
+    {
+      "from": "remotion",
+      "to": "slides",
+      "weight": 1.0,
+      "desc": "Convert slide decks into Remotion video compositions"
+    },
+    {
+      "from": "remotion",
+      "to": "video-transcript-downloader",
+      "weight": 1.0,
+      "desc": "Download reference transcripts before scripting Remotion narration"
+    },
+    {
+      "from": "shadcn-ui",
+      "to": "react-ui-patterns",
+      "weight": 1.0,
+      "desc": "Apply React composition patterns to shadcn/ui components"
+    },
+    {
+      "from": "shadcn-ui",
+      "to": "design-system",
+      "weight": 1.0,
+      "desc": "Override shadcn/ui tokens with design-system aliases"
+    },
+    {
+      "from": "shadcn-ui",
+      "to": "baseline-ui",
+      "weight": 1.0,
+      "desc": "Validate shadcn/ui component usage against baseline rules"
+    },
+    {
+      "from": "shadcn-ui",
+      "to": "fixing-accessibility",
+      "weight": 1.0,
+      "desc": "Fix accessibility issues in shadcn/ui interactive components"
+    },
+    {
+      "from": "shadcn-ui",
+      "to": "figma",
+      "weight": 1.0,
+      "desc": "Use Figma designs as reference for shadcn/ui customisation"
+    },
+    {
+      "from": "stitch-remotion",
+      "to": "stitch-loop",
+      "weight": 1.0,
+      "desc": "Generate the Stitch screens that feed this skill"
+    },
+    {
+      "from": "stitch-remotion",
+      "to": "remotion",
+      "weight": 1.0,
+      "desc": "For custom Remotion compositions beyond Stitch walkthroughs"
+    },
+    {
+      "from": "stitch-remotion",
+      "to": "slides",
+      "weight": 1.0,
+      "desc": "Compare slide deck with Remotion video for the same content"
+    },
+    {
+      "from": "stitch-remotion",
+      "to": "sora",
+      "weight": 1.0,
+      "desc": "Use Sora for AI-generated video alternative to Remotion"
+    },
+    {
+      "from": "ui-ux-creative-coding",
+      "to": "frontend-ui-design",
+      "weight": 1.0,
+      "desc": "Build the structural component before adding creative polish"
+    },
+    {
+      "from": "ui-ux-creative-coding",
+      "to": "threejs-builder",
+      "weight": 1.0,
+      "desc": "Add Three.js 3D elements to creative UI work"
+    },
+    {
+      "from": "ui-ux-creative-coding",
+      "to": "react-ui-patterns",
+      "weight": 1.0,
+      "desc": "Ground creative coding in solid React composition patterns"
+    },
+    {
+      "from": "ui-ux-creative-coding",
+      "to": "baseline-ui",
+      "weight": 1.0,
+      "desc": "Validate animations against baseline motion duration rules"
+    },
+    {
+      "from": "ui-ux-creative-coding",
+      "to": "design-system",
+      "weight": 1.0,
+      "desc": "Keep creative color and token choices aligned with the system"
+    },
+    {
+      "from": "ui-visual-regression",
+      "to": "playwright-interactive",
+      "weight": 1.0,
+      "desc": "Capture screenshots for regression via Playwright"
+    },
+    {
+      "from": "ui-visual-regression",
+      "to": "baseline-ui",
+      "weight": 1.0,
+      "desc": "Run baseline UI checks alongside visual regression"
+    },
+    {
+      "from": "ui-visual-regression",
+      "to": "agent-browser",
+      "weight": 1.0,
+      "desc": "Use agent-browser snapshots as regression inputs"
+    },
+    {
+      "from": "ui-visual-regression",
+      "to": "stitch-react-components",
+      "weight": 1.0,
+      "desc": "Catch visual regressions after Stitch-to-React conversion"
+    },
+    {
+      "from": "fixing-accessibility",
+      "to": "baseline-ui",
+      "weight": 1.0,
+      "desc": "Validate passing accessibility alongside baseline UI checks"
+    },
+    {
+      "from": "fixing-accessibility",
+      "to": "fixing-metadata",
+      "weight": 1.0,
+      "desc": "Fix semantic HTML and metadata alongside ARIA fixes"
+    },
+    {
+      "from": "fixing-accessibility",
+      "to": "frontend-ui-design",
+      "weight": 1.0,
+      "desc": "Apply accessibility constraints during component design"
+    },
+    {
+      "from": "fixing-accessibility",
+      "to": "playwright-interactive",
+      "weight": 1.0,
+      "desc": "Test keyboard and focus behaviour via Playwright"
+    },
+    {
+      "from": "fixing-accessibility",
+      "to": "design-system",
+      "weight": 1.0,
+      "desc": "Ensure token changes don't reduce colour contrast"
+    },
+    {
+      "from": "fixing-metadata",
+      "to": "fixing-accessibility",
+      "weight": 1.0,
+      "desc": "Fix ARIA and semantic HTML alongside metadata"
+    },
+    {
+      "from": "fixing-metadata",
+      "to": "og-image-creator",
+      "weight": 1.0,
+      "desc": "Generate OG images that the metadata tags will reference"
+    },
+    {
+      "from": "fixing-metadata",
+      "to": "favicon-generator",
+      "weight": 1.0,
+      "desc": "Add favicon tags alongside other head metadata"
+    },
+    {
+      "from": "gh-fix-ci",
+      "to": "gh-workflow",
+      "weight": 1.0,
+      "desc": "Use for the full GitHub PR lifecycle \u2014 CI diagnosis is a single mode of this broader skill"
+    },
+    {
+      "from": "gh-fix-ci",
+      "to": "systematic-debugging",
+      "weight": 1.0,
+      "desc": "When CI logs reveal a root-cause bug that needs structured investigation"
+    },
+    {
+      "from": "gh-fix-ci",
+      "to": "verification-before-completion",
+      "weight": 1.0,
+      "desc": "Verify the fix passes CI before claiming the PR is ready"
+    },
+    {
+      "from": "gh-fix-ci",
+      "to": "circleci",
+      "weight": 1.0,
+      "desc": "When the CI failure is from CircleCI rather than GitHub Actions"
+    },
+    {
+      "from": "gh-workflow",
+      "to": "gh-fix-ci",
+      "weight": 1.0,
+      "desc": "Focused CI diagnosis mode \u2014 use when the only task is debugging a failing Actions check"
+    },
+    {
+      "from": "gh-workflow",
+      "to": "verification-before-completion",
+      "weight": 1.0,
+      "desc": "Gate all merge claims with fresh `gh pr checks` and `git log` evidence"
+    },
+    {
+      "from": "gh-workflow",
+      "to": "systematic-debugging",
+      "weight": 1.0,
+      "desc": "When PR CI failures reveal a code-level bug that needs root-cause investigation"
+    },
+    {
+      "from": "gh-workflow",
+      "to": "release",
+      "weight": 1.0,
+      "desc": "After merging \u2014 use to cut the version tag and publish the release"
+    },
+    {
+      "from": "check-pr",
+      "to": "verification-before-completion",
+      "weight": 1.0,
+      "desc": "Gate merge on fresh command evidence"
+    },
+    {
+      "from": "architecture-interview",
+      "to": "product-spec",
+      "weight": 1.0,
+      "desc": "Produce a detailed spec after the architecture is decided"
+    },
+    {
+      "from": "architecture-interview",
+      "to": "writing-plans",
+      "weight": 1.0,
+      "desc": "Convert ADR output into an implementation plan"
+    },
+    {
+      "from": "architecture-interview",
+      "to": "diagram-cli",
+      "weight": 1.0,
+      "desc": "Generate architecture diagrams from ADR decisions"
+    },
+    {
+      "from": "deep-interview",
+      "to": "interview-me",
+      "weight": 1.0,
+      "desc": "Use for fresh requirements discovery; use this skill for deepening existing drafts"
+    },
+    {
+      "from": "deep-interview",
+      "to": "product-spec",
+      "weight": 1.0,
+      "desc": "Hand the completed insights to product-spec for structured PRD/UX/arch artifacts"
+    },
+    {
+      "from": "interview-me",
+      "to": "deep-interview",
+      "weight": 1.0,
+      "desc": "Use after initial scoping \u2014 deep-interview fills gaps in an existing draft spec"
+    },
+    {
+      "from": "interview-me",
+      "to": "product-spec",
+      "weight": 1.0,
+      "desc": "Hand the approved spec from this skill to product-spec for full PRD elaboration"
+    },
+    {
+      "from": "interview-me",
+      "to": "writing-plans",
+      "weight": 1.0,
+      "desc": "After approval gate \u2014 turn the spec into an execution plan"
+    },
+    {
+      "from": "video-transcript-downloader",
+      "to": "notebooklm",
+      "weight": 1.0,
+      "desc": "Feed transcripts to NotebookLM for summarisation"
+    },
+    {
+      "from": "video-transcript-downloader",
+      "to": "markdown-converter",
+      "weight": 1.0,
+      "desc": "Convert transcript text to clean markdown"
+    },
+    {
+      "from": "video-transcript-downloader",
+      "to": "youtube-hooks-scripts",
+      "weight": 1.0,
+      "desc": "Create scripts for videos whose transcripts you've studied"
+    },
+    {
+      "from": "video-transcript-downloader",
+      "to": "youtube-titles-thumbnails",
+      "weight": 1.0,
+      "desc": "Package videos after reviewing competitor transcripts"
+    },
+    {
+      "from": "youtube-hooks-scripts",
+      "to": "youtube-titles-thumbnails",
+      "weight": 1.0,
+      "desc": "Create titles and thumbnails to pair with the script"
+    },
+    {
+      "from": "youtube-hooks-scripts",
+      "to": "video-transcript-downloader",
+      "weight": 1.0,
+      "desc": "Study competitor transcripts before writing hooks"
+    },
+    {
+      "from": "youtube-hooks-scripts",
+      "to": "product-spec",
+      "weight": 1.0,
+      "desc": "Spec the content series before scripting individual videos"
+    },
+    {
+      "from": "youtube-hooks-scripts",
+      "to": "notebooklm",
+      "weight": 1.0,
+      "desc": "Use NotebookLM to generate audio overviews from scripts"
+    },
+    {
+      "from": "youtube-titles-thumbnails",
+      "to": "youtube-hooks-scripts",
+      "weight": 1.0,
+      "desc": "Pair with a hook and script for complete video packaging"
+    },
+    {
+      "from": "youtube-titles-thumbnails",
+      "to": "video-transcript-downloader",
+      "weight": 1.0,
+      "desc": "Research competitor videos before writing titles"
+    },
+    {
+      "from": "youtube-titles-thumbnails",
+      "to": "imagegen",
+      "weight": 1.0,
+      "desc": "Generate thumbnail concept images"
+    },
+    {
+      "from": "youtube-titles-thumbnails",
+      "to": "visual-explainer",
+      "weight": 1.0,
+      "desc": "Present A/B thumbnail options in a visual comparison page"
+    },
+    {
+      "from": "agents-md",
+      "to": "codex-home-audit",
+      "weight": 1.0,
+      "desc": "Audit the full Codex home dir after AGENTS.md refactors"
+    },
+    {
+      "from": "agents-md",
+      "to": "codex-agent-creator",
+      "weight": 1.0,
+      "desc": "Create agent roles that AGENTS.md will reference"
+    },
+    {
+      "from": "agents-md",
+      "to": "compound-engineering-router",
+      "weight": 1.0,
+      "desc": "Route compound workflows referenced in AGENTS.md"
+    },
+    {
+      "from": "context7",
+      "to": "openai-docs",
+      "weight": 1.0,
+      "desc": "Use OpenAI docs MCP for OpenAI-specific library content"
+    },
+    {
+      "from": "context7",
+      "to": "repoprompt",
+      "weight": 1.0,
+      "desc": "Combine repo context with Context7 library docs"
+    },
+    {
+      "from": "context7",
+      "to": "mcp-builder",
+      "weight": 1.0,
+      "desc": "Reference Context7 docs when building MCP tool schemas"
+    },
+    {
+      "from": "context7",
+      "to": "backend-engineer",
+      "weight": 1.0,
+      "desc": "Use Context7 to check API docs during backend work"
+    },
+    {
+      "from": "docs-expert",
+      "to": "diagram-cli",
+      "weight": 1.0,
+      "desc": "Embed architecture diagrams in the documentation"
+    },
+    {
+      "from": "docs-expert",
+      "to": "fixing-metadata",
+      "weight": 1.0,
+      "desc": "Fix meta tags on documentation pages"
+    },
+    {
+      "from": "docs-expert",
+      "to": "visual-explainer",
+      "weight": 1.0,
+      "desc": "Create visual explainers to accompany written docs"
+    },
+    {
+      "from": "docs-expert",
+      "to": "markdown-converter",
+      "weight": 1.0,
+      "desc": "Convert source material to markdown before polish"
+    },
+    {
+      "from": "openai-docs",
+      "to": "context7",
+      "weight": 1.0,
+      "desc": "Supplement with Context7 for non-OpenAI library docs"
+    },
+    {
+      "from": "openai-docs",
+      "to": "workers-mcp",
+      "weight": 1.0,
+      "desc": "Use alongside Cloudflare Workers MCP docs"
+    },
+    {
+      "from": "arscontexta",
+      "to": "codex-plugin-builder",
+      "weight": 1.0,
+      "desc": "Package Ars Contexta surfaces into a Codex plugin"
+    },
+    {
+      "from": "arscontexta",
+      "to": "agents-md",
+      "weight": 1.0,
+      "desc": "Verify Ars Contexta parity in AGENTS.md after sync"
+    },
+    {
+      "from": "arscontexta",
+      "to": "codex-home-audit",
+      "weight": 1.0,
+      "desc": "Audit Codex home for Ars Contexta drift"
+    },
+    {
+      "from": "arscontexta",
+      "to": "compound-engineering-router",
+      "weight": 1.0,
+      "desc": "Route complex Ars Contexta workflows to the right mode"
+    },
+    {
+      "from": "chatgpt-apps",
+      "to": "workers-mcp",
+      "weight": 1.0,
+      "desc": "Host the MCP server on Cloudflare Workers"
+    },
+    {
+      "from": "chatgpt-apps",
+      "to": "oak-api",
+      "weight": 1.0,
+      "desc": "Integrate Oak curriculum content into ChatGPT App workflows"
+    },
+    {
+      "from": "cloudflare-deploy",
+      "to": "workers-mcp",
+      "weight": 1.0,
+      "desc": "Deploy MCP server as part of the Cloudflare stack"
+    },
+    {
+      "from": "cloudflare-deploy",
+      "to": "cf-crawl",
+      "weight": 1.0,
+      "desc": "Run Cloudflare Browser Rendering crawls on the deployed site"
+    },
+    {
+      "from": "cloudflare-deploy",
+      "to": "verification-before-completion",
+      "weight": 1.0,
+      "desc": "Verify deployment is healthy before completing"
+    },
+    {
+      "from": "oak-api",
+      "to": "chatgpt-apps",
+      "weight": 1.0,
+      "desc": "Build a ChatGPT App that surfaces Oak curriculum content"
+    },
+    {
+      "from": "oak-api",
+      "to": "mcp-builder",
+      "weight": 1.0,
+      "desc": "Expose Oak API as MCP tools for agent workflows"
+    },
+    {
+      "from": "oak-api",
+      "to": "product-spec",
+      "weight": 1.0,
+      "desc": "Spec the learning experience before implementing"
+    },
+    {
+      "from": "oak-api",
+      "to": "fixing-accessibility",
+      "weight": 1.0,
+      "desc": "Ensure Oak-powered UI meets accessibility requirements"
+    },
+    {
+      "from": "compound-engineering-router",
+      "to": "brainstorming",
+      "weight": 1.0,
+      "desc": "Start with brainstorming before routing to a compound workflow"
+    },
+    {
+      "from": "compound-engineering-router",
+      "to": "writing-plans",
+      "weight": 1.0,
+      "desc": "Generate the implementation plan the compound mode targets"
+    },
+    {
+      "from": "compound-engineering-router",
+      "to": "product-spec",
+      "weight": 1.0,
+      "desc": "Produce a spec before routing to the work or review mode"
+    },
+    {
+      "from": "compound-engineering-router",
+      "to": "architecture-interview",
+      "weight": 1.0,
+      "desc": "Route architecture decisions through the structured interview"
+    },
+    {
+      "from": "compound-engineering-router",
+      "to": "skill-builder",
+      "weight": 1.0,
+      "desc": "Build skills that compound workflows will invoke"
+    },
+    {
+      "from": "decide-build-primitive",
+      "to": "codex-automation-architect",
+      "weight": 1.0,
+      "desc": "Use after `AGENT_AUTOMATION` decision to design the automation contract"
+    },
+    {
+      "from": "decide-build-primitive",
+      "to": "compound-engineering-router",
+      "weight": 1.0,
+      "desc": "Use when the capability spans multiple workflow types and routing is unclear"
+    },
+    {
+      "from": "linear",
+      "to": "writing-plans",
+      "weight": 1.0,
+      "desc": "Convert Linear issues into sequenced implementation plans"
+    },
+    {
+      "from": "linear",
+      "to": "gh-workflow",
+      "weight": 1.0,
+      "desc": "Link Linear issues to GitHub PRs during delivery"
+    },
+    {
+      "from": "linear",
+      "to": "simple-tasks",
+      "weight": 1.0,
+      "desc": "Use for lightweight local task tracking between Linear syncs"
+    },
+    {
+      "from": "linear",
+      "to": "alignment-checkpoint",
+      "weight": 1.0,
+      "desc": "Gate Linear issue creation behind intent alignment"
+    },
+    {
+      "from": "linear",
+      "to": "compound-engineering-router",
+      "weight": 1.0,
+      "desc": "Route compound work captured as Linear issues"
+    },
+    {
+      "from": "release",
+      "to": "gh-workflow",
+      "weight": 1.0,
+      "desc": "Manage the PR and merge lifecycle before cutting a release"
+    },
+    {
+      "from": "release",
+      "to": "verification-before-completion",
+      "weight": 1.0,
+      "desc": "Validate all checks pass before tagging"
+    },
+    {
+      "from": "release",
+      "to": "check-pr",
+      "weight": 1.0,
+      "desc": "Review the PR that triggers the release"
+    },
+    {
+      "from": "release",
+      "to": "writing-plans",
+      "weight": 1.0,
+      "desc": "Plan the release checklist before executing"
+    },
+    {
+      "from": "security-best-practices",
+      "to": "1password",
+      "weight": 1.0,
+      "desc": "Findings involving secrets management \u2014 use for secure injection patterns"
+    },
+    {
+      "from": "security-ownership-map",
+      "to": "recon-workbench",
+      "weight": 1.0,
+      "desc": "Correlate recon findings with ownership data"
+    },
+    {
+      "from": "security-ownership-map",
+      "to": "gh-workflow",
+      "weight": 1.0,
+      "desc": "Create GitHub issues for identified owners"
+    },
+    {
+      "from": "security-threat-model",
+      "to": "recon-workbench",
+      "weight": 1.0,
+      "desc": "When authorized recon evidence is needed to ground the threat model"
+    },
+    {
+      "from": "product-spec",
+      "to": "interview-me",
+      "weight": 1.0,
+      "desc": "Use for deep requirements discovery when the spec needs user-research grounding"
+    },
+    {
+      "from": "product-spec",
+      "to": "writing-plans",
+      "weight": 1.0,
+      "desc": "After spec approval, use to decompose the spec into an execution plan"
+    },
+    {
+      "from": "product-spec",
+      "to": "architecture-interview",
+      "weight": 1.0,
+      "desc": "Use when `arch_spec` mode reveals open design decisions needing review"
+    },
+    {
+      "from": "product-spec",
+      "to": "security-threat-model",
+      "weight": 1.0,
+      "desc": "Use on the resulting spec/API to identify and model security risks early"
+    },
+    {
+      "from": "brainstorming",
+      "to": "writing-plans",
+      "weight": 1.0,
+      "desc": "After spec is agreed, use to turn it into a sequenced execution plan"
+    },
+    {
+      "from": "product-design-critic",
+      "to": "product-spec",
+      "weight": 1.0,
+      "desc": "Critique the product surface after speccing, before build"
+    },
+    {
+      "from": "product-design-critic",
+      "to": "brainstorming",
+      "weight": 1.0,
+      "desc": "Explore design alternatives before critical review"
+    },
+    {
+      "from": "product-design-critic",
+      "to": "frontend-ui-design",
+      "weight": 1.0,
+      "desc": "Apply critique findings to UI component implementation"
+    },
+    {
+      "from": "product-design-critic",
+      "to": "interview-me",
+      "weight": 1.0,
+      "desc": "Run a requirements interview before critiquing the surface"
+    },
+    {
+      "from": "product-design-critic",
+      "to": "visual-explainer",
+      "weight": 1.0,
+      "desc": "Present critique findings as a visual explainer page"
+    },
+    {
+      "from": "project-improver",
+      "to": "product-spec",
+      "weight": 1.0,
+      "desc": "Produce a revised spec after high-leverage improvements are identified"
+    },
+    {
+      "from": "project-improver",
+      "to": "writing-plans",
+      "weight": 1.0,
+      "desc": "Convert approved improvements into an execution-ready plan"
+    },
+    {
+      "from": "project-improver",
+      "to": "security-threat-model",
+      "weight": 1.0,
+      "desc": "Include security improvements in the improvement scope"
+    },
+    {
+      "from": "1password",
+      "to": "security-best-practices",
+      "weight": 1.0,
+      "desc": "Apply secret management best practices alongside 1Password"
+    },
+    {
+      "from": "1password",
+      "to": "create-auth",
+      "weight": 1.0,
+      "desc": "Inject credentials into authentication flows via 1Password"
+    },
+    {
+      "from": "1password",
+      "to": "cloudflare-deploy",
+      "weight": 1.0,
+      "desc": "Inject secrets into Cloudflare deployments via op run"
+    },
+    {
+      "from": "1password",
+      "to": "workers-mcp",
+      "weight": 1.0,
+      "desc": "Secure MCP server secrets with 1Password injection"
+    },
+    {
+      "from": "1password",
+      "to": "bootstrap",
+      "weight": 1.0,
+      "desc": "Provision dev environment secrets via 1Password during bootstrap"
+    },
+    {
+      "from": "agent-browser",
+      "to": "playwright-interactive",
+      "weight": 1.0,
+      "desc": "Use for iterative UI automation when Playwright is better"
+    },
+    {
+      "from": "agent-browser",
+      "to": "ui-visual-regression",
+      "weight": 1.0,
+      "desc": "Capture snapshots with agent-browser for regression checks"
+    },
+    {
+      "from": "agent-browser",
+      "to": "fixing-accessibility",
+      "weight": 1.0,
+      "desc": "Probe ARIA and keyboard behaviour via browser automation"
+    },
+    {
+      "from": "agent-browser",
+      "to": "agentation",
+      "weight": 1.0,
+      "desc": "Wire agent-browser actions into Agentation self-driving mode"
+    },
+    {
+      "from": "agent-browser",
+      "to": "atlas",
+      "weight": 1.0,
+      "desc": "Use Atlas for macOS ChatGPT app control vs agent-browser for web"
+    },
+    {
+      "from": "alignment-checkpoint",
+      "to": "interview-me",
+      "weight": 1.0,
+      "desc": "Follow with structured interview to clarify requirements"
+    },
+    {
+      "from": "alignment-checkpoint",
+      "to": "brainstorming",
+      "weight": 1.0,
+      "desc": "Explore approaches once intent is aligned"
+    },
+    {
+      "from": "alignment-checkpoint",
+      "to": "writing-plans",
+      "weight": 1.0,
+      "desc": "Move from approved intent to an execution-ready plan"
+    },
+    {
+      "from": "alignment-checkpoint",
+      "to": "product-spec",
+      "weight": 1.0,
+      "desc": "Produce a spec once ambiguity is resolved"
+    },
+    {
+      "from": "alignment-checkpoint",
+      "to": "decide-build-primitive",
+      "weight": 1.0,
+      "desc": "Decide the right primitive after intent is confirmed"
+    },
+    {
+      "from": "apple-app-creator",
+      "to": "xcode-makefiles",
+      "weight": 1.0,
+      "desc": "Add reproducible CLI builds after scaffolding the app"
+    },
+    {
+      "from": "apple-app-creator",
+      "to": "design-system",
+      "weight": 1.0,
+      "desc": "Apply design tokens to native UI components"
+    },
+    {
+      "from": "apple-app-creator",
+      "to": "fixing-accessibility",
+      "weight": 1.0,
+      "desc": "Add UIAccessibility labels to native views"
+    },
+    {
+      "from": "apple-app-creator",
+      "to": "recon-workbench",
+      "weight": 1.0,
+      "desc": "Audit the app binary and entitlements after creation"
+    },
+    {
+      "from": "apple-app-creator",
+      "to": "simple-tasks",
+      "weight": 1.0,
+      "desc": "Track app build and release tasks locally"
+    },
+    {
+      "from": "apple-app-creator",
+      "to": "product-spec",
+      "weight": 1.0,
+      "desc": "Spec the app feature set before scaffolding"
     },
     {
       "from": "atlas",
-      "to": "openai-docs"
+      "to": "openai-docs",
+      "weight": 1.0,
+      "desc": "Reference official ChatGPT documentation for Atlas features"
     },
     {
       "from": "atlas",
-      "to": "agent-browser"
+      "to": "agent-browser",
+      "weight": 1.0,
+      "desc": "Complement Atlas AppleScript control with browser automation"
     },
     {
       "from": "atlas",
-      "to": "notebooklm"
-    },
-    {
-      "from": "backend-engineer",
-      "to": "cli-spec"
-    },
-    {
-      "from": "beautiful-mermaid",
-      "to": "diagram-cli"
+      "to": "notebooklm",
+      "weight": 1.0,
+      "desc": "Cross-reference Atlas conversations with NotebookLM notebooks"
     },
     {
       "from": "beautiful-mermaid",
-      "to": "visual-explainer"
+      "to": "diagram-cli",
+      "weight": 1.0,
+      "desc": "Generate .mmd source files before rendering with Beautiful Mermaid"
     },
     {
       "from": "beautiful-mermaid",
-      "to": "docs-expert"
+      "to": "visual-explainer",
+      "weight": 1.0,
+      "desc": "Embed rendered SVG outputs in HTML explainer pages"
     },
     {
       "from": "beautiful-mermaid",
-      "to": "slides"
+      "to": "docs-expert",
+      "weight": 1.0,
+      "desc": "Add rendered diagrams to repository documentation"
+    },
+    {
+      "from": "beautiful-mermaid",
+      "to": "slides",
+      "weight": 1.0,
+      "desc": "Embed high-quality Mermaid renders in slide decks"
     },
     {
       "from": "bootstrap",
-      "to": "fix-mise"
+      "to": "fix-mise",
+      "weight": 1.0,
+      "desc": "Repair mise trust issues blocking the bootstrapped environment"
     },
     {
       "from": "bootstrap",
-      "to": "cloudflare-deploy"
+      "to": "cloudflare-deploy",
+      "weight": 1.0,
+      "desc": "Deploy the bootstrapped project to Cloudflare"
     },
     {
       "from": "bootstrap",
-      "to": "gh-workflow"
+      "to": "gh-workflow",
+      "weight": 1.0,
+      "desc": "Set up GitHub PR workflow after bootstrap"
     },
     {
       "from": "bootstrap",
-      "to": "verification-before-completion"
-    },
-    {
-      "from": "brainstorming",
-      "to": "product-design-critic"
-    },
-    {
-      "from": "brainstorming",
-      "to": "project-improver"
+      "to": "verification-before-completion",
+      "weight": 1.0,
+      "desc": "Verify the bootstrap is working before continuing"
     },
     {
       "from": "cf-crawl",
-      "to": "cloudflare-deploy"
+      "to": "cloudflare-deploy",
+      "weight": 1.0,
+      "desc": "Deploy and authenticate the crawl target on Cloudflare"
     },
     {
       "from": "cf-crawl",
-      "to": "markdown-converter"
+      "to": "markdown-converter",
+      "weight": 1.0,
+      "desc": "Convert crawl output into clean Markdown"
     },
     {
       "from": "cf-crawl",
-      "to": "context7"
+      "to": "context7",
+      "weight": 1.0,
+      "desc": "Supplement crawl results with library documentation"
     },
     {
       "from": "cf-crawl",
-      "to": "visual-explainer"
-    },
-    {
-      "from": "check-pr",
-      "to": "using-git-worktrees"
-    },
-    {
-      "from": "circleci",
-      "to": "gh-fix-ci"
+      "to": "visual-explainer",
+      "weight": 1.0,
+      "desc": "Present crawl findings in an HTML report"
     },
     {
       "from": "circleci",
-      "to": "cloudflare-deploy"
+      "to": "gh-fix-ci",
+      "weight": 1.0,
+      "desc": "Fix GitHub CI checks that complement CircleCI"
     },
     {
       "from": "circleci",
-      "to": "verification-before-completion"
+      "to": "cloudflare-deploy",
+      "weight": 1.0,
+      "desc": "Deploy to Cloudflare as part of a CircleCI pipeline"
     },
     {
       "from": "circleci",
-      "to": "backend-engineer"
+      "to": "verification-before-completion",
+      "weight": 1.0,
+      "desc": "Verify pipeline output before marking complete"
+    },
+    {
+      "from": "circleci",
+      "to": "backend-engineer",
+      "weight": 1.0,
+      "desc": "Wire backend deployments into CircleCI workflows"
     },
     {
       "from": "codex-agent-creator",
-      "to": "agents-md"
+      "to": "agents-md",
+      "weight": 1.0,
+      "desc": "Register the new role in AGENTS.md after creation"
     },
     {
       "from": "codex-agent-creator",
-      "to": "codex-plugin-builder"
+      "to": "codex-plugin-builder",
+      "weight": 1.0,
+      "desc": "Package the agent role into a distributable plugin"
     },
     {
       "from": "codex-agent-creator",
-      "to": "codex-automation-architect"
+      "to": "codex-automation-architect",
+      "weight": 1.0,
+      "desc": "Design automations the new agent role will run"
     },
     {
       "from": "codex-agent-creator",
-      "to": "decide-build-primitive"
+      "to": "decide-build-primitive",
+      "weight": 1.0,
+      "desc": "Check whether an agent role vs skill vs prompt is correct"
     },
     {
       "from": "codex-agent-creator",
-      "to": "compound-engineering-router"
+      "to": "compound-engineering-router",
+      "weight": 1.0,
+      "desc": "Route requests that need multi-agent coordination"
     },
     {
       "from": "codex-automation-architect",
-      "to": "codex-agent-creator"
+      "to": "codex-agent-creator",
+      "weight": 1.0,
+      "desc": "Create the agent role the automation will run under"
     },
     {
       "from": "codex-automation-architect",
-      "to": "codex-plugin-builder"
+      "to": "codex-plugin-builder",
+      "weight": 1.0,
+      "desc": "Package automations into a plugin for distribution"
     },
     {
       "from": "codex-automation-architect",
-      "to": "decide-build-primitive"
+      "to": "decide-build-primitive",
+      "weight": 1.0,
+      "desc": "Confirm automation is the right primitive before building"
     },
     {
       "from": "codex-automation-architect",
-      "to": "writing-plans"
+      "to": "writing-plans",
+      "weight": 1.0,
+      "desc": "Plan the automation contract before implementing"
     },
     {
       "from": "codex-automation-architect",
-      "to": "verification-before-completion"
+      "to": "verification-before-completion",
+      "weight": 1.0,
+      "desc": "Validate automation output before declaring done"
     },
     {
       "from": "codex-home-audit",
-      "to": "agents-md"
+      "to": "agents-md",
+      "weight": 1.0,
+      "desc": "Refactor AGENTS.md based on audit findings"
     },
     {
       "from": "codex-home-audit",
-      "to": "codex-sessions-skill-scan"
+      "to": "codex-sessions-skill-scan",
+      "weight": 1.0,
+      "desc": "Run a skill health scan alongside the home audit"
     },
     {
       "from": "codex-home-audit",
-      "to": "insight-report"
+      "to": "insight-report",
+      "weight": 1.0,
+      "desc": "Generate a usage report to inform audit priorities"
     },
     {
       "from": "codex-home-audit",
-      "to": "verification-before-completion"
+      "to": "verification-before-completion",
+      "weight": 1.0,
+      "desc": "Verify fixes before marking the audit complete"
     },
     {
       "from": "codex-home-audit",
-      "to": "fix-mise"
+      "to": "fix-mise",
+      "weight": 1.0,
+      "desc": "Fix mise trust/runtime issues found during audit"
+    },
+    {
+      "from": "codex-home-audit",
+      "to": "process-watch",
+      "weight": 1.0,
+      "desc": "Check process resource usage during a home directory audit"
     },
     {
       "from": "codex-plugin-builder",
-      "to": "skill-builder"
+      "to": "verification-before-completion",
+      "weight": 1.0,
+      "desc": "Gate \"plugin is done\" with validator evidence before committing"
     },
     {
       "from": "codex-plugin-builder",
-      "to": "decide-build-primitive"
-    },
-    {
-      "from": "codex-plugin-builder",
-      "to": "verification-before-completion"
-    },
-    {
-      "from": "codex-plugin-builder",
-      "to": "arscontexta"
-    },
-    {
-      "from": "codex-plugin-builder",
-      "to": "mcp-builder"
+      "to": "arscontexta",
+      "weight": 1.0,
+      "desc": "When packaging Ars Contexta surfaces into a Codex plugin"
     },
     {
       "from": "codex-sessions-skill-scan",
-      "to": "insight-report"
+      "to": "insight-report",
+      "weight": 1.0,
+      "desc": "Turn session scan findings into a polished usage report"
     },
     {
       "from": "codex-sessions-skill-scan",
-      "to": "codex-home-audit"
+      "to": "codex-home-audit",
+      "weight": 1.0,
+      "desc": "Run alongside a full home directory audit"
     },
     {
       "from": "codex-sessions-skill-scan",
-      "to": "skill-builder"
+      "to": "skill-builder",
+      "weight": 1.0,
+      "desc": "Act on skill failures discovered in the scan"
     },
     {
       "from": "codex-sessions-skill-scan",
-      "to": "evals-router"
-    },
-    {
-      "from": "compound-engineering-router",
-      "to": "project-improver"
-    },
-    {
-      "from": "create-auth",
-      "to": "best-practices"
+      "to": "evals-router",
+      "weight": 1.0,
+      "desc": "Route evaluation work for under-performing skills"
     },
     {
       "from": "diagram-cli",
-      "to": "visual-explainer"
+      "to": "visual-explainer",
+      "weight": 1.0,
+      "desc": "Render diagram artifacts as a polished HTML explainer"
     },
     {
       "from": "diagram-cli",
-      "to": "beautiful-mermaid"
+      "to": "beautiful-mermaid",
+      "weight": 1.0,
+      "desc": "Convert .mmd outputs to publication-quality SVG/PNG"
     },
     {
       "from": "diagram-cli",
-      "to": "docs-expert"
+      "to": "docs-expert",
+      "weight": 1.0,
+      "desc": "Embed diagrams into repository documentation"
     },
     {
       "from": "diagram-cli",
-      "to": "writing-plans"
+      "to": "writing-plans",
+      "weight": 1.0,
+      "desc": "Use architecture diagrams to ground implementation plans"
     },
     {
       "from": "diagram-cli",
-      "to": "agents-md"
+      "to": "agents-md",
+      "weight": 1.0,
+      "desc": "Add diagram artifacts to AGENTS.md context packs"
     },
     {
       "from": "evals-router",
-      "to": "systematic-debugging"
+      "to": "systematic-debugging",
+      "weight": 1.0,
+      "desc": "When eval pipeline bugs emerge \u2014 debug root cause before redesigning the eval"
     },
     {
       "from": "evals-router",
-      "to": "verification-before-completion"
+      "to": "verification-before-completion",
+      "weight": 1.0,
+      "desc": "Gate \"eval is ready\" claims with concrete calibration or human-label evidence"
     },
     {
       "from": "evals-router",
-      "to": "skill-builder"
-    },
-    {
-      "from": "evals-router",
-      "to": "test-driven-development"
-    },
-    {
-      "from": "fix-mise",
-      "to": "bootstrap"
+      "to": "test-driven-development",
+      "weight": 1.0,
+      "desc": "For the implementation layer of the review tooling or judge prompt validation tests"
     },
     {
       "from": "fix-mise",
-      "to": "codex-home-audit"
+      "to": "bootstrap",
+      "weight": 1.0,
+      "desc": "Fix mise before retrying the bootstrap"
     },
     {
       "from": "fix-mise",
-      "to": "verification-before-completion"
+      "to": "codex-home-audit",
+      "weight": 1.0,
+      "desc": "Address mise issues found during a home directory audit"
     },
     {
       "from": "fix-mise",
-      "to": "systematic-debugging"
+      "to": "verification-before-completion",
+      "weight": 1.0,
+      "desc": "Confirm mise is healthy after the fix"
     },
     {
-      "from": "fixing-metadata",
-      "to": "create-auth"
+      "from": "fix-mise",
+      "to": "systematic-debugging",
+      "weight": 1.0,
+      "desc": "Debug root cause of mis trust or shim failures"
     },
     {
-      "from": "frontend-ui-design",
-      "to": "product-design-critic"
-    },
-    {
-      "from": "gh-fix-ci",
-      "to": "using-git-worktrees"
-    },
-    {
-      "from": "gh-workflow",
-      "to": "using-git-worktrees"
+      "from": "fix-mise",
+      "to": "process-watch",
+      "weight": 1.0,
+      "desc": "Watch process health while diagnosing mise shim issues"
     },
     {
       "from": "insight-report",
-      "to": "codex-sessions-skill-scan"
+      "to": "codex-sessions-skill-scan",
+      "weight": 1.0,
+      "desc": "Scan sessions first to gather data for the report"
     },
     {
       "from": "insight-report",
-      "to": "codex-home-audit"
+      "to": "codex-home-audit",
+      "weight": 1.0,
+      "desc": "Use report findings to prioritise home directory fixes"
     },
     {
       "from": "insight-report",
-      "to": "evals-router"
+      "to": "evals-router",
+      "weight": 1.0,
+      "desc": "Route skill evals based on insight-report failure signals"
     },
     {
       "from": "insight-report",
-      "to": "visual-explainer"
-    },
-    {
-      "from": "interview-me",
-      "to": "product-design-critic"
-    },
-    {
-      "from": "markdown-converter",
-      "to": "docs-expert"
+      "to": "visual-explainer",
+      "weight": 1.0,
+      "desc": "Present report findings as an interactive HTML page"
     },
     {
       "from": "markdown-converter",
-      "to": "visual-explainer"
+      "to": "docs-expert",
+      "weight": 1.0,
+      "desc": "Polish converted docs to meet repository quality standards"
     },
     {
       "from": "markdown-converter",
-      "to": "spreadsheet"
+      "to": "visual-explainer",
+      "weight": 1.0,
+      "desc": "Present converted content as a visual HTML page"
     },
     {
       "from": "markdown-converter",
-      "to": "notebooklm"
+      "to": "spreadsheet",
+      "weight": 1.0,
+      "desc": "Convert tabular data alongside markdown conversion"
     },
     {
-      "from": "mcp-builder",
-      "to": "best-practices"
+      "from": "markdown-converter",
+      "to": "notebooklm",
+      "weight": 1.0,
+      "desc": "Feed converted markdown to NotebookLM for analysis"
+    },
+    {
+      "from": "markdown-converter",
+      "to": "cf-crawl",
+      "weight": 1.0,
+      "desc": "Feed Cloudflare crawl outputs into the markdown converter for cleanup"
     },
     {
       "from": "notebooklm",
-      "to": "video-transcript-downloader"
+      "to": "video-transcript-downloader",
+      "weight": 1.0,
+      "desc": "Download transcripts to feed as NotebookLM sources"
     },
     {
       "from": "notebooklm",
-      "to": "markdown-converter"
+      "to": "markdown-converter",
+      "weight": 1.0,
+      "desc": "Convert docs to markdown before uploading to NotebookLM"
     },
     {
       "from": "notebooklm",
-      "to": "insight-report"
+      "to": "insight-report",
+      "weight": 1.0,
+      "desc": "Feed session insights into NotebookLM for deeper analysis"
     },
     {
       "from": "notebooklm",
-      "to": "compound-engineering-router"
-    },
-    {
-      "from": "openai-docs",
-      "to": "atlas"
-    },
-    {
-      "from": "process-watch",
-      "to": "systematic-debugging"
+      "to": "compound-engineering-router",
+      "weight": 1.0,
+      "desc": "Use NotebookLM evidence to inform compound workflow routing"
     },
     {
       "from": "process-watch",
-      "to": "codex-home-audit"
+      "to": "systematic-debugging",
+      "weight": 1.0,
+      "desc": "Use alongside process-watch for root-cause diagnosis"
     },
     {
       "from": "process-watch",
-      "to": "fix-mise"
+      "to": "codex-home-audit",
+      "weight": 1.0,
+      "desc": "Check process health during a Codex home audit"
     },
     {
       "from": "process-watch",
-      "to": "verification-before-completion"
+      "to": "fix-mise",
+      "weight": 1.0,
+      "desc": "Diagnose mise shim CPU/memory issues via process-watch"
     },
     {
-      "from": "product-spec",
-      "to": "product-design-critic"
-    },
-    {
-      "from": "product-spec",
-      "to": "project-improver"
-    },
-    {
-      "from": "recon-workbench",
-      "to": "security-threat-model"
+      "from": "process-watch",
+      "to": "verification-before-completion",
+      "weight": 1.0,
+      "desc": "Confirm processes are healthy before marking work done"
     },
     {
       "from": "recon-workbench",
-      "to": "security-ownership-map"
+      "to": "security-threat-model",
+      "weight": 1.0,
+      "desc": "Feed recon findings into the threat model"
     },
     {
       "from": "recon-workbench",
-      "to": "security-best-practices"
+      "to": "security-ownership-map",
+      "weight": 1.0,
+      "desc": "Correlate recon findings with code ownership"
     },
     {
       "from": "recon-workbench",
-      "to": "systematic-debugging"
+      "to": "security-best-practices",
+      "weight": 1.0,
+      "desc": "Apply findings-driven best practices after recon"
+    },
+    {
+      "from": "recon-workbench",
+      "to": "systematic-debugging",
+      "weight": 1.0,
+      "desc": "Debug app behaviour discovered during recon"
     },
     {
       "from": "repoprompt",
-      "to": "context7"
+      "to": "context7",
+      "weight": 1.0,
+      "desc": "Combine with Context7 for richer library context in prompts"
     },
     {
       "from": "repoprompt",
-      "to": "agents-md"
+      "to": "agents-md",
+      "weight": 1.0,
+      "desc": "Use Repo Prompt context packs alongside AGENTS.md"
     },
     {
       "from": "repoprompt",
-      "to": "compound-engineering-router"
+      "to": "compound-engineering-router",
+      "weight": 1.0,
+      "desc": "Feed repo context into compound engineering workflows"
     },
     {
       "from": "repoprompt",
-      "to": "writing-plans"
+      "to": "writing-plans",
+      "weight": 1.0,
+      "desc": "Ground implementation plans with Repo Prompt context"
     },
     {
       "from": "simple-tasks",
-      "to": "linear"
+      "to": "linear",
+      "weight": 1.0,
+      "desc": "Escalate to Linear when tasks need team-wide visibility"
     },
     {
       "from": "simple-tasks",
-      "to": "writing-plans"
+      "to": "writing-plans",
+      "weight": 1.0,
+      "desc": "Seed task list from a writing-plans implementation plan"
     },
     {
       "from": "simple-tasks",
-      "to": "alignment-checkpoint"
+      "to": "alignment-checkpoint",
+      "weight": 1.0,
+      "desc": "Capture approved action items as simple tasks"
     },
     {
       "from": "simple-tasks",
-      "to": "verification-before-completion"
+      "to": "verification-before-completion",
+      "weight": 1.0,
+      "desc": "Mark tasks done only after verification evidence"
     },
     {
       "from": "skill-builder",
-      "to": "codex-plugin-builder"
-    },
-    {
-      "from": "skill-builder",
-      "to": "decide-build-primitive"
-    },
-    {
-      "from": "skill-builder",
-      "to": "verification-before-completion"
-    },
-    {
-      "from": "skill-builder",
-      "to": "evals-router"
-    },
-    {
-      "from": "skill-builder",
-      "to": "agents-md"
+      "to": "verification-before-completion",
+      "weight": 1.0,
+      "desc": "Gate any \"skill is done\" claim with fresh validator evidence"
     },
     {
       "from": "slides",
-      "to": "beautiful-mermaid"
+      "to": "beautiful-mermaid",
+      "weight": 1.0,
+      "desc": "Embed high-quality Mermaid diagrams in slide decks"
     },
     {
       "from": "slides",
-      "to": "visual-explainer"
+      "to": "visual-explainer",
+      "weight": 1.0,
+      "desc": "Use when a scrollable HTML page is better than slides"
     },
     {
       "from": "slides",
-      "to": "remotion"
+      "to": "remotion",
+      "weight": 1.0,
+      "desc": "Animate a slide deck as a Remotion video"
     },
     {
       "from": "slides",
-      "to": "product-spec"
+      "to": "product-spec",
+      "weight": 1.0,
+      "desc": "Turn a product spec into a presentation deck"
     },
     {
       "from": "slides",
-      "to": "imagegen"
+      "to": "imagegen",
+      "weight": 1.0,
+      "desc": "Generate illustrative images for slide backgrounds"
     },
     {
       "from": "spreadsheet",
-      "to": "markdown-converter"
+      "to": "markdown-converter",
+      "weight": 1.0,
+      "desc": "Convert spreadsheet data to markdown for documentation"
     },
     {
       "from": "spreadsheet",
-      "to": "visual-explainer"
+      "to": "visual-explainer",
+      "weight": 1.0,
+      "desc": "Present spreadsheet data as a styled HTML table"
     },
     {
       "from": "spreadsheet",
-      "to": "evals-router"
+      "to": "evals-router",
+      "weight": 1.0,
+      "desc": "Track evaluation results in a spreadsheet"
     },
     {
       "from": "spreadsheet",
-      "to": "insight-report"
+      "to": "insight-report",
+      "weight": 1.0,
+      "desc": "Export session data to spreadsheet for analysis"
     },
     {
       "from": "systematic-debugging",
-      "to": "test-driven-development"
+      "to": "test-driven-development",
+      "weight": 1.0,
+      "desc": "Phase 4, Step 1: write the failing test that captures the root cause"
     },
     {
       "from": "systematic-debugging",
-      "to": "verification-before-completion"
+      "to": "verification-before-completion",
+      "weight": 1.0,
+      "desc": "After implementing the fix \u2014 prove it works before claiming done"
     },
     {
       "from": "systematic-debugging",
-      "to": "evals-router"
+      "to": "evals-router",
+      "weight": 1.0,
+      "desc": "When the bug is in an LLM evaluation pipeline or judge prompt"
     },
     {
       "from": "systematic-debugging",
-      "to": "gh-fix-ci"
+      "to": "gh-fix-ci",
+      "weight": 1.0,
+      "desc": "When the failure is a broken GitHub Actions CI check"
     },
     {
       "from": "systematic-debugging",
-      "to": "writing-plans"
+      "to": "writing-plans",
+      "weight": 1.0,
+      "desc": "When 3+ fixes have failed and you need to re-plan the approach"
     },
     {
       "from": "test-driven-development",
-      "to": "systematic-debugging"
+      "to": "systematic-debugging",
+      "weight": 1.0,
+      "desc": "Run the TDD loop inside this debugging workflow for each phase-4 fix"
     },
     {
       "from": "test-driven-development",
-      "to": "verification-before-completion"
+      "to": "verification-before-completion",
+      "weight": 1.0,
+      "desc": "Explicit gate: verify the full test suite is green before claiming done"
     },
     {
       "from": "test-driven-development",
-      "to": "evals-router"
+      "to": "evals-router",
+      "weight": 1.0,
+      "desc": "When the failing \"test\" is an LLM evaluation \u2014 route to the correct eval workflow"
     },
     {
       "from": "test-driven-development",
-      "to": "writing-plans"
+      "to": "writing-plans",
+      "weight": 1.0,
+      "desc": "Write a TDD-aware plan when the feature spans multiple behavior changes"
     },
     {
       "from": "using-git-worktrees",
-      "to": "gh-workflow"
+      "to": "gh-workflow",
+      "weight": 1.0,
+      "desc": "Manage PRs across multiple worktrees"
     },
     {
       "from": "using-git-worktrees",
-      "to": "verification-before-completion"
+      "to": "verification-before-completion",
+      "weight": 1.0,
+      "desc": "Verify each worktree independently before merging"
     },
     {
       "from": "using-git-worktrees",
-      "to": "systematic-debugging"
+      "to": "systematic-debugging",
+      "weight": 1.0,
+      "desc": "Debug issues isolated to a specific worktree"
     },
     {
       "from": "using-git-worktrees",
-      "to": "writing-plans"
+      "to": "writing-plans",
+      "weight": 1.0,
+      "desc": "Plan parallel workstreams across worktrees"
     },
     {
       "from": "verification-before-completion",
-      "to": "systematic-debugging"
+      "to": "systematic-debugging",
+      "weight": 1.0,
+      "desc": "Run first to find root cause; use this skill to prove the fix worked"
     },
     {
       "from": "verification-before-completion",
-      "to": "test-driven-development"
+      "to": "test-driven-development",
+      "weight": 1.0,
+      "desc": "Write failing tests before fixing; this skill verifies they now pass"
     },
     {
       "from": "verification-before-completion",
-      "to": "gh-workflow"
+      "to": "gh-workflow",
+      "weight": 1.0,
+      "desc": "Gate PR merges: verification must pass before PR language is used"
     },
     {
       "from": "verification-before-completion",
-      "to": "evals-router"
+      "to": "evals-router",
+      "weight": 1.0,
+      "desc": "Verify LLM eval pipelines pass before claiming eval work is complete"
     },
     {
       "from": "visual-explainer",
-      "to": "beautiful-mermaid"
+      "to": "beautiful-mermaid",
+      "weight": 1.0,
+      "desc": "Render Mermaid diagrams for embedding in explainer pages"
     },
     {
       "from": "visual-explainer",
-      "to": "diagram-cli"
+      "to": "diagram-cli",
+      "weight": 1.0,
+      "desc": "Generate .mmd architecture artifacts to embed"
     },
     {
       "from": "visual-explainer",
-      "to": "slides"
+      "to": "slides",
+      "weight": 1.0,
+      "desc": "Use slides when presentation format is better than scroll"
     },
     {
       "from": "visual-explainer",
-      "to": "design-system"
-    },
-    {
-      "from": "workers-mcp",
-      "to": "best-practices"
-    },
-    {
-      "from": "writing-plans",
-      "to": "brainstorming"
+      "to": "design-system",
+      "weight": 1.0,
+      "desc": "Apply design-system tokens to visual explainer palettes"
     },
     {
       "from": "writing-plans",
-      "to": "interview-me"
+      "to": "brainstorming",
+      "weight": 1.0,
+      "desc": "Use first when scope is still ambiguous \u2014 resolve approach before planning steps"
     },
     {
       "from": "writing-plans",
-      "to": "product-spec"
+      "to": "interview-me",
+      "weight": 1.0,
+      "desc": "Use when requirements need discovery; hand the spec output to this skill"
     },
     {
       "from": "writing-plans",
-      "to": "verification-before-completion"
+      "to": "product-spec",
+      "weight": 1.0,
+      "desc": "Use for product-level specs; this skill turns the spec into an execution sequence"
     },
     {
       "from": "writing-plans",
-      "to": "systematic-debugging"
+      "to": "verification-before-completion",
+      "weight": 1.0,
+      "desc": "Embed in the plan's final task to gate \"done\" claims"
+    },
+    {
+      "from": "writing-plans",
+      "to": "systematic-debugging",
+      "weight": 1.0,
+      "desc": "When 3+ fix attempts fail, restart with this skill to re-plan the approach"
     },
     {
       "from": "xcode-makefiles",
-      "to": "apple-app-creator"
+      "to": "apple-app-creator",
+      "weight": 1.0,
+      "desc": "Install xcode-makefiles after scaffolding with apple-app-creator"
     },
     {
       "from": "xcode-makefiles",
-      "to": "circleci"
+      "to": "circleci",
+      "weight": 1.0,
+      "desc": "Integrate Make targets into CircleCI pipeline"
     },
     {
       "from": "xcode-makefiles",
-      "to": "verification-before-completion"
+      "to": "verification-before-completion",
+      "weight": 1.0,
+      "desc": "Verify Make targets build cleanly before completing"
     },
     {
       "from": "xcode-makefiles",
-      "to": "recon-workbench"
+      "to": "recon-workbench",
+      "weight": 1.0,
+      "desc": "Audit Makefile build outputs for security"
     },
     {
-      "from": "agent-browser",
-      "to": "atlas"
+      "from": "systematic-debugging",
+      "to": "fix-mise",
+      "weight": 1.0,
+      "desc": "Debug mise trust and runtime failures as a specific case",
+      "source": "adjacency_yaml"
     },
     {
-      "from": "apple-app-creator",
-      "to": "product-spec"
-    },
-    {
-      "from": "codex-home-audit",
-      "to": "process-watch"
-    },
-    {
-      "from": "fix-mise",
-      "to": "process-watch"
-    },
-    {
-      "from": "markdown-converter",
-      "to": "cf-crawl"
+      "from": "systematic-debugging",
+      "to": "process-watch",
+      "weight": 1.0,
+      "desc": "Monitor system processes alongside root-cause debugging",
+      "source": "adjacency_yaml"
     }
   ]
 }

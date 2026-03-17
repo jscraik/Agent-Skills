@@ -1,0 +1,73 @@
+name: Skill Graph Diff
+
+on:
+  pull_request:
+    paths:
+      - '**/SKILL.md'
+      - 'docs/skill-graphs/**'
+      - 'ops/metrics/graph/**'
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  graph-diff:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout head
+        uses: actions/checkout@v4
+        with:
+          path: head
+
+      - name: Checkout base
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.base_ref }}
+          path: base
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install pyyaml
+
+      - name: Extract edges (base)
+        run: |
+          python3 head/product/domain/arscontexta/reference/scripts/graph/extract-skill-edges.py \
+            base \
+            /tmp/base-edges.json
+
+      - name: Extract edges (head)
+        run: |
+          python3 head/product/domain/arscontexta/reference/scripts/graph/extract-skill-edges.py \
+            head \
+            /tmp/head-edges.json
+
+      - name: Check hub stability
+        run: |
+          # Find SKILL.md files changed in this PR
+          cd head
+          git fetch origin ${{ github.base_ref }} --depth=1 2>/dev/null || true
+          CHANGED=$(git diff --name-only FETCH_HEAD HEAD -- '**/SKILL.md' 2>/dev/null || true)
+          if [ -n "$CHANGED" ]; then
+            python3 scripts/check-hub-stability.py . --changed-files $CHANGED
+          else
+            echo "check-hub-stability: no SKILL.md files changed"
+          fi
+
+      - name: Generate graph diff comment
+        id: diff
+        run: |
+          python3 head/scripts/graph-diff.py /tmp/base-edges.json /tmp/head-edges.json > /tmp/graph-diff.md
+          echo "body<<EOF" >> $GITHUB_OUTPUT
+          cat /tmp/graph-diff.md >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Post PR comment
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: skill-graph-diff
+          message: ${{ steps.diff.outputs.body }}
