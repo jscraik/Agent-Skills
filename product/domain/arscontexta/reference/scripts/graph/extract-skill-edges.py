@@ -156,6 +156,18 @@ for node in nodes:
     if node["id"] in _stability:
         node["stability"] = _stability[node["id"]]
 
+# ── I: Stability tiers ────────────────────────────────────────────────────────
+# stable    = manually marked OR in_degree >= 15
+# growing   = in_degree 5–14
+# experimental = in_degree < 5
+for node in nodes:
+    if node.get("stability") == "stable" or node["in_degree"] >= 15:
+        node["tier"] = "stable"
+    elif node["in_degree"] >= 5:
+        node["tier"] = "growing"
+    else:
+        node["tier"] = "experimental"
+
 result = {
     "schema_version": 2,
     "generated_at":   datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%SZ"),

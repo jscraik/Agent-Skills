@@ -1,575 +1,669 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-03-17 01:00:45Z",
+  "generated_at": "2026-03-17 01:37:11Z",
   "node_count": 94,
-  "edge_count": 414,
+  "edge_count": 412,
   "nodes": [
     {
       "id": "openai-docs",
       "topic": "agent-ops",
       "in_degree": 5,
-      "out_degree": 4
+      "out_degree": 4,
+      "tier": "growing"
     },
     {
       "id": "skill-creator",
       "topic": "agent-ops",
       "in_degree": 0,
-      "out_degree": 0
+      "out_degree": 0,
+      "tier": "experimental"
     },
     {
       "id": "skill-installer",
       "topic": "agent-ops",
       "in_degree": 0,
-      "out_degree": 0
+      "out_degree": 0,
+      "tier": "experimental"
     },
     {
       "id": "best-practices",
       "topic": "security-ops",
       "in_degree": 0,
-      "out_degree": 4
+      "out_degree": 4,
+      "tier": "experimental"
     },
     {
       "id": "create-auth",
       "topic": "security-ops",
       "in_degree": 3,
-      "out_degree": 5
+      "out_degree": 5,
+      "tier": "experimental"
     },
     {
       "id": "backend-engineer",
       "topic": "backend-platform",
       "in_degree": 4,
-      "out_degree": 5
+      "out_degree": 5,
+      "tier": "experimental"
     },
     {
       "id": "cli-spec",
       "topic": "backend-platform",
       "in_degree": 0,
-      "out_degree": 4
+      "out_degree": 4,
+      "tier": "experimental"
     },
     {
       "id": "mcp-builder",
       "topic": "backend-platform",
       "in_degree": 9,
-      "out_degree": 5
+      "out_degree": 5,
+      "tier": "growing"
     },
     {
       "id": "workers-mcp",
       "topic": "backend-platform",
       "in_degree": 7,
-      "out_degree": 5
+      "out_degree": 5,
+      "tier": "growing"
     },
     {
       "id": "better-icons",
       "topic": "frontend-ui",
       "in_degree": 1,
-      "out_degree": 5
+      "out_degree": 5,
+      "tier": "experimental"
     },
     {
       "id": "favicon-generator",
       "topic": "frontend-ui",
       "in_degree": 3,
-      "out_degree": 4
+      "out_degree": 4,
+      "tier": "experimental"
     },
     {
       "id": "imagegen",
       "topic": "frontend-ui",
       "in_degree": 6,
-      "out_degree": 5
+      "out_degree": 5,
+      "tier": "growing"
     },
     {
       "id": "nano-banana-builder",
       "topic": "frontend-ui",
       "in_degree": 2,
-      "out_degree": 4
+      "out_degree": 4,
+      "tier": "experimental"
     },
     {
       "id": "og-image-creator",
       "topic": "frontend-ui",
       "in_degree": 4,
-      "out_degree": 4
+      "out_degree": 4,
+      "tier": "experimental"
     },
     {
       "id": "sora",
       "topic": "frontend-ui",
       "in_degree": 4,
-      "out_degree": 4
+      "out_degree": 4,
+      "tier": "experimental"
     },
     {
       "id": "threejs-builder",
       "topic": "frontend-ui",
       "in_degree": 1,
-      "out_degree": 4
+      "out_degree": 4,
+      "tier": "experimental"
     },
     {
       "id": "stitch-react-components",
       "topic": "frontend-ui",
       "in_degree": 4,
-      "out_degree": 5
+      "out_degree": 5,
+      "tier": "experimental"
     },
     {
       "id": "agentation",
       "topic": "frontend-ui",
       "in_degree": 3,
-      "out_degree": 4
+      "out_degree": 4,
+      "tier": "experimental"
     },
     {
       "id": "figma",
       "topic": "frontend-ui",
       "in_degree": 6,
-      "out_degree": 5
+      "out_degree": 5,
+      "tier": "growing"
     },
     {
       "id": "playwright-interactive",
       "topic": "frontend-ui",
       "in_degree": 4,
-      "out_degree": 4
+      "out_degree": 4,
+      "tier": "experimental"
     },
     {
       "id": "stitch-loop",
       "topic": "frontend-ui",
       "in_degree": 3,
-      "out_degree": 4
+      "out_degree": 4,
+      "tier": "experimental"
     },
     {
       "id": "ui-cloner",
       "topic": "product-strategy",
       "in_degree": 1,
-      "out_degree": 4
+      "out_degree": 4,
+      "tier": "experimental"
     },
     {
       "id": "baseline-ui",
       "topic": "frontend-ui",
       "in_degree": 8,
-      "out_degree": 5
+      "out_degree": 5,
+      "tier": "growing"
     },
     {
       "id": "design-system",
       "topic": "frontend-ui",
       "in_degree": 12,
-      "out_degree": 5
+      "out_degree": 5,
+      "tier": "growing"
     },
     {
       "id": "frontend-ui-design",
       "topic": "frontend-ui",
       "in_degree": 12,
-      "out_degree": 5
+      "out_degree": 5,
+      "tier": "growing"
     },
     {
       "id": "react-ui-patterns",
       "topic": "frontend-ui",
       "in_degree": 3,
-      "out_degree": 5
+      "out_degree": 5,
+      "tier": "experimental"
     },
     {
       "id": "remotion",
       "topic": "frontend-ui",
       "in_degree": 3,
-      "out_degree": 5
+      "out_degree": 5,
+      "tier": "experimental"
     },
     {
       "id": "shadcn-ui",
       "topic": "frontend-ui",
       "in_degree": 4,
-      "out_degree": 5
+      "out_degree": 5,
+      "tier": "experimental"
     },
     {
       "id": "stitch-remotion",
       "topic": "frontend-ui",
       "in_degree": 2,
-      "out_degree": 4
+      "out_degree": 4,
+      "tier": "experimental"
     },
     {
       "id": "ui-ux-creative-coding",
       "topic": "frontend-ui",
       "in_degree": 3,
-      "out_degree": 5
+      "out_degree": 5,
+      "tier": "experimental"
     },
     {
       "id": "ui-visual-regression",
       "topic": "frontend-ui",
       "in_degree": 3,
-      "out_degree": 4
+      "out_degree": 4,
+      "tier": "experimental"
     },
     {
       "id": "fixing-accessibility",
       "topic": "frontend-ui",
       "in_degree": 9,
-      "out_degree": 5
+      "out_degree": 5,
+      "tier": "growing"
     },
     {
       "id": "fixing-metadata",
       "topic": "frontend-ui",
       "in_degree": 6,
-      "out_degree": 4
+      "out_degree": 4,
+      "tier": "growing"
     },
     {
       "id": "gh-fix-ci",
       "topic": "backend-platform",
       "in_degree": 4,
-      "out_degree": 4
+      "out_degree": 4,
+      "tier": "experimental"
     },
     {
       "id": "gh-workflow",
       "topic": "backend-platform",
       "in_degree": 8,
-      "out_degree": 5
+      "out_degree": 5,
+      "tier": "growing"
     },
     {
       "id": "check-pr",
       "topic": "backend-platform",
       "in_degree": 2,
-      "out_degree": 4
+      "out_degree": 4,
+      "tier": "experimental"
     },
     {
       "id": "architecture-interview",
       "topic": "product-strategy",
       "in_degree": 7,
-      "out_degree": 5
+      "out_degree": 5,
+      "tier": "growing"
     },
     {
       "id": "deep-interview",
       "topic": "product-strategy",
       "in_degree": 1,
-      "out_degree": 4
+      "out_degree": 4,
+      "tier": "experimental"
     },
     {
       "id": "interview-me",
       "topic": "product-strategy",
       "in_degree": 6,
-      "out_degree": 5
+      "out_degree": 5,
+      "tier": "growing"
     },
     {
       "id": "video-transcript-downloader",
       "topic": "content-publishing",
       "in_degree": 4,
-      "out_degree": 4
+      "out_degree": 4,
+      "tier": "experimental"
     },
     {
       "id": "youtube-hooks-scripts",
       "topic": "content-publishing",
       "in_degree": 3,
-      "out_degree": 4
+      "out_degree": 4,
+      "tier": "experimental"
     },
     {
       "id": "youtube-titles-thumbnails",
       "topic": "content-publishing",
       "in_degree": 3,
-      "out_degree": 4
+      "out_degree": 4,
+      "tier": "experimental"
     },
     {
       "id": "agents-md",
       "topic": "agent-ops",
       "in_degree": 7,
-      "out_degree": 5
+      "out_degree": 5,
+      "tier": "growing"
     },
     {
       "id": "context7",
       "topic": "product-strategy",
       "in_degree": 3,
-      "out_degree": 4
+      "out_degree": 4,
+      "tier": "experimental"
     },
     {
       "id": "docs-expert",
       "topic": "product-strategy",
       "in_degree": 5,
-      "out_degree": 5
+      "out_degree": 5,
+      "tier": "growing"
     },
     {
       "id": "arscontexta",
       "topic": "product-strategy",
       "in_degree": 1,
-      "out_degree": 4
+      "out_degree": 4,
+      "tier": "experimental"
     },
     {
       "id": "chatgpt-apps",
       "topic": "backend-platform",
       "in_degree": 5,
-      "out_degree": 5
+      "out_degree": 5,
+      "tier": "growing"
     },
     {
       "id": "cloudflare-deploy",
       "topic": "backend-platform",
       "in_degree": 9,
-      "out_degree": 5
+      "out_degree": 5,
+      "tier": "growing"
     },
     {
       "id": "oak-api",
       "topic": "backend-platform",
       "in_degree": 1,
-      "out_degree": 4
+      "out_degree": 4,
+      "tier": "experimental"
     },
     {
       "id": "compound-engineering-router",
       "topic": "product-strategy",
       "in_degree": 7,
-      "out_degree": 5
+      "out_degree": 5,
+      "tier": "growing"
     },
     {
       "id": "decide-build-primitive",
       "topic": "agent-ops",
       "in_degree": 5,
-      "out_degree": 4
+      "out_degree": 4,
+      "tier": "growing"
     },
     {
       "id": "linear",
       "topic": "agent-ops",
       "in_degree": 1,
-      "out_degree": 5
+      "out_degree": 5,
+      "tier": "experimental"
     },
     {
       "id": "release",
       "topic": "backend-platform",
       "in_degree": 1,
-      "out_degree": 4
+      "out_degree": 4,
+      "tier": "experimental"
     },
     {
       "id": "security-best-practices",
       "topic": "security-ops",
       "in_degree": 9,
-      "out_degree": 4
+      "out_degree": 4,
+      "tier": "growing"
     },
     {
       "id": "security-ownership-map",
       "topic": "security-ops",
       "in_degree": 4,
-      "out_degree": 4
+      "out_degree": 4,
+      "tier": "experimental"
     },
     {
       "id": "security-threat-model",
       "topic": "security-ops",
       "in_degree": 8,
-      "out_degree": 4
+      "out_degree": 4,
+      "tier": "growing"
     },
     {
       "id": "product-spec",
       "topic": "product-strategy",
       "in_degree": 14,
-      "out_degree": 5
+      "out_degree": 5,
+      "tier": "growing"
     },
     {
       "id": "brainstorming",
       "topic": "product-strategy",
       "in_degree": 9,
-      "out_degree": 4
+      "out_degree": 4,
+      "tier": "growing"
     },
     {
       "id": "product-design-critic",
       "topic": "product-strategy",
       "in_degree": 0,
-      "out_degree": 5
+      "out_degree": 5,
+      "tier": "experimental"
     },
     {
       "id": "project-improver",
       "topic": "product-strategy",
       "in_degree": 0,
-      "out_degree": 5
+      "out_degree": 5,
+      "tier": "experimental"
     },
     {
       "id": "1password",
       "topic": "security-ops",
       "in_degree": 3,
-      "out_degree": 5
+      "out_degree": 5,
+      "tier": "experimental"
     },
     {
       "id": "agent-browser",
       "topic": "frontend-ui",
       "in_degree": 4,
-      "out_degree": 5
+      "out_degree": 5,
+      "tier": "experimental"
     },
     {
       "id": "alignment-checkpoint",
       "topic": "agent-ops",
       "in_degree": 2,
-      "out_degree": 5
+      "out_degree": 5,
+      "tier": "experimental"
     },
     {
       "id": "apple-app-creator",
       "topic": "mobile-native",
       "in_degree": 1,
-      "out_degree": 6
+      "out_degree": 6,
+      "tier": "experimental"
     },
     {
       "id": "atlas",
       "topic": "mobile-native",
       "in_degree": 1,
-      "out_degree": 3
+      "out_degree": 3,
+      "tier": "experimental"
     },
     {
       "id": "beautiful-mermaid",
       "topic": "frontend-ui",
       "in_degree": 3,
-      "out_degree": 4
+      "out_degree": 4,
+      "tier": "experimental"
     },
     {
       "id": "bootstrap",
       "topic": "backend-platform",
       "in_degree": 2,
-      "out_degree": 4
+      "out_degree": 4,
+      "tier": "experimental"
     },
     {
       "id": "cf-crawl",
       "topic": "backend-platform",
       "in_degree": 2,
-      "out_degree": 4
+      "out_degree": 4,
+      "tier": "experimental"
     },
     {
       "id": "circleci",
       "topic": "backend-platform",
       "in_degree": 2,
-      "out_degree": 4
+      "out_degree": 4,
+      "tier": "experimental"
     },
     {
       "id": "codex-agent-creator",
       "topic": "agent-ops",
       "in_degree": 2,
-      "out_degree": 5
+      "out_degree": 5,
+      "tier": "experimental"
     },
     {
       "id": "codex-automation-architect",
       "topic": "agent-ops",
       "in_degree": 2,
-      "out_degree": 5
+      "out_degree": 5,
+      "tier": "experimental"
     },
     {
       "id": "codex-home-audit",
       "topic": "agent-ops",
       "in_degree": 6,
-      "out_degree": 6
+      "out_degree": 6,
+      "tier": "growing"
     },
     {
       "id": "codex-plugin-builder",
       "topic": "agent-ops",
       "in_degree": 5,
-      "out_degree": 5
+      "out_degree": 5,
+      "tier": "growing"
     },
     {
       "id": "codex-sessions-skill-scan",
       "topic": "agent-ops",
       "in_degree": 2,
-      "out_degree": 4
+      "out_degree": 4,
+      "tier": "experimental"
     },
     {
       "id": "diagram-cli",
       "topic": "agent-ops",
       "in_degree": 4,
-      "out_degree": 5
+      "out_degree": 5,
+      "tier": "experimental"
     },
     {
       "id": "evals-router",
       "topic": "agent-ops",
       "in_degree": 7,
-      "out_degree": 4
+      "out_degree": 4,
+      "tier": "growing"
     },
     {
       "id": "fix-mise",
       "topic": "backend-platform",
-      "in_degree": 4,
-      "out_degree": 5
+      "in_degree": 3,
+      "out_degree": 5,
+      "tier": "experimental"
     },
     {
       "id": "insight-report",
       "topic": "agent-ops",
       "in_degree": 4,
-      "out_degree": 4
+      "out_degree": 4,
+      "tier": "experimental"
     },
     {
       "id": "markdown-converter",
       "topic": "content-publishing",
       "in_degree": 5,
-      "out_degree": 5
+      "out_degree": 5,
+      "tier": "growing"
     },
     {
       "id": "notebooklm",
       "topic": "product-strategy",
       "in_degree": 4,
-      "out_degree": 4
+      "out_degree": 4,
+      "tier": "experimental"
     },
     {
       "id": "process-watch",
       "topic": "mobile-native",
-      "in_degree": 3,
-      "out_degree": 4
+      "in_degree": 2,
+      "out_degree": 4,
+      "tier": "experimental"
     },
     {
       "id": "recon-workbench",
       "topic": "security-ops",
       "in_degree": 4,
-      "out_degree": 4
+      "out_degree": 4,
+      "tier": "experimental"
     },
     {
       "id": "repoprompt",
       "topic": "agent-ops",
       "in_degree": 1,
-      "out_degree": 4
+      "out_degree": 4,
+      "tier": "experimental"
     },
     {
       "id": "simple-tasks",
       "topic": "agent-ops",
       "in_degree": 2,
-      "out_degree": 4
+      "out_degree": 4,
+      "tier": "experimental"
     },
     {
       "id": "skill-builder",
       "topic": "agent-ops",
       "in_degree": 6,
-      "out_degree": 5
+      "out_degree": 5,
+      "tier": "growing"
     },
     {
       "id": "slides",
       "topic": "frontend-ui",
       "in_degree": 4,
-      "out_degree": 5
+      "out_degree": 5,
+      "tier": "experimental"
     },
     {
       "id": "spreadsheet",
       "topic": "content-publishing",
       "in_degree": 1,
-      "out_degree": 4
+      "out_degree": 4,
+      "tier": "experimental"
     },
     {
       "id": "systematic-debugging",
       "topic": "agent-ops",
       "in_degree": 10,
-      "out_degree": 7,
-      "stability": "stable"
+      "out_degree": 5,
+      "stability": "stable",
+      "tier": "stable"
     },
     {
       "id": "test-driven-development",
       "topic": "agent-ops",
       "in_degree": 4,
-      "out_degree": 4
+      "out_degree": 4,
+      "tier": "experimental"
     },
     {
       "id": "using-git-worktrees",
       "topic": "backend-platform",
       "in_degree": 0,
-      "out_degree": 4
+      "out_degree": 4,
+      "tier": "experimental"
     },
     {
       "id": "verification-before-completion",
       "topic": "agent-ops",
       "in_degree": 20,
       "out_degree": 4,
-      "stability": "stable"
+      "stability": "stable",
+      "tier": "stable"
     },
     {
       "id": "visual-explainer",
       "topic": "frontend-ui",
       "in_degree": 13,
-      "out_degree": 4
+      "out_degree": 4,
+      "tier": "growing"
     },
     {
       "id": "writing-plans",
       "topic": "agent-ops",
       "in_degree": 18,
       "out_degree": 5,
-      "stability": "stable"
+      "stability": "stable",
+      "tier": "stable"
     },
     {
       "id": "xcode-makefiles",
       "topic": "mobile-native",
       "in_degree": 1,
-      "out_degree": 4
+      "out_degree": 4,
+      "tier": "experimental"
     }
   ],
   "edges": [
@@ -3044,20 +3138,6 @@
       "to": "recon-workbench",
       "weight": 1.0,
       "desc": "Audit Makefile build outputs for security"
-    },
-    {
-      "from": "systematic-debugging",
-      "to": "fix-mise",
-      "weight": 1.0,
-      "desc": "Debug mise trust and runtime failures as a specific case",
-      "source": "adjacency_yaml"
-    },
-    {
-      "from": "systematic-debugging",
-      "to": "process-watch",
-      "weight": 1.0,
-      "desc": "Monitor system processes alongside root-cause debugging",
-      "source": "adjacency_yaml"
     }
   ]
 }

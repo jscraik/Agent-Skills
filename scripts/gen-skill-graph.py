@@ -285,12 +285,13 @@ const nd=g.append("g").selectAll("g").data(nodes).join("g").attr("class","node")
     .on("end",  (e,d)=>{{if(!e.active)sim.alphaTarget(0);d.fx=null;d.fy=null;}}))
   .on("click",(e,d)=>{{e.stopPropagation();sel(d.id);}});
 nd.append("circle")
-  .attr("r",d=>Math.max(5,Math.min(14,5+(deg[d.id]||0)*0.7)))
-  .attr("fill",d=>CLR[d.topic]||CLR.unknown)
+  .attr("r",function(d){{return Math.max(5,Math.min(14,5+(deg[d.id]||0)*0.7));}})
+  .attr("fill",function(d){{return CLR[d.topic]||CLR.unknown;}})
   .attr("fill-opacity",0.82)
-  .attr("stroke",d=>CLR[d.topic]||CLR.unknown)
-  .attr("stroke-opacity",d=>d.stability==="stable"?0.9:0.45)
-  .attr("stroke-width",d=>d.stability==="stable"?3:1.5);
+  .attr("stroke",function(d){{return CLR[d.topic]||CLR.unknown;}})
+  .attr("stroke-opacity",function(d){{return d.tier==="stable"?0.9:d.tier==="growing"?0.6:0.3;}})
+  .attr("stroke-width",function(d){{return d.tier==="stable"?3:d.tier==="growing"?1.8:1;}})
+  .attr("stroke-dasharray",function(d){{return d.tier==="experimental"?"2,2":null;}});
 nd.append("text").attr("dy",13).text(d=>d.id);
 function cf(alpha){{nodes.forEach(n=>{{const p=cp(n.topic);n.vx+=(p.x-n.x)*alpha*0.05;n.vy+=(p.y-n.y)*alpha*0.05;}});}}
 const sim=d3.forceSimulation(nodes)
@@ -327,7 +328,9 @@ function sel(id){{
   const stableTag=node.stability==="stable"?` <span style="font-size:10px;opacity:.7">★ stable hub</span>`:"";
   document.getElementById("dnm").innerHTML=node.id+stableTag;
   const inD=node.in_degree||0;const outD=node.out_degree||0;
-  document.getElementById("dmt").textContent=`${{conn.size}} connection${{conn.size!==1?"s":""}} · ${{node.topic}} · ↓${{inD}} in / ↑${{outD}} out`;
+  const tierIcons={{"stable":"★","growing":"◆","experimental":"◇"}};
+  const tierBadge=`${{tierIcons[node.tier]||"◇"}} ${{node.tier||"experimental"}}`;
+  document.getElementById("dmt").textContent=`${{conn.size}} connection${{conn.size!==1?"s":""}} · ${{node.topic}} · ${{tierBadge}} · ↓${{inD}} in`;
   const ghEl=document.getElementById("dgithub");
   const ghUrl=SKILL_URLS[node.id];
   ghEl.innerHTML=ghUrl?`<a href="${{ghUrl}}" target="_blank" rel="noopener" style="font-size:11px;color:var(--text-dim);text-decoration:none;border:1px solid var(--border);padding:3px 10px;border-radius:6px;display:inline-block" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text-dim)'">Open SKILL.md ↗</a>`:"";
