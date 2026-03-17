@@ -49,6 +49,19 @@ jobs:
           name: skill-portfolio-benchmark
           path: artifacts/industry-benchmark-latest.json
 
+      - name: See Also gate (new skills must have ≥2 cross-skill links)
+        if: github.event_name == 'pull_request'
+        run: |
+          CHANGED=$(git diff --name-only origin/${{ github.base_ref }}...HEAD | grep SKILL.md || true)
+          if [ -n "$CHANGED" ]; then
+            python3 scripts/check-see-also.py . --changed-files $CHANGED
+          else
+            echo "check-see-also: no SKILL.md changes in this PR"
+          fi
+
+      - name: Hub stability gate
+        run: python3 scripts/check-hub-stability.py .
+
   eval-baseline:
     if: github.event_name == 'workflow_dispatch' && inputs.run_evals == 'true'
     runs-on: ubuntu-latest

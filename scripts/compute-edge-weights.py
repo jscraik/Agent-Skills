@@ -76,6 +76,17 @@ result = {
     "weights": weights,
 }
 OUT.parent.mkdir(parents=True, exist_ok=True)
+
+# ── F: Archive snapshot before overwriting ────────────────────────────────────
+from datetime import datetime, timezone as _tz
+import shutil as _shutil
+ARCHIVE_DIR = OUT.parent / "weights-archive"
+ARCHIVE_DIR.mkdir(exist_ok=True)
+STAMP = datetime.now(_tz.utc).strftime("%Y%m%dT%H%M%SZ")
+_archive = ARCHIVE_DIR / f"{STAMP}.json"
+if OUT.exists():
+    _shutil.copy2(OUT, _archive)
+
 OUT.write_text(json.dumps(result, indent=2) + "\n")
 print(f"compute-edge-weights: {processed} sessions, {len(weights)} weighted pairs → {OUT}")
 if weights:
