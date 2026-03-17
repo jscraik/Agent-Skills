@@ -17,21 +17,21 @@ TOPIC_MAPS = {
 }
 
 adjacency = {}   # skill -> {related_skill: description}
-seen_real = set()
+seen_skills: set[str] = set()   # deduplicate by skill name, not resolved path
 
 for md in sorted(ROOT.rglob("SKILL.md")):
     if len(md.parts) < 2:
         continue
     skill = md.parts[-2]
-    real  = str(md.resolve())
-    if real in seen_real:
+    if skill in seen_skills:         # first SKILL.md wins (alphabetical sort = utilities/ before skills-antigravity/ typically)
         continue
-    seen_real.add(real)
+    seen_skills.add(skill)
 
     content = md.read_text(encoding="utf-8", errors="replace")
     sa_block = re.search(
-        r"## See Also\s*\n\| Skill \| When to use together \|\n\|---\|---\|\n((?:\|.*\|\n?)*)",
-        content
+        r"## See Also\s*\n(.*?)(?=\n##|\Z)",
+        content,
+        re.DOTALL,
     )
     if not sa_block:
         continue
@@ -42,7 +42,7 @@ for md in sorted(ROOT.rglob("SKILL.md")):
         if m:
             target = m.group(1).strip()
             desc   = m.group(2).strip()
-            if target not in TOPIC_MAPS:
+            if target not in TOPIC_MAPS and not target.startswith("|"):
                 rows[target] = desc
 
     if rows:

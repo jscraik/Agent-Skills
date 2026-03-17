@@ -14,6 +14,7 @@ Usage:
   python3 extract-skill-edges.py <vault_root> <edges_out>
 """
 import json, math, pathlib, re, sys
+from collections import Counter
 from datetime import datetime, timezone
 
 VAULT_ROOT = pathlib.Path(sys.argv[1] if len(sys.argv) > 1 else ".")
@@ -127,15 +128,13 @@ edges = list(edge_map.values())
 # Sort edges by weight desc for readable JSON
 edges.sort(key=lambda e: -e.get("weight", 1.0))
 
-# ── Annotate nodes with in_degree, out_degree, stability ─────────────────────
-from collections import Counter as _Counter
-in_deg  = _Counter(e["to"]   for e in edges)
-out_deg = _Counter(e["from"] for e in edges)
+# ── Annotate nodes with in_degree, out_degree, and stability ─────────────────
+in_deg  = Counter(e["to"]   for e in edges)
+out_deg = Counter(e["from"] for e in edges)
 
-# Read stability from SKILL.md frontmatter
-import re as _re
-_FM  = _re.compile(r"^---\n(.*?)\n---", _re.DOTALL)
-_STA = _re.compile(r"^stability\s*:\s*(\S+)", _re.MULTILINE)
+# Frontmatter regex handles both LF and CRLF line endings
+_FM  = re.compile(r"^---\r?\n(.*?)\r?\n---", re.DOTALL)
+_STA = re.compile(r"^stability\s*:\s*(\S+)", re.MULTILINE)
 _stability: dict[str, str] = {}
 for _md in VAULT_ROOT.rglob("SKILL.md"):
     _skill = _md.parts[-2] if len(_md.parts) >= 2 else None

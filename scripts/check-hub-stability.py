@@ -19,7 +19,7 @@ if CHANGED_FLAG in sys.argv:
     idx = sys.argv.index(CHANGED_FLAG)
     changed_files = sys.argv[idx + 1:]
 
-FRONTMATTER_RE = re.compile(r"^---\n(.*?)\n---", re.DOTALL)
+FRONTMATTER_RE = re.compile(r"^---\r?\n(.*?)\r?\n---", re.DOTALL)
 STABLE_RE      = re.compile(r"^stability\s*:\s*stable\s*$", re.MULTILINE)
 DEPRECATION_RE = re.compile(r"(?:deprecated|deprecation|migration)", re.IGNORECASE)
 

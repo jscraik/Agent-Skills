@@ -33,16 +33,15 @@ TOPIC_MAPS = {
 
 # ── 1. Extract SKILL.md edges ─────────────────────────────────────────────────
 skill_edges: set[tuple] = set()
-seen_real: set[str] = set()
+seen_skills: set[str] = set()   # dedup by skill name — matches build-adjacency-yaml.py
 
 for md in sorted(ROOT.rglob("SKILL.md")):
     if len(md.parts) < 2:
         continue
     skill = md.parts[-2]
-    real  = str(md.resolve())
-    if real in seen_real:
+    if skill in seen_skills:          # first path wins (same as builder)
         continue
-    seen_real.add(real)
+    seen_skills.add(skill)
 
     content = md.read_text(encoding="utf-8", errors="replace")
     sa_block = re.search(r"## See Also\s*\n(.*?)(?=\n##|\Z)", content, re.DOTALL)

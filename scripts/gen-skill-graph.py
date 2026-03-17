@@ -17,7 +17,7 @@ Run via feedback-loop.sh (recommended) or standalone after an edge extraction:
   python3 product/domain/arscontexta/reference/scripts/graph/extract-skill-edges.py .
   python3 scripts/gen-skill-graph.py
 """
-import json, pathlib, sys
+import json, pathlib, re, sys
 
 ROOT      = pathlib.Path(sys.argv[1]) if len(sys.argv) > 1 else pathlib.Path(".")
 EDGES_IN  = pathlib.Path(sys.argv[2]) if len(sys.argv) > 2 else ROOT / "ops/metrics/graph/skill-edges.json"
@@ -41,11 +41,15 @@ edge_count = data.get("edge_count", len(data.get("edges", [])))
 
 # Detect GitHub repo URL for SKILL.md links
 import subprocess as _sp
+_GITHUB_RE = re.compile(r"^https://github\.com/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
 try:
     _remote = _sp.check_output(["git", "-C", str(ROOT), "remote", "get-url", "origin"],
                                text=True, stderr=_sp.DEVNULL).strip()
     _remote = _remote.rstrip(".git").replace("git@github.com:", "https://github.com/")
-    GITHUB_BASE = _remote + "/blob/main"
+    if _GITHUB_RE.match(_remote):
+        GITHUB_BASE = _remote + "/blob/main"
+    else:
+        raise ValueError(f"Unexpected remote format: {_remote!r}")
 except Exception:
     GITHUB_BASE = "https://github.com/jscraik/Agent-Skills/blob/main"
 
