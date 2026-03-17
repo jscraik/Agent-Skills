@@ -13,6 +13,7 @@ description: Create and review production-ready UI systems/components with token
 - [Deliverables](#deliverables)
 - [Philosophy](#philosophy)
 - [Workflow](#workflow)
+- [Redesign Audit Lens](#redesign-audit-lens)
 - [Validation](#validation)
 - [Constraints](#constraints)
 - [Anti-patterns](#anti-patterns)
@@ -61,8 +62,15 @@ description: Create and review production-ready UI systems/components with token
 3. Anchor measurements to tokens instead of ad hoc values.
 4. Define focus order, keyboard behavior, labels, contrast, and reduced-motion handling explicitly.
 5. Align implementation guidance to the host stack: React 19 patterns, Next.js 16 where relevant, Tailwind v4 utilities/tokens, and Tauri/App SDK constraints when present.
-6. Reuse bundled `references/`, `scripts/`, and `assets/FEATURE_DESIGN.template.md` when producing handoff structure or audit output.
-7. Verify the proposed UI is implementable, accessible, and stable before calling it done.
+6. For redesign requests, run the anti-generic audit pass in `references/redesign-audit-lens.md` before proposing visual polish.
+7. Reuse bundled `references/`, `scripts/`, and `assets/FEATURE_DESIGN.template.md` when producing handoff structure or audit output.
+8. Verify the proposed UI is implementable, accessible, and stable before calling it done.
+
+## Redesign Audit Lens
+- Use this lens when modernizing an existing product surface that feels generic or inconsistent.
+- Prioritize structural fixes before polish: hierarchy, state coverage, trust cues, and interaction clarity.
+- Enforce realism in example content: avoid placeholder names, fake round metrics, and dead actions that point to `#`.
+- Reference: `references/redesign-audit-lens.md`.
 
 ## Validation
 - Confirm responses begin with `## When to use`, `## Inputs`, and `## Outputs` when the skill is used interactively.
@@ -70,6 +78,7 @@ description: Create and review production-ready UI systems/components with token
 - Confirm measurements and spacing decisions map back to tokens or documented exceptions.
 - Confirm UI states are complete enough for real implementation, not just the happy path.
 - Confirm Storybook or equivalent visual review coverage is called out when components change materially.
+- Confirm generated examples avoid generic AI fingerprints (placeholder copy/data, dead actions, repetitive card-grid defaults) unless explicitly requested by the user.
 
 ## Constraints
 - Do not add new heavy UI dependencies without approval.
@@ -82,10 +91,12 @@ description: Create and review production-ready UI systems/components with token
 - Using raw ad hoc spacing, radius, or color values when tokens should exist.
 - Treating accessibility as a QA afterthought instead of part of the design contract.
 - Returning generic “nice UI” advice with no state model or implementation path.
+- Polishing visuals while leaving core redesign issues unresolved (weak hierarchy, unclear primary action, missing edge states, or trust-critical context buried).
 
 ## Examples
 - "Design a settings flow for a React app with accessible tabs and inline validation."
 - "Review this component set for token drift, focus behavior, and responsive gaps."
+- "Redesign this existing settings page to remove generic patterns while preserving stack constraints and accessibility."
 
 ## See Also
 

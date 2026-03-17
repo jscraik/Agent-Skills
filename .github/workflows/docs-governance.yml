@@ -124,3 +124,8 @@ jobs:
         with:
           name: docs-lint-report
           path: /tmp/docs-lint-report.json
+
+      - name: Validate adjacency.yaml ↔ SKILL.md sync
+        run: |
+          pip install pyyaml -q
+          DRIFT_THRESHOLD=5 python3 scripts/validate-adjacency.py .

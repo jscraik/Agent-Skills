@@ -117,7 +117,7 @@ Use optional overlays only when explicitly requested by the user.
   - `MOTION_INTENSITY: 6`
   - `VISUAL_DENSITY: 4`
 - Treat these as defaults that users may adjust in-prompt.
-- Apply strict rules from this overlay only when requested (for example dependency verification, interaction-state completeness, anti-emoji policy, layout/motion guardrails).
+- Apply strict rules from this overlay only when requested (for example dependency verification, interaction-state completeness, anti-emoji policy, layout/motion guardrails, and output-completeness discipline).
 - Keep core skill behavior unchanged when overlay is not requested.
 
 Reference: `references/design-taste-overlay.md`
