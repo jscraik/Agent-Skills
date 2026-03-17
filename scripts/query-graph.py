@@ -112,30 +112,27 @@ def bfs_neighbours(fwd, rev, node_map, start: str, depth: int, reverse: bool, to
     return sorted(results, key=lambda r: (-r["weight"], -r["in_links"]))
 
 def bfs_path(fwd, start: str, end: str, max_depth: int = 6) -> list[str] | None:
-    """Return shortest path from start to end, or None."""
+    """Return shortest path from start to end via BFS, or None."""
     if start == end:
         return [start]
-    visited = {start: None}
-    queue   = deque([start])
+    visited: dict[str, str | None] = {start: None}
+    queue = deque([(start, 0)])             # (node, depth)
     while queue:
-        current = queue.popleft()
+        current, d = queue.popleft()
+        if d >= max_depth:
+            continue
         for edge in fwd.get(current, []):
             peer = edge["to"]
             if peer in visited:
                 continue
             visited[peer] = current
             if peer == end:
-                # Reconstruct path
+                # Reconstruct path by walking predecessors
                 path = [end]
                 while path[-1] != start:
-                    path.append(visited[path[-1]])
+                    path.append(visited[path[-1]])  # type: ignore[arg-type]
                 return list(reversed(path))
-            depth = 0
-            n = peer
-            while visited[n]:
-                n = visited[n]; depth += 1
-            if depth < max_depth:
-                queue.append(peer)
+            queue.append((peer, d + 1))
     return None
 
 # ── pretty printer helpers ────────────────────────────────────────────────────
@@ -330,13 +327,15 @@ def main():
         "topic":   None,
         "tier":    None,
     }
-
+    # Validate depth after flag parsing (set below), guarded at use
     i = 0
-    flags = [a for a in raw if a.startswith("-")]
     flag_src = raw
     while i < len(flag_src):
         a = flag_src[i]
-        if a == "--depth"   and i + 1 < len(flag_src): args["depth"]   = int(flag_src[i+1]); i += 2; continue
+        if a == "--depth"   and i + 1 < len(flag_src):
+            d = int(flag_src[i+1])
+            args["depth"] = max(1, d)   # guard: depth must be >= 1
+            i += 2; continue
         if a == "--topic"   and i + 1 < len(flag_src): args["topic"]   = flag_src[i+1];       i += 2; continue
         if a == "--tier"    and i + 1 < len(flag_src): args["tier"]    = flag_src[i+1];       i += 2; continue
         if a == "--reverse": args["reverse"] = True

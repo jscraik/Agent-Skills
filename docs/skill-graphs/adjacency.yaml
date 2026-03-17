@@ -3,6 +3,10 @@
 # Edit this file to add/change cross-skill links.
 # extract-skill-edges.py reads this as a seed.
 #
+# Format:
+#   skill-name:
+#     related-skill: "when to use together"
+#
 
 1password:
   bootstrap: Provision dev environment secrets via 1Password during bootstrap
@@ -335,10 +339,9 @@ og-image-creator:
   fixing-metadata: Wire generated OG images into correct meta tags
   imagegen: Use imagegen for non-route-specific image generation
 openai-docs:
-  chatgpt-apps: Reference when building ChatGPT Apps SDK integrations
-  context7: Supplement with Context7 for non-OpenAI library docs
-  mcp-builder: Use docs to correctly implement MCP tool schemas
-  workers-mcp: Use alongside Cloudflare Workers MCP docs
+  chatgpt-apps: Build ChatGPT App SDK integrations using up-to-date API refs
+  context7: Use Context7 alongside OpenAI docs for version-accurate library details
+  mcp-builder: Build an MCP server after reading the official tool schema docs
 playwright-interactive:
   agent-browser: Use agent-browser for simpler ref-based interactions
   agentation: Wire Playwright automation into Agentation self-driving
@@ -441,6 +444,14 @@ skill-builder:
     eval layer
   verification-before-completion: Gate any "skill is done" claim with fresh validator
     evidence
+skill-creator:
+  agents-md: Update AGENTS.md after adding a new capability
+  skill-builder: Use when creating a quality-gated skill with evals and rubric
+  skill-installer: Install a newly created skill into Codex home
+skill-installer:
+  codex-plugin-builder: Bundle multiple skills into a plugin before installing
+  skill-builder: Quality-gate the skill before installing
+  skill-creator: Create a skill before installing it from source
 slides:
   beautiful-mermaid: Embed high-quality Mermaid diagrams in slide decks
   imagegen: Generate illustrative images for slide backgrounds

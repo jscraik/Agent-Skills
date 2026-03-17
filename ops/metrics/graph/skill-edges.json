@@ -1,8 +1,8 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-03-17 01:37:11Z",
+  "generated_at": "2026-03-17 01:52:47Z",
   "node_count": 94,
-  "edge_count": 412,
+  "edge_count": 420,
   "nodes": [
     {
       "id": "openai-docs",
@@ -14,15 +14,15 @@
     {
       "id": "skill-creator",
       "topic": "agent-ops",
-      "in_degree": 0,
-      "out_degree": 0,
+      "in_degree": 1,
+      "out_degree": 3,
       "tier": "experimental"
     },
     {
       "id": "skill-installer",
       "topic": "agent-ops",
-      "in_degree": 0,
-      "out_degree": 0,
+      "in_degree": 1,
+      "out_degree": 3,
       "tier": "experimental"
     },
     {
@@ -301,7 +301,7 @@
     {
       "id": "agents-md",
       "topic": "agent-ops",
-      "in_degree": 7,
+      "in_degree": 8,
       "out_degree": 5,
       "tier": "growing"
     },
@@ -511,7 +511,7 @@
     {
       "id": "codex-plugin-builder",
       "topic": "agent-ops",
-      "in_degree": 5,
+      "in_degree": 6,
       "out_degree": 5,
       "tier": "growing"
     },
@@ -539,7 +539,7 @@
     {
       "id": "fix-mise",
       "topic": "backend-platform",
-      "in_degree": 3,
+      "in_degree": 4,
       "out_degree": 5,
       "tier": "experimental"
     },
@@ -567,7 +567,7 @@
     {
       "id": "process-watch",
       "topic": "mobile-native",
-      "in_degree": 2,
+      "in_degree": 3,
       "out_degree": 4,
       "tier": "experimental"
     },
@@ -595,7 +595,7 @@
     {
       "id": "skill-builder",
       "topic": "agent-ops",
-      "in_degree": 6,
+      "in_degree": 8,
       "out_degree": 5,
       "tier": "growing"
     },
@@ -617,7 +617,7 @@
       "id": "systematic-debugging",
       "topic": "agent-ops",
       "in_degree": 10,
-      "out_degree": 5,
+      "out_degree": 7,
       "stability": "stable",
       "tier": "stable"
     },
@@ -668,424 +668,466 @@
   ],
   "edges": [
     {
+      "from": "openai-docs",
+      "to": "mcp-builder",
+      "weight": 4.611,
+      "desc": "Build an MCP server after reading the official tool schema docs"
+    },
+    {
       "from": "best-practices",
       "to": "create-auth",
-      "weight": 4.219,
+      "weight": 4.611,
       "desc": "Apply auth-specific best practices during implementation"
     },
     {
       "from": "create-auth",
       "to": "mcp-builder",
-      "weight": 4.219,
+      "weight": 4.611,
       "desc": "Secure MCP server authentication using Better Auth"
     },
     {
       "from": "backend-engineer",
       "to": "mcp-builder",
-      "weight": 4.219,
+      "weight": 4.611,
       "desc": "Build MCP server tools alongside the backend"
     },
     {
       "from": "mcp-builder",
       "to": "openai-docs",
-      "weight": 4.219,
+      "weight": 4.611,
       "desc": "Use official MCP schema docs when designing tool schemas"
     },
     {
       "from": "mcp-builder",
       "to": "backend-engineer",
-      "weight": 4.219,
+      "weight": 4.611,
       "desc": "Add MCP tools to an existing backend service"
     },
     {
       "from": "agents-md",
       "to": "skill-builder",
-      "weight": 4.219,
+      "weight": 4.611,
       "desc": "Build new skills that will be registered in AGENTS.md"
-    },
-    {
-      "from": "openai-docs",
-      "to": "mcp-builder",
-      "weight": 4.219,
-      "desc": "Use docs to correctly implement MCP tool schemas"
     },
     {
       "from": "decide-build-primitive",
       "to": "skill-builder",
-      "weight": 4.219,
+      "weight": 4.611,
       "desc": "Use after `SKILL` decision is made to scaffold and quality-gate the skill"
     },
     {
       "from": "evals-router",
       "to": "skill-builder",
-      "weight": 4.219,
+      "weight": 4.611,
       "desc": "When the eval workflow should be packaged as a reusable Codex skill"
     },
     {
       "from": "skill-builder",
       "to": "decide-build-primitive",
-      "weight": 4.219,
+      "weight": 4.611,
       "desc": "Use before building to confirm a Skill is the right primitive vs a Prompt or Automation"
     },
     {
       "from": "skill-builder",
       "to": "evals-router",
-      "weight": 4.219,
+      "weight": 4.611,
       "desc": "When the skill is an LLM eval workflow \u2014 use to design or audit the eval layer"
     },
     {
       "from": "skill-builder",
       "to": "agents-md",
-      "weight": 4.219,
+      "weight": 4.611,
       "desc": "When the new skill needs a corresponding AGENTS.md entry or routing update"
     },
     {
       "from": "decide-build-primitive",
       "to": "codex-plugin-builder",
-      "weight": 4.135,
+      "weight": 4.555,
       "desc": "Use after `SKILL` decision when the skill needs plugin packaging for distribution"
     },
     {
       "from": "codex-plugin-builder",
       "to": "skill-builder",
-      "weight": 4.135,
+      "weight": 4.555,
       "desc": "Build and quality-gate the plugin-owned skills before packaging them here"
     },
     {
       "from": "codex-plugin-builder",
       "to": "decide-build-primitive",
-      "weight": 4.135,
+      "weight": 4.555,
       "desc": "Use before building to confirm a plugin is the right packaging choice"
     },
     {
       "from": "codex-plugin-builder",
       "to": "mcp-builder",
-      "weight": 4.135,
+      "weight": 4.555,
       "desc": "For standalone MCP server development without plugin packaging overhead"
     },
     {
       "from": "skill-builder",
       "to": "codex-plugin-builder",
-      "weight": 4.135,
+      "weight": 4.555,
       "desc": "Package a validated skill into a distributable plugin; runs after quality gates pass"
     },
     {
       "from": "best-practices",
       "to": "security-threat-model",
-      "weight": 4.091,
+      "weight": 4.526,
       "desc": "Run a threat model before applying best practices"
     },
     {
       "from": "best-practices",
       "to": "security-ownership-map",
-      "weight": 4.091,
+      "weight": 4.526,
       "desc": "Identify who owns the code being hardened"
     },
     {
       "from": "create-auth",
       "to": "security-best-practices",
-      "weight": 4.091,
+      "weight": 4.526,
       "desc": "Apply secure defaults during auth implementation"
     },
     {
       "from": "create-auth",
       "to": "security-threat-model",
-      "weight": 4.091,
+      "weight": 4.526,
       "desc": "Model auth attack surface before implementing"
     },
     {
       "from": "backend-engineer",
       "to": "security-best-practices",
-      "weight": 4.091,
+      "weight": 4.526,
       "desc": "Apply security hardening to new backend endpoints"
     },
     {
       "from": "mcp-builder",
       "to": "security-best-practices",
-      "weight": 4.091,
+      "weight": 4.526,
       "desc": "Apply security hardening to MCP server endpoints"
     },
     {
       "from": "better-icons",
       "to": "favicon-generator",
-      "weight": 4.091,
+      "weight": 4.526,
       "desc": "Use alongside favicon generation for icon-family consistency"
     },
     {
       "from": "architecture-interview",
       "to": "brainstorming",
-      "weight": 4.091,
+      "weight": 4.526,
       "desc": "Explore options before the architecture interview"
     },
     {
       "from": "interview-me",
       "to": "brainstorming",
-      "weight": 4.091,
+      "weight": 4.526,
       "desc": "For lighter, less structured exploration before committing to interview format"
     },
     {
       "from": "interview-me",
       "to": "architecture-interview",
-      "weight": 4.091,
+      "weight": 4.526,
       "desc": "Track C in this skill routes directly here for architecture decisions"
     },
     {
       "from": "security-best-practices",
       "to": "security-threat-model",
-      "weight": 4.091,
+      "weight": 4.526,
       "desc": "Run first to identify trust boundaries and threat model; this skill remediates specific findings"
     },
     {
       "from": "security-best-practices",
       "to": "security-ownership-map",
-      "weight": 4.091,
+      "weight": 4.526,
       "desc": "Find who owns the highest-risk code after identifying findings"
     },
     {
       "from": "security-best-practices",
       "to": "create-auth",
-      "weight": 4.091,
+      "weight": 4.526,
       "desc": "Security review often surfaces auth issues \u2014 use this for implementation"
     },
     {
       "from": "security-ownership-map",
       "to": "security-threat-model",
-      "weight": 4.091,
+      "weight": 4.526,
       "desc": "Use ownership map to assign threat model mitigations"
     },
     {
       "from": "security-ownership-map",
       "to": "security-best-practices",
-      "weight": 4.091,
+      "weight": 4.526,
       "desc": "Route best-practice remediation to the right owners"
     },
     {
       "from": "security-threat-model",
       "to": "security-best-practices",
-      "weight": 4.091,
+      "weight": 4.526,
       "desc": "Run after threat modeling to get language-specific remediation guidance"
     },
     {
       "from": "security-threat-model",
       "to": "security-ownership-map",
-      "weight": 4.091,
+      "weight": 4.526,
       "desc": "Use to identify which engineers are responsible for the highest-risk code areas"
     },
     {
       "from": "brainstorming",
       "to": "interview-me",
-      "weight": 4.091,
+      "weight": 4.526,
       "desc": "Use when the idea needs deeper requirements discovery beyond a quick brainstorm"
     },
     {
       "from": "brainstorming",
       "to": "architecture-interview",
-      "weight": 4.091,
+      "weight": 4.526,
       "desc": "When the brainstorm reveals a significant architecture decision needing structured review"
     },
     {
       "from": "project-improver",
       "to": "brainstorming",
-      "weight": 4.091,
+      "weight": 4.526,
       "desc": "Brainstorm improvement ideas before running the improver"
+    },
+    {
+      "from": "openai-docs",
+      "to": "chatgpt-apps",
+      "weight": 4.497,
+      "desc": "Build ChatGPT App SDK integrations using up-to-date API refs"
     },
     {
       "from": "backend-engineer",
       "to": "cloudflare-deploy",
-      "weight": 4.045,
+      "weight": 4.497,
       "desc": "Deploy the backend extension to Cloudflare Workers"
     },
     {
       "from": "cli-spec",
       "to": "docs-expert",
-      "weight": 4.045,
+      "weight": 4.497,
       "desc": "Document the CLI surface after speccing it"
     },
     {
       "from": "cli-spec",
       "to": "product-spec",
-      "weight": 4.045,
+      "weight": 4.497,
       "desc": "Produce a broader product spec alongside the CLI spec"
     },
     {
       "from": "mcp-builder",
       "to": "chatgpt-apps",
-      "weight": 4.045,
+      "weight": 4.497,
       "desc": "Connect the MCP server to a ChatGPT Apps SDK integration"
     },
     {
       "from": "better-icons",
       "to": "design-system",
-      "weight": 4.045,
+      "weight": 4.497,
       "desc": "Integrate icon tokens into the design system"
     },
     {
       "from": "better-icons",
       "to": "figma",
-      "weight": 4.045,
+      "weight": 4.497,
       "desc": "Export icons for use in Figma designs"
     },
     {
       "from": "favicon-generator",
       "to": "cloudflare-deploy",
-      "weight": 4.045,
+      "weight": 4.497,
       "desc": "Include favicon assets in Cloudflare Pages deployments"
     },
     {
       "from": "nano-banana-builder",
       "to": "chatgpt-apps",
-      "weight": 4.045,
+      "weight": 4.497,
       "desc": "Integrate Nano Banana image APIs into a ChatGPT App"
     },
     {
       "from": "og-image-creator",
       "to": "cloudflare-deploy",
-      "weight": 4.045,
+      "weight": 4.497,
       "desc": "Serve OG images via Cloudflare Pages after generation"
     },
     {
       "from": "threejs-builder",
       "to": "agentation",
-      "weight": 4.045,
+      "weight": 4.497,
       "desc": "Automate Three.js scene interactions for testing"
     },
     {
       "from": "agentation",
       "to": "playwright-interactive",
-      "weight": 4.045,
+      "weight": 4.497,
       "desc": "Use Playwright for iterative UI inspection alongside Agentation"
     },
     {
       "from": "figma",
       "to": "better-icons",
-      "weight": 4.045,
+      "weight": 4.497,
       "desc": "Source icons via Figma designs and export to Iconify"
     },
     {
       "from": "playwright-interactive",
       "to": "agentation",
-      "weight": 4.045,
+      "weight": 4.497,
       "desc": "Wire Playwright automation into Agentation self-driving"
     },
     {
       "from": "fixing-metadata",
       "to": "cloudflare-deploy",
-      "weight": 4.045,
+      "weight": 4.497,
       "desc": "Verify metadata is served correctly after Cloudflare deployment"
     },
     {
       "from": "gh-workflow",
       "to": "check-pr",
-      "weight": 4.045,
+      "weight": 4.497,
       "desc": "Pre-merge policy review: readiness view with check status and remediation priority"
     },
     {
       "from": "check-pr",
       "to": "gh-workflow",
-      "weight": 4.045,
+      "weight": 4.497,
       "desc": "Full GitHub lifecycle management around the PR"
     },
     {
       "from": "check-pr",
       "to": "gh-fix-ci",
-      "weight": 4.045,
+      "weight": 4.497,
       "desc": "Fix any failing CI checks found during PR review"
     },
     {
       "from": "check-pr",
       "to": "security-best-practices",
-      "weight": 4.045,
+      "weight": 4.497,
       "desc": "Apply security checks during PR review"
     },
     {
       "from": "architecture-interview",
       "to": "security-threat-model",
-      "weight": 4.045,
+      "weight": 4.497,
       "desc": "Run a threat model alongside architecture decisions"
     },
     {
       "from": "deep-interview",
       "to": "brainstorming",
-      "weight": 4.045,
+      "weight": 4.497,
       "desc": "Use before this skill when the topic is still too vague for delta-mode enhancement"
     },
     {
       "from": "deep-interview",
       "to": "architecture-interview",
-      "weight": 4.045,
+      "weight": 4.497,
       "desc": "Use when deep-interview surfaces a major architectural tradeoff requiring structured review"
     },
     {
       "from": "agents-md",
       "to": "docs-expert",
-      "weight": 4.045,
+      "weight": 4.497,
       "desc": "Apply docs polish and community-health guidance to AGENTS.md"
     },
     {
       "from": "docs-expert",
       "to": "agents-md",
-      "weight": 4.045,
+      "weight": 4.497,
       "desc": "Apply docs-expert quality standards to AGENTS.md"
-    },
-    {
-      "from": "openai-docs",
-      "to": "chatgpt-apps",
-      "weight": 4.045,
-      "desc": "Reference when building ChatGPT Apps SDK integrations"
     },
     {
       "from": "chatgpt-apps",
       "to": "mcp-builder",
-      "weight": 4.045,
+      "weight": 4.497,
       "desc": "Build the underlying MCP server the Apps SDK connects to"
     },
     {
       "from": "chatgpt-apps",
       "to": "openai-docs",
-      "weight": 4.045,
+      "weight": 4.497,
       "desc": "Reference official Apps SDK documentation"
     },
     {
       "from": "chatgpt-apps",
       "to": "fixing-metadata",
-      "weight": 4.045,
+      "weight": 4.497,
       "desc": "Ensure App pages have correct meta and CSP headers"
     },
     {
       "from": "cloudflare-deploy",
       "to": "backend-engineer",
-      "weight": 4.045,
+      "weight": 4.497,
       "desc": "Extend the backend before deploying"
     },
     {
       "from": "cloudflare-deploy",
       "to": "fixing-metadata",
-      "weight": 4.045,
+      "weight": 4.497,
       "desc": "Fix OG/meta tags on deployed pages"
     },
     {
       "from": "security-threat-model",
       "to": "architecture-interview",
-      "weight": 4.045,
+      "weight": 4.497,
       "desc": "When the system design is still unclear \u2014 clarify before threat modeling"
     },
     {
       "from": "product-spec",
       "to": "brainstorming",
-      "weight": 4.045,
+      "weight": 4.497,
       "desc": "Use first when idea is unclear \u2014 brainstorm resolves direction, this skill writes the spec"
     },
     {
       "from": "brainstorming",
       "to": "product-spec",
-      "weight": 4.045,
+      "weight": 4.497,
       "desc": "Hand off the chosen direction to this skill to produce implementation-ready specs"
     },
     {
       "from": "project-improver",
       "to": "architecture-interview",
-      "weight": 4.045,
+      "weight": 4.497,
       "desc": "Validate architectural improvements via structured interview"
+    },
+    {
+      "from": "openai-docs",
+      "to": "context7",
+      "weight": 1.0,
+      "desc": "Use Context7 alongside OpenAI docs for version-accurate library details"
+    },
+    {
+      "from": "skill-creator",
+      "to": "skill-builder",
+      "weight": 1.0,
+      "desc": "Use when creating a quality-gated skill with evals and rubric"
+    },
+    {
+      "from": "skill-creator",
+      "to": "skill-installer",
+      "weight": 1.0,
+      "desc": "Install a newly created skill into Codex home"
+    },
+    {
+      "from": "skill-creator",
+      "to": "agents-md",
+      "weight": 1.0,
+      "desc": "Update AGENTS.md after adding a new capability"
+    },
+    {
+      "from": "skill-installer",
+      "to": "skill-creator",
+      "weight": 1.0,
+      "desc": "Create a skill before installing it from source"
+    },
+    {
+      "from": "skill-installer",
+      "to": "skill-builder",
+      "weight": 1.0,
+      "desc": "Quality-gate the skill before installing"
+    },
+    {
+      "from": "skill-installer",
+      "to": "codex-plugin-builder",
+      "weight": 1.0,
+      "desc": "Bundle multiple skills into a plugin before installing"
     },
     {
       "from": "best-practices",
@@ -1986,12 +2028,6 @@
       "to": "markdown-converter",
       "weight": 1.0,
       "desc": "Convert source material to markdown before polish"
-    },
-    {
-      "from": "openai-docs",
-      "to": "context7",
-      "weight": 1.0,
-      "desc": "Supplement with Context7 for non-OpenAI library docs"
     },
     {
       "from": "openai-docs",
@@ -3138,6 +3174,20 @@
       "to": "recon-workbench",
       "weight": 1.0,
       "desc": "Audit Makefile build outputs for security"
+    },
+    {
+      "from": "systematic-debugging",
+      "to": "fix-mise",
+      "weight": 1.0,
+      "desc": "Debug mise trust and runtime failures as a specific case",
+      "source": "adjacency_yaml"
+    },
+    {
+      "from": "systematic-debugging",
+      "to": "process-watch",
+      "weight": 1.0,
+      "desc": "Monitor system processes alongside root-cause debugging",
+      "source": "adjacency_yaml"
     }
   ]
 }
