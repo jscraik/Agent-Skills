@@ -6,6 +6,13 @@ cases:
         value: "Phase 1"
       - type: contains
         value: "approaches"
+  - name: decompose-oversized-request
+    prompt: "Help me brainstorm a new product with chat, billing, analytics, file storage, and admin permissions."
+    acceptance:
+      - type: contains
+        value: "independent workstreams"
+      - type: contains
+        value: "smallest valuable first slice"
   - name: skip-when-clear
     prompt: "Implement exactly this acceptance criteria with no ambiguity."
     acceptance:
@@ -18,3 +25,10 @@ cases:
         value: "Key Decisions"
       - type: contains
         value: "Next Steps"
+  - name: visual-companion-optional
+    prompt: "Can we brainstorm two possible dashboard layouts? If it helps, show me visually."
+    acceptance:
+      - type: contains
+        value: "opt-in"
+      - type: contains
+        value: "references/visual-companion.md"

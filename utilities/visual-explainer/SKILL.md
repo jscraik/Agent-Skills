@@ -1,6 +1,8 @@
 ---
 name: visual-explainer
 description: Generate beautiful, self-contained HTML pages that visually explain systems, code changes, plans, and data. Use when the user asks for a diagram, architecture overview, diff review, plan review, project recap, comparison table, or any visual explanation of technical concepts. Also use proactively when you are about to render a complex ASCII table (4+ rows or 3+ columns) — present it as a styled HTML page instead.
+metadata:
+  skill-type: team_automation
 ---
 
 # Visual Explainer
@@ -13,7 +15,7 @@ Generate self-contained HTML files for technical diagrams, visualizations, and d
 - Use repo-bundled templates and reference patterns before inventing a fresh structure.
 - If the content wants a browser artifact, do not regress to terminal tables or ASCII diagrams.
 
-## When to Use
+## When to use
 
 Use this skill when a request needs a visual artifact (diagram, architecture explainer, plan review, comparison table, timeline, dashboard, or recap) instead of plain text.
 Use slide mode when the user explicitly asks for a deck (`--slides`, `/generate-slides`, or "make this a slide deck").
@@ -24,13 +26,13 @@ Use slide mode when the user explicitly asks for a deck (`--slides`, `/generate-
 - Treat styling as a communication tool, not decoration.
 - Produce durable artifacts that can be reopened, shared, and iterated.
 
-## Inputs
+## Required inputs
 
 - Source material to visualize (architecture notes, diffs, plans, data, or tables).
 - Intended audience and explanation goal.
 - Optional style constraints (branding, theme preferences, presentation context).
 
-## Outputs
+## Deliverables
 
 - A self-contained HTML explainer saved under `~/.agent/diagrams/`.
 - Opened browser artifact and explicit output path.
@@ -279,41 +281,8 @@ Before delivering, verify:
 - If `PyYAML` is missing, fail fast with an explicit fix command instead of retrying ambiguous interpreters.
 - If the right artifact is still unclear after reading the source material, stop and choose the diagram type before writing HTML.
 
-## Example prompts
+## Gotchas
+- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.
 
-- "Create a visual architecture explainer for this service and open it in my browser."
-- "Turn this deployment plan into a timeline-style HTML explainer under `~/.agent/diagrams/`."
-- "Convert this feature comparison table into a polished HTML page instead of ASCII."
-- "Generate a slide deck version of this plan (`--slides`) and keep all sections."
-
-## Anti-Patterns to Avoid
-
-- ❌ Reusing the same generic dark theme every time.
-- ❌ Falling back to terminal ASCII tables when an HTML table is appropriate.
-- ❌ Shipping visuals that are pretty but miss required content or relationships.
-- ❌ Using slide mode to summarize away source content that should be preserved.
-- ❌ Skipping responsive and overflow checks before delivery.
-- ❌ Treating templates as finished designs instead of starting points.
-
-## Remember
-
-Make the browser artifact earn its keep. If it is not clearer, easier to scan, and easier to reopen than a text reply, it needs another pass.
-
-## See Also
-
-| Skill | When to use together |
-|---|---|
-| [[beautiful-mermaid]] | Render Mermaid diagrams for embedding in explainer pages |
-| [[diagram-cli]] | Generate .mmd architecture artifacts to embed |
-| [[slides]] | Use slides when presentation format is better than scroll |
-| [[design-system]] | Apply design-system tokens to visual explainer palettes |
-
-**Topic map:** [[frontend-ui]]
-
-<!-- decision-feedback-protocol:v2 -->
-**Decision feedback protocol (required):**
-- If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.
-- Capture: `decision` (`accepted|partial|rejected|deferred`), `outcome` (`good|neutral|bad|unknown`), and `confidence` (`high|medium|low`).
-- Persist with: `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
-- The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
-<!-- /decision-feedback-protocol -->
+## Failure mode
+- TODO: define fail-fast behavior and nearest safe fallback.

@@ -1,6 +1,8 @@
 ---
 name: bootstrap
 description: Bootstrap a local development environment from a GitHub repository URL. Use when the user asks to clone a repo, install toolchains/dependencies, and validate a working dev setup automatically.
+metadata:
+  skill-type: scaffolding_templates
 ---
 
 # Environment Bootstrap
@@ -8,7 +10,7 @@ description: Bootstrap a local development environment from a GitHub repository 
 Create a working local dev environment from a repository with reproducible setup steps and verification output.
 
 ## Table of Contents
-- [When to Use](#when-to-use)
+- [When to use](#when-to-use)
 - [Standards snapshot](#standards-snapshot-march-2026)
 - [Philosophy](#philosophy)
 - [Inputs](#inputs)
@@ -24,7 +26,7 @@ Create a working local dev environment from a repository with reproducible setup
 - [Troubleshooting](#troubleshooting)
 - [Decision feedback protocol](#decision-feedback-protocol)
 
-## When to Use
+## When to use
 
 Use this skill when the user asks to quickly stand up a new repo locally, reproduce onboarding setup, or validate that a project can run from a clean environment.
 
@@ -40,7 +42,7 @@ Use this skill when the user asks to quickly stand up a new repo locally, reprod
 - Detect and report blockers early so users can recover quickly.
 - Keep generated setup notes actionable for the next contributor.
 
-## Inputs
+## Required inputs
 
 - Repository URL (required).
 - Optional target branch/tag/ref.
@@ -56,7 +58,7 @@ Use this skill when the user asks to quickly stand up a new repo locally, reprod
 6. Run a minimal startup/health verification command.
 7. Record outcomes and next steps in setup artifacts.
 
-## Outputs
+## Deliverables
 
 - Bootstrapped local repository ready for development (or clear failure report).
 - Concise setup summary (commands executed, detected stack, verification result).
@@ -99,31 +101,9 @@ If clone, toolchain activation, dependency install, or the first runnable health
 
 ## Example Output
 
-```
-🚀 Environment Bootstrap Agent Starting...
-   Repository: https://github.com/vercel/next.js
-   Work directory: /tmp/bootstrap-next.js-1234567890
-
-📦 Step 1: Cloning repository...
-   ✅ Repository cloned
-
-🔍 Step 2: Detecting project type...
-   Detected project type: node
-
-🛠️  Step 3: Installing required tools...
-   ✅ Tools installed
-
-📥 Step 4: Installing dependencies...
-   ✅ Dependencies installed
-
-🚀 Step 5: Verifying project startup...
-   ✅ Health check completed
-
-📝 Step 6: Documenting setup...
-   ✅ SETUP.md created
-
-✅ Bootstrap complete!
-```
+- Bootstrap starts with repo URL and temp work directory.
+- It clones, detects project type, installs tools/dependencies, verifies startup, and writes `SETUP.md`.
+- Successful run ends with a clear completion marker and per-step status.
 
 ## Troubleshooting
 
@@ -153,3 +133,6 @@ If bootstrap fails:
 - Persist with: `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
 - The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
 <!-- /decision-feedback-protocol -->
+
+## Gotchas
+- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.
