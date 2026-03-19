@@ -1,0 +1,108 @@
+{
+  "schema_version": 3,
+  "maintenance_conditions": {
+    "orphan_notes": {
+      "enabled": true,
+      "threshold": 1,
+      "priority": "session"
+    },
+    "dangling_links": {
+      "enabled": true,
+      "threshold": 1,
+      "priority": "session"
+    },
+    "inbox_pressure": {
+      "enabled": true,
+      "threshold": 3,
+      "priority": "session"
+    },
+    "observation_accumulation": {
+      "enabled": true,
+      "threshold": 10,
+      "priority": "session"
+    },
+    "tension_accumulation": {
+      "enabled": true,
+      "threshold": 5,
+      "priority": "session"
+    },
+    "pipeline_stalled": {
+      "enabled": true,
+      "threshold": 1,
+      "priority": "multi-session"
+    },
+    "unprocessed_sessions": {
+      "enabled": true,
+      "threshold": 5,
+      "priority": "session"
+    },
+    "moc_oversize": {
+      "enabled": true,
+      "threshold": 40,
+      "priority": "slow"
+    },
+    "stale_notes": {
+      "enabled": true,
+      "threshold": 10,
+      "priority": "multi-session"
+    },
+    "low_link_density": {
+      "enabled": true,
+      "threshold": 2,
+      "priority": "slow"
+    },
+    "methodology_drift": {
+      "enabled": true,
+      "threshold": 1,
+      "priority": "multi-session"
+    }
+  },
+  "tasks": [
+    {
+      "id": "maint-001",
+      "type": "maintenance",
+      "priority": "session",
+      "status": "done",
+      "condition_key": "unprocessed_sessions",
+      "target": "527 unprocessed sessions",
+      "action": "/remember --mine-sessions",
+      "auto_generated": true,
+      "created": "2026-03-04T18:01:23Z",
+      "completed": "2026-03-04T18:01:59Z"
+    },
+    {
+      "id": "maint-002",
+      "type": "maintenance",
+      "priority": "session",
+      "status": "done",
+      "condition_key": "dangling_links",
+      "target": "2 dangling links in ops/health/2026-03-05-report.md and ops/health/2026-03-05-report-2.md",
+      "action": "/health",
+      "auto_generated": true,
+      "created": "2026-03-05T18:03:28Z",
+      "completed": "2026-03-08T18:09:03Z"
+    },
+    {
+      "id": "maint-003",
+      "type": "maintenance",
+      "priority": "slow",
+      "status": "pending",
+      "condition_key": "low_link_density",
+      "target": "avg link density 0.00 across 1 notes",
+      "action": "/reweave <note>",
+      "auto_generated": true,
+      "created": "2026-03-05T18:03:28Z"
+    },
+    {
+      "id": "maint-004",
+      "type": "maintenance",
+      "priority": "session",
+      "status": "pending",
+      "condition_key": "orphan_notes",
+      "target": "1 orphan notes with zero inbound links",
+      "action": "/reflect [[session-transcript-capture-is-required-for-friction-mining]]",
+      "auto_generated": true,
+      "created": "2026-03-08T18:09:03Z"
+    }
+  ]
+}

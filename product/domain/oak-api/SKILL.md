@@ -1,6 +1,8 @@
 ---
 name: oak-api
 description: Build or adapt Oak Curriculum API driven learning experiences, especially for child-facing, interactive ChatGPT Apps SDK workflows. Use when working with Oak API endpoints, curriculum data (subjects, units, lessons, quizzes, search), or when translating Oak content into adaptive learning activities with age-appropriate guardrails and compliance reminders.
+metadata:
+  skill-type: library_api_reference
 ---
 
 # Oak API
@@ -122,3 +124,6 @@ Turn Oak Curriculum API content into age-appropriate learning flows, endpoint ma
 
 ## Remember
 The best Oak output is structured, age-aware, compliant, and easy to turn into a real learning session.
+
+## Gotchas
+- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.

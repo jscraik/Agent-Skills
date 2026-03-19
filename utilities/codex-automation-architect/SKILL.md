@@ -1,6 +1,8 @@
 ---
 name: codex-automation-architect
 description: "Create, review, and merge Codex app automations; use when users need recurring automation design or consolidation with current OpenAI/Codex guidance, environment preflight, and headless multi-runner validation."
+metadata:
+  skill-type: team_automation
 ---
 
 # Codex Automation Architect
@@ -106,3 +108,9 @@ Design, review, consolidate, and validate Codex automations with current Codex a
 
 ## Remember
 An automation is production infrastructure. If its boundaries are unclear, it is not ready.
+
+## Gotchas
+- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.
+
+## Failure mode
+- If the trigger, execution environment, or safety guardrails are unclear, stop, report the missing assumptions, and fall back to an automation design sketch instead of shipping a brittle workflow.

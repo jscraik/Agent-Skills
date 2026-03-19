@@ -285,4 +285,4 @@ Before delivering, verify:
 - None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.
 
 ## Failure mode
-- TODO: define fail-fast behavior and nearest safe fallback.
+- If the source material, diagram choice, or rendering dependencies are unclear, stop, report the missing prerequisite, and fall back to a simpler visual scope or source-selection step before generating HTML.

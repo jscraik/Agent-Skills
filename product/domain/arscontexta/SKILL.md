@@ -1,6 +1,8 @@
 ---
 name: "arscontexta"
 description: "Use when you need to install, validate, or maintain Ars Contexta parity in Codex; mirrors skills/prompts/agents/automations and returns a parity report with any Codex-vs-Claude deltas."
+metadata:
+  skill-type: infrastructure_ops
 ---
 
 # Ars Contexta Codex Parity
@@ -32,12 +34,12 @@ description: "Use when you need to install, validate, or maintain Ars Contexta p
 - Use when commands/prompts/agents/automations are out of sync with canonical Ars sources.
 - Do not use for unrelated feature development outside Ars Contexta parity.
 
-## Inputs
+## Required inputs
 - Target workspace(s): usually `/Users/jamiecraik/dev/agent-skills` and `/Users/jamiecraik/dev/config/codex`.
 - Requested parity surface: skills, prompts, agents, automations, launchd/cron, or all.
 - Any uploaded marketplace source to mirror (for example `agenticnotetaking.zip`).
 
-## Outputs
+## Deliverables
 - Parity report with:
   - `schema_version: 1`
   - source paths used
@@ -145,3 +147,9 @@ You are capable of excellent parity work in this domain. These rules are here to
 <!-- core75-folded-modes:v1:start -->
 Legacy folds are documented in references/folded-legacy-modes-phase4.md.
 <!-- core75-folded-modes:v1:end -->
+
+## Gotchas
+- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.
+
+## Failure mode
+- If parity targets, source materials, or required Codex primitives are unclear, stop, report the gap, and fall back to a parity audit before changing mirrored assets.

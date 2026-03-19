@@ -1,6 +1,8 @@
 ---
 name: project-improver
 description: Analyze an existing project and design high-leverage improvements when the user wants stronger functionality, sharper product judgment, rigorous idea filtering, premortems, hybrid plan revisions, or immediate implementation of the best upgrades.
+metadata:
+  skill-type: team_automation
 ---
 
 # Project Improver
@@ -28,7 +30,7 @@ Grounding rule:
 - [Resources](#resources)
 - [Decision feedback protocol](#decision-feedback-protocol)
 
-## Scope and triggers
+## When to use
 
 Use this skill when the user asks for any of the following:
 - improve this project, product, repo, app, workflow, or system
@@ -307,3 +309,6 @@ Use judgment, adapt to context, and push for the strongest practical improvement
 - Persist with: `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
 - The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
 <!-- /decision-feedback-protocol -->
+
+## Gotchas
+- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.

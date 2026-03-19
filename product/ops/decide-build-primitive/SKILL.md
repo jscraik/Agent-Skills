@@ -3,6 +3,8 @@ name: decide-build-primitive
 description: Analyze and decide the right Codex primitive (Skill, Custom Prompt, or
   Agent automation) for a capability. Use this when you need to plan how to package
   or automate a workflow.
+metadata:
+  skill-type: team_automation
 ---
 
 # Decide Build Primitive
@@ -21,7 +23,7 @@ description: Analyze and decide the right Codex primitive (Skill, Custom Prompt,
 - [Examples](#examples)
 - [Decision feedback protocol](#decision-feedback-protocol)
 
-## Scope and triggers
+## When to use
 - Use this skill when the user asks how to package, automate, or operationalize a Codex capability.
 - Use it when the decision is between a reusable `SKILL`, a `CUSTOM_PROMPT`, or an `AGENT_AUTOMATION`.
 - Use it when the team needs a durable recommendation with tradeoffs, not just a gut-feel answer.
@@ -177,3 +179,6 @@ Follow-up expectations:
 - Persist with: `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
 - The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
 <!-- /decision-feedback-protocol -->
+
+## Gotchas
+- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.

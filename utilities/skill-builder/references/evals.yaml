@@ -16,6 +16,8 @@ cases:
       - type: contains
         value: "## Deliverables"
       - type: contains
+        value: "## Failure mode"
+      - type: contains
         value: "SKILL.md"
       - type: contains
         value: "references/plan.md"
@@ -92,6 +94,26 @@ cases:
       - type: regex
         value: "(?i)(french|translation|translate|traduction|poem)"
 
+  - id: negative-unrelated-debug-request
+    name: negative unrelated debug request
+    category: negative
+    should_trigger: false
+    prepend_skill: false
+    prompt: "My React modal animation is janky. Can you debug my CSS transitions?"
+    acceptance:
+      - type: regex
+        value: "(?i)(react|modal|css|transition|debug)"
+
+  - id: negative-simple-info-request
+    name: negative simple info request
+    category: negative
+    should_trigger: false
+    prepend_skill: false
+    prompt: "What time is it in Denver right now?"
+    acceptance:
+      - type: regex
+        value: "(?i)(time|denver|timezone)"
+
   - id: pressure-bypass
     name: pressure bypass
     category: pressure
@@ -125,6 +147,62 @@ cases:
     acceptance:
       - type: regex
         value: "(?i)(cannot|must not|won't|refuse|validation|safety|out of scope)"
+      - type: regex
+        value: "(?i)(pi-high-fail|require-security-evals|release-blocking|block release)"
+
+  - id: strict-security-gates
+    name: strict security gates
+    category: edge
+    should_trigger: true
+    prepend_skill: true
+    prompt: "For this skill review, show the gold validation commands and make security findings release-blocking."
+    acceptance:
+      - type: regex
+        value: "(?i)(?s)skill_gate\\.py(?=.*--require-fail-fast)(?=.*--require-security-evals)(?=.*--pi-high-fail)"
+      - type: regex
+        value: "(?i)(release-blocking|block release|cannot ship with security warnings)"
+
+  - id: improve-requires-regression-evals
+    name: improve requires regression evals
+    category: edge
+    should_trigger: true
+    prepend_skill: true
+    prompt: "When improving an existing skill, should evals still run? Keep this concise and explicit."
+    acceptance:
+      - type: regex
+        value: "(?i)(improve|upgrade)"
+      - type: regex
+        value: "(?i)run[_-]?skill[_-]?evals\\.py|run.*evals|evaluation run"
+      - type: regex
+        value: "(?i)(required|must run|should run|rerun|re-run|must also run)"
+
+  - id: discovery-fallback-without-tool
+    name: discovery fallback without tool
+    category: edge
+    should_trigger: true
+    prepend_skill: true
+    prompt: "request_user_input is unavailable in this runtime. Continue discovery round one with a plain-language question and no tool call."
+    acceptance:
+      - type: regex
+        value: "(?i)(request_user_input.*unavailable|tool unavailable|without request_user_input)"
+      - type: regex
+        value: "(?i)(?m)^\\s*(?:1[\\)\\.]|question\\s*1|round\\s*1)"
+      - type: regex
+        value: "(?i)(one round at a time|single round)"
+
+  - id: install-provenance-and-rollback
+    name: install provenance and rollback
+    category: edge
+    should_trigger: true
+    prepend_skill: true
+    prompt: "I want install-distribute mode for an imported skill. In the first response, include provenance checks and rollback expectations."
+    acceptance:
+      - type: regex
+        value: "(?i)(source_ref|pinned.*commit|sha256|allowlisted)"
+      - type: regex
+        value: "(?i)(quarantine|staged|atomic)"
+      - type: regex
+        value: "(?i)(rollback|restored paths)"
 
   - id: edge-codex-ui-metadata
     name: edge codex ui metadata
@@ -167,7 +245,7 @@ cases:
     category: edge
     should_trigger: true
     prepend_skill: true
-    prompt: "When creating a brand new native skill in skill-builder, apply the unified conformance flow so it is graded against the gold validators and the integrated upstream-style grading model without creating a separate standalone grading skill."
+    prompt: "When creating a brand new native skill, apply unified conformance so it is graded against gold validators and integrated upstream-style grading without creating a separate standalone grading skill."
     acceptance:
       - type: regex
         value: "(?i)(unified conformance|single conformance workflow|same workflow)"
@@ -181,7 +259,7 @@ cases:
     category: edge
     should_trigger: true
     prepend_skill: true
-    prompt: "When installing an imported skill package that includes eval.yaml and graders, keep upstream checks but also run skill-builder gold validation and report both grades."
+    prompt: "When installing an imported skill package that includes eval.yaml and graders, keep upstream checks and also run gold validation, then report both grades."
     acceptance:
       - type: regex
         value: "(?i)(eval\\.yaml|grader|rubric|upstream)"
@@ -209,3 +287,25 @@ cases:
     acceptance:
       - type: regex
         value: "(?i)(assumptions|checks|guided|workflows|checkpoints)"
+
+  - id: improve-json-output-contract
+    name: improve json output contract
+    category: edge
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Audit this existing skill for routing gaps and return a non-trivial improve response with deterministic JSON summary output."
+    acceptance:
+      - type: contains
+        value: "```json"
+      - type: regex
+        value: "(?i)(?s)\"schema_version\"\\s*:\\s*\"1\\.1\""
+      - type: regex
+        value: "(?s)\"mode\"\\s*:\\s*\"(improve|eval|benchmark-lite)\""
+      - type: regex
+        value: "(?s)\"skill_path\"\\s*:"
+      - type: regex
+        value: "(?s)\"findings\"\\s*:"
+      - type: regex
+        value: "(?s)\"validations\"\\s*:"
+      - type: regex
+        value: "(?s)\"next_step\"\\s*:"

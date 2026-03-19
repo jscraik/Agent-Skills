@@ -1,6 +1,8 @@
 ---
 name: "openai-docs"
 description: "Use when the user asks how to build with OpenAI products or APIs and needs up-to-date official documentation with citations, help choosing the latest model for a use case, or explicit GPT-5.4 upgrade and prompt-upgrade guidance; prioritize OpenAI docs MCP tools, use bundled references only as helper context, and restrict any fallback browsing to official OpenAI domains."
+metadata:
+  skill-type: library_api_reference
 ---
 
 # OpenAI Docs
@@ -22,7 +24,7 @@ description: "Use when the user asks how to build with OpenAI products or APIs a
 
 Provide authoritative, current guidance from OpenAI developer docs using the OpenAI docs MCP tools. Always prioritize the official docs MCP workflow over memory or general web search for OpenAI-related questions.
 
-## Scope and triggers
+## When to use
 - Use this skill when the user asks how to build with OpenAI APIs, ChatGPT Apps SDK, Codex, Responses API, Realtime, Agents SDK, model capabilities or limits, or adjacent official OpenAI platform capabilities.
 - Use it when the user needs current official guidance, exact limits, supported fields, model selection help, or citations.
 - Use it when the request is specifically about a GPT-5.4 upgrade, prompt upgrade, or choosing the latest OpenAI model for a use case.
@@ -152,3 +154,6 @@ Read only what you need:
 - Persist with: `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
 - The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
 <!-- /decision-feedback-protocol -->
+
+## Gotchas
+- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.

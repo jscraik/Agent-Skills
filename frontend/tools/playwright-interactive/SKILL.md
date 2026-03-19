@@ -1,21 +1,25 @@
 ---
 name: playwright-interactive
 description: Use a persistent Playwright session through `js_repl` to debug local web or Electron apps without restarting the browser on every step. Use when you need iterative UI automation, visual QA, or Electron inspection in the current workspace.
+metadata:
+  skill-type: product_verification
 ---
 
 # Playwright Interactive
 
 ## Table of Contents
 - [When to use](#when-to-use)
-- [Inputs](#inputs)
-- [Outputs](#outputs)
+- [Required inputs](#required-inputs)
+- [Deliverables](#deliverables)
+- [Failure mode](#failure-mode)
 - [Philosophy](#philosophy)
 - [Preflight](#preflight)
 - [Workflow](#workflow)
+- [Script helpers](#script-helpers)
 - [Validation](#validation)
 - [Constraints](#constraints)
 - [Anti-patterns](#anti-patterns)
-- [Resources](#resources)
+- [References](#references)
 - [Examples](#examples)
 
 ## When to use
@@ -31,7 +35,7 @@ Do not use this skill when:
 - the task is backend-only or does not require UI interaction;
 - the environment cannot support `js_repl` or Playwright setup.
 
-## Inputs
+## Required inputs
 
 - target workspace path;
 - target runtime:
@@ -43,13 +47,19 @@ Do not use this skill when:
   - startup, preload, or main-process behavior;
 - any viewport or device expectations that matter for signoff.
 
-## Outputs
+## Deliverables
 
 - a persistent Playwright session plan appropriate to web or Electron;
 - a QA coverage list mapping user-visible claims to checks;
 - evidence notes from functional and visual QA;
 - exact next-step commands or `js_repl` cells needed to continue;
 - a final cleanup note when the session should be reset or closed.
+
+## Failure mode
+- If `js_repl` is unavailable, stop and switch to non-persistent browser workflow guidance.
+- If Playwright import or app launch fails, report the first failing gate and the smallest unblock command.
+- If stale handles persist after targeted reset, rebuild only the affected context or process boundary.
+- If signoff evidence is incomplete, return `needs-input` status instead of claiming completion.
 
 ## Philosophy
 
@@ -84,29 +94,13 @@ If `js_repl` is unavailable, stop and switch to a non-persistent browser workflo
 
 ### 1) Bootstrap the persistent session
 
+- Generate a consistent bootstrap snippet with `scripts/playwright_session_snippets.sh bootstrap`.
 - Load Playwright once in `js_repl`.
 - Keep top-level handles stable with `var`, not `const`, so later cells can reuse them.
 - Use one named handle per surface:
   - `page`
   - `mobilePage`
   - `appWindow`
-
-Minimal bootstrap:
-
-```javascript
-var chromium;
-var electronLauncher;
-var browser;
-var context;
-var page;
-var mobileContext;
-var mobilePage;
-var electronApp;
-var appWindow;
-
-({ chromium, _electron: electronLauncher } = await import("playwright"));
-console.log("Playwright loaded");
-```
 
 ### 2) Choose the session mode explicitly
 
@@ -121,26 +115,10 @@ console.log("Playwright loaded");
 
 ### 3) Start or reuse the target session
 
-For web apps:
-
-```javascript
-var TARGET_URL = "http://127.0.0.1:3000";
-
-browser ??= await chromium.launch({ headless: false });
-context ??= await browser.newContext({ viewport: { width: 1600, height: 900 } });
-page ??= await context.newPage();
-await page.goto(TARGET_URL, { waitUntil: "domcontentloaded" });
-```
-
-For Electron apps:
-
-```javascript
-var ELECTRON_ENTRY = ".";
-
-electronApp ??= await electronLauncher.launch({ args: [ELECTRON_ENTRY] });
-appWindow ??= await electronApp.firstWindow();
-console.log(await appWindow.title());
-```
+- For web apps, print the startup cell with:
+  - `scripts/playwright_session_snippets.sh web-start --url http://127.0.0.1:3000`
+- For Electron apps, print the startup cell with:
+  - `scripts/playwright_session_snippets.sh electron-start --entry .`
 
 If a handle is stale, set only that handle back to `undefined` and rerun the narrowest setup cell instead of resetting everything.
 
@@ -177,6 +155,16 @@ If a handle is stale, set only that handle back to `undefined` and rerun the nar
 - close the browser or Electron session when signoff is complete;
 - use `js_repl_reset` only when the kernel state itself is broken or you must start over cleanly.
 
+## Script helpers
+- `scripts/playwright_session_snippets.sh bootstrap`
+  - Emits a reusable top-level handle bootstrap snippet for `js_repl`.
+- `scripts/playwright_session_snippets.sh web-start --url <url>`
+  - Emits a deterministic web-session startup snippet.
+- `scripts/playwright_session_snippets.sh electron-start --entry <path>`
+  - Emits an Electron-launch startup snippet.
+- `scripts/playwright_session_snippets.sh reload-plan --surface web|electron --change renderer|process`
+  - Emits targeted reload vs relaunch guidance.
+
 ## Validation
 
 - Fail fast at the first broken gate:
@@ -207,7 +195,7 @@ If a handle is stale, set only that handle back to `undefined` and rerun the nar
 - using `js_repl_reset` as routine cleanup;
 - collecting screenshots without stating what claim each image supports.
 
-## Resources
+## References
 
 - `references/contract.yaml` for routing and output expectations;
 - `references/evals.yaml` for trigger and safety coverage;
@@ -238,3 +226,21 @@ If a handle is stale, set only that handle back to `undefined` and rerun the nar
 - Persist with: `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
 - The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
 <!-- /decision-feedback-protocol -->
+
+## Gotchas
+- Symptom: Session state disappears between steps.
+  Cause: Handles were declared with `const` inside one-off cells.
+  Do instead: Use top-level `var` handles and reuse them across cells.
+  Check: Subsequent cells can access `page` or `appWindow` without re-bootstrap.
+- Symptom: Reload is used when relaunch is required.
+  Cause: Main-process or preload changes were treated like renderer changes.
+  Do instead: Relaunch Electron for process-boundary changes.
+  Check: Post-change behavior reflects updated preload or main-process logic.
+- Symptom: Visual signoff misses viewport regressions.
+  Cause: Only one viewport or mode was checked.
+  Do instead: Run a separate visual pass with explicit viewport expectations.
+  Check: Evidence notes include each required viewport or window mode.
+- Symptom: QA notes are action logs, not claim evidence.
+  Cause: No claim-to-check mapping before interaction.
+  Do instead: Write QA inventory first, then tie each check to a user-visible claim.
+  Check: Each signoff statement maps to at least one explicit claim and observed result.

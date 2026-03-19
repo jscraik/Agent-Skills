@@ -41,13 +41,20 @@ ANTIGRAVITY_EXPECTED_ROOT = REPO_ROOT / "skills-antigravity"
 @dataclass
 class DiagnosticResult:
     check: str
-    status: str  # "pass", "fail", "warn", "skip"
+    status: str  # "pass", "fail", "warn", "info", "skip"
     message: str
     details: Optional[str] = None
 
 
 def find_skill_dir(skill_name: str) -> Optional[Path]:
     """Find skill directory by name, searching multiple locations."""
+    candidate = Path(skill_name).expanduser()
+    if candidate.exists():
+        if candidate.is_file() and candidate.name == "SKILL.md":
+            candidate = candidate.parent
+        if candidate.is_dir() and (candidate / "SKILL.md").exists():
+            return candidate.resolve()
+
     # Check flat skills directory first
     if SKILLS_DIR.is_dir():
         flat_path = SKILLS_DIR / skill_name
@@ -185,13 +192,15 @@ def check_skill_index(skill_name: str) -> DiagnosticResult:
         return DiagnosticResult("skill index", "skip", "Root SKILL.md not found")
 
     content = SKILL_INDEX.read_text(encoding="utf-8")
-    # Look for skill name as a markdown list item: - `skill-name` —
-    escaped_name = re.escape(skill_name)
-    pattern = rf"^- `({escaped_name})`\s*—"
-    if re.search(pattern, content, re.MULTILINE):
+    if f"- `{skill_name}` —" in content:
         return DiagnosticResult("skill index", "pass", "Listed in SKILL.md index")
     else:
-        return DiagnosticResult("skill index", "warn", "Not found in SKILL.md index (run sync_skills.sh)")
+        return DiagnosticResult(
+            "skill index",
+            "info",
+            "Not found in SKILL.md index",
+            "Run `bash scripts/sync_skills.sh` to regenerate the surfaced catalog.",
+        )
 
 
 def check_task_profile(skill_dir: Path) -> DiagnosticResult:
@@ -249,8 +258,8 @@ def diagnose_skill(skill_name: str) -> List[DiagnosticResult]:
 
 def format_result(result: DiagnosticResult) -> str:
     """Format a single result for display."""
-    symbols = {"pass": "✓", "fail": "✗", "warn": "⚠", "skip": "○"}
-    colors = {"pass": "\033[32m", "fail": "\033[31m", "warn": "\033[33m", "skip": "\033[90m"}
+    symbols = {"pass": "✓", "fail": "✗", "warn": "⚠", "info": "ℹ", "skip": "○"}
+    colors = {"pass": "\033[32m", "fail": "\033[31m", "warn": "\033[33m", "info": "\033[36m", "skip": "\033[90m"}
     reset = "\033[0m"
 
     symbol = symbols.get(result.status, "?")
@@ -268,6 +277,7 @@ def print_report(skill_name: str, results: List[DiagnosticResult]) -> int:
 
     fail_count = sum(1 for r in results if r.status == "fail")
     warn_count = sum(1 for r in results if r.status == "warn")
+    info_count = sum(1 for r in results if r.status == "info")
 
     for result in results:
         print(format_result(result))
@@ -275,10 +285,13 @@ def print_report(skill_name: str, results: List[DiagnosticResult]) -> int:
     print("-" * 50)
 
     if fail_count > 0:
-        print(f"❌ {fail_count} failure(s), {warn_count} warning(s)")
+        print(f"❌ {fail_count} failure(s), {warn_count} warning(s), {info_count} advisory note(s)")
         return 1
     elif warn_count > 0:
-        print(f"⚠️  {warn_count} warning(s)")
+        print(f"⚠️  {warn_count} warning(s), {info_count} advisory note(s)")
+        return 0
+    elif info_count > 0:
+        print(f"ℹ️  {info_count} advisory note(s)")
         return 0
     else:
         print("✅ All checks passed")
@@ -312,26 +325,35 @@ def diagnose_all_skills() -> int:
 
     total_fails = 0
     total_warns = 0
+    total_infos = 0
     failing_skills: List[str] = []
     warning_skills: List[str] = []
+    advisory_skills: List[str] = []
 
     for skill_name in skill_names:
         results = diagnose_skill(skill_name)
         fails = sum(1 for r in results if r.status == "fail")
         warns = sum(1 for r in results if r.status == "warn")
+        infos = sum(1 for r in results if r.status == "info")
 
         total_fails += fails
         total_warns += warns
+        total_infos += infos
         if fails > 0:
             failing_skills.append(skill_name)
-            symbol = "✗" if fails > 0 else "⚠"
-            print(f"{symbol} {skill_name}: {fails} fail(s), {warns} warn(s)")
+            print(f"✗ {skill_name}: {fails} fail(s), {warns} warn(s), {infos} advisory note(s)")
         elif warns > 0:
             warning_skills.append(skill_name)
-            print(f"⚠ {skill_name}: {fails} fail(s), {warns} warn(s)")
+            print(f"⚠ {skill_name}: {fails} fail(s), {warns} warn(s), {infos} advisory note(s)")
+        elif infos > 0:
+            advisory_skills.append(skill_name)
+            print(f"ℹ {skill_name}: {infos} advisory note(s)")
 
     print()
-    print(f"Summary: {len(skill_names)} skills, {total_fails} failures, {total_warns} warnings")
+    print(
+        f"Summary: {len(skill_names)} skills, {total_fails} failures, "
+        f"{total_warns} warnings, {total_infos} advisory notes"
+    )
 
     if failing_skills:
         print(f"\nSkills with failures: {', '.join(failing_skills)}")
@@ -339,6 +361,9 @@ def diagnose_all_skills() -> int:
 
     if warning_skills:
         print(f"\nSkills with warnings: {', '.join(warning_skills)}")
+
+    if advisory_skills:
+        print(f"\nSkills with advisory notes: {', '.join(advisory_skills)}")
 
     print("\n✅ All skills healthy")
     return 0

@@ -3,6 +3,8 @@ name: youtube-titles-thumbnails
 description: Generate multiple SEO/CTR-optimized YouTube title and thumbnail text
   options with variants and rationale. Use when the user wants packaging ideas, titles,
   or thumbnail copy.
+metadata:
+  skill-type: team_automation
 ---
 
 # YouTube Titles & Thumbnails
@@ -20,7 +22,7 @@ description: Generate multiple SEO/CTR-optimized YouTube title and thumbnail tex
 
 Deliver strong YouTube title and thumbnail-copy options with clear positioning tradeoffs. The deeper craft guidance lives in `references/full-guide.md`.
 
-## Scope and triggers
+## When to use
 - Use when asked for high-performing YouTube titles, packaging angles, or thumbnail text.
 - Use it when the user wants differentiated options they can test, not a full script.
 - Route broader product or PRD work to `product-spec`.
@@ -126,3 +128,6 @@ If the topic or audience is too vague to create differentiated packaging, ask fo
 - Persist with: `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
 - The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
 <!-- /decision-feedback-protocol -->
+
+## Gotchas
+- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.

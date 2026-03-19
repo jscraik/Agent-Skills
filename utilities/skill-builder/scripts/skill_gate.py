@@ -280,7 +280,7 @@ def _default_prompt_patterns() -> List[Dict[str, str]]:
         },
         {
             "code": "PI_TOOL_CHAIN",
-            "regex": r"\b(bypass|jailbreak|override|exfiltrate)\b",
+            "regex": r"\b(bypass|jailbreak|exfiltrate)\b|\boverride\s+(?:system|safety|instruction|policy|guardrail|restriction)s?\b",
             "message": "High-risk control language detected; verify this does not instruct unsafe behavior.",
             "severity": "high",
         },
@@ -485,6 +485,7 @@ _DEFAULT_PI_EXPECTED_PATH_PATTERNS = (
     "scripts/migrate_evals_v2.py",
     "scripts/run_skill_evals.py",
     "scripts/run_skill_graph_smoke.py",
+    "scripts/test_*.py",
     "workflows/create-new-skill.md",
 )
 
@@ -786,8 +787,30 @@ def check_path_safety(doc: SkillDoc) -> List[Finding]:
     if re.search(r"(?m)^\s*/", body):
         out.append(Finding(Level.WARN, "PATH_ABSOLUTE", "Absolute paths detected; prefer repo-relative paths."))
 
-    if re.search(r"(?m)\.\./", body):
-        out.append(Finding(Level.WARN, "PATH_TRAVERSAL", "Parent directory traversal (`../`) mentioned; avoid in references."))
+    repo_root: Optional[Path] = None
+    for base in [doc.path.parent, *doc.path.parent.parents]:
+        if (base / ".git").exists():
+            repo_root = base
+            break
+
+    traversal_refs = sorted(set(re.findall(r"\.\./[A-Za-z0-9._/\-]+", body)))
+    unresolved_or_external: List[str] = []
+    for rel in traversal_refs:
+        resolved = (doc.path.parent / rel).resolve()
+        if repo_root and resolved.exists() and resolved.is_relative_to(repo_root):
+            continue
+        unresolved_or_external.append(rel)
+
+    if unresolved_or_external:
+        sample = ", ".join(unresolved_or_external[:3])
+        out.append(
+            Finding(
+                Level.WARN,
+                "PATH_TRAVERSAL",
+                "Parent traversal path(s) unresolved or outside repo root; prefer repo-relative in-repo paths.",
+                evidence=sample,
+            )
+        )
 
     return out
 
@@ -1383,7 +1406,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
     p.add_argument("path", help="Path to a skill directory or SKILL.md file.")
     p.add_argument("--format", choices=["text", "json"], default="text")
 
-    p.add_argument("--max-lines", type=int, default=500, help="Max allowed lines in SKILL.md (default: 500).")
+    p.add_argument("--max-lines", type=int, default=360, help="Max allowed lines in SKILL.md (default: 360).")
     p.add_argument("--max-codeblock-lines", type=int, default=120, help="Warn if a code block exceeds this (default: 120).")
     p.add_argument("--min-description-len", type=int, default=120, help="Warn if description shorter than this (default: 120).")
 

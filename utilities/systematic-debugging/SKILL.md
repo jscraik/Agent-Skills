@@ -1,418 +1,85 @@
 ---
 name: systematic-debugging
-description: "Use this skill when encountering bugs, test failures, regressions, or unexpected behavior to run a root-cause-first debugging workflow before proposing fixes or code changes."
+description: Analyze evidence from production bugs, regressions, and failed checks and diagnose root causes when users need a safe, evidence-backed fix plan before any code changes.
+metadata:
+  skill-type: runbook
 ---
 
 # Systematic Debugging
 
-## Overview
-
-Random fixes waste time and create new bugs. Quick patches mask underlying issues.
-
-## Standards snapshot (March 2026)
-
-- Follow current global instructions from `~/.codex/AGENTS.md` and linked standards docs.
-- Prefer evidence captured from the current environment over assumptions or stale logs.
-- Treat root-cause isolation and verification as required gates before claiming a fix.
-
-**Core principle:** ALWAYS find root cause before attempting fixes. Symptom fixes are failure.
-
-**Violating the letter of this process is violating the spirit of debugging.**
-
-## The Iron Law
-
-```
-NO FIXES WITHOUT ROOT CAUSE INVESTIGATION FIRST
-```
-
-## LearningPosture compatibility
-
-- This skill supports posture-aware debugging responses without changing existing `delegation.mode`.
-- `learn` posture: explain the hypothesis, data-collection plan, and validation steps before proposing code edits.
-- `guided` posture: provide bounded fix plan with explicit checkpoint questions and verification commands.
-- `execute` posture: apply a single minimal change only after evidence gates pass and root cause is confirmed.
-- Default posture for this skill remains `learn` (from task-profile metadata), so explanation-first responses are the expected default.
-- Defer execution behavior changes until user confirms risk and rollback expectations.
-
-If you haven't completed Phase 1, you cannot propose fixes.
-
-## Scope and triggers
-Use for ANY technical issue:
-- Test failures
-- Bugs in production
-- Unexpected behavior
-- Performance problems
-- Build failures
-- Integration issues
-
-**Use this ESPECIALLY when:**
-- Under time pressure (emergencies make guessing tempting)
-- "Just one quick fix" seems obvious
-- You've already tried multiple fixes
-- Previous fix didn't work
-- You don't fully understand the issue
-
-**Don't skip when:**
-- Issue seems simple (simple bugs have root causes too)
-- You're in a hurry (rushing guarantees rework)
-- Manager wants it fixed NOW (systematic is faster than thrashing)
-- The failure seems "probably environmental" without evidence
-
-## The Four Phases
-
-You MUST complete each phase before proceeding to the next.
-
-### Phase 1: Root Cause Investigation
-
-**BEFORE attempting ANY fix:**
-
-1. **Read Error Messages Carefully**
-   - Don't skip past errors or warnings
-   - They often contain the exact solution
-   - Read stack traces completely
-   - Note line numbers, file paths, error codes
-
-2. **Reproduce Consistently**
-   - Can you trigger it reliably?
-   - What are the exact steps?
-   - Does it happen every time?
-   - If not reproducible → gather more data, don't guess
-
-3. **Check Recent Changes**
-   - What changed that could cause this?
-   - Git diff, recent commits
-   - New dependencies, config changes
-   - Environmental differences
-
-4. **Gather Evidence in Multi-Component Systems**
-
-   **WHEN system has multiple components (CI → build → signing, API → service → database):**
-
-   **BEFORE proposing fixes, add diagnostic instrumentation:**
-   ```
-   For EACH component boundary:
-     - Log what data enters component
-     - Log what data exits component
-     - Verify environment/config propagation
-     - Check state at each layer
-
-   Run once to gather evidence showing WHERE it breaks
-   THEN analyze evidence to identify failing component
-   THEN investigate that specific component
-   ```
-
-   **Example (multi-layer system):**
-   ```bash
-   # Layer 1: Workflow
-   echo "=== Secrets available in workflow: ==="
-   echo "IDENTITY: ${IDENTITY:+SET}${IDENTITY:-UNSET}"
-
-   # Layer 2: Build script
-   echo "=== Env vars in build script: ==="
-   env | grep IDENTITY || echo "IDENTITY not in environment"
-
-   # Layer 3: Signing script
-   echo "=== Keychain state: ==="
-   security list-keychains
-   security find-identity -v
-
-   # Layer 4: Actual signing
-   codesign --sign "$IDENTITY" --verbose=4 "$APP"
-   ```
-
-   **This reveals:** Which layer fails (secrets → workflow ✓, workflow → build ✗)
-
-5. **Trace Data Flow**
-
-   **WHEN error is deep in call stack:**
-
-   See `root-cause-tracing.md` in this directory for the complete backward tracing technique.
-
-   **Quick version:**
-   - Where does bad value originate?
-   - What called this with bad value?
-   - Keep tracing up until you find the source
-   - Fix at source, not at symptom
-
-### Phase 2: Pattern Analysis
-
-**Find the pattern before fixing:**
-
-1. **Find Working Examples**
-   - Locate similar working code in same codebase
-   - What works that's similar to what's broken?
-
-2. **Compare Against References**
-   - If implementing pattern, read reference implementation COMPLETELY
-   - Don't skim - read every line
-   - Understand the pattern fully before applying
-
-3. **Identify Differences**
-   - What's different between working and broken?
-   - List every difference, however small
-   - Don't assume "that can't matter"
-
-4. **Understand Dependencies**
-   - What other components does this need?
-   - What settings, config, environment?
-   - What assumptions does it make?
-
-### Phase 3: Hypothesis and Testing
-
-**Scientific method:**
-
-1. **Form Single Hypothesis**
-   - State clearly: "I think X is the root cause because Y"
-   - Write it down
-   - Be specific, not vague
-
-2. **Test Minimally**
-   - Make the SMALLEST possible change to test hypothesis
-   - One variable at a time
-   - Don't fix multiple things at once
-
-3. **Verify Before Continuing**
-   - Did it work? Yes → Phase 4
-   - Didn't work? Form NEW hypothesis
-   - DON'T add more fixes on top
-
-4. **When You Don't Know**
-   - Say "I don't understand X"
-   - Don't pretend to know
-   - Ask for help
-   - Research more
-
-### Phase 4: Implementation
-
-**Fix the root cause, not the symptom:**
-
-1. **Create Failing Test Case**
-   - Simplest possible reproduction
-   - Automated test if possible
-   - One-off test script if no framework
-   - MUST have before fixing
-   - Use the `test-driven-development` skill for writing proper failing tests
-
-2. **Implement Single Fix**
-   - Address the root cause identified
-   - ONE change at a time
-   - No "while I'm here" improvements
-   - No bundled refactoring
-
-3. **Verify Fix**
-   - Test passes now?
-   - No other tests broken?
-   - Issue actually resolved?
-
-4. **If Fix Doesn't Work**
-   - STOP
-   - Count: How many fixes have you tried?
-   - If < 3: Return to Phase 1, re-analyze with new information
-   - **If ≥ 3: STOP and question the architecture (step 5 below)**
-   - DON'T attempt Fix #4 without architectural discussion
-
-5. **If 3+ Fixes Failed: Question Architecture**
-
-   **Pattern indicating architectural problem:**
-   - Each fix reveals new shared state/coupling/problem in different place
-   - Fixes require "massive refactoring" to implement
-   - Each fix creates new symptoms elsewhere
-
-   **STOP and question fundamentals:**
-   - Is this pattern fundamentally sound?
-   - Are we "sticking with it through sheer inertia"?
-   - Should we refactor architecture vs. continue fixing symptoms?
-
-   **Discuss with your human partner before attempting more fixes**
-
-   This is NOT a failed hypothesis - this is a wrong architecture.
-
-## Red Flags - STOP and Follow Process
-
-If you catch yourself thinking:
-- "Quick fix for now, investigate later"
-- "Just try changing X and see if it works"
-- "Add multiple changes, run tests"
-- "Skip the test, I'll manually verify"
-- "It's probably X, let me fix that"
-- "I don't fully understand but this might work"
-- "Pattern says X but I'll adapt it differently"
-- "Here are the main problems: [lists fixes without investigation]"
-- Proposing solutions before tracing data flow
-- **"One more fix attempt" (when already tried 2+)**
-- **Each fix reveals new problem in different place**
-
-**ALL of these mean: STOP. Return to Phase 1.**
-
-**If 3+ fixes failed:** Question the architecture (see Phase 4.5)
-
-## your human partner's Signals You're Doing It Wrong
-
-**Watch for these redirections:**
-- "Is that not happening?" - You assumed without verifying
-- "Will it show us...?" - You should have added evidence gathering
-- "Stop guessing" - You're proposing fixes without understanding
-- "Ultrathink this" - Question fundamentals, not just symptoms
-- "We're stuck?" (frustrated) - Your approach isn't working
-
-**When you see these:** STOP. Return to Phase 1.
-
-## Common Rationalizations
-
-| Excuse | Reality |
-|--------|---------|
-| "Issue is simple, don't need process" | Simple issues have root causes too. Process is fast for simple bugs. |
-| "Emergency, no time for process" | Systematic debugging is FASTER than guess-and-check thrashing. |
-| "Just try this first, then investigate" | First fix sets the pattern. Do it right from the start. |
-| "I'll write test after confirming fix works" | Untested fixes don't stick. Test first proves it. |
-| "Multiple fixes at once saves time" | Can't isolate what worked. Causes new bugs. |
-| "Reference too long, I'll adapt the pattern" | Partial understanding guarantees bugs. Read it completely. |
-| "I see the problem, let me fix it" | Seeing symptoms ≠ understanding root cause. |
-| "One more fix attempt" (after 2+ failures) | 3+ failures = architectural problem. Question pattern, don't fix again. |
-
-## Quick Reference
-
-| Phase | Key Activities | Success Criteria |
-|-------|---------------|------------------|
-| **1. Root Cause** | Read errors, reproduce, check changes, gather evidence | Understand WHAT and WHY |
-| **2. Pattern** | Find working examples, compare | Identify differences |
-| **3. Hypothesis** | Form theory, test minimally | Confirmed or new hypothesis |
-| **4. Implementation** | Create test, fix, verify | Bug resolved, tests pass |
-
-## When Process Reveals "No Root Cause"
-
-If systematic investigation reveals issue is truly environmental, timing-dependent, or external:
-
-1. You've completed the process
-2. Document what you investigated
-3. Implement appropriate handling (retry, timeout, error message)
-4. Add monitoring/logging for future investigation
-
-**But:** 95% of "no root cause" cases are incomplete investigation.
-
-## Supporting Techniques
-
-These techniques are part of systematic debugging and available in this directory:
-
-- **`root-cause-tracing.md`** - Trace bugs backward through call stack to find original trigger
-- **`defense-in-depth.md`** - Add validation at multiple layers after finding root cause
-- **`condition-based-waiting.md`** - Replace arbitrary timeouts with condition polling
-
-**Related skills:**
-- **test-driven-development** - For creating failing test case (Phase 4, Step 1)
-- **verification-before-completion** - Verify fix worked before claiming success
-
-## See Also
-
-| Skill | When to hand off |
-|---|---|
-| [[test-driven-development]] | Phase 4, Step 1: write the failing test that captures the root cause |
-| [[verification-before-completion]] | After implementing the fix — prove it works before claiming done |
-| [[evals-router]] | When the bug is in an LLM evaluation pipeline or judge prompt |
-| [[gh-fix-ci]] | When the failure is a broken GitHub Actions CI check |
-| [[writing-plans]] | When 3+ fixes have failed and you need to re-plan the approach |
-
-**Topic map:** [[agent-ops]]
-
-## Real-World Impact
-
-From debugging sessions:
-- Systematic approach: 15-30 minutes to fix
-- Random fixes approach: 2-3 hours of thrashing
-- First-time fix rate: 95% vs 40%
-- New bugs introduced: Near zero vs common
+## When to use
+- User reports failure, regression, test failure, instability, or unexpected behavior.
+- The user needs a reproducible diagnosis before any code fix.
+
+## Required inputs
+- Observable symptoms (errors, stack traces, repro steps).
+- Recent changes and recent deploy context.
+- Environment details and execution constraints.
+- Whether execution changes are allowed.
+
+## Deliverables
+- A structured diagnostic plan and prioritized root-cause hypothesis.
+- Evidence list (commands, logs, file paths, and observed outputs).
+- Recommended fix plan only after root cause confirmation.
+- Explicit partial/blocked status when data is insufficient.
+- Include `schema_version` in machine-readable output contracts.
+
+## Procedure
+### 1) Stabilize scope
+- Reproduce consistently and collect error signatures first.
+- Avoid speculative fixes before evidence.
+
+### 2) Layered investigation
+- Isolate component boundaries (client/server, CI/tooling/runtime, external dependencies).
+- Confirm where signals drop and gather targeted evidence.
+
+### 3) Hypothesis and verification
+- Propose a narrow hypothesis linked to observed data.
+- Add a minimal check for each hypothesis before change.
+
+### 4) Fix only after confirmation
+- Apply one minimal change at a time.
+- Re-run checks to confirm the causal hypothesis.
+
+## Constraints
+- Redact secrets, tokens, credentials, and user identifiers in output.
+- Prefer non-destructive commands; require explicit confirmation for risky commands.
+- Respect user-defined execution limits and approval gates.
 
 ## Anti-patterns
-
-- Skipping investigation and jumping directly to fixes.
-- Making claims without evidence, logs, or reproducible steps.
-- Mixing unrelated workstreams in a single execution path.
-
-## Constraints / Safety
-
-- Redact secrets, tokens, credentials, and PII by default; never echo raw environment values.
-- Prefer safe defaults and avoid irreversible changes without explicit confirmation.
-
-## Inputs
-
-- User task context and target environment.
-- Relevant constraints, permissions, and preferences required to execute safely.
-
-## Outputs
-
-- A concrete next-step response with explicit, reproducible actions.
-- A short verification checklist and caveats for the user.
-
-## Philosophy
-
-- Keep the workflow minimal, safe, and evidence-based.
-- Load richer context only when needed; avoid unnecessary commands or overreach.
+- Guessing without reproducible evidence.
+- Multiple speculative edits in one cycle.
+- Declaring completion from partial checks.
+- Skipping regression checks after a fix.
 
 ## Validation
+- Stop and confirm at the first hard blocker.
+- Include clear "blocked", "partial", or "complete" status with verification evidence.
+- If no reproducible command can confirm the fix, return partial + next required data.
+- Validation is fail-fast: if any blocking check fails or evidence is insufficient, stop and ask for confirmation before proceeding.
 
-- Fail fast: stop at the first failed check and do not continue.
-- Re-run the required checks before proceeding to the next step.
-- Report any failed check and requested follow-up actions clearly.
+## Variation
+- Vary investigation depth by incident criticality: start with one narrow, high-confidence hypothesis path and only add additional branches when the first set of checks is inconclusive.
 
-<!-- skill-score-boost-v1 -->
-## Philosophy and tradeoffs
-- Use this skill when consistent decision-making matters more than one-off execution because project context should drive the approach.
-- Principle and mindset: prioritize tradeoffs and constraints over rigid checklists; understand why each step exists.
-- Ask this to keep outcomes robust: Why is this the right default, and what could change this outcome?
-- How do we adapt if constraints shift?
-- What evidence is needed before choosing one path over another?
+## Examples
+- "The test suite started failing after yesterday's refactor; can you inspect the first regression point and validate the blast radius?"
+- "I see intermittent timeouts in CI; help me identify the root-cause path before proposing a fix."
+- "Please debug a 500 error that only appears when feature flags are enabled."
 
-## Anti-patterns and caveats
-- Avoid applying this playbook generically without checking repository-specific context.
-- **NEVER** skip required validation gates when behavior changes.
-- **DO NOT** use this skill as a rigid replacement for engineering judgment.
-- **DON'T** ignore warnings or assume one pattern fits all repos.
-- Common pitfall: treating anti-patterns as optional.
-- Incorrect assumptions here can lead to fragile guidance.
-- Warning: wrong sequencing can create avoidable regressions.
+## Failure mode
+- If key logs, config, or context is missing, ask concise follow-up questions and pause execution.
+- If an investigation path is blocked by permissions or missing tooling, provide a safe fallback plan.
 
-## Variation and adaptation
-- Vary the workflow by team size, risk, and deployment target.
-- Use different strategies for small, medium, and large changes.
-- Adapt recommendations to the specific environment and avoid repetitive templates.
-- Avoid generic or cookie-cutter responses; craft context-specific alternatives.
-- Keep outputs diverse and not repetitive.
-- Converge on a custom path only after evidence review.
-- Different constraints should produce different, non-generic recommendations.
+## Philosophy
+- Keep the workflow evidence-driven and reversible.
+- Root cause comes before remediation.
+- One proven change is better than a chain of speculative fixes.
 
-## Empowering execution style
-- Be capable of exploring multiple options and enabling the team to make safe decisions.
-- Unlock confidence by explaining options and tradeoffs clearly.
-- Feel free to be creative while staying rigorous and precise.
-- Push boundaries with practical alternatives when simple recipes fail.
-- Enable outcomes-oriented problem solving.
+## References
+- Contract and scope: `references/contract.yaml` and `references/task-profile.json`.
+- Evaluation coverage: `references/evals.yaml`.
+- Folded modes and compatibility notes: `references/folded-legacy-modes-core60.md`, `references/folded-legacy-modes-phase4.md`.
+- Visual trace assets: `assets/systematic-debugging.png`.
 
-## See Also
-
-| Skill | When to use together |
-|---|---|
-| [[process-watch]] | Monitor system processes alongside root-cause debugging |
-| [[verification-before-completion]] | Validate the fix resolves the issue before marking complete |
-| [[fix-mise]] | Debug mise trust and runtime failures as a specific case |
-| [[gh-fix-ci]] | Debug GitHub CI failures as a specific debugging domain |
-| [[evals-router]] | Route to eval workflows when debugging LLM evaluation issues |
-
-**Topic map:** [[agent-ops]]
-
-<!-- decision-feedback-protocol:v2 -->
-**Decision feedback protocol (required):**
-- If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.
-- Capture: `decision` (`accepted|partial|rejected|deferred`), `outcome` (`good|neutral|bad|unknown`), and `confidence` (`high|medium|low`).
-- Persist with: `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
-- The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
-<!-- /decision-feedback-protocol -->
-
-## Folded Legacy Modes (Core60)
-<!-- core60-folded-modes:v1:start -->
-This skill owns legacy capability from retired skills. Use these modes when requests match prior behavior.
-
-- `recent-commit-lens` from `utilities/recent-code-bugfix`: Diagnose and fix a bug introduced by the current author within the last week. Use when a user asks for a proactive bugfix from their rece...
-
-Deep legacy details: `references/folded-legacy-modes-core60.md`.
-Additional Phase 4 folds: references/folded-legacy-modes-phase4.md.
-<!-- core60-folded-modes:v1:end -->
+## Gotchas
+- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.

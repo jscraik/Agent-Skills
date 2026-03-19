@@ -67,7 +67,7 @@ check-nested-git:
 
 # Count skills
 count-skills:
-    @python3 scripts/diagnose_skill.py --all 2>&1 | grep -E "Diagnosing [0-9]+" | grep -oE "[0-9]+"
+    @python3 scripts/skill_catalog.py --count
 
 # Run CI checks locally
 ci-local:

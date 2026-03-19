@@ -1,6 +1,8 @@
 ---
 name: alignment-checkpoint
 description: "Intent-alignment gate for ambiguous/high-stakes requests. Use this when you want to extract goal/assumptions/criteria and require an explicit /proceed approval gate before any tool use."
+metadata:
+  skill-type: team_automation
 ---
 
 # Alignment Checkpoint
@@ -17,7 +19,7 @@ description: "Intent-alignment gate for ambiguous/high-stakes requests. Use this
 - [Examples](#examples)
 - [Decision feedback protocol](#decision-feedback-protocol)
 
-## Scope and triggers
+## When to use
 Use this skill when:
 - You want to **prevent misunderstandings** before work begins.
 - The request is ambiguous, multi-part, or high-risk.
@@ -86,13 +88,10 @@ Then:
 4) Still present the approach options and require `/proceed <option>` before any tool use.
 
 STASIS_RECORD format:
-
-```text
-STASIS_RECORD
-timestamp: <ISO-8601 local time>
-verbatim_request:
-<paste the user request exactly as written>
-```
+- `STASIS_RECORD`
+- `timestamp: <ISO-8601 local time>`
+- `verbatim_request:`
+- `<paste the user request exactly as written>`
 
 ### 1) Produce the structured extraction (required)
 
@@ -189,3 +188,9 @@ Assistant: STASIS_RECORD → JSON → options → gate (no tools).
 - Persist with: `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
 - The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
 <!-- /decision-feedback-protocol -->
+
+## Gotchas
+- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.
+
+## Failure mode
+- If goals, risks, or approval boundaries remain ambiguous, stop, restate the open assumptions, and fall back to explicit clarification rather than pretending alignment exists.

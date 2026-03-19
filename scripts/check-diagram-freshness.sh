@@ -73,7 +73,7 @@ normalized_checksum() {
 			jq -c 'del(.generated_at, .last_generated_epoch, .changed, .context_sha256)' "$file" | shasum -a 256 | awk '{print $1}'
 			;;
 		*/manifest.json)
-			jq -c 'del(.generatedAt)' "$file" | shasum -a 256 | awk '{print $1}'
+			jq -c 'del(.generatedAt, .rootPath)' "$file" | shasum -a 256 | awk '{print $1}'
 			;;
 		*)
 			shasum -a 256 "$file" | awk '{print $1}'

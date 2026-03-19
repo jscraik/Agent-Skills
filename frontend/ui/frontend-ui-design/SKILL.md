@@ -1,6 +1,8 @@
 ---
 name: frontend-ui-design
 description: Create and review production-ready UI systems/components with tokens and accessibility. Use for standard UI implementation or redesign (not creative-coding polish). Use when the user requests this capability.
+metadata:
+  skill-type: scaffolding_templates
 ---
 
 # Frontend UI Design
@@ -114,3 +116,9 @@ description: Create and review production-ready UI systems/components with token
 - Standard UI design work should feel production-ready, not pitch-deck-ready.
 - A complete state model is part of quality.
 - The best output makes implementation easier and regressions less likely.
+
+## Gotchas
+- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.
+
+## Failure mode
+- If the target surface, design constraints, or implementation boundaries are unclear, stop, surface the missing context, and fall back to a narrower component review before editing UI code.

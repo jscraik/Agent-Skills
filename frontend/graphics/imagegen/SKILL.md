@@ -1,6 +1,8 @@
 ---
 name: imagegen
 description: "Use when the user asks to generate or edit images via the OpenAI Image API (for example: generate image, edit/inpaint/mask, background removal or replacement, transparent background, product shots, concept art, covers, or batch variants); run the bundled CLI (`scripts/image_gen.py`) and require `OPENAI_API_KEY` for live calls."
+metadata:
+  skill-type: scaffolding_templates
 ---
 
 # Imagegen
@@ -102,3 +104,9 @@ description: "Use when the user asks to generate or edit images via the OpenAI I
 - This skill is for execution, not generic image brainstorming.
 - When editing, protect invariants first and creative expansion second.
 - The best handoff includes files, prompt, flags, and what still needs human taste review.
+
+## Gotchas
+- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.
+
+## Failure mode
+- If the prompt, asset inputs, or API prerequisites are missing, stop, report the exact blocker, and fall back to preparing prompts/assets or verifying credentials before attempting image generation.

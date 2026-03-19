@@ -1,6 +1,8 @@
 ---
 name: atlas
 description: macOS-only AppleScript control for the ChatGPT Atlas desktop app. Use only when the user explicitly asks to control Atlas tabs/bookmarks/history on macOS and the "ChatGPT Atlas" app is installed; do not trigger for general browser tasks or non-macOS environments.
+metadata:
+  skill-type: team_automation
 ---
 
 # Atlas
@@ -95,3 +97,9 @@ description: macOS-only AppleScript control for the ChatGPT Atlas desktop app. U
 - This skill is a precise tool, not a general browser hammer.
 - Atlas tasks should be explicit, bounded, and privacy-aware.
 - When blocked, the best output is the exact permission or path issue and the next safe step.
+
+## Gotchas
+- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.
+
+## Failure mode
+- If Atlas is unavailable, unsupported on the current host, or the requested control surface cannot be confirmed, stop, name the limitation, and fall back to a non-Atlas workflow rather than guessing UI automation.

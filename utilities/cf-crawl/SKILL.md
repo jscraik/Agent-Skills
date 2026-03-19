@@ -1,6 +1,8 @@
 ---
 name: cf-crawl
 description: Crawl websites with Cloudflare Browser Rendering's /crawl API and export markdown or JSON results locally. Use when a user needs an authenticated Cloudflare crawl job started, monitored, or exported; do not use it for generic scraping or browser automation outside Cloudflare.
+metadata:
+  skill-type: data_fetch_analysis
 ---
 
 # Cloudflare Crawl
@@ -16,6 +18,7 @@ description: Crawl websites with Cloudflare Browser Rendering's /crawl API and e
 - [Output contract](#output-contract)
 - [Authentication preflight](#authentication-preflight)
 - [Workflow](#workflow)
+- [Script helpers](#script-helpers)
 - [Verification](#verification)
 - [Validation](#validation)
 - [Constraints](#constraints)
@@ -116,13 +119,7 @@ Contract rules:
 - Use `status: unknown` when a network or auth failure prevents status resolution.
 - Keep `blocker` short and actionable, for example `missing CLOUDFLARE_API_TOKEN`.
 
-Create responses are returned as:
-
-```json
-{"success": true, "result": "<crawl-job-id>"}
-```
-
-Treat `result` as a job ID string (not an object) in both parsing logic and user-facing summaries.
+Create responses are returned as a compact object where `result` is the crawl job ID string (not an object), for example `{"success": true, "result": "<crawl-job-id>"}`.
 
 ## Philosophy
 - Keep crawl jobs bounded, authenticated, and auditable.
@@ -136,32 +133,7 @@ Treat `result` as a job ID string (not an object) in both parsing logic and user
 4. Confirm the token scope is intended for Browser Rendering access before issuing `POST` or `GET` calls.
 5. If a crawl request returns `Authentication error`, treat that as a token-permission blocker and stop.
 
-Safe parse shape:
-
-```bash
-python3 - <<'PY'
-from pathlib import Path
-import os
-
-keys = ("CLOUDFLARE_ACCOUNT_ID", "CLOUDFLARE_API_TOKEN")
-candidates = [Path(".env"), Path(".env.local"), Path.home() / ".env"]
-values = {k: os.environ.get(k, "") for k in keys}
-
-for path in candidates:
-    if not path.is_file():
-        continue
-    for raw in path.read_text().splitlines():
-        if "=" not in raw or raw.lstrip().startswith("#"):
-            continue
-        key, value = raw.split("=", 1)
-        key = key.strip()
-        if key in keys and not values[key]:
-            values[key] = value.strip().strip('"').strip("'")
-
-missing = [k for k, v in values.items() if not v or v.startswith("${")]
-print({"missing": missing, "found": [k for k, v in values.items() if v]})
-PY
-```
+Safe parse is externalized to `scripts/cf_crawl_api.sh env-check`, which checks required variables and placeholder values without evaluating untrusted `.env` content.
 
 If credentials are still missing, stop and ask the user to provide them through their environment or an approved secrets workflow.
 
@@ -178,52 +150,22 @@ If credentials are still missing, stop and ask the user to provide them through 
    - use `render: false` for clearly static sites when speed and browser-budget efficiency matter.
    - default `source` to `all` unless user asks otherwise.
    - add include/exclude controls only when the user names clear boundaries.
-4. Start a crawl job with Cloudflare's Browser Rendering create endpoint when action is `start`:
+4. Start a crawl job with `scripts/cf_crawl_api.sh start --payload <payload.json>` when action is `start`.
+5. Poll the crawl job with `scripts/cf_crawl_api.sh status --job-id <job_id>` when action is `status` or `export` until terminal.
+6. Inspect category-specific records (for example skipped or disallowed URLs) with `scripts/cf_crawl_api.sh page-status --job-id <job_id> --status skipped --cursor <cursor>`.
 
-```bash
-curl -sS -X POST \
-  "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/browser-rendering/crawl" \
-  -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "url": "https://example.com/docs",
-    "limit": 25,
-    "depth": 3,
-    "formats": ["markdown"],
-    "render": false,
-    "source": "all",
-    "maxAge": 86400,
-    "modifiedSince": 1704067200,
-    "options": {
-      "includeExternalLinks": true,
-      "includeSubdomains": false,
-      "includePatterns": ["https://docs.cloudflare.com/**"],
-      "excludePatterns": ["https://developers.cloudflare.com/changelog/**"]
-    }
-  }'
-```
+7. Pull final export records with status filtering and cursor pagination (for example `status=completed`, `status=skipped`, `status=disallowed`, `status=errored`, `status=cancelled`).
+8. Save each completed page to a bounded local directory. Include the source URL in the file header, use deterministic filenames, and surface any disallowed, skipped, errored, or cancelled records in the summary even if they are not written as markdown.
+9. Deterministic filename pattern: `<zero-padded-index>-<slug>-<hash8>.md` where `hash8` is a short hash of the source URL.
+10. If the user wants a merged artifact, concatenate the exported markdown files after per-page files exist; keep the per-page files as the auditable source of truth unless the user asks to remove them.
+11. To cancel a running crawl, require explicit confirmation and use `scripts/cf_crawl_api.sh cancel --job-id <job_id>` when the target API version supports cancellation.
 
-5. Poll the crawl job when action is `status` or `export` until the status reaches a terminal state.
-
-```bash
-curl -sS \
-  "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/browser-rendering/crawl/${JOB_ID}" \
-  -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}"
-```
-
-To inspect category-specific results (for example skipped URLs or disallowed URLs), pass `status` in the request and paginate with `cursor`.
-
-```bash
-curl -sS \
-  "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/browser-rendering/crawl/${JOB_ID}?status=skipped&cursor=${CURSOR}" \
-  -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}"
-```
-
-6. Pull final export records with status filtering and cursor pagination (for example `status=completed`, `status=skipped`, `status=disallowed`, `status=errored`, `status=cancelled`).
-7. Save each completed page to a bounded local directory. Include the source URL in the file header, use deterministic filenames, and surface any disallowed, skipped, errored, or cancelled records in the summary even if they are not written as markdown.
-8. Deterministic filename pattern: `<zero-padded-index>-<slug>-<hash8>.md` where `hash8` is a short hash of the source URL.
-9. If the user wants a merged artifact, concatenate the exported markdown files after per-page files exist; keep the per-page files as the auditable source of truth unless the user asks to remove them.
-10. To cancel a running crawl, require explicit confirmation and use the official cancellation endpoint for that `job_id` if available in the target API version.
+## Script helpers
+- `scripts/cf_crawl_api.sh env-check` validates required environment variables and placeholder values.
+- `scripts/cf_crawl_api.sh start --payload <payload.json>` starts a crawl job.
+- `scripts/cf_crawl_api.sh status --job-id <job_id>` retrieves the latest crawl job state.
+- `scripts/cf_crawl_api.sh page-status --job-id <job_id> --status <state> [--cursor <cursor>]` paginates category-specific records.
+- `scripts/cf_crawl_api.sh cancel --job-id <job_id>` attempts cancellation when available.
 
 ### Optional parameter behavior (as documented)
 - `formats` accepts `html`, `markdown`, and `json`; defaults are documented in the endpoint response. If unspecified, `formats` defaults to `["html"]`.
@@ -305,3 +247,21 @@ curl -sS \
 - When the request is not actually about Cloudflare crawl jobs, route away instead of stretching the skill.
 
 The agent is capable and can still apply judgment in edge cases where policy allows adaptation.
+
+## Gotchas
+- Symptom: Crawl starts with broad scope and burns budget quickly.
+  Cause: Missing explicit `limit`, `depth`, and include or exclude boundaries.
+  Do instead: Set bounded defaults and confirm scope before starting.
+  Check: Payload includes concrete limits and boundary patterns.
+- Symptom: Status looks stale or unknown after launch.
+  Cause: Polling wrong job ID or polling before propagation.
+  Do instead: Reconfirm `job_id`, then poll in short intervals until terminal status.
+  Check: Latest status response timestamp is newer than launch time.
+- Symptom: Export summary ignores skipped or disallowed URLs.
+  Cause: Only completed records were inspected.
+  Do instead: Query per-status records and report all categories.
+  Check: Summary includes completed, skipped, disallowed, errored, and cancelled counts.
+- Symptom: Auth fails despite env vars being set.
+  Cause: Placeholder values or token lacks Browser Rendering permission.
+  Do instead: Run env-check and verify token scope before retrying.
+  Check: No placeholder values and API call returns non-auth error or success.

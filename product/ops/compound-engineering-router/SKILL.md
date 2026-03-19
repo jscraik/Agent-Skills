@@ -1,6 +1,8 @@
 ---
 name: compound-engineering-router
 description: "Route Codex compound-engineering requests to the correct workflow prompt or meta-mode in the config repo, with optional NotebookLM evidence for spec quality, agent orchestration, and Codex operating patterns. Use when a user wants brainstorm, spec, plan, work, review, technical review, compound workflow guidance, context compaction, or guardrail extraction rather than direct feature coding."
+metadata:
+  skill-type: team_automation
 ---
 
 # Compound Engineering Router
@@ -39,7 +41,7 @@ description: "Route Codex compound-engineering requests to the correct workflow 
 - For behavior-changing implementation lanes, prefer plans and work prompts that enforce TDD, tracer bullets, and public-interface validation rather than generic "write tests" advice.
 - Default to one supervisor agent owning the task end-to-end; recommend specialist roles only as bounded internal support when they clearly reduce risk or cycle time.
 
-## Scope and triggers
+## When to use
 Use this skill when the user wants to enter or steer the compound-engineering workflow and needs help choosing the correct stage, review mode, or workflow-support meta-mode.
 
 Primary triggers:
@@ -254,3 +256,6 @@ Negative controls:
 - Variation: vary recommendations by context-specific constraints; adapt, customize, and use different approaches when constraints differ.
 - Variation: prefer diverse, unique alternatives and avoid repetition or cookie-cutter template convergence.
 - Empowerment: enable users to explore options confidently, be capable and creative, unlock safe choices, and empower execution.
+
+## Gotchas
+- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.

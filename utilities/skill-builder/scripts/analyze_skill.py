@@ -517,16 +517,16 @@ def score_conciseness(doc: SkillDoc) -> CategoryResult:
     max_score = 10
 
     line_count = len(doc.raw_text.splitlines())
-    if line_count <= 300:
+    if line_count <= 320:
         score = 10
         findings.append(Finding("Conciseness", 10, f"✅ Concise length ({line_count} lines)."))
-    elif line_count <= 400:
+    elif line_count <= 360:
         score = 6
         findings.append(
             Finding(
                 "Conciseness",
                 6,
-                f"⚠️ Slightly long ({line_count} lines). Aim for ~200–300; hard cap ~400.",
+                f"⚠️ Slightly long ({line_count} lines). Aim for <=320; hard cap <=360.",
                 Severity.WARN,
             )
         )
@@ -535,7 +535,7 @@ def score_conciseness(doc: SkillDoc) -> CategoryResult:
             Finding(
                 "Conciseness",
                 0,
-                f"❌ Too long ({line_count} lines). Reduce to ~200–300; hard cap ~400.",
+                f"❌ Too long ({line_count} lines). Reduce to <=320; hard cap <=360.",
                 Severity.FAIL,
             )
         )

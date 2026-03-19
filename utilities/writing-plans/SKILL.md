@@ -1,6 +1,8 @@
 ---
 name: writing-plans
 description: "Create execution-ready implementation plans with task sequencing and checks. Use when requirements are known but implementation is multi-step."
+metadata:
+  skill-type: team_automation
 ---
 
 # Writing Plans
@@ -114,3 +116,6 @@ This skill also owns legacy execution-planning behavior from retired folds.
 - Persist with: `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
 - The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
 <!-- /decision-feedback-protocol -->
+
+## Gotchas
+- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.

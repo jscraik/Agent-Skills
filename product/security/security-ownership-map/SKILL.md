@@ -1,6 +1,8 @@
 ---
 name: "security-ownership-map"
 description: "Analyze git repositories to map security ownership (people-to-file), compute bus-factor and sensitive-code risk, and export CSV/JSON/graph artifacts for visualization. Use only when the user explicitly requests security-focused ownership analysis grounded in git history."
+metadata:
+  skill-type: data_fetch_analysis
 ---
 
 # Security Ownership Map
@@ -222,16 +224,6 @@ Use `references/neo4j-import.md` when you need to load the CSVs into Neo4j. It i
   - CODEOWNERS policy owners
   - gaps where the two diverge materially.
 
-## Deliverables
-
-- ownership graph artifacts in the chosen output directory;
-- a concise security ownership summary highlighting:
-  - orphaned sensitive code
-  - low bus-factor hotspots
-  - hidden owners
-  - community clusters that matter for security review;
-- explicit note on the attribution model and time window used.
-
 ## Anti-patterns
 
 - Skipping investigation and jumping directly to fixes.
@@ -243,7 +235,7 @@ Use `references/neo4j-import.md` when you need to load the CSVs into Neo4j. It i
 - Redact secrets, tokens, credentials, and PII by default; never echo raw environment values.
 - Prefer safe defaults and avoid irreversible changes without explicit confirmation.
 
-## Outputs
+## Deliverables
 
 - A concrete next-step response with explicit, reproducible actions.
 - A short verification checklist and caveats for the user.
@@ -310,3 +302,15 @@ Use `references/neo4j-import.md` when you need to load the CSVs into Neo4j. It i
 - Persist with: `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
 - The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
 <!-- /decision-feedback-protocol -->
+
+## Gotchas
+- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.
+
+## Required inputs
+- Repository path or `owner/repo` target plus the branch/ref to analyze.
+- A defined scope for the run: full repo, selected paths, or sensitive-code slice.
+- Whether to compare against `CODEOWNERS`, emit graph artifacts, or export CSV/JSON only.
+- Any known sensitive directories, ownership expectations, or reporting audience constraints.
+
+## Failure mode
+- If git history, target scope, or ownership signals cannot be read reliably, stop, report the exact blocker, and fall back to a smaller scoped ownership snapshot rather than asserting maintainers from incomplete evidence.

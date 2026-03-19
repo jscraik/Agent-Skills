@@ -24,6 +24,7 @@ Use this when a skill request is promising but underspecified:
 
 Default behavior:
 - use Codex `request_user_input` (AskQuestion parity) first;
+- if `request_user_input` is unavailable, ask 1-3 numbered chat questions for the same round;
 - ask **one round at a time**;
 - do not advance until the user answers the current round;
 - skip rounds already answered by the thread;
@@ -31,6 +32,7 @@ Default behavior:
 
 Tool-fit guidance:
 - If a round can fit into **1–3 short prompts**, use `request_user_input`.
+- If `request_user_input` is unavailable in the runtime, keep the same one-round flow in chat and preserve the same questions/options.
 - Prefer recommended choices when the decision is common, and rely on the client’s free-form **Other** path when you need specifics.
 - If a round truly needs richer prose than the tool can capture cleanly, ask **one concise follow-up in chat**, then return to the round flow.
 

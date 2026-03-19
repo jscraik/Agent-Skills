@@ -1,6 +1,8 @@
 ---
 name: gh-workflow
 description: "Consolidated GitHub lifecycle skill for agents and users: intake, issue fixing, PR prep, review request/reception, review comment handling, CI diagnosis, and server-side merge via gh. Use when requests involve GitHub issues/PRs/checks/merge operations."
+metadata:
+  skill-type: ci_cd_deployment
 ---
 
 # GH Workflow
@@ -131,3 +133,5 @@ GitHub workflow work is only complete when the repository state and the GitHub s
 
 **Topic map:** [[backend-platform]]
 
+## Gotchas
+- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.

@@ -1,6 +1,8 @@
 ---
 name: verification-before-completion
 description: "Validate completion claims with fresh command evidence. Use when you are about to claim work is complete, fixed, or passing."
+metadata:
+  skill-type: code_quality_review
 ---
 
 # Verification Before Completion
@@ -129,3 +131,18 @@ Required gates:
 - The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
 <!-- /decision-feedback-protocol -->
 
+## Gotchas
+- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.
+
+## When to use
+- Use this skill when you are about to claim a fix works, tests pass, a task is complete, or a PR is ready based on local verification.
+- Do not use it as a substitute for root-cause analysis; use it after implementation or debugging to validate the exact claim.
+
+## Required inputs
+- The exact completion claim you intend to make.
+- The fresh command or check that can prove that claim in the current repo state.
+- Enough repo context to interpret the result correctly, including scope and any relevant warnings.
+
+## Deliverables
+- A verified claim tied to fresh command evidence, or an explicit blocked status if the evidence does not support the claim.
+- The exact validation command used, the observed result, and the next safest action when validation fails.

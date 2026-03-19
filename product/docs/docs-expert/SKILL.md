@@ -1,6 +1,8 @@
 ---
 name: docs-expert
 description: "Use when asked to audit or rewrite repository docs (README, docs, runbooks, community-health files) or when code has missing in-code documentation (JSDoc/DocC/config docs): enforce official brand guidance, harden GitHub visibility signals, and deliver evidence-bundled docs QA."
+metadata:
+  skill-type: code_quality_review
 ---
 
 # docs-expert (Repository Documentation)
@@ -83,7 +85,7 @@ Use this when the user wants help quickly and does not want the full three-stage
 6. Run a fast QA pass (clarity, missing steps, top 3 failure points).
 7. Offer to switch to the full workflow if scope grows or ambiguity remains.
 
-## Inputs
+## Required inputs
 - Repo context and target surface: path/link plus README, `/docs`, runbook, or code-doc target.
 - Audience, experience level, and job-to-be-done.
 - Constraints that change the draft: platform, version, compliance, rollout risk.
@@ -95,7 +97,7 @@ Use this when the user wants help quickly and does not want the full three-stage
 - Keep steps short, externalize decisions/assumptions, and show the single next step.
 - Provide ELI5 explanations for non-trivial logic and ask one focused question at a time.
 
-## Outputs
+## Deliverables
 - Updated Markdown docs (**PR-ready edits**).
 - A **doc audit summary** with what changed, what is still unknown, and what to verify.
 - Community-health, GitHub visibility, and brand findings when they are in scope.
@@ -268,62 +270,8 @@ When you finish edits, include:
 - README and templates: `references/readme-crafting.md`, `references/readme-section-templates.md`, `assets/DOC_TEMPLATE.md`, `assets/CODE_DOC_TEMPLATES.md`, `assets/README_TEMPLATE.md`, `assets/AGENTS_TEMPLATE.md`
 - Branding, validation, and contract: `references/BRAND_GUIDELINES.md`, `references/brand-styling.md`, `scripts/bootstrap_doc_qa.py`, `scripts/check_brand_guidelines.py`, `scripts/check_readability.py`, `references/contract.yaml`, `references/evals.yaml`
 
-## Remember
+## Gotchas
+- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.
 
-The agent is capable of extraordinary work in this domain. These guidelines unlock that potential - they do not constrain it.
-Use judgment, adapt to context, and push boundaries when appropriate.
-
-<!-- skill-score-boost-v1 -->
-## Philosophy and tradeoffs
-- Use this skill when consistent decision-making matters more than one-off execution because project context should drive the approach.
-- Principle and mindset: prioritize tradeoffs and constraints over rigid checklists; understand why each step exists.
-- Ask these to keep outcomes robust:
-- Why is this the right default?
-- What could change the recommendation?
-- What evidence would justify a different path?
-
-## Anti-patterns and caveats
-- Avoid applying this playbook generically without checking repository-specific context.
-- **NEVER** skip required validation gates when behavior changes.
-- **DO NOT** use this skill as a rigid replacement for engineering judgment.
-- **DON'T** ignore warnings or assume one pattern fits all repos.
-- Common pitfalls: treating anti-patterns as optional and sequencing work so late corrections become expensive.
-
-## Variation and adaptation
-- Vary the workflow by team size, risk, deployment target, and doc type.
-- Adapt recommendations to the environment instead of repeating templates.
-- Different constraints should produce different, non-generic recommendations after evidence review.
-
-## Empowering execution style
-- Explore multiple options, explain tradeoffs clearly, and enable safe decisions.
-- Be creative when simple recipes fail, but stay rigorous and precise.
-- Aim for outcomes-oriented problem solving rather than template completion.
-
-## See Also
-
-| Skill | When to use together |
-|---|---|
-| [[agents-md]] | Apply docs-expert quality standards to AGENTS.md |
-| [[diagram-cli]] | Embed architecture diagrams in the documentation |
-| [[fixing-metadata]] | Fix meta tags on documentation pages |
-| [[visual-explainer]] | Create visual explainers to accompany written docs |
-| [[markdown-converter]] | Convert source material to markdown before polish |
-
-**Topic map:** [[product-strategy]]
-
-<!-- decision-feedback-protocol:v2 -->
-**Decision feedback protocol (required):**
-- If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.
-- Capture: `decision` (`accepted|partial|rejected|deferred`), `outcome` (`good|neutral|bad|unknown`), and `confidence` (`high|medium|low`).
-- Persist with: `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
-- The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
-<!-- /decision-feedback-protocol -->
-
-## Folded Legacy Modes (Core60)
-<!-- core60-folded-modes:v1:start -->
-This skill owns legacy capability from retired skills. Use these modes when requests match prior behavior.
-
-- `progressive-disclosure` from `product/docs/docs-md`: Review and refactor overloaded Markdown docs into progressive-disclosure docs when the user asks for structural cleanup or document-split...
-
-Deep legacy details: `references/folded-legacy-modes-core60.md`.
-<!-- core60-folded-modes:v1:end -->
+## Failure mode
+- If the repo context, target audience, or governing source material is unclear, stop, name the ambiguity, and fall back to a scoped docs audit or clarification request instead of rewriting documentation on assumption.

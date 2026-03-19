@@ -3,6 +3,8 @@ name: repoprompt
 description: Plan and guide Repo Prompt integration and usage in AI coding workflows.
   Use when integrating Repo Prompt with editors/agents or when needing MCP/CLI tool
   guidance.
+metadata:
+  skill-type: library_api_reference
 ---
 
 # Repo Prompt Integration
@@ -41,7 +43,7 @@ Guide the user to the most effective Repo Prompt integration path for their work
 - Validate install state, workspace binding, and one smoke-test prompt before claiming the setup works.
 - Always include an apply path for edits when recommending external chat or Compose workflows.
 
-## Scope and triggers
+## When to use
 - User asks how to integrate Repo Prompt with Claude Code, Cursor, Codex, or other editors/agents.
 - User asks how to use Compose vs Chat vs Apply/Pro Edit workflows.
 - User asks how to optimize context (codemaps, slices, multi-root workspaces).
@@ -69,7 +71,7 @@ Guide the user to the most effective Repo Prompt integration path for their work
 Always start responses with these headings (no text before them):
 
 ```
-## Scope and triggers
+## When to use
 ## Required inputs
 ## Deliverables
 ## Out-of-scope handling
@@ -207,3 +209,6 @@ Read when needed:
 
 ## Remember
 The agent is capable of extraordinary work in this domain. Use judgment, adapt to context, and push boundaries when appropriate.
+
+## Gotchas
+- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.

@@ -3,6 +3,8 @@ name: product-spec
 description: Create or review implementation-ready product specifications from ideas
   or existing docs. Use when you need a full PRD+UX+build plan pipeline or a focused
   mode (clarify_prd, ux_only, api_spec, arch_spec, testplan).
+metadata:
+  skill-type: team_automation
 ---
 
 # Product Spec Skill
@@ -24,7 +26,7 @@ Use this skill to **plan** a product: turn an idea (or existing docs) into imple
 - Use concise clarifying questions, then move quickly into concrete artifacts.
 - Default to Mermaid for architecture or flow diagrams when diagrams materially improve decision quality.
 
-## Scope and triggers
+## When to use
 Use this skill when you need one of the following modes:
 
 - `full_pipeline` (default): Foundation/PRD → UX spec → Build plan.
@@ -246,3 +248,9 @@ This skill owns legacy capability from retired skills. Use these modes when requ
 
 Deep legacy details: `references/folded-legacy-modes-core60.md`.
 <!-- core60-folded-modes:v1:end -->
+
+## Gotchas
+- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.
+
+## Failure mode
+- If the problem statement, target users, or implementation boundary is too unclear to spec safely, stop, identify the missing decisions, and fall back to clarification or interview work before drafting a full spec.

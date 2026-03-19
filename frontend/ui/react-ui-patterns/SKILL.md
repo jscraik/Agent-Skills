@@ -1,6 +1,8 @@
 ---
 name: react-ui-patterns
 description: "Provide concrete React UI composition patterns for TypeScript + Tailwind + Radix, including state, routing, and component structure examples. Use when building or refactoring React screens and components for maintainability."
+metadata:
+  skill-type: library_api_reference
 ---
 
 # React UI Patterns
@@ -46,7 +48,7 @@ Provide concrete, example-driven guidance for React UI composition, state, routi
 - Keep state local when possible; lift only when needed.
 - Preserve repo conventions; do not introduce new patterns without need.
 
-## Scope and triggers
+## When to use
 - Building or refactoring React screens and components.
 - Designing layout, routing, or tabbed navigation structures.
 - Choosing component-specific patterns or examples in a React stack.
@@ -154,25 +156,9 @@ const [open, setOpen] = useState(false);
 
 ### Dialog owns its actions
 
-```tsx
-function EditDialogContent({ onDone }: { onDone: () => void }) {
-  const [isSaving, setIsSaving] = useState(false);
-
-  async function handleSave() {
-    setIsSaving(true);
-    await save();
-    onDone();
-  }
-
-  return (
-    <div>
-      <Button onClick={handleSave} disabled={isSaving}>
-        {isSaving ? "Saving..." : "Save"}
-      </Button>
-    </div>
-  );
-}
-```
+- Keep async save state local to dialog content.
+- Call `onDone()` only after the async action completes successfully.
+- Disable action controls while saving to prevent duplicate submits.
 
 ## Adding a new component reference
 
@@ -276,3 +262,9 @@ Use judgment, adapt to context, and push boundaries when appropriate.
 - Persist with: `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
 - The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
 <!-- /decision-feedback-protocol -->
+
+## Gotchas
+- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.
+
+## Failure mode
+- If the React architecture problem, routing/state constraints, or component boundaries are unclear, stop, report the ambiguity, and fall back to a smaller composition recommendation instead of forcing a broad pattern.

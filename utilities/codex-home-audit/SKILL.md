@@ -1,6 +1,8 @@
 ---
 name: codex-home-audit
 description: Audit and improve a Codex home directory (AGENTS.md, USER_PROFILE, instructions/, rules/, config.toml) when you want a dated report of risks, duplication, and recommended cleanups.
+metadata:
+  skill-type: code_quality_review
 ---
 
 # Codex Home Audit
@@ -21,7 +23,7 @@ Produce a dated Markdown audit report for a Codex home directory (default: `$COD
 - [Resources](#resources)
 - [Decision feedback protocol](#decision-feedback-protocol)
 
-## Scope and triggers
+## When to use
 Use this skill when you want to:
 - Audit a Codex home folder for **instruction precedence issues** (for example stale shadow files or conflicting guidance around `AGENTS.md`).
 - Identify **duplication/drift** across `AGENTS*` and `USER_PROFILE*`.
@@ -125,3 +127,9 @@ Minimize drift by:
 - Persist with: `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
 - The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
 <!-- /decision-feedback-protocol -->
+
+## Gotchas
+- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.
+
+## Failure mode
+- If the Codex home scope, target files, or audit criteria cannot be verified, stop, report the blocker, and fall back to a read-only inventory rather than proposing risky cleanup.

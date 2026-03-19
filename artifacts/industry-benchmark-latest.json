@@ -1,8 +1,8 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-03-11T19:56:49.893121+00:00",
+  "generated_at": "2026-03-18T02:42:08.436401+00:00",
   "mode": "warn",
-  "policy_path": "/Users/jamiecraik/dev/agent-skills/utilities/skill-builder/references/benchmark-policy.json",
+  "policy_path": "/Users/jamiecraik/dev/Agent-Skills/utilities/skill-builder/references/benchmark-policy.json",
   "skills_scanned": 72,
   "uncategorized_skills": [],
   "cluster_results": [
@@ -85,7 +85,7 @@
         "wcag_2_2": 0,
         "owasp_top10": 0,
         "gha_sha_pin": 0,
-        "cloudflare_workers": 0,
+        "cloudflare_workers": 1,
         "mcp_spec": 0
       },
       "fails": [],

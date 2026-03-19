@@ -1,6 +1,8 @@
 ---
 name: workers-mcp
 description: Create and deploy production-ready MCP servers on Cloudflare Workers. Use when building a Workers-hosted MCP server with auth, billing, and operational guardrails.
+metadata:
+  skill-type: infrastructure_ops
 ---
 
 # Workers MCP
@@ -100,3 +102,9 @@ description: Create and deploy production-ready MCP servers on Cloudflare Worker
 - Platform fit is part of product fit.
 - A production-ready Workers MCP server needs protocol discipline and operational discipline.
 - Make rollout risk legible before someone learns it in production.
+
+## Gotchas
+- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.
+
+## Failure mode
+- If deployment target, auth requirements, or tool contract evidence is missing, stop, describe the blocker, and fall back to defining the Worker MCP interface before implementing or deploying.

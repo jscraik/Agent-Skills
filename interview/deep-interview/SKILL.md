@@ -4,6 +4,8 @@ description: Deep, gap-filling interview that enhances an existing doc/spec (pre
   or explores a topic. Use when deepening PRDs, ADRs, tickets, notes, or draft specs;
   if given a doc path, update it in-place with Delta/Interview Insights and an approval
   gate.
+metadata:
+  skill-type: team_automation
 ---
 
 # deep-interview (enhancer wrapper)
@@ -49,7 +51,7 @@ Guiding questions:
 - What would make this spec fail in the real world?
 - What evidence would make us confident to proceed?
 
-## Scope and triggers
+## When to use
 
 - Use when a draft spec, PRD, ADR, ticket, or notes exist but gaps remain.
 - Use when you need delta-mode enhancement rather than a greenfield interview.
@@ -269,3 +271,6 @@ Append a compact triage addendum covering:
 - smallest next experiment;
 - instrumentation needed;
 - rollback or mitigation options.
+
+## Gotchas
+- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.

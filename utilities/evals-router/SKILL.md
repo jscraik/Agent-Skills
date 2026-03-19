@@ -1,6 +1,8 @@
 ---
 name: evals-router
 description: Use when tasks involve designing, auditing, debugging, or scaling LLM evaluation workflows such as error analysis, judge prompt design, evaluator validation, RAG evaluation, synthetic eval-data generation, or human review interfaces; do not use for generic product analytics, ordinary QA, or unrelated UI implementation.
+metadata:
+  skill-type: code_quality_review
 ---
 
 # Evals Router
@@ -13,7 +15,7 @@ Route evaluation-method work to the smallest trustworthy workflow so users can m
 - Treat evaluator validation and review operations as production work, not notebook-side experimentation.
 - Separate retrieval quality, generation quality, reviewer quality, and judge quality instead of blending them into one score.
 
-## Use when
+## When to use
 - Auditing an existing LLM eval stack to find trust gaps, missing controls, or misleading metrics.
 - Bootstrapping an eval program and deciding whether to begin with traces, labels, judge prompts, or review tooling.
 - Writing or refining an LLM-as-judge prompt for a specific failure mode.
@@ -22,7 +24,7 @@ Route evaluation-method work to the smallest trustworthy workflow so users can m
 - Generating synthetic eval data when representative real traces are sparse.
 - Designing a lightweight human review interface for annotation or disagreement analysis.
 
-## Do not use when
+## When not to use
 - The task is generic QA, browser automation, or product analytics without an LLM evaluation question.
 - The user only needs a metric explanation rather than an evaluation workflow.
 - The task is ordinary UI implementation with no judge, trace, or review-method component.
@@ -109,3 +111,6 @@ Keep the route crisp. The goal is not to explain all of evaluation; it is to pic
 
 **Topic map:** [[agent-ops]]
 
+
+## Gotchas
+- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.

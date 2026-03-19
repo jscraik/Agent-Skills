@@ -2,6 +2,8 @@
 name: architecture-interview
 description: Plan and review architecture decisions via a structured interview and
   ADR output. Use when choosing between system design alternatives.
+metadata:
+  skill-type: team_automation
 ---
 
 # architecture-interview (wrapper)
@@ -52,7 +54,7 @@ Follow `~/.codex/USER_PROFILE.md`: single-threaded, explicit steps, low cognitiv
 - Mode: `standard` (use `deep` for major rewrites)
 - Intent: start `DECIDE`
 
-## Scope and triggers
+## When to use
 
 - Choosing between architectural alternatives.
 - Producing an ADR before implementation.
@@ -203,3 +205,9 @@ Use judgment, adapt to context, and push boundaries when appropriate.
 - Persist with: `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
 - The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
 <!-- /decision-feedback-protocol -->
+
+## Gotchas
+- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.
+
+## Failure mode
+- If the decision scope, constraints, or comparison set are still too vague to evaluate safely, stop, state the missing inputs, and fall back to a narrower clarification pass before recommending an architecture direction.

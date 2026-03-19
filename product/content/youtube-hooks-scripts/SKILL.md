@@ -3,6 +3,8 @@ name: youtube-hooks-scripts
 description: Create high-retention hooks and full scripts for technical YouTube videos
   tailored to topic, audience, and length. Use when the user asks for a hook, outline,
   or full script.
+metadata:
+  skill-type: team_automation
 ---
 
 # YouTube Hooks & Scripts
@@ -20,7 +22,7 @@ description: Create high-retention hooks and full scripts for technical YouTube 
 
 Deliver high-retention technical YouTube hooks, outlines, and scripts. The deeper craft guidance lives in `references/full-guide.md`.
 
-## Scope and triggers
+## When to use
 - Use when asked for technical YouTube hooks, outlines, or long-form scripts.
 - Use it for packaging the story and teaching arc of a video, not for broader product planning.
 - Route broader product or PRD work to `product-spec`.
@@ -127,3 +129,6 @@ If the prompt lacks the core topic, audience, or target output shape, ask for th
 - Persist with: `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
 - The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
 <!-- /decision-feedback-protocol -->
+
+## Gotchas
+- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.

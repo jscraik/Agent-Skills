@@ -35,7 +35,7 @@ This repository solves all three:
 
 ## What you get
 
-### 1. Cross-runtime skill library (133+ skills)
+### 1. Cross-runtime skill library
 
 One canonical library, symlinked to every runtime on sync:
 
@@ -382,7 +382,7 @@ just rollout-drill
 
 ## Documentation
 
-- **[Skills index](/SKILL.md)** — full list of 133+ skills with descriptions
+- **[Skills index](/SKILL.md)** — auto-generated list of the current surfaced skills with descriptions
 - **[Contributor docs](/docs/index.md)** — how to add, validate, and ship skills
 - **[Skill Genome runbook](/docs/skill-graphs/runbooks/skill-genome-loop.md)** — operating the improvement loop
 - **[Agent governance](/docs/agents/06-security-and-governance.md)** — security policy and audit trail

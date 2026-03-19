@@ -23,6 +23,7 @@
     "scripts/migrate_evals_v2.py",
     "scripts/run_skill_evals.py",
     "scripts/run_skill_graph_smoke.py",
+    "scripts/test_*.py",
     "scripts/record_skill_feedback.py",
     "workflows/create-new-skill.md"
   ],

@@ -1,6 +1,8 @@
 ---
 name: "sora"
 description: "Use when the user asks to generate, remix, poll, list, download, or delete Sora videos via OpenAI’s video API using the bundled CLI (`scripts/sora.py`), including requests like “generate AI video,” “Sora,” “video remix,” “download video/thumbnail/spritesheet,” and batch video generation; requires `OPENAI_API_KEY` and Sora API access."
+metadata:
+  skill-type: scaffolding_templates
 ---
 
 # Sora
@@ -96,3 +98,9 @@ description: "Use when the user asks to generate, remix, poll, list, download, o
 - Sora work is job-based, async, and stateful.
 - The handoff should always say what was created, where it was saved, and what prompt/flags produced it.
 - Safety constraints are part of the feature, not a disclaimer at the end.
+
+## Gotchas
+- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.
+
+## Failure mode
+- If prompt inputs, API access, or generation job state cannot be verified, stop, report the exact blocker, and fall back to setup validation or prompt preparation before retrying video generation.

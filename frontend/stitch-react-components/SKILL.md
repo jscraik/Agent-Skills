@@ -7,6 +7,8 @@ allowed-tools:
 - Read
 - Write
 - web_fetch
+metadata:
+  skill-type: scaffolding_templates
 ---
 
 # Stitch to React Components
@@ -115,3 +117,9 @@ allowed-tools:
 - Persist with: `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
 - The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
 <!-- /decision-feedback-protocol -->
+
+## Gotchas
+- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.
+
+## Failure mode
+- If the source screens, component boundaries, or style-system constraints are unclear, stop, surface the missing context, and fall back to structure extraction before writing components.

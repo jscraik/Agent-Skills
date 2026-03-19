@@ -7,17 +7,18 @@ metadata:
 
 # Skill Builder
 Design, improve, validate, and package high-quality Codex skills.
-**Version**: 1.12.0 · **Last updated**: 2026-03-17
-
 ## Table of Contents
 - [Working agreement](#working-agreement)
-- [Scope and triggers](#scope-and-triggers)
+- [When to use](#when-to-use)
+- [Category confirmation](#category-confirmation)
 - [OpenAI skill format and progressive disclosure](#openai-skill-format-and-progressive-disclosure)
 - [Semantic tag governance](#semantic-tag-governance)
+- [Compact governance contract](#compact-governance-contract)
 - [Modes](#modes)
 - [Required inputs](#required-inputs)
 - [Discovery interview](#discovery-interview)
 - [Deliverables](#deliverables)
+- [Gotchas](#gotchas)
 - [Response format](#response-format)
 - [Philosophy](#philosophy)
 - [Examples](#examples)
@@ -27,18 +28,16 @@ Design, improve, validate, and package high-quality Codex skills.
 - [Validation](#validation)
 - [Constraints and safety](#constraints-and-safety)
 - [Install-distribute mode](#install-distribute-mode)
+- [Antipatterns](#antipatterns)
 
 ## Working agreement
 - Follow the repo `AGENTS.md`; treat it as a map, not a megadoc.
 - Keep the artifact boundary explicit: local Codex CLI -> `./artifacts/`, hosted shell -> `/mnt/data/`.
 - Path confinement default: write inside approved repo roots and `./artifacts/`; `USER` scope is an explicit `install-distribute` opt-out with confirmation + allowlist.
-- Keep `SKILL.md` concise with progressive disclosure:
-  - target <= 320 lines
-  - hard cap <= 360 lines
 - Start with the smallest viable package boundary and 2-3 focused surfaces on first pass.
 - Move deep policy into `references/`; move repeatable mechanics into `scripts/`.
 
-## Scope and triggers
+## When to use
 Use this skill when the user asks to:
 - create a new skill;
 - improve an existing skill's routing, workflow, safety, or portability;
@@ -49,6 +48,22 @@ Use this skill when the user asks to:
 - list, install, update, or deconflict local/imported skill folders (`install-distribute` mode).
 
 Keep this skill out of scope for: unrelated app feature coding; generic bug-fixing outside skill quality; routine non-skill docs edits; plugin conversion (`codex-plugin-builder`); session-scan coverage (`codex-sessions-skill-scan`).
+
+## Category confirmation
+For `create` and `improve` mode, confirm the primary category before drafting:
+
+1. Library & API Reference
+2. Product Verification
+3. Data Fetching & Analysis
+4. Business Process & Automation
+5. Code Scaffolding & Templates
+6. Code Quality & Review
+7. CI/CD & Deployment
+8. Runbooks
+9. Infrastructure Operations
+
+Start with:
+- “Based on what you described, this sounds like a [Category X] skill. Does that match your intent, or is it something different?”
 
 ## OpenAI skill format and progressive disclosure
 Enforce OpenAI/Codex skill format by default:
@@ -85,10 +100,33 @@ Governance rules:
 - keep folder taxonomy as-is; semantic tags are a second axis, not a replacement.
 
 Lint and generation expectations:
-- run `bash scripts/sync_skills.sh` after semantic-tag changes;
+- in this sandboxed environment, run `bash scripts/sync_skills_sandbox_safe.sh` after semantic-tag changes;
+- run full `bash scripts/sync_skills.sh` only when runtime skill paths are writable;
 - run `bash scripts/lint_skill_types.sh` and require a clean pass (`Missing: 0`, `Invalid: 0`);
+- run `bash scripts/lint_openai_skill_format.sh --mode strict` and require a clean pass;
+- run `bash scripts/lint_progressive_disclosure.sh --mode warn` and remediate warnings over time;
+- run `python3 scripts/gotcha_pipeline.py validate` to ensure candidate-governance artifacts stay contract-safe;
 - treat `[WARN] Unrecognized metadata.skill-type ...` output as a governance failure to be fixed before claiming completion;
 - confirm `docs/skills-by-type.md` regenerated successfully when tags change.
+
+## Compact governance contract
+Use this contract for `create` and `improve` mode in this repository.
+
+Source of truth:
+- `references/governance-contract.md`
+
+Required gates before completion claim:
+- `bash scripts/lint_openai_skill_format.sh --mode strict`
+- `bash scripts/lint_progressive_disclosure.sh --mode warn`
+- `python3 scripts/gotcha_pipeline.py validate`
+- `bash scripts/sync_skills_sandbox_safe.sh` and `bash scripts/lint_skill_types.sh` when semantic tags changed in this environment
+- full `bash scripts/sync_skills.sh` when runtime skill paths are writable
+
+Core policies:
+- use `Do X because Y` style in `SKILL.md` procedure sections;
+- keep `description` routing-first (`what + when`), never a checklist;
+- progressive-disclosure triggers must live in `references/` (`Read when: <condition>`);
+- `__all__` only when module-style scripts are intended for import reuse; not required for CLI entrypoints.
 
 ## Modes
 Choose the smallest mode that fits:
@@ -104,11 +142,11 @@ Default to `create` or `improve`.
 
 ## Required inputs
 - skill goal and boundary;
-- 3-10 example prompts across happy, edge, and should-not-trigger cases;
+- 2-3 concrete use cases, plus 8-10 should-trigger and 8-10 should-not-trigger queries;
 - target environment: `codex`, `claude`, or `portable`;
 - required tools, schemas, templates, and policy constraints;
 - compatibility posture (`learn`, `guided`, `execute`);
-- preferred fallback strategy (`strict`, `minimal`, `rollback-safe`) when requirements are partial.
+- category confirmation (for create/improve) with rationale for any category tradeoff.
 
 If critical inputs are missing, ask only the minimum needed to proceed safely.
 
@@ -136,17 +174,18 @@ Produce only what the request needs, usually:
 - packaged `.skill` when requested
 - concise blocker summary if quality gates cannot be met in-turn
 
-## Response format
-For non-trivial responses, start exactly with `## Scope and triggers`, `## Required inputs`, `## Deliverables`, `## Failure mode`.
-## Scope and triggers
-- confirm when the skill applies.
-## Required inputs
-- list missing inputs or state what is already known.
-## Deliverables
-- list files, checks, and artifacts to produce.
-## Failure mode
-- if out of scope, say why and offer the nearest next step.
+## Examples
+- User says: “I want you to improve `utilities/diagram-cli` so it can safely install from PRs and still pass our schema gates.” Run `improve` mode, confirm category, then run required validation and package only after gates pass.
+- User says: “This skill keeps failing on imports when we add a new repo path; can you tighten its workflow and add a concrete trigger test plan?” Run `improve` mode, add discovery, then produce 8+ realistic trigger and non-trigger query tests before delivery.
+- User says: “Can you take `frontend/tools/agentation`, figure out why the skill feels bloated and undertriggers, rewrite it to current OpenAI skill format, and show me the exact gates you ran before we ship it?” Run `improve` mode, confirm category, tighten `description`, split heavy guidance into `references/`, and report validator outcomes with the final diff.
 
+## Gotchas
+- Missing required headings -> nested/alias headings used -> promote to exact top-level `##` names -> rerun `bash scripts/lint_progressive_disclosure.sh --mode warn`.
+- `sync_skills` timeout with `Operation not permitted` -> runtime paths are read-only in sandbox -> run `bash scripts/sync_skills_sandbox_safe.sh`.
+- Stale type index after tag edits -> semantic sync skipped -> run sandbox-safe sync, then `bash scripts/lint_skill_types.sh`.
+
+## Response format
+For non-trivial responses, start with `## When to use`, `## Required inputs`, `## Deliverables`, and `## Examples`; confirm applicability, missing inputs, and planned checks in that order.
 ### Deterministic response details
 Keep first response compact and install-focused:
 - include deconflict-first ordering;
@@ -154,21 +193,9 @@ Keep first response compact and install-focused:
 - include artifact-uplift scan plan before any write decision.
 
 ## Philosophy
-- Build minimal, reversible skill updates first; avoid broad rewrites.
-- Favor deterministic behavior and explicit guardrails over heuristics in critical paths.
-- Always preserve existing contracts unless a change is necessary and validated.
-- Offer an alternative strategy or fallback when assumptions are uncertain.
-- Provide one backup plan when inputs or provenance are unclear.
-- Vary the workflow by request context: use `strict` for risky scope, `minimal` for low-risk alignment, and `rollback-safe` when inputs are ambiguous.
-
-## Anti-patterns
-- Treat this skill as a workflow-quality agent, not a generic coding bug-fix helper.
-- Avoid adding extra dependencies or benchmark tooling when a simpler check already resolves the issue.
-
-## Examples
-- When the user asks, "Can you improve this skill in `utilities/skill-creator` to add safer install checks for upstream artifacts?", run improve mode with deconflict-first mode and artifact checks before touching files.
-- A release engineer asked, "I added a new benchmark in `utilities/skill-builder/references/evals.yaml` that keeps failing due to synthetic-looking prompts; can you audit and rewrite eval prompts so they read like real user requests?", then run required eval/security gates after updating `references/evals.yaml`.
-- Product asks, "Please package `utilities/diagram-cli` from this PR with an immutable source ref and run `python3 utilities/skill-builder/scripts/quick_validate.py`, then report only the required validation outcomes."
+- Build minimal, reversible updates first; prefer deterministic guardrails.
+- Apply controlled variation in output depth, phrasing, and check ordering based on user context (team, risk, or scope), while preserving safety guarantees.
+- Keep the user unblocked: when inputs are incomplete but risk is low, make the safest reasonable assumption, state it, and keep momentum.
 
 ## Output contract
 For non-trivial `create`, `improve`, `eval`, or `benchmark-lite`, include:
@@ -183,133 +210,50 @@ For non-trivial `create`, `improve`, `eval`, or `benchmark-lite`, include:
 ## Skill creation process
 Skip steps only with an explicit reason.
 
-### 0) Confirm target and boundary
-- confirm skill path and artifact boundary;
-- enforce folder/name regex:
-  - `^[a-z0-9](?:-?[a-z0-9]){0,63}$`
-- enforce path confinement:
-  - disallow absolute paths and `..` escapes by default;
-  - allow `USER` scope only after explicit confirmation and destination allowlist check.
-- mine thread context before asking the user to restate details.
+Use the compact flow below, then follow the linked references for full detail.
 
-### 1) Lock triggers early
-- encode use-when, dont-use-when, outputs, and success criteria in `description`;
-- create trigger coverage early in `references/evals.yaml`;
-- minimum trigger coverage:
-  - at least 4 should-trigger prompts
-  - at least 4 should-not-trigger prompts
-  - include paraphrases and near-neighbor collision prompts.
+1. Confirm target boundary and enforce scoped writes.
+   - Keep names path-safe (`^[a-z0-9](?:-?[a-z0-9]){0,63}$`).
+   - Default to repo scope; require explicit allowlist confirmation for `USER` scope.
+2. Confirm category and missing inputs in one round.
+3. Set trigger logic first (`description`) and add 8+/8+ trigger coverage in `references/evals.yaml`.
+4. Scaffold and draft with minimal structure, moving deep policy to `references/` and deterministic mechanics to `scripts/`.
+5. Iterate gate-by-gate: fix one failure, rerun, then continue.
+6. Run description optimization before handoff and deliver only when gates are clear or triaged.
 
-### 2) Choose structure
-- single-file for one intent and one workflow;
-- router-style for multi-intent or multi-contract skills.
-
-Router layout:
-```text
-skill-name/
-  SKILL.md
-  workflows/
-  references/
-  scripts/
-  assets/
-  agents/openai.yaml
-```
-
-### 3) Scaffold
-```bash
-python3 utilities/skill-builder/scripts/init_skill.py <skill-name> --target codex --run-type instruction --category <category>
-```
-
-### 4) Author SKILL.md
-- keep frontmatter parser-safe (no `<` or `>` in frontmatter fields);
-- for this repository, include `metadata.skill-type` using one canonical value;
-- keep route-critical guidance in `SKILL.md`;
-- link deep context from `references/`.
-
-### 5) Add resources only when they earn their keep
-- `references/` for contracts, evals, deep docs
-- `scripts/` for deterministic helpers
-- `assets/` for templates/fixtures
-- `agents/openai.yaml` for Codex UI metadata when needed
-
-### 6) Validate and iterate
-- fix first failing gate, then rerun;
-- compare variants only when needed;
-- package only after gates pass (use your repo-approved packaging helper).
+Reference files:
+- `references/governance-contract.md`
+- `references/quality-tools.md`
+- `references/workflows-and-validation.md`
+- `references/iteration-and-testing.md`
+- `references/discovery-interview.md`
 
 ## Execution guardrails
-- Cap iterative fix loops at 3 rounds per failing gate.
-- After loop cap, publish blocker report (`root_cause`, `attempts`, `next_options`) and wait for user decision.
-- Avoid repeating the same unchanged command more than twice.
-- Prefer deterministic scripts over repeated free-form retries.
-- Keep reruns scoped while iterating; run broader checks before completion claims.
+- Cap iterative fix loops at 3 rounds per failing gate, then publish a blocker report and wait for user direction.
+- Avoid repeating unchanged commands more than twice; prefer deterministic scripts.
+- Keep reruns scoped during iteration; run broader checks before completion claims.
 
 ## Validation
-Use two explicit phases.
-Fail fast: fix the first failed gate before moving to later gates.
-
-Phase A (`iterative_fail_fast`):
-- run the first failing gate, fix, rerun until that gate passes.
-
-Phase B (`pre-claim_full_sweep`):
-- run all gold gates and required evals in one sweep before claiming completion.
-
-Core validators (gold gates):
-```bash
-python3 utilities/skill-builder/scripts/quick_validate.py <path/to/skill-folder>
-python3 utilities/skill-builder/scripts/skill_gate.py <path/to/skill-folder> --require-fail-fast --require-security-evals --pi-high-fail
-python3 utilities/skill-builder/scripts/analyze_skill.py <path/to/skill-folder>
-python3 utilities/skill-builder/scripts/openclaw_skill_guard.py <path/to/skill-folder> --mode both
-```
-
-Required eval runs:
-```bash
-python3 utilities/skill-builder/scripts/run_skill_evals.py <path/to/skill-folder>
-```
-Run required evals for:
-- new skills (`create`), changed skills in `improve`/`upgrade`, and `install-distribute` writes (`install`, `update`, `deconflict`).
-
-Reliability checks (required for `eval`, `benchmark-lite`, and install writes):
-```bash
-python3 utilities/skill-builder/scripts/run_skill_evals.py <path/to/skill-folder> --dual-run --capture-jsonl
-python3 utilities/skill-builder/scripts/deterministic_trace_checks.py <path/to/codex-run.jsonl> --budgets-json '{"max_total_tokens":4000,"max_duplicate_command_ratio":0.35}'
-```
-
-Unified conformance rules:
-- always run gold gates (`quick_validate`, `skill_gate`, `analyze_skill`, `openclaw_skill_guard`);
-- for imported packages with upstream eval metadata, run upstream-grade checks and report both;
-- Always run gold gates even when upstream checks pass;
-- PI/security warnings are release-blocking in every mode.
+- Fail-fast is mandatory: stop at first failing gate, fix, rerun, then continue.
+- Use two passes: `iterative_fail_fast` then `pre-claim_full_sweep`.
+- Use `references/quality-tools.md` for gate command matrix and strict PI/security expectations.
 
 ## Constraints and safety
 - Redact secrets, credentials, tokens, and PII by default.
-- Default to offline behavior; gate network access with explicit allowlists.
 - Keep destructive actions behind dry-run or explicit confirmation.
-- Avoid inventing external facts; add verification when uncertain.
-- For schema-bound outputs, include `schema_version`.
-- `schema_version` policy:
-  - major bump = breaking contract change;
-  - minor bump = additive, backward-compatible fields;
-  - unknown major versions must fail validation.
+- Include `schema_version` for schema-bound outputs and follow versioning policy in `references/governance-contract.md`.
+- Default to offline execution; allow network only with explicit permission and allowlist in scope.
 
 ## Install-distribute mode
-Required inputs:
-- source (`name`, repo URL, or path), pinned source ref (`commit SHA` preferred), source hash (`sha256`), source trust (`allowlisted`)
-- destination scope (`REPO` or `USER`) and destination path/category (`REPO` defaults to repo-local skill paths)
-- overwrite consent
-- operation type (`list`, `dry-run`, `install`, `update`, `deconflict`)
+- Confirm provenance (`allowlist` + pinned ref + staged `sha256`) before writes.
+- Run deconflict-first (`overlap matrix` + `artifact-uplift scan` + explicit decision).
+- Validate in quarantine before atomic move/swap; rollback on write failure.
+- Hand off plugin conversion to `codex-plugin-builder` and session coverage scans to `codex-sessions-skill-scan`.
+- Use `references/advanced-workflow.md` for full install-distribute mechanics and checklists.
 
-Operating rules:
-- run deconflict-first before any write:
-  - capability overlap matrix (`incoming` vs installed operational skills)
-  - artifact-uplift scan (`references/`, `assets/`, `agents/`)
-  - explicit decision (`merge|fold|improve-existing|install-new`)
-- apply provenance gate before any install/update write:
-  - verify allowlisted source, pinned source ref, and staged payload `sha256`
-- stage in quarantine path, validate there, then perform atomic move/swap
-- on any write failure, execute rollback and report restored paths
-- preserve imported upstream eval contracts (`eval.yaml`, graders, rubric bundles)
-- run validators on all touched skills with strict PI/security flags
-- handoff:
-  - plugin conversion/publishing -> `codex-plugin-builder`
-  - session-scan coverage -> `codex-sessions-skill-scan`
+## Failure mode
+- If out of scope, say why and offer the nearest next skill-appropriate next step.
+
+## Anti-patterns
+- Overfitted routing language -> description only matches one phrasing -> expand to realistic paraphrases and near-neighbor cases, then recheck `references/evals.yaml`.
+- Checklist dump in frontmatter -> `description` becomes procedure-heavy and undertriggers -> move process detail to `SKILL.md` or `references/` and keep frontmatter routing-first.

@@ -1,6 +1,8 @@
 ---
 name: linear
 description: "Manage Linear issues, projects, and docs through the Linear MCP workflow with consistent read/create/update operations. Use when a user asks to triage, create, update, or report on Linear work items."
+metadata:
+  skill-type: team_automation
 ---
 
 # Linear
@@ -30,7 +32,7 @@ description: "Manage Linear issues, projects, and docs through the Linear MCP wo
 - What is the evidence for the proposed change (context, docs, comments)?
 - How will the team verify and follow up?
 
-## Scope and triggers
+## When to use
 - When the user wants to read, create, or update Linear issues or projects.
 - When the user asks for triage, planning, or reporting inside Linear.
 - When the user needs documentation or comment updates in Linear.
@@ -211,3 +213,6 @@ Documentation & Collaboration: `list_documents`, `get_document`, `search_documen
 - Persist with: `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
 - The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
 <!-- /decision-feedback-protocol -->
+
+## Gotchas
+- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.

@@ -1,6 +1,8 @@
 ---
 name: backend-engineer
 description: Plan and review safe backend extensions for existing services (Cloudflare Workers + Hono primary). Use this skill when patching or adding backend features in an existing codebase.
+metadata:
+  skill-type: scaffolding_templates
 ---
 
 # Backend Engineer
@@ -131,3 +133,9 @@ If blocked by missing critical information, insert `## Questions` before `## Pla
 - Work from the real repo surface, not a generic backend template.
 - Make risks explicit when touching auth, money, messages, or persistent state.
 - Leave the next engineer with a clear verification and rollback story.
+
+## Gotchas
+- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.
+
+## Failure mode
+- If service boundaries, data contracts, or verification paths are unclear, stop, document the missing evidence, and fall back to a narrower design/debugging step before editing backend behavior.

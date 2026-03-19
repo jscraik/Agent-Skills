@@ -1,6 +1,8 @@
 ---
 name: create-auth
 description: Build Better Auth integrations for TS/JS apps with secure defaults. Use for implementation or migration work (not just review). Use when the user requests this capability.
+metadata:
+  skill-type: scaffolding_templates
 ---
 
 # Create Auth
@@ -115,3 +117,6 @@ Build or migrate Better Auth integrations for TypeScript and JavaScript apps wit
 
 ## Remember
 Treat auth rollout like infrastructure. The core flow must work cleanly before you make it richer.
+
+## Gotchas
+- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.

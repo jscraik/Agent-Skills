@@ -1,6 +1,8 @@
 ---
 name: agents-md
 description: "Refactor or create AGENTS.md using progressive disclosure: keep root guidance minimal, split detailed instructions into linked docs, and flag contradictions or redundancy. Use this skill when the user asks to create, update, or refactor AGENTS.md."
+metadata:
+  skill-type: code_quality_review
 ---
 
 # Agents Md
@@ -36,13 +38,13 @@ Create and maintain concise, high-signal AGENTS guidance with progressive disclo
 - Treat contradiction detection and instruction precedence as first-class outputs.
 - Prefer progressive disclosure over megadoc accumulation.
 
-## Inputs
+## Required inputs
 - Target repository root path.
 - Existing `AGENTS.md` and related instruction docs.
 - Verified commands/paths from repository sources.
 - Preferred instruction tree (`instructions/agents` or `docs/agents`) based on repo convention.
 
-## Outputs
+## Deliverables
 - Updated minimal root `AGENTS.md`.
 - Linked category docs for deeper instructions.
 - Contradiction list and deletion candidates.
@@ -145,3 +147,6 @@ If command truth, path ownership, or instruction precedence cannot be verified, 
 - Capture `decision`, `outcome`, and `confidence`.
 - Persist with `python3 utilities/skill-builder/scripts/record_skill_feedback.py`.
 <!-- /decision-feedback-protocol -->
+
+## Gotchas
+- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.

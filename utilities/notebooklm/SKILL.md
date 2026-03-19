@@ -1,6 +1,8 @@
 ---
 name: notebooklm
 description: Manage, analyze, and generate Google NotebookLM workflows for notebook/source management, notebook question answering, and audio/video overview generation. Use this skill when a user asks to run NotebookLM actions from this environment; do not use it for unrelated general web/chat requests.
+metadata:
+  skill-type: data_fetch_analysis
 ---
 
 # Notebooklm
@@ -36,12 +38,12 @@ Operate NotebookLM workflows with script-backed execution and explicit verificat
 - Distinguish "stored auth metadata exists" from "this exact notebook URL was verified in the current run".
 - Report blocked or partial outcomes explicitly instead of guessing NotebookLM state.
 
-## Inputs
+## Required inputs
 - User objective and target notebook/source context.
 - Required action type (list, create, add source, ask, generate media).
 - Constraints on output format, latency, or safety boundaries.
 
-## Outputs
+## Deliverables
 - Completed NotebookLM action or clear blocked state.
 - Evidence summary of commands executed and validation checks.
 - Next action if additional user confirmation is required.
@@ -134,3 +136,6 @@ If auth is stale, the target notebook/source cannot be identified, or the script
 - Persist with: `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
 - The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
 <!-- /decision-feedback-protocol -->
+
+## Gotchas
+- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.

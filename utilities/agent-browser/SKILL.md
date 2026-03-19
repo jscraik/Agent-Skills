@@ -1,6 +1,8 @@
 ---
 name: agent-browser
 description: Use this skill to extract page state and automate web interactions with the agent-browser CLI (navigate, snapshot, click, fill, screenshot). Use this when you need deterministic browser automation or scraping via ref-based elements.
+metadata:
+  skill-type: product_verification
 ---
 
 # Agent Browser
@@ -100,3 +102,9 @@ Use the `agent-browser` CLI for deterministic browser automation through accessi
 
 ## Remember
 The snapshot is the source of truth. If you have not re-read the page state, you are guessing.
+
+## Gotchas
+- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.
+
+## Failure mode
+- If page state, selectors, or browser session prerequisites are missing, stop, describe the failing step, and fall back to a narrower inspection or snapshot flow before automating further.

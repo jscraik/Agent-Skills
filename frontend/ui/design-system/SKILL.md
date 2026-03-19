@@ -1,6 +1,8 @@
 ---
 name: design-system
 description: "Analyze and implement repository-grounded design-system work (tokens, typography, iconography, spacing, styles, aliases, and theme variables) for this monorepo. Use when requests involve UI styling systems or token-layer changes; don’t use for backend/MCP-only tasks with no UI impact. Outputs: evidence-backed analysis or changes with canonical file references, layer impact, and validation commands. Success: work aligns to Brand→Alias→Mapped rules and passes design-system checks."
+metadata:
+  skill-type: library_api_reference
 ---
 
 # Design System
@@ -37,7 +39,7 @@ Current baseline markers:
 - Tailwind CSS v4 for utility and token usage guidance.
 - WCAG 2.2 AA for accessibility acceptance and QA.
 
-## Scope and triggers
+## When to use
 - Use this skill when the user asks about design-system behavior, token usage, typography, spacing, iconography, theme variables, or UI styling consistency in this repo.
 - Use this skill when implementing or auditing changes touching `packages/tokens`, `packages/ui/src/styles`, `packages/ui/src/icons`, or design-system docs/stories.
 - Do **not** use this skill for backend-only, infra-only, or MCP server tasks that do not affect UI/design-system layers.
@@ -151,27 +153,10 @@ pnpm -C packages/ui build
 ```
 
 Targeted checks:
-
-```bash
-# token structure quick checks
-jq 'keys' packages/tokens/src/tokens/index.dtcg.json
-jq '.type.web | keys' packages/tokens/src/tokens/index.dtcg.json
-jq '.space | keys' packages/tokens/src/tokens/index.dtcg.json
-jq '.color | keys' packages/tokens/src/tokens/index.dtcg.json
-jq '.radius | keys' packages/tokens/src/tokens/index.dtcg.json
-
-# Mode-parity checks when token/theme edits affect brand modes
-rg -n "light|dark|highContrast" packages/tokens/src/tokens/index.dtcg.json packages/tokens/src/alias-map.ts
-rg -n "light|dark|highContrast" packages/ui/src/styles/theme.css
-
-# Regeneration drift check (run after token-source edits)
-pnpm -C packages/tokens generate && git diff -- packages/tokens/src/foundations.css packages/tokens/src/aliases.css packages/tokens/src/tokens.css packages/tokens/src/enhanced.css packages/tokens/tailwind.preset.ts
-
-# Token usage and literal hygiene in UI code
-rg -n "--foundation-|--ds-|--color-" packages/ui/src
-rg -n "#[0-9a-fA-F]{3,8}|rgba?\(" packages/ui/src
-rg -n "highContrast|--background|--foreground" packages/ui/src/styles/theme.css packages/tokens/src/tokens/index.dtcg.json
-```
+- token structure quick checks with `jq` on `packages/tokens/src/tokens/index.dtcg.json`
+- mode-parity checks with `rg -n "light|dark|highContrast"` across token and theme files
+- regeneration drift check with `pnpm -C packages/tokens generate && git diff -- ...`
+- token usage and literal hygiene checks with `rg` in `packages/ui/src`
 
 ## Anti-patterns
 - ❌ Editing only `theme.css` when the real change belongs in DTCG/alias layers.
@@ -226,3 +211,9 @@ This skill is here to unlock high-confidence design-system decisions. The agent 
 - Variation: vary recommendations by context-specific constraints; adapt, customize, and use different approaches when constraints differ.
 - Variation: prefer diverse, unique alternatives and avoid repetition or cookie-cutter template convergence.
 - Empowerment: enable users to explore options confidently, be capable and creative, unlock safe choices, and empower execution.
+
+## Gotchas
+- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.
+
+## Failure mode
+- If token layers, theme ownership, or canonical source files are unclear, stop, report the ambiguity, and fall back to a design-system discovery pass before editing tokens or aliases.

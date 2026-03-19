@@ -1,6 +1,8 @@
 ---
 name: codex-plugin-builder
 description: "Create, convert, and validate Codex plugin packages that include focused skills, prompts, hooks, agents, and MCP metadata. Use this skill when the user asks to scaffold plugin bundles, safely convert external plugin sources, or quality-gate plugin-owned skills; do not use it for unrelated app feature work."
+metadata:
+  skill-type: scaffolding_templates
 ---
 
 # Codex Plugin Builder
@@ -21,7 +23,7 @@ Build safe, focused plugin packages for Codex workflows.
 - [Examples](#examples)
 - [Failure mode](#failure-mode)
 
-## Scope and triggers
+## When to use
 Use this skill when the request is to:
 - scaffold a new Codex plugin package;
 - inspect an external plugin source before conversion;
@@ -61,7 +63,7 @@ Do not use this skill for:
 
 If key inputs are missing, ask only the smallest set of clarifying questions needed to scaffold safely.
 
-## Outputs
+## Deliverables
 Produce only what the request needs:
 - plugin package folder with `SKILL.md` or plugin-owned assets;
 - `references/contract.yaml` and `references/evals.yaml` for non-trivial behavior;
@@ -305,15 +307,6 @@ Required behavior:
 - vary examples and mappings based on the source ecosystem;
 - keep deterministic gates constant while allowing structure choices to differ by plugin goal.
 
-## Empowering execution style
-Treat this skill as a precision tool, not a rigid script. Use judgment, explain tradeoffs, and choose the smallest safe path that still delivers momentum.
-
-## Examples
-- "Create a `codex-plugin-builder` package skeleton for a repo-local plugin with `skills` and `prompts` only."
-- "Inspect this GitHub plugin at a pinned commit, dry-run conversion, then show the files you would write."
-- "Convert this Claude plugin into a Codex package and validate plugin-owned skills with `skill_gate.py`."
-- "Add `hooks` and `.mcp.json` to this existing plugin but keep scope narrow and rerun validators."
-
 ## Failure mode
 If the request is out of scope:
 - explain the mismatch clearly;
@@ -322,15 +315,5 @@ If the request is out of scope:
   - `chatgpt-apps` for full Apps SDK implementations,
   - `mcp-builder` for MCP server development without plugin packaging.
 
-## See Also
-
-| Skill | When to use together |
-|---|---|
-| [[skill-builder]] | Build and quality-gate the plugin-owned skills before packaging them here |
-| [[decide-build-primitive]] | Use before building to confirm a plugin is the right packaging choice |
-| [[verification-before-completion]] | Gate "plugin is done" with validator evidence before committing |
-| [[arscontexta]] | When packaging Ars Contexta surfaces into a Codex plugin |
-| [[mcp-builder]] | For standalone MCP server development without plugin packaging overhead |
-
-**Topic map:** [[agent-ops]]
-
+## Gotchas
+- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.

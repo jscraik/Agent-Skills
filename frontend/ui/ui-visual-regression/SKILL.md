@@ -1,6 +1,8 @@
 ---
 name: ui-visual-regression
 description: "Review and validate UI visual regression diffs (Storybook + Playwright capture + Argos) when snapshot changes or layout regressions appear."
+metadata:
+  skill-type: product_verification
 ---
 
 # UI Visual Regression
@@ -117,3 +119,6 @@ Run a deterministic visual regression loop so we can separate expected UI change
 - Persist with: `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
 - The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
 <!-- /decision-feedback-protocol -->
+
+## Gotchas
+- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.

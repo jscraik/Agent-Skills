@@ -2,6 +2,8 @@
 name: video-transcript-downloader
 description: Extract, summarize, and download video/audio/subtitles using yt-dlp/ffmpeg.
   Use when the user requests downloads or transcripts.
+metadata:
+  skill-type: team_automation
 ---
 
 # Video Transcript Downloader
@@ -21,7 +23,7 @@ description: Extract, summarize, and download video/audio/subtitles using yt-dlp
 
 `./scripts/vtd.js` can print transcripts and download video, audio, and subtitles through a consistent local wrapper.
 
-## Scope and triggers
+## When to use
 - Use this skill when the user wants a transcript, subtitles, audio extraction, format inspection, or a direct media download.
 - Use it when the source is video or audio media and the workflow should be grounded in the local `vtd.js` wrapper.
 - Do not use it for broader video strategy or YouTube packaging tasks.
@@ -179,3 +181,6 @@ ffmpeg -version | head -n 1
 - Persist with: `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
 - The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
 <!-- /decision-feedback-protocol -->
+
+## Gotchas
+- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.

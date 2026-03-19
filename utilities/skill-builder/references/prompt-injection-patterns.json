@@ -13,7 +13,7 @@
   },
   {
     "code": "PI_TOOL_CHAIN",
-    "regex": "\\b(bypass|jailbreak|override|exfiltrate)\\b",
+    "regex": "\\b(bypass|jailbreak|exfiltrate)\\b|\\boverride\\s+(?:system|safety|instruction|policy|guardrail|restriction)s?\\b",
     "message": "High-risk control language detected; verify this does not instruct unsafe behavior.",
     "severity": "high"
   },
