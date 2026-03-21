@@ -1,6 +1,6 @@
 ---
 name: ui-ux-creative-coding
-description: Analyze and run focused UI polishing for React/Tauri screens when motion, interaction rhythm, and accessibility refinements are needed in Tailwind v4; use this when users need implementation-ready recommendations before changing interface code.
+description: Analyze and run focused UI polishing for React/Tauri screens when motion, interaction rhythm, and accessibility refinements are needed in Tailwind v4; use this when users need implementation-ready recommendations before changing interface code, especially after the visual direction is already set.
 metadata:
   skill-type: scaffolding_templates
   short-description: UI polish workflow for React/Tauri with motion, accessibility, and implementation-ready validation guidance.
@@ -11,12 +11,14 @@ metadata:
 ## When to use
 - Improve motion systems, interaction rhythm, and UI polish for product surfaces.
 - Produce implementation notes for React/Tauri interfaces using Tailwind v4 and motion patterns.
+- Refine visually led marketing or demo surfaces after visual hierarchy, content structure, and brand direction are already defined.
 - Prefer this skill over brand-only or logo work when behavior and interaction quality are the target.
 
 ## Required inputs
 - Product context and target interface scope (2-3 screens or sections maximum).
 - Performance and accessibility constraints.
 - Persona references or style constraints (for example `@benjitaylor`, `@jenny_wen`).
+- For visually led work, the existing visual thesis/content plan/interaction thesis or enough context to derive them safely.
 - Required assets, existing component library, and design source of truth.
 - Deployment risk tolerance and review cadence.
 
@@ -26,6 +28,7 @@ metadata:
   - concrete motion system,
   - implementation sequence,
   - validation checkpoints (accessibility, responsiveness, performance).
+- For visually led work: motion guidance that sharpens an already chosen visual anchor instead of compensating for weak structure.
 - Clear "why this way" rationale and tradeoffs.
 - Suggested fallback for constraints or blocked motion/runtime conditions.
 - Include `schema_version` in output contracts for machine-checkable notes.
@@ -37,6 +40,7 @@ metadata:
 
 ### 2) Build recommendation
 - Select persona guidance from available references.
+- For visually led work, preserve one dominant visual anchor and one job per section before proposing motion.
 - Define component-level behavior, motion levels, and visual hierarchy.
 - Add explicit tradeoffs for performance and maintainability.
 
@@ -54,6 +58,7 @@ metadata:
 - Design without user constraints (scope drift).
 - Converting every page to a bespoke system instead of extending current components.
 - Overusing heavy motion before proving baseline clarity.
+- Using motion to hide weak composition, weak imagery, or cluttered section structure.
 - Treating this as brand identity work.
 
 ## Constraints
@@ -64,6 +69,7 @@ metadata:
 ## Philosophy
 - Keep recommendations concrete, specific, and implementation-ready.
 - Prefer fewer, higher-quality interactions over many speculative ideas.
+- Use motion to heighten hierarchy and atmosphere, not to rescue generic layout decisions.
 - Stay focused on user outcomes, not decorative novelty.
 
 ## Examples
@@ -73,6 +79,7 @@ metadata:
 
 ## Failure mode
 - If no source constraints or target screen are provided, request scope before proposing a design approach.
+- If the surface still lacks a clear visual thesis or content structure, route back to `frontend-ui-design` before deep motion recommendations.
 - If required persona references are unavailable, proceed with neutral defaults and state the assumption.
 
 ## Variation

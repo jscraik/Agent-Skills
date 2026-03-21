@@ -125,7 +125,11 @@ Use this contract to keep plugin scaffolds and conversions aligned with the enfo
 
 ```json
 {
+  "schema_version": 1,
   "name": "openai-curated",
+  "interface": {
+    "displayName": "OpenAI Curated"
+  },
   "plugins": [
     {
       "name": "linear",
@@ -133,8 +137,10 @@ Use this contract to keep plugin scaffolds and conversions aligned with the enfo
         "source": "local",
         "path": "./plugins/linear"
       },
-      "installPolicy": "AVAILABLE",
-      "authPolicy": "ON_INSTALL",
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
       "category": "Productivity"
     }
   ]
@@ -144,7 +150,10 @@ Use this contract to keep plugin scaffolds and conversions aligned with the enfo
 ## Marketplace field guide
 
 ### Top-level fields
+- `schema_version` (`number`): Marketplace schema marker used by this repo.
 - `name` (`string`): Marketplace identifier or catalog name.
+- `interface` (`object`): Marketplace presentation metadata.
+  - `displayName` (`string`): User-facing marketplace title.
 - `plugins` (`array`): Ordered plugin entries. The order controls render order.
 
 ### Plugin entry fields
@@ -152,16 +161,19 @@ Use this contract to keep plugin scaffolds and conversions aligned with the enfo
 - `source` (`object`): Plugin source descriptor.
   - `source` (`string`): Use `local` for this workflow.
   - `path` (`string`): Relative plugin path, always `./plugins/<plugin-name>`.
-- `installPolicy` (`string`): Availability policy.
+- `policy` (`object`): Install and auth policy block.
+  - `installation` (`string`): Availability policy.
   - Allowed values: `NOT_AVAILABLE`, `AVAILABLE`, `INSTALLED_BY_DEFAULT`
   - Default for new entries: `AVAILABLE`
-- `authPolicy` (`string`): Authentication timing policy.
+  - `authentication` (`string`): Authentication timing policy.
   - Allowed values: `ON_INSTALL`, `ON_USE`
   - Default for new entries: `ON_INSTALL`
 - `category` (`string`): Display category bucket.
 
 ### Marketplace generation rules
-- Always include `installPolicy`, `authPolicy`, and `category` on each generated or updated plugin entry.
+- Always include marketplace `interface.displayName`.
+- Always emit `policy.installation`, `policy.authentication`, and `category` on each generated or updated plugin entry.
+- During migration, validators may accept legacy flat `installPolicy` and `authPolicy`, but scaffolds should not emit them.
 - Append new entries unless the user explicitly requests reordering.
 - Replace an existing entry for the same plugin only when overwrite is intentional.
 

@@ -331,8 +331,10 @@ def build_marketplace_entry(
             "source": "local",
             "path": f"./plugins/{plugin_name}",
         },
-        "installPolicy": install_policy,
-        "authPolicy": auth_policy,
+        "policy": {
+            "installation": install_policy,
+            "authentication": auth_policy,
+        },
         "category": category,
     }
 
@@ -353,8 +355,31 @@ def _optional_json(path: Path) -> dict[str, Any] | None:
 
 def build_default_marketplace() -> dict[str, Any]:
     return {
+        "schema_version": 1,
         "name": "[TODO: marketplace-name]",
+        "interface": {
+            "displayName": "[TODO: Marketplace Display Name]",
+        },
         "plugins": [],
+    }
+
+
+def _display_name_from_identifier(value: str) -> str:
+    words = [word for word in re.split(r"[-_\s]+", value.strip()) if word]
+    if not words:
+        return "[TODO: Marketplace Display Name]"
+    return " ".join(word.capitalize() for word in words)
+
+
+def _ensure_marketplace_interface(payload: dict[str, Any]) -> None:
+    interface = payload.get("interface")
+    if isinstance(interface, dict):
+        display_name = interface.get("displayName")
+        if isinstance(display_name, str) and display_name.strip():
+            return
+    marketplace_name = payload.get("name") if isinstance(payload.get("name"), str) else ""
+    payload["interface"] = {
+        "displayName": _display_name_from_identifier(marketplace_name),
     }
 
 
@@ -392,6 +417,7 @@ def update_marketplace_json(
         payload = load_json(marketplace_path)
     else:
         payload = build_default_marketplace()
+    _ensure_marketplace_interface(payload)
 
     plugins = payload.setdefault("plugins", [])
     if not isinstance(plugins, list):
@@ -1446,6 +1472,17 @@ def _check_marketplace_entry(
     marketplace_payload: dict[str, Any], plugin_name: str
 ) -> list[str]:
     failures: list[str] = []
+    interface = marketplace_payload.get("interface")
+    if interface is not None:
+        if not isinstance(interface, dict):
+            failures.append("marketplace.json field 'interface' must be an object when present.")
+        else:
+            display_name = interface.get("displayName")
+            if not isinstance(display_name, str) or not display_name.strip():
+                failures.append(
+                    "marketplace.json interface.displayName must be a non-empty string when present."
+                )
+
     plugins = marketplace_payload.get("plugins")
     if not isinstance(plugins, list):
         return ["marketplace.json field 'plugins' must be an array."]
@@ -1473,17 +1510,27 @@ def _check_marketplace_entry(
                 f"marketplace plugin '{plugin_name}' source.path must be '{expected_path}'."
             )
 
-    install_policy = plugin_entry.get("installPolicy")
+    policy = plugin_entry.get("policy")
+    install_policy = None
+    auth_policy = None
+    if isinstance(policy, dict):
+        install_policy = policy.get("installation")
+        auth_policy = policy.get("authentication")
+    else:
+        install_policy = plugin_entry.get("installPolicy")
+        auth_policy = plugin_entry.get("authPolicy")
+
     if install_policy not in VALID_INSTALL_POLICIES:
         failures.append(
-            f"marketplace plugin '{plugin_name}' installPolicy must be one of "
+            f"marketplace plugin '{plugin_name}' policy.installation "
+            f"(or legacy installPolicy) must be one of "
             f"{sorted(VALID_INSTALL_POLICIES)}."
         )
 
-    auth_policy = plugin_entry.get("authPolicy")
     if auth_policy not in VALID_AUTH_POLICIES:
         failures.append(
-            f"marketplace plugin '{plugin_name}' authPolicy must be one of "
+            f"marketplace plugin '{plugin_name}' policy.authentication "
+            f"(or legacy authPolicy) must be one of "
             f"{sorted(VALID_AUTH_POLICIES)}."
         )
 
@@ -1789,13 +1836,13 @@ def parse_args() -> argparse.Namespace:
         "--install-policy",
         default=DEFAULT_INSTALL_POLICY,
         choices=sorted(VALID_INSTALL_POLICIES),
-        help="Marketplace installPolicy value.",
+        help="Marketplace policy.installation value.",
     )
     scaffold_parser.add_argument(
         "--auth-policy",
         default=DEFAULT_AUTH_POLICY,
         choices=sorted(VALID_AUTH_POLICIES),
-        help="Marketplace authPolicy value.",
+        help="Marketplace policy.authentication value.",
     )
     scaffold_parser.add_argument(
         "--category",

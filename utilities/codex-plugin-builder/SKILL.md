@@ -260,12 +260,8 @@ Required behavior:
 - include integration metadata when present:
   - `.mcp.json` wiring details,
   - `.app.json` app-level details;
-- marketplace entries must include:
-  - `source.source = "local"`,
-  - `source.path = "./plugins/<plugin-name>"`,
-  - `installPolicy`,
-  - `authPolicy`,
-  - `category`;
+- marketplace entries must include marketplace `interface.displayName`, `source.source = "local"`, `source.path = "./plugins/<plugin-name>"`, `policy.installation`, `policy.authentication`, and `category`;
+- validator compatibility note: accept legacy flat `installPolicy` and `authPolicy` while existing local marketplaces migrate, but emit the canonical nested `policy` object for all new scaffolds and overwrites;
 - keep `prompts` and `agents` optional unless explicitly requested.
 
 ## Hook contract
