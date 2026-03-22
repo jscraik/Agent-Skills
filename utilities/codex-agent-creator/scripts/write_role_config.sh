@@ -10,7 +10,7 @@ Required:
   --output PATH
   --role-name NAME
   --model MODEL
-  --reasoning none|minimal|low|medium|high|xhigh
+  --reasoning minimal|low|medium|high|xhigh
 
 Developer instructions (choose one):
   --developer-instructions TEXT
@@ -122,7 +122,7 @@ if [[ -z "$output_path" || -z "$role_name" || -z "$model" || -z "$reasoning" ]];
 fi
 
 case "$reasoning" in
-  none|minimal|low|medium|high|xhigh) ;;
+  minimal|low|medium|high|xhigh) ;;
   *)
     echo "Invalid reasoning effort: $reasoning" >&2
     exit 1 ;;

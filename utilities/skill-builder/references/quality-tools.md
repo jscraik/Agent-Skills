@@ -15,6 +15,9 @@ Use when:
 
 Outputs:
 - PASS/FAIL result with findings
+- machine-readable envelope in `--format json` with `schema_version`, `decision`, and `exit_code`
+- optional artifact write with `--output /path/to/report.json`
+- optional SARIF output with `--sarif-out /path/to/report.sarif`
 
 ## run_skill_evals.py
 
@@ -36,6 +39,10 @@ Notes:
 - For cross-runner coverage, use dual-run mode:
   - `--dual-run --capture-jsonl`
 - `--capture-jsonl` is required for deterministic Codex trace checks and dual-run mode.
+- Eval suite modes:
+  - `--eval-mode standard` preserves the current full default behavior.
+  - `--eval-mode smoke` runs the faster pre-release subset for local iteration.
+  - `--eval-mode release` runs the release-grade suite and auto-enables Codex JSONL capture when relevant.
 - Codex profile compatibility fallback (enabled by default):
   - `--codex-fallback-profile d`
   - This auto-retries when the active Codex profile/model rejects `reasoning.summary` (for example Spark profile mismatches).
@@ -63,6 +70,8 @@ Notes:
   - `--tier2-mode off`: suppress tier-2 findings
 - Write merged scorecards with:
   - `--scorecard-out /absolute/or/relative/path.json`
+- Write JUnit XML for CI test ingestion with:
+  - `--junit-out /absolute/or/relative/path.xml`
 - In CI, prefer `--ask-for-approval never` to avoid prompts.
 - Keep `--sandbox read-only` unless the eval requires edits.
 - If Codex evals time out during MCP startup, increase the subprocess timeout via:
@@ -72,6 +81,8 @@ Notes:
 Outputs:
 - PASS/FAIL per case with report artifacts under artifacts/reports/skills/
 - merged scorecard JSON (default: `<run>/scorecard.json`, or `--scorecard-out`)
+- release manifest JSON (default: `<run>/release_manifest.json`)
+- JUnit XML (default: `<run>/junit.xml`, or `--junit-out`)
 
 ## analyze_skill.py
 
@@ -86,6 +97,8 @@ Use when:
 Output:
 - overall score out of 100 plus per-category scoring
 - score bands: 80+ strong, 60-79 acceptable, 40-59 needs work, <40 redesign needed
+- machine-readable envelope in `--format json|yaml` with `schema_version`, `decision`, and `exit_code`
+- optional artifact write with `--output /path/to/report.json`
 
 ## openclaw_skill_guard.py
 
@@ -180,6 +193,16 @@ Notes:
 - `--mode fail` blocks on both hard-fail and warning conditions (strict ratchet mode).
 - Keep policy changes in `references/benchmark-policy.json` under version control with a short rationale in the related PR.
 
+## Release manifest template
+
+When you need a stable production artifact contract, start from:
+
+- `references/release-manifest.template.json`
+
+Use it for:
+- documenting generated release metadata fields (`version`, `source_commit`, `release_channel`)
+- standardizing artifact locations across eval/reporting workflows
+
 ## refresh_benchmark_policy.py
 
 ```bash
@@ -218,6 +241,13 @@ Use when:
 - enforcing repo-wide structure gates with baseline-aware drift detection
 - running optional eval sweeps (`--run-evals --dual-run --capture-jsonl`)
 - enforcing portfolio benchmark policy in the same pass as structure/eval gates
+
+Outputs:
+- per-skill structure JSON reports at `<reports-dir>/<skill>/structure-gate.json`
+- per-skill structure SARIF reports at `<reports-dir>/<skill>/structure-gate.sarif`
+- per-skill eval JUnit reports at `<reports-dir>/<skill>/latest-junit.xml` when `--run-evals` is enabled
+- aggregate structure SARIF at `<reports-dir>/skill-structure-gates.sarif` (or `--sarif-out`)
+- repo artifact index at `<reports-dir>/repo-quality-artifacts.json`
 
 ## Contract and evals (gold standard)
 

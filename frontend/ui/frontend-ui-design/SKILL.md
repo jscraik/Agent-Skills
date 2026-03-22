@@ -53,6 +53,7 @@ metadata:
 - For visually led surfaces: one visual thesis, one content plan, and one interaction thesis before component planning.
 - Component or screen plan with states and accessibility behavior.
 - Token-referenced implementation guidance.
+- For recursive-learning runs: rubric-bound observations recorded against `references/learning-rubric.yaml` before any lesson is considered promotable.
 - Verification checklist covering a11y, responsiveness, and state completeness.
 - File plan or handoff path when code changes are in scope.
 
@@ -97,6 +98,7 @@ metadata:
 
 ## Validation
 - Confirm responses begin with `## When to use`, `## Inputs`, and `## Outputs` when the skill is used interactively.
+- Confirm recursive-learning reviews record structured observations in `lesson_observations.json` and do not rewrite the skill from a single run.
 - Confirm accessibility coverage includes focus, keyboard behavior, semantic naming, contrast, and reduced-motion parity.
 - Confirm measurements and spacing decisions map back to tokens or documented exceptions.
 - Confirm UI states are complete enough for real implementation, not just the happy path.
@@ -142,6 +144,7 @@ metadata:
 - Standard UI design work should feel production-ready, not pitch-deck-ready.
 - A complete state model is part of quality.
 - The best output makes implementation easier and regressions less likely.
+- If the skill is running in learning mode, preserve repeated good and bad signals as structured observations first, then let `skill-builder` decide what is safe to promote.
 
 ## Gotchas
 - None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.

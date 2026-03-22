@@ -1,21 +1,21 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-03-08T23:42:13Z",
-  "decision_date": "2026-03-08",
-  "active_skill_count": 114,
-  "expected_count": 114,
+  "generated_at": "2026-03-21T23:07:18Z",
+  "decision_date": "2026-03-21",
+  "active_skill_count": 72,
+  "expected_count": 72,
   "inventory_policy": "docs/skill-graphs/governance/inventory-policy.json",
   "system_slice_mode": "exclude",
   "summary": {
-    "valid_count": 114,
+    "valid_count": 72,
     "invalid_count": 0,
     "missing_profile_count": 0,
     "missing_binding_count": 0,
-    "missing_legacy_binding_count": 104,
+    "missing_legacy_binding_count": 72,
     "invalid_binding_count": 0,
     "wave_counts": {
-      "wave-1-manual": 14,
-      "wave-2-co-pilot": 100
+      "wave-1-manual": 10,
+      "wave-2-co-pilot": 62
     }
   },
   "skills": [
@@ -68,17 +68,6 @@
       "scope_skill": "backend/mcp-builder",
       "wave": "wave-2-co-pilot",
       "profile_path": "backend/mcp-builder/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
-      "profile_binding_mode": "implicit-default",
-      "delegation_mode": "co-pilot",
-      "status": "valid",
-      "errors": []
-    },
-    {
-      "skill_path": "backend/mkit-builder/SKILL.md",
-      "scope_skill": "backend/mkit-builder",
-      "wave": "wave-2-co-pilot",
-      "profile_path": "backend/mkit-builder/references/task-profile.json",
       "profile_binding": "references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
@@ -174,43 +163,10 @@
       "errors": []
     },
     {
-      "skill_path": "frontend/stitch-design-md/SKILL.md",
-      "scope_skill": "frontend/stitch-design-md",
-      "wave": "wave-2-co-pilot",
-      "profile_path": "frontend/stitch-design-md/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
-      "profile_binding_mode": "implicit-default",
-      "delegation_mode": "co-pilot",
-      "status": "valid",
-      "errors": []
-    },
-    {
-      "skill_path": "frontend/stitch-enhance-prompt/SKILL.md",
-      "scope_skill": "frontend/stitch-enhance-prompt",
-      "wave": "wave-2-co-pilot",
-      "profile_path": "frontend/stitch-enhance-prompt/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
-      "profile_binding_mode": "implicit-default",
-      "delegation_mode": "co-pilot",
-      "status": "valid",
-      "errors": []
-    },
-    {
       "skill_path": "frontend/stitch-react-components/SKILL.md",
       "scope_skill": "frontend/stitch-react-components",
       "wave": "wave-2-co-pilot",
       "profile_path": "frontend/stitch-react-components/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
-      "profile_binding_mode": "implicit-default",
-      "delegation_mode": "co-pilot",
-      "status": "valid",
-      "errors": []
-    },
-    {
-      "skill_path": "frontend/tools/agent-trace-debug/SKILL.md",
-      "scope_skill": "frontend/tools/agent-trace-debug",
-      "wave": "wave-2-co-pilot",
-      "profile_path": "frontend/tools/agent-trace-debug/references/task-profile.json",
       "profile_binding": "references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
@@ -233,17 +189,6 @@
       "scope_skill": "frontend/tools/figma",
       "wave": "wave-2-co-pilot",
       "profile_path": "frontend/tools/figma/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
-      "profile_binding_mode": "implicit-default",
-      "delegation_mode": "co-pilot",
-      "status": "valid",
-      "errors": []
-    },
-    {
-      "skill_path": "frontend/tools/stitch-design-md/SKILL.md",
-      "scope_skill": "frontend/tools/stitch-design-md",
-      "wave": "wave-2-co-pilot",
-      "profile_path": "frontend/tools/stitch-design-md/references/task-profile.json",
       "profile_binding": "references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
@@ -284,28 +229,6 @@
       "errors": []
     },
     {
-      "skill_path": "frontend/ui/interface-craft/SKILL.md",
-      "scope_skill": "frontend/ui/interface-craft",
-      "wave": "wave-2-co-pilot",
-      "profile_path": "frontend/ui/interface-craft/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
-      "profile_binding_mode": "implicit-default",
-      "delegation_mode": "co-pilot",
-      "status": "valid",
-      "errors": []
-    },
-    {
-      "skill_path": "frontend/ui/react-best-practices/SKILL.md",
-      "scope_skill": "frontend/ui/react-best-practices",
-      "wave": "wave-2-co-pilot",
-      "profile_path": "frontend/ui/react-best-practices/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
-      "profile_binding_mode": "implicit-default",
-      "delegation_mode": "co-pilot",
-      "status": "valid",
-      "errors": []
-    },
-    {
       "skill_path": "frontend/ui/react-ui-patterns/SKILL.md",
       "scope_skill": "frontend/ui/react-ui-patterns",
       "wave": "wave-2-co-pilot",
@@ -332,17 +255,6 @@
       "scope_skill": "frontend/ui/shadcn-ui",
       "wave": "wave-2-co-pilot",
       "profile_path": "frontend/ui/shadcn-ui/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
-      "profile_binding_mode": "implicit-default",
-      "delegation_mode": "co-pilot",
-      "status": "valid",
-      "errors": []
-    },
-    {
-      "skill_path": "frontend/ui/stitch-react-components/SKILL.md",
-      "scope_skill": "frontend/ui/stitch-react-components",
-      "wave": "wave-2-co-pilot",
-      "profile_path": "frontend/ui/stitch-react-components/references/task-profile.json",
       "profile_binding": "references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
@@ -383,28 +295,6 @@
       "errors": []
     },
     {
-      "skill_path": "frontend/ui/web-design-guidelines/SKILL.md",
-      "scope_skill": "frontend/ui/web-design-guidelines",
-      "wave": "wave-2-co-pilot",
-      "profile_path": "frontend/ui/web-design-guidelines/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
-      "profile_binding_mode": "implicit-default",
-      "delegation_mode": "co-pilot",
-      "status": "valid",
-      "errors": []
-    },
-    {
-      "skill_path": "github/automate-github-issues/SKILL.md",
-      "scope_skill": "github/automate-github-issues",
-      "wave": "wave-2-co-pilot",
-      "profile_path": "github/automate-github-issues/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
-      "profile_binding_mode": "implicit-default",
-      "delegation_mode": "co-pilot",
-      "status": "valid",
-      "errors": []
-    },
-    {
       "skill_path": "github/gh-fix-ci/SKILL.md",
       "scope_skill": "github/gh-fix-ci",
       "wave": "wave-1-manual",
@@ -438,43 +328,10 @@
       "errors": []
     },
     {
-      "skill_path": "github/greptile/greploop/SKILL.md",
-      "scope_skill": "github/greptile/greploop",
-      "wave": "wave-2-co-pilot",
-      "profile_path": "github/greptile/greploop/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
-      "profile_binding_mode": "implicit-default",
-      "delegation_mode": "co-pilot",
-      "status": "valid",
-      "errors": []
-    },
-    {
-      "skill_path": "github/local-action-verification/SKILL.md",
-      "scope_skill": "github/local-action-verification",
-      "wave": "wave-1-manual",
-      "profile_path": "github/local-action-verification/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
-      "profile_binding_mode": "implicit-default",
-      "delegation_mode": "manual",
-      "status": "valid",
-      "errors": []
-    },
-    {
       "skill_path": "interview/architecture-interview/SKILL.md",
       "scope_skill": "interview/architecture-interview",
       "wave": "wave-2-co-pilot",
       "profile_path": "interview/architecture-interview/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
-      "profile_binding_mode": "implicit-default",
-      "delegation_mode": "co-pilot",
-      "status": "valid",
-      "errors": []
-    },
-    {
-      "skill_path": "interview/bug-interview/SKILL.md",
-      "scope_skill": "interview/bug-interview",
-      "wave": "wave-2-co-pilot",
-      "profile_path": "interview/bug-interview/references/task-profile.json",
       "profile_binding": "references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
@@ -493,98 +350,10 @@
       "errors": []
     },
     {
-      "skill_path": "interview/interview-kernel/SKILL.md",
-      "scope_skill": "interview/interview-kernel",
-      "wave": "wave-2-co-pilot",
-      "profile_path": "interview/interview-kernel/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
-      "profile_binding_mode": "implicit-default",
-      "delegation_mode": "co-pilot",
-      "status": "valid",
-      "errors": []
-    },
-    {
       "skill_path": "interview/interview-me/SKILL.md",
       "scope_skill": "interview/interview-me",
       "wave": "wave-2-co-pilot",
       "profile_path": "interview/interview-me/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
-      "profile_binding_mode": "implicit-default",
-      "delegation_mode": "co-pilot",
-      "status": "valid",
-      "errors": []
-    },
-    {
-      "skill_path": "interview/pm-interview/SKILL.md",
-      "scope_skill": "interview/pm-interview",
-      "wave": "wave-2-co-pilot",
-      "profile_path": "interview/pm-interview/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
-      "profile_binding_mode": "implicit-default",
-      "delegation_mode": "co-pilot",
-      "status": "valid",
-      "errors": []
-    },
-    {
-      "skill_path": "personas/benjitaylor-persona/SKILL.md",
-      "scope_skill": "personas/benjitaylor-persona",
-      "wave": "wave-2-co-pilot",
-      "profile_path": "personas/benjitaylor-persona/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
-      "profile_binding_mode": "implicit-default",
-      "delegation_mode": "co-pilot",
-      "status": "valid",
-      "errors": []
-    },
-    {
-      "skill_path": "personas/emilkowalski-persona/SKILL.md",
-      "scope_skill": "personas/emilkowalski-persona",
-      "wave": "wave-2-co-pilot",
-      "profile_path": "personas/emilkowalski-persona/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
-      "profile_binding_mode": "implicit-default",
-      "delegation_mode": "co-pilot",
-      "status": "valid",
-      "errors": []
-    },
-    {
-      "skill_path": "personas/jenny-wen-persona/SKILL.md",
-      "scope_skill": "personas/jenny-wen-persona",
-      "wave": "wave-2-co-pilot",
-      "profile_path": "personas/jenny-wen-persona/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
-      "profile_binding_mode": "implicit-default",
-      "delegation_mode": "co-pilot",
-      "status": "valid",
-      "errors": []
-    },
-    {
-      "skill_path": "personas/jh3yy-persona/SKILL.md",
-      "scope_skill": "personas/jh3yy-persona",
-      "wave": "wave-2-co-pilot",
-      "profile_path": "personas/jh3yy-persona/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
-      "profile_binding_mode": "implicit-default",
-      "delegation_mode": "co-pilot",
-      "status": "valid",
-      "errors": []
-    },
-    {
-      "skill_path": "personas/kubadesign-persona/SKILL.md",
-      "scope_skill": "personas/kubadesign-persona",
-      "wave": "wave-2-co-pilot",
-      "profile_path": "personas/kubadesign-persona/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
-      "profile_binding_mode": "implicit-default",
-      "delegation_mode": "co-pilot",
-      "status": "valid",
-      "errors": []
-    },
-    {
-      "skill_path": "personas/steipete-persona/SKILL.md",
-      "scope_skill": "personas/steipete-persona",
-      "wave": "wave-2-co-pilot",
-      "profile_path": "personas/steipete-persona/references/task-profile.json",
       "profile_binding": "references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
@@ -636,17 +405,6 @@
       "errors": []
     },
     {
-      "skill_path": "product/docs/claude-md/SKILL.md",
-      "scope_skill": "product/docs/claude-md",
-      "wave": "wave-2-co-pilot",
-      "profile_path": "product/docs/claude-md/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
-      "profile_binding_mode": "implicit-default",
-      "delegation_mode": "co-pilot",
-      "status": "valid",
-      "errors": []
-    },
-    {
       "skill_path": "product/docs/context7/SKILL.md",
       "scope_skill": "product/docs/context7",
       "wave": "wave-2-co-pilot",
@@ -669,32 +427,10 @@
       "errors": []
     },
     {
-      "skill_path": "product/docs/gemini-md/SKILL.md",
-      "scope_skill": "product/docs/gemini-md",
-      "wave": "wave-2-co-pilot",
-      "profile_path": "product/docs/gemini-md/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
-      "profile_binding_mode": "implicit-default",
-      "delegation_mode": "co-pilot",
-      "status": "valid",
-      "errors": []
-    },
-    {
       "skill_path": "product/docs/openai-docs/SKILL.md",
       "scope_skill": "product/docs/openai-docs",
       "wave": "wave-2-co-pilot",
       "profile_path": "product/docs/openai-docs/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
-      "profile_binding_mode": "implicit-default",
-      "delegation_mode": "co-pilot",
-      "status": "valid",
-      "errors": []
-    },
-    {
-      "skill_path": "product/domain/chatgpt-apps-production-checklist/SKILL.md",
-      "scope_skill": "product/domain/chatgpt-apps-production-checklist",
-      "wave": "wave-2-co-pilot",
-      "profile_path": "product/domain/chatgpt-apps-production-checklist/references/task-profile.json",
       "profile_binding": "references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
@@ -790,116 +526,6 @@
       "errors": []
     },
     {
-      "skill_path": "product/specs/_archive/prd-to-accessibility/SKILL.md",
-      "scope_skill": "product/specs/_archive/prd-to-accessibility",
-      "wave": "wave-2-co-pilot",
-      "profile_path": "product/specs/_archive/prd-to-accessibility/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
-      "profile_binding_mode": "legacy-frontmatter",
-      "delegation_mode": "co-pilot",
-      "status": "valid",
-      "errors": []
-    },
-    {
-      "skill_path": "product/specs/_archive/prd-to-api-lite/SKILL.md",
-      "scope_skill": "product/specs/_archive/prd-to-api-lite",
-      "wave": "wave-2-co-pilot",
-      "profile_path": "product/specs/_archive/prd-to-api-lite/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
-      "profile_binding_mode": "legacy-frontmatter",
-      "delegation_mode": "co-pilot",
-      "status": "valid",
-      "errors": []
-    },
-    {
-      "skill_path": "product/specs/_archive/prd-to-arch-lite/SKILL.md",
-      "scope_skill": "product/specs/_archive/prd-to-arch-lite",
-      "wave": "wave-2-co-pilot",
-      "profile_path": "product/specs/_archive/prd-to-arch-lite/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
-      "profile_binding_mode": "legacy-frontmatter",
-      "delegation_mode": "co-pilot",
-      "status": "valid",
-      "errors": []
-    },
-    {
-      "skill_path": "product/specs/_archive/prd-to-qa-cases/SKILL.md",
-      "scope_skill": "product/specs/_archive/prd-to-qa-cases",
-      "wave": "wave-2-co-pilot",
-      "profile_path": "product/specs/_archive/prd-to-qa-cases/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
-      "profile_binding_mode": "legacy-frontmatter",
-      "delegation_mode": "co-pilot",
-      "status": "valid",
-      "errors": []
-    },
-    {
-      "skill_path": "product/specs/_archive/prd-to-risk/SKILL.md",
-      "scope_skill": "product/specs/_archive/prd-to-risk",
-      "wave": "wave-2-co-pilot",
-      "profile_path": "product/specs/_archive/prd-to-risk/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
-      "profile_binding_mode": "legacy-frontmatter",
-      "delegation_mode": "co-pilot",
-      "status": "valid",
-      "errors": []
-    },
-    {
-      "skill_path": "product/specs/_archive/prd-to-roadmap/SKILL.md",
-      "scope_skill": "product/specs/_archive/prd-to-roadmap",
-      "wave": "wave-2-co-pilot",
-      "profile_path": "product/specs/_archive/prd-to-roadmap/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
-      "profile_binding_mode": "legacy-frontmatter",
-      "delegation_mode": "co-pilot",
-      "status": "valid",
-      "errors": []
-    },
-    {
-      "skill_path": "product/specs/_archive/prd-to-security-review/SKILL.md",
-      "scope_skill": "product/specs/_archive/prd-to-security-review",
-      "wave": "wave-2-co-pilot",
-      "profile_path": "product/specs/_archive/prd-to-security-review/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
-      "profile_binding_mode": "legacy-frontmatter",
-      "delegation_mode": "co-pilot",
-      "status": "valid",
-      "errors": []
-    },
-    {
-      "skill_path": "product/specs/_archive/prd-to-ui-spec/SKILL.md",
-      "scope_skill": "product/specs/_archive/prd-to-ui-spec",
-      "wave": "wave-2-co-pilot",
-      "profile_path": "product/specs/_archive/prd-to-ui-spec/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
-      "profile_binding_mode": "legacy-frontmatter",
-      "delegation_mode": "co-pilot",
-      "status": "valid",
-      "errors": []
-    },
-    {
-      "skill_path": "product/specs/_archive/ui-spec-to-prompts/SKILL.md",
-      "scope_skill": "product/specs/_archive/ui-spec-to-prompts",
-      "wave": "wave-2-co-pilot",
-      "profile_path": "product/specs/_archive/ui-spec-to-prompts/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
-      "profile_binding_mode": "legacy-frontmatter",
-      "delegation_mode": "co-pilot",
-      "status": "valid",
-      "errors": []
-    },
-    {
-      "skill_path": "product/specs/_archive/ux-spec-to-prompts/SKILL.md",
-      "scope_skill": "product/specs/_archive/ux-spec-to-prompts",
-      "wave": "wave-2-co-pilot",
-      "profile_path": "product/specs/_archive/ux-spec-to-prompts/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
-      "profile_binding_mode": "legacy-frontmatter",
-      "delegation_mode": "co-pilot",
-      "status": "valid",
-      "errors": []
-    },
-    {
       "skill_path": "product/specs/product-spec/SKILL.md",
       "scope_skill": "product/specs/product-spec",
       "wave": "wave-2-co-pilot",
@@ -911,32 +537,10 @@
       "errors": []
     },
     {
-      "skill_path": "product/strategy/asymmetric-ideation-engine/SKILL.md",
-      "scope_skill": "product/strategy/asymmetric-ideation-engine",
-      "wave": "wave-2-co-pilot",
-      "profile_path": "product/strategy/asymmetric-ideation-engine/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
-      "profile_binding_mode": "implicit-default",
-      "delegation_mode": "co-pilot",
-      "status": "valid",
-      "errors": []
-    },
-    {
       "skill_path": "product/strategy/brainstorming/SKILL.md",
       "scope_skill": "product/strategy/brainstorming",
       "wave": "wave-2-co-pilot",
       "profile_path": "product/strategy/brainstorming/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
-      "profile_binding_mode": "implicit-default",
-      "delegation_mode": "co-pilot",
-      "status": "valid",
-      "errors": []
-    },
-    {
-      "skill_path": "product/strategy/project-improvement-ideator/SKILL.md",
-      "scope_skill": "product/strategy/project-improvement-ideator",
-      "wave": "wave-2-co-pilot",
-      "profile_path": "product/strategy/project-improvement-ideator/references/task-profile.json",
       "profile_binding": "references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
@@ -1043,43 +647,10 @@
       "errors": []
     },
     {
-      "skill_path": "utilities/codex-prompt-creator/SKILL.md",
-      "scope_skill": "utilities/codex-prompt-creator",
-      "wave": "wave-2-co-pilot",
-      "profile_path": "utilities/codex-prompt-creator/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
-      "profile_binding_mode": "implicit-default",
-      "delegation_mode": "co-pilot",
-      "status": "valid",
-      "errors": []
-    },
-    {
       "skill_path": "utilities/codex-sessions-skill-scan/SKILL.md",
       "scope_skill": "utilities/codex-sessions-skill-scan",
       "wave": "wave-2-co-pilot",
       "profile_path": "utilities/codex-sessions-skill-scan/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
-      "profile_binding_mode": "implicit-default",
-      "delegation_mode": "co-pilot",
-      "status": "valid",
-      "errors": []
-    },
-    {
-      "skill_path": "utilities/diagram-context-refresh/SKILL.md",
-      "scope_skill": "utilities/diagram-context-refresh",
-      "wave": "wave-1-manual",
-      "profile_path": "utilities/diagram-context-refresh/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
-      "profile_binding_mode": "implicit-default",
-      "delegation_mode": "manual",
-      "status": "valid",
-      "errors": []
-    },
-    {
-      "skill_path": "utilities/executing-plans/SKILL.md",
-      "scope_skill": "utilities/executing-plans",
-      "wave": "wave-2-co-pilot",
-      "profile_path": "utilities/executing-plans/references/task-profile.json",
       "profile_binding": "references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
@@ -1142,17 +713,6 @@
       "errors": []
     },
     {
-      "skill_path": "utilities/recent-code-bugfix/SKILL.md",
-      "scope_skill": "utilities/recent-code-bugfix",
-      "wave": "wave-2-co-pilot",
-      "profile_path": "utilities/recent-code-bugfix/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
-      "profile_binding_mode": "implicit-default",
-      "delegation_mode": "co-pilot",
-      "status": "valid",
-      "errors": []
-    },
-    {
       "skill_path": "utilities/recon-workbench/SKILL.md",
       "scope_skill": "utilities/recon-workbench",
       "wave": "wave-2-co-pilot",
@@ -1175,17 +735,6 @@
       "errors": []
     },
     {
-      "skill_path": "utilities/run-tests-and-write-artifacts/SKILL.md",
-      "scope_skill": "utilities/run-tests-and-write-artifacts",
-      "wave": "wave-1-manual",
-      "profile_path": "utilities/run-tests-and-write-artifacts/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
-      "profile_binding_mode": "implicit-default",
-      "delegation_mode": "manual",
-      "status": "valid",
-      "errors": []
-    },
-    {
       "skill_path": "utilities/skill-builder/SKILL.md",
       "scope_skill": "utilities/skill-builder",
       "wave": "wave-2-co-pilot",
@@ -1193,17 +742,6 @@
       "profile_binding": "references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
-      "status": "valid",
-      "errors": []
-    },
-    {
-      "skill_path": "utilities/skill-installer/SKILL.md",
-      "scope_skill": "utilities/skill-installer",
-      "wave": "wave-1-manual",
-      "profile_path": "utilities/skill-installer/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
-      "profile_binding_mode": "implicit-default",
-      "delegation_mode": "manual",
       "status": "valid",
       "errors": []
     },

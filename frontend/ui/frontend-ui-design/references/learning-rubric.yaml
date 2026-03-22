@@ -1,0 +1,107 @@
+schema_version: "1.0"
+skill: "frontend/ui/frontend-ui-design"
+rubric_version: "2026-03-21"
+summary:
+  purpose: "Score real frontend-ui-design runs so repeated strengths and failures can become safe skill improvements."
+  default_outcome: "hold"
+promotion_thresholds:
+  min_confirming_runs: 3
+  min_average_confidence: 0.72
+  min_negative_recurrence: 2
+  require_eval_patch_before_skill_text: true
+  forbid_single_run_skill_edits: true
+  allow_reference_doc_first: true
+dimensions:
+  - id: hierarchy_primary_action
+    label: "Hierarchy and primary action"
+    weight: 0.18
+    good_signals:
+      - "The first screen establishes one dominant takeaway or primary action."
+      - "Page hierarchy makes scanning easy without needing explanatory narration."
+    bad_signals:
+      - "The first screen feels like a pile of equal-weight cards."
+      - "Primary action is buried under decorative or secondary elements."
+    preferred_targets:
+      - "frontend/ui/frontend-ui-design/SKILL.md#Visually-Led-Surfaces"
+      - "frontend/ui/frontend-ui-design/SKILL.md#Validation"
+  - id: state_completeness
+    label: "State completeness"
+    weight: 0.16
+    good_signals:
+      - "Default, loading, empty, error, and edge states are explicitly covered."
+      - "The output makes implementation safer by naming state-specific behavior."
+    bad_signals:
+      - "Only the happy path is designed."
+      - "Error or empty states are implied rather than specified."
+    preferred_targets:
+      - "frontend/ui/frontend-ui-design/SKILL.md#Workflow"
+      - "frontend/ui/frontend-ui-design/SKILL.md#Anti-patterns"
+  - id: accessibility_contract
+    label: "Accessibility contract"
+    weight: 0.18
+    good_signals:
+      - "Focus order, keyboard behavior, naming, contrast, and reduced motion are explicitly addressed."
+      - "Accessibility is framed as part of the design contract."
+    bad_signals:
+      - "A11y appears only as a final QA note."
+      - "Motion or hierarchy suggestions miss reduced-motion parity or focus behavior."
+    preferred_targets:
+      - "frontend/ui/frontend-ui-design/SKILL.md#Validation"
+      - "frontend/ui/frontend-ui-design/references/a11y-gold-standard.md"
+  - id: token_alignment
+    label: "Token alignment"
+    weight: 0.14
+    good_signals:
+      - "Spacing, typography, color, and radius decisions map back to tokens or documented exceptions."
+      - "Implementation guidance respects the host design system."
+    bad_signals:
+      - "Advice relies on ad hoc px values or arbitrary styling choices."
+      - "Token governance is bypassed in favor of quick visual tweaks."
+    preferred_targets:
+      - "frontend/ui/frontend-ui-design/SKILL.md#Workflow"
+      - "frontend/ui/frontend-ui-design/references/token-governance.md"
+  - id: implementation_readiness
+    label: "Implementation readiness"
+    weight: 0.16
+    good_signals:
+      - "An implementer could ship the output without guessing missing states or interactions."
+      - "Guidance is grounded in the host stack and file-plan reality."
+    bad_signals:
+      - "The output sounds persuasive but does not reduce implementation uncertainty."
+      - "Recommendations are detached from stack constraints or repo conventions."
+    preferred_targets:
+      - "frontend/ui/frontend-ui-design/SKILL.md#Deliverables"
+      - "frontend/ui/frontend-ui-design/SKILL.md#Workflow"
+  - id: visual_distinction
+    label: "Visual distinction"
+    weight: 0.1
+    good_signals:
+      - "The surface has a clear visual thesis and avoids interchangeable SaaS patterns."
+      - "Branded and utility-first surfaces are treated differently."
+    bad_signals:
+      - "The output collapses into generic cards, badges, and split-attention layouts."
+      - "The design could be swapped into any product without changing meaning."
+    preferred_targets:
+      - "frontend/ui/frontend-ui-design/SKILL.md#Visually-Led-Surfaces"
+      - "frontend/ui/frontend-ui-design/references/redesign-audit-lens.md"
+  - id: restraint_and_composition
+    label: "Restraint and composition"
+    weight: 0.08
+    good_signals:
+      - "Composition is doing the work before extra chrome is added."
+      - "Imagery, whitespace, and motion support one message at a time."
+    bad_signals:
+      - "The design uses cards or decorative motion by habit."
+      - "There is no calm region for text or action to land."
+    preferred_targets:
+      - "frontend/ui/frontend-ui-design/SKILL.md#Visually-Led-Surfaces"
+      - "frontend/ui/frontend-ui-design/SKILL.md#Anti-patterns"
+outcome_labels:
+  strengthen:
+    meaning: "Repeated positive lesson worth preserving."
+  hold:
+    meaning: "Interesting signal but not strong enough to promote."
+  investigate:
+    meaning: "Likely skill weakness, but more confirming runs are needed."
+  reject_candidate:
+    meaning: "Do not promote; evidence is contradictory or request-specific."

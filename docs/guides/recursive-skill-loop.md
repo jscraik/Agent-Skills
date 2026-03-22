@@ -66,6 +66,12 @@ Start-of-run retrieval uses canonical lessons from `--lessons-jsonl` filtered by
 Low-confidence lessons are retained but down-ranked and flagged in injected lesson attribution.
 Default rollout mode is `observe_only` (capture on, auto-apply off). Use `--rollout-mode active` to enable lesson injection.
 Default uplift gate mode is `enforce`; use `--uplift-gate-mode observe` for pilot dry-runs when counterfactual sample sizes are intentionally sparse.
+Profiles may also auto-enable terminal feedback prompts through `learning_posture.feedback_capture`.
+When `prompt_on_terminal=true` and the run is interactive, the loop asks a non-blocking one-tap
+question after the terminal status is printed. Interactive terminals get a short bounded response
+window before the loop records `answer.status=missing` and exits; non-interactive runs still complete
+immediately and should keep using
+`--feedback-outcome` and `--feedback-note` so smoke and CI workflows remain deterministic.
 
 Optional debug traces are written only when `--emit-debug-artifacts` is set and stored under `run/debug/`.
 

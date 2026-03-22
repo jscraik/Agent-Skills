@@ -2,7 +2,7 @@
 name: product-spec
 description: Create or review implementation-ready product specifications from ideas
   or existing docs. Use when you need a full PRD+UX+build plan pipeline or a focused
-  mode (clarify_prd, ux_only, api_spec, arch_spec, testplan).
+  mode (clarify_prd, ux_only, api_spec, arch_spec, operator_spec, testplan).
 metadata:
   skill-type: team_automation
 ---
@@ -25,6 +25,7 @@ Use this skill to **plan** a product: turn an idea (or existing docs) into imple
 - Keep outputs implementation-ready: named owners, success metrics, validation gates, and explicit non-goals.
 - Use concise clarifying questions, then move quickly into concrete artifacts.
 - Default to Mermaid for architecture or flow diagrams when diagrams materially improve decision quality.
+- For agent-facing products, specify the robot-mode interface explicitly: machine-readable default, explicit human mode, no-arg quick start, intent-mapped command taxonomy, and deterministic error handling.
 
 ## When to use
 Use this skill when you need one of the following modes:
@@ -34,6 +35,7 @@ Use this skill when you need one of the following modes:
 - `ux_only`: Stage 2 UX specification deepening from an existing PRD/Foundation spec.
 - `api_spec`: full API contract from an existing PRD/tech spec.
 - `arch_spec`: architecture specification from an existing PRD/tech spec.
+- `operator_spec`: agent-operator / robot-mode interface specification for command surfaces, output contracts, and workflow behavior.
 - `testplan`: test plan mapped from PRD acceptance criteria.
 
 Do **not** use this skill for implementation/code changes.
@@ -64,6 +66,9 @@ Mode-specific outputs (write in `.spec/` unless caller specifies another path):
   - API specification (endpoints, schemas, auth, errors, compatibility)
 - `arch_spec`
   - architecture specification (boundaries, interfaces, data flow, risks)
+- `operator_spec`
+  - `.spec/operator-interface-YYYY-MM-DD-<slug>.md`
+  - operator-facing command surface spec covering command taxonomy, machine-readable and human-readable outputs, quick start behavior, error envelope, compatibility policy, and workflow/state handling
 - `testplan`
   - acceptance-criteria-to-tests matrix + quality gates
 
@@ -123,6 +128,23 @@ Contract:
 
 - Produce scope/assumptions, architecture summary, component boundaries, interfaces, data flows, NFRs, risks/mitigations, ADR candidates, and Mermaid diagrams where useful.
 
+#### `operator_spec` workflow
+
+1. Define problem statement, goals, non-goals, and operator tasks.
+2. Model the command surface around user intent, not internal implementation seams.
+3. Specify the robot-mode contract first:
+   - default machine-readable mode (`JSON` or constrained `Markdown`)
+   - explicit human-readable mode
+   - token-dense no-arg quick-start behavior
+   - deterministic error envelope
+   - schema versioning and compatibility policy
+4. If the interface has multi-step behavior, convert the workflow to a compact operational spec using the most efficient representation:
+   - transition table
+   - state machine
+   - pseudocode
+   - Mermaid diagram
+5. Include idempotency, invariants, metadata, logs, and dry-run behavior whenever they materially change operator use or implementation risk.
+
 #### `testplan` workflow
 
 - Map each acceptance criterion to unit/integration/e2e/manual coverage.
@@ -145,6 +167,8 @@ Additional references:
 - `references/finalize.md`
 - `references/ralph-loop.md`
 - `references/avoid-feature-creep.md`
+- `references/agent-operator-interface-spec.md`
+- `assets/` for bundled visual examples and diagram-support artifacts when the spec benefits from them
 
 ### 5) Gold-standard checks before completion
 
@@ -179,12 +203,13 @@ Fail fast: **stop at the first failed gate and do not proceed**.
 
 ## Examples
 
-- "Create a full product spec from this idea" → `full_pipeline`
-- "Clarify this PRD before build" → `clarify_prd`
-- "Generate API contract from this PRD" → `api_spec`
-- "Generate architecture spec from this PRD" → `arch_spec`
-- "Generate test plan from this PRD" → `testplan`
-- "Generate UX spec only from this foundation doc" → `ux_only`
+- "We want to launch an internal support triage dashboard next month. Turn this rough idea into a foundation spec, UX spec, and build plan." → `full_pipeline`
+- "This PRD keeps getting reinterpreted by engineering. Please clarify the ambiguous requirements before we start build." → `clarify_prd`
+- "We already agreed the product shape. Now write the API contract for the mobile and backend teams." → `api_spec`
+- "Please convert this approved PRD into an architecture spec with boundaries, data flow, and risks." → `arch_spec`
+- "Design a robot-mode interface so agents can access all key functionality without the UI. I want machine-readable output, a no-arg quick start, intent-based commands, and helpful errors." → `operator_spec`
+- "Turn these acceptance criteria into a concrete test plan with unit, integration, and end-to-end coverage." → `testplan`
+- "We already have the foundation doc. Generate the UX spec only, with state coverage and flow integrity." → `ux_only`
 
 <!-- skill-score-boost-v1 -->
 ## Philosophy and tradeoffs

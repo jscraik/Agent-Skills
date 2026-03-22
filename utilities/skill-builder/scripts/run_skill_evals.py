@@ -35,6 +35,7 @@ import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Set, Tuple, Union
+import xml.etree.ElementTree as ET
 
 try:
     import yaml  # type: ignore
@@ -65,6 +66,7 @@ _FM_DELIM = re.compile(r"^\s*---\s*$")
 _CODEX_HELP_CACHE: Dict[str, Optional[str]] = {}
 _RUNNER_CHOICES = ["codex", "claude-kimi", "claude-zai", "gemini", "discovery-smoke"]
 _TIMEOUT_PROFILE_CHOICES = ["default", "codex-heavy", "discovery-heavy"]
+_EVAL_MODE_CHOICES = ["standard", "smoke", "release"]
 
 # Script-level options (used to disambiguate `--codex-arg --foo` intent).
 _SCRIPT_OPTIONS: Set[str] = {
@@ -74,6 +76,7 @@ _SCRIPT_OPTIONS: Set[str] = {
     "--dual-run",
     "--smoke",
     "--case",
+    "--eval-mode",
     "--category",
     "--workspace",
     "--sandbox",
@@ -162,6 +165,34 @@ def load_skill_name(skill_md_path: Path) -> str:
     return name.strip()
 
 
+def load_skill_frontmatter(skill_md_path: Path) -> Dict[str, Any]:
+    raw = _read_text(skill_md_path)
+    fm, _ = _parse_frontmatter(raw)
+    return fm
+
+
+def _git_metadata(path: Path) -> Dict[str, Optional[str]]:
+    repo_hint = str(path)
+    metadata: Dict[str, Optional[str]] = {"commit": None, "branch": None}
+    for key, args in {
+        "commit": ["rev-parse", "HEAD"],
+        "branch": ["rev-parse", "--abbrev-ref", "HEAD"],
+    }.items():
+        try:
+            proc = sp.run(
+                ["git", "-C", repo_hint, *args],
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+        except Exception:
+            metadata[key] = None
+            continue
+        if proc.returncode == 0:
+            metadata[key] = proc.stdout.strip() or None
+    return metadata
+
+
 Assertion = Union[str, Dict[str, Any]]
 
 
@@ -180,9 +211,34 @@ class EvalCase:
     timeout_sec: Optional[float] = None
     timeout_profile: Optional[str] = None
     smoke_mode: Optional[str] = None
+    eval_modes: Optional[Tuple[str, ...]] = None
 
 
 _VALID_CATEGORIES = {"happy", "edge", "negative", "pressure"}
+
+
+def _utc_now_iso() -> str:
+    return dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+
+
+def _normalize_eval_modes(raw: Any, *, case_number: int) -> Optional[Tuple[str, ...]]:
+    if raw is None:
+        return None
+    if not isinstance(raw, list) or not raw:
+        raise ValueError(
+            f"Case #{case_number} `eval_modes` must be a non-empty list when provided; "
+            f"allowed: {', '.join(_EVAL_MODE_CHOICES[1:])}."
+        )
+    normalized: List[str] = []
+    for mode in raw:
+        mode_text = str(mode).strip().lower()
+        if mode_text not in {"smoke", "release"}:
+            raise ValueError(
+                f"Case #{case_number} `eval_modes` entries must be one of smoke, release; got {mode!r}."
+            )
+        if mode_text not in normalized:
+            normalized.append(mode_text)
+    return tuple(normalized)
 
 
 def load_evals(evals_path: Path) -> List[EvalCase]:
@@ -250,6 +306,7 @@ def load_evals(evals_path: Path) -> List[EvalCase]:
             smoke_mode = str(smoke_mode).strip()
             if not smoke_mode:
                 smoke_mode = None
+        eval_modes = _normalize_eval_modes(c.get("eval_modes"), case_number=i)
 
         cases.append(
             EvalCase(
@@ -266,9 +323,88 @@ def load_evals(evals_path: Path) -> List[EvalCase]:
                 timeout_sec=timeout_sec,
                 timeout_profile=timeout_profile if timeout_profile else None,
                 smoke_mode=smoke_mode,
+                eval_modes=eval_modes,
             )
         )
     return cases
+
+
+def _case_matches_eval_mode(case: EvalCase, *, eval_mode: str) -> bool:
+    if eval_mode == "standard":
+        return True
+    if case.eval_modes:
+        return eval_mode in case.eval_modes
+    if eval_mode == "release":
+        return True
+    if case.category in {"negative", "pressure"}:
+        return False
+    if case.deterministic_checks or case.budgets:
+        return False
+    return True
+
+
+def _filter_cases_for_eval_mode(cases: Sequence[EvalCase], *, eval_mode: str) -> List[EvalCase]:
+    return [case for case in cases if _case_matches_eval_mode(case, eval_mode=eval_mode)]
+
+
+def _is_smoke_only_case(case: EvalCase) -> bool:
+    if not case.smoke_mode:
+        return False
+    if case.eval_modes is None:
+        return True
+    return case.eval_modes == ("smoke",)
+
+
+def _write_junit_report(summary: Dict[str, Any], destination: Path) -> None:
+    tier2_fail_mode = str(summary.get("tier2_mode") or "warn") == "fail"
+    junit_failures = sum(
+        1
+        for case in summary.get("cases", [])
+        if case.get("tier1_failed") or (tier2_fail_mode and case.get("tier2_failed"))
+    )
+    suite = ET.Element(
+        "testsuite",
+        name=str(summary.get("skill") or "skill-evals"),
+        tests=str(len(summary.get("cases", []))),
+        failures=str(junit_failures),
+        errors="0",
+    )
+    if summary.get("generated_at"):
+        suite.set("timestamp", str(summary["generated_at"]))
+    if summary.get("run_id"):
+        suite.set("id", str(summary["run_id"]))
+    for case in summary.get("cases", []):
+        case_el = ET.SubElement(
+            suite,
+            "testcase",
+            name=str(case.get("id") or case.get("name") or "unknown"),
+            classname=str(summary.get("skill") or "skill-evals"),
+            time=str(case.get("timeout_sec") or 0),
+        )
+        if case.get("tier1_failed"):
+            failure = ET.SubElement(case_el, "failure", message="tier1 failure")
+            detail = "\n".join(case.get("tier1_failures") or []) or "tier1 failure"
+            failure.text = detail
+        elif case.get("tier2_failed"):
+            if tier2_fail_mode:
+                failure = ET.SubElement(case_el, "failure", message="tier2 findings in fail mode")
+                failure.text = "\n".join(case.get("tier2_findings") or []) or "tier2 findings"
+            else:
+                skipped = ET.SubElement(case_el, "skipped", message="tier2 findings in warn/off mode")
+                skipped.text = "\n".join(case.get("tier2_findings") or [])
+        system_out = ET.SubElement(case_el, "system-out")
+        chunks: List[str] = []
+        if case.get("warnings"):
+            chunks.append("warnings:\n" + "\n".join(case["warnings"]))
+        if case.get("tier2_findings"):
+            chunks.append("tier2_findings:\n" + "\n".join(case["tier2_findings"]))
+        if case.get("dir"):
+            chunks.append(f"artifacts_dir:\n{case['dir']}")
+        system_out.text = "\n\n".join(chunks)
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    tree = ET.ElementTree(suite)
+    ET.indent(tree, space="  ")
+    tree.write(destination, encoding="utf-8", xml_declaration=True)
 
 
 def _json_get_path(obj: Any, path: str) -> Any:
@@ -1004,6 +1140,15 @@ def build_arg_parser() -> argparse.ArgumentParser:
         ),
     )
     p.add_argument(
+        "--eval-mode",
+        choices=_EVAL_MODE_CHOICES,
+        default="standard",
+        help=(
+            "Eval suite mode. `standard` preserves current behavior, "
+            "`smoke` runs a faster contract/regression subset, and `release` runs the full release-grade suite."
+        ),
+    )
+    p.add_argument(
         "--category",
         action="append",
         default=[],
@@ -1106,6 +1251,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
     )
     p.add_argument("--reports-dir", default="artifacts/reports/skills", help="Base directory for eval reports.")
     p.add_argument("--scorecard-out", default=None, help="Optional explicit path for merged scorecard JSON.")
+    p.add_argument("--junit-out", default=None, help="Optional explicit path for JUnit XML output (default: <run>/junit.xml).")
     p.add_argument("--format", choices=["text", "json"], default="text")
     p.add_argument(
         "--tier2-mode",
@@ -1180,13 +1326,14 @@ def _print_case_listing(cases: Sequence[EvalCase]) -> None:
     for case in cases:
         category = case.category or "uncategorized"
         smoke = case.smoke_mode or "-"
+        eval_modes = ",".join(case.eval_modes) if case.eval_modes else "auto"
         timeout_profile = case.timeout_profile or "-"
         timeout_sec = (
             f"{case.timeout_sec:g}" if isinstance(case.timeout_sec, (int, float)) else "-"
         )
         print(
             f"- {case.id} [{category}] "
-            f"(prepend_skill={str(case.prepend_skill).lower()}, smoke_mode={smoke}, "
+            f"(prepend_skill={str(case.prepend_skill).lower()}, smoke_mode={smoke}, eval_modes={eval_modes}, "
             f"timeout_profile={timeout_profile}, timeout_sec={timeout_sec})"
         )
         print(f"  name: {case.name}")
@@ -1195,6 +1342,14 @@ def _print_case_listing(cases: Sequence[EvalCase]) -> None:
 def _contains_any(text: str, patterns: Sequence[str]) -> bool:
     low = text.lower()
     return any(p.lower() in low for p in patterns)
+
+
+def _extract_first_question(text: str, patterns: Sequence[str], fallback: str) -> str:
+    for pattern in patterns:
+        match = re.search(pattern, text, flags=re.IGNORECASE)
+        if match:
+            return " ".join(match.group(0).split())
+    return fallback
 
 
 def run_discovery_smoke(
@@ -1244,6 +1399,7 @@ def run_discovery_smoke(
         [
             "why the round matters",
             "explain why the round matters",
+            "why this matters",
         ],
     ):
         missing.append("SKILL.md missing why-this-matters guidance")
@@ -1251,6 +1407,7 @@ def run_discovery_smoke(
         skill_text,
         [
             "avoid dumping the whole interview plan at once",
+            "avoid dumping the full interview plan at once",
         ],
     ):
         missing.append("SKILL.md missing no-full-plan-dump guidance")
@@ -1266,28 +1423,40 @@ def run_discovery_smoke(
             [
                 "what should this skill help you do?",
                 "what kind of help should this skill provide?",
+                "which documentation surface should we improve first?",
+                "which documentation surface should this update target first?",
+                "what should this docs work help you do?",
             ],
         ):
             missing.append("discovery-interview.md missing intuitive round-1 question")
 
     smoke_mode = case.smoke_mode or "discovery-round-one"
+    round_one_question = _extract_first_question(
+        discovery_text,
+        patterns=[
+            r"which documentation surface should(?: we improve first| this update target first)?\?",
+            r"what should this docs work help you do\?",
+            r"what should this skill help you do\?",
+            r"what kind of help should this skill provide\?",
+        ],
+        fallback="What should this work help you do?",
+    )
 
     if smoke_mode == "discovery-round-one":
         response = "\n".join(
             [
-                "## Scope and triggers",
-                "- This request fits $skill-builder because it is about defining a new skill before implementation.",
+                "## Inputs",
+                "- Missing: the exact target surface, primary reader, and job-to-be-done for this documentation work.",
+                "- Why this matters: keeping the goal clear prevents scope creep and makes the later validation and ownership decisions more reliable.",
                 "",
-                "## Required inputs",
-                "- Missing: the exact goal for the skill and the main problem it should solve every time.",
-                "- Why this matters: keeping the goal clear prevents scope creep and makes the later trigger and process design more reliable.",
-                "- Round 1 question: What should this skill help you do?",
+                "## Outputs",
+                "- After discovery confirms the goal, return a tight docs plan or patch scoped to the right surface.",
                 "",
-                "## Deliverables",
-                "- After discovery confirms the goal, produce `SKILL.md` plus any needed `references/` files for the skill.",
+                "## Next step",
+                f"- Round 1 question: {round_one_question}",
                 "",
                 "## Failure mode",
-                "- Do not build the skill yet when the workflow is still underspecified; finish round 1 first.",
+                "- Do not draft or rewrite the docs yet when the workflow is still underspecified; finish round 1 first.",
             ]
         )
     elif smoke_mode == "discovery-round-six":
@@ -1297,58 +1466,75 @@ def run_discovery_smoke(
             discovery_text,
             [
                 "does this capture it",
+                "does this capture the docs work well enough for me to implement",
+                "anything to add or change before i implement it",
                 "anything to add or change before i build it",
             ],
         ):
             missing.append("discovery-interview.md missing explicit confirmation question guidance")
+        primary_confirmation = _extract_first_question(
+            discovery_text,
+            patterns=[
+                r"does this capture[^?]*\?",
+                r"ready to implement\?",
+            ],
+            fallback="Does this capture the work well enough for me to implement?",
+        )
+        secondary_confirmation = _extract_first_question(
+            discovery_text,
+            patterns=[
+                r"anything to add or change before i (?:implement|build) it\?",
+            ],
+            fallback="Anything to add or change before I implement it?",
+        )
         response = "\n".join(
             [
-                "## Scope and triggers",
-                "- This request still fits $skill-builder because the discovery phase is finishing and the skill should not be built until the user confirms the summary.",
+                "## Inputs",
+                "- No major discovery gaps remain; this turn is for confirmation before implementation starts.",
                 "",
-                "## Required inputs",
-                "- No major discovery gaps remain; this turn is for confirmation before building.",
+                "## Outputs",
+                "- Provide a compact docs work summary and wait for confirmation before making edits.",
                 "",
-                "## Deliverables",
-                "- Provide a compact skill summary and wait for confirmation before writing `SKILL.md`.",
+                "## Next step",
+                "- Ask for confirmation before implementation begins.",
                 "",
                 "## Failure mode",
-                "- Do not assume approval from silence; ask for confirmation before building.",
+                "- Do not assume approval from silence; ask for confirmation before implementing.",
                 "",
-                "## Skill Summary: design-review-helper",
+                "## Skill Summary: docs-expert",
                 "",
-                "**Goal:** Help review long design review threads and turn them into actionable summaries.",
-                "**Trigger:** `/design-review-helper` plus natural requests about summarizing design review threads.",
-                "**Arguments:** thread link or pasted discussion",
+                "**Goal:** Help audit or rewrite documentation with a clear target surface, reader, and verification path.",
+                "**Trigger:** natural requests about improving README, docs, runbooks, or in-code documentation.",
+                "**Arguments:** target doc path or surface, audience, source of truth, and validation expectations",
                 "",
                 "**Process:**",
-                "1. Capture the goal and desired output.",
-                "2. Review the thread content.",
-                "3. Summarize key decisions, disagreements, and next actions.",
-                "4. Return a concise review artifact.",
+                "1. Confirm the target documentation surface and audience.",
+                "2. Confirm the governing source of truth and constraints.",
+                "3. Confirm the validation and handoff expectations.",
+                "4. Return a concise docs summary and wait for approval to implement.",
                 "",
-                "**Inputs:** discussion text or link",
-                "**Outputs:** structured summary and action list",
+                "**Inputs:** target doc surface, audience, source material, and constraints",
+                "**Outputs:** compact docs summary plus the agreed implementation path",
                 "**Dependencies:** none required for the smoke example",
-                "**Guardrails:** avoid inventing decisions and do not build before confirmation",
+                "**Guardrails:** avoid inventing commands or policy and do not implement before confirmation",
                 "",
-                "Assumptions: this is a lightweight review helper and not an approval or merge tool.",
+                "Assumptions: this is a docs workflow summary and not the final documentation patch.",
                 "",
-                "Does this capture it well enough for me to build?",
-                "Anything to add or change before I build it?",
+                primary_confirmation,
+                secondary_confirmation,
             ]
         )
     else:
         response = "\n".join(
             [
-                "## Scope and triggers",
-                "- Unsupported discovery smoke mode.",
-                "",
-                "## Required inputs",
+                "## Inputs",
                 "- Missing: a supported smoke mode.",
                 "",
-                "## Deliverables",
+                "## Outputs",
                 "- None until the smoke mode is corrected.",
+                "",
+                "## Next step",
+                "- Correct the smoke mode and rerun the eval.",
                 "",
                 "## Failure mode",
                 "- Unsupported discovery smoke mode.",
@@ -1401,7 +1587,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         return 1
 
     skill_dir = skill_md.parent
-    skill_name = load_skill_name(skill_md)
+    skill_frontmatter = load_skill_frontmatter(skill_md)
+    skill_name = str(skill_frontmatter.get("name") or "").strip()
+    if not skill_name:
+        print(f"ERROR: SKILL.md frontmatter missing valid `name`: {skill_md}", file=sys.stderr)
+        return 1
 
     evals_path = skill_dir / "references" / "evals.yaml"
     if not evals_path.exists():
@@ -1416,10 +1606,14 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     except ValueError as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 1
+    cases = _filter_cases_for_eval_mode(cases, eval_mode=args.eval_mode)
 
     if args.list_cases:
         _print_case_listing(cases)
         return 0
+    if not cases:
+        print(f"ERROR: No eval cases matched the selected filters and eval mode `{args.eval_mode}`.", file=sys.stderr)
+        return 1
 
     workspace_root = Path(args.workspace).expanduser().resolve() if args.workspace else _guess_repo_root(skill_dir)
     codex_home = Path(args.codex_home).expanduser().resolve() if args.codex_home else None
@@ -1454,16 +1648,18 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     # Smoke-profile routing:
     # - For discovery-smoke runs, prefer cases that declare a smoke_mode.
-    # - For live/model runners, ignore smoke-only discovery contract cases.
+    # - For live/model runners, ignore only smoke-only discovery contract cases.
     smoke_runners_only = bool(selected_runners) and all(r == "discovery-smoke" for r in selected_runners)
     has_smoke_cases = any(c.smoke_mode for c in cases)
     if smoke_runners_only and has_smoke_cases:
         cases = [c for c in cases if c.smoke_mode]
     elif not smoke_runners_only and has_smoke_cases:
-        cases = [c for c in cases if not c.smoke_mode]
+        cases = [c for c in cases if not _is_smoke_only_case(c)]
 
     capture_jsonl = bool(
-        args.capture_jsonl or any((c.deterministic_checks or c.budgets) for c in cases)
+        args.capture_jsonl
+        or any((c.deterministic_checks or c.budgets) for c in cases)
+        or (args.eval_mode == "release" and "codex" in selected_runners)
     )
 
     if "codex" in selected_runners and args.dual_run and not capture_jsonl:
@@ -1519,6 +1715,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     if reports_base is None or not run_id:
         print("ERROR: unable to allocate unique report directory run_id", file=sys.stderr)
         return 1
+    git_meta = _git_metadata(skill_dir)
 
     preflight_warnings: List[str] = []
     if "codex" in selected_runners:
@@ -1530,11 +1727,23 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             )
 
     summary: Dict[str, Any] = {
-        "schema_version": "2.0",
+        "schema_version": "2.1",
+        "tool": "run_skill_evals",
+        "generated_at": _utc_now_iso(),
         "skill": skill_name,
         "skill_path": str(skill_dir),
+        "skill_release": {
+            "name": skill_name,
+            "version": str(skill_frontmatter.get("version") or "0.0.0+local"),
+            "compatibility": skill_frontmatter.get("compatibility") or "codex",
+            "release_channel": skill_frontmatter.get("release_channel") or "local",
+            "schema_version": str(skill_frontmatter.get("schema_version") or "1"),
+            "source_commit": git_meta.get("commit"),
+            "source_branch": git_meta.get("branch"),
+        },
         "workspace_root": str(workspace_root),
         "runner_mode": ",".join(selected_runners),
+        "eval_mode": args.eval_mode,
         "tier2_mode": args.tier2_mode,
         "run_id": run_id,
         "case_filters": case_filters,
@@ -1805,6 +2014,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             "id": c.id,
             "name": c.name,
             "category": c.category,
+            "eval_modes": list(c.eval_modes) if c.eval_modes else None,
             "should_trigger": c.should_trigger,
             "prepend_skill": c.prepend_skill,
             "timeout_profile": case_timeout_profile,
@@ -1836,12 +2046,42 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     summary["passed"] = (not any_tier1_failed) and (
         args.tier2_mode != "fail" or (not any_tier2_failed)
     )
+    summary["decision"] = "pass" if summary["passed"] else "fail"
+    summary["exit_code"] = 0 if summary["passed"] else 2
 
     summary_path = reports_base / "summary.json"
     summary_path.write_text(json.dumps(summary, indent=2, ensure_ascii=False), encoding="utf-8")
 
     scorecard_path = Path(args.scorecard_out).expanduser().resolve() if args.scorecard_out else (reports_base / "scorecard.json")
     scorecard_path.parent.mkdir(parents=True, exist_ok=True)
+    scorecard_path.write_text(json.dumps(summary, indent=2, ensure_ascii=False), encoding="utf-8")
+    summary["artifacts"] = {
+        "reports_base": str(reports_base),
+        "summary": str(summary_path),
+        "scorecard": str(scorecard_path),
+    }
+    release_manifest_path = reports_base / "release_manifest.json"
+    junit_path = Path(args.junit_out).expanduser().resolve() if args.junit_out else (reports_base / "junit.xml")
+    summary["artifacts"]["release_manifest"] = str(release_manifest_path)
+    summary["artifacts"]["junit"] = str(junit_path)
+    _write_junit_report(summary, junit_path)
+    release_manifest = {
+        "schema_version": "1.0",
+        "tool": "run_skill_evals",
+        "generated_at": summary["generated_at"],
+        "skill": summary["skill_release"],
+        "run": {
+            "run_id": run_id,
+            "eval_mode": args.eval_mode,
+            "runner_mode": summary["runner_mode"],
+            "tier2_mode": args.tier2_mode,
+            "capture_jsonl": capture_jsonl,
+            "reports_base": str(reports_base),
+        },
+        "artifacts": summary["artifacts"],
+    }
+    release_manifest_path.write_text(json.dumps(release_manifest, indent=2, ensure_ascii=False), encoding="utf-8")
+    summary_path.write_text(json.dumps(summary, indent=2, ensure_ascii=False), encoding="utf-8")
     scorecard_path.write_text(json.dumps(summary, indent=2, ensure_ascii=False), encoding="utf-8")
 
     if args.format == "json":
@@ -1850,7 +2090,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         print(f"Skill evals: {skill_name}")
         print(f"Reports: {reports_base}")
         print(f"Scorecard: {scorecard_path}")
+        print(f"Release manifest: {release_manifest_path}")
+        print(f"JUnit: {junit_path}")
         print(f"Runner mode: {summary['runner_mode']}")
+        print(f"Eval mode: {args.eval_mode}")
         if case_filters:
             print(f"Case filters: {', '.join(case_filters)}")
         if category_filters:
@@ -1872,7 +2115,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         else:
             print(f"RESULT: {'PASS' if summary['passed'] else 'FAIL'}")
 
-    return 0 if summary["passed"] else 2
+    return int(summary["exit_code"])
 
 
 if __name__ == "__main__":

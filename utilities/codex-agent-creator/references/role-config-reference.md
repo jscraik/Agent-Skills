@@ -32,12 +32,14 @@ The role creator scripts validate:
 [agents.researcher]
 description = "Read-only researcher role"
 config_file = "~/.codex/agents/researcher.toml"
+nickname_candidates = ["Researcher"]
 ```
 
 ### Supported keys under `[agents.<role>]`
 
 - `description`
 - `config_file`
+- `nickname_candidates`
 
 Unknown fields under `[agents.<role>]` are rejected.
 
@@ -75,17 +77,23 @@ Do not add optional keys (`sandbox_mode`, `web_search`, `mcp_servers`, `apps`, e
 
 Recommended default profile (if user does not specify):
 
-- `model = "gpt-5-codex"`
+- `model = "gpt-5.4-mini"`
 - `model_reasoning_effort = "medium"`
+
+Recommended role declaration default (if user does not specify):
+
+- `nickname_candidates = ["<Title-cased role name>"]`
 
 ### Useful enums
 
-- `model_reasoning_effort`: `none|minimal|low|medium|high|xhigh`
+- `model_reasoning_effort`: `minimal|low|medium|high|xhigh`
 - `model_reasoning_summary`: `auto|concise|detailed|none`
 - `model_verbosity`: `low|medium|high`
 - `personality`: `none|friendly|pragmatic`
 - `sandbox_mode`: `read-only|workspace-write|danger-full-access`
 - `web_search`: `disabled|cached|live`
+
+Public-docs note: the March 2026 Codex config reference documents `minimal|low|medium|high|xhigh` for `model_reasoning_effort`. The `openai/codex` repo schema still includes `none`; treat that as repo-implementation evidence, not the default builder contract.
 
 ## Runtime behavior that affects role design
 
@@ -102,7 +110,7 @@ Practical implication: keep role instructions narrow and deterministic, and do n
 ### 1) Minimal role (recommended default)
 
 ```toml
-model = "gpt-5-codex"
+model = "gpt-5.4-mini"
 model_reasoning_effort = "medium"
 developer_instructions = """
 You are a focused implementation assistant.
@@ -113,7 +121,7 @@ Work only in requested files, validate changes, and report exact evidence.
 ### 2) Model/reasoning/style knobs
 
 ```toml
-model = "gpt-5-codex"
+model = "gpt-5.4-mini"
 model_reasoning_effort = "high"
 model_reasoning_summary = "concise"
 model_verbosity = "high"

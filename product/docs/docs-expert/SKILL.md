@@ -9,8 +9,14 @@ metadata:
 
 ## Table of Contents
 - [When to use](#when-to-use)
+- [Philosophy](#philosophy)
 - [Standards snapshot (March 2026)](#standards-snapshot-march-2026)
+- [Documentation quality standard](#documentation-quality-standard)
 - [Quickstart (Lightweight Path)](#quickstart-lightweight-path)
+- [Discovery interview](#discovery-interview)
+- [README reality audit mode](#readme-reality-audit-mode)
+- [Operational workflow mode](#operational-workflow-mode)
+- [Output contract mode](#output-contract-mode)
 - [Inputs](#inputs)
 - [Outputs](#outputs)
 - [Response format (required)](#response-format-required)
@@ -49,14 +55,16 @@ If the user asks for a fast pass, use Quickstart. If the scope is large or ambig
 Use these as the baseline unless the repository has stricter internal policy:
 
 - GitHub community profile + health files (README, LICENSE, CONTRIBUTING, CODE_OF_CONDUCT, SECURITY, SUPPORT, issue/PR templates).
+- Treat repository-local files and organization-level default community health files in a public `.github` repository as valid GitHub trust surfaces; if they are not visible from local checkout, mark them as a manual GitHub UI check.
 - GitHub discoverability metadata (topics, repository description/homepage, social preview image).
 - Trust and ownership metadata (CODEOWNERS, release/changelog guidance, CITATION.cff for citable projects, FUNDING.yml where applicable).
 - Reader-first information architecture: separate tutorials, how-to guides, reference, and explanation instead of mixing user needs into one page.
 - Procedure writing: one action per step, goal-first where helpful, verification points when confidence matters, and links to canonical repeated procedures.
 - Accessibility and readability: avoid directional language, avoid color-only meaning, require descriptive headings/alt text/captions, and keep docs usable without images.
 - AI-ready docs surfaces: human-first structured docs with stable headings and explicit examples; add `llms.txt` only when repo owners explicitly want AI-specific context files.
+- Brand handling: prefer official repo or organization brand guidance first, use a neutral repo baseline by default, and only apply the docs-expert fallback brand profile when the repo owner explicitly wants it.
 - Prefer the current global instruction flow from `~/.codex/AGENTS.md` over older legacy config-file conventions.
-- Use `references/industry-gold-standard-2026.md` when you need the current default rationale and quality bar.
+- Use `references/industry-gold-standard-2026.md` and `references/official-docs-baseline.md` when you need the current default rationale and quality bar.
 
 ## Documentation quality standard
 
@@ -85,7 +93,51 @@ Use this when the user wants help quickly and does not want the full three-stage
 6. Run a fast QA pass (clarity, missing steps, top 3 failure points).
 7. Offer to switch to the full workflow if scope grows or ambiguity remains.
 
-## Required inputs
+## Discovery interview
+
+Run discovery for underspecified docs work before drafting.
+- Ask one round at a time and wait before moving on.
+- Start with one plain-language question.
+- Explain why the round matters with one short `Why this matters:` line so the user understands the decision point.
+- Avoid dumping the whole interview plan at once.
+- Skip already-answered rounds.
+- Stop when doc target, audience, source of truth, validation path, and brand authority are clear enough to write safely.
+- Before implementation, summarize confirmed inputs, assumptions, and the next approval checkpoint.
+- Use `references/discovery-interview.md` for reusable round templates.
+
+## README reality audit mode
+
+Use this mode when the user wants the README to reflect what the project can actually do today, not just what older docs say it does.
+
+Core contract:
+- audit code, tests, examples, and recent history for understated or omitted capabilities;
+- separate verified capabilities from inferred ones;
+- revise the README with concrete value framing, practical usage guidance, and trustworthy language.
+Reference: `references/readme-reality-audit.md`.
+
+## Operational workflow mode
+
+Use this mode when the user wants a workflow, runbook, or agent procedure converted into a compact operational spec.
+
+Default contract:
+- choose the most efficient representation: transition table, state machine, pseudocode, or diagram;
+- treat the transition table as the source of truth;
+- model `S=state`, `E=event`, `G=guard`, `A=action`, `N=next`;
+- include deterministic transitions, explicit failure states, idempotency, invariants, metadata, logs, and dry-run behavior.
+Reference: `references/operational-workflow-mode.md`.
+
+## Output contract mode
+
+Use this mode when the user wants canonical output contracts for agent-facing commands, validators, reporters, or automation entry points.
+
+Default contract:
+- define the default machine-readable mode and the explicit human-readable mode;
+- define schema versioning, deterministic error handling, and compatibility rules for future fields;
+- keep the machine-readable contract stable and machine-first;
+- when robot mode is in scope, define no-arg quick-start, intent-based command taxonomy, and errors that teach correct usage.
+Reference: `references/output-contract-mode.md`.
+
+## Inputs
 - Repo context and target surface: path/link plus README, `/docs`, runbook, or code-doc target.
 - Audience, experience level, and job-to-be-done.
 - Constraints that change the draft: platform, version, compliance, rollout risk.
@@ -97,7 +149,7 @@ Use this when the user wants help quickly and does not want the full three-stage
 - Keep steps short, externalize decisions/assumptions, and show the single next step.
 - Provide ELI5 explanations for non-trivial logic and ask one focused question at a time.
 
-## Deliverables
+## Outputs
 - Updated Markdown docs (**PR-ready edits**).
 - A **doc audit summary** with what changed, what is still unknown, and what to verify.
 - Community-health, GitHub visibility, and brand findings when they are in scope.
@@ -114,6 +166,7 @@ Every response must include:
 1) **Inventory & scope**
    - Identify canonical doc surfaces (README, `/docs`, runbooks).
    - If repo-wide: run the **GitHub community health** checklist (see `references/CHECKLIST.md`).
+   - Check whether community health files come from the repo itself or from an organization-level `.github` defaults repository.
    - Detect and record **brand authority sources** before drafting.
 2) **Classify the document type**
    - Decide whether the work is primarily a tutorial, how-to guide, reference page, or explanation.
@@ -130,7 +183,7 @@ Every response must include:
 6) **Bootstrap and run doc QA tooling**
    - See `references/docs-baseline.md` → “Bootstrap missing QA tooling”, then lint.
    - If lint configs are missing, install the baseline configs first, then rerun lint.
-   - If branding checks are required, prefer repo-owned brand policy/assets. Use docs-expert fallback assets only if no official brand policy exists and the user approves fallback mode.
+   - If branding checks are required, prefer repo-owned brand policy/assets. Use the neutral repo profile by default. Use docs-expert fallback assets only if no official brand policy exists and the user approves fallback mode.
 7) **Ship the evidence bundle**
    - Checklist snapshot + validation steps run + key pass/fail outputs + what to do next.
 
@@ -144,6 +197,26 @@ Use this section when the user asks to create, overhaul, or audit a README or RE
 
 1. Read `references/readme-crafting.md` for README-specific structure, rules, templates, badges, and checklists.
 2. If specialized sections are needed (performance, security, data model, API reference, migration, contributing, ecosystem, env vars, shell completions, release notes, acknowledgments), read `references/readme-section-templates.md`.
+3. If the user wants the README aligned to current code/tests/history reality, read `references/readme-reality-audit.md`.
+
+## Operational specs (reference)
+
+Use this section when the user asks to convert a workflow or procedure into a compact operational spec.
+
+1. Read `references/operational-workflow-mode.md`.
+2. Keep the transition table as the source of truth.
+3. Add Mermaid only when the user wants a diagram or when a diagram is the clearest compact representation.
+4. Do not pull in plugin-specific fields unless the request is explicitly about plugin behavior.
+
+## Output contracts (reference)
+
+Use this section when the user asks to define or normalize command outputs for agents or automation.
+
+1. Read `references/output-contract-mode.md`.
+2. Make machine-readable output the default when the command is agent-facing.
+3. Keep human-readable output explicit and separately described.
+4. Define schema versioning, deterministic error handling, and forward-compatibility rules.
+5. If the command is agent-operated, define the robot-mode quick-start, intent taxonomy, and corrective error behavior.
 
 ## Baseline practices (reference)
 
@@ -195,6 +268,7 @@ For public repositories, include these checks in addition to community-health fi
 - Ecosystem metadata when applicable: `CITATION.cff`, `FUNDING.yml`, changelog/release notes.
 
 If visibility checks cannot be verified from local context, mark them as “manual GitHub UI check required” with exact checklist items.
+If community-health coverage depends on an organization `.github` defaults repository, call that out explicitly instead of marking the repo as simply missing files.
 
 ## AI-ready documentation pack
 When AI tooling support is in scope:
@@ -217,13 +291,14 @@ When AI tooling support is in scope:
 ## Validation
 
 Validation options to run when available and record:
-- `python scripts/bootstrap_doc_qa.py --repo . --apply --brand-profile docs-expert` to enforce BrAInwav baseline assets and README signature by default.
+- `python scripts/bootstrap_doc_qa.py --repo . --apply --brand-profile repo` for a neutral docs QA baseline.
 - `vale <doc>` after `.vale.ini` is present.
 - `markdownlint-cli2 <doc> --config <config>` after markdownlint config is present.
 - Link checker if present.
 - `python scripts/check_readability.py <doc>` if available (default target: 45-70 Flesch Reading Ease).
-- `python scripts/check_brand_guidelines.py --repo . --docs <doc> --profile docs-expert` when enforcing the BrAInwav guideline profile.
-- If a repository has its own official non-BrAInwav brand guidance, switch to `--profile repo` and provide explicit `--config`/brand parameters.
+- `python scripts/check_brand_guidelines.py --repo . --docs <doc> --profile repo` for neutral brand-policy verification.
+- Use `--brand-profile docs-expert` and `--profile docs-expert` only when the docs-expert fallback brand profile is explicitly in scope.
+- If a repository has its own official non-docs-expert brand guidance, keep `--profile repo` and provide explicit `--config` or brand parameters.
 
 Fail fast: if any validation fails, stop and report before continuing edits.
 If tooling is missing and bootstrap is not approved, state what is missing and why checks were skipped.
@@ -249,9 +324,14 @@ Quick corrections:
 
 ## Examples
 
-- "Rewrite our README so onboarding is faster and the quickstart is easier to scan."
-- "Audit this runbook for missing rollback steps, verification checks, and trust signals."
-- "Restructure these docs into tutorial, how-to, reference, and explanation pages."
+- "Can you help me rewrite our README so onboarding is faster and the quickstart is easier to scan?"
+- "Please audit this runbook for missing rollback steps, verification checks, and trust signals."
+- "Inspect these docs and split them into tutorial, how-to, reference, and explanation pages without mixing audiences."
+- "Validate whether our public repo is relying on org-level default community health files or whether we still need local copies."
+- "Audit the code, tests, and recent history, then update the README so it reflects the product's current real capabilities."
+- "Convert this approval workflow into a compact operational spec with a transition table, invariants, and dry-run behavior."
+- "Define canonical output contracts for these agent-facing commands, including machine-readable defaults, human-readable mode, schema versioning, and deterministic errors."
+- "Design a robot-mode interface so agents can use the command surface without the UI, including no-arg quick-start behavior and errors that teach correct usage."
 
 ## Deliverable format
 
@@ -266,6 +346,8 @@ When you finish edits, include:
 ## References and templates
 
 - Workflow and routing: `references/DOC_COAUTHORING.md`, `references/document-types.md`, `references/industry-gold-standard-2026.md`
+- Official baseline: `references/official-docs-baseline.md`, `references/discovery-interview.md`
+- Specialized modes: `references/readme-reality-audit.md`, `references/operational-workflow-mode.md`, `references/output-contract-mode.md`
 - QA and policy: `references/CHECKLIST.md`, `references/CODE_DOC_CHECKLIST.md`, `references/docs-baseline.md`, `references/openai-doc-writing-principles.md`, `references/docs-upkeep-runbook.md`
 - README and templates: `references/readme-crafting.md`, `references/readme-section-templates.md`, `assets/DOC_TEMPLATE.md`, `assets/CODE_DOC_TEMPLATES.md`, `assets/README_TEMPLATE.md`, `assets/AGENTS_TEMPLATE.md`
 - Branding, validation, and contract: `references/BRAND_GUIDELINES.md`, `references/brand-styling.md`, `scripts/bootstrap_doc_qa.py`, `scripts/check_brand_guidelines.py`, `scripts/check_readability.py`, `references/contract.yaml`, `references/evals.yaml`

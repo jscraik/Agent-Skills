@@ -13,9 +13,11 @@ Execution model shorthand:
 ## Table of Contents
 
 - [Schemas](/docs/skill-graphs/schemas/task-profile.schema.md)
+- [Skill lesson observation schema](/docs/skill-graphs/schemas/skill-lesson-observation.schema.md)
 - [Knowledge graph model](/docs/skill-graphs/knowledge-graph-operating-model.md)
 - [Question lifecycle contract](/docs/skill-graphs/question-lifecycle.md)
 - [Workflows](/docs/skill-graphs/workflows/promotion-gate.md)
+- [Skill learning loop](/docs/skill-graphs/workflows/skill-learning-loop.md)
 - [Pilots](/docs/skill-graphs/pilots/ui-skills-shadow-results.md)
 - [Runbooks](/docs/skill-graphs/runbooks/kill-switch-and-escalation.md)
 - [Telemetry Outputs](/docs/skill-graphs/telemetry/daily-outputs.md)

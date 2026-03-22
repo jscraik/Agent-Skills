@@ -2,6 +2,17 @@
   "schema_version": "1.0",
   "description": "Portfolio benchmark policy for skill-builder marker coverage and distribution.",
   "validated_on": "2026-03-16",
+  "release_governance": {
+    "pin_models_on_release": true,
+    "require_model_rationale": true,
+    "require_release_manifest": true,
+    "prefer_holdout_before_promotion": true
+  },
+  "regression_budgets": {
+    "tier1_failures_max": 0,
+    "tier2_findings_delta_max": 1,
+    "pass_rate_floor": 0.95
+  },
   "validation_notes": [
     "React latest docs line is 19.x (latest listed 19.2).",
     "Next.js support policy lists 16.x as Active LTS.",

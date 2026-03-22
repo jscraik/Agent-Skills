@@ -1,12 +1,14 @@
 purpose: >
-  Define expected behavior and outputs for docs-expert.
-schema_version: 1.0
+  Define expected behavior and outputs for docs-expert, including repository
+  documentation audits, progressive-disclosure doc refactors, community-health
+  checks, and neutral-by-default docs QA bootstrapping.
+schema_version: 1.1
 triggers:
   - audit or upgrade repository documentation (README, docs, guides, runbooks)
   - add or repair missing in-code documentation (JSDoc, DocC, config docs)
   - bring a repository up to GitHub community health expectations (community profile files)
   - perform a docs QA pass with an evidence bundle (when tooling exists)
-  - enforce BrAInwav brand signature/assets by default, while honoring repository-specific official brand overrides
+  - apply official repo or organization brand guidance before any fallback brand profile
   - improve public GitHub visibility signals (topics, social preview, metadata)
 inputs:
   - repo context (url or local path) and doc targets
@@ -21,10 +23,21 @@ outputs:
   - writing-quality assessment against OpenAI-style skimmability/clarity/helpfulness principles
   - visibility snapshot (topics/social preview/metadata pass-fail-manual)
   - evidence bundle when tooling exists (lint/link/readability/brand checks)
+  - discovery summary with assumptions and next step when inputs are incomplete
+required_response_sections:
+  - "## Inputs"
+  - "## Outputs"
+  - "## Next step"
+official_baseline_rules:
+  brand_default_profile: repo
+  brand_fallback_profile: docs-expert
+  allow_org_default_community_files: true
+  ai_context_file_optional_only: true
 non_goals:
   - requests with no documentation deliverable to create, audit, or improve
   - implementing product features or code changes when documentation work is not in scope
 risks:
   - missing inputs; mitigated by clarifying questions and explicit assumptions
   - inaccurate steps (invented commands/paths/versions); mitigated by verifying against the repo
-  - brand mismatch; mitigated by source-of-truth precedence and explicit citation
+  - brand mismatch; mitigated by source-of-truth precedence, neutral baseline by default, and explicit citation
+  - false missing-health findings; mitigated by checking for org-level `.github` defaults before declaring a gap

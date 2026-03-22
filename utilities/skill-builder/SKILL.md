@@ -1,5 +1,8 @@
 ---
 name: skill-builder
+version: "0.2.0"
+compatibility: codex
+release_channel: stable
 description: "Create, revise, benchmark, and quality-gate Codex skills (SKILL.md plus scripts, references, evals, and packaging). Use this skill when the user asks to build, audit, improve, compare, package, or safely install local/imported skill folders. Scope exclusions: unrelated app features, generic bug fixing, plugin package conversion, or session-log audits."
 metadata:
   skill-type: code_quality_review
@@ -155,7 +158,8 @@ Run discovery for underspecified `create` or `improve` requests.
 - Use `request_user_input` for 1-3 short prompts when it fits the round.
 - If unavailable, ask 1-3 numbered chat questions and then continue.
 - Ask one round at a time and wait before moving forward.
-- Start each round with one plain-language question and briefly state why.
+- Start each round with one plain-language question and explain why the round matters with a short `Why this matters:` line.
+- Avoid dumping the whole interview plan at once; keep the first turn to the current round only.
 - Skip already-answered rounds.
 - Stop when confidence is high enough to build safely.
 - Before implementation, summarize:
@@ -218,8 +222,9 @@ Use the compact flow below, then follow the linked references for full detail.
 2. Confirm category and missing inputs in one round.
 3. Set trigger logic first (`description`) and add 8+/8+ trigger coverage in `references/evals.yaml`.
 4. Scaffold and draft with minimal structure, moving deep policy to `references/` and deterministic mechanics to `scripts/`.
-5. Iterate gate-by-gate: fix one failure, rerun, then continue.
-6. Run description optimization before handoff and deliver only when gates are clear or triaged.
+5. When recursive run evidence exists, consume `lesson_observations.json`, `lesson_candidates.json`, and `promotion_decision.json` and promote only repeated, rubric-bound lessons.
+6. Iterate gate-by-gate: fix one failure, rerun, then continue.
+7. Run description optimization before handoff and deliver only when gates are clear or triaged.
 
 Reference files:
 - `references/governance-contract.md`
@@ -237,6 +242,7 @@ Reference files:
 - Fail-fast is mandatory: stop at first failing gate, fix, rerun, then continue.
 - Use two passes: `iterative_fail_fast` then `pre-claim_full_sweep`.
 - Use `references/quality-tools.md` for gate command matrix and strict PI/security expectations.
+- During iteration prefer `run_skill_evals.py --eval-mode smoke`; before promotion or packaging run `--eval-mode release` and keep the generated `release_manifest.json` with the scorecard artifacts.
 
 ## Constraints and safety
 - Redact secrets, credentials, tokens, and PII by default.
