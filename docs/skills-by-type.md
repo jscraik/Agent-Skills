@@ -11,16 +11,16 @@ Generated from `metadata.skill-type` tags in skill frontmatter.
 ## Summary
 
 - `library_api_reference`: 8
-- `product_verification`: 4
+- `product_verification`: 7
 - `data_fetch_analysis`: 6
-- `team_automation`: 21
+- `team_automation`: 22
 - `scaffolding_templates`: 25
 - `code_quality_review`: 13
 - `ci_cd_deployment`: 6
 - `runbook`: 4
-- `infrastructure_ops`: 5
+- `infrastructure_ops`: 4
 - `invalid`: 0
-- `total_tagged`: 92
+- `total_tagged`: 95
 
 ## Validation Notes
 
@@ -57,8 +57,11 @@ Generated from `metadata.skill-type` tags in skill frontmatter.
 ### Product Verification
 
 - agent-browser (utilities)
+- agent-native-audit (product/review)
 - agentation (frontend/tools)
 - playwright-interactive (frontend/tools)
+- test-browser (frontend/tools)
+- test-xcode (utilities)
 - ui-visual-regression (frontend/ui)
 
 ### Data Fetch Analysis
@@ -80,6 +83,7 @@ Generated from `metadata.skill-type` tags in skill frontmatter.
 - compound-engineering-router (product/ops)
 - decide-build-primitive (product/ops)
 - deep-interview (interview)
+- feature-video (product/content)
 - interview-me (interview)
 - linear (product/ops)
 - markdown-converter (utilities)
@@ -157,7 +161,6 @@ Generated from `metadata.skill-type` tags in skill frontmatter.
 ### Infrastructure Ops
 
 - 1password (utilities)
-- arscontexta (product/domain)
 - fix-mise (utilities)
 - process-watch (utilities)
 - workers-mcp (backend)
