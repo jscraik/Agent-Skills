@@ -148,39 +148,25 @@ cleanup_on_exit() {
 }
 trap cleanup_on_exit EXIT
 
-# Ensure system skills are not in the flat symlink view (prevents duplicates).
-if [ -d "$skills_dir/.system" ]; then
+# Preserve upstream-managed system skills in a repo-level store, then expose
+# them through a hidden `.system` entry so only the hidden system copy remains.
+mkdir -p "$system_skills_dir"
+touch "$system_skills_dir/.codex-system-skills.marker"
+if [ -d "$skills_dir/.system" ] && [ ! -L "$skills_dir/.system" ]; then
   if [ ! -w "$skills_dir/.system" ]; then
-    echo "[WARN] $skills_dir/.system is not writable; skipping cleanup to avoid blocking sync."
+    echo "[WARN] $skills_dir/.system is not writable; skipping preservation to avoid blocking sync."
   else
-  mkdir -p "$system_skills_dir"
-  # Safety: if repo already has a skills-system marker, do NOT overwrite it from
-  # whatever happens to be in skills/.system (which can be partial/ephemeral).
-  # Just remove skills/.system so system skills don't appear in the flat view.
-  if [ -f "$system_skills_dir/.codex-system-skills.marker" ]; then
-    if ! rm -rf "$skills_dir/.system"; then
-      echo "[WARN] Unable to remove $skills_dir/.system (continuing anyway)."
-    fi
-  else
-  # Use rsync to handle existing directories, then remove source
-  if command -v rsync >/dev/null 2>&1; then
-    if ! rsync -a "$skills_dir/.system/" "$system_skills_dir/"; then
-      echo "[WARN] Failed to copy system skills to $system_skills_dir (continuing anyway)."
+    if command -v rsync >/dev/null 2>&1; then
+      if ! rsync -a "$skills_dir/.system/" "$system_skills_dir/"; then
+        echo "[WARN] Failed to preserve system skills into $system_skills_dir (continuing anyway)."
+      fi
+    else
+      mkdir -p "$system_skills_dir"
+      cp -R "$skills_dir/.system"/. "$system_skills_dir"/ 2>/dev/null || true
     fi
     if ! rm -rf "$skills_dir/.system"; then
-      echo "[WARN] Unable to remove $skills_dir/.system (continuing anyway)."
+      echo "[WARN] Unable to remove $skills_dir/.system after preservation (continuing anyway)."
     fi
-  else
-    # Fallback: remove target first, then move
-    if ! find "$system_skills_dir" -mindepth 1 -maxdepth 1 -exec rm -rf -- {} +; then
-      echo "[WARN] Unable to clear $system_skills_dir (continuing anyway)."
-    fi
-    mv "$skills_dir/.system"/.[!.]* "$system_skills_dir"/ 2>/dev/null || true
-    mv "$skills_dir/.system"/..?* "$system_skills_dir"/ 2>/dev/null || true
-    mv "$skills_dir/.system"/* "$system_skills_dir"/ 2>/dev/null || true
-    rmdir "$skills_dir/.system" 2>/dev/null || echo "[WARN] Unable to remove $skills_dir/.system (continuing anyway)."
-  fi
-  fi
   fi
 fi
 
@@ -352,6 +338,14 @@ while IFS= read -r skill_path; do
   fi
   ln -s "$skill_dir_rel" "$skills_dir/$skill_name"
 done < <(all_skill_files_cmd)
+
+# Re-expose preserved system skills through the hidden `.system` path without
+# bringing them back into the flat runtime skill list.
+if [ -e "$skills_dir/.system" ] && [ ! -L "$skills_dir/.system" ]; then
+  echo "[WARN] $skills_dir/.system exists as a non-symlink; leaving it in place."
+elif [ ! -e "$skills_dir/.system" ]; then
+  ln -s "../../skills-system" "$skills_dir/.system"
+fi
 
 # Build a strict Antigravity-compatible projection:
 # - flat first-level skill folders only

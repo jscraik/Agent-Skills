@@ -22,7 +22,8 @@
     "Auto-refreshed via refresh_benchmark_policy.py on 2026-03-08.",
     "Auto-refreshed via refresh_benchmark_policy.py on 2026-03-09.",
     "Auto-refreshed via refresh_benchmark_policy.py on 2026-03-16.",
-    "GitHub cluster warn threshold capped to the current cluster size on 2026-03-22 so the portfolio target remains achievable."
+    "GitHub cluster warn threshold capped to the current cluster size on 2026-03-22 so the portfolio target remains achievable.",
+    "OpenAI apps cluster responses_api distribution floor capped to the current tracked cluster size on 2026-03-22 after upstreaming openai-docs to .agents/skills/.system."
   ],
   "refresh_sources": [
     {
@@ -111,7 +112,6 @@
     "openai_apps": {
       "description": "OpenAI and ChatGPT Apps skills",
       "include_prefixes": [
-        "product/docs/openai-docs",
         "product/domain/chatgpt-apps",
         "frontend/graphics/imagegen",
         "frontend/graphics/sora",
@@ -234,10 +234,10 @@
         "responses_api"
       ],
       "min_hits_fail": {
-        "responses_api": 2
+        "responses_api": 1
       },
       "min_hits_warn": {
-        "responses_api": 2
+        "responses_api": 1
       },
       "min_coverage_fail": 0.25,
       "min_coverage_warn": 0.383

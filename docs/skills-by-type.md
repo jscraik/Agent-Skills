@@ -10,7 +10,7 @@ Generated from `metadata.skill-type` tags in skill frontmatter.
 
 ## Summary
 
-- `library_api_reference`: 8
+- `library_api_reference`: 7
 - `product_verification`: 7
 - `data_fetch_analysis`: 6
 - `team_automation`: 22
@@ -20,7 +20,7 @@ Generated from `metadata.skill-type` tags in skill frontmatter.
 - `runbook`: 4
 - `infrastructure_ops`: 4
 - `invalid`: 0
-- `total_tagged`: 95
+- `total_tagged`: 94
 
 ## Validation Notes
 
@@ -49,7 +49,6 @@ Generated from `metadata.skill-type` tags in skill frontmatter.
 - design-system (frontend/ui)
 - figma (frontend/tools)
 - oak-api (product/domain)
-- openai-docs (product/docs)
 - react-ui-patterns (frontend/ui)
 - remotion (frontend/ui)
 - repoprompt (utilities)

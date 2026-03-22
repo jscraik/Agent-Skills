@@ -16,17 +16,17 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - [Github — Greptile](#github-greptile)
 - [Interview](#interview)
 - [Product — Content](#product-content)
-- [Product — Docs](#product-docs)
 - [Product — Domain](#product-domain)
 - [Product — Ops](#product-ops)
+- [Product — Review](#product-review)
 - [Product — Security](#product-security)
 - [Product — Specs](#product-specs)
 - [Product — Strategy](#product-strategy)
 - [Utilities](#utilities)
 
 ## Summary
-- `total_skills`: 92
-- `catalog_source`: `.agents/skills` flat runtime view
+- `total_skills`: 91
+- `catalog_source`: repository skill scan
 
 ## Catalog
 
@@ -62,13 +62,14 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - `figma` — Use this canonical Figma skill to extract design context/screenshots/assets with Figma MCP and build production-ready UI guidance. Use when requests include Figma URLs/node IDs, design-to-code implementation, or Figma MCP setup/troubleshooting.
 - `playwright-interactive` — Use a persistent Playwright session through `js_repl` to debug local web or Electron apps without restarting the browser on every step. Use when you need iterative UI automation, visual QA, or Electron inspection in the current workspace.
 - `stitch-loop` — Use this skill when the user asks for iterative autonomous website building with Stitch using a baton file (`next-prompt.md`) and multi-pass page generation.
+- `test-browser` — Run or plan browser-based verification for changed web surfaces using sanctioned browser automation tools. Use when a user needs deterministic QA for routes, flows, or PR scope instead of ad hoc manual browsing.
 - `ui-cloner` — Build a structured UI replication plan from a target website URL and adapt it to the user's brand with implementation-ready guidance. Use when users ask to clone, recreate, or emulate a site's visual system; do not use for Cloudflare crawl orchestration-only requests or generic deployment work.
 
 ## Frontend — Ui
 
 - `baseline-ui` — Validates animation durations, enforces typography scale, checks component accessibility, and prevents layout anti-patterns in Tailwind CSS projects. Use when building UI components, reviewing CSS utilities, styling React views, or enforcing design consistency.
 - `design-system` — Analyze and implement repository-grounded design-system work (tokens, typography, iconography, spacing, styles, aliases, and theme variables) for this monorepo. Use when requests involve UI styling systems or token-layer changes; don’t use for backend/MCP-only tasks with no UI impact. Outputs: evidence-backed analysis or changes with canonical file references, layer impact, and validation commands. Success: work aligns to Brand→Alias→Mapped rules and passes design-system checks.
-- `frontend-ui-design` — Create and review production-ready UI systems/components with tokens and accessibility. Use for standard UI implementation or redesign (not creative-coding polish). Use when the user requests this capability.
+- `frontend-ui-design` — Create and review production-ready UI systems/components with tokens, accessibility, and strong visual direction. Use for standard UI implementation, redesign, or visually led landing pages and demos that still need production-ready structure (not creative-coding polish). Use when the user requests this capability.
 - `react-ui-patterns` — Provide concrete React UI composition patterns for TypeScript + Tailwind + Radix, including state, routing, and component structure examples. Use when building or refactoring React screens and components for maintainability.
 - `remotion` — Best-practice guidance for Remotion (React video). Use when building or reviewing Remotion compositions, timing, assets, audio, captions, or rendering.
 - `shadcn-ui` — Integrate and customize shadcn/ui components in existing projects. Use when the user asks to set up, add, adapt, or troubleshoot shadcn/ui components, registry items, and implementation patterns.
@@ -98,20 +99,13 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 
 ## Product — Content
 
+- `feature-video` — Produce a concise feature walkthrough video and package the result for review or release workflows. Use when a user needs a demo artifact, PR-ready walkthrough, or polished clip for a shipped product change.
 - `video-transcript-downloader` — Extract, summarize, and download video/audio/subtitles using yt-dlp/ffmpeg. Use when the user requests downloads or transcripts.
 - `youtube-hooks-scripts` — Create high-retention hooks and full scripts for technical YouTube videos tailored to topic, audience, and length. Use when the user asks for a hook, outline, or full script.
 - `youtube-titles-thumbnails` — Generate multiple SEO/CTR-optimized YouTube title and thumbnail text options with variants and rationale. Use when the user wants packaging ideas, titles, or thumbnail copy.
 
-## Product — Docs
-
-- `agents-md` — Refactor or create AGENTS.md using progressive disclosure: keep root guidance minimal, split detailed instructions into linked docs, and flag contradictions or redundancy. Use this skill when the user asks to create, update, or refactor AGENTS.md.
-- `context7` — Extract current library documentation via Context7 when users need up-to-date API details, version checks, or dependency troubleshooting for external libraries.
-- `docs-expert` — Use when asked to audit or rewrite repository docs (README, docs, runbooks, community-health files) or when code has missing in-code documentation (JSDoc/DocC/config docs): enforce official brand guidance, harden GitHub visibility signals, and deliver evidence-bundled docs QA.
-- `openai-docs` — Use when the user asks how to build with OpenAI products or APIs and needs up-to-date official documentation with citations, help choosing the latest model for a use case, or explicit GPT-5.4 upgrade and prompt-upgrade guidance; prioritize OpenAI docs MCP tools, use bundled references only as helper context, and restrict any fallback browsing to official OpenAI domains.
-
 ## Product — Domain
 
-- `arscontexta` — Use when you need to install, validate, or maintain Ars Contexta parity in Codex; mirrors skills/prompts/agents/automations and returns a parity report with any Codex-vs-Claude deltas.
 - `chatgpt-apps` — Build, scaffold, refactor, and troubleshoot ChatGPT Apps SDK applications that combine an MCP server and widget UI. Use when Codex needs to design tools, register UI resources, wire the MCP Apps bridge or ChatGPT compatibility APIs, apply Apps SDK metadata or CSP or domain settings, or produce a docs-aligned project scaffold grounded in current OpenAI docs.
 - `cloudflare-deploy` — Deploy applications and infrastructure to Cloudflare using Workers, Pages, and related platform services. Use when the user asks to deploy, host, publish, or set up a project on Cloudflare.
 - `oak-api` — Build or adapt Oak Curriculum API driven learning experiences, especially for child-facing, interactive ChatGPT Apps SDK workflows. Use when working with Oak API endpoints, curriculum data (subjects, units, lessons, quizzes, search), or when translating Oak content into adaptive learning activities with age-appropriate guardrails and compliance reminders.
@@ -123,6 +117,10 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - `linear` — Manage Linear issues, projects, and docs through the Linear MCP workflow with consistent read/create/update operations. Use when a user asks to triage, create, update, or report on Linear work items.
 - `release` — Create and publish a new project release (semver) when you need to cut a main-branch, clean-tree release via just release X.Y.Z for Cargo publish and git tag creation.
 
+## Product — Review
+
+- `agent-native-audit` — Audit a repository, workflow, or feature against agent-native operating principles and return evidence-backed gaps plus remediation priorities. Use when a user asks whether agents can realistically discover, execute, verify, and maintain a workflow end to end.
+
 ## Product — Security
 
 - `security-best-practices` — Perform language and framework specific security best-practice reviews and suggest improvements. Trigger only when the user explicitly requests security best practices guidance, a security review/report, or secure-by-default coding help. Trigger only for supported languages (python, javascript/typescript, go). Do not trigger for general code review, debugging, or non-security tasks.
@@ -131,7 +129,7 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 
 ## Product — Specs
 
-- `product-spec` — Create or review implementation-ready product specifications from ideas or existing docs. Use when you need a full PRD+UX+build plan pipeline or a focused mode (clarify_prd, ux_only, api_spec, arch_spec, testplan).
+- `product-spec` — Create or review implementation-ready product specifications from ideas or existing docs. Use when you need a full PRD+UX+build plan pipeline or a focused mode (clarify_prd, ux_only, api_spec, arch_spec, operator_spec, testplan).
 
 ## Product — Strategy
 
@@ -170,6 +168,7 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - `spreadsheet` — Use when tasks involve creating, editing, analyzing, or formatting spreadsheets (`.xlsx`, `.csv`, `.tsv`) with formula-aware workflows, cached recalculation, and visual review.
 - `systematic-debugging` — Analyze evidence from production bugs, regressions, and failed checks and diagnose root causes when users need a safe, evidence-backed fix plan before any code changes.
 - `test-driven-development` — Create test-first Red-Green-Refactor delivery for behavior changes. Use when implementing a feature or bugfix before writing production code.
+- `test-xcode` — Run or plan simulator-based verification for iOS and macOS apps using existing CLI-first Xcode workflows. Use when a user needs build, test, launch, or screenshot evidence for Apple app changes rather than initial scaffolding.
 - `using-git-worktrees` — Create and validate Codex app and Claude CLI git worktree workflows with safe branch/sync strategy and cleanup guidance. Use when users request isolated checkouts; do not use for explicit in-place same-branch edits.
 - `verification-before-completion` — Validate completion claims with fresh command evidence. Use when you are about to claim work is complete, fixed, or passing.
 - `visual-explainer` — Generate beautiful, self-contained HTML pages that visually explain systems, code changes, plans, and data. Use when the user asks for a diagram, architecture overview, diff review, plan review, project recap, comparison table, or any visual explanation of technical concepts. Also use proactively when you are about to render a complex ASCII table (4+ rows or 3+ columns) — present it as a styled HTML page instead.
