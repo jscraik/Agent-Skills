@@ -23,6 +23,7 @@ Deliver an actionable AppSec-grade threat model that is specific to the reposito
 - Prefer root-cause understanding over quick symptom patches.
 - Keep guidance evidence-based, explicit, and reproducible.
 - Optimize for decisions that reduce rework and operational risk.
+- Map the final abuse paths to OWASP Top 10:2025 themes when that helps teams turn the threat model into implementation work.
 
 ## Workflow
 

@@ -1,8 +1,5 @@
 ---
 name: skill-builder
-version: "0.2.0"
-compatibility: codex
-release_channel: stable
 description: "Create, revise, benchmark, and quality-gate Codex skills (SKILL.md plus scripts, references, evals, and packaging). Use this skill when the user asks to build, audit, improve, compare, package, or safely install local/imported skill folders. Scope exclusions: unrelated app features, generic bug fixing, plugin package conversion, or session-log audits."
 metadata:
   skill-type: code_quality_review
