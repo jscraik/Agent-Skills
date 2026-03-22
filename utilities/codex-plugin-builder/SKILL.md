@@ -9,9 +9,9 @@ metadata:
 Build safe, focused plugin packages for Codex workflows.
 
 ## Table of Contents
-- [Scope and triggers](#scope-and-triggers)
+- [When to use](#when-to-use)
 - [Required inputs](#required-inputs)
-- [Outputs](#outputs)
+- [Deliverables](#deliverables)
 - [Core philosophy](#core-philosophy)
 - [Workflow](#workflow)
 - [Validation](#validation)
@@ -29,8 +29,8 @@ Use this skill when the request is to:
 - inspect an external plugin source before conversion;
 - convert a Claude-oriented plugin shape into a Codex-compatible package;
 - compare a proposed plugin against existing local plugins before deciding whether to merge, fold, improve, or create;
-- add plugin-owned surfaces such as `skills/`, `hooks/`, `prompts` (optional), `agents` (optional), `.app.json`, or `.mcp.json`;
-- include package docs `README.md` and `LICENSE` in every plugin package;
+- add plugin-owned surfaces such as `skills/`, `hooks.json`, `commands/`, `prompts/`, `agents/`, `.app.json`, or `.mcp.json`;
+- scaffold local package docs such as `README.md`, `LICENSE`, and `references/operational-spec.md` when helpful;
 - validate plugin-owned skills with the `skill-builder` validator suite.
 
 Do not use this skill for:
@@ -42,13 +42,16 @@ Do not use this skill for:
 - plugin name and destination path;
 - default destination policy: if destination is not explicitly requested, write plugin packages to repo-root `plugins/<plugin-name>/`;
 - requested surfaces for first pass:
-  - required:
+  - runtime required:
     - `.codex-plugin/plugin.json`,
+  - builder conventions:
     - `README.md`,
     - `LICENSE`,
+    - `references/operational-spec.md`,
   - `skills`,
   - `prompts`,
-  - `hooks`,
+  - `commands`,
+  - `hooks.json`,
   - `agents`,
   - `.app.json`,
   - `.mcp.json`;
@@ -68,7 +71,7 @@ Produce only what the request needs:
 - plugin package folder with `SKILL.md` or plugin-owned assets;
 - `references/contract.yaml` and `references/evals.yaml` for non-trivial behavior;
 - `references/plugin-contract.md` whenever packaging rules or manifest fields are in scope;
-- `references/operational-spec.md` for every plugin package the builder creates or converts;
+- `references/operational-spec.md` for locally scaffolded packages when the package needs an auditable runtime contract;
 - `references/deconflict-report.md` when the builder compares the candidate against existing local plugins and merge-or-fold analysis is relevant;
 - `references/hooks-contract.md` whenever `hooks/` is requested or converted;
 - `references/arscontexta-conversion-map.md` when the source plugin is Ars Contexta or similarly mixes package assets, generated runtime outputs, and migration-only platform files;
@@ -138,11 +141,12 @@ Key principles:
 
 4. Scaffold package layout.
 - Default package root to repo-root `plugins/<plugin-name>/` unless the user explicitly requests another destination.
-- Enforce required root surfaces first:
-  - `.codex-plugin/plugin.json`,
+- Enforce the runtime-required surface first:
+  - `.codex-plugin/plugin.json`.
+- Add local scaffold conventions only when they help the package stay maintainable:
   - `README.md`,
-  - `LICENSE`.
-- Always emit `references/operational-spec.md` as a compact runtime contract for the created or converted plugin package.
+  - `LICENSE`,
+  - `references/operational-spec.md`.
 - Emit `references/deconflict-report.md` so merge-vs-new-package reasoning stays auditable.
 - Prefer script-backed scaffolding for deterministic output:
   - `python3 utilities/codex-plugin-builder/scripts/plugin_builder.py scaffold <plugin-name> --path plugins --with-marketplace`.
@@ -151,6 +155,7 @@ Key principles:
 - Create only needed optional directories/files:
   - `skills/`,
   - `prompts/` (optional),
+  - `commands/` when preserving a curated Codex command surface,
   - `hooks/` or `hooks.json`,
   - `agents/` (optional),
   - `scripts/` (optional),
@@ -164,11 +169,12 @@ Key principles:
 - Map source concepts into Codex-friendly structure using documented assumptions.
 - Apply terminology mapping from `references/terminology-map.md`:
   - `.claude-plugin/plugin.json` -> `.codex-plugin/plugin.json`
-  - `commands/` and slash-command language -> `prompts/`
+  - legacy command manifest keys and slash-command language -> `prompts/`
 - Treat command mapping as semantic, not mechanical:
   - if the source artifact is actually a durable workflow skill, keep or convert it into `skills/`;
   - if it is entrypoint-only prompt content, convert it into `prompts/`;
   - if the target UX benefits from both, document the fan-out explicitly.
+- Do not rewrite an existing curated Codex `commands/` directory away unless the user is explicitly converting that surface into prompts or skills.
 - If a source command is explicitly deprecated and only redirects users to a skill, do not preserve it as a first-class Codex prompt unless the user asks for backward-compatibility shims.
 - When the source looks like Ars Contexta or another generator-heavy plugin, explicitly separate:
   - package-owned plugin surfaces,
@@ -189,7 +195,8 @@ Key principles:
 - Report pass, warn, fail status by validator and path.
 
 7. Validate plugin contract.
-- Validate `.codex-plugin/plugin.json` exists and includes required metadata from `references/plugin-contract.md`.
+- Validate `.codex-plugin/plugin.json` exists and satisfies the runtime contract from `references/plugin-contract.md`.
+- Treat richer metadata such as `version`, `author`, `license`, `homepage`, `repository`, `keywords`, and `hooks` as optional curated fields unless the user explicitly asks for marketplace-ready polish.
 - Validate `references/operational-spec.md` exists and matches the compact runtime-spec contract:
   - transition table is the source of truth,
   - Mermaid diagram is derived from the same transitions,
@@ -239,30 +246,16 @@ When packaging plugins, treat `references/plugin-contract.md` as mandatory.
 
 Required behavior:
 - always emit `.codex-plugin/plugin.json`;
-- always emit `README.md` and `LICENSE`;
-- always emit `references/operational-spec.md`;
+- validate the runtime-required manifest shape first;
 - run local deconflict review before shipping a new plugin package;
 - emit `references/deconflict-report.md` when overlap review is relevant;
-- include required manifest metadata:
-  - `name`,
-  - `version`,
-  - `description`,
-  - `author`,
-  - `homepage`,
-  - `repository`,
-  - `license`,
-  - `keywords`,
-  - `skills`,
-  - `hooks`,
-  - `mcpServers`,
-  - `apps`,
-  - `interface`;
 - include integration metadata when present:
   - `.mcp.json` wiring details,
   - `.app.json` app-level details;
 - marketplace entries must include marketplace `interface.displayName`, `source.source = "local"`, `source.path = "./plugins/<plugin-name>"`, `policy.installation`, `policy.authentication`, and `category`;
 - validator compatibility note: accept legacy flat `installPolicy` and `authPolicy` while existing local marketplaces migrate, but emit the canonical nested `policy` object for all new scaffolds and overwrites;
-- keep `prompts` and `agents` optional unless explicitly requested.
+- keep `prompts` and `agents` optional unless explicitly requested;
+- remember that `README.md`, `LICENSE`, `references/operational-spec.md`, and richer manifest metadata are builder conventions or curated-plugin niceties, not minimal runtime requirements.
 
 ## Hook contract
 When plugin work includes `hooks/`, treat `references/hooks-contract.md` as mandatory grounding.
@@ -277,9 +270,10 @@ Required behavior:
 When converting Claude-oriented plugins, use `references/terminology-map.md` as a required check.
 
 Required behavior:
-- do not ship converted plugins with Claude package markers (`.claude-plugin` or `commands/`) as runtime surfaces;
+- do not ship converted plugins with Claude package markers such as `.claude-plugin`;
 - ensure codex prompts use `prompts/` and plugin docs use prompt wording, not slash-command wording;
-- keep shared surfaces (`skills`, `hooks`, `agents`, `.mcp.json`, `.app.json`) in Codex-compatible structure.
+- keep shared surfaces (`skills`, `hooks`, `agents`, `.mcp.json`, `.app.json`) in Codex-compatible structure;
+- allow curated Codex-native `commands/` directories to remain when they are already part of the official plugin shape.
 
 ## Constraints and safety
 - store generated plugin packages under repo-root `plugins/` by default;

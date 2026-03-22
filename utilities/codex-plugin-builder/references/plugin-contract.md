@@ -1,134 +1,141 @@
 # Codex Plugin Package Contract
 
-Use this contract to keep plugin scaffolds and conversions aligned with the enforced JSON specs.
+Use this contract to keep plugin scaffolds and conversions aligned with:
+- the current `openai/codex` runtime manifest loader;
+- the curated `openai/plugins` repository layout and examples;
+- the pinned upstream `plugin-creator` skill in `openai/plugins`.
 
-## Required package root surfaces
-- `.codex-plugin/plugin.json` (required)
-- `README.md` (required)
-- `LICENSE` (required)
+## Runtime-required package surface
+- `.codex-plugin/plugin.json` is the only package file the current Codex runtime requires.
+- `plugin.json` should include a non-empty kebab-case `name`.
+- `skills`, `mcpServers`, and `apps` path values must start with `./` and stay within the plugin root.
+- `interface.defaultPrompt` currently validates as:
+  - a single string, or
+  - a list of strings,
+  - with at most 3 entries and 128 characters per entry.
 
-## Required support surfaces
-- `references/operational-spec.md` (required)
-- `references/deconflict-report.md` (recommended when overlap review finds an exact or similar sibling plugin)
+## Curated and repo-level conventions
 
-`references/operational-spec.md` must provide:
-- a transition table as the source of truth;
-- explicit failure states for validation, blocked, policy, timeout, system, and plugin failures;
-- a Mermaid diagram derived strictly from the transition table;
-- plugin contract metadata, plugin registry, capability map, idempotency, invariants, dry-run simulation, transition tracing, and log fields.
+These are valid and common, but they are not part of the minimal runtime contract:
+- `README.md`
+- `LICENSE`
+- `references/operational-spec.md`
+- `references/deconflict-report.md`
+- `hooks.json`
+- `commands/`
+- `agents/`
+- `assets/`
+- `.mcp.json`
+- `.app.json`
+
+This builder still scaffolds several of those files by default because they are useful for local packaging and they appear in curated `openai/plugins` examples, but the validator should not reject a plugin solely because those helper files are absent.
+
+## Source reconciliation notes
+- The local draft spec in `codex_plugins_spec.md` describes `interface.defaultPrompt` as a string or a list of `{title, prompt}` objects.
+- The current `openai/codex` source accepts a string or a list of strings, so this builder validates the runtime-compatible form.
+- The local draft spec also describes `mcpServers` as a directory path, while curated upstream plugins and current builder defaults commonly use `./.mcp.json`.
+- When sources disagree, prefer current runtime behavior first, then curated `openai/plugins` examples.
 
 ## Deconflict review
 - Before creating a new plugin package, compare it against the existing local plugin directory.
 - Prefer merge, fold, or improvement work when an existing package already serves the same job.
 - Treat unexplained duplicate-intent packages as a packaging smell even when the manifest is otherwise valid.
 
-## Optional package surfaces
-- `skills/`
-- `hooks/` or `hooks.json`
-- `prompts/` (optional)
-- `agents/` (optional)
-- `scripts/`
-- `assets/`
-- `.mcp.json`
-- `.app.json`
-
-## Plugin JSON sample spec
+## Runtime manifest example
 
 ```json
 {
   "name": "plugin-name",
-  "version": "1.2.0",
+  "description": "Brief plugin description",
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "apps": "./.app.json",
+  "interface": {
+    "displayName": "Plugin Display Name",
+    "shortDescription": "One-line summary",
+    "longDescription": "Longer plugin description",
+    "developerName": "OpenAI",
+    "category": "Design",
+    "capabilities": ["Interactive", "Read", "Write"],
+    "websiteURL": "https://example.com",
+    "privacyPolicyURL": "https://example.com/privacy",
+    "termsOfServiceURL": "https://example.com/terms",
+    "defaultPrompt": "Inspect a design and implement it in code.",
+    "brandColor": "#0D99FF",
+    "composerIcon": "./assets/icon.png",
+    "logo": "./assets/logo.png",
+    "screenshots": []
+  }
+}
+```
+
+## Curated manifest example
+
+The curated `openai/plugins` repo commonly adds richer metadata on top of the runtime shape:
+
+```json
+{
+  "name": "plugin-name",
+  "version": "0.1.0",
   "description": "Brief plugin description",
   "author": {
     "name": "Author Name",
     "email": "author@example.com",
-    "url": "https://github.com/author"
+    "url": "https://example.com"
   },
   "homepage": "https://docs.example.com/plugin",
-  "repository": "https://github.com/author/plugin",
+  "repository": "https://github.com/org/repo",
   "license": "MIT",
-  "keywords": ["keyword1", "keyword2"],
+  "keywords": ["plugin", "example"],
   "skills": "./skills/",
   "hooks": "./hooks.json",
   "mcpServers": "./.mcp.json",
   "apps": "./.app.json",
   "interface": {
     "displayName": "Plugin Display Name",
-    "shortDescription": "Short description for subtitle",
-    "longDescription": "Long description for details page",
-    "developerName": "OpenAI",
-    "category": "Productivity",
-    "capabilities": ["Interactive", "Write"],
-    "websiteURL": "https://openai.com/",
-    "privacyPolicyURL": "https://openai.com/policies/row-privacy-policy/",
-    "termsOfServiceURL": "https://openai.com/policies/row-terms-of-use/",
-    "defaultPrompt": "Starter prompt for trying a plugin",
-    "brandColor": "#3B82F6",
-    "composerIcon": "./assets/icon.png",
-    "logo": "./assets/logo.png",
-    "screenshots": [
-      "./assets/screenshot1.png",
-      "./assets/screenshot2.png",
-      "./assets/screenshot3.png"
-    ]
+    "defaultPrompt": "Try this plugin"
   }
 }
 ```
 
-## Plugin field guide
+## Manifest field guide
 
 ### Top-level fields
-- `name` (`string`): Plugin identifier (kebab-case, no spaces). Required if `plugin.json` is provided and used as manifest name and component namespace.
-- `version` (`string`): Plugin semantic version.
-- `description` (`string`): Short purpose summary.
-- `author` (`object`): Publisher identity.
-  - `name` (`string`): Author or team name.
-  - `email` (`string`): Contact email.
-  - `url` (`string`): Author or team homepage or profile URL.
-- `homepage` (`string`): Documentation URL for plugin usage.
-- `repository` (`string`): Source code URL.
-- `license` (`string`): License identifier (for example `MIT`, `Apache-2.0`).
-- `keywords` (`array[string]`): Search and discovery tags.
-- `skills` (`string`): Relative path to skill directories or files.
-- `hooks` (`string`): Hook config path.
-- `mcpServers` (`string`): MCP config path.
-- `apps` (`string`): App manifest path for plugin integrations.
-- `interface` (`object`): Interface and UX metadata block for plugin presentation.
+- `name` (`string`): required by this builder. Use kebab-case and keep it aligned with the folder name.
+- `description` (`string`): optional runtime summary.
+- `skills` (`string`): optional relative path to plugin skills.
+- `mcpServers` (`string`): optional relative path. Current curated examples use `./.mcp.json`.
+- `apps` (`string`): optional relative path. Current curated examples use `./.app.json`.
+- `interface` (`object`): optional UI metadata block.
+- `hooks` (`string`): optional curated metadata path. Curated examples use `./hooks.json`.
+- `version`, `author`, `homepage`, `repository`, `license`, `keywords`: optional curated metadata fields. They are common in `openai/plugins` but are not required by the current runtime manifest loader.
 
 ### `interface` fields
-- `displayName` (`string`): User-facing title shown for the plugin.
-- `shortDescription` (`string`): Brief subtitle used in compact views.
-- `longDescription` (`string`): Longer description used on details screens.
-- `developerName` (`string`): Human-readable publisher name.
-- `category` (`string`): Plugin category bucket.
-- `capabilities` (`array[string]`): Capability list from implementation.
-- `websiteURL` (`string`): Public website for the plugin.
-- `privacyPolicyURL` (`string`): Privacy policy URL.
-- `termsOfServiceURL` (`string`): Terms of service URL.
-- `defaultPrompt` (`string`): Starter prompt shown in composer context.
-- `brandColor` (`string`): Theme color for the plugin card.
-- `composerIcon` (`string`): Path to icon asset.
-- `logo` (`string`): Path to logo asset.
-- `screenshots` (`array[string]`): Screenshot asset paths.
-  - Screenshot entries must be PNG filenames under `./assets/`.
-  - File paths must remain relative to plugin root.
+- All `interface` fields are optional.
+- `capabilities` must be an array of strings when present.
+- `screenshots` must be an array of relative plugin paths when present.
+- `composerIcon` and `logo` must be relative plugin paths when present.
+- `defaultPrompt` should follow the runtime-compatible shape documented above.
 
 ### Path conventions and defaults
 - Path values should be relative and begin with `./`.
-- `skills`, `hooks`, and `mcpServers` are supplemented on top of default component discovery; they do not replace defaults.
-- Custom path values must follow plugin root convention and naming rules.
-- This scaffold writes `.codex-plugin/plugin.json` and treats it as the canonical manifest location.
+- Declared manifest paths must stay inside the plugin root.
+- If a manifest declares `skills`, `hooks`, `mcpServers`, or `apps`, the referenced path should exist.
+- Current curated examples and this builder both prefer:
+  - `./skills/`
+  - `./hooks.json`
+  - `./.mcp.json`
+  - `./.app.json`
 
-## Marketplace JSON sample spec
+## Marketplace JSON example
 
 `marketplace.json` lives at `<repo-root>/.agents/plugins/marketplace.json`.
 
 ```json
 {
-  "schema_version": 1,
   "name": "openai-curated",
   "interface": {
-    "displayName": "OpenAI Curated"
+    "displayName": "ChatGPT Official"
   },
   "plugins": [
     {
@@ -150,30 +157,23 @@ Use this contract to keep plugin scaffolds and conversions aligned with the enfo
 ## Marketplace field guide
 
 ### Top-level fields
-- `schema_version` (`number`): Marketplace schema marker used by this repo.
-- `name` (`string`): Marketplace identifier or catalog name.
-- `interface` (`object`): Marketplace presentation metadata.
-  - `displayName` (`string`): User-facing marketplace title.
-- `plugins` (`array`): Ordered plugin entries. The order controls render order.
+- `name` (`string`): marketplace identifier or catalog name.
+- `interface.displayName` (`string`): user-facing marketplace title.
+- `plugins` (`array`): ordered plugin entries. Order controls render order.
 
 ### Plugin entry fields
-- `name` (`string`): Plugin identifier. Must match folder name and `plugin.json` `name`.
-- `source` (`object`): Plugin source descriptor.
-  - `source` (`string`): Use `local` for this workflow.
-  - `path` (`string`): Relative plugin path, always `./plugins/<plugin-name>`.
-- `policy` (`object`): Install and auth policy block.
-  - `installation` (`string`): Availability policy.
-  - Allowed values: `NOT_AVAILABLE`, `AVAILABLE`, `INSTALLED_BY_DEFAULT`
-  - Default for new entries: `AVAILABLE`
-  - `authentication` (`string`): Authentication timing policy.
-  - Allowed values: `ON_INSTALL`, `ON_USE`
-  - Default for new entries: `ON_INSTALL`
-- `category` (`string`): Display category bucket.
+- `name` (`string`): plugin identifier. Keep it aligned with the folder name and manifest `name`.
+- `source.source` (`string`): use `local`.
+- `source.path` (`string`): always `./plugins/<plugin-name>`.
+- `policy.installation` (`string`): one of `NOT_AVAILABLE`, `AVAILABLE`, `INSTALLED_BY_DEFAULT`.
+- `policy.authentication` (`string`): one of `ON_INSTALL`, `ON_USE`.
+- `category` (`string`): recommended and emitted by this builder, but accepted as optional for compatibility with existing curated entries that omit it.
+- `policy.products` (`array`): optional override. Only add it when the user explicitly asks for product gating.
 
 ### Marketplace generation rules
 - Always include marketplace `interface.displayName`.
-- Always emit `policy.installation`, `policy.authentication`, and `category` on each generated or updated plugin entry.
-- During migration, validators may accept legacy flat `installPolicy` and `authPolicy`, but scaffolds should not emit them.
+- Scaffolds should emit `policy.installation`, `policy.authentication`, and `category` on each generated or updated plugin entry.
+- Validators should accept legacy flat `installPolicy` and `authPolicy` during migration.
 - Append new entries unless the user explicitly requests reordering.
 - Replace an existing entry for the same plugin only when overwrite is intentional.
 
@@ -193,11 +193,11 @@ python3 utilities/codex-plugin-builder/scripts/plugin_builder.py validate <path/
 Use `inspect-source` before conversion when the input may be:
 - a marketplace repo with nested plugins;
 - a provider-converter repo with multiple manifest formats;
-- a plugin that declares custom paths for `commands`, `skills`, `agents`, `hooks`, or `mcpServers`;
+- a plugin that declares custom paths for `commands`, `skills`, `agents`, `hooks`, `mcpServers`, or `apps`;
 - a plugin that embeds `mcpServers` inline instead of using only `./.mcp.json`.
 
 Use `scaffold --from-source-path ...` when you want the scaffold to auto-create likely Codex surfaces from the inspected source plugin root.
-The scaffold also emits `references/operational-spec.md` for every plugin package it creates.
+The scaffold also emits `references/operational-spec.md` for locally created packages.
 When overlap review is relevant, the scaffold also emits `references/deconflict-report.md`.
 
 ## Claude-to-Codex conversion requirement
@@ -206,4 +206,4 @@ When the source plugin is Claude-oriented, apply `references/terminology-map.md`
 
 Minimum enforced mapping:
 - `.claude-plugin/plugin.json` -> `.codex-plugin/plugin.json`
-- `commands/` and slash-command terminology -> `prompts/`
+- legacy manifest command keys -> `prompts/`, `skills/`, and or `interface.defaultPrompt`

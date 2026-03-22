@@ -35,54 +35,36 @@ SOURCE_SURFACE_DEFAULTS = {
     "agents": ["./agents"],
     "hooks": ["./hooks.json", "./hooks/hooks.json"],
     "mcpServers": ["./.mcp.json"],
+    "apps": ["./.app.json"],
 }
 SOURCE_CODEX_SUPPORT_DOCS = (
     ".codex/INSTALL.md",
     "docs/README.codex.md",
 )
 
-REQUIRED_PLUGIN_ROOT_FILES = [
-    ".codex-plugin/plugin.json",
-    "README.md",
-    "LICENSE",
-]
-REQUIRED_PLUGIN_SUPPORT_FILES = [
-    "references/operational-spec.md",
-]
+REQUIRED_PLUGIN_ROOT_FILES = [".codex-plugin/plugin.json"]
 
-REQUIRED_PLUGIN_FIELDS = [
-    "name",
-    "version",
+OPTIONAL_PLUGIN_STRING_FIELDS = [
     "description",
-    "author",
+    "version",
     "homepage",
     "repository",
     "license",
-    "keywords",
-    "skills",
-    "hooks",
-    "mcpServers",
-    "apps",
-    "interface",
 ]
-
-REQUIRED_AUTHOR_FIELDS = ["name", "email", "url"]
-REQUIRED_INTERFACE_FIELDS = [
+OPTIONAL_PLUGIN_PATH_FIELDS = ["skills", "hooks", "mcpServers", "apps"]
+OPTIONAL_AUTHOR_FIELDS = ["name", "email", "url"]
+OPTIONAL_INTERFACE_STRING_FIELDS = [
     "displayName",
     "shortDescription",
     "longDescription",
     "developerName",
     "category",
-    "capabilities",
     "websiteURL",
     "privacyPolicyURL",
     "termsOfServiceURL",
-    "defaultPrompt",
     "brandColor",
-    "composerIcon",
-    "logo",
-    "screenshots",
 ]
+OPTIONAL_INTERFACE_PATH_FIELDS = ["composerIcon", "logo"]
 
 CLAUDE_TO_CODEX_TERMINOLOGY = {
     "commands/": "prompts/ or skills/ or both",
@@ -142,8 +124,12 @@ def validate_plugin_name(plugin_name: str) -> None:
         )
 
 
-def build_plugin_json(plugin_name: str) -> dict[str, Any]:
-    return {
+def build_plugin_json(
+    plugin_name: str,
+    enabled_surfaces: dict[str, bool] | None = None,
+) -> dict[str, Any]:
+    enabled_surfaces = enabled_surfaces or {}
+    payload: dict[str, Any] = {
         "name": plugin_name,
         "version": "0.1.0",
         "description": "[TODO: Brief plugin description]",
@@ -156,10 +142,6 @@ def build_plugin_json(plugin_name: str) -> dict[str, Any]:
         "repository": "[TODO: https://github.com/author/plugin]",
         "license": "MIT",
         "keywords": ["plugin", plugin_name],
-        "skills": "./skills/",
-        "hooks": "./hooks.json",
-        "mcpServers": "./.mcp.json",
-        "apps": "./.app.json",
         "interface": {
             "displayName": "[TODO: Plugin Display Name]",
             "shortDescription": "[TODO: Short description for subtitle]",
@@ -172,15 +154,29 @@ def build_plugin_json(plugin_name: str) -> dict[str, Any]:
             "termsOfServiceURL": "[TODO: https://openai.com/policies/row-terms-of-use/]",
             "defaultPrompt": "[TODO: Starter prompt for trying a plugin]",
             "brandColor": "#3B82F6",
-            "composerIcon": "./assets/icon.png",
-            "logo": "./assets/logo.png",
-            "screenshots": [
-                "./assets/screenshot1.png",
-                "./assets/screenshot2.png",
-                "./assets/screenshot3.png",
-            ],
         },
     }
+    if enabled_surfaces.get("skills"):
+        payload["skills"] = "./skills/"
+    if enabled_surfaces.get("hooks"):
+        payload["hooks"] = "./hooks.json"
+    if enabled_surfaces.get("mcp"):
+        payload["mcpServers"] = "./.mcp.json"
+    if enabled_surfaces.get("apps"):
+        payload["apps"] = "./.app.json"
+    if enabled_surfaces.get("assets"):
+        payload["interface"].update(
+            {
+                "composerIcon": "./assets/icon.png",
+                "logo": "./assets/logo.png",
+                "screenshots": [
+                    "./assets/screenshot1.png",
+                    "./assets/screenshot2.png",
+                    "./assets/screenshot3.png",
+                ],
+            }
+        )
+    return payload
 
 
 def _tokenize_text(*values: str) -> set[str]:
@@ -292,7 +288,7 @@ def _source_signature_from_report(
             "skills": bool(detected_surfaces.get("skills")),
             "hooks": bool(detected_surfaces.get("hooks")),
             "mcpServers": bool(detected_surfaces.get("mcpServers")),
-            "apps": False,
+            "apps": bool(detected_surfaces.get("apps")),
             "prompts": bool(detected_surfaces.get("commands")),
             "agents": bool(detected_surfaces.get("agents")),
         }
@@ -355,7 +351,6 @@ def _optional_json(path: Path) -> dict[str, Any] | None:
 
 def build_default_marketplace() -> dict[str, Any]:
     return {
-        "schema_version": 1,
         "name": "[TODO: marketplace-name]",
         "interface": {
             "displayName": "[TODO: Marketplace Display Name]",
@@ -381,6 +376,56 @@ def _ensure_marketplace_interface(payload: dict[str, Any]) -> None:
     payload["interface"] = {
         "displayName": _display_name_from_identifier(marketplace_name),
     }
+
+
+def _check_string_list(value: Any, field_name: str) -> list[str]:
+    if not isinstance(value, list) or not all(isinstance(item, str) for item in value):
+        return [f"{field_name} must be an array of strings."]
+    return []
+
+
+def _check_declared_plugin_path(
+    plugin_root: Path,
+    field_name: str,
+    value: Any,
+    *,
+    require_exists: bool,
+) -> list[str]:
+    failures: list[str] = []
+    if not _is_relative_plugin_path(value):
+        return [f"{field_name} must be a relative path starting with './'."]
+    candidate = (plugin_root / value[2:]).resolve()
+    if not _path_within_root(plugin_root, candidate):
+        failures.append(f"{field_name} must stay within the plugin root.")
+        return failures
+    if require_exists and not candidate.exists():
+        failures.append(f"{field_name} points to a missing path: {value}")
+    return failures
+
+
+def _check_default_prompt(value: Any) -> list[str]:
+    prompts: list[str]
+    if isinstance(value, str):
+        prompts = [value]
+    elif isinstance(value, list) and all(isinstance(item, str) for item in value):
+        prompts = value
+    else:
+        return [
+            "plugin.json interface.defaultPrompt must be a string or an array of strings."
+        ]
+
+    failures: list[str] = []
+    if len(prompts) > 3:
+        failures.append(
+            "plugin.json interface.defaultPrompt supports at most 3 prompts."
+        )
+    for prompt in prompts:
+        if len(prompt) > 128:
+            failures.append(
+                "plugin.json interface.defaultPrompt entries must be 128 characters or fewer."
+            )
+            break
+    return failures
 
 
 def write_json(path: Path, data: dict[str, Any], force: bool) -> None:
@@ -1395,8 +1440,10 @@ def _check_required_fields(
 def _check_plugin_manifest(plugin_json_path: Path) -> list[str]:
     failures: list[str] = []
     payload = load_json(plugin_json_path)
+    plugin_root = plugin_json_path.parent.parent
 
-    failures.extend(_check_required_fields(payload, REQUIRED_PLUGIN_FIELDS, "plugin.json"))
+    if "name" not in payload:
+        failures.append("Missing required plugin.json field: name")
 
     name = payload.get("name")
     if isinstance(name, str):
@@ -1407,56 +1454,81 @@ def _check_plugin_manifest(plugin_json_path: Path) -> list[str]:
     else:
         failures.append("plugin.json field 'name' must be a string.")
 
-    if not isinstance(payload.get("keywords"), list):
-        failures.append("plugin.json field 'keywords' must be an array of strings.")
-    elif not all(isinstance(item, str) for item in payload["keywords"]):
-        failures.append("plugin.json field 'keywords' must contain only strings.")
+    for field_name in OPTIONAL_PLUGIN_STRING_FIELDS:
+        if field_name in payload and not isinstance(payload[field_name], str):
+            failures.append(f"plugin.json field '{field_name}' must be a string.")
 
-    author = payload.get("author")
-    if not isinstance(author, dict):
-        failures.append("plugin.json field 'author' must be an object.")
-    else:
-        failures.extend(_check_required_fields(author, REQUIRED_AUTHOR_FIELDS, "author"))
-        for key in REQUIRED_AUTHOR_FIELDS:
-            if key in author and not isinstance(author[key], str):
-                failures.append(f"plugin.json author.{key} must be a string.")
+    if "keywords" in payload:
+        failures.extend(
+            _check_string_list(payload.get("keywords"), "plugin.json field 'keywords'")
+        )
 
-    for path_key in ("skills", "hooks", "mcpServers", "apps"):
-        if path_key in payload and not _is_relative_plugin_path(payload[path_key]):
-            failures.append(
-                f"plugin.json field '{path_key}' must be a relative path starting with './'."
+    if "author" in payload:
+        author = payload.get("author")
+        if not isinstance(author, dict):
+            failures.append("plugin.json field 'author' must be an object.")
+        else:
+            for key in OPTIONAL_AUTHOR_FIELDS:
+                if key in author and not isinstance(author[key], str):
+                    failures.append(f"plugin.json author.{key} must be a string.")
+
+    for path_key in OPTIONAL_PLUGIN_PATH_FIELDS:
+        if path_key in payload:
+            failures.extend(
+                _check_declared_plugin_path(
+                    plugin_root,
+                    f"plugin.json field '{path_key}'",
+                    payload[path_key],
+                    require_exists=True,
+                )
             )
 
     interface = payload.get("interface")
-    if not isinstance(interface, dict):
-        failures.append("plugin.json field 'interface' must be an object.")
-    else:
-        failures.extend(_check_required_fields(interface, REQUIRED_INTERFACE_FIELDS, "interface"))
-        for key in REQUIRED_INTERFACE_FIELDS:
-            if key == "capabilities":
-                value = interface.get(key)
-                if not isinstance(value, list) or not all(isinstance(item, str) for item in value):
-                    failures.append("plugin.json interface.capabilities must be an array of strings.")
-            elif key == "screenshots":
-                value = interface.get(key)
-                if not isinstance(value, list) or not all(isinstance(item, str) for item in value):
-                    failures.append("plugin.json interface.screenshots must be an array of strings.")
-                else:
-                    for shot in value:
-                        if not shot.startswith("./assets/") or not shot.lower().endswith(".png"):
-                            failures.append(
-                                "plugin.json interface.screenshots entries must be PNG paths "
-                                "under './assets/'."
-                            )
-            else:
+    if interface is not None:
+        if not isinstance(interface, dict):
+            failures.append("plugin.json field 'interface' must be an object when present.")
+        else:
+            for key in OPTIONAL_INTERFACE_STRING_FIELDS:
                 if key in interface and not isinstance(interface[key], str):
                     failures.append(f"plugin.json interface.{key} must be a string.")
 
-        for path_key in ("composerIcon", "logo"):
-            if path_key in interface and not _is_relative_plugin_path(interface[path_key]):
-                failures.append(
-                    f"plugin.json interface.{path_key} must be a relative path starting with './'."
+            if "capabilities" in interface:
+                failures.extend(
+                    _check_string_list(
+                        interface.get("capabilities"),
+                        "plugin.json interface.capabilities",
+                    )
                 )
+            if "screenshots" in interface:
+                failures.extend(
+                    _check_string_list(
+                        interface.get("screenshots"),
+                        "plugin.json interface.screenshots",
+                    )
+                )
+                if isinstance(interface.get("screenshots"), list):
+                    for index, screenshot in enumerate(interface["screenshots"]):
+                        failures.extend(
+                            _check_declared_plugin_path(
+                                plugin_root,
+                                f"plugin.json interface.screenshots[{index}]",
+                                screenshot,
+                                require_exists=False,
+                            )
+                        )
+            if "defaultPrompt" in interface:
+                failures.extend(_check_default_prompt(interface.get("defaultPrompt")))
+
+            for path_key in OPTIONAL_INTERFACE_PATH_FIELDS:
+                if path_key in interface:
+                    failures.extend(
+                        _check_declared_plugin_path(
+                            plugin_root,
+                            f"plugin.json interface.{path_key}",
+                            interface[path_key],
+                            require_exists=False,
+                        )
+                    )
 
     for legacy_key in ("commands", "slashCommands", "slash_commands"):
         if legacy_key in payload:
@@ -1534,8 +1606,11 @@ def _check_marketplace_entry(
             f"{sorted(VALID_AUTH_POLICIES)}."
         )
 
-    if not isinstance(plugin_entry.get("category"), str) or not plugin_entry.get("category"):
-        failures.append(f"marketplace plugin '{plugin_name}' category must be a non-empty string.")
+    category = plugin_entry.get("category")
+    if category is not None and (not isinstance(category, str) or not category):
+        failures.append(
+            f"marketplace plugin '{plugin_name}' category must be a non-empty string when present."
+        )
 
     return failures
 
@@ -1583,13 +1658,6 @@ def _run_scaffold(args: argparse.Namespace) -> int:
             )
             return 2
 
-    plugin_root.mkdir(parents=True, exist_ok=True)
-
-    plugin_json_path = plugin_root / ".codex-plugin" / "plugin.json"
-    write_json(plugin_json_path, build_plugin_json(plugin_name), args.force)
-    write_text(plugin_root / "README.md", _readme_template(plugin_name), args.force)
-    write_text(plugin_root / "LICENSE", _license_template(), args.force)
-
     optional_directories = {
         "skills": args.with_skills or bool(source_report and source_report["detected_surfaces"]["skills"]),
         "hooks": args.with_hooks or bool(source_report and (Path(source_report["plugin_root"]) / "hooks").exists()),
@@ -1617,8 +1685,16 @@ def _run_scaffold(args: argparse.Namespace) -> int:
                 )
             )
         ),
-        "apps": bool(args.with_apps),
+        "apps": bool(args.with_apps or (source_report and source_report["detected_surfaces"].get("apps"))),
+        "assets": optional_directories["assets"],
     }
+
+    plugin_root.mkdir(parents=True, exist_ok=True)
+
+    plugin_json_path = plugin_root / ".codex-plugin" / "plugin.json"
+    write_json(plugin_json_path, build_plugin_json(plugin_name, enabled_surfaces), args.force)
+    write_text(plugin_root / "README.md", _readme_template(plugin_name), args.force)
+    write_text(plugin_root / "LICENSE", _license_template(), args.force)
 
     write_text(
         plugin_root / "references" / "operational-spec.md",
@@ -1636,7 +1712,7 @@ def _run_scaffold(args: argparse.Namespace) -> int:
         args.force,
     )
 
-    if args.with_hooks_json or (source_report and source_report["detected_surfaces"]["hooks"]):
+    if enabled_surfaces["hooks"]:
         create_stub_file(
             plugin_root / "hooks.json",
             {"hooks": {"SessionStart": [], "Stop": []}},
@@ -1656,7 +1732,7 @@ def _run_scaffold(args: argparse.Namespace) -> int:
             args.force,
         )
 
-    if args.with_apps:
+    if enabled_surfaces["apps"]:
         create_stub_file(
             plugin_root / ".app.json",
             {"apps": {}},
@@ -1694,10 +1770,6 @@ def _run_validate(args: argparse.Namespace) -> int:
         required_path = plugin_root / required_rel
         if not required_path.exists():
             findings.append(f"Missing required file: {required_path}")
-    for required_rel in REQUIRED_PLUGIN_SUPPORT_FILES:
-        required_path = plugin_root / required_rel
-        if not required_path.exists():
-            findings.append(f"Missing required support file: {required_path}")
 
     legacy_claude_manifest = plugin_root / ".claude-plugin" / "plugin.json"
     if legacy_claude_manifest.exists():
@@ -1732,21 +1804,6 @@ def _run_validate(args: argparse.Namespace) -> int:
                     f"Missing deconflict report for overlapping plugin intent: {deconflict_report_path}"
                 )
 
-    # Claude -> Codex terminology enforcement for conversion safety.
-    commands_dir = plugin_root / "commands"
-    prompts_dir = plugin_root / "prompts"
-    slash_commands_dir = plugin_root / "slash-commands"
-    if commands_dir.exists() and not prompts_dir.exists():
-        findings.append(
-            "Detected Claude-oriented `commands/` without Codex `prompts/`. "
-            "Map commands semantically into Codex prompts, skills, or both during conversion."
-        )
-    if slash_commands_dir.exists() and not prompts_dir.exists():
-        findings.append(
-            "Detected `slash-commands/` without Codex `prompts/`. "
-            "Map slash commands -> prompts during conversion."
-        )
-
     marketplace_path = Path(args.marketplace_path).expanduser().resolve()
     if args.require_marketplace:
         if not marketplace_path.exists():
@@ -1758,9 +1815,6 @@ def _run_validate(args: argparse.Namespace) -> int:
             findings.extend(
                 _check_marketplace_entry(marketplace_payload, plugin_root.name)
             )
-    elif marketplace_path.exists():
-        marketplace_payload = load_json(marketplace_path)
-        findings.extend(_check_marketplace_entry(marketplace_payload, plugin_root.name))
 
     _print_findings(findings)
     return 0 if not findings else 2
