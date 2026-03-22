@@ -149,6 +149,7 @@ Default to `create` or `improve`.
 - category confirmation (for create/improve) with rationale for any category tradeoff.
 
 If critical inputs are missing, ask only the minimum needed to proceed safely.
+- When inputs are missing, phrase each critical item as a direct question ending in `?`; do not only list field names or placeholders.
 
 ## Discovery interview
 Run discovery for underspecified `create` or `improve` requests.
@@ -186,7 +187,19 @@ Produce only what the request needs, usually:
 - Stale type index after tag edits -> semantic sync skipped -> run sandbox-safe sync, then `bash scripts/lint_skill_types.sh`.
 
 ## Response format
-For non-trivial responses, start with `## When to use`, `## Required inputs`, `## Deliverables`, and `## Examples`; confirm applicability, missing inputs, and planned checks in that order.
+For non-trivial first responses in `create`, `improve`, `eval`, or `benchmark-lite`, start with these exact top-level headings in this order:
+- `## Scope and triggers`
+- `## Required inputs`
+- `## Deliverables`
+- `## Failure mode`
+- `## Examples`
+
+Heading contract:
+- use the exact heading text above; do not substitute aliases such as `## When to use`;
+- keep each section short if the user asked for a concise first response, but still include the heading;
+- under `## Scope and triggers`, briefly confirm whether this skill applies, the likely category, and the boundary of the work;
+- under `## Required inputs`, ask the minimum missing items as direct questions with `?`;
+- under `## Failure mode`, say what happens if the request is out of scope or critical inputs remain missing.
 ### Deterministic response details
 Keep first response compact and install-focused:
 - include deconflict-first ordering;
