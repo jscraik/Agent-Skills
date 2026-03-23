@@ -14,13 +14,13 @@ Generated from `metadata.skill-type` tags in skill frontmatter.
 - `product_verification`: 7
 - `data_fetch_analysis`: 6
 - `team_automation`: 22
-- `scaffolding_templates`: 25
+- `scaffolding_templates`: 26
 - `code_quality_review`: 13
 - `ci_cd_deployment`: 6
 - `runbook`: 4
 - `infrastructure_ops`: 4
 - `invalid`: 0
-- `total_tagged`: 94
+- `total_tagged`: 95
 
 ## Validation Notes
 
@@ -107,6 +107,7 @@ Generated from `metadata.skill-type` tags in skill frontmatter.
 - chatgpt-apps (product/domain)
 - cli-spec (backend)
 - codex-agent-creator (utilities)
+- codex-hooks-builder (utilities)
 - codex-plugin-builder (utilities)
 - create-auth (auth)
 - favicon-generator (frontend/graphics)

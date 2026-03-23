@@ -1,0 +1,41 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "^(startup|resume)$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/bin/zsh /Users/jamiecraik/dev/Agent-Skills/.codex/hooks/session-start.sh",
+            "timeout": 10,
+            "statusMessage": "loading repo-aware startup context"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/bin/zsh /Users/jamiecraik/dev/Agent-Skills/.codex/hooks/user-prompt-submit.sh",
+            "timeout": 10,
+            "statusMessage": "checking prompt safety and shortcut requests"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/bin/zsh /Users/jamiecraik/dev/Agent-Skills/.codex/hooks/stop-guard.sh",
+            "timeout": 10,
+            "statusMessage": "checking final-response completeness"
+          }
+        ]
+      }
+    ]
+  }
+}
