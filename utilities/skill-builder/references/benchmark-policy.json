@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "description": "Portfolio benchmark policy for skill-builder marker coverage and distribution.",
-  "validated_on": "2026-03-16",
+  "validated_on": "2026-03-23",
   "validation_notes": [
     "React latest docs line is 19.x (latest listed 19.2).",
     "Next.js support policy lists 16.x as Active LTS.",
@@ -10,7 +10,8 @@
     "MCP current protocol line in versioning docs is 2025-06-18, with 2025-11-25 release announced in protocol updates.",
     "Auto-refreshed via refresh_benchmark_policy.py on 2026-03-08.",
     "Auto-refreshed via refresh_benchmark_policy.py on 2026-03-09.",
-    "Auto-refreshed via refresh_benchmark_policy.py on 2026-03-16."
+    "Auto-refreshed via refresh_benchmark_policy.py on 2026-03-16.",
+    "Auto-refreshed via refresh_benchmark_policy.py on 2026-03-23."
   ],
   "refresh_sources": [
     {
@@ -177,19 +178,19 @@
         "wcag_2_2"
       ],
       "min_hits_fail": {
-        "react_19": 2,
-        "next_16": 2,
-        "tailwind_v4": 3,
-        "wcag_2_2": 2
-      },
-      "min_hits_warn": {
         "react_19": 3,
         "next_16": 3,
         "tailwind_v4": 4,
         "wcag_2_2": 3
       },
-      "min_coverage_fail": 0.15,
-      "min_coverage_warn": 0.25
+      "min_hits_warn": {
+        "react_19": 3,
+        "next_16": 3,
+        "tailwind_v4": 5,
+        "wcag_2_2": 3
+      },
+      "min_coverage_fail": 0.2,
+      "min_coverage_warn": 0.263
     },
     "github": {
       "required_all": [
@@ -201,7 +202,7 @@
       "min_hits_warn": {
         "gha_sha_pin": 4
       },
-      "min_coverage_fail": 0.6,
+      "min_coverage_fail": 0.65,
       "min_coverage_warn": 1.0
     },
     "cloudflare_backend": {
@@ -214,8 +215,8 @@
       "min_hits_warn": {
         "cloudflare_workers": 2
       },
-      "min_coverage_fail": 0.35,
-      "min_coverage_warn": 0.55
+      "min_coverage_fail": 0.4,
+      "min_coverage_warn": 0.6
     },
     "openai_apps": {
       "required_all": [
@@ -227,8 +228,8 @@
       "min_hits_warn": {
         "responses_api": 2
       },
-      "min_coverage_fail": 0.25,
-      "min_coverage_warn": 0.383
+      "min_coverage_fail": 0.3,
+      "min_coverage_warn": 0.433
     },
     "security": {
       "required_all": [
@@ -240,7 +241,7 @@
       "min_hits_warn": {
         "owasp_top10": 3
       },
-      "min_coverage_fail": 0.4,
+      "min_coverage_fail": 0.45,
       "min_coverage_warn": 0.65
     },
     "mcp": {
@@ -253,8 +254,8 @@
       "min_hits_warn": {
         "mcp_spec": 2
       },
-      "min_coverage_fail": 0.35,
-      "min_coverage_warn": 0.55
+      "min_coverage_fail": 0.4,
+      "min_coverage_warn": 0.6
     },
     "backend_general": {},
     "interview": {},
