@@ -22,7 +22,9 @@ cases:
       - type: contains
         value: "Missing config.toml"
       - type: contains
-        value: "Fail fast"
+        value: "Blockers"
+      - type: contains
+        value: "Wrote report"
 
   - name: failure-mode
     prompt: "Deploy my app from this repo."
@@ -35,6 +37,6 @@ cases:
         value: "redirect"
 
 metadata:
-  last_updated: "2026-02-09"
+  last_updated: "2026-03-22"
   author: "Jamie Craik + Codex"
   review_status: "draft"

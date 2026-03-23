@@ -20,15 +20,49 @@ These are valid and common, but they are not part of the minimal runtime contrac
 - `README.md`
 - `LICENSE`
 - `references/operational-spec.md`
+- `references/package-guide.md`
 - `references/deconflict-report.md`
 - `hooks.json`
-- `commands/`
 - `agents/`
 - `assets/`
 - `.mcp.json`
 - `.app.json`
 
 This builder still scaffolds several of those files by default because they are useful for local packaging and they appear in curated `openai/plugins` examples, but the validator should not reject a plugin solely because those helper files are absent.
+
+## Capability-driven optional surfaces
+- `.mcp.json` should exist only when the plugin contributes real MCP wiring that the manifest exposes through `mcpServers`.
+- `.app.json` should exist only when the plugin contributes a real app integration surface that the manifest exposes through `apps`.
+- Recommended external MCPs that are not packaged runtime wiring belong in `README.md` or `references/package-guide.md`, not in `.mcp.json`.
+- `assets/` is optional package storage; do not declare `interface.composerIcon`, `interface.logo`, or `interface.screenshots` until the referenced files exist.
+- When image assets are required, use `imagegen` or another deterministic asset workflow to create the actual files before wiring them into the manifest.
+
+## Helper ownership in this repo
+- `skill-builder` owns plugin-owned skill bundles under `skills/<skill-name>/`.
+- `codex-agent-builder` owns plugin-owned root agent configs under `agents/<agent-name>.toml`.
+- `docs-expert` owns the shared templates for `README.md`, `LICENSE`, and `references/package-guide.md`.
+- `codex-plugin-builder` should orchestrate those helpers, then add plugin-specific runtime files such as `.codex-plugin/plugin.json`, `hooks.json`, and, when truly needed, `.mcp.json`, `.app.json`, plus operational/deconflict docs.
+
+## Archetype-driven curated defaults
+- Use archetypes to make new plugin manifests and marketplace entries look more like real curated packages without changing the minimal runtime contract.
+- Current local archetypes are:
+  - `coding_tool`
+  - `productivity_connector`
+  - `design_tool`
+  - `research_connector`
+  - `communication_connector`
+  - `automation_orchestrator`
+- Archetypes should influence:
+  - manifest description and interface placeholders/defaults,
+  - suggested `interface.category`,
+  - suggested marketplace `category`,
+  - compatibility-audit recommendations.
+- Archetypes should not force optional runtime surfaces by themselves; surface creation should still follow explicit request or source evidence.
+
+## Repo packaging policy
+- New plugin-owned workflow content should live under `skills/`.
+- Do not scaffold or ship `prompts/`, `commands/`, or `slash-commands/` as runtime package surfaces.
+- When legacy sources expose command or prompt directories, convert them into plugin-owned skills and keep `interface.defaultPrompt` only for lightweight entry text when useful.
 
 ## Source reconciliation notes
 - The local draft spec in `codex_plugins_spec.md` describes `interface.defaultPrompt` as a string or a list of `{title, prompt}` objects.
@@ -69,6 +103,8 @@ This builder still scaffolds several of those files by default because they are 
 }
 ```
 
+Only include `composerIcon`, `logo`, and `screenshots` when those files already exist.
+
 ## Curated manifest example
 
 The curated `openai/plugins` repo commonly adds richer metadata on top of the runtime shape:
@@ -104,8 +140,8 @@ The curated `openai/plugins` repo commonly adds richer metadata on top of the ru
 - `name` (`string`): required by this builder. Use kebab-case and keep it aligned with the folder name.
 - `description` (`string`): optional runtime summary.
 - `skills` (`string`): optional relative path to plugin skills.
-- `mcpServers` (`string`): optional relative path. Current curated examples use `./.mcp.json`.
-- `apps` (`string`): optional relative path. Current curated examples use `./.app.json`.
+- `mcpServers` (`string`): optional relative path. Current curated examples use `./.mcp.json`. Use it only for real MCP wiring.
+- `apps` (`string`): optional relative path. Current curated examples use `./.app.json`. Use it only for real app integrations.
 - `interface` (`object`): optional UI metadata block.
 - `hooks` (`string`): optional curated metadata path. Curated examples use `./hooks.json`.
 - `version`, `author`, `homepage`, `repository`, `license`, `keywords`: optional curated metadata fields. They are common in `openai/plugins` but are not required by the current runtime manifest loader.
@@ -113,8 +149,8 @@ The curated `openai/plugins` repo commonly adds richer metadata on top of the ru
 ### `interface` fields
 - All `interface` fields are optional.
 - `capabilities` must be an array of strings when present.
-- `screenshots` must be an array of relative plugin paths when present.
-- `composerIcon` and `logo` must be relative plugin paths when present.
+- `screenshots` must be an array of relative plugin paths when present, and each referenced file should already exist.
+- `composerIcon` and `logo` must be relative plugin paths when present, and each referenced file should already exist.
 - `defaultPrompt` should follow the runtime-compatible shape documented above.
 
 ### Path conventions and defaults
@@ -173,18 +209,34 @@ The curated `openai/plugins` repo commonly adds richer metadata on top of the ru
 ### Marketplace generation rules
 - Always include marketplace `interface.displayName`.
 - Scaffolds should emit `policy.installation`, `policy.authentication`, and `category` on each generated or updated plugin entry.
+- When category is not explicitly provided, infer it from the chosen or inferred archetype.
 - Validators should accept legacy flat `installPolicy` and `authPolicy` during migration.
 - Append new entries unless the user explicitly requests reordering.
 - Replace an existing entry for the same plugin only when overwrite is intentional.
+- Use marketplace normalization to sort entries, upgrade legacy flat policy fields, normalize `source.path`, and fill missing categories where local plugin evidence exists.
+
+## Compatibility audits
+- Treat runtime validation and curated compatibility as separate checks.
+- `validate` should answer: is this package valid for current runtime and local contract rules?
+- `audit-compat` should answer: does this package look like a strong curated plugin package based on current `openai/plugins` patterns?
+- `audit-marketplace` should answer: does the marketplace cover local plugins cleanly and consistently?
+- `normalize-marketplace` should make safe catalog-only fixes such as:
+  - sort entries by plugin name,
+  - normalize `source.source` and `source.path`,
+  - migrate `installPolicy` and `authPolicy` into `policy.installation` and `policy.authentication`,
+  - fill missing category values using local plugin evidence when possible.
 
 ## Enforced script commands
 
 ```bash
 python3 utilities/codex-plugin-builder/scripts/plugin_builder.py inspect-source <path/to/source-repo-or-plugin>
 python3 utilities/codex-plugin-builder/scripts/plugin_builder.py inspect-local <plugin-name> --path plugins
-python3 utilities/codex-plugin-builder/scripts/plugin_builder.py scaffold <plugin-name> --path plugins --with-marketplace
+python3 utilities/codex-plugin-builder/scripts/plugin_builder.py scaffold <plugin-name> --path plugins --with-marketplace --archetype coding_tool
 python3 utilities/codex-plugin-builder/scripts/plugin_builder.py scaffold <plugin-name> --path plugins --from-source-path <path/to/source-repo-or-plugin> --with-marketplace
 python3 utilities/codex-plugin-builder/scripts/plugin_builder.py validate <path/to/plugin> --require-marketplace --marketplace-path .agents/plugins/marketplace.json
+python3 utilities/codex-plugin-builder/scripts/plugin_builder.py audit-compat <path/to/plugin> --marketplace-path .agents/plugins/marketplace.json
+python3 utilities/codex-plugin-builder/scripts/plugin_builder.py audit-marketplace --marketplace-path .agents/plugins/marketplace.json --plugins-path plugins
+python3 utilities/codex-plugin-builder/scripts/plugin_builder.py normalize-marketplace --marketplace-path .agents/plugins/marketplace.json --plugins-path plugins --write
 python3 utilities/codex-plugin-builder/scripts/plugin_builder.py validate <path/to/plugin> --show-terminology-map
 ```
 
@@ -198,6 +250,7 @@ Use `inspect-source` before conversion when the input may be:
 
 Use `scaffold --from-source-path ...` when you want the scaffold to auto-create likely Codex surfaces from the inspected source plugin root.
 The scaffold also emits `references/operational-spec.md` for locally created packages.
+The scaffold also emits `references/package-guide.md` from the shared docs template set.
 When overlap review is relevant, the scaffold also emits `references/deconflict-report.md`.
 
 ## Claude-to-Codex conversion requirement
@@ -206,4 +259,4 @@ When the source plugin is Claude-oriented, apply `references/terminology-map.md`
 
 Minimum enforced mapping:
 - `.claude-plugin/plugin.json` -> `.codex-plugin/plugin.json`
-- legacy manifest command keys -> `prompts/`, `skills/`, and or `interface.defaultPrompt`
+- legacy manifest command keys, `commands/`, `slash-commands/`, and `prompts/` -> `skills/` and or `interface.defaultPrompt`

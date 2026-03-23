@@ -5,7 +5,7 @@ schema_version: "1.0"
 purpose: >
   Audit a Codex home directory (typically ~/.codex) and produce a dated Markdown
   report describing instruction loading risks, duplication/drift, rules guardrail
-  gaps, and recommended cleanups. Default behavior is report-only.
+  gaps, config drift, and recommended cleanups. Default behavior is report-only.
 
 triggers:
   - user asks to audit or improve their Codex home setup
@@ -19,6 +19,7 @@ inputs:
 outputs:
   - dated Markdown file written to out_dir (YYYY-MM-DD_HHMM.md)
   - short stdout summary including report path + top findings
+  - non-zero exit when blocker inventory is missing (for example config.toml, rules/, or any global guidance source)
   - explicit verification commands and rollback guidance embedded in the report
 
 non_goals:
@@ -36,7 +37,7 @@ examples:
     expected_output: "Writes a dated report file and prints top findings + the report path."
   edge_case:
     input: "Audit CODEX_HOME at /tmp/empty"
-    expected_output: "Fails fast, reports missing required files/dirs, exits non-zero."
+    expected_output: "Writes a blocker report, reports missing required files/dirs, and exits non-zero."
   failure_mode:
     input: "Deploy my app"
     expected_output: "Declines as out of scope and redirects to a different workflow."

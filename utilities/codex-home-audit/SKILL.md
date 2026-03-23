@@ -1,6 +1,6 @@
 ---
 name: codex-home-audit
-description: Audit and improve a Codex home directory (AGENTS.md, USER_PROFILE, instructions/, rules/, config.toml) when you want a dated report of risks, duplication, and recommended cleanups.
+description: Audit a Codex home directory (`AGENTS.md`, `AGENTS.override.md`, `config.toml`, `rules/`, profile instruction files) when you want a dated report of precedence risks, config drift, rule safety gaps, and recommended cleanups.
 metadata:
   skill-type: code_quality_review
 ---
@@ -27,9 +27,9 @@ Produce a dated Markdown audit report for a Codex home directory (default: `$COD
 Use this skill when you want to:
 - Audit a Codex home folder for **instruction precedence issues** (for example stale shadow files or conflicting guidance around `AGENTS.md`).
 - Identify **duplication/drift** across `AGENTS*` and `USER_PROFILE*`.
-- Verify `instructions/global.md` is safe/reliable (no stray code fences, no mojibake).
+- Verify the active `model_instructions_file` is safe/reliable (no stray code fences, no mojibake, no cwd-relative ambiguity).
 - Review `.rules` for **bypass risks** (especially `zsh -lc "<script>"` patterns) and missing guardrails.
-- Flag config risk hotspots (e.g. defaulting to `danger-full-access`, noisy OTel exporters).
+- Flag config risk hotspots (e.g. active `danger-full-access`, deprecated `experimental_instructions_file`, noisy OTel exporters).
 
 ## Required inputs
 - `codex_home` (path): optional. Defaults to `$CODEX_HOME` if set, otherwise `~/.codex`.
@@ -42,6 +42,7 @@ Assumptions:
 ## Standards snapshot (March 2026)
 - Treat the Codex home as an instruction and policy control plane, not a generic dotfiles folder.
 - Audit precedence, duplication, and rule safety before proposing cleanup.
+- Align with current Codex discovery rules: global scope prefers non-empty `AGENTS.override.md` over `AGENTS.md`, and the active profile can override top-level `model_instructions_file`.
 - Keep the default mode report-only; implementation should be a separate explicit step.
 - Prefer enforceable guardrails and small reversible fixes over sprawling prose reshuffles.
 
@@ -60,8 +61,8 @@ Assumptions:
 
 ## Validation
 
-Fail fast:
-- If the script cannot find `config.toml`, `rules/`, or `AGENTS.md` in the target home, stop and report what’s missing.
+Blocker exit:
+- If the script cannot find `config.toml`, cannot find any `.rules` files, or cannot identify any global guidance source (`AGENTS.override.md`, `AGENTS.md`, or configured instruction file), it still writes a report but exits non-zero.
 - If the report cannot be written, stop and return a non-zero exit status.
 
 Recommended checks after updates:
