@@ -25,7 +25,7 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - [Utilities](#utilities)
 
 ## Summary
-- `total_skills`: 91
+- `total_skills`: 103
 - `catalog_source`: repository skill scan
 
 ## Catalog
@@ -112,7 +112,18 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 
 ## Product — Ops
 
-- `compound-engineering-router` — Route Codex compound-engineering requests to the correct workflow prompt or meta-mode in the config repo, with optional NotebookLM evidence for spec quality, agent orchestration, and Codex operating patterns. Use when a user wants brainstorm, spec, plan, work, review, technical review, compound workflow guidance, context compaction, or guardrail extraction rather than direct feature coding.
+- `ce-brainstorm` — Clarify a feature or improvement before spec or planning by comparing 2-3 viable directions, choosing a recommendation, and deciding whether a spec is required. Use when a user wants help figuring out what to build, not implementing it yet.
+- `ce-compound` — Analyze compound-engineering artifact state and document verified solved problems in docs/solutions. Use when the user needs a CE request started or resumed from the right place, or wants a fresh fix turned into reusable team knowledge.
+- `ce-compound-refresh` — Refresh stale or drifting docs/solutions learnings and pattern docs against the current codebase. Use when the user wants stale solution docs reviewed after refactors, migrations, dependency upgrades, or when a retrieved learning looks outdated, contradictory, or wrong.
+- `ce-deepen-plan` — Strengthen an existing implementation plan so weak sections, sequencing, verification, and risk treatment are grounded before execution. Use when a user wants a second-pass confidence check or an exhaustive deepen-plan pass before implementation starts.
+- `ce-deepen-spec` — Deepen existing system specs and UI specs when a user wants a second-pass confidence check before planning. Tightens boundaries, lifecycle rules, failure handling, observability, and validation so planning can proceed with less guesswork.
+- `ce-ideate` — Generate and critically evaluate grounded improvement ideas for the current project before brainstorming one in depth. Use when the user asks what to improve, wants idea generation, requests surprising but grounded project directions, or wants the strongest ideas ranked before ce-brainstorm.
+- `ce-plan` — Create an execution-ready implementation plan from a spec, brainstorm, bug report, or feature description, with traceable phases, validation, rollout guidance, and optional UI-planning branches. Use when a user wants to plan HOW to build compound-engineering work, not implement it yet.
+- `ce-review` — Assess the readiness of a PR, branch, diff, or workflow artifact and surface blockers plus recommendations. Use when the user wants a broad package-level review rather than only a narrow technical critique.
+- `ce-spec` — Turn a brainstorm, existing spec, UI source, or feature description into an implementation-grade system spec or UI spec with explicit boundaries, stable acceptance IDs, validation, and handoff guidance. Use when the user wants to define WHAT must be true before planning begins.
+- `ce-technical-review` — Run a focused technical review on a diff, PR, branch, file set, spec, or plan and return only actionable, severity-ranked findings with exact locations, adherence gaps, and readiness guidance. Use when the user wants deep engineering critique rather than implementation or generic review.
+- `ce-work` — Execute a plan, todo list, or tightly scoped spec with traceable progress, validation, contract-drift control, UI execution gates, and optional external delegation. Use when the user wants compound-engineering work implemented, not just planned.
+- `compound-engineering-router` — Route Codex compound-engineering requests to the correct packaged CE skill or workflow-support meta-mode, with optional NotebookLM evidence for spec quality, agent orchestration, and Codex operating patterns. Use when a user wants ideate, brainstorm, spec, deepen-spec, plan, deepen-plan, work, review, technical review, compound, compound-refresh, context compaction, or guardrail extraction rather than direct feature coding.
 - `decide-build-primitive` — Analyze and decide the right Codex primitive (Skill, Custom Prompt, or Agent automation) for a capability. Use this when you need to plan how to package or automate a workflow.
 - `linear` — Manage Linear issues, projects, and docs through the Linear MCP workflow with consistent read/create/update operations. Use when a user asks to triage, create, update, or report on Linear work items.
 - `release` — Create and publish a new project release (semver) when you need to cut a main-branch, clean-tree release via just release X.Y.Z for Cargo publish and git tag creation.
@@ -150,8 +161,9 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - `circleci` — Use this skill when the user asks for CircleCI migration, orchestration, testing, deployment, optimization, security/secrets, config policy, integration, or developer toolkit guidance.
 - `codex-agent-creator` — Create and install Codex custom multi-agent roles when role creation, validation, or safe update is requested, using secure minimal-change configuration.
 - `codex-automation-architect` — Create, review, and merge Codex app automations; use when users need recurring automation design or consolidation with current OpenAI/Codex guidance, environment preflight, and headless multi-runner validation.
-- `codex-home-audit` — Audit and improve a Codex home directory (AGENTS.md, USER_PROFILE, instructions/, rules/, config.toml) when you want a dated report of risks, duplication, and recommended cleanups.
-- `codex-plugin-builder` — Create, convert, and validate Codex plugin packages that include focused skills, prompts, hooks, agents, and MCP metadata. Use this skill when the user asks to scaffold plugin bundles, safely convert external plugin sources, or quality-gate plugin-owned skills; do not use it for unrelated app feature work.
+- `codex-home-audit` — Audit a Codex home directory (`AGENTS*`, `config.toml`, telemetry, history, hooks, agents, skills, plugins, rules, and local state paths) when you want a dated report of control-plane drift, safety risks, retention issues, and recommended cleanups.
+- `codex-hooks-builder` — Create, upgrade, and validate Codex hook packs for project-local or user-level `.codex/` installs using the current March 2026 runtime contract. Use when you want `hooks.json` plus `SessionStart`, `UserPromptSubmit`, or `Stop` hook scripts scaffolded, hardened, or audited for a repo or Codex home.
+- `codex-plugin-builder` — Create, convert, and validate Codex plugin packages that include focused skills, hooks, agents, and MCP metadata. Use this skill when the user asks to scaffold plugin bundles, safely convert external plugin sources, or quality-gate plugin-owned skills; do not use it for unrelated app feature work.
 - `codex-sessions-skill-scan` — Session-driven skill intelligence: run daily health scans over ~/.codex sessions to detect skill failures and, when requested, audit project-local skill coverage to recommend merge/fold/improve-existing/install-new decisions grounded in memory and rollout evidence.
 - `diagram-cli` — Generate, validate, and refresh @brainwav/diagram architecture artifacts (.mmd/.svg/.diagram manifest + context packs). Use this skill when users need fast repository understanding for onboarding, PR architecture impact, and CI drift checks; do not use it for hand-drawn product/UI mock diagrams.
 - `evals-router` — Use when tasks involve designing, auditing, debugging, or scaling LLM evaluation workflows such as error analysis, judge prompt design, evaluator validation, RAG evaluation, synthetic eval-data generation, or human review interfaces; do not use for generic product analytics, ordinary QA, or unrelated UI implementation.

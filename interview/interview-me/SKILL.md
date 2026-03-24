@@ -1,6 +1,6 @@
 ---
 name: interview-me
-description: Analyze underspecified requests when tradeoff decisions are missing and run concise interviews to capture assumptions and explicit approval before implementation begins.
+description: Use this skill to analyze underspecified requests through a short interview and surface missing tradeoffs, assumptions, and approval gates before implementation when a prompt is underdefined and guessing would be risky.
 metadata:
   skill-type: team_automation
 ---
@@ -105,3 +105,13 @@ metadata:
   Cause: Missing decision ledger.
   Do instead: Maintain a compact decision + assumption log and update entries intentionally.
   Check: Each recommendation traces to a visible decision record.
+
+## See Also
+| Skill | When to use |
+|---|---|
+| [[deep-interview]] | Deepen an existing draft doc or spec rather than running a lighter clarifying interview |
+| [[architecture-interview]] | Structure a concrete architecture choice into a decision record |
+| [[brainstorming]] | Explore multiple solution directions before narrowing into interview questions |
+| [[product-spec]] | Turn the clarified outcome into a fuller product-planning specification |
+
+**Topic map:** [[product-strategy]]

@@ -1,9 +1,6 @@
 ---
 name: deep-interview
-description: Deep, gap-filling interview that enhances an existing doc/spec (preferred)
-  or explores a topic. Use when deepening PRDs, ADRs, tickets, notes, or draft specs;
-  if given a doc path, update it in-place with Delta/Interview Insights and an approval
-  gate.
+description: Deepen an existing doc or topic through a structured gap-filling interview that adds missing assumptions, edge cases, and approval gates. Use when refining PRDs, ADRs, tickets, notes, or draft specs before planning or execution.
 metadata:
   skill-type: team_automation
 ---

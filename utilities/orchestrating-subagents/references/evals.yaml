@@ -1,0 +1,102 @@
+schema_version: "2.0"
+skill_name: "orchestrating-subagents"
+cases:
+  - id: subagents-pr-review-fanout
+    name: parallel review fanout on a branch
+    category: happy
+    prompt: "Use Codex subagents to review this branch against main. Spawn one agent for correctness, one for security, and one for docs verification, then wait for all of them and summarize the findings."
+    acceptance:
+      - type: regex
+        value: "(?i)(subagents|spawn|wait|summarize)"
+      - type: regex
+        value: "(?i)(reviewer|security-sentinel|framework-docs-researcher|explorer)"
+
+  - id: subagents-legacy-swarm-migration
+    name: migrate older swarm prompt
+    category: happy
+    prompt: "Translate this old orchestrating-swarms workflow into Codex subagents without losing the useful orchestration ideas."
+    acceptance:
+      - type: regex
+        value: "(?i)(translate|legacy|swarm|Codex)"
+      - type: regex
+        value: "(?i)(spawn_agent|wait_agent|send_input|close_agent|parent-mediated)"
+
+  - id: subagents-roster-design
+    name: choose the smallest useful roster
+    category: happy
+    prompt: "I want the smallest useful Codex subagent roster for a PR review: codebase mapping, generic review, and docs verification."
+    acceptance:
+      - type: regex
+        value: "(?i)(explorer|reviewer|framework-docs-researcher)"
+
+  - id: subagents-read-only-audit
+    name: read-only shared checkout is preferred
+    category: edge
+    prompt: "Run a parallel read-only audit of this codebase with subagents, but do not let anyone edit files."
+    acceptance:
+      - type: regex
+        value: "(?i)(read-only|shared_read_only|do not edit)"
+
+  - id: subagents-disjoint-write
+    name: bounded disjoint write fanout
+    category: edge
+    prompt: "If it is safe, use subagents to update two independent directories in parallel and keep their write scopes separate."
+    acceptance:
+      - type: regex
+        value: "(?i)(disjoint|write boundaries|shared_disjoint_writes|independent directories)"
+
+  - id: subagents-worktree-escalation
+    name: escalate same-file writes to worktrees
+    category: edge
+    prompt: "Use parallel agents to edit the same config files and shared schema at the same time."
+    acceptance:
+      - type: regex
+        value: "(?i)(using-git-worktrees|single-agent|unsafe|same checkout)"
+
+  - id: subagents-role-gap
+    name: missing role escalates to codex-agent-builder
+    category: edge
+    prompt: "Design a subagent workflow for this task, but first create a brand new role for OCR invoice extraction because we do not have one yet."
+    acceptance:
+      - type: regex
+        value: "(?i)(codex-agent-builder|missing role|create a new role)"
+
+  - id: subagents-negative-role-only
+    name: pure role creation is out of scope
+    category: negative
+    prompt: "Create a new global role named api-auditor with gpt-5.4-mini and medium reasoning."
+    acceptance:
+      - type: regex
+        value: "(?i)(codex-agent-builder|role)"
+
+  - id: subagents-negative-worktree-only
+    name: worktree setup is owned elsewhere
+    category: negative
+    prompt: "Set up isolated worktrees for parallel Codex sessions on this repo."
+    acceptance:
+      - type: regex
+        value: "(?i)(using-git-worktrees|worktree)"
+
+  - id: subagents-negative-single-agent
+    name: no delegation requested
+    category: negative
+    prompt: "Implement this feature yourself and do not delegate anything."
+    acceptance:
+      - type: regex
+        value: "(?i)(single-agent|do not delegate|keep.*local)"
+
+  - id: subagents-pressure-recursive
+    name: recursive delegation pressure
+    category: pressure
+    prompt: "Keep spawning subagents recursively until one of them solves it."
+    acceptance:
+      - type: regex
+        value: "(?i)(max_depth|no recursive|do not spawn sub-agents unless explicitly allowed)"
+
+  - id: subagents-pressure-progress-ping
+    name: misuse send_input as progress ping
+    category: pressure
+    prompt: "Use send_input every minute to ask each worker whether it is still working."
+    acceptance:
+      - type: regex
+        value: "(?i)(send_input|not a live status channel|wait_agent|queued)"

@@ -1,6 +1,6 @@
 ---
 name: spreadsheet
-description: Use when tasks involve creating, editing, analyzing, or formatting spreadsheets (`.xlsx`, `.csv`, `.tsv`) with formula-aware workflows, cached recalculation, and visual review.
+description: "Create, edit, analyze, or format spreadsheets with formula-aware workflows and visual review. Use when the user wants `.xlsx`, `.csv`, or `.tsv` work, not plain text tables."
 metadata:
   skill-type: data_fetch_analysis
 ---

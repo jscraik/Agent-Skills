@@ -1,6 +1,6 @@
 ---
 name: agentation
-description: Analyze and verify Agentation integrations in frontend apps when annotations, MCP registration, endpoint sync, or webhook delivery are failing; use this when you need deterministic evidence before edits.
+description: Audit or troubleshoot Agentation integrations in frontend apps with deterministic evidence gathering before edits. Use when annotations, MCP registration, endpoint sync, or webhook delivery are failing.
 metadata:
   skill-type: product_verification
 ---
@@ -80,3 +80,13 @@ metadata:
 
 ## Gotchas
 - Symptom: annotations never appear, even though the frontend renders. Cause: mount validation was skipped and the session started at endpoint or webhook layers first. Do instead: re-check the root mount and client bootstrap before investigating control-plane delivery. Check: confirm the app renders the Agentation mount in the intended runtime and that the smallest layer passes before expanding scope.
+
+## See Also
+| Skill | When to use |
+|---|---|
+| [[agent-browser]] | Run deterministic browser interactions against the app once Agentation wiring is healthy |
+| [[playwright-interactive]] | Use a persistent Playwright session for iterative local inspection or debugging |
+| [[frontend-ui-design]] | Improve or redesign the frontend surface after the integration path is verified |
+| [[visual-explainer]] | Turn the integration state machine or failure path into a visual handoff artifact |
+
+**Topic map:** [[frontend-ui]]

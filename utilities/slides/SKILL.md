@@ -1,6 +1,6 @@
 ---
 name: slides
-description: Use when tasks involve creating, editing, recreating, validating, or visually debugging presentation slide decks (`.pptx`) with editable PowerPoint output, PptxGenJS authoring, bundled layout helpers, and render/overflow checks; do not use for generic web UI design, prose editing, or non-presentation visual explainers.
+description: "Create, edit, validate, or debug PowerPoint-compatible slide decks with PptxGenJS and visual overflow checks. Use when the user wants `.pptx` work, not generic web UI design or prose editing."
 metadata:
   skill-type: team_automation
 ---

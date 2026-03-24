@@ -1,159 +1,79 @@
 ---
 name: "openai-docs"
-description: "Use when the user asks how to build with OpenAI products or APIs and needs up-to-date official documentation with citations, help choosing the latest model for a use case, or explicit GPT-5.4 upgrade and prompt-upgrade guidance; prioritize OpenAI docs MCP tools, use bundled references only as helper context, and restrict any fallback browsing to official OpenAI domains."
-metadata:
-  skill-type: library_api_reference
+description: Retrieve current official OpenAI product and API documentation with citations and docs-aligned guidance. Use when the user needs up-to-date OpenAI API, model-selection, Apps SDK, or migration guidance from official sources.
 ---
+
 
 # OpenAI Docs
 
-## Table of Contents
-- [Scope and triggers](#scope-and-triggers)
-- [Required inputs](#required-inputs)
-- [Deliverables](#deliverables)
-- [Failure mode](#failure-mode)
-- [Standards snapshot](#standards-snapshot-march-2026)
-- [Workflow](#workflow)
-- [Reference map](#reference-map)
-- [Tooling notes](#tooling-notes)
-- [Constraints](#constraints)
-- [Validation](#validation)
-- [Examples](#examples)
-- [Anti-patterns](#anti-patterns)
-- [Decision feedback protocol](#decision-feedback-protocol)
+Provide authoritative, current guidance from OpenAI developer docs using the developers.openai.com MCP server. Always prioritize the developer docs MCP tools over web.run for OpenAI-related questions. This skill may also load targeted files from `references/` for model-selection and GPT-5.4-specific requests, but current OpenAI docs remain authoritative. Only if the MCP server is installed and returns no meaningful results should you fall back to web search.
 
-Provide authoritative, current guidance from OpenAI developer docs using the OpenAI docs MCP tools. Always prioritize the official docs MCP workflow over memory or general web search for OpenAI-related questions.
+## Quick start
 
-## When to use
-- Use this skill when the user asks how to build with OpenAI APIs, ChatGPT Apps SDK, Codex, Responses API, Realtime, Agents SDK, model capabilities or limits, or adjacent official OpenAI platform capabilities.
-- Use it when the user needs current official guidance, exact limits, supported fields, model selection help, or citations.
-- Use it when the request is specifically about a GPT-5.4 upgrade, prompt upgrade, or choosing the latest OpenAI model for a use case.
-- Do not use it for general web research or speculative product claims not grounded in official docs.
+- Use `mcp__openaiDeveloperDocs__search_openai_docs` to find the most relevant doc pages.
+- Use `mcp__openaiDeveloperDocs__fetch_openai_doc` to pull exact sections and quote/paraphrase accurately.
+- Use `mcp__openaiDeveloperDocs__list_openai_docs` only when you need to browse or discover pages without a clear query.
+- Load only the relevant file from `references/` when the question is about model selection or a GPT-5.4 upgrade.
 
-## Required inputs
-- the product or API surface in question
-- the specific task, question, or implementation problem
-- whether the request is general docs lookup, model selection, or a GPT-5.4 upgrade
-- any version, language, or environment constraints that materially affect the answer
+## OpenAI product snapshots
 
-## Deliverables
-- a concise answer grounded in current OpenAI docs
-- links to the exact official doc pages used
-- paraphrased or lightly quoted details only where they materially answer the question
-- explicit uncertainty when the docs do not fully answer the user’s need
-- when relevant, the exact bundled helper reference used in addition to current docs
-- when a structured status report is requested, include a `schema_version` field in the returned payload
+1. Apps SDK: Build ChatGPT apps by providing a web component UI and an MCP server that exposes your app's tools to ChatGPT.
+2. Responses API: A unified endpoint designed for stateful, multimodal, tool-using interactions in agentic workflows.
+3. Chat Completions API: Generate a model response from a list of messages comprising a conversation.
+4. Codex: OpenAI's coding agent for software development that can write, understand, review, and debug code.
+5. gpt-oss: Open-weight OpenAI reasoning models (gpt-oss-120b and gpt-oss-20b) released under the Apache 2.0 license.
+6. Realtime API: Build low-latency, multimodal experiences including natural speech-to-speech conversations.
+7. Agents SDK: A toolkit for building agentic apps where a model can use tools and context, hand off to other agents, stream partial results, and keep a full trace.
 
-## Failure mode
-If the docs do not contain the answer, say so clearly, summarize what was checked, and then use a tightly scoped fallback on official OpenAI domains only when needed.
+## If MCP server is missing
 
-## Standards snapshot (March 2026)
-- Official OpenAI docs are the source of truth for current product behavior, limits, and examples.
-- Search first, then fetch the exact page or anchor before answering.
-- Keep citations precise and current; do not answer OpenAI platform questions from memory when fresh docs are available.
-- Prefer direct doc-backed guidance over stale local conventions or tool-name folklore.
-- Bundled references are helper context only; current official docs always win for volatile guidance.
+If MCP tools fail or no OpenAI docs resources are available:
+
+1. Run the install command yourself: `codex mcp add openaiDeveloperDocs --url https://developers.openai.com/mcp`
+2. If it fails due to permissions/sandboxing, immediately retry the same command with escalated permissions and include a 1-sentence justification for approval. Do not ask the user to run it yet.
+3. Only if the escalated attempt fails, ask the user to run the install command.
+4. Ask the user to restart Codex.
+5. Re-run the doc search/fetch after restart.
 
 ## Workflow
+
 1. Clarify the product scope and whether the request is general docs lookup, model selection, a GPT-5.4 upgrade, or a GPT-5.4 prompt upgrade.
-2. Use `mcp__openai-docs__search_openai_docs` to find the best doc page for the live question.
-3. Use `mcp__openai-docs__fetch_openai_doc` to retrieve the relevant page or anchor.
-4. If it is a model-selection request, load `references/latest-model.md` as helper context and verify every recommendation against current docs before answering.
-5. If it is an explicit GPT-5.4 upgrade request, load `references/upgrading-to-gpt-5p4.md`.
-6. If the upgrade may require prompt changes, or the workflow is research-heavy, tool-heavy, coding-oriented, multi-agent, or long-running, also load `references/gpt-5p4-prompting-guide.md`.
-7. For GPT-5.4 upgrade reviews, make the per-usage-site output explicit: target model, starting reasoning recommendation, `phase` assessment when relevant, prompt blocks, and compatibility status.
-8. Answer with concise guidance and cite the fetched doc page, using bundled references only as helper context.
-9. If MCP docs are unavailable or insufficient, fall back to browsing official OpenAI domains only.
+2. If it is a model-selection request, load `references/latest-model.md`.
+3. If it is an explicit GPT-5.4 upgrade request, load `references/upgrading-to-gpt-5p4.md`.
+4. If the upgrade may require prompt changes, or the workflow is research-heavy, tool-heavy, coding-oriented, multi-agent, or long-running, also load `references/gpt-5p4-prompting-guide.md`.
+5. Search docs with a precise query.
+6. Fetch the best page and the exact section needed (use `anchor` when possible).
+7. For GPT-5.4 upgrade reviews, always make the per-usage-site output explicit: target model, starting reasoning recommendation, `phase` assessment when relevant, prompt blocks, and compatibility status.
+8. Answer with concise guidance and cite the doc source, using the reference files only as helper context.
 
 ## Reference map
+
 Read only what you need:
 
 - `references/latest-model.md` -> model-selection and "best/latest/current model" questions; verify every recommendation against current OpenAI docs before answering.
 - `references/upgrading-to-gpt-5p4.md` -> only for explicit GPT-5.4 upgrade and upgrade-planning requests; verify the checklist and compatibility guidance against current OpenAI docs before answering.
 - `references/gpt-5p4-prompting-guide.md` -> prompt rewrites and prompt-behavior upgrades for GPT-5.4; verify prompting guidance against current OpenAI docs before answering.
-- `references/contract.yaml` and `references/evals.yaml` -> repo-local output and trigger expectations for this skill.
+
+## Quality rules
+
+- Treat OpenAI docs as the source of truth; avoid speculation.
+- Keep quotes short and within policy limits; prefer paraphrase with citations.
+- If multiple pages differ, call out the difference and cite both.
+- Reference files are convenience guides only; for volatile guidance such as recommended models, upgrade instructions, or prompting advice, current OpenAI docs always win.
+- If docs do not cover the user’s need, say so and offer next steps.
 
 ## Tooling notes
-- Prefer `mcp__openai-docs__search_openai_docs` for discovery.
-- Prefer `mcp__openai-docs__fetch_openai_doc` for exact wording, examples, and anchored sections.
-- Use `mcp__openai-docs__list_openai_docs` only when you need broad browsing without a sharp query.
-- When falling back to `web.run`, restrict to `developers.openai.com` and `platform.openai.com`.
-- Reuse bundled references only when they sharpen the answer without replacing official docs as the source of truth.
-- Bundled assets: `assets/openai-small.svg`, `assets/openai.png`.
 
-## Constraints
-- Redact secrets, tokens, credentials, and sensitive data by default.
-- Never echo raw environment values or secret-bearing commands.
-- Prefer safe, read-only documentation retrieval over speculative or mutating guidance.
-- If MCP tools fail or return no meaningful results, report that clearly before falling back to official-domain browsing.
-
-## Validation
-- Fail fast if the answer is not grounded in an official doc page.
-- Re-check the exact page when the question depends on current fields, limits, supported models, or upgrade guidance.
-- If multiple pages differ, call out the difference and cite both.
-- Report clearly when the docs are silent, ambiguous, or conflicting.
-
-## Examples
-- "What is the current Responses API pattern for tool calling?"
-- "How do I wire a ChatGPT Apps SDK component with official docs citations?"
-- "What do the current Codex docs say about setup and usage?"
-- "What is the latest OpenAI model for this use case?"
-- "How should I upgrade this workflow to GPT-5.4?"
-
-## Anti-patterns
-- Answering OpenAI platform questions from memory when current docs are available.
-- Making claims without evidence or without linking the official page.
-- Mixing unofficial community advice into a docs-grounded answer without labeling it as such.
-- Treating bundled upgrade/model-selection references as authoritative when live docs disagree.
-- Browsing unrelated domains when the user asked for OpenAI guidance.
-
-<!-- skill-score-boost-v1 -->
-## Philosophy and tradeoffs
-- Use this skill when authoritative, current documentation matters more than memory or folklore.
-- Principle and mindset: search first, fetch the exact source, then answer narrowly from evidence.
-- Ask this to keep outcomes robust: Why is this the right doc page, and what could change the answer?
-- How do we adapt if current docs and bundled helper references diverge?
-- What evidence is needed before recommending a model upgrade path?
-
-## Anti-patterns and caveats
-- Avoid treating the helper references as a substitute for current docs.
-- **NEVER** skip the fetch step when the user needs current limits, field names, or upgrade guidance.
-- **DO NOT** answer a "latest" OpenAI question from memory.
-- **DON'T** browse non-OpenAI domains when the docs tools already cover the question.
-- Common pitfall: stopping at search results without reading the exact page or section.
-- Incorrect assumptions here can lead to stale or unsupported guidance.
-
-## Variation and adaptation
-- Adapt the workflow depending on whether the request is general docs lookup, model selection, or GPT-5.4 migration planning.
-- Use more bundled helper context for upgrade planning and less for straightforward API field lookups.
-- Avoid generic or cookie-cutter responses; anchor the answer to the exact product surface and doc section.
-- Different constraints should produce different, non-generic recommendations.
-
-## Empowering execution style
-- Be capable of finding the sharpest official guidance quickly.
-- Unlock confidence by citing the exact current page and explaining tradeoffs clearly.
-- Feel free to surface multiple documented paths when the docs support them.
-
-## Decision feedback protocol
+- Always use MCP doc tools before any web search for OpenAI-related questions.
+- If the MCP server is installed but returns no meaningful results, then use web search as a fallback.
+- When falling back to web search, restrict to official OpenAI domains (developers.openai.com, platform.openai.com) and cite sources.
 
 ## See Also
-
-| Skill | When to use together |
+| Skill | When to use |
 |---|---|
-| [[context7]] | Supplement with Context7 for non-OpenAI library docs |
-| [[mcp-builder]] | Use docs to correctly implement MCP tool schemas |
-| [[chatgpt-apps]] | Reference when building ChatGPT Apps SDK integrations |
-| [[workers-mcp]] | Use alongside Cloudflare Workers MCP docs |
+| [[chatgpt-apps]] | Build a ChatGPT Apps SDK product after grounding the work in current OpenAI docs |
+| [[codex-automation-architect]] | Design or review Codex automations with current OpenAI and Codex platform guidance |
+| [[imagegen]] | Use the OpenAI Image API after confirming current docs and capabilities |
+| [[sora]] | Use OpenAI video tooling after checking the latest official guidance and limits |
 
 **Topic map:** [[agent-ops]]
-
-<!-- decision-feedback-protocol:v2 -->
-**Decision feedback protocol (required):**
-- If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.
-- Capture: `decision` (`accepted|partial|rejected|deferred`), `outcome` (`good|neutral|bad|unknown`), and `confidence` (`high|medium|low`).
-- Persist with: `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
-- The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
-<!-- /decision-feedback-protocol -->
-
-## Gotchas
-- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.

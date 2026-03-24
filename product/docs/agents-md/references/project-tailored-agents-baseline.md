@@ -7,6 +7,7 @@
 - [Stack detection](#stack-detection)
 - [Required tooling](#required-tooling)
 - [Required repo paths](#required-repo-paths)
+- [Cross-agent instruction files](#cross-agent-instruction-files)
 - [Local Memory policy](#local-memory-policy)
 - [Startup workflow](#startup-workflow)
 - [Supplemental context](#supplemental-context)
@@ -88,6 +89,8 @@ Common examples:
 - `AGENTS.md`
 - `docs/`
 - `docs/plans/`
+- a documented architecture-diagram directory such as `.diagram/` or `.diagrams/` only when that exact path is a real repo standard
+- `.harness/memory/LEARNINGS.md` only when the repo explicitly adopts the harness-memory convention for repo-specific learnings
 
 Language-specific modes may also require the root manifest:
 - JS or TS: `package.json`
@@ -95,6 +98,23 @@ Language-specific modes may also require the root manifest:
 - Rust: `Cargo.toml`
 
 Do not require paths just because they appear in another project template.
+Do not require `.harness/memory/LEARNINGS.md` unless the repo has explicitly standardized that harness-memory layout.
+Do not silently rename or normalize architecture-diagram paths between `.diagram/`, `.diagrams/`, `AI/diagrams/`, or other variants.
+When a documented architecture-diagram directory exists, treat it as high-value project context for faster repo understanding, but still verify the exact path before making it mandatory guidance.
+
+## Cross-agent instruction files
+
+Use this section when the repo maintains parallel instruction files such as `AGENTS.md`, `CLAUDE.md`, and `GEMINI.md`.
+
+- Keep durable repo-operating rules semantically aligned across all in-scope instruction files, but preserve each tool's official instruction-file behavior and any repo-specific filename configuration.
+- For `CLAUDE.md`, follow Anthropic's current guidance: keep instructions concise, specific, and verifiable, and prefer strengthening an existing rule over appending a second weaker version.
+- For `GEMINI.md`, honor Gemini CLI's current context-file configuration model. If the repo config sets `context.fileName`, use that verified filename behavior instead of assuming an unconfigured default.
+- Prefer the same section names across agent files when the guidance is truly shared, so operators can find the rule quickly regardless of agent.
+- For TypeScript validation guidance, use `## Quality Checks` across `AGENTS.md`, `CLAUDE.md`, and `GEMINI.md`. If the section is missing, create it.
+- In npm-based repos, make the rule explicit and verifiable: run `npm run lint` and `npm run test` after TypeScript changes, and confirm both pass before marking work complete. In non-npm repos, substitute the repo-native lint and test commands instead of hard-coding `npm`.
+- For CI guidance, use `## CI/CD Workflow` when present or create it when missing. Require confirmation of the final authoritative pipeline status before ending CI/CD work. GitHub's protected-branch model relies on required status checks succeeding before merge, so avoid treating a local fix or partial rerun as completion.
+- For pull-request coordination, use `## GitHub Workflow` or `## PR Management`. For multi-repo PR work, check merge-conflict state up front and flag blocked PRs early. GitHub blocks merge completion when conflicts remain unresolved, so the guidance should surface that blocker immediately rather than late in the session.
+- If a weaker version of one of these rules already exists, strengthen it in place instead of duplicating it elsewhere in the file.
 
 ## Local Memory policy
 
@@ -135,7 +155,8 @@ Optional extra context files can be mentioned when they exist and fit the repo's
 - `~/dev/config/codex/instructions/Learnings.md`
 - legacy repo notes like `FORJAMIE.md`, but only when the file still exists and the repo intentionally uses it
 
-Treat them as supplemental context, not a replacement for repo-local instructions.
+Treat organization `instructions/Learning.md` or `instructions/Learnings.md` as supplemental context, not a replacement for repo-local instructions.
+Treat `.harness/memory/LEARNINGS.md` separately as a repo-operating path only in repos that adopt the harness-memory convention.
 
 If `FORJAMIE.md` appears in old docs but is gone from the repo, treat those references as stale cleanup work rather than as active instruction routing.
 
@@ -147,7 +168,13 @@ If `FORJAMIE.md` appears in old docs but is gone from the repo, treat those refe
 - Verify required tooling matches the actual repo stack.
 - Verify required repo paths exist before naming them as mandatory.
 - Verify required paths stay inside the repo root after path resolution.
+- Verify any architecture-diagram path matches the repo's documented location exactly, and do not silently swap `.diagram/` for `.diagrams/` or another variant.
+- Verify `.harness/memory/LEARNINGS.md` is required only when the repo has explicitly adopted the harness-memory convention.
+- Verify `Quality Checks` uses repo-native commands, and keep explicit `npm run lint` / `npm run test` wording only when the repo is actually npm-based.
+- Verify CI guidance points to the authoritative provider status surface for the repo, and do not imply CI is complete before the final pipeline state is known.
+- Verify PR guidance reflects real merge-conflict behavior for the host platform and flags blocked PRs early rather than after review or merge prep.
 - Verify Local Memory is truly a repo requirement before making it mandatory.
 - Verify Local Memory mode semantics match the script (`off`, `optional`, `required`).
 - Verify supplemental context paths exist before referencing them.
+- Verify organization `Learning.md` / `Learnings.md` references stay supplemental and are not presented as required repo-local instruction files.
 - Verify any `FORJAMIE.md` mention points to a real file or an explicit fallback-filename policy before keeping it.

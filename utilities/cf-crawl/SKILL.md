@@ -1,6 +1,6 @@
 ---
 name: cf-crawl
-description: Crawl websites with Cloudflare Browser Rendering's /crawl API and export markdown or JSON results locally. Use when a user needs an authenticated Cloudflare crawl job started, monitored, or exported; do not use it for generic scraping or browser automation outside Cloudflare.
+description: Crawl sites through Cloudflare Browser Rendering's `/crawl` API and export markdown or JSON results. Use when the user wants a Cloudflare-managed crawl job, not generic browser automation or scraping.
 metadata:
   skill-type: data_fetch_analysis
 ---

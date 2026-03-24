@@ -1,0 +1,3 @@
+interface:
+  display_name: "Greptile Greploop"
+  short_description: "Bounded Greptile review-fix loop for one PR"

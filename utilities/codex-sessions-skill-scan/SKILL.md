@@ -1,6 +1,6 @@
 ---
 name: codex-sessions-skill-scan
-description: "Session-driven skill intelligence: run daily health scans over ~/.codex sessions to detect skill failures and, when requested, audit project-local skill coverage to recommend merge/fold/improve-existing/install-new decisions grounded in memory and rollout evidence."
+description: Scan Codex session history for skill failures, usage patterns, and coverage gaps. Use when the user wants daily skill-health monitoring or evidence-backed recommendations about installing, improving, merging, or pruning skills.
 metadata:
   skill-type: data_fetch_analysis
 ---

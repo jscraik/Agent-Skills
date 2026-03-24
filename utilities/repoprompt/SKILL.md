@@ -1,8 +1,6 @@
 ---
 name: repoprompt
-description: Plan and guide Repo Prompt integration and usage in AI coding workflows.
-  Use when integrating Repo Prompt with editors/agents or when needing MCP/CLI tool
-  guidance.
+description: Plan and troubleshoot Repo Prompt integration across editors, agents, MCP, and CLI workflows. Use when the user wants Repo Prompt configured, adopted, or compared inside an AI coding setup.
 metadata:
   skill-type: library_api_reference
 ---
@@ -195,7 +193,7 @@ Read when needed:
 | [[context7]] | Combine with Context7 for richer library context in prompts |
 | [[agents-md]] | Use Repo Prompt context packs alongside AGENTS.md |
 | [[compound-engineering-router]] | Feed repo context into compound engineering workflows |
-| [[writing-plans]] | Ground implementation plans with Repo Prompt context |
+| [[ce-plan]] | Ground implementation plans with Repo Prompt context |
 
 **Topic map:** [[agent-ops]]
 

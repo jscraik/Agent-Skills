@@ -1,6 +1,6 @@
 ---
 name: product-design-critic
-description: Use this skill when the user asks to critique or shape a software product surface, workflow, card, panel, or chat UX. It analyzes and reviews product decisions with opinionated recommendations grounded in jobs-to-be-done, hierarchy, trust/governance cues, and explicit tradeoffs beyond visual polish.
+description: Critique product surfaces and flows with opinionated UX judgment about hierarchy, trust, and jobs-to-be-done. Use when the user wants product-level interaction or workflow critique, not pure visual styling advice.
 metadata:
   skill-type: team_automation
 ---

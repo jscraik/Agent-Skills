@@ -56,12 +56,12 @@ jobs:
         with:
           name: skill-quality-structure-reports
           path: artifacts/reports/skills
-      - name: Upload structure SARIF to GitHub
-        if: always() && hashFiles('artifacts/reports/skills/skill-structure-gates.sarif') != '' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork == false)
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: artifacts/reports/skills/skill-structure-gates.sarif
-          category: skill-structure-gate
+      - name: Skip aggregate SARIF upload
+        if: always() && hashFiles('artifacts/reports/skills/skill-structure-gates.sarif') != ''
+        run: |
+          echo "Aggregate skill structure SARIF contains one run per skill."
+          echo "GitHub code scanning rejects multi-run uploads that reuse the same category."
+          echo "Structure reports remain available via uploaded workflow artifacts."
 
       - name: See Also gate (new skills must have ≥2 cross-skill links)
         if: github.event_name == 'pull_request'
@@ -113,9 +113,9 @@ jobs:
           path: |
             artifacts/reports/skills
             artifacts/industry-benchmark-latest.json
-      - name: Upload structure SARIF to GitHub
-        if: always() && hashFiles('artifacts/reports/skills/skill-structure-gates.sarif') != '' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork == false)
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: artifacts/reports/skills/skill-structure-gates.sarif
-          category: skill-structure-gate-evals
+      - name: Skip aggregate SARIF upload
+        if: always() && hashFiles('artifacts/reports/skills/skill-structure-gates.sarif') != ''
+        run: |
+          echo "Aggregate skill structure SARIF contains one run per skill."
+          echo "GitHub code scanning rejects multi-run uploads that reuse the same category."
+          echo "Structure reports remain available via uploaded workflow artifacts."

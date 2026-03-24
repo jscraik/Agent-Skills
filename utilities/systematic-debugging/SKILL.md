@@ -1,6 +1,6 @@
 ---
 name: systematic-debugging
-description: Analyze evidence from production bugs, regressions, and failed checks and diagnose root causes when users need a safe, evidence-backed fix plan before any code changes.
+description: Diagnose production bugs, regressions, or failing checks from concrete evidence before code changes. Use when the user wants a safe root-cause analysis and fix plan, not immediate speculative implementation.
 metadata:
   skill-type: runbook
 ---
@@ -83,3 +83,13 @@ metadata:
 
 ## Gotchas
 - None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.
+
+## See Also
+| Skill | When to use |
+|---|---|
+| [[gh-fix-ci]] | Investigate a failing GitHub Actions check instead of a general bug report |
+| [[test-driven-development]] | Capture the root cause as a failing test before or alongside the fix |
+| [[verification-before-completion]] | Prove the fix works before claiming the debugging loop is done |
+| [[ce-plan]] | Re-plan the approach when repeated fixes fail and the current path is not converging |
+
+**Topic map:** [[agent-ops]]

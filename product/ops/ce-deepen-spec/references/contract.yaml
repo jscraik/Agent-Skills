@@ -1,0 +1,35 @@
+schema_version: 1
+
+purpose: >
+  Run the spec-deepening stage of the compound-engineering workflow so the user gets
+  a stronger, planning-ready system spec or UI spec with better boundary clarity,
+  lifecycle detail, failure handling, observability, and validation before `ce-plan`.
+
+triggers:
+  - the user wants to deepen, stress-test, or strengthen an existing specification
+  - the user wants more confidence around lifecycle, failures, safety, observability, or acceptance coverage
+  - the user explicitly asks for an exhaustive deepen-spec pass before planning
+  - the user has a spec already but wants a second-pass research and review workflow
+
+inputs:
+  - a valid spec path
+  - repository context and linked artifacts such as origin, parent spec, or plan when available
+  - optional user emphasis on specific weak sections or exhaustive coverage
+
+outputs:
+  - a deepening-mode decision such as targeted-confidence or max-coverage
+  - a research execution mode decision such as direct or artifact-backed
+  - a strengthened spec written in place or as a -deepened variant
+  - a short enhancement summary, preserved or extended SA/VAC IDs, and explicit next-step guidance
+
+non_goals:
+  - creating the first spec from scratch
+  - implementing code
+  - turning the spec into a task plan or command-by-command execution script
+  - silently changing product scope or inventing requirements
+
+risks:
+  - spec inflation without real planning-readiness gain; mitigate with weak-section scoring and targeted rewrites
+  - context bloat from broad fan-out; mitigate with targeted-confidence default and artifact-backed mode only when justified
+  - contradiction with linked artifacts; mitigate with origin or parent rereads and explicit preservation checks
+  - unstable acceptance IDs; mitigate with preserve-and-append rules for SA and VAC matrices

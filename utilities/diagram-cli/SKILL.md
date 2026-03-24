@@ -1,6 +1,6 @@
 ---
 name: diagram-cli
-description: Generate, validate, and refresh @brainwav/diagram architecture artifacts (.mmd/.svg/.diagram manifest + context packs). Use this skill when users need fast repository understanding for onboarding, PR architecture impact, and CI drift checks; do not use it for hand-drawn product/UI mock diagrams.
+description: Generate, validate, and refresh @brainwav/diagram architecture artifacts and context packs. Use when the user wants repository architecture diagrams for onboarding, PR impact, or CI drift checks, not hand-drawn product mock diagrams.
 metadata:
   skill-type: runbook
 ---
@@ -182,7 +182,7 @@ Minimum checks:
 | [[visual-explainer]] | Render diagram artifacts as a polished HTML explainer |
 | [[beautiful-mermaid]] | Convert .mmd outputs to publication-quality SVG/PNG |
 | [[docs-expert]] | Embed diagrams into repository documentation |
-| [[writing-plans]] | Use architecture diagrams to ground implementation plans |
+| [[ce-plan]] | Use architecture diagrams to ground implementation plans |
 | [[agents-md]] | Add diagram artifacts to AGENTS.md context packs |
 
 **Topic map:** [[agent-ops]]

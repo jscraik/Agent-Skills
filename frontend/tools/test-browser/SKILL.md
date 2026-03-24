@@ -15,6 +15,7 @@ metadata:
 - [Philosophy](#philosophy)
 - [Workflow](#workflow)
 - [Validation](#validation)
+- [References](#references)
 - [Gotchas](#gotchas)
 - [Anti-patterns](#anti-patterns)
 - [See also](#see-also)
@@ -67,7 +68,7 @@ Do not use this skill when:
 
 1. Identify the affected browser surface from the PR, branch, or user description.
 2. Choose the operator surface:
-   - `agent-browser` for deterministic live-page interaction or extraction;
+   - `agent-browser` for deterministic live-page interaction or extraction, especially when the user wants a PR/branch-driven route sweep or a reproducible CLI browser run;
    - `playwright-interactive` for local iterative QA with persistent state;
    - `ui-visual-regression` when snapshot diffs are the primary signal.
 3. Turn the changed surface into a small QA matrix:
@@ -75,19 +76,26 @@ Do not use this skill when:
    - primary action;
    - expected result;
    - regression check.
-4. Execute the checks or produce the exact next commands if execution is blocked.
-5. Summarize pass/fail status with evidence.
+4. If `agent-browser` is the chosen surface and the run needs concrete browser-ops detail such as install checks, headed versus headless selection, route derivation from PR or branch diff, dev-server port detection, human verification pauses, or failure-to-todo handling, open `references/agent-browser-runbook.md`.
+5. Execute the checks or produce the exact next commands if execution is blocked.
+6. Summarize pass/fail status with evidence.
 
 ## Validation
 
 - Verify every claimed pass has an observable check.
 - Verify every failure names the exact step, route, and expected behavior.
 - Verify saved artifacts exist when screenshots or captures are promised.
+- Verify the chosen browser operator matches the requested environment instead of defaulting blindly to one tool.
+
+## References
+
+- `references/agent-browser-runbook.md`
 
 ## Gotchas
 
 - PR scope often understates browser impact when shared layouts, auth gates, or form components were touched indirectly.
 - A passing local browser flow is not enough if the requested environment was a live or review deployment.
+- A deterministic `agent-browser` runbook can be the right default for changed-route QA, but it should not erase the local skill's broader routing to `playwright-interactive` or `ui-visual-regression`.
 
 ## Anti-patterns
 
@@ -95,10 +103,13 @@ Do not use this skill when:
 - Running long brittle browser sequences without intermediate checkpoints.
 - Claiming “looks good” without route-specific evidence.
 
-## See also
+## See Also
 
 | Skill | When to use together |
 |---|---|
 | [[agent-browser]] | Deterministic live-page interaction using snapshot refs |
 | [[playwright-interactive]] | Persistent local browser QA for iterative debugging |
 | [[ui-visual-regression]] | Snapshot or layout diff validation |
+| [[fixing-accessibility]] | Pair route-level verification with accessibility checks on interactive surfaces |
+
+**Topic map:** [[frontend-ui]]

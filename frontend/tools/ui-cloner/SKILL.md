@@ -1,6 +1,6 @@
 ---
 name: ui-cloner
-description: Build a structured UI replication plan from a target website URL and adapt it to the user's brand with implementation-ready guidance. Use when users ask to clone, recreate, or emulate a site's visual system; do not use for Cloudflare crawl orchestration-only requests or generic deployment work.
+description: Plan a branded UI clone from a target website URL with implementation-ready guidance. Use when the user wants a site's visual system recreated or adapted, not raw crawling or deployment work.
 metadata:
   skill-type: scaffolding_templates
 ---

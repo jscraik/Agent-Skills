@@ -231,6 +231,23 @@ cases:
       - type: regex
         value: "(?i)(agents/openai.yaml|display_name|short_description)"
 
+  - id: edge-graph-ready-bundle
+    name: edge graph ready bundle
+    category: edge
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: true
+    prompt: "I want a new repo skill that should improve our skill graph too. In this first response, keep the required headings and make the deliverables mention both cross-skill navigation and task-profile metadata."
+    acceptance:
+      - type: contains
+        value: "## Deliverables"
+      - type: regex
+        value: "(?i)(see also|cross-skill|related skill)"
+      - type: regex
+        value: "(?i)(task-profile\\.json|references/task-profile\\.json)"
+      - type: regex
+        value: "(?i)(topic map|wiki-link|graph)"
+
   - id: edge-frontmatter-sanitizer
     name: edge frontmatter sanitizer
     category: edge

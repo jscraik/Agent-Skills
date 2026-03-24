@@ -6,7 +6,7 @@ import re
 import shutil
 import subprocess
 import tempfile
-import xml.etree.ElementTree as ET
+from defusedxml import ElementTree as ET
 from os import makedirs, replace
 from os.path import abspath, basename, exists, expanduser, join, splitext
 from typing import Sequence, cast

@@ -1,89 +1,74 @@
 ---
 name: writing-plans
-description: "Create execution-ready implementation plans with task sequencing and checks. Use when requirements are known but implementation is multi-step."
+description: Compatibility wrapper for generic implementation planning. Use when the user asks for a general plan and route the work to `ce-plan` in `generic-plan` mode.
 metadata:
   skill-type: team_automation
 ---
 
 # Writing Plans
 
-Create execution-ready plans that another agent can run without guessing.
+This skill has been folded into [`ce-plan`](/Users/jamiecraik/dev/Agent-Skills/product/ops/ce-plan/SKILL.md). Keep this wrapper only for compatibility and route execution-planning work to `ce-plan` using `generic-plan` mode.
 
 ## Standards snapshot (March 2026)
-- Planning is a delivery tool, not ceremony.
-- Every task should have a concrete outcome, target files, and a verification step.
-- Keep the plan small enough to execute in batches but explicit enough to survive handoff.
-- Surface hidden assumptions before implementation starts.
+- `ce-plan` is now the canonical owner for execution-planning behavior.
+- Preserve this wrapper only so older references and invocations still land in the right place.
+- Do not maintain a second independent planning doctrine here.
 
 ## When to use
-- Scope is clear enough to plan but too large for one-step implementation.
-- Work needs deterministic sequencing, checkpoints, or handoff to another agent or later session.
-- Requirements exist, but execution order and verification still need to be made explicit.
+- The user asks for `writing-plans` explicitly.
+- Older docs or neighboring skills still reference `writing-plans`.
+- The request is really generic implementation sequencing and should be handled by `ce-plan` in `generic-plan` mode.
 
 ## When not to use
-- The problem is still ambiguous and needs discovery or brainstorming first.
-- The task is small enough to execute directly without a plan artifact.
-- The user needs a product spec or research memo rather than an implementation sequence.
+- Do not author a separate planning workflow here.
+- Do not keep this wrapper as a competing owner beside `ce-plan`.
+- Do not use this wrapper when the caller can go straight to [`ce-plan`](/Users/jamiecraik/dev/Agent-Skills/product/ops/ce-plan/SKILL.md).
 
 ## Required inputs
-- Requirements, spec, or explicit user goal.
-- Repository context and likely impacted areas.
-- Constraints such as timeline, rollout risk, approvals, or compatibility expectations.
+- The same planning inputs that `ce-plan` expects for `generic-plan` mode:
+  - requirements, spec, or explicit user goal;
+  - repository context and likely impacted areas;
+  - constraints such as timeline, rollout risk, approvals, or compatibility expectations.
 
 ## Deliverables
-- An implementation plan with ordered tasks.
-- Per-task target files or work areas.
-- Per-task verification commands or checks.
-- Clear handoff notes covering assumptions, checkpoints, and the next execution mode.
-- When a structured status report is requested, include a `schema_version` field in the returned payload.
+- Immediate routing to [`ce-plan`](/Users/jamiecraik/dev/Agent-Skills/product/ops/ce-plan/SKILL.md) with `generic-plan` selected.
+- No separate planning doctrine, checklist, or artifact contract beyond what `ce-plan` already owns.
 
 ## Failure mode
-- If critical scope decisions are still unresolved, stop and name them instead of pretending the sequence is settled.
-- If a task cannot be tied to a file target or verification step, the plan is not ready.
-- If the user only needs exploration, route to brainstorming or interview work instead of overcommitting to execution detail.
+- If the request is still ambiguous, route to `brainstorming` or `ce-brainstorm` instead of improvising a plan here.
+- If `ce-plan` cannot safely proceed, surface the same blocker rather than inventing wrapper-specific logic.
 
 ## Workflow
-1. Frame the goal, boundary, and assumptions in a short opening summary.
-2. Decompose the work into the smallest safe tasks, usually 2-15 minute execution steps.
-3. Attach concrete file targets, systems, or work areas to each task.
-4. Add the command or check that proves each task is done.
-5. Insert checkpoints where feedback, rollout approval, or risk review should happen.
-6. End with a clear handoff: execute now, execute later, or revisit scope first.
+1. Detect that the request is generic implementation planning rather than a different upstream stage.
+2. Route immediately to [`ce-plan`](/Users/jamiecraik/dev/Agent-Skills/product/ops/ce-plan/SKILL.md).
+3. Use `generic-plan` mode there.
+4. Preserve this wrapper only as a compatibility entrypoint.
 
 ## Validation
-- Every task maps to a clear outcome.
-- Every task has at least one verification command or check.
-- The plan has no hidden prerequisites.
-- The execution or handoff path is explicit.
-- Fail fast at the first missing task outcome, target, or verification step.
+- Verify this wrapper does not drift into a second independent planning workflow.
+- Verify routing points to [`ce-plan`](/Users/jamiecraik/dev/Agent-Skills/product/ops/ce-plan/SKILL.md) as the canonical owner.
+- Fail fast if this wrapper starts to diverge from `ce-plan` behavior.
 
 ## Anti-patterns
-- Vague tasks like "improve" or "clean up" with no acceptance criteria.
-- Missing file paths or missing verification commands.
-- Oversized tasks that bundle multiple behavior changes.
-- Padding the plan with generic steps that add no signal.
-- Hiding assumptions the executor needs to know.
+- Keeping a full second planning doctrine here after the fold.
+- Letting neighboring skills keep routing generic planning work here as the primary owner.
+- Adding wrapper-only logic that `ce-plan` does not own.
 
 ## Constraints
 - Redact secrets, tokens, and sensitive material in examples and artifacts.
-- Keep scope canonical by default and add compatibility work only when requested.
+- Keep this wrapper compatibility-only.
 - Do not execute destructive commands while planning.
 
 ## Philosophy
-- Planning is risk reduction, not ceremony.
-- High-signal steps beat long prose.
-- A plan should be executable by someone with zero local context.
-- Good plans expose uncertainty before implementation cost grows.
+- One planning owner is better than two near-identical planning owners.
+- Compatibility wrappers are acceptable; duplicate doctrine is not.
 
 ## Variation
-- Use tighter, shorter tasks for risky migrations and looser batching for low-risk cleanup.
-- Increase checkpoint density when rollout, compliance, or coordination risk is high.
-- Adapt the evidence format to the executor: command-focused for engineers, milestone-focused for broader stakeholders.
+- None here; variation now belongs to `ce-plan` modes.
 
 ## Examples
-- Create a task-by-task plan to add optimistic UI updates to this feature.
-- Break this migration spec into implementation steps with checks.
-- Turn this approved PRD into an execution plan with file targets and validation commands.
+- "Use writing-plans to break this feature into implementation steps." -> route to `ce-plan` with `generic-plan`.
+- "Turn this approved PRD into an execution plan." -> route to `ce-plan` with `generic-plan` unless the user explicitly wants product-planning work first.
 
 ## References
 - `references/contract.yaml`
@@ -92,17 +77,16 @@ Create execution-ready plans that another agent can run without guessing.
 - `references/folded-legacy-modes-phase4.md`
 
 ## Folded legacy mode
-This skill also owns legacy execution-planning behavior from retired folds.
-
-- `execute` from `utilities/executing-plans`: use when a plan already exists and the immediate job is to validate and execute it in verified batches with checkpoints.
+Legacy execution-planning behavior is now owned by `ce-plan` as the canonical planner.
 
 ## See Also
 
 | Skill | When to use together |
 |---|---|
 | [[brainstorming]] | Use first when scope is still ambiguous — resolve approach before planning steps |
-| [[interview-me]] | Use when requirements need discovery; hand the spec output to this skill |
-| [[product-spec]] | Use for product-level specs; this skill turns the spec into an execution sequence |
+| [[interview-me]] | Use when requirements need discovery before routing to `ce-plan` |
+| [[product-spec]] | Use for product-level specs before routing to `ce-plan` |
+| [[ce-plan]] | Canonical owner of both generic and CE execution-planning behavior |
 | [[verification-before-completion]] | Embed in the plan's final task to gate "done" claims |
 | [[systematic-debugging]] | When 3+ fix attempts fail, restart with this skill to re-plan the approach |
 

@@ -1,6 +1,6 @@
 ---
 name: visual-explainer
-description: Generate beautiful, self-contained HTML pages that visually explain systems, code changes, plans, and data. Use when the user asks for a diagram, architecture overview, diff review, plan review, project recap, comparison table, or any visual explanation of technical concepts. Also use proactively when you are about to render a complex ASCII table (4+ rows or 3+ columns) — present it as a styled HTML page instead.
+description: Generate self-contained HTML explainers for systems, diffs, plans, or data with clearer visual presentation than plain text. Use when the user wants a diagram or visual technical explainer, or when a large ASCII table would be hard to scan.
 metadata:
   skill-type: team_automation
 ---
@@ -295,3 +295,13 @@ Before delivering, verify:
 
 ## Failure mode
 - If the source material, diagram choice, or rendering dependencies are unclear, stop, report the missing prerequisite, and fall back to a simpler visual scope or source-selection step before generating HTML.
+
+## See Also
+| Skill | When to use |
+|---|---|
+| [[beautiful-mermaid]] | Render Mermaid diagrams as image assets for the explainer |
+| [[diagram-cli]] | Generate architecture diagrams and context packs before building the final explainer |
+| [[slides]] | Use a presentation deck instead of a scrollable HTML explainer when the format fits better |
+| [[design-system]] | Align the explainer’s token and visual language with the repo’s design system |
+
+**Topic map:** [[agent-ops]]

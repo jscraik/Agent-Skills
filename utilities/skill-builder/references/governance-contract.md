@@ -28,6 +28,15 @@ Run these gates before claiming completion for `create` or `improve` work.
 - Pass criteria: validation success with no contract violations
 - Scope: gotcha structure and candidate-governance integrity
 
+`GATE-GRAPH-READINESS`
+- Commands:
+  - `python3 scripts/check-see-also.py . --changed-files <skill>/SKILL.md`
+  - `python3 utilities/skill-builder/scripts/validate_skill_graph_profiles.py --repo-root . --expected-count 0`
+- Pass criteria:
+  - changed skills have a `## See Also` table with at least 2 real skill links
+  - active/in-scope skill profiles validate cleanly
+- Scope: graph traversal quality, task-profile completeness, and onboarding-contract integrity
+
 `GATE-SEMANTIC-TAGS` (only when tags changed)
 - Commands:
   - `bash scripts/sync_skills.sh`
@@ -51,13 +60,24 @@ Run these gates before claiming completion for `create` or `improve` work.
 `POL-03 Progressive disclosure contract`
 - `SKILL.md` stays concise and route-critical.
 - Deep mechanics belong in `references/` or `scripts/`.
+- Progressive disclosure is a preservation pattern:
+  - relocate nuanced doctrine, caveats, and examples into `references/`,
+  - do not delete valuable context solely to satisfy line-count or wrapper-size goals.
 - Reference docs should include trigger hints:
   - `Read when: <specific condition>`
+- `SKILL.md` should signpost the preserved material clearly enough that the right reference is easy to open at the right time.
 
 `POL-04 Template contract`
 - Skill template must include a `## Gotchas` section by default.
 
-`POL-05 Python composability contract`
+`POL-05 Graph contract`
+- For repo-owned operational skills, create graph scaffolding at source:
+  - `## See Also` with related skill links,
+  - one topic-map signpost,
+  - `references/task-profile.json` when the onboarding contract applies.
+- Do not defer graph wiring to a later cleanup pass when the relevant skill is being created or materially improved.
+
+`POL-06 Python composability contract`
 - For reusable, importable module-style scripts:
   - include `__all__` exports,
   - include type hints on public APIs,
@@ -76,6 +96,10 @@ Run these gates before claiming completion for `create` or `improve` work.
 `EX-03 Progressive-disclosure warnings`
 - Warning-only findings can ship only with explicit triage notes and prioritized fix queue.
 - Hard-cap and schema failures do not qualify for warning-only treatment.
+
+`EX-04 Graph onboarding scope`
+- Skills outside the operational graph or explicitly excluded by inventory policy may omit `references/task-profile.json`.
+- If omitted, say why in the change summary instead of silently skipping it.
 
 ## Completion criteria
 - Required gates complete and passing according to scope.

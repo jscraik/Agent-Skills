@@ -1,6 +1,6 @@
 ---
 name: evals-router
-description: Use when tasks involve designing, auditing, debugging, or scaling LLM evaluation workflows such as error analysis, judge prompt design, evaluator validation, RAG evaluation, synthetic eval-data generation, or human review interfaces; do not use for generic product analytics, ordinary QA, or unrelated UI implementation.
+description: Route and guide LLM evaluation work such as evaluator design, error analysis, RAG evals, and synthetic eval data. Use when the user wants eval-specific workflow help, not product analytics or ordinary QA.
 metadata:
   skill-type: code_quality_review
 ---

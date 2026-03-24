@@ -19,6 +19,7 @@ Create a narrow router-style skill that selects the correct compound-engineering
 - Add meta-modes only where there is real value and no prompt-backed equivalent exists.
 
 ## Included routes
+- ideate
 - brainstorm
 - spec
 - deepen-spec
@@ -28,6 +29,9 @@ Create a narrow router-style skill that selects the correct compound-engineering
 - review
 - technical-review
 - compound
+- compound-refresh
+
+UI-first requests are intentionally folded into `spec` and `plan` rather than kept as a separate `ui-workflow` route.
 
 ## Included meta-modes
 - context-compaction

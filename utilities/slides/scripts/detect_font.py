@@ -73,7 +73,7 @@ import re
 import shutil
 import subprocess
 import tempfile
-import xml.etree.ElementTree as ET
+from defusedxml import ElementTree as ET
 from functools import lru_cache
 from os.path import abspath, basename, exists, expanduser, join, splitext
 from zipfile import ZipFile

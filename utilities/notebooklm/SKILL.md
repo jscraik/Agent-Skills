@@ -1,6 +1,6 @@
 ---
 name: notebooklm
-description: Manage, analyze, and generate Google NotebookLM workflows for notebook/source management, notebook question answering, and audio/video overview generation. Use this skill when a user asks to run NotebookLM actions from this environment; do not use it for unrelated general web/chat requests.
+description: Run NotebookLM workflows for notebook management, question answering, and audio or video overviews. Use when the user wants NotebookLM actions from this environment, not general browsing or note writing.
 metadata:
   skill-type: data_fetch_analysis
 ---

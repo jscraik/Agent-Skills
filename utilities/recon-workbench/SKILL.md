@@ -296,3 +296,13 @@ When analyzing a target:
 
 ## Gotchas
 - None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.
+
+## See Also
+| Skill | When to use |
+|---|---|
+| [[security-best-practices]] | Turn recon findings into concrete secure-by-default implementation guidance |
+| [[security-threat-model]] | Map recon evidence into trust boundaries, abuse paths, and mitigations |
+| [[security-ownership-map]] | Connect the findings to code ownership and bus-factor risk |
+| [[systematic-debugging]] | Debug confirmed runtime behavior after recon narrows the target surface |
+
+**Topic map:** [[security-ops]]

@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-03-18T02:42:08.436401+00:00",
+  "generated_at": "2026-03-24T20:55:12.460764+00:00",
   "mode": "warn",
   "policy_path": "/Users/jamiecraik/dev/Agent-Skills/utilities/skill-builder/references/benchmark-policy.json",
   "skills_scanned": 72,
@@ -30,9 +30,9 @@
     {
       "cluster": "github",
       "description": "GitHub and CI skills",
-      "skills": 3,
+      "skills": 4,
       "skills_with_any_marker": 3,
-      "coverage": 1.0,
+      "coverage": 0.75,
       "marker_hits": {
         "react_19": 0,
         "next_16": 0,
@@ -46,7 +46,7 @@
       },
       "fails": [],
       "warns": [
-        "distribution warn: `gha_sha_pin` hits 3 < 4"
+        "coverage warn: 0.750 < 1.000"
       ],
       "pass": true
     },
@@ -74,18 +74,18 @@
     {
       "cluster": "openai_apps",
       "description": "OpenAI and ChatGPT Apps skills",
-      "skills": 2,
-      "skills_with_any_marker": 2,
+      "skills": 1,
+      "skills_with_any_marker": 1,
       "coverage": 1.0,
       "marker_hits": {
         "react_19": 0,
         "next_16": 0,
         "tailwind_v4": 0,
-        "responses_api": 2,
+        "responses_api": 1,
         "wcag_2_2": 0,
         "owasp_top10": 0,
         "gha_sha_pin": 0,
-        "cloudflare_workers": 1,
+        "cloudflare_workers": 0,
         "mcp_spec": 0
       },
       "fails": [],
@@ -96,23 +96,21 @@
       "cluster": "security",
       "description": "Security and auth skills",
       "skills": 5,
-      "skills_with_any_marker": 3,
-      "coverage": 0.6,
+      "skills_with_any_marker": 4,
+      "coverage": 0.8,
       "marker_hits": {
         "react_19": 0,
         "next_16": 0,
         "tailwind_v4": 0,
         "responses_api": 0,
         "wcag_2_2": 0,
-        "owasp_top10": 3,
+        "owasp_top10": 4,
         "gha_sha_pin": 0,
         "cloudflare_workers": 0,
         "mcp_spec": 0
       },
       "fails": [],
-      "warns": [
-        "coverage warn: 0.600 < 0.650"
-      ],
+      "warns": [],
       "pass": true
     },
     {
@@ -266,7 +264,7 @@
   "summary": {
     "cluster_count": 12,
     "fail_count": 0,
-    "warn_count": 2,
+    "warn_count": 1,
     "overall_pass": true
   }
 }

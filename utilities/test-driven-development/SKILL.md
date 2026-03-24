@@ -128,7 +128,7 @@ Required gates:
 | [[systematic-debugging]] | Run the TDD loop inside this debugging workflow for each phase-4 fix |
 | [[verification-before-completion]] | Explicit gate: verify the full test suite is green before claiming done |
 | [[evals-router]] | When the failing "test" is an LLM evaluation — route to the correct eval workflow |
-| [[writing-plans]] | Write a TDD-aware plan when the feature spans multiple behavior changes |
+| [[ce-plan]] | Write a TDD-aware plan when the feature spans multiple behavior changes |
 
 **Topic map:** [[agent-ops]]
 

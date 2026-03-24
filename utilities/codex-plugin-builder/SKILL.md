@@ -1,6 +1,6 @@
 ---
 name: codex-plugin-builder
-description: "Create, convert, and validate Codex plugin packages that include focused skills, hooks, agents, and MCP metadata. Use this skill when the user asks to scaffold plugin bundles, safely convert external plugin sources, or quality-gate plugin-owned skills; do not use it for unrelated app feature work."
+description: Create, convert, or validate Codex plugin packages that bundle skills, hooks, agents, and MCP metadata. Use when the user wants plugin packaging work, not standalone skill editing or generic app features.
 metadata:
   skill-type: scaffolding_templates
 ---
@@ -250,7 +250,6 @@ just validate
 ```
 
 If full `just validate` fails due to known unrelated baseline issues, report them as pre-existing blockers rather than new regressions.
-
 ## Plugin contract
 When packaging plugins, treat `references/plugin-contract.md` as mandatory.
 
@@ -279,14 +278,12 @@ Required behavior:
 - align examples to currently supported handler types;
 - mark unsupported or provisional fields explicitly instead of presenting them as stable;
 - keep hook conversion notes auditable with source file links and short evidence notes.
-
 ## Terminology mapping
 When converting Claude-oriented plugins, use `references/terminology-map.md` as a required check.
 
 Required behavior:
 - do not ship converted plugins with Claude package markers such as `.claude-plugin`;
-- fold deprecated prompt and command surfaces into `skills/` and rewrite docs to use skill wording instead of slash-command wording;
-- keep shared surfaces (`skills`, `hooks`, `agents`, `.mcp.json`, `.app.json`) in Codex-compatible structure;
+- fold deprecated prompt and command surfaces into `skills/`, rewrite docs to use skill wording instead of slash-command wording, and keep shared surfaces (`skills`, `hooks`, `agents`, `.mcp.json`, `.app.json`) in Codex-compatible structure;
 - do not keep `commands/`, `slash-commands/`, or `prompts/` as runtime package surfaces in newly created or converted plugins.
 
 ## Constraints and safety
@@ -308,11 +305,16 @@ Required behavior:
 
 ## Failure mode
 If the request is out of scope:
-- explain the mismatch clearly;
-- recommend the closest skill:
-  - `skill-builder` for standalone skill authoring,
-  - `chatgpt-apps` for full Apps SDK implementations,
-  - `mcp-builder` for MCP server development without plugin packaging.
+- explain the mismatch clearly and recommend the closest skill: `skill-builder` for standalone skill authoring, `chatgpt-apps` for full Apps SDK implementations, or `mcp-builder` for MCP server development without plugin packaging.
 
 ## Gotchas
 - Keep marketplace hygiene (`audit-marketplace`, `normalize-marketplace`) separate from runtime validity (`validate`).
+## See Also
+| Skill | When to use |
+|---|---|
+| [[skill-builder]] | Author or upgrade a standalone skill before packaging it into a plugin |
+| [[codex-agent-creator]] | Add agent roles to the plugin bundle alongside skills and hooks |
+| [[decide-build-primitive]] | Decide whether the capability belongs in a plugin at all |
+| [[skill-installer]] | Install a finished skill directly when full plugin packaging is unnecessary |
+
+**Topic map:** [[agent-ops]]

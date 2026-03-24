@@ -1,6 +1,6 @@
 ---
 name: compound-engineering-router
-description: "Route Codex compound-engineering requests to the correct workflow prompt or meta-mode in the config repo, with optional NotebookLM evidence for spec quality, agent orchestration, and Codex operating patterns. Use when a user wants brainstorm, spec, plan, work, review, technical review, compound workflow guidance, context compaction, or guardrail extraction rather than direct feature coding."
+description: Route compound-engineering requests to the correct CE stage or support meta-mode. Use when the user wants CE ideation, spec, planning, work, review, compound learning, or context compaction and the right stage is not yet explicit.
 metadata:
   skill-type: team_automation
 ---
@@ -28,9 +28,10 @@ metadata:
 
 ## Working agreement
 - Keep `SKILL.md` as the map; keep durable detail in `references/` and `workflows/`.
-- Treat `/Users/jamiecraik/dev/config` as the canonical target repo for this skill unless the user explicitly says the same prompt pack has been installed elsewhere.
+- Treat `/Users/jamiecraik/dev/Agent-Skills` as the primary target repo for packaged CE skills. Use `/Users/jamiecraik/dev/config` only as a legacy compatibility source when the user explicitly wants the original prompt-pack mapping.
 - Prefer the smallest route or meta-mode that fits.
-- Route to existing prompts and configured agents instead of duplicating their instructions.
+- Keep scope tight: choose one route, or at most 2-3 focused candidates when ambiguity remains after one question.
+- Route to existing packaged CE skills and configured agents instead of duplicating their instructions.
 - Use NotebookLM only as optional evidence enrichment, not as a substitute for repo truth.
 
 ## Standards snapshot (March 2026)
@@ -46,7 +47,7 @@ Use this skill when the user wants to enter or steer the compound-engineering wo
 
 Primary triggers:
 - "help me route this into the workflow"
-- "should this be brainstorm/spec/plan/work/review?"
+- "should this be ideate/brainstorm/spec/plan/work/review?"
 - "use the compound engineering workflow"
 - "route this UI request with design and frontend agents"
 - "do a technical review"
@@ -63,14 +64,15 @@ Non-triggers:
 
 ## Required inputs
 - user request or artifact to route: idea, spec, plan, task, branch, PR, diff, postmortem, or review ask
-- target repo context; default to `/Users/jamiecraik/dev/config`
+- target repo context; default to `/Users/jamiecraik/dev/Agent-Skills`
 - enough signal to choose one route safely; ask a single concise follow-up only if the route is ambiguous
 - for `technical-review`, at least one of: file set, diff, PR, branch, stack, or focus area
 - for `context-compaction` or `guardrail-extract`, the current state summary, failure note, or artifact set to compress or convert
 
 ## Deliverables
 - a `schema_version: 1` route or meta-mode brief
-- the exact prompt file under `codex/prompts/` when the selection is prompt-backed
+- the exact packaged CE skill name and path when the selection is skill-backed
+- the legacy prompt alias only when compatibility context is relevant
 - the recommended background agents to fan out, using exact configured role names when relevant
 - a compact execution brief with:
   - objective
@@ -127,25 +129,26 @@ Guiding questions:
 
 ## Prerequisites
 Before routing:
-1. confirm the target repo contains the prompt pack under `codex/prompts/`
-2. confirm the target repo contains matching role configs under `codex/agents/` and `codex/config.toml`
+1. confirm the target repo contains the packaged CE skills under `product/ops/`
+2. confirm the target repo contains matching role configs when the route recommends specialist agents
 3. confirm shell and tooling preflight for any repo inspection or validation work
 4. if NotebookLM enrichment is requested or clearly helpful, use the canonical NotebookLM skill and its `run.py` wrapper
 
 ## Route map
 See `workflows/route-selection.md` for the canonical route table and `workflows/meta-modes.md` for the support modes.
 
-Prompt-backed routes:
-- `brainstorm` -> `codex/prompts/workflow-brainstorm.md`
-- `spec` -> `codex/prompts/workflow-spec.md`
-- `deepen-spec` -> `codex/prompts/deepen-spec.md`
-- `plan` -> `codex/prompts/workflow-plan.md`
-- `deepen-plan` -> `codex/prompts/deepen-plan.md`
-- `work` -> `codex/prompts/workflow-work.md`
-- `ui-workflow` -> `codex/prompts/workflow-ui.md`
-- `review` -> `codex/prompts/workflow-review.md`
-- `technical-review` -> `codex/prompts/technical_review.md`
-- `compound` -> `codex/prompts/workflow-compound.md`
+Packaged CE routes:
+- `ideate` -> `product/ops/ce-ideate`
+- `brainstorm` -> `product/ops/ce-brainstorm`
+- `spec` -> `product/ops/ce-spec`
+- `deepen-spec` -> `product/ops/ce-deepen-spec`
+- `plan` -> `product/ops/ce-plan`
+- `deepen-plan` -> `product/ops/ce-deepen-plan`
+- `work` -> `product/ops/ce-work`
+- `review` -> `product/ops/ce-review`
+- `technical-review` -> `product/ops/ce-technical-review`
+- `compound` -> `product/ops/ce-compound`
+- `compound-refresh` -> `product/ops/ce-compound-refresh`
 
 Meta-modes:
 - `context-compaction` -> summarize state for a clean continuation; no backing prompt file
@@ -162,10 +165,12 @@ Meta-modes:
    - notebook 1 for spec and orchestration quality
    - notebook 2 for context injection, planning mode, hooks, and drift recovery
    - notebook 3 for Codex operating patterns, review loops, doc gardening, and eval patterns
-8. End with the selected prompt path or meta-mode, route rationale, recommended agents, and validation gates.
-9. When routing to `ui-workflow`, call out whether the UI task is prototype-first, brownfield refinement, or implementation-ready, and make the downstream handoff route explicit.
-10. When routing to `plan`, `deepen-plan`, `ui-workflow`, or `work` for behavior-changing tasks, call out the expected TDD/tracer-bullet contract explicitly so later runs do not silently downgrade it.
-11. If the route depends on missing repo assets, stop with a precise blocker instead of suggesting an imaginary path.
+8. End with the selected packaged skill path or meta-mode, route rationale, recommended agents, and validation gates.
+9. For UI-first asks, route into `ce-spec` or `ce-plan` instead of a separate `ui-workflow` lane:
+   - choose `ce-spec` when the UI contract, states, accessibility rules, or companion UI spec still need to be defined
+   - choose `ce-plan` when the UI contract already exists and the next need is prototype-first sequencing, build order, validation, or rollout planning
+10. When routing to `plan`, `deepen-plan`, or `work` for behavior-changing tasks, call out the expected TDD/tracer-bullet contract explicitly so later runs do not silently downgrade it.
+11. If the route depends on a missing packaged skill or required repo asset, stop with a precise blocker instead of suggesting an imaginary path.
 12. When recommending any agents beyond the main lane owner, state that they are internal bounded support and not peer operators Jamie is expected to coordinate manually.
 
 UI route fan-out defaults:
@@ -190,11 +195,11 @@ Do not use NotebookLM to override repo-local truth about:
 - current config values
 
 ## Validation
-- verify the selected route exists on disk before recommending it
+- verify the selected packaged route exists on disk before recommending it
 - for technical-review and review, verify referenced agent names exist in `codex/config.toml` and on disk where feasible
 - for meta-modes, verify that the output explicitly says no backing prompt file applies
 - keep route reasoning explicit and short
-- fail fast on missing prompt files or mismatched role names
+- fail fast on missing packaged skill paths, missing legacy prompt files, or mismatched role names
 - verify the route brief does not imply unnecessary multi-agent orchestration for routine work
 
 ## Anti-patterns
@@ -209,15 +214,19 @@ Do not use NotebookLM to override repo-local truth about:
 - do not equate "more agents" with a better route
 
 ## Examples
+When the user asks things like:
+
 Happy-path examples:
-- "Use the compound engineering workflow to turn this idea into a spec."
-- "Which prompt should I use for a deep PR critique on this Rails branch?"
-- "I have a rough plan; should this go to deepen-plan or work?"
-- "Route this task into the right stage and tell me which agents should fan out."
+- "Can you route this rough feature idea into the right CE stage so we know whether to ideate, brainstorm, or spec it?"
+- "Please point me at the right CE skill for a deep PR critique on this Rails branch."
+- "Should this start with ideation first, or is it already ready for brainstorming?"
+- "I have a rough plan draft. Help me decide whether it needs deepen-plan or is ready for work."
+- "Route this task into the right CE stage and tell me which internal support agents are actually worth using."
+- "We need to build a new screen. Should this go to `ce-spec` for the UI contract first, or is it already ready for `ce-plan`?"
 
 Meta-mode examples:
-- "Compact this thread so the next run can continue without losing the plan."
-- "Turn this repeated failure into a durable guardrail recommendation."
+- "Can you compact this thread so the next run can continue without losing the plan?"
+- "Help me turn this repeated workflow failure into a durable guardrail recommendation."
 
 Edge cases:
 - "I need a review, but I only know it touches migrations and performance."
@@ -234,7 +243,7 @@ Negative controls:
 | Skill | When to use together |
 |---|---|
 | [[brainstorming]] | Start with brainstorming before routing to a compound workflow |
-| [[writing-plans]] | Generate the implementation plan the compound mode targets |
+| [[ce-plan]] | Generate the implementation plan the compound mode targets |
 | [[product-spec]] | Produce a spec before routing to the work or review mode |
 | [[architecture-interview]] | Route architecture decisions through the structured interview |
 | [[skill-builder]] | Build skills that compound workflows will invoke |

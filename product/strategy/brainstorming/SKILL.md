@@ -1,13 +1,13 @@
 ---
 name: brainstorming
-description: Use before planning or implementation when a request is ambiguous, has multiple valid approaches, or needs trade-off exploration. Clarify what to build, compare 2-3 approaches, and recommend a direction before moving into planning.
+description: Clarify ambiguous product or implementation directions by comparing a few viable approaches and recommending one. Use when the user wants general brainstorming before planning or building, not the compound-engineering stage artifact.
 metadata:
   skill-type: team_automation
 ---
 
 # Brainstorming
 
-Use this skill to clarify what to build before committing to how to build it.
+Use this skill to clarify what to build before committing to how to build it in the general, non-CE case.
 
 ## Table of Contents
 - [When to use](#when-to-use)
@@ -204,7 +204,7 @@ Present clear next options:
 3. Stop here and return later.
 
 When the design is approved:
-- use `[[writing-plans]]` for implementation sequencing
+- use `[[ce-plan]]` for implementation sequencing
 - use `[[product-spec]]` if the user wants a fuller implementation-ready spec
 - use `[[architecture-interview]]` if the brainstorm surfaced a significant architecture choice that needs deeper review
 
@@ -290,7 +290,7 @@ Good brainstorming reduces ambiguity. If it is not narrowing the decision space,
 |---|---|
 | [[interview-me]] | Use when the idea needs deeper requirements discovery beyond a quick brainstorm |
 | [[product-spec]] | Hand off the chosen direction to this skill to produce implementation-ready specs |
-| [[writing-plans]] | After spec is agreed, use to turn it into a sequenced execution plan |
+| [[ce-plan]] | After spec is agreed, use to turn it into a sequenced execution plan |
 | [[architecture-interview]] | When the brainstorm reveals a significant architecture decision needing structured review |
 
 **Topic map:** [[product-strategy]]

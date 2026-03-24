@@ -1,6 +1,6 @@
 ---
 name: docs-expert
-description: "Use when asked to audit or rewrite repository docs (README, docs, runbooks, community-health files) or when code has missing in-code documentation (JSDoc/DocC/config docs): enforce official brand guidance, harden GitHub visibility signals, and deliver evidence-bundled docs QA."
+description: Audit and rewrite repository documentation, runbooks, and in-code docs with repo-visibility and brand-quality checks. Use when the user wants README, docs, JSDoc, DocC, or config documentation improved, not editorial house-style copyediting.
 metadata:
   skill-type: code_quality_review
 ---
@@ -278,3 +278,13 @@ Quick corrections:
 
 ## Failure mode
 - If the repo context, target audience, or governing source material is unclear, stop, name the ambiguity, and fall back to a scoped docs audit or clarification request instead of rewriting documentation on assumption.
+
+## See Also
+| Skill | When to use |
+|---|---|
+| [[agents-md]] | Refactor or tighten AGENTS.md and related repo instruction routing |
+| [[markdown-converter]] | Convert source materials into clean Markdown before docs restructuring |
+| [[fixing-metadata]] | Repair page metadata and SEO surfaces after docs or web content edits |
+| [[visual-explainer]] | Present a complex system, workflow, or docs audit as a visual artifact |
+
+**Topic map:** [[agent-ops]]

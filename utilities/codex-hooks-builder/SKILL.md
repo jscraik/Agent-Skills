@@ -1,6 +1,6 @@
 ---
 name: codex-hooks-builder
-description: Create, upgrade, and validate Codex hook packs for project-local or user-level `.codex/` installs using the current March 2026 runtime contract. Use when you want `hooks.json` plus `SessionStart`, `UserPromptSubmit`, or `Stop` hook scripts scaffolded, hardened, or audited for a repo or Codex home.
+description: Create, upgrade, or audit Codex hook packs for repo-local or user-level `.codex` installs. Use when the user wants hook runtime files or hook-script hardening, not general agent role creation.
 metadata:
   skill-type: scaffolding_templates
 ---
@@ -148,3 +148,13 @@ bash scripts/lint_skill_types.sh
 - `UserPromptSubmit` exists in the released runtime -> older internal notes may omit it -> trust released `0.116.0` and current alpha source over stale summaries -> confirm with `references/runtime-contract.md`.
 - Relative hook commands fail from nested working directories -> command execution uses session cwd, not the config folder -> emit absolute script paths in `hooks.json` -> inspect the generated JSON before install.
 - `Stop` can block its own retry loop -> the same incomplete message gets re-checked -> honor `stop_hook_active` and fail open on the second pass -> dry-run the `Stop` payload twice when tuning.
+
+## See Also
+| Skill | When to use |
+|---|---|
+| [[codex-plugin-builder]] | Package the hooks together with related skills or agents in a plugin |
+| [[codex-home-audit]] | Audit an existing Codex home installation for hook drift or unsafe config |
+| [[codex-agent-creator]] | Create or update agent roles that the hooks should invoke or govern |
+| [[gh-workflow]] | Ship and review hook-pack changes through the GitHub lifecycle |
+
+**Topic map:** [[agent-ops]]

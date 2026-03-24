@@ -96,9 +96,11 @@ Do not use this skill when:
 - Treating a one-off GUI success as equivalent to repeatable CLI verification.
 - Mixing setup/install work into a verification-only task without calling that out.
 
-## See also
+## See Also
 
 | Skill | When to use together |
 |---|---|
 | [[xcode-makefiles]] | Install or upgrade the CLI-first Xcode build toolkit |
 | [[apple-app-builder]] | Scaffold a new Apple app project before runtime verification |
+
+**Topic map:** [[mobile-native]]

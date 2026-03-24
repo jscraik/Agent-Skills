@@ -1,13 +1,13 @@
 ---
 name: gh-workflow
-description: "Consolidated GitHub lifecycle skill for agents and users: intake, issue fixing, PR prep, review request/reception, review comment handling, CI diagnosis, and server-side merge via gh. Use when requests involve GitHub issues/PRs/checks/merge operations."
+description: "Operate the GitHub lifecycle through `gh`: issue work, PR preparation, review handling, CI diagnosis, and merge execution. Use when the user wants GitHub state changed, advanced, or reconciled, not when they only want a policy-gated PR readiness decision."
 metadata:
   skill-type: ci_cd_deployment
 ---
 
 # GH Workflow
 
-Use the canonical GitHub workflow path for issue, PR, review, CI, and merge work driven by `gh`.
+Use the canonical GitHub operations lane for issue, PR, review, CI, and merge work driven by `gh`. This skill acts on GitHub state; it does not replace a separate readiness or governance review.
 
 ## Standards snapshot (March 2026)
 - Keep GitHub operations evidence-backed and stateful: know the repo, branch, PR, and current git status before acting.
@@ -26,6 +26,11 @@ Use the canonical GitHub workflow path for issue, PR, review, CI, and merge work
 - PR preparation, review requests, review intake, and review-comment handling.
 - CI failure diagnosis for PR checks.
 - Server-side merge flows through `gh pr merge`.
+
+## When not to use
+- A pre-merge readiness decision is the main job and no lifecycle action should happen yet; use `check-pr`.
+- The user wants a broad code or architecture review rather than GitHub operations.
+- The user wants implementation work with no GitHub lifecycle step in scope.
 
 ## Modes
 - `intake`

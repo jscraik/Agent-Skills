@@ -21,6 +21,7 @@ Use this reference when updating `AGENTS.md` skills or auditing repo instruction
 - `project_doc_fallback_filenames`: additional filenames that Codex should treat as project instructions when `AGENTS.md` is absent.
 - `project_doc_max_bytes`: maximum combined byte budget for discovered project docs. The default is 32 KiB.
 - `CODEX_HOME`: swaps the home directory Codex uses for global config and global `AGENTS` files.
+- If OpenAI doc pages phrase `project_doc_max_bytes` differently, prefer the `agents-md` guide plus live Codex source behavior for operator guidance. As of March 2026, the guide and `codex-rs/core/src/project_doc.rs` both reflect an effective combined discovery budget across the loaded instruction chain.
 
 ## Verification Commands
 - Root scope:

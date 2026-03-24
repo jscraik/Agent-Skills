@@ -10,17 +10,17 @@ Generated from `metadata.skill-type` tags in skill frontmatter.
 
 ## Summary
 
-- `library_api_reference`: 7
-- `product_verification`: 7
+- `library_api_reference`: 8
+- `product_verification`: 8
 - `data_fetch_analysis`: 6
-- `team_automation`: 22
-- `scaffolding_templates`: 26
-- `code_quality_review`: 13
-- `ci_cd_deployment`: 6
+- `team_automation`: 35
+- `scaffolding_templates`: 27
+- `code_quality_review`: 17
+- `ci_cd_deployment`: 7
 - `runbook`: 4
-- `infrastructure_ops`: 4
+- `infrastructure_ops`: 5
 - `invalid`: 0
-- `total_tagged`: 95
+- `total_tagged`: 117
 
 ## Validation Notes
 
@@ -45,6 +45,7 @@ Generated from `metadata.skill-type` tags in skill frontmatter.
 
 ### Library Api Reference
 
+- agent-native-architecture (product/domain)
 - context7 (product/docs)
 - design-system (frontend/ui)
 - figma (frontend/tools)
@@ -59,6 +60,7 @@ Generated from `metadata.skill-type` tags in skill frontmatter.
 - agent-native-audit (product/review)
 - agentation (frontend/tools)
 - playwright-interactive (frontend/tools)
+- reproduce-bug (utilities)
 - test-browser (frontend/tools)
 - test-xcode (utilities)
 - ui-visual-regression (frontend/ui)
@@ -78,6 +80,16 @@ Generated from `metadata.skill-type` tags in skill frontmatter.
 - architecture-interview (interview)
 - atlas (utilities)
 - brainstorming (product/strategy)
+- ce-brainstorm (product/ops)
+- ce-compound (product/ops)
+- ce-compound-refresh (product/ops)
+- ce-deepen-plan (product/ops)
+- ce-deepen-spec (product/ops)
+- ce-ideate (product/ops)
+- ce-plan (product/ops)
+- ce-spec (product/ops)
+- ce-work (product/ops)
+- changelog (product/content)
 - codex-automation-architect (utilities)
 - compound-engineering-router (product/ops)
 - decide-build-primitive (product/ops)
@@ -86,11 +98,14 @@ Generated from `metadata.skill-type` tags in skill frontmatter.
 - interview-me (interview)
 - linear (product/ops)
 - markdown-converter (utilities)
+- orchestrating-subagents (utilities)
 - product-design-critic (product/strategy)
 - product-spec (product/specs)
 - project-improver (product/strategy)
+- resolve-todo-parallel (product/ops)
 - simple-tasks (utilities)
 - slides (utilities)
+- triage (product/ops)
 - video-transcript-downloader (product/content)
 - visual-explainer (utilities)
 - writing-plans (utilities)
@@ -111,6 +126,7 @@ Generated from `metadata.skill-type` tags in skill frontmatter.
 - codex-plugin-builder (utilities)
 - create-auth (auth)
 - favicon-generator (frontend/graphics)
+- frontend-design (frontend/ui)
 - frontend-ui-design (frontend/ui)
 - imagegen (frontend/graphics)
 - mcp-builder (backend)
@@ -131,12 +147,16 @@ Generated from `metadata.skill-type` tags in skill frontmatter.
 - agents-md (product/docs)
 - baseline-ui (frontend/ui)
 - best-practices (auth)
+- ce-review (product/ops)
+- ce-technical-review (product/ops)
 - check-pr (github/greptile)
 - codex-home-audit (utilities)
 - docs-expert (product/docs)
 - evals-router (utilities)
+- every-style-editor (product/content)
 - fixing-accessibility (frontend/website)
 - fixing-metadata (frontend/website)
+- greploop (github/greptile)
 - security-best-practices (product/security)
 - skill-builder (utilities)
 - test-driven-development (utilities)
@@ -149,6 +169,7 @@ Generated from `metadata.skill-type` tags in skill frontmatter.
 - gh-fix-ci (github)
 - gh-workflow (github)
 - release (product/ops)
+- resolve-pr-parallel (github)
 - using-git-worktrees (utilities)
 
 ### Runbook
@@ -163,5 +184,6 @@ Generated from `metadata.skill-type` tags in skill frontmatter.
 - 1password (utilities)
 - fix-mise (utilities)
 - process-watch (utilities)
+- rclone (utilities)
 - workers-mcp (backend)
 

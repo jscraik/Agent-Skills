@@ -1,6 +1,6 @@
 ---
 name: best-practices
-description: Review Better Auth setups and highlight secure integration best practices. Use for audits, config guidance, or debugging flows (not full implementation). Use when the user requests this capability.
+description: Audit Better Auth integrations for secure patterns, config mistakes, and operational gaps. Use when the user wants Better Auth review, hardening, or debugging guidance, not a fresh implementation.
 metadata:
   skill-type: code_quality_review
 ---

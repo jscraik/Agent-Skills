@@ -1,0 +1,73 @@
+schema_version: 1
+purpose: >
+  Triage file-based todo findings by reviewing pending items, deciding whether they
+  become ready for work, skipping weak items, or lightly customizing them before approval,
+  without implementing code changes.
+
+triggers:
+  - Requests to triage pending file-based todos
+  - Requests to approve or skip findings before execution
+  - Requests to move review-created pending items into ready state
+
+inputs:
+  - repo context with a todos workflow, or a findings list destined for that workflow
+  - optional todo selector
+  - optional bulk-vs-interactive preference
+
+outputs:
+  - Human-readable triage summary
+  - Structured output matching required_output fields when requested
+
+risks:
+  - Repo lacks a file-based todos workflow
+  - Filename and frontmatter status drift
+  - Triage drifting into implementation
+  - Generic tracker triage being mistaken for file-based todo triage
+
+modes:
+  - pending_todo_triage
+  - findings_to_pending_triage
+
+required_output:
+  mode: string
+  repo:
+    localPath: string
+  status:
+    enum: [ready, blocked, in_progress, completed, failed]
+  items_seen: integer
+  approved_ready:
+    type: array
+    items: string
+  skipped:
+    type: array
+    items: string
+  customized:
+    type: array
+    items: string
+  blocked:
+    type: array
+    items: string
+  actions_taken:
+    type: array
+    items: string
+  evidence:
+    type: array
+    items:
+      type: object
+      fields:
+        kind: string
+        label: string
+        value: string
+  next_step: string
+  risks:
+    type: array
+    items: string
+
+defaults:
+  mode: pending_todo_triage
+  presentation: one_item_at_a_time
+
+non_goals:
+  - Generic issue tracker triage
+  - Code implementation
+  - Todo execution or cleanup after implementation

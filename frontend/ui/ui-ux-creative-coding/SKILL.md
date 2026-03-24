@@ -1,6 +1,6 @@
 ---
 name: ui-ux-creative-coding
-description: Analyze and run focused UI polishing for React/Tauri screens when motion, interaction rhythm, and accessibility refinements are needed in Tailwind v4; use this when users need implementation-ready recommendations before changing interface code, especially after the visual direction is already set.
+description: Use this skill to build and polish an existing React or Tauri UI with stronger motion, interaction rhythm, and accessibility refinements when the visual direction is already set and the user wants targeted implementation-ready polish, not a full redesign.
 metadata:
   skill-type: scaffolding_templates
   short-description: UI polish workflow for React/Tauri with motion, accessibility, and implementation-ready validation guidance.
@@ -93,3 +93,13 @@ metadata:
 
 ## Gotchas
 - None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.
+
+## See Also
+| Skill | When to use |
+|---|---|
+| [[frontend-ui-design]] | Establish the structural UI direction before layering in motion and polish |
+| [[baseline-ui]] | Keep animation timing, typography, and accessibility aligned with the baseline system |
+| [[design-system]] | Route token, palette, and alias-level system work to the design-system owner |
+| [[react-ui-patterns]] | Ground the creative layer in maintainable React composition patterns |
+
+**Topic map:** [[frontend-ui]]

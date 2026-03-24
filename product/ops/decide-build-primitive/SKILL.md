@@ -1,8 +1,6 @@
 ---
 name: decide-build-primitive
-description: Analyze and decide the right Codex primitive (Skill, Custom Prompt, or
-  Agent automation) for a capability. Use this when you need to plan how to package
-  or automate a workflow.
+description: Use this skill to analyze whether a capability should become a Skill, Custom Prompt, or Agent automation when the user is packaging or automating a workflow and the right Codex primitive is not yet clear.
 metadata:
   skill-type: team_automation
 ---

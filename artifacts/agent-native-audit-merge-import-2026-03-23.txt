@@ -1,0 +1,8 @@
+source_repo: EveryInc/compound-engineering-plugin
+source_ref: 0fdc25a36cabea4ce9e2ae47ff69c1a9a2de8f0b
+source_path: plugins/compound-engineering/skills/agent-native-audit/SKILL.md
+merge_target: product/review/agent-native-audit
+strategy: merge_local_keep_existing_wrapper_and_add_scored_audit_reference
+imported_reference: references/upstream-playbook.md
+sha256:
+fbda06f95197ec42b99d2622427fd4c67fff710f180b7eba22ff012ff2a14cc9  /Users/jamiecraik/dev/Agent-Skills/product/review/agent-native-audit/references/upstream-playbook.md

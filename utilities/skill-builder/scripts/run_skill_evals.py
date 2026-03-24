@@ -35,7 +35,7 @@ import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Set, Tuple, Union
-import xml.etree.ElementTree as ET
+from defusedxml import ElementTree as ET
 
 try:
     import yaml  # type: ignore

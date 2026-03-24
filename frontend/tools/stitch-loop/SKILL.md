@@ -1,6 +1,6 @@
 ---
 name: stitch-loop
-description: Use this skill when the user asks for iterative autonomous website building with Stitch using a baton file (`next-prompt.md`) and multi-pass page generation.
+description: Run iterative autonomous website-building loops with Stitch using a baton file and multi-pass page generation. Use when the user wants Stitch to keep building or refining a site over repeated passes, not one-shot UI extraction.
 allowed-tools:
   - "stitch*:*"
   - "chrome*:*"

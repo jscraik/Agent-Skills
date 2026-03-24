@@ -219,6 +219,72 @@ cases:
       - type: regex
         value: "(?i)(tailor|verified repo evidence|only when|if present|not observed|optional|required)"
 
+  - id: cross-agent-quality-checks-propagation
+    name: cross-agent-quality-checks-propagation
+    category: edge
+    eval_modes: [release]
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Update our shared AGENTS, CLAUDE, and GEMINI guidance so all three use a `## Quality Checks` section for TypeScript validation. In npm-based repos, require `npm run lint` and `npm run test` after TypeScript changes and confirm both pass before work is complete. Also require CI/CD work to end only after the final pipeline status is confirmed, and require multi-repo PR workflows to check merge conflicts up front and flag blocked PRs early."
+    acceptance:
+      - type: contains
+        value: "Quality Checks"
+      - type: contains
+        value: "npm run lint"
+      - type: contains
+        value: "npm run test"
+      - type: regex
+        value: "(?i)(AGENTS\\.md|CLAUDE\\.md|GEMINI\\.md)"
+      - type: regex
+        value: "(?i)(CI/CD Workflow|final pipeline status|authoritative pipeline)"
+      - type: regex
+        value: "(?i)(GitHub Workflow|PR Management|merge conflicts|blocked PRs)"
+
+  - id: strengthen-existing-cross-agent-guidance
+    name: strengthen-existing-cross-agent-guidance
+    category: edge
+    eval_modes: [release]
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Our AGENTS, CLAUDE, and GEMINI files already mention testing, CI, and PRs, but the wording is weak. Update the guidance so the existing rules are strengthened in place instead of duplicated."
+    acceptance:
+      - type: regex
+        value: "(?i)(strengthen|stronger|in place|instead of duplicating)"
+      - type: regex
+        value: "(?i)(Quality Checks|CI/CD Workflow|GitHub Workflow|PR Management)"
+
+  - id: harness-memory-learnings-opt-in
+    name: harness-memory-learnings-opt-in
+    category: edge
+    eval_modes: [release]
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Update our AGENTS guidance so `.harness/memory/LEARNINGS.md` is required only in repos that explicitly adopt the harness-memory convention, while organization `instructions/Learning.md` stays supplemental context."
+    acceptance:
+      - type: contains
+        value: ".harness/memory/LEARNINGS.md"
+      - type: regex
+        value: "(?i)(explicitly adopt|harness-memory convention|opt-in|not observed)"
+      - type: regex
+        value: "(?i)(supplemental context|instructions/Learning\\.md|instructions/Learnings\\.md)"
+
+  - id: architecture-diagram-path-exactness
+    name: architecture-diagram-path-exactness
+    category: edge
+    eval_modes: [release]
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Our repos often keep architecture drawings in `.diagram/` or `.diagrams/`. Update the AGENTS guidance so agents use the documented diagram folder as quick project context, but never guess or silently normalize the path between repos."
+    acceptance:
+      - type: regex
+        value: "(?i)(architecture|diagram).*(context|quick project context|repo understanding)"
+      - type: contains
+        value: ".diagram/"
+      - type: contains
+        value: ".diagrams/"
+      - type: regex
+        value: "(?i)(verify|documented path|exact path|do not silently normalize|do not guess)"
+
   - id: repo-baseline-resists-blind-copy
     name: repo-baseline-resists-blind-copy
     category: edge

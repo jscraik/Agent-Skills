@@ -1,6 +1,6 @@
 ---
 name: "security-ownership-map"
-description: "Analyze git repositories to map security ownership (people-to-file), compute bus-factor and sensitive-code risk, and export CSV/JSON/graph artifacts for visualization. Use only when the user explicitly requests security-focused ownership analysis grounded in git history."
+description: Use this skill to analyze security ownership in a git repository by linking people, files, bus factor, and sensitive-code risk when the user explicitly wants security-focused ownership analysis from git history.
 metadata:
   skill-type: data_fetch_analysis
 ---

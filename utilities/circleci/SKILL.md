@@ -1,6 +1,6 @@
 ---
 name: circleci
-description: "Use this skill when the user asks for CircleCI migration, orchestration, testing, deployment, optimization, security/secrets, config policy, integration, or developer toolkit guidance."
+description: Plan, migrate, debug, or harden CircleCI pipelines and related delivery workflows. Use when the user wants CircleCI-specific config, testing, deployment, secrets, or policy help, not generic CI advice.
 metadata:
   skill-type: ci_cd_deployment
 ---

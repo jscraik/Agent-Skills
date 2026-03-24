@@ -872,6 +872,7 @@ sync_user_skills "$skills_dir" "$HOME/.claude/skills"
 sync_user_skills "$skills_dir" "$HOME/.agents/skills"
 sync_user_skills "$plugins_dir" "$HOME/.agents/plugins"
 sync_user_skills "$skills_dir" "$HOME/.codex/skills"
+sync_user_skills "$plugins_dir" "$HOME/.codex/plugins" 1
 sync_user_skills "$antigravity_skills_dir" "$HOME/.gemini/antigravity/skills" 1 copy
 sync_user_skills "$antigravity_skills_dir" "$HOME/.gemini/skills" 1 copy
 sync_user_skills "$antigravity_skills_dir" "$HOME/.antigravity/skills"

@@ -198,7 +198,7 @@ Documentation & Collaboration: `list_documents`, `get_document`, `search_documen
 
 | Skill | When to use together |
 |---|---|
-| [[writing-plans]] | Convert Linear issues into sequenced implementation plans |
+| [[ce-plan]] | Convert Linear issues into sequenced implementation plans |
 | [[gh-workflow]] | Link Linear issues to GitHub PRs during delivery |
 | [[simple-tasks]] | Use for lightweight local task tracking between Linear syncs |
 | [[alignment-checkpoint]] | Gate Linear issue creation behind intent alignment |

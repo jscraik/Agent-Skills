@@ -2,6 +2,50 @@
 
 Use these scripts to upgrade skill quality before packaging.
 
+## check-see-also.py
+
+```bash
+python3 scripts/check-see-also.py . --changed-files <skill>/SKILL.md
+```
+
+Use when:
+- validating that new or materially changed skills include a `## See Also` table
+- enforcing the minimum related-skill link count for graph traversal quality
+
+Outputs:
+- PASS/FAIL for changed skills in CI mode
+- audit report of weakly linked skills in full-scan mode
+
+## validate_skill_graph_profiles.py
+
+```bash
+python3 utilities/skill-builder/scripts/validate_skill_graph_profiles.py --repo-root . --expected-count 0
+```
+
+Use when:
+- creating or improving active skills that should participate in the recursive skill graph
+- checking `references/task-profile.json` completeness and onboarding-contract validity
+
+Outputs:
+- `artifacts/skill-graphs/onboarding/profile-index.json`
+- `artifacts/skill-graphs/onboarding/wave-readiness.json`
+- non-zero exit when graph profile contracts fail
+
+## build-adjacency-yaml.py + validate-adjacency.py
+
+```bash
+python3 scripts/build-adjacency-yaml.py
+python3 scripts/validate-adjacency.py
+```
+
+Use when:
+- `## See Also` tables changed materially across one or more skills
+- refreshing and validating the repository adjacency artifact after graph-link updates
+
+Outputs:
+- updated `docs/skill-graphs/adjacency.yaml`
+- PASS/FAIL drift check between `SKILL.md` links and adjacency output
+
 ## skill_gate.py
 
 ```bash
@@ -12,6 +56,7 @@ Use when:
 - enforcing frontmatter constraints and trigger quality
 - enforcing progressive disclosure limits
 - requiring references/contract.yaml and references/evals.yaml
+- checking that the skill bundle is structurally ready before graph-specific gates run
 
 Outputs:
 - PASS/FAIL result with findings

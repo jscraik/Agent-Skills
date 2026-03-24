@@ -7,6 +7,8 @@ metadata:
 
 # Agent-Native Audit
 
+Merged with preserved upstream audit guidance from `EveryInc/compound-engineering-plugin` at pinned ref `0fdc25a36cabea4ce9e2ae47ff69c1a9a2de8f0b`; see [`artifacts/agent-native-audit-merge-import-2026-03-23.txt`](../../../artifacts/agent-native-audit-merge-import-2026-03-23.txt) for provenance and hashes.
+
 ## Table of Contents
 - [When to use](#when-to-use)
 - [Required inputs](#required-inputs)
@@ -14,6 +16,7 @@ metadata:
 - [Failure mode](#failure-mode)
 - [Philosophy](#philosophy)
 - [Workflow](#workflow)
+- [Deep-Dive Playbook](#deep-dive-playbook)
 - [Validation](#validation)
 - [Gotchas](#gotchas)
 - [Anti-patterns](#anti-patterns)
@@ -25,6 +28,7 @@ Use this skill when:
 - a repo or feature needs an agent-native audit;
 - a workflow appears to rely on hidden human knowledge, UI-only actions, or undocumented setup;
 - you need a structured review of whether an agent can discover, execute, and verify a task safely.
+- you want a scored principle-by-principle agent-native review and remediation priorities.
 
 Do not use this skill when:
 - the user only wants a normal code review;
@@ -46,6 +50,7 @@ Do not use this skill when:
 - prioritized findings grouped by severity or operational risk;
 - concrete remediation steps that move the workflow toward agent-native parity;
 - residual risks or unknowns that still require human decisions.
+- when requested, a scored scorecard or principle-specific audit using the preserved deep-dive playbook.
 
 ## Failure mode
 
@@ -78,6 +83,15 @@ Do not use this skill when:
 4. Capture evidence for each gap with file or command references.
 5. Recommend the smallest fixes that remove the highest-friction agent blockers first.
 
+## Deep-Dive Playbook
+
+- Use `references/upstream-playbook.md` when the user wants a full scored architecture review instead of the default concise blocker audit.
+- Read that playbook when you need:
+  - an 8-principle scorecard;
+  - a principle-specific audit such as action parity, tools as primitives, shared workspace, or capability discovery;
+  - a heavier parallelized audit plan with separate workstreams per principle.
+- Keep this `SKILL.md` as the routing wrapper and preserve the detailed scoring doctrine in the reference instead of inflating the wrapper.
+
 ## Validation
 
 - Every finding should point to concrete evidence, not inference alone.
@@ -88,14 +102,16 @@ Do not use this skill when:
 
 - A workflow can look agent-friendly in docs but still hide manual-only setup in scripts or external tooling.
 - Audit findings should stay tied to the named task; avoid drifting into a general platform critique unless the user asked for that.
+- If the user asks for a comprehensive scored audit and you only run the lightweight wrapper flow, switch to `references/upstream-playbook.md` before responding.
 
 ## Anti-patterns
 
 - Treating vague “this feels manual” impressions as findings without evidence.
 - Mixing architectural critique with unrelated style preferences.
 - Recommending large rewrites when a missing instruction, script, or validation step would remove the blocker.
+- Collapsing the scored upstream audit doctrine into a vague summary instead of routing to the preserved deep-dive reference.
 
-## See also
+## See Also
 
 | Skill | When to use together |
 |---|---|
@@ -103,3 +119,5 @@ Do not use this skill when:
 | [[codex-home-audit]] | Audit the Codex home surface instead of a single repo |
 | [[check-pr]] | Review a specific pull request after identifying agent-native risks |
 | [[gh-workflow]] | Land follow-up fixes through the GitHub workflow |
+
+**Topic map:** [[agent-ops]]

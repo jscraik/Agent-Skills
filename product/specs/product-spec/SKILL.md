@@ -1,15 +1,13 @@
 ---
 name: product-spec
-description: Create or review implementation-ready product specifications from ideas
-  or existing docs. Use when you need a full PRD+UX+build plan pipeline or a focused
-  mode (clarify_prd, ux_only, api_spec, arch_spec, operator_spec, testplan).
+description: Create or review product-planning specifications from ideas or existing docs. Use when the user wants a PRD, UX, API, architecture, operator, or test-plan artifact, not the narrower CE spec stage.
 metadata:
   skill-type: team_automation
 ---
 
 # Product Spec Skill
 
-Use this skill to **plan** a product: turn an idea (or existing docs) into implementation-ready specs and execution planning artifacts. This skill does **not** implement product code.
+Use this skill to **plan** a product: turn an idea (or existing docs) into product-level specs and execution-planning artifacts. This skill does **not** implement product code.
 
 ## Philosophy
 
@@ -250,7 +248,7 @@ Fail fast: **stop at the first failed gate and do not proceed**.
 |---|---|
 | [[brainstorming]] | Use first when idea is unclear — brainstorm resolves direction, this skill writes the spec |
 | [[interview-me]] | Use for deep requirements discovery when the spec needs user-research grounding |
-| [[writing-plans]] | After spec approval, use to decompose the spec into an execution plan |
+| [[ce-plan]] | After spec approval, use to decompose the spec into an execution plan |
 | [[architecture-interview]] | Use when `arch_spec` mode reveals open design decisions needing review |
 | [[security-threat-model]] | Use on the resulting spec/API to identify and model security risks early |
 

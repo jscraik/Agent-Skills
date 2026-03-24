@@ -136,7 +136,7 @@ Required gates:
 | [[gh-workflow]] | Manage PRs across multiple worktrees |
 | [[verification-before-completion]] | Verify each worktree independently before merging |
 | [[systematic-debugging]] | Debug issues isolated to a specific worktree |
-| [[writing-plans]] | Plan parallel workstreams across worktrees |
+| [[ce-plan]] | Plan parallel workstreams across worktrees |
 
 **Topic map:** [[backend-platform]]
 

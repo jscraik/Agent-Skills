@@ -1,6 +1,6 @@
 ---
 name: frontend-ui-design
-description: Create and review production-ready UI systems/components with tokens, accessibility, and strong visual direction. Use for standard UI implementation, redesign, or visually led landing pages and demos that still need production-ready structure (not creative-coding polish). Use when the user requests this capability.
+description: Design or implement production-ready frontend UI components and screens with strong visual direction, accessibility, and reusable structure. Use when the user wants standard UI build or redesign work, not design-system governance or post-direction polish only.
 metadata:
   skill-type: scaffolding_templates
 ---

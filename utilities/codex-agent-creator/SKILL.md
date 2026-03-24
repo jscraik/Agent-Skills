@@ -1,6 +1,6 @@
 ---
 name: codex-agent-builder
-description: Create and install Codex custom multi-agent roles when role creation, validation, or safe update is requested, using secure minimal-change configuration.
+description: Create and install Codex multi-agent roles and configs with safe minimal-change updates. Use when the user wants agent roles created or updated, not orchestration of existing roles.
 metadata:
   skill-type: scaffolding_templates
 ---
@@ -97,3 +97,13 @@ Run discovery for underspecified role-creation or role-hardening requests.
 
 ## Gotchas
 - None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.
+
+## See Also
+| Skill | When to use |
+|---|---|
+| [[agents-md]] | Update repo instructions to reference or govern the new agent roles |
+| [[codex-automation-architect]] | Design recurring automations that orchestrate the installed agents |
+| [[codex-plugin-builder]] | Package agent roles together with hooks or skills in a plugin |
+| [[decide-build-primitive]] | Decide whether the capability should be an agent, skill, or automation first |
+
+**Topic map:** [[agent-ops]]

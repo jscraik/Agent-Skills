@@ -1,6 +1,6 @@
 ---
 name: simple-tasks
-description: Install a fast local task workflow for single-project planning with scripts/task.sh (claim, done, status, reporting) backed by tasks/TASKS.md and optional tasks/details/ notes. Use when you need lightweight in-progress task coordination rather than full team issue tracking.
+description: Install a lightweight local task workflow backed by `tasks/TASKS.md` and `scripts/task.sh`. Use when the user wants simple in-repo task coordination, not team issue-tracker management.
 metadata:
   skill-type: team_automation
 ---
@@ -92,7 +92,7 @@ skills/simple-tasks/scripts/install.sh --project-dir /tmp/demo --mode upgrade
 | Skill | When to use together |
 |---|---|
 | [[linear]] | Escalate to Linear when tasks need team-wide visibility |
-| [[writing-plans]] | Seed task list from a writing-plans implementation plan |
+| [[ce-plan]] | Seed task list from a finished implementation plan |
 | [[alignment-checkpoint]] | Capture approved action items as simple tasks |
 | [[verification-before-completion]] | Mark tasks done only after verification evidence |
 

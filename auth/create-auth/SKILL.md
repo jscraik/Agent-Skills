@@ -1,6 +1,6 @@
 ---
 name: create-auth
-description: Build Better Auth integrations for TS/JS apps with secure defaults. Use for implementation or migration work (not just review). Use when the user requests this capability.
+description: Implement or migrate Better Auth in TypeScript or JavaScript apps with secure defaults. Use when the user wants Better Auth added or changed in code, not just reviewed.
 metadata:
   skill-type: scaffolding_templates
 ---

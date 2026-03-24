@@ -1,6 +1,6 @@
 ---
 name: skill-builder
-description: "Create, revise, benchmark, and quality-gate Codex skills (SKILL.md plus scripts, references, evals, and packaging). Use this skill when the user asks to build, audit, improve, compare, package, or safely install local/imported skill folders. Scope exclusions: unrelated app features, generic bug fixing, plugin package conversion, or session-log audits."
+description: Create, improve, compare, import, and quality-gate Codex skills, including SKILL.md, references, evals, scripts, and packaging. Use when the user wants skill-focused building, auditing, or installation work, not generic feature coding or plugin conversion.
 metadata:
   skill-type: code_quality_review
 ---
@@ -36,6 +36,11 @@ Design, improve, validate, and package high-quality Codex skills.
 - Path confinement default: write inside approved repo roots and `./artifacts/`; `USER` scope is an explicit `install-distribute` opt-out with confirmation + allowlist.
 - Start with the smallest viable package boundary and 2-3 focused surfaces on first pass.
 - Move deep policy into `references/`; move repeatable mechanics into `scripts/`.
+- Preserve valuable context by relocating it with explicit signposting, not by deleting or flattening nuanced guidance just to make `SKILL.md` shorter.
+- Treat graph-readiness as source quality, not cleanup work after the fact:
+  - add a `## See Also` table with at least 2 real related skills,
+  - include a topic-map signpost such as `**Topic map:** [[agent-ops]]` when the skill belongs in the graph,
+  - create or preserve `references/task-profile.json` for in-scope operational skills.
 
 ## When to use
 Use this skill when the user asks to:
@@ -75,6 +80,8 @@ Enforce OpenAI/Codex skill format by default:
 - keep `SKILL.md` as the map:
   - route-critical boundaries, required inputs, output contract, and safety guardrails stay in `SKILL.md`
   - long examples, compatibility matrices, and operational runbooks move to `references/`
+  - when relocating material, preserve high-value nuance, caveats, and doctrine in `references/` instead of summarizing them away
+  - add explicit signposts so `SKILL.md` tells the reader which reference to open and when
   - deterministic helpers stay in `scripts/`
 - for non-trivial responses, include machine-checkable output contracts with `schema_version`.
 
@@ -126,6 +133,7 @@ Core policies:
 - use `Do X because Y` style in `SKILL.md` procedure sections;
 - keep `description` routing-first (`what + when`), never a checklist;
 - progressive-disclosure triggers must live in `references/` (`Read when: <condition>`);
+- progressive disclosure means signposted relocation, not information loss; if detail matters for correct behavior, preserve it in `references/` and route to it explicitly;
 - `__all__` only when module-style scripts are intended for import reuse; not required for CLI entrypoints.
 
 ## Modes
@@ -172,6 +180,9 @@ Produce only what the request needs, usually:
 - optional `scripts/`, `references/`, `assets/`, `workflows/`
 - `agents/openai.yaml` when UI/tool metadata is needed
 - `references/contract.yaml` and `references/evals.yaml` for non-trivial skills
+- `## See Also` plus a topic-map signpost for graph-visible skills in this repository
+- `references/task-profile.json` for active/in-scope skills that participate in the recursive skill graph
+- preserved reference context with clear signposts when content is being condensed or imported from a richer source
 - validator and analyzer evidence
 - packaged `.skill` when requested
 - concise blocker summary if quality gates cannot be met in-turn
@@ -185,6 +196,7 @@ Produce only what the request needs, usually:
 - Missing required headings -> nested/alias headings used -> promote to exact top-level `##` names -> rerun `bash scripts/lint_progressive_disclosure.sh --mode warn`.
 - `sync_skills` timeout with `Operation not permitted` -> runtime paths are read-only in sandbox -> run `bash scripts/sync_skills_sandbox_safe.sh`.
 - Stale type index after tag edits -> semantic sync skipped -> run sandbox-safe sync, then `bash scripts/lint_skill_types.sh`.
+- Valuable source context disappears during cleanup -> progressive disclosure was treated as compression -> restore the nuance into `references/` and add direct signposts from `SKILL.md`.
 
 ## Response format
 For non-trivial first responses in `create`, `improve`, `eval`, or `benchmark-lite`, start with these exact top-level headings in this order:
@@ -232,6 +244,11 @@ Use the compact flow below, then follow the linked references for full detail.
 2. Confirm category and missing inputs in one round.
 3. Set trigger logic first (`description`) and add 8+/8+ trigger coverage in `references/evals.yaml`.
 4. Scaffold and draft with minimal structure, moving deep policy to `references/` and deterministic mechanics to `scripts/`.
+   - When slimming `SKILL.md`, preserve high-impact context in `references/` and add explicit read-when signposts instead of collapsing the source material into a weaker summary.
+   - For repo skills, wire graph navigation while drafting:
+     - add `## See Also` with 2+ real related skills,
+     - add a topic-map signpost,
+     - create or preserve `references/task-profile.json` when the skill is in the operational graph.
 5. When recursive run evidence exists, consume `lesson_observations.json`, `lesson_candidates.json`, and `promotion_decision.json` and promote only repeated, rubric-bound lessons.
 6. Iterate gate-by-gate: fix one failure, rerun, then continue.
 7. Run description optimization before handoff and deliver only when gates are clear or triaged.
@@ -253,6 +270,12 @@ Reference files:
 - Use two passes: `iterative_fail_fast` then `pre-claim_full_sweep`.
 - Use `references/quality-tools.md` for gate command matrix and strict PI/security expectations.
 - During iteration prefer `run_skill_evals.py --eval-mode smoke`; before promotion or packaging run `--eval-mode release` and keep the generated `release_manifest.json` with the scorecard artifacts.
+- Treat graph-readiness as part of the default repo gate set for `create` and `improve` work:
+  - `python3 scripts/check-see-also.py . --changed-files <skill>/SKILL.md`
+  - `python3 utilities/skill-builder/scripts/validate_skill_graph_profiles.py --repo-root . --expected-count 0`
+- When graph-facing skills changed materially, refresh adjacency evidence:
+  - `python3 scripts/build-adjacency-yaml.py`
+  - `python3 scripts/validate-adjacency.py`
 
 ## Constraints and safety
 - Redact secrets, credentials, tokens, and PII by default.
@@ -263,9 +286,20 @@ Reference files:
 ## Install-distribute mode
 - Confirm provenance (`allowlist` + pinned ref + staged `sha256`) before writes.
 - Run deconflict-first (`overlap matrix` + `artifact-uplift scan` + explicit decision).
+- Preserve relevant upstream context when importing: keep high-value references, examples, and caveat docs unless they are clearly redundant or out of scope, and signpost them from the wrapper skill.
 - Validate in quarantine before atomic move/swap; rollback on write failure.
 - Hand off plugin conversion to `codex-plugin-builder` and session coverage scans to `codex-sessions-skill-scan`.
 - Use `references/advanced-workflow.md` for full install-distribute mechanics and checklists.
+
+## See Also
+| Skill | When to use |
+|---|---|
+| [[decide-build-primitive]] | Decide whether the capability should be a skill, prompt, or agent before authoring it |
+| [[codex-plugin-builder]] | Package or convert a validated skill into a plugin-owned distribution surface |
+| [[codex-sessions-skill-scan]] | Audit skill coverage, failures, and overlap using real session evidence instead of authoring doctrine alone |
+| [[skill-installer]] | Install or repair runtime visibility when the skill package is already built and the problem is projection or distribution |
+
+**Topic map:** [[agent-ops]]
 
 ## Failure mode
 - If out of scope, say why and offer the nearest next skill-appropriate next step.
@@ -273,3 +307,4 @@ Reference files:
 ## Anti-patterns
 - Overfitted routing language -> description only matches one phrasing -> expand to realistic paraphrases and near-neighbor cases, then recheck `references/evals.yaml`.
 - Checklist dump in frontmatter -> `description` becomes procedure-heavy and undertriggers -> move process detail to `SKILL.md` or `references/` and keep frontmatter routing-first.
+- Over-compression during cleanup -> valuable context gets deleted to satisfy disclosure rules -> preserve nuance in `references/` and make `SKILL.md` a stronger signpost instead of a thinner substitute.

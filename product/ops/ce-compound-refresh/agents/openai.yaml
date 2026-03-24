@@ -1,0 +1,9 @@
+interface:
+  display_name: "CE Compound Refresh"
+  short_description: "Refresh stale docs/solutions learnings and patterns against the current codebase with evidence-backed update, replace, archive, or stale outcomes."
+
+policy:
+  allow_implicit_invocation: true
+
+dependencies:
+  tools: []
