@@ -37,6 +37,11 @@ if [[ "$mode" != "strict" && "$mode" != "warn" ]]; then
   exit 2
 fi
 
+if ! command -v fd >/dev/null 2>&1; then
+  echo "fd is required to lint OpenAI skill format" >&2
+  exit 2
+fi
+
 roots=(auth backend frontend github interview product utilities)
 errors=0
 warnings=0

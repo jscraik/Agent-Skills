@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "/bin/zsh /Users/jamiecraik/dev/Agent-Skills/.codex/hooks/session-start.sh",
+            "command": "/bin/zsh -lc 'repo_root=\"$(git rev-parse --show-toplevel 2>/dev/null || pwd)\"; exec /bin/zsh \"$repo_root/.codex/hooks/session-start.sh\"'",
             "timeout": 10,
             "statusMessage": "loading repo-aware startup context"
           }
@@ -18,7 +18,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "/bin/zsh /Users/jamiecraik/dev/Agent-Skills/.codex/hooks/user-prompt-submit.sh",
+            "command": "/bin/zsh -lc 'repo_root=\"$(git rev-parse --show-toplevel 2>/dev/null || pwd)\"; exec /bin/zsh \"$repo_root/.codex/hooks/user-prompt-submit.sh\"'",
             "timeout": 10,
             "statusMessage": "checking prompt safety and shortcut requests"
           }
@@ -30,7 +30,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "/bin/zsh /Users/jamiecraik/dev/Agent-Skills/.codex/hooks/stop-guard.sh",
+            "command": "/bin/zsh -lc 'repo_root=\"$(git rev-parse --show-toplevel 2>/dev/null || pwd)\"; exec /bin/zsh \"$repo_root/.codex/hooks/stop-guard.sh\"'",
             "timeout": 10,
             "statusMessage": "checking final-response completeness"
           }

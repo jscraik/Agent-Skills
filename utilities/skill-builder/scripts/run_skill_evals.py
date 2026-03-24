@@ -35,6 +35,13 @@ import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Set, Tuple, Union
+
+SCRIPT_DIR = Path(__file__).resolve().parent
+REPO_ROOT = SCRIPT_DIR.parents[2]
+for path_entry in (str(REPO_ROOT), str(SCRIPT_DIR)):
+    if path_entry not in sys.path:
+        sys.path.insert(0, path_entry)
+
 from defusedxml import ElementTree as ET
 
 try:
@@ -54,11 +61,6 @@ except ModuleNotFoundError:  # pragma: no cover
         file=sys.stderr,
     )
     raise SystemExit(1)
-
-# Local deterministic checker (same directory as this script)
-SCRIPT_DIR = Path(__file__).resolve().parent
-if str(SCRIPT_DIR) not in sys.path:
-    sys.path.insert(0, str(SCRIPT_DIR))
 
 from deterministic_trace_checks import evaluate_trace, load_jsonl_events  # noqa: E402
 

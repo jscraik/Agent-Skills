@@ -15,13 +15,13 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
-import run_skill_evals
 from run_skill_evals import (
     EvalCase,
     _filter_cases_for_eval_mode,
     _is_smoke_only_case,
     _write_junit_report,
     load_evals,
+    main,
     run_discovery_smoke,
 )
 
@@ -279,7 +279,7 @@ class RunSkillEvalsModeTests(unittest.TestCase):
             )
 
             reports_dir = Path(tmpdir) / "reports"
-            exit_code = run_skill_evals.main(
+            exit_code = main(
                 [
                     str(skill_dir),
                     "--runner",

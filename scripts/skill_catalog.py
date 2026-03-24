@@ -11,19 +11,7 @@ from typing import Dict, Iterable, List
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 FLAT_SKILLS_DIR = REPO_ROOT / ".agents" / "skills"
-SKIP_SCAN_DIRS = {
-    ".git",
-    ".agents",
-    "artifacts",
-    "docs",
-    "node_modules",
-    "references",
-    "scripts",
-    "skills",
-    "skills-antigravity",
-    "skills-system",
-    "templates",
-}
+REPO_SCAN_ROOTS = ("auth", "backend", "frontend", "github", "interview", "product", "utilities")
 
 
 @dataclass(frozen=True)
@@ -49,13 +37,12 @@ def _iter_flat_skill_dirs() -> Iterable[Path]:
 
 def _iter_repo_skill_dirs() -> Iterable[Path]:
     dirs: List[Path] = []
-    for skill_md in sorted(REPO_ROOT.rglob("SKILL.md")):
-        rel = skill_md.relative_to(REPO_ROOT)
-        if rel.as_posix() == "SKILL.md":
+    for root_name in REPO_SCAN_ROOTS:
+        root = REPO_ROOT / root_name
+        if not root.is_dir():
             continue
-        if any(part in SKIP_SCAN_DIRS for part in rel.parts):
-            continue
-        dirs.append(skill_md.parent)
+        for skill_md in sorted(root.rglob("SKILL.md")):
+            dirs.append(skill_md.parent)
     return dirs
 
 

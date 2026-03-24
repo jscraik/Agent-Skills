@@ -12,7 +12,7 @@ import tempfile
 from collections import Counter, defaultdict, deque
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Set, Tuple
+from typing import Any, Dict, List, Set, Tuple
 
 LINK_PATTERN = re.compile(r"\[\[([^\]]+)\]\]")
 
