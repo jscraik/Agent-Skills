@@ -28,6 +28,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
@@ -66,7 +68,10 @@ jobs:
       - name: See Also gate (new skills must have ≥2 cross-skill links)
         if: github.event_name == 'pull_request'
         run: |
-          CHANGED=$(git diff --name-only origin/${{ github.base_ref }}...HEAD | grep SKILL.md || true)
+          set -euo pipefail
+          git fetch --no-tags origin "${{ github.base_ref }}:refs/remotes/origin/${{ github.base_ref }}"
+          ALL_CHANGED=$(git diff --name-only "origin/${{ github.base_ref }}...HEAD")
+          CHANGED=$(printf '%s\n' "$ALL_CHANGED" | grep 'SKILL.md$' || true)
           if [ -n "$CHANGED" ]; then
             python3 scripts/check-see-also.py . --changed-files $CHANGED
           else
@@ -82,6 +87,8 @@ jobs:
     needs: [structure-gate]
     steps:
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
