@@ -34,6 +34,15 @@ roots=(auth backend frontend github interview product utilities)
 modified=0
 checked=0
 
+find_cmd=""
+if command -v fd >/dev/null 2>&1; then
+  find_cmd="fd"
+elif command -v fdfind >/dev/null 2>&1; then
+  find_cmd="fdfind"
+else
+  find_cmd="find"
+fi
+
 append_section_if_missing() {
   local file="$1"
   local heading="$2"
@@ -44,6 +53,14 @@ append_section_if_missing() {
       echo "## ${heading}"
       echo "$body"
     } >> "$file"
+  fi
+}
+
+list_skill_files() {
+  if [[ "$find_cmd" == "find" ]]; then
+    find "${roots[@]}" -type f -name SKILL.md | sort
+  else
+    "$find_cmd" -t f SKILL.md "${roots[@]}" | sort
   fi
 }
 
@@ -92,7 +109,7 @@ while IFS= read -r file; do
     append_section_if_missing "$file" "Failure mode" "- TODO: define fail-fast behavior and nearest safe fallback."
     append_section_if_missing "$file" "Gotchas" "- Symptom: TODO. Cause: TODO. Do instead: TODO. Check: TODO."
   fi
-done < <(fd -t f SKILL.md "${roots[@]}" | sort)
+done < <(list_skill_files)
 
 echo "Checked files: $checked"
 echo "Modified files: $modified"

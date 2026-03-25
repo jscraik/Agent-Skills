@@ -4,16 +4,21 @@
 from __future__ import annotations
 
 import json
+import sys
 import tempfile
 import textwrap
-import sys
 import unittest
 from pathlib import Path
-from defusedxml import ElementTree as ET
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
+REPO_ROOT = SCRIPT_DIR.parents[2]
+repo_root_str = str(REPO_ROOT)
+if repo_root_str not in sys.path:
+    sys.path.insert(0, repo_root_str)
+
+from defusedxml import ElementTree as ET
 
 from run_skill_evals import (
     EvalCase,

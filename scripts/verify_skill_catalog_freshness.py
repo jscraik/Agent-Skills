@@ -138,7 +138,7 @@ def discover_skill_files(repo_root: Path) -> List[Path]:
         rel = path.relative_to(repo_root)
         if rel.as_posix() == "SKILL.md":
             continue
-        if any(part in SKIP_DIRS for part in rel.parts):
+        if rel.parts and rel.parts[0] in SKIP_DIRS:
             continue
         files.append(path)
     return files
