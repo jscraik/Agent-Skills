@@ -72,11 +72,20 @@ import os
 import re
 import shutil
 import subprocess
+import sys
 import tempfile
-from defusedxml import ElementTree as ET
 from functools import lru_cache
 from os.path import abspath, basename, exists, expanduser, join, splitext
+from pathlib import Path
 from zipfile import ZipFile
+
+SCRIPT_DIR = Path(__file__).resolve().parent
+REPO_ROOT = SCRIPT_DIR.parents[2]
+repo_root_str = str(REPO_ROOT)
+if repo_root_str not in sys.path:
+    sys.path.insert(0, repo_root_str)
+
+from defusedxml import ElementTree as ET
 
 STYLE_TOKENS = [
     "regular",

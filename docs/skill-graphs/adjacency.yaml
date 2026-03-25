@@ -263,6 +263,14 @@ codex-sessions-skill-scan:
   evals-router: Route evaluation work for under-performing skills
   insight-report: Turn session scan findings into a polished usage report
   skill-builder: Act on skill failures discovered in the scan
+coding-harness:
+  bootstrap: Clone and bootstrap a repository before coding-harness setup begins
+  circleci: Work on CircleCI-specific pipeline design or migration details beyond
+    the harness wrapper
+  systematic-debugging: Root-cause failing harness commands or broken repo state before
+    applying fixes
+  verification-before-completion: Add a stronger final verification pass before claiming
+    a repo change is complete
 compound-engineering-router:
   architecture-interview: Route architecture decisions through the structured interview
   brainstorming: Start with brainstorming before routing to a compound workflow
@@ -460,13 +468,6 @@ og-image-creator:
   favicon-generator: Generate OG images and favicons as a complete brand suite
   fixing-metadata: Wire generated OG images into correct meta tags
   imagegen: Use imagegen for non-route-specific image generation
-openai-docs:
-  chatgpt-apps: Build a ChatGPT Apps SDK product after grounding the work in current
-    OpenAI docs
-  codex-automation-architect: Design or review Codex automations with current OpenAI
-    and Codex platform guidance
-  imagegen: Use the OpenAI Image API after confirming current docs and capabilities
-  sora: Use OpenAI video tooling after checking the latest official guidance and limits
 orchestrating-subagents:
   ce-work: Execute a plan once the orchestration decision is made and the task is
     implementation-ready
@@ -603,19 +604,6 @@ skill-builder:
     or agent before authoring it
   skill-installer: Install or repair runtime visibility when the skill package is
     already built and the problem is projection or distribution
-skill-creator:
-  codex-plugin-builder: Convert or bundle a skill into a plugin-owned distribution
-    surface
-  decide-build-primitive: Confirm a skill is the right primitive before authoring
-    it
-  skill-builder: Build or improve a quality-gated skill package with references, evals,
-    and validation
-  skill-installer: Install the finished skill into the runtime once authoring is complete
-skill-installer:
-  codex-plugin-builder: Bundle multiple skills into a plugin instead of installing
-    them one by one
-  skill-builder: Build, audit, or improve the skill package before installation
-  skill-creator: Draft a new skill from scratch before installing it
 slides:
   beautiful-mermaid: Embed high-quality Mermaid diagrams in slide decks
   imagegen: Generate illustrative images for slide backgrounds

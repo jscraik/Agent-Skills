@@ -1,6 +1,6 @@
 ---
 name: "openai-docs"
-description: Retrieve current official OpenAI product and API documentation with citations and docs-aligned guidance. Use when the user needs up-to-date OpenAI API, model-selection, Apps SDK, or migration guidance from official sources.
+description: "Use when the user asks how to build with OpenAI products or APIs and needs up-to-date official documentation with citations, help choosing the latest model for a use case, or explicit GPT-5.4 upgrade and prompt-upgrade guidance; prioritize OpenAI docs MCP tools, use bundled references only as helper context, and restrict any fallback browsing to official OpenAI domains."
 ---
 
 
@@ -67,13 +67,3 @@ Read only what you need:
 - Always use MCP doc tools before any web search for OpenAI-related questions.
 - If the MCP server is installed but returns no meaningful results, then use web search as a fallback.
 - When falling back to web search, restrict to official OpenAI domains (developers.openai.com, platform.openai.com) and cite sources.
-
-## See Also
-| Skill | When to use |
-|---|---|
-| [[chatgpt-apps]] | Build a ChatGPT Apps SDK product after grounding the work in current OpenAI docs |
-| [[codex-automation-architect]] | Design or review Codex automations with current OpenAI and Codex platform guidance |
-| [[imagegen]] | Use the OpenAI Image API after confirming current docs and capabilities |
-| [[sora]] | Use OpenAI video tooling after checking the latest official guidance and limits |
-
-**Topic map:** [[agent-ops]]

@@ -1,9 +1,9 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-03-21T23:07:18Z",
-  "decision_date": "2026-03-21",
+  "generated_at": "2026-03-25T01:46:56Z",
+  "decision_date": "2026-03-25",
   "active_skill_count": 72,
-  "expected_count": 72,
+  "expected_count": 0,
   "inventory_policy": "docs/skill-graphs/governance/inventory-policy.json",
   "system_slice_mode": "exclude",
   "summary": {
@@ -328,6 +328,17 @@
       "errors": []
     },
     {
+      "skill_path": "github/greptile/greploop/SKILL.md",
+      "scope_skill": "github/greptile/greploop",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "github/greptile/greploop/references/task-profile.json",
+      "profile_binding": "references/task-profile.json",
+      "profile_binding_mode": "implicit-default",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
       "skill_path": "interview/architecture-interview/SKILL.md",
       "scope_skill": "interview/architecture-interview",
       "wave": "wave-2-co-pilot",
@@ -420,17 +431,6 @@
       "scope_skill": "product/docs/docs-expert",
       "wave": "wave-2-co-pilot",
       "profile_path": "product/docs/docs-expert/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
-      "profile_binding_mode": "implicit-default",
-      "delegation_mode": "co-pilot",
-      "status": "valid",
-      "errors": []
-    },
-    {
-      "skill_path": "product/docs/openai-docs/SKILL.md",
-      "scope_skill": "product/docs/openai-docs",
-      "wave": "wave-2-co-pilot",
-      "profile_path": "product/docs/openai-docs/references/task-profile.json",
       "profile_binding": "references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",

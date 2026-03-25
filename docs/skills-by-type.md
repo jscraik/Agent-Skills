@@ -13,14 +13,14 @@ Generated from `metadata.skill-type` tags in skill frontmatter.
 - `library_api_reference`: 8
 - `product_verification`: 8
 - `data_fetch_analysis`: 6
-- `team_automation`: 35
+- `team_automation`: 36
 - `scaffolding_templates`: 27
 - `code_quality_review`: 17
 - `ci_cd_deployment`: 7
 - `runbook`: 4
 - `infrastructure_ops`: 5
 - `invalid`: 0
-- `total_tagged`: 117
+- `total_tagged`: 118
 
 ## Validation Notes
 
@@ -91,6 +91,7 @@ Generated from `metadata.skill-type` tags in skill frontmatter.
 - ce-work (product/ops)
 - changelog (product/content)
 - codex-automation-architect (utilities)
+- coding-harness (utilities)
 - compound-engineering-router (product/ops)
 - decide-build-primitive (product/ops)
 - deep-interview (interview)

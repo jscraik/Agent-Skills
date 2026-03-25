@@ -1,6 +1,6 @@
 ---
 name: skill-creator
-description: Create or update Codex skills that add specialized workflows, knowledge, or tool usage. Use when the user wants a new skill drafted or an existing skill expanded, not plugin packaging or generic feature work.
+description: Guide for creating effective skills. This skill should be used when users want to create a new skill (or update an existing skill) that extends Codex's capabilities with specialized knowledge, workflows, or tool integrations.
 metadata:
   short-description: Create or update a skill
 ---
@@ -414,13 +414,3 @@ Considerations when forward-testing:
 
 If forward-testing only succeeds when subagents see leaked context, tighten the skill or the
 forward-testing setup before trusting the result.
-
-## See Also
-| Skill | When to use |
-|---|---|
-| [[skill-builder]] | Build or improve a quality-gated skill package with references, evals, and validation |
-| [[skill-installer]] | Install the finished skill into the runtime once authoring is complete |
-| [[codex-plugin-builder]] | Convert or bundle a skill into a plugin-owned distribution surface |
-| [[decide-build-primitive]] | Confirm a skill is the right primitive before authoring it |
-
-**Topic map:** [[agent-ops]]
