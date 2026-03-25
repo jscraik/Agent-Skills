@@ -2,11 +2,11 @@
 name: react-components
 description: Convert Stitch screens into modular Vite or React components with extracted structure and style-system alignment. Use when the user wants Stitch-to-React componentization, not generic React UI design.
 allowed-tools:
-- stitch*:*
-- Bash
-- Read
-- Write
-- web_fetch
+  - stitch*:*
+  - Bash
+  - Read
+  - Write
+  - web_fetch
 metadata:
   skill-type: scaffolding_templates
 ---

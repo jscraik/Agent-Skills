@@ -67,3 +67,17 @@ Read only what you need:
 - Always use MCP doc tools before any web search for OpenAI-related questions.
 - If the MCP server is installed but returns no meaningful results, then use web search as a fallback.
 - When falling back to web search, restrict to official OpenAI domains (developers.openai.com, platform.openai.com) and cite sources.
+
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[product/docs/context7]] | Retrieve current third-party library docs when an OpenAI integration depends on external frameworks |
+| [[product/domain/chatgpt-apps]] | Move from docs lookup into Apps SDK implementation work |
+| [[utilities/coding-harness]] | Apply current OpenAI guidance while wiring repository automation or agent flows |
+
+**Topic map:** [[product-docs]]
+
+## Gotchas
+
+- If the OpenAI docs MCP server is unavailable, retry installation yourself before asking the user to intervene.

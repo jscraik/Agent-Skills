@@ -146,3 +146,17 @@ After editing `SKILL.md`, run:
 ```bash
 python3 <path-to-skill-creator>/scripts/quick_validate.py .agents/skills/plugin-creator
 ```
+
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[skills-system/skill-creator]] | Create or update skills that will live inside the plugin's `skills/` directory |
+| [[utilities/codex-plugin-builder]] | Evolve a basic local plugin into a fuller packaged plugin workflow |
+| [[github/gh-workflow]] | Prepare, push, and update GitHub state after plugin packaging changes are ready |
+
+**Topic map:** [[codex-plugins]]
+
+## Gotchas
+
+- Marketplace entries require `policy.installation`, `policy.authentication`, and `category` even when using default values.
