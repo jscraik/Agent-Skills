@@ -8,7 +8,7 @@ cases:
     should_trigger: true
     prepend_skill: false
     timeout_profile: codex-heavy
-    prompt: "Before we touch this repo, map the safe harness setup sequence, including validation gates and what still needs my credentials."
+    prompt: "Without running any commands, map the safe harness setup sequence, including validation gates and what still needs my credentials."
     acceptance:
       - type: regex
         value: "(?i)(harness init --dry-run|harness init|pnpm check|cannot|credentials|token)"

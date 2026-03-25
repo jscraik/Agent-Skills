@@ -69,6 +69,7 @@ Produce only what the request needs, usually:
 1. Confirm execution mode.
 - Do stay in no-execution mode when the user wants explanation or planning because that keeps guidance reversible.
 - Do switch to execution mode only when command evidence is required because completion claims must be grounded in the live repo state.
+- Do not inspect the current workspace when the request is explanation-only and no target repo path was provided because the answer should come from the documented harness contract first.
 
 2. Preflight the repository.
 - Do confirm repo root, toolchain availability, and current harness state because path-sensitive or multi-step work is fragile without preflight.
