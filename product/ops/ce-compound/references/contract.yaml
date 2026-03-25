@@ -1,0 +1,40 @@
+schema_version: 1
+
+purpose: >
+  Coordinate the compound-engineering lifecycle from the correct stage, or
+  capture a verified solved problem into a durable `docs/solutions/` artifact
+  with explicit evidence, prevention guidance, and narrow refresh follow-up when
+  warranted.
+
+triggers:
+  - the user wants the CE workflow routed or resumed from the correct stage
+  - the user wants the final compound stage run after implementation
+  - the user wants a recently solved issue documented while the context is fresh
+  - the user wants a durable `docs/solutions/` artifact instead of ephemeral chat guidance
+
+inputs:
+  - a problem statement, workflow state, artifact path, or solved-problem context
+  - current CE artifact paths when they exist
+  - constraints such as risk, compliance, accessibility, or rollout sensitivity
+  - for learning capture, evidence that the fix is solved and verified
+
+outputs:
+  - "a mode decision: full-lifecycle, resume-from-stage, or learning-capture"
+  - "for lifecycle mode, the current stage, completed stages, blockers, and exact next CE command"
+  - "for learning capture, a single docs/solutions/[category]/[filename].md artifact"
+  - "optional narrow ce-compound-refresh guidance when older solution docs appear stale"
+  - "structured status output with schema_version: 1 when requested"
+
+non_goals:
+  - direct product-code implementation inside the compound orchestrator
+  - skipping upstream CE gates without evidence
+  - documenting unsolved or unverified problems as durable learnings
+  - broad stale-doc sweeps without evidence
+  - deleting or ignoring CE artifact directories
+
+risks:
+  - routing to the wrong stage; mitigate with artifact-first stage validation and explicit mode selection
+  - losing the strong legacy solved-problem flow; mitigate with explicit learning-capture mode and dedicated reference rules
+  - over-broad refresh recommendations; mitigate with narrow scope hints and evidence thresholds
+  - stale or contradictory supplementary notes; mitigate by treating auto memory as secondary evidence and labeling it when used
+  - helper-role drift during learning capture; mitigate with the one-file-write rule and orchestrator-owned final assembly

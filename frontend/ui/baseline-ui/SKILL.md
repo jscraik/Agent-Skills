@@ -1,6 +1,8 @@
 ---
 name: baseline-ui
-description: Validates animation durations, enforces typography scale, checks component accessibility, and prevents layout anti-patterns in Tailwind CSS projects. Use when building UI components, reviewing CSS utilities, styling React views, or enforcing design consistency.
+description: Check Tailwind UI work for typography scale, motion timing, accessibility, and layout anti-patterns. Use when the user wants guardrail-style UI validation or cleanup, not a full redesign.
+metadata:
+  skill-type: code_quality_review
 ---
 
 # Baseline UI
@@ -103,12 +105,12 @@ Current baseline markers:
 - Use this skill when the user asks to audit or fix the domain covered by this skill.
 - Use during UI review passes when quick, concrete remediation is needed.
 
-## Inputs
+## Required inputs
 - Target file(s) or component scope to review.
 - Current stack context (framework, styling, and component primitives) when known.
 - Any explicit constraints from the user (for example: no refactors, minimal diff).
 
-## Outputs
+## Deliverables
 - Prioritized findings with exact snippets.
 - Why each issue matters (brief rationale).
 - Concrete code-level fix suggestions with minimal scope.
@@ -182,3 +184,9 @@ Current baseline markers:
 - Variation: vary recommendations by context-specific constraints; adapt, customize, and use different approaches when constraints differ.
 - Variation: prefer diverse, unique alternatives and avoid repetition or cookie-cutter template convergence.
 - Empowerment: enable users to explore options confidently, be capable and creative, unlock safe choices, and empower execution.
+
+## Gotchas
+- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.
+
+## Failure mode
+- If the target component, design constraints, or accessibility expectations are unclear, stop, identify the missing context, and fall back to a narrower UI audit before changing styles.

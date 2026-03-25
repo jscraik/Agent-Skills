@@ -24,6 +24,17 @@ except ImportError:
 ROOT      = pathlib.Path(sys.argv[1]) if len(sys.argv) > 1 else pathlib.Path(".")
 ADJ_YAML  = ROOT / "docs/skill-graphs/adjacency.yaml"
 THRESHOLD = int(os.environ.get("DRIFT_THRESHOLD", "0"))
+CANONICAL_PREFIXES = {
+    "auth/",
+    "backend/",
+    "frontend/",
+    "github/",
+    "interview/",
+    "personas/",
+    "product/",
+    "skills-system/",
+    "utilities/",
+}
 
 TOPIC_MAPS = {
     "frontend-ui", "backend-platform", "agent-ops",
@@ -35,8 +46,18 @@ TOPIC_MAPS = {
 skill_edges: set[tuple] = set()
 seen_skills: set[str] = set()   # dedup by skill name — matches build-adjacency-yaml.py
 
+
+def is_canonical_skill_md(path: pathlib.Path) -> bool:
+    try:
+        rel = path.relative_to(ROOT).as_posix()
+    except ValueError:
+        return False
+    if rel == "SKILL.md":
+        return False
+    return any(rel.startswith(prefix) for prefix in CANONICAL_PREFIXES)
+
 for md in sorted(ROOT.rglob("SKILL.md")):
-    if len(md.parts) < 2:
+    if not is_canonical_skill_md(md):
         continue
     skill = md.parts[-2]
     if skill in seen_skills:          # first path wins (same as builder)

@@ -1,6 +1,8 @@
 ---
 name: circleci
-description: "Use this skill when the user asks for CircleCI migration, orchestration, testing, deployment, optimization, security/secrets, config policy, integration, or developer toolkit guidance."
+description: Plan, migrate, debug, or harden CircleCI pipelines and related delivery workflows. Use when the user wants CircleCI-specific config, testing, deployment, secrets, or policy help, not generic CI advice.
+metadata:
+  skill-type: ci_cd_deployment
 ---
 
 # CircleCI
@@ -39,7 +41,7 @@ description: "Use this skill when the user asks for CircleCI migration, orchestr
   - VCS-only questions not tied to CircleCI process design.
   - UI/browser automation requests (use `agent-browser`).
 
-## Inputs
+## Required inputs
 - Required:
   - Project context: repository shape, branch model, compliance expectations, deployment targets.
   - Scope: `migrate`, `orchestrate`, `testing`, `deploy`, `optimize`, `security`, `config_policy`, `integration`, `toolkit`, `howto`, or `gold_standard`.
@@ -81,7 +83,7 @@ description: "Use this skill when the user asks for CircleCI migration, orchestr
 4. Produce recommendations using verifiable references and explicit caveats.
 5. Preserve artifact trail in the `artifacts/` output.
 
-## Outputs
+## Deliverables
 - `artifacts/circleci-migration-plan.md`  
   Phase-by-phase migration plan from discovery to enforce.
 - `artifacts/circleci-gold-standard.md`  
@@ -188,3 +190,9 @@ description: "Use this skill when the user asks for CircleCI migration, orchestr
 
 **Topic map:** [[backend-platform]]
 
+
+## Gotchas
+- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.
+
+## Failure mode
+- If the CircleCI context, config target, or integration prerequisites are unclear, stop, name the missing evidence, and fall back to a scoped config audit before making pipeline changes.

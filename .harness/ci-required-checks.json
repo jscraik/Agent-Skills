@@ -1,0 +1,201 @@
+{
+  "version": 1,
+  "activeProvider": "github-actions",
+  "requiredChecks": [
+    {
+      "policyId": "required-check-1",
+      "displayName": "pr-template",
+      "sourceAppSlug": "github-actions",
+      "sourceAppId": "github-actions",
+      "externalIdPattern": "^pr-template$",
+      "requiredOnEvents": [
+        "pull_request",
+        "merge_group"
+      ],
+      "freshnessWindowDays": 7,
+      "class": "required"
+    },
+    {
+      "policyId": "required-check-2",
+      "displayName": "linear-gate",
+      "sourceAppSlug": "github-actions",
+      "sourceAppId": "github-actions",
+      "externalIdPattern": "^linear-gate$",
+      "requiredOnEvents": [
+        "pull_request",
+        "merge_group"
+      ],
+      "freshnessWindowDays": 7,
+      "class": "required"
+    },
+    {
+      "policyId": "required-check-3",
+      "displayName": "risk-policy-gate",
+      "sourceAppSlug": "github-actions",
+      "sourceAppId": "github-actions",
+      "externalIdPattern": "^risk-policy-gate$",
+      "requiredOnEvents": [
+        "pull_request",
+        "merge_group"
+      ],
+      "freshnessWindowDays": 7,
+      "class": "required"
+    },
+    {
+      "policyId": "required-check-4",
+      "displayName": "dependency-review",
+      "sourceAppSlug": "github-actions",
+      "sourceAppId": "github-actions",
+      "externalIdPattern": "^dependency-review$",
+      "requiredOnEvents": [
+        "pull_request",
+        "merge_group"
+      ],
+      "freshnessWindowDays": 7,
+      "class": "required"
+    },
+    {
+      "policyId": "required-check-5",
+      "displayName": "actions-pinning",
+      "sourceAppSlug": "github-actions",
+      "sourceAppId": "github-actions",
+      "externalIdPattern": "^actions-pinning$",
+      "requiredOnEvents": [
+        "pull_request",
+        "merge_group"
+      ],
+      "freshnessWindowDays": 7,
+      "class": "required"
+    },
+    {
+      "policyId": "required-check-6",
+      "displayName": "consistency-drift-health",
+      "sourceAppSlug": "github-actions",
+      "sourceAppId": "github-actions",
+      "externalIdPattern": "^consistency-drift-health$",
+      "requiredOnEvents": [
+        "pull_request",
+        "merge_group"
+      ],
+      "freshnessWindowDays": 7,
+      "class": "required"
+    },
+    {
+      "policyId": "required-check-7",
+      "displayName": "docs-gate",
+      "sourceAppSlug": "github-actions",
+      "sourceAppId": "github-actions",
+      "externalIdPattern": "^docs-gate$",
+      "requiredOnEvents": [
+        "pull_request",
+        "merge_group"
+      ],
+      "freshnessWindowDays": 7,
+      "class": "required"
+    },
+    {
+      "policyId": "required-check-8",
+      "displayName": "lint",
+      "sourceAppSlug": "github-actions",
+      "sourceAppId": "github-actions",
+      "externalIdPattern": "^lint$",
+      "requiredOnEvents": [
+        "pull_request",
+        "merge_group"
+      ],
+      "freshnessWindowDays": 7,
+      "class": "required"
+    },
+    {
+      "policyId": "required-check-9",
+      "displayName": "typecheck",
+      "sourceAppSlug": "github-actions",
+      "sourceAppId": "github-actions",
+      "externalIdPattern": "^typecheck$",
+      "requiredOnEvents": [
+        "pull_request",
+        "merge_group"
+      ],
+      "freshnessWindowDays": 7,
+      "class": "required"
+    },
+    {
+      "policyId": "required-check-10",
+      "displayName": "test",
+      "sourceAppSlug": "github-actions",
+      "sourceAppId": "github-actions",
+      "externalIdPattern": "^test$",
+      "requiredOnEvents": [
+        "pull_request",
+        "merge_group"
+      ],
+      "freshnessWindowDays": 7,
+      "class": "required"
+    },
+    {
+      "policyId": "required-check-11",
+      "displayName": "audit",
+      "sourceAppSlug": "github-actions",
+      "sourceAppId": "github-actions",
+      "externalIdPattern": "^audit$",
+      "requiredOnEvents": [
+        "pull_request",
+        "merge_group"
+      ],
+      "freshnessWindowDays": 7,
+      "class": "required"
+    },
+    {
+      "policyId": "required-check-12",
+      "displayName": "check",
+      "sourceAppSlug": "github-actions",
+      "sourceAppId": "github-actions",
+      "externalIdPattern": "^check$",
+      "requiredOnEvents": [
+        "pull_request",
+        "merge_group"
+      ],
+      "freshnessWindowDays": 7,
+      "class": "required"
+    },
+    {
+      "policyId": "required-check-13",
+      "displayName": "memory",
+      "sourceAppSlug": "github-actions",
+      "sourceAppId": "github-actions",
+      "externalIdPattern": "^memory$",
+      "requiredOnEvents": [
+        "pull_request",
+        "merge_group"
+      ],
+      "freshnessWindowDays": 7,
+      "class": "required"
+    },
+    {
+      "policyId": "required-check-14",
+      "displayName": "security-scan",
+      "sourceAppSlug": "github-actions",
+      "sourceAppId": "github-actions",
+      "externalIdPattern": "^security-scan$",
+      "requiredOnEvents": [
+        "pull_request",
+        "merge_group"
+      ],
+      "freshnessWindowDays": 7,
+      "class": "required"
+    },
+    {
+      "policyId": "required-check-15",
+      "displayName": "Greptile Review",
+      "sourceAppSlug": "github-actions",
+      "sourceAppId": "github-actions",
+      "externalIdPattern": "^Greptile Review$",
+      "requiredOnEvents": [
+        "pull_request",
+        "merge_group"
+      ],
+      "freshnessWindowDays": 7,
+      "class": "required"
+    }
+  ]
+}

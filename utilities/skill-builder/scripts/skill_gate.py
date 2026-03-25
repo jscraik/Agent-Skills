@@ -26,6 +26,7 @@ Recommended CI:
 from __future__ import annotations
 
 import argparse
+import datetime as dt
 import json
 import re
 import sys
@@ -280,7 +281,7 @@ def _default_prompt_patterns() -> List[Dict[str, str]]:
         },
         {
             "code": "PI_TOOL_CHAIN",
-            "regex": r"\b(bypass|jailbreak|override|exfiltrate)\b",
+            "regex": r"\b(bypass|jailbreak|exfiltrate)\b|\boverride\s+(?:system|safety|instruction|policy|guardrail|restriction)s?\b",
             "message": "High-risk control language detected; verify this does not instruct unsafe behavior.",
             "severity": "high",
         },
@@ -485,6 +486,7 @@ _DEFAULT_PI_EXPECTED_PATH_PATTERNS = (
     "scripts/migrate_evals_v2.py",
     "scripts/run_skill_evals.py",
     "scripts/run_skill_graph_smoke.py",
+    "scripts/test_*.py",
     "workflows/create-new-skill.md",
 )
 
@@ -786,8 +788,30 @@ def check_path_safety(doc: SkillDoc) -> List[Finding]:
     if re.search(r"(?m)^\s*/", body):
         out.append(Finding(Level.WARN, "PATH_ABSOLUTE", "Absolute paths detected; prefer repo-relative paths."))
 
-    if re.search(r"(?m)\.\./", body):
-        out.append(Finding(Level.WARN, "PATH_TRAVERSAL", "Parent directory traversal (`../`) mentioned; avoid in references."))
+    repo_root: Optional[Path] = None
+    for base in [doc.path.parent, *doc.path.parent.parents]:
+        if (base / ".git").exists():
+            repo_root = base
+            break
+
+    traversal_refs = sorted(set(re.findall(r"\.\./[A-Za-z0-9._/\-]+", body)))
+    unresolved_or_external: List[str] = []
+    for rel in traversal_refs:
+        resolved = (doc.path.parent / rel).resolve()
+        if repo_root and resolved.exists() and resolved.is_relative_to(repo_root):
+            continue
+        unresolved_or_external.append(rel)
+
+    if unresolved_or_external:
+        sample = ", ".join(unresolved_or_external[:3])
+        out.append(
+            Finding(
+                Level.WARN,
+                "PATH_TRAVERSAL",
+                "Parent traversal path(s) unresolved or outside repo root; prefer repo-relative in-repo paths.",
+                evidence=sample,
+            )
+        )
 
     return out
 
@@ -1340,6 +1364,106 @@ def _lvl_name(level: Level) -> str:
     return {Level.INFO: "INFO", Level.WARN: "WARN", Level.FAIL: "FAIL"}[level]
 
 
+def _utc_now_iso() -> str:
+    return dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+
+
+def _build_json_payload(doc: SkillDoc, findings: Sequence[Finding], *, failed: bool) -> Dict[str, Any]:
+    exit_code = 2 if failed else 0
+    return {
+        "schema_version": "1.1",
+        "tool": "skill_gate",
+        "generated_at": _utc_now_iso(),
+        "skill": str(doc.path),
+        "skill_path": str(doc.path),
+        "name": doc.frontmatter.get("name"),
+        "decision": "fail" if failed else "pass",
+        "exit_code": exit_code,
+        "failed": failed,
+        "findings": [
+            {"level": _lvl_name(f.level), "code": f.code, "message": f.message, "evidence": f.evidence}
+            for f in findings
+        ],
+    }
+
+
+def _find_repo_root(path: Path) -> Optional[Path]:
+    resolved = path.expanduser().resolve()
+    current = resolved if resolved.is_dir() else resolved.parent
+    for candidate in (current, *current.parents):
+        if (candidate / ".git").exists():
+            return candidate
+    return None
+
+
+def _sarif_artifact_uri(path: Path) -> str:
+    resolved = path.expanduser().resolve()
+    repo_root = _find_repo_root(resolved)
+    if repo_root is not None:
+        try:
+            return resolved.relative_to(repo_root).as_posix()
+        except ValueError:
+            pass
+    cwd = Path.cwd().resolve()
+    try:
+        return resolved.relative_to(cwd).as_posix()
+    except ValueError:
+        return resolved.name
+
+
+def _build_sarif_payload(doc: SkillDoc, findings: Sequence[Finding], *, failed: bool) -> Dict[str, Any]:
+    rules = []
+    seen_codes = set()
+    for finding in findings:
+        if finding.code in seen_codes:
+            continue
+        seen_codes.add(finding.code)
+        level = _lvl_name(finding.level).lower()
+        rules.append(
+            {
+                "id": finding.code,
+                "name": finding.code,
+                "shortDescription": {"text": finding.message},
+                "properties": {"defaultSeverity": level},
+            }
+        )
+    results = []
+    uri = _sarif_artifact_uri(doc.path)
+    for finding in findings:
+        level = _lvl_name(finding.level).lower()
+        results.append(
+            {
+                "ruleId": finding.code,
+                "level": {"info": "note", "warn": "warning", "fail": "error"}[level],
+                "message": {"text": finding.message + (f" | {finding.evidence}" if finding.evidence else "")},
+                "locations": [
+                    {
+                        "physicalLocation": {
+                            "artifactLocation": {"uri": uri},
+                        }
+                    }
+                ],
+            }
+        )
+    return {
+        "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+        "version": "2.1.0",
+        "runs": [
+            {
+                "tool": {
+                    "driver": {
+                        "name": "skill_gate",
+                        "informationUri": "https://github.com/openai/skills",
+                        "rules": rules,
+                    }
+                },
+                "invocations": [{"executionSuccessful": not failed}],
+                "results": results,
+            }
+        ],
+    }
+
+
 def run_gate(
     doc: SkillDoc,
     *,
@@ -1382,8 +1506,10 @@ def build_arg_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(prog="skill_gate.py", description="Gold-standard gate for Codex SKILL.md quality.")
     p.add_argument("path", help="Path to a skill directory or SKILL.md file.")
     p.add_argument("--format", choices=["text", "json"], default="text")
+    p.add_argument("--output", default=None, help="Optional path to write the rendered report.")
+    p.add_argument("--sarif-out", default=None, help="Optional path to write SARIF 2.1.0 findings for CI/code scanning.")
 
-    p.add_argument("--max-lines", type=int, default=500, help="Max allowed lines in SKILL.md (default: 500).")
+    p.add_argument("--max-lines", type=int, default=360, help="Max allowed lines in SKILL.md (default: 360).")
     p.add_argument("--max-codeblock-lines", type=int, default=120, help="Warn if a code block exceeds this (default: 120).")
     p.add_argument("--min-description-len", type=int, default=120, help="Warn if description shorter than this (default: 120).")
 
@@ -1437,24 +1563,30 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     failed = any(f.level == Level.FAIL for f in findings)
 
+    rendered = ""
     if args.format == "json":
-        payload = {
-            "skill": str(doc.path),
-            "name": doc.frontmatter.get("name"),
-            "failed": failed,
-            "findings": [
-                {"level": _lvl_name(f.level), "code": f.code, "message": f.message, "evidence": f.evidence}
-                for f in findings
-            ],
-        }
-        print(json.dumps(payload, indent=2, ensure_ascii=False))
+        payload = _build_json_payload(doc, findings, failed=failed)
+        rendered = json.dumps(payload, indent=2, ensure_ascii=False)
     else:
-        print(f"Skill: {doc.frontmatter.get('name', 'unknown')}")
-        print(f"Path:  {doc.path}\n")
+        lines = [f"Skill: {doc.frontmatter.get('name', 'unknown')}", f"Path:  {doc.path}", ""]
         for f in findings:
             ev = f" | {f.evidence}" if f.evidence else ""
-            print(f"{_lvl_name(f.level)} {f.code}: {f.message}{ev}")
-        print("\nRESULT:", "FAIL" if failed else "PASS")
+            lines.append(f"{_lvl_name(f.level)} {f.code}: {f.message}{ev}")
+        lines.extend(["", f"RESULT: {'FAIL' if failed else 'PASS'}"])
+        rendered = "\n".join(lines)
+
+    if args.output:
+        output_path = Path(args.output).expanduser().resolve()
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        output_path.write_text(rendered + ("\n" if not rendered.endswith("\n") else ""), encoding="utf-8")
+
+    if args.sarif_out:
+        sarif_path = Path(args.sarif_out).expanduser().resolve()
+        sarif_path.parent.mkdir(parents=True, exist_ok=True)
+        sarif_payload = _build_sarif_payload(doc, findings, failed=failed)
+        sarif_path.write_text(json.dumps(sarif_payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+
+    print(rendered)
 
     return 2 if failed else 0
 

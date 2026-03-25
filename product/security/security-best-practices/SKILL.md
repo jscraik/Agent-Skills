@@ -1,6 +1,8 @@
 ---
 name: "security-best-practices"
-description: "Perform language and framework specific security best-practice reviews and suggest improvements. Trigger only when the user explicitly requests security best practices guidance, a security review/report, or secure-by-default coding help. Trigger only for supported languages (python, javascript/typescript, go). Do not trigger for general code review, debugging, or non-security tasks."
+description: Review code or architecture against language-specific security best practices. Use when the user explicitly wants a security best-practices review or secure-by-default guidance, not general debugging or code review.
+metadata:
+  skill-type: code_quality_review
 ---
 
 # Security Best Practices
@@ -125,3 +127,6 @@ Use language- and framework-specific security guidance to produce secure-by-defa
 - Persist with: `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
 - The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
 <!-- /decision-feedback-protocol -->
+
+## Gotchas
+- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.

@@ -1,6 +1,8 @@
 ---
 name: gh-fix-ci
-description: Use when a user asks to debug or fix failing GitHub PR checks that run in GitHub Actions; use `gh` to inspect checks and logs, summarize failure context, draft a fix plan, and implement only after explicit approval. Treat external providers (for example Buildkite) as out of scope and report only the details URL.
+description: "Diagnose failing GitHub Actions checks on a PR and prepare a fix path grounded in `gh` evidence. Use when the user wants CI failure analysis or repair for GitHub-hosted checks, not external CI triage."
+metadata:
+  skill-type: ci_cd_deployment
 ---
 
 # GH Fix CI
@@ -105,3 +107,6 @@ CI diagnosis should narrow the problem, not widen the scope. Pull the evidence f
 
 **Topic map:** [[backend-platform]]
 
+
+## Gotchas
+- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.

@@ -1,6 +1,8 @@
 ---
 name: process-watch
 description: Analyze system processes and resource usage to diagnose runaway CPU/memory/IO, identify culprits, and propose next diagnostic steps. Use when investigating performance spikes or leaks.
+metadata:
+  skill-type: infrastructure_ops
 ---
 
 # Process Watch
@@ -126,3 +128,6 @@ process-watch watch --interval 2 --alert-cpu 90 --alert-mem 85
 - Persist with: `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
 - The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
 <!-- /decision-feedback-protocol -->
+
+## Gotchas
+- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.

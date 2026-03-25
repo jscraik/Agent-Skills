@@ -10,6 +10,7 @@ Canonical artifacts written per run:
 - promotion_decision.json
 - capture_record.json
 - evidence_packet.json
+- lesson_observations.json
 - lesson_candidates.json
 
 Optional debug artifacts (disabled by default):
@@ -28,6 +29,7 @@ import math
 import os
 import random
 import re
+import select
 import sys
 import time
 from dataclasses import dataclass
@@ -64,6 +66,8 @@ BLOCKER_CODES = {
     "kill_switch_activated",
     "evaluator_conflict",
 }
+TERMINAL_FEEDBACK_RESPONSE_TIMEOUT_SEC = 12.0
+TERMINAL_FEEDBACK_NOTE_TIMEOUT_SEC = 4.0
 
 
 @dataclass(frozen=True)
@@ -106,6 +110,7 @@ class Profile:
     thresholds: Thresholds
     criteria: List[Criterion]
     delegation: Optional[DelegationDecision]
+    learning_posture: Optional[Dict[str, Any]] = None
 
 
 def iso_now() -> str:
@@ -157,7 +162,12 @@ def delegation_to_dict(delegation: Optional[DelegationDecision]) -> Optional[Dic
     }
 
 
-def normalize_feedback(feedback_outcome: Optional[str], feedback_note: Optional[str]) -> Dict[str, str]:
+def normalize_feedback(
+    feedback_outcome: Optional[str],
+    feedback_note: Optional[str],
+    *,
+    source: Optional[str] = None,
+) -> Dict[str, str]:
     outcome_raw = (feedback_outcome or "").strip().lower()
     note = (feedback_note or "").strip()
     if outcome_raw and outcome_raw not in FEEDBACK_OUTCOMES:
@@ -171,8 +181,176 @@ def normalize_feedback(feedback_outcome: Optional[str], feedback_note: Optional[
         "status": outcome,
         "note": note,
         "captured_at": iso_now(),
-        "source": "cli_one_tap" if outcome_raw else "none",
+        "source": source or ("cli_one_tap" if outcome_raw else "none"),
     }
+
+
+def feedback_prompt_wait_seconds(*, stdin_is_tty: bool, note_prompt: bool = False) -> float:
+    if not stdin_is_tty:
+        return 0.0
+    return TERMINAL_FEEDBACK_NOTE_TIMEOUT_SEC if note_prompt else TERMINAL_FEEDBACK_RESPONSE_TIMEOUT_SEC
+
+
+def prompt_for_feedback(*, run_id: str, skill_id: str) -> Tuple[Dict[str, str], Dict[str, Any]]:
+    question_id = sha256_text(f"{run_id}:post_run_feedback")[:16]
+    prompt_started_at = time.time()
+    base_event = {
+        "question_id": question_id,
+        "question_type": "post_run_feedback",
+        "phase": "feedback_capture",
+        "origin_layer": "graph_capture",
+        "blocking": False,
+        "prompt_style": "one_tap_feedback",
+        "header": "Quick Check",
+        "question": "How did that skill output perform for this task?",
+        "skill_id": skill_id,
+    }
+
+    print("[recursive-loop] feedback_header=Quick Check", flush=True)
+    print(
+        "[recursive-loop] feedback_question=How did that skill output perform for this task? "
+        "[worked/partly/didnt_work/skip]",
+        flush=True,
+    )
+    stdin_is_tty = sys.stdin.isatty()
+    response_wait_sec = feedback_prompt_wait_seconds(stdin_is_tty=stdin_is_tty)
+    print(
+        f"[recursive-loop] feedback_capture=bounded_optional timeout_sec={response_wait_sec:g}",
+        flush=True,
+    )
+
+    try:
+        ready, _write_ready, _error_ready = select.select([sys.stdin], [], [], response_wait_sec)
+    except (OSError, ValueError):
+        ready = []
+    if not ready:
+        latency_ms = int((time.time() - prompt_started_at) * 1000)
+        return (
+            normalize_feedback(None, None, source="terminal_prompt_unanswered"),
+            {
+                **base_event,
+                "question_outcome": "missing",
+                "downstream_effect": "no_effect",
+                "answer_latency_ms": latency_ms,
+                "answered_at": iso_now(),
+            },
+        )
+    try:
+        raw_outcome_line = sys.stdin.readline()
+    except EOFError:
+        raw_outcome_line = ""
+    if raw_outcome_line == "":
+        latency_ms = int((time.time() - prompt_started_at) * 1000)
+        return (
+            normalize_feedback(None, None, source="terminal_prompt_unanswered"),
+            {
+                **base_event,
+                "question_outcome": "missing",
+                "downstream_effect": "no_effect",
+                "answer_latency_ms": latency_ms,
+                "answered_at": iso_now(),
+            },
+        )
+    raw_outcome = raw_outcome_line.strip().lower()
+
+    if raw_outcome in {"", "skip", "s"}:
+        latency_ms = int((time.time() - prompt_started_at) * 1000)
+        return (
+            normalize_feedback(None, None, source="terminal_prompt_skipped"),
+            {
+                **base_event,
+                "question_outcome": "skipped",
+                "downstream_effect": "no_effect",
+                "answer_latency_ms": latency_ms,
+                "answered_at": iso_now(),
+            },
+        )
+
+    alias_map = {
+        "1": "worked",
+        "worked": "worked",
+        "2": "partly",
+        "partly": "partly",
+        "partial": "partly",
+        "3": "didnt_work",
+        "didnt_work": "didnt_work",
+        "didntwork": "didnt_work",
+        "didn't_work": "didnt_work",
+        "didn't work": "didnt_work",
+        "didnt work": "didnt_work",
+    }
+    normalized_outcome = alias_map.get(raw_outcome)
+    if normalized_outcome is None:
+        print("[recursive-loop] feedback_invalid_input=treated_as_skip", flush=True)
+        latency_ms = int((time.time() - prompt_started_at) * 1000)
+        return (
+            normalize_feedback(None, None, source="terminal_prompt_skipped"),
+            {
+                **base_event,
+                "question_outcome": "skipped",
+                "downstream_effect": "no_effect",
+                "answer_latency_ms": latency_ms,
+                "answered_at": iso_now(),
+            },
+        )
+
+    note_wait_sec = feedback_prompt_wait_seconds(stdin_is_tty=stdin_is_tty, note_prompt=True)
+    print(
+        f"[recursive-loop] feedback_note_prompt=Optional note (press enter to skip, timeout {note_wait_sec:g}s)",
+        flush=True,
+    )
+    try:
+        note_ready, _write_ready, _error_ready = select.select([sys.stdin], [], [], note_wait_sec)
+    except (OSError, ValueError):
+        note_ready = []
+    if note_ready:
+        try:
+            feedback_note = sys.stdin.readline().strip()
+        except EOFError:
+            feedback_note = ""
+    else:
+        feedback_note = ""
+    latency_ms = int((time.time() - prompt_started_at) * 1000)
+    return (
+        normalize_feedback(normalized_outcome, feedback_note, source="terminal_prompt"),
+        {
+            **base_event,
+            "question_outcome": "answered",
+            "downstream_effect": "feedback_recorded",
+            "answer_latency_ms": latency_ms,
+            "answered_at": iso_now(),
+            "answer": {
+                "status": normalized_outcome,
+                "note_present": bool(feedback_note.strip()),
+            },
+        },
+    )
+
+
+def should_prompt_for_feedback(
+    *,
+    profile: Profile,
+    explicit_prompt_requested: bool,
+    feedback_outcome_present: bool,
+    stdin_is_tty: bool,
+    stdout_is_tty: bool,
+) -> bool:
+    if feedback_outcome_present:
+        return False
+    if explicit_prompt_requested:
+        return True
+
+    learning_posture = profile.learning_posture
+    if not isinstance(learning_posture, dict):
+        return False
+    feedback_capture = learning_posture.get("feedback_capture")
+    if not isinstance(feedback_capture, dict):
+        return False
+    if not bool(feedback_capture.get("prompt_on_terminal", False)):
+        return False
+    if bool(feedback_capture.get("interactive_only", True)) and not (stdin_is_tty and stdout_is_tty):
+        return False
+    return True
 
 
 def build_evidence_packet(
@@ -290,6 +468,32 @@ def feedback_signal(status: str) -> float:
     return table.get(status, 0.5)
 
 
+def feedback_observation_weight(status: str, observation_type: str) -> float:
+    weights = {
+        "worked": {
+            "positive_pattern": 1.35,
+            "remediation": 0.55,
+        },
+        "partly": {
+            "positive_pattern": 1.0,
+            "remediation": 1.0,
+        },
+        "didnt_work": {
+            "positive_pattern": 0.3,
+            "remediation": 1.45,
+        },
+        "missing": {
+            "positive_pattern": 0.85,
+            "remediation": 0.95,
+        },
+    }
+    return weights.get(status, weights["missing"]).get(observation_type, 1.0)
+
+
+def note_signal(note: str) -> float:
+    return 0.05 if str(note or "").strip() else 0.0
+
+
 def compute_confidence_assessment(
     *,
     run_obj: Dict[str, Any],
@@ -357,7 +561,7 @@ def compute_confidence_assessment(
     }
 
 
-def build_lesson_candidates(
+def build_lesson_observations(
     *,
     run_id: str,
     profile: Profile,
@@ -380,6 +584,7 @@ def build_lesson_candidates(
         for k, v in deltas.items()
         if isinstance(v, (int, float)) and float(v) > 0
     }
+    deficits = diagnosis.get("deficits", {}) if isinstance(diagnosis.get("deficits"), dict) else {}
 
     weakest = diagnosis.get("weakest_criteria", [])
     if isinstance(weakest, list):
@@ -387,58 +592,273 @@ def build_lesson_candidates(
     else:
         weakest_text = ""
 
-    candidate_id_seed = f"{run_id}:{profile.profile_id}:{iteration_id}:candidate"
-    candidate_id = f"candidate_{sha256_text(candidate_id_seed)[:12]}"
     terminal_status = str(run_obj.get("terminal_status", ""))
+    feedback_status = feedback.get("status", "missing")
+    feedback_note = feedback.get("note", "")
+    confidence_score = float(confidence.get("score", 0.0))
+    evidence_score = float(evidence_packet.get("completeness", {}).get("score", 0.0))
 
     advice_summary = str(diagnosis.get("reason", "")).strip() or "No diagnosis summary available."
     implementation_summary = str(action.get("summary", "")).strip() or "No improvement action summary available."
+    delegation_context = run_obj.get("delegation") if isinstance(run_obj.get("delegation"), dict) else None
 
-    candidate = {
-        "schema_version": "1.0",
-        "candidate_id": candidate_id,
-        "run_id": run_id,
-        "profile_id": profile.profile_id,
-        "scope_skill": profile.scope_skill,
-        "scope_profile": profile.scope_profile,
-        "iteration_id": iteration_id,
-        "created_at": iso_now(),
-        "status": "candidate",
-        "advice": {
-            "summary": advice_summary,
+    observations: List[Dict[str, Any]] = []
+
+    def base_observation(
+        *,
+        observation_type: str,
+        criterion_id: str,
+        selection_score: float,
+        selection_rationale: str,
+    ) -> Dict[str, Any]:
+        observation_id_seed = f"{run_id}:{profile.profile_id}:{iteration_id}:{observation_type}:{criterion_id}"
+        observation = {
+            "schema_version": "1.0",
+            "observation_id": f"observation_{sha256_text(observation_id_seed)[:12]}",
+            "run_id": run_id,
+            "profile_id": profile.profile_id,
+            "scope_skill": profile.scope_skill,
+            "scope_profile": profile.scope_profile,
+            "iteration_id": iteration_id,
+            "created_at": iso_now(),
+            "observation_type": observation_type,
+            "criterion_id": criterion_id,
+            "selection_hint": {
+                "score": round(selection_score, 3),
+                "rationale": selection_rationale,
+                "feedback_weight": round(feedback_observation_weight(feedback_status, observation_type), 3),
+            },
+            "outcome": {
+                "terminal_status": terminal_status,
+                "stop_reason": str(run_obj.get("stop_reason", "")),
+                "feedback_status": feedback_status,
+                "feedback_note": feedback_note,
+                "quality_uplift": float(confidence.get("quality_uplift", 0.0)),
+            },
+            "confidence": {
+                "score": confidence_score,
+                "bucket": str(confidence.get("bucket", "low")),
+                "calibration_bucket": str(confidence.get("calibration_bucket", "C3_low_confidence")),
+                "evidence_completeness": evidence_score,
+            },
+            "evidence_refs": {
+                "iteration_journal_path": "iteration_journal.jsonl",
+                "events_path": "events.jsonl",
+                "evidence_packet_path": "evidence_packet.json",
+            },
+        }
+        if delegation_context is not None:
+            observation["delegation_context"] = delegation_context
+        return observation
+
+    sorted_positive = sorted(
+        positive_deltas.items(),
+        key=lambda item: (float(item[1]), str(item[0])),
+        reverse=True,
+    )
+    for criterion_id, delta in sorted_positive[:3]:
+        selection_score = (
+            0.45
+            + min(0.25, float(delta))
+            + (confidence_score * 0.15)
+            + (evidence_score * 0.1)
+            + note_signal(feedback_note)
+        ) * feedback_observation_weight(feedback_status, "positive_pattern")
+        observation = base_observation(
+            observation_type="positive_pattern",
+            criterion_id=criterion_id,
+            selection_score=selection_score,
+            selection_rationale=(
+                f"Positive delta on {criterion_id} was amplified by feedback status `{feedback_status}`."
+            ),
+        )
+        observation["advice"] = {
+            "summary": (
+                f"Preserve and reuse the pattern that improved `{criterion_id}`."
+            ),
             "weakest_criteria": weakest if isinstance(weakest, list) else [],
-        },
-        "implementation": {
+        }
+        observation["implementation"] = {
+            "summary": implementation_summary,
+            "positive_criterion_deltas": {criterion_id: float(delta)},
+        }
+        observation["title"] = f"{profile.scope_skill} positive pattern observation ({criterion_id})"
+        observation["signals"] = {"positive_delta": round(float(delta), 3), "deficit": 0.0}
+        observations.append(observation)
+
+    weakest_items: List[Tuple[str, float]] = []
+    if isinstance(weakest, list):
+        for criterion_id in weakest[:3]:
+            deficit_value = deficits.get(str(criterion_id), 0.0)
+            try:
+                weakest_items.append((str(criterion_id), max(0.0, float(deficit_value))))
+            except (TypeError, ValueError):
+                weakest_items.append((str(criterion_id), 0.0))
+    for criterion_id, deficit_value in weakest_items:
+        selection_score = (
+            0.5
+            + min(0.2, deficit_value if deficit_value > 0 else 0.08)
+            + ((1.0 - confidence_score) * 0.15)
+            + ((1.0 - float(confidence.get("quality_uplift", 0.0))) * 0.05)
+            + note_signal(feedback_note)
+        ) * feedback_observation_weight(feedback_status, "remediation")
+        observation = base_observation(
+            observation_type="remediation",
+            criterion_id=criterion_id,
+            selection_score=selection_score,
+            selection_rationale=(
+                f"Weakness in {criterion_id} was prioritized because feedback status was `{feedback_status}`."
+            ),
+        )
+        observation["advice"] = {
+            "summary": advice_summary,
+            "weakest_criteria": [criterion_id],
+        }
+        observation["implementation"] = {
             "summary": implementation_summary,
             "positive_criterion_deltas": positive_deltas,
-        },
-        "outcome": {
-            "terminal_status": terminal_status,
-            "stop_reason": str(run_obj.get("stop_reason", "")),
-            "feedback_status": feedback.get("status", "missing"),
-            "feedback_note": feedback.get("note", ""),
-            "quality_uplift": float(confidence.get("quality_uplift", 0.0)),
-        },
-        "confidence": {
-            "score": float(confidence.get("score", 0.0)),
-            "bucket": str(confidence.get("bucket", "low")),
-            "calibration_bucket": str(confidence.get("calibration_bucket", "C3_low_confidence")),
-            "evidence_completeness": float(evidence_packet.get("completeness", {}).get("score", 0.0)),
-        },
-        "evidence_refs": {
-            "iteration_journal_path": "iteration_journal.jsonl",
-            "events_path": "events.jsonl",
-            "evidence_packet_path": "evidence_packet.json",
-        },
-        "title": (
-            f"{profile.scope_skill} remediation candidate"
+        }
+        observation["title"] = f"{profile.scope_skill} remediation observation ({criterion_id})"
+        observation["signals"] = {"positive_delta": 0.0, "deficit": round(float(deficit_value), 3)}
+        observations.append(observation)
+
+    if not observations:
+        selection_score = 0.65 + note_signal(feedback_note)
+        fallback_type = "positive_pattern" if feedback_status == "worked" and sorted_positive else "remediation"
+        fallback_criterion = (
+            sorted_positive[0][0]
+            if fallback_type == "positive_pattern" and sorted_positive
+            else (weakest_items[0][0] if weakest_items else "general")
+        )
+        observation = base_observation(
+            observation_type=fallback_type,
+            criterion_id=fallback_criterion,
+            selection_score=selection_score,
+            selection_rationale=(
+                f"Fallback candidate retained because no observation crossed the selection threshold for feedback `{feedback_status}`."
+            ),
+        )
+        observation["advice"] = {
+            "summary": advice_summary,
+            "weakest_criteria": weakest if isinstance(weakest, list) else [],
+        }
+        observation["implementation"] = {
+            "summary": implementation_summary,
+            "positive_criterion_deltas": positive_deltas,
+        }
+        observation["title"] = (
+            f"{profile.scope_skill} remediation observation"
             + (f" ({weakest_text})" if weakest_text else "")
+        )
+        observation["signals"] = {
+            "positive_delta": round(float(positive_deltas.get(fallback_criterion, 0.0)), 3),
+            "deficit": round(float(dict(weakest_items).get(fallback_criterion, 0.0)), 3),
+        }
+        observations.append(observation)
+
+    observations.sort(
+        key=lambda item: (
+            float(item.get("selection_hint", {}).get("score", 0.0)),
+            float(item.get("confidence", {}).get("score", 0.0)),
+            str(item.get("observation_id", "")),
         ),
-    }
-    delegation_context = run_obj.get("delegation")
-    if isinstance(delegation_context, dict):
-        candidate["delegation_context"] = delegation_context
-    return [candidate]
+        reverse=True,
+    )
+    return observations
+
+
+def build_lesson_candidates(
+    *,
+    run_id: str,
+    profile: Profile,
+    iteration_rows: List[Dict[str, Any]],
+    run_obj: Dict[str, Any],
+    feedback: Dict[str, str],
+    confidence: Dict[str, Any],
+    evidence_packet: Dict[str, Any],
+) -> List[Dict[str, Any]]:
+    observations = build_lesson_observations(
+        run_id=run_id,
+        profile=profile,
+        iteration_rows=iteration_rows,
+        run_obj=run_obj,
+        feedback=feedback,
+        confidence=confidence,
+        evidence_packet=evidence_packet,
+    )
+    if not observations:
+        return []
+
+    candidates: List[Dict[str, Any]] = []
+    for observation in observations:
+        selection = dict(observation.get("selection_hint", {}))
+        selection_score = float(selection.get("score", 0.0))
+        if selection_score < 0.7:
+            continue
+        candidate = {
+            "schema_version": "1.1",
+            "candidate_id": f"candidate_{sha256_text(str(observation['observation_id']) + ':candidate')[:12]}",
+            "run_id": run_id,
+            "profile_id": profile.profile_id,
+            "scope_skill": profile.scope_skill,
+            "scope_profile": profile.scope_profile,
+            "iteration_id": int(observation.get("iteration_id", len(iteration_rows))),
+            "created_at": iso_now(),
+            "status": "candidate",
+            "observation_type": observation.get("observation_type"),
+            "source_observation": {
+                "observation_id": observation.get("observation_id"),
+                "criterion_id": observation.get("criterion_id"),
+                "feedback_status": observation.get("outcome", {}).get("feedback_status", "missing"),
+                "feedback_note_present": bool(observation.get("outcome", {}).get("feedback_note", "").strip()),
+            },
+            "selection": selection,
+            "outcome": observation.get("outcome"),
+            "confidence": observation.get("confidence"),
+            "evidence_refs": observation.get("evidence_refs"),
+            "advice": observation.get("advice"),
+            "implementation": observation.get("implementation"),
+            "title": str(observation.get("title", "")).replace(" observation ", " candidate "),
+        }
+        delegation_context = observation.get("delegation_context")
+        if isinstance(delegation_context, dict):
+            candidate["delegation_context"] = delegation_context
+        candidates.append(candidate)
+
+    if not candidates:
+        top_observation = observations[0]
+        selection = dict(top_observation.get("selection_hint", {}))
+        candidate = {
+            "schema_version": "1.1",
+            "candidate_id": f"candidate_{sha256_text(str(top_observation['observation_id']) + ':candidate')[:12]}",
+            "run_id": run_id,
+            "profile_id": profile.profile_id,
+            "scope_skill": profile.scope_skill,
+            "scope_profile": profile.scope_profile,
+            "iteration_id": int(top_observation.get("iteration_id", len(iteration_rows))),
+            "created_at": iso_now(),
+            "status": "candidate",
+            "observation_type": top_observation.get("observation_type"),
+            "source_observation": {
+                "observation_id": top_observation.get("observation_id"),
+                "criterion_id": top_observation.get("criterion_id"),
+                "feedback_status": top_observation.get("outcome", {}).get("feedback_status", "missing"),
+                "feedback_note_present": bool(top_observation.get("outcome", {}).get("feedback_note", "").strip()),
+            },
+            "selection": selection,
+            "outcome": top_observation.get("outcome"),
+            "confidence": top_observation.get("confidence"),
+            "evidence_refs": top_observation.get("evidence_refs"),
+            "advice": top_observation.get("advice"),
+            "implementation": top_observation.get("implementation"),
+            "title": str(top_observation.get("title", "")).replace(" observation ", " candidate "),
+        }
+        delegation_context = top_observation.get("delegation_context")
+        if isinstance(delegation_context, dict):
+            candidate["delegation_context"] = delegation_context
+        candidates.append(candidate)
+
+    return candidates
 
 
 def parse_lesson_effective_from(value: Any) -> float:
@@ -823,6 +1243,10 @@ def load_profile(path: Path) -> Profile:
     if profile_id in {".", ".."}:
         raise ValueError("Profile profile_id cannot be . or ..")
 
+    learning_posture = obj.get("learning_posture")
+    if learning_posture is not None and not isinstance(learning_posture, dict):
+        raise ValueError("Profile learning_posture must be an object when provided")
+
     return Profile(
         schema_version=str(obj["schema_version"]),
         profile_id=profile_id,
@@ -834,6 +1258,7 @@ def load_profile(path: Path) -> Profile:
         thresholds=thresholds,
         criteria=criteria,
         delegation=delegation,
+        learning_posture=learning_posture,
     )
 
 
@@ -1175,6 +1600,14 @@ def run_loop(args: argparse.Namespace) -> int:
     objective_hash = sha256_text(args.objective)
     feedback_payload = normalize_feedback(args.feedback_outcome, args.feedback_note)
     invocation_id = sha256_text(f"{objective_hash}:{args.actor_id}:{created_at}")[:16]
+    interactive_terminal = sys.stdin.isatty() and sys.stdout.isatty()
+    feedback_prompt_enabled = should_prompt_for_feedback(
+        profile=profile,
+        explicit_prompt_requested=bool(args.prompt_for_feedback),
+        feedback_outcome_present=bool(args.feedback_outcome),
+        stdin_is_tty=sys.stdin.isatty(),
+        stdout_is_tty=sys.stdout.isatty(),
+    )
 
     max_iterations = args.max_iterations or profile.thresholds.max_iterations
     max_elapsed_ms = args.max_elapsed_ms or profile.thresholds.max_elapsed_ms
@@ -1322,6 +1755,13 @@ def run_loop(args: argparse.Namespace) -> int:
         "effective_rollout_mode": effective_rollout_mode,
         "auto_capture_enabled": auto_capture_enabled,
         "auto_apply_enabled": auto_apply_enabled,
+        "interactive_terminal": interactive_terminal,
+        "feedback_prompt_enabled": feedback_prompt_enabled,
+        "feedback_prompt_source": (
+            "explicit_flag"
+            if args.prompt_for_feedback
+            else ("profile_learning_posture" if feedback_prompt_enabled else "disabled")
+        ),
         "uplift_gate_mode": args.uplift_gate_mode,
         "uplift_promotion_decision": uplift_gate.get("promotion_decision"),
         "uplift_auto_apply_decision": uplift_gate.get("auto_apply_decision"),
@@ -1395,6 +1835,15 @@ def run_loop(args: argparse.Namespace) -> int:
             feedback=feedback_payload,
             iteration_rows=iteration_rows,
         )
+        lesson_observations = build_lesson_observations(
+            run_id=run_id,
+            profile=profile,
+            iteration_rows=iteration_rows,
+            run_obj=run_obj,
+            feedback=feedback_payload,
+            confidence=confidence,
+            evidence_packet=evidence_packet,
+        )
         lesson_candidates = build_lesson_candidates(
             run_id=run_id,
             profile=profile,
@@ -1442,6 +1891,10 @@ def run_loop(args: argparse.Namespace) -> int:
                 "completeness": evidence_packet["completeness"],
             },
             "confidence": confidence,
+            "lesson_observations": {
+                "count": len(lesson_observations),
+                "top_observation_id": lesson_observations[0]["observation_id"] if lesson_observations else "",
+            },
             "candidate_lessons": {
                 "count": len(lesson_candidates),
                 "top_candidate_id": lesson_candidates[0]["candidate_id"] if lesson_candidates else "",
@@ -1452,6 +1905,10 @@ def run_loop(args: argparse.Namespace) -> int:
             },
         }
         write_json(out_dir / "capture_record.json", capture_record)
+        write_json(
+            out_dir / "lesson_observations.json",
+            {"schema_version": "1.0", "run_id": run_id, "items": lesson_observations},
+        )
         write_json(out_dir / "lesson_candidates.json", {"schema_version": "1.0", "run_id": run_id, "items": lesson_candidates})
 
         promotion_decision["confidence"] = {
@@ -2131,8 +2588,6 @@ def run_loop(args: argparse.Namespace) -> int:
 
     write_json(out_dir / "run.json", run_obj)
     write_json(out_dir / "promotion_decision.json", promotion_decision)
-    write_jsonl(events_path, events)
-    write_capture_artifacts(run_obj, promotion_decision)
 
     if args.emit_debug_artifacts:
         (debug_dir / "summary.md").write_text(summary_md, encoding="utf-8")
@@ -2140,6 +2595,50 @@ def run_loop(args: argparse.Namespace) -> int:
     print(f"[recursive-loop] run_id={run_id}")
     print(f"[recursive-loop] status={terminal_status} stop_reason={stop_reason}")
     print(f"[recursive-loop] out_dir={out_dir}")
+
+    write_jsonl(events_path, events)
+    write_capture_artifacts(run_obj, promotion_decision)
+
+    if feedback_prompt_enabled:
+        emit_event(
+            events=events,
+            run_id=run_id,
+            profile=profile,
+            actor_id=args.actor_id,
+            objective_hash=objective_hash,
+            event_type="post_run_feedback_prompted",
+            severity="info",
+            terminal_status=terminal_status,
+            stop_reason=stop_reason,
+            extra={
+                "question_type": "post_run_feedback",
+                "phase": "terminal",
+                "origin_layer": "graph_capture",
+                "blocking": False,
+                "prompt_style": "one_tap_feedback",
+                "header": "Quick Check",
+                "question": "How did that skill output perform for this task?",
+            },
+        )
+        feedback_payload, feedback_event = prompt_for_feedback(
+            run_id=run_id,
+            skill_id=profile.scope_skill,
+        )
+        emit_event(
+            events=events,
+            run_id=run_id,
+            profile=profile,
+            actor_id=args.actor_id,
+            objective_hash=objective_hash,
+            event_type="post_run_feedback_recorded",
+            severity="info",
+            terminal_status=terminal_status,
+            stop_reason=stop_reason,
+            extra=feedback_event,
+        )
+
+        write_jsonl(events_path, events)
+        write_capture_artifacts(run_obj, promotion_decision)
 
     if terminal_status == "passed":
         return 0
@@ -2284,6 +2783,11 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument(
         "--feedback-note",
         help="Optional short feedback note paired with --feedback-outcome",
+    )
+    p.add_argument(
+        "--prompt-for-feedback",
+        action="store_true",
+        help="Ask for one-tap post-run feedback after terminal status is shown",
     )
     p.add_argument(
         "--emit-debug-artifacts",

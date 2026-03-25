@@ -1,6 +1,8 @@
 ---
 name: chatgpt-apps
-description: Build, scaffold, refactor, and troubleshoot ChatGPT Apps SDK applications that combine an MCP server and widget UI. Use when Codex needs to design tools, register UI resources, wire the MCP Apps bridge or ChatGPT compatibility APIs, apply Apps SDK metadata or CSP or domain settings, or produce a docs-aligned project scaffold grounded in current OpenAI docs.
+description: Build, refactor, or troubleshoot ChatGPT Apps SDK apps that combine MCP tools and widget UI. Use when the user wants Apps SDK tool registration, UI resources, bridge wiring, CSP or domain setup, or docs-aligned scaffolding.
+metadata:
+  skill-type: scaffolding_templates
 ---
 
 # ChatGPT Apps
@@ -263,13 +265,13 @@ Persist with `python3 utilities/skill-builder/scripts/record_skill_feedback.py -
 - Designing MCP tools + widget interactions for ChatGPT.
 - Preparing deployment or submission-ready app structures.
 
-## Inputs
+## Required inputs
 
 - Intended app use case and core user flow.
 - Stack choices (server language, widget approach).
 - Deployment target, auth requirements, and domain/CSP constraints.
 
-## Outputs
+## Deliverables
 
 - App archetype and implementation plan.
 - Tool design + metadata recommendations.
@@ -305,32 +307,8 @@ Persist with `python3 utilities/skill-builder/scripts/record_skill_feedback.py -
 - Customize tool and widget plans to the actual user flow instead of reusing generic templates.
 - Aim for unique outputs and avoid repetition when requirements differ.
 
-## Remember
+## Gotchas
+- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.
 
-The agent is capable of extraordinary work in this domain. These guidelines unlock that potential—they don't constrain it.
-Use judgment, be creative, and push boundaries when it improves outcomes safely.
-
-## Examples
-
-- "Use $chatgpt-apps with $openai-docs to scaffold a submission-ready app with React UI and an MCP server."
-- "Use $chatgpt-apps to refactor this tool-only app into a decoupled render/data architecture."
-
-## Folded Legacy Modes (Core60)
-<!-- core60-folded-modes:v1:start -->
-This skill owns legacy capability from retired skills. Use these modes when requests match prior behavior.
-
-- `production-gate` from `product/domain/chatgpt-apps-production-checklist`: Turn ChatGPT Apps implementation work into a production-ready checklist with concrete tasks, tests, widget changes, and tool-result patte...
-
-Deep legacy details: `references/folded-legacy-modes-core60.md`.
-<!-- core60-folded-modes:v1:end -->
-
-## Quality Uplift
-- Philosophy and approach: apply a clear framework, explain why, consider tradeoff decisions, and use a practical mental model for execution.
-- Guiding question: Why is this the right context-specific path?
-- Guiding question: What tradeoff is being made and how is risk reduced?
-- Guiding question: How do we verify behavior end-to-end before completion?
-- Anti-pattern warning: avoid generic or repetitive output; DO NOT hide failures; NEVER skip validation; avoid common pitfall and mistake patterns.
-- Anti-pattern warning: treat incorrect or wrong assumptions as blockers, and call out anti-pattern risks explicitly.
-- Variation: vary recommendations by context-specific constraints; adapt, customize, and use different approaches when constraints differ.
-- Variation: prefer diverse, unique alternatives and avoid repetition or cookie-cutter template convergence.
-- Empowerment: enable users to explore options confidently, be capable and creative, unlock safe choices, and empower execution.
+## Failure mode
+- If the app surface, tool contract, or official platform constraints are not grounded in current docs, stop, report the missing evidence, and fall back to a narrower docs-first design step.

@@ -148,7 +148,7 @@ See references/recommended-structure.md for templates.
 Use the initializer (auto-creates beneficial resources):
 
 ```bash
-python scripts/init_skill.py {skill-name} --path ~/.claude/skills --category utilities
+python scripts/init_skill.py {skill-name} --category utilities --description "Use when ..." --owner "Agent Skills Team" --review-cadence monthly --last-reviewed 2026-03-24
 ```
 
 **Auto-created by default:**
@@ -156,6 +156,14 @@ python scripts/init_skill.py {skill-name} --path ~/.claude/skills --category uti
 - `assets/` - for templates, icons, static files
 - `agents/openai.yaml` - OpenAI/Codex configuration
 - `scripts/` - only for `--run-type python` or `container`
+
+**Required lifecycle inputs:**
+- `--description` - real discovery description for routing
+- `--owner` - accountable maintainer or team
+- `--review-cadence` - concrete cadence such as `monthly` or `quarterly`
+- `--last-reviewed` - ISO date for the most recent governance review
+- `--lifecycle-state` - defaults to `incubating`
+- `--maturity` - defaults to `experimental`
 
 **Override options:**
 - `--minimal` - Just SKILL.md + agents/openai.yaml (no resources)

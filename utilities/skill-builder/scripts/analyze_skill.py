@@ -24,6 +24,7 @@ Output:
 from __future__ import annotations
 
 import argparse
+import datetime as dt
 import json
 import re
 import sys
@@ -517,16 +518,16 @@ def score_conciseness(doc: SkillDoc) -> CategoryResult:
     max_score = 10
 
     line_count = len(doc.raw_text.splitlines())
-    if line_count <= 300:
+    if line_count <= 320:
         score = 10
         findings.append(Finding("Conciseness", 10, f"✅ Concise length ({line_count} lines)."))
-    elif line_count <= 400:
+    elif line_count <= 360:
         score = 6
         findings.append(
             Finding(
                 "Conciseness",
                 6,
-                f"⚠️ Slightly long ({line_count} lines). Aim for ~200–300; hard cap ~400.",
+                f"⚠️ Slightly long ({line_count} lines). Aim for <=320; hard cap <=360.",
                 Severity.WARN,
             )
         )
@@ -535,7 +536,7 @@ def score_conciseness(doc: SkillDoc) -> CategoryResult:
             Finding(
                 "Conciseness",
                 0,
-                f"❌ Too long ({line_count} lines). Reduce to ~200–300; hard cap ~400.",
+                f"❌ Too long ({line_count} lines). Reduce to <=320; hard cap <=360.",
                 Severity.FAIL,
             )
         )
@@ -722,6 +723,10 @@ def _sev_icon(sev: Severity, *, emoji: bool) -> str:
     return {Severity.INFO: "ℹ️", Severity.WARN: "⚠️", Severity.FAIL: "❌"}[sev]
 
 
+def _utc_now_iso() -> str:
+    return dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+
+
 def print_human_report(doc: SkillDoc, results: List[CategoryResult], total: int, max_total: int, *, emoji: bool) -> None:
     name = doc.frontmatter.get("name", "unknown")
     print("=" * 78)
@@ -752,9 +757,23 @@ def print_human_report(doc: SkillDoc, results: List[CategoryResult], total: int,
         print("\nSignificant improvements needed: rebuild structure and clarify selection triggers.\n")
 
 
-def print_machine_report(doc: SkillDoc, results: List[CategoryResult], total: int, max_total: int, *, fmt: str) -> None:
-    payload = {
+def build_machine_payload(
+    doc: SkillDoc,
+    results: List[CategoryResult],
+    total: int,
+    max_total: int,
+    *,
+    min_pass: int,
+) -> Dict[str, Any]:
+    decision = "pass" if total >= min_pass else "fail"
+    return {
+        "schema_version": "1.1",
+        "tool": "analyze_skill",
+        "generated_at": _utc_now_iso(),
+        "decision": decision,
+        "exit_code": 0 if decision == "pass" else 2,
         "name": doc.frontmatter.get("name"),
+        "description": doc.frontmatter.get("description"),
         "path": str(doc.skill_md_path),
         "total_score": total,
         "max_total": max_total,
@@ -778,10 +797,13 @@ def print_machine_report(doc: SkillDoc, results: List[CategoryResult], total: in
         ],
     }
 
+
+def render_machine_report(doc: SkillDoc, results: List[CategoryResult], total: int, max_total: int, *, fmt: str, min_pass: int) -> str:
+    payload = build_machine_payload(doc, results, total, max_total, min_pass=min_pass)
     if fmt == "json":
-        print(json.dumps(payload, indent=2, ensure_ascii=False))
+        return json.dumps(payload, indent=2, ensure_ascii=False)
     elif fmt == "yaml":
-        print(yaml.safe_dump(payload, sort_keys=False, allow_unicode=True))
+        return yaml.safe_dump(payload, sort_keys=False, allow_unicode=True)
     else:
         raise ValueError(f"Unsupported format: {fmt}")
 
@@ -832,6 +854,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Disable emoji in text output (useful for CI logs).",
     )
+    p.add_argument("--output", default=None, help="Optional path to write the rendered report.")
     return p
 
 
@@ -854,10 +877,24 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     total, max_total, results = analyze(doc)
 
+    rendered = ""
     if args.format == "text":
-        print_human_report(doc, results, total, max_total, emoji=not args.no_emoji)
+        from contextlib import redirect_stdout
+        from io import StringIO
+
+        buf = StringIO()
+        with redirect_stdout(buf):
+            print_human_report(doc, results, total, max_total, emoji=not args.no_emoji)
+        rendered = buf.getvalue()
     else:
-        print_machine_report(doc, results, total, max_total, fmt=args.format)
+        rendered = render_machine_report(doc, results, total, max_total, fmt=args.format, min_pass=args.min_pass)
+
+    if args.output:
+        output_path = Path(args.output).expanduser().resolve()
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        output_path.write_text(rendered + ("" if rendered.endswith("\n") else "\n"), encoding="utf-8")
+
+    print(rendered, end="" if rendered.endswith("\n") else "\n")
 
     return 0 if total >= args.min_pass else 2
 

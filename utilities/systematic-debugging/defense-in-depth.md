@@ -2,7 +2,7 @@
 
 ## Overview
 
-When you fix a bug caused by invalid data, adding validation at one place feels sufficient. But that single check can be bypassed by different code paths, refactoring, or mocks.
+When you fix a bug caused by invalid data, adding validation at one place feels sufficient. But that single check can be skipped by different code paths, refactoring, or mocks.
 
 **Core principle:** Validate at EVERY layer data passes through. Make the bug structurally impossible.
 
@@ -91,7 +91,7 @@ When you find a bug:
 1. **Trace the data flow** - Where does bad value originate? Where used?
 2. **Map all checkpoints** - List every point data passes through
 3. **Add validation at each layer** - Entry, business, environment, debug
-4. **Test each layer** - Try to bypass layer 1, verify layer 2 catches it
+4. **Test each layer** - Try to skip layer 1, verify layer 2 catches it
 
 ## Example from Session
 
@@ -114,8 +114,8 @@ Bug: Empty `projectDir` caused `git init` in source code
 ## Key Insight
 
 All four layers were necessary. During testing, each layer caught bugs the others missed:
-- Different code paths bypassed entry validation
-- Mocks bypassed business logic checks
+- Different code paths skipped entry validation
+- Mocks skipped business logic checks
 - Edge cases on different platforms needed environment guards
 - Debug logging identified structural misuse
 

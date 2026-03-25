@@ -21,12 +21,15 @@ on:
 
 permissions:
   contents: read
+  security-events: write
 
 jobs:
   structure-gate:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
@@ -42,17 +45,33 @@ jobs:
             --benchmark-mode warn \
             --benchmark-config utilities/skill-builder/references/benchmark-policy.json \
             --benchmark-output-json artifacts/industry-benchmark-latest.json \
+            --sarif-out artifacts/reports/skills/skill-structure-gates.sarif \
             --format text
       - name: Upload benchmark artifact
         uses: actions/upload-artifact@v7
         with:
           name: skill-portfolio-benchmark
           path: artifacts/industry-benchmark-latest.json
+      - name: Upload structure reports
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: skill-quality-structure-reports
+          path: artifacts/reports/skills
+      - name: Skip aggregate SARIF upload
+        if: always() && hashFiles('artifacts/reports/skills/skill-structure-gates.sarif') != ''
+        run: |
+          echo "Aggregate skill structure SARIF contains one run per skill."
+          echo "GitHub code scanning rejects multi-run uploads that reuse the same category."
+          echo "Structure reports remain available via uploaded workflow artifacts."
 
       - name: See Also gate (new skills must have ≥2 cross-skill links)
         if: github.event_name == 'pull_request'
         run: |
-          CHANGED=$(git diff --name-only origin/${{ github.base_ref }}...HEAD | grep SKILL.md || true)
+          set -euo pipefail
+          git fetch --no-tags origin "${{ github.base_ref }}:refs/remotes/origin/${{ github.base_ref }}"
+          ALL_CHANGED=$(git diff --name-only "origin/${{ github.base_ref }}...HEAD")
+          CHANGED=$(printf '%s\n' "$ALL_CHANGED" | grep 'SKILL.md$' || true)
           if [ -n "$CHANGED" ]; then
             python3 scripts/check-see-also.py . --changed-files $CHANGED
           else
@@ -68,6 +87,8 @@ jobs:
     needs: [structure-gate]
     steps:
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
@@ -84,6 +105,7 @@ jobs:
             --benchmark-mode warn \
             --benchmark-config utilities/skill-builder/references/benchmark-policy.json \
             --benchmark-output-json artifacts/industry-benchmark-latest.json \
+            --sarif-out artifacts/reports/skills/skill-structure-gates.sarif \
             --format text
       - name: Build dashboard
         run: |
@@ -98,3 +120,9 @@ jobs:
           path: |
             artifacts/reports/skills
             artifacts/industry-benchmark-latest.json
+      - name: Skip aggregate SARIF upload
+        if: always() && hashFiles('artifacts/reports/skills/skill-structure-gates.sarif') != ''
+        run: |
+          echo "Aggregate skill structure SARIF contains one run per skill."
+          echo "GitHub code scanning rejects multi-run uploads that reuse the same category."
+          echo "Structure reports remain available via uploaded workflow artifacts."

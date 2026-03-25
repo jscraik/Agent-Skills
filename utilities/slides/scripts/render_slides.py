@@ -5,12 +5,21 @@ import os
 import re
 import shutil
 import subprocess
+import sys
 import tempfile
-import xml.etree.ElementTree as ET
 from os import makedirs, replace
 from os.path import abspath, basename, exists, expanduser, join, splitext
+from pathlib import Path
 from typing import Sequence, cast
 from zipfile import ZipFile
+
+SCRIPT_DIR = Path(__file__).resolve().parent
+REPO_ROOT = SCRIPT_DIR.parents[2]
+repo_root_str = str(REPO_ROOT)
+if repo_root_str not in sys.path:
+    sys.path.insert(0, repo_root_str)
+
+from defusedxml import ElementTree as ET
 
 from pdf2image import convert_from_path, pdfinfo_from_path
 

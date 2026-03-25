@@ -1,11 +1,13 @@
 ---
 name: check-pr
-description: Use when a user asks to review a GitHub pull request before merge (or asks how to set up Greptile prerequisites) and return a policy-gated readiness view with check status and remediation priority.
+description: Classify whether a GitHub PR is ready to merge by checking Greptile prerequisites, checks, unresolved review signal, and remediation priority. Use when the user wants a readiness decision only, not lifecycle actions or comment-by-comment remediation.
+metadata:
+  skill-type: code_quality_review
 ---
 
 # Check PR
 
-Run a policy-gated PR readiness review using GitHub plus Greptile setup and review signals.
+Run a policy-gated PR readiness review using GitHub plus Greptile setup and review signals. This skill classifies readiness; it does not perform the broader GitHub operations owned by `gh-workflow`.
 
 ## Standards snapshot (March 2026)
 - Review readiness is a governance decision, not just a lint summary.
@@ -26,6 +28,7 @@ Run a policy-gated PR readiness review using GitHub plus Greptile setup and revi
 
 ## When not to use
 - Performing broad GitHub workflow operations unrelated to PR readiness.
+- Preparing, updating, or merging a PR as the main job; use `gh-workflow`.
 - Fixing code before the user asks for changes.
 - Running a generic code review without Greptile or governance context.
 
@@ -113,3 +116,6 @@ Run a policy-gated PR readiness review using GitHub plus Greptile setup and revi
 
 ## Remember
 PR readiness is a confidence judgment. Keep governance, checks, and reviewer intent separate so the next action is obvious.
+
+## Gotchas
+- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.

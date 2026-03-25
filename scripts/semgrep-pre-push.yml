@@ -1,0 +1,31 @@
+rules:
+  - id: ts-no-eval
+    message: Avoid eval in src/** code.
+    severity: ERROR
+    languages: [javascript, typescript]
+    pattern: eval(...)
+
+  - id: ts-no-new-function
+    message: Avoid Function constructor usage in src/** code.
+    severity: ERROR
+    languages: [javascript, typescript]
+    pattern: new Function(...)
+
+  - id: ts-no-child-process-exec
+    message: Avoid child_process exec/execSync in src/** code.
+    severity: ERROR
+    languages: [javascript, typescript]
+    patterns:
+      - pattern-either:
+          - pattern: exec(...)
+          - pattern: execSync(...)
+
+  - id: ts-no-shell-true
+    message: Avoid shell:true in child process options in src/** code.
+    severity: ERROR
+    languages: [javascript, typescript]
+    pattern-either:
+      - pattern: spawn(..., { ..., shell: true, ... })
+      - pattern: spawnSync(..., { ..., shell: true, ... })
+      - pattern: execFile(..., { ..., shell: true, ... })
+      - pattern: execFileSync(..., { ..., shell: true, ... })

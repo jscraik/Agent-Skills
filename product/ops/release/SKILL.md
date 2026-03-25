@@ -1,8 +1,8 @@
 ---
 name: release
-description: Create and publish a new project release (semver) when you need to cut
-  a main-branch, clean-tree release via just release X.Y.Z for Cargo publish and git
-  tag creation.
+description: Cut a clean semver release from the main branch using the repo's release flow. Use when the user wants a tagged Cargo release, not generic deployment or changelog drafting.
+metadata:
+  skill-type: ci_cd_deployment
 ---
 
 # Release
@@ -18,7 +18,7 @@ description: Create and publish a new project release (semver) when you need to 
 - [Anti-patterns](#anti-patterns)
 - [Decision feedback protocol](#decision-feedback-protocol)
 
-## Scope and triggers
+## When to use
 - You need to ship a new version using `just release X.Y.Z`.
 - The release must be semver-valid, greater than current, and performed from `main`.
 - The flow includes Cargo.toml version bumps, lockfile update, tag, and crates.io publish.
@@ -126,7 +126,7 @@ just release 1.4.2
 | [[gh-workflow]] | Manage the PR and merge lifecycle before cutting a release |
 | [[verification-before-completion]] | Validate all checks pass before tagging |
 | [[check-pr]] | Review the PR that triggers the release |
-| [[writing-plans]] | Plan the release checklist before executing |
+| [[ce-plan]] | Plan the release checklist before executing |
 
 **Topic map:** [[backend-platform]]
 
@@ -137,3 +137,6 @@ just release 1.4.2
 - Persist with: `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
 - The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
 <!-- /decision-feedback-protocol -->
+
+## Gotchas
+- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.

@@ -1,6 +1,8 @@
 ---
 name: spreadsheet
-description: Use when tasks involve creating, editing, analyzing, or formatting spreadsheets (`.xlsx`, `.csv`, `.tsv`) with formula-aware workflows, cached recalculation, and visual review.
+description: "Create, edit, analyze, or format spreadsheets with formula-aware workflows and visual review. Use when the user wants `.xlsx`, `.csv`, or `.tsv` work, not plain text tables."
+metadata:
+  skill-type: data_fetch_analysis
 ---
 
 # Spreadsheet
@@ -13,13 +15,13 @@ Create, edit, analyze, and validate spreadsheets with strong defaults for formul
 - Treat recalculation and render review as quality gates whenever tooling is available.
 - Keep outputs auditable: make it obvious what changed, what was recalculated, and what still needs local review.
 
-## Use when
+## When to use
 - Creating new workbooks with formulas, structured layouts, and formatting.
 - Analyzing tabular data including filtering, aggregation, pivots, and summary metrics.
 - Modifying existing workbooks without breaking formulas, references, or styles.
 - Producing spreadsheet-native charts, summary tabs, or presentation-quality workbook outputs.
 
-## Do not use when
+## When not to use
 - The task is plain-text table formatting with no spreadsheet artifact.
 - A database, notebook, or code-first analysis output is the real deliverable instead of `.xlsx`, `.csv`, or `.tsv`.
 - The user only wants a narrative summary and no spreadsheet mutation or output.
@@ -46,8 +48,17 @@ Create, edit, analyze, and validate spreadsheets with strong defaults for formul
 2. Prefer `openpyxl` for `.xlsx` editing and formatting-preserving work.
 3. Prefer `pandas` for analysis-heavy CSV or TSV workflows, then write back to the requested output format.
 4. Use formulas for derived values instead of hardcoding results.
-5. Recalculate and render the relevant sheets when tooling is available.
-6. Save stable outputs, review them, and clean up intermediate files.
+5. Run `scripts/spreadsheet_workflows.sh deps-check` to verify core and optional tooling.
+6. Recalculate and render the relevant sheets when tooling is available.
+7. Save stable outputs, review them, and clean up intermediate files.
+
+## Script helpers
+- `scripts/spreadsheet_workflows.sh deps-check`
+  - Reports availability of Python tooling (`openpyxl`, `pandas`) and optional render binaries.
+- `scripts/spreadsheet_workflows.sh print-install core|charting|render`
+  - Prints deterministic install commands without executing them.
+- `scripts/spreadsheet_workflows.sh paths`
+  - Prints canonical temporary and output directories used by this skill.
 
 ## Tooling and references
 - Use `openpyxl` for workbook-preserving `.xlsx` edits and formatting.
@@ -58,6 +69,7 @@ Create, edit, analyze, and validate spreadsheets with strong defaults for formul
   - `references/contract.yaml`
   - `references/evals.yaml`
   - `references/examples/openpyxl/`
+  - `scripts/spreadsheet_workflows.sh`
   - `agents/openai.yaml`
 
 ## Temp and output conventions
@@ -67,22 +79,9 @@ Create, edit, analyze, and validate spreadsheets with strong defaults for formul
 
 ## Dependencies
 Prefer `uv` for Python dependency management.
-
-```bash
-uv pip install openpyxl pandas
-```
-
-Optional charting support:
-
-```bash
-uv pip install matplotlib
-```
-
-Optional rendering support:
-
-```bash
-brew install libreoffice poppler
-```
+- Core install command: `scripts/spreadsheet_workflows.sh print-install core`
+- Optional charting install command: `scripts/spreadsheet_workflows.sh print-install charting`
+- Optional rendering install command: `scripts/spreadsheet_workflows.sh print-install render`
 
 If installation is not possible in the current environment, report the exact missing dependency and stop.
 
@@ -144,3 +143,21 @@ If installation is not possible in the current environment, report the exact mis
 
 ## Remember
 Spreadsheet work is only trustworthy when formulas, formatting, and rendered output all agree with the requested change.
+
+## Gotchas
+- Symptom: Totals or derived values are typed as literals.
+  Cause: Formula workflow was skipped during quick edits.
+  Do instead: Use formula-first updates for all derived cells.
+  Check: Derived cells contain formulas, not hardcoded numbers.
+- Symptom: Workbook styling drifts after routine updates.
+  Cause: New cell writes ignored surrounding style context.
+  Do instead: Preserve and mirror nearby styles unless redesign is requested.
+  Check: Changed ranges match existing number formats, alignment, and emphasis.
+- Symptom: Output is declared validated without recalculation evidence.
+  Cause: Recalculation tool availability was assumed.
+  Do instead: Run dependency check and mark recalculation as unverified when unavailable.
+  Check: Evidence summary explicitly states recalculation status.
+- Symptom: Delivery includes only a merged artifact with no auditable intermediates.
+  Cause: Intermediate outputs were overwritten or skipped.
+  Do instead: Keep stable temporary artifacts until review is complete.
+  Check: Output notes reference source artifact paths and final destination.

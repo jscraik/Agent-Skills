@@ -1,6 +1,8 @@
 ---
 name: slides
-description: Use when tasks involve creating, editing, recreating, validating, or visually debugging presentation slide decks (`.pptx`) with editable PowerPoint output, PptxGenJS authoring, bundled layout helpers, and render/overflow checks; do not use for generic web UI design, prose editing, or non-presentation visual explainers.
+description: "Create, edit, validate, or debug PowerPoint-compatible slide decks with PptxGenJS and visual overflow checks. Use when the user wants `.pptx` work, not generic web UI design or prose editing."
+metadata:
+  skill-type: team_automation
 ---
 
 # Slides
@@ -13,13 +15,13 @@ Create, edit, recreate, and validate presentation decks with editable PowerPoint
 - Treat rendering review, overflow checks, and font verification as release gates, not optional polish.
 - Keep the workflow reproducible so another agent can regenerate the deck without hidden context.
 
-## Use when
+## When to use
 - Creating a new `.pptx` deck from scratch.
 - Updating or extending an existing presentation while preserving its theme and layout.
 - Recreating a deck from screenshots, PDFs, or visual references into editable slides.
 - Validating an existing deck for overflow, font drift, or render-quality regressions.
 
-## Do not use when
+## When not to use
 - The user wants a generic HTML explainer, dashboard, or browser-only visual artifact.
 - The task is prose editing without any slide deliverable.
 - A static image is enough and no editable slide output is required.
@@ -128,3 +130,6 @@ If a dependency is missing, report the exact install gap before continuing.
 
 ## Remember
 Treat the deck like a product artifact. If it is not editable, reviewable, and reproducible, it is not done.
+
+## Gotchas
+- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.

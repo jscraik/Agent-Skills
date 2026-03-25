@@ -183,11 +183,11 @@ section that includes:
 
 ### 9) Bootstrap missing QA tooling (default)
 
-- Preferred bootstrap step: `python scripts/bootstrap_doc_qa.py --repo . --apply --brand-profile docs-expert` before lint and brand checks.
+- Preferred bootstrap step: `python scripts/bootstrap_doc_qa.py --repo . --apply --brand-profile repo` before lint and brand checks.
 - If `.vale.ini` is missing, install a local Vale baseline (`.vale.ini` and `.vale/styles/Docs/`).
 - If markdownlint config is missing, install `.markdownlint-cli2.yaml`.
-- If `brand/` or branding constraints are missing, install BrAInwav baseline assets and constraints.
-- Use `--brand-profile repo` only when repository-specific official brand guidance overrides BrAInwav.
+- If `brand/` or branding constraints are missing, install neutral repo-brand placeholders and constraints first.
+- Use `--brand-profile docs-expert` only when the docs-expert fallback brand profile is explicitly requested.
 - Record exactly which files were created and which files were already present.
 
 ### 10) Run doc linters (when available)
@@ -203,10 +203,10 @@ section that includes:
 Example CI or pre-commit snippets, adjusted to your repo:
 
 ```sh
-python /path/to/bootstrap_doc_qa.py --repo . --apply
+python /path/to/bootstrap_doc_qa.py --repo . --apply --brand-profile repo
 vale <doc>
 markdownlint-cli2 <doc> --config <config>
-python /path/to/check_brand_guidelines.py --repo . --docs <doc> --profile docs-expert
+python /path/to/check_brand_guidelines.py --repo . --docs <doc> --profile repo
 python /path/to/check_readability.py <doc>
 ```
 

@@ -281,7 +281,7 @@ Rules:
 - Use concise headers and short options.
 - For feedback capture, prefer one-tap choices with optional note.
 - Preserve low cognitive load: ask for missing decisions, not narrative essays.
-- If a question is non-blocking, say so implicitly by allowing the run to complete without waiting.
+- If a question is non-blocking, say so implicitly by not requiring a response to proceed. Interactive runtimes may allow a short bounded response window, but the run must still auto-complete when the window expires.
 
 ## Evaluation contract
 
@@ -317,7 +317,7 @@ Replace:
 - “collect user feedback before closing the run”
 
 With:
-- “if post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event after result delivery.”
+- “if post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event after result delivery, with only a short bounded response window when the runtime is interactive.”
 
 ### Compatibility note
 Existing docs that mention `default_mode_request_user_input` or `askquestiontool` should be updated to prefer Codex `request_user_input` while preserving a brief alias note where historical parity matters.

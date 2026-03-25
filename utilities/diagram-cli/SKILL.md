@@ -1,6 +1,8 @@
 ---
 name: diagram-cli
-description: Generate, validate, and refresh @brainwav/diagram architecture artifacts (.mmd/.svg/.diagram manifest + context packs). Use this skill when users need fast repository understanding for onboarding, PR architecture impact, and CI drift checks; do not use it for hand-drawn product/UI mock diagrams.
+description: Generate, validate, and refresh @brainwav/diagram architecture artifacts and context packs. Use when the user wants repository architecture diagrams for onboarding, PR impact, or CI drift checks, not hand-drawn product mock diagrams.
+metadata:
+  skill-type: runbook
 ---
 
 # Diagram CLI
@@ -51,7 +53,7 @@ Do not use when:
 - The user wants marketing/UI mock diagrams (use design-oriented skills).
 - The user needs threat modeling without code-graph artifacts (use security-focused skills).
 
-## Inputs
+## Required inputs
 
 Required:
 - Target repository path (default: current working directory).
@@ -62,7 +64,7 @@ Optional:
 - Output root (`.diagram` for CI-style artifacts or `artifacts/diagrams` for local runs).
 - Rule config path for architecture tests (`.architecture.yml`).
 
-## Outputs
+## Deliverables
 
 - Generated diagram artifacts (`.mmd` and optionally `.svg`/`.png`).
 - `manifest` summary and completeness check result.
@@ -180,7 +182,7 @@ Minimum checks:
 | [[visual-explainer]] | Render diagram artifacts as a polished HTML explainer |
 | [[beautiful-mermaid]] | Convert .mmd outputs to publication-quality SVG/PNG |
 | [[docs-expert]] | Embed diagrams into repository documentation |
-| [[writing-plans]] | Use architecture diagrams to ground implementation plans |
+| [[ce-plan]] | Use architecture diagrams to ground implementation plans |
 | [[agents-md]] | Add diagram artifacts to AGENTS.md context packs |
 
 **Topic map:** [[agent-ops]]
@@ -201,3 +203,6 @@ This skill owns legacy capability from retired skills. Use these modes when requ
 
 Deep legacy details: `references/folded-legacy-modes-core60.md`.
 <!-- core60-folded-modes:v1:end -->
+
+## Gotchas
+- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.

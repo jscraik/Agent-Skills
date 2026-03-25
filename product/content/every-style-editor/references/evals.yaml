@@ -1,0 +1,112 @@
+schema_version: "2.0"
+skill_name: every-style-editor
+cases:
+  - id: article-line-edit
+    name: article line edit
+    category: happy
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Edit this article against Every's style guide and flag exact lines that need changes."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "every-style-editor"
+      - type: regex
+        value: "(?i)(Every|style guide|exact lines|editorial)"
+
+  - id: newsletter-proofread
+    name: newsletter proofread
+    category: happy
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Proofread this newsletter draft for punctuation, mechanics, and Every house style."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "every-style-editor"
+      - type: regex
+        value: "(?i)(punctuation|mechanics|house style)"
+
+  - id: review-and-rewrite
+    name: review and rewrite
+    category: edge
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Give me a review memo for this memo, then rewrite it cleanly in Every style."
+    acceptance:
+      - type: regex
+        value: "(?i)(review memo|rewrite|Every style)"
+      - type: regex
+        value: "(?i)(rule|correction|recurring)"
+
+  - id: social-copy
+    name: social copy
+    category: edge
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Check this social copy for Every voice, capitalization, and number style."
+    acceptance:
+      - type: regex
+        value: "(?i)(voice|capitalization|number style)"
+
+  - id: preserve-voice
+    name: preserve voice
+    category: edge
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Tighten this draft to Every style, but keep the author's voice intact."
+    acceptance:
+      - type: regex
+        value: "(?i)(voice|preserve|intent)"
+
+  - id: docs-expert-negative
+    name: docs expert negative
+    category: negative
+    should_trigger: false
+    prepend_skill: false
+    prompt: "Rewrite this README and audit the repo docs for GitHub community-health gaps."
+    acceptance:
+      - type: skill_not_selected
+        expected_skill: "every-style-editor"
+      - type: regex
+        value: "(?i)(docs-expert|README|repo docs)"
+
+  - id: generic-rewrite-negative
+    name: generic rewrite negative
+    category: negative
+    should_trigger: false
+    prepend_skill: false
+    prompt: "Rewrite this paragraph to sound better, no specific style guide needed."
+    acceptance:
+      - type: skill_not_selected
+        expected_skill: "every-style-editor"
+      - type: regex
+        value: "(?i)(generic|no specific style guide|different skill)"
+
+  - id: headline-ideation-negative
+    name: headline ideation negative
+    category: negative
+    should_trigger: false
+    prepend_skill: false
+    prompt: "Give me 20 headline ideas for this essay."
+    acceptance:
+      - type: skill_not_selected
+        expected_skill: "every-style-editor"
+
+  - id: no-text-pressure
+    name: no text pressure
+    category: pressure
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Use Every style editor on this, but I haven't pasted the draft yet."
+    acceptance:
+      - type: regex
+        value: "(?i)(provide|paste|text to review)"
+
+  - id: unsupported-style-pressure
+    name: unsupported style pressure
+    category: pressure
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Edit this in Chicago Manual style, not Every style."
+    acceptance:
+      - type: regex
+        value: "(?i)(wrong editorial standard|not Every|different style)"

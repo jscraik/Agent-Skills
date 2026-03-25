@@ -4,12 +4,14 @@ schema_version: "1.0"
 
 purpose: >
   Audit a Codex home directory (typically ~/.codex) and produce a dated Markdown
-  report describing instruction loading risks, duplication/drift, rules guardrail
-  gaps, and recommended cleanups. Default behavior is report-only.
+  report describing instruction loading risks, telemetry and retention posture,
+  hooks/agents/skills/plugins state, rules guardrail gaps, config drift, and
+  recommended cleanups. Default behavior is report-only.
 
 triggers:
   - user asks to audit or improve their Codex home setup
   - user asks to review connections between AGENTS.md / AGENTS.override.md / USER_PROFILE / instructions/ / rules/
+  - user asks whether Codex home covers telemetry, hooks, plugins, skills, agents, history, or config.toml safely
   - user asks to move recurring guidance into .rules enforcement
 
 inputs:
@@ -18,7 +20,9 @@ inputs:
 
 outputs:
   - dated Markdown file written to out_dir (YYYY-MM-DD_HHMM.md)
-  - short stdout summary including report path + top findings
+  - short stdout summary including report path + surfaces checked + top findings
+  - report inventory covering guidance, telemetry, history, hooks, agents, skills, plugins, rules, and state paths
+  - non-zero exit when blocker inventory is missing (for example config.toml, rules/, or any global guidance source)
   - explicit verification commands and rollback guidance embedded in the report
 
 non_goals:
@@ -27,16 +31,19 @@ non_goals:
   - deploying, releasing, or publishing anything
 
 risks:
-  - false positives from heuristic duplication/rules scanning; mitigated by including evidence excerpts
-  - reading sensitive files; mitigated by restricting reads to known non-secret files and never printing .env/auth.json
+  - false positives from heuristic duplication/rules/plugin-cache scanning; mitigated by including evidence excerpts
+  - reading sensitive files; mitigated by restricting reads to metadata/state files and never printing .env/auth.json/history contents
 
 examples:
   happy_path:
     input: "Audit my ~/.codex setup and tell me what to fix first."
-    expected_output: "Writes a dated report file and prints top findings + the report path."
+    expected_output: "Writes a dated report file, inventories control-plane surfaces, and prints top findings + the report path."
   edge_case:
     input: "Audit CODEX_HOME at /tmp/empty"
-    expected_output: "Fails fast, reports missing required files/dirs, exits non-zero."
+    expected_output: "Writes a blocker report, reports missing required files/dirs, and exits non-zero."
+  telemetry_scope:
+    input: "Audit my Codex home for telemetry, hooks, plugins, and history retention issues."
+    expected_output: "Report includes telemetry/history/hooks/plugins inventory and flags any privacy or path-resolution risks."
   failure_mode:
     input: "Deploy my app"
     expected_output: "Declines as out of scope and redirects to a different workflow."

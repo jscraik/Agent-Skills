@@ -1,0 +1,32 @@
+schema_version: "1.0"
+purpose: |
+  Run a bounded Greptile review-remediation loop for a GitHub pull request by collecting
+  Greptile review signal, classifying comments, optionally applying approved fixes, and
+  stopping on explicit convergence or safety boundaries.
+triggers:
+  - User asks to iterate on a PR until Greptile feedback is resolved or stabilizes.
+  - User asks for a Greptile fix loop, review loop, or repeated review/fix cycle.
+  - User asks to optimize a PR against Greptile review standards over multiple iterations.
+inputs:
+  - PR number or current-branch PR context.
+  - Repo/auth context and Greptile-installed repo assumptions.
+  - Mutation approval level: audit only, propose fixes, or approved fix loop.
+  - Optional target stop condition such as iteration cap or "no actionable comments".
+outputs:
+  - Loop status summary with iteration count, unresolved comment count, and stop reason.
+  - Actionable versus informational comment classification.
+  - Optional proposed or applied fix batches with verification notes.
+  - Clear next-step guidance when setup, approval, or convergence blocks progress.
+non_goals:
+  - General GitHub lifecycle management outside the bounded Greptile loop.
+  - One-shot PR readiness classification without iterative remediation.
+  - Blindly chasing a score with unsafe or unjustified code changes.
+risks:
+  - Unbounded loop behavior if stop conditions are not enforced.
+  - Mutating PR state without explicit approval.
+  - Misclassifying informational or false-positive review comments as code-change requirements.
+guardrails:
+  - Fail fast when PR context, auth, or Greptile setup is missing.
+  - Require explicit approval before comment, commit, push, or thread-resolution mutations.
+  - Cap iterations and report remaining blockers instead of looping indefinitely.
+  - Never emit secrets, tokens, or credentials in output.

@@ -1,0 +1,37 @@
+schema_version: 1
+
+purpose: >
+  Run the compound-engineering technical-review stage so code diffs, specs,
+  and plans receive severity-ranked, evidence-backed findings with adherence
+  checks, readiness guidance, and minimal-fix recommendations.
+
+triggers:
+  - the user wants a technical review of a PR, branch, diff, or file
+  - the user wants a plan or spec scored for readiness
+  - the user wants deep engineering critique rather than implementation
+  - the user wants findings ordered by severity with clear next actions
+
+inputs:
+  - a review target such as PR, branch, current diff, file path, spec path, or plan path
+  - access to the relevant diff, file contents, or markdown document
+  - enough stack or risk context to choose reviewer coverage
+
+outputs:
+  - a chosen review mode such as code-diff-review or document-review
+  - severity-ranked findings with location, impact, minimal fix, and confidence
+  - deduplicated synthesis across reviewer lenses
+  - a document score and readiness recommendation when the target is a spec or plan
+  - an explicit no-critical-findings statement when appropriate
+  - schema_version: 1 when the caller requests structured review output
+
+non_goals:
+  - implementing fixes
+  - rewriting weak docs instead of reviewing them
+  - style-only commentary that does not affect risk or comprehension
+  - pretending a target is ready when critical findings remain
+
+risks:
+  - noisy review output; mitigate with actionability and severity ranking
+  - missing adherence gaps; mitigate with linked-artifact baseline reads
+  - over-broad reviewer fanout; mitigate with bounded reviewer selection
+  - unsupported or stale claims; mitigate with explicit evidence, repo-first review, and current-source checks only when needed

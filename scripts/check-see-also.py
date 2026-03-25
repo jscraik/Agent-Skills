@@ -17,6 +17,17 @@ ROOT           = pathlib.Path(sys.argv[1]) if len(sys.argv) > 1 else pathlib.Pat
 MIN_ENTRIES    = int(os.environ.get("SEE_ALSO_MIN", "2"))
 CHANGED_FLAG   = "--changed-files"
 changed_files: list[str] = []
+CANONICAL_PREFIXES = (
+    "auth/",
+    "backend/",
+    "frontend/",
+    "github/",
+    "interview/",
+    "personas/",
+    "product/",
+    "skills-system/",
+    "utilities/",
+)
 
 if CHANGED_FLAG in sys.argv:
     idx          = sys.argv.index(CHANGED_FLAG)
@@ -52,17 +63,14 @@ def see_also_count(path: pathlib.Path) -> int:
 errors: list[str] = []
 
 def _is_real_skill(path: pathlib.Path) -> bool:
-    """Return False for root-level or template SKILL.md files."""
-    parts = path.parts
-    # Must be at least dir/SKILL.md
-    if len(parts) < 2:
+    """Return True only for canonical source skills in the repo."""
+    try:
+        rel = path.relative_to(ROOT).as_posix()
+    except ValueError:
         return False
-    parent = parts[-2]
-    # Skip root, hidden dirs, template dirs
-    if parent in (".", "..", "templates", ".agents", "docs", "scripts") or parent.startswith("."):
+    if rel == "SKILL.md":
         return False
-    # Skip if any part of path is 'templates'
-    if "templates" in parts:
+    if not any(rel.startswith(prefix) for prefix in CANONICAL_PREFIXES):
         return False
     return True
 
@@ -79,7 +87,7 @@ if not changed_files:
         seen_real.add(real)
         n = see_also_count(md)
         if n < MIN_ENTRIES:
-            poor.append((md.parts[-2] if len(md.parts) >= 2 else str(md), n))
+            poor.append((md.relative_to(ROOT).parent.as_posix(), n))
     if poor:
         print(f"check-see-also: {len(poor)} skill(s) below minimum ({MIN_ENTRIES}):")
         for skill, n in sorted(poor):
@@ -95,7 +103,9 @@ for f in changed_files:
         continue
     if not p.exists():
         continue   # deleted file — skip (hub-stability catches protected deletions)
-    skill  = p.parts[-2] if len(p.parts) >= 2 else str(p)
+    if not _is_real_skill(p):
+        continue
+    skill  = p.relative_to(ROOT).parent.as_posix()
     n      = see_also_count(p)
     if n < MIN_ENTRIES:
         errors.append(

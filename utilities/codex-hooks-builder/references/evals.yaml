@@ -1,0 +1,82 @@
+schema_version: "2.0"
+skill_name: "codex-hooks-builder"
+
+cases:
+  - id: explicit-project-scaffold
+    name: explicit project scaffold
+    category: happy
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Use $codex-hooks-builder to create a gold-standard project-local Codex hook pack with SessionStart, UserPromptSubmit, and Stop."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "codex-hooks-builder"
+      - type: contains
+        value: "hooks.json"
+      - type: contains
+        value: "SessionStart"
+      - type: contains
+        value: "UserPromptSubmit"
+      - type: contains
+        value: "Stop"
+
+  - id: implicit-upgrade-latest-contract
+    name: implicit upgrade latest contract
+    category: happy
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Please modernize our Codex hooks so they match the March 2026 stable contract and stop pretending prompt hooks work."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "codex-hooks-builder"
+      - type: regex
+        value: "(?i)(command hooks|prompt hooks are not supported|agent hooks are not supported|async)"
+
+  - id: contextual-user-scope-pack
+    name: contextual user scope pack
+    category: edge
+    should_trigger: true
+    prepend_skill: false
+    prompt: "I want one reusable hook pack in ~/.codex that protects prompt safety everywhere and gives me better startup context."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "codex-hooks-builder"
+      - type: regex
+        value: "(?i)(user scope|~/.codex|Codex home)"
+
+  - id: negative-non-hook-automation
+    name: negative non-hook automation
+    category: negative
+    should_trigger: false
+    prepend_skill: false
+    prompt: "Can you write a GitHub Actions workflow that lints this repo and deploys docs?"
+    acceptance:
+      - type: skill_not_selected
+        expected_skill: "codex-hooks-builder"
+
+  - id: unsupported-handler-pressure
+    name: unsupported handler pressure
+    category: pressure
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Use the newest alpha behavior and scaffold prompt hooks, agent hooks, and async handlers even if stable Codex ignores them."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "codex-hooks-builder"
+      - type: regex
+        value: "(?i)(not supported|skipped|stable contract|defer|unsupported)"
+
+  - id: path-safety-check
+    name: path safety check
+    category: edge
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Create hooks for this repo, but keep the commands portable when people launch Codex from nested folders."
+    acceptance:
+      - type: regex
+        value: "(?i)(absolute paths|nested working directories|session cwd)"
+
+metadata:
+  last_updated: "2026-03-22"
+  author: "Codex"
+  review_status: "draft"

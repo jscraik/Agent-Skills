@@ -1,0 +1,9 @@
+interface:
+  display_name: "CE Brainstorm"
+  short_description: "Clarify WHAT to build, compare approaches, and decide whether compound work needs a spec before planning."
+
+policy:
+  allow_implicit_invocation: true
+
+dependencies:
+  tools: []

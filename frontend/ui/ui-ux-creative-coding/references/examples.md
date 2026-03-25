@@ -127,8 +127,9 @@ Use the ui-ux-creative-coding skill to outline a motion system for a dashboard. 
 
 ## Outputs
 - **@emilkowalski — references/emilkowalski-persona.md**
-- **Motion rules:** 140–200ms ease‑out for state transitions; 240ms for modal entry.
+- **Motion rules:** no-motion or fade-only for high-frequency keyboard flows; 140–200ms ease‑out for state transitions; 240ms for modal entry.
 - **State clarity:** animate opacity/transform only; no layout reflow.
-- **Education:** document the 3 primary easing curves with usage notes.
-- **Next step:** confirm reduced‑motion fallback (fade‑only).
+- **Interaction detail:** origin-aware overlays, subtle press feedback, and instant follow-up tooltips once one tooltip is open.
+- **Education:** document the core easing curves plus where motion should be removed entirely.
+- **Next step:** confirm reduced‑motion fallback and which actions are frequent enough to stay unanimated.
 ```

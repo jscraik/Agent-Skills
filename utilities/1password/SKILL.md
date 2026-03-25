@@ -1,6 +1,8 @@
 ---
 name: 1password
 description: Plan, validate, and use 1Password CLI setup for secret injection and auth. Use when tasks need 1Password CLI usage, secret references, op run/read/inject, or provisioning secrets via env vars/.env files and scripts.
+metadata:
+  skill-type: infrastructure_ops
 ---
 
 # 1Password CLI
@@ -112,3 +114,9 @@ When interactive sign-in is required, use a fresh tmux-backed session and keep a
 
 ## Remember
 If the workflow would expose a secret unnecessarily, it is the wrong workflow.
+
+## Gotchas
+- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.
+
+## Failure mode
+- If 1Password auth, vault access, or secret references cannot be verified, stop, report the failing check, and fall back to auth/session repair before attempting secret operations.

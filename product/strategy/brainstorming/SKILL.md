@@ -1,20 +1,23 @@
 ---
 name: brainstorming
-description: Use before planning or implementation when a request is ambiguous, has multiple valid approaches, or needs trade-off exploration. Clarify what to build, compare 2-3 approaches, and recommend a direction before moving into planning.
+description: Clarify ambiguous product or implementation directions by comparing a few viable approaches and recommending one. Use when the user wants general brainstorming before planning or building, not the compound-engineering stage artifact.
+metadata:
+  skill-type: team_automation
 ---
 
 # Brainstorming
 
-Use this skill to clarify what to build before committing to how to build it.
+Use this skill to clarify what to build before committing to how to build it in the general, non-CE case.
 
 ## Table of Contents
 - [When to use](#when-to-use)
 - [Standards snapshot](#standards-snapshot-march-2026)
-- [Inputs](#inputs)
-- [Outputs](#outputs)
+- [Required inputs](#required-inputs)
+- [Deliverables](#deliverables)
 - [Failure mode](#failure-mode)
 - [Constraints](#constraints)
 - [Core process](#core-process)
+- [Optional visual companion](#optional-visual-companion)
 - [YAGNI principles](#yagni-principles)
 - [Incremental validation](#incremental-validation)
 - [Anti-patterns](#anti-patterns)
@@ -44,14 +47,16 @@ Skip brainstorming when:
 - Ask one focused question at a time when clarification is needed.
 - Prefer small decision-oriented summaries over long ideation dumps.
 - End with a recommended direction or a clear handoff into planning.
+- Decompose oversized projects before refining low-level details.
+- Use visual aids only when the user would understand the choice better by seeing it than reading it.
 
-## Inputs
+## Required inputs
 
 - user request or draft idea that needs clarification before planning
 - relevant constraints already known: timeline, platform, dependencies, scope
 - optional existing artifacts: PRD, ticket, screenshots, prior brainstorm notes
 
-## Outputs
+## Deliverables
 
 - a concise decision-oriented brainstorm summary
 - 2-3 approaches with trade-offs
@@ -114,6 +119,15 @@ Key topics to explore:
 | Edge cases | What should not happen? Any failure states to consider? |
 | Existing patterns | Are there similar features in the codebase to follow? |
 
+If the request describes multiple loosely-coupled subsystems, pause and decompose before refining details. Examples:
+- "Build a platform with chat, billing, file storage, and analytics."
+- "Redesign onboarding, notifications, permissions, and reporting."
+
+For oversized requests:
+- identify the independent workstreams
+- recommend the smallest valuable first slice
+- brainstorm that first slice instead of forcing one giant design
+
 Exit when the idea is clear or the user says to proceed.
 
 ### Phase 2: Explore approaches
@@ -150,6 +164,37 @@ Summarize key decisions in a compact structure:
 Default output location when requested:
 - `docs/brainstorms/YYYY-MM-DD-<topic>-brainstorm.md`
 
+For larger or riskier work, expand the design summary to explicitly cover:
+- architecture and boundaries
+- key components or actors
+- data flow and state transitions
+- failure handling and fallback behavior
+- testing or validation expectations
+
+When the brainstorm is substantial enough to write down, prefer a lightweight spec note rather than a mandatory formal process. Suggested structure:
+
+```md
+# <Topic Title>
+
+## What We're Building
+
+## Why This Direction
+
+## Architecture
+
+## Components
+
+## Data Flow
+
+## Failure Handling
+
+## Testing Notes
+
+## Open Questions
+
+## Next Steps
+```
+
 ### Phase 4: Handoff
 
 Present clear next options:
@@ -157,6 +202,29 @@ Present clear next options:
 1. Proceed to planning.
 2. Refine further.
 3. Stop here and return later.
+
+When the design is approved:
+- use `[[ce-plan]]` for implementation sequencing
+- use `[[product-spec]]` if the user wants a fuller implementation-ready spec
+- use `[[architecture-interview]]` if the brainstorm surfaced a significant architecture choice that needs deeper review
+
+## Optional visual companion
+
+Use an optional visual companion only when the topic is genuinely visual and the browser will reduce ambiguity faster than text alone.
+
+Good fits:
+- wireframes or layout comparisons
+- architecture diagrams
+- side-by-side visual directions
+- flows that are easier to understand spatially than verbally
+
+Keep the discussion in the terminal for:
+- scope clarification
+- conceptual trade-offs
+- requirements and acceptance criteria
+- text-first option comparison
+
+Offer it as an opt-in aid, not a default step. If accepted, use the guidance in `references/visual-companion.md`.
 
 ## YAGNI principles
 
@@ -178,8 +246,10 @@ Keep outputs compact. After each section of substantive output, validate directi
 - asking too many questions at once
 - jumping to implementation details too early
 - proposing overly complex solutions for unclear problems
+- refining details before checking whether the request should be decomposed
 - ignoring existing codebase or product patterns
 - making assumptions without validating them
+- using visual artifacts for text-only decisions
 - producing long design documents when a short decision summary would do
 
 ## Integration with planning
@@ -199,6 +269,7 @@ When brainstorm output exists, planning should use it as input instead of redoin
 ## References
 - Contract: `references/contract.yaml`
 - Evals: `references/evals.yaml`
+- Visual companion: `references/visual-companion.md`
 
 ## Examples
 - "Let's brainstorm the onboarding flow before we build it."
@@ -219,7 +290,7 @@ Good brainstorming reduces ambiguity. If it is not narrowing the decision space,
 |---|---|
 | [[interview-me]] | Use when the idea needs deeper requirements discovery beyond a quick brainstorm |
 | [[product-spec]] | Hand off the chosen direction to this skill to produce implementation-ready specs |
-| [[writing-plans]] | After spec is agreed, use to turn it into a sequenced execution plan |
+| [[ce-plan]] | After spec is agreed, use to turn it into a sequenced execution plan |
 | [[architecture-interview]] | When the brainstorm reveals a significant architecture decision needing structured review |
 
 **Topic map:** [[product-strategy]]
@@ -232,3 +303,6 @@ Good brainstorming reduces ambiguity. If it is not narrowing the decision space,
 - Persist with: `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
 - The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
 <!-- /decision-feedback-protocol -->
+
+## Gotchas
+- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.

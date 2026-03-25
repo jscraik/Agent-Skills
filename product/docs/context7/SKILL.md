@@ -1,7 +1,8 @@
 ---
 name: context7
-description: Extract current library documentation via Context7 when users need up-to-date
-  API details, version checks, or dependency troubleshooting for external libraries.
+description: Retrieve current third-party library documentation through Context7. Use when the user needs up-to-date API details, version-specific behavior, or dependency troubleshooting for external libraries.
+metadata:
+  skill-type: library_api_reference
 ---
 
 # Context7 Documentation Fetcher
@@ -19,7 +20,7 @@ description: Extract current library documentation via Context7 when users need 
 
 Retrieve current external library documentation via Context7 so implementation guidance is grounded in current docs instead of memory.
 
-## Scope and triggers
+## When to use
 - Use this skill when the user needs current external library or framework documentation.
 - Use it for API details, version checks, supported patterns, or dependency troubleshooting.
 - Do not use it for OpenAI platform docs; route those to `openai-docs`.
@@ -125,3 +126,6 @@ If no good library match exists, say so clearly and ask for the minimum refineme
 - Persist with: `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
 - The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
 <!-- /decision-feedback-protocol -->
+
+## Gotchas
+- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.

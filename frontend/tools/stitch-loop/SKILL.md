@@ -1,12 +1,14 @@
 ---
 name: stitch-loop
-description: Use this skill when the user asks for iterative autonomous website building with Stitch using a baton file (`next-prompt.md`) and multi-pass page generation.
+description: Run iterative autonomous website-building loops with Stitch using a baton file and multi-pass page generation. Use when the user wants Stitch to keep building or refining a site over repeated passes, not one-shot UI extraction.
 allowed-tools:
   - "stitch*:*"
   - "chrome*:*"
   - "Read"
   - "Write"
   - "Bash"
+metadata:
+  skill-type: scaffolding_templates
 ---
 
 # Stitch Loop
@@ -106,3 +108,6 @@ Run a baton-driven Stitch website build loop where each pass produces one cohere
 - Persist with: `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
 - The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
 <!-- /decision-feedback-protocol -->
+
+## Gotchas
+- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.

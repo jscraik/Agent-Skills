@@ -1,0 +1,72 @@
+schema_version: 1
+name: rclone
+purpose: Safely set up, inspect, transfer, sync, and verify files across remote storage providers with rclone.
+triggers:
+  - User asks to upload or sync files to S3, R2, B2, Google Drive, Dropbox, or another remote storage provider with rclone.
+  - User asks to configure or troubleshoot an rclone remote.
+  - User asks to verify or inspect remote file contents with rclone.
+inputs:
+  - name: action
+    type: enum
+    values: [setup, list, copy, sync, verify, troubleshoot]
+    description: Requested rclone operation.
+  - name: source_path
+    type: string
+    description: Local source path when uploading, syncing, or verifying.
+  - name: destination_path
+    type: string
+    description: Remote destination path when uploading or syncing.
+  - name: remote
+    type: string
+    description: Remote name or provider alias to inspect or configure.
+  - name: provider
+    type: string
+    description: Storage provider when setup guidance is needed.
+  - name: dry_run
+    type: boolean
+    description: Whether to preview a transfer without executing it.
+  - name: include_patterns
+    type: array
+    description: Optional include filters.
+  - name: exclude_patterns
+    type: array
+    description: Optional exclude filters.
+  - name: transfers
+    type: integer
+    description: Optional parallel transfer count.
+  - name: bwlimit
+    type: string
+    description: Optional bandwidth limit such as 10M.
+outputs:
+  - name: action_plan
+    type: string
+    description: Chosen command or setup flow for the request.
+  - name: structured_summary
+    type: object
+    description: Optional structured summary when requested.
+    schema:
+      schema_version: 1
+      action: setup|list|copy|sync|verify|troubleshoot
+      remote: string|null
+      source_path: string|null
+      destination_path: string|null
+      dry_run: boolean
+      command: string|null
+      blocker: string|null
+      next_step: string
+  - name: verification_step
+    type: string
+    description: The follow-up command or check to verify success.
+success_criteria:
+  - Installation and remote preflight are checked before live transfer guidance.
+  - Sync operations are clearly distinguished from copy operations.
+  - Structured output includes schema_version when requested.
+  - Secrets are redacted from setup and troubleshooting guidance.
+non_goals:
+  - Generic local file management with no remote storage.
+  - Cloud deployment or app-specific upload APIs.
+  - Exposing raw credentials or dumping full config contents into chat.
+risks:
+  - Using sync when copy would be safer.
+  - Missing or invalid remote credentials.
+  - Over-broad transfers caused by vague paths or missing dry runs.

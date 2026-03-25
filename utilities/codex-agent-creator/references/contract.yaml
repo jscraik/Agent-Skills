@@ -8,6 +8,7 @@ inputs:
   - model
   - model_reasoning_effort
   - developer_instructions
+  - optional nickname_candidates for [agents.<role>] display labels
   - install scope (global or project)
   - role name, description, and role config file path
   - optional global limits: agents.max_threads, agents.max_depth, agents.job_max_runtime_seconds

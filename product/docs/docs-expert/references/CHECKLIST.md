@@ -53,6 +53,7 @@ Reference:
 - [ ] PR intake exists (`.github/PULL_REQUEST_TEMPLATE.md` or equivalent).
 - [ ] Changelog / release notes exist when the project is versioned (CHANGELOG.md or Releases guidance).
 - [ ] Ownership is discoverable (CODEOWNERS and/or “Maintainers” section in docs) when the project has multiple contributors.
+- [ ] If a file is missing locally, check whether it is satisfied by an organization-level public `.github` defaults repository before marking it missing.
 
 ### GitHub visibility and trust signals (public repos)
 - [ ] Repository description clearly states value and audience.
@@ -64,9 +65,9 @@ Reference:
 
 ### Brand compliance (when applicable)
 - [ ] Brand source-of-truth path is cited in the deliverable.
-- [ ] Root README includes the documentation signature (image or ASCII fallback).
-- [ ] Signature text uses approved BrAInwav wording; tagline remains exactly "from demo to duty".
-- [ ] Brand assets exist in `brand/` and match approved formats.
+- [ ] Root README only includes a brand signature when the selected brand profile actually requires one.
+- [ ] If the docs-expert fallback brand profile is selected, signature text uses approved BrAInwav wording and assets.
+- [ ] Brand assets exist in `brand/` only when the selected brand profile or official repo guidance requires them.
 - [ ] No watermark usage in README or technical docs.
 - [ ] Visual styling follows brand guidance only when requested.
 

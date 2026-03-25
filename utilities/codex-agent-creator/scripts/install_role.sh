@@ -8,6 +8,8 @@ Usage:
 
 Options:
   --config PATH          Target config.toml (default: ~/.codex/config.toml)
+  --nickname-candidates CSV
+                         Optional comma-separated display names for spawned agents
   --update-existing      Allow updating an existing [agents.<role>] definition
   --disable-multi-agent  Do not force features.multi_agent=true
   --max-threads N        Set agents.max_threads (optional)
@@ -22,6 +24,7 @@ config_path="${HOME}/.codex/config.toml"
 role_name=""
 role_description=""
 role_config_file=""
+nickname_candidates_csv=""
 set_multi_agent="true"
 update_existing="false"
 max_threads=""
@@ -35,6 +38,21 @@ require_option_value() {
     usage
     exit 2
   fi
+}
+
+derive_nickname_candidate() {
+  printf '%s' "$1" | awk '
+    BEGIN { FS = "[-_./]+"; OFS = " " }
+    {
+      for (i = 1; i <= NF; i++) {
+        if ($i == "") {
+          continue
+        }
+        $i = toupper(substr($i, 1, 1)) tolower(substr($i, 2))
+      }
+      print
+    }
+  ' | sed -E 's/[[:space:]]+/ /g; s/^ //; s/ $//'
 }
 
 while [[ $# -gt 0 ]]; do
@@ -51,6 +69,9 @@ while [[ $# -gt 0 ]]; do
     --role-config-file)
       require_option_value "$1" "${2:-}"
       role_config_file="$2"; shift 2 ;;
+    --nickname-candidates)
+      require_option_value "$1" "${2:-}"
+      nickname_candidates_csv="$2"; shift 2 ;;
     --update-existing)
       update_existing="true"; shift ;;
     --disable-multi-agent)
@@ -100,6 +121,11 @@ if [[ -n "$job_max_runtime_seconds" ]]; then
   fi
 fi
 
+if ! command -v jq >/dev/null 2>&1; then
+  echo "Missing dependency: jq" >&2
+  exit 1
+fi
+
 if ! command -v yq >/dev/null 2>&1; then
   echo "Missing dependency: yq (mikefarah/yq v4+)" >&2
   exit 1
@@ -118,6 +144,9 @@ fi
 
 expr='.agents[strenv(ROLE_NAME)].description = strenv(ROLE_DESCRIPTION) |
       .agents[strenv(ROLE_NAME)].config_file = strenv(ROLE_CONFIG_FILE)'
+
+nickname_candidates_json="$(printf '%s' "${nickname_candidates_csv:-$(derive_nickname_candidate "$role_name")}" | jq -Rc 'split(",") | map(gsub("^\\s+|\\s+$"; "")) | map(select(length > 0))')"
+expr+=' | .agents[strenv(ROLE_NAME)].nickname_candidates = (strenv(NICKNAME_CANDIDATES_JSON) | fromjson)'
 
 if [[ "$set_multi_agent" == "true" ]]; then
   expr+=' | .features.multi_agent = true'
@@ -143,6 +172,7 @@ tmp_json="$(mktemp)"
 ROLE_NAME="$role_name" \
 ROLE_DESCRIPTION="$role_description" \
 ROLE_CONFIG_FILE="$role_config_file" \
+NICKNAME_CANDIDATES_JSON="${nickname_candidates_json:-[]}" \
 MAX_THREADS="$max_threads" \
 MAX_DEPTH="$max_depth" \
 JOB_MAX_RUNTIME_SECONDS="$job_max_runtime_seconds" \
@@ -162,4 +192,5 @@ mv "$tmp_file" "$config_path"
 
 echo "Installed role '$role_name' in $config_path"
 echo "Role config file: $role_config_file"
+echo "Nickname candidates: $(printf '%s' "$nickname_candidates_json" | jq -r 'join(", ")')"
 echo "Backup created at: $backup_path"

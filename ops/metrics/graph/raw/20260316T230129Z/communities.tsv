@@ -1,0 +1,9 @@
+mode: fallback-label-propagation
+notes: 8
+edges: 21
+communities: 1
+quality_metric: modularity
+quality_score: 0.000000
+
+community	size	members
+1	8	[[agent-ops]], [[backend-platform]], [[content-publishing]], [[frontend-ui]], [[index]], [[mobile-native]], [[product-strategy]], [[security-ops]]

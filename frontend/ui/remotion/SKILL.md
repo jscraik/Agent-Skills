@@ -1,6 +1,8 @@
 ---
 name: remotion
 description: Best-practice guidance for Remotion (React video). Use when building or reviewing Remotion compositions, timing, assets, audio, captions, or rendering.
+metadata:
+  skill-type: library_api_reference
 ---
 
 # Remotion Best Practices
@@ -117,3 +119,6 @@ Use the Remotion ruleset as a focused advisor for composition design, timing, as
 - Persist with: `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
 - The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
 <!-- /decision-feedback-protocol -->
+
+## Gotchas
+- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.

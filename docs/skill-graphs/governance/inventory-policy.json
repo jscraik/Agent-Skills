@@ -64,7 +64,6 @@
     "product/docs/context7",
     "product/docs/docs-expert",
     "product/docs/gemini-md",
-    "product/docs/openai-docs",
     "product/domain/chatgpt-apps-production-checklist",
     "product/domain/cloudflare-deploy",
     "product/domain/oak-api",

@@ -2,8 +2,8 @@
 """Audit brand-guideline compliance in a target repository.
 
 Profiles:
-- docs-expert (default): checks BrAInwav signature and required assets.
-- repo: neutral checks for watermark misuse, optional custom signature/assets.
+- repo (default): neutral checks for watermark misuse, optional custom signature/assets.
+- docs-expert: checks BrAInwav fallback signature and required assets.
 """
 
 from __future__ import annotations
@@ -119,8 +119,8 @@ def main() -> int:
     parser.add_argument(
         "--profile",
         choices=("repo", "docs-expert"),
-        default="docs-expert",
-        help="Brand profile mode: docs-expert (default) or repo (neutral/custom).",
+        default="repo",
+        help="Brand profile mode: repo (neutral/custom, default) or docs-expert (fallback branded).",
     )
     parser.add_argument(
         "--config",

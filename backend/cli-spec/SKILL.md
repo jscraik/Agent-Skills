@@ -1,6 +1,8 @@
 ---
 name: cli-spec
 description: Plan and draft CLI UX and surface area (commands, flags, help, output). Use when specifying or refactoring a command-line interface.
+metadata:
+  skill-type: scaffolding_templates
 ---
 
 # CLI Spec
@@ -119,3 +121,9 @@ Use these headings in order:
 - A good CLI spec reduces implementation churn later.
 - Optimize for the common path, but make failure and automation paths explicit.
 - If the CLI will be used by agents or scripts, design for deterministic parsing from the start.
+
+## Gotchas
+- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.
+
+## Failure mode
+- If the command goals, user workflows, or output contract are underspecified, stop, name the ambiguity, and fall back to a smaller CLI surface proposal before locking in flags or behaviors.

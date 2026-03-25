@@ -4,22 +4,18 @@ schema_version: 1
 
 # agent-skills Agent Guide
 
-This repository is the canonical source of Codex skills, docs, and agent workflow instructions.
+This repository is the canonical source of Codex skills, linked operator docs, and agent workflow instructions.
 
 ## Table of Contents
 - [Mandatory workflow snippet](#mandatory-workflow-snippet)
 - [Required essentials](#required-essentials)
-- [Command preflight](#command-preflight)
-- [Verification default](#verification-default)
+- [Startup workflow](#startup-workflow)
 - [Instruction routing](#instruction-routing)
 - [Documentation map](#documentation-map)
 - [Git workflow](#git-workflow)
-- [External integrations](#external-integrations)
-- [Communication and file operations](#communication-and-file-operations)
 - [Learnings](#learnings)
 - [References (informational)](#references-informational)
 - [Agent-First Scaffold Contract](#agent-first-scaffold-contract-managed-by-codex)
-- [Repository preflight helper](#repository-preflight-helper)
 
 ## Mandatory workflow snippet
 
@@ -28,44 +24,36 @@ This repository is the canonical source of Codex skills, docs, and agent workflo
 3. Add a Table of Contents for docs.
 
 ## Required essentials
+
 - Package manager: none at repository root (configuration-focused repo).
 - Non-standard build/typecheck commands: none at repository root.
 - Compatibility posture: canonical-only.
 - Keep communication single-threaded by default.
+- Keep root `AGENTS.md` minimal; put volatile or category-specific policy in `docs/agents/*.md`.
 
-## Command preflight
+## Startup workflow
 
-- Run shell commands with `zsh -lc` (fallback to `bash -lc` only when `zsh` is unavailable or script internals require bash).
-- Confirm `pwd` is `/Users/jamiecraik/dev/agent-skills` before edits.
-- Confirm required binaries for the task (`rg`, `fd`, `jq`, plus repo-specific tools).
-- Use `which` before any `mise` tooling installs.
-- Confirm target paths exist before editing and visually verify paths with `fd` before destructive operations.
-- Fail fast if a required check is missing.
-
-## Verification default
-
-- Prefer one-shot, auditable commands.
-- Run focused validation after each edit batch and broader validation before finalizing.
-- Default root checks:
-  - `bash scripts/sync_skills.sh`
-  - `python3 scripts/docs_lint.py --mode warn --config docs-policy.json`
-  - `just validate` (or `bash scripts/validate_all.sh`) for full repo gates
-- After config-sensitive changes (`package.json`, CI workflows, `settings.json`, related config files), run applicable validation and confirm passing status before commit.
-- For implementation work, run separate implementation and verification workflows, then run `codex review --uncommitted` before merge.
+1. Run `bash scripts/codex-preflight.sh --stack auto --mode required` before multi-step, destructive, or path-sensitive work.
+2. Read [docs/agents/README.md](docs/agents/README.md), then open only the task-relevant linked doc.
+3. Run the narrowest proof first after edits, then broader checks from [docs/agents/04-validation.md](docs/agents/04-validation.md) before handoff.
 
 ## Instruction routing
 
 1. `/Users/jamiecraik/.codex/AGENTS.md`
 2. Repository `AGENTS.md` (this file)
-3. `/Users/jamiecraik/dev/agent-skills/docs/agents/README.md`
+3. `/Users/jamiecraik/dev/Agent-Skills/docs/agents/README.md`
 4. Linked docs under `docs/agents/`
 5. If instructions conflict, pause and ask which one wins.
 
 ## Documentation map
 
-- Use [`docs/agents/README.md`](docs/agents/README.md) as the front door.
-- Keep root guidance minimal and move deep policy into linked docs.
-- Maintain contradiction tracking in [`docs/agents/05-contradictions-and-cleanup.md`](docs/agents/05-contradictions-and-cleanup.md).
+- Use [docs/agents/README.md](docs/agents/README.md) as the front door for detailed policy.
+- Use [docs/agents/02-tooling-policy.md](docs/agents/02-tooling-policy.md) for command style, preflight flags, and verified package roots.
+- Use [docs/agents/03-local-memory.md](docs/agents/03-local-memory.md) for Local Memory workflow and session conventions.
+- Use [docs/agents/04-validation.md](docs/agents/04-validation.md) for validation order and repo checks.
+- Use [docs/agents/05-contradictions-and-cleanup.md](docs/agents/05-contradictions-and-cleanup.md) for live cleanup notes and resolved conflicts.
+- Use [docs/agents/06-security-and-governance.md](docs/agents/06-security-and-governance.md) for MCP, auth, and disclosure guidance.
+- Use [docs/agents/08-release-and-change-control.md](docs/agents/08-release-and-change-control.md) for risky git or release workflows.
 
 ## Git workflow
 
@@ -76,21 +64,6 @@ This repository is the canonical source of Codex skills, docs, and agent workflo
   4. User confirmation before proceeding.
 - Never assume there are no conflicts without verification.
 - Re-check PR comments and checks before reporting completion.
-
-## External integrations
-
-- Run `codex mcp list` before MCP-dependent implementation.
-- Before external API or MCP operations, run this preflight in order:
-  1. Verify env vars resolve (not placeholders).
-  2. Verify 1Password session (`op account list`).
-  3. Run a simple connectivity check.
-  4. Then proceed with full operations.
-- If auth fails, debug the auth layer before retrying operations.
-
-## Communication and file operations
-
-- When the user names a tool or skill, verify it exists before choosing fallback behavior.
-- Verify file paths against documentation before commit (for example `.diagram/`).
 
 ## Learnings
 
@@ -103,7 +76,7 @@ This repository is the canonical source of Codex skills, docs, and agent workflo
 - Global protocol: `/Users/jamiecraik/.codex/AGENTS.md`
 - Security baseline: `/Users/jamiecraik/.codex/instructions/standards.md`
 - RVCP source of truth: `/Users/jamiecraik/.codex/instructions/rvcp-common.md`
-- Repository overview: `/Users/jamiecraik/dev/agent-skills/README.md`
+- Repository overview: `/Users/jamiecraik/dev/Agent-Skills/README.md`
 
 <!-- AGENT-FIRST-SCAFFOLD:START -->
 ## Agent-First Scaffold Contract (managed by ~/.codex)
@@ -126,10 +99,3 @@ Repo-level requirements:
 
 State model: `S0 -> S1 -> S2 -> S3 -> S4 -> S5` with rollback to `Sx` on critical governance events.
 <!-- AGENT-FIRST-SCAFFOLD:END -->
-
-## Repository preflight helper
-
-- Use `scripts/codex-preflight.sh` before multi-step, destructive, or path-sensitive workflows.
-- Run with bash internals:
-  - `bash -lc "source /Users/jamiecraik/dev/agent-skills/scripts/codex-preflight.sh && preflight_repo"`
-- If the script is unavailable, run the manual preflight checklist above.

@@ -7,6 +7,7 @@
 - [Recursive promotion gate](/docs/skill-graphs/workflows/recursive-promotion-gate.md) — PR vs WDsp modes with strict parity
 - [Skill quality](/docs/skill-graphs/workflows/skill-quality.md) — T1/T2 validation jobs with conditional triggers
 - [Recursive skill shadow](/docs/skill-graphs/workflows/recursive-skill-shadow.md) — Weekly shadow cycles with pilot profiles
+- [Skill learning loop](/docs/skill-graphs/workflows/skill-learning-loop.md) — Turn repeated run evidence into safe skill improvements
 
 ## Security & Governance
 

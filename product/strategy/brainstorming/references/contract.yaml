@@ -11,9 +11,12 @@ outputs:
   - clarified problem statement
   - 2-3 approaches with tradeoffs
   - recommended direction and open questions
+  - decomposition of oversized requests into a smaller first slice when needed
 non_goals:
   - implementation-ready code changes
   - skipping clarification when requirements are ambiguous
+  - mandatory visual artifacts for text-first decisions
 risks:
   - over-questioning; mitigate with one-question-at-a-time flow
   - over-design; mitigate with YAGNI checks
+  - scoping drift on multi-system requests; mitigate with decomposition before detail

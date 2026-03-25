@@ -1,0 +1,40 @@
+schema_version: 1
+skill: frontend-design
+should_trigger:
+  - query: "Design the frontend for this new product landing page."
+    reason: Broad frontend design ask with no narrower skill chosen yet.
+  - query: "I need a dashboard that feels premium instead of generic."
+    reason: Broad visual-direction request for an app surface.
+  - query: "Can you handle the frontend design for this admin panel?"
+    reason: General frontend design wording should route here first.
+  - query: "Build a frontend with genuine design quality, not AI slop."
+    reason: Direct match to the imported upstream framing.
+  - query: "Improve the design of this existing React app, but respect what's already there."
+    reason: Existing-system detection is part of this skill's job.
+  - query: "I want a distinctive web UI, but I’m not sure if this is redesign work or polish."
+    reason: Ambiguous broad ask that needs routing into narrower skills.
+  - query: "Create the visual direction for this new dashboard before we start coding."
+    reason: Pre-build visual thesis and content planning should trigger.
+  - query: "Can you figure out whether we should extend our current design system or go more bespoke on this frontend?"
+    reason: Context-detection and mode classification are primary triggers.
+should_not_trigger:
+  - query: "Design a settings flow with accessible tabs, inline validation, and complete loading and error states."
+    reason: This is clearly owned by frontend-ui-design, not the umbrella router.
+  - query: "Create a visually strong landing page with one dominant hero composition and restrained motion."
+    reason: A concrete visually led surface with production-ready structure belongs to frontend-ui-design.
+  - query: "Update our token aliases and mapped theme variables for the button system."
+    reason: This is design-system work, not broad frontend-design routing.
+  - query: "Tune the motion rhythm on this existing settings panel."
+    reason: Motion-only polish should go to ui-ux-creative-coding.
+  - query: "Review this Tailwind spacing scale for consistency."
+    reason: Narrow design-system or baseline review.
+  - query: "Fix the broken API for the dashboard filters."
+    reason: Backend bug fix with no design scope.
+  - query: "Add keyboard support and focus states to this modal."
+    reason: Accessibility fix is narrower than this umbrella skill.
+  - query: "Implement the exact Figma design for this component."
+    reason: Figma-led implementation should go through the dedicated Figma/UI skills.
+  - query: "Generate an Open Graph image for our blog post."
+    reason: Graphics/OG-image work is out of scope.
+  - query: "Refactor this React component into smaller pieces without changing the visual design."
+    reason: Code structure work without a design-planning need.

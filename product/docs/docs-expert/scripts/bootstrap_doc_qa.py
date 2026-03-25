@@ -249,8 +249,8 @@ def main() -> int:
     parser.add_argument(
         "--brand-profile",
         choices=("repo", "docs-expert", "none"),
-        default="docs-expert",
-        help="Brand baseline mode: docs-expert (default), repo (neutral/custom), or none.",
+        default="repo",
+        help="Brand baseline mode: repo (neutral/custom, default), docs-expert (fallback branded), or none.",
     )
     parser.add_argument(
         "--insert-readme-signature",

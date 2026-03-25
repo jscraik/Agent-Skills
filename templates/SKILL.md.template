@@ -1,55 +1,61 @@
 # Skill Template
 
-Use this template when creating new skills. Copy and customize.
-
----
+Use this starter when creating a new canonical skill. Keep the initial artifact honest: gather the real trigger, owner, and review cadence up front, keep the skill in `incubating` state until the workflow is real, and avoid broad placeholder debt that looks ready to merge.
 
 ---
 name: skill-name-here
-description: One-line description for skill discovery (max 80 chars)
+description: Concrete discovery description for the real trigger
 metadata:
-  category: utilities | product | github | interview | utilities
-  tags: [tag1, tag2]
+  lifecycle_state: incubating
+  maturity: experimental
+  owner: team-or-maintainer
+  review_cadence: monthly
+  last_reviewed: 2026-03-24
+  metadata_source: frontmatter
 ---
 
 # [Skill Name]
 
-[One paragraph explaining what this skill does and when to use it]
+This scaffold starts as an incubating skill. Replace the starter workflow below before promoting it beyond local experimentation.
+
+## Table of Contents
+- [When to use](#when-to-use)
+- [Required inputs](#required-inputs)
+- [Workflow](#workflow)
+- [Validation](#validation)
+- [Resources](#resources)
 
 ## When to use
+- Use this skill only for the concrete trigger named in the description.
+- Keep the boundary narrow until the workflow and references are fully customized.
 
-- Use case 1
-- Use case 2
-- Use case 3
+## Required inputs
+- target repo, file set, or artifact the skill will operate on
+- execution posture and validation depth the finished skill should support
+- any external tools, auth, or references the final workflow will require
 
-## Procedure
+## Workflow
+1. Rewrite the summary so it describes the real user request, not the scaffold.
+2. Replace the starter sections with the smallest workflow or task structure that matches the skill.
+3. Add only the supporting scripts, references, and assets the skill actually uses.
+4. Run the repo validation gates before treating the skill as active.
 
-1. Step one
-2. Step two
-3. Step three
+## Validation
+- Run the skill-format and progressive-disclosure checks after customizing this file.
+- Add evals or helper scripts only when the final contract needs them.
 
-## LearningPosture (pilot-aware authoring)
+## Gotchas
+- Replace with the misconception, recurring failure pattern, or easy-to-miss boundary this skill should call out early.
 
-- For pilot skills, define posture support in `references/task-profile.json` using a top-level `learning_posture` block:
-  - `supported`: allowed values (`learn`, `guided`, `execute`)
-  - `default`: default posture for this skill
-- Keep `learning_posture` additive only; do not encode posture into `delegation.mode`.
-- Keep behavior differences by posture explicit in the skill contract body.
+## See Also
+| Skill | When to use |
+|---|---|
+| `adjacent-skill-name-1` | Replace with a real nearby skill this one is commonly confused with. |
+| `adjacent-skill-name-2` | Replace with another real related skill in the local graph. |
 
-## Outputs
+**Topic map:** `[[topic-name]]`
 
-- What this skill produces
-
-## Constraints
-
-- Limitation 1
-- Limitation 2
-
-## Examples
-
-- "Example prompt 1"
-- "Example prompt 2"
-
-## References
-
-- [Link to relevant docs](/docs/path)
+## Resources
+- `scripts/`: executable helpers used by the finished skill
+- `references/`: stable docs or contracts the skill needs in context
+- `assets/`: templates or non-context files used in the output
