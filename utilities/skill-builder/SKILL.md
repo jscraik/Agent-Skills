@@ -3,6 +3,12 @@ name: skill-builder
 description: Create, improve, compare, import, and quality-gate Codex skills, including SKILL.md, references, evals, scripts, and packaging. Use when the user wants skill-focused building, auditing, or installation work, not generic feature coding or plugin conversion.
 metadata:
   skill-type: code_quality_review
+  lifecycle_state: active
+  maturity: canonical
+  owner: Agent Skills Team
+  review_cadence: quarterly
+  last_reviewed: 2026-03-24
+  metadata_source: frontmatter
 ---
 
 # Skill Builder

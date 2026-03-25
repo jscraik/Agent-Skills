@@ -24,6 +24,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Optional
 
+from verify_skill_catalog_freshness import analyze_skill_file, canonical_skill_map, discover_skill_files
+
 REPO_ROOT = Path(__file__).resolve().parent.parent
 SKILLS_DIR = REPO_ROOT / ".agents" / "skills"
 SKILL_INDEX = REPO_ROOT / "SKILL.md"
@@ -228,6 +230,31 @@ def check_task_profile(skill_dir: Path) -> DiagnosticResult:
     return DiagnosticResult("task profile", "skip", "No task profile found (neither legacy binding nor implicit path)")
 
 
+def check_lifecycle_readiness(skill_dir: Path) -> DiagnosticResult:
+    """Check governed lifecycle readiness for a skill."""
+    skill_files = discover_skill_files(REPO_ROOT)
+    canonical_by_name = canonical_skill_map(skill_files, REPO_ROOT)
+    report = analyze_skill_file(skill_dir / "SKILL.md", REPO_ROOT, canonical_by_name)
+
+    if report.readiness == "blocked":
+        return DiagnosticResult(
+            "lifecycle readiness",
+            "fail",
+            "blocked",
+            "; ".join(report.findings) or "governed asset is blocked",
+        )
+    if report.readiness == "degraded":
+        return DiagnosticResult(
+            "lifecycle readiness",
+            "warn",
+            "degraded",
+            "; ".join(report.findings) or "governed asset is degraded",
+        )
+    if report.details:
+        return DiagnosticResult("lifecycle readiness", "pass", "healthy", report.details)
+    return DiagnosticResult("lifecycle readiness", "pass", "healthy")
+
+
 def diagnose_skill(skill_name: str) -> List[DiagnosticResult]:
     """Run all diagnostic checks for a skill."""
     results: List[DiagnosticResult] = []
@@ -252,6 +279,7 @@ def diagnose_skill(skill_name: str) -> List[DiagnosticResult]:
     results.append(check_antigravity_skills_txt())
     results.append(check_skill_index(skill_name))
     results.append(check_task_profile(skill_dir))
+    results.append(check_lifecycle_readiness(skill_dir))
 
     return results
 

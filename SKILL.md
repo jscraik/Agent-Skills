@@ -4,6 +4,7 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 
 ## Table of Contents
 - [Summary](#summary)
+- [Managed Asset Governance](#managed-asset-governance)
 - [Catalog](#catalog)
 - [Auth](#auth)
 - [Backend](#backend)
@@ -28,6 +29,14 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 ## Summary
 - `total_skills`: 118
 - `catalog_source`: repository skill scan
+
+## Managed Asset Governance
+- `phase_one_scope`: canonical skills, packaged skills, plugin packages
+- `authoritative_representation`: in-file metadata only
+- `markdown_assets`: canonical `SKILL.md` frontmatter
+- `plugin_assets`: `.codex-plugin/plugin.json`
+- `packaged_skill_rule`: inherit lifecycle metadata from canonical source when the mapping is one-to-one and validator-visible
+- `reference`: `docs/reference/managed-asset-lifecycle.md`
 
 ## Catalog
 
@@ -205,4 +214,3 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - `visual-explainer` — Generate self-contained HTML explainers for systems, diffs, plans, or data with clearer visual presentation than plain text. Use when the user wants a diagram or visual technical explainer, or when a large ASCII table would be hard to scan.
 - `writing-plans` — Compatibility wrapper for generic implementation planning. Use when the user asks for a general plan and route the work to `ce-plan` in `generic-plan` mode.
 - `xcode-makefiles` — Install strict Xcode Makefile tooling for iOS/macOS projects, including build/run/test scripts with AGENT_NAME-based per-agent isolation under build/. Use when a project needs reproducible local CLI builds without full app scaffolding.
-

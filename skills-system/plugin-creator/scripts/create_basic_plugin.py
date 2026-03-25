@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-"""Scaffold a plugin directory and optionally update marketplace.json."""
+"""Scaffold a lifecycle-aware plugin directory and optionally update marketplace.json."""
 
 from __future__ import annotations
 
 import argparse
 import json
 import re
+from datetime import date
 from pathlib import Path
 from typing import Any
 
@@ -16,9 +17,14 @@ DEFAULT_MARKETPLACE_PATH = Path.cwd() / ".agents" / "plugins" / "marketplace.jso
 DEFAULT_INSTALL_POLICY = "AVAILABLE"
 DEFAULT_AUTH_POLICY = "ON_INSTALL"
 DEFAULT_CATEGORY = "Productivity"
-DEFAULT_MARKETPLACE_DISPLAY_NAME = "[TODO: Marketplace Display Name]"
+DEFAULT_MARKETPLACE_DISPLAY_NAME = "Local Plugins"
+DEFAULT_VERSION = "0.1.0"
+DEFAULT_LIFECYCLE_STATE = "incubating"
+DEFAULT_MATURITY = "experimental"
 VALID_INSTALL_POLICIES = {"NOT_AVAILABLE", "AVAILABLE", "INSTALLED_BY_DEFAULT"}
 VALID_AUTH_POLICIES = {"ON_INSTALL", "ON_USE"}
+VALID_LIFECYCLE_STATES = {"incubating", "active", "maintenance", "deprecated"}
+VALID_MATURITY_LEVELS = {"experimental", "validated", "canonical"}
 
 
 def normalize_plugin_name(plugin_name: str) -> str:
@@ -40,49 +46,68 @@ def validate_plugin_name(plugin_name: str) -> None:
         )
 
 
-def build_plugin_json(plugin_name: str) -> dict:
-    return {
+def plugin_display_name(plugin_name: str) -> str:
+    return " ".join(part.capitalize() for part in plugin_name.split("-"))
+
+
+def build_plugin_json(
+    plugin_name: str,
+    description: str,
+    owner: str,
+    review_cadence: str,
+    last_reviewed: str,
+    lifecycle_state: str,
+    maturity: str,
+    category: str,
+    with_skills: bool,
+    with_hooks: bool,
+    with_mcp: bool,
+    with_apps: bool,
+) -> dict:
+    display_name = plugin_display_name(plugin_name)
+    payload = {
+        "schema_version": 1,
         "name": plugin_name,
-        "version": "[TODO: 1.2.0]",
-        "description": "[TODO: Brief plugin description]",
+        "version": DEFAULT_VERSION,
+        "description": description,
         "author": {
-            "name": "[TODO: Author Name]",
-            "email": "[TODO: author@example.com]",
-            "url": "[TODO: https://github.com/author]",
+            "name": owner,
         },
-        "homepage": "[TODO: https://docs.example.com/plugin]",
-        "repository": "[TODO: https://github.com/author/plugin]",
-        "license": "[TODO: MIT]",
-        "keywords": ["[TODO: keyword1]", "[TODO: keyword2]"],
-        "skills": "[TODO: ./skills/]",
-        "hooks": "[TODO: ./hooks.json]",
-        "mcpServers": "[TODO: ./.mcp.json]",
-        "apps": "[TODO: ./.app.json]",
+        "license": "MIT",
+        "keywords": ["plugin", plugin_name, "incubating"],
+        "governance": {
+            "lifecycle_state": lifecycle_state,
+            "maturity": maturity,
+            "owner": owner,
+            "review_cadence": review_cadence,
+            "last_reviewed": last_reviewed,
+            "metadata_source": "plugin_manifest",
+        },
         "interface": {
-            "displayName": "[TODO: Plugin Display Name]",
-            "shortDescription": "[TODO: Short description for subtitle]",
-            "longDescription": "[TODO: Long description for details page]",
-            "developerName": "[TODO: OpenAI]",
-            "category": "[TODO: Productivity]",
-            "capabilities": ["[TODO: Interactive]", "[TODO: Write]"],
-            "websiteURL": "[TODO: https://openai.com/]",
-            "privacyPolicyURL": "[TODO: https://openai.com/policies/row-privacy-policy/]",
-            "termsOfServiceURL": "[TODO: https://openai.com/policies/row-terms-of-use/]",
+            "displayName": display_name,
+            "shortDescription": description,
+            "longDescription": (
+                f"Incubating plugin scaffold for {display_name}. "
+                "Replace this starter metadata before treating the plugin as active."
+            ),
+            "developerName": owner,
+            "category": category,
+            "capabilities": ["Interactive", "Read"],
             "defaultPrompt": [
-                "[TODO: Summarize my inbox and draft replies for me.]",
-                "[TODO: Find open bugs and turn them into tickets.]",
-                "[TODO: Review today's meetings and flag gaps.]",
+                f"Help me evaluate whether {display_name} is ready to move beyond incubating."
             ],
-            "brandColor": "[TODO: #3B82F6]",
-            "composerIcon": "[TODO: ./assets/icon.png]",
-            "logo": "[TODO: ./assets/logo.png]",
-            "screenshots": [
-                "[TODO: ./assets/screenshot1.png]",
-                "[TODO: ./assets/screenshot2.png]",
-                "[TODO: ./assets/screenshot3.png]",
-            ],
+            "brandColor": "#3B82F6",
         },
     }
+    if with_skills:
+        payload["skills"] = "./skills/"
+    if with_hooks:
+        payload["hooks"] = "./hooks.json"
+    if with_mcp:
+        payload["mcpServers"] = "./.mcp.json"
+    if with_apps:
+        payload["apps"] = "./.app.json"
+    return payload
 
 
 def build_marketplace_entry(
@@ -185,7 +210,7 @@ def create_stub_file(path: Path, payload: dict, force: bool) -> None:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Create a plugin skeleton with placeholder plugin.json."
+        description="Create a lifecycle-aware plugin skeleton with honest starter metadata."
     )
     parser.add_argument("plugin_name")
     parser.add_argument(
@@ -226,6 +251,38 @@ def parse_args() -> argparse.Namespace:
         default=DEFAULT_CATEGORY,
         help="Marketplace category value",
     )
+    parser.add_argument(
+        "--description",
+        required=True,
+        help="Short plugin description used in the manifest and interface block",
+    )
+    parser.add_argument(
+        "--owner",
+        required=True,
+        help="Primary maintainer or owner string for lifecycle governance",
+    )
+    parser.add_argument(
+        "--review-cadence",
+        required=True,
+        help="Concrete review cadence such as monthly or quarterly",
+    )
+    parser.add_argument(
+        "--last-reviewed",
+        default=date.today().isoformat(),
+        help="ISO date for the most recent lifecycle review (defaults to today)",
+    )
+    parser.add_argument(
+        "--lifecycle-state",
+        default=DEFAULT_LIFECYCLE_STATE,
+        choices=sorted(VALID_LIFECYCLE_STATES),
+        help="Initial lifecycle state for the plugin",
+    )
+    parser.add_argument(
+        "--maturity",
+        default=DEFAULT_MATURITY,
+        choices=sorted(VALID_MATURITY_LEVELS),
+        help="Initial maturity level for the plugin",
+    )
     parser.add_argument("--force", action="store_true", help="Overwrite existing files")
     return parser.parse_args()
 
@@ -242,7 +299,24 @@ def main() -> None:
     plugin_root.mkdir(parents=True, exist_ok=True)
 
     plugin_json_path = plugin_root / ".codex-plugin" / "plugin.json"
-    write_json(plugin_json_path, build_plugin_json(plugin_name), args.force)
+    write_json(
+        plugin_json_path,
+        build_plugin_json(
+            plugin_name,
+            args.description,
+            args.owner,
+            args.review_cadence,
+            args.last_reviewed,
+            args.lifecycle_state,
+            args.maturity,
+            args.category,
+            args.with_skills,
+            args.with_hooks,
+            args.with_mcp,
+            args.with_apps,
+        ),
+        args.force,
+    )
 
     optional_directories = {
         "skills": args.with_skills,

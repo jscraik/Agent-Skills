@@ -53,6 +53,7 @@ run_check warn plan-graphs "📊 Validating plan graphs..." ./scripts/validate_p
 run_check warn recursive-artifacts "🔄 Verifying skill graph artifacts..." python3 scripts/verify_recursive_skill_graph_artifacts.py --quiet
 run_check warn docs-lint "📚 Running docs lint..." python3 scripts/docs_lint.py --mode warn --config docs-policy.json
 run_check required question-lifecycle "❓ Verifying question lifecycle contract..." python3 scripts/verify_question_lifecycle_contract.py
+run_check required skill-lifecycle-tests "🧪 Running lifecycle readiness tests..." python3 scripts/test_skill_lifecycle_validation.py
 run_check warn skill-catalog "🧭 Verifying skill catalog freshness..." python3 scripts/verify_skill_catalog_freshness.py --strict
 run_check required skill-types "🏷️  Linting semantic skill-type tags..." bash scripts/lint_skill_types.sh
 run_check required openai-format "🧩 Linting OpenAI skill format..." bash scripts/lint_openai_skill_format.sh --mode strict

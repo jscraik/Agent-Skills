@@ -3,6 +3,12 @@ name: coding-harness
 description: Use when a repository needs `@brainwav/coding-harness` installed, bootstrapped, updated, audited, or explained. Covers `harness init`, harness-managed CI migration, governance checks, and Codex environment action-sync guidance. Do not use for unrelated coding, general deployment, or broad cloud work.
 metadata:
   skill-type: team_automation
+  lifecycle_state: active
+  maturity: validated
+  owner: Agent Skills Team
+  review_cadence: quarterly
+  last_reviewed: 2026-03-24
+  metadata_source: frontmatter
 ---
 
 # Coding Harness
@@ -64,6 +70,7 @@ Produce only what the request needs, usually:
 - Treat capability boundaries as part of the contract, especially around auth, destructive changes, and enforced scaffold files.
 - Separate `skill bundle is accurate` from `target repo is fully green` because those are different claims.
 - When refusing unsafe or unsupported requests, say `cannot` plainly and explain the missing evidence or prerequisite.
+- Start with the smallest viable harness boundary, keep scope tight, and expand only when the user clearly asks for more than bootstrap, CI migration, environment action-sync, or auth-bound verification.
 
 ## Workflow
 1. Confirm execution mode.
@@ -140,7 +147,7 @@ python3 utilities/skill-builder/scripts/validate_skill_graph_profiles.py --repo-
 bash scripts/sync_skills_sandbox_safe.sh
 bash scripts/lint_skill_types.sh
 python3 utilities/skill-builder/scripts/skill_gate.py utilities/coding-harness --require-fail-fast --require-security-evals
-python3 utilities/skill-builder/scripts/run_skill_evals.py utilities/coding-harness --eval-mode release --runner codex --capture-jsonl --timeout-profile codex-heavy
+python3 utilities/skill-builder/scripts/run_skill_evals.py utilities/coding-harness --eval-mode release --runner codex --capture-jsonl --timeout-profile codex-heavy --profile d --codex-fallback-profile ''
 ```
 
 Fail fast on the first blocking gate, fix the specific issue, rerun that gate, and only then continue to broader validation.
@@ -192,12 +199,14 @@ Fail fast on the first blocking gate, fix the specific issue, rerun that gate, a
 - Symptom: CI migration guidance looks right but rollback is missing. Cause: older summaries often stop after `commit`. Do instead: preserve the full snapshot-based sequence including `abort --snapshot <snapshot-id>`. Check: confirm preview, apply, verify, commit, and abort all appear in both `SKILL.md` and `references/agent-install-guide.md`.
 - Symptom: an agent claims repo setup is complete after only local checks. Cause: remote gates such as Greptile verification were skipped because auth was missing. Do instead: report the local pass separately from auth-blocked remote checks. Check: the final summary should say exactly which checks were skipped and why.
 - Symptom: `.harness/memory/LEARNINGS.md` guidance is applied to a repo without `.harness/`. Cause: the memory layer is repo-specific, not universal. Do instead: skip creation when `.harness/` is absent. Check: only read or append the repo memory file when the harness directory exists.
+- Symptom: `run_skill_evals.py` fails early with `Unsupported parameter: 'reasoning.summary'` under a Spark-oriented Codex profile. Cause: the active profile/model does not support the runner's default reasoning setting. Do instead: pin the eval run to `--profile d --codex-fallback-profile ''`. Check: the release run should emit normal case artifacts and a populated `scorecard.json`.
 
 ## Examples
-- Triggering prompt: "Set up the Brainwav harness in this repo and tell me what still needs my credentials."
-- Triggering prompt: "Show me the safe repo-governance bootstrap flow, including preview, validation, and rollback."
-- Triggering prompt: "Audit whether our Codex environment actions are still aligned with the current scripts."
-- Non-triggering prompt: "Build a new dashboard for our admin panel."
+- When the user asks: "Can you help me add the Brainwav harness to this repo and tell me which steps still need my credentials?"
+- When the user asks: "Please map the safe bootstrap flow for this repo, including preview, validation, update, and rollback commands."
+- When the user asks: "Help me inspect whether our Codex environment actions are still aligned with the current scripts."
+- When the user asks: "Can you explain whether we should use a GitHub App JWT or a PAT for the harness verification checks?"
+- Do not trigger for: "Build a new dashboard for our admin panel."
 
 ## See Also
 | Skill | When to use |

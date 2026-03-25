@@ -3,6 +3,12 @@ name: compound-engineering-router
 description: Route compound-engineering requests to the correct CE stage or support meta-mode. Use when the user wants CE ideation, spec, planning, work, review, compound learning, or context compaction and the right stage is not yet explicit.
 metadata:
   skill-type: team_automation
+  lifecycle_state: active
+  maturity: validated
+  owner: Agent Skills Team
+  review_cadence: monthly
+  last_reviewed: 2026-03-24
+  metadata_source: frontmatter
 ---
 
 # Compound Engineering Router
