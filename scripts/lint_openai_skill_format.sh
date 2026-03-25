@@ -37,8 +37,13 @@ if [[ "$mode" != "strict" && "$mode" != "warn" ]]; then
   exit 2
 fi
 
-if ! command -v fd >/dev/null 2>&1; then
-  echo "fd is required to lint OpenAI skill format" >&2
+find_cmd=""
+if command -v fd >/dev/null 2>&1; then
+  find_cmd="fd"
+elif command -v fdfind >/dev/null 2>&1; then
+  find_cmd="fdfind"
+else
+  echo "fd or fdfind is required to lint OpenAI skill format" >&2
   exit 2
 fi
 
@@ -125,7 +130,7 @@ while IFS= read -r file; do
       fi
     done <<< "$output"
   fi
-done < <(fd -t f SKILL.md "${roots[@]}" | sort)
+done < <("$find_cmd" -t f SKILL.md "${roots[@]}" | sort)
 
 echo "Checked files: $checked"
 echo "Errors: $errors"
