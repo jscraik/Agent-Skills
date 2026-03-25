@@ -1,0 +1,9 @@
+interface:
+  display_name: "CE Review"
+  short_description: "Run broad PR, branch, or workflow-artifact reviews with synthesized findings, blockers, and readiness guidance."
+
+policy:
+  allow_implicit_invocation: true
+
+dependencies:
+  tools: []

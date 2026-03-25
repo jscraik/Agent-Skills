@@ -1,18 +1,19 @@
 schema_version: 1
 
 purpose: >
-  Route compound-engineering requests to the correct prompt, specialist review path,
-  or workflow-support meta-mode in the Codex config repository, with optional NotebookLM evidence enrichment.
+  Route compound-engineering requests to the correct packaged CE skill, specialist review path,
+  or workflow-support meta-mode in the Agent-Skills repository, with optional NotebookLM evidence enrichment.
 
 triggers:
   - the user asks which compound-engineering stage to use
-  - the user wants the correct prompt plus background agents for brainstorm, spec, plan, work, review, technical review, or compound execution
+  - the user wants the correct CE skill plus background agents for ideate, brainstorm, spec, deepen-spec, plan, deepen-plan, work, review, technical review, compound, or compound-refresh execution
+  - the user has a UI-first request and needs to know whether it belongs in ce-spec or ce-plan
   - the user wants to route a PR, diff, spec, or plan into the workflow instead of executing it directly
   - the user wants context compaction or guardrail extraction tied to the workflow
 
 inputs:
   - user request, artifact, or target to route
-  - target repository context; default /Users/jamiecraik/dev/config
+  - target repository context; default /Users/jamiecraik/dev/Agent-Skills
   - enough routing signal to classify the request safely
   - optional review focus such as architecture, security, performance, data, frontend, rails, python, or typescript
   - optional NotebookLM enrichment request
@@ -21,7 +22,8 @@ inputs:
 outputs:
   - schema_version: 1 route or meta-mode brief
   - selected route or meta-mode name
-  - prompt path when prompt-backed, otherwise an explicit no-prompt-path note
+  - packaged CE skill path when skill-backed
+  - legacy prompt alias when relevant, otherwise an explicit no-prompt-path note
   - concise route rationale
   - required and optional agent fan-out lists
   - NotebookLM usage notes when enrichment is used
@@ -37,6 +39,7 @@ risks:
   - route ambiguity; mitigated by one concise clarification or candidate routes
   - stale repo assumptions; mitigated by local prompt and role verification
   - review under-scoping; mitigated by separate technical-review route and explicit specialist fan-out
+  - UI route overlap; mitigated by explicit ce-spec-versus-ce-plan guidance
   - meta-mode confusion; mitigated by explicit no-prompt-path notes
   - NotebookLM overreach; mitigated by keeping enrichment optional and secondary
 
@@ -44,7 +47,7 @@ examples:
   happy_path:
     input: "Use the compound workflow to review this TypeScript PR deeply."
     expected_output: >
-      Select technical-review, point to codex/prompts/technical_review.md,
+      Select technical-review, point to product/ops/ce-technical-review,
       recommend kieran-typescript-reviewer plus security or performance reviewers as applicable,
       and list validation gates.
   edge_case:
@@ -52,6 +55,11 @@ examples:
     expected_output: >
       Select context-compaction, state that there is no backing prompt path,
       and return a compact continuation brief with the next step and blockers.
+  ui_case:
+    input: "We need to build a new screen and I am not sure whether I need the UI spec first or the implementation plan."
+    expected_output: >
+      Distinguish ce-spec from ce-plan based on whether the UI contract is already clear,
+      then route to the packaged CE skill with the brief rationale.
   failure_mode:
     input: "Implement the feature directly and skip the workflow."
     expected_output: >

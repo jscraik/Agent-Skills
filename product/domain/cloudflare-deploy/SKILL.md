@@ -1,6 +1,8 @@
 ---
 name: cloudflare-deploy
 description: Deploy applications and infrastructure to Cloudflare using Workers, Pages, and related platform services. Use when the user asks to deploy, host, publish, or set up a project on Cloudflare.
+metadata:
+  skill-type: ci_cd_deployment
 ---
 
 # Cloudflare Deploy
@@ -137,3 +139,6 @@ If unauthenticated:
 
 ## Remember
 Cloudflare is a platform family, not one product. Route first, then go deep.
+
+## Gotchas
+- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.

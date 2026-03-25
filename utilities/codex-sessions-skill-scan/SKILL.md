@@ -1,6 +1,8 @@
 ---
 name: codex-sessions-skill-scan
-description: "Session-driven skill intelligence: run daily health scans over ~/.codex sessions to detect skill failures and, when requested, audit project-local skill coverage to recommend merge/fold/improve-existing/install-new decisions grounded in memory and rollout evidence."
+description: Scan Codex session history for skill failures, usage patterns, and coverage gaps. Use when the user wants daily skill-health monitoring or evidence-backed recommendations about installing, improving, merging, or pruning skills.
+metadata:
+  skill-type: data_fetch_analysis
 ---
 
 # Codex Sessions Skill Scan
@@ -40,7 +42,7 @@ Both modes are evidence-first and privacy-aware.
 - Preserve privacy by default: summarize failures without replaying full sessions.
 - Keep the workflow read-only unless the user explicitly asks for a patch follow-up.
 
-## Scope and triggers
+## When to use
 - “Scan yesterday’s Codex sessions for skill failures (personal skills only).”
 - “Why does `$some-skill` keep failing? Look at recent session logs and tell me what’s wrong.”
 - “Daily check: any broken skill references or validation commands in the last 24 hours?”
@@ -179,3 +181,9 @@ References used by skill-gate:
 - Persist with: `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
 - The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
 <!-- /decision-feedback-protocol -->
+
+## Gotchas
+- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.
+
+## Failure mode
+- If session inputs, scan scope, or telemetry evidence cannot be read safely, stop, report the blocked source, and fall back to a smaller local-only scan instead of inferring results.

@@ -1,6 +1,8 @@
 ---
 name: visual-explainer
-description: Generate beautiful, self-contained HTML pages that visually explain systems, code changes, plans, and data. Use when the user asks for a diagram, architecture overview, diff review, plan review, project recap, comparison table, or any visual explanation of technical concepts. Also use proactively when you are about to render a complex ASCII table (4+ rows or 3+ columns) — present it as a styled HTML page instead.
+description: Generate self-contained HTML explainers for systems, diffs, plans, or data with clearer visual presentation than plain text. Use when the user wants a diagram or visual technical explainer, or when a large ASCII table would be hard to scan.
+metadata:
+  skill-type: team_automation
 ---
 
 # Visual Explainer
@@ -13,7 +15,7 @@ Generate self-contained HTML files for technical diagrams, visualizations, and d
 - Use repo-bundled templates and reference patterns before inventing a fresh structure.
 - If the content wants a browser artifact, do not regress to terminal tables or ASCII diagrams.
 
-## When to Use
+## When to use
 
 Use this skill when a request needs a visual artifact (diagram, architecture explainer, plan review, comparison table, timeline, dashboard, or recap) instead of plain text.
 Use slide mode when the user explicitly asks for a deck (`--slides`, `/generate-slides`, or "make this a slide deck").
@@ -24,17 +26,23 @@ Use slide mode when the user explicitly asks for a deck (`--slides`, `/generate-
 - Treat styling as a communication tool, not decoration.
 - Produce durable artifacts that can be reopened, shared, and iterated.
 
-## Inputs
+## Required inputs
 
 - Source material to visualize (architecture notes, diffs, plans, data, or tables).
 - Intended audience and explanation goal.
 - Optional style constraints (branding, theme preferences, presentation context).
 
-## Outputs
+## Deliverables
 
 - A self-contained HTML explainer saved under `~/.agent/diagrams/`.
 - Opened browser artifact and explicit output path.
 - Optional concise written summary of the most important takeaways.
+
+## Examples
+
+- Turn an architecture diff into a browser-first explainer with topology, changed files, and rollout notes.
+- Replace a terminal comparison table with a responsive HTML matrix when the content reaches 4+ rows or 3+ columns.
+- Convert a technical proposal or implementation plan into a visual review artifact with sections, diagrams, and key decisions.
 
 ## Constraints
 
@@ -43,6 +51,14 @@ Use slide mode when the user explicitly asks for a deck (`--slides`, `/generate-
 - Keep deliverables self-contained and resilient across light/dark system themes.
 
 **Proactive table rendering.** When you're about to present tabular data as an ASCII box-drawing table in the terminal (comparisons, audits, feature matrices, status reports, any structured rows/columns), generate an HTML page instead. The threshold: if the table has 4+ rows or 3+ columns, it belongs in the browser. Don't wait for the user to ask — render it as HTML automatically and tell them the file path. You can still include a brief text summary in the chat, but the table itself should be the HTML page.
+
+## Anti-patterns
+
+- Do not ship a dense wall of equal-weight cards where nothing clearly matters first.
+- Do not fake connection-heavy diagrams with ad hoc CSS arrows when Mermaid is the right rendering engine.
+- Do not fall back to default dark-mode SaaS styling just because it is easy; choose an intentional visual direction.
+- Do not hide critical caveats in tiny footnotes, collapsed sections, or low-contrast labels.
+- Do not deliver an explainer that overflows, clips, or becomes unreadable on smaller viewports.
 
 ## Workflow
 
@@ -74,6 +90,7 @@ Vary the choice each time. If the last diagram was dark and technical, make the 
 - For flowcharts, sequence diagrams, ER, state machines, mind maps: read `./templates/mermaid-flowchart.html`
 - For data tables, comparisons, audits, feature matrices: read `./templates/data-table.html`
 - For slide-deck output (explicitly requested): read `./templates/slide-deck.html` and `./references/slide-patterns.md`
+- If helper utilities exist under `./scripts/`, prefer reusing them for scaffolding or validation rather than retyping the same logic by hand.
 
 **For CSS/layout patterns and SVG connectors**, read `./references/css-patterns.md`.
 
@@ -105,12 +122,9 @@ Vary the choice each time. If the last diagram was dark and technical, make the 
 # Generate to a temp file (use --aspect-ratio for control)
 surf gemini "descriptive prompt" --generate-image /tmp/ve-img.png --aspect-ratio 16:9
 
-# Base64 encode for self-containment (macOS)
-IMG=$(base64 -i /tmp/ve-img.png)
-# Linux: IMG=$(base64 -w 0 /tmp/ve-img.png)
-
-# Embed in HTML and clean up
-# <img src="data:image/png;base64,${IMG}" alt="descriptive alt text">
+# Convert the image into a self-contained data URI before embedding.
+# The exact command depends on the tooling available on the machine.
+# Example embed target: <img src="data:image/png;..." alt="descriptive alt text">
 rm /tmp/ve-img.png
 ```
 
@@ -131,12 +145,10 @@ Apply these principles to every diagram:
 **Color tells a story.** Use CSS custom properties for the full palette. Define at minimum: `--bg`, `--surface`, `--border`, `--text`, `--text-dim`, and 3-5 accent colors. Each accent should have a full and a dim variant (for backgrounds). Name variables semantically when possible (`--pipeline-step` not `--blue-3`). Support both themes. Put your primary aesthetic in `:root` and the alternate in the media query:
 
 ```css
-/* Light-first (editorial, paper/ink, blueprint): */
-:root { /* light values */ }
+:root { /* light-first values for editorial, paper/ink, or blueprint treatments */ }
 @media (prefers-color-scheme: dark) { :root { /* dark values */ } }
 
-/* Dark-first (neon, IDE-inspired, terminal): */
-:root { /* dark values */ }
+:root { /* dark-first values for neon, IDE-inspired, or terminal treatments */ }
 @media (prefers-color-scheme: light) { :root { /* light values */ } }
 ```
 
@@ -249,9 +261,7 @@ Every diagram is a single self-contained `.html` file. No external assets except
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Descriptive Title</title>
   <link href="https://fonts.googleapis.com/css2?family=...&display=swap" rel="stylesheet">
-  <style>
-    /* CSS custom properties, theme, layout, components — all inline */
-  </style>
+  <style> /* CSS custom properties, theme, layout, and components stay inline */ </style>
 </head>
 <body>
   <!-- Semantic HTML: sections, headings, lists, tables, inline SVG -->
@@ -264,6 +274,7 @@ Every diagram is a single self-contained `.html` file. No external assets except
 ## Quality Checks
 
 Before delivering, verify:
+- **Fail fast**: If any gate below fails, stop and fix that issue before polishing visuals or adding extra sections.
 - **The squint test**: Blur your eyes. Can you still perceive hierarchy? Are sections visually distinct?
 - **The swap test**: Would replacing your fonts and colors with a generic dark theme make this indistinguishable from a template? If yes, push the aesthetic further.
 - **Both themes**: Toggle your OS between light and dark mode. Both should look intentional, not broken.
@@ -279,41 +290,18 @@ Before delivering, verify:
 - If `PyYAML` is missing, fail fast with an explicit fix command instead of retrying ambiguous interpreters.
 - If the right artifact is still unclear after reading the source material, stop and choose the diagram type before writing HTML.
 
-## Example prompts
+## Gotchas
+- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.
 
-- "Create a visual architecture explainer for this service and open it in my browser."
-- "Turn this deployment plan into a timeline-style HTML explainer under `~/.agent/diagrams/`."
-- "Convert this feature comparison table into a polished HTML page instead of ASCII."
-- "Generate a slide deck version of this plan (`--slides`) and keep all sections."
-
-## Anti-Patterns to Avoid
-
-- ❌ Reusing the same generic dark theme every time.
-- ❌ Falling back to terminal ASCII tables when an HTML table is appropriate.
-- ❌ Shipping visuals that are pretty but miss required content or relationships.
-- ❌ Using slide mode to summarize away source content that should be preserved.
-- ❌ Skipping responsive and overflow checks before delivery.
-- ❌ Treating templates as finished designs instead of starting points.
-
-## Remember
-
-Make the browser artifact earn its keep. If it is not clearer, easier to scan, and easier to reopen than a text reply, it needs another pass.
+## Failure mode
+- If the source material, diagram choice, or rendering dependencies are unclear, stop, report the missing prerequisite, and fall back to a simpler visual scope or source-selection step before generating HTML.
 
 ## See Also
-
-| Skill | When to use together |
+| Skill | When to use |
 |---|---|
-| [[beautiful-mermaid]] | Render Mermaid diagrams for embedding in explainer pages |
-| [[diagram-cli]] | Generate .mmd architecture artifacts to embed |
-| [[slides]] | Use slides when presentation format is better than scroll |
-| [[design-system]] | Apply design-system tokens to visual explainer palettes |
+| [[beautiful-mermaid]] | Render Mermaid diagrams as image assets for the explainer |
+| [[diagram-cli]] | Generate architecture diagrams and context packs before building the final explainer |
+| [[slides]] | Use a presentation deck instead of a scrollable HTML explainer when the format fits better |
+| [[design-system]] | Align the explainer’s token and visual language with the repo’s design system |
 
-**Topic map:** [[frontend-ui]]
-
-<!-- decision-feedback-protocol:v2 -->
-**Decision feedback protocol (required):**
-- If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.
-- Capture: `decision` (`accepted|partial|rejected|deferred`), `outcome` (`good|neutral|bad|unknown`), and `confidence` (`high|medium|low`).
-- Persist with: `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
-- The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
-<!-- /decision-feedback-protocol -->
+**Topic map:** [[agent-ops]]

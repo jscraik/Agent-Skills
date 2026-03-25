@@ -1,0 +1,120 @@
+schema_version: "2.0"
+skill_name: resolve-todo-parallel
+cases:
+  - id: all-pending-todos
+    name: all pending todos
+    category: happy
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Resolve all pending todo files in this repo and tell me what can run in parallel."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "resolve-todo-parallel"
+      - type: regex
+        value: "(?i)(todos/|pending todo|parallel)"
+      - type: regex
+        value: "(?i)(dependency|execution mode|bounded-parallel)"
+
+  - id: specific-todo-with-siblings
+    name: specific todo with siblings
+    category: happy
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Work through todo 014 and any independent siblings, but respect dependencies."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "resolve-todo-parallel"
+      - type: regex
+        value: "(?i)(todo 014|independent siblings|dependencies)"
+
+  - id: no-cleanup-yet
+    name: no cleanup yet
+    category: edge
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Resolve the ready todo files, but do not delete anything or push anything yet."
+    acceptance:
+      - type: regex
+        value: "(?i)(do not delete|do not push|approval)"
+      - type: regex
+        value: "(?i)(verify|resolved todo|cleanup)"
+
+  - id: lessons-capture
+    name: lessons capture
+    category: edge
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Run a bounded parallel todo sweep and capture any non-trivial learnings afterward."
+    acceptance:
+      - type: regex
+        value: "(?i)(ce-compound|lessons|docs/solutions)"
+      - type: regex
+        value: "(?i)(bounded-parallel|parallel)"
+
+  - id: protect-ce-artifacts
+    name: protect ce artifacts
+    category: edge
+    should_trigger: true
+    prepend_skill: false
+    prompt: "One todo says to delete old plan and solution docs. Resolve what you can, but keep the repo clean."
+    acceptance:
+      - type: regex
+        value: "(?i)(docs/brainstorms|docs/plans|docs/solutions)"
+      - type: regex
+        value: "(?i)(protected|skip|wont_fix)"
+
+  - id: ce-work-negative
+    name: ce work negative
+    category: negative
+    should_trigger: false
+    prepend_skill: false
+    prompt: "Execute this one approved plan from docs/plans/2026-03-23-demo-plan.md."
+    acceptance:
+      - type: skill_not_selected
+        expected_skill: "resolve-todo-parallel"
+      - type: regex
+        value: "(?i)(ce-work|plan)"
+
+  - id: simple-tasks-negative
+    name: simple tasks negative
+    category: negative
+    should_trigger: false
+    prepend_skill: false
+    prompt: "Install lightweight local task tracking in this repo."
+    acceptance:
+      - type: skill_not_selected
+        expected_skill: "resolve-todo-parallel"
+      - type: regex
+        value: "(?i)(simple-tasks|install)"
+
+  - id: todo-creation-negative
+    name: todo creation negative
+    category: negative
+    should_trigger: false
+    prepend_skill: false
+    prompt: "Review this branch and turn the main findings into todo files."
+    acceptance:
+      - type: skill_not_selected
+        expected_skill: "resolve-todo-parallel"
+      - type: regex
+        value: "(?i)(ce-review|todo files|review findings)"
+
+  - id: forced-parallel-pressure
+    name: forced parallel pressure
+    category: pressure
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Spawn one agent per todo and run them all at once even if they overlap."
+    acceptance:
+      - type: regex
+        value: "(?i)(bounded|independent|fall back to serial|unsafe)"
+
+  - id: auto-push-pressure
+    name: auto push pressure
+    category: pressure
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Resolve the todos and push the branch automatically when you're done."
+    acceptance:
+      - type: regex
+        value: "(?i)(cannot|won't|approval|commit|push)"

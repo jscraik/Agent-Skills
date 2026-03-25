@@ -1,9 +1,10 @@
-schema_version: "1.1"
+schema_version: "1.2"
 
 purpose: >
   Define expected behavior and outputs for the agents-md skill, including
   progressive-disclosure AGENTS refactors and optional Jamie agent-first
-  scaffold rollout guidance.
+  scaffold rollout guidance, while staying aligned with current Codex AGENTS
+  discovery behavior and project-tailored repo operating rules.
 
 triggers:
   - user requests AGENTS.md creation or update
@@ -12,7 +13,17 @@ triggers:
 
 inputs:
   - repo_root_path
+  - current_working_scope
   - existing_agents_state
+  - agents_override_state
+  - fallback_instruction_files
+  - codex_project_doc_config
+  - repo_preflight_command_state
+  - repo_preflight_flag_support
+  - root_manifest_signals
+  - required_repo_paths_state
+  - local_memory_policy_state
+  - supplemental_context_paths
   - verified_repo_commands_and_paths
   - package_manager_signal
   - conflicting_instruction_sources
@@ -20,8 +31,12 @@ inputs:
 
 outputs:
   - minimal_root_agents_with_links
+  - scoped_override_guidance_when_needed
+  - project_tailored_repo_rules_section
   - category_guidance_files_or_split_plan
   - package_manager_command_map
+  - discovery_chain_summary
+  - verification_commands_with_expected_results
   - contradictions_list_with_resolution_questions
   - flag_for_deletion_list
   - scaffold_mode_artifacts_when_requested
@@ -30,6 +45,21 @@ required_response_sections:
   - "When to use"
   - "Outputs"
   - "Inputs"
+
+official_codex_rules:
+  global_scope_precedence:
+    - ~/.codex/AGENTS.override.md
+    - ~/.codex/AGENTS.md
+  per_directory_precedence:
+    - AGENTS.override.md
+    - AGENTS.md
+    - project_doc_fallback_filenames
+  one_instruction_file_per_directory: true
+  empty_files_ignored: true
+  default_project_doc_max_bytes: 32768
+  verification_commands:
+    - 'codex --ask-for-approval never "Summarize the current instructions."'
+    - 'codex --cd <subdir> --ask-for-approval never "Show which instruction files are active."'
 
 scaffold_mode_contract:
   required_global_references:
@@ -50,12 +80,24 @@ non_goals:
   - implementing product code
   - inventing non-existent commands or paths
   - duplicating full global policy text in repo AGENTS files
+  - claiming linked docs are auto-loaded by Codex when they are only referenced from AGENTS
+  - pasting the same repo-rules template into every project without adaptation
 
 risks:
   - risk: stale_global_paths
     mitigation: verify paths on disk before insertion; otherwise emit "not observed"
   - risk: contradictory_instructions
     mitigation: surface conflict and ask user which instruction wins
+  - risk: wrong_discovery_precedence
+    mitigation: preserve official AGENTS.override.md and fallback filename ordering
+  - risk: silent_instruction_truncation
+    mitigation: mention `project_doc_max_bytes` and prefer narrower scopes over bloated root files
+  - risk: boilerplate_repo_rules
+    mitigation: derive preflight, manifests, required paths, and Local Memory policy from verified repo evidence
+  - risk: stale_preflight_flag_guidance
+    mitigation: derive documented flags and mode semantics from the actual script revision in scope
+  - risk: invented_local_memory_requirements
+    mitigation: only make Local Memory required when the repo or user explicitly standardizes it
   - risk: non_idempotent_scaffold_edits
     mitigation: enforce marker-block update pattern
   - risk: wrong_package_manager_commands

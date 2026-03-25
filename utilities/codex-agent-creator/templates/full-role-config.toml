@@ -1,7 +1,7 @@
 # Full-surface example. Demonstrates advanced knobs.
 # Do not apply wholesale unless the user asks for each category.
 
-model = "gpt-5-codex"
+model = "gpt-5.4-mini"
 model_reasoning_effort = "high"
 model_reasoning_summary = "detailed"
 model_verbosity = "high"

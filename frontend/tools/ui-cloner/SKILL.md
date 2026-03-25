@@ -1,6 +1,8 @@
 ---
 name: ui-cloner
-description: Build a structured UI replication plan from a target website URL and adapt it to the user's brand with implementation-ready guidance. Use when users ask to clone, recreate, or emulate a site's visual system; do not use for Cloudflare crawl orchestration-only requests or generic deployment work.
+description: Plan a branded UI clone from a target website URL with implementation-ready guidance. Use when the user wants a site's visual system recreated or adapted, not raw crawling or deployment work.
+metadata:
+  skill-type: scaffolding_templates
 ---
 
 # UI Cloner
@@ -69,7 +71,7 @@ description: Build a structured UI replication plan from a target website URL an
 - Stop discovery once URL, mode, target stack, and brand constraints are sufficiently clear to proceed safely.
 - Use `references/discovery-interview.md` for a compact question flow.
 
-## Outputs
+## Deliverables
 - `artifacts/ui-cloner/site-dna.md`: visual system extraction (layout, tokens, hierarchy, motion patterns).
 - `artifacts/ui-cloner/replication-plan.md`: implementation-oriented section-by-section build plan.
 - `artifacts/ui-cloner/adaptation-map.json`: structured token/section mapping for adapting source UI to user brand (`schema_version: 1`).
@@ -190,3 +192,6 @@ Use this shape for `adaptation-map.json`:
 - Use `cf-crawl` as an upstream helper, not as this skill's core behavior.
 - Keep outputs implementation-ready and evidence-backed.
 - Enable bold replication quality without losing user brand constraints.
+
+## Gotchas
+- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.

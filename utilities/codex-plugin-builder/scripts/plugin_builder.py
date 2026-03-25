@@ -6,7 +6,9 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import subprocess
 import sys
+from datetime import date
 from pathlib import Path
 from typing import Any, Iterable
 
@@ -15,6 +17,11 @@ MAX_PLUGIN_NAME_LENGTH = 64
 REPO_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_PLUGIN_PARENT = REPO_ROOT / "plugins"
 DEFAULT_MARKETPLACE_PATH = REPO_ROOT / ".agents" / "plugins" / "marketplace.json"
+SKILL_BUILDER_INIT = REPO_ROOT / "utilities" / "skill-builder" / "scripts" / "init_skill.py"
+CODEX_AGENT_WRITER = (
+    REPO_ROOT / "utilities" / "codex-agent-creator" / "scripts" / "write_role_config.sh"
+)
+DOCS_EXPERT_ASSETS = REPO_ROOT / "product" / "docs" / "docs-expert" / "assets"
 DEFAULT_INSTALL_POLICY = "AVAILABLE"
 DEFAULT_AUTH_POLICY = "ON_INSTALL"
 DEFAULT_CATEGORY = "Productivity"
@@ -35,60 +42,43 @@ SOURCE_SURFACE_DEFAULTS = {
     "agents": ["./agents"],
     "hooks": ["./hooks.json", "./hooks/hooks.json"],
     "mcpServers": ["./.mcp.json"],
+    "apps": ["./.app.json"],
 }
 SOURCE_CODEX_SUPPORT_DOCS = (
     ".codex/INSTALL.md",
     "docs/README.codex.md",
 )
 
-REQUIRED_PLUGIN_ROOT_FILES = [
-    ".codex-plugin/plugin.json",
-    "README.md",
-    "LICENSE",
-]
-REQUIRED_PLUGIN_SUPPORT_FILES = [
-    "references/operational-spec.md",
-]
+REQUIRED_PLUGIN_ROOT_FILES = [".codex-plugin/plugin.json"]
 
-REQUIRED_PLUGIN_FIELDS = [
-    "name",
-    "version",
+OPTIONAL_PLUGIN_STRING_FIELDS = [
     "description",
-    "author",
+    "version",
     "homepage",
     "repository",
     "license",
-    "keywords",
-    "skills",
-    "hooks",
-    "mcpServers",
-    "apps",
-    "interface",
 ]
-
-REQUIRED_AUTHOR_FIELDS = ["name", "email", "url"]
-REQUIRED_INTERFACE_FIELDS = [
+OPTIONAL_PLUGIN_PATH_FIELDS = ["skills", "hooks", "mcpServers", "apps"]
+OPTIONAL_AUTHOR_FIELDS = ["name", "email", "url"]
+OPTIONAL_INTERFACE_STRING_FIELDS = [
     "displayName",
     "shortDescription",
     "longDescription",
     "developerName",
     "category",
-    "capabilities",
     "websiteURL",
     "privacyPolicyURL",
     "termsOfServiceURL",
-    "defaultPrompt",
     "brandColor",
-    "composerIcon",
-    "logo",
-    "screenshots",
 ]
+OPTIONAL_INTERFACE_PATH_FIELDS = ["composerIcon", "logo"]
 
 CLAUDE_TO_CODEX_TERMINOLOGY = {
-    "commands/": "prompts/ or skills/ or both",
-    "slash commands": "prompts",
-    "slash-commands": "prompts",
-    "commands key": "prompts and or skills surfaces",
+    "commands/": "skills/ plus optional interface.defaultPrompt",
+    "prompts/": "skills/ plus optional interface.defaultPrompt",
+    "slash commands": "skills/",
+    "slash-commands": "skills/",
+    "commands key": "skills/ plus optional interface.defaultPrompt",
 }
 
 SIMILARITY_STOPWORDS = {
@@ -116,6 +106,278 @@ SIMILARITY_STOPWORDS = {
     "with",
 }
 SIMILAR_PLUGIN_SCORE_THRESHOLD = 0.45
+DEFAULT_ARCHETYPE = "general"
+ARCHETYPE_PROFILES: dict[str, dict[str, Any]] = {
+    "general": {
+        "display_name": "General",
+        "category": "Productivity",
+        "capabilities": ["Interactive", "Read", "Write"],
+        "keywords": ["workflow", "assistant"],
+        "description": "A curated Codex plugin package for reusable workflows.",
+        "short_description": "Reusable workflows packaged for Codex",
+        "long_description": "A curated Codex plugin package that groups reusable workflows and optional integration surfaces.",
+        "default_prompt": "Use this plugin to handle its primary workflow end to end.",
+        "brand_color": "#3B82F6",
+    },
+    "coding_tool": {
+        "display_name": "Coding Tool",
+        "category": "Coding",
+        "capabilities": ["Interactive", "Read", "Write"],
+        "keywords": ["coding", "developer-tools", "repository"],
+        "description": "A Codex plugin package for codebase workflows and developer tooling.",
+        "short_description": "Codebase workflows and developer tooling",
+        "long_description": "A Codex plugin package that helps inspect repositories, modify code, and automate developer workflows.",
+        "default_prompt": "Inspect this codebase and help me implement the next safe change.",
+        "brand_color": "#2563EB",
+    },
+    "productivity_connector": {
+        "display_name": "Productivity Connector",
+        "category": "Productivity",
+        "capabilities": ["Interactive", "Read", "Write"],
+        "keywords": ["productivity", "connector", "workspace"],
+        "description": "A Codex plugin package for structured workspace and task workflows.",
+        "short_description": "Workspace, planning, and task workflows",
+        "long_description": "A Codex plugin package that connects structured workspace workflows, project context, and task actions.",
+        "default_prompt": "Connect to this workspace and help me complete the next task.",
+        "brand_color": "#0EA5E9",
+    },
+    "design_tool": {
+        "display_name": "Design Tool",
+        "category": "Design",
+        "capabilities": ["Interactive", "Read", "Write"],
+        "keywords": ["design", "assets", "ui"],
+        "description": "A Codex plugin package for design inspection, asset workflows, and UI implementation handoff.",
+        "short_description": "Design inspection and UI handoff workflows",
+        "long_description": "A Codex plugin package that supports design inspection, asset handling, and implementation-ready UI workflows.",
+        "default_prompt": "Inspect the design context and help implement it accurately.",
+        "brand_color": "#0D99FF",
+    },
+    "research_connector": {
+        "display_name": "Research Connector",
+        "category": "Research",
+        "capabilities": ["Interactive", "Read", "Write"],
+        "keywords": ["research", "search", "knowledge"],
+        "description": "A Codex plugin package for research, retrieval, and evidence-backed workflows.",
+        "short_description": "Research and evidence-backed retrieval workflows",
+        "long_description": "A Codex plugin package that helps gather sources, retrieve relevant context, and synthesize evidence-backed answers.",
+        "default_prompt": "Gather the relevant sources and summarize the evidence for this question.",
+        "brand_color": "#14B8A6",
+    },
+    "communication_connector": {
+        "display_name": "Communication Connector",
+        "category": "Communication",
+        "capabilities": ["Interactive", "Read", "Write"],
+        "keywords": ["communication", "messages", "collaboration"],
+        "description": "A Codex plugin package for messaging, collaboration, and communication workflows.",
+        "short_description": "Messaging and collaboration workflows",
+        "long_description": "A Codex plugin package that supports message retrieval, collaboration context, and communication tasks.",
+        "default_prompt": "Find the relevant conversation and help me respond or summarize it.",
+        "brand_color": "#8B5CF6",
+    },
+    "automation_orchestrator": {
+        "display_name": "Automation Orchestrator",
+        "category": "Productivity",
+        "capabilities": ["Interactive", "Read", "Write"],
+        "keywords": ["automation", "workflow", "orchestrator"],
+        "description": "A Codex plugin package for orchestrated multi-step workflows and automation.",
+        "short_description": "Multi-step workflow orchestration",
+        "long_description": "A Codex plugin package that coordinates repeatable multi-step workflows, integrations, and automation surfaces.",
+        "default_prompt": "Run the next stage of this workflow and report what changed.",
+        "brand_color": "#F59E0B",
+    },
+}
+ARCHETYPE_TOKEN_HINTS: dict[str, set[str]] = {
+    "coding_tool": {
+        "code",
+        "coding",
+        "developer",
+        "devtools",
+        "github",
+        "git",
+        "repo",
+        "repository",
+        "terminal",
+        "sentry",
+        "debug",
+    },
+    "productivity_connector": {
+        "drive",
+        "docs",
+        "sheets",
+        "slides",
+        "calendar",
+        "notion",
+        "linear",
+        "task",
+        "workspace",
+        "todo",
+        "productivity",
+    },
+    "design_tool": {
+        "figma",
+        "design",
+        "asset",
+        "assets",
+        "icon",
+        "image",
+        "video",
+        "media",
+        "ui",
+        "brand",
+    },
+    "research_connector": {
+        "crawl",
+        "docs",
+        "knowledge",
+        "research",
+        "search",
+        "web",
+        "source",
+        "evidence",
+    },
+    "communication_connector": {
+        "chat",
+        "communication",
+        "conversation",
+        "discord",
+        "email",
+        "gmail",
+        "message",
+        "messages",
+        "slack",
+        "mail",
+    },
+    "automation_orchestrator": {
+        "agent",
+        "automation",
+        "automations",
+        "orchestrate",
+        "orchestrator",
+        "pipeline",
+        "workflow",
+        "workflows",
+    },
+}
+
+
+def _archetype_profile(archetype: str | None) -> dict[str, Any]:
+    return ARCHETYPE_PROFILES.get(archetype or DEFAULT_ARCHETYPE, ARCHETYPE_PROFILES[DEFAULT_ARCHETYPE])
+
+
+def _infer_plugin_archetype(
+    plugin_name: str,
+    *,
+    payload: dict[str, Any] | None = None,
+    enabled_surfaces: dict[str, bool] | None = None,
+    plugin_root: Path | None = None,
+) -> str:
+    tokens: set[str] = _tokenize_text(plugin_name)
+    if payload:
+        interface = payload.get("interface") if isinstance(payload.get("interface"), dict) else {}
+        tokens.update(
+            _tokenize_text(
+                str(payload.get("description") or ""),
+                " ".join(_manifest_keywords(payload)),
+                " ".join(_manifest_capabilities(payload)),
+                str(interface.get("shortDescription") or ""),
+                str(interface.get("longDescription") or ""),
+                str(interface.get("category") or ""),
+            )
+        )
+    surface_flags = dict(enabled_surfaces or {})
+    if plugin_root is not None:
+        surface_flags.setdefault("skills", (plugin_root / "skills").exists())
+        surface_flags.setdefault("hooks", (plugin_root / "hooks.json").exists())
+        surface_flags.setdefault("mcp", (plugin_root / ".mcp.json").exists())
+        surface_flags.setdefault("apps", (plugin_root / ".app.json").exists())
+        surface_flags.setdefault("agents", (plugin_root / "agents").exists())
+
+    scores = {name: 0 for name in ARCHETYPE_PROFILES if name != DEFAULT_ARCHETYPE}
+    for archetype, hints in ARCHETYPE_TOKEN_HINTS.items():
+        scores[archetype] += len(tokens & hints) * 2
+
+    if surface_flags.get("apps"):
+        scores["productivity_connector"] += 2
+        scores["communication_connector"] += 1
+    if surface_flags.get("mcp"):
+        scores["automation_orchestrator"] += 1
+        scores["research_connector"] += 1
+    if surface_flags.get("skills"):
+        scores["coding_tool"] += 1
+        scores["automation_orchestrator"] += 1
+    if surface_flags.get("agents"):
+        scores["automation_orchestrator"] += 2
+        scores["coding_tool"] += 1
+    if surface_flags.get("hooks"):
+        scores["automation_orchestrator"] += 1
+
+    best_archetype = max(scores, key=scores.get, default=DEFAULT_ARCHETYPE)
+    if scores.get(best_archetype, 0) <= 0:
+        return DEFAULT_ARCHETYPE
+    return best_archetype
+
+
+def _suggest_marketplace_category(
+    plugin_name: str,
+    *,
+    archetype: str | None = None,
+    payload: dict[str, Any] | None = None,
+    enabled_surfaces: dict[str, bool] | None = None,
+    plugin_root: Path | None = None,
+) -> str:
+    inferred = archetype or _infer_plugin_archetype(
+        plugin_name,
+        payload=payload,
+        enabled_surfaces=enabled_surfaces,
+        plugin_root=plugin_root,
+    )
+    return str(_archetype_profile(inferred)["category"])
+
+
+def _display_name(plugin_name: str) -> str:
+    return _display_name_from_identifier(plugin_name)
+
+
+def _surface_summary(enabled_surfaces: dict[str, bool]) -> list[str]:
+    surfaces = [".codex-plugin/plugin.json", "README.md", "LICENSE", "references/operational-spec.md"]
+    if enabled_surfaces.get("skills"):
+        surfaces.append("skills/<skill>/SKILL.md")
+    if enabled_surfaces.get("agents"):
+        surfaces.append("agents/<agent>.toml")
+    if enabled_surfaces.get("hooks"):
+        surfaces.append("hooks.json")
+    if enabled_surfaces.get("mcp"):
+        surfaces.append(".mcp.json")
+    if enabled_surfaces.get("apps"):
+        surfaces.append(".app.json")
+    if enabled_surfaces.get("assets"):
+        surfaces.append("assets/")
+    return surfaces
+
+
+def _load_docs_asset(name: str) -> str:
+    return (DOCS_EXPERT_ASSETS / name).read_text(encoding="utf-8")
+
+
+def _run_helper(command: list[str], description: str) -> str:
+    result = subprocess.run(
+        command,
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if result.returncode == 0:
+        return result.stdout.strip()
+
+    details = [f"{description} failed with exit code {result.returncode}."]
+    if result.stdout.strip():
+        details.append("stdout:")
+        details.append(result.stdout.strip())
+    if result.stderr.strip():
+        details.append("stderr:")
+        details.append(result.stderr.strip())
+    raise RuntimeError("\n".join(details))
 
 
 def normalize_plugin_name(plugin_name: str) -> str:
@@ -142,11 +404,19 @@ def validate_plugin_name(plugin_name: str) -> None:
         )
 
 
-def build_plugin_json(plugin_name: str) -> dict[str, Any]:
-    return {
+def build_plugin_json(
+    plugin_name: str,
+    enabled_surfaces: dict[str, bool] | None = None,
+    *,
+    archetype: str | None = None,
+) -> dict[str, Any]:
+    enabled_surfaces = enabled_surfaces or {}
+    profile = _archetype_profile(archetype)
+    display_name = _display_name(plugin_name)
+    payload: dict[str, Any] = {
         "name": plugin_name,
         "version": "0.1.0",
-        "description": "[TODO: Brief plugin description]",
+        "description": profile["description"],
         "author": {
             "name": "[TODO: Author Name]",
             "email": "[TODO: author@example.com]",
@@ -155,32 +425,67 @@ def build_plugin_json(plugin_name: str) -> dict[str, Any]:
         "homepage": "[TODO: https://docs.example.com/plugin]",
         "repository": "[TODO: https://github.com/author/plugin]",
         "license": "MIT",
-        "keywords": ["plugin", plugin_name],
-        "skills": "./skills/",
-        "hooks": "./hooks.json",
-        "mcpServers": "./.mcp.json",
-        "apps": "./.app.json",
+        "keywords": ["plugin", plugin_name, *profile["keywords"]],
         "interface": {
-            "displayName": "[TODO: Plugin Display Name]",
-            "shortDescription": "[TODO: Short description for subtitle]",
-            "longDescription": "[TODO: Long description for details page]",
+            "displayName": display_name,
+            "shortDescription": profile["short_description"],
+            "longDescription": profile["long_description"],
             "developerName": "[TODO: OpenAI]",
-            "category": "[TODO: Productivity]",
-            "capabilities": ["Interactive", "Write"],
+            "category": profile["category"],
+            "capabilities": profile["capabilities"],
             "websiteURL": "[TODO: https://openai.com/]",
             "privacyPolicyURL": "[TODO: https://openai.com/policies/row-privacy-policy/]",
             "termsOfServiceURL": "[TODO: https://openai.com/policies/row-terms-of-use/]",
-            "defaultPrompt": "[TODO: Starter prompt for trying a plugin]",
-            "brandColor": "#3B82F6",
-            "composerIcon": "./assets/icon.png",
-            "logo": "./assets/logo.png",
-            "screenshots": [
-                "./assets/screenshot1.png",
-                "./assets/screenshot2.png",
-                "./assets/screenshot3.png",
-            ],
+            "defaultPrompt": profile["default_prompt"],
+            "brandColor": profile["brand_color"],
         },
     }
+    if enabled_surfaces.get("skills"):
+        payload["skills"] = "./skills/"
+    if enabled_surfaces.get("hooks"):
+        payload["hooks"] = "./hooks.json"
+    if enabled_surfaces.get("mcp"):
+        payload["mcpServers"] = "./.mcp.json"
+    if enabled_surfaces.get("apps"):
+        payload["apps"] = "./.app.json"
+    if enabled_surfaces.get("image_assets"):
+        payload["interface"].update(
+            {
+                "composerIcon": "./assets/icon.png",
+                "logo": "./assets/logo.png",
+                "screenshots": [
+                    "./assets/screenshot1.png",
+                    "./assets/screenshot2.png",
+                    "./assets/screenshot3.png",
+                ],
+            }
+        )
+    return payload
+
+
+def _asset_brief_template(plugin_name: str) -> str:
+    display_name = _display_name(plugin_name)
+    return "\n".join(
+        [
+            f"# {display_name} Assets",
+            "",
+            "Use this directory for optional plugin visuals and shared package assets.",
+            "",
+            "## Policy",
+            "- Do not add `interface.composerIcon`, `interface.logo`, or `interface.screenshots` to `.codex-plugin/plugin.json` until the referenced files actually exist.",
+            "- Use `$imagegen` only when the plugin truly needs PNG assets such as icons, logos, screenshots, or marketplace art.",
+            "- If the plugin is infra-only or has no visual surface, keep this directory empty or remove it.",
+            "",
+            "## Suggested files",
+            "- `icon.png` for a square launcher/composer icon",
+            "- `logo.png` for a wider plugin logo",
+            "- `screenshot1.png` and follow-on screenshots only when a review surface needs them",
+            "",
+            "## Validation",
+            "- Any image path declared in `plugin.json` must resolve to a real file under `./assets/`.",
+            "",
+        ]
+    )
 
 
 def _tokenize_text(*values: str) -> set[str]:
@@ -252,7 +557,6 @@ def _plugin_signature_from_payload(
             "hooks": _relative_surface_exists(plugin_root, payload.get("hooks")),
             "mcpServers": _relative_surface_exists(plugin_root, payload.get("mcpServers")),
             "apps": _relative_surface_exists(plugin_root, payload.get("apps")),
-            "prompts": (plugin_root / "prompts").exists(),
             "agents": (plugin_root / "agents").exists(),
         },
     }
@@ -275,7 +579,6 @@ def _source_signature_from_report(
             "hooks": False,
             "mcpServers": False,
             "apps": False,
-            "prompts": False,
             "agents": False,
         },
     }
@@ -289,11 +592,10 @@ def _source_signature_from_report(
     detected_surfaces = source_report.get("detected_surfaces") or {}
     signature["surface_flags"].update(
         {
-            "skills": bool(detected_surfaces.get("skills")),
+            "skills": bool(detected_surfaces.get("skills") or detected_surfaces.get("commands")),
             "hooks": bool(detected_surfaces.get("hooks")),
             "mcpServers": bool(detected_surfaces.get("mcpServers")),
-            "apps": False,
-            "prompts": bool(detected_surfaces.get("commands")),
+            "apps": bool(detected_surfaces.get("apps")),
             "agents": bool(detected_surfaces.get("agents")),
         }
     )
@@ -331,8 +633,10 @@ def build_marketplace_entry(
             "source": "local",
             "path": f"./plugins/{plugin_name}",
         },
-        "installPolicy": install_policy,
-        "authPolicy": auth_policy,
+        "policy": {
+            "installation": install_policy,
+            "authentication": auth_policy,
+        },
         "category": category,
     }
 
@@ -354,8 +658,80 @@ def _optional_json(path: Path) -> dict[str, Any] | None:
 def build_default_marketplace() -> dict[str, Any]:
     return {
         "name": "[TODO: marketplace-name]",
+        "interface": {
+            "displayName": "[TODO: Marketplace Display Name]",
+        },
         "plugins": [],
     }
+
+
+def _display_name_from_identifier(value: str) -> str:
+    words = [word for word in re.split(r"[-_\s]+", value.strip()) if word]
+    if not words:
+        return "[TODO: Marketplace Display Name]"
+    return " ".join(word.capitalize() for word in words)
+
+
+def _ensure_marketplace_interface(payload: dict[str, Any]) -> None:
+    interface = payload.get("interface")
+    if isinstance(interface, dict):
+        display_name = interface.get("displayName")
+        if isinstance(display_name, str) and display_name.strip():
+            return
+    marketplace_name = payload.get("name") if isinstance(payload.get("name"), str) else ""
+    payload["interface"] = {
+        "displayName": _display_name_from_identifier(marketplace_name),
+    }
+
+
+def _check_string_list(value: Any, field_name: str) -> list[str]:
+    if not isinstance(value, list) or not all(isinstance(item, str) for item in value):
+        return [f"{field_name} must be an array of strings."]
+    return []
+
+
+def _check_declared_plugin_path(
+    plugin_root: Path,
+    field_name: str,
+    value: Any,
+    *,
+    require_exists: bool,
+) -> list[str]:
+    failures: list[str] = []
+    if not _is_relative_plugin_path(value):
+        return [f"{field_name} must be a relative path starting with './'."]
+    candidate = (plugin_root / value[2:]).resolve()
+    if not _path_within_root(plugin_root, candidate):
+        failures.append(f"{field_name} must stay within the plugin root.")
+        return failures
+    if require_exists and not candidate.exists():
+        failures.append(f"{field_name} points to a missing path: {value}")
+    return failures
+
+
+def _check_default_prompt(value: Any) -> list[str]:
+    prompts: list[str]
+    if isinstance(value, str):
+        prompts = [value]
+    elif isinstance(value, list) and all(isinstance(item, str) for item in value):
+        prompts = value
+    else:
+        return [
+            "plugin.json interface.defaultPrompt must be a string or an array of strings."
+        ]
+
+    failures: list[str] = []
+    if len(prompts) > 3:
+        failures.append(
+            "plugin.json interface.defaultPrompt supports at most 3 prompts."
+        )
+    for prompt in prompts:
+        if len(prompt) > 128:
+            failures.append(
+                "plugin.json interface.defaultPrompt entries must be 128 characters or fewer."
+            )
+            break
+    return failures
 
 
 def write_json(path: Path, data: dict[str, Any], force: bool) -> None:
@@ -385,19 +761,26 @@ def update_marketplace_json(
     plugin_name: str,
     install_policy: str,
     auth_policy: str,
-    category: str,
+    category: str | None,
     force: bool,
 ) -> None:
     if marketplace_path.exists():
         payload = load_json(marketplace_path)
     else:
         payload = build_default_marketplace()
+    _ensure_marketplace_interface(payload)
 
     plugins = payload.setdefault("plugins", [])
     if not isinstance(plugins, list):
         raise ValueError(f"{marketplace_path} field 'plugins' must be an array.")
 
-    new_entry = build_marketplace_entry(plugin_name, install_policy, auth_policy, category)
+    effective_category = category or _suggest_marketplace_category(plugin_name)
+    new_entry = build_marketplace_entry(
+        plugin_name,
+        install_policy,
+        auth_policy,
+        effective_category,
+    )
 
     for index, entry in enumerate(plugins):
         if isinstance(entry, dict) and entry.get("name") == plugin_name:
@@ -414,54 +797,364 @@ def update_marketplace_json(
     write_json(marketplace_path, payload, force=True)
 
 
+def _load_plugin_payload(plugin_root: Path) -> dict[str, Any] | None:
+    manifest_path = plugin_root / ".codex-plugin" / "plugin.json"
+    if not manifest_path.exists():
+        return None
+    return load_json(manifest_path)
+
+
+def _normalize_marketplace_entry(
+    entry: dict[str, Any],
+    plugins_path: Path,
+) -> tuple[dict[str, Any], list[str]]:
+    notes: list[str] = []
+    normalized = dict(entry)
+    plugin_name = normalized.get("name")
+    if not isinstance(plugin_name, str) or not plugin_name.strip():
+        raise ValueError("marketplace plugin entries must include a non-empty 'name'.")
+
+    plugin_name = normalize_plugin_name(plugin_name)
+    normalized["name"] = plugin_name
+    expected_path = f"./plugins/{plugin_name}"
+    plugin_root = plugins_path / plugin_name
+    plugin_payload = _load_plugin_payload(plugin_root)
+
+    source = normalized.get("source")
+    if not isinstance(source, dict):
+        source = {}
+    if source.get("source") != "local":
+        notes.append(f"{plugin_name}: normalized source.source to 'local'")
+    if source.get("path") != expected_path:
+        notes.append(f"{plugin_name}: normalized source.path to '{expected_path}'")
+    source["source"] = "local"
+    source["path"] = expected_path
+    normalized["source"] = source
+
+    policy = normalized.get("policy")
+    if not isinstance(policy, dict):
+        policy = {}
+    install_policy = policy.get("installation")
+    if install_policy not in VALID_INSTALL_POLICIES:
+        legacy_install = normalized.get("installPolicy")
+        if legacy_install in VALID_INSTALL_POLICIES:
+            install_policy = legacy_install
+            notes.append(f"{plugin_name}: migrated legacy installPolicy into policy.installation")
+        else:
+            install_policy = DEFAULT_INSTALL_POLICY
+            notes.append(f"{plugin_name}: filled missing policy.installation with '{DEFAULT_INSTALL_POLICY}'")
+    auth_policy = policy.get("authentication")
+    if auth_policy not in VALID_AUTH_POLICIES:
+        legacy_auth = normalized.get("authPolicy")
+        if legacy_auth in VALID_AUTH_POLICIES:
+            auth_policy = legacy_auth
+            notes.append(f"{plugin_name}: migrated legacy authPolicy into policy.authentication")
+        else:
+            auth_policy = DEFAULT_AUTH_POLICY
+            notes.append(f"{plugin_name}: filled missing policy.authentication with '{DEFAULT_AUTH_POLICY}'")
+    policy["installation"] = install_policy
+    policy["authentication"] = auth_policy
+    if "products" in normalized and "products" not in policy:
+        policy["products"] = normalized["products"]
+    normalized["policy"] = policy
+    normalized.pop("installPolicy", None)
+    normalized.pop("authPolicy", None)
+
+    category = normalized.get("category")
+    if not isinstance(category, str) or not category.strip():
+        suggested_category = _suggest_marketplace_category(
+            plugin_name,
+            payload=plugin_payload,
+            plugin_root=plugin_root if plugin_root.exists() else None,
+        )
+        normalized["category"] = suggested_category
+        notes.append(f"{plugin_name}: filled missing category with '{suggested_category}'")
+
+    return normalized, notes
+
+
+def _audit_marketplace(
+    marketplace_path: Path,
+    plugins_path: Path,
+) -> dict[str, Any]:
+    payload = load_json(marketplace_path)
+    _ensure_marketplace_interface(payload)
+    plugins = payload.get("plugins")
+    if not isinstance(plugins, list):
+        raise ValueError(f"{marketplace_path} field 'plugins' must be an array.")
+
+    findings: list[dict[str, str]] = []
+    seen_names: set[str] = set()
+    entry_names: list[str] = []
+    for entry in plugins:
+        if not isinstance(entry, dict):
+            findings.append({"severity": "error", "message": "marketplace entry must be an object."})
+            continue
+        name = entry.get("name")
+        if not isinstance(name, str) or not name.strip():
+            findings.append({"severity": "error", "message": "marketplace entry missing non-empty name."})
+            continue
+        entry_names.append(name)
+        if name in seen_names:
+            findings.append({"severity": "error", "message": f"duplicate marketplace entry for '{name}'."})
+            continue
+        seen_names.add(name)
+        findings.extend(
+            {"severity": "error", "message": message}
+            for message in _check_marketplace_entry(payload, name)
+        )
+        plugin_root = plugins_path / name
+        if not plugin_root.exists():
+            findings.append(
+                {
+                    "severity": "warning",
+                    "message": f"marketplace entry '{name}' points to missing plugin directory '{plugin_root}'.",
+                }
+            )
+            continue
+        plugin_payload = _load_plugin_payload(plugin_root)
+        if plugin_payload is None:
+            findings.append(
+                {
+                    "severity": "warning",
+                    "message": f"plugin directory '{plugin_root}' is missing .codex-plugin/plugin.json.",
+                }
+            )
+            continue
+        suggested_category = _suggest_marketplace_category(
+            name,
+            payload=plugin_payload,
+            plugin_root=plugin_root,
+        )
+        entry_category = entry.get("category")
+        if not isinstance(entry_category, str) or not entry_category.strip():
+            findings.append(
+                {
+                    "severity": "warning",
+                    "message": f"marketplace entry '{name}' is missing category; suggested '{suggested_category}'.",
+                }
+            )
+        elif entry_category != suggested_category:
+            findings.append(
+                {
+                    "severity": "warning",
+                    "message": f"marketplace entry '{name}' category '{entry_category}' differs from suggested '{suggested_category}'.",
+                }
+            )
+
+    local_plugin_names = sorted(
+        child.name
+        for child in plugins_path.iterdir()
+        if child.is_dir() and not child.name.startswith(".")
+    ) if plugins_path.exists() else []
+    for plugin_name in local_plugin_names:
+        if plugin_name not in seen_names:
+            findings.append(
+                {
+                    "severity": "warning",
+                    "message": f"local plugin '{plugin_name}' is missing a marketplace entry.",
+                }
+            )
+
+    if entry_names != sorted(entry_names):
+        findings.append(
+            {
+                "severity": "warning",
+                "message": "marketplace plugin entries are not sorted by name.",
+            }
+        )
+
+    return {
+        "marketplace_path": str(marketplace_path),
+        "plugins_path": str(plugins_path),
+        "plugin_count": len(entry_names),
+        "local_plugin_count": len(local_plugin_names),
+        "findings": findings,
+    }
+
+
+def _normalize_marketplace_payload(
+    marketplace_path: Path,
+    plugins_path: Path,
+) -> tuple[dict[str, Any], list[str]]:
+    payload = load_json(marketplace_path) if marketplace_path.exists() else build_default_marketplace()
+    _ensure_marketplace_interface(payload)
+    plugins = payload.setdefault("plugins", [])
+    if not isinstance(plugins, list):
+        raise ValueError(f"{marketplace_path} field 'plugins' must be an array.")
+
+    normalized_plugins: list[dict[str, Any]] = []
+    notes: list[str] = []
+    seen_names: set[str] = set()
+    for entry in plugins:
+        if not isinstance(entry, dict):
+            raise ValueError("marketplace entries must be JSON objects.")
+        normalized_entry, entry_notes = _normalize_marketplace_entry(entry, plugins_path)
+        plugin_name = normalized_entry["name"]
+        if plugin_name in seen_names:
+            raise ValueError(f"duplicate marketplace entry for '{plugin_name}'. Resolve duplicates before normalization.")
+        seen_names.add(plugin_name)
+        normalized_plugins.append(normalized_entry)
+        notes.extend(entry_notes)
+
+    normalized_plugins.sort(key=lambda item: str(item["name"]))
+    payload["plugins"] = normalized_plugins
+    return payload, notes
+
+
 def _readme_template(plugin_name: str) -> str:
-    return "\n".join(
-        [
-            f"# {plugin_name}",
-            "",
-            "## Overview",
-            "TODO: Describe what this plugin does and when to use it.",
-            "",
-            "## Surfaces",
-            "- Skills",
-            "- Prompts (optional)",
-            "- Agents (optional)",
-            "- Hooks",
-            "- MCP",
-            "",
-            "## Validation",
-            "Run plugin and skill validators before publishing.",
-            "",
-        ]
+    return _render_readme_template(
+        plugin_name,
+        {
+            "skills": True,
+            "hooks": False,
+            "agents": False,
+            "mcp": False,
+            "apps": False,
+            "assets": False,
+        },
     )
 
 
 def _license_template() -> str:
-    return "\n".join(
-        [
-            "MIT License",
+    current_year = str(date.today().year)
+    return (
+        _load_docs_asset("LICENSE_TEMPLATE.txt")
+        .replace("[TODO: year]", current_year)
+        .replace("[TODO: owner]", "[TODO: plugin owner]")
+    )
+
+
+def _render_readme_template(plugin_name: str, enabled_surfaces: dict[str, bool]) -> str:
+    display_name = _display_name(plugin_name)
+    surface_lines = "\n".join(f"- `{surface}`" for surface in _surface_summary(enabled_surfaces))
+    template = _load_docs_asset("README_TEMPLATE.md")
+    return (
+        template
+        .replace(
+            "# <Project name> helps <audience> <verb> <outcome>",
+            f"# {display_name} helps teams ship reusable Codex workflows",
+        )
+        .replace(
+            "One sentence: what this repo is for and who it serves.",
+            f"This plugin package collects the manifest, plugin-owned skills, and optional integration surfaces for `{plugin_name}`.",
+        )
+        .replace("Last updated: YYYY-MM-DD", f"Last updated: {date.today().isoformat()}")
+        .replace("Owner: <name/team>", "Owner: [TODO: plugin owner]")
+        .replace("Review cadence: <e.g., quarterly>", "Review cadence: quarterly")
+        .replace("- Audience tier: <beginner/intermediate/expert>", "- Audience tier: intermediate")
+        .replace(
+            "- Scope: <what this doc covers>",
+            "- Scope: package layout, scaffolded surfaces, validation, and maintenance expectations",
+        )
+        .replace(
+            "- Non-scope: <what this doc does not cover>",
+            "- Non-scope: implementing external MCP servers, app UIs, or non-plugin product features",
+        )
+        .replace("- Required approvals: <names/roles>", "- Required approvals: plugin owner")
+        .replace("- Assumptions: <what must be true>", "- Assumptions: this package lives inside the Agent-Skills repo and follows the Codex plugin contract")
+        .replace("- Risks / blast radius: <what can go wrong>", "- Risks / blast radius: stale metadata or duplicate plugin intent can make the package misleading")
+        .replace("- Rollback / recovery: <how to recover>", "- Rollback / recovery: rerun scaffold with corrected inputs or remove the package before marketplace registration")
+        .replace("- Required: <runtime/tooling versions>, <accounts>, <permissions>", "- Required: Python 3, repo access, and validator dependencies used by this repo")
+        .replace("- Optional: <editor plugins>, <CLI helpers>", "- Optional: `jq`, `yq`, and Codex runtime tooling for deeper validation")
+        .replace(
+            "# commands the repo actually supports",
+            f"python3 utilities/codex-plugin-builder/scripts/plugin_builder.py scaffold {plugin_name} --path plugins --with-skills --with-marketplace",
+        )
+        .replace(
+            "### 2) Run it\n```sh\n```\n",
+            "### 2) Run it\n```sh\n"
+            f"python3 utilities/codex-plugin-builder/scripts/plugin_builder.py validate plugins/{plugin_name} --require-marketplace --marketplace-path .agents/plugins/marketplace.json\n"
+            "```\n",
+        )
+        .replace("- <what success looks like>", "- The plugin manifest validates and the package surfaces exist at the expected relative paths")
+        .replace("### Do <task> to achieve <result>", "### Add or refine plugin-owned skills")
+        .replace("- What you get:", "- What you get: a `skills/<skill>/` bundle generated through `skill-builder`")
+        .replace("- Steps:\n```sh\n```\n- Verify:", "- Steps:\n```sh\n"
+            f"python3 utilities/codex-plugin-builder/scripts/plugin_builder.py scaffold {plugin_name} --path plugins --with-skills --force\n"
+            "```\n- Verify: confirm `skills/<skill>/SKILL.md`, `references/`, `scripts/`, `assets/`, and `agents/openai.yaml` exist\n")
+        .replace("### Configure <thing> so that <result>", "### Validate package integrity before publishing")
+        .replace("- Options table (if applicable):", "- Package surfaces:\n" + surface_lines + "\n")
+        .replace("### Symptom: <what the reader sees>", "### Symptom: validation reports missing plugin-owned surfaces")
+        .replace("Cause:\nFix:\n```sh\n```\n", "Cause: the scaffold was partial or a helper-generated surface was removed.\nFix:\n```sh\n"
+            f"python3 utilities/codex-plugin-builder/scripts/plugin_builder.py scaffold {plugin_name} --path plugins --with-skills --with-agents --force\n"
+            "```\n")
+        .replace("- [ ] <criterion 1>", "- [ ] manifest exists at `.codex-plugin/plugin.json`")
+        .replace("- [ ] <criterion 2>", "- [ ] plugin-owned skills and agents were scaffolded through shared builders when requested")
+        .replace("- [ ] <criterion 3>", "- [ ] package validation passes before marketplace publication")
+        .replace("- Lint outputs (Vale/markdownlint/link check):", "- Lint outputs (Vale/markdownlint/link check): not run by default for plugin scaffolds")
+        .replace("- Brand check output:", "- Brand check output: not applicable unless assets are added")
+        .replace("- Readability output (if available):", "- Readability output (if available): optional")
+        .replace("- Checklist snapshot:", "- Checklist snapshot: confirm scaffold helpers ran successfully")
+        .replace("- Key links:", "- Key links:\n  - `references/operational-spec.md`\n  - `references/package-guide.md`\n  - `references/deconflict-report.md`")
+        .replace("- Project layout:", f"- Project layout:\n{surface_lines}")
+        .replace("- Commands:", "- Commands:\n  - scaffold via `plugin_builder.py scaffold`\n  - validate via `plugin_builder.py validate`\n  - inspect source via `plugin_builder.py inspect-source`")
+        .replace("- Constraints / limits:", "- Constraints / limits:\n  - `prompts/`, `commands/`, and `slash-commands/` are migration inputs, not runtime surfaces")
+        .replace(
+            "\n---\n\n<!-- ASCII fallback (use if images are not supported):\nbrAInwav\nfrom demo to duty\n-->\n\n<img\n  src=\"./brand/brand-mark.webp\"\n  srcset=\"./brand/brand-mark.webp 1x, ./brand/brand-mark@2x.webp 2x\"\n  alt=\"brAInwav\"\n  height=\"28\"\n  align=\"left\"\n/>\n\n<br clear=\"left\" />\n\n**brAInwav**\n_from demo to duty_\n",
             "",
-            "Copyright (c) [TODO: year] [TODO: owner]",
-            "",
-            "Permission is hereby granted, free of charge, to any person obtaining a copy",
-            "of this software and associated documentation files (the \"Software\"), to deal",
-            "in the Software without restriction, including without limitation the rights",
-            "to use, copy, modify, merge, publish, distribute, sublicense, and/or sell",
-            "copies of the Software, and to permit persons to whom the Software is",
-            "furnished to do so, subject to the following conditions:",
-            "",
-            "The above copyright notice and this permission notice shall be included in all",
-            "copies or substantial portions of the Software.",
-            "",
-            "THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR",
-            "IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,",
-            "FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE",
-            "AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER",
-            "LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,",
-            "OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE",
-            "SOFTWARE.",
-            "",
-        ]
+        )
+    )
+
+
+def _package_guide_template(plugin_name: str, enabled_surfaces: dict[str, bool]) -> str:
+    display_name = _display_name(plugin_name)
+    surface_lines = "\n".join(f"- `{surface}`" for surface in _surface_summary(enabled_surfaces))
+    template = _load_docs_asset("DOC_TEMPLATE.md")
+    return (
+        template
+        .replace(
+            "# <Doc title as an informative sentence>",
+            f"# {display_name} package guide for scaffolded plugin surfaces",
+        )
+        .replace(
+            "One sentence: what this doc helps the reader do, and who it is for.",
+            f"This guide explains what `codex-plugin-builder` generated for `{plugin_name}` and how to extend it safely.",
+        )
+        .replace("Last updated: YYYY-MM-DD", f"Last updated: {date.today().isoformat()}")
+        .replace("Owner: <name/team>", "Owner: [TODO: plugin owner]")
+        .replace("Review cadence: <e.g., quarterly>", "Review cadence: quarterly")
+        .replace("- Audience tier: <beginner/intermediate/expert>", "- Audience tier: intermediate")
+        .replace("- Scope: <what this doc covers>", "- Scope: package layout, helper ownership, and validation expectations")
+        .replace("- Non-scope: <what this doc does not cover>", "- Non-scope: implementing the business logic behind the package")
+        .replace("- Required approvals: <names/roles>", "- Required approvals: plugin owner")
+        .replace("- Assumptions: <what must be true>", "- Assumptions: the plugin stays inside a repo that has access to the shared scaffold helpers")
+        .replace("- Risks / blast radius: <what can go wrong>", "- Risks / blast radius: hand-editing generated files can drift from the helper contracts")
+        .replace("- Rollback / recovery: <how to recover>", "- Rollback / recovery: regenerate missing surfaces or compare against the helper-owned templates")
+        .replace("- Required: <tool/version>, <access>, <accounts>", "- Required: Python 3 plus the helper scripts committed in this repo")
+        .replace("- Optional: <tooling>", "- Optional: `jq`, `yq`, OpenAI docs access for contract verification")
+        .replace("# commands the repo actually supports", "ls -R .")
+        .replace(
+            "### 2) Run it\n```sh\n```\n",
+            "### 2) Run it\n```sh\n"
+            f"python3 utilities/codex-plugin-builder/scripts/plugin_builder.py validate plugins/{plugin_name}\n"
+            "```\n",
+        )
+        .replace("- <what success looks like>", "- Every declared surface exists and helper-owned folders are in the expected locations")
+        .replace("### Do <task> to achieve <result>", "### Understand which helper owns each package surface")
+        .replace("- What you get:", "- What you get: a clear map of which builder created which part of the package")
+        .replace("- Steps:\n```sh\n```\n- Verify:", "- Steps:\n```text\n"
+            "skill-builder -> skills/<skill>/SKILL.md, references/, scripts/, assets/, agents/openai.yaml\n"
+            "codex-agent-builder -> agents/<agent>.toml\n"
+            "docs-expert assets -> README.md, LICENSE, references/package-guide.md\n"
+            "plugin-builder -> .codex-plugin/plugin.json, hooks.json, .mcp.json, .app.json, operational/deconflict docs\n"
+            "```\n- Verify: compare generated files against the package tree below\n")
+        .replace("### Configure <thing> so that <result>", "### Review the package tree before extending it")
+        .replace("- Options table (if applicable):", "- Package tree:\n" + surface_lines + "\n")
+        .replace("### Symptom: <what the reader sees>", "### Symptom: a plugin surface exists but does not match the owning helper contract")
+        .replace("Cause:\nFix:\n```sh\n```\n", "Cause: the surface was hand-edited or generated with the wrong helper.\nFix:\n```sh\n"
+            f"python3 utilities/codex-plugin-builder/scripts/plugin_builder.py scaffold {plugin_name} --path plugins --with-skills --with-agents --force\n"
+            "```\n")
+        .replace("- [ ] <criterion 1>", "- [ ] helper ownership of each surface is documented")
+        .replace("- [ ] <criterion 2>", "- [ ] package layout matches the manifest and generated docs")
+        .replace("- [ ] <criterion 3>", "- [ ] validation command is recorded for future changes")
+        .replace("- Lint outputs (Vale/markdownlint/link check):", "- Lint outputs (Vale/markdownlint/link check): optional")
+        .replace("- Brand check output (if applicable):", "- Brand check output (if applicable): only needed if package assets are customized")
+        .replace("- Readability output (if available):", "- Readability output (if available): optional")
+        .replace("- Checklist snapshot:", "- Checklist snapshot: compare manifest paths to actual package contents")
+        .replace("- Key terms:", "- Key terms:\n  - package root\n  - plugin-owned skill\n  - plugin-owned agent\n  - runtime surface")
+        .replace("- Links to related docs:", "- Links to related docs:\n  - `README.md`\n  - `references/operational-spec.md`\n  - `references/plugin-contract.md`")
+        .replace("- Constraints / limits:", "- Constraints / limits:\n  - convert legacy prompt and command surfaces into `skills/`\n  - keep plugin-root shared docs separate from per-skill docs")
     )
 
 
@@ -481,8 +1174,6 @@ def _operational_spec_template(
         capability_rows.append(("hook_execute", "Execute startup hook behavior for the plugin."))
     if enabled_surfaces.get("skills"):
         capability_rows.append(("skill_dispatch", "Dispatch a plugin-owned skill."))
-    if enabled_surfaces.get("prompts"):
-        capability_rows.append(("prompt_dispatch", "Dispatch a plugin-owned prompt."))
     if enabled_surfaces.get("agents"):
         capability_rows.append(("agent_dispatch", "Dispatch a plugin-owned agent."))
     if enabled_surfaces.get("mcp"):
@@ -496,8 +1187,6 @@ def _operational_spec_template(
     plugin_scope = ["package_validation", "runtime_request_routing"]
     if enabled_surfaces.get("skills"):
         plugin_scope.append("skill_dispatch")
-    if enabled_surfaces.get("prompts"):
-        plugin_scope.append("prompt_dispatch")
     if enabled_surfaces.get("agents"):
         plugin_scope.append("agent_dispatch")
     if enabled_surfaces.get("hooks"):
@@ -521,7 +1210,7 @@ def _operational_spec_template(
         if source_report.get("native_codex_docs"):
             source_summary_lines.append("- source already ships Codex-native docs; conversion may be additive rather than replacing the existing Codex lane.")
         if source_report.get("deprecated_command_files"):
-            source_summary_lines.append("- deprecated command shims were detected; command surfaces should be treated as redirects unless revalidated.")
+            source_summary_lines.append("- deprecated command shims were detected; command and prompt surfaces should be folded into skills unless intentionally archived outside the runtime package.")
         if source_report.get("hook_glue_signals"):
             source_summary_lines.append("- provider-specific hook glue was detected; preserve hook intent, not source-provider wrapper behavior.")
 
@@ -699,18 +1388,6 @@ def _operational_spec_template(
                 "request resolves uniquely to a plugin skill",
                 "dispatch plugin skill",
                 f"`{plugin_name}.skill_dispatch`",
-                "SUCCESS",
-                "WORK_ACTIVE",
-            )
-        )
-    if enabled_surfaces.get("prompts"):
-        request_rows.append(
-            (
-                "SESSION_READY",
-                "request_received",
-                "request resolves uniquely to a plugin prompt",
-                "dispatch plugin prompt",
-                f"`{plugin_name}.prompt_dispatch`",
                 "SUCCESS",
                 "WORK_ACTIVE",
             )
@@ -979,6 +1656,70 @@ def _safe_read_text(path: Path, max_chars: int = 4000) -> str:
         return path.read_text(encoding="utf-8")[:max_chars]
     except (UnicodeDecodeError, OSError):
         return ""
+
+
+def _scaffold_plugin_skill(skill_root: Path, skill_name: str, force: bool) -> str:
+    skill_dir = skill_root / skill_name
+    if skill_dir.exists():
+        return f"skill-builder: kept existing plugin skill at {skill_dir}"
+
+    command = [
+        sys.executable,
+        str(SKILL_BUILDER_INIT),
+        skill_name,
+        "--path",
+        str(skill_root),
+        "--target",
+        "codex",
+        "--resources",
+        "scripts,references,assets",
+    ]
+    output = _run_helper(command, f"skill-builder scaffold for {skill_name}")
+    if force and output:
+        return f"skill-builder: created {skill_dir}\n{output}"
+    return f"skill-builder: created {skill_dir}"
+
+
+def _plugin_agent_instructions(plugin_name: str) -> str:
+    return "\n".join(
+        [
+            f"You are the {plugin_name} plugin agent.",
+            "Operate within the plugin package, prefer plugin-owned skills before ad hoc workflows, and keep edits inside the plugin root unless the user explicitly asks for broader repository work.",
+            "If the request changes package docs, update README.md and references/ alongside the implementation.",
+            "If the request changes runtime surfaces, re-run plugin validation before reporting completion.",
+        ]
+    )
+
+
+def _scaffold_plugin_agent(plugin_root: Path, agent_name: str, force: bool) -> str:
+    output_path = plugin_root / "agents" / f"{agent_name}.toml"
+    if output_path.exists():
+        return f"codex-agent-builder: kept existing plugin agent at {output_path}"
+
+    command = [
+        "bash",
+        str(CODEX_AGENT_WRITER),
+        "--output",
+        str(output_path),
+        "--role-name",
+        agent_name,
+        "--model",
+        "gpt-5.4-mini",
+        "--reasoning",
+        "medium",
+        "--developer-instructions",
+        _plugin_agent_instructions(agent_name),
+        "--sandbox-mode",
+        "workspace-write",
+        "--network-access",
+        "false",
+        "--writable-roots",
+        str(plugin_root),
+    ]
+    output = _run_helper(command, f"codex-agent-builder scaffold for {agent_name}")
+    if force and output:
+        return f"codex-agent-builder: created {output_path}\n{output}"
+    return f"codex-agent-builder: created {output_path}"
 
 
 def _detect_deprecated_command_files(plugin_root: Path, resolved_paths: dict[str, list[dict[str, Any]]]) -> list[str]:
@@ -1262,7 +2003,7 @@ def _inspect_source_plugin(plugin_root: Path) -> dict[str, Any]:
     if native_codex_docs:
         notes.append("Source already ships Codex-native install or usage docs; decide whether plugin packaging is additive or redundant.")
     if deprecated_command_files:
-        notes.append("Deprecated command shims detected; inspect command contents before converting them into Codex prompts.")
+        notes.append("Deprecated command shims detected; inspect command contents before converting them into plugin-owned skills.")
     if hook_glue_signals:
         notes.append("Hook wrappers or provider-specific hook glue detected; preserve hook intent but rewrite Codex runtime shape explicitly.")
     for surface_name, items in resolved_paths.items():
@@ -1366,11 +2107,45 @@ def _check_required_fields(
     return failures
 
 
+def _check_plugin_skill_surface(plugin_root: Path, payload: dict[str, Any]) -> list[str]:
+    skills_value = payload.get("skills")
+    if not _is_relative_plugin_path(skills_value):
+        return []
+
+    skills_root = (plugin_root / skills_value[2:]).resolve()
+    if not skills_root.exists() or not skills_root.is_dir():
+        return []
+
+    skill_packages = sorted(skills_root.glob("*/SKILL.md"))
+    if skill_packages:
+        return []
+    return [
+        "plugin.json field 'skills' points to a directory without any plugin-owned skill packages. "
+        "Use skill-builder to create at least one `skills/<name>/SKILL.md` bundle."
+    ]
+
+
+def _check_plugin_agent_surface(plugin_root: Path) -> list[str]:
+    agents_root = plugin_root / "agents"
+    if not agents_root.exists() or not agents_root.is_dir():
+        return []
+
+    role_configs = sorted(agents_root.glob("*.toml"))
+    if role_configs:
+        return []
+    return [
+        "Plugin package includes agents/ but no `.toml` role configs. "
+        "Use codex-agent-builder to scaffold plugin-owned agents."
+    ]
+
+
 def _check_plugin_manifest(plugin_json_path: Path) -> list[str]:
     failures: list[str] = []
     payload = load_json(plugin_json_path)
+    plugin_root = plugin_json_path.parent.parent
 
-    failures.extend(_check_required_fields(payload, REQUIRED_PLUGIN_FIELDS, "plugin.json"))
+    if "name" not in payload:
+        failures.append("Missing required plugin.json field: name")
 
     name = payload.get("name")
     if isinstance(name, str):
@@ -1381,63 +2156,104 @@ def _check_plugin_manifest(plugin_json_path: Path) -> list[str]:
     else:
         failures.append("plugin.json field 'name' must be a string.")
 
-    if not isinstance(payload.get("keywords"), list):
-        failures.append("plugin.json field 'keywords' must be an array of strings.")
-    elif not all(isinstance(item, str) for item in payload["keywords"]):
-        failures.append("plugin.json field 'keywords' must contain only strings.")
+    for field_name in OPTIONAL_PLUGIN_STRING_FIELDS:
+        if field_name in payload and not isinstance(payload[field_name], str):
+            failures.append(f"plugin.json field '{field_name}' must be a string.")
 
-    author = payload.get("author")
-    if not isinstance(author, dict):
-        failures.append("plugin.json field 'author' must be an object.")
-    else:
-        failures.extend(_check_required_fields(author, REQUIRED_AUTHOR_FIELDS, "author"))
-        for key in REQUIRED_AUTHOR_FIELDS:
-            if key in author and not isinstance(author[key], str):
-                failures.append(f"plugin.json author.{key} must be a string.")
+    if "keywords" in payload:
+        failures.extend(
+            _check_string_list(payload.get("keywords"), "plugin.json field 'keywords'")
+        )
 
-    for path_key in ("skills", "hooks", "mcpServers", "apps"):
-        if path_key in payload and not _is_relative_plugin_path(payload[path_key]):
-            failures.append(
-                f"plugin.json field '{path_key}' must be a relative path starting with './'."
+    if "author" in payload:
+        author = payload.get("author")
+        if not isinstance(author, dict):
+            failures.append("plugin.json field 'author' must be an object.")
+        else:
+            for key in OPTIONAL_AUTHOR_FIELDS:
+                if key in author and not isinstance(author[key], str):
+                    failures.append(f"plugin.json author.{key} must be a string.")
+
+    for path_key in OPTIONAL_PLUGIN_PATH_FIELDS:
+        if path_key in payload:
+            failures.extend(
+                _check_declared_plugin_path(
+                    plugin_root,
+                    f"plugin.json field '{path_key}'",
+                    payload[path_key],
+                    require_exists=True,
+                )
             )
 
     interface = payload.get("interface")
-    if not isinstance(interface, dict):
-        failures.append("plugin.json field 'interface' must be an object.")
-    else:
-        failures.extend(_check_required_fields(interface, REQUIRED_INTERFACE_FIELDS, "interface"))
-        for key in REQUIRED_INTERFACE_FIELDS:
-            if key == "capabilities":
-                value = interface.get(key)
-                if not isinstance(value, list) or not all(isinstance(item, str) for item in value):
-                    failures.append("plugin.json interface.capabilities must be an array of strings.")
-            elif key == "screenshots":
-                value = interface.get(key)
-                if not isinstance(value, list) or not all(isinstance(item, str) for item in value):
-                    failures.append("plugin.json interface.screenshots must be an array of strings.")
-                else:
-                    for shot in value:
-                        if not shot.startswith("./assets/") or not shot.lower().endswith(".png"):
-                            failures.append(
-                                "plugin.json interface.screenshots entries must be PNG paths "
-                                "under './assets/'."
-                            )
-            else:
+    if interface is not None:
+        if not isinstance(interface, dict):
+            failures.append("plugin.json field 'interface' must be an object when present.")
+        else:
+            for key in OPTIONAL_INTERFACE_STRING_FIELDS:
                 if key in interface and not isinstance(interface[key], str):
                     failures.append(f"plugin.json interface.{key} must be a string.")
 
-        for path_key in ("composerIcon", "logo"):
-            if path_key in interface and not _is_relative_plugin_path(interface[path_key]):
-                failures.append(
-                    f"plugin.json interface.{path_key} must be a relative path starting with './'."
+            if "capabilities" in interface:
+                failures.extend(
+                    _check_string_list(
+                        interface.get("capabilities"),
+                        "plugin.json interface.capabilities",
+                    )
                 )
+            if "screenshots" in interface:
+                failures.extend(
+                    _check_string_list(
+                        interface.get("screenshots"),
+                        "plugin.json interface.screenshots",
+                    )
+                )
+                if isinstance(interface.get("screenshots"), list):
+                    for index, screenshot in enumerate(interface["screenshots"]):
+                        failures.extend(
+                            _check_declared_plugin_path(
+                                plugin_root,
+                                f"plugin.json interface.screenshots[{index}]",
+                                screenshot,
+                                require_exists=True,
+                            )
+                        )
+            if "defaultPrompt" in interface:
+                failures.extend(_check_default_prompt(interface.get("defaultPrompt")))
+
+            for path_key in OPTIONAL_INTERFACE_PATH_FIELDS:
+                if path_key in interface:
+                    failures.extend(
+                        _check_declared_plugin_path(
+                            plugin_root,
+                            f"plugin.json interface.{path_key}",
+                            interface[path_key],
+                            require_exists=True,
+                        )
+                    )
 
     for legacy_key in ("commands", "slashCommands", "slash_commands"):
         if legacy_key in payload:
             failures.append(
                 f"plugin.json uses Claude-oriented field '{legacy_key}'. "
-                "Use Codex prompt surface fields (`prompts/` path and `interface.defaultPrompt`) instead."
+                "Use plugin-owned `skills/` and optionally `interface.defaultPrompt` instead."
             )
+
+    declared_mcp = "mcpServers" in payload
+    declared_apps = "apps" in payload
+    if (plugin_root / ".mcp.json").exists() and not declared_mcp:
+        failures.append(
+            "Plugin package includes `.mcp.json` but `plugin.json` does not declare `mcpServers`. "
+            "Only ship `.mcp.json` for real MCP wiring the manifest exposes."
+        )
+    if (plugin_root / ".app.json").exists() and not declared_apps:
+        failures.append(
+            "Plugin package includes `.app.json` but `plugin.json` does not declare `apps`. "
+            "Only ship `.app.json` for real app integrations the manifest exposes."
+        )
+
+    failures.extend(_check_plugin_skill_surface(plugin_root, payload))
+    failures.extend(_check_plugin_agent_surface(plugin_root))
 
     return failures
 
@@ -1446,6 +2262,17 @@ def _check_marketplace_entry(
     marketplace_payload: dict[str, Any], plugin_name: str
 ) -> list[str]:
     failures: list[str] = []
+    interface = marketplace_payload.get("interface")
+    if interface is not None:
+        if not isinstance(interface, dict):
+            failures.append("marketplace.json field 'interface' must be an object when present.")
+        else:
+            display_name = interface.get("displayName")
+            if not isinstance(display_name, str) or not display_name.strip():
+                failures.append(
+                    "marketplace.json interface.displayName must be a non-empty string when present."
+                )
+
     plugins = marketplace_payload.get("plugins")
     if not isinstance(plugins, list):
         return ["marketplace.json field 'plugins' must be an array."]
@@ -1473,24 +2300,153 @@ def _check_marketplace_entry(
                 f"marketplace plugin '{plugin_name}' source.path must be '{expected_path}'."
             )
 
-    install_policy = plugin_entry.get("installPolicy")
+    policy = plugin_entry.get("policy")
+    install_policy = None
+    auth_policy = None
+    if isinstance(policy, dict):
+        install_policy = policy.get("installation")
+        auth_policy = policy.get("authentication")
+    else:
+        install_policy = plugin_entry.get("installPolicy")
+        auth_policy = plugin_entry.get("authPolicy")
+
     if install_policy not in VALID_INSTALL_POLICIES:
         failures.append(
-            f"marketplace plugin '{plugin_name}' installPolicy must be one of "
+            f"marketplace plugin '{plugin_name}' policy.installation "
+            f"(or legacy installPolicy) must be one of "
             f"{sorted(VALID_INSTALL_POLICIES)}."
         )
 
-    auth_policy = plugin_entry.get("authPolicy")
     if auth_policy not in VALID_AUTH_POLICIES:
         failures.append(
-            f"marketplace plugin '{plugin_name}' authPolicy must be one of "
+            f"marketplace plugin '{plugin_name}' policy.authentication "
+            f"(or legacy authPolicy) must be one of "
             f"{sorted(VALID_AUTH_POLICIES)}."
         )
 
-    if not isinstance(plugin_entry.get("category"), str) or not plugin_entry.get("category"):
-        failures.append(f"marketplace plugin '{plugin_name}' category must be a non-empty string.")
+    category = plugin_entry.get("category")
+    if category is not None and (not isinstance(category, str) or not category):
+        failures.append(
+            f"marketplace plugin '{plugin_name}' category must be a non-empty string when present."
+        )
 
     return failures
+
+
+def _audit_plugin_compatibility(
+    plugin_root: Path,
+    marketplace_payload: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    plugin_json_path = plugin_root / ".codex-plugin" / "plugin.json"
+    if not plugin_json_path.exists():
+        raise ValueError(f"Missing plugin manifest: {plugin_json_path}")
+
+    payload = load_json(plugin_json_path)
+    inferred_archetype = _infer_plugin_archetype(
+        plugin_root.name,
+        payload=payload,
+        plugin_root=plugin_root,
+    )
+    suggested_category = _suggest_marketplace_category(
+        plugin_root.name,
+        archetype=inferred_archetype,
+        payload=payload,
+        plugin_root=plugin_root,
+    )
+
+    warnings: list[str] = []
+    recommendations: list[str] = []
+    curated_files = [
+        "README.md",
+        "LICENSE",
+        "references/operational-spec.md",
+        "references/package-guide.md",
+        "references/deconflict-report.md",
+    ]
+    for relative_path in curated_files:
+        if not (plugin_root / relative_path).exists():
+            warnings.append(
+                f"Missing curated package file '{relative_path}'. This is optional at runtime but common in hardened repo packages."
+            )
+
+    for field_name in ("version", "author", "homepage", "repository", "license", "keywords"):
+        if field_name not in payload:
+            warnings.append(
+                f"Manifest is missing curated metadata field '{field_name}'."
+            )
+
+    interface = payload.get("interface")
+    if not isinstance(interface, dict):
+        warnings.append("Manifest is missing 'interface' metadata.")
+        interface = {}
+    for field_name in (
+        "displayName",
+        "shortDescription",
+        "longDescription",
+        "developerName",
+        "category",
+        "websiteURL",
+        "privacyPolicyURL",
+        "termsOfServiceURL",
+        "defaultPrompt",
+    ):
+        if field_name not in interface:
+            warnings.append(
+                f"Manifest interface is missing curated field '{field_name}'."
+            )
+
+    if payload.get("skills") is None and (plugin_root / "skills").exists():
+        warnings.append("Plugin has a skills/ directory but plugin.json does not declare 'skills'.")
+    if payload.get("hooks") is None and (plugin_root / "hooks.json").exists():
+        warnings.append("Plugin has hooks.json but plugin.json does not declare 'hooks'.")
+
+    if marketplace_payload is not None:
+        plugins = marketplace_payload.get("plugins")
+        if isinstance(plugins, list):
+            entry = next(
+                (
+                    item
+                    for item in plugins
+                    if isinstance(item, dict) and item.get("name") == plugin_root.name
+                ),
+                None,
+            )
+            if entry is None:
+                warnings.append("Marketplace entry is missing for this plugin.")
+            else:
+                entry_category = entry.get("category")
+                if not isinstance(entry_category, str) or not entry_category.strip():
+                    warnings.append(
+                        f"Marketplace entry is missing category; suggested '{suggested_category}'."
+                    )
+                elif entry_category != suggested_category:
+                    warnings.append(
+                        f"Marketplace category '{entry_category}' differs from suggested '{suggested_category}' for inferred archetype '{inferred_archetype}'."
+                    )
+        else:
+            warnings.append("Marketplace payload does not contain a valid plugins array.")
+
+    recommendations.append(
+        f"Use archetype '{inferred_archetype}' as the default contract language for docs and marketplace metadata."
+    )
+    recommendations.append(
+        f"Prefer marketplace category '{suggested_category}' unless product positioning requires a deliberate override."
+    )
+    recommendations.append(
+        "Run `audit-marketplace` after marketplace changes so entry normalization and plugin coverage stay in sync."
+    )
+
+    return {
+        "plugin_root": str(plugin_root),
+        "inferred_archetype": inferred_archetype,
+        "suggested_category": suggested_category,
+        "warnings": warnings,
+        "recommendations": recommendations,
+    }
+
+
+def _print_audit_report(report: dict[str, Any]) -> None:
+    print(json.dumps(report, indent=2))
 
 
 def _print_findings(findings: list[str]) -> None:
@@ -1536,17 +2492,19 @@ def _run_scaffold(args: argparse.Namespace) -> int:
             )
             return 2
 
-    plugin_root.mkdir(parents=True, exist_ok=True)
-
-    plugin_json_path = plugin_root / ".codex-plugin" / "plugin.json"
-    write_json(plugin_json_path, build_plugin_json(plugin_name), args.force)
-    write_text(plugin_root / "README.md", _readme_template(plugin_name), args.force)
-    write_text(plugin_root / "LICENSE", _license_template(), args.force)
-
     optional_directories = {
-        "skills": args.with_skills or bool(source_report and source_report["detected_surfaces"]["skills"]),
+        "skills": (
+            args.with_skills
+            or args.with_prompts
+            or bool(
+                source_report
+                and (
+                    source_report["detected_surfaces"]["skills"]
+                    or source_report["detected_surfaces"]["commands"]
+                )
+            )
+        ),
         "hooks": args.with_hooks or bool(source_report and (Path(source_report["plugin_root"]) / "hooks").exists()),
-        "prompts": args.with_prompts,
         "agents": args.with_agents or bool(source_report and source_report["detected_surfaces"]["agents"]),
         "scripts": args.with_scripts,
         "assets": args.with_assets,
@@ -1558,7 +2516,6 @@ def _run_scaffold(args: argparse.Namespace) -> int:
     enabled_surfaces = {
         "skills": optional_directories["skills"],
         "hooks": args.with_hooks_json or optional_directories["hooks"] or bool(source_report and source_report["detected_surfaces"]["hooks"]),
-        "prompts": optional_directories["prompts"],
         "agents": optional_directories["agents"],
         "mcp": bool(
             args.with_mcp
@@ -1570,8 +2527,38 @@ def _run_scaffold(args: argparse.Namespace) -> int:
                 )
             )
         ),
-        "apps": bool(args.with_apps),
+        "apps": bool(args.with_apps or (source_report and source_report["detected_surfaces"].get("apps"))),
+        "assets": optional_directories["assets"],
     }
+    archetype = args.archetype or (
+        _infer_plugin_archetype(plugin_name, enabled_surfaces=enabled_surfaces)
+        if source_report is None
+        else _infer_plugin_archetype(
+            plugin_name,
+            payload=load_json(Path(source_report["primary_manifest"])) if source_report.get("primary_manifest") else None,
+            enabled_surfaces=enabled_surfaces,
+        )
+    )
+    effective_category = args.category or _suggest_marketplace_category(
+        plugin_name,
+        archetype=archetype,
+        enabled_surfaces=enabled_surfaces,
+    )
+
+    plugin_root.mkdir(parents=True, exist_ok=True)
+
+    plugin_json_path = plugin_root / ".codex-plugin" / "plugin.json"
+    write_json(
+        plugin_json_path,
+        build_plugin_json(
+            plugin_name,
+            enabled_surfaces,
+            archetype=archetype,
+        ),
+        args.force,
+    )
+    write_text(plugin_root / "README.md", _render_readme_template(plugin_name, enabled_surfaces), args.force)
+    write_text(plugin_root / "LICENSE", _license_template(), args.force)
 
     write_text(
         plugin_root / "references" / "operational-spec.md",
@@ -1588,8 +2575,19 @@ def _run_scaffold(args: argparse.Namespace) -> int:
         _deconflict_report_template(overlap_report),
         args.force,
     )
+    write_text(
+        plugin_root / "references" / "package-guide.md",
+        _package_guide_template(plugin_name, enabled_surfaces),
+        args.force,
+    )
+    if optional_directories["assets"]:
+        write_text(
+            plugin_root / "assets" / "README.md",
+            _asset_brief_template(plugin_name),
+            args.force,
+        )
 
-    if args.with_hooks_json or (source_report and source_report["detected_surfaces"]["hooks"]):
+    if enabled_surfaces["hooks"]:
         create_stub_file(
             plugin_root / "hooks.json",
             {"hooks": {"SessionStart": [], "Stop": []}},
@@ -1609,11 +2607,26 @@ def _run_scaffold(args: argparse.Namespace) -> int:
             args.force,
         )
 
-    if args.with_apps:
+    if enabled_surfaces["apps"]:
         create_stub_file(
             plugin_root / ".app.json",
             {"apps": {}},
             args.force,
+        )
+
+    helper_notes: list[str] = []
+    if optional_directories["skills"]:
+        skill_name = normalize_plugin_name(args.skill_name or plugin_name)
+        validate_plugin_name(skill_name)
+        helper_notes.append(
+            _scaffold_plugin_skill(plugin_root / "skills", skill_name, args.force)
+        )
+
+    if optional_directories["agents"]:
+        agent_name = normalize_plugin_name(args.agent_name or plugin_name)
+        validate_plugin_name(agent_name)
+        helper_notes.append(
+            _scaffold_plugin_agent(plugin_root, agent_name, args.force)
         )
 
     marketplace_path: Path | None = None
@@ -1624,12 +2637,21 @@ def _run_scaffold(args: argparse.Namespace) -> int:
             plugin_name,
             args.install_policy,
             args.auth_policy,
-            args.category,
+            effective_category,
             args.force,
         )
 
     print(f"Created plugin scaffold: {plugin_root}")
     print(f"plugin manifest: {plugin_json_path}")
+    print(f"archetype: {archetype}")
+    print(f"suggested marketplace category: {effective_category}")
+    if helper_notes:
+        print("helper scaffolds:")
+        for note in helper_notes:
+            for line in note.splitlines():
+                print(f"  - {line}")
+    if args.with_prompts:
+        print("NOTE: --with-prompts is deprecated in this repo and now folds prompt content into skills/.")
     if marketplace_path is not None:
         print(f"marketplace manifest: {marketplace_path}")
     return 0
@@ -1647,10 +2669,6 @@ def _run_validate(args: argparse.Namespace) -> int:
         required_path = plugin_root / required_rel
         if not required_path.exists():
             findings.append(f"Missing required file: {required_path}")
-    for required_rel in REQUIRED_PLUGIN_SUPPORT_FILES:
-        required_path = plugin_root / required_rel
-        if not required_path.exists():
-            findings.append(f"Missing required support file: {required_path}")
 
     legacy_claude_manifest = plugin_root / ".claude-plugin" / "plugin.json"
     if legacy_claude_manifest.exists():
@@ -1658,6 +2676,14 @@ def _run_validate(args: argparse.Namespace) -> int:
             "Detected legacy Claude manifest `.claude-plugin/plugin.json`. "
             "Converted Codex packages must use `.codex-plugin/plugin.json` as runtime manifest."
         )
+
+    for deprecated_surface in ("prompts", "commands", "slash-commands"):
+        deprecated_path = plugin_root / deprecated_surface
+        if deprecated_path.exists():
+            findings.append(
+                f"Deprecated runtime surface detected: {deprecated_path}. "
+                "Fold prompt or command content into skills/ and keep only interface.defaultPrompt as optional entry text."
+            )
 
     plugin_json_path = plugin_root / ".codex-plugin" / "plugin.json"
     source_inspection = _inspect_source_root(plugin_root)
@@ -1685,21 +2711,6 @@ def _run_validate(args: argparse.Namespace) -> int:
                     f"Missing deconflict report for overlapping plugin intent: {deconflict_report_path}"
                 )
 
-    # Claude -> Codex terminology enforcement for conversion safety.
-    commands_dir = plugin_root / "commands"
-    prompts_dir = plugin_root / "prompts"
-    slash_commands_dir = plugin_root / "slash-commands"
-    if commands_dir.exists() and not prompts_dir.exists():
-        findings.append(
-            "Detected Claude-oriented `commands/` without Codex `prompts/`. "
-            "Map commands semantically into Codex prompts, skills, or both during conversion."
-        )
-    if slash_commands_dir.exists() and not prompts_dir.exists():
-        findings.append(
-            "Detected `slash-commands/` without Codex `prompts/`. "
-            "Map slash commands -> prompts during conversion."
-        )
-
     marketplace_path = Path(args.marketplace_path).expanduser().resolve()
     if args.require_marketplace:
         if not marketplace_path.exists():
@@ -1711,9 +2722,6 @@ def _run_validate(args: argparse.Namespace) -> int:
             findings.extend(
                 _check_marketplace_entry(marketplace_payload, plugin_root.name)
             )
-    elif marketplace_path.exists():
-        marketplace_payload = load_json(marketplace_path)
-        findings.extend(_check_marketplace_entry(marketplace_payload, plugin_root.name))
 
     _print_findings(findings)
     return 0 if not findings else 2
@@ -1746,6 +2754,55 @@ def _run_inspect_local(args: argparse.Namespace) -> int:
     return 0
 
 
+def _run_audit_marketplace(args: argparse.Namespace) -> int:
+    marketplace_path = Path(args.marketplace_path).expanduser().resolve()
+    plugins_path = Path(args.plugins_path).expanduser().resolve()
+    if not marketplace_path.exists():
+        print(f"ERROR: marketplace path does not exist: {marketplace_path}", file=sys.stderr)
+        return 1
+    report = _audit_marketplace(marketplace_path, plugins_path)
+    _print_audit_report(report)
+    has_errors = any(item.get("severity") == "error" for item in report["findings"])
+    return 2 if has_errors else 0
+
+
+def _run_normalize_marketplace(args: argparse.Namespace) -> int:
+    marketplace_path = Path(args.marketplace_path).expanduser().resolve()
+    plugins_path = Path(args.plugins_path).expanduser().resolve()
+    payload, notes = _normalize_marketplace_payload(marketplace_path, plugins_path)
+    changed = True
+    if marketplace_path.exists():
+        current_payload = load_json(marketplace_path)
+        changed = current_payload != payload
+    report = {
+        "marketplace_path": str(marketplace_path),
+        "plugins_path": str(plugins_path),
+        "changed": changed,
+        "notes": notes,
+    }
+    if args.write:
+        write_json(marketplace_path, payload, force=True)
+    else:
+        report["normalized_payload"] = payload
+    _print_audit_report(report)
+    return 0
+
+
+def _run_audit_compat(args: argparse.Namespace) -> int:
+    plugin_root = Path(args.plugin_path).expanduser().resolve()
+    if not plugin_root.exists() or not plugin_root.is_dir():
+        print(f"ERROR: plugin path is not a directory: {plugin_root}", file=sys.stderr)
+        return 1
+    marketplace_payload = None
+    if args.marketplace_path:
+        marketplace_path = Path(args.marketplace_path).expanduser().resolve()
+        if marketplace_path.exists():
+            marketplace_payload = load_json(marketplace_path)
+    report = _audit_plugin_compatibility(plugin_root, marketplace_payload=marketplace_payload)
+    _print_audit_report(report)
+    return 0
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Scaffold and validate Codex plugin packages."
@@ -1758,6 +2815,12 @@ def parse_args() -> argparse.Namespace:
     )
     scaffold_parser.add_argument("plugin_name")
     scaffold_parser.add_argument(
+        "--archetype",
+        choices=sorted(ARCHETYPE_PROFILES),
+        default=None,
+        help="Archetype that drives curated manifest defaults and category suggestions.",
+    )
+    scaffold_parser.add_argument(
         "--path",
         default=str(DEFAULT_PLUGIN_PARENT),
         help="Parent directory for plugin creation (defaults to <repo>/plugins).",
@@ -1769,12 +2832,36 @@ def parse_args() -> argparse.Namespace:
     scaffold_parser.add_argument("--with-skills", action="store_true", help="Create skills/ directory.")
     scaffold_parser.add_argument("--with-hooks", action="store_true", help="Create hooks/ directory.")
     scaffold_parser.add_argument("--with-hooks-json", action="store_true", help="Create hooks.json placeholder.")
-    scaffold_parser.add_argument("--with-prompts", action="store_true", help="Create prompts/ directory.")
+    scaffold_parser.add_argument(
+        "--with-prompts",
+        action="store_true",
+        help="Deprecated alias: fold prompt content into skills/ instead of creating prompts/.",
+    )
+    scaffold_parser.add_argument(
+        "--skill-name",
+        help="Plugin-owned skill name to scaffold under skills/ (defaults to plugin name).",
+    )
     scaffold_parser.add_argument("--with-agents", action="store_true", help="Create agents/ directory.")
+    scaffold_parser.add_argument(
+        "--agent-name",
+        help="Plugin-owned agent role name to scaffold under agents/ (defaults to plugin name).",
+    )
     scaffold_parser.add_argument("--with-scripts", action="store_true", help="Create scripts/ directory.")
-    scaffold_parser.add_argument("--with-assets", action="store_true", help="Create assets/ directory.")
-    scaffold_parser.add_argument("--with-mcp", action="store_true", help="Create .mcp.json placeholder.")
-    scaffold_parser.add_argument("--with-apps", action="store_true", help="Create .app.json placeholder.")
+    scaffold_parser.add_argument(
+        "--with-assets",
+        action="store_true",
+        help="Create assets/ for optional docs or real visual assets without wiring manifest image paths by default.",
+    )
+    scaffold_parser.add_argument(
+        "--with-mcp",
+        action="store_true",
+        help="Create .mcp.json placeholder only for a real MCP integration the plugin will expose.",
+    )
+    scaffold_parser.add_argument(
+        "--with-apps",
+        action="store_true",
+        help="Create .app.json placeholder only for a real ChatGPT App or app connector surface the plugin will expose.",
+    )
     scaffold_parser.add_argument(
         "--with-marketplace",
         action="store_true",
@@ -1789,18 +2876,17 @@ def parse_args() -> argparse.Namespace:
         "--install-policy",
         default=DEFAULT_INSTALL_POLICY,
         choices=sorted(VALID_INSTALL_POLICIES),
-        help="Marketplace installPolicy value.",
+        help="Marketplace policy.installation value.",
     )
     scaffold_parser.add_argument(
         "--auth-policy",
         default=DEFAULT_AUTH_POLICY,
         choices=sorted(VALID_AUTH_POLICIES),
-        help="Marketplace authPolicy value.",
+        help="Marketplace policy.authentication value.",
     )
     scaffold_parser.add_argument(
         "--category",
-        default=DEFAULT_CATEGORY,
-        help="Marketplace category value.",
+        help="Marketplace category value. Defaults to an archetype-aware suggestion.",
     )
     scaffold_parser.add_argument(
         "--allow-overlap",
@@ -1851,6 +2937,52 @@ def parse_args() -> argparse.Namespace:
         help="Optional source repo or plugin path to improve overlap scoring using source metadata.",
     )
 
+    audit_marketplace_parser = subparsers.add_parser(
+        "audit-marketplace",
+        help="Audit marketplace coverage, entry normalization, and plugin-directory alignment.",
+    )
+    audit_marketplace_parser.add_argument(
+        "--marketplace-path",
+        default=str(DEFAULT_MARKETPLACE_PATH),
+        help="Path to marketplace.json.",
+    )
+    audit_marketplace_parser.add_argument(
+        "--plugins-path",
+        default=str(DEFAULT_PLUGIN_PARENT),
+        help="Path to the local plugins directory.",
+    )
+
+    normalize_marketplace_parser = subparsers.add_parser(
+        "normalize-marketplace",
+        help="Normalize marketplace entries to canonical nested policy/source shape and sorted order.",
+    )
+    normalize_marketplace_parser.add_argument(
+        "--marketplace-path",
+        default=str(DEFAULT_MARKETPLACE_PATH),
+        help="Path to marketplace.json.",
+    )
+    normalize_marketplace_parser.add_argument(
+        "--plugins-path",
+        default=str(DEFAULT_PLUGIN_PARENT),
+        help="Path to the local plugins directory.",
+    )
+    normalize_marketplace_parser.add_argument(
+        "--write",
+        action="store_true",
+        help="Write the normalized payload back to marketplace.json.",
+    )
+
+    audit_compat_parser = subparsers.add_parser(
+        "audit-compat",
+        help="Audit a plugin against curated upstream-style package conventions.",
+    )
+    audit_compat_parser.add_argument("plugin_path", help="Path to plugin root.")
+    audit_compat_parser.add_argument(
+        "--marketplace-path",
+        default=str(DEFAULT_MARKETPLACE_PATH),
+        help="Optional marketplace.json path for category and entry comparison.",
+    )
+
     return parser.parse_args()
 
 
@@ -1868,6 +3000,12 @@ def main() -> None:
         raise SystemExit(_run_inspect_source(args))
     if args.command == "inspect-local":
         raise SystemExit(_run_inspect_local(args))
+    if args.command == "audit-marketplace":
+        raise SystemExit(_run_audit_marketplace(args))
+    if args.command == "normalize-marketplace":
+        raise SystemExit(_run_normalize_marketplace(args))
+    if args.command == "audit-compat":
+        raise SystemExit(_run_audit_compat(args))
     raise SystemExit(1)
 
 

@@ -1,7 +1,18 @@
 {
   "schema_version": "1.0",
   "description": "Portfolio benchmark policy for skill-builder marker coverage and distribution.",
-  "validated_on": "2026-03-23",
+  "validated_on": "2026-03-16",
+  "release_governance": {
+    "pin_models_on_release": true,
+    "require_model_rationale": true,
+    "require_release_manifest": true,
+    "prefer_holdout_before_promotion": true
+  },
+  "regression_budgets": {
+    "tier1_failures_max": 0,
+    "tier2_findings_delta_max": 1,
+    "pass_rate_floor": 0.95
+  },
   "validation_notes": [
     "React latest docs line is 19.x (latest listed 19.2).",
     "Next.js support policy lists 16.x as Active LTS.",
@@ -11,7 +22,8 @@
     "Auto-refreshed via refresh_benchmark_policy.py on 2026-03-08.",
     "Auto-refreshed via refresh_benchmark_policy.py on 2026-03-09.",
     "Auto-refreshed via refresh_benchmark_policy.py on 2026-03-16.",
-    "Auto-refreshed via refresh_benchmark_policy.py on 2026-03-23."
+    "GitHub cluster warn threshold capped to the current cluster size on 2026-03-22 so the portfolio target remains achievable.",
+    "OpenAI apps cluster responses_api distribution floor capped to the current tracked cluster size on 2026-03-22 after upstreaming openai-docs to .agents/skills/.system."
   ],
   "refresh_sources": [
     {
@@ -100,7 +112,6 @@
     "openai_apps": {
       "description": "OpenAI and ChatGPT Apps skills",
       "include_prefixes": [
-        "product/docs/openai-docs",
         "product/domain/chatgpt-apps",
         "frontend/graphics/imagegen",
         "frontend/graphics/sora",
@@ -200,7 +211,7 @@
         "gha_sha_pin": 3
       },
       "min_hits_warn": {
-        "gha_sha_pin": 4
+        "gha_sha_pin": 3
       },
       "min_coverage_fail": 0.65,
       "min_coverage_warn": 1.0
@@ -223,10 +234,10 @@
         "responses_api"
       ],
       "min_hits_fail": {
-        "responses_api": 2
+        "responses_api": 1
       },
       "min_hits_warn": {
-        "responses_api": 2
+        "responses_api": 1
       },
       "min_coverage_fail": 0.3,
       "min_coverage_warn": 0.433

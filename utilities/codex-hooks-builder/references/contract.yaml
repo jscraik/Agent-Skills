@@ -1,0 +1,57 @@
+schema_version: "1.0"
+
+purpose: >
+  Define expected behavior and outputs for the codex-hooks-builder skill, which
+  scaffolds, upgrades, and validates project-local or user-level Codex hook
+  packs using the March 2026 supported runtime contract.
+
+triggers:
+  - user asks to create or scaffold Codex hooks
+  - user asks to upgrade hooks.json or hook scripts to the latest supported Codex behavior
+  - user asks to audit supported hook events, fields, or blocking behavior
+  - user asks for SessionStart, UserPromptSubmit, or Stop starter hooks
+
+inputs:
+  - target_scope
+  - target_root_path
+  - mode
+  - desired_event_set
+  - preserve_or_replace_policy
+
+outputs:
+  - hooks_json_with_absolute_commands
+  - starter_hook_scripts_when_scaffolding
+  - validation_commands_and_results
+  - refusal_or_deferral_notes_for_unsupported_hook_features
+
+required_response_sections:
+  - "When to use"
+  - "Required inputs"
+  - "Deliverables"
+  - "Failure mode"
+
+non_goals:
+  - generic repo automation unrelated to Codex hooks
+  - plugin packaging
+  - presenting prompt or agent hooks as currently production-ready
+
+risks:
+  - risk: stale_runtime_assumption
+    mitigation: verify against released Codex docs and codex-repo sources before changing contract claims
+  - risk: broken_command_paths
+    mitigation: generate absolute paths in hooks.json and validate them
+  - risk: overblocking
+    mitigation: keep Stop and UserPromptSubmit rules narrow, explainable, and dry-run tested
+  - risk: duplicated_hook_execution
+    mitigation: install into one active config layer by default and call out double-run risk explicitly
+
+examples:
+  happy_path:
+    input: "Create a project-local gold-standard Codex hook pack for this repo."
+    expected_output: "Scaffold .codex/hooks.json, three starter scripts, README, and validation steps."
+  edge_case:
+    input: "Audit this hooks.json and keep only what is supported in March 2026."
+    expected_output: "List supported vs unsupported surfaces and propose or apply a safe rewrite."
+  failure_mode:
+    input: "Create prompt hooks and async hooks because I need the newest unreleased behavior."
+    expected_output: "Decline unsupported runtime assumptions and scaffold only stable command hooks."

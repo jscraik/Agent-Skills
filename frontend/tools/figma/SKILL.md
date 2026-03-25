@@ -1,6 +1,8 @@
 ---
 name: figma
 description: "Use this canonical Figma skill to extract design context/screenshots/assets with Figma MCP and build production-ready UI guidance. Use when requests include Figma URLs/node IDs, design-to-code implementation, or Figma MCP setup/troubleshooting."
+metadata:
+  skill-type: library_api_reference
 ---
 
 # Figma MCP (Canonical)
@@ -34,7 +36,7 @@ This is the canonical Figma workflow skill. It supports both extraction and impl
 - Reuse project design tokens/components instead of copying raw generated output.
 - Prefer deterministic, stepwise flows that are easy to validate.
 
-## Scope and triggers
+## When to use
 Use this skill when requests involve:
 
 - Figma URLs or node IDs.
@@ -206,3 +208,6 @@ Fail fast: **stop at first failed prerequisite** (e.g., missing node ID, auth fa
 - Persist with: `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
 - The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
 <!-- /decision-feedback-protocol -->
+
+## Gotchas
+- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.

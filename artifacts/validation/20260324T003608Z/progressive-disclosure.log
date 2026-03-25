@@ -1,0 +1,8 @@
+ERROR product/ops/ce-brainstorm/SKILL.md: missing recommended section heading: ## When to use
+WARN  product/ops/ce-deepen-plan/SKILL.md: SKILL.md exceeds target length (lines=340, target=320)
+WARN  product/ops/ce-plan/SKILL.md: SKILL.md exceeds target length (lines=359, target=320)
+WARN  product/ops/ce-spec/SKILL.md: SKILL.md exceeds target length (lines=334, target=320)
+Checked files: 105
+Errors: 1
+Warnings: 3
+Mode: strict

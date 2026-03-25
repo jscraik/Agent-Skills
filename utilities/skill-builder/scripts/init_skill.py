@@ -26,6 +26,7 @@ from __future__ import annotations
 import argparse
 import re
 import sys
+from datetime import date
 from pathlib import Path
 from typing import Iterable, List, Optional
 
@@ -37,14 +38,25 @@ CATEGORIES = {"github", "frontend", "apple", "backend", "product", "utilities"}
 
 ALLOWED_RESOURCES = {"scripts", "references", "assets", "workflows"}
 STRUCTURES = {"simple", "router"}
+VALID_LIFECYCLE_STATES = ("incubating", "active", "maintenance", "deprecated")
+VALID_MATURITY_LEVELS = ("experimental", "validated", "canonical")
 
 
 SKILL_TEMPLATE_SIMPLE = """---
 name: {skill_name}
-description: "Use this skill when the user asks for {{TRIGGER_CONTEXT}}. It helps create or update {{PRIMARY_OUTPUTS}} using {{INPUTS}}; avoid it for {{NON_TRIGGERS}}."
+description: "{description}"
+metadata:
+  lifecycle_state: {lifecycle_state}
+  maturity: {maturity}
+  owner: {owner}
+  review_cadence: {review_cadence}
+  last_reviewed: {last_reviewed}
+  metadata_source: frontmatter
 ---
 
 # {skill_title}
+
+This scaffold starts in `{lifecycle_state}` state with `{maturity}` maturity. Replace the starter guidance below before treating it as active or broadly reusable.
 
 ## Working agreement
 - Follow the repo's `AGENTS.md` (map, not a megadoc).
@@ -55,18 +67,18 @@ description: "Use this skill when the user asks for {{TRIGGER_CONTEXT}}. It help
 
 ## When to use
 - Primary triggers:
-  - TODO
+  - Replace with the real user ask this skill should own.
 - Non-triggers (route elsewhere):
-  - TODO
+  - Replace with the neighboring asks this skill should reject or reroute.
 
 ## Inputs
 - Assumptions:
-  - TODO
-- TODO: files, repos, APIs, schemas, constraints.
+  - Replace with the minimum safe assumptions for this skill.
+- Replace with the concrete files, repos, APIs, schemas, or constraints the finished skill will need.
 - Ask clarifying questions only for genuine gaps.
 
 ## Outputs
-- TODO: concrete outputs (paths + formats).
+- Replace with the concrete outputs, paths, and formats the skill should produce.
 - Always write artifacts to `./artifacts/` (local) or `/mnt/data/` (hosted).
 
 ## Constraints and safety
@@ -75,11 +87,11 @@ description: "Use this skill when the user asks for {{TRIGGER_CONTEXT}}. It help
 - Destructive actions require explicit confirmation; prefer dry-run first.
 
 ## Principles
-- TODO: 2–6 bullets capturing the mental model / why this works.
+- Replace with 2–6 bullets capturing the mental model for this skill.
 - Adapt execution and output shape to context; avoid rigid one-size-fits-all responses.
 
 ## Workflow
-1) TODO: smallest reliable workflow.
+1) Replace with the smallest reliable workflow for this skill.
 2) Prefer progressive disclosure:
    - Put deep docs in `references/` and link to them.
    - Put reusable automation in `scripts/` and reference it here.
@@ -87,28 +99,48 @@ description: "Use this skill when the user asks for {{TRIGGER_CONTEXT}}. It help
 3) End by writing artifacts + listing changed files/commands.
 
 ## Validation
-- TODO: commands/tests/checks to verify correctness.
+- Replace with the commands, tests, or checks that prove this skill is safe to use.
 - Fail fast: if a gate fails, stop and report the failure before continuing.
 - For non-trivial skills, add `references/evals.yaml` with at least:
   - happy-path
   - edge-case
   - failure-mode
 
+## Gotchas
+- Replace with the recurring mistake, misconception, or failure pattern this skill should call out early.
+
+## See Also
+| Skill | When to use |
+|---|---|
+| `adjacent-skill-name-1` | Replace with a real nearby skill this one is commonly confused with. |
+| `adjacent-skill-name-2` | Replace with another real related skill in the local graph. |
+
+**Topic map:** `[[topic-name]]`
+
 ## Anti-patterns
-- ❌ TODO: common pitfalls and what *not* to do.
+- ❌ Replace with the common pitfalls and what not to do.
 
 ## Examples
-- Triggering prompt: "TODO"
-- Non-triggering prompt: "TODO"
+- Triggering prompt: "Replace with a realistic triggering prompt."
+- Non-triggering prompt: "Replace with a realistic non-triggering prompt."
 """
 
 
 SKILL_TEMPLATE_ROUTER = """---
 name: {skill_name}
-description: "Use this skill when the user needs routing across multiple workflows. It asks one intake question, selects the right route, and executes with validated outputs."
+description: "{description}"
+metadata:
+  lifecycle_state: {lifecycle_state}
+  maturity: {maturity}
+  owner: {owner}
+  review_cadence: {review_cadence}
+  last_reviewed: {last_reviewed}
+  metadata_source: frontmatter
 ---
 
 # {skill_title}
+
+This router scaffold starts in `{lifecycle_state}` state with `{maturity}` maturity. Replace the starter routes before treating it as active or reusable.
 
 ## Working agreement
 - Follow the repo's `AGENTS.md` (map, not a megadoc).
@@ -120,16 +152,16 @@ description: "Use this skill when the user needs routing across multiple workflo
 ## When to use
 - This is a **router skill**: it asks one intake question and routes to a workflow in `workflows/`.
 - Primary triggers:
-  - TODO
+  - Replace with the routing asks this skill should own.
 - Non-triggers (route elsewhere):
-  - TODO
+  - Replace with the nearby asks this router should reject or hand off.
 
 ## Inputs
-- TODO: what you need from the user before routing.
+- Replace with the minimum user signal you need before routing.
 - Ask follow-up questions only when the route cannot be selected safely.
 
 ## Outputs
-- TODO: routed output contract (paths + formats).
+- Replace with the routed output contract, including paths and formats.
 - Always write artifacts to `./artifacts/` (local) or `/mnt/data/` (hosted).
 
 ## Constraints and safety
@@ -143,7 +175,7 @@ description: "Use this skill when the user needs routing across multiple workflo
 - Keep route explanations concise and evidence-based.
 
 ## Intake
-Ask the user one concise routing question and wait for the response.
+Replace this line with the one concise routing question the user should answer.
 
 ## Routes
 | Response | Workflow |
@@ -163,6 +195,17 @@ Ask the user one concise routing question and wait for the response.
 - Fail fast: if route criteria are ambiguous or checks fail, stop and ask for clarification.
 - Verify outputs match the chosen workflow contract.
 
+## Gotchas
+- Replace with the routing misconception or common failure pattern this router should surface early.
+
+## See Also
+| Skill | When to use |
+|---|---|
+| `adjacent-router-or-skill-1` | Replace with a real nearby route or skill this router should defer to when appropriate. |
+| `adjacent-router-or-skill-2` | Replace with another real related route or skill in the local graph. |
+
+**Topic map:** `[[topic-name]]`
+
 ## References map
 Prefer pointers over pasted docs.
 - `references/` for deep docs, contracts, and evals.
@@ -173,8 +216,8 @@ Prefer pointers over pasted docs.
 - ❌ Proceeding when route criteria are ambiguous.
 
 ## Examples
-- Triggering prompt: "Route this request to the correct workflow."
-- Non-triggering prompt: "Implement the final feature directly without routing."
+- Triggering prompt: "Replace with a realistic routing request."
+- Non-triggering prompt: "Replace with a realistic non-routing request."
 """
 
 
@@ -372,6 +415,12 @@ def init_skill(
     run_type: str,
     target: str,
     dry_run: bool,
+    description: str,
+    owner: str,
+    review_cadence: str,
+    last_reviewed: str,
+    lifecycle_state: str,
+    maturity: str,
 ) -> Optional[Path]:
     skill_dir = out_dir.resolve() / skill_name
     if skill_dir.exists():
@@ -397,7 +446,16 @@ def init_skill(
     skill_title = title_case_skill_name(skill_name)
 
     template = SKILL_TEMPLATE_ROUTER if structure == "router" else SKILL_TEMPLATE_SIMPLE
-    content = template.format(skill_name=skill_name, skill_title=skill_title)
+    content = template.format(
+        skill_name=skill_name,
+        skill_title=skill_title,
+        description=description,
+        owner=owner,
+        review_cadence=review_cadence,
+        last_reviewed=last_reviewed,
+        lifecycle_state=lifecycle_state,
+        maturity=maturity,
+    )
 
     (skill_dir / "SKILL.md").write_text(content, encoding="utf-8")
     print("[OK] Created SKILL.md")
@@ -437,7 +495,7 @@ def init_skill(
     print(f"\n[OK] Skill '{skill_name}' initialized successfully at {skill_dir}")
     print("\nNext steps:")
     next_steps = [
-        "Edit SKILL.md (especially the description) to remove TODOs and tailor triggers/non-triggers.",
+        "Replace the starter trigger, workflow, validation, and example text in SKILL.md with the real skill contract.",
         "Keep SKILL.md as a map; put depth in references/ and scripts/.",
     ]
     if run_type != "instruction":
@@ -474,6 +532,16 @@ def main(argv: Optional[Iterable[str]] = None) -> int:
     parser.add_argument("--target", choices=sorted(TARGET_NAME_LIMITS.keys()), default=DEFAULT_TARGET, help="Target environment (controls name/description limits)")
     parser.add_argument("--category", choices=sorted(CATEGORIES), help="Category folder under the repo")
     parser.add_argument("--path", help="Output directory for the skill (alternative to --category)")
+    parser.add_argument("--description", required=True, help="Concrete discovery description for the skill frontmatter")
+    parser.add_argument("--owner", required=True, help="Primary maintainer or owner string for lifecycle governance")
+    parser.add_argument("--review-cadence", required=True, help="Concrete review cadence such as monthly or quarterly")
+    parser.add_argument(
+        "--last-reviewed",
+        default=date.today().isoformat(),
+        help="ISO date for the most recent lifecycle review (defaults to today)",
+    )
+    parser.add_argument("--lifecycle-state", choices=VALID_LIFECYCLE_STATES, default="incubating", help="Initial lifecycle state for the new skill")
+    parser.add_argument("--maturity", choices=VALID_MATURITY_LEVELS, default="experimental", help="Initial maturity level for the new skill")
     parser.add_argument("--structure", choices=sorted(STRUCTURES), default="simple", help="Skill structure: simple (default) or router")
     parser.add_argument("--run-type", choices=["instruction", "python", "container"], default="instruction", help="Scaffold type: instruction-only, python script-backed, or container-backed")
     parser.add_argument("--resources", default="", help="Explicit comma-separated list: scripts,references,assets,workflows")
@@ -552,6 +620,12 @@ def main(argv: Optional[Iterable[str]] = None) -> int:
         run_type=args.run_type,
         target=args.target,
         dry_run=args.dry_run,
+        description=args.description,
+        owner=args.owner,
+        review_cadence=args.review_cadence,
+        last_reviewed=args.last_reviewed,
+        lifecycle_state=args.lifecycle_state,
+        maturity=args.maturity,
     )
 
     return 0 if result else 1

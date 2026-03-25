@@ -1,6 +1,8 @@
 ---
 name: "security-threat-model"
-description: "Repository-grounded threat modeling that enumerates trust boundaries, assets, attacker capabilities, abuse paths, and mitigations, and writes a concise Markdown threat model. Trigger only when the user explicitly asks to threat model a codebase or path, enumerate threats/abuse paths, or perform AppSec threat modeling. Do not trigger for general architecture summaries, code review, or non-security design work."
+description: Produce a repository-grounded threat model covering assets, trust boundaries, attackers, abuse paths, and mitigations. Use when the user explicitly wants AppSec threat modeling, not general architecture review.
+metadata:
+  skill-type: runbook
 ---
 
 # Threat Model Source Code Repo
@@ -21,6 +23,7 @@ Deliver an actionable AppSec-grade threat model that is specific to the reposito
 - Prefer root-cause understanding over quick symptom patches.
 - Keep guidance evidence-based, explicit, and reproducible.
 - Optimize for decisions that reduce rework and operational risk.
+- Map the final abuse paths to OWASP Top 10:2025 themes when that helps teams turn the threat model into implementation work.
 
 ## Workflow
 
@@ -113,12 +116,12 @@ Only load the reference files you need. Keep the final result concise, grounded,
 - Redact secrets, tokens, credentials, and PII by default; never echo raw environment values.
 - Prefer safe defaults and avoid irreversible changes without explicit confirmation.
 
-## Inputs
+## Required inputs
 
 - User task context and target environment.
 - Relevant constraints, permissions, and preferences required to execute safely.
 
-## Outputs
+## Deliverables
 
 - A concrete next-step response with explicit, reproducible actions.
 - A short verification checklist and caveats for the user.
@@ -187,3 +190,9 @@ Only load the reference files you need. Keep the final result concise, grounded,
 - Persist with: `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
 - The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
 <!-- /decision-feedback-protocol -->
+
+## Gotchas
+- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.
+
+## Failure mode
+- If assets, trust boundaries, or attacker assumptions are not evidenced in the repo, stop, list the missing model inputs, and fall back to a scoped system inventory before asserting threats or mitigations.

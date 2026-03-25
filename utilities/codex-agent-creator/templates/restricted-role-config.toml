@@ -1,6 +1,6 @@
 # Constrained role profile. Use only when user explicitly requests restrictions.
 
-model = "gpt-5-codex"
+model = "gpt-5.4-mini"
 model_reasoning_effort = "medium"
 developer_instructions = """
 local-memory-mcp policy:

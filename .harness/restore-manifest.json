@@ -1,0 +1,59 @@
+{
+  "harnessVersion": "0.8.1",
+  "ciProvider": "github-actions",
+  "files": [
+    {
+      "path": ".harness/ci-required-checks.json",
+      "action": "created"
+    },
+    {
+      "path": ".github/workflows/secret-scan.yml",
+      "action": "created"
+    },
+    {
+      "path": "scripts/check-staged-secrets.sh",
+      "action": "created"
+    },
+    {
+      "path": "scripts/check-doc-style.sh",
+      "action": "created"
+    },
+    {
+      "path": "scripts/check-related-tests.sh",
+      "action": "created"
+    },
+    {
+      "path": "scripts/check-semgrep-changed.sh",
+      "action": "created"
+    },
+    {
+      "path": "scripts/semgrep-pre-push.yml",
+      "action": "created"
+    },
+    {
+      "path": "scripts/refresh-diagram-context.sh",
+      "action": "created"
+    },
+    {
+      "path": "scripts/check-diagram-freshness.sh",
+      "action": "created"
+    },
+    {
+      "path": ".diagram/.gitkeep",
+      "action": "created"
+    },
+    {
+      "path": ".diagram/context/diagram-context.md",
+      "action": "created"
+    },
+    {
+      "path": ".mise.toml",
+      "action": "created"
+    },
+    {
+      "path": ".codex/environments/environment.toml",
+      "action": "modified",
+      "backupHash": "cd49adffccd28c2b"
+    }
+  ]
+}

@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "run_graph_op_v1",
+  "type": "object",
+  "required": [
+    "schema",
+    "operation",
+    "status",
+    "exit_code",
+    "inputs",
+    "artifacts",
+    "warnings",
+    "errors"
+  ],
+  "properties": {
+    "schema": {
+      "type": "string",
+      "const": "run_graph_op.v1"
+    },
+    "operation": {
+      "type": "string",
+      "enum": [
+        "visual",
+        "communities",
+        "evolution",
+        "unknown"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "success",
+        "failed",
+        "partial",
+        "dry_run"
+      ]
+    },
+    "exit_code": {
+      "type": "integer"
+    },
+    "inputs": {
+      "type": "object"
+    },
+    "artifacts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "path": { "type": "string" },
+          "sha256": { "type": "string" }
+        },
+        "required": ["path", "sha256"]
+      }
+    },
+    "warnings": {
+      "type": "array"
+    },
+    "errors": {
+      "type": "array"
+    },
+    "stage": {
+      "type": "object",
+      "properties": {
+        "preflight": { "type": "string" },
+        "operation": { "type": "string" },
+        "artifact_write": { "type": "string" }
+      }
+    },
+    "planned_actions": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}

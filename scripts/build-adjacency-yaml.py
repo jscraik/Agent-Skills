@@ -9,6 +9,17 @@ import pathlib, re, sys, yaml  # needs PyYAML
 
 ROOT     = pathlib.Path(sys.argv[1]) if len(sys.argv) > 1 else pathlib.Path(".")
 OUT_YAML = ROOT / "docs/skill-graphs/adjacency.yaml"
+CANONICAL_PREFIXES = {
+    "auth/",
+    "backend/",
+    "frontend/",
+    "github/",
+    "interview/",
+    "personas/",
+    "product/",
+    "skills-system/",
+    "utilities/",
+}
 
 TOPIC_MAPS = {
     "frontend-ui", "backend-platform", "agent-ops",
@@ -19,8 +30,18 @@ TOPIC_MAPS = {
 adjacency = {}   # skill -> {related_skill: description}
 seen_skills: set[str] = set()   # deduplicate by skill name, not resolved path
 
+
+def is_canonical_skill_md(path: pathlib.Path) -> bool:
+    try:
+        rel = path.relative_to(ROOT).as_posix()
+    except ValueError:
+        return False
+    if rel == "SKILL.md":
+        return False
+    return any(rel.startswith(prefix) for prefix in CANONICAL_PREFIXES)
+
 for md in sorted(ROOT.rglob("SKILL.md")):
-    if len(md.parts) < 2:
+    if not is_canonical_skill_md(md):
         continue
     skill = md.parts[-2]
     if skill in seen_skills:         # first SKILL.md wins (alphabetical sort = utilities/ before skills-antigravity/ typically)

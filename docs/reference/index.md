@@ -8,5 +8,6 @@ Good reference topics for this repo:
 - Skill index generation (`/scripts/sync_skills.sh`).
 - Recursive loop contracts in `/docs/skill-graphs/schemas/*`.
 - Any contracts or schemas that tools should not guess.
+- Managed asset lifecycle defaults in [managed-asset-lifecycle.md](/Users/jamiecraik/dev/Agent-Skills/docs/reference/managed-asset-lifecycle.md).
 
 - Back to [Docs index](/docs)

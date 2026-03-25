@@ -86,7 +86,7 @@ Found brainstorm from **2026-02-19**: `skill-graph-learning-loop`. Used as sourc
 
 ### Local repo findings (internal)
 - Skill indexing/sync conventions: `scripts/sync_skills.sh:126`
-- Existing lessons slot: `FORJAMIE.md:93`
+- Existing lessons slot: stale reference to `FORJAMIE.md:93` (file not present in repo as of 2026-03-21)
 - Tiered gating model (`report-only -> warn -> fail`): `skills-system/skill-builder/references/tiered-gating-policy.md:5`
 - MUST/SHOULD/MAY rubric pattern: `skills-system/skill-builder/references/gold-skill-rubric.md:1`
 - Docs governance cutoff model: `docs-policy.json:2`
@@ -525,7 +525,7 @@ _Baseline protocol (applies to all KPIs unless noted):_
 ### Internal references
 - `docs/brainstorms/2026-02-19-skill-graph-learning-loop-brainstorm.md`
 - `scripts/sync_skills.sh:126`
-- `FORJAMIE.md:93`
+- stale `FORJAMIE.md:93` reference (file not present in repo as of 2026-03-21)
 - `.agent/PLANS.md:19`
 - `skills-system/skill-builder/references/tiered-gating-policy.md:5`
 - `skills-system/skill-builder/references/gold-skill-rubric.md:1`

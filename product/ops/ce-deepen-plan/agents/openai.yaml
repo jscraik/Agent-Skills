@@ -1,0 +1,9 @@
+interface:
+  display_name: "CE Deepen Plan"
+  short_description: "Stress-test and strengthen an existing plan with targeted research, risk treatment, and optional exhaustive coverage."
+
+policy:
+  allow_implicit_invocation: true
+
+dependencies:
+  tools: []

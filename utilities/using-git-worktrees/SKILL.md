@@ -1,6 +1,8 @@
 ---
 name: using-git-worktrees
 description: "Create and validate Codex app and Claude CLI git worktree workflows with safe branch/sync strategy and cleanup guidance. Use when users request isolated checkouts; do not use for explicit in-place same-branch edits."
+metadata:
+  skill-type: ci_cd_deployment
 ---
 
 # Using Git Worktrees
@@ -134,7 +136,7 @@ Required gates:
 | [[gh-workflow]] | Manage PRs across multiple worktrees |
 | [[verification-before-completion]] | Verify each worktree independently before merging |
 | [[systematic-debugging]] | Debug issues isolated to a specific worktree |
-| [[writing-plans]] | Plan parallel workstreams across worktrees |
+| [[ce-plan]] | Plan parallel workstreams across worktrees |
 
 **Topic map:** [[backend-platform]]
 
@@ -154,3 +156,22 @@ Required gates:
 - Guiding question: How do we verify the result end-to-end?
 - Anti-patterns: DO NOT skip validation, NEVER hide failed checks, and avoid repetitive template-only output.
 - Empowerment: be capable, creative, and enable users to explore options with confidence.
+
+## Gotchas
+- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.
+
+## When to use
+- Use this skill when the user wants isolated work in a separate checkout, whether through Codex app worktrees, Claude CLI worktrees, or manual `git worktree` commands.
+- Do not use it when the user explicitly wants to stay in the current checkout with no isolation workflow.
+
+## Required inputs
+- The repository root and starting branch or commit.
+- The execution environment: Codex app, Claude CLI, or manual git.
+- The intended verification and sync path, plus whether cleanup should keep or remove the worktree afterward.
+
+## Deliverables
+- A recommended isolation path, concrete worktree state, and sync guidance for the chosen flow.
+- Baseline verification instructions or results plus a cleanup recommendation.
+
+## Failure mode
+- If the repo cannot support the requested worktree flow or the target branch/state is unclear, stop, report the blocker, and fall back to a clarified manual git plan or an explicit in-place workflow.

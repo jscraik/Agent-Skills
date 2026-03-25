@@ -1,0 +1,9 @@
+interface:
+  display_name: "CE Plan"
+  short_description: "Turn a spec, brainstorm, or UI contract into a traceable implementation plan with execution, validation, and rollout guidance."
+
+policy:
+  allow_implicit_invocation: true
+
+dependencies:
+  tools: []

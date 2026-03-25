@@ -1,8 +1,8 @@
 ---
 name: repoprompt
-description: Plan and guide Repo Prompt integration and usage in AI coding workflows.
-  Use when integrating Repo Prompt with editors/agents or when needing MCP/CLI tool
-  guidance.
+description: Plan and troubleshoot Repo Prompt integration across editors, agents, MCP, and CLI workflows. Use when the user wants Repo Prompt configured, adopted, or compared inside an AI coding setup.
+metadata:
+  skill-type: library_api_reference
 ---
 
 # Repo Prompt Integration
@@ -41,7 +41,7 @@ Guide the user to the most effective Repo Prompt integration path for their work
 - Validate install state, workspace binding, and one smoke-test prompt before claiming the setup works.
 - Always include an apply path for edits when recommending external chat or Compose workflows.
 
-## Scope and triggers
+## When to use
 - User asks how to integrate Repo Prompt with Claude Code, Cursor, Codex, or other editors/agents.
 - User asks how to use Compose vs Chat vs Apply/Pro Edit workflows.
 - User asks how to optimize context (codemaps, slices, multi-root workspaces).
@@ -69,7 +69,7 @@ Guide the user to the most effective Repo Prompt integration path for their work
 Always start responses with these headings (no text before them):
 
 ```
-## Scope and triggers
+## When to use
 ## Required inputs
 ## Deliverables
 ## Out-of-scope handling
@@ -193,7 +193,7 @@ Read when needed:
 | [[context7]] | Combine with Context7 for richer library context in prompts |
 | [[agents-md]] | Use Repo Prompt context packs alongside AGENTS.md |
 | [[compound-engineering-router]] | Feed repo context into compound engineering workflows |
-| [[writing-plans]] | Ground implementation plans with Repo Prompt context |
+| [[ce-plan]] | Ground implementation plans with Repo Prompt context |
 
 **Topic map:** [[agent-ops]]
 
@@ -207,3 +207,6 @@ Read when needed:
 
 ## Remember
 The agent is capable of extraordinary work in this domain. Use judgment, adapt to context, and push boundaries when appropriate.
+
+## Gotchas
+- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.

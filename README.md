@@ -16,6 +16,7 @@ Edit a skill once. Run `just sync`. It propagates everywhere.
 - [Creating a skill](#creating-a-skill)
 - [Skill quality system](#skill-quality-system)
 - [Governance and safety](#governance-and-safety)
+- [Managed asset lifecycle](#managed-asset-lifecycle)
 - [Limits and constraints](#limits-and-constraints)
 - [Documentation](#documentation)
 
@@ -35,7 +36,7 @@ This repository solves all three:
 
 ## What you get
 
-### 1. Cross-runtime skill library (133+ skills)
+### 1. Cross-runtime skill library
 
 One canonical library, symlinked to every runtime on sync:
 
@@ -322,6 +323,26 @@ The contract (`v1.2.0`) defines concrete policies applied on every PR:
 
 ---
 
+## Managed asset lifecycle
+
+Phase-one managed asset governance keeps one lifecycle contract across:
+- canonical skills
+- packaged skills
+- plugin packages
+
+Phase-one defaults:
+- authoritative lifecycle metadata stays in-file
+- Markdown-governed assets use canonical `SKILL.md` frontmatter
+- plugin packages use `.codex-plugin/plugin.json`
+- packaged skills inherit lifecycle metadata from the canonical source skill when a one-to-one mapping exists
+- `docs/solutions/` entries need linked assets, concrete evidence, ownership context, and freshness markers
+
+Reference:
+- [Managed asset lifecycle reference](/Users/jamiecraik/dev/Agent-Skills/docs/reference/managed-asset-lifecycle.md)
+- [Governed solutions](/Users/jamiecraik/dev/Agent-Skills/docs/solutions/README.md)
+
+---
+
 ## Troubleshooting
 
 ### Skill not found after sync
@@ -382,8 +403,9 @@ just rollout-drill
 
 ## Documentation
 
-- **[Skills index](/SKILL.md)** — full list of 133+ skills with descriptions
+- **[Skills index](/SKILL.md)** — auto-generated list of the current surfaced skills with descriptions
 - **[Contributor docs](/docs/index.md)** — how to add, validate, and ship skills
+- **[Governed solutions](/Users/jamiecraik/dev/Agent-Skills/docs/solutions/README.md)** — reusable fixes and decisions linked to governed assets
 - **[Skill Genome runbook](/docs/skill-graphs/runbooks/skill-genome-loop.md)** — operating the improvement loop
 - **[Agent governance](/docs/agents/06-security-and-governance.md)** — security policy and audit trail
 

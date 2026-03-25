@@ -1,6 +1,8 @@
 ---
 name: recon-workbench
 description: Run authorized, evidence-backed Recon Workbench (rwb) workflows (doctor/authorize/plan/run/summarize/manifest/validate/reconcile) and produce evidence-cited findings. Use when interrogating macOS/iOS, web/React, or OSS targets under explicit scope/permission.
+metadata:
+  skill-type: runbook
 ---
 
 # Recon Workbench (rwb)
@@ -45,7 +47,7 @@ When you respond while this skill is active, answer with sections titled exactly
 - Start read-only, escalate only with explicit justification, and stop on circumvention pressure.
 - Keep outputs deterministic, redact sensitive material by default, and validate findings before summarizing them.
 
-## Scope and triggers
+## When to use
 - Running rwb CLI flows (`doctor`, `authorize`, `plan`, `run`, `summarize`, `manifest`, `validate`, `reconcile`).
 - Designing/updating probe catalogs, schemas, or validation scripts.
 - Producing evidence-backed findings/reports with artifact citations (no speculation).
@@ -292,39 +294,15 @@ When analyzing a target:
 - Treating unknowns as confirmed facts
 - Relying on inferred behavior without artifacts
 
-## Examples
-- “Design a controlled evidence-only interrogation workflow for an authorized web/React target, including probe plan and reporting outputs.”
-- “Run probes on an unauthorized target.” (Expected: refuse + explain authorization gate.)
-- “Summarize findings without any artifacts.” (Expected: refuse + request artifacts.)
-
-## Remember
-The agent is capable of extraordinary work in this domain. Use judgment, adapt to context, and push boundaries when appropriate.
-
-## Extended guidance
-See `references/extended.md` for additional examples, workflows, and appendices.
-
-## Decision feedback protocol
+## Gotchas
+- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.
 
 ## See Also
-
-| Skill | When to use together |
+| Skill | When to use |
 |---|---|
-| [[security-threat-model]] | Feed recon findings into the threat model |
-| [[security-ownership-map]] | Correlate recon findings with code ownership |
-| [[security-best-practices]] | Apply findings-driven best practices after recon |
-| [[systematic-debugging]] | Debug app behaviour discovered during recon |
+| [[security-best-practices]] | Turn recon findings into concrete secure-by-default implementation guidance |
+| [[security-threat-model]] | Map recon evidence into trust boundaries, abuse paths, and mitigations |
+| [[security-ownership-map]] | Connect the findings to code ownership and bus-factor risk |
+| [[systematic-debugging]] | Debug confirmed runtime behavior after recon narrows the target surface |
 
 **Topic map:** [[security-ops]]
-
-<!-- decision-feedback-protocol:v2 -->
-**Decision feedback protocol (required):**
-- If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.
-- Capture: `decision` (`accepted|partial|rejected|deferred`), `outcome` (`good|neutral|bad|unknown`), and `confidence` (`high|medium|low`).
-- Persist with: `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
-- The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
-<!-- /decision-feedback-protocol -->
-
-## Folded Legacy Modes (Phase4)
-<!-- core75-folded-modes:v1:start -->
-Legacy folds are documented in references/folded-legacy-modes-phase4.md.
-<!-- core75-folded-modes:v1:end -->

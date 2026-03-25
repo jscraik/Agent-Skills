@@ -98,7 +98,7 @@ for path in "$config_path" "$role_config_path" "$schema_path"; do
   fi
 done
 
-allowed_decl='["description","config_file"]'
+allowed_decl='["description","config_file","nickname_candidates"]'
 decl_keys="$(ROLE_NAME="$role_name" yq -p=toml -o=json '.agents[strenv(ROLE_NAME)] // {} | keys' "$config_path")"
 unsupported_decl="$(jq -n --argjson have "$decl_keys" --argjson allowed "$allowed_decl" '$have - $allowed')"
 if [[ "$unsupported_decl" != "[]" ]]; then

@@ -29,6 +29,8 @@ equipped with procedural knowledge that no model can fully possess.
 - SKILL.md (required)
 - references/contract.yaml (required)
 - references/evals.yaml (required, >= 3 cases)
+- `## See Also` in `SKILL.md` with at least 2 real related-skill links for graph-visible repo skills
+- references/task-profile.json (required for active/in-scope operational skills in this repository)
 - scripts/ (optional, for deterministic operations)
 
 ## Evaluation Requirement
@@ -43,6 +45,11 @@ equipped with procedural knowledge that no model can fully possess.
 
 Keep SKILL.md lean and move details into references and scripts. This preserves context
 for actual task execution and speeds retrieval of targeted information.
+
+Graph-ready skills also need navigability:
+- Add `## See Also` so neighboring skills are discoverable from the wrapper itself.
+- Add a topic-map signpost when the skill belongs to a graph cluster.
+- Treat task-profile metadata as part of the source bundle when the repo's onboarding contract applies.
 
 ## Automation Mapping
 

@@ -243,8 +243,10 @@ Codex entry shape required by this repo:
     "source": "local",
     "path": "./plugins/arscontexta"
   },
-  "installPolicy": "AVAILABLE",
-  "authPolicy": "ON_INSTALL",
+  "policy": {
+    "installation": "AVAILABLE",
+    "authentication": "ON_INSTALL"
+  },
   "category": "Productivity"
 }
 ```
@@ -252,7 +254,9 @@ Codex entry shape required by this repo:
 Carry-over rules:
 - preserve plugin `name`;
 - rewrite `source` into object form with `source: "local"` and plugin path;
-- always add `installPolicy`, `authPolicy`, and `category`;
+- add marketplace `interface.displayName` at the root when the target marketplace is created or refreshed;
+- always add `policy.installation`, `policy.authentication`, and `category`;
+- accept legacy flat `installPolicy` and `authPolicy` only as temporary migration inputs, not as fresh scaffold output;
 - ignore Claude-specific `strict` because it is not part of the Codex marketplace contract here.
 
 ## Terminology mapping

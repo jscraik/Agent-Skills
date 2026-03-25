@@ -1,6 +1,8 @@
 ---
 name: codex-automation-architect
-description: "Create, review, and merge Codex app automations; use when users need recurring automation design or consolidation with current OpenAI/Codex guidance, environment preflight, and headless multi-runner validation."
+description: Design, review, or merge Codex app automations using current OpenAI/Codex guidance and validation. Use when the user wants recurring Codex automation workflows built, audited, or consolidated.
+metadata:
+  skill-type: team_automation
 ---
 
 # Codex Automation Architect
@@ -99,10 +101,16 @@ Design, review, consolidate, and validate Codex automations with current Codex a
 | [[codex-agent-creator]] | Create the agent role the automation will run under |
 | [[codex-plugin-builder]] | Package automations into a plugin for distribution |
 | [[decide-build-primitive]] | Confirm automation is the right primitive before building |
-| [[writing-plans]] | Plan the automation contract before implementing |
+| [[ce-plan]] | Plan the automation contract before implementing |
 | [[verification-before-completion]] | Validate automation output before declaring done |
 
 **Topic map:** [[agent-ops]]
 
 ## Remember
 An automation is production infrastructure. If its boundaries are unclear, it is not ready.
+
+## Gotchas
+- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.
+
+## Failure mode
+- If the trigger, execution environment, or safety guardrails are unclear, stop, report the missing assumptions, and fall back to an automation design sketch instead of shipping a brittle workflow.

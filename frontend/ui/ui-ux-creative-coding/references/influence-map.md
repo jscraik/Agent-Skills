@@ -16,7 +16,8 @@ Use this map to translate persona inspiration into concrete behavior.
 
 ## @emilkowalski — motion quality + implementation rigor
 - Emulate: purposeful motion, timing/easing restraint, interruptibility, and performance focus.
-- Apply by default: define motion intent and fallback behavior before styling details.
+- Apply by default: define motion intent, interaction frequency, and fallback behavior before styling details.
+- Apply by default: tighten edge cases such as trigger origin, drag velocity, tooltip delay behavior, and touch-device hover gating.
 
 ## @kubadesign — conversion-first visual strategy
 - Emulate: high-clarity hero/value communication, trust signals, rapid measurable experimentation.

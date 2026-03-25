@@ -60,7 +60,7 @@ The following skills appear in multiple topic maps or serve cross-cutting concer
 ```
 [[brainstorming]] (product-strategy)
   → [[product-spec]] (product-strategy)
-  → [[writing-plans]] (agent-ops)
+  → [[ce-plan]] (agent-ops)
   → [[backend-engineer]] (backend-platform) + [[frontend-ui-design]] (frontend-ui)
   → [[test-driven-development]] (agent-ops)
   → [[verification-before-completion]] (agent-ops)

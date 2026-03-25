@@ -1,6 +1,8 @@
 ---
 name: fixing-accessibility
 description: Audit and fix HTML accessibility issues including ARIA labels, keyboard navigation, focus management, color contrast, and form errors. Use when adding interactive controls, forms, dialogs, or reviewing WCAG compliance.
+metadata:
+  skill-type: code_quality_review
 ---
 
 # fixing-accessibility
@@ -150,12 +152,12 @@ Reference these guidelines when:
 - Use this skill when the user asks to audit or fix the domain covered by this skill.
 - Use during UI review passes when quick, concrete remediation is needed.
 
-## Inputs
+## Required inputs
 - Target file(s) or component scope to review.
 - Current stack context (framework, styling, and component primitives) when known.
 - Any explicit constraints from the user (for example: no refactors, minimal diff).
 
-## Outputs
+## Deliverables
 - Prioritized findings with exact snippets.
 - Why each issue matters (brief rationale).
 - Concrete code-level fix suggestions with minimal scope.
@@ -237,3 +239,9 @@ Reference these guidelines when:
 - Variation: vary recommendations by context-specific constraints; adapt, customize, and use different approaches when constraints differ.
 - Variation: prefer diverse, unique alternatives and avoid repetition or cookie-cutter template convergence.
 - Empowerment: enable users to explore options confidently, be capable and creative, unlock safe choices, and empower execution.
+
+## Gotchas
+- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.
+
+## Failure mode
+- If the affected UI, interaction path, or verification evidence is unclear, stop, report the missing context, and fall back to a scoped accessibility audit before making speculative fixes.

@@ -10,13 +10,15 @@
 ## Tools
 - Use `rg`, `fd`, `jq` from repo workflow.
 - Read `~/.codex/instructions/tooling.md` for the current authoritative tool stack.
-- Use `zsh -lc` in shell tooling.
+- Default to `zsh -lc` for shell tooling; switch to `bash` only when a script relies on bash internals.
 
 ## Command preflight
-- Confirm `pwd` is `/Users/jamiecraik/dev/agent-skills` before edits.
+- Run `bash scripts/codex-preflight.sh --stack auto --mode required` before multi-step, destructive, or path-sensitive work.
+- The verified optional overrides are `--repo-fragment`, `--bins`, and `--paths`.
+- Confirm `pwd` is `/Users/jamiecraik/dev/Agent-Skills` before edits.
 - Verify required binaries with `which` before running installs.
 - Confirm target paths with `fd` before destructive operations.
-- Use `bash -lc` only when bash-specific internals are required.
+- Do not source `scripts/codex-preflight.sh` or call `preflight_repo`; the current script is a bash CLI, not a shell function library.
 
 ## Verified command style
 - Keep command snippets backed by repo files before documenting them.
@@ -33,6 +35,7 @@
   - `npm --prefix <path> exec <bin>`
 
 ## Useful checks
+- `bash scripts/codex-preflight.sh --stack auto --mode required`
 - `bash scripts/sync_skills.sh`
 - `python3 scripts/docs_lint.py --mode warn --config docs-policy.json`
 - `python3 ~/.codex/scripts/plan-graph-lint.py .agent/PLANS.md`

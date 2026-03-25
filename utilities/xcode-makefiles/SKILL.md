@@ -1,6 +1,8 @@
 ---
 name: xcode-makefiles
 description: Install strict Xcode Makefile tooling for iOS/macOS projects, including build/run/test scripts with AGENT_NAME-based per-agent isolation under build/. Use when a project needs reproducible local CLI builds without full app scaffolding.
+metadata:
+  skill-type: scaffolding_templates
 ---
 
 # Xcode Makefiles
@@ -108,3 +110,6 @@ skills/xcode-makefiles/scripts/install.sh --project-dir /tmp/demo --app-name Dem
 - Persist with: `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
 - The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
 <!-- /decision-feedback-protocol -->
+
+## Gotchas
+- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.

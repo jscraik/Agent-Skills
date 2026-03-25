@@ -1,6 +1,8 @@
 ---
 name: test-driven-development
 description: "Create test-first Red-Green-Refactor delivery for behavior changes. Use when implementing a feature or bugfix before writing production code."
+metadata:
+  skill-type: code_quality_review
 ---
 
 # Test-Driven Development
@@ -126,7 +128,7 @@ Required gates:
 | [[systematic-debugging]] | Run the TDD loop inside this debugging workflow for each phase-4 fix |
 | [[verification-before-completion]] | Explicit gate: verify the full test suite is green before claiming done |
 | [[evals-router]] | When the failing "test" is an LLM evaluation — route to the correct eval workflow |
-| [[writing-plans]] | Write a TDD-aware plan when the feature spans multiple behavior changes |
+| [[ce-plan]] | Write a TDD-aware plan when the feature spans multiple behavior changes |
 
 **Topic map:** [[agent-ops]]
 
@@ -138,3 +140,19 @@ Required gates:
 - Persist with: `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
 - The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
 <!-- /decision-feedback-protocol -->
+
+## Gotchas
+- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.
+
+## When to use
+- Use this skill when implementing or repairing observable behavior where a failing test can capture the requirement before production code changes.
+- Do not use it for pure documentation edits or changes where no meaningful executable behavior can be specified yet.
+
+## Required inputs
+- A concrete behavior target, bug reproduction, or acceptance criterion.
+- The relevant test command/framework for the repository.
+- The likely files or components involved in the change.
+
+## Deliverables
+- A clear Red-Green evidence trail with at least one meaningful failing test followed by a passing result.
+- Minimal implementation changes plus a short explanation of what behavior was proved and what regression checks were run.

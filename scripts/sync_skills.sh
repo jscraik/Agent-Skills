@@ -1,17 +1,27 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+timeout_seconds="${SYNC_SKILLS_TIMEOUT_SECONDS:-300}"
+lock_dir="${TMPDIR:-/tmp}/agent-skills-sync.lock"
+lock_pid_file="$lock_dir/pid"
+lock_owned=0
+watchdog_pid=""
+
 usage() {
   cat <<'USAGE'
 Usage:
-  scripts/sync_skills.sh
+  scripts/sync_skills.sh [--timeout-seconds <int>]
 
 Regenerates skill/plugin symlinks and SKILL.md index for this repository.
 USAGE
 }
 
-if [[ $# -gt 0 ]]; then
+while [[ $# -gt 0 ]]; do
   case "${1:-}" in
+    --timeout-seconds)
+      timeout_seconds="${2:-}"
+      shift 2
+      ;;
     -h|--help)
       usage
       exit 0
@@ -22,10 +32,68 @@ if [[ $# -gt 0 ]]; then
       exit 2
       ;;
   esac
+done
+
+if ! [[ "$timeout_seconds" =~ ^[0-9]+$ ]] || [[ "$timeout_seconds" -lt 30 ]]; then
+  echo "Invalid --timeout-seconds value: $timeout_seconds (expected integer >= 30)" >&2
+  exit 2
 fi
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$repo_root"
+
+acquire_sync_lock() {
+  if mkdir "$lock_dir" 2>/dev/null; then
+    printf '%s\n' "$$" > "$lock_pid_file"
+    lock_owned=1
+    return 0
+  fi
+
+  if [[ -f "$lock_pid_file" ]]; then
+    existing_pid="$(cat "$lock_pid_file" 2>/dev/null || true)"
+    if [[ -n "$existing_pid" ]] && kill -0 "$existing_pid" 2>/dev/null; then
+      echo "sync_skills already running (pid=$existing_pid); exiting without duplicate work."
+      exit 0
+    fi
+  fi
+
+  rm -rf -- "$lock_dir"
+  if mkdir "$lock_dir" 2>/dev/null; then
+    printf '%s\n' "$$" > "$lock_pid_file"
+    lock_owned=1
+    return 0
+  fi
+
+  echo "Unable to acquire sync lock at $lock_dir" >&2
+  exit 1
+}
+
+start_watchdog() {
+  (
+    sleep "$timeout_seconds"
+    echo "[ERROR] sync_skills timed out after ${timeout_seconds}s" >&2
+    kill -TERM "$$" 2>/dev/null || true
+  ) &
+  watchdog_pid="$!"
+}
+
+stop_watchdog() {
+  if [[ -n "$watchdog_pid" ]]; then
+    kill "$watchdog_pid" 2>/dev/null || true
+    wait "$watchdog_pid" 2>/dev/null || true
+    watchdog_pid=""
+  fi
+}
+
+release_sync_lock() {
+  if [[ "$lock_owned" -eq 1 ]]; then
+    rm -rf -- "$lock_dir"
+    lock_owned=0
+  fi
+}
+
+acquire_sync_lock
+start_watchdog
 
 skills_dir="$repo_root/.agents/skills"
 plugins_dir="$repo_root/plugins"
@@ -70,40 +138,44 @@ done
 cleanup_paths=()
 cleanup_on_exit() {
   local path=""
+  stop_watchdog
   for path in "${cleanup_paths[@]:-}"; do
     if [ -n "$path" ] && [ -d "$path" ]; then
       rm -rf -- "$path"
     fi
   done
+  release_sync_lock
 }
 trap cleanup_on_exit EXIT
 
-# Ensure system skills are not in the flat symlink view (prevents duplicates).
-if [ -d "$skills_dir/.system" ]; then
-  mkdir -p "$system_skills_dir"
-  # Safety: if repo already has a skills-system marker, do NOT overwrite it from
-  # whatever happens to be in skills/.system (which can be partial/ephemeral).
-  # Just remove skills/.system so system skills don't appear in the flat view.
-  if [ -f "$system_skills_dir/.codex-system-skills.marker" ]; then
-    rm -rf "$skills_dir/.system"
+# Preserve upstream-managed system skills in a repo-level store, then expose
+# them through a hidden `.system` entry so only the hidden system copy remains.
+mkdir -p "$system_skills_dir"
+touch "$system_skills_dir/.codex-system-skills.marker"
+if [ -d "$skills_dir/.system" ] && [ ! -L "$skills_dir/.system" ]; then
+  if [ ! -w "$skills_dir/.system" ]; then
+    echo "[WARN] $skills_dir/.system is not writable; skipping preservation to avoid blocking sync."
   else
-  # Use rsync to handle existing directories, then remove source
-  if command -v rsync >/dev/null 2>&1; then
-    rsync -a "$skills_dir/.system/" "$system_skills_dir/"
-    rm -rf "$skills_dir/.system"
-  else
-    # Fallback: remove target first, then move
-    find "$system_skills_dir" -mindepth 1 -maxdepth 1 -exec rm -rf -- {} +
-    mv "$skills_dir/.system"/.[!.]* "$system_skills_dir"/ 2>/dev/null || true
-    mv "$skills_dir/.system"/..?* "$system_skills_dir"/ 2>/dev/null || true
-    mv "$skills_dir/.system"/* "$system_skills_dir"/ 2>/dev/null || true
-    rmdir "$skills_dir/.system" 2>/dev/null || true
-  fi
+    if command -v rsync >/dev/null 2>&1; then
+      if ! rsync -a "$skills_dir/.system/" "$system_skills_dir/"; then
+        echo "[WARN] Failed to preserve system skills into $system_skills_dir (continuing anyway)."
+      fi
+    else
+      mkdir -p "$system_skills_dir"
+      cp -R "$skills_dir/.system"/. "$system_skills_dir"/ 2>/dev/null || true
+    fi
+    if ! rm -rf "$skills_dir/.system"; then
+      echo "[WARN] Unable to remove $skills_dir/.system after preservation (continuing anyway)."
+    fi
   fi
 fi
 
 # Remove stale symlinks only (keep any real files that might be intentional).
-find "$skills_dir" -maxdepth 1 -type l -exec rm -f {} +
+if [ -w "$skills_dir" ]; then
+  find "$skills_dir" -maxdepth 1 -type l -exec rm -f {} +
+else
+  echo "[WARN] $skills_dir is not writable; skipping stale symlink cleanup."
+fi
 
 # Remove meta/internal skills from the flat runtime surface so they do not
 # appear as user-selectable skills in Codex.
@@ -114,8 +186,11 @@ hidden_flat_skills=(
 )
 for hidden_skill in "${hidden_flat_skills[@]}"; do
   if [ -e "$skills_dir/$hidden_skill" ]; then
-    rm -rf -- "$skills_dir/$hidden_skill"
-    echo "Removed hidden flat skill: $hidden_skill"
+    if rm -rf -- "$skills_dir/$hidden_skill"; then
+      echo "Removed hidden flat skill: $hidden_skill"
+    else
+      echo "[WARN] Could not remove hidden skill $hidden_skill at $skills_dir (continuing anyway)."
+    fi
   fi
 done
 
@@ -191,6 +266,43 @@ all_skill_files_cmd() {
     }
   '
 }
+
+# Extract `metadata.skill-type` (or `metadata.skill_type`) from frontmatter.
+# Returns empty when the field is not present.
+extract_skill_type() {
+  local skill_path="$1"
+  awk '
+    function ltrim(s) { sub(/^[ \t]+/, "", s); return s }
+    function rtrim(s) { sub(/[ \t]+$/, "", s); return s }
+    function trim(s) { return rtrim(ltrim(s)) }
+    BEGIN { in_fm = 0; in_meta = 0 }
+    /^---[ \t]*$/ {
+      if (in_fm == 0) { in_fm = 1; next }
+      exit
+    }
+    in_fm == 0 { next }
+    /^[A-Za-z0-9_-]+:[ \t]*/ {
+      key = $0
+      sub(/:.*/, "", key)
+      if (key == "metadata") { in_meta = 1; next }
+      if (in_meta == 1) { in_meta = 0 }
+    }
+    in_meta == 1 && /^[ \t]+(skill-type|skill_type):[ \t]*/ {
+      rest = $0
+      sub(/^[ \t]+(skill-type|skill_type):[ \t]*/, "", rest)
+      rest = trim(rest)
+      if (rest ~ /^["\047].*["\047]$/) {
+        q1 = substr(rest, 1, 1)
+        q2 = substr(rest, length(rest), 1)
+        if (q1 == q2) {
+          rest = substr(rest, 2, length(rest) - 2)
+        }
+      }
+      print rest
+      exit
+    }
+  ' "$skill_path"
+}
 while IFS= read -r skill_path; do
   # Skip the root index.
   if [ "$skill_path" = "./SKILL.md" ]; then
@@ -215,7 +327,10 @@ while IFS= read -r skill_path; do
     # copies so the loader view stays aligned with the source-of-truth skill.
     if [ -d "$skills_dir/$skill_name" ] && [ "${skill_dir#./.agents/skills/}" = "$skill_dir" ]; then
       echo "Replacing conflicting flat skill dir: $skill_name -> $skill_dir_rel"
-      rm -rf -- "$skills_dir/$skill_name"
+      if ! rm -rf -- "$skills_dir/$skill_name"; then
+        echo "[WARN] Could not replace existing $skill_name in $skills_dir; skipping $skill_dir_rel."
+        continue
+      fi
     else
       echo "Duplicate skill name: $skill_name (skip $skill_dir_rel)"
       continue
@@ -223,6 +338,14 @@ while IFS= read -r skill_path; do
   fi
   ln -s "$skill_dir_rel" "$skills_dir/$skill_name"
 done < <(all_skill_files_cmd)
+
+# Re-expose preserved system skills through the hidden `.system` path without
+# bringing them back into the flat runtime skill list.
+if [ -e "$skills_dir/.system" ] && [ ! -L "$skills_dir/.system" ]; then
+  echo "[WARN] $skills_dir/.system exists as a non-symlink; leaving it in place."
+elif [ ! -e "$skills_dir/.system" ]; then
+  ln -s "../../skills-system" "$skills_dir/.system"
+fi
 
 # Build a strict Antigravity-compatible projection:
 # - flat first-level skill folders only
@@ -527,7 +650,133 @@ HEADER
   done < <(cd "$temp_dir" && find . -mindepth 1 -maxdepth 1 -type f -print | sed 's|^\./||' | sort)
 }
 
-generate_skill_index "$repo_root/SKILL.md"
+generate_skill_type_index() {
+  local index_file="$1"
+  local temp_dir=""
+  local type_file=""
+  temp_dir="$(mktemp -d)"
+  cleanup_paths+=("$temp_dir")
+
+  mkdir -p "$(dirname "$index_file")"
+
+  local ordered_types=(
+    "library_api_reference"
+    "product_verification"
+    "data_fetch_analysis"
+    "team_automation"
+    "scaffolding_templates"
+    "code_quality_review"
+    "ci_cd_deployment"
+    "runbook"
+    "infrastructure_ops"
+  )
+
+  # Bucket tagged skills by semantic type.
+  while IFS= read -r skill_path; do
+    if [ "$skill_path" = "./SKILL.md" ]; then
+      continue
+    fi
+
+    skill_type_raw="$(extract_skill_type "$skill_path" | tr '\n' ' ' | sed -E 's/[[:space:]]+/ /g; s/^[[:space:]]+//; s/[[:space:]]+$//')"
+    if [ -z "$skill_type_raw" ]; then
+      continue
+    fi
+
+    skill_type="$(echo "$skill_type_raw" | tr '[:upper:]' '[:lower:]' | sed -E 's/[[:space:]-]+/_/g')"
+    skill_dir="$(dirname "$skill_path")"
+    skill_name="$(basename "$skill_dir")"
+    category="$(dirname "$skill_dir" | sed 's|^\./||; s|^\.||')"
+
+    case "$skill_type" in
+      library_api_reference|product_verification|data_fetch_analysis|team_automation|scaffolding_templates|code_quality_review|ci_cd_deployment|runbook|infrastructure_ops)
+        echo "- \`$skill_name\` — \`$category\`" >> "$temp_dir/$skill_type"
+        ;;
+      *)
+        echo "[WARN] Unrecognized metadata.skill-type in $skill_path: $skill_type_raw" >&2
+        echo "- \`$skill_name\` — \`$category\` (\`$skill_type_raw\`)" >> "$temp_dir/__invalid__"
+        ;;
+    esac
+  done < <(all_skill_files_cmd)
+
+  cat > "$index_file" << 'HEADER'
+# Skill Type Index
+
+Generated from `metadata.skill-type` tags in skill frontmatter. This index complements the directory-based catalog in `SKILL.md`.
+
+## Table of Contents
+- [Summary](#summary)
+- [Semantic Types](#semantic-types)
+- [Validation Notes](#validation-notes)
+
+HEADER
+
+  {
+    echo "## Summary"
+    echo ""
+  } >> "$index_file"
+
+  tagged_count=0
+  for type_name in "${ordered_types[@]}"; do
+    type_file="$temp_dir/$type_name"
+    count=0
+    if [ -f "$type_file" ]; then
+      count="$(wc -l < "$type_file" | tr -d '[:space:]')"
+    fi
+    tagged_count=$((tagged_count + count))
+    echo "- \`$type_name\`: $count" >> "$index_file"
+  done
+
+  invalid_count=0
+  if [ -f "$temp_dir/__invalid__" ]; then
+    invalid_count="$(wc -l < "$temp_dir/__invalid__" | tr -d '[:space:]')"
+  fi
+  echo "- \`invalid\`: $invalid_count" >> "$index_file"
+  echo "- \`total_tagged\`: $tagged_count" >> "$index_file"
+  echo "" >> "$index_file"
+
+  {
+    echo "## Semantic Types"
+    echo ""
+  } >> "$index_file"
+
+  for type_name in "${ordered_types[@]}"; do
+    header="$(echo "$type_name" | tr '_' ' ')"
+    title=""
+    for word in $header; do
+      first="$(echo "$word" | cut -c1 | tr '[:lower:]' '[:upper:]')"
+      rest="$(echo "$word" | cut -c2-)"
+      title="$title$first$rest "
+    done
+    title="${title% }"
+
+    {
+      echo "### $title"
+      echo ""
+      if [ -f "$temp_dir/$type_name" ]; then
+        sort "$temp_dir/$type_name"
+      else
+        echo "- _No tagged skills yet._"
+      fi
+      echo ""
+    } >> "$index_file"
+  done
+
+  {
+    echo "## Validation Notes"
+    echo ""
+    if [ "$invalid_count" -gt 0 ]; then
+      echo "- Unrecognized tags were found. Check script warnings and normalize to the canonical values."
+      echo ""
+      sort "$temp_dir/__invalid__"
+    else
+      echo "- No invalid semantic type tags detected."
+    fi
+    echo ""
+  } >> "$index_file"
+}
+
+python3 "$repo_root/scripts/skill_catalog.py" --source repo --write-index "$repo_root/SKILL.md"
+generate_skill_type_index "$repo_root/docs/skills-by-type.md"
 
 # Remove legacy tool symlinks (no longer supported)
 remove_legacy_symlink() {
@@ -548,16 +797,53 @@ sync_user_skills() {
   local source_dir="$1"
   local target_dir="$2"
   local force="${3:-0}"
+  local mode="${4:-symlink}"
+
+  sync_dir_copy() {
+    local source_dir="$1"
+    local target_dir="$2"
+
+    mkdir -p "$target_dir"
+
+    if command -v rsync >/dev/null 2>&1; then
+      rsync -a "$source_dir/" "$target_dir/" --delete
+      return 0
+    fi
+
+    # Fallback for environments without rsync.
+    find "$target_dir" -mindepth 1 -maxdepth 1 -exec rm -rf -- {} +
+    cp -a "$source_dir/." "$target_dir/"
+  }
+
+  if [ "$mode" = "copy" ]; then
+    mkdir -p "$(dirname "$target_dir")"
+    if [ -L "$target_dir" ] || [ ! -d "$target_dir" ]; then
+      rm -rf "$target_dir" || echo "[WARN] Could not replace non-directory target at $target_dir (continuing with copy)."
+    fi
+    sync_dir_copy "$source_dir" "$target_dir"
+    echo "[OK] Synced directory: $target_dir"
+    return 0
+  fi
+
   mkdir -p "$(dirname "$target_dir")"
   if [ -L "$target_dir" ]; then
     # Update existing symlink
-    ln -sfn "$source_dir" "$target_dir"
-    echo "[OK] Updated symlink: $target_dir -> $source_dir"
+    if ln -sfn "$source_dir" "$target_dir"; then
+      echo "[OK] Updated symlink: $target_dir -> $source_dir"
+    else
+      echo "[WARN] Unable to update symlink $target_dir -> $source_dir (continuing)."
+    fi
   elif [ -e "$target_dir" ] && [ ! -L "$target_dir" ]; then
     if [ "$force" = "1" ]; then
-      rm -rf "$target_dir"
-      ln -s "$source_dir" "$target_dir"
-      echo "[OK] Replaced existing path with symlink: $target_dir -> $source_dir"
+      if rm -rf "$target_dir"; then
+        if ln -s "$source_dir" "$target_dir"; then
+          echo "[OK] Replaced existing path with symlink: $target_dir -> $source_dir"
+        else
+          echo "[WARN] Unable to create symlink $target_dir -> $source_dir (continuing)."
+        fi
+      else
+        echo "[WARN] Could not remove existing path at $target_dir; skipping symlink update."
+      fi
     else
       # Exists but is not a symlink - warn and skip
       echo "[WARN] $target_dir exists but is not a symlink (skipping)"
@@ -586,8 +872,9 @@ sync_user_skills "$skills_dir" "$HOME/.claude/skills"
 sync_user_skills "$skills_dir" "$HOME/.agents/skills"
 sync_user_skills "$plugins_dir" "$HOME/.agents/plugins"
 sync_user_skills "$skills_dir" "$HOME/.codex/skills"
-sync_user_skills "$antigravity_skills_dir" "$HOME/.gemini/antigravity/skills" 1
-sync_user_skills "$antigravity_skills_dir" "$HOME/.gemini/skills" 1
+sync_user_skills "$plugins_dir" "$HOME/.codex/plugins" 1
+sync_user_skills "$antigravity_skills_dir" "$HOME/.gemini/antigravity/skills" 1 copy
+sync_user_skills "$antigravity_skills_dir" "$HOME/.gemini/skills" 1 copy
 sync_user_skills "$antigravity_skills_dir" "$HOME/.antigravity/skills"
 sync_skill_path_file "$antigravity_skills_dir" "$antigravity_skills_txt"
 

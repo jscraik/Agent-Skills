@@ -1,455 +1,316 @@
 ---
 name: skill-builder
-description: "Create, revise, benchmark, and quality-gate Codex skills (SKILL.md plus scripts, references, evals, and packaging). Use this skill when the user asks to build, audit, improve, compare, or package a Codex skill or skill-graph contract; do not use it for unrelated app features, generic bug fixing, or routine docs edits."
+description: Create, improve, compare, import, and quality-gate Codex skills, including SKILL.md, references, evals, scripts, and packaging. Use when the user wants skill-focused building, auditing, or installation work, not generic feature coding or plugin conversion.
+metadata:
+  skill-type: code_quality_review
+  lifecycle_state: active
+  maturity: canonical
+  owner: Agent Skills Team
+  review_cadence: quarterly
+  last_reviewed: 2026-03-24
+  metadata_source: frontmatter
 ---
 
 # Skill Builder
-This skill designs, improves, validates, and packages high-quality Codex skills.
-**Version**: 1.10.0 · **Last updated**: 2026-03-07
-
+Design, improve, validate, and package high-quality Codex skills.
 ## Table of Contents
 - [Working agreement](#working-agreement)
-- [Scope and triggers](#scope-and-triggers)
+- [When to use](#when-to-use)
+- [Category confirmation](#category-confirmation)
+- [OpenAI skill format and progressive disclosure](#openai-skill-format-and-progressive-disclosure)
+- [Semantic tag governance](#semantic-tag-governance)
+- [Compact governance contract](#compact-governance-contract)
 - [Modes](#modes)
-- [Needed inputs](#needed-inputs)
+- [Required inputs](#required-inputs)
 - [Discovery interview](#discovery-interview)
-- [LearningPosture compatibility](#learningposture-compatibility)
 - [Deliverables](#deliverables)
+- [Gotchas](#gotchas)
 - [Response format](#response-format)
+- [Philosophy](#philosophy)
+- [Examples](#examples)
 - [Output contract](#output-contract)
-- [Operating principles](#operating-principles)
 - [Skill creation process](#skill-creation-process)
 - [Execution guardrails](#execution-guardrails)
-- [Script-backed security rules](#script-backed-security-rules)
-- [What to avoid](#what-to-avoid)
-- [Constraints](#constraints)
 - [Validation](#validation)
-- [Troubleshooting](#troubleshooting)
-- [Examples](#examples)
-- [Reference map](#reference-map)
-- [Decision feedback protocol](#decision-feedback-protocol)
-- [Empowering execution style](#empowering-execution-style)
+- [Constraints and safety](#constraints-and-safety)
+- [Install-distribute mode](#install-distribute-mode)
+- [Antipatterns](#antipatterns)
 
 ## Working agreement
 - Follow the repo `AGENTS.md`; treat it as a map, not a megadoc.
-- Keep the artifact boundary explicit:
-  - local Codex CLI -> `./artifacts/`
-  - hosted shell -> `/mnt/data/`
-- Keep `SKILL.md` within a strict line budget (target <= 320 lines). If new depth is needed, move it to `references/` and link it.
-- For long runs, write short status notes so compaction is safe.
-- For advisory or intake-only turns, do bounded preflight first; do not broad-scan the repo tree unless editing or repo-wide analysis is actually needed.
+- Keep the artifact boundary explicit: local Codex CLI -> `./artifacts/`, hosted shell -> `/mnt/data/`.
+- Path confinement default: write inside approved repo roots and `./artifacts/`; `USER` scope is an explicit `install-distribute` opt-out with confirmation + allowlist.
+- Start with the smallest viable package boundary and 2-3 focused surfaces on first pass.
+- Move deep policy into `references/`; move repeatable mechanics into `scripts/`.
+- Preserve valuable context by relocating it with explicit signposting, not by deleting or flattening nuanced guidance just to make `SKILL.md` shorter.
+- Treat graph-readiness as source quality, not cleanup work after the fact:
+  - add a `## See Also` table with at least 2 real related skills,
+  - include a topic-map signpost such as `**Topic map:** [[agent-ops]]` when the skill belongs in the graph,
+  - create or preserve `references/task-profile.json` for in-scope operational skills.
 
-## Standards snapshot (March 2026)
-- Build skills as routing assets plus durable support files, not megadocs.
-- Prefer repo-validated workflow and benchmark evidence over aspirational wording.
-- Treat evals, contracts, and validator output as part of the product, not optional polish.
-- Keep the result implementable by another agent without hidden context.
-- Start with the smallest package boundary and 2-3 focused surfaces on a first pass.
-- Avoid sprawling scope by keeping first-pass plans narrow until evidence justifies expansion.
-
-## Scope and triggers
-Use this skill to:
+## When to use
+Use this skill when the user asks to:
 - create a new skill;
-- improve an existing skill’s routing, workflow, or reliability;
-- audit a skill against repo standards and validators;
-- compare two skill variants;
-- package a validated skill for reuse;
-- improve skill-graph contracts tied to recursive workflow operations.
+- improve an existing skill's routing, workflow, safety, or portability;
+- audit a skill against validators and evals;
+- compare variants with shared evals;
+- package a validated skill;
+- refine skill-graph contracts tied to recursive workflow operations;
+- list, install, update, or deconflict local/imported skill folders (`install-distribute` mode).
 
-Do not use this skill for unrelated application features, generic debugging, or ordinary documentation tasks that do not create or improve a skill.
+Keep this skill out of scope for: unrelated app feature coding; generic bug-fixing outside skill quality; routine non-skill docs edits; plugin conversion (`codex-plugin-builder`); session-scan coverage (`codex-sessions-skill-scan`).
 
-## LearningPosture compatibility
+## Category confirmation
+For `create` and `improve` mode, confirm the primary category before drafting:
 
-This skill must preserve existing `delegation.mode` semantics while supporting posture-aware guidance via `learning_posture` metadata.
+1. Library & API Reference
+2. Product Verification
+3. Data Fetching & Analysis
+4. Business Process & Automation
+5. Code Scaffolding & Templates
+6. Code Quality & Review
+7. CI/CD & Deployment
+8. Runbooks
+9. Infrastructure Operations
 
-- Supported posture modes:
-  - `learn`: explain alternatives, assumptions, and risks first before proposing edits.
-  - `guided`: propose concrete improvements, keep the user in the loop, and require explicit progression checkpoints.
-  - `execute`: apply agreed changes only after scope, inputs, and safety gates are present.
-- Default posture for this skill is `guided`.
-- Explicit `learn` posture requests should delay output-only behavior and increase explanation depth.
-- For execution requests, the skill should still preserve the advisory safety bar and never remove existing human checkpoint gates from the spec.
+Start with:
+- “Based on what you described, this sounds like a [Category X] skill. Does that match your intent, or is it something different?”
+
+## OpenAI skill format and progressive disclosure
+Enforce OpenAI/Codex skill format by default:
+- frontmatter uses official keys only:
+  - required: `name`, `description`
+  - optional: `license`, `allowed-tools`, `metadata`
+- for this repository, use `metadata.skill-type` to classify skills for semantic indexing and governance checks
+- keep `description` as routing logic (what + when), not a procedure dump;
+- keep `SKILL.md` as the map:
+  - route-critical boundaries, required inputs, output contract, and safety guardrails stay in `SKILL.md`
+  - long examples, compatibility matrices, and operational runbooks move to `references/`
+  - when relocating material, preserve high-value nuance, caveats, and doctrine in `references/` instead of summarizing them away
+  - add explicit signposts so `SKILL.md` tells the reader which reference to open and when
+  - deterministic helpers stay in `scripts/`
+- for non-trivial responses, include machine-checkable output contracts with `schema_version`.
+
+## Semantic tag governance
+Use semantic tags to complement directory categories without renaming folders.
+
+Canonical `metadata.skill-type` values:
+- `library_api_reference`
+- `product_verification`
+- `data_fetch_analysis`
+- `team_automation`
+- `scaffolding_templates`
+- `code_quality_review`
+- `ci_cd_deployment`
+- `runbook`
+- `infrastructure_ops`
+
+Governance rules:
+- for `create` mode in this repo, set `metadata.skill-type` on every new skill;
+- for `improve` mode in this repo, preserve existing `metadata.skill-type` unless there is an explicit reason to retag;
+- if no canonical value fits, choose the closest fit and add a short rationale in the change summary instead of inventing a new value;
+- add new semantic-type values only with explicit user approval;
+- keep folder taxonomy as-is; semantic tags are a second axis, not a replacement.
+
+Lint and generation expectations:
+- in this sandboxed environment, run `bash scripts/sync_skills_sandbox_safe.sh` after semantic-tag changes;
+- run full `bash scripts/sync_skills.sh` only when runtime skill paths are writable;
+- run `bash scripts/lint_skill_types.sh` and require a clean pass (`Missing: 0`, `Invalid: 0`);
+- run `bash scripts/lint_openai_skill_format.sh --mode strict` and require a clean pass;
+- run `bash scripts/lint_progressive_disclosure.sh --mode warn` and remediate warnings over time;
+- run `python3 scripts/gotcha_pipeline.py validate` to ensure candidate-governance artifacts stay contract-safe;
+- treat `[WARN] Unrecognized metadata.skill-type ...` output as a governance failure to be fixed before claiming completion;
+- confirm `docs/skills-by-type.md` regenerated successfully when tags change.
+
+## Compact governance contract
+Use this contract for `create` and `improve` mode in this repository.
+
+Source of truth:
+- `references/governance-contract.md`
+
+Required gates before completion claim:
+- `bash scripts/lint_openai_skill_format.sh --mode strict`
+- `bash scripts/lint_progressive_disclosure.sh --mode warn`
+- `python3 scripts/gotcha_pipeline.py validate`
+- `bash scripts/sync_skills_sandbox_safe.sh` and `bash scripts/lint_skill_types.sh` when semantic tags changed in this environment
+- full `bash scripts/sync_skills.sh` when runtime skill paths are writable
+
+Core policies:
+- use `Do X because Y` style in `SKILL.md` procedure sections;
+- keep `description` routing-first (`what + when`), never a checklist;
+- progressive-disclosure triggers must live in `references/` (`Read when: <condition>`);
+- progressive disclosure means signposted relocation, not information loss; if detail matters for correct behavior, preserve it in `references/` and route to it explicitly;
+- `__all__` only when module-style scripts are intended for import reuse; not required for CLI entrypoints.
 
 ## Modes
 Choose the smallest mode that fits:
-- **create**: scaffold and author a new skill;
-- **improve**: tighten routing, workflow, safety, or portability;
-- **eval**: run validators and summarize findings;
-- **benchmark-lite**: compare variants with shared evals;
-- **graph**: refine skill-graph docs, contracts, or runtime metadata;
-- **package**: produce a distributable `.skill` archive.
+- `create`
+- `improve` (includes `upgrade`)
+- `eval`
+- `benchmark-lite`
+- `graph`
+- `package`
+- `install-distribute`
 
 Default to `create` or `improve`.
-Treat `upgrade` requests as `improve`.
-
-## Unified conformance and grading
-Apply one conformance workflow across `create`, `improve`/`upgrade`, and `install-distribute`.
-
-- Keep this inside `skill-builder`; do not split this into a standalone grading skill.
-- Run gold gates on every skill:
-  - `quick_validate`, `skill_gate`, `analyze_skill`, and `openclaw_skill_guard`.
-- If upstream eval metadata exists (for example `eval.yaml`, grader scripts, or rubric files), run an upstream-grade pass in addition to gold gates.
-- Use conformance profiles:
-  - `native`: skill-builder gold standard is primary and required.
-  - `imported`: preserve upstream structure, add compatibility overlays as needed, and report both upstream-grade and gold-grade status.
-- Emit one decision per skill: `pass`, `warn`, or `fail`, with a short reason and next fix.
-
-## Needed inputs
-- skill goal;
-- 3-10 example prompts:
-  - 2-5 happy path,
-  - 1-3 edge cases,
-  - 1-3 should-not-trigger negatives;
-- target environment: `codex`, `claude`, or `portable`;
-- any needed tools, APIs, schemas, templates, or style rules;
-- compatibility posture;
-- if graph work is in scope, the profile/scope and intended graph outputs.
-
-If key details are missing, ask only the minimum questions needed to proceed safely.
-
-## Discovery interview
-When `create` or `improve` work is underspecified, run a round-based discovery interview before building.
-
-- Use Codex `request_user_input` first when a round fits into 1-3 short prompts.
-- Ask one round at a time and wait for the answer before moving on.
-- Skip rounds already answered by the thread; do not make the user restate known context.
-- Stop when you are about 95 percent confident you can build the skill safely.
-- Keep each round intuitive:
-  - start with one plain-language question,
-  - prefer concrete options over jargon,
-  - explain why the round matters in one short sentence,
-  - avoid dumping the whole interview plan at once.
-- Prefer the reusable `request_user_input` mini-templates and payload examples in `references/discovery-interview.md` unless the thread already suggests a better phrasing.
-- If discovery needs more than one round, prefer isolated discovery in a forked subagent context so the main thread stays compact.
-- Before building, summarize the skill back to the user and ask for confirmation.
-- Use `references/discovery-interview.md` for the six-round default flow.
-
-## Deliverables
-Produce what the request actually needs, usually from this set:
-- a skill folder with `SKILL.md`;
-- `scripts/`, `references/`, `assets/`, or `workflows/` when they materially help;
-- `agents/openai.yaml` when OpenAI or Codex UI or tool metadata is needed;
-- `references/contract.yaml` and `references/evals.yaml` for non-trivial skills;
-- `references/plan.md` for multi-step builds;
-- validator output, analyzer output, and an OpenClaw-style readiness summary;
-- a packaged `.skill` file when packaging is requested.
-- a concise blocker summary when a skill cannot meet the quality bar in the current turn
-
-For created or revised skills, keep decision-feedback instrumentation in scope:
-- include the `decision-feedback-protocol:v2` block in the skill when post-run feedback is relevant;
-- make feedback runtime-owned: if capture is enabled, emit a non-blocking `post_run_feedback` event after result delivery via Codex `request_user_input`;
-- keep feedback recordable with `scripts/record_skill_feedback.py`.
-
-## Response format
-Start with these headings and no text before them:
-
-## Scope and triggers
-- confirm when the skill applies.
 
 ## Required inputs
-- list missing inputs or state what is already known.
+- skill goal and boundary;
+- 2-3 concrete use cases, plus 8-10 should-trigger and 8-10 should-not-trigger queries;
+- target environment: `codex`, `claude`, or `portable`;
+- required tools, schemas, templates, and policy constraints;
+- compatibility posture (`learn`, `guided`, `execute`);
+- category confirmation (for create/improve) with rationale for any category tradeoff.
+
+If critical inputs are missing, ask only the minimum needed to proceed safely.
+- When inputs are missing, phrase each critical item as a direct question ending in `?`; do not only list field names or placeholders.
+
+## Discovery interview
+Run discovery for underspecified `create` or `improve` requests.
+- Use `request_user_input` for 1-3 short prompts when it fits the round.
+- If unavailable, ask 1-3 numbered chat questions and then continue.
+- Ask one round at a time and wait before moving forward.
+- Start each round with one plain-language question and explain why the round matters with a short `Why this matters:` line.
+- Avoid dumping the whole interview plan at once; keep the first turn to the current round only.
+- Skip already-answered rounds.
+- Stop when confidence is high enough to build safely.
+- Before implementation, summarize:
+  - confirmed facts
+  - assumptions
+  - approval checkpoint
+- Use `references/discovery-interview.md` for reusable round templates.
 
 ## Deliverables
-- list the files, checks, or artifacts you will produce.
-
-## Failure mode
-- if the request is out of scope, say why and suggest the closest next step.
-
-On the first response, stay compact: no deep implementation, no file scaffolding, and no validator dump unless the user asked for it or the inputs are already complete.
-For `install-distribute`, the first response must still explicitly state `deconflict-first` ordering, a capability overlap matrix, and an artifact-uplift scan across incoming `references/`, `assets/`, and `agents/` before any install decision.
-
-## Output contract
-For non-trivial `improve`, `eval`, or `benchmark-lite` responses, include a deterministic summary block after prose:
-
-```json
-{
-  "schema_version": "1.0",
-  "mode": "improve|eval|benchmark-lite",
-  "skill_path": "<path>",
-  "findings": [{"id":"<short-id>","priority":"P0|P1|P2","status":"open|fixed","summary":"<one line>"}],
-  "validations": [{"name":"<validator>","result":"pass|warn|fail"}],
-  "next_step": "<single next action>"
-}
-```
-
-## Operating principles
-### Humans steer. Agents execute.
-Translate vague intent into a repeatable workflow. When results are weak, fix the scaffolding, constraints, or feedback loop instead of pushing harder on the same draft.
-
-### Keep SKILL.md as a map
-Keep route-critical guidance in `SKILL.md` and move depth into:
-- `references/` for the system of record,
-- `scripts/` for deterministic helpers,
-- `assets/` for templates and fixtures.
-
-### Descriptions are routing logic
-The frontmatter `description` is the decision boundary. Make it concrete about:
-- when to use the skill;
-- when not to use it;
-- outputs and success criteria.
-
-Use `references/description-optimization.md` when routing quality is the main issue.
-
-### Calibrate language to the user
-Use terms like `eval`, `assertion`, `benchmark`, and `JSON` only as freely as the user’s fluency supports. Briefly define specialized terms when needed.
-
-### Think in tradeoffs
-Ask three questions before you lock the design:
-- Why does this skill exist?
-- What evidence would change the workflow?
-- What should stay out of scope?
-
-Vary examples, adapt the structure, and choose context-specific guidance. Avoid repetitive, generic, cookie-cutter instructions; converge only after evidence review.
-
-## Skill creation process
-Skip steps only with a clear reason.
-
-### 0) Confirm target and boundary
-- confirm where the skill lives;
-- confirm the artifact boundary;
-- confirm `name` follows `^[a-z0-9](?:-?[a-z0-9]){0,63}$` and exactly matches the target folder name;
-- mine the current thread for demonstrated tools, steps, constraints, output shapes, and corrections before asking the user to restate them.
-
-### 1) Lock down triggers early
-- collect happy, edge, and negative prompts;
-- encode use-when, don’t-use-when, outputs, and success criteria in the `description`;
-- keep compatibility boundaries explicit;
-- for non-trivial skills, write `references/evals.yaml` early;
-- enforce trigger coverage minimums in evals: at least 3 should-trigger prompts and 3 should-not-trigger prompts;
-- for trigger-tuning work, use `references/description-optimization.md`.
-
-### 2) Choose the structure
-- **single-file** for one intent and one workflow;
-- **router-style** for multiple intents, heavy domain knowledge, or multiple output contracts.
-
-Router layout:
-```text
-skill-name/
-  SKILL.md
-  workflows/
-  references/
-  scripts/
-  assets/
-  agents/openai.yaml
-```
-
-Keep support files one-level deep inside standard folders (`references/<file>`, `scripts/<file>`, `assets/<file>`). Avoid nested trees unless a validator requires them.
-
-### 3) Scaffold the folder
-Use:
-```bash
-python scripts/init_skill.py <skill-name> --target codex --run-type instruction --path <output-dir>
-```
-
-Delete unused starter files immediately.
-
-### 4) Author SKILL.md
-- keep frontmatter minimal: `name` plus `description`;
-- make `description` a single line with trigger boundary and success criteria;
-- keep frontmatter parser-safe: avoid XML-style angle brackets (`<` or `>`) in `name`/`description`;
-- keep the workflow lean and reliable;
-- link to references instead of pasting deep docs;
-- keep templates and examples inside the skill bundle, not in prompts.
-
-### 5) Add resources only when they earn their keep
-- use `references/` for deep docs, schemas, contracts, and evals;
-- use `scripts/` for repeatable helpers;
-- use `assets/` for templates and fixtures.
-- for Codex-native UX or tool wiring, add `agents/openai.yaml` with at least `display_name`, `short_description`, and policy-aware tool metadata.
-
-If repeated eval runs recreate the same helper script, bundle it once in `scripts/` and reuse it.
-
-### 6) Validate
-Run the core validators, fix the first failing gate, then rerun.
-
-### 6.5) Compare variants only when needed
-- run shared evals for baseline and candidate;
-- compare evidence and failure modes, not style alone;
-- when quality is subjective, prefer blind comparison before declaring a winner.
-
-### 7) Package only after quality gates pass
-```bash
-python scripts/package_skill.py <path/to/skill-folder> dist/
-```
-
-## Execution guardrails
-- Cap iterative fix loops at 3 rounds per failing gate; after round 3, stop and report blockers plus the smallest safe next step.
-- Do not repeat the same command unchanged more than twice; if it fails twice, change approach or halt.
-- Prefer deterministic helper scripts over free-form retries when the same failure repeats.
-- Keep benchmark and validation reruns scoped while iterating, then rerun repo-wide gates before claiming the portfolio is clean.
-
-## Script-backed security rules
-When the skill includes executable code:
-- default to offline behavior;
-- gate network use behind explicit flags and an allowed domains or host allowlist policy;
-- keep destructive actions behind dry-run or explicit confirmation;
-- never echo secrets or raw environment values.
-
-## What to avoid
-- NEVER pad `SKILL.md` with theory that belongs in `references/`.
-- DO NOT broaden the `description` until it overlaps with adjacent skills.
-- DON'T add scripts, network calls, or compatibility branches unless the workflow truly needs them.
-- Avoid marketing copy; treat the description as routing logic.
-- Avoid absolute paths and hidden environment assumptions when a relative path or explicit prerequisite will do.
-
-## Constraints
-- Redact secrets, credentials, tokens, and PII by default.
-- Keep frontmatter valid and minimal.
-- Do not invent external facts; add a verification step when uncertain.
-- Default to canonical implementations for unreleased or greenfield work.
-- For schema-bound outputs, include `schema_version` in the contract or artifact example.
-- Keep generated skill names and folder names aligned; do not finalize with a mismatch.
-- Use `docs/skill-graphs/question-lifecycle.md` for question timing and `docs/skill-graphs/knowledge-graph-operating-model.md` for graph-mode runtime boundaries instead of expanding them inline here.
-
-## Validation
-Fail fast: stop at the first failed gate, fix it, and rerun before continuing.
-Core validators:
-```bash
-~/.venvs/pyyaml/bin/python scripts/quick_validate.py <path/to/skill-folder>
-~/.venvs/pyyaml/bin/python scripts/skill_gate.py <path/to/skill-folder>
-~/.venvs/pyyaml/bin/python scripts/analyze_skill.py <path/to/skill-folder>
-~/.venvs/pyyaml/bin/python scripts/openclaw_skill_guard.py <path/to/skill-folder> --mode both
-```
-
-For new skills:
-```bash
-~/.venvs/pyyaml/bin/python scripts/run_skill_evals.py <path/to/skill-folder>
-```
-
-Unified conformance rule:
-- `create` and `improve` runs must pass gold validators and evals before done.
-- `install-distribute` runs must execute gold validators and, when detected, upstream-grade checks from the imported package.
-- Never skip the gold validators even when upstream checks pass.
-
-Optional deep checks:
-- `~/.venvs/pyyaml/bin/python scripts/run_skill_evals.py <path/to/skill-folder> --dual-run --capture-jsonl`
-- `python utilities/skill-builder/scripts/benchmark_skill_portfolio.py --root . --config utilities/skill-builder/references/benchmark-policy.json --mode warn --format text --output-json artifacts/industry-benchmark-latest.json`
-- `python utilities/skill-builder/scripts/refresh_benchmark_policy.py --root . --policy utilities/skill-builder/references/benchmark-policy.json --benchmark-json artifacts/industry-benchmark-latest.json --schedule-days 7 --report-json artifacts/benchmark-policy-refresh-report.json`
-- `python utilities/skill-builder/scripts/run_repo_skill_quality.py --root . --baseline-file utilities/skill-builder/references/skill-quality-baseline.json --benchmark-mode warn --benchmark-config utilities/skill-builder/references/benchmark-policy.json --benchmark-output-json artifacts/industry-benchmark-latest.json --format text`
-- `~/.venvs/pyyaml/bin/python scripts/deterministic_trace_checks.py <path/to/codex-run.jsonl> --budgets-json '{"max_total_tokens":4000,"max_duplicate_command_ratio":0.35}'`
-- `python3 scripts/record_skill_feedback.py --skill-path <path/to/skill-folder>/SKILL.md --decision accepted --outcome good --confidence high --notes "validation sample" --workspace <workspace>`
-- `python3 scripts/skill_subject_scoreboard.py --workspace <workspace> --format table`
-- `python3 - <<'PY'\nimport pathlib,re,sys\np=pathlib.Path(\"<path/to/skill-folder>\").resolve(); name=p.name\nok=bool(re.fullmatch(r\"[a-z0-9](?:-?[a-z0-9]){0,63}\", name))\nprint(\"OK\" if ok else \"FAIL\", name)\nsys.exit(0 if ok else 1)\nPY`
-
-## Troubleshooting
-- Error: folder/name mismatch. Recovery: rename folder to match frontmatter `name`, then rerun validators.
-- Error: frontmatter contains `<` or `>` and fails parser safety. Recovery: replace angle brackets with plain-language wording, then rerun validators.
-- Error: repeated validator failure after 3 rounds. Recovery: halt, summarize failing gate output verbatim, and ask for a scoped decision.
+Produce only what the request needs, usually:
+- `SKILL.md`
+- optional `scripts/`, `references/`, `assets/`, `workflows/`
+- `agents/openai.yaml` when UI/tool metadata is needed
+- `references/contract.yaml` and `references/evals.yaml` for non-trivial skills
+- `## See Also` plus a topic-map signpost for graph-visible skills in this repository
+- `references/task-profile.json` for active/in-scope skills that participate in the recursive skill graph
+- preserved reference context with clear signposts when content is being condensed or imported from a richer source
+- validator and analyzer evidence
+- packaged `.skill` when requested
+- concise blocker summary if quality gates cannot be met in-turn
 
 ## Examples
-- “When the user asks to create a new release-note helper skill under `utilities/`, scaffold it with evals, contract, and an output contract.”
-- “Can you audit this skill’s trigger quality and tighten the description so it routes cleanly?”
-- “Help me compare two skill variants with the same eval suite and keep the higher-signal version.”
+- User says: “I want you to improve `utilities/diagram-cli` so it can safely install from PRs and still pass our schema gates.” Run `improve` mode, confirm category, then run required validation and package only after gates pass.
+- User says: “This skill keeps failing on imports when we add a new repo path; can you tighten its workflow and add a concrete trigger test plan?” Run `improve` mode, add discovery, then produce 8+ realistic trigger and non-trigger query tests before delivery.
+- User says: “Can you take `frontend/tools/agentation`, figure out why the skill feels bloated and undertriggers, rewrite it to current OpenAI skill format, and show me the exact gates you ran before we ship it?” Run `improve` mode, confirm category, tighten `description`, split heavy guidance into `references/`, and report validator outcomes with the final diff.
 
-## Reference map
-Use these files when needed:
-- `references/discovery-interview.md` for round-by-round clarification;
-- `references/description-optimization.md` for trigger tuning;
-- `references/iteration-and-testing.md` for eval-driven refinement;
-- `references/quality-tools.md` for validator and eval interpretation;
-- `references/skill-structure.md` and `references/progressive-disclosure-patterns.md` for layout choices;
-- `references/security-hardening.md` for offline defaults and destructive-action gates;
-- `references/imported-eval-interop.md` for preserving upstream eval semantics (skillgrade-style `eval.yaml`, grader schema, and CI threshold behavior) while still enforcing gold gates;
-- `docs/skill-graphs/question-lifecycle.md` for question timing and post-run feedback behavior;
-- `docs/skill-graphs/knowledge-graph-operating-model.md` for graph-mode boundaries;
-- `references/examples.md`, `references/anti-patterns.md`, and `references/governance-and-style.md` for calibrated examples and deeper guidance.
-- `../codex-plugin-builder/references/plugin-contract.md` and `../codex-plugin-builder/scripts/plugin_builder.py` when validating plugin-owned skills or enforcing plugin manifest and marketplace contracts.
+## Gotchas
+- Missing required headings -> nested/alias headings used -> promote to exact top-level `##` names -> rerun `bash scripts/lint_progressive_disclosure.sh --mode warn`.
+- `sync_skills` timeout with `Operation not permitted` -> runtime paths are read-only in sandbox -> run `bash scripts/sync_skills_sandbox_safe.sh`.
+- Stale type index after tag edits -> semantic sync skipped -> run sandbox-safe sync, then `bash scripts/lint_skill_types.sh`.
+- Valuable source context disappears during cleanup -> progressive disclosure was treated as compression -> restore the nuance into `references/` and add direct signposts from `SKILL.md`.
+
+## Response format
+For non-trivial first responses in `create`, `improve`, `eval`, or `benchmark-lite`, start with these exact top-level headings in this order:
+- `## Scope and triggers`
+- `## Required inputs`
+- `## Deliverables`
+- `## Failure mode`
+- `## Examples`
+
+Heading contract:
+- use the exact heading text above; do not substitute aliases such as `## When to use`;
+- keep each section short if the user asked for a concise first response, but still include the heading;
+- under `## Scope and triggers`, briefly confirm whether this skill applies, the likely category, and the boundary of the work;
+- under `## Required inputs`, ask the minimum missing items as direct questions with `?`;
+- under `## Failure mode`, say what happens if the request is out of scope or critical inputs remain missing.
+### Deterministic response details
+Keep first response compact and install-focused:
+- include deconflict-first ordering;
+- include capability overlap matrix;
+- include artifact-uplift scan plan before any write decision.
+
+## Philosophy
+- Build minimal, reversible updates first; prefer deterministic guardrails.
+- Apply controlled variation in output depth, phrasing, and check ordering based on user context (team, risk, or scope), while preserving safety guarantees.
+- Keep the user unblocked: when inputs are incomplete but risk is low, make the safest reasonable assumption, state it, and keep momentum.
+
+## Output contract
+For non-trivial `create`, `improve`, `eval`, or `benchmark-lite`, include:
+- `schema_version`
+- `mode`
+- `skill_path`
+- `findings`
+- `validations`
+- `security`
+- `next_step`
+
+## Skill creation process
+Skip steps only with an explicit reason.
+
+Use the compact flow below, then follow the linked references for full detail.
+
+1. Confirm target boundary and enforce scoped writes.
+   - Keep names path-safe (`^[a-z0-9](?:-?[a-z0-9]){0,63}$`).
+   - Default to repo scope; require explicit allowlist confirmation for `USER` scope.
+2. Confirm category and missing inputs in one round.
+3. Set trigger logic first (`description`) and add 8+/8+ trigger coverage in `references/evals.yaml`.
+4. Scaffold and draft with minimal structure, moving deep policy to `references/` and deterministic mechanics to `scripts/`.
+   - When slimming `SKILL.md`, preserve high-impact context in `references/` and add explicit read-when signposts instead of collapsing the source material into a weaker summary.
+   - For repo skills, wire graph navigation while drafting:
+     - add `## See Also` with 2+ real related skills,
+     - add a topic-map signpost,
+     - create or preserve `references/task-profile.json` when the skill is in the operational graph.
+5. When recursive run evidence exists, consume `lesson_observations.json`, `lesson_candidates.json`, and `promotion_decision.json` and promote only repeated, rubric-bound lessons.
+6. Iterate gate-by-gate: fix one failure, rerun, then continue.
+7. Run description optimization before handoff and deliver only when gates are clear or triaged.
+
+Reference files:
+- `references/governance-contract.md`
+- `references/quality-tools.md`
+- `references/workflows-and-validation.md`
+- `references/iteration-and-testing.md`
+- `references/discovery-interview.md`
+
+## Execution guardrails
+- Cap iterative fix loops at 3 rounds per failing gate, then publish a blocker report and wait for user direction.
+- Avoid repeating unchanged commands more than twice; prefer deterministic scripts.
+- Keep reruns scoped during iteration; run broader checks before completion claims.
+
+## Validation
+- Fail-fast is mandatory: stop at first failing gate, fix, rerun, then continue.
+- Use two passes: `iterative_fail_fast` then `pre-claim_full_sweep`.
+- Use `references/quality-tools.md` for gate command matrix and strict PI/security expectations.
+- During iteration prefer `run_skill_evals.py --eval-mode smoke`; before promotion or packaging run `--eval-mode release` and keep the generated `release_manifest.json` with the scorecard artifacts.
+- Treat graph-readiness as part of the default repo gate set for `create` and `improve` work:
+  - `python3 scripts/check-see-also.py . --changed-files <skill>/SKILL.md`
+  - `python3 utilities/skill-builder/scripts/validate_skill_graph_profiles.py --repo-root . --expected-count 0`
+- When graph-facing skills changed materially, refresh adjacency evidence:
+  - `python3 scripts/build-adjacency-yaml.py`
+  - `python3 scripts/validate-adjacency.py`
+
+## Constraints and safety
+- Redact secrets, credentials, tokens, and PII by default.
+- Keep destructive actions behind dry-run or explicit confirmation.
+- Include `schema_version` for schema-bound outputs and follow versioning policy in `references/governance-contract.md`.
+- Default to offline execution; allow network only with explicit permission and allowlist in scope.
+
+## Install-distribute mode
+- Confirm provenance (`allowlist` + pinned ref + staged `sha256`) before writes.
+- Run deconflict-first (`overlap matrix` + `artifact-uplift scan` + explicit decision).
+- Preserve relevant upstream context when importing: keep high-value references, examples, and caveat docs unless they are clearly redundant or out of scope, and signpost them from the wrapper skill.
+- Validate in quarantine before atomic move/swap; rollback on write failure.
+- Hand off plugin conversion to `codex-plugin-builder` and session coverage scans to `codex-sessions-skill-scan`.
+- Use `references/advanced-workflow.md` for full install-distribute mechanics and checklists.
 
 ## See Also
-
-| Skill | When to use together |
+| Skill | When to use |
 |---|---|
-| [[codex-plugin-builder]] | Package a validated skill into a distributable plugin; runs after quality gates pass |
-| [[decide-build-primitive]] | Use before building to confirm a Skill is the right primitive vs a Prompt or Automation |
-| [[verification-before-completion]] | Gate any "skill is done" claim with fresh validator evidence |
-| [[evals-router]] | When the skill is an LLM eval workflow — use to design or audit the eval layer |
-| [[agents-md]] | When the new skill needs a corresponding AGENTS.md entry or routing update |
+| [[decide-build-primitive]] | Decide whether the capability should be a skill, prompt, or agent before authoring it |
+| [[codex-plugin-builder]] | Package or convert a validated skill into a plugin-owned distribution surface |
+| [[codex-sessions-skill-scan]] | Audit skill coverage, failures, and overlap using real session evidence instead of authoring doctrine alone |
+| [[skill-installer]] | Install or repair runtime visibility when the skill package is already built and the problem is projection or distribution |
 
 **Topic map:** [[agent-ops]]
 
-## Decision feedback protocol
+## Failure mode
+- If out of scope, say why and offer the nearest next skill-appropriate next step.
 
-<!-- decision-feedback-protocol:v2 -->
-- Question timing is runtime-owned. Do not make the skill itself decide when feedback is asked.
-- If post-run feedback capture is enabled, emit a non-blocking `post_run_feedback` event via Codex `request_user_input` after result delivery.
-- Capture `decision`, `outcome`, and `confidence`.
-- Persist feedback with `python3 scripts/record_skill_feedback.py`.
-
-## Empowering execution style
-Be capable, creative, and willing to explore better options when evidence supports them. Enable the user to make safe choices by explaining tradeoffs clearly, then keep the implementation disciplined and auditable.
-
-## Legacy mode: install-distribute
-Use this mode when the request is about listing, installing, updating, or validating skills from curated registries or GitHub sources rather than authoring the skill itself.
-
-### Install-distribute triggers
-- list curated skills or compare what is already installed;
-- install a skill from a curated registry, GitHub repo, or repo path;
-- update an installed skill safely with overwrite and deconflict checks;
-- dry-run a proposed install before writing files.
-
-### Install-distribute required inputs
-- source: curated skill name, repo URL, or repo path;
-- destination scope: `REPO` or `USER`;
-- target destination path or category;
-- overwrite/update consent when the destination already exists;
-- whether the user wants listing, dry-run, install, update, or deconflict analysis.
-
-Use `request_user_input` for missing install decisions when the turn fits in 1-3 short questions. Do not overwrite or promote files until the scope and overwrite decision are explicit.
-
-### Install-distribute operating rules
-- Prefer curated or verified sources and stage external fetches in `/tmp` or `/mnt/data`.
-- Keep installs auditable: source, ref, staging path, validations, and final destination should all be reported.
-- Run deconflict-first preflight as step zero before import-quality validation:
-  - build a capability overlap matrix (`incoming skill` vs `all installed operational skills` in the chosen scope);
-  - run an artifact-uplift scan across incoming `references/`, `assets/`, and `agents/` (when present) and map reusable improvements into overlapping installed skills;
-  - emit one explicit decision (`merge|fold|improve-existing|install-new`) before any install/upgrade edits;
-  - if `merge|fold|improve-existing`, do not proceed with `install-new` unless the user explicitly overrides.
-- Run a risk scan before promotion and stop on high-severity findings unless the user explicitly approves continuation.
-- Run deconflict analysis for every install/update request before any write. Do not rely on "looks overlapping" heuristics.
-- Deconflict scope must review all installed operational skills in the chosen destination scope (`REPO` or `USER`) and then decide: merge, fold, improve-existing, or install-new.
-- Exclude system/meta skills from default deconflict comparisons unless the user explicitly asks for system-skill work. Default exclusions include `.system` slices and creator/meta scaffolding skills such as `skill-creator`.
-- When imported skills include upstream eval contracts (for example `eval.yaml`, graders, or rubric files), preserve those files as source-of-truth for upstream grading. Do not rewrite them into a different format during install.
-- For plugin installs or Claude-to-Codex plugin conversions, run local plugin deconflict analysis first:
-  - `python3 utilities/codex-plugin-builder/scripts/plugin_builder.py inspect-local <plugin-name> --path plugins`
-  - prefer merge, fold, or improvement work when an existing local plugin already covers the intended job.
-- For unclear requests, default to `list` or `dry-run` instead of mutating the workspace.
-- For Claude-to-Codex plugin conversion during install runs, enforce terminology mapping:
-  - `.claude-plugin/plugin.json` -> `.codex-plugin/plugin.json`
-  - `commands/` and slash-command wording -> `prompts/`
-  - reject legacy Claude runtime markers in final Codex package paths.
-
-### Install-distribute deliverables
-- installed or updated skill folder, or a dry-run plan if no writes occurred;
-- source summary, staging boundary, and any deconflict or risk findings;
-- capability overlap matrix for install/update decisions (incoming vs existing operational skills);
-- explicit deconflict decision record (`merge`, `fold`, `improve-existing`, or `install-new`) and why;
-- artifact-uplift matrix (`incoming artifact` -> `target installed skill` -> `adopt|adapt|reject` with rationale), covering `references/`, `assets/`, and `agents/` when present;
-- upstream eval interop note when present: profile presets, threshold behavior, grader weighting, and schema checks preserved from source package;
-- validator results for each installed target;
-- restart reminder after successful install/update;
-- verification that the installed `SKILL.md` includes decision feedback instrumentation when relevant.
-
-### Install-distribute validation
-- run the installed skill through quick validation, skill gate, analyzer, and OpenClaw-style guard checks;
-- run evals for newly installed skills after write completion;
-- when overlap leads to `merge|fold|improve-existing`, run validators on every touched installed skill after uplift changes;
-- when imported source includes upstream eval contracts (for example `eval.yaml` or grader/rubric bundles), run upstream-grade checks and report those results alongside gold-gate results;
-- for skillgrade-style packages specifically, preserve and report upstream semantics:
-  - smoke/reliable/regression trial tiers;
-  - CI threshold behavior;
-  - grader weighting and deterministic/LLM rubric split;
-  - grader output JSON schema (`score`, `details`, optional `checks`).
-- confirm the repo diff only contains expected skill-install paths;
-- stop and report blockers if a failing step repeats 3 times.
-- for plugin installs/conversions, run:
-  - `python3 utilities/codex-plugin-builder/scripts/plugin_builder.py validate <path/to/plugin> --require-marketplace --marketplace-path .agents/plugins/marketplace.json`
-
-## Folded Legacy Modes (Core60)
-<!-- core60-folded-modes:v1:start -->
-This skill owns legacy capability from retired skills. Use these modes when requests match prior behavior.
-
-- `install-distribute` from `utilities/skill-installer`: Plan and install skills into a Codex skills directory from curated or repo sources; use when a user asks to list available skills, install or update a skill, or validate a source before installation.
-- `prompt-packaging` from `utilities/codex-prompt-creator`: Create or update reusable Codex skills under .agents/skills and optionally local ~/.codex/prompts shortcuts. Use when a user asks to buil...
-
-Deep legacy details: `references/folded-legacy-modes-core60.md`.
-<!-- core60-folded-modes:v1:end -->
+## Anti-patterns
+- Overfitted routing language -> description only matches one phrasing -> expand to realistic paraphrases and near-neighbor cases, then recheck `references/evals.yaml`.
+- Checklist dump in frontmatter -> `description` becomes procedure-heavy and undertriggers -> move process detail to `SKILL.md` or `references/` and keep frontmatter routing-first.
+- Over-compression during cleanup -> valuable context gets deleted to satisfy disclosure rules -> preserve nuance in `references/` and make `SKILL.md` a stronger signpost instead of a thinner substitute.

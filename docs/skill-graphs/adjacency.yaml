@@ -20,11 +20,28 @@ agent-browser:
   fixing-accessibility: Probe ARIA and keyboard behaviour via browser automation
   playwright-interactive: Use for iterative UI automation when Playwright is better
   ui-visual-regression: Capture snapshots with agent-browser for regression checks
+agent-native-architecture:
+  agent-native-audit: Audit whether an existing repo or workflow already meets agent-native
+    operating principles
+  architecture-interview: Structure tradeoff-heavy architecture choices into an ADR-style
+    decision
+  chatgpt-apps: Apply agent-native patterns inside a ChatGPT Apps SDK product
+  mcp-builder: Build general MCP servers once the tool surface is clear
+  workers-mcp: Deploy an agent-native MCP surface on Cloudflare Workers
+agent-native-audit:
+  agents-md: Tighten repo instructions after finding discoverability gaps
+  check-pr: Review a specific pull request after identifying agent-native risks
+  codex-home-audit: Audit the Codex home surface instead of a single repo
+  gh-workflow: Land follow-up fixes through the GitHub workflow
 agentation:
-  agent-browser: Use agent-browser for deterministic ref-based element actions
-  frontend-ui-design: Design the UI that Agentation will automate
-  playwright-interactive: Use Playwright for iterative UI inspection alongside Agentation
-  visual-explainer: Visualise Agentation workflow states as an HTML diagram
+  agent-browser: Run deterministic browser interactions against the app once Agentation
+    wiring is healthy
+  frontend-ui-design: Improve or redesign the frontend surface after the integration
+    path is verified
+  playwright-interactive: Use a persistent Playwright session for iterative local
+    inspection or debugging
+  visual-explainer: Turn the integration state machine or failure path into a visual
+    handoff artifact
 agents-md:
   codex-agent-creator: Create agent roles that AGENTS.md will reference
   codex-home-audit: Audit the full Codex home dir after AGENTS.md refactors
@@ -33,10 +50,10 @@ agents-md:
   skill-builder: Build new skills that will be registered in AGENTS.md
 alignment-checkpoint:
   brainstorming: Explore approaches once intent is aligned
+  ce-plan: Move from approved intent to an execution-ready plan
   decide-build-primitive: Decide the right primitive after intent is confirmed
   interview-me: Follow with structured interview to clarify requirements
   product-spec: Produce a spec once ambiguity is resolved
-  writing-plans: Move from approved intent to an execution-ready plan
 apple-app-creator:
   design-system: Apply design tokens to native UI components
   fixing-accessibility: Add UIAccessibility labels to native views
@@ -50,11 +67,6 @@ architecture-interview:
   product-spec: Produce a detailed spec after the architecture is decided
   security-threat-model: Run a threat model alongside architecture decisions
   writing-plans: Convert ADR output into an implementation plan
-arscontexta:
-  agents-md: Verify Ars Contexta parity in AGENTS.md after sync
-  codex-home-audit: Audit Codex home for Ars Contexta drift
-  codex-plugin-builder: Package Ars Contexta surfaces into a Codex plugin
-  compound-engineering-router: Route complex Ars Contexta workflows to the right mode
 atlas:
   agent-browser: Complement Atlas AppleScript control with browser automation
   notebooklm: Cross-reference Atlas conversations with NotebookLM notebooks
@@ -95,16 +107,96 @@ bootstrap:
 brainstorming:
   architecture-interview: When the brainstorm reveals a significant architecture decision
     needing structured review
+  ce-plan: After spec is agreed, use to turn it into a sequenced execution plan
   interview-me: Use when the idea needs deeper requirements discovery beyond a quick
     brainstorm
   product-spec: Hand off the chosen direction to this skill to produce implementation-ready
     specs
-  writing-plans: After spec is agreed, use to turn it into a sequenced execution plan
+ce-brainstorm:
+  brainstorming: Use when the user needs a broader, non-compound brainstorming workflow
+  compound-engineering-router: Use to choose the right compound-engineering stage
+    before or after brainstorming
+  product-spec: Hand off medium or high-risk brainstorm outputs into a spec
+ce-compound:
+  ce-brainstorm: Use when the lifecycle needs WHAT/WHY clarity first
+  ce-plan: Use when orchestration lands at implementation planning
+  ce-review: Use when implementation is complete and merge/readiness review is the
+    next stage
+  ce-work: Use when the workflow is ready for execution
+  compound-engineering-router: Use when the user needs the correct CE route selected
+    before entering a stage
+ce-compound-refresh:
+  ce-compound: Capture newly solved issues before or after targeted refresh maintenance
+  ce-review: Validate current implementation readiness when drift in docs may reflect
+    broader product risk
+  ce-technical-review: Audit focused technical correctness when the stale-doc signal
+    points to code-level risk, not just doc maintenance
+ce-deepen-plan:
+  ce-plan: Use before deepening when the plan does not yet exist
+  ce-spec: Use when deepening reveals that the plan is blocked by missing contract-level
+    decisions
+  compound-engineering-router: Use to route into or out of the deepening stage
+ce-deepen-spec:
+  ce-deepen-plan: Strengthen the implementation plan after the spec contract is solid
+  ce-spec: Draft or tighten the base compound-engineering spec before a deepening
+    pass
+  compound-engineering-router: Route into the correct CE stage when the next step
+    is still unclear
+  product-spec: Use the broader planning-spec pipeline instead of the narrower CE
+    contract path
+ce-ideate:
+  ce-brainstorm: Take one selected survivor from ranked ideation into clarified problem
+    framing and approach shaping
+  ce-compound: Route broader CE lifecycle work or preserve learning after implementation
+    rather than before exploration
+  ce-plan: Use only after a brainstormed direction has been selected and specified
+    enough to plan
+ce-plan:
+  ce-brainstorm: Use first when the work still needs WHAT/WHY clarification before
+    sequencing
+  compound-engineering-router: Use to choose the correct compound-engineering stage
+    before or after planning
+  linear: Use after plan completion when the user wants the plan turned into a Linear
+    issue with read-before-write safeguards
+  product-spec: Use when the plan should be blocked until the product contract is
+    made explicit
+ce-review:
+  agent-native-audit: Audit whether the workflow is broadly agent-operable rather
+    than just merge-ready
+  ce-technical-review: Produce a severity-ranked engineering issue list instead of
+    a package-level readiness synthesis
+  ce-work: Execute the approved work once review confirms the branch is ready to advance
+  check-pr: Ask for a policy-gated PR readiness decision in GitHub specifically
+ce-spec:
+  ce-brainstorm: Use first when the work still needs WHAT and WHY clarification
+  ce-plan: Use after spec completion when the contract is ready for execution sequencing
+  compound-engineering-router: Use to choose the correct compound-engineering stage
+    before or after specification
+ce-technical-review:
+  agent-native-audit: Review agent-operability or workflow autonomy rather than code-level
+    engineering risk
+  ce-review: Return a broader readiness verdict and next-step synthesis instead of
+    a findings-first issue list
+  check-pr: Gate merge readiness in GitHub after the technical review is complete
+  systematic-debugging: Investigate root cause first when the risky behavior is not
+    yet well understood
+ce-work:
+  ce-compound: Preserve durable learnings or resume the broader CE lifecycle around
+    the work
+  ce-plan: Build the execution-ready plan before implementation starts
+  ce-review: Review the delivered package and next-step readiness after execution
+  test-browser: Run deterministic browser verification for changed web flows before
+    completion
 cf-crawl:
   cloudflare-deploy: Deploy and authenticate the crawl target on Cloudflare
   context7: Supplement crawl results with library documentation
   markdown-converter: Convert crawl output into clean Markdown
   visual-explainer: Present crawl findings in an HTML report
+changelog:
+  every-style-editor: Polish the final changelog for a branded external audience
+  feature-video: Pair a release-note summary with a visual walkthrough artifact
+  gh-workflow: Inspect PRs, branches, and merge state before drafting the summary
+  release: Cut the release after the changelog content is ready
 chatgpt-apps:
   fixing-metadata: Ensure App pages have correct meta and CSP headers
   mcp-builder: Build the underlying MCP server the Apps SDK connects to
@@ -133,17 +225,18 @@ cloudflare-deploy:
   verification-before-completion: Verify deployment is healthy before completing
   workers-mcp: Deploy MCP server as part of the Cloudflare stack
 codex-agent-creator:
-  agents-md: Register the new role in AGENTS.md after creation
-  codex-automation-architect: Design automations the new agent role will run
-  codex-plugin-builder: Package the agent role into a distributable plugin
-  compound-engineering-router: Route requests that need multi-agent coordination
-  decide-build-primitive: Check whether an agent role vs skill vs prompt is correct
+  agents-md: Update repo instructions to reference or govern the new agent roles
+  codex-automation-architect: Design recurring automations that orchestrate the installed
+    agents
+  codex-plugin-builder: Package agent roles together with hooks or skills in a plugin
+  decide-build-primitive: Decide whether the capability should be an agent, skill,
+    or automation first
 codex-automation-architect:
+  ce-plan: Plan the automation contract before implementing
   codex-agent-creator: Create the agent role the automation will run under
   codex-plugin-builder: Package automations into a plugin for distribution
   decide-build-primitive: Confirm automation is the right primitive before building
   verification-before-completion: Validate automation output before declaring done
-  writing-plans: Plan the automation contract before implementing
 codex-home-audit:
   agents-md: Refactor AGENTS.md based on audit findings
   codex-sessions-skill-scan: Run a skill health scan alongside the home audit
@@ -151,26 +244,39 @@ codex-home-audit:
   insight-report: Generate a usage report to inform audit priorities
   process-watch: Check process resource usage during a home directory audit
   verification-before-completion: Verify fixes before marking the audit complete
+codex-hooks-builder:
+  codex-agent-creator: Create or update agent roles that the hooks should invoke or
+    govern
+  codex-home-audit: Audit an existing Codex home installation for hook drift or unsafe
+    config
+  codex-plugin-builder: Package the hooks together with related skills or agents in
+    a plugin
+  gh-workflow: Ship and review hook-pack changes through the GitHub lifecycle
 codex-plugin-builder:
-  arscontexta: When packaging Ars Contexta surfaces into a Codex plugin
-  decide-build-primitive: Use before building to confirm a plugin is the right packaging
-    choice
-  mcp-builder: For standalone MCP server development without plugin packaging overhead
-  skill-builder: Build and quality-gate the plugin-owned skills before packaging them
-    here
-  verification-before-completion: Gate "plugin is done" with validator evidence before
-    committing
+  codex-agent-creator: Add agent roles to the plugin bundle alongside skills and hooks
+  decide-build-primitive: Decide whether the capability belongs in a plugin at all
+  skill-builder: Author or upgrade a standalone skill before packaging it into a plugin
+  skill-installer: Install a finished skill directly when full plugin packaging is
+    unnecessary
 codex-sessions-skill-scan:
   codex-home-audit: Run alongside a full home directory audit
   evals-router: Route evaluation work for under-performing skills
   insight-report: Turn session scan findings into a polished usage report
   skill-builder: Act on skill failures discovered in the scan
+coding-harness:
+  bootstrap: Clone and bootstrap a repository before coding-harness setup begins
+  circleci: Work on CircleCI-specific pipeline design or migration details beyond
+    the harness wrapper
+  systematic-debugging: Root-cause failing harness commands or broken repo state before
+    applying fixes
+  verification-before-completion: Add a stronger final verification pass before claiming
+    a repo change is complete
 compound-engineering-router:
   architecture-interview: Route architecture decisions through the structured interview
   brainstorming: Start with brainstorming before routing to a compound workflow
+  ce-plan: Generate the implementation plan the compound mode targets
   product-spec: Produce a spec before routing to the work or review mode
   skill-builder: Build skills that compound workflows will invoke
-  writing-plans: Generate the implementation plan the compound mode targets
 context7:
   backend-engineer: Use Context7 to check API docs during backend work
   mcp-builder: Reference Context7 docs when building MCP tool schemas
@@ -209,15 +315,16 @@ design-system:
 diagram-cli:
   agents-md: Add diagram artifacts to AGENTS.md context packs
   beautiful-mermaid: Convert .mmd outputs to publication-quality SVG/PNG
+  ce-plan: Use architecture diagrams to ground implementation plans
   docs-expert: Embed diagrams into repository documentation
   visual-explainer: Render diagram artifacts as a polished HTML explainer
-  writing-plans: Use architecture diagrams to ground implementation plans
 docs-expert:
-  agents-md: Apply docs-expert quality standards to AGENTS.md
-  diagram-cli: Embed architecture diagrams in the documentation
-  fixing-metadata: Fix meta tags on documentation pages
-  markdown-converter: Convert source material to markdown before polish
-  visual-explainer: Create visual explainers to accompany written docs
+  agents-md: Refactor or tighten AGENTS.md and related repo instruction routing
+  fixing-metadata: Repair page metadata and SEO surfaces after docs or web content
+    edits
+  markdown-converter: Convert source materials into clean Markdown before docs restructuring
+  visual-explainer: Present a complex system, workflow, or docs audit as a visual
+    artifact
 evals-router:
   skill-builder: When the eval workflow should be packaged as a reusable Codex skill
   systematic-debugging: When eval pipeline bugs emerge — debug root cause before redesigning
@@ -226,11 +333,24 @@ evals-router:
     prompt validation tests
   verification-before-completion: Gate "eval is ready" claims with concrete calibration
     or human-label evidence
+every-style-editor:
+  changelog: Edit engineering summaries for a clearer external or community audience
+  docs-expert: Improve repository documentation instead of brand-editorial prose
+  youtube-hooks-scripts: Shape the longer-form video script before applying Every-style
+    edits
+  youtube-titles-thumbnails: Tighten packaging copy once the tone and messaging are
+    set
 favicon-generator:
   cloudflare-deploy: Include favicon assets in Cloudflare Pages deployments
   design-system: Keep favicon palette consistent with design-system tokens
   fixing-metadata: Pair with metadata fixes to ensure correct favicon references
   og-image-creator: Generate OG images alongside favicons for complete brand suite
+feature-video:
+  gh-workflow: Attach the final artifact to a PR or delivery note
+  remotion: Create or review a custom Remotion composition
+  sora: Generate synthetic video only when the request is not tied to real product
+    footage
+  stitch-remotion: Build a walkthrough from Stitch screens
 figma:
   better-icons: Source icons via Figma designs and export to Iconify
   design-system: Extract Figma tokens to drive the repository design system
@@ -254,6 +374,14 @@ fixing-metadata:
   favicon-generator: Add favicon tags alongside other head metadata
   fixing-accessibility: Fix ARIA and semantic HTML alongside metadata
   og-image-creator: Generate OG images that the metadata tags will reference
+frontend-design:
+  design-system: Route token, alias, or system-governance work to the dedicated owner
+  figma: Pull design context from Figma before choosing the downstream implementation
+    skill
+  frontend-ui-design: Hand off once the request clearly becomes standard UI build
+    or redesign work
+  ui-ux-creative-coding: Route post-direction polish and motion refinement to the
+    narrower owner
 frontend-ui-design:
   baseline-ui: Validate components against baseline UI rules after design
   design-system: Ground component design in the token layer
@@ -278,6 +406,10 @@ gh-workflow:
     investigation
   verification-before-completion: Gate all merge claims with fresh `gh pr checks`
     and `git log` evidence
+greploop:
+  check-pr: Verify setup and classify readiness before starting the loop
+  gh-fix-ci: Investigate failing CI if Greptile remediation exposes check failures
+  gh-workflow: Handle PR lifecycle actions outside the bounded Greptile loop
 imagegen:
   nano-banana-builder: Integrate imagegen into Nano Banana iterative editing flows
   og-image-creator: Use generated images as OG image assets
@@ -290,21 +422,19 @@ insight-report:
   evals-router: Route skill evals based on insight-report failure signals
   visual-explainer: Present report findings as an interactive HTML page
 interview-me:
-  architecture-interview: Track C in this skill routes directly here for architecture
-    decisions
-  brainstorming: For lighter, less structured exploration before committing to interview
-    format
-  deep-interview: Use after initial scoping — deep-interview fills gaps in an existing
-    draft spec
-  product-spec: Hand the approved spec from this skill to product-spec for full PRD
-    elaboration
-  writing-plans: After approval gate — turn the spec into an execution plan
+  architecture-interview: Structure a concrete architecture choice into a decision
+    record
+  brainstorming: Explore multiple solution directions before narrowing into interview
+    questions
+  deep-interview: Deepen an existing draft doc or spec rather than running a lighter
+    clarifying interview
+  product-spec: Turn the clarified outcome into a fuller product-planning specification
 linear:
   alignment-checkpoint: Gate Linear issue creation behind intent alignment
+  ce-plan: Convert Linear issues into sequenced implementation plans
   compound-engineering-router: Route compound work captured as Linear issues
   gh-workflow: Link Linear issues to GitHub PRs during delivery
   simple-tasks: Use for lightweight local task tracking between Linear syncs
-  writing-plans: Convert Linear issues into sequenced implementation plans
 markdown-converter:
   cf-crawl: Feed Cloudflare crawl outputs into the markdown converter for cleanup
   docs-expert: Polish converted docs to meet repository quality standards
@@ -339,14 +469,33 @@ og-image-creator:
   fixing-metadata: Wire generated OG images into correct meta tags
   imagegen: Use imagegen for non-route-specific image generation
 openai-docs:
-  chatgpt-apps: Build ChatGPT App SDK integrations using up-to-date API refs
-  context7: Use Context7 alongside OpenAI docs for version-accurate library details
-  mcp-builder: Build an MCP server after reading the official tool schema docs
+  product/docs/context7: Retrieve current third-party library docs when an OpenAI
+    integration depends on external frameworks
+  product/domain/chatgpt-apps: Move from docs lookup into Apps SDK implementation
+    work
+  utilities/coding-harness: Apply current OpenAI guidance while wiring repository
+    automation or agent flows
+orchestrating-subagents:
+  ce-work: Execute a plan once the orchestration decision is made and the task is
+    implementation-ready
+  codex-agent-creator: Create or update the agent roles that the orchestration plan
+    needs
+  resolve-pr-parallel: Apply bounded parallelism to PR review resolution rather than
+    general subagent orchestration
+  using-git-worktrees: Split write-heavy parallel work into isolated worktrees instead
+    of a shared checkout
 playwright-interactive:
   agent-browser: Use agent-browser for simpler ref-based interactions
   agentation: Wire Playwright automation into Agentation self-driving
   fixing-accessibility: Test keyboard navigation and focus via Playwright
   ui-visual-regression: Capture Playwright screenshots for regression baselines
+plugin-creator:
+  github/gh-workflow: Prepare, push, and update GitHub state after plugin packaging
+    changes are ready
+  skills-system/skill-creator: Create or update skills that will live inside the plugin's
+    `skills/` directory
+  utilities/codex-plugin-builder: Evolve a basic local plugin into a fuller packaged
+    plugin workflow
 process-watch:
   codex-home-audit: Check process health during a Codex home audit
   fix-mise: Diagnose mise shim CPU/memory issues via process-watch
@@ -364,18 +513,23 @@ product-spec:
     needing review
   brainstorming: Use first when idea is unclear — brainstorm resolves direction, this
     skill writes the spec
+  ce-plan: After spec approval, use to decompose the spec into an execution plan
   interview-me: Use for deep requirements discovery when the spec needs user-research
     grounding
   security-threat-model: Use on the resulting spec/API to identify and model security
     risks early
-  writing-plans: After spec approval, use to decompose the spec into an execution
-    plan
 project-improver:
   architecture-interview: Validate architectural improvements via structured interview
   brainstorming: Brainstorm improvement ideas before running the improver
+  ce-plan: Convert approved improvements into an execution-ready plan
   product-spec: Produce a revised spec after high-leverage improvements are identified
   security-threat-model: Include security improvements in the improvement scope
-  writing-plans: Convert approved improvements into an execution-ready plan
+rclone:
+  1password: Inject remote credentials or secrets safely into the runtime
+  cf-crawl: Export crawl results locally, then move them to remote storage
+  feature-video: Upload generated demo artifacts after rendering or capture
+  video-transcript-downloader: Transfer downloaded media or transcripts to long-term
+    storage
 react-ui-patterns:
   baseline-ui: Validate React component patterns against baseline rules
   frontend-ui-design: Apply React patterns to components being designed
@@ -383,15 +537,18 @@ react-ui-patterns:
   stitch-react-components: Use patterns when converting Stitch screens to React
   ui-ux-creative-coding: Layer motion on top of React pattern scaffolds
 recon-workbench:
-  security-best-practices: Apply findings-driven best practices after recon
-  security-ownership-map: Correlate recon findings with code ownership
-  security-threat-model: Feed recon findings into the threat model
-  systematic-debugging: Debug app behaviour discovered during recon
+  security-best-practices: Turn recon findings into concrete secure-by-default implementation
+    guidance
+  security-ownership-map: Connect the findings to code ownership and bus-factor risk
+  security-threat-model: Map recon evidence into trust boundaries, abuse paths, and
+    mitigations
+  systematic-debugging: Debug confirmed runtime behavior after recon narrows the target
+    surface
 release:
+  ce-plan: Plan the release checklist before executing
   check-pr: Review the PR that triggers the release
   gh-workflow: Manage the PR and merge lifecycle before cutting a release
   verification-before-completion: Validate all checks pass before tagging
-  writing-plans: Plan the release checklist before executing
 remotion:
   imagegen: Generate still images to use as Remotion assets
   slides: Convert slide decks into Remotion video compositions
@@ -401,9 +558,27 @@ remotion:
     narration
 repoprompt:
   agents-md: Use Repo Prompt context packs alongside AGENTS.md
+  ce-plan: Ground implementation plans with Repo Prompt context
   compound-engineering-router: Feed repo context into compound engineering workflows
   context7: Combine with Context7 for richer library context in prompts
-  writing-plans: Ground implementation plans with Repo Prompt context
+reproduce-bug:
+  gh-workflow: Follow up on GitHub issues or PR state after the bug is understood
+  linear: Pull issue context from the local tracker before reproducing the bug
+  systematic-debugging: Move from reproduction evidence into a deeper root-cause analysis
+  test-browser: Reproduce or verify browser-facing regressions with route-level evidence
+resolve-pr-parallel:
+  check-pr: Ask for a merge-readiness decision instead of comment resolution work
+  gh-workflow: Handle a single-threaded PR lifecycle or smaller review loop without
+    fan-out
+  greploop: Run a bounded remediation loop when Greptile findings are the driver
+  systematic-debugging: Diagnose a stubborn defect before continuing to resolve review
+    feedback
+resolve-todo-parallel:
+  ce-compound: Capture durable learnings that emerge from repeated todo fixes
+  ce-work: Execute a single scoped implementation path instead of a todo sweep
+  orchestrating-subagents: Coordinate explicit subagent fan-out when runtime and user
+    approval allow it
+  triage: Review pending todo findings before execution begins
 security-best-practices:
   1password: Findings involving secrets management — use for secure injection patterns
   create-auth: Security review often surfaces auth issues — use this for implementation
@@ -431,27 +606,32 @@ shadcn-ui:
   react-ui-patterns: Apply React composition patterns to shadcn/ui components
 simple-tasks:
   alignment-checkpoint: Capture approved action items as simple tasks
+  ce-plan: Seed task list from a finished implementation plan
   linear: Escalate to Linear when tasks need team-wide visibility
   verification-before-completion: Mark tasks done only after verification evidence
-  writing-plans: Seed task list from a writing-plans implementation plan
 skill-builder:
-  agents-md: When the new skill needs a corresponding AGENTS.md entry or routing update
-  codex-plugin-builder: Package a validated skill into a distributable plugin; runs
-    after quality gates pass
-  decide-build-primitive: Use before building to confirm a Skill is the right primitive
-    vs a Prompt or Automation
-  evals-router: When the skill is an LLM eval workflow — use to design or audit the
-    eval layer
-  verification-before-completion: Gate any "skill is done" claim with fresh validator
-    evidence
+  codex-plugin-builder: Package or convert a validated skill into a plugin-owned distribution
+    surface
+  codex-sessions-skill-scan: Audit skill coverage, failures, and overlap using real
+    session evidence instead of authoring doctrine alone
+  decide-build-primitive: Decide whether the capability should be a skill, prompt,
+    or agent before authoring it
+  skill-installer: Install or repair runtime visibility when the skill package is
+    already built and the problem is projection or distribution
 skill-creator:
-  agents-md: Update AGENTS.md after adding a new capability
-  skill-builder: Use when creating a quality-gated skill with evals and rubric
-  skill-installer: Install a newly created skill into Codex home
+  product/docs/docs-expert: Tighten supporting references or skill-adjacent documentation
+    after scaffold creation
+  skills-system/plugin-creator: Package newly created skills inside a plugin when
+    the user wants distributable packaging
+  utilities/skill-builder: Apply the canonical skill-building workflow, evals, and
+    governance checks
 skill-installer:
-  codex-plugin-builder: Bundle multiple skills into a plugin before installing
-  skill-builder: Quality-gate the skill before installing
-  skill-creator: Create a skill before installing it from source
+  skills-system/skill-creator: Create or refine a skill before installing it into
+    a Codex home
+  utilities/1password: Supply authenticated GitHub access when private repo installation
+    needs secrets or token flow help
+  utilities/skill-builder: Audit or harden a skill package before distributing it
+    for installation
 slides:
   beautiful-mermaid: Embed high-quality Mermaid diagrams in slide decks
   imagegen: Generate illustrative images for slide backgrounds
@@ -485,47 +665,66 @@ stitch-remotion:
   sora: Use Sora for AI-generated video alternative to Remotion
   stitch-loop: Generate the Stitch screens that feed this skill
 systematic-debugging:
-  evals-router: When the bug is in an LLM evaluation pipeline or judge prompt
-  gh-fix-ci: When the failure is a broken GitHub Actions CI check
-  test-driven-development: 'Phase 4, Step 1: write the failing test that captures
-    the root cause'
-  verification-before-completion: After implementing the fix — prove it works before
-    claiming done
-  writing-plans: When 3+ fixes have failed and you need to re-plan the approach
+  ce-plan: Re-plan the approach when repeated fixes fail and the current path is not
+    converging
+  gh-fix-ci: Investigate a failing GitHub Actions check instead of a general bug report
+  test-driven-development: Capture the root cause as a failing test before or alongside
+    the fix
+  verification-before-completion: Prove the fix works before claiming the debugging
+    loop is done
+test-browser:
+  agent-browser: Deterministic live-page interaction using snapshot refs
+  fixing-accessibility: Pair route-level verification with accessibility checks on
+    interactive surfaces
+  playwright-interactive: Persistent local browser QA for iterative debugging
+  ui-visual-regression: Snapshot or layout diff validation
 test-driven-development:
+  ce-plan: Write a TDD-aware plan when the feature spans multiple behavior changes
   evals-router: When the failing "test" is an LLM evaluation — route to the correct
     eval workflow
   systematic-debugging: Run the TDD loop inside this debugging workflow for each phase-4
     fix
   verification-before-completion: 'Explicit gate: verify the full test suite is green
     before claiming done'
-  writing-plans: Write a TDD-aware plan when the feature spans multiple behavior changes
+test-xcode:
+  apple-app-builder: Scaffold a new Apple app project before runtime verification
+  xcode-makefiles: Install or upgrade the CLI-first Xcode build toolkit
 threejs-builder:
   agentation: Automate Three.js scene interactions for testing
   frontend-ui-design: Provide the design context Three.js scene should match
   ui-ux-creative-coding: Orchestrate Three.js alongside React motion for rich UI
   visual-explainer: Embed Three.js scenes in HTML explainer pages
+triage:
+  ce-work: Execute the approved work once triage decisions are made
+  linear: Route to tracker-first triage when the work lives in Linear instead of repo
+    todo files
+  resolve-todo-parallel: Resolve a batch of approved todo items in parallel rather
+    than triaging them
+  systematic-debugging: Diagnose unclear or flaky findings before deciding whether
+    they belong in the queue
 ui-cloner:
   design-system: Map cloned design tokens into your design system
   figma: Use Figma as the intermediate for cloned designs
   frontend-ui-design: Adapt the cloned design system to your brand
   stitch-loop: Feed cloned UI design into Stitch for iterative generation
 ui-ux-creative-coding:
-  baseline-ui: Validate animations against baseline motion duration rules
-  design-system: Keep creative color and token choices aligned with the system
-  frontend-ui-design: Build the structural component before adding creative polish
-  react-ui-patterns: Ground creative coding in solid React composition patterns
-  threejs-builder: Add Three.js 3D elements to creative UI work
+  baseline-ui: Keep animation timing, typography, and accessibility aligned with the
+    baseline system
+  design-system: Route token, palette, and alias-level system work to the design-system
+    owner
+  frontend-ui-design: Establish the structural UI direction before layering in motion
+    and polish
+  react-ui-patterns: Ground the creative layer in maintainable React composition patterns
 ui-visual-regression:
   agent-browser: Use agent-browser snapshots as regression inputs
   baseline-ui: Run baseline UI checks alongside visual regression
   playwright-interactive: Capture screenshots for regression via Playwright
   stitch-react-components: Catch visual regressions after Stitch-to-React conversion
 using-git-worktrees:
+  ce-plan: Plan parallel workstreams across worktrees
   gh-workflow: Manage PRs across multiple worktrees
   systematic-debugging: Debug issues isolated to a specific worktree
   verification-before-completion: Verify each worktree independently before merging
-  writing-plans: Plan parallel workstreams across worktrees
 verification-before-completion:
   evals-router: Verify LLM eval pipelines pass before claiming eval work is complete
   gh-workflow: 'Gate PR merges: verification must pass before PR language is used'
@@ -539,10 +738,13 @@ video-transcript-downloader:
   youtube-hooks-scripts: Create scripts for videos whose transcripts you've studied
   youtube-titles-thumbnails: Package videos after reviewing competitor transcripts
 visual-explainer:
-  beautiful-mermaid: Render Mermaid diagrams for embedding in explainer pages
-  design-system: Apply design-system tokens to visual explainer palettes
-  diagram-cli: Generate .mmd architecture artifacts to embed
-  slides: Use slides when presentation format is better than scroll
+  beautiful-mermaid: Render Mermaid diagrams as image assets for the explainer
+  design-system: Align the explainer’s token and visual language with the repo’s design
+    system
+  diagram-cli: Generate architecture diagrams and context packs before building the
+    final explainer
+  slides: Use a presentation deck instead of a scrollable HTML explainer when the
+    format fits better
 workers-mcp:
   chatgpt-apps: Connect the Workers MCP server to a ChatGPT App
   cloudflare-deploy: Deploy the full Workers-hosted MCP stack
@@ -552,10 +754,9 @@ workers-mcp:
 writing-plans:
   brainstorming: Use first when scope is still ambiguous — resolve approach before
     planning steps
-  interview-me: Use when requirements need discovery; hand the spec output to this
-    skill
-  product-spec: Use for product-level specs; this skill turns the spec into an execution
-    sequence
+  ce-plan: Canonical owner of both generic and CE execution-planning behavior
+  interview-me: Use when requirements need discovery before routing to `ce-plan`
+  product-spec: Use for product-level specs before routing to `ce-plan`
   systematic-debugging: When 3+ fix attempts fail, restart with this skill to re-plan
     the approach
   verification-before-completion: Embed in the plan's final task to gate "done" claims

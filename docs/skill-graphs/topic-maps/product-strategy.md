@@ -32,7 +32,7 @@ covers:
 ## Specification & Planning
 
 - [[product-spec]] — Create or review implementation-ready product specifications from ideas or existing docs; modes: PRD, UX-only, API spec, arch spec, test plan.
-- [[writing-plans]] — Create execution-ready implementation plans with task sequencing and verification checks.
+- [[ce-plan]] — Create execution-ready implementation plans with sequencing, validation, and rollout guidance.
 - [[architecture-interview]] — Plan and review architecture decisions via structured interview with ADR output.
 
 ## Research & Interviews
@@ -55,8 +55,8 @@ covers:
 
 ## Pipelines
 
-- New feature idea → [[brainstorming]] → [[interview-me]] → [[product-spec]] → [[writing-plans]].
-- Improve existing project → [[project-improver]] → [[deep-interview]] → [[architecture-interview]] → [[writing-plans]].
+- New feature idea → [[brainstorming]] → [[interview-me]] → [[product-spec]] → [[ce-plan]].
+- Improve existing project → [[project-improver]] → [[deep-interview]] → [[architecture-interview]] → [[ce-plan]].
 - Research and document → [[context7]] / [[notebooklm]] → [[docs-expert]] →  [[arscontexta]].
 
 ## Cross-links

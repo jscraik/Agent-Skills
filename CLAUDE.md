@@ -89,5 +89,5 @@ All PRs must use `.github/PULL_REQUEST_TEMPLATE.md` which includes required AI d
 - Run `pnpm typecheck` after significant TypeScript changes (or use the repo-native command when using a different package manager).
 
 ## Command preflight helper
-- Source `scripts/codex-preflight.sh` and run `preflight_repo` before command-heavy, destructive, or path-sensitive work.
+- Run `bash scripts/codex-preflight.sh --stack auto --mode required` before command-heavy, destructive, or path-sensitive work.
 - Validate required bins and target paths first so mistakes are prevented before edits.

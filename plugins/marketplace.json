@@ -1,6 +1,9 @@
 {
   "schema_version": 1,
   "name": "openai-curated",
+  "interface": {
+    "displayName": "OpenAI Curated"
+  },
   "plugins": [
     {
       "name": "arscontexta",
@@ -8,8 +11,22 @@
         "source": "local",
         "path": "./plugins/arscontexta"
       },
-      "installPolicy": "AVAILABLE",
-      "authPolicy": "ON_INSTALL",
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    },
+    {
+      "name": "compound-engineering-router",
+      "source": {
+        "source": "local",
+        "path": "./plugins/compound-engineering-router"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
       "category": "Productivity"
     }
   ]

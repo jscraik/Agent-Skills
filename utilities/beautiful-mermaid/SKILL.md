@@ -1,6 +1,8 @@
 ---
 name: beautiful-mermaid
 description: Render Mermaid diagrams to SVG and PNG with Beautiful Mermaid. Use when the user asks to render or convert Mermaid diagrams into images.
+metadata:
+  skill-type: scaffolding_templates
 ---
 
 # Beautiful Mermaid
@@ -99,3 +101,9 @@ description: Render Mermaid diagrams to SVG and PNG with Beautiful Mermaid. Use 
 - SVG is the primary artifact; PNG is a convenience artifact.
 - Good diagram rendering starts with good Mermaid source.
 - When something fails, report the syntax or runtime issue precisely so the next pass is easy.
+
+## Gotchas
+- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.
+
+## Failure mode
+- If the Mermaid source, render target, or local tooling is broken or missing, stop, show the exact failure, and fall back to validating the diagram source before retrying render/export steps.

@@ -1,0 +1,25 @@
+source_repo: EveryInc/compound-engineering-plugin
+source_ref: 0fdc25a36cabea4ce9e2ae47ff69c1a9a2de8f0b
+source_path: plugins/compound-engineering/skills/agent-native-architecture
+install_target: product/domain/agent-native-architecture
+decision: installed as a new product-domain skill
+overlap_notes:
+- no live local agent-native-architecture skill folder existed
+- closest local overlaps were agent-native-audit and architecture-interview
+- kept as a separate skill because it is a design/reference surface, not an audit or ADR wrapper
+sha256:
+- 7913515b9404d59b699d631d29a7e72b5bbd0e98f46e033a4566c8963024de29  product/domain/agent-native-architecture/SKILL.md
+- 998c545e4dd17ac80d879aeb21e8f05e06739350157a2eac3740b8d2f1c9e9cc  product/domain/agent-native-architecture/references/action-parity-discipline.md
+- 23bbe4a18ac3c54a034968d637cd6d49760682a25ed4219458539918578184a5  product/domain/agent-native-architecture/references/agent-execution-patterns.md
+- 8d79f192708c67f86cfaa574409d5ab285b0e765538a2404b3b9f890bfdf01b2  product/domain/agent-native-architecture/references/agent-native-testing.md
+- 38b0f63c304248e016cb38143813fe3ed259b0803f63b3244fa365796dc83b0d  product/domain/agent-native-architecture/references/architecture-patterns.md
+- 25a559b46909a62027cc771aea1d78cb51b27476f5e7805e548ead4e2d9995a5  product/domain/agent-native-architecture/references/dynamic-context-injection.md
+- b6b5d690767a83ad0b8ffdb00d02257c626bef45b515fc1a045f42307030c22d  product/domain/agent-native-architecture/references/files-universal-interface.md
+- 2ac9765c7aa2d3c2bc03b1f6f14208746025dd2bf89b756126f01a36cef3c1a4  product/domain/agent-native-architecture/references/from-primitives-to-domain-tools.md
+- 54c4e772949a89aff00e1aca0522667876f3d75951e1947e7344beaa038efaeb  product/domain/agent-native-architecture/references/mcp-tool-design.md
+- a86c63fab54e1b56f8cbb4384f505c319efcb9dd74cbb7375ee497b89fb42f48  product/domain/agent-native-architecture/references/mobile-patterns.md
+- 1e29f67e1d218a1620a10224d9eda66081fa983e8d99fb3c445951425d9a218a  product/domain/agent-native-architecture/references/product-implications.md
+- efc8d0ec069f35700ce0e41bca45b07d00b161cab1aa2523cc043c4988dd9310  product/domain/agent-native-architecture/references/refactoring-to-prompt-native.md
+- a5b6199a3ebd04b6510309269d8999d7ae69ddea042d0852f8114807f2c4a619  product/domain/agent-native-architecture/references/self-modification.md
+- 67b0c1c4c7883140d1017d09a0c4ad8ec6d09aaa00d77d71570b0e44938e2ce9  product/domain/agent-native-architecture/references/shared-workspace-architecture.md
+- 466505afbcd8d4def8f1a2e4e93b5f3d8bd35f230c28d3ec1b2be054eb775fd8  product/domain/agent-native-architecture/references/system-prompt-design.md

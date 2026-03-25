@@ -1,6 +1,8 @@
 ---
 name: product-design-critic
-description: Use this skill when the user asks to critique or shape a software product surface, workflow, card, panel, or chat UX. It analyzes and reviews product decisions with opinionated recommendations grounded in jobs-to-be-done, hierarchy, trust/governance cues, and explicit tradeoffs beyond visual polish.
+description: Critique product surfaces and flows with opinionated UX judgment about hierarchy, trust, and jobs-to-be-done. Use when the user wants product-level interaction or workflow critique, not pure visual styling advice.
+metadata:
+  skill-type: team_automation
 ---
 
 # Product Design Critic
@@ -50,14 +52,14 @@ Do not use this skill when:
 - the request is only backend implementation work
 - the user wants broad brainstorming without a recommendation
 
-## Inputs
+## Required inputs
 
 - user goal and job-to-be-done context
 - target surface or workflow description
 - critical constraints and risk tolerance when available
 - optional screenshots, competitor examples, and trust/governance requirements
 
-## Outputs
+## Deliverables
 
 - an opinionated critique or redesign recommendation using the required output pattern
 - explicit tradeoff call-outs and a chosen direction
@@ -310,3 +312,9 @@ This skill succeeds when the next design decision becomes clearer, more opiniona
 - If post-run feedback capture is enabled, emit a non-blocking `post_run_feedback` event via Codex `request_user_input` after result delivery.
 - Capture `decision`, `outcome`, and `confidence`.
 - Persist feedback with `python3 scripts/record_skill_feedback.py`.
+
+## Gotchas
+- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.
+
+## Failure mode
+- If the product surface, user goal, or evaluation frame is unclear, stop, surface the missing context, and fall back to a smaller critique slice rather than inventing product requirements.

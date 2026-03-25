@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "name": "compound-engineering-router",
+  "version": "0.1.0",
+  "description": "Routes compound-engineering requests to the correct workflow prompt or meta-mode in the Codex config repo.",
+  "author": {
+    "name": "Jamie Craik",
+    "url": "https://github.com/jscraik"
+  },
+  "homepage": "https://github.com/jscraik/Agent-Skills",
+  "repository": "https://github.com/jscraik/Agent-Skills",
+  "license": "MIT",
+  "keywords": [
+    "plugin",
+    "compound-engineering-router",
+    "workflow-routing",
+    "codex",
+    "automation"
+  ],
+  "governance": {
+    "lifecycle_state": "active",
+    "maturity": "validated",
+    "owner": "Agent Skills Team",
+    "review_cadence": "monthly",
+    "last_reviewed": "2026-03-24",
+    "metadata_source": "plugin_manifest"
+  },
+  "interface": {
+    "displayName": "Compound Engineering Router",
+    "shortDescription": "Routes compound-engineering workflow requests",
+    "longDescription": "A Codex plugin package that helps choose the smallest safe compound-engineering workflow stage, prompt path, and bounded specialist support for a request.",
+    "developerName": "Jamie Craik",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/jscraik/Agent-Skills",
+    "defaultPrompt": "Route this task into the right compound-engineering workflow stage and tell me which prompt to use.",
+    "brandColor": "#F59E0B"
+  },
+  "skills": "./skills/"
+}

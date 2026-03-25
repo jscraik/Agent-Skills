@@ -1,6 +1,8 @@
 ---
 name: threejs-builder
 description: Build and validate simple, performant Three.js web apps using modern ES module patterns. Use this when you need a minimal Three.js scene, interaction, or animation for a web UI or demo.
+metadata:
+  skill-type: scaffolding_templates
 ---
 
 # Three.js Builder
@@ -99,3 +101,9 @@ description: Build and validate simple, performant Three.js web apps using moder
 - The first milestone is a correct frame on screen.
 - The second milestone is a stable, cleanly integrated scene.
 - Everything after that is polish.
+
+## Gotchas
+- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.
+
+## Failure mode
+- If the scene goal, asset inputs, or runtime constraints are unclear, stop, report the blocker, and fall back to a minimal scene plan before writing Three.js code.

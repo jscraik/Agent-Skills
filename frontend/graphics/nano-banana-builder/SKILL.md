@@ -1,6 +1,8 @@
 ---
 name: nano-banana-builder
 description: "Build web applications that use Google's Nano Banana image APIs for generation and iterative editing workflows. Use when a user asks to prototype or ship a Nano Banana powered image product from text-to-image to multi-turn editing."
+metadata:
+  skill-type: scaffolding_templates
 ---
 
 # Nano Banana Builder
@@ -107,3 +109,9 @@ Do not invent alternate names or date-suffixed variants.
 - The core product loop is generate, inspect, refine, persist.
 - Good Nano Banana products make iteration feel natural, not bolted on.
 - A realistic storage and quota story is part of the feature, not follow-up work.
+
+## Gotchas
+- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.
+
+## Failure mode
+- If the product flow, API access, or asset requirements are missing, stop, surface the exact prerequisite gap, and fall back to workflow design or setup validation before building.

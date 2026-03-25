@@ -1,0 +1,16 @@
+cases:
+  - name: happy-path
+    prompt: "Use the changelog skill to create a weekly engineering summary from merged PRs."
+    acceptance:
+      - type: contains
+        value: "## Deliverables"
+  - name: edge-case-missing-window
+    prompt: "Use the changelog skill, but the user did not specify the repository or time period."
+    acceptance:
+      - type: contains
+        value: "## Required inputs"
+  - name: out-of-scope-release
+    prompt: "Use the changelog skill to cut and publish a semver release."
+    acceptance:
+      - type: contains
+        value: "Do not use this skill when:"

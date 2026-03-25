@@ -1,6 +1,8 @@
 ---
 name: fix-mise
-description: Diagnose and repair mise trust/runtime failures and reconcile `~/.config/mise/config.toml` with required versions; use when commands fail due to trust blockers or stale tool config.
+description: Use this skill to diagnose and repair mise trust or runtime selection problems and reconcile `~/.config/mise/config.toml` with required tool versions when commands fail because mise shims or trust state are broken.
+metadata:
+  skill-type: infrastructure_ops
 ---
 
 # Fix Mise
@@ -96,3 +98,9 @@ Diagnose and repair `mise` trust, runtime, and version-drift failures with the s
 
 ## Remember
 If the original command was not retried, the `mise` fix is still only a theory.
+
+## Gotchas
+- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.
+
+## Failure mode
+- If runtime resolution, trust state, or version evidence is missing, stop, show the exact blocked command, and fall back to environment inspection rather than reinstalling tools speculatively.

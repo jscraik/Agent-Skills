@@ -1,6 +1,8 @@
 ---
 name: apple-app-builder
 description: Orchestrate iOS/macOS app scaffolding and optional subskill adoption for existing projects. Use when users need a guided wizard to scaffold with XcodeGen and optionally install xcode-makefiles and simple-tasks.
+metadata:
+  skill-type: scaffolding_templates
 ---
 
 # Apple App Builder
@@ -107,3 +109,9 @@ scripts/init.sh --project-mode adopt
 
 ## Remember
 Good Apple project setup reduces future Xcode drift. Keep the scaffold reproducible and the adoption path deliberate.
+
+## Gotchas
+- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.
+
+## Failure mode
+- If the target platform, signing/toolchain prerequisites, or scaffold choices are unclear, stop, report the prerequisite gap, and fall back to setup validation before scaffolding.

@@ -1,6 +1,8 @@
 ---
 name: codex-home-audit
-description: Audit and improve a Codex home directory (AGENTS.md, USER_PROFILE, instructions/, rules/, config.toml) when you want a dated report of risks, duplication, and recommended cleanups.
+description: Audit a Codex home directory for control-plane drift, risky state, and cleanup opportunities across config, agents, hooks, skills, plugins, and telemetry. Use when the user wants a dated Codex home health review.
+metadata:
+  skill-type: code_quality_review
 ---
 
 # Codex Home Audit
@@ -21,13 +23,15 @@ Produce a dated Markdown audit report for a Codex home directory (default: `$COD
 - [Resources](#resources)
 - [Decision feedback protocol](#decision-feedback-protocol)
 
-## Scope and triggers
+## When to use
 Use this skill when you want to:
 - Audit a Codex home folder for **instruction precedence issues** (for example stale shadow files or conflicting guidance around `AGENTS.md`).
 - Identify **duplication/drift** across `AGENTS*` and `USER_PROFILE*`.
-- Verify `instructions/global.md` is safe/reliable (no stray code fences, no mojibake).
+- Verify the active `model_instructions_file` is safe/reliable (no stray code fences, no mojibake, no cwd-relative ambiguity).
+- Review **telemetry and retention posture** (`analytics`, OTel exporters, `otel.log_user_prompt`, `history.persistence`, `history.max_bytes`).
+- Audit **automation surfaces** (`hooks.json`, named agent roles, skill config overrides, plugin cache layout, and local state paths such as `log_dir` / `sqlite_home`).
 - Review `.rules` for **bypass risks** (especially `zsh -lc "<script>"` patterns) and missing guardrails.
-- Flag config risk hotspots (e.g. defaulting to `danger-full-access`, noisy OTel exporters).
+- Flag config risk hotspots (for example active `danger-full-access`, deprecated `experimental_instructions_file`, unsupported hooks, missing agent config files, stale history, or invalid plugin manifests).
 
 ## Required inputs
 - `codex_home` (path): optional. Defaults to `$CODEX_HOME` if set, otherwise `~/.codex`.
@@ -39,7 +43,9 @@ Assumptions:
 
 ## Standards snapshot (March 2026)
 - Treat the Codex home as an instruction and policy control plane, not a generic dotfiles folder.
-- Audit precedence, duplication, and rule safety before proposing cleanup.
+- Audit precedence, telemetry, retention, automation surfaces, and rule safety before proposing cleanup.
+- Align with current Codex discovery rules: global scope prefers non-empty `AGENTS.override.md` over `AGENTS.md`, and the active profile can override top-level `model_instructions_file`.
+- Align with March 2026 Codex runtime behavior: hooks currently load only `SessionStart` and `Stop`, async/prompt/agent hooks are skipped, skills load from CODEX_HOME skill roots plus config overrides, and cached plugins are expected to carry `.codex-plugin/plugin.json`.
 - Keep the default mode report-only; implementation should be a separate explicit step.
 - Prefer enforceable guardrails and small reversible fixes over sprawling prose reshuffles.
 
@@ -47,6 +53,8 @@ Assumptions:
 - A dated Markdown report written to the output directory.
 - A short console summary that includes:
   - the report path
+  - the number of surfaces checked
+  - the surface inventory snapshot
   - the top findings
   - the top “next actions”
 
@@ -58,13 +66,14 @@ Assumptions:
 
 ## Validation
 
-Fail fast:
-- If the script cannot find `config.toml`, `rules/`, or `AGENTS.md` in the target home, stop and report what’s missing.
+Blocker exit:
+- If the script cannot find `config.toml`, cannot find any `.rules` files, or cannot identify any global guidance source (`AGENTS.override.md`, `AGENTS.md`, or configured instruction file), it still writes a report but exits non-zero.
 - If the report cannot be written, stop and return a non-zero exit status.
 
 Recommended checks after updates:
 - Run the skill’s audit again and confirm issues are resolved.
 - For rules: run `~/.codex/scripts/rules-check.sh` and `~/.codex/scripts/rules-lint.py`.
+- For hooks/plugins/config edits: re-parse `hooks.json`, `config.toml`, and any plugin JSON touched before marking the audit clean.
 
 ## Constraints / Safety
 
@@ -77,6 +86,7 @@ Recommended checks after updates:
 - Printing `.env` files, `auth.json`, or raw environment variables.
 - Applying file edits “because the report says so” without explicit user request.
 - Making broad allow-rules for shell wrappers like `zsh -lc "<script>"` that can hide multiple actions.
+- Auditing telemetry, history, or plugin state by dumping transcript content, prompt bodies, or credential payloads into the report.
 
 ## Philosophy
 
@@ -92,10 +102,11 @@ Minimize drift by:
 3. “Move recurring command guidance into rules where possible.”
 4. “A stale shadow instruction file is conflicting with AGENTS.md—help me clean this up safely.”
 5. “Tighten rules so grep is blocked and find requires a prompt.”
-6. “Generate a dated report I can paste into a ticket.”
-7. “Do not implement—report only.”
-8. “Audit a different CODEX_HOME at /path/to/.codex.”
-9. “Deploy my app.” (out of scope; this skill should refuse and redirect)
+6. “Audit my Codex home for telemetry, hooks, plugins, and history retention issues.”
+7. “Generate a dated report I can paste into a ticket.”
+8. “Do not implement—report only.”
+9. “Audit a different CODEX_HOME at /path/to/.codex.”
+10. “Deploy my app.” (out of scope; this skill should refuse and redirect)
 
 ## Resources
 
@@ -125,3 +136,9 @@ Minimize drift by:
 - Persist with: `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
 - The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
 <!-- /decision-feedback-protocol -->
+
+## Gotchas
+- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.
+
+## Failure mode
+- If the Codex home scope, target files, or audit criteria cannot be verified, stop, report the blocker, and fall back to a read-only inventory rather than proposing risky cleanup.

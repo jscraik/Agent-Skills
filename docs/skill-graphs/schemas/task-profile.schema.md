@@ -49,6 +49,9 @@ criteria:
 learning_posture:                       # optional pilot extension
   supported: [learn, guided, execute]   # supported postures for this pilot skill
   default: learn|guided|execute          # fallback posture when selection is unset
+  feedback_capture:                      # optional post-run feedback automation
+    prompt_on_terminal: bool             # ask after result delivery when runtime allows
+    interactive_only: bool               # default true; suppress prompts in non-interactive runs
   degraded_pairings_acknowledged:        # required only when enabling degraded pairings
     - posture: string                   # example: guided
       rationale: string
@@ -72,6 +75,13 @@ Legacy `collaboration` may be read for compatibility, but new profiles must not 
 
 `learning_posture` is a pilot-only extension for learning-preserving behavior.
 It is additive and must remain separate from `delegation.mode`.
+
+`learning_posture.feedback_capture` is optional. When `prompt_on_terminal=true`,
+the recursive loop may automatically ask the user for non-blocking `post_run_feedback`
+after terminal output is shown. Interactive terminals may use a short bounded response window before the
+run records `answer.status=missing`; non-interactive runs must complete immediately without waiting.
+`interactive_only=true` is recommended so smoke runs,
+CI, and other non-interactive automation do not block on input.
 
 Supported values:
 

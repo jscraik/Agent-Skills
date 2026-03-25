@@ -12,9 +12,16 @@ import re
 import sys
 import time
 import traceback
-import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Any
+
+SCRIPT_DIR = Path(__file__).resolve().parent
+REPO_ROOT = SCRIPT_DIR.parents[2]
+repo_root_str = str(REPO_ROOT)
+if repo_root_str not in sys.path:
+    sys.path.insert(0, repo_root_str)
+
+from defusedxml import ElementTree as ET
 
 EVALUATION_PROMPT = """You are an AI assistant with access to tools.
 

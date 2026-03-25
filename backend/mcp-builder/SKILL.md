@@ -1,6 +1,8 @@
 ---
 name: mcp-builder
 description: Create general-purpose MCP servers and tool schemas for standard integrations. Use when building MCP services without OAuth/billing/Apps UI requirements.
+metadata:
+  skill-type: scaffolding_templates
 ---
 
 # MCP Builder
@@ -100,3 +102,9 @@ description: Create general-purpose MCP servers and tool schemas for standard in
 - Good MCP servers are easy to discover, easy to trust, and easy to compose.
 - Schema discipline is part of usability.
 - The smallest good server is the one another agent can call correctly on the first try.
+
+## Gotchas
+- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.
+
+## Failure mode
+- If the tool contract, auth model, or runtime target is not grounded in repo evidence, stop, report the blocker, and fall back to a contract-definition step before drafting or changing the MCP server.

@@ -1,6 +1,11 @@
 # Progressive disclosure patterns
 
-Use these patterns to keep SKILL.md concise while enabling depth on demand.
+Use these patterns to keep `SKILL.md` concise while enabling depth on demand.
+
+Progressive disclosure is a signposting pattern, not a compression mandate:
+- keep route-critical guidance in `SKILL.md`;
+- preserve nuanced doctrine, caveats, and richer examples in `references/`;
+- explicitly point to the right reference when that deeper context is needed.
 
 ## Pattern 1: High-level guide with references
 
@@ -65,3 +70,5 @@ For simple edits, modify the XML directly.
 
 - Avoid deeply nested references; keep references one level deep from SKILL.md.
 - For reference files longer than 100 lines, include a table of contents.
+- If a detail changes the recommendation or safety posture, preserve it in `references/` instead of summarizing it away.
+- Add direct cues such as `Read when: <condition>` or `Use this reference for <specific task>` so the wrapper remains navigable.
