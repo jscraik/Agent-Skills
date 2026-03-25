@@ -468,6 +468,13 @@ og-image-creator:
   favicon-generator: Generate OG images and favicons as a complete brand suite
   fixing-metadata: Wire generated OG images into correct meta tags
   imagegen: Use imagegen for non-route-specific image generation
+openai-docs:
+  product/docs/context7: Retrieve current third-party library docs when an OpenAI
+    integration depends on external frameworks
+  product/domain/chatgpt-apps: Move from docs lookup into Apps SDK implementation
+    work
+  utilities/coding-harness: Apply current OpenAI guidance while wiring repository
+    automation or agent flows
 orchestrating-subagents:
   ce-work: Execute a plan once the orchestration decision is made and the task is
     implementation-ready
@@ -482,6 +489,13 @@ playwright-interactive:
   agentation: Wire Playwright automation into Agentation self-driving
   fixing-accessibility: Test keyboard navigation and focus via Playwright
   ui-visual-regression: Capture Playwright screenshots for regression baselines
+plugin-creator:
+  github/gh-workflow: Prepare, push, and update GitHub state after plugin packaging
+    changes are ready
+  skills-system/skill-creator: Create or update skills that will live inside the plugin's
+    `skills/` directory
+  utilities/codex-plugin-builder: Evolve a basic local plugin into a fuller packaged
+    plugin workflow
 process-watch:
   codex-home-audit: Check process health during a Codex home audit
   fix-mise: Diagnose mise shim CPU/memory issues via process-watch
@@ -604,6 +618,20 @@ skill-builder:
     or agent before authoring it
   skill-installer: Install or repair runtime visibility when the skill package is
     already built and the problem is projection or distribution
+skill-creator:
+  product/docs/docs-expert: Tighten supporting references or skill-adjacent documentation
+    after scaffold creation
+  skills-system/plugin-creator: Package newly created skills inside a plugin when
+    the user wants distributable packaging
+  utilities/skill-builder: Apply the canonical skill-building workflow, evals, and
+    governance checks
+skill-installer:
+  skills-system/skill-creator: Create or refine a skill before installing it into
+    a Codex home
+  utilities/1password: Supply authenticated GitHub access when private repo installation
+    needs secrets or token flow help
+  utilities/skill-builder: Audit or harden a skill package before distributing it
+    for installation
 slides:
   beautiful-mermaid: Embed high-quality Mermaid diagrams in slide decks
   imagegen: Generate illustrative images for slide backgrounds
