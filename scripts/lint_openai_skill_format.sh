@@ -43,14 +43,21 @@ if command -v fd >/dev/null 2>&1; then
 elif command -v fdfind >/dev/null 2>&1; then
   find_cmd="fdfind"
 else
-  echo "fd or fdfind is required to lint OpenAI skill format" >&2
-  exit 2
+  find_cmd="find"
 fi
 
 roots=(auth backend frontend github interview product utilities)
 errors=0
 warnings=0
 checked=0
+
+list_skill_files() {
+  if [[ "$find_cmd" == "find" ]]; then
+    find "${roots[@]}" -type f -name SKILL.md | sort
+  else
+    "$find_cmd" -t f SKILL.md "${roots[@]}" | sort
+  fi
+}
 
 while IFS= read -r file; do
   [[ -n "$file" ]] || continue
@@ -130,7 +137,7 @@ while IFS= read -r file; do
       fi
     done <<< "$output"
   fi
-done < <("$find_cmd" -t f SKILL.md "${roots[@]}" | sort)
+done < <(list_skill_files)
 
 echo "Checked files: $checked"
 echo "Errors: $errors"
