@@ -189,19 +189,19 @@
         "wcag_2_2"
       ],
       "min_hits_fail": {
-        "react_19": 2,
-        "next_16": 2,
-        "tailwind_v4": 3,
-        "wcag_2_2": 2
-      },
-      "min_hits_warn": {
         "react_19": 3,
         "next_16": 3,
         "tailwind_v4": 4,
         "wcag_2_2": 3
       },
-      "min_coverage_fail": 0.15,
-      "min_coverage_warn": 0.25
+      "min_hits_warn": {
+        "react_19": 3,
+        "next_16": 3,
+        "tailwind_v4": 5,
+        "wcag_2_2": 3
+      },
+      "min_coverage_fail": 0.2,
+      "min_coverage_warn": 0.263
     },
     "github": {
       "required_all": [
@@ -213,7 +213,7 @@
       "min_hits_warn": {
         "gha_sha_pin": 3
       },
-      "min_coverage_fail": 0.6,
+      "min_coverage_fail": 0.65,
       "min_coverage_warn": 1.0
     },
     "cloudflare_backend": {
@@ -226,8 +226,8 @@
       "min_hits_warn": {
         "cloudflare_workers": 2
       },
-      "min_coverage_fail": 0.35,
-      "min_coverage_warn": 0.55
+      "min_coverage_fail": 0.4,
+      "min_coverage_warn": 0.6
     },
     "openai_apps": {
       "required_all": [
@@ -239,8 +239,8 @@
       "min_hits_warn": {
         "responses_api": 1
       },
-      "min_coverage_fail": 0.25,
-      "min_coverage_warn": 0.383
+      "min_coverage_fail": 0.3,
+      "min_coverage_warn": 0.433
     },
     "security": {
       "required_all": [
@@ -252,7 +252,7 @@
       "min_hits_warn": {
         "owasp_top10": 3
       },
-      "min_coverage_fail": 0.4,
+      "min_coverage_fail": 0.45,
       "min_coverage_warn": 0.65
     },
     "mcp": {
@@ -265,8 +265,8 @@
       "min_hits_warn": {
         "mcp_spec": 2
       },
-      "min_coverage_fail": 0.35,
-      "min_coverage_warn": 0.55
+      "min_coverage_fail": 0.4,
+      "min_coverage_warn": 0.6
     },
     "backend_general": {},
     "interview": {},
