@@ -1,0 +1,329 @@
+{
+  "confidence": {
+    "bucket": "medium",
+    "calibration_bucket": "C2_medium_confidence",
+    "evidence_completeness": 0.8,
+    "quality_uplift": 0.05,
+    "schema_version": "1.0",
+    "score": 0.68
+  },
+  "counterfactual_uplift": {
+    "analysis_method_version": "counterfactual_uplift_v1",
+    "auto_apply_decision": "insufficient_data",
+    "auto_apply_thresholds": {
+      "ci_lower_min": 0.02,
+      "delta_min": 0.05,
+      "min_pairs_per_skill": 20,
+      "min_pairs_total": 100
+    },
+    "computed_at": "2026-03-27T17:37:50Z",
+    "control_outcome": null,
+    "control_pool_size": 10,
+    "control_sample_size": 0,
+    "decision_window_days": 7,
+    "match_quality_metrics": {
+      "max_allowed_unmatched_rate": 0.15,
+      "required_covariates": [
+        "skill_id",
+        "task_profile",
+        "recency_bucket"
+      ],
+      "smd": {
+        "recency_bucket": 0.0,
+        "skill_id": 0.0,
+        "task_profile": 0.0
+      },
+      "treated_unmatched_count": 0,
+      "treated_unmatched_rate": 0.0,
+      "valid": true
+    },
+    "pair_counts_by_skill": {
+      "product/ops/release": 0
+    },
+    "promotion_decision": "insufficient_data",
+    "promotion_thresholds": {
+      "ci_lower_min": 0.0,
+      "delta_min": 0.03,
+      "min_pairs_per_skill": 10,
+      "min_pairs_total": 40
+    },
+    "sample_size": 0,
+    "schema_version": "1.0",
+    "treated_sample_size": 0,
+    "treatment_outcome": null,
+    "uplift_confidence_band": {
+      "level": 0.95,
+      "lower": null,
+      "method": "normal_approx_95",
+      "upper": null
+    },
+    "uplift_delta": null
+  },
+  "decision": "draft",
+  "delegation": {
+    "agentic_cost_benefit": {
+      "ai_process_minutes": 20.0,
+      "human_baseline_minutes": 60.0,
+      "probability_of_success": 0.68,
+      "roi_signal": "positive",
+      "time_delta_minutes": 40.0
+    },
+    "mode": "manual",
+    "rationale": "Manual mode required: high-impact side effects need explicit human sign-off before applying candidate lessons."
+  },
+  "evidence_packet": {
+    "completeness_score": 0.8,
+    "evidence_packet_id": "4ddf867c09cb9663"
+  },
+  "expected_version": "",
+  "gate_decision": {
+    "notes": "Fill before approve/reject. uplift_decision=insufficient_data",
+    "provenance_complete": true,
+    "runtime_gates_passed": false,
+    "security_checklist_passed": false
+  },
+  "injected_lesson_ids": [],
+  "invocation_id": "c0e816efd2aa9fa7",
+  "lesson_candidates": [
+    {
+      "advice": {
+        "summary": "Preserve and reuse the pattern that improved `safety`.",
+        "weakest_criteria": [
+          "safety",
+          "clarity"
+        ]
+      },
+      "candidate_id": "candidate_f715796a7444",
+      "confidence": {
+        "bucket": "medium",
+        "calibration_bucket": "C2_medium_confidence",
+        "evidence_completeness": 0.8,
+        "score": 0.68
+      },
+      "created_at": "2026-03-27T17:37:50Z",
+      "delegation_context": {
+        "agentic_cost_benefit": {
+          "ai_process_minutes": 20.0,
+          "human_baseline_minutes": 60.0,
+          "probability_of_success": 0.68,
+          "roi_signal": "positive",
+          "time_delta_minutes": 40.0
+        },
+        "mode": "manual",
+        "rationale": "Manual mode required: high-impact side effects need explicit human sign-off before applying candidate lessons."
+      },
+      "evidence_refs": {
+        "events_path": "events.jsonl",
+        "evidence_packet_path": "evidence_packet.json",
+        "iteration_journal_path": "iteration_journal.jsonl"
+      },
+      "implementation": {
+        "positive_criterion_deltas": {
+          "safety": 0.05
+        },
+        "summary": "Applied focused remediation for: safety, clarity"
+      },
+      "iteration_id": 1,
+      "observation_type": "positive_pattern",
+      "outcome": {
+        "feedback_note": "smoke validation pass",
+        "feedback_status": "worked",
+        "quality_uplift": 0.05,
+        "stop_reason": "budget_exhausted",
+        "terminal_status": "failed"
+      },
+      "profile_id": "product-ops-release",
+      "run_id": "run_20260327T173750064181Z_affe4a_9507063a",
+      "schema_version": "1.1",
+      "scope_profile": "product",
+      "scope_skill": "product/ops/release",
+      "selection": {
+        "feedback_weight": 1.35,
+        "rationale": "Positive delta on safety was amplified by feedback status `worked`.",
+        "score": 0.988
+      },
+      "source_observation": {
+        "criterion_id": "safety",
+        "feedback_note_present": true,
+        "feedback_status": "worked",
+        "observation_id": "observation_a92858d0b7ba"
+      },
+      "status": "candidate",
+      "title": "product/ops/release positive pattern candidate (safety)"
+    },
+    {
+      "advice": {
+        "summary": "Preserve and reuse the pattern that improved `clarity`.",
+        "weakest_criteria": [
+          "safety",
+          "clarity"
+        ]
+      },
+      "candidate_id": "candidate_fce701aa2320",
+      "confidence": {
+        "bucket": "medium",
+        "calibration_bucket": "C2_medium_confidence",
+        "evidence_completeness": 0.8,
+        "score": 0.68
+      },
+      "created_at": "2026-03-27T17:37:50Z",
+      "delegation_context": {
+        "agentic_cost_benefit": {
+          "ai_process_minutes": 20.0,
+          "human_baseline_minutes": 60.0,
+          "probability_of_success": 0.68,
+          "roi_signal": "positive",
+          "time_delta_minutes": 40.0
+        },
+        "mode": "manual",
+        "rationale": "Manual mode required: high-impact side effects need explicit human sign-off before applying candidate lessons."
+      },
+      "evidence_refs": {
+        "events_path": "events.jsonl",
+        "evidence_packet_path": "evidence_packet.json",
+        "iteration_journal_path": "iteration_journal.jsonl"
+      },
+      "implementation": {
+        "positive_criterion_deltas": {
+          "clarity": 0.05
+        },
+        "summary": "Applied focused remediation for: safety, clarity"
+      },
+      "iteration_id": 1,
+      "observation_type": "positive_pattern",
+      "outcome": {
+        "feedback_note": "smoke validation pass",
+        "feedback_status": "worked",
+        "quality_uplift": 0.05,
+        "stop_reason": "budget_exhausted",
+        "terminal_status": "failed"
+      },
+      "profile_id": "product-ops-release",
+      "run_id": "run_20260327T173750064181Z_affe4a_9507063a",
+      "schema_version": "1.1",
+      "scope_profile": "product",
+      "scope_skill": "product/ops/release",
+      "selection": {
+        "feedback_weight": 1.35,
+        "rationale": "Positive delta on clarity was amplified by feedback status `worked`.",
+        "score": 0.988
+      },
+      "source_observation": {
+        "criterion_id": "clarity",
+        "feedback_note_present": true,
+        "feedback_status": "worked",
+        "observation_id": "observation_9b342baf5a23"
+      },
+      "status": "candidate",
+      "title": "product/ops/release positive pattern candidate (clarity)"
+    },
+    {
+      "advice": {
+        "summary": "Preserve and reuse the pattern that improved `specificity`.",
+        "weakest_criteria": [
+          "safety",
+          "clarity"
+        ]
+      },
+      "candidate_id": "candidate_32748594fdc3",
+      "confidence": {
+        "bucket": "medium",
+        "calibration_bucket": "C2_medium_confidence",
+        "evidence_completeness": 0.8,
+        "score": 0.68
+      },
+      "created_at": "2026-03-27T17:37:50Z",
+      "delegation_context": {
+        "agentic_cost_benefit": {
+          "ai_process_minutes": 20.0,
+          "human_baseline_minutes": 60.0,
+          "probability_of_success": 0.68,
+          "roi_signal": "positive",
+          "time_delta_minutes": 40.0
+        },
+        "mode": "manual",
+        "rationale": "Manual mode required: high-impact side effects need explicit human sign-off before applying candidate lessons."
+      },
+      "evidence_refs": {
+        "events_path": "events.jsonl",
+        "evidence_packet_path": "evidence_packet.json",
+        "iteration_journal_path": "iteration_journal.jsonl"
+      },
+      "implementation": {
+        "positive_criterion_deltas": {
+          "specificity": 0.05
+        },
+        "summary": "Applied focused remediation for: safety, clarity"
+      },
+      "iteration_id": 1,
+      "observation_type": "positive_pattern",
+      "outcome": {
+        "feedback_note": "smoke validation pass",
+        "feedback_status": "worked",
+        "quality_uplift": 0.05,
+        "stop_reason": "budget_exhausted",
+        "terminal_status": "failed"
+      },
+      "profile_id": "product-ops-release",
+      "run_id": "run_20260327T173750064181Z_affe4a_9507063a",
+      "schema_version": "1.1",
+      "scope_profile": "product",
+      "scope_skill": "product/ops/release",
+      "selection": {
+        "feedback_weight": 1.35,
+        "rationale": "Positive delta on specificity was amplified by feedback status `worked`.",
+        "score": 0.988
+      },
+      "source_observation": {
+        "criterion_id": "specificity",
+        "feedback_note_present": true,
+        "feedback_status": "worked",
+        "observation_id": "observation_116feeef135a"
+      },
+      "status": "candidate",
+      "title": "product/ops/release positive pattern candidate (specificity)"
+    }
+  ],
+  "lesson_effective_to": null,
+  "lesson_id": "",
+  "lesson_status": "",
+  "provenance": {
+    "evaluator_version": "v1",
+    "iteration_ids": [
+      1
+    ],
+    "objective_hash": "66c7dfe22a73e68fb60305ab0d385b7ecc7222c4638cb5c1a3300136326cfa2e",
+    "prompt_hash": "66c7dfe22a73e68fb60305ab0d385b7ecc7222c4638cb5c1a3300136326cfa2e",
+    "rubric_version": "2026-02-26",
+    "scope_profile": "product",
+    "scope_skill": "product/ops/release"
+  },
+  "reviewer_ids": [],
+  "run_id": "run_20260327T173750064181Z_affe4a_9507063a",
+  "runtime_controls": {
+    "auto_apply_enabled": false,
+    "auto_capture_enabled": true,
+    "effective_rollout_mode": "observe_only",
+    "feedback_prompt_enabled": false,
+    "feedback_prompt_source": "disabled",
+    "interactive_terminal": false,
+    "paths": {
+      "controls_dir": "/Users/jamiecraik/dev/Agent-Skills/artifacts/skill-graphs/controls",
+      "global_auto_apply_switch_file": "/Users/jamiecraik/dev/Agent-Skills/artifacts/skill-graphs/controls/auto_apply.disabled",
+      "global_auto_capture_switch_file": "/Users/jamiecraik/dev/Agent-Skills/artifacts/skill-graphs/controls/auto_capture.disabled",
+      "rollout_mode_file": "/Users/jamiecraik/dev/Agent-Skills/artifacts/skill-graphs/controls/rollout-mode.txt",
+      "skill_auto_apply_switch_file": "/Users/jamiecraik/dev/Agent-Skills/artifacts/skill-graphs/controls/skills/product/ops/release/auto_apply.disabled",
+      "skill_auto_capture_switch_file": "/Users/jamiecraik/dev/Agent-Skills/artifacts/skill-graphs/controls/skills/product/ops/release/auto_capture.disabled",
+      "skill_controls_dir": "/Users/jamiecraik/dev/Agent-Skills/artifacts/skill-graphs/controls/skills"
+    },
+    "reasons": [
+      "rollout_mode_observe_only_disables_auto_apply"
+    ],
+    "rollout_mode": "observe_only",
+    "schema_version": "1.0",
+    "uplift_auto_apply_decision": "insufficient_data",
+    "uplift_gate_mode": "observe",
+    "uplift_promotion_decision": "insufficient_data"
+  },
+  "schema_version": "1.1"
+}

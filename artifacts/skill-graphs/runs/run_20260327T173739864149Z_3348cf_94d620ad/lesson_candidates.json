@@ -1,0 +1,201 @@
+{
+  "items": [
+    {
+      "advice": {
+        "summary": "Preserve and reuse the pattern that improved `specificity`.",
+        "weakest_criteria": [
+          "safety"
+        ]
+      },
+      "candidate_id": "candidate_60f7c5bab3a4",
+      "confidence": {
+        "bucket": "medium",
+        "calibration_bucket": "C2_medium_confidence",
+        "evidence_completeness": 0.8,
+        "score": 0.68
+      },
+      "created_at": "2026-03-27T17:37:40Z",
+      "delegation_context": {
+        "agentic_cost_benefit": {
+          "ai_process_minutes": 15.0,
+          "human_baseline_minutes": 45.0,
+          "probability_of_success": 0.75,
+          "roi_signal": "positive",
+          "time_delta_minutes": 30.0
+        },
+        "mode": "co-pilot",
+        "rationale": "Co-pilot mode default: advisory guidance with controlled rollout and human oversight for promotions."
+      },
+      "evidence_refs": {
+        "events_path": "events.jsonl",
+        "evidence_packet_path": "evidence_packet.json",
+        "iteration_journal_path": "iteration_journal.jsonl"
+      },
+      "implementation": {
+        "positive_criterion_deltas": {
+          "specificity": 0.05
+        },
+        "summary": "Applied focused remediation for: safety"
+      },
+      "iteration_id": 1,
+      "observation_type": "positive_pattern",
+      "outcome": {
+        "feedback_note": "smoke validation pass",
+        "feedback_status": "worked",
+        "quality_uplift": 0.05,
+        "stop_reason": "budget_exhausted",
+        "terminal_status": "failed"
+      },
+      "profile_id": "frontend-graphics-threejs-builder",
+      "run_id": "run_20260327T173739864149Z_3348cf_94d620ad",
+      "schema_version": "1.1",
+      "scope_profile": "frontend",
+      "scope_skill": "frontend/graphics/threejs-builder",
+      "selection": {
+        "feedback_weight": 1.35,
+        "rationale": "Positive delta on specificity was amplified by feedback status `worked`.",
+        "score": 0.988
+      },
+      "source_observation": {
+        "criterion_id": "specificity",
+        "feedback_note_present": true,
+        "feedback_status": "worked",
+        "observation_id": "observation_f305ecd53171"
+      },
+      "status": "candidate",
+      "title": "frontend/graphics/threejs-builder positive pattern candidate (specificity)"
+    },
+    {
+      "advice": {
+        "summary": "Preserve and reuse the pattern that improved `safety`.",
+        "weakest_criteria": [
+          "safety"
+        ]
+      },
+      "candidate_id": "candidate_f43aead73651",
+      "confidence": {
+        "bucket": "medium",
+        "calibration_bucket": "C2_medium_confidence",
+        "evidence_completeness": 0.8,
+        "score": 0.68
+      },
+      "created_at": "2026-03-27T17:37:40Z",
+      "delegation_context": {
+        "agentic_cost_benefit": {
+          "ai_process_minutes": 15.0,
+          "human_baseline_minutes": 45.0,
+          "probability_of_success": 0.75,
+          "roi_signal": "positive",
+          "time_delta_minutes": 30.0
+        },
+        "mode": "co-pilot",
+        "rationale": "Co-pilot mode default: advisory guidance with controlled rollout and human oversight for promotions."
+      },
+      "evidence_refs": {
+        "events_path": "events.jsonl",
+        "evidence_packet_path": "evidence_packet.json",
+        "iteration_journal_path": "iteration_journal.jsonl"
+      },
+      "implementation": {
+        "positive_criterion_deltas": {
+          "safety": 0.05
+        },
+        "summary": "Applied focused remediation for: safety"
+      },
+      "iteration_id": 1,
+      "observation_type": "positive_pattern",
+      "outcome": {
+        "feedback_note": "smoke validation pass",
+        "feedback_status": "worked",
+        "quality_uplift": 0.05,
+        "stop_reason": "budget_exhausted",
+        "terminal_status": "failed"
+      },
+      "profile_id": "frontend-graphics-threejs-builder",
+      "run_id": "run_20260327T173739864149Z_3348cf_94d620ad",
+      "schema_version": "1.1",
+      "scope_profile": "frontend",
+      "scope_skill": "frontend/graphics/threejs-builder",
+      "selection": {
+        "feedback_weight": 1.35,
+        "rationale": "Positive delta on safety was amplified by feedback status `worked`.",
+        "score": 0.988
+      },
+      "source_observation": {
+        "criterion_id": "safety",
+        "feedback_note_present": true,
+        "feedback_status": "worked",
+        "observation_id": "observation_ea265104ea63"
+      },
+      "status": "candidate",
+      "title": "frontend/graphics/threejs-builder positive pattern candidate (safety)"
+    },
+    {
+      "advice": {
+        "summary": "Preserve and reuse the pattern that improved `clarity`.",
+        "weakest_criteria": [
+          "safety"
+        ]
+      },
+      "candidate_id": "candidate_a5f72ae6ef71",
+      "confidence": {
+        "bucket": "medium",
+        "calibration_bucket": "C2_medium_confidence",
+        "evidence_completeness": 0.8,
+        "score": 0.68
+      },
+      "created_at": "2026-03-27T17:37:40Z",
+      "delegation_context": {
+        "agentic_cost_benefit": {
+          "ai_process_minutes": 15.0,
+          "human_baseline_minutes": 45.0,
+          "probability_of_success": 0.75,
+          "roi_signal": "positive",
+          "time_delta_minutes": 30.0
+        },
+        "mode": "co-pilot",
+        "rationale": "Co-pilot mode default: advisory guidance with controlled rollout and human oversight for promotions."
+      },
+      "evidence_refs": {
+        "events_path": "events.jsonl",
+        "evidence_packet_path": "evidence_packet.json",
+        "iteration_journal_path": "iteration_journal.jsonl"
+      },
+      "implementation": {
+        "positive_criterion_deltas": {
+          "clarity": 0.05
+        },
+        "summary": "Applied focused remediation for: safety"
+      },
+      "iteration_id": 1,
+      "observation_type": "positive_pattern",
+      "outcome": {
+        "feedback_note": "smoke validation pass",
+        "feedback_status": "worked",
+        "quality_uplift": 0.05,
+        "stop_reason": "budget_exhausted",
+        "terminal_status": "failed"
+      },
+      "profile_id": "frontend-graphics-threejs-builder",
+      "run_id": "run_20260327T173739864149Z_3348cf_94d620ad",
+      "schema_version": "1.1",
+      "scope_profile": "frontend",
+      "scope_skill": "frontend/graphics/threejs-builder",
+      "selection": {
+        "feedback_weight": 1.35,
+        "rationale": "Positive delta on clarity was amplified by feedback status `worked`.",
+        "score": 0.988
+      },
+      "source_observation": {
+        "criterion_id": "clarity",
+        "feedback_note_present": true,
+        "feedback_status": "worked",
+        "observation_id": "observation_889e8a64e045"
+      },
+      "status": "candidate",
+      "title": "frontend/graphics/threejs-builder positive pattern candidate (clarity)"
+    }
+  ],
+  "run_id": "run_20260327T173739864149Z_3348cf_94d620ad",
+  "schema_version": "1.0"
+}

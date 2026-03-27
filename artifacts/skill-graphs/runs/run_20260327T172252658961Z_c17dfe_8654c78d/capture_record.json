@@ -1,0 +1,78 @@
+{
+  "candidate_lessons": {
+    "count": 3,
+    "top_candidate_id": "candidate_e105890837f5"
+  },
+  "capture_id": "8cdec63d1ac2aa05",
+  "confidence": {
+    "bucket": "high",
+    "calibration_bucket": "C1_high_confidence",
+    "inputs": {
+      "evidence_completeness": 0.8,
+      "feedback_signal": 1.0,
+      "feedback_status": "worked",
+      "iterations_observed": 2,
+      "non_regression_signal": 1.0,
+      "quality_uplift_signal": 1.0,
+      "runtime_gate_signal": 1.0,
+      "stop_reason": "pass",
+      "terminal_status": "passed"
+    },
+    "quality_uplift": 0.12,
+    "schema_version": "1.0",
+    "score": 0.93
+  },
+  "created_at": "2026-03-27T17:22:52Z",
+  "evidence": {
+    "completeness": {
+      "checks": true,
+      "events": true,
+      "logs": false,
+      "score": 0.8,
+      "session_signals": true,
+      "traces": true
+    },
+    "evidence_packet_id": "880f5803cbbd13ed",
+    "evidence_packet_path": "evidence_packet.json"
+  },
+  "feedback": {
+    "captured_at": "2026-03-27T17:22:52Z",
+    "note": "smoke validation pass",
+    "source": "cli_one_tap",
+    "status": "worked"
+  },
+  "injected_lessons": {
+    "count": 0,
+    "items": []
+  },
+  "invocation_envelope": {
+    "actor_id": "recursive-skill-loop",
+    "auto_apply_enabled": false,
+    "auto_capture_enabled": true,
+    "idempotency_key": "14f13884055e2c337b8d",
+    "invocation_id": "a70444d6fea6c2dc",
+    "invoked_at": "2026-03-27T17:22:52Z",
+    "kill_switch_file": "",
+    "objective_hash": "bbcaf1413fa0d00f0cbe26b9844e59d8f84442efb674c3c0baf576efcdb5ed58",
+    "rollback_required_file": "",
+    "rollout_mode": "observe_only",
+    "run_owner": "skill-graph-smoke"
+  },
+  "lesson_observations": {
+    "count": 3,
+    "top_observation_id": "observation_fcfc08323a7b"
+  },
+  "output_summary": {
+    "duration_ms": 8,
+    "finished_at": "2026-03-27T17:22:52Z",
+    "iterations_completed": 2,
+    "stop_reason": "pass",
+    "terminal_status": "passed",
+    "tokens_used": 172
+  },
+  "profile_id": "interview-architecture-interview",
+  "run_id": "run_20260327T172252658961Z_c17dfe_8654c78d",
+  "schema_version": "1.0",
+  "scope_profile": "interview",
+  "scope_skill": "interview/architecture-interview"
+}

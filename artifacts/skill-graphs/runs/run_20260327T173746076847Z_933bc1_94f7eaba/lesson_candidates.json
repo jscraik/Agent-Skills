@@ -1,0 +1,201 @@
+{
+  "items": [
+    {
+      "advice": {
+        "summary": "Preserve and reuse the pattern that improved `specificity`.",
+        "weakest_criteria": [
+          "safety"
+        ]
+      },
+      "candidate_id": "candidate_2a16674a9936",
+      "confidence": {
+        "bucket": "medium",
+        "calibration_bucket": "C2_medium_confidence",
+        "evidence_completeness": 0.8,
+        "score": 0.68
+      },
+      "created_at": "2026-03-27T17:37:46Z",
+      "delegation_context": {
+        "agentic_cost_benefit": {
+          "ai_process_minutes": 15.0,
+          "human_baseline_minutes": 45.0,
+          "probability_of_success": 0.75,
+          "roi_signal": "positive",
+          "time_delta_minutes": 30.0
+        },
+        "mode": "co-pilot",
+        "rationale": "Co-pilot mode default: advisory guidance with controlled rollout and human oversight for promotions."
+      },
+      "evidence_refs": {
+        "events_path": "events.jsonl",
+        "evidence_packet_path": "evidence_packet.json",
+        "iteration_journal_path": "iteration_journal.jsonl"
+      },
+      "implementation": {
+        "positive_criterion_deltas": {
+          "specificity": 0.05
+        },
+        "summary": "Applied focused remediation for: safety"
+      },
+      "iteration_id": 1,
+      "observation_type": "positive_pattern",
+      "outcome": {
+        "feedback_note": "smoke validation pass",
+        "feedback_status": "worked",
+        "quality_uplift": 0.05,
+        "stop_reason": "budget_exhausted",
+        "terminal_status": "failed"
+      },
+      "profile_id": "interview-deep-interview",
+      "run_id": "run_20260327T173746076847Z_933bc1_94f7eaba",
+      "schema_version": "1.1",
+      "scope_profile": "interview",
+      "scope_skill": "interview/deep-interview",
+      "selection": {
+        "feedback_weight": 1.35,
+        "rationale": "Positive delta on specificity was amplified by feedback status `worked`.",
+        "score": 0.988
+      },
+      "source_observation": {
+        "criterion_id": "specificity",
+        "feedback_note_present": true,
+        "feedback_status": "worked",
+        "observation_id": "observation_88823b30a568"
+      },
+      "status": "candidate",
+      "title": "interview/deep-interview positive pattern candidate (specificity)"
+    },
+    {
+      "advice": {
+        "summary": "Preserve and reuse the pattern that improved `safety`.",
+        "weakest_criteria": [
+          "safety"
+        ]
+      },
+      "candidate_id": "candidate_d4f0f48e4343",
+      "confidence": {
+        "bucket": "medium",
+        "calibration_bucket": "C2_medium_confidence",
+        "evidence_completeness": 0.8,
+        "score": 0.68
+      },
+      "created_at": "2026-03-27T17:37:46Z",
+      "delegation_context": {
+        "agentic_cost_benefit": {
+          "ai_process_minutes": 15.0,
+          "human_baseline_minutes": 45.0,
+          "probability_of_success": 0.75,
+          "roi_signal": "positive",
+          "time_delta_minutes": 30.0
+        },
+        "mode": "co-pilot",
+        "rationale": "Co-pilot mode default: advisory guidance with controlled rollout and human oversight for promotions."
+      },
+      "evidence_refs": {
+        "events_path": "events.jsonl",
+        "evidence_packet_path": "evidence_packet.json",
+        "iteration_journal_path": "iteration_journal.jsonl"
+      },
+      "implementation": {
+        "positive_criterion_deltas": {
+          "safety": 0.05
+        },
+        "summary": "Applied focused remediation for: safety"
+      },
+      "iteration_id": 1,
+      "observation_type": "positive_pattern",
+      "outcome": {
+        "feedback_note": "smoke validation pass",
+        "feedback_status": "worked",
+        "quality_uplift": 0.05,
+        "stop_reason": "budget_exhausted",
+        "terminal_status": "failed"
+      },
+      "profile_id": "interview-deep-interview",
+      "run_id": "run_20260327T173746076847Z_933bc1_94f7eaba",
+      "schema_version": "1.1",
+      "scope_profile": "interview",
+      "scope_skill": "interview/deep-interview",
+      "selection": {
+        "feedback_weight": 1.35,
+        "rationale": "Positive delta on safety was amplified by feedback status `worked`.",
+        "score": 0.988
+      },
+      "source_observation": {
+        "criterion_id": "safety",
+        "feedback_note_present": true,
+        "feedback_status": "worked",
+        "observation_id": "observation_2f14cdd08a29"
+      },
+      "status": "candidate",
+      "title": "interview/deep-interview positive pattern candidate (safety)"
+    },
+    {
+      "advice": {
+        "summary": "Preserve and reuse the pattern that improved `clarity`.",
+        "weakest_criteria": [
+          "safety"
+        ]
+      },
+      "candidate_id": "candidate_6e2b64773c9f",
+      "confidence": {
+        "bucket": "medium",
+        "calibration_bucket": "C2_medium_confidence",
+        "evidence_completeness": 0.8,
+        "score": 0.68
+      },
+      "created_at": "2026-03-27T17:37:46Z",
+      "delegation_context": {
+        "agentic_cost_benefit": {
+          "ai_process_minutes": 15.0,
+          "human_baseline_minutes": 45.0,
+          "probability_of_success": 0.75,
+          "roi_signal": "positive",
+          "time_delta_minutes": 30.0
+        },
+        "mode": "co-pilot",
+        "rationale": "Co-pilot mode default: advisory guidance with controlled rollout and human oversight for promotions."
+      },
+      "evidence_refs": {
+        "events_path": "events.jsonl",
+        "evidence_packet_path": "evidence_packet.json",
+        "iteration_journal_path": "iteration_journal.jsonl"
+      },
+      "implementation": {
+        "positive_criterion_deltas": {
+          "clarity": 0.05
+        },
+        "summary": "Applied focused remediation for: safety"
+      },
+      "iteration_id": 1,
+      "observation_type": "positive_pattern",
+      "outcome": {
+        "feedback_note": "smoke validation pass",
+        "feedback_status": "worked",
+        "quality_uplift": 0.05,
+        "stop_reason": "budget_exhausted",
+        "terminal_status": "failed"
+      },
+      "profile_id": "interview-deep-interview",
+      "run_id": "run_20260327T173746076847Z_933bc1_94f7eaba",
+      "schema_version": "1.1",
+      "scope_profile": "interview",
+      "scope_skill": "interview/deep-interview",
+      "selection": {
+        "feedback_weight": 1.35,
+        "rationale": "Positive delta on clarity was amplified by feedback status `worked`.",
+        "score": 0.988
+      },
+      "source_observation": {
+        "criterion_id": "clarity",
+        "feedback_note_present": true,
+        "feedback_status": "worked",
+        "observation_id": "observation_0edb2ec1ba72"
+      },
+      "status": "candidate",
+      "title": "interview/deep-interview positive pattern candidate (clarity)"
+    }
+  ],
+  "run_id": "run_20260327T173746076847Z_933bc1_94f7eaba",
+  "schema_version": "1.0"
+}

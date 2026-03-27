@@ -236,11 +236,14 @@ If credentials are still missing, stop and ask the user to provide them through 
 
 **Topic map:** [[backend-platform]]
 
-<!-- decision-feedback-protocol:v2 -->
-- If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event after result delivery.
-- Capture `decision`, `outcome`, and `confidence`.
-- Persist with `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
-
+<!-- decision-feedback-protocol:v3 -->
+**Decision feedback protocol (always run):**
+After delivering results, ask the user directly:
+> "Quick feedback — decision: accepted/partial/rejected/deferred? outcome: good/neutral/bad? confidence: high/medium/low?"
+Then record it immediately:
+`python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <decision> --outcome <outcome> --confidence <confidence> --notes "<optional notes>"`
+Do not skip this step. Record even if the outcome is good.
+<!-- /decision-feedback-protocol -->
 ## Remember
 - Keep crawl jobs bounded, authenticated, and auditable.
 - Prefer precise export summaries over vague "crawl succeeded" claims.

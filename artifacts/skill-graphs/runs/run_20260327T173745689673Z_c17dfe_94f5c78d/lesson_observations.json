@@ -1,0 +1,328 @@
+{
+  "items": [
+    {
+      "advice": {
+        "summary": "Preserve and reuse the pattern that improved `safety`.",
+        "weakest_criteria": [
+          "safety",
+          "clarity"
+        ]
+      },
+      "confidence": {
+        "bucket": "medium",
+        "calibration_bucket": "C2_medium_confidence",
+        "evidence_completeness": 0.8,
+        "score": 0.68
+      },
+      "created_at": "2026-03-27T17:37:45Z",
+      "criterion_id": "safety",
+      "delegation_context": {
+        "agentic_cost_benefit": {
+          "ai_process_minutes": 15.0,
+          "human_baseline_minutes": 45.0,
+          "probability_of_success": 0.75,
+          "roi_signal": "positive",
+          "time_delta_minutes": 30.0
+        },
+        "mode": "co-pilot",
+        "rationale": "Co-pilot mode default: advisory guidance with controlled rollout and human oversight for promotions."
+      },
+      "evidence_refs": {
+        "events_path": "events.jsonl",
+        "evidence_packet_path": "evidence_packet.json",
+        "iteration_journal_path": "iteration_journal.jsonl"
+      },
+      "implementation": {
+        "positive_criterion_deltas": {
+          "safety": 0.05
+        },
+        "summary": "Applied focused remediation for: safety, clarity"
+      },
+      "iteration_id": 1,
+      "observation_id": "observation_e60f2342775e",
+      "observation_type": "positive_pattern",
+      "outcome": {
+        "feedback_note": "smoke validation pass",
+        "feedback_status": "worked",
+        "quality_uplift": 0.05,
+        "stop_reason": "budget_exhausted",
+        "terminal_status": "failed"
+      },
+      "profile_id": "interview-architecture-interview",
+      "run_id": "run_20260327T173745689673Z_c17dfe_94f5c78d",
+      "schema_version": "1.0",
+      "scope_profile": "interview",
+      "scope_skill": "interview/architecture-interview",
+      "selection_hint": {
+        "feedback_weight": 1.35,
+        "rationale": "Positive delta on safety was amplified by feedback status `worked`.",
+        "score": 0.988
+      },
+      "signals": {
+        "deficit": 0.0,
+        "positive_delta": 0.05
+      },
+      "title": "interview/architecture-interview positive pattern observation (safety)"
+    },
+    {
+      "advice": {
+        "summary": "Preserve and reuse the pattern that improved `specificity`.",
+        "weakest_criteria": [
+          "safety",
+          "clarity"
+        ]
+      },
+      "confidence": {
+        "bucket": "medium",
+        "calibration_bucket": "C2_medium_confidence",
+        "evidence_completeness": 0.8,
+        "score": 0.68
+      },
+      "created_at": "2026-03-27T17:37:45Z",
+      "criterion_id": "specificity",
+      "delegation_context": {
+        "agentic_cost_benefit": {
+          "ai_process_minutes": 15.0,
+          "human_baseline_minutes": 45.0,
+          "probability_of_success": 0.75,
+          "roi_signal": "positive",
+          "time_delta_minutes": 30.0
+        },
+        "mode": "co-pilot",
+        "rationale": "Co-pilot mode default: advisory guidance with controlled rollout and human oversight for promotions."
+      },
+      "evidence_refs": {
+        "events_path": "events.jsonl",
+        "evidence_packet_path": "evidence_packet.json",
+        "iteration_journal_path": "iteration_journal.jsonl"
+      },
+      "implementation": {
+        "positive_criterion_deltas": {
+          "specificity": 0.05
+        },
+        "summary": "Applied focused remediation for: safety, clarity"
+      },
+      "iteration_id": 1,
+      "observation_id": "observation_912bb6c3da9f",
+      "observation_type": "positive_pattern",
+      "outcome": {
+        "feedback_note": "smoke validation pass",
+        "feedback_status": "worked",
+        "quality_uplift": 0.05,
+        "stop_reason": "budget_exhausted",
+        "terminal_status": "failed"
+      },
+      "profile_id": "interview-architecture-interview",
+      "run_id": "run_20260327T173745689673Z_c17dfe_94f5c78d",
+      "schema_version": "1.0",
+      "scope_profile": "interview",
+      "scope_skill": "interview/architecture-interview",
+      "selection_hint": {
+        "feedback_weight": 1.35,
+        "rationale": "Positive delta on specificity was amplified by feedback status `worked`.",
+        "score": 0.988
+      },
+      "signals": {
+        "deficit": 0.0,
+        "positive_delta": 0.05
+      },
+      "title": "interview/architecture-interview positive pattern observation (specificity)"
+    },
+    {
+      "advice": {
+        "summary": "Preserve and reuse the pattern that improved `clarity`.",
+        "weakest_criteria": [
+          "safety",
+          "clarity"
+        ]
+      },
+      "confidence": {
+        "bucket": "medium",
+        "calibration_bucket": "C2_medium_confidence",
+        "evidence_completeness": 0.8,
+        "score": 0.68
+      },
+      "created_at": "2026-03-27T17:37:45Z",
+      "criterion_id": "clarity",
+      "delegation_context": {
+        "agentic_cost_benefit": {
+          "ai_process_minutes": 15.0,
+          "human_baseline_minutes": 45.0,
+          "probability_of_success": 0.75,
+          "roi_signal": "positive",
+          "time_delta_minutes": 30.0
+        },
+        "mode": "co-pilot",
+        "rationale": "Co-pilot mode default: advisory guidance with controlled rollout and human oversight for promotions."
+      },
+      "evidence_refs": {
+        "events_path": "events.jsonl",
+        "evidence_packet_path": "evidence_packet.json",
+        "iteration_journal_path": "iteration_journal.jsonl"
+      },
+      "implementation": {
+        "positive_criterion_deltas": {
+          "clarity": 0.05
+        },
+        "summary": "Applied focused remediation for: safety, clarity"
+      },
+      "iteration_id": 1,
+      "observation_id": "observation_08624adca0ee",
+      "observation_type": "positive_pattern",
+      "outcome": {
+        "feedback_note": "smoke validation pass",
+        "feedback_status": "worked",
+        "quality_uplift": 0.05,
+        "stop_reason": "budget_exhausted",
+        "terminal_status": "failed"
+      },
+      "profile_id": "interview-architecture-interview",
+      "run_id": "run_20260327T173745689673Z_c17dfe_94f5c78d",
+      "schema_version": "1.0",
+      "scope_profile": "interview",
+      "scope_skill": "interview/architecture-interview",
+      "selection_hint": {
+        "feedback_weight": 1.35,
+        "rationale": "Positive delta on clarity was amplified by feedback status `worked`.",
+        "score": 0.988
+      },
+      "signals": {
+        "deficit": 0.0,
+        "positive_delta": 0.05
+      },
+      "title": "interview/architecture-interview positive pattern observation (clarity)"
+    },
+    {
+      "advice": {
+        "summary": "Strengthen concrete examples, file-path specificity, and measurable checks.",
+        "weakest_criteria": [
+          "safety"
+        ]
+      },
+      "confidence": {
+        "bucket": "medium",
+        "calibration_bucket": "C2_medium_confidence",
+        "evidence_completeness": 0.8,
+        "score": 0.68
+      },
+      "created_at": "2026-03-27T17:37:45Z",
+      "criterion_id": "safety",
+      "delegation_context": {
+        "agentic_cost_benefit": {
+          "ai_process_minutes": 15.0,
+          "human_baseline_minutes": 45.0,
+          "probability_of_success": 0.75,
+          "roi_signal": "positive",
+          "time_delta_minutes": 30.0
+        },
+        "mode": "co-pilot",
+        "rationale": "Co-pilot mode default: advisory guidance with controlled rollout and human oversight for promotions."
+      },
+      "evidence_refs": {
+        "events_path": "events.jsonl",
+        "evidence_packet_path": "evidence_packet.json",
+        "iteration_journal_path": "iteration_journal.jsonl"
+      },
+      "implementation": {
+        "positive_criterion_deltas": {
+          "clarity": 0.05,
+          "safety": 0.05,
+          "specificity": 0.05
+        },
+        "summary": "Applied focused remediation for: safety, clarity"
+      },
+      "iteration_id": 1,
+      "observation_id": "observation_145ff17d3b65",
+      "observation_type": "remediation",
+      "outcome": {
+        "feedback_note": "smoke validation pass",
+        "feedback_status": "worked",
+        "quality_uplift": 0.05,
+        "stop_reason": "budget_exhausted",
+        "terminal_status": "failed"
+      },
+      "profile_id": "interview-architecture-interview",
+      "run_id": "run_20260327T173745689673Z_c17dfe_94f5c78d",
+      "schema_version": "1.0",
+      "scope_profile": "interview",
+      "scope_skill": "interview/architecture-interview",
+      "selection_hint": {
+        "feedback_weight": 0.55,
+        "rationale": "Weakness in safety was prioritized because feedback status was `worked`.",
+        "score": 0.39
+      },
+      "signals": {
+        "deficit": 0.063,
+        "positive_delta": 0.0
+      },
+      "title": "interview/architecture-interview remediation observation (safety)"
+    },
+    {
+      "advice": {
+        "summary": "Strengthen concrete examples, file-path specificity, and measurable checks.",
+        "weakest_criteria": [
+          "clarity"
+        ]
+      },
+      "confidence": {
+        "bucket": "medium",
+        "calibration_bucket": "C2_medium_confidence",
+        "evidence_completeness": 0.8,
+        "score": 0.68
+      },
+      "created_at": "2026-03-27T17:37:45Z",
+      "criterion_id": "clarity",
+      "delegation_context": {
+        "agentic_cost_benefit": {
+          "ai_process_minutes": 15.0,
+          "human_baseline_minutes": 45.0,
+          "probability_of_success": 0.75,
+          "roi_signal": "positive",
+          "time_delta_minutes": 30.0
+        },
+        "mode": "co-pilot",
+        "rationale": "Co-pilot mode default: advisory guidance with controlled rollout and human oversight for promotions."
+      },
+      "evidence_refs": {
+        "events_path": "events.jsonl",
+        "evidence_packet_path": "evidence_packet.json",
+        "iteration_journal_path": "iteration_journal.jsonl"
+      },
+      "implementation": {
+        "positive_criterion_deltas": {
+          "clarity": 0.05,
+          "safety": 0.05,
+          "specificity": 0.05
+        },
+        "summary": "Applied focused remediation for: safety, clarity"
+      },
+      "iteration_id": 1,
+      "observation_id": "observation_c40caf1c57f9",
+      "observation_type": "remediation",
+      "outcome": {
+        "feedback_note": "smoke validation pass",
+        "feedback_status": "worked",
+        "quality_uplift": 0.05,
+        "stop_reason": "budget_exhausted",
+        "terminal_status": "failed"
+      },
+      "profile_id": "interview-architecture-interview",
+      "run_id": "run_20260327T173745689673Z_c17dfe_94f5c78d",
+      "schema_version": "1.0",
+      "scope_profile": "interview",
+      "scope_skill": "interview/architecture-interview",
+      "selection_hint": {
+        "feedback_weight": 0.55,
+        "rationale": "Weakness in clarity was prioritized because feedback status was `worked`.",
+        "score": 0.372
+      },
+      "signals": {
+        "deficit": 0.03,
+        "positive_delta": 0.0
+      },
+      "title": "interview/architecture-interview remediation observation (clarity)"
+    }
+  ],
+  "run_id": "run_20260327T173745689673Z_c17dfe_94f5c78d",
+  "schema_version": "1.0"
+}

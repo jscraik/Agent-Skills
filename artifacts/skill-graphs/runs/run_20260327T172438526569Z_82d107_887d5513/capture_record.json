@@ -1,0 +1,78 @@
+{
+  "candidate_lessons": {
+    "count": 3,
+    "top_candidate_id": "candidate_70a6d8546f4c"
+  },
+  "capture_id": "d333581a3af379aa",
+  "confidence": {
+    "bucket": "high",
+    "calibration_bucket": "C1_high_confidence",
+    "inputs": {
+      "evidence_completeness": 0.8,
+      "feedback_signal": 1.0,
+      "feedback_status": "worked",
+      "iterations_observed": 2,
+      "non_regression_signal": 1.0,
+      "quality_uplift_signal": 1.0,
+      "runtime_gate_signal": 1.0,
+      "stop_reason": "pass",
+      "terminal_status": "passed"
+    },
+    "quality_uplift": 0.12,
+    "schema_version": "1.0",
+    "score": 0.93
+  },
+  "created_at": "2026-03-27T17:24:38Z",
+  "evidence": {
+    "completeness": {
+      "checks": true,
+      "events": true,
+      "logs": false,
+      "score": 0.8,
+      "session_signals": true,
+      "traces": true
+    },
+    "evidence_packet_id": "aca88607357488a8",
+    "evidence_packet_path": "evidence_packet.json"
+  },
+  "feedback": {
+    "captured_at": "2026-03-27T17:24:38Z",
+    "note": "smoke validation pass",
+    "source": "cli_one_tap",
+    "status": "worked"
+  },
+  "injected_lessons": {
+    "count": 0,
+    "items": []
+  },
+  "invocation_envelope": {
+    "actor_id": "recursive-skill-loop",
+    "auto_apply_enabled": false,
+    "auto_capture_enabled": true,
+    "idempotency_key": "dac71d340495df5e2e8a",
+    "invocation_id": "7eeca35b05313b86",
+    "invoked_at": "2026-03-27T17:24:38Z",
+    "kill_switch_file": "",
+    "objective_hash": "e22b7bb7adb84d24c9822ab5599bcdcdb63be1b929f785f90d513cae108d1973",
+    "rollback_required_file": "",
+    "rollout_mode": "observe_only",
+    "run_owner": "skill-graph-smoke"
+  },
+  "lesson_observations": {
+    "count": 4,
+    "top_observation_id": "observation_c457da217ef4"
+  },
+  "output_summary": {
+    "duration_ms": 79,
+    "finished_at": "2026-03-27T17:24:38Z",
+    "iterations_completed": 2,
+    "stop_reason": "pass",
+    "terminal_status": "passed",
+    "tokens_used": 172
+  },
+  "profile_id": "product-strategy-brainstorming",
+  "run_id": "run_20260327T172438526569Z_82d107_887d5513",
+  "schema_version": "1.0",
+  "scope_profile": "product",
+  "scope_skill": "product/strategy/brainstorming"
+}

@@ -1,0 +1,201 @@
+{
+  "items": [
+    {
+      "advice": {
+        "summary": "Preserve and reuse the pattern that improved `specificity`.",
+        "weakest_criteria": [
+          "safety"
+        ]
+      },
+      "candidate_id": "candidate_ac50f6e36e88",
+      "confidence": {
+        "bucket": "medium",
+        "calibration_bucket": "C2_medium_confidence",
+        "evidence_completeness": 0.8,
+        "score": 0.68
+      },
+      "created_at": "2026-03-27T17:23:56Z",
+      "delegation_context": {
+        "agentic_cost_benefit": {
+          "ai_process_minutes": 20.0,
+          "human_baseline_minutes": 60.0,
+          "probability_of_success": 0.68,
+          "roi_signal": "positive",
+          "time_delta_minutes": 40.0
+        },
+        "mode": "manual",
+        "rationale": "Manual mode required: high-impact side effects need explicit human sign-off before applying candidate lessons."
+      },
+      "evidence_refs": {
+        "events_path": "events.jsonl",
+        "evidence_packet_path": "evidence_packet.json",
+        "iteration_journal_path": "iteration_journal.jsonl"
+      },
+      "implementation": {
+        "positive_criterion_deltas": {
+          "specificity": 0.05
+        },
+        "summary": "Applied focused remediation for: safety"
+      },
+      "iteration_id": 1,
+      "observation_type": "positive_pattern",
+      "outcome": {
+        "feedback_note": "smoke validation pass",
+        "feedback_status": "worked",
+        "quality_uplift": 0.05,
+        "stop_reason": "evaluator_conflict",
+        "terminal_status": "escalated"
+      },
+      "profile_id": "github-gh-workflow",
+      "run_id": "run_20260327T172356545960Z_cf7062_87b34d07",
+      "schema_version": "1.1",
+      "scope_profile": "github",
+      "scope_skill": "github/gh-workflow",
+      "selection": {
+        "feedback_weight": 1.35,
+        "rationale": "Positive delta on specificity was amplified by feedback status `worked`.",
+        "score": 0.988
+      },
+      "source_observation": {
+        "criterion_id": "specificity",
+        "feedback_note_present": true,
+        "feedback_status": "worked",
+        "observation_id": "observation_ea5aec755db9"
+      },
+      "status": "candidate",
+      "title": "github/gh-workflow positive pattern candidate (specificity)"
+    },
+    {
+      "advice": {
+        "summary": "Preserve and reuse the pattern that improved `clarity`.",
+        "weakest_criteria": [
+          "safety"
+        ]
+      },
+      "candidate_id": "candidate_016440fafb93",
+      "confidence": {
+        "bucket": "medium",
+        "calibration_bucket": "C2_medium_confidence",
+        "evidence_completeness": 0.8,
+        "score": 0.68
+      },
+      "created_at": "2026-03-27T17:23:56Z",
+      "delegation_context": {
+        "agentic_cost_benefit": {
+          "ai_process_minutes": 20.0,
+          "human_baseline_minutes": 60.0,
+          "probability_of_success": 0.68,
+          "roi_signal": "positive",
+          "time_delta_minutes": 40.0
+        },
+        "mode": "manual",
+        "rationale": "Manual mode required: high-impact side effects need explicit human sign-off before applying candidate lessons."
+      },
+      "evidence_refs": {
+        "events_path": "events.jsonl",
+        "evidence_packet_path": "evidence_packet.json",
+        "iteration_journal_path": "iteration_journal.jsonl"
+      },
+      "implementation": {
+        "positive_criterion_deltas": {
+          "clarity": 0.05
+        },
+        "summary": "Applied focused remediation for: safety"
+      },
+      "iteration_id": 1,
+      "observation_type": "positive_pattern",
+      "outcome": {
+        "feedback_note": "smoke validation pass",
+        "feedback_status": "worked",
+        "quality_uplift": 0.05,
+        "stop_reason": "evaluator_conflict",
+        "terminal_status": "escalated"
+      },
+      "profile_id": "github-gh-workflow",
+      "run_id": "run_20260327T172356545960Z_cf7062_87b34d07",
+      "schema_version": "1.1",
+      "scope_profile": "github",
+      "scope_skill": "github/gh-workflow",
+      "selection": {
+        "feedback_weight": 1.35,
+        "rationale": "Positive delta on clarity was amplified by feedback status `worked`.",
+        "score": 0.988
+      },
+      "source_observation": {
+        "criterion_id": "clarity",
+        "feedback_note_present": true,
+        "feedback_status": "worked",
+        "observation_id": "observation_99f552e36dd3"
+      },
+      "status": "candidate",
+      "title": "github/gh-workflow positive pattern candidate (clarity)"
+    },
+    {
+      "advice": {
+        "summary": "Preserve and reuse the pattern that improved `safety`.",
+        "weakest_criteria": [
+          "safety"
+        ]
+      },
+      "candidate_id": "candidate_326873499f11",
+      "confidence": {
+        "bucket": "medium",
+        "calibration_bucket": "C2_medium_confidence",
+        "evidence_completeness": 0.8,
+        "score": 0.68
+      },
+      "created_at": "2026-03-27T17:23:56Z",
+      "delegation_context": {
+        "agentic_cost_benefit": {
+          "ai_process_minutes": 20.0,
+          "human_baseline_minutes": 60.0,
+          "probability_of_success": 0.68,
+          "roi_signal": "positive",
+          "time_delta_minutes": 40.0
+        },
+        "mode": "manual",
+        "rationale": "Manual mode required: high-impact side effects need explicit human sign-off before applying candidate lessons."
+      },
+      "evidence_refs": {
+        "events_path": "events.jsonl",
+        "evidence_packet_path": "evidence_packet.json",
+        "iteration_journal_path": "iteration_journal.jsonl"
+      },
+      "implementation": {
+        "positive_criterion_deltas": {
+          "safety": 0.05
+        },
+        "summary": "Applied focused remediation for: safety"
+      },
+      "iteration_id": 1,
+      "observation_type": "positive_pattern",
+      "outcome": {
+        "feedback_note": "smoke validation pass",
+        "feedback_status": "worked",
+        "quality_uplift": 0.05,
+        "stop_reason": "evaluator_conflict",
+        "terminal_status": "escalated"
+      },
+      "profile_id": "github-gh-workflow",
+      "run_id": "run_20260327T172356545960Z_cf7062_87b34d07",
+      "schema_version": "1.1",
+      "scope_profile": "github",
+      "scope_skill": "github/gh-workflow",
+      "selection": {
+        "feedback_weight": 1.35,
+        "rationale": "Positive delta on safety was amplified by feedback status `worked`.",
+        "score": 0.988
+      },
+      "source_observation": {
+        "criterion_id": "safety",
+        "feedback_note_present": true,
+        "feedback_status": "worked",
+        "observation_id": "observation_24a37cb61418"
+      },
+      "status": "candidate",
+      "title": "github/gh-workflow positive pattern candidate (safety)"
+    }
+  ],
+  "run_id": "run_20260327T172356545960Z_cf7062_87b34d07",
+  "schema_version": "1.0"
+}

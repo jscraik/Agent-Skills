@@ -1,0 +1,195 @@
+{
+  "items": [
+    {
+      "advice": {
+        "summary": "Preserve and reuse the pattern that improved `safety`.",
+        "weakest_criteria": []
+      },
+      "candidate_id": "candidate_b6dfe0815e0d",
+      "confidence": {
+        "bucket": "medium",
+        "calibration_bucket": "C2_medium_confidence",
+        "evidence_completeness": 0.8,
+        "score": 0.68
+      },
+      "created_at": "2026-03-27T17:25:34Z",
+      "delegation_context": {
+        "agentic_cost_benefit": {
+          "ai_process_minutes": 20.0,
+          "human_baseline_minutes": 60.0,
+          "probability_of_success": 0.7,
+          "roi_signal": "positive",
+          "time_delta_minutes": 40.0
+        },
+        "mode": "co-pilot",
+        "rationale": "Greploop is iterative and approval-sensitive, so it benefits from controlled co-pilot execution rather than unbounded autonomy."
+      },
+      "evidence_refs": {
+        "events_path": "events.jsonl",
+        "evidence_packet_path": "evidence_packet.json",
+        "iteration_journal_path": "iteration_journal.jsonl"
+      },
+      "implementation": {
+        "positive_criterion_deltas": {
+          "safety": 0.05
+        },
+        "summary": "Applied focused remediation for: consistency"
+      },
+      "iteration_id": 4,
+      "observation_type": "positive_pattern",
+      "outcome": {
+        "feedback_note": "smoke validation pass",
+        "feedback_status": "worked",
+        "quality_uplift": 0.26,
+        "stop_reason": "evaluator_conflict",
+        "terminal_status": "escalated"
+      },
+      "profile_id": "github-greptile-greploop",
+      "run_id": "run_20260327T172534410749Z_5eb661_898fe4b9",
+      "schema_version": "1.1",
+      "scope_profile": "github",
+      "scope_skill": "github/greptile/greploop",
+      "selection": {
+        "feedback_weight": 1.35,
+        "rationale": "Positive delta on safety was amplified by feedback status `worked`.",
+        "score": 0.988
+      },
+      "source_observation": {
+        "criterion_id": "safety",
+        "feedback_note_present": true,
+        "feedback_status": "worked",
+        "observation_id": "observation_bb146c700626"
+      },
+      "status": "candidate",
+      "title": "github/greptile/greploop positive pattern candidate (safety)"
+    },
+    {
+      "advice": {
+        "summary": "Preserve and reuse the pattern that improved `clarity`.",
+        "weakest_criteria": []
+      },
+      "candidate_id": "candidate_237ea8d9e132",
+      "confidence": {
+        "bucket": "medium",
+        "calibration_bucket": "C2_medium_confidence",
+        "evidence_completeness": 0.8,
+        "score": 0.68
+      },
+      "created_at": "2026-03-27T17:25:34Z",
+      "delegation_context": {
+        "agentic_cost_benefit": {
+          "ai_process_minutes": 20.0,
+          "human_baseline_minutes": 60.0,
+          "probability_of_success": 0.7,
+          "roi_signal": "positive",
+          "time_delta_minutes": 40.0
+        },
+        "mode": "co-pilot",
+        "rationale": "Greploop is iterative and approval-sensitive, so it benefits from controlled co-pilot execution rather than unbounded autonomy."
+      },
+      "evidence_refs": {
+        "events_path": "events.jsonl",
+        "evidence_packet_path": "evidence_packet.json",
+        "iteration_journal_path": "iteration_journal.jsonl"
+      },
+      "implementation": {
+        "positive_criterion_deltas": {
+          "clarity": 0.05
+        },
+        "summary": "Applied focused remediation for: consistency"
+      },
+      "iteration_id": 4,
+      "observation_type": "positive_pattern",
+      "outcome": {
+        "feedback_note": "smoke validation pass",
+        "feedback_status": "worked",
+        "quality_uplift": 0.26,
+        "stop_reason": "evaluator_conflict",
+        "terminal_status": "escalated"
+      },
+      "profile_id": "github-greptile-greploop",
+      "run_id": "run_20260327T172534410749Z_5eb661_898fe4b9",
+      "schema_version": "1.1",
+      "scope_profile": "github",
+      "scope_skill": "github/greptile/greploop",
+      "selection": {
+        "feedback_weight": 1.35,
+        "rationale": "Positive delta on clarity was amplified by feedback status `worked`.",
+        "score": 0.988
+      },
+      "source_observation": {
+        "criterion_id": "clarity",
+        "feedback_note_present": true,
+        "feedback_status": "worked",
+        "observation_id": "observation_3d1471d52e34"
+      },
+      "status": "candidate",
+      "title": "github/greptile/greploop positive pattern candidate (clarity)"
+    },
+    {
+      "advice": {
+        "summary": "Preserve and reuse the pattern that improved `specificity`.",
+        "weakest_criteria": []
+      },
+      "candidate_id": "candidate_ded8392a71a2",
+      "confidence": {
+        "bucket": "medium",
+        "calibration_bucket": "C2_medium_confidence",
+        "evidence_completeness": 0.8,
+        "score": 0.68
+      },
+      "created_at": "2026-03-27T17:25:34Z",
+      "delegation_context": {
+        "agentic_cost_benefit": {
+          "ai_process_minutes": 20.0,
+          "human_baseline_minutes": 60.0,
+          "probability_of_success": 0.7,
+          "roi_signal": "positive",
+          "time_delta_minutes": 40.0
+        },
+        "mode": "co-pilot",
+        "rationale": "Greploop is iterative and approval-sensitive, so it benefits from controlled co-pilot execution rather than unbounded autonomy."
+      },
+      "evidence_refs": {
+        "events_path": "events.jsonl",
+        "evidence_packet_path": "evidence_packet.json",
+        "iteration_journal_path": "iteration_journal.jsonl"
+      },
+      "implementation": {
+        "positive_criterion_deltas": {
+          "specificity": 0.05
+        },
+        "summary": "Applied focused remediation for: consistency"
+      },
+      "iteration_id": 4,
+      "observation_type": "positive_pattern",
+      "outcome": {
+        "feedback_note": "smoke validation pass",
+        "feedback_status": "worked",
+        "quality_uplift": 0.26,
+        "stop_reason": "evaluator_conflict",
+        "terminal_status": "escalated"
+      },
+      "profile_id": "github-greptile-greploop",
+      "run_id": "run_20260327T172534410749Z_5eb661_898fe4b9",
+      "schema_version": "1.1",
+      "scope_profile": "github",
+      "scope_skill": "github/greptile/greploop",
+      "selection": {
+        "feedback_weight": 1.35,
+        "rationale": "Positive delta on specificity was amplified by feedback status `worked`.",
+        "score": 0.988
+      },
+      "source_observation": {
+        "criterion_id": "specificity",
+        "feedback_note_present": true,
+        "feedback_status": "worked",
+        "observation_id": "observation_20ce3341d67d"
+      },
+      "status": "candidate",
+      "title": "github/greptile/greploop positive pattern candidate (specificity)"
+    }
+  ],
+  "run_id": "run_20260327T172534410749Z_5eb661_898fe4b9",
+  "schema_version": "1.0"
+}

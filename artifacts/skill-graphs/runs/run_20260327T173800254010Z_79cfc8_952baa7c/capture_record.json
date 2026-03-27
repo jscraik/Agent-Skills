@@ -1,0 +1,78 @@
+{
+  "candidate_lessons": {
+    "count": 3,
+    "top_candidate_id": "candidate_7da2c8d89c8c"
+  },
+  "capture_id": "b230c713815bfd22",
+  "confidence": {
+    "bucket": "medium",
+    "calibration_bucket": "C2_medium_confidence",
+    "inputs": {
+      "evidence_completeness": 0.8,
+      "feedback_signal": 1.0,
+      "feedback_status": "worked",
+      "iterations_observed": 1,
+      "non_regression_signal": 1.0,
+      "quality_uplift_signal": 1.0,
+      "runtime_gate_signal": 0.0,
+      "stop_reason": "budget_exhausted",
+      "terminal_status": "failed"
+    },
+    "quality_uplift": 0.05,
+    "schema_version": "1.0",
+    "score": 0.68
+  },
+  "created_at": "2026-03-27T17:38:00Z",
+  "evidence": {
+    "completeness": {
+      "checks": true,
+      "events": true,
+      "logs": false,
+      "score": 0.8,
+      "session_signals": true,
+      "traces": true
+    },
+    "evidence_packet_id": "10a315bf9a4e2bea",
+    "evidence_packet_path": "evidence_packet.json"
+  },
+  "feedback": {
+    "captured_at": "2026-03-27T17:38:00Z",
+    "note": "smoke validation pass",
+    "source": "cli_one_tap",
+    "status": "worked"
+  },
+  "injected_lessons": {
+    "count": 0,
+    "items": []
+  },
+  "invocation_envelope": {
+    "actor_id": "recursive-skill-loop",
+    "auto_apply_enabled": false,
+    "auto_capture_enabled": true,
+    "idempotency_key": "7598172ba2dc50b56a29",
+    "invocation_id": "b87cf8bd2cb1daaa",
+    "invoked_at": "2026-03-27T17:38:00Z",
+    "kill_switch_file": "",
+    "objective_hash": "bff368b99d1abef709b4ab84b4c62bf57509efa8b306ff94fe7c991d0da3b264",
+    "rollback_required_file": "",
+    "rollout_mode": "observe_only",
+    "run_owner": "skill-graph-smoke"
+  },
+  "lesson_observations": {
+    "count": 6,
+    "top_observation_id": "observation_8c3e7f8a6451"
+  },
+  "output_summary": {
+    "duration_ms": 147,
+    "finished_at": "2026-03-27T17:38:00Z",
+    "iterations_completed": 1,
+    "stop_reason": "budget_exhausted",
+    "terminal_status": "failed",
+    "tokens_used": 61
+  },
+  "profile_id": "utilities-test-driven-development",
+  "run_id": "run_20260327T173800254010Z_79cfc8_952baa7c",
+  "schema_version": "1.0",
+  "scope_profile": "utilities",
+  "scope_skill": "utilities/test-driven-development"
+}

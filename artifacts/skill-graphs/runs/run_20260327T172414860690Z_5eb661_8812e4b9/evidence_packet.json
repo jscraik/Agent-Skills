@@ -1,0 +1,47 @@
+{
+  "completeness": {
+    "checks": true,
+    "events": true,
+    "logs": false,
+    "score": 0.8,
+    "session_signals": true,
+    "traces": true
+  },
+  "created_at": "2026-03-27T17:24:14Z",
+  "evidence_packet_id": "3e54e5b58788bd49",
+  "run_id": "run_20260327T172414860690Z_5eb661_8812e4b9",
+  "schema_version": "1.0",
+  "sources": {
+    "checks": {
+      "present": true,
+      "provenance_complete": true,
+      "run_blocker_present": true,
+      "runtime_gates_passed": false,
+      "security_checklist_passed": false
+    },
+    "events": {
+      "path": "events.jsonl",
+      "present": true,
+      "sha256": "1d49cd6ed71d3939460b11e7438d5d43031807070d8a258d9df2c05935ba50c8",
+      "size_bytes": 2531
+    },
+    "logs": {
+      "paths": [],
+      "present": false
+    },
+    "session_signals": {
+      "duration_ms": 64,
+      "iterations_completed": 4,
+      "present": true,
+      "stop_reason": "evaluator_conflict",
+      "terminal_status": "escalated",
+      "tokens_used": 574
+    },
+    "traces": {
+      "path": "iteration_journal.jsonl",
+      "present": true,
+      "sha256": "a9fdb1ba0e27d2680b3325e5624bdf9fcc161113a0b7b2fd25d09f87d8645a45",
+      "size_bytes": 9318
+    }
+  }
+}

@@ -1,0 +1,135 @@
+{
+  "budget": {
+    "max_elapsed_ms": 180000,
+    "max_iterations": 4,
+    "max_tokens": 16000
+  },
+  "counterfactual_uplift": {
+    "analysis_method_version": "counterfactual_uplift_v1",
+    "auto_apply_decision": "insufficient_data",
+    "auto_apply_thresholds": {
+      "ci_lower_min": 0.02,
+      "delta_min": 0.05,
+      "min_pairs_per_skill": 20,
+      "min_pairs_total": 100
+    },
+    "computed_at": "2026-03-27T17:22:50Z",
+    "control_outcome": null,
+    "control_pool_size": 0,
+    "control_sample_size": 0,
+    "decision_window_days": 7,
+    "match_quality_metrics": {
+      "max_allowed_unmatched_rate": 0.15,
+      "required_covariates": [
+        "skill_id",
+        "task_profile",
+        "recency_bucket"
+      ],
+      "smd": {
+        "recency_bucket": 0.0,
+        "skill_id": 0.0,
+        "task_profile": 0.0
+      },
+      "treated_unmatched_count": 0,
+      "treated_unmatched_rate": 0.0,
+      "valid": true
+    },
+    "pair_counts_by_skill": {
+      "frontend/ui/frontend-ui-design": 0
+    },
+    "promotion_decision": "insufficient_data",
+    "promotion_thresholds": {
+      "ci_lower_min": 0.0,
+      "delta_min": 0.03,
+      "min_pairs_per_skill": 10,
+      "min_pairs_total": 40
+    },
+    "sample_size": 0,
+    "schema_version": "1.0",
+    "treated_sample_size": 0,
+    "treatment_outcome": null,
+    "uplift_confidence_band": {
+      "level": 0.95,
+      "lower": null,
+      "method": "normal_approx_95",
+      "upper": null
+    },
+    "uplift_delta": null
+  },
+  "counters": {
+    "consecutive_passes": 0,
+    "iterations_completed": 4,
+    "tokens_used": 324
+  },
+  "created_by": "recursive-skill-loop",
+  "delegation": {
+    "agentic_cost_benefit": {
+      "ai_process_minutes": 25.0,
+      "human_baseline_minutes": 75.0,
+      "probability_of_success": 0.78,
+      "roi_signal": "positive",
+      "time_delta_minutes": 50.0
+    },
+    "mode": "co-pilot",
+    "rationale": "Frontend UI design benefits from repeated human plus agent review because hierarchy, accessibility, and visual distinction all need strong evidence before promotion."
+  },
+  "duration_ms": 7,
+  "finished_at": "2026-03-20T10:18:00Z",
+  "idempotency_key": "a1b6cd25aa676374a779",
+  "injected_lessons": [],
+  "injection_summary": {
+    "lessons_file": "/Users/jamiecraik/dev/Agent-Skills/artifacts/skill-graphs/lessons/canonical-lessons.jsonl",
+    "low_confidence_threshold": 0.6,
+    "retrieved_count": 0,
+    "selected_count": 0,
+    "selected_lesson_ids": [],
+    "suppressed_by_controls": false
+  },
+  "invocation_id": "f6f97090ec0c513f",
+  "kill_switch_file": "",
+  "lock_path": "/Users/jamiecraik/dev/Agent-Skills/artifacts/skill-graphs/runs/.locks/frontend-ui-frontend-ui-design.lock",
+  "objective_hash": "8a1a34c409b9745094e6705fe13d6b59e89dce75125c733e2b870cd24fc9904b",
+  "profile_id": "frontend-ui-frontend-ui-design",
+  "prompt_hash": "8a1a34c409b9745094e6705fe13d6b59e89dce75125c733e2b870cd24fc9904b",
+  "retrieved_lessons": [],
+  "rollback_required_file": "",
+  "run_blocker": null,
+  "run_id": "run_20260320T172250325795Z_03f80a_8649d70f",
+  "run_owner": "skill-graph-smoke",
+  "runtime_controls": {
+    "auto_apply_enabled": false,
+    "auto_capture_enabled": true,
+    "effective_rollout_mode": "observe_only",
+    "feedback_prompt_enabled": false,
+    "feedback_prompt_source": "disabled",
+    "interactive_terminal": false,
+    "paths": {
+      "controls_dir": "/Users/jamiecraik/dev/Agent-Skills/artifacts/skill-graphs/controls",
+      "global_auto_apply_switch_file": "/Users/jamiecraik/dev/Agent-Skills/artifacts/skill-graphs/controls/auto_apply.disabled",
+      "global_auto_capture_switch_file": "/Users/jamiecraik/dev/Agent-Skills/artifacts/skill-graphs/controls/auto_capture.disabled",
+      "rollout_mode_file": "/Users/jamiecraik/dev/Agent-Skills/artifacts/skill-graphs/controls/rollout-mode.txt",
+      "skill_auto_apply_switch_file": "/Users/jamiecraik/dev/Agent-Skills/artifacts/skill-graphs/controls/skills/frontend/ui/frontend-ui-design/auto_apply.disabled",
+      "skill_auto_capture_switch_file": "/Users/jamiecraik/dev/Agent-Skills/artifacts/skill-graphs/controls/skills/frontend/ui/frontend-ui-design/auto_capture.disabled",
+      "skill_controls_dir": "/Users/jamiecraik/dev/Agent-Skills/artifacts/skill-graphs/controls/skills"
+    },
+    "reasons": [
+      "rollout_mode_observe_only_disables_auto_apply"
+    ],
+    "rollout_mode": "observe_only",
+    "schema_version": "1.0",
+    "uplift_auto_apply_decision": "insufficient_data",
+    "uplift_gate_mode": "observe",
+    "uplift_promotion_decision": "insufficient_data"
+  },
+  "schema_version": "1.0",
+  "scope_profile": "frontend",
+  "scope_skill": "frontend/ui/frontend-ui-design",
+  "started_at": "2026-03-27T17:22:50Z",
+  "stop_reason": "budget_exhausted",
+  "terminal_status": "failed",
+  "versions": {
+    "evaluator_version": "v1-frontend-learning",
+    "persona_set_id": "frontend-ui-design-v1",
+    "rubric_version": "2026-03-21"
+  }
+}

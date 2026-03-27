@@ -1,0 +1,327 @@
+{
+  "confidence": {
+    "bucket": "high",
+    "calibration_bucket": "C1_high_confidence",
+    "evidence_completeness": 0.8,
+    "quality_uplift": 0.12,
+    "schema_version": "1.0",
+    "score": 0.93
+  },
+  "counterfactual_uplift": {
+    "analysis_method_version": "counterfactual_uplift_v1",
+    "auto_apply_decision": "insufficient_data",
+    "auto_apply_thresholds": {
+      "ci_lower_min": 0.02,
+      "delta_min": 0.05,
+      "min_pairs_per_skill": 20,
+      "min_pairs_total": 100
+    },
+    "computed_at": "2026-03-27T17:32:34Z",
+    "control_outcome": null,
+    "control_pool_size": 10,
+    "control_sample_size": 0,
+    "decision_window_days": 7,
+    "match_quality_metrics": {
+      "max_allowed_unmatched_rate": 0.15,
+      "required_covariates": [
+        "skill_id",
+        "task_profile",
+        "recency_bucket"
+      ],
+      "smd": {
+        "recency_bucket": 0.0,
+        "skill_id": 0.0,
+        "task_profile": 0.0
+      },
+      "treated_unmatched_count": 0,
+      "treated_unmatched_rate": 0.0,
+      "valid": true
+    },
+    "pair_counts_by_skill": {
+      "frontend/ui/ui-ux-creative-coding": 0
+    },
+    "promotion_decision": "insufficient_data",
+    "promotion_thresholds": {
+      "ci_lower_min": 0.0,
+      "delta_min": 0.03,
+      "min_pairs_per_skill": 10,
+      "min_pairs_total": 40
+    },
+    "sample_size": 0,
+    "schema_version": "1.0",
+    "treated_sample_size": 0,
+    "treatment_outcome": null,
+    "uplift_confidence_band": {
+      "level": 0.95,
+      "lower": null,
+      "method": "normal_approx_95",
+      "upper": null
+    },
+    "uplift_delta": null
+  },
+  "decision": "draft",
+  "delegation": {
+    "agentic_cost_benefit": {
+      "ai_process_minutes": 15.0,
+      "human_baseline_minutes": 45.0,
+      "probability_of_success": 0.75,
+      "roi_signal": "positive",
+      "time_delta_minutes": 30.0
+    },
+    "mode": "co-pilot",
+    "rationale": "Co-pilot mode default: advisory guidance with controlled rollout and human oversight for promotions."
+  },
+  "evidence_packet": {
+    "completeness_score": 0.8,
+    "evidence_packet_id": "95d546b48d1fe3bc"
+  },
+  "expected_version": "",
+  "gate_decision": {
+    "notes": "Fill before approve/reject. uplift_decision=insufficient_data",
+    "provenance_complete": true,
+    "runtime_gates_passed": true,
+    "security_checklist_passed": false
+  },
+  "injected_lesson_ids": [],
+  "invocation_id": "eede25c28b14207a",
+  "lesson_candidates": [
+    {
+      "advice": {
+        "summary": "Preserve and reuse the pattern that improved `clarity`.",
+        "weakest_criteria": [
+          "safety"
+        ]
+      },
+      "candidate_id": "candidate_dc75f6b968d0",
+      "confidence": {
+        "bucket": "high",
+        "calibration_bucket": "C1_high_confidence",
+        "evidence_completeness": 0.8,
+        "score": 0.93
+      },
+      "created_at": "2026-03-27T17:32:34Z",
+      "delegation_context": {
+        "agentic_cost_benefit": {
+          "ai_process_minutes": 15.0,
+          "human_baseline_minutes": 45.0,
+          "probability_of_success": 0.75,
+          "roi_signal": "positive",
+          "time_delta_minutes": 30.0
+        },
+        "mode": "co-pilot",
+        "rationale": "Co-pilot mode default: advisory guidance with controlled rollout and human oversight for promotions."
+      },
+      "evidence_refs": {
+        "events_path": "events.jsonl",
+        "evidence_packet_path": "evidence_packet.json",
+        "iteration_journal_path": "iteration_journal.jsonl"
+      },
+      "implementation": {
+        "positive_criterion_deltas": {
+          "clarity": 0.05
+        },
+        "summary": "Applied focused remediation for: safety"
+      },
+      "iteration_id": 2,
+      "observation_type": "positive_pattern",
+      "outcome": {
+        "feedback_note": "smoke validation pass",
+        "feedback_status": "worked",
+        "quality_uplift": 0.12,
+        "stop_reason": "pass",
+        "terminal_status": "passed"
+      },
+      "profile_id": "frontend-ui-ui-ux-creative-coding",
+      "run_id": "run_20260327T173234803842Z_ce4394_92706720",
+      "schema_version": "1.1",
+      "scope_profile": "frontend",
+      "scope_skill": "frontend/ui/ui-ux-creative-coding",
+      "selection": {
+        "feedback_weight": 1.35,
+        "rationale": "Positive delta on clarity was amplified by feedback status `worked`.",
+        "score": 1.039
+      },
+      "source_observation": {
+        "criterion_id": "clarity",
+        "feedback_note_present": true,
+        "feedback_status": "worked",
+        "observation_id": "observation_a409ca460557"
+      },
+      "status": "candidate",
+      "title": "frontend/ui/ui-ux-creative-coding positive pattern candidate (clarity)"
+    },
+    {
+      "advice": {
+        "summary": "Preserve and reuse the pattern that improved `safety`.",
+        "weakest_criteria": [
+          "safety"
+        ]
+      },
+      "candidate_id": "candidate_aa70b03a9364",
+      "confidence": {
+        "bucket": "high",
+        "calibration_bucket": "C1_high_confidence",
+        "evidence_completeness": 0.8,
+        "score": 0.93
+      },
+      "created_at": "2026-03-27T17:32:34Z",
+      "delegation_context": {
+        "agentic_cost_benefit": {
+          "ai_process_minutes": 15.0,
+          "human_baseline_minutes": 45.0,
+          "probability_of_success": 0.75,
+          "roi_signal": "positive",
+          "time_delta_minutes": 30.0
+        },
+        "mode": "co-pilot",
+        "rationale": "Co-pilot mode default: advisory guidance with controlled rollout and human oversight for promotions."
+      },
+      "evidence_refs": {
+        "events_path": "events.jsonl",
+        "evidence_packet_path": "evidence_packet.json",
+        "iteration_journal_path": "iteration_journal.jsonl"
+      },
+      "implementation": {
+        "positive_criterion_deltas": {
+          "safety": 0.05
+        },
+        "summary": "Applied focused remediation for: safety"
+      },
+      "iteration_id": 2,
+      "observation_type": "positive_pattern",
+      "outcome": {
+        "feedback_note": "smoke validation pass",
+        "feedback_status": "worked",
+        "quality_uplift": 0.12,
+        "stop_reason": "pass",
+        "terminal_status": "passed"
+      },
+      "profile_id": "frontend-ui-ui-ux-creative-coding",
+      "run_id": "run_20260327T173234803842Z_ce4394_92706720",
+      "schema_version": "1.1",
+      "scope_profile": "frontend",
+      "scope_skill": "frontend/ui/ui-ux-creative-coding",
+      "selection": {
+        "feedback_weight": 1.35,
+        "rationale": "Positive delta on safety was amplified by feedback status `worked`.",
+        "score": 1.039
+      },
+      "source_observation": {
+        "criterion_id": "safety",
+        "feedback_note_present": true,
+        "feedback_status": "worked",
+        "observation_id": "observation_6ac887cbd72f"
+      },
+      "status": "candidate",
+      "title": "frontend/ui/ui-ux-creative-coding positive pattern candidate (safety)"
+    },
+    {
+      "advice": {
+        "summary": "Preserve and reuse the pattern that improved `specificity`.",
+        "weakest_criteria": [
+          "safety"
+        ]
+      },
+      "candidate_id": "candidate_a70cd02ca7ab",
+      "confidence": {
+        "bucket": "high",
+        "calibration_bucket": "C1_high_confidence",
+        "evidence_completeness": 0.8,
+        "score": 0.93
+      },
+      "created_at": "2026-03-27T17:32:34Z",
+      "delegation_context": {
+        "agentic_cost_benefit": {
+          "ai_process_minutes": 15.0,
+          "human_baseline_minutes": 45.0,
+          "probability_of_success": 0.75,
+          "roi_signal": "positive",
+          "time_delta_minutes": 30.0
+        },
+        "mode": "co-pilot",
+        "rationale": "Co-pilot mode default: advisory guidance with controlled rollout and human oversight for promotions."
+      },
+      "evidence_refs": {
+        "events_path": "events.jsonl",
+        "evidence_packet_path": "evidence_packet.json",
+        "iteration_journal_path": "iteration_journal.jsonl"
+      },
+      "implementation": {
+        "positive_criterion_deltas": {
+          "specificity": 0.05
+        },
+        "summary": "Applied focused remediation for: safety"
+      },
+      "iteration_id": 2,
+      "observation_type": "positive_pattern",
+      "outcome": {
+        "feedback_note": "smoke validation pass",
+        "feedback_status": "worked",
+        "quality_uplift": 0.12,
+        "stop_reason": "pass",
+        "terminal_status": "passed"
+      },
+      "profile_id": "frontend-ui-ui-ux-creative-coding",
+      "run_id": "run_20260327T173234803842Z_ce4394_92706720",
+      "schema_version": "1.1",
+      "scope_profile": "frontend",
+      "scope_skill": "frontend/ui/ui-ux-creative-coding",
+      "selection": {
+        "feedback_weight": 1.35,
+        "rationale": "Positive delta on specificity was amplified by feedback status `worked`.",
+        "score": 1.039
+      },
+      "source_observation": {
+        "criterion_id": "specificity",
+        "feedback_note_present": true,
+        "feedback_status": "worked",
+        "observation_id": "observation_49736b65525b"
+      },
+      "status": "candidate",
+      "title": "frontend/ui/ui-ux-creative-coding positive pattern candidate (specificity)"
+    }
+  ],
+  "lesson_effective_to": null,
+  "lesson_id": "",
+  "lesson_status": "",
+  "provenance": {
+    "evaluator_version": "v1",
+    "iteration_ids": [
+      1,
+      2
+    ],
+    "objective_hash": "4d6c81fc84c409dac97c0c979f38cc4ce6f5ac73fd37ae2dfc3592c6b260819c",
+    "prompt_hash": "4d6c81fc84c409dac97c0c979f38cc4ce6f5ac73fd37ae2dfc3592c6b260819c",
+    "rubric_version": "2026-02-26",
+    "scope_profile": "frontend",
+    "scope_skill": "frontend/ui/ui-ux-creative-coding"
+  },
+  "reviewer_ids": [],
+  "run_id": "run_20260327T173234803842Z_ce4394_92706720",
+  "runtime_controls": {
+    "auto_apply_enabled": false,
+    "auto_capture_enabled": true,
+    "effective_rollout_mode": "observe_only",
+    "feedback_prompt_enabled": false,
+    "feedback_prompt_source": "disabled",
+    "interactive_terminal": false,
+    "paths": {
+      "controls_dir": "/Users/jamiecraik/dev/Agent-Skills/artifacts/skill-graphs/controls",
+      "global_auto_apply_switch_file": "/Users/jamiecraik/dev/Agent-Skills/artifacts/skill-graphs/controls/auto_apply.disabled",
+      "global_auto_capture_switch_file": "/Users/jamiecraik/dev/Agent-Skills/artifacts/skill-graphs/controls/auto_capture.disabled",
+      "rollout_mode_file": "/Users/jamiecraik/dev/Agent-Skills/artifacts/skill-graphs/controls/rollout-mode.txt",
+      "skill_auto_apply_switch_file": "/Users/jamiecraik/dev/Agent-Skills/artifacts/skill-graphs/controls/skills/frontend/ui/ui-ux-creative-coding/auto_apply.disabled",
+      "skill_auto_capture_switch_file": "/Users/jamiecraik/dev/Agent-Skills/artifacts/skill-graphs/controls/skills/frontend/ui/ui-ux-creative-coding/auto_capture.disabled",
+      "skill_controls_dir": "/Users/jamiecraik/dev/Agent-Skills/artifacts/skill-graphs/controls/skills"
+    },
+    "reasons": [
+      "rollout_mode_observe_only_disables_auto_apply"
+    ],
+    "rollout_mode": "observe_only",
+    "schema_version": "1.0",
+    "uplift_auto_apply_decision": "insufficient_data",
+    "uplift_gate_mode": "observe",
+    "uplift_promotion_decision": "insufficient_data"
+  },
+  "schema_version": "1.1"
+}

@@ -1,0 +1,78 @@
+{
+  "candidate_lessons": {
+    "count": 3,
+    "top_candidate_id": "candidate_ab7dbfe0236c"
+  },
+  "capture_id": "40598d6d876e2359",
+  "confidence": {
+    "bucket": "high",
+    "calibration_bucket": "C1_high_confidence",
+    "inputs": {
+      "evidence_completeness": 0.8,
+      "feedback_signal": 1.0,
+      "feedback_status": "worked",
+      "iterations_observed": 2,
+      "non_regression_signal": 1.0,
+      "quality_uplift_signal": 1.0,
+      "runtime_gate_signal": 1.0,
+      "stop_reason": "pass",
+      "terminal_status": "passed"
+    },
+    "quality_uplift": 0.12,
+    "schema_version": "1.0",
+    "score": 0.93
+  },
+  "created_at": "2026-03-27T17:32:47Z",
+  "evidence": {
+    "completeness": {
+      "checks": true,
+      "events": true,
+      "logs": false,
+      "score": 0.8,
+      "session_signals": true,
+      "traces": true
+    },
+    "evidence_packet_id": "82264f52cf01e08c",
+    "evidence_packet_path": "evidence_packet.json"
+  },
+  "feedback": {
+    "captured_at": "2026-03-27T17:32:46Z",
+    "note": "smoke validation pass",
+    "source": "cli_one_tap",
+    "status": "worked"
+  },
+  "injected_lessons": {
+    "count": 0,
+    "items": []
+  },
+  "invocation_envelope": {
+    "actor_id": "recursive-skill-loop",
+    "auto_apply_enabled": false,
+    "auto_capture_enabled": true,
+    "idempotency_key": "56692c5ad3f6e960907e",
+    "invocation_id": "92c94d0d747210b6",
+    "invoked_at": "2026-03-27T17:32:46Z",
+    "kill_switch_file": "",
+    "objective_hash": "469782ea915bd93db4331f8a165e1abc19d130912441e2640e949dc6b6f8d31f",
+    "rollback_required_file": "",
+    "rollout_mode": "observe_only",
+    "run_owner": "skill-graph-smoke"
+  },
+  "lesson_observations": {
+    "count": 3,
+    "top_observation_id": "observation_d2c857adf48c"
+  },
+  "output_summary": {
+    "duration_ms": 118,
+    "finished_at": "2026-03-27T17:32:47Z",
+    "iterations_completed": 2,
+    "stop_reason": "pass",
+    "terminal_status": "passed",
+    "tokens_used": 163
+  },
+  "profile_id": "utilities-process-watch",
+  "run_id": "run_20260327T173246990138Z_eddfeb_929e3c35",
+  "schema_version": "1.0",
+  "scope_profile": "utilities",
+  "scope_skill": "utilities/process-watch"
+}

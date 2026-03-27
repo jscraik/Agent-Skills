@@ -1,0 +1,204 @@
+{
+  "items": [
+    {
+      "advice": {
+        "summary": "Preserve and reuse the pattern that improved `specificity`.",
+        "weakest_criteria": [
+          "safety",
+          "clarity"
+        ]
+      },
+      "candidate_id": "candidate_cc373fac1170",
+      "confidence": {
+        "bucket": "high",
+        "calibration_bucket": "C1_high_confidence",
+        "evidence_completeness": 0.8,
+        "score": 0.93
+      },
+      "created_at": "2026-03-27T17:24:52Z",
+      "delegation_context": {
+        "agentic_cost_benefit": {
+          "ai_process_minutes": 20.0,
+          "human_baseline_minutes": 60.0,
+          "probability_of_success": 0.68,
+          "roi_signal": "positive",
+          "time_delta_minutes": 40.0
+        },
+        "mode": "manual",
+        "rationale": "Manual mode required: high-impact side effects need explicit human sign-off before applying candidate lessons."
+      },
+      "evidence_refs": {
+        "events_path": "events.jsonl",
+        "evidence_packet_path": "evidence_packet.json",
+        "iteration_journal_path": "iteration_journal.jsonl"
+      },
+      "implementation": {
+        "positive_criterion_deltas": {
+          "specificity": 0.05
+        },
+        "summary": "Applied focused remediation for: safety, clarity"
+      },
+      "iteration_id": 2,
+      "observation_type": "positive_pattern",
+      "outcome": {
+        "feedback_note": "smoke validation pass",
+        "feedback_status": "worked",
+        "quality_uplift": 0.12,
+        "stop_reason": "pass",
+        "terminal_status": "passed"
+      },
+      "profile_id": "github-gh-fix-ci",
+      "run_id": "run_20260327T172452111644Z_c662ca_88c7241a",
+      "schema_version": "1.1",
+      "scope_profile": "github",
+      "scope_skill": "github/gh-fix-ci",
+      "selection": {
+        "feedback_weight": 1.35,
+        "rationale": "Positive delta on specificity was amplified by feedback status `worked`.",
+        "score": 1.039
+      },
+      "source_observation": {
+        "criterion_id": "specificity",
+        "feedback_note_present": true,
+        "feedback_status": "worked",
+        "observation_id": "observation_c2b3557cd05e"
+      },
+      "status": "candidate",
+      "title": "github/gh-fix-ci positive pattern candidate (specificity)"
+    },
+    {
+      "advice": {
+        "summary": "Preserve and reuse the pattern that improved `clarity`.",
+        "weakest_criteria": [
+          "safety",
+          "clarity"
+        ]
+      },
+      "candidate_id": "candidate_c4ff9f980e72",
+      "confidence": {
+        "bucket": "high",
+        "calibration_bucket": "C1_high_confidence",
+        "evidence_completeness": 0.8,
+        "score": 0.93
+      },
+      "created_at": "2026-03-27T17:24:52Z",
+      "delegation_context": {
+        "agentic_cost_benefit": {
+          "ai_process_minutes": 20.0,
+          "human_baseline_minutes": 60.0,
+          "probability_of_success": 0.68,
+          "roi_signal": "positive",
+          "time_delta_minutes": 40.0
+        },
+        "mode": "manual",
+        "rationale": "Manual mode required: high-impact side effects need explicit human sign-off before applying candidate lessons."
+      },
+      "evidence_refs": {
+        "events_path": "events.jsonl",
+        "evidence_packet_path": "evidence_packet.json",
+        "iteration_journal_path": "iteration_journal.jsonl"
+      },
+      "implementation": {
+        "positive_criterion_deltas": {
+          "clarity": 0.05
+        },
+        "summary": "Applied focused remediation for: safety, clarity"
+      },
+      "iteration_id": 2,
+      "observation_type": "positive_pattern",
+      "outcome": {
+        "feedback_note": "smoke validation pass",
+        "feedback_status": "worked",
+        "quality_uplift": 0.12,
+        "stop_reason": "pass",
+        "terminal_status": "passed"
+      },
+      "profile_id": "github-gh-fix-ci",
+      "run_id": "run_20260327T172452111644Z_c662ca_88c7241a",
+      "schema_version": "1.1",
+      "scope_profile": "github",
+      "scope_skill": "github/gh-fix-ci",
+      "selection": {
+        "feedback_weight": 1.35,
+        "rationale": "Positive delta on clarity was amplified by feedback status `worked`.",
+        "score": 1.039
+      },
+      "source_observation": {
+        "criterion_id": "clarity",
+        "feedback_note_present": true,
+        "feedback_status": "worked",
+        "observation_id": "observation_981aceb28a42"
+      },
+      "status": "candidate",
+      "title": "github/gh-fix-ci positive pattern candidate (clarity)"
+    },
+    {
+      "advice": {
+        "summary": "Preserve and reuse the pattern that improved `safety`.",
+        "weakest_criteria": [
+          "safety",
+          "clarity"
+        ]
+      },
+      "candidate_id": "candidate_a60b51ebd800",
+      "confidence": {
+        "bucket": "high",
+        "calibration_bucket": "C1_high_confidence",
+        "evidence_completeness": 0.8,
+        "score": 0.93
+      },
+      "created_at": "2026-03-27T17:24:52Z",
+      "delegation_context": {
+        "agentic_cost_benefit": {
+          "ai_process_minutes": 20.0,
+          "human_baseline_minutes": 60.0,
+          "probability_of_success": 0.68,
+          "roi_signal": "positive",
+          "time_delta_minutes": 40.0
+        },
+        "mode": "manual",
+        "rationale": "Manual mode required: high-impact side effects need explicit human sign-off before applying candidate lessons."
+      },
+      "evidence_refs": {
+        "events_path": "events.jsonl",
+        "evidence_packet_path": "evidence_packet.json",
+        "iteration_journal_path": "iteration_journal.jsonl"
+      },
+      "implementation": {
+        "positive_criterion_deltas": {
+          "safety": 0.05
+        },
+        "summary": "Applied focused remediation for: safety, clarity"
+      },
+      "iteration_id": 2,
+      "observation_type": "positive_pattern",
+      "outcome": {
+        "feedback_note": "smoke validation pass",
+        "feedback_status": "worked",
+        "quality_uplift": 0.12,
+        "stop_reason": "pass",
+        "terminal_status": "passed"
+      },
+      "profile_id": "github-gh-fix-ci",
+      "run_id": "run_20260327T172452111644Z_c662ca_88c7241a",
+      "schema_version": "1.1",
+      "scope_profile": "github",
+      "scope_skill": "github/gh-fix-ci",
+      "selection": {
+        "feedback_weight": 1.35,
+        "rationale": "Positive delta on safety was amplified by feedback status `worked`.",
+        "score": 1.039
+      },
+      "source_observation": {
+        "criterion_id": "safety",
+        "feedback_note_present": true,
+        "feedback_status": "worked",
+        "observation_id": "observation_56bbd0a86d4c"
+      },
+      "status": "candidate",
+      "title": "github/gh-fix-ci positive pattern candidate (safety)"
+    }
+  ],
+  "run_id": "run_20260327T172452111644Z_c662ca_88c7241a",
+  "schema_version": "1.0"
+}

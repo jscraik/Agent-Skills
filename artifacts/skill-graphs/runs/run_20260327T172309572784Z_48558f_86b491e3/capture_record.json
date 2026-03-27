@@ -1,0 +1,78 @@
+{
+  "candidate_lessons": {
+    "count": 3,
+    "top_candidate_id": "candidate_dd8e5c12d5a9"
+  },
+  "capture_id": "b5deb0156174d57a",
+  "confidence": {
+    "bucket": "high",
+    "calibration_bucket": "C1_high_confidence",
+    "inputs": {
+      "evidence_completeness": 0.8,
+      "feedback_signal": 1.0,
+      "feedback_status": "worked",
+      "iterations_observed": 2,
+      "non_regression_signal": 1.0,
+      "quality_uplift_signal": 1.0,
+      "runtime_gate_signal": 1.0,
+      "stop_reason": "pass",
+      "terminal_status": "passed"
+    },
+    "quality_uplift": 0.12,
+    "schema_version": "1.0",
+    "score": 0.93
+  },
+  "created_at": "2026-03-27T17:23:09Z",
+  "evidence": {
+    "completeness": {
+      "checks": true,
+      "events": true,
+      "logs": false,
+      "score": 0.8,
+      "session_signals": true,
+      "traces": true
+    },
+    "evidence_packet_id": "862f5d4e9c032fd6",
+    "evidence_packet_path": "evidence_packet.json"
+  },
+  "feedback": {
+    "captured_at": "2026-03-27T17:23:09Z",
+    "note": "smoke validation pass",
+    "source": "cli_one_tap",
+    "status": "worked"
+  },
+  "injected_lessons": {
+    "count": 0,
+    "items": []
+  },
+  "invocation_envelope": {
+    "actor_id": "recursive-skill-loop",
+    "auto_apply_enabled": false,
+    "auto_capture_enabled": true,
+    "idempotency_key": "f5d8f5b4053021c0fa5a",
+    "invocation_id": "9aa9e6a260c3babe",
+    "invoked_at": "2026-03-27T17:23:09Z",
+    "kill_switch_file": "",
+    "objective_hash": "94d99cd9cdfa0d8e06a1729bd77caa40574e32801cedb35c705fc3b3739bb450",
+    "rollback_required_file": "",
+    "rollout_mode": "observe_only",
+    "run_owner": "skill-graph-smoke"
+  },
+  "lesson_observations": {
+    "count": 3,
+    "top_observation_id": "observation_87c1b8b0e94b"
+  },
+  "output_summary": {
+    "duration_ms": 21,
+    "finished_at": "2026-03-27T17:23:09Z",
+    "iterations_completed": 2,
+    "stop_reason": "pass",
+    "terminal_status": "passed",
+    "tokens_used": 154
+  },
+  "profile_id": "product-docs-context7",
+  "run_id": "run_20260327T172309572784Z_48558f_86b491e3",
+  "schema_version": "1.0",
+  "scope_profile": "product",
+  "scope_skill": "product/docs/context7"
+}

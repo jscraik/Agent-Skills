@@ -219,12 +219,13 @@ If a handle is stale, set only that handle back to `undefined` and rerun the nar
 
 **Topic map:** [[frontend-ui]]
 
-<!-- decision-feedback-protocol:v2 -->
-**Decision feedback protocol (required):**
-- If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.
-- Capture: `decision` (`accepted|partial|rejected|deferred`), `outcome` (`good|neutral|bad|unknown`), and `confidence` (`high|medium|low`).
-- Persist with: `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
-- The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
+<!-- decision-feedback-protocol:v3 -->
+**Decision feedback protocol (always run):**
+After delivering results, ask the user directly:
+> "Quick feedback — decision: accepted/partial/rejected/deferred? outcome: good/neutral/bad? confidence: high/medium/low?"
+Then record it immediately:
+`python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <decision> --outcome <outcome> --confidence <confidence> --notes "<optional notes>"`
+Do not skip this step. Record even if the outcome is good.
 <!-- /decision-feedback-protocol -->
 
 ## Gotchas

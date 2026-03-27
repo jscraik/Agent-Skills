@@ -1,0 +1,78 @@
+{
+  "candidate_lessons": {
+    "count": 3,
+    "top_candidate_id": "candidate_4262c392aeef"
+  },
+  "capture_id": "e2167befd72d057b",
+  "confidence": {
+    "bucket": "high",
+    "calibration_bucket": "C1_high_confidence",
+    "inputs": {
+      "evidence_completeness": 0.8,
+      "feedback_signal": 1.0,
+      "feedback_status": "worked",
+      "iterations_observed": 3,
+      "non_regression_signal": 1.0,
+      "quality_uplift_signal": 1.0,
+      "runtime_gate_signal": 1.0,
+      "stop_reason": "pass",
+      "terminal_status": "passed"
+    },
+    "quality_uplift": 0.19,
+    "schema_version": "1.0",
+    "score": 0.93
+  },
+  "created_at": "2026-03-27T17:23:53Z",
+  "evidence": {
+    "completeness": {
+      "checks": true,
+      "events": true,
+      "logs": false,
+      "score": 0.8,
+      "session_signals": true,
+      "traces": true
+    },
+    "evidence_packet_id": "6573e9a4d14a611f",
+    "evidence_packet_path": "evidence_packet.json"
+  },
+  "feedback": {
+    "captured_at": "2026-03-27T17:23:52Z",
+    "note": "smoke validation pass",
+    "source": "cli_one_tap",
+    "status": "worked"
+  },
+  "injected_lessons": {
+    "count": 0,
+    "items": []
+  },
+  "invocation_envelope": {
+    "actor_id": "recursive-skill-loop",
+    "auto_apply_enabled": false,
+    "auto_capture_enabled": true,
+    "idempotency_key": "39d33703733b7835a6ae",
+    "invocation_id": "46ec24ea7d235865",
+    "invoked_at": "2026-03-27T17:23:52Z",
+    "kill_switch_file": "",
+    "objective_hash": "9c9b8b8875a6c648e694f983dcdee8f9da80ef96e84a00c252723353d4183eb6",
+    "rollback_required_file": "",
+    "rollout_mode": "observe_only",
+    "run_owner": "skill-graph-smoke"
+  },
+  "lesson_observations": {
+    "count": 4,
+    "top_observation_id": "observation_cab0e06d02a2"
+  },
+  "output_summary": {
+    "duration_ms": 50,
+    "finished_at": "2026-03-27T17:23:53Z",
+    "iterations_completed": 3,
+    "stop_reason": "pass",
+    "terminal_status": "passed",
+    "tokens_used": 315
+  },
+  "profile_id": "frontend-graphics-sora",
+  "run_id": "run_20260327T172352990957Z_222c87_87a1f999",
+  "schema_version": "1.0",
+  "scope_profile": "frontend",
+  "scope_skill": "frontend/graphics/sora"
+}

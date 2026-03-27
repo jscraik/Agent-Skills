@@ -1,0 +1,78 @@
+{
+  "candidate_lessons": {
+    "count": 3,
+    "top_candidate_id": "candidate_4753cfa5fd69"
+  },
+  "capture_id": "426eb49337c20f2a",
+  "confidence": {
+    "bucket": "high",
+    "calibration_bucket": "C1_high_confidence",
+    "inputs": {
+      "evidence_completeness": 0.8,
+      "feedback_signal": 1.0,
+      "feedback_status": "worked",
+      "iterations_observed": 3,
+      "non_regression_signal": 1.0,
+      "quality_uplift_signal": 1.0,
+      "runtime_gate_signal": 1.0,
+      "stop_reason": "pass",
+      "terminal_status": "passed"
+    },
+    "quality_uplift": 0.19,
+    "schema_version": "1.0",
+    "score": 0.93
+  },
+  "created_at": "2026-03-27T17:24:00Z",
+  "evidence": {
+    "completeness": {
+      "checks": true,
+      "events": true,
+      "logs": false,
+      "score": 0.8,
+      "session_signals": true,
+      "traces": true
+    },
+    "evidence_packet_id": "834296e5505e0389",
+    "evidence_packet_path": "evidence_packet.json"
+  },
+  "feedback": {
+    "captured_at": "2026-03-27T17:24:00Z",
+    "note": "smoke validation pass",
+    "source": "cli_one_tap",
+    "status": "worked"
+  },
+  "injected_lessons": {
+    "count": 0,
+    "items": []
+  },
+  "invocation_envelope": {
+    "actor_id": "recursive-skill-loop",
+    "auto_apply_enabled": false,
+    "auto_capture_enabled": true,
+    "idempotency_key": "6e28f99d09b45877e0d6",
+    "invocation_id": "8e4ec24d0ecc8e73",
+    "invoked_at": "2026-03-27T17:24:00Z",
+    "kill_switch_file": "",
+    "objective_hash": "e1b07fcf17d22801006ad7c9945046d1aeaf2f776059a488a1deb77b2cf17530",
+    "rollback_required_file": "",
+    "rollout_mode": "observe_only",
+    "run_owner": "skill-graph-smoke"
+  },
+  "lesson_observations": {
+    "count": 3,
+    "top_observation_id": "observation_c3d2a6d43f63"
+  },
+  "output_summary": {
+    "duration_ms": 60,
+    "finished_at": "2026-03-27T17:24:00Z",
+    "iterations_completed": 3,
+    "stop_reason": "pass",
+    "terminal_status": "passed",
+    "tokens_used": 354
+  },
+  "profile_id": "product-security-security-best-practices",
+  "run_id": "run_20260327T172400616630Z_78f4a2_87c8daf2",
+  "schema_version": "1.0",
+  "scope_profile": "product",
+  "scope_skill": "product/security/security-best-practices"
+}

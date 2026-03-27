@@ -1,0 +1,78 @@
+{
+  "candidate_lessons": {
+    "count": 3,
+    "top_candidate_id": "candidate_7372b11ed0fc"
+  },
+  "capture_id": "4c125bd5cb8709a6",
+  "confidence": {
+    "bucket": "high",
+    "calibration_bucket": "C1_high_confidence",
+    "inputs": {
+      "evidence_completeness": 0.8,
+      "feedback_signal": 1.0,
+      "feedback_status": "worked",
+      "iterations_observed": 2,
+      "non_regression_signal": 1.0,
+      "quality_uplift_signal": 1.0,
+      "runtime_gate_signal": 1.0,
+      "stop_reason": "pass",
+      "terminal_status": "passed"
+    },
+    "quality_uplift": 0.12,
+    "schema_version": "1.0",
+    "score": 0.93
+  },
+  "created_at": "2026-03-27T17:32:29Z",
+  "evidence": {
+    "completeness": {
+      "checks": true,
+      "events": true,
+      "logs": false,
+      "score": 0.8,
+      "session_signals": true,
+      "traces": true
+    },
+    "evidence_packet_id": "a75cad63e18179e3",
+    "evidence_packet_path": "evidence_packet.json"
+  },
+  "feedback": {
+    "captured_at": "2026-03-27T17:32:28Z",
+    "note": "smoke validation pass",
+    "source": "cli_one_tap",
+    "status": "worked"
+  },
+  "injected_lessons": {
+    "count": 0,
+    "items": []
+  },
+  "invocation_envelope": {
+    "actor_id": "recursive-skill-loop",
+    "auto_apply_enabled": false,
+    "auto_capture_enabled": true,
+    "idempotency_key": "703be73c071dab12ea0c",
+    "invocation_id": "ff5aa1957fd235e2",
+    "invoked_at": "2026-03-27T17:32:28Z",
+    "kill_switch_file": "",
+    "objective_hash": "948e172e297b5ba0f32810f54d5676fcc97f0340a5282b76d08452b50cb79c2d",
+    "rollback_required_file": "",
+    "rollout_mode": "observe_only",
+    "run_owner": "skill-graph-smoke"
+  },
+  "lesson_observations": {
+    "count": 3,
+    "top_observation_id": "observation_7e49e7f35ad8"
+  },
+  "output_summary": {
+    "duration_ms": 115,
+    "finished_at": "2026-03-27T17:32:29Z",
+    "iterations_completed": 2,
+    "stop_reason": "pass",
+    "terminal_status": "passed",
+    "tokens_used": 159
+  },
+  "profile_id": "backend-mcp-builder",
+  "run_id": "run_20260327T173228909479Z_e3a8be_925654d5",
+  "schema_version": "1.0",
+  "scope_profile": "backend",
+  "scope_skill": "backend/mcp-builder"
+}

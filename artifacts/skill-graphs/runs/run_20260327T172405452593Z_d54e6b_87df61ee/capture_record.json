@@ -1,0 +1,78 @@
+{
+  "candidate_lessons": {
+    "count": 3,
+    "top_candidate_id": "candidate_73cfed669ec8"
+  },
+  "capture_id": "f39f6813b3257f48",
+  "confidence": {
+    "bucket": "high",
+    "calibration_bucket": "C1_high_confidence",
+    "inputs": {
+      "evidence_completeness": 0.8,
+      "feedback_signal": 1.0,
+      "feedback_status": "worked",
+      "iterations_observed": 2,
+      "non_regression_signal": 1.0,
+      "quality_uplift_signal": 1.0,
+      "runtime_gate_signal": 1.0,
+      "stop_reason": "pass",
+      "terminal_status": "passed"
+    },
+    "quality_uplift": 0.12,
+    "schema_version": "1.0",
+    "score": 0.93
+  },
+  "created_at": "2026-03-27T17:24:05Z",
+  "evidence": {
+    "completeness": {
+      "checks": true,
+      "events": true,
+      "logs": false,
+      "score": 0.8,
+      "session_signals": true,
+      "traces": true
+    },
+    "evidence_packet_id": "1c9b82d2c44bb099",
+    "evidence_packet_path": "evidence_packet.json"
+  },
+  "feedback": {
+    "captured_at": "2026-03-27T17:24:05Z",
+    "note": "smoke validation pass",
+    "source": "cli_one_tap",
+    "status": "worked"
+  },
+  "injected_lessons": {
+    "count": 0,
+    "items": []
+  },
+  "invocation_envelope": {
+    "actor_id": "recursive-skill-loop",
+    "auto_apply_enabled": false,
+    "auto_capture_enabled": true,
+    "idempotency_key": "8b3f65d1bd2e8bbdf174",
+    "invocation_id": "bfa2cb4f7c280be6",
+    "invoked_at": "2026-03-27T17:24:05Z",
+    "kill_switch_file": "",
+    "objective_hash": "07d4bbed1b30218cd8a313dace741a7250c9d8ed5fe191088e4d06e15458e01c",
+    "rollback_required_file": "",
+    "rollout_mode": "observe_only",
+    "run_owner": "skill-graph-smoke"
+  },
+  "lesson_observations": {
+    "count": 4,
+    "top_observation_id": "observation_f5047b9d41c7"
+  },
+  "output_summary": {
+    "duration_ms": 58,
+    "finished_at": "2026-03-27T17:24:05Z",
+    "iterations_completed": 2,
+    "stop_reason": "pass",
+    "terminal_status": "passed",
+    "tokens_used": 165
+  },
+  "profile_id": "utilities-recon-workbench",
+  "run_id": "run_20260327T172405452593Z_d54e6b_87df61ee",
+  "schema_version": "1.0",
+  "scope_profile": "utilities",
+  "scope_skill": "utilities/recon-workbench"
+}

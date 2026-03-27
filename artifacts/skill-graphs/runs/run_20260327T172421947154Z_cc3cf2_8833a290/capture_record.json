@@ -1,0 +1,78 @@
+{
+  "candidate_lessons": {
+    "count": 3,
+    "top_candidate_id": "candidate_78706e4c613c"
+  },
+  "capture_id": "2999ca914e225bc7",
+  "confidence": {
+    "bucket": "high",
+    "calibration_bucket": "C1_high_confidence",
+    "inputs": {
+      "evidence_completeness": 0.8,
+      "feedback_signal": 1.0,
+      "feedback_status": "worked",
+      "iterations_observed": 2,
+      "non_regression_signal": 1.0,
+      "quality_uplift_signal": 1.0,
+      "runtime_gate_signal": 1.0,
+      "stop_reason": "pass",
+      "terminal_status": "passed"
+    },
+    "quality_uplift": 0.12,
+    "schema_version": "1.0",
+    "score": 0.93
+  },
+  "created_at": "2026-03-27T17:24:22Z",
+  "evidence": {
+    "completeness": {
+      "checks": true,
+      "events": true,
+      "logs": false,
+      "score": 0.8,
+      "session_signals": true,
+      "traces": true
+    },
+    "evidence_packet_id": "1c260e7f102ec34c",
+    "evidence_packet_path": "evidence_packet.json"
+  },
+  "feedback": {
+    "captured_at": "2026-03-27T17:24:21Z",
+    "note": "smoke validation pass",
+    "source": "cli_one_tap",
+    "status": "worked"
+  },
+  "injected_lessons": {
+    "count": 0,
+    "items": []
+  },
+  "invocation_envelope": {
+    "actor_id": "recursive-skill-loop",
+    "auto_apply_enabled": false,
+    "auto_capture_enabled": true,
+    "idempotency_key": "42aafbe71aa7baf377cb",
+    "invocation_id": "eb32435489b04f17",
+    "invoked_at": "2026-03-27T17:24:21Z",
+    "kill_switch_file": "",
+    "objective_hash": "b388874cc1b5189765c6c43fb07fbc627716b50fd900d1fc83fa3b41c287c624",
+    "rollback_required_file": "",
+    "rollout_mode": "observe_only",
+    "run_owner": "skill-graph-smoke"
+  },
+  "lesson_observations": {
+    "count": 4,
+    "top_observation_id": "observation_93b7a0f9df10"
+  },
+  "output_summary": {
+    "duration_ms": 71,
+    "finished_at": "2026-03-27T17:24:22Z",
+    "iterations_completed": 2,
+    "stop_reason": "pass",
+    "terminal_status": "passed",
+    "tokens_used": 175
+  },
+  "profile_id": "utilities-codex-home-audit",
+  "run_id": "run_20260327T172421947154Z_cc3cf2_8833a290",
+  "schema_version": "1.0",
+  "scope_profile": "utilities",
+  "scope_skill": "utilities/codex-home-audit"
+}

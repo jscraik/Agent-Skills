@@ -1,0 +1,78 @@
+{
+  "candidate_lessons": {
+    "count": 3,
+    "top_candidate_id": "candidate_7b9529571cfd"
+  },
+  "capture_id": "988bcc2a22a1f96b",
+  "confidence": {
+    "bucket": "high",
+    "calibration_bucket": "C1_high_confidence",
+    "inputs": {
+      "evidence_completeness": 0.8,
+      "feedback_signal": 1.0,
+      "feedback_status": "worked",
+      "iterations_observed": 2,
+      "non_regression_signal": 1.0,
+      "quality_uplift_signal": 1.0,
+      "runtime_gate_signal": 1.0,
+      "stop_reason": "pass",
+      "terminal_status": "passed"
+    },
+    "quality_uplift": 0.12,
+    "schema_version": "1.0",
+    "score": 0.93
+  },
+  "created_at": "2026-03-27T17:25:11Z",
+  "evidence": {
+    "completeness": {
+      "checks": true,
+      "events": true,
+      "logs": false,
+      "score": 0.8,
+      "session_signals": true,
+      "traces": true
+    },
+    "evidence_packet_id": "2c70e496fc16065b",
+    "evidence_packet_path": "evidence_packet.json"
+  },
+  "feedback": {
+    "captured_at": "2026-03-27T17:25:11Z",
+    "note": "smoke validation pass",
+    "source": "cli_one_tap",
+    "status": "worked"
+  },
+  "injected_lessons": {
+    "count": 0,
+    "items": []
+  },
+  "invocation_envelope": {
+    "actor_id": "recursive-skill-loop",
+    "auto_apply_enabled": false,
+    "auto_capture_enabled": true,
+    "idempotency_key": "68afa77578f78bd64035",
+    "invocation_id": "d127aaefbbbe45f6",
+    "invoked_at": "2026-03-27T17:25:11Z",
+    "kill_switch_file": "",
+    "objective_hash": "b472a959176ff4a2475699ecc6b8ee3759af3718b0f458d83ae2e51f628cfc70",
+    "rollback_required_file": "",
+    "rollout_mode": "observe_only",
+    "run_owner": "skill-graph-smoke"
+  },
+  "lesson_observations": {
+    "count": 3,
+    "top_observation_id": "observation_fe6466ff8481"
+  },
+  "output_summary": {
+    "duration_ms": 94,
+    "finished_at": "2026-03-27T17:25:11Z",
+    "iterations_completed": 2,
+    "stop_reason": "pass",
+    "terminal_status": "passed",
+    "tokens_used": 176
+  },
+  "profile_id": "frontend-ui-stitch-remotion",
+  "run_id": "run_20260327T172511569134Z_9b6cb0_892dc2b4",
+  "schema_version": "1.0",
+  "scope_profile": "frontend",
+  "scope_skill": "frontend/ui/stitch-remotion"
+}

@@ -1,0 +1,78 @@
+{
+  "candidate_lessons": {
+    "count": 3,
+    "top_candidate_id": "candidate_763037d4a025"
+  },
+  "capture_id": "3b1a5196dd30b53b",
+  "confidence": {
+    "bucket": "high",
+    "calibration_bucket": "C1_high_confidence",
+    "inputs": {
+      "evidence_completeness": 0.8,
+      "feedback_signal": 1.0,
+      "feedback_status": "worked",
+      "iterations_observed": 2,
+      "non_regression_signal": 1.0,
+      "quality_uplift_signal": 1.0,
+      "runtime_gate_signal": 1.0,
+      "stop_reason": "pass",
+      "terminal_status": "passed"
+    },
+    "quality_uplift": 0.12,
+    "schema_version": "1.0",
+    "score": 0.93
+  },
+  "created_at": "2026-03-27T17:24:19Z",
+  "evidence": {
+    "completeness": {
+      "checks": true,
+      "events": true,
+      "logs": false,
+      "score": 0.8,
+      "session_signals": true,
+      "traces": true
+    },
+    "evidence_packet_id": "4a8f183427b936e4",
+    "evidence_packet_path": "evidence_packet.json"
+  },
+  "feedback": {
+    "captured_at": "2026-03-27T17:24:19Z",
+    "note": "smoke validation pass",
+    "source": "cli_one_tap",
+    "status": "worked"
+  },
+  "injected_lessons": {
+    "count": 0,
+    "items": []
+  },
+  "invocation_envelope": {
+    "actor_id": "recursive-skill-loop",
+    "auto_apply_enabled": false,
+    "auto_capture_enabled": true,
+    "idempotency_key": "b5deb2c4ad88fa573d7f",
+    "invocation_id": "c8d89bc1a629ab7a",
+    "invoked_at": "2026-03-27T17:24:19Z",
+    "kill_switch_file": "",
+    "objective_hash": "eb7b11f85d9ee11c50274fdd2896886228fabb902a6a074fc39fc7f170c2709a",
+    "rollback_required_file": "",
+    "rollout_mode": "observe_only",
+    "run_owner": "skill-graph-smoke"
+  },
+  "lesson_observations": {
+    "count": 4,
+    "top_observation_id": "observation_e54f63b3ab84"
+  },
+  "output_summary": {
+    "duration_ms": 71,
+    "finished_at": "2026-03-27T17:24:19Z",
+    "iterations_completed": 2,
+    "stop_reason": "pass",
+    "terminal_status": "passed",
+    "tokens_used": 171
+  },
+  "profile_id": "product-security-security-threat-model",
+  "run_id": "run_20260327T172419121476Z_b1ba18_8827036f",
+  "schema_version": "1.0",
+  "scope_profile": "product",
+  "scope_skill": "product/security/security-threat-model"
+}

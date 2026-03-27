@@ -1,0 +1,78 @@
+{
+  "candidate_lessons": {
+    "count": 3,
+    "top_candidate_id": "candidate_78a48c8d7c71"
+  },
+  "capture_id": "6cf75caab61458dc",
+  "confidence": {
+    "bucket": "high",
+    "calibration_bucket": "C1_high_confidence",
+    "inputs": {
+      "evidence_completeness": 0.8,
+      "feedback_signal": 1.0,
+      "feedback_status": "worked",
+      "iterations_observed": 3,
+      "non_regression_signal": 1.0,
+      "quality_uplift_signal": 1.0,
+      "runtime_gate_signal": 1.0,
+      "stop_reason": "pass",
+      "terminal_status": "passed"
+    },
+    "quality_uplift": 0.19,
+    "schema_version": "1.0",
+    "score": 0.93
+  },
+  "created_at": "2026-03-27T17:24:25Z",
+  "evidence": {
+    "completeness": {
+      "checks": true,
+      "events": true,
+      "logs": false,
+      "score": 0.8,
+      "session_signals": true,
+      "traces": true
+    },
+    "evidence_packet_id": "13cf83f5f59f58b8",
+    "evidence_packet_path": "evidence_packet.json"
+  },
+  "feedback": {
+    "captured_at": "2026-03-27T17:24:25Z",
+    "note": "smoke validation pass",
+    "source": "cli_one_tap",
+    "status": "worked"
+  },
+  "injected_lessons": {
+    "count": 0,
+    "items": []
+  },
+  "invocation_envelope": {
+    "actor_id": "recursive-skill-loop",
+    "auto_apply_enabled": false,
+    "auto_capture_enabled": true,
+    "idempotency_key": "356b3f72a7a41685d91a",
+    "invocation_id": "cbd8d2df82c8d789",
+    "invoked_at": "2026-03-27T17:24:25Z",
+    "kill_switch_file": "",
+    "objective_hash": "976c663a2d2a1ffb65b95447459dade068d7902d3a57bab8404cf3865bf4d07c",
+    "rollback_required_file": "",
+    "rollout_mode": "observe_only",
+    "run_owner": "skill-graph-smoke"
+  },
+  "lesson_observations": {
+    "count": 3,
+    "top_observation_id": "observation_622fe6fc30e7"
+  },
+  "output_summary": {
+    "duration_ms": 75,
+    "finished_at": "2026-03-27T17:24:25Z",
+    "iterations_completed": 3,
+    "stop_reason": "pass",
+    "terminal_status": "passed",
+    "tokens_used": 326
+  },
+  "profile_id": "utilities-using-git-worktrees",
+  "run_id": "run_20260327T172425037896Z_0931d0_88434ba0",
+  "schema_version": "1.0",
+  "scope_profile": "utilities",
+  "scope_skill": "utilities/using-git-worktrees"
+}

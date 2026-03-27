@@ -1,0 +1,8 @@
+{
+  "code": "evaluator_conflict",
+  "created_at": "2026-03-27T17:24:17Z",
+  "message": "run halted by blocker: evaluator_conflict",
+  "remediation_owner": "skill-graph-smoke",
+  "run_id": "run_20260327T172417877820Z_94ca45_882121e0",
+  "schema_version": "1.0"
+}

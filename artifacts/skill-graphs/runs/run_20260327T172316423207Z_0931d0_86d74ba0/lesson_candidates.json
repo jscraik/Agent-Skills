@@ -1,0 +1,195 @@
+{
+  "items": [
+    {
+      "advice": {
+        "summary": "Preserve and reuse the pattern that improved `safety`.",
+        "weakest_criteria": []
+      },
+      "candidate_id": "candidate_ceba0d39f9b8",
+      "confidence": {
+        "bucket": "high",
+        "calibration_bucket": "C1_high_confidence",
+        "evidence_completeness": 0.8,
+        "score": 0.93
+      },
+      "created_at": "2026-03-27T17:23:16Z",
+      "delegation_context": {
+        "agentic_cost_benefit": {
+          "ai_process_minutes": 20.0,
+          "human_baseline_minutes": 60.0,
+          "probability_of_success": 0.68,
+          "roi_signal": "positive",
+          "time_delta_minutes": 40.0
+        },
+        "mode": "manual",
+        "rationale": "Manual mode required: high-impact side effects need explicit human sign-off before applying candidate lessons."
+      },
+      "evidence_refs": {
+        "events_path": "events.jsonl",
+        "evidence_packet_path": "evidence_packet.json",
+        "iteration_journal_path": "iteration_journal.jsonl"
+      },
+      "implementation": {
+        "positive_criterion_deltas": {
+          "safety": 0.05
+        },
+        "summary": "Applied focused remediation for: consistency"
+      },
+      "iteration_id": 3,
+      "observation_type": "positive_pattern",
+      "outcome": {
+        "feedback_note": "smoke validation pass",
+        "feedback_status": "worked",
+        "quality_uplift": 0.19,
+        "stop_reason": "pass",
+        "terminal_status": "passed"
+      },
+      "profile_id": "utilities-using-git-worktrees",
+      "run_id": "run_20260327T172316423207Z_0931d0_86d74ba0",
+      "schema_version": "1.1",
+      "scope_profile": "utilities",
+      "scope_skill": "utilities/using-git-worktrees",
+      "selection": {
+        "feedback_weight": 1.35,
+        "rationale": "Positive delta on safety was amplified by feedback status `worked`.",
+        "score": 1.039
+      },
+      "source_observation": {
+        "criterion_id": "safety",
+        "feedback_note_present": true,
+        "feedback_status": "worked",
+        "observation_id": "observation_f7ed75a63188"
+      },
+      "status": "candidate",
+      "title": "utilities/using-git-worktrees positive pattern candidate (safety)"
+    },
+    {
+      "advice": {
+        "summary": "Preserve and reuse the pattern that improved `clarity`.",
+        "weakest_criteria": []
+      },
+      "candidate_id": "candidate_af36d3ccc54a",
+      "confidence": {
+        "bucket": "high",
+        "calibration_bucket": "C1_high_confidence",
+        "evidence_completeness": 0.8,
+        "score": 0.93
+      },
+      "created_at": "2026-03-27T17:23:16Z",
+      "delegation_context": {
+        "agentic_cost_benefit": {
+          "ai_process_minutes": 20.0,
+          "human_baseline_minutes": 60.0,
+          "probability_of_success": 0.68,
+          "roi_signal": "positive",
+          "time_delta_minutes": 40.0
+        },
+        "mode": "manual",
+        "rationale": "Manual mode required: high-impact side effects need explicit human sign-off before applying candidate lessons."
+      },
+      "evidence_refs": {
+        "events_path": "events.jsonl",
+        "evidence_packet_path": "evidence_packet.json",
+        "iteration_journal_path": "iteration_journal.jsonl"
+      },
+      "implementation": {
+        "positive_criterion_deltas": {
+          "clarity": 0.05
+        },
+        "summary": "Applied focused remediation for: consistency"
+      },
+      "iteration_id": 3,
+      "observation_type": "positive_pattern",
+      "outcome": {
+        "feedback_note": "smoke validation pass",
+        "feedback_status": "worked",
+        "quality_uplift": 0.19,
+        "stop_reason": "pass",
+        "terminal_status": "passed"
+      },
+      "profile_id": "utilities-using-git-worktrees",
+      "run_id": "run_20260327T172316423207Z_0931d0_86d74ba0",
+      "schema_version": "1.1",
+      "scope_profile": "utilities",
+      "scope_skill": "utilities/using-git-worktrees",
+      "selection": {
+        "feedback_weight": 1.35,
+        "rationale": "Positive delta on clarity was amplified by feedback status `worked`.",
+        "score": 1.039
+      },
+      "source_observation": {
+        "criterion_id": "clarity",
+        "feedback_note_present": true,
+        "feedback_status": "worked",
+        "observation_id": "observation_b56683f4d86d"
+      },
+      "status": "candidate",
+      "title": "utilities/using-git-worktrees positive pattern candidate (clarity)"
+    },
+    {
+      "advice": {
+        "summary": "Preserve and reuse the pattern that improved `specificity`.",
+        "weakest_criteria": []
+      },
+      "candidate_id": "candidate_8c730fd7ccaf",
+      "confidence": {
+        "bucket": "high",
+        "calibration_bucket": "C1_high_confidence",
+        "evidence_completeness": 0.8,
+        "score": 0.93
+      },
+      "created_at": "2026-03-27T17:23:16Z",
+      "delegation_context": {
+        "agentic_cost_benefit": {
+          "ai_process_minutes": 20.0,
+          "human_baseline_minutes": 60.0,
+          "probability_of_success": 0.68,
+          "roi_signal": "positive",
+          "time_delta_minutes": 40.0
+        },
+        "mode": "manual",
+        "rationale": "Manual mode required: high-impact side effects need explicit human sign-off before applying candidate lessons."
+      },
+      "evidence_refs": {
+        "events_path": "events.jsonl",
+        "evidence_packet_path": "evidence_packet.json",
+        "iteration_journal_path": "iteration_journal.jsonl"
+      },
+      "implementation": {
+        "positive_criterion_deltas": {
+          "specificity": 0.05
+        },
+        "summary": "Applied focused remediation for: consistency"
+      },
+      "iteration_id": 3,
+      "observation_type": "positive_pattern",
+      "outcome": {
+        "feedback_note": "smoke validation pass",
+        "feedback_status": "worked",
+        "quality_uplift": 0.19,
+        "stop_reason": "pass",
+        "terminal_status": "passed"
+      },
+      "profile_id": "utilities-using-git-worktrees",
+      "run_id": "run_20260327T172316423207Z_0931d0_86d74ba0",
+      "schema_version": "1.1",
+      "scope_profile": "utilities",
+      "scope_skill": "utilities/using-git-worktrees",
+      "selection": {
+        "feedback_weight": 1.35,
+        "rationale": "Positive delta on specificity was amplified by feedback status `worked`.",
+        "score": 1.039
+      },
+      "source_observation": {
+        "criterion_id": "specificity",
+        "feedback_note_present": true,
+        "feedback_status": "worked",
+        "observation_id": "observation_171ed03d2354"
+      },
+      "status": "candidate",
+      "title": "utilities/using-git-worktrees positive pattern candidate (specificity)"
+    }
+  ],
+  "run_id": "run_20260327T172316423207Z_0931d0_86d74ba0",
+  "schema_version": "1.0"
+}

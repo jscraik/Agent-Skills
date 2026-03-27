@@ -1,0 +1,78 @@
+{
+  "candidate_lessons": {
+    "count": 3,
+    "top_candidate_id": "candidate_d90b770c9dff"
+  },
+  "capture_id": "c74fd45ff23324c4",
+  "confidence": {
+    "bucket": "high",
+    "calibration_bucket": "C1_high_confidence",
+    "inputs": {
+      "evidence_completeness": 0.8,
+      "feedback_signal": 1.0,
+      "feedback_status": "worked",
+      "iterations_observed": 2,
+      "non_regression_signal": 1.0,
+      "quality_uplift_signal": 1.0,
+      "runtime_gate_signal": 1.0,
+      "stop_reason": "pass",
+      "terminal_status": "passed"
+    },
+    "quality_uplift": 0.12,
+    "schema_version": "1.0",
+    "score": 0.93
+  },
+  "created_at": "2026-03-27T17:22:54Z",
+  "evidence": {
+    "completeness": {
+      "checks": true,
+      "events": true,
+      "logs": false,
+      "score": 0.8,
+      "session_signals": true,
+      "traces": true
+    },
+    "evidence_packet_id": "ed072de45994ceee",
+    "evidence_packet_path": "evidence_packet.json"
+  },
+  "feedback": {
+    "captured_at": "2026-03-27T17:22:54Z",
+    "note": "smoke validation pass",
+    "source": "cli_one_tap",
+    "status": "worked"
+  },
+  "injected_lessons": {
+    "count": 0,
+    "items": []
+  },
+  "invocation_envelope": {
+    "actor_id": "recursive-skill-loop",
+    "auto_apply_enabled": false,
+    "auto_capture_enabled": true,
+    "idempotency_key": "527e7ff05e7b492c4d15",
+    "invocation_id": "6afb2ff11208f60a",
+    "invoked_at": "2026-03-27T17:22:54Z",
+    "kill_switch_file": "",
+    "objective_hash": "de13c3b285521b74af53906efa1883a6da106b4914553ec75cb9dac9c5c70d7e",
+    "rollback_required_file": "",
+    "rollout_mode": "observe_only",
+    "run_owner": "skill-graph-smoke"
+  },
+  "lesson_observations": {
+    "count": 4,
+    "top_observation_id": "observation_d38c78818e44"
+  },
+  "output_summary": {
+    "duration_ms": 12,
+    "finished_at": "2026-03-27T17:22:54Z",
+    "iterations_completed": 2,
+    "stop_reason": "pass",
+    "terminal_status": "passed",
+    "tokens_used": 171
+  },
+  "profile_id": "product-domain-cloudflare-deploy",
+  "run_id": "run_20260327T172254527940Z_f13e6a_865f3009",
+  "schema_version": "1.0",
+  "scope_profile": "product",
+  "scope_skill": "product/domain/cloudflare-deploy"
+}

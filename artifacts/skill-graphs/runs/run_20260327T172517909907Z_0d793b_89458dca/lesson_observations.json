@@ -1,0 +1,396 @@
+{
+  "items": [
+    {
+      "advice": {
+        "summary": "Preserve and reuse the pattern that improved `specificity`.",
+        "weakest_criteria": [
+          "specificity",
+          "safety",
+          "clarity"
+        ]
+      },
+      "confidence": {
+        "bucket": "medium",
+        "calibration_bucket": "C2_medium_confidence",
+        "evidence_completeness": 0.8,
+        "score": 0.68
+      },
+      "created_at": "2026-03-27T17:25:18Z",
+      "criterion_id": "specificity",
+      "delegation_context": {
+        "agentic_cost_benefit": {
+          "ai_process_minutes": 15.0,
+          "human_baseline_minutes": 45.0,
+          "probability_of_success": 0.75,
+          "roi_signal": "positive",
+          "time_delta_minutes": 30.0
+        },
+        "mode": "co-pilot",
+        "rationale": "Co-pilot mode default: advisory guidance with controlled rollout and human oversight for promotions."
+      },
+      "evidence_refs": {
+        "events_path": "events.jsonl",
+        "evidence_packet_path": "evidence_packet.json",
+        "iteration_journal_path": "iteration_journal.jsonl"
+      },
+      "implementation": {
+        "positive_criterion_deltas": {
+          "specificity": 0.05
+        },
+        "summary": "Applied focused remediation for: specificity, safety, clarity"
+      },
+      "iteration_id": 1,
+      "observation_id": "observation_f8f90e7ae963",
+      "observation_type": "positive_pattern",
+      "outcome": {
+        "feedback_note": "smoke validation pass",
+        "feedback_status": "worked",
+        "quality_uplift": 0.05,
+        "stop_reason": "evaluator_conflict",
+        "terminal_status": "escalated"
+      },
+      "profile_id": "product-security-security-ownership-map",
+      "run_id": "run_20260327T172517909907Z_0d793b_89458dca",
+      "schema_version": "1.0",
+      "scope_profile": "product",
+      "scope_skill": "product/security/security-ownership-map",
+      "selection_hint": {
+        "feedback_weight": 1.35,
+        "rationale": "Positive delta on specificity was amplified by feedback status `worked`.",
+        "score": 0.988
+      },
+      "signals": {
+        "deficit": 0.0,
+        "positive_delta": 0.05
+      },
+      "title": "product/security/security-ownership-map positive pattern observation (specificity)"
+    },
+    {
+      "advice": {
+        "summary": "Preserve and reuse the pattern that improved `safety`.",
+        "weakest_criteria": [
+          "specificity",
+          "safety",
+          "clarity"
+        ]
+      },
+      "confidence": {
+        "bucket": "medium",
+        "calibration_bucket": "C2_medium_confidence",
+        "evidence_completeness": 0.8,
+        "score": 0.68
+      },
+      "created_at": "2026-03-27T17:25:18Z",
+      "criterion_id": "safety",
+      "delegation_context": {
+        "agentic_cost_benefit": {
+          "ai_process_minutes": 15.0,
+          "human_baseline_minutes": 45.0,
+          "probability_of_success": 0.75,
+          "roi_signal": "positive",
+          "time_delta_minutes": 30.0
+        },
+        "mode": "co-pilot",
+        "rationale": "Co-pilot mode default: advisory guidance with controlled rollout and human oversight for promotions."
+      },
+      "evidence_refs": {
+        "events_path": "events.jsonl",
+        "evidence_packet_path": "evidence_packet.json",
+        "iteration_journal_path": "iteration_journal.jsonl"
+      },
+      "implementation": {
+        "positive_criterion_deltas": {
+          "safety": 0.05
+        },
+        "summary": "Applied focused remediation for: specificity, safety, clarity"
+      },
+      "iteration_id": 1,
+      "observation_id": "observation_bbaba2c43fbd",
+      "observation_type": "positive_pattern",
+      "outcome": {
+        "feedback_note": "smoke validation pass",
+        "feedback_status": "worked",
+        "quality_uplift": 0.05,
+        "stop_reason": "evaluator_conflict",
+        "terminal_status": "escalated"
+      },
+      "profile_id": "product-security-security-ownership-map",
+      "run_id": "run_20260327T172517909907Z_0d793b_89458dca",
+      "schema_version": "1.0",
+      "scope_profile": "product",
+      "scope_skill": "product/security/security-ownership-map",
+      "selection_hint": {
+        "feedback_weight": 1.35,
+        "rationale": "Positive delta on safety was amplified by feedback status `worked`.",
+        "score": 0.988
+      },
+      "signals": {
+        "deficit": 0.0,
+        "positive_delta": 0.05
+      },
+      "title": "product/security/security-ownership-map positive pattern observation (safety)"
+    },
+    {
+      "advice": {
+        "summary": "Preserve and reuse the pattern that improved `clarity`.",
+        "weakest_criteria": [
+          "specificity",
+          "safety",
+          "clarity"
+        ]
+      },
+      "confidence": {
+        "bucket": "medium",
+        "calibration_bucket": "C2_medium_confidence",
+        "evidence_completeness": 0.8,
+        "score": 0.68
+      },
+      "created_at": "2026-03-27T17:25:18Z",
+      "criterion_id": "clarity",
+      "delegation_context": {
+        "agentic_cost_benefit": {
+          "ai_process_minutes": 15.0,
+          "human_baseline_minutes": 45.0,
+          "probability_of_success": 0.75,
+          "roi_signal": "positive",
+          "time_delta_minutes": 30.0
+        },
+        "mode": "co-pilot",
+        "rationale": "Co-pilot mode default: advisory guidance with controlled rollout and human oversight for promotions."
+      },
+      "evidence_refs": {
+        "events_path": "events.jsonl",
+        "evidence_packet_path": "evidence_packet.json",
+        "iteration_journal_path": "iteration_journal.jsonl"
+      },
+      "implementation": {
+        "positive_criterion_deltas": {
+          "clarity": 0.05
+        },
+        "summary": "Applied focused remediation for: specificity, safety, clarity"
+      },
+      "iteration_id": 1,
+      "observation_id": "observation_b04ce4590950",
+      "observation_type": "positive_pattern",
+      "outcome": {
+        "feedback_note": "smoke validation pass",
+        "feedback_status": "worked",
+        "quality_uplift": 0.05,
+        "stop_reason": "evaluator_conflict",
+        "terminal_status": "escalated"
+      },
+      "profile_id": "product-security-security-ownership-map",
+      "run_id": "run_20260327T172517909907Z_0d793b_89458dca",
+      "schema_version": "1.0",
+      "scope_profile": "product",
+      "scope_skill": "product/security/security-ownership-map",
+      "selection_hint": {
+        "feedback_weight": 1.35,
+        "rationale": "Positive delta on clarity was amplified by feedback status `worked`.",
+        "score": 0.988
+      },
+      "signals": {
+        "deficit": 0.0,
+        "positive_delta": 0.05
+      },
+      "title": "product/security/security-ownership-map positive pattern observation (clarity)"
+    },
+    {
+      "advice": {
+        "summary": "Strengthen concrete examples, file-path specificity, and measurable checks.",
+        "weakest_criteria": [
+          "specificity"
+        ]
+      },
+      "confidence": {
+        "bucket": "medium",
+        "calibration_bucket": "C2_medium_confidence",
+        "evidence_completeness": 0.8,
+        "score": 0.68
+      },
+      "created_at": "2026-03-27T17:25:18Z",
+      "criterion_id": "specificity",
+      "delegation_context": {
+        "agentic_cost_benefit": {
+          "ai_process_minutes": 15.0,
+          "human_baseline_minutes": 45.0,
+          "probability_of_success": 0.75,
+          "roi_signal": "positive",
+          "time_delta_minutes": 30.0
+        },
+        "mode": "co-pilot",
+        "rationale": "Co-pilot mode default: advisory guidance with controlled rollout and human oversight for promotions."
+      },
+      "evidence_refs": {
+        "events_path": "events.jsonl",
+        "evidence_packet_path": "evidence_packet.json",
+        "iteration_journal_path": "iteration_journal.jsonl"
+      },
+      "implementation": {
+        "positive_criterion_deltas": {
+          "clarity": 0.05,
+          "safety": 0.05,
+          "specificity": 0.05
+        },
+        "summary": "Applied focused remediation for: specificity, safety, clarity"
+      },
+      "iteration_id": 1,
+      "observation_id": "observation_a64dc4209bb1",
+      "observation_type": "remediation",
+      "outcome": {
+        "feedback_note": "smoke validation pass",
+        "feedback_status": "worked",
+        "quality_uplift": 0.05,
+        "stop_reason": "evaluator_conflict",
+        "terminal_status": "escalated"
+      },
+      "profile_id": "product-security-security-ownership-map",
+      "run_id": "run_20260327T172517909907Z_0d793b_89458dca",
+      "schema_version": "1.0",
+      "scope_profile": "product",
+      "scope_skill": "product/security/security-ownership-map",
+      "selection_hint": {
+        "feedback_weight": 0.55,
+        "rationale": "Weakness in specificity was prioritized because feedback status was `worked`.",
+        "score": 0.378
+      },
+      "signals": {
+        "deficit": 0.042,
+        "positive_delta": 0.0
+      },
+      "title": "product/security/security-ownership-map remediation observation (specificity)"
+    },
+    {
+      "advice": {
+        "summary": "Strengthen concrete examples, file-path specificity, and measurable checks.",
+        "weakest_criteria": [
+          "safety"
+        ]
+      },
+      "confidence": {
+        "bucket": "medium",
+        "calibration_bucket": "C2_medium_confidence",
+        "evidence_completeness": 0.8,
+        "score": 0.68
+      },
+      "created_at": "2026-03-27T17:25:18Z",
+      "criterion_id": "safety",
+      "delegation_context": {
+        "agentic_cost_benefit": {
+          "ai_process_minutes": 15.0,
+          "human_baseline_minutes": 45.0,
+          "probability_of_success": 0.75,
+          "roi_signal": "positive",
+          "time_delta_minutes": 30.0
+        },
+        "mode": "co-pilot",
+        "rationale": "Co-pilot mode default: advisory guidance with controlled rollout and human oversight for promotions."
+      },
+      "evidence_refs": {
+        "events_path": "events.jsonl",
+        "evidence_packet_path": "evidence_packet.json",
+        "iteration_journal_path": "iteration_journal.jsonl"
+      },
+      "implementation": {
+        "positive_criterion_deltas": {
+          "clarity": 0.05,
+          "safety": 0.05,
+          "specificity": 0.05
+        },
+        "summary": "Applied focused remediation for: specificity, safety, clarity"
+      },
+      "iteration_id": 1,
+      "observation_id": "observation_79a77cebe766",
+      "observation_type": "remediation",
+      "outcome": {
+        "feedback_note": "smoke validation pass",
+        "feedback_status": "worked",
+        "quality_uplift": 0.05,
+        "stop_reason": "evaluator_conflict",
+        "terminal_status": "escalated"
+      },
+      "profile_id": "product-security-security-ownership-map",
+      "run_id": "run_20260327T172517909907Z_0d793b_89458dca",
+      "schema_version": "1.0",
+      "scope_profile": "product",
+      "scope_skill": "product/security/security-ownership-map",
+      "selection_hint": {
+        "feedback_weight": 0.55,
+        "rationale": "Weakness in safety was prioritized because feedback status was `worked`.",
+        "score": 0.369
+      },
+      "signals": {
+        "deficit": 0.026,
+        "positive_delta": 0.0
+      },
+      "title": "product/security/security-ownership-map remediation observation (safety)"
+    },
+    {
+      "advice": {
+        "summary": "Strengthen concrete examples, file-path specificity, and measurable checks.",
+        "weakest_criteria": [
+          "clarity"
+        ]
+      },
+      "confidence": {
+        "bucket": "medium",
+        "calibration_bucket": "C2_medium_confidence",
+        "evidence_completeness": 0.8,
+        "score": 0.68
+      },
+      "created_at": "2026-03-27T17:25:18Z",
+      "criterion_id": "clarity",
+      "delegation_context": {
+        "agentic_cost_benefit": {
+          "ai_process_minutes": 15.0,
+          "human_baseline_minutes": 45.0,
+          "probability_of_success": 0.75,
+          "roi_signal": "positive",
+          "time_delta_minutes": 30.0
+        },
+        "mode": "co-pilot",
+        "rationale": "Co-pilot mode default: advisory guidance with controlled rollout and human oversight for promotions."
+      },
+      "evidence_refs": {
+        "events_path": "events.jsonl",
+        "evidence_packet_path": "evidence_packet.json",
+        "iteration_journal_path": "iteration_journal.jsonl"
+      },
+      "implementation": {
+        "positive_criterion_deltas": {
+          "clarity": 0.05,
+          "safety": 0.05,
+          "specificity": 0.05
+        },
+        "summary": "Applied focused remediation for: specificity, safety, clarity"
+      },
+      "iteration_id": 1,
+      "observation_id": "observation_ea2a2fe2f204",
+      "observation_type": "remediation",
+      "outcome": {
+        "feedback_note": "smoke validation pass",
+        "feedback_status": "worked",
+        "quality_uplift": 0.05,
+        "stop_reason": "evaluator_conflict",
+        "terminal_status": "escalated"
+      },
+      "profile_id": "product-security-security-ownership-map",
+      "run_id": "run_20260327T172517909907Z_0d793b_89458dca",
+      "schema_version": "1.0",
+      "scope_profile": "product",
+      "scope_skill": "product/security/security-ownership-map",
+      "selection_hint": {
+        "feedback_weight": 0.55,
+        "rationale": "Weakness in clarity was prioritized because feedback status was `worked`.",
+        "score": 0.362
+      },
+      "signals": {
+        "deficit": 0.013,
+        "positive_delta": 0.0
+      },
+      "title": "product/security/security-ownership-map remediation observation (clarity)"
+    }
+  ],
+  "run_id": "run_20260327T172517909907Z_0d793b_89458dca",
+  "schema_version": "1.0"
+}

@@ -108,3 +108,12 @@ Run discovery for underspecified role-creation or role-hardening requests.
 | [[decide-build-primitive]] | Decide whether the capability should be an agent, skill, or automation first |
 
 **Topic map:** [[agent-ops]]
+
+<!-- decision-feedback-protocol:v3 -->
+**Decision feedback protocol (always run):**
+After delivering results, ask the user directly:
+> "Quick feedback — decision: accepted/partial/rejected/deferred? outcome: good/neutral/bad? confidence: high/medium/low?"
+Then record it immediately:
+`python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path utilities/codex-agent-creator/SKILL.md --decision <decision> --outcome <outcome> --confidence <confidence> --notes "<optional notes>"`
+Do not skip this step. Record even if the outcome is good.
+<!-- /decision-feedback-protocol -->

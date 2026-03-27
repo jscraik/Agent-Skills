@@ -1,0 +1,201 @@
+{
+  "items": [
+    {
+      "advice": {
+        "summary": "Preserve and reuse the pattern that improved `state_completeness`.",
+        "weakest_criteria": [
+          "restraint_and_composition"
+        ]
+      },
+      "candidate_id": "candidate_29d100f27f77",
+      "confidence": {
+        "bucket": "medium",
+        "calibration_bucket": "C2_medium_confidence",
+        "evidence_completeness": 0.8,
+        "score": 0.68
+      },
+      "created_at": "2026-03-27T17:25:10Z",
+      "delegation_context": {
+        "agentic_cost_benefit": {
+          "ai_process_minutes": 25.0,
+          "human_baseline_minutes": 75.0,
+          "probability_of_success": 0.78,
+          "roi_signal": "positive",
+          "time_delta_minutes": 50.0
+        },
+        "mode": "co-pilot",
+        "rationale": "Frontend UI design benefits from repeated human plus agent review because hierarchy, accessibility, and visual distinction all need strong evidence before promotion."
+      },
+      "evidence_refs": {
+        "events_path": "events.jsonl",
+        "evidence_packet_path": "evidence_packet.json",
+        "iteration_journal_path": "iteration_journal.jsonl"
+      },
+      "implementation": {
+        "positive_criterion_deltas": {
+          "state_completeness": 0.05
+        },
+        "summary": "Applied focused remediation for: restraint_and_composition"
+      },
+      "iteration_id": 4,
+      "observation_type": "positive_pattern",
+      "outcome": {
+        "feedback_note": "smoke validation pass",
+        "feedback_status": "worked",
+        "quality_uplift": 0.249,
+        "stop_reason": "budget_exhausted",
+        "terminal_status": "failed"
+      },
+      "profile_id": "frontend-ui-frontend-ui-design",
+      "run_id": "run_20260327T172510441429Z_03f80a_8928d70f",
+      "schema_version": "1.1",
+      "scope_profile": "frontend",
+      "scope_skill": "frontend/ui/frontend-ui-design",
+      "selection": {
+        "feedback_weight": 1.35,
+        "rationale": "Positive delta on state_completeness was amplified by feedback status `worked`.",
+        "score": 0.988
+      },
+      "source_observation": {
+        "criterion_id": "state_completeness",
+        "feedback_note_present": true,
+        "feedback_status": "worked",
+        "observation_id": "observation_feb9bd24ed01"
+      },
+      "status": "candidate",
+      "title": "frontend/ui/frontend-ui-design positive pattern candidate (state_completeness)"
+    },
+    {
+      "advice": {
+        "summary": "Preserve and reuse the pattern that improved `token_alignment`.",
+        "weakest_criteria": [
+          "restraint_and_composition"
+        ]
+      },
+      "candidate_id": "candidate_55a9670b9c33",
+      "confidence": {
+        "bucket": "medium",
+        "calibration_bucket": "C2_medium_confidence",
+        "evidence_completeness": 0.8,
+        "score": 0.68
+      },
+      "created_at": "2026-03-27T17:25:10Z",
+      "delegation_context": {
+        "agentic_cost_benefit": {
+          "ai_process_minutes": 25.0,
+          "human_baseline_minutes": 75.0,
+          "probability_of_success": 0.78,
+          "roi_signal": "positive",
+          "time_delta_minutes": 50.0
+        },
+        "mode": "co-pilot",
+        "rationale": "Frontend UI design benefits from repeated human plus agent review because hierarchy, accessibility, and visual distinction all need strong evidence before promotion."
+      },
+      "evidence_refs": {
+        "events_path": "events.jsonl",
+        "evidence_packet_path": "evidence_packet.json",
+        "iteration_journal_path": "iteration_journal.jsonl"
+      },
+      "implementation": {
+        "positive_criterion_deltas": {
+          "token_alignment": 0.05
+        },
+        "summary": "Applied focused remediation for: restraint_and_composition"
+      },
+      "iteration_id": 4,
+      "observation_type": "positive_pattern",
+      "outcome": {
+        "feedback_note": "smoke validation pass",
+        "feedback_status": "worked",
+        "quality_uplift": 0.249,
+        "stop_reason": "budget_exhausted",
+        "terminal_status": "failed"
+      },
+      "profile_id": "frontend-ui-frontend-ui-design",
+      "run_id": "run_20260327T172510441429Z_03f80a_8928d70f",
+      "schema_version": "1.1",
+      "scope_profile": "frontend",
+      "scope_skill": "frontend/ui/frontend-ui-design",
+      "selection": {
+        "feedback_weight": 1.35,
+        "rationale": "Positive delta on token_alignment was amplified by feedback status `worked`.",
+        "score": 0.988
+      },
+      "source_observation": {
+        "criterion_id": "token_alignment",
+        "feedback_note_present": true,
+        "feedback_status": "worked",
+        "observation_id": "observation_6b9fb2bfd629"
+      },
+      "status": "candidate",
+      "title": "frontend/ui/frontend-ui-design positive pattern candidate (token_alignment)"
+    },
+    {
+      "advice": {
+        "summary": "Preserve and reuse the pattern that improved `visual_distinction`.",
+        "weakest_criteria": [
+          "restraint_and_composition"
+        ]
+      },
+      "candidate_id": "candidate_c0085d1e343b",
+      "confidence": {
+        "bucket": "medium",
+        "calibration_bucket": "C2_medium_confidence",
+        "evidence_completeness": 0.8,
+        "score": 0.68
+      },
+      "created_at": "2026-03-27T17:25:10Z",
+      "delegation_context": {
+        "agentic_cost_benefit": {
+          "ai_process_minutes": 25.0,
+          "human_baseline_minutes": 75.0,
+          "probability_of_success": 0.78,
+          "roi_signal": "positive",
+          "time_delta_minutes": 50.0
+        },
+        "mode": "co-pilot",
+        "rationale": "Frontend UI design benefits from repeated human plus agent review because hierarchy, accessibility, and visual distinction all need strong evidence before promotion."
+      },
+      "evidence_refs": {
+        "events_path": "events.jsonl",
+        "evidence_packet_path": "evidence_packet.json",
+        "iteration_journal_path": "iteration_journal.jsonl"
+      },
+      "implementation": {
+        "positive_criterion_deltas": {
+          "visual_distinction": 0.05
+        },
+        "summary": "Applied focused remediation for: restraint_and_composition"
+      },
+      "iteration_id": 4,
+      "observation_type": "positive_pattern",
+      "outcome": {
+        "feedback_note": "smoke validation pass",
+        "feedback_status": "worked",
+        "quality_uplift": 0.249,
+        "stop_reason": "budget_exhausted",
+        "terminal_status": "failed"
+      },
+      "profile_id": "frontend-ui-frontend-ui-design",
+      "run_id": "run_20260327T172510441429Z_03f80a_8928d70f",
+      "schema_version": "1.1",
+      "scope_profile": "frontend",
+      "scope_skill": "frontend/ui/frontend-ui-design",
+      "selection": {
+        "feedback_weight": 1.35,
+        "rationale": "Positive delta on visual_distinction was amplified by feedback status `worked`.",
+        "score": 0.988
+      },
+      "source_observation": {
+        "criterion_id": "visual_distinction",
+        "feedback_note_present": true,
+        "feedback_status": "worked",
+        "observation_id": "observation_3487f6615953"
+      },
+      "status": "candidate",
+      "title": "frontend/ui/frontend-ui-design positive pattern candidate (visual_distinction)"
+    }
+  ],
+  "run_id": "run_20260327T172510441429Z_03f80a_8928d70f",
+  "schema_version": "1.0"
+}

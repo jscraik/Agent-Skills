@@ -1,0 +1,189 @@
+{
+  "items": [
+    {
+      "advice": {
+        "summary": "Preserve and reuse the pattern that improved `clarity`.",
+        "weakest_criteria": []
+      },
+      "confidence": {
+        "bucket": "high",
+        "calibration_bucket": "C1_high_confidence",
+        "evidence_completeness": 0.8,
+        "score": 0.93
+      },
+      "created_at": "2026-03-27T17:25:00Z",
+      "criterion_id": "clarity",
+      "delegation_context": {
+        "agentic_cost_benefit": {
+          "ai_process_minutes": 20.0,
+          "human_baseline_minutes": 60.0,
+          "probability_of_success": 0.68,
+          "roi_signal": "positive",
+          "time_delta_minutes": 40.0
+        },
+        "mode": "manual",
+        "rationale": "Manual mode required: high-impact side effects need explicit human sign-off before applying candidate lessons."
+      },
+      "evidence_refs": {
+        "events_path": "events.jsonl",
+        "evidence_packet_path": "evidence_packet.json",
+        "iteration_journal_path": "iteration_journal.jsonl"
+      },
+      "implementation": {
+        "positive_criterion_deltas": {
+          "clarity": 0.05
+        },
+        "summary": "Applied focused remediation for: consistency"
+      },
+      "iteration_id": 3,
+      "observation_id": "observation_e7151dbe5d85",
+      "observation_type": "positive_pattern",
+      "outcome": {
+        "feedback_note": "smoke validation pass",
+        "feedback_status": "worked",
+        "quality_uplift": 0.19,
+        "stop_reason": "pass",
+        "terminal_status": "passed"
+      },
+      "profile_id": "utilities-codex-agent-creator",
+      "run_id": "run_20260327T172500155880Z_8d6129_88f34d18",
+      "schema_version": "1.0",
+      "scope_profile": "utilities",
+      "scope_skill": "utilities/codex-agent-creator",
+      "selection_hint": {
+        "feedback_weight": 1.35,
+        "rationale": "Positive delta on clarity was amplified by feedback status `worked`.",
+        "score": 1.039
+      },
+      "signals": {
+        "deficit": 0.0,
+        "positive_delta": 0.05
+      },
+      "title": "utilities/codex-agent-creator positive pattern observation (clarity)"
+    },
+    {
+      "advice": {
+        "summary": "Preserve and reuse the pattern that improved `specificity`.",
+        "weakest_criteria": []
+      },
+      "confidence": {
+        "bucket": "high",
+        "calibration_bucket": "C1_high_confidence",
+        "evidence_completeness": 0.8,
+        "score": 0.93
+      },
+      "created_at": "2026-03-27T17:25:00Z",
+      "criterion_id": "specificity",
+      "delegation_context": {
+        "agentic_cost_benefit": {
+          "ai_process_minutes": 20.0,
+          "human_baseline_minutes": 60.0,
+          "probability_of_success": 0.68,
+          "roi_signal": "positive",
+          "time_delta_minutes": 40.0
+        },
+        "mode": "manual",
+        "rationale": "Manual mode required: high-impact side effects need explicit human sign-off before applying candidate lessons."
+      },
+      "evidence_refs": {
+        "events_path": "events.jsonl",
+        "evidence_packet_path": "evidence_packet.json",
+        "iteration_journal_path": "iteration_journal.jsonl"
+      },
+      "implementation": {
+        "positive_criterion_deltas": {
+          "specificity": 0.05
+        },
+        "summary": "Applied focused remediation for: consistency"
+      },
+      "iteration_id": 3,
+      "observation_id": "observation_c89ca7d86da8",
+      "observation_type": "positive_pattern",
+      "outcome": {
+        "feedback_note": "smoke validation pass",
+        "feedback_status": "worked",
+        "quality_uplift": 0.19,
+        "stop_reason": "pass",
+        "terminal_status": "passed"
+      },
+      "profile_id": "utilities-codex-agent-creator",
+      "run_id": "run_20260327T172500155880Z_8d6129_88f34d18",
+      "schema_version": "1.0",
+      "scope_profile": "utilities",
+      "scope_skill": "utilities/codex-agent-creator",
+      "selection_hint": {
+        "feedback_weight": 1.35,
+        "rationale": "Positive delta on specificity was amplified by feedback status `worked`.",
+        "score": 1.039
+      },
+      "signals": {
+        "deficit": 0.0,
+        "positive_delta": 0.05
+      },
+      "title": "utilities/codex-agent-creator positive pattern observation (specificity)"
+    },
+    {
+      "advice": {
+        "summary": "Preserve and reuse the pattern that improved `safety`.",
+        "weakest_criteria": []
+      },
+      "confidence": {
+        "bucket": "high",
+        "calibration_bucket": "C1_high_confidence",
+        "evidence_completeness": 0.8,
+        "score": 0.93
+      },
+      "created_at": "2026-03-27T17:25:00Z",
+      "criterion_id": "safety",
+      "delegation_context": {
+        "agentic_cost_benefit": {
+          "ai_process_minutes": 20.0,
+          "human_baseline_minutes": 60.0,
+          "probability_of_success": 0.68,
+          "roi_signal": "positive",
+          "time_delta_minutes": 40.0
+        },
+        "mode": "manual",
+        "rationale": "Manual mode required: high-impact side effects need explicit human sign-off before applying candidate lessons."
+      },
+      "evidence_refs": {
+        "events_path": "events.jsonl",
+        "evidence_packet_path": "evidence_packet.json",
+        "iteration_journal_path": "iteration_journal.jsonl"
+      },
+      "implementation": {
+        "positive_criterion_deltas": {
+          "safety": 0.05
+        },
+        "summary": "Applied focused remediation for: consistency"
+      },
+      "iteration_id": 3,
+      "observation_id": "observation_b5b297231a13",
+      "observation_type": "positive_pattern",
+      "outcome": {
+        "feedback_note": "smoke validation pass",
+        "feedback_status": "worked",
+        "quality_uplift": 0.19,
+        "stop_reason": "pass",
+        "terminal_status": "passed"
+      },
+      "profile_id": "utilities-codex-agent-creator",
+      "run_id": "run_20260327T172500155880Z_8d6129_88f34d18",
+      "schema_version": "1.0",
+      "scope_profile": "utilities",
+      "scope_skill": "utilities/codex-agent-creator",
+      "selection_hint": {
+        "feedback_weight": 1.35,
+        "rationale": "Positive delta on safety was amplified by feedback status `worked`.",
+        "score": 1.039
+      },
+      "signals": {
+        "deficit": 0.0,
+        "positive_delta": 0.05
+      },
+      "title": "utilities/codex-agent-creator positive pattern observation (safety)"
+    }
+  ],
+  "run_id": "run_20260327T172500155880Z_8d6129_88f34d18",
+  "schema_version": "1.0"
+}

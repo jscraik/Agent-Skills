@@ -1,0 +1,78 @@
+{
+  "candidate_lessons": {
+    "count": 3,
+    "top_candidate_id": "candidate_fe53fb5ebcd7"
+  },
+  "capture_id": "cde22fa3d15407f4",
+  "confidence": {
+    "bucket": "medium",
+    "calibration_bucket": "C2_medium_confidence",
+    "inputs": {
+      "evidence_completeness": 0.8,
+      "feedback_signal": 1.0,
+      "feedback_status": "worked",
+      "iterations_observed": 1,
+      "non_regression_signal": 1.0,
+      "quality_uplift_signal": 1.0,
+      "runtime_gate_signal": 0.0,
+      "stop_reason": "evaluator_conflict",
+      "terminal_status": "escalated"
+    },
+    "quality_uplift": 0.05,
+    "schema_version": "1.0",
+    "score": 0.68
+  },
+  "created_at": "2026-03-27T17:23:20Z",
+  "evidence": {
+    "completeness": {
+      "checks": true,
+      "events": true,
+      "logs": false,
+      "score": 0.8,
+      "session_signals": true,
+      "traces": true
+    },
+    "evidence_packet_id": "30bc50a9e89c7a52",
+    "evidence_packet_path": "evidence_packet.json"
+  },
+  "feedback": {
+    "captured_at": "2026-03-27T17:23:20Z",
+    "note": "smoke validation pass",
+    "source": "cli_one_tap",
+    "status": "worked"
+  },
+  "injected_lessons": {
+    "count": 0,
+    "items": []
+  },
+  "invocation_envelope": {
+    "actor_id": "recursive-skill-loop",
+    "auto_apply_enabled": false,
+    "auto_capture_enabled": true,
+    "idempotency_key": "ef319d8b0ae9e956a191",
+    "invocation_id": "1767447f5e79eeaf",
+    "invoked_at": "2026-03-27T17:23:20Z",
+    "kill_switch_file": "",
+    "objective_hash": "3d244d3dea6f2546c07214203a9ed4b62f2690ab9c48217f1b6e44b7ed57f5ff",
+    "rollback_required_file": "",
+    "rollout_mode": "observe_only",
+    "run_owner": "skill-graph-smoke"
+  },
+  "lesson_observations": {
+    "count": 5,
+    "top_observation_id": "observation_e5358f51305b"
+  },
+  "output_summary": {
+    "duration_ms": 28,
+    "finished_at": "2026-03-27T17:23:20Z",
+    "iterations_completed": 1,
+    "stop_reason": "evaluator_conflict",
+    "terminal_status": "escalated",
+    "tokens_used": 54
+  },
+  "profile_id": "frontend-tools-stitch-loop",
+  "run_id": "run_20260327T172320892998Z_4171eb_86ed4991",
+  "schema_version": "1.0",
+  "scope_profile": "frontend",
+  "scope_skill": "frontend/tools/stitch-loop"
+}

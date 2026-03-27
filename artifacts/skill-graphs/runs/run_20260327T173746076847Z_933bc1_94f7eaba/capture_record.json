@@ -1,0 +1,78 @@
+{
+  "candidate_lessons": {
+    "count": 3,
+    "top_candidate_id": "candidate_2a16674a9936"
+  },
+  "capture_id": "481f323cbd675f90",
+  "confidence": {
+    "bucket": "medium",
+    "calibration_bucket": "C2_medium_confidence",
+    "inputs": {
+      "evidence_completeness": 0.8,
+      "feedback_signal": 1.0,
+      "feedback_status": "worked",
+      "iterations_observed": 1,
+      "non_regression_signal": 1.0,
+      "quality_uplift_signal": 1.0,
+      "runtime_gate_signal": 0.0,
+      "stop_reason": "budget_exhausted",
+      "terminal_status": "failed"
+    },
+    "quality_uplift": 0.05,
+    "schema_version": "1.0",
+    "score": 0.68
+  },
+  "created_at": "2026-03-27T17:37:46Z",
+  "evidence": {
+    "completeness": {
+      "checks": true,
+      "events": true,
+      "logs": false,
+      "score": 0.8,
+      "session_signals": true,
+      "traces": true
+    },
+    "evidence_packet_id": "db980a3c256cb3a1",
+    "evidence_packet_path": "evidence_packet.json"
+  },
+  "feedback": {
+    "captured_at": "2026-03-27T17:37:46Z",
+    "note": "smoke validation pass",
+    "source": "cli_one_tap",
+    "status": "worked"
+  },
+  "injected_lessons": {
+    "count": 0,
+    "items": []
+  },
+  "invocation_envelope": {
+    "actor_id": "recursive-skill-loop",
+    "auto_apply_enabled": false,
+    "auto_capture_enabled": true,
+    "idempotency_key": "3e7efdd78a4beeadd172",
+    "invocation_id": "a230020aed42f8d7",
+    "invoked_at": "2026-03-27T17:37:46Z",
+    "kill_switch_file": "",
+    "objective_hash": "d2f609990049e2df4cb881ed8525ebdb8c98a00bf14014a8a9c96a14d5865b87",
+    "rollback_required_file": "",
+    "rollout_mode": "observe_only",
+    "run_owner": "skill-graph-smoke"
+  },
+  "lesson_observations": {
+    "count": 4,
+    "top_observation_id": "observation_88823b30a568"
+  },
+  "output_summary": {
+    "duration_ms": 137,
+    "finished_at": "2026-03-27T17:37:46Z",
+    "iterations_completed": 1,
+    "stop_reason": "budget_exhausted",
+    "terminal_status": "failed",
+    "tokens_used": 51
+  },
+  "profile_id": "interview-deep-interview",
+  "run_id": "run_20260327T173746076847Z_933bc1_94f7eaba",
+  "schema_version": "1.0",
+  "scope_profile": "interview",
+  "scope_skill": "interview/deep-interview"
+}

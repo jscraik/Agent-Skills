@@ -1,0 +1,78 @@
+{
+  "candidate_lessons": {
+    "count": 3,
+    "top_candidate_id": "candidate_a266a8f1925b"
+  },
+  "capture_id": "d74495ebbc733808",
+  "confidence": {
+    "bucket": "medium",
+    "calibration_bucket": "C2_medium_confidence",
+    "inputs": {
+      "evidence_completeness": 0.8,
+      "feedback_signal": 1.0,
+      "feedback_status": "worked",
+      "iterations_observed": 4,
+      "non_regression_signal": 1.0,
+      "quality_uplift_signal": 1.0,
+      "runtime_gate_signal": 0.0,
+      "stop_reason": "evaluator_conflict",
+      "terminal_status": "escalated"
+    },
+    "quality_uplift": 0.26,
+    "schema_version": "1.0",
+    "score": 0.68
+  },
+  "created_at": "2026-03-27T17:23:39Z",
+  "evidence": {
+    "completeness": {
+      "checks": true,
+      "events": true,
+      "logs": false,
+      "score": 0.8,
+      "session_signals": true,
+      "traces": true
+    },
+    "evidence_packet_id": "d1d4468d51a503c6",
+    "evidence_packet_path": "evidence_packet.json"
+  },
+  "feedback": {
+    "captured_at": "2026-03-27T17:23:39Z",
+    "note": "smoke validation pass",
+    "source": "cli_one_tap",
+    "status": "worked"
+  },
+  "injected_lessons": {
+    "count": 0,
+    "items": []
+  },
+  "invocation_envelope": {
+    "actor_id": "recursive-skill-loop",
+    "auto_apply_enabled": false,
+    "auto_capture_enabled": true,
+    "idempotency_key": "8f8dc4cb8cf9146639a5",
+    "invocation_id": "2fde18ebd88072e3",
+    "invoked_at": "2026-03-27T17:23:39Z",
+    "kill_switch_file": "",
+    "objective_hash": "a667f40182071335a24a6f1261c3371865e0cc37c5a2075354d9c20f886f9461",
+    "rollback_required_file": "",
+    "rollout_mode": "observe_only",
+    "run_owner": "skill-graph-smoke"
+  },
+  "lesson_observations": {
+    "count": 3,
+    "top_observation_id": "observation_eee80df945f9"
+  },
+  "output_summary": {
+    "duration_ms": 41,
+    "finished_at": "2026-03-27T17:23:39Z",
+    "iterations_completed": 4,
+    "stop_reason": "evaluator_conflict",
+    "terminal_status": "escalated",
+    "tokens_used": 574
+  },
+  "profile_id": "github-greptile-greploop",
+  "run_id": "run_20260327T172339869049Z_5eb661_8753e4b9",
+  "schema_version": "1.0",
+  "scope_profile": "github",
+  "scope_skill": "github/greptile/greploop"
+}

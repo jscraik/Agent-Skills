@@ -1,0 +1,78 @@
+{
+  "candidate_lessons": {
+    "count": 3,
+    "top_candidate_id": "candidate_5e339812c805"
+  },
+  "capture_id": "6ef2f984b241ca41",
+  "confidence": {
+    "bucket": "medium",
+    "calibration_bucket": "C2_medium_confidence",
+    "inputs": {
+      "evidence_completeness": 0.8,
+      "feedback_signal": 1.0,
+      "feedback_status": "worked",
+      "iterations_observed": 4,
+      "non_regression_signal": 1.0,
+      "quality_uplift_signal": 1.0,
+      "runtime_gate_signal": 0.0,
+      "stop_reason": "budget_exhausted",
+      "terminal_status": "failed"
+    },
+    "quality_uplift": 0.249,
+    "schema_version": "1.0",
+    "score": 0.68
+  },
+  "created_at": "2026-03-27T17:23:37Z",
+  "evidence": {
+    "completeness": {
+      "checks": true,
+      "events": true,
+      "logs": false,
+      "score": 0.8,
+      "session_signals": true,
+      "traces": true
+    },
+    "evidence_packet_id": "db781530d9ad9b91",
+    "evidence_packet_path": "evidence_packet.json"
+  },
+  "feedback": {
+    "captured_at": "2026-03-27T17:23:37Z",
+    "note": "smoke validation pass",
+    "source": "cli_one_tap",
+    "status": "worked"
+  },
+  "injected_lessons": {
+    "count": 0,
+    "items": []
+  },
+  "invocation_envelope": {
+    "actor_id": "recursive-skill-loop",
+    "auto_apply_enabled": false,
+    "auto_capture_enabled": true,
+    "idempotency_key": "a1b6cd25aa676374a779",
+    "invocation_id": "e57c55fe56ce1793",
+    "invoked_at": "2026-03-27T17:23:37Z",
+    "kill_switch_file": "",
+    "objective_hash": "8a1a34c409b9745094e6705fe13d6b59e89dce75125c733e2b870cd24fc9904b",
+    "rollback_required_file": "",
+    "rollout_mode": "observe_only",
+    "run_owner": "skill-graph-smoke"
+  },
+  "lesson_observations": {
+    "count": 4,
+    "top_observation_id": "observation_dda46201c945"
+  },
+  "output_summary": {
+    "duration_ms": 40,
+    "finished_at": "2026-03-27T17:23:37Z",
+    "iterations_completed": 4,
+    "stop_reason": "budget_exhausted",
+    "terminal_status": "failed",
+    "tokens_used": 744
+  },
+  "profile_id": "frontend-ui-frontend-ui-design",
+  "run_id": "run_20260327T172337458496Z_03f80a_8745d70f",
+  "schema_version": "1.0",
+  "scope_profile": "frontend",
+  "scope_skill": "frontend/ui/frontend-ui-design"
+}

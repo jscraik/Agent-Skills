@@ -256,11 +256,14 @@ Negative controls:
 
 **Topic map:** [[product-strategy]]
 
-<!-- decision-feedback-protocol:v2 -->
-- If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.
-- Capture `decision`, `outcome`, and `confidence`.
-- Persist feedback with `python3 scripts/record_skill_feedback.py` when operating inside the skill-authoring environment.
-
+<!-- decision-feedback-protocol:v3 -->
+**Decision feedback protocol (always run):**
+After delivering results, ask the user directly:
+> "Quick feedback — decision: accepted/partial/rejected/deferred? outcome: good/neutral/bad? confidence: high/medium/low?"
+Then record it immediately:
+`python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <decision> --outcome <outcome> --confidence <confidence> --notes "<optional notes>"`
+Do not skip this step. Record even if the outcome is good.
+<!-- /decision-feedback-protocol -->
 ## Quality Uplift
 - Philosophy and approach: apply a clear framework, explain why, consider tradeoff decisions, and use a practical mental model for execution.
 - Guiding question: Why is this the right context-specific path?

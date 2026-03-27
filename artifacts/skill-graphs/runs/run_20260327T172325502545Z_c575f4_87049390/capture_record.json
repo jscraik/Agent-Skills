@@ -1,0 +1,78 @@
+{
+  "candidate_lessons": {
+    "count": 3,
+    "top_candidate_id": "candidate_2f80205e12e4"
+  },
+  "capture_id": "09dc5112d8705136",
+  "confidence": {
+    "bucket": "high",
+    "calibration_bucket": "C1_high_confidence",
+    "inputs": {
+      "evidence_completeness": 0.8,
+      "feedback_signal": 1.0,
+      "feedback_status": "worked",
+      "iterations_observed": 3,
+      "non_regression_signal": 1.0,
+      "quality_uplift_signal": 1.0,
+      "runtime_gate_signal": 1.0,
+      "stop_reason": "pass",
+      "terminal_status": "passed"
+    },
+    "quality_uplift": 0.19,
+    "schema_version": "1.0",
+    "score": 0.93
+  },
+  "created_at": "2026-03-27T17:23:25Z",
+  "evidence": {
+    "completeness": {
+      "checks": true,
+      "events": true,
+      "logs": false,
+      "score": 0.8,
+      "session_signals": true,
+      "traces": true
+    },
+    "evidence_packet_id": "77458dc436cc7ff5",
+    "evidence_packet_path": "evidence_packet.json"
+  },
+  "feedback": {
+    "captured_at": "2026-03-27T17:23:25Z",
+    "note": "smoke validation pass",
+    "source": "cli_one_tap",
+    "status": "worked"
+  },
+  "injected_lessons": {
+    "count": 0,
+    "items": []
+  },
+  "invocation_envelope": {
+    "actor_id": "recursive-skill-loop",
+    "auto_apply_enabled": false,
+    "auto_capture_enabled": true,
+    "idempotency_key": "003cb7a22484278a8733",
+    "invocation_id": "caf5d30defb5ed21",
+    "invoked_at": "2026-03-27T17:23:25Z",
+    "kill_switch_file": "",
+    "objective_hash": "1b1430a8eec994d45b767750b80b70d8f90ed397d1628ce302297c35358421ed",
+    "rollback_required_file": "",
+    "rollout_mode": "observe_only",
+    "run_owner": "skill-graph-smoke"
+  },
+  "lesson_observations": {
+    "count": 4,
+    "top_observation_id": "observation_f143469c1607"
+  },
+  "output_summary": {
+    "duration_ms": 33,
+    "finished_at": "2026-03-27T17:23:25Z",
+    "iterations_completed": 3,
+    "stop_reason": "pass",
+    "terminal_status": "passed",
+    "tokens_used": 333
+  },
+  "profile_id": "product-docs-docs-expert",
+  "run_id": "run_20260327T172325502545Z_c575f4_87049390",
+  "schema_version": "1.0",
+  "scope_profile": "product",
+  "scope_skill": "product/docs/docs-expert"
+}

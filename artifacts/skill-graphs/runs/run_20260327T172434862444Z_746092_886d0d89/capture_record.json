@@ -1,0 +1,78 @@
+{
+  "candidate_lessons": {
+    "count": 3,
+    "top_candidate_id": "candidate_647a1528656d"
+  },
+  "capture_id": "a6fca0a29c3a3437",
+  "confidence": {
+    "bucket": "medium",
+    "calibration_bucket": "C2_medium_confidence",
+    "inputs": {
+      "evidence_completeness": 0.8,
+      "feedback_signal": 1.0,
+      "feedback_status": "worked",
+      "iterations_observed": 1,
+      "non_regression_signal": 1.0,
+      "quality_uplift_signal": 1.0,
+      "runtime_gate_signal": 0.0,
+      "stop_reason": "evaluator_conflict",
+      "terminal_status": "escalated"
+    },
+    "quality_uplift": 0.05,
+    "schema_version": "1.0",
+    "score": 0.68
+  },
+  "created_at": "2026-03-27T17:24:34Z",
+  "evidence": {
+    "completeness": {
+      "checks": true,
+      "events": true,
+      "logs": false,
+      "score": 0.8,
+      "session_signals": true,
+      "traces": true
+    },
+    "evidence_packet_id": "f8577d08ee773663",
+    "evidence_packet_path": "evidence_packet.json"
+  },
+  "feedback": {
+    "captured_at": "2026-03-27T17:24:34Z",
+    "note": "smoke validation pass",
+    "source": "cli_one_tap",
+    "status": "worked"
+  },
+  "injected_lessons": {
+    "count": 0,
+    "items": []
+  },
+  "invocation_envelope": {
+    "actor_id": "recursive-skill-loop",
+    "auto_apply_enabled": false,
+    "auto_capture_enabled": true,
+    "idempotency_key": "3bac26d724f01e0abfac",
+    "invocation_id": "9b14c9c8ca55dcc5",
+    "invoked_at": "2026-03-27T17:24:34Z",
+    "kill_switch_file": "",
+    "objective_hash": "a25938a418b15a20c3c8a0855faeb838d0f814b0f8a9d50ddafe2ba4d0b5b234",
+    "rollback_required_file": "",
+    "rollout_mode": "observe_only",
+    "run_owner": "skill-graph-smoke"
+  },
+  "lesson_observations": {
+    "count": 5,
+    "top_observation_id": "observation_aee59ef86015"
+  },
+  "output_summary": {
+    "duration_ms": 74,
+    "finished_at": "2026-03-27T17:24:34Z",
+    "iterations_completed": 1,
+    "stop_reason": "evaluator_conflict",
+    "terminal_status": "escalated",
+    "tokens_used": 60
+  },
+  "profile_id": "product-content-youtube-hooks-scripts",
+  "run_id": "run_20260327T172434862444Z_746092_886d0d89",
+  "schema_version": "1.0",
+  "scope_profile": "product",
+  "scope_skill": "product/content/youtube-hooks-scripts"
+}

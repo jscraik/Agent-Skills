@@ -1,0 +1,78 @@
+{
+  "candidate_lessons": {
+    "count": 3,
+    "top_candidate_id": "candidate_117acc0fef07"
+  },
+  "capture_id": "5f2e36655d890c35",
+  "confidence": {
+    "bucket": "medium",
+    "calibration_bucket": "C2_medium_confidence",
+    "inputs": {
+      "evidence_completeness": 0.8,
+      "feedback_signal": 1.0,
+      "feedback_status": "worked",
+      "iterations_observed": 1,
+      "non_regression_signal": 1.0,
+      "quality_uplift_signal": 1.0,
+      "runtime_gate_signal": 0.0,
+      "stop_reason": "budget_exhausted",
+      "terminal_status": "failed"
+    },
+    "quality_uplift": 0.05,
+    "schema_version": "1.0",
+    "score": 0.68
+  },
+  "created_at": "2026-03-27T17:38:00Z",
+  "evidence": {
+    "completeness": {
+      "checks": true,
+      "events": true,
+      "logs": false,
+      "score": 0.8,
+      "session_signals": true,
+      "traces": true
+    },
+    "evidence_packet_id": "ceb8a46cf75fc9d3",
+    "evidence_packet_path": "evidence_packet.json"
+  },
+  "feedback": {
+    "captured_at": "2026-03-27T17:38:00Z",
+    "note": "smoke validation pass",
+    "source": "cli_one_tap",
+    "status": "worked"
+  },
+  "injected_lessons": {
+    "count": 0,
+    "items": []
+  },
+  "invocation_envelope": {
+    "actor_id": "recursive-skill-loop",
+    "auto_apply_enabled": false,
+    "auto_capture_enabled": true,
+    "idempotency_key": "356b3f72a7a41685d91a",
+    "invocation_id": "563c594f3127fdc8",
+    "invoked_at": "2026-03-27T17:38:00Z",
+    "kill_switch_file": "",
+    "objective_hash": "976c663a2d2a1ffb65b95447459dade068d7902d3a57bab8404cf3865bf4d07c",
+    "rollback_required_file": "",
+    "rollout_mode": "observe_only",
+    "run_owner": "skill-graph-smoke"
+  },
+  "lesson_observations": {
+    "count": 4,
+    "top_observation_id": "observation_c5bfa93a53f9"
+  },
+  "output_summary": {
+    "duration_ms": 162,
+    "finished_at": "2026-03-27T17:38:00Z",
+    "iterations_completed": 1,
+    "stop_reason": "budget_exhausted",
+    "terminal_status": "failed",
+    "tokens_used": 53
+  },
+  "profile_id": "utilities-using-git-worktrees",
+  "run_id": "run_20260327T173800600754Z_0931d0_952c4ba0",
+  "schema_version": "1.0",
+  "scope_profile": "utilities",
+  "scope_skill": "utilities/using-git-worktrees"
+}

@@ -244,7 +244,14 @@ For direct scaffold requests, provide plan + implementation in one pass. Default
 
 **Topic map:** [[backend-platform]]
 
-<!-- decision-feedback-protocol:v2 -->
+<!-- decision-feedback-protocol:v3 -->
+**Decision feedback protocol (always run):**
+After delivering results, ask the user directly:
+> "Quick feedback — decision: accepted/partial/rejected/deferred? outcome: good/neutral/bad? confidence: high/medium/low?"
+Then record it immediately:
+`python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <decision> --outcome <outcome> --confidence <confidence> --notes "<optional notes>"`
+Do not skip this step. Record even if the outcome is good.
+<!-- /decision-feedback-protocol -->
 ## Decision Quality Feedback
 
 For non-trivial outcomes, collect AskQuestion parity feedback (`request_user_input`) before closing:

@@ -1,0 +1,78 @@
+{
+  "candidate_lessons": {
+    "count": 3,
+    "top_candidate_id": "candidate_63765230939c"
+  },
+  "capture_id": "7bc821d38a3e75d2",
+  "confidence": {
+    "bucket": "high",
+    "calibration_bucket": "C1_high_confidence",
+    "inputs": {
+      "evidence_completeness": 0.8,
+      "feedback_signal": 1.0,
+      "feedback_status": "worked",
+      "iterations_observed": 2,
+      "non_regression_signal": 1.0,
+      "quality_uplift_signal": 1.0,
+      "runtime_gate_signal": 1.0,
+      "stop_reason": "pass",
+      "terminal_status": "passed"
+    },
+    "quality_uplift": 0.12,
+    "schema_version": "1.0",
+    "score": 0.93
+  },
+  "created_at": "2026-03-27T17:23:33Z",
+  "evidence": {
+    "completeness": {
+      "checks": true,
+      "events": true,
+      "logs": false,
+      "score": 0.8,
+      "session_signals": true,
+      "traces": true
+    },
+    "evidence_packet_id": "d7d0827d38e3ba7e",
+    "evidence_packet_path": "evidence_packet.json"
+  },
+  "feedback": {
+    "captured_at": "2026-03-27T17:23:33Z",
+    "note": "smoke validation pass",
+    "source": "cli_one_tap",
+    "status": "worked"
+  },
+  "injected_lessons": {
+    "count": 0,
+    "items": []
+  },
+  "invocation_envelope": {
+    "actor_id": "recursive-skill-loop",
+    "auto_apply_enabled": false,
+    "auto_capture_enabled": true,
+    "idempotency_key": "aa5d6f53664ba04cdc5a",
+    "invocation_id": "162330787d7e7fb2",
+    "invoked_at": "2026-03-27T17:23:33Z",
+    "kill_switch_file": "",
+    "objective_hash": "0c7d256f0300e7806eb0dee20b167a39780faa73581276573b84754890062bbc",
+    "rollback_required_file": "",
+    "rollout_mode": "observe_only",
+    "run_owner": "skill-graph-smoke"
+  },
+  "lesson_observations": {
+    "count": 3,
+    "top_observation_id": "observation_e1a7a6a09259"
+  },
+  "output_summary": {
+    "duration_ms": 37,
+    "finished_at": "2026-03-27T17:23:33Z",
+    "iterations_completed": 2,
+    "stop_reason": "pass",
+    "terminal_status": "passed",
+    "tokens_used": 162
+  },
+  "profile_id": "auth-best-practices",
+  "run_id": "run_20260327T172333417695Z_83cb58_872f8147",
+  "schema_version": "1.0",
+  "scope_profile": "auth",
+  "scope_skill": "auth/best-practices"
+}

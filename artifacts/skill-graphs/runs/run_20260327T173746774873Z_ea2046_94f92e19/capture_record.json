@@ -1,0 +1,78 @@
+{
+  "candidate_lessons": {
+    "count": 3,
+    "top_candidate_id": "candidate_dedff4024f0a"
+  },
+  "capture_id": "d5504c7bff924fec",
+  "confidence": {
+    "bucket": "medium",
+    "calibration_bucket": "C2_medium_confidence",
+    "inputs": {
+      "evidence_completeness": 0.8,
+      "feedback_signal": 1.0,
+      "feedback_status": "worked",
+      "iterations_observed": 1,
+      "non_regression_signal": 1.0,
+      "quality_uplift_signal": 1.0,
+      "runtime_gate_signal": 0.0,
+      "stop_reason": "budget_exhausted",
+      "terminal_status": "failed"
+    },
+    "quality_uplift": 0.05,
+    "schema_version": "1.0",
+    "score": 0.68
+  },
+  "created_at": "2026-03-27T17:37:46Z",
+  "evidence": {
+    "completeness": {
+      "checks": true,
+      "events": true,
+      "logs": false,
+      "score": 0.8,
+      "session_signals": true,
+      "traces": true
+    },
+    "evidence_packet_id": "daf268d5b954e9d4",
+    "evidence_packet_path": "evidence_packet.json"
+  },
+  "feedback": {
+    "captured_at": "2026-03-27T17:37:46Z",
+    "note": "smoke validation pass",
+    "source": "cli_one_tap",
+    "status": "worked"
+  },
+  "injected_lessons": {
+    "count": 0,
+    "items": []
+  },
+  "invocation_envelope": {
+    "actor_id": "recursive-skill-loop",
+    "auto_apply_enabled": false,
+    "auto_capture_enabled": true,
+    "idempotency_key": "324945185ec21eb555fb",
+    "invocation_id": "d8cfacadfe3772e3",
+    "invoked_at": "2026-03-27T17:37:46Z",
+    "kill_switch_file": "",
+    "objective_hash": "3cd548714fb7233335f11aaaf81ac8f6626c2fae183b378f270ac53d88831525",
+    "rollback_required_file": "",
+    "rollout_mode": "observe_only",
+    "run_owner": "skill-graph-smoke"
+  },
+  "lesson_observations": {
+    "count": 6,
+    "top_observation_id": "observation_b9c420137e5a"
+  },
+  "output_summary": {
+    "duration_ms": 131,
+    "finished_at": "2026-03-27T17:37:46Z",
+    "iterations_completed": 1,
+    "stop_reason": "budget_exhausted",
+    "terminal_status": "failed",
+    "tokens_used": 65
+  },
+  "profile_id": "product-content-video-transcript-downloader",
+  "run_id": "run_20260327T173746774873Z_ea2046_94f92e19",
+  "schema_version": "1.0",
+  "scope_profile": "product",
+  "scope_skill": "product/content/video-transcript-downloader"
+}

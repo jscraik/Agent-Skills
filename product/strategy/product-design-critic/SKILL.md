@@ -307,12 +307,14 @@ This skill succeeds when the next design decision becomes clearer, more opiniona
 | [[visual-explainer]] | Present critique findings as a visual explainer page |
 
 **Topic map:** [[product-strategy]]
-<!-- decision-feedback-protocol:v2 -->
-- Question timing is runtime-owned. Do not make the skill itself decide when feedback is asked.
-- If post-run feedback capture is enabled, emit a non-blocking `post_run_feedback` event via Codex `request_user_input` after result delivery.
-- Capture `decision`, `outcome`, and `confidence`.
-- Persist feedback with `python3 scripts/record_skill_feedback.py`.
-
+<!-- decision-feedback-protocol:v3 -->
+**Decision feedback protocol (always run):**
+After delivering results, ask the user directly:
+> "Quick feedback — decision: accepted/partial/rejected/deferred? outcome: good/neutral/bad? confidence: high/medium/low?"
+Then record it immediately:
+`python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <decision> --outcome <outcome> --confidence <confidence> --notes "<optional notes>"`
+Do not skip this step. Record even if the outcome is good.
+<!-- /decision-feedback-protocol -->
 ## Gotchas
 - None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.
 

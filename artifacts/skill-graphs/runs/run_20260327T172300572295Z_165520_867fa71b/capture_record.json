@@ -1,0 +1,78 @@
+{
+  "candidate_lessons": {
+    "count": 3,
+    "top_candidate_id": "candidate_cc8f758c48f3"
+  },
+  "capture_id": "4536e63297f57ccc",
+  "confidence": {
+    "bucket": "medium",
+    "calibration_bucket": "C2_medium_confidence",
+    "inputs": {
+      "evidence_completeness": 0.8,
+      "feedback_signal": 1.0,
+      "feedback_status": "worked",
+      "iterations_observed": 1,
+      "non_regression_signal": 1.0,
+      "quality_uplift_signal": 1.0,
+      "runtime_gate_signal": 0.0,
+      "stop_reason": "evaluator_conflict",
+      "terminal_status": "escalated"
+    },
+    "quality_uplift": 0.05,
+    "schema_version": "1.0",
+    "score": 0.68
+  },
+  "created_at": "2026-03-27T17:23:00Z",
+  "evidence": {
+    "completeness": {
+      "checks": true,
+      "events": true,
+      "logs": false,
+      "score": 0.8,
+      "session_signals": true,
+      "traces": true
+    },
+    "evidence_packet_id": "c26b0f4030cac09c",
+    "evidence_packet_path": "evidence_packet.json"
+  },
+  "feedback": {
+    "captured_at": "2026-03-27T17:23:00Z",
+    "note": "smoke validation pass",
+    "source": "cli_one_tap",
+    "status": "worked"
+  },
+  "injected_lessons": {
+    "count": 0,
+    "items": []
+  },
+  "invocation_envelope": {
+    "actor_id": "recursive-skill-loop",
+    "auto_apply_enabled": false,
+    "auto_capture_enabled": true,
+    "idempotency_key": "1efdb212d108855aa5be",
+    "invocation_id": "2bd66f5fce3da872",
+    "invoked_at": "2026-03-27T17:23:00Z",
+    "kill_switch_file": "",
+    "objective_hash": "32c02a0f8f2707e333c4f39be84850479344cd3487d021ddb20443eccc33a2a0",
+    "rollback_required_file": "",
+    "rollout_mode": "observe_only",
+    "run_owner": "skill-graph-smoke"
+  },
+  "lesson_observations": {
+    "count": 4,
+    "top_observation_id": "observation_bc98e636c3a9"
+  },
+  "output_summary": {
+    "duration_ms": 15,
+    "finished_at": "2026-03-27T17:23:00Z",
+    "iterations_completed": 1,
+    "stop_reason": "evaluator_conflict",
+    "terminal_status": "escalated",
+    "tokens_used": 54
+  },
+  "profile_id": "utilities-systematic-debugging",
+  "run_id": "run_20260327T172300572295Z_165520_867fa71b",
+  "schema_version": "1.0",
+  "scope_profile": "utilities",
+  "scope_skill": "utilities/systematic-debugging"
+}

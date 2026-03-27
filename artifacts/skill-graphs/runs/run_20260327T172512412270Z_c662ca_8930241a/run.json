@@ -1,0 +1,135 @@
+{
+  "budget": {
+    "max_elapsed_ms": 120000,
+    "max_iterations": 4,
+    "max_tokens": 12000
+  },
+  "counterfactual_uplift": {
+    "analysis_method_version": "counterfactual_uplift_v1",
+    "auto_apply_decision": "insufficient_data",
+    "auto_apply_thresholds": {
+      "ci_lower_min": 0.02,
+      "delta_min": 0.05,
+      "min_pairs_per_skill": 20,
+      "min_pairs_total": 100
+    },
+    "computed_at": "2026-03-27T17:25:12Z",
+    "control_outcome": null,
+    "control_pool_size": 8,
+    "control_sample_size": 0,
+    "decision_window_days": 7,
+    "match_quality_metrics": {
+      "max_allowed_unmatched_rate": 0.15,
+      "required_covariates": [
+        "skill_id",
+        "task_profile",
+        "recency_bucket"
+      ],
+      "smd": {
+        "recency_bucket": 0.0,
+        "skill_id": 0.0,
+        "task_profile": 0.0
+      },
+      "treated_unmatched_count": 0,
+      "treated_unmatched_rate": 0.0,
+      "valid": true
+    },
+    "pair_counts_by_skill": {
+      "github/gh-fix-ci": 0
+    },
+    "promotion_decision": "insufficient_data",
+    "promotion_thresholds": {
+      "ci_lower_min": 0.0,
+      "delta_min": 0.03,
+      "min_pairs_per_skill": 10,
+      "min_pairs_total": 40
+    },
+    "sample_size": 0,
+    "schema_version": "1.0",
+    "treated_sample_size": 0,
+    "treatment_outcome": null,
+    "uplift_confidence_band": {
+      "level": 0.95,
+      "lower": null,
+      "method": "normal_approx_95",
+      "upper": null
+    },
+    "uplift_delta": null
+  },
+  "counters": {
+    "consecutive_passes": 1,
+    "iterations_completed": 2,
+    "tokens_used": 157
+  },
+  "created_by": "recursive-skill-loop",
+  "delegation": {
+    "agentic_cost_benefit": {
+      "ai_process_minutes": 20.0,
+      "human_baseline_minutes": 60.0,
+      "probability_of_success": 0.68,
+      "roi_signal": "positive",
+      "time_delta_minutes": 40.0
+    },
+    "mode": "manual",
+    "rationale": "Manual mode required: high-impact side effects need explicit human sign-off before applying candidate lessons."
+  },
+  "duration_ms": 103,
+  "finished_at": "2026-03-27T17:25:12Z",
+  "idempotency_key": "795a6d8fe5b7e9d00f30",
+  "injected_lessons": [],
+  "injection_summary": {
+    "lessons_file": "/Users/jamiecraik/dev/Agent-Skills/artifacts/skill-graphs/lessons/canonical-lessons.jsonl",
+    "low_confidence_threshold": 0.6,
+    "retrieved_count": 0,
+    "selected_count": 0,
+    "selected_lesson_ids": [],
+    "suppressed_by_controls": false
+  },
+  "invocation_id": "a7fa484268bf4a4b",
+  "kill_switch_file": "",
+  "lock_path": "/Users/jamiecraik/dev/Agent-Skills/artifacts/skill-graphs/runs/.locks/github-gh-fix-ci.lock",
+  "objective_hash": "a29a7a6688ae6b420263b5fa496613f1223f8d0a146c039c927648948812fb41",
+  "profile_id": "github-gh-fix-ci",
+  "prompt_hash": "a29a7a6688ae6b420263b5fa496613f1223f8d0a146c039c927648948812fb41",
+  "retrieved_lessons": [],
+  "rollback_required_file": "",
+  "run_blocker": null,
+  "run_id": "run_20260327T172512412270Z_c662ca_8930241a",
+  "run_owner": "skill-graph-smoke",
+  "runtime_controls": {
+    "auto_apply_enabled": false,
+    "auto_capture_enabled": true,
+    "effective_rollout_mode": "observe_only",
+    "feedback_prompt_enabled": false,
+    "feedback_prompt_source": "disabled",
+    "interactive_terminal": false,
+    "paths": {
+      "controls_dir": "/Users/jamiecraik/dev/Agent-Skills/artifacts/skill-graphs/controls",
+      "global_auto_apply_switch_file": "/Users/jamiecraik/dev/Agent-Skills/artifacts/skill-graphs/controls/auto_apply.disabled",
+      "global_auto_capture_switch_file": "/Users/jamiecraik/dev/Agent-Skills/artifacts/skill-graphs/controls/auto_capture.disabled",
+      "rollout_mode_file": "/Users/jamiecraik/dev/Agent-Skills/artifacts/skill-graphs/controls/rollout-mode.txt",
+      "skill_auto_apply_switch_file": "/Users/jamiecraik/dev/Agent-Skills/artifacts/skill-graphs/controls/skills/github/gh-fix-ci/auto_apply.disabled",
+      "skill_auto_capture_switch_file": "/Users/jamiecraik/dev/Agent-Skills/artifacts/skill-graphs/controls/skills/github/gh-fix-ci/auto_capture.disabled",
+      "skill_controls_dir": "/Users/jamiecraik/dev/Agent-Skills/artifacts/skill-graphs/controls/skills"
+    },
+    "reasons": [
+      "rollout_mode_observe_only_disables_auto_apply"
+    ],
+    "rollout_mode": "observe_only",
+    "schema_version": "1.0",
+    "uplift_auto_apply_decision": "insufficient_data",
+    "uplift_gate_mode": "observe",
+    "uplift_promotion_decision": "insufficient_data"
+  },
+  "schema_version": "1.0",
+  "scope_profile": "github",
+  "scope_skill": "github/gh-fix-ci",
+  "started_at": "2026-03-27T17:25:12Z",
+  "stop_reason": "pass",
+  "terminal_status": "passed",
+  "versions": {
+    "evaluator_version": "v1",
+    "persona_set_id": "default-v1",
+    "rubric_version": "2026-02-26"
+  }
+}

@@ -1,0 +1,78 @@
+{
+  "candidate_lessons": {
+    "count": 3,
+    "top_candidate_id": "candidate_499be9d46507"
+  },
+  "capture_id": "b9f7429dddda7c08",
+  "confidence": {
+    "bucket": "medium",
+    "calibration_bucket": "C2_medium_confidence",
+    "inputs": {
+      "evidence_completeness": 0.8,
+      "feedback_signal": 1.0,
+      "feedback_status": "worked",
+      "iterations_observed": 1,
+      "non_regression_signal": 1.0,
+      "quality_uplift_signal": 1.0,
+      "runtime_gate_signal": 0.0,
+      "stop_reason": "budget_exhausted",
+      "terminal_status": "failed"
+    },
+    "quality_uplift": 0.05,
+    "schema_version": "1.0",
+    "score": 0.68
+  },
+  "created_at": "2026-03-27T17:37:45Z",
+  "evidence": {
+    "completeness": {
+      "checks": true,
+      "events": true,
+      "logs": false,
+      "score": 0.8,
+      "session_signals": true,
+      "traces": true
+    },
+    "evidence_packet_id": "084fa08ce1dd0576",
+    "evidence_packet_path": "evidence_packet.json"
+  },
+  "feedback": {
+    "captured_at": "2026-03-27T17:37:45Z",
+    "note": "smoke validation pass",
+    "source": "cli_one_tap",
+    "status": "worked"
+  },
+  "injected_lessons": {
+    "count": 0,
+    "items": []
+  },
+  "invocation_envelope": {
+    "actor_id": "recursive-skill-loop",
+    "auto_apply_enabled": false,
+    "auto_capture_enabled": true,
+    "idempotency_key": "a5853bcb0690e6e3c22c",
+    "invocation_id": "70d803a45b7ca5bd",
+    "invoked_at": "2026-03-27T17:37:45Z",
+    "kill_switch_file": "",
+    "objective_hash": "9ddd95ec82c0db94a61a18953253fe7d29ead1c98a5e4b631cbe1d6e9aef82c8",
+    "rollback_required_file": "",
+    "rollout_mode": "observe_only",
+    "run_owner": "skill-graph-smoke"
+  },
+  "lesson_observations": {
+    "count": 4,
+    "top_observation_id": "observation_f8c86ae544a6"
+  },
+  "output_summary": {
+    "duration_ms": 129,
+    "finished_at": "2026-03-27T17:37:45Z",
+    "iterations_completed": 1,
+    "stop_reason": "budget_exhausted",
+    "terminal_status": "failed",
+    "tokens_used": 51
+  },
+  "profile_id": "github-greptile-check-pr",
+  "run_id": "run_20260327T173745057848Z_877860_94f35015",
+  "schema_version": "1.0",
+  "scope_profile": "github",
+  "scope_skill": "github/greptile/check-pr"
+}
