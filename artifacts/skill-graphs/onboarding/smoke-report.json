@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-03-27T17:25:47Z",
+  "generated_at": "2026-03-27T17:38:01Z",
   "repo_root": ".",
   "dry_run": false,
   "profile_count": 72,
@@ -12,200 +12,200 @@
     {
       "profile_path": "auth/best-practices/references/task-profile.json",
       "status": "accepted",
-      "execution_status": "passed",
-      "exit_code": 0,
-      "run_id": "run_20260327T172526174091Z_83cb58_89698147",
-      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T172526174091Z_83cb58_89698147",
+      "execution_status": "nonzero_exit",
+      "exit_code": 2,
+      "run_id": "run_20260327T173735139702Z_83cb58_94c68147",
+      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T173735139702Z_83cb58_94c68147",
       "missing_artifacts": [],
       "artifact_details": {
-        "terminal_status": "passed",
-        "stop_reason": "pass",
+        "terminal_status": "failed",
+        "stop_reason": "budget_exhausted",
         "evidence_completeness": 0.8
       },
       "stdout_tail": [
-        "[recursive-loop] run_id=run_20260327T172526174091Z_83cb58_89698147",
-        "[recursive-loop] status=passed stop_reason=pass",
-        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T172526174091Z_83cb58_89698147"
+        "[recursive-loop] run_id=run_20260327T173735139702Z_83cb58_94c68147",
+        "[recursive-loop] status=failed stop_reason=budget_exhausted",
+        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T173735139702Z_83cb58_94c68147"
       ],
       "stderr_tail": []
     },
     {
       "profile_path": "auth/create-auth/references/task-profile.json",
       "status": "accepted",
-      "execution_status": "passed",
-      "exit_code": 0,
-      "run_id": "run_20260327T172526466134Z_0f1548_896a68e1",
-      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T172526466134Z_0f1548_896a68e1",
+      "execution_status": "nonzero_exit",
+      "exit_code": 2,
+      "run_id": "run_20260327T173735633793Z_0f1548_94c768e1",
+      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T173735633793Z_0f1548_94c768e1",
       "missing_artifacts": [],
       "artifact_details": {
-        "terminal_status": "passed",
-        "stop_reason": "pass",
+        "terminal_status": "failed",
+        "stop_reason": "budget_exhausted",
         "evidence_completeness": 0.8
       },
       "stdout_tail": [
-        "[recursive-loop] run_id=run_20260327T172526466134Z_0f1548_896a68e1",
-        "[recursive-loop] status=passed stop_reason=pass",
-        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T172526466134Z_0f1548_896a68e1"
+        "[recursive-loop] run_id=run_20260327T173735633793Z_0f1548_94c768e1",
+        "[recursive-loop] status=failed stop_reason=budget_exhausted",
+        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T173735633793Z_0f1548_94c768e1"
       ],
       "stderr_tail": []
     },
     {
       "profile_path": "backend/backend-engineer/references/task-profile.json",
       "status": "accepted",
-      "execution_status": "passed",
-      "exit_code": 0,
-      "run_id": "run_20260327T172526747676Z_181f31_896b0397",
-      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T172526747676Z_181f31_896b0397",
+      "execution_status": "nonzero_exit",
+      "exit_code": 2,
+      "run_id": "run_20260327T173736028052Z_181f31_94c80397",
+      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T173736028052Z_181f31_94c80397",
       "missing_artifacts": [],
       "artifact_details": {
-        "terminal_status": "passed",
-        "stop_reason": "pass",
+        "terminal_status": "failed",
+        "stop_reason": "budget_exhausted",
         "evidence_completeness": 0.8
       },
       "stdout_tail": [
-        "[recursive-loop] run_id=run_20260327T172526747676Z_181f31_896b0397",
-        "[recursive-loop] status=passed stop_reason=pass",
-        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T172526747676Z_181f31_896b0397"
+        "[recursive-loop] run_id=run_20260327T173736028052Z_181f31_94c80397",
+        "[recursive-loop] status=failed stop_reason=budget_exhausted",
+        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T173736028052Z_181f31_94c80397"
       ],
       "stderr_tail": []
     },
     {
       "profile_path": "backend/cli-spec/references/task-profile.json",
       "status": "accepted",
-      "execution_status": "passed",
-      "exit_code": 0,
-      "run_id": "run_20260327T172527030623Z_2f18b9_896d0f9b",
-      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T172527030623Z_2f18b9_896d0f9b",
+      "execution_status": "nonzero_exit",
+      "exit_code": 2,
+      "run_id": "run_20260327T173736389760Z_2f18b9_94c90f9b",
+      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T173736389760Z_2f18b9_94c90f9b",
       "missing_artifacts": [],
       "artifact_details": {
-        "terminal_status": "passed",
-        "stop_reason": "pass",
+        "terminal_status": "failed",
+        "stop_reason": "budget_exhausted",
         "evidence_completeness": 0.8
       },
       "stdout_tail": [
-        "[recursive-loop] run_id=run_20260327T172527030623Z_2f18b9_896d0f9b",
-        "[recursive-loop] status=passed stop_reason=pass",
-        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T172527030623Z_2f18b9_896d0f9b"
+        "[recursive-loop] run_id=run_20260327T173736389760Z_2f18b9_94c90f9b",
+        "[recursive-loop] status=failed stop_reason=budget_exhausted",
+        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T173736389760Z_2f18b9_94c90f9b"
       ],
       "stderr_tail": []
     },
     {
       "profile_path": "backend/mcp-builder/references/task-profile.json",
       "status": "accepted",
-      "execution_status": "passed",
-      "exit_code": 0,
-      "run_id": "run_20260327T172527315479Z_e3a8be_896f54d5",
-      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T172527315479Z_e3a8be_896f54d5",
+      "execution_status": "nonzero_exit",
+      "exit_code": 2,
+      "run_id": "run_20260327T173736727559Z_e3a8be_94ca54d5",
+      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T173736727559Z_e3a8be_94ca54d5",
       "missing_artifacts": [],
       "artifact_details": {
-        "terminal_status": "passed",
-        "stop_reason": "pass",
+        "terminal_status": "failed",
+        "stop_reason": "budget_exhausted",
         "evidence_completeness": 0.8
       },
       "stdout_tail": [
-        "[recursive-loop] run_id=run_20260327T172527315479Z_e3a8be_896f54d5",
-        "[recursive-loop] status=passed stop_reason=pass",
-        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T172527315479Z_e3a8be_896f54d5"
+        "[recursive-loop] run_id=run_20260327T173736727559Z_e3a8be_94ca54d5",
+        "[recursive-loop] status=failed stop_reason=budget_exhausted",
+        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T173736727559Z_e3a8be_94ca54d5"
       ],
       "stderr_tail": []
     },
     {
       "profile_path": "backend/workers-mcp/references/task-profile.json",
       "status": "accepted",
-      "execution_status": "passed",
-      "exit_code": 0,
-      "run_id": "run_20260327T172527601655Z_cf5698_8970c964",
-      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T172527601655Z_cf5698_8970c964",
+      "execution_status": "nonzero_exit",
+      "exit_code": 2,
+      "run_id": "run_20260327T173737107449Z_cf5698_94ccc964",
+      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T173737107449Z_cf5698_94ccc964",
       "missing_artifacts": [],
       "artifact_details": {
-        "terminal_status": "passed",
-        "stop_reason": "pass",
+        "terminal_status": "failed",
+        "stop_reason": "budget_exhausted",
         "evidence_completeness": 0.8
       },
       "stdout_tail": [
-        "[recursive-loop] run_id=run_20260327T172527601655Z_cf5698_8970c964",
-        "[recursive-loop] status=passed stop_reason=pass",
-        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T172527601655Z_cf5698_8970c964"
+        "[recursive-loop] run_id=run_20260327T173737107449Z_cf5698_94ccc964",
+        "[recursive-loop] status=failed stop_reason=budget_exhausted",
+        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T173737107449Z_cf5698_94ccc964"
       ],
       "stderr_tail": []
     },
     {
       "profile_path": "frontend/graphics/better-icons/references/task-profile.json",
       "status": "accepted",
-      "execution_status": "passed",
-      "exit_code": 0,
-      "run_id": "run_20260327T172527883858Z_4b6975_8971c136",
-      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T172527883858Z_4b6975_8971c136",
+      "execution_status": "nonzero_exit",
+      "exit_code": 2,
+      "run_id": "run_20260327T173737463305Z_4b6975_94cdc136",
+      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T173737463305Z_4b6975_94cdc136",
       "missing_artifacts": [],
       "artifact_details": {
-        "terminal_status": "passed",
-        "stop_reason": "pass",
+        "terminal_status": "failed",
+        "stop_reason": "budget_exhausted",
         "evidence_completeness": 0.8
       },
       "stdout_tail": [
-        "[recursive-loop] run_id=run_20260327T172527883858Z_4b6975_8971c136",
-        "[recursive-loop] status=passed stop_reason=pass",
-        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T172527883858Z_4b6975_8971c136"
+        "[recursive-loop] run_id=run_20260327T173737463305Z_4b6975_94cdc136",
+        "[recursive-loop] status=failed stop_reason=budget_exhausted",
+        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T173737463305Z_4b6975_94cdc136"
       ],
       "stderr_tail": []
     },
     {
       "profile_path": "frontend/graphics/favicon-generator/references/task-profile.json",
       "status": "accepted",
-      "execution_status": "passed",
-      "exit_code": 0,
-      "run_id": "run_20260327T172528180296Z_2d867d_89728055",
-      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T172528180296Z_2d867d_89728055",
+      "execution_status": "nonzero_exit",
+      "exit_code": 2,
+      "run_id": "run_20260327T173737938117Z_2d867d_94cf8055",
+      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T173737938117Z_2d867d_94cf8055",
       "missing_artifacts": [],
       "artifact_details": {
-        "terminal_status": "passed",
-        "stop_reason": "pass",
+        "terminal_status": "failed",
+        "stop_reason": "budget_exhausted",
         "evidence_completeness": 0.8
       },
       "stdout_tail": [
-        "[recursive-loop] run_id=run_20260327T172528180296Z_2d867d_89728055",
-        "[recursive-loop] status=passed stop_reason=pass",
-        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T172528180296Z_2d867d_89728055"
+        "[recursive-loop] run_id=run_20260327T173737938117Z_2d867d_94cf8055",
+        "[recursive-loop] status=failed stop_reason=budget_exhausted",
+        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T173737938117Z_2d867d_94cf8055"
       ],
       "stderr_tail": []
     },
     {
       "profile_path": "frontend/graphics/imagegen/references/task-profile.json",
       "status": "accepted",
-      "execution_status": "passed",
-      "exit_code": 0,
-      "run_id": "run_20260327T172528473638Z_149de9_89735b45",
-      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T172528473638Z_149de9_89735b45",
+      "execution_status": "nonzero_exit",
+      "exit_code": 2,
+      "run_id": "run_20260327T173738350212Z_149de9_94d05b45",
+      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T173738350212Z_149de9_94d05b45",
       "missing_artifacts": [],
       "artifact_details": {
-        "terminal_status": "passed",
-        "stop_reason": "pass",
+        "terminal_status": "failed",
+        "stop_reason": "budget_exhausted",
         "evidence_completeness": 0.8
       },
       "stdout_tail": [
-        "[recursive-loop] run_id=run_20260327T172528473638Z_149de9_89735b45",
-        "[recursive-loop] status=passed stop_reason=pass",
-        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T172528473638Z_149de9_89735b45"
+        "[recursive-loop] run_id=run_20260327T173738350212Z_149de9_94d05b45",
+        "[recursive-loop] status=failed stop_reason=budget_exhausted",
+        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T173738350212Z_149de9_94d05b45"
       ],
       "stderr_tail": []
     },
     {
       "profile_path": "frontend/graphics/nano-banana-builder/references/task-profile.json",
       "status": "accepted",
-      "execution_status": "passed",
-      "exit_code": 0,
-      "run_id": "run_20260327T172528764767Z_e235c9_8974374c",
-      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T172528764767Z_e235c9_8974374c",
+      "execution_status": "nonzero_exit",
+      "exit_code": 2,
+      "run_id": "run_20260327T173738720135Z_e235c9_94d1374c",
+      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T173738720135Z_e235c9_94d1374c",
       "missing_artifacts": [],
       "artifact_details": {
-        "terminal_status": "passed",
-        "stop_reason": "pass",
+        "terminal_status": "failed",
+        "stop_reason": "budget_exhausted",
         "evidence_completeness": 0.8
       },
       "stdout_tail": [
-        "[recursive-loop] run_id=run_20260327T172528764767Z_e235c9_8974374c",
-        "[recursive-loop] status=passed stop_reason=pass",
-        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T172528764767Z_e235c9_8974374c"
+        "[recursive-loop] run_id=run_20260327T173738720135Z_e235c9_94d1374c",
+        "[recursive-loop] status=failed stop_reason=budget_exhausted",
+        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T173738720135Z_e235c9_94d1374c"
       ],
       "stderr_tail": []
     },
@@ -214,8 +214,8 @@
       "status": "accepted",
       "execution_status": "nonzero_exit",
       "exit_code": 3,
-      "run_id": "run_20260327T172529060029Z_b28040_8976d212",
-      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T172529060029Z_b28040_8976d212",
+      "run_id": "run_20260327T173739102788Z_b28040_94d3d212",
+      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T173739102788Z_b28040_94d3d212",
       "missing_artifacts": [],
       "artifact_details": {
         "terminal_status": "escalated",
@@ -223,109 +223,109 @@
         "evidence_completeness": 0.8
       },
       "stdout_tail": [
-        "[recursive-loop] run_id=run_20260327T172529060029Z_b28040_8976d212",
+        "[recursive-loop] run_id=run_20260327T173739102788Z_b28040_94d3d212",
         "[recursive-loop] status=escalated stop_reason=evaluator_conflict",
-        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T172529060029Z_b28040_8976d212"
+        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T173739102788Z_b28040_94d3d212"
       ],
       "stderr_tail": []
     },
     {
       "profile_path": "frontend/graphics/sora/references/task-profile.json",
       "status": "accepted",
-      "execution_status": "passed",
-      "exit_code": 0,
-      "run_id": "run_20260327T172529369312Z_222c87_8978f999",
-      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T172529369312Z_222c87_8978f999",
+      "execution_status": "nonzero_exit",
+      "exit_code": 2,
+      "run_id": "run_20260327T173739487229Z_222c87_94d5f999",
+      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T173739487229Z_222c87_94d5f999",
       "missing_artifacts": [],
       "artifact_details": {
-        "terminal_status": "passed",
-        "stop_reason": "pass",
+        "terminal_status": "failed",
+        "stop_reason": "budget_exhausted",
         "evidence_completeness": 0.8
       },
       "stdout_tail": [
-        "[recursive-loop] run_id=run_20260327T172529369312Z_222c87_8978f999",
-        "[recursive-loop] status=passed stop_reason=pass",
-        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T172529369312Z_222c87_8978f999"
+        "[recursive-loop] run_id=run_20260327T173739487229Z_222c87_94d5f999",
+        "[recursive-loop] status=failed stop_reason=budget_exhausted",
+        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T173739487229Z_222c87_94d5f999"
       ],
       "stderr_tail": []
     },
     {
       "profile_path": "frontend/graphics/threejs-builder/references/task-profile.json",
       "status": "accepted",
-      "execution_status": "passed",
-      "exit_code": 0,
-      "run_id": "run_20260327T172529658523Z_3348cf_897a20ad",
-      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T172529658523Z_3348cf_897a20ad",
+      "execution_status": "nonzero_exit",
+      "exit_code": 2,
+      "run_id": "run_20260327T173739864149Z_3348cf_94d620ad",
+      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T173739864149Z_3348cf_94d620ad",
       "missing_artifacts": [],
       "artifact_details": {
-        "terminal_status": "passed",
-        "stop_reason": "pass",
+        "terminal_status": "failed",
+        "stop_reason": "budget_exhausted",
         "evidence_completeness": 0.8
       },
       "stdout_tail": [
-        "[recursive-loop] run_id=run_20260327T172529658523Z_3348cf_897a20ad",
-        "[recursive-loop] status=passed stop_reason=pass",
-        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T172529658523Z_3348cf_897a20ad"
+        "[recursive-loop] run_id=run_20260327T173739864149Z_3348cf_94d620ad",
+        "[recursive-loop] status=failed stop_reason=budget_exhausted",
+        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T173739864149Z_3348cf_94d620ad"
       ],
       "stderr_tail": []
     },
     {
       "profile_path": "frontend/stitch-react-components/references/task-profile.json",
       "status": "accepted",
-      "execution_status": "passed",
-      "exit_code": 0,
-      "run_id": "run_20260327T172529951210Z_962f03_897dbc5b",
-      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T172529951210Z_962f03_897dbc5b",
+      "execution_status": "nonzero_exit",
+      "exit_code": 2,
+      "run_id": "run_20260327T173740373351Z_962f03_94ddbc5b",
+      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T173740373351Z_962f03_94ddbc5b",
       "missing_artifacts": [],
       "artifact_details": {
-        "terminal_status": "passed",
-        "stop_reason": "pass",
+        "terminal_status": "failed",
+        "stop_reason": "budget_exhausted",
         "evidence_completeness": 0.8
       },
       "stdout_tail": [
-        "[recursive-loop] run_id=run_20260327T172529951210Z_962f03_897dbc5b",
-        "[recursive-loop] status=passed stop_reason=pass",
-        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T172529951210Z_962f03_897dbc5b"
+        "[recursive-loop] run_id=run_20260327T173740373351Z_962f03_94ddbc5b",
+        "[recursive-loop] status=failed stop_reason=budget_exhausted",
+        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T173740373351Z_962f03_94ddbc5b"
       ],
       "stderr_tail": []
     },
     {
       "profile_path": "frontend/tools/agentation/references/task-profile.json",
       "status": "accepted",
-      "execution_status": "passed",
-      "exit_code": 0,
-      "run_id": "run_20260327T172530238281Z_ce9bdc_897e8981",
-      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T172530238281Z_ce9bdc_897e8981",
+      "execution_status": "nonzero_exit",
+      "exit_code": 2,
+      "run_id": "run_20260327T173740742935Z_ce9bdc_94e08981",
+      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T173740742935Z_ce9bdc_94e08981",
       "missing_artifacts": [],
       "artifact_details": {
-        "terminal_status": "passed",
-        "stop_reason": "pass",
+        "terminal_status": "failed",
+        "stop_reason": "budget_exhausted",
         "evidence_completeness": 0.8
       },
       "stdout_tail": [
-        "[recursive-loop] run_id=run_20260327T172530238281Z_ce9bdc_897e8981",
-        "[recursive-loop] status=passed stop_reason=pass",
-        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T172530238281Z_ce9bdc_897e8981"
+        "[recursive-loop] run_id=run_20260327T173740742935Z_ce9bdc_94e08981",
+        "[recursive-loop] status=failed stop_reason=budget_exhausted",
+        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T173740742935Z_ce9bdc_94e08981"
       ],
       "stderr_tail": []
     },
     {
       "profile_path": "frontend/tools/figma/references/task-profile.json",
       "status": "accepted",
-      "execution_status": "passed",
-      "exit_code": 0,
-      "run_id": "run_20260327T172530535179Z_c4d764_897fcad4",
-      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T172530535179Z_c4d764_897fcad4",
+      "execution_status": "nonzero_exit",
+      "exit_code": 2,
+      "run_id": "run_20260327T173741099479Z_c4d764_94e1cad4",
+      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T173741099479Z_c4d764_94e1cad4",
       "missing_artifacts": [],
       "artifact_details": {
-        "terminal_status": "passed",
-        "stop_reason": "pass",
+        "terminal_status": "failed",
+        "stop_reason": "budget_exhausted",
         "evidence_completeness": 0.8
       },
       "stdout_tail": [
-        "[recursive-loop] run_id=run_20260327T172530535179Z_c4d764_897fcad4",
-        "[recursive-loop] status=passed stop_reason=pass",
-        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T172530535179Z_c4d764_897fcad4"
+        "[recursive-loop] run_id=run_20260327T173741099479Z_c4d764_94e1cad4",
+        "[recursive-loop] status=failed stop_reason=budget_exhausted",
+        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T173741099479Z_c4d764_94e1cad4"
       ],
       "stderr_tail": []
     },
@@ -334,8 +334,8 @@
       "status": "accepted",
       "execution_status": "nonzero_exit",
       "exit_code": 3,
-      "run_id": "run_20260327T172530829690Z_4171eb_89804991",
-      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T172530829690Z_4171eb_89804991",
+      "run_id": "run_20260327T173741425676Z_4171eb_94e24991",
+      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T173741425676Z_4171eb_94e24991",
       "missing_artifacts": [],
       "artifact_details": {
         "terminal_status": "escalated",
@@ -343,29 +343,29 @@
         "evidence_completeness": 0.8
       },
       "stdout_tail": [
-        "[recursive-loop] run_id=run_20260327T172530829690Z_4171eb_89804991",
+        "[recursive-loop] run_id=run_20260327T173741425676Z_4171eb_94e24991",
         "[recursive-loop] status=escalated stop_reason=evaluator_conflict",
-        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T172530829690Z_4171eb_89804991"
+        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T173741425676Z_4171eb_94e24991"
       ],
       "stderr_tail": []
     },
     {
       "profile_path": "frontend/ui/design-system/references/task-profile.json",
       "status": "accepted",
-      "execution_status": "passed",
-      "exit_code": 0,
-      "run_id": "run_20260327T172531131914Z_8ce78f_8981a4ea",
-      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T172531131914Z_8ce78f_8981a4ea",
+      "execution_status": "nonzero_exit",
+      "exit_code": 2,
+      "run_id": "run_20260327T173741762149Z_8ce78f_94e3a4ea",
+      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T173741762149Z_8ce78f_94e3a4ea",
       "missing_artifacts": [],
       "artifact_details": {
-        "terminal_status": "passed",
-        "stop_reason": "pass",
+        "terminal_status": "failed",
+        "stop_reason": "budget_exhausted",
         "evidence_completeness": 0.8
       },
       "stdout_tail": [
-        "[recursive-loop] run_id=run_20260327T172531131914Z_8ce78f_8981a4ea",
-        "[recursive-loop] status=passed stop_reason=pass",
-        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T172531131914Z_8ce78f_8981a4ea"
+        "[recursive-loop] run_id=run_20260327T173741762149Z_8ce78f_94e3a4ea",
+        "[recursive-loop] status=failed stop_reason=budget_exhausted",
+        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T173741762149Z_8ce78f_94e3a4ea"
       ],
       "stderr_tail": []
     },
@@ -374,8 +374,8 @@
       "status": "accepted",
       "execution_status": "nonzero_exit",
       "exit_code": 2,
-      "run_id": "run_20260327T172531432010Z_03f80a_8982d70f",
-      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T172531432010Z_03f80a_8982d70f",
+      "run_id": "run_20260327T173742087542Z_03f80a_94e4d70f",
+      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T173742087542Z_03f80a_94e4d70f",
       "missing_artifacts": [],
       "artifact_details": {
         "terminal_status": "failed",
@@ -383,149 +383,149 @@
         "evidence_completeness": 0.8
       },
       "stdout_tail": [
-        "[recursive-loop] run_id=run_20260327T172531432010Z_03f80a_8982d70f",
+        "[recursive-loop] run_id=run_20260327T173742087542Z_03f80a_94e4d70f",
         "[recursive-loop] status=failed stop_reason=budget_exhausted",
-        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T172531432010Z_03f80a_8982d70f"
+        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T173742087542Z_03f80a_94e4d70f"
       ],
       "stderr_tail": []
     },
     {
       "profile_path": "frontend/ui/react-ui-patterns/references/task-profile.json",
       "status": "accepted",
-      "execution_status": "passed",
-      "exit_code": 0,
-      "run_id": "run_20260327T172531725075Z_303d47_8983d5d1",
-      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T172531725075Z_303d47_8983d5d1",
+      "execution_status": "nonzero_exit",
+      "exit_code": 2,
+      "run_id": "run_20260327T173742421279Z_303d47_94e6d5d1",
+      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T173742421279Z_303d47_94e6d5d1",
       "missing_artifacts": [],
       "artifact_details": {
-        "terminal_status": "passed",
-        "stop_reason": "pass",
+        "terminal_status": "failed",
+        "stop_reason": "budget_exhausted",
         "evidence_completeness": 0.8
       },
       "stdout_tail": [
-        "[recursive-loop] run_id=run_20260327T172531725075Z_303d47_8983d5d1",
-        "[recursive-loop] status=passed stop_reason=pass",
-        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T172531725075Z_303d47_8983d5d1"
+        "[recursive-loop] run_id=run_20260327T173742421279Z_303d47_94e6d5d1",
+        "[recursive-loop] status=failed stop_reason=budget_exhausted",
+        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T173742421279Z_303d47_94e6d5d1"
       ],
       "stderr_tail": []
     },
     {
       "profile_path": "frontend/ui/remotion/references/task-profile.json",
       "status": "accepted",
-      "execution_status": "passed",
-      "exit_code": 0,
-      "run_id": "run_20260327T172532022301Z_575a9b_8984ac5a",
-      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T172532022301Z_575a9b_8984ac5a",
+      "execution_status": "nonzero_exit",
+      "exit_code": 2,
+      "run_id": "run_20260327T173742743331Z_575a9b_94e7ac5a",
+      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T173742743331Z_575a9b_94e7ac5a",
       "missing_artifacts": [],
       "artifact_details": {
-        "terminal_status": "passed",
-        "stop_reason": "pass",
+        "terminal_status": "failed",
+        "stop_reason": "budget_exhausted",
         "evidence_completeness": 0.8
       },
       "stdout_tail": [
-        "[recursive-loop] run_id=run_20260327T172532022301Z_575a9b_8984ac5a",
-        "[recursive-loop] status=passed stop_reason=pass",
-        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T172532022301Z_575a9b_8984ac5a"
+        "[recursive-loop] run_id=run_20260327T173742743331Z_575a9b_94e7ac5a",
+        "[recursive-loop] status=failed stop_reason=budget_exhausted",
+        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T173742743331Z_575a9b_94e7ac5a"
       ],
       "stderr_tail": []
     },
     {
       "profile_path": "frontend/ui/shadcn-ui/references/task-profile.json",
       "status": "accepted",
-      "execution_status": "passed",
-      "exit_code": 0,
-      "run_id": "run_20260327T172532311521Z_fe0a77_8985bc5b",
-      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T172532311521Z_fe0a77_8985bc5b",
+      "execution_status": "nonzero_exit",
+      "exit_code": 2,
+      "run_id": "run_20260327T173743062183Z_fe0a77_94e8bc5b",
+      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T173743062183Z_fe0a77_94e8bc5b",
       "missing_artifacts": [],
       "artifact_details": {
-        "terminal_status": "passed",
-        "stop_reason": "pass",
+        "terminal_status": "failed",
+        "stop_reason": "budget_exhausted",
         "evidence_completeness": 0.8
       },
       "stdout_tail": [
-        "[recursive-loop] run_id=run_20260327T172532311521Z_fe0a77_8985bc5b",
-        "[recursive-loop] status=passed stop_reason=pass",
-        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T172532311521Z_fe0a77_8985bc5b"
+        "[recursive-loop] run_id=run_20260327T173743062183Z_fe0a77_94e8bc5b",
+        "[recursive-loop] status=failed stop_reason=budget_exhausted",
+        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T173743062183Z_fe0a77_94e8bc5b"
       ],
       "stderr_tail": []
     },
     {
       "profile_path": "frontend/ui/stitch-remotion/references/task-profile.json",
       "status": "accepted",
-      "execution_status": "passed",
-      "exit_code": 0,
-      "run_id": "run_20260327T172532607405Z_9b6cb0_8986c2b4",
-      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T172532607405Z_9b6cb0_8986c2b4",
+      "execution_status": "nonzero_exit",
+      "exit_code": 2,
+      "run_id": "run_20260327T173743383334Z_9b6cb0_94e9c2b4",
+      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T173743383334Z_9b6cb0_94e9c2b4",
       "missing_artifacts": [],
       "artifact_details": {
-        "terminal_status": "passed",
-        "stop_reason": "pass",
+        "terminal_status": "failed",
+        "stop_reason": "budget_exhausted",
         "evidence_completeness": 0.8
       },
       "stdout_tail": [
-        "[recursive-loop] run_id=run_20260327T172532607405Z_9b6cb0_8986c2b4",
-        "[recursive-loop] status=passed stop_reason=pass",
-        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T172532607405Z_9b6cb0_8986c2b4"
+        "[recursive-loop] run_id=run_20260327T173743383334Z_9b6cb0_94e9c2b4",
+        "[recursive-loop] status=failed stop_reason=budget_exhausted",
+        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T173743383334Z_9b6cb0_94e9c2b4"
       ],
       "stderr_tail": []
     },
     {
       "profile_path": "frontend/ui/ui-ux-creative-coding/references/task-profile.json",
       "status": "accepted",
-      "execution_status": "passed",
-      "exit_code": 0,
-      "run_id": "run_20260327T172532909804Z_ce4394_89876720",
-      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T172532909804Z_ce4394_89876720",
+      "execution_status": "nonzero_exit",
+      "exit_code": 2,
+      "run_id": "run_20260327T173743729128Z_ce4394_94ea6720",
+      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T173743729128Z_ce4394_94ea6720",
       "missing_artifacts": [],
       "artifact_details": {
-        "terminal_status": "passed",
-        "stop_reason": "pass",
+        "terminal_status": "failed",
+        "stop_reason": "budget_exhausted",
         "evidence_completeness": 0.8
       },
       "stdout_tail": [
-        "[recursive-loop] run_id=run_20260327T172532909804Z_ce4394_89876720",
-        "[recursive-loop] status=passed stop_reason=pass",
-        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T172532909804Z_ce4394_89876720"
+        "[recursive-loop] run_id=run_20260327T173743729128Z_ce4394_94ea6720",
+        "[recursive-loop] status=failed stop_reason=budget_exhausted",
+        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T173743729128Z_ce4394_94ea6720"
       ],
       "stderr_tail": []
     },
     {
       "profile_path": "frontend/ui/ui-visual-regression/references/task-profile.json",
       "status": "accepted",
-      "execution_status": "passed",
-      "exit_code": 0,
-      "run_id": "run_20260327T172533213772Z_7ac853_8989a2ab",
-      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T172533213772Z_7ac853_8989a2ab",
+      "execution_status": "nonzero_exit",
+      "exit_code": 2,
+      "run_id": "run_20260327T173744070713Z_7ac853_94eda2ab",
+      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T173744070713Z_7ac853_94eda2ab",
       "missing_artifacts": [],
       "artifact_details": {
-        "terminal_status": "passed",
-        "stop_reason": "pass",
+        "terminal_status": "failed",
+        "stop_reason": "budget_exhausted",
         "evidence_completeness": 0.8
       },
       "stdout_tail": [
-        "[recursive-loop] run_id=run_20260327T172533213772Z_7ac853_8989a2ab",
-        "[recursive-loop] status=passed stop_reason=pass",
-        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T172533213772Z_7ac853_8989a2ab"
+        "[recursive-loop] run_id=run_20260327T173744070713Z_7ac853_94eda2ab",
+        "[recursive-loop] status=failed stop_reason=budget_exhausted",
+        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T173744070713Z_7ac853_94eda2ab"
       ],
       "stderr_tail": []
     },
     {
       "profile_path": "github/gh-fix-ci/references/task-profile.json",
       "status": "accepted",
-      "execution_status": "passed",
-      "exit_code": 0,
-      "run_id": "run_20260327T172533521273Z_c662ca_898a241a",
-      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T172533521273Z_c662ca_898a241a",
+      "execution_status": "nonzero_exit",
+      "exit_code": 2,
+      "run_id": "run_20260327T173744395503Z_c662ca_94ef241a",
+      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T173744395503Z_c662ca_94ef241a",
       "missing_artifacts": [],
       "artifact_details": {
-        "terminal_status": "passed",
-        "stop_reason": "pass",
+        "terminal_status": "failed",
+        "stop_reason": "budget_exhausted",
         "evidence_completeness": 0.8
       },
       "stdout_tail": [
-        "[recursive-loop] run_id=run_20260327T172533521273Z_c662ca_898a241a",
-        "[recursive-loop] status=passed stop_reason=pass",
-        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T172533521273Z_c662ca_898a241a"
+        "[recursive-loop] run_id=run_20260327T173744395503Z_c662ca_94ef241a",
+        "[recursive-loop] status=failed stop_reason=budget_exhausted",
+        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T173744395503Z_c662ca_94ef241a"
       ],
       "stderr_tail": []
     },
@@ -534,8 +534,8 @@
       "status": "accepted",
       "execution_status": "nonzero_exit",
       "exit_code": 3,
-      "run_id": "run_20260327T172533817871Z_cf7062_898c4d07",
-      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T172533817871Z_cf7062_898c4d07",
+      "run_id": "run_20260327T173744727092Z_cf7062_94f14d07",
+      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T173744727092Z_cf7062_94f14d07",
       "missing_artifacts": [],
       "artifact_details": {
         "terminal_status": "escalated",
@@ -543,29 +543,29 @@
         "evidence_completeness": 0.8
       },
       "stdout_tail": [
-        "[recursive-loop] run_id=run_20260327T172533817871Z_cf7062_898c4d07",
+        "[recursive-loop] run_id=run_20260327T173744727092Z_cf7062_94f14d07",
         "[recursive-loop] status=escalated stop_reason=evaluator_conflict",
-        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T172533817871Z_cf7062_898c4d07"
+        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T173744727092Z_cf7062_94f14d07"
       ],
       "stderr_tail": []
     },
     {
       "profile_path": "github/greptile/check-pr/references/task-profile.json",
       "status": "accepted",
-      "execution_status": "passed",
-      "exit_code": 0,
-      "run_id": "run_20260327T172534108680Z_877860_898e5015",
-      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T172534108680Z_877860_898e5015",
+      "execution_status": "nonzero_exit",
+      "exit_code": 2,
+      "run_id": "run_20260327T173745057848Z_877860_94f35015",
+      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T173745057848Z_877860_94f35015",
       "missing_artifacts": [],
       "artifact_details": {
-        "terminal_status": "passed",
-        "stop_reason": "pass",
+        "terminal_status": "failed",
+        "stop_reason": "budget_exhausted",
         "evidence_completeness": 0.8
       },
       "stdout_tail": [
-        "[recursive-loop] run_id=run_20260327T172534108680Z_877860_898e5015",
-        "[recursive-loop] status=passed stop_reason=pass",
-        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T172534108680Z_877860_898e5015"
+        "[recursive-loop] run_id=run_20260327T173745057848Z_877860_94f35015",
+        "[recursive-loop] status=failed stop_reason=budget_exhausted",
+        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T173745057848Z_877860_94f35015"
       ],
       "stderr_tail": []
     },
@@ -573,99 +573,99 @@
       "profile_path": "github/greptile/greploop/references/task-profile.json",
       "status": "accepted",
       "execution_status": "nonzero_exit",
-      "exit_code": 3,
-      "run_id": "run_20260327T172534410749Z_5eb661_898fe4b9",
-      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T172534410749Z_5eb661_898fe4b9",
+      "exit_code": 2,
+      "run_id": "run_20260327T173745370425Z_5eb661_94f4e4b9",
+      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T173745370425Z_5eb661_94f4e4b9",
       "missing_artifacts": [],
       "artifact_details": {
-        "terminal_status": "escalated",
-        "stop_reason": "evaluator_conflict",
+        "terminal_status": "failed",
+        "stop_reason": "budget_exhausted",
         "evidence_completeness": 0.8
       },
       "stdout_tail": [
-        "[recursive-loop] run_id=run_20260327T172534410749Z_5eb661_898fe4b9",
-        "[recursive-loop] status=escalated stop_reason=evaluator_conflict",
-        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T172534410749Z_5eb661_898fe4b9"
+        "[recursive-loop] run_id=run_20260327T173745370425Z_5eb661_94f4e4b9",
+        "[recursive-loop] status=failed stop_reason=budget_exhausted",
+        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T173745370425Z_5eb661_94f4e4b9"
       ],
       "stderr_tail": []
     },
     {
       "profile_path": "interview/architecture-interview/references/task-profile.json",
       "status": "accepted",
-      "execution_status": "passed",
-      "exit_code": 0,
-      "run_id": "run_20260327T172534720120Z_c17dfe_8990c78d",
-      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T172534720120Z_c17dfe_8990c78d",
+      "execution_status": "nonzero_exit",
+      "exit_code": 2,
+      "run_id": "run_20260327T173745689673Z_c17dfe_94f5c78d",
+      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T173745689673Z_c17dfe_94f5c78d",
       "missing_artifacts": [],
       "artifact_details": {
-        "terminal_status": "passed",
-        "stop_reason": "pass",
+        "terminal_status": "failed",
+        "stop_reason": "budget_exhausted",
         "evidence_completeness": 0.8
       },
       "stdout_tail": [
-        "[recursive-loop] run_id=run_20260327T172534720120Z_c17dfe_8990c78d",
-        "[recursive-loop] status=passed stop_reason=pass",
-        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T172534720120Z_c17dfe_8990c78d"
+        "[recursive-loop] run_id=run_20260327T173745689673Z_c17dfe_94f5c78d",
+        "[recursive-loop] status=failed stop_reason=budget_exhausted",
+        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T173745689673Z_c17dfe_94f5c78d"
       ],
       "stderr_tail": []
     },
     {
       "profile_path": "interview/deep-interview/references/task-profile.json",
       "status": "accepted",
-      "execution_status": "passed",
-      "exit_code": 0,
-      "run_id": "run_20260327T172535018324Z_933bc1_8991eaba",
-      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T172535018324Z_933bc1_8991eaba",
+      "execution_status": "nonzero_exit",
+      "exit_code": 2,
+      "run_id": "run_20260327T173746076847Z_933bc1_94f7eaba",
+      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T173746076847Z_933bc1_94f7eaba",
       "missing_artifacts": [],
       "artifact_details": {
-        "terminal_status": "passed",
-        "stop_reason": "pass",
+        "terminal_status": "failed",
+        "stop_reason": "budget_exhausted",
         "evidence_completeness": 0.8
       },
       "stdout_tail": [
-        "[recursive-loop] run_id=run_20260327T172535018324Z_933bc1_8991eaba",
-        "[recursive-loop] status=passed stop_reason=pass",
-        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T172535018324Z_933bc1_8991eaba"
+        "[recursive-loop] run_id=run_20260327T173746076847Z_933bc1_94f7eaba",
+        "[recursive-loop] status=failed stop_reason=budget_exhausted",
+        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T173746076847Z_933bc1_94f7eaba"
       ],
       "stderr_tail": []
     },
     {
       "profile_path": "interview/interview-me/references/task-profile.json",
       "status": "accepted",
-      "execution_status": "passed",
-      "exit_code": 0,
-      "run_id": "run_20260327T172535317221Z_1996cc_89922d6e",
-      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T172535317221Z_1996cc_89922d6e",
+      "execution_status": "nonzero_exit",
+      "exit_code": 2,
+      "run_id": "run_20260327T173746455041Z_1996cc_94f82d6e",
+      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T173746455041Z_1996cc_94f82d6e",
       "missing_artifacts": [],
       "artifact_details": {
-        "terminal_status": "passed",
-        "stop_reason": "pass",
+        "terminal_status": "failed",
+        "stop_reason": "budget_exhausted",
         "evidence_completeness": 0.8
       },
       "stdout_tail": [
-        "[recursive-loop] run_id=run_20260327T172535317221Z_1996cc_89922d6e",
-        "[recursive-loop] status=passed stop_reason=pass",
-        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T172535317221Z_1996cc_89922d6e"
+        "[recursive-loop] run_id=run_20260327T173746455041Z_1996cc_94f82d6e",
+        "[recursive-loop] status=failed stop_reason=budget_exhausted",
+        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T173746455041Z_1996cc_94f82d6e"
       ],
       "stderr_tail": []
     },
     {
       "profile_path": "product/content/video-transcript-downloader/references/task-profile.json",
       "status": "accepted",
-      "execution_status": "passed",
-      "exit_code": 0,
-      "run_id": "run_20260327T172535612321Z_ea2046_89932e19",
-      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T172535612321Z_ea2046_89932e19",
+      "execution_status": "nonzero_exit",
+      "exit_code": 2,
+      "run_id": "run_20260327T173746774873Z_ea2046_94f92e19",
+      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T173746774873Z_ea2046_94f92e19",
       "missing_artifacts": [],
       "artifact_details": {
-        "terminal_status": "passed",
-        "stop_reason": "pass",
+        "terminal_status": "failed",
+        "stop_reason": "budget_exhausted",
         "evidence_completeness": 0.8
       },
       "stdout_tail": [
-        "[recursive-loop] run_id=run_20260327T172535612321Z_ea2046_89932e19",
-        "[recursive-loop] status=passed stop_reason=pass",
-        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T172535612321Z_ea2046_89932e19"
+        "[recursive-loop] run_id=run_20260327T173746774873Z_ea2046_94f92e19",
+        "[recursive-loop] status=failed stop_reason=budget_exhausted",
+        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T173746774873Z_ea2046_94f92e19"
       ],
       "stderr_tail": []
     },
@@ -674,8 +674,8 @@
       "status": "accepted",
       "execution_status": "nonzero_exit",
       "exit_code": 3,
-      "run_id": "run_20260327T172535902068Z_746092_89940d89",
-      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T172535902068Z_746092_89940d89",
+      "run_id": "run_20260327T173747096582Z_746092_94fa0d89",
+      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T173747096582Z_746092_94fa0d89",
       "missing_artifacts": [],
       "artifact_details": {
         "terminal_status": "escalated",
@@ -683,129 +683,129 @@
         "evidence_completeness": 0.8
       },
       "stdout_tail": [
-        "[recursive-loop] run_id=run_20260327T172535902068Z_746092_89940d89",
+        "[recursive-loop] run_id=run_20260327T173747096582Z_746092_94fa0d89",
         "[recursive-loop] status=escalated stop_reason=evaluator_conflict",
-        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T172535902068Z_746092_89940d89"
+        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T173747096582Z_746092_94fa0d89"
       ],
       "stderr_tail": []
     },
     {
       "profile_path": "product/content/youtube-titles-thumbnails/references/task-profile.json",
       "status": "accepted",
-      "execution_status": "passed",
-      "exit_code": 0,
-      "run_id": "run_20260327T172536200757Z_e9f2af_89954c62",
-      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T172536200757Z_e9f2af_89954c62",
+      "execution_status": "nonzero_exit",
+      "exit_code": 2,
+      "run_id": "run_20260327T173747417480Z_e9f2af_94fc4c62",
+      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T173747417480Z_e9f2af_94fc4c62",
       "missing_artifacts": [],
       "artifact_details": {
-        "terminal_status": "passed",
-        "stop_reason": "pass",
+        "terminal_status": "failed",
+        "stop_reason": "budget_exhausted",
         "evidence_completeness": 0.8
       },
       "stdout_tail": [
-        "[recursive-loop] run_id=run_20260327T172536200757Z_e9f2af_89954c62",
-        "[recursive-loop] status=passed stop_reason=pass",
-        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T172536200757Z_e9f2af_89954c62"
+        "[recursive-loop] run_id=run_20260327T173747417480Z_e9f2af_94fc4c62",
+        "[recursive-loop] status=failed stop_reason=budget_exhausted",
+        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T173747417480Z_e9f2af_94fc4c62"
       ],
       "stderr_tail": []
     },
     {
       "profile_path": "product/docs/agents-md/references/task-profile.json",
       "status": "accepted",
-      "execution_status": "passed",
-      "exit_code": 0,
-      "run_id": "run_20260327T172536492158Z_0e961d_899631a4",
-      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T172536492158Z_0e961d_899631a4",
+      "execution_status": "nonzero_exit",
+      "exit_code": 2,
+      "run_id": "run_20260327T173747740250Z_0e961d_94fd31a4",
+      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T173747740250Z_0e961d_94fd31a4",
       "missing_artifacts": [],
       "artifact_details": {
-        "terminal_status": "passed",
-        "stop_reason": "pass",
+        "terminal_status": "failed",
+        "stop_reason": "budget_exhausted",
         "evidence_completeness": 0.8
       },
       "stdout_tail": [
-        "[recursive-loop] run_id=run_20260327T172536492158Z_0e961d_899631a4",
-        "[recursive-loop] status=passed stop_reason=pass",
-        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T172536492158Z_0e961d_899631a4"
+        "[recursive-loop] run_id=run_20260327T173747740250Z_0e961d_94fd31a4",
+        "[recursive-loop] status=failed stop_reason=budget_exhausted",
+        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T173747740250Z_0e961d_94fd31a4"
       ],
       "stderr_tail": []
     },
     {
       "profile_path": "product/docs/context7/references/task-profile.json",
       "status": "accepted",
-      "execution_status": "passed",
-      "exit_code": 0,
-      "run_id": "run_20260327T172536791228Z_48558f_899791e3",
-      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T172536791228Z_48558f_899791e3",
+      "execution_status": "nonzero_exit",
+      "exit_code": 2,
+      "run_id": "run_20260327T173748060318Z_48558f_94ff91e3",
+      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T173748060318Z_48558f_94ff91e3",
       "missing_artifacts": [],
       "artifact_details": {
-        "terminal_status": "passed",
-        "stop_reason": "pass",
+        "terminal_status": "failed",
+        "stop_reason": "budget_exhausted",
         "evidence_completeness": 0.8
       },
       "stdout_tail": [
-        "[recursive-loop] run_id=run_20260327T172536791228Z_48558f_899791e3",
-        "[recursive-loop] status=passed stop_reason=pass",
-        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T172536791228Z_48558f_899791e3"
+        "[recursive-loop] run_id=run_20260327T173748060318Z_48558f_94ff91e3",
+        "[recursive-loop] status=failed stop_reason=budget_exhausted",
+        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T173748060318Z_48558f_94ff91e3"
       ],
       "stderr_tail": []
     },
     {
       "profile_path": "product/docs/docs-expert/references/task-profile.json",
       "status": "accepted",
-      "execution_status": "passed",
-      "exit_code": 0,
-      "run_id": "run_20260327T172537079859Z_c575f4_89989390",
-      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T172537079859Z_c575f4_89989390",
+      "execution_status": "nonzero_exit",
+      "exit_code": 2,
+      "run_id": "run_20260327T173748380571Z_c575f4_95009390",
+      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T173748380571Z_c575f4_95009390",
       "missing_artifacts": [],
       "artifact_details": {
-        "terminal_status": "passed",
-        "stop_reason": "pass",
+        "terminal_status": "failed",
+        "stop_reason": "budget_exhausted",
         "evidence_completeness": 0.8
       },
       "stdout_tail": [
-        "[recursive-loop] run_id=run_20260327T172537079859Z_c575f4_89989390",
-        "[recursive-loop] status=passed stop_reason=pass",
-        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T172537079859Z_c575f4_89989390"
+        "[recursive-loop] run_id=run_20260327T173748380571Z_c575f4_95009390",
+        "[recursive-loop] status=failed stop_reason=budget_exhausted",
+        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T173748380571Z_c575f4_95009390"
       ],
       "stderr_tail": []
     },
     {
       "profile_path": "product/domain/cloudflare-deploy/references/task-profile.json",
       "status": "accepted",
-      "execution_status": "passed",
-      "exit_code": 0,
-      "run_id": "run_20260327T172537368728Z_f13e6a_899a3009",
-      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T172537368728Z_f13e6a_899a3009",
+      "execution_status": "nonzero_exit",
+      "exit_code": 2,
+      "run_id": "run_20260327T173748713556Z_f13e6a_95013009",
+      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T173748713556Z_f13e6a_95013009",
       "missing_artifacts": [],
       "artifact_details": {
-        "terminal_status": "passed",
-        "stop_reason": "pass",
+        "terminal_status": "failed",
+        "stop_reason": "budget_exhausted",
         "evidence_completeness": 0.8
       },
       "stdout_tail": [
-        "[recursive-loop] run_id=run_20260327T172537368728Z_f13e6a_899a3009",
-        "[recursive-loop] status=passed stop_reason=pass",
-        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T172537368728Z_f13e6a_899a3009"
+        "[recursive-loop] run_id=run_20260327T173748713556Z_f13e6a_95013009",
+        "[recursive-loop] status=failed stop_reason=budget_exhausted",
+        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T173748713556Z_f13e6a_95013009"
       ],
       "stderr_tail": []
     },
     {
       "profile_path": "product/domain/oak-api/references/task-profile.json",
       "status": "accepted",
-      "execution_status": "passed",
-      "exit_code": 0,
-      "run_id": "run_20260327T172537666400Z_16a7dd_899c1017",
-      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T172537666400Z_16a7dd_899c1017",
+      "execution_status": "nonzero_exit",
+      "exit_code": 2,
+      "run_id": "run_20260327T173749042292Z_16a7dd_95031017",
+      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T173749042292Z_16a7dd_95031017",
       "missing_artifacts": [],
       "artifact_details": {
-        "terminal_status": "passed",
-        "stop_reason": "pass",
+        "terminal_status": "failed",
+        "stop_reason": "budget_exhausted",
         "evidence_completeness": 0.8
       },
       "stdout_tail": [
-        "[recursive-loop] run_id=run_20260327T172537666400Z_16a7dd_899c1017",
-        "[recursive-loop] status=passed stop_reason=pass",
-        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T172537666400Z_16a7dd_899c1017"
+        "[recursive-loop] run_id=run_20260327T173749042292Z_16a7dd_95031017",
+        "[recursive-loop] status=failed stop_reason=budget_exhausted",
+        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T173749042292Z_16a7dd_95031017"
       ],
       "stderr_tail": []
     },
@@ -814,8 +814,8 @@
       "status": "accepted",
       "execution_status": "nonzero_exit",
       "exit_code": 3,
-      "run_id": "run_20260327T172537964396Z_94ca45_899d21e0",
-      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T172537964396Z_94ca45_899d21e0",
+      "run_id": "run_20260327T173749378931Z_94ca45_950421e0",
+      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T173749378931Z_94ca45_950421e0",
       "missing_artifacts": [],
       "artifact_details": {
         "terminal_status": "escalated",
@@ -823,69 +823,69 @@
         "evidence_completeness": 0.8
       },
       "stdout_tail": [
-        "[recursive-loop] run_id=run_20260327T172537964396Z_94ca45_899d21e0",
+        "[recursive-loop] run_id=run_20260327T173749378931Z_94ca45_950421e0",
         "[recursive-loop] status=escalated stop_reason=evaluator_conflict",
-        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T172537964396Z_94ca45_899d21e0"
+        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T173749378931Z_94ca45_950421e0"
       ],
       "stderr_tail": []
     },
     {
       "profile_path": "product/ops/linear/references/task-profile.json",
       "status": "accepted",
-      "execution_status": "passed",
-      "exit_code": 0,
-      "run_id": "run_20260327T172538263722Z_acf147_899eaf84",
-      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T172538263722Z_acf147_899eaf84",
+      "execution_status": "nonzero_exit",
+      "exit_code": 2,
+      "run_id": "run_20260327T173749723896Z_acf147_9506af84",
+      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T173749723896Z_acf147_9506af84",
       "missing_artifacts": [],
       "artifact_details": {
-        "terminal_status": "passed",
-        "stop_reason": "pass",
+        "terminal_status": "failed",
+        "stop_reason": "budget_exhausted",
         "evidence_completeness": 0.8
       },
       "stdout_tail": [
-        "[recursive-loop] run_id=run_20260327T172538263722Z_acf147_899eaf84",
-        "[recursive-loop] status=passed stop_reason=pass",
-        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T172538263722Z_acf147_899eaf84"
+        "[recursive-loop] run_id=run_20260327T173749723896Z_acf147_9506af84",
+        "[recursive-loop] status=failed stop_reason=budget_exhausted",
+        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T173749723896Z_acf147_9506af84"
       ],
       "stderr_tail": []
     },
     {
       "profile_path": "product/ops/release/references/task-profile.json",
       "status": "accepted",
-      "execution_status": "passed",
-      "exit_code": 0,
-      "run_id": "run_20260327T172538566226Z_affe4a_899f063a",
-      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T172538566226Z_affe4a_899f063a",
+      "execution_status": "nonzero_exit",
+      "exit_code": 2,
+      "run_id": "run_20260327T173750064181Z_affe4a_9507063a",
+      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T173750064181Z_affe4a_9507063a",
       "missing_artifacts": [],
       "artifact_details": {
-        "terminal_status": "passed",
-        "stop_reason": "pass",
+        "terminal_status": "failed",
+        "stop_reason": "budget_exhausted",
         "evidence_completeness": 0.8
       },
       "stdout_tail": [
-        "[recursive-loop] run_id=run_20260327T172538566226Z_affe4a_899f063a",
-        "[recursive-loop] status=passed stop_reason=pass",
-        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T172538566226Z_affe4a_899f063a"
+        "[recursive-loop] run_id=run_20260327T173750064181Z_affe4a_9507063a",
+        "[recursive-loop] status=failed stop_reason=budget_exhausted",
+        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T173750064181Z_affe4a_9507063a"
       ],
       "stderr_tail": []
     },
     {
       "profile_path": "product/security/security-best-practices/references/task-profile.json",
       "status": "accepted",
-      "execution_status": "passed",
-      "exit_code": 0,
-      "run_id": "run_20260327T172538875593Z_78f4a2_89a1daf2",
-      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T172538875593Z_78f4a2_89a1daf2",
+      "execution_status": "nonzero_exit",
+      "exit_code": 2,
+      "run_id": "run_20260327T173750408511Z_78f4a2_9508daf2",
+      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T173750408511Z_78f4a2_9508daf2",
       "missing_artifacts": [],
       "artifact_details": {
-        "terminal_status": "passed",
-        "stop_reason": "pass",
+        "terminal_status": "failed",
+        "stop_reason": "budget_exhausted",
         "evidence_completeness": 0.8
       },
       "stdout_tail": [
-        "[recursive-loop] run_id=run_20260327T172538875593Z_78f4a2_89a1daf2",
-        "[recursive-loop] status=passed stop_reason=pass",
-        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T172538875593Z_78f4a2_89a1daf2"
+        "[recursive-loop] run_id=run_20260327T173750408511Z_78f4a2_9508daf2",
+        "[recursive-loop] status=failed stop_reason=budget_exhausted",
+        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T173750408511Z_78f4a2_9508daf2"
       ],
       "stderr_tail": []
     },
@@ -894,8 +894,8 @@
       "status": "accepted",
       "execution_status": "nonzero_exit",
       "exit_code": 3,
-      "run_id": "run_20260327T172539208485Z_0d793b_89a28dca",
-      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T172539208485Z_0d793b_89a28dca",
+      "run_id": "run_20260327T173750723088Z_0d793b_950a8dca",
+      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T173750723088Z_0d793b_950a8dca",
       "missing_artifacts": [],
       "artifact_details": {
         "terminal_status": "escalated",
@@ -903,429 +903,429 @@
         "evidence_completeness": 0.8
       },
       "stdout_tail": [
-        "[recursive-loop] run_id=run_20260327T172539208485Z_0d793b_89a28dca",
+        "[recursive-loop] run_id=run_20260327T173750723088Z_0d793b_950a8dca",
         "[recursive-loop] status=escalated stop_reason=evaluator_conflict",
-        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T172539208485Z_0d793b_89a28dca"
+        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T173750723088Z_0d793b_950a8dca"
       ],
       "stderr_tail": []
     },
     {
       "profile_path": "product/security/security-threat-model/references/task-profile.json",
       "status": "accepted",
-      "execution_status": "passed",
-      "exit_code": 0,
-      "run_id": "run_20260327T172539510349Z_b1ba18_89a3036f",
-      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T172539510349Z_b1ba18_89a3036f",
+      "execution_status": "nonzero_exit",
+      "exit_code": 2,
+      "run_id": "run_20260327T173751060095Z_b1ba18_950b036f",
+      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T173751060095Z_b1ba18_950b036f",
       "missing_artifacts": [],
       "artifact_details": {
-        "terminal_status": "passed",
-        "stop_reason": "pass",
+        "terminal_status": "failed",
+        "stop_reason": "budget_exhausted",
         "evidence_completeness": 0.8
       },
       "stdout_tail": [
-        "[recursive-loop] run_id=run_20260327T172539510349Z_b1ba18_89a3036f",
-        "[recursive-loop] status=passed stop_reason=pass",
-        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T172539510349Z_b1ba18_89a3036f"
+        "[recursive-loop] run_id=run_20260327T173751060095Z_b1ba18_950b036f",
+        "[recursive-loop] status=failed stop_reason=budget_exhausted",
+        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T173751060095Z_b1ba18_950b036f"
       ],
       "stderr_tail": []
     },
     {
       "profile_path": "product/specs/product-spec/references/task-profile.json",
       "status": "accepted",
-      "execution_status": "passed",
-      "exit_code": 0,
-      "run_id": "run_20260327T172539803352Z_27b5c1_89a48a24",
-      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T172539803352Z_27b5c1_89a48a24",
+      "execution_status": "nonzero_exit",
+      "exit_code": 2,
+      "run_id": "run_20260327T173751386354Z_27b5c1_950c8a24",
+      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T173751386354Z_27b5c1_950c8a24",
       "missing_artifacts": [],
       "artifact_details": {
-        "terminal_status": "passed",
-        "stop_reason": "pass",
+        "terminal_status": "failed",
+        "stop_reason": "budget_exhausted",
         "evidence_completeness": 0.8
       },
       "stdout_tail": [
-        "[recursive-loop] run_id=run_20260327T172539803352Z_27b5c1_89a48a24",
-        "[recursive-loop] status=passed stop_reason=pass",
-        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T172539803352Z_27b5c1_89a48a24"
+        "[recursive-loop] run_id=run_20260327T173751386354Z_27b5c1_950c8a24",
+        "[recursive-loop] status=failed stop_reason=budget_exhausted",
+        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T173751386354Z_27b5c1_950c8a24"
       ],
       "stderr_tail": []
     },
     {
       "profile_path": "product/strategy/brainstorming/references/task-profile.json",
       "status": "accepted",
-      "execution_status": "passed",
-      "exit_code": 0,
-      "run_id": "run_20260327T172540095955Z_82d107_89a55513",
-      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T172540095955Z_82d107_89a55513",
+      "execution_status": "nonzero_exit",
+      "exit_code": 2,
+      "run_id": "run_20260327T173751721034Z_82d107_950d5513",
+      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T173751721034Z_82d107_950d5513",
       "missing_artifacts": [],
       "artifact_details": {
-        "terminal_status": "passed",
-        "stop_reason": "pass",
+        "terminal_status": "failed",
+        "stop_reason": "budget_exhausted",
         "evidence_completeness": 0.8
       },
       "stdout_tail": [
-        "[recursive-loop] run_id=run_20260327T172540095955Z_82d107_89a55513",
-        "[recursive-loop] status=passed stop_reason=pass",
-        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T172540095955Z_82d107_89a55513"
+        "[recursive-loop] run_id=run_20260327T173751721034Z_82d107_950d5513",
+        "[recursive-loop] status=failed stop_reason=budget_exhausted",
+        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T173751721034Z_82d107_950d5513"
       ],
       "stderr_tail": []
     },
     {
       "profile_path": "utilities/1password/references/task-profile.json",
       "status": "accepted",
-      "execution_status": "passed",
-      "exit_code": 0,
-      "run_id": "run_20260327T172540394245Z_871a4c_89a62795",
-      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T172540394245Z_871a4c_89a62795",
+      "execution_status": "nonzero_exit",
+      "exit_code": 2,
+      "run_id": "run_20260327T173752058401Z_871a4c_950e2795",
+      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T173752058401Z_871a4c_950e2795",
       "missing_artifacts": [],
       "artifact_details": {
-        "terminal_status": "passed",
-        "stop_reason": "pass",
+        "terminal_status": "failed",
+        "stop_reason": "budget_exhausted",
         "evidence_completeness": 0.8
       },
       "stdout_tail": [
-        "[recursive-loop] run_id=run_20260327T172540394245Z_871a4c_89a62795",
-        "[recursive-loop] status=passed stop_reason=pass",
-        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T172540394245Z_871a4c_89a62795"
+        "[recursive-loop] run_id=run_20260327T173752058401Z_871a4c_950e2795",
+        "[recursive-loop] status=failed stop_reason=budget_exhausted",
+        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T173752058401Z_871a4c_950e2795"
       ],
       "stderr_tail": []
     },
     {
       "profile_path": "utilities/agent-browser/references/task-profile.json",
       "status": "accepted",
-      "execution_status": "passed",
-      "exit_code": 0,
-      "run_id": "run_20260327T172540706287Z_d08cac_89a74b30",
-      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T172540706287Z_d08cac_89a74b30",
+      "execution_status": "nonzero_exit",
+      "exit_code": 2,
+      "run_id": "run_20260327T173752386381Z_d08cac_950f4b30",
+      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T173752386381Z_d08cac_950f4b30",
       "missing_artifacts": [],
       "artifact_details": {
-        "terminal_status": "passed",
-        "stop_reason": "pass",
+        "terminal_status": "failed",
+        "stop_reason": "budget_exhausted",
         "evidence_completeness": 0.8
       },
       "stdout_tail": [
-        "[recursive-loop] run_id=run_20260327T172540706287Z_d08cac_89a74b30",
-        "[recursive-loop] status=passed stop_reason=pass",
-        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T172540706287Z_d08cac_89a74b30"
+        "[recursive-loop] run_id=run_20260327T173752386381Z_d08cac_950f4b30",
+        "[recursive-loop] status=failed stop_reason=budget_exhausted",
+        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T173752386381Z_d08cac_950f4b30"
       ],
       "stderr_tail": []
     },
     {
       "profile_path": "utilities/alignment-checkpoint/references/task-profile.json",
       "status": "accepted",
-      "execution_status": "passed",
-      "exit_code": 0,
-      "run_id": "run_20260327T172541010457Z_2f9e66_89a825b8",
-      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T172541010457Z_2f9e66_89a825b8",
+      "execution_status": "nonzero_exit",
+      "exit_code": 2,
+      "run_id": "run_20260327T173752728731Z_2f9e66_951125b8",
+      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T173752728731Z_2f9e66_951125b8",
       "missing_artifacts": [],
       "artifact_details": {
-        "terminal_status": "passed",
-        "stop_reason": "pass",
+        "terminal_status": "failed",
+        "stop_reason": "budget_exhausted",
         "evidence_completeness": 0.8
       },
       "stdout_tail": [
-        "[recursive-loop] run_id=run_20260327T172541010457Z_2f9e66_89a825b8",
-        "[recursive-loop] status=passed stop_reason=pass",
-        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T172541010457Z_2f9e66_89a825b8"
+        "[recursive-loop] run_id=run_20260327T173752728731Z_2f9e66_951125b8",
+        "[recursive-loop] status=failed stop_reason=budget_exhausted",
+        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T173752728731Z_2f9e66_951125b8"
       ],
       "stderr_tail": []
     },
     {
       "profile_path": "utilities/atlas/references/task-profile.json",
       "status": "accepted",
-      "execution_status": "passed",
-      "exit_code": 0,
-      "run_id": "run_20260327T172541321200Z_d47302_89a97ba7",
-      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T172541321200Z_d47302_89a97ba7",
+      "execution_status": "nonzero_exit",
+      "exit_code": 2,
+      "run_id": "run_20260327T173753062286Z_d47302_95127ba7",
+      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T173753062286Z_d47302_95127ba7",
       "missing_artifacts": [],
       "artifact_details": {
-        "terminal_status": "passed",
-        "stop_reason": "pass",
+        "terminal_status": "failed",
+        "stop_reason": "budget_exhausted",
         "evidence_completeness": 0.8
       },
       "stdout_tail": [
-        "[recursive-loop] run_id=run_20260327T172541321200Z_d47302_89a97ba7",
-        "[recursive-loop] status=passed stop_reason=pass",
-        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T172541321200Z_d47302_89a97ba7"
+        "[recursive-loop] run_id=run_20260327T173753062286Z_d47302_95127ba7",
+        "[recursive-loop] status=failed stop_reason=budget_exhausted",
+        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T173753062286Z_d47302_95127ba7"
       ],
       "stderr_tail": []
     },
     {
       "profile_path": "utilities/beautiful-mermaid/references/task-profile.json",
       "status": "accepted",
-      "execution_status": "passed",
-      "exit_code": 0,
-      "run_id": "run_20260327T172541626558Z_f51e38_89aa4325",
-      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T172541626558Z_f51e38_89aa4325",
+      "execution_status": "nonzero_exit",
+      "exit_code": 2,
+      "run_id": "run_20260327T173753413592Z_f51e38_95134325",
+      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T173753413592Z_f51e38_95134325",
       "missing_artifacts": [],
       "artifact_details": {
-        "terminal_status": "passed",
-        "stop_reason": "pass",
+        "terminal_status": "failed",
+        "stop_reason": "budget_exhausted",
         "evidence_completeness": 0.8
       },
       "stdout_tail": [
-        "[recursive-loop] run_id=run_20260327T172541626558Z_f51e38_89aa4325",
-        "[recursive-loop] status=passed stop_reason=pass",
-        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T172541626558Z_f51e38_89aa4325"
+        "[recursive-loop] run_id=run_20260327T173753413592Z_f51e38_95134325",
+        "[recursive-loop] status=failed stop_reason=budget_exhausted",
+        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T173753413592Z_f51e38_95134325"
       ],
       "stderr_tail": []
     },
     {
       "profile_path": "utilities/bootstrap/references/task-profile.json",
       "status": "accepted",
-      "execution_status": "passed",
-      "exit_code": 0,
-      "run_id": "run_20260327T172541933616Z_4888ba_89ab1d2e",
-      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T172541933616Z_4888ba_89ab1d2e",
+      "execution_status": "nonzero_exit",
+      "exit_code": 2,
+      "run_id": "run_20260327T173753789754Z_4888ba_95141d2e",
+      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T173753789754Z_4888ba_95141d2e",
       "missing_artifacts": [],
       "artifact_details": {
-        "terminal_status": "passed",
-        "stop_reason": "pass",
+        "terminal_status": "failed",
+        "stop_reason": "budget_exhausted",
         "evidence_completeness": 0.8
       },
       "stdout_tail": [
-        "[recursive-loop] run_id=run_20260327T172541933616Z_4888ba_89ab1d2e",
-        "[recursive-loop] status=passed stop_reason=pass",
-        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T172541933616Z_4888ba_89ab1d2e"
+        "[recursive-loop] run_id=run_20260327T173753789754Z_4888ba_95141d2e",
+        "[recursive-loop] status=failed stop_reason=budget_exhausted",
+        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T173753789754Z_4888ba_95141d2e"
       ],
       "stderr_tail": []
     },
     {
       "profile_path": "utilities/codex-agent-creator/references/task-profile.json",
       "status": "accepted",
-      "execution_status": "passed",
-      "exit_code": 0,
-      "run_id": "run_20260327T172542239774Z_8d6129_89ac4d18",
-      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T172542239774Z_8d6129_89ac4d18",
+      "execution_status": "nonzero_exit",
+      "exit_code": 2,
+      "run_id": "run_20260327T173754255763Z_8d6129_95174d18",
+      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T173754255763Z_8d6129_95174d18",
       "missing_artifacts": [],
       "artifact_details": {
-        "terminal_status": "passed",
-        "stop_reason": "pass",
+        "terminal_status": "failed",
+        "stop_reason": "budget_exhausted",
         "evidence_completeness": 0.8
       },
       "stdout_tail": [
-        "[recursive-loop] run_id=run_20260327T172542239774Z_8d6129_89ac4d18",
-        "[recursive-loop] status=passed stop_reason=pass",
-        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T172542239774Z_8d6129_89ac4d18"
+        "[recursive-loop] run_id=run_20260327T173754255763Z_8d6129_95174d18",
+        "[recursive-loop] status=failed stop_reason=budget_exhausted",
+        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T173754255763Z_8d6129_95174d18"
       ],
       "stderr_tail": []
     },
     {
       "profile_path": "utilities/codex-automation-architect/references/task-profile.json",
       "status": "accepted",
-      "execution_status": "passed",
-      "exit_code": 0,
-      "run_id": "run_20260327T172542532705Z_465545_89ad5b4f",
-      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T172542532705Z_465545_89ad5b4f",
+      "execution_status": "nonzero_exit",
+      "exit_code": 2,
+      "run_id": "run_20260327T173754839617Z_465545_951a5b4f",
+      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T173754839617Z_465545_951a5b4f",
       "missing_artifacts": [],
       "artifact_details": {
-        "terminal_status": "passed",
-        "stop_reason": "pass",
+        "terminal_status": "failed",
+        "stop_reason": "budget_exhausted",
         "evidence_completeness": 0.8
       },
       "stdout_tail": [
-        "[recursive-loop] run_id=run_20260327T172542532705Z_465545_89ad5b4f",
-        "[recursive-loop] status=passed stop_reason=pass",
-        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T172542532705Z_465545_89ad5b4f"
+        "[recursive-loop] run_id=run_20260327T173754839617Z_465545_951a5b4f",
+        "[recursive-loop] status=failed stop_reason=budget_exhausted",
+        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T173754839617Z_465545_951a5b4f"
       ],
       "stderr_tail": []
     },
     {
       "profile_path": "utilities/codex-home-audit/references/task-profile.json",
       "status": "accepted",
-      "execution_status": "passed",
-      "exit_code": 0,
-      "run_id": "run_20260327T172542835619Z_cc3cf2_89aea290",
-      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T172542835619Z_cc3cf2_89aea290",
+      "execution_status": "nonzero_exit",
+      "exit_code": 2,
+      "run_id": "run_20260327T173755376814Z_cc3cf2_951ba290",
+      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T173755376814Z_cc3cf2_951ba290",
       "missing_artifacts": [],
       "artifact_details": {
-        "terminal_status": "passed",
-        "stop_reason": "pass",
+        "terminal_status": "failed",
+        "stop_reason": "budget_exhausted",
         "evidence_completeness": 0.8
       },
       "stdout_tail": [
-        "[recursive-loop] run_id=run_20260327T172542835619Z_cc3cf2_89aea290",
-        "[recursive-loop] status=passed stop_reason=pass",
-        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T172542835619Z_cc3cf2_89aea290"
+        "[recursive-loop] run_id=run_20260327T173755376814Z_cc3cf2_951ba290",
+        "[recursive-loop] status=failed stop_reason=budget_exhausted",
+        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T173755376814Z_cc3cf2_951ba290"
       ],
       "stderr_tail": []
     },
     {
       "profile_path": "utilities/codex-sessions-skill-scan/references/task-profile.json",
       "status": "accepted",
-      "execution_status": "passed",
-      "exit_code": 0,
-      "run_id": "run_20260327T172543126527Z_03dd77_89af1fc3",
-      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T172543126527Z_03dd77_89af1fc3",
+      "execution_status": "nonzero_exit",
+      "exit_code": 2,
+      "run_id": "run_20260327T173755767428Z_03dd77_951c1fc3",
+      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T173755767428Z_03dd77_951c1fc3",
       "missing_artifacts": [],
       "artifact_details": {
-        "terminal_status": "passed",
-        "stop_reason": "pass",
+        "terminal_status": "failed",
+        "stop_reason": "budget_exhausted",
         "evidence_completeness": 0.8
       },
       "stdout_tail": [
-        "[recursive-loop] run_id=run_20260327T172543126527Z_03dd77_89af1fc3",
-        "[recursive-loop] status=passed stop_reason=pass",
-        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T172543126527Z_03dd77_89af1fc3"
+        "[recursive-loop] run_id=run_20260327T173755767428Z_03dd77_951c1fc3",
+        "[recursive-loop] status=failed stop_reason=budget_exhausted",
+        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T173755767428Z_03dd77_951c1fc3"
       ],
       "stderr_tail": []
     },
     {
       "profile_path": "utilities/fix-mise/references/task-profile.json",
       "status": "accepted",
-      "execution_status": "passed",
-      "exit_code": 0,
-      "run_id": "run_20260327T172543419812Z_78911e_89b0edbc",
-      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T172543419812Z_78911e_89b0edbc",
+      "execution_status": "nonzero_exit",
+      "exit_code": 2,
+      "run_id": "run_20260327T173756094311Z_78911e_951dedbc",
+      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T173756094311Z_78911e_951dedbc",
       "missing_artifacts": [],
       "artifact_details": {
-        "terminal_status": "passed",
-        "stop_reason": "pass",
+        "terminal_status": "failed",
+        "stop_reason": "budget_exhausted",
         "evidence_completeness": 0.8
       },
       "stdout_tail": [
-        "[recursive-loop] run_id=run_20260327T172543419812Z_78911e_89b0edbc",
-        "[recursive-loop] status=passed stop_reason=pass",
-        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T172543419812Z_78911e_89b0edbc"
+        "[recursive-loop] run_id=run_20260327T173756094311Z_78911e_951dedbc",
+        "[recursive-loop] status=failed stop_reason=budget_exhausted",
+        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T173756094311Z_78911e_951dedbc"
       ],
       "stderr_tail": []
     },
     {
       "profile_path": "utilities/insight-report/references/task-profile.json",
       "status": "accepted",
-      "execution_status": "passed",
-      "exit_code": 0,
-      "run_id": "run_20260327T172543723377Z_241369_89b19ccd",
-      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T172543723377Z_241369_89b19ccd",
+      "execution_status": "nonzero_exit",
+      "exit_code": 2,
+      "run_id": "run_20260327T173756433908Z_241369_951e9ccd",
+      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T173756433908Z_241369_951e9ccd",
       "missing_artifacts": [],
       "artifact_details": {
-        "terminal_status": "passed",
-        "stop_reason": "pass",
+        "terminal_status": "failed",
+        "stop_reason": "budget_exhausted",
         "evidence_completeness": 0.8
       },
       "stdout_tail": [
-        "[recursive-loop] run_id=run_20260327T172543723377Z_241369_89b19ccd",
-        "[recursive-loop] status=passed stop_reason=pass",
-        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T172543723377Z_241369_89b19ccd"
+        "[recursive-loop] run_id=run_20260327T173756433908Z_241369_951e9ccd",
+        "[recursive-loop] status=failed stop_reason=budget_exhausted",
+        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T173756433908Z_241369_951e9ccd"
       ],
       "stderr_tail": []
     },
     {
       "profile_path": "utilities/markdown-converter/references/task-profile.json",
       "status": "accepted",
-      "execution_status": "passed",
-      "exit_code": 0,
-      "run_id": "run_20260327T172544018721Z_5cd9ba_89b3f715",
-      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T172544018721Z_5cd9ba_89b3f715",
+      "execution_status": "nonzero_exit",
+      "exit_code": 2,
+      "run_id": "run_20260327T173756830545Z_5cd9ba_951ff715",
+      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T173756830545Z_5cd9ba_951ff715",
       "missing_artifacts": [],
       "artifact_details": {
-        "terminal_status": "passed",
-        "stop_reason": "pass",
+        "terminal_status": "failed",
+        "stop_reason": "budget_exhausted",
         "evidence_completeness": 0.8
       },
       "stdout_tail": [
-        "[recursive-loop] run_id=run_20260327T172544018721Z_5cd9ba_89b3f715",
-        "[recursive-loop] status=passed stop_reason=pass",
-        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T172544018721Z_5cd9ba_89b3f715"
+        "[recursive-loop] run_id=run_20260327T173756830545Z_5cd9ba_951ff715",
+        "[recursive-loop] status=failed stop_reason=budget_exhausted",
+        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T173756830545Z_5cd9ba_951ff715"
       ],
       "stderr_tail": []
     },
     {
       "profile_path": "utilities/notebooklm/references/task-profile.json",
       "status": "accepted",
-      "execution_status": "passed",
-      "exit_code": 0,
-      "run_id": "run_20260327T172544318313Z_f9ca05_89b403fd",
-      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T172544318313Z_f9ca05_89b403fd",
+      "execution_status": "nonzero_exit",
+      "exit_code": 2,
+      "run_id": "run_20260327T173757533564Z_f9ca05_952203fd",
+      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T173757533564Z_f9ca05_952203fd",
       "missing_artifacts": [],
       "artifact_details": {
-        "terminal_status": "passed",
-        "stop_reason": "pass",
+        "terminal_status": "failed",
+        "stop_reason": "budget_exhausted",
         "evidence_completeness": 0.8
       },
       "stdout_tail": [
-        "[recursive-loop] run_id=run_20260327T172544318313Z_f9ca05_89b403fd",
-        "[recursive-loop] status=passed stop_reason=pass",
-        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T172544318313Z_f9ca05_89b403fd"
+        "[recursive-loop] run_id=run_20260327T173757533564Z_f9ca05_952203fd",
+        "[recursive-loop] status=failed stop_reason=budget_exhausted",
+        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T173757533564Z_f9ca05_952203fd"
       ],
       "stderr_tail": []
     },
     {
       "profile_path": "utilities/process-watch/references/task-profile.json",
       "status": "accepted",
-      "execution_status": "passed",
-      "exit_code": 0,
-      "run_id": "run_20260327T172544615765Z_eddfeb_89b63c35",
-      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T172544615765Z_eddfeb_89b63c35",
+      "execution_status": "nonzero_exit",
+      "exit_code": 2,
+      "run_id": "run_20260327T173758004300Z_eddfeb_95233c35",
+      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T173758004300Z_eddfeb_95233c35",
       "missing_artifacts": [],
       "artifact_details": {
-        "terminal_status": "passed",
-        "stop_reason": "pass",
+        "terminal_status": "failed",
+        "stop_reason": "budget_exhausted",
         "evidence_completeness": 0.8
       },
       "stdout_tail": [
-        "[recursive-loop] run_id=run_20260327T172544615765Z_eddfeb_89b63c35",
-        "[recursive-loop] status=passed stop_reason=pass",
-        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T172544615765Z_eddfeb_89b63c35"
+        "[recursive-loop] run_id=run_20260327T173758004300Z_eddfeb_95233c35",
+        "[recursive-loop] status=failed stop_reason=budget_exhausted",
+        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T173758004300Z_eddfeb_95233c35"
       ],
       "stderr_tail": []
     },
     {
       "profile_path": "utilities/recon-workbench/references/task-profile.json",
       "status": "accepted",
-      "execution_status": "passed",
-      "exit_code": 0,
-      "run_id": "run_20260327T172544908461Z_d54e6b_89b761ee",
-      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T172544908461Z_d54e6b_89b761ee",
+      "execution_status": "nonzero_exit",
+      "exit_code": 2,
+      "run_id": "run_20260327T173758405144Z_d54e6b_952461ee",
+      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T173758405144Z_d54e6b_952461ee",
       "missing_artifacts": [],
       "artifact_details": {
-        "terminal_status": "passed",
-        "stop_reason": "pass",
+        "terminal_status": "failed",
+        "stop_reason": "budget_exhausted",
         "evidence_completeness": 0.8
       },
       "stdout_tail": [
-        "[recursive-loop] run_id=run_20260327T172544908461Z_d54e6b_89b761ee",
-        "[recursive-loop] status=passed stop_reason=pass",
-        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T172544908461Z_d54e6b_89b761ee"
+        "[recursive-loop] run_id=run_20260327T173758405144Z_d54e6b_952461ee",
+        "[recursive-loop] status=failed stop_reason=budget_exhausted",
+        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T173758405144Z_d54e6b_952461ee"
       ],
       "stderr_tail": []
     },
     {
       "profile_path": "utilities/repoprompt/references/task-profile.json",
       "status": "accepted",
-      "execution_status": "passed",
-      "exit_code": 0,
-      "run_id": "run_20260327T172545205065Z_79d94e_89b8f154",
-      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T172545205065Z_79d94e_89b8f154",
+      "execution_status": "nonzero_exit",
+      "exit_code": 2,
+      "run_id": "run_20260327T173758884265Z_79d94e_9527f154",
+      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T173758884265Z_79d94e_9527f154",
       "missing_artifacts": [],
       "artifact_details": {
-        "terminal_status": "passed",
-        "stop_reason": "pass",
+        "terminal_status": "failed",
+        "stop_reason": "budget_exhausted",
         "evidence_completeness": 0.8
       },
       "stdout_tail": [
-        "[recursive-loop] run_id=run_20260327T172545205065Z_79d94e_89b8f154",
-        "[recursive-loop] status=passed stop_reason=pass",
-        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T172545205065Z_79d94e_89b8f154"
+        "[recursive-loop] run_id=run_20260327T173758884265Z_79d94e_9527f154",
+        "[recursive-loop] status=failed stop_reason=budget_exhausted",
+        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T173758884265Z_79d94e_9527f154"
       ],
       "stderr_tail": []
     },
     {
       "profile_path": "utilities/skill-builder/references/task-profile.json",
       "status": "accepted",
-      "execution_status": "passed",
-      "exit_code": 0,
-      "run_id": "run_20260327T172545512671Z_624a34_89b91873",
-      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T172545512671Z_624a34_89b91873",
+      "execution_status": "nonzero_exit",
+      "exit_code": 2,
+      "run_id": "run_20260327T173759403804Z_624a34_95281873",
+      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T173759403804Z_624a34_95281873",
       "missing_artifacts": [],
       "artifact_details": {
-        "terminal_status": "passed",
-        "stop_reason": "pass",
+        "terminal_status": "failed",
+        "stop_reason": "budget_exhausted",
         "evidence_completeness": 0.8
       },
       "stdout_tail": [
-        "[recursive-loop] run_id=run_20260327T172545512671Z_624a34_89b91873",
-        "[recursive-loop] status=passed stop_reason=pass",
-        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T172545512671Z_624a34_89b91873"
+        "[recursive-loop] run_id=run_20260327T173759403804Z_624a34_95281873",
+        "[recursive-loop] status=failed stop_reason=budget_exhausted",
+        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T173759403804Z_624a34_95281873"
       ],
       "stderr_tail": []
     },
@@ -1334,8 +1334,8 @@
       "status": "accepted",
       "execution_status": "nonzero_exit",
       "exit_code": 3,
-      "run_id": "run_20260327T172545810028Z_165520_89baa71b",
-      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T172545810028Z_165520_89baa71b",
+      "run_id": "run_20260327T173759816085Z_165520_952aa71b",
+      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T173759816085Z_165520_952aa71b",
       "missing_artifacts": [],
       "artifact_details": {
         "terminal_status": "escalated",
@@ -1343,89 +1343,89 @@
         "evidence_completeness": 0.8
       },
       "stdout_tail": [
-        "[recursive-loop] run_id=run_20260327T172545810028Z_165520_89baa71b",
+        "[recursive-loop] run_id=run_20260327T173759816085Z_165520_952aa71b",
         "[recursive-loop] status=escalated stop_reason=evaluator_conflict",
-        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T172545810028Z_165520_89baa71b"
+        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T173759816085Z_165520_952aa71b"
       ],
       "stderr_tail": []
     },
     {
       "profile_path": "utilities/test-driven-development/references/task-profile.json",
       "status": "accepted",
-      "execution_status": "passed",
-      "exit_code": 0,
-      "run_id": "run_20260327T172546102340Z_79cfc8_89bbaa7c",
-      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T172546102340Z_79cfc8_89bbaa7c",
+      "execution_status": "nonzero_exit",
+      "exit_code": 2,
+      "run_id": "run_20260327T173800254010Z_79cfc8_952baa7c",
+      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T173800254010Z_79cfc8_952baa7c",
       "missing_artifacts": [],
       "artifact_details": {
-        "terminal_status": "passed",
-        "stop_reason": "pass",
+        "terminal_status": "failed",
+        "stop_reason": "budget_exhausted",
         "evidence_completeness": 0.8
       },
       "stdout_tail": [
-        "[recursive-loop] run_id=run_20260327T172546102340Z_79cfc8_89bbaa7c",
-        "[recursive-loop] status=passed stop_reason=pass",
-        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T172546102340Z_79cfc8_89bbaa7c"
+        "[recursive-loop] run_id=run_20260327T173800254010Z_79cfc8_952baa7c",
+        "[recursive-loop] status=failed stop_reason=budget_exhausted",
+        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T173800254010Z_79cfc8_952baa7c"
       ],
       "stderr_tail": []
     },
     {
       "profile_path": "utilities/using-git-worktrees/references/task-profile.json",
       "status": "accepted",
-      "execution_status": "passed",
-      "exit_code": 0,
-      "run_id": "run_20260327T172546403113Z_0931d0_89bc4ba0",
-      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T172546403113Z_0931d0_89bc4ba0",
+      "execution_status": "nonzero_exit",
+      "exit_code": 2,
+      "run_id": "run_20260327T173800600754Z_0931d0_952c4ba0",
+      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T173800600754Z_0931d0_952c4ba0",
       "missing_artifacts": [],
       "artifact_details": {
-        "terminal_status": "passed",
-        "stop_reason": "pass",
+        "terminal_status": "failed",
+        "stop_reason": "budget_exhausted",
         "evidence_completeness": 0.8
       },
       "stdout_tail": [
-        "[recursive-loop] run_id=run_20260327T172546403113Z_0931d0_89bc4ba0",
-        "[recursive-loop] status=passed stop_reason=pass",
-        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T172546403113Z_0931d0_89bc4ba0"
+        "[recursive-loop] run_id=run_20260327T173800600754Z_0931d0_952c4ba0",
+        "[recursive-loop] status=failed stop_reason=budget_exhausted",
+        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T173800600754Z_0931d0_952c4ba0"
       ],
       "stderr_tail": []
     },
     {
       "profile_path": "utilities/verification-before-completion/references/task-profile.json",
       "status": "accepted",
-      "execution_status": "passed",
-      "exit_code": 0,
-      "run_id": "run_20260327T172546701865Z_f1ccf7_89c08815",
-      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T172546701865Z_f1ccf7_89c08815",
+      "execution_status": "nonzero_exit",
+      "exit_code": 2,
+      "run_id": "run_20260327T173800952712Z_f1ccf7_952d8815",
+      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T173800952712Z_f1ccf7_952d8815",
       "missing_artifacts": [],
       "artifact_details": {
-        "terminal_status": "passed",
-        "stop_reason": "pass",
+        "terminal_status": "failed",
+        "stop_reason": "budget_exhausted",
         "evidence_completeness": 0.8
       },
       "stdout_tail": [
-        "[recursive-loop] run_id=run_20260327T172546701865Z_f1ccf7_89c08815",
-        "[recursive-loop] status=passed stop_reason=pass",
-        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T172546701865Z_f1ccf7_89c08815"
+        "[recursive-loop] run_id=run_20260327T173800952712Z_f1ccf7_952d8815",
+        "[recursive-loop] status=failed stop_reason=budget_exhausted",
+        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T173800952712Z_f1ccf7_952d8815"
       ],
       "stderr_tail": []
     },
     {
       "profile_path": "utilities/visual-explainer/references/task-profile.json",
       "status": "accepted",
-      "execution_status": "passed",
-      "exit_code": 0,
-      "run_id": "run_20260327T172547010324Z_2733b5_89c6da25",
-      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T172547010324Z_2733b5_89c6da25",
+      "execution_status": "nonzero_exit",
+      "exit_code": 2,
+      "run_id": "run_20260327T173801292095Z_2733b5_952eda25",
+      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T173801292095Z_2733b5_952eda25",
       "missing_artifacts": [],
       "artifact_details": {
-        "terminal_status": "passed",
-        "stop_reason": "pass",
+        "terminal_status": "failed",
+        "stop_reason": "budget_exhausted",
         "evidence_completeness": 0.8
       },
       "stdout_tail": [
-        "[recursive-loop] run_id=run_20260327T172547010324Z_2733b5_89c6da25",
-        "[recursive-loop] status=passed stop_reason=pass",
-        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T172547010324Z_2733b5_89c6da25"
+        "[recursive-loop] run_id=run_20260327T173801292095Z_2733b5_952eda25",
+        "[recursive-loop] status=failed stop_reason=budget_exhausted",
+        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T173801292095Z_2733b5_952eda25"
       ],
       "stderr_tail": []
     },
@@ -1434,8 +1434,8 @@
       "status": "accepted",
       "execution_status": "nonzero_exit",
       "exit_code": 3,
-      "run_id": "run_20260327T172547310778Z_155995_89cb9c94",
-      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T172547310778Z_155995_89cb9c94",
+      "run_id": "run_20260327T173801629908Z_155995_952f9c94",
+      "run_out_dir": "artifacts/skill-graphs/runs/run_20260327T173801629908Z_155995_952f9c94",
       "missing_artifacts": [],
       "artifact_details": {
         "terminal_status": "escalated",
@@ -1443,9 +1443,9 @@
         "evidence_completeness": 0.8
       },
       "stdout_tail": [
-        "[recursive-loop] run_id=run_20260327T172547310778Z_155995_89cb9c94",
+        "[recursive-loop] run_id=run_20260327T173801629908Z_155995_952f9c94",
         "[recursive-loop] status=escalated stop_reason=evaluator_conflict",
-        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T172547310778Z_155995_89cb9c94"
+        "[recursive-loop] out_dir=./artifacts/skill-graphs/runs/run_20260327T173801629908Z_155995_952f9c94"
       ],
       "stderr_tail": []
     }

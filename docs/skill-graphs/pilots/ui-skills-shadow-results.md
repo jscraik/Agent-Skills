@@ -87,140 +87,140 @@ Shadow mode runs evaluator + checkpoint adversarial checks without automatic imp
 ## Window summary
 
 - Window: `2026-03-21..2026-03-27`
-- Runs total: `720`
+- Runs total: `804`
 - Runs by profile:
-  - `auth-best-practices`: `10`
-  - `auth-create-auth`: `10`
-  - `backend-backend-engineer`: `10`
-  - `backend-cli-spec`: `10`
-  - `backend-mcp-builder`: `10`
-  - `backend-workers-mcp`: `10`
-  - `frontend-graphics-better-icons`: `10`
-  - `frontend-graphics-favicon-generator`: `10`
-  - `frontend-graphics-imagegen`: `10`
-  - `frontend-graphics-nano-banana-builder`: `10`
-  - `frontend-graphics-og-image-creator`: `10`
-  - `frontend-graphics-sora`: `10`
-  - `frontend-graphics-threejs-builder`: `10`
-  - `frontend-stitch-react-components`: `10`
-  - `frontend-tools-agentation`: `10`
-  - `frontend-tools-figma`: `10`
-  - `frontend-tools-stitch-loop`: `10`
-  - `frontend-ui-design-system`: `10`
-  - `frontend-ui-frontend-ui-design`: `10`
-  - `frontend-ui-react-ui-patterns`: `10`
-  - `frontend-ui-remotion`: `10`
-  - `frontend-ui-shadcn-ui`: `10`
-  - `frontend-ui-stitch-remotion`: `10`
-  - `frontend-ui-ui-ux-creative-coding`: `10`
-  - `frontend-ui-ui-visual-regression`: `10`
-  - `github-gh-fix-ci`: `10`
-  - `github-gh-workflow`: `10`
-  - `github-greptile-check-pr`: `10`
-  - `github-greptile-greploop`: `10`
-  - `interview-architecture-interview`: `10`
-  - `interview-deep-interview`: `10`
-  - `interview-interview-me`: `10`
-  - `product-content-video-transcript-downloader`: `10`
-  - `product-content-youtube-hooks-scripts`: `10`
-  - `product-content-youtube-titles-thumbnails`: `10`
-  - `product-docs-agents-md`: `10`
-  - `product-docs-context7`: `10`
-  - `product-docs-docs-expert`: `10`
-  - `product-domain-cloudflare-deploy`: `10`
-  - `product-domain-oak-api`: `10`
-  - `product-ops-decide-build-primitive`: `10`
-  - `product-ops-linear`: `10`
-  - `product-ops-release`: `10`
-  - `product-security-security-best-practices`: `10`
-  - `product-security-security-ownership-map`: `10`
-  - `product-security-security-threat-model`: `10`
-  - `product-specs-product-spec`: `10`
-  - `product-strategy-brainstorming`: `10`
-  - `utilities-1password`: `10`
-  - `utilities-agent-browser`: `10`
-  - `utilities-alignment-checkpoint`: `10`
-  - `utilities-atlas`: `10`
-  - `utilities-beautiful-mermaid`: `10`
-  - `utilities-bootstrap`: `10`
-  - `utilities-codex-agent-creator`: `10`
-  - `utilities-codex-automation-architect`: `10`
-  - `utilities-codex-home-audit`: `10`
-  - `utilities-codex-sessions-skill-scan`: `10`
-  - `utilities-fix-mise`: `10`
-  - `utilities-insight-report`: `10`
-  - `utilities-markdown-converter`: `10`
-  - `utilities-notebooklm`: `10`
-  - `utilities-process-watch`: `10`
-  - `utilities-recon-workbench`: `10`
-  - `utilities-repoprompt`: `10`
-  - `utilities-skill-builder`: `10`
-  - `utilities-systematic-debugging`: `10`
-  - `utilities-test-driven-development`: `10`
-  - `utilities-using-git-worktrees`: `10`
-  - `utilities-verification-before-completion`: `10`
-  - `utilities-visual-explainer`: `10`
-  - `utilities-writing-plans`: `10`
+  - `auth-best-practices`: `11`
+  - `auth-create-auth`: `11`
+  - `backend-backend-engineer`: `11`
+  - `backend-cli-spec`: `11`
+  - `backend-mcp-builder`: `11`
+  - `backend-workers-mcp`: `11`
+  - `frontend-graphics-better-icons`: `11`
+  - `frontend-graphics-favicon-generator`: `11`
+  - `frontend-graphics-imagegen`: `11`
+  - `frontend-graphics-nano-banana-builder`: `11`
+  - `frontend-graphics-og-image-creator`: `11`
+  - `frontend-graphics-sora`: `11`
+  - `frontend-graphics-threejs-builder`: `11`
+  - `frontend-stitch-react-components`: `11`
+  - `frontend-tools-agentation`: `11`
+  - `frontend-tools-figma`: `11`
+  - `frontend-tools-stitch-loop`: `11`
+  - `frontend-ui-design-system`: `11`
+  - `frontend-ui-frontend-ui-design`: `11`
+  - `frontend-ui-react-ui-patterns`: `11`
+  - `frontend-ui-remotion`: `11`
+  - `frontend-ui-shadcn-ui`: `11`
+  - `frontend-ui-stitch-remotion`: `11`
+  - `frontend-ui-ui-ux-creative-coding`: `11`
+  - `frontend-ui-ui-visual-regression`: `11`
+  - `github-gh-fix-ci`: `11`
+  - `github-gh-workflow`: `11`
+  - `github-greptile-check-pr`: `11`
+  - `github-greptile-greploop`: `11`
+  - `interview-architecture-interview`: `11`
+  - `interview-deep-interview`: `11`
+  - `interview-interview-me`: `11`
+  - `product-content-video-transcript-downloader`: `11`
+  - `product-content-youtube-hooks-scripts`: `11`
+  - `product-content-youtube-titles-thumbnails`: `11`
+  - `product-docs-agents-md`: `11`
+  - `product-docs-context7`: `11`
+  - `product-docs-docs-expert`: `11`
+  - `product-domain-cloudflare-deploy`: `11`
+  - `product-domain-oak-api`: `11`
+  - `product-ops-decide-build-primitive`: `11`
+  - `product-ops-linear`: `11`
+  - `product-ops-release`: `11`
+  - `product-security-security-best-practices`: `11`
+  - `product-security-security-ownership-map`: `11`
+  - `product-security-security-threat-model`: `11`
+  - `product-specs-product-spec`: `11`
+  - `product-strategy-brainstorming`: `11`
+  - `utilities-1password`: `11`
+  - `utilities-agent-browser`: `11`
+  - `utilities-alignment-checkpoint`: `11`
+  - `utilities-atlas`: `11`
+  - `utilities-beautiful-mermaid`: `11`
+  - `utilities-bootstrap`: `11`
+  - `utilities-codex-agent-creator`: `11`
+  - `utilities-codex-automation-architect`: `11`
+  - `utilities-codex-home-audit`: `11`
+  - `utilities-codex-sessions-skill-scan`: `11`
+  - `utilities-fix-mise`: `11`
+  - `utilities-insight-report`: `11`
+  - `utilities-markdown-converter`: `12`
+  - `utilities-notebooklm`: `12`
+  - `utilities-process-watch`: `12`
+  - `utilities-recon-workbench`: `12`
+  - `utilities-repoprompt`: `12`
+  - `utilities-skill-builder`: `12`
+  - `utilities-systematic-debugging`: `12`
+  - `utilities-test-driven-development`: `12`
+  - `utilities-using-git-worktrees`: `12`
+  - `utilities-verification-before-completion`: `12`
+  - `utilities-visual-explainer`: `12`
+  - `utilities-writing-plans`: `12`
 
 ### KPI snapshot
 
-- Repeat failure pattern rate: `13.9%` (delta vs baseline: `n/a`)
-- First-pass acceptance: `0.0%` (delta vs baseline: `n/a`)
+- Repeat failure pattern rate: `21.6%` (delta vs baseline: `-78.4pp`)
+- First-pass acceptance: `27.4%` (delta vs baseline: `+27.4pp`)
 - Iterations median / p90: `2.00` / `3.00`
 - Quality uplift median: `0.120`; positive uplift rate: `100.0%`
 - Critical non-regression compliance: `100.0%`
-- Budget compliance: `98.6%`
-- Evaluator flip rate: `18.7%`
-- Capture coverage: `100.0%` (`720/720` runs with capture artifacts)
-- Confidence bucket distribution: `high=620` `medium=100` `low=0` `unknown=0`
-- Injection usage rate: `0.0%` (`0/720` runs, total lessons `0`, suppressed-by-controls runs `0`)
-- Rollout mode distribution: `active=0` `observe_only=720` `off=0` `other=0`
-- Uplift gate decisions (promotion/auto-apply): `pass=0/0` `insufficient_data=720/720` `regressed=0/0`
+- Budget compliance: `100.0%`
+- Evaluator flip rate: `20.1%`
+- Capture coverage: `100.0%` (`804/804` runs with capture artifacts)
+- Confidence bucket distribution: `high=630` `medium=174` `low=0` `unknown=0`
+- Injection usage rate: `0.0%` (`0/804` runs, total lessons `0`, suppressed-by-controls runs `0`)
+- Rollout mode distribution: `active=0` `observe_only=804` `off=0` `other=0`
+- Uplift gate decisions (promotion/auto-apply): `pass=0/0` `insufficient_data=804/804` `regressed=0/0`
 
 ## Run log
 
 | Run | Profile | Status | Stop reason | Iterations | Uplift | Non-regression | Tokens |
 |---|---|---|---|---:|---:|:---:|---:|
-| run_20260327T172547010324Z_2733b5_89c6da25 | utilities-visual-explainer | passed | pass | 2 | +0.120 | ✅ | 177 |
-| run_20260327T172547310778Z_155995_89cb9c94 | utilities-writing-plans | escalated | evaluator_conflict | 1 | +0.050 | ✅ | 55 |
-| run_20260327T172546102340Z_79cfc8_89bbaa7c | utilities-test-driven-development | passed | pass | 3 | +0.190 | ✅ | 358 |
-| run_20260327T172546403113Z_0931d0_89bc4ba0 | utilities-using-git-worktrees | passed | pass | 3 | +0.190 | ✅ | 326 |
-| run_20260327T172546701865Z_f1ccf7_89c08815 | utilities-verification-before-completion | passed | pass | 2 | +0.120 | ✅ | 179 |
-| run_20260327T172544908461Z_d54e6b_89b761ee | utilities-recon-workbench | passed | pass | 2 | +0.120 | ✅ | 165 |
-| run_20260327T172545205065Z_79d94e_89b8f154 | utilities-repoprompt | passed | pass | 2 | +0.120 | ✅ | 153 |
-| run_20260327T172545512671Z_624a34_89b91873 | utilities-skill-builder | passed | pass | 2 | +0.120 | ✅ | 165 |
-| run_20260327T172545810028Z_165520_89baa71b | utilities-systematic-debugging | escalated | evaluator_conflict | 1 | +0.050 | ✅ | 54 |
-| run_20260327T172544018721Z_5cd9ba_89b3f715 | utilities-markdown-converter | passed | pass | 3 | +0.190 | ✅ | 325 |
-| run_20260327T172544318313Z_f9ca05_89b403fd | utilities-notebooklm | passed | pass | 3 | +0.186 | ✅ | 324 |
-| run_20260327T172544615765Z_eddfeb_89b63c35 | utilities-process-watch | passed | pass | 2 | +0.120 | ✅ | 163 |
-| run_20260327T172543126527Z_03dd77_89af1fc3 | utilities-codex-sessions-skill-scan | passed | pass | 3 | +0.190 | ✅ | 333 |
-| run_20260327T172543419812Z_78911e_89b0edbc | utilities-fix-mise | passed | pass | 3 | +0.190 | ✅ | 324 |
-| run_20260327T172543723377Z_241369_89b19ccd | utilities-insight-report | passed | pass | 2 | +0.120 | ✅ | 163 |
-| run_20260327T172541933616Z_4888ba_89ab1d2e | utilities-bootstrap | passed | pass | 3 | +0.190 | ✅ | 326 |
-| run_20260327T172542239774Z_8d6129_89ac4d18 | utilities-codex-agent-creator | passed | pass | 3 | +0.190 | ✅ | 326 |
-| run_20260327T172542532705Z_465545_89ad5b4f | utilities-codex-automation-architect | passed | pass | 3 | +0.190 | ✅ | 354 |
-| run_20260327T172542835619Z_cc3cf2_89aea290 | utilities-codex-home-audit | passed | pass | 2 | +0.120 | ✅ | 175 |
-| run_20260327T172541010457Z_2f9e66_89a825b8 | utilities-alignment-checkpoint | passed | pass | 3 | +0.190 | ✅ | 328 |
-| run_20260327T172541321200Z_d47302_89a97ba7 | utilities-atlas | passed | pass | 3 | +0.190 | ✅ | 303 |
-| run_20260327T172541626558Z_f51e38_89aa4325 | utilities-beautiful-mermaid | passed | pass | 3 | +0.190 | ✅ | 339 |
-| run_20260327T172540095955Z_82d107_89a55513 | product-strategy-brainstorming | passed | pass | 2 | +0.120 | ✅ | 172 |
-| run_20260327T172540394245Z_871a4c_89a62795 | utilities-1password | passed | pass | 3 | +0.190 | ✅ | 327 |
-| run_20260327T172540706287Z_d08cac_89a74b30 | utilities-agent-browser | passed | pass | 3 | +0.190 | ✅ | 332 |
-| run_20260327T172539208485Z_0d793b_89a28dca | product-security-security-ownership-map | escalated | evaluator_conflict | 1 | +0.050 | ✅ | 63 |
-| run_20260327T172539510349Z_b1ba18_89a3036f | product-security-security-threat-model | passed | pass | 2 | +0.120 | ✅ | 171 |
-| run_20260327T172539803352Z_27b5c1_89a48a24 | product-specs-product-spec | passed | pass | 3 | +0.190 | ✅ | 348 |
-| run_20260327T172537964396Z_94ca45_899d21e0 | product-ops-decide-build-primitive | escalated | evaluator_conflict | 1 | +0.050 | ✅ | 59 |
-| run_20260327T172538263722Z_acf147_899eaf84 | product-ops-linear | passed | pass | 2 | +0.120 | ✅ | 167 |
-| run_20260327T172538566226Z_affe4a_899f063a | product-ops-release | passed | pass | 3 | +0.190 | ✅ | 327 |
-| run_20260327T172538875593Z_78f4a2_89a1daf2 | product-security-security-best-practices | passed | pass | 3 | +0.190 | ✅ | 354 |
-| run_20260327T172537079859Z_c575f4_89989390 | product-docs-docs-expert | passed | pass | 3 | +0.190 | ✅ | 333 |
-| run_20260327T172537368728Z_f13e6a_899a3009 | product-domain-cloudflare-deploy | passed | pass | 2 | +0.120 | ✅ | 171 |
-| run_20260327T172537666400Z_16a7dd_899c1017 | product-domain-oak-api | passed | pass | 2 | +0.120 | ✅ | 161 |
-| run_20260327T172535902068Z_746092_89940d89 | product-content-youtube-hooks-scripts | escalated | evaluator_conflict | 1 | +0.050 | ✅ | 60 |
-| run_20260327T172536200757Z_e9f2af_89954c62 | product-content-youtube-titles-thumbnails | passed | pass | 3 | +0.190 | ✅ | 342 |
-| run_20260327T172536492158Z_0e961d_899631a4 | product-docs-agents-md | passed | pass | 3 | +0.190 | ✅ | 330 |
-| run_20260327T172536791228Z_48558f_899791e3 | product-docs-context7 | passed | pass | 2 | +0.120 | ✅ | 154 |
-| run_20260327T172535018324Z_933bc1_8991eaba | interview-deep-interview | passed | pass | 3 | +0.190 | ✅ | 318 |
+| run_20260327T173800952712Z_f1ccf7_952d8815 | utilities-verification-before-completion | escalated | escalated | 1 | +0.050 | ✅ | 61 |
+| run_20260327T173801292095Z_2733b5_952eda25 | utilities-visual-explainer | escalated | escalated | 1 | +0.050 | ✅ | 57 |
+| run_20260327T173801629908Z_155995_952f9c94 | utilities-writing-plans | escalated | evaluator_conflict | 1 | +0.050 | ✅ | 55 |
+| run_20260327T173759816085Z_165520_952aa71b | utilities-systematic-debugging | escalated | evaluator_conflict | 1 | +0.050 | ✅ | 54 |
+| run_20260327T173800254010Z_79cfc8_952baa7c | utilities-test-driven-development | escalated | escalated | 1 | +0.050 | ✅ | 61 |
+| run_20260327T173800600754Z_0931d0_952c4ba0 | utilities-using-git-worktrees | escalated | escalated | 1 | +0.050 | ✅ | 53 |
+| run_20260327T173758884265Z_79d94e_9527f154 | utilities-repoprompt | escalated | escalated | 1 | +0.050 | ✅ | 49 |
+| run_20260327T173759403804Z_624a34_95281873 | utilities-skill-builder | escalated | escalated | 1 | +0.050 | ✅ | 53 |
+| run_20260327T173758004300Z_eddfeb_95233c35 | utilities-process-watch | escalated | escalated | 1 | +0.050 | ✅ | 52 |
+| run_20260327T173758405144Z_d54e6b_952461ee | utilities-recon-workbench | escalated | escalated | 1 | +0.050 | ✅ | 54 |
+| run_20260327T173756830545Z_5cd9ba_951ff715 | utilities-markdown-converter | escalated | escalated | 1 | +0.050 | ✅ | 53 |
+| run_20260327T173757533564Z_f9ca05_952203fd | utilities-notebooklm | escalated | escalated | 1 | +0.050 | ✅ | 51 |
+| run_20260327T173756094311Z_78911e_951dedbc | utilities-fix-mise | escalated | escalated | 1 | +0.050 | ✅ | 51 |
+| run_20260327T173756433908Z_241369_951e9ccd | utilities-insight-report | escalated | escalated | 1 | +0.050 | ✅ | 53 |
+| run_20260327T173754839617Z_465545_951a5b4f | utilities-codex-automation-architect | escalated | escalated | 1 | +0.050 | ✅ | 59 |
+| run_20260327T173755376814Z_cc3cf2_951ba290 | utilities-codex-home-audit | escalated | escalated | 1 | +0.050 | ✅ | 57 |
+| run_20260327T173755767428Z_03dd77_951c1fc3 | utilities-codex-sessions-skill-scan | escalated | escalated | 1 | +0.050 | ✅ | 56 |
+| run_20260327T173754255763Z_8d6129_95174d18 | utilities-codex-agent-creator | escalated | escalated | 1 | +0.050 | ✅ | 53 |
+| run_20260327T173753062286Z_d47302_95127ba7 | utilities-atlas | escalated | escalated | 1 | +0.050 | ✅ | 46 |
+| run_20260327T173753413592Z_f51e38_95134325 | utilities-beautiful-mermaid | escalated | escalated | 1 | +0.050 | ✅ | 54 |
+| run_20260327T173753789754Z_4888ba_95141d2e | utilities-bootstrap | escalated | escalated | 1 | +0.050 | ✅ | 51 |
+| run_20260327T173752058401Z_871a4c_950e2795 | utilities-1password | escalated | escalated | 1 | +0.050 | ✅ | 51 |
+| run_20260327T173752386381Z_d08cac_950f4b30 | utilities-agent-browser | escalated | escalated | 1 | +0.050 | ✅ | 53 |
+| run_20260327T173752728731Z_2f9e66_951125b8 | utilities-alignment-checkpoint | escalated | escalated | 1 | +0.050 | ✅ | 54 |
+| run_20260327T173751060095Z_b1ba18_950b036f | product-security-security-threat-model | escalated | escalated | 1 | +0.050 | ✅ | 58 |
+| run_20260327T173751386354Z_27b5c1_950c8a24 | product-specs-product-spec | escalated | escalated | 1 | +0.050 | ✅ | 57 |
+| run_20260327T173751721034Z_82d107_950d5513 | product-strategy-brainstorming | escalated | escalated | 1 | +0.050 | ✅ | 57 |
+| run_20260327T173750064181Z_affe4a_9507063a | product-ops-release | escalated | escalated | 1 | +0.050 | ✅ | 50 |
+| run_20260327T173750408511Z_78f4a2_9508daf2 | product-security-security-best-practices | escalated | escalated | 1 | +0.050 | ✅ | 61 |
+| run_20260327T173750723088Z_0d793b_950a8dca | product-security-security-ownership-map | escalated | evaluator_conflict | 1 | +0.050 | ✅ | 63 |
+| run_20260327T173749042292Z_16a7dd_95031017 | product-domain-oak-api | escalated | escalated | 1 | +0.050 | ✅ | 52 |
+| run_20260327T173749378931Z_94ca45_950421e0 | product-ops-decide-build-primitive | escalated | evaluator_conflict | 1 | +0.050 | ✅ | 59 |
+| run_20260327T173749723896Z_acf147_9506af84 | product-ops-linear | escalated | escalated | 1 | +0.050 | ✅ | 53 |
+| run_20260327T173748060318Z_48558f_94ff91e3 | product-docs-context7 | escalated | escalated | 1 | +0.050 | ✅ | 49 |
+| run_20260327T173748380571Z_c575f4_95009390 | product-docs-docs-expert | escalated | escalated | 1 | +0.050 | ✅ | 54 |
+| run_20260327T173748713556Z_f13e6a_95013009 | product-domain-cloudflare-deploy | escalated | escalated | 1 | +0.050 | ✅ | 57 |
+| run_20260327T173747096582Z_746092_94fa0d89 | product-content-youtube-hooks-scripts | escalated | evaluator_conflict | 1 | +0.050 | ✅ | 60 |
+| run_20260327T173747417480Z_e9f2af_94fc4c62 | product-content-youtube-titles-thumbnails | escalated | escalated | 1 | +0.050 | ✅ | 59 |
+| run_20260327T173747740250Z_0e961d_94fd31a4 | product-docs-agents-md | escalated | escalated | 1 | +0.050 | ✅ | 53 |
+| run_20260327T173746076847Z_933bc1_94f7eaba | interview-deep-interview | escalated | escalated | 1 | +0.050 | ✅ | 51 |
 
 ## Exit gate checks
 
