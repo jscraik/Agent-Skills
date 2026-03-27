@@ -3,6 +3,7 @@ name: agentation
 description: Audit or troubleshoot Agentation integrations in frontend apps with deterministic evidence gathering before edits. Use when annotations, MCP registration, endpoint sync, or webhook delivery are failing.
 metadata:
   skill-type: product_verification
+
 ---
 
 # Agentation Integration + Live Annotation Workflows

@@ -3,6 +3,7 @@ name: ui-visual-regression
 description: Review and validate Storybook, Playwright, and Argos visual regression diffs. Use when the user wants snapshot-change triage or layout regression analysis, not broad frontend QA.
 metadata:
   skill-type: product_verification
+
 ---
 
 # UI Visual Regression

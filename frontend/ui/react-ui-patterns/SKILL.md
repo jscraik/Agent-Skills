@@ -3,6 +3,7 @@ name: react-ui-patterns
 description: "Provide concrete React UI composition patterns for TypeScript + Tailwind + Radix, including state, routing, and component structure examples. Use when building or refactoring React screens and components for maintainability."
 metadata:
   skill-type: library_api_reference
+
 ---
 
 # React UI Patterns

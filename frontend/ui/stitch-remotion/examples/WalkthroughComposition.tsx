@@ -3,8 +3,8 @@ import {Composition} from 'remotion';
 import {fade} from '@remotion/transitions/fade';
 import {slide} from '@remotion/transitions/slide';
 import {linearTiming, TransitionSeries} from '@remotion/transitions';
-import {ScreenSlide} from './ScreenSlide';
-import screensManifest from '../screens.json';
+import {ScreenSlide} from '../resources/screen-slide-template';
+import screensManifest from './screens.json';
 
 // Calculate total duration in frames
 const calculateDuration = () => {

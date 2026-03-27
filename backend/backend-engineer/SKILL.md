@@ -3,6 +3,7 @@ name: backend-engineer
 description: Plan and review safe backend extensions for existing services (Cloudflare Workers + Hono primary). Use this skill when patching or adding backend features in an existing codebase.
 metadata:
   skill-type: scaffolding_templates
+
 ---
 
 # Backend Engineer

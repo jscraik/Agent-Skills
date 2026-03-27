@@ -3,6 +3,7 @@ name: brainstorming
 description: Clarify ambiguous product or implementation directions by comparing a few viable approaches and recommending one. Use when the user wants general brainstorming before planning or building, not the compound-engineering stage artifact.
 metadata:
   skill-type: team_automation
+
 ---
 
 # Brainstorming

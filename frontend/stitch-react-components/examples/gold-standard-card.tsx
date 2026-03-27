@@ -15,9 +15,12 @@
  */
 
 import React from 'react';
-// Note for Agent: The '@' alias refers to the target project's src directory.
-// Ensure src/data/mockData.ts is created before generating this component.
-import { cardData } from '../data/mockData';
+// NOTE FOR AGENT (template instruction, not a repo path):
+// This import resolves inside the TARGET PROJECT, not this skill repo.
+// When generating the component, use the '@' src alias:
+//   import { cardData } from '@/data/mockData';
+// and create `src/data/mockData.ts` in the target project before use.
+import { cardData } from '@/data/mockData';
 
 /**
  * Gold Standard: ActivityCard

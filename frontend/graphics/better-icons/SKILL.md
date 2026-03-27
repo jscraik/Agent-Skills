@@ -3,6 +3,7 @@ name: better-icons
 description: Search and extract SVG icons from Iconify collections through the better-icons CLI or MCP. Use when the user needs production-ready icons for UI work, not custom illustration design.
 metadata:
   skill-type: scaffolding_templates
+
 ---
 
 # Better Icons

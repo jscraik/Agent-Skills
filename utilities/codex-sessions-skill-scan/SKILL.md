@@ -3,6 +3,7 @@ name: codex-sessions-skill-scan
 description: Scan Codex session history for skill failures, usage patterns, and coverage gaps. Use when the user wants daily skill-health monitoring or evidence-backed recommendations about installing, improving, merging, or pruning skills.
 metadata:
   skill-type: data_fetch_analysis
+
 ---
 
 # Codex Sessions Skill Scan

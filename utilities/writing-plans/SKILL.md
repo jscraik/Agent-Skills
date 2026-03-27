@@ -3,6 +3,7 @@ name: writing-plans
 description: Compatibility wrapper for generic implementation planning. Use when the user asks for a general plan and route the work to `ce-plan` in `generic-plan` mode.
 metadata:
   skill-type: team_automation
+
 ---
 
 # Writing Plans

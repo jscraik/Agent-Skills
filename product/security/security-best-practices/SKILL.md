@@ -3,6 +3,7 @@ name: "security-best-practices"
 description: Review code or architecture against language-specific security best practices. Use when the user explicitly wants a security best-practices review or secure-by-default guidance, not general debugging or code review.
 metadata:
   skill-type: code_quality_review
+
 ---
 
 # Security Best Practices

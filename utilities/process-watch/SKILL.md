@@ -3,6 +3,7 @@ name: process-watch
 description: Analyze system processes and resource usage to diagnose runaway CPU/memory/IO, identify culprits, and propose next diagnostic steps. Use when investigating performance spikes or leaks.
 metadata:
   skill-type: infrastructure_ops
+
 ---
 
 # Process Watch

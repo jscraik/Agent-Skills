@@ -3,6 +3,7 @@ name: bootstrap
 description: Bootstrap a local development environment from a GitHub repository URL. Use when the user asks to clone a repo, install toolchains/dependencies, and validate a working dev setup automatically.
 metadata:
   skill-type: scaffolding_templates
+
 ---
 
 # Environment Bootstrap

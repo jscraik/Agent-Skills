@@ -3,6 +3,7 @@ name: og-image-builder
 description: Generate brand-aligned Open Graph images for existing routes by inspecting a web codebase and rendering assets with Playwright components. Use when a user asks for route-specific OG image generation or refresh in an existing app.
 metadata:
   skill-type: scaffolding_templates
+
 ---
 
 # OG Image Builder

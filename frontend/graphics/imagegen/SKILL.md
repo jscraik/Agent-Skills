@@ -3,6 +3,7 @@ name: imagegen
 description: "Generate or edit images through the OpenAI Image API using the bundled CLI. Use when the user wants text-to-image, inpainting, background changes, or batch image variants and has API access configured."
 metadata:
   skill-type: scaffolding_templates
+
 ---
 
 # Imagegen

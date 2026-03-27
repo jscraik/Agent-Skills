@@ -3,6 +3,7 @@ name: greploop
 description: Iteratively remediate one GitHub PR against Greptile review feedback until the signal stabilizes or stop conditions are hit. Use when the user wants a bounded Greptile fix loop, not a one-shot readiness decision or generic GitHub workflow.
 metadata:
   skill-type: code_quality_review
+
 ---
 
 # Greploop

@@ -3,6 +3,7 @@ name: recon-workbench
 description: Run authorized, evidence-backed Recon Workbench (rwb) workflows (doctor/authorize/plan/run/summarize/manifest/validate/reconcile) and produce evidence-cited findings. Use when interrogating macOS/iOS, web/React, or OSS targets under explicit scope/permission.
 metadata:
   skill-type: runbook
+
 ---
 
 # Recon Workbench (rwb)

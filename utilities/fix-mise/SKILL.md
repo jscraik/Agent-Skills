@@ -3,6 +3,7 @@ name: fix-mise
 description: Use this skill to diagnose and repair mise trust or runtime selection problems and reconcile `~/.config/mise/config.toml` with required tool versions when commands fail because mise shims or trust state are broken.
 metadata:
   skill-type: infrastructure_ops
+
 ---
 
 # Fix Mise

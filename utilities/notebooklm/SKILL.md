@@ -3,6 +3,7 @@ name: notebooklm
 description: Run NotebookLM workflows for notebook management, question answering, and audio or video overviews. Use when the user wants NotebookLM actions from this environment, not general browsing or note writing.
 metadata:
   skill-type: data_fetch_analysis
+
 ---
 
 # Notebooklm

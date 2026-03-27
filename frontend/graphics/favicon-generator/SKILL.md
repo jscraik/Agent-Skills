@@ -3,6 +3,7 @@ name: favicon-generator
 description: Generate complete favicon/app icon suites with templates and assets. Use when the user needs favicons or app icons for a web/app project.
 metadata:
   skill-type: scaffolding_templates
+
 ---
 
 # Favicon Generator

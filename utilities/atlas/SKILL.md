@@ -3,6 +3,7 @@ name: atlas
 description: Control the ChatGPT Atlas desktop app on macOS via AppleScript. Use when and only when the user explicitly wants Atlas tabs, bookmarks, or history manipulated on macOS, not general browser automation.
 metadata:
   skill-type: team_automation
+
 ---
 
 # Atlas

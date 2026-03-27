@@ -3,6 +3,7 @@ name: codex-automation-architect
 description: Design, review, or merge Codex app automations using current OpenAI/Codex guidance and validation. Use when the user wants recurring Codex automation workflows built, audited, or consolidated.
 metadata:
   skill-type: team_automation
+
 ---
 
 # Codex Automation Architect

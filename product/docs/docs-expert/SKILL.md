@@ -3,6 +3,7 @@ name: docs-expert
 description: Audit and rewrite repository documentation, runbooks, and in-code docs with repo-visibility and brand-quality checks. Use when the user wants README, docs, JSDoc, DocC, or config documentation improved, not editorial house-style copyediting.
 metadata:
   skill-type: code_quality_review
+
 ---
 
 # docs-expert (Repository Documentation)

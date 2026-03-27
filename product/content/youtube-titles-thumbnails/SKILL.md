@@ -3,6 +3,7 @@ name: youtube-titles-thumbnails
 description: Generate SEO/CTR-oriented YouTube title options and thumbnail copy variants with rationale. Use when the user wants video packaging ideas, not a full script or production plan.
 metadata:
   skill-type: team_automation
+
 ---
 
 # YouTube Titles & Thumbnails

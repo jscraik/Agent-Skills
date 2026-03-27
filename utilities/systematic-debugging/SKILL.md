@@ -3,6 +3,7 @@ name: systematic-debugging
 description: Diagnose production bugs, regressions, or failing checks from concrete evidence before code changes. Use when the user wants a safe root-cause analysis and fix plan, not immediate speculative implementation.
 metadata:
   skill-type: runbook
+
 ---
 
 # Systematic Debugging

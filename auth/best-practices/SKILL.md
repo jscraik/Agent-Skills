@@ -3,6 +3,7 @@ name: best-practices
 description: Audit Better Auth integrations for secure patterns, config mistakes, and operational gaps. Use when the user wants Better Auth review, hardening, or debugging guidance, not a fresh implementation.
 metadata:
   skill-type: code_quality_review
+
 ---
 
 # Better Auth Best Practices

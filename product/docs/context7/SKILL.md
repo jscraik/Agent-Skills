@@ -3,6 +3,7 @@ name: context7
 description: Retrieve current third-party library documentation through Context7. Use when the user needs up-to-date API details, version-specific behavior, or dependency troubleshooting for external libraries.
 metadata:
   skill-type: library_api_reference
+
 ---
 
 # Context7 Documentation Fetcher

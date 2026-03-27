@@ -9,6 +9,7 @@ allowed-tools:
   - "Bash"
 metadata:
   skill-type: scaffolding_templates
+
 ---
 
 # Stitch Loop
@@ -94,6 +95,8 @@ Run a baton-driven Stitch website build loop where each pass produces one cohere
 
 | Skill | When to use together |
 |---|---|
+| [[design-md]] | Generate `.stitch/DESIGN.md` before starting the loop |
+| [[enhance-prompt]] | Enhance baton prompts with design tokens before generation |
 | [[stitch-react-components]] | Convert Stitch outputs to React components |
 | [[stitch-remotion]] | Turn Stitch screens into narrated video walkthroughs |
 | [[ui-cloner]] | Clone a UI design into Stitch for iterative generation |

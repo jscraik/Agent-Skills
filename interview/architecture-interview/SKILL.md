@@ -3,6 +3,7 @@ name: architecture-interview
 description: Use this skill to analyze architecture alternatives through a structured interview that produces an ADR-style decision record when the user is choosing between system design options and wants tradeoffs surfaced before implementation.
 metadata:
   skill-type: team_automation
+
 ---
 
 # architecture-interview (wrapper)

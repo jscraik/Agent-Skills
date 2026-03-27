@@ -3,6 +3,7 @@ name: visual-explainer
 description: Generate self-contained HTML explainers for systems, diffs, plans, or data with clearer visual presentation than plain text. Use when the user wants a diagram or visual technical explainer, or when a large ASCII table would be hard to scan.
 metadata:
   skill-type: team_automation
+
 ---
 
 # Visual Explainer

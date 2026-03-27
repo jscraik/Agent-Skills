@@ -3,6 +3,7 @@ name: youtube-hooks-scripts
 description: Use this skill to create high-retention hooks, outlines, and full scripts for technical YouTube videos when the user wants YouTube scripting help tailored to a topic, audience, and target runtime.
 metadata:
   skill-type: team_automation
+
 ---
 
 # YouTube Hooks & Scripts

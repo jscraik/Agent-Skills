@@ -3,6 +3,7 @@ name: linear
 description: "Manage Linear issues, projects, and docs through the Linear MCP workflow with consistent read/create/update operations. Use when a user asks to triage, create, update, or report on Linear work items."
 metadata:
   skill-type: team_automation
+
 ---
 
 # Linear

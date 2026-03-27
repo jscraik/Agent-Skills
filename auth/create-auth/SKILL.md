@@ -3,6 +3,7 @@ name: create-auth
 description: Implement or migrate Better Auth in TypeScript or JavaScript apps with secure defaults. Use when the user wants Better Auth added or changed in code, not just reviewed.
 metadata:
   skill-type: scaffolding_templates
+
 ---
 
 # Create Auth

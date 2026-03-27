@@ -3,6 +3,7 @@ name: frontend-ui-design
 description: Design or implement production-ready frontend UI components and screens with strong visual direction, accessibility, and reusable structure. Use when the user wants standard UI build or redesign work, not design-system governance or post-direction polish only.
 metadata:
   skill-type: scaffolding_templates
+
 ---
 
 # Frontend UI Design

@@ -3,6 +3,7 @@ name: insight-report
 description: Generate a high-fidelity Codex usage insights HTML report from local Codex session data. Use this skill when a user asks for an insights report, usage report, or session analysis.
 metadata:
   skill-type: data_fetch_analysis
+
 ---
 
 # Insight Report

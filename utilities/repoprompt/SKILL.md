@@ -3,6 +3,7 @@ name: repoprompt
 description: Plan and troubleshoot Repo Prompt integration across editors, agents, MCP, and CLI workflows. Use when the user wants Repo Prompt configured, adopted, or compared inside an AI coding setup.
 metadata:
   skill-type: library_api_reference
+
 ---
 
 # Repo Prompt Integration

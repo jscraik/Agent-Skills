@@ -3,6 +3,7 @@ name: gh-fix-ci
 description: "Diagnose failing GitHub Actions checks on a PR and prepare a fix path grounded in `gh` evidence. Use when the user wants CI failure analysis or repair for GitHub-hosted checks, not external CI triage."
 metadata:
   skill-type: ci_cd_deployment
+
 ---
 
 # GH Fix CI

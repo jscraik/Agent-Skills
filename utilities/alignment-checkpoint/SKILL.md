@@ -3,6 +3,7 @@ name: alignment-checkpoint
 description: "Intent-alignment gate for ambiguous/high-stakes requests. Use this when you want to extract goal/assumptions/criteria and require an explicit /proceed approval gate before any tool use."
 metadata:
   skill-type: team_automation
+
 ---
 
 # Alignment Checkpoint

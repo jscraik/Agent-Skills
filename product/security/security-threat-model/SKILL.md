@@ -3,6 +3,7 @@ name: "security-threat-model"
 description: Produce a repository-grounded threat model covering assets, trust boundaries, attackers, abuse paths, and mitigations. Use when the user explicitly wants AppSec threat modeling, not general architecture review.
 metadata:
   skill-type: runbook
+
 ---
 
 # Threat Model Source Code Repo

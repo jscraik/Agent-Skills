@@ -3,6 +3,7 @@ name: decide-build-primitive
 description: Use this skill to analyze whether a capability should become a Skill, Custom Prompt, or Agent automation when the user is packaging or automating a workflow and the right Codex primitive is not yet clear.
 metadata:
   skill-type: team_automation
+
 ---
 
 # Decide Build Primitive

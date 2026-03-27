@@ -3,6 +3,7 @@ name: release
 description: Cut a clean semver release from the main branch using the repo's release flow. Use when the user wants a tagged Cargo release, not generic deployment or changelog drafting.
 metadata:
   skill-type: ci_cd_deployment
+
 ---
 
 # Release

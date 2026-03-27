@@ -3,6 +3,7 @@ name: beautiful-mermaid
 description: Render Mermaid diagrams to SVG and PNG with Beautiful Mermaid. Use when the user asks to render or convert Mermaid diagrams into images.
 metadata:
   skill-type: scaffolding_templates
+
 ---
 
 # Beautiful Mermaid

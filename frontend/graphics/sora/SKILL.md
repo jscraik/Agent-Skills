@@ -3,6 +3,7 @@ name: "sora"
 description: "Generate, remix, manage, or download videos through OpenAI's Sora API using the bundled CLI. Use when the user wants AI video generation or asset retrieval, not traditional video editing."
 metadata:
   skill-type: scaffolding_templates
+
 ---
 
 # Sora

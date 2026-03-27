@@ -3,6 +3,7 @@ name: remotion
 description: Best-practice guidance for Remotion (React video). Use when building or reviewing Remotion compositions, timing, assets, audio, captions, or rendering.
 metadata:
   skill-type: library_api_reference
+
 ---
 
 # Remotion Best Practices

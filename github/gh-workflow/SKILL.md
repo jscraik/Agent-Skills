@@ -3,6 +3,7 @@ name: gh-workflow
 description: "Operate the GitHub lifecycle through `gh`: issue work, PR preparation, review handling, CI diagnosis, and merge execution. Use when the user wants GitHub state changed, advanced, or reconciled, not when they only want a policy-gated PR readiness decision."
 metadata:
   skill-type: ci_cd_deployment
+
 ---
 
 # GH Workflow

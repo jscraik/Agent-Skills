@@ -3,6 +3,7 @@ name: codex-home-audit
 description: Audit a Codex home directory for control-plane drift, risky state, and cleanup opportunities across config, agents, hooks, skills, plugins, and telemetry. Use when the user wants a dated Codex home health review.
 metadata:
   skill-type: code_quality_review
+
 ---
 
 # Codex Home Audit

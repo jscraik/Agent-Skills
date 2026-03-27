@@ -3,6 +3,7 @@ name: markdown-converter
 description: "Convert source files into Markdown outputs using the bundled converter workflow. Use when a user asks to transform documents, notes, or technical files into clean Markdown format."
 metadata:
   skill-type: team_automation
+
 ---
 
 # Markdown Converter

@@ -3,6 +3,7 @@ name: design-system
 description: Analyze or implement repository-grounded design-system layers such as tokens, typography, iconography, spacing, styles, aliases, and theme variables. Use when the user wants monorepo design-system work, not ordinary component styling or backend-only changes.
 metadata:
   skill-type: library_api_reference
+
 ---
 
 # Design System

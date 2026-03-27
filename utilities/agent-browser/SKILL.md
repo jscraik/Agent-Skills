@@ -3,6 +3,7 @@ name: agent-browser
 description: "Inspect and automate browser pages deterministically with the `agent-browser` CLI. Use when the user wants ref-based navigation, extraction, clicks, fills, or screenshots, not general browsing advice."
 metadata:
   skill-type: product_verification
+
 ---
 
 # Agent Browser

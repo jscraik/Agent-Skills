@@ -3,6 +3,7 @@ name: codex-agent-builder
 description: Create and install Codex multi-agent roles and configs with safe minimal-change updates. Use when the user wants agent roles created or updated, not orchestration of existing roles.
 metadata:
   skill-type: scaffolding_templates
+
 ---
 
 # Codex Agent Creator

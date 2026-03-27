@@ -3,6 +3,7 @@ name: product-spec
 description: Create or review product-planning specifications from ideas or existing docs. Use when the user wants a PRD, UX, API, architecture, operator, or test-plan artifact, not the narrower CE spec stage.
 metadata:
   skill-type: team_automation
+
 ---
 
 # Product Spec Skill

@@ -3,6 +3,7 @@ name: stitch-remotion
 description: Generate Stitch-to-Remotion walkthrough videos from screen assets. Use this skill when a user asks to transform Stitch screens into narrated or demo-style videos with transitions, overlays, and rendered exports.
 metadata:
   skill-type: scaffolding_templates
+
 ---
 
 # Stitch Remotion

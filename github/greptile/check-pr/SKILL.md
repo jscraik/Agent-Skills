@@ -3,6 +3,7 @@ name: check-pr
 description: Classify whether a GitHub PR is ready to merge by checking Greptile prerequisites, checks, unresolved review signal, and remediation priority. Use when the user wants a readiness decision only, not lifecycle actions or comment-by-comment remediation.
 metadata:
   skill-type: code_quality_review
+
 ---
 
 # Check PR

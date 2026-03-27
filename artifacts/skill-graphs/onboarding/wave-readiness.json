@@ -1,81 +1,50 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-03-25T01:46:56Z",
-  "decision_date": "2026-03-25",
+  "generated_at": "2026-03-27T17:28:03Z",
+  "decision_date": "2026-03-27",
   "summary": {
     "active_skill_count": 72,
     "manual_skill_count": 10,
     "co_pilot_skill_count": 62,
     "profile_valid_count": 72,
     "profile_invalid_count": 0,
-    "event_envelope_errors": 8,
+    "event_envelope_errors": 0,
     "approver_count": 2
   },
   "waves": {
     "wave-0-controls": {
-      "ready": false,
+      "ready": true,
       "checks": {
         "required_controls_present": true,
-        "event_envelope_errors_zero": false,
+        "event_envelope_errors_zero": true,
         "approver_count_gte_2": true
       },
-      "blockers": [
-        {
-          "code": "EVENT_ENVELOPE_ERRORS",
-          "detail": "Event envelope errors in decision window: 8",
-          "owner": "unassigned",
-          "due_date": null,
-          "escalation_date": null
-        }
-      ]
+      "blockers": []
     },
     "wave-1-manual": {
-      "ready": false,
+      "ready": true,
       "checks": {
         "manual_profiles_valid": true,
-        "wave_0_ready": false
+        "wave_0_ready": true
       },
       "coverage": {
         "total": 10,
         "valid": 10
       },
-      "blockers": [
-        {
-          "code": "WAVE0_NOT_READY",
-          "detail": "Wave 1 blocked until Wave 0 controls verification passes",
-          "owner": "unassigned",
-          "due_date": null,
-          "escalation_date": null
-        }
-      ]
+      "blockers": []
     },
     "wave-2-co-pilot": {
-      "ready": false,
+      "ready": true,
       "checks": {
         "co_pilot_profiles_valid": true,
-        "wave_1_ready": false,
-        "event_envelope_errors_zero": false
+        "wave_1_ready": true,
+        "event_envelope_errors_zero": true
       },
       "coverage": {
         "total": 62,
         "valid": 62
       },
-      "blockers": [
-        {
-          "code": "WAVE1_NOT_READY",
-          "detail": "Wave 2 blocked until Wave 1 manual onboarding passes",
-          "owner": "unassigned",
-          "due_date": null,
-          "escalation_date": null
-        },
-        {
-          "code": "EVENT_ENVELOPE_ERRORS",
-          "detail": "Wave 2 requires zero event envelope errors (actual=8)",
-          "owner": "unassigned",
-          "due_date": null,
-          "escalation_date": null
-        }
-      ]
+      "blockers": []
     }
   }
 }

@@ -10,6 +10,7 @@ allowed-tools:
   - "web_fetch"
 metadata:
   skill-type: scaffolding_templates
+
 ---
 
 # shadcn/ui Integration

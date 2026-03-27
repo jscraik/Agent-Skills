@@ -3,6 +3,7 @@ name: mcp-builder
 description: Create general-purpose MCP servers and tool schemas for standard integrations. Use when building MCP services without OAuth/billing/Apps UI requirements.
 metadata:
   skill-type: scaffolding_templates
+
 ---
 
 # MCP Builder

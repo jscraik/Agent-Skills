@@ -3,6 +3,7 @@ name: video-transcript-downloader
 description: Download video or audio and extract transcripts or subtitles with yt-dlp and ffmpeg. Use when the user wants media downloaded, transcribed, summarized, or converted from a video source.
 metadata:
   skill-type: team_automation
+
 ---
 
 # Video Transcript Downloader

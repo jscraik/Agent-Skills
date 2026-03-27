@@ -3,6 +3,7 @@ name: verification-before-completion
 description: "Validate completion claims with fresh command evidence. Use when you are about to claim work is complete, fixed, or passing."
 metadata:
   skill-type: code_quality_review
+
 ---
 
 # Verification Before Completion

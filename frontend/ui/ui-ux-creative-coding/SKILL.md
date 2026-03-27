@@ -4,6 +4,7 @@ description: Use this skill to build and polish an existing React or Tauri UI wi
 metadata:
   skill-type: scaffolding_templates
   short-description: UI polish workflow for React/Tauri with motion, accessibility, and implementation-ready validation guidance.
+
 ---
 
 # UI/UX Creative Coding

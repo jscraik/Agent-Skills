@@ -3,6 +3,7 @@ name: cli-spec
 description: Plan and draft CLI UX and surface area (commands, flags, help, output). Use when specifying or refactoring a command-line interface.
 metadata:
   skill-type: scaffolding_templates
+
 ---
 
 # CLI Spec

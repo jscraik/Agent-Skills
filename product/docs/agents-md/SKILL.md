@@ -3,6 +3,7 @@ name: agents-md
 description: Create or refactor AGENTS.md and linked instruction docs using progressive disclosure. Use when the user wants repo-specific agent guidance organized, deduplicated, or routed cleanly, not ordinary product documentation edits.
 metadata:
   skill-type: code_quality_review
+
 ---
 
 # Agents Md

@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-03-25T01:46:56Z",
-  "decision_date": "2026-03-25",
+  "generated_at": "2026-03-27T17:28:03Z",
+  "decision_date": "2026-03-27",
   "active_skill_count": 72,
   "expected_count": 0,
   "inventory_policy": "docs/skill-graphs/governance/inventory-policy.json",

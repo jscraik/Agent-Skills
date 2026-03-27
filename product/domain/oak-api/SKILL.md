@@ -3,6 +3,7 @@ name: oak-api
 description: Build or adapt Oak Curriculum API learning experiences, especially child-facing Apps SDK flows. Use when the user wants Oak endpoints or curriculum data turned into guided learning interactions with age-appropriate guardrails.
 metadata:
   skill-type: library_api_reference
+
 ---
 
 # Oak API

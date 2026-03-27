@@ -306,6 +306,11 @@ deep-interview:
     existing drafts
   product-spec: Hand the completed insights to product-spec for structured PRD/UX/arch
     artifacts
+design-md:
+  enhance-prompt: Enhance generation prompts using the tokens from `DESIGN.md`
+  stitch-design: Unified entry point combining design-md, enhance-prompt, and screen
+    generation
+  stitch-loop: Run iterative page generation after `DESIGN.md` is established
 design-system:
   baseline-ui: Validate UI components against design-system tokens
   figma: Extract Figma tokens as source of truth for the design system
@@ -325,6 +330,10 @@ docs-expert:
   markdown-converter: Convert source materials into clean Markdown before docs restructuring
   visual-explainer: Present a complex system, workflow, or docs audit as a visual
     artifact
+enhance-prompt:
+  design-md: Create `DESIGN.md` first so enhance-prompt can inject design tokens
+  stitch-design: Unified entry point that wraps enhance-prompt + screen generation
+  stitch-loop: Pipe enhanced prompts into the baton loop for iterative page generation
 evals-router:
   skill-builder: When the eval workflow should be packaged as a reusable Codex skill
   systematic-debugging: When eval pipeline bugs emerge — debug root cause before redesigning
@@ -648,7 +657,14 @@ spreadsheet:
   insight-report: Export session data to spreadsheet for analysis
   markdown-converter: Convert spreadsheet data to markdown for documentation
   visual-explainer: Present spreadsheet data as a styled HTML table
+stitch-design:
+  design-md: Generate `.stitch/DESIGN.md` before iterative screen generation
+  enhance-prompt: Standalone prompt enhancement without screen generation
+  stitch-loop: Chain this skill's output into an autonomous multi-page build loop
+  stitch-react-components: Convert Stitch HTML output into React component files
 stitch-loop:
+  design-md: Generate `.stitch/DESIGN.md` before starting the loop
+  enhance-prompt: Enhance baton prompts with design tokens before generation
   frontend-ui-design: Review and polish Stitch-generated UI
   stitch-react-components: Convert Stitch outputs to React components
   stitch-remotion: Turn Stitch screens into narrated video walkthroughs
