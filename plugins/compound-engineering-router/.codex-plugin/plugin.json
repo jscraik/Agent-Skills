@@ -1,5 +1,4 @@
 {
-  "schema_version": 1,
   "name": "compound-engineering-router",
   "version": "0.1.0",
   "description": "Routes compound-engineering requests to the correct workflow prompt or meta-mode in the Codex config repo.",
@@ -17,14 +16,6 @@
     "codex",
     "automation"
   ],
-  "governance": {
-    "lifecycle_state": "active",
-    "maturity": "validated",
-    "owner": "Agent Skills Team",
-    "review_cadence": "monthly",
-    "last_reviewed": "2026-03-24",
-    "metadata_source": "plugin_manifest"
-  },
   "interface": {
     "displayName": "Compound Engineering Router",
     "shortDescription": "Routes compound-engineering workflow requests",

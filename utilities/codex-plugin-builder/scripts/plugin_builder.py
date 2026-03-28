@@ -623,6 +623,8 @@ def _source_signature_from_report(
 
 def build_marketplace_entry(
     plugin_name: str,
+    plugin_root: Path,
+    marketplace_path: Path,
     install_policy: str,
     auth_policy: str,
     category: str,
@@ -631,7 +633,7 @@ def build_marketplace_entry(
         "name": plugin_name,
         "source": {
             "source": "local",
-            "path": f"./plugins/{plugin_name}",
+            "path": _relative_repo_source_path(plugin_root, marketplace_path),
         },
         "policy": {
             "installation": install_policy,
@@ -682,6 +684,25 @@ def _ensure_marketplace_interface(payload: dict[str, Any]) -> None:
     payload["interface"] = {
         "displayName": _display_name_from_identifier(marketplace_name),
     }
+
+
+def _marketplace_repo_root(marketplace_path: Path) -> Path:
+    resolved_path = marketplace_path.resolve()
+    marketplace_dir = resolved_path.parent
+    if marketplace_dir.name == "plugins" and marketplace_dir.parent.name == ".agents":
+        return marketplace_dir.parent.parent
+    return marketplace_dir.parent
+
+
+def _relative_repo_source_path(plugin_root: Path, marketplace_path: Path) -> str:
+    repo_root = _marketplace_repo_root(marketplace_path)
+    resolved_plugin_root = plugin_root.resolve()
+    if not _path_within_root(repo_root, resolved_plugin_root):
+        raise ValueError(
+            f"Plugin root '{resolved_plugin_root}' must stay within repo root '{repo_root}'."
+        )
+    relative_path = resolved_plugin_root.relative_to(repo_root).as_posix()
+    return f"./{relative_path}"
 
 
 def _check_string_list(value: Any, field_name: str) -> list[str]:
@@ -759,6 +780,7 @@ def create_stub_file(path: Path, payload: dict[str, Any], force: bool) -> None:
 def update_marketplace_json(
     marketplace_path: Path,
     plugin_name: str,
+    plugin_root: Path,
     install_policy: str,
     auth_policy: str,
     category: str | None,
@@ -777,6 +799,8 @@ def update_marketplace_json(
     effective_category = category or _suggest_marketplace_category(plugin_name)
     new_entry = build_marketplace_entry(
         plugin_name,
+        plugin_root,
+        marketplace_path,
         install_policy,
         auth_policy,
         effective_category,
@@ -806,6 +830,7 @@ def _load_plugin_payload(plugin_root: Path) -> dict[str, Any] | None:
 
 def _normalize_marketplace_entry(
     entry: dict[str, Any],
+    marketplace_path: Path,
     plugins_path: Path,
 ) -> tuple[dict[str, Any], list[str]]:
     notes: list[str] = []
@@ -816,9 +841,9 @@ def _normalize_marketplace_entry(
 
     plugin_name = normalize_plugin_name(plugin_name)
     normalized["name"] = plugin_name
-    expected_path = f"./plugins/{plugin_name}"
     plugin_root = plugins_path / plugin_name
     plugin_payload = _load_plugin_payload(plugin_root)
+    expected_path = _relative_repo_source_path(plugin_root, marketplace_path)
 
     source = normalized.get("source")
     if not isinstance(source, dict):
@@ -899,11 +924,21 @@ def _audit_marketplace(
             findings.append({"severity": "error", "message": f"duplicate marketplace entry for '{name}'."})
             continue
         seen_names.add(name)
+        plugin_root = plugins_path / name
+        source = entry.get("source")
+        if isinstance(source, dict):
+            source_path = source.get("path")
+            if _is_relative_plugin_path(source_path):
+                plugin_root = (_marketplace_repo_root(marketplace_path) / source_path[2:]).resolve()
         findings.extend(
             {"severity": "error", "message": message}
-            for message in _check_marketplace_entry(payload, name)
+            for message in _check_marketplace_entry(
+                payload,
+                name,
+                plugin_root,
+                marketplace_path,
+            )
         )
-        plugin_root = plugins_path / name
         if not plugin_root.exists():
             findings.append(
                 {
@@ -989,7 +1024,11 @@ def _normalize_marketplace_payload(
     for entry in plugins:
         if not isinstance(entry, dict):
             raise ValueError("marketplace entries must be JSON objects.")
-        normalized_entry, entry_notes = _normalize_marketplace_entry(entry, plugins_path)
+        normalized_entry, entry_notes = _normalize_marketplace_entry(
+            entry,
+            marketplace_path,
+            plugins_path,
+        )
         plugin_name = normalized_entry["name"]
         if plugin_name in seen_names:
             raise ValueError(f"duplicate marketplace entry for '{plugin_name}'. Resolve duplicates before normalization.")
@@ -2259,7 +2298,10 @@ def _check_plugin_manifest(plugin_json_path: Path) -> list[str]:
 
 
 def _check_marketplace_entry(
-    marketplace_payload: dict[str, Any], plugin_name: str
+    marketplace_payload: dict[str, Any],
+    plugin_name: str,
+    plugin_root: Path,
+    marketplace_path: Path,
 ) -> list[str]:
     failures: list[str] = []
     interface = marketplace_payload.get("interface")
@@ -2294,11 +2336,23 @@ def _check_marketplace_entry(
             failures.append(
                 f"marketplace plugin '{plugin_name}' source.source must be 'local'."
             )
-        expected_path = f"./plugins/{plugin_name}"
-        if source.get("path") != expected_path:
+        source_path = source.get("path")
+        if not _is_relative_plugin_path(source_path):
             failures.append(
-                f"marketplace plugin '{plugin_name}' source.path must be '{expected_path}'."
+                f"marketplace plugin '{plugin_name}' source.path must be a './'-prefixed path relative to the repo root."
             )
+        else:
+            repo_root = _marketplace_repo_root(marketplace_path)
+            resolved_source_root = (repo_root / source_path[2:]).resolve()
+            if not _path_within_root(repo_root, resolved_source_root):
+                failures.append(
+                    f"marketplace plugin '{plugin_name}' source.path must stay within repo root '{repo_root}'."
+                )
+            elif resolved_source_root != plugin_root.resolve():
+                expected_path = _relative_repo_source_path(plugin_root, marketplace_path)
+                failures.append(
+                    f"marketplace plugin '{plugin_name}' source.path resolves to '{resolved_source_root}', expected '{expected_path}'."
+                )
 
     policy = plugin_entry.get("policy")
     install_policy = None
@@ -2325,9 +2379,9 @@ def _check_marketplace_entry(
         )
 
     category = plugin_entry.get("category")
-    if category is not None and (not isinstance(category, str) or not category):
+    if not isinstance(category, str) or not category.strip():
         failures.append(
-            f"marketplace plugin '{plugin_name}' category must be a non-empty string when present."
+            f"marketplace plugin '{plugin_name}' category must be a non-empty string."
         )
 
     return failures
@@ -2635,6 +2689,7 @@ def _run_scaffold(args: argparse.Namespace) -> int:
         update_marketplace_json(
             marketplace_path,
             plugin_name,
+            plugin_root,
             args.install_policy,
             args.auth_policy,
             effective_category,
@@ -2720,7 +2775,12 @@ def _run_validate(args: argparse.Namespace) -> int:
         else:
             marketplace_payload = load_json(marketplace_path)
             findings.extend(
-                _check_marketplace_entry(marketplace_payload, plugin_root.name)
+                _check_marketplace_entry(
+                    marketplace_payload,
+                    plugin_root.name,
+                    plugin_root,
+                    marketplace_path,
+                )
             )
 
     _print_findings(findings)

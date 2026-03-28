@@ -200,10 +200,10 @@ The curated `openai/plugins` repo commonly adds richer metadata on top of the ru
 ### Plugin entry fields
 - `name` (`string`): plugin identifier. Keep it aligned with the folder name and manifest `name`.
 - `source.source` (`string`): use `local`.
-- `source.path` (`string`): always `./plugins/<plugin-name>`.
+- `source.path` (`string`): a `./`-prefixed path relative to the repo root that resolves to the plugin directory, typically `./plugins/<plugin-name>`.
 - `policy.installation` (`string`): one of `NOT_AVAILABLE`, `AVAILABLE`, `INSTALLED_BY_DEFAULT`.
 - `policy.authentication` (`string`): one of `ON_INSTALL`, `ON_USE`.
-- `category` (`string`): recommended and emitted by this builder, but accepted as optional for compatibility with existing curated entries that omit it.
+- `category` (`string`): required and emitted by this builder.
 - `policy.products` (`array`): optional override. Only add it when the user explicitly asks for product gating.
 
 ### Marketplace generation rules
@@ -213,7 +213,7 @@ The curated `openai/plugins` repo commonly adds richer metadata on top of the ru
 - Validators should accept legacy flat `installPolicy` and `authPolicy` during migration.
 - Append new entries unless the user explicitly requests reordering.
 - Replace an existing entry for the same plugin only when overwrite is intentional.
-- Use marketplace normalization to sort entries, upgrade legacy flat policy fields, normalize `source.path`, and fill missing categories where local plugin evidence exists.
+- Use marketplace normalization to sort entries, upgrade legacy flat policy fields, normalize `source.path` relative to the repo root, and fill missing categories where local plugin evidence exists.
 
 ## Compatibility audits
 - Treat runtime validation and curated compatibility as separate checks.
@@ -222,7 +222,7 @@ The curated `openai/plugins` repo commonly adds richer metadata on top of the ru
 - `audit-marketplace` should answer: does the marketplace cover local plugins cleanly and consistently?
 - `normalize-marketplace` should make safe catalog-only fixes such as:
   - sort entries by plugin name,
-  - normalize `source.source` and `source.path`,
+  - normalize `source.source` and `source.path` relative to the repo root,
   - migrate `installPolicy` and `authPolicy` into `policy.installation` and `policy.authentication`,
   - fill missing category values using local plugin evidence when possible.
 
