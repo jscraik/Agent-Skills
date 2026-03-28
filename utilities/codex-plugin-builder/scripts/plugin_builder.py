@@ -688,10 +688,27 @@ def _ensure_marketplace_interface(payload: dict[str, Any]) -> None:
 
 def _marketplace_repo_root(marketplace_path: Path) -> Path:
     resolved_path = marketplace_path.resolve()
-    marketplace_dir = resolved_path.parent
-    if marketplace_dir.name == "plugins" and marketplace_dir.parent.name == ".agents":
-        return marketplace_dir.parent.parent
-    return marketplace_dir.parent
+    for candidate in (resolved_path.parent, *resolved_path.parents):
+        if (candidate / ".git").exists():
+            repo_root = candidate
+            break
+    else:
+        raise ValueError(
+            f"Unable to locate repo root for marketplace path '{resolved_path}'. "
+            "Expected a '.git' sentinel above the marketplace file."
+        )
+
+    relative_marketplace = resolved_path.relative_to(repo_root).as_posix()
+    if relative_marketplace in {
+        "plugins/marketplace.json",
+        ".agents/plugins/marketplace.json",
+    }:
+        return repo_root
+
+    raise ValueError(
+        "Marketplace file must live at 'plugins/marketplace.json' or "
+        "'.agents/plugins/marketplace.json' relative to the repo root."
+    )
 
 
 def _relative_repo_source_path(plugin_root: Path, marketplace_path: Path) -> str:

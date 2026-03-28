@@ -21,6 +21,7 @@ class PluginBuilderMarketplacePathTests(unittest.TestCase):
     def test_repo_root_relative_path_for_plugins_marketplace(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             repo_root = Path(tmpdir)
+            (repo_root / ".git").mkdir()
             plugin_root = repo_root / "plugins" / "example-plugin"
             plugin_root.mkdir(parents=True)
             marketplace_path = repo_root / "plugins" / "marketplace.json"
@@ -32,6 +33,7 @@ class PluginBuilderMarketplacePathTests(unittest.TestCase):
     def test_repo_root_relative_path_for_agents_marketplace(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             repo_root = Path(tmpdir)
+            (repo_root / ".git").mkdir()
             plugin_root = repo_root / "plugins" / "example-plugin"
             plugin_root.mkdir(parents=True)
             agents_plugins = repo_root / ".agents" / "plugins"
@@ -42,9 +44,20 @@ class PluginBuilderMarketplacePathTests(unittest.TestCase):
 
             self.assertEqual(path, "./plugins/example-plugin")
 
+    def test_marketplace_root_rejects_nested_plugins_dir(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo_root = Path(tmpdir)
+            (repo_root / ".git").mkdir()
+            nested_marketplace = repo_root / "custom" / "plugins" / "marketplace.json"
+            nested_marketplace.parent.mkdir(parents=True)
+
+            with self.assertRaisesRegex(ValueError, "Marketplace file must live at"):
+                plugin_builder._marketplace_repo_root(nested_marketplace)
+
     def test_marketplace_entry_rejects_plugins_dir_relative_path(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             repo_root = Path(tmpdir)
+            (repo_root / ".git").mkdir()
             plugin_root = repo_root / "plugins" / "example-plugin"
             plugin_root.mkdir(parents=True)
             marketplace_path = repo_root / "plugins" / "marketplace.json"
