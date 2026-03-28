@@ -7,6 +7,8 @@ metadata:
   maturity: canonical
   owner: Design System Team
   last_reviewed: 2026-03-28
+  review_cadence: quarterly
+  metadata_source: frontmatter
 ---
 
 # Design System
