@@ -34,7 +34,9 @@ class PluginBuilderMarketplacePathTests(unittest.TestCase):
             repo_root = Path(tmpdir)
             plugin_root = repo_root / "plugins" / "example-plugin"
             plugin_root.mkdir(parents=True)
-            marketplace_path = repo_root / ".agents" / "plugins" / "marketplace.json"
+            agents_plugins = repo_root / ".agents" / "plugins"
+            agents_plugins.mkdir(parents=True)
+            marketplace_path = agents_plugins / "marketplace.json"
 
             path = plugin_builder._relative_repo_source_path(plugin_root, marketplace_path)
 
