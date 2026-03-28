@@ -942,11 +942,12 @@ def _audit_marketplace(
             continue
         seen_names.add(name)
         plugin_root = plugins_path / name
+        source_plugin_root = plugin_root
         source = entry.get("source")
         if isinstance(source, dict):
             source_path = source.get("path")
             if _is_relative_plugin_path(source_path):
-                plugin_root = (_marketplace_repo_root(marketplace_path) / source_path[2:]).resolve()
+                source_plugin_root = (_marketplace_repo_root(marketplace_path) / source_path[2:]).resolve()
         findings.extend(
             {"severity": "error", "message": message}
             for message in _check_marketplace_entry(
@@ -956,27 +957,27 @@ def _audit_marketplace(
                 marketplace_path,
             )
         )
-        if not plugin_root.exists():
+        if not source_plugin_root.exists():
             findings.append(
                 {
                     "severity": "warning",
-                    "message": f"marketplace entry '{name}' points to missing plugin directory '{plugin_root}'.",
+                    "message": f"marketplace entry '{name}' points to missing plugin directory '{source_plugin_root}'.",
                 }
             )
             continue
-        plugin_payload = _load_plugin_payload(plugin_root)
+        plugin_payload = _load_plugin_payload(source_plugin_root)
         if plugin_payload is None:
             findings.append(
                 {
                     "severity": "warning",
-                    "message": f"plugin directory '{plugin_root}' is missing .codex-plugin/plugin.json.",
+                    "message": f"plugin directory '{source_plugin_root}' is missing .codex-plugin/plugin.json.",
                 }
             )
             continue
         suggested_category = _suggest_marketplace_category(
             name,
             payload=plugin_payload,
-            plugin_root=plugin_root,
+            plugin_root=source_plugin_root,
         )
         entry_category = entry.get("category")
         if not isinstance(entry_category, str) or not entry_category.strip():
