@@ -263,7 +263,7 @@ Required behavior:
   - `.app.json` app-level details;
 - treat `.mcp.json` and `.app.json` as runtime integration files, not recommendation lists;
 - if manifest image fields are declared, the referenced files must already exist under `./assets/`;
-- marketplace entries must include marketplace `interface.displayName`, `source.source = "local"`, `source.path = "./plugins/<plugin-name>"`, `policy.installation`, `policy.authentication`, and `category`;
+- marketplace entries must include marketplace `interface.displayName`, `source.source = "local"`, a `./`-prefixed `source.path` relative to the repo root (for example `./plugins/<plugin-name>`), `policy.installation`, `policy.authentication`, and `category`;
 - when the user does not specify a category, infer a suggested category from the chosen or inferred archetype, then allow deliberate overrides;
 - validator compatibility note: accept legacy flat `installPolicy` and `authPolicy` while existing local marketplaces migrate, but emit the canonical nested `policy` object for all new scaffolds and overwrites;
 - keep marketplace normalization separate from plugin runtime validation so curated-compatibility cleanup does not masquerade as runtime breakage;

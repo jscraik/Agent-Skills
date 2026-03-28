@@ -73,3 +73,7 @@ Repo-specific agent knowledge base. Append-only.
 - **2026-03-17 [Codex]:** `run_skill_evals.py` and `docs_lint.py` false negatives are often caused by stale or missing skill sync artifacts; rebuild projections with `bash scripts/sync_skills.sh` and verify `/skills-antigravity/` plus `skills.txt` before blaming skill logic for missing invocations.
 
 - **2026-03-17 [Codex]:** During skill install review, validating import quality before enforcing a full fold/merge-first deconflict pass against existing operational skills can delay the correct consolidation call. → Fix: run a mandatory capability overlap matrix first (existing skills vs incoming skill), record an explicit `merge|fold|improve-existing|install-new` decision before any install edits, and treat prior duplicate incidents as hard guardrails.
+
+- **2026-03-27 [Codex]:** Local plugin marketplaces named `openai-curated` can collide with Codex's official synced marketplace namespace and surface `Plugin detail unavailable` or plugin read failures in the TUI. -> Use a unique local marketplace name (for example `agent-skills-local`) and keep local plugin manifests to the known runtime top-level shape without extra metadata keys.
+
+- **2026-03-28 [Codex]:** Codex app-server resolves marketplace `source.path` from the repo root, not from the directory containing `marketplace.json`. -> Keep local marketplace entries as repo-root-relative paths like `./plugins/<plugin-name>` even when the marketplace file itself lives under `plugins/` or `.agents/plugins/`.

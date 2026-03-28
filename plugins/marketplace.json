@@ -1,8 +1,7 @@
 {
-  "schema_version": 1,
-  "name": "openai-curated",
+  "name": "agent-skills-local",
   "interface": {
-    "displayName": "OpenAI Curated"
+    "displayName": "Agent Skills Local"
   },
   "plugins": [
     {
