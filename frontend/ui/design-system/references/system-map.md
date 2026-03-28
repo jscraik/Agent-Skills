@@ -6,6 +6,7 @@
 - [Spacing and sizing](#spacing-and-sizing)
 - [Color and semantic theming](#color-and-semantic-theming)
 - [Iconography](#iconography)
+- [Guidance policy and protection scope](#guidance-policy-and-protection-scope)
 - [Validation and policy](#validation-and-policy)
 - [Fast retrieval commands](#fast-retrieval-commands)
 
@@ -14,10 +15,11 @@
 - **Brand governance:** `brand/README.md`, `docs/design-system/CHARTER.md`, `docs/design-system/UPSTREAM_ALIGNMENT.md`
 - **Generated foundations:** `packages/tokens/src/foundations.css`
 - **Semantic aliases:** `packages/tokens/src/aliases.css`
-- **Generated output artifacts:** `packages/tokens/src/tokens.css`, `packages/tokens/src/enhanced.css`
 - **Tailwind mapping:** `packages/tokens/tailwind.preset.ts`
 - **Runtime mapped slots:** `packages/ui/src/styles/theme.css`
 - **Governance contract:** `docs/design-system/CONTRACT.md`
+- **Professional UI contract:** `docs/design-system/PROFESSIONAL_UI_CONTRACT.md`
+- **Routing map:** `docs/design-system/AGENT_UI_ROUTING.md`
 
 ## Typography
 - DTCG keys: `type.fontFamily`, `type.web.*`
@@ -54,9 +56,19 @@
 - Consolidation notes: `docs/design-system/ICON_CONSOLIDATION.md`
 - Storybook reference: `packages/ui/src/storybook/design-system/12_Iconography/Iconography.stories.tsx`
 
+## Guidance policy and protection scope
+- Guidance scope config: `.design-system-guidance.json`
+- Guidance package: `packages/design-system-guidance`
+- Surface routing contract: `docs/design-system/AGENT_UI_ROUTING.md`
+- Lifecycle contract: `docs/design-system/COMPONENT_LIFECYCLE.json`
+- Exemptions ledger: `docs/design-system/ENFORCEMENT_EXEMPTIONS.json`
+
 ## Validation and policy
 - Token validation: `pnpm validate:tokens`
 - Coverage policy: `pnpm ds:matrix:check`
+- Repo policy gate: `pnpm test:policy`
+- Guidance ratchet gate: `pnpm design-system-guidance:ratchet`
+- Guidance full check: `pnpm design-system-guidance:check:ci`
 - Design-system governance docs:
   - `docs/design-system/collections/brand-collection-rules.md`
   - `docs/design-system/collections/alias-collection-rules.md`
@@ -65,7 +77,6 @@
   - `docs/design-system/ADOPTION_CHECKLIST.md`
   - `docs/design-system/A11Y_CONTRACTS.md`
   - `docs/design-system/COVERAGE_MATRIX.md`
-  - `packages/tokens/docs/FIGMA_EXPORT_GUIDE.md`
 
 ## Fast retrieval commands
 ```bash
@@ -76,6 +87,8 @@ jq '.radius | keys' packages/tokens/src/tokens/index.dtcg.json
 
 rg -n "--foundation-|--ds-|--color-" packages/tokens packages/ui/src/styles
 rg -n "@design-studio/ui/icons|@design-studio/astudio-icons" packages/ui/src
+rg -n "protectedSurfaces|mode|exemptions" .design-system-guidance.json docs/design-system/ENFORCEMENT_EXEMPTIONS.json
+rg -n "PROFESSIONAL_UI_CONTRACT|AGENT_UI_ROUTING|COMPONENT_LIFECYCLE" docs/design-system
 rg -n "Brand|Alias|Mapped" docs/design-system/CONTRACT.md docs/design-system/collections/*.md
 rg -n "CHARTER|UPSTREAM_ALIGNMENT|ADOPTION_CHECKLIST|COVERAGE_MATRIX|A11Y_CONTRACTS" docs/design-system brand/README.md
 ```

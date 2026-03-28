@@ -3,12 +3,15 @@ schema_version: "1.0"
 purpose: >
   Provide repository-grounded design-system guidance and implementation support
   for this monorepo, including tokens, typography, iconography, spacing,
-  semantic aliases, mapped theme variables, and UI consumption patterns.
+  semantic aliases, mapped theme variables, guidance-policy scope controls,
+  and UI consumption patterns.
 
 triggers:
   - user asks to audit or modify design tokens, typography, spacing, iconography, or theme variables
   - user asks how styles should map across Brand → Alias → Mapped layers
   - user asks for design-system consistency checks in packages/tokens or packages/ui
+  - user asks to troubleshoot guidance-policy/ratchet behavior on protected UI surfaces
+  - user asks for semantic-literal cleanup in Storybook or app UI surfaces
 
 inputs:
   - user request and desired output format (audit, patch, migration, checklist)
@@ -19,6 +22,7 @@ outputs:
   - evidence-backed response with canonical file references
   - layer-aware change plan or edits (Brand/Alias/Mapped/Usage)
   - brand-accessibility audit matrix when color/interaction/mode changes are in scope
+  - guidance-policy impact notes when `.design-system-guidance.json` or protected surfaces are touched
   - validation command set and expected pass criteria
   - optional artifact docs under ./artifacts/design-system/
 
@@ -31,11 +35,15 @@ risks:
   - stale assumptions about canonical sources; mitigated by reading source files first
   - accidental layer violations; mitigated by explicit layer impact tracing
   - token drift; mitigated by running token and policy validation commands
+  - policy drift between docs and enforcement config; mitigated by reading contract docs plus ratchet/check outputs
 
 examples:
   happy_path:
     input: "Audit our spacing + typography token usage for chat components and list issues."
     expected_output: "Findings mapped to canonical token sources and component files, with fixes."
+  guidance_path:
+    input: "Why did design-system-guidance ratchet fail after I touched settings stories?"
+    expected_output: "Touched-file scope analysis with concrete fixes and rerun commands."
   edge_case:
     input: "Need icon cleanup but preserve deprecated package compatibility for one release."
     expected_output: "Canonical path migration plan plus explicit temporary compatibility boundaries."

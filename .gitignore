@@ -31,6 +31,12 @@ node_modules/
 
 # Generated skill views (symlink aggregation dirs)
 skills/
+# Keep codex-plugin-builder Ars Contexta fixture skill tracked for lint coverage.
+!utilities/codex-plugin-builder/fixtures/arscontexta-codex/skills/
+utilities/codex-plugin-builder/fixtures/arscontexta-codex/skills/*
+!utilities/codex-plugin-builder/fixtures/arscontexta-codex/skills/arscontexta/
+utilities/codex-plugin-builder/fixtures/arscontexta-codex/skills/arscontexta/*
+!utilities/codex-plugin-builder/fixtures/arscontexta-codex/skills/arscontexta/SKILL.md
 skills-antigravity/
 sync-symlink/
 

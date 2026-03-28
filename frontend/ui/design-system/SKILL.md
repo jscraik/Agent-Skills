@@ -1,8 +1,14 @@
 ---
 name: design-system
-description: Analyze or implement repository-grounded design-system layers such as tokens, typography, iconography, spacing, styles, aliases, and theme variables. Use when the user wants monorepo design-system work, not ordinary component styling or backend-only changes.
+description: "Analyze and implement repository-grounded design-system work (tokens, typography, iconography, spacing, styles, aliases, and theme variables) for this monorepo. Use when requests involve UI styling systems or token-layer changes; don’t use for backend/MCP-only tasks with no UI impact. Outputs: evidence-backed analysis or changes with canonical file references, layer impact, and validation commands. Success: work aligns to Brand→Alias→Mapped rules and passes design-system checks."
 metadata:
-  skill-type: library_api_reference
+  skill-type: product_verification
+  lifecycle_state: active
+  maturity: canonical
+  owner: Design System Team
+  last_reviewed: 2026-03-28
+  review_cadence: quarterly
+  metadata_source: frontmatter
 ---
 
 # Design System
@@ -10,6 +16,7 @@ metadata:
 ## Table of Contents
 - [Working agreement](#working-agreement)
 - [Scope and triggers](#scope-and-triggers)
+- [When to use](#when-to-use)
 - [Required inputs](#required-inputs)
 - [Required context](#required-context)
 - [Principles](#principles)
@@ -19,30 +26,32 @@ metadata:
 - [Constraints](#constraints)
 - [Validation](#validation)
 - [Anti-patterns](#anti-patterns)
+- [Failure mode](#failure-mode)
+- [Gotchas](#gotchas)
 - [Examples](#examples)
 - [Reference map](#reference-map)
+- [See Also](#see-also)
 - [Remember](#remember)
 
 ## Working agreement
-- Follow `AGENTS.md` (repo root) and treat docs as maps.
+- Follow `/Users/jamiecraik/dev/design-system/AGENTS.md` and treat docs as maps.
 - Prefer retrieval-led reasoning: inspect canonical files before proposing answers/changes.
-- Treat this as the brand/design map for this repo: validate `docs/design-system/CHARTER.md` and `docs/design-system/UPSTREAM_ALIGNMENT.md` before token/theme edits.
+- This skill is a design/brand map for the repo; when token or visual guidance is requested, validate both design contracts (`docs/design-system/CHARTER.md`, `docs/design-system/UPSTREAM_ALIGNMENT.md`) and canonical token sources before editing.
 - Use `zsh -lc`, `rg`, `fd`, and `jq`; avoid `grep`/`find` for repo-wide scans.
-- If any of `rg`, `fd`, or `jq` are unavailable in the current environment, use a compatible fallback and note the substitute command used.
+- For multi-step or path-sensitive work, run `bash -lc 'source scripts/codex-preflight.sh && preflight_repo'` before editing.
 - Artifact boundary:
   - Local CLI: write outputs to `./artifacts/`
   - Hosted shell: write outputs to `/mnt/data/`
 
-Current baseline markers:
-- React 19 for component-layer guidance and stateful UI patterns.
-- Next.js 16 when the target surface is a Next.js app or widget shell.
-- Tailwind CSS v4 for utility and token usage guidance.
-- WCAG 2.2 AA for accessibility acceptance and QA.
-
-## When to use
+## Scope and triggers
 - Use this skill when the user asks about design-system behavior, token usage, typography, spacing, iconography, theme variables, or UI styling consistency in this repo.
 - Use this skill when implementing or auditing changes touching `packages/tokens`, `packages/ui/src/styles`, `packages/ui/src/icons`, or design-system docs/stories.
 - Do **not** use this skill for backend-only, infra-only, or MCP server tasks that do not affect UI/design-system layers.
+
+## When to use
+- Use when the task requires design-system governance, token-layer decisions, or cross-surface UI consistency enforcement.
+- Use when the user needs evidence-backed recommendations tied to canonical design-system contracts and token layers.
+- Avoid using this skill for backend-only or infrastructure-only requests; route those to backend/infra skills.
 
 ## Required inputs
 - User goal (audit, implementation, migration, or Q&A).
@@ -52,7 +61,7 @@ Current baseline markers:
 ## Required context
 Collect only the minimum set needed for the user request:
 
-1. Brand and governance:
+1. Brand and adoption contracts:
    - `brand/README.md`
    - `docs/design-system/CHARTER.md`
    - `docs/design-system/ADOPTION_CHECKLIST.md`
@@ -62,7 +71,6 @@ Collect only the minimum set needed for the user request:
    - `packages/tokens/src/tokens/index.dtcg.json`
    - `packages/tokens/src/alias-map.ts`
    - `packages/tokens/schema/dtcg.schema.json`
-   - `packages/tokens/src/validation/token-validator.ts`
 3. Generated token outputs:
    - `packages/tokens/src/foundations.css`
    - `packages/tokens/src/aliases.css`
@@ -74,8 +82,12 @@ Collect only the minimum set needed for the user request:
 5. Icon system source:
    - `packages/ui/src/icons/index.ts`
    - `docs/design-system/ICON_CONSOLIDATION.md`
-6. Rules and coverage artifacts:
+6. Governance + rules:
    - `docs/design-system/CONTRACT.md`
+   - `docs/design-system/PROFESSIONAL_UI_CONTRACT.md`
+   - `docs/design-system/AGENT_UI_ROUTING.md`
+   - `docs/design-system/COMPONENT_LIFECYCLE.json`
+   - `docs/design-system/ENFORCEMENT_EXEMPTIONS.json`
    - `docs/design-system/collections/*.md`
    - `docs/design-system/COVERAGE_MATRIX.md`
    - `docs/design-system/A11Y_CONTRACTS.md`
@@ -83,6 +95,9 @@ Collect only the minimum set needed for the user request:
 7. Surface examples:
    - `packages/ui/src/storybook/design-system/**`
    - `packages/ui/src/design-system/showcase/**`
+8. Guidance policy + scope:
+   - `.design-system-guidance.json`
+   - `packages/design-system-guidance/**`
 
 If the request is ambiguous, ask one focused clarification question.
 
@@ -102,24 +117,22 @@ If the request is ambiguous, ask one focused clarification question.
 1. **Classify the request mode**
    - `audit`, `implementation`, `migration`, or `Q&A`.
 2. **Build a focused system snapshot**
-   - Verify brand posture with `docs/design-system/CHARTER.md`, `ADOPTION_CHECKLIST.md`, and `UPSTREAM_ALIGNMENT.md` before token/theme edits.
-   - Use `jq` for DTCG keys/values and `rg`/`fd` for usage tracing (with environment fallbacks when needed).
-   - Record relevant pillars: color, typography, spacing, radius/size/shadow, motion, icons, brand-mode behavior.
+   - For path-sensitive work, run repo preflight first (`source scripts/codex-preflight.sh && preflight_repo` via `bash`).
+   - Verify brand posture with `docs/design-system/CHARTER.md` and `ADOPTION_CHECKLIST.md` before touching tokens or theme.
+   - Use `jq` for DTCG keys/values and `rg`/`fd` for CSS variable and component usage.
+   - Record only relevant pillars: color, typography, spacing, radius/size/shadow, motion, icons, brand-mode behavior.
 3. **Trace the layer path for each finding/change**
    - Brand token in DTCG → generated foundation vars → alias vars → mapped theme vars → component/story usage.
 4. **Produce response or implement edits**
    - Include exact file references and affected token names.
-   - For code changes, avoid introducing hard-coded color values or ad-hoc pixel values in component code unless explicitly requested.
-   - For brand decisions (new/renamed semantic tokens, dark/high-contrast additions), cite `docs/design-system/CONTRACT.md` and `docs/design-system/collections/brand-collection-rules.md`.
+   - For code changes, avoid introducing hex/rgb literals or ad-hoc px values in component code unless explicitly requested.
+   - For brand decisions (new/renamed semantic tokens, dark/high contrast additions), cite `docs/design-system/CONTRACT.md` and `docs/design-system/collections/brand-collection-rules.md`.
 5. **Validate**
    - Run the smallest relevant checks from [Validation](#validation).
-   - If token source files changed (`packages/tokens/src/tokens/index.dtcg.json`, `packages/tokens/src/alias-map.ts`), verify `packages/tokens/SCHEMA_VERSION` and regenerate artifacts to confirm coherence.
-     - Primary: `pnpm -C packages/tokens generate`
-     - Repo-level alias: `pnpm generate:tokens`
-   - If `UPSTREAM_ALIGNMENT.md` changed, include upstream alignment evidence (verification stamp or explicit reason alignment validation is intentionally deferred).
+   - If token files changed, verify schema version in `packages/tokens/SCHEMA_VERSION` and the generated artifacts stay coherent.
+   - If guidance policy scope or protected surfaces changed, run both `design-system-guidance:ratchet` and `design-system-guidance:check:ci` and report warn/error counts.
 6. **Write artifacts**
-   - For `audit`, `implementation`, and `migration` modes: save artifacts under `./artifacts/design-system/` (or `/mnt/data/design-system/`).
-   - For `Q&A`: return concise evidence-backed findings; artifact output is optional if requested.
+   - Save the summary/report under `./artifacts/design-system/` (or `/mnt/data/design-system/`).
 
 ## Deliverables
 Depending on user request, produce one or more:
@@ -133,7 +146,7 @@ Depending on user request, produce one or more:
 
 ## Constraints
 - Keep changes in the correct token tier; preserve Brand → Alias → Mapped layering.
-- Preserve brand-mode parity (`light`, `dark`, and `highContrast` when that mode is part of the canonical contract for the touched layer).
+- Preserve brand-mode parity (`light`, `dark`, `highContrast`) when editing design tokens.
 - Prefer semantic tokens in UI code; avoid introducing raw literals unless explicitly required.
 - Redact secrets and avoid destructive actions without explicit confirmation.
 
@@ -143,27 +156,46 @@ Fail fast: stop at the first failed gate, fix, then rerun.
 Run only what matches the touched area:
 
 ```bash
-# Baseline design-system checks
 pnpm validate:tokens
 pnpm ds:matrix:check
-# Add only if the request touches runtime/systemwide behavior
 pnpm test:policy
-# Add when UI component behavior changed
+pnpm design-system-guidance:ratchet
+pnpm design-system-guidance:check:ci
 pnpm -C packages/ui build
 ```
 
 Targeted checks:
-- token structure quick checks with `jq` on `packages/tokens/src/tokens/index.dtcg.json`
-- mode-parity checks with `rg -n "light|dark|highContrast"` across token and theme files
-- regeneration drift check with `pnpm -C packages/tokens generate && git diff -- ...`
-- token usage and literal hygiene checks with `rg` in `packages/ui/src`
+
+```bash
+# token structure quick checks
+jq 'keys' packages/tokens/src/tokens/index.dtcg.json
+jq '.type.web | keys' packages/tokens/src/tokens/index.dtcg.json
+jq '.space | keys' packages/tokens/src/tokens/index.dtcg.json
+jq '.color | keys' packages/tokens/src/tokens/index.dtcg.json
+jq '.radius | keys' packages/tokens/src/tokens/index.dtcg.json
+
+# find direct token usage or potential literals in UI code
+rg -n "--foundation-|--ds-|--color-" packages/ui/src
+rg -n "#[0-9a-fA-F]{3,8}|rgba?\(" packages/ui/src
+rg -n "highContrast|--background|--foreground" packages/ui/src/styles/theme.css packages/tokens/src/tokens/index.dtcg.json
+```
 
 ## Anti-patterns
 - ❌ Editing only `theme.css` when the real change belongs in DTCG/alias layers.
 - ❌ Adding raw color/spacing literals to components when semantic tokens exist.
 - ❌ Treating deprecated icon sources as canonical (`@design-studio/astudio-icons` for new work).
 - ❌ Skipping brand-mode/accessibility contracts when updating color systems or motion defaults.
+- ❌ Skipping guidance policy checks when touching protected surfaces or `.design-system-guidance.json`.
 - ❌ Returning advice without file-path evidence from this repository.
+
+## Failure mode
+- If the task is backend-only, infra-only, or MCP-only with no UI/token impact, decline this skill and route to a backend/infra skill path.
+- If scope is too vague to locate touched surfaces, ask one focused clarification question before edits.
+- If required design-system checks fail due unrelated repo-wide debt, report the exact failing gate and continue with bounded evidence for touched files only.
+
+## Gotchas
+- `check-see-also.py` expects a strict `## See Also` table plus `**Topic map:** [[...]]` format; plain bullets are not counted.
+- Commit-time validation may run progressive-disclosure in strict mode; ensure required headings stay present even if warn-mode lint passes.
 
 ## Examples
 - Triggering prompt: “Audit our typography and spacing tokens and show where they map into UI styles.”
@@ -171,49 +203,23 @@ Targeted checks:
 - Non-triggering prompt: “Debug MCP tool auth timeouts in the Cloudflare worker.”
 
 ## Reference map
-- `./references/system-map.md` — canonical file map by design-system pillar.
 - `brand/README.md` — current brand asset catalog and visual identity entry points.
+- `./references/system-map.md` — canonical file map by design-system pillar.
 - `./references/contract.yaml` — expected behavior and boundaries.
 - `./references/evals.yaml` — trigger and safety eval cases.
 - `./references/plan.md` — build plan and assumptions.
+- `docs/design-system/PROFESSIONAL_UI_CONTRACT.md` — quality bar and semantics contract for UI outputs.
+- `docs/design-system/AGENT_UI_ROUTING.md` — route-first map from request type to canonical surfaces.
 - `./assets/design-system-brief-template.md` — report template for outputs.
 
-## Remember
-This skill is here to unlock high-confidence design-system decisions. The agent is capable of extraordinary work in this domain—use judgment, stay evidence-backed, and push boundaries with creative but safe options when multiple valid approaches exist.
-
 ## See Also
-
 | Skill | When to use together |
 |---|---|
-| [[baseline-ui]] | Validate UI components against design-system tokens |
-| [[frontend-ui-design]] | Implement components using design-system token layer |
-| [[figma]] | Extract Figma tokens as source of truth for the design system |
-| [[shadcn-ui]] | Adapt shadcn/ui to use design-system token aliases |
-| [[fixing-accessibility]] | Combine token changes with accessibility fixes |
+| [[frontend-ui-design]] | Implement component and screen changes after design-system decisions are set |
+| [[baseline-ui]] | Run a UI guardrail pass after token or theme updates |
+| [[shadcn-ui]] | Apply design-system tokens while integrating shadcn components |
 
 **Topic map:** [[frontend-ui]]
 
-<!-- decision-feedback-protocol:v2 -->
-**Decision feedback protocol (required):**
-- If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.
-- Capture: `decision` (`accepted|partial|rejected|deferred`), `outcome` (`good|neutral|bad|unknown`), and `confidence` (`high|medium|low`).
-- Persist with: `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
-- The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
-<!-- /decision-feedback-protocol -->
-
-## Quality Uplift
-- Philosophy and approach: apply a clear framework, explain why, consider tradeoff decisions, and use a practical mental model for execution.
-- Guiding question: Why is this the right context-specific path?
-- Guiding question: What tradeoff is being made and how is risk reduced?
-- Guiding question: How do we verify behavior end-to-end before completion?
-- Anti-pattern warning: avoid generic or repetitive output; DO NOT hide failures; NEVER skip validation; avoid common pitfall and mistake patterns.
-- Anti-pattern warning: treat incorrect or wrong assumptions as blockers, and call out anti-pattern risks explicitly.
-- Variation: vary recommendations by context-specific constraints; adapt, customize, and use different approaches when constraints differ.
-- Variation: prefer diverse, unique alternatives and avoid repetition or cookie-cutter template convergence.
-- Empowerment: enable users to explore options confidently, be capable and creative, unlock safe choices, and empower execution.
-
-## Gotchas
-- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.
-
-## Failure mode
-- If token layers, theme ownership, or canonical source files are unclear, stop, report the ambiguity, and fall back to a design-system discovery pass before editing tokens or aliases.
+## Remember
+This skill is here to unlock high-confidence design-system decisions. The agent is capable of extraordinary work in this domain—use judgment, stay evidence-backed, and push boundaries with creative but safe options when multiple valid approaches exist.
