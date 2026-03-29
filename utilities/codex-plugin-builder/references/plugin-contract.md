@@ -25,6 +25,10 @@ Source anchors used for this contract:
   - `skills` adds to default `./skills/` discovery when both exist;
   - `mcpServers` and `apps` use the declared manifest paths when present, otherwise they fall back to default `./.mcp.json` and `./.app.json`.
 
+## Official structure rules
+- Keep only `plugin.json` inside `.codex-plugin/`.
+- Keep `skills/`, `assets/`, `.mcp.json`, and `.app.json` at the plugin root.
+
 ## Curated and repo-level conventions
 
 These are valid and common, but they are not part of the minimal runtime contract:
@@ -211,7 +215,7 @@ The curated `openai/plugins` repo commonly adds richer metadata on top of the ru
 ### Plugin entry fields
 - `name` (`string`): plugin identifier. Keep it aligned with the folder name and manifest `name`.
 - `source.source` (`string`): use `local`.
-- `source.path` (`string`): a `./`-prefixed path relative to the repo root that resolves to the plugin directory, typically `./plugins/<plugin-name>`.
+- `source.path` (`string`): a `./`-prefixed path relative to the marketplace root that resolves to the plugin directory, typically `./plugins/<plugin-name>` for repo marketplaces.
 - `policy.installation` (`string`): one of `NOT_AVAILABLE`, `AVAILABLE`, `INSTALLED_BY_DEFAULT`.
 - `policy.authentication` (`string`): one of `ON_INSTALL`, `ON_USE`.
 - `category` (`string`): required and emitted by this builder.
