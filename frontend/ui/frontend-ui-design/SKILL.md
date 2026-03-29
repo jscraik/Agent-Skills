@@ -15,6 +15,7 @@ metadata:
 - [Deliverables](#deliverables)
 - [Philosophy](#philosophy)
 - [Workflow](#workflow)
+- [Cross-Context Adaptation](#cross-context-adaptation)
 - [Visually Led Surfaces](#visually-led-surfaces)
 - [Redesign Audit Lens](#redesign-audit-lens)
 - [Validation](#validation)
@@ -33,6 +34,7 @@ metadata:
 - Design or review standard product UI systems and components.
 - Specify accessible screens, flows, states, and design-system changes.
 - Plan or patch production UI for React, Apps SDK widgets, or Tauri web UI when the work is standard product design rather than experimental creative coding.
+- Adapt an existing interface across mobile, tablet, desktop, print, or email contexts while keeping behavior and information architecture coherent.
 - Shape visually led landing pages, websites, prototypes, or demos when art direction matters but the result still needs production-ready hierarchy and accessibility.
 - Audit existing UI for accessibility, token use, state coverage, or implementation readiness.
 
@@ -45,6 +47,11 @@ metadata:
 - Target surface and stack.
 - User goal, task-critical path, and constraints.
 - Existing token, component, and layout conventions.
+- Source assumptions and target-context constraints when adaptation is requested:
+  - device class and orientation,
+  - input model (touch, keyboard, pointer),
+  - connectivity/performance expectations,
+  - non-screen outputs like print/email when relevant.
 - Visual direction inputs when relevant: brand posture, imagery constraints, and whether the surface is utility-first product UI or a visually led marketing/demo surface.
 - Definition of done: accessibility, performance, visual review, or implementation depth.
 
@@ -53,6 +60,7 @@ metadata:
 - For visually led surfaces: one visual thesis, one content plan, and one interaction thesis before component planning.
 - Component or screen plan with states and accessibility behavior.
 - Token-referenced implementation guidance.
+- For adaptation work: a compact adaptation matrix covering what to keep, adapt, or redesign for each target context (layout, interaction, content density, and navigation).
 - For recursive-learning runs: rubric-bound observations recorded against `references/learning-rubric.yaml` before any lesson is considered promotable.
 - Verification checklist covering a11y, responsiveness, and state completeness.
 - File plan or handoff path when code changes are in scope.
@@ -70,12 +78,26 @@ metadata:
    - content plan: hero, support, detail, final CTA;
    - interaction thesis: 2-3 motions that materially change the feel of the page.
 3. Map the key states: default, loading, empty, error, permission, and edge cases that matter.
-4. Anchor measurements to tokens instead of ad hoc values.
-5. Define focus order, keyboard behavior, labels, contrast, and reduced-motion handling explicitly.
-6. Align implementation guidance to the host stack: React 19 patterns, Next.js 16 where relevant, Tailwind v4 utilities/tokens, and Tauri/App SDK constraints when present.
-7. For redesign requests, run the anti-generic audit pass in `references/redesign-audit-lens.md` before proposing visual polish.
-8. Reuse bundled `references/`, `scripts/`, and `assets/FEATURE_DESIGN.template.md` when producing handoff structure or audit output.
-9. Verify the proposed UI is implementable, accessible, and stable before calling it done.
+4. If the task is adaptation-focused, run the cross-context pass in `references/cross-context-adaptation.md`:
+   - capture source assumptions,
+   - map target constraints,
+   - decide what to keep, adapt, or redesign.
+5. Anchor measurements to tokens instead of ad hoc values.
+6. Define focus order, keyboard behavior, labels, contrast, and reduced-motion handling explicitly.
+7. Align implementation guidance to the host stack: React 19 patterns, Next.js 16 where relevant, Tailwind v4 utilities/tokens, and Tauri/App SDK constraints when present.
+8. For redesign requests, run the anti-generic audit pass in `references/redesign-audit-lens.md` before proposing visual polish.
+9. Reuse bundled `references/`, `scripts/`, and `assets/FEATURE_DESIGN.template.md` when producing handoff structure or audit output.
+10. Verify the proposed UI is implementable, accessible, and stable before calling it done.
+
+## Cross-Context Adaptation
+- Adaptation is not simple scaling. Treat it as a context shift in device constraints, interaction model, and user intent.
+- Preserve core information architecture and primary actions across contexts; adapt presentation and interaction patterning, not product meaning.
+- For adaptation-heavy requests, use `references/cross-context-adaptation.md` to build a source-to-target matrix covering:
+  - layout strategy,
+  - interaction/touch strategy,
+  - content-priority strategy,
+  - navigation strategy,
+  - verification requirements on real devices and orientations.
 
 ## Visually Led Surfaces
 - Use this track for branded landing pages, websites, prototypes, and demos where hierarchy, imagery, and restraint matter as much as correctness.
@@ -102,6 +124,7 @@ metadata:
 - Confirm accessibility coverage includes focus, keyboard behavior, semantic naming, contrast, and reduced-motion parity.
 - Confirm measurements and spacing decisions map back to tokens or documented exceptions.
 - Confirm UI states are complete enough for real implementation, not just the happy path.
+- Confirm adaptation requests include source assumptions, target constraints, and explicit keep/adapt/redesign decisions rather than a generic "make it responsive" answer.
 - Confirm visually led work distinguishes branded landing pages from utility-first product UI and does not collapse both into the same layout language.
 - Confirm the first viewport has a clear dominant visual or hierarchy anchor and that any card treatment is justified instead of habitual.
 - Confirm Storybook or equivalent visual review coverage is called out when components change materially.
@@ -125,6 +148,7 @@ metadata:
 ## Examples
 - "Design a settings flow for a React app with accessible tabs and inline validation."
 - "Design a visually strong landing page for a product launch with one dominant hero composition and restrained motion."
+- "Adapt this desktop analytics workspace for mobile and tablet while preserving core tasks and avoiding hover-only interactions."
 - "Review this component set for token drift, focus behavior, and responsive gaps."
 - "Redesign this existing settings page to remove generic patterns while preserving stack constraints and accessibility."
 

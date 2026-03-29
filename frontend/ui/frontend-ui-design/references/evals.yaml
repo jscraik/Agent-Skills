@@ -9,6 +9,11 @@ cases:
     acceptance:
       - type: contains
         value: "## Inputs"
+  - name: adaptation-path
+    prompt: "Adapt this desktop dashboard for mobile and tablet while keeping the same core tasks."
+    acceptance:
+      - type: contains
+        value: "## Outputs"
   - name: failure-mode
     prompt: "User request is out of scope for frontend-ui-design."
     acceptance:
