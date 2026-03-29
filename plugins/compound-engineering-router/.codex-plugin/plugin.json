@@ -39,6 +39,5 @@
     "websiteURL": "https://github.com/jscraik/Agent-Skills",
     "defaultPrompt": "Route this task into the right compound-engineering workflow stage and tell me which prompt to use.",
     "brandColor": "#F59E0B"
-  },
-  "skills": "./skills/"
+  }
 }

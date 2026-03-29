@@ -20,4 +20,5 @@ Optional integration metadata included in this pass:
 
 Deferred surfaces:
 - `hooks/`
-- `agents/`
+- `references/legacy/agents/`
+- `references/legacy/prompts/`

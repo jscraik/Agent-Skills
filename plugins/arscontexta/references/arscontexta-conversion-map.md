@@ -9,11 +9,13 @@ Pinned commit: 2acfd5cc4473c4d06c46be63df748e77e00e2746
 - `.codex-plugin/plugin.json`
 - `README.md`
 - `LICENSE`
-- `prompts/commands/*` (mapped from upstream plugin skills)
-- `prompts/workflows/*` (mapped from upstream skill-sources)
 - `hooks.json` + `hooks/scripts/*`
-- `agents/knowledge-guide.md`
 - `references/*` conversion artifacts
+
+### Archived non-runtime conversion surfaces
+- `references/legacy/prompts/commands/*` (mapped from upstream plugin skills)
+- `references/legacy/prompts/workflows/*` (mapped from upstream skill-sources)
+- `references/legacy/agents/knowledge-guide.md`
 
 ### Generated runtime outputs (not packaged as executable Codex surfaces)
 - `methodology/*` research corpus files (kept out of runtime payload in this pass)
