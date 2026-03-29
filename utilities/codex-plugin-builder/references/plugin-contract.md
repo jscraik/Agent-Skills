@@ -5,14 +5,25 @@ Use this contract to keep plugin scaffolds and conversions aligned with:
 - the curated `openai/plugins` repository layout and examples;
 - the pinned upstream `plugin-creator` skill in `openai/plugins`.
 
+Source anchors used for this contract:
+- `openai/codex` `codex-rs/core/src/plugins/manifest.rs` and `codex-rs/core/src/plugins/manager.rs` on `main` (runtime parsing and discovery behavior).
+- `openai/codex` `codex-rs/core/src/plugins/marketplace.rs` on `main` (marketplace policy shape and source-path rules).
+- `openai/plugins` pinned ref `d88301d4694edc6282ca554e97fb8425cbd5a250`:
+  - `.agents/skills/plugin-creator/SKILL.md`
+  - `.agents/skills/plugin-creator/references/plugin-json-spec.md`
+
 ## Runtime-required package surface
 - `.codex-plugin/plugin.json` is the only package file the current Codex runtime requires.
 - `plugin.json` should include a non-empty kebab-case `name`.
 - `skills`, `mcpServers`, and `apps` path values must start with `./` and stay within the plugin root.
+- manifest paths cannot be bare `./` and cannot contain `..`.
 - `interface.defaultPrompt` currently validates as:
   - a single string, or
   - a list of strings,
   - with at most 3 entries and 128 characters per entry.
+- runtime discovery behavior differs by surface:
+  - `skills` adds to default `./skills/` discovery when both exist;
+  - `mcpServers` and `apps` use the declared manifest paths when present, otherwise they fall back to default `./.mcp.json` and `./.app.json`.
 
 ## Curated and repo-level conventions
 
@@ -207,7 +218,8 @@ The curated `openai/plugins` repo commonly adds richer metadata on top of the ru
 - `policy.products` (`array`): optional override. Only add it when the user explicitly asks for product gating.
 
 ### Marketplace generation rules
-- Always include marketplace `interface.displayName`.
+- For scaffolds and normalized catalogs in this repo, include marketplace `interface.displayName`.
+- Do not fail runtime validity solely because `interface.displayName` is absent in pre-existing marketplace files.
 - Scaffolds should emit `policy.installation`, `policy.authentication`, and `category` on each generated or updated plugin entry.
 - When category is not explicitly provided, infer it from the chosen or inferred archetype.
 - Validators should accept legacy flat `installPolicy` and `authPolicy` during migration.

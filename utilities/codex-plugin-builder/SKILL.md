@@ -262,8 +262,12 @@ Required behavior:
   - `.mcp.json` wiring details,
   - `.app.json` app-level details;
 - treat `.mcp.json` and `.app.json` as runtime integration files, not recommendation lists;
+- enforce manifest path safety for `skills`, `mcpServers`, and `apps`: values must start with `./`, must not be `./`, and must not contain `..`;
+- model runtime discovery correctly:
+  - `skills` augments the default `./skills/` discovery when both exist;
+  - `mcpServers` and `apps` select the declared path and replace default `./.mcp.json` and `./.app.json` discovery;
 - if manifest image fields are declared, the referenced files must already exist under `./assets/`;
-- marketplace entries must include marketplace `interface.displayName`, `source.source = "local"`, a `./`-prefixed `source.path` relative to the repo root (for example `./plugins/<plugin-name>`), `policy.installation`, `policy.authentication`, and `category`;
+- for scaffolded or normalized marketplace files in this repo, include marketplace `interface.displayName` plus plugin-entry `source.source = "local"`, a `./`-prefixed `source.path` relative to the repo root (for example `./plugins/<plugin-name>`), `policy.installation`, `policy.authentication`, and `category`;
 - when the user does not specify a category, infer a suggested category from the chosen or inferred archetype, then allow deliberate overrides;
 - validator compatibility note: accept legacy flat `installPolicy` and `authPolicy` while existing local marketplaces migrate, but emit the canonical nested `policy` object for all new scaffolds and overwrites;
 - keep marketplace normalization separate from plugin runtime validation so curated-compatibility cleanup does not masquerade as runtime breakage;
@@ -313,7 +317,7 @@ If the request is out of scope:
 | Skill | When to use |
 |---|---|
 | [[skill-builder]] | Author or upgrade a standalone skill before packaging it into a plugin |
-| [[codex-agent-creator]] | Add agent roles to the plugin bundle alongside skills and hooks |
+| [[codex-agent-builder]] | Add agent roles to the plugin bundle alongside skills and hooks |
 | [[decide-build-primitive]] | Decide whether the capability belongs in a plugin at all |
 | [[skill-installer]] | Install a finished skill directly when full plugin packaging is unnecessary |
 
