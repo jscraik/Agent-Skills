@@ -56,3 +56,13 @@ All of these scripts use network, so when running in the sandbox, request escala
 - Git fallback tries HTTPS first, then SSH.
 - The skills at https://github.com/openai/skills/tree/main/skills/.system are preinstalled, so no need to help users install those. If they ask, just explain this. If they insist, you can download and overwrite.
 - Installed annotations come from `$CODEX_HOME/skills`.
+
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[skill-creator]] | Author or revise a skill before attempting to distribute it |
+| [[skill-builder]] | Run quality gates and packaging checks on a skill before installation |
+| [[plugin-creator]] | Scaffold plugin packaging when the deliverable should ship as a plugin instead of a bare skill |
+
+**Topic map:** [[agent-ops]]

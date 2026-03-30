@@ -239,6 +239,16 @@ These conventions apply only to the explicit CLI fallback. They do not describe 
 ### Dependencies
 Prefer `uv` for dependency management in this repo.
 
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[better-icons]] | Reach for existing production SVG icons before generating a new bitmap asset |
+| [[favicon-generator]] | Turn a selected raster concept into a full favicon or app-icon suite |
+| [[og-image-builder]] | Generate route-specific Open Graph images when the output should plug into an existing web codebase |
+
+**Topic map:** [[frontend-graphics]]
+
 Required Python package:
 ```bash
 uv pip install openai

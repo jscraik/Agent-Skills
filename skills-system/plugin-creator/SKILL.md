@@ -158,3 +158,13 @@ After editing `SKILL.md`, run:
 ```bash
 python3 <path-to-skill-creator>/scripts/quick_validate.py .agents/skills/plugin-creator
 ```
+
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[codex-plugin-builder]] | Build or validate a fuller Codex plugin package beyond the starter scaffold |
+| [[skill-builder]] | Improve bundled skill content after the plugin skeleton exists |
+| [[codex-agent-builder]] | Add agent roles to a plugin after the base manifest and folders are in place |
+
+**Topic map:** [[agent-ops]]
