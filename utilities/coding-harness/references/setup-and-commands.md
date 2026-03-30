@@ -135,12 +135,16 @@ Expected scaffold lane in `B3`:
 
 ## Update workflow for existing repos
 
+Routine existing-install upgrades now use `harness upgrade`, not `harness init --update`.
+Reserve `harness init --update` for re-scaffolding missing tracked baseline files.
+
 ### State machine
 
 ```txt
 U0 CHECK -> U1 PREVIEW -> U2 APPLY -> U3 VALIDATE -> U4 DONE
    |          |           |             |
-   +--------> UX FAIL <---+-------------+
+   |          +-------> U1R RESCAFFOLD -+
+   +-----------------> UX FAIL <--------+
 ```
 
 ### Transition table (`S | E | G | A | N`)
@@ -148,9 +152,11 @@ U0 CHECK -> U1 PREVIEW -> U2 APPLY -> U3 VALIDATE -> U4 DONE
 | S | E | G | A | N |
 | --- | --- | --- | --- | --- |
 | `U0 CHECK` | `updates_found` | update check runs | `harness init --check-updates` | `U1 PREVIEW` |
-| `U1 PREVIEW` | `preview_ok` | dry-run output reviewed | `harness init --dry-run --update` | `U2 APPLY` |
-| `U2 APPLY` | `apply_ok` | selected update strategy confirmed | `harness init --update` (or `--interactive`) | `U3 VALIDATE` |
-| `U2 APPLY` | `tracked_apply` | rollback tracking requested | `harness init --track` before apply | `U3 VALIDATE` |
+| `U0 CHECK` | `legacy_manifest` | old restore manifest is missing `ciProvider` but provider can be inferred | auto-repair during `harness init --check-updates` | `U1 PREVIEW` |
+| `U1 PREVIEW` | `preview_ok` | dry-run output reviewed for routine upgrade | `harness upgrade --dry-run` | `U2 APPLY` |
+| `U1 PREVIEW` | `tracked_baseline_missing` | tracked scaffold files are missing and need re-scaffold | `harness init --dry-run --update` | `U1R RESCAFFOLD` |
+| `U1R RESCAFFOLD` | `re_scaffold_ok` | re-scaffold preview accepted | `harness init --update` (or `--interactive`) | `U3 VALIDATE` |
+| `U2 APPLY` | `apply_ok` | selected routine upgrade strategy confirmed | `harness upgrade` | `U3 VALIDATE` |
 | `U3 VALIDATE` | `checks_pass` | validation ladder passes | run `pnpm check` (+ deep gate if needed) | `U4 DONE` |
 | `U*` | `migration_or_rollback` | contract transition needed | `harness init --migrate` or `harness init --rollback` | `U0 CHECK` |
 | `U*` | `error` | any guard fails | capture blocker + stop | `UX FAIL` |
@@ -238,6 +244,8 @@ Important constraints:
 
 - `harness init`
 - `harness init --check-updates`
+- `harness upgrade --dry-run`
+- `harness upgrade`
 - `harness init --update`
 - `harness init --migrate`
 - `harness init --rollback`

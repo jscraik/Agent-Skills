@@ -7,7 +7,7 @@ metadata:
   maturity: validated
   owner: Agent Skills Team
   review_cadence: quarterly
-  last_reviewed: 2026-03-24
+  last_reviewed: 2026-03-30
   metadata_source: frontmatter
 ---
 
@@ -85,6 +85,9 @@ Produce only what the request needs, usually:
 3. Install or upgrade harness conservatively.
 - Do prefer `mise install -g npm:@brainwav/coding-harness` for consumer repos because it matches the current recommended global install posture.
 - Do bootstrap with `harness init --dry-run` followed by `harness init` because the current CLI-safe path is preview-first.
+- Do treat existing harness-managed repos differently from fresh bootstrap: run `harness init --check-updates`, then `harness upgrade --dry-run`, then `harness upgrade` because that is the routine update lane now.
+- Do reserve `harness init --update` for re-scaffolding missing tracked baseline files because it is not the default upgrade path for mature installs.
+- Do know that `harness init --check-updates`, `harness init --update`, and `harness upgrade` can auto-repair legacy `.harness/restore-manifest.json` files missing `ciProvider` when the active provider can be inferred safely.
 - Do not pass `--ci circleci` to `harness init` because the current CLI treats the extra positional token as a target directory in this flow.
 - Do use `harness ci-migrate prepare --provider circleci --dry-run`, then `--apply`, `verify --snapshot <snapshot-id>`, `commit --snapshot <snapshot-id>`, and `abort --snapshot <snapshot-id>` because cutover must stay reversible and snapshot-bound.
 - Do use project-local source execution only when you are actively developing the coding-harness repository because consumer repos should follow the packaged CLI contract.
@@ -110,6 +113,9 @@ Run the smallest relevant checks first, then broaden before claiming completion:
 ```bash
 harness --help
 harness init --dry-run
+harness init --check-updates
+harness upgrade --dry-run
+harness upgrade
 pnpm check
 pnpm test:deep
 ```
@@ -118,6 +124,8 @@ Use targeted governance or lifecycle commands as needed:
 
 ```bash
 harness init --check-updates
+harness upgrade --dry-run
+harness upgrade
 harness init --update
 harness init --migrate
 harness init --rollback
@@ -184,6 +192,7 @@ Fail fast on the first blocking gate, fix the specific issue, rerun that gate, a
 - deleting `.github/workflows/` files manually instead of using `harness ci-migrate`;
 - treating `pnpm check` and `pnpm test:deep` as interchangeable when runtime behavior changed;
 - reporting remote verification as passed when auth was never supplied;
+- treating `harness init --update` as the routine existing-repo upgrade lane;
 - applying `harness init --update` without previewing first when repo state is unclear;
 - editing enforced scaffold files by hand and assuming the changes will persist.
 
@@ -196,6 +205,8 @@ Fail fast on the first blocking gate, fix the specific issue, rerun that gate, a
 
 ## Gotchas
 - Symptom: `harness init --ci circleci` fails with a path-resolution error. Cause: the current CLI interprets `circleci` like a target directory in that flow. Do instead: run `harness init --dry-run` and then `harness init`. Check: rerun `harness init --dry-run` and confirm the scaffold plan renders normally.
+- Symptom: an agent treats `harness init --update` as the normal way to update an existing harness repo. Cause: older summaries collapsed the upgrade lane into the re-scaffold lane. Do instead: run `harness init --check-updates`, then `harness upgrade --dry-run`, then `harness upgrade`; use `harness init --update` only when tracked baseline files are missing and need re-scaffolding. Check: the final plan should distinguish routine upgrade from re-scaffold explicitly.
+- Symptom: a legacy repo reports that `.harness/restore-manifest.json` is missing `ciProvider`. Cause: the repo was scaffolded before that metadata became mandatory for the update lane. Do instead: rerun `harness init --check-updates`, `harness upgrade --dry-run`, or `harness init --update` and let current harness repair the manifest automatically when the active provider can be inferred. Check: verify the manifest now includes `ciProvider` and the upgrade lane proceeds.
 - Symptom: CI migration guidance looks right but rollback is missing. Cause: older summaries often stop after `commit`. Do instead: preserve the full snapshot-based sequence including `abort --snapshot <snapshot-id>`. Check: confirm preview, apply, verify, commit, and abort all appear in both `SKILL.md` and `references/agent-install-guide.md`.
 - Symptom: an agent claims repo setup is complete after only local checks. Cause: remote gates such as Greptile verification were skipped because auth was missing. Do instead: report the local pass separately from auth-blocked remote checks. Check: the final summary should say exactly which checks were skipped and why.
 - Symptom: `.harness/memory/LEARNINGS.md` guidance is applied to a repo without `.harness/`. Cause: the memory layer is repo-specific, not universal. Do instead: skip creation when `.harness/` is absent. Check: only read or append the repo memory file when the harness directory exists.

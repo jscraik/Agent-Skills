@@ -7,6 +7,18 @@
 	"install_command": "mise install -g npm:@brainwav/coding-harness",
 	"init_command": "harness init",
 	"verify_command": "harness check-environment --json",
+	"update_workflow": {
+		"routine_existing_repo": [
+			"harness init --check-updates",
+			"harness upgrade --dry-run",
+			"harness upgrade"
+		],
+		"re_scaffold_missing_tracked_files": [
+			"harness init --dry-run --update",
+			"harness init --update"
+		],
+		"legacy_restore_manifest_repair": "harness init --check-updates, harness init --update, and harness upgrade can auto-repair a missing ciProvider when the active provider can be inferred safely"
+	},
 
 	"phases": [
 		{
@@ -164,6 +176,7 @@
 				"source scripts/codex-preflight.sh && preflight_repo",
 				"harness check-environment --json",
 				"harness init --check-updates",
+				"harness upgrade --dry-run",
 				"pnpm check",
 				"harness verify-greptile --token $GITHUB_PERSONAL_ACCESS_TOKEN --owner <owner> --repo <repo>",
 				"harness check-authz --contract harness.contract.json --repo <owner>/<repo> --branch main"
