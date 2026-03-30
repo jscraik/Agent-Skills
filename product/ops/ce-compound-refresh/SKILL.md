@@ -1,6 +1,6 @@
 ---
 name: ce-compound-refresh
-description: Refresh stale docs/solutions learnings and pattern docs against the current codebase. Use when retrieved CE learnings may be outdated, contradictory, or stale after refactors, migrations, or dependency upgrades.
+description: Review and update stale docs and solution patterns against the current codebase when users ask to reconcile compound-engineering learnings after refactors, migrations, or dependency upgrades.
 metadata:
   skill-type: team_automation
 ---

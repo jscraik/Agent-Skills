@@ -30,6 +30,11 @@ metadata:
 - Keep planning portable: capture decisions, files, sequencing, risks, and verification, not shell choreography or implementation code.
 - Stop when the plan file is written, verified, and the next-step options are clear.
 
+## Philosophy
+- Planning quality is measured by execution clarity, not by document length.
+- Every phase should reduce uncertainty with explicit dependencies, verification, and rollback awareness.
+- Prefer minimal viable sequencing that still protects safety, governance, and delivery confidence.
+
 ## When to use
 Use this skill when the user wants an execution-ready plan for a feature, improvement, refactor, bug fix, or UI delivery path and needs sequencing, validation, traceability, or rollout guidance before coding starts.
 

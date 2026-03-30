@@ -1,6 +1,6 @@
 ---
 name: ce-review
-description: Assess the overall readiness of a PR, branch, diff, or workflow artifact and recommend blockers, risks, and next actions. Use when the user wants package-level go/no-go synthesis, not a findings-first engineering issue list.
+description: Review PRs, branches, diffs, and workflow artifacts for package-level go/no-go readiness when users ask for broad synthesis instead of findings-first technical critique.
 metadata:
   skill-type: code_quality_review
 ---
