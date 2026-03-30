@@ -30,6 +30,7 @@ Use shadcn/ui as a code-ownership workflow, not as a drop-in component dependenc
 - Treat shadcn/ui as source code copied into the repo, owned by the project team.
 - Prefer the current shadcn CLI workflow and registry-aware install path over manual copy-paste unless the repo requires it.
 - Keep Tailwind v4, design tokens, accessibility, and project-local component composition aligned with the host app.
+- For React 19 and Next.js 16 projects, preserve WCAG 2.2 accessibility behaviors during every shadcn/ui integration step.
 - Customize through project wrappers and token-aware variants rather than forking primitives blindly.
 
 ## When to use
