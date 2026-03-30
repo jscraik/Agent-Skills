@@ -4,7 +4,6 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 
 ## Table of Contents
 - [Summary](#summary)
-- [Managed Asset Governance](#managed-asset-governance)
 - [Catalog](#catalog)
 - [Auth](#auth)
 - [Backend](#backend)
@@ -25,18 +24,11 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - [Product — Specs](#product-specs)
 - [Product — Strategy](#product-strategy)
 - [Utilities](#utilities)
+- [Utilities — Codex Plugin Builder — Fixtures — Arscontexta Codex — Skills](#utilities-codex-plugin-builder-fixtures-arscontexta-codex-skills)
 
 ## Summary
-- `total_skills`: 118
+- `total_skills`: 119
 - `catalog_source`: repository skill scan
-
-## Managed Asset Governance
-- `phase_one_scope`: canonical skills, packaged skills, plugin packages
-- `authoritative_representation`: in-file metadata only
-- `markdown_assets`: canonical `SKILL.md` frontmatter
-- `plugin_assets`: `.codex-plugin/plugin.json`
-- `packaged_skill_rule`: inherit lifecycle metadata from canonical source when the mapping is one-to-one and validator-visible
-- `reference`: `docs/reference/managed-asset-lifecycle.md`
 
 ## Catalog
 
@@ -77,10 +69,10 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 
 ## Frontend — Ui
 
-- `baseline-ui` — Check Tailwind UI work for typography scale, motion timing, accessibility, and layout anti-patterns. Use when the user wants guardrail-style UI validation or cleanup, not a full redesign.
-- `design-system` — Analyze or implement repository-grounded design-system layers such as tokens, typography, iconography, spacing, styles, aliases, and theme variables. Use when the user wants monorepo design-system work, not ordinary component styling or backend-only changes.
+- `baseline-ui` — Check Tailwind UI work for accessibility, performance, theming, responsive behavior, and anti-patterns. Use when the user wants guardrail-style UI validation, scored technical audits, or targeted cleanup, not a full redesign.
+- `design-system` — Analyze and implement repository-grounded design-system work (tokens, typography, iconography, spacing, styles, aliases, and theme variables) for this monorepo. Use when requests involve UI styling systems or token-layer changes; don’t use for backend/MCP-only tasks with no UI impact. Outputs: evidence-backed analysis or changes with canonical file references, layer impact, and validation commands. Success: work aligns to Brand→Alias→Mapped rules and passes design-system checks.
 - `frontend-design` — Route broad frontend design requests to the correct local UI skill after classifying intent and maturity. Use when the user asks for frontend design generally and the specific design owner is not yet clear.
-- `frontend-ui-design` — Design or implement production-ready frontend UI components and screens with strong visual direction, accessibility, and reusable structure. Use when the user wants standard UI build or redesign work, not design-system governance or post-direction polish only.
+- `frontend-ui-design` — Design or implement production-ready frontend UI components and screens with strong visual direction, layout rhythm, spacing hierarchy, accessibility, and reusable structure. Use when the user wants standard UI build or redesign work, including fixing crowded or structurally weak layouts, not design-system governance or post-direction polish only.
 - `react-ui-patterns` — Provide concrete React UI composition patterns for TypeScript + Tailwind + Radix, including state, routing, and component structure examples. Use when building or refactoring React screens and components for maintainability.
 - `remotion` — Best-practice guidance for Remotion (React video). Use when building or reviewing Remotion compositions, timing, assets, audio, captions, or rendering.
 - `shadcn-ui` — Integrate and customize shadcn/ui components in existing projects. Use when the user asks to set up, add, adapt, or troubleshoot shadcn/ui components, registry items, and implementation patterns.
@@ -214,3 +206,8 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - `visual-explainer` — Generate self-contained HTML explainers for systems, diffs, plans, or data with clearer visual presentation than plain text. Use when the user wants a diagram or visual technical explainer, or when a large ASCII table would be hard to scan.
 - `writing-plans` — Compatibility wrapper for generic implementation planning. Use when the user asks for a general plan and route the work to `ce-plan` in `generic-plan` mode.
 - `xcode-makefiles` — Install strict Xcode Makefile tooling for iOS/macOS projects, including build/run/test scripts with AGENT_NAME-based per-agent isolation under build/. Use when a project needs reproducible local CLI builds without full app scaffolding.
+
+## Utilities — Codex Plugin Builder — Fixtures — Arscontexta Codex — Skills
+
+- `arscontexta` — Analyze Ars Contexta vault state in Codex and recommend setup, health, and next-command actions. Use this skill when users ask for Ars Contexta help, routing, or health triage.
+

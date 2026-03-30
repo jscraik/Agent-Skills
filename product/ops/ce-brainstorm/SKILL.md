@@ -132,9 +132,15 @@ If the request is already clear, say so directly and offer the equivalent of:
 Do not force a brainstorm when the clearer next step is obvious.
 
 ### Phase 1: Gather lightweight local context
-Run these in parallel as bounded internal subagents when repo context matters:
+When repo context matters, start with a lightweight inline scan in the main thread.
+
+If bounded internal support would materially improve coverage and the user has not already explicitly asked for delegation or sub-agents, ask a short blocking approval question via `request_user_input` before spawning any internal subagents.
+
+If approved, run these bounded internal subagents in parallel:
 - `repo-research-analyst("Understand existing patterns related to: <feature description>")`
 - `learnings-researcher("Find related learnings for: <feature description>. Check .harness/memory/LEARNINGS.md first when it exists, then use instructions/Learnings.md for compatibility, then scan only directly relevant deeper solution docs. Return only directly relevant findings, <=200 words total.")`
+
+If approval is not granted, the tool is unavailable, or subagents are unnecessary, cover the same checks inline before recommending directions.
 
 Focus on:
 - similar features or flows

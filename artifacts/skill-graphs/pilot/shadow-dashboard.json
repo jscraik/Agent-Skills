@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-03-08T23:54:56Z",
+  "generated_at": "2026-03-30T17:06:03Z",
   "runs_root": "artifacts/skill-graphs/runs",
   "pilot_profiles": [
     "ui-ux-creative-coding",
@@ -86,16 +86,71 @@
       "baseline window unavailable for delta KPIs"
     ]
   },
-  "event_envelope_errors": [
-    "run_20260220T195545Z_8799c2: missing events.jsonl",
-    "run_20260220T150021Z_518880: missing events.jsonl",
-    "run_20260220T150021Z_82ecf7: missing events.jsonl",
-    "run_20260220T150021Z_9b592b: missing events.jsonl",
-    "run_20260220T150021Z_bb9acb: missing events.jsonl",
-    "run_20260220T144736Z_425b7a: missing events.jsonl",
-    "run_20260220T144710Z_425b7a: missing events.jsonl",
-    "run_20260220T144703Z_425b7a: missing events.jsonl"
+  "event_envelope_errors": [],
+  "event_envelope_waived": [
+    {
+      "run_id": "run_20260220T195545Z_8799c2",
+      "run_dir": "run_20260220T195545Z_8799c2",
+      "error": "missing events.jsonl",
+      "waiver_id": "historical-run-20260220t195545z-8799c2",
+      "reason": "Historical transition run preserved as-is during parity migration; envelope was incomplete at capture time."
+    },
+    {
+      "run_id": "run_20260220T150021Z_518880",
+      "run_dir": "run_20260220T150021Z_518880",
+      "error": "missing events.jsonl",
+      "waiver_id": "historical-run-20260220t150021z-518880",
+      "reason": "Historical transition run preserved as-is during parity migration; envelope was incomplete at capture time."
+    },
+    {
+      "run_id": "run_20260220T150021Z_82ecf7",
+      "run_dir": "run_20260220T150021Z_82ecf7",
+      "error": "missing events.jsonl",
+      "waiver_id": "historical-run-20260220t150021z-82ecf7",
+      "reason": "Legacy partial run created before capture/evidence packet files became required."
+    },
+    {
+      "run_id": "run_20260220T150021Z_9b592b",
+      "run_dir": "run_20260220T150021Z_9b592b",
+      "error": "missing events.jsonl",
+      "waiver_id": "historical-run-20260220t150021z-9b592b",
+      "reason": "Legacy partial run created before capture/evidence packet files became required."
+    },
+    {
+      "run_id": "run_20260220T150021Z_bb9acb",
+      "run_dir": "run_20260220T150021Z_bb9acb",
+      "error": "missing events.jsonl",
+      "waiver_id": "historical-run-20260220t150021z-bb9acb",
+      "reason": "Legacy partial run created before capture/evidence packet files became required."
+    },
+    {
+      "run_id": "run_20260220T144736Z_425b7a",
+      "run_dir": "run_20260220T144736Z_425b7a",
+      "error": "missing events.jsonl",
+      "waiver_id": "historical-run-20260220t144736z-425b7a",
+      "reason": "Legacy partial run created before capture/evidence packet files became required."
+    },
+    {
+      "run_id": "run_20260220T144710Z_425b7a",
+      "run_dir": "run_20260220T144710Z_425b7a",
+      "error": "missing events.jsonl",
+      "waiver_id": "historical-run-20260220t144710z-425b7a",
+      "reason": "Legacy partial run created before capture/evidence packet files became required."
+    },
+    {
+      "run_id": "run_20260220T144703Z_425b7a",
+      "run_dir": "run_20260220T144703Z_425b7a",
+      "error": "missing events.jsonl",
+      "waiver_id": "historical-run-20260220t144703z-425b7a",
+      "reason": "Legacy partial run created before capture/evidence packet files became required."
+    }
   ],
+  "event_envelope_error_summary": {
+    "total": 8,
+    "waived": 8,
+    "unresolved": 0,
+    "waiver_file": "artifacts/skill-graphs/pilot/artifact-parity-waivers.json"
+  },
   "recent_runs": [
     {
       "run_id": "run_20260220T195545Z_8799c2",

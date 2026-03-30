@@ -1,0 +1,3 @@
+$frontend-ui-design
+
+This dashboard layout feels crowded and flat. Can you improve spacing rhythm, visual hierarchy, and alignment without changing the stack?

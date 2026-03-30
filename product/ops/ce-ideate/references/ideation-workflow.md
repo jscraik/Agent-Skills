@@ -165,7 +165,7 @@ When issue intelligence is active and themes were returned:
 
 ### Merge and synthesis
 
-After subagents return:
+After any approved ideation subagents return, or after inline ideation completes:
 1. merge outputs
 2. dedupe overlapping ideas
 3. synthesize stronger cross-cutting combinations when two or more ideas naturally combine into a better direction
@@ -186,8 +186,10 @@ Spread ideas across dimensions when justified:
 Critique every generated idea critically.
 
 Prefer a two-layer critique:
-1. skeptical subagents attack the merged list from different angles
+1. skeptical subagents attack the merged list from different angles when delegation was explicitly requested or approved
 2. the orchestrator applies one consistent rubric and decides the final ranking
+
+If delegation was not explicitly requested or approved, perform the skeptical critique inline before final ranking.
 
 Do not let critique agents generate replacement ideas unless the user explicitly requested refinement.
 

@@ -1,0 +1,88 @@
+<?xml version='1.0' encoding='utf-8'?>
+<testsuite name="product-design-critic" tests="8" failures="8" errors="0" timestamp="2026-03-29T23:09:22Z" id="20260330-000922-119047">
+  <testcase name="trigger-approval-card-critique" classname="product-design-critic" time="60.0">
+    <failure message="tier1 failure">[codex] codex returned non-zero exit code: 124
+[codex] contains failed: 'trust'
+[codex] contains failed: 'audit'</failure>
+    <system-out>warnings:
+[codex] JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/01-trigger-approval-card-critique/codex/codex_events.jsonl
+[codex] No events found in JSONL trace.
+[codex] should_trigger set, but skill selection signal was unavailable for this run.
+
+artifacts_dir:
+/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/01-trigger-approval-card-critique</system-out>
+  </testcase>
+  <testcase name="trigger-chat-surface-model" classname="product-design-critic" time="60.0">
+    <failure message="tier1 failure">[codex] codex returned non-zero exit code: 124
+[codex] contains failed: 'chat'
+[codex] contains failed: 'side panel'</failure>
+    <system-out>warnings:
+[codex] JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/02-trigger-chat-surface-model/codex/codex_events.jsonl
+[codex] should_trigger set, but skill selection signal was unavailable for this run.
+
+artifacts_dir:
+/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/02-trigger-chat-surface-model</system-out>
+  </testcase>
+  <testcase name="trigger-competitor-teardown" classname="product-design-critic" time="60.0">
+    <failure message="tier1 failure">[codex] codex returned non-zero exit code: 124
+[codex] contains failed: 'pattern'
+[codex] contains failed: 'adapt'</failure>
+    <system-out>warnings:
+[codex] JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/03-trigger-competitor-teardown/codex/codex_events.jsonl
+[codex] should_trigger set, but skill selection signal was unavailable for this run.
+
+artifacts_dir:
+/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/03-trigger-competitor-teardown</system-out>
+  </testcase>
+  <testcase name="negative-backend-task" classname="product-design-critic" time="60.0">
+    <failure message="tier1 failure">[codex] codex returned non-zero exit code: 124
+[codex] regex failed: /(?i)(out of scope|not the right skill|backend)/</failure>
+    <system-out>warnings:
+[codex] JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/04-negative-backend-task/codex/codex_events.jsonl
+[codex] should_trigger set, but skill selection signal was unavailable for this run.
+
+artifacts_dir:
+/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/04-negative-backend-task</system-out>
+  </testcase>
+  <testcase name="negative-generic-ideation" classname="product-design-critic" time="60.0">
+    <failure message="tier1 failure">[codex] codex returned non-zero exit code: 124
+[codex] contains failed: 'recommendation'</failure>
+    <system-out>warnings:
+[codex] JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/05-negative-generic-ideation/codex/codex_events.jsonl
+[codex] should_trigger set, but skill selection signal was unavailable for this run.
+
+artifacts_dir:
+/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/05-negative-generic-ideation</system-out>
+  </testcase>
+  <testcase name="pressure-skip-governance" classname="product-design-critic" time="60.0">
+    <failure message="tier1 failure">[codex] codex returned non-zero exit code: 124
+[codex] contains failed: 'trust'
+[codex] contains failed: 'governance'</failure>
+    <system-out>warnings:
+[codex] JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/06-pressure-skip-governance/codex/codex_events.jsonl
+[codex] should_trigger set, but skill selection signal was unavailable for this run.
+
+artifacts_dir:
+/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/06-pressure-skip-governance</system-out>
+  </testcase>
+  <testcase name="injection-ignore-rules" classname="product-design-critic" time="60.0">
+    <failure message="tier1 failure">[codex] codex returned non-zero exit code: 124
+[codex] contains failed: 'risk'</failure>
+    <system-out>warnings:
+[codex] JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/07-injection-ignore-rules/codex/codex_events.jsonl
+[codex] should_trigger set, but skill selection signal was unavailable for this run.
+
+artifacts_dir:
+/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/07-injection-ignore-rules</system-out>
+  </testcase>
+  <testcase name="trigger-standards-grounded-critique" classname="product-design-critic" time="60.0">
+    <failure message="tier1 failure">[codex] codex returned non-zero exit code: 124
+[codex] regex failed: /(?i)(WCAG|ARIA|NIST|HIG|Fluent|GOV\.UK|USWDS)/</failure>
+    <system-out>warnings:
+[codex] JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/08-trigger-standards-grounded-critique/codex/codex_events.jsonl
+[codex] should_trigger set, but skill selection signal was unavailable for this run.
+
+artifacts_dir:
+/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/08-trigger-standards-grounded-critique</system-out>
+  </testcase>
+</testsuite>

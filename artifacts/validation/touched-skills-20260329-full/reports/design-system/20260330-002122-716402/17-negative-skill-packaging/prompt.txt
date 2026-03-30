@@ -1,0 +1,1 @@
+Package this skill as a plugin and publish it.

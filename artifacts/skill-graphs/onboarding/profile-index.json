@@ -1,21 +1,21 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-03-25T01:46:56Z",
-  "decision_date": "2026-03-25",
-  "active_skill_count": 72,
-  "expected_count": 0,
+  "generated_at": "2026-03-30T17:07:14Z",
+  "decision_date": "2026-02-20",
+  "active_skill_count": 84,
+  "expected_count": 84,
   "inventory_policy": "docs/skill-graphs/governance/inventory-policy.json",
   "system_slice_mode": "exclude",
   "summary": {
-    "valid_count": 72,
+    "valid_count": 84,
     "invalid_count": 0,
     "missing_profile_count": 0,
     "missing_binding_count": 0,
-    "missing_legacy_binding_count": 72,
+    "missing_legacy_binding_count": 84,
     "invalid_binding_count": 0,
     "wave_counts": {
       "wave-1-manual": 10,
-      "wave-2-co-pilot": 62
+      "wave-2-co-pilot": 74
     }
   },
   "skills": [
@@ -453,6 +453,138 @@
       "scope_skill": "product/domain/oak-api",
       "wave": "wave-2-co-pilot",
       "profile_path": "product/domain/oak-api/references/task-profile.json",
+      "profile_binding": "references/task-profile.json",
+      "profile_binding_mode": "implicit-default",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "product/ops/ce-brainstorm/SKILL.md",
+      "scope_skill": "product/ops/ce-brainstorm",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "product/ops/ce-brainstorm/references/task-profile.json",
+      "profile_binding": "references/task-profile.json",
+      "profile_binding_mode": "implicit-default",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "product/ops/ce-compound/SKILL.md",
+      "scope_skill": "product/ops/ce-compound",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "product/ops/ce-compound/references/task-profile.json",
+      "profile_binding": "references/task-profile.json",
+      "profile_binding_mode": "implicit-default",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "product/ops/ce-compound-refresh/SKILL.md",
+      "scope_skill": "product/ops/ce-compound-refresh",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "product/ops/ce-compound-refresh/references/task-profile.json",
+      "profile_binding": "references/task-profile.json",
+      "profile_binding_mode": "implicit-default",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "product/ops/ce-deepen-plan/SKILL.md",
+      "scope_skill": "product/ops/ce-deepen-plan",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "product/ops/ce-deepen-plan/references/task-profile.json",
+      "profile_binding": "references/task-profile.json",
+      "profile_binding_mode": "implicit-default",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "product/ops/ce-deepen-spec/SKILL.md",
+      "scope_skill": "product/ops/ce-deepen-spec",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "product/ops/ce-deepen-spec/references/task-profile.json",
+      "profile_binding": "references/task-profile.json",
+      "profile_binding_mode": "implicit-default",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "product/ops/ce-ideate/SKILL.md",
+      "scope_skill": "product/ops/ce-ideate",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "product/ops/ce-ideate/references/task-profile.json",
+      "profile_binding": "references/task-profile.json",
+      "profile_binding_mode": "implicit-default",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "product/ops/ce-plan/SKILL.md",
+      "scope_skill": "product/ops/ce-plan",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "product/ops/ce-plan/references/task-profile.json",
+      "profile_binding": "references/task-profile.json",
+      "profile_binding_mode": "implicit-default",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "product/ops/ce-review/SKILL.md",
+      "scope_skill": "product/ops/ce-review",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "product/ops/ce-review/references/task-profile.json",
+      "profile_binding": "references/task-profile.json",
+      "profile_binding_mode": "implicit-default",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "product/ops/ce-spec/SKILL.md",
+      "scope_skill": "product/ops/ce-spec",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "product/ops/ce-spec/references/task-profile.json",
+      "profile_binding": "references/task-profile.json",
+      "profile_binding_mode": "implicit-default",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "product/ops/ce-technical-review/SKILL.md",
+      "scope_skill": "product/ops/ce-technical-review",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "product/ops/ce-technical-review/references/task-profile.json",
+      "profile_binding": "references/task-profile.json",
+      "profile_binding_mode": "implicit-default",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "product/ops/ce-work/SKILL.md",
+      "scope_skill": "product/ops/ce-work",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "product/ops/ce-work/references/task-profile.json",
+      "profile_binding": "references/task-profile.json",
+      "profile_binding_mode": "implicit-default",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "product/ops/compound-engineering-router/SKILL.md",
+      "scope_skill": "product/ops/compound-engineering-router",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "product/ops/compound-engineering-router/references/task-profile.json",
       "profile_binding": "references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",

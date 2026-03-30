@@ -1,0 +1,217 @@
+{
+  "schema_version": "1.1",
+  "tool": "analyze_skill",
+  "generated_at": "2026-03-29T22:50:45Z",
+  "decision": "pass",
+  "exit_code": 0,
+  "name": "frontend-design",
+  "description": "Route broad frontend design requests to the correct local UI skill after classifying intent and maturity. Use when the user asks for frontend design generally and the specific design owner is not yet clear.",
+  "path": "/Users/jamiecraik/dev/agent-skills/frontend/ui/frontend-design/SKILL.md",
+  "total_score": 87,
+  "max_total": 165,
+  "categories": [
+    {
+      "category": "Frontmatter",
+      "score": 30,
+      "max_score": 30,
+      "findings": [
+        {
+          "category": "Frontmatter",
+          "points": 10,
+          "severity": "INFO",
+          "message": "✅ `name` present and valid.",
+          "evidence": ""
+        },
+        {
+          "category": "Frontmatter",
+          "points": 20,
+          "severity": "INFO",
+          "message": "✅ `description` is detailed and includes trigger language.",
+          "evidence": ""
+        }
+      ]
+    },
+    {
+      "category": "Philosophy",
+      "score": 3,
+      "max_score": 20,
+      "findings": [
+        {
+          "category": "Philosophy",
+          "points": 0,
+          "severity": "FAIL",
+          "message": "❌ No clear philosophical foundation detected.",
+          "evidence": ""
+        },
+        {
+          "category": "Philosophy",
+          "points": 3,
+          "severity": "WARN",
+          "message": "⚠️ Contains 1 guiding question(s).",
+          "evidence": ""
+        }
+      ]
+    },
+    {
+      "category": "Anti-Patterns",
+      "score": 0,
+      "max_score": 20,
+      "findings": [
+        {
+          "category": "Anti-Patterns",
+          "points": 0,
+          "severity": "FAIL",
+          "message": "❌ No explicit anti-pattern warnings detected.",
+          "evidence": ""
+        }
+      ]
+    },
+    {
+      "category": "Variation",
+      "score": 7,
+      "max_score": 15,
+      "findings": [
+        {
+          "category": "Variation",
+          "points": 6,
+          "severity": "WARN",
+          "message": "⚠️ Some variation mentioned: adapt.",
+          "evidence": ""
+        },
+        {
+          "category": "Variation",
+          "points": 1,
+          "severity": "INFO",
+          "message": "✅ Warns against generic patterns (1 mention(s)).",
+          "evidence": ""
+        }
+      ]
+    },
+    {
+      "category": "Organization",
+      "score": 10,
+      "max_score": 10,
+      "findings": [
+        {
+          "category": "Organization",
+          "points": 6,
+          "severity": "INFO",
+          "message": "✅ Well-structured with 17 headings.",
+          "evidence": ""
+        },
+        {
+          "category": "Organization",
+          "points": 4,
+          "severity": "INFO",
+          "message": "✅ Contains 94 list items (actionable).",
+          "evidence": ""
+        }
+      ]
+    },
+    {
+      "category": "Empowerment",
+      "score": 3,
+      "max_score": 5,
+      "findings": [
+        {
+          "category": "Empowerment",
+          "points": 3,
+          "severity": "WARN",
+          "message": "⚠️ Some empowering language: creative.",
+          "evidence": ""
+        }
+      ]
+    },
+    {
+      "category": "Conciseness",
+      "score": 10,
+      "max_score": 10,
+      "findings": [
+        {
+          "category": "Conciseness",
+          "points": 10,
+          "severity": "INFO",
+          "message": "✅ Concise length (154 lines).",
+          "evidence": ""
+        }
+      ]
+    },
+    {
+      "category": "Repo Integration",
+      "score": 6,
+      "max_score": 10,
+      "findings": [
+        {
+          "category": "Repo",
+          "points": 2,
+          "severity": "INFO",
+          "message": "ℹ️ No `scripts/` directory (fine for instruction-only skills).",
+          "evidence": ""
+        },
+        {
+          "category": "Repo",
+          "points": 3,
+          "severity": "INFO",
+          "message": "✅ `references/` present and referenced (3 file(s)).",
+          "evidence": ""
+        },
+        {
+          "category": "Repo",
+          "points": 1,
+          "severity": "INFO",
+          "message": "ℹ️ No `assets/` directory.",
+          "evidence": ""
+        }
+      ]
+    },
+    {
+      "category": "Research: Scope Focus",
+      "score": 8,
+      "max_score": 15,
+      "findings": [
+        {
+          "category": "Research: Scope",
+          "points": 5,
+          "severity": "WARN",
+          "message": "⚠️ Moderately broad capability surface (4 major surface(s)).",
+          "evidence": ""
+        },
+        {
+          "category": "Research: Scope",
+          "points": 3,
+          "severity": "WARN",
+          "message": "⚠️ Some focus language present; make package-boundary guidance more explicit.",
+          "evidence": ""
+        }
+      ]
+    },
+    {
+      "category": "Research: Example Quality",
+      "score": 10,
+      "max_score": 15,
+      "findings": [
+        {
+          "category": "Research: Examples",
+          "points": 10,
+          "severity": "INFO",
+          "message": "✅ Includes multiple worked examples or realistic trigger prompts.",
+          "evidence": ""
+        }
+      ]
+    },
+    {
+      "category": "Research: Eval Realism",
+      "score": 0,
+      "max_score": 15,
+      "findings": [
+        {
+          "category": "Research: Evals",
+          "points": 0,
+          "severity": "WARN",
+          "message": "⚠️ No eval cases parsed for realism scoring.",
+          "evidence": ""
+        }
+      ]
+    }
+  ]
+}

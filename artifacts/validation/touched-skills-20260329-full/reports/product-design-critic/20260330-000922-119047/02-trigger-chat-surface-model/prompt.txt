@@ -1,0 +1,1 @@
+Can you help me design this? We are launching a chat assistant for production policy changes. People miss evidence because it jumps between chat and a side panel. Decide what belongs inline versus secondary so decisions stay safe and fast.

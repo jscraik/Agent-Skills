@@ -194,12 +194,14 @@ Choose the lightest approach that fits:
 
 | Approach | When |
 |---|---|
-| main thread only | small scope, short docs |
-| sequential subagents | 1-2 artifacts with heavy supporting reads |
-| parallel subagents | 3+ independent artifacts with low overlap |
-| batched subagents | broad sweeps after triage narrows scope |
+| main thread only | small scope, short docs, or any run where delegation was not explicitly requested or approved |
+| sequential subagents | 1-2 artifacts with heavy supporting reads after explicit user request or approval |
+| parallel subagents | 3+ independent artifacts with low overlap after explicit user request or approval |
+| batched subagents | broad sweeps after triage narrows scope and the user has approved delegation |
 
-When spawning any subagent, include this instruction:
+If the user has not already explicitly asked for delegation or sub-agents, ask a short blocking approval question via `request_user_input` before spawning any subagent.
+
+When spawning any approved subagent, include this instruction:
 
 > Use dedicated file search and read tools for all investigation. Do not use shell commands for file operations unless those tools are unavailable in the current harness. Also read `MEMORY.md` from the auto-memory directory if it exists, and report memory-sourced drift signals separately from codebase-sourced evidence, tagged with `(auto memory [claude])`.
 

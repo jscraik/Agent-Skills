@@ -14,18 +14,6 @@
     "max_tokens": 16000,
     "no_improvement_escalation_limit": 2
   },
-  "learning_posture": {
-    "supported": [
-      "learn",
-      "guided",
-      "execute"
-    ],
-    "default": "guided",
-    "feedback_capture": {
-      "prompt_on_terminal": true,
-      "interactive_only": true
-    }
-  },
   "criteria": [
     {
       "id": "hierarchy_primary_action",
@@ -83,5 +71,17 @@
     "ai_process_minutes": 25.0,
     "probability_of_success": 0.78,
     "rationale": "Frontend UI design benefits from repeated human plus agent review because hierarchy, accessibility, and visual distinction all need strong evidence before promotion."
+  },
+  "learning_posture": {
+    "supported": [
+      "learn",
+      "guided",
+      "execute"
+    ],
+    "default": "guided",
+    "feedback_capture": {
+      "prompt_on_terminal": true,
+      "interactive_only": true
+    }
   }
 }

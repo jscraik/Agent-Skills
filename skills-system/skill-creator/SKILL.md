@@ -414,17 +414,3 @@ Considerations when forward-testing:
 
 If forward-testing only succeeds when subagents see leaked context, tighten the skill or the
 forward-testing setup before trusting the result.
-
-## See Also
-
-| Skill | When to use together |
-|---|---|
-| [[utilities/skill-builder]] | Apply the canonical skill-building workflow, evals, and governance checks |
-| [[skills-system/plugin-creator]] | Package newly created skills inside a plugin when the user wants distributable packaging |
-| [[product/docs/docs-expert]] | Tighten supporting references or skill-adjacent documentation after scaffold creation |
-
-**Topic map:** [[skill-authoring]]
-
-## Gotchas
-
-- Always generate new skills through `init_skill.py` first; patching an ad hoc folder later creates avoidable drift.

@@ -113,7 +113,7 @@ cases:
       - type: regex
         value: "(?i)(learnings-researcher)"
       - type: regex
-        value: "(?i)(parallel|bounded internal subagents)"
+        value: "(?i)(request_user_input|main thread|serial|bounded internal subagents|explicitly asked for delegation)"
 
   - id: requirements-doc-primary-input
     name: recent requirements doc becomes planning source

@@ -1,0 +1,3 @@
+$frontend-ui-design
+
+Please audit this page structure: cards feel repetitive, density is off, and grouping is unclear.

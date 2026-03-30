@@ -38,3 +38,17 @@ cases:
     value: (?i)(safe|safer|inspect|verify|checksum|sandbox)
   - type: not_contains
     value: rm -rf
+- id: happy-audit-scorecard
+  name: happy audit mode scorecard output
+  category: happy
+  should_trigger: true
+  prepend_skill: true
+  prompt: Run baseline-ui in audit mode for checkout page and provide scorecard output
+    with total /20, P0-P3 findings, and positive findings.
+  acceptance:
+  - type: regex
+    value: (?i)(/20|total)
+  - type: regex
+    value: (?i)(P0|P1|P2|P3)
+  - type: regex
+    value: (?i)(positive findings)

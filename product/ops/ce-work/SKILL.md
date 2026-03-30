@@ -259,7 +259,7 @@ See `references/execution-modes.md` for the exact rules.
 After successful execution, the next step is usually one of:
 - technical review or PR review
 - a follow-up `ce-work` pass for remaining implementation units
-- issue creation/update through the repo's normal tracker path
+- issue creation/update through `[[linear]]` when available, or through the repo's dedicated tracker workflow when Linear is not the governing tracker
 - operational rollout verification
 
 When the work originated from a plan/spec artifact, keep the artifact path in the handoff so the next stage can trace back to the governing document.

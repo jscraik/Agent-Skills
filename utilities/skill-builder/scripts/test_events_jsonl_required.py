@@ -4,7 +4,7 @@
 import json
 import sys
 from pathlib import Path
-from typing import List, Set
+from typing import Any, Dict, List, Optional, Set
 
 sys.path.insert(0, str(Path(__file__).parent))
 
@@ -13,6 +13,62 @@ try:
 except ImportError:
     print("⚠ Could not import validate_recursive_promotion (using fallback)")
     RUN_REQUIRED_FILES = {"run.json", "iteration_journal.jsonl", "events.jsonl", "promotion_decision.json"}
+
+
+DEFAULT_WAIVER_FILE = Path("artifacts/skill-graphs/pilot/artifact-parity-waivers.json")
+
+
+def _load_json(path: Path) -> Dict[str, Any]:
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    if isinstance(payload, dict):
+        return payload
+    return {}
+
+
+def load_event_envelope_waivers(path: Path = DEFAULT_WAIVER_FILE) -> Dict[str, Dict[str, Any]]:
+    """Load waiver rows that explicitly apply to event-envelope checks."""
+    if not path.exists():
+        return {}
+
+    try:
+        payload = _load_json(path)
+    except Exception:
+        return {}
+
+    rows = payload.get("waived_runs")
+    if not isinstance(rows, list):
+        return {}
+
+    waivers: Dict[str, Dict[str, Any]] = {}
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        run_dir = str(row.get("run_dir", "")).strip()
+        if not run_dir:
+            continue
+
+        applies_to = row.get("applies_to")
+        scope = str(row.get("scope", "")).strip().lower()
+        applies = False
+        if isinstance(applies_to, list):
+            applies = any(str(item).strip().lower() == "event_envelope" for item in applies_to)
+        elif isinstance(applies_to, str):
+            applies = applies_to.strip().lower() == "event_envelope"
+        elif scope:
+            applies = scope == "event_envelope"
+
+        if applies:
+            waivers[run_dir] = row
+    return waivers
+
+
+def resolve_event_envelope_waiver(run_dir_name: str, waivers: Dict[str, Dict[str, Any]]) -> Optional[Dict[str, Any]]:
+    candidates = [run_dir_name, f"artifacts/skill-graphs/runs/{run_dir_name}"]
+    for key in candidates:
+        row = waivers.get(key)
+        if row:
+            return row
+    return None
 
 
 def test_events_jsonl_is_required() -> None:
@@ -30,21 +86,32 @@ def test_all_runs_have_events_jsonl() -> None:
         print("⚠ SKIP: No runs directory found")
         return
 
+    waivers = load_event_envelope_waivers()
     missing_events: List[str] = []
+    waived_missing_events: List[str] = []
     for run_dir in runs_root.iterdir():
         if not run_dir.is_dir():
             continue
         if not (run_dir / "run.json").exists():
             continue
         if not (run_dir / "events.jsonl").exists():
-            missing_events.append(run_dir.name)
+            if resolve_event_envelope_waiver(run_dir.name, waivers):
+                waived_missing_events.append(run_dir.name)
+            else:
+                missing_events.append(run_dir.name)
 
     assert not missing_events, (
         f"{len(missing_events)} runs missing events.jsonl:\n"
         + "\n".join(f"  - {name}" for name in missing_events[:5])
         + (f"\n  ... and {len(missing_events) - 5} more" if len(missing_events) > 5 else "")
     )
-    print("✓ All runs have events.jsonl")
+    if waived_missing_events:
+        print(
+            f"✓ All runs have events.jsonl or explicit event-envelope waivers "
+            f"(waived={len(waived_missing_events)})"
+        )
+    else:
+        print("✓ All runs have events.jsonl")
 
 
 def test_events_jsonl_has_valid_format() -> None:

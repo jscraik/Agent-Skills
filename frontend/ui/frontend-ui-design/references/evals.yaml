@@ -1,4 +1,18 @@
 cases:
+  - name: layout-spacing-rhythm-trigger
+    prompt: "This dashboard layout feels crowded and flat. Can you improve spacing rhythm, visual hierarchy, and alignment without changing the stack?"
+    acceptance:
+      - type: contains
+        value: "## Outputs"
+      - type: regex
+        value: "(spacing|hierarchy|rhythm|alignment)"
+
+  - name: layout-audit-structure
+    prompt: "Please audit this page structure: cards feel repetitive, density is off, and grouping is unclear."
+    acceptance:
+      - type: regex
+        value: "(spacing|hierarchy|rhythm|density)"
+
   - name: happy-path
     prompt: "Use the frontend-ui-design skill for a typical request."
     acceptance:
@@ -19,3 +33,9 @@ cases:
     acceptance:
       - type: contains
         value: "## When to use"
+
+  - name: negative-motion-polish-route-away
+    prompt: "Only tune motion polish and interaction timing for an already-designed screen."
+    acceptance:
+      - type: regex
+        value: "(ui-ux-creative-coding|When not to use|post-direction polish)"

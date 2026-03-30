@@ -7,7 +7,7 @@ import argparse
 import json
 import re
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional
 
@@ -47,6 +47,16 @@ class SkillEntry:
     profile_path: Path
     expected_mode: str
     wave: str
+
+
+@dataclass(frozen=True)
+class TelemetryHealth:
+    generated_at: Optional[datetime]
+    window_start: Optional[str]
+    window_end: Optional[str]
+    event_envelope_errors_total: Optional[int]
+    event_envelope_errors_waived: int
+    event_envelope_errors_unresolved: Optional[int]
 
 
 def iso_now() -> str:
@@ -212,14 +222,51 @@ def parse_json(path: Path) -> Optional[Dict[str, Any]]:
     return payload if isinstance(payload, dict) else None
 
 
-def parse_telemetry_event_errors(health_path: Path) -> Optional[int]:
+def parse_telemetry_health(health_path: Path) -> Optional[TelemetryHealth]:
     if not health_path.exists():
         return None
     text = health_path.read_text(encoding="utf-8")
-    match = re.search(r"Event envelope errors:\s*`?(\d+)`?", text)
-    if match:
-        return int(match.group(1))
-    return None
+    generated_at: Optional[datetime] = None
+    generated_match = re.search(r"Generated at:\s*`([^`]+)`", text)
+    if generated_match:
+        raw = generated_match.group(1).strip()
+        try:
+            generated_at = datetime.fromisoformat(raw.replace("Z", "+00:00")).astimezone(timezone.utc)
+        except Exception:
+            generated_at = None
+
+    window_start: Optional[str] = None
+    window_end: Optional[str] = None
+    window_match = re.search(r"Window:\s*`(\d{4}-\d{2}-\d{2})\.\.(\d{4}-\d{2}-\d{2})`", text)
+    if window_match:
+        window_start = window_match.group(1)
+        window_end = window_match.group(2)
+
+    total_match = re.search(r"Event envelope errors total:\s*`?(\d+)`?", text)
+    waived_match = re.search(r"Event envelope errors waived:\s*`?(\d+)`?", text)
+    unresolved_match = re.search(r"Event envelope errors unresolved:\s*`?(\d+)`?", text)
+    legacy_match = re.search(r"Event envelope errors:\s*`?(\d+)`?", text)
+
+    total = int(total_match.group(1)) if total_match else None
+    waived = int(waived_match.group(1)) if waived_match else 0
+    unresolved = int(unresolved_match.group(1)) if unresolved_match else None
+
+    if unresolved is None and total is not None:
+        unresolved = max(total - waived, 0)
+    if unresolved is None and legacy_match:
+        unresolved = int(legacy_match.group(1))
+        if total is None:
+            total = unresolved
+        waived = 0
+
+    return TelemetryHealth(
+        generated_at=generated_at,
+        window_start=window_start,
+        window_end=window_end,
+        event_envelope_errors_total=total,
+        event_envelope_errors_waived=waived,
+        event_envelope_errors_unresolved=unresolved,
+    )
 
 
 def load_approver_count(path: Path) -> Optional[int]:
@@ -272,6 +319,18 @@ def parse_args() -> argparse.Namespace:
         "--decision-date",
         default=today,
         help="Decision date for wave readiness artifact",
+    )
+    parser.add_argument(
+        "--window-days",
+        type=int,
+        default=7,
+        help="Expected decision window size used by daily health artifacts",
+    )
+    parser.add_argument(
+        "--max-health-age-hours",
+        type=float,
+        default=24.0,
+        help="Maximum allowed age for daily health generated_at before readiness blocks",
     )
     parser.add_argument(
         "--inventory-policy",
@@ -428,21 +487,93 @@ def main() -> int:
                 }
             )
 
-    telemetry_errors = parse_telemetry_event_errors(
+    telemetry_health = parse_telemetry_health(
         repo_root / "docs/skill-graphs/telemetry/daily-skill-health.md"
     )
-    if telemetry_errors is None:
+    telemetry_errors_unresolved: Optional[int] = None
+    telemetry_errors_total: Optional[int] = None
+    telemetry_errors_waived = 0
+    telemetry_generated_at: Optional[str] = None
+    telemetry_window_start: Optional[str] = None
+    telemetry_window_end: Optional[str] = None
+    telemetry_freshness_ok = False
+
+    if telemetry_health is None or telemetry_health.event_envelope_errors_unresolved is None:
         wave0_blockers.append(
             {
                 "code": "TELEMETRY_HEALTH_MISSING",
                 "detail": "Could not parse Event envelope errors metric from daily-skill-health.md",
             }
         )
-    elif telemetry_errors > 0:
+    else:
+        telemetry_errors_unresolved = telemetry_health.event_envelope_errors_unresolved
+        telemetry_errors_total = telemetry_health.event_envelope_errors_total
+        telemetry_errors_waived = telemetry_health.event_envelope_errors_waived
+        telemetry_generated_at = (
+            telemetry_health.generated_at.replace(microsecond=0).isoformat().replace("+00:00", "Z")
+            if telemetry_health.generated_at
+            else None
+        )
+        telemetry_window_start = telemetry_health.window_start
+        telemetry_window_end = telemetry_health.window_end
+
+        freshness_checks_ok = True
+        if telemetry_health.generated_at is None:
+            freshness_checks_ok = False
+            wave0_blockers.append(
+                {
+                    "code": "TELEMETRY_HEALTH_STALE",
+                    "detail": "daily-skill-health.md missing parseable Generated at timestamp",
+                }
+            )
+        else:
+            max_age_hours = max(args.max_health_age_hours, 0.0)
+            age_hours = (datetime.now(timezone.utc) - telemetry_health.generated_at).total_seconds() / 3600.0
+            if age_hours > max_age_hours:
+                freshness_checks_ok = False
+                wave0_blockers.append(
+                    {
+                        "code": "TELEMETRY_HEALTH_STALE",
+                        "detail": f"daily-skill-health.md age {age_hours:.2f}h exceeds {max_age_hours:.2f}h",
+                    }
+                )
+
+        expected_end = args.decision_date
+        try:
+            expected_end_date = datetime.fromisoformat(expected_end).date()
+            expected_start_date = expected_end_date - timedelta(days=max(args.window_days, 1) - 1)
+            expected_start = expected_start_date.isoformat()
+        except Exception:
+            freshness_checks_ok = False
+            expected_start = None
+            wave0_blockers.append(
+                {
+                    "code": "TELEMETRY_WINDOW_MISMATCH",
+                    "detail": f"Invalid --decision-date provided: {args.decision_date}",
+                }
+            )
+
+        if expected_start is not None:
+            if telemetry_health.window_start != expected_start or telemetry_health.window_end != expected_end:
+                freshness_checks_ok = False
+                wave0_blockers.append(
+                    {
+                        "code": "TELEMETRY_WINDOW_MISMATCH",
+                        "detail": (
+                            "daily-skill-health.md window mismatch "
+                            f"(expected {expected_start}..{expected_end}, "
+                            f"actual {telemetry_health.window_start}..{telemetry_health.window_end})"
+                        ),
+                    }
+                )
+
+        telemetry_freshness_ok = freshness_checks_ok
+
+    if telemetry_errors_unresolved is not None and telemetry_errors_unresolved > 0:
         wave0_blockers.append(
             {
                 "code": "EVENT_ENVELOPE_ERRORS",
-                "detail": f"Event envelope errors in decision window: {telemetry_errors}",
+                "detail": f"Unresolved event envelope errors in decision window: {telemetry_errors_unresolved}",
             }
         )
 
@@ -497,11 +628,14 @@ def main() -> int:
                 "detail": "Wave 2 blocked until Wave 1 manual onboarding passes",
             }
         )
-    if telemetry_errors is not None and telemetry_errors > 0:
+    if telemetry_errors_unresolved is not None and telemetry_errors_unresolved > 0:
         wave2_blockers.append(
             {
                 "code": "EVENT_ENVELOPE_ERRORS",
-                "detail": f"Wave 2 requires zero event envelope errors (actual={telemetry_errors})",
+                "detail": (
+                    "Wave 2 requires zero unresolved event envelope errors "
+                    f"(actual={telemetry_errors_unresolved})"
+                ),
             }
         )
     wave2_ready = not wave2_blockers
@@ -516,8 +650,15 @@ def main() -> int:
             "co_pilot_skill_count": copilot_total,
             "profile_valid_count": len(entries) - invalid_count,
             "profile_invalid_count": invalid_count,
-            "event_envelope_errors": telemetry_errors,
+            "event_envelope_errors": telemetry_errors_unresolved,
+            "event_envelope_errors_total": telemetry_errors_total,
+            "event_envelope_errors_waived": telemetry_errors_waived,
+            "event_envelope_errors_unresolved": telemetry_errors_unresolved,
             "approver_count": approver_count,
+            "telemetry_generated_at": telemetry_generated_at,
+            "telemetry_window_start": telemetry_window_start,
+            "telemetry_window_end": telemetry_window_end,
+            "telemetry_freshness_ok": telemetry_freshness_ok,
         },
         "waves": {
             "wave-0-controls": {
@@ -525,7 +666,10 @@ def main() -> int:
                 "checks": {
                     "required_controls_present": len(wave0_blockers) == 0
                     or all(blocker["code"] != "MISSING_CONTROL_FILE" for blocker in wave0_blockers),
-                    "event_envelope_errors_zero": telemetry_errors == 0 if telemetry_errors is not None else False,
+                    "event_envelope_errors_zero": (
+                        telemetry_errors_unresolved == 0 if telemetry_errors_unresolved is not None else False
+                    ),
+                    "telemetry_freshness_ok": telemetry_freshness_ok,
                     "approver_count_gte_2": bool(approver_count is not None and approver_count >= 2),
                 },
                 "blockers": blockers_with_sla(wave0_blockers),
@@ -547,7 +691,10 @@ def main() -> int:
                 "checks": {
                     "co_pilot_profiles_valid": copilot_valid == copilot_total,
                     "wave_1_ready": wave1_ready,
-                    "event_envelope_errors_zero": telemetry_errors == 0 if telemetry_errors is not None else False,
+                    "event_envelope_errors_zero": (
+                        telemetry_errors_unresolved == 0 if telemetry_errors_unresolved is not None else False
+                    ),
+                    "telemetry_freshness_ok": telemetry_freshness_ok,
                 },
                 "coverage": {
                     "total": copilot_total,

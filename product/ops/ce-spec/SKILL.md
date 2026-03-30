@@ -159,9 +159,15 @@ Rules:
 Increase reasoning depth before structuring the contract when the work is full-spec depth, security-sensitive, failure-heavy, or spans multiple system boundaries.
 
 ### Phase 1: Gather local grounding
-Run these in parallel as bounded internal subagents:
+Start with local grounding in the main thread.
+
+If bounded internal support would materially improve coverage and the user has not already explicitly asked for delegation or sub-agents, ask a short blocking approval question via `request_user_input` before spawning any internal subagents.
+
+If approved, run these bounded internal subagents in parallel:
 - `repo-research-analyst("Find existing architecture, patterns, and relevant files related to: <spec source> — max 20 files, max 4 MB total read, return a <=400 word summary with file:line refs")`
 - `learnings-researcher("Find prior learnings relevant to: <spec source> — check .harness/memory/LEARNINGS.md first when it exists, then use instructions/Learnings.md for compatibility, then scan only directly relevant deeper solution docs. Return only directly relevant findings, <=200 words total.")`
+
+If approval is not granted, the tool is unavailable, or subagents are unnecessary, perform the equivalent grounding serially in the main thread.
 
 Focus on:
 - similar components, services, or flows already in the repo
@@ -175,9 +181,13 @@ Treat them as internal support for the spec stage, not separate top-level operat
 ### Phase 2: Run external research conditionally
 Run external research only when the work is high risk, externally dependent, standards-sensitive, or current best practices materially affect the contract.
 
-If needed, run in parallel as bounded internal subagents:
+If bounded external research support would materially improve the contract and the user has not already explicitly asked for delegation or sub-agents, ask a short blocking approval question via `request_user_input` before spawning any internal research subagents.
+
+If approved, run these bounded internal subagents in parallel:
 - `best-practices-researcher("<spec source> — max 5 external sources, <=300 word summary, cite URLs and dates")`
 - `framework-docs-researcher("<spec source> — max 3 docs pages, return only sections directly applicable, <=300 words")`
+
+If approval is not granted, the tool is unavailable, or the support is unnecessary, do the external research inline and keep the source set tight.
 
 Use external research to sharpen:
 - framework- or platform-specific constraints

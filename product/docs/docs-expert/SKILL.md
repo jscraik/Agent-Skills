@@ -140,6 +140,7 @@ Reference: `references/output-contract-mode.md`.
 - A **doc audit summary** with what changed, what is still unknown, and what to verify.
 - Community-health, GitHub visibility, and brand findings when they are in scope.
 - A QA bootstrap summary plus an evidence bundle when tooling exists.
+- If doc validation or audit work surfaces durable repo follow-up rather than a one-off note, create or update a Linear issue in the named `[[ project ]]` instead of leaving the finding only in chat.
 - Final handoff format:
   - summary of changes
   - doc QA checklist results
@@ -243,6 +244,7 @@ Validation options to run when available and record:
 
 Fail fast: if any validation fails, stop and report before continuing edits.
 If tooling is missing and bootstrap is not approved, state what is missing and why checks were skipped.
+If validation surfaces durable repo work, create or update a Linear issue in the named `[[ project ]]` rather than leaving the finding only in chat.
 
 ## Anti-patterns
 - Writing without confirming audience and purpose.
@@ -272,6 +274,7 @@ Quick corrections:
 - "Convert this approval workflow into a compact operational spec with a transition table, invariants, and dry-run behavior."
 - "Define canonical output contracts for these agent-facing commands, including machine-readable defaults, human-readable mode, schema versioning, and deterministic errors."
 - "Design a robot-mode interface so agents can use the command surface without the UI, including no-arg quick-start behavior and errors that teach correct usage."
+- "Update our docs workflow so when validation finds durable repo work, it creates or updates a Linear issue in the right `[[ project ]]` instead of leaving the finding only in chat."
 
 ## Gotchas
 - None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.

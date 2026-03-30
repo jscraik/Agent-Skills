@@ -182,7 +182,9 @@ Add conditional reviewers by exact configured role name based on target shape:
 - `deployment-verification-agent` for rollout-sensitive or production-risky changes
 
 Execution strategy:
-- run in bounded parallel by default
+- use serial review in the main thread by default
+- if multiple independent specialist reviewers would materially improve the review and the user has not already explicitly asked for delegation or sub-agents, ask a short blocking approval question via `request_user_input` before spawning them
+- when approved, run the selected reviewer set in bounded parallel
 - switch to serial when the session is long, the reviewer set is large, or the platform cannot safely hold all results inline
 - preserve reviewer body context from `compound-engineering.local.md` when available
 

@@ -26,6 +26,8 @@ user goal
 - [Constraints](#constraints)
 - [Philosophy](#philosophy)
 - [Standards baseline (March 2026)](#standards-baseline-march-2026)
+- [Cognitive Load Lens](#cognitive-load-lens)
+- [Persona Stress Test](#persona-stress-test)
 - [Use this skill to](#use-this-skill-to)
 - [Workflow](#workflow)
 - [Interaction rules](#interaction-rules)
@@ -40,7 +42,6 @@ user goal
 - [Decision feedback protocol](#decision-feedback-protocol)
 
 ## When to use
-
 Use this skill when:
 - the user asks for critique or redesign of a product UI/UX surface
 - the user needs product judgment about hierarchy, flow ownership, or interaction clarity
@@ -53,21 +54,18 @@ Do not use this skill when:
 - the user wants broad brainstorming without a recommendation
 
 ## Required inputs
-
 - user goal and job-to-be-done context
 - target surface or workflow description
 - critical constraints and risk tolerance when available
 - optional screenshots, competitor examples, and trust/governance requirements
 
 ## Deliverables
-
 - an opinionated critique or redesign recommendation using the required output pattern
 - explicit tradeoff call-outs and a chosen direction
 - trust/governance implications tied to decision points
 - adapted pattern references when competitor material is relevant
 
 ## Constraints
-
 - Redact secrets, credentials, and sensitive data by default.
 - Optimize for product clarity, trust, and momentum before craft polish.
 - Keep one dominant action per moment unless there is a strong reason not to.
@@ -78,7 +76,6 @@ Do not use this skill when:
 - Avoid sprawling recommendations; keep the critique focused and narrow.
 
 ## Philosophy
-
 - Optimize for clarity, momentum, trust, and legibility.
 - Prefer product judgment over generic brainstorming.
 - Say plainly when a design is confused, overloaded, or too clever.
@@ -89,7 +86,6 @@ Do not use this skill when:
 - Enable capable teams to execute quickly with explicit rationale and implementation-ready calls.
 
 ## Standards baseline (March 2026)
-
 Use official standards and system documentation as evidence anchors, especially for high-stakes flows.
 
 - Normative accessibility baseline: WCAG 2.2 and WAI-ARIA APG.
@@ -102,8 +98,26 @@ Use official standards and system documentation as evidence anchors, especially 
 
 Use [references/gold-standards-2026.md](references/gold-standards-2026.md) as the source of truth for links and usage notes.
 
-## Use this skill to
+## Cognitive Load Lens
+Use this lens when the interface asks users to choose, compare, or decide under uncertainty.
 
+- Check whether the interface preserves a single clear focus per moment.
+- Check whether related choices are chunked into digestible groups instead of being dumped into one visual field.
+- Check whether the user has to remember information from another screen, panel, or earlier step to finish the current decision.
+- Check whether the surface hides necessary context in a different panel, modal, or tab, forcing unnecessary context switching.
+- Treat more than 4 simultaneous meaningful options at one decision point as a likely overload signal unless there is strong grouping and recommendation support.
+
+Reference: [references/cognitive-load.md](references/cognitive-load.md).
+
+## Persona Stress Test
+When critiquing an interface, pressure-test it through 2-3 relevant user lenses instead of relying on one generic observer voice.
+
+- Use the predefined personas in [references/persona-stress-test.md](references/persona-stress-test.md).
+- Pick the personas that best match the interface type and risk profile.
+- Report concrete red flags for each chosen persona tied to the actual primary flow.
+- Use this as a probe for hidden failure modes, not as a substitute for the main recommendation.
+
+## Use this skill to
 - Critique a UI or workflow.
 - Design a new product surface, card, side panel, or chat experience.
 - Decide what belongs inline versus in a secondary surface.
@@ -113,9 +127,7 @@ Use [references/gold-standards-2026.md](references/gold-standards-2026.md) as th
 - Tear down competitor products with an eye for reusable design moves.
 
 ## Workflow
-
 ### 1. Anchor on the job
-
 Start with the user's job, moment, and risk.
 
 - What is the user trying to get done right now
@@ -125,7 +137,6 @@ Start with the user's job, moment, and risk.
 If the design does not make the job easier, cleaner visuals do not save it.
 
 ### 2. Decide the owning surface
-
 Choose which surface should own the moment before discussing components.
 
 - Primary surface: where intent and action happen
@@ -138,7 +149,6 @@ For chat-native products, default to:
 - side panels as reference, evidence, and durable context
 
 ### 3. Clarify hierarchy
-
 State what matters most in one glance.
 
 - What is the single primary action
@@ -148,7 +158,17 @@ State what matters most in one glance.
 
 If everything is competing, the design has not chosen yet.
 
-### 4. Design for trust, not just task completion
+### 4. Check cognitive load before adding polish
+Run a quick cognitive-load pass for the primary flow:
+
+- Are there more than 4 meaningful choices competing at once?
+- Does the user need to remember information from somewhere else to decide now?
+- Is complexity revealed progressively, or dumped upfront?
+- Does the UI require reading, deciding, and navigating at the same time?
+
+If the flow is overloaded, reduce choice count, improve grouping, or move slower context into a supporting surface before discussing craft details.
+
+### 5. Design for trust, not just task completion
 
 Surface governance where decisions happen.
 
@@ -160,7 +180,7 @@ Surface governance where decisions happen.
 
 Do not bury trust-critical information in a side panel if the user needs it to decide now.
 
-### 5. Review the full state set
+### 6. Review the full state set
 
 Do not evaluate only the happy path.
 
@@ -174,7 +194,15 @@ Do not evaluate only the happy path.
 
 The quality of the edge states often determines whether the product feels serious.
 
-### 6. Use market references correctly
+### 7. Run a persona stress test
+
+Pick 2-3 relevant personas from [references/persona-stress-test.md](references/persona-stress-test.md) and walk the main flow through their lens.
+
+- Use persona testing to expose friction for first-timers, power users, accessibility-dependent users, stress testers, or mobile users.
+- Report only concrete red flags that change the recommendation or sequencing.
+- If no additional signal appears, say so briefly and move on.
+
+### 8. Use market references correctly
 
 When comparing products:
 
@@ -184,7 +212,7 @@ When comparing products:
 
 Do not praise a competitor just for being minimal. Minimal interfaces can still be vague, slow, or untrustworthy.
 
-### 7. Apply a craft pass after the product call is clear
+### 9. Apply a craft pass after the product call is clear
 
 Once the job, surface model, hierarchy, and trust model are working, refine the feel of the interface.
 
@@ -226,8 +254,9 @@ When using this skill, structure the response in this order:
 5. Recommended change
 6. Plain-language why this is the right call
 7. Governance and trust implications
-8. Competitor or pattern references, if relevant
-9. Standards and evidence references used
+8. Persona or edge-case red flags
+9. Competitor or pattern references, if relevant
+10. Standards and evidence references used
 
 Keep the recommendation opinionated. Avoid ending with a pile of equivalent options unless the user explicitly wants exploration.
 
@@ -247,9 +276,11 @@ Adapt depth and tradeoff framing by context:
 
 ## Validation
 
-- Confirm the recommendation includes all nine output-pattern sections.
+- Confirm the recommendation includes all ten output-pattern sections.
 - Confirm one clear recommendation and at least one explicit tradeoff.
 - Confirm trust/governance implications are surfaced where decisions happen.
+- Confirm the critique checked for cognitive overload when the surface contains multi-step decisions, dense option sets, or split context.
+- Confirm the persona or edge-case red-flag section is present when the flow has meaningful user-variance risk.
 - Confirm non-happy-path states were considered where relevant.
 - If competitor references are used, confirm they are adapted, not copied.
 - For high-stakes recommendations, confirm at least one normative and one platform/system reference are cited.

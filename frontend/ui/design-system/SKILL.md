@@ -20,6 +20,7 @@ metadata:
 - [Required inputs](#required-inputs)
 - [Required context](#required-context)
 - [Principles](#principles)
+- [Normalization and Extraction Rules](#normalization-and-extraction-rules)
 - [Variation and adaptation](#variation-and-adaptation)
 - [Workflow](#workflow)
 - [Deliverables](#deliverables)
@@ -108,6 +109,22 @@ If the request is ambiguous, ask one focused clarification question.
 - **Smallest safe diff:** prefer minimal, auditable changes and explicit validation steps.
 - **Design-system consistency:** typography, spacing, and icon choices should align to existing scales/categories.
 
+## Normalization and Extraction Rules
+- Normalize before inventing. If a surface drifts, first determine whether the root cause is:
+  - one-off literals,
+  - misuse of an existing token or component,
+  - a missing semantic token,
+  - a missing reusable component or documented pattern.
+- Extract only when reuse is real:
+  - repeated 3+ times already, or
+  - highly likely to recur across nearby surfaces.
+- Do not create tokens for every single value. New tokens must carry semantic meaning, not just preserve arbitrary numbers.
+- Prefer replacing bespoke implementations with canonical design-system equivalents instead of preserving drift through wrappers.
+- When extracting a reusable pattern, define the migration path as part of the recommendation:
+  - what becomes shared,
+  - what gets replaced,
+  - what dead code can be removed after migration.
+
 ## Variation and adaptation
 - Adapt output depth by request type: quick Q&A, deep audit report, implementation patch plan, or migration checklist.
 - Use different recommendation strategies for small, medium, and large changes rather than repeating one template.
@@ -121,17 +138,21 @@ If the request is ambiguous, ask one focused clarification question.
    - Verify brand posture with `docs/design-system/CHARTER.md` and `ADOPTION_CHECKLIST.md` before touching tokens or theme.
    - Use `jq` for DTCG keys/values and `rg`/`fd` for CSS variable and component usage.
    - Record only relevant pillars: color, typography, spacing, radius/size/shadow, motion, icons, brand-mode behavior.
-3. **Trace the layer path for each finding/change**
+3. **Classify drift or extraction opportunity**
+   - Decide whether the issue is normalization work, true system extraction, or a local exception.
+   - If normalization is enough, prefer the smallest change that restores canonical behavior.
+   - If extraction is justified, identify reuse count, future consumers, and migration cost before proposing a new shared primitive or token.
+4. **Trace the layer path for each finding/change**
    - Brand token in DTCG → generated foundation vars → alias vars → mapped theme vars → component/story usage.
-4. **Produce response or implement edits**
+5. **Produce response or implement edits**
    - Include exact file references and affected token names.
    - For code changes, avoid introducing hex/rgb literals or ad-hoc px values in component code unless explicitly requested.
    - For brand decisions (new/renamed semantic tokens, dark/high contrast additions), cite `docs/design-system/CONTRACT.md` and `docs/design-system/collections/brand-collection-rules.md`.
-5. **Validate**
+6. **Validate**
    - Run the smallest relevant checks from [Validation](#validation).
    - If token files changed, verify schema version in `packages/tokens/SCHEMA_VERSION` and the generated artifacts stay coherent.
    - If guidance policy scope or protected surfaces changed, run both `design-system-guidance:ratchet` and `design-system-guidance:check:ci` and report warn/error counts.
-6. **Write artifacts**
+7. **Write artifacts**
    - Save the summary/report under `./artifacts/design-system/` (or `/mnt/data/design-system/`).
 
 ## Deliverables
@@ -141,6 +162,7 @@ Depending on user request, produce one or more:
 - `token-impact-matrix.md` — token path tracing (Brand/Alias/Mapped/Usage).
 - `brand-audit-matrix.md` — brand-asset, contract, and accessibility constraints checked.
 - `migration-checklist.md` — ordered migration steps + risk notes.
+- `normalization-plan.md` — drift source, canonical replacement path, and cleanup notes.
 - `validation-report.md` — commands run + pass/fail summary.
 - For structured outputs (YAML/JSON), include a top-level `schema_version` field.
 
@@ -183,6 +205,7 @@ rg -n "highContrast|--background|--foreground" packages/ui/src/styles/theme.css 
 ## Anti-patterns
 - ❌ Editing only `theme.css` when the real change belongs in DTCG/alias layers.
 - ❌ Adding raw color/spacing literals to components when semantic tokens exist.
+- ❌ Creating a new token or shared component before proving reuse or semantic need.
 - ❌ Treating deprecated icon sources as canonical (`@design-studio/astudio-icons` for new work).
 - ❌ Skipping brand-mode/accessibility contracts when updating color systems or motion defaults.
 - ❌ Skipping guidance policy checks when touching protected surfaces or `.design-system-guidance.json`.

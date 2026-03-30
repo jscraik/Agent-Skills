@@ -106,11 +106,11 @@ Summarize results, call out remaining gaps or blockers, and propose next actions
 
 ## Available Tools
 
-Issue Management: `list_issues`, `get_issue`, `create_issue`, `update_issue`, `list_my_issues`, `list_issue_statuses`, `list_issue_labels`, `create_issue_label`
+Issue Management: `list_issues`, `get_issue`, `save_issue`, `list_issue_statuses`, `list_issue_labels`, `create_issue_label`
 
-Project & Team: `list_projects`, `get_project`, `create_project`, `update_project`, `list_teams`, `get_team`, `list_users`
+Project & Team: `list_projects`, `get_project`, `save_project`, `list_teams`, `get_team`, `list_users`
 
-Documentation & Collaboration: `list_documents`, `get_document`, `search_documentation`, `list_comments`, `create_comment`, `list_cycles`
+Documentation & Collaboration: `list_documents`, `get_document`, `create_document`, `update_document`, `search_documentation`, `list_comments`, `save_comment`, `list_cycles`
 
 ## Practical Workflows
 

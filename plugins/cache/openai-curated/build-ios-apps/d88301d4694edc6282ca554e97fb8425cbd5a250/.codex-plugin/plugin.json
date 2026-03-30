@@ -1,0 +1,42 @@
+{
+  "name": "build-ios-apps",
+  "version": "0.1.0",
+  "description": "Build iOS apps with workflows for SwiftUI UI work, refactors, performance audits, and simulator debugging.",
+  "author": {
+    "name": "OpenAI",
+    "email": "support@openai.com",
+    "url": "https://openai.com/"
+  },
+  "homepage": "https://openai.com/",
+  "repository": "https://github.com/openai/plugins",
+  "license": "MIT",
+  "keywords": [
+    "ios",
+    "swift",
+    "swiftui",
+    "xcode",
+    "performance",
+    "debugging"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Build iOS Apps",
+    "shortDescription": "Build, refine, and debug iOS apps with SwiftUI and Xcode workflows",
+    "longDescription": "Use Build iOS Apps to build or refactor SwiftUI UI, adopt modern iOS patterns such as Liquid Glass, audit runtime performance, and debug apps on simulators with XcodeBuildMCP-backed workflows.",
+    "developerName": "OpenAI",
+    "category": "Coding",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://openai.com/",
+    "privacyPolicyURL": "https://openai.com/policies/privacy-policy/",
+    "termsOfServiceURL": "https://openai.com/policies/terms-of-use/",
+    "defaultPrompt": "Build or refactor SwiftUI UI, audit performance, adopt modern iOS APIs, or debug an app on a simulator",
+    "brandColor": "#0A84FF",
+    "composerIcon": "./assets/build-ios-apps-small.svg",
+    "logo": "./assets/app-icon.png",
+    "screenshots": []
+  }
+}

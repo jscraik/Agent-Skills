@@ -21,6 +21,7 @@ DEFAULT_PILOT_PROFILES = [
 PILOT_PROFILES = list(DEFAULT_PILOT_PROFILES)
 CANONICAL_DAILY_HEALTH_DOC = "docs/skill-graphs/telemetry/daily-skill-health.md"
 LEGACY_DAILY_HEALTH_ARTIFACT = "artifacts/skill-graphs/telemetry/daily-skill-health.md"
+DEFAULT_WAIVER_FILE = "artifacts/skill-graphs/pilot/artifact-parity-waivers.json"
 
 EVENT_TYPES = {
     "run_initialized",
@@ -118,6 +119,11 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--promotion-queue-md", default="artifacts/skill-graphs/telemetry/promotion-queue.md")
     p.add_argument("--pilot-profiles-file", default="docs/skill-graphs/schemas/examples/pilot-profiles.json")
     p.add_argument("--max-run-lines", type=int, default=40)
+    p.add_argument(
+        "--waiver-file",
+        default=DEFAULT_WAIVER_FILE,
+        help="Optional JSON waiver file (waived_runs[]) used for event-envelope waiver application",
+    )
     return p.parse_args()
 
 
@@ -184,6 +190,51 @@ def load_jsonl(path: Path) -> List[Dict[str, Any]]:
             continue
         rows.append(json.loads(line))
     return rows
+
+
+def load_event_envelope_waivers(path: Path) -> Dict[str, Dict[str, Any]]:
+    if not path.exists():
+        return {}
+    try:
+        payload = load_json(path)
+    except Exception:
+        return {}
+    rows = payload.get("waived_runs")
+    if not isinstance(rows, list):
+        return {}
+
+    waivers: Dict[str, Dict[str, Any]] = {}
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        run_dir = str(row.get("run_dir", "")).strip()
+        if not run_dir:
+            continue
+        applies_to = row.get("applies_to")
+        scope = str(row.get("scope", "")).strip().lower()
+        applies = False
+        if isinstance(applies_to, list):
+            applies = any(str(item).strip().lower() == "event_envelope" for item in applies_to)
+        elif isinstance(applies_to, str):
+            applies = applies_to.strip().lower() == "event_envelope"
+        elif scope:
+            applies = scope == "event_envelope"
+        if not applies:
+            continue
+        waivers[run_dir] = row
+    return waivers
+
+
+def resolve_event_envelope_waiver(run_dir_name: str, waivers: Dict[str, Dict[str, Any]]) -> Optional[Dict[str, Any]]:
+    candidates = [
+        run_dir_name,
+        f"artifacts/skill-graphs/runs/{run_dir_name}",
+    ]
+    for key in candidates:
+        waiver = waivers.get(key)
+        if waiver:
+            return waiver
+    return None
 
 
 def infer_queue_reason(
@@ -887,7 +938,7 @@ def main() -> int:
     run_records: List[RunRecord] = []
     run_meta: List[RunMeta] = []
     skipped_runs: List[Dict[str, str]] = []
-    event_errors: List[str] = []
+    event_error_entries: List[Dict[str, str]] = []
     promotion_approved_by_run: Dict[str, bool] = {}
 
     for run_dir in sorted(runs_root.glob("run_*")):
@@ -935,23 +986,70 @@ def main() -> int:
         run_records.append(record)
         events_path = run_dir / "events.jsonl"
         if not events_path.exists():
-            event_errors.append(f"{record.run_id}: missing events.jsonl")
+            event_error_entries.append(
+                {
+                    "run_id": record.run_id,
+                    "run_dir": run_dir.name,
+                    "error": "missing events.jsonl",
+                }
+            )
             promotion_approved_by_run[record.run_id] = False
         else:
             try:
                 events = load_jsonl(events_path)
-                event_errors.extend(validate_event_envelope(events, record.run_id))
+                for err in validate_event_envelope(events, record.run_id):
+                    detail = err.split(":", 1)[1].strip() if ":" in err else err
+                    event_error_entries.append(
+                        {
+                            "run_id": record.run_id,
+                            "run_dir": run_dir.name,
+                            "error": detail,
+                        }
+                    )
                 promotion_approved_by_run[record.run_id] = any(
                     e.get("event_type") == "promotion_approved" for e in events
                 )
             except Exception as exc:
-                event_errors.append(f"{record.run_id}: invalid events.jsonl ({exc})")
+                event_error_entries.append(
+                    {
+                        "run_id": record.run_id,
+                        "run_dir": run_dir.name,
+                        "error": f"invalid events.jsonl ({exc})",
+                    }
+                )
                 promotion_approved_by_run[record.run_id] = False
 
     run_records.sort(key=lambda r: r.finished_at, reverse=True)
 
     current_records = [r for r in run_records if r.finished_at >= current_start]
     baseline_records = [r for r in run_records if baseline_start <= r.finished_at < current_start]
+    current_run_ids = {record.run_id for record in current_records}
+    current_event_entries = [entry for entry in event_error_entries if entry["run_id"] in current_run_ids]
+
+    waiver_file_path = Path(args.waiver_file).expanduser().resolve()
+    waivers = load_event_envelope_waivers(waiver_file_path)
+    unresolved_event_errors: List[str] = []
+    waived_event_errors: List[Dict[str, str]] = []
+    for entry in current_event_entries:
+        run_dir_name = entry["run_dir"]
+        waiver = resolve_event_envelope_waiver(run_dir_name, waivers)
+        rendered = f"{entry['run_id']}: {entry['error']}"
+        if waiver is None:
+            unresolved_event_errors.append(rendered)
+            continue
+        waived_event_errors.append(
+            {
+                "run_id": entry["run_id"],
+                "run_dir": run_dir_name,
+                "error": entry["error"],
+                "waiver_id": str(waiver.get("waiver_id", "")).strip(),
+                "reason": str(waiver.get("reason", "")).strip(),
+            }
+        )
+
+    event_total_count = len(current_event_entries)
+    event_waived_count = len(waived_event_errors)
+    event_unresolved_count = len(unresolved_event_errors)
 
     current_summary = summarize(current_records)
     baseline_summary = summarize(baseline_records) if baseline_records else None
@@ -1013,7 +1111,14 @@ def main() -> int:
             "state": decision,
             "reasons": reasons,
         },
-        "event_envelope_errors": event_errors,
+        "event_envelope_errors": unresolved_event_errors,
+        "event_envelope_waived": waived_event_errors,
+        "event_envelope_error_summary": {
+            "total": event_total_count,
+            "waived": event_waived_count,
+            "unresolved": event_unresolved_count,
+            "waiver_file": args.waiver_file if waivers else None,
+        },
         "recent_runs": [
             {
                 "run_id": r.run_id,
@@ -1077,14 +1182,30 @@ def main() -> int:
             f"- Injection suppressed by controls: `{current_summary.suppressed_injection_runs}`",
             f"- Uplift promotion decisions: `pass={current_summary.uplift_promotion_decision_counts['pass']}` `hold={current_summary.uplift_promotion_decision_counts['hold']}` `insufficient_data={current_summary.uplift_promotion_decision_counts['insufficient_data']}`",
             f"- Uplift auto-apply decisions: `pass={current_summary.uplift_auto_apply_decision_counts['pass']}` `hold={current_summary.uplift_auto_apply_decision_counts['hold']}` `insufficient_data={current_summary.uplift_auto_apply_decision_counts['insufficient_data']}`",
-            f"- Event envelope errors: `{len(event_errors)}`",
+            f"- Event envelope errors: `{event_unresolved_count}`",
+            f"- Event envelope errors total: `{event_total_count}`",
+            f"- Event envelope errors waived: `{event_waived_count}`",
+            f"- Event envelope errors unresolved: `{event_unresolved_count}`",
             "",
         ]
-        if event_errors:
-            daily_lines.append("## Event envelope errors")
+        if waivers:
+            daily_lines.append(f"- Event envelope waiver file: `{args.waiver_file}`")
             daily_lines.append("")
-            for err in event_errors[:50]:
+        if unresolved_event_errors:
+            daily_lines.append("## Event envelope errors (unresolved)")
+            daily_lines.append("")
+            for err in unresolved_event_errors[:50]:
                 daily_lines.append(f"- {err}")
+            daily_lines.append("")
+        if waived_event_errors:
+            daily_lines.append("## Event envelope waivers applied")
+            daily_lines.append("")
+            for row in waived_event_errors[:50]:
+                waiver_id = row["waiver_id"] or "unspecified"
+                reason = row["reason"] or "no reason provided"
+                daily_lines.append(
+                    f"- {row['run_id']} ({row['run_dir']}): waiver_id=`{waiver_id}` reason=`{reason}`"
+                )
             daily_lines.append("")
         write_markdown_artifact(
             daily_health_path,

@@ -59,6 +59,7 @@ All PRs must use `.github/PULL_REQUEST_TEMPLATE.md` which includes required AI d
 
 ## Development Workflow
 - Applies to Codex and Claude workflow execution in this repository.
+- If validation surfaces durable repo work rather than a one-off note, create or update a Linear issue in the `agent-skills` project instead of leaving the finding only in chat.
 
 ## Code Quality Checks
 - Run TypeScript type check (`tsc --noEmit`) after code changes in TypeScript packages where applicable.

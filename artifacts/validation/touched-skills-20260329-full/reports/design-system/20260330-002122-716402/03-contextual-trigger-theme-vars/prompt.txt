@@ -1,0 +1,1 @@
+Text contrast is off in light mode. Trace which token layer owns --text-secondary and where to patch.

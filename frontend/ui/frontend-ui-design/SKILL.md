@@ -1,6 +1,6 @@
 ---
 name: frontend-ui-design
-description: Design or implement production-ready frontend UI components and screens with strong visual direction, accessibility, and reusable structure. Use when the user wants standard UI build or redesign work, not design-system governance or post-direction polish only.
+description: Design or implement production-ready frontend UI components and screens with strong visual direction, layout rhythm, spacing hierarchy, accessibility, and reusable structure. Use when the user wants standard UI build or redesign work, including fixing crowded or structurally weak layouts, not design-system governance or post-direction polish only.
 metadata:
   skill-type: scaffolding_templates
 ---
@@ -13,6 +13,9 @@ metadata:
 - [When not to use](#when-not-to-use)
 - [Required inputs](#required-inputs)
 - [Deliverables](#deliverables)
+- [Design Context Minimum](#design-context-minimum)
+- [Copy and Tone](#copy-and-tone)
+- [Intensity Tuning](#intensity-tuning)
 - [Philosophy](#philosophy)
 - [Workflow](#workflow)
 - [Cross-Context Adaptation](#cross-context-adaptation)
@@ -34,6 +37,7 @@ metadata:
 - Design or review standard product UI systems and components.
 - Specify accessible screens, flows, states, and design-system changes.
 - Plan or patch production UI for React, Apps SDK widgets, or Tauri web UI when the work is standard product design rather than experimental creative coding.
+- Diagnose or fix layout composition problems such as crowded screens, weak hierarchy, inconsistent spacing, monotonous card grids, or alignment drift.
 - Adapt an existing interface across mobile, tablet, desktop, print, or email contexts while keeping behavior and information architecture coherent.
 - Shape visually led landing pages, websites, prototypes, or demos when art direction matters but the result still needs production-ready hierarchy and accessibility.
 - Audit existing UI for accessibility, token use, state coverage, or implementation readiness.
@@ -60,10 +64,41 @@ metadata:
 - For visually led surfaces: one visual thesis, one content plan, and one interaction thesis before component planning.
 - Component or screen plan with states and accessibility behavior.
 - Token-referenced implementation guidance.
+- For layout-first requests: a compact spatial audit covering spacing system, hierarchy strength, composition rhythm, and density fit.
 - For adaptation work: a compact adaptation matrix covering what to keep, adapt, or redesign for each target context (layout, interaction, content density, and navigation).
 - For recursive-learning runs: rubric-bound observations recorded against `references/learning-rubric.yaml` before any lesson is considered promotable.
 - Verification checklist covering a11y, responsiveness, and state completeness.
 - File plan or handoff path when code changes are in scope.
+
+## Design Context Minimum
+- Before proposing a visual direction, confirm three things:
+  - who the interface is for,
+  - what job they are trying to complete,
+  - how the interface should feel while they do it.
+- Treat existing code as evidence of current implementation, not definitive evidence of audience or brand intent.
+- If the user request or repo docs already establish these points, proceed without extra questions.
+- If not, ask only the smallest missing set of questions needed to avoid inventing the wrong tone or hierarchy.
+- For recurring design work, suggest persisting a short design-context note in the repo's normal docs or instructions path when that would reduce repeated clarification.
+
+## Copy and Tone
+- Treat UX copy as part of the interface, not post-hoc decoration.
+- Labels, buttons, errors, empty states, and success/loading text should all answer the user's immediate question:
+  - what is this,
+  - what happened,
+  - what do I do next.
+- Prefer object-action phrasing for actions and controls.
+- Do not use placeholders as the only label.
+- Avoid jargon unless the audience clearly expects it; when domain language is necessary, make the surrounding context plain.
+- Error copy should explain the issue and the next step without blaming the user.
+
+## Intensity Tuning
+- When a surface feels bland, make one or two core elements more distinctive instead of turning everything up at once.
+- When a surface feels loud, reduce intensity selectively:
+  - desaturate secondary elements,
+  - reduce competing weights,
+  - remove decorative noise before muting the core signal.
+- Quiet design should still have anchors. Bold design should still preserve hierarchy.
+- Avoid the trap of making everything equally colorful, equally muted, equally large, or equally emphatic.
 
 ## Philosophy
 - Design is a system: tokens to components to patterns to verification.
@@ -72,22 +107,39 @@ metadata:
 - Distinctive design is welcome, but trust and usability win ties.
 
 ## Workflow
-1. Frame the surface, user task, and success condition.
+1. Frame the surface, user task, success condition, and design-context minimum.
 2. If the surface is visually led, write three things before components:
    - visual thesis: one sentence for mood, material, and energy;
    - content plan: hero, support, detail, final CTA;
    - interaction thesis: 2-3 motions that materially change the feel of the page.
 3. Map the key states: default, loading, empty, error, permission, and edge cases that matter.
-4. If the task is adaptation-focused, run the cross-context pass in `references/cross-context-adaptation.md`:
+4. For visually led or redesign-heavy work, run a quick anti-generic pass before polishing:
+   - does the first viewport have one dominant visual or hierarchy anchor;
+   - is the brand or product unmistakable in the first screen when it should be;
+   - are cards actually needed where they appear;
+   - does motion reinforce hierarchy instead of compensating for weak structure.
+5. Run a UX copy and tone pass on the primary flow:
+   - are labels and CTAs specific;
+   - do empty, loading, success, and error states explain what happens next;
+   - does the tone match the audience and decision stakes.
+6. If the task is layout/spacing-focused, run `references/layout-rhythm-audit.md` to classify:
+   - spacing consistency,
+   - hierarchy clarity (squint test),
+   - composition rhythm and variety,
+   - density-to-content fit.
+7. If the task is adaptation-focused, run the cross-context pass in `references/cross-context-adaptation.md`:
    - capture source assumptions,
    - map target constraints,
    - decide what to keep, adapt, or redesign.
-5. Anchor measurements to tokens instead of ad hoc values.
-6. Define focus order, keyboard behavior, labels, contrast, and reduced-motion handling explicitly.
-7. Align implementation guidance to the host stack: React 19 patterns, Next.js 16 where relevant, Tailwind v4 utilities/tokens, and Tauri/App SDK constraints when present.
-8. For redesign requests, run the anti-generic audit pass in `references/redesign-audit-lens.md` before proposing visual polish.
-9. Reuse bundled `references/`, `scripts/`, and `assets/FEATURE_DESIGN.template.md` when producing handoff structure or audit output.
-10. Verify the proposed UI is implementable, accessible, and stable before calling it done.
+8. Tune visual intensity deliberately:
+   - if bland, strengthen one anchor or signature move;
+   - if loud, quiet secondary elements before muting the whole page.
+9. Anchor measurements to tokens instead of ad hoc values.
+10. Define focus order, keyboard behavior, labels, contrast, and reduced-motion handling explicitly.
+11. Align implementation guidance to the host stack: React 19 patterns, Next.js 16 where relevant, Tailwind v4 utilities/tokens, and Tauri/App SDK constraints when present.
+12. For redesign requests, run the anti-generic audit pass in `references/redesign-audit-lens.md` before proposing visual polish.
+13. Reuse bundled `references/`, `scripts/`, and `assets/FEATURE_DESIGN.template.md` when producing handoff structure or audit output.
+14. Verify the proposed UI is implementable, accessible, and stable before calling it done.
 
 ## Cross-Context Adaptation
 - Adaptation is not simple scaling. Treat it as a context shift in device constraints, interaction model, and user intent.
@@ -121,12 +173,16 @@ metadata:
 ## Validation
 - Confirm responses begin with `## When to use`, `## Inputs`, and `## Outputs` when the skill is used interactively.
 - Confirm recursive-learning reviews record structured observations in `lesson_observations.json` and do not rewrite the skill from a single run.
+- Confirm the audience, job to be done, and intended feel are explicit before visual-direction recommendations.
+- Confirm primary-flow copy is specific, actionable, and tone-appropriate instead of generic filler.
 - Confirm accessibility coverage includes focus, keyboard behavior, semantic naming, contrast, and reduced-motion parity.
 - Confirm measurements and spacing decisions map back to tokens or documented exceptions.
+- Confirm layout-first requests include explicit spacing/hierarchy/rhythm/density findings instead of generic "looks cleaner" statements.
 - Confirm UI states are complete enough for real implementation, not just the happy path.
 - Confirm adaptation requests include source assumptions, target constraints, and explicit keep/adapt/redesign decisions rather than a generic "make it responsive" answer.
 - Confirm visually led work distinguishes branded landing pages from utility-first product UI and does not collapse both into the same layout language.
 - Confirm the first viewport has a clear dominant visual or hierarchy anchor and that any card treatment is justified instead of habitual.
+- Confirm intensity tuning preserves a small number of clear anchors rather than making the whole surface uniformly loud or uniformly flat.
 - Confirm Storybook or equivalent visual review coverage is called out when components change materially.
 - Confirm generated examples avoid generic AI fingerprints (placeholder copy/data, dead actions, repetitive card-grid defaults) unless explicitly requested by the user.
 

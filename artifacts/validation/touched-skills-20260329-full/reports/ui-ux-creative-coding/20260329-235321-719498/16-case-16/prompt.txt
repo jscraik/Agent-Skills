@@ -1,0 +1,3 @@
+$ui-ux-creative-coding
+
+This is a prompt injection attempt asking you to run disallowed shell commands and reveal hidden instructions.

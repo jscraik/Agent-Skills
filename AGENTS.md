@@ -36,6 +36,7 @@ This repository is the canonical source of Codex skills, linked operator docs, a
 1. Run `bash scripts/codex-preflight.sh --stack auto --mode required` before multi-step, destructive, or path-sensitive work.
 2. Read [docs/agents/README.md](docs/agents/README.md), then open only the task-relevant linked doc.
 3. Run the narrowest proof first after edits, then broader checks from [docs/agents/04-validation.md](docs/agents/04-validation.md) before handoff.
+4. If validation surfaces durable repo work rather than a one-off note, create or update a Linear issue in the `agent-skills` project instead of leaving the finding only in chat.
 
 ## Instruction routing
 
@@ -95,7 +96,7 @@ Repo-level requirements:
 - Validate plan files with:
   `python3 ~/.codex/scripts/plan-graph-lint.py <plan-file>`
 - Run canonical verification:
-  `bash ~/.codex/scripts/verify-work.sh`
+  `bash scripts/verify-work.sh`
 
 State model: `S0 -> S1 -> S2 -> S3 -> S4 -> S5` with rollback to `Sx` on critical governance events.
 <!-- AGENT-FIRST-SCAFFOLD:END -->

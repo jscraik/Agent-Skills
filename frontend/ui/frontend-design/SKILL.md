@@ -14,6 +14,7 @@ Install a broad, deconflicted frontend design entrypoint that preserves the upst
 - [When not to use](#when-not-to-use)
 - [Required inputs](#required-inputs)
 - [Deliverables](#deliverables)
+- [Design Context Handshake](#design-context-handshake)
 - [Workflow](#workflow)
 - [Routing map](#routing-map)
 - [Overlap matrix](#overlap-matrix)
@@ -53,23 +54,39 @@ Install a broad, deconflicted frontend design entrypoint that preserves the upst
 - Visual verification notes and screenshot-first review expectation before calling the work done.
 - Preserved upstream doctrine in references so none of the imported guidance is lost.
 
+## Design Context Handshake
+- Before routing deeper, confirm the minimum design context exists:
+  - target audience,
+  - primary use case or job to be done,
+  - brand personality or intended feel.
+- Do not pretend codebase inspection alone can answer those three questions. Existing code can show what is there; it cannot fully reveal who the product is for or how it should feel.
+- Gather context in this order:
+  1. explicit user instructions already present in the thread,
+  2. project docs or repo guidance that clearly define audience or tone,
+  3. narrow follow-up questions only for what remains unclear.
+- Ask only for missing context. Do not run a broad design interview if the essentials are already known.
+- If repeated design work is likely and the user wants it, recommend persisting a compact `Design Context` section in the project's normal instruction or documentation path rather than inventing a parallel canonical surface.
+
 ## Workflow
 1. Detect context first.
    - Look for design tokens, CSS variables, typography, component libraries, motion libraries, spacing scales, and existing composition patterns.
    - Classify the surface as existing-system, partial-system, or greenfield.
-2. Decide whether this skill should continue to own the request.
+2. Run the design context handshake.
+   - Confirm audience, use case, and intended feel from instructions, repo docs, or targeted user answers.
+   - If one of those is still unclear and it materially affects the design direction, stop and ask only the missing question before routing deeper.
+3. Decide whether this skill should continue to own the request.
    - If the request is already standard product UI with clear deliverables, route immediately to `frontend-ui-design`.
    - If the main job is token, theme, alias, or design-system structure, route immediately to `design-system`.
    - If the visual direction is already chosen and the request is mainly about motion, rhythm, or polish, route immediately to `ui-ux-creative-coding`.
-3. Write the pre-build plan.
+4. Write the pre-build plan.
    - Visual thesis: one sentence covering mood, material, and energy.
    - Content plan: the main information order for the page, screen, or component.
    - Interaction plan: 2-3 motions or interaction beats that materially shape the feel.
-4. Route to the right implementation skill.
+5. Route to the right implementation skill.
    - Standard product UI or redesign work: `frontend-ui-design`.
    - Motion, rhythm, and polish after direction is set: `ui-ux-creative-coding`.
    - Token architecture or design-system work: `design-system`.
-5. Verify visually before completion.
+6. Verify visually before completion.
    - Prefer existing browser tooling, then browser MCPs, then agent-browser, then explicit mental-review fallback.
    - Fix only glaring issues in the first verification pass unless the user asks for iteration.
 
@@ -95,6 +112,7 @@ Install a broad, deconflicted frontend design entrypoint that preserves the upst
 
 ## Validation
 - Confirm the skill first decides whether this is existing-system, partial-system, or greenfield work.
+- Confirm the skill establishes audience, use case, and intended feel before routing into deeper design work.
 - Confirm the skill does not stay in control once a narrower local owner is obvious.
 - Confirm a visual thesis, content plan, and interaction plan exist before implementation recommendations begin.
 - Confirm the narrower local skill is named explicitly when routing is appropriate.

@@ -11,6 +11,7 @@ outputs:
 - Prioritized findings
 - Concrete minimal fixes
 - Validation checklist
+- Optional audit scorecard output (/20 with P0-P3 severity)
 non_goals:
 - Large unrelated refactors
 - Framework migrations without approval

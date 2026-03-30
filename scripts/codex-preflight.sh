@@ -71,7 +71,9 @@ is_local_memory_pidfile_sandbox_block() {
 
 
 make_tmp_file() {
-	mktemp "${TMPDIR:-/tmp}/local-memory-preflight.XXXXXX.json"
+	local tmp_root
+	tmp_root="${TMPDIR:-/tmp}"
+	mktemp "${tmp_root%/}/local-memory-preflight.XXXXXX"
 }
 
 detect_stack() {
@@ -335,10 +337,21 @@ preflight_local_memory_gold() {
 	log_ok "smoke cycle ok: ids ${id_a}, ${id_b}; relationship ${relationship_id}"
 
 	local malformed_output dup_output_1 dup_output_2
-	malformed_output="$(make_tmp_file)"
-	dup_output_1="$(make_tmp_file)"
-	dup_output_2="$(make_tmp_file)"
-	trap 'rm -f "${malformed_output}" "${dup_output_1}" "${dup_output_2}"' RETURN
+	malformed_output="$(make_tmp_file)" || {
+		log_err 'failed to allocate temp file for malformed payload probe'
+		return 1
+	}
+	dup_output_1="$(make_tmp_file)" || {
+		log_err 'failed to allocate first temp file for duplicate payload probe'
+		rm -f "${malformed_output}"
+		return 1
+	}
+	dup_output_2="$(make_tmp_file)" || {
+		log_err 'failed to allocate second temp file for duplicate payload probe'
+		rm -f "${malformed_output}" "${dup_output_1}"
+		return 1
+	}
+	trap 'rm -f "${malformed_output:-}" "${dup_output_1:-}" "${dup_output_2:-}"; trap - RETURN' RETURN
 
 	local malformed_code
 	malformed_code="$(curl -sS -o "${malformed_output}" -w '%{http_code}' \

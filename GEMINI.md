@@ -17,6 +17,7 @@ For repository-wide rules, use `AGENTS.md` as the source of truth.
 
 ## Development Workflow
 - Applies to Codex, Claude, and Gemini workstreams in this repo.
+- If validation surfaces durable repo work rather than a one-off note, create or update a Linear issue in the `agent-skills` project instead of leaving the finding only in chat.
 
 ## Code Quality Checks
 - Run TypeScript type check (`tsc --noEmit`) after code changes in TypeScript packages where applicable.

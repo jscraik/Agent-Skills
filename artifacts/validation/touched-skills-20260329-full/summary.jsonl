@@ -1,0 +1,54 @@
+{
+  "skill": "frontend/ui/frontend-design",
+  "gate_exit": 2,
+  "analyze_exit": 0,
+  "eval_exit": 1,
+  "gate_json": "artifacts/validation/touched-skills-20260329-full/frontend__ui__frontend-design.gate.json",
+  "analyze_json": "artifacts/validation/touched-skills-20260329-full/frontend__ui__frontend-design.analyze.json",
+  "eval_scorecard": "artifacts/validation/touched-skills-20260329-full/frontend__ui__frontend-design.scorecard.json"
+}
+{
+  "skill": "frontend/ui/frontend-ui-design",
+  "gate_exit": 0,
+  "analyze_exit": 0,
+  "eval_exit": 143,
+  "gate_json": "artifacts/validation/touched-skills-20260329-full/frontend__ui__frontend-ui-design.gate.json",
+  "analyze_json": "artifacts/validation/touched-skills-20260329-full/frontend__ui__frontend-ui-design.analyze.json",
+  "eval_scorecard": "artifacts/validation/touched-skills-20260329-full/frontend__ui__frontend-ui-design.scorecard.json"
+}
+{
+  "skill": "frontend/ui/ui-ux-creative-coding",
+  "gate_exit": 0,
+  "analyze_exit": 0,
+  "eval_exit": 2,
+  "gate_json": "artifacts/validation/touched-skills-20260329-full/frontend__ui__ui-ux-creative-coding.gate.json",
+  "analyze_json": "artifacts/validation/touched-skills-20260329-full/frontend__ui__ui-ux-creative-coding.analyze.json",
+  "eval_scorecard": "artifacts/validation/touched-skills-20260329-full/frontend__ui__ui-ux-creative-coding.scorecard.json"
+}
+{
+  "skill": "product/strategy/product-design-critic",
+  "gate_exit": 2,
+  "analyze_exit": 0,
+  "eval_exit": 2,
+  "gate_json": "artifacts/validation/touched-skills-20260329-full/product__strategy__product-design-critic.gate.json",
+  "analyze_json": "artifacts/validation/touched-skills-20260329-full/product__strategy__product-design-critic.analyze.json",
+  "eval_scorecard": "artifacts/validation/touched-skills-20260329-full/product__strategy__product-design-critic.scorecard.json"
+}
+{
+  "skill": "frontend/ui/baseline-ui",
+  "gate_exit": 0,
+  "analyze_exit": 0,
+  "eval_exit": 2,
+  "gate_json": "artifacts/validation/touched-skills-20260329-full/frontend__ui__baseline-ui.gate.json",
+  "analyze_json": "artifacts/validation/touched-skills-20260329-full/frontend__ui__baseline-ui.analyze.json",
+  "eval_scorecard": "artifacts/validation/touched-skills-20260329-full/frontend__ui__baseline-ui.scorecard.json"
+}
+{
+  "skill": "frontend/ui/design-system",
+  "gate_exit": 0,
+  "analyze_exit": 0,
+  "eval_exit": 2,
+  "gate_json": "artifacts/validation/touched-skills-20260329-full/frontend__ui__design-system.gate.json",
+  "analyze_json": "artifacts/validation/touched-skills-20260329-full/frontend__ui__design-system.analyze.json",
+  "eval_scorecard": "artifacts/validation/touched-skills-20260329-full/frontend__ui__design-system.scorecard.json"
+}

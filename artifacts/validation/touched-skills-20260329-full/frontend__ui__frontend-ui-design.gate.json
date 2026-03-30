@@ -1,0 +1,121 @@
+{
+  "schema_version": "1.1",
+  "tool": "skill_gate",
+  "generated_at": "2026-03-29T22:50:45Z",
+  "skill": "/Users/jamiecraik/dev/agent-skills/frontend/ui/frontend-ui-design/SKILL.md",
+  "skill_path": "/Users/jamiecraik/dev/agent-skills/frontend/ui/frontend-ui-design/SKILL.md",
+  "name": "frontend-ui-design",
+  "decision": "pass",
+  "exit_code": 0,
+  "failed": false,
+  "findings": [
+    {
+      "level": "WARN",
+      "code": "OUT_SCHEMA_VERSION_MISSING",
+      "message": "Schema-bound outputs detected; consider including `schema_version` in the output contract.",
+      "evidence": ""
+    },
+    {
+      "level": "WARN",
+      "code": "PI_OBFUSCATION",
+      "message": "[high] Potential obfuscation / hidden-instruction language detected; verify it cannot bypass safety checks.",
+      "evidence": "references/brand-apps-in-chatgpt.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_OBFUSCATION",
+      "message": "[high] Potential obfuscation / hidden-instruction language detected; verify it cannot bypass safety checks.",
+      "evidence": "references/design-guidelines-canonical.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_OBFUSCATION",
+      "message": "[high] Potential obfuscation / hidden-instruction language detected; verify it cannot bypass safety checks.",
+      "evidence": "references/design-guidelines-summary.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_OBFUSCATION",
+      "message": "[high] Potential obfuscation / hidden-instruction language detected; verify it cannot bypass safety checks.",
+      "evidence": "references/foundations-cheatsheet.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_OBFUSCATION",
+      "message": "[high] Potential obfuscation / hidden-instruction language detected; verify it cannot bypass safety checks.",
+      "evidence": "references/token-mapping-dtcg.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_OBFUSCATION",
+      "message": "[high] Potential obfuscation / hidden-instruction language detected; verify it cannot bypass safety checks.",
+      "evidence": "references/vite-build-standards.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_TOOL_CHAIN",
+      "message": "[high] High-risk control language detected; verify this does not instruct unsafe behavior.",
+      "evidence": "references/tailwind-best-practices.md"
+    },
+    {
+      "level": "WARN",
+      "code": "RESEARCH_EVALS_UNREALISTIC",
+      "message": "Positive eval prompts look synthetic. Rewrite more prompts as realistic user utterances.",
+      "evidence": "realistic=2/7"
+    },
+    {
+      "level": "WARN",
+      "code": "RESEARCH_EXAMPLES_SYNTHETIC",
+      "message": "Examples look abstract or template-like. Prefer realistic user requests and concrete workflows.",
+      "evidence": "## Examples"
+    },
+    {
+      "level": "WARN",
+      "code": "SAFE_NETWORK_ALLOWLIST",
+      "message": "Network usage detected in scripts without an explicit domain/host allowlist policy in SKILL.md.",
+      "evidence": "scripts/link_audit.sh"
+    },
+    {
+      "level": "WARN",
+      "code": "SAFE_NETWORK_UNDECLARED",
+      "message": "Network usage detected in scripts but SKILL.md does not explicitly describe network requirements/constraints. Default to offline; gate behind --allow-network if needed.",
+      "evidence": "scripts/link_audit.sh"
+    },
+    {
+      "level": "WARN",
+      "code": "SAFE_NETWORK_URL_ALLOWLIST",
+      "message": "Hard-coded URL(s) detected in scripts; document explicit allowed domains/hosts in SKILL.md.",
+      "evidence": "scripts/link_audit.sh"
+    },
+    {
+      "level": "WARN",
+      "code": "SEC_EVALS_COMMAND_GUARD_MISSING",
+      "message": "No deterministic risky-command guard detected. Add forbidden command checks (e.g., curl/wget/rm -rf/netcat).",
+      "evidence": "references/evals.yaml"
+    },
+    {
+      "level": "WARN",
+      "code": "SEC_EVALS_NEGATIVE_MISSING",
+      "message": "No negative/non-trigger security case detected in evals.yaml. Add `category: negative` or `should_trigger: false` coverage.",
+      "evidence": "references/evals.yaml"
+    },
+    {
+      "level": "WARN",
+      "code": "SEC_EVALS_PI_CASE_MISSING",
+      "message": "No prompt-injection/jailbreak-style prompt detected in evals.yaml. Add one adversarial PI prompt case.",
+      "evidence": "references/evals.yaml"
+    },
+    {
+      "level": "WARN",
+      "code": "SEC_EVALS_PRESSURE_MISSING",
+      "message": "No pressure/adversarial case detected in evals.yaml. Add at least one `category: pressure` case.",
+      "evidence": "references/evals.yaml"
+    },
+    {
+      "level": "WARN",
+      "code": "WF_FAIL_FAST_MISSING",
+      "message": "Validation section should specify fail-fast behavior (stop at first failed gate).",
+      "evidence": ""
+    }
+  ]
+}

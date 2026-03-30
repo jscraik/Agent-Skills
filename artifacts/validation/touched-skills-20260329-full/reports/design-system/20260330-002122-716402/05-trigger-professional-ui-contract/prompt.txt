@@ -1,0 +1,1 @@
+Before I ship this UI refactor, check it against the professional UI contract and tell me where it diverges.

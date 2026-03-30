@@ -101,7 +101,7 @@ cases:
       - type: regex
         value: "(?i)(learnings-researcher)"
       - type: regex
-        value: "(?i)(parallel|bounded internal subagents)"
+        value: "(?i)(request_user_input|main thread|inline|bounded internal subagents|explicitly asked for delegation)"
 
   - id: brainstorm-complete-summary
     name: brainstorm complete summary

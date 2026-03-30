@@ -215,10 +215,11 @@ Use `autonomous` when:
 - `Stale`: evidence is not strong enough for update, replace, or archive, but leaving the doc as trustworthy would be misleading
 
 ## Execution rules
-- Use the main thread only for small scopes or short docs.
-- Use sequential subagents for 1-2 heavy artifacts.
-- Use parallel investigation subagents only for independent artifacts with low overlap.
-- Use replacement subagents one at a time, sequentially.
+- Prefer the main thread for small scopes, short docs, or any run where delegation was not explicitly requested or approved.
+- If 1-2 heavy artifacts would benefit from delegation and the user has not already explicitly asked for sub-agents, ask a short blocking approval question via `request_user_input` before spawning sequential subagents.
+- Use sequential subagents for 1-2 heavy artifacts only after explicit user request or approval.
+- Use parallel investigation subagents only for independent artifacts with low overlap and only after explicit user request or approval.
+- Use replacement subagents one at a time, sequentially, and only after explicit user request or approval.
 - When spawning subagents, preserve the dedicated file-search/read-first instruction and separate memory-sourced evidence from codebase-sourced evidence.
 - When replacing a learning, write the successor in `ce-compound` learning-capture format and archive the superseded source after the successor exists.
 

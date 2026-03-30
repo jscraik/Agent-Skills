@@ -1,0 +1,3 @@
+$baseline-ui
+
+Use $baseline-ui. Reply in 3 bullets: confirm minimal-fix approach, ask for file path or pasted code, and ask for constraints.
