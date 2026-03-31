@@ -35,6 +35,7 @@ Create and maintain concise, high-signal AGENTS guidance with progressive disclo
 - Use this skill when AGENTS docs are too large, duplicated, or contradictory.
 - Use this skill when instruction routing needs to be split into linked files.
 - Use this skill when a repo needs AGENTS operating rules such as preflight, stack detection, tooling, required paths, Local Memory policy, or startup workflow tailored from real repo evidence.
+- Use this skill when the user wants the project's instruction surface audited so required instruction files are present, current, correctly routed, and accurately disclosed.
 
 ## Standards snapshot (March 2026)
 - Keep root `AGENTS.md` minimal and route depth into linked docs.
@@ -91,6 +92,7 @@ Run discovery for underspecified AGENTS creation or refactor requests.
 - Contradiction list and deletion candidates.
 - Verification commands with expected discovery behavior.
 - Evidence-backed command map and validation notes.
+- Required-instruction coverage report showing which files were verified, created, strengthened, left unchanged, or intentionally omitted.
 - If you return a machine-checkable split plan or JSON contract, include `schema_version`.
 
 ## Failure mode
@@ -114,10 +116,16 @@ If command truth, path ownership, or instruction precedence cannot be verified, 
 1. Discover repo facts, active instruction scopes, and any Codex config knobs that affect instruction discovery.
 2. Detect command/style conventions from actual repo evidence.
 3. Map the canonical instruction chain: global file, repo/root file, nested overrides, and linked docs.
-4. Identify contradictions, duplicate guidance, and places where linked docs are being mistaken for auto-loaded instructions.
-5. Write minimal root AGENTS, reserve overrides for genuinely narrower scopes, and link deeper docs for progressive disclosure.
-6. Add table of contents for generated docs.
-7. Validate links, commands, discovery behavior, and instruction consistency.
+4. Audit the current instruction surface for four conditions before writing:
+   - required files present for the repo's actual instruction model,
+   - guidance still accurate against current repo evidence,
+   - guidance still up to date with current scripts, paths, and workflow entrypoints,
+   - and guidance disclosed in the correct file instead of hidden in the wrong scope or duplicated across surfaces.
+5. Identify contradictions, duplicate guidance, stale guidance, and places where linked docs are being mistaken for auto-loaded instructions.
+6. Write minimal root AGENTS, reserve overrides for genuinely narrower scopes, and link deeper docs for progressive disclosure.
+7. Create or update missing required instruction files when repo evidence shows they belong in the active instruction surface.
+8. Add table of contents for generated docs.
+9. Validate links, commands, discovery behavior, instruction consistency, and coverage of the required instruction surface.
 
 ## Validation
 - Confirm commands exist in repo scripts/docs.
@@ -127,6 +135,13 @@ If command truth, path ownership, or instruction precedence cannot be verified, 
 - Confirm required-path guidance only names directories that exist or are explicit repo policy.
 - Confirm Local Memory requirements are present only when requested or verified by repo policy.
 - Confirm discovery guidance matches official behavior: `AGENTS.override.md` wins within a directory, fallback names require config, empty files are ignored, and combined project docs are capped by `project_doc_max_bytes`.
+- Confirm each required instruction file for the chosen surface is either:
+  - present and current,
+  - created as part of the change,
+  - intentionally omitted with a repo-evidence reason,
+  - or replaced by a clearly disclosed canonical alternative.
+- Confirm no stale rule survives when the repo evidence has moved, such as renamed scripts, deleted folders, outdated quality checks, or retired fallback instruction files.
+- Confirm the final instruction set clearly discloses where durable guidance lives, which files are canonical, which files are supplemental, and which files are legacy or migration candidates.
 - Provide the official verification commands when applicable:
   - `codex --ask-for-approval never "Summarize the current instructions."`
   - `codex --cd <subdir> --ask-for-approval never "Show which instruction files are active."`
@@ -138,6 +153,9 @@ If command truth, path ownership, or instruction precedence cannot be verified, 
 - If the named section does not exist, create it with concise, action-oriented bullets instead of scattering equivalent guidance across multiple unrelated files.
 - Keep cross-repo guidance consistent by mirroring durable section-level rules in this skill when they affect how AGENTS refactors should be performed.
 - When a user wants the same operating rule reflected across `AGENTS.md`, `CLAUDE.md`, and `GEMINI.md`, keep the rule semantically consistent across all three files but preserve target-specific wording and file structure instead of forcing one identical block everywhere.
+- When `agents-md` is asked to update a project's instruction surface, treat the task as an audit-and-repair pass by default: inspect which instruction files should exist for that repo, verify the current files are accurate and current, create or repair missing canonical files when needed, and disclose any intentional omissions or legacy files explicitly.
+- By default, verify the active shared instruction set for all supported surfaces the repo actually uses, such as `AGENTS.md`, `CLAUDE.md`, and `GEMINI.md`, instead of updating only one file in isolation unless the user explicitly asks for a narrower scope.
+- When one instruction file is current but its sibling surface is missing, stale, or materially weaker, either align that sibling file in the same pass or report the exact reason it was left untouched.
 - When `agents-md` updates shared operational guidance across `AGENTS.md`, `CLAUDE.md`, and `GEMINI.md`, include a policy-calibration section by default unless the repo already has an equivalent section covering approvals, trusted prefixes, destructive-command gating, and rejection-trend review.
 - When a repo uses `CLAUDE.md`, prefer Anthropic's official style guidance: concise, specific, verifiable instructions, structured headings, and stronger wording over duplicate bullets when a weaker rule already exists.
 - When a repo uses `GEMINI.md`, preserve Gemini CLI's configured context-file behavior and avoid assuming the filename is always the default when the repo or tool config sets `context.fileName` differently.
@@ -183,6 +201,7 @@ If command truth, path ownership, or instruction precedence cannot be verified, 
 - When delivery workflow guidance is requested, require separate implementation and verification `codex exec` workflows, and require `codex review --uncommitted` before merge.
 - When startup workflow guidance is requested, preserve the operator sequence: read `AGENTS.md` and task-relevant docs, run the required preflight, summarize repo structure and blockers before editing, make the smallest change that satisfies the task, and run the narrowest validation that proves the change works.
 - When supplemental context guidance is requested, mention organization-level `instructions/Learning.md` or `instructions/Learnings.md` only if those files exist and the repo wants them as extra context. Keep them supplemental, not a replacement for repo-local instructions.
+- When finishing an instruction-surface update, return a concise coverage summary that says which files are canonical, which linked docs were updated, which expected files were missing and created, which files were already current, and which legacy files remain for migration or deletion.
 
 ## Project-tailored repo baseline
 - Use `references/project-tailored-agents-baseline.md` when a user wants a reusable AGENTS operating baseline adapted to each repository.
@@ -225,6 +244,8 @@ If command truth, path ownership, or instruction precedence cannot be verified, 
 - User says: "Update our shared AGENTS, CLAUDE, and GEMINI guidance so all three get a `## Quality Checks` section with `npm run lint` and `npm run test`, CI work always ends by confirming final pipeline status, and multi-repo PRs check merge conflicts up front."
 - User says: "Add a reusable `## Policy Calibration (Dynamic)` section to our AGENTS, CLAUDE, and GEMINI docs so safe repeated command prefixes can be whitelisted without changing the default approval policy."
 - User says: "Refactor our shared instruction files with agents-md and make sure the approval/sandbox calibration rules are part of the default governance baseline."
+- User says: "Check this project's AGENTS, CLAUDE, and GEMINI files and make sure the required instruction files exist, are current, and disclose the right canonical docs."
+- User says: "Use agents-md to audit our instruction surface, repair anything stale, and tell me which files are canonical versus legacy."
 - User says: "Inspect these conflicting instructions and return a clear conflict-decision list before you edit anything."
 - User says: "Update our AGENTS template so repo rules, stack detection, required tooling, required paths, Local Memory policy, and startup workflow are tailored per project instead of copied blindly."
 - User says: "We used to have a `FORJAMIE.md` file. Please update the AGENTS guidance so it handles that legacy file correctly."
