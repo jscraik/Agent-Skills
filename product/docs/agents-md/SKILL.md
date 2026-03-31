@@ -138,6 +138,7 @@ If command truth, path ownership, or instruction precedence cannot be verified, 
 - If the named section does not exist, create it with concise, action-oriented bullets instead of scattering equivalent guidance across multiple unrelated files.
 - Keep cross-repo guidance consistent by mirroring durable section-level rules in this skill when they affect how AGENTS refactors should be performed.
 - When a user wants the same operating rule reflected across `AGENTS.md`, `CLAUDE.md`, and `GEMINI.md`, keep the rule semantically consistent across all three files but preserve target-specific wording and file structure instead of forcing one identical block everywhere.
+- When `agents-md` updates shared operational guidance across `AGENTS.md`, `CLAUDE.md`, and `GEMINI.md`, include a policy-calibration section by default unless the repo already has an equivalent section covering approvals, trusted prefixes, destructive-command gating, and rejection-trend review.
 - When a repo uses `CLAUDE.md`, prefer Anthropic's official style guidance: concise, specific, verifiable instructions, structured headings, and stronger wording over duplicate bullets when a weaker rule already exists.
 - When a repo uses `GEMINI.md`, preserve Gemini CLI's configured context-file behavior and avoid assuming the filename is always the default when the repo or tool config sets `context.fileName` differently.
 - For TypeScript validation guidance in `AGENTS.md`, `CLAUDE.md`, and `GEMINI.md`, place repo-native test and lint instructions under `## Quality Checks`. If that section does not exist, create it. In npm-based repos, require `npm run lint` and `npm run test` after TypeScript changes and require both to pass before the session is marked complete. If equivalent guidance already exists, strengthen it instead of duplicating it.
@@ -168,6 +169,16 @@ If command truth, path ownership, or instruction precedence cannot be verified, 
 - When validation guidance is requested for config-sensitive files (for example `package.json`, CI workflows, `settings.json`, config files), require running applicable validation commands and reporting pass status before commit.
 - When command preflight guidance is requested, preserve explicit `exec_command` preflight rules: run shell via `zsh -lc`, use `which` before `mise` installs, and verify destructive-operation paths with `fd` before execution.
 - When policy guidance is requested, include sandbox tuning rules that review rejected patterns, whitelist safe frequent commands, and keep strict controls for destructive operations.
+- By default, express the shared policy-calibration rule under `## Policy`, `## Sandbox`, `## Approvals`, or another repo-native governance heading in `AGENTS.md`, `CLAUDE.md`, and `GEMINI.md` using target-native wording but the same operating rule:
+  - record the current rejection signal for the latest review window,
+  - keep baseline `approval_policy = "on-request"` unless the user explicitly wants a different default,
+  - add trusted command prefixes only for repeated, demonstrably safe patterns,
+  - keep destructive command families explicitly gated,
+  - and require re-checking the rejection trend in the next reporting window before broadening policy further.
+- When writing that policy-calibration block, prefer concise operator language such as `## Policy Calibration (Dynamic)` with short bullets instead of prose paragraphs, and treat the rejection count as mutable report data rather than a hard-coded evergreen fact.
+- Only omit that section when:
+  - the repo already contains a materially equivalent policy-calibration section, or
+  - the user explicitly asks to exclude approval/sandbox governance from the generated instruction files.
 - When MCP workflow guidance is requested, require `codex mcp list` before implementation and require fixing missing server setup first.
 - When delivery workflow guidance is requested, require separate implementation and verification `codex exec` workflows, and require `codex review --uncommitted` before merge.
 - When startup workflow guidance is requested, preserve the operator sequence: read `AGENTS.md` and task-relevant docs, run the required preflight, summarize repo structure and blockers before editing, make the smallest change that satisfies the task, and run the narrowest validation that proves the change works.
@@ -212,6 +223,8 @@ If command truth, path ownership, or instruction precedence cannot be verified, 
 - User says: "Validate this `TEAM_GUIDE.md` setup and tell me whether I should migrate it or register it with `project_doc_fallback_filenames`."
 - User says: "Help me merge AGENTS, CLAUDE, and GEMINI guidance into one progressive-disclosure instruction tree."
 - User says: "Update our shared AGENTS, CLAUDE, and GEMINI guidance so all three get a `## Quality Checks` section with `npm run lint` and `npm run test`, CI work always ends by confirming final pipeline status, and multi-repo PRs check merge conflicts up front."
+- User says: "Add a reusable `## Policy Calibration (Dynamic)` section to our AGENTS, CLAUDE, and GEMINI docs so safe repeated command prefixes can be whitelisted without changing the default approval policy."
+- User says: "Refactor our shared instruction files with agents-md and make sure the approval/sandbox calibration rules are part of the default governance baseline."
 - User says: "Inspect these conflicting instructions and return a clear conflict-decision list before you edit anything."
 - User says: "Update our AGENTS template so repo rules, stack detection, required tooling, required paths, Local Memory policy, and startup workflow are tailored per project instead of copied blindly."
 - User says: "We used to have a `FORJAMIE.md` file. Please update the AGENTS guidance so it handles that legacy file correctly."
