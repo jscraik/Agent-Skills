@@ -18,6 +18,7 @@ import re
 import sys
 import time
 from typing import Any, Dict, Iterable, List, Optional, Tuple
+import logging
 
 from io import BytesIO
 
@@ -811,7 +812,7 @@ class _SingleFile:
             try:
                 self._handle.close()
             except Exception:
-                pass
+                logging.warning("Failed to close file %s", self._path, exc_info=True)
         return False
 
 
