@@ -186,6 +186,14 @@ If command truth, path ownership, or instruction precedence cannot be verified, 
 - When git safety guidance is requested, require explicit pre-operation briefing for rebasing 5+ commits, merge conflict resolution, and force-pushes, including branch state, strategy with risks, alternatives, and user confirmation.
 - When validation guidance is requested for config-sensitive files (for example `package.json`, CI workflows, `settings.json`, config files), require running applicable validation commands and reporting pass status before commit.
 - When command preflight guidance is requested, preserve explicit `exec_command` preflight rules: run shell via `zsh -lc`, use `which` before `mise` installs, and verify destructive-operation paths with `fd` before execution.
+- By default, express shared command-reliability guidance under `## Command Preflight`, `## Path Contract`, or another repo-native operational heading in `AGENTS.md`, `CLAUDE.md`, and `GEMINI.md` when those files carry execution guidance. Keep the rule concise and operator-facing:
+  - confirm cwd and repo root before path-sensitive work,
+  - confirm required binaries with `command -v`,
+  - confirm targets with `test -e`, `fd`, or `rg --files` before acting,
+  - prefer dry-run or check modes before destructive changes,
+  - and prefer absolute file references in generated command chains.
+- When writing that preflight block, include the reason signal as dynamic operational context when the repo or user provides one, such as elevated command-failure or path-miss rates, but treat the counts as mutable report data rather than evergreen constants.
+- When path-sensitive workflow guidance is requested, require a path-contract guardrail that prints or resolves the repo root first, uses discovery before edits or deletions, validates every critical path explicitly, and avoids relative-path guesswork in generated commands.
 - When policy guidance is requested, include sandbox tuning rules that review rejected patterns, whitelist safe frequent commands, and keep strict controls for destructive operations.
 - By default, express the shared policy-calibration rule under `## Policy`, `## Sandbox`, `## Approvals`, or another repo-native governance heading in `AGENTS.md`, `CLAUDE.md`, and `GEMINI.md` using target-native wording but the same operating rule:
   - record the current rejection signal for the latest review window,
