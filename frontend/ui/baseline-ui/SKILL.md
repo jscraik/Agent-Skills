@@ -14,6 +14,11 @@ Current baseline markers:
 - Next.js 16 conventions when the target app is on Next.js.
 - Tailwind CSS v4 utility patterns and token-safe usage.
 - WCAG 2.2 accessibility expectations for review findings.
+- Use `frontend/ui/references/skill-routing-matrix-2026.md` when deciding whether this skill should audit or route to a narrower frontend owner.
+
+Design-system integration contract:
+- Apply `frontend/ui/references/design-system-integration-contract.md` when auditing typography, spacing, iconography, and token usage.
+- Treat drift from semantic token and icon governance as a first-class finding, not optional polish.
 
 ## How to use
 
@@ -137,6 +142,7 @@ Reference template: `references/audit-scorecard.md`.
 ## When to use
 - Use this skill when the user asks to audit or fix the domain covered by this skill.
 - Use during UI review passes when quick, concrete remediation is needed.
+- Keep scope to audit and targeted cleanup only; route broad redesign direction work to `frontend-ui-design` or `frontend-design`.
 
 ## Required inputs
 - Target file(s) or component scope to review.
@@ -148,6 +154,7 @@ Reference template: `references/audit-scorecard.md`.
 - Why each issue matters (brief rationale).
 - Concrete code-level fix suggestions with minimal scope.
 - Optional score-first technical audit report (`/20`, P0-P3, patterns, positive findings) when audit mode is requested.
+- Output contract note: when returning structured audit payloads, include `schema_version: 1.0`.
 
 ## Constraints / Safety
 - Do not refactor unrelated code.
@@ -170,6 +177,7 @@ Reference template: `references/audit-scorecard.md`.
 - Verify fixes preserve intended UX behavior.
 - Verify accessibility, performance, or metadata outcomes relevant to this skill.
 - Confirm recommendations are scoped and actionable.
+- Confirm typography, spacing, iconography, and token findings align with `frontend/ui/references/design-system-integration-contract.md`.
 - Fail fast on ambiguous or unsafe changes and ask for clarification.
 
 ## Anti-patterns
@@ -205,8 +213,10 @@ Reference template: `references/audit-scorecard.md`.
 <!-- /decision-feedback-protocol -->
 
 ## Examples
-- Review one component and return only critical and high-impact fixes first.
-- Suggest minimal edits that preserve current stack and behavior.
+- User says: "Review one component and return only critical and high-impact fixes first."
+- User says: "Suggest minimal edits that preserve current stack and behavior."
+- User says: "Can you audit this checkout modal for a11y/perf and give me a `/20` score plus top P1 fixes?"
+- User says: "Please inspect and validate `src/components/NavBar.tsx`, then suggest minimal fixes only. No refactor."
 
 ## Notes
 - Contract: `references/contract.yaml`

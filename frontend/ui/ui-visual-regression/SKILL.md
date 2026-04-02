@@ -11,22 +11,33 @@ Run a deterministic visual regression loop so we can separate expected UI change
 
 ## Table of Contents
 - [Standards snapshot](#standards-snapshot)
+- [Design-system integration](#design-system-integration)
 - [When to use](#when-to-use)
 - [Required inputs](#required-inputs)
 - [Deliverables](#deliverables)
 - [Philosophy](#philosophy)
+- [Variation](#variation)
 - [Failure mode](#failure-mode)
 - [Constraints](#constraints)
 - [Workflow](#workflow)
-- [Anti-patterns](#anti-patterns)
+- [Antipatterns](#antipatterns)
 - [Validation](#validation)
+- [Examples](#examples)
 - [References](#references)
 
 ## Standards snapshot
 - Prefer deterministic capture conditions over repeated reruns.
 - Treat diffs as evidence to classify, not defects to auto-reject.
+- Treat React 19 and Next.js 16 rendering behavior as the baseline when classifying hydration, layout, or style regressions in those stacks.
+- Treat Tailwind CSS v4 token usage as the baseline when triaging utility drift versus intended visual changes.
+- Hold acceptance to WCAG 2.2 AA expectations for focus visibility, contrast, and keyboard-operable states in changed surfaces.
 - Keep fixes minimal and aligned with the design system already in use.
 - Only update a baseline after intent and implementation are both verified.
+
+## Design-system integration
+- Apply `frontend/ui/references/design-system-integration-contract.md` when classifying typography, spacing, iconography, and token drift.
+- Route shared token architecture and design-language decisions to `design-system` after regression triage is complete.
+- Use `frontend/ui/references/skill-routing-matrix-2026.md` when regression asks broaden into redesign or implementation ownership decisions.
 
 ## When to use
 - Storybook, Playwright, or Argos visual diffs need investigation.
@@ -51,6 +62,21 @@ Run a deterministic visual regression loop so we can separate expected UI change
 - Stabilize before patching.
 - Prefer the smallest fix that restores intended visuals.
 - Make acceptance or rejection of a diff traceable to evidence.
+- Use a clear framework: isolate capture noise first, then classify intent versus regression.
+- Make tradeoff decisions explicit so we understand why deterministic capture beats quick baseline churn.
+- Ask: "Is this diff showing product intent, or is it exposing capture noise?"
+- Ask: "What is the minimum reliable change that makes this lane trustworthy again?"
+- Ask: "Why would we accept this baseline if we cannot explain the visual delta with evidence?"
+
+## Variation
+- Adapt the investigation depth to risk:
+  - for one-story cosmetic drift, classify and fix only that story lane;
+  - for multi-surface drift, isolate one deterministic repro before broad edits;
+  - for release-blocking regressions, prioritize rollback-safe stabilization before visual polish.
+- Vary capture hardening by stack:
+  - Storybook-first repos: lock stories, fonts, and viewport before Argos triage;
+  - Playwright-first repos: lock navigation timing and fixture state before baseline decisions.
+- Keep scope narrow by default: fix one failing lane, re-run, then expand only if evidence still spreads.
 
 ## Failure mode
 - If the issue is broader design-system work rather than regression review, route to the design-system or frontend design skill.
@@ -86,20 +112,30 @@ Run a deterministic visual regression loop so we can separate expected UI change
    - async timing.
 5. Re-run the same pipeline slice and only approve once the evidence is clean.
 
-## Anti-patterns
-- Updating baselines to hide a regression.
-- Re-running flaky captures until green without addressing the instability.
-- Making a broad visual rewrite for a narrow diff.
+## Antipatterns
+- Avoid updating baselines to hide a regression.
+- Do not re-run flaky captures until green without addressing the instability.
+- Never make a broad visual rewrite for a narrow diff.
+- Anti-pattern warning: treating every diff as a design failure without checking deterministic capture conditions first is the wrong triage approach.
+- Merging screenshot updates without an explicit reasoned classification for each changed surface is incorrect regression governance.
 
 ## Validation
 - Fail fast: stop at the first broken build, missing story, or unstable capture prerequisite.
 - Confirm Storybook build and capture both succeed before interpreting Argos output.
 - Verify the final state is either diff-clean or explicitly justified as an expected change.
+- Confirm any visual-literal, typography, spacing, or icon corrections align with `frontend/ui/references/design-system-integration-contract.md`.
+
+## Examples
+- "Argos shows spacing drift in only the billing card. Is this token drift or a flaky snapshot?"
+- "Our Playwright screenshots fail only in CI after font loading. Help me stabilize capture settings before we touch CSS."
+- "Storybook snapshots changed for all button states after a refactor. Classify what is expected and what should block merge."
+- "I need a review note explaining why two diffs are intentional so we can approve baseline updates confidently."
 
 ## References
 - Contract: `references/contract.yaml`
 - Evals: `references/evals.yaml`
 - Argos notes: `references/argos-quickstart-notes.md`
+- Asset preview: `assets/ui-visual-regression.png`
 
 ## See Also
 
@@ -107,6 +143,7 @@ Run a deterministic visual regression loop so we can separate expected UI change
 |---|---|
 | [[playwright-interactive]] | Capture screenshots for regression via Playwright |
 | [[baseline-ui]] | Run baseline UI checks alongside visual regression |
+| [[design-system]] | Resolve confirmed token, typography, spacing, or icon drift at the system layer |
 | [[agent-browser]] | Use agent-browser snapshots as regression inputs |
 | [[stitch-react-components]] | Catch visual regressions after Stitch-to-React conversion |
 

@@ -13,7 +13,11 @@ import unittest
 
 
 SCRIPT = Path(__file__).resolve().parents[0] / "bootstrap_recursive_skill_graph_artifacts.py"
-DEFAULT_SCOPES = ["ui-ux-creative-coding", "interface-craft", "react-ui-patterns", "frontend-ui-design"]
+DEFAULT_SCOPES = [
+    "frontend/ui/ui-ux-creative-coding",
+    "frontend/ui/react-ui-patterns",
+    "frontend/ui/frontend-ui-design",
+]
 
 
 def _bootstrap_script(

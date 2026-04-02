@@ -69,6 +69,57 @@ is_local_memory_pidfile_sandbox_block() {
 	[[ "${output}" == *"failed to write PID file"* && "${output}" == *"operation not permitted"* ]]
 }
 
+wait_for_local_memory_health() {
+	local health_url="$1"
+	local max_attempts="${2:-10}"
+	local attempt=1
+	local health_json=''
+	local health_success='false'
+
+	while (( attempt <= max_attempts )); do
+		if health_json="$(curl -fsS "${health_url}" 2>/dev/null)"; then
+			health_success="$(echo "${health_json}" | jq -r '.success // false')"
+			if [[ "${health_success}" == 'true' ]]; then
+				printf '%s\n' "${health_json}"
+				return 0
+			fi
+		fi
+		sleep 1
+		attempt=$((attempt + 1))
+	done
+	return 1
+}
+
+start_local_memory_daemon_if_needed() {
+	local health_url="$1"
+	local start_output=''
+	local started=1
+
+	log_warn 'local-memory status reported stopped; attempting daemon start'
+	if ! start_output="$(local-memory start 2>&1)"; then
+		if is_local_memory_pidfile_sandbox_block "${start_output}"; then
+			log_warn 'local-memory start reported sandbox pidfile limits; continuing with REST health probe'
+		else
+			log_err 'local-memory start failed'
+			if [[ -n "${start_output}" ]]; then
+				echo "${start_output}" >&2
+			fi
+			return 1
+		fi
+	else
+		started=0
+	fi
+
+	if [[ "${started}" -eq 0 ]]; then
+		log_ok 'local-memory start command succeeded'
+	fi
+	if ! wait_for_local_memory_health "${health_url}" 12 >/dev/null; then
+		log_err "local-memory daemon failed to become healthy at ${health_url} after start attempt"
+		return 1
+	fi
+	return 0
+}
+
 
 make_tmp_file() {
 	local tmp_root
@@ -255,10 +306,13 @@ preflight_local_memory_gold() {
 		fi
 	fi
 	if [[ "${running}" != 'true' ]]; then
-		log_err 'local-memory daemon is not running'
-		return 1
+		if ! start_local_memory_daemon_if_needed "${health_url}"; then
+			return 1
+		fi
+		running='true'
+		health_json="$(wait_for_local_memory_health "${health_url}" 1 || true)"
 	fi
-	if ! health_json="$(curl -fsS "${health_url}")"; then
+	if [[ -z "${health_json:-}" ]] && ! health_json="$(curl -fsS "${health_url}")"; then
 		log_err "REST health endpoint unreachable at ${health_url}"
 		return 1
 	fi

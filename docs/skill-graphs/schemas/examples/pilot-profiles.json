@@ -1,6 +1,22 @@
 [
-  "ui-ux-creative-coding",
-  "interface-craft",
-  "frontend-ui-design",
-  "react-ui-patterns"
+  {
+    "profile_id": "ui-ux-creative-coding",
+    "profile_file": "frontend/ui/ui-ux-creative-coding/references/task-profile.json",
+    "objective": "Shadow evaluation run {n} for {profile_id}: produce implementation-ready UI polish guidance for an existing React or Tauri surface with one clear interaction thesis, reduced-motion parity, concrete accessibility constraints, and measurable validation checks."
+  },
+  {
+    "profile_id": "interface-craft",
+    "profile_file": "frontend/ui/ui-ux-creative-coding/references/interface-craft.task-profile.json",
+    "objective": "Shadow evaluation run {n} for {profile_id}: produce folded interface-craft guidance for a polished React interaction surface with clear motion boundaries, concrete implementation notes, explicit safety constraints, and testable validation steps."
+  },
+  {
+    "profile_id": "frontend-ui-design",
+    "profile_file": "frontend/ui/frontend-ui-design/references/task-profile.json",
+    "objective": "Shadow evaluation run {n} for {profile_id}: produce production-ready frontend UI design guidance for a web screen with one clear primary action, explicit default/loading/empty/error/disabled states, token-backed primitives, keyboard-focus-contrast-reduced-motion behavior, restrained composition without decorative overload, and a concrete verification checklist."
+  },
+  {
+    "profile_id": "react-ui-patterns",
+    "profile_file": "frontend/ui/react-ui-patterns/references/task-profile.json",
+    "objective": "Shadow evaluation run {n} for {profile_id}: produce concrete React UI composition guidance for a TypeScript plus Tailwind plus Radix screen with file-path-specific component structure, explicit state ownership, accessibility rules, and measurable verification checks."
+  }
 ]

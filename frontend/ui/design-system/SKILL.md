@@ -19,6 +19,7 @@ metadata:
 - [When to use](#when-to-use)
 - [Required inputs](#required-inputs)
 - [Required context](#required-context)
+- [Standards snapshot](#standards-snapshot)
 - [Principles](#principles)
 - [Normalization and Extraction Rules](#normalization-and-extraction-rules)
 - [Variation and adaptation](#variation-and-adaptation)
@@ -102,12 +103,22 @@ Collect only the minimum set needed for the user request:
 
 If the request is ambiguous, ask one focused clarification question.
 
+## Standards snapshot
+- Treat React 19 and Next.js 16 as the default app-level baselines when mapping design-system guidance into implementation-facing recommendations.
+- Treat Tailwind CSS v4 token integration as the default utility contract for generated preset and UI consumption paths.
+- Hold accessibility decisions to WCAG 2.2 AA outcomes, including focus visibility, contrast, and keyboard-operable components.
+- Keep semantic token governance aligned to DTCG/W3C token structure and the repo's Brand -> Alias -> Mapped contract.
+- Use `frontend/ui/references/skill-routing-matrix-2026.md` when implementation requests blur token governance and screen-level UI execution.
+
 ## Principles
 - **Layer discipline:** change the correct tier (Brand → Alias → Mapped).
 - **Semantic-first UI:** components consume mapped/semantic tokens, not raw literals.
 - **Evidence over intuition:** always cite concrete file paths and token names.
 - **Smallest safe diff:** prefer minimal, auditable changes and explicit validation steps.
 - **Design-system consistency:** typography, spacing, and icon choices should align to existing scales/categories.
+- Ask: "Why does this belong in Brand, Alias, or Mapped rather than a local override?"
+- Ask: "What tradeoff are we accepting if we skip normalization and patch the symptom?"
+- Ask: "Can we prove this change improves consistency without widening scope?"
 
 ## Normalization and Extraction Rules
 - Normalize before inventing. If a surface drifts, first determine whether the root cause is:
@@ -129,6 +140,7 @@ If the request is ambiguous, ask one focused clarification question.
 - Adapt output depth by request type: quick Q&A, deep audit report, implementation patch plan, or migration checklist.
 - Use different recommendation strategies for small, medium, and large changes rather than repeating one template.
 - Avoid generic outputs; tailor findings to the exact surface (`packages/ui`, `packages/tokens`, Storybook, widgets) and requested constraints.
+- Keep package boundary explicit: start with one surface and one validation lane before expanding to cross-package refactors.
 
 ## Workflow
 1. **Classify the request mode**
@@ -176,40 +188,33 @@ Depending on user request, produce one or more:
 Fail fast: stop at the first failed gate, fix, then rerun.
 
 Run only what matches the touched area:
-
-```bash
-pnpm validate:tokens
-pnpm ds:matrix:check
-pnpm test:policy
-pnpm design-system-guidance:ratchet
-pnpm design-system-guidance:check:ci
-pnpm -C packages/ui build
-```
+- `pnpm validate:tokens`
+- `pnpm ds:matrix:check`
+- `pnpm test:policy`
+- `pnpm design-system-guidance:ratchet`
+- `pnpm design-system-guidance:check:ci`
+- `pnpm -C packages/ui build`
 
 Targeted checks:
-
-```bash
-# token structure quick checks
-jq 'keys' packages/tokens/src/tokens/index.dtcg.json
-jq '.type.web | keys' packages/tokens/src/tokens/index.dtcg.json
-jq '.space | keys' packages/tokens/src/tokens/index.dtcg.json
-jq '.color | keys' packages/tokens/src/tokens/index.dtcg.json
-jq '.radius | keys' packages/tokens/src/tokens/index.dtcg.json
-
-# find direct token usage or potential literals in UI code
-rg -n "--foundation-|--ds-|--color-" packages/ui/src
-rg -n "#[0-9a-fA-F]{3,8}|rgba?\(" packages/ui/src
-rg -n "highContrast|--background|--foreground" packages/ui/src/styles/theme.css packages/tokens/src/tokens/index.dtcg.json
-```
+- Token structure quick checks:
+  - `jq 'keys' packages/tokens/src/tokens/index.dtcg.json`
+  - `jq '.type.web | keys' packages/tokens/src/tokens/index.dtcg.json`
+  - `jq '.space | keys' packages/tokens/src/tokens/index.dtcg.json`
+  - `jq '.color | keys' packages/tokens/src/tokens/index.dtcg.json`
+  - `jq '.radius | keys' packages/tokens/src/tokens/index.dtcg.json`
+- Find direct token usage or potential literals in UI code:
+  - `rg -n "--foundation-|--ds-|--color-" packages/ui/src`
+  - `rg -n "#[0-9a-fA-F]{3,8}|rgba?\(" packages/ui/src`
+  - `rg -n "highContrast|--background|--foreground" packages/ui/src/styles/theme.css packages/tokens/src/tokens/index.dtcg.json`
 
 ## Anti-patterns
-- ❌ Editing only `theme.css` when the real change belongs in DTCG/alias layers.
-- ❌ Adding raw color/spacing literals to components when semantic tokens exist.
-- ❌ Creating a new token or shared component before proving reuse or semantic need.
-- ❌ Treating deprecated icon sources as canonical (`@design-studio/astudio-icons` for new work).
-- ❌ Skipping brand-mode/accessibility contracts when updating color systems or motion defaults.
-- ❌ Skipping guidance policy checks when touching protected surfaces or `.design-system-guidance.json`.
-- ❌ Returning advice without file-path evidence from this repository.
+- ❌ Avoid editing only `theme.css` when the real change belongs in DTCG/alias layers.
+- ❌ Do not add raw color or spacing literals to components when semantic tokens exist.
+- ❌ Never create a new token or shared component before proving reuse or semantic need.
+- ❌ Anti-pattern warning: treating deprecated icon sources as canonical (`@design-studio/astudio-icons` for new work) is incorrect.
+- ❌ Avoid skipping brand-mode/accessibility contracts when updating color systems or motion defaults.
+- ❌ Do not skip guidance policy checks when touching protected surfaces or `.design-system-guidance.json`.
+- ❌ Returning advice without file-path evidence from this repository is the wrong review posture.
 
 ## Failure mode
 - If the task is backend-only, infra-only, or MCP-only with no UI/token impact, decline this skill and route to a backend/infra skill path.
@@ -231,6 +236,7 @@ rg -n "highContrast|--background|--foreground" packages/ui/src/styles/theme.css 
 - `./references/contract.yaml` — expected behavior and boundaries.
 - `./references/evals.yaml` — trigger and safety eval cases.
 - `./references/plan.md` — build plan and assumptions.
+- `frontend/ui/references/design-system-integration-contract.md` — shared typography/spacing/iconography/token integration contract for sibling `frontend/ui` skills.
 - `docs/design-system/PROFESSIONAL_UI_CONTRACT.md` — quality bar and semantics contract for UI outputs.
 - `docs/design-system/AGENT_UI_ROUTING.md` — route-first map from request type to canonical surfaces.
 - `./assets/design-system-brief-template.md` — report template for outputs.

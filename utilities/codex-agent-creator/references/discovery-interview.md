@@ -5,17 +5,17 @@
 - [How to run the interview](#how-to-run-the-interview)
 - [Request user input mini-templates](#request-user-input-mini-templates)
 - [Copy paste payload examples](#copy-paste-payload-examples)
-- [Round 1: Role goal](#round-1-role-goal)
+- [Round 1: Agent goal](#round-1-agent-goal)
 - [Round 2: Scope](#round-2-scope)
 - [Round 3: Safety and runtime limits](#round-3-safety-and-runtime-limits)
 - [Round 6: Confirmation](#round-6-confirmation)
 
 ## When to use this reference
 
-Use this when a role request is promising but still underspecified:
-- the user wants a new role but has not pinned down the job it should own;
-- the user wants to tighten an existing role but the main failure mode is still fuzzy;
-- the role could change project or global runtime behavior and you need a safer boundary first.
+Use this when a custom-agent request is promising but underspecified:
+- the user wants a new custom agent but has not pinned down the exact job;
+- the user wants to tighten an existing custom agent but the failure mode is still fuzzy;
+- the request could change project or global runtime behavior and needs safer boundaries first.
 
 ## How to run the interview
 
@@ -24,59 +24,58 @@ Default behavior:
 - if that tool is unavailable, ask the same round in chat;
 - ask one round at a time;
 - do not advance until the current round is answered;
-- stop when you are confident the role can be created safely.
+- stop when confidence is high enough to build safely.
 
 Interaction style:
 - lead with one simple question, not a wall of bullets;
 - explain the purpose of the round in plain language before asking it;
-- use role language the user would naturally recognize;
+- use language the user would naturally recognize;
 - summarize what you learned before moving on.
 
 ## Request user input mini-templates
 
-### Round 1 template: role goal
+### Round 1 template: agent goal
 
 Chat intro:
-- "Let’s start simple: what should this role help with?"
+- "Let’s start simple: what should this custom agent help with?"
 
 Good tool question shape:
 - `Header:` `Goal`
-- `Question:` `What kind of help should this role provide?`
+- `Question:` `What kind of help should this custom agent provide?`
 - `Options:`
-  - `Create new role (Recommended)` — Best when the role is mostly net-new.
-  - `Improve current role` — Best when an existing role needs tightening.
-  - `Package repeatable role` — Best when the role already works and needs safer reuse.
+  - `Create new custom agent (Recommended)` — Best when capability is mostly net-new.
+  - `Improve current custom agent` — Best when an existing custom agent needs tightening.
+  - `Package repeatable custom agent` — Best when the agent already works and needs safer reuse.
 
 Follow-up prompt if needed:
-- `In one sentence, what should this role reliably do every time?`
-- Canonical round-1 wording fallback: `What should this skill help you do?`
+- `In one sentence, what should this custom agent reliably do every time?`
 
 ### Round 2 template: scope
 
 Chat intro:
-- "Next, let’s make sure the scope is explicit."
+- "Next, let’s make sure scope and install location are explicit."
 
 Good tool question shape:
 - `Header:` `Scope`
-- `Question:` `Where should this role live?`
+- `Question:` `Where should this custom agent live?`
 - `Options:`
-  - `Project role (Recommended)` — Best when the role is specific to one repo.
-  - `Global role` — Best when the role should be reusable across repos.
-  - `Not sure yet` — Best when the user needs a quick tradeoff before deciding.
+  - `Project custom agent (Recommended)` — Best when behavior is specific to one repo.
+  - `Global custom agent` — Best when behavior should be reusable across repos.
+  - `Not sure yet` — Best when a quick tradeoff is still needed.
 
 Follow-up prompt if needed:
-- `Should this role be mostly read-only, or should it be able to edit files too?`
+- `Should this custom agent be mostly read-only, or should it be able to edit files too?`
 
 ### Round 3 template: safety and limits
 
 Chat intro:
-- "Last, let’s make the boundaries explicit so the role behaves safely."
+- "Last, let’s make the boundaries explicit so the custom agent behaves safely."
 
 Good tool question shape:
 - `Header:` `Guardrails`
-- `Question:` `What should this role optimize for most?`
+- `Question:` `What should this custom agent optimize for most?`
 - `Options:`
-  - `Safety and predictability (Recommended)` — Best when the role should avoid surprising behavior.
+  - `Safety and predictability (Recommended)` — Best when behavior should avoid surprises.
   - `Speed and low friction` — Best when fast progress matters more than exhaustive checks.
   - `Depth and completeness` — Best when richer output is worth more time or tokens.
 
@@ -89,7 +88,7 @@ Chat intro:
 - "Here’s my understanding so far."
 
 Confirmation ask:
-- summarize with the standard role summary block;
+- summarize with the standard custom-agent summary block;
 - call out assumptions with an `Assumptions:` line when needed;
 - end with one simple confirmation question:
   - `Does this capture it well enough for me to build?`
@@ -104,20 +103,20 @@ Confirmation ask:
   "questions": [
     {
       "header": "Goal",
-      "id": "role_goal",
-      "question": "What kind of role are we shaping?",
+      "id": "agent_goal",
+      "question": "What kind of custom agent are we shaping?",
       "options": [
         {
-          "label": "New role (Recommended)",
-          "description": "Use this when the role is mostly net-new."
+          "label": "New custom agent (Recommended)",
+          "description": "Use this when the capability is mostly net-new."
         },
         {
-          "label": "Improve role",
-          "description": "Use this when an existing role needs tightening."
+          "label": "Improve custom agent",
+          "description": "Use this when an existing custom agent needs tightening."
         },
         {
-          "label": "Package role",
-          "description": "Use this when the role already works and needs reuse."
+          "label": "Package custom agent",
+          "description": "Use this when the custom agent already works and needs safer reuse."
         }
       ]
     }
@@ -126,7 +125,7 @@ Confirmation ask:
 ```
 
 Suggested follow-up in chat:
-- `What should this role help you do?`
+- `What should this custom agent help you do?`
 
 ### Round 2 example
 
@@ -135,16 +134,16 @@ Suggested follow-up in chat:
   "questions": [
     {
       "header": "Scope",
-      "id": "role_scope",
-      "question": "Where should this role usually live?",
+      "id": "agent_scope",
+      "question": "Where should this custom agent usually live?",
       "options": [
         {
           "label": "Project (Recommended)",
-          "description": "Best when the role is specific to one repo."
+          "description": "Best when the behavior is specific to one repo."
         },
         {
           "label": "Global",
-          "description": "Best when the role should work across repos."
+          "description": "Best when the behavior should work across repos."
         },
         {
           "label": "Not sure",

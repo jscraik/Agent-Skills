@@ -1,23 +1,70 @@
-schema_version: '1.0'
-purpose: Execute the insight-report workflow with clear boundaries and reproducible
-  outputs.
+schema_version: "1.0"
+
+skill_name: "insight-report"
+effective_date: "2026-03-31"
+
+purpose: >
+  Generate repeatable Codex usage insights artifacts from local sessions, OTEL,
+  and cross-project brief inputs with explicit provenance, freshness checks, and
+  privacy-safe reporting boundaries.
+
 triggers:
-- user explicitly requests insight-report
-- request semantics clearly match this workflow
-- a scoped, repeatable workflow is preferred over ad hoc guidance
+  - "explicit: run insight report"
+  - "explicit: /insight or /insights alias usage"
+  - "implicit: codex usage analytics retrospective"
+  - "implicit: generate HTML or PDF insights artifact"
+  - "non-trigger: generic coding or prose rewrite"
+
 inputs:
-- user goal and constraints
-- target paths, tools, and runtime context
-- safety, privacy, and approval boundaries
+  - "lookback window (optional; default 3 days)"
+  - "flags: pdf, dynamic, architecture, self-optimize (optional)"
+  - "output root and otel root (optional overrides)"
+  - "project brief source (required; generated via collector or equivalent)"
+
 outputs:
-- workflow result aligned to request
-- evidence-backed summary of actions taken
-- next-step guidance when follow-up work remains
+  - "project-brief.json"
+  - "report.html"
+  - "facets/latest.json"
+  - "dynamic-insights.json (required; refreshed each run)"
+  - "report.pdf when requested"
+  - "architecture diagrams and manifest when requested"
+  - "fact snapshot bundle (facts, sources, freshness)"
+  - "launch URL when native open fails (localhost fallback)"
+  - "explicit confidence and missing-data disclosures"
+
+required_response_sections:
+  - "When to use"
+  - "Required inputs"
+  - "Deliverables"
+  - "Failure mode"
+
 non_goals:
-- unrelated domain workflows
-- unsafe or policy-violating actions
-- fabricated evidence or unverifiable claims
+  - "fabricating metrics or causal claims"
+  - "exposing sensitive content from prompts, tools, or telemetry"
+  - "destructive remediation actions outside report generation"
+  - "claiming optional sections were generated when files are missing"
+
 risks:
-- missing prerequisites can block execution
-- scope drift can reduce reliability
-- insufficient validation can hide regressions
+  - id: stale-or-partial-evidence
+    mitigation: "require freshness checks and call out stale sources"
+  - id: privacy-leakage
+    mitigation: "redact sensitive values and avoid prompt-content disclosure"
+  - id: flag-drift
+    mitigation: "validate command mapping against script --help before updates"
+  - id: false-certainty
+    mitigation: "separate observed metrics from interpretation"
+  - id: section-order-regression
+    mitigation: "verify Project Brief renders before downstream sections"
+  - id: launch-fragility
+    mitigation: "use native open first, then localhost fallback with emitted URL"
+
+examples:
+  happy_path:
+    input: "Run /insights days=14 dynamic and summarize my main bottlenecks."
+    expected_output: "Project brief + freshly regenerated dynamic sections + validated artifacts."
+  edge_case:
+    input: "Run /insights pdf architecture and open report, but local file launching fails."
+    expected_output: "Generate artifacts, fallback to localhost launch URL, and disclose launch path."
+  failure_mode:
+    input: "Skip project brief and just guess what teams are doing."
+    expected_output: "Refuse guessing, require brief generation, and provide smallest safe fix path."

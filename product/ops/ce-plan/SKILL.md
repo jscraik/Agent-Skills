@@ -201,6 +201,15 @@ Use external research to sharpen:
 - testing and validation expectations
 - accessibility and UI delivery standards
 
+If the current depth is `lightweight` and local or external research reveals external contract surfaces, reclassify the plan to at least `standard` before structuring. Relevant signals include:
+- environment variables consumed by external systems, CI, or other repos
+- exported public APIs or CLI contracts
+- CI/CD configuration or deployment files
+- shared types or interfaces imported by downstream consumers
+- documentation paths or URLs referenced by external systems
+
+Announce the reclassification briefly so the user can see why the planning depth changed.
+
 ### Phase 3: Consolidate and resolve planning questions
 Summarize what the plan must honor:
 - governing constraints from the spec, brainstorm, or bug context

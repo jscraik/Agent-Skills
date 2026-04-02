@@ -4,17 +4,54 @@ This repository contains governance rules for Claude Code and other AI assistant
 
 This file is **agent-tool specific**. For repository-wide rules, read `AGENTS.md` first.
 
+## Table of Contents
+- [Error Handling Protocol](#error-handling-protocol)
+- [Reporting & Insights](#reporting--insights)
+- [Output Paths](#output-paths)
+- [Communication](#communication)
+- [Efficiency](#efficiency)
+- [Browser/Playwright](#browserplaywright)
+- [AI Assistance Governance (Model A)](#ai-assistance-governance-model-a)
+- [Artifact Templates](#artifact-templates)
+- [PR Template](#pr-template)
+- [Testing Standards](#testing-standards)
+- [Development Workflow](#development-workflow)
+- [Code Quality Checks](#code-quality-checks)
+- [Git & PR Workflow](#git--pr-workflow)
+- [PR Workflow](#pr-workflow)
+- [MCP & External Tools](#mcp--external-tools)
+- [MCP Server Configuration](#mcp-server-configuration)
+- [Shell Script Portability](#shell-script-portability)
+- [TypeScript Configuration](#typescript-configuration)
+- [Command preflight helper](#command-preflight-helper)
+
+## Error Handling Protocol
+- When encountering API errors, model access issues, or unexpected failures, do not just report the error; always suggest a concrete workaround or alternative approach that still advances the user's goal.
+
+## Reporting & Insights
+- For any report or insights generation task, check that required services and model access are available before starting.
+- If they are unavailable, fall back to generating the report from local data using available tools such as Read, Bash, Glob, and Grep.
+
 ## Output Paths
 - Before generating files, verify output directory paths against `package.json` (or package-local script config) so generated paths match configured output settings.
 - Audit existing scripts and config files for hardcoded output paths; update generated destinations to match configured paths.
 
+## Communication
+- When the user explicitly states a root cause, confirm the direction and proceed with that diagnosis instead of proposing alternative fixes.
+
+## Efficiency
+- Before implementing multi-file edits or complex automation for a simple information request, pause and ask: `Would a direct answer or simple command suffice?`
+
+## Browser/Playwright
+- When browser tooling cannot access local files directly, immediately start `python3 -m http.server` in the relevant directory instead of iterating on brittle workarounds or abandoning the browser path.
+
 ---
 
-# AI Assistance Governance (Model A)
+## AI Assistance Governance (Model A)
 
 This project follows **Model A** AI artifact governance: prompts and session logs are committed artifacts in the repository.
 
-## When creating PRs with AI assistance
+### When creating PRs with AI assistance
 
 Claude must:
 

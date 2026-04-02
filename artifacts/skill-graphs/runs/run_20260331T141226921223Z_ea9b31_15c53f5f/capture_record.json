@@ -1,0 +1,78 @@
+{
+  "candidate_lessons": {
+    "count": 1,
+    "top_candidate_id": "candidate_cc22b533ca02"
+  },
+  "capture_id": "04b64f9b45084ba4",
+  "confidence": {
+    "bucket": "medium",
+    "calibration_bucket": "C2_medium_confidence",
+    "inputs": {
+      "evidence_completeness": 0.8,
+      "feedback_signal": 0.5,
+      "feedback_status": "missing",
+      "iterations_observed": 2,
+      "non_regression_signal": 1.0,
+      "quality_uplift_signal": 1.0,
+      "runtime_gate_signal": 0.0,
+      "stop_reason": "pass",
+      "terminal_status": "passed"
+    },
+    "quality_uplift": 0.192,
+    "schema_version": "1.0",
+    "score": 0.63
+  },
+  "created_at": "2026-03-31T14:12:26Z",
+  "evidence": {
+    "completeness": {
+      "checks": true,
+      "events": true,
+      "logs": false,
+      "score": 0.8,
+      "session_signals": true,
+      "traces": true
+    },
+    "evidence_packet_id": "a31edeea07eb2e45",
+    "evidence_packet_path": "evidence_packet.json"
+  },
+  "feedback": {
+    "captured_at": "2026-03-31T14:12:26Z",
+    "note": "",
+    "source": "none",
+    "status": "missing"
+  },
+  "injected_lessons": {
+    "count": 0,
+    "items": []
+  },
+  "invocation_envelope": {
+    "actor_id": "recursive-skill-loop",
+    "auto_apply_enabled": true,
+    "auto_capture_enabled": true,
+    "idempotency_key": "684031612df71a8c0f43",
+    "invocation_id": "9d2c906120fc664b",
+    "invoked_at": "2026-03-31T14:12:26Z",
+    "kill_switch_file": "",
+    "objective_hash": "2295b1d7286215df29d9fbc7a8d6b6ec105b6ac665c8d9a30aed6391b08f64ac",
+    "rollback_required_file": "",
+    "rollout_mode": "active",
+    "run_owner": "shadow-cycle"
+  },
+  "lesson_observations": {
+    "count": 4,
+    "top_observation_id": "observation_4ce21d0ba54d"
+  },
+  "output_summary": {
+    "duration_ms": 2,
+    "finished_at": "2026-03-31T14:12:26Z",
+    "iterations_completed": 2,
+    "stop_reason": "pass",
+    "terminal_status": "passed",
+    "tokens_used": 231
+  },
+  "profile_id": "react-ui-patterns",
+  "run_id": "run_20260331T141226921223Z_ea9b31_15c53f5f",
+  "schema_version": "1.0",
+  "scope_profile": "ui",
+  "scope_skill": "react-ui-patterns"
+}

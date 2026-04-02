@@ -4,9 +4,12 @@ Daily operator artifacts for recursive loop health monitoring.
 
 ## Required outputs
 
+- `shadow-baseline.json`
 - `daily-skill-health.md`
 - `failure-pattern-candidates.jsonl`
 - `promotion-queue.md`
+- `arscontexta-intervention-queue.json`
+- `arscontexta-intervention-queue.md`
 
 `promotion-queue.md` entries should include:
 - run id + profile id
@@ -16,11 +19,33 @@ Daily operator artifacts for recursive loop health monitoring.
 - rollout mode + injected lesson count
 
 `daily-skill-health.md` should include:
+- baseline source + baseline window
+- critical non-regression compliance (all reevaluations clean)
+- terminal non-regression compliance (final accepted state clean)
+- non-regression recovered rate (intermediate failure, final clean)
 - capture coverage (`capture_record` written / total runs)
 - confidence bucket counts (`high|medium|low|unknown`)
 - injection usage rate (runs with injected lessons / total runs)
 - suppression count (runs where retrieval occurred but injection was disabled by controls)
 - uplift gate decision counts (`pass|hold|insufficient_data|regressed`) for promotion and auto-apply paths
+
+`shadow-baseline.json` should include:
+- captured-at timestamp
+- baseline window
+- window size in days
+- pilot profile set
+- frozen summary metrics used for delta KPI comparison when no prior rolling window is available
+
+`arscontexta-intervention-queue.json` should include:
+- pilot profiles ordered by instability / recovery pressure
+- per-profile weak criteria, regression criteria, and repeated positive criteria
+- recommended hardening stage (`documentation|skill|hook-candidate`)
+- retrieval checkpoint questions for the next operator pass
+
+`arscontexta-intervention-queue.md` should include:
+- operator-facing summary of the same queue
+- explicit reminder that the shadow gate remains authoritative
+- documentation -> skill -> hook promotion guidance
 
 ## Minimum event envelope
 

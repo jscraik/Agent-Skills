@@ -8,15 +8,16 @@
 - [Known hard blockers](#known-hard-blockers)
 
 ## Objectives
-- Build a gold-standard Codex automation skill (March 2026 baseline).
+- Build a gold-standard Codex automation skill (March 30, 2026 baseline).
 - Support creation plus review/merge of existing automations.
 - Enforce safe operation under strict approval/sandbox policies.
 
 ## Scope
 - In scope:
   - automation design/consolidation
-  - freshness checks via `openaiDeveloperDocs` + `codexRepo`
+  - freshness checks via OpenAI docs MCP + `codexRepo` MCP + Context7 MCP
   - blocker remediation and permission mapping
+  - RRULE design guardrails (timezone, `count` vs `until`, `wkst`)
   - headless multi-runner validation guidance
 - Out of scope:
   - unrelated app feature coding

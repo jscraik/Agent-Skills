@@ -1,0 +1,196 @@
+{
+  "items": [
+    {
+      "advice": {
+        "summary": "Strengthen concrete examples, file-path specificity, and measurable checks.",
+        "weakest_criteria": [
+          "safety"
+        ]
+      },
+      "confidence": {
+        "bucket": "low",
+        "calibration_bucket": "C3_low_confidence",
+        "evidence_completeness": 0.8,
+        "score": 0.43
+      },
+      "created_at": "2026-03-31T14:12:26Z",
+      "criterion_id": "safety",
+      "delegation_context": {
+        "agentic_cost_benefit": {
+          "ai_process_minutes": 30.0,
+          "human_baseline_minutes": 90.0,
+          "probability_of_success": 0.78,
+          "roi_signal": "positive",
+          "time_delta_minutes": 60.0
+        },
+        "mode": "co-pilot",
+        "rationale": "High-context UI improvement requires iterative human + agent synthesis."
+      },
+      "evidence_refs": {
+        "events_path": "events.jsonl",
+        "evidence_packet_path": "evidence_packet.json",
+        "iteration_journal_path": "iteration_journal.jsonl"
+      },
+      "implementation": {
+        "positive_criterion_deltas": {
+          "clarity": 0.06,
+          "safety": 0.085
+        },
+        "summary": "Applied focused remediation for: safety"
+      },
+      "iteration_id": 2,
+      "observation_id": "observation_76c6b9c244d7",
+      "observation_type": "remediation",
+      "outcome": {
+        "feedback_note": "",
+        "feedback_status": "missing",
+        "quality_uplift": 0.161,
+        "stop_reason": "pass",
+        "terminal_status": "passed"
+      },
+      "profile_id": "frontend-ui-design",
+      "run_id": "run_20260331T141226327074Z_355088_15c426cd",
+      "schema_version": "1.0",
+      "scope_profile": "ui",
+      "scope_skill": "frontend-ui-design",
+      "selection_hint": {
+        "feedback_weight": 0.95,
+        "rationale": "Weakness in safety was prioritized because feedback status was `missing`.",
+        "score": 0.602
+      },
+      "signals": {
+        "deficit": 0.006,
+        "positive_delta": 0.0
+      },
+      "title": "frontend-ui-design remediation observation (safety)"
+    },
+    {
+      "advice": {
+        "summary": "Preserve and reuse the pattern that improved `safety`.",
+        "weakest_criteria": [
+          "safety"
+        ]
+      },
+      "confidence": {
+        "bucket": "low",
+        "calibration_bucket": "C3_low_confidence",
+        "evidence_completeness": 0.8,
+        "score": 0.43
+      },
+      "created_at": "2026-03-31T14:12:26Z",
+      "criterion_id": "safety",
+      "delegation_context": {
+        "agentic_cost_benefit": {
+          "ai_process_minutes": 30.0,
+          "human_baseline_minutes": 90.0,
+          "probability_of_success": 0.78,
+          "roi_signal": "positive",
+          "time_delta_minutes": 60.0
+        },
+        "mode": "co-pilot",
+        "rationale": "High-context UI improvement requires iterative human + agent synthesis."
+      },
+      "evidence_refs": {
+        "events_path": "events.jsonl",
+        "evidence_packet_path": "evidence_packet.json",
+        "iteration_journal_path": "iteration_journal.jsonl"
+      },
+      "implementation": {
+        "positive_criterion_deltas": {
+          "safety": 0.085
+        },
+        "summary": "Applied focused remediation for: safety"
+      },
+      "iteration_id": 2,
+      "observation_id": "observation_7cd1e246be30",
+      "observation_type": "positive_pattern",
+      "outcome": {
+        "feedback_note": "",
+        "feedback_status": "missing",
+        "quality_uplift": 0.161,
+        "stop_reason": "pass",
+        "terminal_status": "passed"
+      },
+      "profile_id": "frontend-ui-design",
+      "run_id": "run_20260331T141226327074Z_355088_15c426cd",
+      "schema_version": "1.0",
+      "scope_profile": "ui",
+      "scope_skill": "frontend-ui-design",
+      "selection_hint": {
+        "feedback_weight": 0.85,
+        "rationale": "Positive delta on safety was amplified by feedback status `missing`.",
+        "score": 0.578
+      },
+      "signals": {
+        "deficit": 0.0,
+        "positive_delta": 0.085
+      },
+      "title": "frontend-ui-design positive pattern observation (safety)"
+    },
+    {
+      "advice": {
+        "summary": "Preserve and reuse the pattern that improved `clarity`.",
+        "weakest_criteria": [
+          "safety"
+        ]
+      },
+      "confidence": {
+        "bucket": "low",
+        "calibration_bucket": "C3_low_confidence",
+        "evidence_completeness": 0.8,
+        "score": 0.43
+      },
+      "created_at": "2026-03-31T14:12:26Z",
+      "criterion_id": "clarity",
+      "delegation_context": {
+        "agentic_cost_benefit": {
+          "ai_process_minutes": 30.0,
+          "human_baseline_minutes": 90.0,
+          "probability_of_success": 0.78,
+          "roi_signal": "positive",
+          "time_delta_minutes": 60.0
+        },
+        "mode": "co-pilot",
+        "rationale": "High-context UI improvement requires iterative human + agent synthesis."
+      },
+      "evidence_refs": {
+        "events_path": "events.jsonl",
+        "evidence_packet_path": "evidence_packet.json",
+        "iteration_journal_path": "iteration_journal.jsonl"
+      },
+      "implementation": {
+        "positive_criterion_deltas": {
+          "clarity": 0.06
+        },
+        "summary": "Applied focused remediation for: safety"
+      },
+      "iteration_id": 2,
+      "observation_id": "observation_d16b0b796aa7",
+      "observation_type": "positive_pattern",
+      "outcome": {
+        "feedback_note": "",
+        "feedback_status": "missing",
+        "quality_uplift": 0.161,
+        "stop_reason": "pass",
+        "terminal_status": "passed"
+      },
+      "profile_id": "frontend-ui-design",
+      "run_id": "run_20260331T141226327074Z_355088_15c426cd",
+      "schema_version": "1.0",
+      "scope_profile": "ui",
+      "scope_skill": "frontend-ui-design",
+      "selection_hint": {
+        "feedback_weight": 0.85,
+        "rationale": "Positive delta on clarity was amplified by feedback status `missing`.",
+        "score": 0.556
+      },
+      "signals": {
+        "deficit": 0.0,
+        "positive_delta": 0.06
+      },
+      "title": "frontend-ui-design positive pattern observation (clarity)"
+    }
+  ],
+  "run_id": "run_20260331T141226327074Z_355088_15c426cd",
+  "schema_version": "1.0"
+}

@@ -2,7 +2,7 @@
 
 Read when: the user wants a real product walkthrough recorded from a running app and uploaded into a GitHub PR as a native inline video.
 
-Imported from the upstream `feature-video` skill in `EveryInc/compound-engineering-plugin` commit `0fdc25a36cabea4ce9e2ae47ff69c1a9a2de8f0b`, adapted for the local `feature-video` wrapper.
+Imported from the upstream `feature-video` skill in `EveryInc/compound-engineering-plugin` commit `847ce3f156a5cdf75667d9802e95d68e6b3c53a4`, adapted from the donor's single-file workflow into the local `feature-video` wrapper.
 
 ## Purpose
 
@@ -38,6 +38,14 @@ Behavior:
 - skip recording and encoding
 - resolve the PR from the current branch or explicit input
 - continue directly into auth, upload, and PR update
+
+## Argument shape
+
+Interpret the browser PR walkthrough inputs as:
+- first argument: PR number, `current`, or path to an existing `.mp4`
+- second argument: optional base URL, default `http://localhost:3000`
+
+If the first argument is an existing `.mp4`, treat the run as upload-only resume and skip recording.
 
 ## Prerequisites
 
@@ -125,9 +133,13 @@ Recommended approach:
 Then:
 - open the PR page
 - save any draft textarea content before upload
-- upload the video through the hidden file input
+- upload the video through the PR form's hidden file input
 - wait for GitHub processing
 - read the textarea value to extract the uploaded video URL
+
+Preferred selectors from the donor workflow:
+- file input: `#fc-new_comment_field`
+- textarea: `#new_comment_field`
 
 ## Upload validation
 
@@ -143,6 +155,11 @@ If upload validation fails:
 After extracting the URL:
 - restore the user's original textarea content
 - then edit the PR body through `gh`
+
+Textarea restoration detail:
+- assign the saved content back as a direct JavaScript string literal
+- do not rely on `JSON.parse(...)` for the restored textarea body
+- if the saved textarea was empty, restore `""`
 
 ## PR update shape
 

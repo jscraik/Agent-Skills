@@ -1,0 +1,508 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-03-31T15:28:27Z",
+  "current_window": "2026-03-25..2026-03-31",
+  "source_artifacts": {
+    "dashboard_json": "artifacts/skill-graphs/pilot/shadow-dashboard.json",
+    "failure_patterns_jsonl": "artifacts/skill-graphs/telemetry/failure-pattern-candidates.jsonl",
+    "pilot_profiles_file": "docs/skill-graphs/schemas/examples/pilot-profiles.json",
+    "runs_root": "artifacts/skill-graphs/runs"
+  },
+  "methodology_refs": [
+    "plugins/arscontexta/methodology/retrieval verification loop tests description quality at scale.md",
+    "plugins/arscontexta/methodology/queries evolve during search so agents should checkpoint.md",
+    "plugins/arscontexta/methodology/schema enforcement via validation agents enables soft consistency.md",
+    "plugins/arscontexta/methodology/methodology development should follow the trajectory from documentation to skill to hook as understanding hardens.md"
+  ],
+  "profiles": [
+    {
+      "profile_id": "frontend-ui-design",
+      "profile_file": "frontend/ui/frontend-ui-design/references/task-profile.json",
+      "scope_skill": "frontend/ui/frontend-ui-design",
+      "scope_profile": "frontend",
+      "objective": "Shadow evaluation run N for frontend-ui-design: produce production-ready frontend UI design guidance for a web screen with one clear primary action, explicit default/loading/empty/error/disabled states, token-backed primitives, keyboard-focus-contrast-reduced-motion behavior, restrained composition without decorative overload, and a concrete verification checklist.",
+      "arscontexta_stage": "documentation",
+      "metrics": {
+        "runs_total": 20,
+        "clean_runs": 6,
+        "terminal_pass_runs": 16,
+        "recovered_runs": 14,
+        "evaluator_conflicts": 4,
+        "low_confidence_runs": 14,
+        "median_iterations": 3.5,
+        "median_quality_uplift": 0.221,
+        "mean_flip_rate": 0.12
+      },
+      "signals": {
+        "weakest_criteria": [
+          {
+            "criterion_id": "restraint_and_composition",
+            "label": "Restraint and composition",
+            "count": 40,
+            "threshold": 0.85
+          },
+          {
+            "criterion_id": "accessibility_contract",
+            "label": "Accessibility contract",
+            "count": 21,
+            "threshold": 0.86
+          },
+          {
+            "criterion_id": "safety",
+            "label": "Safety",
+            "count": 17,
+            "threshold": null
+          }
+        ],
+        "regression_criteria": [
+          {
+            "criterion_id": "accessibility_contract",
+            "label": "Accessibility contract",
+            "count": 9,
+            "threshold": 0.86
+          },
+          {
+            "criterion_id": "clarity",
+            "label": "Clarity",
+            "count": 4,
+            "threshold": null
+          },
+          {
+            "criterion_id": "safety",
+            "label": "Safety",
+            "count": 2,
+            "threshold": null
+          }
+        ],
+        "positive_criteria": [
+          {
+            "criterion_id": "restraint_and_composition",
+            "label": "Restraint and composition",
+            "count": 9,
+            "threshold": 0.85
+          },
+          {
+            "criterion_id": "specificity",
+            "label": "Specificity",
+            "count": 6,
+            "threshold": null
+          },
+          {
+            "criterion_id": "clarity",
+            "label": "Clarity",
+            "count": 5,
+            "threshold": null
+          }
+        ],
+        "failure_candidates": [
+          {
+            "run_id": "run_20260331T143101180026Z_2ac1a9_bffd74d5",
+            "stop_reason": "evaluator_conflict",
+            "terminal_status": "escalated",
+            "quality_uplift": 0.248
+          },
+          {
+            "run_id": "run_20260331T141226543802Z_fc9894_15c48010",
+            "stop_reason": "evaluator_conflict",
+            "terminal_status": "escalated",
+            "quality_uplift": 0.132
+          },
+          {
+            "run_id": "run_20260331T141225956402Z_bb9acb_15c37bdd",
+            "stop_reason": "evaluator_conflict",
+            "terminal_status": "escalated",
+            "quality_uplift": 0.068
+          },
+          {
+            "run_id": "run_20260331T134303206769Z_bb9acb_12e8bbdd",
+            "stop_reason": "evaluator_conflict",
+            "terminal_status": "escalated",
+            "quality_uplift": 0.068
+          }
+        ]
+      },
+      "recommendations": [
+        "Capture an Ars Contexta note for frontend-ui-design centered on Restraint and composition, Accessibility contract, and Safety, using run_20260331T143101180026Z_2ac1a9_bffd74d5, run_20260331T141226543802Z_fc9894_15c48010, run_20260331T141225956402Z_bb9acb_15c37bdd as the seed evidence set.",
+        "At each reevaluation checkpoint, explicitly reassess whether the objective should pivot toward Accessibility contract, Clarity, and Safety; treat that as search refinement, not failure.",
+        "Keep these interventions at documentation level for now, and only promote a pattern upward once it repeats cleanly without reopening regressions."
+      ],
+      "retrieval_packet": {
+        "checkpoint_queries": [
+          "What recurring evidence explains why frontend-ui-design regresses on Restraint and composition, Accessibility contract, and Safety during reevaluation?",
+          "Which prompt clauses or rubric reminders improved Restraint and composition, Specificity, and Clarity without weakening safety or non-regression?",
+          "What should be retrieved before iteration 1 so frontend-ui-design starts from the last stable intervention instead of rediscovering it?"
+        ],
+        "capture_fields": [
+          "run_id",
+          "profile_id",
+          "objective_hash",
+          "weakest_criteria",
+          "regression_criteria",
+          "positive_criterion_deltas",
+          "critical_non_regression_passed",
+          "terminal_non_regression_passed"
+        ]
+      },
+      "unstable_score": 57.0
+    },
+    {
+      "profile_id": "interface-craft",
+      "profile_file": "frontend/ui/ui-ux-creative-coding/references/interface-craft.task-profile.json",
+      "scope_skill": "frontend/ui/ui-ux-creative-coding",
+      "scope_profile": "frontend",
+      "objective": "Shadow evaluation run N for interface-craft: produce folded interface-craft guidance for a polished React interaction surface with clear motion boundaries, concrete implementation notes, explicit safety constraints, and testable validation steps.",
+      "arscontexta_stage": "documentation",
+      "metrics": {
+        "runs_total": 19,
+        "clean_runs": 4,
+        "terminal_pass_runs": 17,
+        "recovered_runs": 15,
+        "evaluator_conflicts": 2,
+        "low_confidence_runs": 15,
+        "median_iterations": 2,
+        "median_quality_uplift": 0.083,
+        "mean_flip_rate": 0.14
+      },
+      "signals": {
+        "weakest_criteria": [
+          {
+            "criterion_id": "safety",
+            "label": "Safety/compliance compliance",
+            "count": 36,
+            "threshold": 0.85
+          },
+          {
+            "criterion_id": "clarity",
+            "label": "Instructional clarity",
+            "count": 5,
+            "threshold": 0.72
+          },
+          {
+            "criterion_id": "specificity",
+            "label": "Concrete implementation detail",
+            "count": 2,
+            "threshold": 0.68
+          }
+        ],
+        "regression_criteria": [
+          {
+            "criterion_id": "clarity",
+            "label": "Instructional clarity",
+            "count": 11,
+            "threshold": 0.72
+          },
+          {
+            "criterion_id": "specificity",
+            "label": "Concrete implementation detail",
+            "count": 9,
+            "threshold": 0.68
+          },
+          {
+            "criterion_id": "safety",
+            "label": "Safety/compliance compliance",
+            "count": 4,
+            "threshold": 0.85
+          }
+        ],
+        "positive_criteria": [
+          {
+            "criterion_id": "safety",
+            "label": "Safety/compliance compliance",
+            "count": 13,
+            "threshold": 0.85
+          },
+          {
+            "criterion_id": "specificity",
+            "label": "Concrete implementation detail",
+            "count": 8,
+            "threshold": 0.68
+          },
+          {
+            "criterion_id": "clarity",
+            "label": "Instructional clarity",
+            "count": 4,
+            "threshold": 0.72
+          }
+        ],
+        "failure_candidates": [
+          {
+            "run_id": "run_20260331T141225453996Z_7bff1d_15c27f41",
+            "stop_reason": "evaluator_conflict",
+            "terminal_status": "escalated",
+            "quality_uplift": 0.029
+          },
+          {
+            "run_id": "run_20260331T141225594250Z_2b9eeb_15c2b824",
+            "stop_reason": "evaluator_conflict",
+            "terminal_status": "escalated",
+            "quality_uplift": 0.083
+          }
+        ]
+      },
+      "recommendations": [
+        "Capture an Ars Contexta note for interface-craft centered on Safety/compliance compliance, Instructional clarity, and Concrete implementation detail, using run_20260331T141225453996Z_7bff1d_15c27f41, run_20260331T141225594250Z_2b9eeb_15c2b824 as the seed evidence set.",
+        "At each reevaluation checkpoint, explicitly reassess whether the objective should pivot toward Instructional clarity, Concrete implementation detail, and Safety/compliance compliance; treat that as search refinement, not failure.",
+        "Keep these interventions at documentation level for now, and only promote a pattern upward once it repeats cleanly without reopening regressions."
+      ],
+      "retrieval_packet": {
+        "checkpoint_queries": [
+          "What recurring evidence explains why interface-craft regresses on Safety/compliance compliance, Instructional clarity, and Concrete implementation detail during reevaluation?",
+          "Which prompt clauses or rubric reminders improved Safety/compliance compliance, Concrete implementation detail, and Instructional clarity without weakening safety or non-regression?",
+          "What should be retrieved before iteration 1 so interface-craft starts from the last stable intervention instead of rediscovering it?"
+        ],
+        "capture_fields": [
+          "run_id",
+          "profile_id",
+          "objective_hash",
+          "weakest_criteria",
+          "regression_criteria",
+          "positive_criterion_deltas",
+          "critical_non_regression_passed",
+          "terminal_non_regression_passed"
+        ]
+      },
+      "unstable_score": 56.5
+    },
+    {
+      "profile_id": "react-ui-patterns",
+      "profile_file": "frontend/ui/react-ui-patterns/references/task-profile.json",
+      "scope_skill": "frontend/ui/react-ui-patterns",
+      "scope_profile": "frontend",
+      "objective": "Shadow evaluation run N for react-ui-patterns: produce concrete React UI composition guidance for a TypeScript plus Tailwind plus Radix screen with file-path-specific component structure, explicit state ownership, accessibility rules, and measurable verification checks.",
+      "arscontexta_stage": "documentation",
+      "metrics": {
+        "runs_total": 19,
+        "clean_runs": 8,
+        "terminal_pass_runs": 14,
+        "recovered_runs": 11,
+        "evaluator_conflicts": 5,
+        "low_confidence_runs": 11,
+        "median_iterations": 2,
+        "median_quality_uplift": 0.158,
+        "mean_flip_rate": 0.316
+      },
+      "signals": {
+        "weakest_criteria": [
+          {
+            "criterion_id": "safety",
+            "label": "Safety/compliance compliance",
+            "count": 34,
+            "threshold": 0.85
+          },
+          {
+            "criterion_id": "clarity",
+            "label": "Instructional clarity",
+            "count": 16,
+            "threshold": 0.72
+          },
+          {
+            "criterion_id": "specificity",
+            "label": "Concrete implementation detail",
+            "count": 12,
+            "threshold": 0.68
+          }
+        ],
+        "regression_criteria": [
+          {
+            "criterion_id": "clarity",
+            "label": "Instructional clarity",
+            "count": 7,
+            "threshold": 0.72
+          },
+          {
+            "criterion_id": "safety",
+            "label": "Safety/compliance compliance",
+            "count": 3,
+            "threshold": 0.85
+          },
+          {
+            "criterion_id": "specificity",
+            "label": "Concrete implementation detail",
+            "count": 2,
+            "threshold": 0.68
+          }
+        ],
+        "positive_criteria": [
+          {
+            "criterion_id": "specificity",
+            "label": "Concrete implementation detail",
+            "count": 13,
+            "threshold": 0.68
+          },
+          {
+            "criterion_id": "clarity",
+            "label": "Instructional clarity",
+            "count": 7,
+            "threshold": 0.72
+          },
+          {
+            "criterion_id": "safety",
+            "label": "Safety/compliance compliance",
+            "count": 7,
+            "threshold": 0.85
+          }
+        ],
+        "failure_candidates": [
+          {
+            "run_id": "run_20260331T143705798653Z_f4298e_f6846cbf",
+            "stop_reason": "evaluator_conflict",
+            "terminal_status": "escalated",
+            "quality_uplift": 0.068
+          },
+          {
+            "run_id": "run_20260331T142550250609Z_82ecf7_6bdae6fc",
+            "stop_reason": "evaluator_conflict",
+            "terminal_status": "escalated",
+            "quality_uplift": 0.094
+          },
+          {
+            "run_id": "run_20260331T141226620193Z_82ecf7_15c4be6f",
+            "stop_reason": "evaluator_conflict",
+            "terminal_status": "escalated",
+            "quality_uplift": 0.097
+          },
+          {
+            "run_id": "run_20260331T141226996030Z_6b0e62_15c559c5",
+            "stop_reason": "evaluator_conflict",
+            "terminal_status": "escalated",
+            "quality_uplift": 0.136
+          },
+          {
+            "run_id": "run_20260331T134303284536Z_82ecf7_12e9be6f",
+            "stop_reason": "evaluator_conflict",
+            "terminal_status": "escalated",
+            "quality_uplift": 0.097
+          }
+        ]
+      },
+      "recommendations": [
+        "Capture an Ars Contexta note for react-ui-patterns centered on Safety/compliance compliance, Instructional clarity, and Concrete implementation detail, using run_20260331T143705798653Z_f4298e_f6846cbf, run_20260331T142550250609Z_82ecf7_6bdae6fc, run_20260331T141226620193Z_82ecf7_15c4be6f as the seed evidence set.",
+        "At each reevaluation checkpoint, explicitly reassess whether the objective should pivot toward Instructional clarity, Safety/compliance compliance, and Concrete implementation detail; treat that as search refinement, not failure.",
+        "Keep these interventions at documentation level for now, and only promote a pattern upward once it repeats cleanly without reopening regressions."
+      ],
+      "retrieval_packet": {
+        "checkpoint_queries": [
+          "What recurring evidence explains why react-ui-patterns regresses on Safety/compliance compliance, Instructional clarity, and Concrete implementation detail during reevaluation?",
+          "Which prompt clauses or rubric reminders improved Concrete implementation detail, Instructional clarity, and Safety/compliance compliance without weakening safety or non-regression?",
+          "What should be retrieved before iteration 1 so react-ui-patterns starts from the last stable intervention instead of rediscovering it?"
+        ],
+        "capture_fields": [
+          "run_id",
+          "profile_id",
+          "objective_hash",
+          "weakest_criteria",
+          "regression_criteria",
+          "positive_criterion_deltas",
+          "critical_non_regression_passed",
+          "terminal_non_regression_passed"
+        ]
+      },
+      "unstable_score": 48.5
+    },
+    {
+      "profile_id": "ui-ux-creative-coding",
+      "profile_file": "frontend/ui/ui-ux-creative-coding/references/task-profile.json",
+      "scope_skill": "frontend/ui/ui-ux-creative-coding",
+      "scope_profile": "frontend",
+      "objective": "Shadow evaluation run N for ui-ux-creative-coding: produce implementation-ready UI polish guidance for an existing React or Tauri surface with one clear interaction thesis, reduced-motion parity, concrete accessibility constraints, and measurable validation checks.",
+      "arscontexta_stage": "documentation",
+      "metrics": {
+        "runs_total": 19,
+        "clean_runs": 12,
+        "terminal_pass_runs": 19,
+        "recovered_runs": 7,
+        "evaluator_conflicts": 0,
+        "low_confidence_runs": 7,
+        "median_iterations": 2,
+        "median_quality_uplift": 0.174,
+        "mean_flip_rate": 0.386
+      },
+      "signals": {
+        "weakest_criteria": [
+          {
+            "criterion_id": "safety",
+            "label": "Safety/compliance compliance",
+            "count": 33,
+            "threshold": 0.85
+          },
+          {
+            "criterion_id": "clarity",
+            "label": "Instructional clarity",
+            "count": 19,
+            "threshold": 0.72
+          },
+          {
+            "criterion_id": "specificity",
+            "label": "Concrete implementation detail",
+            "count": 17,
+            "threshold": 0.68
+          }
+        ],
+        "regression_criteria": [
+          {
+            "criterion_id": "safety",
+            "label": "Safety/compliance compliance",
+            "count": 5,
+            "threshold": 0.85
+          },
+          {
+            "criterion_id": "clarity",
+            "label": "Instructional clarity",
+            "count": 4,
+            "threshold": 0.72
+          },
+          {
+            "criterion_id": "specificity",
+            "label": "Concrete implementation detail",
+            "count": 1,
+            "threshold": 0.68
+          }
+        ],
+        "positive_criteria": [
+          {
+            "criterion_id": "clarity",
+            "label": "Instructional clarity",
+            "count": 11,
+            "threshold": 0.72
+          },
+          {
+            "criterion_id": "specificity",
+            "label": "Concrete implementation detail",
+            "count": 6,
+            "threshold": 0.68
+          },
+          {
+            "criterion_id": "safety",
+            "label": "Safety/compliance compliance",
+            "count": 4,
+            "threshold": 0.85
+          }
+        ],
+        "failure_candidates": []
+      },
+      "recommendations": [
+        "Capture an Ars Contexta note for ui-ux-creative-coding centered on Safety/compliance compliance, Instructional clarity, and Concrete implementation detail, using recent recovered runs as the seed evidence set.",
+        "At each reevaluation checkpoint, explicitly reassess whether the objective should pivot toward Safety/compliance compliance, Instructional clarity, and Concrete implementation detail; treat that as search refinement, not failure.",
+        "Keep these interventions at documentation level for now, and only promote a pattern upward once it repeats cleanly without reopening regressions."
+      ],
+      "retrieval_packet": {
+        "checkpoint_queries": [
+          "What recurring evidence explains why ui-ux-creative-coding regresses on Safety/compliance compliance, Instructional clarity, and Concrete implementation detail during reevaluation?",
+          "Which prompt clauses or rubric reminders improved Instructional clarity, Concrete implementation detail, and Safety/compliance compliance without weakening safety or non-regression?",
+          "What should be retrieved before iteration 1 so ui-ux-creative-coding starts from the last stable intervention instead of rediscovering it?"
+        ],
+        "capture_fields": [
+          "run_id",
+          "profile_id",
+          "objective_hash",
+          "weakest_criteria",
+          "regression_criteria",
+          "positive_criterion_deltas",
+          "critical_non_regression_passed",
+          "terminal_non_regression_passed"
+        ]
+      },
+      "unstable_score": 24.5
+    }
+  ]
+}

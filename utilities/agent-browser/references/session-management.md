@@ -1,12 +1,13 @@
 # Session Management
 
-Multiple isolated browser sessions with state persistence and concurrent browsing.
+Multiple isolated browser sessions, persistent session names, and concurrent browsing patterns.
 
 **Related**: [authentication.md](authentication.md) for login patterns, [SKILL.md](../SKILL.md) for quick start.
 
 ## Contents
 
-- [Named Sessions](#named-sessions)
+- [Isolated Sessions](#isolated-sessions)
+- [Persistent Session Names](#persistent-session-names)
 - [Session Isolation Properties](#session-isolation-properties)
 - [Session State Persistence](#session-state-persistence)
 - [Common Patterns](#common-patterns)
@@ -14,7 +15,7 @@ Multiple isolated browser sessions with state persistence and concurrent browsin
 - [Session Cleanup](#session-cleanup)
 - [Best Practices](#best-practices)
 
-## Named Sessions
+## Isolated Sessions
 
 Use `--session` flag to isolate browser contexts:
 
@@ -29,6 +30,30 @@ agent-browser --session public open https://example.com
 agent-browser --session auth fill @e1 "user@example.com"
 agent-browser --session public get text body
 ```
+
+Use `--session` when you want separate live browser contexts for concurrent work, A/B comparison, or protected state boundaries.
+
+## Persistent Session Names
+
+Use `--session-name` when you want one browser identity to auto-save and restore cookies plus localStorage across restarts:
+
+```bash
+# First run: login flow
+agent-browser --session-name github open https://github.com/login
+# ... authenticate ...
+agent-browser close   # state auto-saved
+
+# Future runs: state auto-restored
+agent-browser --session-name github open https://github.com
+
+# Manage saved named-state files
+agent-browser state list
+agent-browser state show github-default.json
+agent-browser state clear github
+agent-browser state clean --older-than 7
+```
+
+Use `--session-name` for recurrence. Use `--session` for live isolation. It is fine to combine them when a workflow needs both.
 
 ## Session Isolation Properties
 
@@ -152,6 +177,9 @@ agent-browser --session auth close
 
 # List active sessions
 agent-browser session list
+
+# Remove stale persisted state
+agent-browser state clean --older-than 7
 ```
 
 ## Best Practices
@@ -190,4 +218,15 @@ rm /tmp/auth-state.json
 ```bash
 # Set timeout for automated scripts
 timeout 60 agent-browser --session long-task get text body
+```
+
+### 5. Match the Session Primitive to the Need
+
+```bash
+# Use --session for concurrent isolated runs
+agent-browser --session staging open https://staging.example.com
+agent-browser --session prod open https://prod.example.com
+
+# Use --session-name for one durable identity reused over time
+agent-browser --session-name billing-admin open https://app.example.com
 ```

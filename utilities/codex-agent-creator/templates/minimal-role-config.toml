@@ -1,5 +1,8 @@
-# Minimal role config (recommended default).
+# Minimal custom-agent config (recommended default).
 # Omitted keys inherit from parent config.
+
+name = "implementer"
+description = "Implementation-focused worker for scoped code changes."
 
 model = "gpt-5.4-mini"
 model_reasoning_effort = "medium"

@@ -1,0 +1,40 @@
+{
+  "confidence": {
+    "bucket": "unknown",
+    "calibration_bucket": "C0_historical_backfill",
+    "evidence_completeness": 0.8,
+    "quality_uplift": 0.0,
+    "schema_version": "1.0",
+    "score": 0.0
+  },
+  "decision": "draft",
+  "evidence_packet": {
+    "completeness_score": 0.8,
+    "evidence_packet_id": "8d2b22f28315bfc6"
+  },
+  "expected_version": "",
+  "gate_decision": {
+    "notes": "Fill before approve/reject.",
+    "provenance_complete": true,
+    "runtime_gates_passed": true,
+    "security_checklist_passed": false
+  },
+  "lesson_candidates": [],
+  "lesson_id": "",
+  "provenance": {
+    "evaluator_version": "v1",
+    "iteration_ids": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "prompt_hash": "eaa11c4fcb6fe83e3c2a4f77c18885ece81fd8f93c1060ba9c6a9f3c6b648e21",
+    "rubric_version": "2026-02-19"
+  },
+  "reviewer_ids": [],
+  "run_id": "run_20260220T144710Z_425b7a",
+  "schema_version": "1.0",
+  "updated_at": "2026-02-20T14:47:10Z"
+}

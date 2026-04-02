@@ -4,11 +4,12 @@ set -euo pipefail
 usage() {
   cat <<'USAGE'
 Usage:
-  write_role_config.sh --output PATH --role-name NAME --model MODEL --reasoning EFFORT [options]
+  write_role_config.sh --output PATH --agent-name NAME --description TEXT --model MODEL --reasoning EFFORT [options]
 
 Required:
   --output PATH
-  --role-name NAME
+  --agent-name NAME          (alias: --role-name)
+  --description TEXT         (alias: --agent-description)
   --model MODEL
   --reasoning minimal|low|medium|high|xhigh
 
@@ -17,6 +18,7 @@ Developer instructions (choose one):
   --developer-instructions-file PATH
 
 Optional:
+  --nickname-candidates CSV
   --reasoning-summary auto|concise|detailed|none
   --verbosity low|medium|high
   --personality none|friendly|pragmatic
@@ -32,11 +34,13 @@ USAGE
 }
 
 output_path=""
-role_name=""
+agent_name=""
+agent_description=""
 model=""
 reasoning=""
 developer_instructions=""
 developer_instructions_file=""
+nickname_candidates_csv=""
 sandbox_mode=""
 network_access=""
 writable_roots_csv=""
@@ -62,9 +66,12 @@ while [[ $# -gt 0 ]]; do
     --output)
       require_option_value "$1" "${2:-}"
       output_path="$2"; shift 2 ;;
-    --role-name)
+    --agent-name|--role-name)
       require_option_value "$1" "${2:-}"
-      role_name="$2"; shift 2 ;;
+      agent_name="$2"; shift 2 ;;
+    --description|--agent-description)
+      require_option_value "$1" "${2:-}"
+      agent_description="$2"; shift 2 ;;
     --model)
       require_option_value "$1" "${2:-}"
       model="$2"; shift 2 ;;
@@ -77,6 +84,9 @@ while [[ $# -gt 0 ]]; do
     --developer-instructions-file)
       require_option_value "$1" "${2:-}"
       developer_instructions_file="$2"; shift 2 ;;
+    --nickname-candidates)
+      require_option_value "$1" "${2:-}"
+      nickname_candidates_csv="$2"; shift 2 ;;
     --sandbox-mode)
       require_option_value "$1" "${2:-}"
       sandbox_mode="$2"; shift 2 ;;
@@ -115,7 +125,7 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-if [[ -z "$output_path" || -z "$role_name" || -z "$model" || -z "$reasoning" ]]; then
+if [[ -z "$output_path" || -z "$agent_name" || -z "$agent_description" || -z "$model" || -z "$reasoning" ]]; then
   echo "Missing required arguments." >&2
   usage
   exit 2
@@ -195,14 +205,33 @@ if [[ -n "$developer_instructions_file" ]]; then
   developer_instructions="$(cat "$developer_instructions_file")"
 fi
 
-LOCAL_MEMORY_SNIPPET=$'local-memory-mcp policy:\n- Use local-memory-mcp for durable context and cross-run continuity.\n- Mandatory workflow:\n  - `bootstrap(mode="minimal", include_questions=true, session_id="repo:<name>:task:<id>")`\n  - `search(query="...", session_id="repo:<name>:task:<id>")`\n- Record durable facts only with `observe(...)` (level `observation|learning`) and stable tags.\n- Do not store secrets, tokens, keys, or PII.'
+LOCAL_MEMORY_SNIPPET="$(cat <<'SNIPPET'
+local-memory-mcp policy:
+- Use local-memory-mcp for durable context and cross-run continuity.
+- Mandatory workflow:
+  - `bootstrap(mode="minimal", include_questions=true, session_id="repo:<name>:task:<id>")`
+  - `search(query="...", session_id="repo:<name>:task:<id>")`
+- Record durable facts only with `observe(...)` (level `observation|learning`) and stable tags.
+- Do not store secrets, tokens, keys, or PII.
+SNIPPET
+)"
 
 if [[ -z "$developer_instructions" ]]; then
-  developer_instructions="You are the ${role_name} role.\nOwn the assigned task end-to-end.\nState assumptions clearly, fail fast on invalid inputs, and report concrete evidence for results.\nStay within scope and do not modify unrelated files.\n\n${LOCAL_MEMORY_SNIPPET}"
+  developer_instructions="$(cat <<EOF_DEFAULT
+You are the ${agent_name} custom agent.
+Own the assigned task end to end.
+State assumptions clearly, fail fast on invalid inputs, and report concrete evidence for results.
+Stay within scope and do not modify unrelated files.
+
+${LOCAL_MEMORY_SNIPPET}
+EOF_DEFAULT
+)"
 fi
 
 if [[ "$developer_instructions" != *"local-memory-mcp policy:"* ]]; then
-  developer_instructions="${developer_instructions}\n\n${LOCAL_MEMORY_SNIPPET}"
+  developer_instructions="${developer_instructions}
+
+${LOCAL_MEMORY_SNIPPET}"
 fi
 
 if ! command -v jq >/dev/null 2>&1; then
@@ -218,10 +247,17 @@ fi
 mkdir -p "$(dirname "$output_path")"
 
 config_json="$(jq -n \
+  --arg NAME "$agent_name" \
+  --arg DESCRIPTION "$agent_description" \
   --arg MODEL "$model" \
   --arg REASONING "$reasoning" \
   --arg DEVELOPER_INSTRUCTIONS "$developer_instructions" \
-  '{model: $MODEL, model_reasoning_effort: $REASONING, developer_instructions: $DEVELOPER_INSTRUCTIONS}')"
+  '{name: $NAME, description: $DESCRIPTION, model: $MODEL, model_reasoning_effort: $REASONING, developer_instructions: $DEVELOPER_INSTRUCTIONS}')"
+
+if [[ -n "$nickname_candidates_csv" ]]; then
+  nickname_candidates_json="$(printf '%s' "$nickname_candidates_csv" | jq -Rc 'split(",") | map(gsub("^\\s+|\\s+$"; "")) | map(select(length > 0))')"
+  config_json="$(printf '%s' "$config_json" | jq --argjson NICKS "$nickname_candidates_json" '.nickname_candidates = $NICKS')"
+fi
 
 if [[ -n "$sandbox_mode" ]]; then
   config_json="$(printf '%s' "$config_json" | jq --arg SANDBOX_MODE "$sandbox_mode" '.sandbox_mode = $SANDBOX_MODE')"
@@ -278,4 +314,4 @@ fi
 
 printf '%s\n' "$config_json" | yq -p=json -o=toml '.' > "$output_path"
 
-echo "Wrote role config to $output_path"
+echo "Wrote custom agent config to $output_path"

@@ -1,0 +1,12 @@
+WARN  product/ops/ce-brainstorm/SKILL.md: SKILL.md exceeds target length (lines=353, target=320)
+WARN  product/ops/ce-deepen-plan/SKILL.md: SKILL.md exceeds target length (lines=326, target=320)
+WARN  product/ops/ce-deepen-spec/SKILL.md: SKILL.md exceeds target length (lines=326, target=320)
+WARN  product/ops/ce-plan/SKILL.md: SKILL.md exceeds target length (lines=331, target=320)
+WARN  product/ops/ce-review/SKILL.md: SKILL.md exceeds target length (lines=322, target=320)
+WARN  product/ops/ce-spec/SKILL.md: SKILL.md exceeds target length (lines=328, target=320)
+WARN  product/strategy/product-design-critic/SKILL.md: SKILL.md exceeds target length (lines=351, target=320)
+ERROR utilities/codex-agent-creator/SKILL.md: missing recommended section heading: ## When to use
+Checked files: 119
+Errors: 1
+Warnings: 7
+Mode: strict

@@ -15,6 +15,7 @@ Read when: the request has routed to `ce-ideate`.
 ## Interaction method
 
 - Use the runtime's blocking question tool when available.
+- If the blocking question tool is unavailable, present numbered options in chat and wait for the user's reply before proceeding.
 - Ask one question at a time.
 - Prefer concise single-select choices when natural options exist.
 - When a clear recommendation exists, lead with it.
@@ -62,6 +63,13 @@ Do not trigger issue-tracker intent for a simple bug focus like:
 - `fix the login issue`
 - `the signup bug`
 
+When signals are combined, interpret them in this order:
+1. detect issue-tracker intent first
+2. detect volume override second
+3. treat the remainder as the focus hint
+
+The focus narrows which issues or repo areas matter; the volume override controls how many survivors to keep.
+
 Default volume:
 - each ideation subagent generates about 7-8 ideas
 - merged and deduped output usually yields 20-30 unique candidates
@@ -93,7 +101,12 @@ Use a bounded subagent or equivalent direct workflow to gather:
 - obvious pain points or gaps
 - likely leverage points
 
-Keep this scan shallow. Read top-level docs and directory structure only.
+Keep this scan shallow. Prefer:
+- `AGENTS.md` first
+- `CLAUDE.md` only as a compatibility fallback
+- `README.md` when neither instruction file exists
+
+Read top-level documentation and directory structure only. Do not do deep code search, issue analysis, or contribution-process review in this pass.
 
 ### Learnings search
 
@@ -118,6 +131,12 @@ Keep the grounding summary split into:
 - `Past learnings`
 - `Issue intelligence` when present
 
+When issue intelligence is present, preserve the returned:
+- theme titles
+- theme descriptions
+- issue counts
+- trend directions
+
 Do not do external research by default in this runtime workflow.
 
 ## Phase 2: Divergent ideation
@@ -126,6 +145,8 @@ Preserve this exact mechanism:
 1. generate many ideas first
 2. critique the combined list second
 3. explain only the survivors in detail
+
+Push past the safe obvious layer before critique begins. The first few ideas are often the least useful.
 
 ### Per-agent expectations
 
@@ -180,6 +201,8 @@ Spread ideas across dimensions when justified:
 - docs and knowledge compounding
 - quality and maintenance
 - leverage on future work
+
+If a focus hint was provided, weight the merged list toward it without excluding stronger adjacent ideas that the repo evidence clearly supports.
 
 ## Phase 3: Adversarial filtering
 
@@ -250,6 +273,8 @@ For each survivor show:
   - `strategic bet`
 
 Also include a short rejection summary.
+
+Allow brief follow-up questions and lightweight clarification before finalizing the main repo artifact when that improves survivor quality.
 
 ### Artifact timing rule
 

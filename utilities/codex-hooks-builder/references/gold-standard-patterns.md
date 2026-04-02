@@ -1,6 +1,6 @@
 # Gold-Standard Hook Patterns
 
-Read when: you want starter behaviors that feel production-ready without exceeding the March 2026 stable runtime contract.
+Read when: you want starter behaviors that feel production-ready while matching the current Codex hooks documentation.
 
 ## Table of Contents
 - [Principles](#principles)
@@ -35,6 +35,18 @@ For most repos, start with three hooks:
 - Catch draft markers, unresolved checklist items, and validation-skipped claims without reasons.
 - Respect `stop_hook_active` so the hook does not trap the session in a retry loop.
 
+Optional, when explicitly requested:
+
+4. `PreToolUse` (Bash-only today)
+- Use for narrow, high-confidence command interception.
+- Match on `tool_name` and remember it currently equals `Bash`.
+- Keep a clear note that this is a guardrail, not complete enforcement.
+
+5. `PostToolUse` (Bash-only today)
+- Use for after-command feedback and additional context.
+- Do not treat it as rollback because command side effects have already happened.
+- Use it only when the extra latency is worth the additional safety signal.
+
 ## Project vs user scope
 Prefer project scope when:
 - validation rules differ by repo;
@@ -61,6 +73,10 @@ Do not install the same pack in both places unless you intentionally want duplic
 - good pattern: block only on obvious incompleteness with a one-shot corrective reason
 - bad pattern: block stylistic differences or subjective tone choices
 
+`PreToolUse` and `PostToolUse`
+- good pattern: gate or annotate a small set of risky Bash behaviors with explicit reasons
+- bad pattern: pretend Bash-only interception can enforce all command execution paths
+
 ## Validation standard
 Minimum:
 - `zsh -n` every hook script
@@ -73,7 +89,7 @@ Better:
 - test `SessionStart` on both a repo directory and a non-repo directory
 
 ## What to avoid
-- unsupported `prompt`, `agent`, or `async` hooks sold as stable;
+- undocumented non-command hook handler types sold as stable;
 - relative command paths inside `hooks.json`;
 - giant `SessionStart.additionalContext` strings;
 - `Stop` logic that blocks because tests were skipped even when a valid reason is present;

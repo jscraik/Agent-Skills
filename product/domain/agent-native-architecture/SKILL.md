@@ -7,7 +7,7 @@ metadata:
 
 # Agent-Native Architecture
 
-Imported from `EveryInc/compound-engineering-plugin` at pinned ref `0fdc25a36cabea4ce9e2ae47ff69c1a9a2de8f0b`.
+Refreshed against the pinned donor snapshot in `EveryInc/compound-engineering-plugin`; see `references/source-parity.md` for the exact source path and preserved behaviors.
 
 ## Table of Contents
 - [When to use](#when-to-use)
@@ -115,6 +115,7 @@ Agent-native systems should accumulate context, refine prompts, and optionally e
 13. **Refactoring** - Make existing code more agent-native
 
 **Wait for response before proceeding.**
+If the user already named the architecture surface, skip this menu and route directly. Use it as an intake aid only when the ask is still broad.
 </intake>
 
 <routing>
@@ -191,10 +192,17 @@ When designing an agent-native system, verify these **before implementation**:
 4. Verify parity, shared workspace, and CRUD completeness before adding polish.
 
 For deeper implementation examples, use the imported references rather than expanding this wrapper.
+Read `references/architecture-patterns.md` and `references/agent-execution-patterns.md` when you need concrete tool, prompt, or loop examples before recommending a pattern.
 </quick_start>
 
 <reference_index>
 ## Reference Files
+
+Package surfaces:
+- [source-parity.md](./references/source-parity.md) - donor path, preserved behaviors, local adaptations
+- [contract.yaml](./references/contract.yaml) - compact contract for validators and future maintenance
+- [evals.yaml](./references/evals.yaml) - routing and pressure-test coverage for this wrapper
+- [agents/openai.yaml](./agents/openai.yaml) - Codex UI metadata for the local package
 
 All references in `references/`:
 
@@ -227,6 +235,7 @@ Treat this `SKILL.md` as a router, not the full body of the architecture doctrin
 - If the recommendation depends on a subtle tradeoff, cite the specific reference file instead of flattening it into generic guidance.
 - If multiple architecture surfaces are involved, combine the relevant references rather than relying on this wrapper alone.
 - If the wrapper and a reference ever feel mismatched, treat the imported reference as canonical for the detailed pattern.
+- Use `references/source-parity.md` when refreshing this package again so the local wrapper keeps the donor's doctrine without losing repo-specific packaging and routing improvements.
 
 <anti_patterns>
 ## Anti-Patterns
@@ -258,6 +267,7 @@ You are in good shape when:
 - This skill imports deep reference material intentionally; prefer reading the linked `references/` files instead of re-expanding the wrapper.
 - Do not “simplify” away the imported doctrine. Preserve impact by keeping the detailed patterns in `references/` and routing to them explicitly.
 - If you find yourself writing audit findings, ADR interviews, or file-level implementation plans, you have probably crossed into a neighboring skill.
+- If the user already specified the architecture surface, do not force them back through the numbered intake menu; route directly to the matching reference and keep momentum.
 
 ## See Also
 

@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-03-30T17:57:24.726140+00:00",
+  "generated_at": "2026-03-30T18:24:16.047976+00:00",
   "mode": "warn",
   "policy_path": "/Users/jamiecraik/dev/agent-skills/utilities/skill-builder/references/benchmark-policy.json",
   "skills_scanned": 84,
@@ -10,24 +10,21 @@
       "cluster": "frontend_ui",
       "description": "Frontend and UI implementation skills",
       "skills": 19,
-      "skills_with_any_marker": 4,
-      "coverage": 0.2105,
+      "skills_with_any_marker": 8,
+      "coverage": 0.4211,
       "marker_hits": {
-        "react_19": 3,
-        "next_16": 3,
-        "tailwind_v4": 4,
+        "react_19": 8,
+        "next_16": 6,
+        "tailwind_v4": 6,
         "responses_api": 0,
-        "wcag_2_2": 3,
+        "wcag_2_2": 8,
         "owasp_top10": 0,
         "gha_sha_pin": 0,
         "cloudflare_workers": 0,
         "mcp_spec": 0
       },
       "fails": [],
-      "warns": [
-        "distribution warn: `tailwind_v4` hits 4 < 5",
-        "coverage warn: 0.211 < 0.263"
-      ],
+      "warns": [],
       "pass": true
     },
     {
@@ -267,7 +264,7 @@
   "summary": {
     "cluster_count": 12,
     "fail_count": 0,
-    "warn_count": 3,
+    "warn_count": 1,
     "overall_pass": true
   }
 }

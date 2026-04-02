@@ -9,14 +9,17 @@ metadata:
 
 ## Table of Contents
 - [Standards snapshot](#standards-snapshot)
+- [Design-system integration](#design-system-integration)
 - [When to use](#when-to-use)
 - [When not to use](#when-not-to-use)
+- [Routing boundary contract](#routing-boundary-contract)
 - [Required inputs](#required-inputs)
 - [Deliverables](#deliverables)
 - [Design Context Minimum](#design-context-minimum)
 - [Copy and Tone](#copy-and-tone)
 - [Intensity Tuning](#intensity-tuning)
 - [Philosophy](#philosophy)
+- [Variation](#variation)
 - [Workflow](#workflow)
 - [Cross-Context Adaptation](#cross-context-adaptation)
 - [Visually Led Surfaces](#visually-led-surfaces)
@@ -33,6 +36,11 @@ metadata:
 - Hold web UI work to WCAG 2.2 AA, explicit focus behavior, and token-referenced measurements.
 - Keep design-system outputs grounded in DTCG/W3C token structure and repo-native component conventions.
 
+## Design-system integration
+- Apply `frontend/ui/references/design-system-integration-contract.md` to keep typography, spacing, iconography, and semantic token usage consistent.
+- Route token architecture, aliasing, and theme-slot governance changes to `design-system`; keep this skill focused on screen and component implementation.
+- Use `frontend/ui/references/skill-routing-matrix-2026.md` to resolve overlap with `frontend-design`, `design-system`, and `ui-ux-creative-coding`.
+
 ## When to use
 - Design or review standard product UI systems and components.
 - Specify accessible screens, flows, states, and design-system changes.
@@ -46,6 +54,13 @@ metadata:
 - Motion-first or experimental creative-coding work. Use [`ui-ux-creative-coding`](/Users/jamiecraik/dev/agent-skills/frontend/ui/ui-ux-creative-coding/SKILL.md).
 - Backend or infra-only work with no UI surface.
 - Brand-only exploration with no product UI deliverable.
+- Broad ambiguous frontend-design requests that do not yet declare implementation intent. Start with [`frontend-design`](/Users/jamiecraik/dev/agent-skills/frontend/ui/frontend-design/SKILL.md).
+
+## Routing boundary contract
+- Own requests with explicit implementation or redesign intent, including verbs like `build`, `implement`, `redesign`, `fix layout`, and `create screen`.
+- Route to `design-system` when the primary outcome is shared token/alias/theme governance.
+- Route to `ui-ux-creative-coding` when the visual direction is already set and the ask is motion polish only.
+- Defer broad ambiguous asks to `frontend-design`, then accept handoff once scope is implementation-ready.
 
 ## Required inputs
 - Target surface and stack.
@@ -105,6 +120,20 @@ metadata:
 - Clarity and accessibility are default quality bars, not optional polish.
 - Favor production-ready structure over abstract inspiration.
 - Distinctive design is welcome, but trust and usability win ties.
+- Use a practical framework: define task-critical states first, then tune visual expression.
+- Make tradeoff calls explicit so we understand why usability decisions win under delivery pressure.
+- Ask: "Why would this hierarchy help the user complete the core task faster?"
+- Ask: "Can we implement this with existing patterns before inventing a new structure?"
+- Ask: "What would break for keyboard and reduced-motion users if this choice is wrong?"
+
+## Variation
+- Vary output depth by request type:
+  - implementation request: prioritize concrete component and state contracts;
+  - redesign request: prioritize hierarchy, composition rhythm, and trust cues first.
+- Adapt recommendations to context-specific constraints:
+  - existing system: preserve token and component conventions unless there is a clear defect;
+  - new surface: explore different hierarchy anchors before locking implementation details.
+- Avoid repetitive templates; use different framing for utility-first product surfaces and visually led landing pages.
 
 ## Workflow
 1. Frame the surface, user task, success condition, and design-context minimum.
@@ -185,6 +214,8 @@ metadata:
 - Confirm intensity tuning preserves a small number of clear anchors rather than making the whole surface uniformly loud or uniformly flat.
 - Confirm Storybook or equivalent visual review coverage is called out when components change materially.
 - Confirm generated examples avoid generic AI fingerprints (placeholder copy/data, dead actions, repetitive card-grid defaults) unless explicitly requested by the user.
+- Confirm typography, spacing, and icon usage decisions stay compliant with `frontend/ui/references/design-system-integration-contract.md`.
+- Confirm routing decisions remain aligned with `frontend/ui/references/skill-routing-matrix-2026.md`.
 
 ## Constraints
 - Do not add new heavy UI dependencies without approval.

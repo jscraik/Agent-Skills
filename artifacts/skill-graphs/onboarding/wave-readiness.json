@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-03-30T17:07:14Z",
-  "decision_date": "2026-02-20",
+  "generated_at": "2026-04-02T22:29:54Z",
+  "decision_date": "2026-04-02",
   "summary": {
     "active_skill_count": 84,
     "manual_skill_count": 10,
@@ -9,51 +9,82 @@
     "profile_valid_count": 84,
     "profile_invalid_count": 0,
     "event_envelope_errors": 0,
-    "event_envelope_errors_total": 8,
-    "event_envelope_errors_waived": 8,
+    "event_envelope_errors_total": 0,
+    "event_envelope_errors_waived": 0,
     "event_envelope_errors_unresolved": 0,
     "approver_count": 2,
-    "telemetry_generated_at": "2026-03-30T17:06:03Z",
-    "telemetry_window_start": "2026-02-14",
-    "telemetry_window_end": "2026-02-20",
-    "telemetry_freshness_ok": true
+    "telemetry_generated_at": "2026-03-31T15:28:27Z",
+    "telemetry_window_start": "2026-03-25",
+    "telemetry_window_end": "2026-03-31",
+    "telemetry_freshness_ok": false
   },
   "waves": {
     "wave-0-controls": {
-      "ready": true,
+      "ready": false,
       "checks": {
         "required_controls_present": true,
         "event_envelope_errors_zero": true,
-        "telemetry_freshness_ok": true,
+        "telemetry_freshness_ok": false,
         "approver_count_gte_2": true
       },
-      "blockers": []
+      "blockers": [
+        {
+          "code": "TELEMETRY_HEALTH_STALE",
+          "detail": "daily-skill-health.md age 55.02h exceeds 24.00h",
+          "owner": "unassigned",
+          "due_date": null,
+          "escalation_date": null
+        },
+        {
+          "code": "TELEMETRY_WINDOW_MISMATCH",
+          "detail": "daily-skill-health.md window mismatch (expected 2026-03-27..2026-04-02, actual 2026-03-25..2026-03-31)",
+          "owner": "unassigned",
+          "due_date": null,
+          "escalation_date": null
+        }
+      ]
     },
     "wave-1-manual": {
-      "ready": true,
+      "ready": false,
       "checks": {
         "manual_profiles_valid": true,
-        "wave_0_ready": true
+        "wave_0_ready": false
       },
       "coverage": {
         "total": 10,
         "valid": 10
       },
-      "blockers": []
+      "blockers": [
+        {
+          "code": "WAVE0_NOT_READY",
+          "detail": "Wave 1 blocked until Wave 0 controls verification passes",
+          "owner": "unassigned",
+          "due_date": null,
+          "escalation_date": null
+        }
+      ]
     },
     "wave-2-co-pilot": {
-      "ready": true,
+      "ready": false,
       "checks": {
         "co_pilot_profiles_valid": true,
-        "wave_1_ready": true,
+        "wave_1_ready": false,
         "event_envelope_errors_zero": true,
-        "telemetry_freshness_ok": true
+        "telemetry_freshness_ok": false
       },
       "coverage": {
         "total": 74,
         "valid": 74
       },
-      "blockers": []
+      "blockers": [
+        {
+          "code": "WAVE1_NOT_READY",
+          "detail": "Wave 2 blocked until Wave 1 manual onboarding passes",
+          "owner": "unassigned",
+          "due_date": null,
+          "escalation_date": null
+        }
+      ]
     }
   }
 }

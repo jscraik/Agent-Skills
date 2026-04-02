@@ -27,6 +27,30 @@ cases:
       - type: regex
         value: "(?i)(blockers|operational|test-browser|recommendation)"
 
+  - id: report-only-override
+    name: report-only override
+    category: edge
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Review the current branch in mode:report-only against base:origin/main and tell me if anything still blocks merge."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "ce-review"
+      - type: regex
+        value: "(?i)(report-only|base:origin/main|blockers|merge)"
+
+  - id: headless-plan-context
+    name: headless with plan context
+    category: edge
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Run ce-review mode:headless on the latest PR with plan:docs/plans/2026-03-23-001-feat-example-plan.md and return the structured completion output."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "ce-review"
+      - type: regex
+        value: "(?i)(headless|plan:docs/plans/2026-03-23-001-feat-example-plan.md|Review complete|structured)"
+
   - id: latest-pr-target
     name: latest pr target
     category: edge
@@ -75,6 +99,18 @@ cases:
       - type: regex
         value: "(?i)(todos|pending|issue_id|P1|P2|P3)"
 
+  - id: autofix-residual-ready
+    name: autofix residual todo status
+    category: edge
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Do the broad review in mode:autofix and turn any unresolved actionable findings into ready todos after synthesis."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "ce-review"
+      - type: regex
+        value: "(?i)(mode:autofix|ready|todos|residual)"
+
   - id: technical-review-request
     name: technical review request
     category: negative
@@ -114,6 +150,6 @@ cases:
         value: "(?i)(untrusted input|protected artifact|blockers|cannot|validation)"
 
 metadata:
-  last_updated: "2026-03-23"
+  last_updated: "2026-03-30"
   author: "Codex"
   review_status: "draft"

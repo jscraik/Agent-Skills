@@ -51,6 +51,30 @@ cases:
       - type: regex
         value: "(?i)(compact-safe|minimal but complete|docs/solutions)"
 
+  - id: high-overlap-refresh-existing-doc
+    name: refresh existing doc when overlap is high
+    category: edge
+    should_trigger: true
+    prepend_skill: false
+    prompt: "We solved the same payments retry issue again. Please use ce-compound to capture the fresher learning, but update the existing solution doc instead of creating a duplicate if the overlap is high."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "ce-compound"
+      - type: regex
+        value: "(?i)(high overlap|existing solution doc|update the existing doc|avoid duplicate)"
+
+  - id: moderate-overlap-refresh-flag
+    name: moderate overlap should flag targeted refresh
+    category: edge
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Document this solved issue, but if there is only moderate overlap with an older solution doc, keep the new artifact and call out a narrow ce-compound-refresh follow-up instead of forcing a merge."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "ce-compound"
+      - type: regex
+        value: "(?i)(moderate overlap|new artifact|ce-compound-refresh|targeted consolidation|narrow refresh)"
+
   - id: refresh-candidate-handling
     name: narrow refresh candidate handling
     category: edge
@@ -144,6 +168,6 @@ cases:
         value: "(?i)(cannot comply|verified|validation|untrusted input|stage)"
 
 metadata:
-  last_updated: "2026-03-23"
+  last_updated: "2026-03-30"
   author: "Codex"
   review_status: "draft"

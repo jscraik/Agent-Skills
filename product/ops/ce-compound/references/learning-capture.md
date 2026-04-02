@@ -16,6 +16,8 @@ Knowledge compounds:
 
 Default behavior.
 
+Proceed directly in full mode unless the user explicitly asks for `compact-safe`.
+
 Critical rule:
 - Only one file gets written: the final documentation artifact.
 - Phase 1 helpers return text data to the orchestrator.
@@ -62,23 +64,36 @@ Launch these helpers in parallel. They return text only.
 
 1. Context Analyzer
    - extract conversation history
-   - identify problem type, component, and symptoms
+   - identify problem type, component, and track
    - incorporate any auto-memory excerpt as supplementary evidence
-   - validate against the documentation schema
-   - return: YAML frontmatter skeleton
+   - validate against the documentation schema when the repo uses the preserved schema-driven variant
+   - map the problem into the correct `docs/solutions/` category
+   - suggest a path-safe filename slug
+   - return: YAML frontmatter skeleton, category path, suggested filename, and track notes
 
 2. Solution Extractor
    - analyze investigation steps
    - identify root cause
    - extract the working solution with code examples when useful
    - use auto memory only as secondary evidence
+   - adapt the output shape to the repo's active solution-doc contract
    - return: solution content block
 
 3. Related Docs Finder
    - search `docs/solutions/` for related documentation
    - identify cross-references and related issues
    - flag docs that may now be stale, contradicted, or overly broad
-   - return: links, relationships, and refresh candidates
+   - assess overlap against the new learning across:
+     - problem statement
+     - root cause
+     - solution approach
+     - referenced files
+     - prevention rules
+   - score overlap as:
+     - `High`: essentially the same problem solved again
+     - `Moderate`: same area but different angle, root cause, or solution
+     - `Low`: related but distinct
+   - return: links, relationships, refresh candidates, and overlap assessment
 
 4. Prevention Strategist
    - develop prevention strategies
@@ -98,10 +113,20 @@ Wait for all Phase 1 helpers to complete.
 
 The orchestrator then:
 1. collects all text results
-2. assembles the complete markdown file
-3. validates YAML frontmatter
-4. creates the directory when needed
-5. writes the single final file
+2. checks the overlap assessment before deciding what to write:
+   - `High` -> update the existing doc with fresher context instead of creating a duplicate
+   - `Moderate` -> create the new doc and flag the overlap for selective refresh or consolidation review
+   - `Low` -> create the new doc normally
+3. assembles the complete markdown file
+4. validates YAML frontmatter
+5. creates the directory when needed for new-doc writes
+6. writes the single final file
+
+When updating an existing doc due to high overlap:
+- preserve the file path and frontmatter structure
+- refresh the solution details, code examples, prevention tips, and stale references
+- add `last_updated: YYYY-MM-DD`
+- do not change the title unless the problem framing materially shifted
 
 ### Phase 2.5: Selective refresh check
 
@@ -113,6 +138,7 @@ Good reasons to refresh:
 - a refactor, migration, rename, or dependency upgrade likely invalidated older references
 - a pattern doc is now overly broad or outdated
 - Related Docs Finder surfaced strong stale-doc candidates
+- Related Docs Finder reported moderate overlap, suggesting that a targeted consolidation review may be useful
 
 Do not refresh when:
 - no related docs were found
@@ -160,6 +186,11 @@ Compact-safe success output should make it clear that:
 - the documentation is complete
 - it was created in compact-safe mode
 - a richer rerun is possible later in a fresh session
+
+Compact-safe caveat:
+- overlap review is skipped because there is no Related Docs Finder helper
+- a compact-safe run may create a doc that overlaps with an older one
+- that is acceptable; recommend `ce-compound-refresh` only when there is an obvious narrow refresh target
 
 ## What the artifact should capture
 
@@ -217,7 +248,7 @@ Summarize:
 - whether auto memory contributed supplementary evidence
 - helper-role results in full mode
 - optional specialized reviewer results
-- the created solution artifact path
+- the created or updated solution artifact path
 - the likely future module or problem space this learning helps
 
 ## Auto-invoke cues

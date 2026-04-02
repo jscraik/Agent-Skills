@@ -1,31 +1,42 @@
 ---
 name: codex-agent-builder
-description: Create and install Codex multi-agent roles and configs with safe minimal-change updates. Use when the user wants agent roles created or updated, not orchestration of existing roles.
+description: Create, install, and validate Codex custom subagents as standalone `.codex/agents/*.toml` files with safe minimal-change updates. Use when the user wants custom agent definitions created or upgraded, not orchestration of running agent threads.
 metadata:
   skill-type: scaffolding_templates
+  lifecycle_state: active
+  maturity: canonical
+  owner: Agent Skills Team
+  review_cadence: quarterly
+  last_reviewed: 2026-03-31
+  metadata_source: frontmatter
 ---
 
 # Codex Agent Creator
 
 ## When to use
-- User asks to add, update, or troubleshoot a `[agents.<role>]` entry.
-- User needs project/global role installation with explicit developer instructions.
-- User needs constrained multi-agent settings validation (`agents.max_threads`, `agents.max_depth`, `agents.job_max_runtime_seconds`).
+- User asks to create, update, or troubleshoot a custom subagent file in `.codex/agents/` or `~/.codex/agents/`.
+- User needs project or global custom-agent installation with explicit developer instructions.
+- User needs constrained global agent runtime settings validation (`agents.max_threads`, `agents.max_depth`, `agents.job_max_runtime_seconds`).
+- User asks for upgrades from older role-declaration flows to modern standalone custom-agent files.
+
+## Scope and triggers
+- Focus on standalone custom-agent authoring, installation, and validation for Codex.
+- Do not use this skill for orchestrating active subagent threads or deciding whether the capability should be a skill, prompt, or automation.
 
 ## Required inputs
-- Role name and short description.
+- Agent name and short description.
 - Model and reasoning profile.
 - Desired developer instructions.
 - Scope: `global` or `project`.
-- Confirmed target role config path.
+- Confirmed target custom-agent file path.
 - Optional `nickname_candidates` override for display-friendly spawned-agent labels.
 - Optional runtime limits and approval mode.
 
 ## Deliverables
-- Confirmed role configuration plan.
-- Generated or updated role config path.
+- Confirmed custom-agent configuration plan.
+- Generated or updated standalone custom-agent TOML path.
 - Validation result with explicit success/failure reasons.
-- Optional summary of limits configured.
+- Optional summary of global runtime limits configured in `config.toml`.
 - Include `schema_version` whenever output is machine-validated.
 
 ## Procedure
@@ -33,55 +44,81 @@ metadata:
 - Confirm required values explicitly: model, reasoning effort, developer instructions, scope.
 - Validate that requested limits and path edits are intentional.
 
-### 2) Minimal config generation
-- Use minimal keys by default (`model`, `model_reasoning_effort`, `developer_instructions`).
-- Keep role declarations limited to `description`, `config_file`, and `nickname_candidates`.
-- Add a single clear nickname by default; let the user override it only when they want a specific display label set.
+### 2) Minimal custom-agent generation
+- Generate a standalone custom-agent TOML with required fields: `name`, `description`, `developer_instructions`.
+- Keep model controls explicit by default: `model`, `model_reasoning_effort`.
+- Add `nickname_candidates` only when requested or when display labels are explicitly desired.
 - Keep optional behavior strict and explicit.
+- Treat legacy `[agents.<name>]` declaration flows as compatibility-only, not the default authoring path.
 
 ### 3) Validation-first execution
-- Run role script checks before declaring completion.
-- Never skip schema checks when `description`/`config_file` values are updated.
+- Run custom-agent script checks before declaring completion.
+- Never skip required-key checks when `name`/`description`/`developer_instructions` are updated.
 
 ### 4) Install and handoff
-- Install global or project scope only after validation.
+- Install global or project scope only after validation by writing into the correct `.codex/agents/` directory.
+- If the user requests runtime limits, update only `[agents]` global keys in `config.toml`.
 - Return next-step verification command and residual risk.
 
+## Scope focus guardrails
+- Start with the **smallest viable package boundary**: one custom agent file and one validation pass.
+- Keep first pass focused on **2-3 modules** only: write, validate, install.
+- Limit scope before extending behavior; only add advanced flags after the base flow passes.
+- Use context-specific expansion rather than broad config sprawl.
+
 ## Discovery interview
-Run discovery for underspecified role-creation or role-hardening requests.
+Run discovery for underspecified custom-agent creation or hardening requests.
 - Ask one round at a time and wait before moving forward.
 - Start each round with one plain-language question and explain why the round matters in a short `Why this matters:` line.
 - Avoid dumping the whole interview plan at once; keep the first turn to the current round only.
 - Skip already-answered rounds.
-- Stop when the role can be built safely with explicit model, reasoning, scope, and instruction constraints.
+- Stop when the custom agent can be built safely with explicit model, reasoning, scope, and instruction constraints.
 - Before implementation, summarize confirmed facts, assumptions, and the approval checkpoint.
 - Use `references/discovery-interview.md` for reusable round templates.
 
 ## Validation
 - Validate all inputs before file changes.
-- Run role validation after any config write.
+- Run custom-agent validation after any file write.
 - Fail fast when required inputs are missing.
 - Return blocked state when any validation error appears.
 
 ## Anti-patterns
-- Adding unsupported keys outside schema.
+- DO NOT default to legacy `[agents.<name>]` declaration-first authoring when standalone files are supported.
+- NEVER ship a config change without write + validate evidence.
+- Avoid the common pitfall of broad, speculative config changes before the baseline flow passes.
+- Treating legacy `[agents.<name>]` role declarations as the primary contract when standalone custom-agent files are available.
+- Omitting required standalone fields (`name`, `description`, `developer_instructions`).
 - Assuming required inputs from defaults.
 - Reporting success without evidence from validation commands.
+- Reusing generic or repetitive template output without adapting to the user’s context and constraints.
+- Warning: incorrect scope defaults can silently shift agent behavior across projects.
 
 ## Constraints
 - Redact secrets and credentials by default.
-- Keep role configs minimal unless explicitly expanded by user request.
+- Keep custom-agent TOML files minimal unless explicitly expanded by user request.
 - Confirm destructive or far-reaching scope changes before applying.
 
 ## Philosophy
-- Preserve minimal, reversible configuration paths.
-- Prefer explicitness over hidden assumptions.
-- Keep scope and security constraints visible in every plan.
+- Principle: preserve minimal, reversible configuration paths before adding optional complexity.
+- Framework: establish safe defaults first, then layer context-specific behavior by explicit user intent.
+- Tradeoff: optimize for reliable validation evidence over speed when those goals conflict.
+- Why: this keeps migrations from legacy declarations predictable and auditable.
+- Guiding questions:
+- What is the smallest boundary that solves the user request without overbuilding?
+- Which extension unlocks real value now, and which one should wait for a second pass?
+- How do we keep the custom agent capable while still easy to review, debug, and rollback?
+
+## Empowerment
+- Enable users to ship capable custom agents quickly with confidence.
+- Empower teams to explore higher-leverage workflows once the baseline contract is stable.
+- Keep the workflow creative but grounded: small safe wins first, then innovative extensions.
 
 ## Examples
-- "Create a global researcher role with model gpt-5.4-mini and medium reasoning effort."
-- "Can you set project role limits for safer fan-out, then validate the config?"
-- "Please install a worker role with nickname candidates Scout and Archivist, then verify it."
+- "Create a global `researcher` custom agent with model gpt-5.4-mini and medium reasoning effort."
+- "Can you create a project-scoped custom agent file for UI fixes and set max threads to 4?"
+- "Please install a reviewer custom agent with nickname candidates Scout and Archivist, then verify it."
+- "Can you inspect my existing reviewer agent, validate it, and migrate only what is outdated?"
+- "Help me migrate from legacy role declarations to standalone custom-agent files without breaking limits."
 
 ## Failure mode
 - If required input is missing or ambiguous, ask one precise question and stop.
@@ -93,17 +130,18 @@ Run discovery for underspecified role-creation or role-hardening requests.
 - Compatibility and governance notes in `references/task-profile.json`.
 
 ## Variation
-- Vary by role complexity: for simple roles, do minimal config only; for advanced roles, propose one explicit constrained extension pass after validation.
+- Vary by context-specific custom-agent complexity: keep simple requests minimal, and adapt advanced requests with one constrained extension pass.
+- Avoid repetition and cookie-cutter outputs; customize instructions, naming, and limits for each user goal.
+- For diverse requests, propose different safe paths and explain why one is best for this environment.
 
 ## Gotchas
 - None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.
 
 ## See Also
-| Skill | When to use |
+| Related utility | When to use |
 |---|---|
 | [[agents-md]] | Update repo instructions to reference or govern the new agent roles |
 | [[codex-automation-architect]] | Design recurring automations that orchestrate the installed agents |
-| [[codex-plugin-builder]] | Package agent roles together with hooks or skills in a plugin |
 | [[decide-build-primitive]] | Decide whether the capability should be an agent, skill, or automation first |
 
 **Topic map:** [[agent-ops]]

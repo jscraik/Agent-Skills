@@ -1,0 +1,72 @@
+{
+  "items": [
+    {
+      "advice": {
+        "summary": "Preserve and reuse the pattern that improved `specificity`.",
+        "weakest_criteria": [
+          "safety",
+          "specificity"
+        ]
+      },
+      "candidate_id": "candidate_f224c175ccab",
+      "confidence": {
+        "bucket": "medium",
+        "calibration_bucket": "C2_medium_confidence",
+        "evidence_completeness": 0.8,
+        "score": 0.63
+      },
+      "created_at": "2026-03-31T14:12:26Z",
+      "delegation_context": {
+        "agentic_cost_benefit": {
+          "ai_process_minutes": 30.0,
+          "human_baseline_minutes": 90.0,
+          "probability_of_success": 0.78,
+          "roi_signal": "positive",
+          "time_delta_minutes": 60.0
+        },
+        "mode": "co-pilot",
+        "rationale": "High-context UI improvement requires iterative human + agent synthesis."
+      },
+      "evidence_refs": {
+        "events_path": "events.jsonl",
+        "evidence_packet_path": "evidence_packet.json",
+        "iteration_journal_path": "iteration_journal.jsonl"
+      },
+      "implementation": {
+        "positive_criterion_deltas": {
+          "specificity": 0.157
+        },
+        "summary": "Applied focused remediation for: safety, specificity"
+      },
+      "iteration_id": 2,
+      "observation_type": "positive_pattern",
+      "outcome": {
+        "feedback_note": "",
+        "feedback_status": "missing",
+        "quality_uplift": 0.104,
+        "stop_reason": "pass",
+        "terminal_status": "passed"
+      },
+      "profile_id": "frontend-ui-design",
+      "run_id": "run_20260331T141226177747Z_5d415a_15c3dc94",
+      "schema_version": "1.1",
+      "scope_profile": "ui",
+      "scope_skill": "frontend-ui-design",
+      "selection": {
+        "feedback_weight": 0.85,
+        "rationale": "Positive delta on specificity was amplified by feedback status `missing`.",
+        "score": 0.664
+      },
+      "source_observation": {
+        "criterion_id": "specificity",
+        "feedback_note_present": false,
+        "feedback_status": "missing",
+        "observation_id": "observation_f7532e35c96b"
+      },
+      "status": "candidate",
+      "title": "frontend-ui-design positive pattern candidate (specificity)"
+    }
+  ],
+  "run_id": "run_20260331T141226177747Z_5d415a_15c3dc94",
+  "schema_version": "1.0"
+}

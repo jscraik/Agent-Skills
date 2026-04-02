@@ -9,6 +9,11 @@
 ## Source input
 This package was synthesized from the supplied `ce:ideate` prompt that defines the ideation stage preceding `ce:brainstorm`.
 
+Pinned donor snapshot:
+- repo: `EveryInc/compound-engineering-plugin`
+- commit: `847ce3f156a5cdf75667d9802e95d68e6b3c53a4`
+- path: `plugins/compound-engineering/skills/ce-ideate/SKILL.md`
+
 ## Preserved behaviors
 - `ce:ideate` explicitly precedes `ce:brainstorm`
 - the stage boundary:
@@ -25,12 +30,19 @@ This package was synthesized from the supplied `ce:ideate` prompt that defines t
   - status preservation
   - session-log preservation
 - issue-tracker intent detection distinct from simple bug focus
+- combined intent parsing order:
+  - issue-tracker intent first
+  - volume override second
+  - remaining text treated as the focus hint
 - codebase scan before idea generation
 - learnings search as part of grounding
 - conditional issue intelligence for issue-grounded ideation
+- issue-theme titles, descriptions, counts, and trend directions preserved when issue intelligence is available
 - many-ideas -> critique -> survivors mechanism
+- explicit push past the safe obvious layer before filtering
 - ideation frames as starting biases rather than hard constraints
 - orchestrator merge, dedupe, and cross-cutting synthesis
+- focus weighting that still allows stronger adjacent ideas to survive
 - adversarial filtering with explicit rejection reasons
 - structured survivor presentation before handoff
 - durable ideation artifact in `docs/ideation/`
@@ -43,6 +55,7 @@ This package was synthesized from the supplied `ce:ideate` prompt that defines t
 ## Intentional modernizations
 - tightened the stage boundary so `ce-ideate` does not drift into generic brainstorming, planning, or implementation
 - kept runtime ideation repo-first and non-web-research by default, while still building the package itself against current OpenAI and Codex guidance
+- preserved AGENTS-first shallow grounding while keeping the runtime fallback order portable: `AGENTS.md`, then `CLAUDE.md`, then `README.md`
 - resolved the prompt's artifact-timing tension by preparing preservation-ready content early, presenting survivors as a checkpoint, then requiring the durable write before handoff, sharing, or session end
 - preserved the issue-intelligence lane while making it portable:
   - use a dedicated helper if available

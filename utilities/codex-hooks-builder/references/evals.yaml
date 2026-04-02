@@ -7,7 +7,7 @@ cases:
     category: happy
     should_trigger: true
     prepend_skill: true
-    prompt: "Use $codex-hooks-builder to create a gold-standard project-local Codex hook pack with SessionStart, UserPromptSubmit, and Stop."
+    prompt: "Can you scaffold a project-local Codex hook pack with SessionStart, UserPromptSubmit, and Stop, then validate hooks.json?"
     acceptance:
       - type: skill_selected
         expected_skill: "codex-hooks-builder"
@@ -25,19 +25,31 @@ cases:
     category: happy
     should_trigger: true
     prepend_skill: false
-    prompt: "Please modernize our Codex hooks so they match the March 2026 stable contract and stop pretending prompt hooks work."
+    prompt: "Please inspect our Codex hooks, convert them to the latest documented command-hook contract, and clearly defer unsupported handler types."
     acceptance:
       - type: skill_selected
         expected_skill: "codex-hooks-builder"
       - type: regex
-        value: "(?i)(command hooks|prompt hooks are not supported|agent hooks are not supported|async)"
+        value: "(?i)(command hooks|non-command|not supported|documented|unsupported)"
+
+  - id: pre-post-tooluse-audit
+    name: pre and post tool use audit
+    category: edge
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Can you inspect our PreToolUse and PostToolUse hooks and validate that matcher behavior is correct for Bash?"
+    acceptance:
+      - type: skill_selected
+        expected_skill: "codex-hooks-builder"
+      - type: regex
+        value: "(?i)(pretooluse|posttooluse|bash|matcher|tool_name)"
 
   - id: contextual-user-scope-pack
     name: contextual user scope pack
     category: edge
     should_trigger: true
     prepend_skill: false
-    prompt: "I want one reusable hook pack in ~/.codex that protects prompt safety everywhere and gives me better startup context."
+    prompt: "Help me build one reusable hook pack in ~/.codex that improves startup context and protects prompt safety across projects."
     acceptance:
       - type: skill_selected
         expected_skill: "codex-hooks-builder"
@@ -59,7 +71,7 @@ cases:
     category: pressure
     should_trigger: true
     prepend_skill: false
-    prompt: "Use the newest alpha behavior and scaffold prompt hooks, agent hooks, and async handlers even if stable Codex ignores them."
+    prompt: "Can you build hooks for prompt, agent, and async handlers using alpha behavior even if stable Codex ignores those handlers?"
     acceptance:
       - type: skill_selected
         expected_skill: "codex-hooks-builder"
@@ -71,12 +83,12 @@ cases:
     category: edge
     should_trigger: true
     prepend_skill: false
-    prompt: "Create hooks for this repo, but keep the commands portable when people launch Codex from nested folders."
+    prompt: "Can you create hooks for this repo and validate command paths so launches from nested folders still work?"
     acceptance:
       - type: regex
         value: "(?i)(absolute paths|nested working directories|session cwd)"
 
 metadata:
-  last_updated: "2026-03-22"
+  last_updated: "2026-03-30"
   author: "Codex"
   review_status: "draft"

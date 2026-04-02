@@ -1,0 +1,260 @@
+{
+  "items": [
+    {
+      "advice": {
+        "summary": "Preserve and reuse the pattern that improved `safety`.",
+        "weakest_criteria": [
+          "safety"
+        ]
+      },
+      "confidence": {
+        "bucket": "medium",
+        "calibration_bucket": "C2_medium_confidence",
+        "evidence_completeness": 0.8,
+        "score": 0.63
+      },
+      "created_at": "2026-03-31T14:12:24Z",
+      "criterion_id": "safety",
+      "delegation_context": {
+        "agentic_cost_benefit": {
+          "ai_process_minutes": 30.0,
+          "human_baseline_minutes": 90.0,
+          "probability_of_success": 0.78,
+          "roi_signal": "positive",
+          "time_delta_minutes": 60.0
+        },
+        "mode": "co-pilot",
+        "rationale": "High-context UI improvement requires iterative human + agent synthesis."
+      },
+      "evidence_refs": {
+        "events_path": "events.jsonl",
+        "evidence_packet_path": "evidence_packet.json",
+        "iteration_journal_path": "iteration_journal.jsonl"
+      },
+      "implementation": {
+        "positive_criterion_deltas": {
+          "safety": 0.096
+        },
+        "summary": "Applied focused remediation for: safety"
+      },
+      "iteration_id": 2,
+      "observation_id": "observation_55f20bd94d52",
+      "observation_type": "positive_pattern",
+      "outcome": {
+        "feedback_note": "",
+        "feedback_status": "missing",
+        "quality_uplift": 0.147,
+        "stop_reason": "pass",
+        "terminal_status": "passed"
+      },
+      "profile_id": "ui-ux-creative-coding",
+      "run_id": "run_20260331T141224889081Z_48c8a0_15c164cb",
+      "schema_version": "1.0",
+      "scope_profile": "ui",
+      "scope_skill": "ui-ux-creative-coding",
+      "selection_hint": {
+        "feedback_weight": 0.85,
+        "rationale": "Positive delta on safety was amplified by feedback status `missing`.",
+        "score": 0.612
+      },
+      "signals": {
+        "deficit": 0.0,
+        "positive_delta": 0.096
+      },
+      "title": "ui-ux-creative-coding positive pattern observation (safety)"
+    },
+    {
+      "advice": {
+        "summary": "Preserve and reuse the pattern that improved `clarity`.",
+        "weakest_criteria": [
+          "safety"
+        ]
+      },
+      "confidence": {
+        "bucket": "medium",
+        "calibration_bucket": "C2_medium_confidence",
+        "evidence_completeness": 0.8,
+        "score": 0.63
+      },
+      "created_at": "2026-03-31T14:12:24Z",
+      "criterion_id": "clarity",
+      "delegation_context": {
+        "agentic_cost_benefit": {
+          "ai_process_minutes": 30.0,
+          "human_baseline_minutes": 90.0,
+          "probability_of_success": 0.78,
+          "roi_signal": "positive",
+          "time_delta_minutes": 60.0
+        },
+        "mode": "co-pilot",
+        "rationale": "High-context UI improvement requires iterative human + agent synthesis."
+      },
+      "evidence_refs": {
+        "events_path": "events.jsonl",
+        "evidence_packet_path": "evidence_packet.json",
+        "iteration_journal_path": "iteration_journal.jsonl"
+      },
+      "implementation": {
+        "positive_criterion_deltas": {
+          "clarity": 0.087
+        },
+        "summary": "Applied focused remediation for: safety"
+      },
+      "iteration_id": 2,
+      "observation_id": "observation_37e660f4f745",
+      "observation_type": "positive_pattern",
+      "outcome": {
+        "feedback_note": "",
+        "feedback_status": "missing",
+        "quality_uplift": 0.147,
+        "stop_reason": "pass",
+        "terminal_status": "passed"
+      },
+      "profile_id": "ui-ux-creative-coding",
+      "run_id": "run_20260331T141224889081Z_48c8a0_15c164cb",
+      "schema_version": "1.0",
+      "scope_profile": "ui",
+      "scope_skill": "ui-ux-creative-coding",
+      "selection_hint": {
+        "feedback_weight": 0.85,
+        "rationale": "Positive delta on clarity was amplified by feedback status `missing`.",
+        "score": 0.605
+      },
+      "signals": {
+        "deficit": 0.0,
+        "positive_delta": 0.087
+      },
+      "title": "ui-ux-creative-coding positive pattern observation (clarity)"
+    },
+    {
+      "advice": {
+        "summary": "Strengthen concrete examples, file-path specificity, and measurable checks.",
+        "weakest_criteria": [
+          "safety"
+        ]
+      },
+      "confidence": {
+        "bucket": "medium",
+        "calibration_bucket": "C2_medium_confidence",
+        "evidence_completeness": 0.8,
+        "score": 0.63
+      },
+      "created_at": "2026-03-31T14:12:24Z",
+      "criterion_id": "safety",
+      "delegation_context": {
+        "agentic_cost_benefit": {
+          "ai_process_minutes": 30.0,
+          "human_baseline_minutes": 90.0,
+          "probability_of_success": 0.78,
+          "roi_signal": "positive",
+          "time_delta_minutes": 60.0
+        },
+        "mode": "co-pilot",
+        "rationale": "High-context UI improvement requires iterative human + agent synthesis."
+      },
+      "evidence_refs": {
+        "events_path": "events.jsonl",
+        "evidence_packet_path": "evidence_packet.json",
+        "iteration_journal_path": "iteration_journal.jsonl"
+      },
+      "implementation": {
+        "positive_criterion_deltas": {
+          "clarity": 0.087,
+          "safety": 0.096,
+          "specificity": 0.008
+        },
+        "summary": "Applied focused remediation for: safety"
+      },
+      "iteration_id": 2,
+      "observation_id": "observation_5b59add760b8",
+      "observation_type": "remediation",
+      "outcome": {
+        "feedback_note": "",
+        "feedback_status": "missing",
+        "quality_uplift": 0.147,
+        "stop_reason": "pass",
+        "terminal_status": "passed"
+      },
+      "profile_id": "ui-ux-creative-coding",
+      "run_id": "run_20260331T141224889081Z_48c8a0_15c164cb",
+      "schema_version": "1.0",
+      "scope_profile": "ui",
+      "scope_skill": "ui-ux-creative-coding",
+      "selection_hint": {
+        "feedback_weight": 0.95,
+        "rationale": "Weakness in safety was prioritized because feedback status was `missing`.",
+        "score": 0.582
+      },
+      "signals": {
+        "deficit": 0.015,
+        "positive_delta": 0.0
+      },
+      "title": "ui-ux-creative-coding remediation observation (safety)"
+    },
+    {
+      "advice": {
+        "summary": "Preserve and reuse the pattern that improved `specificity`.",
+        "weakest_criteria": [
+          "safety"
+        ]
+      },
+      "confidence": {
+        "bucket": "medium",
+        "calibration_bucket": "C2_medium_confidence",
+        "evidence_completeness": 0.8,
+        "score": 0.63
+      },
+      "created_at": "2026-03-31T14:12:24Z",
+      "criterion_id": "specificity",
+      "delegation_context": {
+        "agentic_cost_benefit": {
+          "ai_process_minutes": 30.0,
+          "human_baseline_minutes": 90.0,
+          "probability_of_success": 0.78,
+          "roi_signal": "positive",
+          "time_delta_minutes": 60.0
+        },
+        "mode": "co-pilot",
+        "rationale": "High-context UI improvement requires iterative human + agent synthesis."
+      },
+      "evidence_refs": {
+        "events_path": "events.jsonl",
+        "evidence_packet_path": "evidence_packet.json",
+        "iteration_journal_path": "iteration_journal.jsonl"
+      },
+      "implementation": {
+        "positive_criterion_deltas": {
+          "specificity": 0.008
+        },
+        "summary": "Applied focused remediation for: safety"
+      },
+      "iteration_id": 2,
+      "observation_id": "observation_4f6fe7abe8ed",
+      "observation_type": "positive_pattern",
+      "outcome": {
+        "feedback_note": "",
+        "feedback_status": "missing",
+        "quality_uplift": 0.147,
+        "stop_reason": "pass",
+        "terminal_status": "passed"
+      },
+      "profile_id": "ui-ux-creative-coding",
+      "run_id": "run_20260331T141224889081Z_48c8a0_15c164cb",
+      "schema_version": "1.0",
+      "scope_profile": "ui",
+      "scope_skill": "ui-ux-creative-coding",
+      "selection_hint": {
+        "feedback_weight": 0.85,
+        "rationale": "Positive delta on specificity was amplified by feedback status `missing`.",
+        "score": 0.538
+      },
+      "signals": {
+        "deficit": 0.0,
+        "positive_delta": 0.008
+      },
+      "title": "ui-ux-creative-coding positive pattern observation (specificity)"
+    }
+  ],
+  "run_id": "run_20260331T141224889081Z_48c8a0_15c164cb",
+  "schema_version": "1.0"
+}

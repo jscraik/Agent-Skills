@@ -13,11 +13,14 @@ TRACKED_ARTIFACT_PATHS=(
 is_ignored_change() {
 	local changed_path="$1"
 
-	if [[ "$changed_path" =~ ^src/.+\.(test|spec)\.(ts|tsx|js|jsx)$ ]]; then
-		return 0
-	fi
-
-	return 1
+	case "$changed_path" in
+		src/*.test.ts|src/*.spec.ts|src/*.test.js|src/*.spec.js)
+			return 0
+			;;
+		*)
+			return 1
+			;;
+	esac
 }
 
 is_architecture_sensitive_change() {
@@ -30,14 +33,15 @@ is_architecture_sensitive_change() {
 		.diagram/*)
 			return 0
 			;;
-		*)
-			if [[ "$changed_path" == src/* ]]; then
-				if is_ignored_change "$changed_path"; then
-					return 1
-				fi
-				return 0
+		src/*)
+			if is_ignored_change "$changed_path"; then
+				return 1
 			fi
+			return 0
+			;;
+		*)
 			return 1
+			;;
 	esac
 }
 
@@ -73,7 +77,7 @@ normalized_checksum() {
 			jq -c 'del(.generated_at, .last_generated_epoch, .changed, .context_sha256)' "$file" | shasum -a 256 | awk '{print $1}'
 			;;
 		*/manifest.json)
-			jq -c 'del(.generatedAt, .rootPath)' "$file" | shasum -a 256 | awk '{print $1}'
+			jq -c 'del(.generatedAt)' "$file" | shasum -a 256 | awk '{print $1}'
 			;;
 		*)
 			shasum -a 256 "$file" | awk '{print $1}'

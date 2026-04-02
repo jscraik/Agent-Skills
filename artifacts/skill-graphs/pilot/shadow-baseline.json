@@ -1,0 +1,77 @@
+{
+  "schema_version": "1.0",
+  "captured_at": "2026-03-31T14:50:31Z",
+  "window": "2026-03-25..2026-03-31",
+  "window_days": 7,
+  "sample_ready": true,
+  "pilot_profiles": [
+    "ui-ux-creative-coding",
+    "interface-craft",
+    "frontend-ui-design",
+    "react-ui-patterns"
+  ],
+  "summary": {
+    "runs_total": 60,
+    "by_profile": {
+      "ui-ux-creative-coding": 15,
+      "interface-craft": 15,
+      "frontend-ui-design": 15,
+      "react-ui-patterns": 15
+    },
+    "repeat_failure_rate": 0.1833,
+    "first_pass_acceptance_rate": 0.0,
+    "median_iterations": 2.0,
+    "p90_iterations": 3.0,
+    "quality_uplift_median": 0.153,
+    "quality_uplift_positive_rate": 1.0,
+    "critical_non_regression_compliance": 0.4333,
+    "terminal_non_regression_compliance": 1.0,
+    "non_regression_recovered_rate": 0.5667,
+    "budget_compliance": 1.0,
+    "evaluator_flip_rate": 0.2733,
+    "capture_records_written": 60,
+    "capture_coverage_rate": 1.0,
+    "auto_capture_enabled_rate": 1.0,
+    "auto_apply_enabled_rate": 1.0,
+    "confidence_bucket_counts": {
+      "high": 0,
+      "medium": 26,
+      "low": 34,
+      "unknown": 0
+    },
+    "confidence_bucket_distribution": {
+      "high": 0.0,
+      "medium": 0.4333,
+      "low": 0.5667,
+      "unknown": 0.0
+    },
+    "runs_with_injection": 0,
+    "runs_with_retrieved_lessons": 0,
+    "suppressed_injection_runs": 0,
+    "injection_usage_rate": 0.0,
+    "total_injected_lessons": 0,
+    "average_injected_lessons_per_run": 0.0,
+    "rollout_mode_counts": {
+      "off": 0,
+      "observe_only": 0,
+      "active": 60,
+      "other": 0
+    },
+    "uplift_promotion_decision_counts": {
+      "pass": 0,
+      "hold": 0,
+      "regressed": 0,
+      "insufficient_data": 60,
+      "insufficient_match_quality": 0,
+      "unknown": 0
+    },
+    "uplift_auto_apply_decision_counts": {
+      "pass": 0,
+      "hold": 0,
+      "regressed": 0,
+      "insufficient_data": 60,
+      "insufficient_match_quality": 0,
+      "unknown": 0
+    }
+  }
+}

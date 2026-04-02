@@ -18,11 +18,15 @@ Use shadcn/ui as a code-ownership workflow, not as a drop-in component dependenc
 
 ## Table of Contents
 - [Standards snapshot](#standards-snapshot)
+- [Design-system integration](#design-system-integration)
 - [When to use](#when-to-use)
 - [Required inputs](#required-inputs)
 - [Deliverables](#deliverables)
+- [Philosophy](#philosophy)
+- [Variation](#variation)
 - [Failure mode](#failure-mode)
 - [Workflow](#workflow)
+- [Antipatterns](#antipatterns)
 - [Validation](#validation)
 - [References](#references)
 
@@ -32,6 +36,11 @@ Use shadcn/ui as a code-ownership workflow, not as a drop-in component dependenc
 - Keep Tailwind v4, design tokens, accessibility, and project-local component composition aligned with the host app.
 - For React 19 and Next.js 16 projects, preserve WCAG 2.2 accessibility behaviors during every shadcn/ui integration step.
 - Customize through project wrappers and token-aware variants rather than forking primitives blindly.
+
+## Design-system integration
+- Apply `frontend/ui/references/design-system-integration-contract.md` for typography, spacing, iconography, and semantic token alignment decisions.
+- Route shared design-language changes to `design-system`; keep this skill focused on component integration and customization execution.
+- Use `frontend/ui/references/skill-routing-matrix-2026.md` when shadcn component requests overlap with broader frontend routing or redesign asks.
 
 ## When to use
 - The user wants to install, add, customize, or troubleshoot shadcn/ui components.
@@ -59,6 +68,18 @@ Use shadcn/ui as a code-ownership workflow, not as a drop-in component dependenc
 - Treat shadcn/ui as owned source code, not a black-box dependency.
 - Prefer the smallest install and customization path that matches the host repo.
 - Keep accessibility and token alignment intact while adapting components.
+- Ask: "Can this be solved with one component add plus wrapper adjustments?"
+- Ask: "Will this customization still be maintainable after the next upstream update?"
+- Ask: "Are we avoiding optional complexity and keeping this scope focused on one component lane?"
+
+## Variation
+- Adapt setup depth by project maturity:
+  - existing production app: verify readiness and add only requested components;
+  - new app bootstrap: initialize once, then establish wrapper conventions early.
+- Vary customization strategy by ownership constraints:
+  - strict design-system repo: use token-aware wrappers and minimal source edits;
+  - exploratory prototype: allow faster iteration, then harden with accessibility and token checks.
+- Keep package boundary explicit: prefer one component path and one validation lane before wider adoption.
 
 ## Failure mode
 - If the task is a general design-system rewrite, route to a broader frontend or design-system skill.
@@ -85,10 +106,13 @@ Use shadcn/ui as a code-ownership workflow, not as a drop-in component dependenc
 5. Preserve accessibility and token alignment when editing variants or markup.
 6. End with exact local checks the repo should pass next.
 
-## Anti-patterns
-- Treating copied components as if they were still vendor-owned and off-limits.
-- Dropping custom wrappers into `components/ui/` instead of the project’s own layer.
-- Hardcoding visual values that bypass the repo’s token system.
+## Antipatterns
+- Avoid treating copied components as if they were still vendor-owned and off-limits.
+- Do not drop custom wrappers into `components/ui/`; keep wrappers in the project layer so ownership is explicit.
+- Never hardcode visual values that bypass the repo token system. That is the wrong integration posture for long-term maintainability.
+- Avoid installing many registry items before confirming the first component path compiles and matches host conventions.
+- Do not bypass accessibility checks because the component "looked fine" in one viewport.
+- Anti-pattern warning: incorrect import boundaries and ad hoc overrides create hidden upgrade debt.
 
 ## Validation
 - Fail fast: stop at the first missing prerequisite or broken import before adding more components.
@@ -96,6 +120,7 @@ Use shadcn/ui as a code-ownership workflow, not as a drop-in component dependenc
 - Confirm required dependencies and config changes are present, not implied.
 - Check keyboard interaction, focus behavior, and semantic markup after customization.
 - If the repo uses theme tokens, ensure the component respects them instead of hardcoded visual values.
+- Confirm shadcn variants and overrides remain compliant with `frontend/ui/references/design-system-integration-contract.md`.
 
 ## Examples
 - "Add shadcn dialog and command components to this Next.js app and keep the existing token system."

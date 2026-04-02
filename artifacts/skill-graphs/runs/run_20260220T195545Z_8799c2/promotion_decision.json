@@ -1,5 +1,17 @@
 {
+  "confidence": {
+    "bucket": "unknown",
+    "calibration_bucket": "C0_historical_backfill",
+    "evidence_completeness": 0.8,
+    "quality_uplift": 0.0,
+    "schema_version": "1.0",
+    "score": 0.0
+  },
   "decision": "draft",
+  "evidence_packet": {
+    "completeness_score": 0.8,
+    "evidence_packet_id": "d14f05bb03d0fcfe"
+  },
   "expected_version": "",
   "gate_decision": {
     "notes": "Fill before approve/reject.",
@@ -7,6 +19,7 @@
     "runtime_gates_passed": true,
     "security_checklist_passed": false
   },
+  "lesson_candidates": [],
   "lesson_id": "",
   "provenance": {
     "evaluator_version": "v1",

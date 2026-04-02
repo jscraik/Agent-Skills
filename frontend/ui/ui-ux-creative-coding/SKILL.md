@@ -9,6 +9,8 @@ metadata:
 # UI/UX Creative Coding
 
 ## Table of Contents
+- [Standards snapshot](#standards-snapshot)
+- [Design-system integration](#design-system-integration)
 - [When to use](#when-to-use)
 - [Required inputs](#required-inputs)
 - [Deliverables](#deliverables)
@@ -24,6 +26,18 @@ metadata:
 - [References](#references)
 - [Gotchas](#gotchas)
 - [See Also](#see-also)
+
+## Standards snapshot
+- Treat React 19 as the default interaction baseline for stateful UI polish work.
+- Treat Next.js 16 as the default rendering/routing baseline when the target surface is a Next.js app.
+- Treat Tailwind CSS v4 and semantic design tokens as the default styling and spacing baseline.
+- Hold polish recommendations to WCAG 2.2 AA outcomes, including keyboard support, focus visibility, contrast, and clear reduced-motion parity.
+- Route token architecture or system-level visual changes to `design-system`; keep this skill focused on implementation-level interaction quality.
+
+## Design-system integration
+- Apply `frontend/ui/references/design-system-integration-contract.md` before recommending typography, spacing, iconography, or token changes during polish work.
+- Keep this skill focused on interaction quality while delegating shared visual-language governance to `design-system`.
+- Use `frontend/ui/references/skill-routing-matrix-2026.md` when deciding whether an ask is polish-only or should route to `frontend-ui-design`.
 
 ## When to use
 - Improve motion systems, interaction rhythm, and UI polish for product surfaces.
@@ -100,6 +114,7 @@ metadata:
 - Confirm reduced-motion behavior has a clear parity path, not just disabled UX.
 - In high-ambition mode, confirm at least two candidate directions were considered before implementation guidance was chosen.
 - In high-ambition mode, confirm browser-based visual verification or an explicit blocked note is part of the completion contract.
+- Confirm typography, spacing, icon usage, and token-level recommendations remain compliant with `frontend/ui/references/design-system-integration-contract.md`.
 - If checks are incomplete, return a partial result and ask for missing constraints.
 - Validation is fail-fast: if a required check fails, stop and only continue after user confirmation.
 

@@ -1,0 +1,71 @@
+{
+  "items": [
+    {
+      "advice": {
+        "summary": "Preserve and reuse the pattern that improved `restraint_and_composition`.",
+        "weakest_criteria": [
+          "restraint_and_composition"
+        ]
+      },
+      "candidate_id": "candidate_559d4f94df74",
+      "confidence": {
+        "bucket": "low",
+        "calibration_bucket": "C3_low_confidence",
+        "evidence_completeness": 0.8,
+        "score": 0.43
+      },
+      "created_at": "2026-03-31T14:50:40Z",
+      "delegation_context": {
+        "agentic_cost_benefit": {
+          "ai_process_minutes": 25.0,
+          "human_baseline_minutes": 75.0,
+          "probability_of_success": 0.78,
+          "roi_signal": "positive",
+          "time_delta_minutes": 50.0
+        },
+        "mode": "co-pilot",
+        "rationale": "Frontend UI design benefits from repeated human plus agent review because hierarchy, accessibility, and visual distinction all need strong evidence before promotion."
+      },
+      "evidence_refs": {
+        "events_path": "events.jsonl",
+        "evidence_packet_path": "evidence_packet.json",
+        "iteration_journal_path": "iteration_journal.jsonl"
+      },
+      "implementation": {
+        "positive_criterion_deltas": {
+          "restraint_and_composition": 0.155
+        },
+        "summary": "Applied focused remediation for: restraint_and_composition"
+      },
+      "iteration_id": 4,
+      "observation_type": "positive_pattern",
+      "outcome": {
+        "feedback_note": "",
+        "feedback_status": "missing",
+        "quality_uplift": 0.249,
+        "stop_reason": "pass",
+        "terminal_status": "passed"
+      },
+      "profile_id": "frontend-ui-design",
+      "run_id": "run_20260331T145040546695Z_1c1272_2de1ad51",
+      "schema_version": "1.1",
+      "scope_profile": "frontend",
+      "scope_skill": "frontend/ui/frontend-ui-design",
+      "selection": {
+        "feedback_weight": 0.85,
+        "rationale": "Positive delta on restraint_and_composition was amplified by feedback status `missing`.",
+        "score": 0.637
+      },
+      "source_observation": {
+        "criterion_id": "restraint_and_composition",
+        "feedback_note_present": false,
+        "feedback_status": "missing",
+        "observation_id": "observation_564f5880492f"
+      },
+      "status": "candidate",
+      "title": "frontend/ui/frontend-ui-design positive pattern candidate (restraint_and_composition)"
+    }
+  ],
+  "run_id": "run_20260331T145040546695Z_1c1272_2de1ad51",
+  "schema_version": "1.0"
+}

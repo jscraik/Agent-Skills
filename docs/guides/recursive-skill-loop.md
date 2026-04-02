@@ -45,10 +45,21 @@ bash scripts/run_recursive_skill_shadow_cycle.sh \
   --window-days 7
 ```
 
+Focused rerun example:
+
+```bash
+bash scripts/run_recursive_skill_shadow_cycle.sh \
+  --runs-per-profile 1 \
+  --profiles-file docs/skill-graphs/schemas/examples/pilot-profiles.frontend-ui-design.json \
+  --window-days 7
+```
+
 This generates/updates:
 - `/docs/skill-graphs/pilots/ui-skills-shadow-results.md`
 - `/docs/skill-graphs/pilots/ui-skills-pilot-readout.md`
+- `/docs/skill-graphs/pilots/arscontexta-intervention-queue.md`
 - `/artifacts/skill-graphs/pilot/shadow-dashboard.json`
+- `/artifacts/skill-graphs/telemetry/arscontexta-intervention-queue.json`
 
 ## Expected output
 
@@ -63,6 +74,7 @@ A run directory with:
 - `run_blocker.json` / `rollback_recommendation.json` on blocked or kill-switch paths
 
 Start-of-run retrieval uses canonical lessons from `--lessons-jsonl` filtered by `{scope_skill, scope_profile}`.
+Canonical lesson rows can now carry `title`, `summary`, `guidance`, `checkpoints`, `arscontexta_stage`, and `source_note`, and the loop injects that content directly into the candidate prompt when auto-apply is enabled.
 Low-confidence lessons are retained but down-ranked and flagged in injected lesson attribution.
 Default rollout mode is `observe_only` (capture on, auto-apply off). Use `--rollout-mode active` to enable lesson injection.
 Default uplift gate mode is `enforce`; use `--uplift-gate-mode observe` for pilot dry-runs when counterfactual sample sizes are intentionally sparse.
@@ -74,6 +86,8 @@ immediately and should keep using
 `--feedback-outcome` and `--feedback-note` so smoke and CI workflows remain deterministic.
 
 Optional debug traces are written only when `--emit-debug-artifacts` is set and stored under `run/debug/`.
+
+After the shadow report is built, the cycle now also creates an Ars Contexta intervention queue that turns repeated failure and recovery patterns into retrieval-ready operator guidance. Treat that queue as the synthesis layer; keep the shadow dashboard as the scoring and promotion gate.
 
 ## Verify graph plans
 

@@ -1,0 +1,260 @@
+{
+  "items": [
+    {
+      "advice": {
+        "summary": "Strengthen concrete examples, file-path specificity, and measurable checks.",
+        "weakest_criteria": [
+          "safety"
+        ]
+      },
+      "confidence": {
+        "bucket": "medium",
+        "calibration_bucket": "C2_medium_confidence",
+        "evidence_completeness": 0.8,
+        "score": 0.63
+      },
+      "created_at": "2026-03-31T14:12:25Z",
+      "criterion_id": "safety",
+      "delegation_context": {
+        "agentic_cost_benefit": {
+          "ai_process_minutes": 30.0,
+          "human_baseline_minutes": 90.0,
+          "probability_of_success": 0.78,
+          "roi_signal": "positive",
+          "time_delta_minutes": 60.0
+        },
+        "mode": "co-pilot",
+        "rationale": "High-context UI improvement requires iterative human + agent synthesis."
+      },
+      "evidence_refs": {
+        "events_path": "events.jsonl",
+        "evidence_packet_path": "evidence_packet.json",
+        "iteration_journal_path": "iteration_journal.jsonl"
+      },
+      "implementation": {
+        "positive_criterion_deltas": {
+          "clarity": 0.036,
+          "safety": 0.157,
+          "specificity": 0.029
+        },
+        "summary": "Applied focused remediation for: safety"
+      },
+      "iteration_id": 1,
+      "observation_id": "observation_78f3181efdaa",
+      "observation_type": "remediation",
+      "outcome": {
+        "feedback_note": "",
+        "feedback_status": "missing",
+        "quality_uplift": 0.083,
+        "stop_reason": "evaluator_conflict",
+        "terminal_status": "escalated"
+      },
+      "profile_id": "interface-craft",
+      "run_id": "run_20260331T141225594250Z_2b9eeb_15c2b824",
+      "schema_version": "1.0",
+      "scope_profile": "ui",
+      "scope_skill": "interface-craft",
+      "selection_hint": {
+        "feedback_weight": 0.95,
+        "rationale": "Weakness in safety was prioritized because feedback status was `missing`.",
+        "score": 0.702
+      },
+      "signals": {
+        "deficit": 0.138,
+        "positive_delta": 0.0
+      },
+      "title": "interface-craft remediation observation (safety)"
+    },
+    {
+      "advice": {
+        "summary": "Preserve and reuse the pattern that improved `safety`.",
+        "weakest_criteria": [
+          "safety"
+        ]
+      },
+      "confidence": {
+        "bucket": "medium",
+        "calibration_bucket": "C2_medium_confidence",
+        "evidence_completeness": 0.8,
+        "score": 0.63
+      },
+      "created_at": "2026-03-31T14:12:25Z",
+      "criterion_id": "safety",
+      "delegation_context": {
+        "agentic_cost_benefit": {
+          "ai_process_minutes": 30.0,
+          "human_baseline_minutes": 90.0,
+          "probability_of_success": 0.78,
+          "roi_signal": "positive",
+          "time_delta_minutes": 60.0
+        },
+        "mode": "co-pilot",
+        "rationale": "High-context UI improvement requires iterative human + agent synthesis."
+      },
+      "evidence_refs": {
+        "events_path": "events.jsonl",
+        "evidence_packet_path": "evidence_packet.json",
+        "iteration_journal_path": "iteration_journal.jsonl"
+      },
+      "implementation": {
+        "positive_criterion_deltas": {
+          "safety": 0.157
+        },
+        "summary": "Applied focused remediation for: safety"
+      },
+      "iteration_id": 1,
+      "observation_id": "observation_ad596c36a7e9",
+      "observation_type": "positive_pattern",
+      "outcome": {
+        "feedback_note": "",
+        "feedback_status": "missing",
+        "quality_uplift": 0.083,
+        "stop_reason": "evaluator_conflict",
+        "terminal_status": "escalated"
+      },
+      "profile_id": "interface-craft",
+      "run_id": "run_20260331T141225594250Z_2b9eeb_15c2b824",
+      "schema_version": "1.0",
+      "scope_profile": "ui",
+      "scope_skill": "interface-craft",
+      "selection_hint": {
+        "feedback_weight": 0.85,
+        "rationale": "Positive delta on safety was amplified by feedback status `missing`.",
+        "score": 0.664
+      },
+      "signals": {
+        "deficit": 0.0,
+        "positive_delta": 0.157
+      },
+      "title": "interface-craft positive pattern observation (safety)"
+    },
+    {
+      "advice": {
+        "summary": "Preserve and reuse the pattern that improved `clarity`.",
+        "weakest_criteria": [
+          "safety"
+        ]
+      },
+      "confidence": {
+        "bucket": "medium",
+        "calibration_bucket": "C2_medium_confidence",
+        "evidence_completeness": 0.8,
+        "score": 0.63
+      },
+      "created_at": "2026-03-31T14:12:25Z",
+      "criterion_id": "clarity",
+      "delegation_context": {
+        "agentic_cost_benefit": {
+          "ai_process_minutes": 30.0,
+          "human_baseline_minutes": 90.0,
+          "probability_of_success": 0.78,
+          "roi_signal": "positive",
+          "time_delta_minutes": 60.0
+        },
+        "mode": "co-pilot",
+        "rationale": "High-context UI improvement requires iterative human + agent synthesis."
+      },
+      "evidence_refs": {
+        "events_path": "events.jsonl",
+        "evidence_packet_path": "evidence_packet.json",
+        "iteration_journal_path": "iteration_journal.jsonl"
+      },
+      "implementation": {
+        "positive_criterion_deltas": {
+          "clarity": 0.036
+        },
+        "summary": "Applied focused remediation for: safety"
+      },
+      "iteration_id": 1,
+      "observation_id": "observation_0da69f27b122",
+      "observation_type": "positive_pattern",
+      "outcome": {
+        "feedback_note": "",
+        "feedback_status": "missing",
+        "quality_uplift": 0.083,
+        "stop_reason": "evaluator_conflict",
+        "terminal_status": "escalated"
+      },
+      "profile_id": "interface-craft",
+      "run_id": "run_20260331T141225594250Z_2b9eeb_15c2b824",
+      "schema_version": "1.0",
+      "scope_profile": "ui",
+      "scope_skill": "interface-craft",
+      "selection_hint": {
+        "feedback_weight": 0.85,
+        "rationale": "Positive delta on clarity was amplified by feedback status `missing`.",
+        "score": 0.561
+      },
+      "signals": {
+        "deficit": 0.0,
+        "positive_delta": 0.036
+      },
+      "title": "interface-craft positive pattern observation (clarity)"
+    },
+    {
+      "advice": {
+        "summary": "Preserve and reuse the pattern that improved `specificity`.",
+        "weakest_criteria": [
+          "safety"
+        ]
+      },
+      "confidence": {
+        "bucket": "medium",
+        "calibration_bucket": "C2_medium_confidence",
+        "evidence_completeness": 0.8,
+        "score": 0.63
+      },
+      "created_at": "2026-03-31T14:12:25Z",
+      "criterion_id": "specificity",
+      "delegation_context": {
+        "agentic_cost_benefit": {
+          "ai_process_minutes": 30.0,
+          "human_baseline_minutes": 90.0,
+          "probability_of_success": 0.78,
+          "roi_signal": "positive",
+          "time_delta_minutes": 60.0
+        },
+        "mode": "co-pilot",
+        "rationale": "High-context UI improvement requires iterative human + agent synthesis."
+      },
+      "evidence_refs": {
+        "events_path": "events.jsonl",
+        "evidence_packet_path": "evidence_packet.json",
+        "iteration_journal_path": "iteration_journal.jsonl"
+      },
+      "implementation": {
+        "positive_criterion_deltas": {
+          "specificity": 0.029
+        },
+        "summary": "Applied focused remediation for: safety"
+      },
+      "iteration_id": 1,
+      "observation_id": "observation_1acafe852125",
+      "observation_type": "positive_pattern",
+      "outcome": {
+        "feedback_note": "",
+        "feedback_status": "missing",
+        "quality_uplift": 0.083,
+        "stop_reason": "evaluator_conflict",
+        "terminal_status": "escalated"
+      },
+      "profile_id": "interface-craft",
+      "run_id": "run_20260331T141225594250Z_2b9eeb_15c2b824",
+      "schema_version": "1.0",
+      "scope_profile": "ui",
+      "scope_skill": "interface-craft",
+      "selection_hint": {
+        "feedback_weight": 0.85,
+        "rationale": "Positive delta on specificity was amplified by feedback status `missing`.",
+        "score": 0.555
+      },
+      "signals": {
+        "deficit": 0.0,
+        "positive_delta": 0.029
+      },
+      "title": "interface-craft positive pattern observation (specificity)"
+    }
+  ],
+  "run_id": "run_20260331T141225594250Z_2b9eeb_15c2b824",
+  "schema_version": "1.0"
+}

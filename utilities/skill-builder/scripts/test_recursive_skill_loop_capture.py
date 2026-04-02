@@ -229,6 +229,56 @@ class RecursiveLoopCaptureTests(unittest.TestCase):
         )
         self.assertEqual(capture.get("injected_lessons", {}).get("count"), 2)
 
+    def test_retrieve_and_rank_lessons_includes_guidance_payload(self) -> None:
+        lessons_dir = Path(tempfile.mkdtemp(prefix="lessons-guidance-"))
+        lessons_file = lessons_dir / "canonical-lessons.jsonl"
+        row = {
+            "schema_version": "1.0",
+            "lesson_id": "frontend-ui-design-accessibility-before-polish-v1",
+            "scope_skill": "frontend/ui/frontend-ui-design",
+            "scope_profile": "frontend",
+            "status": "candidate",
+            "effective_from": "2026-03-31T15:30:00Z",
+            "confidence": 0.62,
+            "title": "Frontend UI Design: stabilize accessibility before polish",
+            "summary": "Front-load accessibility and state coverage before decorative polish.",
+            "guidance": [
+                "Restate default, loading, empty, error, and disabled states before proposing embellishment.",
+                "Name keyboard focus order, contrast expectations, and reduced-motion behavior explicitly.",
+            ],
+            "checkpoints": [
+                "Did the guidance restate a complete state matrix?",
+                "Did the guidance define focus, contrast, and reduced-motion requirements?",
+            ],
+            "arscontexta_stage": "documentation",
+            "source_note": "/docs/skill-graphs/pilots/interventions/frontend-ui-design-accessibility-before-polish.md",
+        }
+        lessons_file.write_text(json.dumps(row) + "\n", encoding="utf-8")
+
+        injection = RECURSIVE_LOOP_MODULE.retrieve_and_rank_lessons(
+            profile=self._make_profile(),
+            lessons_file=lessons_file,
+            max_lessons=1,
+            low_confidence_threshold=0.6,
+        )
+
+        self.assertEqual(injection["selected_count"], 1)
+        selected = injection["selected"][0]
+        self.assertEqual(selected["lesson_id"], row["lesson_id"])
+        self.assertEqual(selected["title"], row["title"])
+        self.assertEqual(selected["summary"], row["summary"])
+        self.assertEqual(selected["guidance"], row["guidance"])
+        self.assertEqual(selected["checkpoints"], row["checkpoints"])
+        self.assertEqual(selected["arscontexta_stage"], "documentation")
+        self.assertIn("Summary: Front-load accessibility and state coverage before decorative polish.", injection["injection_text"])
+        self.assertIn("Restate default, loading, empty, error, and disabled states before proposing embellishment.", injection["injection_text"])
+        self.assertIn("Did the guidance define focus, contrast, and reduced-motion requirements?", injection["injection_text"])
+        self.assertIn("Ars Contexta stage: documentation", injection["injection_text"])
+        self.assertIn(
+            "Source note: /docs/skill-graphs/pilots/interventions/frontend-ui-design-accessibility-before-polish.md",
+            injection["injection_text"],
+        )
+
     def test_observe_only_default_disables_auto_apply(self) -> None:
         lessons_dir = Path(tempfile.mkdtemp(prefix="lessons-observe-"))
         lessons_file = lessons_dir / "canonical-lessons.jsonl"

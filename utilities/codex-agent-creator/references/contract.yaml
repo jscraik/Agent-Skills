@@ -1,26 +1,27 @@
 purpose: >
-  Define expected behavior for creating, installing, and validating Codex multi-agent role configs.
+  Define expected behavior for creating, installing, and validating Codex custom subagent files.
 schema_version: 1.0
 triggers:
-  - user asks to create, update, or troubleshoot a custom agent role
-  - user asks to tune multi-agent concurrency/runtime limits for agent fan-out jobs
+  - user asks to create, update, or troubleshoot a custom Codex subagent
+  - user asks to tune spawned-agent concurrency/runtime limits for agent fan-out jobs
 inputs:
+  - agent_name
+  - agent_description
   - model
   - model_reasoning_effort
   - developer_instructions
-  - optional nickname_candidates for [agents.<role>] display labels
+  - optional nickname_candidates for spawned-agent display labels
   - install scope (global or project)
-  - role name, description, and role config file path
+  - target standalone custom-agent file path
   - optional global limits: agents.max_threads, agents.max_depth, agents.job_max_runtime_seconds
 outputs:
-  - updated role config file
-  - updated config.toml role declaration
+  - updated standalone custom-agent file
   - optional updated [agents] global limits
   - validation result summary
 non_goals:
-  - editing unrelated codex config sections
-  - guessing missing required role inputs
+  - editing unrelated codex config sections beyond requested [agents] runtime-limit keys
+  - guessing missing required custom-agent inputs
 risks:
-  - unsupported role keys; mitigated by schema/key validation
+  - missing required standalone keys (name/description/developer_instructions); mitigated by explicit key validation
   - path mistakes; mitigated by explicit path confirmation
   - over-constraining agent runtime globally; mitigated by explicit user confirmation before setting limits

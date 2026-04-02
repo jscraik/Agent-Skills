@@ -1,0 +1,78 @@
+{
+  "candidate_lessons": {
+    "count": 1,
+    "top_candidate_id": "candidate_2f945ebdeed6"
+  },
+  "capture_id": "469daccf32605120",
+  "confidence": {
+    "bucket": "low",
+    "calibration_bucket": "C3_low_confidence",
+    "inputs": {
+      "evidence_completeness": 0.8,
+      "feedback_signal": 0.5,
+      "feedback_status": "missing",
+      "iterations_observed": 2,
+      "non_regression_signal": 0.0,
+      "quality_uplift_signal": 1.0,
+      "runtime_gate_signal": 0.0,
+      "stop_reason": "pass",
+      "terminal_status": "passed"
+    },
+    "quality_uplift": 0.118,
+    "schema_version": "1.0",
+    "score": 0.43
+  },
+  "created_at": "2026-03-31T14:12:27Z",
+  "evidence": {
+    "completeness": {
+      "checks": true,
+      "events": true,
+      "logs": false,
+      "score": 0.8,
+      "session_signals": true,
+      "traces": true
+    },
+    "evidence_packet_id": "ce3dd40814ad2ed8",
+    "evidence_packet_path": "evidence_packet.json"
+  },
+  "feedback": {
+    "captured_at": "2026-03-31T14:12:27Z",
+    "note": "",
+    "source": "none",
+    "status": "missing"
+  },
+  "injected_lessons": {
+    "count": 0,
+    "items": []
+  },
+  "invocation_envelope": {
+    "actor_id": "recursive-skill-loop",
+    "auto_apply_enabled": true,
+    "auto_capture_enabled": true,
+    "idempotency_key": "a7b8bdfbbe134d43ffab",
+    "invocation_id": "abc750153f029adb",
+    "invoked_at": "2026-03-31T14:12:27Z",
+    "kill_switch_file": "",
+    "objective_hash": "55b0d24e7130f71e2026bf84a0ddec593b027516b2b9659f05939a8cc021c0ae",
+    "rollback_required_file": "",
+    "rollout_mode": "active",
+    "run_owner": "shadow-cycle"
+  },
+  "lesson_observations": {
+    "count": 2,
+    "top_observation_id": "observation_e9ebe8e3333f"
+  },
+  "output_summary": {
+    "duration_ms": 2,
+    "finished_at": "2026-03-31T14:12:27Z",
+    "iterations_completed": 2,
+    "stop_reason": "pass",
+    "terminal_status": "passed",
+    "tokens_used": 216
+  },
+  "profile_id": "react-ui-patterns",
+  "run_id": "run_20260331T141227072955Z_fc4e0c_15c57efe",
+  "schema_version": "1.0",
+  "scope_profile": "ui",
+  "scope_skill": "react-ui-patterns"
+}

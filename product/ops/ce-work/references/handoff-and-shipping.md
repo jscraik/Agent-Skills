@@ -4,6 +4,7 @@
 - [Purpose](#purpose)
 - [Required handoff package](#required-handoff-package)
 - [Operational validation notes](#operational-validation-notes)
+- [Review tiers](#review-tiers)
 - [Commit and PR guidance](#commit-and-pr-guidance)
 - [Status updates](#status-updates)
 
@@ -31,6 +32,22 @@ Every shipped change should include one of:
   - validation window and owner
 - or a justified no-impact note:
   - `No additional operational monitoring required` plus a one-line reason
+
+## Review tiers
+Every meaningful code change gets reviewed before handoff. Default to Tier 2.
+
+Tier 2: full review
+- default for almost all execution work
+- run `ce-review mode:autofix` and pass `plan:` when the governing plan path is available
+- accept safe fixes automatically, then surface any remaining actionable work in the final handoff
+
+Tier 1: inline self-review
+- allowed only when all four are explicitly true:
+  - purely additive
+  - single concern
+  - pattern-following
+  - plan-faithful
+- if any one of those is unclear, use Tier 2 instead
 
 ## Commit and PR guidance
 - use the current repo's commit and PR conventions

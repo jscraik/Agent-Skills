@@ -1,0 +1,78 @@
+{
+  "candidate_lessons": {
+    "count": 1,
+    "top_candidate_id": "candidate_52f2d724e424"
+  },
+  "capture_id": "56ccedfb7c474885",
+  "confidence": {
+    "bucket": "low",
+    "calibration_bucket": "C3_low_confidence",
+    "inputs": {
+      "evidence_completeness": 0.8,
+      "feedback_signal": 0.5,
+      "feedback_status": "missing",
+      "iterations_observed": 2,
+      "non_regression_signal": 0.0,
+      "quality_uplift_signal": 1.0,
+      "runtime_gate_signal": 0.0,
+      "stop_reason": "evaluator_conflict",
+      "terminal_status": "escalated"
+    },
+    "quality_uplift": 0.132,
+    "schema_version": "1.0",
+    "score": 0.43
+  },
+  "created_at": "2026-03-31T14:12:26Z",
+  "evidence": {
+    "completeness": {
+      "checks": true,
+      "events": true,
+      "logs": false,
+      "score": 0.8,
+      "session_signals": true,
+      "traces": true
+    },
+    "evidence_packet_id": "944fa88efae1e518",
+    "evidence_packet_path": "evidence_packet.json"
+  },
+  "feedback": {
+    "captured_at": "2026-03-31T14:12:26Z",
+    "note": "",
+    "source": "none",
+    "status": "missing"
+  },
+  "injected_lessons": {
+    "count": 0,
+    "items": []
+  },
+  "invocation_envelope": {
+    "actor_id": "recursive-skill-loop",
+    "auto_apply_enabled": true,
+    "auto_capture_enabled": true,
+    "idempotency_key": "da47f4eb6e29f55042e8",
+    "invocation_id": "0eb1e9261047f3d6",
+    "invoked_at": "2026-03-31T14:12:26Z",
+    "kill_switch_file": "",
+    "objective_hash": "5a13a9eb889de9d7d9f26222629bb260222d4a4f0025d9aba7ca2011cbc874ac",
+    "rollback_required_file": "",
+    "rollout_mode": "active",
+    "run_owner": "shadow-cycle"
+  },
+  "lesson_observations": {
+    "count": 4,
+    "top_observation_id": "observation_19832c946bab"
+  },
+  "output_summary": {
+    "duration_ms": 2,
+    "finished_at": "2026-03-31T14:12:26Z",
+    "iterations_completed": 2,
+    "stop_reason": "evaluator_conflict",
+    "terminal_status": "escalated",
+    "tokens_used": 233
+  },
+  "profile_id": "frontend-ui-design",
+  "run_id": "run_20260331T141226543802Z_fc9894_15c48010",
+  "schema_version": "1.0",
+  "scope_profile": "ui",
+  "scope_skill": "frontend-ui-design"
+}

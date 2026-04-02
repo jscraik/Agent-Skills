@@ -1,5 +1,8 @@
 # Example role that explicitly calls a skill.
 
+name = "frontend_architect"
+description = "UI architecture specialist focused on production-grade responsive interfaces."
+
 model = "gpt-5.4-mini"
 model_reasoning_effort = "high"
 model_reasoning_summary = "detailed"

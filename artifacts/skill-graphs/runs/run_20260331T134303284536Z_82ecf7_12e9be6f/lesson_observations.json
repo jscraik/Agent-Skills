@@ -1,0 +1,396 @@
+{
+  "items": [
+    {
+      "advice": {
+        "summary": "Strengthen concrete examples, file-path specificity, and measurable checks.",
+        "weakest_criteria": [
+          "safety"
+        ]
+      },
+      "confidence": {
+        "bucket": "medium",
+        "calibration_bucket": "C2_medium_confidence",
+        "evidence_completeness": 0.8,
+        "score": 0.63
+      },
+      "created_at": "2026-03-31T13:43:03Z",
+      "criterion_id": "safety",
+      "delegation_context": {
+        "agentic_cost_benefit": {
+          "ai_process_minutes": 30.0,
+          "human_baseline_minutes": 90.0,
+          "probability_of_success": 0.78,
+          "roi_signal": "positive",
+          "time_delta_minutes": 60.0
+        },
+        "mode": "co-pilot",
+        "rationale": "High-context UI improvement requires iterative human + agent synthesis."
+      },
+      "evidence_refs": {
+        "events_path": "events.jsonl",
+        "evidence_packet_path": "evidence_packet.json",
+        "iteration_journal_path": "iteration_journal.jsonl"
+      },
+      "implementation": {
+        "positive_criterion_deltas": {
+          "clarity": 0.083,
+          "safety": 0.118,
+          "specificity": 0.083
+        },
+        "summary": "Applied focused remediation for: safety, clarity, specificity"
+      },
+      "iteration_id": 1,
+      "observation_id": "observation_47b2e187a1a3",
+      "observation_type": "remediation",
+      "outcome": {
+        "feedback_note": "",
+        "feedback_status": "missing",
+        "quality_uplift": 0.097,
+        "stop_reason": "evaluator_conflict",
+        "terminal_status": "escalated"
+      },
+      "profile_id": "react-ui-patterns",
+      "run_id": "run_20260331T134303284536Z_82ecf7_12e9be6f",
+      "schema_version": "1.0",
+      "scope_profile": "ui",
+      "scope_skill": "react-ui-patterns",
+      "selection_hint": {
+        "feedback_weight": 0.95,
+        "rationale": "Weakness in safety was prioritized because feedback status was `missing`.",
+        "score": 0.682
+      },
+      "signals": {
+        "deficit": 0.117,
+        "positive_delta": 0.0
+      },
+      "title": "react-ui-patterns remediation observation (safety)"
+    },
+    {
+      "advice": {
+        "summary": "Preserve and reuse the pattern that improved `safety`.",
+        "weakest_criteria": [
+          "safety",
+          "clarity",
+          "specificity"
+        ]
+      },
+      "confidence": {
+        "bucket": "medium",
+        "calibration_bucket": "C2_medium_confidence",
+        "evidence_completeness": 0.8,
+        "score": 0.63
+      },
+      "created_at": "2026-03-31T13:43:03Z",
+      "criterion_id": "safety",
+      "delegation_context": {
+        "agentic_cost_benefit": {
+          "ai_process_minutes": 30.0,
+          "human_baseline_minutes": 90.0,
+          "probability_of_success": 0.78,
+          "roi_signal": "positive",
+          "time_delta_minutes": 60.0
+        },
+        "mode": "co-pilot",
+        "rationale": "High-context UI improvement requires iterative human + agent synthesis."
+      },
+      "evidence_refs": {
+        "events_path": "events.jsonl",
+        "evidence_packet_path": "evidence_packet.json",
+        "iteration_journal_path": "iteration_journal.jsonl"
+      },
+      "implementation": {
+        "positive_criterion_deltas": {
+          "safety": 0.118
+        },
+        "summary": "Applied focused remediation for: safety, clarity, specificity"
+      },
+      "iteration_id": 1,
+      "observation_id": "observation_162a3ede59e5",
+      "observation_type": "positive_pattern",
+      "outcome": {
+        "feedback_note": "",
+        "feedback_status": "missing",
+        "quality_uplift": 0.097,
+        "stop_reason": "evaluator_conflict",
+        "terminal_status": "escalated"
+      },
+      "profile_id": "react-ui-patterns",
+      "run_id": "run_20260331T134303284536Z_82ecf7_12e9be6f",
+      "schema_version": "1.0",
+      "scope_profile": "ui",
+      "scope_skill": "react-ui-patterns",
+      "selection_hint": {
+        "feedback_weight": 0.85,
+        "rationale": "Positive delta on safety was amplified by feedback status `missing`.",
+        "score": 0.631
+      },
+      "signals": {
+        "deficit": 0.0,
+        "positive_delta": 0.118
+      },
+      "title": "react-ui-patterns positive pattern observation (safety)"
+    },
+    {
+      "advice": {
+        "summary": "Strengthen concrete examples, file-path specificity, and measurable checks.",
+        "weakest_criteria": [
+          "clarity"
+        ]
+      },
+      "confidence": {
+        "bucket": "medium",
+        "calibration_bucket": "C2_medium_confidence",
+        "evidence_completeness": 0.8,
+        "score": 0.63
+      },
+      "created_at": "2026-03-31T13:43:03Z",
+      "criterion_id": "clarity",
+      "delegation_context": {
+        "agentic_cost_benefit": {
+          "ai_process_minutes": 30.0,
+          "human_baseline_minutes": 90.0,
+          "probability_of_success": 0.78,
+          "roi_signal": "positive",
+          "time_delta_minutes": 60.0
+        },
+        "mode": "co-pilot",
+        "rationale": "High-context UI improvement requires iterative human + agent synthesis."
+      },
+      "evidence_refs": {
+        "events_path": "events.jsonl",
+        "evidence_packet_path": "evidence_packet.json",
+        "iteration_journal_path": "iteration_journal.jsonl"
+      },
+      "implementation": {
+        "positive_criterion_deltas": {
+          "clarity": 0.083,
+          "safety": 0.118,
+          "specificity": 0.083
+        },
+        "summary": "Applied focused remediation for: safety, clarity, specificity"
+      },
+      "iteration_id": 1,
+      "observation_id": "observation_dbc057a5a2b5",
+      "observation_type": "remediation",
+      "outcome": {
+        "feedback_note": "",
+        "feedback_status": "missing",
+        "quality_uplift": 0.097,
+        "stop_reason": "evaluator_conflict",
+        "terminal_status": "escalated"
+      },
+      "profile_id": "react-ui-patterns",
+      "run_id": "run_20260331T134303284536Z_82ecf7_12e9be6f",
+      "schema_version": "1.0",
+      "scope_profile": "ui",
+      "scope_skill": "react-ui-patterns",
+      "selection_hint": {
+        "feedback_weight": 0.95,
+        "rationale": "Weakness in clarity was prioritized because feedback status was `missing`.",
+        "score": 0.613
+      },
+      "signals": {
+        "deficit": 0.045,
+        "positive_delta": 0.0
+      },
+      "title": "react-ui-patterns remediation observation (clarity)"
+    },
+    {
+      "advice": {
+        "summary": "Strengthen concrete examples, file-path specificity, and measurable checks.",
+        "weakest_criteria": [
+          "specificity"
+        ]
+      },
+      "confidence": {
+        "bucket": "medium",
+        "calibration_bucket": "C2_medium_confidence",
+        "evidence_completeness": 0.8,
+        "score": 0.63
+      },
+      "created_at": "2026-03-31T13:43:03Z",
+      "criterion_id": "specificity",
+      "delegation_context": {
+        "agentic_cost_benefit": {
+          "ai_process_minutes": 30.0,
+          "human_baseline_minutes": 90.0,
+          "probability_of_success": 0.78,
+          "roi_signal": "positive",
+          "time_delta_minutes": 60.0
+        },
+        "mode": "co-pilot",
+        "rationale": "High-context UI improvement requires iterative human + agent synthesis."
+      },
+      "evidence_refs": {
+        "events_path": "events.jsonl",
+        "evidence_packet_path": "evidence_packet.json",
+        "iteration_journal_path": "iteration_journal.jsonl"
+      },
+      "implementation": {
+        "positive_criterion_deltas": {
+          "clarity": 0.083,
+          "safety": 0.118,
+          "specificity": 0.083
+        },
+        "summary": "Applied focused remediation for: safety, clarity, specificity"
+      },
+      "iteration_id": 1,
+      "observation_id": "observation_1f1339bedd60",
+      "observation_type": "remediation",
+      "outcome": {
+        "feedback_note": "",
+        "feedback_status": "missing",
+        "quality_uplift": 0.097,
+        "stop_reason": "evaluator_conflict",
+        "terminal_status": "escalated"
+      },
+      "profile_id": "react-ui-patterns",
+      "run_id": "run_20260331T134303284536Z_82ecf7_12e9be6f",
+      "schema_version": "1.0",
+      "scope_profile": "ui",
+      "scope_skill": "react-ui-patterns",
+      "selection_hint": {
+        "feedback_weight": 0.95,
+        "rationale": "Weakness in specificity was prioritized because feedback status was `missing`.",
+        "score": 0.613
+      },
+      "signals": {
+        "deficit": 0.045,
+        "positive_delta": 0.0
+      },
+      "title": "react-ui-patterns remediation observation (specificity)"
+    },
+    {
+      "advice": {
+        "summary": "Preserve and reuse the pattern that improved `specificity`.",
+        "weakest_criteria": [
+          "safety",
+          "clarity",
+          "specificity"
+        ]
+      },
+      "confidence": {
+        "bucket": "medium",
+        "calibration_bucket": "C2_medium_confidence",
+        "evidence_completeness": 0.8,
+        "score": 0.63
+      },
+      "created_at": "2026-03-31T13:43:03Z",
+      "criterion_id": "specificity",
+      "delegation_context": {
+        "agentic_cost_benefit": {
+          "ai_process_minutes": 30.0,
+          "human_baseline_minutes": 90.0,
+          "probability_of_success": 0.78,
+          "roi_signal": "positive",
+          "time_delta_minutes": 60.0
+        },
+        "mode": "co-pilot",
+        "rationale": "High-context UI improvement requires iterative human + agent synthesis."
+      },
+      "evidence_refs": {
+        "events_path": "events.jsonl",
+        "evidence_packet_path": "evidence_packet.json",
+        "iteration_journal_path": "iteration_journal.jsonl"
+      },
+      "implementation": {
+        "positive_criterion_deltas": {
+          "specificity": 0.083
+        },
+        "summary": "Applied focused remediation for: safety, clarity, specificity"
+      },
+      "iteration_id": 1,
+      "observation_id": "observation_56622a9ed7d2",
+      "observation_type": "positive_pattern",
+      "outcome": {
+        "feedback_note": "",
+        "feedback_status": "missing",
+        "quality_uplift": 0.097,
+        "stop_reason": "evaluator_conflict",
+        "terminal_status": "escalated"
+      },
+      "profile_id": "react-ui-patterns",
+      "run_id": "run_20260331T134303284536Z_82ecf7_12e9be6f",
+      "schema_version": "1.0",
+      "scope_profile": "ui",
+      "scope_skill": "react-ui-patterns",
+      "selection_hint": {
+        "feedback_weight": 0.85,
+        "rationale": "Positive delta on specificity was amplified by feedback status `missing`.",
+        "score": 0.601
+      },
+      "signals": {
+        "deficit": 0.0,
+        "positive_delta": 0.083
+      },
+      "title": "react-ui-patterns positive pattern observation (specificity)"
+    },
+    {
+      "advice": {
+        "summary": "Preserve and reuse the pattern that improved `clarity`.",
+        "weakest_criteria": [
+          "safety",
+          "clarity",
+          "specificity"
+        ]
+      },
+      "confidence": {
+        "bucket": "medium",
+        "calibration_bucket": "C2_medium_confidence",
+        "evidence_completeness": 0.8,
+        "score": 0.63
+      },
+      "created_at": "2026-03-31T13:43:03Z",
+      "criterion_id": "clarity",
+      "delegation_context": {
+        "agentic_cost_benefit": {
+          "ai_process_minutes": 30.0,
+          "human_baseline_minutes": 90.0,
+          "probability_of_success": 0.78,
+          "roi_signal": "positive",
+          "time_delta_minutes": 60.0
+        },
+        "mode": "co-pilot",
+        "rationale": "High-context UI improvement requires iterative human + agent synthesis."
+      },
+      "evidence_refs": {
+        "events_path": "events.jsonl",
+        "evidence_packet_path": "evidence_packet.json",
+        "iteration_journal_path": "iteration_journal.jsonl"
+      },
+      "implementation": {
+        "positive_criterion_deltas": {
+          "clarity": 0.083
+        },
+        "summary": "Applied focused remediation for: safety, clarity, specificity"
+      },
+      "iteration_id": 1,
+      "observation_id": "observation_02a52b242602",
+      "observation_type": "positive_pattern",
+      "outcome": {
+        "feedback_note": "",
+        "feedback_status": "missing",
+        "quality_uplift": 0.097,
+        "stop_reason": "evaluator_conflict",
+        "terminal_status": "escalated"
+      },
+      "profile_id": "react-ui-patterns",
+      "run_id": "run_20260331T134303284536Z_82ecf7_12e9be6f",
+      "schema_version": "1.0",
+      "scope_profile": "ui",
+      "scope_skill": "react-ui-patterns",
+      "selection_hint": {
+        "feedback_weight": 0.85,
+        "rationale": "Positive delta on clarity was amplified by feedback status `missing`.",
+        "score": 0.601
+      },
+      "signals": {
+        "deficit": 0.0,
+        "positive_delta": 0.083
+      },
+      "title": "react-ui-patterns positive pattern observation (clarity)"
+    }
+  ],
+  "run_id": "run_20260331T134303284536Z_82ecf7_12e9be6f",
+  "schema_version": "1.0"
+}

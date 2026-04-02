@@ -3,13 +3,13 @@ schema_version: "1.0"
 purpose: >
   Define expected behavior and outputs for the codex-hooks-builder skill, which
   scaffolds, upgrades, and validates project-local or user-level Codex hook
-  packs using the March 2026 supported runtime contract.
+  packs using the current documented runtime contract.
 
 triggers:
   - user asks to create or scaffold Codex hooks
   - user asks to upgrade hooks.json or hook scripts to the latest supported Codex behavior
   - user asks to audit supported hook events, fields, or blocking behavior
-  - user asks for SessionStart, UserPromptSubmit, or Stop starter hooks
+  - user asks for SessionStart, UserPromptSubmit, Stop, PreToolUse, or PostToolUse hooks
 
 inputs:
   - target_scope
@@ -33,7 +33,7 @@ required_response_sections:
 non_goals:
   - generic repo automation unrelated to Codex hooks
   - plugin packaging
-  - presenting prompt or agent hooks as currently production-ready
+  - presenting undocumented non-command handlers as currently production-ready
 
 risks:
   - risk: stale_runtime_assumption
@@ -50,7 +50,7 @@ examples:
     input: "Create a project-local gold-standard Codex hook pack for this repo."
     expected_output: "Scaffold .codex/hooks.json, three starter scripts, README, and validation steps."
   edge_case:
-    input: "Audit this hooks.json and keep only what is supported in March 2026."
+    input: "Audit this hooks.json and keep only what is documented as supported."
     expected_output: "List supported vs unsupported surfaces and propose or apply a safe rewrite."
   failure_mode:
     input: "Create prompt hooks and async hooks because I need the newest unreleased behavior."

@@ -1,0 +1,73 @@
+{
+  "items": [
+    {
+      "advice": {
+        "summary": "Strengthen concrete examples, file-path specificity, and measurable checks.",
+        "weakest_criteria": [
+          "safety"
+        ]
+      },
+      "candidate_id": "candidate_a5caf837fb72",
+      "confidence": {
+        "bucket": "medium",
+        "calibration_bucket": "C2_medium_confidence",
+        "evidence_completeness": 0.8,
+        "score": 0.63
+      },
+      "created_at": "2026-03-31T14:37:05Z",
+      "delegation_context": {
+        "agentic_cost_benefit": {
+          "ai_process_minutes": 15.0,
+          "human_baseline_minutes": 45.0,
+          "probability_of_success": 0.75,
+          "roi_signal": "positive",
+          "time_delta_minutes": 30.0
+        },
+        "mode": "co-pilot",
+        "rationale": "Co-pilot mode default: advisory guidance with controlled rollout and human oversight for promotions."
+      },
+      "evidence_refs": {
+        "events_path": "events.jsonl",
+        "evidence_packet_path": "evidence_packet.json",
+        "iteration_journal_path": "iteration_journal.jsonl"
+      },
+      "implementation": {
+        "positive_criterion_deltas": {
+          "clarity": 0.028,
+          "safety": 0.145,
+          "specificity": 0.034
+        },
+        "summary": "Applied focused remediation for: safety, specificity"
+      },
+      "iteration_id": 1,
+      "observation_type": "remediation",
+      "outcome": {
+        "feedback_note": "",
+        "feedback_status": "missing",
+        "quality_uplift": 0.068,
+        "stop_reason": "evaluator_conflict",
+        "terminal_status": "escalated"
+      },
+      "profile_id": "react-ui-patterns",
+      "run_id": "run_20260331T143705798653Z_f4298e_f6846cbf",
+      "schema_version": "1.1",
+      "scope_profile": "frontend",
+      "scope_skill": "frontend/ui/react-ui-patterns",
+      "selection": {
+        "feedback_weight": 0.95,
+        "rationale": "Weakness in safety was prioritized because feedback status was `missing`.",
+        "score": 0.681
+      },
+      "source_observation": {
+        "criterion_id": "safety",
+        "feedback_note_present": false,
+        "feedback_status": "missing",
+        "observation_id": "observation_0762a26ae730"
+      },
+      "status": "candidate",
+      "title": "frontend/ui/react-ui-patterns remediation candidate (safety)"
+    }
+  ],
+  "run_id": "run_20260331T143705798653Z_f4298e_f6846cbf",
+  "schema_version": "1.0"
+}

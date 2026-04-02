@@ -14,10 +14,9 @@ from typing import Any, Dict, List, Sequence
 DEFAULT_CONTROL_ROOT = Path("artifacts/skill-graphs/controls")
 DEFAULT_LESSONS_ROOT = Path("artifacts/skill-graphs/lessons")
 DEFAULT_CONTROL_SKILLS = [
-    "ui-ux-creative-coding",
-    "interface-craft",
-    "react-ui-patterns",
-    "frontend-ui-design",
+    "frontend/ui/ui-ux-creative-coding",
+    "frontend/ui/react-ui-patterns",
+    "frontend/ui/frontend-ui-design",
 ]
 
 CONTROL_FILES: Dict[str, str] = {
@@ -91,7 +90,12 @@ def _split_scope_skills(values: Sequence[str], comma_values: str) -> List[str]:
             normalized = item.strip()
             if normalized:
                 skills.append(normalized)
-    return skills or DEFAULT_CONTROL_SKILLS.copy()
+    ordered = skills or DEFAULT_CONTROL_SKILLS.copy()
+    deduped: List[str] = []
+    for item in ordered:
+        if item and item not in deduped:
+            deduped.append(item)
+    return deduped
 
 
 def _ensure_file(

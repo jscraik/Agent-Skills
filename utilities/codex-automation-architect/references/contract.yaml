@@ -1,7 +1,7 @@
 schema_version: "1.0"
 
 skill_name: "codex-automation-architect"
-effective_date: "2026-03-04"
+effective_date: "2026-03-30"
 
 purpose: >
   Create, review, and consolidate Codex app automations using current
@@ -26,9 +26,10 @@ inputs:
 outputs:
   - "schema_version in structured artifacts"
   - "automation_spec fields: name,prompt,rrule,cwds,status"
+  - "rrule notes include timezone/count-until intent when schedule ambiguity exists"
   - "merge recommendations with keep/merge/retire rationale"
   - "blockers and permissions report"
-  - "validation evidence and freshness date stamp"
+  - "validation evidence and freshness date stamp with source provenance"
 
 non_goals:
   - "editing unrelated application source code"
@@ -37,7 +38,7 @@ non_goals:
 
 risks:
   - id: stale-guidance
-    mitigation: "always fetch latest docs/release context before final recommendation"
+    mitigation: "always fetch latest OpenAI docs, codexRepo release context, and Context7 RRULE guidance before final recommendation"
   - id: blocked-commands
     mitigation: "map blocked patterns to safe manual alternatives"
   - id: commit-policy-block

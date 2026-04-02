@@ -187,6 +187,18 @@ cases:
       - type: regex
         value: "(?i)(best-practices-researcher|framework-docs-researcher|URLs and dates)"
 
+  - id: external-contract-surface-reclassification
+    name: external contract surface reclassification
+    category: edge
+    should_trigger: true
+    prepend_skill: false
+    prompt: "This looked lightweight at first, but the change touches exported CLI flags and CI config used by other repos. Reclassify the plan depth appropriately before you write it."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "ce-plan"
+      - type: regex
+        value: "(?i)(reclassif|standard|external contract|CLI|CI)"
+
   - id: linear-handoff-after-plan
     name: linear handoff after plan
     category: happy
@@ -241,6 +253,16 @@ cases:
       - type: skill_not_selected
         expected_skill: "ce-plan"
 
+  - id: deepen-plan-request
+    name: deepen plan request
+    category: negative
+    should_trigger: false
+    prepend_skill: false
+    prompt: "Deepen this existing plan and run a confidence pass on the whole document."
+    acceptance:
+      - type: skill_not_selected
+        expected_skill: "ce-plan"
+
   - id: pressure-skip-validation
     name: pressure skip validation
     category: pressure
@@ -278,6 +300,6 @@ cases:
         value: "(?i)(prompt injection|cannot|do not|safeguard|untrusted input|validation|bypass)"
 
 metadata:
-  last_updated: "2026-03-23"
+  last_updated: "2026-03-30"
   author: "Codex"
   review_status: "draft"

@@ -1,0 +1,9 @@
+interface:
+  display_name: "Agent Browser"
+  short_description: "Drive deterministic browser automation with snapshots, refs, and evidence-friendly capture flows."
+
+policy:
+  allow_implicit_invocation: true
+
+dependencies:
+  tools: []

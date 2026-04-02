@@ -77,3 +77,7 @@ Repo-specific agent knowledge base. Append-only.
 - **2026-03-27 [Codex]:** Local plugin marketplaces named `openai-curated` can collide with Codex's official synced marketplace namespace and surface `Plugin detail unavailable` or plugin read failures in the TUI. -> Use a unique local marketplace name (for example `agent-skills-local`) and keep local plugin manifests to the known runtime top-level shape without extra metadata keys.
 
 - **2026-03-28 [Codex]:** Codex app-server resolves marketplace `source.path` from the repo root, not from the directory containing `marketplace.json`. -> Keep local marketplace entries as repo-root-relative paths like `./plugins/<plugin-name>` even when the marketplace file itself lives under `plugins/` or `.agents/plugins/`.
+
+- **2026-03-30 [Codex]:** `run_skill_evals.py --runner discovery-smoke` can fail every smoke case when a skill is missing discovery contract markers (`## Discovery interview`, one-round-at-a-time guidance, plain-language question guidance, `Why this matters`, no-full-plan-dump wording, and `references/discovery-interview.md`). -> Add the exact contract phrases in `SKILL.md` and provide `references/discovery-interview.md` with mini-templates, payload examples, intuitive round-1 wording, and round-6 confirmation guidance before trusting smoke results.
+
+- **2026-03-30 [Codex]:** In `zsh`, `status` is a read-only special variable and using it in shell loops causes `read-only variable: status`. -> Use a different variable name (for example `gate_status`) in validation scripts and result collectors.

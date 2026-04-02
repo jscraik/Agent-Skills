@@ -2,6 +2,7 @@
 
 ## Table of Contents
 - [Purpose](#purpose)
+- [Argument parsing and overrides](#argument-parsing-and-overrides)
 - [Boundary against ce-technical-review](#boundary-against-ce-technical-review)
 - [Protected artifacts](#protected-artifacts)
 - [External evidence rule](#external-evidence-rule)
@@ -9,11 +10,26 @@
 - [Artifact review](#artifact-review)
 - [Reviewer coverage map](#reviewer-coverage-map)
 - [Execution strategy](#execution-strategy)
+- [Mode-driven post-review flow](#mode-driven-post-review-flow)
 - [Todo follow-up](#todo-follow-up)
 - [Optional runtime verification](#optional-runtime-verification)
 
 ## Purpose
 This note preserves the stronger parts of the legacy `ce:review` prompt while keeping the main skill concise and scoped.
+
+## Argument parsing and overrides
+Parse optional modifiers before reviewer selection:
+- `mode:interactive` keeps the default broad review flow
+- `mode:report-only` stops after findings and recommendation
+- `mode:autofix` allows only the smallest safe fixer follow-up after synthesis
+- `mode:headless` runs the same review logic without blocking questions and returns a machine-friendly completion signal
+- `base:<ref>` overrides the diff base for branch or diff review
+- `plan:<path>` injects a plan artifact as extra review context
+
+Guardrails:
+- fail fast on conflicting `mode:` tokens
+- do not invent a `base:` override when the user did not supply one
+- do not treat `plan:<path>` as the primary review target unless the rest of the request makes that explicit
 
 ## Boundary against ce-technical-review
 Use `ce-review` when the user wants:
@@ -117,12 +133,46 @@ Switch to serial when:
 
 If local config defines `review_agents`, respect that set first, then add required baseline reviewers when missing.
 
+## Mode-driven post-review flow
+Keep collection, reviewer coverage, and synthesis consistent across modes. Only the handoff changes.
+
+`interactive`:
+- review-first default
+- after safe synthesis, ask at most one blocking question before any mutating follow-up
+- no automatic todo creation unless the user asked for it or the repo convention requires it
+
+`report-only`:
+- no fixer queue
+- no todo creation
+- no run artifact
+- stop after findings, blockers, and recommendation
+
+`autofix`:
+- allow only the smallest safe fixer pass after synthesis
+- keep unresolved `manual`, `human`, or rollout-owned findings as residual work
+- create durable todos only for residual actionable findings that still belong to downstream execution
+
+`headless`:
+- no blocking questions
+- one safe fixer pass at most
+- no todo creation
+- emit a structured text envelope plus a terminal `Review complete` signal for callers
+
+Shared checkout safety:
+- do not run a mutating review loop concurrently with browser or simulator verification on the same checkout
+- if both need to proceed in parallel, keep review in `mode:report-only` or isolate mutation in a separate worktree
+
 ## Todo follow-up
 If the repo has a `todos/` review workflow or the user explicitly asks for structured follow-up:
 - create or update todo artifacts after findings are synthesized
 - keep the review report small; point to the todo artifacts for detail
 - preserve `P1`, `P2`, `P3` severity in the todo metadata or naming convention
 - use the exact `file-todos` workflow defined in `references/findings-and-todos.md`
+
+Mode nuance:
+- default broad review findings normally land as `pending`
+- residual actionable findings left over after `mode:autofix` land as `ready` because they have already been triaged during synthesis
+- do not create todos for advisory-only, release-owned, or protected-artifact cleanup findings
 
 If there is no local todo convention and the user did not ask for todo capture, return structured findings directly instead of fabricating a todo dependency.
 
