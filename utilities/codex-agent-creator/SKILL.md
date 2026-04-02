@@ -138,7 +138,7 @@ Run discovery for underspecified custom-agent creation or hardening requests.
 - None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.
 
 ## See Also
-| Related utility | When to use |
+| Skill | When to use |
 |---|---|
 | [[agents-md]] | Update repo instructions to reference or govern the new agent roles |
 | [[codex-automation-architect]] | Design recurring automations that orchestrate the installed agents |
