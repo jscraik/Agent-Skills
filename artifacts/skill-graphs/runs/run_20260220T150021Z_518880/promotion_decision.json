@@ -1,17 +1,5 @@
 {
-  "confidence": {
-    "bucket": "unknown",
-    "calibration_bucket": "C0_historical_backfill",
-    "evidence_completeness": 0.8,
-    "quality_uplift": 0.0,
-    "schema_version": "1.0",
-    "score": 0.0
-  },
   "decision": "approved",
-  "evidence_packet": {
-    "completeness_score": 0.8,
-    "evidence_packet_id": "c99e7c5bf72961e2"
-  },
   "expected_version": "v1",
   "gate_decision": {
     "notes": "Promotion approved after reviewer rubric + security checks",
@@ -19,7 +7,6 @@
     "runtime_gates_passed": true,
     "security_checklist_passed": true
   },
-  "lesson_candidates": [],
   "lesson_content_sha256": "2e5301f12000d62e843f91e2ac421e92bb4396db8a9fc11466b40e0d62dc7055",
   "lesson_id": "lesson_ui_20260220_001",
   "lesson_source_path": "docs/skill-graphs/workflows/reviewer-rubric.md",
