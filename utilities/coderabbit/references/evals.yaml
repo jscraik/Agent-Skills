@@ -13,7 +13,7 @@ cases:
       - type: regex
         value: '(?i)(\.coderabbit\.yaml|configuration|sequence diagrams|reviews\.sequence_diagrams)'
       - type: regex
-        value: "(?i)(evidence|source|docs|corpus|crawl|reference|citation)"
+        value: "(?i)(evidence|source|docs|corpus|crawl|reference|citation|guidance|read-only)"
 
   - id: coderabbit-pr-commands
     name: pr command reference
@@ -31,7 +31,8 @@ cases:
     name: autofix simplify comparison
     category: edge
     should_trigger: true
-    prepend_skill: true
+    prepend_skill: false
+    eval_modes: [release]
     prompt: "Compare CodeRabbit Autofix and Simplify and list rollout caveats."
     acceptance:
       - type: regex

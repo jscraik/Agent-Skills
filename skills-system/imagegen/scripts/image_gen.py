@@ -812,6 +812,7 @@ class _SingleFile:
         if self._handle:
             try:
                 self._handle.close()
+            except Exception:
                 # Log close failures instead of silently ignoring them, but do not
                 # suppress any exception from the with-block itself.
                 traceback.print_exc()
@@ -832,10 +833,11 @@ class _FileBundle:
         for handle in self._handles:
             try:
                 handle.close()
+            except Exception:
                 # Log close failures while ensuring they do not mask exceptions
                 # raised inside the with-block.
                 traceback.print_exc()
-                pass
+                logging.warning("Failed to close input file handle", exc_info=True)
         return False
 
 
