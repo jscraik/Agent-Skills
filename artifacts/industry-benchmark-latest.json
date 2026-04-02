@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "generated_at": "2026-04-02T23:03:41.638713+00:00",
   "mode": "warn",
-  "policy_path": "/Users/jamiecraik/dev/agent-skills/utilities/skill-builder/references/benchmark-policy.json",
+  "policy_path": "utilities/skill-builder/references/benchmark-policy.json",
   "skills_scanned": 84,
   "uncategorized_skills": [],
   "cluster_results": [
