@@ -11,7 +11,7 @@ cases:
       - type: skill_selected
         expected_skill: "coderabbit"
       - type: regex
-        value: "(?i)(\.coderabbit\.yaml|configuration|sequence diagrams|reviews\.sequence_diagrams)"
+        value: '(?i)(\.coderabbit\.yaml|configuration|sequence diagrams|reviews\.sequence_diagrams)'
       - type: regex
         value: "(?i)(evidence|source|docs|corpus|crawl)"
 
