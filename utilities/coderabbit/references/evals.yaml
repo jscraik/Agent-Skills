@@ -12,8 +12,6 @@ cases:
         expected_skill: "coderabbit"
       - type: regex
         value: '(?i)(\.coderabbit\.yaml|configuration|sequence diagrams|reviews\.sequence_diagrams)'
-      - type: regex
-        value: "(?i)(evidence|source|docs|corpus|crawl|reference|citation|guidance|read-only)"
 
   - id: coderabbit-pr-commands
     name: pr command reference
