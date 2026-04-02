@@ -20,7 +20,7 @@ Turn Stitch screens into a maintainable Remotion walkthrough workflow instead of
 - [Failure mode](#failure-mode)
 - [Constraints](#constraints)
 - [Workflow](#workflow)
-- [Antipatterns](#antipatterns)
+- [Anti-patterns](#anti-patterns)
 - [Validation](#validation)
 - [Examples](#examples)
 - [References](#references)
@@ -88,7 +88,7 @@ Turn Stitch screens into a maintainable Remotion walkthrough workflow instead of
 5. Run a preview render and refine pacing or containment issues.
 6. Render final output and summarize the handoff path.
 
-## Antipatterns
+## Anti-patterns
 - Avoid skipping preview validation before final render.
 - Do not hardcode brittle asset paths when a manifest-driven approach is available.
 - Never overuse transitions that distract from the actual walkthrough content.

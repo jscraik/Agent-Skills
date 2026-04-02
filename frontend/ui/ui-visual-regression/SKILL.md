@@ -20,7 +20,7 @@ Run a deterministic visual regression loop so we can separate expected UI change
 - [Failure mode](#failure-mode)
 - [Constraints](#constraints)
 - [Workflow](#workflow)
-- [Antipatterns](#antipatterns)
+- [Anti-patterns](#anti-patterns)
 - [Validation](#validation)
 - [Examples](#examples)
 - [References](#references)
@@ -112,7 +112,7 @@ Run a deterministic visual regression loop so we can separate expected UI change
    - async timing.
 5. Re-run the same pipeline slice and only approve once the evidence is clean.
 
-## Antipatterns
+## Anti-patterns
 - Avoid updating baselines to hide a regression.
 - Do not re-run flaky captures until green without addressing the instability.
 - Never make a broad visual rewrite for a narrow diff.

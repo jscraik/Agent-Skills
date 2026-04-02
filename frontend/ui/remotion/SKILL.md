@@ -19,7 +19,7 @@ Use the Remotion ruleset as a focused advisor for composition design, timing, as
 - [Variation](#variation)
 - [Failure mode](#failure-mode)
 - [Workflow](#workflow)
-- [Antipatterns](#antipatterns)
+- [Anti-patterns](#anti-patterns)
 - [Validation](#validation)
 - [References](#references)
 
@@ -98,7 +98,7 @@ Use the Remotion ruleset as a focused advisor for composition design, timing, as
 4. Answer from the smallest relevant rule set.
 5. End with the concrete validation commands or checks the user should run next.
 
-## Antipatterns
+## Anti-patterns
 - Avoid dumping the full ruleset when only one or two rule files matter.
 - Do not give animation advice without checking timing, duration, and asset constraints.
 - Never treat decode support or caption sync as optional cleanup.

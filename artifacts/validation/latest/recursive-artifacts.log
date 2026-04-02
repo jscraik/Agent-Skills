@@ -1,20 +1,20 @@
 {
-  "generated_at": "2026-03-31T15:28:41Z",
+  "generated_at": "2026-04-02T22:50:16Z",
   "runs_root": "/Users/jamiecraik/dev/agent-skills/artifacts/skill-graphs/runs",
   "counts": {
-    "compliant": 87,
-    "missing_mandatory": 0,
-    "legacy_partial": 0,
+    "compliant": 0,
+    "missing_mandatory": 85,
+    "legacy_partial": 2,
     "empty": 0
   },
   "total_runs": 87,
   "run_status_counts": {
-    "compliant": 87,
-    "missing_mandatory": 0,
-    "legacy_partial": 0,
+    "compliant": 0,
+    "missing_mandatory": 85,
+    "legacy_partial": 2,
     "empty": 0
   },
-  "compliance_rate": 100.0,
+  "compliance_rate": 0.0,
   "waived_non_compliant": 0,
   "prune_empty": {
     "enabled": false,

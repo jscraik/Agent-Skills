@@ -11,6 +11,7 @@ Design, review, consolidate, and validate Codex automations with current Codex a
 
 ## Standards snapshot (March 30, 2026)
 - Codex app automations run in the background, and the Codex app plus selected project path must be available on disk.
+- When OpenAI API guidance is relevant, treat the OpenAI Responses API as the current baseline.
 - In Git repositories, automations can run in local mode or dedicated background worktrees; in non-version-controlled projects they run directly in the project directory.
 - Automations are unattended and inherit default sandbox settings; full access carries elevated risk and should not be the default.
 - When allowed, automations use `approval_policy = "never"`; if org requirements disallow that, behavior falls back to the selected approval mode.

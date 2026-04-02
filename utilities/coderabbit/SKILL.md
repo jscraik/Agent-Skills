@@ -55,8 +55,12 @@ metadata:
 ## Discovery interview
 - Use discovery only when scope is ambiguous.
 - Ask one round at a time and keep it short.
+- Start each round with one plain-language question.
+- Include a short `Why this matters:` line after the question.
+- Avoid dumping the whole interview plan at once.
 - Confirm platform and desired outcome before proposing config changes.
 - Use `references/evals.yaml` pressure and negative cases to guard against over-triggering.
+- Use `references/discovery-interview.md` when discovery is needed.
 
 ## Deliverables
 - Source-grounded answer with cited corpus files.
@@ -110,6 +114,11 @@ Contract rules:
 4. Draft an answer tailored to the user's platform and requested depth.
 5. If user requests implementation artifacts, provide file-ready snippets and clearly mark assumptions.
 6. End with the safest next verification step.
+
+Fast path for low-latency responses:
+- If the user asks a conceptual or command-reference question and no repo edits are requested, answer directly without tool calls.
+- Include an `Evidence` line that cites the corpus root or specific corpus paths used.
+- State when guidance is corpus-based and may require live verification for current SaaS state.
 
 ## Verification
 - Verify every recommendation maps to at least one local corpus file.

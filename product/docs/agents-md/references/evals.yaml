@@ -253,6 +253,44 @@ cases:
       - type: regex
         value: "(?i)(Quality Checks|CI/CD Workflow|GitHub Workflow|PR Management)"
 
+  - id: cross-agent-python-preflight-propagation
+    name: cross-agent-python-preflight-propagation
+    category: edge
+    eval_modes: [release]
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Update our shared AGENTS, CLAUDE, and GEMINI guidance so Python environment defaults and preflight enforcement are auto-added when missing, while preserving each tool's file conventions."
+    acceptance:
+      - type: regex
+        value: "(?i)(AGENTS\\.md|CLAUDE\\.md|GEMINI\\.md)"
+      - type: contains
+        value: "Python Environment and Dependency Management"
+      - type: regex
+        value: "(?i)(uv|Python 3\\.12|\\.venv|requirements\\.txt|requirements-dev\\.txt|requirements\\.lock|pyproject\\.toml)"
+      - type: regex
+        value: "(?i)(Preflight Enforcement|PREFLIGHT REQUIRED|codex-preflight\\.sh)"
+      - type: regex
+        value: "(?i)(repo-verified|verified command|supported flags|preserve.*file.*conventions)"
+
+  - id: cross-agent-coding-standards-propagation
+    name: cross-agent-coding-standards-propagation
+    category: edge
+    eval_modes: [release]
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Strengthen coding standards across AGENTS, CLAUDE, and GEMINI so quality gates are auto-added when missing and work cannot be marked complete until all repo-native checks pass."
+    acceptance:
+      - type: regex
+        value: "(?i)(AGENTS\\.md|CLAUDE\\.md|GEMINI\\.md)"
+      - type: contains
+        value: "Quality Checks"
+      - type: regex
+        value: "(?i)(formatter|lint|typecheck|test)"
+      - type: regex
+        value: "(?i)(repo-native|project-native|verified command)"
+      - type: regex
+        value: "(?i)(pass before|must pass|before .*complete|before .*marked complete)"
+
   - id: harness-memory-learnings-opt-in
     name: harness-memory-learnings-opt-in
     category: edge

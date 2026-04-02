@@ -137,6 +137,10 @@ If command truth, path ownership, or instruction precedence cannot be verified, 
 - When a user asks to add guidance under named AGENTS sections, place it in the canonical AGENTS file for that repo scope and update that file's Table of Contents.
 - If the named section does not exist, create it with concise, action-oriented bullets instead of scattering equivalent guidance across multiple unrelated files.
 - Keep cross-repo guidance consistent by mirroring durable section-level rules in this skill when they affect how AGENTS refactors should be performed.
+- When users request a reusable Python runtime policy, auto-populate `## Python Environment and Dependency Management` when missing in the target AGENTS scope and keep it as a root-visible operating section.
+- For that Python section, preserve these defaults unless the repo explicitly overrides them: `uv`-only environment/dependency management, Python `3.12` default for new environments, explicit dependency declaration files (`pyproject.toml`, `requirements.txt`, `requirements-dev.txt`, `requirements.lock`), project-local `.venv` preference, activation-before-execution, and global fallback via `source ~/personal/bin/activate` only when no dependency files exist.
+- When users request preflight enforcement defaults, auto-populate both the mandatory workflow snippet (`PREFLIGHT REQUIRED` + explore-then-skill + retrieval-led rule + docs TOC rule) and a `## Preflight Enforcement (REQUIRED)` section when missing, while still validating that prescribed commands/flags exist for that repo before insertion.
+- When users request stronger coding standards, auto-populate a `## Quality Checks` section (or strengthen it in place) across in-scope instruction files and require repo-native formatter, linter, typecheck, and test commands plus explicit pass-state reporting before work is marked complete.
 - When a user wants the same operating rule reflected across `AGENTS.md`, `CLAUDE.md`, and `GEMINI.md`, keep the rule semantically consistent across all three files but preserve target-specific wording and file structure instead of forcing one identical block everywhere.
 - For durable cross-tool behavioral rules that the user wants agents to always see, keep the rule as its own top-level section in each of `AGENTS.md`, `CLAUDE.md`, and `GEMINI.md` instead of hiding it only in linked docs.
 - Use progressive disclosure, not rule burial: keep the short, operative rule in the root instruction file and move only deeper rationale or procedure into linked docs when needed.
@@ -188,6 +192,9 @@ If command truth, path ownership, or instruction precedence cannot be verified, 
 - Treat the baseline as a section menu, not a verbatim template. Verify each section before insertion.
 - Keep `Repository rules` grounded in the actual repo preflight, supported flag set, and repo-root workflow.
 - Keep `Stack detection` grounded in observed root manifests and documented override behavior.
+- For Python-capable repos, include a concise `## Python Environment and Dependency Management` baseline section by default when absent, then tailor only paths/overrides to repo evidence.
+- For repos that require preflight, include both the mandatory workflow snippet and `## Preflight Enforcement (REQUIRED)` block by default when absent, using repo-verified commands and supported flags.
+- For coding-standards requests, include a `## Quality Checks` baseline section by default when absent, using repo-native formatter/lint/typecheck/test commands and a pass-before-complete rule.
 - Keep `Required tooling` and `Required repo paths` limited to what the repo actually needs.
 - Keep architecture-diagram paths repo-specific: mention `.diagram/`, `.diagrams/`, or another diagram directory only when that exact path is documented or verified in the repo.
 - Keep `.harness/memory/LEARNINGS.md` opt-in at the repo level unless the repo has explicitly adopted the harness-memory convention.
@@ -225,6 +232,8 @@ If command truth, path ownership, or instruction precedence cannot be verified, 
 - User says: "Update our shared AGENTS, CLAUDE, and GEMINI guidance so validation findings that represent durable repo work create or update a Linear issue in the right `[[ project ]]` instead of being left only in chat."
 - User says: "Inspect these conflicting instructions and return a clear conflict-decision list before you edit anything."
 - User says: "Update our AGENTS template so repo rules, stack detection, required tooling, required paths, Local Memory policy, and startup workflow are tailored per project instead of copied blindly."
+- User says: "Make sure every generated AGENTS file auto-adds Python environment policy and preflight enforcement defaults when those sections are missing."
+- User says: "Enforce coding standards better by auto-adding quality-check gates and requiring all checks to pass before completion."
 - User says: "We used to have a `FORJAMIE.md` file. Please update the AGENTS guidance so it handles that legacy file correctly."
 - User says: "Our repo keeps architecture drawings in `.diagrams/`. Update the AGENTS guidance so agents use that as quick project context without guessing the wrong diagram path in other repos."
 - User says: "Add a worktree bootstrap helper rule across AGENTS, CLAUDE, and GEMINI so first push from a fresh worktree runs the repo helper script."

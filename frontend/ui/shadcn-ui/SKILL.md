@@ -26,7 +26,7 @@ Use shadcn/ui as a code-ownership workflow, not as a drop-in component dependenc
 - [Variation](#variation)
 - [Failure mode](#failure-mode)
 - [Workflow](#workflow)
-- [Antipatterns](#antipatterns)
+- [Anti-patterns](#anti-patterns)
 - [Validation](#validation)
 - [References](#references)
 
@@ -106,7 +106,7 @@ Use shadcn/ui as a code-ownership workflow, not as a drop-in component dependenc
 5. Preserve accessibility and token alignment when editing variants or markup.
 6. End with exact local checks the repo should pass next.
 
-## Antipatterns
+## Anti-patterns
 - Avoid treating copied components as if they were still vendor-owned and off-limits.
 - Do not drop custom wrappers into `components/ui/`; keep wrappers in the project layer so ownership is explicit.
 - Never hardcode visual values that bypass the repo token system. That is the wrong integration posture for long-term maintainability.
