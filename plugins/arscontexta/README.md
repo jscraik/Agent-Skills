@@ -5,10 +5,10 @@ Codex plugin package converted from Ars Contexta.
 ## Included surfaces
 - `.codex-plugin/plugin.json`
 - `skills/arscontexta/`
-- `prompts/commands/*` (mapped from upstream plugin skills)
-- `prompts/workflows/*` (mapped from upstream skill-sources)
 - `hooks.json` and `hooks/scripts/*`
-- `agents/knowledge-guide.md`
+- `references/legacy/prompts/commands/*` (mapped from upstream plugin skills; archived, non-runtime)
+- `references/legacy/prompts/workflows/*` (mapped from upstream skill-sources; archived, non-runtime)
+- `references/legacy/agents/knowledge-guide.md` (archived, non-runtime)
 - `.app.json` and `.mcp.json`
 - `references/*` conversion and contract artifacts
 
