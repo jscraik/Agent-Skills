@@ -157,7 +157,7 @@ Use when:
 
 Output:
 - readiness findings (missing SKILL.md/frontmatter/references artifacts)
-- security findings from script pattern scan (dangerous exec/eval/env-harvesting/network)
+- security findings from script pattern scan (dangerous exec/eval, env-harvesting, file-read exfiltration, obfuscation, crypto-mining, suspicious websocket, network)
 
 ## upgrade_skill.py
 
