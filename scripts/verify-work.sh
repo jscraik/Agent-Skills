@@ -71,12 +71,31 @@ skip_check() {
 
 run_skill_sync_check() {
   local sync_log
+  local sync_start
+  local sync_end
+  local sync_elapsed
   sync_log="$(mktemp "${TMPDIR:-/tmp}/verify-work-sync.XXXXXX")"
+  sync_start="$(date +%s)"
   echo
   echo "==> skill-sync"
   if bash "scripts/sync_skills.sh" >"${sync_log}" 2>&1; then
+    sync_end="$(date +%s)"
+    sync_elapsed="$((sync_end - sync_start))"
     passed_checks+=("skill-sync")
     cat "${sync_log}"
+    echo "[verify-work] skill-sync duration: ${sync_elapsed}s"
+    if [[ -n "${SYNC_SKILLS_MAX_SECONDS:-}" ]]; then
+      if [[ "${SYNC_SKILLS_MAX_SECONDS}" =~ ^[0-9]+$ ]]; then
+        if ((sync_elapsed > SYNC_SKILLS_MAX_SECONDS)); then
+          failed_checks+=("skill-sync-performance")
+          echo "[verify-work] skill-sync exceeded SYNC_SKILLS_MAX_SECONDS=${SYNC_SKILLS_MAX_SECONDS}s (observed ${sync_elapsed}s)." >&2
+          rm -f "${sync_log}"
+          return 1
+        fi
+      else
+        echo "[verify-work] ignoring invalid SYNC_SKILLS_MAX_SECONDS='${SYNC_SKILLS_MAX_SECONDS}' (expected integer)." >&2
+      fi
+    fi
     rm -f "${sync_log}"
     return 0
   fi

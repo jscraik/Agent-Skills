@@ -352,7 +352,14 @@ fi
 # - each folder must contain SKILL.md
 # - each entry must be a real directory, not a symlink
 # This avoids loader confusion from metadata folders like .system/ or helper repos.
-find "$antigravity_skills_dir" -mindepth 1 -maxdepth 1 -exec rm -rf -- {} +
+#
+# Keep the projection incremental instead of deleting everything first:
+# unchanged skills stay in place, changed skills are refreshed, and stale skills
+# are pruned at the end. This preserves output behavior while reducing I/O.
+antigravity_state_dir="$(mktemp -d)"
+cleanup_paths+=("$antigravity_state_dir")
+antigravity_keep_file="$antigravity_state_dir/skills.keep"
+: > "$antigravity_keep_file"
 
 for skill_link in "$skills_dir"/*; do
   if [ ! -L "$skill_link" ]; then
@@ -364,6 +371,7 @@ for skill_link in "$skills_dir"/*; do
 
   skill_name="$(basename "$skill_link")"
   target_dir="$antigravity_skills_dir/$skill_name"
+  printf '%s\n' "$skill_name" >> "$antigravity_keep_file"
   mkdir -p "$target_dir"
 
   if command -v rsync >/dev/null 2>&1; then
@@ -380,6 +388,17 @@ for skill_link in "$skills_dir"/*; do
     rm -rf -- "$target_dir/.git" "$target_dir/node_modules" "$target_dir/__pycache__"
   fi
 done
+
+# Remove non-directory entries that could confuse flat directory loaders.
+find "$antigravity_skills_dir" -mindepth 1 -maxdepth 1 ! -type d -exec rm -rf -- {} +
+
+# Prune stale directories that were not refreshed in this run.
+while IFS= read -r existing_dir; do
+  existing_name="$(basename "$existing_dir")"
+  if ! grep -Fqx "$existing_name" "$antigravity_keep_file"; then
+    rm -rf -- "$existing_dir"
+  fi
+done < <(find "$antigravity_skills_dir" -mindepth 1 -maxdepth 1 -type d -print)
 
 # Regenerate root SKILL.md index dynamically from skill frontmatter.
 generate_skill_index() {

@@ -25,6 +25,13 @@ DOCS_EXPERT_ASSETS = REPO_ROOT / "product" / "docs" / "docs-expert" / "assets"
 DEFAULT_INSTALL_POLICY = "AVAILABLE"
 DEFAULT_AUTH_POLICY = "ON_INSTALL"
 DEFAULT_CATEGORY = "Productivity"
+DEFAULT_OWNER = "Plugin Maintainers"
+DEFAULT_AUTHOR_EMAIL = "maintainers@example.com"
+DEFAULT_AUTHOR_URL = "https://github.com/example"
+DEFAULT_PRIVACY_URL = "https://example.com/privacy"
+DEFAULT_TERMS_URL = "https://example.com/terms"
+DEFAULT_MARKETPLACE_NAME = "local-marketplace"
+DEFAULT_MARKETPLACE_DISPLAY_NAME = "Local Plugins"
 VALID_INSTALL_POLICIES = {"NOT_AVAILABLE", "AVAILABLE", "INSTALLED_BY_DEFAULT"}
 VALID_AUTH_POLICIES = {"ON_INSTALL", "ON_USE"}
 SOURCE_PROVIDER_MANIFESTS = (
@@ -338,6 +345,18 @@ def _display_name(plugin_name: str) -> str:
     return _display_name_from_identifier(plugin_name)
 
 
+def _default_repo_url(plugin_name: str) -> str:
+    return f"{DEFAULT_AUTHOR_URL}/{plugin_name}"
+
+
+def _default_docs_url(plugin_name: str) -> str:
+    return f"https://example.com/plugins/{plugin_name}"
+
+
+def _default_owner(plugin_name: str) -> str:
+    return f"{_display_name(plugin_name)} Team"
+
+
 def _surface_summary(enabled_surfaces: dict[str, bool]) -> list[str]:
     surfaces = [".codex-plugin/plugin.json", "README.md", "LICENSE", "references/operational-spec.md"]
     if enabled_surfaces.get("skills"):
@@ -413,29 +432,30 @@ def build_plugin_json(
     enabled_surfaces = enabled_surfaces or {}
     profile = _archetype_profile(archetype)
     display_name = _display_name(plugin_name)
+    owner = _default_owner(plugin_name)
     payload: dict[str, Any] = {
         "name": plugin_name,
         "version": "0.1.0",
         "description": profile["description"],
         "author": {
-            "name": "[TODO: Author Name]",
-            "email": "[TODO: author@example.com]",
-            "url": "[TODO: https://github.com/author]",
+            "name": owner,
+            "email": DEFAULT_AUTHOR_EMAIL,
+            "url": DEFAULT_AUTHOR_URL,
         },
-        "homepage": "[TODO: https://docs.example.com/plugin]",
-        "repository": "[TODO: https://github.com/author/plugin]",
+        "homepage": _default_docs_url(plugin_name),
+        "repository": _default_repo_url(plugin_name),
         "license": "MIT",
         "keywords": ["plugin", plugin_name, *profile["keywords"]],
         "interface": {
             "displayName": display_name,
             "shortDescription": profile["short_description"],
             "longDescription": profile["long_description"],
-            "developerName": "[TODO: OpenAI]",
+            "developerName": owner,
             "category": profile["category"],
             "capabilities": profile["capabilities"],
-            "websiteURL": "[TODO: https://openai.com/]",
-            "privacyPolicyURL": "[TODO: https://openai.com/policies/row-privacy-policy/]",
-            "termsOfServiceURL": "[TODO: https://openai.com/policies/row-terms-of-use/]",
+            "websiteURL": _default_docs_url(plugin_name),
+            "privacyPolicyURL": DEFAULT_PRIVACY_URL,
+            "termsOfServiceURL": DEFAULT_TERMS_URL,
             "defaultPrompt": profile["default_prompt"],
             "brandColor": profile["brand_color"],
         },
@@ -659,9 +679,9 @@ def _optional_json(path: Path) -> dict[str, Any] | None:
 
 def build_default_marketplace() -> dict[str, Any]:
     return {
-        "name": "[TODO: marketplace-name]",
+        "name": DEFAULT_MARKETPLACE_NAME,
         "interface": {
-            "displayName": "[TODO: Marketplace Display Name]",
+            "displayName": DEFAULT_MARKETPLACE_DISPLAY_NAME,
         },
         "plugins": [],
     }
@@ -670,7 +690,7 @@ def build_default_marketplace() -> dict[str, Any]:
 def _display_name_from_identifier(value: str) -> str:
     words = [word for word in re.split(r"[-_\s]+", value.strip()) if word]
     if not words:
-        return "[TODO: Marketplace Display Name]"
+        return DEFAULT_MARKETPLACE_DISPLAY_NAME
     return " ".join(word.capitalize() for word in words)
 
 
@@ -788,7 +808,7 @@ def write_text(path: Path, content: str, force: bool) -> None:
     path.write_text(content, encoding="utf-8")
 
 
-def create_stub_file(path: Path, payload: dict[str, Any], force: bool) -> None:
+def create_json_file(path: Path, payload: dict[str, Any], force: bool) -> None:
     if path.exists() and not force:
         return
     write_json(path, payload, force=True)
@@ -1077,8 +1097,8 @@ def _license_template() -> str:
     current_year = str(date.today().year)
     return (
         _load_docs_asset("LICENSE_TEMPLATE.txt")
-        .replace("[TODO: year]", current_year)
-        .replace("[TODO: owner]", "[TODO: plugin owner]")
+        .replace("{year}", current_year)
+        .replace("{owner}", DEFAULT_OWNER)
     )
 
 
@@ -1097,7 +1117,7 @@ def _render_readme_template(plugin_name: str, enabled_surfaces: dict[str, bool])
             f"This plugin package collects the manifest, plugin-owned skills, and optional integration surfaces for `{plugin_name}`.",
         )
         .replace("Last updated: YYYY-MM-DD", f"Last updated: {date.today().isoformat()}")
-        .replace("Owner: <name/team>", "Owner: [TODO: plugin owner]")
+        .replace("Owner: <name/team>", f"Owner: {DEFAULT_OWNER}")
         .replace("Review cadence: <e.g., quarterly>", "Review cadence: quarterly")
         .replace("- Audience tier: <beginner/intermediate/expert>", "- Audience tier: intermediate")
         .replace(
@@ -1169,7 +1189,7 @@ def _package_guide_template(plugin_name: str, enabled_surfaces: dict[str, bool])
             f"This guide explains what `codex-plugin-builder` generated for `{plugin_name}` and how to extend it safely.",
         )
         .replace("Last updated: YYYY-MM-DD", f"Last updated: {date.today().isoformat()}")
-        .replace("Owner: <name/team>", "Owner: [TODO: plugin owner]")
+        .replace("Owner: <name/team>", f"Owner: {DEFAULT_OWNER}")
         .replace("Review cadence: <e.g., quarterly>", "Review cadence: quarterly")
         .replace("- Audience tier: <beginner/intermediate/expert>", "- Audience tier: intermediate")
         .replace("- Scope: <what this doc covers>", "- Scope: package layout, helper ownership, and validation expectations")
@@ -1585,7 +1605,7 @@ def _operational_spec_template(
             "## Metadata",
             "```yaml",
             "metadata:",
-            "  owner: \"[TODO: plugin owner]\"",
+            f"  owner: \"{DEFAULT_OWNER}\"",
             "  max_duration: \"validation <= 30s, runtime <= plugin-specific\"",
             "  escalation: \"escalate when validation fails, routing is ambiguous, or runtime dependencies are blocked\"",
             "  plugin_scope:",
@@ -2660,7 +2680,7 @@ def _run_scaffold(args: argparse.Namespace) -> int:
         )
 
     if enabled_surfaces["hooks"]:
-        create_stub_file(
+        create_json_file(
             plugin_root / "hooks.json",
             {"hooks": {"SessionStart": [], "Stop": []}},
             args.force,
@@ -2673,14 +2693,14 @@ def _run_scaffold(args: argparse.Namespace) -> int:
             or bool(source_report["inline_mcp_server_names"])
         )
     ):
-        create_stub_file(
+        create_json_file(
             plugin_root / ".mcp.json",
             {"mcpServers": {}},
             args.force,
         )
 
     if enabled_surfaces["apps"]:
-        create_stub_file(
+        create_json_file(
             plugin_root / ".app.json",
             {"apps": {}},
             args.force,
@@ -2889,7 +2909,7 @@ def parse_args() -> argparse.Namespace:
 
     scaffold_parser = subparsers.add_parser(
         "scaffold",
-        help="Create a plugin skeleton with placeholder plugin.json and package docs.",
+        help="Create a plugin skeleton with a complete plugin.json and package docs.",
     )
     scaffold_parser.add_argument("plugin_name")
     scaffold_parser.add_argument(
@@ -2909,7 +2929,7 @@ def parse_args() -> argparse.Namespace:
     )
     scaffold_parser.add_argument("--with-skills", action="store_true", help="Create skills/ directory.")
     scaffold_parser.add_argument("--with-hooks", action="store_true", help="Create hooks/ directory.")
-    scaffold_parser.add_argument("--with-hooks-json", action="store_true", help="Create hooks.json placeholder.")
+    scaffold_parser.add_argument("--with-hooks-json", action="store_true", help="Create hooks.json scaffold.")
     scaffold_parser.add_argument(
         "--with-prompts",
         action="store_true",
@@ -2933,12 +2953,12 @@ def parse_args() -> argparse.Namespace:
     scaffold_parser.add_argument(
         "--with-mcp",
         action="store_true",
-        help="Create .mcp.json placeholder only for a real MCP integration the plugin will expose.",
+        help="Create .mcp.json scaffold only for a real MCP integration the plugin will expose.",
     )
     scaffold_parser.add_argument(
         "--with-apps",
         action="store_true",
-        help="Create .app.json placeholder only for a real ChatGPT App or app connector surface the plugin will expose.",
+        help="Create .app.json scaffold only for a real ChatGPT App or app connector surface the plugin will expose.",
     )
     scaffold_parser.add_argument(
         "--with-marketplace",

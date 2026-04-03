@@ -44,10 +44,10 @@ def _ensure_tomli_available() -> None:
         return
     except ModuleNotFoundError:
         pass
-    # Last resort: minimal stub so the import succeeds in restricted envs.
-    stub = types.ModuleType("tomli")
-    stub.load = lambda f: {}  # type: ignore[attr-defined]
-    sys.modules["tomli"] = stub
+    # Last resort: lightweight fallback so the import succeeds in restricted envs.
+    fallback_module = types.ModuleType("tomli")
+    fallback_module.load = lambda _file: {}  # type: ignore[attr-defined]
+    sys.modules["tomli"] = fallback_module
 
 _ensure_tomli_available()
 sys.path.insert(0, str(SCRIPT_DIR))

@@ -142,7 +142,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     if not args.no_policy:
         payload["policy"] = {"allow_implicit_invocation": bool(args.allow_implicit)}
 
-    # Always include a commented dependency stub in the file footer (more discoverable than empty YAML keys).
+    # Always include a commented dependency sample in the file footer (more discoverable than empty YAML keys).
     rendered = yaml.safe_dump(payload, sort_keys=False, allow_unicode=True).rstrip() + "\n"
     rendered += "\n# dependencies:\n#   tools:\n#     - type: \"mcp\"\n#       value: \"serverName\"\n#       description: \"MCP server description\"\n#       transport: \"streamable_http\"\n#       url: \"https://example.com/mcp\"\n"
 
