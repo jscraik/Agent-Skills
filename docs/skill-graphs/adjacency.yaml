@@ -61,6 +61,7 @@ apple-app-creator:
   recon-workbench: Audit the app binary and entitlements after creation
   simple-tasks: Track app build and release tasks locally
   xcode-makefiles: Add reproducible CLI builds after scaffolding the app
+apple-app-builder: {}
 architecture-interview:
   brainstorming: Explore options before the architecture interview
   diagram-cli: Generate architecture diagrams from ADR decisions
@@ -243,6 +244,7 @@ codex-agent-creator:
     agents
   decide-build-primitive: Decide whether the capability should be an agent, skill,
     or automation first
+codex-agent-builder: {}
 codex-automation-architect:
   ce-plan: Plan the automation contract before implementing
   codex-agent-creator: Create the agent role the automation will run under
@@ -264,7 +266,7 @@ codex-hooks-builder:
     a plugin
   gh-workflow: Ship and review hook-pack changes through the GitHub lifecycle
 codex-plugin-builder:
-  codex-agent-creator: Add agent roles to the plugin bundle alongside skills and hooks
+  codex-agent-builder: Add agent roles to the plugin bundle alongside skills and hooks
   decide-build-primitive: Decide whether the capability belongs in a plugin at all
   skill-builder: Author or upgrade a standalone skill before packaging it into a plugin
   skill-installer: Install a finished skill directly when full plugin packaging is
@@ -500,7 +502,7 @@ playwright-interactive:
   fixing-accessibility: Test keyboard navigation and focus via Playwright
   ui-visual-regression: Capture Playwright screenshots for regression baselines
 plugin-creator:
-  codex-agent-creator: Add agent roles to a plugin after the base manifest and folders
+  codex-agent-builder: Add agent roles to a plugin after the base manifest and folders
     are in place
   codex-plugin-builder: Build or validate a fuller Codex plugin package beyond the
     starter scaffold
