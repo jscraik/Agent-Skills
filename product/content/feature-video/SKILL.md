@@ -40,7 +40,8 @@ Do not use this skill when:
   - running app,
   - Stitch screens,
   - existing Remotion project,
-  - or screen recording plan;
+  - screen recording plan,
+  - or an existing `.mp4` when upload-only resume is intended;
 - intended destination:
   - PR comment,
   - release artifact,
@@ -48,7 +49,7 @@ Do not use this skill when:
   - or handoff note.
 - if the goal is a real product walkthrough recorded from a running app:
   - PR number or `current`,
-  - base URL,
+  - optional base URL, default `http://localhost:3000`,
   - and whether draft-PR creation is acceptable if no PR exists yet.
 
 ## Deliverables
@@ -84,7 +85,7 @@ Do not use this skill when:
 
 ## Production paths
 
-- Use the browser-record-and-upload path when the user wants a walkthrough of a running product flow and the output should land in a GitHub PR. This path uses `agent-browser`, `ffmpeg`, and `gh`, supports record-only fallback plus upload-only resume, and preserves the detailed auth/upload procedure in `references/browser-pr-walkthrough.md`.
+- Use the browser-record-and-upload path when the user wants a walkthrough of a running product flow and the output should land in a GitHub PR. This path uses `agent-browser`, `ffmpeg`, and `gh`, accepts `current`, an explicit PR number, or an existing `.mp4` for upload-only resume, supports record-only fallback plus optional draft-PR creation, and preserves the detailed auth/upload procedure in `references/browser-pr-walkthrough.md`.
 - Use `stitch-remotion` when the source of truth is Stitch screens rather than a live app.
 - Use `remotion` when a custom composed explainer is needed instead of a literal browser walkthrough.
 - Use an existing artifact plus `gh-workflow` when the video already exists and only packaging or PR attachment is needed.
@@ -94,6 +95,7 @@ Do not use this skill when:
 - Verify the walkthrough covers the intended feature, not an adjacent flow.
 - Verify the artifact exists at the reported output path.
 - Verify overlays, captions, or notes do not misstate the product behavior.
+- For browser PR walkthroughs, verify the chosen mode was correct: record-and-upload, record-only, or upload-only resume.
 - For PR upload workflows, verify the uploaded URL is a native `user-attachments/assets/` GitHub video URL before editing the PR body.
 
 ## Gotchas
@@ -111,6 +113,9 @@ Do not use this skill when:
 ## References
 
 - Browser walkthrough + GitHub PR upload: `references/browser-pr-walkthrough.md`
+- Source parity notes: `references/source-parity.md`
+- Routing and deliverable contract: `references/contract.yaml`
+- Trigger coverage: `references/evals.yaml`
 
 ## See Also
 

@@ -99,6 +99,12 @@ After `ce-review` synthesizes and deduplicates findings:
 
 Default review-created status:
 - `pending`, unless the repo explicitly pre-approves review findings to land as `ready`
+- residual actionable findings emitted after `mode:autofix` should land as `ready` because synthesis already performed the initial triage
+
+Never create review todos for:
+- advisory-only findings
+- deployment-only or release-owned notes
+- protected-artifact cleanup suggestions
 
 ## Triage lifecycle
 Status progression:

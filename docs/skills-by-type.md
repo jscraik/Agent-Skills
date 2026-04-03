@@ -11,16 +11,16 @@ Generated from `metadata.skill-type` tags in skill frontmatter.
 ## Summary
 
 - `library_api_reference`: 8
-- `product_verification`: 8
+- `product_verification`: 9
 - `data_fetch_analysis`: 6
 - `team_automation`: 36
 - `scaffolding_templates`: 27
 - `code_quality_review`: 17
 - `ci_cd_deployment`: 7
-- `runbook`: 4
+- `runbook`: 5
 - `infrastructure_ops`: 5
 - `invalid`: 0
-- `total_tagged`: 118
+- `total_tagged`: 120
 
 ## Validation Notes
 
@@ -46,8 +46,8 @@ Generated from `metadata.skill-type` tags in skill frontmatter.
 ### Library Api Reference
 
 - agent-native-architecture (product/domain)
+- coderabbit (utilities)
 - context7 (product/docs)
-- design-system (frontend/ui)
 - figma (frontend/tools)
 - oak-api (product/domain)
 - react-ui-patterns (frontend/ui)
@@ -59,6 +59,7 @@ Generated from `metadata.skill-type` tags in skill frontmatter.
 - agent-browser (utilities)
 - agent-native-audit (product/review)
 - agentation (frontend/tools)
+- design-system (frontend/ui)
 - playwright-interactive (frontend/tools)
 - reproduce-bug (utilities)
 - test-browser (frontend/tools)
@@ -175,6 +176,7 @@ Generated from `metadata.skill-type` tags in skill frontmatter.
 
 ### Runbook
 
+- arscontexta (utilities/codex-plugin-builder/fixtures/arscontexta-codex/skills)
 - diagram-cli (utilities)
 - recon-workbench (utilities)
 - security-threat-model (product/security)

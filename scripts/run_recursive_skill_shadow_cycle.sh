@@ -47,7 +47,7 @@ Options:
   --runs-per-profile N   Number of loop runs per pilot profile (default: 2)
   --window-days N        Window size for report aggregation (default: 7)
   --out-root PATH        Output root for run artifacts (default: artifacts/skill-graphs/runs)
-  --profiles-file PATH   JSON array of pilot profile ids (default: docs/skill-graphs/schemas/examples/pilot-profiles.json)
+  --profiles-file PATH   JSON array of pilot profile ids or profile objects (default: docs/skill-graphs/schemas/examples/pilot-profiles.json)
 USAGE
       exit 0
       ;;
@@ -64,9 +64,13 @@ if [[ ! -f "$profiles_file" ]]; then
 fi
 
 profiles=()
-while IFS= read -r profile; do
+profile_files=()
+profile_objectives=()
+while IFS=$'\t' read -r profile profile_file profile_objective; do
   [[ -z "$profile" ]] && continue
   profiles+=("$profile")
+  profile_files+=("$profile_file")
+  profile_objectives+=("$profile_objective")
 done < <(python3 - "$profiles_file" <<'PY'
 import json
 import sys
@@ -76,10 +80,48 @@ path = Path(sys.argv[1])
 data = json.loads(path.read_text(encoding="utf-8"))
 if not isinstance(data, list) or not data:
     raise SystemExit("profiles file must be a non-empty JSON array")
+
+
+def sanitize(value: str) -> str:
+    return value.replace("\t", " ").replace("\n", " ").strip()
+
+
+def emit(profile_id: str, profile_file: str = "", objective: str = "") -> None:
+    print("\t".join((sanitize(profile_id), sanitize(profile_file), sanitize(objective))))
+
+
 for item in data:
-    value = str(item).strip()
-    if value:
-        print(value)
+    if isinstance(item, str):
+        value = item.strip()
+        if value:
+            emit(value)
+        continue
+    if not isinstance(item, dict):
+        raise SystemExit("profile entries must be strings or objects")
+
+    profile_file = str(item.get("profile_file") or item.get("profile_path") or "").strip()
+    objective = str(item.get("objective") or "").strip()
+    profile_id = str(item.get("profile_id") or "").strip()
+
+    if profile_file:
+        resolved = Path(profile_file)
+        if not resolved.is_absolute():
+            manifest_relative = (path.parent / resolved).resolve()
+            repo_relative = (Path.cwd() / resolved).resolve()
+            if manifest_relative.is_file():
+                resolved = manifest_relative
+            else:
+                resolved = repo_relative
+        if not resolved.is_file():
+            raise SystemExit(f"profile file does not exist: {profile_file}")
+        if not profile_id:
+            profile_obj = json.loads(resolved.read_text(encoding="utf-8"))
+            profile_id = str(profile_obj.get("profile_id") or "").strip()
+
+    if not profile_id:
+        raise SystemExit("profile object entries require profile_id or profile_file")
+
+    emit(profile_id, profile_file, objective)
 PY
 )
 
@@ -91,12 +133,16 @@ fi
 example_profile="docs/skill-graphs/schemas/examples/ui-skills-profile.example.json"
 loop_script="utilities/skill-builder/scripts/recursive_skill_loop.py"
 report_script="utilities/skill-builder/scripts/build_recursive_skill_shadow_report.py"
+arscontexta_queue_script="utilities/skill-builder/scripts/build_arscontexta_intervention_queue.py"
 shadow_md="docs/skill-graphs/pilots/ui-skills-shadow-results.md"
 readout_md="docs/skill-graphs/pilots/ui-skills-pilot-readout.md"
+arscontexta_queue_md="docs/skill-graphs/pilots/arscontexta-intervention-queue.md"
 dashboard_json="artifacts/skill-graphs/pilot/shadow-dashboard.json"
+baseline_snapshot_json="artifacts/skill-graphs/pilot/shadow-baseline.json"
 daily_health_md="docs/skill-graphs/telemetry/daily-skill-health.md"
 failure_patterns_jsonl="artifacts/skill-graphs/telemetry/failure-pattern-candidates.jsonl"
 promotion_queue_md="artifacts/skill-graphs/telemetry/promotion-queue.md"
+arscontexta_queue_json="artifacts/skill-graphs/telemetry/arscontexta-intervention-queue.json"
 
 echo "[shadow-cycle] runs_per_profile=${runs_per_profile}"
 echo "[shadow-cycle] window_days=${window_days}"
@@ -119,9 +165,22 @@ cleanup() {
 trap cleanup EXIT
 
 for profile in "${profiles[@]}"; do
+  idx=0
+  for existing in "${profiles[@]}"; do
+    if [[ "$existing" == "$profile" ]]; then
+      break
+    fi
+    idx=$((idx + 1))
+  done
+
+  source_profile_file="${profile_files[$idx]}"
+  profile_objective="${profile_objectives[$idx]}"
+
   for n in $(seq 1 "$runs_per_profile"); do
-    profile_file="$tmp_dir/${profile}-${n}.json"
-    python3 - "$example_profile" "$profile_file" "$profile" <<'PY'
+    profile_file="$source_profile_file"
+    if [[ -z "$profile_file" ]]; then
+      profile_file="$tmp_dir/${profile}-${n}.json"
+      python3 - "$example_profile" "$profile_file" "$profile" <<'PY'
 import json
 import sys
 from pathlib import Path
@@ -136,8 +195,34 @@ obj["scope_skill"] = profile
 obj["scope_profile"] = "ui"
 out.write_text(json.dumps(obj, indent=2) + "\n", encoding="utf-8")
 PY
+    else
+      if [[ "$profile_file" != /* ]]; then
+        profile_file="$repo_root/$profile_file"
+      fi
+      rendered_profile_file="$tmp_dir/${profile}-${n}.json"
+      python3 - "$profile_file" "$rendered_profile_file" "$profile" <<'PY'
+import json
+import sys
+from pathlib import Path
 
-    objective="Shadow evaluation run ${n} for ${profile}: improve instruction quality with safe, testable outputs."
+src = Path(sys.argv[1])
+out = Path(sys.argv[2])
+profile = sys.argv[3]
+
+obj = json.loads(src.read_text(encoding="utf-8"))
+obj["profile_id"] = profile
+out.write_text(json.dumps(obj, indent=2) + "\n", encoding="utf-8")
+PY
+      profile_file="$rendered_profile_file"
+    fi
+
+    objective="$profile_objective"
+    if [[ -z "$objective" ]]; then
+      objective="Shadow evaluation run ${n} for ${profile}: improve instruction quality with safe, testable outputs."
+    else
+      objective="${objective//\{n\}/$n}"
+      objective="${objective//\{profile_id\}/$profile}"
+    fi
 
     echo "[shadow-cycle] run profile=${profile} n=${n}"
     if ! python3 "$loop_script" \
@@ -157,11 +242,21 @@ python3 "$report_script" \
   --shadow-md "$shadow_md" \
   --readout-md "$readout_md" \
   --out-json "$dashboard_json" \
+  --baseline-snapshot-json "$baseline_snapshot_json" \
+  --refresh-baseline-snapshot \
   --daily-health-md "$daily_health_md" \
   --failure-patterns-jsonl "$failure_patterns_jsonl" \
   --promotion-queue-md "$promotion_queue_md"
 
-for output in "$shadow_md" "$readout_md" "$dashboard_json" "$daily_health_md" "$failure_patterns_jsonl" "$promotion_queue_md"; do
+python3 "$arscontexta_queue_script" \
+  --runs-root "$out_root" \
+  --pilot-profiles-file "$profiles_file" \
+  --dashboard-json "$dashboard_json" \
+  --failure-patterns-jsonl "$failure_patterns_jsonl" \
+  --output-json "$arscontexta_queue_json" \
+  --output-md "$arscontexta_queue_md"
+
+for output in "$shadow_md" "$readout_md" "$arscontexta_queue_md" "$dashboard_json" "$baseline_snapshot_json" "$daily_health_md" "$failure_patterns_jsonl" "$promotion_queue_md" "$arscontexta_queue_json"; do
   require_file_nonempty "$output" "$(basename "$output")"
 done
 

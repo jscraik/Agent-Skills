@@ -11,19 +11,30 @@ Use the Remotion ruleset as a focused advisor for composition design, timing, as
 
 ## Table of Contents
 - [Standards snapshot](#standards-snapshot)
+- [Design-system integration](#design-system-integration)
 - [When to use](#when-to-use)
 - [Required inputs](#required-inputs)
 - [Deliverables](#deliverables)
+- [Philosophy](#philosophy)
+- [Variation](#variation)
 - [Failure mode](#failure-mode)
 - [Workflow](#workflow)
+- [Anti-patterns](#anti-patterns)
 - [Validation](#validation)
 - [References](#references)
 
 ## Standards snapshot
 - Keep guidance rule-backed and topic-specific rather than generic React advice.
+- Treat React 19 as the default baseline for Remotion composition code and related UI integration guidance.
 - Favor deterministic timing, asset loading, and caption workflows over visual guesswork.
 - Prefer Remotion-native primitives and official utilities before custom abstractions.
+- Hold caption, readability, and motion recommendations to WCAG 2.2-aligned outcomes where they apply to interactive playback surfaces and transcript support.
 - Treat render reliability and decode support as first-class constraints, not cleanup work.
+
+## Design-system integration
+- Apply `frontend/ui/references/design-system-integration-contract.md` for typography, spacing, iconography, and token choices used in overlays, captions, and UI-adjacent composition elements.
+- Route shared token architecture and system-level visual language changes to `design-system`.
+- Use `frontend/ui/references/skill-routing-matrix-2026.md` when requests mix Remotion concerns with broader frontend-skill ownership.
 
 ## When to use
 - You are building or reviewing a Remotion composition.
@@ -52,6 +63,20 @@ Use the Remotion ruleset as a focused advisor for composition design, timing, as
 - Use the smallest rule set that fully explains the issue.
 - Prioritize render reliability and timing correctness over stylistic novelty.
 - Keep advice tied to real Remotion capabilities rather than generic React patterns.
+- Use a clear framework: diagnose timing and decode risk first, then tune visual polish.
+- Make tradeoff decisions explicit so we understand why reliability wins over novelty when deadlines are tight.
+- Ask: "What breaks first in render output if this assumption is wrong?"
+- Ask: "Can we prove timing and decode behavior before adding stylistic complexity?"
+- Ask: "Why are we adding this transition if it does not improve understanding?"
+
+## Variation
+- Adapt recommendations to project maturity:
+  - early prototype: focus on composition correctness and deterministic timing;
+  - production pipeline: prioritize render reliability, asset fallback, and repeatable validation.
+- Vary depth by user need:
+  - one bug report: answer from one primary rules file plus one adjacency at most;
+  - architecture review: map cross-file constraints only after first-risk verification passes.
+- Keep package boundary explicit: start with 2-3 relevant rule modules, then expand only if evidence requires it.
 
 ## Failure mode
 - If the request is about general frontend video UI rather than Remotion itself, route to a broader frontend skill.
@@ -74,9 +99,12 @@ Use the Remotion ruleset as a focused advisor for composition design, timing, as
 5. End with the concrete validation commands or checks the user should run next.
 
 ## Anti-patterns
-- Dumping the full ruleset when only one or two rule files matter.
-- Giving animation advice without checking timing, duration, and asset constraints.
-- Treating decode support or caption sync as optional cleanup.
+- Avoid dumping the full ruleset when only one or two rule files matter.
+- Do not give animation advice without checking timing, duration, and asset constraints.
+- Never treat decode support or caption sync as optional cleanup.
+- Avoid suggesting dependency churn before exhausting Remotion-native primitives and utilities.
+- Anti-pattern warning: transitions that obscure narration, caption readability, or scene intent are the wrong default.
+- Incorrect sequencing of timing assumptions and asset checks creates fragile renders and hard-to-debug output.
 
 ## Validation
 - Fail fast: stop at the first broken media assumption and validate that before broadening the recommendation.
@@ -87,6 +115,7 @@ Use the Remotion ruleset as a focused advisor for composition design, timing, as
   - decode support;
   - duration and timing assumptions;
   - caption synchronization.
+- Confirm UI-adjacent visual decisions remain compliant with `frontend/ui/references/design-system-integration-contract.md`.
 
 ## Examples
 - "Which Remotion rule files should I use to fix choppy transitions and timing drift?"
@@ -106,6 +135,7 @@ Use the Remotion ruleset as a focused advisor for composition design, timing, as
 |---|---|
 | [[sora]] | Compare Remotion (code-driven) with Sora (AI-driven) video |
 | [[stitch-remotion]] | Generate Remotion compositions from Stitch screen assets |
+| [[design-system]] | Keep caption, overlay, and UI-adjacent typography and token usage aligned with system governance |
 | [[imagegen]] | Generate still images to use as Remotion assets |
 | [[slides]] | Convert slide decks into Remotion video compositions |
 | [[video-transcript-downloader]] | Download reference transcripts before scripting Remotion narration |

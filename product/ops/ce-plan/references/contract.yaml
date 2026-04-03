@@ -17,7 +17,7 @@ inputs:
   - optional framework, design-system, rollout, and testing context
 
 outputs:
-  - a plan-mode choice such as standard-plan, ui-enhanced-plan, or dedicated-ui-plan
+  - a plan-mode choice such as generic-plan, standard-plan, ui-enhanced-plan, or dedicated-ui-plan
   - a written plan artifact with stable phase and acceptance IDs
   - exact parallel research support via `repo-research-analyst`, `learnings-researcher`, and conditional external-research roles when needed
   - explicit validation, rollout, and execution-control guidance
@@ -37,6 +37,7 @@ risks:
   - silently dropping requirements-doc content or prior plan context; mitigate with explicit source carry-forward and validation
   - inventing behavior; mitigate with spec-first and UI-spec-first rules plus traceability checks
   - shallow plans without repo grounding; mitigate with bounded parallel subagent research
+  - under-scoping a plan that touches external contract surfaces; mitigate with post-research reclassification from lightweight to standard when env vars, exported APIs, CI, shared types, or external docs are affected
   - mixing planning with execution-time unknowns; mitigate with deferred-implementation notes and directional-only technical-design guidance
   - UI ambiguity causing execution churn; mitigate with explicit mode selection, prototype-planning rules, and prototype-to-production mapping
   - plan/state drift during execution; mitigate with the Execution Ledger and planning-mode handshake

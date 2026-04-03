@@ -238,6 +238,16 @@ Follow these steps in order, skipping only if there is a clear reason why they a
 - Use lowercase letters, digits, and hyphens only; normalize user-provided titles to hyphen-case (e.g., "Plan Mode" -> `plan-mode`).
 - When generating names, generate a name under 64 characters (letters, digits, hyphens).
 - Prefer short, verb-led phrases that describe the action.
+
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[skill-builder]] | Improve, quality-gate, and package a skill after the first draft exists |
+| [[plugin-creator]] | Scaffold a plugin wrapper when the new skill should ship inside a Codex plugin |
+| [[skill-installer]] | Distribute the finished skill into a local Codex skills directory or another repo source |
+
+**Topic map:** [[agent-ops]]
 - Namespace by tool when it improves clarity or triggering (e.g., `gh-address-comments`, `linear-address-issue`).
 - Name the skill folder exactly after the skill name.
 
@@ -414,17 +424,3 @@ Considerations when forward-testing:
 
 If forward-testing only succeeds when subagents see leaked context, tighten the skill or the
 forward-testing setup before trusting the result.
-
-## See Also
-
-| Skill | When to use together |
-|---|---|
-| [[utilities/skill-builder]] | Apply the canonical skill-building workflow, evals, and governance checks |
-| [[skills-system/plugin-creator]] | Package newly created skills inside a plugin when the user wants distributable packaging |
-| [[product/docs/docs-expert]] | Tighten supporting references or skill-adjacent documentation after scaffold creation |
-
-**Topic map:** [[skill-authoring]]
-
-## Gotchas
-
-- Always generate new skills through `init_skill.py` first; patching an ad hoc folder later creates avoidable drift.

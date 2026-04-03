@@ -18,41 +18,76 @@ Shadow mode runs evaluator + checkpoint adversarial checks without automatic imp
 
 ## Window summary
 
-- Window: `2026-02-14..2026-02-20`
-- Runs total: `8`
+- Window: `2026-03-25..2026-03-31`
+- Baseline source: `bootstrap pending`
+- Runs total: `77`
 - Runs by profile:
-  - `ui-ux-creative-coding`: `5`
-  - `interface-craft`: `1`
-  - `frontend-ui-design`: `1`
-  - `react-ui-patterns`: `1`
+  - `ui-ux-creative-coding`: `19`
+  - `interface-craft`: `19`
+  - `frontend-ui-design`: `20`
+  - `react-ui-patterns`: `19`
 
 ### KPI snapshot
 
-- Repeat failure pattern rate: `12.5%` (delta vs baseline: `n/a`)
-- First-pass acceptance: `25.0%` (delta vs baseline: `n/a`)
-- Iterations median / p90: `2.00` / `4.30`
-- Quality uplift median: `0.141`; positive uplift rate: `100.0%`
-- Critical non-regression compliance: `62.5%`
-- Budget compliance: `87.5%`
-- Evaluator flip rate: `24.4%`
-- Capture coverage: `0.0%` (`0/8` runs with capture artifacts)
-- Confidence bucket distribution: `high=0` `medium=0` `low=0` `unknown=8`
-- Injection usage rate: `0.0%` (`0/8` runs, total lessons `0`, suppressed-by-controls runs `0`)
-- Rollout mode distribution: `active=0` `observe_only=8` `off=0` `other=0`
-- Uplift gate decisions (promotion/auto-apply): `pass=0/0` `insufficient_data=0/0` `regressed=0/0`
+- Repeat failure pattern rate: `14.3%` (delta vs baseline: `n/a`)
+- First-pass acceptance: `0.0%` (delta vs baseline: `n/a`)
+- Iterations median / p90: `2.00` / `4.00`
+- Quality uplift median: `0.158`; positive uplift rate: `100.0%`
+- Critical non-regression compliance: `39.0%`
+- Terminal non-regression compliance: `100.0%`
+- Non-regression recovered: `61.0%`
+- Budget compliance: `100.0%`
+- Evaluator flip rate: `23.9%`
+- Capture coverage: `100.0%` (`77/77` runs with capture artifacts)
+- Confidence bucket distribution: `high=0` `medium=30` `low=47` `unknown=0`
+- Injection usage rate: `2.6%` (`2/77` runs, total lessons `2`, suppressed-by-controls runs `0`)
+- Rollout mode distribution: `active=77` `observe_only=0` `off=0` `other=0`
+- Uplift gate decisions (promotion/auto-apply): `pass=0/0` `insufficient_data=77/77` `regressed=0/0`
 
 ## Run log
 
 | Run | Profile | Status | Stop reason | Iterations | Uplift | Non-regression | Tokens |
 |---|---|---|---|---:|---:|:---:|---:|
-| run_20260220T195545Z_8799c2 | ui-ux-creative-coding | passed | pass | 1 | +0.040 | ✅ | 44 |
-| run_20260220T150021Z_518880 | interface-craft | passed | pass | 2 | +0.132 | ✅ | 219 |
-| run_20260220T150021Z_82ecf7 | react-ui-patterns | passed | pass | 1 | +0.097 | ✅ | 85 |
-| run_20260220T150021Z_9b592b | ui-ux-creative-coding | passed | pass | 2 | +0.092 | ❌ | 235 |
-| run_20260220T150021Z_bb9acb | frontend-ui-design | passed | pass | 3 | +0.151 | ❌ | 427 |
-| run_20260220T144736Z_425b7a | ui-ux-creative-coding | passed | pass | 2 | +0.187 | ❌ | 181 |
-| run_20260220T144710Z_425b7a | ui-ux-creative-coding | passed | pass | 5 | +0.304 | ✅ | 959 |
-| run_20260220T144703Z_425b7a | ui-ux-creative-coding | failed | budget_exhausted | 4 | +0.277 | ✅ | 645 |
+| run_20260331T152827531388Z_4270e1_1632580e | ui-ux-creative-coding | passed | pass | 2 | +0.179 | ✅ | 394 |
+| run_20260331T152827612936Z_5b4309_16328fa8 | interface-craft | passed | pass | 2 | +0.064 | ❌ | 357 |
+| run_20260331T152827697664Z_1c1272_1632bad5 | frontend-ui-design | passed | pass | 4 | +0.249 | ❌ | 4407 |
+| run_20260331T152827779313Z_c6442d_1632e82b | react-ui-patterns | passed | pass | 2 | +0.158 | ❌ | 389 |
+| run_20260331T152813334763Z_1c1272_161e7ad5 | frontend-ui-design | passed | pass | 4 | +0.249 | ❌ | 4407 |
+| run_20260331T151852050720Z_5b4309_114cefa8 | interface-craft | passed | pass | 2 | +0.064 | ❌ | 357 |
+| run_20260331T151852142690Z_1c1272_114d2ad5 | frontend-ui-design | passed | pass | 4 | +0.249 | ❌ | 1385 |
+| run_20260331T151852236494Z_c6442d_114d582b | react-ui-patterns | passed | pass | 2 | +0.158 | ❌ | 389 |
+| run_20260331T151851936706Z_4270e1_114cb80e | ui-ux-creative-coding | passed | pass | 2 | +0.179 | ✅ | 394 |
+| run_20260331T151815127679Z_4270e1_1112780e | ui-ux-creative-coding | passed | pass | 2 | +0.179 | ✅ | 394 |
+| run_20260331T151815243207Z_5b4309_1112bfa8 | interface-craft | passed | pass | 2 | +0.064 | ❌ | 357 |
+| run_20260331T151815347202Z_1c1272_1112ead5 | frontend-ui-design | passed | pass | 4 | +0.249 | ❌ | 1385 |
+| run_20260331T151815442395Z_c6442d_1113182b | react-ui-patterns | passed | pass | 2 | +0.158 | ❌ | 389 |
+| run_20260331T145040232925Z_4270e1_2dd980eb | ui-ux-creative-coding | passed | pass | 2 | +0.179 | ✅ | 394 |
+| run_20260331T145040392381Z_5b4309_2ddefa81 | interface-craft | passed | pass | 2 | +0.064 | ❌ | 357 |
+| run_20260331T145040546695Z_1c1272_2de1ad51 | frontend-ui-design | passed | pass | 4 | +0.249 | ❌ | 1385 |
+| run_20260331T145040697904Z_c6442d_2de482bd | react-ui-patterns | passed | pass | 2 | +0.158 | ❌ | 389 |
+| run_20260331T143754115936Z_4270e1_1056f80e | ui-ux-creative-coding | passed | pass | 2 | +0.179 | ✅ | 394 |
+| run_20260331T143754207808Z_5b4309_10575fa8 | interface-craft | passed | pass | 2 | +0.064 | ❌ | 357 |
+| run_20260331T143754291331Z_1c1272_10578ad5 | frontend-ui-design | passed | pass | 4 | +0.249 | ❌ | 1385 |
+| run_20260331T143754373532Z_c6442d_1058f82b | react-ui-patterns | passed | pass | 2 | +0.158 | ❌ | 389 |
+| run_20260331T143705500263Z_4270e1_f67680eb | ui-ux-creative-coding | passed | pass | 2 | +0.179 | ✅ | 394 |
+| run_20260331T143705631166Z_e0cea3_f67cd447 | interface-craft | passed | pass | 2 | +0.080 | ❌ | 393 |
+| run_20260331T143705716005Z_1c1272_f681ad51 | frontend-ui-design | passed | pass | 4 | +0.249 | ❌ | 1385 |
+| run_20260331T143705798653Z_f4298e_f6846cbf | react-ui-patterns | escalated | evaluator_conflict | 1 | +0.068 | ✅ | 191 |
+| run_20260331T143338402916Z_4270e1_d61080eb | ui-ux-creative-coding | passed | pass | 2 | +0.179 | ✅ | 394 |
+| run_20260331T143338495120Z_5b4309_d616fa81 | interface-craft | passed | pass | 2 | +0.064 | ❌ | 357 |
+| run_20260331T143338576793Z_1c1272_d619ad51 | frontend-ui-design | passed | pass | 4 | +0.249 | ❌ | 1385 |
+| run_20260331T143338663201Z_c6442d_d61d82bd | react-ui-patterns | passed | pass | 2 | +0.158 | ❌ | 389 |
+| run_20260331T143101029285Z_4270e1_bff780eb | ui-ux-creative-coding | passed | pass | 2 | +0.179 | ✅ | 394 |
+| run_20260331T143101103918Z_5b4309_bffafa81 | interface-craft | passed | pass | 2 | +0.064 | ❌ | 357 |
+| run_20260331T143101180026Z_2ac1a9_bffd74d5 | frontend-ui-design | escalated | evaluator_conflict | 5 | +0.248 | ✅ | 1574 |
+| run_20260331T143101254668Z_c6442d_c00082bd | react-ui-patterns | passed | pass | 2 | +0.158 | ❌ | 389 |
+| run_20260331T142550018594Z_9b592b_6bcdd322 | ui-ux-creative-coding | passed | pass | 2 | +0.138 | ❌ | 236 |
+| run_20260331T142550100545Z_518880_6bd4e292 | interface-craft | passed | pass | 3 | +0.124 | ❌ | 412 |
+| run_20260331T142550175622Z_bb9acb_6bd7bddf | frontend-ui-design | passed | pass | 4 | +0.245 | ❌ | 880 |
+| run_20260331T142550250609Z_82ecf7_6bdae6fc | react-ui-patterns | escalated | evaluator_conflict | 1 | +0.094 | ✅ | 85 |
+| run_20260331T141227072955Z_fc4e0c_15c57efe | react-ui-patterns | passed | pass | 2 | +0.118 | ❌ | 216 |
+| run_20260331T141227147051Z_75196b_15c59f5e | react-ui-patterns | passed | pass | 3 | +0.147 | ❌ | 421 |
+| run_20260331T141227221095Z_231f82_15c5b397 | react-ui-patterns | passed | pass | 3 | +0.195 | ❌ | 433 |
 
 ## Exit gate checks
 

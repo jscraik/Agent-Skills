@@ -1,0 +1,10 @@
+Lifecycle readiness findings:
+- plugins/cache/openai-curated/cloudflare/d88301d4694edc6282ca554e97fb8425cbd5a250/skills/building-ai-agent-on-cloudflare/SKILL.md [skill] -> degraded
+  - description quality is too low for reliable routing
+- plugins/cache/openai-curated/cloudflare/d88301d4694edc6282ca554e97fb8425cbd5a250/skills/building-mcp-server-on-cloudflare/SKILL.md [skill] -> degraded
+  - description quality is too low for reliable routing
+Duplicate skill names:
+- arscontexta: plugins/arscontexta/skills/arscontexta/SKILL.md, utilities/codex-plugin-builder/fixtures/arscontexta-codex/skills/arscontexta/SKILL.md
+- gh-fix-ci: github/gh-fix-ci/SKILL.md, plugins/cache/openai-curated/github/d88301d4694edc6282ca554e97fb8425cbd5a250/skills/gh-fix-ci/SKILL.md
+- linear: plugins/cache/openai-curated/linear/d88301d4694edc6282ca554e97fb8425cbd5a250/skills/linear/SKILL.md, product/ops/linear/SKILL.md
+Catalog check complete. assets=158 healthy=156 degraded=2 blocked=0 duplicates=3

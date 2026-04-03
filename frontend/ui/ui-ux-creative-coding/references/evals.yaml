@@ -1,4 +1,25 @@
 cases:
+  - name: trigger-animation-micro-interactions
+    category: happy
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Can you add purposeful animations, hover transitions, and micro-interactions to this settings UI so it feels more alive without hurting usability?"
+    acceptance:
+      - type: regex
+        value: "(micro-interactions|micro interactions)"
+      - type: regex
+        value: "(hero moment|feedback layer|transition layer|delight layer)"
+      - type: regex
+        value: "(reduced-motion|prefers-reduced-motion)"
+
+  - name: negative-remotion-video-route-away
+    category: negative
+    should_trigger: false
+    prompt: "I need help building a Remotion composition with scene transitions and render settings for a video export."
+    acceptance:
+      - type: regex
+        value: "(remotion|out of scope|route)"
+
   - name: happy-path-standard-headings
     category: happy
     should_trigger: true

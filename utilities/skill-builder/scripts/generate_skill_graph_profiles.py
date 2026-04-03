@@ -299,18 +299,48 @@ def write_baseline(
     write_json(baseline_path, payload)
 
 
-def write_checklist(path: Path, generated_at: str, entries: Iterable[SkillEntry]) -> None:
+def load_owner_map(path: Path) -> Dict[str, Any]:
+    if not path.exists():
+        return {}
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return {}
+    return payload if isinstance(payload, dict) else {}
+
+
+def _sanitize_assignment(value: Any, fallback: str) -> str:
+    text = str(value).strip() if value is not None else ""
+    return text if text else fallback
+
+
+def write_checklist(
+    path: Path,
+    generated_at: str,
+    entries: Iterable[SkillEntry],
+    owner_map: Dict[str, Any],
+) -> None:
     rows = sorted(entries, key=lambda item: item.relative_skill_dir)
     wave_counts: Dict[str, int] = {}
     for row in rows:
         wave_counts[row.wave] = wave_counts.get(row.wave, 0) + 1
+
+    defaults_raw = owner_map.get("defaults", {}) if isinstance(owner_map.get("defaults"), dict) else {}
+    fallback_status = _sanitize_assignment(defaults_raw.get("readiness_status"), "pending")
+    fallback_owner = _sanitize_assignment(defaults_raw.get("owner"), "unassigned")
+    fallback_due_date = _sanitize_assignment(defaults_raw.get("due_date"), "tbd")
+
+    skills_map = owner_map.get("skills", {}) if isinstance(owner_map.get("skills"), dict) else {}
+    fallback_row_count = 0
 
     lines = [
         "# Skill-by-Skill Onboarding Checklist (All-Skills Graph Migration)",
         "",
         f"- Generated at: `{generated_at}`",
         f"- Active skills: `{len(rows)}`",
-        "- Status default: `pending`",
+        f"- Status default: `{fallback_status}`",
+        f"- Owner default: `{fallback_owner}`",
+        f"- Due date default: `{fallback_due_date}`",
         "",
         "## Wave summary",
         "",
@@ -331,9 +361,37 @@ def write_checklist(path: Path, generated_at: str, entries: Iterable[SkillEntry]
     for idx, row in enumerate(rows, start=1):
         skill_path = row.skill_md.relative_to(ROOT).as_posix()
         profile_path = row.profile_path.relative_to(ROOT).as_posix()
+        assignment = None
+        candidate_keys = (skill_path, row.relative_skill_dir)
+        for key in candidate_keys:
+            raw = skills_map.get(key)
+            if isinstance(raw, dict):
+                assignment = raw
+                break
+
+        if assignment is None:
+            fallback_row_count += 1
+            readiness_status = fallback_status
+            owner = fallback_owner
+            due_date = fallback_due_date
+        else:
+            readiness_status = _sanitize_assignment(assignment.get("readiness_status"), fallback_status)
+            owner = _sanitize_assignment(assignment.get("owner"), fallback_owner)
+            due_date = _sanitize_assignment(assignment.get("due_date"), fallback_due_date)
+
         lines.append(
-            f"| {idx} | `{skill_path}` | `{profile_path}` | `{row.delegation_mode}` | `{row.wave}` | `pending` | `unassigned` | `tbd` |"
+            f"| {idx} | `{skill_path}` | `{profile_path}` | `{row.delegation_mode}` | `{row.wave}` | `{readiness_status}` | `{owner}` | `{due_date}` |"
         )
+
+    lines.extend(
+        [
+            "",
+            "## Assignment coverage",
+            "",
+            f"- Rows using explicit per-skill assignment: `{len(rows) - fallback_row_count}`",
+            f"- Rows using fallback defaults: `{fallback_row_count}`",
+        ]
+    )
 
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text("\n".join(lines).rstrip() + "\n", encoding="utf-8")
@@ -363,6 +421,11 @@ def parse_args() -> argparse.Namespace:
         "--checklist-out",
         default=f"artifacts/skill-graphs/onboarding/skill-onboarding-checklist-{today}.md",
         help="Path for onboarding checklist markdown (repo-relative)",
+    )
+    parser.add_argument(
+        "--owner-map",
+        default="artifacts/skill-graphs/onboarding/skill-owner-map.json",
+        help="Optional JSON map for checklist readiness_status/owner/due_date fields",
     )
     parser.add_argument(
         "--frontmatter-profile-binding",
@@ -442,7 +505,9 @@ def main() -> int:
     )
 
     checklist_path = (repo_root / args.checklist_out).resolve()
-    write_checklist(checklist_path, generated_at, entries)
+    owner_map_path = (repo_root / args.owner_map).resolve()
+    owner_map = load_owner_map(owner_map_path)
+    write_checklist(checklist_path, generated_at, entries, owner_map)
 
     print(
         json.dumps(
@@ -453,6 +518,7 @@ def main() -> int:
                 "frontmatter_updated": frontmatter_updated,
                 "baseline_out": str(baseline_path.relative_to(repo_root)),
                 "checklist_out": str(checklist_path.relative_to(repo_root)),
+                "owner_map": str(owner_map_path.relative_to(repo_root)),
             },
             indent=2,
         )

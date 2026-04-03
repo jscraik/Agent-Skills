@@ -81,6 +81,12 @@ When asked to build core UI controls in the Apps-in-ChatGPT brand, follow:
 For cross-platform layout guidance (web, desktop), use:
 - `references/layout-grids-breakpoints.md`
 
+For layout/spacing rhythm diagnosis and composition cleanup, use:
+- `references/layout-rhythm-audit.md`
+
+For adaptation planning across mobile/tablet/desktop/print/email contexts, use:
+- `references/cross-context-adaptation.md`
+
 ## 11.9) Iconography (official set)
 Use the Apps-in-ChatGPT icon set and category guidance:
 - `references/iconography-apps-in-chatgpt.md`

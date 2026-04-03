@@ -95,4 +95,31 @@ tasks:
     title: Final verification and go/no-go readiness summary
     depends_on: [M10, M11]
 ```
+
+Outstanding onboarding/readiness closeout plan (2026-03-29):
+
+```yaml
+tasks:
+  - id: P0
+    title: Baseline freeze and closeout contract
+    depends_on: []
+  - id: P1
+    title: Event-envelope gate remediation
+    depends_on: [P0]
+  - id: P2
+    title: Checklist ownership and status operationalization
+    depends_on: [P0]
+  - id: P3
+    title: Plan-state and completion-tracking reconciliation
+    depends_on: [P0, P1, P2]
+  - id: P4
+    title: Worktree closeout and change-slice hygiene
+    depends_on: [P1, P2, P3]
+  - id: P5
+    title: Final validation and readiness handoff
+    depends_on: [P4]
+```
+
+Closeout status update (2026-03-30):
+- Closeout execution completed; evidence recorded in `docs/plans/2026-03-29-fix-outstanding-onboarding-readiness-closeout-plan.md` execution ledger and acceptance checklist.
 <!-- AGENT-FIRST-PLANS:END -->

@@ -1,6 +1,6 @@
 ---
 name: baseline-ui
-description: Check Tailwind UI work for typography scale, motion timing, accessibility, and layout anti-patterns. Use when the user wants guardrail-style UI validation or cleanup, not a full redesign.
+description: Check Tailwind UI work for accessibility, performance, theming, responsive behavior, and anti-patterns. Use when the user wants guardrail-style UI validation, scored technical audits, or targeted cleanup, not a full redesign.
 metadata:
   skill-type: code_quality_review
 ---
@@ -14,6 +14,11 @@ Current baseline markers:
 - Next.js 16 conventions when the target app is on Next.js.
 - Tailwind CSS v4 utility patterns and token-safe usage.
 - WCAG 2.2 accessibility expectations for review findings.
+- Use `frontend/ui/references/skill-routing-matrix-2026.md` when deciding whether this skill should audit or route to a narrower frontend owner.
+
+Design-system integration contract:
+- Apply `frontend/ui/references/design-system-integration-contract.md` when auditing typography, spacing, iconography, and token usage.
+- Treat drift from semantic token and icon governance as a first-class finding, not optional polish.
 
 ## How to use
 
@@ -25,6 +30,15 @@ Current baseline markers:
   - violations (quote the exact line/snippet)
   - why it matters (1 short sentence)
   - a concrete fix (code-level suggestion)
+
+- `/baseline-ui --audit <area>`
+  Run score-first technical audit mode and output:
+  - 5-dimension scorecard (0-4 each, total `/20`)
+  - P0-P3 prioritized findings with impact and location
+  - systemic patterns and positive findings
+  - recommended follow-up skill sequence
+
+In `--audit` mode, do not apply code fixes unless the user explicitly asks for edits.
 
 ## Stack
 
@@ -95,6 +109,30 @@ Current baseline markers:
 - SHOULD limit accent color usage to one per view
 - SHOULD use existing theme or Tailwind CSS color tokens before introducing new ones
 
+## Flow Friction Overlay
+
+Use this overlay in `--audit` mode when the target is a user flow, decision surface, or dense UI rather than a single isolated component.
+
+- Check whether the user faces more than 4 meaningful visible choices at once without grouping or recommendation support.
+- Check whether key information needed for an action is hidden in another screen, tab, modal, or side panel.
+- Check whether the interface forces reading, deciding, and navigating at the same time.
+- If these issues appear, report them under anti-patterns or systemic patterns instead of inventing a second score axis.
+
+## Audit report mode
+
+Use this mode when the user asks for a technical quality audit, quality score, or release-readiness review.
+
+1. Score these dimensions from 0 to 4: Accessibility, Performance, Theming, Responsive Design, and Anti-Patterns.
+2. Report total score as `/20` with rating band.
+3. Classify issues by severity:
+   - `P0`: blocking
+   - `P1`: major
+   - `P2`: minor
+   - `P3`: polish
+4. Include anti-pattern verdict first, then executive summary, detailed findings by severity, systemic patterns, positive findings, and prioritized follow-up actions.
+5. When the audit scope is a real user flow, add a short flow-friction note if cognitive overload or context switching materially increases error risk.
+
+Reference template: `references/audit-scorecard.md`.
 
 ## Philosophy
 - Keep fixes minimal, targeted, and reversible.
@@ -104,6 +142,7 @@ Current baseline markers:
 ## When to use
 - Use this skill when the user asks to audit or fix the domain covered by this skill.
 - Use during UI review passes when quick, concrete remediation is needed.
+- Keep scope to audit and targeted cleanup only; route broad redesign direction work to `frontend-ui-design` or `frontend-design`.
 
 ## Required inputs
 - Target file(s) or component scope to review.
@@ -114,6 +153,8 @@ Current baseline markers:
 - Prioritized findings with exact snippets.
 - Why each issue matters (brief rationale).
 - Concrete code-level fix suggestions with minimal scope.
+- Optional score-first technical audit report (`/20`, P0-P3, patterns, positive findings) when audit mode is requested.
+- Output contract note: when returning structured audit payloads, include `schema_version: 1.0`.
 
 ## Constraints / Safety
 - Do not refactor unrelated code.
@@ -124,15 +165,19 @@ Current baseline markers:
 
 ## Procedure
 1. Confirm target scope and constraints.
-2. Audit against this skill rule set.
-3. Prioritize critical issues first.
-4. Provide minimal, concrete remediations.
-5. Re-check modified snippets for regressions.
+2. Determine execution mode:
+   - audit-only scorecard mode (`--audit`)
+   - remediation mode (default)
+3. Audit against this skill rule set.
+4. Prioritize critical issues first.
+5. Provide minimal, concrete remediations in remediation mode, or report-only output in audit mode.
+6. Re-check modified snippets for regressions when edits are made.
 
 ## Validation
 - Verify fixes preserve intended UX behavior.
 - Verify accessibility, performance, or metadata outcomes relevant to this skill.
 - Confirm recommendations are scoped and actionable.
+- Confirm typography, spacing, iconography, and token findings align with `frontend/ui/references/design-system-integration-contract.md`.
 - Fail fast on ambiguous or unsafe changes and ask for clarification.
 
 ## Anti-patterns
@@ -145,6 +190,7 @@ Current baseline markers:
 - Adapt enforcement depth for design-system implementation, component QA, or pre-release polish passes.
 - Use different recommendation styles for new builds versus incremental refactors in existing UI code.
 - Customize checks by surface area: typography-heavy pages, animation-heavy interactions, or dense dashboards.
+- Switch between audit-only scorecard mode and targeted remediation mode based on user intent.
 
 ## See Also
 
@@ -167,12 +213,15 @@ Current baseline markers:
 <!-- /decision-feedback-protocol -->
 
 ## Examples
-- Review one component and return only critical and high-impact fixes first.
-- Suggest minimal edits that preserve current stack and behavior.
+- User says: "Review one component and return only critical and high-impact fixes first."
+- User says: "Suggest minimal edits that preserve current stack and behavior."
+- User says: "Can you audit this checkout modal for a11y/perf and give me a `/20` score plus top P1 fixes?"
+- User says: "Please inspect and validate `src/components/NavBar.tsx`, then suggest minimal fixes only. No refactor."
 
 ## Notes
 - Contract: `references/contract.yaml`
 - Evals: `references/evals.yaml`
+- Audit template: `references/audit-scorecard.md`
 
 ## Quality Uplift
 - Philosophy and approach: apply a clear framework, explain why, consider tradeoff decisions, and use a practical mental model for execution.

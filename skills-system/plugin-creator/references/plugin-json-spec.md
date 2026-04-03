@@ -2,36 +2,45 @@
 
 ```json
 {
-  "schema_version": 1,
   "name": "plugin-name",
-  "version": "0.1.0",
+  "version": "1.2.0",
   "description": "Brief plugin description",
   "author": {
-    "name": "Author Name"
+    "name": "Author Name",
+    "email": "author@example.com",
+    "url": "https://github.com/author"
   },
+  "homepage": "https://docs.example.com/plugin",
+  "repository": "https://github.com/author/plugin",
   "license": "MIT",
-  "keywords": ["plugin", "plugin-name", "incubating"],
-  "governance": {
-    "lifecycle_state": "incubating",
-    "maturity": "experimental",
-    "owner": "Author Name",
-    "review_cadence": "monthly",
-    "last_reviewed": "2026-03-24",
-    "metadata_source": "plugin_manifest"
-  },
+  "keywords": ["keyword1", "keyword2"],
   "skills": "./skills/",
+  "hooks": "./hooks.json",
   "mcpServers": "./.mcp.json",
+  "apps": "./.app.json",
   "interface": {
     "displayName": "Plugin Display Name",
     "shortDescription": "Short description for subtitle",
-    "longDescription": "Incubating plugin scaffold for this package",
-    "developerName": "Author Name",
+    "longDescription": "Long description for details page",
+    "developerName": "OpenAI",
     "category": "Productivity",
-    "capabilities": ["Interactive", "Read"],
+    "capabilities": ["Interactive", "Write"],
+    "websiteURL": "https://openai.com/",
+    "privacyPolicyURL": "https://openai.com/policies/row-privacy-policy/",
+    "termsOfServiceURL": "https://openai.com/policies/row-terms-of-use/",
     "defaultPrompt": [
-      "Help me evaluate whether this plugin is ready to move beyond incubating."
+      "Summarize my inbox and draft replies for me.",
+      "Find open bugs and turn them into Linear tickets.",
+      "Review today's meetings and flag scheduling gaps."
     ],
-    "brandColor": "#3B82F6"
+    "brandColor": "#3B82F6",
+    "composerIcon": "./assets/icon.png",
+    "logo": "./assets/logo.png",
+    "screenshots": [
+      "./assets/screenshot1.png",
+      "./assets/screenshot2.png",
+      "./assets/screenshot3.png"
+    ]
   }
 }
 ```
@@ -41,39 +50,43 @@
 ### Top-level fields
 
 - `name` (`string`): Plugin identifier (kebab-case, no spaces). Required if `plugin.json` is provided and used as manifest name and component namespace.
-- `schema_version` (`integer`): Plugin manifest schema version for repo-native tooling.
-- `version` (`string`): Plugin semantic version. Scaffolds start at `0.1.0`.
+- `version` (`string`): Plugin semantic version.
 - `description` (`string`): Short purpose summary.
 - `author` (`object`): Publisher identity.
   - `name` (`string`): Author or team name.
+  - `email` (`string`): Contact email.
+  - `url` (`string`): Author/team homepage or profile URL.
+- `homepage` (`string`): Documentation URL for plugin usage.
+- `repository` (`string`): Source code URL.
 - `license` (`string`): License identifier (for example `MIT`, `Apache-2.0`).
 - `keywords` (`array` of `string`): Search/discovery tags.
-- `governance` (`object`): Lifecycle metadata for the plugin package.
-  - `lifecycle_state` (`string`): Initial lifecycle state. Phase-one default: `incubating`.
-  - `maturity` (`string`): Initial maturity level. Phase-one default: `experimental`.
-  - `owner` (`string`): Primary maintainer or owner string.
-  - `review_cadence` (`string`): Review expectation such as `monthly` or `quarterly`.
-  - `last_reviewed` (`string`): ISO date for the most recent lifecycle review.
-  - `metadata_source` (`string`): Use `plugin_manifest` for plugin-package authority.
-- `skills` (`string`, optional): Relative path to skill directories/files when the plugin ships skills.
-- `hooks` (`string`, optional): Hook config path when hooks exist.
-- `mcpServers` (`string`, optional): MCP config path when MCP servers exist.
-- `apps` (`string`, optional): App manifest path when app integrations exist.
+- `skills` (`string`): Relative path to skill directories/files.
+- `hooks` (`string`): Hook config path.
+- `mcpServers` (`string`): MCP config path.
+- `apps` (`string`): App manifest path for plugin integrations.
 - `interface` (`object`): Interface/UX metadata block for plugin presentation.
 
 ### `interface` fields
 
 - `displayName` (`string`): User-facing title shown for the plugin.
 - `shortDescription` (`string`): Brief subtitle used in compact views.
-- `longDescription` (`string`): Longer description used on details screens. Starter scaffolds should stay honest about incubating status rather than pretending the plugin is production-ready.
+- `longDescription` (`string`): Longer description used on details screens.
 - `developerName` (`string`): Human-readable publisher name.
 - `category` (`string`): Plugin category bucket.
 - `capabilities` (`array` of `string`): Capability list from implementation.
+- `websiteURL` (`string`): Public website for the plugin.
+- `privacyPolicyURL` (`string`): Privacy policy URL.
+- `termsOfServiceURL` (`string`): Terms of service URL.
 - `defaultPrompt` (`array` of `string`): Starter prompts shown in composer/UX context.
   - Include at most 3 strings. Entries after the first 3 are ignored and will not be included.
   - Each string is capped at 128 characters. Longer entries are truncated.
-  - Prefer one honest incubating-stage prompt over multiple speculative marketing prompts in the scaffold.
+  - Prefer short starter prompts around 50 characters so they scan well in the UI.
 - `brandColor` (`string`): Theme color for the plugin card.
+- `composerIcon` (`string`): Path to icon asset.
+- `logo` (`string`): Path to logo asset.
+- `screenshots` (`array` of `string`): List of screenshot asset paths.
+  - Screenshot entries must be PNG filenames and stored under `./assets/`.
+  - Keep file paths relative to plugin root.
 
 ### Path conventions and defaults
 
@@ -81,7 +94,6 @@
 - `skills`, `hooks`, and `mcpServers` are supplemented on top of default component discovery; they do not replace defaults.
 - Custom path values must follow the plugin root convention and naming/namespacing rules.
 - This repo’s scaffold writes `.codex-plugin/plugin.json`; treat that as the manifest location this skill generates.
-- Do not emit broad `[TODO: ...]` placeholder blocks in the scaffold manifest. Require owner, review cadence, and description up front, then keep the rest of the starter metadata honest about incubating status.
 
 # Marketplace JSON sample spec
 
@@ -103,8 +115,10 @@
         "source": "local",
         "path": "./plugins/linear"
       },
-      "installPolicy": "AVAILABLE",
-      "authPolicy": "ON_INSTALL",
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
       "category": "Productivity"
     }
   ]
@@ -130,7 +144,9 @@
   - `source` (`string`): Use `local` for this repo workflow.
   - `path` (`string`): Relative plugin path based on the marketplace root.
     - Repo plugin: `./plugins/<plugin-name>`
-    - Local plugin in `~/.agents/plugins/marketplace.json`: `./.codex/plugins/<plugin-name>`
+    - Local plugin in `~/.agents/plugins/marketplace.json`: `./plugins/<plugin-name>`
+  - The same relative path convention is used for both repo-rooted and home-rooted marketplaces.
+    - Example: with `~/.agents/plugins/marketplace.json`, `./plugins/<plugin-name>` resolves to `~/plugins/<plugin-name>`.
 - `policy` (`object`): Marketplace policy block. Always include it.
   - `installation` (`string`): Availability policy.
     - Allowed values: `NOT_AVAILABLE`, `AVAILABLE`, `INSTALLED_BY_DEFAULT`

@@ -1,6 +1,9 @@
 # Full-surface example. Demonstrates advanced knobs.
 # Do not apply wholesale unless the user asks for each category.
 
+name = "product_analyst"
+description = "Senior product analyst for turning ambiguous goals into executable plans."
+
 model = "gpt-5.4-mini"
 model_reasoning_effort = "high"
 model_reasoning_summary = "detailed"

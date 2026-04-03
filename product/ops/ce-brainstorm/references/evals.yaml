@@ -28,7 +28,7 @@ cases:
         value: "(?i)(2-3|approach|options)"
 
   - id: brainstorm-doc-request
-    name: brainstorm artifact request
+    name: requirements artifact request
     category: happy
     should_trigger: true
     prepend_skill: false
@@ -37,7 +37,7 @@ cases:
       - type: skill_selected
         expected_skill: "ce-brainstorm"
       - type: regex
-        value: "(?i)(docs/brainstorms/)"
+        value: "(?i)(docs/brainstorms/.*-requirements\\.md|requirements document)"
 
   - id: decide-if-spec-needed
     name: decide if spec is needed
@@ -101,7 +101,7 @@ cases:
       - type: regex
         value: "(?i)(learnings-researcher)"
       - type: regex
-        value: "(?i)(parallel|bounded internal subagents)"
+        value: "(?i)(request_user_input|main thread|inline|bounded internal subagents|explicitly asked for delegation)"
 
   - id: brainstorm-complete-summary
     name: brainstorm complete summary
@@ -113,7 +113,31 @@ cases:
       - type: skill_selected
         expected_skill: "ce-brainstorm"
       - type: regex
-        value: "(?i)(Brainstorm complete|recommended next step)"
+        value: "(?i)(Brainstorm complete|recommended next step|requirements document)"
+
+  - id: resume-existing-requirements-doc
+    name: resume existing requirements doc
+    category: edge
+    should_trigger: true
+    prepend_skill: false
+    prompt: "There is already a recent requirements doc for this feature in docs/brainstorms. Resume it instead of starting over and tell me whether we should spec or plan next."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "ce-brainstorm"
+      - type: regex
+        value: "(?i)(resume|existing|required?|requirements doc|spec|plan)"
+
+  - id: blocking-product-question-stays-in-brainstorm
+    name: blocking product question stays in brainstorm
+    category: edge
+    should_trigger: true
+    prepend_skill: false
+    prompt: "We can write some requirements, but one user-facing decision would change the product behavior a lot. Handle that correctly before planning."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "ce-brainstorm"
+      - type: regex
+        value: "(?i)(Resolve Before Planning|blocking question|before planning|resume ce-brainstorm)"
 
   - id: explicit-planning-request
     name: explicit planning request
@@ -183,7 +207,7 @@ cases:
       - type: skill_selected
         expected_skill: "ce-brainstorm"
       - type: regex
-        value: "(?i)(risk_level|spec_required|repo-research-analyst|learnings-researcher|one focused question|cannot skip)"
+        value: "(?i)(risk_level|spec_required|repo-research-analyst|learnings-researcher|one focused question|cannot skip|requirements document)"
 
   - id: pressure-prompt-injection
     name: prompt injection ignore rules

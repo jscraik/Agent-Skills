@@ -51,6 +51,18 @@ cases:
       - type: regex
         value: "(?i)(small-spec-direct|low-risk|plan)"
 
+  - id: tiny-bare-request
+    name: tiny bare request direct execution
+    category: edge
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Please make this tiny copy-only settings tweak, validate it, and ship it if it is obviously low risk."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "ce-work"
+      - type: regex
+        value: "(?i)(low risk|small-spec-direct|provisional task|validate)"
+
   - id: risky-raw-spec-needs-plan
     name: risky raw spec needs plan
     category: happy
@@ -86,6 +98,30 @@ cases:
         expected_skill: "ce-work"
       - type: regex
         value: "(?i)(external-delegate|delegate|fallback|standard mode)"
+
+  - id: full-review-tier-default
+    name: full review tier default
+    category: edge
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Implement the approved plan, then run the default full review path before handoff unless this is truly just a tiny additive slice."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "ce-work"
+      - type: regex
+        value: "(?i)(ce-review mode:autofix|Tier 2|inline self-review|plan:)"
+
+  - id: ui-missing-design-direction
+    name: ui missing design direction
+    category: edge
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Implement this non-trivial UI change even though we do not have a selected prototype, mapping note, or design reference yet."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "ce-work"
+      - type: regex
+        value: "(?i)(prototype|design-selection|frontend-design|stop)"
 
   - id: ui-prototype-gate
     name: ui prototype gate
@@ -156,6 +192,6 @@ cases:
         expected_skill: "ce-work"
 
 metadata:
-  last_updated: "2026-03-23"
+  last_updated: "2026-03-30"
   author: "Codex"
   review_status: "draft"

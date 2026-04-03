@@ -9,7 +9,12 @@ This repository is the canonical source of Codex skills, linked operator docs, a
 ## Table of Contents
 - [Mandatory workflow snippet](#mandatory-workflow-snippet)
 - [Required essentials](#required-essentials)
+- [Error Handling Protocol](#error-handling-protocol)
+- [Reporting & Insights](#reporting--insights)
 - [Startup workflow](#startup-workflow)
+- [Communication](#communication)
+- [Efficiency](#efficiency)
+- [Browser/Playwright](#browserplaywright)
 - [Instruction routing](#instruction-routing)
 - [Documentation map](#documentation-map)
 - [Git workflow](#git-workflow)
@@ -31,11 +36,33 @@ This repository is the canonical source of Codex skills, linked operator docs, a
 - Keep communication single-threaded by default.
 - Keep root `AGENTS.md` minimal; put volatile or category-specific policy in `docs/agents/*.md`.
 
+## Error Handling Protocol
+
+- When encountering API errors, model access issues, or unexpected failures, do not stop at reporting the error; always suggest a concrete workaround or alternative path that still advances the user's goal.
+
+## Reporting & Insights
+
+- For any report or insights generation task, verify required services and model access before starting.
+- If required services or model access are unavailable, fall back to generating the report from local data using available tools such as Read, Bash, Glob, and Grep.
+
 ## Startup workflow
 
 1. Run `bash scripts/codex-preflight.sh --stack auto --mode required` before multi-step, destructive, or path-sensitive work.
 2. Read [docs/agents/README.md](docs/agents/README.md), then open only the task-relevant linked doc.
 3. Run the narrowest proof first after edits, then broader checks from [docs/agents/04-validation.md](docs/agents/04-validation.md) before handoff.
+4. If validation surfaces durable repo work rather than a one-off note, create or update a Linear issue in the `agent-skills` project instead of leaving the finding only in chat.
+
+## Communication
+
+- When the user explicitly states a root cause, confirm that understanding and proceed with their direction instead of proposing alternative fixes.
+
+## Efficiency
+
+- Before implementing multi-file edits or complex automation for a simple information request, pause and ask: `Would a direct answer or simple command suffice?`
+
+## Browser/Playwright
+
+- When browser tooling cannot access local files directly, immediately start `python3 -m http.server` in the relevant directory instead of cycling through fragile workarounds or abandoning the browser approach.
 
 ## Instruction routing
 
@@ -95,7 +122,7 @@ Repo-level requirements:
 - Validate plan files with:
   `python3 ~/.codex/scripts/plan-graph-lint.py <plan-file>`
 - Run canonical verification:
-  `bash ~/.codex/scripts/verify-work.sh`
+  `bash scripts/verify-work.sh`
 
 State model: `S0 -> S1 -> S2 -> S3 -> S4 -> S5` with rollback to `Sx` on critical governance events.
 <!-- AGENT-FIRST-SCAFFOLD:END -->

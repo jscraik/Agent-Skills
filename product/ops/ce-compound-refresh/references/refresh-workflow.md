@@ -4,16 +4,16 @@ Read when: the request has routed to `ce-compound-refresh`.
 
 ## Mode detection
 
-Check whether the arguments contain `mode:autonomous`.
+Check whether the arguments contain `mode:autonomous` or the upstream alias `mode:autofix`.
 
-- If yes, strip that token and use the remaining text as the scope hint.
+- If yes, strip that token, normalize the run to `autonomous`, and use the remaining text as the scope hint.
 - If no, run in `interactive` mode.
 
 ### Autonomous mode rules
 
 - Skip all user questions.
 - Process the entire matched scope. If no scope hint exists, process everything discovered under `docs/solutions/`.
-- Apply all unambiguous `Keep`, `Update`, auto-`Archive`, and `Replace` actions when evidence is sufficient.
+- Apply all unambiguous `Keep`, `Update`, `Consolidate`, auto-`Archive`, and `Replace` actions when evidence is sufficient.
 - If a write succeeds, report it as `Applied`.
 - If a write fails, continue and report the same action as `Recommended`.
 - If classification is genuinely ambiguous or replacement evidence is insufficient, mark the artifact stale in place with:
@@ -53,6 +53,7 @@ Why this order:
 |---|---|---|
 | `Keep` | Still accurate and still useful | No file edit by default |
 | `Update` | Core solution is still correct, but references drifted | Apply evidence-backed in-place edits |
+| `Consolidate` | Two or more docs overlap heavily but still contain compatible truth | Merge the unique value into one canonical doc, then archive or retire the redundant doc |
 | `Replace` | Old artifact is now misleading, but a known better successor exists | Write a trustworthy successor, then archive or supersede the old artifact |
 | `Archive` | No longer useful or applicable | Move to `docs/solutions/_archived/` with archive metadata |
 | `Stale` | Not trustworthy enough to keep, but not trustworthy enough to replace or archive decisively | Mark in place with stale metadata |
@@ -67,6 +68,8 @@ Why this order:
 6. Use `Update` only for meaningful, evidence-backed drift.
 7. Use `Replace` only when a real successor can be documented honestly.
 8. Missing referenced implementation with no successor is strong archive evidence, but only after checking whether the problem domain itself still exists.
+9. Evaluate document-set design, not just single-file accuracy. If several docs now say the same thing, decide whether they still deserve separate retrieval value.
+10. Use archival rather than direct deletion in this local package. The upstream donor deletes redundant docs; this package preserves the same maintenance intent while keeping an explicit archive trail in `docs/solutions/_archived/`.
 
 ## Scope selection
 
@@ -158,6 +161,23 @@ The crucial distinction is whether drift is cosmetic or substantive.
 Boundary rule:
 - if you are rewriting what the learning recommends, that is `Replace`, not `Update`
 
+### Consolidate
+
+Choose `Consolidate` when document-set analysis shows that multiple docs are still materially correct but one canonical doc should absorb the others.
+
+Use it when:
+- two docs describe the same problem and compatible solution
+- one doc is a narrow precursor and a newer doc covers the same ground more comprehensively
+- the secondary doc contains edge cases, prevention rules, or context that should survive inside the canonical doc
+
+Do not use it when:
+- the docs cover genuinely different sub-problems
+- the merge would create an unwieldy artifact that hurts retrieval more than it helps
+
+`Consolidate` vs `Archive`:
+- if the redundant doc has unique value worth preserving, consolidate first
+- if it adds no unique value, archive it directly once the canonical doc is clearly identified
+
 ### Memory-sourced drift signals
 
 Memory-only drift is never enough by itself for `Replace` or `Archive`.
@@ -174,6 +194,59 @@ In autonomous mode, memory-only drift with no codebase corroboration should resu
 - contradiction with current code is a strong `Replace` signal
 - age alone is not staleness
 - before `Replace` or `Archive`, look for successors in newer learnings, patterns, PRs, or issues
+
+## Phase 1.25: Document-set analysis
+
+After investigating individual docs, step back and evaluate the document set as a whole.
+
+### Overlap detection
+
+For docs that share the same module, component, tags, or problem domain, compare:
+- problem statement
+- solution shape
+- referenced files
+- prevention rules
+- root cause
+
+High overlap across three or more dimensions is a strong `Consolidate` signal.
+
+Record for each overlap:
+- the file paths involved
+- which dimensions overlap
+- which doc appears broader, newer, or more accurate
+- whether the secondary doc contains unique content worth preserving
+
+### Canonical doc identification
+
+Within each overlap cluster, identify the canonical source of truth:
+- usually the broadest, clearest, and most current doc
+- the doc a maintainer should find first
+- the doc other related docs should point to rather than duplicate
+
+All other docs in the cluster are either:
+- `Distinct`: still worth separate retrieval
+- `Subsumed`: should be consolidated into the canonical doc
+- `Redundant`: adds no unique value and can be archived after consolidation analysis
+
+### Retrieval-value test
+
+Before leaving two similar docs separate, ask:
+
+`Would a maintainer searching for this topic later benefit from these being separate, or am I only preserving drift risk?`
+
+Keep docs separate only when:
+- they cover genuinely different sub-problems
+- they serve meaningfully different audiences or contexts
+- merging would make the canonical doc materially harder to use
+
+### Cross-doc conflict check
+
+Look for contradictions:
+- one doc recommends an approach another rejects
+- one doc references a path another marks deprecated
+- two docs describe the same problem with materially different root causes
+
+Contradictions are higher urgency than ordinary drift. Resolve them through `Consolidate`, `Replace`, or `Archive`; do not leave both docs untouched.
 
 ## Phase 1.5: Investigate pattern docs
 
@@ -194,12 +267,14 @@ Choose the lightest approach that fits:
 
 | Approach | When |
 |---|---|
-| main thread only | small scope, short docs |
-| sequential subagents | 1-2 artifacts with heavy supporting reads |
-| parallel subagents | 3+ independent artifacts with low overlap |
-| batched subagents | broad sweeps after triage narrows scope |
+| main thread only | small scope, short docs, or any run where delegation was not explicitly requested or approved |
+| sequential subagents | 1-2 artifacts with heavy supporting reads after explicit user request or approval |
+| parallel subagents | 3+ independent artifacts with low overlap after explicit user request or approval |
+| batched subagents | broad sweeps after triage narrows scope and the user has approved delegation |
 
-When spawning any subagent, include this instruction:
+If the user has not already explicitly asked for delegation or sub-agents, ask a short blocking approval question via `request_user_input` before spawning any subagent.
+
+When spawning any approved subagent, include this instruction:
 
 > Use dedicated file search and read tools for all investigation. Do not use shell commands for file operations unless those tools are unavailable in the current harness. Also read `MEMORY.md` from the auto-memory directory if it exists, and report memory-sourced drift signals separately from codebase-sourced evidence, tagged with `(auto memory [claude])`.
 
@@ -294,6 +369,7 @@ Archive action:
 Patterns use the same outcomes, but evaluate them as derived guidance:
 - `Keep`: refreshed learnings still support the rule
 - `Update`: the rule holds, but examples, scope, links, or references drifted
+- `Consolidate`: two patterns now teach the same lesson and should become one canonical pattern
 - `Replace`: the generalized rule is misleading and refreshed learnings support a different synthesis
 - `Archive`: the pattern is no longer valid, no longer recurring, or fully subsumed by a stronger pattern
 
@@ -304,8 +380,9 @@ If "archive" feels too strong but the pattern should no longer be elevated, redu
 Skip this entire phase in autonomous mode.
 
 In interactive mode, ask only when:
-- `Update` vs `Replace` vs `Archive` is genuinely ambiguous
+- `Update` vs `Replace` vs `Consolidate` vs `Archive` is genuinely ambiguous
 - archive evidence is not strong enough for auto-archive
+- a consolidation cluster has no obvious canonical doc
 - a successor doc is about to be created and user awareness is useful
 
 Question style:
@@ -330,8 +407,9 @@ What would you like to do?
 
 Batch-scope order:
 1. grouped keeps and straightforward updates
-2. replace cases one at a time or in very small groups
-3. archive cases individually unless they meet auto-archive criteria
+2. consolidation clusters where the canonical doc is clear
+3. replace cases one at a time or in very small groups
+4. archive cases individually unless they meet auto-archive criteria
 
 Broad-scope order:
 1. triage a manageable batch
@@ -347,6 +425,12 @@ Broad-scope order:
 ### Update flow
 - apply only meaningful in-place factual fixes
 - do not use this flow for materially changed solutions
+
+### Consolidate flow
+- choose the canonical doc explicitly
+- merge unique content from the subsumed doc into the canonical doc in a natural location
+- update any affected cross-references
+- archive the subsumed doc with metadata that points at the surviving canonical artifact
 
 ### Replace flow
 - run replacements one at a time
@@ -372,6 +456,7 @@ Scanned: N learnings
 
 Kept: X
 Updated: Y
+Consolidated: C
 Replaced: Z
 Archived: W
 Skipped: V
@@ -383,6 +468,7 @@ Then for every processed file include:
 - classification
 - evidence found
 - action taken or recommended
+- for `Consolidate`, identify the canonical doc, the unique content preserved, and the archived or retired file
 
 For `Keep`, include a reviewed-without-edits section so the result is visible without git churn.
 

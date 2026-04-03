@@ -46,7 +46,7 @@ One canonical library, symlinked to every runtime on sync:
 | Claude Code | `~/.claude/skills/` | Native skill folders |
 | Gemini / Antigravity | `~/.gemini/antigravity/skills/` | Folder + `skills.txt` index |
 
-Skills are organized by domain: `auth/`, `backend/`, `frontend/`, `github/`, `ops/`, `product/`, `utilities/`. Running `just sync` also projects MCP server configs from `~/.codex/config.toml` into Antigravity via `scripts/sync_mcp.py`.
+Canonical skills are authored under domain folders such as `auth/`, `backend/`, `frontend/`, `github/`, `ops/`, `product/`, and `utilities/`. Run `just sync` to project skills and plugins to the runtime directories. If you need to refresh Antigravity MCP config from `~/.codex/config.toml`, run `python3 scripts/sync_mcp.py` separately.
 
 ### 2. Deterministic skill router
 
@@ -71,11 +71,11 @@ The router:
 Every `SKILL.md` change runs two gate tiers:
 
 **Tier 1 — Structure gate** (always runs):
-- Validates YAML frontmatter fields, category, description length
+- Validates YAML frontmatter, lifecycle metadata, and structure requirements
 - Compares against a baseline JSON; fails on regressions
 - Benchmarks portfolio coverage against `benchmark-policy.json`
 
-**Tier 2 — Eval baseline** (on `workflow_dispatch`):
+**Tier 2 — Eval baseline** (available on `workflow_dispatch`):
 - Runs `run_skill_evals.py` per skill with Codex and/or Claude-Kimi/ZAI in **dual-run mode**
 - Captures JSONL traces and builds a scorecard dashboard (`artifacts/reports/skills/dashboard.json`)
 
@@ -164,8 +164,11 @@ just validate
 # Count active skills
 just count-skills
 
-# Sync to all runtime directories (including MCP config projection)
+# Sync skills and plugins to all runtime directories
 just sync
+
+# Optional: refresh Antigravity MCP config from ~/.codex/config.toml
+python3 scripts/sync_mcp.py
 
 # Run full CI bundle locally
 just ci-local
@@ -182,7 +185,7 @@ just --list                # All available recipes
 just status                # System health overview
 just validate              # Full validation suite
 just diagnose              # Skill diagnostics (all skills)
-just sync                  # Project skills + MCP config to runtimes
+just sync                  # Project skills + plugins to runtime directories
 just genome-loop           # Dry-run improvement loop
 just genome-loop-live      # Live improvement loop
 just spotlight             # Daily health spotlight (one skill needing attention)
@@ -203,7 +206,7 @@ just install-cron          # Set up nightly genome loop cron
 ```mermaid
 graph TD
     A["Skill authored in\ndomain folder"] -->|"just sync"| B["Symlinked to\nCodex / Claude / Gemini"]
-    A -->|"PR opened"| C["CI quality gates\n12 workflows"]
+    A -->|"PR opened"| C["CI quality gates\n13 workflows"]
     C --> D["Tier 1: structure gate\n+ benchmark check"]
     C --> E["Tier 2: dual-run evals\nCodex + Claude-Kimi"]
     C --> F["Security scan\nCodeQL + Semgrep + Trivy"]
@@ -233,10 +236,14 @@ skill-name/
 ```yaml
 ---
 name: skill-name
-description: "One-line description, max 80 chars"
+description: Concrete discovery description for the real trigger
 metadata:
-  category: frontend | backend | product | utilities | auth | ops | github
-  tags: [tag1, tag2]
+  lifecycle_state: incubating
+  maturity: experimental
+  owner: team-or-maintainer
+  review_cadence: monthly
+  last_reviewed: 2026-03-24
+  metadata_source: frontmatter
 ---
 ```
 
@@ -284,22 +291,23 @@ Pilot skills: `skill-builder`, `agentation`, `systematic-debugging`, `interview-
 
 ## Skill quality system
 
-### CI workflows (12)
+### CI workflows (13)
 
 | Workflow | Trigger | What it enforces |
 |----------|---------|----------------|
-| `pr-pipeline` | Every PR | PR template, repo validate, harness preflight gate |
-| `ci-tests` | Push to main + PR | Docs lint, skill diagnostics |
-| `skill-quality` | SKILL.md changes | Tier-1 structure + benchmark; Tier-2 dual-run evals |
-| `recursive-promotion-gate` | Promotion artifact changes | Validates promotion decisions, strict-runs check |
-| `recursive-skill-shadow` | Monday 1am UTC + dispatch | Runs shadow cycle, uploads failure-pattern candidates |
-| `benchmark-policy-refresh` | Monday 7am UTC + dispatch | Context7-backed threshold ratchet, auto-opens PR |
-| `greptile-review` | Every PR | AI-assisted code review checks |
-| `security-scan` | Every PR | Semgrep + Trivy CVE scanning |
-| `codeql` | Push to main + PR | CodeQL static analysis (Python, TypeScript) |
-| `secret-scan` | Every PR | Gitleaks secret detection |
-| `docs-governance` | Docs/governance changes | Link integrity, policy conformance |
-| `gov-security-gates` | Governance/compliance changes | Policy file integrity checks |
+| `pr-pipeline.yml` | Every PR | PR template, repo validation, harness preflight gate |
+| `ci-tests.yml` | Push to `main` + PR | Docs lint and skill diagnostics |
+| `skill-quality.yml` | Skill-quality path changes on PR + dispatch | Tier-1 structure gate; optional Tier-2 dual-run evals |
+| `skill-graph-diff.yml` | Skill graph path changes on PR | Graph diff comment and hub-stability checks |
+| `recursive-promotion-gate.yml` | Promotion artifact changes on PR + dispatch | Promotion decision validation |
+| `recursive-skill-shadow.yml` | Scheduled run + dispatch | Shadow cycle and candidate generation |
+| `benchmark-policy-refresh.yml` | Scheduled run + dispatch | Benchmark threshold refresh |
+| `greptile-review.yml` | Every PR | AI-assisted review pass |
+| `secret-scan.yml` | Push to `main`, PR, merge queue | Gitleaks, Trivy, and Semgrep filesystem scan |
+| `security-scan.yml` | Push to `main`, PR, nightly schedule | Security SARIF uploads plus artifact secret scan |
+| `codeql.yml` | Push/PR on protected branches + schedule + dispatch | CodeQL static analysis |
+| `docs-governance.yml` | Docs/governance path changes on PR/push + dispatch | Docs policy and governance checks |
+| `gov-security-gates.yml` | Governance/compliance/security path changes on PR | Policy integrity checks |
 
 ### harness.contract.json
 
@@ -338,8 +346,8 @@ Phase-one defaults:
 - `docs/solutions/` entries need linked assets, concrete evidence, ownership context, and freshness markers
 
 Reference:
-- [Managed asset lifecycle reference](/Users/jamiecraik/dev/Agent-Skills/docs/reference/managed-asset-lifecycle.md)
-- [Governed solutions](/Users/jamiecraik/dev/Agent-Skills/docs/solutions/README.md)
+- [Managed asset lifecycle reference](docs/reference/managed-asset-lifecycle.md)
+- [Governed solutions](docs/solutions/README.md)
 
 ---
 
@@ -403,20 +411,20 @@ just rollout-drill
 
 ## Documentation
 
-- **[Skills index](/SKILL.md)** — auto-generated list of the current surfaced skills with descriptions
-- **[Contributor docs](/docs/index.md)** — how to add, validate, and ship skills
-- **[Governed solutions](/Users/jamiecraik/dev/Agent-Skills/docs/solutions/README.md)** — reusable fixes and decisions linked to governed assets
-- **[Skill Genome runbook](/docs/skill-graphs/runbooks/skill-genome-loop.md)** — operating the improvement loop
-- **[Agent governance](/docs/agents/06-security-and-governance.md)** — security policy and audit trail
+- **[Skills index](SKILL.md)** — auto-generated list of the current surfaced skills with descriptions
+- **[Contributor docs](docs/index.md)** — how to add, validate, and ship skills
+- **[Governed solutions](docs/solutions/README.md)** — reusable fixes and decisions linked to governed assets
+- **[Skill Genome runbook](docs/skill-graphs/runbooks/skill-genome-loop.md)** — operating the improvement loop
+- **[Agent governance](docs/agents/06-security-and-governance.md)** — security policy and audit trail
 
 ---
 
 ## Governance
 
-- **License**: Apache 2.0 ([LICENSE](/LICENSE))
-- **Contributing**: [CONTRIBUTING.md](/CONTRIBUTING.md)
-- **Security**: [SECURITY.md](/SECURITY.md)
-- **Code of Conduct**: [CODE_OF_CONDUCT.md](/CODE_OF_CONDUCT.md)
+- **License**: Apache 2.0 ([LICENSE](LICENSE))
+- **Contributing**: [CONTRIBUTING.md](CONTRIBUTING.md)
+- **Security**: [SECURITY.md](SECURITY.md)
+- **Code of Conduct**: [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
 
 ---
 
@@ -433,5 +441,5 @@ just rollout-drill
 
 1. Create or update a plan in `.agent/PLANS.md`
 2. Validate: `python3 ~/.codex/scripts/plan-graph-lint.py .agent/PLANS.md`
-3. Verify: `bash ~/.codex/scripts/verify-work.sh`
+3. Verify: `bash scripts/verify-work.sh`
 <!-- AGENT-FIRST-WORKFLOW:END -->

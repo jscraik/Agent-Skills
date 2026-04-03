@@ -9,6 +9,7 @@ Login flows, session persistence, OAuth, 2FA, and authenticated browsing.
 - [Import Auth from Your Browser](#import-auth-from-your-browser)
 - [Persistent Profiles](#persistent-profiles)
 - [Session Persistence](#session-persistence)
+- [Auth Vault](#auth-vault)
 - [Basic Login Flow](#basic-login-flow)
 - [Saving Authentication State](#saving-authentication-state)
 - [Restoring Authentication](#restoring-authentication)
@@ -116,6 +117,28 @@ Encrypt state at rest:
 export AGENT_BROWSER_ENCRYPTION_KEY=$(openssl rand -hex 32)
 agent-browser --session-name secure open https://app.example.com
 ```
+
+## Auth Vault
+
+Use the built-in auth vault when you want reusable encrypted credentials without pasting secrets into the model-visible command stream:
+
+```bash
+# Save once; prefer stdin to avoid shell history exposure
+echo "$PASSWORD" | agent-browser auth save github \
+  --url https://github.com/login \
+  --username "$USERNAME" \
+  --password-stdin
+
+# Reuse later
+agent-browser auth login github
+
+# Inspect or clean up saved entries
+agent-browser auth list
+agent-browser auth show github
+agent-browser auth delete github
+```
+
+`auth login` is usually more reliable than a hand-rolled login macro on delayed SPA screens because it waits for the relevant username, password, and submit controls before acting.
 
 ## Basic Login Flow
 

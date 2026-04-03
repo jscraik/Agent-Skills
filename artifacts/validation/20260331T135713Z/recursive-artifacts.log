@@ -1,0 +1,26 @@
+{
+  "generated_at": "2026-03-31T13:57:14Z",
+  "runs_root": "/Users/jamiecraik/dev/agent-skills/artifacts/skill-graphs/runs",
+  "counts": {
+    "compliant": 14,
+    "missing_mandatory": 0,
+    "legacy_partial": 0,
+    "empty": 0
+  },
+  "total_runs": 14,
+  "run_status_counts": {
+    "compliant": 14,
+    "missing_mandatory": 0,
+    "legacy_partial": 0,
+    "empty": 0
+  },
+  "compliance_rate": 100.0,
+  "waived_non_compliant": 0,
+  "prune_empty": {
+    "enabled": false,
+    "dry_run": false,
+    "actions": {}
+  },
+  "waiver_file": "artifacts/skill-graphs/pilot/artifact-parity-waivers.json",
+  "status": "ok"
+}

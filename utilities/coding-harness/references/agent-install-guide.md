@@ -114,6 +114,34 @@ harness init --check-updates
 > Greptile review runs as a **CircleCI job**
 > (`greptile-review`) — no GitHub Actions workflow file is written or required.
 
+### Updating an existing harness-managed repo
+
+For a repo that already has harness installed, use the routine upgrade lane:
+
+```bash
+# Check whether the installed scaffold/version is behind
+harness init --check-updates
+
+# Preview the routine upgrade
+harness upgrade --dry-run
+
+# Apply the routine upgrade
+harness upgrade
+```
+
+Current harness can auto-repair a legacy `.harness/restore-manifest.json`
+that is missing `ciProvider` when the active provider can be inferred safely
+from `harness.contract.json`, an unambiguous CI layout on disk, or the
+requested/default provider for the update command.
+
+Use `harness init --update` only when tracked baseline files are missing and
+you need to re-scaffold them:
+
+```bash
+harness init --dry-run --update
+harness init --update
+```
+
 ---
 
 ## Phase 3b: Migrate away from GitHub Actions
@@ -365,20 +393,23 @@ source scripts/codex-preflight.sh && preflight_repo
 # 9.2 — Environment check (mise tools, harness readiness)
 harness check-environment --json
 
-# 9.3 — Init idempotency (no pending updates)
+# 9.3 — Update check (also repairs legacy manifests when provider inference is safe)
 harness init --check-updates
 
-# 9.4 — Policy baseline
+# 9.4 — Routine upgrade preview for existing installs
+harness upgrade --dry-run
+
+# 9.5 — Policy baseline
 pnpm check   # or: npm run check
 
-# 9.5 — Greptile (if token available)
+# 9.6 — Greptile (if token available)
 harness verify-greptile --token "$GITHUB_PERSONAL_ACCESS_TOKEN" --owner <owner> --repo <repo>
 
-# 9.6 — Authorization (branch protection matches contract)
+# 9.7 — Authorization (branch protection matches contract)
 harness check-authz --contract harness.contract.json --repo <owner>/<repo> --branch main
 ```
 
-All six steps must pass before the setup is complete.
+All seven steps must pass before the setup is complete.
 
 ---
 
@@ -462,9 +493,10 @@ Use this table to decide whether to touch a file. When in doubt, check the colum
 
 ### Enforced — harness owns these files
 
-`harness init --update` will overwrite these with the latest template. Do not
-hand-edit them — changes will be lost on the next update. Use harness commands to
-change the values they encode (for example `harness branch-protect` for required checks).
+`harness init --update` will overwrite these with the latest template when you
+intentionally use the re-scaffold lane. Do not hand-edit them — changes will be
+lost on the next re-scaffold. Use harness commands to change the values they encode
+(for example `harness branch-protect` for required checks).
 
 | File | Owned by |
 |---|---|
@@ -543,6 +575,6 @@ Harness **cannot** do — requires user action:
 | `harness check-environment` reports missing binaries | Tool not installed | Run `mise install -g <tool>` for each missing binary |
 | `harness verify-greptile` fails | Greptile App not installed on repo | User must install from app.greptile.com |
 | Branch protection not applying | PAT missing `repo` + `admin:repo_hook` scopes | Re-generate PAT with required scopes |
-| `preflight_repo` fails in zsh | Old `codex-preflight.sh` without zsh guard | Run `harness init --update` to get the fixed version |
+| `preflight_repo` fails in zsh | Old `codex-preflight.sh` without zsh guard | Use the existing-repo flow: `harness init --check-updates`, `harness upgrade --dry-run`, then `harness upgrade`. Use `harness init --update` only if tracked baseline files are missing and need re-scaffold |
 | CircleCI can't authenticate to npm | `NPM_TOKEN` missing from CircleCI project env vars | Set in CircleCI project settings → Environment Variables |
 | CI fails on `npm pack` / missing `dist/` | Build not run before pack | Verify `.circleci/config.yml` has build step before pack |

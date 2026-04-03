@@ -1,51 +1,87 @@
-# Role Config Reference (Codex Multi-Agent, March 2026)
+# Custom Agent Config Reference (Codex Subagents, March 2026)
 
 ## Table of Contents
 - [Canonical sources](#canonical-sources)
+- [Preferred authoring model](#preferred-authoring-model)
+- [Required custom-agent file fields](#required-custom-agent-file-fields)
+- [Global agent runtime controls](#global-agent-runtime-controls)
 - [Validation baseline](#validation-baseline)
-- [Role declaration shape in `config.toml`](#role-declaration-shape-in-configtoml)
-- [Global multi-agent controls](#global-multi-agent-controls)
-- [Role `config_file` shape](#role-config_file-shape)
-- [Runtime behavior that affects role design](#runtime-behavior-that-affects-role-design)
+- [Runtime behavior that affects agent design](#runtime-behavior-that-affects-agent-design)
 - [Configuration categories with examples](#configuration-categories-with-examples)
 - [Inheritance rule of thumb](#inheritance-rule-of-thumb)
+- [Compatibility note](#compatibility-note)
 
 ## Canonical sources
 
+- Codex subagents guide: <https://developers.openai.com/codex/subagents/>
+- Codex subagent concepts: <https://developers.openai.com/codex/concepts/subagents/>
 - Codex config reference: <https://developers.openai.com/codex/config-reference/>
-- Codex multi-agent guide: <https://developers.openai.com/codex/multi-agent/>
-- Codex multi-agent concepts: <https://developers.openai.com/codex/concepts/multi-agents/>
-- Canonical config schema URL: <https://developers.openai.com/codex/config-schema.json>
 
-## Validation baseline
+## Preferred authoring model
 
-Use the active Codex schema (`config-schema.json`) for top-level role-config validation.
+As of March 2026 guidance, custom subagents should be authored as standalone TOML files under:
 
-The role creator scripts validate:
-1. `[agents.<role>]` key shape in target `config.toml`
-2. required role-config fields (`model`, `model_reasoning_effort`, `developer_instructions`)
-3. top-level role-config keys against schema
+- `~/.codex/agents/` for personal/global agents
+- `.codex/agents/` for project-scoped agents
 
-## Role declaration shape in `config.toml`
+Each file defines exactly one custom agent.
+
+## Required custom-agent file fields
+
+Every standalone custom-agent file must define:
+
+- `name`
+- `description`
+- `developer_instructions`
+
+The builder keeps `model` and `model_reasoning_effort` explicit by default for predictable behavior and easier review.
+
+Optional fields can include:
+
+- `nickname_candidates`
+- `model`
+- `model_reasoning_effort`
+- `sandbox_mode`
+- `mcp_servers`
+- `skills.config`
+- any other supported `config.toml` keys that are valid for a config layer
+
+### Required example (minimal valid shape)
 
 ```toml
-[agents.researcher]
-description = "Read-only researcher role"
-config_file = "~/.codex/agents/researcher.toml"
-nickname_candidates = ["Researcher"]
+name = "reviewer"
+description = "PR reviewer focused on correctness, security, and missing tests."
+developer_instructions = """
+Review code like an owner.
+Prioritize correctness, security, behavior regressions, and missing test coverage.
+"""
 ```
 
-### Supported keys under `[agents.<role>]`
+### Recommended minimal working profile
 
-- `description`
-- `config_file`
-- `nickname_candidates`
+```toml
+name = "reviewer"
+description = "PR reviewer focused on correctness, security, and missing tests."
+model = "gpt-5.4-mini"
+model_reasoning_effort = "medium"
+developer_instructions = """
+Review code like an owner.
+Prioritize correctness, security, behavior regressions, and missing test coverage.
+"""
+```
 
-Unknown fields under `[agents.<role>]` are rejected.
+### Useful enums
 
-## Global multi-agent controls
+- `model_reasoning_effort`: `minimal|low|medium|high|xhigh`
+- `model_reasoning_summary`: `auto|concise|detailed|none`
+- `model_verbosity`: `low|medium|high`
+- `personality`: `none|friendly|pragmatic`
+- `sandbox_mode`: `read-only|workspace-write|danger-full-access`
+- `web_search`: `disabled|cached|live`
 
-These belong under `[agents]` in main config (not inside role `config_file`):
+## Global agent runtime controls
+
+Global spawned-agent limits belong under `[agents]` in `config.toml`:
 
 - `agents.max_threads`
 - `agents.max_depth`
@@ -60,124 +96,74 @@ max_depth = 1
 job_max_runtime_seconds = 1800
 ```
 
-## Role `config_file` shape
+## Validation baseline
 
-Role `config_file` is parsed as a full config layer.  
-Top-level keys must match schema keys.
+For this skill, validation must assert:
 
-### Minimum policy for this skill
+1. standalone agent file exists at the expected path
+2. `name`, `description`, and `developer_instructions` are present and non-empty
+3. `name` matches the intended installed agent name
+4. optional `nickname_candidates`, if present, is unique and uses allowed characters
+5. optional global limits match requested values when limit assertions are provided
 
-Require these fields in every role config:
+This baseline intentionally avoids over-restricting optional top-level keys because standalone custom-agent files are config layers and can validly include broader `config.toml` settings.
 
-- `model`
-- `model_reasoning_effort`
-- `developer_instructions`
+## Runtime behavior that affects agent design
 
-Do not add optional keys (`sandbox_mode`, `web_search`, `mcp_servers`, `apps`, etc.) unless explicitly requested.
+From current subagents guidance:
 
-Recommended default profile (if user does not specify):
+- Codex only spawns new subagents when explicitly asked.
+- Subagents inherit parent sandbox and approval policy defaults.
+- Parent turn runtime overrides are reapplied to children (including interactive override choices).
+- Custom-agent defaults still matter, but they do not bypass parent runtime controls.
+- If a custom agent name collides with a built-in one, the custom definition takes precedence.
 
-- `model = "gpt-5.4-mini"`
-- `model_reasoning_effort = "medium"`
-
-Recommended role declaration default (if user does not specify):
-
-- `nickname_candidates = ["<Title-cased role name>"]`
-
-### Useful enums
-
-- `model_reasoning_effort`: `minimal|low|medium|high|xhigh`
-- `model_reasoning_summary`: `auto|concise|detailed|none`
-- `model_verbosity`: `low|medium|high`
-- `personality`: `none|friendly|pragmatic`
-- `sandbox_mode`: `read-only|workspace-write|danger-full-access`
-- `web_search`: `disabled|cached|live`
-
-Public-docs note: the March 2026 Codex config reference documents `minimal|low|medium|high|xhigh` for `model_reasoning_effort`. The `openai/codex` repo schema still includes `none`; treat that as repo-implementation evidence, not the default builder contract.
-
-## Runtime behavior that affects role design
-
-- Spawn starts from parent turn runtime settings.
-- Role config is merged as an additional config layer.
-- Parent runtime overrides still apply (sandbox/approval settings set interactively or by run mode).
-- Relative `config_file` paths resolve from the `config.toml` that declares the role.
-- If role config fails to load, spawns can fail until fixed.
-
-Practical implication: keep role instructions narrow and deterministic, and do not rely on role config to sidestep runtime safety settings.
+Practical implication: keep instructions narrow and deterministic, and prefer explicit safety boundaries over hidden assumptions.
 
 ## Configuration categories with examples
 
-### 1) Minimal role (recommended default)
+### 1) Minimal custom agent (recommended default)
 
 ```toml
+name = "implementer"
+description = "Implementation-focused worker for scoped code changes."
 model = "gpt-5.4-mini"
 model_reasoning_effort = "medium"
 developer_instructions = """
-You are a focused implementation assistant.
-Work only in requested files, validate changes, and report exact evidence.
+Own the requested implementation tasks end to end.
+Keep changes scoped, run targeted validation, and report evidence.
 """
 ```
 
-### 2) Model/reasoning/style knobs
+### 2) Read-only reviewer profile
 
 ```toml
-model = "gpt-5.4-mini"
+name = "reviewer"
+description = "Find correctness and security risks before merge."
+model = "gpt-5.4"
 model_reasoning_effort = "high"
-model_reasoning_summary = "concise"
-model_verbosity = "high"
-personality = "pragmatic"
-developer_instructions = "..."
+sandbox_mode = "read-only"
+developer_instructions = """
+Review code for correctness, security, and behavioral regressions.
+Lead with concrete findings and reproduction guidance.
+"""
 ```
 
-### 3) Sandboxing and workspace controls
+### 3) Optional display nicknames
 
 ```toml
-sandbox_mode = "workspace-write"
-
-[sandbox_workspace_write]
-network_access = false
-writable_roots = ["/absolute/path/to/repo"]
-```
-
-### 4) Search and feature toggles
-
-```toml
-web_search = "disabled"
-
-[features]
-shell_tool = true
-memory_tool = false
-```
-
-### 5) MCP server controls (basic and rich)
-
-```toml
-[mcp_servers.linear]
-enabled = true
-required = false
-```
-
-```toml
-[mcp_servers.linear]
-command = "npx"
-args = ["-y", "@modelcontextprotocol/server-linear"]
-env_vars = ["LINEAR_API_KEY"]
-enabled = true
-required = false
-```
-
-### 6) App connector toggles
-
-```toml
-[apps.notion]
-enabled = true
-
-[apps.monday]
-enabled = false
+name = "reviewer"
+description = "PR reviewer focused on correctness and tests."
+developer_instructions = "Review code like an owner."
+nickname_candidates = ["Atlas", "Delta", "Echo"]
 ```
 
 ## Inheritance rule of thumb
 
 - Configure only what must differ from parent.
 - Leave everything else omitted to inherit.
-- Keep role configs minimal unless stronger constraints are explicitly requested.
+- Keep custom-agent files minimal unless stronger constraints are explicitly requested.
+
+## Compatibility note
+
+`config-reference` still documents `agents.<name>.description`, `agents.<name>.config_file`, and `agents.<name>.nickname_candidates`. Treat that pattern as legacy compatibility for existing deployments. The default builder path for new work should be standalone custom-agent files under `.codex/agents/` or `~/.codex/agents/`.

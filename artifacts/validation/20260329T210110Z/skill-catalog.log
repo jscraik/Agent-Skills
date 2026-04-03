@@ -1,0 +1,7 @@
+Lifecycle readiness findings:
+- .agents/skills/.system/plugin-creator/SKILL.md [skill] -> degraded
+  - scaffold_quality_gap: contains starter placeholder token `[TODO:`
+Duplicate skill names:
+- arscontexta: plugins/arscontexta/skills/arscontexta/SKILL.md, utilities/codex-plugin-builder/fixtures/arscontexta-codex/skills/arscontexta/SKILL.md
+- imagegen: .agents/skills/.system/imagegen/SKILL.md, frontend/graphics/imagegen/SKILL.md
+Catalog check complete. assets=132 healthy=131 degraded=1 blocked=0 duplicates=2

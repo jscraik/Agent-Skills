@@ -12,7 +12,7 @@ triggers:
   - the user wants delegate-mode implementation for scoped tasks
 
 inputs:
-  - a plan path, UI plan path, todo path, or small low-risk spec path
+  - a plan path, UI plan path, todo path, small low-risk spec path, or an obviously tiny low-risk bare work request
   - linked artifacts such as origin brainstorms, parent specs, UI specs, or related issue context
   - repo conventions and validation commands from AGENTS.md
   - optional execution posture signals such as test-first, characterization-first, or external-delegate
@@ -23,6 +23,7 @@ outputs:
   - implemented code plus validation evidence
   - updated contract artifacts when execution reveals drift
   - a shipping handoff package with monitoring and validation notes
+  - a review-tier decision that defaults to full ce-review before handoff
   - UI evidence when user-visible surfaces changed
 
 non_goals:
@@ -34,6 +35,7 @@ non_goals:
 
 risks:
   - executing from the wrong artifact; mitigate with explicit lane selection and linked-artifact reads
+  - inventing structure for an underspecified bare request; mitigate with tiny-scope-only direct execution and upstream routing for anything larger
   - plan/task drift; mitigate with synchronized markdown and task updates
   - contract drift during execution; mitigate with stop-and-update rules
   - unsafe direct raw-spec execution; mitigate with plan-first escalation for medium/high-risk work

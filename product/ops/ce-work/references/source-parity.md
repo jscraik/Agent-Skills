@@ -14,8 +14,8 @@ This document records how the prompt sources for the execution stage were migrat
 - canonical source prompt:
   - `/Users/jamiecraik/dev/config/codex/prompts/workflow-work.md`
 - donor prompts explicitly preserved:
-  - inline `ce:work`
-  - inline `ce:work-beta`
+  - `https://github.com/EveryInc/compound-engineering-plugin/tree/847ce3f156a5cdf75667d9802e95d68e6b3c53a4/plugins/compound-engineering/skills/ce-work`
+  - `https://github.com/EveryInc/compound-engineering-plugin/tree/847ce3f156a5cdf75667d9802e95d68e6b3c53a4/plugins/compound-engineering/skills/ce-work-beta`
 - packaging target:
   - `/Users/jamiecraik/dev/Agent-Skills/product/ops/ce-work/`
 
@@ -37,6 +37,9 @@ This document records how the prompt sources for the execution stage were migrat
 | UI execution requires prototype gate and shipped-surface validation | `Workflow -> Phase 5`, `references/ui-execution.md` | Preserved directly |
 | final shipping package includes summary, tests, and post-deploy validation notes | `Workflow -> Phase 6`, `references/handoff-and-shipping.md` | Preserved directly |
 | beta external delegation mode | `Execution modes`, `references/execution-modes.md` | Preserved directly as an optional task-level modifier |
+| beta environment guard and delegate fallback rules | `references/execution-modes.md` | Preserved directly |
+| default full-review tier with inline-review exception | `Workflow -> Phase 6`, `references/handoff-and-shipping.md` | Preserved as repo-compatible handoff guidance |
+| tiny bare-prompt execution compatibility | `Working agreement`, `Required inputs`, `Workflow -> Phase 0` | Preserved as a guarded compatibility path |
 | optional swarm mode for explicit agent-team requests | `Workflow -> Phase 2`, `references/execution-modes.md` | Preserved directly |
 
 ## Intentional modernizations
@@ -45,6 +48,7 @@ This document records how the prompt sources for the execution stage were migrat
 - The execution workflow now states the lane choice explicitly as `plan-led | todo-led | small-spec-direct`, which makes raw-spec execution safer and easier to audit.
 - UI execution behavior was moved into `references/ui-execution.md` so the main skill keeps the 2026 delivery rules without becoming excessively long.
 - External delegation was preserved, but framed as a guarded optional modifier that falls back cleanly instead of being assumed available everywhere.
+- Donor bare-prompt execution was preserved only as a tiny, low-risk compatibility path; this repo still keeps artifact-led execution as the default.
 - Parallel execution is preserved as an execution strategy, but the skill avoids assuming that every platform or turn permits subagent spawning.
 - `contract.yaml` and `evals.yaml` were added to improve routing reliability and validation coverage.
 

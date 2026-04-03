@@ -24,6 +24,12 @@ SKIP_DIRS = {
     "skills-system",
     ".worktrees",
 }
+SKIP_PATH_PREFIXES = {
+    ("plugins", "cache"),
+}
+SKIP_PATH_PARTS = {
+    "fixtures",
+}
 
 PILOT_SKILL_PROFILE_PATHS = {
     "utilities/skill-builder",
@@ -138,10 +144,21 @@ def discover_skill_files(repo_root: Path) -> List[Path]:
         rel = path.relative_to(repo_root)
         if rel.as_posix() == "SKILL.md":
             continue
-        if rel.parts and rel.parts[0] in SKIP_DIRS:
+        if should_skip_skill_path(rel):
             continue
         files.append(path)
     return files
+
+
+def should_skip_skill_path(rel: Path) -> bool:
+    if rel.parts and rel.parts[0] in SKIP_DIRS:
+        return True
+    if any(part in SKIP_PATH_PARTS for part in rel.parts):
+        return True
+    for prefix in SKIP_PATH_PREFIXES:
+        if rel.parts[: len(prefix)] == prefix:
+            return True
+    return False
 
 
 def discover_plugin_manifests(repo_root: Path) -> List[Path]:

@@ -61,12 +61,8 @@ All of these scripts use network, so when running in the sandbox, request escala
 
 | Skill | When to use together |
 |---|---|
-| [[skills-system/skill-creator]] | Create or refine a skill before installing it into a Codex home |
-| [[utilities/skill-builder]] | Audit or harden a skill package before distributing it for installation |
-| [[utilities/1password]] | Supply authenticated GitHub access when private repo installation needs secrets or token flow help |
+| [[skill-creator]] | Author or revise a skill before attempting to distribute it |
+| [[skill-builder]] | Run quality gates and packaging checks on a skill before installation |
+| [[plugin-creator]] | Scaffold plugin packaging when the deliverable should ship as a plugin instead of a bare skill |
 
-**Topic map:** [[skill-installation]]
-
-## Gotchas
-
-- After installation, remind the user to restart Codex so the new skill is discoverable.
+**Topic map:** [[agent-ops]]

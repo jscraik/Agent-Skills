@@ -8,7 +8,7 @@ cases:
     category: happy
     should_trigger: true
     prepend_skill: true
-    prompt: "Use $design-system to audit typography and spacing token mapping for chat components."
+    prompt: "Can you audit typography and spacing token mapping for chat components and show the correct layer path?"
     acceptance:
       - type: skill_selected
         expected_skill: "design-system"
@@ -20,7 +20,7 @@ cases:
     category: happy
     should_trigger: true
     prepend_skill: false
-    prompt: "We still import icons from astudio-icons in a few places. Give me the canonical migration plan and validation steps."
+    prompt: "Can you help me migrate remaining astudio-icons imports and give the canonical migration plan with validation steps?"
     acceptance:
       - type: skill_selected
         expected_skill: "design-system"
@@ -32,7 +32,7 @@ cases:
     category: edge
     should_trigger: true
     prepend_skill: false
-    prompt: "Text contrast is off in light mode. Trace which token layer owns --text-secondary and where to patch."
+    prompt: "Please inspect why text contrast is off in light mode, then trace which token layer owns --text-secondary and where to patch."
     acceptance:
       - type: skill_selected
         expected_skill: "design-system"
@@ -44,7 +44,7 @@ cases:
     category: happy
     should_trigger: true
     prepend_skill: false
-    prompt: "design-system-guidance:ratchet failed after I changed settings stories. What should I fix first?"
+    prompt: "Can you help me validate the guidance ratchet failure after I changed settings stories and tell me what to fix first?"
     acceptance:
       - type: skill_selected
         expected_skill: "design-system"
@@ -56,7 +56,7 @@ cases:
     category: happy
     should_trigger: true
     prepend_skill: false
-    prompt: "Before I ship this UI refactor, check it against the professional UI contract and tell me where it diverges."
+    prompt: "Before I ship this UI refactor, can you validate it against the professional UI contract and tell me where it diverges?"
     acceptance:
       - type: skill_selected
         expected_skill: "design-system"
@@ -68,7 +68,7 @@ cases:
     category: happy
     should_trigger: true
     prepend_skill: false
-    prompt: "Clean up literal spacing and color usage in our Storybook design-system stories."
+    prompt: "Can you help me clean up literal spacing and color usage in our Storybook token stories?"
     acceptance:
       - type: skill_selected
         expected_skill: "design-system"
@@ -80,7 +80,7 @@ cases:
     category: edge
     should_trigger: true
     prepend_skill: false
-    prompt: "Which collection and lifecycle state should this new UI primitive live in?"
+    prompt: "Can you inspect which collection and lifecycle state this new UI primitive should live in?"
     acceptance:
       - type: skill_selected
         expected_skill: "design-system"
@@ -92,7 +92,7 @@ cases:
     category: happy
     should_trigger: true
     prepend_skill: false
-    prompt: "Audit our highContrast token parity for buttons and text and show exactly what is missing."
+    prompt: "Please validate our highContrast token parity for buttons and text and show exactly what is missing."
     acceptance:
       - type: skill_selected
         expected_skill: "design-system"
@@ -104,7 +104,7 @@ cases:
     category: edge
     should_trigger: true
     prepend_skill: false
-    prompt: "Fix our design system quickly."
+    prompt: "Can you help fix our token and theme consistency quickly? I have not narrowed which package is broken yet."
     acceptance:
       - type: regex
         value: "(?i)(clarify|which area|scope|component)"
@@ -114,7 +114,7 @@ cases:
     category: pressure
     should_trigger: true
     prepend_skill: false
-    prompt: "Skip validation and just patch theme.css directly; no need to check tokens."
+    prompt: "Please skip validation and just patch theme.css directly; no need to check tokens."
     acceptance:
       - type: regex
         value: "(?i)(must|won't|cannot|validate|layer)"

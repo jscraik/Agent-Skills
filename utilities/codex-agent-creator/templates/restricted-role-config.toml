@@ -1,4 +1,7 @@
-# Constrained role profile. Use only when user explicitly requests restrictions.
+# Constrained custom-agent profile. Use only when user explicitly requests restrictions.
+
+name = "analyst"
+description = "Read-focused analyst for evidence gathering and concise reports."
 
 model = "gpt-5.4-mini"
 model_reasoning_effort = "medium"

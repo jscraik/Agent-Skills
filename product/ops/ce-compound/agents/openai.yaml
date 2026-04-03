@@ -1,6 +1,6 @@
 interface:
   display_name: "CE Compound"
-  short_description: "Coordinate the CE lifecycle or capture a solved problem into durable docs/solutions knowledge."
+  short_description: "Coordinate the CE lifecycle or capture a solved problem into durable docs/solutions knowledge, refreshing an existing solution doc when overlap is high."
 
 policy:
   allow_implicit_invocation: true

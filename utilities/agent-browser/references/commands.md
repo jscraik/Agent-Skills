@@ -20,6 +20,7 @@ agent-browser connect 9222    # Connect to browser via CDP port
 ```bash
 agent-browser snapshot            # Full accessibility tree
 agent-browser snapshot -i         # Interactive elements only (recommended)
+agent-browser snapshot -i -C      # Include cursor-interactive elements
 agent-browser snapshot -c         # Compact output
 agent-browser snapshot -d 3       # Limit depth to 3
 agent-browser snapshot -s "#main" # Scope to CSS selector
@@ -44,9 +45,12 @@ agent-browser uncheck @e1         # Uncheck checkbox
 agent-browser select @e1 "value"  # Select dropdown option
 agent-browser select @e1 "a" "b"  # Select multiple options
 agent-browser scroll down 500     # Scroll page (default: down 300px)
+agent-browser scroll down 500 --selector "div.content" # Scroll inside container
 agent-browser scrollintoview @e1  # Scroll element into view (alias: scrollinto)
 agent-browser drag @e1 @e2        # Drag and drop
 agent-browser upload @e1 file.pdf # Upload files
+agent-browser keyboard type "text"        # Type at current focus
+agent-browser keyboard inserttext "text"  # Insert without key events
 ```
 
 ## Get Information
@@ -78,7 +82,18 @@ agent-browser is checked @e1      # Check if checked
 agent-browser screenshot          # Save to temporary directory
 agent-browser screenshot path.png # Save to specific path
 agent-browser screenshot --full   # Full page
+agent-browser screenshot --annotate         # Numbered element labels
+agent-browser screenshot --screenshot-dir ./shots
+agent-browser screenshot --screenshot-format jpeg --screenshot-quality 80
 agent-browser pdf output.pdf      # Save as PDF
+```
+
+## Downloads
+
+```bash
+agent-browser download @e1 ./file.pdf   # Click element to trigger download
+agent-browser wait --download ./output.zip
+agent-browser --download-path ./downloads open https://example.com
 ```
 
 ## Video Recording
@@ -99,6 +114,7 @@ agent-browser wait --text "Success"        # Wait for text (or -t)
 agent-browser wait --url "**/dashboard"    # Wait for URL pattern (or -u)
 agent-browser wait --load networkidle      # Wait for network idle (or -l)
 agent-browser wait --fn "window.ready"     # Wait for JS condition (or -f)
+agent-browser wait "#spinner" --state hidden  # Wait for element to disappear
 ```
 
 ## Mouse Control
@@ -140,6 +156,15 @@ agent-browser set media dark                  # Emulate color scheme
 agent-browser set media light reduced-motion  # Light mode + reduced motion
 ```
 
+## Clipboard
+
+```bash
+agent-browser clipboard read           # Read text from clipboard
+agent-browser clipboard write "Hello"  # Write text to clipboard
+agent-browser clipboard copy           # Copy current selection
+agent-browser clipboard paste          # Paste from clipboard
+```
+
 ## Cookies and Storage
 
 ```bash
@@ -161,6 +186,8 @@ agent-browser network route <url> --body '{}'  # Mock response
 agent-browser network unroute [url]            # Remove routes
 agent-browser network requests                 # View tracked requests
 agent-browser network requests --filter api    # Filter requests
+agent-browser network har start                # Start HAR capture
+agent-browser network har stop ./capture.har   # Stop and save HAR
 ```
 
 ## Tabs and Windows
@@ -216,15 +243,44 @@ agent-browser state save auth.json    # Save cookies, storage, auth state
 agent-browser state load auth.json    # Restore saved state
 ```
 
+## Diff
+
+```bash
+agent-browser diff snapshot                      # Compare current vs last snapshot
+agent-browser diff snapshot --baseline before.txt
+agent-browser diff screenshot --baseline before.png
+agent-browser diff url https://staging.example.com https://prod.example.com
+agent-browser diff url https://a.example.com https://b.example.com --wait-until networkidle
+agent-browser diff url https://a.example.com https://b.example.com --selector "#main"
+```
+
+## Batch Execution
+
+```bash
+echo '[["open","https://example.com"],["snapshot","-i"],["click","@e1"]]' | agent-browser batch --json
+agent-browser batch --bail < commands.json
+```
+
+Use `batch` when the sequence is already known and does not require reading intermediate output.
+Use separate commands or `&&` chaining when you need to inspect snapshot output between steps.
+
 ## Global Options
 
 ```bash
 agent-browser --session <name> ...    # Isolated browser session
+agent-browser --session-name <name> ... # Auto-save/restore named state
 agent-browser --json ...              # JSON output for parsing
 agent-browser --headed ...            # Show browser window (not headless)
 agent-browser --full ...              # Full page screenshot (-f)
 agent-browser --cdp <port> ...        # Connect via Chrome DevTools Protocol
+agent-browser --auto-connect ...      # Reuse a running Chrome when available
 agent-browser -p <provider> ...       # Cloud browser provider (--provider)
+agent-browser --download-path <dir> ... # Default download directory
+agent-browser --profile <path> ...    # Persistent browser profile
+agent-browser --state <path> ...      # Load state on startup
+agent-browser --color-scheme dark ... # Persistent color scheme
+agent-browser --allow-file-access ... # Allow file:// URLs
+agent-browser --content-boundaries ... # Wrap untrusted page content
 agent-browser --proxy <url> ...       # Use proxy server
 agent-browser --proxy-bypass <hosts>  # Hosts to bypass proxy
 agent-browser --headers <json> ...    # HTTP headers scoped to URL's origin
@@ -263,4 +319,10 @@ AGENT_BROWSER_EXTENSIONS="/ext1,/ext2"       # Comma-separated extension paths
 AGENT_BROWSER_PROVIDER="browserbase"         # Cloud browser provider
 AGENT_BROWSER_STREAM_PORT="9223"             # WebSocket streaming port
 AGENT_BROWSER_HOME="/path/to/agent-browser"  # Custom install location
+AGENT_BROWSER_COLOR_SCHEME="dark"            # Default color scheme
+AGENT_BROWSER_ALLOWED_DOMAINS="example.com,*.example.com" # Allowlist
+AGENT_BROWSER_ACTION_POLICY="./policy.json"  # Gate risky actions
+AGENT_BROWSER_CONTENT_BOUNDARIES=1           # Mark page-sourced output
+AGENT_BROWSER_DEFAULT_TIMEOUT="25000"        # Default action timeout (ms)
+AGENT_BROWSER_MAX_OUTPUT="50000"             # Prevent context flooding
 ```

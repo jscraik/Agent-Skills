@@ -16,6 +16,7 @@ paths = [
   "(^|/)test-data/",
   "(^|/)[^.]+\\.(test|spec)\\.[^.]+$",
   "frontend/ui/figma-implement-design/SKILL\\.md$",
+  "(^|/)artifacts/skill-graphs/runs/",
 ]
 regexes = [
   "\\[REDACTED\\]",
@@ -24,4 +25,5 @@ regexes = [
   "sk_live_abc123",
   "mkL9xQn2VwM8pYrTb4ZcHjF",
   "pR8mNv5KqXzGwY2JtCfL4D",
+  "\"idempotency_key\"\\s*:\\s*\"[^\"]+\"",
 ]

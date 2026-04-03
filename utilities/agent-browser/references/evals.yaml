@@ -1,15 +1,77 @@
-schema_version: 1
+schema_version: "2.0"
+
+skill_name: "agent-browser"
+
 cases:
-  - name: snapshot-flow
-    prompt: "Open a page, take an interactive snapshot, and click a button by ref."
+  - id: explicit-agent-browser
+    name: explicit agent-browser request
+    category: happy
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Use $agent-browser to open this page, take an interactive snapshot, and click the primary action by ref."
     acceptance:
-      - "Uses snapshot before interacting."
-      - "References ref-based selection."
-  - name: capture-artifact
-    prompt: "Take a full-page screenshot after navigation."
+      - type: skill_selected
+        expected_skill: "agent-browser"
+      - type: regex
+        value: "(?i)(snapshot|-i|@e\\d+|ref)"
+
+  - id: authenticated-browser-flow
+    name: authenticated browser flow
+    category: happy
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Open the dashboard, but reuse my saved browser auth or another safe login method instead of having the model paste credentials into the page."
     acceptance:
-      - "Produces a screenshot artifact path."
-  - name: scrape-text
-    prompt: "Extract headline text from a news page using refs."
+      - type: skill_selected
+        expected_skill: "agent-browser"
+      - type: regex
+        value: "(?i)(auth|state|profile|session-name|vault)"
+
+  - id: diff-or-download-evidence
+    name: diff or download evidence
+    category: edge
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Click the export button, wait for the download, and give me the artifact path or a narrow proof that the browser action changed the page."
     acceptance:
-      - "Uses get text with a ref."
+      - type: skill_selected
+        expected_skill: "agent-browser"
+      - type: regex
+        value: "(?i)(download|diff snapshot|artifact|verify)"
+
+  - id: deterministic-scrape
+    name: deterministic scrape
+    category: happy
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Extract the visible headline text from this page using browser snapshots or refs instead of raw HTML scraping."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "agent-browser"
+      - type: regex
+        value: "(?i)(snapshot|get text|ref|@e\\d+)"
+
+  - id: generic-browsing-advice
+    name: generic browsing advice
+    category: negative
+    should_trigger: false
+    prepend_skill: false
+    prompt: "What are some good tips for browsing the web more safely?"
+    acceptance:
+      - type: skill_not_selected
+        expected_skill: "agent-browser"
+
+  - id: desktop-screenshot-only
+    name: desktop screenshot only
+    category: negative
+    should_trigger: false
+    prepend_skill: false
+    prompt: "Take a screenshot of my Mac desktop."
+    acceptance:
+      - type: skill_not_selected
+        expected_skill: "agent-browser"
+
+metadata:
+  last_updated: "2026-03-30"
+  author: "Codex"
+  review_status: "draft"

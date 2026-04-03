@@ -10,6 +10,7 @@ metadata:
 ## Table of Contents
 - [Overview](#overview)
 - [Current baseline markers](#current-baseline-markers)
+- [Design-system integration](#design-system-integration)
 - [Philosophy](#philosophy)
 - [Scope and triggers](#scope-and-triggers)
 - [Required inputs](#required-inputs)
@@ -42,6 +43,11 @@ Provide concrete, example-driven guidance for React UI composition, state, routi
 - Next.js 16 is the default routing and server/client boundary baseline when the target app uses Next.js.
 - Tailwind CSS v4 is the default utility and token baseline for styling examples.
 - WCAG 2.2 AA is the default accessibility bar for component and screen recommendations.
+
+## Design-system integration
+- Apply `frontend/ui/references/design-system-integration-contract.md` when giving typography, spacing, iconography, and token guidance.
+- Route shared token architecture, aliasing, and theme-governance changes to `design-system`.
+- Use `frontend/ui/references/skill-routing-matrix-2026.md` when prompt scope overlaps with routing (`frontend-design`) or full UI execution (`frontend-ui-design`).
 
 ## Philosophy
 - Prefer composable, accessible primitives over bespoke UI logic.
@@ -197,6 +203,7 @@ Use judgment, adapt to context, and push boundaries when appropriate.
 ## Validation
 - Run any relevant checks or scripts when available.
 - Fail fast and report errors before proceeding.
+- Confirm recommended typography, spacing, icon usage, and visual literals stay compliant with `frontend/ui/references/design-system-integration-contract.md`.
 
 ## Anti-patterns
 - Avoid vague guidance without concrete steps.
@@ -248,6 +255,7 @@ Use judgment, adapt to context, and push boundaries when appropriate.
 | Skill | When to use together |
 |---|---|
 | [[frontend-ui-design]] | Apply React patterns to components being designed |
+| [[design-system]] | Keep typography, spacing, and icon guidance aligned to canonical token governance |
 | [[shadcn-ui]] | Source Radix/shadcn primitives for React pattern implementations |
 | [[stitch-react-components]] | Use patterns when converting Stitch screens to React |
 | [[baseline-ui]] | Validate React component patterns against baseline rules |

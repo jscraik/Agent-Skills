@@ -1,5 +1,5 @@
 {
-  "harnessVersion": "0.8.1",
+  "harnessVersion": "0.11.12",
   "ciProvider": "github-actions",
   "files": [
     {
@@ -54,6 +54,31 @@
       "path": ".codex/environments/environment.toml",
       "action": "modified",
       "backupHash": "cd49adffccd28c2b"
+    },
+    {
+      "path": ".harness/ci-provider-transition-status.json",
+      "action": "created"
+    },
+    {
+      "path": "scripts/codex-learn",
+      "action": "created"
+    },
+    {
+      "path": "scripts/codex-enforced",
+      "action": "created"
+    },
+    {
+      "path": "scripts/prepare-worktree.sh",
+      "action": "created"
+    },
+    {
+      "path": "scripts/harness-cli.sh",
+      "action": "created"
+    },
+    {
+      "path": "WORKFLOW.md",
+      "action": "created"
     }
-  ]
+  ],
+  "issueTracker": "github"
 }

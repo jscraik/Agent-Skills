@@ -37,6 +37,10 @@ Production implementation should align to:
 - the repo's canonical component, token, styling, accessibility, and routing patterns
 - Figma design references when the plan or repo provides them
 
+If UI work is non-trivial and no design artifact, selected prototype, or mapping note exists yet:
+- stop and route back to the missing prototype or design-selection step before polishing production UI
+- for repo-local design exploration or implementation direction, prefer `[[frontend-design]]` or the governing UI-plan path rather than ad-libbing a new direction mid-execution
+
 ## Evidence requirements
 For changed user-visible surfaces:
 - capture screenshots of the shipped implementation

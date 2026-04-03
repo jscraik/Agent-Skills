@@ -1,0 +1,9 @@
+interface:
+  display_name: "Feature Video"
+  short_description: "Produce a concise feature walkthrough video and package it for PR, release, or handoff workflows."
+
+policy:
+  allow_implicit_invocation: true
+
+dependencies:
+  tools: []

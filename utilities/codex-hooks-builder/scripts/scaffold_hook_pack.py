@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Use when: you need a deterministic project-local or user-level Codex hook pack
-scaffold that matches the March 2026 supported command-hook contract.
+scaffold that matches the currently documented command-hook contract.
 """
 
 from __future__ import annotations
@@ -408,7 +408,7 @@ def readme_template(config_dir: Path, hooks_dir: Path) -> str:
 
         ## Overview
         This hook pack was scaffolded from `utilities/codex-hooks-builder` and
-        targets the March 2026 supported Codex command-hook contract.
+        targets the currently documented Codex command-hook contract.
 
         ## Files
         - `{config_dir / "hooks.json"}`
@@ -425,6 +425,7 @@ def readme_template(config_dir: Path, hooks_dir: Path) -> str:
         - `SessionStart` adds concise repo-aware startup context
         - `UserPromptSubmit` blocks obvious instruction-bypass attempts and annotates risky shortcuts
         - `Stop` blocks clearly incomplete final handoffs once, then fails open on retry
+        - `PreToolUse` and `PostToolUse` are supported by Codex docs but intentionally not scaffolded in this starter pack unless requested
 
         ## Validation
         ```bash

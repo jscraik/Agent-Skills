@@ -72,12 +72,8 @@ Read only what you need:
 
 | Skill | When to use together |
 |---|---|
-| [[product/docs/context7]] | Retrieve current third-party library docs when an OpenAI integration depends on external frameworks |
-| [[product/domain/chatgpt-apps]] | Move from docs lookup into Apps SDK implementation work |
-| [[utilities/coding-harness]] | Apply current OpenAI guidance while wiring repository automation or agent flows |
+| [[context7]] | Retrieve current third-party library docs when the question is not OpenAI-specific |
+| [[chatgpt-apps]] | Implement or troubleshoot Apps SDK projects after the relevant OpenAI docs are retrieved |
+| [[coding-harness]] | Check current harness guidance when OpenAI tooling questions are part of a repo bootstrap or upgrade workflow |
 
 **Topic map:** [[product-docs]]
-
-## Gotchas
-
-- If the OpenAI docs MCP server is unavailable, retry installation yourself before asking the user to intervene.

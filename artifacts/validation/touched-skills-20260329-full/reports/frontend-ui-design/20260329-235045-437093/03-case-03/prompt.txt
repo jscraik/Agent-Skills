@@ -1,0 +1,3 @@
+$frontend-ui-design
+
+Use the frontend-ui-design skill for a typical request.

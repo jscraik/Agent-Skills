@@ -1,0 +1,4 @@
+Lifecycle readiness findings:
+- utilities/insight-report/SKILL.md [skill] -> blocked
+  - missing_metadata: governed skill missing `metadata_source`
+Catalog check complete. assets=131 healthy=130 degraded=0 blocked=1 duplicates=0

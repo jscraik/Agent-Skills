@@ -1,5 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-02-26T16:27:09Z",
-  "scopes": {}
+  "generated_at": "2026-03-31T15:30:00Z",
+  "scopes": {
+    "frontend/ui/frontend-ui-design::frontend": {
+      "active_lesson_id": "",
+      "current_version": 0,
+      "updated_at": "2026-03-31T15:30:00Z"
+    }
+  }
 }

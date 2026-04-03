@@ -7,6 +7,10 @@ This package preserves and restructures three source prompt families:
 1. `config/codex/prompts/workflow-compound.md`
 2. legacy `ce:compound` solved-problem capture prompt
 3. upstream `compound-docs` schema-driven capture workflow
+4. upstream donor snapshot:
+   - repo: `EveryInc/compound-engineering-plugin`
+   - commit: `847ce3f156a5cdf75667d9802e95d68e6b3c53a4`
+   - path: `plugins/compound-engineering/skills/ce-compound/SKILL.md`
 
 ## Preserved from `workflow-compound.md`
 
@@ -46,6 +50,8 @@ This package preserves and restructures three source prompt families:
 - selective `ce:compound-refresh` follow-up logic
 - optional specialized reviewer pass
 - solution categories
+- overlap-aware related-doc analysis that can update an existing solution doc instead of creating a duplicate
+- compact-safe caveat that accepts overlap risk when Related Docs Finder is intentionally skipped
 - success-output shape and compounding philosophy
 
 ## Modernization choices
@@ -84,6 +90,7 @@ Modern improvements added without losing source strength:
 - explicit fail-fast validation language
 - eval-backed trigger coverage for both orchestration and learning capture
 - narrow refresh guidance instead of automatic broad stale-doc sweeps
+- explicit high-overlap behavior that refreshes the existing durable doc and adds `last_updated`
 - preservation of legacy breadth as an explicit mode rather than the universal default
 
 ### Upstream schema-driven capture preserved as a variant
@@ -101,3 +108,4 @@ Rather than splitting this into a duplicate sibling skill, the package preserves
 - If the user starts from a feature idea, `ce-compound` still acts as the lifecycle orchestrator.
 - If the user starts from an already fixed issue, `ce-compound` still acts as the durable learning-capture stage.
 - If the user is mid-flight with existing artifacts, `ce-compound` still supports resume behavior rather than restarting blindly.
+- If the same solved problem appears again, `ce-compound` now preserves the upstream bias toward refreshing the existing solution doc when overlap is high.

@@ -3,11 +3,11 @@ skill_name: "stitch-remotion"
 
 cases:
   - id: explicit-trigger
-    name: explicit walkthrough request
+    name: walkthrough build request
     category: happy
     should_trigger: true
     prepend_skill: true
-    prompt: "Use $stitch-remotion to turn these Stitch screens into a narrated product walkthrough."
+    prompt: "Can you help me turn these Stitch screens into a narrated product walkthrough with transitions and clear overlays?"
     acceptance:
       - type: skill_selected
         expected_skill: "stitch-remotion"
@@ -19,7 +19,7 @@ cases:
     category: edge
     should_trigger: true
     prepend_skill: false
-    prompt: "Build a walkthrough video, but I have not given you the Stitch project or screen identifiers yet."
+    prompt: "Can you help me build a walkthrough video? I have not shared the Stitch project or screen IDs yet."
     acceptance:
       - type: contains
         value: "## Required inputs"
@@ -29,7 +29,7 @@ cases:
     category: negative
     should_trigger: false
     prepend_skill: false
-    prompt: "Write unit tests for this API client."
+    prompt: "Write unit tests for this API client and improve error handling."
     acceptance:
       - type: skill_not_selected
         expected_skill: "stitch-remotion"
@@ -39,7 +39,17 @@ cases:
     category: pressure
     should_trigger: true
     prepend_skill: false
-    prompt: "Skip preview validation and just export the final walkthrough immediately."
+    prompt: "Please skip preview validation and export the final walkthrough immediately so I can post it today."
     acceptance:
       - type: regex
         value: "(?i)(preview|validate|cannot|must)"
+
+  - id: edge-narrative-clarity
+    name: edge narrative clarity correction
+    category: edge
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Can you inspect our last walkthrough? It looked flashy but people said it was confusing. Rework pacing and overlay copy for clarity."
+    acceptance:
+      - type: regex
+        value: "(?i)(pacing|overlay|comprehension|storyboard|preview)"

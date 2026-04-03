@@ -194,15 +194,21 @@ Use `max-coverage` only when:
 In `max-coverage` mode, preserve the original prompt's strengths:
 - create a section manifest
 - discover clearly relevant skills, reviewers, research agents, and learnings from the current platform or installed registries when available
-- run a broad but still evidence-oriented parallel fan-out
+- prepare a broad but still evidence-oriented fan-out when the user has explicitly asked for delegation or approves it via `request_user_input`; otherwise widen inline coverage selectively
 - synthesize all usable findings back into the spec without rewriting its intent
 
 See `references/deepening-modes.md` for the detailed mode matrix and scoring rules.
 
 ### Phase 3: Gather grounding
-Always run these bounded internal subagents in parallel:
+Start with grounding in the main thread.
+
+If bounded internal support would materially improve coverage and the user has not already explicitly asked for delegation or sub-agents, ask a short blocking approval question via `request_user_input` before spawning any internal subagents.
+
+If approved, run these bounded internal subagents in parallel:
 - `repo-research-analyst("Find similar architecture, lifecycle, operational, or UI contract patterns relevant to: <spec topic> — max 20 files, max 4 MB total read, return a <=400 word summary with file:line refs")`
 - `learnings-researcher("Find prior learnings relevant to: <spec topic> — check .harness/memory/LEARNINGS.md first when it exists, then instructions/Learnings.md for compatibility, then scan only directly relevant docs/solutions entries. Return only directly relevant findings, <=200 words total.")`
+
+If approval is not granted, the tool is unavailable, or subagents are unnecessary, perform the equivalent grounding serially in the main thread.
 
 Add conditional external research only when the section gaps justify it:
 - `best-practices-researcher("<section or spec topic> — max 5 external sources, <=300 word summary, cite URLs and dates")`
@@ -213,7 +219,7 @@ Use OpenAI docs, Codex repo guidance, and Context7 when they materially improve 
 When `max-coverage` is selected, also:
 - apply clearly matched skills from the current platform or installed registries
 - scan deeper learnings under `docs/solutions/`
-- run a broader reviewer sweep for spec sections that benefit from multiple specialist views
+- run a broader reviewer sweep for spec sections that benefit from multiple specialist views only when delegation was explicitly requested or approved; otherwise expand the inline sweep selectively
 
 ### Phase 4: Choose research execution mode
 Use `direct` mode by default when the selected research scope is small enough for inline synthesis.

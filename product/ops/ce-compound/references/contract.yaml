@@ -3,8 +3,8 @@ schema_version: 1
 purpose: >
   Coordinate the compound-engineering lifecycle from the correct stage, or
   capture a verified solved problem into a durable `docs/solutions/` artifact
-  with explicit evidence, prevention guidance, and narrow refresh follow-up when
-  warranted.
+  with explicit evidence, prevention guidance, overlap-aware duplicate
+  avoidance, and narrow refresh follow-up when warranted.
 
 triggers:
   - the user wants the CE workflow routed or resumed from the correct stage
@@ -21,7 +21,7 @@ inputs:
 outputs:
   - "a mode decision: full-lifecycle, resume-from-stage, or learning-capture"
   - "for lifecycle mode, the current stage, completed stages, blockers, and exact next CE command"
-  - "for learning capture, a single docs/solutions/[category]/[filename].md artifact"
+  - "for learning capture, a single created or updated docs/solutions/[category]/[filename].md artifact"
   - "optional narrow ce-compound-refresh guidance when older solution docs appear stale"
   - "structured status output with schema_version: 1 when requested"
 
@@ -35,6 +35,8 @@ non_goals:
 risks:
   - routing to the wrong stage; mitigate with artifact-first stage validation and explicit mode selection
   - losing the strong legacy solved-problem flow; mitigate with explicit learning-capture mode and dedicated reference rules
+  - creating duplicate solution docs for the same solved problem; mitigate with overlap scoring and refresh-in-place on high-overlap matches
   - over-broad refresh recommendations; mitigate with narrow scope hints and evidence thresholds
+  - compact-safe overlap blind spots; mitigate by treating compact-safe as an explicit tradeoff and only recommending narrow follow-up refreshes when obvious
   - stale or contradictory supplementary notes; mitigate by treating auto memory as secondary evidence and labeling it when used
   - helper-role drift during learning capture; mitigate with the one-file-write rule and orchestrator-owned final assembly

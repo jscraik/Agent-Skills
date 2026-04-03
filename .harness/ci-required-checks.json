@@ -17,19 +17,6 @@
     },
     {
       "policyId": "required-check-2",
-      "displayName": "linear-gate",
-      "sourceAppSlug": "github-actions",
-      "sourceAppId": "github-actions",
-      "externalIdPattern": "^linear-gate$",
-      "requiredOnEvents": [
-        "pull_request",
-        "merge_group"
-      ],
-      "freshnessWindowDays": 7,
-      "class": "required"
-    },
-    {
-      "policyId": "required-check-3",
       "displayName": "risk-policy-gate",
       "sourceAppSlug": "github-actions",
       "sourceAppId": "github-actions",
@@ -42,11 +29,24 @@
       "class": "required"
     },
     {
-      "policyId": "required-check-4",
-      "displayName": "dependency-review",
+      "policyId": "required-check-3",
+      "displayName": "dependency-scan",
       "sourceAppSlug": "github-actions",
       "sourceAppId": "github-actions",
-      "externalIdPattern": "^dependency-review$",
+      "externalIdPattern": "^dependency-scan$",
+      "requiredOnEvents": [
+        "pull_request",
+        "merge_group"
+      ],
+      "freshnessWindowDays": 7,
+      "class": "required"
+    },
+    {
+      "policyId": "required-check-4",
+      "displayName": "orb-pinning",
+      "sourceAppSlug": "github-actions",
+      "sourceAppId": "github-actions",
+      "externalIdPattern": "^orb-pinning$",
       "requiredOnEvents": [
         "pull_request",
         "merge_group"
@@ -56,19 +56,6 @@
     },
     {
       "policyId": "required-check-5",
-      "displayName": "actions-pinning",
-      "sourceAppSlug": "github-actions",
-      "sourceAppId": "github-actions",
-      "externalIdPattern": "^actions-pinning$",
-      "requiredOnEvents": [
-        "pull_request",
-        "merge_group"
-      ],
-      "freshnessWindowDays": 7,
-      "class": "required"
-    },
-    {
-      "policyId": "required-check-6",
       "displayName": "consistency-drift-health",
       "sourceAppSlug": "github-actions",
       "sourceAppId": "github-actions",
@@ -81,7 +68,7 @@
       "class": "required"
     },
     {
-      "policyId": "required-check-7",
+      "policyId": "required-check-6",
       "displayName": "docs-gate",
       "sourceAppSlug": "github-actions",
       "sourceAppId": "github-actions",
@@ -94,7 +81,7 @@
       "class": "required"
     },
     {
-      "policyId": "required-check-8",
+      "policyId": "required-check-7",
       "displayName": "lint",
       "sourceAppSlug": "github-actions",
       "sourceAppId": "github-actions",
@@ -107,7 +94,7 @@
       "class": "required"
     },
     {
-      "policyId": "required-check-9",
+      "policyId": "required-check-8",
       "displayName": "typecheck",
       "sourceAppSlug": "github-actions",
       "sourceAppId": "github-actions",
@@ -120,7 +107,7 @@
       "class": "required"
     },
     {
-      "policyId": "required-check-10",
+      "policyId": "required-check-9",
       "displayName": "test",
       "sourceAppSlug": "github-actions",
       "sourceAppId": "github-actions",
@@ -133,7 +120,7 @@
       "class": "required"
     },
     {
-      "policyId": "required-check-11",
+      "policyId": "required-check-10",
       "displayName": "audit",
       "sourceAppSlug": "github-actions",
       "sourceAppId": "github-actions",
@@ -146,7 +133,7 @@
       "class": "required"
     },
     {
-      "policyId": "required-check-12",
+      "policyId": "required-check-11",
       "displayName": "check",
       "sourceAppSlug": "github-actions",
       "sourceAppId": "github-actions",
@@ -159,7 +146,7 @@
       "class": "required"
     },
     {
-      "policyId": "required-check-13",
+      "policyId": "required-check-12",
       "displayName": "memory",
       "sourceAppSlug": "github-actions",
       "sourceAppId": "github-actions",
@@ -172,7 +159,7 @@
       "class": "required"
     },
     {
-      "policyId": "required-check-14",
+      "policyId": "required-check-13",
       "displayName": "security-scan",
       "sourceAppSlug": "github-actions",
       "sourceAppId": "github-actions",
@@ -185,11 +172,11 @@
       "class": "required"
     },
     {
-      "policyId": "required-check-15",
-      "displayName": "Greptile Review",
+      "policyId": "required-check-14",
+      "displayName": "CodeRabbit",
       "sourceAppSlug": "github-actions",
       "sourceAppId": "github-actions",
-      "externalIdPattern": "^Greptile Review$",
+      "externalIdPattern": "^CodeRabbit$",
       "requiredOnEvents": [
         "pull_request",
         "merge_group"

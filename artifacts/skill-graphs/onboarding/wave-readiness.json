@@ -1,28 +1,43 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-03-25T01:46:56Z",
-  "decision_date": "2026-03-25",
+  "generated_at": "2026-04-02T22:29:54Z",
+  "decision_date": "2026-04-02",
   "summary": {
-    "active_skill_count": 72,
+    "active_skill_count": 84,
     "manual_skill_count": 10,
-    "co_pilot_skill_count": 62,
-    "profile_valid_count": 72,
+    "co_pilot_skill_count": 74,
+    "profile_valid_count": 84,
     "profile_invalid_count": 0,
-    "event_envelope_errors": 8,
-    "approver_count": 2
+    "event_envelope_errors": 0,
+    "event_envelope_errors_total": 0,
+    "event_envelope_errors_waived": 0,
+    "event_envelope_errors_unresolved": 0,
+    "approver_count": 2,
+    "telemetry_generated_at": "2026-03-31T15:28:27Z",
+    "telemetry_window_start": "2026-03-25",
+    "telemetry_window_end": "2026-03-31",
+    "telemetry_freshness_ok": false
   },
   "waves": {
     "wave-0-controls": {
       "ready": false,
       "checks": {
         "required_controls_present": true,
-        "event_envelope_errors_zero": false,
+        "event_envelope_errors_zero": true,
+        "telemetry_freshness_ok": false,
         "approver_count_gte_2": true
       },
       "blockers": [
         {
-          "code": "EVENT_ENVELOPE_ERRORS",
-          "detail": "Event envelope errors in decision window: 8",
+          "code": "TELEMETRY_HEALTH_STALE",
+          "detail": "daily-skill-health.md age 55.02h exceeds 24.00h",
+          "owner": "unassigned",
+          "due_date": null,
+          "escalation_date": null
+        },
+        {
+          "code": "TELEMETRY_WINDOW_MISMATCH",
+          "detail": "daily-skill-health.md window mismatch (expected 2026-03-27..2026-04-02, actual 2026-03-25..2026-03-31)",
           "owner": "unassigned",
           "due_date": null,
           "escalation_date": null
@@ -54,23 +69,17 @@
       "checks": {
         "co_pilot_profiles_valid": true,
         "wave_1_ready": false,
-        "event_envelope_errors_zero": false
+        "event_envelope_errors_zero": true,
+        "telemetry_freshness_ok": false
       },
       "coverage": {
-        "total": 62,
-        "valid": 62
+        "total": 74,
+        "valid": 74
       },
       "blockers": [
         {
           "code": "WAVE1_NOT_READY",
           "detail": "Wave 2 blocked until Wave 1 manual onboarding passes",
-          "owner": "unassigned",
-          "due_date": null,
-          "escalation_date": null
-        },
-        {
-          "code": "EVENT_ENVELOPE_ERRORS",
-          "detail": "Wave 2 requires zero event envelope errors (actual=8)",
           "owner": "unassigned",
           "due_date": null,
           "escalation_date": null

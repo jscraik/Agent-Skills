@@ -1,6 +1,6 @@
 ---
 name: ce-compound
-description: "Analyze compound-engineering artifact state and document verified solved problems in docs/solutions. Use when the user needs a CE request started or resumed from the right place, or wants a fresh fix turned into reusable team knowledge."
+description: "Analyze compound-engineering artifact state and capture verified solved problems into durable `docs/solutions/` knowledge, including refreshing an existing solution doc instead of creating a duplicate when the same problem is solved again. Use when the user needs a CE request started or resumed from the right place, or wants a fresh fix turned into reusable team knowledge."
 metadata:
   skill-type: team_automation
 ---
@@ -51,6 +51,7 @@ Primary triggers:
 - "capture the fix into docs/solutions"
 - "compound this learning while the context is fresh"
 - "route this request through the full CE lifecycle"
+- "we solved this again; update the existing solution doc if it is basically the same problem"
 
 Non-triggers:
 - the user already knows the exact downstream stage and only wants that stage run
@@ -82,7 +83,7 @@ If the request is ambiguous, ask one direct question:
   - recommended next command
 - for direct learning capture:
   - a mode choice: `full | compact-safe`
-  - one durable solution artifact under `docs/solutions/[category]/[filename].md`
+  - one durable solution artifact under `docs/solutions/[category]/[filename].md`, either as a new file or a refreshed existing doc when overlap is high
   - optional narrow `ce-compound-refresh` recommendation or invocation guidance
 - when a structured status report is requested, include `schema_version: 1`
 
@@ -107,6 +108,7 @@ If an upstream artifact gate fails in lifecycle mode, keep the workflow at the e
 - in lifecycle mode, already validated stages are preserved and the run resumes from the earliest incomplete stage
 - in learning-capture mode, the solved-problem flow writes exactly one final documentation artifact in full mode
 - direct learning capture preserves the legacy `full` and `compact-safe` behaviors as explicit submodes rather than silently dropping breadth
+- high-overlap learning capture updates the existing doc instead of creating a duplicate artifact
 - UI-impacting lifecycle work inserts the required UI checkpoints before implementation
 - stage boundaries remain intact: orchestration is not treated as implementation, and learning capture is not treated as generic review
 - if any required check fails, stop at the first failed gate and do not proceed until it is fixed
@@ -161,7 +163,7 @@ For `full-lifecycle` and `resume-from-stage`, use the stage sequence, stage exit
 
 For `learning-capture`, use the solved-problem workflow in `references/learning-capture.md`, including:
 - auto-memory scan
-- parallel research roles in `full` mode
+- approval-gated research helper roles in `full` mode
 - one-file-write rule
 - selective `ce-compound-refresh` follow-up
 - optional specialized reviewer pass
@@ -196,7 +198,9 @@ For the detailed lifecycle stage contract, use `references/lifecycle-modes.md`.
 ## Learning-capture rules
 - Preserve the legacy `full` mode as the default solved-problem capture lane.
 - Preserve `compact-safe` as an explicit opt-in for context-constrained runs.
+- In `full` mode, if helper roles would materially improve coverage and the user has not already explicitly asked for delegation or sub-agents, ask a short blocking approval question via `request_user_input` before spawning them; otherwise gather the same evidence inline.
 - In `full` mode, subagents or helper roles return text only; the orchestrator writes the single final file.
+- In `full` mode, check for high-overlap existing solution docs before writing; refresh the existing doc when the same problem, root cause, and solution are already documented rather than creating a duplicate.
 - Auto-memory notes are supplementary evidence only and must be labeled when they materially influence the final document.
 - `ce-compound-refresh` is selective follow-up maintenance, not an automatic second workflow.
 - If related docs are still consistent, do not force a refresh recommendation just because overlap exists.
@@ -232,6 +236,7 @@ After learning capture:
 - stop with the new `docs/solutions/` artifact when the documentation is sufficient
 - recommend `ce-compound-refresh` only for clear stale-doc candidates
 - if implementation is still in flight or review findings remain open, route back to the correct lifecycle stage instead of pretending the workflow is complete
+- if a high-overlap existing doc was refreshed instead of creating a new file, report that updated path explicitly and explain why duplicate creation was avoided
 
 ## Validation
 - fail fast: stop at the first failed gate, fix or report it, rerun that gate, then continue
@@ -249,6 +254,7 @@ After learning capture:
 - using solved-problem capture to document unverified or still-changing fixes
 - broadening `ce-compound-refresh` into a repo-wide sweep without evidence
 - allowing helper agents to write intermediate files during learning capture full mode
+- creating a second solution doc when an existing one already covers the same problem, root cause, and solution
 - collapsing lifecycle orchestration and knowledge capture into vague generic advice
 - fabricating stage evidence, learnings, cross-references, or current-doc claims
 
@@ -266,6 +272,7 @@ When the user asks things like:
 - "This production issue is finally fixed. Capture the symptom, root cause, and prevention steps in `docs/solutions/` while the details are still fresh."
 - "The session is tight on context, so write the lightweight solution doc for this verified fix and skip the bigger fan-out."
 - "We shipped the work and I want the final workflow stage that records the learning and tells me whether one older solution doc now needs a narrow refresh."
+- "We hit the same payment retry bug again. Capture the fresher fix, but update the existing solution doc instead of creating a near-duplicate if the overlap is high."
 
 ## References
 - Contract: `references/contract.yaml`

@@ -1,0 +1,1 @@
+Debug MCP auth failures in Cloudflare Workers and update route handlers.

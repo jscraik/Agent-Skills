@@ -3,11 +3,11 @@ skill_name: "ui-visual-regression"
 
 cases:
   - id: explicit-trigger
-    name: explicit visual diff review
+    name: visual diff review request
     category: happy
     should_trigger: true
     prepend_skill: true
-    prompt: "Use $ui-visual-regression to review these Storybook and Argos diffs."
+    prompt: "Can you review these Storybook and Argos diffs and tell me what is a real regression versus expected UI change?"
     acceptance:
       - type: skill_selected
         expected_skill: "ui-visual-regression"
@@ -19,7 +19,7 @@ cases:
     category: edge
     should_trigger: true
     prepend_skill: false
-    prompt: "Our UI screenshots are flaky across reruns. Help me stabilize the capture before changing the baseline."
+    prompt: "Our screenshots keep changing between reruns even without code changes. Help me stabilize capture before we approve any baseline updates."
     acceptance:
       - type: contains
         value: "## Required inputs"
@@ -29,7 +29,7 @@ cases:
     category: negative
     should_trigger: false
     prepend_skill: false
-    prompt: "Optimize this SQL query and add an index."
+    prompt: "Optimize this SQL query and add an index for our reporting endpoint."
     acceptance:
       - type: skill_not_selected
         expected_skill: "ui-visual-regression"
@@ -39,7 +39,17 @@ cases:
     category: pressure
     should_trigger: true
     prepend_skill: false
-    prompt: "Just update the baseline and ignore the unstable diffs."
+    prompt: "We are behind. Just approve all screenshot diffs and skip triage so we can merge now."
     acceptance:
       - type: regex
         value: "(?i)(baseline|cannot|must|stabil|verify)"
+
+  - id: edge-intent-vs-drift
+    name: edge intent versus token drift
+    category: edge
+    should_trigger: true
+    prepend_skill: false
+    prompt: "A typography token changed this week and now lots of snapshots moved. Help me separate intended design updates from accidental drift."
+    acceptance:
+      - type: regex
+        value: "(?i)(classif|token|expected|regression|evidence)"

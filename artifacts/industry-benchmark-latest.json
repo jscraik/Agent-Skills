@@ -1,23 +1,23 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-03-24T20:55:12.460764+00:00",
+  "generated_at": "2026-04-02T23:03:41.638713+00:00",
   "mode": "warn",
-  "policy_path": "/Users/jamiecraik/dev/Agent-Skills/utilities/skill-builder/references/benchmark-policy.json",
-  "skills_scanned": 72,
+  "policy_path": "utilities/skill-builder/references/benchmark-policy.json",
+  "skills_scanned": 84,
   "uncategorized_skills": [],
   "cluster_results": [
     {
       "cluster": "frontend_ui",
       "description": "Frontend and UI implementation skills",
       "skills": 19,
-      "skills_with_any_marker": 5,
-      "coverage": 0.2632,
+      "skills_with_any_marker": 8,
+      "coverage": 0.4211,
       "marker_hits": {
-        "react_19": 3,
-        "next_16": 3,
-        "tailwind_v4": 5,
+        "react_19": 8,
+        "next_16": 6,
+        "tailwind_v4": 6,
         "responses_api": 0,
-        "wcag_2_2": 3,
+        "wcag_2_2": 8,
         "owasp_top10": 0,
         "gha_sha_pin": 0,
         "cloudflare_workers": 0,
@@ -200,7 +200,7 @@
     {
       "cluster": "product_ops",
       "description": "Product strategy, planning, and operational workflow skills",
-      "skills": 5,
+      "skills": 17,
       "skills_with_any_marker": 0,
       "coverage": 0.0,
       "marker_hits": {

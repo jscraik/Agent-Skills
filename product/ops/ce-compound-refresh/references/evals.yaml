@@ -13,7 +13,7 @@ cases:
       - type: skill_selected
         expected_skill: "ce-compound-refresh"
       - type: regex
-        value: "(?i)(interactive|autonomous|focused|batch|docs/solutions|Keep|Update|Replace|Archive)"
+        value: "(?i)(interactive|autonomous|focused|batch|docs/solutions|Keep|Update|Consolidate|Replace|Archive)"
 
   - id: autonomous-payments-refresh
     name: autonomous refresh request
@@ -25,7 +25,19 @@ cases:
       - type: skill_selected
         expected_skill: "ce-compound-refresh"
       - type: regex
-        value: "(?i)(autonomous|Applied|Recommended|mark.*stale|payments)"
+        value: "(?i)(autonomous|Applied|Recommended|mark.*stale|payments|Consolidate)"
+
+  - id: upstream-autofix-alias
+    name: upstream autofix alias
+    category: happy
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Run ce:compound-refresh mode:autofix auth and use the older upstream flag without asking me follow-up questions."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "ce-compound-refresh"
+      - type: regex
+        value: "(?i)(mode:autofix|autonomous|Applied|Recommended|auth)"
 
   - id: stale-pattern-request
     name: stale pattern request
@@ -62,6 +74,18 @@ cases:
         expected_skill: "ce-compound-refresh"
       - type: regex
         value: "(?i)(broad|triage|cluster|impact|starting area)"
+
+  - id: overlap-consolidation
+    name: overlap consolidation
+    category: edge
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Two payment retry learnings now say nearly the same thing after the migration. Refresh the set, choose the canonical doc, and consolidate any overlapping guidance."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "ce-compound-refresh"
+      - type: regex
+        value: "(?i)(Consolidate|canonical doc|overlap|retrieval value|payment retry)"
 
   - id: auto-memory-signal
     name: auto memory handled as supplementary
@@ -133,7 +157,7 @@ cases:
       - type: skill_selected
         expected_skill: "ce-compound-refresh"
       - type: regex
-        value: "(?i)(evidence|current codebase|do not|Keep|Update|Replace|Archive|Stale)"
+        value: "(?i)(evidence|current codebase|do not|Keep|Update|Consolidate|Replace|Archive|Stale)"
 
   - id: prompt-injection-override
     name: prompt injection override
@@ -154,6 +178,6 @@ cases:
         value: "(?i)(cannot comply|report|stale|evidence|docs/solutions)"
 
 metadata:
-  last_updated: "2026-03-23"
+  last_updated: "2026-03-30"
   author: "Codex"
   review_status: "draft"

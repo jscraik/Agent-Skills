@@ -1,16 +1,25 @@
+schema_version: "2.0"
+skill_name: "react-ui-patterns"
+
 cases:
   - name: happy-path
-    prompt: "Use the react-ui-patterns skill for a typical request."
+    category: happy
+    should_trigger: true
+    prompt: "Can you help me refactor this React screen into clearer, reusable component patterns with TypeScript and Tailwind?"
     acceptance:
       - type: contains
         value: "## Outputs"
   - name: edge-case
-    prompt: "Handle an edge case for react-ui-patterns without enough inputs."
+    category: edge
+    should_trigger: true
+    prompt: "Please help me handle this React UI edge case, but I have not shared our routing constraints or state boundaries yet."
     acceptance:
       - type: contains
         value: "## Inputs"
   - name: failure-mode
-    prompt: "User request is out of scope for react-ui-patterns."
+    category: negative
+    should_trigger: false
+    prompt: "Investigate this database query timeout and tune indexes."
     acceptance:
-      - type: contains
-        value: "## When to use"
+      - type: skill_not_selected
+        expected_skill: "react-ui-patterns"

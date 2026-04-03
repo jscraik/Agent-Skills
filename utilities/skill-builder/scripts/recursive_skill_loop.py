@@ -56,6 +56,7 @@ LESSON_STATUS_PRIORITY = {
     "active": 5,
     "promoted": 4,
     "superseded": 3,
+    "candidate": 2,
     "deprecated": 1,
     "revoked": 0,
 }
@@ -919,6 +920,12 @@ def retrieve_and_rank_lessons(
         low_confidence = confidence < low_confidence_threshold
         confidence_adjusted = confidence - (0.15 if low_confidence else 0.0)
         ranking_score = round(status_priority * 10.0 + confidence_adjusted, 4)
+        title = normalize_lesson_text(row.get("title"))
+        summary = normalize_lesson_text(row.get("summary"))
+        guidance = normalize_lesson_lines(row.get("guidance"))
+        checkpoints = normalize_lesson_lines(row.get("checkpoints"))
+        source_note = normalize_lesson_text(row.get("source_note"))
+        arscontexta_stage = normalize_lesson_text(row.get("arscontexta_stage"))
         ranked.append(
             {
                 "lesson_id": lesson_id,
@@ -932,6 +939,12 @@ def retrieve_and_rank_lessons(
                     "low_confidence_downranked" if low_confidence else ""
                 ),
                 "ranking_score": ranking_score,
+                "title": title,
+                "summary": summary,
+                "guidance": guidance,
+                "checkpoints": checkpoints,
+                "source_note": source_note,
+                "arscontexta_stage": arscontexta_stage,
             }
         )
 
@@ -946,12 +959,30 @@ def retrieve_and_rank_lessons(
     selected = ranked[: max(0, max_lessons)]
     injection_text = ""
     if selected:
-        lines = ["[Injected canonical lessons]"]
-        for item in selected:
-            warn = f" ⚠ {item['warning']}" if item["warning"] else ""
+        lines = [
+            "[Injected canonical lessons]",
+            "Apply these retrieved lessons before drafting. Keep them aligned with the current objective and do not let polish reopen safety, accessibility, or clarity regressions.",
+        ]
+        for idx, item in enumerate(selected, start=1):
+            warn = f" warning={item['warning']}" if item["warning"] else ""
+            title = item["title"] or item["lesson_id"]
             lines.append(
-                f"- lesson_id={item['lesson_id']} status={item['status']} confidence={item['confidence']:.3f}{warn}"
+                f"Lesson {idx}: {title} (lesson_id={item['lesson_id']} status={item['status']} confidence={item['confidence']:.3f}{warn})"
             )
+            if item["summary"]:
+                lines.append(f"- Summary: {item['summary']}")
+            if item["guidance"]:
+                lines.append("- Guidance:")
+                for entry in item["guidance"]:
+                    lines.append(f"  - {entry}")
+            if item["checkpoints"]:
+                lines.append("- Checkpoints:")
+                for entry in item["checkpoints"]:
+                    lines.append(f"  - {entry}")
+            if item["arscontexta_stage"]:
+                lines.append(f"- Ars Contexta stage: {item['arscontexta_stage']}")
+            if item["source_note"]:
+                lines.append(f"- Source note: {item['source_note']}")
         injection_text = "\n".join(lines)
 
     return {
@@ -963,6 +994,29 @@ def retrieve_and_rank_lessons(
         "selected": selected,
         "injection_text": injection_text,
     }
+
+
+def normalize_lesson_text(value: Any) -> str:
+    raw = str(value or "").strip()
+    if not raw:
+        return ""
+    return re.sub(r"\s+", " ", raw)
+
+
+def normalize_lesson_lines(value: Any) -> List[str]:
+    if isinstance(value, list):
+        items = value
+    else:
+        raw = str(value or "").strip()
+        if not raw:
+            return []
+        items = raw.splitlines()
+    normalized: List[str] = []
+    for item in items:
+        text = normalize_lesson_text(item)
+        if text:
+            normalized.append(text)
+    return normalized
 
 
 def parse_iso_timestamp(value: Any) -> Optional[datetime]:

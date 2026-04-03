@@ -17,6 +17,10 @@ This document maps the original planning prompts in `/Users/jamiecraik/dev/confi
 - `/Users/jamiecraik/dev/config/codex/prompts/workflow-plan-ui.md`
 - `/Users/jamiecraik/dev/config/codex/prompts/workflow-ui-plan.md`
 - `/Users/jamiecraik/dev/config/codex/prompts/ce:plan-beta` (prompt body provided by user during merge/update)
+- upstream donor snapshot:
+  - repo: `EveryInc/compound-engineering-plugin`
+  - commit: `847ce3f156a5cdf75667d9802e95d68e6b3c53a4`
+  - path: `plugins/compound-engineering/skills/ce-plan/SKILL.md`
 - Migration target: `/Users/jamiecraik/dev/Agent-Skills/product/ops/ce-plan/`
 
 ## Parity mapping
@@ -47,10 +51,12 @@ This document maps the original planning prompts in `/Users/jamiecraik/dev/confi
 | `ce:plan-beta` plan depth (`lightweight | standard | deep`) | `## Workflow` -> `Phase 0`, `references/plan-artifacts.md` | Preserved directly |
 | `ce:plan-beta` execution posture signals (`test-first`, `characterization-first`, `external-delegate`) | `## Workflow` -> `Phase 1`, `references/plan-artifacts.md` | Preserved directly |
 | `ce:plan-beta` sharper external-research decisioning based on repo maturity | `## Workflow` -> `Phase 2` | Preserved in condensed form |
+| donor `ce-plan` depth reclassification when research reveals external contract surfaces | `## Workflow` -> `Phase 2` | Preserved directly |
 | `ce:plan-beta` planning-time vs implementation-time unknown separation | `## Workflow` -> `Phase 3`, `references/plan-artifacts.md` | Preserved directly |
 | `ce:plan-beta` optional high-level technical design and per-unit technical design | `## Workflow` -> `Phase 4`, `references/plan-artifacts.md` | Preserved directly |
 | `ce:plan-beta` richer implementation-unit contract | `## Workflow` -> `Phase 4`, `references/plan-artifacts.md` | Preserved directly |
 | `ce:plan-beta` deep-plan optional extensions | `references/plan-artifacts.md` | Preserved directly |
+| donor `ce-plan` tracker creation and prompt-level next-step branch | `## Handoff guidance`, `references/plan-artifacts.md` | Preserved as explicit post-plan handoff rather than inline mutation |
 | old post-generation options | `## Handoff guidance` | Preserved as one merged option set |
 | validation and do-not-do boundaries | `## Validation`, `## Anti-patterns`, `## Constraints` | Preserved directly |
 
@@ -68,6 +74,8 @@ This document maps the original planning prompts in `/Users/jamiecraik/dev/confi
 - `references/contract.yaml` and `references/evals.yaml` were added to meet current skill quality requirements and strengthen routing reliability.
 - Pressure and prompt-injection evals were added because the original prompts relied more on ambient scaffolding than a packaged skill can safely assume.
 - Tracker creation was modernized into an explicit `[[linear]]` handoff so plan generation and issue mutation stay separated while still preserving the original post-plan issue workflow intent.
+- The donor prompt's plan-deepening fast path was intentionally separated into `ce-deepen-plan` in this repository so `ce-plan` stays focused on initial plan creation and safe plan revision, while holistic plan-confidence passes route to the dedicated deepening stage.
+- The donor prompt's sequenced `docs/plans/YYYY-MM-DD-NNN-...` filename convention was adapted to the repo's stable `docs/plans/YYYY-MM-DD-<type>-<descriptive-name>-plan.md` convention. This preserves durability without forcing filename churn across existing local plan artifacts.
 - The beta prompt's `-beta-plan.md` filename pattern was not adopted into stable `ce-plan`; the canonical skill keeps the existing stable plan filename convention to avoid unnecessary artifact churn across the repo. This is an intentional portability decision, not a loss of planning behavior.
 - The beta prompt's inline Proof-share and tracker-mutation branches were not moved into the core planning skill. `ce-plan` remains focused on producing the plan artifact, then handing off to dedicated tracker workflows such as `[[linear]]`.
 
@@ -78,6 +86,7 @@ This document maps the original planning prompts in `/Users/jamiecraik/dev/confi
 - Brainstorms that still require a spec still block planning.
 - The exact local research roles are still named and used in parallel.
 - Conditional external research is still present for high-risk or externally dependent work.
+- Research-triggered depth reclassification for external contract surfaces is still present.
 - Stable `P` / `AC` and `UP` / `UAC` / `VAC` behaviors are still present.
 - Execution Ledger and planning-mode synchronization are still present.
 - Prototype planning, accessibility, visual validation, and rollout work are still present.

@@ -1,0 +1,1 @@
+Investigate D1 query latency in our Cloudflare worker and propose indexes.

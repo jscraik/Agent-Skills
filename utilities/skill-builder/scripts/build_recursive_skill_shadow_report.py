@@ -21,6 +21,8 @@ DEFAULT_PILOT_PROFILES = [
 PILOT_PROFILES = list(DEFAULT_PILOT_PROFILES)
 CANONICAL_DAILY_HEALTH_DOC = "docs/skill-graphs/telemetry/daily-skill-health.md"
 LEGACY_DAILY_HEALTH_ARTIFACT = "artifacts/skill-graphs/telemetry/daily-skill-health.md"
+DEFAULT_WAIVER_FILE = "artifacts/skill-graphs/pilot/artifact-parity-waivers.json"
+DEFAULT_BASELINE_SNAPSHOT = "artifacts/skill-graphs/pilot/shadow-baseline.json"
 
 EVENT_TYPES = {
     "run_initialized",
@@ -44,6 +46,7 @@ class RunRecord:
     final_overall: float
     quality_uplift: float
     critical_non_regression_passed: bool
+    terminal_non_regression_passed: bool
     non_regression_recovered: bool  # True if intermediate failures existed but final iteration passed
     budget_compliant: bool
     first_pass_accepted: bool
@@ -84,6 +87,7 @@ class WindowSummary:
     quality_uplift_median: float
     quality_uplift_positive_rate: float
     critical_non_regression_compliance: float
+    terminal_non_regression_compliance: float
     non_regression_recovered_rate: float  # Runs with intermediate failures that recovered
     budget_compliance: float
     evaluator_flip_rate: float
@@ -117,7 +121,18 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--failure-patterns-jsonl", default="artifacts/skill-graphs/telemetry/failure-pattern-candidates.jsonl")
     p.add_argument("--promotion-queue-md", default="artifacts/skill-graphs/telemetry/promotion-queue.md")
     p.add_argument("--pilot-profiles-file", default="docs/skill-graphs/schemas/examples/pilot-profiles.json")
+    p.add_argument("--baseline-snapshot-json", default=DEFAULT_BASELINE_SNAPSHOT)
+    p.add_argument(
+        "--refresh-baseline-snapshot",
+        action="store_true",
+        help="Refresh the frozen baseline snapshot to the current window after report generation.",
+    )
     p.add_argument("--max-run-lines", type=int, default=40)
+    p.add_argument(
+        "--waiver-file",
+        default=DEFAULT_WAIVER_FILE,
+        help="Optional JSON waiver file (waived_runs[]) used for event-envelope waiver application",
+    )
     return p.parse_args()
 
 
@@ -166,11 +181,45 @@ def load_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def load_optional_json(path: Path) -> Optional[Dict[str, Any]]:
+    if not path.exists():
+        return None
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return None
+    return payload if isinstance(payload, dict) else None
+
+
 def load_pilot_profiles(path: Path) -> List[str]:
     raw = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(raw, list):
         raise ValueError("pilot profiles file must be a JSON array")
-    profiles = [str(item).strip() for item in raw if str(item).strip()]
+    profiles: List[str] = []
+    for item in raw:
+        if isinstance(item, str):
+            value = item.strip()
+            if value:
+                profiles.append(value)
+            continue
+        if not isinstance(item, dict):
+            raise ValueError("pilot profile entries must be strings or objects")
+
+        profile_id = str(item.get("profile_id") or "").strip()
+        profile_file = str(item.get("profile_file") or item.get("profile_path") or "").strip()
+        if not profile_id and profile_file:
+            resolved = Path(profile_file)
+            if not resolved.is_absolute():
+                manifest_relative = (path.parent / resolved).resolve()
+                repo_relative = (Path.cwd() / resolved).resolve()
+                resolved = manifest_relative if manifest_relative.is_file() else repo_relative
+            if not resolved.is_file():
+                raise ValueError(f"pilot profile file does not exist: {profile_file}")
+            profile_obj = json.loads(resolved.read_text(encoding="utf-8"))
+            profile_id = str(profile_obj.get("profile_id") or "").strip()
+        if not profile_id:
+            raise ValueError("pilot profile objects require profile_id or profile_file")
+        profiles.append(profile_id)
     if not profiles:
         raise ValueError("pilot profiles file must include at least one profile id")
     return profiles
@@ -184,6 +233,51 @@ def load_jsonl(path: Path) -> List[Dict[str, Any]]:
             continue
         rows.append(json.loads(line))
     return rows
+
+
+def load_event_envelope_waivers(path: Path) -> Dict[str, Dict[str, Any]]:
+    if not path.exists():
+        return {}
+    try:
+        payload = load_json(path)
+    except Exception:
+        return {}
+    rows = payload.get("waived_runs")
+    if not isinstance(rows, list):
+        return {}
+
+    waivers: Dict[str, Dict[str, Any]] = {}
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        run_dir = str(row.get("run_dir", "")).strip()
+        if not run_dir:
+            continue
+        applies_to = row.get("applies_to")
+        scope = str(row.get("scope", "")).strip().lower()
+        applies = False
+        if isinstance(applies_to, list):
+            applies = any(str(item).strip().lower() == "event_envelope" for item in applies_to)
+        elif isinstance(applies_to, str):
+            applies = applies_to.strip().lower() == "event_envelope"
+        elif scope:
+            applies = scope == "event_envelope"
+        if not applies:
+            continue
+        waivers[run_dir] = row
+    return waivers
+
+
+def resolve_event_envelope_waiver(run_dir_name: str, waivers: Dict[str, Dict[str, Any]]) -> Optional[Dict[str, Any]]:
+    candidates = [
+        run_dir_name,
+        f"artifacts/skill-graphs/runs/{run_dir_name}",
+    ]
+    for key in candidates:
+        waiver = waivers.get(key)
+        if waiver:
+            return waiver
+    return None
 
 
 def infer_queue_reason(
@@ -275,6 +369,9 @@ def load_run_record(run_dir: Path) -> Optional[RunRecord]:
 
     counters = as_dict(run.get("counters"))
     iter_count = max(1, safe_int(counters.get("iterations_completed"), len(journals)))
+    terminal_non_regression_passed = bool(
+        as_dict(journals[-1].get("reevaluation_report", {})).get("non_regression_passed", False)
+    )
     non_regression_all = all(
         bool(as_dict(row.get("reevaluation_report")).get("non_regression_passed", False)) for row in journals
     )
@@ -372,6 +469,7 @@ def load_run_record(run_dir: Path) -> Optional[RunRecord]:
         final_overall=final_overall,
         quality_uplift=round(final_overall - initial_overall, 3),
         critical_non_regression_passed=non_regression_all,
+        terminal_non_regression_passed=terminal_non_regression_passed,
         non_regression_recovered=non_regression_recovered,
         budget_compliant=stop_reason != "budget_exhausted",
         first_pass_accepted=terminal_status == "passed" and iter_count == 1,
@@ -435,6 +533,7 @@ def summarize(records: List[RunRecord]) -> WindowSummary:
             quality_uplift_median=0.0,
             quality_uplift_positive_rate=0.0,
             critical_non_regression_compliance=0.0,
+            terminal_non_regression_compliance=0.0,
             non_regression_recovered_rate=0.0,
             budget_compliance=0.0,
             evaluator_flip_rate=0.0,
@@ -478,6 +577,7 @@ def summarize(records: List[RunRecord]) -> WindowSummary:
     first_pass = sum(1 for r in records if r.first_pass_accepted)
     positive_uplift = sum(1 for r in records if r.quality_uplift > 0)
     non_reg_ok = sum(1 for r in records if r.critical_non_regression_passed)
+    terminal_non_reg_ok = sum(1 for r in records if r.terminal_non_regression_passed)
     non_reg_recovered = sum(1 for r in records if r.non_regression_recovered)
     budget_ok = sum(1 for r in records if r.budget_compliant)
     capture_records_written = sum(1 for r in records if r.capture_record_present)
@@ -524,6 +624,7 @@ def summarize(records: List[RunRecord]) -> WindowSummary:
         quality_uplift_median=round(statistics.median(uplift_values), 4),
         quality_uplift_positive_rate=round(positive_uplift / total, 4),
         critical_non_regression_compliance=round(non_reg_ok / total, 4),
+        terminal_non_regression_compliance=round(terminal_non_reg_ok / total, 4),
         non_regression_recovered_rate=round(non_reg_recovered / total, 4),
         budget_compliance=round(budget_ok / total, 4),
         evaluator_flip_rate=round(sum(flip_values) / total, 4),
@@ -562,6 +663,90 @@ def fmt_float(v: Optional[float], digits: int = 2) -> str:
     if v is None:
         return "n/a"
     return f"{v:.{digits}f}"
+
+
+def summary_from_dict(obj: Dict[str, Any]) -> WindowSummary:
+    confidence_bucket_counts_raw = obj.get("confidence_bucket_counts")
+    confidence_bucket_counts = {
+        "high": safe_int(as_dict(confidence_bucket_counts_raw).get("high"), 0),
+        "medium": safe_int(as_dict(confidence_bucket_counts_raw).get("medium"), 0),
+        "low": safe_int(as_dict(confidence_bucket_counts_raw).get("low"), 0),
+        "unknown": safe_int(as_dict(confidence_bucket_counts_raw).get("unknown"), 0),
+    }
+    confidence_bucket_distribution_raw = obj.get("confidence_bucket_distribution")
+    confidence_bucket_distribution = {
+        "high": safe_float(as_dict(confidence_bucket_distribution_raw).get("high"), 0.0),
+        "medium": safe_float(as_dict(confidence_bucket_distribution_raw).get("medium"), 0.0),
+        "low": safe_float(as_dict(confidence_bucket_distribution_raw).get("low"), 0.0),
+        "unknown": safe_float(as_dict(confidence_bucket_distribution_raw).get("unknown"), 0.0),
+    }
+    rollout_mode_counts_raw = obj.get("rollout_mode_counts")
+    rollout_mode_counts = {
+        "off": safe_int(as_dict(rollout_mode_counts_raw).get("off"), 0),
+        "observe_only": safe_int(as_dict(rollout_mode_counts_raw).get("observe_only"), 0),
+        "active": safe_int(as_dict(rollout_mode_counts_raw).get("active"), 0),
+        "other": safe_int(as_dict(rollout_mode_counts_raw).get("other"), 0),
+    }
+    uplift_promotion_counts_raw = obj.get("uplift_promotion_decision_counts")
+    uplift_auto_apply_counts_raw = obj.get("uplift_auto_apply_decision_counts")
+    uplift_states = ["pass", "hold", "regressed", "insufficient_data", "insufficient_match_quality", "unknown"]
+    uplift_promotion_counts = {
+        state: safe_int(as_dict(uplift_promotion_counts_raw).get(state), 0) for state in uplift_states
+    }
+    uplift_auto_apply_counts = {
+        state: safe_int(as_dict(uplift_auto_apply_counts_raw).get(state), 0) for state in uplift_states
+    }
+    return WindowSummary(
+        runs_total=safe_int(obj.get("runs_total"), 0),
+        by_profile={profile: safe_int(as_dict(obj.get("by_profile")).get(profile), 0) for profile in PILOT_PROFILES},
+        repeat_failure_rate=safe_float(obj.get("repeat_failure_rate"), 0.0),
+        first_pass_acceptance_rate=safe_float(obj.get("first_pass_acceptance_rate"), 0.0),
+        median_iterations=safe_float(obj.get("median_iterations"), 0.0),
+        p90_iterations=safe_float(obj.get("p90_iterations"), 0.0),
+        quality_uplift_median=safe_float(obj.get("quality_uplift_median"), 0.0),
+        quality_uplift_positive_rate=safe_float(obj.get("quality_uplift_positive_rate"), 0.0),
+        critical_non_regression_compliance=safe_float(obj.get("critical_non_regression_compliance"), 0.0),
+        terminal_non_regression_compliance=safe_float(
+            obj.get("terminal_non_regression_compliance"),
+            safe_float(obj.get("critical_non_regression_compliance"), 0.0),
+        ),
+        non_regression_recovered_rate=safe_float(obj.get("non_regression_recovered_rate"), 0.0),
+        budget_compliance=safe_float(obj.get("budget_compliance"), 0.0),
+        evaluator_flip_rate=safe_float(obj.get("evaluator_flip_rate"), 0.0),
+        capture_records_written=safe_int(obj.get("capture_records_written"), 0),
+        capture_coverage_rate=safe_float(obj.get("capture_coverage_rate"), 0.0),
+        auto_capture_enabled_rate=safe_float(obj.get("auto_capture_enabled_rate"), 0.0),
+        auto_apply_enabled_rate=safe_float(obj.get("auto_apply_enabled_rate"), 0.0),
+        confidence_bucket_counts=confidence_bucket_counts,
+        confidence_bucket_distribution=confidence_bucket_distribution,
+        runs_with_injection=safe_int(obj.get("runs_with_injection"), 0),
+        runs_with_retrieved_lessons=safe_int(obj.get("runs_with_retrieved_lessons"), 0),
+        suppressed_injection_runs=safe_int(obj.get("suppressed_injection_runs"), 0),
+        injection_usage_rate=safe_float(obj.get("injection_usage_rate"), 0.0),
+        total_injected_lessons=safe_int(obj.get("total_injected_lessons"), 0),
+        average_injected_lessons_per_run=safe_float(obj.get("average_injected_lessons_per_run"), 0.0),
+        rollout_mode_counts=rollout_mode_counts,
+        uplift_promotion_decision_counts=uplift_promotion_counts,
+        uplift_auto_apply_decision_counts=uplift_auto_apply_counts,
+    )
+
+
+def build_baseline_snapshot_payload(
+    *,
+    summary: WindowSummary,
+    current_window: str,
+    window_days: int,
+    sample_ready: bool,
+) -> Dict[str, Any]:
+    return {
+        "schema_version": "1.0",
+        "captured_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+        "window": current_window,
+        "window_days": window_days,
+        "sample_ready": sample_ready,
+        "pilot_profiles": PILOT_PROFILES,
+        "summary": to_dict(summary),
+    }
 
 
 def gate_decision(
@@ -607,6 +792,8 @@ def render_shadow_md(
     current_records: List[RunRecord],
     current_summary: WindowSummary,
     baseline_summary: Optional[WindowSummary],
+    baseline_window: Optional[str],
+    baseline_source: Optional[str],
     current_window: str,
     max_run_lines: int,
 ) -> str:
@@ -630,6 +817,12 @@ def render_shadow_md(
     lines.append("## Window summary")
     lines.append("")
     lines.append(f"- Window: `{current_window}`")
+    if baseline_window:
+        lines.append(
+            f"- Baseline source: `{baseline_source or 'unknown'}` (`{baseline_window}`)"
+        )
+    else:
+        lines.append("- Baseline source: `bootstrap pending`")
     lines.append(f"- Runs total: `{current_summary.runs_total}`")
     lines.append("- Runs by profile:")
     for profile, count in current_summary.by_profile.items():
@@ -653,6 +846,12 @@ def render_shadow_md(
         f"- Quality uplift median: `{fmt_float(current_summary.quality_uplift_median, 3)}`; positive uplift rate: `{fmt_pct(current_summary.quality_uplift_positive_rate)}`"
     )
     lines.append(f"- Critical non-regression compliance: `{fmt_pct(current_summary.critical_non_regression_compliance)}`")
+    lines.append(
+        f"- Terminal non-regression compliance: `{fmt_pct(current_summary.terminal_non_regression_compliance)}`"
+    )
+    lines.append(
+        f"- Non-regression recovered: `{fmt_pct(current_summary.non_regression_recovered_rate)}`"
+    )
     lines.append(f"- Budget compliance: `{fmt_pct(current_summary.budget_compliance)}`")
     lines.append(f"- Evaluator flip rate: `{fmt_pct(current_summary.evaluator_flip_rate)}`")
     lines.append(
@@ -718,6 +917,8 @@ def render_readout_md(
     *,
     current_summary: WindowSummary,
     baseline_summary: Optional[WindowSummary],
+    baseline_window: Optional[str],
+    baseline_source: Optional[str],
     current_window: str,
     decision: str,
     reasons: List[str],
@@ -744,6 +945,10 @@ def render_readout_md(
     lines.append("## Readout metadata")
     lines.append("")
     lines.append(f"- Window: `{current_window}`")
+    if baseline_window:
+        lines.append(f"- Baseline: `{baseline_window}` via `{baseline_source or 'unknown'}`")
+    else:
+        lines.append("- Baseline: `_bootstrap pending_`")
     lines.append(f"- Total runs: `{current_summary.runs_total}`")
     lines.append("- Runs per profile:")
     for profile, count in current_summary.by_profile.items():
@@ -767,6 +972,12 @@ def render_readout_md(
     )
     lines.append(
         f"- Critical non-regression compliance: `{fmt_pct(current_summary.critical_non_regression_compliance)}` (target: `100.0%`)"
+    )
+    lines.append(
+        f"- Terminal non-regression compliance: `{fmt_pct(current_summary.terminal_non_regression_compliance)}` (monitor recovery separately)"
+    )
+    lines.append(
+        f"- Non-regression recovered: `{fmt_pct(current_summary.non_regression_recovered_rate)}` (intermediate failures that still finished clean)"
     )
     lines.append(
         f"- Budget compliance: `{fmt_pct(current_summary.budget_compliance)}` (target: `>=95.0%`)"
@@ -811,6 +1022,8 @@ def to_dict(summary: WindowSummary) -> Dict[str, Any]:
         "quality_uplift_median": summary.quality_uplift_median,
         "quality_uplift_positive_rate": summary.quality_uplift_positive_rate,
         "critical_non_regression_compliance": summary.critical_non_regression_compliance,
+        "terminal_non_regression_compliance": summary.terminal_non_regression_compliance,
+        "non_regression_recovered_rate": summary.non_regression_recovered_rate,
         "budget_compliance": summary.budget_compliance,
         "evaluator_flip_rate": summary.evaluator_flip_rate,
         "capture_records_written": summary.capture_records_written,
@@ -887,7 +1100,7 @@ def main() -> int:
     run_records: List[RunRecord] = []
     run_meta: List[RunMeta] = []
     skipped_runs: List[Dict[str, str]] = []
-    event_errors: List[str] = []
+    event_error_entries: List[Dict[str, str]] = []
     promotion_approved_by_run: Dict[str, bool] = {}
 
     for run_dir in sorted(runs_root.glob("run_*")):
@@ -935,26 +1148,95 @@ def main() -> int:
         run_records.append(record)
         events_path = run_dir / "events.jsonl"
         if not events_path.exists():
-            event_errors.append(f"{record.run_id}: missing events.jsonl")
+            event_error_entries.append(
+                {
+                    "run_id": record.run_id,
+                    "run_dir": run_dir.name,
+                    "error": "missing events.jsonl",
+                }
+            )
             promotion_approved_by_run[record.run_id] = False
         else:
             try:
                 events = load_jsonl(events_path)
-                event_errors.extend(validate_event_envelope(events, record.run_id))
+                for err in validate_event_envelope(events, record.run_id):
+                    detail = err.split(":", 1)[1].strip() if ":" in err else err
+                    event_error_entries.append(
+                        {
+                            "run_id": record.run_id,
+                            "run_dir": run_dir.name,
+                            "error": detail,
+                        }
+                    )
                 promotion_approved_by_run[record.run_id] = any(
                     e.get("event_type") == "promotion_approved" for e in events
                 )
             except Exception as exc:
-                event_errors.append(f"{record.run_id}: invalid events.jsonl ({exc})")
+                event_error_entries.append(
+                    {
+                        "run_id": record.run_id,
+                        "run_dir": run_dir.name,
+                        "error": f"invalid events.jsonl ({exc})",
+                    }
+                )
                 promotion_approved_by_run[record.run_id] = False
 
     run_records.sort(key=lambda r: r.finished_at, reverse=True)
 
     current_records = [r for r in run_records if r.finished_at >= current_start]
     baseline_records = [r for r in run_records if baseline_start <= r.finished_at < current_start]
+    current_run_ids = {record.run_id for record in current_records}
+    current_event_entries = [entry for entry in event_error_entries if entry["run_id"] in current_run_ids]
+
+    waiver_file_path = Path(args.waiver_file).expanduser().resolve()
+    waivers = load_event_envelope_waivers(waiver_file_path)
+    unresolved_event_errors: List[str] = []
+    waived_event_errors: List[Dict[str, str]] = []
+    for entry in current_event_entries:
+        run_dir_name = entry["run_dir"]
+        waiver = resolve_event_envelope_waiver(run_dir_name, waivers)
+        rendered = f"{entry['run_id']}: {entry['error']}"
+        if waiver is None:
+            unresolved_event_errors.append(rendered)
+            continue
+        waived_event_errors.append(
+            {
+                "run_id": entry["run_id"],
+                "run_dir": run_dir_name,
+                "error": entry["error"],
+                "waiver_id": str(waiver.get("waiver_id", "")).strip(),
+                "reason": str(waiver.get("reason", "")).strip(),
+            }
+        )
+
+    event_total_count = len(current_event_entries)
+    event_waived_count = len(waived_event_errors)
+    event_unresolved_count = len(unresolved_event_errors)
 
     current_summary = summarize(current_records)
-    baseline_summary = summarize(baseline_records) if baseline_records else None
+    baseline_snapshot_path = Path(args.baseline_snapshot_json).expanduser().resolve()
+    baseline_snapshot_payload = load_optional_json(baseline_snapshot_path)
+    baseline_snapshot_window = None
+    baseline_snapshot_summary = None
+    baseline_snapshot_ready = False
+    if baseline_snapshot_payload:
+        baseline_snapshot_window = str(baseline_snapshot_payload.get("window") or "").strip() or None
+        baseline_snapshot_ready = bool(baseline_snapshot_payload.get("sample_ready", False))
+        summary_obj = baseline_snapshot_payload.get("summary")
+        if baseline_snapshot_ready and isinstance(summary_obj, dict):
+            baseline_snapshot_summary = summary_from_dict(summary_obj)
+
+    baseline_summary = None
+    baseline_window = None
+    baseline_source = None
+    if baseline_records:
+        baseline_summary = summarize(baseline_records)
+        if baseline_records:
+            baseline_window = (
+                f"{min(r.finished_at for r in baseline_records).date().isoformat()}.."
+                f"{max(r.finished_at for r in baseline_records).date().isoformat()}"
+            )
+        baseline_source = "rolling_window"
 
     decision, reasons = gate_decision(
         current=current_summary,
@@ -965,10 +1247,23 @@ def main() -> int:
 
     current_window = f"{current_start.date().isoformat()}..{latest.date().isoformat()}"
 
+    if baseline_summary is None and baseline_snapshot_summary is not None and baseline_snapshot_window != current_window:
+        baseline_summary = baseline_snapshot_summary
+        baseline_window = baseline_snapshot_window
+        baseline_source = "frozen_snapshot"
+        decision, reasons = gate_decision(
+            current=current_summary,
+            baseline=baseline_summary,
+            min_runs_total=args.min_runs_total,
+            min_runs_per_profile=args.min_runs_per_profile,
+        )
+
     shadow_md_text = render_shadow_md(
         current_records=current_records,
         current_summary=current_summary,
         baseline_summary=baseline_summary,
+        baseline_window=baseline_window,
+        baseline_source=baseline_source,
         current_window=current_window,
         max_run_lines=args.max_run_lines,
     )
@@ -976,6 +1271,8 @@ def main() -> int:
     readout_md_text = render_readout_md(
         current_summary=current_summary,
         baseline_summary=baseline_summary,
+        baseline_window=baseline_window,
+        baseline_source=baseline_source,
         current_window=current_window,
         decision=decision,
         reasons=reasons,
@@ -995,6 +1292,18 @@ def main() -> int:
     daily_health_path.parent.mkdir(parents=True, exist_ok=True)
     failure_patterns_path.parent.mkdir(parents=True, exist_ok=True)
     promotion_queue_path.parent.mkdir(parents=True, exist_ok=True)
+    baseline_snapshot_path.parent.mkdir(parents=True, exist_ok=True)
+
+    required_sample_ready = (
+        current_summary.runs_total >= args.min_runs_total
+        and all(count >= args.min_runs_per_profile for count in current_summary.by_profile.values())
+    )
+    baseline_snapshot_update_reason: Optional[str] = None
+    if not baseline_snapshot_payload:
+        baseline_snapshot_update_reason = "bootstrap_created"
+    elif args.refresh_baseline_snapshot:
+        if baseline_snapshot_window != current_window:
+            baseline_snapshot_update_reason = "refreshed_to_current_window"
 
     dashboard = {
         "generated_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
@@ -1009,11 +1318,27 @@ def main() -> int:
         "current_window": current_window,
         "current": to_dict(current_summary),
         "baseline": to_dict(baseline_summary) if baseline_summary else None,
+        "baseline_metadata": {
+            "source": baseline_source,
+            "window": baseline_window,
+            "snapshot_path": str(baseline_snapshot_path),
+            "snapshot_window": baseline_snapshot_window,
+            "snapshot_available": baseline_snapshot_payload is not None,
+            "snapshot_sample_ready": baseline_snapshot_ready,
+            "snapshot_update_reason": baseline_snapshot_update_reason,
+        },
         "decision": {
             "state": decision,
             "reasons": reasons,
         },
-        "event_envelope_errors": event_errors,
+        "event_envelope_errors": unresolved_event_errors,
+        "event_envelope_waived": waived_event_errors,
+        "event_envelope_error_summary": {
+            "total": event_total_count,
+            "waived": event_waived_count,
+            "unresolved": event_unresolved_count,
+            "waiver_file": args.waiver_file if waivers else None,
+        },
         "recent_runs": [
             {
                 "run_id": r.run_id,
@@ -1051,6 +1376,7 @@ def main() -> int:
             "daily_health_md": {"path": str(daily_health_path), "generated": False},
             "failure_patterns_jsonl": {"path": str(failure_patterns_path), "generated": False},
             "promotion_queue_md": {"path": str(promotion_queue_path), "generated": False},
+            "baseline_snapshot_json": {"path": str(baseline_snapshot_path), "generated": False},
         },
     }
 
@@ -1066,9 +1392,12 @@ def main() -> int:
             "",
             f"- Generated at: `{dashboard['generated_at']}`",
             f"- Window: `{current_window}`",
+            f"- Baseline source: `{baseline_source or 'bootstrap pending'}`",
+            f"- Baseline window: `{baseline_window or 'n/a'}`",
             f"- Runs total: `{current_summary.runs_total}`",
             f"- Decision: `{decision}`",
             f"- Critical non-regression compliance: `{fmt_pct(current_summary.critical_non_regression_compliance)}`",
+            f"- Terminal non-regression compliance: `{fmt_pct(current_summary.terminal_non_regression_compliance)}`",
             f"- Non-regression recovered: `{fmt_pct(current_summary.non_regression_recovered_rate)}` (intermediate failures recovered)",
             f"- Budget compliance: `{fmt_pct(current_summary.budget_compliance)}`",
             f"- Capture coverage: `{fmt_pct(current_summary.capture_coverage_rate)}` ({current_summary.capture_records_written}/{current_summary.runs_total})",
@@ -1077,14 +1406,30 @@ def main() -> int:
             f"- Injection suppressed by controls: `{current_summary.suppressed_injection_runs}`",
             f"- Uplift promotion decisions: `pass={current_summary.uplift_promotion_decision_counts['pass']}` `hold={current_summary.uplift_promotion_decision_counts['hold']}` `insufficient_data={current_summary.uplift_promotion_decision_counts['insufficient_data']}`",
             f"- Uplift auto-apply decisions: `pass={current_summary.uplift_auto_apply_decision_counts['pass']}` `hold={current_summary.uplift_auto_apply_decision_counts['hold']}` `insufficient_data={current_summary.uplift_auto_apply_decision_counts['insufficient_data']}`",
-            f"- Event envelope errors: `{len(event_errors)}`",
+            f"- Event envelope errors: `{event_unresolved_count}`",
+            f"- Event envelope errors total: `{event_total_count}`",
+            f"- Event envelope errors waived: `{event_waived_count}`",
+            f"- Event envelope errors unresolved: `{event_unresolved_count}`",
             "",
         ]
-        if event_errors:
-            daily_lines.append("## Event envelope errors")
+        if waivers:
+            daily_lines.append(f"- Event envelope waiver file: `{args.waiver_file}`")
             daily_lines.append("")
-            for err in event_errors[:50]:
+        if unresolved_event_errors:
+            daily_lines.append("## Event envelope errors (unresolved)")
+            daily_lines.append("")
+            for err in unresolved_event_errors[:50]:
                 daily_lines.append(f"- {err}")
+            daily_lines.append("")
+        if waived_event_errors:
+            daily_lines.append("## Event envelope waivers applied")
+            daily_lines.append("")
+            for row in waived_event_errors[:50]:
+                waiver_id = row["waiver_id"] or "unspecified"
+                reason = row["reason"] or "no reason provided"
+                daily_lines.append(
+                    f"- {row['run_id']} ({row['run_dir']}): waiver_id=`{waiver_id}` reason=`{reason}`"
+                )
             daily_lines.append("")
         write_markdown_artifact(
             daily_health_path,
@@ -1092,6 +1437,25 @@ def main() -> int:
             label="daily health markdown",
         )
         dashboard["artifact_outputs"]["daily_health_md"]["generated"] = True
+
+        if baseline_snapshot_update_reason:
+            baseline_payload = build_baseline_snapshot_payload(
+                summary=current_summary,
+                current_window=current_window,
+                window_days=window_days,
+                sample_ready=required_sample_ready,
+            )
+            write_json_artifact(
+                baseline_snapshot_path,
+                baseline_payload,
+                label="baseline snapshot json",
+            )
+            dashboard["artifact_outputs"]["baseline_snapshot_json"]["generated"] = True
+            dashboard["baseline_metadata"]["snapshot_window"] = current_window
+            dashboard["baseline_metadata"]["snapshot_available"] = True
+            dashboard["baseline_metadata"]["snapshot_sample_ready"] = required_sample_ready
+        elif baseline_snapshot_path.exists():
+            dashboard["artifact_outputs"]["baseline_snapshot_json"]["generated"] = True
 
         failure_rows: List[Dict[str, Any]] = []
         for r in current_records:

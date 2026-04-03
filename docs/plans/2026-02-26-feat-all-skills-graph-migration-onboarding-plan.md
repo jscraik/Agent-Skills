@@ -11,6 +11,7 @@ origin: docs/brainstorms/2026-02-24-skill-graph-live-auto-learning-brainstorm.md
 
 ## Table of Contents
 - [Overview](#overview)
+- [Closeout addendum (2026-03-30)](#closeout-addendum-2026-03-30)
 - [Goals and scope](#goals-and-scope)
 - [Public interface and contract changes](#public-interface-and-contract-changes)
 - [Wave model](#wave-model)
@@ -31,6 +32,18 @@ This carries forward the brainstorm decisions to:
 - enforce kill-switch-first safety.
 
 (see brainstorm: `docs/brainstorms/2026-02-24-skill-graph-live-auto-learning-brainstorm.md`)
+
+## Closeout Addendum (2026-03-30)
+
+Historical migration delivery remains complete, but post-migration readiness drift (event-envelope blocker accounting and checklist placeholder ownership fields) was tracked in:
+
+- `docs/plans/2026-03-29-fix-outstanding-onboarding-readiness-closeout-plan.md`
+
+That closeout plan is now completed with current evidence in:
+
+- `artifacts/skill-graphs/onboarding/wave-readiness.json`
+- `artifacts/skill-graphs/onboarding/skill-onboarding-checklist-2026-03-29.md`
+- `docs/skill-graphs/telemetry/daily-skill-health.md`
 
 ## Goals and scope
 

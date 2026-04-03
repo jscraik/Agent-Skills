@@ -1,6 +1,6 @@
 ---
 name: ce-compound-refresh
-description: Refresh stale docs/solutions learnings and pattern docs against the current codebase. Use when retrieved CE learnings may be outdated, contradictory, or stale after refactors, migrations, or dependency upgrades.
+description: Review and refresh stale `docs/solutions/` learnings and pattern docs against the current codebase, including overlap consolidation when multiple docs now cover the same ground after refactors, migrations, or dependency upgrades.
 metadata:
   skill-type: team_automation
 ---
@@ -33,6 +33,7 @@ metadata:
 ## Working agreement
 - Treat `ce-compound-refresh` as the maintenance stage for `docs/solutions/`, not as a generic doc-polish or code-review lane.
 - Keep the refresh order explicit: inspect individual learnings first, then inspect derived pattern docs that depend on them.
+- Evaluate document-set shape as well as single-doc accuracy. If multiple docs now cover the same problem with compatible guidance, consolidate the set instead of preserving silent drift risk.
 - Match documentation to current repo truth. If the code changed, refresh the doc; do not debate whether the code change was intentional inside this workflow.
 - Prefer no-write `Keep` outcomes over churn. Only edit when the result materially improves trustworthiness.
 - Use external docs only when a stale claim depends on current framework or library behavior; otherwise stay repo-first.
@@ -48,6 +49,8 @@ Primary triggers:
 - "a retrieved learning looks outdated or wrong"
 - "refresh the payments learnings in autonomous mode"
 - "dependency upgrade probably made these docs stale"
+- "these two learnings now overlap; consolidate the right one"
+- "multiple docs cover the same workaround now; clean up the document set"
 
 Non-triggers:
 - the user wants to capture a newly solved issue for the first time; use `ce-compound`
@@ -58,6 +61,7 @@ Non-triggers:
 ## Required inputs
 - a scope hint, file path, module, category, pattern topic, or explicit request to sweep all of `docs/solutions/`
 - optional `mode:autonomous` argument when the run should avoid all user questions
+- optional upstream alias `mode:autofix`, which should be normalized to `mode:autonomous`
 - access to the current codebase and the in-scope `docs/solutions/` artifacts
 - optional current artifact or conversation context if a recently solved issue is driving the refresh
 
@@ -68,11 +72,11 @@ If the user gives no scope hint:
 ## Deliverables
 - a chosen mode: `interactive | autonomous`
 - a scope route: `focused | batch | broad`
-- one classification per processed artifact: `Keep | Update | Replace | Archive | Stale`
-- applied in-place refreshes, successor creation, stale marking, or archival changes when evidence supports them
+- one classification per processed artifact or overlap cluster: `Keep | Update | Consolidate | Replace | Archive | Stale`
+- applied in-place refreshes, consolidation merges, successor creation, stale marking, or archival changes when evidence supports them
 - a full markdown report covering:
   - scanned artifact counts
-  - per-file evidence
+  - per-file or per-cluster evidence
   - actions applied
   - recommendations when writes could not be completed
 - optional commit or PR follow-up when files changed
@@ -101,9 +105,11 @@ If evidence is insufficient to write a trustworthy replacement, do not invent a 
 ## Acceptance criteria
 - the skill chooses `interactive` or `autonomous` before asking questions or applying actions
 - in-scope learnings are investigated before dependent pattern docs
-- each artifact receives exactly one maintenance outcome backed by explicit evidence
+- overlap analysis happens before duplicate docs are left in place
+- each artifact or overlap cluster receives exactly one maintenance outcome backed by explicit evidence
 - `Keep` does not create churn by default
 - `Update` is used only for meaningful evidence-backed drift
+- `Consolidate` is used only when overlapping docs are both materially correct and one canonical doc is clear
 - `Replace` is used only when the old guidance is misleading and successor evidence is sufficient
 - ambiguous autonomous cases are marked stale rather than guessed
 - the final report is full markdown, not a one-line summary
@@ -132,6 +138,8 @@ Guiding questions:
 ## Workflow
 ### Phase 0: Detect mode and scope
 Choose `interactive` by default. If the argument contains `mode:autonomous`, strip that token, use the remaining text as the scope hint, and run without user questions.
+
+Treat the upstream `mode:autofix` token as a compatibility alias. Normalize it to the same autonomous behavior rather than rejecting the request.
 
 Start with the smallest useful scope that matches the evidence. Only widen after discovery shows broader drift.
 
@@ -162,28 +170,41 @@ Check:
 - code examples remain representative
 - related learnings and patterns remain consistent
 - auto-memory notes supply supplementary drift signals
+- overlap signals note when another doc in scope covers the same problem, files, root cause, or prevention advice
 
 Use the Update vs Replace boundary, memory-signal rules, and successor checks in `references/refresh-workflow.md`.
 
-### Phase 3: Investigate pattern docs
+### Phase 3: Analyze the document set
+After individual learnings are investigated, step back and compare overlapping docs before treating the set as final.
+
+Check:
+- whether one doc is now the canonical source and another is mostly a narrower precursor
+- whether multiple docs share the same problem, solution shape, files, or prevention rules
+- whether keeping them separate still improves retrieval value enough to justify drift risk
+- whether outright contradictions between docs need immediate consolidation, replacement, or archival follow-up
+
+Use the document-set analysis and consolidation rules in `references/refresh-workflow.md`.
+
+### Phase 4: Investigate pattern docs
 After the underlying learnings are classified, inspect any affected pattern docs under `docs/solutions/patterns/`.
 
 Treat patterns as derived guidance:
 - stronger stale risk
-- same four primary outcomes
+- same five primary outcomes
 - no new generalized rules without evidence from refreshed learnings
 
-### Phase 4: Classify the maintenance action
-Pick one action per artifact:
+### Phase 5: Classify the maintenance action
+Pick one action per artifact or overlap cluster:
 - `Keep`
 - `Update`
+- `Consolidate`
 - `Replace`
 - `Archive`
 - `Stale` when autonomous ambiguity or insufficient replacement evidence prevents a trustworthy write
 
 Use the execution rules, archive-vs-replace boundary, and pattern-specific guidance in `references/refresh-workflow.md`.
 
-### Phase 5: Execute and report
+### Phase 6: Execute and report
 Apply unambiguous actions directly.
 
 Interactive mode:
@@ -203,22 +224,24 @@ Use `interactive` when:
 - the refresh is narrow and the user likely wants to steer edge cases
 
 Use `autonomous` when:
-- the arguments include `mode:autonomous`
+- the arguments include `mode:autonomous` or the upstream alias `mode:autofix`
 - the user wants a no-interruption maintenance sweep
 - the best safe behavior is to apply unambiguous actions and stale-mark borderline cases
 
 ## Maintenance model
 - `Keep`: still accurate and still useful; no edit by default
 - `Update`: core guidance still correct, but references or examples drifted
+- `Consolidate`: multiple docs are still materially correct, but one canonical doc should absorb the others
 - `Replace`: old guidance is misleading and strong successor evidence exists
 - `Archive`: implementation and problem domain are gone, or the doc is plainly obsolete or redundant
 - `Stale`: evidence is not strong enough for update, replace, or archive, but leaving the doc as trustworthy would be misleading
 
 ## Execution rules
-- Use the main thread only for small scopes or short docs.
-- Use sequential subagents for 1-2 heavy artifacts.
-- Use parallel investigation subagents only for independent artifacts with low overlap.
-- Use replacement subagents one at a time, sequentially.
+- Prefer the main thread for small scopes, short docs, or any run where delegation was not explicitly requested or approved.
+- If 1-2 heavy artifacts would benefit from delegation and the user has not already explicitly asked for sub-agents, ask a short blocking approval question via `request_user_input` before spawning sequential subagents.
+- Use sequential subagents for 1-2 heavy artifacts only after explicit user request or approval.
+- Use parallel investigation subagents only for independent artifacts with low overlap and only after explicit user request or approval.
+- Use replacement subagents one at a time, sequentially, and only after explicit user request or approval.
 - When spawning subagents, preserve the dedicated file-search/read-first instruction and separate memory-sourced evidence from codebase-sourced evidence.
 - When replacing a learning, write the successor in `ce-compound` learning-capture format and archive the superseded source after the successor exists.
 
@@ -226,8 +249,10 @@ Use `autonomous` when:
 - fail fast: stop at the first failed gate, fix or report it, rerun that gate, then continue
 - verify the chosen scope actually matches discovered `docs/solutions/` artifacts
 - verify learnings were reviewed before dependent patterns
+- verify overlap analysis happened before duplicate docs were left in place
 - verify each action is backed by concrete evidence rather than age or guesswork
 - verify `Update` was not used for a materially changed solution
+- verify `Consolidate` preserved any unique content from a subsumed doc before archival follow-up
 - verify `Archive` was not used when the problem domain still exists and should be replaced instead
 - verify autonomous ambiguous cases were stale-marked, not guessed through
 - verify the final report includes every processed file and any write failures
@@ -237,6 +262,7 @@ Use `autonomous` when:
 - reviewing pattern docs before the learnings that support them
 - using age alone as the stale signal
 - updating solution prose when the actual solution changed materially
+- leaving overlapping docs in place without checking whether they should be consolidated
 - archiving a learning because the file paths moved without checking whether the problem domain still exists
 - replacing a learning without enough evidence to document the current solution honestly
 - asking the user whether code drift was intentional instead of matching docs to reality
@@ -257,6 +283,8 @@ IMPORTANT: Outputs should vary based on scope, evidence quality, and mode.
 When the user asks things like:
 - "Run `ce:compound-refresh auth` after the auth refactor and update anything stale."
 - "Use `ce:compound-refresh mode:autonomous payments` and just apply safe maintenance without questions."
+- "Use `ce:compound-refresh mode:autofix auth` and normalize that older flag to the current autonomous flow."
+- "These retry learnings overlap now. Consolidate the canonical doc and archive the redundant one if it adds no unique value."
 - "This solution doc was retrieved during debugging, but it no longer matches the code. Refresh it."
 - "Review the `docs/solutions/patterns/` docs for CI because the old learnings may have drifted."
 - "We renamed the session-token stack months ago. Find the related learnings and either update, replace, or archive them."

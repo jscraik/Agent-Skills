@@ -1,104 +1,100 @@
 # Codex Hooks Runtime Contract
 
-Read when: you need the exact March 2026 Codex hooks surface before scaffolding, upgrading, or refusing unsupported behavior.
+Read when: you need the exact currently documented Codex hooks surface before scaffolding, upgrading, or refusing unsupported behavior.
 
 ## Table of Contents
 - [Why this matters](#why-this-matters)
-- [Release snapshot](#release-snapshot)
-- [Stable runtime surface](#stable-runtime-surface)
+- [Docs snapshot](#docs-snapshot)
+- [Runtime surface](#runtime-surface)
 - [Field support and caveats](#field-support-and-caveats)
-- [Alpha nuance](#alpha-nuance)
 - [Design implications](#design-implications)
 - [Source anchors](#source-anchors)
 
 ## Why this matters
-Codex hooks are version-sensitive. This skill should scaffold only what is demonstrably implemented in current released Codex and should label anything else as provisional.
+Codex hooks are contract-sensitive. This skill should scaffold only what is explicitly documented as supported and should label anything else as deferred.
 
-## Release snapshot
-- Stable release checked: `0.116.0`, published March 19, 2026.
-- Latest alpha checked: `0.117.0-alpha.8`, published March 21, 2026.
-- Verification date for this skill scaffold: March 22, 2026.
+## Docs snapshot
+- Primary source checked: `https://developers.openai.com/codex/hooks`.
+- Verification date for this skill: March 30, 2026.
 
-## Stable runtime surface
+## Runtime surface
 `hooks.json` is discovered from active config-layer folders.
 
-Supported event buckets:
+Documented event buckets:
 - `SessionStart`
+- `PreToolUse`
+- `PostToolUse`
 - `UserPromptSubmit`
 - `Stop`
 
-Supported handler type:
+Documented handler type:
 - `type: "command"`
 
-Parsed but skipped handler types:
-- `type: "prompt"`
-- `type: "agent"`
-- `"async": true` on command hooks
-
 Matcher behavior:
-- `SessionStart.matcher` is honored.
-- `UserPromptSubmit.matcher` is ignored during discovery.
-- `Stop.matcher` is ignored during discovery.
+- `SessionStart.matcher` matches `source` (`startup` or `resume`).
+- `PreToolUse.matcher` matches `tool_name` (currently always `Bash`).
+- `PostToolUse.matcher` matches `tool_name` (currently always `Bash`).
+- `UserPromptSubmit.matcher` is currently not used.
+- `Stop.matcher` is currently not used.
+
+Timeout behavior:
+- `timeout` is in seconds.
+- `timeoutSec` is accepted as an alias.
+- If `timeout` is omitted, Codex defaults to `600` seconds.
+
+Path behavior:
+- Commands run with the session `cwd`.
+- For repo-local hooks, resolve command paths from git root or use absolute paths to avoid nested-directory drift.
 
 ## Field support and caveats
-Dependable fields for command hook outputs:
+Common output fields for `SessionStart`, `UserPromptSubmit`, and `Stop`:
 - `continue`
 - `stopReason`
 - `systemMessage`
 - `suppressOutput`
-  Note: parsed by handlers, but current runtime path does not appear to apply it meaningfully.
+  - note: parsed today but not fully implemented.
 
 Event-specific behavior:
 - `SessionStart`
-  - supports `hookSpecificOutput.additionalContext`
-  - plain non-JSON stdout becomes context
-  - invalid JSON-like stdout becomes a failure
+  - plain text on stdout is added as context.
+  - JSON supports `hookSpecificOutput.additionalContext`.
+- `PreToolUse`
+  - currently supports Bash tool interception only.
+  - JSON supports `hookSpecificOutput.permissionDecision: "deny"` and `permissionDecisionReason`.
+  - legacy block shape (`decision: "block"` + `reason`) and exit code `2` are accepted.
+  - `permissionDecision: "allow"`/`"ask"` and several extra fields are parsed but currently fail open.
+- `PostToolUse`
+  - currently supports Bash tool results only.
+  - cannot undo side effects from the command that already ran.
+  - JSON supports `systemMessage`, `decision: "block"` feedback shape, and `hookSpecificOutput.additionalContext`.
+  - `continue: false` can stop normal processing of the original tool result.
+  - `updatedMCPToolOutput` and `suppressOutput` are parsed but currently fail open.
 - `UserPromptSubmit`
-  - supports `decision: "block"` with `reason`
-  - supports `hookSpecificOutput.additionalContext`
-  - exit code `2` with stderr is also treated as block feedback
-  - invalid JSON-like stdout becomes a failure
+  - plain text on stdout is added as extra developer context.
+  - JSON supports `hookSpecificOutput.additionalContext`.
+  - prompt blocking supports `decision: "block"` + `reason` (or exit code `2` + stderr).
 - `Stop`
-  - supports `decision: "block"` with `reason`
-  - exit code `2` with stderr is also treated as a block path
-  - malformed stdout is treated as failure, not ignored
-
-## Alpha nuance
-The latest alpha keeps the same external `hooks.json` event and handler surface as stable.
-
-Observed internal change in `0.117.0-alpha.8`:
-- `Stop` converts block reasons into continuation fragments internally instead of a single continuation prompt string.
-
-Implication:
-- scaffold against the stable external JSON contract because the user-facing hook output shape is unchanged;
-- avoid claiming new external fields unless a released schema or docs page exposes them.
+  - expects JSON on stdout when exiting `0`; plain text is invalid.
+  - `decision: "block"` creates a continuation prompt rather than rejecting the turn.
+  - if any matching `Stop` hook returns `continue: false`, that takes precedence.
 
 ## Design implications
-- Use command hooks with explicit timeouts because that is the stable, released path.
-- Keep `hooks.json` command paths absolute because discovery loads config by layer, but command execution happens against session cwd.
-- Prefer JSON outputs for `UserPromptSubmit` and `Stop` because JSON gives auditable reasons and cleaner maintenance than stderr-only block paths.
-- Keep `SessionStart.additionalContext` short and durable because it is model context, not a place for long procedural text.
+- Keep the default scaffold to the three-hook starter (`SessionStart`, `UserPromptSubmit`, `Stop`) because it provides strong baseline value with minimal latency.
+- Add `PreToolUse` or `PostToolUse` only when the user asks for command guardrails that justify additional turn-time cost.
+- Keep command paths absolute in generated packs to prevent cwd-dependent failures.
+- Keep guardrails narrow and auditable; document that Bash interception is helpful but not a complete enforcement boundary.
 
 ## Source anchors
 Official documentation:
-- OpenAI docs: configuration precedence and project config layering
-  - `https://developers.openai.com/codex/config-basic/#configuration-precedence`
-  - `https://developers.openai.com/codex/config-advanced/#project-root-detection`
-- OpenAI docs: customization and best-practice validation loop
-  - `https://developers.openai.com/codex/concepts/customization/#next-step`
-  - `https://developers.openai.com/codex/learn/best-practices/#improve-reliability-with-testing-and-review`
+- Hooks reference and runtime behavior:
+  - `https://developers.openai.com/codex/hooks`
 
-Codex repo source:
-- `codex-rs/hooks/src/engine/config.rs`
-- `codex-rs/hooks/src/engine/discovery.rs`
-- `codex-rs/hooks/src/events/session_start.rs`
-- `codex-rs/hooks/src/events/user_prompt_submit.rs`
-- `codex-rs/hooks/src/events/stop.rs`
-- `codex-rs/hooks/schema/generated/session-start.command.output.schema.json`
-- `codex-rs/hooks/schema/generated/user-prompt-submit.command.output.schema.json`
-- `codex-rs/hooks/schema/generated/stop.command.output.schema.json`
+Codex repo schema source:
+- Generated hook schemas:
+  - `https://github.com/openai/codex/tree/main/codex-rs/hooks/schema/generated`
+  - includes `pre-tool-use`, `post-tool-use`, `session-start`, `user-prompt-submit`, and `stop` command input/output schemas.
 
-Local operational reference used as a builder pattern source:
+Local operational reference used as a builder-pattern source:
 - `/Users/jamiecraik/dev/config/codex/hooks/README.md`
 - `/Users/jamiecraik/dev/config/codex/hooks/hooks.json`
 - `/Users/jamiecraik/dev/config/codex/hooks/session-start.sh`

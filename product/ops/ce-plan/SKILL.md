@@ -30,6 +30,11 @@ metadata:
 - Keep planning portable: capture decisions, files, sequencing, risks, and verification, not shell choreography or implementation code.
 - Stop when the plan file is written, verified, and the next-step options are clear.
 
+## Philosophy
+- Planning quality is measured by execution clarity, not by document length.
+- Every phase should reduce uncertainty with explicit dependencies, verification, and rollback awareness.
+- Prefer minimal viable sequencing that still protects safety, governance, and delivery confidence.
+
 ## When to use
 Use this skill when the user wants an execution-ready plan for a feature, improvement, refactor, bug fix, or UI delivery path and needs sequencing, validation, traceability, or rollout guidance before coding starts.
 
@@ -152,9 +157,15 @@ Rules:
 Increase reasoning depth before structuring the plan when the work is multi-phase, high-risk, UI-accessibility-critical, or spans multiple system boundaries.
 
 ### Phase 1: Research local context
-Run these in parallel as bounded internal subagents:
+Start with inline research in the main thread.
+
+If bounded internal support would materially improve coverage and the user has not already explicitly asked for delegation or sub-agents, ask a short blocking approval question via `request_user_input` before spawning any internal subagents.
+
+If approval is granted, run these bounded internal subagents in parallel:
 - `repo-research-analyst("Find existing patterns to follow related to: <planning source> — max 20 files, max 4 MB total read, return a <=400 word summary with file:line refs")`
 - `learnings-researcher("Find prior learnings relevant to: <planning source> — check .harness/memory/LEARNINGS.md first when it exists, then use instructions/Learnings.md for compatibility, then scan only directly relevant deeper solution docs. Return only directly relevant findings, <=200 words total.")`
+
+If approval is not granted, the tool is unavailable, or subagents are unnecessary, perform the equivalent research serially in the main thread before structuring the plan.
 
 Focus on:
 - existing patterns to follow
@@ -176,15 +187,28 @@ Run external research only when the work is high risk, externally dependent, unf
 
 Lean toward external research when the local scan shows the relevant layer is absent, thin, novel, or externally constrained. Skip it when strong local patterns already exist and current external guidance would not materially change the plan.
 
-If needed, run in parallel as bounded internal subagents:
+If bounded external research support would materially improve the plan and the user has not already explicitly asked for delegation or sub-agents, ask a short blocking approval question via `request_user_input` before spawning any internal research subagents.
+
+If approved, run these bounded internal subagents in parallel:
 - `best-practices-researcher("<planning source> — max 5 external sources, <=300 word summary, cite URLs and dates")`
 - `framework-docs-researcher("<planning source> — max 3 docs pages, return only sections directly applicable, <=300 words")`
+
+If approval is not granted, the tool is unavailable, or the support is unnecessary, do the external research inline and keep the source set tight.
 
 Use external research to sharpen:
 - framework- or platform-specific sequencing
 - rollout or migration safety
 - testing and validation expectations
 - accessibility and UI delivery standards
+
+If the current depth is `lightweight` and local or external research reveals external contract surfaces, reclassify the plan to at least `standard` before structuring. Relevant signals include:
+- environment variables consumed by external systems, CI, or other repos
+- exported public APIs or CLI contracts
+- CI/CD configuration or deployment files
+- shared types or interfaces imported by downstream consumers
+- documentation paths or URLs referenced by external systems
+
+Announce the reclassification briefly so the user can see why the planning depth changed.
 
 ### Phase 3: Consolidate and resolve planning questions
 Summarize what the plan must honor:

@@ -12,10 +12,10 @@ Create and maintain concise, high-signal AGENTS guidance with progressive disclo
 ## Table of Contents
 - [When to use](#when-to-use)
 - [Standards snapshot](#standards-snapshot-march-2026)
-- [Inputs](#inputs)
+- [Required inputs](#required-inputs)
 - [Discovery interview](#discovery-interview)
 - [Response format](#response-format)
-- [Outputs](#outputs)
+- [Deliverables](#deliverables)
 - [Failure mode](#failure-mode)
 - [Philosophy](#philosophy)
 - [Constraints](#constraints)
@@ -87,7 +87,7 @@ Run discovery for underspecified AGENTS creation or refactor requests.
 - For the confirmation round, start with `## Skill Summary:`.
 - In the confirmation round, include `Assumptions:` when any remain and end with one simple confirmation question such as `Does this capture it well enough for me to build?`.
 - Keep the confirmation round compact as well: summarize only the current AGENTS update shape, list assumptions only when needed, and end with the single confirmation question.
-- For out-of-scope responses, keep the compact structure expected by the evals: `## When to use`, `## Outputs`, and `## Inputs`.
+- For out-of-scope responses, keep the compact structure expected by the evals: `## When to use`, `## Deliverables`, and `## Required inputs`.
 
 ## Deliverables
 - Updated minimal root `AGENTS.md`.
@@ -157,15 +157,28 @@ If command truth, path ownership, or instruction precedence cannot be verified, 
 - When a user asks to add guidance under named AGENTS sections, place it in the canonical AGENTS file for that repo scope and update that file's Table of Contents.
 - If the named section does not exist, create it with concise, action-oriented bullets instead of scattering equivalent guidance across multiple unrelated files.
 - Keep cross-repo guidance consistent by mirroring durable section-level rules in this skill when they affect how AGENTS refactors should be performed.
+- When users request a reusable Python runtime policy, auto-populate `## Python Environment and Dependency Management` when missing in the target AGENTS scope and keep it as a root-visible operating section.
+- For that Python section, preserve these defaults unless the repo explicitly overrides them: `uv`-only environment/dependency management, Python `3.12` default for new environments, explicit dependency declaration files (`pyproject.toml`, `requirements.txt`, `requirements-dev.txt`, `requirements.lock`), project-local `.venv` preference, activation-before-execution, and global fallback via `source ~/personal/bin/activate` only when no dependency files exist.
+- When users request preflight enforcement defaults, auto-populate both the mandatory workflow snippet (`PREFLIGHT REQUIRED` + explore-then-skill + retrieval-led rule + docs TOC rule) and a `## Preflight Enforcement (REQUIRED)` section when missing, while still validating that prescribed commands/flags exist for that repo before insertion.
+- When users request stronger coding standards, auto-populate a `## Quality Checks` section (or strengthen it in place) across in-scope instruction files and require repo-native formatter, linter, typecheck, and test commands plus explicit pass-state reporting before work is marked complete.
 - When a user wants the same operating rule reflected across `AGENTS.md`, `CLAUDE.md`, and `GEMINI.md`, keep the rule semantically consistent across all three files but preserve target-specific wording and file structure instead of forcing one identical block everywhere.
+- For durable cross-tool behavioral rules that the user wants agents to always see, keep the rule as its own top-level section in each of `AGENTS.md`, `CLAUDE.md`, and `GEMINI.md` instead of hiding it only in linked docs.
+- Use progressive disclosure, not rule burial: keep the short, operative rule in the root instruction file and move only deeper rationale or procedure into linked docs when needed.
 - When `agents-md` is asked to update a project's instruction surface, treat the task as an audit-and-repair pass by default: inspect which instruction files should exist for that repo, verify the current files are accurate and current, create or repair missing canonical files when needed, and disclose any intentional omissions or legacy files explicitly.
 - By default, verify the active shared instruction set for all supported surfaces the repo actually uses, such as `AGENTS.md`, `CLAUDE.md`, and `GEMINI.md`, instead of updating only one file in isolation unless the user explicitly asks for a narrower scope.
 - When one instruction file is current but its sibling surface is missing, stale, or materially weaker, either align that sibling file in the same pass or report the exact reason it was left untouched.
 - When a repo uses `CLAUDE.md`, prefer Anthropic's official style guidance: concise, specific, verifiable instructions, structured headings, and stronger wording over duplicate bullets when a weaker rule already exists.
 - When a repo uses `GEMINI.md`, preserve Gemini CLI's configured context-file behavior and avoid assuming the filename is always the default when the repo or tool config sets `context.fileName` differently.
+- When users request cross-tool additions for `Error Handling Protocol` or `Reporting & Insights`, place them near the top of each instruction file because they govern common report-generation and failure-recovery behavior.
+- When users request cross-tool additions under `Communication`, `Efficiency`, or `Browser/Playwright`, create those sections when missing and keep each rule short enough to remain a fast-start instruction rather than a hidden policy block.
+- In `Communication`, if the user explicitly states the root cause, require agents to confirm that understanding and proceed instead of continuing to suggest alternative fixes.
+- In `Efficiency`, require a pause before multi-file edits or automation for simple information requests and explicitly ask whether a direct answer or simple command would suffice.
+- In `Browser/Playwright`, require starting `python3 -m http.server` in the relevant directory as the default fallback when browser tooling cannot open local files directly.
+- For validation follow-up guidance in `AGENTS.md`, `CLAUDE.md`, and `GEMINI.md`, place the rule under `## Startup workflow`, `## Validation`, or the nearest validation-results section. Require that if validation surfaces durable repo work, agents create or update a Linear issue in the named `[[ project ]]` instead of leaving the finding only in chat. If equivalent wording already exists, strengthen it instead of duplicating it.
 - For TypeScript validation guidance in `AGENTS.md`, `CLAUDE.md`, and `GEMINI.md`, place repo-native test and lint instructions under `## Quality Checks`. If that section does not exist, create it. In npm-based repos, require `npm run lint` and `npm run test` after TypeScript changes and require both to pass before the session is marked complete. If equivalent guidance already exists, strengthen it instead of duplicating it.
 - For CI guidance in `AGENTS.md`, `CLAUDE.md`, or `GEMINI.md`, place the rule under `## CI/CD Workflow` when present or create that section when it is missing. Require confirmation of the final authoritative pipeline or workflow-run status before ending CI/CD work, not just a local fix or partial rerun.
 - For pull-request coordination guidance in `AGENTS.md`, `CLAUDE.md`, or `GEMINI.md`, place the rule under `## GitHub Workflow` or `## PR Management`. Require checking merge-conflict state up front for multi-repo PR work, flagging blocked PRs early, and calling out blockers before spending effort on downstream merge prep.
+- For worktree reliability guidance in `AGENTS.md`, `CLAUDE.md`, and `GEMINI.md`, if the repo ships a helper such as `scripts/prepare-worktree.sh`, add a consistent rule under startup/preflight sections: run that helper before first push from a fresh worktree so pre-push hooks execute with dependencies installed. Verify the script path exists before adding the rule.
 - When repo operating rules are requested, tailor sections like `Repository rules`, `Stack detection`, `Required tooling`, `Required repo paths`, `Local Memory policy`, `Startup workflow`, and `Supplemental context` from verified repo evidence instead of copying a fixed block unchanged.
 - For section-level additions touching operational safety, preserve explicit checks for:
   - quality validation after config/CI/dependency edits,
@@ -189,6 +202,7 @@ If command truth, path ownership, or instruction precedence cannot be verified, 
 - When Local Memory guidance is requested, preserve the script's explicit mode handling (`off`, `optional`, `required`) and required-mode checks for installation, daemon health, config path resolution (`LOCAL_MEMORY_CONFIG_PATH` or `~/.local-memory/config.yaml`), `host: 127.0.0.1`, `auto_port: false`, numeric `rest_api_port`, REST health, smoke cycle (`observe`, `relate`, `search`), malformed payload rejection, duplicate-observe snapshot capture, daemon-log migration signal check when available, and stop-on-failure behavior in required mode.
 - When git safety guidance is requested, require explicit pre-operation briefing for rebasing 5+ commits, merge conflict resolution, and force-pushes, including branch state, strategy with risks, alternatives, and user confirmation.
 - When validation guidance is requested for config-sensitive files (for example `package.json`, CI workflows, `settings.json`, config files), require running applicable validation commands and reporting pass status before commit.
+- When config-edit guidance is requested for `AGENTS.md`, `CLAUDE.md`, or `GEMINI.md` progressive-build instructions, require copy-paste-safe single-line commands, then require anchored verification checks (`rg -n '^\s*<key>\s*=' <file>` plus a bounded line preview like `nl -ba <file> | sed -n '1,16p'`) before proceeding. For root Codex policy defaults, prefer string form such as `approval_policy = "on-request"` unless that repo has verified table-style policy support in its current runtime and validators.
 - When command preflight guidance is requested, preserve explicit `exec_command` preflight rules: run shell via `zsh -lc`, use `which` before `mise` installs, and verify destructive-operation paths with `fd` before execution.
 
 ### Command preflight defaults
@@ -229,6 +243,9 @@ If command truth, path ownership, or instruction precedence cannot be verified, 
 - Treat the baseline as a section menu, not a verbatim template. Verify each section before insertion.
 - Keep `Repository rules` grounded in the actual repo preflight, supported flag set, and repo-root workflow.
 - Keep `Stack detection` grounded in observed root manifests and documented override behavior.
+- For Python-capable repos, include a concise `## Python Environment and Dependency Management` baseline section by default when absent, then tailor only paths/overrides to repo evidence.
+- For repos that require preflight, include both the mandatory workflow snippet and `## Preflight Enforcement (REQUIRED)` block by default when absent, using repo-verified commands and supported flags.
+- For coding-standards requests, include a `## Quality Checks` baseline section by default when absent, using repo-native formatter/lint/typecheck/test commands and a pass-before-complete rule.
 - Keep `Required tooling` and `Required repo paths` limited to what the repo actually needs.
 - Keep architecture-diagram paths repo-specific: mention `.diagram/`, `.diagrams/`, or another diagram directory only when that exact path is documented or verified in the repo.
 - Keep `.harness/memory/LEARNINGS.md` opt-in at the repo level unless the repo has explicitly adopted the harness-memory convention.
@@ -263,14 +280,18 @@ If command truth, path ownership, or instruction precedence cannot be verified, 
 - User says: "Validate this `TEAM_GUIDE.md` setup and tell me whether I should migrate it or register it with `project_doc_fallback_filenames`."
 - User says: "Help me merge AGENTS, CLAUDE, and GEMINI guidance into one progressive-disclosure instruction tree."
 - User says: "Update our shared AGENTS, CLAUDE, and GEMINI guidance so all three get a `## Quality Checks` section with `npm run lint` and `npm run test`, CI work always ends by confirming final pipeline status, and multi-repo PRs check merge conflicts up front."
+- User says: "Update our shared AGENTS, CLAUDE, and GEMINI guidance so validation findings that represent durable repo work create or update a Linear issue in the right `[[ project ]]` instead of being left only in chat."
 - User says: "Add a reusable `## Policy Calibration (Dynamic)` section to our AGENTS, CLAUDE, and GEMINI docs so safe repeated command prefixes can be whitelisted without changing the default approval policy."
 - User says: "Refactor our shared instruction files with agents-md and make sure the approval/sandbox calibration rules are part of the default governance baseline."
 - User says: "Check this project's AGENTS, CLAUDE, and GEMINI files and make sure the required instruction files exist, are current, and disclose the right canonical docs."
 - User says: "Use agents-md to audit our instruction surface, repair anything stale, and tell me which files are canonical versus legacy."
 - User says: "Inspect these conflicting instructions and return a clear conflict-decision list before you edit anything."
 - User says: "Update our AGENTS template so repo rules, stack detection, required tooling, required paths, Local Memory policy, and startup workflow are tailored per project instead of copied blindly."
+- User says: "Make sure every generated AGENTS file auto-adds Python environment policy and preflight enforcement defaults when those sections are missing."
+- User says: "Enforce coding standards better by auto-adding quality-check gates and requiring all checks to pass before completion."
 - User says: "We used to have a `FORJAMIE.md` file. Please update the AGENTS guidance so it handles that legacy file correctly."
 - User says: "Our repo keeps architecture drawings in `.diagrams/`. Update the AGENTS guidance so agents use that as quick project context without guessing the wrong diagram path in other repos."
+- User says: "Add a worktree bootstrap helper rule across AGENTS, CLAUDE, and GEMINI so first push from a fresh worktree runs the repo helper script."
 
 ## Resource map
 - References: `references/contract.yaml`, `references/discovery-interview.md`, `references/evals.yaml`, `references/folded-legacy-modes-core60.md`, `references/official-codex-agents-guidance.md`, `references/project-tailored-agents-baseline.md`, `references/task-profile.json`

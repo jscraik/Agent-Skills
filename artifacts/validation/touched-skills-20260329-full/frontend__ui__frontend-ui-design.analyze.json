@@ -1,0 +1,217 @@
+{
+  "schema_version": "1.1",
+  "tool": "analyze_skill",
+  "generated_at": "2026-03-29T22:50:45Z",
+  "decision": "pass",
+  "exit_code": 0,
+  "name": "frontend-ui-design",
+  "description": "Design or implement production-ready frontend UI components and screens with strong visual direction, layout rhythm, spacing hierarchy, accessibility, and reusable structure. Use when the user wants standard UI build or redesign work, including fixing crowded or structurally weak layouts, not design-system governance or post-direction polish only.",
+  "path": "/Users/jamiecraik/dev/agent-skills/frontend/ui/frontend-ui-design/SKILL.md",
+  "total_score": 121,
+  "max_total": 165,
+  "categories": [
+    {
+      "category": "Frontmatter",
+      "score": 30,
+      "max_score": 30,
+      "findings": [
+        {
+          "category": "Frontmatter",
+          "points": 10,
+          "severity": "INFO",
+          "message": "✅ `name` present and valid.",
+          "evidence": ""
+        },
+        {
+          "category": "Frontmatter",
+          "points": 20,
+          "severity": "INFO",
+          "message": "✅ `description` is detailed and includes trigger language.",
+          "evidence": ""
+        }
+      ]
+    },
+    {
+      "category": "Philosophy",
+      "score": 8,
+      "max_score": 20,
+      "findings": [
+        {
+          "category": "Philosophy",
+          "points": 8,
+          "severity": "WARN",
+          "message": "⚠️ Some philosophy indicators found: philosophy, consider.",
+          "evidence": ""
+        }
+      ]
+    },
+    {
+      "category": "Anti-Patterns",
+      "score": 14,
+      "max_score": 20,
+      "findings": [
+        {
+          "category": "Anti-Patterns",
+          "points": 14,
+          "severity": "INFO",
+          "message": "✅ Strong anti-pattern guidance detected (5 signals).",
+          "evidence": ""
+        }
+      ]
+    },
+    {
+      "category": "Variation",
+      "score": 11,
+      "max_score": 15,
+      "findings": [
+        {
+          "category": "Variation",
+          "points": 6,
+          "severity": "WARN",
+          "message": "⚠️ Some variation mentioned: adapt.",
+          "evidence": ""
+        },
+        {
+          "category": "Variation",
+          "points": 5,
+          "severity": "INFO",
+          "message": "✅ Warns against generic patterns (11 mention(s)).",
+          "evidence": ""
+        }
+      ]
+    },
+    {
+      "category": "Organization",
+      "score": 10,
+      "max_score": 10,
+      "findings": [
+        {
+          "category": "Organization",
+          "points": 6,
+          "severity": "INFO",
+          "message": "✅ Well-structured with 23 headings.",
+          "evidence": ""
+        },
+        {
+          "category": "Organization",
+          "points": 4,
+          "severity": "INFO",
+          "message": "✅ Contains 157 list items (actionable).",
+          "evidence": ""
+        }
+      ]
+    },
+    {
+      "category": "Empowerment",
+      "score": 3,
+      "max_score": 5,
+      "findings": [
+        {
+          "category": "Empowerment",
+          "points": 3,
+          "severity": "WARN",
+          "message": "⚠️ Some empowering language: creative.",
+          "evidence": ""
+        }
+      ]
+    },
+    {
+      "category": "Conciseness",
+      "score": 10,
+      "max_score": 10,
+      "findings": [
+        {
+          "category": "Conciseness",
+          "points": 10,
+          "severity": "INFO",
+          "message": "✅ Concise length (233 lines).",
+          "evidence": ""
+        }
+      ]
+    },
+    {
+      "category": "Repo Integration",
+      "score": 10,
+      "max_score": 10,
+      "findings": [
+        {
+          "category": "Repo",
+          "points": 5,
+          "severity": "INFO",
+          "message": "✅ `scripts/` present and referenced (2 file(s)).",
+          "evidence": ""
+        },
+        {
+          "category": "Repo",
+          "points": 3,
+          "severity": "INFO",
+          "message": "✅ `references/` present and referenced (55 file(s)).",
+          "evidence": ""
+        },
+        {
+          "category": "Repo",
+          "points": 3,
+          "severity": "INFO",
+          "message": "✅ `assets/` present and referenced (3 file(s)).",
+          "evidence": ""
+        }
+      ]
+    },
+    {
+      "category": "Research: Scope Focus",
+      "score": 15,
+      "max_score": 15,
+      "findings": [
+        {
+          "category": "Research: Scope",
+          "points": 9,
+          "severity": "INFO",
+          "message": "✅ Focused capability surface (3 major surface(s) mentioned).",
+          "evidence": ""
+        },
+        {
+          "category": "Research: Scope",
+          "points": 6,
+          "severity": "INFO",
+          "message": "✅ Explicit focus language encourages narrow first-pass packaging.",
+          "evidence": ""
+        }
+      ]
+    },
+    {
+      "category": "Research: Example Quality",
+      "score": 10,
+      "max_score": 15,
+      "findings": [
+        {
+          "category": "Research: Examples",
+          "points": 10,
+          "severity": "INFO",
+          "message": "✅ Includes multiple worked examples or realistic trigger prompts.",
+          "evidence": ""
+        }
+      ]
+    },
+    {
+      "category": "Research: Eval Realism",
+      "score": 0,
+      "max_score": 15,
+      "findings": [
+        {
+          "category": "Research: Evals",
+          "points": 0,
+          "severity": "WARN",
+          "message": "⚠️ Many eval prompts leak the skill name (3/7). Prefer natural user phrasing.",
+          "evidence": ""
+        },
+        {
+          "category": "Research: Evals",
+          "points": 0,
+          "severity": "WARN",
+          "message": "⚠️ Eval prompts look synthetic; rewrite more cases as realistic user utterances.",
+          "evidence": ""
+        }
+      ]
+    }
+  ]
+}

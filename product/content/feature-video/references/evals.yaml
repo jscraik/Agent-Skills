@@ -1,0 +1,89 @@
+schema_version: "2.0"
+
+skill_name: "feature-video"
+
+cases:
+  - id: explicit-feature-video
+    name: explicit feature video request
+    category: happy
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Use $feature-video to make a short walkthrough for this shipped feature and package it for the PR."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "feature-video"
+      - type: regex
+        value: "(?i)(walkthrough|PR|artifact|video)"
+
+  - id: running-app-pr-walkthrough
+    name: running app pr walkthrough
+    category: happy
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Record a walkthrough of the running app for the current PR and upload the result as a native GitHub video."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "feature-video"
+      - type: regex
+        value: "(?i)(browser-record-and-upload|current|user-attachments/assets|PR)"
+
+  - id: upload-only-resume
+    name: upload only resume
+    category: edge
+    should_trigger: true
+    prepend_skill: false
+    prompt: "I already have an MP4. Please use feature-video to upload it to the PR and add the demo section."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "feature-video"
+      - type: regex
+        value: "(?i)(upload-only resume|\\.mp4|PR body|demo)"
+
+  - id: record-only-fallback
+    name: record only fallback
+    category: edge
+    should_trigger: true
+    prepend_skill: false
+    prompt: "There is no PR yet, but I still want the walkthrough captured now and uploaded later."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "feature-video"
+      - type: regex
+        value: "(?i)(record-only|upload later|local video path|run ID)"
+
+  - id: stitch-walkthrough
+    name: stitch walkthrough
+    category: happy
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Create a feature walkthrough from these Stitch screens for an internal handoff."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "feature-video"
+      - type: regex
+        value: "(?i)(stitch-remotion|handoff|walkthrough)"
+
+  - id: thumbnail-only-request
+    name: thumbnail only request
+    category: negative
+    should_trigger: false
+    prepend_skill: false
+    prompt: "I only need title and thumbnail ideas for the launch video."
+    acceptance:
+      - type: skill_not_selected
+        expected_skill: "feature-video"
+
+  - id: synthetic-video-request
+    name: synthetic unrelated video
+    category: negative
+    should_trigger: false
+    prepend_skill: false
+    prompt: "Generate a fully synthetic AI promo video that is not based on the real product flow."
+    acceptance:
+      - type: skill_not_selected
+        expected_skill: "feature-video"
+
+metadata:
+  last_updated: "2026-03-30"
+  author: "Codex"
+  review_status: "draft"

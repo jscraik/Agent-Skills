@@ -99,6 +99,30 @@ cases:
       - type: regex
         value: "(?i)(issue intelligence|focus hint|survivor)"
 
+  - id: combined-issue-volume-focus-parsing
+    name: combined issue, volume, and focus parsing
+    category: edge
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Look at the top 3 authentication issue themes and tell me which bigger ideas are actually worth exploring before we brainstorm one."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "ce-ideate"
+      - type: regex
+        value: "(?i)(top 3|issue intelligence|authentication|survivor|ce-brainstorm)"
+
+  - id: raise-the-bar-refinement
+    name: raise the bar refinement
+    category: edge
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Resume the ideation work if it exists and raise the bar. I want only the directions that still survive skeptical review."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "ce-ideate"
+      - type: regex
+        value: "(?i)(continue|start fresh|raise the bar|rejection|survivor)"
+
   - id: refine-existing-idea-set
     name: refine existing idea set
     category: edge
@@ -198,6 +222,6 @@ cases:
         value: "(?i)(cannot|grounded|repo|critique|survivor|untrusted)"
 
 metadata:
-  last_updated: "2026-03-23"
+  last_updated: "2026-03-30"
   author: "Codex"
   review_status: "draft"

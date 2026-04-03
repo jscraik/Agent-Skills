@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Scaffold a lifecycle-aware plugin directory and optionally update marketplace.json."""
+"""Scaffold a plugin directory and optionally update marketplace.json."""
 
 from __future__ import annotations
 
@@ -17,7 +17,7 @@ DEFAULT_MARKETPLACE_PATH = Path.cwd() / ".agents" / "plugins" / "marketplace.jso
 DEFAULT_INSTALL_POLICY = "AVAILABLE"
 DEFAULT_AUTH_POLICY = "ON_INSTALL"
 DEFAULT_CATEGORY = "Productivity"
-DEFAULT_MARKETPLACE_DISPLAY_NAME = "Local Plugins"
+DEFAULT_MARKETPLACE_DISPLAY_NAME = "[TODO: Marketplace Display Name]"
 DEFAULT_VERSION = "0.1.0"
 DEFAULT_LIFECYCLE_STATE = "incubating"
 DEFAULT_MATURITY = "experimental"
@@ -52,9 +52,10 @@ def plugin_display_name(plugin_name: str) -> str:
 
 def build_plugin_json(
     plugin_name: str,
-    description: str,
-    owner: str,
-    review_cadence: str,
+    *,
+    description: str | None,
+    owner: str | None,
+    review_cadence: str | None,
     last_reviewed: str,
     lifecycle_state: str,
     maturity: str,
@@ -63,9 +64,54 @@ def build_plugin_json(
     with_hooks: bool,
     with_mcp: bool,
     with_apps: bool,
-) -> dict:
+) -> dict[str, Any]:
+    legacy_mode = bool(description and owner and review_cadence)
+    if not legacy_mode:
+        return {
+            "name": plugin_name,
+            "version": "[TODO: 1.2.0]",
+            "description": "[TODO: Brief plugin description]",
+            "author": {
+                "name": "[TODO: Author Name]",
+                "email": "[TODO: author@example.com]",
+                "url": "[TODO: https://github.com/author]",
+            },
+            "homepage": "[TODO: https://docs.example.com/plugin]",
+            "repository": "[TODO: https://github.com/author/plugin]",
+            "license": "[TODO: MIT]",
+            "keywords": ["[TODO: keyword1]", "[TODO: keyword2]"],
+            "skills": "[TODO: ./skills/]",
+            "hooks": "[TODO: ./hooks.json]",
+            "mcpServers": "[TODO: ./.mcp.json]",
+            "apps": "[TODO: ./.app.json]",
+            "interface": {
+                "displayName": "[TODO: Plugin Display Name]",
+                "shortDescription": "[TODO: Short description for subtitle]",
+                "longDescription": "[TODO: Long description for details page]",
+                "developerName": "[TODO: OpenAI]",
+                "category": "[TODO: Productivity]",
+                "capabilities": ["[TODO: Interactive]", "[TODO: Write]"],
+                "websiteURL": "[TODO: https://openai.com/]",
+                "privacyPolicyURL": "[TODO: https://openai.com/policies/row-privacy-policy/]",
+                "termsOfServiceURL": "[TODO: https://openai.com/policies/row-terms-of-use/]",
+                "defaultPrompt": [
+                    "[TODO: Summarize my inbox and draft replies for me.]",
+                    "[TODO: Find open bugs and turn them into tickets.]",
+                    "[TODO: Review today's meetings and flag gaps.]",
+                ],
+                "brandColor": "[TODO: #3B82F6]",
+                "composerIcon": "[TODO: ./assets/icon.png]",
+                "logo": "[TODO: ./assets/logo.png]",
+                "screenshots": [
+                    "[TODO: ./assets/screenshot1.png]",
+                    "[TODO: ./assets/screenshot2.png]",
+                    "[TODO: ./assets/screenshot3.png]",
+                ],
+            },
+        }
+
     display_name = plugin_display_name(plugin_name)
-    payload = {
+    payload: dict[str, Any] = {
         "schema_version": 1,
         "name": plugin_name,
         "version": DEFAULT_VERSION,
@@ -210,13 +256,16 @@ def create_stub_file(path: Path, payload: dict, force: bool) -> None:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Create a lifecycle-aware plugin skeleton with honest starter metadata."
+        description="Create a plugin skeleton with placeholder plugin.json."
     )
     parser.add_argument("plugin_name")
     parser.add_argument(
         "--path",
         default=str(DEFAULT_PLUGIN_PARENT),
-        help="Parent directory for plugin creation (defaults to <cwd>/plugins)",
+        help=(
+            "Parent directory for plugin creation (defaults to <cwd>/plugins). "
+            "When using a home-rooted marketplace, use <home>/plugins."
+        ),
     )
     parser.add_argument("--with-skills", action="store_true", help="Create skills/ directory")
     parser.add_argument("--with-hooks", action="store_true", help="Create hooks/ directory")
@@ -227,12 +276,19 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--with-marketplace",
         action="store_true",
-        help="Create or update <cwd>/.agents/plugins/marketplace.json",
+        help=(
+            "Create or update <cwd>/.agents/plugins/marketplace.json. "
+            "Marketplace entries always point to ./plugins/<plugin-name> relative to the "
+            "marketplace root."
+        ),
     )
     parser.add_argument(
         "--marketplace-path",
         default=str(DEFAULT_MARKETPLACE_PATH),
-        help="Path to marketplace.json (defaults to <cwd>/.agents/plugins/marketplace.json)",
+        help=(
+            "Path to marketplace.json (defaults to <cwd>/.agents/plugins/marketplace.json). "
+            "For a home-rooted marketplace, use <home>/.agents/plugins/marketplace.json."
+        ),
     )
     parser.add_argument(
         "--install-policy",
@@ -253,38 +309,59 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--description",
-        required=True,
-        help="Short plugin description used in the manifest and interface block",
+        help="Legacy lifecycle-aware scaffold description. Use with --owner and --review-cadence.",
     )
     parser.add_argument(
         "--owner",
-        required=True,
-        help="Primary maintainer or owner string for lifecycle governance",
+        help="Legacy lifecycle-aware scaffold owner. Use with --description and --review-cadence.",
     )
     parser.add_argument(
         "--review-cadence",
-        required=True,
-        help="Concrete review cadence such as monthly or quarterly",
+        help="Legacy lifecycle-aware scaffold cadence. Use with --description and --owner.",
     )
     parser.add_argument(
         "--last-reviewed",
         default=date.today().isoformat(),
-        help="ISO date for the most recent lifecycle review (defaults to today)",
+        help="ISO date for lifecycle review in legacy mode (defaults to today)",
     )
     parser.add_argument(
         "--lifecycle-state",
         default=DEFAULT_LIFECYCLE_STATE,
         choices=sorted(VALID_LIFECYCLE_STATES),
-        help="Initial lifecycle state for the plugin",
+        help="Initial lifecycle state in legacy mode",
     )
     parser.add_argument(
         "--maturity",
         default=DEFAULT_MATURITY,
         choices=sorted(VALID_MATURITY_LEVELS),
-        help="Initial maturity level for the plugin",
+        help="Initial maturity level in legacy mode",
     )
     parser.add_argument("--force", action="store_true", help="Overwrite existing files")
-    return parser.parse_args()
+    args = parser.parse_args()
+
+    has_description = bool(args.description)
+    has_owner = bool(args.owner)
+    has_review_cadence = bool(args.review_cadence)
+    legacy_requested = has_description or has_owner or has_review_cadence
+
+    if (has_description or has_owner) and not has_review_cadence:
+        parser.error("--review-cadence is required when --description or --owner is provided.")
+    if has_review_cadence and not has_description:
+        parser.error("--description is required when --review-cadence is provided.")
+    if has_review_cadence and not has_owner:
+        parser.error("--owner is required when --review-cadence is provided.")
+
+    if not legacy_requested and (
+        args.last_reviewed != date.today().isoformat()
+        or args.lifecycle_state != DEFAULT_LIFECYCLE_STATE
+        or args.maturity != DEFAULT_MATURITY
+    ):
+        parser.error(
+            "--last-reviewed, --lifecycle-state, and --maturity require legacy mode "
+            "(--description, --owner, and --review-cadence)."
+        )
+
+    return args
 
 
 def main() -> None:
@@ -303,17 +380,17 @@ def main() -> None:
         plugin_json_path,
         build_plugin_json(
             plugin_name,
-            args.description,
-            args.owner,
-            args.review_cadence,
-            args.last_reviewed,
-            args.lifecycle_state,
-            args.maturity,
-            args.category,
-            args.with_skills,
-            args.with_hooks,
-            args.with_mcp,
-            args.with_apps,
+            description=args.description,
+            owner=args.owner,
+            review_cadence=args.review_cadence,
+            last_reviewed=args.last_reviewed,
+            lifecycle_state=args.lifecycle_state,
+            maturity=args.maturity,
+            category=args.category,
+            with_skills=args.with_skills,
+            with_hooks=args.with_hooks,
+            with_mcp=args.with_mcp,
+            with_apps=args.with_apps,
         ),
         args.force,
     )
