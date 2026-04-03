@@ -45,7 +45,6 @@ metadata:
 - Design or review standard product UI systems and components.
 - Specify accessible screens, flows, states, and design-system changes.
 - Plan or patch production UI for React, Apps SDK widgets, or Tauri web UI when the work is standard product design rather than experimental creative coding.
-- Diagnose or fix layout composition problems such as crowded screens, weak hierarchy, inconsistent spacing, monotonous card grids, or alignment drift.
 - Adapt an existing interface across mobile, tablet, desktop, print, or email contexts while keeping behavior and information architecture coherent.
 - Shape visually led landing pages, websites, prototypes, or demos when art direction matters but the result still needs production-ready hierarchy and accessibility.
 - Audit existing UI for accessibility, token use, state coverage, or implementation readiness.
@@ -79,7 +78,6 @@ metadata:
 - For visually led surfaces: one visual thesis, one content plan, and one interaction thesis before component planning.
 - Component or screen plan with states and accessibility behavior.
 - Token-referenced implementation guidance.
-- For layout-first requests: a compact spatial audit covering spacing system, hierarchy strength, composition rhythm, and density fit.
 - For adaptation work: a compact adaptation matrix covering what to keep, adapt, or redesign for each target context (layout, interaction, content density, and navigation).
 - For recursive-learning runs: rubric-bound observations recorded against `references/learning-rubric.yaml` before any lesson is considered promotable.
 - Verification checklist covering a11y, responsiveness, and state completeness.
@@ -142,33 +140,16 @@ metadata:
    - content plan: hero, support, detail, final CTA;
    - interaction thesis: 2-3 motions that materially change the feel of the page.
 3. Map the key states: default, loading, empty, error, permission, and edge cases that matter.
-4. For visually led or redesign-heavy work, run a quick anti-generic pass before polishing:
-   - does the first viewport have one dominant visual or hierarchy anchor;
-   - is the brand or product unmistakable in the first screen when it should be;
-   - are cards actually needed where they appear;
-   - does motion reinforce hierarchy instead of compensating for weak structure.
-5. Run a UX copy and tone pass on the primary flow:
-   - are labels and CTAs specific;
-   - do empty, loading, success, and error states explain what happens next;
-   - does the tone match the audience and decision stakes.
-6. If the task is layout/spacing-focused, run `references/layout-rhythm-audit.md` to classify:
-   - spacing consistency,
-   - hierarchy clarity (squint test),
-   - composition rhythm and variety,
-   - density-to-content fit.
-7. If the task is adaptation-focused, run the cross-context pass in `references/cross-context-adaptation.md`:
+4. If the task is adaptation-focused, run the cross-context pass in `references/cross-context-adaptation.md`:
    - capture source assumptions,
    - map target constraints,
    - decide what to keep, adapt, or redesign.
-8. Tune visual intensity deliberately:
-   - if bland, strengthen one anchor or signature move;
-   - if loud, quiet secondary elements before muting the whole page.
-9. Anchor measurements to tokens instead of ad hoc values.
-10. Define focus order, keyboard behavior, labels, contrast, and reduced-motion handling explicitly.
-11. Align implementation guidance to the host stack: React 19 patterns, Next.js 16 where relevant, Tailwind v4 utilities/tokens, and Tauri/App SDK constraints when present.
-12. For redesign requests, run the anti-generic audit pass in `references/redesign-audit-lens.md` before proposing visual polish.
-13. Reuse bundled `references/`, `scripts/`, and `assets/FEATURE_DESIGN.template.md` when producing handoff structure or audit output.
-14. Verify the proposed UI is implementable, accessible, and stable before calling it done.
+5. Anchor measurements to tokens instead of ad hoc values.
+6. Define focus order, keyboard behavior, labels, contrast, and reduced-motion handling explicitly.
+7. Align implementation guidance to the host stack: React 19 patterns, Next.js 16 where relevant, Tailwind v4 utilities/tokens, and Tauri/App SDK constraints when present.
+8. For redesign requests, run the anti-generic audit pass in `references/redesign-audit-lens.md` before proposing visual polish.
+9. Reuse bundled `references/`, `scripts/`, and `assets/FEATURE_DESIGN.template.md` when producing handoff structure or audit output.
+10. Verify the proposed UI is implementable, accessible, and stable before calling it done.
 
 ## Cross-Context Adaptation
 - Adaptation is not simple scaling. Treat it as a context shift in device constraints, interaction model, and user intent.

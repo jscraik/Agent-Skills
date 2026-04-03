@@ -330,6 +330,7 @@ preflight_local_memory_gold() {
 	local observe_a_json
 	local observe_b_json
 	local observe_a_output
+	local observe_b_output
 	if ! observe_a_output="$(local-memory observe "${content_a}" --domain 'coding-harness' --tags 'preflight,local-memory' --source 'codex_preflight' --json 2>&1)"; then
 		if is_local_memory_pidfile_sandbox_block "${observe_a_output}"; then
 			log_warn 'local-memory CLI smoke write skipped: sandbox blocked PID file write while daemon health was already verified'
@@ -337,14 +338,20 @@ preflight_local_memory_gold() {
 			return 0
 		fi
 		log_err 'observe A failed'
+		if [[ -n "${observe_a_output}" ]]; then
+			echo "${observe_a_output}" >&2
+		fi
 		return 1
 	fi
 	observe_a_json="$(extract_last_json_line "${observe_a_output}")"
-	if ! observe_b_json="$(local-memory observe "${content_b}" --domain 'coding-harness' --tags 'preflight,local-memory' --source 'codex_preflight' --json 2>/dev/null)"; then
+	if ! observe_b_output="$(local-memory observe "${content_b}" --domain 'coding-harness' --tags 'preflight,local-memory' --source 'codex_preflight' --json 2>&1)"; then
 		log_err 'observe B failed'
+		if [[ -n "${observe_b_output}" ]]; then
+			echo "${observe_b_output}" >&2
+		fi
 		return 1
 	fi
-	observe_b_json="$(extract_last_json_line "${observe_b_json}")"
+	observe_b_json="$(extract_last_json_line "${observe_b_output}")"
 
 	local id_a
 	local id_b

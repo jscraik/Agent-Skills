@@ -61,12 +61,18 @@ apple-app-creator:
   recon-workbench: Audit the app binary and entitlements after creation
   simple-tasks: Track app build and release tasks locally
   xcode-makefiles: Add reproducible CLI builds after scaffolding the app
+apple-app-builder: {}
 architecture-interview:
   brainstorming: Explore options before the architecture interview
   diagram-cli: Generate architecture diagrams from ADR decisions
   product-spec: Produce a detailed spec after the architecture is decided
   security-threat-model: Run a threat model alongside architecture decisions
   writing-plans: Convert ADR output into an implementation plan
+arscontexta:
+  codex-plugin-builder: Bundle this skill into plugin workflows and run plugin-level
+    validations
+  skill-builder: Improve, validate, and package the Ars Contexta skill after operational
+    updates
 atlas:
   agent-browser: Complement Atlas AppleScript control with browser automation
   notebooklm: Cross-reference Atlas conversations with NotebookLM notebooks
@@ -114,9 +120,11 @@ brainstorming:
     specs
 ce-brainstorm:
   brainstorming: Use when the user needs a broader, non-compound brainstorming workflow
+  ce-plan: Hand off low-risk, well-resolved brainstorm outputs into implementation
+    planning
+  ce-spec: Hand off medium or high-risk brainstorm outputs into a durable spec
   compound-engineering-router: Use to choose the right compound-engineering stage
     before or after brainstorming
-  product-spec: Hand off medium or high-risk brainstorm outputs into a spec
 ce-compound:
   ce-brainstorm: Use when the lifecycle needs WHAT/WHY clarity first
   ce-plan: Use when orchestration lands at implementation planning
@@ -224,17 +232,22 @@ cloudflare-deploy:
   fixing-metadata: Fix OG/meta tags on deployed pages
   verification-before-completion: Verify deployment is healthy before completing
   workers-mcp: Deploy MCP server as part of the Cloudflare stack
+coderabbit:
+  cf-crawl: Refresh or expand the local CodeRabbit docs corpus before analysis
+  circleci: Pair CodeRabbit guidance with broader CircleCI migration and policy workflows
+  context7: Cross-check third-party library docs when CodeRabbit guidance references
+    external tools
+  gh-workflow: Apply CodeRabbit guidance while executing GitHub PR lifecycle changes
 codex-agent-creator:
   agents-md: Update repo instructions to reference or govern the new agent roles
   codex-automation-architect: Design recurring automations that orchestrate the installed
     agents
-  codex-plugin-builder: Package agent roles together with hooks or skills in a plugin
   decide-build-primitive: Decide whether the capability should be an agent, skill,
     or automation first
+codex-agent-builder: {}
 codex-automation-architect:
   ce-plan: Plan the automation contract before implementing
   codex-agent-creator: Create the agent role the automation will run under
-  codex-plugin-builder: Package automations into a plugin for distribution
   decide-build-primitive: Confirm automation is the right primitive before building
   verification-before-completion: Validate automation output before declaring done
 codex-home-audit:
@@ -253,7 +266,7 @@ codex-hooks-builder:
     a plugin
   gh-workflow: Ship and review hook-pack changes through the GitHub lifecycle
 codex-plugin-builder:
-  codex-agent-creator: Add agent roles to the plugin bundle alongside skills and hooks
+  codex-agent-builder: Add agent roles to the plugin bundle alongside skills and hooks
   decide-build-primitive: Decide whether the capability belongs in a plugin at all
   skill-builder: Author or upgrade a standalone skill before packaging it into a plugin
   skill-installer: Install a finished skill directly when full plugin packaging is
@@ -307,11 +320,10 @@ deep-interview:
   product-spec: Hand the completed insights to product-spec for structured PRD/UX/arch
     artifacts
 design-system:
-  baseline-ui: Validate UI components against design-system tokens
-  figma: Extract Figma tokens as source of truth for the design system
-  fixing-accessibility: Combine token changes with accessibility fixes
-  frontend-ui-design: Implement components using design-system token layer
-  shadcn-ui: Adapt shadcn/ui to use design-system token aliases
+  baseline-ui: Run a UI guardrail pass after token or theme updates
+  frontend-ui-design: Implement component and screen changes after design-system decisions
+    are set
+  shadcn-ui: Apply design-system tokens while integrating shadcn components
 diagram-cli:
   agents-md: Add diagram artifacts to AGENTS.md context packs
   beautiful-mermaid: Convert .mmd outputs to publication-quality SVG/PNG
@@ -417,10 +429,11 @@ imagegen:
   visual-explainer: Embed generated images as hero banners in HTML explainers
   youtube-titles-thumbnails: Generate thumbnail concept images for YouTube packaging
 insight-report:
-  codex-home-audit: Use report findings to prioritise home directory fixes
-  codex-sessions-skill-scan: Scan sessions first to gather data for the report
-  evals-router: Route skill evals based on insight-report failure signals
-  visual-explainer: Present report findings as an interactive HTML page
+  codex-automation-architect: Convert repeated recommendations into scheduled automations
+  codex-home-audit: Follow up on report-detected local environment drift
+  codex-sessions-skill-scan: Build a session quality baseline before generating the
+    report
+  visual-explainer: Convert report outcomes into an executive visual explainer
 interview-me:
   architecture-interview: Structure a concrete architecture choice into a decision
     record
@@ -469,12 +482,11 @@ og-image-creator:
   fixing-metadata: Wire generated OG images into correct meta tags
   imagegen: Use imagegen for non-route-specific image generation
 openai-docs:
-  product/docs/context7: Retrieve current third-party library docs when an OpenAI
-    integration depends on external frameworks
-  product/domain/chatgpt-apps: Move from docs lookup into Apps SDK implementation
-    work
-  utilities/coding-harness: Apply current OpenAI guidance while wiring repository
-    automation or agent flows
+  chatgpt-apps: Implement or troubleshoot Apps SDK projects after the relevant OpenAI
+    docs are retrieved
+  coding-harness: Check current harness guidance when OpenAI tooling questions are
+    part of a repo bootstrap or upgrade workflow
+  context7: Retrieve current third-party library docs when the question is not OpenAI-specific
 orchestrating-subagents:
   ce-work: Execute a plan once the orchestration decision is made and the task is
     implementation-ready
@@ -490,12 +502,11 @@ playwright-interactive:
   fixing-accessibility: Test keyboard navigation and focus via Playwright
   ui-visual-regression: Capture Playwright screenshots for regression baselines
 plugin-creator:
-  github/gh-workflow: Prepare, push, and update GitHub state after plugin packaging
-    changes are ready
-  skills-system/skill-creator: Create or update skills that will live inside the plugin's
-    `skills/` directory
-  utilities/codex-plugin-builder: Evolve a basic local plugin into a fuller packaged
-    plugin workflow
+  codex-agent-builder: Add agent roles to a plugin after the base manifest and folders
+    are in place
+  codex-plugin-builder: Build or validate a fuller Codex plugin package beyond the
+    starter scaffold
+  skill-builder: Improve bundled skill content after the plugin skeleton exists
 process-watch:
   codex-home-audit: Check process health during a Codex home audit
   fix-mise: Diagnose mise shim CPU/memory issues via process-watch
@@ -532,6 +543,8 @@ rclone:
     storage
 react-ui-patterns:
   baseline-ui: Validate React component patterns against baseline rules
+  design-system: Keep typography, spacing, and icon guidance aligned to canonical
+    token governance
   frontend-ui-design: Apply React patterns to components being designed
   shadcn-ui: Source Radix/shadcn primitives for React pattern implementations
   stitch-react-components: Use patterns when converting Stitch screens to React
@@ -550,6 +563,8 @@ release:
   gh-workflow: Manage the PR and merge lifecycle before cutting a release
   verification-before-completion: Validate all checks pass before tagging
 remotion:
+  design-system: Keep caption, overlay, and UI-adjacent typography and token usage
+    aligned with system governance
   imagegen: Generate still images to use as Remotion assets
   slides: Convert slide decks into Remotion video compositions
   sora: Compare Remotion (code-driven) with Sora (AI-driven) video
@@ -619,19 +634,17 @@ skill-builder:
   skill-installer: Install or repair runtime visibility when the skill package is
     already built and the problem is projection or distribution
 skill-creator:
-  product/docs/docs-expert: Tighten supporting references or skill-adjacent documentation
-    after scaffold creation
-  skills-system/plugin-creator: Package newly created skills inside a plugin when
-    the user wants distributable packaging
-  utilities/skill-builder: Apply the canonical skill-building workflow, evals, and
-    governance checks
+  plugin-creator: Scaffold a plugin wrapper when the new skill should ship inside
+    a Codex plugin
+  skill-builder: Improve, quality-gate, and package a skill after the first draft
+    exists
+  skill-installer: Distribute the finished skill into a local Codex skills directory
+    or another repo source
 skill-installer:
-  skills-system/skill-creator: Create or refine a skill before installing it into
-    a Codex home
-  utilities/1password: Supply authenticated GitHub access when private repo installation
-    needs secrets or token flow help
-  utilities/skill-builder: Audit or harden a skill package before distributing it
-    for installation
+  plugin-creator: Scaffold plugin packaging when the deliverable should ship as a
+    plugin instead of a bare skill
+  skill-builder: Run quality gates and packaging checks on a skill before installation
+  skill-creator: Author or revise a skill before attempting to distribute it
 slides:
   beautiful-mermaid: Embed high-quality Mermaid diagrams in slide decks
   imagegen: Generate illustrative images for slide backgrounds
@@ -660,6 +673,8 @@ stitch-react-components:
   react-ui-patterns: Apply React composition patterns to converted components
   stitch-loop: Generate the Stitch screens that this skill converts
 stitch-remotion:
+  design-system: Keep overlay and caption styling aligned with canonical token and
+    typography governance
   remotion: For custom Remotion compositions beyond Stitch walkthroughs
   slides: Compare slide deck with Remotion video for the same content
   sora: Use Sora for AI-generated video alternative to Remotion
@@ -718,6 +733,8 @@ ui-ux-creative-coding:
 ui-visual-regression:
   agent-browser: Use agent-browser snapshots as regression inputs
   baseline-ui: Run baseline UI checks alongside visual regression
+  design-system: Resolve confirmed token, typography, spacing, or icon drift at the
+    system layer
   playwright-interactive: Capture screenshots for regression via Playwright
   stitch-react-components: Catch visual regressions after Stitch-to-React conversion
 using-git-worktrees:

@@ -77,14 +77,21 @@ for md in sorted(ROOT.rglob("SKILL.md")):
 
 # ── 2. Load adjacency.yaml edges ──────────────────────────────────────────────
 yaml_edges: set[tuple] = set()
+unknown_targets: set[tuple] = set()
 if ADJ_YAML.exists() and HAS_YAML:
     adj = yaml.safe_load(ADJ_YAML.read_text()) or {}
+    defined_nodes = {
+        skill for skill, refs in adj.items()
+        if isinstance(refs, dict)
+    }
     for skill, refs in adj.items():
         if not isinstance(refs, dict):
             continue
         for target in refs:
             if target not in TOPIC_MAPS:
                 yaml_edges.add((skill, target))
+                if target not in defined_nodes:
+                    unknown_targets.add((skill, target))
 elif not HAS_YAML:
     print("WARNING: pyyaml not installed — skipping adjacency.yaml validation", file=sys.stderr)
     sys.exit(0)
@@ -113,6 +120,14 @@ if in_yaml_not_skill:
         print(f"  STALE    {frm} → {to}")
     if len(in_yaml_not_skill) > 20:
         print(f"  … and {len(in_yaml_not_skill)-20} more")
+
+if unknown_targets:
+    print(f"\nUnknown adjacency targets ({len(unknown_targets)}):", file=sys.stderr)
+    for frm, to in sorted(unknown_targets)[:20]:
+        print(f"  UNKNOWN  {frm} → {to}", file=sys.stderr)
+    if len(unknown_targets) > 20:
+        print(f"  … and {len(unknown_targets)-20} more", file=sys.stderr)
+    sys.exit(1)
 
 if total_drift == 0:
     print("  ✓ adjacency.yaml and SKILL.md See Also are in sync")
