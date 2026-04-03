@@ -6,7 +6,7 @@ cases:
     category: happy
     should_trigger: true
     prepend_skill: false
-    prompt: "Can you help me create a minimal .coderabbit.yaml for a TypeScript repository with sequence diagrams enabled?"
+    prompt: "Can you help me create a minimal review-bot YAML config for a TypeScript repository with sequence diagrams enabled?"
     acceptance:
       - type: skill_selected
         expected_skill: "coderabbit"
