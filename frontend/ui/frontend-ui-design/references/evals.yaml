@@ -35,9 +35,9 @@ cases:
       - type: contains
         value: "## Inputs"
   - name: adaptation-path
-    category: edge
+    category: happy
     should_trigger: true
-    prompt: "Please adapt this desktop dashboard for mobile and tablet while keeping the same core tasks."
+    prompt: "Adapt this desktop dashboard for mobile and tablet while keeping the same core tasks."
     acceptance:
       - type: contains
         value: "## Outputs"

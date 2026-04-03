@@ -1,6 +1,6 @@
 ---
 name: coderabbit
-description: Use the local CodeRabbit crawl corpus to answer CodeRabbit setup, configuration, CLI, and workflow questions with source-grounded guidance. Use when the user needs CodeRabbit-specific help from repository-local docs, not generic CI or Git hosting setup.
+description: Answer CodeRabbit setup, configuration, knowledge-base, review-command, tool, and rollout questions by retrieving evidence from the local crawl corpus. Use when a user needs repository-local CodeRabbit documentation to decide how to configure, operate, or troubleshoot CodeRabbit, not when they need generic CI authoring or live SaaS state changes.
 metadata:
   skill-type: library_api_reference
 ---
@@ -9,6 +9,7 @@ metadata:
 
 ## Table of Contents
 - [Standards snapshot](#standards-snapshot)
+- [Philosophy](#philosophy)
 - [When to use](#when-to-use)
 - [When not to use](#when-not-to-use)
 - [Required inputs](#required-inputs)
@@ -34,10 +35,13 @@ metadata:
 - Distinguish local-corpus answers from live/vendor-state assumptions.
 - Escalate missing-doc or stale-doc risk explicitly instead of guessing.
 
-Approach and mindset:
+## Philosophy
 - Use a setup-first framework: baseline configuration, safety checks, then optional advanced features.
 - Explain why each recommendation exists and what tradeoff it introduces.
-- Adapt depth to user context: quickstart for first-time setup, deeper rollout guidance for mature teams.
+- Adapt depth to user context: quickstart for first-time setup, cross-family evidence for mature teams and multi-surface rollout guidance.
+- Keep scope tight: start with the smallest package boundary that answers the question before widening to different or more customized surfaces.
+- Help the user choose the smallest safe rollout step that still moves their CodeRabbit setup forward.
+- Unlock a capable next step so the user can explore, customize, and extend the rollout without guessing.
 
 ## When to use
 - User asks how to configure CodeRabbit reviews, tools, checks, CLI, or pull request commands.
@@ -146,6 +150,7 @@ Fast path for low-latency responses:
 - Verify `references/contract.yaml` reflects triggers, inputs, and outputs in this file.
 - Verify `references/evals.yaml` includes trigger, negative, and pressure cases.
 - Verify this skill does not claim live account introspection by default.
+- Validation is fail-fast: stop at the first blocking gate, fix that issue, then rerun the smallest relevant check before broader validation.
 
 ## Constraints
 - DO NOT fabricate unsupported CodeRabbit features.
@@ -168,10 +173,12 @@ Fast path for low-latency responses:
 - Warning: forcing a generic rollout when a context-specific or phased approach is safer.
 
 ## Examples
-- "Give me a minimal `.coderabbit.yaml` for TypeScript repos with explicit sequence diagrams enabled."
-- "What are the PR comment commands like pause, review, and update summary?"
-- "Summarize the difference between Autofix and Simplify with rollout caveats."
-- "Which docs describe CircleCI integration and how failure analysis is surfaced?"
+- User says: "I just installed the review bot. What should I configure first before I touch the YAML?"
+- User says: "Give me a minimal `.coderabbit.yaml` for a TypeScript repo with explicit sequence diagrams enabled, then validate what I actually need."
+- User says: "What are the PR comment commands like pause, review, update summary, and configuration?"
+- User says: "Walk me through GitHub setup, YAML config, CircleCI failure analysis, and linked issue planning without skipping the relevant docs."
+- User says: "Inspect the docs and explain why path instructions might beat learnings in one repository folder."
+- User says: "Summarize the difference between Autofix and Simplify with rollout caveats."
 
 ## References
 - `references/contract.yaml`
