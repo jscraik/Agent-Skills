@@ -229,13 +229,13 @@ Security / safety baseline:
 - Offline by default. If networking is required, gate behind --allow-network and document allowed domains.
 - Never echo secrets (do not print os.environ / token values).
 - Destructive actions require explicit confirmation. Prefer --dry-run by default.
-
-Replace the TODOs with your actual implementation.
 """
 
 from __future__ import annotations
 
 import argparse
+import json
+from pathlib import Path
 
 
 def require_confirm(*, confirm: bool, dry_run: bool, message: str) -> None:
@@ -248,22 +248,44 @@ def require_confirm(*, confirm: bool, dry_run: bool, message: str) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Skill helper entrypoint for %(skill_name)s")
+    parser.add_argument("--input", default="", help="Optional input path or identifier")
+    parser.add_argument(
+        "--output",
+        default="./artifacts/%(skill_name)s-run-summary.json",
+        help="Output path for the execution summary",
+    )
     parser.add_argument("--dry-run", action="store_true", help="Preview intended actions without making changes")
     parser.add_argument("--confirm", action="store_true", help="Required to run destructive actions (delete/overwrite/remote writes)")
     parser.add_argument("--allow-network", action="store_true", help="Opt-in to network operations (default: offline)")
     args = parser.parse_args()
 
-    # TODO: implement the real behavior for this skill.
-    if not args.allow_network:
-        # Keep network code paths disabled unless explicitly enabled.
-        pass
+    if not args.allow_network and args.input.startswith(("http://", "https://")):
+        raise SystemExit(
+            "Refusing network-style input without --allow-network. "
+            "Use a local input path or re-run with explicit opt-in."
+        )
 
     # Example destructive action:
     # require_confirm(confirm=args.confirm, dry_run=args.dry_run, message="Would delete ./build and recreate it")
     # if not args.dry_run:
     #     ...
 
-    print("TODO: implement skill script")
+    payload = {
+        "skill": "%(skill_name)s",
+        "input": args.input or None,
+        "network_enabled": bool(args.allow_network),
+        "mode": "dry-run" if args.dry_run else "execute",
+        "status": "ok",
+    }
+
+    if args.dry_run:
+        print(json.dumps(payload, indent=2))
+        return
+
+    output_path = Path(args.output).expanduser()
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(json.dumps(payload, indent=2) + "\\n", encoding="utf-8")
+    print(f"Wrote run summary: {output_path}")
 
 
 if __name__ == "__main__":
@@ -308,19 +330,25 @@ AGENTS_OPENAI_YAML_TEMPLATE = """# OpenAI Agents SDK Configuration
 WORKFLOW_PLACEHOLDER = """# Workflow: {title}
 
 ## Goal
-TODO
+Deliver a deterministic outcome for this route with explicit validation evidence.
 
 ## Steps
-1) TODO
+1) Confirm request scope, constraints, and expected deliverables.
+2) Run the smallest safe probe to validate assumptions.
+3) Execute the workflow with deterministic commands.
+4) Record outputs and validation evidence.
 
 ## Validation
-- TODO
+- Run the narrowest checks that prove correctness.
+- Stop at the first failing gate and report root cause.
 
 ## Outputs
-- TODO (write to ./artifacts/ or /mnt/data/)
+- Write artifacts to `./artifacts/` (local) or `/mnt/data/` (hosted).
+- Include a concise execution summary with changed files and commands.
 
 ## Notes / anti-patterns
-- TODO
+- Avoid broad edits before validating the smallest path.
+- Do not proceed on ambiguous scope without one targeted clarification.
 """
 
 
@@ -384,7 +412,8 @@ def create_resource_dirs(*, skill_dir: Path, skill_title: str, resources: List[s
         if not plan_md.exists():
             plan_md.write_text(
                 f"# Plan for {skill_title}\n\n"
-                "TODO: Paste the output from `$create-plan` (if available) or write the plan used to build this skill.\n",
+                "Capture the concrete implementation plan used to build or update this skill.\n"
+                "Include scope, sequencing, validation gates, and rollback notes.\n",
                 encoding="utf-8",
             )
 

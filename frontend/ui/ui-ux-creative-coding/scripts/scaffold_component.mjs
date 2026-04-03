@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Scaffold a React UI component + Storybook story + spec stub.
+ * Scaffold a React UI component + Storybook story + implementation spec.
  *
  * Usage:
  *   node scripts/scaffold_component.mjs Button src/components/ui
@@ -109,17 +109,50 @@ export const Danger: Story = { args: { intent: "danger" } };
 export const Compact: Story = { args: { density: "compact" } };
 `;
 
-const spec = `# ${name} — Component Spec (stub)
+const spec = `# ${name} — Component Spec
 
-Copy/paste the template from:
-- assets/component-spec.md
+## Purpose
+- Provide a reusable \`${name}\` surface with consistent intent and density variants.
+- Keep behavior predictable and styling token-driven.
 
-Then fill in:
-- purpose + non-goals
-- anatomy/slots
-- states + keyboard/focus
-- tokens + motion
-- Storybook coverage
+## Non-goals
+- Do not encode business logic directly in this component.
+- Do not hardcode brand colors outside the token system.
+
+## API contract
+- Component: \`${name}\`
+- Props:
+  - \`intent\`: \`default | brand | danger\` (default: \`default\`)
+  - \`density\`: \`comfortable | compact\` (default: \`comfortable\`)
+  - \`className\` and other \`HTMLAttributes<HTMLDivElement>\`
+
+## Anatomy
+- Root container uses semantic surface/foreground/border tokens.
+- Intent variants map to border tokens.
+- Density variants map to spacing tokens.
+
+## Interaction and accessibility
+- Preserves native semantics from the chosen root element.
+- Supports keyboard interaction through parent-composed handlers.
+- Must keep visible focus styles when made interactive by composition.
+
+## Visual tokens
+- Surface: \`--semantic-surface\`
+- Foreground: \`--semantic-fg\`
+- Border: \`--semantic-border\`
+- Intent accents: \`--semantic-brand\`, \`--semantic-danger\`
+
+## Storybook coverage
+- \`Default\`: baseline rendering
+- \`Brand\`: intent token mapping
+- \`Danger\`: destructive-state styling
+- \`Compact\`: density spacing contract
+
+## Validation checklist
+- [ ] Type-check passes for exported props.
+- [ ] Stories render without runtime warnings.
+- [ ] Token variables resolve in local theme.
+- [ ] Intent and density attributes generate expected selectors.
 `;
 
 fs.writeFileSync(componentPath, component, "utf8");

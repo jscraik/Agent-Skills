@@ -1,6 +1,6 @@
 ---
 name: plugin-creator
-description: Create and scaffold plugin directories for Codex with a required `.codex-plugin/plugin.json`, optional plugin folders/files, and baseline placeholders you can edit before publishing or testing. Use when Codex needs to create a new local plugin, add optional plugin structure, or generate or update repo-root `.agents/plugins/marketplace.json` entries for plugin ordering and availability metadata.
+description: Create and scaffold plugin directories for Codex with a required `.codex-plugin/plugin.json`, optional plugin folders/files, and complete baseline metadata ready for immediate validation. Use when Codex needs to create a new local plugin, add optional plugin structure, or generate or update repo-root `.agents/plugins/marketplace.json` entries for plugin ordering and availability metadata.
 ---
 
 # Plugin Creator
@@ -17,7 +17,7 @@ description: Create and scaffold plugin directories for Codex with a required `.
 python3 .agents/skills/plugin-creator/scripts/create_basic_plugin.py <plugin-name>
 ```
 
-2. Open `<plugin-path>/.codex-plugin/plugin.json` and replace `[TODO: ...]` placeholders.
+2. Open `<plugin-path>/.codex-plugin/plugin.json` and tailor the generated metadata for your plugin owner, policies, and integrations.
 
 3. Generate or update the repo marketplace entry when the plugin should appear in Codex UI ordering:
 
@@ -49,9 +49,9 @@ python3 .agents/skills/plugin-creator/scripts/create_basic_plugin.py my-plugin -
 - If the user has not made the plugin location explicit, ask whether they want a repo-local plugin or a home-local plugin before generating marketplace entries.
 - Creates plugin root at `/<parent-plugin-directory>/<plugin-name>/`.
 - Always creates `/<parent-plugin-directory>/<plugin-name>/.codex-plugin/plugin.json`.
-- Fills the manifest with the full schema shape, placeholder values, and the complete `interface` section.
+- Fills the manifest with the full schema shape, concrete defaults, and the complete `interface` section.
 - Creates or updates `<repo-root>/.agents/plugins/marketplace.json` when `--with-marketplace` is set.
-  - If the marketplace file does not exist yet, seed top-level `name` plus `interface.displayName` placeholders before adding the first plugin entry.
+  - If the marketplace file does not exist yet, seed top-level `name` plus `interface.displayName` defaults before adding the first plugin entry.
 - `<plugin-name>` is normalized using skill-creator naming rules:
   - `My Plugin` → `my-plugin`
   - `My--Plugin` → `my-plugin`
@@ -113,9 +113,9 @@ python3 .agents/skills/plugin-creator/scripts/create_basic_plugin.py my-plugin -
 
 ```json
 {
-  "name": "[TODO: marketplace-name]",
+  "name": "local-marketplace",
   "interface": {
-    "displayName": "[TODO: Marketplace Display Name]"
+    "displayName": "Local Plugins"
   },
   "plugins": [
     {
@@ -138,7 +138,7 @@ python3 .agents/skills/plugin-creator/scripts/create_basic_plugin.py my-plugin -
 
 - Outer folder name and `plugin.json` `"name"` are always the same normalized plugin name.
 - Do not remove required structure; keep `.codex-plugin/plugin.json` present.
-- Keep manifest values as placeholders until a human or follow-up step explicitly fills them.
+- Keep manifest values explicit and valid so scaffold output passes immediate sanity checks.
 - If creating files inside an existing plugin path, use `--force` only when overwrite is intentional.
 - Preserve any existing marketplace `interface.displayName`.
 - When generating marketplace entries, always write `policy.installation`, `policy.authentication`, and `category` even if their values are defaults.

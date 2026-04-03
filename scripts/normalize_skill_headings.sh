@@ -7,7 +7,7 @@ Usage:
   scripts/normalize_skill_headings.sh [--dry-run]
 
 Normalizes SKILL.md section headings to progressive-disclosure canonical names
-and inserts missing required headings with safe placeholders.
+and inserts missing required headings with actionable starter guidance.
 USAGE
 }
 
@@ -103,11 +103,11 @@ while IFS= read -r file; do
   fi
 
   if [[ "$dry_run" -eq 0 ]]; then
-    append_section_if_missing "$file" "When to use" "- TODO: define trigger conditions and boundaries."
-    append_section_if_missing "$file" "Required inputs" "- TODO: define minimum inputs required to run this skill safely."
-    append_section_if_missing "$file" "Deliverables" "- TODO: define concrete outputs this skill must produce."
-    append_section_if_missing "$file" "Failure mode" "- TODO: define fail-fast behavior and nearest safe fallback."
-    append_section_if_missing "$file" "Gotchas" "- Symptom: TODO. Cause: TODO. Do instead: TODO. Check: TODO."
+    append_section_if_missing "$file" "When to use" "- Use when the request clearly matches this skill's owned workflow and expected outputs."
+    append_section_if_missing "$file" "Required inputs" "- Confirm goal, constraints, and required paths or URLs before execution."
+    append_section_if_missing "$file" "Deliverables" "- Produce concrete outputs with exact paths, commands run, and verification evidence."
+    append_section_if_missing "$file" "Failure mode" "- Stop at the first blocker, report root cause, and provide the safest next command."
+    append_section_if_missing "$file" "Gotchas" "- Symptom: ambiguous scope. Cause: missing constraints. Do instead: ask one routing question. Check: plan and output contract are explicit."
   fi
 done < <(list_skill_files)
 

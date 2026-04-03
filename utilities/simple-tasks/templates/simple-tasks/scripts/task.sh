@@ -389,9 +389,9 @@ planning_reasons_for_task() {
     note_lc="$(printf '%s' "$note" | tr '[:upper:]' '[:lower:]')"
     if printf '%s' "$note_lc" | grep -Eq '(^|[^a-z])(tbd|todo|fixme|later|pending|unknown|needs plan|to discuss)([^a-z]|$)|\?\?\?'; then
       if [[ -n "$reasons" ]]; then
-        reasons="$reasons; placeholder Note"
+        reasons="$reasons; non-actionable Note"
       else
-        reasons="placeholder Note"
+        reasons="non-actionable Note"
       fi
     fi
   fi

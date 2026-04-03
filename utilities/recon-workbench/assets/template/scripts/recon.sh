@@ -8,7 +8,7 @@ Usage:
   scripts/recon.sh summarize --target-id <id> --run-dir <path> --schema <schema.json> --out <findings.json> [--no-validate]
 
 Notes:
-- Minimal runner stub; replace probe execution with your pipeline.
+- Runner scaffold; adapt probe execution for your target pipeline.
 - Uses codex exec with --output-schema and -o for deterministic outputs.
 - Validation requires scripts/validate_schema.py (jsonschema).
 USAGE

@@ -27,7 +27,7 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - [Utilities — Codex Plugin Builder — Fixtures — Arscontexta Codex — Skills](#utilities-codex-plugin-builder-fixtures-arscontexta-codex-skills)
 
 ## Summary
-- `total_skills`: 119
+- `total_skills`: 120
 - `catalog_source`: repository skill scan
 
 ## Catalog
@@ -175,6 +175,7 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - `bootstrap` — Bootstrap a local development environment from a GitHub repository URL. Use when the user asks to clone a repo, install toolchains/dependencies, and validate a working dev setup automatically.
 - `cf-crawl` — Crawl sites through Cloudflare Browser Rendering's `/crawl` API and export markdown or JSON results. Use when the user wants a Cloudflare-managed crawl job, not generic browser automation or scraping.
 - `circleci` — Plan, migrate, debug, or harden CircleCI pipelines and related delivery workflows. Use when the user wants CircleCI-specific config, testing, deployment, secrets, or policy help, not generic CI advice.
+- `coderabbit` — Use the local CodeRabbit crawl corpus to answer CodeRabbit setup, configuration, CLI, and workflow questions with source-grounded guidance. Use when the user needs CodeRabbit-specific help from repository-local docs, not generic CI or Git hosting setup.
 - `codex-agent-creator` — Create, install, and validate Codex custom subagents as standalone `.codex/agents/*.toml` files with safe minimal-change updates. Use when the user wants custom agent definitions created or upgraded, not orchestration of running agent threads.
 - `codex-automation-architect` — Design, review, or merge Codex app automations using current OpenAI/Codex guidance and validation. Use when the user wants recurring Codex automation workflows built, audited, or consolidated.
 - `codex-home-audit` — Audit a Codex home directory for control-plane drift, risky state, and cleanup opportunities across config, agents, hooks, skills, plugins, and telemetry. Use when the user wants a dated Codex home health review.

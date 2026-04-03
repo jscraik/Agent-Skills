@@ -233,7 +233,7 @@ def normalize_existing_evals(obj: Dict[str, Any], skill_name: str) -> Dict[str, 
             }
         )
 
-    # Add deterministic stub on first case if missing
+    # Add deterministic baseline on first case if missing
     if cases and isinstance(cases[0], dict) and "deterministic_checks" not in cases[0]:
         cases[0]["deterministic_checks"] = {
             "required_event_types": ["turn.started"],
