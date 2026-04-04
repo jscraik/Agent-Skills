@@ -178,9 +178,9 @@ else
 fi
 
 # Remove meta/internal skills from the flat runtime surface so they do not
-# appear as user-selectable skills in Codex.
+# appear as user-selectable skills in Codex. Lifecycle family skills such as
+# `skill-creator` and `skill-installer` are intentionally visible again.
 hidden_flat_skills=(
-  "skill-creator"
   "skillgrade-graders"
   "skillgrade-setup"
 )
@@ -209,6 +209,7 @@ skill_files_cmd() {
     "./ops"
     "./personas"
     "./product"
+    "./skills-system"
     "./utilities"
   )
 

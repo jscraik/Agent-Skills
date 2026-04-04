@@ -23,11 +23,12 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - [Product — Security](#product-security)
 - [Product — Specs](#product-specs)
 - [Product — Strategy](#product-strategy)
+- [Skills System](#skills-system)
 - [Utilities](#utilities)
 - [Utilities — Codex Plugin Builder — Fixtures — Arscontexta Codex — Skills](#utilities-codex-plugin-builder-fixtures-arscontexta-codex-skills)
 
 ## Summary
-- `total_skills`: 120
+- `total_skills`: 124
 - `catalog_source`: repository skill scan
 
 ## Catalog
@@ -163,6 +164,13 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - `brainstorming` — Clarify ambiguous product or implementation directions by comparing a few viable approaches and recommending one. Use when the user wants general brainstorming before planning or building, not the compound-engineering stage artifact.
 - `product-design-critic` — Critique product surfaces and flows with opinionated UX judgment about hierarchy, trust, and jobs-to-be-done. Use when the user wants product-level interaction or workflow critique, not pure visual styling advice.
 - `project-improver` — Analyze an existing project and propose or implement high-leverage improvements with strong product judgment. Use when the user wants grounded improvement opportunities ranked and refined, not a single-feature spec.
+
+## Skills System
+
+- `openai-docs` — Use when the user asks how to build with OpenAI products or APIs and needs up-to-date official documentation with citations, help choosing the latest model for a use case, or explicit GPT-5.4 upgrade and prompt-upgrade guidance; prioritize OpenAI docs MCP tools, use bundled references only as helper context, and restrict any fallback browsing to official OpenAI domains.
+- `plugin-creator` — Create and scaffold plugin directories for Codex with a required `.codex-plugin/plugin.json`, optional plugin folders/files, and complete baseline metadata ready for immediate validation. Use when Codex needs to create a new local plugin, add optional plugin structure, or generate or update repo-root `.agents/plugins/marketplace.json` entries for plugin ordering and availability metadata.
+- `skill-creator` — Create a first-draft skill scaffold
+- `skill-installer` — Install contract-valid skills from curated or repo sources
 
 ## Utilities
 
