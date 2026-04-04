@@ -701,6 +701,21 @@ def detect_skill_selected(
 
 
 def extract_rubric_metrics(parsed_json: Any) -> Optional[Dict[str, Any]]:
+    """
+    Extracts rubric-style metrics from a parsed JSON object.
+    
+    When the input is a mapping containing any of the keys "overall_pass", "score", or "checks",
+    this returns a dictionary with the extracted metrics. The returned mapping may include:
+    - "overall_pass": the boolean value from the input when present.
+    - "score": the numeric score coerced to a float when present.
+    - "checks_count": the number of entries in the "checks" list when present.
+    - "checks_passed": count of check entries with a boolean `"pass": true`.
+    - "checks_failed": count of check entries with a boolean `"pass": false`.
+    
+    Returns:
+        A dict with the extracted metrics as described above, or `None` if the input is not a mapping
+        or contains none of the recognized rubric fields.
+    """
     if not isinstance(parsed_json, dict):
         return None
 
@@ -731,7 +746,16 @@ def extract_rubric_metrics(parsed_json: Any) -> Optional[Dict[str, Any]]:
 
 
 def _acceptance_skip_reason(*, exit_code: int, output_text: str) -> Optional[str]:
-    """Return a skip reason when acceptance checks would only misreport transport failure."""
+    """
+    Return a skip reason when acceptance assertions should be skipped because the runner failed and produced no final output.
+    
+    Parameters:
+        exit_code (int): The runner process exit code.
+        output_text (str): The runner's final output text.
+    
+    Returns:
+        Optional[str]: A human-readable skip reason when acceptance checks should be skipped, or `None` when they should be performed.
+    """
     if exit_code == 0:
         return None
     if output_text.strip():
@@ -757,6 +781,31 @@ def run_codex_exec(
     extra_codex_args: Optional[List[str]] = None,
     fallback_profile: Optional[str] = None,
 ) -> Tuple[int, str, str, List[str]]:
+    """
+    Run the Codex CLI `exec` command with the provided prompt and capture outputs and warnings.
+    
+    Parameters:
+        workspace_root (Path): Working directory for the Codex subprocess.
+        prompt (str): Prompt text supplied to Codex via stdin.
+        output_last_message_path (Path): File path where the CLI's "last message" output will be written.
+        output_schema_path (Optional[Path]): Path to an output schema file to pass via `--output-schema` (if any).
+        sandbox (str): Sandbox name to pass via `--sandbox`.
+        ask_for_approval (Optional[str]): Value for `--ask-for-approval` when supported by the Codex CLI.
+        model (Optional[str]): Model name to pass via `--model`.
+        profile (Optional[str]): Active Codex profile name to pass via `--profile`.
+        codex_home (Optional[Path]): Directory to set as `CODEX_HOME` in the subprocess environment.
+        jsonl_path (Optional[Path]): When provided, the raw CLI stdout is written to this path as JSONL.
+        codex_bin (Optional[Path]): Path to a Codex binary; its parent directory is prepended to `PATH`.
+        timeout_sec (Optional[float]): Explicit timeout in seconds for the subprocess; if omitted, resolved from profile/env.
+        timeout_profile (str): Timeout profile name used when `timeout_sec` is not provided.
+        extra_codex_args (Optional[List[str]]): Additional CLI arguments appended to the command.
+        fallback_profile (Optional[str]): If the first run fails due to unsupported reasoning.summary, retry with this profile.
+    
+    Returns:
+        Tuple[int, str, str, List[str]]: A tuple of `(exit_code, stdout, stderr, warnings)`. `exit_code` may be
+        127 when the Codex CLI is not found and 124 on timeout. `stdout` and `stderr` are the subprocess outputs;
+        `warnings` contains non-fatal diagnostics (e.g., unsupported flags, automatic fallback retries).
+    """
     warnings: List[str] = []
     env = os.environ.copy()
     if codex_home:
@@ -1045,6 +1094,19 @@ def _filter_cases(
     case_filters: Sequence[str],
     categories: Sequence[str],
 ) -> List[EvalCase]:
+    """
+    Filter eval cases by case id/name substring and by category.
+    
+    Parameters:
+        case_filters (Sequence[str]): Substring terms (case-insensitive) to match against each case's `id` or `name`. An empty sequence disables id/name filtering.
+        categories (Sequence[str]): Category names to include (case-insensitive). An empty sequence disables category filtering.
+    
+    Returns:
+        List[EvalCase]: The subset of `cases` that match all provided filters.
+    
+    Raises:
+        ValueError: If any provided category is not in the allowed set, or if no cases match the supplied filters.
+    """
     if not case_filters and not categories:
         return cases
 
@@ -1076,6 +1138,18 @@ def _filter_cases(
 
 
 def _codex_cli_prefix(codex_bin: Optional[Path]) -> List[str]:
+    """
+    Builds the command prefix to invoke the Codex CLI, preferring a bundled `node` executable when present.
+    
+    Parameters:
+        codex_bin (Optional[Path]): Path to a specific `codex` binary. If `None`, the system `codex` command name is used.
+    
+    Returns:
+        List[str]: Sequence of command tokens to run the CLI:
+            - `["node", "<codex_bin>"]` if a sibling `node` executable exists next to `codex_bin`,
+            - `["<codex_bin>"]` if `codex_bin` is provided without a sibling `node`,
+            - `["codex"]` if `codex_bin` is `None`.
+    """
     if codex_bin:
         node_bin = codex_bin.parent / "node"
         if node_bin.exists():
@@ -1085,15 +1159,45 @@ def _codex_cli_prefix(codex_bin: Optional[Path]) -> List[str]:
 
 
 def _codex_exec_prefix(codex_bin: Optional[Path]) -> List[str]:
+    """
+    Build the command token prefix for invoking the Codex CLI `exec` subcommand.
+    
+    Parameters:
+        codex_bin (Optional[Path]): Optional path to a specific `codex` binary to prefer; if `None` the default resolver is used.
+    
+    Returns:
+        List[str]: A list of command tokens forming the prefix (e.g. `["codex", "exec"]` or `["node", "...", "codex", "exec"]`).
+    """
     return [*_codex_cli_prefix(codex_bin), "exec"]
 
 
 def _effective_codex_home(codex_home: Optional[Path]) -> Path:
+    """
+    Resolve the effective CODEX_HOME directory to use for Codex operations.
+    
+    If `codex_home` is provided, it is used; otherwise the `CODEX_HOME` environment variable is used if set; if neither is present, defaults to `~/.codex`. The returned Path is expanded and resolved to an absolute path.
+    
+    Parameters:
+        codex_home (Optional[Path]): Optional override path for CODEX_HOME.
+    
+    Returns:
+        Path: Absolute, expanded, resolved path to the Codex home directory.
+    """
     raw = str(codex_home) if codex_home else (os.environ.get("CODEX_HOME") or str(Path.home() / ".codex"))
     return Path(raw).expanduser().resolve()
 
 
 def _codex_env(*, codex_bin: Optional[Path], codex_home: Optional[Path]) -> Dict[str, str]:
+    """
+    Builds an environment mapping configured for running the Codex CLI.
+    
+    Parameters:
+        codex_bin (Optional[Path]): Path to the Codex binary; when provided, its parent directory is prepended to the `PATH`.
+        codex_home (Optional[Path]): Desired Codex home directory; when `None` an effective home is resolved via `_effective_codex_home`.
+    
+    Returns:
+        Dict[str, str]: A copy of the current environment with `CODEX_HOME` set and `PATH` modified if `codex_bin` was provided.
+    """
     env = os.environ.copy()
     effective_home = _effective_codex_home(codex_home)
     env["CODEX_HOME"] = str(effective_home)
@@ -1103,6 +1207,15 @@ def _codex_env(*, codex_bin: Optional[Path], codex_home: Optional[Path]) -> Dict
 
 
 def _codex_auth_env_keys(env: Dict[str, str]) -> List[str]:
+    """
+    Return the Codex authentication environment variable names that are present and non-empty in the provided environment mapping.
+    
+    Parameters:
+        env (Dict[str, str]): Mapping of environment variable names to their values (typically os.environ).
+    
+    Returns:
+        List[str]: Keys from `_CODEX_AUTH_ENV_VARS` whose corresponding value in `env` is non-empty after trimming.
+    """
     return [key for key in _CODEX_AUTH_ENV_VARS if str(env.get(key) or "").strip()]
 
 
@@ -1111,6 +1224,19 @@ def _codex_login_status(
     codex_bin: Optional[Path],
     codex_home: Optional[Path],
 ) -> Tuple[int, str, str]:
+    """
+    Check the Codex CLI authentication status by running `codex login status`.
+    
+    Parameters:
+        codex_bin (Optional[Path]): Path to the Codex binary to use; if None the system PATH is used.
+        codex_home (Optional[Path]): Codex home directory to set via the `CODEX_HOME` environment variable.
+    
+    Returns:
+        Tuple[int, str, str]: A tuple of `(exit_code, stdout, stderr)`.
+            - `exit_code`: the subprocess return code; `127` if the Codex CLI was not found, `124` if the command timed out.
+            - `stdout`: the command's standard output as a string (empty string if none).
+            - `stderr`: the command's standard error as a string (contains a user-facing message when CLI is missing or timed out).
+    """
     cmd = [*_codex_cli_prefix(codex_bin), "login", "status"]
     env = _codex_env(codex_bin=codex_bin, codex_home=codex_home)
     try:
@@ -1128,6 +1254,21 @@ def _preflight_codex_live_runner(
     codex_bin: Optional[Path],
     codex_home: Optional[Path],
 ) -> Tuple[List[str], List[str]]:
+    """
+    Validate that the configured Codex home/bin provide authenticated state required for live `codex exec` runs.
+    
+    Performs checks for the existence of the effective CODEX_HOME, presence of an auth.json file or auth-related environment variables, and attempts a short `codex login status` probe. Collects any blocking error messages and non-blocking warnings but does not raise exceptions.
+    
+    Parameters:
+        workspace_root (Path): Repository/workspace root used to detect repo-local `.codex`.
+        codex_bin (Optional[Path]): Optional path to a Codex binary to use for login status probing.
+        codex_home (Optional[Path]): Optional explicit Codex home directory; if omitted an effective default is used.
+    
+    Returns:
+        Tuple[List[str], List[str]]: A pair (errors, warnings).
+            - errors: blocking issues that should prevent live Codex execution (e.g., missing home or missing authentication).
+            - warnings: non-blocking diagnostics or guidance (e.g., env-based auth present despite login status).
+    """
     errors: List[str] = []
     warnings: List[str] = []
     effective_home = _effective_codex_home(codex_home)
@@ -1194,6 +1335,15 @@ def _preflight_codex_live_runner(
 
 
 def _codex_help_text(codex_bin: Optional[Path]) -> Optional[str]:
+    """
+    Retrieve and cache the combined help text for the Codex CLI.
+    
+    Parameters:
+        codex_bin (Optional[Path]): Path to the Codex binary to query. If omitted, the system "codex" command will be used.
+    
+    Returns:
+        Optional[str]: Combined stdout and stderr produced by running the help command, or `None` if the executable is not available or the help invocation failed.
+    """
     key = str(codex_bin.resolve()) if codex_bin else "codex"
     if key in _CODEX_HELP_CACHE:
         return _CODEX_HELP_CACHE[key]
@@ -1238,6 +1388,16 @@ def _has_skip_git_repo_check(extra_codex_args: Optional[Sequence[str]]) -> bool:
 
 
 def build_arg_parser() -> argparse.ArgumentParser:
+    """
+    Builds and returns the command-line argument parser for run_skill_evals.py.
+    
+    The parser includes options for selecting cases and runners, eval suite mode and categories,
+    timeout and runtime configuration, Codex/Claude/Gemini CLI overrides and extra flags,
+    JSONL capture and reporting paths, and tier2 gating behavior.
+    
+    Returns:
+        argparse.ArgumentParser: A parser configured with the script's CLI options.
+    """
     p = argparse.ArgumentParser(
         prog="run_skill_evals.py",
         description="Run skill evals using Codex, Claude Code (Kimi/Zai), and/or Gemini CLI runners.",
@@ -1696,6 +1856,17 @@ def run_discovery_smoke(
 
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
+    """
+    Run the full skill evaluation workflow from parsed CLI arguments, execute selected runners against eval cases, and write evaluation reports.
+    
+    This function parses and validates CLI arguments (or the provided argv list), loads the skill and eval cases, selects and runs configured runners for each case (including deterministic trace evaluation when enabled), aggregates per-runner and per-case results, emits artifacts (reports, scorecard, junit, release manifest), and determines an overall pass/fail decision.
+    
+    Parameters:
+        argv (Optional[Sequence[str]]): Optional list of CLI arguments to parse instead of sys.argv[1:].
+    
+    Returns:
+        int: Exit code: `0` when required gates pass; `1` for configuration/IO/preflight errors; `2` when evaluation gates fail.
+    """
     raw_argv = list(argv) if argv is not None else sys.argv[1:]
     normalized_argv = _rewrite_dash_prefixed_codex_args(raw_argv)
     args = build_arg_parser().parse_args(normalized_argv)

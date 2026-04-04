@@ -69,6 +69,7 @@ is_local_memory_pidfile_sandbox_block() {
 	[[ "${output}" == *"failed to write PID file"* && "${output}" == *"operation not permitted"* ]]
 }
 
+# wait_for_local_memory_health polls a health endpoint until it reports success or the maximum attempts elapse, printing the successful JSON response.
 wait_for_local_memory_health() {
 	local health_url="$1"
 	local max_attempts="${2:-10}"
@@ -90,6 +91,17 @@ wait_for_local_memory_health() {
 	return 1
 }
 
+# local_memory_rest_post_json posts a JSON payload to a REST endpoint, prints the response body, and returns success on HTTP 2xx.
+# It retries up to `max_attempts` (default 4) when the response body indicates a transient Local Memory lock ("database is locked" or "SQLITE_BUSY").
+# Parameters:
+#   url - the target REST URL to POST to.
+#   payload - the JSON payload string to send.
+#   action_label - short label used in warning messages when retrying.
+#   max_attempts - optional number of attempts before giving up (defaults to 4).
+# Behavior:
+#   - On HTTP 2xx: prints the response body and returns 0.
+#   - On transient lock and attempts remain: logs a warning, waits 1s, and retries.
+#   - Otherwise: prints the response body and returns 1.
 local_memory_rest_post_json() {
 	local url="$1"
 	local payload="$2"
@@ -127,6 +139,7 @@ local_memory_rest_post_json() {
 	return 1
 }
 
+# start_local_memory_daemon_if_needed attempts to start the local-memory daemon when it appears stopped and waits for the daemon health endpoint at the provided health_url to become healthy, returning a non-zero exit status on failure.
 start_local_memory_daemon_if_needed() {
 	local health_url="$1"
 	local start_output=''
@@ -267,6 +280,7 @@ check_paths() {
 	log_ok "paths ok: ${paths_csv}"
 }
 
+# preflight_local_memory_gold performs a comprehensive local-memory preflight: verifies required binaries and config policies, ensures the daemon/REST health, executes an observe→relate→search smoke cycle (with CLI then REST fallbacks), runs malformed and duplicate request checks, inspects daemon logs, and returns non‑zero on any critical failure.
 preflight_local_memory_gold() {
 	log_section "Local Memory Preflight"
 

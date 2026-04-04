@@ -278,6 +278,18 @@ def _line_text(text: str, idx: int) -> str:
 
 
 def _should_skip_match(_code: str, line_text: str) -> bool:
+    """
+    Decides whether a detected match on a line should be ignored to reduce false positives.
+    
+    Parameters:
+        _code (str): The rule code associated with the match (e.g., "security.node_exec").
+        line_text (str): The full text of the line containing the match.
+    
+    Returns:
+        bool: `True` if the match should be skipped (when the line is empty or a comment, or when `_code` is
+        `"security.node_exec"` and the line appears to be a regex pattern table containing `re.compile(`),
+        `False` otherwise.
+    """
     stripped = line_text.strip()
     if not stripped:
         return True
@@ -328,6 +340,16 @@ def iter_code_files(skill_dir: Path, *, max_files: int, max_file_bytes: int) -> 
 
 
 def scan_source(text: str, rel_file: str) -> List[Finding]:
+    """
+    Scan file contents with configured line-level and source-level rules and return any generated findings.
+    
+    Parameters:
+        text (str): Full text of the file to scan.
+        rel_file (str): Path used in findings to identify the file (typically relative to the skill root).
+    
+    Returns:
+        List[Finding]: A list of findings produced by applying LINE_RULES (at most one finding per line-level rule) and SOURCE_RULES (at most one finding per source-level rule). Certain matches are suppressed by heuristics (e.g., subprocess usage when `shell=False` or an argv list is detected; websocket ports in {80, 443, 3000, 8080, 8443} are ignored).
+    """
     out: List[Finding] = []
 
     for rule in LINE_RULES:

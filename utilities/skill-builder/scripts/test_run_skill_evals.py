@@ -194,6 +194,14 @@ class RunSkillEvalsModeTests(unittest.TestCase):
         )
 
     def test_preflight_codex_live_runner_rejects_repo_local_home_without_auth(self) -> None:
+        """
+        Verifies that _preflight_codex_live_runner rejects a repository-local `.codex` directory when the user's default Codex home is unauthenticated.
+        
+        Asserts that no warnings are returned, exactly one error is produced, and that the error message includes:
+        - the phrase "missing authenticated Codex state",
+        - guidance that a repo-local `.codex` is suitable only for discovery/static smoke, and
+        - the filesystem path to the default home `.codex`.
+        """
         with tempfile.TemporaryDirectory() as tmpdir:
             workspace_root = Path(tmpdir)
             repo_home = workspace_root / ".codex"

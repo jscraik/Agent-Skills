@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# usage prints the help text that describes script invocation and the required and allowed top-level frontmatter keys for SKILL.md linting.
 usage() {
   cat <<'USAGE'
 Usage:
