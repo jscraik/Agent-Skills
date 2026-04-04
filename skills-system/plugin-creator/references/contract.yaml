@@ -1,0 +1,25 @@
+schema_version: "1.1"
+purpose: >
+  Define the scaffold contract for plugin-creator so plugin skeletons and optional
+  marketplace entries are generated with consistent policy-safe defaults.
+triggers:
+  - user asks to scaffold a new Codex plugin directory
+  - user asks to create optional plugin companion folders/files
+  - user asks to create or update local marketplace entries for plugin visibility
+inputs:
+  - plugin name and desired parent path
+  - local scope choice (repo-local or home-local)
+  - optional folders and metadata overrides
+  - marketplace update intent
+outputs:
+  - normalized plugin folder with required .codex-plugin/plugin.json
+  - optional folders/files requested by flags
+  - marketplace entry with required policy and category fields when enabled
+non_goals:
+  - authoring lifecycle hardening for bundled skills
+  - installing remote skills from curated/github sources
+  - bypassing required plugin manifest structure
+risks:
+  - malformed plugin metadata; mitigated by deterministic scaffold defaults
+  - marketplace policy drift; mitigated by required explicit policy fields
+  - accidental overwrite; mitigated by force-only replacement semantics

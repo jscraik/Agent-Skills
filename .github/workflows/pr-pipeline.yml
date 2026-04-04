@@ -59,9 +59,27 @@ jobs:
       - name: Run docs lint
         run: python3 scripts/docs_lint.py --mode warn --config docs-policy.json
 
+  authoring-family-gate:
+    name: authoring-family-gate
+    needs: [pr-template]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install Python deps
+        run: python -m pip install --upgrade pip pyyaml
+
+      - name: Run authoring family contract/eval/security gate
+        run: bash scripts/validate_skill_authoring_family.sh
+
   harness-preflight:
     name: harness-preflight
-    needs: [repo-validate]
+    needs: [repo-validate, authoring-family-gate]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

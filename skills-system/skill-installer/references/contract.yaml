@@ -1,0 +1,25 @@
+schema_version: "1.1"
+purpose: >
+  Define the install-stage contract for skill-installer so remote skills are
+  imported with trusted provenance, staged validation, and atomic rollback-safe activation.
+triggers:
+  - user asks to list available skills from curated or explicit repo sources
+  - user asks to install contract-valid skills from GitHub repo paths
+  - user asks to repair missing installed-skill visibility
+inputs:
+  - source repository and skill path(s)
+  - pinned source ref or explicit unpinned override
+  - destination skill root
+  - install method preference (download, git, auto)
+outputs:
+  - installed skills under CODEX_HOME/skills
+  - provenance manifest with requested ref and resolved commit
+  - rollback journal capturing staged and promoted install events
+non_goals:
+  - authoring or lifecycle hardening of skill behavior
+  - plugin package creation or marketplace scaffolding
+  - bypassing trust and provenance checks silently
+risks:
+  - supply chain drift from moving refs; mitigated by enforced ref pinning
+  - partial activation failures; mitigated by quarantine-to-promote and rollback
+  - weak traceability; mitigated by persisted manifest and journal artifacts

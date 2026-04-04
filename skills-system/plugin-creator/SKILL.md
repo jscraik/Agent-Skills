@@ -150,13 +150,17 @@ python3 .agents/skills/plugin-creator/scripts/create_basic_plugin.py my-plugin -
 For the exact canonical sample JSON for both plugin manifests and marketplace entries, use:
 
 - `references/plugin-json-spec.md`
+- `references/contract.yaml`
+- `references/evals.yaml`
 
 ## Validation
 
 After editing `SKILL.md`, run:
 
 ```bash
-python3 <path-to-skill-creator>/scripts/quick_validate.py .agents/skills/plugin-creator
+~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/quick_validate.py skills-system/plugin-creator
+~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/skill_gate.py skills-system/plugin-creator --require-security-evals --pi-high-fail
+~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/openclaw_skill_guard.py skills-system/plugin-creator --mode both --format text
 ```
 
 ## See Also

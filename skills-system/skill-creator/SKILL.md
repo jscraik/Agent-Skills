@@ -379,9 +379,11 @@ Once development of the skill is complete, validate the skill folder to catch ba
 
 ```bash
 ~/.venvs/pyyaml/bin/python skills-system/skill-creator/scripts/quick_validate.py <path/to/skill-folder>
+~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/skill_gate.py <path/to/skill-folder> --require-security-evals --pi-high-fail
+~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/openclaw_skill_guard.py <path/to/skill-folder> --mode both --format text
 ```
 
-The validation script checks YAML frontmatter format, required fields, and naming rules. If validation fails, fix the reported issues and run the command again.
+The validators check frontmatter format, contract/evals security coverage, and script-level risk posture. If validation fails, fix the reported issues and run the commands again.
 
 ### Step 6: Create the Handoff Artifact for Non-Trivial Work
 
@@ -404,6 +406,7 @@ Required fields in the handoff artifact:
 - `authoring_state`
 
 Do not treat this artifact as optional prose. It is the lifecycle bridge that lets `skill-builder` start comparative hardening without re-interviewing the entire skill.
+For non-trivial starter packages, also include `references/contract.yaml` and `references/evals.yaml` before handoff so downstream security/eval gates are not blocked.
 
 ### Step 7: Iterate
 

@@ -22,6 +22,7 @@ Use the helper scripts based on the task:
 - List skills when the user asks what is available, or if the user uses this skill without specifying what to do. Default listing is `.curated`, but you can pass `--path skills/.experimental` when they ask about experimental skills.
 - Install from the curated list when the user provides a skill name.
 - Install from another repo when the user provides a GitHub repo/path (including private repos).
+- For production-trust installs, require a pinned commit ref, provenance manifest output, and rollback journal output.
 
 Install skills with the helper scripts.
 
@@ -48,6 +49,8 @@ All of these scripts use network, so when running in the sandbox, request escala
 - `scripts/install-skill-from-github.py --repo <owner>/<repo> --path <path/to/skill> [<path/to/skill> ...]`
 - `scripts/install-skill-from-github.py --url https://github.com/<owner>/<repo>/tree/<ref>/<path>`
 - Example (experimental skill): `scripts/install-skill-from-github.py --repo openai/skills --path skills/.experimental/<skill-name>`
+- Recommended trusted-source install:
+  `scripts/install-skill-from-github.py --repo <owner>/<repo> --ref <40-char-commit-sha> --path <path/to/skill>`
 
 ## Behavior and Options
 
@@ -56,7 +59,11 @@ All of these scripts use network, so when running in the sandbox, request escala
 - Aborts if the destination skill directory already exists.
 - Installs into `$CODEX_HOME/skills/<skill-name>` (defaults to `~/.codex/skills`).
 - Multiple `--path` values install multiple skills in one run, each named from the path basename unless `--name` is supplied.
-- Options: `--ref <ref>` (default `main`), `--dest <path>`, `--method auto|download|git`.
+- Enforces pinned refs by default (`--ref` must be a 40-char commit SHA). Use `--allow-unpinned-ref` only when explicitly approved.
+- Stages every install in `<dest>/.quarantine/skill-install-<run-id>` before atomic promotion.
+- Writes a rollback journal at `<dest>/.install-journal/skill-installer/<run-id>.jsonl`.
+- Writes a provenance manifest at `<dest>/.provenance/skill-installer/<run-id>.json`.
+- Options: `--ref <ref>`, `--dest <path>`, `--method auto|download|git`, `--allow-unpinned-ref`, `--provenance-dir <path>`, `--journal-dir <path>`.
 
 ## Notes
 
@@ -65,6 +72,11 @@ All of these scripts use network, so when running in the sandbox, request escala
 - Git fallback tries HTTPS first, then SSH.
 - The skills at https://github.com/openai/skills/tree/main/skills/.system are preinstalled, so no need to help users install those. If they ask, just explain this. If they insist, you can download and overwrite.
 - Installed annotations come from `$CODEX_HOME/skills`.
+
+## Contract Artifacts
+
+- `references/contract.yaml` defines install-stage ownership, trusted-source requirements, and rollback expectations.
+- `references/evals.yaml` defines happy/edge/negative/pressure cases, including prompt-injection and risky-command guard coverage.
 
 ## See Also
 

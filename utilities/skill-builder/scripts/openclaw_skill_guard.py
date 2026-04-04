@@ -326,9 +326,12 @@ def iter_code_files(skill_dir: Path, *, max_files: int, max_file_bytes: int) -> 
                 continue
             if f.name.startswith("test_") or f.name.endswith("_test.py") or f.name.endswith(".test.py"):
                 continue
-            if "/node_modules/" in f.as_posix() or "/." in f.as_posix().replace("/..", "/"):
-                continue
             if not _is_path_inside(d, f):
+                continue
+            rel_parts = f.relative_to(d).parts
+            if "node_modules" in rel_parts:
+                continue
+            if any(part.startswith(".") for part in rel_parts):
                 continue
             try:
                 if f.stat().st_size > max_file_bytes:
