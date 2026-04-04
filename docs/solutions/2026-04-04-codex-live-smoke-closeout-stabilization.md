@@ -4,6 +4,7 @@ asset_family: skill authoring family live smoke evaluation
 owner: Agent Skills Team
 source_artifact: docs/plans/2026-04-04-feat-skill-authoring-family-contract-rollout-plan.md
 freshness_reviewed_on: 2026-04-04
+last_updated: 2026-04-04
 review_after_days: 90
 ---
 
@@ -26,6 +27,8 @@ The recurring failure pattern had three layers:
 
 That combination left the rollout plan and maturity matrix in a degraded closeout state because live smoke failures were initially indistinguishable from real routing or provenance regressions.
 
+After infrastructure recovery, one residual failure remained in the new builder round contract case: acceptance regex wording used hyphenated readiness tokens while the contract and harness used underscore state names (`comparison_incomplete`, `comparison_blocked`, and related values). That mismatch looked like a contract regression even though the underlying logic was correct.
+
 ## Resolution
 
 Stabilize live smoke closeout in this order:
@@ -40,17 +43,22 @@ Stabilize live smoke closeout in this order:
    Empty-output non-zero live runs stay classified as runner failures rather than being mislabeled as regex or acceptance failures.
 5. Tighten the surviving skill contract once infrastructure is healthy.
    `skill-builder` now treats undecided `standalone skill` versus `plugin` requests as explicit `route clarification` and asks the deliverable-boundary question directly, so the clarification smoke case passes for the right reason.
+6. Keep eval acceptance token conventions aligned with canonical state enums.
+   The builder metadata case now accepts readiness tokens with `[_-]` matching so live output using underscore enums still satisfies acceptance checks.
 
 The durable closeout pattern for future work is:
 - preflight the repo;
 - run live smoke with an authenticated Codex home;
 - rely on per-case `codex-heavy` timeouts for the slow family cases;
-- only treat remaining failures as skill-contract problems after those runner prerequisites are satisfied.
+- only treat remaining failures as skill-contract problems after those runner prerequisites are satisfied;
+- verify acceptance token conventions against the harness enum source before classifying a failure as behavioral drift.
 
 ## Evidence
 
 - Rollout artifact that exposed the degraded closeout state:
   [2026-04-04-feat-skill-authoring-family-contract-rollout-plan.md](/Users/jamiecraik/dev/agent-skills/docs/plans/2026-04-04-feat-skill-authoring-family-contract-rollout-plan.md)
+- Iteration-upgrade artifact that captured the final green closeout evidence:
+  [2026-04-04-feat-skill-authoring-family-iteration-upgrade-plan.md](/Users/jamiecraik/dev/agent-skills/docs/plans/2026-04-04-feat-skill-authoring-family-iteration-upgrade-plan.md)
 - Runner-side hardening and Codex-home preflight:
   [run_skill_evals.py](/Users/jamiecraik/dev/agent-skills/utilities/skill-builder/scripts/run_skill_evals.py)
 - Case-level 180-second routing for the affected live smoke checks:
@@ -63,10 +71,12 @@ The durable closeout pattern for future work is:
   [automation.rules](/Users/jamiecraik/dev/config/codex/rules/automation.rules)
 
 Validated on 2026-04-04 with:
+- `python3 utilities/skill-builder/scripts/run_skill_evals.py utilities/skill-builder --eval-mode smoke --runner codex --case builder-round-metadata-contract`
 - `python3 utilities/skill-builder/scripts/run_skill_evals.py utilities/skill-builder --eval-mode smoke --runner codex --case clarification-package-ambiguous --case provenance-import-rollback`
+- `python3 utilities/skill-builder/scripts/test_run_skill_evals.py`
 - `bash scripts/verify-work.sh`
 
 ## Follow-up
 
 - Refresh rollout artifacts that still describe the pre-fix degraded state if they are needed as current readiness evidence.
-- If live Codex smoke regresses again, check effective `CODEX_HOME`, login state, and resolved case timeout before changing skill prose or acceptance regexes.
+- If live Codex smoke regresses again, check effective `CODEX_HOME`, login state, rule-pack self-test validity, and resolved case timeout before changing skill prose or acceptance regexes.
