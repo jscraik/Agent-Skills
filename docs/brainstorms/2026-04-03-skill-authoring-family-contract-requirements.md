@@ -1,110 +1,145 @@
 ---
-title: Skill Authoring Family Contract Requirements
-date: 2026-04-03
+title: Skill Authoring Family Contract and Iteration Requirements
+date: 2026-04-04
 status: draft
-spec_required: lite
+spec_required: full
 risk_level: medium
 complexity: medium
 ---
 
-# Skill Authoring Family Contract Requirements
+# Skill Authoring Family Contract and Iteration Requirements
+
+## Table of Contents
+- [Problem Frame](#problem-frame)
+- [Approaches](#approaches)
+- [Recommendation](#recommendation)
+- [Requirements](#requirements)
+- [Success Criteria](#success-criteria)
+- [Scope Boundaries](#scope-boundaries)
+- [Key Decisions](#key-decisions)
+- [Dependencies / Assumptions](#dependencies--assumptions)
+- [Outstanding Questions](#outstanding-questions)
+- [Next Steps](#next-steps)
 
 ## Problem Frame
 
-The repo now has a capable but increasingly ambiguous skill-authoring family:
-- `skill-creator` still reads as the starter path for first-draft skill creation.
-- `skill-builder` has evolved into a broad lifecycle maintainer covering creation, improvement, audit, packaging, and install-distribute work.
-- `skill-installer` still owns focused installation and curated import flows.
-- `codex-plugin-builder` remains the correct path when the deliverable should ship as a plugin instead of a bare skill.
+The repo has already improved the skill-authoring family by clarifying the lifecycle split:
+- `skill-creator` owns first-draft scaffolding and starter authoring.
+- `skill-builder` owns lifecycle hardening, routing, evals, and standalone packaging.
+- `skill-installer` owns import, install, and runtime visibility for already-valid skills.
+- `codex-plugin-builder` owns plugin packaging once the standalone-skill boundary is settled.
 
-This is useful for power users, but it is no longer self-explanatory. Current repo evidence shows:
-- the broadest surface, `skill-builder`, still presents itself like a narrow creator in UI metadata
-- the repo still has stale frontmatter assumptions around `compatibility`
-- there is no explicit family-level routing contract that says which surface should win for ambiguous prompts
+That family split is now in a good place. The remaining gap is the quality of the authoring loop itself.
 
-The result is a gap between capability and usability: the repo has strong skill-building machinery, but weaker routing clarity than current April 2026 best practice recommends.
+Current repo evidence shows:
+- `skill-creator` still ends largely at `quick_validate.py` plus generic forward-testing guidance.
+- `skill-builder` already owns validators, smoke/release evals, and description optimization, but it does not yet present a single explicit iterative loop that compares baseline vs improved skill behavior, captures runtime evidence, and reruns at wider scale.
+- the seam between first-draft creation and lifecycle hardening is clear in principle, but not yet strong enough in artifacts and operator flow to feel best-in-class.
+
+The result is a new kind of gap: not role ambiguity, but loop maturity. The family is easier to route than before, yet it still trails the strongest known authoring workflows in how it turns a draft skill into an evidence-backed, benchmarked, trigger-optimized skill.
 
 ## Approaches
 
 | Approach | Description | Pros | Cons |
 |---|---|---|---|
-| A. Documentation-first posture correction | Update descriptions, See Also guidance, and repo docs so each skill is easier to choose, but stop short of adding system-level eval enforcement. | Fastest path, lowest coordination cost, improves readability quickly. | Too easy to drift, weak protection against future overlap regressions. |
-| B. Family contract plus routing evals | Define one explicit contract across `skill-creator`, `skill-builder`, `skill-installer`, and `codex-plugin-builder`, then protect it with routing regression evals. | Best match for April 2026 best practice, durable, measurable, preserves specialization without forced consolidation. | More work than a narrow copy fix, requires coordinated updates across multiple surfaces. |
-| C. Consolidation-first merge or rename | Collapse or rename surfaces to reduce overlap structurally before tightening routing. | Simpler surface area in theory, could reduce long-term confusion if done well. | High churn, premature, risks destroying useful specialization before the contract is proven. |
+| A. Handoff-only patch | Add an explicit creator-to-builder handoff checklist, but leave `skill-builder`'s eval and iteration flow largely as-is. | Smallest change, reinforces the current family split, low churn. | Improves the seam but not the maturity of the loop; still lacks clear paired benchmarking and review rhythm. |
+| B. Selective Anthropic-inspired loop import | Keep the current family split, add an explicit handoff package to `skill-creator`, and teach `skill-builder` a first-class iterative loop: realistic prompts, with-skill vs baseline runs, timing/token capture, qualitative plus quantitative review, routing optimization, and wider reruns. | Best balance of clarity and leverage, imports the strongest upstream ideas without collapsing local specialization, fits current repo architecture. | Requires coordinated updates across docs, eval contracts, and possibly helper scripts or artifact schemas. |
+| C. Full role convergence | Expand `skill-creator` into the primary end-to-end create/improve/benchmark surface, closer to Anthropic's single-skill model. | Maximum parity with the reference workflow, potentially fewer handoffs. | Reopens family-boundary ambiguity, weakens the lifecycle split the repo just finished clarifying, and risks making `skill-installer`/`skill-builder` feel second-class again. |
 
 ## Recommendation
 
-Choose **Approach B: family contract plus routing evals**.
+Choose **Approach B: selective Anthropic-inspired loop import**.
 
-This is the smallest durable move that makes the repo feel industry-standard rather than just internally powerful. It matches current OpenAI guidance to keep each skill focused on one job while still respecting the fact that `skill-builder` has already grown into an expert maintainer surface.
+This preserves the local architecture that now makes sense while importing the highest-value upstream improvements:
+- explicit capture of intent from real conversation context before drafting;
+- a visible creator-to-builder handoff package rather than an implied escalation;
+- paired evaluation against a baseline rather than single-lane validation;
+- runtime evidence such as timing and token cost, not just pass/fail assertions;
+- qualitative review alongside quantitative grading;
+- description and routing optimization as a named phase, not an optional afterthought;
+- wider-scale reruns only after a smaller loop shows the direction is working.
 
-Important companion decision:
-- apply the narrow standards fix from the earlier review as a prerequisite or phase-zero patch
-- specifically, update stale `compatibility` assumptions before presenting the new family contract as complete
+This is the smallest durable move that makes the family feel modern and evidence-backed without undoing the lifecycle clarity already achieved.
 
 ## Requirements
 
-**Family routing contract**
-- R1. Define one canonical routing contract for `skill-creator`, `skill-builder`, `skill-installer`, and `codex-plugin-builder`.
-- R2. The contract must state each skill's primary job, strongest trigger phrases, and explicit non-triggers.
-- R3. The contract must establish a two-tier authoring model:
-  - starter authoring via `skill-creator`
-  - expert lifecycle improvement via `skill-builder`
-- R4. The contract must preserve `skill-installer` as the focused execution path for installation and curated import work.
-- R5. The contract must preserve `codex-plugin-builder` as the packaging path when the deliverable is a plugin rather than a standalone skill.
+**Family posture**
+- R1. Preserve the current lifecycle split:
+  - `skill-creator` for starter authoring and scaffold-bound edits;
+  - `skill-builder` for lifecycle hardening, evals, and standalone packaging;
+  - `skill-installer` for already-valid install/import/visibility work;
+  - `codex-plugin-builder` for plugin packaging.
+- R2. Do not merge or rename these family members in this phase unless the upgraded loop proves the split is materially harmful.
 
-**Discoverability and copy**
-- R6. Each skill in the family must expose routing copy that matches its real scope in both frontmatter and any `agents/openai.yaml` metadata.
-- R7. `skill-builder` must be described as an expert lifecycle maintainer surface rather than a default create-or-update entrypoint.
-- R8. Each family member must include explicit handoff guidance to the adjacent skills when a request crosses boundaries.
+**Creator-to-builder handoff**
+- R3. `skill-creator` must end with an explicit handoff package whenever the work moves beyond first-draft creation.
+- R4. The handoff package must capture the minimum context `skill-builder` needs without rediscovery, including:
+  - skill goal and boundary;
+  - intended trigger phrases or user contexts;
+  - a draft resource inventory;
+  - 2-3 realistic starter prompts or prompt candidates;
+  - known weak spots, open questions, or likely routing risks;
+  - current validation state, including `quick_validate.py` outcome.
+- R5. The handoff must be framed as the normal next lifecycle step for non-trivial skills, not as an exception only when something is wrong.
 
-**Validation and enforcement**
-- R9. Add routing regression evals that pressure-test ambiguous prompts across the family, including create-only, improve-only, install-only, and mixed lifecycle requests.
-- R10. The family contract must live in one repo-visible durable place so future edits have a canonical reference point.
-- R11. The repo's frontmatter-validation guidance must be brought back into sync with the current official skill spec, including support for `compatibility`, before the contract rollout is considered complete.
+**Builder iterative eval loop**
+- R6. `skill-builder` must present one explicit iterative improvement loop for non-trivial skill hardening.
+- R7. That loop must include:
+  - drafting or refining realistic user prompts;
+  - running the candidate skill against an appropriate baseline in the same evaluation round;
+  - capturing quantitative evidence beyond assertion outcomes when available, including timing and token usage;
+  - presenting both qualitative and quantitative review surfaces;
+  - tuning routing and description quality as part of the loop;
+  - rerunning at wider scale after promising small-sample results.
+- R8. The baseline rule must be explicit:
+  - for new skills, compare against no-skill behavior or the best available neutral baseline;
+  - for existing skills, compare against the prior version or prior contract-valid snapshot.
+- R9. The loop must reuse repo-native validation and reporting surfaces where practical instead of cloning an upstream directory layout or viewer contract wholesale.
 
-**Adoption posture**
-- R12. Preserve current skill names for this phase unless contract/eval work proves that naming alone is blocking correct routing.
-- R13. Favor explicit routing clarity and evaluation evidence over structural consolidation in phase one.
+**Adoption and evidence**
+- R10. The upgraded loop must strengthen evidence quality without forcing heavier process on trivial skills.
+- R11. The workflow must stay legible to less technical users by explaining evaluation terminology when needed and avoiding jargon-heavy handoffs by default.
+- R12. The durable repo-visible contract must explain the relationship between creator output, builder iteration, and installer/plugin handoff so later stages do not need to rediscover lifecycle boundaries.
 
 ## Success Criteria
 
-- A maintainer can tell which authoring-family skill should be used for a given request without reading all four skills end to end.
-- `skill-builder` no longer appears to be a narrow starter skill in metadata while behaving like an expert lifecycle tool in practice.
-- The repo no longer contains stale frontmatter guidance that rejects spec-valid `compatibility` usage.
-- Ambiguous prompts such as "make me a skill", "improve and install this skill", and "package this for reuse" have defined expected routing outcomes and regression coverage.
-- The family contract is clear enough that a later `ce-spec` or `ce-plan` stage does not need to invent ownership boundaries from scratch.
+- A new skill can move from first draft to lifecycle hardening without rediscovering intent, trigger shape, or starter eval prompts.
+- `skill-builder` makes it obvious how to judge whether a revision is actually better than the baseline, not just syntactically valid.
+- The family preserves clear routing boundaries while still feeling like one coherent authoring system.
+- Maintainers can see qualitative output quality, quantitative grading, and cost/performance signals in one loop before deciding a skill is ready.
+- The requirements are concrete enough that the next spec can define the contract without inventing the lifecycle stages from scratch.
 
 ## Scope Boundaries
 
-- Do not merge or rename the family in this phase unless the contract work clearly fails.
-- Do not turn this phase into a plugin packaging initiative.
-- Do not refactor unrelated skills across the wider repo.
-- Do not overfit the family contract around one temporary validator quirk; the contract should describe roles, not implementation accidents.
-- Do not treat installer delegation mechanics as the first-order problem unless routing clarity work leaves a real residual gap.
+- Do not collapse `skill-creator` and `skill-builder` back into one surface in this phase.
+- Do not turn this into a generic skill-evals platform redesign for the whole repo.
+- Do not make `skill-installer` responsible for lifecycle hardening or benchmark interpretation.
+- Do not require a brand-new custom viewer if existing report surfaces can satisfy the first version of qualitative plus quantitative review.
+- Do not copy Anthropic's file layout or script names literally when the local repo already has stronger or more canonical equivalents.
 
 ## Key Decisions
 
-- Decision: Treat this as a family-level product-shape problem, not as a single-skill wording fix.
-  Rationale: The main weakness is overlap ambiguity across multiple surfaces, not poor quality inside `skill-builder` alone.
+- Decision: Keep the current family split.
+  Rationale: The recent lifecycle clarification is a strength and should not be undone just to mimic an upstream workflow shape.
 
-- Decision: Keep the current family members and clarify their jobs before considering structural consolidation.
-  Rationale: Current specialization is still useful; the repo lacks a contract more than it lacks surfaces.
+- Decision: Treat `skill-creator`'s quick validation as an early gate, not the end of the quality story.
+  Rationale: First-draft correctness is useful, but it does not prove trigger quality, comparative value, or operational efficiency.
 
-- Decision: Use a two-tier authoring model.
-  Rationale: This aligns with current best practice while preserving the user's deliberate expert expansion of `skill-builder`.
+- Decision: Make the creator-to-builder handoff an explicit artifact, not tribal knowledge.
+  Rationale: The handoff is now part of the product shape of the family and should be teachable, inspectable, and reusable.
 
-- Decision: Treat the `compatibility` support fix as a prerequisite patch, not as the entirety of the effort.
-  Rationale: It is necessary for correctness, but insufficient for long-term routing quality.
+- Decision: Import the strongest parts of Anthropic's loop into `skill-builder`, not `skill-creator`.
+  Rationale: The upstream ideas are high-value, but their single-surface model would blur local lifecycle ownership.
 
-- Decision: Protect the family contract with evals, not documentation alone.
-  Rationale: Routing drift is predictable when multiple skills overlap; measured regression coverage is the durable control.
+- Decision: Prefer paired baseline comparisons, qualitative review, and timing/token evidence over pass/fail-only validation.
+  Rationale: The goal is to know whether the skill improved, not merely whether it passes a minimum gate.
 
 ## Dependencies / Assumptions
 
-- Official April 2026 OpenAI/Codex guidance remains the routing baseline: one-job skills, clear trigger descriptions, and explicit use boundaries.
-- The current repo continues to keep `skill-creator`, `skill-builder`, `skill-installer`, and `codex-plugin-builder` as separate discoverable surfaces during this phase.
-- Repo validators and examples can be updated incrementally without requiring a large migration event.
+- The current family contract rollout remains the baseline and should be extended rather than reopened.
+- Anthropic's `skill-creator` is a useful reference for loop quality, not a canonical source for local file layout, naming, or ownership boundaries.
+- The repo can extend existing `skill-builder` eval/reporting surfaces without needing to adopt a brand-new external harness architecture in phase one.
+- Upstream-inspired improvements should map into repo-native docs, eval manifests, and validation flows so the family stays locally coherent.
 
 ## Outstanding Questions
 
@@ -114,14 +149,16 @@ Important companion decision:
 
 ### Deferred to Planning
 
-- [Affects R9][Technical] Which eval harness and fixture shape should own cross-skill routing regression cases?
-- [Affects R10][Information architecture] Should the canonical family contract live in a dedicated reference doc, shared README, or one anchor skill reference with mirrored summaries elsewhere?
-- [Affects R8][Technical] Should `skill-builder` become explicit-only immediately, or should invocation policy change wait until routing evals establish a baseline?
+- [Affects R4][Technical] What is the smallest durable schema for the creator-to-builder handoff package: frontmatter block, reference file, or structured artifact generated during creation?
+- [Affects R7][Technical] Which existing `skill-builder` reports can carry timing/token and qualitative review signals, and where do we need new helper output rather than new infrastructure?
+- [Affects R8][Technical] What is the canonical baseline for brand-new skills in this repo when there is no prior skill version to compare against?
+- [Affects R7][UX] Should description optimization be a mandatory final loop phase for non-trivial skills, or a named optional phase triggered by under/over-trigger evidence?
 
 ## Next Steps
 
--> `/ce:spec` for a lite spec that defines:
-- the canonical routing matrix
-- required description and metadata updates by skill
-- the regression-eval contract
-- the phase-zero `compatibility` sync patch
+-> `/ce:spec` for a full spec that defines:
+- the creator-to-builder handoff artifact and its required fields
+- the `skill-builder` iterative eval-loop contract and minimum evidence set
+- the qualitative-plus-quantitative review flow
+- the baseline-selection rules for new vs existing skills
+- the lowest-churn repo-native implementation path for the upgraded loop
