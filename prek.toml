@@ -10,7 +10,7 @@ repo = "local"
 [[repos.hooks]]
 id = "validate-all"
 name = "Validate all"
-entry = "bash scripts/validate_all.sh"
+entry = "bash scripts/validate_all.sh --ephemeral"
 language = "system"
 pass_filenames = false
 
