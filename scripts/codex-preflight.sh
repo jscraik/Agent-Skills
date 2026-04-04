@@ -90,6 +90,43 @@ wait_for_local_memory_health() {
 	return 1
 }
 
+local_memory_rest_post_json() {
+	local url="$1"
+	local payload="$2"
+	local action_label="$3"
+	local max_attempts="${4:-4}"
+	local attempt=1
+	local response=''
+	local body=''
+	local http_code=''
+
+	while (( attempt <= max_attempts )); do
+		response="$(curl -sS -H 'Content-Type: application/json' -d "${payload}" -w $'\n%{http_code}' "${url}" 2>&1)" || true
+		http_code="${response##*$'\n'}"
+		body="${response%$'\n'*}"
+
+		if [[ "${http_code}" =~ ^2[0-9][0-9]$ ]]; then
+			printf '%s\n' "${body}"
+			return 0
+		fi
+
+		if [[ "${body}" == *"database is locked"* || "${body}" == *"SQLITE_BUSY"* ]]; then
+			if (( attempt < max_attempts )); then
+				log_warn "${action_label} hit transient Local Memory lock; retrying (${attempt}/${max_attempts})"
+				sleep 1
+				attempt=$((attempt + 1))
+				continue
+			fi
+		fi
+
+		printf '%s\n' "${body}"
+		return 1
+	done
+
+	printf '%s\n' "${body}"
+	return 1
+}
+
 start_local_memory_daemon_if_needed() {
 	local health_url="$1"
 	local start_output=''
@@ -326,6 +363,9 @@ preflight_local_memory_gold() {
 	probe="LM-PREFLIGHT-$(date +%Y%m%d-%H%M%S)-$$"
 	local content_a="Preflight anchor ${probe}"
 	local content_b="Preflight evidence ${probe}"
+	local observe_url="http://127.0.0.1:${rest_port}/api/v1/observe"
+	local relate_url="http://127.0.0.1:${rest_port}/api/v1/relate"
+	local search_url="http://127.0.0.1:${rest_port}/api/v1/memories/search"
 
 	local observe_a_json
 	local observe_b_json
@@ -337,36 +377,57 @@ preflight_local_memory_gold() {
 			log_ok 'local-memory preflight passed'
 			return 0
 		fi
-		log_err 'observe A failed'
-		if [[ -n "${observe_a_output}" ]]; then
-			echo "${observe_a_output}" >&2
-		fi
-		return 1
+		log_warn 'observe A via CLI failed; falling back to REST observe endpoint'
+		observe_a_output="$(jq -nc --arg c "${content_a}" \
+			'{content:$c,domain:"coding-harness",source:"codex_preflight",tags:["preflight","local-memory"]}' |
+			while IFS= read -r payload; do
+				local_memory_rest_post_json "${observe_url}" "${payload}" 'observe A'
+			done)" || {
+			log_err 'observe A failed'
+			if [[ -n "${observe_a_output}" ]]; then
+				echo "${observe_a_output}" >&2
+			fi
+			return 1
+		}
 	fi
 	observe_a_json="$(extract_last_json_line "${observe_a_output}")"
 	if ! observe_b_output="$(local-memory observe "${content_b}" --domain 'coding-harness' --tags 'preflight,local-memory' --source 'codex_preflight' --json 2>&1)"; then
-		log_err 'observe B failed'
-		if [[ -n "${observe_b_output}" ]]; then
-			echo "${observe_b_output}" >&2
-		fi
-		return 1
+		log_warn 'observe B via CLI failed; falling back to REST observe endpoint'
+		observe_b_output="$(jq -nc --arg c "${content_b}" \
+			'{content:$c,domain:"coding-harness",source:"codex_preflight",tags:["preflight","local-memory"]}' |
+			while IFS= read -r payload; do
+				local_memory_rest_post_json "${observe_url}" "${payload}" 'observe B'
+			done)" || {
+			log_err 'observe B failed'
+			if [[ -n "${observe_b_output}" ]]; then
+				echo "${observe_b_output}" >&2
+			fi
+			return 1
+		}
 	fi
 	observe_b_json="$(extract_last_json_line "${observe_b_output}")"
 
 	local id_a
 	local id_b
-	id_a="$(echo "${observe_a_json}" | jq -r '.id // .data.id // .memory_id // .data.memory_id // empty')"
-	id_b="$(echo "${observe_b_json}" | jq -r '.id // .data.id // .memory_id // .data.memory_id // empty')"
+	id_a="$(echo "${observe_a_json}" | jq -r '.data.memory_id // .memory_id // .data.id // .id // empty')"
+	id_b="$(echo "${observe_b_json}" | jq -r '.data.memory_id // .memory_id // .data.id // .id // empty')"
 	if [[ -z "${id_a}" || -z "${id_b}" ]]; then
 		log_err 'observe returned no memory IDs'
 		return 1
 	fi
 
 	local relate_json
-	relate_json="$(local-memory relate "${id_a}" "${id_b}" --type 'references' --strength 0.8 --confirm --json 2>/dev/null)" || {
-		log_err 'relate failed'
-		return 1
-	}
+	if ! relate_json="$(local-memory relate "${id_a}" "${id_b}" --type 'references' --strength 0.8 --confirm --json 2>/dev/null)"; then
+		log_warn 'relate via CLI failed; falling back to REST relate endpoint'
+		relate_json="$(jq -nc --arg s "${id_a}" --arg t "${id_b}" \
+			'{source_memory_id:$s,target_memory_id:$t,relationship_type:"references",strength:0.8}' |
+			while IFS= read -r payload; do
+				local_memory_rest_post_json "${relate_url}" "${payload}" 'relate'
+			done)" || {
+			log_err 'relate failed'
+			return 1
+		}
+	fi
 	relate_json="$(extract_last_json_line "${relate_json}")"
 	local relationship_id
 	relationship_id="$(echo "${relate_json}" | jq -r '.id // .data.id // .relationship_id // .data.relationship_id // empty')"
@@ -378,18 +439,25 @@ preflight_local_memory_gold() {
 	fi
 
 	local search_json
-	search_json="$(local-memory search "${probe}" --limit 10 --json 2>/dev/null)" || {
-		log_err 'search failed'
-		return 1
-	}
+	if ! search_json="$(local-memory search "${probe}" --limit 10 --json 2>/dev/null)"; then
+		log_warn 'search via CLI failed; falling back to REST search endpoint'
+		search_json="$(jq -nc --arg q "${probe}" '{query:$q,limit:10}' |
+			while IFS= read -r payload; do
+				local_memory_rest_post_json "${search_url}" "${payload}" 'search'
+			done)" || {
+			log_err 'search failed'
+			return 1
+		}
+	fi
 	search_json="$(extract_last_json_line "${search_json}")"
 	local search_hits
 	search_hits="$(echo "${search_json}" | jq -r '
-		if type == "array" then length
-		elif .results then (.results | length)
-		elif .data.results then (.data.results | length)
-		elif .data then (.data | length)
-		else 0 end
+		if type == "array" then
+			length
+		else
+			((try .results catch null) // (try .data.results catch null) // (try .data catch [])) |
+			if type == "array" then length else 0 end
+		end
 	')"
 	if [[ "${search_hits}" -lt 1 ]]; then
 		log_err "search returned no results for probe ${probe}"
@@ -418,7 +486,7 @@ preflight_local_memory_gold() {
 	malformed_code="$(curl -sS -o "${malformed_output}" -w '%{http_code}' \
 		-H 'Content-Type: application/json' \
 		-d '{"level":"observation"}' \
-		"http://127.0.0.1:${rest_port}/api/v1/observe")"
+		"${observe_url}")"
 	if [[ "${malformed_code}" -lt 400 ]]; then
 		log_err "malformed payload did not return an error (HTTP ${malformed_code})"
 		return 1
@@ -432,11 +500,11 @@ preflight_local_memory_gold() {
 	dup_code_1="$(curl -sS -o "${dup_output_1}" -w '%{http_code}' \
 		-H 'Content-Type: application/json' \
 		-d "${dup_payload}" \
-		"http://127.0.0.1:${rest_port}/api/v1/observe")"
+		"${observe_url}")"
 	dup_code_2="$(curl -sS -o "${dup_output_2}" -w '%{http_code}' \
 		-H 'Content-Type: application/json' \
 		-d "${dup_payload}" \
-		"http://127.0.0.1:${rest_port}/api/v1/observe")"
+		"${observe_url}")"
 	echo "ℹ️ duplicate behavior snapshot: first=${dup_code_1}, second=${dup_code_2}"
 
 	local daemon_log="${HOME}/.local-memory/daemon.log"

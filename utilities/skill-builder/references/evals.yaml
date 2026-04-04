@@ -89,6 +89,23 @@ cases:
       - type: contains
         value: "?"
 
+  - id: improve-confirms-category
+    name: improve confirms category
+    category: edge
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Can you improve a code review skill that keeps over-triggering? In this first response, use the required headings and confirm the likely skill category before drafting."
+    acceptance:
+      - type: contains
+        value: "## Scope and triggers"
+      - type: regex
+        value: "(?i)(code quality\\s*&\\s*review|code quality\\s+and\\s+review)"
+      - type: regex
+        value: "(?i)(based on what you described|this sounds like)"
+      - type: regex
+        value: "(?i)(does that match your intent|or is it something different)"
+
   - id: negative-explicit-out-of-scope
     name: negative explicit out of scope
     category: negative
@@ -347,4 +364,63 @@ cases:
       - type: regex
         value: "(?s)\"validations\"\\s*:"
       - type: regex
+        value: "(?s)\"security\"\\s*:"
+      - type: regex
         value: "(?s)\"next_step\"\\s*:"
+
+  - id: validation-two-pass-release-flow
+    name: validation two pass release flow
+    category: edge
+    eval_modes: [release]
+    should_trigger: true
+    prepend_skill: true
+    prompt: "For a substantial skill improvement, give the concrete validation sequence you would use before claiming completion. Include the iterative pass, the broader pre-claim sweep, and the eval mode progression."
+    acceptance:
+      - type: regex
+        value: "(?i)(iterative_fail_fast|fail-fast)"
+      - type: regex
+        value: "(?i)(pre-claim_full_sweep|pre[- ]claim full sweep|broader checks before handoff)"
+      - type: regex
+        value: "(?i)(run[_-]?skill[_-]?evals\\.py|run.*skill evals)"
+      - type: regex
+        value: "(?i)(--eval-mode smoke|eval mode smoke)"
+      - type: regex
+        value: "(?i)(--eval-mode release|eval mode release)"
+      - type: regex
+        value: "(?i)(release_manifest\\.json|release manifest)"
+
+  - id: validation-semantic-tag-gates
+    name: validation semantic tag gates
+    category: edge
+    eval_modes: [release]
+    should_trigger: true
+    prepend_skill: true
+    prompt: "I changed metadata.skill-type while improving a repo skill in this sandbox. What validation commands should I run before claiming completion?"
+    acceptance:
+      - type: regex
+        value: "(?i)(sync_skills_sandbox_safe\\.sh|sandbox-safe sync)"
+      - type: regex
+        value: "(?i)(lint_skill_types\\.sh|missing:\\s*0|invalid:\\s*0)"
+      - type: regex
+        value: "(?i)(lint_openai_skill_format\\.sh\\s+--mode\\s+strict|openai skill format)"
+      - type: regex
+        value: "(?i)(lint_progressive_disclosure\\.sh\\s+--mode\\s+warn|progressive disclosure)"
+      - type: regex
+        value: "(?i)(gotcha_pipeline\\.py\\s+validate|gotcha pipeline)"
+
+  - id: validation-graph-specific-gates
+    name: validation graph specific gates
+    category: edge
+    eval_modes: [release]
+    should_trigger: true
+    prepend_skill: true
+    prompt: "This repo-facing skill changed See Also links, topic-map wiring, and task-profile metadata. What graph checks should the validation plan include?"
+    acceptance:
+      - type: regex
+        value: "(?i)(check-see-also\\.py|see also)"
+      - type: regex
+        value: "(?i)(validate_skill_graph_profiles\\.py|skill graph profiles)"
+      - type: regex
+        value: "(?i)(build-adjacency-yaml\\.py|build adjacency)"
+      - type: regex
+        value: "(?i)(validate-adjacency\\.py|validate adjacency)"

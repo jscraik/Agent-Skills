@@ -49,18 +49,32 @@ try:
 except ModuleNotFoundError:  # pragma: no cover
     preferred = Path.home() / ".venvs" / "pyyaml" / "bin" / "python"
     already_reexec = os.environ.get("SKILL_CREATOR_PYYAML_REEXEC") == "1"
-    if preferred.exists() and not already_reexec:
+    preferred_site_packages: Optional[Path] = None
+    if preferred.exists():
+        lib_root = preferred.parent.parent / "lib"
+        for candidate in sorted(lib_root.glob("python*/site-packages")):
+            if candidate.exists():
+                preferred_site_packages = candidate
+                break
+
+    # Import-safe fallback: when this module is imported by tests from a Python
+    # interpreter without PyYAML, pull PyYAML from the dedicated helper venv
+    # instead of re-executing the CLI entrypoint.
+    if preferred_site_packages is not None and str(preferred_site_packages) not in sys.path:
+        sys.path.insert(0, str(preferred_site_packages))
+        import yaml  # type: ignore
+    elif preferred.exists() and not already_reexec and __name__ == "__main__":
         env = dict(os.environ)
         env["SKILL_CREATOR_PYYAML_REEXEC"] = "1"
         os.execve(str(preferred), [str(preferred), __file__, *sys.argv[1:]], env)
-
-    print(
-        "ERROR: PyYAML is required to run run_skill_evals.py.\n\n"
-        "Fix:\n"
-        "  ~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/run_skill_evals.py <path/to/skill-dir-or-SKILL.md>\n",
-        file=sys.stderr,
-    )
-    raise SystemExit(1)
+    else:
+        print(
+            "ERROR: PyYAML is required to run run_skill_evals.py.\n\n"
+            "Fix:\n"
+            "  ~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/run_skill_evals.py <path/to/skill-dir-or-SKILL.md>\n",
+            file=sys.stderr,
+        )
+        raise SystemExit(1)
 
 from deterministic_trace_checks import evaluate_trace, load_jsonl_events  # noqa: E402
 
