@@ -90,3 +90,4 @@ artifacts/skill-graphs/telemetry/skill-genome-processing-stats.json
 artifacts/skill-graphs/telemetry/.genome-watermark
 
 artifacts/policy/
+plugins/cache/
