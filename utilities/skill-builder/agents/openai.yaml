@@ -1,5 +1,5 @@
 interface:
   display_name: "Skill Builder"
-  short_description: "Create or update a skill"
+  short_description: "Harden, validate, and package standalone skills"
   icon_small: "./assets/skill-builder-small.svg"
   icon_large: "./assets/skill-builder.png"

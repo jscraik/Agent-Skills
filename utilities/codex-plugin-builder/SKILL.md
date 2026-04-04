@@ -1,6 +1,6 @@
 ---
 name: codex-plugin-builder
-description: Create, convert, or validate Codex plugin packages that bundle skills, hooks, agents, and MCP metadata. Use when the user wants plugin packaging work, not standalone skill editing or generic app features.
+description: Create, convert, or validate Codex plugin packages that bundle skills, hooks, agents, and MCP metadata. Use when the deliverable is clearly a plugin package, not when standalone skill lifecycle hardening or generic app work is still the main job.
 metadata:
   skill-type: scaffolding_templates
 ---
@@ -31,6 +31,7 @@ Use this skill when the request is to:
 - convert a Claude-oriented plugin shape into a Codex-compatible package;
 - compare a proposed plugin against existing local plugins before deciding whether to merge, fold, improve, or create;
 - choose an archetype-informed scaffold shape based on real upstream plugin families;
+- package a contract-valid standalone skill as a plugin-owned deliverable once lifecycle judgment is already settled;
 - add plugin-owned surfaces such as `skills/`, `hooks.json`, `agents/`, `.app.json`, or `.mcp.json`;
 - fold deprecated `commands/`, `slash-commands/`, or `prompts/` content into plugin-owned `skills/`;
 - scaffold local package docs such as `README.md`, `LICENSE`, and `references/operational-spec.md` when helpful;
@@ -39,6 +40,7 @@ Use this skill when the request is to:
 - audit a plugin against curated upstream `openai/plugins` conventions without conflating that with minimal runtime validity.
 
 Do not use this skill for:
+- standalone skill hardening, routing fixes, validator work, or audit-first packaging when the skill is not yet contract-valid (`skill-builder` owns that stage);
 - standalone app feature implementation;
 - unrelated bugfix work;
 - generic MCP server implementation that is not plugin packaging.
@@ -97,6 +99,7 @@ Key principles:
 1. Confirm package boundary.
 - Restate requested surfaces and what is out of scope for this pass.
 - Prefer smallest package boundary wording when the request is broad.
+- If the request still mixes audit, validation, hardening, or routing work with plugin packaging, keep `skill-builder` as the primary owner until the standalone skill is contract-valid, then hand off explicitly.
 
 2. Inspect source state.
 - For external sources, capture:
@@ -256,6 +259,8 @@ When packaging plugins, treat `references/plugin-contract.md` as mandatory.
 Required behavior:
 - always emit `.codex-plugin/plugin.json`;
 - validate the runtime-required manifest shape first;
+- require validator-visible standalone-skill validity evidence before plugin packaging becomes the primary path for a reused skill;
+- do not treat plugin packaging as a workaround for unresolved standalone skill validation or routing ambiguity;
 - run local deconflict review before shipping a new plugin package;
 - emit `references/deconflict-report.md` when overlap review is relevant;
 - include integration metadata when present:
@@ -317,9 +322,9 @@ If the request is out of scope:
 ## See Also
 | Skill | When to use |
 |---|---|
-| [[skill-builder]] | Author or upgrade a standalone skill before packaging it into a plugin |
+| [[skill-builder]] | Harden and validate a standalone skill before plugin packaging or conversion work begins |
 | [[codex-agent-builder]] | Add agent roles to the plugin bundle alongside skills and hooks |
 | [[decide-build-primitive]] | Decide whether the capability belongs in a plugin at all |
-| [[skill-installer]] | Install a finished skill directly when full plugin packaging is unnecessary |
+| [[skill-installer]] | Install a contract-valid skill directly when full plugin packaging is unnecessary |
 
 **Topic map:** [[agent-ops]]

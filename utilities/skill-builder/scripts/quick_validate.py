@@ -55,6 +55,7 @@ COMPAT_ALLOWED_KEYS = {
     "name",
     "description",
     "license",
+    "compatibility",
     "allowed-tools",
     "metadata",
 }
@@ -162,7 +163,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         help=(
             "Validation mode (default: compat). "
             "strict allows only name+description; "
-            "compat allows OpenAI official keys: name, description, license, allowed-tools, metadata."
+            "compat allows OpenAI official keys: name, description, license, compatibility, "
+            "allowed-tools, metadata."
         ),
     )
     args = p.parse_args(list(argv) if argv is not None else None)

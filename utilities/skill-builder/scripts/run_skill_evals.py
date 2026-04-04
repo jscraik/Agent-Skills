@@ -83,6 +83,7 @@ _CODEX_HELP_CACHE: Dict[str, Optional[str]] = {}
 _RUNNER_CHOICES = ["codex", "claude-kimi", "claude-zai", "gemini", "discovery-smoke"]
 _TIMEOUT_PROFILE_CHOICES = ["default", "codex-heavy", "discovery-heavy"]
 _EVAL_MODE_CHOICES = ["standard", "smoke", "release"]
+_CODEX_AUTH_ENV_VARS = ("OPENAI_API_KEY", "OPENAI_API_TOKEN", "OPENAI_ACCESS_TOKEN")
 
 # Script-level options (used to disambiguate `--codex-arg --foo` intent).
 _SCRIPT_OPTIONS: Set[str] = {
@@ -729,6 +730,15 @@ def extract_rubric_metrics(parsed_json: Any) -> Optional[Dict[str, Any]]:
     return metrics or None
 
 
+def _acceptance_skip_reason(*, exit_code: int, output_text: str) -> Optional[str]:
+    """Return a skip reason when acceptance checks would only misreport transport failure."""
+    if exit_code == 0:
+        return None
+    if output_text.strip():
+        return None
+    return "skipped acceptance assertions because the runner exited non-zero and produced no final output"
+
+
 def run_codex_exec(
     *,
     workspace_root: Path,
@@ -1065,13 +1075,122 @@ def _filter_cases(
     return filtered
 
 
-def _codex_exec_prefix(codex_bin: Optional[Path]) -> List[str]:
+def _codex_cli_prefix(codex_bin: Optional[Path]) -> List[str]:
     if codex_bin:
         node_bin = codex_bin.parent / "node"
         if node_bin.exists():
-            return [str(node_bin), str(codex_bin), "exec"]
-        return [str(codex_bin), "exec"]
-    return ["codex", "exec"]
+            return [str(node_bin), str(codex_bin)]
+        return [str(codex_bin)]
+    return ["codex"]
+
+
+def _codex_exec_prefix(codex_bin: Optional[Path]) -> List[str]:
+    return [*_codex_cli_prefix(codex_bin), "exec"]
+
+
+def _effective_codex_home(codex_home: Optional[Path]) -> Path:
+    raw = str(codex_home) if codex_home else (os.environ.get("CODEX_HOME") or str(Path.home() / ".codex"))
+    return Path(raw).expanduser().resolve()
+
+
+def _codex_env(*, codex_bin: Optional[Path], codex_home: Optional[Path]) -> Dict[str, str]:
+    env = os.environ.copy()
+    effective_home = _effective_codex_home(codex_home)
+    env["CODEX_HOME"] = str(effective_home)
+    if codex_bin:
+        env["PATH"] = f"{codex_bin.parent}{os.pathsep}{env.get('PATH', '')}"
+    return env
+
+
+def _codex_auth_env_keys(env: Dict[str, str]) -> List[str]:
+    return [key for key in _CODEX_AUTH_ENV_VARS if str(env.get(key) or "").strip()]
+
+
+def _codex_login_status(
+    *,
+    codex_bin: Optional[Path],
+    codex_home: Optional[Path],
+) -> Tuple[int, str, str]:
+    cmd = [*_codex_cli_prefix(codex_bin), "login", "status"]
+    env = _codex_env(codex_bin=codex_bin, codex_home=codex_home)
+    try:
+        proc = sp.run(cmd, text=True, capture_output=True, env=env, timeout=10)
+    except FileNotFoundError:
+        return 127, "", "codex CLI not found on PATH. Install it (for example: npm i -g @openai/codex)."
+    except sp.TimeoutExpired:
+        return 124, "", "codex login status timed out after 10 seconds."
+    return proc.returncode, proc.stdout or "", proc.stderr or ""
+
+
+def _preflight_codex_live_runner(
+    *,
+    workspace_root: Path,
+    codex_bin: Optional[Path],
+    codex_home: Optional[Path],
+) -> Tuple[List[str], List[str]]:
+    errors: List[str] = []
+    warnings: List[str] = []
+    effective_home = _effective_codex_home(codex_home)
+    env = _codex_env(codex_bin=codex_bin, codex_home=codex_home)
+    auth_env_keys = _codex_auth_env_keys(env)
+    auth_file = effective_home / "auth.json"
+    default_home = (Path.home() / ".codex").resolve()
+    default_auth_file = default_home / "auth.json"
+    repo_local_home = (workspace_root / ".codex").resolve()
+
+    if not effective_home.exists():
+        errors.append(f"Selected Codex home does not exist: {effective_home}")
+        return errors, warnings
+
+    if not auth_file.exists() and not auth_env_keys:
+        message = (
+            f"Selected Codex home is missing authenticated Codex state for live Codex runs: {effective_home}. "
+            "`--codex-home` replaces CODEX_HOME for `codex exec`."
+        )
+        if effective_home == repo_local_home:
+            message += (
+                " Repo-local `.codex` is suitable for discovery/static smoke, not full live smoke unless "
+                "it is provisioned with authenticated Codex state."
+            )
+        if effective_home != default_home and default_auth_file.exists():
+            message += (
+                f" The default home {default_home} has auth.json, but the selected home does not inherit it."
+            )
+        message += " Use an authenticated Codex home for `--runner codex`, or omit `--codex-home` to use the default home."
+        errors.append(message)
+        return errors, warnings
+
+    status_code, status_stdout, status_stderr = _codex_login_status(codex_bin=codex_bin, codex_home=effective_home)
+    status_text = " ".join(part.strip() for part in (status_stdout, status_stderr) if part.strip()).strip()
+    if status_code == 0:
+        return errors, warnings
+
+    if "not logged in" in status_text.lower():
+        if auth_env_keys:
+            warnings.append(
+                "Codex login status reported 'Not logged in', but auth environment variables are present "
+                f"({', '.join(auth_env_keys)}). Live exec may still work if this environment intentionally uses env-based auth."
+            )
+            return errors, warnings
+
+        message = f"Selected Codex home is not logged in for live Codex runs: {effective_home}."
+        if effective_home == repo_local_home:
+            message += (
+                " Repo-local `.codex` is suitable for discovery/static smoke, not full live smoke unless "
+                "it is authenticated."
+            )
+        if effective_home != default_home and default_auth_file.exists():
+            message += f" The default home {default_home} has auth.json, but the selected home does not inherit it."
+        message += (
+            " Run `CODEX_HOME=<that-home> codex login` for the selected home, or omit `--codex-home` to use the default authenticated home."
+        )
+        errors.append(message)
+        return errors, warnings
+
+    warnings.append(
+        f"Unable to confirm Codex login status for {effective_home}: {status_text or f'exit code {status_code}'}"
+    )
+    return errors, warnings
 
 
 def _codex_help_text(codex_bin: Optional[Path]) -> Optional[str]:
@@ -1207,7 +1326,11 @@ def build_arg_parser() -> argparse.ArgumentParser:
             "(default: d). Set empty string to disable."
         ),
     )
-    p.add_argument("--codex-home", default=None, help="Set CODEX_HOME (useful for repo-scoped .codex).")
+    p.add_argument(
+        "--codex-home",
+        default=None,
+        help="Set CODEX_HOME. This replaces the full Codex home; live Codex runs need authenticated state in the selected home.",
+    )
     p.add_argument("--codex-bin", default=None, help="Override codex CLI path.")
     p.add_argument("--claude-bin", default=None, help="Override claude CLI path.")
     p.add_argument("--gemini-bin", default=None, help="Override gemini CLI path.")
@@ -1714,6 +1837,30 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             if candidate.exists():
                 claude_zai_settings = candidate
 
+    preflight_errors: List[str] = []
+    preflight_warnings: List[str] = []
+    if "codex" in selected_runners:
+        if not (workspace_root / ".git").exists() and not _has_skip_git_repo_check(args.codex_arg):
+            preflight_warnings.append(
+                "Workspace does not appear to be a trusted git repository. "
+                "Codex may fail with 'Not inside a trusted directory'. "
+                "If this is an ephemeral directory, add --codex-arg=--skip-git-repo-check."
+            )
+        auth_errors, auth_warnings = _preflight_codex_live_runner(
+            workspace_root=workspace_root,
+            codex_bin=codex_bin,
+            codex_home=codex_home,
+        )
+        preflight_errors.extend(auth_errors)
+        preflight_warnings.extend(auth_warnings)
+
+    if preflight_errors:
+        for message in preflight_errors:
+            print(f"ERROR: {message}", file=sys.stderr)
+        for message in preflight_warnings:
+            print(f"WARNING: {message}", file=sys.stderr)
+        return 1
+
     reports_root = Path(args.reports_dir).expanduser().resolve() / skill_name
     reports_root.mkdir(parents=True, exist_ok=True)
     reports_base: Optional[Path] = None
@@ -1733,14 +1880,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         return 1
     git_meta = _git_metadata(skill_dir)
 
-    preflight_warnings: List[str] = []
-    if "codex" in selected_runners:
-        if not (workspace_root / ".git").exists() and not _has_skip_git_repo_check(args.codex_arg):
-            preflight_warnings.append(
-                "Workspace does not appear to be a trusted git repository. "
-                "Codex may fail with 'Not inside a trusted directory'. "
-                "If this is an ephemeral directory, add --codex-arg=--skip-git-repo-check."
-            )
 
     summary: Dict[str, Any] = {
         "schema_version": "2.1",
@@ -1935,47 +2074,51 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             # Assertions + rubric parsing
             parsed_json: Optional[Any] = None
             used_json_assertions = False
+            acceptance_skip_reason = _acceptance_skip_reason(exit_code=rc, output_text=output_text)
 
-            if schema_path and runner_name == "codex":
-                try:
-                    parsed_json = json.loads(output_text)
-                except Exception as e:  # noqa: BLE001
-                    runner_tier1_failures.append(f"expected JSON output (schema used), but parsing failed: {e}")
-                else:
-                    used_json_assertions = True
-            elif runner_name in {"claude-kimi", "claude-zai"} and args.claude_output_format == "json":
-                try:
-                    parsed_json = json.loads(output_text)
-                except Exception as e:  # noqa: BLE001
-                    runner_tier1_failures.append(f"expected JSON output (Claude json format), but parsing failed: {e}")
-                else:
-                    used_json_assertions = True
-            elif runner_name == "gemini" and args.gemini_output_format == "json":
-                try:
-                    parsed_json = json.loads(output_text)
-                except Exception as e:  # noqa: BLE001
-                    runner_tier1_failures.append(f"expected JSON output (Gemini json format), but parsing failed: {e}")
-                else:
-                    used_json_assertions = True
-
-            if used_json_assertions and parsed_json is not None:
-                runner_tier1_failures.extend(
-                    evaluate_assertions_json(
-                        parsed_json,
-                        c.acceptance,
-                        skill_name=skill_name,
-                        selected_skill=selected_skill,
-                    )
-                )
+            if acceptance_skip_reason is not None:
+                runner_warnings.append(acceptance_skip_reason)
             else:
-                runner_tier1_failures.extend(
-                    evaluate_assertions_text(
-                        output_text,
-                        c.acceptance,
-                        skill_name=skill_name,
-                        selected_skill=selected_skill,
+                if schema_path and runner_name == "codex":
+                    try:
+                        parsed_json = json.loads(output_text)
+                    except Exception as e:  # noqa: BLE001
+                        runner_tier1_failures.append(f"expected JSON output (schema used), but parsing failed: {e}")
+                    else:
+                        used_json_assertions = True
+                elif runner_name in {"claude-kimi", "claude-zai"} and args.claude_output_format == "json":
+                    try:
+                        parsed_json = json.loads(output_text)
+                    except Exception as e:  # noqa: BLE001
+                        runner_tier1_failures.append(f"expected JSON output (Claude json format), but parsing failed: {e}")
+                    else:
+                        used_json_assertions = True
+                elif runner_name == "gemini" and args.gemini_output_format == "json":
+                    try:
+                        parsed_json = json.loads(output_text)
+                    except Exception as e:  # noqa: BLE001
+                        runner_tier1_failures.append(f"expected JSON output (Gemini json format), but parsing failed: {e}")
+                    else:
+                        used_json_assertions = True
+
+                if used_json_assertions and parsed_json is not None:
+                    runner_tier1_failures.extend(
+                        evaluate_assertions_json(
+                            parsed_json,
+                            c.acceptance,
+                            skill_name=skill_name,
+                            selected_skill=selected_skill,
+                        )
                     )
-                )
+                else:
+                    runner_tier1_failures.extend(
+                        evaluate_assertions_text(
+                            output_text,
+                            c.acceptance,
+                            skill_name=skill_name,
+                            selected_skill=selected_skill,
+                        )
+                    )
 
             rubric = extract_rubric_metrics(parsed_json) if parsed_json is not None else None
             if rubric:

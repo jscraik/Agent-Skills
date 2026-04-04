@@ -235,6 +235,88 @@ cases:
       - type: regex
         value: "(?i)(rollback|restored paths)"
 
+  - id: clarification-package-ambiguous
+    name: clarification package ambiguous
+    category: edge
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: true
+    timeout_profile: codex-heavy
+    prompt: "Package this skill for reuse, but I have not decided whether it should stay a standalone skill or become a plugin. Keep the first response route-safe and do not guess the deliverable."
+    acceptance:
+      - type: regex
+        value: "(?i)(route[_ -]?clarification|clarification)"
+      - type: regex
+        value: "(?i)(standalone skill|plugin)"
+      - type: regex
+        value: "(?i)(which deliverable|do you want.*plugin|should this stay.*standalone|is the output.*plugin)"
+
+  - id: plugin-only-handoff
+    name: plugin only handoff
+    category: edge
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: true
+    timeout_profile: codex-heavy
+    prompt: "The standalone skill is already validated. I only want it packaged as a Codex plugin, not re-authored."
+    acceptance:
+      - type: regex
+        value: "(?i)(codex-plugin-builder)"
+      - type: regex
+        value: "(?i)(plugin package|plugin packaging|plugin-owned)"
+      - type: regex
+        value: "(?i)(already validated|contract-valid|standalone skill)"
+
+  - id: mixed-authoring-install-handoff
+    name: mixed authoring install handoff
+    category: edge
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: true
+    timeout_profile: codex-heavy
+    prompt: "Improve this imported skill's routing and safety, then install it once the fixes are done. In the first response, keep the ownership boundary explicit."
+    acceptance:
+      - type: regex
+        value: "(?i)(routing|safety|hardening|validate)"
+      - type: regex
+        value: "(?i)(skill-installer)"
+      - type: regex
+        value: "(?i)(once the skill is valid|after it is contract-valid|when the remaining work is installation|then hand off)"
+
+  - id: audit-package-validation-first
+    name: audit package validation first
+    category: edge
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: true
+    timeout_profile: codex-heavy
+    prompt: "Audit and harden this skill, then package it as a plugin. Do not let packaging skip the lifecycle checks."
+    acceptance:
+      - type: regex
+        value: "(?i)(audit|harden|validate|quality gates)"
+      - type: regex
+        value: "(?i)(codex-plugin-builder)"
+      - type: regex
+        value: "(?i)(after the skill is valid|once the standalone skill is contract-valid|do not skip validation|validation-first)"
+
+  - id: provenance-import-rollback
+    name: provenance import rollback
+    category: edge
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: true
+    timeout_profile: codex-heavy
+    prompt: "Import a skill from another repo and make it ready for installation. In the first response, require trusted-source checks, pinned refs, provenance capture, staged validation, and rollback."
+    acceptance:
+      - type: regex
+        value: "(?i)(trusted[- ]source|allowlist|trusted source)"
+      - type: regex
+        value: "(?i)(pinned.*(ref|commit)|source_ref|sha256|provenance)"
+      - type: regex
+        value: "(?i)(quarantine|staged|validate.*before activation)"
+      - type: regex
+        value: "(?i)(rollback|restore|atomic)"
+
   - id: edge-codex-ui-metadata
     name: edge codex ui metadata
     category: edge

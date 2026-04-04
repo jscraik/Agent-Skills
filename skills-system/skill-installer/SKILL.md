@@ -1,13 +1,21 @@
 ---
 name: skill-installer
-description: Install Codex skills into $CODEX_HOME/skills from a curated list or a GitHub repo path. Use when a user asks to list installable skills, install a curated skill, or install a skill from another repo (including private repos).
+description: Install contract-valid Codex skills into $CODEX_HOME/skills from a curated list or a GitHub repo path. Use when a user asks to list, import, install, or repair visibility for an already-valid skill, not to author, harden, or package a plugin.
 metadata:
-  short-description: Install curated skills from openai/skills or other repos
+  short-description: Install contract-valid skills from curated or repo sources
 ---
 
 # Skill Installer
 
-Helps install skills. By default these are from https://github.com/openai/skills/tree/main/skills/.curated, but users can also provide other locations. Experimental skills live in https://github.com/openai/skills/tree/main/skills/.experimental and can be installed the same way.
+Helps install already-valid skills. By default these are from https://github.com/openai/skills/tree/main/skills/.curated, but users can also provide other locations. Experimental skills live in https://github.com/openai/skills/tree/main/skills/.experimental and can be installed the same way.
+
+Treat installation as the execution stage after lifecycle judgment is settled:
+- prefer curated or explicitly trusted sources;
+- when importing remote content, pin the ref or commit and record provenance before activation;
+- validate imported skills in quarantine or another staged location before moving them into `$CODEX_HOME/skills`;
+- roll back atomically if validation or activation fails;
+- hand off to `skill-builder` if the skill still needs routing, validator, eval, or packaging judgment;
+- hand off to `codex-plugin-builder` when the requested deliverable is a plugin package instead of a standalone installed skill.
 
 Use the helper scripts based on the task:
 - List skills when the user asks what is available, or if the user uses this skill without specifying what to do. Default listing is `.curated`, but you can pass `--path skills/.experimental` when they ask about experimental skills.
@@ -63,6 +71,6 @@ All of these scripts use network, so when running in the sandbox, request escala
 |---|---|
 | [[skill-creator]] | Author or revise a skill before attempting to distribute it |
 | [[skill-builder]] | Run quality gates and packaging checks on a skill before installation |
-| [[plugin-creator]] | Scaffold plugin packaging when the deliverable should ship as a plugin instead of a bare skill |
+| [[codex-plugin-builder]] | Package a contract-valid standalone skill when the deliverable should ship as a plugin instead of a bare install |
 
 **Topic map:** [[agent-ops]]

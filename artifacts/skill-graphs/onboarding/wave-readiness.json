@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-02T22:29:54Z",
-  "decision_date": "2026-04-02",
+  "generated_at": "2026-04-03T22:04:30Z",
+  "decision_date": "2026-04-03",
   "summary": {
     "active_skill_count": 84,
     "manual_skill_count": 10,
@@ -30,14 +30,14 @@
       "blockers": [
         {
           "code": "TELEMETRY_HEALTH_STALE",
-          "detail": "daily-skill-health.md age 55.02h exceeds 24.00h",
+          "detail": "daily-skill-health.md age 78.60h exceeds 24.00h",
           "owner": "unassigned",
           "due_date": null,
           "escalation_date": null
         },
         {
           "code": "TELEMETRY_WINDOW_MISMATCH",
-          "detail": "daily-skill-health.md window mismatch (expected 2026-03-27..2026-04-02, actual 2026-03-25..2026-03-31)",
+          "detail": "daily-skill-health.md window mismatch (expected 2026-03-28..2026-04-03, actual 2026-03-25..2026-03-31)",
           "owner": "unassigned",
           "due_date": null,
           "escalation_date": null

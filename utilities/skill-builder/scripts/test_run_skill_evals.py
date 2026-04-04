@@ -9,6 +9,7 @@ import tempfile
 import textwrap
 import unittest
 from pathlib import Path
+from unittest import mock
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 if str(SCRIPT_DIR) not in sys.path:
@@ -22,6 +23,8 @@ from defusedxml import ElementTree as ET
 
 from run_skill_evals import (
     EvalCase,
+    _acceptance_skip_reason,
+    _preflight_codex_live_runner,
     _filter_cases_for_eval_mode,
     _is_smoke_only_case,
     _write_junit_report,
@@ -32,6 +35,35 @@ from run_skill_evals import (
 
 
 class RunSkillEvalsModeTests(unittest.TestCase):
+    def test_acceptance_skip_reason_only_triggers_for_empty_nonzero_output(self) -> None:
+        self.assertEqual(
+            _acceptance_skip_reason(exit_code=1, output_text=""),
+            "skipped acceptance assertions because the runner exited non-zero and produced no final output",
+        )
+        self.assertEqual(
+            _acceptance_skip_reason(exit_code=2, output_text="   \n"),
+            "skipped acceptance assertions because the runner exited non-zero and produced no final output",
+        )
+        self.assertIsNone(_acceptance_skip_reason(exit_code=1, output_text="partial response"))
+        self.assertIsNone(_acceptance_skip_reason(exit_code=0, output_text=""))
+
+    def test_repo_evals_include_family_contract_cases(self) -> None:
+        evals_path = REPO_ROOT / "utilities" / "skill-builder" / "references" / "evals.yaml"
+
+        cases = load_evals(evals_path)
+        case_map = {case.id: case for case in cases}
+
+        for case_id in [
+            "clarification-package-ambiguous",
+            "plugin-only-handoff",
+            "mixed-authoring-install-handoff",
+            "audit-package-validation-first",
+            "provenance-import-rollback",
+        ]:
+            self.assertIn(case_id, case_map)
+            self.assertEqual(case_map[case_id].eval_modes, ("smoke", "release"))
+            self.assertEqual(case_map[case_id].timeout_profile, "codex-heavy")
+
     def test_smoke_mode_filters_release_only_and_pressure_cases(self) -> None:
         cases = [
             EvalCase(
@@ -143,6 +175,84 @@ class RunSkillEvalsModeTests(unittest.TestCase):
 
         self.assertEqual(len(cases), 1)
         self.assertEqual(cases[0].eval_modes, ("smoke", "release"))
+
+    def test_new_family_contract_cases_survive_smoke_filter(self) -> None:
+        evals_path = REPO_ROOT / "utilities" / "skill-builder" / "references" / "evals.yaml"
+
+        cases = load_evals(evals_path)
+        selected = _filter_cases_for_eval_mode(cases, eval_mode="smoke")
+        selected_ids = {case.id for case in selected}
+
+        self.assertTrue(
+            {
+                "clarification-package-ambiguous",
+                "plugin-only-handoff",
+                "mixed-authoring-install-handoff",
+                "audit-package-validation-first",
+                "provenance-import-rollback",
+            }.issubset(selected_ids)
+        )
+
+    def test_preflight_codex_live_runner_rejects_repo_local_home_without_auth(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            workspace_root = Path(tmpdir)
+            repo_home = workspace_root / ".codex"
+            repo_home.mkdir()
+            home_root = workspace_root / "home-root"
+            default_home = home_root / ".codex"
+            default_home.mkdir(parents=True)
+            (default_home / "auth.json").write_text("{}", encoding="utf-8")
+
+            with mock.patch("run_skill_evals.Path.home", return_value=home_root):
+                errors, warnings = _preflight_codex_live_runner(
+                    workspace_root=workspace_root,
+                    codex_bin=None,
+                    codex_home=repo_home,
+                )
+
+        self.assertEqual(warnings, [])
+        self.assertEqual(len(errors), 1)
+        self.assertIn("missing authenticated Codex state", errors[0])
+        self.assertIn("Repo-local `.codex` is suitable for discovery/static smoke", errors[0])
+        self.assertIn(str(default_home), errors[0])
+
+    def test_preflight_codex_live_runner_accepts_logged_in_home(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            workspace_root = Path(tmpdir)
+            codex_home = workspace_root / ".codex"
+            codex_home.mkdir()
+            (codex_home / "auth.json").write_text("{}", encoding="utf-8")
+            fake_proc = mock.Mock(returncode=0, stdout="Logged in using ChatGPT\n", stderr="")
+
+            with mock.patch("run_skill_evals.sp.run", return_value=fake_proc) as mocked_run:
+                errors, warnings = _preflight_codex_live_runner(
+                    workspace_root=workspace_root,
+                    codex_bin=None,
+                    codex_home=codex_home,
+                )
+
+        self.assertEqual(errors, [])
+        self.assertEqual(warnings, [])
+        mocked_run.assert_called_once()
+
+    def test_preflight_codex_live_runner_warns_when_env_auth_is_present(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            workspace_root = Path(tmpdir)
+            codex_home = workspace_root / ".codex"
+            codex_home.mkdir()
+            fake_proc = mock.Mock(returncode=1, stdout="Not logged in\n", stderr="")
+
+            with mock.patch("run_skill_evals.sp.run", return_value=fake_proc):
+                with mock.patch.dict("run_skill_evals.os.environ", {"OPENAI_API_KEY": "sk-test"}, clear=False):
+                    errors, warnings = _preflight_codex_live_runner(
+                        workspace_root=workspace_root,
+                        codex_bin=None,
+                        codex_home=codex_home,
+                    )
+
+        self.assertEqual(errors, [])
+        self.assertEqual(len(warnings), 1)
+        self.assertIn("auth environment variables are present", warnings[0])
 
     def test_write_junit_report_outputs_failures(self) -> None:
         summary = {
