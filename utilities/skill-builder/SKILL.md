@@ -16,6 +16,8 @@ Design, improve, validate, and package high-quality Codex skills.
 ## Table of Contents
 - [Working agreement](#working-agreement)
 - [When to use](#when-to-use)
+- [Iteration Round Contract](#iteration-round-contract)
+- [Evidence Ownership and Readiness](#evidence-ownership-and-readiness)
 - [Category confirmation](#category-confirmation)
 - [OpenAI skill format and progressive disclosure](#openai-skill-format-and-progressive-disclosure)
 - [Semantic tag governance](#semantic-tag-governance)
@@ -58,6 +60,30 @@ Use this skill when the user asks to:
 - prepare a contract-valid skill for install/distribute handoff or finish bounded distribution work when lifecycle judgment is already settled.
 
 Keep this skill out of scope for: first-draft skill scaffolding (`skill-creator`); pure install/import or runtime-visibility work once the skill is already valid (`skill-installer`); unrelated app feature coding; generic bug-fixing outside skill quality; routine non-skill docs edits; plugin conversion (`codex-plugin-builder`); session-scan coverage (`codex-sessions-skill-scan`).
+
+## Iteration Round Contract
+For non-trivial lifecycle work, use one explicit round model:
+1. Prepare realistic prompts from the creator handoff package.
+2. Freeze comparison inputs for candidate and baseline parity.
+3. Select baseline type:
+   - `no_skill` for new skills by default
+   - `prior_skill_snapshot` for existing skills
+   - `neutral_repo_baseline` only when planning explicitly approved it
+4. Run candidate and baseline in the same round window.
+5. Capture evidence (quantitative, qualitative, and metric-availability status).
+6. Assess route and description quality every round; edit only when evidence shows weakness or ambiguity.
+7. Record round decision (`iterate_again`, `widen_eval_set`, `ready_for_install_handoff`, `ready_for_plugin_handoff`, or `stop_blocked`).
+Round state must remain explicit in artifacts: `prepared`, `running`, `evidence_captured`, `reviewed`, `decision_recorded`, `blocked`.
+
+## Evidence Ownership and Readiness
+Use one additive artifact model:
+- `result.json`: per-case comparison details, round-state fields, metric availability, and optional qualitative review path.
+- `summary.json`: run-level readiness rollup and blocked-state visibility.
+- `scorecard.json`: CI-facing pass/fail surface; additive metadata only.
+- `release_manifest.json`: thin release-facing snapshot that points to richer artifacts.
+- `comparison_review.md` (optional, run-scoped): qualitative review notes when JSON alone is not enough.
+Readiness states must stay distinct: `starter_valid`, `comparison_incomplete`, `comparison_blocked`, `downstream_ready`.
+Downstream handoff guardrail: `skill-installer` and `codex-plugin-builder` are downstream-only. Hand off only when `ContractValidityEvidence` exists and lifecycle judgment is complete.
 
 ## Category confirmation
 For `create` and `improve` mode, confirm the primary category before drafting:

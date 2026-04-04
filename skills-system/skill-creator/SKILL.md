@@ -9,7 +9,7 @@ metadata:
 
 This skill provides guidance for creating effective skills.
 
-Use this skill for starter authoring and scaffold-bound edits only. When the request becomes primarily about routing hardening, validator or eval changes, packaging decisions, or existing-skill lifecycle maintenance, hand off to `skill-builder`. When the deliverable becomes a plugin package, hand off to `codex-plugin-builder`.
+Use this skill for starter authoring and scaffold-bound edits only. When the request becomes primarily about routing hardening, validator or eval changes, packaging decisions, or existing-skill lifecycle maintenance, hand off to `skill-builder`. For non-trivial skills, make that handoff explicit by creating `references/handoff-package.md` in the target skill before transitioning ownership. When the deliverable becomes a plugin package after lifecycle validity is established, hand off to `codex-plugin-builder`.
 
 ## About Skills
 
@@ -231,7 +231,8 @@ Skill creation involves these steps:
 3. Initialize the skill (run init_skill.py)
 4. Edit the skill (implement resources and write SKILL.md)
 5. Validate the skill (run quick_validate.py)
-6. Iterate based on real usage and forward-test complex skills.
+6. Create a durable handoff artifact for non-trivial lifecycle transitions.
+7. Iterate based on real usage and forward-test complex skills.
 
 Follow these steps in order, skipping only if there is a clear reason why they are not applicable.
 
@@ -382,7 +383,29 @@ Once development of the skill is complete, validate the skill folder to catch ba
 
 The validation script checks YAML frontmatter format, required fields, and naming rules. If validation fails, fix the reported issues and run the command again.
 
-### Step 6: Iterate
+### Step 6: Create the Handoff Artifact for Non-Trivial Work
+
+If the request remains scaffold-only, you can finish at creator stage.
+
+If the skill now needs lifecycle hardening, comparative evals, packaging judgment, or broader route-boundary tuning, create a durable creator-to-builder handoff artifact in the target skill at:
+
+`references/handoff-package.md`
+
+Use `references/handoff-package-template.md` in this skill as the canonical starter shape.
+
+Required fields in the handoff artifact:
+- `skill_goal`
+- `boundary_summary`
+- `trigger_contexts`
+- `resource_inventory`
+- `starter_prompts` (2-3 realistic prompts)
+- `known_risks_or_unknowns`
+- `validation_state`
+- `authoring_state`
+
+Do not treat this artifact as optional prose. It is the lifecycle bridge that lets `skill-builder` start comparative hardening without re-interviewing the entire skill.
+
+### Step 7: Iterate
 
 After testing the skill, you may detect the skill is complex enough that it requires forward-testing; or users may request improvements.
 

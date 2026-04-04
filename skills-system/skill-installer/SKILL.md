@@ -1,6 +1,6 @@
 ---
 name: skill-installer
-description: Install contract-valid Codex skills into $CODEX_HOME/skills from a curated list or a GitHub repo path. Use when a user asks to list, import, install, or repair visibility for an already-valid skill, not to author, harden, or package a plugin.
+description: Install contract-valid Codex skills into $CODEX_HOME/skills from a curated list or a GitHub repo path. Use when a user asks to list, import, install, or repair visibility for an already-valid skill backed by ContractValidityEvidence, not to author, harden, or package a plugin.
 metadata:
   short-description: Install contract-valid skills from curated or repo sources
 ---
@@ -14,6 +14,7 @@ Treat installation as the execution stage after lifecycle judgment is settled:
 - when importing remote content, pin the ref or commit and record provenance before activation;
 - validate imported skills in quarantine or another staged location before moving them into `$CODEX_HOME/skills`;
 - roll back atomically if validation or activation fails;
+- consume `ContractValidityEvidence` from `skill-builder` before treating a skill as install-ready;
 - hand off to `skill-builder` if the skill still needs routing, validator, eval, or packaging judgment;
 - hand off to `codex-plugin-builder` when the requested deliverable is a plugin package instead of a standalone installed skill.
 

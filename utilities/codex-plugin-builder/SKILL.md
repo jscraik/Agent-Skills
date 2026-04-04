@@ -31,7 +31,7 @@ Use this skill when the request is to:
 - convert a Claude-oriented plugin shape into a Codex-compatible package;
 - compare a proposed plugin against existing local plugins before deciding whether to merge, fold, improve, or create;
 - choose an archetype-informed scaffold shape based on real upstream plugin families;
-- package a contract-valid standalone skill as a plugin-owned deliverable once lifecycle judgment is already settled;
+- package a contract-valid standalone skill as a plugin-owned deliverable once lifecycle judgment is already settled and `ContractValidityEvidence` is present;
 - add plugin-owned surfaces such as `skills/`, `hooks.json`, `agents/`, `.app.json`, or `.mcp.json`;
 - fold deprecated `commands/`, `slash-commands/`, or `prompts/` content into plugin-owned `skills/`;
 - scaffold local package docs such as `README.md`, `LICENSE`, and `references/operational-spec.md` when helpful;
@@ -40,7 +40,7 @@ Use this skill when the request is to:
 - audit a plugin against curated upstream `openai/plugins` conventions without conflating that with minimal runtime validity.
 
 Do not use this skill for:
-- standalone skill hardening, routing fixes, validator work, or audit-first packaging when the skill is not yet contract-valid (`skill-builder` owns that stage);
+- standalone skill hardening, routing fixes, validator work, or audit-first packaging when the skill is not yet contract-valid (`skill-builder` owns that stage and produces `ContractValidityEvidence`);
 - standalone app feature implementation;
 - unrelated bugfix work;
 - generic MCP server implementation that is not plugin packaging.
@@ -100,6 +100,7 @@ Key principles:
 - Restate requested surfaces and what is out of scope for this pass.
 - Prefer smallest package boundary wording when the request is broad.
 - If the request still mixes audit, validation, hardening, or routing work with plugin packaging, keep `skill-builder` as the primary owner until the standalone skill is contract-valid, then hand off explicitly.
+- Treat this skill as downstream-only: consume `ContractValidityEvidence` rather than creating new lifecycle-validity judgments locally.
 
 2. Inspect source state.
 - For external sources, capture:

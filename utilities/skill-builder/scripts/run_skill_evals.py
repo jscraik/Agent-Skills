@@ -84,6 +84,22 @@ _RUNNER_CHOICES = ["codex", "claude-kimi", "claude-zai", "gemini", "discovery-sm
 _TIMEOUT_PROFILE_CHOICES = ["default", "codex-heavy", "discovery-heavy"]
 _EVAL_MODE_CHOICES = ["standard", "smoke", "release"]
 _CODEX_AUTH_ENV_VARS = ("OPENAI_API_KEY", "OPENAI_API_TOKEN", "OPENAI_ACCESS_TOKEN")
+_BASELINE_TYPE_CHOICES = {"no_skill", "prior_skill_snapshot", "neutral_repo_baseline"}
+_ROUND_STATE_CHOICES = {
+    "prepared",
+    "running",
+    "evidence_captured",
+    "reviewed",
+    "decision_recorded",
+    "blocked",
+}
+_READINESS_STATE_CHOICES = {
+    "starter_valid",
+    "comparison_incomplete",
+    "comparison_blocked",
+    "downstream_ready",
+}
+_METRIC_AVAILABILITY_CHOICES = {"available", "unavailable"}
 
 # Script-level options (used to disambiguate `--codex-arg --foo` intent).
 _SCRIPT_OPTIONS: Set[str] = {
@@ -229,6 +245,13 @@ class EvalCase:
     timeout_profile: Optional[str] = None
     smoke_mode: Optional[str] = None
     eval_modes: Optional[Tuple[str, ...]] = None
+    baseline_type: Optional[str] = None
+    comparison_inputs: Optional[Dict[str, Any]] = None
+    iteration_round_state: Optional[str] = None
+    metric_availability: Optional[str] = None
+    readiness_state: Optional[str] = None
+    comparison_review_artifact: Optional[str] = None
+    neutral_baseline_approval_id: Optional[str] = None
 
 
 _VALID_CATEGORIES = {"happy", "edge", "negative", "pressure"}
@@ -236,6 +259,15 @@ _VALID_CATEGORIES = {"happy", "edge", "negative", "pressure"}
 
 def _utc_now_iso() -> str:
     return dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+
+
+def _resolve_optional_case_artifact_path(case_dir: Path, artifact: Optional[str]) -> Optional[str]:
+    if artifact is None:
+        return None
+    candidate = Path(artifact)
+    if candidate.is_absolute():
+        return str(candidate)
+    return str((case_dir / candidate).resolve())
 
 
 def _normalize_eval_modes(raw: Any, *, case_number: int) -> Optional[Tuple[str, ...]]:
@@ -258,10 +290,34 @@ def _normalize_eval_modes(raw: Any, *, case_number: int) -> Optional[Tuple[str, 
     return tuple(normalized)
 
 
-def load_evals(evals_path: Path) -> List[EvalCase]:
+def _load_evals_document(evals_path: Path) -> Dict[str, Any]:
     obj = yaml.safe_load(evals_path.read_text(encoding="utf-8"))
     if not isinstance(obj, dict) or "cases" not in obj or not isinstance(obj["cases"], list):
         raise ValueError("evals.yaml must be a mapping with `cases: [...]`.")
+    return obj
+
+
+def load_neutral_baseline_approvals(evals_path: Path) -> Dict[str, Dict[str, Any]]:
+    obj = _load_evals_document(evals_path)
+    raw = obj.get("neutral_baseline_approvals")
+    if raw is None:
+        return {}
+    if not isinstance(raw, list):
+        raise ValueError("`neutral_baseline_approvals` must be a list when provided.")
+
+    approvals: Dict[str, Dict[str, Any]] = {}
+    for i, item in enumerate(raw, 1):
+        if not isinstance(item, dict):
+            raise ValueError(f"neutral_baseline_approvals entry #{i} must be a mapping.")
+        approval_id = str(item.get("id") or "").strip()
+        if not approval_id:
+            raise ValueError(f"neutral_baseline_approvals entry #{i} missing non-empty `id`.")
+        approvals[approval_id] = dict(item)
+    return approvals
+
+
+def load_evals(evals_path: Path) -> List[EvalCase]:
+    obj = _load_evals_document(evals_path)
 
     cases: List[EvalCase] = []
     for i, c in enumerate(obj["cases"], 1):
@@ -325,6 +381,63 @@ def load_evals(evals_path: Path) -> List[EvalCase]:
                 smoke_mode = None
         eval_modes = _normalize_eval_modes(c.get("eval_modes"), case_number=i)
 
+        baseline_type = c.get("baseline_type")
+        if baseline_type is not None:
+            baseline_type = str(baseline_type).strip().lower()
+            if baseline_type and baseline_type not in _BASELINE_TYPE_CHOICES:
+                raise ValueError(
+                    f"Case #{i} `baseline_type` must be one of {sorted(_BASELINE_TYPE_CHOICES)}; "
+                    f"got {baseline_type!r}."
+                )
+
+        comparison_inputs = c.get("comparison_inputs")
+        if comparison_inputs is not None and not isinstance(comparison_inputs, dict):
+            raise ValueError(f"Case #{i} `comparison_inputs` must be a mapping when provided.")
+
+        iteration_round_state = c.get("iteration_round_state")
+        if iteration_round_state is not None:
+            iteration_round_state = str(iteration_round_state).strip().lower()
+            if iteration_round_state and iteration_round_state not in _ROUND_STATE_CHOICES:
+                raise ValueError(
+                    f"Case #{i} `iteration_round_state` must be one of {sorted(_ROUND_STATE_CHOICES)}; "
+                    f"got {iteration_round_state!r}."
+                )
+
+        metric_availability = c.get("metric_availability")
+        if metric_availability is not None:
+            metric_availability = str(metric_availability).strip().lower()
+            if metric_availability and metric_availability not in _METRIC_AVAILABILITY_CHOICES:
+                raise ValueError(
+                    f"Case #{i} `metric_availability` must be one of {sorted(_METRIC_AVAILABILITY_CHOICES)}; "
+                    f"got {metric_availability!r}."
+                )
+
+        readiness_state = c.get("readiness_state")
+        if readiness_state is not None:
+            readiness_state = str(readiness_state).strip().lower()
+            if readiness_state and readiness_state not in _READINESS_STATE_CHOICES:
+                raise ValueError(
+                    f"Case #{i} `readiness_state` must be one of {sorted(_READINESS_STATE_CHOICES)}; "
+                    f"got {readiness_state!r}."
+                )
+
+        comparison_review_artifact = c.get("comparison_review_artifact")
+        if comparison_review_artifact is not None:
+            comparison_review_artifact = str(comparison_review_artifact).strip()
+            if not comparison_review_artifact:
+                comparison_review_artifact = None
+
+        neutral_baseline_approval_id = c.get("neutral_baseline_approval_id")
+        if neutral_baseline_approval_id is not None:
+            neutral_baseline_approval_id = str(neutral_baseline_approval_id).strip()
+            if not neutral_baseline_approval_id:
+                neutral_baseline_approval_id = None
+
+        if baseline_type == "neutral_repo_baseline" and not neutral_baseline_approval_id:
+            raise ValueError(
+                f"Case #{i} uses baseline_type=neutral_repo_baseline but is missing `neutral_baseline_approval_id`."
+            )
+
         cases.append(
             EvalCase(
                 id=case_id,
@@ -341,6 +454,13 @@ def load_evals(evals_path: Path) -> List[EvalCase]:
                 timeout_profile=timeout_profile if timeout_profile else None,
                 smoke_mode=smoke_mode,
                 eval_modes=eval_modes,
+                baseline_type=baseline_type if baseline_type else None,
+                comparison_inputs=dict(comparison_inputs) if isinstance(comparison_inputs, dict) else None,
+                iteration_round_state=iteration_round_state if iteration_round_state else None,
+                metric_availability=metric_availability if metric_availability else None,
+                readiness_state=readiness_state if readiness_state else None,
+                comparison_review_artifact=comparison_review_artifact,
+                neutral_baseline_approval_id=neutral_baseline_approval_id,
             )
         )
     return cases
@@ -1908,7 +2028,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         print(f"ERROR: Missing evals file: {evals_path}", file=sys.stderr)
         return 1
 
-    cases = load_evals(evals_path)
+    try:
+        cases = load_evals(evals_path)
+        neutral_baseline_approvals = load_neutral_baseline_approvals(evals_path)
+    except ValueError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 1
     case_filters = _parse_csv_args(args.case)
     category_filters = _parse_csv_args(args.category)
     try:
@@ -2052,6 +2177,13 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     git_meta = _git_metadata(skill_dir)
 
 
+    readiness_summary: Dict[str, int] = {state: 0 for state in sorted(_READINESS_STATE_CHOICES)}
+    readiness_summary["unknown"] = 0
+    round_state_summary: Dict[str, int] = {state: 0 for state in sorted(_ROUND_STATE_CHOICES)}
+    round_state_summary["unknown"] = 0
+    comparison_review_paths: List[str] = []
+    used_neutral_baseline_approvals: Set[str] = set()
+
     summary: Dict[str, Any] = {
         "schema_version": "2.1",
         "tool": "run_skill_evals",
@@ -2082,6 +2214,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "tier1_failures": 0,
         "tier2_findings": 0,
         "preflight_warnings": preflight_warnings,
+        "readiness_summary": readiness_summary,
+        "round_state_summary": round_state_summary,
+        "neutral_baseline_approvals_used": [],
     }
 
     any_tier1_failed = False
@@ -2109,6 +2244,18 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             cli_timeout_sec=args.timeout_sec,
             cli_timeout_profile=args.timeout_profile,
         )
+        comparison_review_artifact = _resolve_optional_case_artifact_path(case_dir, c.comparison_review_artifact)
+        neutral_baseline_approval: Optional[Dict[str, Any]] = None
+        if c.baseline_type == "neutral_repo_baseline":
+            approval_id = c.neutral_baseline_approval_id or ""
+            neutral_baseline_approval = neutral_baseline_approvals.get(approval_id)
+            if neutral_baseline_approval is None:
+                print(
+                    "ERROR: case "
+                    f"{c.id} references missing neutral_baseline_approval_id={approval_id!r} in {evals_path}",
+                    file=sys.stderr,
+                )
+                return 1
 
         case_tier1_failures: List[str] = []
         case_tier2_findings: List[str] = []
@@ -2347,6 +2494,13 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             "eval_modes": list(c.eval_modes) if c.eval_modes else None,
             "should_trigger": c.should_trigger,
             "prepend_skill": c.prepend_skill,
+            "baseline_type": c.baseline_type,
+            "comparison_inputs": dict(c.comparison_inputs) if c.comparison_inputs else None,
+            "iteration_round_state": c.iteration_round_state,
+            "metric_availability": c.metric_availability,
+            "readiness_state": c.readiness_state,
+            "comparison_review_artifact": comparison_review_artifact,
+            "neutral_baseline_approval": neutral_baseline_approval,
             "timeout_profile": case_timeout_profile,
             "timeout_sec": _eval_timeout_seconds(
                 timeout_sec=case_timeout_sec,
@@ -2365,6 +2519,23 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         (case_dir / "result.json").write_text(json.dumps(case_record, indent=2, ensure_ascii=False), encoding="utf-8")
 
         summary["cases"].append(case_record)
+
+        if c.readiness_state:
+            summary["readiness_summary"][c.readiness_state] = summary["readiness_summary"].get(c.readiness_state, 0) + 1
+        else:
+            summary["readiness_summary"]["unknown"] += 1
+
+        if c.iteration_round_state:
+            summary["round_state_summary"][c.iteration_round_state] = (
+                summary["round_state_summary"].get(c.iteration_round_state, 0) + 1
+            )
+        else:
+            summary["round_state_summary"]["unknown"] += 1
+
+        if comparison_review_artifact:
+            comparison_review_paths.append(comparison_review_artifact)
+        if c.neutral_baseline_approval_id:
+            used_neutral_baseline_approvals.add(c.neutral_baseline_approval_id)
 
         if case_tier1_failed:
             any_tier1_failed = True
@@ -2390,6 +2561,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "summary": str(summary_path),
         "scorecard": str(scorecard_path),
     }
+    if comparison_review_paths:
+        unique_paths = sorted(set(comparison_review_paths))
+        summary["artifacts"]["comparison_review"] = unique_paths[0] if len(unique_paths) == 1 else unique_paths
+    summary["neutral_baseline_approvals_used"] = sorted(used_neutral_baseline_approvals)
     release_manifest_path = reports_base / "release_manifest.json"
     junit_path = Path(args.junit_out).expanduser().resolve() if args.junit_out else (reports_base / "junit.xml")
     summary["artifacts"]["release_manifest"] = str(release_manifest_path)
@@ -2406,6 +2581,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             "runner_mode": summary["runner_mode"],
             "tier2_mode": args.tier2_mode,
             "capture_jsonl": capture_jsonl,
+            "readiness_summary": summary["readiness_summary"],
+            "round_state_summary": summary["round_state_summary"],
+            "neutral_baseline_approvals_used": summary["neutral_baseline_approvals_used"],
             "reports_base": str(reports_base),
         },
         "artifacts": summary["artifacts"],

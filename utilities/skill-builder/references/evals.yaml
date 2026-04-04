@@ -1,5 +1,11 @@
 schema_version: "2.0"
 skill_name: "skill-builder"
+neutral_baseline_approvals:
+  - id: planner-approved-neutral-baseline-skill-builder
+    rationale: "Use a neutral repo baseline only when no-skill and prior snapshot comparisons are invalid for the target lane."
+    approved_by: "docs/plans/2026-04-04-feat-skill-authoring-family-iteration-upgrade-plan.md"
+    recorded_at: "2026-04-04"
+    source_of_truth: "planning-artifact"
 
 cases:
   - id: explicit-plan
@@ -316,6 +322,36 @@ cases:
         value: "(?i)(quarantine|staged|validate.*before activation)"
       - type: regex
         value: "(?i)(rollback|restore|atomic)"
+
+  - id: builder-round-metadata-contract
+    name: builder round metadata contract
+    category: edge
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: true
+    timeout_profile: codex-heavy
+    baseline_type: neutral_repo_baseline
+    neutral_baseline_approval_id: planner-approved-neutral-baseline-skill-builder
+    comparison_inputs:
+      prompt_set: "frozen-first-response-contract"
+      fixture_set: "none"
+      environment: "repo-default"
+    iteration_round_state: reviewed
+    metric_availability: unavailable
+    readiness_state: comparison_incomplete
+    comparison_review_artifact: "comparison_review.md"
+    prompt: "Define one explicit non-trivial iteration round contract for skill hardening. Include baseline rules, frozen comparison inputs, round-state vocabulary, metric unavailability handling, and readiness-state distinctions."
+    acceptance:
+      - type: regex
+        value: "(?i)(baseline|no_skill|prior_skill_snapshot|neutral_repo_baseline)"
+      - type: regex
+        value: "(?i)(comparison inputs|frozen|same inputs)"
+      - type: regex
+        value: "(?i)(prepared|running|evidence_captured|reviewed|decision_recorded|blocked)"
+      - type: regex
+        value: "(?i)(metric.*unavailable|unavailable)"
+      - type: regex
+        value: "(?i)(starter[_-]valid|comparison[_-]incomplete|comparison[_-]blocked|downstream[_-]ready)"
 
   - id: edge-codex-ui-metadata
     name: edge codex ui metadata

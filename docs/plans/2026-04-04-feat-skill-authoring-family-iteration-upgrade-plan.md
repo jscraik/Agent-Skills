@@ -1,7 +1,7 @@
 ---
 title: feat: Skill Authoring Family Iteration Upgrade
 type: feat
-status: active
+status: complete
 date: 2026-04-04
 origin: docs/brainstorms/2026-04-03-skill-authoring-family-contract-requirements.md
 requirements: docs/brainstorms/2026-04-03-skill-authoring-family-contract-requirements.md
@@ -219,7 +219,7 @@ Design notes:
 
 ## Implementation Units
 
-- [ ] **P0 / Creator Handoff Artifact Contract**
+- [x] **P0 / Creator Handoff Artifact Contract**
 
 **Goal:** Make the creator-to-builder transition concrete by teaching `skill-creator` to produce and reference `references/handoff-package.md` for non-trivial skills.
 
@@ -258,7 +258,7 @@ Design notes:
 - `skill-creator` no longer leaves the handoff artifact shape implicit.
 - A maintainer can identify the required target-skill artifact path without reading the spec.
 
-- [ ] **P1 / Builder Round Contract and Evidence Surface**
+- [x] **P1 / Builder Round Contract and Evidence Surface**
 
 **Goal:** Teach `skill-builder` one explicit comparative round model and decide the minimum additive artifact shape that makes the loop auditable.
 
@@ -311,7 +311,7 @@ Design notes:
 - `skill-builder` no longer describes evaluation as a loose collection of checks.
 - The chosen human and machine evidence surfaces are explicit enough that P2 can implement them without design guesswork.
 
-- [ ] **P2 / Eval Harness and Regression Coverage**
+- [x] **P2 / Eval Harness and Regression Coverage**
 
 **Goal:** Extend the existing eval harness so the new round model, baseline rules, and readiness signals are enforceable instead of doc-only.
 
@@ -370,7 +370,7 @@ Design notes:
 - The comparative loop is protected by runnable tests and report outputs, not only prose.
 - The existing release-manifest contract remains usable after the additive changes.
 
-- [ ] **P3 / Downstream Gating and Family Surface Alignment**
+- [x] **P3 / Downstream Gating and Family Surface Alignment**
 
 **Goal:** Align installer and plugin-builder surfaces with the new evidence model so they consume `ContractValidityEvidence` instead of improvising lifecycle judgment.
 
@@ -408,7 +408,7 @@ Design notes:
 - Installer and plugin-builder surfaces consume the new evidence model consistently.
 - Catalog and runtime-visible skill descriptions no longer contradict the family contract.
 
-- [ ] **P4 / Integrated Validation and Closeout Evidence**
+- [x] **P4 / Integrated Validation and Closeout Evidence**
 
 **Goal:** Prove the upgraded loop is coherent across docs, templates, harness behavior, and repo-facing validation before handing execution back as complete.
 
@@ -530,25 +530,25 @@ tasks:
 ## Execution Ledger (Planning Mode)
 
 STEP_ID | status | owner | evidence
-P0 | in_progress | ce-work | Plan approved; creator handoff artifact work is the first execution step.
-P1 | pending | ce-work | Blocked on P0 artifact contract landing.
-P2 | pending | ce-work | Blocked on P1 builder round contract decisions being reflected in docs.
-P3 | pending | ce-work | Blocked on P1 and P2 evidence surfaces.
-P4 | pending | ce-work | Blocked on prior implementation units and final validation sweep.
+P0 | completed | ce-work | Added non-trivial handoff contract + template in `skills-system/skill-creator/SKILL.md`, `skills-system/skill-creator/agents/openai.yaml`, and `skills-system/skill-creator/references/handoff-package-template.md`.
+P1 | completed | ce-work | Landed explicit round contract and artifact ownership across `utilities/skill-builder/SKILL.md`, `utilities/skill-builder/agents/openai.yaml`, and builder references (`iteration-and-testing.md`, `description-optimization.md`, `quality-tools.md`, `release-manifest.template.json`).
+P2 | completed | ce-work | Extended harness + eval contracts in `utilities/skill-builder/scripts/run_skill_evals.py`, `utilities/skill-builder/scripts/test_run_skill_evals.py`, and `utilities/skill-builder/references/evals.yaml`; `python3 utilities/skill-builder/scripts/test_run_skill_evals.py` passed; targeted smoke cases passed: `builder-round-metadata-contract` (`artifacts/reports/skills/skill-builder/20260404-192346-391682`), `clarification-package-ambiguous` (`artifacts/reports/skills/skill-builder/20260404-191825-956858`), and `provenance-import-rollback` (`artifacts/reports/skills/skill-builder/20260404-191825-956931`).
+P3 | completed | ce-work | Updated downstream-only gating language in `skills-system/skill-installer/*` and `utilities/codex-plugin-builder/SKILL.md`; ran `bash scripts/sync_skills.sh` successfully.
+P4 | completed | ce-work | Validation stack completed: preflight, docs lint, plan-graph lint, skill quick validators (`skill-creator` via `uv run --with pyyaml`), harness tests, and `bash scripts/verify-work.sh` pass (`artifacts/validation/20260404T181136Z`).
 
 ## Acceptance Checklist
 
-- [ ] **AC1.** `skill-creator` teaches one dedicated target-skill handoff artifact path, and the artifact fields match the governing spec.
+- [x] **AC1.** `skill-creator` teaches one dedicated target-skill handoff artifact path, and the artifact fields match the governing spec.
   Trace: R2; `SA2`, `SA2a`, `SA3`
-- [ ] **AC2.** `skill-builder` teaches one explicit non-trivial round model with baseline choice, frozen comparison inputs, tuning assessment, and round decision.
+- [x] **AC2.** `skill-builder` teaches one explicit non-trivial round model with baseline choice, frozen comparison inputs, tuning assessment, and round decision.
   Trace: R3; `SA4`, `SA5`, `SA7`, `SA14`, `SA15`
-- [ ] **AC3.** Comparative evidence surfaces distinguish qualitative review, quantitative evidence, metric unavailability, and readiness-state differences without inventing a new parallel viewer.
+- [x] **AC3.** Comparative evidence surfaces distinguish qualitative review, quantitative evidence, metric unavailability, and readiness-state differences without inventing a new parallel viewer.
   Trace: R4, R6; `SA6`, `SA11`, `SA17`
-- [ ] **AC4.** Eval harness outputs and regression coverage enforce the new round vocabulary and downstream-gating language.
+- [x] **AC4.** Eval harness outputs and regression coverage enforce the new round vocabulary and downstream-gating language.
   Trace: R3, R4; `SA12`, `SA13`, `SA18`
-- [ ] **AC5.** `skill-installer` and `codex-plugin-builder` remain downstream-only and consume `ContractValidityEvidence` rather than self-attesting lifecycle validity.
+- [x] **AC5.** `skill-installer` and `codex-plugin-builder` remain downstream-only and consume `ContractValidityEvidence` rather than self-attesting lifecycle validity.
   Trace: R5; `SA9`, `SA10`, `SA18`
-- [ ] **AC6.** Docs lint, targeted validators, eval-harness regression, skill sync, plan-graph lint, and broad repo validation all pass, or remaining blockers are explicit and evidence-backed.
+- [x] **AC6.** Docs lint, targeted validators, eval-harness regression, skill sync, plan-graph lint, and broad repo validation all pass, or remaining blockers are explicit and evidence-backed.
   Trace: R1-R6; spec observability and definition of done
 
 ## Sources and References

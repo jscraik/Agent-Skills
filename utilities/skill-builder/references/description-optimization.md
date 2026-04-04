@@ -7,6 +7,7 @@
 - [Use near-miss negatives](#use-near-miss-negatives)
 - [What good trigger queries look like](#what-good-trigger-queries-look-like)
 - [How to interpret trigger misses](#how-to-interpret-trigger-misses)
+- [Round requirement](#round-requirement)
 - [Improvement heuristics during optimization](#improvement-heuristics-during-optimization)
 - [Blind comparison for subjective improvements](#blind-comparison-for-subjective-improvements)
 
@@ -89,6 +90,14 @@ Check whether the query was:
 - missing the operational detail that would make the skill clearly valuable.
 
 Likewise, an over-trigger does not always mean the keywords are wrong. Sometimes the skill boundary is underspecified because the description does not say what **not** to use it for.
+
+## Round requirement
+
+In non-trivial builder rounds, route and description assessment is mandatory.
+
+- Record that assessment even when you do not change wording.
+- If evidence shows ambiguity, weak triggering, or misleading boundaries, edits are mandatory before marking the round ready.
+- If no edits are needed, state why in the round evidence so downstream handoff is auditable.
 
 ## Improvement heuristics during optimization
 

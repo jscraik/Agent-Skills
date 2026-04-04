@@ -17,12 +17,19 @@
     "runner_mode": "codex,claude-kimi",
     "tier2_mode": "warn",
     "capture_jsonl": true,
+    "readiness_summary": {
+      "starter_valid": 0,
+      "comparison_incomplete": 0,
+      "comparison_blocked": 0,
+      "downstream_ready": 12
+    },
     "reports_base": "artifacts/reports/skills/example-skill/20260321-120000-000000"
   },
   "artifacts": {
     "reports_base": "artifacts/reports/skills/example-skill/20260321-120000-000000",
     "summary": "artifacts/reports/skills/example-skill/20260321-120000-000000/summary.json",
     "scorecard": "artifacts/reports/skills/example-skill/20260321-120000-000000/scorecard.json",
+    "comparison_review": "artifacts/reports/skills/example-skill/20260321-120000-000000/comparison_review.md",
     "release_manifest": "artifacts/reports/skills/example-skill/20260321-120000-000000/release_manifest.json"
   }
 }

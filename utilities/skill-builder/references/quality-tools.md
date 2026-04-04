@@ -129,6 +129,18 @@ Outputs:
 - release manifest JSON (default: `<run>/release_manifest.json`)
 - JUnit XML (default: `<run>/junit.xml`, or `--junit-out`)
 
+Iteration-upgrade artifact expectations:
+- case `result.json` includes additive round metadata when provided in eval cases:
+  - `baseline_type`
+  - `comparison_inputs`
+  - `iteration_round_state`
+  - `metric_availability`
+  - `readiness_state`
+  - optional `comparison_review_artifact`
+  - optional `neutral_baseline_approval`
+- run `summary.json` includes readiness rollup and blocked-round visibility.
+- `release_manifest.json` stays thin and points to richer artifacts rather than duplicating all per-case evidence.
+
 ## analyze_skill.py
 
 ```bash

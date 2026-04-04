@@ -68,7 +68,7 @@ This repository is the canonical source of Codex skills, linked operator docs, a
 
 1. `/Users/jamiecraik/.codex/AGENTS.md`
 2. Repository `AGENTS.md` (this file)
-3. `/Users/jamiecraik/dev/Agent-Skills/docs/agents/README.md`
+3. `/Users/jamiecraik/dev/agent-skills/docs/agents/README.md`
 4. Linked docs under `docs/agents/`
 5. If instructions conflict, pause and ask which one wins.
 
@@ -103,7 +103,7 @@ This repository is the canonical source of Codex skills, linked operator docs, a
 - Global protocol: `/Users/jamiecraik/.codex/AGENTS.md`
 - Security baseline: `/Users/jamiecraik/.codex/instructions/standards.md`
 - RVCP source of truth: `/Users/jamiecraik/.codex/instructions/rvcp-common.md`
-- Repository overview: `/Users/jamiecraik/dev/Agent-Skills/README.md`
+- Repository overview: `/Users/jamiecraik/dev/agent-skills/README.md`
 
 <!-- AGENT-FIRST-SCAFFOLD:START -->
 ## Agent-First Scaffold Contract (managed by ~/.codex)

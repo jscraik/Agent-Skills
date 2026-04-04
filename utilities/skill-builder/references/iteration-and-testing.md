@@ -1,5 +1,51 @@
 # Iteration and testing (2026)
 
+## Table of Contents
+- [Round contract](#round-contract)
+- [Artifact ownership](#artifact-ownership)
+- [RED GREEN REFACTOR (eval-driven)](#red--green--refactor-eval-driven)
+- [Pressure tests (A/B/C scenarios)](#pressure-tests-abc-scenarios)
+
+## Round contract
+
+Use this contract for non-trivial lifecycle rounds:
+
+1. Prepare prompts from the handoff package.
+2. Freeze candidate and baseline `ComparisonInputs`.
+3. Select baseline type:
+   - `no_skill`
+   - `prior_skill_snapshot`
+   - `neutral_repo_baseline` (only with human-approved justification recorded in `references/evals.yaml`)
+4. Run candidate and baseline in the same round window.
+5. Capture evidence with explicit metric availability status:
+   - `available`
+   - `unavailable`
+6. Assess route and description quality every round.
+7. Record round state and decision.
+
+Round states:
+- `prepared`
+- `running`
+- `evidence_captured`
+- `reviewed`
+- `decision_recorded`
+- `blocked`
+
+Round decisions:
+- `iterate_again`
+- `widen_eval_set`
+- `ready_for_install_handoff`
+- `ready_for_plugin_handoff`
+- `stop_blocked`
+
+## Artifact ownership
+
+- `result.json`: per-case comparative details.
+- `summary.json`: run-level readiness and blocked-state rollup.
+- `scorecard.json`: CI-facing pass/fail summary plus additive metadata.
+- `release_manifest.json`: thin release snapshot that references richer artifacts.
+- `comparison_review.md`: optional run-scoped human review notes when needed.
+
 ## RED → GREEN → REFACTOR (eval-driven)
 
 1) **RED (baseline)**: Run representative prompts *without* the skill (or with the old version). Capture failures.

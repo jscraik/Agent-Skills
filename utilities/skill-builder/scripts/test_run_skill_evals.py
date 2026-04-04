@@ -29,6 +29,7 @@ from run_skill_evals import (
     _is_smoke_only_case,
     _write_junit_report,
     load_evals,
+    load_neutral_baseline_approvals,
     main,
     run_discovery_smoke,
 )
@@ -59,10 +60,28 @@ class RunSkillEvalsModeTests(unittest.TestCase):
             "mixed-authoring-install-handoff",
             "audit-package-validation-first",
             "provenance-import-rollback",
+            "builder-round-metadata-contract",
         ]:
             self.assertIn(case_id, case_map)
             self.assertEqual(case_map[case_id].eval_modes, ("smoke", "release"))
             self.assertEqual(case_map[case_id].timeout_profile, "codex-heavy")
+
+    def test_builder_round_metadata_case_has_baseline_contract_fields(self) -> None:
+        evals_path = REPO_ROOT / "utilities" / "skill-builder" / "references" / "evals.yaml"
+        cases = load_evals(evals_path)
+        case_map = {case.id: case for case in cases}
+        target = case_map["builder-round-metadata-contract"]
+
+        self.assertEqual(target.baseline_type, "neutral_repo_baseline")
+        self.assertEqual(target.metric_availability, "unavailable")
+        self.assertEqual(target.iteration_round_state, "reviewed")
+        self.assertEqual(target.readiness_state, "comparison_incomplete")
+        self.assertEqual(target.neutral_baseline_approval_id, "planner-approved-neutral-baseline-skill-builder")
+        self.assertIsInstance(target.comparison_inputs, dict)
+        self.assertEqual(target.comparison_inputs["prompt_set"], "frozen-first-response-contract")
+
+        approvals = load_neutral_baseline_approvals(evals_path)
+        self.assertIn("planner-approved-neutral-baseline-skill-builder", approvals)
 
     def test_smoke_mode_filters_release_only_and_pressure_cases(self) -> None:
         cases = [
@@ -190,6 +209,7 @@ class RunSkillEvalsModeTests(unittest.TestCase):
                 "mixed-authoring-install-handoff",
                 "audit-package-validation-first",
                 "provenance-import-rollback",
+                "builder-round-metadata-contract",
             }.issubset(selected_ids)
         )
 
@@ -510,6 +530,104 @@ class RunSkillEvalsModeTests(unittest.TestCase):
             self.assertIn("Does this capture the docs work well enough for me to implement?", round_six_response)
             self.assertIn("Anything to add or change before I implement it?", round_six_response)
             self.assertEqual(round_six_path.read_text(encoding="utf-8"), round_six_response)
+
+    def test_summary_and_manifest_include_iteration_round_metadata(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            skill_dir = Path(tmpdir) / "demo-skill"
+            refs_dir = skill_dir / "references"
+            refs_dir.mkdir(parents=True)
+            (skill_dir / "SKILL.md").write_text(
+                textwrap.dedent(
+                    """
+                    ---
+                    name: demo-skill
+                    ---
+
+                    ## Discovery interview
+                    - ask one round at a time
+                    - use a plain-language question
+                    - explain why the round matters
+                    - avoid dumping the whole interview plan at once
+                    """
+                ).strip()
+                + "\n",
+                encoding="utf-8",
+            )
+            (refs_dir / "discovery-interview.md").write_text(
+                textwrap.dedent(
+                    """
+                    ## Request user input mini-templates
+
+                    What should this skill help you do?
+
+                    ## Copy paste payload examples
+                    """
+                ).strip()
+                + "\n",
+                encoding="utf-8",
+            )
+            (refs_dir / "evals.yaml").write_text(
+                textwrap.dedent(
+                    """
+                    schema_version: "2.0"
+                    neutral_baseline_approvals:
+                      - id: planner-approved-neutral-baseline-skill-builder
+                        rationale: approved for this synthetic regression test
+                        approved_by: test
+                    cases:
+                      - id: builder-round-metadata-contract
+                        name: builder round metadata contract
+                        prompt: Define one explicit iteration contract.
+                        smoke_mode: discovery-round-one
+                        baseline_type: neutral_repo_baseline
+                        neutral_baseline_approval_id: planner-approved-neutral-baseline-skill-builder
+                        comparison_inputs:
+                          prompt_set: frozen-first-response-contract
+                        iteration_round_state: reviewed
+                        metric_availability: unavailable
+                        readiness_state: comparison_incomplete
+                        comparison_review_artifact: comparison_review.md
+                        acceptance:
+                          - contains: "## Inputs"
+                    """
+                ).strip()
+                + "\n",
+                encoding="utf-8",
+            )
+
+            reports_dir = Path(tmpdir) / "reports"
+            exit_code = main(
+                [
+                    str(skill_dir),
+                    "--runner",
+                    "discovery-smoke",
+                    "--reports-dir",
+                    str(reports_dir),
+                    "--format",
+                    "json",
+                ]
+            )
+
+            self.assertEqual(exit_code, 0)
+            report_dirs = sorted((reports_dir / "demo-skill").glob("*"))
+            self.assertTrue(report_dirs)
+            summary = json.loads((report_dirs[-1] / "summary.json").read_text(encoding="utf-8"))
+            release_manifest = json.loads((report_dirs[-1] / "release_manifest.json").read_text(encoding="utf-8"))
+
+        case = summary["cases"][0]
+        self.assertEqual(case["baseline_type"], "neutral_repo_baseline")
+        self.assertEqual(case["iteration_round_state"], "reviewed")
+        self.assertEqual(case["metric_availability"], "unavailable")
+        self.assertEqual(case["readiness_state"], "comparison_incomplete")
+        self.assertIn("comparison_review.md", case["comparison_review_artifact"])
+        self.assertEqual(case["neutral_baseline_approval"]["id"], "planner-approved-neutral-baseline-skill-builder")
+        self.assertEqual(summary["readiness_summary"]["comparison_incomplete"], 1)
+        self.assertEqual(summary["round_state_summary"]["reviewed"], 1)
+        self.assertIn("planner-approved-neutral-baseline-skill-builder", summary["neutral_baseline_approvals_used"])
+        self.assertEqual(
+            release_manifest["run"]["readiness_summary"]["comparison_incomplete"],
+            1,
+        )
 
 
 if __name__ == "__main__":
