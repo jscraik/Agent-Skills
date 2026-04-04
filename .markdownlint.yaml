@@ -1,0 +1,7 @@
+# markdownlint config — repo root, applies to all directories.
+# Suppresses rules that conflict with the compact heading+list style
+# used across all SKILL.md and linked reference files in this repo.
+MD022: false  # blanks-around-headings  — skill files use compact heading:list style
+MD032: false  # blanks-around-lists      — same compact style
+MD051: false  # link-fragments           — TOC anchors with parens trip up the linter
+MD060: false  # table-column-style       — compact pipe tables are intentional here
