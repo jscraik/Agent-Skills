@@ -17,7 +17,7 @@ This matrix is the derived April 2026 readiness view for the governed skill-auth
 - `utilities/codex-plugin-builder`
 
 It is evidence-focused only. The canonical family contract remains:
-- [docs/specs/2026-04-03-feat-skill-authoring-family-contract-spec.md](/Users/jamiecraik/dev/agent-skills/docs/specs/2026-04-03-feat-skill-authoring-family-contract-spec.md)
+- [docs/specs/2026-04-03-feat-skill-authoring-family-contract-spec.md](../specs/2026-04-03-feat-skill-authoring-family-contract-spec.md)
 
 ## Scope
 
