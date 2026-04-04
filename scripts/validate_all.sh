@@ -2,18 +2,71 @@
 # Consolidated validation runner - one command to check everything
 set -u
 
+usage() {
+  cat <<'EOF'
+Usage: bash scripts/validate_all.sh [--ephemeral|--persistent]
+
+  --ephemeral   Write logs to a temporary directory and do not mutate repo
+                validation artifacts. Intended for git hook runs.
+  --persistent  Write logs to artifacts/validation/<timestamp> and refresh
+                artifacts/validation/latest. This is the default behavior.
+EOF
+}
+
+output_mode="${VALIDATE_ALL_OUTPUT_MODE:-persistent}"
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --ephemeral)
+      output_mode="ephemeral"
+      ;;
+    --persistent)
+      output_mode="persistent"
+      ;;
+    --help|-h)
+      usage
+      exit 0
+      ;;
+    *)
+      echo "Error: unknown argument '$1'" >&2
+      usage >&2
+      exit 2
+      ;;
+  esac
+  shift
+done
+
 run_id="$(date -u +"%Y%m%dT%H%M%SZ")"
-log_root="artifacts/validation"
-run_dir="$log_root/$run_id"
-latest_dir="$log_root/latest"
 required_failures=0
 warn_only_issues=0
+cleanup_ephemeral_logs=0
 
-mkdir -p "$run_dir"
-rm -rf "$latest_dir"
-cp -R "$run_dir" "$latest_dir"
+if [[ "$output_mode" == "ephemeral" ]]; then
+  run_dir="$(mktemp -d "${TMPDIR:-/tmp}/agent-skills-validate-all.XXXXXX")"
+  cleanup_ephemeral_logs=1
+else
+  log_root="artifacts/validation"
+  run_dir="$log_root/$run_id"
+  latest_dir="$log_root/latest"
+
+  mkdir -p "$run_dir"
+  rm -rf "$latest_dir"
+  cp -R "$run_dir" "$latest_dir"
+fi
+
+cleanup() {
+  if [[ "$cleanup_ephemeral_logs" -eq 1 && "$required_failures" -eq 0 ]]; then
+    rm -rf "$run_dir"
+  fi
+}
+
+trap cleanup EXIT
 
 refresh_latest_dir() {
+  if [[ "$output_mode" != "persistent" ]]; then
+    return 0
+  fi
+
   rm -rf "$latest_dir"
   cp -R "$run_dir" "$latest_dir"
 }
@@ -47,6 +100,9 @@ run_check() {
 
 echo "🔍 Running all validations..."
 echo "📁 Validation logs: $run_dir"
+if [[ "$output_mode" == "ephemeral" ]]; then
+  echo "🧹 Ephemeral mode: repo validation artifacts will not be updated"
+fi
 echo ""
 
 run_check warn plan-graphs "📊 Validating plan graphs..." ./scripts/validate_plan_graphs.sh
@@ -70,8 +126,12 @@ echo "- logs: $run_dir"
 if [ "$required_failures" -gt 0 ]; then
   echo ""
   echo "❌ Validation failed. Review the logs above for exact command output."
+  cleanup_ephemeral_logs=0
   exit 1
 fi
 
 echo ""
 echo "✅ Validation complete"
+if [[ "$output_mode" == "ephemeral" ]]; then
+  echo "ℹ️ Ephemeral logs are removed automatically after a successful run"
+fi

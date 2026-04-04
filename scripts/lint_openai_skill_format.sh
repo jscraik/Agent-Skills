@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# usage prints the help text that describes script invocation and the required and allowed top-level frontmatter keys for SKILL.md linting.
 usage() {
   cat <<'USAGE'
 Usage:
@@ -8,7 +9,7 @@ Usage:
 
 Checks SKILL.md files for OpenAI skill frontmatter compatibility.
 - Requires top-level frontmatter keys: name, description
-- Allows optional top-level keys: license, allowed-tools, metadata
+- Allows optional top-level keys: license, compatibility, allowed-tools, metadata
 - Flags unknown top-level keys in frontmatter
 USAGE
 }
@@ -46,7 +47,7 @@ else
   find_cmd="find"
 fi
 
-roots=(auth backend frontend github interview product utilities)
+roots=(auth backend frontend github interview product skills-system utilities)
 errors=0
 warnings=0
 checked=0
@@ -101,7 +102,7 @@ while IFS= read -r file; do
           has_name = 1
         } else if (key == "description") {
           has_description = 1
-        } else if (key != "license" && key != "allowed-tools" && key != "metadata") {
+        } else if (key != "license" && key != "compatibility" && key != "allowed-tools" && key != "metadata") {
           print "ERR:" NR ":unknown top-level frontmatter key `" key "`"
         }
       }

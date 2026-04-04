@@ -23,11 +23,12 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - [Product — Security](#product-security)
 - [Product — Specs](#product-specs)
 - [Product — Strategy](#product-strategy)
+- [Skills System](#skills-system)
 - [Utilities](#utilities)
 - [Utilities — Codex Plugin Builder — Fixtures — Arscontexta Codex — Skills](#utilities-codex-plugin-builder-fixtures-arscontexta-codex-skills)
 
 ## Summary
-- `total_skills`: 120
+- `total_skills`: 124
 - `catalog_source`: repository skill scan
 
 ## Catalog
@@ -164,6 +165,13 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - `product-design-critic` — Critique product surfaces and flows with opinionated UX judgment about hierarchy, trust, and jobs-to-be-done. Use when the user wants product-level interaction or workflow critique, not pure visual styling advice.
 - `project-improver` — Analyze an existing project and propose or implement high-leverage improvements with strong product judgment. Use when the user wants grounded improvement opportunities ranked and refined, not a single-feature spec.
 
+## Skills System
+
+- `openai-docs` — Use when the user asks how to build with OpenAI products or APIs and needs up-to-date official documentation with citations, help choosing the latest model for a use case, or explicit GPT-5.4 upgrade and prompt-upgrade guidance; prioritize OpenAI docs MCP tools, use bundled references only as helper context, and restrict any fallback browsing to official OpenAI domains.
+- `plugin-creator` — Create and scaffold plugin directories for Codex with a required `.codex-plugin/plugin.json`, optional plugin folders/files, and complete baseline metadata ready for immediate validation. Use when Codex needs to create a new local plugin, add optional plugin structure, or generate or update repo-root `.agents/plugins/marketplace.json` entries for plugin ordering and availability metadata.
+- `skill-creator` — Create a first-draft skill scaffold
+- `skill-installer` — Install contract-valid skills from curated or repo sources
+
 ## Utilities
 
 - `1password` — Plan, validate, and use 1Password CLI setup for secret injection and auth. Use when tasks need 1Password CLI usage, secret references, op run/read/inject, or provisioning secrets via env vars/.env files and scripts.
@@ -180,7 +188,7 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - `codex-automation-architect` — Design, review, or merge Codex app automations using current OpenAI/Codex guidance and validation. Use when the user wants recurring Codex automation workflows built, audited, or consolidated.
 - `codex-home-audit` — Audit a Codex home directory for control-plane drift, risky state, and cleanup opportunities across config, agents, hooks, skills, plugins, and telemetry. Use when the user wants a dated Codex home health review.
 - `codex-hooks-builder` — Create, upgrade, or audit Codex hook packs for repo-local or user-level `.codex` installs. Use when the user wants hook runtime files or hook-script hardening, not general agent role creation.
-- `codex-plugin-builder` — Create, convert, or validate Codex plugin packages that bundle skills, hooks, agents, and MCP metadata. Use when the user wants plugin packaging work, not standalone skill editing or generic app features.
+- `codex-plugin-builder` — Create, convert, or validate Codex plugin packages that bundle skills, hooks, agents, and MCP metadata. Use when the deliverable is clearly a plugin package, not when standalone skill lifecycle hardening or generic app work is still the main job.
 - `codex-sessions-skill-scan` — Scan Codex session history for skill failures, usage patterns, and coverage gaps. Use when the user wants daily skill-health monitoring or evidence-backed recommendations about installing, improving, merging, or pruning skills.
 - `coding-harness` — Use when a repository needs `@brainwav/coding-harness` installed, bootstrapped, updated, audited, or explained. Covers `harness init`, harness-managed CI migration, governance checks, and Codex environment action-sync guidance. Do not use for unrelated coding, general deployment, or broad cloud work.
 - `diagram-cli` — Generate, validate, and refresh @brainwav/diagram architecture artifacts and context packs. Use when the user wants repository architecture diagrams for onboarding, PR impact, or CI drift checks, not hand-drawn product mock diagrams.
@@ -196,7 +204,7 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - `repoprompt` — Plan and troubleshoot Repo Prompt integration across editors, agents, MCP, and CLI workflows. Use when the user wants Repo Prompt configured, adopted, or compared inside an AI coding setup.
 - `reproduce-bug` — Reproduce or investigate a bug from a Linear issue or GitHub issue, preserving tracker context, symptoms, and repro steps. Use when the user wants issue-driven debugging rather than a freeform root-cause review.
 - `simple-tasks` — Install a lightweight local task workflow backed by `tasks/TASKS.md` and `scripts/task.sh`. Use when the user wants simple in-repo task coordination, not team issue-tracker management.
-- `skill-builder` — Create, improve, compare, import, and quality-gate Codex skills, including SKILL.md, references, evals, scripts, and packaging. Use when the user wants skill-focused building, auditing, or installation work, not generic feature coding or plugin conversion.
+- `skill-builder` — Improve, audit, compare, validate, and package Codex skills, including SKILL.md, references, evals, scripts, and standalone-skill handoff prep. Use when lifecycle hardening, routing, quality gates, or standalone skill packaging is the primary job, not first-draft scaffolding, pure installation, or plugin conversion.
 - `slides` — Create, edit, validate, or debug PowerPoint-compatible slide decks with PptxGenJS and visual overflow checks. Use when the user wants `.pptx` work, not generic web UI design or prose editing.
 - `spreadsheet` — Create, edit, analyze, or format spreadsheets with formula-aware workflows and visual review. Use when the user wants `.xlsx`, `.csv`, or `.tsv` work, not plain text tables.
 - `systematic-debugging` — Diagnose production bugs, regressions, or failing checks from concrete evidence before code changes. Use when the user wants a safe root-cause analysis and fix plan, not immediate speculative implementation.

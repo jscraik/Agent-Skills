@@ -50,7 +50,18 @@ class SourceRule:
     remediation: str | None = None
 
 
-SCANNABLE_EXTENSIONS = {".py", ".js", ".ts", ".sh"}
+SCANNABLE_EXTENSIONS = {
+    ".py",
+    ".js",
+    ".jsx",
+    ".ts",
+    ".tsx",
+    ".mjs",
+    ".cjs",
+    ".mts",
+    ".cts",
+    ".sh",
+}
 DEFAULT_MAX_SCAN_FILES = 500
 DEFAULT_MAX_FILE_BYTES = 1024 * 1024
 
@@ -173,9 +184,13 @@ LINE_RULES: List[Rule] = [
     Rule(
         "critical",
         "security.node_exec",
-        "Node exec/execSync execution detected.",
-        compile_safe_regex(r"\b(child_process\.(exec|execSync)|execSync)\b"),
-        remediation="Prefer spawn/spawnSync with fixed argv and strict input validation.",
+        "Node child_process execution detected.",
+        compile_safe_regex(
+            r"\b(?:child_process\.)?(?:exec|execSync|spawn|spawnSync|execFile|execFileSync)\s*\(",
+            allow_nested=True,
+        ),
+        requires_context=compile_safe_regex(r"\b(?:node:child_process|child_process)\b"),
+        remediation="Prefer fixed argv, avoid shell wrappers, and strictly validate any dynamic inputs.",
     ),
     Rule(
         "critical",
@@ -193,11 +208,18 @@ LINE_RULES: List[Rule] = [
         remediation="Ensure argv lists, `shell=False`, and strict input sanitization are used.",
     ),
     Rule(
+        "critical",
+        "security.crypto_mining",
+        "Possible crypto-mining reference detected.",
+        compile_safe_regex(r"stratum\+tcp|stratum\+ssl|coinhive|cryptonight|xmrig", re.IGNORECASE),
+        remediation="Remove mining-related endpoints or payloads from the skill package before distribution.",
+    ),
+    Rule(
         "warn",
-        "security.node_child_process",
-        "Node child_process usage detected; review for command injection risk.",
-        compile_safe_regex(r"\b(node:child_process|child_process\.(?:spawn|spawnSync|exec|execSync)|spawnSync\(|spawn\()"),
-        remediation="Ensure command/argv are fixed or validated and avoid shell wrappers.",
+        "security.suspicious_websocket",
+        "WebSocket connection to a non-standard port detected.",
+        compile_safe_regex(r"new\s+WebSocket\s*\(\s*[\"']wss?:\/\/[^\"']*:(\d+)", re.IGNORECASE),
+        remediation="Document why the remote port is expected and verify the endpoint is trusted.",
     ),
 ]
 
@@ -219,6 +241,31 @@ SOURCE_RULES: List[SourceRule] = [
         compile_safe_regex(r"(os\.environ|getenv\(|process\.env).{0,200}(requests\.|fetch\(|axios\.|httpx\.|curl)", re.DOTALL),
         remediation="Avoid sending env-derived data over network; explicitly redact and isolate secrets.",
     ),
+    SourceRule(
+        "warn",
+        "security.potential_exfiltration",
+        "File reads combined with network send detected.",
+        compile_safe_regex(
+            r"(?:read_text\(|read_bytes\(|readFileSync|readFile\(|Path\([^)]*\)\.read_text\(|Path\([^)]*\)\.read_bytes\(|open\([^)]*\))",
+            allow_nested=True,
+        ),
+        requires_context=compile_safe_regex(r"(?:requests\.|fetch\(|axios\.|httpx\.|curl|http\.request)", re.DOTALL),
+        remediation="Review file-access scope and ensure local data is not transmitted off-box unintentionally.",
+    ),
+    SourceRule(
+        "warn",
+        "security.hex_obfuscation",
+        "Hex-encoded string sequence detected (possible obfuscation).",
+        compile_safe_regex(r"(?:\\x[0-9a-fA-F]{2}){6,}", allow_nested=True),
+        remediation="Replace opaque encoded payloads with readable source or document the benign encoding reason.",
+    ),
+    SourceRule(
+        "warn",
+        "security.base64_obfuscation",
+        "Large base64 payload with decode call detected (possible obfuscation).",
+        compile_safe_regex(r"(?:atob|Buffer\.from)\s*\(\s*[\"'][A-Za-z0-9+/=]{200,}[\"']"),
+        remediation="Avoid bundling opaque large encoded blobs unless they are necessary and clearly documented.",
+    ),
 ]
 
 
@@ -231,12 +278,24 @@ def _line_text(text: str, idx: int) -> str:
 
 
 def _should_skip_match(_code: str, line_text: str) -> bool:
+    """
+    Decides whether a detected match on a line should be ignored to reduce false positives.
+    
+    Parameters:
+        _code (str): The rule code associated with the match (e.g., "security.node_exec").
+        line_text (str): The full text of the line containing the match.
+    
+    Returns:
+        bool: `True` if the match should be skipped (when the line is empty or a comment, or when `_code` is
+        `"security.node_exec"` and the line appears to be a regex pattern table containing `re.compile(`),
+        `False` otherwise.
+    """
     stripped = line_text.strip()
     if not stripped:
         return True
     if stripped.startswith("#"):
         return True
-    if _code in {"security.node_exec", "security.node_child_process"} and "re.compile(" in stripped:
+    if _code == "security.node_exec" and "re.compile(" in stripped:
         # False-positive guard: regex pattern tables that mention node exec/spawn
         # are detection definitions, not executable process launches.
         return True
@@ -281,6 +340,16 @@ def iter_code_files(skill_dir: Path, *, max_files: int, max_file_bytes: int) -> 
 
 
 def scan_source(text: str, rel_file: str) -> List[Finding]:
+    """
+    Scan file contents with configured line-level and source-level rules and return any generated findings.
+    
+    Parameters:
+        text (str): Full text of the file to scan.
+        rel_file (str): Path used in findings to identify the file (typically relative to the skill root).
+    
+    Returns:
+        List[Finding]: A list of findings produced by applying LINE_RULES (at most one finding per line-level rule) and SOURCE_RULES (at most one finding per source-level rule). Certain matches are suppressed by heuristics (e.g., subprocess usage when `shell=False` or an argv list is detected; websocket ports in {80, 443, 3000, 8080, 8443} are ignored).
+    """
     out: List[Finding] = []
 
     for rule in LINE_RULES:
@@ -295,6 +364,10 @@ def scan_source(text: str, rel_file: str) -> List[Finding]:
                 if re.search(r"\bshell\s*=\s*False\b", window):
                     continue
                 if re.search(r"\bsubprocess\.(run|Popen|call|check_call|check_output)\s*\(\s*\[", window):
+                    continue
+            if rule.code == "security.suspicious_websocket":
+                port = int(m.group(1))
+                if port in {80, 443, 3000, 8080, 8443}:
                     continue
             out.append(
                 Finding(

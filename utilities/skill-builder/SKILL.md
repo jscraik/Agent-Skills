@@ -1,6 +1,6 @@
 ---
 name: skill-builder
-description: Create, improve, compare, import, and quality-gate Codex skills, including SKILL.md, references, evals, scripts, and packaging. Use when the user wants skill-focused building, auditing, or installation work, not generic feature coding or plugin conversion.
+description: Improve, audit, compare, validate, and package Codex skills, including SKILL.md, references, evals, scripts, and standalone-skill handoff prep. Use when lifecycle hardening, routing, quality gates, or standalone skill packaging is the primary job, not first-draft scaffolding, pure installation, or plugin conversion.
 metadata:
   skill-type: code_quality_review
   lifecycle_state: active
@@ -50,15 +50,14 @@ Design, improve, validate, and package high-quality Codex skills.
 
 ## When to use
 Use this skill when the user asks to:
-- create a new skill;
-- improve an existing skill's routing, workflow, safety, or portability;
+- improve an existing skill's routing, workflow, safety, portability, or eval posture;
 - audit a skill against validators and evals;
-- compare variants with shared evals;
-- package a validated skill;
+- compare variants or fold overlapping skill approaches into one governed surface;
+- package a validated standalone skill;
 - refine skill-graph contracts tied to recursive workflow operations;
-- list, install, update, or deconflict local/imported skill folders (`install-distribute` mode).
+- prepare a contract-valid skill for install/distribute handoff or finish bounded distribution work when lifecycle judgment is already settled.
 
-Keep this skill out of scope for: unrelated app feature coding; generic bug-fixing outside skill quality; routine non-skill docs edits; plugin conversion (`codex-plugin-builder`); session-scan coverage (`codex-sessions-skill-scan`).
+Keep this skill out of scope for: first-draft skill scaffolding (`skill-creator`); pure install/import or runtime-visibility work once the skill is already valid (`skill-installer`); unrelated app feature coding; generic bug-fixing outside skill quality; routine non-skill docs edits; plugin conversion (`codex-plugin-builder`); session-scan coverage (`codex-sessions-skill-scan`).
 
 ## Category confirmation
 For `create` and `improve` mode, confirm the primary category before drafting:
@@ -80,7 +79,7 @@ Start with:
 Enforce OpenAI/Codex skill format by default:
 - frontmatter uses official keys only:
   - required: `name`, `description`
-  - optional: `license`, `allowed-tools`, `metadata`
+  - optional: `license`, `compatibility`, `allowed-tools`, `metadata`
 - for this repository, use `metadata.skill-type` to classify skills for semantic indexing and governance checks
 - keep `description` as routing logic (what + when), not a procedure dump;
 - keep `SKILL.md` as the map:
@@ -218,11 +217,13 @@ Heading contract:
 - under `## Scope and triggers`, briefly confirm whether this skill applies, the likely category, and the boundary of the work;
 - under `## Required inputs`, ask the minimum missing items as direct questions with `?`;
 - under `## Failure mode`, say what happens if the request is out of scope or critical inputs remain missing.
+- when a packaging request leaves the standalone-skill vs plugin boundary undecided, treat that as route clarification, say so explicitly under `## Scope and triggers`, and ask one direct deliverable-boundary question under `## Required inputs` such as `Should this stay a standalone skill, or do you want the output packaged as a plugin?`
 ### Deterministic response details
 Keep first response compact and install-focused:
 - include deconflict-first ordering;
 - include capability overlap matrix;
 - include artifact-uplift scan plan before any write decision.
+- for ambiguous packaging requests, include the word `clarification` or `route clarification` plus both deliverable terms `standalone skill` and `plugin` in the first response.
 
 ## Philosophy
 - Build minimal, reversible updates first; prefer deterministic guardrails.
@@ -294,16 +295,18 @@ Reference files:
 - Run deconflict-first (`overlap matrix` + `artifact-uplift scan` + explicit decision).
 - Preserve relevant upstream context when importing: keep high-value references, examples, and caveat docs unless they are clearly redundant or out of scope, and signpost them from the wrapper skill.
 - Validate in quarantine before atomic move/swap; rollback on write failure.
-- Hand off plugin conversion to `codex-plugin-builder` and session coverage scans to `codex-sessions-skill-scan`.
+- Hand off pure installation or runtime-visibility work on an already-valid skill to `skill-installer`.
+- Hand off plugin conversion to `codex-plugin-builder` once the standalone skill is contract-valid and the deliverable boundary becomes a plugin.
+- Hand off session coverage scans to `codex-sessions-skill-scan`.
 - Use `references/advanced-workflow.md` for full install-distribute mechanics and checklists.
 
 ## See Also
 | Skill | When to use |
 |---|---|
 | [[decide-build-primitive]] | Decide whether the capability should be a skill, prompt, or agent before authoring it |
-| [[codex-plugin-builder]] | Package or convert a validated skill into a plugin-owned distribution surface |
+| [[codex-plugin-builder]] | Package a contract-valid standalone skill when the deliverable explicitly becomes a plugin |
 | [[codex-sessions-skill-scan]] | Audit skill coverage, failures, and overlap using real session evidence instead of authoring doctrine alone |
-| [[skill-installer]] | Install or repair runtime visibility when the skill package is already built and the problem is projection or distribution |
+| [[skill-installer]] | Install, import, or repair runtime visibility when the skill package is already valid and the remaining work is distribution |
 
 **Topic map:** [[agent-ops]]
 

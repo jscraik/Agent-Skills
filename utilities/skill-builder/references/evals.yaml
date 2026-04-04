@@ -89,6 +89,23 @@ cases:
       - type: contains
         value: "?"
 
+  - id: improve-confirms-category
+    name: improve confirms category
+    category: edge
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Can you improve a code review skill that keeps over-triggering? In this first response, use the required headings and confirm the likely skill category before drafting."
+    acceptance:
+      - type: contains
+        value: "## Scope and triggers"
+      - type: regex
+        value: "(?i)(code quality\\s*&\\s*review|code quality\\s+and\\s+review)"
+      - type: regex
+        value: "(?i)(based on what you described|this sounds like)"
+      - type: regex
+        value: "(?i)(does that match your intent|or is it something different)"
+
   - id: negative-explicit-out-of-scope
     name: negative explicit out of scope
     category: negative
@@ -217,6 +234,88 @@ cases:
         value: "(?i)(quarantine|staged|atomic)"
       - type: regex
         value: "(?i)(rollback|restored paths)"
+
+  - id: clarification-package-ambiguous
+    name: clarification package ambiguous
+    category: edge
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: true
+    timeout_profile: codex-heavy
+    prompt: "Package this skill for reuse, but I have not decided whether it should stay a standalone skill or become a plugin. Keep the first response route-safe and do not guess the deliverable."
+    acceptance:
+      - type: regex
+        value: "(?i)(route[_ -]?clarification|clarification)"
+      - type: regex
+        value: "(?i)(standalone skill|plugin)"
+      - type: regex
+        value: "(?i)(which deliverable|do you want.*plugin|should this stay.*standalone|is the output.*plugin)"
+
+  - id: plugin-only-handoff
+    name: plugin only handoff
+    category: edge
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: true
+    timeout_profile: codex-heavy
+    prompt: "The standalone skill is already validated. I only want it packaged as a Codex plugin, not re-authored."
+    acceptance:
+      - type: regex
+        value: "(?i)(codex-plugin-builder)"
+      - type: regex
+        value: "(?i)(plugin package|plugin packaging|plugin-owned)"
+      - type: regex
+        value: "(?i)(already validated|contract-valid|standalone skill)"
+
+  - id: mixed-authoring-install-handoff
+    name: mixed authoring install handoff
+    category: edge
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: true
+    timeout_profile: codex-heavy
+    prompt: "Improve this imported skill's routing and safety, then install it once the fixes are done. In the first response, keep the ownership boundary explicit."
+    acceptance:
+      - type: regex
+        value: "(?i)(routing|safety|hardening|validate)"
+      - type: regex
+        value: "(?i)(skill-installer)"
+      - type: regex
+        value: "(?i)(once the skill is valid|after it is contract-valid|when the remaining work is installation|then hand off)"
+
+  - id: audit-package-validation-first
+    name: audit package validation first
+    category: edge
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: true
+    timeout_profile: codex-heavy
+    prompt: "Audit and harden this skill, then package it as a plugin. Do not let packaging skip the lifecycle checks."
+    acceptance:
+      - type: regex
+        value: "(?i)(audit|harden|validate|quality gates)"
+      - type: regex
+        value: "(?i)(codex-plugin-builder)"
+      - type: regex
+        value: "(?i)(after the skill is valid|once the standalone skill is contract-valid|do not skip validation|validation-first)"
+
+  - id: provenance-import-rollback
+    name: provenance import rollback
+    category: edge
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: true
+    timeout_profile: codex-heavy
+    prompt: "Import a skill from another repo and make it ready for installation. In the first response, require trusted-source checks, pinned refs, provenance capture, staged validation, and rollback."
+    acceptance:
+      - type: regex
+        value: "(?i)(trusted[- ]source|allowlist|trusted source)"
+      - type: regex
+        value: "(?i)(pinned.*(ref|commit)|source_ref|sha256|provenance)"
+      - type: regex
+        value: "(?i)(quarantine|staged|validate.*before activation)"
+      - type: regex
+        value: "(?i)(rollback|restore|atomic)"
 
   - id: edge-codex-ui-metadata
     name: edge codex ui metadata
@@ -347,4 +446,63 @@ cases:
       - type: regex
         value: "(?s)\"validations\"\\s*:"
       - type: regex
+        value: "(?s)\"security\"\\s*:"
+      - type: regex
         value: "(?s)\"next_step\"\\s*:"
+
+  - id: validation-two-pass-release-flow
+    name: validation two pass release flow
+    category: edge
+    eval_modes: [release]
+    should_trigger: true
+    prepend_skill: true
+    prompt: "For a substantial skill improvement, give the concrete validation sequence you would use before claiming completion. Include the iterative pass, the broader pre-claim sweep, and the eval mode progression."
+    acceptance:
+      - type: regex
+        value: "(?i)(iterative_fail_fast|fail-fast)"
+      - type: regex
+        value: "(?i)(pre-claim_full_sweep|pre[- ]claim full sweep|broader checks before handoff)"
+      - type: regex
+        value: "(?i)(run[_-]?skill[_-]?evals\\.py|run.*skill evals)"
+      - type: regex
+        value: "(?i)(--eval-mode smoke|eval mode smoke)"
+      - type: regex
+        value: "(?i)(--eval-mode release|eval mode release)"
+      - type: regex
+        value: "(?i)(release_manifest\\.json|release manifest)"
+
+  - id: validation-semantic-tag-gates
+    name: validation semantic tag gates
+    category: edge
+    eval_modes: [release]
+    should_trigger: true
+    prepend_skill: true
+    prompt: "I changed metadata.skill-type while improving a repo skill in this sandbox. What validation commands should I run before claiming completion?"
+    acceptance:
+      - type: regex
+        value: "(?i)(sync_skills_sandbox_safe\\.sh|sandbox-safe sync)"
+      - type: regex
+        value: "(?i)(lint_skill_types\\.sh|missing:\\s*0|invalid:\\s*0)"
+      - type: regex
+        value: "(?i)(lint_openai_skill_format\\.sh\\s+--mode\\s+strict|openai skill format)"
+      - type: regex
+        value: "(?i)(lint_progressive_disclosure\\.sh\\s+--mode\\s+warn|progressive disclosure)"
+      - type: regex
+        value: "(?i)(gotcha_pipeline\\.py\\s+validate|gotcha pipeline)"
+
+  - id: validation-graph-specific-gates
+    name: validation graph specific gates
+    category: edge
+    eval_modes: [release]
+    should_trigger: true
+    prepend_skill: true
+    prompt: "This repo-facing skill changed See Also links, topic-map wiring, and task-profile metadata. What graph checks should the validation plan include?"
+    acceptance:
+      - type: regex
+        value: "(?i)(check-see-also\\.py|see also)"
+      - type: regex
+        value: "(?i)(validate_skill_graph_profiles\\.py|skill graph profiles)"
+      - type: regex
+        value: "(?i)(build-adjacency-yaml\\.py|build adjacency)"
+      - type: regex
+        value: "(?i)(validate-adjacency\\.py|validate adjacency)"

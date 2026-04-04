@@ -3,7 +3,7 @@
  * Setup git hooks for this configuration-first repository.
  *
  * This repo has no root package manager, so we install hooks directly:
- *   - pre-commit: bash scripts/validate_all.sh
+ *   - pre-commit: bash scripts/validate_all.sh --ephemeral
  *   - commit-msg: node scripts/validate-commit-msg.js "$1"
  *   - pre-push:   python3 scripts/diagnose_skill.py --all
  */
@@ -20,7 +20,7 @@ if [ "$SKIP_SIMPLE_GIT_HOOKS" = "1" ]; then
   echo "[INFO] SKIP_SIMPLE_GIT_HOOKS=1, skipping pre-commit."
   exit 0
 fi
-bash scripts/validate_all.sh
+bash scripts/validate_all.sh --ephemeral
 `,
 	"commit-msg": `#!/bin/sh
 if [ "$SKIP_SIMPLE_GIT_HOOKS" = "1" ]; then

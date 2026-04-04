@@ -1,5 +1,5 @@
 interface:
   display_name: "Skill Creator"
-  short_description: "Create or update a skill"
+  short_description: "Create a first-draft skill scaffold"
   icon_small: "./assets/skill-creator-small.svg"
   icon_large: "./assets/skill-creator.png"

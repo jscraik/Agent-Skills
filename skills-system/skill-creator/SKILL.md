@@ -1,13 +1,15 @@
 ---
 name: skill-creator
-description: Guide for creating effective skills. This skill should be used when users want to create a new skill (or update an existing skill) that extends Codex's capabilities with specialized knowledge, workflows, or tool integrations.
+description: Create the first version of a Codex skill or finish a just-created scaffold that extends Codex with specialized knowledge, workflows, or tool integrations. Use when starter authoring is the main job, not lifecycle hardening, installation, or plugin packaging.
 metadata:
-  short-description: Create or update a skill
+  short-description: Create a first-draft skill scaffold
 ---
 
 # Skill Creator
 
 This skill provides guidance for creating effective skills.
+
+Use this skill for starter authoring and scaffold-bound edits only. When the request becomes primarily about routing hardening, validator or eval changes, packaging decisions, or existing-skill lifecycle maintenance, hand off to `skill-builder`. When the deliverable becomes a plugin package, hand off to `codex-plugin-builder`.
 
 ## About Skills
 
@@ -76,7 +78,7 @@ skill-name/
 
 Every SKILL.md consists of:
 
-- **Frontmatter** (YAML): Contains `name` and `description` fields. These are the only fields that Codex reads to determine when the skill gets used, thus it is very important to be clear and comprehensive in describing what the skill is, and when it should be used.
+- **Frontmatter** (YAML): Must contain `name` and `description`. Official optional top-level keys are `license`, `compatibility`, `allowed-tools`, and `metadata`. `name` and `description` are the routing-critical fields Codex uses to determine when the skill gets used, so it is very important to be clear and comprehensive in describing what the skill is, and when it should be used.
 - **Body** (Markdown): Instructions and guidance for using the skill. Only loaded AFTER the skill triggers (if at all).
 
 #### Agents metadata (recommended)
@@ -244,7 +246,7 @@ Follow these steps in order, skipping only if there is a clear reason why they a
 | Skill | When to use together |
 |---|---|
 | [[skill-builder]] | Improve, quality-gate, and package a skill after the first draft exists |
-| [[plugin-creator]] | Scaffold a plugin wrapper when the new skill should ship inside a Codex plugin |
+| [[codex-plugin-builder]] | Package the skill into a Codex plugin when the deliverable boundary is explicitly a plugin |
 | [[skill-installer]] | Distribute the finished skill into a local Codex skills directory or another repo source |
 
 **Topic map:** [[agent-ops]]
@@ -355,15 +357,16 @@ If you used `--examples`, delete any placeholder files that are not needed for t
 
 ##### Frontmatter
 
-Write the YAML frontmatter with `name` and `description`:
+Write the YAML frontmatter with `name` and `description`, and include official optional keys only when they are actually needed:
 
 - `name`: The skill name
 - `description`: This is the primary triggering mechanism for your skill, and helps Codex understand when to use the skill.
   - Include both what the Skill does and specific triggers/contexts for when to use it.
   - Include all "when to use" information here - Not in the body. The body is only loaded after triggering, so "When to Use This Skill" sections in the body are not helpful to Codex.
   - Example description for a `docx` skill: "Comprehensive document creation, editing, and analysis with support for tracked changes, comments, formatting preservation, and text extraction. Use when Codex needs to work with professional documents (.docx files) for: (1) Creating new documents, (2) Modifying or editing content, (3) Working with tracked changes, (4) Adding comments, or any other document tasks"
+- `license`, `compatibility`, `allowed-tools`, `metadata`: Optional official keys for portability, tool policy, and repo governance. Do not invent other top-level keys.
 
-Do not include any other fields in YAML frontmatter.
+Do not include any other top-level fields in YAML frontmatter.
 
 ##### Body
 
@@ -374,7 +377,7 @@ Write instructions for using the skill and its bundled resources.
 Once development of the skill is complete, validate the skill folder to catch basic issues early:
 
 ```bash
-scripts/quick_validate.py <path/to/skill-folder>
+~/.venvs/pyyaml/bin/python skills-system/skill-creator/scripts/quick_validate.py <path/to/skill-folder>
 ```
 
 The validation script checks YAML frontmatter format, required fields, and naming rules. If validation fails, fix the reported issues and run the command again.

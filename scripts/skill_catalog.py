@@ -11,7 +11,16 @@ from typing import Dict, Iterable, List
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 FLAT_SKILLS_DIR = REPO_ROOT / ".agents" / "skills"
-REPO_SCAN_ROOTS = ("auth", "backend", "frontend", "github", "interview", "product", "utilities")
+REPO_SCAN_ROOTS = (
+    "auth",
+    "backend",
+    "frontend",
+    "github",
+    "interview",
+    "product",
+    "skills-system",
+    "utilities",
+)
 
 
 @dataclass(frozen=True)
