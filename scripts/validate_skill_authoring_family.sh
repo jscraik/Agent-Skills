@@ -16,6 +16,28 @@ skill_dirs=(
   "skills-system/plugin-creator"
 )
 
+# ---------------------------------------------------------------------------
+# Release-readiness mode validation
+# ---------------------------------------------------------------------------
+# SKILL_FAMILY_RELEASE_READY=1 enforces:
+#   - SKILL_FAMILY_LIVE_EVALS=1 and SKILL_FAMILY_LIVE_EVALS_TRUSTED=1 must be set
+#   - Evidence artifacts are captured with branch + commit SHA metadata
+#   - An evidence index is written to SKILL_FAMILY_EVIDENCE_DIR (default: artifacts/validation/family-gate)
+#   - Freshness constraint: evidence is produced from the current run; stale pre-existing artifacts are not accepted
+#   - Degraded-mode handling: runner failures block closeout; retry-limited reruns are documented in evidence index
+# ---------------------------------------------------------------------------
+release_ready="${SKILL_FAMILY_RELEASE_READY:-0}"
+if [[ "$release_ready" == "1" ]]; then
+  if [[ "${SKILL_FAMILY_LIVE_EVALS:-0}" != "1" ]] || [[ "${SKILL_FAMILY_LIVE_EVALS_TRUSTED:-0}" != "1" ]]; then
+    echo "[family-gate] ERROR: SKILL_FAMILY_RELEASE_READY=1 requires both:"
+    echo "[family-gate]   SKILL_FAMILY_LIVE_EVALS=1"
+    echo "[family-gate]   SKILL_FAMILY_LIVE_EVALS_TRUSTED=1"
+    echo "[family-gate] These must be set only for trusted branches and CI jobs with authenticated runners."
+    echo "[family-gate] Release-grade readiness claims require trusted live execution proof, not structural listing alone."
+    exit 1
+  fi
+fi
+
 assert_security_eval_contract() {
   local skill_dir="$1"
   local report_file
@@ -78,6 +100,35 @@ PY
   trap - RETURN
 }
 
+# ---------------------------------------------------------------------------
+# Codex profile for live eval runs
+# ---------------------------------------------------------------------------
+# Set SKILL_FAMILY_CODEX_PROFILE to pass --profile <name> to run_skill_evals.py.
+# Example: SKILL_FAMILY_CODEX_PROFILE=fast uses the [profiles.fast] config (gpt-5.3-codex-spark).
+# Leave unset to use the default Codex profile from config.toml.
+codex_profile_args=()
+if [[ -n "${SKILL_FAMILY_CODEX_PROFILE:-}" ]]; then
+  codex_profile_args=(--profile "${SKILL_FAMILY_CODEX_PROFILE}")
+fi
+
+# ---------------------------------------------------------------------------
+# Release-readiness evidence setup
+# ---------------------------------------------------------------------------
+evidence_dir="${SKILL_FAMILY_EVIDENCE_DIR:-artifacts/validation/family-gate}"
+run_timestamp="$(date -u '+%Y%m%dT%H%M%SZ')"
+git_branch="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo 'unknown')"
+git_sha="$(git rev-parse HEAD 2>/dev/null || echo 'unknown')"
+evidence_run_dir=""
+if [[ "$release_ready" == "1" ]]; then
+  evidence_run_dir="${evidence_dir}/${run_timestamp}"
+  mkdir -p "$evidence_run_dir"
+  echo "[family-gate] release-ready mode: evidence will be captured at ${evidence_run_dir}"
+  echo "[family-gate] branch: ${git_branch} | sha: ${git_sha}"
+  if [[ -n "${SKILL_FAMILY_CODEX_PROFILE:-}" ]]; then
+    echo "[family-gate] codex profile: ${SKILL_FAMILY_CODEX_PROFILE}"
+  fi
+fi
+
 echo "[family-gate] using python: $python_bin"
 echo "[family-gate] validating ${#skill_dirs[@]} skill authoring family members"
 if [[ "${SKILL_FAMILY_LIVE_EVALS:-0}" == "1" ]]; then
@@ -93,6 +144,10 @@ fi
 
 "$python_bin" scripts/validate_skill_authoring_family_benchmarks.py
 
+# Track per-skill evidence for the release-ready index
+declare -A skill_evidence_paths
+declare -A skill_outcomes
+
 for skill_dir in "${skill_dirs[@]}"; do
   echo
   echo "[family-gate] === $skill_dir ==="
@@ -102,12 +157,31 @@ for skill_dir in "${skill_dirs[@]}"; do
   assert_security_eval_contract "$skill_dir"
 
   if [[ "${SKILL_FAMILY_LIVE_EVALS:-0}" == "1" ]]; then
-    "$python_bin" utilities/skill-builder/scripts/run_skill_evals.py "$skill_dir" \
-      --runner codex \
-      --eval-mode smoke
-    "$python_bin" utilities/skill-builder/scripts/run_skill_evals.py "$skill_dir" \
-      --runner codex \
-      --eval-mode release
+    skill_slug="${skill_dir//\//-}"
+    if [[ "$release_ready" == "1" ]]; then
+      skill_evidence_path="${evidence_run_dir}/${skill_slug}"
+      skill_evidence_paths["$skill_dir"]="$skill_evidence_path"
+      "$python_bin" utilities/skill-builder/scripts/run_skill_evals.py "$skill_dir" \
+        --runner codex \
+        --eval-mode smoke \
+        --reports-dir "$skill_evidence_path" \
+        "${codex_profile_args[@]+"${codex_profile_args[@]}"}"
+      "$python_bin" utilities/skill-builder/scripts/run_skill_evals.py "$skill_dir" \
+        --runner codex \
+        --eval-mode release \
+        --reports-dir "$skill_evidence_path" \
+        "${codex_profile_args[@]+"${codex_profile_args[@]}"}"
+    else
+      "$python_bin" utilities/skill-builder/scripts/run_skill_evals.py "$skill_dir" \
+        --runner codex \
+        --eval-mode smoke \
+        "${codex_profile_args[@]+"${codex_profile_args[@]}"}"
+      "$python_bin" utilities/skill-builder/scripts/run_skill_evals.py "$skill_dir" \
+        --runner codex \
+        --eval-mode release \
+        "${codex_profile_args[@]+"${codex_profile_args[@]}"}"
+    fi
+    skill_outcomes["$skill_dir"]="passed"
   else
     "$python_bin" utilities/skill-builder/scripts/run_skill_evals.py "$skill_dir" \
       --list-cases \
@@ -115,6 +189,7 @@ for skill_dir in "${skill_dirs[@]}"; do
     "$python_bin" utilities/skill-builder/scripts/run_skill_evals.py "$skill_dir" \
       --list-cases \
       --eval-mode release
+    skill_outcomes["$skill_dir"]="structural-only"
   fi
 
   "$python_bin" utilities/skill-builder/scripts/openclaw_skill_guard.py "$skill_dir" \
@@ -127,9 +202,53 @@ for skill_dir in "${skill_dirs[@]}"; do
 
 done
 
+# ---------------------------------------------------------------------------
+# Write evidence index for release-ready runs
+# ---------------------------------------------------------------------------
+if [[ "$release_ready" == "1" ]] && [[ -n "$evidence_run_dir" ]]; then
+  index_path="${evidence_run_dir}/evidence-index.json"
+
+  # Build skills JSON array
+  skills_json="["
+  first=1
+  for skill_dir in "${skill_dirs[@]}"; do
+    [[ "$first" == "0" ]] && skills_json+=","
+    first=0
+    outcome="${skill_outcomes[$skill_dir]:-unknown}"
+    evpath="${skill_evidence_paths[$skill_dir]:-}"
+    skills_json+="{\"skill\":\"${skill_dir}\",\"outcome\":\"${outcome}\",\"evidence_path\":\"${evpath}\"}"
+  done
+  skills_json+="]"
+
+  codex_profile_label="${SKILL_FAMILY_CODEX_PROFILE:-default}"
+
+  cat >"$index_path" <<EOF
+{
+  "schema_version": 1,
+  "generated_at": "${run_timestamp}",
+  "branch": "${git_branch}",
+  "commit_sha": "${git_sha}",
+  "freshness_window_days": 7,
+  "mode": "release-ready",
+  "codex_profile": "${codex_profile_label}",
+  "evidence_dir": "${evidence_run_dir}",
+  "skill_coverage": ${skills_json},
+  "degraded_mode_policy": "runner failures block closeout; retry-limited reruns are required before marking release-ready; one successful trusted rerun per skill is the minimum evidence standard",
+  "note": "This index satisfies the P1 trusted live eval release gate. Stale artifacts older than freshness_window_days or from non-descendant commits must be rejected at closeout time."
+}
+EOF
+  echo "[family-gate] evidence index written: ${index_path}"
+  echo "[family-gate] lineage: branch=${git_branch} sha=${git_sha}"
+fi
+
 echo
 if [[ "${SKILL_FAMILY_LIVE_EVALS:-0}" == "1" ]]; then
-  echo "[family-gate] pass: all authoring-family skills met equivalent eval/security benchmarks"
+  if [[ "$release_ready" == "1" ]]; then
+    echo "[family-gate] pass (release-ready): all authoring-family skills met trusted live eval/security benchmarks"
+    echo "[family-gate] evidence artifacts: ${evidence_run_dir}"
+  else
+    echo "[family-gate] pass: all authoring-family skills met equivalent eval/security benchmarks"
+  fi
 else
   echo "[family-gate] pass: all authoring-family skills met structural contract/security checks"
 fi

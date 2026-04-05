@@ -249,7 +249,20 @@ SOURCE_RULES: List[SourceRule] = [
             r"(?:read_text\(|read_bytes\(|readFileSync|readFile\(|Path\([^)]*\)\.read_text\(|Path\([^)]*\)\.read_bytes\(|open\([^)]*\))",
             allow_nested=True,
         ),
-        requires_context=compile_safe_regex(r"(?:requests\.|fetch\(|axios\.|httpx\.|curl|http\.request)", re.DOTALL),
+        # Require actual HTTP call syntax (method + opening paren) to avoid false positives
+        # from string literals that contain "curl" (e.g., security pattern tables, eval prompts)
+        # or "requests." without a method call (e.g., "user requests.").
+        # Subprocess-based curl invocations are separately covered by the network_usage rule.
+        requires_context=compile_safe_regex(
+            r"(?:"
+            r"requests\.(?:get|post|put|patch|delete|request|head|options|Session)\s*\("
+            r"|fetch\s*\(\s*[\"'`]https?://"
+            r"|axios\.(?:get|post|put|patch|delete|request|create)\s*\("
+            r"|httpx\.(?:get|post|put|patch|delete|request|Client|AsyncClient)\s*\("
+            r"|http\.request\s*\("
+            r")",
+            re.DOTALL,
+        ),
         remediation="Review file-access scope and ensure local data is not transmitted off-box unintentionally.",
     ),
     SourceRule(

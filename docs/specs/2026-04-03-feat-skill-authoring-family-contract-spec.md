@@ -86,7 +86,7 @@ This spec closes that gap without undoing the family split that now works.
 ## System Boundary
 
 Owned by this spec:
-- the preserved routing and ownership relationship across `skill-creator`, `skill-builder`, `skill-installer`, and `codex-plugin-builder`
+- the preserved routing and ownership relationship across `skill-creator`, `skill-builder`, `skill-installer`, and `plugin-creator` (active gate family); `codex-plugin-builder` remains an adjacent handoff surface for full plugin packaging and is not a gate-family member
 - the creator-to-builder handoff contract for non-trivial skills
 - the `skill-builder` iteration loop for baseline comparison, evidence capture, review, tuning, and reruns
 - the rules for when a skill is ready to hand off into install/import or plugin packaging
@@ -105,11 +105,13 @@ Not owned by this spec:
 
 - `SkillSurface`
   - One discoverable authoring-family skill surface.
-  - Phase-one members:
+  - Phase-one members (active gate family):
     - `skill-creator`
     - `skill-builder`
     - `skill-installer`
-    - `codex-plugin-builder`
+    - `plugin-creator`
+  - Adjacent handoff surface (not a gate-family member):
+    - `codex-plugin-builder` — full plugin packaging; valid handoff target from `skill-builder` once lifecycle validity is established
 
 - `PrimaryJob`
   - The strongest lifecycle responsibility of a `SkillSurface`.
@@ -229,7 +231,8 @@ Not owned by this spec:
 | `skill-creator` | `starter_authoring` | create a first draft, finish a just-created scaffold, turn an already-understood workflow into a starter skill shape | benchmark-heavy hardening, install execution, plugin packaging, broad lifecycle audit |
 | `skill-builder` | `expert_lifecycle_maintenance` | improve routing, harden workflow, compare candidate vs baseline behavior, evaluate, package a validated standalone skill, prepare downstream handoff | pure install/import, plugin conversion without lifecycle judgment, unrelated feature work |
 | `skill-installer` | `skill_installation` | install, import, list, project, or repair visibility for an already-valid skill package | first-draft creation, lifecycle benchmarking, plugin packaging |
-| `codex-plugin-builder` | `plugin_packaging` | convert or package a contract-valid standalone skill as a plugin | first-draft creation, lifecycle benchmarking, install-only work |
+| `plugin-creator` *(gate member)* | `plugin_scaffolding` | scaffold a new plugin skeleton, generate a valid `plugin.json`, add or update local marketplace entries | skill lifecycle hardening, install execution, full plugin packaging and governance programs |
+| `codex-plugin-builder` *(adjacent)* | `plugin_packaging` | convert or package a contract-valid standalone skill as a full plugin with governance checks | first-draft creation, lifecycle benchmarking, install-only work; not a gate-family member |
 
 ## Main Flow / Lifecycle
 
@@ -411,7 +414,7 @@ Explicitly rejected imports:
 
 ## Invariants / Safety Requirements
 
-- The family split remains intact: `skill-creator` creates, `skill-builder` hardens, `skill-installer` installs, `codex-plugin-builder` packages plugins.
+- The family split remains intact: `skill-creator` creates, `skill-builder` hardens, `skill-installer` installs, `plugin-creator` scaffolds plugins. `codex-plugin-builder` is an adjacent handoff surface for full plugin packaging and is not a gate-family member.
 - `skill-creator` validation is an early correctness gate, not proof that a skill is lifecycle-ready.
 - A non-trivial creator-to-builder transition must leave behind a durable `HandoffPackage`.
 - `skill-builder` must compare candidate behavior against an explicit baseline in the canonical non-trivial loop.
@@ -512,7 +515,7 @@ Minimum readiness checks for planning:
 
 ## Acceptance and Test Matrix
 
-- SA1. The family split remains preserved: `skill-creator` owns starter authoring, `skill-builder` owns lifecycle hardening, `skill-installer` owns install/import of already-valid skills, and `codex-plugin-builder` owns plugin packaging.
+- SA1. The family split remains preserved: `skill-creator` owns starter authoring, `skill-builder` owns lifecycle hardening, `skill-installer` owns install/import of already-valid skills, and `plugin-creator` owns plugin scaffolding. `codex-plugin-builder` is an adjacent handoff surface for full plugin packaging and is not a gate-family member.
 - SA2. Non-trivial creator-stage work ends with a durable `HandoffPackage` rather than a purely implicit referral.
 - SA2a. The phase-one `HandoffPackage` is represented as a dedicated repo-visible artifact file.
 - SA3. The `HandoffPackage` includes at least: skill goal, boundary summary, trigger contexts, resource inventory, 2-3 realistic starter prompts, known risks or unknowns, validation state, and authoring state.

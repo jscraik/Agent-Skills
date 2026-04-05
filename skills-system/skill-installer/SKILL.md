@@ -65,6 +65,8 @@ Installation is downstream execution, not authoring judgment:
 - activation should be transactional so failures roll back cleanly;
 - installer behavior should remain predictable under pressure.
 
+Adapt the trust policy and validation depth to different source contexts and deployment environments. Each install workflow is unique — vary quarantine depth, provenance detail, and override scope to match the actual risk level of the source. Diverse environments (curated registries, GitHub paths, offline caches) each require context-specific trust decisions. A capable installer enables reliable skill distribution without requiring users to accept one-size-fits-all defaults. Explore the validation options and customize behavior to match your team's security posture before any activation step.
+
 ## Constraints
 
 - Prefer curated or explicitly trusted sources by default.

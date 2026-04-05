@@ -14,7 +14,9 @@ This matrix is the derived April 2026 readiness view for the governed skill-auth
 - `skills-system/skill-creator`
 - `utilities/skill-builder`
 - `skills-system/skill-installer`
-- `utilities/codex-plugin-builder`
+- `skills-system/plugin-creator`
+
+> **Boundary note (2026-04-05):** `utilities/codex-plugin-builder` is an adjacent plugin-packaging handoff surface, not an active gate-family member. Active gate membership is enforced by `scripts/validate_skill_authoring_family.sh`. See `docs/reference/skill-authoring-family-boundary-decision.md` for the canonical decision record.
 
 It is evidence-focused only. The canonical family contract remains:
 - [docs/specs/2026-04-03-feat-skill-authoring-family-contract-spec.md](/Users/jamiecraik/dev/agent-skills/docs/specs/2026-04-03-feat-skill-authoring-family-contract-spec.md)
@@ -52,8 +54,33 @@ Critical layers for rollout closeout:
 - The recurring auth and broken-home failures were addressed by Codex-home preflight plus the automation-rule repair, and the final live smoke pair rerun passed for both `clarification-package-ambiguous` and `provenance-import-rollback`.
 - Residual risk only: one transient live-runner timeout was observed on an earlier paired rerun before the final successful paired rerun, so future closeout work should still treat occasional live-runner latency as operational noise rather than immediate contract drift.
 
+## Release-Readiness Mode
+
+The family gate supports two operating modes:
+
+| Mode | Invocation | Purpose |
+|---|---|---|
+| Structural (default) | `bash scripts/validate_skill_authoring_family.sh` | Local iteration; verifies eval case listings, security benchmarks, and format contracts without running live evals. |
+| Trusted live | `SKILL_FAMILY_LIVE_EVALS=1 SKILL_FAMILY_LIVE_EVALS_TRUSTED=1 bash scripts/validate_skill_authoring_family.sh` | Runs smoke + release evals against a live Codex runner; required for any release-grade readiness claim. |
+| Release-ready | `SKILL_FAMILY_RELEASE_READY=1 SKILL_FAMILY_LIVE_EVALS=1 SKILL_FAMILY_LIVE_EVALS_TRUSTED=1 bash scripts/validate_skill_authoring_family.sh` | Full trusted live execution **plus** evidence artifact capture. Required for closeout. |
+
+### Release-Ready Evidence Requirements
+
+- Evidence must be produced from the current run (not from pre-existing artifacts).
+- Evidence must not be older than **7 calendar days** at closeout time.
+- Evidence must be produced from the current branch tip or a direct descendant commit.
+- An `evidence-index.json` must be present at `artifacts/validation/family-gate/<run-timestamp>/evidence-index.json` capturing: `branch`, `commit_sha`, `generated_at`, and per-skill `outcome`.
+- Evidence dir is configurable via `SKILL_FAMILY_EVIDENCE_DIR` (default: `artifacts/validation/family-gate`).
+
+### Degraded-Mode Handling
+
+- Transient runner failures do not excuse missing evidence — retry-limited reruns are required.
+- Closeout is blocked until at least one successful trusted run per skill produces retained evidence.
+- Runner instability observed during a run should be noted in `.harness/memory/LEARNINGS.md` as operational noise, not reopened as a contract blocker.
+
 ## Smallest Follow-Ups
 
 1. Keep using authenticated Codex homes for live smoke and let the built-in preflight reject repo-local unauthenticated homes before execution.
 2. If a future live smoke rerun flakes once, rerun the targeted case or pair before reopening a contract-level blocker.
 3. If intermittent live-runner latency becomes common again, treat it as a new operational follow-up rather than changing the family routing contract first.
+4. Use `SKILL_FAMILY_RELEASE_READY=1` for all gold-standard closeout runs; do not rely on structural mode alone for release-grade claims.

@@ -29,11 +29,11 @@ Handoffs:
 Minimum inputs:
 - plugin name (will be normalized to lowercase hyphen-case);
 - target parent path (`plugins/` repo-local or home-local alternative);
-- optional folder toggles (`--with-skills`, `--with-hooks`, `--with-scripts`, `--with-assets`, `--with-mcp`, `--with-apps`);
+- optional companion folder flags (`--with-<type>`): choose only the folder types needed for this plugin's first-pass scaffold; avoid adding every available type unless explicitly requested;
 - marketplace intent (`--with-marketplace`, optional marketplace path override);
 - overwrite intent (`--force` only when explicit replacement is requested).
 
-If requirements are broad, start with 2-3 focused surfaces (manifest, folder scaffold, marketplace entry), then defer advanced packaging to handoff skills.
+If requirements are broad, start with 2-3 focused surfaces (manifest, folder scaffold, marketplace entry), then defer advanced packaging to handoff skills. Vary the companion folder selection to match what the plugin actually needs — unique scaffolds are better than generic kitchen-sink layouts that add noise without purpose.
 
 Contract resources to reference during scaffold work:
 - `references/plugin-json-spec.md`
@@ -65,6 +65,8 @@ Plugin scaffolding should be deterministic and policy-forward:
 - preserve existing marketplace metadata unless user asks to replace it;
 - separate scaffold creation from deeper packaging lifecycle decisions.
 
+Adapt the scaffold layout to each plugin's unique purpose — avoid repetition of generic templates that don't match actual needs. Different plugin types require different companion structures; a capable scaffold enables rapid prototyping while keeping the first-pass scope narrow. Creative variation in the folder selection and marketplace policy is encouraged when the plugin's context differs from the default. Explore the available structure options and customize the baseline to what the plugin actually needs today, not what it might need tomorrow.
+
 ## Constraints
 
 - Keep `.codex-plugin/plugin.json` present in every generated plugin.
@@ -87,9 +89,14 @@ Plugin scaffolding should be deterministic and policy-forward:
 Core commands:
 
 ```bash
+# Minimal scaffold (manifest only)
 python3 .agents/skills/plugin-creator/scripts/create_basic_plugin.py <plugin-name>
+
+# With marketplace entry
 python3 .agents/skills/plugin-creator/scripts/create_basic_plugin.py <plugin-name> --with-marketplace
-python3 .agents/skills/plugin-creator/scripts/create_basic_plugin.py <plugin-name> --with-skills --with-hooks --with-scripts --with-assets --with-mcp --with-apps --with-marketplace
+
+# With selected companion folders (choose only what the plugin needs)
+python3 .agents/skills/plugin-creator/scripts/create_basic_plugin.py <plugin-name> --with-<type> [--with-<type>...] --with-marketplace
 ```
 
 Home-local example:
@@ -114,7 +121,7 @@ Avoid these failures:
 
 - When the user asks: "Can you create a repo-local plugin scaffold named `incident-tools` and add marketplace entry?"
 - When the user says: "Help me set up a home-local plugin in `~/plugins` and update `~/.agents/plugins/marketplace.json`."
-- When the user asks: "Please generate the plugin skeleton with skills/hooks/scripts folders but keep policy defaults unchanged."
+- When the user asks: "Please generate the plugin skeleton with companion structure folders (scripts, assets) but keep policy defaults unchanged."
 
 ## Validation
 
