@@ -4,9 +4,11 @@ description: "Diagnose, repair, and harden Claude wrapper alias routing (`ck`, `
 metadata:
   skill-type: infrastructure_ops
   lifecycle_state: active
-  maturity: draft
+  maturity: experimental
   owner: Jamie Craik
   last_updated: 2026-04-05
+  review_cadence: quarterly
+  metadata_source: frontmatter
 ---
 
 # Claude Alias
