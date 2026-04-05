@@ -1,0 +1,4 @@
+interface:
+  display_name: "Claude Alias Guard"
+  short_description: "Fix and harden ck/cz/cc alias routing"
+  default_prompt: "Diagnose and repair Claude alias drift so ck/cz/cc map to the intended providers and remain stable."
