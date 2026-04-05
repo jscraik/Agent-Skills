@@ -130,6 +130,65 @@ if [[ "$release_ready" == "1" ]]; then
 fi
 
 echo "[family-gate] using python: $python_bin"
+
+# ---------------------------------------------------------------------------
+# P1.2: shellcheck gate — lint all gate/validation shell scripts
+# ---------------------------------------------------------------------------
+if command -v shellcheck >/dev/null 2>&1; then
+  echo "[family-gate] running shellcheck on gate scripts..."
+  gate_scripts=()
+  while IFS= read -r -d '' f; do
+    gate_scripts+=("$f")
+  done < <(find scripts/ -maxdepth 1 -name "*.sh" -print0 2>/dev/null)
+  if [[ ${#gate_scripts[@]} -gt 0 ]]; then
+    if shellcheck --severity=error "${gate_scripts[@]}"; then
+      echo "[family-gate] shellcheck passed"
+    else
+      echo "[family-gate] ERROR: shellcheck found errors in gate scripts — fix before proceeding"
+      exit 2
+    fi
+  fi
+else
+  echo "[family-gate] WARN: shellcheck not found; skipping shell script lint (install via: brew install shellcheck)"
+fi
+
+# ---------------------------------------------------------------------------
+# P3.7: ruff lint gate — lint Python validator scripts
+# ---------------------------------------------------------------------------
+ruff_bin="${RUFF_BIN:-ruff}"
+if command -v "$ruff_bin" >/dev/null 2>&1; then
+  echo "[family-gate] running ruff on validator scripts..."
+  # Lint only the family validator scripts; legacy utility scripts in scripts/
+  # are excluded to avoid pre-existing E401 violations in unrelated tooling.
+  family_py_scripts=(
+    scripts/validate_skill_authoring_family_benchmarks.py
+    utilities/skill-builder/scripts/yaml_frontmatter.py
+    utilities/skill-builder/scripts/skill_gate.py
+    utilities/skill-builder/scripts/analyze_skill.py
+    utilities/skill-builder/scripts/upgrade_skill.py
+    utilities/skill-builder/scripts/quick_validate.py
+    utilities/skill-builder/scripts/run_skill_evals.py
+    utilities/skill-builder/scripts/ci_skill_quality_gate.py
+    utilities/skill-builder/scripts/openclaw_skill_guard.py
+  )
+  existing_py_scripts=()
+  for f in "${family_py_scripts[@]}"; do
+    [[ -f "$f" ]] && existing_py_scripts+=("$f")
+  done
+  if "$ruff_bin" check \
+      --select E,F,W \
+      --ignore E501 \
+      --quiet \
+      "${existing_py_scripts[@]}"; then
+    echo "[family-gate] ruff passed"
+  else
+    echo "[family-gate] ERROR: ruff found issues in validator scripts — fix before proceeding"
+    exit 2
+  fi
+else
+  echo "[family-gate] WARN: ruff not found; skipping Python lint (install via: pip install ruff)"
+fi
+
 echo "[family-gate] validating ${#skill_dirs[@]} skill authoring family members"
 if [[ "${SKILL_FAMILY_LIVE_EVALS:-0}" == "1" ]]; then
   if [[ "${SKILL_FAMILY_LIVE_EVALS_TRUSTED:-0}" != "1" ]]; then

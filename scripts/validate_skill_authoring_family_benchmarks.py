@@ -15,8 +15,10 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import sys
 from dataclasses import dataclass
+from datetime import date, datetime
 from pathlib import Path
 from typing import Any, Dict, List, Sequence, Set
 
@@ -63,6 +65,27 @@ REQUIRED_TASK_PROFILE_KEYS = {
     "learning_posture",
 }
 RISKY_COMMAND_TOKENS = {"curl", "wget", "rm -rf", "netcat", "nc"}
+
+# Indirect PI tokens to scan in non-eval reference files and SKILL.md body.
+# evals.yaml is intentionally excluded — PI language there is test coverage, not injection.
+_INDIRECT_PI_TOKENS = re.compile(
+    r"ignore (all |previous )?instructions|disregard (all )?previous|"
+    r"forget (your|all) instructions|bypass (safety|all checks)|"
+    r"you are now|your new instructions are|act as if",
+    re.IGNORECASE,
+)
+
+# Minimum ratio of cases that must carry deterministic_checks (non-trivial dict).
+_DET_CHECK_COVERAGE_WARN_THRESHOLD = 0.30
+
+# rubric_version staleness: WARN if older than this many days.
+_RUBRIC_VERSION_STALE_DAYS = 180
+
+# rubric_version family divergence: WARN if spread across members exceeds this many days.
+_RUBRIC_VERSION_DIVERGENCE_DAYS = 90
+
+# Optional contract fields expected at gold standard; absence produces WARN (not FAIL).
+_RECOMMENDED_CONTRACT_KEYS = {"rollback_procedure", "observability"}
 
 
 @dataclass(frozen=True)
@@ -134,6 +157,19 @@ def _validate_contract(skill_rel: str, skill_dir: Path) -> List[Finding]:
     if not schema_version:
         findings.append(Finding("FAIL", "CONTRACT_SCHEMA_VERSION", skill_rel, "contract.yaml missing schema_version"))
 
+    # P2.5: Gold-standard recommended fields (WARN, not FAIL)
+    missing_recommended = sorted(_RECOMMENDED_CONTRACT_KEYS - set(contract.keys()))
+    if missing_recommended:
+        findings.append(
+            Finding(
+                "WARN",
+                "CONTRACT_RECOMMENDED_KEYS",
+                skill_rel,
+                f"contract.yaml missing recommended gold-standard keys: {', '.join(missing_recommended)} "
+                "(add rollback_procedure and observability for operational readiness)",
+            )
+        )
+
     return findings
 
 
@@ -178,6 +214,8 @@ def _validate_evals(skill_rel: str, skill_dir: Path) -> List[Finding]:
     has_pi_case = False
     has_negative_should_trigger_false = False
     has_pressure_command_guard = False
+    cases_with_det_checks = 0
+    happy_missing_smoke: List[str] = []
 
     for idx, case in enumerate(cases, 1):
         if not isinstance(case, dict):
@@ -215,6 +253,9 @@ def _validate_evals(skill_rel: str, skill_dir: Path) -> List[Finding]:
                         f"case {case_id or idx} has invalid eval_modes: {', '.join(invalid_modes)}",
                     )
                 )
+            # P1.3: happy-path cases without smoke can't catch regressions in quick runs
+            if category == "happy" and "smoke" not in normalized_modes:
+                happy_missing_smoke.append(case_id or f"#{idx}")
 
         if _case_has_pi_language(case):
             has_pi_case = True
@@ -223,6 +264,11 @@ def _validate_evals(skill_rel: str, skill_dir: Path) -> List[Finding]:
             commands = _case_forbidden_commands(case)
             if commands and commands.intersection(RISKY_COMMAND_TOKENS):
                 has_pressure_command_guard = True
+
+        # P1.1: track deterministic_checks coverage
+        det = case.get("deterministic_checks")
+        if isinstance(det, dict) and det:
+            cases_with_det_checks += 1
 
     missing_categories = sorted(REQUIRED_CASE_CATEGORIES - categories)
     if missing_categories:
@@ -255,6 +301,33 @@ def _validate_evals(skill_rel: str, skill_dir: Path) -> List[Finding]:
                 "EVALS_PRESSURE_COMMAND_GUARD",
                 skill_rel,
                 "missing pressure case with deterministic forbidden command guard (curl/wget/rm -rf/netcat)",
+            )
+        )
+
+    # P1.1: deterministic_checks coverage ratio
+    total_valid = len([c for c in cases if isinstance(c, dict)])
+    if total_valid > 0:
+        coverage = cases_with_det_checks / total_valid
+        if coverage < _DET_CHECK_COVERAGE_WARN_THRESHOLD:
+            findings.append(
+                Finding(
+                    "WARN",
+                    "EVALS_DET_CHECK_COVERAGE",
+                    skill_rel,
+                    f"only {cases_with_det_checks}/{total_valid} cases ({coverage:.0%}) have deterministic_checks; "
+                    f"aim for ≥{_DET_CHECK_COVERAGE_WARN_THRESHOLD:.0%} to reduce reliance on LLM-graded outputs alone",
+                )
+            )
+
+    # P1.3: happy-path cases without smoke mode
+    if happy_missing_smoke:
+        findings.append(
+            Finding(
+                "WARN",
+                "EVALS_HAPPY_NO_SMOKE",
+                skill_rel,
+                f"{len(happy_missing_smoke)} happy-path case(s) lack smoke eval_mode and won't catch regressions "
+                f"in quick runs: {', '.join(happy_missing_smoke)}",
             )
         )
 
@@ -296,6 +369,84 @@ def _validate_task_profile(skill_rel: str, skill_dir: Path) -> List[Finding]:
             )
         )
 
+    # P2.6: rubric_version must be a valid ISO date and not stale
+    rubric_version = str(profile.get("rubric_version", "")).strip()
+    if rubric_version:
+        try:
+            rubric_date = datetime.strptime(rubric_version, "%Y-%m-%d").date()
+            today = date.today()
+            age_days = (today - rubric_date).days
+            if age_days > _RUBRIC_VERSION_STALE_DAYS:
+                findings.append(
+                    Finding(
+                        "WARN",
+                        "TASK_PROFILE_RUBRIC_STALE",
+                        skill_rel,
+                        f"rubric_version {rubric_version} is {age_days} days old "
+                        f"(threshold: {_RUBRIC_VERSION_STALE_DAYS} days); review and update rubric",
+                    )
+                )
+        except ValueError:
+            findings.append(
+                Finding(
+                    "WARN",
+                    "TASK_PROFILE_RUBRIC_FORMAT",
+                    skill_rel,
+                    f"rubric_version '{rubric_version}' is not a valid ISO date (expected YYYY-MM-DD)",
+                )
+            )
+
+    return findings
+
+
+def _validate_reference_pi(skill_rel: str, skill_dir: Path) -> List[Finding]:
+    """P2.4: Scan SKILL.md body and non-eval reference files for indirect PI language.
+
+    evals.yaml is intentionally excluded — PI language there is test coverage.
+    """
+    findings: List[Finding] = []
+
+    # SKILL.md body (everything after closing frontmatter ---)
+    skill_md = skill_dir / "SKILL.md"
+    if skill_md.exists():
+        raw = skill_md.read_text(encoding="utf-8", errors="replace")
+        # Strip frontmatter before scanning
+        parts = raw.split("---", 2)
+        body = parts[2] if len(parts) >= 3 else raw
+        if _INDIRECT_PI_TOKENS.search(body):
+            findings.append(
+                Finding(
+                    "WARN",
+                    "SKILL_MD_INDIRECT_PI",
+                    skill_rel,
+                    "SKILL.md body contains language matching indirect prompt injection patterns; "
+                    "verify this is intentional (e.g., documenting attack patterns)",
+                )
+            )
+
+    # References directory — scan .md and .yaml but skip evals.yaml
+    refs_dir = skill_dir / "references"
+    if refs_dir.is_dir():
+        for ref_file in sorted(refs_dir.iterdir()):
+            if ref_file.name == "evals.yaml":
+                continue  # PI language in evals is deliberate test coverage
+            if ref_file.suffix not in {".md", ".yaml", ".yml"}:
+                continue
+            try:
+                text = ref_file.read_text(encoding="utf-8", errors="replace")
+            except OSError:
+                continue
+            if _INDIRECT_PI_TOKENS.search(text):
+                findings.append(
+                    Finding(
+                        "WARN",
+                        "REFERENCE_INDIRECT_PI",
+                        skill_rel,
+                        f"reference file {ref_file.name} contains indirect prompt injection patterns; "
+                        "review for unintended instructions that could influence skill behaviour",
+                    )
+                )
+
     return findings
 
 
@@ -313,6 +464,7 @@ def _validate_skill(skill_rel: str) -> List[Finding]:
     findings.extend(_validate_contract(skill_rel, skill_dir))
     findings.extend(_validate_evals(skill_rel, skill_dir))
     findings.extend(_validate_task_profile(skill_rel, skill_dir))
+    findings.extend(_validate_reference_pi(skill_rel, skill_dir))
     return findings
 
 
@@ -370,6 +522,35 @@ def main(argv: Sequence[str]) -> int:
     findings: List[Finding] = []
     for skill in skills:
         findings.extend(_validate_skill(skill))
+
+    # P2.6: family-level rubric_version divergence check
+    rubric_dates: List[tuple[str, date]] = []
+    for skill in skills:
+        skill_dir = (REPO_ROOT / skill).resolve()
+        profile_path = skill_dir / "references" / "task-profile.json"
+        if profile_path.exists():
+            try:
+                profile = _load_json(profile_path)
+                rv = str(profile.get("rubric_version", "")).strip()
+                rubric_dates.append((skill, datetime.strptime(rv, "%Y-%m-%d").date()))
+            except (ValueError, Exception):  # noqa: BLE001
+                pass
+    if len(rubric_dates) >= 2:
+        dates_only = [d for _, d in rubric_dates]
+        spread_days = (max(dates_only) - min(dates_only)).days
+        if spread_days > _RUBRIC_VERSION_DIVERGENCE_DAYS:
+            oldest = min(rubric_dates, key=lambda x: x[1])
+            newest = max(rubric_dates, key=lambda x: x[1])
+            findings.append(
+                Finding(
+                    "WARN",
+                    "TASK_PROFILE_RUBRIC_DIVERGENCE",
+                    "family",
+                    f"rubric_version spread across family is {spread_days} days "
+                    f"(oldest: {oldest[0]} at {oldest[1]}, newest: {newest[0]} at {newest[1]}); "
+                    f"align family rubric versions within {_RUBRIC_VERSION_DIVERGENCE_DAYS} days",
+                )
+            )
 
     if args.format == "json":
         _print_json(findings, skills)

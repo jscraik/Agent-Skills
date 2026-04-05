@@ -29,10 +29,10 @@ import os
 import re
 import sys
 from pathlib import Path
-from typing import Any, Dict, Optional, Sequence, Tuple
+from typing import Any, Dict, Optional, Sequence
 
 try:
-    import yaml  # type: ignore
+    import yaml  # type: ignore  # noqa: F401
 except ModuleNotFoundError:
     preferred = Path.home() / ".venvs" / "pyyaml" / "bin" / "python"
     already_reexec = os.environ.get("SKILL_CREATOR_PYYAML_REEXEC") == "1"
@@ -119,15 +119,15 @@ def validate_frontmatter(fm: Dict[str, Any], *, target: str, mode: str) -> None:
 def main(argv: Optional[Sequence[str]] = None) -> int:
     """
     Validate a SKILL.md file's YAML frontmatter according to command-line options and return a CLI exit code.
-    
+
     Parses command-line arguments (path, --target, --mode), resolves the given path to a SKILL.md file, reads and parses its YAML frontmatter, and runs frontmatter validation. On success, prints a confirmation message and returns 0.
-    
+
     Parameters:
         argv (Optional[Sequence[str]]): Optional sequence of command-line arguments to parse (typically sys.argv[1:]). If omitted, the process's command-line arguments are used.
-    
+
     Returns:
         int: 0 on successful validation.
-    
+
     Notes:
         On validation failure or other errors, the function terminates the process with exit code 1 via the module's fail() helper.
     """

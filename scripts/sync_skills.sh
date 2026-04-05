@@ -128,12 +128,10 @@ fi
 
 # Remove legacy aggregation directories that could cause duplicate skills in IDE panels.
 # sync-symlink/ was created by an older version of this script under a different name.
-for legacy_dir in "$repo_root/sync-symlink"; do
-  if [ -d "$legacy_dir" ]; then
-    echo "Removing legacy skill aggregation dir: $legacy_dir"
-    rm -rf -- "$legacy_dir"
-  fi
-done
+if [ -d "$repo_root/sync-symlink" ]; then
+  echo "Removing legacy skill aggregation dir: $repo_root/sync-symlink"
+  rm -rf -- "$repo_root/sync-symlink"
+fi
 
 cleanup_paths=()
 cleanup_on_exit() {

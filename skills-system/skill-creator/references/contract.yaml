@@ -23,3 +23,16 @@ risks:
   - overscoped starter drafts; mitigated by explicit scaffold boundary and handoff
   - routing ambiguity; mitigated by trigger and non-trigger examples
   - missing safety posture; mitigated by mandatory validation and handoff notes
+rollback_procedure: >
+  If skill-creator produces an invalid scaffold (malformed frontmatter, missing required sections,
+  or incorrect handoff artifact), discard the generated SKILL.md and re-invoke with an explicit
+  mode=create prompt. For regressions in the skill itself, restore the previous
+  skills-system/skill-creator/SKILL.md from git and revalidate with the family gate before
+  re-deploying. Incomplete scaffolds should be handed off to skill-builder for repair rather than
+  left in a broken state.
+observability: >
+  Monitor skill-creator via: (1) quick_validate.py pass rate on generated scaffolds — any
+  FAIL on FM_NAME_MISSING or FM_DESC_MISSING indicates scaffold regression; (2) handoff artifact
+  presence in creator-generated output — missing handoff notes signal scope boundary drift;
+  (3) family gate CI results for skills-system/skill-creator; (4) downstream skill-builder
+  rejection rate on creator-originated scaffolds as a quality proxy.
