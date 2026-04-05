@@ -21,3 +21,5 @@
 - [08-release-and-change-control](/docs/agents/08-release-and-change-control.md)
 - [09-audit-trail-policy](/docs/agents/09-audit-trail-policy.md)
 - [10-agent-testing-gates](/docs/agents/10-agent-testing-gates.md)
+- [12-ai-review-governance](/docs/agents/12-ai-review-governance.md)
+- [17-ci-required-checks](/docs/agents/17-ci-required-checks.md)

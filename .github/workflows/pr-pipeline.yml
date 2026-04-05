@@ -62,6 +62,10 @@ jobs:
       - name: Run docs lint
         run: python3 scripts/docs_lint.py --mode warn --config docs-policy.json
 
+  # Governance gate for the skill authoring family (skill-builder, skill-creator,
+  # skill-installer, plugin-creator). This job executes
+  # scripts/validate_skill_authoring_family.sh so contract coverage, eval parity,
+  # prompt-injection/security cases, and OpenClaw checks are enforced in PR CI.
   authoring-family-gate:
     name: authoring-family-gate
     needs: [pr-template]
@@ -80,6 +84,9 @@ jobs:
       - name: Run authoring family contract/eval/security gate
         run: bash scripts/validate_skill_authoring_family.sh
 
+  # CI orchestration policy: harness-preflight must wait for both repo-validate
+  # and authoring-family-gate so harness checks only run after repository and
+  # authoring-family governance gates have passed.
   harness-preflight:
     name: harness-preflight
     needs: [repo-validate, authoring-family-gate]

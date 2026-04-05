@@ -34,3 +34,5 @@ Use this map when starting any task in this repository.
 8. Release and change control
 9. Audit trail policy
 10. Agent testing gates
+11. AI review governance
+12. CI required checks

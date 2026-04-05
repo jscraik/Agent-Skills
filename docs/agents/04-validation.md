@@ -4,6 +4,8 @@
 - [Repository checks](#repository-checks)
 - [Config-sensitive checks](#config-sensitive-checks)
 - [AI workflow checks](#ai-workflow-checks)
+- [PR gate structure](#pr-gate-structure)
+- [Authoring-family contract behavior](#authoring-family-contract-behavior)
 - [Failure handling](#failure-handling)
 
 ## Repository checks
@@ -31,6 +33,29 @@
 ## AI workflow checks
 - Ensure `README.md`, `AGENTS.md`, and linked docs agree on commands and scope.
 - Prefer repository-root commands over guessed defaults.
+
+## PR gate structure
+Current `pr-pipeline` orchestration for pull requests:
+1. `pr-template` runs first.
+2. `repo-validate` and `authoring-family-gate` run after `pr-template`.
+3. `harness-preflight` depends on both `repo-validate` and `authoring-family-gate`.
+
+This dependency order is intentional: harness checks should only run after the repository-wide validation and authoring-family governance checks succeed.
+
+## Authoring-family contract behavior
+`authoring-family-gate` invokes `bash scripts/validate_skill_authoring_family.sh`.
+
+That script enforces equivalent governance for:
+- `utilities/skill-builder`
+- `skills-system/skill-creator`
+- `skills-system/skill-installer`
+- `skills-system/plugin-creator`
+
+Validation behavior includes:
+- Contract/eval/security benchmark checks via `scripts/validate_skill_authoring_family_benchmarks.py`.
+- Contract/eval/prompt-injection/security fail criteria from `skill_gate.py` (`CONTRACT_*`, `EVALS_*`, `SEC_EVALS_*`, `PI_*`, `SCRIPT_SECURITY_*`, fail-fast workflow checks).
+- OpenClaw security checks through `openclaw_skill_guard.py --mode both`.
+- Structural eval coverage verification (smoke/release listing), with trusted-lane live eval execution only when explicitly enabled.
 
 ## Failure handling
 - Stop at the first failed gate, fix, then rerun the minimal required check.
