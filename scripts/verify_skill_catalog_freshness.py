@@ -13,7 +13,6 @@ from typing import Any, Dict, List, Optional, Tuple
 
 SKIP_DIRS = {
     ".git",
-    ".codex",
     "artifacts",
     "node_modules",
     "docs",

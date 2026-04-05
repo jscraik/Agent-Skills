@@ -4,6 +4,8 @@
 from __future__ import annotations
 
 import json
+import importlib.util
+import sys
 from datetime import date, timedelta
 import subprocess
 import tempfile
@@ -33,6 +35,16 @@ def write_text(path: Path, content: str) -> None:
 
 def iso_days_ago(days: int) -> str:
     return (date.today() - timedelta(days=days)).isoformat()
+
+
+def load_validator_module():
+    spec = importlib.util.spec_from_file_location("verify_skill_catalog_freshness", SCRIPT)
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f"Failed to load validator module from {SCRIPT}")
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    return module
 
 
 class SkillLifecycleValidationTests(unittest.TestCase):
@@ -255,6 +267,17 @@ class SkillLifecycleValidationTests(unittest.TestCase):
             self.assertIn("degraded=0", result.stdout)
             self.assertIn("duplicates=0", result.stdout)
             self.assertNotIn("scaffold_quality_gap", result.stdout)
+
+    def test_should_skip_skill_path_uses_granular_codex_prefixes(self) -> None:
+        module = load_validator_module()
+
+        self.assertTrue(
+            module.should_skip_skill_path(Path(".codex/.tmp/plugins/.agents/skills/canonical-skill/SKILL.md"))
+        )
+        self.assertTrue(
+            module.should_skip_skill_path(Path(".codex/skills/.system/canonical-skill/SKILL.md"))
+        )
+        self.assertFalse(module.should_skip_skill_path(Path(".codex/skills/custom-skill/SKILL.md")))
 
     def test_packaged_representation_does_not_count_as_duplicate(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
