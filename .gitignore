@@ -96,3 +96,4 @@ artifacts/policy/
 # - ignore timestamped local run directories by default
 /artifacts/validation/20*/
 !/artifacts/validation/latest/
+plugins/cache/
