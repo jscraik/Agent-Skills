@@ -20,7 +20,7 @@ def infer_subject(skill_path: str, override: str | None = None) -> str:
     p = skill_path.lower()
     if "/frontend/ui/" in p or "/design/" in p or "figma" in p or "react" in p:
         return "ui"
-    if "/github/" in p or "check-pr" in p or "greploop" in p or "review" in p:
+    if "/github/" in p or "review" in p:
         return "code_review"
     if "/backend/" in p or "workers-mcp" in p or "mcp-builder" in p:
         return "backend"

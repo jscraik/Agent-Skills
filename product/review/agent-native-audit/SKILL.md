@@ -117,7 +117,6 @@ Do not use this skill when:
 |---|---|
 | [[agents-md]] | Tighten repo instructions after finding discoverability gaps |
 | [[codex-home-audit]] | Audit the Codex home surface instead of a single repo |
-| [[check-pr]] | Review a specific pull request after identifying agent-native risks |
 | [[gh-workflow]] | Land follow-up fixes through the GitHub workflow |
 
 **Topic map:** [[agent-ops]]

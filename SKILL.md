@@ -13,7 +13,6 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - [Frontend — Ui](#frontend-ui)
 - [Frontend — Website](#frontend-website)
 - [Github](#github)
-- [Github — Greptile](#github-greptile)
 - [Interview](#interview)
 - [Product — Content](#product-content)
 - [Product — Docs](#product-docs)
@@ -28,7 +27,7 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - [Utilities — Codex Plugin Builder — Fixtures — Arscontexta Codex — Skills](#utilities-codex-plugin-builder-fixtures-arscontexta-codex-skills)
 
 ## Summary
-- `total_skills`: 124
+- `total_skills`: 121
 - `catalog_source`: repository skill scan
 
 ## Catalog
@@ -88,14 +87,8 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 
 ## Github
 
-- `gh-fix-ci` — Diagnose failing GitHub Actions checks on a PR and prepare a fix path grounded in `gh` evidence. Use when the user wants CI failure analysis or repair for GitHub-hosted checks, not external CI triage.
-- `gh-workflow` — Operate the GitHub lifecycle through `gh`: issue work, PR preparation, review handling, CI diagnosis, and merge execution. Use when the user wants GitHub state changed, advanced, or reconciled, not when they only want a policy-gated PR readiness decision.
+- `gh-workflow` — Operate the GitHub lifecycle through `gh`: issue work, PR readiness checks, PR preparation, review handling, CI diagnosis, and merge execution. Use when the user wants GitHub state changed, advanced, or reconciled.
 - `resolve-pr-parallel` — Resolve multiple unresolved GitHub PR review threads in parallel by applying fixes, responding, and closing verified threads. Use when the user wants a broad PR-comment cleanup sweep, not readiness classification or one-off comment handling.
-
-## Github — Greptile
-
-- `check-pr` — Classify whether a GitHub PR is ready to merge by checking Greptile prerequisites, checks, unresolved review signal, and remediation priority. Use when the user wants a readiness decision only, not lifecycle actions or comment-by-comment remediation.
-- `greploop` — Iteratively remediate one GitHub PR against Greptile review feedback until the signal stabilizes or stop conditions are hit. Use when the user wants a bounded Greptile fix loop, not a one-shot readiness decision or generic GitHub workflow.
 
 ## Interview
 

@@ -313,7 +313,7 @@ Keep the handoff small and explicit:
 |---|---|
 | [[ce-technical-review]] | Produce a severity-ranked engineering issue list instead of a package-level readiness synthesis |
 | [[ce-work]] | Execute the approved work once review confirms the branch is ready to advance |
-| [[check-pr]] | Ask for a policy-gated PR readiness decision in GitHub specifically |
+| [[gh-workflow]] | Run GitHub-native merge readiness and blocker checks before lifecycle actions |
 | [[agent-native-audit]] | Audit whether the workflow is broadly agent-operable rather than just merge-ready |
 
 **Topic map:** [[agent-ops]]

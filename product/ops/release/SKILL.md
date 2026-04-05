@@ -125,7 +125,6 @@ just release 1.4.2
 |---|---|
 | [[gh-workflow]] | Manage the PR and merge lifecycle before cutting a release |
 | [[verification-before-completion]] | Validate all checks pass before tagging |
-| [[check-pr]] | Review the PR that triggers the release |
 | [[ce-plan]] | Plan the release checklist before executing |
 
 **Topic map:** [[backend-platform]]

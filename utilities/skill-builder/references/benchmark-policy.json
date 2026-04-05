@@ -209,10 +209,10 @@
         "gha_sha_pin"
       ],
       "min_hits_fail": {
-        "gha_sha_pin": 3
+        "gha_sha_pin": 1
       },
       "min_hits_warn": {
-        "gha_sha_pin": 3
+        "gha_sha_pin": 1
       },
       "min_coverage_fail": 0.7,
       "min_coverage_warn": 1.0

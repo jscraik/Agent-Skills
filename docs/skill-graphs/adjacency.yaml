@@ -30,7 +30,6 @@ agent-native-architecture:
   workers-mcp: Deploy an agent-native MCP surface on Cloudflare Workers
 agent-native-audit:
   agents-md: Tighten repo instructions after finding discoverability gaps
-  check-pr: Review a specific pull request after identifying agent-native risks
   codex-home-audit: Audit the Codex home surface instead of a single repo
   gh-workflow: Land follow-up fixes through the GitHub workflow
 agentation:
@@ -174,7 +173,6 @@ ce-review:
   ce-technical-review: Produce a severity-ranked engineering issue list instead of
     a package-level readiness synthesis
   ce-work: Execute the approved work once review confirms the branch is ready to advance
-  check-pr: Ask for a policy-gated PR readiness decision in GitHub specifically
 ce-spec:
   ce-brainstorm: Use first when the work still needs WHAT and WHY clarification
   ce-plan: Use after spec completion when the contract is ready for execution sequencing
@@ -185,7 +183,6 @@ ce-technical-review:
     engineering risk
   ce-review: Return a broader readiness verdict and next-step synthesis instead of
     a findings-first issue list
-  check-pr: Gate merge readiness in GitHub after the technical review is complete
   systematic-debugging: Investigate root cause first when the risky behavior is not
     yet well understood
 ce-work:
@@ -211,15 +208,10 @@ chatgpt-apps:
   oak-api: Integrate Oak curriculum content into ChatGPT App workflows
   openai-docs: Reference official Apps SDK documentation
   workers-mcp: Host the MCP server on Cloudflare Workers
-check-pr:
-  gh-fix-ci: Fix any failing CI checks found during PR review
-  gh-workflow: Full GitHub lifecycle management around the PR
-  security-best-practices: Apply security checks during PR review
-  verification-before-completion: Gate merge on fresh command evidence
 circleci:
   backend-engineer: Wire backend deployments into CircleCI workflows
   cloudflare-deploy: Deploy to Cloudflare as part of a CircleCI pipeline
-  gh-fix-ci: Fix GitHub CI checks that complement CircleCI
+  "github:gh-fix-ci": Fix GitHub CI checks that complement CircleCI
   verification-before-completion: Verify pipeline output before marking complete
 cli-spec:
   docs-expert: Document the CLI surface after speccing it
@@ -400,7 +392,7 @@ frontend-ui-design:
   figma: Use Figma designs as reference for implementation
   fixing-accessibility: Apply accessibility fixes during component design
   ui-ux-creative-coding: Add motion and creative polish to designed components
-gh-fix-ci:
+"github:gh-fix-ci":
   circleci: When the CI failure is from CircleCI rather than GitHub Actions
   gh-workflow: Use for the full GitHub PR lifecycle — CI diagnosis is a single mode
     of this broader skill
@@ -409,19 +401,14 @@ gh-fix-ci:
   verification-before-completion: Verify the fix passes CI before claiming the PR
     is ready
 gh-workflow:
-  check-pr: 'Pre-merge policy review: readiness view with check status and remediation
-    priority'
-  gh-fix-ci: Focused CI diagnosis mode — use when the only task is debugging a failing
+  resolve-pr-parallel: Use when unresolved review-thread volume warrants bounded fan-out
+  "github:gh-fix-ci": Focused CI diagnosis mode — use when the only task is debugging a failing
     Actions check
   release: After merging — use to cut the version tag and publish the release
   systematic-debugging: When PR CI failures reveal a code-level bug that needs root-cause
     investigation
   verification-before-completion: Gate all merge claims with fresh `gh pr checks`
     and `git log` evidence
-greploop:
-  check-pr: Verify setup and classify readiness before starting the loop
-  gh-fix-ci: Investigate failing CI if Greptile remediation exposes check failures
-  gh-workflow: Handle PR lifecycle actions outside the bounded Greptile loop
 imagegen:
   nano-banana-builder: Integrate imagegen into Nano Banana iterative editing flows
   og-image-creator: Use generated images as OG image assets
@@ -559,7 +546,6 @@ recon-workbench:
     surface
 release:
   ce-plan: Plan the release checklist before executing
-  check-pr: Review the PR that triggers the release
   gh-workflow: Manage the PR and merge lifecycle before cutting a release
   verification-before-completion: Validate all checks pass before tagging
 remotion:
@@ -582,10 +568,8 @@ reproduce-bug:
   systematic-debugging: Move from reproduction evidence into a deeper root-cause analysis
   test-browser: Reproduce or verify browser-facing regressions with route-level evidence
 resolve-pr-parallel:
-  check-pr: Ask for a merge-readiness decision instead of comment resolution work
-  gh-workflow: Handle a single-threaded PR lifecycle or smaller review loop without
-    fan-out
-  greploop: Run a bounded remediation loop when Greptile findings are the driver
+  gh-workflow: Handle merge-readiness triage (`pr_readiness`) or a single-threaded
+    PR lifecycle instead of bulk comment remediation
   systematic-debugging: Diagnose a stubborn defect before continuing to resolve review
     feedback
 resolve-todo-parallel:
@@ -682,7 +666,7 @@ stitch-remotion:
 systematic-debugging:
   ce-plan: Re-plan the approach when repeated fixes fail and the current path is not
     converging
-  gh-fix-ci: Investigate a failing GitHub Actions check instead of a general bug report
+  "github:gh-fix-ci": Investigate a failing GitHub Actions check instead of a general bug report
   test-driven-development: Capture the root cause as a failing test before or alongside
     the fix
   verification-before-completion: Prove the fix works before claiming the debugging

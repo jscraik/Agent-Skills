@@ -41,9 +41,9 @@ Use a focused GitHub remediation workflow for unresolved PR review threads. Pres
 - Handle mixed review feedback where some threads need code changes and others need reviewer replies, while keeping one verified completion pass.
 
 ## When not to use
-- Do not use for PR readiness, policy, or merge-blocker review. Use [`check-pr`](/Users/jamiecraik/dev/Agent-Skills/github/greptile/check-pr/SKILL.md).
+- Do not use for PR readiness, policy, or merge-blocker review. Use [`gh-workflow`](/Users/jamiecraik/dev/Agent-Skills/github/gh-workflow/SKILL.md) in `pr_readiness` mode.
 - Do not use for broad GitHub lifecycle work like PR creation, review requests, or server-side merge. Use [`gh-workflow`](/Users/jamiecraik/dev/Agent-Skills/github/gh-workflow/SKILL.md).
-- Do not use for CI-only diagnosis. Use [`gh-fix-ci`](/Users/jamiecraik/dev/Agent-Skills/github/gh-fix-ci/SKILL.md).
+- Do not use for CI-only diagnosis. Use [`github:gh-fix-ci`](/Users/jamiecraik/dev/agent-skills/plugins/cache/openai-curated/github/f78e3ad49297672a905eb7afb6aa0cef34edc79e/skills/gh-fix-ci/SKILL.md).
 - Do not use for CircleCI workflow design, migration, policy, or CircleCI-specific pipeline diagnosis. Use [`circleci`](/Users/jamiecraik/dev/Agent-Skills/utilities/circleci/SKILL.md).
 - Do not use for a generic code review or technical critique with no remediation ask. Use [`ce-review`](/Users/jamiecraik/dev/Agent-Skills/product/ops/ce-review/SKILL.md) or [`ce-technical-review`](/Users/jamiecraik/dev/Agent-Skills/product/ops/ce-technical-review/SKILL.md).
 - Do not use when the user only wants to address one or two specifically named comments manually. Use `gh-workflow` in `pr_review_comments` mode instead.
@@ -101,7 +101,7 @@ Use a focused GitHub remediation workflow for unresolved PR review threads. Pres
 
 ## Routing map
 - Read [`references/overlap-matrix.md`](/Users/jamiecraik/dev/Agent-Skills/github/resolve-pr-parallel/references/overlap-matrix.md) before widening this skill's trigger wording.
-- Use [`check-pr`](/Users/jamiecraik/dev/Agent-Skills/github/greptile/check-pr/SKILL.md) when the user wants to know whether a PR is ready, not to fix it.
+- Use [`gh-workflow`](/Users/jamiecraik/dev/Agent-Skills/github/gh-workflow/SKILL.md) in `pr_readiness` mode when the user wants to know whether a PR is ready, not to fix it.
 - Use [`gh-workflow`](/Users/jamiecraik/dev/Agent-Skills/github/gh-workflow/SKILL.md) when the work is a selected-comment response, broader PR lifecycle task, or one-mode GitHub operation.
 - Use [`circleci`](/Users/jamiecraik/dev/Agent-Skills/utilities/circleci/SKILL.md) when the blocker is CircleCI workflow design, migration, policy, or provider-specific diagnosis rather than GitHub thread remediation.
 - Use [`ce-review`](/Users/jamiecraik/dev/Agent-Skills/product/ops/ce-review/SKILL.md) or [`ce-technical-review`](/Users/jamiecraik/dev/Agent-Skills/product/ops/ce-technical-review/SKILL.md) when the user wants critique rather than remediation.
@@ -156,8 +156,7 @@ Use a focused GitHub remediation workflow for unresolved PR review threads. Pres
 | Skill | When to use |
 |---|---|
 | [[gh-workflow]] | Handle a single-threaded PR lifecycle or smaller review loop without fan-out |
-| [[check-pr]] | Ask for a merge-readiness decision instead of comment resolution work |
-| [[greploop]] | Run a bounded remediation loop when Greptile findings are the driver |
+| `github:gh-fix-ci` (plugin) | Debug failing Actions checks discovered while resolving review feedback |
 | [[systematic-debugging]] | Diagnose a stubborn defect before continuing to resolve review feedback |
 
 **Topic map:** [[backend-platform]]

@@ -9,9 +9,9 @@ Available helper scripts:
 - `validate_reference_contracts.py`
   - Purpose: fail fast when skill docs regress to deprecated command references.
   - Checks for banned patterns:
-    - `verify-greptile`
-    - `request-greptile-review`
-    - `Greptile Review`
+    - legacy `verify-<provider>` command alias
+    - legacy `request-<provider>-review` command alias
+    - legacy `<Provider> Review` check label
     - `source scripts/codex-preflight.sh && preflight_repo`
   - Checks for required patterns:
     - `verify-coderabbit`

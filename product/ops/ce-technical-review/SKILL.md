@@ -268,7 +268,7 @@ When the target is a document, preserve the score and readiness recommendation i
 |---|---|
 | [[ce-review]] | Return a broader readiness verdict and next-step synthesis instead of a findings-first issue list |
 | [[agent-native-audit]] | Review agent-operability or workflow autonomy rather than code-level engineering risk |
-| [[check-pr]] | Gate merge readiness in GitHub after the technical review is complete |
+| [[gh-workflow]] | Gate merge readiness in GitHub after the technical review is complete |
 | [[systematic-debugging]] | Investigate root cause first when the risky behavior is not yet well understood |
 
 **Topic map:** [[agent-ops]]

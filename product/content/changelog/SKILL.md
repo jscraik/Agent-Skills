@@ -28,7 +28,7 @@ Preserves upstream changelog guidance from `EveryInc/compound-engineering-plugin
 
 Do not use this skill when:
 - the user needs to cut or publish a release; use `release`;
-- the task is a full PR review or merge-readiness check; use `check-pr` or `gh-workflow`;
+- the task is a full PR review or merge-readiness check; use `gh-workflow`;
 - the user wants a marketing launch post rather than an engineering changelog.
 
 ## Required inputs

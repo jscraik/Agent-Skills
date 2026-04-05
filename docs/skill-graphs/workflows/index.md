@@ -24,6 +24,5 @@
 ## Code Quality
 
 - [CodeQL](/docs/skill-graphs/workflows/codeql.md) — Matrix analysis (javascript, python) with SARIF upload
-- [Greptile review](/docs/skill-graphs/workflows/greptile-review.md) — AI bot integration with neutral check run
 
 - Back to [Skill Graphs](/docs/skill-graphs)

@@ -183,7 +183,7 @@ metadata:
 
 | Skill | When to use together |
 |---|---|
-| [[gh-fix-ci]] | Fix GitHub CI checks that complement CircleCI |
+| `github:gh-fix-ci` (plugin) | Fix GitHub Actions checks that complement CircleCI |
 | [[cloudflare-deploy]] | Deploy to Cloudflare as part of a CircleCI pipeline |
 | [[verification-before-completion]] | Verify pipeline output before marking complete |
 | [[backend-engineer]] | Wire backend deployments into CircleCI workflows |

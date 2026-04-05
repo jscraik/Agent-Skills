@@ -17,15 +17,15 @@ Use this matrix to keep `resolve-pr-parallel` focused on remediation of all unre
 |---|---|---|
 | "Resolve all remaining review comments on this PR." | Batch remediation and thread resolution | `resolve-pr-parallel` |
 | "Clear every unresolved review thread on PR 482 and verify GitHub is clean." | End-to-end review-thread remediation | `resolve-pr-parallel` |
-| "Is this PR ready to merge?" | Readiness and blocker audit | `check-pr` |
+| "Is this PR ready to merge?" | Readiness and blocker audit | `gh-workflow (pr_readiness mode)` |
 | "Handle review comments 2 and 4 only." | Selected-comment workflow | `gh-workflow` |
 | "Prepare this branch as a PR and request review." | Broader GitHub lifecycle management | `gh-workflow` |
-| "Why are the PR checks failing?" | CI diagnosis | `gh-fix-ci` |
+| "Why are the PR checks failing?" | CI diagnosis | `github:gh-fix-ci` (plugin) |
 | "How should this repo's CircleCI workflow gate PR remediation and deploys?" | CircleCI workflow design and policy | `circleci` |
 | "Do a broad readiness review of this branch." | Package-level review | `ce-review` |
 | "Find the engineering risks in this PR." | Technical critique, not remediation | `ce-technical-review` |
 
 ## Notes
 - `resolve-pr-parallel` is a focused specialist, not the canonical GitHub umbrella skill.
-- If the user already names a narrower owner like `check-pr` or `gh-workflow`, that narrower owner wins.
+- If the user already names a narrower owner like `gh-workflow`, that narrower owner wins.
 - Question-only threads still count as remediation work here, but only when the user wants the whole unresolved-thread set handled.

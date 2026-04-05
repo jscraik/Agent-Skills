@@ -107,10 +107,6 @@
   },
   "remediationPolicy": {
     "providerDefaults": {
-      "greptile": {
-        "autoApplyMaxTier": "medium",
-        "dryRunOnlyByDefault": false
-      },
       "codex": {
         "autoApplyMaxTier": "medium",
         "dryRunOnlyByDefault": false

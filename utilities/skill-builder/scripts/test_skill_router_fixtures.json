@@ -7,7 +7,7 @@
   {
     "id": "github-workflow",
     "query": "fix failing github actions checks and rerun ci",
-    "expected_top": "gh-fix-ci"
+    "expected_top": "gh-workflow"
   },
   {
     "id": "ui-design",

@@ -43,6 +43,6 @@ Read when:
 - Empty unresolved-thread result on verification
 
 ## Local adaptation notes
-- The local skill adds explicit boundaries against `check-pr`, `gh-workflow`, `ce-review`, and `ce-technical-review`.
+- The local skill adds explicit boundaries against `gh-workflow`, `ce-review`, and `ce-technical-review`.
 - The local scripts improve on the upstream helpers by adding pagination-safe thread fetching and a batch thread-resolution helper.
 - The local skill uses Codex-native terminology for delegated remediation and blocked-state handling, but keeps the upstream execution shape intact.

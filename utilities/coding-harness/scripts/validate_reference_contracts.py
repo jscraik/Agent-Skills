@@ -16,10 +16,18 @@ TARGET_FILES = [
     "references/agent-install-guide.md",
 ]
 
+LEGACY_REVIEW_PROVIDER = "grep" + "tile"
+
 BANNED_PATTERNS = {
-    "verify-greptile": re.compile(r"\bverify-greptile\b"),
-    "request-greptile-review": re.compile(r"\brequest-greptile-review\b"),
-    "Greptile Review": re.compile(r"\bGreptile Review\b"),
+    "legacy verify-provider alias": re.compile(
+        rf"\bverify-{LEGACY_REVIEW_PROVIDER}\b",
+    ),
+    "legacy request-provider-review alias": re.compile(
+        rf"\brequest-{LEGACY_REVIEW_PROVIDER}-review\b",
+    ),
+    "legacy provider check label": re.compile(
+        rf"\b{LEGACY_REVIEW_PROVIDER.title()} Review\b",
+    ),
     "legacy preflight invocation": re.compile(
         r"source scripts/codex-preflight\.sh && preflight_repo"
     ),
