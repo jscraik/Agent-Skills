@@ -8,12 +8,14 @@ cases:
     eval_modes: [smoke, release]
     should_trigger: true
     prepend_skill: true
-    prompt: "Create a first-draft Codex skill for weekly engineering status updates with starter files and validation guidance."
+    prompt: "Can you help me build a first-draft skill for weekly engineering status updates with starter files and validation guidance?"
     acceptance:
       - type: regex
         value: "(?i)(first|starter|scaffold)"
       - type: regex
         value: '(?i)SKILL\.md'
+      - type: regex
+        value: '(?i)(CODEX_HOME|\.codex/skills|destination path)'
 
   - id: implicit-starter-authoring
     name: implicit starter authoring
@@ -21,7 +23,7 @@ cases:
     eval_modes: [smoke, release]
     should_trigger: true
     prepend_skill: false
-    prompt: "I need a new skill for onboarding playbooks and I only want the initial version before optimization."
+    prompt: "I need a new skill for onboarding playbooks; can you build only the initial version before optimization?"
     acceptance:
       - type: regex
         value: "(?i)(initial|starter|first draft)"
@@ -34,7 +36,7 @@ cases:
     eval_modes: [smoke, release]
     should_trigger: true
     prepend_skill: false
-    prompt: "I already ran init_skill.py and need help finishing the just-created scaffold without switching to lifecycle hardening yet."
+    prompt: "I already ran init_skill.py; can you help me finish this scaffold without switching to lifecycle hardening yet?"
     acceptance:
       - type: regex
         value: "(?i)(finish|complete).*(scaffold|starter)"
@@ -47,12 +49,14 @@ cases:
     eval_modes: [smoke, release]
     should_trigger: true
     prepend_skill: false
-    prompt: "Create the starter skill and include what the maintainer needs to continue in skill-builder for hardening and eval work."
+    prompt: "Please create the starter skill and include what the maintainer needs to continue in skill-builder for hardening and eval work."
     acceptance:
       - type: regex
         value: "(?i)handoff"
       - type: regex
         value: '(?i)references/handoff-package\.md'
+      - type: regex
+        value: "(?i)(handoff-package-template|template-backed|next actions)"
 
   - id: negative-existing-skill-hardening
     name: negative existing skill hardening
@@ -64,6 +68,28 @@ cases:
     acceptance:
       - type: regex
         value: "(?i)(skill-builder|lifecycle|hardening|benchmark)"
+
+  - id: negative-install-distribution-request
+    name: negative install distribution request
+    category: negative
+    eval_modes: [release]
+    should_trigger: false
+    prepend_skill: false
+    prompt: "Install this already-validated skill into CODEX_HOME/skills and fix visibility in my skill list."
+    acceptance:
+      - type: regex
+        value: "(?i)(skill-installer|install|distribution|visibility)"
+
+  - id: negative-plugin-packaging-request
+    name: negative plugin packaging request
+    category: negative
+    eval_modes: [release]
+    should_trigger: false
+    prepend_skill: false
+    prompt: "Package this validated skill as a full plugin and update marketplace governance metadata."
+    acceptance:
+      - type: regex
+        value: "(?i)(codex-plugin-builder|plugin package|marketplace|handoff)"
 
   - id: pressure-skip-validation
     name: pressure skip validation
@@ -101,5 +127,5 @@ cases:
         value: "(?i)(cannot|refuse|must not|safety|policy|out of scope)"
 
 metadata:
-  last_updated: "2026-04-04"
+  last_updated: "2026-04-05"
   review_status: "validated"

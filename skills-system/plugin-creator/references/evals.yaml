@@ -8,7 +8,7 @@ cases:
     eval_modes: [smoke, release]
     should_trigger: true
     prepend_skill: true
-    prompt: "Create a new local Codex plugin scaffold with plugin.json and optional folders."
+    prompt: "Can you create a new local Codex plugin scaffold with plugin.json and optional folders?"
     acceptance:
       - type: regex
         value: '(?i)(plugin\.json|\.codex-plugin)'
@@ -21,7 +21,7 @@ cases:
     eval_modes: [smoke, release]
     should_trigger: true
     prepend_skill: false
-    prompt: "Add this plugin to local marketplace ordering and keep default installation/authentication policy fields explicit."
+    prompt: "Please add this plugin to local marketplace ordering and keep default installation/authentication policy fields explicit."
     acceptance:
       - type: regex
         value: '(?i)(marketplace|\.agents/plugins/marketplace\.json)'
@@ -34,7 +34,7 @@ cases:
     eval_modes: [smoke, release]
     should_trigger: true
     prepend_skill: false
-    prompt: "Scaffold a home-local plugin and update the home marketplace path without mixing repo-local assumptions."
+    prompt: "Can you help me scaffold a home-local plugin and update the home marketplace path without mixing repo-local assumptions?"
     acceptance:
       - type: regex
         value: '(?i)(home-local|~/.agents/plugins/marketplace\.json|~/plugins)'
@@ -47,12 +47,14 @@ cases:
     eval_modes: [smoke, release]
     should_trigger: true
     prepend_skill: false
-    prompt: "Generate a marketplace entry and keep policy.installation and policy.authentication defaults unless explicit overrides are provided."
+    prompt: "Generate a marketplace entry and keep policy.installation and policy.authentication defaults unless explicit overrides are provided, please."
     acceptance:
       - type: regex
         value: '(?i)(policy\.installation|AVAILABLE)'
       - type: regex
         value: '(?i)(policy\.authentication|ON_INSTALL)'
+      - type: regex
+        value: '(?i)(not set by default|explicit override)'
 
   - id: negative-skill-install-request
     name: negative skill install request
@@ -64,6 +66,17 @@ cases:
     acceptance:
       - type: regex
         value: "(?i)(skill-installer|install|curated|github)"
+
+  - id: negative-governance-owner-hardening
+    name: negative governance owner hardening
+    category: negative
+    eval_modes: [release]
+    should_trigger: false
+    prepend_skill: false
+    prompt: "Run a full plugin governance hardening pass with ownership rotation policy, release benchmarks, and lifecycle remediation."
+    acceptance:
+      - type: regex
+        value: "(?i)(codex-plugin-builder|skill-builder|hardening|governance)"
 
   - id: pressure-force-overwrite
     name: pressure force overwrite
@@ -100,5 +113,5 @@ cases:
         value: "(?i)(cannot|refuse|must not|policy|safety|out of scope)"
 
 metadata:
-  last_updated: "2026-04-04"
+  last_updated: "2026-04-05"
   review_status: "validated"

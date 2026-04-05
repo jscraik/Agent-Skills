@@ -25,6 +25,7 @@ import sys
 import tempfile
 import urllib.error
 import urllib.parse
+import uuid
 import zipfile
 
 from github_utils import github_request
@@ -52,6 +53,7 @@ class Args:
     trusted_repo: list[str] | None = None
     allow_untrusted_source: bool = False
     validation_level: str = "strict"
+    allow_ssh_fallback: bool = False
 
 
 @dataclass
@@ -196,7 +198,7 @@ def _download_repo_zip(owner: str, repo: str, ref: str, dest_dir: str) -> str:
 
 
 def _run_git(args: list[str]) -> str:
-    result = subprocess.run(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    result = subprocess.run(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, shell=False)
     if result.returncode != 0:
         raise InstallError(result.stderr.strip() or "Git command failed.")
     return result.stdout.strip()
@@ -216,6 +218,18 @@ def _validate_relative_path(path: str) -> None:
     normalized = os.path.normpath(path)
     if os.path.isabs(path) or normalized.startswith(".."):
         raise InstallError("Skill path must be a relative path inside the repo.")
+    if normalized in ("", "."):
+        raise InstallError("Skill path must resolve to a concrete subdirectory.")
+    if normalized.startswith("-"):
+        raise InstallError("Skill path must not start with `-`.")
+
+
+def _validate_ref_token(ref: str) -> None:
+    clean_ref = ref.strip()
+    if not clean_ref:
+        raise InstallError("Ref cannot be empty.")
+    if clean_ref.startswith("-"):
+        raise InstallError("Ref must not start with `-`.")
 
 
 def _validate_skill_name(name: str) -> None:
@@ -259,7 +273,7 @@ def _git_sparse_checkout(repo_url: str, ref: str, paths: list[str], dest_dir: st
             ]
         )
 
-    _run_git(["git", "-C", repo_dir, "sparse-checkout", "set", *paths])
+    _run_git(["git", "-C", repo_dir, "sparse-checkout", "set", "--", *paths])
     _run_git(["git", "-C", repo_dir, "checkout", ref])
     resolved_commit = _run_git(["git", "-C", repo_dir, "rev-parse", "HEAD"])
     if not _is_pinned_ref(resolved_commit):
@@ -268,6 +282,8 @@ def _git_sparse_checkout(repo_url: str, ref: str, paths: list[str], dest_dir: st
 
 
 def _validate_skill(path: str) -> None:
+    if os.path.islink(path):
+        raise InstallError(f"Skill root must not be a symlink: {path}")
     if not os.path.isdir(path):
         raise InstallError(f"Skill path not found: {path}")
 
@@ -282,6 +298,30 @@ def _validate_skill(path: str) -> None:
         raise InstallError("references/contract.yaml not found in selected skill directory.")
     if not os.path.isfile(evals_path):
         raise InstallError("references/evals.yaml not found in selected skill directory.")
+    _assert_tree_has_no_symlinks(path)
+
+
+def _assert_tree_has_no_symlinks(path: str) -> None:
+    for root, dirs, files in os.walk(path, followlinks=False):
+        for directory in dirs:
+            full_path = os.path.join(root, directory)
+            if os.path.islink(full_path):
+                raise InstallError(f"Symlinks are not allowed in imported skills: {full_path}")
+        for filename in files:
+            full_path = os.path.join(root, filename)
+            if os.path.islink(full_path):
+                raise InstallError(f"Symlinks are not allowed in imported skills: {full_path}")
+
+
+def _assert_path_within_repo(repo_root: str, candidate: str) -> None:
+    repo_real = os.path.realpath(repo_root)
+    candidate_real = os.path.realpath(candidate)
+    if candidate_real == repo_real or candidate_real.startswith(repo_real + os.sep):
+        return
+    raise InstallError(
+        "Resolved skill path is outside the fetched repository root. "
+        f"repo={repo_real} candidate={candidate_real}"
+    )
 
 
 def _normalize_repo_id(repo_text: str) -> str:
@@ -368,7 +408,7 @@ def _run_stage_validators(skill_dir: str, journal: JournalWriter, validation_lev
     ]
 
     for validator_name, command in commands:
-        proc = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        proc = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, shell=False)
         stdout = proc.stdout or ""
         stderr = proc.stderr or ""
         command_text = " ".join(command)
@@ -418,10 +458,10 @@ def _rollback_promoted(promoted_dirs: list[str], journal: JournalWriter) -> list
         try:
             if os.path.isdir(directory):
                 shutil.rmtree(directory)
-            journal.write("rollback_removed_destination", path=directory)
+            _journal_write_best_effort(journal, "rollback_removed_destination", path=directory)
         except Exception as exc:  # noqa: BLE001
             errors.append(f"{directory}: {exc}")
-            journal.write("rollback_remove_failed", path=directory, error=str(exc))
+            _journal_write_best_effort(journal, "rollback_remove_failed", path=directory, error=str(exc))
     return errors
 
 
@@ -433,7 +473,31 @@ def _build_repo_ssh(owner: str, repo: str) -> str:
     return f"git@github.com:{owner}/{repo}.git"
 
 
-def _prepare_repo(source: Source, method: str, tmp_dir: str) -> PreparedRepo:
+def _is_ssh_fallback_eligible(error_text: str) -> bool:
+    lowered = error_text.lower()
+    auth_markers = (
+        "authentication failed",
+        "could not read username",
+        "repository not found",
+        "http 401",
+        "http 403",
+        "permission denied",
+    )
+    transport_markers = (
+        "unable to access",
+        "could not resolve host",
+        "failed to connect",
+        "connection timed out",
+        "connection reset",
+        "network is unreachable",
+        "tls",
+        "ssl",
+        "proxy",
+    )
+    return any(marker in lowered for marker in auth_markers + transport_markers)
+
+
+def _prepare_repo(source: Source, method: str, tmp_dir: str, *, allow_ssh_fallback: bool) -> PreparedRepo:
     if method in ("download", "auto"):
         try:
             repo_root = _download_repo_zip(source.owner, source.repo, source.ref, tmp_dir)
@@ -458,10 +522,23 @@ def _prepare_repo(source: Source, method: str, tmp_dir: str) -> PreparedRepo:
         repo_url = source.repo_url or _build_repo_url(source.owner, source.repo)
         try:
             repo_root, resolved_commit = _git_sparse_checkout(repo_url, source.ref, source.paths, tmp_dir)
-        except InstallError:
+            return PreparedRepo(repo_root=repo_root, resolved_commit=resolved_commit, source_method="git+https")
+        except InstallError as https_exc:
+            if not allow_ssh_fallback:
+                raise InstallError(
+                    "Git HTTPS sparse-checkout failed and SSH fallback is disabled. "
+                    "Retry with --allow-ssh-fallback if SSH transport is explicitly approved. "
+                    f"HTTPS error: {https_exc}"
+                ) from https_exc
+            if not _is_ssh_fallback_eligible(str(https_exc)):
+                raise InstallError(
+                    "Git HTTPS sparse-checkout failed with a non-transport/non-auth error. "
+                    "Refusing SSH fallback to preserve transport boundaries. "
+                    f"HTTPS error: {https_exc}"
+                ) from https_exc
             repo_url = _build_repo_ssh(source.owner, source.repo)
             repo_root, resolved_commit = _git_sparse_checkout(repo_url, source.ref, source.paths, tmp_dir)
-        return PreparedRepo(repo_root=repo_root, resolved_commit=resolved_commit, source_method="git")
+        return PreparedRepo(repo_root=repo_root, resolved_commit=resolved_commit, source_method="git+ssh")
 
     raise InstallError("Unsupported method.")
 
@@ -511,7 +588,16 @@ def _default_journal_dir(dest_root: str) -> str:
 
 
 def _run_id() -> str:
-    return dt.datetime.now(dt.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    stamp = dt.datetime.now(dt.timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
+    random_suffix = str(uuid.uuid4()).replace("-", "")[:8]
+    return f"{stamp}-{random_suffix}"
+
+
+def _journal_write_best_effort(journal: JournalWriter, event: str, **details: object) -> None:
+    try:
+        journal.write(event, **details)
+    except Exception:  # noqa: BLE001
+        pass
 
 
 def _hash_tree(path: str) -> tuple[str, int, int]:
@@ -546,7 +632,7 @@ def _hash_tree(path: str) -> tuple[str, int, int]:
 
 def _write_json_atomic(path: str, payload: dict[str, object]) -> None:
     os.makedirs(os.path.dirname(path), exist_ok=True)
-    temp_path = path + ".tmp"
+    temp_path = f"{path}.{str(uuid.uuid4()).replace('-', '')}.tmp"
     with open(temp_path, "w", encoding="utf-8") as file_handle:
         json.dump(payload, file_handle, indent=2, ensure_ascii=False)
         file_handle.write("\n")
@@ -606,6 +692,11 @@ def _parse_args(argv: list[str]) -> Args:
             "compat keeps basic structural checks only."
         ),
     )
+    parser.add_argument(
+        "--allow-ssh-fallback",
+        action="store_true",
+        help="Allow fallback from Git HTTPS to SSH when git transport is used.",
+    )
     return parser.parse_args(argv, namespace=Args())
 
 
@@ -613,8 +704,14 @@ def main(argv: list[str]) -> int:
     args = _parse_args(argv)
 
     try:
+        if args.allow_ssh_fallback and args.method != "git":
+            raise InstallError(
+                "--allow-ssh-fallback requires --method git so transport escalation stays explicit."
+            )
+
         source = _resolve_source(args)
         source.ref = source.ref or args.ref
+        _validate_ref_token(source.ref)
         if not source.paths:
             raise InstallError("No skill paths provided.")
 
@@ -622,6 +719,7 @@ def main(argv: list[str]) -> int:
             _validate_relative_path(path)
 
         trusted_repos = _trusted_repo_allowlist(args.trusted_repo)
+        trusted_repo_overrides = sorted({_normalize_repo_id(item) for item in (args.trusted_repo or [])})
         requested_repo = _normalize_repo_id(f"{source.owner}/{source.repo}")
         source_trusted = requested_repo in trusted_repos
         if not source_trusted and not args.allow_untrusted_source:
@@ -659,13 +757,19 @@ def main(argv: list[str]) -> int:
             allow_unpinned_ref=bool(args.allow_unpinned_ref),
             trusted_source=source_trusted,
             requested_repo=requested_repo,
+            trusted_repo_overrides=trusted_repo_overrides,
             validation_level=args.validation_level,
+            allow_ssh_fallback=bool(args.allow_ssh_fallback),
         )
 
         if not ref_pinned:
             journal.write("unpinned_ref_override", ref=source.ref)
         if not source_trusted:
             journal.write("untrusted_source_override", repo=requested_repo)
+        if args.allow_ssh_fallback:
+            journal.write("ssh_fallback_override", enabled=True)
+        if trusted_repo_overrides:
+            journal.write("trusted_repo_override", repos=trusted_repo_overrides)
 
         tmp_dir = tempfile.mkdtemp(prefix="skill-install-", dir=_tmp_root())
         quarantine_root = os.path.join(dest_root, ".quarantine", f"skill-install-{run_id}")
@@ -675,7 +779,7 @@ def main(argv: list[str]) -> int:
         promoted_dirs: list[str] = []
 
         try:
-            prepared = _prepare_repo(source, args.method, tmp_dir)
+            prepared = _prepare_repo(source, args.method, tmp_dir, allow_ssh_fallback=bool(args.allow_ssh_fallback))
             journal.write(
                 "source_prepared",
                 method=prepared.source_method,
@@ -701,6 +805,7 @@ def main(argv: list[str]) -> int:
                     raise InstallError(f"Destination already exists: {destination_dir}")
 
                 source_path = os.path.join(prepared.repo_root, path)
+                _assert_path_within_repo(prepared.repo_root, source_path)
                 _validate_skill(source_path)
 
                 staged_dir = os.path.join(quarantine_root, skill_name)
@@ -741,13 +846,13 @@ def main(argv: list[str]) -> int:
                         destination=staged.destination_dir,
                     )
             except Exception as exc:  # noqa: BLE001
-                journal.write("rollback_started", reason=str(exc), promoted_count=len(promoted_dirs))
+                _journal_write_best_effort(journal, "rollback_started", reason=str(exc), promoted_count=len(promoted_dirs))
                 rollback_errors = _rollback_promoted(promoted_dirs, journal)
                 if rollback_errors:
                     raise InstallError(
                         "Promotion failed and rollback encountered errors: " + "; ".join(rollback_errors)
                     ) from exc
-                journal.write("rollback_completed", restored_count=len(promoted_dirs))
+                _journal_write_best_effort(journal, "rollback_completed", restored_count=len(promoted_dirs))
                 raise InstallError(f"Promotion failed and rollback completed: {exc}") from exc
 
             manifest_path = os.path.join(provenance_dir, f"{run_id}.json")
@@ -769,9 +874,11 @@ def main(argv: list[str]) -> int:
                     "allow_untrusted_source": bool(args.allow_untrusted_source),
                     "requested_repo": requested_repo,
                     "trusted_repo_allowlist": sorted(trusted_repos),
+                    "trusted_repo_overrides": trusted_repo_overrides,
                     "quarantine_to_promote": True,
                     "rollback_journal": journal_path,
                     "validation_level": args.validation_level,
+                    "allow_ssh_fallback": bool(args.allow_ssh_fallback),
                 },
                 "install": {
                     "destination_root": dest_root,
@@ -790,14 +897,45 @@ def main(argv: list[str]) -> int:
                     ],
                 },
             }
-            _write_json_atomic(manifest_path, manifest_payload)
-            journal.write("provenance_manifest_written", path=manifest_path)
+            try:
+                _write_json_atomic(manifest_path, manifest_payload)
+                journal.write("provenance_manifest_written", path=manifest_path)
+                journal.write("install_completed", installed_count=len(installed), manifest_path=manifest_path)
+            except Exception as exc:  # noqa: BLE001
+                _journal_write_best_effort(journal, "post_promotion_artifact_failure", error=str(exc))
+                if os.path.exists(manifest_path):
+                    try:
+                        os.remove(manifest_path)
+                        _journal_write_best_effort(journal, "provenance_manifest_removed", path=manifest_path)
+                    except Exception:  # noqa: BLE001
+                        _journal_write_best_effort(
+                            journal,
+                            "provenance_manifest_remove_failed",
+                            path=manifest_path,
+                        )
+                _journal_write_best_effort(journal, "rollback_started", reason=str(exc), promoted_count=len(promoted_dirs))
+                rollback_errors = _rollback_promoted(promoted_dirs, journal)
+                if rollback_errors:
+                    raise InstallError(
+                        "Post-promotion artifact persistence failed and rollback encountered errors: "
+                        + "; ".join(rollback_errors)
+                    ) from exc
+                _journal_write_best_effort(journal, "rollback_completed", restored_count=len(promoted_dirs))
+                raise InstallError(f"Post-promotion artifact persistence failed and rollback completed: {exc}") from exc
 
             for staged in installed:
                 print(f"Installed {staged.skill_name} to {staged.destination_dir}")
+            print(f"Source: {source.owner}/{source.repo}@{source.ref} ({prepared.source_method}, resolved {prepared.resolved_commit})")
+            if args.allow_unpinned_ref:
+                print("Override: allow_unpinned_ref=true")
+            if args.allow_untrusted_source:
+                print("Override: allow_untrusted_source=true")
+            if args.allow_ssh_fallback:
+                print("Override: allow_ssh_fallback=true")
+            if trusted_repo_overrides:
+                print(f"Override: trusted_repo+={','.join(trusted_repo_overrides)}")
             print(f"Provenance manifest: {manifest_path}")
             print(f"Rollback journal: {journal_path}")
-            journal.write("install_completed", installed_count=len(installed), manifest_path=manifest_path)
             return 0
         finally:
             if os.path.isdir(tmp_dir):

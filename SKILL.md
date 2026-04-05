@@ -168,9 +168,9 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 ## Skills System
 
 - `openai-docs` — Use when the user asks how to build with OpenAI products or APIs and needs up-to-date official documentation with citations, help choosing the latest model for a use case, or explicit GPT-5.4 upgrade and prompt-upgrade guidance; prioritize OpenAI docs MCP tools, use bundled references only as helper context, and restrict any fallback browsing to official OpenAI domains.
-- `plugin-creator` — Create and scaffold plugin directories for Codex with a required `.codex-plugin/plugin.json`, optional plugin folders/files, and complete baseline metadata ready for immediate validation. Use when Codex needs to create a new local plugin, add optional plugin structure, or generate or update repo-root `.agents/plugins/marketplace.json` entries for plugin ordering and availability metadata.
-- `skill-creator` — Create a first-draft skill scaffold
-- `skill-installer` — Install contract-valid skills from curated or repo sources
+- `plugin-creator` — Scaffold plugin skeletons and marketplace entries
+- `skill-creator` — Create first-pass skill scaffolds with clear handoff
+- `skill-installer` — Install validated skills with provenance and rollback safety
 
 ## Utilities
 
