@@ -1,0 +1,88 @@
+## Scope and triggers
+
+This is a **skill-builder route** request (governance, quality, and edit-safety for Codex skills), so I can run it in multiple modes, but to match your preference I’ll teach the options first and avoid proposing concrete file edits yet.
+
+- Option 1: **Improve mode** (most likely for this context): tune existing skill quality, routing, prompts, gates, and packaging-readiness without changing project boundaries.
+- Option 2: **Create mode**: introduce a new skill from scratch.
+- Option 3: **Eval mode**: run focused quality checks before any edits.
+- Option 4: **Benchmark-lite mode**: quick comparative evidence pass for low-cost decisions.
+- Option 5: **Graph or Package mode**: validate recursive skill graph and prepare release/handoff artifacts.
+- Option 6: **Install-distribute mode**: only if the deliverable is intentionally for install/runtime distribution, not just repo quality.
+
+The likely category question (if we’re in create/improve) is one of:
+1) Library & API Reference
+2) Product Verification
+3) Data Fetching & Analysis
+4) Business Process & Automation
+5) Code Scaffolding & Templates
+6) Code Quality & Review
+7) CI/CD & Deployment
+8) Runbooks
+9) Infrastructure Operations
+
+Route clarification if distribution scope matters: should this remain a **standalone skill** or become a **plugin**?
+
+Deconflict-first ordering (recommended):
+1) Scope lock (mode + category + deliverable boundary)
+2) Baseline snapshot + overlap matrix
+3) Evidence plan + gate plan
+4) Edit proposal (after you choose an option)
+
+Capability overlap matrix (quickest teaching view):
+- **Improve**: strong with **Code Quality & Review**, overlaps with **Runbooks** and **Product Verification**
+- **Eval**: strong with **Product Verification**, overlaps with **CI/CD & Deployment**
+- **Package**: strong with **Code Quality & Review**, overlaps with **Install-distribute**, **Plugin** path
+- **Graph**: strong with **Business Process & Automation**, overlaps with **Code Quality & Review**
+
+## Required inputs
+
+I need 1) your mode decision and 2) the specific target(s) before proposing edits.  
+Which of these do you want me to proceed with first: `improve`, `create`, `eval`, `benchmark-lite`, `graph`, `package`, or `install-distribute`?  
+Which skill path should we operate on (for example `utilities/skill-builder/...` or another folder)?  
+What is the business intent: rewrite safety, improve trigger coverage, prepare for release handoff, or all three?  
+Based on what you described, this sounds like a **[Code Quality & Review]** skill. Does that match your intent, or is it something different?  
+Should this work stay as a **standalone skill**, or do you want plugin packaging as the output (`standalone skill` vs `plugin` route clarification)?  
+Do you want me to keep this in `learn` / `guided` / `execute` compatibility posture?
+
+## Deliverables
+
+If you approve one mode now, I will provide an option-specific plan in this order:
+
+1) **Artifact-upshift scan plan (before any write decision)**
+- Read current SKILL/docs/refs/scripts layout
+- Run overlap checks (scope and duplicate function overlap)
+- Confirm any existing `.agents/` or reference contract expectations
+- Verify branch-local constraints before file changes
+
+2) **Learning-preserving design**
+- Keep behavioral doctrine in `references/`
+- Keep map and triggers in `SKILL.md`
+- Preserve nuance (no content compression that loses edge-case behavior)
+- Add `## See Also` + topic map signpost if graph-facing
+
+3) **Execution contract**
+- For create/improve: evidence + gate + release readiness set
+- Optional dry-runs before any broader edits
+- Gate order fixed to fail fast, then narrow scope, then pre-claim validation
+
+4) **Delivery posture**
+- If you choose package/graph/install-distribute, include handoff-specific checks and handoff boundary explicitly
+- If you choose normal improve, stop at validated candidate + findings, not plugin conversion
+
+Failure-safe option fallback: if any required gate fails or data is unavailable, I will return a blocker report with the next safest action, not force speculative changes.
+
+## Failure mode
+
+If required inputs stay unconfirmed, I should not propose edits; I will return only a constrained checklist and a safe default strategy.  
+If this is an install/distribution request but scope is ambiguous, I will pause and ask route clarification before producing edits, because standalone skill and plugin paths require different contracts and evidence sets.  
+If graph-facing changes are needed but references/graph signals are missing, I will not proceed with structural edits until the graph-readiness checks are staged.
+
+## Examples
+
+- **Example A (best for your phrase “teach options first”)**: You pick `improve` for `utilities/<skill>` and I give the deconflict matrix + gate order only; no edits until you approve.
+- **Example B**: You pick `eval` only; I run/prepare the evaluation plan and share what evidence would/does support edits.
+- **Example C**: You pick `package`; I separate content-quality and distribution work, and confirm whether you want **standalone skill** or **plugin** before proposing changes.
+
+Reply with one line like:
+- `1) Mode: improve, 2) Target: utilities/<skill>, 3) Deliverable: standalone skill`
+Then I’ll move from options to a minimal, learning-preserving proposal.

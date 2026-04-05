@@ -1,0 +1,186 @@
+## Skill Hardening Iteration Round Contract (single explicit version)
+
+**Contract name:** `skill-hardening-round-contract-v1`  
+**Intent:** One bounded pass comparing a skill candidate against a frozen baseline before deciding to iterate, widen coverage, or hand off.
+
+### 1) Baseline rules
+
+Use this fixed precedence for `baseline.type`:
+
+1. `no_skill` for new skills (default).
+2. `prior_skill_snapshot` for existing skills, using the latest release-grade snapshot from the same path and governance manifest.
+3. `neutral_repo_baseline` only with explicit approval for cross-skill comparator runs.
+
+A baseline is valid only if all of the following are present and checksum-frozen:
+
+- `baseline.id` (content hash or commit SHA)
+- `baseline.source` (`branch`, `tag`, or `PR artifact`)
+- `baseline.inputs_manifest.sha256`
+- `baseline.capture_ts_utc`
+- `selection_reason` from one allowed baseline rule above
+
+Hard baseline validation rule: if baseline selection reason is missing, mismatched, or untraceable, the round is **blocked** before running comparisons.
+
+---
+
+### 2) Frozen comparison inputs
+
+Each round must freeze and persist the exact inputs below; no edits to these inputs are allowed once state moves to `running`:
+
+- `candidate_ref`: exact artifact pointer (`sha`, build output path, or skill package path)
+- `candidate_config_hash`: hash of invocation config
+- `baseline_config_hash`: hash of baseline config
+- `eval_query_bank`: 8+ trigger + 8+ non-trigger queries, fixed list + versioned prompt pack
+- `quality_toolchain_version`: pinned tool versions used for gates
+- `evaluation_matrix`: pass/fail matrix spec hash
+- `runtime_profile`: environment fingerprint (`python/node`, OS, dependency snapshot)
+- `round_seed` and `random_seed`: explicit for any stochastic scorer
+
+Round starts only if each entry resolves successfully and `freeze_signature = sha256(json.dumps(frozen_inputs, sort_keys=True))` is recorded.
+
+---
+
+### 3) Round-state vocabulary (strict, ordered)
+
+Allowed `round_state` values are exactly:
+
+1. `prepared`
+2. `running`
+3. `evidence_captured`
+4. `reviewed`
+5. `decision_recorded`
+6. `blocked`
+
+State transition invariants:
+
+- `prepared -> running` only after baseline validation and freeze signature persisted.
+- `running -> evidence_captured` only after candidate and baseline evaluation execution.
+- `evidence_captured -> reviewed` only after all required metrics are parsed or explicitly marked unavailable.
+- `reviewed -> decision_recorded` only after a decision is selected.
+- Any state -> `blocked` on critical unrecoverable failure (including metric unavailable for critical dimensions).
+
+No other transitions are valid.  
+No state may jump directly to a terminal handoff decision without passing through `reviewed`.
+
+---
+
+### 4) Metric unavailability handling
+
+Define metric status per metric as one of:
+
+- `available`
+- `unavailable_infra` (tool/runtime/auth dependency unavailable)
+- `unavailable_input` (input missing by contract violation)
+- `not_applicable` (metric does not logically apply to this skill/mode)
+
+For each round, record `metric_coverage`:
+
+- `critical_missing_count`
+- `critical_unavailable_count`
+- `non_critical_missing_count`
+
+Critical metric categories include at minimum:
+
+- round-level diff quality score
+- route/trigger coverage evidence
+- required lint/validation passes
+
+Non-critical categories include optional performance or token-cost indicators unless explicitly required by the request.
+
+Decision rule on unavailability:
+
+1. If any critical metric is `unavailable_infra` or `unavailable_input`, set round state to `blocked` and readiness state to `comparison_blocked`.
+2. If only non-critical metrics are missing/unavailable, set readiness to `comparison_incomplete` with explicit impact notes and continue review.
+3. If all required critical metrics are available and pass threshold, proceed to normal review decisioning.
+
+All unavailable metrics must include one-line `metric_exception` plus reproduction evidence (command, error, timestamp).
+
+---
+
+### 5) Readiness-state distinctions (run-level)
+
+Use these exact readiness states:
+
+- `starter_valid`: Inputs are frozen and baseline is valid, but comparison not yet complete.
+- `comparison_incomplete`: Evidence captured with non-critical gaps or partial comparison.
+- `comparison_blocked`: Critical unavailable/failed preconditions prevent valid comparison.
+- `downstream_ready`: Evidence is complete, decision recorded, and handoff gates pass.
+
+Run-level gating:  
+`starter_valid` is not sufficient for handoff; `downstream_ready` is required for install/distribute transitions.
+
+---
+
+### 6) Decision outcomes and required next action
+
+At `decision_recorded`, choose one exact outcome:
+
+- `iterate_again`: targeted edits to candidate to remove identified evidence-backed gaps.
+- `widen_eval_set`: expand query bank / scenarios, then return to `prepared`.
+- `ready_for_install_handoff`: only if readiness is `downstream_ready`.
+- `ready_for_plugin_handoff`: only if install-handoff criteria already satisfied and plugin path is explicitly approved.
+- `stop_blocked`: unresolved critical blocker not feasible in this round.
+
+---
+
+### 7) Evidence schema (minimal required fields)
+
+Every round must emit a single result artifact with at least:
+
+- `round_id`
+- `skill_path`
+- `mode`
+- `baseline` (type, id, source, input_manifest_hash)
+- `frozen_inputs` (all fields above + signature)
+- `round_state`
+- `readiness_state`
+- `metric_status` (per metric with status + rationale)
+- `evidence` (raw/derived outputs + links)
+- `decision`
+- `decision_rationale`
+- `next_actions`
+
+---
+
+### 8) Contract example (copyable)
+
+```yaml
+contract_version: skill-hardening-round-contract-v1
+round_id: rh-2026-04-05-01
+skill_path: utilities/example-skill
+mode: improve
+baseline:
+  type: prior_skill_snapshot
+  id: skills-prior-9a1b2c4
+  source: refs/heads/main@8c12d4a
+  selection_reason: existing-skill-default
+  inputs_manifest_sha256: 4f2d...
+inputs:
+  candidate_ref: output/candidates/round-01
+  candidate_config_hash: a12b...
+  baseline_config_hash: b34c...
+  eval_query_bank: refs/inputs/query-bank-v3.json
+  quality_toolchain_version: "lint@2.1.0, eval@1.4.0"
+  round_seed: 20260405A
+  freeze_signature: c9df...
+round_state: reviewed
+readiness_state: comparison_incomplete
+metric_status:
+  route_coverage:
+    status: unavailable_input
+    reason: missing non-trigger set in frozen query bank
+  diff_quality_score:
+    status: available
+    value: 0.89
+  lint_openai_format:
+    status: available
+    value: pass
+readiness_notes:
+  - Critical metrics complete; non-critical coverage gap still present
+decision: widen_eval_set
+next_actions:
+  - add and freeze the missing non-trigger queries
+  - rerun from prepared
+```
+
+This contract is explicit, non-trivial, and complete enough to run, compare, explain, and hand off with machine-parseable state transitions while preserving blocked/comparison uncertainty as first-class outcomes.

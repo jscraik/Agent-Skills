@@ -1,0 +1,112 @@
+OpenAI Codex v0.119.0-alpha.6 (research preview)
+--------
+workdir: /Users/jamiecraik/dev/agent-skills
+model: gpt-5.3-codex-spark
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: high
+reasoning summaries: none
+session id: 019d5ef7-5cea-7420-a303-b7fc2ce2a9c4
+--------
+user
+$skill-builder
+
+I want a new repo skill that should improve our skill graph too. In this first response, keep the required headings and make the deliverables mention both cross-skill navigation and task-profile metadata.
+
+2026-04-05T18:46:03.431876Z ERROR rmcp::transport::worker: worker quit with fatal: Transport channel closed, when AuthRequired(AuthRequiredError { www_authenticate_header: "Bearer error=\"invalid_request\", error_description=\"No access token was provided in this request\", resource_metadata=\"https://mcp.supabase.com/.well-known/oauth-protected-resource/mcp\"" })
+2026-04-05T18:46:03.490067Z ERROR rmcp::transport::worker: worker quit with fatal: Transport channel closed, when AuthRequired(AuthRequiredError { www_authenticate_header: "Bearer error=\"invalid_token\", error_description=\"No authorization provided\", resource_metadata=\"https://mcp.vercel.com/.well-known/oauth-protected-resource\"" })
+2026-04-05T18:46:03.495957Z ERROR rmcp::transport::worker: worker quit with fatal: Transport channel closed, when AuthRequired(AuthRequiredError { www_authenticate_header: "Bearer error=\"invalid_token\", error_description=\"Authentication required\", resource_metadata=\"https://circleci.mcp.kapa.ai/.well-known/oauth-protected-resource\"" })
+2026-04-05T18:46:03.554949Z ERROR rmcp::transport::worker: worker quit with fatal: Transport channel closed, when AuthRequired(AuthRequiredError { www_authenticate_header: "Bearer resource_metadata=https://mcp.stripe.com/.well-known/oauth-protected-resource" })
+hook: SessionStart
+hook: SessionStart
+hook: SessionStart Completed
+hook: SessionStart Failed
+hook: UserPromptSubmit
+hook: UserPromptSubmit Completed
+codex
+## Scope and triggers
+This request is in scope for `skill-builder` and fits the skill-first workflow contract.  
+Likely mode: `create` (a new repo skill) with repo-scope writes under `/Users/jamiecraik/dev/agent-skills/utilities/...`.
+
+This looks like a **Code Quality & Review** category intent because you want the skill to improve the graph quality and navigation structure.
+
+Could you confirm that this category is correct, or is your intent closer to **Runbook** or **Infrastructure Operations**?
+
+I will also treat this as a route decision now: should this stay as a `standalone skill` only, or do you want the output prepared for `plugin` packaging as well? (This is route clarification.)
+
+I will use this deconflict-first order before any write:
+1. Confirm category and packaging route.
+2. Build a capability-overlap matrix against adjacent skills and decide non-duplication boundaries.
+3. Run an artifact-uplift scan for existing graph/evals/task-profile references.
+4. Draft minimal skill artifacts and then run graph + validation gates.
+
+## Required inputs
+Please answer these to proceed safely:
+1. What is the skill name and target path under `utilities/`?
+2. What are 2–3 concrete use cases this skill should solve?
+3. Should the category be **Code Quality & Review**, or is another category better?
+4. Target environment is `codex`, `claude`, or `portable`?
+5. Please provide required context constraints: required tools, allowed tools, and any safety/governance exclusions?
+6. Should we keep this as a `standalone skill` only, or include `plugin` packaging in this pass?
+7. Could you provide or confirm 8 should-trigger and 8 should-not-trigger query patterns (I can draft if you prefer)?
+
+## Deliverables
+Once confirmed, I will deliver the following in the first implementation pass:
+
+1. `utilities/<skill-name>/SKILL.md` (routing-first description + clear, minimal boundaries + signposted references).
+2. `references/` files, including:
+- `references/evals.yaml` with initial trigger/non-trigger coverage (8/8 minimum, with capability-complete wording).
+- `references/task-profile.json` so the skill participates in recursive graph metadata.
+- `references/governance-contract.md`-aligned evidence signposting where needed.
+- `references/quality-tools.md` or task-specific references as needed.
+
+3. Graph/navigation deliverables (explicitly included per your request):
+- `## See Also` table in `SKILL.md` with 2+ real related skills.
+- Topic-map signpost like `**Topic map:** [[agent-ops]]` (or appropriate map key).
+- `python3 scripts/check-see-also.py . --changed-files <skill>/SKILL.md` after edits.
+- Graph-profile validation via `python3 utilities/skill-builder/scripts/validate_skill_graph_profiles.py --repo-root . --expected-count 0` (or current expected-count from repo guidance).
+- If materially changed, adjacency refresh: `python3 scripts/build-adjacency-yaml.py` and `python3 scripts/validate-adjacency.py`.
+
+4. Output artifacts for quality flow:
+- `result.json`, `summary.json`, `scorecard.json`, optional `comparison_review.md`.
+- `release_manifest.json` only when promoting beyond evaluation mode.
+- `notes` including overlap matrix and blocker handling.
+
+5. Gate plan before claiming completion:
+- `bash scripts/lint_openai_skill_format.sh --mode strict`
+- `bash scripts/lint_progressive_disclosure.sh --mode warn`
+- `python3 scripts/gotcha_pipeline.py validate`
+- `bash scripts/sync_skills_sandbox_safe.sh` and `bash scripts/lint_skill_types.sh` if semantic tags change
+- `bash scripts/sync_skills.sh` when runtime paths are writable
+- evaluator flow: `run_skill_evals.py --eval-mode smoke` then `--eval-mode release` once ready
+
+## Failure mode
+If any critical input remains missing, I will pause before writing and return only:
+- a blocking item list,
+- the concrete impact,
+- and the minimum next input needed.
+
+If this request is out of scope (for example, install/distribution mechanics only, no lifecycle hardening), I will route to the nearest next-fit skill and ask for a one-step redirection.
+
+## Examples
+1. If you confirm a `skill-builder` create of a skill for skill-graph hygiene:
+- I will produce a routed skill with graph-visible metadata (`See Also`, `Topic map`, `task-profile.json`) and a trigger matrix before code-level checks.
+
+2. If you confirm overlap with `codex-sessions-skill-scan` and `skill-installer`:
+- I will mark those as bounded boundaries in the overlap matrix to avoid duplicate coverage and keep the new skill additive.
+
+3. If you confirm `standalone skill` + later `plugin` consideration:
+- I will document route clarification in this pass and prepare a clean handoff gate record for the plugin boundary later.
+
+schema_version: 1  
+mode: create  
+skill_path: `/Users/jamiecraik/dev/agent-skills/utilities/<skill-name>`  
+findings: "In-scope; awaiting required inputs before first write."  
+validations: "Planned (see Deliverables). Not yet executed pending category/route/goal confirmation."  
+security: "No secrets or runtime credentials requested in this step; defaults to safe defaults and no destructive actions."  
+next_step: "Provide the required inputs above to begin write phase."
+hook: Stop
+hook: Stop Completed
+tokens used
+8,368

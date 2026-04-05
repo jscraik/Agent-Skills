@@ -1,0 +1,40 @@
+## Scope and triggers
+This is a good fit for **`create` mode** and the likely category is **Code Quality & Review** (specifically long design-review-thread support).  
+I’ll treat this as a **standalone skill first** (not a plugin) unless you want it packaged as something else later.
+
+Before drafting, I’ll use this deconflict-first sequence:
+- Capability-overlap matrix (so we don’t duplicate existing review/design workflows)
+- Trigger/anti-trigger draft set
+- Artifact-uplift scan plan (what existing docs/references can be preserved vs. moved into `references/`)  
+
+That keeps the first pass focused and prevents under-specifying the skill contract.
+
+## Required inputs
+What should the new skill do **first** when it detects a long design review thread:  
+- surface unresolved decisions and owners,  
+- prioritize action items, or  
+- produce a high-signal summary for the next handoff?
+
+**Why this matters:** this one goal determines the skill’s routing, trigger language, and what success looks like in evals.
+
+I’ll use that answer to set the first-round trigger set and `references/` structure before any write.
+
+## Deliverables
+For this discovery round, no file edits yet—just confirmation of intent and baseline assumptions.
+- Confirmed mode/category and scope
+- A one-paragraph draft goal statement
+- Initial overlap matrix scope list
+- Draft trigger/non-trigger buckets (high-level)
+- Artifact-uplift scan plan (what to preserve from current sources and where it should live)
+
+## Failure mode
+If we proceed without a clear goal, the skill will likely overfit to one workflow and miss real review usage (e.g., it may summarize too little, prioritize wrong tasks, or create noisy outputs).  
+If this turns out to be a plugin/distribution question rather than skill design, we should switch tracks before writing; I’ll flag that explicitly and pause.
+
+## Examples
+Example goal interpretations you might confirm:
+- “Turn long review threads into a clear “decision + actionable owner” snapshot.”
+- “Track and rank unresolved review comments by impact and next-step risk.”
+- “Auto-distill long design threads into a reviewer handoff checklist.”
+
+

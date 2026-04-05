@@ -1,0 +1,32 @@
+## Scope and triggers
+- This request fits the `skill-builder` flow and is right for **Round 1 discovery**.
+- The likely category is **Code Quality & Review**, specifically for design-review thread triage and consistency.
+- Boundary (for this round): I will define what problem this skill solves (thread longness + decision quality), not draft the full skill file yet.
+- Deconflict-first ordering for this round: confirm goal → confirm category → identify overlaps → define scope → plan evidence checks before any write.
+- Capability overlap check (initial): we should compare this new skill’s intended behavior against existing review/design/process skills before drafting to avoid duplicate guidance.
+- Artifact-uplift scan plan before write decision: I will first map existing `SKILL.md`/`references/` patterns for review-related skills, then check graph-signposting impact (`See Also`, `Topic map`, and task-profile expectations) before creating anything.
+
+Why this matters (plain language): if we pin the goal now, we avoid building a skill that solves the wrong problem or duplicates what another skill already does.
+
+## Required inputs
+- What is the main goal this skill should deliver when a design review thread gets long: **automated thread triage + resolution planning**, **summary + decision synthesis**, or **a specific escalation playbook**?
+
+## Deliverables
+- In Round 1, I will only confirm: goal, category certainty, and scope boundary.
+- After your answer, I will prepare:
+  - a tightened trigger/no-trigger definition list,
+  - a short overlap matrix against adjacent skills,
+  - a `Scope and failure` lock for whether this should be a **standalone skill** path or requires any packaging route clarification.
+- Then I can draft the first-pass structure aligned to repo standards (frontmatter, progressive disclosure, graph links/signposts, and required validation sequence).
+
+## Failure mode
+- If this remains underspecified, the resulting skill is likely to under-trigger, over-trigger, or conflict with existing review workflows, which would fail validation quality gates later and reduce reliability.
+- If the request is actually runtime/tooling behavior (not skill lifecycle), I would route it to the nearest runtime/installation skill instead of creating a new authoring contract.
+- If you want a standalone skill vs plugin path, that boundary still needs explicit clarification before I proceed to Round 2.
+
+## Examples
+- If you want thread-management focus: “Long review threads must be converted into a structured resolution state with owners, open risks, and next action each time.”
+- If you want synthesis focus: “Long review threads should end with a final, concise decision memo + unresolved-item backlog.”
+- If you want escalation focus: “Long threads should escalate automatically when unresolved conflict, stale decision loops, or repeated contradictions appear.”
+
+

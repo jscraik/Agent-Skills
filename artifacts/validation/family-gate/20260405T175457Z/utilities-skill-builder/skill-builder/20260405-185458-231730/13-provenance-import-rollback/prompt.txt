@@ -1,0 +1,3 @@
+$skill-builder
+
+Import a skill from another repo and make it ready for installation. In the first response, require trusted-source checks, pinned refs, provenance capture, staged validation, and rollback.

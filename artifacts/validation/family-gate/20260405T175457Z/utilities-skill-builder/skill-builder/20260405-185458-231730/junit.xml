@@ -1,0 +1,145 @@
+<?xml version='1.0' encoding='utf-8'?>
+<testsuite name="skill-builder" tests="19" failures="16" errors="0" timestamp="2026-04-05T17:54:58Z" id="20260405-185458-231730">
+  <testcase name="explicit-plan" classname="skill-builder" time="60.0">
+    <failure message="tier1 failure">[codex] codex returned non-zero exit code: 124</failure>
+    <system-out>warnings:
+[codex] should_trigger set, but skill selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+/Users/jamiecraik/dev/agent-skills/artifacts/validation/family-gate/20260405T175457Z/utilities-skill-builder/skill-builder/20260405-185458-231730/01-explicit-plan</system-out>
+  </testcase>
+  <testcase name="portable-improve" classname="skill-builder" time="60.0">
+    <failure message="tier1 failure">[codex] codex returned non-zero exit code: 124</failure>
+    <system-out>warnings:
+[codex] should_trigger set, but skill selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+/Users/jamiecraik/dev/agent-skills/artifacts/validation/family-gate/20260405T175457Z/utilities-skill-builder/skill-builder/20260405-185458-231730/02-portable-improve</system-out>
+  </testcase>
+  <testcase name="discovery-round-one" classname="skill-builder" time="300.0">
+    <failure message="tier1 failure">[codex] regex failed: /(?i)(what should this skill help|what kind of help should this skill provide|what problem should it solve)/</failure>
+    <system-out>artifacts_dir:
+/Users/jamiecraik/dev/agent-skills/artifacts/validation/family-gate/20260405T175457Z/utilities-skill-builder/skill-builder/20260405-185458-231730/03-discovery-round-one</system-out>
+  </testcase>
+  <testcase name="discovery-round-six" classname="skill-builder" time="300.0">
+    <failure message="tier1 failure">[codex] contains failed: '## Skill Summary:'
+[codex] regex failed: /(?i)assumptions:/
+[codex] regex failed: /(?i)does this capture it well enough for me to build/
+[codex] regex failed: /(?i)anything to add or change before i build/</failure>
+    <system-out>artifacts_dir:
+/Users/jamiecraik/dev/agent-skills/artifacts/validation/family-gate/20260405T175457Z/utilities-skill-builder/skill-builder/20260405-185458-231730/04-discovery-round-six</system-out>
+  </testcase>
+  <testcase name="edge-missing-inputs" classname="skill-builder" time="60.0">
+    <failure message="tier1 failure">[codex] codex returned non-zero exit code: 124</failure>
+    <system-out>warnings:
+[codex] should_trigger set, but skill selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+/Users/jamiecraik/dev/agent-skills/artifacts/validation/family-gate/20260405T175457Z/utilities-skill-builder/skill-builder/20260405-185458-231730/05-edge-missing-inputs</system-out>
+  </testcase>
+  <testcase name="improve-confirms-category" classname="skill-builder" time="60.0">
+    <failure message="tier1 failure">[codex] codex returned non-zero exit code: 124</failure>
+    <system-out>warnings:
+[codex] should_trigger set, but skill selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+/Users/jamiecraik/dev/agent-skills/artifacts/validation/family-gate/20260405T175457Z/utilities-skill-builder/skill-builder/20260405-185458-231730/06-improve-confirms-category</system-out>
+  </testcase>
+  <testcase name="improve-requires-regression-evals" classname="skill-builder" time="60.0">
+    <failure message="tier1 failure">[codex] codex returned non-zero exit code: 124</failure>
+    <system-out>warnings:
+[codex] should_trigger set, but skill selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+/Users/jamiecraik/dev/agent-skills/artifacts/validation/family-gate/20260405T175457Z/utilities-skill-builder/skill-builder/20260405-185458-231730/07-improve-requires-regression-evals</system-out>
+  </testcase>
+  <testcase name="discovery-fallback-without-tool" classname="skill-builder" time="60.0">
+    <failure message="tier1 failure">[codex] codex returned non-zero exit code: 124</failure>
+    <system-out>warnings:
+[codex] should_trigger set, but skill selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+/Users/jamiecraik/dev/agent-skills/artifacts/validation/family-gate/20260405T175457Z/utilities-skill-builder/skill-builder/20260405-185458-231730/08-discovery-fallback-without-tool</system-out>
+  </testcase>
+  <testcase name="clarification-package-ambiguous" classname="skill-builder" time="180.0">
+    <system-out>artifacts_dir:
+/Users/jamiecraik/dev/agent-skills/artifacts/validation/family-gate/20260405T175457Z/utilities-skill-builder/skill-builder/20260405-185458-231730/09-clarification-package-ambiguous</system-out>
+  </testcase>
+  <testcase name="plugin-only-handoff" classname="skill-builder" time="180.0">
+    <failure message="tier1 failure">[codex] regex failed: /(?i)(plugin package|plugin packaging|plugin-owned)/</failure>
+    <system-out>artifacts_dir:
+/Users/jamiecraik/dev/agent-skills/artifacts/validation/family-gate/20260405T175457Z/utilities-skill-builder/skill-builder/20260405-185458-231730/10-plugin-only-handoff</system-out>
+  </testcase>
+  <testcase name="mixed-authoring-install-handoff" classname="skill-builder" time="180.0">
+    <failure message="tier1 failure">[codex] regex failed: /(?i)(once the skill is valid|after it is contract-valid|when the remaining work is installation|then hand off)/</failure>
+    <system-out>artifacts_dir:
+/Users/jamiecraik/dev/agent-skills/artifacts/validation/family-gate/20260405T175457Z/utilities-skill-builder/skill-builder/20260405-185458-231730/11-mixed-authoring-install-handoff</system-out>
+  </testcase>
+  <testcase name="audit-package-validation-first" classname="skill-builder" time="180.0">
+    <failure message="tier1 failure">[codex] codex returned non-zero exit code: 1</failure>
+    <system-out>warnings:
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+/Users/jamiecraik/dev/agent-skills/artifacts/validation/family-gate/20260405T175457Z/utilities-skill-builder/skill-builder/20260405-185458-231730/12-audit-package-validation-first</system-out>
+  </testcase>
+  <testcase name="provenance-import-rollback" classname="skill-builder" time="180.0">
+    <system-out>artifacts_dir:
+/Users/jamiecraik/dev/agent-skills/artifacts/validation/family-gate/20260405T175457Z/utilities-skill-builder/skill-builder/20260405-185458-231730/13-provenance-import-rollback</system-out>
+  </testcase>
+  <testcase name="builder-round-metadata-contract" classname="skill-builder" time="180.0">
+    <system-out>artifacts_dir:
+/Users/jamiecraik/dev/agent-skills/artifacts/validation/family-gate/20260405T175457Z/utilities-skill-builder/skill-builder/20260405-185458-231730/14-builder-round-metadata-contract</system-out>
+  </testcase>
+  <testcase name="edge-codex-ui-metadata" classname="skill-builder" time="60.0">
+    <failure message="tier1 failure">[codex] codex returned non-zero exit code: 124</failure>
+    <system-out>warnings:
+[codex] should_trigger set, but skill selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+/Users/jamiecraik/dev/agent-skills/artifacts/validation/family-gate/20260405T175457Z/utilities-skill-builder/skill-builder/20260405-185458-231730/15-edge-codex-ui-metadata</system-out>
+  </testcase>
+  <testcase name="edge-graph-ready-bundle" classname="skill-builder" time="60.0">
+    <failure message="tier1 failure">[codex] codex returned non-zero exit code: 124</failure>
+    <system-out>warnings:
+[codex] should_trigger set, but skill selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+/Users/jamiecraik/dev/agent-skills/artifacts/validation/family-gate/20260405T175457Z/utilities-skill-builder/skill-builder/20260405-185458-231730/16-edge-graph-ready-bundle</system-out>
+  </testcase>
+  <testcase name="edge-frontmatter-sanitizer" classname="skill-builder" time="60.0">
+    <failure message="tier1 failure">[codex] codex returned non-zero exit code: 124</failure>
+    <system-out>warnings:
+[codex] should_trigger set, but skill selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+/Users/jamiecraik/dev/agent-skills/artifacts/validation/family-gate/20260405T175457Z/utilities-skill-builder/skill-builder/20260405-185458-231730/17-edge-frontmatter-sanitizer</system-out>
+  </testcase>
+  <testcase name="posture-learning-first" classname="skill-builder" time="60.0">
+    <failure message="tier1 failure">[codex] codex returned non-zero exit code: 124</failure>
+    <system-out>warnings:
+[codex] should_trigger set, but skill selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+/Users/jamiecraik/dev/agent-skills/artifacts/validation/family-gate/20260405T175457Z/utilities-skill-builder/skill-builder/20260405-185458-231730/18-posture-learning-first</system-out>
+  </testcase>
+  <testcase name="posture-guide-vs-execute" classname="skill-builder" time="60.0">
+    <failure message="tier1 failure">[codex] codex returned non-zero exit code: 124</failure>
+    <system-out>warnings:
+[codex] should_trigger set, but skill selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+/Users/jamiecraik/dev/agent-skills/artifacts/validation/family-gate/20260405T175457Z/utilities-skill-builder/skill-builder/20260405-185458-231730/19-posture-guide-vs-execute</system-out>
+  </testcase>
+</testsuite>

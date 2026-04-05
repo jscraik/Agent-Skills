@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-05T14:10:37Z",
+  "generated_at": "2026-04-05T19:31:29Z",
   "decision_date": "2026-04-05",
   "summary": {
     "active_skill_count": 81,
@@ -30,7 +30,7 @@
       "blockers": [
         {
           "code": "TELEMETRY_HEALTH_STALE",
-          "detail": "daily-skill-health.md age 118.70h exceeds 24.00h",
+          "detail": "daily-skill-health.md age 124.05h exceeds 24.00h",
           "owner": "unassigned",
           "due_date": null,
           "escalation_date": null

@@ -1,0 +1,3 @@
+$skill-builder
+
+Define one explicit non-trivial iteration round contract for skill hardening. Include baseline rules, frozen comparison inputs, round-state vocabulary, metric unavailability handling, and readiness-state distinctions.

@@ -1,0 +1,89 @@
+OpenAI Codex v0.119.0-alpha.6 (research preview)
+--------
+workdir: /Users/jamiecraik/dev/agent-skills
+model: gpt-5.3-codex-spark
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: high
+reasoning summaries: none
+session id: 019d5ed8-b36a-7640-8be3-5a92c34ff125
+--------
+user
+$skill-builder
+
+Import a skill from another repo and make it ready for installation. In the first response, require trusted-source checks, pinned refs, provenance capture, staged validation, and rollback.
+
+2026-04-05T18:12:34.193561Z ERROR rmcp::transport::worker: worker quit with fatal: Transport channel closed, when AuthRequired(AuthRequiredError { www_authenticate_header: "Bearer error=\"invalid_request\", error_description=\"No access token was provided in this request\", resource_metadata=\"https://mcp.supabase.com/.well-known/oauth-protected-resource/mcp\"" })
+2026-04-05T18:12:34.262720Z ERROR rmcp::transport::worker: worker quit with fatal: Transport channel closed, when AuthRequired(AuthRequiredError { www_authenticate_header: "Bearer error=\"invalid_token\", error_description=\"No authorization provided\", resource_metadata=\"https://mcp.vercel.com/.well-known/oauth-protected-resource\"" })
+2026-04-05T18:12:34.295190Z ERROR rmcp::transport::worker: worker quit with fatal: Transport channel closed, when AuthRequired(AuthRequiredError { www_authenticate_header: "Bearer error=\"invalid_token\", error_description=\"Authentication required\", resource_metadata=\"https://circleci.mcp.kapa.ai/.well-known/oauth-protected-resource\"" })
+2026-04-05T18:12:34.321678Z ERROR rmcp::transport::worker: worker quit with fatal: Transport channel closed, when AuthRequired(AuthRequiredError { www_authenticate_header: "Bearer resource_metadata=https://mcp.stripe.com/.well-known/oauth-protected-resource" })
+hook: SessionStart
+hook: SessionStart
+hook: SessionStart Completed
+hook: SessionStart Failed
+hook: UserPromptSubmit
+hook: UserPromptSubmit Completed
+codex
+## Scope and triggers
+This request is in-scope for `skill-builder` and maps to **Code Quality & Review** in this repo (skill lifecycle/import hardening + install readiness). It is a **route clarification** scenario because installation output can be one of: **standalone skill** or **plugin**. I need you to confirm which deliverable you want.
+I will follow `install-distribute`-first guardrails and gate the import with deconflict/validation before any write:
+1. Trusted-source checks with explicit source allowlist and provenance capture.
+2. Pinned ref resolution (commit SHA) before any file copy.
+3. Overlap/capability matrix and artifact-uplift scan before package decisions.
+4. Staged validation in iterative fail-fast mode, then pre-claim full sweep.
+5. Rollback checkpoints at each phase (Git baseline + staged diff checkpoints + revertable import branch).
+
+I will treat this as a non-trivial import-and-handoff task and start with `install-distribute` mode unless you confirm another boundary.
+
+## Required inputs
+1. What is the source repository and exact skill path to import (for example, `/Users/.../repo/utilities/<skill>` or a GitHub URL)?
+2. What is the exact source ref you want me to use (must be pinned, e.g. full commit SHA)?
+3. Which destination path should receive this skill in `agent-skills` (for example, `utilities/<skill-name>/`)?
+4. Do you want the final deliverable as a **standalone skill** or a **plugin**?
+5. What allowlist/source-trust basis should I validate against (e.g., specific repo/org allowlist or team policy)?
+6. Do you want the package output now, or just a readiness artifact set (`result.json`, `summary.json`, `scorecard.json`, `release_manifest.json`) for sign-off first?
+
+## Deliverables
+Once the required inputs are confirmed, I will produce:
+- A prepared import under staging with preserved high-value source context moved into `references/` and deterministic steps in `scripts/` as needed.
+- Provenance dossier containing:
+  - source repo URL
+  - pinned commit SHA
+  - imported file list and diff trace
+  - checksum notes (`sha256`) for key artifacts
+- Capability overlap matrix and conflict notes (source skill vs existing repo skills, especially routing overlap and duplicated behavior).
+- Artifact uplift scan plan executed before any write commit:
+  - `python3 scripts/check-see-also.py . --changed-files <skill>/SKILL.md`
+  - `python3 scripts/build-adjacency-yaml.py` (if graph-facing changes)
+  - `python3 scripts/validate-adjacency.py` (to verify graph integrity)
+- Staged validation passset:
+  - `bash scripts/sync_skills_sandbox_safe.sh`
+  - `bash scripts/lint_skill_types.sh`
+  - `bash scripts/lint_openai_skill_format.sh --mode strict`
+  - `bash scripts/lint_progressive_disclosure.sh --mode warn`
+  - `python3 scripts/gotcha_pipeline.py validate`
+  - `run_skill_evals.py --eval-mode smoke`
+  - `run_skill_evals.py --eval-mode release` (before packaging/handoff)
+- Rollback-ready workflow:
+  - work in a dedicated branch
+  - no destructive command without explicit confirmation
+  - keep each phase checkpointed as a committed-staged checkpoint or cleanly revertible stash state.
+
+## Failure mode
+If any mandatory requirement is missing or fails, work will stop at the blocker boundary and I will return a blocker report with:
+- the exact failed guardrail
+- reproducible evidence command output
+- safest next step options (fallback path that does not skip provenance/pinning/rollback)
+- required user confirmation to proceed.
+
+If trusted-source signals are not provided (allowlist + commit hash), I will not proceed with import.
+
+## Examples
+- If you want this to end as a **standalone skill**, I will import, validate, and prepare handoff artifacts for `skill-installer`.
+- If you want it as a **plugin**, I will still complete the same validation package first, then route to `codex-plugin-builder` once the standalone skill package is contract-valid.
+- If source trust is ambiguous, I will hold at `comparison_blocked` and request a pinned-source override plus provenance confirmation before writing files.
+hook: Stop
+hook: Stop Completed
+tokens used
+88,529

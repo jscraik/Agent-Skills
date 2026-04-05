@@ -1,0 +1,19 @@
+{
+  "runner": "codex",
+  "exit_code": 0,
+  "passed": true,
+  "tier1_failures": [],
+  "tier2_findings": [],
+  "warnings": [],
+  "artifacts": {
+    "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/family-gate/20260405T182450Z/utilities-skill-builder/skill-builder/20260405-192451-221987/06-improve-confirms-category/codex",
+    "final": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/family-gate/20260405T182450Z/utilities-skill-builder/skill-builder/20260405-192451-221987/06-improve-confirms-category/codex/final.txt",
+    "stdout": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/family-gate/20260405T182450Z/utilities-skill-builder/skill-builder/20260405-192451-221987/06-improve-confirms-category/codex/stdout.txt",
+    "stderr": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/family-gate/20260405T182450Z/utilities-skill-builder/skill-builder/20260405-192451-221987/06-improve-confirms-category/codex/stderr.txt",
+    "jsonl": null
+  },
+  "metrics": {
+    "selected_skill": true
+  },
+  "used_schema": false
+}

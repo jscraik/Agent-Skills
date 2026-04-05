@@ -1,0 +1,29 @@
+## Discovery interview completion summary (final pass)
+
+### Confirmed facts
+- You asked to finish discovery for a **new skill** and want this stage to conclude now, not continue as a multi-turn interview.
+- The governing skill context is **`skill-builder`** in `agent-skills`, so the workflow should follow:
+  - `create` by default for a new skill.
+  - repository-level canonical instructions and progressive-disclosure structure.
+- The repo baseline for this work is:
+  - **package-manager-free** at repo root,
+  - canonical-only compatibility posture,
+  - graph-readiness and validator gates required for lifecycle completion.
+- For a new skill, the default baseline is `no_skill` unless you explicitly choose a comparative baseline.
+- For code-quality style readiness, the key governance deliverables are still required before claim completion (format/validation/gating + graph checks).
+
+### Assumptions (not confirmed yet)
+- The skill intent is a standalone Codex skill (not a plugin) unless you specify plugin packaging.
+- The target environment is `codex` (not `claude` or `portable`) unless you state otherwise.
+- Primary category is currently assumed to be **Code Quality & Review** (`metadata.skill-type: code_quality_review`) only as a temporary default.
+- Tool scope, trigger queries, and should/should-not trigger coverage have not been finalized yet, so I am holding them as assumptions until build starts.
+- No explicit scope exclusions were provided, so I assumed a standard internal repo-facing skill with safe defaults.
+
+### Next decision (single confirmation request)
+Please confirm whether this captures the skill well enough to build as-is:
+
+**If this summary is correct, should I proceed to build with these assumptions, or should we revisit any assumption before implementation starts?**
+
+Reply with one of:
+1. `Proceed` (build now)
+2. `Edit assumptions` (list which fact/assumption to change)

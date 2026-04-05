@@ -1,0 +1,52 @@
+{
+  "id": "mixed-authoring-install-handoff",
+  "name": "mixed authoring install handoff",
+  "category": "edge",
+  "eval_modes": [
+    "smoke",
+    "release"
+  ],
+  "should_trigger": true,
+  "prepend_skill": true,
+  "baseline_type": null,
+  "comparison_inputs": null,
+  "iteration_round_state": null,
+  "metric_availability": null,
+  "readiness_state": null,
+  "comparison_review_artifact": null,
+  "neutral_baseline_approval": null,
+  "timeout_profile": "codex-heavy",
+  "timeout_sec": 180.0,
+  "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/family-gate/20260405T175457Z/utilities-skill-builder/skill-builder/20260405-185458-231730/11-mixed-authoring-install-handoff",
+  "runners": {
+    "codex": {
+      "runner": "codex",
+      "exit_code": 0,
+      "passed": false,
+      "tier1_failures": [
+        "regex failed: /(?i)(once the skill is valid|after it is contract-valid|when the remaining work is installation|then hand off)/"
+      ],
+      "tier2_findings": [],
+      "warnings": [],
+      "artifacts": {
+        "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/family-gate/20260405T175457Z/utilities-skill-builder/skill-builder/20260405-185458-231730/11-mixed-authoring-install-handoff/codex",
+        "final": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/family-gate/20260405T175457Z/utilities-skill-builder/skill-builder/20260405-185458-231730/11-mixed-authoring-install-handoff/codex/final.txt",
+        "stdout": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/family-gate/20260405T175457Z/utilities-skill-builder/skill-builder/20260405-185458-231730/11-mixed-authoring-install-handoff/codex/stdout.txt",
+        "stderr": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/family-gate/20260405T175457Z/utilities-skill-builder/skill-builder/20260405-185458-231730/11-mixed-authoring-install-handoff/codex/stderr.txt",
+        "jsonl": null
+      },
+      "metrics": {
+        "selected_skill": true
+      },
+      "used_schema": false
+    }
+  },
+  "passed": false,
+  "tier1_failed": true,
+  "tier2_failed": false,
+  "tier1_failures": [
+    "[codex] regex failed: /(?i)(once the skill is valid|after it is contract-valid|when the remaining work is installation|then hand off)/"
+  ],
+  "tier2_findings": [],
+  "warnings": []
+}

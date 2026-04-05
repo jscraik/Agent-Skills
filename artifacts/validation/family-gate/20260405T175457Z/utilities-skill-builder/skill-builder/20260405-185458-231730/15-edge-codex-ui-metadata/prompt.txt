@@ -1,0 +1,3 @@
+$skill-builder
+
+Can you design a new Codex-first skill that appears polished in the Codex UI? In this first response, include required headings and list deliverables that include agents/openai.yaml metadata.

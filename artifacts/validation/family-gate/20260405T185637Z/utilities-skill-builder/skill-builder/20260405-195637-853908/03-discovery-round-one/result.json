@@ -1,0 +1,52 @@
+{
+  "id": "discovery-round-one",
+  "name": "discovery round one",
+  "category": "edge",
+  "eval_modes": [
+    "smoke",
+    "release"
+  ],
+  "should_trigger": true,
+  "prepend_skill": true,
+  "baseline_type": null,
+  "comparison_inputs": null,
+  "iteration_round_state": null,
+  "metric_availability": null,
+  "readiness_state": null,
+  "comparison_review_artifact": null,
+  "neutral_baseline_approval": null,
+  "timeout_profile": "discovery-heavy",
+  "timeout_sec": 300.0,
+  "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/family-gate/20260405T185637Z/utilities-skill-builder/skill-builder/20260405-195637-853908/03-discovery-round-one",
+  "runners": {
+    "codex": {
+      "runner": "codex",
+      "exit_code": 0,
+      "passed": false,
+      "tier1_failures": [
+        "regex failed: /(?i)(what should this skill help|what kind of help should this skill provide|what problem should it solve)/"
+      ],
+      "tier2_findings": [],
+      "warnings": [],
+      "artifacts": {
+        "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/family-gate/20260405T185637Z/utilities-skill-builder/skill-builder/20260405-195637-853908/03-discovery-round-one/codex",
+        "final": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/family-gate/20260405T185637Z/utilities-skill-builder/skill-builder/20260405-195637-853908/03-discovery-round-one/codex/final.txt",
+        "stdout": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/family-gate/20260405T185637Z/utilities-skill-builder/skill-builder/20260405-195637-853908/03-discovery-round-one/codex/stdout.txt",
+        "stderr": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/family-gate/20260405T185637Z/utilities-skill-builder/skill-builder/20260405-195637-853908/03-discovery-round-one/codex/stderr.txt",
+        "jsonl": null
+      },
+      "metrics": {
+        "selected_skill": true
+      },
+      "used_schema": false
+    }
+  },
+  "passed": false,
+  "tier1_failed": true,
+  "tier2_failed": false,
+  "tier1_failures": [
+    "[codex] regex failed: /(?i)(what should this skill help|what kind of help should this skill provide|what problem should it solve)/"
+  ],
+  "tier2_findings": [],
+  "warnings": []
+}

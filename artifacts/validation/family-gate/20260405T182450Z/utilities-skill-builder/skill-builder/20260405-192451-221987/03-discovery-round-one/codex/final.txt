@@ -1,0 +1,28 @@
+## Scope and triggers
+- This request applies: you want a new skill focused on handling long design review threads, and you want a discovery-first, low-risk first pass only.
+- Based on your description, the likely category is **Code Quality & Review** (longer conversation design-review workflow with decision clarity and escalation behavior), and we can keep that assumption unless you confirm otherwise.
+- For round 1, I’ll stay at discovery scope: clarify the intended goal, avoid drafting full workflow content, and wait to propose implementation details after your confirmation.
+
+## Required inputs
+- Why this matters: without one clear user goal, the skill will either over-trigger (too broad) or under-trigger (too narrow), which makes eval coverage and safe handoff rules unreliable.
+- What is the single primary goal you want this skill to accomplish when a design thread is dragging on?  
+  - Example intent targets: **(a)** summarize unresolved decisions and blockers, **(b)** produce a closure plan with owners, or **(c)** surface design debt patterns and request the right approver.
+
+## Deliverables
+- In this round 1, deliverables are:
+  - Confirmed category and intended boundary.
+  - Deconflict-first ordering plan (conflict check, overlap check, overlap matrix) before any edits.
+  - Capability-overlap matrix sketch (candidate skill vs existing repo skills) before drafting the workflow.
+  - Artifact-uplift scan plan (existing references, graph-readiness artifacts, and trigger/eval surface plan) before write decision.
+- I will use your answer to lock:
+  - final goal statement,
+  - trigger/non-trigger boundaries,
+  - and only then switch to writing `SKILL.md`, `references/`, and validation artifacts.
+
+## Failure mode
+- If the core goal remains ambiguous, this turn ends at discovery only, with no content changes.
+- If this is actually a packaging/distribution task (standalone skill vs plugin path) rather than a skill creation task, I will stop and ask for that routing clarification before proceeding.
+
+## Examples
+- In-scope example: “When a thread exceeds N back-and-forths or stalls on unresolved decisions, the skill generates a structured summary with owners, options, and a close path.”
+- Out-of-scope example: “Rewrite the product itself” or “replace design quality policy,” which belongs to broader process governance work before skill scope decisions.

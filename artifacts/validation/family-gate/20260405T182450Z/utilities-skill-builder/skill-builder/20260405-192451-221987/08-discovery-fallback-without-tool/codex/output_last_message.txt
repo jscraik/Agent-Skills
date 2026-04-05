@@ -1,0 +1,18 @@
+## Scope and triggers
+I can proceed with `skill-builder` in discovery mode, but I need the target to align safely with your intent before I do anything else.
+
+## Required inputs
+1. What exact skill are we working on (for example, `utilities/...` or `frontend/...`) and what is the exact goal you want changed?  
+2. Is this a **create**, **improve**, or **package/install-distribute** task, and is the likely category **Code Quality & Review** or something else?  
+3. Should this stay a **standalone skill**, or do you want to route toward a **plugin** end state?
+
+**Why this matters:** these three answers set the validation surface (including which gates must pass), the allowed folder/type moves, and the packaging/validation route.
+
+## Deliverables
+Once you confirm those, I’ll proceed in the same discovery sequence you requested: category confirmation, minimal scoped edits, then gate-driven improvements before any broader write changes.
+
+## Failure mode
+If any of the three inputs are missing, I risk applying the wrong workflow (e.g., improving in the wrong category or running the wrong packaging/distribution gates), so I’ll pause with a concise blocker summary rather than guessing.
+
+## Examples
+For example, if you tell me “improve `utilities/diagram-cli` for packaging readiness,” I’ll confirm category, run the `skill-builder` graph-readiness and schema gates for `improve` mode, then report only the validated artifact changes.

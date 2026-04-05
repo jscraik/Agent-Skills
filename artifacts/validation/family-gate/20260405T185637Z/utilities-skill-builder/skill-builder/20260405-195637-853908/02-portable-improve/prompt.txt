@@ -1,0 +1,3 @@
+$skill-builder
+
+Can you improve a skill so it works in Codex and Claude without adding dependencies? In this first response, use the required headings and keep the compatibility posture portable.

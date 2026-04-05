@@ -1,0 +1,3 @@
+$skill-builder
+
+Package this skill for reuse, but I have not decided whether it should stay a standalone skill or become a plugin. Keep the first response route-safe and do not guess the deliverable.

@@ -1,0 +1,56 @@
+{
+  "id": "plugin-only-handoff",
+  "name": "plugin only handoff",
+  "category": "edge",
+  "eval_modes": [
+    "smoke",
+    "release"
+  ],
+  "should_trigger": true,
+  "prepend_skill": true,
+  "baseline_type": null,
+  "comparison_inputs": null,
+  "iteration_round_state": null,
+  "metric_availability": null,
+  "readiness_state": null,
+  "comparison_review_artifact": null,
+  "neutral_baseline_approval": null,
+  "timeout_profile": "codex-heavy",
+  "timeout_sec": 180.0,
+  "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/family-gate/20260405T185637Z/utilities-skill-builder/skill-builder/20260405-195637-853908/10-plugin-only-handoff",
+  "runners": {
+    "codex": {
+      "runner": "codex",
+      "exit_code": 1,
+      "passed": false,
+      "tier1_failures": [
+        "codex returned non-zero exit code: 1"
+      ],
+      "tier2_findings": [],
+      "warnings": [
+        "skipped acceptance assertions because the runner exited non-zero and produced no final output"
+      ],
+      "artifacts": {
+        "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/family-gate/20260405T185637Z/utilities-skill-builder/skill-builder/20260405-195637-853908/10-plugin-only-handoff/codex",
+        "final": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/family-gate/20260405T185637Z/utilities-skill-builder/skill-builder/20260405-195637-853908/10-plugin-only-handoff/codex/final.txt",
+        "stdout": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/family-gate/20260405T185637Z/utilities-skill-builder/skill-builder/20260405-195637-853908/10-plugin-only-handoff/codex/stdout.txt",
+        "stderr": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/family-gate/20260405T185637Z/utilities-skill-builder/skill-builder/20260405-195637-853908/10-plugin-only-handoff/codex/stderr.txt",
+        "jsonl": null
+      },
+      "metrics": {
+        "selected_skill": true
+      },
+      "used_schema": false
+    }
+  },
+  "passed": false,
+  "tier1_failed": true,
+  "tier2_failed": false,
+  "tier1_failures": [
+    "[codex] codex returned non-zero exit code: 1"
+  ],
+  "tier2_findings": [],
+  "warnings": [
+    "[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output"
+  ]
+}

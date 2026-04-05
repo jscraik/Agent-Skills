@@ -1,0 +1,21 @@
+{
+  "runner": "codex",
+  "exit_code": 0,
+  "passed": false,
+  "tier1_failures": [
+    "regex failed: /(?i)(plugin package|plugin packaging|plugin-owned)/"
+  ],
+  "tier2_findings": [],
+  "warnings": [],
+  "artifacts": {
+    "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/family-gate/20260405T175457Z/utilities-skill-builder/skill-builder/20260405-185458-231730/10-plugin-only-handoff/codex",
+    "final": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/family-gate/20260405T175457Z/utilities-skill-builder/skill-builder/20260405-185458-231730/10-plugin-only-handoff/codex/final.txt",
+    "stdout": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/family-gate/20260405T175457Z/utilities-skill-builder/skill-builder/20260405-185458-231730/10-plugin-only-handoff/codex/stdout.txt",
+    "stderr": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/family-gate/20260405T175457Z/utilities-skill-builder/skill-builder/20260405-185458-231730/10-plugin-only-handoff/codex/stderr.txt",
+    "jsonl": null
+  },
+  "metrics": {
+    "selected_skill": true
+  },
+  "used_schema": false
+}

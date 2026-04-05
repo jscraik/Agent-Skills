@@ -1,0 +1,21 @@
+{
+  "runner": "codex",
+  "exit_code": 0,
+  "passed": false,
+  "tier1_failures": [
+    "regex failed: /(?i)(what should this skill help|what kind of help should this skill provide|what problem should it solve)/"
+  ],
+  "tier2_findings": [],
+  "warnings": [],
+  "artifacts": {
+    "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/family-gate/20260405T182450Z/utilities-skill-builder/skill-builder/20260405-192451-221987/03-discovery-round-one/codex",
+    "final": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/family-gate/20260405T182450Z/utilities-skill-builder/skill-builder/20260405-192451-221987/03-discovery-round-one/codex/final.txt",
+    "stdout": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/family-gate/20260405T182450Z/utilities-skill-builder/skill-builder/20260405-192451-221987/03-discovery-round-one/codex/stdout.txt",
+    "stderr": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/family-gate/20260405T182450Z/utilities-skill-builder/skill-builder/20260405-192451-221987/03-discovery-round-one/codex/stderr.txt",
+    "jsonl": null
+  },
+  "metrics": {
+    "selected_skill": true
+  },
+  "used_schema": false
+}

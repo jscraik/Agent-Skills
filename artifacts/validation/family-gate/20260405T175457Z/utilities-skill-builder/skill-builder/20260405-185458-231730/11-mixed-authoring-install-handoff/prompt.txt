@@ -1,0 +1,3 @@
+$skill-builder
+
+Improve this imported skill's routing and safety, then install it once the fixes are done. In the first response, keep the ownership boundary explicit.

@@ -1,0 +1,23 @@
+{
+  "runner": "codex",
+  "exit_code": 1,
+  "passed": false,
+  "tier1_failures": [
+    "codex returned non-zero exit code: 1"
+  ],
+  "tier2_findings": [],
+  "warnings": [
+    "skipped acceptance assertions because the runner exited non-zero and produced no final output"
+  ],
+  "artifacts": {
+    "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/family-gate/20260405T185637Z/utilities-skill-builder/skill-builder/20260405-195637-853908/09-clarification-package-ambiguous/codex",
+    "final": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/family-gate/20260405T185637Z/utilities-skill-builder/skill-builder/20260405-195637-853908/09-clarification-package-ambiguous/codex/final.txt",
+    "stdout": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/family-gate/20260405T185637Z/utilities-skill-builder/skill-builder/20260405-195637-853908/09-clarification-package-ambiguous/codex/stdout.txt",
+    "stderr": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/family-gate/20260405T185637Z/utilities-skill-builder/skill-builder/20260405-195637-853908/09-clarification-package-ambiguous/codex/stderr.txt",
+    "jsonl": null
+  },
+  "metrics": {
+    "selected_skill": true
+  },
+  "used_schema": false
+}

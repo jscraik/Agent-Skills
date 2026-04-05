@@ -1,0 +1,23 @@
+## Confirmation summary
+
+I’m treating this as the **final discovery checkpoint** for your **new skill** request.
+
+### Confirmed facts (from this turn)
+- You asked to finish the discovery interview for a **new skill** and explicitly requested no further interview rounds.
+- You want the outcome as a **confirmation summary** with:
+  - a clear split between confirmed facts and assumptions
+  - a direct decision point on whether the summary is sufficient to proceed to build
+- You referenced the `skill-builder` skill context, so the work should follow this repo’s skill lifecycle rules, guardrails, and delivery modes.
+
+### Assumptions I’m using (to move to a build decision)
+- This is a **`create`-mode** new-skill effort (not `improve` of an existing skill).
+- The skill belongs in the `agent-skills` repo and should follow the repo’s **OpenAI/Codex skill format + progressive disclosure** rules.
+- You want a minimal, reversible first pass, with heavy behavior details in `references/` and a lean `SKILL.md` surface.
+- If it is graph-facing, we will include graph-readiness artifacts/signposts (for example `## See Also` + topic-map metadata) as part of readiness planning.
+- I should proceed with standard pre-build guardrails and evidence/gate sequencing after you confirm.
+
+### Approval checkpoint
+I’m prepared to proceed if this scope matches your intent.
+
+**Does this capture the skill well enough to build now?**  
+Reply **“Yes, this is accurate—proceed to build”** (or list any corrections) and I’ll continue directly to drafting the implementation.

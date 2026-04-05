@@ -1,0 +1,66 @@
+## Scope and triggers
+This applies to **skill improvement** work (mode: `improve`) for:
+
+- Target: `/Users/jamiecraik/dev/agent-skills/utilities/skill-builder/SKILL.md` (and associated `references/`/`scripts/` if needed).
+- Likely category: **Code Quality & Review** (`metadata.skill-type: code_quality_review`).
+- Compatibility posture: **portable** and cross-runner for **Codex + Claude**, with **no new dependencies** added.
+
+I will only proceed if this is the exact target skill.  
+**Based on what you described, this sounds like a [code_quality_review] skill. Does that match your intent, or is it a different skill path?**
+
+## Required inputs
+1. Is the target exactly `/Users/jamiecraik/dev/agent-skills/utilities/skill-builder/SKILL.md`, or should I edit a different skill file/path?
+2. Should compatibility remain `portable` only, or do you want additional checks for environment-specific compatibility in Codex/Claude (`portable` + `codex` + `claude`)?
+3. Can I make focused edits limited to **documentation/runtime contracts** (frontmatter, headers, references, validation guidance) without changing behavior code outside this scope?
+4. Do you want this to remain a **standalone skill** refinement only, or should I also prepare a **plugin-boundary route clarification** in this first pass?
+
+## Deliverables
+I can proceed in this order:
+
+1. **Deconflict-first ordering**
+   1. Confirm target/intent/compatibility (`portable`, no dependencies).  
+   2. Confirm category and missing inputs.  
+   3. Align wording to portable Codex+Claude triggers and runtime constraints.  
+   4. Add/adjust graph-ready references (`## See Also`, topic-map signpost, task-profile presence where applicable).  
+   5. Propose minimal patch diff and validation plan.
+
+2. **Capability overlap matrix** (quick conflict scan)
+
+| Existing skill area | Overlap risk | Keep / merge behavior |
+|---|---|---|
+| `codex-plugin-builder` | Package/distribution boundaries | Don’t mix install/distribute handoff details into this improvement unless requested |
+| `decide-build-primitive` | Build-vs-skill routing | Keep routing decision text, do not alter decision flow unless requested |
+| `skill-installer` | Runtime visibility fixes | Route install/runtime steps downstream; do not embed installer-only operations here |
+| `docs/agents/` governance docs | Policy duplication | Prefer references links + signposts instead of duplicating policy text |
+| `skill-builder` own scripts/tools | Validator/lint strategy | Preserve current validator contract and keep commands portable |
+
+3. **Artifact-uplift scan plan before write**
+   - Check required graph/readiness artifacts implied by this skill update scope.
+   - Identify which artifacts need refresh (`check-see-also`, adjacency/profile validators, task-profile) before final claim.
+   - Run checks in a minimal order to avoid scope creep:
+     - graph visibility checks (if docs changed)
+     - semantic tag validation
+     - progressive disclosure lint
+     - format lint and gotcha pipeline (as governed by current repo policy)
+
+4. Portable, no-dependency output contract:
+
+- `schema_version: 1`
+- `mode: improve`
+- `skill_path: /Users/jamiecraik/dev/agent-skills/utilities/skill-builder/SKILL.md`
+- `findings: not yet edited (awaiting confirmation)`
+- `validations: pending`
+- `security: no secrets, credentials, or tokens touched`
+- `next_step: apply scoped doc-structure improvements after answers`
+
+## Failure mode
+If any of the required inputs remain unanswered, I should not patch to avoid misrouting. In that case I will return a short blocker summary and a safe next action so we can proceed quickly once clarified. If you want plugin packaging instead of standalone-skill hardening, this will be treated as a **route clarification** and I will stop at boundary decisions before editing.
+
+## Examples
+If you confirm the inputs:
+
+- Example 1: **Improve for portability only**  
+  I will tighten this skill for predictable Codex/Claude execution semantics, keep it dependency-free, and preserve behavior through references + progressive disclosure without expanding scope.
+
+- Example 2: **Improve + validate-readiness**  
+  I will add precise section boundaries, route-critical constraints, and required portability-focused checks while preserving all high-value nuance in `references/` and keeping the surface in `SKILL.md` concise.
