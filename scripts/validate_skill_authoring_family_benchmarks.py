@@ -366,7 +366,7 @@ def main(argv: Sequence[str]) -> int:
     else:
         _print_text(findings, skills)
 
-    return 1 if findings else 0
+    return 2 if findings else 0
 
 
 if __name__ == "__main__":

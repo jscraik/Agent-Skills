@@ -1049,6 +1049,14 @@ def check_security_eval_coverage(skill_dir: Path, *, require_security_evals: boo
     out: List[Finding] = []
     evals_path = skill_dir / "references" / "evals.yaml"
     if not evals_path.exists():
+        if require_security_evals:
+            out.append(
+                Finding(
+                    Level.FAIL,
+                    "SEC_EVALS_MISSING",
+                    "references/evals.yaml not found; required when --require-security-evals is set.",
+                )
+            )
         return out
 
     try:

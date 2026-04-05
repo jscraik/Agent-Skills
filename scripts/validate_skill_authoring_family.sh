@@ -171,6 +171,10 @@ for skill_dir in "${skill_dirs[@]}"; do
         --eval-mode release \
         --reports-dir "$skill_evidence_path" \
         "${codex_profile_args[@]+"${codex_profile_args[@]}"}"
+      "$python_bin" utilities/skill-builder/scripts/ci_skill_quality_gate.py \
+        "$skill_evidence_path" \
+        --tier2-mode warn \
+        --format text
     else
       "$python_bin" utilities/skill-builder/scripts/run_skill_evals.py "$skill_dir" \
         --runner codex \
@@ -199,6 +203,9 @@ for skill_dir in "${skill_dirs[@]}"; do
   "$python_bin" utilities/skill-builder/scripts/analyze_skill.py "$skill_dir" \
     --min-pass 60 \
     --no-emoji
+
+  "$python_bin" utilities/skill-builder/scripts/upgrade_skill.py "$skill_dir" \
+    --format text
 
 done
 
