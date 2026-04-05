@@ -47,9 +47,9 @@ cases:
       - type: contains
         value: "## When to use"
       - type: contains
-        value: "## Deliverables"
+        value: "## Outputs"
       - type: contains
-        value: "## Required inputs"
+        value: "## Inputs"
 
   - id: out-of-scope-failure-template
     name: out-of-scope-failure-template
@@ -64,9 +64,9 @@ cases:
       - type: contains
         value: "None (out of scope)."
       - type: contains
-        value: "## Deliverables"
+        value: "## Outputs"
       - type: contains
-        value: "## Required inputs"
+        value: "## Inputs"
 
   - id: scaffold-mode-insertion-guidance
     name: scaffold-mode-insertion-guidance

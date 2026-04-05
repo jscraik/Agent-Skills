@@ -285,4 +285,4 @@ Use this only when the instruction surface is genuinely identical across tools. 
 
 ## Gotchas
 
-- **Conflict resolution drops section headings** → When resolving rebase conflicts in this file, carefully verify that `###` subheadings (especially `### Policy calibration defaults`) survive the merge. Symptom: section content present but heading line missing, causing broken TOC anchors. Do instead: after resolving each conflict block, scan ±5 lines above the resolved content for orphaned headings. Check: `rg '### Policy calibration' product/docs/agents-md/SKILL.md`.
+- **Conflict resolution drops section headings** → When resolving rebase conflicts in this file, carefully verify that `###` subheadings (especially `### Policy calibration defaults`) survive the merge. Symptom: section content present but heading line missing, causing broken TOC anchors. Do instead: after resolving each conflict block, scan ±5 lines above the resolved content for orphaned headings. Check: `rg '### Policy calibration' product/docs/agents-md/references/shared-guidance-propagation.md`.
