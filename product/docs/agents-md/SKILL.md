@@ -308,16 +308,6 @@ If command truth, path ownership, or instruction precedence cannot be verified, 
 
 Do not overload either level. The agent sees all merged AGENTS files. Keep each level scoped to what is only relevant at that depth.
 
-### Cross-tool symlink pattern
-
-When Claude Code (`CLAUDE.md`) is in scope alongside Codex (`AGENTS.md`), a symlink avoids divergence:
-
-```bash
-ln -s AGENTS.md CLAUDE.md
-```
-
-Use this only when the instruction surface is genuinely identical across tools. When tool-specific wording matters, maintain separate files and sync semantically.
-
 ## Mandatory workflow snippet
 
 1. Explore project first, then invoke skill.
@@ -336,14 +326,7 @@ Use this only when the instruction surface is genuinely identical across tools. 
 - User says: "Refactor our shared instruction files with agents-md and make sure the approval/sandbox calibration rules are part of the default governance baseline."
 - User says: "Check this project's AGENTS, CLAUDE, and GEMINI files and make sure the required instruction files exist, are current, and disclose the right canonical docs."
 - User says: "Use agents-md to audit our instruction surface, repair anything stale, and tell me which files are canonical versus legacy."
-- User says: "Inspect these conflicting instructions and return a clear conflict-decision list before you edit anything."
 - User says: "Update our AGENTS template so repo rules, stack detection, required tooling, required paths, Local Memory policy, and startup workflow are tailored per project instead of copied blindly."
-- User says: "Make sure every generated AGENTS file auto-adds Python environment policy and preflight enforcement defaults when those sections are missing."
-- User says: "Enforce coding standards better by auto-adding quality-check gates and requiring all checks to pass before completion."
-- User says: "We used to have a `FORJAMIE.md` file. Please update the AGENTS guidance so it handles that legacy file correctly."
-- User says: "Our repo keeps architecture drawings in `.diagrams/`. Update the AGENTS guidance so agents use that as quick project context without guessing the wrong diagram path in other repos."
-- User says: "Add a worktree bootstrap helper rule across AGENTS, CLAUDE, and GEMINI so first push from a fresh worktree runs the repo helper script."
-- User says: "Our repo now has `instructions/project-brain.md`. Update agents-md so AGENTS refactors always include that reference and keep Project Brain guidance linked correctly."
 
 ## Resource map
 
@@ -373,4 +356,4 @@ Use this only when the instruction surface is genuinely identical across tools. 
 
 ## Gotchas
 
-- **Conflict resolution drops section headings** → When resolving rebase conflicts in this file, carefully verify that `###` subheadings (especially `### Policy calibration defaults`) survive the merge. Symptom: section content present but heading line missing, causing broken TOC anchors. Do instead: after resolving each conflict block, scan ±5 lines above the resolved content for orphaned headings. Check: `rg '### Policy calibration' product/docs/agents-md/references/shared-guidance-propagation.md`.
+- Rebase conflict resolution can drop `###` subheadings in shared-guidance sections; after resolving conflicts, verify headings still exist and TOC anchors remain valid.
