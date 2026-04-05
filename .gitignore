@@ -90,3 +90,9 @@ artifacts/skill-graphs/telemetry/skill-genome-processing-stats.json
 artifacts/skill-graphs/telemetry/.genome-watermark
 
 artifacts/policy/
+
+# Validation evidence policy:
+# - keep artifacts/validation/latest tracked as the rolling snapshot
+# - ignore timestamped local run directories by default
+/artifacts/validation/20*/
+!/artifacts/validation/latest/
