@@ -43,6 +43,19 @@ except ModuleNotFoundError:
     print("ERROR: PyYAML is required (pip install pyyaml).", file=sys.stderr)
     raise SystemExit(1)
 
+# ---------------------------------------------------------------------------
+# Shared frontmatter parser (sibling module)
+# ---------------------------------------------------------------------------
+_SCRIPT_DIR = Path(__file__).resolve().parent
+if str(_SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(_SCRIPT_DIR))
+
+from yaml_frontmatter import (  # noqa: E402  # type: ignore[import]
+    parse_frontmatter as _parse_frontmatter_shared,
+    read_text as _read_text_shared,
+    resolve_skill_md_path as _resolve_skill_md_path_shared,
+)
+
 
 TARGET_NAME_LIMITS = {"portable": 64, "codex": 64, "claude": 64}
 TARGET_DESCRIPTION_LIMITS = {"portable": 1024, "codex": 1024, "claude": 1024}
@@ -60,58 +73,9 @@ COMPAT_ALLOWED_KEYS = {
     "metadata",
 }
 
-_FRONTMATTER_DELIM_RE = re.compile(r"^\s*---\s*$")
-
-
-def resolve_skill_md_path(path_like: str) -> Path:
-    p = Path(path_like).expanduser().resolve()
-    if p.is_dir():
-        return p / "SKILL.md"
-    return p
-
-
-def read_text(path: Path) -> str:
-    try:
-        return path.read_text(encoding="utf-8")
-    except UnicodeDecodeError:
-        return path.read_text(encoding="utf-8", errors="replace")
-
-
-def parse_frontmatter(raw_text: str) -> Tuple[Dict[str, Any], str]:
-    lines = raw_text.splitlines(keepends=True)
-
-    # Find first non-empty line; frontmatter must start there.
-    first_nonempty: Optional[int] = None
-    for i, line in enumerate(lines):
-        if line.strip():
-            first_nonempty = i
-            break
-    if first_nonempty is None:
-        raise ValueError("SKILL.md is empty")
-
-    if not _FRONTMATTER_DELIM_RE.match(lines[first_nonempty]):
-        raise ValueError("Missing YAML frontmatter. Expected `---` as the first non-empty line.")
-
-    # Find closing delimiter
-    end_idx: Optional[int] = None
-    for j in range(first_nonempty + 1, len(lines)):
-        if _FRONTMATTER_DELIM_RE.match(lines[j]):
-            end_idx = j
-            break
-    if end_idx is None:
-        raise ValueError("Unterminated YAML frontmatter. Missing closing `---`.")
-
-    yaml_text = "".join(lines[first_nonempty + 1 : end_idx])
-    fm_obj = yaml.safe_load(yaml_text) if yaml_text.strip() else {}
-    if fm_obj is None:
-        fm: Dict[str, Any] = {}
-    elif isinstance(fm_obj, dict):
-        fm = fm_obj
-    else:
-        raise ValueError("Frontmatter YAML must be a mapping/object (key: value pairs).")
-
-    body = "".join(lines[end_idx + 1 :]).lstrip("\n")
-    return fm, body
+# Local aliases for the shared implementations (backwards-compatible names).
+resolve_skill_md_path = _resolve_skill_md_path_shared
+read_text = _read_text_shared
 
 
 def fail(msg: str) -> None:
@@ -189,7 +153,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     try:
         raw = read_text(skill_md)
-        fm, _body = parse_frontmatter(raw)
+        fm, _body, _fm_start, _fm_end = _parse_frontmatter_shared(raw)
     except Exception as e:
         fail(str(e))
 

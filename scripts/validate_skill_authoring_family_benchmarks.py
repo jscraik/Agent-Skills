@@ -170,6 +170,8 @@ def _validate_evals(skill_rel: str, skill_dir: Path) -> List[Finding]:
 
     if len(cases) < 7:
         findings.append(Finding("FAIL", "EVALS_CASE_COUNT", skill_rel, f"evals must include at least 7 cases (found {len(cases)})"))
+    elif len(cases) <= 8:
+        findings.append(Finding("WARN", "EVALS_CASE_COUNT_MINIMAL", skill_rel, f"evals meet the minimum with only {len(cases)} cases; aim for ≥9 for meaningful coverage across all 4 required categories"))
 
     seen_ids: Set[str] = set()
     categories: Set[str] = set()
@@ -319,16 +321,24 @@ def _print_text(findings: Sequence[Finding], checked: Sequence[str]) -> None:
     for skill in checked:
         print(f"  - {skill}")
 
-    if not findings:
-        print("[family-benchmark] pass: all family benchmark checks satisfied")
-        return
+    fails = [f for f in findings if f.level == "FAIL"]
+    warns = [f for f in findings if f.level == "WARN"]
 
-    print("[family-benchmark] failures:")
-    for finding in findings:
-        print(f"  - {finding.level} {finding.code} [{finding.skill}] {finding.message}")
+    if not fails:
+        print("[family-benchmark] pass: all family benchmark checks satisfied")
+    else:
+        print("[family-benchmark] failures:")
+        for finding in fails:
+            print(f"  - {finding.level} {finding.code} [{finding.skill}] {finding.message}")
+
+    if warns:
+        print("[family-benchmark] warnings:")
+        for finding in warns:
+            print(f"  - {finding.level} {finding.code} [{finding.skill}] {finding.message}")
 
 
 def _print_json(findings: Sequence[Finding], checked: Sequence[str]) -> None:
+    fails = [f for f in findings if f.level == "FAIL"]
     payload = {
         "checked": list(checked),
         "findings": [
@@ -340,7 +350,7 @@ def _print_json(findings: Sequence[Finding], checked: Sequence[str]) -> None:
             }
             for finding in findings
         ],
-        "pass": not findings,
+        "pass": not fails,
     }
     print(json.dumps(payload, indent=2))
 
@@ -366,7 +376,8 @@ def main(argv: Sequence[str]) -> int:
     else:
         _print_text(findings, skills)
 
-    return 2 if findings else 0
+    fails = [f for f in findings if f.level == "FAIL"]
+    return 2 if fails else 0
 
 
 if __name__ == "__main__":

@@ -27,15 +27,19 @@ from __future__ import annotations
 
 import argparse
 import datetime as dt
+import fnmatch
 import json
+import os
 import re
 import sys
 from dataclasses import dataclass
 from enum import IntEnum
-import fnmatch
-import os
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Tuple
+
+_SCRIPT_DIR = Path(__file__).resolve().parent
+if str(_SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(_SCRIPT_DIR))
 
 try:
     import yaml  # type: ignore
@@ -83,67 +87,9 @@ class SkillDoc:
     fm_end_line: int
 
 
-_FM_DELIM = re.compile(r"^\s*---\s*$")
-
-
-def _resolve_skill_md_path(path_like: str) -> Path:
-    p = Path(path_like).expanduser().resolve()
-    return (p / "SKILL.md") if p.is_dir() else p
-
-
-def _read_text(path: Path) -> str:
-    try:
-        return path.read_text(encoding="utf-8")
-    except UnicodeDecodeError:
-        return path.read_text(encoding="utf-8", errors="replace")
-
-
-def _parse_frontmatter(raw: str, strict_line1: bool) -> Tuple[Dict[str, Any], str, int, int]:
-    lines = raw.splitlines(keepends=True)
-    if not lines:
-        raise ValueError("SKILL.md is empty")
-
-    if strict_line1:
-        if not _FM_DELIM.match(lines[0]):
-            raise ValueError("Strict mode: frontmatter must start on line 1 with `---`.")
-        start_idx = 0
-    else:
-        start_idx: Optional[int] = None
-        for i, line in enumerate(lines):
-            if line.strip():
-                start_idx = i
-                break
-        if start_idx is None:
-            raise ValueError("SKILL.md has no content")
-        if not _FM_DELIM.match(lines[start_idx]):
-            raise ValueError("Missing YAML frontmatter. Expected `---` as first non-empty line.")
-
-    end_idx: Optional[int] = None
-    for j in range(start_idx + 1, len(lines)):
-        if _FM_DELIM.match(lines[j]):
-            end_idx = j
-            break
-    if end_idx is None:
-        raise ValueError("Unterminated YAML frontmatter. Missing closing `---`.")
-
-    yaml_text = "".join(lines[start_idx + 1 : end_idx])
-    if "\t" in yaml_text:
-        raise ValueError("Frontmatter YAML must use spaces (tabs found).")
-
-    try:
-        fm_obj = yaml.safe_load(yaml_text)
-    except yaml.YAMLError as e:
-        raise ValueError(f"Invalid YAML in frontmatter: {e}") from e
-
-    if fm_obj is None:
-        fm: Dict[str, Any] = {}
-    elif isinstance(fm_obj, dict):
-        fm = fm_obj
-    else:
-        raise ValueError("Frontmatter YAML must be a mapping/object.")
-
-    body = "".join(lines[end_idx + 1 :]).lstrip("\n")
-    return fm, body, start_idx + 1, end_idx + 1
+from yaml_frontmatter import parse_frontmatter as _parse_frontmatter_shared  # noqa: E402  # type: ignore[import]
+from yaml_frontmatter import read_text as _read_text  # noqa: E402  # type: ignore[import]
+from yaml_frontmatter import resolve_skill_md_path as _resolve_skill_md_path  # noqa: E402  # type: ignore[import]
 
 
 def load_skill(path_like: str, strict_line1: bool) -> SkillDoc:
@@ -152,7 +98,7 @@ def load_skill(path_like: str, strict_line1: bool) -> SkillDoc:
         raise FileNotFoundError(f"SKILL.md not found at: {path}")
 
     raw = _read_text(path)
-    fm, body, fm_start, fm_end = _parse_frontmatter(raw, strict_line1=strict_line1)
+    fm, body, fm_start, fm_end = _parse_frontmatter_shared(raw, strict_line1=strict_line1)
     return SkillDoc(path=path, raw=raw, frontmatter=fm, body=body, fm_start_line=fm_start, fm_end_line=fm_end)
 
 
