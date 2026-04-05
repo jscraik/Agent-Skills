@@ -7,10 +7,18 @@ metadata:
 
 # CE Deepen Plan
 
+**Note: The current year is 2026.** Use this when dating deepening artifacts and searching for recent documentation.
+
+`ce-plan` defines **HOW** to build. `ce-deepen-plan` strengthens it — tightening sequencing, rationale, verification, and risk treatment before execution.
+
+This workflow produces a stronger implementation plan. It does **not** create plans from scratch or implement code.
+
 ## Table of Contents
 - [Working agreement](#working-agreement)
 - [When to use](#when-to-use)
 - [Required inputs](#required-inputs)
+- [Interaction Method](#interaction-method)
+- [Core Principles](#core-principles)
 - [Workflow](#workflow)
 - [Deepening modes](#deepening-modes)
 - [Rewrite rules](#rewrite-rules)
@@ -19,6 +27,20 @@ metadata:
 - [Anti-patterns](#anti-patterns)
 - [References](#references)
 - [Gotchas](#gotchas)
+
+## Interaction Method
+
+Use the platform's blocking question tool when available (`AskUserQuestion` in Claude Code, `request_user_input` in Codex, `ask_user` in Gemini). Otherwise, present numbered options in chat and wait for the user's reply before proceeding.
+
+Ask one question at a time. Prefer concise single-select choices when natural options exist.
+
+## Core Principles
+
+1. **Increase justified confidence, not bulk** - Deepening should make the plan more executable, not merely longer.
+2. **Evidence before change** - Use the strongest available evidence source before modifying the plan.
+3. **Targeted over exhaustive** - Prefer 2-5 weak sections improved deeply over whole-document churn.
+4. **Preserve planning boundaries** - Keep research focused on plan strength; defer implementation ideas.
+5. **Preserve intent** - Keep original decisions unless evidence justifies change.
 
 ## Working agreement
 - Treat this as the compound-engineering deepening stage, not a planning-from-scratch or implementation lane.
@@ -80,6 +102,7 @@ If critical source context is missing after one concise follow-up, stop and surf
 - do not turn the plan into an implementation script, commit choreography, or exact command cookbook
 - do not add new product requirements silently; surface them as open questions when discovered
 - do not auto-advance into implementation without user confirmation
+- **PII/Secrets redaction**: redact credentials, tokens, API keys, and personal data from all deepening artifacts and research notes
 
 ## Acceptance criteria
 - the selected deepening mode matches the user's request, plan depth, and topic risk
@@ -90,7 +113,7 @@ If critical source context is missing after one concise follow-up, stop and surf
 - the plan boundary remains intact: no implementation code, no git choreography, no fabricated references
 - if any required check fails, stop at the first failed gate and do not proceed until it is fixed
 
-## Standards snapshot (March 2026)
+## Standards snapshot (April 2026)
 - Keep each skill scoped to one reusable job and make the description say what it does and when to use it.
 - Prefer explicit routing, realistic examples, negative examples, and validation over prompt-only procedures.
 - For multi-step agentic work, plan the workflow, keep one current step in focus, and use bounded research instead of unconstrained fan-out by default.
@@ -175,7 +198,7 @@ Use `max-coverage` only when:
 In `max-coverage` mode, preserve the original prompt's strengths:
 - create a section manifest
 - discover available skills, reviewers, research agents, and learnings from the current platform and installed registries when available
-- prepare a broad but still evidence-oriented fan-out when the user has explicitly asked for delegation or approves it via `request_user_input`; otherwise widen inline coverage selectively
+- prepare a broad but still evidence-oriented fan-out when the user has explicitly asked for delegation or approves it via the platform's blocking question tool (`AskUserQuestion`, `request_user_input`, or `ask_user`); otherwise widen inline coverage selectively
 - synthesize all usable findings back into the plan without rewriting its intent
 
 See `references/deepening-modes.md` for the detailed mode matrix and selection rules.
@@ -183,7 +206,7 @@ See `references/deepening-modes.md` for the detailed mode matrix and selection r
 ### Phase 3: Gather grounding
 Start with grounding in the main thread.
 
-If bounded internal support would materially improve coverage and the user has not already explicitly asked for delegation or sub-agents, ask a short blocking approval question via `request_user_input` before spawning any internal subagents.
+If bounded internal support would materially improve coverage and the user has not already explicitly asked for delegation or sub-agents, ask a short blocking approval question via the platform's blocking question tool (`AskUserQuestion`, `request_user_input`, or `ask_user`) before spawning any internal subagents.
 
 If approved, run these bounded internal subagents in parallel:
 - `repo-research-analyst("Find repo patterns, file targets, and sequencing clues relevant to: <plan topic> — max 20 files, max 4 MB total read, return a <=400 word summary with file:line refs")`
@@ -273,8 +296,18 @@ See `references/deepening-modes.md` for scoring heuristics, execution modes, and
 - Add evidence-backed depth only where it materially improves execution quality.
 - Use `references/rewrite-rules.md` for the canonical enhancement-summary template, allowed rewrites, and final checks.
 
+## Empowerment
+
+You are capable of transforming good plans into excellent plans through systematic deepening. Your analysis prevents execution surprises:
+- **Trust your gap analysis** - if dependencies are unclear, flag them
+- **Sequencing is your expertise** - the order matters as much as the tasks
+- **Risk treatment protects the team** - explicit mitigations prevent firefighting
+- **Verification foresight prevents drift** - plan how to verify before execution
+
+Use judgment on depth: lightweight plans need light touch, complex plans need thorough analysis. Match depth to risk.
+
 ## Handoff guidance
-After writing the deepened plan, offer the clearest next-step options:
+After writing the deepened plan, offer next-step options:
 - view the diff or changed sections
 - deepen specific sections further
 - start `ce-work` when the plan is ready for implementation

@@ -1,4 +1,4 @@
-# Industry Gold Standard (March 2026)
+# Industry Gold Standard (April 2026)
 
 Use this reference to keep `docs-expert` aligned with current technical documentation best practices.
 

@@ -7,6 +7,15 @@ metadata:
 
 # CE Ideate
 
+**Note: The current year is 2026.** Use this when dating ideation documents and checking recent ideation artifacts.
+
+`ce-ideate` precedes `ce-brainstorm`.
+- `ce-ideate` answers: "What are the strongest ideas worth exploring?"
+- `ce-brainstorm` answers: "What exactly should one chosen idea mean?"
+- `ce-plan` answers: "How should it be built?"
+
+This workflow produces a ranked ideation artifact in `docs/ideation/`. It does **not** produce requirements, plans, or code.
+
 ## Table of Contents
 - [Working agreement](#working-agreement)
 - [When to use](#when-to-use)
@@ -15,7 +24,9 @@ metadata:
 - [Failure mode](#failure-mode)
 - [Constraints](#constraints)
 - [Acceptance criteria](#acceptance-criteria)
-- [Standards snapshot (March 2026)](#standards-snapshot-march-2026)
+- [Interaction Method](#interaction-method)
+- [Core Principles](#core-principles)
+- [Standards snapshot (April 2026)](#standards-snapshot-april-2026)
 - [Philosophy](#philosophy)
 - [Workflow](#workflow)
 - [Focus modes](#focus-modes)
@@ -28,6 +39,22 @@ metadata:
 - [See Also](#see-also)
 - [Decision feedback protocol](#decision-feedback-protocol)
 - [Gotchas](#gotchas)
+
+## Interaction Method
+
+Use the platform's blocking question tool when available (`AskUserQuestion` in Claude Code, `request_user_input` in Codex, `ask_user` in Gemini). Otherwise, present numbered options in chat and wait for the user's reply before proceeding.
+
+Ask one question at a time. Prefer concise single-select choices when natural options exist.
+
+## Core Principles
+
+1. **Ground before ideating** - Scan the actual codebase first. Do not generate abstract product advice detached from the repository.
+2. **Diverge before judging** - Generate the full idea set before evaluating any individual idea.
+3. **Use adversarial filtering** - The quality mechanism is explicit rejection with reasons, not optimistic ranking.
+4. **Preserve the original prompt mechanism** - Generate many ideas, critique the whole list, then explain only the survivors in detail. Do not let extra process obscure this pattern.
+5. **Use agent diversity to improve the candidate pool** - Parallel sub-agents are a support mechanism for richer idea generation and critique, not the core workflow itself.
+6. **Preserve the artifact early** - Write the ideation document before presenting results so work survives interruptions.
+7. **Route action into brainstorming** - Ideation identifies promising directions; `ce-brainstorm` defines the selected one precisely enough for planning.
 
 ## Working agreement
 - Treat `ce-ideate` as the compound-engineering stage that decides which ideas are worth exploring next, not as generic brainstorming, planning, or implementation.
@@ -119,7 +146,7 @@ If no `docs/ideation/` directory exists, create it before writing the durable ar
 - the ideation artifact is written or updated before any handoff, Proof sharing, or session end
 - if any required check fails, stop at the first failed gate and do not proceed until it is fixed or triaged
 
-## Standards snapshot (March 2026)
+## Standards snapshot (April 2026)
 - Keep the skill scoped to one reusable job with routing-first frontmatter that says what it does and when to use it.
 - Use progressive disclosure: keep `SKILL.md` focused on route-critical behavior and move templates, frame logic, and artifact details into `references/`.
 - Prefer realistic positive and negative examples plus eval-backed routing tests over hidden prompt assumptions.
@@ -225,7 +252,7 @@ Do not skip from ideation directly to planning or implementation.
 - `resume`: continue an existing ideation doc, preserve statuses, and append to the session log
 
 ## Execution rules
-- Use blocking question tools when available and ask one question at a time.
+- Use the platform's blocking question tool (`AskUserQuestion`, `request_user_input`, or `ask_user`) and ask one question at a time.
 - Keep the initial codebase scan shallow; do not do deep implementation analysis before ideating.
 - Use `repo-research-analyst` and `learnings-researcher` for bounded grounding only when delegation was explicitly requested or approved; otherwise perform the equivalent grounding inline.
 - If an issue-intelligence helper exists, use it for issue-theme clustering. Otherwise do a bounded direct issue-theme pass with available repo and issue tools, and clearly note the fallback.

@@ -7,10 +7,19 @@ metadata:
 
 # CE Plan
 
+**Note: The current year is 2026.** Use this when dating plans and searching for recent documentation.
+
+`ce-brainstorm` defines **WHAT** to build. `ce-plan` defines **HOW** to build it. `ce-work` executes.
+
+This workflow produces a durable implementation plan. It does **not** implement code, run tests, or learn from execution-time results.
+
 ## Table of Contents
 - [Working agreement](#working-agreement)
 - [When to use](#when-to-use)
 - [Required inputs](#required-inputs)
+- [Interaction Method](#interaction-method)
+- [Core Principles](#core-principles)
+- [Plan Quality Bar](#plan-quality-bar)
 - [Workflow](#workflow)
 - [Plan modes](#plan-modes)
 - [Planning-mode handshake](#planning-mode-handshake)
@@ -21,19 +30,41 @@ metadata:
 - [Gotchas](#gotchas)
 
 ## Working agreement
-- `ce:brainstorm` defines WHAT, `ce-plan` defines HOW, and `ce:work` executes.
-- `ce-plan` now also owns the former generic `writing-plans` lane through `generic-plan` mode.
-- Treat this as the compound-engineering planning stage, not an implementation lane.
-- Use the lightest planning mode that fits: `generic-plan` for plain sequencing, CE modes when stage artifacts and stronger traceability matter.
-- Use the most authoritative artifact available and do not invent behavior that belongs in a spec, requirements doc, or UI spec.
-- Prefer the smallest plan that still makes execution, testing, and rollout safe.
-- Keep planning portable: capture decisions, files, sequencing, risks, and verification, not shell choreography or implementation code.
-- Stop when the plan file is written, verified, and the next-step options are clear.
+- `ce:brainstorm` defines WHAT, `ce-plan` defines HOW, `ce-work` executes.
+- Use the lightest planning mode that fits: `generic-plan` for plain sequencing, CE modes when stage artifacts matter.
+- Prefer the smallest plan that still protects safety, governance, and delivery confidence.
+- Keep planning portable: capture decisions, files, sequencing, risks, and verification — not shell choreography or implementation code.
+- Stop when the plan file is written, verified, and next-step options are clear.
 
-## Philosophy
-- Planning quality is measured by execution clarity, not by document length.
-- Every phase should reduce uncertainty with explicit dependencies, verification, and rollback awareness.
-- Prefer minimal viable sequencing that still protects safety, governance, and delivery confidence.
+## Interaction Method
+
+Use the platform's question tool when available. When asking the user a question, prefer the platform's blocking question tool if one exists (`AskUserQuestion` in Claude Code, `request_user_input` in Codex, `ask_user` in Gemini). Otherwise, present numbered options in chat and wait for the user's reply before proceeding.
+
+Ask one question at a time. Prefer a concise single-select choice when natural options exist.
+
+## Core Principles
+
+1. **Use requirements as the source of truth** - If `ce-brainstorm` produced a requirements document, planning should build from it rather than re-inventing behavior.
+2. **Decisions, not code** - Capture approach, boundaries, files, dependencies, risks, and test scenarios. Do not pre-write implementation code.
+3. **Research before structuring** - Explore the codebase, institutional learnings, and external guidance when warranted before finalizing the plan.
+4. **Right-size the artifact** - Small work gets a compact plan. Large work gets more structure. The philosophy stays the same at every depth.
+5. **Separate planning from execution discovery** - Resolve planning-time questions here. Explicitly defer execution-time unknowns to implementation.
+6. **Keep the plan portable** - The plan should work as a living document, review artifact, or issue body without embedding tool-specific executor instructions.
+7. **Carry execution posture lightly when it matters** - If the request or repo context clearly implies test-first or characterization-first, reflect that as a lightweight signal.
+
+## Plan Quality Bar
+
+Every plan should contain:
+- A clear problem frame and scope boundary
+- Concrete requirements traceability back to the request or origin document
+- Repo-relative file paths for the work being proposed (never absolute paths)
+- Explicit test file paths for feature-bearing implementation units
+- Decisions with rationale, not just tasks
+- Existing patterns or code references to follow
+- Enumerated test scenarios for each feature-bearing unit
+- Clear dependencies and sequencing
+
+A plan is ready when an implementer can start confidently without needing the plan to write the code for them.
 
 ## When to use
 Use this skill when the user wants an execution-ready plan for a feature, improvement, refactor, bug fix, or UI delivery path and needs sequencing, validation, traceability, or rollout guidance before coding starts.
@@ -103,7 +134,7 @@ If critical context remains missing after one concise follow-up, stop and surfac
 - for time-sensitive or external claims, retrieve current sources first and cite explicit dates
 - keep Codex planning-mode status synchronized with the current planning stage
 - do not auto-advance into implementation without user confirmation
-- use `request_user_input` only when one blocking user choice materially changes scope, architecture, sequencing, or risk
+- use the platform's blocking question tool (`AskUserQuestion`, `request_user_input`, or `ask_user`) only when one blocking user choice materially changes scope, architecture, sequencing, or risk
 - when planning UI work, define prototype tasks but do not build the prototypes during this planning stage
 
 ## Acceptance criteria
@@ -116,15 +147,21 @@ If critical context remains missing after one concise follow-up, stop and surfac
 - the plan contains explicit phase exit criteria and execution-control guidance
 - if any required check fails, stop at the first failed gate and do not proceed until it is fixed
 
+## Standards snapshot (April 2026)
+- Keep each skill scoped to one reusable job and make the description say what it does and when to use it.
+- Prefer explicit routing, realistic examples, and validation over prompt-only procedures.
+- Use repo guidance, origin context, and prior learnings before external research.
+- Plan workflows, keep one current step in focus, and use bounded research by default.
+
 ## Workflow
 ### Phase 0: Resume, source, and classify
 Determine the planning baseline before writing anything substantial.
 
-Use this mode selection:
-- `generic-plan` for plain implementation sequencing when the user needs a durable execution plan but not the stronger compound-engineering stage framing
-- `standard-plan` for feature, bug, refactor, or service work where one main delivery plan is the output
-- `ui-enhanced-plan` for a main delivery plan that must also account for UI contract, prototype direction, accessibility, and visual validation
-- `dedicated-ui-plan` for explicit UI implementation planning from a UI spec or UI-heavy request
+Mode selection:
+- `generic-plan` for plain implementation sequencing
+- `standard-plan` for feature, bug, refactor, or service work
+- `ui-enhanced-plan` when UI work affects sequencing, validation, or rollout
+- `dedicated-ui-plan` for explicit UI implementation planning
 
 Source resolution order:
 - existing plan path or obvious matching recent plan in `docs/plans/`
@@ -141,97 +178,39 @@ Source resolution order:
   - parent spec with `ui_required: true`
   - raw UI feature description only
 
-Rules:
-- if updating an existing plan, preserve completed checkboxes and revise only still-relevant sections
-- if a relevant requirements doc exists, use it as the primary planning input and carry forward its problem frame, requirements, decisions, dependencies, and open questions
-- if a relevant spec exists, read it thoroughly and treat it as the source of truth
-- if a spec references a brainstorm, read that too
-- if a brainstorm says `spec_required: lite` or `full`, recommend the spec stage before planning unless the user explicitly skips it
-- if a parent spec has `ui_required: true`, look for a matching UI spec and treat it as the UI contract
-- if no relevant artifact exists, run a short planning bootstrap covering problem frame, intended behavior, scope boundaries, success criteria, and blocking assumptions before structuring the plan
-- reclassify open questions before planning:
-  - product/scope/success-criteria blockers return to `ce:brainstorm` or explicit assumptions
-  - technical/architectural/research questions stay in planning
-- classify plan depth as `lightweight | standard | deep` before structuring the document
-
-Increase reasoning depth before structuring the plan when the work is multi-phase, high-risk, UI-accessibility-critical, or spans multiple system boundaries.
+Rules: preserve checkboxes when updating; carry forward problem frame and requirements from source docs; treat specs as source of truth; recommend spec stage if required; bootstrap only when no artifacts exist; reclassify questions (product blockers to `ce-brainstorm`, technical stay); classify depth as `lightweight | standard | deep`. Increase depth for multi-phase, high-risk, or cross-boundary work.
 
 ### Phase 1: Research local context
-Start with inline research in the main thread.
+Start inline. If subagents would help and user hasn't pre-approved, ask first.
 
-If bounded internal support would materially improve coverage and the user has not already explicitly asked for delegation or sub-agents, ask a short blocking approval question via `request_user_input` before spawning any internal subagents.
+If approved, run in parallel:
+- `repo-research-analyst` for patterns and conventions
+- `learnings-researcher` for prior learnings
 
-If approval is granted, run these bounded internal subagents in parallel:
-- `repo-research-analyst("Find existing patterns to follow related to: <planning source> — max 20 files, max 4 MB total read, return a <=400 word summary with file:line refs")`
-- `learnings-researcher("Find prior learnings relevant to: <planning source> — check .harness/memory/LEARNINGS.md first when it exists, then use instructions/Learnings.md for compatibility, then scan only directly relevant deeper solution docs. Return only directly relevant findings, <=200 words total.")`
-
-If approval is not granted, the tool is unavailable, or subagents are unnecessary, perform the equivalent research serially in the main thread before structuring the plan.
-
-Focus on:
-- existing patterns to follow
-- AGENTS guidance and local conventions
-- linked or similar modules and files
-- prior learnings or failed patterns
-- component, Storybook, accessibility, and visual-regression conventions when UI work is involved
-- stack maturity and version context that will sharpen any external research decision
-
-Also detect whether the plan should carry a lightweight execution-posture signal:
-- `test-first` or `characterization-first` when the user, source doc, or local research makes that expectation clear
-- `Execution target: external-delegate` when the user explicitly asks for delegation or token-conserving implementation in a separate execution lane
-
-Use the role names exactly as declared in the configured agent catalog.
-Treat them as internal support for the planning stage, not separate top-level operators the user must coordinate.
+Focus on: existing patterns, AGENTS guidance, similar modules, UI conventions, stack context.
+Detect execution-posture signals (test-first, external-delegate) from request or research.
 
 ### Phase 2: Run external research conditionally
-Run external research only when the work is high risk, externally dependent, unfamiliar, or current best practices materially affect the plan.
+Run external research for high-risk or unfamiliar work where best practices affect planning. Lean in when local patterns are absent; skip when strong patterns exist.
 
-Lean toward external research when the local scan shows the relevant layer is absent, thin, novel, or externally constrained. Skip it when strong local patterns already exist and current external guidance would not materially change the plan.
+Ask before spawning research subagents if not pre-approved. If approved, run `best-practices-researcher` and `framework-docs-researcher`.
 
-If bounded external research support would materially improve the plan and the user has not already explicitly asked for delegation or sub-agents, ask a short blocking approval question via `request_user_input` before spawning any internal research subagents.
-
-If approved, run these bounded internal subagents in parallel:
-- `best-practices-researcher("<planning source> — max 5 external sources, <=300 word summary, cite URLs and dates")`
-- `framework-docs-researcher("<planning source> — max 3 docs pages, return only sections directly applicable, <=300 words")`
-
-If approval is not granted, the tool is unavailable, or the support is unnecessary, do the external research inline and keep the source set tight.
-
-Use external research to sharpen:
-- framework- or platform-specific sequencing
-- rollout or migration safety
-- testing and validation expectations
-- accessibility and UI delivery standards
-
-If the current depth is `lightweight` and local or external research reveals external contract surfaces, reclassify the plan to at least `standard` before structuring. Relevant signals include:
-- environment variables consumed by external systems, CI, or other repos
-- exported public APIs or CLI contracts
-- CI/CD configuration or deployment files
-- shared types or interfaces imported by downstream consumers
-- documentation paths or URLs referenced by external systems
-
-Announce the reclassification briefly so the user can see why the planning depth changed.
+Reclassify `lightweight` → `standard` if research reveals external contract surfaces.
 
 ### Phase 3: Consolidate and resolve planning questions
-Summarize what the plan must honor:
-- governing constraints from the spec, brainstorm, or bug context
-- non-goals
-- invariants and safety requirements
-- repo patterns and relevant file references
-- prior learnings
-- any external requirements or docs that materially affect execution
+Summarize what the plan must honor: constraints, non-goals, invariants, repo patterns, prior learnings, external requirements.
 
-Resolve only planning-time questions here. Defer execution-time unknowns such as exact helper names, final query shapes, and runtime discoveries to implementation notes instead of pretending they are settled.
+Resolve planning-time questions here. Defer execution-time unknowns (exact helper names, query shapes) to implementation notes.
 
-If the request is still too ambiguous to sequence safely, ask one focused follow-up question and stop there.
+If still too ambiguous to sequence safely, ask one focused follow-up question and stop.
 
 ### Phase 4: Build the main plan structure
 For `generic-plan`, `standard-plan`, and `ui-enhanced-plan`:
 - use the general-plan template from `references/plan-artifacts.md`
-- keep stable `P` and `AC` IDs, exact file paths, explicit exit criteria, traceability, and an Execution Ledger
-- name concrete files and modules when known, but do not invent system behavior
-- include the optional High-Level Technical Design section when a sketch, pseudo-code, diagram, or flow is the clearest way to validate approach shape
-- make each implementation unit directional and execution-ready:
-  - goal, requirements, dependencies, files, approach, patterns, test scenarios, verification
-  - optional `Execution note` and per-unit `Technical design` only when they materially reduce ambiguity
+- keep stable `P` and `AC` IDs, exact file paths, exit criteria, traceability, Execution Ledger
+- name concrete files/modules when known; do not invent system behavior
+- include optional High-Level Technical Design when sketch/pseudocode validates approach
+- make each implementation unit execution-ready: goal, requirements, dependencies, files, approach, patterns, test scenarios, verification
 
 ### Phase 5: Add the UI planning branch when relevant
 When the mode is `ui-enhanced-plan` or `dedicated-ui-plan`, add explicit UI planning guidance rather than burying it in generic phases.
@@ -251,16 +230,58 @@ Prototype planning modes:
 
 For full UI artifact rules, prototype-delivery details, and `UP` / `UAC` / `VAC` structure, use `references/ui-modes.md` and `references/plan-artifacts.md`.
 
-### Phase 6: Run gap analysis before finalizing
-Before finalizing, run:
-- `spec-flow-analyzer("<planning source> with summarized research findings")`
+### Phase 5b: Testing Strategy
+Per `references/production-considerations.md`:
 
-Incorporate:
-- missed user flows
-- edge cases
-- testing gaps
-- rollout or rollback gaps
-- UI dependency or accessibility gaps when applicable
+| Type | When |
+|------|------|
+| **Unit** | Business logic |
+| **Integration** | Cross-layer work |
+| **Contract** | API boundaries |
+| **E2E** | Critical flows |
+
+Rules: cross-layer needs integration; external APIs need contract tests.
+
+### Phase 5d: Verification-First Planning
+Every unit needs verification strategy per `references/verification-first.md`:
+
+| Type | When | How |
+|------|------|-----|
+| **Test oracle** | All changes | Tests verify behavior through public interfaces |
+| **Type check** | Typed langs | Static analysis |
+| **Lint** | All repos | Pattern enforcement |
+| **Self-check** | AI-generated | Compare to spec |
+
+Rules: tests describe _what_ not _how_; survive refactors; no horizontal slicing (see `references/ce-anti-patterns.md`).
+
+### Phase 5e: Rollout Strategy
+Per `references/production-considerations.md`:
+
+| Type | Approach |
+|------|----------|
+| **Feature Flag** | Dark launch → gradual % → GA |
+| **Canary** | Deploy to subset, monitor, expand |
+| **Blue/Green** | Parallel environments |
+| **DB Migration** | Backward-compatible steps |
+
+Rules: flags need removal criteria; plan rollback.
+
+### Phase 6: Gap analysis
+Run `spec-flow-analyzer("<source>")`; incorporate: missed flows, edge cases, testing/rollout/UI gaps.
+
+### Phase 6.5: Reliability Modeling
+For services/high-risk work, model failures per `references/production-considerations.md`:
+
+| Domain | Check |
+|--------|-------|
+| **Failure modes** | Network, disk, dependency, timeout |
+| **Cascading** | Containment strategy |
+| **Degradation** | What remains when deps fail |
+| **Recovery** | Auto/manual, time to recover |
+| **Retry safety** | Idempotency |
+| **Resource limits** | Circuit breakers |
+
+Route to `[[ce-reliability-review]]` for new services or high blast radius.
 
 ### Phase 7: Write the plan artifact
 Ensure the destination directory exists before writing:
@@ -274,6 +295,7 @@ Use the canonical frontmatter, required sections, and template details in `refer
 After writing, run exact checks and fix failures before presenting options.
 
 - use the verification matrix in `references/plan-artifacts.md`
+- verify production considerations are documented per `references/production-considerations.md`
 - patch failures before presenting options
 - if the repo has additional plan-graph or structural linting, run it as an extra non-blocking quality check before handoff
 
@@ -288,12 +310,10 @@ See `references/ui-modes.md` for the full compatibility matrix.
 Before handoff, initialize planning state from the plan's Execution Ledger, keep exactly one actionable step `in_progress`, and keep planning-tool state synchronized with the markdown plan.
 
 ## Handoff guidance
-- review the plan in an editor or refine it directly
-- run `workflow-review`, `technical-review`, or `deepen-plan` when additional scrutiny is needed
-- generate or merge a companion UI plan when UI work is in scope
-- start `workflow-work` or hand the finished plan to `[[linear]]` for issue creation
-- hand off to `[[linear]]` with the plan path plus any known team, project, priority, labels, assignee, and cycle context
-- treat the plan artifact as the canonical issue body/input and let `[[linear]]` confirm missing identifiers before mutation
+- review the plan or refine it directly
+- run `workflow-review`, `technical-review`, or `deepen-plan` when scrutiny is needed
+- generate a companion UI plan when UI work is in scope
+- start `workflow-work` (with `[[ce-tdd]]` posture if TDD) or hand to `[[linear]]` for issue creation
 - recommend the companion UI plan when the work is UI-heavy and not already covered by a dedicated UI artifact
 
 ## Validation
@@ -308,33 +328,31 @@ Before handoff, initialize planning state from the plan's Execution Ledger, keep
 - report exact failures and the smallest safe fix if a check does not pass
 
 ## Anti-patterns
-- skipping the spec step for medium- or high-risk work when the source says a spec is required
-- skipping a recent matching requirements doc or existing plan and re-planning from scratch
-- inventing architectural, visual, or file-path details that belong in the spec or UI spec
-- writing implementation code instead of planning execution
-- producing a plan without stable phase and acceptance IDs or clear traceability
-- planning a UI change without accessibility or visual-validation phases
-- treating prototype planning as permission to build prototypes during this planning turn
-- fabricating references, research findings, or component names
+See `references/ce-anti-patterns.md` for full catalog with detection and fixes:
+- skipping spec for medium/high-risk work
+- inventing details that belong in spec
+- writing code instead of planning
+- **Death March**, **Cart Before Horse**, **Big Batch Syndrome**, **Premature Optimization**
+- **Horizontal Slicing**, **80/20 Imbalance**, **No Plan Mode**
 
 ## Examples
 - "Turn this approved spec into an implementation plan with phases, tests, rollout, and acceptance IDs."
 - "Please plan this bug fix from the bug report and tell me the safest execution order."
-- "I have a brainstorm doc and need the compound-engineering planning stage."
-- "This feature has `ui_required: true`; write the main plan and tell me whether we also need a companion UI plan."
+
 ## References
-- Contract: `references/contract.yaml`
-- Evals: `references/evals.yaml`
-- Prompt parity map: `references/source-parity.md`
-- UI mode matrix: `references/ui-modes.md`
-- Plan artifact templates: `references/plan-artifacts.md`
+- Contract: `references/contract.yaml`, Evals: `references/evals.yaml`
+- Source parity: `references/source-parity.md`, UI modes: `references/ui-modes.md`
+- Plan templates: `references/plan-artifacts.md`, Production: `references/production-considerations.md`
+- Anti-patterns: `references/ce-anti-patterns.md`, Verification: `references/verification-first.md`
+
 ## See Also
-| Skill | When to use together |
+| Skill | Purpose |
 |---|---|
-| [[compound-engineering-router]] | Use to choose the correct compound-engineering stage before or after planning |
-| [[ce-brainstorm]] | Use first when the work still needs WHAT/WHY clarification before sequencing |
-| [[product-spec]] | Use when the plan should be blocked until the product contract is made explicit |
-| [[linear]] | Use after plan completion when the user wants the plan turned into a Linear issue with read-before-write safeguards |
+| [[compound-engineering-router]] | Choose CE stage |
+| [[ce-brainstorm]] | Clarify WHAT/WHY |
+| [[ce-reliability-review]] | Reliability analysis |
+| [[product-spec]] | Product contract |
+| [[linear]] | Issue creation |
 **Topic map:** [[product-ops]]
 ## Gotchas
-- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.
+- None yet.
