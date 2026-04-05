@@ -38,11 +38,6 @@ def _write_fixture_skills(root: Path) -> None:
         "Threat model repositories and identify abuse paths.",
     )
     _write_skill(
-        root / "github" / "gh-fix-ci",
-        "gh-fix-ci",
-        "Fix failing GitHub Actions checks and rerun CI.",
-    )
-    _write_skill(
         root / "github" / "gh-workflow",
         "gh-workflow",
         "Manage GitHub pull requests and review workflow.",
@@ -73,14 +68,14 @@ class SkillRouterTests(unittest.TestCase):
     def test_explicit_mention_wins(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            _write_skill(root / "github" / "gh-fix-ci", "gh-fix-ci", "Fix failing GitHub Actions CI checks.")
+            _write_skill(root / "github" / "gh-workflow", "gh-workflow", "Manage GitHub lifecycle and CI diagnosis.")
             _write_skill(root / "product" / "brainstorming", "brainstorming", "Explore feature options before planning.")
 
             skills = discover_skills(root)
-            candidates, _reasons = route("please run gh-fix-ci now", skills, top_k=3)
+            candidates, _reasons = route("please run gh-workflow now", skills, top_k=3)
 
             self.assertGreaterEqual(len(candidates), 1)
-            self.assertEqual(candidates[0].skill_name, "gh-fix-ci")
+            self.assertEqual(candidates[0].skill_name, "gh-workflow")
 
     def test_routing_is_deterministic(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -167,8 +162,8 @@ class SkillRouterTests(unittest.TestCase):
             catalog_version="test",
             candidates=[
                 Candidate(
-                    skill_name="gh-fix-ci",
-                    skill_path="github/gh-fix-ci",
+                    skill_name="gh-workflow",
+                    skill_path="github/gh-workflow",
                     confidence=0.75,
                     rationale=["keyword overlap=3"],
                     risk_tier="low",
@@ -217,8 +212,8 @@ class SkillRouterTests(unittest.TestCase):
             "prompt_hash": "deadbeef",
             "top_candidates": [
                 {
-                    "skill_name": "gh-fix-ci",
-                    "skill_path": "github/gh-fix-ci",
+                    "skill_name": "gh-workflow",
+                    "skill_path": "github/gh-workflow",
                     "confidence": 0.9,
                     "confidence_band": "high",
                     "risk_tier": "medium",
@@ -227,7 +222,7 @@ class SkillRouterTests(unittest.TestCase):
             ],
         }
         event = build_route_event(result=payload, selected_rank=2, correction_latency_ms=1800)
-        self.assertEqual(event["top1_skill"], "gh-fix-ci")
+        self.assertEqual(event["top1_skill"], "gh-workflow")
         self.assertFalse(event["top1_chosen"])
         self.assertTrue(event["override_regret_flag"])
 

@@ -14,7 +14,7 @@
 - [Phase 4: mise tool baseline](#phase-4-mise-tool-baseline)
 - [Phase 5: CircleCI environment variables](#phase-5-circleci-environment-variables-and-github-secrets)
 - [Phase 6: Branch protection](#phase-6-branch-protection)
-- [Phase 7: Greptile setup](#phase-7-greptile-setup)
+- [Phase 7: CodeRabbit setup](#phase-7-coderabbit-setup)
 - [Phase 8: Memory layer bootstrap](#phase-8-memory-layer-bootstrap)
 - [Phase 9: Validate end-to-end](#phase-9-validate-end-to-end)
 - [What harness init scaffolds (file inventory)](#what-harness-init-scaffolds)
@@ -111,36 +111,8 @@ harness init --check-updates
 
 > **CI provider:** `circleci` is the default. Do **not** pass `--ci circleci` here:
 > the current CLI treats that extra positional argument as a target directory.
-> Greptile review runs as a **CircleCI job**
-> (`greptile-review`) — no GitHub Actions workflow file is written or required.
-
-### Updating an existing harness-managed repo
-
-For a repo that already has harness installed, use the routine upgrade lane:
-
-```bash
-# Check whether the installed scaffold/version is behind
-harness init --check-updates
-
-# Preview the routine upgrade
-harness upgrade --dry-run
-
-# Apply the routine upgrade
-harness upgrade
-```
-
-Current harness can auto-repair a legacy `.harness/restore-manifest.json`
-that is missing `ciProvider` when the active provider can be inferred safely
-from `harness.contract.json`, an unambiguous CI layout on disk, or the
-requested/default provider for the update command.
-
-Use `harness init --update` only when tracked baseline files are missing and
-you need to re-scaffold them:
-
-```bash
-harness init --dry-run --update
-harness init --update
-```
+> CodeRabbit review is surfaced by the GitHub App check context (`CodeRabbit`);
+> it is not a separate scaffolded CircleCI workflow file.
 
 ---
 
@@ -193,10 +165,8 @@ harness ci-migrate abort --snapshot <snapshot-id>
 ```
 harness.contract.json               — governance contract (source of truth)
 .harness/ci-required-checks.json    — required CI check list
-.greptile/config.json               — Greptile AI review config (repo-scoped)
-.greptile/rules.md                  — Greptile custom rules
-.greptile/files.json                — Greptile context files
-.circleci/config.yml                — All CI jobs (lint, test, security, greptile-review, release)
+.coderabbit.yaml                    — CodeRabbit review config (repo-scoped)
+.circleci/config.yml                — All CI jobs (lint, test, security, release)
 .github/PULL_REQUEST_TEMPLATE.md    — PR checklist
 scripts/codex-preflight.sh          — agent preflight script (source at session start)
 scripts/check-environment.sh        — harness env readiness script
@@ -259,7 +229,6 @@ Harness cannot create them — surface this to the user if any are missing.
 |---|---|---|
 | `NPM_TOKEN` | Install `@brainwav/coding-harness` in CI jobs | npm / 1Password |
 | `GITHUB_PERSONAL_ACCESS_TOKEN` | `gh` CLI auth for review-gate, PR creation, branch ops | GitHub PAT |
-| `GREPTILE_API_KEY` | Greptile API call in the `greptile-review` CircleCI job | Greptile dashboard |
 | `LINEAR_API_KEY` | Linear issue sync job | Linear settings |
 
 Check via CircleCI API:
@@ -271,8 +240,8 @@ curl -s --request GET \
   --header "Circle-Token: $CIRCLE_TOKEN" | jq '[.items[].name]'
 ```
 
-> **No GitHub Actions secrets are required.** All CI including Greptile runs through
-> CircleCI. The only GitHub-side configuration is the Greptile GitHub App installation.
+> **No GitHub Actions secrets are required.** CI runs through CircleCI, and
+> CodeRabbit enforcement is provided by the GitHub App check context (`CodeRabbit`).
 
 ---
 
@@ -293,7 +262,7 @@ Required checks applied by `--ecosystem harness`:
 ```
 pr-template, linear-gate, risk-policy-gate, dependency-scan,
 orb-pinning, consistency-drift-health, docs-gate,
-lint, typecheck, test, audit, check, memory, security-scan, Greptile Review
+lint, typecheck, test, audit, check, memory, security-scan, CodeRabbit
 ```
 
 > `dependency-scan` = Trivy SCA (replaces GitHub Actions `dependency-review`)
@@ -310,43 +279,28 @@ harness check-authz \
 
 ---
 
-## Phase 7: Greptile setup
+## Phase 7: CodeRabbit setup
 
-Greptile provides AI code review on every PR. The scaffolded `.greptile/config.json`
-scopes it to this repository only (prevents cross-repo context contamination).
+CodeRabbit provides automated PR review through the GitHub App check context.
+This repository should use `.coderabbit.yaml` as the repo-local review source.
 
-### 7.1 Verify config files exist
+### 7.1 Verify repo-local config exists
 
 ```bash
-test -f .greptile/config.json && echo "✅ config" || echo "❌ missing"
-test -f .greptile/rules.md    && echo "✅ rules"  || echo "❌ missing"
-test -f .greptile/files.json  && echo "✅ files"  || echo "❌ missing"
+test -f .coderabbit.yaml && echo "✅ config" || echo "❌ missing"
 ```
 
-### 7.2 Verify Greptile GitHub App installation
+### 7.2 Verify CodeRabbit GitHub App installation
 
 ```bash
-harness verify-greptile \
+harness verify-coderabbit \
   --token "$GITHUB_PERSONAL_ACCESS_TOKEN" \
   --owner <owner> \
   --repo <repo>
 ```
 
-If this fails: instruct the user to install the Greptile GitHub App from
-https://app.greptile.com and grant it access to this repository.
-
-### 7.3 Confirm GREPTILE_API_KEY is set in CircleCI
-
-The `greptile-review` CircleCI job calls the Greptile API directly using
-`GREPTILE_API_KEY`. Verify it is set as a CircleCI project environment variable:
-
-```bash
-curl -s --request GET \
-  --url "https://circleci.com/api/v2/project/github/<owner>/<repo>/envvar" \
-  --header "Circle-Token: $CIRCLE_TOKEN" | jq '[.items[].name]' | grep GREPTILE
-```
-
-If missing: ask the user to add `GREPTILE_API_KEY` in CircleCI project settings → Environment Variables.
+If this fails: instruct the user to install the CodeRabbit GitHub App from
+https://github.com/marketplace/coderabbitai and grant repository access.
 
 ---
 
@@ -388,28 +342,25 @@ Run this validation ladder in order. Stop on first failure and report.
 
 ```bash
 # 9.1 — Preflight (repo context, required binaries)
-source scripts/codex-preflight.sh && preflight_repo
+bash scripts/codex-preflight.sh --stack auto --mode required
 
 # 9.2 — Environment check (mise tools, harness readiness)
 harness check-environment --json
 
-# 9.3 — Update check (also repairs legacy manifests when provider inference is safe)
+# 9.3 — Init idempotency (no pending updates)
 harness init --check-updates
 
-# 9.4 — Routine upgrade preview for existing installs
-harness upgrade --dry-run
-
-# 9.5 — Policy baseline
+# 9.4 — Policy baseline
 pnpm check   # or: npm run check
 
-# 9.6 — Greptile (if token available)
-harness verify-greptile --token "$GITHUB_PERSONAL_ACCESS_TOKEN" --owner <owner> --repo <repo>
+# 9.5 — CodeRabbit (if token available)
+harness verify-coderabbit --token "$GITHUB_PERSONAL_ACCESS_TOKEN" --owner <owner> --repo <repo>
 
-# 9.7 — Authorization (branch protection matches contract)
+# 9.6 — Authorization (branch protection matches contract)
 harness check-authz --contract harness.contract.json --repo <owner>/<repo> --branch main
 ```
 
-All seven steps must pass before the setup is complete.
+All six steps must pass before the setup is complete.
 
 ---
 
@@ -425,17 +376,14 @@ Full file inventory — all paths relative to repo root.
 | `.harness/ci-required-checks.json` | Required CI check names |
 | `memory.json` | Harness memory/state file |
 
-### Greptile AI review
+### CodeRabbit AI review
 
 | File | Purpose |
 |---|---|
-| `.greptile/config.json` | AI review config (strictness, rules, repo scope) |
-| `.greptile/rules.md` | Custom review rules |
-| `.greptile/files.json` | Priority context files for review |
+| `.coderabbit.yaml` | Repo-local CodeRabbit review configuration |
 
-Greptile review is triggered via the `greptile-review` job in `.circleci/config.yml`.
-No GitHub Actions workflow file is needed — the Greptile GitHub App is installed
-on the repository and the CircleCI job calls its API.
+CodeRabbit review is provided by the GitHub App check context (`CodeRabbit`).
+Use `harness verify-coderabbit` to validate setup from CLI.
 
 ### CI pipeline (CircleCI)
 
@@ -493,10 +441,9 @@ Use this table to decide whether to touch a file. When in doubt, check the colum
 
 ### Enforced — harness owns these files
 
-`harness init --update` will overwrite these with the latest template when you
-intentionally use the re-scaffold lane. Do not hand-edit them — changes will be
-lost on the next re-scaffold. Use harness commands to change the values they encode
-(for example `harness branch-protect` for required checks).
+`harness init --update` will overwrite these with the latest template. Do not
+hand-edit them — changes will be lost on the next update. Use harness commands to
+change the values they encode (for example `harness branch-protect` for required checks).
 
 | File | Owned by |
 |---|---|
@@ -514,9 +461,7 @@ These are written once by `harness init` but treated as project-owned after that
 
 | File | What to customise |
 |---|---|
-| `.greptile/rules.md` | Add project-specific review rules |
-| `.greptile/files.json` | Add priority context files for review |
-| `.greptile/config.json` | Adjust strictness or scope |
+| `.coderabbit.yaml` | Adjust review routing, scopes, and repository-specific review behavior |
 | `.github/CODEOWNERS` | Set actual owners for this repo |
 | `.github/PULL_REQUEST_TEMPLATE.md` | Add project-specific checklist items |
 | `CONTRIBUTING.md` | Add project-specific contribution guidance |
@@ -551,14 +496,14 @@ project uses them. `harness check-environment` will surface which are missing.
 
 Harness **can** do automatically:
 - Scaffold all governance files (`harness init`)
-- Verify repository state (`check-environment`, `check-authz`, `verify-greptile`)
+- Verify repository state (`check-environment`, `check-authz`, `verify-coderabbit`)
 - Apply branch protection via GitHub API (`harness branch-protect`)
 - Generate Codex environment action blocks from package.json scripts
 - Run policy gates (lint, typecheck, test, audit, docs-gate, risk-policy-gate)
 
 Harness **cannot** do — requires user action:
 - Create or rotate GitHub tokens/PATs or CircleCI environment variables
-- Install the Greptile GitHub App on a repository
+- Install the CodeRabbit GitHub App on a repository
 - Create GitHub repository secrets or CircleCI project vars (agent can check; user must set)
 - Bypass branch protection or required review checks
 - Safely overwrite user-customized `.codex/environments/environment.toml` without explicit approval
@@ -573,8 +518,8 @@ Harness **cannot** do — requires user action:
 | `harness` not found after install | PATH missing `~/.local/bin` or mise shims | Add to `~/.zprofile`: `export PATH="$HOME/.local/bin:$(mise shims path):$PATH"` |
 | `mise install` hangs | FIFO env file issue | Use `op run -- mise install` or source env file directly |
 | `harness check-environment` reports missing binaries | Tool not installed | Run `mise install -g <tool>` for each missing binary |
-| `harness verify-greptile` fails | Greptile App not installed on repo | User must install from app.greptile.com |
+| `harness verify-coderabbit` fails | CodeRabbit App not installed on repo | User must install from github.com/marketplace/coderabbitai |
 | Branch protection not applying | PAT missing `repo` + `admin:repo_hook` scopes | Re-generate PAT with required scopes |
-| `preflight_repo` fails in zsh | Old `codex-preflight.sh` without zsh guard | Use the existing-repo flow: `harness init --check-updates`, `harness upgrade --dry-run`, then `harness upgrade`. Use `harness init --update` only if tracked baseline files are missing and need re-scaffold |
+| Preflight script fails | Old or corrupted `scripts/codex-preflight.sh` in target repo | Use the existing-repo flow: `harness init --check-updates`, `harness upgrade --dry-run`, then `harness upgrade`. Use `harness init --update` only if tracked baseline files are missing and need re-scaffold |
 | CircleCI can't authenticate to npm | `NPM_TOKEN` missing from CircleCI project env vars | Set in CircleCI project settings → Environment Variables |
 | CI fails on `npm pack` / missing `dist/` | Build not run before pack | Verify `.circleci/config.yml` has build step before pack |

@@ -114,6 +114,7 @@ run_check warn skill-catalog "🧭 Verifying skill catalog freshness..." python3
 run_check required skill-types "🏷️  Linting semantic skill-type tags..." bash scripts/lint_skill_types.sh
 run_check required openai-format "🧩 Linting OpenAI skill format..." bash scripts/lint_openai_skill_format.sh --mode strict
 run_check required progressive-disclosure "📐 Linting progressive disclosure quality..." bash scripts/lint_progressive_disclosure.sh --mode strict
+run_check required skill-authoring-family "👨‍👩‍👧‍👦 Validating skill authoring family gate..." bash scripts/validate_skill_authoring_family.sh
 run_check required gotcha-store "🧠 Validating gotcha candidate store..." python3 scripts/gotcha_pipeline.py validate
 run_check warn router-schema "🛡️  Verifying router schema tooling..." python3 scripts/verify_router_schema.py --fail-on-sensitive-fields
 

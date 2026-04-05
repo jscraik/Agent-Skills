@@ -20,7 +20,6 @@ ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_RUBRIC_VERSION = "2026-02-26"
 DEFAULT_PROFILE_REL_PATH = "references/task-profile.json"
 MANUAL_SKILL_PATHS = {
-    "github/gh-fix-ci",
     "github/gh-workflow",
     "github/local-action-verification",
     "product/ops/release",

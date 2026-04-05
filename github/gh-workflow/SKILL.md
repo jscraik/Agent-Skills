@@ -1,13 +1,14 @@
 ---
 name: gh-workflow
-description: "Operate the GitHub lifecycle through `gh`: issue work, PR preparation, review handling, CI diagnosis, and merge execution. Use when the user wants GitHub state changed, advanced, or reconciled, not when they only want a policy-gated PR readiness decision."
+description: "Operate the GitHub lifecycle through `gh`: issue work, PR readiness checks, PR preparation, review handling, CI diagnosis, and merge execution. Use when the user wants GitHub state changed, advanced, or reconciled."
 metadata:
   skill-type: ci_cd_deployment
 ---
 
 # GH Workflow
 
-Use the canonical GitHub operations lane for issue, PR, review, CI, and merge work driven by `gh`. This skill acts on GitHub state; it does not replace a separate readiness or governance review.
+Use the canonical GitHub operations lane for issue, PR, review, CI, and merge work driven by `gh`. This skill acts on GitHub state and includes GitHub-native readiness checks (checks, review-thread signal, mergeability), but it does not replace external governance systems.
+Boundary: this skill executes end-to-end `gh`/git lifecycle operations with post-mutation verification, while `github:github` stays the connector-first triage and routing entrypoint.
 
 ## Standards snapshot (March 2026)
 - Keep GitHub operations evidence-backed and stateful: know the repo, branch, PR, and current git status before acting.
@@ -23,17 +24,18 @@ Use the canonical GitHub operations lane for issue, PR, review, CI, and merge wo
 
 ## When to use
 - GitHub issue triage or issue-linked fixes.
+- Pre-merge readiness checks for a PR when the user wants blocker status and next actions.
 - PR preparation, review requests, review intake, and review-comment handling.
 - CI failure diagnosis for PR checks.
 - Server-side merge flows through `gh pr merge`.
 
 ## When not to use
-- A pre-merge readiness decision is the main job and no lifecycle action should happen yet; use `check-pr`.
 - The user wants a broad code or architecture review rather than GitHub operations.
 - The user wants implementation work with no GitHub lifecycle step in scope.
 
 ## Modes
 - `intake`
+- `pr_readiness`
 - `issue_fix`
 - `pr_prepare`
 - `pr_request_review`
@@ -83,6 +85,7 @@ Use the canonical GitHub operations lane for issue, PR, review, CI, and merge wo
 5. Return the outcome, evidence, risks, and next step.
 
 ## Mode notes
+- `pr_readiness`: gather check status, unresolved review signal, and mergeability, then return blockers plus the smallest next action.
 - `issue_fix`: inspect the issue, make the minimal fix, and verify it.
 - `pr_prepare`: stage intended files, commit, verify git state, push, and prepare the PR.
 - `pr_request_review`: summarize change scope, risk, and readiness evidence before requesting review.
@@ -119,6 +122,7 @@ Use the canonical GitHub operations lane for issue, PR, review, CI, and merge wo
 - Apply least-privilege `permissions` for workflows and jobs.
 
 ## Examples
+- Is PR 123 ready to merge, and what is still blocking it?
 - Prepare this branch as a draft PR and show me the review summary.
 - Check PR 123, classify the review feedback, and tell me what to fix next.
 - Merge this PR server-side if the checks are ready and then verify the final state.
@@ -130,11 +134,11 @@ GitHub workflow work is only complete when the repository state and the GitHub s
 
 | Skill | When to use together |
 |---|---|
-| [[gh-fix-ci]] | Focused CI diagnosis mode — use when the only task is debugging a failing Actions check |
+| `github:gh-fix-ci` (plugin) | Focused CI diagnosis mode when the only task is debugging a failing Actions check |
+| [[resolve-pr-parallel]] | Resolve many unresolved review threads when a one-thread-at-a-time loop is too slow |
 | [[verification-before-completion]] | Gate all merge claims with fresh `gh pr checks` and `git log` evidence |
 | [[systematic-debugging]] | When PR CI failures reveal a code-level bug that needs root-cause investigation |
 | [[release]] | After merging — use to cut the version tag and publish the release |
-| [[check-pr]] | Pre-merge policy review: readiness view with check status and remediation priority |
 
 **Topic map:** [[backend-platform]]
 

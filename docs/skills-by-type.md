@@ -14,12 +14,12 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 - `data_fetch_analysis`: 6
 - `team_automation`: 36
 - `scaffolding_templates`: 27
-- `code_quality_review`: 17
-- `ci_cd_deployment`: 7
+- `code_quality_review`: 15
+- `ci_cd_deployment`: 6
 - `runbook`: 5
 - `infrastructure_ops`: 5
 - `invalid`: 0
-- `total_tagged`: 120
+- `total_tagged`: 117
 
 ## Semantic Types
 
@@ -131,14 +131,12 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 - `best-practices` — `auth`
 - `ce-review` — `product/ops`
 - `ce-technical-review` — `product/ops`
-- `check-pr` — `github/greptile`
 - `codex-home-audit` — `utilities`
 - `docs-expert` — `product/docs`
 - `evals-router` — `utilities`
 - `every-style-editor` — `product/content`
 - `fixing-accessibility` — `frontend/website`
 - `fixing-metadata` — `frontend/website`
-- `greploop` — `github/greptile`
 - `security-best-practices` — `product/security`
 - `skill-builder` — `utilities`
 - `test-driven-development` — `utilities`
@@ -148,7 +146,6 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 
 - `circleci` — `utilities`
 - `cloudflare-deploy` — `product/domain`
-- `gh-fix-ci` — `github`
 - `gh-workflow` — `github`
 - `release` — `product/ops`
 - `resolve-pr-parallel` — `github`

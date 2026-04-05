@@ -1,9 +1,9 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-02T23:03:41.638713+00:00",
+  "generated_at": "2026-04-05T14:07:06.248244+00:00",
   "mode": "warn",
-  "policy_path": "utilities/skill-builder/references/benchmark-policy.json",
-  "skills_scanned": 84,
+  "policy_path": "/Users/jamiecraik/dev/agent-skills/utilities/skill-builder/references/benchmark-policy.json",
+  "skills_scanned": 81,
   "uncategorized_skills": [],
   "cluster_results": [
     {
@@ -30,9 +30,9 @@
     {
       "cluster": "github",
       "description": "GitHub and CI skills",
-      "skills": 4,
-      "skills_with_any_marker": 3,
-      "coverage": 0.75,
+      "skills": 1,
+      "skills_with_any_marker": 1,
+      "coverage": 1.0,
       "marker_hits": {
         "react_19": 0,
         "next_16": 0,
@@ -40,14 +40,12 @@
         "responses_api": 0,
         "wcag_2_2": 0,
         "owasp_top10": 0,
-        "gha_sha_pin": 3,
+        "gha_sha_pin": 1,
         "cloudflare_workers": 0,
         "mcp_spec": 0
       },
       "fails": [],
-      "warns": [
-        "coverage warn: 0.750 < 1.000"
-      ],
+      "warns": [],
       "pass": true
     },
     {
@@ -264,7 +262,7 @@
   "summary": {
     "cluster_count": 12,
     "fail_count": 0,
-    "warn_count": 1,
+    "warn_count": 0,
     "overall_pass": true
   }
 }

@@ -6,6 +6,7 @@ cd "$repo_root"
 
 skip_preflight=0
 skip_sync=0
+validate_output_mode="${VERIFY_WORK_VALIDATE_MODE:-persistent}"
 
 usage() {
   cat <<'USAGE'
@@ -16,6 +17,9 @@ Repository-local verification runner for agent-skills.
 Options:
   --skip-preflight   Skip scripts/codex-preflight.sh
   --skip-sync        Skip scripts/sync_skills.sh
+  --persistent-artifacts
+                     Run repo validation in persistent artifact mode
+                     (this is the default; use VERIFY_WORK_VALIDATE_MODE=ephemeral to opt out)
   -h, --help         Show this help text
 USAGE
 }
@@ -30,6 +34,10 @@ while (($# > 0)); do
       skip_sync=1
       shift
       ;;
+    --persistent-artifacts)
+      validate_output_mode="persistent"
+      shift
+      ;;
     -h|--help)
       usage
       exit 0
@@ -41,6 +49,11 @@ while (($# > 0)); do
       ;;
   esac
 done
+
+if [[ "$validate_output_mode" != "ephemeral" && "$validate_output_mode" != "persistent" ]]; then
+  echo "[verify-work] invalid VERIFY_WORK_VALIDATE_MODE='${validate_output_mode}' (expected ephemeral or persistent)" >&2
+  exit 2
+fi
 
 declare -a passed_checks=()
 declare -a failed_checks=()
@@ -127,7 +140,7 @@ else
   skip_check "skill-sync" "disabled by --skip-sync"
 fi
 
-run_check "repo-validation" bash "scripts/validate_all.sh"
+run_check "repo-validation" bash "scripts/validate_all.sh" "--${validate_output_mode}"
 
 echo
 echo "=== verify-work summary ==="

@@ -324,7 +324,7 @@ If the request is out of scope:
 | Skill | When to use |
 |---|---|
 | [[skill-builder]] | Harden and validate a standalone skill before plugin packaging or conversion work begins |
-| [[codex-agent-builder]] | Add agent roles to the plugin bundle alongside skills and hooks |
+| [[codex-agent-creator]] | Add agent roles to the plugin bundle alongside skills and hooks |
 | [[decide-build-primitive]] | Decide whether the capability belongs in a plugin at all |
 | [[skill-installer]] | Install a contract-valid skill directly when full plugin packaging is unnecessary |
 

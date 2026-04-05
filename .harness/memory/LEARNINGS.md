@@ -81,3 +81,7 @@ Repo-specific agent knowledge base. Append-only.
 - **2026-03-30 [Codex]:** `run_skill_evals.py --runner discovery-smoke` can fail every smoke case when a skill is missing discovery contract markers (`## Discovery interview`, one-round-at-a-time guidance, plain-language question guidance, `Why this matters`, no-full-plan-dump wording, and `references/discovery-interview.md`). -> Add the exact contract phrases in `SKILL.md` and provide `references/discovery-interview.md` with mini-templates, payload examples, intuitive round-1 wording, and round-6 confirmation guidance before trusting smoke results.
 
 - **2026-03-30 [Codex]:** In `zsh`, `status` is a read-only special variable and using it in shell loops causes `read-only variable: status`. -> Use a different variable name (for example `gate_status`) in validation scripts and result collectors.
+
+- **2026-04-05 [Codex]:** Equivalent CI gates in this repo can drift on Python dependency setup (`repo-validate` vs `authoring-family-gate`) and produce contradictory outcomes on the same commit. -> Keep parity by installing shared deps (for example `pyyaml`) in each equivalent lane or centralizing setup in the workflow.
+
+- **2026-04-05 [Codex]:** `skill-installer` diagnostic logs that echo override payloads can trigger CodeQL `Clear-text logging of sensitive information` alerts. -> Log redacted metadata (for example override count/presence) instead of raw override values.

@@ -26,6 +26,8 @@ SKIP_DIRS = {
 }
 SKIP_PATH_PREFIXES = {
     ("plugins", "cache"),
+    (".codex", ".tmp"),
+    (".codex", "skills", ".system"),
 }
 SKIP_PATH_PARTS = {
     "fixtures",
@@ -530,6 +532,12 @@ def analyze_repo(repo_root: Path, *, today: Optional[date] = None) -> Tuple[List
         reports.append(report)
         name = parse_frontmatter(skill_file).get("name", "").strip()
         if name:
+            if is_packaged_skill(skill_file, repo_root):
+                canonical_path = canonical_by_name.get(name)
+                # Packaged plugin copies inherit metadata from canonical skills and
+                # should not count as duplicate catalog entries by themselves.
+                if canonical_path is not None and canonical_path != skill_file:
+                    continue
             names_seen.setdefault(name, []).append(skill_file)
 
     for manifest in discover_plugin_manifests(repo_root):

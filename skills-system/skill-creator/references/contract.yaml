@@ -1,0 +1,25 @@
+schema_version: "1.1"
+purpose: >
+  Define the starter-authoring contract for skill-creator so first-pass skill
+  scaffolds are consistent, handoff-ready, and bounded to creation-stage ownership.
+triggers:
+  - user asks to create a new Codex skill from scratch
+  - user asks to finish a just-created skill scaffold
+  - user requests starter authoring before lifecycle hardening
+inputs:
+  - skill objective and intended user outcomes
+  - target category and boundaries
+  - example trigger and non-trigger prompts
+  - required resources (scripts, references, assets) if known
+outputs:
+  - first-pass SKILL.md scaffold with valid frontmatter and routing description
+  - starter resource layout (agents, references, scripts, assets) when needed
+  - creator-to-builder handoff artifact for non-trivial work
+non_goals:
+  - deep lifecycle hardening or benchmarking for existing mature skills
+  - install/distribute execution tasks
+  - plugin packaging ownership
+risks:
+  - overscoped starter drafts; mitigated by explicit scaffold boundary and handoff
+  - routing ambiguity; mitigated by trigger and non-trigger examples
+  - missing safety posture; mitigated by mandatory validation and handoff notes

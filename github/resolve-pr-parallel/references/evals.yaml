@@ -55,7 +55,7 @@ cases:
     prompt: "Run a pre-merge readiness review on this PR and tell me whether it is safe to merge."
     acceptance:
       - type: regex
-        value: "(?i)(check-pr|ready|readiness|review)"
+        value: "(?i)(gh-workflow|ready|readiness|review)"
 
   - id: resolve-pr-parallel-negative-selected-comments
     name: negative selected comment workflow
@@ -71,7 +71,7 @@ cases:
     prompt: "Investigate why the PR checks are failing in GitHub Actions."
     acceptance:
       - type: regex
-        value: "(?i)(gh-fix-ci|ci)"
+        value: "(?i)(github:gh-fix-ci|gh-fix-ci|ci)"
 
   - id: resolve-pr-parallel-negative-circleci
     name: negative CircleCI workflow strategy

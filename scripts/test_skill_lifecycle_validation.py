@@ -4,6 +4,9 @@
 from __future__ import annotations
 
 import json
+import importlib.util
+import sys
+from datetime import date, timedelta
 import subprocess
 import tempfile
 import textwrap
@@ -30,13 +33,27 @@ def write_text(path: Path, content: str) -> None:
     path.write_text(textwrap.dedent(content).strip() + "\n", encoding="utf-8")
 
 
+def iso_days_ago(days: int) -> str:
+    return (date.today() - timedelta(days=days)).isoformat()
+
+
+def load_validator_module():
+    spec = importlib.util.spec_from_file_location("verify_skill_catalog_freshness", SCRIPT)
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f"Failed to load validator module from {SCRIPT}")
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
 class SkillLifecycleValidationTests(unittest.TestCase):
     def test_governed_skill_is_healthy_when_required_fields_are_present(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             repo_root = Path(tmpdir)
             write_text(
                 repo_root / "utilities" / "healthy-skill" / "SKILL.md",
-                """
+                f"""
                 ---
                 name: healthy-skill
                 description: "Use when a repo needs a healthy governed skill example."
@@ -44,7 +61,7 @@ class SkillLifecycleValidationTests(unittest.TestCase):
                 maturity: experimental
                 owner: Agent Skills Team
                 review_cadence: monthly
-                last_reviewed: 2026-03-24
+                last_reviewed: {iso_days_ago(7)}
                 metadata_source: frontmatter
                 ---
 
@@ -66,7 +83,7 @@ class SkillLifecycleValidationTests(unittest.TestCase):
             repo_root = Path(tmpdir)
             write_text(
                 repo_root / "utilities" / "stale-skill" / "SKILL.md",
-                """
+                f"""
                 ---
                 name: stale-skill
                 description: "Use when a repo needs a stale governed skill example."
@@ -74,7 +91,7 @@ class SkillLifecycleValidationTests(unittest.TestCase):
                 maturity: experimental
                 owner: Agent Skills Team
                 review_cadence: weekly
-                last_reviewed: 2026-01-01
+                last_reviewed: {iso_days_ago(45)}
                 metadata_source: frontmatter
                 ---
 
@@ -95,11 +112,11 @@ class SkillLifecycleValidationTests(unittest.TestCase):
             repo_root = Path(tmpdir)
             write_text(
                 repo_root / "docs" / "solutions" / "missing-link.md",
-                """
+                f"""
                 ---
                 title: Missing link example
                 owner: Agent Skills Team
-                freshness_reviewed_on: 2026-03-24
+                freshness_reviewed_on: {iso_days_ago(3)}
                 review_after_days: 30
                 source_artifact: docs/specs/example.md
                 ---
@@ -132,7 +149,7 @@ class SkillLifecycleValidationTests(unittest.TestCase):
                             "lifecycle_state": "incubating",
                             "maturity": "experimental",
                             "review_cadence": "monthly",
-                            "last_reviewed": "2026-03-24",
+                            "last_reviewed": iso_days_ago(7),
                             "metadata_source": "plugin_manifest",
                         },
                     },
@@ -150,7 +167,7 @@ class SkillLifecycleValidationTests(unittest.TestCase):
     def test_cached_and_fixture_skills_are_skipped_from_catalog_duplicates(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             repo_root = Path(tmpdir)
-            canonical = """
+            canonical = f"""
                 ---
                 name: shared-skill
                 description: "Use when a repo needs the canonical shared skill."
@@ -158,7 +175,7 @@ class SkillLifecycleValidationTests(unittest.TestCase):
                 maturity: experimental
                 owner: Agent Skills Team
                 review_cadence: monthly
-                last_reviewed: 2026-03-24
+                last_reviewed: {iso_days_ago(7)}
                 metadata_source: frontmatter
                 ---
 
@@ -202,6 +219,102 @@ class SkillLifecycleValidationTests(unittest.TestCase):
             self.assertIn("duplicates=0", result.stdout)
             self.assertNotIn("shared-skill", result.stdout)
             self.assertNotIn("fixture-skill", result.stdout)
+
+    def test_codex_shadow_skill_trees_are_skipped(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo_root = Path(tmpdir)
+            canonical = f"""
+                ---
+                name: canonical-skill
+                description: "Use when a repo needs the canonical skill record."
+                lifecycle_state: incubating
+                maturity: experimental
+                owner: Agent Skills Team
+                review_cadence: monthly
+                last_reviewed: {iso_days_ago(7)}
+                metadata_source: frontmatter
+                ---
+
+                # Canonical Skill
+
+                ## Workflow
+                1. Execute canonical behavior.
+            """
+            shadow_copy = """
+                ---
+                name: canonical-skill
+                description: "Shadow mirror that should be ignored by catalog freshness."
+                ---
+
+                # Shadow Skill
+
+                [TODO: placeholder content]
+            """
+
+            write_text(repo_root / "utilities" / "canonical-skill" / "SKILL.md", canonical)
+            write_text(
+                repo_root / ".codex" / ".tmp" / "plugins" / ".agents" / "skills" / "canonical-skill" / "SKILL.md",
+                shadow_copy,
+            )
+            write_text(
+                repo_root / ".codex" / "skills" / ".system" / "canonical-skill" / "SKILL.md",
+                shadow_copy,
+            )
+
+            result = run_validator(repo_root)
+            self.assertEqual(result.returncode, 0, result.stderr or result.stdout)
+            self.assertIn("healthy=1", result.stdout)
+            self.assertIn("degraded=0", result.stdout)
+            self.assertIn("duplicates=0", result.stdout)
+            self.assertNotIn("scaffold_quality_gap", result.stdout)
+
+    def test_should_skip_skill_path_uses_granular_codex_prefixes(self) -> None:
+        module = load_validator_module()
+
+        self.assertTrue(
+            module.should_skip_skill_path(Path(".codex/.tmp/plugins/.agents/skills/canonical-skill/SKILL.md"))
+        )
+        self.assertTrue(
+            module.should_skip_skill_path(Path(".codex/skills/.system/canonical-skill/SKILL.md"))
+        )
+        self.assertFalse(module.should_skip_skill_path(Path(".codex/skills/custom-skill/SKILL.md")))
+
+    def test_packaged_representation_does_not_count_as_duplicate(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo_root = Path(tmpdir)
+            canonical = f"""
+                ---
+                name: shared-catalog-skill
+                description: "Canonical shared skill for duplicate accounting tests."
+                lifecycle_state: incubating
+                maturity: experimental
+                owner: Agent Skills Team
+                review_cadence: monthly
+                last_reviewed: {iso_days_ago(7)}
+                metadata_source: frontmatter
+                ---
+
+                # Shared Catalog Skill
+            """
+            packaged = """
+                ---
+                name: shared-catalog-skill
+                description: "Packaged representation mirrored from canonical skill."
+                ---
+
+                # Packaged Shared Catalog Skill
+            """
+
+            write_text(repo_root / "utilities" / "shared-catalog-skill" / "SKILL.md", canonical)
+            write_text(
+                repo_root / "plugins" / "example-plugin" / "skills" / "shared-catalog-skill" / "SKILL.md",
+                packaged,
+            )
+
+            result = run_validator(repo_root)
+            self.assertEqual(result.returncode, 0, result.stderr or result.stdout)
+            self.assertIn("duplicates=0", result.stdout)
+            self.assertNotIn("Duplicate skill names", result.stdout)
 
 
 if __name__ == "__main__":

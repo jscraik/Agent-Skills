@@ -351,7 +351,7 @@ fi
 # Build a strict Antigravity-compatible projection:
 # - flat first-level skill folders only
 # - each folder must contain SKILL.md
-# - each entry must be a real directory, not a symlink
+# - each entry must be a first-level directory with SKILL.md (symlink or real dir)
 # This avoids loader confusion from metadata folders like .system/ or helper repos.
 #
 # Keep the projection incremental instead of deleting everything first:
@@ -362,15 +362,17 @@ cleanup_paths+=("$antigravity_state_dir")
 antigravity_keep_file="$antigravity_state_dir/skills.keep"
 : > "$antigravity_keep_file"
 
-for skill_link in "$skills_dir"/*; do
-  if [ ! -L "$skill_link" ]; then
+for skill_entry in "$skills_dir"/*; do
+  # Keep hidden entries excluded (glob does not match dotfiles like .system),
+  # but allow both symlinked and real first-level directories with SKILL.md.
+  if [ ! -d "$skill_entry" ]; then
     continue
   fi
-  if [ ! -f "$skill_link/SKILL.md" ]; then
+  if [ ! -f "$skill_entry/SKILL.md" ]; then
     continue
   fi
 
-  skill_name="$(basename "$skill_link")"
+  skill_name="$(basename "$skill_entry")"
   target_dir="$antigravity_skills_dir/$skill_name"
   printf '%s\n' "$skill_name" >> "$antigravity_keep_file"
   mkdir -p "$target_dir"
@@ -381,11 +383,11 @@ for skill_link in "$skills_dir"/*; do
       --exclude '.git' \
       --exclude 'node_modules' \
       --exclude '__pycache__' \
-      "$skill_link/" "$target_dir/"
+      "$skill_entry/" "$target_dir/"
   else
     rm -rf -- "$target_dir"
     mkdir -p "$target_dir"
-    cp -R "$skill_link"/. "$target_dir"/
+    cp -R "$skill_entry"/. "$target_dir"/
     rm -rf -- "$target_dir/.git" "$target_dir/node_modules" "$target_dir/__pycache__"
   fi
 done

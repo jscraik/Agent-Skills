@@ -1,3 +1,0 @@
-interface:
-  display_name: "Greptile Check PR"
-  short_description: "Policy-gated PR readiness: checks, reviews, blockers"

@@ -60,8 +60,7 @@ covers:
 
 - [[circleci]] — CircleCI migration, orchestration, testing, deployment, optimization, secrets, and config policy.
 - [[gh-workflow]] — GitHub lifecycle: intake, issue fixing, PR prep, review, CI diagnosis, and server-side merge.
-- [[gh-fix-ci]] — Debug and fix failing GitHub PR checks running in GitHub Actions.
-- [[check-pr]] — Review a GitHub pull request before merge with policy-gated readiness view and check status.
+- `github:gh-fix-ci` (plugin) — Debug and fix failing GitHub PR checks running in GitHub Actions.
 - [[release]] — Create and publish a new project release (semver) via `just release X.Y.Z`.
 - [[using-git-worktrees]] — Create and validate Codex/Claude CLI git worktree workflows with safe branch/sync strategies.
 

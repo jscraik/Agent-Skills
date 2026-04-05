@@ -7,18 +7,6 @@
 	"install_command": "mise install -g npm:@brainwav/coding-harness",
 	"init_command": "harness init",
 	"verify_command": "harness check-environment --json",
-	"update_workflow": {
-		"routine_existing_repo": [
-			"harness init --check-updates",
-			"harness upgrade --dry-run",
-			"harness upgrade"
-		],
-		"re_scaffold_missing_tracked_files": [
-			"harness init --dry-run --update",
-			"harness init --update"
-		],
-		"legacy_restore_manifest_repair": "harness init --check-updates, harness init --update, and harness upgrade can auto-repair a missing ciProvider when the active provider can be inferred safely"
-	},
 
 	"phases": [
 		{
@@ -108,18 +96,13 @@
 					"source": "GitHub PAT (requires repo + admin:repo_hook scopes)"
 				},
 				{
-					"name": "GREPTILE_API_KEY",
-					"purpose": "Greptile API call in the greptile-review CircleCI job",
-					"source": "app.greptile.com"
-				},
-				{
 					"name": "LINEAR_API_KEY",
 					"purpose": "Linear issue sync job",
 					"source": "Linear project settings"
 				}
 			],
 			"github_repo_secrets": [],
-			"note": "No GitHub Actions secrets are required. All CI including Greptile runs through CircleCI.",
+			"note": "No GitHub Actions secrets are required. CI runs through CircleCI; CodeRabbit enforcement comes from the GitHub App check context.",
 			"check_commands": [
 				"curl -s --request GET --url 'https://circleci.com/api/v2/project/github/<owner>/<repo>/envvar' --header 'Circle-Token: $CIRCLE_TOKEN' | jq '[.items[].name]'"
 			]
@@ -146,19 +129,17 @@
 				"check",
 				"memory",
 				"security-scan",
-				"Greptile Review"
+				"CodeRabbit"
 			]
 		},
 		{
-			"id": "greptile",
-			"label": "Greptile AI review setup",
+			"id": "coderabbit",
+			"label": "CodeRabbit setup",
 			"steps": [
-				"test -f .greptile/config.json",
-				"test -f .greptile/rules.md",
-				"test -f .greptile/files.json",
-				"harness verify-greptile --token $GITHUB_PERSONAL_ACCESS_TOKEN --owner <owner> --repo <repo>"
+				"test -f .coderabbit.yaml",
+				"harness verify-coderabbit --token $GITHUB_PERSONAL_ACCESS_TOKEN --owner <owner> --repo <repo>"
 			],
-			"user_action_required": "Install Greptile GitHub App at https://app.greptile.com and ensure GREPTILE_API_KEY is set as a CircleCI project environment variable"
+			"user_action_required": "Ensure the CodeRabbit GitHub integration is enabled for the repository and the CodeRabbit check is allowed in branch protection"
 		},
 		{
 			"id": "memory",
@@ -173,12 +154,11 @@
 			"id": "validate",
 			"label": "End-to-end validation",
 			"steps": [
-				"source scripts/codex-preflight.sh && preflight_repo",
+				"bash scripts/codex-preflight.sh --stack auto --mode required",
 				"harness check-environment --json",
 				"harness init --check-updates",
-				"harness upgrade --dry-run",
 				"pnpm check",
-				"harness verify-greptile --token $GITHUB_PERSONAL_ACCESS_TOKEN --owner <owner> --repo <repo>",
+				"harness verify-coderabbit --token $GITHUB_PERSONAL_ACCESS_TOKEN --owner <owner> --repo <repo>",
 				"harness check-authz --contract harness.contract.json --repo <owner>/<repo> --branch main"
 			],
 			"all_must_pass": true
@@ -199,11 +179,7 @@
 			".harness/ci-required-checks.json",
 			"memory.json"
 		],
-		"greptile": [
-			".greptile/config.json",
-			".greptile/rules.md",
-			".greptile/files.json"
-		],
+		"coderabbit": [".coderabbit.yaml"],
 		"ci": [".circleci/config.yml"],
 		"pr_hygiene": [
 			".github/PULL_REQUEST_TEMPLATE.md",
@@ -238,14 +214,14 @@
 	"capability_boundaries": {
 		"can": [
 			"Scaffold all governance files via harness init",
-			"Verify repository state (check-environment, check-authz, verify-greptile)",
+			"Verify repository state (check-environment, check-authz, verify-coderabbit)",
 			"Apply branch protection via GitHub API",
 			"Generate Codex environment action blocks from package.json scripts",
 			"Run policy gates (lint, typecheck, test, audit, docs-gate, risk-policy-gate)"
 		],
 		"cannot": [
 			"Create or rotate GitHub tokens / CircleCI environment variables",
-			"Install the Greptile GitHub App on a repository",
+			"Install or authorize third-party review app integrations on a repository",
 			"Set GitHub repository secrets or CircleCI project env vars",
 			"Bypass branch protection or required review checks",
 			"Overwrite user-customized environment.toml without explicit approval"

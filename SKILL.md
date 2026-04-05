@@ -13,7 +13,6 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - [Frontend — Ui](#frontend-ui)
 - [Frontend — Website](#frontend-website)
 - [Github](#github)
-- [Github — Greptile](#github-greptile)
 - [Interview](#interview)
 - [Product — Content](#product-content)
 - [Product — Docs](#product-docs)
@@ -28,7 +27,7 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - [Utilities — Codex Plugin Builder — Fixtures — Arscontexta Codex — Skills](#utilities-codex-plugin-builder-fixtures-arscontexta-codex-skills)
 
 ## Summary
-- `total_skills`: 124
+- `total_skills`: 121
 - `catalog_source`: repository skill scan
 
 ## Catalog
@@ -88,14 +87,8 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 
 ## Github
 
-- `gh-fix-ci` — Diagnose failing GitHub Actions checks on a PR and prepare a fix path grounded in `gh` evidence. Use when the user wants CI failure analysis or repair for GitHub-hosted checks, not external CI triage.
-- `gh-workflow` — Operate the GitHub lifecycle through `gh`: issue work, PR preparation, review handling, CI diagnosis, and merge execution. Use when the user wants GitHub state changed, advanced, or reconciled, not when they only want a policy-gated PR readiness decision.
+- `gh-workflow` — Operate the GitHub lifecycle through `gh`: issue work, PR readiness checks, PR preparation, review handling, CI diagnosis, and merge execution. Use when the user wants GitHub state changed, advanced, or reconciled.
 - `resolve-pr-parallel` — Resolve multiple unresolved GitHub PR review threads in parallel by applying fixes, responding, and closing verified threads. Use when the user wants a broad PR-comment cleanup sweep, not readiness classification or one-off comment handling.
-
-## Github — Greptile
-
-- `check-pr` — Classify whether a GitHub PR is ready to merge by checking Greptile prerequisites, checks, unresolved review signal, and remediation priority. Use when the user wants a readiness decision only, not lifecycle actions or comment-by-comment remediation.
-- `greploop` — Iteratively remediate one GitHub PR against Greptile review feedback until the signal stabilizes or stop conditions are hit. Use when the user wants a bounded Greptile fix loop, not a one-shot readiness decision or generic GitHub workflow.
 
 ## Interview
 
@@ -168,9 +161,9 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 ## Skills System
 
 - `openai-docs` — Use when the user asks how to build with OpenAI products or APIs and needs up-to-date official documentation with citations, help choosing the latest model for a use case, or explicit GPT-5.4 upgrade and prompt-upgrade guidance; prioritize OpenAI docs MCP tools, use bundled references only as helper context, and restrict any fallback browsing to official OpenAI domains.
-- `plugin-creator` — Create and scaffold plugin directories for Codex with a required `.codex-plugin/plugin.json`, optional plugin folders/files, and complete baseline metadata ready for immediate validation. Use when Codex needs to create a new local plugin, add optional plugin structure, or generate or update repo-root `.agents/plugins/marketplace.json` entries for plugin ordering and availability metadata.
-- `skill-creator` — Create a first-draft skill scaffold
-- `skill-installer` — Install contract-valid skills from curated or repo sources
+- `plugin-creator` — Scaffold plugin skeletons and marketplace entries
+- `skill-creator` — Create first-pass skill scaffolds with clear handoff
+- `skill-installer` — Install validated skills with provenance and rollback safety
 
 ## Utilities
 
