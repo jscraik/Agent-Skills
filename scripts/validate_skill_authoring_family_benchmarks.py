@@ -13,12 +13,13 @@ It is designed for CI and local gates where live LLM eval execution is not requi
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import json
 import os
 import re
 import sys
 from dataclasses import dataclass
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Sequence, Set
 
@@ -33,8 +34,13 @@ except ModuleNotFoundError as exc:  # pragma: no cover
         os.execve(str(preferred), [str(preferred), __file__, *sys.argv[1:]], env)
     raise SystemExit("PyYAML is required for validate_skill_authoring_family_benchmarks.py") from exc
 
+_JSONSCHEMA_AVAILABLE = importlib.util.find_spec("jsonschema") is not None
+
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
+_SCHEMA_DIR = REPO_ROOT / "utilities" / "skill-builder" / "references"
+_CONTRACT_SCHEMA_PATH = _SCHEMA_DIR / "contract.schema.yaml"
+_EVALS_SCHEMA_PATH = _SCHEMA_DIR / "evals.schema.yaml"
 DEFAULT_FAMILY_SKILLS = (
     "utilities/skill-builder",
     "skills-system/skill-creator",
@@ -110,6 +116,74 @@ def _load_json(path: Path) -> Dict[str, Any]:
     return obj
 
 
+def _load_schema(schema_path: Path) -> Any:
+    """Load a YAML schema file; return None if unavailable."""
+    if not schema_path.exists():
+        return None
+    try:
+        return yaml.safe_load(schema_path.read_text(encoding="utf-8"))
+    except Exception:  # noqa: BLE001
+        return None
+
+
+def _validate_with_schema(
+    skill_rel: str,
+    data: Dict[str, Any],
+    schema_path: Path,
+    fail_code: str,
+    context: str,
+) -> List[Finding]:
+    """Validate *data* against a JSON Schema YAML file using jsonschema.
+
+    Returns a FAIL finding for each schema violation, or a WARN if jsonschema
+    is not installed (soft dependency so CI without the package still runs).
+    """
+    findings: List[Finding] = []
+    if not _JSONSCHEMA_AVAILABLE:
+        findings.append(
+            Finding(
+                "WARN",
+                f"{fail_code}_NO_JSONSCHEMA",
+                skill_rel,
+                f"jsonschema not installed; skipping schema validation for {context}. "
+                "Install via: pip install jsonschema",
+            )
+        )
+        return findings
+
+    schema = _load_schema(schema_path)
+    if schema is None:
+        findings.append(
+            Finding(
+                "WARN",
+                f"{fail_code}_SCHEMA_MISSING",
+                skill_rel,
+                f"schema file not found at {schema_path.relative_to(REPO_ROOT)}; "
+                "skipping JSON Schema validation",
+            )
+        )
+        return findings
+
+    import jsonschema as _js  # type: ignore  # noqa: PLC0415
+
+    validator_cls = _js.Draft202012Validator
+    try:
+        validator_cls.check_schema(schema)
+    except _js.SchemaError as exc:  # noqa: BLE001
+        findings.append(
+            Finding("WARN", f"{fail_code}_SCHEMA_INVALID", skill_rel, f"schema file is invalid: {exc.message}")
+        )
+        return findings
+
+    for error in sorted(validator_cls(schema).iter_errors(data), key=lambda e: list(e.path)):
+        path = " > ".join(str(p) for p in error.path) if error.path else "(root)"
+        findings.append(
+            Finding("FAIL", fail_code, skill_rel, f"{context} schema violation at {path}: {error.message}")
+        )
+
+    return findings
+
+
 def _normalize_skill_name(skill_dir: Path) -> str:
     return skill_dir.name
 
@@ -169,6 +243,9 @@ def _validate_contract(skill_rel: str, skill_dir: Path) -> List[Finding]:
                 "(add rollback_procedure and observability for operational readiness)",
             )
         )
+
+    # Item 3: JSON Schema structural validation
+    findings.extend(_validate_with_schema(skill_rel, contract, _CONTRACT_SCHEMA_PATH, "CONTRACT_SCHEMA", "contract.yaml"))
 
     return findings
 
@@ -330,6 +407,9 @@ def _validate_evals(skill_rel: str, skill_dir: Path) -> List[Finding]:
                 f"in quick runs: {', '.join(happy_missing_smoke)}",
             )
         )
+
+    # Item 3: JSON Schema structural validation
+    findings.extend(_validate_with_schema(skill_rel, evals, _EVALS_SCHEMA_PATH, "EVALS_SCHEMA", "evals.yaml"))
 
     return findings
 
@@ -516,6 +596,21 @@ def main(argv: Sequence[str]) -> int:
         help="Skill path relative to repo root (repeatable). Defaults to all family members.",
     )
     parser.add_argument("--format", choices=["text", "json"], default="text")
+    _default_baseline = REPO_ROOT / "artifacts" / "validation" / "baselines" / "family-gate-baseline.json"
+    parser.add_argument(
+        "--write-baseline",
+        metavar="PATH",
+        nargs="?",
+        const=str(_default_baseline),
+        help="Write current findings as the regression baseline (default path if no arg given)",
+    )
+    parser.add_argument(
+        "--check-baseline",
+        metavar="PATH",
+        nargs="?",
+        const=str(_default_baseline),
+        help="Compare current findings against a saved baseline and fail on regressions",
+    )
     args = parser.parse_args(list(argv))
 
     skills = tuple(args.skill) if args.skill else DEFAULT_FAMILY_SKILLS
@@ -552,12 +647,56 @@ def main(argv: Sequence[str]) -> int:
                 )
             )
 
-    if args.format == "json":
-        _print_json(findings, skills)
-    else:
-        _print_text(findings, skills)
+    # Item 5: Baseline write/check
+    if args.write_baseline:
+        baseline_path = Path(args.write_baseline)
+        baseline_path.parent.mkdir(parents=True, exist_ok=True)
+        baseline_data = {
+            "schema_version": 1,
+            "recorded_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "skills": list(skills),
+            "findings": [{"level": f.level, "code": f.code, "skill": f.skill} for f in findings],
+            "summary": {
+                "fail_count": sum(1 for f in findings if f.level == "FAIL"),
+                "warn_count": sum(1 for f in findings if f.level == "WARN"),
+            },
+        }
+        baseline_path.write_text(json.dumps(baseline_data, indent=2) + "\n", encoding="utf-8")
+        print(f"[family-benchmark] baseline written: {baseline_path}")
 
-    fails = [f for f in findings if f.level == "FAIL"]
+    regression_findings: List[Finding] = []
+    if args.check_baseline:
+        baseline_path = Path(args.check_baseline)
+        if not baseline_path.exists():
+            print(f"[family-benchmark] WARN: baseline not found at {baseline_path}; skipping regression check")
+        else:
+            try:
+                baseline_data = _load_json(baseline_path)
+                baseline_set = {
+                    (f["level"], f["code"], f["skill"])
+                    for f in baseline_data.get("findings", [])
+                    if isinstance(f, dict)
+                }
+                current_set = {(f.level, f.code, f.skill) for f in findings}
+                regressions = current_set - baseline_set
+                if regressions:
+                    for level, code, skill in sorted(regressions):
+                        regression_findings.append(
+                            Finding("FAIL", "BASELINE_REGRESSION", skill, f"new finding vs baseline: {level} {code}")
+                        )
+                else:
+                    print("[family-benchmark] baseline check: no regressions detected")
+            except Exception as exc:  # noqa: BLE001
+                print(f"[family-benchmark] WARN: could not load baseline: {exc}")
+
+    all_findings = list(findings) + regression_findings
+
+    if args.format == "json":
+        _print_json(all_findings, skills)
+    else:
+        _print_text(all_findings, skills)
+
+    fails = [f for f in all_findings if f.level == "FAIL"]
     return 2 if fails else 0
 
 

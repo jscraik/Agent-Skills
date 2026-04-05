@@ -203,6 +203,22 @@ fi
 
 "$python_bin" scripts/validate_skill_authoring_family_benchmarks.py
 
+# ---------------------------------------------------------------------------
+# P1.x: pytest unit gate — run validator unit tests
+# ---------------------------------------------------------------------------
+if "$python_bin" -m pytest --version >/dev/null 2>&1; then
+  echo "[family-gate] running pytest unit tests..."
+  if "$python_bin" -m pytest utilities/skill-builder/scripts/test_skill_gate.py \
+      -q --tb=short; then
+    echo "[family-gate] pytest passed"
+  else
+    echo "[family-gate] ERROR: pytest found test failures — fix before proceeding"
+    exit 2
+  fi
+else
+  echo "[family-gate] WARN: pytest not found; skipping unit tests (install via: pip install pytest)"
+fi
+
 # Track per-skill evidence for the release-ready index
 declare -A skill_evidence_paths
 declare -A skill_outcomes
