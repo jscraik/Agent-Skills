@@ -1,12 +1,12 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-03T22:04:30Z",
-  "decision_date": "2026-04-03",
+  "generated_at": "2026-04-05T14:10:37Z",
+  "decision_date": "2026-04-05",
   "summary": {
-    "active_skill_count": 84,
-    "manual_skill_count": 10,
-    "co_pilot_skill_count": 74,
-    "profile_valid_count": 84,
+    "active_skill_count": 81,
+    "manual_skill_count": 9,
+    "co_pilot_skill_count": 72,
+    "profile_valid_count": 81,
     "profile_invalid_count": 0,
     "event_envelope_errors": 0,
     "event_envelope_errors_total": 0,
@@ -30,14 +30,14 @@
       "blockers": [
         {
           "code": "TELEMETRY_HEALTH_STALE",
-          "detail": "daily-skill-health.md age 78.60h exceeds 24.00h",
+          "detail": "daily-skill-health.md age 118.70h exceeds 24.00h",
           "owner": "unassigned",
           "due_date": null,
           "escalation_date": null
         },
         {
           "code": "TELEMETRY_WINDOW_MISMATCH",
-          "detail": "daily-skill-health.md window mismatch (expected 2026-03-28..2026-04-03, actual 2026-03-25..2026-03-31)",
+          "detail": "daily-skill-health.md window mismatch (expected 2026-03-30..2026-04-05, actual 2026-03-25..2026-03-31)",
           "owner": "unassigned",
           "due_date": null,
           "escalation_date": null
@@ -51,8 +51,8 @@
         "wave_0_ready": false
       },
       "coverage": {
-        "total": 10,
-        "valid": 10
+        "total": 9,
+        "valid": 9
       },
       "blockers": [
         {
@@ -73,8 +73,8 @@
         "telemetry_freshness_ok": false
       },
       "coverage": {
-        "total": 74,
-        "valid": 74
+        "total": 72,
+        "valid": 72
       },
       "blockers": [
         {

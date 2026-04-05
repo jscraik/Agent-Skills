@@ -60,7 +60,6 @@ apple-app-creator:
   recon-workbench: Audit the app binary and entitlements after creation
   simple-tasks: Track app build and release tasks locally
   xcode-makefiles: Add reproducible CLI builds after scaffolding the app
-apple-app-builder: {}
 architecture-interview:
   brainstorming: Explore options before the architecture interview
   diagram-cli: Generate architecture diagrams from ADR decisions
@@ -173,6 +172,8 @@ ce-review:
   ce-technical-review: Produce a severity-ranked engineering issue list instead of
     a package-level readiness synthesis
   ce-work: Execute the approved work once review confirms the branch is ready to advance
+  gh-workflow: Run GitHub-native merge readiness and blocker checks before lifecycle
+    actions
 ce-spec:
   ce-brainstorm: Use first when the work still needs WHAT and WHY clarification
   ce-plan: Use after spec completion when the contract is ready for execution sequencing
@@ -183,6 +184,7 @@ ce-technical-review:
     engineering risk
   ce-review: Return a broader readiness verdict and next-step synthesis instead of
     a findings-first issue list
+  gh-workflow: Gate merge readiness in GitHub after the technical review is complete
   systematic-debugging: Investigate root cause first when the risky behavior is not
     yet well understood
 ce-work:
@@ -211,7 +213,6 @@ chatgpt-apps:
 circleci:
   backend-engineer: Wire backend deployments into CircleCI workflows
   cloudflare-deploy: Deploy to Cloudflare as part of a CircleCI pipeline
-  "github:gh-fix-ci": Fix GitHub CI checks that complement CircleCI
   verification-before-completion: Verify pipeline output before marking complete
 cli-spec:
   docs-expert: Document the CLI surface after speccing it
@@ -236,7 +237,6 @@ codex-agent-creator:
     agents
   decide-build-primitive: Decide whether the capability should be an agent, skill,
     or automation first
-codex-agent-builder: {}
 codex-automation-architect:
   ce-plan: Plan the automation contract before implementing
   codex-agent-creator: Create the agent role the automation will run under
@@ -258,11 +258,13 @@ codex-hooks-builder:
     a plugin
   gh-workflow: Ship and review hook-pack changes through the GitHub lifecycle
 codex-plugin-builder:
-  codex-agent-builder: Add agent roles to the plugin bundle alongside skills and hooks
+  codex-agent-creator: Add agent roles to the plugin bundle alongside skills and
+    hooks
   decide-build-primitive: Decide whether the capability belongs in a plugin at all
-  skill-builder: Author or upgrade a standalone skill before packaging it into a plugin
-  skill-installer: Install a finished skill directly when full plugin packaging is
-    unnecessary
+  skill-builder: Harden and validate a standalone skill before plugin packaging or
+    conversion work begins
+  skill-installer: Install a contract-valid skill directly when full plugin packaging
+    is unnecessary
 codex-sessions-skill-scan:
   codex-home-audit: Run alongside a full home directory audit
   evals-router: Route evaluation work for under-performing skills
@@ -392,19 +394,10 @@ frontend-ui-design:
   figma: Use Figma designs as reference for implementation
   fixing-accessibility: Apply accessibility fixes during component design
   ui-ux-creative-coding: Add motion and creative polish to designed components
-"github:gh-fix-ci":
-  circleci: When the CI failure is from CircleCI rather than GitHub Actions
-  gh-workflow: Use for the full GitHub PR lifecycle — CI diagnosis is a single mode
-    of this broader skill
-  systematic-debugging: When CI logs reveal a root-cause bug that needs structured
-    investigation
-  verification-before-completion: Verify the fix passes CI before claiming the PR
-    is ready
 gh-workflow:
-  resolve-pr-parallel: Use when unresolved review-thread volume warrants bounded fan-out
-  "github:gh-fix-ci": Focused CI diagnosis mode — use when the only task is debugging a failing
-    Actions check
   release: After merging — use to cut the version tag and publish the release
+  resolve-pr-parallel: Resolve many unresolved review threads when a one-thread-at-a-time
+    loop is too slow
   systematic-debugging: When PR CI failures reveal a code-level bug that needs root-cause
     investigation
   verification-before-completion: Gate all merge claims with fresh `gh pr checks`
@@ -489,11 +482,10 @@ playwright-interactive:
   fixing-accessibility: Test keyboard navigation and focus via Playwright
   ui-visual-regression: Capture Playwright screenshots for regression baselines
 plugin-creator:
-  codex-agent-builder: Add agent roles to a plugin after the base manifest and folders
-    are in place
-  codex-plugin-builder: Build or validate a fuller Codex plugin package beyond the
-    starter scaffold
-  skill-builder: Improve bundled skill content after the plugin skeleton exists
+  codex-agent-creator: Add or refine agent roles inside the plugin
+  codex-plugin-builder: Promote scaffold into a full plugin package with governance
+    checks
+  skill-builder: Improve bundled skill quality before plugin release
 process-watch:
   codex-home-audit: Check process health during a Codex home audit
   fix-mise: Diagnose mise shim CPU/memory issues via process-watch
@@ -568,8 +560,8 @@ reproduce-bug:
   systematic-debugging: Move from reproduction evidence into a deeper root-cause analysis
   test-browser: Reproduce or verify browser-facing regressions with route-level evidence
 resolve-pr-parallel:
-  gh-workflow: Handle merge-readiness triage (`pr_readiness`) or a single-threaded
-    PR lifecycle instead of bulk comment remediation
+  gh-workflow: Handle a single-threaded PR lifecycle or smaller review loop without
+    fan-out
   systematic-debugging: Diagnose a stubborn defect before continuing to resolve review
     feedback
 resolve-todo-parallel:
@@ -609,26 +601,23 @@ simple-tasks:
   linear: Escalate to Linear when tasks need team-wide visibility
   verification-before-completion: Mark tasks done only after verification evidence
 skill-builder:
-  codex-plugin-builder: Package or convert a validated skill into a plugin-owned distribution
-    surface
+  codex-plugin-builder: Package a contract-valid standalone skill when the deliverable
+    explicitly becomes a plugin
   codex-sessions-skill-scan: Audit skill coverage, failures, and overlap using real
     session evidence instead of authoring doctrine alone
   decide-build-primitive: Decide whether the capability should be a skill, prompt,
     or agent before authoring it
-  skill-installer: Install or repair runtime visibility when the skill package is
-    already built and the problem is projection or distribution
+  skill-installer: Install, import, or repair runtime visibility when the skill package
+    is already valid and the remaining work is distribution
 skill-creator:
-  plugin-creator: Scaffold a plugin wrapper when the new skill should ship inside
-    a Codex plugin
-  skill-builder: Improve, quality-gate, and package a skill after the first draft
-    exists
-  skill-installer: Distribute the finished skill into a local Codex skills directory
-    or another repo source
+  codex-plugin-builder: Packaging a validated standalone skill into a plugin deliverable
+  skill-builder: Lifecycle hardening, comparative eval rounds, and release-quality
+    contract upgrades
+  skill-installer: Installing already-valid skills into Codex environments
 skill-installer:
-  plugin-creator: Scaffold plugin packaging when the deliverable should ship as a
-    plugin instead of a bare skill
-  skill-builder: Run quality gates and packaging checks on a skill before installation
-  skill-creator: Author or revise a skill before attempting to distribute it
+  codex-plugin-builder: Package a validated skill as a plugin deliverable
+  skill-builder: Harden and validate an existing skill before install/distribution
+  skill-creator: Author or complete a starter skill before installation
 slides:
   beautiful-mermaid: Embed high-quality Mermaid diagrams in slide decks
   imagegen: Generate illustrative images for slide backgrounds
@@ -666,7 +655,6 @@ stitch-remotion:
 systematic-debugging:
   ce-plan: Re-plan the approach when repeated fixes fail and the current path is not
     converging
-  "github:gh-fix-ci": Investigate a failing GitHub Actions check instead of a general bug report
   test-driven-development: Capture the root cause as a failing test before or alongside
     the fix
   verification-before-completion: Prove the fix works before claiming the debugging
@@ -686,7 +674,7 @@ test-driven-development:
   verification-before-completion: 'Explicit gate: verify the full test suite is green
     before claiming done'
 test-xcode:
-  apple-app-builder: Scaffold a new Apple app project before runtime verification
+  apple-app-creator: Scaffold a new Apple app project before runtime verification
   xcode-makefiles: Install or upgrade the CLI-first Xcode build toolkit
 threejs-builder:
   agentation: Automate Three.js scene interactions for testing

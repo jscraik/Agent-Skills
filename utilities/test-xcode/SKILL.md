@@ -101,6 +101,6 @@ Do not use this skill when:
 | Skill | When to use together |
 |---|---|
 | [[xcode-makefiles]] | Install or upgrade the CLI-first Xcode build toolkit |
-| [[apple-app-builder]] | Scaffold a new Apple app project before runtime verification |
+| [[apple-app-creator]] | Scaffold a new Apple app project before runtime verification |
 
 **Topic map:** [[mobile-native]]

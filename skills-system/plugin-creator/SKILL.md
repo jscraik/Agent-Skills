@@ -139,6 +139,6 @@ Family gate note:
 |---|---|
 | [[codex-plugin-builder]] | Promote scaffold into a full plugin package with governance checks |
 | [[skill-builder]] | Improve bundled skill quality before plugin release |
-| [[codex-agent-builder]] | Add or refine agent roles inside the plugin |
+| [[codex-agent-creator]] | Add or refine agent roles inside the plugin |
 
 **Topic map:** [[agent-ops]]

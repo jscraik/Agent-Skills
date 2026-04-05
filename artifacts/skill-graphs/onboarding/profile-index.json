@@ -1,21 +1,21 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-03T22:04:30Z",
-  "decision_date": "2026-04-03",
-  "active_skill_count": 84,
+  "generated_at": "2026-04-05T14:10:37Z",
+  "decision_date": "2026-04-05",
+  "active_skill_count": 81,
   "expected_count": 0,
   "inventory_policy": "docs/skill-graphs/governance/inventory-policy.json",
   "system_slice_mode": "exclude",
   "summary": {
-    "valid_count": 84,
+    "valid_count": 81,
     "invalid_count": 0,
     "missing_profile_count": 0,
     "missing_binding_count": 0,
-    "missing_legacy_binding_count": 84,
+    "missing_legacy_binding_count": 81,
     "invalid_binding_count": 0,
     "wave_counts": {
-      "wave-1-manual": 10,
-      "wave-2-co-pilot": 74
+      "wave-1-manual": 9,
+      "wave-2-co-pilot": 72
     }
   },
   "skills": [
@@ -295,17 +295,6 @@
       "errors": []
     },
     {
-      "skill_path": "github/gh-fix-ci/SKILL.md",
-      "scope_skill": "github/gh-fix-ci",
-      "wave": "wave-1-manual",
-      "profile_path": "github/gh-fix-ci/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
-      "profile_binding_mode": "implicit-default",
-      "delegation_mode": "manual",
-      "status": "valid",
-      "errors": []
-    },
-    {
       "skill_path": "github/gh-workflow/SKILL.md",
       "scope_skill": "github/gh-workflow",
       "wave": "wave-1-manual",
@@ -313,28 +302,6 @@
       "profile_binding": "references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "manual",
-      "status": "valid",
-      "errors": []
-    },
-    {
-      "skill_path": "github/greptile/check-pr/SKILL.md",
-      "scope_skill": "github/greptile/check-pr",
-      "wave": "wave-2-co-pilot",
-      "profile_path": "github/greptile/check-pr/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
-      "profile_binding_mode": "implicit-default",
-      "delegation_mode": "co-pilot",
-      "status": "valid",
-      "errors": []
-    },
-    {
-      "skill_path": "github/greptile/greploop/SKILL.md",
-      "scope_skill": "github/greptile/greploop",
-      "wave": "wave-2-co-pilot",
-      "profile_path": "github/greptile/greploop/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
-      "profile_binding_mode": "implicit-default",
-      "delegation_mode": "co-pilot",
       "status": "valid",
       "errors": []
     },
