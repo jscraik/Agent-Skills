@@ -38,7 +38,7 @@ Create and maintain concise, high-signal AGENTS guidance with progressive disclo
 - Use this skill when the user asks to create or update `AGENTS.md`.
 - Use this skill when AGENTS docs are too large, duplicated, or contradictory.
 - Use this skill when instruction routing needs to be split into linked files.
-- Use this skill when a repo needs AGENTS operating rules such as preflight, stack detection, tooling, required paths, Local Memory policy, or startup workflow tailored from real repo evidence.
+- Use this skill when a repo needs AGENTS operating rules such as preflight, stack detection, tooling, required paths, Local Memory policy, Project Brain policy, or startup workflow tailored from real repo evidence.
 - Use this skill when the user wants the project's instruction surface audited so required instruction files are present, current, correctly routed, and accurately disclosed.
 
 ## Standards snapshot (March 2026)
@@ -63,6 +63,7 @@ Create and maintain concise, high-signal AGENTS guidance with progressive disclo
 - Required repo paths and whether they are present, especially `docs/`, `docs/plans/`, and any repo-specific operating folders.
 - Whether the repo has explicitly adopted the harness-memory convention and, if so, whether `.harness/memory/LEARNINGS.md` is part of the required operating surface.
 - Local Memory policy expectations and whether required-mode checks are genuinely part of the repo standard.
+- Project Brain expectations, including whether `instructions/project-brain.md` exists, whether a root-visible Project Brain section is expected, and whether a bootstrap helper such as `scripts/init-project-brain.sh` is part of the documented workflow.
 - Optional supplemental context files, such as `Learning.md` or `Learnings.md`, only when they exist and are intended for operators.
 
 ## Discovery interview
@@ -138,6 +139,7 @@ If command truth, path ownership, or instruction precedence cannot be verified, 
 - Confirm stack detection guidance matches observed root manifests or documented repo scripts.
 - Confirm required-path guidance only names directories that exist or are explicit repo policy.
 - Confirm Local Memory requirements are present only when requested or verified by repo policy.
+- Confirm Project Brain guidance is present when requested or when `instructions/project-brain.md` exists in the target scope, and confirm linked paths/scripts resolve before insertion.
 - Confirm discovery guidance matches official behavior: `AGENTS.override.md` wins within a directory, fallback names require config, empty files are ignored, and combined project docs are capped by `project_doc_max_bytes`.
 - Confirm each required instruction file for the chosen surface is either:
   - present and current,
@@ -191,9 +193,12 @@ If command truth, path ownership, or instruction precedence cannot be verified, 
 - When stack detection guidance is requested, derive it from root manifests such as `package.json`, `pyproject.toml`, and `Cargo.toml`, and mention override flags only when the repo's scripts or docs support them.
 - When required path guidance is requested, mention `docs/` and `docs/plans/` only if they are present or explicitly standardized by the repo.
 - When architecture-context guidance is requested, treat the repo's documented architecture-diagram surface as valuable quick-start context when it exists, because diagrams often help agents form a correct system model faster than prose alone.
+- When Project Brain guidance is requested, include `instructions/project-brain.md` in the documentation map only when the file exists or is explicitly requested, and verify any linked bootstrap script path before inserting it.
 - Never silently normalize between diagram-path variants such as `.diagram/`, `.diagrams/`, or `AI/diagrams/`. Verify the repo's documented path first and then use that exact location consistently in AGENTS guidance.
 - When project learnings guidance is requested, require `.harness/memory/LEARNINGS.md` only for repos that explicitly adopt the harness-memory convention. Otherwise, treat it as `not observed` rather than promoting it into a universal required path.
 - When a repo uses legacy guidance files like `FORJAMIE.md`, do not present them as canonical by default. Either migrate durable guidance into `AGENTS.md`, register the file through `project_doc_fallback_filenames`, or mention it only as supplemental context when the file actually exists.
+- When a repo standardizes Project Brain guidance (for example `instructions/project-brain.md` exists), keep a concise root-visible Project Brain section and route detailed procedure to linked docs; do not omit Project Brain from AGENTS refactors once it is part of the documented operating surface.
+- When Project Brain and Local Memory are both documented, preserve their relationship explicitly in AGENTS guidance (for example "use both together"), while keeping operational depth in linked docs.
 - When external integration guidance is requested, preserve a strict preflight order:
   1. env vars resolved,
   2. `op account list` succeeds,
@@ -251,6 +256,7 @@ If command truth, path ownership, or instruction precedence cannot be verified, 
 - Keep architecture-diagram paths repo-specific: mention `.diagram/`, `.diagrams/`, or another diagram directory only when that exact path is documented or verified in the repo.
 - Keep `.harness/memory/LEARNINGS.md` opt-in at the repo level unless the repo has explicitly adopted the harness-memory convention.
 - Keep `Local Memory policy` opt-in unless the repo or user explicitly makes it required.
+- Keep `Project Brain` guidance opt-in unless the repo or user explicitly makes it part of the operating surface; when present, keep the root section concise and route detail to `instructions/project-brain.md`.
 - Treat `FORJAMIE.md` as legacy or supplemental unless repo evidence shows it is still a live fallback instruction file.
 - Keep `Startup workflow` and `Supplemental context` concise and operator-focused.
 
@@ -293,6 +299,7 @@ If command truth, path ownership, or instruction precedence cannot be verified, 
 - User says: "We used to have a `FORJAMIE.md` file. Please update the AGENTS guidance so it handles that legacy file correctly."
 - User says: "Our repo keeps architecture drawings in `.diagrams/`. Update the AGENTS guidance so agents use that as quick project context without guessing the wrong diagram path in other repos."
 - User says: "Add a worktree bootstrap helper rule across AGENTS, CLAUDE, and GEMINI so first push from a fresh worktree runs the repo helper script."
+- User says: "Our repo now has `instructions/project-brain.md`. Update agents-md so AGENTS refactors always include that reference and keep Project Brain guidance linked correctly."
 
 ## Resource map
 - References: `references/contract.yaml`, `references/discovery-interview.md`, `references/evals.yaml`, `references/folded-legacy-modes-core60.md`, `references/official-codex-agents-guidance.md`, `references/project-tailored-agents-baseline.md`, `references/task-profile.json`

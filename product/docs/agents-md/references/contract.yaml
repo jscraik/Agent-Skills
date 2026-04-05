@@ -23,6 +23,7 @@ inputs:
   - root_manifest_signals
   - required_repo_paths_state
   - local_memory_policy_state
+  - project_brain_policy_state
   - supplemental_context_paths
   - verified_repo_commands_and_paths
   - package_manager_signal
@@ -35,6 +36,7 @@ outputs:
   - project_tailored_repo_rules_section
   - category_guidance_files_or_split_plan
   - package_manager_command_map
+  - project_brain_guidance_when_in_scope
   - discovery_chain_summary
   - verification_commands_with_expected_results
   - contradictions_list_with_resolution_questions
@@ -98,6 +100,8 @@ risks:
     mitigation: derive documented flags and mode semantics from the actual script revision in scope
   - risk: invented_local_memory_requirements
     mitigation: only make Local Memory required when the repo or user explicitly standardizes it
+  - risk: project_brain_omitted_when_standardized
+    mitigation: when `instructions/project-brain.md` exists or is requested, include a root-visible Project Brain reference and verify any linked helper script paths before insertion
   - risk: non_idempotent_scaffold_edits
     mitigation: enforce marker-block update pattern
   - risk: wrong_package_manager_commands

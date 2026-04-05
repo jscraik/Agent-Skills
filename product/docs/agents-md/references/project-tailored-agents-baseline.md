@@ -9,6 +9,7 @@
 - [Required repo paths](#required-repo-paths)
 - [Cross-agent instruction files](#cross-agent-instruction-files)
 - [Local Memory policy](#local-memory-policy)
+- [Project Brain policy](#project-brain-policy)
 - [Startup workflow](#startup-workflow)
 - [Supplemental context](#supplemental-context)
 - [Validation checklist](#validation-checklist)
@@ -89,6 +90,7 @@ Common examples:
 - `AGENTS.md`
 - `docs/`
 - `docs/plans/`
+- `instructions/project-brain.md` only when the repo actually documents Project Brain as part of the operating surface
 - a documented architecture-diagram directory such as `.diagram/` or `.diagrams/` only when that exact path is a real repo standard
 - `.harness/memory/LEARNINGS.md` only when the repo explicitly adopts the harness-memory convention for repo-specific learnings
 
@@ -143,6 +145,17 @@ If Local Memory is enabled, preserve these checks:
 
 If Local Memory fails in required mode, stop. In optional mode, warn and continue. In off mode, skip Local Memory checks.
 
+## Project Brain policy
+
+Include this section only when the repo or user explicitly wants Project Brain in the AGENTS operating surface.
+
+When Project Brain is in scope:
+- Verify `instructions/project-brain.md` exists before adding it to AGENTS routing or documentation maps.
+- Keep the root AGENTS Project Brain section concise and action-oriented, and route procedural depth to `instructions/project-brain.md`.
+- If the workflow references a bootstrap helper (for example `scripts/init-project-brain.sh`), verify that script path exists before insertion.
+- If Local Memory is also part of the repo contract, preserve the relationship explicitly (for example "use both together") rather than presenting the two systems as independent or conflicting flows.
+- Do not invent `.harness/` requirements; only include them when the repo has actually standardized those paths.
+
 ## Startup workflow
 
 Keep the startup sequence short and operator-facing:
@@ -174,6 +187,8 @@ If `FORJAMIE.md` appears in old docs but is gone from the repo, treat those refe
 - Verify required paths stay inside the repo root after path resolution.
 - Verify any architecture-diagram path matches the repo's documented location exactly, and do not silently swap `.diagram/` for `.diagrams/` or another variant.
 - Verify `.harness/memory/LEARNINGS.md` is required only when the repo has explicitly adopted the harness-memory convention.
+- Verify Project Brain guidance is included only when the repo standardizes it, and that `instructions/project-brain.md` path references resolve.
+- Verify any Project Brain bootstrap helper path (for example `scripts/init-project-brain.sh`) exists before documenting it.
 - Verify `Quality Checks` uses repo-native commands, and keep explicit `npm run lint` / `npm run test` wording only when the repo is actually npm-based.
 - Verify CI guidance points to the authoritative provider status surface for the repo, and do not imply CI is complete before the final pipeline state is known.
 - Verify PR guidance reflects real merge-conflict behavior for the host platform and flags blocked PRs early rather than after review or merge prep.

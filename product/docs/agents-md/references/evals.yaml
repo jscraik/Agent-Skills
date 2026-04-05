@@ -351,6 +351,23 @@ cases:
       - type: regex
         value: "(?i)(supplemental context|legacy|stale|migrate.*AGENTS\\.md)"
 
+  - id: project-brain-guidance-inclusion
+    name: project-brain-guidance-inclusion
+    category: edge
+    eval_modes: [release]
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Our repo added `instructions/project-brain.md`. Update agents-md guidance so AGENTS refactors include Project Brain routing and verify any referenced bootstrap helper path before insertion."
+    acceptance:
+      - type: contains
+        value: "instructions/project-brain.md"
+      - type: regex
+        value: "(?i)(Project Brain|project-brain)"
+      - type: regex
+        value: "(?i)(documentation map|Instruction routing|linked docs|root-visible)"
+      - type: regex
+        value: "(?i)(verify|exists|path.*resolve|bootstrap helper|init-project-brain\\.sh)"
+
   - id: no-invention-guard
     name: no-invention-guard
     category: edge
