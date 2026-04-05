@@ -3,6 +3,7 @@
 ## Table of Contents
 - [How to use this folder](#how-to-use-this-folder)
 - [Instruction files](#instruction-files)
+- [Quick picks](#quick-picks)
 
 ## How to use this folder
 1. Start at repository root `AGENTS.md`.
@@ -23,3 +24,12 @@
 - [10-agent-testing-gates](/docs/agents/10-agent-testing-gates.md)
 - [12-ai-review-governance](/docs/agents/12-ai-review-governance.md)
 - [17-ci-required-checks](/docs/agents/17-ci-required-checks.md)
+
+## Quick picks
+
+| Need | Open |
+| --- | --- |
+| Tooling and command policy | [/docs/agents/02-tooling-policy.md](/docs/agents/02-tooling-policy.md) |
+| Validation order and checks | [/docs/agents/04-validation.md](/docs/agents/04-validation.md) |
+| Security and governance | [/docs/agents/06-security-and-governance.md](/docs/agents/06-security-and-governance.md) |
+| Release and risky git controls | [/docs/agents/08-release-and-change-control.md](/docs/agents/08-release-and-change-control.md) |

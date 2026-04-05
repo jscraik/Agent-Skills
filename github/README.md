@@ -1,13 +1,24 @@
 # GitHub Skills
 
-Canonical lifecycle skill: `gh-workflow`.
+GitHub workflow and PR operations skill directory.
 
-Focused specialists:
-- `github:gh-fix-ci` (plugin) for GitHub Actions diagnosis and repair
-- `resolve-pr-parallel` for batch remediation of unresolved PR review threads
+## Table of Contents
+- [Skills](#skills)
+- [Notes](#notes)
 
-Plugin mirror note:
-- Plugin-scoped skills under `plugins/cache/openai-curated/github/.../skills/` stay connector-first (`github`, `yeet`, `gh-fix-ci`, `gh-address-comments`).
-- Repo-local `github/*` skills stay `gh`-first and include richer governance and validation framing.
+## Skills
+- [gh-workflow](/github/gh-workflow/SKILL.md)
+- [resolve-pr-parallel](/github/resolve-pr-parallel/SKILL.md)
 
-Deprecated aliases were retired and removed on **2026-02-24**.
+## Notes
+- Canonical lifecycle skill: `gh-workflow`.
+- Focused specialist:
+  `resolve-pr-parallel` for batch remediation of unresolved PR threads.
+- Plugin mirror note:
+  plugin-scoped skills under
+  `plugins/cache/openai-curated/github/.../skills/`
+  stay connector-first (`github`, `yeet`, `gh-fix-ci`,
+  `gh-address-comments`).
+- Repo-local `github/*` skills stay `gh`-first with richer governance and
+  validation framing.
+- Deprecated aliases were retired on `2026-02-24`.
