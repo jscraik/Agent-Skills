@@ -10,8 +10,9 @@ metadata:
 Create and maintain concise, high-signal AGENTS guidance with progressive disclosure.
 
 ## Table of Contents
+
 - [When to use](#when-to-use)
-- [Standards snapshot](#standards-snapshot-march-2026)
+- [Standards snapshot](#standards-snapshot-april-2026)
 - [Required inputs](#required-inputs)
 - [Discovery interview](#discovery-interview)
 - [Response format](#response-format)
@@ -22,10 +23,6 @@ Create and maintain concise, high-signal AGENTS guidance with progressive disclo
 - [Procedure](#procedure)
 - [Validation](#validation)
 - [Shared guidance propagation](#shared-guidance-propagation)
-- [General propagation defaults](#general-propagation-defaults)
-- [Command preflight defaults](#command-preflight-defaults)
-- [Policy calibration defaults](#policy-calibration-defaults)
-- [Completion requirements](#completion-requirements)
 - [Project-tailored repo baseline](#project-tailored-repo-baseline)
 - [Anti-patterns](#anti-patterns)
 - [Variation](#variation)
@@ -35,24 +32,31 @@ Create and maintain concise, high-signal AGENTS guidance with progressive disclo
 - [Decision feedback protocol](#decision-quality-feedback)
 
 ## When to use
+
 - Use this skill when the user asks to create or update `AGENTS.md`.
 - Use this skill when AGENTS docs are too large, duplicated, or contradictory.
 - Use this skill when instruction routing needs to be split into linked files.
 - Use this skill when a repo needs AGENTS operating rules such as preflight, stack detection, tooling, required paths, Local Memory policy, Project Brain policy, or startup workflow tailored from real repo evidence.
 - Use this skill when the user wants the project's instruction surface audited so required instruction files are present, current, correctly routed, and accurately disclosed.
 
-## Standards snapshot (March 2026)
+## Standards snapshot (April 2026)
+
 - Keep root `AGENTS.md` minimal and route depth into linked docs.
 - Start with 2-3 focused surfaces for a first pass: usually the root `AGENTS.md`, one linked-doc tree, and only one nested override if it is truly needed.
 - Teach the canonical discovery chain: global `AGENTS.override.md` or `AGENTS.md`, then per-directory `AGENTS.override.md`, `AGENTS.md`, then configured fallback filenames.
 - Treat only one auto-loaded instruction file per directory as canonical; linked docs are progressive-disclosure references, not implicitly discovered project instructions.
 - Keep combined project guidance under the `project_doc_max_bytes` budget (32 KiB default) by splitting large guidance across nested scopes instead of bloating one root file.
-- When harmonizing `AGENTS.md`, `CLAUDE.md`, and `GEMINI.md`, keep shared operational rules semantically aligned while respecting each tool's official instruction-file model and section conventions.
+- **Instruction budget:** frontier thinking models can reliably follow ~150–200 instructions. Every token in `AGENTS.md` loads on every request regardless of relevance, so every instruction must earn its place.
+- **Minimum viable floor:** the root file needs only three things — a one-sentence project description, the package manager if not npm, and any non-standard build/typecheck commands. Everything else is a candidate for progressive disclosure.
+- **Staleness is poison:** avoid documenting file paths in `AGENTS.md`; they change constantly and agents read stale paths confidently. Describe capabilities and where things *might* be rather than hardcoding structure.
+- **Never auto-generate AGENTS.md files;** generated files flood the budget with generic instructions that hurt performance. Write them intentionally.
+- When harmonizing `AGENTS.md`, `CLAUDE.md`, and `GEMINI.md`, keep shared operational rules semantically aligned while respecting each tool's official instruction-file model and section conventions. For cross-tool coverage, a `ln -s AGENTS.md CLAUDE.md` symlink is a valid low-maintenance option when Claude Code is in scope.
 - Base commands, paths, and conventions on verified repo evidence only.
 - Treat contradiction detection and instruction precedence as first-class outputs.
 - Prefer progressive disclosure over megadoc accumulation.
 
 ## Required inputs
+
 - Target repository root path.
 - Existing `AGENTS.md`, `AGENTS.override.md`, fallback-named instruction files, and related linked docs.
 - Verified commands/paths from repository sources.
@@ -67,7 +71,9 @@ Create and maintain concise, high-signal AGENTS guidance with progressive disclo
 - Optional supplemental context files, such as `Learning.md` or `Learnings.md`, only when they exist and are intended for operators.
 
 ## Discovery interview
+
 Run discovery for underspecified AGENTS creation or refactor requests.
+
 - For discovery-only prompts that do not provide a concrete repo path or editable files yet, do not explore the filesystem or run tools first. Ask the compact scope question immediately.
 - Ask one round at a time and wait before moving forward.
 - Start each round with one plain-language question and explain why the round matters in a short `Why this matters:` line.
@@ -78,6 +84,7 @@ Run discovery for underspecified AGENTS creation or refactor requests.
 - Use `references/discovery-interview.md` for reusable round templates.
 
 ## Response format
+
 - For the first discovery response, start with `## Scope and triggers`, then `## Required inputs`.
 - In that first discovery response, include one short `Why this matters:` line and ask only one intuitive scope question before waiting.
 - Keep discovery-round responses minimal and immediate: no repo walkthrough, no extra sections, no tool calls, no examples, and no optional next-step menu before the question.
@@ -91,6 +98,7 @@ Run discovery for underspecified AGENTS creation or refactor requests.
 - For out-of-scope responses, keep the compact structure expected by the evals: `## When to use`, `## Deliverables`, and `## Required inputs`.
 
 ## Deliverables
+
 - Updated minimal root `AGENTS.md`.
 - Updated scoped overrides when a nested directory truly needs different rules.
 - Linked category docs for deeper instructions.
@@ -101,23 +109,31 @@ Run discovery for underspecified AGENTS creation or refactor requests.
 - If you return a machine-checkable split plan or JSON contract, include `schema_version`.
 
 ## Failure mode
+
 If command truth, path ownership, or instruction precedence cannot be verified, stop at that contradiction, state the conflict clearly, and request a decision instead of writing speculative AGENTS guidance.
 
 ## Philosophy
+
 - Prefer concise, verifiable guidance over comprehensive prose.
 - Keep root AGENTS as an operator map, with depth in linked docs.
 - Optimize for reader success in under two minutes.
-- Why keep this instruction in root instead of a linked doc?
-- What evidence confirms this command/path is real?
-- Which tradeoff is best here: brevity or explicitness?
+- Every instruction not relevant to the current task wastes tokens and distracts the agent. Irrelevant instructions do not just occupy space; they reduce model attention on the actual work.
+- Before adding anything to root AGENTS, apply these self-tests:
+  - Is this relevant to **every single task** in this repo? If not, it belongs in a linked doc.
+  - Why keep this instruction in root instead of a linked doc?
+  - What evidence confirms this command/path is real?
+  - Which tradeoff is best here: brevity or explicitness?
+  - Would removing this line hurt a real workflow?
 
 ## Constraints
+
 - Redact secrets, tokens, credentials, and PII by default.
 - Do not invent commands, scripts, or paths.
 - Keep ASCII by default unless repository conventions require otherwise.
 - Avoid adding dependencies, legacy shims, or compatibility layers unless explicitly requested.
 
 ## Procedure
+
 1. Discover repo facts, active instruction scopes, and any Codex config knobs that affect instruction discovery.
 2. Detect command/style conventions from actual repo evidence.
 3. Map the canonical instruction chain: global file, repo/root file, nested overrides, and linked docs.
@@ -133,6 +149,7 @@ If command truth, path ownership, or instruction precedence cannot be verified, 
 9. Validate links, commands, discovery behavior, instruction consistency, and coverage of the required instruction surface.
 
 ## Validation
+
 - Confirm commands exist in repo scripts/docs.
 - Confirm file paths exist and links resolve.
 - Confirm any prescribed preflight command and flags actually exist before inserting them.
@@ -245,6 +262,7 @@ If command truth, path ownership, or instruction precedence cannot be verified, 
 - When finishing an instruction-surface update, return a concise coverage summary that says which files are canonical, which linked docs were updated, which expected files were missing and created, which files were already current, and which legacy files remain for migration or deletion.
 
 ## Project-tailored repo baseline
+
 - Use `references/project-tailored-agents-baseline.md` when a user wants a reusable AGENTS operating baseline adapted to each repository.
 - Treat the baseline as a section menu, not a verbatim template. Verify each section before insertion.
 - Keep `Repository rules` grounded in the actual repo preflight, supported flag set, and repo-root workflow.
@@ -261,27 +279,53 @@ If command truth, path ownership, or instruction precedence cannot be verified, 
 - Keep `Startup workflow` and `Supplemental context` concise and operator-focused.
 
 ## Anti-patterns
+
 - Do not dump full policy documents into root AGENTS.
 - Never duplicate the same instruction across many files without need.
-- Do not keep vague guidance that cannot be executed.
+- Do not keep vague guidance that cannot be executed (e.g. "write clean code", "be careful").
+- **Never auto-generate AGENTS.md** from init scripts or templates. They prioritize comprehensiveness over restraint and create bloated files that actively hurt agent performance.
+- **Never document file system paths as source of truth.** Paths change; agents read stale paths confidently. Describe capabilities and surface hints instead.
 - Do not paste the same `Repository rules` or `Local Memory policy` block into every repo without checking scripts, manifests, paths, and actual repo standards first.
 - Do not keep stale `FORJAMIE.md` references around once the file is gone or the repo has moved to `AGENTS.md`.
 - Do not imply that arbitrary linked Markdown files are auto-discovered by Codex; only scoped AGENTS files and configured fallback filenames participate in instruction discovery.
 - Avoid repetitive, generic, cookie-cutter templates that ignore repo context.
 - Warn on conflicting package manager instructions and unresolved hierarchy conflicts.
+- Do not add instructions that are redundant with the agent's base knowledge (e.g. "use descriptive variable names").
 
 ## Variation
+
 - Adapt structure for small repos versus multi-package monorepos.
 - Use different category splits based on repo domains (frontend, backend, ops, docs).
 - Customize guidance depth to team maturity and operational risk.
 - Keep scope tight on the first pass; expand beyond the core 2-3 surfaces only when the repo evidence or user request clearly requires it.
 
+### Monorepo scope table
+
+| Level | Content |
+|---|---|
+| **Root** | Monorepo purpose, how to navigate packages, shared tools (e.g. pnpm workspaces) |
+| **Package** | Package purpose, specific tech stack, package-specific conventions |
+
+Do not overload either level. The agent sees all merged AGENTS files. Keep each level scoped to what is only relevant at that depth.
+
+### Cross-tool symlink pattern
+
+When Claude Code (`CLAUDE.md`) is in scope alongside Codex (`AGENTS.md`), a symlink avoids divergence:
+
+```bash
+ln -s AGENTS.md CLAUDE.md
+```
+
+Use this only when the instruction surface is genuinely identical across tools. When tool-specific wording matters, maintain separate files and sync semantically.
+
 ## Mandatory workflow snippet
+
 1. Explore project first, then invoke skill.
 2. IMPORTANT: Prefer retrieval-led reasoning over pre-training-led reasoning for any React, Tauri, Apps-SDK-ui, Tailwind, Vite, Storybook + Chat Widget tasks.
 3. Add a Table of Contents for docs.
 
 ## Examples
+
 - User says: "Can you help me trim this giant root `AGENTS.md` and move the detailed policy into linked docs without breaking Codex discovery?"
 - User says: "Please inspect our repo instructions and explain whether `services/payments/AGENTS.override.md` should replace the broader root rule."
 - User says: "Validate this `TEAM_GUIDE.md` setup and tell me whether I should migrate it or register it with `project_doc_fallback_filenames`."
@@ -302,7 +346,8 @@ If command truth, path ownership, or instruction precedence cannot be verified, 
 - User says: "Our repo now has `instructions/project-brain.md`. Update agents-md so AGENTS refactors always include that reference and keep Project Brain guidance linked correctly."
 
 ## Resource map
-- References: `references/contract.yaml`, `references/discovery-interview.md`, `references/evals.yaml`, `references/folded-legacy-modes-core60.md`, `references/official-codex-agents-guidance.md`, `references/project-tailored-agents-baseline.md`, `references/task-profile.json`
+
+- References: `references/contract.yaml`, `references/discovery-interview.md`, `references/evals.yaml`, `references/folded-legacy-modes-core60.md`, `references/official-codex-agents-guidance.md`, `references/project-tailored-agents-baseline.md`, `references/shared-guidance-propagation.md`, `references/task-profile.json`
 
 ## See Also
 
@@ -317,11 +362,15 @@ If command truth, path ownership, or instruction precedence cannot be verified, 
 **Topic map:** [[agent-ops]]
 
 <!-- decision-feedback-protocol:v2 -->
+
 ## Decision Quality Feedback
+
 - If post-run feedback capture is enabled, emit non-blocking `post_run_feedback` after result delivery.
 - Capture `decision`, `outcome`, and `confidence`.
 - Persist with `python3 utilities/skill-builder/scripts/record_skill_feedback.py`.
+
 <!-- /decision-feedback-protocol -->
 
 ## Gotchas
-- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.
+
+- **Conflict resolution drops section headings** → When resolving rebase conflicts in this file, carefully verify that `###` subheadings (especially `### Policy calibration defaults`) survive the merge. Symptom: section content present but heading line missing, causing broken TOC anchors. Do instead: after resolving each conflict block, scan ±5 lines above the resolved content for orphaned headings. Check: `rg '### Policy calibration' product/docs/agents-md/references/shared-guidance-propagation.md`.
