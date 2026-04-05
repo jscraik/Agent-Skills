@@ -6,7 +6,7 @@ cd "$repo_root"
 
 skip_preflight=0
 skip_sync=0
-validate_output_mode="${VERIFY_WORK_VALIDATE_MODE:-ephemeral}"
+validate_output_mode="${VERIFY_WORK_VALIDATE_MODE:-persistent}"
 
 usage() {
   cat <<'USAGE'
@@ -19,7 +19,7 @@ Options:
   --skip-sync        Skip scripts/sync_skills.sh
   --persistent-artifacts
                      Run repo validation in persistent artifact mode
-                     (default is ephemeral to avoid mutating tracked logs)
+                     (this is the default; use VERIFY_WORK_VALIDATE_MODE=ephemeral to opt out)
   -h, --help         Show this help text
 USAGE
 }
