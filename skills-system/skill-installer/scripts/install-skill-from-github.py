@@ -933,7 +933,8 @@ def main(argv: list[str]) -> int:
             if args.allow_ssh_fallback:
                 print("Override: allow_ssh_fallback=true")
             if trusted_repo_overrides:
-                print(f"Override: trusted_repo+={','.join(trusted_repo_overrides)}")
+                # Avoid clear-text echo of user-supplied repo override values.
+                print(f"Override: trusted_repo_override_count={len(trusted_repo_overrides)}")
             print(f"Provenance manifest: {manifest_path}")
             print(f"Rollback journal: {journal_path}")
             return 0
