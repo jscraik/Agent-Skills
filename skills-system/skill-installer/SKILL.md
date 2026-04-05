@@ -60,10 +60,12 @@ All of these scripts use network, so when running in the sandbox, request escala
 - Installs into `$CODEX_HOME/skills/<skill-name>` (defaults to `~/.codex/skills`).
 - Multiple `--path` values install multiple skills in one run, each named from the path basename unless `--name` is supplied.
 - Enforces pinned refs by default (`--ref` must be a 40-char commit SHA). Use `--allow-unpinned-ref` only when explicitly approved.
+- Enforces trusted-source allowlist by default (`openai/skills`, `jamiecraik/agent-skills`, and optional `CODEX_SKILL_TRUSTED_REPOS`/`--trusted-repo` entries). Use `--allow-untrusted-source` only with explicit approval.
 - Stages every install in `<dest>/.quarantine/skill-install-<run-id>` before atomic promotion.
+- Runs strict staged validators in quarantine before promotion (`quick_validate`, `skill_gate --require-security-evals --pi-high-fail`, and `openclaw_skill_guard`). Use `--validation-level compat` only when validator scripts are intentionally unavailable.
 - Writes a rollback journal at `<dest>/.install-journal/skill-installer/<run-id>.jsonl`.
 - Writes a provenance manifest at `<dest>/.provenance/skill-installer/<run-id>.json`.
-- Options: `--ref <ref>`, `--dest <path>`, `--method auto|download|git`, `--allow-unpinned-ref`, `--provenance-dir <path>`, `--journal-dir <path>`.
+- Options: `--ref <ref>`, `--dest <path>`, `--method auto|download|git`, `--allow-unpinned-ref`, `--trusted-repo <owner/repo>`, `--allow-untrusted-source`, `--validation-level strict|compat`, `--provenance-dir <path>`, `--journal-dir <path>`.
 
 ## Notes
 
@@ -77,6 +79,18 @@ All of these scripts use network, so when running in the sandbox, request escala
 
 - `references/contract.yaml` defines install-stage ownership, trusted-source requirements, and rollback expectations.
 - `references/evals.yaml` defines happy/edge/negative/pressure cases, including prompt-injection and risky-command guard coverage.
+- `references/task-profile.json` defines benchmark parity thresholds used by the family validation suite.
+
+## Validation
+
+After editing this skill, run:
+
+```bash
+~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/quick_validate.py skills-system/skill-installer --mode compat
+~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/skill_gate.py skills-system/skill-installer --require-security-evals --pi-high-fail --require-fail-fast
+~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/openclaw_skill_guard.py skills-system/skill-installer --mode both --format text
+~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/run_skill_evals.py skills-system/skill-installer --list-cases --eval-mode smoke
+```
 
 ## See Also
 

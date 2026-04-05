@@ -152,6 +152,7 @@ For the exact canonical sample JSON for both plugin manifests and marketplace en
 - `references/plugin-json-spec.md`
 - `references/contract.yaml`
 - `references/evals.yaml`
+- `references/task-profile.json`
 
 ## Validation
 
@@ -161,6 +162,7 @@ After editing `SKILL.md`, run:
 ~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/quick_validate.py skills-system/plugin-creator
 ~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/skill_gate.py skills-system/plugin-creator --require-security-evals --pi-high-fail
 ~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/openclaw_skill_guard.py skills-system/plugin-creator --mode both --format text
+~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/run_skill_evals.py skills-system/plugin-creator --list-cases --eval-mode smoke
 ```
 
 ## See Also

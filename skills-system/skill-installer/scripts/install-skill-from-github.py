@@ -17,6 +17,7 @@ import datetime as dt
 import hashlib
 import json
 import os
+from pathlib import Path
 import re
 import shutil
 import subprocess
@@ -30,6 +31,10 @@ from github_utils import github_request
 
 DEFAULT_REF = "main"
 PINNED_REF_RE = re.compile(r"^[0-9a-fA-F]{40}$")
+DEFAULT_TRUSTED_REPOS = {
+    "openai/skills",
+    "jamiecraik/agent-skills",
+}
 
 
 @dataclass
@@ -44,6 +49,9 @@ class Args:
     allow_unpinned_ref: bool = False
     provenance_dir: str | None = None
     journal_dir: str | None = None
+    trusted_repo: list[str] | None = None
+    allow_untrusted_source: bool = False
+    validation_level: str = "strict"
 
 
 @dataclass
@@ -71,6 +79,7 @@ class StagedInstall:
     tree_sha256: str
     file_count: int
     bytes_total: int
+    validation: dict[str, object]
 
 
 class InstallError(Exception):
@@ -266,6 +275,128 @@ def _validate_skill(path: str) -> None:
     if not os.path.isfile(skill_md):
         raise InstallError("SKILL.md not found in selected skill directory.")
 
+    refs_dir = os.path.join(path, "references")
+    contract_path = os.path.join(refs_dir, "contract.yaml")
+    evals_path = os.path.join(refs_dir, "evals.yaml")
+    if not os.path.isfile(contract_path):
+        raise InstallError("references/contract.yaml not found in selected skill directory.")
+    if not os.path.isfile(evals_path):
+        raise InstallError("references/evals.yaml not found in selected skill directory.")
+
+
+def _normalize_repo_id(repo_text: str) -> str:
+    parts = [p.strip() for p in repo_text.split("/") if p.strip()]
+    if len(parts) != 2:
+        raise InstallError(f"Trusted repo must be owner/repo: {repo_text}")
+    return f"{parts[0].lower()}/{parts[1].lower()}"
+
+
+def _trusted_repo_allowlist(raw_repos: list[str] | None) -> set[str]:
+    allowlist = set(DEFAULT_TRUSTED_REPOS)
+    env_raw = os.environ.get("CODEX_SKILL_TRUSTED_REPOS", "")
+    if env_raw.strip():
+        for item in env_raw.split(","):
+            item = item.strip()
+            if item:
+                allowlist.add(_normalize_repo_id(item))
+
+    for repo_text in raw_repos or []:
+        allowlist.add(_normalize_repo_id(repo_text))
+    return allowlist
+
+
+def _repo_root_from_installer() -> Path:
+    return Path(__file__).resolve().parents[3]
+
+
+def _validator_paths(repo_root: Path) -> dict[str, Path]:
+    return {
+        "quick_validate": repo_root / "utilities" / "skill-builder" / "scripts" / "quick_validate.py",
+        "skill_gate": repo_root / "utilities" / "skill-builder" / "scripts" / "skill_gate.py",
+        "openclaw": repo_root / "utilities" / "skill-builder" / "scripts" / "openclaw_skill_guard.py",
+    }
+
+
+def _run_stage_validators(skill_dir: str, journal: JournalWriter, validation_level: str) -> dict[str, object]:
+    result: dict[str, object] = {
+        "validation_level": validation_level,
+        "validators": [],
+    }
+
+    if validation_level == "compat":
+        journal.write("stage_validation_skipped", skill_dir=skill_dir, validation_level=validation_level)
+        return result
+
+    repo_root = _repo_root_from_installer()
+    validators = _validator_paths(repo_root)
+    missing = [name for name, path in validators.items() if not path.exists()]
+    if missing:
+        raise InstallError(
+            "Strict stage validation requires repo validator scripts. Missing: "
+            + ", ".join(sorted(missing))
+            + ". Re-run with --validation-level compat only if your environment intentionally lacks the validator bundle."
+        )
+
+    commands: list[tuple[str, list[str]]] = [
+        (
+            "quick_validate",
+            [sys.executable, str(validators["quick_validate"]), skill_dir, "--mode", "compat"],
+        ),
+        (
+            "skill_gate",
+            [
+                sys.executable,
+                str(validators["skill_gate"]),
+                skill_dir,
+                "--require-fail-fast",
+                "--require-security-evals",
+                "--pi-high-fail",
+            ],
+        ),
+        (
+            "openclaw",
+            [
+                sys.executable,
+                str(validators["openclaw"]),
+                skill_dir,
+                "--mode",
+                "both",
+                "--format",
+                "json",
+            ],
+        ),
+    ]
+
+    for validator_name, command in commands:
+        proc = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        stdout = proc.stdout or ""
+        stderr = proc.stderr or ""
+        command_text = " ".join(command)
+        validator_result = {
+            "name": validator_name,
+            "command": command_text,
+            "exit_code": proc.returncode,
+        }
+        cast_list = result["validators"]
+        assert isinstance(cast_list, list)
+        cast_list.append(validator_result)
+        journal.write(
+            "stage_validator_result",
+            skill_dir=skill_dir,
+            validator=validator_name,
+            command=command_text,
+            exit_code=proc.returncode,
+            stdout_tail=stdout[-800:],
+            stderr_tail=stderr[-800:],
+        )
+        if proc.returncode != 0:
+            raise InstallError(
+                f"Staged validation failed ({validator_name}) for {skill_dir}. "
+                "See rollback journal for command output tail."
+            )
+
+    return result
+
 
 def _copy_skill(src: str, dest_dir: str) -> None:
     os.makedirs(os.path.dirname(dest_dir), exist_ok=True)
@@ -448,6 +579,33 @@ def _parse_args(argv: list[str]) -> Args:
         "--journal-dir",
         help="Directory where rollback journals are written (default: <dest>/.install-journal/skill-installer).",
     )
+    parser.add_argument(
+        "--trusted-repo",
+        action="append",
+        default=[],
+        help=(
+            "Additional trusted source in owner/repo format (repeatable). "
+            "Default trust allowlist includes openai/skills and jamiecraik/agent-skills."
+        ),
+    )
+    parser.add_argument(
+        "--allow-untrusted-source",
+        action="store_true",
+        help=(
+            "Allow source repos outside the trusted allowlist. "
+            "Use only with explicit approval and audit intent."
+        ),
+    )
+    parser.add_argument(
+        "--validation-level",
+        choices=["strict", "compat"],
+        default="strict",
+        help=(
+            "Staged validation policy before promotion: "
+            "strict runs quick_validate + skill_gate + openclaw in quarantine; "
+            "compat keeps basic structural checks only."
+        ),
+    )
     return parser.parse_args(argv, namespace=Args())
 
 
@@ -462,6 +620,17 @@ def main(argv: list[str]) -> int:
 
         for path in source.paths:
             _validate_relative_path(path)
+
+        trusted_repos = _trusted_repo_allowlist(args.trusted_repo)
+        requested_repo = _normalize_repo_id(f"{source.owner}/{source.repo}")
+        source_trusted = requested_repo in trusted_repos
+        if not source_trusted and not args.allow_untrusted_source:
+            allowed = ", ".join(sorted(trusted_repos))
+            raise InstallError(
+                "Source repository is not in the trusted allowlist. "
+                f"requested={requested_repo}; allowlist={allowed}. "
+                "Pass --trusted-repo owner/repo to extend trust or --allow-untrusted-source with explicit approval."
+            )
 
         ref_pinned = _is_pinned_ref(source.ref)
         if not ref_pinned and not args.allow_unpinned_ref:
@@ -488,10 +657,15 @@ def main(argv: list[str]) -> int:
             requested_paths=source.paths,
             destination_root=dest_root,
             allow_unpinned_ref=bool(args.allow_unpinned_ref),
+            trusted_source=source_trusted,
+            requested_repo=requested_repo,
+            validation_level=args.validation_level,
         )
 
         if not ref_pinned:
             journal.write("unpinned_ref_override", ref=source.ref)
+        if not source_trusted:
+            journal.write("untrusted_source_override", repo=requested_repo)
 
         tmp_dir = tempfile.mkdtemp(prefix="skill-install-", dir=_tmp_root())
         quarantine_root = os.path.join(dest_root, ".quarantine", f"skill-install-{run_id}")
@@ -532,6 +706,7 @@ def main(argv: list[str]) -> int:
                 staged_dir = os.path.join(quarantine_root, skill_name)
                 _copy_skill(source_path, staged_dir)
                 _validate_skill(staged_dir)
+                validation_result = _run_stage_validators(staged_dir, journal, args.validation_level)
                 tree_sha256, file_count, bytes_total = _hash_tree(staged_dir)
 
                 staged = StagedInstall(
@@ -542,6 +717,7 @@ def main(argv: list[str]) -> int:
                     tree_sha256=tree_sha256,
                     file_count=file_count,
                     bytes_total=bytes_total,
+                    validation=validation_result,
                 )
                 installed.append(staged)
                 journal.write(
@@ -552,6 +728,7 @@ def main(argv: list[str]) -> int:
                     tree_sha256=tree_sha256,
                     file_count=file_count,
                     bytes_total=bytes_total,
+                    validation=validation_result,
                 )
 
             try:
@@ -575,7 +752,7 @@ def main(argv: list[str]) -> int:
 
             manifest_path = os.path.join(provenance_dir, f"{run_id}.json")
             manifest_payload: dict[str, object] = {
-                "schema_version": "1.0",
+                "schema_version": "1.1",
                 "generated_at": _utc_now_iso(),
                 "run_id": run_id,
                 "source": {
@@ -588,8 +765,13 @@ def main(argv: list[str]) -> int:
                 "policy": {
                     "ref_pinning_enforced": not args.allow_unpinned_ref,
                     "allow_unpinned_ref": bool(args.allow_unpinned_ref),
+                    "trusted_source_enforced": not args.allow_untrusted_source,
+                    "allow_untrusted_source": bool(args.allow_untrusted_source),
+                    "requested_repo": requested_repo,
+                    "trusted_repo_allowlist": sorted(trusted_repos),
                     "quarantine_to_promote": True,
                     "rollback_journal": journal_path,
+                    "validation_level": args.validation_level,
                 },
                 "install": {
                     "destination_root": dest_root,
@@ -602,6 +784,7 @@ def main(argv: list[str]) -> int:
                             "tree_sha256": staged.tree_sha256,
                             "file_count": staged.file_count,
                             "bytes_total": staged.bytes_total,
+                            "validation": staged.validation,
                         }
                         for staged in installed
                     ],

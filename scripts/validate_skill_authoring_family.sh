@@ -19,10 +19,11 @@ skill_dirs=(
 assert_security_eval_contract() {
   local skill_dir="$1"
   local report_file
-  report_file="$(mktemp "${TMPDIR:-/tmp}/skill-authoring-family-gate.XXXXXX.json")"
+  report_file="$(mktemp "${TMPDIR:-/tmp}/skill-authoring-family-gate.XXXXXX")"
 
   if ! "$python_bin" utilities/skill-builder/scripts/skill_gate.py "$skill_dir" \
     --require-security-evals \
+    --pi-high-fail \
     --format json >"$report_file"; then
     # skill_gate can return non-zero for non-contract style findings.
     # We still parse JSON and fail only on contract/eval/security benchmark findings.
@@ -49,6 +50,8 @@ for finding in findings:
         code.startswith("CONTRACT_")
         or code.startswith("EVALS_")
         or code.startswith("SEC_EVALS_")
+        or code.startswith("PI_")
+        or code.startswith("SCRIPT_SECURITY_")
     ):
         blocking.append(finding)
     if code == "SEC_EVALS_PARSE":
@@ -72,6 +75,8 @@ PY
 echo "[family-gate] using python: $python_bin"
 echo "[family-gate] validating ${#skill_dirs[@]} skill authoring family members"
 
+"$python_bin" scripts/validate_skill_authoring_family_benchmarks.py
+
 for skill_dir in "${skill_dirs[@]}"; do
   echo
   echo "[family-gate] === $skill_dir ==="
@@ -79,6 +84,10 @@ for skill_dir in "${skill_dirs[@]}"; do
   "$python_bin" utilities/skill-builder/scripts/quick_validate.py "$skill_dir" --mode compat
 
   assert_security_eval_contract "$skill_dir"
+
+  "$python_bin" utilities/skill-builder/scripts/run_skill_evals.py "$skill_dir" \
+    --list-cases \
+    --eval-mode smoke
 
   "$python_bin" utilities/skill-builder/scripts/openclaw_skill_guard.py "$skill_dir" \
     --mode both \

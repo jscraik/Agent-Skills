@@ -7,7 +7,7 @@ metadata:
   maturity: validated
   owner: Agent Skills Team
   review_cadence: quarterly
-  last_reviewed: 2026-03-30
+  last_reviewed: 2026-04-04
   metadata_source: frontmatter
 ---
 
@@ -47,7 +47,7 @@ Do not use this skill for:
 - target repository path and package-manager context;
 - current harness state: `not installed`, `installed`, `needs update`, or `broken`;
 - execution posture: `no-execution` guidance or command-running execution mode;
-- auth posture for remote checks, such as PAT or GitHub App JWT, when `verify-greptile` or similar remote checks are requested;
+- auth posture for remote checks, such as PAT or GitHub App JWT, when `verify-coderabbit` or similar remote checks are requested;
 - desired verification depth: lightweight setup confirmation or deep runtime/artifact validation.
 
 If details are missing, make the safest reasonable assumption:
@@ -80,10 +80,11 @@ Produce only what the request needs, usually:
 
 2. Preflight the repository.
 - Do confirm repo root, toolchain availability, and current harness state because path-sensitive or multi-step work is fragile without preflight.
-- Do run `source scripts/codex-preflight.sh && preflight_repo` when available because harness-enabled repos often encode extra local policy there.
+- Do run `bash scripts/codex-preflight.sh --stack auto --mode required` when available because harness-enabled repos often encode extra local policy there.
 
 3. Install or upgrade harness conservatively.
 - Do prefer `mise install -g npm:@brainwav/coding-harness` for consumer repos because it matches the current recommended global install posture.
+- Do prefer `pnpm exec tsx src/cli.ts --help` as command truth when working inside `/Users/jamiecraik/dev/coding-harness`, because a globally installed `harness` binary may lag behind source.
 - Do bootstrap with `harness init --dry-run` followed by `harness init` because the current CLI-safe path is preview-first.
 - Do treat existing harness-managed repos differently from fresh bootstrap: run `harness init --check-updates`, then `harness upgrade --dry-run`, then `harness upgrade` because that is the routine update lane now.
 - Do reserve `harness init --update` for re-scaffolding missing tracked baseline files because it is not the default upgrade path for mature installs.
@@ -95,7 +96,7 @@ Produce only what the request needs, usually:
 4. Validate setup and policy state.
 - Do run the baseline repository gate first because `pnpm check` catches the broad integration surface expected by the tool.
 - Do escalate to `pnpm test:deep` when runtime behavior or artifact formats changed because baseline checks are not enough for behavior-affecting work.
-- Do use targeted harness checks such as `harness check-environment`, `verify-greptile`, `check-authz`, `docs-gate`, and `tooling-audit` when the user asks for specific governance evidence.
+- Do use targeted harness checks such as `harness check-environment`, `verify-coderabbit`, `check-authz`, `docs-gate`, and `tooling-audit` when the user asks for specific governance evidence.
 - Do rely on structured `--json` output for gates and `health --auto-fix --dry-run` because machine-readable findings are safer to automate than table scraping.
 - Do answer directly that a repo is not verified yet when checks were skipped because unsupported certainty is worse than an incomplete status.
 
@@ -134,8 +135,8 @@ harness ci-migrate prepare --provider circleci --apply
 harness ci-migrate verify --snapshot <snapshot-id>
 harness ci-migrate commit --snapshot <snapshot-id>
 harness ci-migrate abort --snapshot <snapshot-id>
-harness verify-greptile
-harness verify-greptile --token <token-or-jwt> --owner <owner> --repo <repo>
+harness verify-coderabbit
+harness verify-coderabbit --token <token-or-jwt> --owner <owner> --repo <repo>
 harness check-authz --contract <path> --repo <owner/repo> --branch <branch>
 harness check-environment --contract <path> --attestation <path>
 harness docs-gate --mode advisory --json
@@ -208,7 +209,7 @@ Fail fast on the first blocking gate, fix the specific issue, rerun that gate, a
 - Symptom: an agent treats `harness init --update` as the normal way to update an existing harness repo. Cause: older summaries collapsed the upgrade lane into the re-scaffold lane. Do instead: run `harness init --check-updates`, then `harness upgrade --dry-run`, then `harness upgrade`; use `harness init --update` only when tracked baseline files are missing and need re-scaffolding. Check: the final plan should distinguish routine upgrade from re-scaffold explicitly.
 - Symptom: a legacy repo reports that `.harness/restore-manifest.json` is missing `ciProvider`. Cause: the repo was scaffolded before that metadata became mandatory for the update lane. Do instead: rerun `harness init --check-updates`, `harness upgrade --dry-run`, or `harness init --update` and let current harness repair the manifest automatically when the active provider can be inferred. Check: verify the manifest now includes `ciProvider` and the upgrade lane proceeds.
 - Symptom: CI migration guidance looks right but rollback is missing. Cause: older summaries often stop after `commit`. Do instead: preserve the full snapshot-based sequence including `abort --snapshot <snapshot-id>`. Check: confirm preview, apply, verify, commit, and abort all appear in both `SKILL.md` and `references/agent-install-guide.md`.
-- Symptom: an agent claims repo setup is complete after only local checks. Cause: remote gates such as Greptile verification were skipped because auth was missing. Do instead: report the local pass separately from auth-blocked remote checks. Check: the final summary should say exactly which checks were skipped and why.
+- Symptom: an agent claims repo setup is complete after only local checks. Cause: remote gates such as CodeRabbit verification were skipped because auth was missing. Do instead: report the local pass separately from auth-blocked remote checks. Check: the final summary should say exactly which checks were skipped and why.
 - Symptom: `.harness/memory/LEARNINGS.md` guidance is applied to a repo without `.harness/`. Cause: the memory layer is repo-specific, not universal. Do instead: skip creation when `.harness/` is absent. Check: only read or append the repo memory file when the harness directory exists.
 - Symptom: `run_skill_evals.py` fails early with `Unsupported parameter: 'reasoning.summary'` under a Spark-oriented Codex profile. Cause: the active profile/model does not support the runner's default reasoning setting. Do instead: pin the eval run to `--profile d --codex-fallback-profile ''`. Check: the release run should emit normal case artifacts and a populated `scorecard.json`.
 

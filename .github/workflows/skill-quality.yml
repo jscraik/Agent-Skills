@@ -6,9 +6,11 @@ on:
       - "**/SKILL.md"
       - "**/references/evals.yaml"
       - "**/references/contract.yaml"
+      - "**/references/task-profile.json"
       - "utilities/skill-builder/scripts/**"
       - "skills-system/skill-installer/scripts/install-skill-from-github.py"
       - "scripts/validate_skill_authoring_family.sh"
+      - "scripts/validate_skill_authoring_family_benchmarks.py"
       - "templates/evals.yaml"
   workflow_dispatch:
     inputs:
