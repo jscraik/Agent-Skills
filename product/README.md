@@ -1,6 +1,6 @@
 # Product Skills
 
-Product skill directory grouped by content, docs, domain, ops, and strategy.
+Product skill directory grouped by content, docs, domain, ops, review, security, specs, and strategy.
 
 ## Table of Contents
 - [Subdirectories](#subdirectories)
