@@ -1,18 +1,28 @@
 #!/usr/bin/env python3
+"""
+Agent Skills Kit (ask) CLI - Agent-Native Interface
+
+Designed for AI coding agents with:
+- --robot / --agent-mode: Flexible parsing, helpful corrections
+- --json: Structured output for programmatic use
+- Fuzzy command matching when intent is clear
+- Detailed error messages with examples
+"""
 import sys
 import os
 import argparse
 import time
+import difflib
 from pathlib import Path
+from typing import List, Optional, Tuple
 
 # Add scripts/lib and scripts to path
 repo_root_path = Path(__file__).resolve().parents[1]
-# Insert at end to allow dynamic loading to take priority when needed
 sys.path.append(str(repo_root_path / "scripts" / "lib"))
 sys.path.append(str(repo_root_path / "scripts"))
 sys.path.append(str(repo_root_path / "utilities" / "skill-builder" / "scripts"))
 
-from ask.envelope import CallResult
+from ask.envelope import CallResult, ErrorObject
 from ask.context import find_repo_root
 from ask.commands.skills import list_skills, sync_skills, audit_skill, install_skill, fold_skills, init_skill
 from ask.commands.repo import repo_status, repo_validate
@@ -33,16 +43,232 @@ ERROR_MAP = {
     "ERR_AUTH": 5
 }
 
+# Valid commands for fuzzy matching
+VALID_TOPICS = ["repo", "skills", "plugins", "evals", "graph"]
+VALID_ACTIONS = {
+    "repo": ["status", "validate"],
+    "skills": ["list", "sync", "audit", "install", "fold", "init"],
+    "plugins": ["init"],
+    "evals": ["run", "benchmark", "dashboard"],
+    "graph": ["related", "find", "info", "chain", "list", "topics"]
+}
+
+# Common mistakes and their corrections
+FUZZY_MATCHES = {
+    # Topic typos
+    "skill": "skills",
+    "skil": "skills",
+    "skils": "skills",
+    "repo": "repo",
+    "rep": "repo",
+    "plugin": "plugins",
+    "plug": "plugins",
+    "eval": "evals",
+    "evaluation": "evals",
+    # Action typos for skills
+    "aud": "audit",
+    "audt": "audit",
+    "sync": "sync",
+    "syn": "sync",
+    "install": "install",
+    "instal": "install",
+    "list": "list",
+    "ls": "list",
+    "init": "init",
+    "create": "init",
+    "fold": "fold",
+    "merge": "fold",
+    # Graph actions
+    "search": "find",
+    "query": "find",
+    "related": "related",
+    "rel": "related",
+    "neighbors": "related",
+    "info": "info",
+    "show": "info",
+    "details": "info",
+    "chain": "chain",
+    "path": "chain",
+    "route": "chain",
+    "topics": "topics",
+    "tags": "topics",
+    "categories": "topics",
+}
+
+
+def get_closest_match(query: str, options: List[str], cutoff: float = 0.6) -> Optional[str]:
+    """Find closest match using difflib."""
+    matches = difflib.get_close_matches(query, options, n=1, cutoff=cutoff)
+    return matches[0] if matches else None
+
+
+def format_correction(original: str, corrected: str, robot_mode: bool = False) -> str:
+    """Format a command correction message."""
+    if robot_mode:
+        return f"🤖 Robot mode: Interpreting '{original}' as '{corrected}'\n   💡 Tip: Use '{corrected}' for exact matching next time."
+    return f"💡 Did you mean: '{corrected}'? (Use --robot to auto-correct)"
+
+
+def build_helpful_error(topic: Optional[str], action: Optional[str], raw_args: List[str], repo_root: Path) -> CallResult:
+    """Build a helpful error message with examples."""
+    result = CallResult()
+    result.status = "error"
+
+    error_msg = "I couldn't understand that command."
+    suggestions = []
+    examples = []
+
+    # Try to figure out what they meant
+    if not topic:
+        error_msg = "Missing or unknown command topic."
+        suggestions.append(f"Valid topics: {', '.join(VALID_TOPICS)}")
+        if raw_args:
+            guess = get_closest_match(raw_args[0], VALID_TOPICS)
+            if guess:
+                suggestions.append(f"💡 Did you mean 'ask {guess}'?")
+    elif topic not in VALID_TOPICS:
+        guess = get_closest_match(topic, VALID_TOPICS)
+        if guess:
+            error_msg = f"Unknown topic: '{topic}'"
+            suggestions.append(f"💡 Did you mean 'ask {guess}'?")
+        else:
+            error_msg = f"Unknown topic: '{topic}'"
+            suggestions.append(f"Valid topics: {', '.join(VALID_TOPICS)}")
+    elif not action:
+        error_msg = f"Missing action for 'ask {topic}'"
+        valid_actions = VALID_ACTIONS.get(topic, [])
+        suggestions.append(f"Valid actions: {', '.join(valid_actions)}")
+    elif action not in VALID_ACTIONS.get(topic, []):
+        valid = VALID_ACTIONS.get(topic, [])
+        guess = get_closest_match(action, valid)
+        if guess:
+            error_msg = f"Unknown action: '{action}' for topic '{topic}'"
+            suggestions.append(f"💡 Did you mean 'ask {topic} {guess}'?")
+        else:
+            error_msg = f"Unknown action: '{action}' for topic '{topic}'"
+            suggestions.append(f"Valid actions: {', '.join(valid)}")
+
+    # Add relevant examples based on context
+    if topic == "skills" or not topic:
+        examples.extend([
+            "ask skills list",
+            "ask skills audit backend/cli-spec --level strict",
+            "ask skills init my-skill --category backend --description 'Does something useful'",
+        ])
+    if topic == "graph" or not topic:
+        examples.extend([
+            "ask graph find security",
+            "ask graph related skill-builder --depth 2",
+            "ask graph info cli-spec",
+        ])
+    if topic == "repo" or not topic:
+        examples.extend([
+            "ask repo status",
+            "ask repo validate --ephemeral",
+        ])
+
+    # Build the full error message
+    full_message = f"❌ {error_msg}\n"
+    if suggestions:
+        full_message += "\n" + "\n".join(f"   {s}" for s in suggestions)
+    if examples:
+        full_message += "\n\n📚 Examples:\n"
+        full_message += "\n".join(f"   • {e}" for e in examples[:4])
+
+    result.errors.append(ErrorObject(
+        code="ERR_VALIDATION",
+        message=full_message,
+        fix_suggestion="Use 'ask --help' for full usage information."
+    ))
+
+    return result
+
+
+def try_fuzzy_parse(raw_args: List[str], robot_mode: bool = False) -> Tuple[Optional[str], Optional[str], List[str], Optional[str]]:
+    """
+    Try to parse args with fuzzy matching.
+    Returns: (topic, action, remaining_args, correction_note)
+    """
+    if not raw_args:
+        return None, None, [], None
+
+    correction_note = None
+    topic = raw_args[0]
+    remaining = raw_args[1:]
+
+    # Try fuzzy match on topic
+    if topic not in VALID_TOPICS:
+        # Check direct fuzzy matches
+        if topic in FUZZY_MATCHES:
+            corrected = FUZZY_MATCHES[topic]
+            if corrected in VALID_TOPICS:
+                correction_note = format_correction(topic, corrected, robot_mode)
+                topic = corrected
+        else:
+            # Try difflib
+            guess = get_closest_match(topic, VALID_TOPICS)
+            if guess:
+                correction_note = format_correction(topic, guess, robot_mode)
+                topic = guess
+
+    # Get action if available
+    action = None
+    if remaining:
+        action = remaining[0]
+        valid_actions = VALID_ACTIONS.get(topic, [])
+
+        if action not in valid_actions:
+            # Try fuzzy match on action
+            if action in FUZZY_MATCHES:
+                corrected = FUZZY_MATCHES[action]
+                if corrected in valid_actions:
+                    if correction_note:
+                        correction_note += f"\n   Also interpreting '{action}' as '{corrected}'"
+                    else:
+                        correction_note = format_correction(action, corrected, robot_mode)
+                    action = corrected
+            else:
+                guess = get_closest_match(action, valid_actions)
+                if guess:
+                    if correction_note:
+                        correction_note += f"\n   Also interpreting '{action}' as '{guess}'"
+                    else:
+                        correction_note = format_correction(action, guess, robot_mode)
+                    action = guess
+
+        remaining = remaining[1:]
+
+    return topic, action, remaining, correction_note
+
 def main():
     start_time = time.time()
-    
+
+    # Check for robot mode in raw args before parsing
+    raw_args = sys.argv[1:]
+    robot_mode = any(flag in raw_args for flag in ["--robot", "--agent-mode", "-r"])
+
+    # Remove robot flags before argparse sees them
+    filtered_args = [a for a in raw_args if a not in ["--robot", "--agent-mode", "-r"]]
+
     # Use a parent parser for global flags to share them with subcommands
     global_parser = argparse.ArgumentParser(add_help=False)
-    global_parser.add_argument("--json", action="store_true", help="Output results in JSON format")
+    global_parser.add_argument("--json", action="store_true", help="Output results in JSON format for programmatic use")
     global_parser.add_argument("--trace-id", help="Trace ID for correlating logs", default=os.environ.get("ASK_TRACE_ID"))
-    
-    parser = argparse.ArgumentParser(prog="ask", description="Agent Skills Kit CLI", parents=[global_parser])
-    subparsers = parser.add_subparsers(dest="topic")
+    global_parser.add_argument("--robot", "--agent-mode", "-r", dest="robot_mode", action="store_true",
+                               help="Enable AI-friendly mode: flexible parsing, helpful corrections, verbose guidance")
+
+    parser = argparse.ArgumentParser(
+        prog="ask",
+        description="Agent Skills Kit CLI - Designed for AI coding agents. Use --robot for maximum flexibility.",
+        parents=[global_parser],
+        epilog="Examples:\n"
+               "  ask repo status                    # Check repository health\n"
+               "  ask skills list --json             # List skills as JSON\n"
+               "  ask graph find security --robot    # Fuzzy search with corrections\n"
+               "  ask skills audit backend/cli-spec  # Validate a skill\n"
+               "\n🤖 Robot mode (--robot): Auto-corrects minor syntax errors when intent is clear."
+    )
+    subparsers = parser.add_subparsers(dest="topic", help="Command topics (use --robot for fuzzy matching)")
     
     # --- repo ---
     repo_parser = subparsers.add_parser("repo", help="Repository management", parents=[global_parser])
@@ -137,15 +363,81 @@ def main():
 
     graph_subparsers.add_parser("topics", help="List all topic clusters", parents=[global_parser])
 
-    args = parser.parse_args()
-    
+    # Pre-parse to check for help
+    if not filtered_args or filtered_args[0] in ("-h", "--help"):
+        parser.print_help()
+        sys.exit(0)
+
+    # Try fuzzy parsing if robot mode or if initial parse fails
+    parsed_topic = None
+    parsed_action = None
+    remaining_args = []
+    correction_note = None
+
+    try:
+        args = parser.parse_args(filtered_args)
+        parsed_topic = args.topic
+        parsed_action = getattr(args, 'action', None)
+    except SystemExit:
+        # Parse failed - try fuzzy matching if robot mode
+        if robot_mode:
+            parsed_topic, parsed_action, remaining_args, correction_note = try_fuzzy_parse(filtered_args, robot_mode=True)
+            if not parsed_topic:
+                # Still couldn't parse - show helpful error
+                repo_root = find_repo_root()
+                result = build_helpful_error(None, None, filtered_args, repo_root)
+                print(result.to_json() if "--json" in raw_args else result.errors[0].message)
+                sys.exit(2)
+        else:
+            # Not in robot mode - show standard error with hint
+            print("❌ Unknown command. Use --robot to enable flexible parsing.")
+            print("\n📚 Quick examples:")
+            print("  ask skills list")
+            print("  ask repo status")
+            print("  ask graph find security")
+            sys.exit(2)
+
+    # If we have fuzzy matches, rebuild args
+    if correction_note and (parsed_topic not in VALID_TOPICS or parsed_action not in VALID_ACTIONS.get(parsed_topic, [])):
+        # Still invalid after fuzzy matching
+        repo_root = find_repo_root()
+        result = build_helpful_error(parsed_topic, parsed_action, remaining_args, repo_root)
+        if "--json" in raw_args:
+            print(result.to_json())
+        else:
+            print(result.errors[0].message)
+            if correction_note:
+                print(f"\n{correction_note}")
+        sys.exit(2)
+
+    # Re-parse with corrected values if needed
+    if correction_note and parsed_topic:
+        # Rebuild the command line with corrected values
+        corrected_args = [parsed_topic]
+        if parsed_action:
+            corrected_args.append(parsed_action)
+        corrected_args.extend(remaining_args)
+        # Add back any flags
+        for flag in ["--json", "--trace-id"]:
+            if flag in raw_args:
+                idx = raw_args.index(flag)
+                corrected_args.append(flag)
+                if idx + 1 < len(raw_args) and not raw_args[idx + 1].startswith("-"):
+                    corrected_args.append(raw_args[idx + 1])
+
+        args = parser.parse_args(corrected_args)
+
     repo_root = find_repo_root()
     result = CallResult()
     if args.trace_id:
         result.trace_id = args.trace_id
-        
+
     result.metadata["command"] = " ".join(sys.argv[1:])
-    
+
+    # Print correction note if in human mode
+    if correction_note and not args.json:
+        print(f"{correction_note}\n")
+
     if args.topic == "repo":
         if args.action == "status":
             result = repo_status(repo_root, verbose=args.verbose)
@@ -207,6 +499,9 @@ def main():
     # Dispatch Output
     if args.json:
         result.metadata["command"] = " ".join(sys.argv[1:])
+        # Add correction note to metadata if present
+        if correction_note:
+            result.metadata["correction_note"] = correction_note.replace("\n", " ")
         print(result.to_json(repo_root=str(repo_root)))
     else:
         if result.status == "success":
@@ -310,21 +605,61 @@ def main():
             else:
                 parser.print_help()
         else:
-            print(f"❌ Error: {result.errors[0].message if result.errors else 'Unknown error'}")
-            if args.topic == "skills" and args.action == "audit":
-                if "diagnostics" in result.data: print(result.data["diagnostics"]["stdout"])
-                if "security_gate" in result.data: print(result.data["security_gate"]["stdout"])
-            elif args.topic == "skills" and args.action in ("install", "fold", "init"):
-                if "raw_output" in result.data: print(result.data["raw_output"])
-                if "raw_error" in result.data: print(result.data["raw_error"])
-            elif args.topic == "plugins" and args.action == "init":
-                if "raw_output" in result.data: print(result.data["raw_output"])
-                if "raw_error" in result.data: print(result.data["raw_error"])
-            elif args.topic == "evals" and args.action == "run":
-                if "raw_output" in result.data: print(result.data["raw_output"])
-                if "raw_error" in result.data: print(result.data["raw_error"])
-            elif args.topic == "repo" and args.action == "validate":
-                print(result.data.get("raw_output", ""))
+            # Enhanced error output with examples
+            error = result.errors[0] if result.errors else ErrorObject(code="ERR_RUNTIME", message="Unknown error")
+
+            if args.json:
+                # JSON output already handled above
+                pass
+            else:
+                print(f"❌ Error: {error.message}")
+
+                # Add fix suggestion if available
+                if error.fix_suggestion:
+                    print(f"\n💡 {error.fix_suggestion}")
+
+                # Add examples based on the current context
+                if args.topic == "skills":
+                    if args.action == "audit":
+                        if "diagnostics" in result.data: print(result.data["diagnostics"]["stdout"])
+                        if "security_gate" in result.data: print(result.data["security_gate"]["stdout"])
+                        print("\n📚 Audit examples:")
+                        print("   ask skills audit backend/cli-spec --level compat")
+                        print("   ask skills audit backend/cli-spec --level strict")
+                        print("   ask skills audit utilities/skill-builder --level strict")
+                    elif args.action in ("install", "fold", "init"):
+                        if "raw_output" in result.data: print(result.data["raw_output"])
+                        if "raw_error" in result.data: print(result.data["raw_error"])
+                        if args.action == "init":
+                            print("\n📚 Init examples:")
+                            print("   ask skills init my-skill --category backend --description 'Does X'")
+                            print("   ask skills init security-guard --category auth --description 'Validates Y'")
+                        elif args.action == "install":
+                            print("\n📚 Install examples:")
+                            print("   ask skills install https://github.com/user/repo --remediate")
+                elif args.topic == "plugins" and args.action == "init":
+                    if "raw_output" in result.data: print(result.data["raw_output"])
+                    if "raw_error" in result.data: print(result.data["raw_error"])
+                    print("\n📚 Plugin examples:")
+                    print("   ask plugins init my-plugin --with-marketplace")
+                elif args.topic == "evals":
+                    if "raw_output" in result.data: print(result.data["raw_output"])
+                    if "raw_error" in result.data: print(result.data["raw_error"])
+                    print("\n📚 Eval examples:")
+                    print("   ask evals run backend/cli-spec --mode smoke")
+                    print("   ask evals run backend/cli-spec --mode release")
+                elif args.topic == "graph":
+                    print("\n📚 Graph examples:")
+                    print("   ask graph find security")
+                    print("   ask graph related skill-builder --depth 2")
+                    print("   ask graph chain skill-creator skill-installer")
+                    print("   ask graph info cli-spec")
+                elif args.topic == "repo":
+                    if args.action == "validate":
+                        print(result.data.get("raw_output", ""))
+                    print("\n📚 Repo examples:")
+                    print("   ask repo status")
+                    print("   ask repo validate --ephemeral")
 
     # Semantic Exit Code
     if result.status == "success":
