@@ -33,15 +33,25 @@ def load_codex_config():
 
 def build_antigravity_config(codex_config):
     mcp_servers = {}
+    NAME_MAPPING = {
+        "repo-prompt": "repoprompt",
+    }
     
-    # Source .env files and then execute the configured command safely.
-    wrapper = "set -a; [ -f ~/.codex/.env ] && . ~/.codex/.env >/dev/null 2>&1; [ -f ~/dev/config/.env ] && . ~/dev/config/.env >/dev/null 2>&1; set +a"
+    # Source .env files with a timeout to avoid blocking on empty FIFOs
+    # We use a short timeout; if it fails, we assume the environment is already set or 1Password is locked.
+    source_env = (
+        'for f in ~/.codex/.env ~/dev/config/.env; do '
+        '[ -f "$f" ] && { timeout 0.5s sh -c ". $f && env -0" | xargs -0 -I {} export {} 2>/dev/null || true; }; '
+        'done'
+    )
+    wrapper = f"set -a; {source_env}; set +a"
     
     servers = codex_config.get("mcp_servers", {})
     for server_name, config in servers.items():
         if config.get("enabled") is False:
             continue
             
+        mcp_name = NAME_MAPPING.get(server_name, server_name)
         mcp_obj = {}
         
         # 1. STDIO servers
@@ -95,7 +105,7 @@ def build_antigravity_config(codex_config):
         else:
             continue
             
-        mcp_servers[server_name] = mcp_obj
+        mcp_servers[mcp_name] = mcp_obj
 
     # Antigravity ships sequentially-thinking by default typically
     if "sequential-thinking" not in mcp_servers:

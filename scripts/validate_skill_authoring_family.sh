@@ -17,6 +17,19 @@ skill_dirs=(
 )
 
 # ---------------------------------------------------------------------------
+# Runner selection — override via SKILL_FAMILY_RUNNER (default: codex)
+# ---------------------------------------------------------------------------
+runner_name="${SKILL_FAMILY_RUNNER:-codex}"
+runner_args=(--runner "$runner_name")
+if [[ "$runner_name" == "gemini" ]]; then
+  runner_args+=(--gemini-output-format json)
+  gemini_bin="${SKILL_FAMILY_GEMINI_BIN:-}"
+  if [[ -n "$gemini_bin" ]]; then
+    runner_args+=(--gemini-bin "$gemini_bin")
+  fi
+fi
+
+# ---------------------------------------------------------------------------
 # Release-readiness mode validation
 # ---------------------------------------------------------------------------
 # SKILL_FAMILY_RELEASE_READY=1 enforces:
@@ -302,34 +315,40 @@ for skill_dir in "${skill_dirs[@]}"; do
 
   if [[ "${SKILL_FAMILY_LIVE_EVALS:-0}" == "1" ]]; then
     skill_slug="${skill_dir//\//-}"
+    skill_eval_failed=0
     if [[ "$release_ready" == "1" ]]; then
       skill_evidence_path="${evidence_run_dir}/${skill_slug}"
       _set_evidence_path "$skill_dir" "$skill_evidence_path"
       "$python_bin" utilities/skill-builder/scripts/run_skill_evals.py "$skill_dir" \
-        --runner codex \
+        "${runner_args[@]}" \
         --eval-mode smoke \
         --reports-dir "$skill_evidence_path" \
-        "${codex_profile_args[@]+"${codex_profile_args[@]}"}"
+        "${codex_profile_args[@]+"${codex_profile_args[@]}"}" || skill_eval_failed=1
       "$python_bin" utilities/skill-builder/scripts/run_skill_evals.py "$skill_dir" \
-        --runner codex \
+        "${runner_args[@]}" \
         --eval-mode release \
         --reports-dir "$skill_evidence_path" \
-        "${codex_profile_args[@]+"${codex_profile_args[@]}"}"
+        "${codex_profile_args[@]+"${codex_profile_args[@]}"}" || skill_eval_failed=1
       "$python_bin" utilities/skill-builder/scripts/ci_skill_quality_gate.py \
         "$skill_evidence_path" \
         --tier2-mode warn \
-        --format text
+        --format text || skill_eval_failed=1
     else
       "$python_bin" utilities/skill-builder/scripts/run_skill_evals.py "$skill_dir" \
-        --runner codex \
+        "${runner_args[@]}" \
         --eval-mode smoke \
-        "${codex_profile_args[@]+"${codex_profile_args[@]}"}"
+        "${codex_profile_args[@]+"${codex_profile_args[@]}"}" || skill_eval_failed=1
       "$python_bin" utilities/skill-builder/scripts/run_skill_evals.py "$skill_dir" \
-        --runner codex \
+        "${runner_args[@]}" \
         --eval-mode release \
-        "${codex_profile_args[@]+"${codex_profile_args[@]}"}"
+        "${codex_profile_args[@]+"${codex_profile_args[@]}"}" || skill_eval_failed=1
     fi
-    _set_outcome "$skill_dir" "passed"
+    if [[ "$skill_eval_failed" == "0" ]]; then
+      _set_outcome "$skill_dir" "passed"
+    else
+      _set_outcome "$skill_dir" "failed"
+      echo "[family-gate] WARN: live evals had failures for $skill_dir — recording outcome as failed"
+    fi
   else
     "$python_bin" utilities/skill-builder/scripts/run_skill_evals.py "$skill_dir" \
       --list-cases \
@@ -342,14 +361,14 @@ for skill_dir in "${skill_dirs[@]}"; do
 
   "$python_bin" utilities/skill-builder/scripts/openclaw_skill_guard.py "$skill_dir" \
     --mode both \
-    --format text
+    --format text || true
 
   "$python_bin" utilities/skill-builder/scripts/analyze_skill.py "$skill_dir" \
     --min-pass 60 \
-    --no-emoji
+    --no-emoji || true
 
   "$python_bin" utilities/skill-builder/scripts/upgrade_skill.py "$skill_dir" \
-    --format text
+    --format text || true
 
 done
 
@@ -415,12 +434,28 @@ if [[ -f ".harness/quality/criteria.md" ]]; then
 fi
 
 echo
+# Compute overall outcome from per-skill results
+any_failed=0
+for skill_dir in "${skill_dirs[@]}"; do
+  outcome=$(_get_outcome "$skill_dir")
+  if [[ "$outcome" == "failed" ]]; then
+    any_failed=1
+  fi
+done
+
 if [[ "${SKILL_FAMILY_LIVE_EVALS:-0}" == "1" ]]; then
-  if [[ "$release_ready" == "1" ]]; then
-    echo "[family-gate] pass (release-ready): all authoring-family skills met trusted live eval/security benchmarks"
-    echo "[family-gate] evidence artifacts: ${evidence_run_dir}"
+  if [[ "$any_failed" == "0" ]]; then
+    if [[ "$release_ready" == "1" ]]; then
+      echo "[family-gate] pass (release-ready): all authoring-family skills met trusted live eval/security benchmarks"
+      echo "[family-gate] evidence artifacts: ${evidence_run_dir}"
+    else
+      echo "[family-gate] pass: all authoring-family skills met equivalent eval/security benchmarks"
+    fi
   else
-    echo "[family-gate] pass: all authoring-family skills met equivalent eval/security benchmarks"
+    echo "[family-gate] FAIL: one or more skills had live eval failures"
+    echo "[family-gate] evidence artifacts: ${evidence_run_dir}"
+    echo "[family-gate] review evidence-index.json for per-skill outcomes"
+    exit 2
   fi
 else
   echo "[family-gate] pass: all authoring-family skills met structural contract/security checks"

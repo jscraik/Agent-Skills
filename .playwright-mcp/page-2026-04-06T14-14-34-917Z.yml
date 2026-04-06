@@ -1,0 +1,1697 @@
+- generic [ref=e2]:
+  - region
+  - generic [ref=e3]:
+    - link "Skip to content" [ref=e4] [cursor=pointer]:
+      - /url: "#start-of-content"
+    - banner [ref=e6]:
+      - heading "Navigation Menu" [level=2] [ref=e7]
+      - generic [ref=e8]:
+        - link "Homepage" [ref=e10] [cursor=pointer]:
+          - /url: /
+          - img [ref=e11]
+        - generic [ref=e13]:
+          - navigation "Global" [ref=e16]:
+            - list [ref=e17]:
+              - listitem [ref=e18]:
+                - button "Platform" [ref=e20] [cursor=pointer]:
+                  - text: Platform
+                  - img [ref=e21]
+              - listitem [ref=e23]:
+                - button "Solutions" [ref=e25] [cursor=pointer]:
+                  - text: Solutions
+                  - img [ref=e26]
+              - listitem [ref=e28]:
+                - button "Resources" [ref=e30] [cursor=pointer]:
+                  - text: Resources
+                  - img [ref=e31]
+              - listitem [ref=e33]:
+                - button "Open Source" [ref=e35] [cursor=pointer]:
+                  - text: Open Source
+                  - img [ref=e36]
+              - listitem [ref=e38]:
+                - button "Enterprise" [ref=e40] [cursor=pointer]:
+                  - text: Enterprise
+                  - img [ref=e41]
+              - listitem [ref=e43]:
+                - link "Pricing" [ref=e44] [cursor=pointer]:
+                  - /url: https://github.com/pricing
+                  - generic [ref=e45]: Pricing
+          - generic [ref=e46]:
+            - button "Search or jump to…" [ref=e49] [cursor=pointer]:
+              - img [ref=e51]
+            - link "Sign in" [ref=e54] [cursor=pointer]:
+              - /url: /login?return_to=https%3A%2F%2Fgithub.com%2Fjscraik%2FAgent-Skills%2Ftree%2Ffeat%2Fce-ops-skills-gold-standard-upgrade
+            - link "Sign up" [ref=e55] [cursor=pointer]:
+              - /url: /signup?ref_cta=Sign+up&ref_loc=header+logged+out&ref_page=%2F%3Cuser-name%3E%2F%3Crepo-name%3E%2Ffiles%2Fdisambiguate&source=header-repo&source_repo=jscraik%2FAgent-Skills
+            - button "Appearance settings" [ref=e58] [cursor=pointer]:
+              - img
+  - main [ref=e62]:
+    - generic [ref=e63]:
+      - generic [ref=e64]:
+        - generic [ref=e66]:
+          - img [ref=e67]
+          - link "jscraik" [ref=e70] [cursor=pointer]:
+            - /url: /jscraik
+          - generic [ref=e71]: /
+          - strong [ref=e72]:
+            - link "Agent-Skills" [ref=e73] [cursor=pointer]:
+              - /url: /jscraik/Agent-Skills
+          - generic [ref=e74]: Public
+        - generic [ref=e75]:
+          - list:
+            - listitem [ref=e76]:
+              - link "You must be signed in to change notification settings" [ref=e77] [cursor=pointer]:
+                - /url: /login?return_to=%2Fjscraik%2FAgent-Skills
+                - img [ref=e78]
+                - text: Notifications
+            - listitem [ref=e80]:
+              - link "Fork 1" [ref=e81] [cursor=pointer]:
+                - /url: /login?return_to=%2Fjscraik%2FAgent-Skills
+                - img [ref=e82]
+                - text: Fork
+                - generic "1" [ref=e84]
+            - listitem [ref=e85]:
+              - link "You must be signed in to star a repository" [ref=e87] [cursor=pointer]:
+                - /url: /login?return_to=%2Fjscraik%2FAgent-Skills
+                - img [ref=e88]
+                - text: Star
+                - generic "2 users starred this repository" [ref=e90]: "2"
+      - navigation "Repository" [ref=e91]:
+        - list [ref=e92]:
+          - listitem [ref=e93]:
+            - link "Code" [ref=e94] [cursor=pointer]:
+              - /url: /jscraik/Agent-Skills/tree/feat/ce-ops-skills-gold-standard-upgrade
+              - img [ref=e95]
+              - generic [ref=e97]: Code
+          - listitem [ref=e98]:
+            - link "Issues" [ref=e99] [cursor=pointer]:
+              - /url: /jscraik/Agent-Skills/issues
+              - img [ref=e100]
+              - generic [ref=e103]: Issues
+          - listitem [ref=e104]:
+            - link "Pull requests 1" [ref=e105] [cursor=pointer]:
+              - /url: /jscraik/Agent-Skills/pulls
+              - img [ref=e106]
+              - generic [ref=e108]: Pull requests
+              - generic "1" [ref=e109]
+          - listitem [ref=e110]:
+            - link "Actions" [ref=e111] [cursor=pointer]:
+              - /url: /jscraik/Agent-Skills/actions
+              - img [ref=e112]
+              - generic [ref=e114]: Actions
+          - listitem [ref=e115]:
+            - link "Projects" [ref=e116] [cursor=pointer]:
+              - /url: /jscraik/Agent-Skills/projects
+              - img [ref=e117]
+              - generic [ref=e119]: Projects
+          - listitem [ref=e120]:
+            - link "Security and quality" [ref=e121] [cursor=pointer]:
+              - /url: /jscraik/Agent-Skills/security
+              - img [ref=e122]
+              - generic [ref=e124]: Security and quality
+          - listitem [ref=e125]:
+            - link "Insights" [ref=e126] [cursor=pointer]:
+              - /url: /jscraik/Agent-Skills/pulse
+              - img [ref=e127]
+              - generic [ref=e129]: Insights
+    - generic [ref=e142]:
+      - heading "jscraik/Agent-Skills" [level=1] [ref=e144]
+      - generic [ref=e145]:
+        - generic [ref=e148]:
+          - generic [ref=e149]:
+            - generic [ref=e150]:
+              - button "feat/ce-ops-skills-gold-standard-upgrade branch" [ref=e152] [cursor=pointer]:
+                - generic [ref=e153]:
+                  - generic [ref=e155]:
+                    - img [ref=e157]
+                    - generic [ref=e160]: feat/ce-ops-skills-gold-standard-upgrade
+                  - generic:
+                    - img
+              - generic [ref=e161]:
+                - link "9 Branches" [ref=e1596] [cursor=pointer]:
+                  - /url: /jscraik/Agent-Skills/branches
+                  - generic [ref=e163]:
+                    - generic:
+                      - img
+                    - generic [ref=e1597]:
+                      - strong [ref=e1598]: "9"
+                      - text: Branches
+                - link "1 Tag" [ref=e1599] [cursor=pointer]:
+                  - /url: /jscraik/Agent-Skills/tags
+                  - generic [ref=e166]:
+                    - generic:
+                      - img
+                    - generic [ref=e1600]:
+                      - strong [ref=e1601]: "1"
+                      - text: Tag
+            - generic [ref=e168]:
+              - generic [ref=e172]:
+                - img [ref=e174]
+                - combobox "Go to file" [ref=e176]
+              - button "Code" [ref=e177] [cursor=pointer]:
+                - generic [ref=e178]:
+                  - generic:
+                    - img
+                  - generic [ref=e179]: Code
+                  - generic:
+                    - img
+          - generic [ref=e180]:
+            - generic [ref=e1602]:
+              - text: This branch is
+              - link "33 commits ahead of" [ref=e1603] [cursor=pointer]:
+                - /url: /jscraik/Agent-Skills/compare/main...feat/ce-ops-skills-gold-standard-upgrade
+              - text: and
+              - link "3 commits behind" [ref=e1604] [cursor=pointer]:
+                - /url: /jscraik/Agent-Skills/compare/feat/ce-ops-skills-gold-standard-upgrade...main
+              - generic [ref=e1605]: main
+              - text: .
+            - link "#86" [ref=e1607] [cursor=pointer]:
+              - /url: /jscraik/Agent-Skills/pull/86
+              - img [ref=e1608]
+              - text: "#86"
+          - generic [ref=e183]:
+            - generic [ref=e184]:
+              - heading "Folders and files" [level=2] [ref=e185]
+              - table "Folders and files" [ref=e186]:
+                - rowgroup:
+                  - row "Name Last commit message Last commit date":
+                    - columnheader "Name"
+                    - columnheader "Last commit message":
+                      - generic "Last commit message"
+                    - columnheader "Last commit date":
+                      - generic "Last commit date"
+                - rowgroup [ref=e187]:
+                  - 'row "Latest commit jscraik commits by jscraik fix: restore adjacency edges by adding to SKILL.md See Also tables Open commit details failure Commit 01d426d · Apr 6, 20262 minutes ago History 450 Commits" [ref=e1610]':
+                    - 'cell "Latest commit jscraik commits by jscraik fix: restore adjacency edges by adding to SKILL.md See Also tables Open commit details failure Commit 01d426d · Apr 6, 20262 minutes ago History 450 Commits" [ref=e1611]':
+                      - generic [ref=e190]:
+                        - heading "Latest commit" [level=2] [ref=e191]
+                        - generic [ref=e1612]:
+                          - generic [ref=e1614]:
+                            - link "jscraik" [ref=e1615] [cursor=pointer]:
+                              - /url: /jscraik
+                              - img "jscraik" [ref=e1616]
+                            - link "commits by jscraik" [ref=e1617] [cursor=pointer]:
+                              - /url: /jscraik/Agent-Skills/commits?author=jscraik
+                              - text: jscraik
+                          - generic [ref=e1618]:
+                            - 'link "fix: restore adjacency edges by adding to SKILL.md See Also tables" [ref=e1621] [cursor=pointer]':
+                              - /url: /jscraik/Agent-Skills/commit/01d426dad912aa90c4c12e84e5746f913cf5ce5f
+                            - button "Open commit details" [ref=e1622] [cursor=pointer]:
+                              - img [ref=e1623]
+                            - button "failure" [ref=e1625] [cursor=pointer]:
+                              - img [ref=e1626]
+                        - generic [ref=e193]:
+                          - generic [ref=e1629]:
+                            - link "Commit 01d426d" [ref=e1630] [cursor=pointer]:
+                              - /url: /jscraik/Agent-Skills/commit/01d426dad912aa90c4c12e84e5746f913cf5ce5f
+                              - text: 01d426d
+                            - text: ·
+                            - generic "Apr 6, 2026, 3:11 PM GMT+1" [ref=e1631]: Apr 6, 20262 minutes ago
+                          - generic [ref=e194]:
+                            - heading "History" [level=2] [ref=e195]
+                            - link "450 Commits" [ref=e196] [cursor=pointer]:
+                              - /url: /jscraik/Agent-Skills/commits/feat/ce-ops-skills-gold-standard-upgrade/
+                              - generic [ref=e197]:
+                                - generic:
+                                  - img
+                                - generic [ref=e198]: 450 Commits
+                  - 'row ".agent, (Directory) chore: close outstanding readiness and governance updates (#76) Apr 3, 20264 days ago" [ref=e1632]':
+                    - cell ".agent, (Directory)" [ref=e200]:
+                      - generic [ref=e201]:
+                        - img [ref=e202]
+                        - link ".agent, (Directory)" [ref=e207] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/tree/feat/ce-ops-skills-gold-standard-upgrade/.agent
+                          - text: .agent
+                    - 'cell "chore: close outstanding readiness and governance updates (#76)" [ref=e1633]':
+                      - generic [ref=e1635]:
+                        - 'link "chore: close outstanding readiness and governance updates (" [ref=e1636] [cursor=pointer]':
+                          - /url: /jscraik/Agent-Skills/commit/3c0bcb40125ea7fa895abf888475bca7fcd7fe64
+                        - link "#76" [ref=e1637] [cursor=pointer]:
+                          - /url: https://github.com/jscraik/Agent-Skills/pull/76
+                        - link ")" [ref=e1638] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/commit/3c0bcb40125ea7fa895abf888475bca7fcd7fe64
+                    - cell "Apr 3, 20264 days ago" [ref=e1639]:
+                      - generic [ref=e211]: Apr 3, 20264 days ago
+                  - 'row ".codex/environments, (Directory) chore: close outstanding readiness and governance updates (#76) Apr 3, 20264 days ago" [ref=e1640]':
+                    - cell ".codex/environments, (Directory)" [ref=e214]:
+                      - generic [ref=e215]:
+                        - img [ref=e216]
+                        - link ".codex/environments, (Directory)" [ref=e221] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/tree/feat/ce-ops-skills-gold-standard-upgrade/.codex/environments
+                          - text: .codex/environments
+                    - 'cell "chore: close outstanding readiness and governance updates (#76)" [ref=e1641]':
+                      - generic [ref=e1643]:
+                        - 'link "chore: close outstanding readiness and governance updates (" [ref=e1644] [cursor=pointer]':
+                          - /url: /jscraik/Agent-Skills/commit/3c0bcb40125ea7fa895abf888475bca7fcd7fe64
+                        - link "#76" [ref=e1645] [cursor=pointer]:
+                          - /url: https://github.com/jscraik/Agent-Skills/pull/76
+                        - link ")" [ref=e1646] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/commit/3c0bcb40125ea7fa895abf888475bca7fcd7fe64
+                    - cell "Apr 3, 20264 days ago" [ref=e1647]:
+                      - generic [ref=e225]: Apr 3, 20264 days ago
+                  - 'row ".diagram, (Directory) chore: close outstanding readiness and governance updates (#76) Apr 3, 20264 days ago" [ref=e1648]':
+                    - cell ".diagram, (Directory)" [ref=e228]:
+                      - generic [ref=e229]:
+                        - img [ref=e230]
+                        - link ".diagram, (Directory)" [ref=e235] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/tree/feat/ce-ops-skills-gold-standard-upgrade/.diagram
+                          - text: .diagram
+                    - 'cell "chore: close outstanding readiness and governance updates (#76)" [ref=e1649]':
+                      - generic [ref=e1651]:
+                        - 'link "chore: close outstanding readiness and governance updates (" [ref=e1652] [cursor=pointer]':
+                          - /url: /jscraik/Agent-Skills/commit/3c0bcb40125ea7fa895abf888475bca7fcd7fe64
+                        - link "#76" [ref=e1653] [cursor=pointer]:
+                          - /url: https://github.com/jscraik/Agent-Skills/pull/76
+                        - link ")" [ref=e1654] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/commit/3c0bcb40125ea7fa895abf888475bca7fcd7fe64
+                    - cell "Apr 3, 20264 days ago" [ref=e1655]:
+                      - generic [ref=e239]: Apr 3, 20264 days ago
+                  - 'row ".github, (Directory) fix: address CI failures and adjacency drift Apr 6, 20267 minutes ago" [ref=e1656]':
+                    - cell ".github, (Directory)" [ref=e242]:
+                      - generic [ref=e243]:
+                        - img [ref=e244]
+                        - link ".github, (Directory)" [ref=e249] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/tree/feat/ce-ops-skills-gold-standard-upgrade/.github
+                          - text: .github
+                    - 'cell "fix: address CI failures and adjacency drift" [ref=e1657]':
+                      - 'link "fix: address CI failures and adjacency drift" [ref=e1660] [cursor=pointer]':
+                        - /url: /jscraik/Agent-Skills/commit/f9bd9fccbc3f904c3ba8ced5f8880d04c9e4409f
+                    - cell "Apr 6, 20267 minutes ago" [ref=e1661]:
+                      - generic [ref=e253]: Apr 6, 20267 minutes ago
+                  - 'row ".harness, (Directory) fix: address Codex review comments on PR #86 Apr 6, 20261 hour ago" [ref=e1662]':
+                    - cell ".harness, (Directory)" [ref=e256]:
+                      - generic [ref=e257]:
+                        - img [ref=e258]
+                        - link ".harness, (Directory)" [ref=e263] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/tree/feat/ce-ops-skills-gold-standard-upgrade/.harness
+                          - text: .harness
+                    - 'cell "fix: address Codex review comments on PR #86" [ref=e1663]':
+                      - generic [ref=e1665]:
+                        - 'link "fix: address Codex review comments on PR" [ref=e1666] [cursor=pointer]':
+                          - /url: /jscraik/Agent-Skills/commit/3eb346d8f3a625f725e03e306689334548d9188a
+                        - link "#86" [ref=e1667] [cursor=pointer]:
+                          - /url: https://github.com/jscraik/Agent-Skills/pull/86
+                    - cell "Apr 6, 20261 hour ago" [ref=e1668]:
+                      - generic [ref=e267]: Apr 6, 20261 hour ago
+                  - 'row ".playwright-mcp, (Directory) security: fix clear-text logging and formatting vulnerabilities (This commit closes pull request #47. … Mar 11, 2026last month" [ref=e1669]':
+                    - cell ".playwright-mcp, (Directory)" [ref=e270]:
+                      - generic [ref=e271]:
+                        - img [ref=e272]
+                        - link ".playwright-mcp, (Directory)" [ref=e277] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/tree/feat/ce-ops-skills-gold-standard-upgrade/.playwright-mcp
+                          - text: .playwright-mcp
+                    - 'cell "security: fix clear-text logging and formatting vulnerabilities (This commit closes pull request #47. …" [ref=e1670]':
+                      - generic [ref=e1672]:
+                        - 'link "security: fix clear-text logging and formatting vulnerabilities (" [ref=e1673] [cursor=pointer]':
+                          - /url: /jscraik/Agent-Skills/commit/2de4a0901424dcfef9dee870404967512ac930be
+                        - 'generic "This commit closes pull request #47." [ref=e1674]':
+                          - link "fixes" [ref=e1675] [cursor=pointer]:
+                            - /url: /jscraik/Agent-Skills/commit/2de4a0901424dcfef9dee870404967512ac930be
+                        - link "…" [ref=e1676] [cursor=pointer]:
+                          - /url: https://github.com/jscraik/Agent-Skills/pull/47
+                    - cell "Mar 11, 2026last month" [ref=e1677]:
+                      - generic [ref=e281]: Mar 11, 2026last month
+                  - 'row "COMPLIANCE, (Directory) feat: add governance baseline sweep artifacts (#12) Feb 21, 20262 months ago" [ref=e1678]':
+                    - cell "COMPLIANCE, (Directory)" [ref=e284]:
+                      - generic [ref=e285]:
+                        - img [ref=e286]
+                        - link "COMPLIANCE, (Directory)" [ref=e291] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/tree/feat/ce-ops-skills-gold-standard-upgrade/COMPLIANCE
+                          - text: COMPLIANCE
+                    - 'cell "feat: add governance baseline sweep artifacts (#12)" [ref=e1679]':
+                      - generic [ref=e1681]:
+                        - 'link "feat: add governance baseline sweep artifacts (" [ref=e1682] [cursor=pointer]':
+                          - /url: /jscraik/Agent-Skills/commit/8924bc66a4585f5c110b181d981d21f8d1309a45
+                        - link "#12" [ref=e1683] [cursor=pointer]:
+                          - /url: https://github.com/jscraik/Agent-Skills/pull/12
+                        - link ")" [ref=e1684] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/commit/8924bc66a4585f5c110b181d981d21f8d1309a45
+                    - cell "Feb 21, 20262 months ago" [ref=e1685]:
+                      - generic [ref=e295]: Feb 21, 20262 months ago
+                  - 'row "EVALUATION, (Directory) feat: add governance baseline sweep artifacts (#12) Feb 21, 20262 months ago" [ref=e1686]':
+                    - cell "EVALUATION, (Directory)" [ref=e298]:
+                      - generic [ref=e299]:
+                        - img [ref=e300]
+                        - link "EVALUATION, (Directory)" [ref=e305] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/tree/feat/ce-ops-skills-gold-standard-upgrade/EVALUATION
+                          - text: EVALUATION
+                    - 'cell "feat: add governance baseline sweep artifacts (#12)" [ref=e1687]':
+                      - generic [ref=e1689]:
+                        - 'link "feat: add governance baseline sweep artifacts (" [ref=e1690] [cursor=pointer]':
+                          - /url: /jscraik/Agent-Skills/commit/8924bc66a4585f5c110b181d981d21f8d1309a45
+                        - link "#12" [ref=e1691] [cursor=pointer]:
+                          - /url: https://github.com/jscraik/Agent-Skills/pull/12
+                        - link ")" [ref=e1692] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/commit/8924bc66a4585f5c110b181d981d21f8d1309a45
+                    - cell "Feb 21, 20262 months ago" [ref=e1693]:
+                      - generic [ref=e309]: Feb 21, 20262 months ago
+                  - 'row "GOVERNANCE, (Directory) feat: add governance baseline sweep artifacts (#12) Feb 21, 20262 months ago" [ref=e1694]':
+                    - cell "GOVERNANCE, (Directory)" [ref=e312]:
+                      - generic [ref=e313]:
+                        - img [ref=e314]
+                        - link "GOVERNANCE, (Directory)" [ref=e319] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/tree/feat/ce-ops-skills-gold-standard-upgrade/GOVERNANCE
+                          - text: GOVERNANCE
+                    - 'cell "feat: add governance baseline sweep artifacts (#12)" [ref=e1695]':
+                      - generic [ref=e1697]:
+                        - 'link "feat: add governance baseline sweep artifacts (" [ref=e1698] [cursor=pointer]':
+                          - /url: /jscraik/Agent-Skills/commit/8924bc66a4585f5c110b181d981d21f8d1309a45
+                        - link "#12" [ref=e1699] [cursor=pointer]:
+                          - /url: https://github.com/jscraik/Agent-Skills/pull/12
+                        - link ")" [ref=e1700] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/commit/8924bc66a4585f5c110b181d981d21f8d1309a45
+                    - cell "Feb 21, 20262 months ago" [ref=e1701]:
+                      - generic [ref=e323]: Feb 21, 20262 months ago
+                  - 'row "SECURITY, (Directory) feat: add governance baseline sweep artifacts (#12) Feb 21, 20262 months ago" [ref=e1702]':
+                    - cell "SECURITY, (Directory)" [ref=e326]:
+                      - generic [ref=e327]:
+                        - img [ref=e328]
+                        - link "SECURITY, (Directory)" [ref=e333] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/tree/feat/ce-ops-skills-gold-standard-upgrade/SECURITY
+                          - text: SECURITY
+                    - 'cell "feat: add governance baseline sweep artifacts (#12)" [ref=e1703]':
+                      - generic [ref=e1705]:
+                        - 'link "feat: add governance baseline sweep artifacts (" [ref=e1706] [cursor=pointer]':
+                          - /url: /jscraik/Agent-Skills/commit/8924bc66a4585f5c110b181d981d21f8d1309a45
+                        - link "#12" [ref=e1707] [cursor=pointer]:
+                          - /url: https://github.com/jscraik/Agent-Skills/pull/12
+                        - link ")" [ref=e1708] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/commit/8924bc66a4585f5c110b181d981d21f8d1309a45
+                    - cell "Feb 21, 20262 months ago" [ref=e1709]:
+                      - generic [ref=e337]: Feb 21, 20262 months ago
+                  - 'row "artifacts, (Directory) fix: address CI failures and adjacency drift Apr 6, 20267 minutes ago" [ref=e1710]':
+                    - cell "artifacts, (Directory)" [ref=e340]:
+                      - generic [ref=e341]:
+                        - img [ref=e342]
+                        - link "artifacts, (Directory)" [ref=e347] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/tree/feat/ce-ops-skills-gold-standard-upgrade/artifacts
+                          - text: artifacts
+                    - 'cell "fix: address CI failures and adjacency drift" [ref=e1711]':
+                      - 'link "fix: address CI failures and adjacency drift" [ref=e1714] [cursor=pointer]':
+                        - /url: /jscraik/Agent-Skills/commit/f9bd9fccbc3f904c3ba8ced5f8880d04c9e4409f
+                    - cell "Apr 6, 20267 minutes ago" [ref=e1715]:
+                      - generic [ref=e351]: Apr 6, 20267 minutes ago
+                  - 'row "auth, (Directory) [AI] docs: add directory indexes and clean root placeholders (#84) Apr 5, 2026yesterday" [ref=e1716]':
+                    - cell "auth, (Directory)" [ref=e354]:
+                      - generic [ref=e355]:
+                        - img [ref=e356]
+                        - link "auth, (Directory)" [ref=e361] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/tree/feat/ce-ops-skills-gold-standard-upgrade/auth
+                          - text: auth
+                    - 'cell "[AI] docs: add directory indexes and clean root placeholders (#84)" [ref=e1717]':
+                      - generic [ref=e1719]:
+                        - 'link "[AI] docs: add directory indexes and clean root placeholders (" [ref=e1720] [cursor=pointer]':
+                          - /url: /jscraik/Agent-Skills/commit/7c14600c817e74697cdecf72a75c188788f72885
+                        - link "#84" [ref=e1721] [cursor=pointer]:
+                          - /url: https://github.com/jscraik/Agent-Skills/pull/84
+                        - link ")" [ref=e1722] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/commit/7c14600c817e74697cdecf72a75c188788f72885
+                    - cell "Apr 5, 2026yesterday" [ref=e1723]:
+                      - generic [ref=e365]: Apr 5, 2026yesterday
+                  - 'row "backend, (Directory) [AI] docs: add directory indexes and clean root placeholders (#84) Apr 5, 2026yesterday" [ref=e1724]':
+                    - cell "backend, (Directory)" [ref=e368]:
+                      - generic [ref=e369]:
+                        - img [ref=e370]
+                        - link "backend, (Directory)" [ref=e375] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/tree/feat/ce-ops-skills-gold-standard-upgrade/backend
+                          - text: backend
+                    - 'cell "[AI] docs: add directory indexes and clean root placeholders (#84)" [ref=e1725]':
+                      - generic [ref=e1727]:
+                        - 'link "[AI] docs: add directory indexes and clean root placeholders (" [ref=e1728] [cursor=pointer]':
+                          - /url: /jscraik/Agent-Skills/commit/7c14600c817e74697cdecf72a75c188788f72885
+                        - link "#84" [ref=e1729] [cursor=pointer]:
+                          - /url: https://github.com/jscraik/Agent-Skills/pull/84
+                        - link ")" [ref=e1730] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/commit/7c14600c817e74697cdecf72a75c188788f72885
+                    - cell "Apr 5, 2026yesterday" [ref=e1731]:
+                      - generic [ref=e379]: Apr 5, 2026yesterday
+                  - 'row "brand, (Directory) chore: finalize docs and brand artifacts Mar 7, 2026last month" [ref=e1732]':
+                    - cell "brand, (Directory)" [ref=e382]:
+                      - generic [ref=e383]:
+                        - img [ref=e384]
+                        - link "brand, (Directory)" [ref=e389] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/tree/feat/ce-ops-skills-gold-standard-upgrade/brand
+                          - text: brand
+                    - 'cell "chore: finalize docs and brand artifacts" [ref=e1733]':
+                      - 'link "chore: finalize docs and brand artifacts" [ref=e1736] [cursor=pointer]':
+                        - /url: /jscraik/Agent-Skills/commit/083b359e0f090d9945155bd94b74f45d264c0dc7
+                    - cell "Mar 7, 2026last month" [ref=e1737]:
+                      - generic [ref=e393]: Mar 7, 2026last month
+                  - row "defusedxml, (Directory) Add lifecycle governance and scaffold hardening (#68) Mar 25, 20262 weeks ago" [ref=e1738]:
+                    - cell "defusedxml, (Directory)" [ref=e396]:
+                      - generic [ref=e397]:
+                        - img [ref=e398]
+                        - link "defusedxml, (Directory)" [ref=e403] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/tree/feat/ce-ops-skills-gold-standard-upgrade/defusedxml
+                          - text: defusedxml
+                    - cell "Add lifecycle governance and scaffold hardening (#68)" [ref=e1739]:
+                      - generic [ref=e1741]:
+                        - link "Add lifecycle governance and scaffold hardening (" [ref=e1742] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/commit/e2ea3e9f7151d048177a6df0065f07cfd00617a4
+                        - link "#68" [ref=e1743] [cursor=pointer]:
+                          - /url: https://github.com/jscraik/Agent-Skills/pull/68
+                        - link ")" [ref=e1744] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/commit/e2ea3e9f7151d048177a6df0065f07cfd00617a4
+                    - cell "Mar 25, 20262 weeks ago" [ref=e1745]:
+                      - generic [ref=e407]: Mar 25, 20262 weeks ago
+                  - 'row "docs, (Directory) fix: restore adjacency edges by adding to SKILL.md See Also tables Apr 6, 20262 minutes ago" [ref=e1746]':
+                    - cell "docs, (Directory)" [ref=e410]:
+                      - generic [ref=e411]:
+                        - img [ref=e412]
+                        - link "docs, (Directory)" [ref=e417] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/tree/feat/ce-ops-skills-gold-standard-upgrade/docs
+                          - text: docs
+                    - 'cell "fix: restore adjacency edges by adding to SKILL.md See Also tables" [ref=e1747]':
+                      - 'link "fix: restore adjacency edges by adding to SKILL.md See Also tables" [ref=e1750] [cursor=pointer]':
+                        - /url: /jscraik/Agent-Skills/commit/01d426dad912aa90c4c12e84e5746f913cf5ce5f
+                    - cell "Apr 6, 20262 minutes ago" [ref=e1751]:
+                      - generic [ref=e421]: Apr 6, 20262 minutes ago
+                  - 'row "frontend, (Directory) [AI] docs: add directory indexes and clean root placeholders (#84) Apr 5, 2026yesterday" [ref=e1752]':
+                    - cell "frontend, (Directory)" [ref=e424]:
+                      - generic [ref=e425]:
+                        - img [ref=e426]
+                        - link "frontend, (Directory)" [ref=e431] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/tree/feat/ce-ops-skills-gold-standard-upgrade/frontend
+                          - text: frontend
+                    - 'cell "[AI] docs: add directory indexes and clean root placeholders (#84)" [ref=e1753]':
+                      - generic [ref=e1755]:
+                        - 'link "[AI] docs: add directory indexes and clean root placeholders (" [ref=e1756] [cursor=pointer]':
+                          - /url: /jscraik/Agent-Skills/commit/7c14600c817e74697cdecf72a75c188788f72885
+                        - link "#84" [ref=e1757] [cursor=pointer]:
+                          - /url: https://github.com/jscraik/Agent-Skills/pull/84
+                        - link ")" [ref=e1758] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/commit/7c14600c817e74697cdecf72a75c188788f72885
+                    - cell "Apr 5, 2026yesterday" [ref=e1759]:
+                      - generic [ref=e435]: Apr 5, 2026yesterday
+                  - 'row "github, (Directory) [AI] docs: add directory indexes and clean root placeholders (#84) Apr 5, 2026yesterday" [ref=e1760]':
+                    - cell "github, (Directory)" [ref=e438]:
+                      - generic [ref=e439]:
+                        - img [ref=e440]
+                        - link "github, (Directory)" [ref=e445] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/tree/feat/ce-ops-skills-gold-standard-upgrade/github
+                          - text: github
+                    - 'cell "[AI] docs: add directory indexes and clean root placeholders (#84)" [ref=e1761]':
+                      - generic [ref=e1763]:
+                        - 'link "[AI] docs: add directory indexes and clean root placeholders (" [ref=e1764] [cursor=pointer]':
+                          - /url: /jscraik/Agent-Skills/commit/7c14600c817e74697cdecf72a75c188788f72885
+                        - link "#84" [ref=e1765] [cursor=pointer]:
+                          - /url: https://github.com/jscraik/Agent-Skills/pull/84
+                        - link ")" [ref=e1766] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/commit/7c14600c817e74697cdecf72a75c188788f72885
+                    - cell "Apr 5, 2026yesterday" [ref=e1767]:
+                      - generic [ref=e449]: Apr 5, 2026yesterday
+                  - 'row "interview, (Directory) [AI] docs: add directory indexes and clean root placeholders (#84) Apr 5, 2026yesterday" [ref=e1768]':
+                    - cell "interview, (Directory)" [ref=e452]:
+                      - generic [ref=e453]:
+                        - img [ref=e454]
+                        - link "interview, (Directory)" [ref=e459] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/tree/feat/ce-ops-skills-gold-standard-upgrade/interview
+                          - text: interview
+                    - 'cell "[AI] docs: add directory indexes and clean root placeholders (#84)" [ref=e1769]':
+                      - generic [ref=e1771]:
+                        - 'link "[AI] docs: add directory indexes and clean root placeholders (" [ref=e1772] [cursor=pointer]':
+                          - /url: /jscraik/Agent-Skills/commit/7c14600c817e74697cdecf72a75c188788f72885
+                        - link "#84" [ref=e1773] [cursor=pointer]:
+                          - /url: https://github.com/jscraik/Agent-Skills/pull/84
+                        - link ")" [ref=e1774] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/commit/7c14600c817e74697cdecf72a75c188788f72885
+                    - cell "Apr 5, 2026yesterday" [ref=e1775]:
+                      - generic [ref=e463]: Apr 5, 2026yesterday
+                  - row "ops/metrics, (Directory) Add lifecycle governance and scaffold hardening (#68) Mar 25, 20262 weeks ago" [ref=e1776]:
+                    - cell "ops/metrics, (Directory)" [ref=e466]:
+                      - generic [ref=e467]:
+                        - img [ref=e468]
+                        - link "ops/metrics, (Directory)" [ref=e473] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/tree/feat/ce-ops-skills-gold-standard-upgrade/ops/metrics
+                          - text: ops/metrics
+                    - cell "Add lifecycle governance and scaffold hardening (#68)" [ref=e1777]:
+                      - generic [ref=e1779]:
+                        - link "Add lifecycle governance and scaffold hardening (" [ref=e1780] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/commit/e2ea3e9f7151d048177a6df0065f07cfd00617a4
+                        - link "#68" [ref=e1781] [cursor=pointer]:
+                          - /url: https://github.com/jscraik/Agent-Skills/pull/68
+                        - link ")" [ref=e1782] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/commit/e2ea3e9f7151d048177a6df0065f07cfd00617a4
+                    - cell "Mar 25, 20262 weeks ago" [ref=e1783]:
+                      - generic [ref=e477]: Mar 25, 20262 weeks ago
+                  - 'row "plugins, (Directory) chore: snapshot all local workspace changes (#79) Apr 3, 20263 days ago" [ref=e1784]':
+                    - cell "plugins, (Directory)" [ref=e480]:
+                      - generic [ref=e481]:
+                        - img [ref=e482]
+                        - link "plugins, (Directory)" [ref=e487] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/tree/feat/ce-ops-skills-gold-standard-upgrade/plugins
+                          - text: plugins
+                    - 'cell "chore: snapshot all local workspace changes (#79)" [ref=e1785]':
+                      - generic [ref=e1787]:
+                        - 'link "chore: snapshot all local workspace changes (" [ref=e1788] [cursor=pointer]':
+                          - /url: /jscraik/Agent-Skills/commit/6e340833ecaad5bebea2bd99afcdc0dd44482ab4
+                        - link "#79" [ref=e1789] [cursor=pointer]:
+                          - /url: https://github.com/jscraik/Agent-Skills/pull/79
+                        - link ")" [ref=e1790] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/commit/6e340833ecaad5bebea2bd99afcdc0dd44482ab4
+                    - cell "Apr 3, 20263 days ago" [ref=e1791]:
+                      - generic [ref=e491]: Apr 3, 20263 days ago
+                  - 'row "product, (Directory) fix: restore adjacency edges by adding to SKILL.md See Also tables Apr 6, 20262 minutes ago" [ref=e1792]':
+                    - cell "product, (Directory)" [ref=e494]:
+                      - generic [ref=e495]:
+                        - img [ref=e496]
+                        - link "product, (Directory)" [ref=e501] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/tree/feat/ce-ops-skills-gold-standard-upgrade/product
+                          - text: product
+                    - 'cell "fix: restore adjacency edges by adding to SKILL.md See Also tables" [ref=e1793]':
+                      - 'link "fix: restore adjacency edges by adding to SKILL.md See Also tables" [ref=e1796] [cursor=pointer]':
+                        - /url: /jscraik/Agent-Skills/commit/01d426dad912aa90c4c12e84e5746f913cf5ce5f
+                    - cell "Apr 6, 20262 minutes ago" [ref=e1797]:
+                      - generic [ref=e505]: Apr 6, 20262 minutes ago
+                  - 'row "references, (Directory) fix: repair Antigravity skill discovery Mar 10, 2026last month" [ref=e1798]':
+                    - cell "references, (Directory)" [ref=e508]:
+                      - generic [ref=e509]:
+                        - img [ref=e510]
+                        - link "references, (Directory)" [ref=e515] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/tree/feat/ce-ops-skills-gold-standard-upgrade/references
+                          - text: references
+                    - 'cell "fix: repair Antigravity skill discovery" [ref=e1799]':
+                      - 'link "fix: repair Antigravity skill discovery" [ref=e1802] [cursor=pointer]':
+                        - /url: /jscraik/Agent-Skills/commit/c90ab6164815ab8bc3c2deb6e06f823393b50bfc
+                    - cell "Mar 10, 2026last month" [ref=e1803]:
+                      - generic [ref=e519]: Mar 10, 2026last month
+                  - row "reports, (Directory) Codex/skill hardening iteration 3 (#37) Mar 8, 2026last month" [ref=e1804]:
+                    - cell "reports, (Directory)" [ref=e522]:
+                      - generic [ref=e523]:
+                        - img [ref=e524]
+                        - link "reports, (Directory)" [ref=e529] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/tree/feat/ce-ops-skills-gold-standard-upgrade/reports
+                          - text: reports
+                    - cell "Codex/skill hardening iteration 3 (#37)" [ref=e1805]:
+                      - generic [ref=e1807]:
+                        - link "Codex/skill hardening iteration 3 (" [ref=e1808] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/commit/841747af428a19fa2cd5fe07f7bbe1f8b9ee1078
+                        - link "#37" [ref=e1809] [cursor=pointer]:
+                          - /url: https://github.com/jscraik/Agent-Skills/pull/37
+                        - link ")" [ref=e1810] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/commit/841747af428a19fa2cd5fe07f7bbe1f8b9ee1078
+                    - cell "Mar 8, 2026last month" [ref=e1811]:
+                      - generic [ref=e533]: Mar 8, 2026last month
+                  - 'row "scripts, (Directory) fix: address CI failures and adjacency drift Apr 6, 20267 minutes ago" [ref=e1812]':
+                    - cell "scripts, (Directory)" [ref=e536]:
+                      - generic [ref=e537]:
+                        - img [ref=e538]
+                        - link "scripts, (Directory)" [ref=e543] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/tree/feat/ce-ops-skills-gold-standard-upgrade/scripts
+                          - text: scripts
+                    - 'cell "fix: address CI failures and adjacency drift" [ref=e1813]':
+                      - 'link "fix: address CI failures and adjacency drift" [ref=e1816] [cursor=pointer]':
+                        - /url: /jscraik/Agent-Skills/commit/f9bd9fccbc3f904c3ba8ced5f8880d04c9e4409f
+                    - cell "Apr 6, 20267 minutes ago" [ref=e1817]:
+                      - generic [ref=e547]: Apr 6, 20267 minutes ago
+                  - 'row "skills-system, (Directory) feat(gate): add P1/P2/P3 validation improvements to family gate Apr 5, 202618 hours ago" [ref=e1818]':
+                    - cell "skills-system, (Directory)" [ref=e550]:
+                      - generic [ref=e551]:
+                        - img [ref=e552]
+                        - link "skills-system, (Directory)" [ref=e557] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/tree/feat/ce-ops-skills-gold-standard-upgrade/skills-system
+                          - text: skills-system
+                    - 'cell "feat(gate): add P1/P2/P3 validation improvements to family gate" [ref=e1819]':
+                      - 'link "feat(gate): add P1/P2/P3 validation improvements to family gate" [ref=e1822] [cursor=pointer]':
+                        - /url: /jscraik/Agent-Skills/commit/44ad406de6c13c34d097db2f552fddb58b92cc0c
+                    - cell "Apr 5, 202618 hours ago" [ref=e1823]:
+                      - generic [ref=e561]: Apr 5, 202618 hours ago
+                  - 'row "storage, (Directory) chore: add prek pre-commit hooks and fix trailing whitespace Mar 2, 2026last month" [ref=e1824]':
+                    - cell "storage, (Directory)" [ref=e564]:
+                      - generic [ref=e565]:
+                        - img [ref=e566]
+                        - link "storage, (Directory)" [ref=e571] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/tree/feat/ce-ops-skills-gold-standard-upgrade/storage
+                          - text: storage
+                    - 'cell "chore: add prek pre-commit hooks and fix trailing whitespace" [ref=e1825]':
+                      - 'link "chore: add prek pre-commit hooks and fix trailing whitespace" [ref=e1828] [cursor=pointer]':
+                        - /url: /jscraik/Agent-Skills/commit/43ea4abe927ace58c70aa00d115574712ea72b4b
+                    - cell "Mar 2, 2026last month" [ref=e1829]:
+                      - generic [ref=e575]: Mar 2, 2026last month
+                  - row "templates, (Directory) Add lifecycle governance and scaffold hardening (#68) Mar 25, 20262 weeks ago" [ref=e1830]:
+                    - cell "templates, (Directory)" [ref=e578]:
+                      - generic [ref=e579]:
+                        - img [ref=e580]
+                        - link "templates, (Directory)" [ref=e585] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/tree/feat/ce-ops-skills-gold-standard-upgrade/templates
+                          - text: templates
+                    - cell "Add lifecycle governance and scaffold hardening (#68)" [ref=e1831]:
+                      - generic [ref=e1833]:
+                        - link "Add lifecycle governance and scaffold hardening (" [ref=e1834] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/commit/e2ea3e9f7151d048177a6df0065f07cfd00617a4
+                        - link "#68" [ref=e1835] [cursor=pointer]:
+                          - /url: https://github.com/jscraik/Agent-Skills/pull/68
+                        - link ")" [ref=e1836] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/commit/e2ea3e9f7151d048177a6df0065f07cfd00617a4
+                    - cell "Mar 25, 20262 weeks ago" [ref=e1837]:
+                      - generic [ref=e589]: Mar 25, 20262 weeks ago
+                  - row "todos, (Directory) Codex/skill hardening iteration 3 (#37) Mar 8, 2026last month" [ref=e1838]:
+                    - cell "todos, (Directory)" [ref=e592]:
+                      - generic [ref=e593]:
+                        - img [ref=e594]
+                        - link "todos, (Directory)" [ref=e599] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/tree/feat/ce-ops-skills-gold-standard-upgrade/todos
+                          - text: todos
+                    - cell "Codex/skill hardening iteration 3 (#37)" [ref=e1839]:
+                      - generic [ref=e1841]:
+                        - link "Codex/skill hardening iteration 3 (" [ref=e1842] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/commit/841747af428a19fa2cd5fe07f7bbe1f8b9ee1078
+                        - link "#37" [ref=e1843] [cursor=pointer]:
+                          - /url: https://github.com/jscraik/Agent-Skills/pull/37
+                        - link ")" [ref=e1844] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/commit/841747af428a19fa2cd5fe07f7bbe1f8b9ee1078
+                    - cell "Mar 8, 2026last month" [ref=e1845]:
+                      - generic [ref=e603]: Mar 8, 2026last month
+                  - 'row "utilities, (Directory) fix: restore adjacency edges by adding to SKILL.md See Also tables Apr 6, 20262 minutes ago" [ref=e1846]':
+                    - cell "utilities, (Directory)" [ref=e606]:
+                      - generic [ref=e607]:
+                        - img [ref=e608]
+                        - link "utilities, (Directory)" [ref=e613] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/tree/feat/ce-ops-skills-gold-standard-upgrade/utilities
+                          - text: utilities
+                    - 'cell "fix: restore adjacency edges by adding to SKILL.md See Also tables" [ref=e1847]':
+                      - 'link "fix: restore adjacency edges by adding to SKILL.md See Also tables" [ref=e1850] [cursor=pointer]':
+                        - /url: /jscraik/Agent-Skills/commit/01d426dad912aa90c4c12e84e5746f913cf5ce5f
+                    - cell "Apr 6, 20262 minutes ago" [ref=e1851]:
+                      - generic [ref=e617]: Apr 6, 20262 minutes ago
+                  - row "vaults/arscontexta, (Directory) Add lifecycle governance and scaffold hardening (#68) Mar 25, 20262 weeks ago" [ref=e1852]:
+                    - cell "vaults/arscontexta, (Directory)" [ref=e620]:
+                      - generic [ref=e621]:
+                        - img [ref=e622]
+                        - link "vaults/arscontexta, (Directory)" [ref=e627] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/tree/feat/ce-ops-skills-gold-standard-upgrade/vaults/arscontexta
+                          - text: vaults/arscontexta
+                    - cell "Add lifecycle governance and scaffold hardening (#68)" [ref=e1853]:
+                      - generic [ref=e1855]:
+                        - link "Add lifecycle governance and scaffold hardening (" [ref=e1856] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/commit/e2ea3e9f7151d048177a6df0065f07cfd00617a4
+                        - link "#68" [ref=e1857] [cursor=pointer]:
+                          - /url: https://github.com/jscraik/Agent-Skills/pull/68
+                        - link ")" [ref=e1858] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/commit/e2ea3e9f7151d048177a6df0065f07cfd00617a4
+                    - cell "Mar 25, 20262 weeks ago" [ref=e1859]:
+                      - generic [ref=e631]: Mar 25, 20262 weeks ago
+                  - 'row ".architecture.yml, (File) feat(security): harden promotion gate and add CI scanning Mar 7, 2026last month" [ref=e1860]':
+                    - cell ".architecture.yml, (File)" [ref=e634]:
+                      - generic [ref=e635]:
+                        - img [ref=e636]
+                        - link ".architecture.yml, (File)" [ref=e641] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/blob/feat/ce-ops-skills-gold-standard-upgrade/.architecture.yml
+                          - text: .architecture.yml
+                    - 'cell "feat(security): harden promotion gate and add CI scanning" [ref=e1861]':
+                      - 'link "feat(security): harden promotion gate and add CI scanning" [ref=e1864] [cursor=pointer]':
+                        - /url: /jscraik/Agent-Skills/commit/8a9e0683e4b570ed41e20989f4469609c56c7e9f
+                    - cell "Mar 7, 2026last month" [ref=e1865]:
+                      - generic [ref=e645]: Mar 7, 2026last month
+                  - 'row ".diagramrc, (File) chore: add architecture diagrams and diagram config Mar 2, 2026last month" [ref=e1866]':
+                    - cell ".diagramrc, (File)" [ref=e648]:
+                      - generic [ref=e649]:
+                        - img [ref=e650]
+                        - link ".diagramrc, (File)" [ref=e655] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/blob/feat/ce-ops-skills-gold-standard-upgrade/.diagramrc
+                          - text: .diagramrc
+                    - 'cell "chore: add architecture diagrams and diagram config" [ref=e1867]':
+                      - 'link "chore: add architecture diagrams and diagram config" [ref=e1870] [cursor=pointer]':
+                        - /url: /jscraik/Agent-Skills/commit/40921ed7a7ea20059b8cdf758e8a00df6ba58645
+                    - cell "Mar 2, 2026last month" [ref=e1871]:
+                      - generic [ref=e659]: Mar 2, 2026last month
+                  - 'row ".gitignore, (File) fix(ci): resolve PR CI failures from structure-gate and gitleaks Apr 6, 20261 hour ago" [ref=e1872]':
+                    - cell ".gitignore, (File)" [ref=e662]:
+                      - generic [ref=e663]:
+                        - img [ref=e664]
+                        - link ".gitignore, (File)" [ref=e669] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/blob/feat/ce-ops-skills-gold-standard-upgrade/.gitignore
+                          - text: .gitignore
+                    - 'cell "fix(ci): resolve PR CI failures from structure-gate and gitleaks" [ref=e1873]':
+                      - 'link "fix(ci): resolve PR CI failures from structure-gate and gitleaks" [ref=e1876] [cursor=pointer]':
+                        - /url: /jscraik/Agent-Skills/commit/51d316dd07831e04b3929c868b65df39b4bbf792
+                    - cell "Apr 6, 20261 hour ago" [ref=e1877]:
+                      - generic [ref=e673]: Apr 6, 20261 hour ago
+                  - 'row ".gitleaks.toml, (File) fix: add validation artifacts and cache to gitleaks allowlist Apr 6, 202641 minutes ago" [ref=e1878]':
+                    - cell ".gitleaks.toml, (File)" [ref=e676]:
+                      - generic [ref=e677]:
+                        - img [ref=e678]
+                        - link ".gitleaks.toml, (File)" [ref=e683] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/blob/feat/ce-ops-skills-gold-standard-upgrade/.gitleaks.toml
+                          - text: .gitleaks.toml
+                    - 'cell "fix: add validation artifacts and cache to gitleaks allowlist" [ref=e1879]':
+                      - 'link "fix: add validation artifacts and cache to gitleaks allowlist" [ref=e1882] [cursor=pointer]':
+                        - /url: /jscraik/Agent-Skills/commit/6e317a7b1e6303c72175a196462185f1f8831069
+                    - cell "Apr 6, 202641 minutes ago" [ref=e1883]:
+                      - generic [ref=e687]: Apr 6, 202641 minutes ago
+                  - 'row ".markdownlint.yaml, (File) feat(agents-md): gold-standard progressive disclosure upgrade (#82) Apr 5, 2026yesterday" [ref=e1884]':
+                    - cell ".markdownlint.yaml, (File)" [ref=e690]:
+                      - generic [ref=e691]:
+                        - img [ref=e692]
+                        - link ".markdownlint.yaml, (File)" [ref=e697] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/blob/feat/ce-ops-skills-gold-standard-upgrade/.markdownlint.yaml
+                          - text: .markdownlint.yaml
+                    - 'cell "feat(agents-md): gold-standard progressive disclosure upgrade (#82)" [ref=e1885]':
+                      - generic [ref=e1887]:
+                        - 'link "feat(agents-md): gold-standard progressive disclosure upgrade (" [ref=e1888] [cursor=pointer]':
+                          - /url: /jscraik/Agent-Skills/commit/ca59130faf37a3d7c7fa9b272ee284db6b189a47
+                        - link "#82" [ref=e1889] [cursor=pointer]:
+                          - /url: https://github.com/jscraik/Agent-Skills/pull/82
+                        - link ")" [ref=e1890] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/commit/ca59130faf37a3d7c7fa9b272ee284db6b189a47
+                    - cell "Apr 5, 2026yesterday" [ref=e1891]:
+                      - generic [ref=e701]: Apr 5, 2026yesterday
+                  - 'row ".memory-metrics.json, (File) chore: sync agent skills updates Mar 3, 2026last month" [ref=e1892]':
+                    - cell ".memory-metrics.json, (File)" [ref=e704]:
+                      - generic [ref=e705]:
+                        - img [ref=e706]
+                        - link ".memory-metrics.json, (File)" [ref=e711] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/blob/feat/ce-ops-skills-gold-standard-upgrade/.memory-metrics.json
+                          - text: .memory-metrics.json
+                    - 'cell "chore: sync agent skills updates" [ref=e1893]':
+                      - 'link "chore: sync agent skills updates" [ref=e1896] [cursor=pointer]':
+                        - /url: /jscraik/Agent-Skills/commit/dd23ace2a8c4f9670e4bc6b0556a29817032504d
+                    - cell "Mar 3, 2026last month" [ref=e1897]:
+                      - generic [ref=e715]: Mar 3, 2026last month
+                  - row ".mise.toml, (File) Add lifecycle governance and scaffold hardening (#68) Mar 25, 20262 weeks ago" [ref=e1898]:
+                    - cell ".mise.toml, (File)" [ref=e718]:
+                      - generic [ref=e719]:
+                        - img [ref=e720]
+                        - link ".mise.toml, (File)" [ref=e725] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/blob/feat/ce-ops-skills-gold-standard-upgrade/.mise.toml
+                          - text: .mise.toml
+                    - cell "Add lifecycle governance and scaffold hardening (#68)" [ref=e1899]:
+                      - generic [ref=e1901]:
+                        - link "Add lifecycle governance and scaffold hardening (" [ref=e1902] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/commit/e2ea3e9f7151d048177a6df0065f07cfd00617a4
+                        - link "#68" [ref=e1903] [cursor=pointer]:
+                          - /url: https://github.com/jscraik/Agent-Skills/pull/68
+                        - link ")" [ref=e1904] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/commit/e2ea3e9f7151d048177a6df0065f07cfd00617a4
+                    - cell "Mar 25, 20262 weeks ago" [ref=e1905]:
+                      - generic [ref=e729]: Mar 25, 20262 weeks ago
+                  - 'row ".npmrc, (File) chore: sync agent skills updates Mar 3, 2026last month" [ref=e1906]':
+                    - cell ".npmrc, (File)" [ref=e732]:
+                      - generic [ref=e733]:
+                        - img [ref=e734]
+                        - link ".npmrc, (File)" [ref=e739] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/blob/feat/ce-ops-skills-gold-standard-upgrade/.npmrc
+                          - text: .npmrc
+                    - 'cell "chore: sync agent skills updates" [ref=e1907]':
+                      - 'link "chore: sync agent skills updates" [ref=e1910] [cursor=pointer]':
+                        - /url: /jscraik/Agent-Skills/commit/dd23ace2a8c4f9670e4bc6b0556a29817032504d
+                    - cell "Mar 3, 2026last month" [ref=e1911]:
+                      - generic [ref=e743]: Mar 3, 2026last month
+                  - 'row ".pre-commit-config.yaml, (File) fix(pre-commit): remove check-yaml --unsafe flag (024DB0AB) Mar 7, 2026last month" [ref=e1912]':
+                    - cell ".pre-commit-config.yaml, (File)" [ref=e746]:
+                      - generic [ref=e747]:
+                        - img [ref=e748]
+                        - link ".pre-commit-config.yaml, (File)" [ref=e753] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/blob/feat/ce-ops-skills-gold-standard-upgrade/.pre-commit-config.yaml
+                          - text: .pre-commit-config.yaml
+                    - 'cell "fix(pre-commit): remove check-yaml --unsafe flag (024DB0AB)" [ref=e1913]':
+                      - 'link "fix(pre-commit): remove check-yaml --unsafe flag (024DB0AB)" [ref=e1916] [cursor=pointer]':
+                        - /url: /jscraik/Agent-Skills/commit/5d7ff5122c66177727134f9cb7e76b6be5e9c798
+                    - cell "Mar 7, 2026last month" [ref=e1917]:
+                      - generic [ref=e757]: Mar 7, 2026last month
+                  - 'row ".qdrant-initialized, (File) chore: remove duplicate system skills and update index Feb 22, 20262 months ago" [ref=e1918]':
+                    - cell ".qdrant-initialized, (File)" [ref=e760]:
+                      - generic [ref=e761]:
+                        - img [ref=e762]
+                        - link ".qdrant-initialized, (File)" [ref=e767] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/blob/feat/ce-ops-skills-gold-standard-upgrade/.qdrant-initialized
+                          - text: .qdrant-initialized
+                    - 'cell "chore: remove duplicate system skills and update index" [ref=e1919]':
+                      - 'link "chore: remove duplicate system skills and update index" [ref=e1922] [cursor=pointer]':
+                        - /url: /jscraik/Agent-Skills/commit/2c16a02b8256e1a45583840b9a4f225b18a70b5a
+                    - cell "Feb 22, 20262 months ago" [ref=e1923]:
+                      - generic [ref=e771]: Feb 22, 20262 months ago
+                  - 'row ".vale.ini, (File) [AI] fix: restore stdout output in validate_recursive_promotion (#52) Mar 12, 2026last month" [ref=e1924]':
+                    - cell ".vale.ini, (File)" [ref=e774]:
+                      - generic [ref=e775]:
+                        - img [ref=e776]
+                        - link ".vale.ini, (File)" [ref=e781] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/blob/feat/ce-ops-skills-gold-standard-upgrade/.vale.ini
+                          - text: .vale.ini
+                    - 'cell "[AI] fix: restore stdout output in validate_recursive_promotion (#52)" [ref=e1925]':
+                      - generic [ref=e1927]:
+                        - 'link "[AI] fix: restore stdout output in validate_recursive_promotion (" [ref=e1928] [cursor=pointer]':
+                          - /url: /jscraik/Agent-Skills/commit/715bc637681474406c618a8ccd46848d994b1393
+                        - link "#52" [ref=e1929] [cursor=pointer]:
+                          - /url: https://github.com/jscraik/Agent-Skills/pull/52
+                        - link ")" [ref=e1930] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/commit/715bc637681474406c618a8ccd46848d994b1393
+                    - cell "Mar 12, 2026last month" [ref=e1931]:
+                      - generic [ref=e785]: Mar 12, 2026last month
+                  - 'row "AGENTS.md, (File) fix(artifacts): correct misleading ok status in artifact-parity-manifest Apr 6, 20261 hour ago" [ref=e1932]':
+                    - cell "AGENTS.md, (File)" [ref=e788]:
+                      - generic [ref=e789]:
+                        - img [ref=e790]
+                        - link "AGENTS.md, (File)" [ref=e795] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/blob/feat/ce-ops-skills-gold-standard-upgrade/AGENTS.md
+                          - text: AGENTS.md
+                    - 'cell "fix(artifacts): correct misleading ok status in artifact-parity-manifest" [ref=e1933]':
+                      - 'link "fix(artifacts): correct misleading ok status in artifact-parity-manifest" [ref=e1936] [cursor=pointer]':
+                        - /url: /jscraik/Agent-Skills/commit/5ca6608c07afb9660e43d2b48cade557f8f82597
+                    - cell "Apr 6, 20261 hour ago" [ref=e1937]:
+                      - generic [ref=e799]: Apr 6, 20261 hour ago
+                  - 'row "CHANGELOG.md, (File) refactor: fold skill-creator into skill-builder Mar 9, 2026last month" [ref=e1938]':
+                    - cell "CHANGELOG.md, (File)" [ref=e802]:
+                      - generic [ref=e803]:
+                        - img [ref=e804]
+                        - link "CHANGELOG.md, (File)" [ref=e809] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/blob/feat/ce-ops-skills-gold-standard-upgrade/CHANGELOG.md
+                          - text: CHANGELOG.md
+                    - 'cell "refactor: fold skill-creator into skill-builder" [ref=e1939]':
+                      - 'link "refactor: fold skill-creator into skill-builder" [ref=e1942] [cursor=pointer]':
+                        - /url: /jscraik/Agent-Skills/commit/147cce1a4f676477f87cf5e142e7c81d8c5b9794
+                    - cell "Mar 9, 2026last month" [ref=e1943]:
+                      - generic [ref=e813]: Mar 9, 2026last month
+                  - 'row "CLAUDE.md, (File) chore: close outstanding readiness and governance updates (#76) Apr 3, 20264 days ago" [ref=e1944]':
+                    - cell "CLAUDE.md, (File)" [ref=e816]:
+                      - generic [ref=e817]:
+                        - img [ref=e818]
+                        - link "CLAUDE.md, (File)" [ref=e823] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/blob/feat/ce-ops-skills-gold-standard-upgrade/CLAUDE.md
+                          - text: CLAUDE.md
+                    - 'cell "chore: close outstanding readiness and governance updates (#76)" [ref=e1945]':
+                      - generic [ref=e1947]:
+                        - 'link "chore: close outstanding readiness and governance updates (" [ref=e1948] [cursor=pointer]':
+                          - /url: /jscraik/Agent-Skills/commit/3c0bcb40125ea7fa895abf888475bca7fcd7fe64
+                        - link "#76" [ref=e1949] [cursor=pointer]:
+                          - /url: https://github.com/jscraik/Agent-Skills/pull/76
+                        - link ")" [ref=e1950] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/commit/3c0bcb40125ea7fa895abf888475bca7fcd7fe64
+                    - cell "Apr 3, 20264 days ago" [ref=e1951]:
+                      - generic [ref=e827]: Apr 3, 20264 days ago
+                  - 'row "CODEOWNERS, (File) feat: add governance baseline sweep artifacts (#12) Feb 21, 20262 months ago" [ref=e1952]':
+                    - cell "CODEOWNERS, (File)" [ref=e830]:
+                      - generic [ref=e831]:
+                        - img [ref=e832]
+                        - link "CODEOWNERS, (File)" [ref=e837] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/blob/feat/ce-ops-skills-gold-standard-upgrade/CODEOWNERS
+                          - text: CODEOWNERS
+                    - 'cell "feat: add governance baseline sweep artifacts (#12)" [ref=e1953]':
+                      - generic [ref=e1955]:
+                        - 'link "feat: add governance baseline sweep artifacts (" [ref=e1956] [cursor=pointer]':
+                          - /url: /jscraik/Agent-Skills/commit/8924bc66a4585f5c110b181d981d21f8d1309a45
+                        - link "#12" [ref=e1957] [cursor=pointer]:
+                          - /url: https://github.com/jscraik/Agent-Skills/pull/12
+                        - link ")" [ref=e1958] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/commit/8924bc66a4585f5c110b181d981d21f8d1309a45
+                    - cell "Feb 21, 20262 months ago" [ref=e1959]:
+                      - generic [ref=e841]: Feb 21, 20262 months ago
+                  - 'row "CODE_OF_CONDUCT.md, (File) chore: clean repo root and update docs/skill metadata Feb 18, 20262 months ago" [ref=e1960]':
+                    - cell "CODE_OF_CONDUCT.md, (File)" [ref=e844]:
+                      - generic [ref=e845]:
+                        - img [ref=e846]
+                        - link "CODE_OF_CONDUCT.md, (File)" [ref=e851] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/blob/feat/ce-ops-skills-gold-standard-upgrade/CODE_OF_CONDUCT.md
+                          - text: CODE_OF_CONDUCT.md
+                    - 'cell "chore: clean repo root and update docs/skill metadata" [ref=e1961]':
+                      - 'link "chore: clean repo root and update docs/skill metadata" [ref=e1964] [cursor=pointer]':
+                        - /url: /jscraik/Agent-Skills/commit/052afd6ea9d993b10151d656f3dea8158f4e9571
+                    - cell "Feb 18, 20262 months ago" [ref=e1965]:
+                      - generic [ref=e855]: Feb 18, 20262 months ago
+                  - 'row "CONTRIBUTING.md, (File) chore: clean repo root and update docs/skill metadata Feb 18, 20262 months ago" [ref=e1966]':
+                    - cell "CONTRIBUTING.md, (File)" [ref=e858]:
+                      - generic [ref=e859]:
+                        - img [ref=e860]
+                        - link "CONTRIBUTING.md, (File)" [ref=e865] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/blob/feat/ce-ops-skills-gold-standard-upgrade/CONTRIBUTING.md
+                          - text: CONTRIBUTING.md
+                    - 'cell "chore: clean repo root and update docs/skill metadata" [ref=e1967]':
+                      - 'link "chore: clean repo root and update docs/skill metadata" [ref=e1970] [cursor=pointer]':
+                        - /url: /jscraik/Agent-Skills/commit/052afd6ea9d993b10151d656f3dea8158f4e9571
+                    - cell "Feb 18, 20262 months ago" [ref=e1971]:
+                      - generic [ref=e869]: Feb 18, 20262 months ago
+                  - 'row "DIRECTORY_MAP.md, (File) [AI] docs: add directory indexes and clean root placeholders (#84) Apr 5, 2026yesterday" [ref=e1972]':
+                    - cell "DIRECTORY_MAP.md, (File)" [ref=e872]:
+                      - generic [ref=e873]:
+                        - img [ref=e874]
+                        - link "DIRECTORY_MAP.md, (File)" [ref=e879] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/blob/feat/ce-ops-skills-gold-standard-upgrade/DIRECTORY_MAP.md
+                          - text: DIRECTORY_MAP.md
+                    - 'cell "[AI] docs: add directory indexes and clean root placeholders (#84)" [ref=e1973]':
+                      - generic [ref=e1975]:
+                        - 'link "[AI] docs: add directory indexes and clean root placeholders (" [ref=e1976] [cursor=pointer]':
+                          - /url: /jscraik/Agent-Skills/commit/7c14600c817e74697cdecf72a75c188788f72885
+                        - link "#84" [ref=e1977] [cursor=pointer]:
+                          - /url: https://github.com/jscraik/Agent-Skills/pull/84
+                        - link ")" [ref=e1978] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/commit/7c14600c817e74697cdecf72a75c188788f72885
+                    - cell "Apr 5, 2026yesterday" [ref=e1979]:
+                      - generic [ref=e883]: Apr 5, 2026yesterday
+                  - 'row "GEMINI.md, (File) chore: close outstanding readiness and governance updates (#76) Apr 3, 20264 days ago" [ref=e1980]':
+                    - cell "GEMINI.md, (File)" [ref=e886]:
+                      - generic [ref=e887]:
+                        - img [ref=e888]
+                        - link "GEMINI.md, (File)" [ref=e893] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/blob/feat/ce-ops-skills-gold-standard-upgrade/GEMINI.md
+                          - text: GEMINI.md
+                    - 'cell "chore: close outstanding readiness and governance updates (#76)" [ref=e1981]':
+                      - generic [ref=e1983]:
+                        - 'link "chore: close outstanding readiness and governance updates (" [ref=e1984] [cursor=pointer]':
+                          - /url: /jscraik/Agent-Skills/commit/3c0bcb40125ea7fa895abf888475bca7fcd7fe64
+                        - link "#76" [ref=e1985] [cursor=pointer]:
+                          - /url: https://github.com/jscraik/Agent-Skills/pull/76
+                        - link ")" [ref=e1986] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/commit/3c0bcb40125ea7fa895abf888475bca7fcd7fe64
+                    - cell "Apr 3, 20264 days ago" [ref=e1987]:
+                      - generic [ref=e897]: Apr 3, 20264 days ago
+                  - 'row "LICENSE, (File) chore: relicense under Apache 2.0 Mar 2, 2026last month" [ref=e1988]':
+                    - cell "LICENSE, (File)" [ref=e900]:
+                      - generic [ref=e901]:
+                        - img [ref=e902]
+                        - link "LICENSE, (File)" [ref=e907] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/blob/feat/ce-ops-skills-gold-standard-upgrade/LICENSE
+                          - text: LICENSE
+                    - 'cell "chore: relicense under Apache 2.0" [ref=e1989]':
+                      - 'link "chore: relicense under Apache 2.0" [ref=e1992] [cursor=pointer]':
+                        - /url: /jscraik/Agent-Skills/commit/21e3cdfeb36988b71c817eefeb344b03922e1e27
+                    - cell "Mar 2, 2026last month" [ref=e1993]:
+                      - generic [ref=e911]: Mar 2, 2026last month
+                  - 'row "Makefile, (File) [AI] fix: restore stdout output in validate_recursive_promotion (#52) Mar 12, 2026last month" [ref=e1994]':
+                    - cell "Makefile, (File)" [ref=e914]:
+                      - generic [ref=e915]:
+                        - img [ref=e916]
+                        - link "Makefile, (File)" [ref=e921] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/blob/feat/ce-ops-skills-gold-standard-upgrade/Makefile
+                          - text: Makefile
+                    - 'cell "[AI] fix: restore stdout output in validate_recursive_promotion (#52)" [ref=e1995]':
+                      - generic [ref=e1997]:
+                        - 'link "[AI] fix: restore stdout output in validate_recursive_promotion (" [ref=e1998] [cursor=pointer]':
+                          - /url: /jscraik/Agent-Skills/commit/715bc637681474406c618a8ccd46848d994b1393
+                        - link "#52" [ref=e1999] [cursor=pointer]:
+                          - /url: https://github.com/jscraik/Agent-Skills/pull/52
+                        - link ")" [ref=e2000] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/commit/715bc637681474406c618a8ccd46848d994b1393
+                    - cell "Mar 12, 2026last month" [ref=e2001]:
+                      - generic [ref=e925]: Mar 12, 2026last month
+                  - 'row "README.md, (File) [AI] docs: add directory indexes and clean root placeholders (#84) Apr 5, 2026yesterday" [ref=e2002]':
+                    - cell "README.md, (File)" [ref=e928]:
+                      - generic [ref=e929]:
+                        - img [ref=e930]
+                        - link "README.md, (File)" [ref=e935] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/blob/feat/ce-ops-skills-gold-standard-upgrade/README.md
+                          - text: README.md
+                    - 'cell "[AI] docs: add directory indexes and clean root placeholders (#84)" [ref=e2003]':
+                      - generic [ref=e2005]:
+                        - 'link "[AI] docs: add directory indexes and clean root placeholders (" [ref=e2006] [cursor=pointer]':
+                          - /url: /jscraik/Agent-Skills/commit/7c14600c817e74697cdecf72a75c188788f72885
+                        - link "#84" [ref=e2007] [cursor=pointer]:
+                          - /url: https://github.com/jscraik/Agent-Skills/pull/84
+                        - link ")" [ref=e2008] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/commit/7c14600c817e74697cdecf72a75c188788f72885
+                    - cell "Apr 5, 2026yesterday" [ref=e2009]:
+                      - generic [ref=e939]: Apr 5, 2026yesterday
+                  - 'row "RELEASE_NOTES.md, (File) refactor: fold skill-creator into skill-builder Mar 9, 2026last month" [ref=e2010]':
+                    - cell "RELEASE_NOTES.md, (File)" [ref=e942]:
+                      - generic [ref=e943]:
+                        - img [ref=e944]
+                        - link "RELEASE_NOTES.md, (File)" [ref=e949] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/blob/feat/ce-ops-skills-gold-standard-upgrade/RELEASE_NOTES.md
+                          - text: RELEASE_NOTES.md
+                    - 'cell "refactor: fold skill-creator into skill-builder" [ref=e2011]':
+                      - 'link "refactor: fold skill-creator into skill-builder" [ref=e2014] [cursor=pointer]':
+                        - /url: /jscraik/Agent-Skills/commit/147cce1a4f676477f87cf5e142e7c81d8c5b9794
+                    - cell "Mar 9, 2026last month" [ref=e2015]:
+                      - generic [ref=e953]: Mar 9, 2026last month
+                  - 'row "SECURITY.md, (File) chore: clean repo root and update docs/skill metadata Feb 18, 20262 months ago" [ref=e2016]':
+                    - cell "SECURITY.md, (File)" [ref=e956]:
+                      - generic [ref=e957]:
+                        - img [ref=e958]
+                        - link "SECURITY.md, (File)" [ref=e963] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/blob/feat/ce-ops-skills-gold-standard-upgrade/SECURITY.md
+                          - text: SECURITY.md
+                    - 'cell "chore: clean repo root and update docs/skill metadata" [ref=e2017]':
+                      - 'link "chore: clean repo root and update docs/skill metadata" [ref=e2020] [cursor=pointer]':
+                        - /url: /jscraik/Agent-Skills/commit/052afd6ea9d993b10151d656f3dea8158f4e9571
+                    - cell "Feb 18, 20262 months ago" [ref=e2021]:
+                      - generic [ref=e967]: Feb 18, 20262 months ago
+                  - 'row "SKILL.md, (File) chore(artifacts): refresh catalog, skill-graphs, family-gate evidence Apr 5, 202617 hours ago" [ref=e2022]':
+                    - cell "SKILL.md, (File)" [ref=e970]:
+                      - generic [ref=e971]:
+                        - img [ref=e972]
+                        - link "SKILL.md, (File)" [ref=e977] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/blob/feat/ce-ops-skills-gold-standard-upgrade/SKILL.md
+                          - text: SKILL.md
+                    - 'cell "chore(artifacts): refresh catalog, skill-graphs, family-gate evidence" [ref=e2023]':
+                      - 'link "chore(artifacts): refresh catalog, skill-graphs, family-gate evidence" [ref=e2026] [cursor=pointer]':
+                        - /url: /jscraik/Agent-Skills/commit/5ab3eba4b75a0dda0a082a3178d8099cc2aef80c
+                    - cell "Apr 5, 202617 hours ago" [ref=e2027]:
+                      - generic [ref=e981]: Apr 5, 202617 hours ago
+                  - 'row "SUPPORT.md, (File) chore: clean repo root and update docs/skill metadata Feb 18, 20262 months ago" [ref=e2028]':
+                    - cell "SUPPORT.md, (File)" [ref=e984]:
+                      - generic [ref=e985]:
+                        - img [ref=e986]
+                        - link "SUPPORT.md, (File)" [ref=e991] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/blob/feat/ce-ops-skills-gold-standard-upgrade/SUPPORT.md
+                          - text: SUPPORT.md
+                    - 'cell "chore: clean repo root and update docs/skill metadata" [ref=e2029]':
+                      - 'link "chore: clean repo root and update docs/skill metadata" [ref=e2032] [cursor=pointer]':
+                        - /url: /jscraik/Agent-Skills/commit/052afd6ea9d993b10151d656f3dea8158f4e9571
+                    - cell "Feb 18, 20262 months ago" [ref=e2033]:
+                      - generic [ref=e995]: Feb 18, 20262 months ago
+                  - 'row "WORKFLOW.md, (File) chore: close outstanding readiness and governance updates (#76) Apr 3, 20264 days ago" [ref=e2034]':
+                    - cell "WORKFLOW.md, (File)" [ref=e998]:
+                      - generic [ref=e999]:
+                        - img [ref=e1000]
+                        - link "WORKFLOW.md, (File)" [ref=e1005] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/blob/feat/ce-ops-skills-gold-standard-upgrade/WORKFLOW.md
+                          - text: WORKFLOW.md
+                    - 'cell "chore: close outstanding readiness and governance updates (#76)" [ref=e2035]':
+                      - generic [ref=e2037]:
+                        - 'link "chore: close outstanding readiness and governance updates (" [ref=e2038] [cursor=pointer]':
+                          - /url: /jscraik/Agent-Skills/commit/3c0bcb40125ea7fa895abf888475bca7fcd7fe64
+                        - link "#76" [ref=e2039] [cursor=pointer]:
+                          - /url: https://github.com/jscraik/Agent-Skills/pull/76
+                        - link ")" [ref=e2040] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/commit/3c0bcb40125ea7fa895abf888475bca7fcd7fe64
+                    - cell "Apr 3, 20264 days ago" [ref=e2041]:
+                      - generic [ref=e1009]: Apr 3, 20264 days ago
+                  - 'row "biome.json, (File) chore: sync agent skills updates Mar 3, 2026last month" [ref=e2042]':
+                    - cell "biome.json, (File)" [ref=e1012]:
+                      - generic [ref=e1013]:
+                        - img [ref=e1014]
+                        - link "biome.json, (File)" [ref=e1019] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/blob/feat/ce-ops-skills-gold-standard-upgrade/biome.json
+                          - text: biome.json
+                    - 'cell "chore: sync agent skills updates" [ref=e2043]':
+                      - 'link "chore: sync agent skills updates" [ref=e2046] [cursor=pointer]':
+                        - /url: /jscraik/Agent-Skills/commit/dd23ace2a8c4f9670e4bc6b0556a29817032504d
+                    - cell "Mar 3, 2026last month" [ref=e2047]:
+                      - generic [ref=e1023]: Mar 3, 2026last month
+                  - row "docs-policy.json, (File) Add docs governance contract, lint, and CI workflow Feb 12, 20262 months ago" [ref=e2048]:
+                    - cell "docs-policy.json, (File)" [ref=e1026]:
+                      - generic [ref=e1027]:
+                        - img [ref=e1028]
+                        - link "docs-policy.json, (File)" [ref=e1033] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/blob/feat/ce-ops-skills-gold-standard-upgrade/docs-policy.json
+                          - text: docs-policy.json
+                    - cell "Add docs governance contract, lint, and CI workflow" [ref=e2049]:
+                      - link "Add docs governance contract, lint, and CI workflow" [ref=e2052] [cursor=pointer]:
+                        - /url: /jscraik/Agent-Skills/commit/8898419150ea6a5962f0b44c0bc4b8511cf01592
+                    - cell "Feb 12, 20262 months ago" [ref=e2053]:
+                      - generic [ref=e1037]: Feb 12, 20262 months ago
+                  - row "harness.contract.json, (File) [AI] [codex] Harden skill-authoring family gate and installer safety (#… Apr 5, 2026yesterday" [ref=e2054]:
+                    - cell "harness.contract.json, (File)" [ref=e1040]:
+                      - generic [ref=e1041]:
+                        - img [ref=e1042]
+                        - link "harness.contract.json, (File)" [ref=e1047] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/blob/feat/ce-ops-skills-gold-standard-upgrade/harness.contract.json
+                          - text: harness.contract.json
+                    - cell "[AI] [codex] Harden skill-authoring family gate and installer safety (#…" [ref=e2055]:
+                      - generic [ref=e2057]:
+                        - link "[AI] [codex] Harden skill-authoring family gate and installer safety (" [ref=e2058] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/commit/c84b2c2faeb7e3249c2fa1ee3a52253b175c7b0e
+                        - link "#…" [ref=e2059] [cursor=pointer]:
+                          - /url: https://github.com/jscraik/Agent-Skills/pull/83
+                    - cell "Apr 5, 2026yesterday" [ref=e2060]:
+                      - generic [ref=e1051]: Apr 5, 2026yesterday
+                  - row "justfile, (File) Add lifecycle governance and scaffold hardening (#68) Mar 25, 20262 weeks ago" [ref=e2061]:
+                    - cell "justfile, (File)" [ref=e1054]:
+                      - generic [ref=e1055]:
+                        - img [ref=e1056]
+                        - link "justfile, (File)" [ref=e1061] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/blob/feat/ce-ops-skills-gold-standard-upgrade/justfile
+                          - text: justfile
+                    - cell "Add lifecycle governance and scaffold hardening (#68)" [ref=e2062]:
+                      - generic [ref=e2064]:
+                        - link "Add lifecycle governance and scaffold hardening (" [ref=e2065] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/commit/e2ea3e9f7151d048177a6df0065f07cfd00617a4
+                        - link "#68" [ref=e2066] [cursor=pointer]:
+                          - /url: https://github.com/jscraik/Agent-Skills/pull/68
+                        - link ")" [ref=e2067] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/commit/e2ea3e9f7151d048177a6df0065f07cfd00617a4
+                    - cell "Mar 25, 20262 weeks ago" [ref=e2068]:
+                      - generic [ref=e1065]: Mar 25, 20262 weeks ago
+                  - 'row "memory.json, (File) chore: sync agent skills updates Mar 3, 2026last month" [ref=e2069]':
+                    - cell "memory.json, (File)" [ref=e1068]:
+                      - generic [ref=e1069]:
+                        - img [ref=e1070]
+                        - link "memory.json, (File)" [ref=e1075] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/blob/feat/ce-ops-skills-gold-standard-upgrade/memory.json
+                          - text: memory.json
+                    - 'cell "chore: sync agent skills updates" [ref=e2070]':
+                      - 'link "chore: sync agent skills updates" [ref=e2073] [cursor=pointer]':
+                        - /url: /jscraik/Agent-Skills/commit/dd23ace2a8c4f9670e4bc6b0556a29817032504d
+                    - cell "Mar 3, 2026last month" [ref=e2074]:
+                      - generic [ref=e1079]: Mar 3, 2026last month
+                  - 'row "prek.toml, (File) [AI] feat: roll out skill authoring family contract (#80) Apr 4, 20262 days ago" [ref=e2075]':
+                    - cell "prek.toml, (File)" [ref=e1082]:
+                      - generic [ref=e1083]:
+                        - img [ref=e1084]
+                        - link "prek.toml, (File)" [ref=e1089] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/blob/feat/ce-ops-skills-gold-standard-upgrade/prek.toml
+                          - text: prek.toml
+                    - 'cell "[AI] feat: roll out skill authoring family contract (#80)" [ref=e2076]':
+                      - generic [ref=e2078]:
+                        - 'link "[AI] feat: roll out skill authoring family contract (" [ref=e2079] [cursor=pointer]':
+                          - /url: /jscraik/Agent-Skills/commit/231c1ad37d61211d1f3389e3ee4177eed6b69d16
+                        - link "#80" [ref=e2080] [cursor=pointer]:
+                          - /url: https://github.com/jscraik/Agent-Skills/pull/80
+                        - link ")" [ref=e2081] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/commit/231c1ad37d61211d1f3389e3ee4177eed6b69d16
+                    - cell "Apr 4, 20262 days ago" [ref=e2082]:
+                      - generic [ref=e1093]: Apr 4, 20262 days ago
+                  - row "security_best_practices_report.md, (File) Codex/design system skill validation (#19) Feb 24, 20262 months ago" [ref=e2083]:
+                    - cell "security_best_practices_report.md, (File)" [ref=e1096]:
+                      - generic [ref=e1097]:
+                        - img [ref=e1098]
+                        - link "security_best_practices_report.md, (File)" [ref=e1103] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/blob/feat/ce-ops-skills-gold-standard-upgrade/security_best_practices_report.md
+                          - text: security_best_practices_report.md
+                    - cell "Codex/design system skill validation (#19)" [ref=e2084]:
+                      - generic [ref=e2086]:
+                        - link "Codex/design system skill validation (" [ref=e2087] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/commit/4ed7a9a4683d745a2cc554f39820e8a66583f8de
+                        - link "#19" [ref=e2088] [cursor=pointer]:
+                          - /url: https://github.com/jscraik/Agent-Skills/pull/19
+                        - link ")" [ref=e2089] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/commit/4ed7a9a4683d745a2cc554f39820e8a66583f8de
+                    - cell "Feb 24, 20262 months ago" [ref=e2090]:
+                      - generic [ref=e1107]: Feb 24, 20262 months ago
+                  - 'row "skills, (Symlink to file) chore: close outstanding readiness and governance updates (#76) Apr 3, 20264 days ago" [ref=e2091]':
+                    - cell "skills, (Symlink to file)" [ref=e1110]:
+                      - generic [ref=e1111]:
+                        - img [ref=e1112]
+                        - link "skills, (Symlink to file)" [ref=e1117] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/blob/feat/ce-ops-skills-gold-standard-upgrade/skills
+                          - text: skills
+                    - 'cell "chore: close outstanding readiness and governance updates (#76)" [ref=e2092]':
+                      - generic [ref=e2094]:
+                        - 'link "chore: close outstanding readiness and governance updates (" [ref=e2095] [cursor=pointer]':
+                          - /url: /jscraik/Agent-Skills/commit/3c0bcb40125ea7fa895abf888475bca7fcd7fe64
+                        - link "#76" [ref=e2096] [cursor=pointer]:
+                          - /url: https://github.com/jscraik/Agent-Skills/pull/76
+                        - link ")" [ref=e2097] [cursor=pointer]:
+                          - /url: /jscraik/Agent-Skills/commit/3c0bcb40125ea7fa895abf888475bca7fcd7fe64
+                    - cell "Apr 3, 20264 days ago" [ref=e2098]:
+                      - generic [ref=e1121]: Apr 3, 20264 days ago
+            - generic [ref=e1124]:
+              - generic [ref=e1125]:
+                - heading "Repository files navigation" [level=2] [ref=e1126]
+                - navigation "Repository files" [ref=e1127]:
+                  - list [ref=e1128]:
+                    - listitem [ref=e1129]:
+                      - link "README" [ref=e1130] [cursor=pointer]:
+                        - /url: "#"
+                        - img [ref=e1132]
+                        - generic [ref=e1134]: README
+                    - listitem [ref=e1135]:
+                      - link "Code of conduct" [ref=e1136] [cursor=pointer]:
+                        - /url: "#"
+                        - img [ref=e1138]
+                        - generic [ref=e1140]: Code of conduct
+                    - listitem [ref=e1141]:
+                      - link "Contributing" [ref=e1142] [cursor=pointer]:
+                        - /url: "#"
+                        - img [ref=e1144]
+                        - generic [ref=e1146]: Contributing
+                    - listitem [ref=e1147]:
+                      - link "License" [ref=e1148] [cursor=pointer]:
+                        - /url: "#"
+                        - img [ref=e1150]
+                        - generic [ref=e1152]: License
+                    - listitem [ref=e1153]:
+                      - link "Security" [ref=e1154] [cursor=pointer]:
+                        - /url: "#"
+                        - img [ref=e1156]
+                        - generic [ref=e1158]: Security
+                - button "Outline" [ref=e1159] [cursor=pointer]:
+                  - img [ref=e1160]
+              - article [ref=e1163]:
+                - generic [ref=e1164]:
+                  - heading "Agent Skills" [level=1] [ref=e1165]
+                  - 'link "Permalink: Agent Skills" [ref=e1166] [cursor=pointer]':
+                    - /url: "#agent-skills"
+                    - img [ref=e1167]
+                - paragraph [ref=e1169]: Canonical skill repository for Codex, Claude Code, and Gemini/Antigravity.
+                - paragraph [ref=e1170]: This repo gives you one place to author skills, validate quality, and sync runtime-ready projections.
+                - generic [ref=e1171]:
+                  - heading "Table of Contents" [level=2] [ref=e1172]
+                  - 'link "Permalink: Table of Contents" [ref=e1173] [cursor=pointer]':
+                    - /url: "#table-of-contents"
+                    - img [ref=e1174]
+                - list [ref=e1176]:
+                  - listitem [ref=e1177]:
+                    - link "Why teams use this repo" [ref=e1178] [cursor=pointer]:
+                      - /url: "#why-teams-use-this-repo"
+                  - listitem [ref=e1179]:
+                    - link "What is implemented today" [ref=e1180] [cursor=pointer]:
+                      - /url: "#what-is-implemented-today"
+                  - listitem [ref=e1181]:
+                    - link "Quickstart" [ref=e1182] [cursor=pointer]:
+                      - /url: "#quickstart"
+                  - listitem [ref=e1183]:
+                    - link "Common workflows" [ref=e1184] [cursor=pointer]:
+                      - /url: "#common-workflows"
+                  - listitem [ref=e1185]:
+                    - link "Why the claims are credible" [ref=e1186] [cursor=pointer]:
+                      - /url: "#why-the-claims-are-credible"
+                  - listitem [ref=e1187]:
+                    - link "Operational limits" [ref=e1188] [cursor=pointer]:
+                      - /url: "#operational-limits"
+                  - listitem [ref=e1189]:
+                    - link "Repository layout" [ref=e1190] [cursor=pointer]:
+                      - /url: "#repository-layout"
+                  - listitem [ref=e1191]:
+                    - link "Directory map" [ref=e1192] [cursor=pointer]:
+                      - /url: "#directory-map"
+                  - listitem [ref=e1193]:
+                    - link "Documentation" [ref=e1194] [cursor=pointer]:
+                      - /url: "#documentation"
+                - generic [ref=e1195]:
+                  - heading "Why teams use this repo" [level=2] [ref=e1196]
+                  - 'link "Permalink: Why teams use this repo" [ref=e1197] [cursor=pointer]':
+                    - /url: "#why-teams-use-this-repo"
+                    - img [ref=e1198]
+                - list [ref=e1200]:
+                  - listitem [ref=e1201]:
+                    - strong [ref=e1202]: Single source of truth
+                    - text: ": author a skill once, then project it to multiple agent runtimes with"
+                    - code [ref=e1203]: just sync
+                    - text: .
+                  - listitem [ref=e1204]:
+                    - strong [ref=e1205]: Lower review risk
+                    - text: ": every change can run through deterministic validation ("
+                    - code [ref=e1206]: scripts/validate_all.sh
+                    - text: ) with per-check logs.
+                  - listitem [ref=e1207]:
+                    - strong [ref=e1208]: Safer automation
+                    - text: ": routing and recursive improvement workflows include explicit control files, promotion gates, and artifact verification."
+                - generic [ref=e1209]:
+                  - heading "What is implemented today" [level=2] [ref=e1210]
+                  - 'link "Permalink: What is implemented today" [ref=e1211] [cursor=pointer]':
+                    - /url: "#what-is-implemented-today"
+                    - img [ref=e1212]
+                - list [ref=e1214]:
+                  - listitem [ref=e1215]:
+                    - strong [ref=e1216]: Large skill catalog
+                    - text: ": currently 100+"
+                    - code [ref=e1217]: SKILL.md
+                    - text: assets across domain folders and system skills.
+                  - listitem [ref=e1218]:
+                    - strong [ref=e1219]: Cross-runtime projection
+                    - text: ":"
+                    - code [ref=e1220]: scripts/sync_skills.sh
+                    - text: rebuilds projections with lock + timeout protections and path safety checks.
+                  - listitem [ref=e1221]:
+                    - strong [ref=e1222]: Deterministic skill router
+                    - text: ":"
+                    - code [ref=e1223]: utilities/skill-builder/scripts/skill_router.py
+                    - text: returns ranked candidates, confidence, rationale, and policy decisions.
+                  - listitem [ref=e1224]:
+                    - strong [ref=e1225]: Guarded recursive loop
+                    - text: ":"
+                    - code [ref=e1226]: scripts/run_skill_genome_loop.py
+                    - text: supports kill-switch/rollout controls, redaction filters, watermark-based processing, and bounded output.
+                  - listitem [ref=e1227]:
+                    - strong [ref=e1228]: Promotion governance
+                    - text: ":"
+                    - code [ref=e1229]: scripts/human_promote_recursive_run.sh
+                    - text: enforces reviewer policy signatures, allowlist checks, run-dir confinement, and write-once blockers.
+                  - listitem [ref=e1230]:
+                    - strong [ref=e1231]: Artifact parity checks
+                    - text: ":"
+                    - code [ref=e1232]: scripts/verify_recursive_skill_graph_artifacts.py
+                    - text: classifies run artifacts and can fail strict mode in CI.
+                  - listitem [ref=e1233]:
+                    - strong [ref=e1234]: CI coverage
+                    - text: ": 13 GitHub workflows cover PR hygiene, skill quality, promotion validation, security scanning, and governance checks."
+                - generic [ref=e1235]:
+                  - heading "Quickstart" [level=2] [ref=e1236]
+                  - 'link "Permalink: Quickstart" [ref=e1237] [cursor=pointer]':
+                    - /url: "#quickstart"
+                    - img [ref=e1238]
+                - generic [ref=e1240]:
+                  - generic [ref=e1241]:
+                    - generic [ref=e1242]: "# 1) Health check"
+                    - text: just status
+                    - generic [ref=e1243]: "# 2) Validate repo state"
+                    - text: just validate
+                    - generic [ref=e1244]: "# 3) Sync skills to runtime projections"
+                    - text: just sync
+                    - generic [ref=e1245]: "# 4) Optional: sync MCP config into Antigravity format"
+                    - text: python3 scripts/sync_mcp.py
+                  - button "Copy" [ref=e1247] [cursor=pointer]:
+                    - img [ref=e1248]
+                - generic [ref=e1251]:
+                  - heading "Common workflows" [level=2] [ref=e1252]
+                  - 'link "Permalink: Common workflows" [ref=e1253] [cursor=pointer]':
+                    - /url: "#common-workflows"
+                    - img [ref=e1254]
+                - generic [ref=e1256]:
+                  - heading "1) Add or update a skill" [level=3] [ref=e1257]
+                  - 'link "Permalink: 1) Add or update a skill" [ref=e1258] [cursor=pointer]':
+                    - /url: "#1-add-or-update-a-skill"
+                    - img [ref=e1259]
+                - generic [ref=e1261]:
+                  - generic [ref=e1262]:
+                    - generic [ref=e1263]: "# scaffold from template"
+                    - text: mkdir -p frontend/my-skill cp templates/SKILL.md.template frontend/my-skill/SKILL.md
+                    - generic [ref=e1264]: "# run quality checks"
+                    - text: just diagnose just validate
+                    - generic [ref=e1265]: "# rebuild projections"
+                    - text: just sync
+                  - button "Copy" [ref=e1267] [cursor=pointer]:
+                    - img [ref=e1268]
+                - generic [ref=e1271]:
+                  - heading "2) Run CI-equivalent checks locally" [level=3] [ref=e1272]
+                  - 'link "Permalink: 2) Run CI-equivalent checks locally" [ref=e1273] [cursor=pointer]':
+                    - /url: "#2-run-ci-equivalent-checks-locally"
+                    - img [ref=e1274]
+                - generic [ref=e1276]:
+                  - generic [ref=e1277]:
+                    - generic [ref=e1278]: "# preflight + sync + validation bundle"
+                    - text: bash scripts/verify-work.sh
+                    - generic [ref=e1279]: "# validation-only path"
+                    - text: bash scripts/validate_all.sh
+                  - button "Copy" [ref=e1281] [cursor=pointer]:
+                    - img [ref=e1282]
+                - generic [ref=e1285]:
+                  - heading "3) Route a task to likely skills" [level=3] [ref=e1286]
+                  - 'link "Permalink: 3) Route a task to likely skills" [ref=e1287] [cursor=pointer]':
+                    - /url: "#3-route-a-task-to-likely-skills"
+                    - img [ref=e1288]
+                - generic [ref=e1290]:
+                  - generic [ref=e1291]:
+                    - text: python3 utilities/skill-builder/scripts/skill_router.py \ --query
+                    - generic [ref=e1292]: "\"fix failing GitHub Actions checks\""
+                    - text: \ --top-k 3 \ --json
+                  - button "Copy" [ref=e1294] [cursor=pointer]:
+                    - img [ref=e1295]
+                - generic [ref=e1298]:
+                  - heading "4) Operate recursive improvement safely" [level=3] [ref=e1299]
+                  - 'link "Permalink: 4) Operate recursive improvement safely" [ref=e1300] [cursor=pointer]':
+                    - /url: "#4-operate-recursive-improvement-safely"
+                    - img [ref=e1301]
+                - generic [ref=e1303]:
+                  - generic [ref=e1304]:
+                    - generic [ref=e1305]: "# preview candidates"
+                    - text: just genome-loop
+                    - generic [ref=e1306]: "# generate candidates"
+                    - text: just genome-loop-live
+                    - generic [ref=e1307]: "# review and approve"
+                    - text: python3 scripts/review_candidates.py --list python3 scripts/review_candidates.py --approve <candidate_id>
+                  - button "Copy" [ref=e1309] [cursor=pointer]:
+                    - img [ref=e1310]
+                - generic [ref=e1313]:
+                  - heading "Why the claims are credible" [level=2] [ref=e1314]
+                  - 'link "Permalink: Why the claims are credible" [ref=e1315] [cursor=pointer]':
+                    - /url: "#why-the-claims-are-credible"
+                    - img [ref=e1316]
+                - list [ref=e1318]:
+                  - listitem [ref=e1319]:
+                    - strong [ref=e1320]: Validation is deterministic and logged
+                    - text: ":"
+                    - code [ref=e1321]: scripts/validate_all.sh
+                    - text: runs required + warn checks and writes artifacts to
+                    - code [ref=e1322]: artifacts/validation/
+                    - text: .
+                  - listitem [ref=e1323]:
+                    - strong [ref=e1324]: Routing is policy-aware
+                    - text: ":"
+                    - code [ref=e1325]: skill_router.py
+                    - text: returns ranked candidates with confidence, uncertainty reasons, policy mode decisions, and guardrail outcomes.
+                  - listitem [ref=e1326]:
+                    - strong [ref=e1327]: Promotion is governance-hardened
+                    - text: ":"
+                    - code [ref=e1328]: human_promote_recursive_run.sh
+                    - text: enforces signed reviewer policy, allowlist checks, run-dir confinement, and write-once blockers.
+                  - listitem [ref=e1329]:
+                    - strong [ref=e1330]: Recursive artifacts are verifiable
+                    - text: ":"
+                    - code [ref=e1331]: verify_recursive_skill_graph_artifacts.py
+                    - text: classifies run states and supports strict CI failures.
+                  - listitem [ref=e1332]:
+                    - strong [ref=e1333]: MCP sync is tested for real drift
+                    - text: ":"
+                    - code [ref=e1334]: test_sync_mcp.py
+                    - text: covers stdio/HTTP mapping, env header injection, default injection, and corrupted JSON recovery.
+                - generic [ref=e1335]:
+                  - heading "Operational limits" [level=2] [ref=e1336]
+                  - 'link "Permalink: Operational limits" [ref=e1337] [cursor=pointer]':
+                    - /url: "#operational-limits"
+                    - img [ref=e1338]
+                - list [ref=e1340]:
+                  - listitem [ref=e1341]: Skill versioning is repo-level, not per-skill semver.
+                  - listitem [ref=e1342]: Sync is local projection; cross-machine distribution is still git-based.
+                  - listitem [ref=e1343]: Tier-2 eval paths require local CLI/model auth availability on the runner.
+                  - listitem [ref=e1344]: Some helper commands may be policy-gated depending on your Codex runtime approval settings.
+                - generic [ref=e1345]:
+                  - heading "Repository layout" [level=2] [ref=e1346]
+                  - 'link "Permalink: Repository layout" [ref=e1347] [cursor=pointer]':
+                    - /url: "#repository-layout"
+                    - img [ref=e1348]
+                - generic [ref=e1350]:
+                  - code [ref=e1352]: "agent-skills/ ├── auth/ backend/ frontend/ github/ interview/ ops/ product/ utilities/ ├── skills-system/ # system-level skills ├── .agents/skills/ # flat projection surface ├── skills-antigravity/ # Antigravity projection ├── scripts/ # sync, validation, genome loop, governance tools ├── artifacts/ # generated reports, telemetry, run outputs ├── docs/ # runbooks, specs, governance docs └── templates/ # skill and eval templates"
+                  - button "Copy" [ref=e1354] [cursor=pointer]:
+                    - img [ref=e1355]
+                - generic [ref=e1358]:
+                  - heading "Directory map" [level=2] [ref=e1359]
+                  - 'link "Permalink: Directory map" [ref=e1360] [cursor=pointer]':
+                    - /url: "#directory-map"
+                    - img [ref=e1361]
+                - paragraph [ref=e1363]:
+                  - text: Need a navigable root + subdirectory index? See
+                  - link "DIRECTORY_MAP.md" [ref=e1364] [cursor=pointer]:
+                    - /url: /jscraik/Agent-Skills/blob/feat/ce-ops-skills-gold-standard-upgrade/DIRECTORY_MAP.md
+                  - text: .
+                - generic [ref=e1365]:
+                  - heading "Documentation" [level=2] [ref=e1366]
+                  - 'link "Permalink: Documentation" [ref=e1367] [cursor=pointer]':
+                    - /url: "#documentation"
+                    - img [ref=e1368]
+                - list [ref=e1370]:
+                  - listitem [ref=e1371]:
+                    - link "Skills index" [ref=e1372] [cursor=pointer]:
+                      - /url: /jscraik/Agent-Skills/blob/feat/ce-ops-skills-gold-standard-upgrade/SKILL.md
+                  - listitem [ref=e1373]:
+                    - link "Directory map" [ref=e1374] [cursor=pointer]:
+                      - /url: /jscraik/Agent-Skills/blob/feat/ce-ops-skills-gold-standard-upgrade/DIRECTORY_MAP.md
+                  - listitem [ref=e1375]:
+                    - link "Contributor docs" [ref=e1376] [cursor=pointer]:
+                      - /url: /jscraik/Agent-Skills/blob/feat/ce-ops-skills-gold-standard-upgrade/docs/index.md
+                  - listitem [ref=e1377]:
+                    - link "Governed solutions" [ref=e1378] [cursor=pointer]:
+                      - /url: /jscraik/Agent-Skills/blob/feat/ce-ops-skills-gold-standard-upgrade/docs/solutions/README.md
+                  - listitem [ref=e1379]:
+                    - link "Skill genome loop runbook" [ref=e1380] [cursor=pointer]:
+                      - /url: /jscraik/Agent-Skills/blob/feat/ce-ops-skills-gold-standard-upgrade/docs/skill-graphs/runbooks/skill-genome-loop.md
+                  - listitem [ref=e1381]:
+                    - link "Agent governance" [ref=e1382] [cursor=pointer]:
+                      - /url: /jscraik/Agent-Skills/blob/feat/ce-ops-skills-gold-standard-upgrade/docs/agents/06-security-and-governance.md
+                - generic [ref=e1383]:
+                  - heading "Governance" [level=2] [ref=e1384]
+                  - 'link "Permalink: Governance" [ref=e1385] [cursor=pointer]':
+                    - /url: "#governance"
+                    - img [ref=e1386]
+                - list [ref=e1388]:
+                  - listitem [ref=e1389]:
+                    - text: "License: Apache 2.0 ("
+                    - code [ref=e1390]: LICENSE
+                    - text: )
+                  - listitem [ref=e1391]:
+                    - text: "Contributing:"
+                    - code [ref=e1392]: CONTRIBUTING.md
+                  - listitem [ref=e1393]:
+                    - text: "Security:"
+                    - code [ref=e1394]: SECURITY.md
+                  - listitem [ref=e1395]:
+                    - text: "Code of Conduct:"
+                    - code [ref=e1396]: CODE_OF_CONDUCT.md
+                - generic [ref=e1397]:
+                  - heading "Agent-first workflow" [level=2] [ref=e1398]
+                  - 'link "Permalink: Agent-first workflow" [ref=e1399] [cursor=pointer]':
+                    - /url: "#agent-first-workflow"
+                    - img [ref=e1400]
+                - list [ref=e1402]:
+                  - listitem [ref=e1403]:
+                    - text: Create or update a plan in
+                    - code [ref=e1404]: .agent/PLANS.md
+                  - listitem [ref=e1405]:
+                    - text: "Validate:"
+                    - code [ref=e1406]: python3 ~/.codex/scripts/plan-graph-lint.py .agent/PLANS.md
+                  - listitem [ref=e1407]:
+                    - text: "Verify:"
+                    - code [ref=e1408]: bash scripts/verify-work.sh
+        - generic [ref=e1412]:
+          - generic [ref=e1415]:
+            - heading "About" [level=2] [ref=e1416]
+            - paragraph [ref=e1417]: Canonical skill catalog for Codex, Claude Code, and Gemini/Antigravity. Author once, validate quality, and sync 120+ AI coding skills across runtimes.
+            - heading "Topics" [level=3] [ref=e1418]
+            - generic [ref=e1420]:
+              - link "automation" [ref=e1421] [cursor=pointer]:
+                - /url: /topics/automation
+              - link "mcp" [ref=e1422] [cursor=pointer]:
+                - /url: /topics/mcp
+              - link "gemini" [ref=e1423] [cursor=pointer]:
+                - /url: /topics/gemini
+              - link "developer-tools" [ref=e1424] [cursor=pointer]:
+                - /url: /topics/developer-tools
+              - link "codex" [ref=e1425] [cursor=pointer]:
+                - /url: /topics/codex
+              - link "ai-agents" [ref=e1426] [cursor=pointer]:
+                - /url: /topics/ai-agents
+              - link "llm" [ref=e1427] [cursor=pointer]:
+                - /url: /topics/llm
+              - link "prompt-engineering" [ref=e1428] [cursor=pointer]:
+                - /url: /topics/prompt-engineering
+              - link "agentic-workflow" [ref=e1429] [cursor=pointer]:
+                - /url: /topics/agentic-workflow
+              - link "ai-tooling" [ref=e1430] [cursor=pointer]:
+                - /url: /topics/ai-tooling
+              - link "model-context-protocol" [ref=e1431] [cursor=pointer]:
+                - /url: /topics/model-context-protocol
+              - link "claude-code" [ref=e1432] [cursor=pointer]:
+                - /url: /topics/claude-code
+              - link "skill-library" [ref=e1433] [cursor=pointer]:
+                - /url: /topics/skill-library
+              - link "skill-catalog" [ref=e1434] [cursor=pointer]:
+                - /url: /topics/skill-catalog
+            - heading "Resources" [level=3] [ref=e1435]
+            - link "Readme" [ref=e1437] [cursor=pointer]:
+              - /url: "#readme-ov-file"
+              - img [ref=e1438]
+              - text: Readme
+            - heading "License" [level=3] [ref=e1440]
+            - link "Apache-2.0 license" [ref=e1442] [cursor=pointer]:
+              - /url: /jscraik/Agent-Skills/blob/main/LICENSE
+              - img [ref=e1443]
+              - text: Apache-2.0 license
+            - heading "Code of conduct" [level=3] [ref=e1445]
+            - link "Code of conduct" [ref=e1447] [cursor=pointer]:
+              - /url: "#coc-ov-file"
+              - img [ref=e1448]
+              - text: Code of conduct
+            - heading "Contributing" [level=3] [ref=e1450]
+            - link "Contributing" [ref=e1452] [cursor=pointer]:
+              - /url: "#contributing-ov-file"
+              - img [ref=e1453]
+              - text: Contributing
+            - heading "Security policy" [level=3] [ref=e1455]
+            - link "Security policy" [ref=e1457] [cursor=pointer]:
+              - /url: "#security-ov-file"
+              - img [ref=e1458]
+              - text: Security policy
+            - link "Activity" [ref=e1461] [cursor=pointer]:
+              - /url: /jscraik/Agent-Skills/activity
+              - img [ref=e1462]
+              - text: Activity
+            - heading "Stars" [level=3] [ref=e1464]
+            - link "2 stars" [ref=e1466] [cursor=pointer]:
+              - /url: /jscraik/Agent-Skills/stargazers
+              - img [ref=e1467]
+              - strong [ref=e1469]: "2"
+              - text: stars
+            - heading "Watchers" [level=3] [ref=e1470]
+            - link "0 watching" [ref=e1472] [cursor=pointer]:
+              - /url: /jscraik/Agent-Skills/watchers
+              - img [ref=e1473]
+              - strong [ref=e1475]: "0"
+              - text: watching
+            - heading "Forks" [level=3] [ref=e1476]
+            - link "1 fork" [ref=e1478] [cursor=pointer]:
+              - /url: /jscraik/Agent-Skills/forks
+              - img [ref=e1479]
+              - strong [ref=e1481]: "1"
+              - text: fork
+            - link "Report repository" [ref=e1483] [cursor=pointer]:
+              - /url: /contact/report-content?content_url=https%3A%2F%2Fgithub.com%2Fjscraik%2FAgent-Skills&report=jscraik+%28user%29
+          - generic [ref=e1485]:
+            - heading "Releases" [level=2] [ref=e1486]:
+              - link "Releases" [ref=e1487] [cursor=pointer]:
+                - /url: /jscraik/Agent-Skills/releases
+            - link "1 tags" [ref=e1488] [cursor=pointer]:
+              - /url: /jscraik/Agent-Skills/tags
+              - img [ref=e1489]
+              - text: 1 tags
+          - generic [ref=e1492]:
+            - heading "Packages" [level=2] [ref=e2099]:
+              - link "Packages" [ref=e2100] [cursor=pointer]:
+                - /url: /users/jscraik/packages?repo_name=Agent-Skills
+            - generic [ref=e2101]: No packages published
+          - generic [ref=e1506]:
+            - heading "Contributors 9" [level=2] [ref=e1507]:
+              - link "Contributors 9" [ref=e1508] [cursor=pointer]:
+                - /url: /jscraik/Agent-Skills/graphs/contributors
+                - text: Contributors
+                - generic "9" [ref=e1509]
+            - list [ref=e1510]:
+              - listitem [ref=e1511]:
+                - link "@jscraik" [ref=e1512] [cursor=pointer]:
+                  - /url: https://github.com/jscraik
+                  - img "@jscraik" [ref=e1513]
+              - listitem [ref=e1514]:
+                - link "@claude" [ref=e1515] [cursor=pointer]:
+                  - /url: https://github.com/claude
+                  - img "@claude" [ref=e1516]
+              - listitem [ref=e1517]:
+                - link "@codex" [ref=e1518] [cursor=pointer]:
+                  - /url: https://github.com/codex
+                  - img "@codex" [ref=e1519]
+              - listitem [ref=e1520]:
+                - link "@dependabot[bot]" [ref=e1521] [cursor=pointer]:
+                  - /url: https://github.com/apps/dependabot
+                  - img "@dependabot[bot]" [ref=e1522]
+              - listitem [ref=e1523]:
+                - link "@github-advanced-security[bot]" [ref=e1524] [cursor=pointer]:
+                  - /url: https://github.com/apps/github-advanced-security
+                  - img "@github-advanced-security[bot]" [ref=e1525]
+              - listitem [ref=e1526]:
+                - link "@greptile-apps[bot]" [ref=e1527] [cursor=pointer]:
+                  - /url: https://github.com/apps/greptile-apps
+                  - img "@greptile-apps[bot]" [ref=e1528]
+              - listitem [ref=e1529]:
+                - link "@github-actions[bot]" [ref=e1530] [cursor=pointer]:
+                  - /url: https://github.com/apps/github-actions
+                  - img "@github-actions[bot]" [ref=e1531]
+              - listitem [ref=e1532]:
+                - link "@coderabbitai[bot]" [ref=e1533] [cursor=pointer]:
+                  - /url: https://github.com/apps/coderabbitai
+                  - img "@coderabbitai[bot]" [ref=e1534]
+              - listitem [ref=e1535]:
+                - link "@cubic-dev-ai[bot]" [ref=e1536] [cursor=pointer]:
+                  - /url: https://github.com/apps/cubic-dev-ai
+                  - img "@cubic-dev-ai[bot]" [ref=e1537]
+          - generic [ref=e1539]:
+            - heading "Languages" [level=2] [ref=e1540]
+            - list [ref=e1550]:
+              - listitem [ref=e1551]:
+                - link "HTML 47.9%" [ref=e1552] [cursor=pointer]:
+                  - /url: /jscraik/Agent-Skills/search?l=html
+                  - img [ref=e1553]
+                  - generic [ref=e1555]: HTML
+                  - generic [ref=e1556]: 47.9%
+              - listitem [ref=e1557]:
+                - link "Python 36.1%" [ref=e1558] [cursor=pointer]:
+                  - /url: /jscraik/Agent-Skills/search?l=python
+                  - img [ref=e1559]
+                  - generic [ref=e1561]: Python
+                  - generic [ref=e1562]: 36.1%
+              - listitem [ref=e1563]:
+                - link "Shell 7.6%" [ref=e1564] [cursor=pointer]:
+                  - /url: /jscraik/Agent-Skills/search?l=shell
+                  - img [ref=e1565]
+                  - generic [ref=e1567]: Shell
+                  - generic [ref=e1568]: 7.6%
+              - listitem [ref=e1569]:
+                - link "Mermaid 5.0%" [ref=e1570] [cursor=pointer]:
+                  - /url: /jscraik/Agent-Skills/search?l=mermaid
+                  - img [ref=e1571]
+                  - generic [ref=e1573]: Mermaid
+                  - generic [ref=e1574]: 5.0%
+              - listitem [ref=e1575]:
+                - link "JavaScript 2.0%" [ref=e1576] [cursor=pointer]:
+                  - /url: /jscraik/Agent-Skills/search?l=javascript
+                  - img [ref=e1577]
+                  - generic [ref=e1579]: JavaScript
+                  - generic [ref=e1580]: 2.0%
+              - listitem [ref=e1581]:
+                - link "TypeScript 1.0%" [ref=e1582] [cursor=pointer]:
+                  - /url: /jscraik/Agent-Skills/search?l=typescript
+                  - img [ref=e1583]
+                  - generic [ref=e1585]: TypeScript
+                  - generic [ref=e1586]: 1.0%
+              - listitem [ref=e1587]:
+                - generic [ref=e1588]:
+                  - img [ref=e1589]
+                  - generic [ref=e1591]: Other
+                  - generic [ref=e1592]: 0.4%

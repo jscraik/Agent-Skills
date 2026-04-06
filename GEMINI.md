@@ -23,6 +23,7 @@ For repository-wide rules, use `AGENTS.md` as the source of truth.
 
 ## Error Handling Protocol
 - When encountering API errors, model access issues, or unexpected failures, do not just report the error; always suggest a concrete workaround or alternative approach that still advances the user's goal.
+- **Skill Install Failures:** If `skill-installer` fails, you MUST follow the **Skill Management Protocol** in `AGENTS.md` (mandatory `skill-builder` pass after manual import).
 
 ## Reporting & Insights
 - For any report or insights generation task, check that required services and model access are available before starting.

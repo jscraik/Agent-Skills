@@ -893,8 +893,10 @@ sync_user_skills "$skills_dir" "$HOME/.agents/skills"
 sync_user_skills "$plugins_dir" "$HOME/.agents/plugins"
 sync_user_skills "$skills_dir" "$HOME/.codex/skills"
 sync_user_skills "$plugins_dir" "$HOME/.codex/plugins" 1
+# Antigravity app requires a flat copy (no symlinks) in its own config dir
 sync_user_skills "$antigravity_skills_dir" "$HOME/.gemini/antigravity/skills" 1 copy
-sync_user_skills "$antigravity_skills_dir" "$HOME/.gemini/skills" 1 copy
+# Redundant Gemini path (already covered by ~/.agents/skills alias)
+# sync_user_skills "$antigravity_skills_dir" "$HOME/.gemini/skills" 1 copy
 sync_user_skills "$antigravity_skills_dir" "$HOME/.antigravity/skills"
 sync_skill_path_file "$antigravity_skills_dir" "$antigravity_skills_txt"
 

@@ -60,6 +60,12 @@ This repository is the canonical source of Codex skills, linked operator docs, a
 
 - Before implementing multi-file edits or complex automation for a simple information request, pause and ask: `Would a direct answer or simple command suffice?`
 
+## Skill Management Protocol
+
+- **Fail-Fast Recovery:** If `skill-installer` fails due to missing files (e.g., `contract.yaml`), you should first attempt to re-run with the `--remediate` flag to automatically scaffold the missing boilerplate.
+- **Mandatory Hardening:** Whether you use `--remediate` or pivot to a manual import, it is **never** the end of the task. You MUST immediately invoke `skill-builder` to harden the new skill until it passes the project's "Gold Standard" validation suite.
+- **Completion Criteria:** A skill is only "installed" once it passes `skill_gate.py` with the `--require-security-evals` flag.
+
 ## Skill line-budget policy
 
 When a `SKILL.md` exceeds the 360-line split budget (`PD_SKILLMD_TOO_LONG`), **never delete content** to bring it under the limit. Move the bulk section(s) to `references/<topic>.md` under the skill directory and replace with a one-line link. Removing blank lines or navigation-only TOC entries (no prose content) is acceptable as a last resort. Owner rule: context is never lost, only relocated.

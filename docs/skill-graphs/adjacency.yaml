@@ -220,10 +220,9 @@ claude-alias:
   bootstrap: Bootstrap a local development environment from a GitHub repository URL
   fix-mise: Diagnose and repair mise trust/runtime issues
 cli-spec:
+  agent-native-architecture: Ensure the CLI fits into an autonomous agent workflow
+  ce-spec: Use when the CLI is a front for a broader system spec
   docs-expert: Document the CLI surface after speccing it
-  product-spec: Produce a broader product spec alongside the CLI spec
-  test-driven-development: Write CLI acceptance tests from the spec
-  writing-plans: Turn the CLI spec into an implementation plan
 cloudflare-deploy:
   backend-engineer: Extend the backend before deploying
   cf-crawl: Run Cloudflare Browser Rendering crawls on the deployed site
@@ -559,6 +558,11 @@ repoprompt:
   ce-plan: Ground implementation plans with Repo Prompt context
   compound-engineering-router: Feed repo context into compound engineering workflows
   context7: Combine with Context7 for richer library context in prompts
+review-duplication:
+  backend-engineer: Check backend code for duplicated functionality
+  codex-home-audit: Review Codex configuration for duplicates
+  frontend-ui-design: Check UI components for duplication
+
 reproduce-bug:
   gh-workflow: Follow up on GitHub issues or PR state after the bug is understood
   linear: Pull issue context from the local tracker before reproducing the bug

@@ -27,7 +27,7 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - [Utilities — Codex Plugin Builder — Fixtures — Arscontexta Codex — Skills](#utilities-codex-plugin-builder-fixtures-arscontexta-codex-skills)
 
 ## Summary
-- `total_skills`: 122
+- `total_skills`: 123
 - `catalog_source`: repository skill scan
 
 ## Catalog
@@ -89,6 +89,7 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 
 - `gh-workflow` — Operate the GitHub lifecycle through `gh`: issue work, PR readiness checks, PR preparation, review handling, CI diagnosis, and merge execution. Use when the user wants GitHub state changed, advanced, or reconciled.
 - `resolve-pr-parallel` — Resolve multiple unresolved GitHub PR review threads in parallel by applying fixes, responding, and closing verified threads. Use when the user wants a broad PR-comment cleanup sweep, not readiness classification or one-off comment handling.
+- `review-duplication` — Proactively investigate for duplicated functionality during code reviews.
 
 ## Interview
 
@@ -188,7 +189,7 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - `diagram-cli` — Generate, validate, and refresh @brainwav/diagram architecture artifacts and context packs. Use when the user wants repository architecture diagrams for onboarding, PR impact, or CI drift checks, not hand-drawn product mock diagrams.
 - `evals-router` — Route and guide LLM evaluation work such as evaluator design, error analysis, RAG evals, and synthetic eval data. Use when the user wants eval-specific workflow help, not product analytics or ordinary QA.
 - `fix-mise` — Use this skill to diagnose and repair mise trust or runtime selection problems and reconcile `~/.config/mise/config.toml` with required tool versions when commands fail because mise shims or trust state are broken.
-- `insight-report` — Generate an evidence-backed Codex usage insights report (HTML and optional PDF) from local sessions, OTEL signals, and a project brief. Use when the user asks for insights, usage analytics, or repeatable retrospective reporting.
+- `insight-report` — WHAT: Generate comprehensive HTML insights from Codex OTEL data using local Ollama LLMs. WHEN: Use when the user asks for usage analytics, workflow patterns, Codex session summaries, or recommendations for improving their development workflow.
 - `markdown-converter` — Convert source files into Markdown outputs using the bundled converter workflow. Use when a user asks to transform documents, notes, or technical files into clean Markdown format.
 - `notebooklm` — Analyze NotebookLM workflows for notebook management, question answering, and audio or video overviews. Use when the user wants NotebookLM actions from this environment, not general browsing or note writing.
 - `orchestrating-subagents` — Plan and run Codex subagent workflows using installed roles and Codex-native delegation tools. Use when the user explicitly wants subagents, parallel delegation, or swarm-style orchestration, not ordinary single-agent work or role creation.
