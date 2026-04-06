@@ -189,6 +189,18 @@ ce-technical-review:
   gh-workflow: Gate merge readiness in GitHub after the technical review is complete
   systematic-debugging: Investigate root cause first when the risky behavior is not
     yet well understood
+ce-reliability-review:
+  ce-plan: Incorporate reliability phases and acceptance criteria
+  ce-review: Broad readiness synthesis, not detailed reliability analysis
+  ce-spec: Define failure model and recovery requirements in the contract
+  ce-technical-review: Code-level engineering issues, not failure scenario modeling
+  systematic-debugging: When investigating a specific failure that already occurred
+ce-tdd:
+  ce-plan: When test strategy needs planning before TDD
+  ce-review: Contract acceptance after TDD completion
+  ce-work: General execution without strict TDD
+  linear: Issue creation and progress tracking
+  test-driven-development: Broader TDD guidance without CE-stage framing
 ce-work:
   ce-compound: Preserve durable learnings or resume the broader CE lifecycle around
     the work
@@ -491,7 +503,6 @@ playwright-interactive:
   ui-visual-regression: Capture Playwright screenshots for regression baselines
 plugin-creator:
   cli-spec: Consult the technical contract for the ask CLI
-  codex-agent-creator: Add or refine agent roles inside the plugin
   codex-plugin-builder: Promote scaffold into a full plugin package with governance
     checks
   skill-builder: Improve bundled skill quality before plugin release
