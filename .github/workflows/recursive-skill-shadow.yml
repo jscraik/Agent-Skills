@@ -81,6 +81,7 @@ jobs:
           git add artifacts/skill-graphs/onboarding/wave-readiness.json 2>/dev/null || true
           git add artifacts/skill-graphs/pilot/artifact-parity-manifest.json 2>/dev/null || true
           git add artifacts/skill-graphs/pilot/shadow-dashboard.json 2>/dev/null || true
+          git add artifacts/skill-graphs/pilot/shadow-baseline.json 2>/dev/null || true
           git add artifacts/skill-graphs/telemetry/ 2>/dev/null || true
           git add docs/skill-graphs/pilots/ui-skills-shadow-results.md 2>/dev/null || true
           git add docs/skill-graphs/pilots/ui-skills-pilot-readout.md 2>/dev/null || true
