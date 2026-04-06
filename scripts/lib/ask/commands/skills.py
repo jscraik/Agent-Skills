@@ -1,5 +1,4 @@
 import os
-import shutil
 from pathlib import Path
 from typing import List, Dict, Any, Tuple
 from ask.envelope import CallResult
