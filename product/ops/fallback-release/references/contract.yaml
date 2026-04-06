@@ -1,0 +1,99 @@
+schema_version: "1.0"
+
+purpose: Execute deterministic fallback releases when primary CI is unavailable due to queue congestion, rate limits, or incidents
+
+skill:
+  name: fallback-release
+  
+triggers:
+  - GitHub Actions workflow queued > 30 minutes
+  - GitHub API rate limit < 10%
+  - GitHub Status shows major incident
+  - Critical security patch needed within 2 hours
+  - Primary CI declared incident
+  
+non_goals:
+  - Replacing primary CI for normal operations
+  - Bypassing code quality checks
+  - Building without verification
+  - Skipping GPG signatures
+
+inputs:
+  - name: version
+    type: string
+    required: true
+    description: Target release version (semver format)
+    validation: "^\\d+\\.\\d+\\.\\d+(-[a-zA-Z0-9.-]+)?$"
+    
+  - name: ci_blocked_evidence
+    type: string
+    required: true
+    description: Evidence that primary CI is blocked (incident URL or status)
+    
+  - name: skip_tests
+    type: boolean
+    required: false
+    default: false
+    description: Skip test suite (not recommended)
+    
+  - name: output_dir
+    type: string
+    required: false
+    default: "./fallback-artifacts"
+    description: Directory for build artifacts
+
+outputs:
+  - name: fallback-build-manifest.json
+    type: application/json
+    schema: "./manifest-schema.json"
+    description: Build provenance manifest with full toolchain and environment info
+    
+  - name: artifact-sha256
+    type: text/plain
+    description: SHA256 checksum file for each binary artifact
+    pattern: "{binary}-{version}-{sha}.sha256"
+    
+  - name: artifact-signature
+    type: text/plain
+    description: GPG detached ASCII-armored signature for each binary artifact
+    pattern: "{binary}-{version}-{sha}.asc"
+    
+  - name: binary-artifact
+    type: application/octet-stream
+    description: Built binary executable
+    pattern: "{binary}-{version}-{sha}"
+
+risks:
+  - name: non_deterministic_build
+    description: Build may differ from primary CI output
+    mitigation: Use locked dependencies, record all toolchain versions
+    
+  - name: compromised_builder
+    description: Fallback builder environment may be compromised
+    mitigation: Mandatory environment verification, GPG signing with trusted key
+    
+  - name: missing_provenance
+    description: Build origin may not be fully documented
+    mitigation: Complete manifest with fallback reason and incident URL
+    
+  - name: signature_chain_break
+    description: GPG key may be different from primary CI
+    mitigation: Use same release signing key, document key ID in manifest
+
+constraints:
+  - Primary CI is default path - fallback only when CI demonstrably stuck
+  - Environment verification mandatory - verify-env.sh must exit 0
+  - GPG signing required for all artifacts with trusted release key
+  - Deterministic builds with locked dependencies
+  - Complete provenance - manifest documents fallback reason
+  - Verification required - installer works before publication
+  - Redaction - secrets and sensitive data redacted in all outputs
+  - Network domains - github.com, crates.io, S3-compatible storage only
+
+safety:
+  - All scripts support --dry-run for preview without mutation
+  - Publish script requires explicit confirmation for destructive operations
+  - GPG passphrase never logged or stored in scripts
+  - AWS credentials from environment only, never hardcoded
+  - Artifact paths validated before operations
+  - Redaction of home directory paths in manifest output
