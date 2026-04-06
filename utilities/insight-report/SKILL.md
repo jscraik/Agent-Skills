@@ -50,7 +50,7 @@ Optional:
 ## Deliverables
 
 - HTML report: `file://$HOME/dev/config/codex/usage-data/report.html`
-- Facet cache: `~/.codex/usage-data/facets-cache.json`
+- Facet cache: `$HOME/dev/config/codex/usage-data/facets-cache.json`
 - Report includes:
   - Session stats (count, duration, success rate)
   - Tool usage charts

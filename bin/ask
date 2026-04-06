@@ -770,68 +770,64 @@ def main():
                 parser.print_help()
         else:
             # Enhanced error output with examples
-            error = result.errors[0] if result.errors else ErrorObject(code="ERR_RUNTIME", message="Unknown error")
+            error = result.errors[0] if result.errors else ErrorObject(code=ErrorCode.ERR_RUNTIME, message="Unknown error")
 
-            if args.json:
-                # JSON output already handled above
-                pass
-            else:
-                print(f"❌ Error: {error.message}")
+            print(f"❌ Error: {error.message}")
 
                 # Add fix suggestion if available
-                if error.fix_suggestion:
-                    print(f"\n💡 {error.fix_suggestion}")
+            if error.fix_suggestion:
+                print(f"\n💡 {error.fix_suggestion}")
 
                 # Add examples based on the current context
-                if args.topic == "skills":
-                    if args.action == "audit":
-                        if "diagnostics" in result.data: print(result.data["diagnostics"]["stdout"])
-                        if "security_gate" in result.data: print(result.data["security_gate"]["stdout"])
-                        print("\n📚 Audit examples:")
-                        print("   ask skills audit backend/cli-spec --level compat")
-                        print("   ask skills audit backend/cli-spec --level strict")
-                        print("   ask skills audit utilities/skill-builder --level strict")
-                    elif args.action in ("install", "fold", "init"):
-                        if "raw_output" in result.data: print(result.data["raw_output"])
-                        if "raw_error" in result.data: print(result.data["raw_error"])
-                        if args.action == "init":
-                            print("\n📚 Init examples:")
-                            print("   ask skills init my-skill --category backend --description 'Does X'")
-                            print("   ask skills init security-guard --category auth --description 'Validates Y'")
-                        elif args.action == "install":
-                            print("\n📚 Install examples:")
-                            print("   ask skills install https://github.com/user/repo --remediate")
-                elif args.topic == "plugins" and args.action == "init":
+            if args.topic == "skills":
+                if args.action == "audit":
+                    if "diagnostics" in result.data: print(result.data["diagnostics"]["stdout"])
+                    if "security_gate" in result.data: print(result.data["security_gate"]["stdout"])
+                    print("\n📚 Audit examples:")
+                    print("   ask skills audit backend/cli-spec --level compat")
+                    print("   ask skills audit backend/cli-spec --level strict")
+                    print("   ask skills audit utilities/skill-builder --level strict")
+                elif args.action in ("install", "fold", "init"):
                     if "raw_output" in result.data: print(result.data["raw_output"])
                     if "raw_error" in result.data: print(result.data["raw_error"])
-                    print("\n📚 Plugin examples:")
-                    print("   ask plugins init my-plugin --with-marketplace")
-                elif args.topic == "evals":
-                    if "raw_output" in result.data: print(result.data["raw_output"])
-                    if "raw_error" in result.data: print(result.data["raw_error"])
-                    print("\n📚 Eval examples:")
-                    print("   ask evals run backend/cli-spec --mode smoke")
-                    print("   ask evals run backend/cli-spec --mode release")
-                elif args.topic == "graph":
-                    print("\n📚 Graph examples:")
-                    print("   ask graph find security")
-                    print("   ask graph related skill-builder --depth 2")
-                    print("   ask graph chain skill-creator skill-installer")
-                    print("   ask graph info cli-spec")
-                elif args.topic == "repo":
-                    if args.action == "validate":
-                        print(result.data.get("raw_output", ""))
-                    if args.action == "check-stability" and "errors" in result.data:
-                        for e in result.data["errors"]:
-                            print(f"   ERROR: {e}")
-                    print("\n📚 Repo examples:")
-                    print("   ask repo status")
-                    print("   ask repo validate --ephemeral")
-                    print("   ask repo check-stability --changed-files backend/cli-spec/SKILL.md")
-                elif args.topic == "mcp":
-                    print("\n📚 MCP examples:")
-                    print("   ask mcp sync")
-                    print("   ask mcp sync --dry-run")
+                    if args.action == "init":
+                        print("\n📚 Init examples:")
+                        print("   ask skills init my-skill --category backend --description 'Does X'")
+                        print("   ask skills init security-guard --category auth --description 'Validates Y'")
+                    elif args.action == "install":
+                        print("\n📚 Install examples:")
+                        print("   ask skills install https://github.com/user/repo --remediate")
+            elif args.topic == "plugins" and args.action == "init":
+                if "raw_output" in result.data: print(result.data["raw_output"])
+                if "raw_error" in result.data: print(result.data["raw_error"])
+                print("\n📚 Plugin examples:")
+                print("   ask plugins init my-plugin --with-marketplace")
+            elif args.topic == "evals":
+                if "raw_output" in result.data: print(result.data["raw_output"])
+                if "raw_error" in result.data: print(result.data["raw_error"])
+                print("\n📚 Eval examples:")
+                print("   ask evals run backend/cli-spec --mode smoke")
+                print("   ask evals run backend/cli-spec --mode release")
+            elif args.topic == "graph":
+                print("\n📚 Graph examples:")
+                print("   ask graph find security")
+                print("   ask graph related skill-builder --depth 2")
+                print("   ask graph chain skill-creator skill-installer")
+                print("   ask graph info cli-spec")
+            elif args.topic == "repo":
+                if args.action == "validate":
+                    print(result.data.get("raw_output", ""))
+                if args.action == "check-stability" and "errors" in result.data:
+                    for e in result.data["errors"]:
+                        print(f"   ERROR: {e}")
+                print("\n📚 Repo examples:")
+                print("   ask repo status")
+                print("   ask repo validate --ephemeral")
+                print("   ask repo check-stability --changed-files backend/cli-spec/SKILL.md")
+            elif args.topic == "mcp":
+                print("\n📚 MCP examples:")
+                print("   ask mcp sync")
+                print("   ask mcp sync --dry-run")
 
     # Semantic Exit Code
     if result.status == "success":
