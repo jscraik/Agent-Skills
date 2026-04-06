@@ -40,8 +40,8 @@ TOPIC_MAPS = {
 }
 
 SA_TABLE_RE = re.compile(
-    r"## See Also\s*\n\| Skill \| .+? \|\n\|[-]+\|[-]+\|\n((?:\|.*\|\n?)*)",
-    re.DOTALL
+    r"##\s+See\s+Also\s*\n\|\s*Skill\s*\|\s*.+?\s*\|\s*\n\|[-\s|]+\|\n((?:\|.*\|\s*\n?)*)",
+    re.DOTALL | re.IGNORECASE
 )
 
 def see_also_count(path: pathlib.Path) -> int:
