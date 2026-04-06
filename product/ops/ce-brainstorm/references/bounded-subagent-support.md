@@ -1,5 +1,12 @@
 # Bounded Subagent Support for ce-brainstorm
 
+## Table of Contents
+
+- [Approval gate](#approval-gate)
+- [Research roles](#research-roles)
+- [Fallback](#fallback)
+- [Constraints](#constraints)
+
 Read when: spawning internal research subagents during Phase 1.1 (Standard or Deep scope)
 
 ## Approval gate
