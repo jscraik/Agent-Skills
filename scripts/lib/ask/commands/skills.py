@@ -269,16 +269,17 @@ def sync_skills(repo_root: Path, scope: str = "workspace", dry_run: bool = False
     skills_dir = repo_root / ".agents" / "skills"
     antigravity_skills_dir = repo_root / "skills-antigravity"
     entries = discover_skill_entries(source="repo")
-    for entry in entries:
-        skill_name = entry.name
-        target_link = skills_dir / skill_name
-        if not entry.source_dir.is_relative_to(repo_root):
-            continue
-        rel_to_root = entry.source_dir.relative_to(repo_root)
-        source_rel = os.path.join("../..", str(rel_to_root))
-        plan["symlinks"].append({"from": str(target_link), "to": source_rel})
-        logs.append(_create_symlink(Path(source_rel), target_link, dry_run))
-    if scope == "user":
+    if scope == "workspace":
+        for entry in entries:
+            skill_name = entry.name
+            target_link = skills_dir / skill_name
+            if not entry.source_dir.is_relative_to(repo_root):
+                continue
+            rel_to_root = entry.source_dir.relative_to(repo_root)
+            source_rel = os.path.join("../..", str(rel_to_root))
+            plan["symlinks"].append({"from": str(target_link), "to": source_rel})
+            logs.append(_create_symlink(Path(source_rel), target_link, dry_run))
+    elif scope == "user":
         home = Path.home()
         targets = [(skills_dir, repo_root / "skills"), (skills_dir, home / ".claude" / "skills"), (skills_dir, home / ".agents" / "skills"), (skills_dir, home / ".codex" / "skills"), (antigravity_skills_dir, home / ".antigravity" / "skills")]
         for src, dst in targets:
@@ -287,6 +288,14 @@ def sync_skills(repo_root: Path, scope: str = "workspace", dry_run: bool = False
         antigravity_dest = home / ".gemini" / "antigravity" / "skills"
         plan["writes"].append(str(antigravity_dest))
         logs.append(_sync_dir_copy(antigravity_skills_dir, antigravity_dest, dry_run))
+    else:
+        result.status = "error"
+        result.errors.append(ErrorObject(
+            code="ERR_INVALID_SCOPE",
+            message=f"Invalid scope: '{scope}'. Must be 'workspace' or 'user'.",
+            fix_suggestion="Use --scope workspace or --scope user"
+        ))
+        return result
     result.data["plan"] = plan
     result.data["logs"] = logs
     result.status = "success"
