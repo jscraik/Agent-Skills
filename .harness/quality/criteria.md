@@ -34,7 +34,7 @@ This file is the authoritative quality gate for the active skill-authoring famil
 
 - **Family gate run**: every PR that touches family members or their validation scripts
 - **Trusted live eval run**: required before any release-grade readiness claim
-- **Official-doc alignment check**: quarterly (next due: 2026-07-05)
+- **Official-doc alignment check**: quarterly (90 days from last review)
 - **Scorecard review**: after any gate failure or quarterly
 
 ## Related Artifacts
@@ -42,6 +42,6 @@ This file is the authoritative quality gate for the active skill-authoring famil
 - `docs/reference/skill-authoring-family-gold-scorecard.md` — single-view scorecard
 - `docs/reference/skill-authoring-family-boundary-decision.md` — family membership authority
 - `docs/reference/skill-authoring-family-quality-baseline.md` — analyzer baselines and thresholds
-- `docs/reference/skill-authoring-family-risk-acceptance.md` — residual risk register (if needed)
-- `docs/reference/skill-authoring-validation-maturity-matrix.md` — readiness matrix
+- `docs/reference/skill-authoring-family-risk-acceptance.md` — residual risk register (created when needed)
+- `docs/reference/skill-authoring-validation-maturity-matrix.md` — readiness matrix (optional)
 - `scripts/validate_skill_authoring_family.sh` — enforcement gate

@@ -33,6 +33,14 @@ REQUIRED_OPTIONAL_BLOCKER_FILES: Dict[str, Set[str]] = {
 DEFAULT_MANIFEST = "artifacts/skill-graphs/pilot/artifact-parity-manifest.json"
 DEFAULT_WAIVER_FILE = "artifacts/skill-graphs/pilot/artifact-parity-waivers.json"
 
+def _make_relative_path(path: Path, base: Path) -> str:
+    """Return relative path if under base, otherwise return absolute path."""
+    try:
+        return str(path.relative_to(base))
+    except ValueError:
+        return str(path)
+
+
 LEGACY_RUN_FILE_SETS = {
     frozenset({"run.json", "iteration_journal.jsonl"}),
     frozenset({"run.json", "iteration_journal.jsonl", "promotion_decision.template.json"}),
@@ -343,7 +351,7 @@ def summarize_audits(audits: Sequence[ArtifactStatus]) -> Dict[str, Any]:
         counts[audit.status] = counts.get(audit.status, 0) + 1
     return {
         "generated_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
-        "runs_root": str((Path(audits[0].run_dir).parent.relative_to(Path.cwd())) if audits else Path("artifacts/skill-graphs/runs")),
+        "runs_root": str(_make_relative_path(Path(audits[0].run_dir).parent, Path.cwd()) if audits else Path("artifacts/skill-graphs/runs")),
         "counts": counts,
         "total_runs": len(audits),
         "run_status_counts": counts,
@@ -498,7 +506,7 @@ def main() -> int:
         )
     else:
         # Derive status from actual compliance counts
-        compliant_count = counts.get("compliant", 0)
+        compliant_count = sum(1 for a in audits if a.status == "compliant")
         total = len(audits)
         manifest["status"] = "ok" if (total > 0 and compliant_count == total) else "non_compliant"
 

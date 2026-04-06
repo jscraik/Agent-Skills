@@ -238,7 +238,10 @@ def parse_session_file(file_path):
                         
                         if msg_type == 'user_message':
                             content = payload.get('message', '') or payload.get('content', '')
-                            is_human = bool(content and content.strip())
+                            # Handle block arrays - convert to string for analysis
+                            if isinstance(content, list):
+                                content = json.dumps(content)
+                            is_human = bool(content and isinstance(content, str) and content.strip())
                             
                             if is_human:
                                 user_messages.append((msg_timestamp, content))
@@ -1438,7 +1441,8 @@ def collect_session_data(args):
     to_parse = []
     
     for file_path in session_files[:args.max_sessions]:
-        session_id = file_path.stem.split('-')[-1] if '-' in file_path.stem else file_path.stem
+        # Use full stem as session_id to avoid collisions from truncated tokens
+        session_id = file_path.stem
         cached = load_cached_session_meta(session_id)
         if cached:
             sessions.append(cached)
