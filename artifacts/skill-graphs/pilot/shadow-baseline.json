@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "captured_at": "2026-03-31T23:59:59Z",
+  "captured_at": "2026-03-25T00:00:00Z",
   "window": "2026-03-25..2026-03-31",
   "window_days": 7,
   "sample_ready": true,
@@ -11,57 +11,57 @@
     "react-ui-patterns"
   ],
   "summary": {
-    "runs_total": 8,
+    "runs_total": 60,
     "by_profile": {
-      "ui-ux-creative-coding": 2,
-      "interface-craft": 2,
-      "frontend-ui-design": 2,
-      "react-ui-patterns": 2
+      "ui-ux-creative-coding": 15,
+      "interface-craft": 15,
+      "frontend-ui-design": 15,
+      "react-ui-patterns": 15
     },
-    "repeat_failure_rate": 0.25,
+    "repeat_failure_rate": 0.1833,
     "first_pass_acceptance_rate": 0.0,
     "median_iterations": 2.0,
-    "p90_iterations": 4.3,
-    "quality_uplift_median": 0.165,
+    "p90_iterations": 3.0,
+    "quality_uplift_median": 0.153,
     "quality_uplift_positive_rate": 1.0,
-    "critical_non_regression_compliance": 0.375,
+    "critical_non_regression_compliance": 0.4333,
     "terminal_non_regression_compliance": 1.0,
-    "non_regression_recovered_rate": 0.625,
+    "non_regression_recovered_rate": 0.5667,
     "budget_compliance": 1.0,
-    "evaluator_flip_rate": 0.0875,
-    "capture_records_written": 8,
+    "evaluator_flip_rate": 0.2733,
+    "capture_records_written": 60,
     "capture_coverage_rate": 1.0,
     "auto_capture_enabled_rate": 1.0,
     "auto_apply_enabled_rate": 1.0,
     "confidence_bucket_counts": {
       "high": 0,
-      "medium": 3,
-      "low": 5,
+      "medium": 26,
+      "low": 34,
       "unknown": 0
     },
     "confidence_bucket_distribution": {
       "high": 0.0,
-      "medium": 0.375,
-      "low": 0.625,
+      "medium": 0.4333,
+      "low": 0.5667,
       "unknown": 0.0
     },
-    "runs_with_injection": 2,
-    "runs_with_retrieved_lessons": 2,
+    "runs_with_injection": 0,
+    "runs_with_retrieved_lessons": 0,
     "suppressed_injection_runs": 0,
-    "injection_usage_rate": 0.25,
-    "total_injected_lessons": 2,
-    "average_injected_lessons_per_run": 0.25,
+    "injection_usage_rate": 0.0,
+    "total_injected_lessons": 0,
+    "average_injected_lessons_per_run": 0.0,
     "rollout_mode_counts": {
       "off": 0,
       "observe_only": 0,
-      "active": 8,
+      "active": 60,
       "other": 0
     },
     "uplift_promotion_decision_counts": {
       "pass": 0,
       "hold": 0,
       "regressed": 0,
-      "insufficient_data": 8,
+      "insufficient_data": 60,
       "insufficient_match_quality": 0,
       "unknown": 0
     },
@@ -69,7 +69,7 @@
       "pass": 0,
       "hold": 0,
       "regressed": 0,
-      "insufficient_data": 8,
+      "insufficient_data": 60,
       "insufficient_match_quality": 0,
       "unknown": 0
     }
