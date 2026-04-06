@@ -29,7 +29,7 @@ def _load_builder_module(repo_root: Path, module_name: str):
         return mod
     return None
 
-def list_skills(repo_root: Path, category: str = None) -> CallResult:
+def list_skills(repo_root: Path, category: Optional[str] = None) -> CallResult:
     result = CallResult()
     entries = discover_skill_entries(source="auto")
     skills_data = []
