@@ -311,9 +311,9 @@ Before handoff, initialize planning state from the plan's Execution Ledger, keep
 
 ## Handoff guidance
 - review the plan or refine it directly
-- run `workflow-review`, `technical-review`, or `deepen-plan` when scrutiny is needed
+- run `ce-review`, `ce-technical-review`, or `ce-deepen-plan` when scrutiny is needed
 - generate a companion UI plan when UI work is in scope
-- start `workflow-work` (with `[[ce-tdd]]` posture if TDD) or hand to `[[linear]]` for issue creation
+- start `ce-work` (with `[[ce-tdd]]` posture if TDD) or hand to `[[linear]]` for issue creation
 - recommend the companion UI plan when the work is UI-heavy and not already covered by a dedicated UI artifact
 
 ## Validation

@@ -5,8 +5,8 @@ prompt: |
   1. Fix shadow cycle CI workflow (daily schedule, contents: write, commit-back)
   2. Run shadow cycle locally to generate fresh telemetry
   3. Regenerate wave-readiness and artifact-parity manifests
-  4. Run release-ready family gate
-  5. Commit and open PR
+  4. Run release-ready family gate (generates evidence-index.json in artifacts/validation/family-gate/ - ephemeral CI/local output, NOT to be committed; reviewers verify CI logs and gate exit status)
+  5. Commit code changes and open PR (do NOT commit evidence-index.json or other validation artifacts - these are ephemeral CI/local outputs)
 context: |
   Three gaps blocking release-ready certification:
   - TELEMETRY_HEALTH_STALE (generated 2026-03-31, >5 days old)

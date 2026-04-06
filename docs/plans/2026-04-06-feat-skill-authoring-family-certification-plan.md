@@ -335,10 +335,10 @@ artifacts/skill-graphs/pilot/artifact-parity-manifest.json
 |----|-----------|--------|-------------|
 | AC1 | `daily-skill-health.md` Generated at < 24h | R1 | `head -3` shows today's timestamp |
 | AC2 | `wave-readiness.json` `wave-0-controls.ready: true`, zero blockers | R3 | Python check exits 0 |
-| AC3 | `artifact-parity-manifest.json` compliance_rate > 0.0 | R2 | `jq .compliance_rate` > 0 |
+| AC3 | `artifact-parity-manifest.json` compliance_rate > 0.0 | R2 | `jq .compliance_rate` > 0 — NOT MET (compliance_rate currently 0.0) |
 | AC4 | `recursive-skill-shadow.yml` CI job passes on schedule with commit-back | R5 | Actions UI shows green; git log shows telemetry commit |
 | AC5 | Family gate exits 0 in structural mode (PR CI) | R4 | `pr-pipeline.yml` passes |
-| AC6 | Release-ready gate exits 0 with `evidence-index.json` (local/manual cert) | R4 | Evidence index shows all 4 skills `outcome: passed` |
+| AC6 | Release-ready gate exits 0 with `evidence-index.json` (local/manual cert) | R4 | Evidence index shows all 4 skills `outcome: passed` — NOT MET (evidence-index.json not yet generated with passing outcomes) |
 
 ## Execution Ledger
 
@@ -347,8 +347,8 @@ artifacts/skill-graphs/pilot/artifact-parity-manifest.json
 | P0 — Fix shadow CI workflow | `done` | Already committed in c3ab24d (daily schedule, write-back, freshness check) |
 | P1 — Local shadow cycle run | `done` | 8 runs across 4 profiles, 6 passed, 2 escalated (expected) |
 | P2 — Verify wave-0 passes | `done` | wave-0-controls.ready=true, zero blockers |
-| P3 — Release-ready gate | `done` | Structural gate passed (live evals deferred to Codex CI) |
-| P4 — PR with artifacts + CI fix | `done` | PR #86 updated, AI artifacts committed |
+| P3 — Release-ready gate | `open` | Structural gate passed; AC3 and AC6 not yet met (compliance_rate=0.0, evidence not release-ready) |
+| P4 — PR with artifacts + CI fix | `open` | PR #86 updated; plan open pending AC3/AC6 completion |
 
 ## Risks
 

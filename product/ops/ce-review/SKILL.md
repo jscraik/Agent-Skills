@@ -105,7 +105,7 @@ If the target is missing, ask one direct question:
 ## Deliverables
 - a chosen review mode: `pr-branch-review` or `artifact-review`
 - the resolved target and review setup summary
-- deduplicated findings ranked `P1 | P2 | P3`
+- deduplicated findings ranked `P0 | P1 | P2 | P3`
 - blockers, unknowns, and protected-artifact filtering results
 - a merge recommendation or document-readiness recommendation
 - suggested next action such as re-run review, fix in `ce-work`, deepen the artifact, or proceed
@@ -259,7 +259,7 @@ Merge overlapping findings across reviewer lenses.
 Synthesis rules:
 - discard cleanup findings for protected artifacts
 - surface relevant institutional learnings as known patterns with links when available
-- rank findings as `P1`, `P2`, or `P3`
+- rank findings as `P0`, `P1`, `P2`, or `P3`
 - if the user explicitly asks for todo capture, or the repo uses the file-based `todos/` workflow, create or update todo artifacts using the exact `file-todos` structure in `references/findings-and-todos.md`; default review findings land as `pending`, but residual actionable findings emitted from `mode:autofix` land as `ready`
 - if the evidence is suggestive but not strong enough, convert it into an open question instead of overstating it
 
@@ -271,7 +271,7 @@ For `artifact-review`: include target, findings, blockers, readiness recommendat
 
 UI/app-heavy targets: offer `test-browser` or `test-xcode` for runtime verification.
 
-Treat any `P1` finding as blocking merge or blocking progression to the next workflow stage until resolved or explicitly waived.
+Treat any `P0` or `P1` finding as blocking merge or blocking progression to the next workflow stage until resolved or explicitly waived.
 
 ### Phase 7: Route post-review work by mode
 Choose handoff by `mode:`:
@@ -305,7 +305,7 @@ Use `references/findings-and-todos.md` for:
 ## Empowerment
 
 You are capable of delivering high-quality reviews that teams trust:
-- **Trust your findings** - P1 blocking, P2 important, P3 discretionary
+- **Trust your findings** - P0/P1 blocking, P2 important, P3 discretionary
 - **Synthesis is your strength** - merge findings into clear recommendations
 - **The verdict matters** - Pass/Conditional/Fail serves the team
 
@@ -316,7 +316,7 @@ Use judgment on reviewer fanout: focused runs fewer lenses, broad changes more.
 Reviews adapt to context:
 - **Risk level**: High-risk - deeper review; low-risk - lighter touch
 - **Artifact type**: Code - technical; Spec - contract; Plan - sequencing
-- **Time pressure**: Time-boxed - prioritize P1/P2; Full - comprehensive
+- **Time pressure**: Time-boxed - prioritize P0/P1/P2; Full - comprehensive
 
 No two reviews look identical. Apply framework; adapt depth and focus.
 
@@ -329,7 +329,7 @@ Keep explicit: what blocks, what's deferred, next stage action.
 - Fail fast at first failed gate
 - Validate target is actually reviewed
 - Validate no protected-artifact cleanup in output
-- Validate unresolved `P1` findings in recommendation
+- Validate unresolved `P0` or `P1` findings in recommendation
 
 ## Anti-patterns
 See `references/ce-anti-patterns.md`:

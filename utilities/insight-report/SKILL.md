@@ -7,6 +7,17 @@ metadata:
 
 # Insight Report
 
+## Table of Contents
+
+- [Philosophy](#philosophy)
+- [When to use](#when-to-use)
+- [Required inputs](#required-inputs)
+- [Deliverables](#deliverables)
+- [Examples](#examples)
+- [Implementation details](#implementation-details)
+- [References](#references)
+- [See Also](#see-also)
+
 Full-featured Codex analytics with local LLM-powered session analysis. Uses **local Ollama LLMs** for intelligent session analysis.
 
 ## Philosophy
@@ -228,7 +239,7 @@ User: "Monthly report"
 ## References
 
 - Generator: `scripts/run_insight_report.py`
-- Facet cache: `~/.codex/usage-data/facets-cache.json`
+- Facet cache: `$HOME/dev/config/codex/usage-data/facets-cache.json`
 - OTEL paths: `~/.agents/otel-collector/`
 
 ## See Also
