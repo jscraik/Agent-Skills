@@ -7,12 +7,12 @@ import re
 import shlex
 
 try:
-    import tomllib
+    import tomllib  # stdlib (Python ≥ 3.11)
 except ModuleNotFoundError:
     try:
-        import tomli as tomllib
+        import tomli as tomllib  # type: ignore[no-redef]  # third-party backport
     except ModuleNotFoundError:
-        logging.error("Error: Please install tomli if using Python < 3.11: pip install tomli")
+        logging.error("Error: Please install tomli: pip install tomli")
         sys.exit(1)
 
 CODEX_CONFIG_PATH = os.path.expanduser("~/.codex/config.toml")
@@ -33,28 +33,15 @@ def load_codex_config():
 
 def build_antigravity_config(codex_config):
     mcp_servers = {}
-    NAME_MAPPING = {
-        "repo-prompt": "repoprompt",
-    }
     
-    # Loader to source .env files (handles regular files and FIFOs with 0.5s timeout)
-    source_env = (
-        'for f in ~/.codex/.env ~/dev/config/.env; do '
-        '[ -e "$f" ] && { tmp=$(mktemp); timeout 0.5s cat "$f" > "$tmp" || true; [ -s "$tmp" ] && . "$tmp"; rm -f "$tmp"; }; '
-        'done'
-    )
-    # Ensure Homebrew and Mise shims are on the PATH for npx and other tools
-    wrapper = (
-        'export PATH="/opt/homebrew/bin:$HOME/.local/share/mise/shims:$PATH"; '
-        f'set -a; {source_env}; set +a'
-    )
+    # Source .env files and then execute the configured command safely.
+    wrapper = "set -a; [ -f ~/.codex/.env ] && . ~/.codex/.env >/dev/null 2>&1; [ -f ~/dev/config/.env ] && . ~/dev/config/.env >/dev/null 2>&1; set +a"
     
     servers = codex_config.get("mcp_servers", {})
     for server_name, config in servers.items():
         if config.get("enabled") is False:
             continue
             
-        mcp_name = NAME_MAPPING.get(server_name, server_name)
         mcp_obj = {}
         
         # 1. STDIO servers
@@ -108,27 +95,20 @@ def build_antigravity_config(codex_config):
         else:
             continue
             
-        # Deduplicate remote servers by URL
-        if "url" in config:
-            is_duplicate = False
-            for existing_mcp in mcp_servers.values():
-                if existing_mcp.get("command") == "sh" and any(config["url"] in arg for arg in existing_mcp.get("args", [])):
-                    is_duplicate = True
-                    break
-            if is_duplicate:
-                logging.info("Skipping duplicate remote server URL: %s", config["url"])
-                continue
-            
-        mcp_servers[mcp_name] = mcp_obj
+        mcp_servers[server_name] = mcp_obj
 
+    # Antigravity ships sequentially-thinking by default typically
+    if "sequential-thinking" not in mcp_servers:
+        mcp_servers["sequential-thinking"] = {
+            "command": "npx",
+            "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+        }
+        
     # User requested agentation MCP to be globally available in Antigravity
     if "agentation" not in mcp_servers:
         mcp_servers["agentation"] = {
             "command": "sh",
-            "args": [
-                "-c",
-                f"{wrapper}; exec npx -y agentation-mcp server"
-            ]
+            "args": ["-c", f"{wrapper}; exec npx -y agentation-mcp server"]
         }
 
     return {"mcpServers": mcp_servers}

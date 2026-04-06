@@ -14,12 +14,12 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 - `data_fetch_analysis`: 6
 - `team_automation`: 36
 - `scaffolding_templates`: 27
-- `code_quality_review`: 16
+- `code_quality_review`: 15
 - `ci_cd_deployment`: 6
 - `runbook`: 5
 - `infrastructure_ops`: 6
 - `invalid`: 0
-- `total_tagged`: 119
+- `total_tagged`: 118
 
 ## Semantic Types
 
@@ -137,7 +137,6 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 - `every-style-editor` — `product/content`
 - `fixing-accessibility` — `frontend/website`
 - `fixing-metadata` — `frontend/website`
-- `review-duplication` — `github`
 - `security-best-practices` — `product/security`
 - `skill-builder` — `utilities`
 - `test-driven-development` — `utilities`

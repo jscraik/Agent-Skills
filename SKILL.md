@@ -27,7 +27,7 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - [Utilities — Codex Plugin Builder — Fixtures — Arscontexta Codex — Skills](#utilities-codex-plugin-builder-fixtures-arscontexta-codex-skills)
 
 ## Summary
-- `total_skills`: 123
+- `total_skills`: 122
 - `catalog_source`: repository skill scan
 
 ## Catalog
@@ -89,7 +89,6 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 
 - `gh-workflow` — Operate the GitHub lifecycle through `gh`: issue work, PR readiness checks, PR preparation, review handling, CI diagnosis, and merge execution. Use when the user wants GitHub state changed, advanced, or reconciled.
 - `resolve-pr-parallel` — Resolve multiple unresolved GitHub PR review threads in parallel by applying fixes, responding, and closing verified threads. Use when the user wants a broad PR-comment cleanup sweep, not readiness classification or one-off comment handling.
-- `review-duplication` — Proactively investigate for duplicated functionality during code reviews.
 
 ## Interview
 
@@ -99,7 +98,7 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 
 ## Product — Content
 
-- `changelog` — Draft concise changelogs from recently merged pull requests, grouped by user-facing impact and contributor credit. Use when the user wants a daily or weekly engineering summary, release-note style update, or Discord-ready changelog based on GitHub activity.
+- `changelog` — Create engaging changelogs for recent merges to main branch with a witty, enthusiastic marketing voice. Use when the user wants a daily or weekly engineering summary, release-note style update, or Discord-ready changelog that highlights features, bugs, and gives contributor credit with personality.
 - `every-style-editor` — Edit prose to conform to Every's editorial house style, including grammar, punctuation, mechanics, and naming conventions. Use when the user wants articles, newsletters, social copy, or other branded editorial writing polished, not repo docs QA.
 - `feature-video` — Produce a concise feature walkthrough video and package the result for review or release workflows. Use when a user needs a demo artifact, PR-ready walkthrough, or polished clip for a shipped product change.
 - `video-transcript-downloader` — Download video or audio and extract transcripts or subtitles with yt-dlp and ffmpeg. Use when the user wants media downloaded, transcribed, summarized, or converted from a video source.
@@ -135,7 +134,6 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - `compound-engineering-router` — Route compound-engineering requests to the correct CE stage or support meta-mode. Use when the user wants CE ideation, spec, planning, work, review, compound learning, or context compaction and the right stage is not yet explicit.
 - `decide-build-primitive` — Use this skill to analyze whether a capability should become a Skill, Custom Prompt, or Agent automation when the user is packaging or automating a workflow and the right Codex primitive is not yet clear.
 - `linear` — Manage Linear issues, projects, and docs through the Linear MCP workflow with consistent read/create/update operations. Use when a user asks to triage, create, update, or report on Linear work items.
-- `production-deployment` — Deploy and manage production services across various platforms with automated verification and rollback safety. Use when the platform is specified or to scaffold a deployment plan when details are missing.
 - `release` — Cut a clean semver release from the main branch using the repo's release flow. Use when the user wants a tagged Cargo release, not generic deployment or changelog drafting.
 - `resolve-todo-parallel` — Resolve file-based `todos/` items in bounded parallel with dependency ordering and cleanup. Use when the todo sweep itself is the job to coordinate, not generic implementation work.
 - `triage` — Triage file-based `todos/` findings into ready, skipped, or revised states before execution. Use when the repo already uses the file-based todo workflow and the user wants approval-style triage, not tracker triage or todo execution.
@@ -190,7 +188,7 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - `diagram-cli` — Generate, validate, and refresh @brainwav/diagram architecture artifacts and context packs. Use when the user wants repository architecture diagrams for onboarding, PR impact, or CI drift checks, not hand-drawn product mock diagrams.
 - `evals-router` — Route and guide LLM evaluation work such as evaluator design, error analysis, RAG evals, and synthetic eval data. Use when the user wants eval-specific workflow help, not product analytics or ordinary QA.
 - `fix-mise` — Use this skill to diagnose and repair mise trust or runtime selection problems and reconcile `~/.config/mise/config.toml` with required tool versions when commands fail because mise shims or trust state are broken.
-- `insight-report` — WHAT: Generate comprehensive HTML insights from Codex OTEL data using local Ollama LLMs. WHEN: Use when the user asks for usage analytics, workflow patterns, Codex session summaries, or recommendations for improving their development workflow.
+- `insight-report` — Generate comprehensive HTML insights from Codex OTEL data using local Ollama LLMs. Local LLM-powered facet extraction for personalized analytics and actionable recommendations.
 - `markdown-converter` — Convert source files into Markdown outputs using the bundled converter workflow. Use when a user asks to transform documents, notes, or technical files into clean Markdown format.
 - `notebooklm` — Analyze NotebookLM workflows for notebook management, question answering, and audio or video overviews. Use when the user wants NotebookLM actions from this environment, not general browsing or note writing.
 - `orchestrating-subagents` — Plan and run Codex subagent workflows using installed roles and Codex-native delegation tools. Use when the user explicitly wants subagents, parallel delegation, or swarm-style orchestration, not ordinary single-agent work or role creation.
