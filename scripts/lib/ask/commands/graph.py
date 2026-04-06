@@ -1,6 +1,5 @@
 """Skill graph navigation and discovery for agent-native workflows."""
 import json
-import subprocess
 from pathlib import Path
 from typing import List, Dict, Any, Optional
 from collections import defaultdict, deque
