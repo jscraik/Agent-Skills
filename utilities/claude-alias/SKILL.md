@@ -137,3 +137,12 @@ Keep Claude alias routing deterministic:
 
 - `scripts/claude_alias_guard.sh`: deterministic check/repair guardrail.
 - `references/alias-hardening-runbook.md`: troubleshooting and operational notes.
+
+## See Also
+
+| Skill | When to use |
+|-------|-------------|
+| [[fix-mise]] | Diagnose and repair mise trust/runtime issues |
+| [[bootstrap]] | Bootstrap a local development environment from a GitHub repository URL |
+
+**Topic map:** [[infrastructure]]

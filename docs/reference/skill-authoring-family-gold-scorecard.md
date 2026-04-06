@@ -25,8 +25,14 @@ plan: docs/plans/2026-04-05-feat-skill-authoring-family-gold-standard-upgrade-pl
 | `structural-pass` | Structural gate passes; live evidence not yet captured for release-grade claim |
 | `blocked` | One or more gate failures; not release-grade |
 
+**Governance Requirement:** Any PR modifying skill authoring family behavior must run and pass the `authoring-family-gate` CI job before claiming `gold` status. The check must execute:
+```bash
+SKILL_FAMILY_RELEASE_READY=1 SKILL_FAMILY_LIVE_EVALS=1 SKILL_FAMILY_LIVE_EVALS_TRUSTED=1 SKILL_FAMILY_CODEX_PROFILE=fast SKILL_EVAL_TIMEOUT_SEC=300 bash scripts/validate_skill_authoring_family.sh
+```
+PR approval is conditional on this job passing.
+
 **Current status: `structural-pass`**  
-Structural family gate passes for all 4 members. Trusted live evidence attempted 2026-04-05 — partial evidence captured (quota-limited); quota resets at 11:58 PM. Re-run required before gold claim.
+Structural family gate passes for all 4 members. Trusted live evidence attempted 2026-04-05 — partial evidence captured (quota-limited); quota resets at 11:58 PM UTC. Re-run required before gold claim.
 
 **Live eval attempt summary (2026-04-05):**
 - Run command: `SKILL_FAMILY_RELEASE_READY=1 SKILL_FAMILY_LIVE_EVALS=1 SKILL_FAMILY_LIVE_EVALS_TRUSTED=1 SKILL_FAMILY_CODEX_PROFILE=fast SKILL_EVAL_TIMEOUT_SEC=300 bash scripts/validate_skill_authoring_family.sh`
@@ -47,12 +53,12 @@ Active family:
 | Gate | Artifact | Status |
 |---|---|---|
 | Boundary reconciliation (P0) | `docs/reference/skill-authoring-family-boundary-decision.md` | complete |
-| Trusted live eval evidence (P1) | `artifacts/validation/family-gate/<run-ts>/evidence-index.json` | pending trusted run |
+| Trusted live eval evidence (P1) | `docs/evidence/skill-authoring-family/gold-evidence-index.json` (committed) or release asset | pending trusted run |
 | Security hardening (P2) | OpenClaw output in gate run — 0 warnings | complete |
 | Quality uplift (P3) | `docs/reference/skill-authoring-family-quality-baseline.md` | complete |
-| Governance scorecard (P4) | this file | complete |
+| Governance scorecard (P4) | `docs/reference/skill-authoring-family-gold-scorecard.md` | complete |
 
-**To advance to `gold` status:** run with `SKILL_FAMILY_RELEASE_READY=1 SKILL_FAMILY_LIVE_EVALS=1 SKILL_FAMILY_LIVE_EVALS_TRUSTED=1` and link the resulting `evidence-index.json` here.
+**To advance to `gold` status:** run with `SKILL_FAMILY_RELEASE_READY=1 SKILL_FAMILY_LIVE_EVALS=1 SKILL_FAMILY_LIVE_EVALS_TRUSTED=1` and commit the resulting `evidence-index.json` to `docs/evidence/skill-authoring-family/gold-evidence-index.json`, or upload it as a release asset and link it in this scorecard.
 
 ## Metric Scorecard
 

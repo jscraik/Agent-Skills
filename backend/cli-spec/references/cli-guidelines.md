@@ -11,7 +11,7 @@ Use this rubric for CLI surface-area design: args/flags/subcommands/help/output/
 - Robustness and empathy: fail fast with clear errors.
 
 ## Help and documentation
-- Always support `-h`/`--help`; ignore other args when present.
+- Prioritize `-h`/`--help` support as the primary pattern for displaying documentation.
 - On missing args: show concise help with 1-2 examples and "use --help".
 - Support `cmd help` and `cmd subcmd --help` patterns.
 - Lead with examples; list common flags/commands first.

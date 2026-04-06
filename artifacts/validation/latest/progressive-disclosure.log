@@ -1,14 +1,18 @@
-WARN  product/docs/agents-md/SKILL.md: SKILL.md exceeds target length (lines=359, target=320)
-WARN  product/ops/ce-brainstorm/SKILL.md: SKILL.md exceeds target length (lines=353, target=320)
-WARN  product/ops/ce-deepen-plan/SKILL.md: SKILL.md exceeds target length (lines=326, target=320)
-WARN  product/ops/ce-deepen-spec/SKILL.md: SKILL.md exceeds target length (lines=326, target=320)
-WARN  product/ops/ce-plan/SKILL.md: SKILL.md exceeds target length (lines=340, target=320)
-WARN  product/ops/ce-spec/SKILL.md: SKILL.md exceeds target length (lines=328, target=320)
+WARN  product/ops/ce-compound/SKILL.md: SKILL.md exceeds target length (lines=356, target=320)
+WARN  product/ops/ce-compound-refresh/SKILL.md: SKILL.md exceeds target length (lines=360, target=320)
+WARN  product/ops/ce-deepen-plan/SKILL.md: SKILL.md exceeds target length (lines=359, target=320)
+WARN  product/ops/ce-deepen-spec/SKILL.md: SKILL.md exceeds target length (lines=350, target=320)
+WARN  product/ops/ce-ideate/SKILL.md: SKILL.md exceeds target length (lines=330, target=320)
+WARN  product/ops/ce-plan/SKILL.md: SKILL.md exceeds target length (lines=358, target=320)
+WARN  product/ops/ce-review/SKILL.md: SKILL.md exceeds target length (lines=360, target=320)
+WARN  product/ops/ce-spec/SKILL.md: SKILL.md exceeds target length (lines=353, target=320)
+WARN  product/ops/ce-technical-review/SKILL.md: SKILL.md exceeds target length (lines=341, target=320)
+WARN  product/ops/ce-work/SKILL.md: SKILL.md exceeds target length (lines=356, target=320)
 WARN  product/strategy/product-design-critic/SKILL.md: SKILL.md exceeds target length (lines=351, target=320)
 WARN  utilities/codex-plugin-builder/SKILL.md: SKILL.md exceeds target length (lines=331, target=320)
 WARN  utilities/skill-builder/SKILL.md: SKILL.md exceeds target length (lines=345, target=320)
-Checked files: 117
+Checked files: 118
 Errors: 0
-Warnings: 9
+Warnings: 13
 Mode: strict
 Progressive disclosure lint passed

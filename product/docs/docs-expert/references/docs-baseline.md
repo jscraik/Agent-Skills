@@ -4,7 +4,7 @@
 
 Produce documentation that gets useful information into a reader's head quickly, with minimal cognitive load, and with practical paths to success (examples plus troubleshooting).
 
-## Standards snapshot (as of March 2026)
+## Standards snapshot (as of April 2026)
 
 Use this baseline unless the repository has stricter internal policy:
 

@@ -27,7 +27,7 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - [Utilities — Codex Plugin Builder — Fixtures — Arscontexta Codex — Skills](#utilities-codex-plugin-builder-fixtures-arscontexta-codex-skills)
 
 ## Summary
-- `total_skills`: 121
+- `total_skills`: 124
 - `catalog_source`: repository skill scan
 
 ## Catalog
@@ -98,7 +98,7 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 
 ## Product — Content
 
-- `changelog` — Draft concise changelogs from recently merged pull requests, grouped by user-facing impact and contributor credit. Use when the user wants a daily or weekly engineering summary, release-note style update, or Discord-ready changelog based on GitHub activity.
+- `changelog` — Create engaging changelogs for recent merges to main branch with a witty, enthusiastic marketing voice. Use when the user wants a daily or weekly engineering summary, release-note style update, or Discord-ready changelog that highlights features, bugs, and gives contributor credit with personality.
 - `every-style-editor` — Edit prose to conform to Every's editorial house style, including grammar, punctuation, mechanics, and naming conventions. Use when the user wants articles, newsletters, social copy, or other branded editorial writing polished, not repo docs QA.
 - `feature-video` — Produce a concise feature walkthrough video and package the result for review or release workflows. Use when a user needs a demo artifact, PR-ready walkthrough, or polished clip for a shipped product change.
 - `video-transcript-downloader` — Download video or audio and extract transcripts or subtitles with yt-dlp and ffmpeg. Use when the user wants media downloaded, transcribed, summarized, or converted from a video source.
@@ -176,6 +176,7 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - `bootstrap` — Bootstrap a local development environment from a GitHub repository URL. Use when the user asks to clone a repo, install toolchains/dependencies, and validate a working dev setup automatically.
 - `cf-crawl` — Crawl sites through Cloudflare Browser Rendering's `/crawl` API and export markdown or JSON results. Use when the user wants a Cloudflare-managed crawl job, not generic browser automation or scraping.
 - `circleci` — Plan, migrate, debug, or harden CircleCI pipelines and related delivery workflows. Use when the user wants CircleCI-specific config, testing, deployment, secrets, or policy help, not generic CI advice.
+- `claude-alias` — Diagnose, repair, and harden Claude wrapper alias routing (`ck`, `cz`, `cc`) when provider configs drift or auth/model conflicts return the wrong backend.
 - `coderabbit` — Answer CodeRabbit setup, configuration, knowledge-base, review-command, tool, and rollout questions by retrieving evidence from the local crawl corpus. Use when a user needs repository-local CodeRabbit documentation to decide how to configure, operate, or troubleshoot CodeRabbit, not when they need generic CI authoring or live SaaS state changes.
 - `codex-agent-creator` — Create, install, and validate Codex custom subagents as standalone `.codex/agents/*.toml` files with safe minimal-change updates. Use when the user wants custom agent definitions created or upgraded, not orchestration of running agent threads.
 - `codex-automation-architect` — Design, review, or merge Codex app automations using current OpenAI/Codex guidance and validation. Use when the user wants recurring Codex automation workflows built, audited, or consolidated.
@@ -187,9 +188,9 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - `diagram-cli` — Generate, validate, and refresh @brainwav/diagram architecture artifacts and context packs. Use when the user wants repository architecture diagrams for onboarding, PR impact, or CI drift checks, not hand-drawn product mock diagrams.
 - `evals-router` — Route and guide LLM evaluation work such as evaluator design, error analysis, RAG evals, and synthetic eval data. Use when the user wants eval-specific workflow help, not product analytics or ordinary QA.
 - `fix-mise` — Use this skill to diagnose and repair mise trust or runtime selection problems and reconcile `~/.config/mise/config.toml` with required tool versions when commands fail because mise shims or trust state are broken.
-- `insight-report` — Generate an evidence-backed Codex usage insights report (HTML and optional PDF) from local sessions, OTEL signals, and a project brief. Use when the user asks for insights, usage analytics, or repeatable retrospective reporting.
+- `insight-report` — Generate comprehensive HTML insights from Codex OTEL data using local Ollama LLMs. Local LLM-powered facet extraction for personalized analytics and actionable recommendations.
 - `markdown-converter` — Convert source files into Markdown outputs using the bundled converter workflow. Use when a user asks to transform documents, notes, or technical files into clean Markdown format.
-- `notebooklm` — Run NotebookLM workflows for notebook management, question answering, and audio or video overviews. Use when the user wants NotebookLM actions from this environment, not general browsing or note writing.
+- `notebooklm` — Analyze NotebookLM workflows for notebook management, question answering, and audio or video overviews. Use when the user wants NotebookLM actions from this environment, not general browsing or note writing.
 - `orchestrating-subagents` — Plan and run Codex subagent workflows using installed roles and Codex-native delegation tools. Use when the user explicitly wants subagents, parallel delegation, or swarm-style orchestration, not ordinary single-agent work or role creation.
 - `process-watch` — Analyze system processes and resource usage to diagnose runaway CPU/memory/IO, identify culprits, and propose next diagnostic steps. Use when investigating performance spikes or leaks.
 - `rclone` — Upload, sync, verify, or inspect files in remote storage with rclone. Use when the user wants S3, R2, B2, Google Drive, Dropbox, or similar remote file operations, not local file moves or app deployment.

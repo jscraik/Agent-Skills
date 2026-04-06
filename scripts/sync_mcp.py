@@ -7,10 +7,13 @@ import re
 import shlex
 
 try:
-    import tomli as tomllib
+    import tomllib  # stdlib (Python ≥ 3.11)
 except ModuleNotFoundError:
-    logging.error("Error: Please install tomli if using Python < 3.11: pip install tomli")
-    sys.exit(1)
+    try:
+        import tomli as tomllib  # type: ignore[no-redef]  # third-party backport
+    except ModuleNotFoundError:
+        logging.error("Error: Please install tomli: pip install tomli")
+        sys.exit(1)
 
 CODEX_CONFIG_PATH = os.path.expanduser("~/.codex/config.toml")
 ANTIGRAVITY_MCP_PATH = os.path.expanduser("~/.gemini/antigravity/mcp_config.json")
@@ -28,13 +31,53 @@ def load_codex_config():
     with open(CODEX_CONFIG_PATH, "rb") as f:
         return tomllib.load(f)
 
+# Optional: Map Codex server names to Antigravity names (can cause collisions)
+NAME_MAPPING = {}
+
+
+def _detect_mapping_collisions(servers, name_mapping):
+    """Detect collisions before applying name mapping.
+
+    Raises ValueError if:
+    - Multiple original names map to the same target name
+    - A mapped name collides with an existing unmapped server name
+    """
+    collisions = []
+    remapped_targets = {}
+
+    for original_name in servers.keys():
+        target_name = name_mapping.get(original_name, original_name)
+        if target_name in remapped_targets:
+            collisions.append(
+                f"'{original_name}' and '{remapped_targets[target_name]}' both map to '{target_name}'"
+            )
+        else:
+            remapped_targets[target_name] = original_name
+
+    # Check for target names that exist as original names (would overwrite)
+    for original_name in servers.keys():
+        target_name = name_mapping.get(original_name, original_name)
+        if target_name != original_name and target_name in servers:
+            collisions.append(
+                f"'{original_name}' maps to '{target_name}' which already exists as an original server"
+            )
+
+    if collisions:
+        raise ValueError(
+            "NAME_MAPPING collisions detected:\n  - " + "\n  - ".join(collisions)
+        )
+
+
 def build_antigravity_config(codex_config):
     mcp_servers = {}
-    
+
     # Source .env files and then execute the configured command safely.
     wrapper = "set -a; [ -f ~/.codex/.env ] && . ~/.codex/.env >/dev/null 2>&1; [ -f ~/dev/config/.env ] && . ~/dev/config/.env >/dev/null 2>&1; set +a"
-    
+
     servers = codex_config.get("mcp_servers", {})
+
+    # Detect collisions before applying mapping
+    _detect_mapping_collisions(servers, NAME_MAPPING)
     for server_name, config in servers.items():
         if config.get("enabled") is False:
             continue
@@ -91,8 +134,19 @@ def build_antigravity_config(codex_config):
             ]
         else:
             continue
-            
-        mcp_servers[server_name] = mcp_obj
+
+        # Apply NAME_MAPPING to get the target server name
+        target_name = NAME_MAPPING.get(server_name, server_name)
+
+        # Check for collision with existing entry
+        if target_name in mcp_servers:
+            logging.warning(
+                "Skipping '%s' -> '%s': target already exists (from '%s')",
+                server_name, target_name, server_name if target_name == server_name else "mapped source"
+            )
+            continue
+
+        mcp_servers[target_name] = mcp_obj
 
     # Antigravity ships sequentially-thinking by default typically
     if "sequential-thinking" not in mcp_servers:

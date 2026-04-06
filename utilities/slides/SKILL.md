@@ -36,7 +36,7 @@ Create, edit, recreate, and validate presentation decks with editable PowerPoint
 - An updated or newly created `.pptx` deck aligned to the request.
 - Rebuildable JavaScript source when the deck is authored or materially edited with PptxGenJS.
 - A short evidence summary covering render review, overflow checks, font drift, and blockers.
-- If requested, a structured status report with a `schema_version` field.
+- If requested, a structured status report with `schema_version: 1` aligned to `references/contract.yaml`.
 
 ## Failure mode
 - If required tools are missing, report the exact dependency blocker and stop instead of improvising.

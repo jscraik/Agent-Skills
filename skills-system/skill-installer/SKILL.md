@@ -86,7 +86,7 @@ Adapt the trust policy and validation depth to different source contexts and dep
 3. Validate path/ref tokens (`--path` and `--ref`) before any Git command execution.
 4. Fetch source via download and use git fallback only when failure class and transport policy allow it.
 5. Stage each skill in quarantine.
-6. Run staged validators (`quick_validate`, `skill_gate`, `openclaw`) when validation level is strict.
+6. Run staged validators via the unified CLI (`ask skills audit`) when validation level is strict.
 7. Promote staged skills atomically.
 8. Write rollback journal and provenance manifest.
 9. Report installed skills and restart guidance.
@@ -94,13 +94,12 @@ Adapt the trust policy and validation depth to different source contexts and dep
 Primary commands:
 
 ```bash
-scripts/list-skills.py
-scripts/list-skills.py --path skills/.experimental
-scripts/install-skill-from-github.py --repo <owner>/<repo> --ref <40-char-sha> --path <path/to/skill>
-scripts/install-skill-from-github.py --url https://github.com/<owner>/<repo>/tree/<sha>/<path>
+bin/ask skills list
+bin/ask skills list --category experimental
+bin/ask skills install https://github.com/<owner>/<repo> --remediate
 ```
 
-Key options:
+Key options for the underlying logic:
 - `--trusted-repo <owner/repo>`
 - `--allow-untrusted-source`
 - `--allow-unpinned-ref`
@@ -129,13 +128,11 @@ Avoid these failures:
 Run these checks and fail fast: if any gate fails, stop immediately, fix, then rerun from that gate.
 
 ```bash
-~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/quick_validate.py skills-system/skill-installer --mode compat
-~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/skill_gate.py skills-system/skill-installer --require-security-evals --pi-high-fail --require-fail-fast
-~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/openclaw_skill_guard.py skills-system/skill-installer --mode both --format text
-~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/run_skill_evals.py skills-system/skill-installer --list-cases --eval-mode smoke
-~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/run_skill_evals.py skills-system/skill-installer --runner codex --eval-mode smoke
-~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/run_skill_evals.py skills-system/skill-installer --runner codex --eval-mode release
-python3 scripts/test_skill_installer_security.py
+# Verify the installer logic itself
+./bin/ask repo validate --ephemeral
+
+# Verify a specific installed skill
+./bin/ask skills audit github/new-skill --level strict
 ```
 
 Family gate note:

@@ -22,10 +22,7 @@ Reviewers should expect this gate to enforce:
 - Structural smoke/release eval case coverage (or trusted-lane live eval execution when explicitly enabled).
 
 ## Gate dependency policy
-PR orchestration for these checks follows this dependency model:
-1. `pr-template`
-2. `repo-validate` and `authoring-family-gate` (in parallel after template pass)
-3. `harness-preflight` (must depend on both jobs above)
+See [CI Required Checks](/docs/agents/12-ci-required-checks.md) for the canonical PR gate dependency policy.
 
 Any change that removes or bypasses the `harness-preflight -> [repo-validate, authoring-family-gate]` dependency must be treated as governance-impacting and reviewed explicitly.
 

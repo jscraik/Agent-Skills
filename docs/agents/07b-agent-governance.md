@@ -23,4 +23,5 @@
 - Treat `authoring-family-gate` as a governance approval gate for skill authoring family changes.
 - The gate is satisfied only when `scripts/validate_skill_authoring_family.sh` passes for all family members.
 - Do not mark a skill-authoring-family pull request merge-ready while this gate is failing or missing.
-- `harness-preflight` must run after both `repo-validate` and `authoring-family-gate`; this dependency is part of PR governance, not an optional sequence detail.
+
+See [CI Required Checks](/docs/agents/17-ci-required-checks.md) for the complete PR gate dependency policy.

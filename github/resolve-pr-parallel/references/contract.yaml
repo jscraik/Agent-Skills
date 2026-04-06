@@ -2,11 +2,12 @@ schema_version: 1
 purpose: >
   Batch-resolve unresolved GitHub PR review threads by implementing requested changes,
   answering reviewer questions, committing and pushing updates, resolving completed
-  threads, and verifying that no unresolved non-outdated threads remain.
+  threads, and verifying that no unresolved non-outdated threads remain. Includes
+  an interactive summary phase to align with user priorities.
 
 triggers:
   - Requests to handle all remaining PR feedback on a PR
-  - Requests to clear unresolved GitHub review threads after fixes
+  - Requests to summarize or clear unresolved GitHub review threads after fixes
   - Requests for parallel PR-comment remediation or batch review-comment resolution
 
 inputs:
@@ -15,6 +16,7 @@ inputs:
   - permission to edit code, commit, push, and resolve threads when not already implied
 
 outputs:
+  - Interactive status reports of open and resolved threads
   - Human-readable summary of the remediation outcome
   - Structured output matching required_output fields when requested
 

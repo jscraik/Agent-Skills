@@ -63,16 +63,17 @@ Use a focused GitHub remediation workflow for unresolved PR review threads. Pres
 - If requested, a structured status report matching [`references/contract.yaml`](/Users/jamiecraik/dev/Agent-Skills/github/resolve-pr-parallel/references/contract.yaml) with `schema_version: 1`.
 
 ## Workflow
-1. Resolve the PR context and baseline safety state.
+1. **Resolve the PR context and baseline safety state.**
    - Confirm `gh` auth, repo context, current git status, and the target PR before planning work.
    - If the working tree is dirty in a way that would interfere with PR remediation, stop and surface the real state.
-2. Fetch unresolved review threads.
-   - Use [`scripts/get-pr-comments`](/Users/jamiecraik/dev/Agent-Skills/github/resolve-pr-parallel/scripts/get-pr-comments) to collect unresolved, non-outdated review threads.
-   - If repo auto-detection fails, pass `OWNER/REPO` explicitly.
-3. Classify the thread work.
+2. **Fetch and Summarize unresolved review threads.**
+   - Use `scripts/get-pr-comments` to collect unresolved, non-outdated review threads.
+   - **Interactive Status Report:** Present a numbered list of open comments to the user. For resolved threads, summarize as a single line with a ✅.
+   - **Request Guidance:** Ask the user which threads they would like to address first or if any should be skipped. Do not begin batch remediation until the intent is confirmed.
+3. **Classify the thread work.**
    - Split threads into code changes, reviewer questions, style/convention fixes, test additions, and blocked items.
    - Keep question-only threads separate so they return substantive reply text instead of fake code churn.
-4. Execute remediation in bounded parallel.
+4. **Execute remediation in bounded parallel.**
    - For 1-4 unresolved items, direct parallel remediation is fine.
    - For 5+ unresolved items, run batches of at most 4 and keep parent-context summaries short.
    - Prefer the `pr-comment-resolver` agent when a worker-per-thread model is available; otherwise run the same checklist serially.

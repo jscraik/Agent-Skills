@@ -17,9 +17,9 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 - `code_quality_review`: 15
 - `ci_cd_deployment`: 6
 - `runbook`: 5
-- `infrastructure_ops`: 5
+- `infrastructure_ops`: 6
 - `invalid`: 0
-- `total_tagged`: 117
+- `total_tagged`: 118
 
 ## Semantic Types
 
@@ -162,6 +162,7 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 ### Infrastructure Ops
 
 - `1password` — `utilities`
+- `claude-alias` — `utilities`
 - `fix-mise` — `utilities`
 - `process-watch` — `utilities`
 - `rclone` — `utilities`

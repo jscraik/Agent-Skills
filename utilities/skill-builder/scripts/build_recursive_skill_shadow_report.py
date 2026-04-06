@@ -1313,7 +1313,11 @@ def main() -> int:
             else str(runs_root)
         ),
         "pilot_profiles": PILOT_PROFILES,
-        "pilot_profiles_file": str(pilot_profiles_path),
+        "pilot_profiles_file": (
+            str(pilot_profiles_path.relative_to(repo_root))
+            if pilot_profiles_path.is_relative_to(repo_root)
+            else str(pilot_profiles_path)
+        ),
         "window_days": window_days,
         "current_window": current_window,
         "current": to_dict(current_summary),

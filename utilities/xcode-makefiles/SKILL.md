@@ -48,6 +48,7 @@ Install strict CLI-first Xcode build tooling with per-agent isolation for iOS an
 - Installed Makefile toolkit and scripts.
 - Standard build and test targets such as `make diagnose`, `make build`, `make test`, and `make run`.
 - Agent-isolated directories under `build/`.
+- If requested, a structured status report with `schema_version: 1` aligned to `references/contract.yaml`.
 
 ## Philosophy
 - Xcode automation should be reproducible enough to trust in both solo and multi-agent workflows.

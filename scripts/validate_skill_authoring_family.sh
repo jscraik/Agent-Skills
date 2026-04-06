@@ -1,6 +1,15 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Run repo preflight before any path-sensitive operations
+if [[ -f "scripts/codex-preflight.sh" ]]; then
+  bash scripts/codex-preflight.sh --stack auto --mode required
+elif [[ -f "$(dirname "${BASH_SOURCE[0]}")/codex-preflight.sh" ]]; then
+  bash "$(dirname "${BASH_SOURCE[0]}")/codex-preflight.sh" --stack auto --mode required
+else
+  echo "WARNING: codex-preflight.sh not found, skipping preflight"
+fi
+
 repo_root="$(cd -P "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
 cd "$repo_root"
 
@@ -15,6 +24,19 @@ skill_dirs=(
   "skills-system/skill-installer"
   "skills-system/plugin-creator"
 )
+
+# ---------------------------------------------------------------------------
+# Runner selection — override via SKILL_FAMILY_RUNNER (default: codex)
+# ---------------------------------------------------------------------------
+runner_name="${SKILL_FAMILY_RUNNER:-codex}"
+runner_args=(--runner "$runner_name")
+if [[ "$runner_name" == "gemini" ]]; then
+  runner_args+=(--gemini-output-format json)
+  gemini_bin="${SKILL_FAMILY_GEMINI_BIN:-}"
+  if [[ -n "$gemini_bin" ]]; then
+    runner_args+=(--gemini-bin "$gemini_bin")
+  fi
+fi
 
 # ---------------------------------------------------------------------------
 # Release-readiness mode validation
@@ -186,7 +208,7 @@ if command -v "$ruff_bin" >/dev/null 2>&1; then
     exit 2
   fi
 else
-  echo "[family-gate] WARN: ruff not found; skipping Python lint (install via: pip install ruff)"
+  echo "[family-gate] WARN: ruff not found; skipping Python lint (install via: pip install ruff or brew install ruff)"
 fi
 
 echo "[family-gate] validating ${#skill_dirs[@]} skill authoring family members"
@@ -216,12 +238,81 @@ if "$python_bin" -m pytest --version >/dev/null 2>&1; then
     exit 2
   fi
 else
-  echo "[family-gate] WARN: pytest not found; skipping unit tests (install via: pip install pytest)"
+  echo "[family-gate] WARN: pytest not found; skipping unit tests (install via: pip install pytest or brew install python)"
 fi
 
 # Track per-skill evidence for the release-ready index
-declare -A skill_evidence_paths
-declare -A skill_outcomes
+# Using parallel indexed arrays for Bash 3.2+ compatibility (avoid associative arrays)
+skill_dirs_ordered=()
+skill_evidence_paths_ordered=()
+skill_outcomes_ordered=()
+
+# Helper: get index of skill_dir in ordered array (or -1 if not found)
+_get_skill_index() {
+  local target="$1"
+  local i
+  for i in "${!skill_dirs_ordered[@]}"; do
+    if [[ "${skill_dirs_ordered[$i]}" == "$target" ]]; then
+      echo "$i"
+      return
+    fi
+  done
+  echo "-1"
+}
+
+# Helper: set evidence path for skill_dir
+_set_evidence_path() {
+  local skill="$1"
+  local path="$2"
+  local idx
+  idx=$(_get_skill_index "$skill")
+  if [[ "$idx" == "-1" ]]; then
+    skill_dirs_ordered+=("$skill")
+    skill_evidence_paths_ordered+=("$path")
+    skill_outcomes_ordered+=("")
+  else
+    skill_evidence_paths_ordered[$idx]="$path"
+  fi
+}
+
+# Helper: set outcome for skill_dir
+_set_outcome() {
+  local skill="$1"
+  local outcome="$2"
+  local idx
+  idx=$(_get_skill_index "$skill")
+  if [[ "$idx" == "-1" ]]; then
+    skill_dirs_ordered+=("$skill")
+    skill_evidence_paths_ordered+=("")
+    skill_outcomes_ordered+=("$outcome")
+  else
+    skill_outcomes_ordered[$idx]="$outcome"
+  fi
+}
+
+# Helper: get evidence path for skill_dir (returns empty if not found)
+_get_evidence_path() {
+  local skill="$1"
+  local idx
+  idx=$(_get_skill_index "$skill")
+  if [[ "$idx" == "-1" ]]; then
+    echo ""
+  else
+    echo "${skill_evidence_paths_ordered[$idx]}"
+  fi
+}
+
+# Helper: get outcome for skilldir (returns "unknown" if not found)
+_get_outcome() {
+  local skill="$1"
+  local idx
+  idx=$(_get_skill_index "$skill")
+  if [[ "$idx" == "-1" ]]; then
+    echo "unknown"
+  else
+    echo "${skill_outcomes_ordered[$idx]:-unknown}"
+  fi
+}
 
 for skill_dir in "${skill_dirs[@]}"; do
   echo
@@ -233,34 +324,40 @@ for skill_dir in "${skill_dirs[@]}"; do
 
   if [[ "${SKILL_FAMILY_LIVE_EVALS:-0}" == "1" ]]; then
     skill_slug="${skill_dir//\//-}"
+    skill_eval_failed=0
     if [[ "$release_ready" == "1" ]]; then
       skill_evidence_path="${evidence_run_dir}/${skill_slug}"
-      skill_evidence_paths["$skill_dir"]="$skill_evidence_path"
+      _set_evidence_path "$skill_dir" "$skill_evidence_path"
       "$python_bin" utilities/skill-builder/scripts/run_skill_evals.py "$skill_dir" \
-        --runner codex \
+        "${runner_args[@]}" \
         --eval-mode smoke \
         --reports-dir "$skill_evidence_path" \
-        "${codex_profile_args[@]+"${codex_profile_args[@]}"}"
+        "${codex_profile_args[@]+"${codex_profile_args[@]}"}" || skill_eval_failed=1
       "$python_bin" utilities/skill-builder/scripts/run_skill_evals.py "$skill_dir" \
-        --runner codex \
+        "${runner_args[@]}" \
         --eval-mode release \
         --reports-dir "$skill_evidence_path" \
-        "${codex_profile_args[@]+"${codex_profile_args[@]}"}"
+        "${codex_profile_args[@]+"${codex_profile_args[@]}"}" || skill_eval_failed=1
       "$python_bin" utilities/skill-builder/scripts/ci_skill_quality_gate.py \
         "$skill_evidence_path" \
         --tier2-mode warn \
-        --format text
+        --format text || skill_eval_failed=1
     else
       "$python_bin" utilities/skill-builder/scripts/run_skill_evals.py "$skill_dir" \
-        --runner codex \
+        "${runner_args[@]}" \
         --eval-mode smoke \
-        "${codex_profile_args[@]+"${codex_profile_args[@]}"}"
+        "${codex_profile_args[@]+"${codex_profile_args[@]}"}" || skill_eval_failed=1
       "$python_bin" utilities/skill-builder/scripts/run_skill_evals.py "$skill_dir" \
-        --runner codex \
+        "${runner_args[@]}" \
         --eval-mode release \
-        "${codex_profile_args[@]+"${codex_profile_args[@]}"}"
+        "${codex_profile_args[@]+"${codex_profile_args[@]}"}" || skill_eval_failed=1
     fi
-    skill_outcomes["$skill_dir"]="passed"
+    if [[ "$skill_eval_failed" == "0" ]]; then
+      _set_outcome "$skill_dir" "passed"
+    else
+      _set_outcome "$skill_dir" "failed"
+      echo "[family-gate] WARN: live evals had failures for $skill_dir — recording outcome as failed"
+    fi
   else
     "$python_bin" utilities/skill-builder/scripts/run_skill_evals.py "$skill_dir" \
       --list-cases \
@@ -268,7 +365,7 @@ for skill_dir in "${skill_dirs[@]}"; do
     "$python_bin" utilities/skill-builder/scripts/run_skill_evals.py "$skill_dir" \
       --list-cases \
       --eval-mode release
-    skill_outcomes["$skill_dir"]="structural-only"
+    _set_outcome "$skill_dir" "structural-only"
   fi
 
   "$python_bin" utilities/skill-builder/scripts/openclaw_skill_guard.py "$skill_dir" \
@@ -290,46 +387,93 @@ done
 if [[ "$release_ready" == "1" ]] && [[ -n "$evidence_run_dir" ]]; then
   index_path="${evidence_run_dir}/evidence-index.json"
 
-  # Build skills JSON array
-  skills_json="["
-  first=1
-  for skill_dir in "${skill_dirs[@]}"; do
-    [[ "$first" == "0" ]] && skills_json+=","
-    first=0
-    outcome="${skill_outcomes[$skill_dir]:-unknown}"
-    evpath="${skill_evidence_paths[$skill_dir]:-}"
-    skills_json+="{\"skill\":\"${skill_dir}\",\"outcome\":\"${outcome}\",\"evidence_path\":\"${evpath}\"}"
-  done
-  skills_json+="]"
-
+  runner_label="${SKILL_FAMILY_RUNNER:-codex}"
   codex_profile_label="${SKILL_FAMILY_CODEX_PROFILE:-default}"
 
-  cat >"$index_path" <<EOF
-{
-  "schema_version": 1,
-  "generated_at": "${run_timestamp}",
-  "branch": "${git_branch}",
-  "commit_sha": "${git_sha}",
-  "freshness_window_days": 7,
-  "mode": "release-ready",
-  "codex_profile": "${codex_profile_label}",
-  "evidence_dir": "${evidence_run_dir}",
-  "skill_coverage": ${skills_json},
-  "degraded_mode_policy": "runner failures block closeout; retry-limited reruns are required before marking release-ready; one successful trusted rerun per skill is the minimum evidence standard",
-  "note": "This index satisfies the P1 trusted live eval release gate. Stale artifacts older than freshness_window_days or from non-descendant commits must be rejected at closeout time."
-}
-EOF
+  # Build skills JSON array safely with jq
+  skills_json_array="[]"
+  for skill_dir in "${skill_dirs[@]}"; do
+    outcome=$(_get_outcome "$skill_dir")
+    evpath=$(_get_evidence_path "$skill_dir")
+    skills_json_array=$(echo "$skills_json_array" | jq \
+      --arg skill "$skill_dir" \
+      --arg outcome "$outcome" \
+      --arg evpath "$evpath" \
+      '. + [{skill: $skill, outcome: $outcome, evidence_path: $evpath}]')
+  done
+
+  # Write entire index with jq to safely escape all values
+  jq -n \
+    --arg ts "$run_timestamp" \
+    --arg branch "$git_branch" \
+    --arg sha "$git_sha" \
+    --arg runner "$runner_label" \
+    --arg profile "$codex_profile_label" \
+    --arg dir "$evidence_run_dir" \
+    --argjson skills "$skills_json_array" \
+    '{
+      schema_version: 1,
+      generated_at: $ts,
+      branch: $branch,
+      commit_sha: $sha,
+      runner: $runner,
+      freshness_window_days: 7,
+      mode: "release-ready",
+      codex_profile: $profile,
+      evidence_dir: $dir,
+      skill_coverage: $skills,
+      degraded_mode_policy: "runner failures block closeout; retry-limited reruns are required before marking release-ready; one successful trusted rerun per skill is the minimum evidence standard",
+      note: "This index satisfies the P1 trusted live eval release gate. Stale artifacts older than freshness_window_days or from non-descendant commits must be rejected at closeout time."
+    }' > "$index_path"
   echo "[family-gate] evidence index written: ${index_path}"
   echo "[family-gate] lineage: branch=${git_branch} sha=${git_sha}"
 fi
 
+# ---------------------------------------------------------------------------
+# Quarterly review date freshness check
+# ---------------------------------------------------------------------------
+# Parse the criteria.md file and check if quarterly review is overdue
+if [[ -f ".harness/quality/criteria.md" ]]; then
+  # Look for pattern like "quarterly (90 days from last review)" or similar
+  # Extract any explicit dates and check if they're in the past
+  if grep -qE 'next due.*20[0-9]{2}-[0-9]{2}-[0-9]{2}' .harness/quality/criteria.md 2>/dev/null; then
+    next_due=$(grep -oE 'next due.*20[0-9]{2}-[0-9]{2}-[0-9]{2}' .harness/quality/criteria.md | grep -oE '20[0-9]{2}-[0-9]{2}-[0-9]{2}' | head -1)
+    if [[ -n "$next_due" ]]; then
+      # Compare date (works on macOS and Linux)
+      next_due_epoch=$(date -j -f "%Y-%m-%d" "$next_due" +%s 2>/dev/null || date -d "$next_due" +%s 2>/dev/null || echo "")
+      today_epoch=$(date +%s)
+      if [[ -n "$next_due_epoch" && "$today_epoch" -gt "$next_due_epoch" ]]; then
+        echo "[family-gate] WARN: Quarterly review date ($next_due) is overdue"
+        echo "[family-gate]        Update .harness/quality/criteria.md with new review date"
+        # Non-blocking: warn only, don't exit 1
+      fi
+    fi
+  fi
+fi
+
 echo
+# Compute overall outcome from per-skill results
+any_failed=0
+for skill_dir in "${skill_dirs[@]}"; do
+  outcome=$(_get_outcome "$skill_dir")
+  if [[ "$outcome" == "failed" ]]; then
+    any_failed=1
+  fi
+done
+
 if [[ "${SKILL_FAMILY_LIVE_EVALS:-0}" == "1" ]]; then
-  if [[ "$release_ready" == "1" ]]; then
-    echo "[family-gate] pass (release-ready): all authoring-family skills met trusted live eval/security benchmarks"
-    echo "[family-gate] evidence artifacts: ${evidence_run_dir}"
+  if [[ "$any_failed" == "0" ]]; then
+    if [[ "$release_ready" == "1" ]]; then
+      echo "[family-gate] pass (release-ready): all authoring-family skills met trusted live eval/security benchmarks"
+      echo "[family-gate] evidence artifacts: ${evidence_run_dir}"
+    else
+      echo "[family-gate] pass: all authoring-family skills met equivalent eval/security benchmarks"
+    fi
   else
-    echo "[family-gate] pass: all authoring-family skills met equivalent eval/security benchmarks"
+    echo "[family-gate] FAIL: one or more skills had live eval failures"
+    echo "[family-gate] evidence artifacts: ${evidence_run_dir}"
+    echo "[family-gate] review evidence-index.json for per-skill outcomes"
+    exit 2
   fi
 else
   echo "[family-gate] pass: all authoring-family skills met structural contract/security checks"

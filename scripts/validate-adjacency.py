@@ -32,6 +32,7 @@ CANONICAL_PREFIXES = {
     "interview/",
     "personas/",
     "product/",
+    "skills-antigravity/",
     "skills-system/",
     "utilities/",
 }

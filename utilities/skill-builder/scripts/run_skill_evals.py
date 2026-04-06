@@ -261,13 +261,20 @@ def _utc_now_iso() -> str:
     return dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
 
-def _resolve_optional_case_artifact_path(case_dir: Path, artifact: Optional[str]) -> Optional[str]:
+def _resolve_optional_case_artifact_path(case_dir: Path, artifact: Optional[str], workspace_root: Optional[Path] = None) -> Optional[str]:
     if artifact is None:
         return None
     candidate = Path(artifact)
     if candidate.is_absolute():
-        return str(candidate)
-    return str((case_dir / candidate).resolve())
+        result = candidate
+    else:
+        result = (case_dir / candidate).resolve()
+    if workspace_root:
+        try:
+            return str(result.relative_to(workspace_root))
+        except ValueError:
+            pass
+    return str(result)
 
 
 def _normalize_eval_modes(raw: Any, *, case_number: int) -> Optional[Tuple[str, ...]]:
@@ -1709,6 +1716,16 @@ def _resolve_path(path_like: str, *, base: Path) -> Path:
     return (base / p).resolve()
 
 
+def _make_relative(path: Optional[Path], base: Path) -> str:
+    """Convert absolute path to relative path from base, or return as-is if not possible."""
+    if path is None:
+        return ""
+    try:
+        return str(path.relative_to(base))
+    except ValueError:
+        return str(path)
+
+
 def _extract_min_rubric_score(budgets: Optional[Dict[str, Any]]) -> Optional[float]:
     if not budgets:
         return None
@@ -2189,7 +2206,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "tool": "run_skill_evals",
         "generated_at": _utc_now_iso(),
         "skill": skill_name,
-        "skill_path": str(skill_dir),
+        "skill_path": _make_relative(skill_dir, workspace_root),
         "skill_release": {
             "name": skill_name,
             "version": str(skill_frontmatter.get("version") or "0.0.0+local"),
@@ -2244,7 +2261,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             cli_timeout_sec=args.timeout_sec,
             cli_timeout_profile=args.timeout_profile,
         )
-        comparison_review_artifact = _resolve_optional_case_artifact_path(case_dir, c.comparison_review_artifact)
+        comparison_review_artifact = _resolve_optional_case_artifact_path(case_dir, c.comparison_review_artifact, workspace_root)
         neutral_baseline_approval: Optional[Dict[str, Any]] = None
         if c.baseline_type == "neutral_repo_baseline":
             approval_id = c.neutral_baseline_approval_id or ""
@@ -2464,11 +2481,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 "tier2_findings": runner_tier2_findings,
                 "warnings": runner_warnings,
                 "artifacts": {
-                    "dir": str(runner_dir),
-                    "final": str(runner_dir / "final.txt"),
-                    "stdout": str(runner_dir / "stdout.txt"),
-                    "stderr": str(runner_dir / "stderr.txt"),
-                    "jsonl": str(jsonl_path) if jsonl_path else None,
+                    "dir": _make_relative(runner_dir, workspace_root),
+                    "final": _make_relative(runner_dir / "final.txt", workspace_root),
+                    "stdout": _make_relative(runner_dir / "stdout.txt", workspace_root),
+                    "stderr": _make_relative(runner_dir / "stderr.txt", workspace_root),
+                    "jsonl": _make_relative(jsonl_path, workspace_root) if jsonl_path else None,
                 },
                 "metrics": runner_metrics,
                 "used_schema": bool(schema_path and runner_name == "codex"),
@@ -2506,7 +2523,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 timeout_sec=case_timeout_sec,
                 timeout_profile=case_timeout_profile,
             ),
-            "dir": str(case_dir),
+            "dir": _make_relative(case_dir, workspace_root),
             "runners": runner_records,
             "passed": case_pass,
             "tier1_failed": case_tier1_failed,
@@ -2556,10 +2573,16 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     scorecard_path = Path(args.scorecard_out).expanduser().resolve() if args.scorecard_out else (reports_base / "scorecard.json")
     scorecard_path.parent.mkdir(parents=True, exist_ok=True)
     scorecard_path.write_text(json.dumps(summary, indent=2, ensure_ascii=False), encoding="utf-8")
+    def _rel(p: Path) -> str:
+        try:
+            return str(p.relative_to(workspace_root))
+        except ValueError:
+            return str(p)
+
     summary["artifacts"] = {
-        "reports_base": str(reports_base),
-        "summary": str(summary_path),
-        "scorecard": str(scorecard_path),
+        "reports_base": _rel(reports_base),
+        "summary": _rel(summary_path),
+        "scorecard": _rel(scorecard_path),
     }
     if comparison_review_paths:
         unique_paths = sorted(set(comparison_review_paths))
@@ -2567,8 +2590,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     summary["neutral_baseline_approvals_used"] = sorted(used_neutral_baseline_approvals)
     release_manifest_path = reports_base / "release_manifest.json"
     junit_path = Path(args.junit_out).expanduser().resolve() if args.junit_out else (reports_base / "junit.xml")
-    summary["artifacts"]["release_manifest"] = str(release_manifest_path)
-    summary["artifacts"]["junit"] = str(junit_path)
+    summary["artifacts"]["release_manifest"] = _rel(release_manifest_path)
+    summary["artifacts"]["junit"] = _rel(junit_path)
     _write_junit_report(summary, junit_path)
     release_manifest = {
         "schema_version": "1.0",
@@ -2584,7 +2607,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             "readiness_summary": summary["readiness_summary"],
             "round_state_summary": summary["round_state_summary"],
             "neutral_baseline_approvals_used": summary["neutral_baseline_approvals_used"],
-            "reports_base": str(reports_base),
+            "reports_base": _rel(reports_base),
         },
         "artifacts": summary["artifacts"],
     }

@@ -10,7 +10,7 @@ metadata:
 ## Table of Contents
 - [When to use](#when-to-use)
 - [Philosophy](#philosophy)
-- [Standards snapshot (March 2026)](#standards-snapshot-march-2026)
+- [Standards snapshot (April 2026)](#standards-snapshot-april-2026)
 - [Quickstart (Lightweight Path)](#quickstart-lightweight-path)
 - [Discovery interview](#discovery-interview)
 - [README reality audit mode](#readme-reality-audit-mode)
@@ -55,7 +55,7 @@ This skill provides a structured workflow for **collaborative doc creation and r
 
 If the user asks for a fast pass, use Quickstart. If the scope is large or ambiguous, use the full workflow from `references/DOC_COAUTHORING.md`.
 
-## Standards snapshot (March 2026)
+## Standards snapshot (April 2026)
 Use these as the baseline unless the repository has stricter internal policy:
 
 - GitHub community profile + health files (README, LICENSE, CONTRIBUTING, CODE_OF_CONDUCT, SECURITY, SUPPORT, issue/PR templates).
@@ -216,7 +216,7 @@ When AI tooling support is in scope:
 
 ## Reference map
 - Full workflow and reader-testing rubric: `references/DOC_COAUTHORING.md`
-- README structure and templates: `references/readme-crafting.md`, `references/readme-section-templates.md`, `references/readme-reality-audit.md`
+- README structure, templates, and quick reference: `references/readme-crafting.md` (includes 8 Critical Rules, copy-paste templates, one-page quick reference), `references/readme-section-templates.md`, `references/readme-reality-audit.md`
 - Doc-type routing and baseline writing rules: `references/document-types.md`, `references/docs-baseline.md`, `references/openai-doc-writing-principles.md`, `references/industry-gold-standard-2026.md`, `references/official-docs-baseline.md`
 - Operational spec and output-contract modes: `references/operational-workflow-mode.md`, `references/output-contract-mode.md`, `references/contract.yaml`, `references/evals.yaml`
 - In-code docs, upkeep, and branding: `references/code-docs.md`, `references/CODE_DOC_CHECKLIST.md`, `references/docs-upkeep-runbook.md`, `references/BRAND_GUIDELINES.md`, `references/brand-styling.md`, `assets/CODE_DOC_TEMPLATES.md`
@@ -247,22 +247,21 @@ If tooling is missing and bootstrap is not approved, state what is missing and w
 If validation surfaces durable repo work, create or update a Linear issue in the named `[[ project ]]` rather than leaving the finding only in chat.
 
 ## Anti-patterns
-- Writing without confirming audience and purpose.
-- Burying key decisions or risks in long prose.
-- Shipping drafts without a verification pass.
-- Inventing commands, paths, or results.
-- Applying fallback brand assets when official brand guidance already exists.
-- Generic templates that ignore context or tradeoffs.
-- Checklist dumping without rationale or decision framing.
-- Vague headings or jargon-only section titles that hide the point.
-- Screenshots or visuals without alt text or captions.
-- One-size-fits-all guidance that ignores constraints or audience.
 
-Quick corrections:
-- Do not lead with installation when the reader needs value first; start with the problem, outcome, or quick example.
-- Do not use generic boilerplate; state audience, constraints, and concrete use cases.
-- Do not skip risks or rollback; add them when failure modes matter.
-- Do not replace official repo branding with fallback assets; resolve and cite the real source of truth.
+| Anti-Pattern | Why It Fails | Do Instead |
+|--------------|--------------|------------|
+| Writing without confirming audience | Wrong focus, wrong depth | Confirm audience and purpose first |
+| Burying key decisions in prose | Readers miss critical info | Use tables, callouts for decisions |
+| Shipping without verification | Errors, broken commands | Run verification pass before publish |
+| Inventing commands/paths | Untrustworthy docs | Verify against repo before writing |
+| Fallback brand over official | Brand misalignment | Resolve and cite real source of truth |
+| Generic templates without context | Feels copy-paste | State audience, constraints, use cases |
+| Checklist dumping without rationale | No decision context | Frame with rationale and tradeoffs |
+| Vague/jargon headings | Hides the point | Use descriptive, scannable headings |
+| Screenshots without alt text | Accessibility failure | Always include alt text or captions |
+| Installation-first README | Buries value proposition | Lead with TL;DR/problem first |
+| One-size-fits-all guidance | Ignores constraints | Tailor to context and audience |
+| Abstract feature claims | Does not convince | Every claim → concrete example |
 
 ## Examples
 

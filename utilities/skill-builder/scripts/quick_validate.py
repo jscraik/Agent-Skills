@@ -31,9 +31,9 @@ import sys
 from pathlib import Path
 from typing import Any, Dict, Optional, Sequence
 
-try:
-    import yaml  # type: ignore  # noqa: F401
-except ModuleNotFoundError:
+import importlib.util as _ilu
+
+if _ilu.find_spec("yaml") is None:
     preferred = Path.home() / ".venvs" / "pyyaml" / "bin" / "python"
     already_reexec = os.environ.get("SKILL_CREATOR_PYYAML_REEXEC") == "1"
     if preferred.exists() and not already_reexec:
@@ -42,6 +42,8 @@ except ModuleNotFoundError:
         os.execve(str(preferred), [str(preferred), __file__, *sys.argv[1:]], env)
     print("ERROR: PyYAML is required (pip install pyyaml).", file=sys.stderr)
     raise SystemExit(1)
+
+del _ilu
 
 # ---------------------------------------------------------------------------
 # Shared frontmatter parser (sibling module)

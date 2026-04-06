@@ -7,10 +7,17 @@ metadata:
 
 # CE Spec
 
+**Note: The current year is 2026.** Use this when dating spec artifacts and searching for recent documentation.
+
+`ce-brainstorm` defines **WHAT** to build and why. `ce-spec` defines the **contract** (boundaries, lifecycles, failures, acceptance criteria). `ce-plan` defines **HOW** to build it.
+
+This workflow produces an implementation-grade specification. It does **not** produce implementation plans or code.
+
 ## Table of Contents
 - [Working agreement](#working-agreement)
 - [When to use](#when-to-use)
 - [Required inputs](#required-inputs)
+- [Interaction Method](#interaction-method)
 - [Workflow](#workflow)
 - [Spec modes](#spec-modes)
 - [Artifact contracts](#artifact-contracts)
@@ -20,15 +27,19 @@ metadata:
 - [References](#references)
 - [Gotchas](#gotchas)
 
+## Interaction Method
+
+Use the platform's blocking question tool when available (`AskUserQuestion` in Claude Code, `request_user_input` in Codex, `ask_user` in Gemini). Otherwise, present numbered options in chat and wait for the user's reply before proceeding.
+
+Ask one question at a time. Prefer concise single-select choices when natural options exist.
+
 ## Working agreement
-- Treat this as the compound-engineering specification stage, not planning or implementation.
-- `product-spec` stays separate: use it for broader product-planning pipelines such as PRD, UX, API, architecture, operator-interface, or test-plan work.
+- Treat this as the compound-engineering specification stage, not planning or implementation; `product-spec` stays separate for broader product-planning.
 - Specification answers WHAT the system owns, what behavior must hold, what can fail, and how correctness will be proved.
-- Use the most authoritative source artifact available and do not invent product or UI behavior that belongs upstream.
-- Prefer the smallest spec that still removes contract ambiguity for planning and implementation.
-- Keep the contract scoped to the smallest meaningful slice, usually one feature boundary or at most 2-3 tightly coupled modules unless the source clearly requires a broader system spec.
-- Leave a written artifact when the work is substantial enough to hand off.
-- Stop when the spec file is written, verified, and the next-step options are clear.
+- Use the most authoritative source artifact; do not invent product or UI behavior that belongs upstream.
+- Prefer the smallest spec that removes contract ambiguity; scope to one feature boundary or 2-3 tightly coupled modules unless broader is clearly needed.
+- Leave a written artifact when work is substantial enough to hand off.
+- Stop when the spec file is written, verified, and next-step options are clear.
 
 ## When to use
 Use this skill when the user wants a design and behavior contract for a feature, service, workflow, or UI surface before planning begins.
@@ -99,26 +110,27 @@ If critical context remains missing after one concise follow-up, stop and surfac
 - the artifact path matches the selected mode and repo convention
 - if any required check fails, stop at the first failed gate and do not proceed until it is fixed
 
-## Standards snapshot (March 2026)
+## Standards snapshot (April 2026)
 - Keep each skill scoped to one reusable job and make the description say what it does and when to use it.
 - Prefer explicit routing, examples, negative examples, and validation over prompt-only procedures.
 - Use repo guidance and prior learnings before external research, and add external research only when it materially changes the contract.
 - For UI work, specify interaction states, accessibility, design constraints, and measurable UX outcomes explicitly.
 - For long-running or failure-prone systems, specify state, recovery, observability, and trust boundaries instead of leaving them implicit.
 
+## Core Principles
+
+1. **Remove ambiguity, don't restate** - A spec should make behavior unambiguous, not merely echo the request.
+2. **Source-driven, not guessed** - Use the strongest available source artifact and surface blockers instead of inventing.
+3. **Concrete over prose** - Prefer entities, fields, defaults, and error cases over broad descriptions.
+4. **Repo-grounded** - Use bounded research to ground the contract in repo reality before proposing new structure.
+5. **System/UI separation with explicit bridge** - Keep system and UI contracts separate, but their relationship explicit when both are needed.
+
 ## Philosophy
-- A spec should remove ambiguity about behavior, not merely restate the request.
 - Use the strongest available source artifact and surface blockers instead of guessing.
 - Prefer concrete entities, fields, defaults, and error cases over broad prose.
 - Use bounded research to ground the contract in repo reality before proposing new structure.
-- Separate system contracts from UI contracts, but keep their bridge explicit when both are needed.
 
-Guiding questions:
-- What is the most authoritative source available?
-- Does this actually need a spec, or should it go straight to planning?
-- What must be true about behavior over time?
-- What can fail, and how is recovery defined?
-- Does this require a companion UI contract before planning is safe?
+Guiding questions: What is the most authoritative source? Does this need a spec or go straight to planning? What must be true over time? What can fail and how is recovery defined? Does this need a companion UI contract before planning?
 
 ## Workflow
 ### Phase 0: Choose the spec baseline
@@ -161,7 +173,7 @@ Increase reasoning depth before structuring the contract when the work is full-s
 ### Phase 1: Gather local grounding
 Start with local grounding in the main thread.
 
-If bounded internal support would materially improve coverage and the user has not already explicitly asked for delegation or sub-agents, ask a short blocking approval question via `request_user_input` before spawning any internal subagents.
+If bounded internal support would materially improve coverage and the user has not already explicitly asked for delegation or sub-agents, ask a short blocking approval question via the platform's blocking question tool (`AskUserQuestion`, `request_user_input`, or `ask_user`) before spawning any internal subagents.
 
 If approved, run these bounded internal subagents in parallel:
 - `repo-research-analyst("Find existing architecture, patterns, and relevant files related to: <spec source> — max 20 files, max 4 MB total read, return a <=400 word summary with file:line refs")`
@@ -181,7 +193,7 @@ Treat them as internal support for the spec stage, not separate top-level operat
 ### Phase 2: Run external research conditionally
 Run external research only when the work is high risk, externally dependent, standards-sensitive, or current best practices materially affect the contract.
 
-If bounded external research support would materially improve the contract and the user has not already explicitly asked for delegation or sub-agents, ask a short blocking approval question via `request_user_input` before spawning any internal research subagents.
+If bounded external research support would materially improve the contract and the user has not already explicitly asked for delegation or sub-agents, ask a short blocking approval question via the platform's blocking question tool (`AskUserQuestion`, `request_user_input`, or `ask_user`) before spawning any internal research subagents.
 
 If approved, run these bounded internal subagents in parallel:
 - `best-practices-researcher("<spec source> — max 5 external sources, <=300 word summary, cite URLs and dates")`
@@ -217,7 +229,7 @@ For `dedicated-ui-spec`, ensure the document answers:
 - Interaction States
 - Design Tokens and visual constraints
 - Interaction Flows
-- Accessibility Requirements
+- **Accessibility Requirements (WCAG 2.1 AA minimum)**
 - Responsive or adaptive behavior
 - Telemetry and UX success metrics
 - Visual Acceptance Criteria with stable `VAC` IDs
@@ -226,6 +238,9 @@ For `dedicated-ui-spec`, ensure the document answers:
 
 Use `references/spec-artifacts.md` for the canonical templates and section details.
 Use `references/spec-modes.md` for UI companion rules, compatibility paths, and mode selection.
+Use `references/spec-quality-gates.md` for accessibility, idempotency, and GDPR requirements.
+
+
 
 ### Phase 4: Write the artifact
 Ensure the destination directory exists before writing:
@@ -275,8 +290,18 @@ See `references/spec-modes.md` for the full compatibility matrix and companion U
 - dedicated UI specs prefer `docs/ui-specs/YYYY-MM-DD-<descriptive-name>-ui-spec.md`
 - use the legacy `docs/specs/...-ui-spec.md` form only in compatibility mode, then rely on `references/spec-artifacts.md` for templates and verification
 
+## Empowerment
+
+You are capable of writing specs that make implementation obvious. The spec is the product; code is a side effect:
+- **Boundaries are your protection** - clear interfaces prevent integration nightmares
+- **Lifecycle modeling reveals gaps** - what happens at start, middle, end, failure?
+- **Failure-first thinking** - how can this break? document it
+- **Validation defines done** - acceptance criteria make "done" objective
+
+Use judgment on spec depth: simple features need less ceremony, complex systems need more rigor. The spec serves the implementer.
+
 ## Handoff guidance
-After writing the spec, offer the next-stage options that keep the workflow explicit:
+After writing the spec, offer next-stage options:
 - refine or review the spec further
 - create the companion UI spec when `ui_required: true` and no UI contract exists yet
 - hand the completed spec to `ce-plan` when the user wants execution sequencing

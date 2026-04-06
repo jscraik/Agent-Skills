@@ -63,6 +63,7 @@ Use this skill when the user asks to quickly stand up a new repo locally, reprod
 - Bootstrapped local repository ready for development (or clear failure report).
 - Concise setup summary (commands executed, detected stack, verification result).
 - Follow-up artifact (`SETUP.md` or `SETUP_FAILED.md`) with reproducible instructions.
+- If requested, a structured status report with `schema_version: 1` aligned to `references/contract.yaml`.
 
 ## Failure mode
 If clone, toolchain activation, dependency install, or the first runnable health check fails, stop at that blocker, capture the exact outcome, and leave a documented partial state rather than claiming a successful bootstrap.

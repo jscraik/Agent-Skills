@@ -1,0 +1,191 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://company.com/schemas/fallback-build-manifest/v1.0.0",
+  "title": "Fallback Build Manifest",
+  "description": "Schema for fallback release build manifest. Documents provenance of artifacts built outside primary CI.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "build_id",
+    "version",
+    "git_sha",
+    "timestamp",
+    "builder",
+    "ci_fallback",
+    "artifacts"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "description": "Schema version in semver format",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "examples": ["1.0.0"]
+    },
+    "build_id": {
+      "type": "string",
+      "description": "Unique identifier for this build",
+      "format": "uuid",
+      "examples": ["550e8400-e29b-41d4-a716-446655440000"]
+    },
+    "version": {
+      "type": "string",
+      "description": "Version being built",
+      "pattern": "^\\d+\\.\\d+\\.\\d+(-[a-zA-Z0-9.-]+)?$",
+      "examples": ["1.4.2", "2.0.0-beta.1"]
+    },
+    "git_sha": {
+      "type": "string",
+      "description": "Full Git commit SHA",
+      "pattern": "^[a-f0-9]{40}$",
+      "examples": ["abc123def456789abc123def456789abc123def4"]
+    },
+    "git_sha_short": {
+      "type": "string",
+      "description": "Short Git commit SHA (first 7-8 characters)",
+      "pattern": "^[a-f0-9]{7,8}$",
+      "examples": ["abc123d"]
+    },
+    "timestamp": {
+      "type": "string",
+      "description": "ISO 8601 timestamp of build completion",
+      "format": "date-time",
+      "examples": ["2026-04-06T12:00:00Z"]
+    },
+    "builder": {
+      "type": "object",
+      "description": "Information about the build environment",
+      "required": ["hostname", "os", "arch", "user"],
+      "properties": {
+        "hostname": {
+          "type": "string",
+          "description": "Machine hostname",
+          "examples": ["build-host-01"]
+        },
+        "os": {
+          "type": "string",
+          "description": "Operating system",
+          "examples": ["Linux", "Darwin"]
+        },
+        "arch": {
+          "type": "string",
+          "description": "CPU architecture",
+          "examples": ["x86_64", "aarch64"]
+        },
+        "user": {
+          "type": "string",
+          "description": "User who ran the build",
+          "examples": ["release-engineer"]
+        }
+      }
+    },
+    "ci_fallback": {
+      "type": "object",
+      "description": "Information about why fallback CI was used",
+      "required": ["reason", "triggered_by"],
+      "properties": {
+        "reason": {
+          "type": "string",
+          "description": "Why primary CI was not used",
+          "enum": [
+            "manual",
+            "ci-queue-congestion",
+            "ci-rate-limit",
+            "ci-incident",
+            "ci-maintenance",
+            "security-patch-urgent"
+          ],
+          "examples": ["ci-queue-congestion"]
+        },
+        "incident_url": {
+          "type": ["string", "null"],
+          "description": "URL to incident report or status page",
+          "format": "uri",
+          "examples": ["https://www.githubstatus.com/incidents/xxx"]
+        },
+        "triggered_by": {
+          "type": "string",
+          "description": "Person who triggered the fallback build",
+          "examples": ["johndoe"]
+        }
+      }
+    },
+    "toolchain": {
+      "type": "object",
+      "description": "Versions of build tools used",
+      "properties": {
+        "rust": {
+          "type": "string",
+          "examples": ["rustc 1.75.0"]
+        },
+        "cargo": {
+          "type": "string",
+          "examples": ["cargo 1.75.0"]
+        },
+        "node": {
+          "type": "string",
+          "examples": ["v20.10.0"]
+        },
+        "python": {
+          "type": "string",
+          "examples": ["Python 3.12.1"]
+        }
+      }
+    },
+    "artifacts": {
+      "type": "array",
+      "description": "List of built artifacts",
+      "items": {
+        "type": "object",
+        "required": ["name", "sha256", "size"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Filename of the artifact",
+            "examples": ["my-binary-1.4.2-abc123d"]
+          },
+          "path": {
+            "type": "string",
+            "description": "Absolute or relative path to artifact"
+          },
+          "sha256": {
+            "type": "string",
+            "description": "SHA256 hash of the artifact",
+            "pattern": "^[a-f0-9]{64}$",
+            "examples": ["e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"]
+          },
+          "size": {
+            "type": "integer",
+            "description": "File size in bytes",
+            "minimum": 0,
+            "examples": [1048576]
+          },
+          "signature_valid": {
+            "type": "boolean",
+            "description": "Whether GPG signature was verified",
+            "default": false
+          }
+        }
+      }
+    },
+    "build_log": {
+      "type": "array",
+      "description": "Chronological log of build steps",
+      "items": {
+        "type": "object",
+        "properties": {
+          "step": {
+            "type": "string",
+            "description": "Name of the build step",
+            "examples": ["tests_passed", "build_complete"]
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When this step completed"
+          }
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}

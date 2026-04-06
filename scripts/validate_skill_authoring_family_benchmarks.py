@@ -38,6 +38,9 @@ _JSONSCHEMA_AVAILABLE = importlib.util.find_spec("jsonschema") is not None
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
+
+# Severity ranking for baseline regression comparison (higher = worse)
+SEVERITY_RANK = {"INFO": 0, "WARN": 1, "FAIL": 2}
 _SCHEMA_DIR = REPO_ROOT / "utilities" / "skill-builder" / "references"
 _CONTRACT_SCHEMA_PATH = _SCHEMA_DIR / "contract.schema.yaml"
 _EVALS_SCHEMA_PATH = _SCHEMA_DIR / "evals.schema.yaml"
@@ -668,26 +671,46 @@ def main(argv: Sequence[str]) -> int:
     if args.check_baseline:
         baseline_path = Path(args.check_baseline)
         if not baseline_path.exists():
-            print(f"[family-benchmark] WARN: baseline not found at {baseline_path}; skipping regression check")
+            print(f"[family-benchmark] ERROR: baseline not found at {baseline_path}; regression check required", file=sys.stderr)
+            return 1
         else:
             try:
                 baseline_data = _load_json(baseline_path)
-                baseline_set = {
-                    (f["level"], f["code"], f["skill"])
-                    for f in baseline_data.get("findings", [])
-                    if isinstance(f, dict)
-                }
-                current_set = {(f.level, f.code, f.skill) for f in findings}
-                regressions = current_set - baseline_set
+                # Group baseline findings by (code, skill) -> max severity rank
+                baseline_by_code: Dict[tuple, int] = {}
+                for f in baseline_data.get("findings", []):
+                    if isinstance(f, dict):
+                        key = (f["code"], f["skill"])
+                        rank = SEVERITY_RANK.get(f["level"], 0)
+                        baseline_by_code[key] = max(baseline_by_code.get(key, 0), rank)
+
+                # Group current findings by (code, skill) -> max severity rank
+                current_by_code: Dict[tuple, int] = {}
+                for f in findings:
+                    key = (f.code, f.skill)
+                    rank = SEVERITY_RANK.get(f.level, 0)
+                    current_by_code[key] = max(current_by_code.get(key, 0), rank)
+
+                # Find regressions: new findings or worsened severity
+                regressions = []
+                for key, current_rank in current_by_code.items():
+                    code, skill = key
+                    baseline_rank = baseline_by_code.get(key, -1)
+                    if current_rank > baseline_rank:
+                        # Severity increased or completely new finding
+                        level_name = {v: k for k, v in SEVERITY_RANK.items()}.get(current_rank, "UNKNOWN")
+                        regressions.append((level_name, code, skill))
+
                 if regressions:
                     for level, code, skill in sorted(regressions):
                         regression_findings.append(
-                            Finding("FAIL", "BASELINE_REGRESSION", skill, f"new finding vs baseline: {level} {code}")
+                            Finding("FAIL", "BASELINE_REGRESSION", skill, f"new or worsened finding vs baseline: {level} {code}")
                         )
                 else:
                     print("[family-benchmark] baseline check: no regressions detected")
             except Exception as exc:  # noqa: BLE001
-                print(f"[family-benchmark] WARN: could not load baseline: {exc}")
+                print(f"[family-benchmark] ERROR: could not load/parse baseline: {exc}", file=sys.stderr)
+                return 1
 
     all_findings = list(findings) + regression_findings
 

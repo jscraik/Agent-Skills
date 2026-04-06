@@ -261,6 +261,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--with-assets", action="store_true", help="Create assets/ directory")
     parser.add_argument("--with-mcp", action="store_true", help="Create .mcp.json scaffold")
     parser.add_argument("--with-apps", action="store_true", help="Create .app.json scaffold")
+    parser.add_argument("--with-references", action="store_true", help="Create references/ directory")
+    parser.add_argument("--with-workflows", action="store_true", help="Create workflows/ directory")
     parser.add_argument(
         "--with-marketplace",
         action="store_true",
@@ -388,6 +390,8 @@ def main() -> None:
         "hooks": args.with_hooks,
         "scripts": args.with_scripts,
         "assets": args.with_assets,
+        "references": args.with_references,
+        "workflows": args.with_workflows,
     }
     for folder, enabled in optional_directories.items():
         if enabled:

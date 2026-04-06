@@ -1,21 +1,49 @@
 # Daily Skill Health
 
-- Generated at: `2026-03-31T15:28:27Z`
-- Window: `2026-03-25..2026-03-31`
-- Baseline source: `bootstrap pending`
-- Baseline window: `n/a`
-- Runs total: `77`
+## Table of Contents
+
+- [Summary](#summary)
+- [Runs Total and Decision](#runs-total-and-decision)
+- [Compliance Metrics](#compliance-metrics)
+- [Capture Coverage](#capture-coverage)
+- [Confidence Buckets](#confidence-buckets)
+- [Injection Usage and Controls](#injection-usage-and-controls)
+- [Uplift Decisions](#uplift-decisions)
+
+## Summary
+
+- Generated at: `2026-04-06T13:26:16Z`
+- Window: `2026-03-31..2026-04-06`
+- Baseline source: `frozen_snapshot`
+- Baseline window: `2026-03-25..2026-03-31`
+
+## Runs Total and Decision
+
+- Runs total: `8`
 - Decision: `HOLD`
-- Critical non-regression compliance: `39.0%`
+
+- Critical non-regression compliance: `37.5%`
 - Terminal non-regression compliance: `100.0%`
-- Non-regression recovered: `61.0%` (intermediate failures recovered)
+- Non-regression recovered: `62.5%` (intermediate failures recovered)
 - Budget compliance: `100.0%`
-- Capture coverage: `100.0%` (77/77)
-- Confidence buckets: `high=0` `medium=30` `low=47` `unknown=0`
-- Injection usage: `2.6%` (2/77)
+
+## Capture Coverage
+
+- Capture coverage: `100.0%` (8/8)
+
+## Confidence Buckets
+
+- Confidence buckets: `high=0` `medium=3` `low=5` `unknown=0`
+
+## Injection Usage and Controls
+
+- Injection usage: `25.0%` (2/8)
 - Injection suppressed by controls: `0`
-- Uplift promotion decisions: `pass=0` `hold=0` `insufficient_data=77`
-- Uplift auto-apply decisions: `pass=0` `hold=0` `insufficient_data=77`
+
+## Uplift Decisions
+
+- Uplift promotion decisions: `pass=0` `hold=0` `insufficient_data=8`
+- Uplift auto-apply decisions: `pass=0` `hold=0` `insufficient_data=8`
 - Event envelope errors: `0`
 - Event envelope errors total: `0`
 - Event envelope errors waived: `0`
