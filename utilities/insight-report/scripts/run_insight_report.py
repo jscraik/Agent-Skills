@@ -170,7 +170,8 @@ def find_session_files(days):
                 for f in day_dir.glob("rollout-*.jsonl"):
                     files.append(f)
     
-    return sorted(files)
+    # Sort by modification time (newest first) so max_sessions limit keeps recent sessions
+    return sorted(files, key=lambda p: p.stat().st_mtime, reverse=True)
 
 
 def is_meta_session(events):

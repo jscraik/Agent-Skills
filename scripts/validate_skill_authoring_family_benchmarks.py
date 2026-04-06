@@ -671,7 +671,8 @@ def main(argv: Sequence[str]) -> int:
     if args.check_baseline:
         baseline_path = Path(args.check_baseline)
         if not baseline_path.exists():
-            print(f"[family-benchmark] WARN: baseline not found at {baseline_path}; skipping regression check")
+            print(f"[family-benchmark] ERROR: baseline not found at {baseline_path}; regression check required", file=sys.stderr)
+            return 1
         else:
             try:
                 baseline_data = _load_json(baseline_path)
