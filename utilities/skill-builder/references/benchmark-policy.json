@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "description": "Portfolio benchmark policy for skill-builder marker coverage and distribution.",
-  "validated_on": "2026-03-30",
+  "validated_on": "2026-04-06",
   "release_governance": {
     "pin_models_on_release": true,
     "require_model_rationale": true,
@@ -24,7 +24,8 @@
     "Auto-refreshed via refresh_benchmark_policy.py on 2026-03-16.",
     "GitHub cluster warn threshold capped to the current cluster size on 2026-03-22 so the portfolio target remains achievable.",
     "OpenAI apps cluster responses_api distribution floor capped to the current tracked cluster size on 2026-03-22 after upstreaming openai-docs to .agents/skills/.system.",
-    "Auto-refreshed via refresh_benchmark_policy.py on 2026-03-30."
+    "Auto-refreshed via refresh_benchmark_policy.py on 2026-03-30.",
+    "Auto-refreshed via refresh_benchmark_policy.py on 2026-04-06."
   ],
   "refresh_sources": [
     {
@@ -190,19 +191,19 @@
         "wcag_2_2"
       ],
       "min_hits_fail": {
-        "react_19": 3,
-        "next_16": 3,
-        "tailwind_v4": 4,
-        "wcag_2_2": 3
+        "react_19": 4,
+        "next_16": 4,
+        "tailwind_v4": 5,
+        "wcag_2_2": 4
       },
       "min_hits_warn": {
-        "react_19": 3,
-        "next_16": 3,
-        "tailwind_v4": 5,
-        "wcag_2_2": 3
+        "react_19": 4,
+        "next_16": 4,
+        "tailwind_v4": 6,
+        "wcag_2_2": 4
       },
-      "min_coverage_fail": 0.21,
-      "min_coverage_warn": 0.263
+      "min_coverage_fail": 0.26,
+      "min_coverage_warn": 0.313
     },
     "github": {
       "required_all": [
@@ -214,7 +215,7 @@
       "min_hits_warn": {
         "gha_sha_pin": 1
       },
-      "min_coverage_fail": 0.7,
+      "min_coverage_fail": 0.75,
       "min_coverage_warn": 1.0
     },
     "cloudflare_backend": {
@@ -227,8 +228,8 @@
       "min_hits_warn": {
         "cloudflare_workers": 2
       },
-      "min_coverage_fail": 0.45,
-      "min_coverage_warn": 0.65
+      "min_coverage_fail": 0.5,
+      "min_coverage_warn": 0.7
     },
     "openai_apps": {
       "required_all": [
@@ -240,8 +241,8 @@
       "min_hits_warn": {
         "responses_api": 1
       },
-      "min_coverage_fail": 0.35,
-      "min_coverage_warn": 0.483
+      "min_coverage_fail": 0.4,
+      "min_coverage_warn": 0.533
     },
     "security": {
       "required_all": [
@@ -253,8 +254,8 @@
       "min_hits_warn": {
         "owasp_top10": 4
       },
-      "min_coverage_fail": 0.5,
-      "min_coverage_warn": 0.7
+      "min_coverage_fail": 0.55,
+      "min_coverage_warn": 0.75
     },
     "mcp": {
       "required_all": [
@@ -266,8 +267,8 @@
       "min_hits_warn": {
         "mcp_spec": 2
       },
-      "min_coverage_fail": 0.45,
-      "min_coverage_warn": 0.65
+      "min_coverage_fail": 0.5,
+      "min_coverage_warn": 0.666
     },
     "backend_general": {},
     "interview": {},
