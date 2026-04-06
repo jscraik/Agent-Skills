@@ -1,107 +1,159 @@
 # Agent Skills
 
-Canonical skill repository for Codex, Claude Code, and Gemini/Antigravity.
+A governed repository of 123+ skills for AI coding agents (Codex, Claude, Gemini). Built around the **Agent Skills Kit (`ask`)** CLI—designed for both humans and autonomous agents.
 
-This repo gives you one place to author skills, validate quality,
-and sync runtime-ready projections using the **Agent Skills Kit (`ask`)** CLI.
+## Why this exists
 
-## Table of Contents
-- [Unified CLI (`ask`)](#unified-cli-ask)
-- [Why teams use this repo](#why-teams-use-this-repo)
-- [Quickstart](#quickstart)
-- [Common workflows](#common-workflows)
-- [Repository layout](#repository-layout)
-- [Documentation](#documentation)
+**The problem:** AI agents need reliable, versioned skills with validation, provenance, and discoverability. Ad-hoc prompts fail at scale.
 
-## Unified CLI (`ask`)
+**The solution:** This repository provides:
+- **Author once, project everywhere** – Write skills in standard Markdown, sync to multiple runtime formats
+- **Quality gates** – Every skill passes structural, security, and behavioral validation
+- **Living skill graph** – 123 skills organized in 7 topic clusters with relationship mapping
+- **Agent-native CLI** – Fuzzy matching, JSON output, trace IDs, helpful errors
 
-The `ask` CLI is the authoritative interface for this repository, designed for both human developers and autonomous agents.
-
-- **Dual-Mode DX:** Use standard terminal commands for humans, or `--json` for deterministic, machine-readable output.
-- **Safety First:** Mandatory `--dry-run` for all state mutations.
-- **Gold Standard:** Adheres to 2026 industry standards for lifecycle provenance and error recovery.
-
-## Quickstart
+## Quick start (60 seconds)
 
 ```bash
-# 1) Install/Update the CLI entry point
-chmod +x bin/ask
-
-# 2) Health check
+# Health check
 ./bin/ask repo status
 
-# 3) Validate repo state
-./bin/ask repo validate
+# See what skills exist
+./bin/ask graph topics
 
-# 4) Sync skills to runtime projections
+# Validate the repository
+./bin/ask repo validate --ephemeral
+
+# Sync to your runtime
 ./bin/ask skills sync --scope user
 ```
 
-## Common workflows
+## What the CLI can do
 
-### 1) Add and Audit a Skill
-
+### Discover skills
 ```bash
-# Install a skill from GitHub with auto-remediation
-./bin/ask skills install https://github.com/owner/repo --dest github --remediate
+# Search across 123 skills
+./bin/ask graph find security --tier stable
 
-# Run a strict security and quality audit
-./bin/ask skills audit github/new-skill --level strict
+# See related skills
+./bin/ask graph related skill-builder --depth 2
+
+# Find path between skills
+./bin/ask graph chain skill-creator skill-installer
+
+# Browse by topic cluster
+./bin/ask graph topics
 ```
 
-### 2) Maintain a Lean Skill Graph
-
+### Validate quality
 ```bash
-# List all skills in a specific category
-./bin/ask skills list --category frontend
+# Quick structural check
+./bin/ask skills audit backend/cli-spec --level compat
 
-# Detect semantic overlap between two skills
+# Full security audit
+./bin/ask skills audit backend/cli-spec --level strict
+
+# Run evaluation suite
+./bin/ask evals run backend/cli-spec --mode smoke
+
+# Validate entire repository
+./bin/ask repo validate --ephemeral
+```
+
+### Manage lifecycle
+```bash
+# Install from GitHub with auto-remediation
+./bin/ask skills install https://github.com/owner/repo --remediate
+
+# Check for duplicate functionality
 ./bin/ask skills fold source-skill target-skill
+
+# Create new skill scaffold
+./bin/ask skills init my-skill --category backend --description "Does X when Y"
+
+# Create plugin scaffold
+./bin/ask plugins init my-plugin --with-marketplace
 ```
 
-### 3) Programmatic Usage (Agents)
+### Robot mode (for AI agents)
+
+When your intent is clear but syntax is off, use `--robot` (or `-r`):
 
 ```bash
-# Get machine-readable status with trace-id tracking
-./bin/ask repo status --json
+# These all work and get corrected:
+./bin/ask skill list --robot          # → skills list
+./bin/ask skills ls --robot           # → skills list  
+./bin/ask graph search X --robot      # → graph find X
 ```
 
-## Why teams use this repo
+**Error handling:** When intent is unclear, you get helpful errors with examples:
+```
+❌ Unknown topic: 'invalid'
 
-- **Single source of truth**: author a skill once, then project it to multiple runtimes with `ask skills sync`.
-- **Lower review risk**: every change can run through deterministic validation with per-check logs.
-- **Safer automation**: routing and recursive improvement workflows include explicit control files and artifact verification.
+💡 Did you mean 'ask skills'?
+   Valid topics: repo, skills, plugins, evals, graph
+
+📚 Examples:
+   • ask skills list
+   • ask graph find security
+```
+
+## Programmatic usage (CI/agents)
+
+```bash
+# JSON output with trace IDs
+./bin/ask repo status --json --trace-id "build-123"
+
+# Fuzzy matching with corrections
+./bin/ask skill list --robot --json | jq '.metadata.correction_note'
+
+# Ephemeral validation (no repo mutation)
+./bin/ask repo validate --ephemeral
+```
+
+**Response envelope** (all commands):
+```json
+{
+  "status": "success",
+  "trace_id": "uuid",
+  "metadata": {
+    "next_steps": ["ask skills audit ..."],
+    "correction_note": "..."
+  },
+  "data": { ... }
+}
+```
 
 ## Repository layout
 
-```text
+```
 agent-skills/
-├── bin/ask                   # Unified CLI entry point
-├── auth/ backend/ ...        # Domain-specific skill folders
-├── skills-system/            # system-level skills
-├── .agents/skills/           # flat projection surface
-├── scripts/lib/ask/          # CLI implementation logic
-├── artifacts/                # generated reports and telemetry
-└── docs/cli-specs/           # Implementation-grade CLI contracts
+├── bin/ask                   # CLI entry point
+├── ask skills sync           # Flat projection to .agents/skills/
+│
+├── backend/                  # Backend platform skills (16)
+├── frontend/                 # Frontend UI skills (27)
+├── product/                  # Product strategy skills (13)
+├── auth/                     # Security operations skills (7)
+├── skills-system/            # Meta-skills (installer, creator, etc.)
+│
+├── scripts/lib/ask/          # CLI implementation
+├── docs/cli-specs/           # Implementation contracts
+└── ops/metrics/graph/        # Skill relationship data
 ```
 
 ## Documentation
 
-- [Skills index](SKILL.md)
-- [ask CLI Specification](docs/cli-specs/2026-04-06-ask-cli-spec.md)
-- [Contributor docs](docs/index.md)
-- [Governed solutions](docs/solutions/README.md)
+| Document | Purpose |
+|----------|---------|
+| [CLI Specification](docs/cli-specs/2026-04-06-ask-cli-spec.md) | Full command reference |
+| [Agent Guide](AGENTS.md) | AI agent workflow patterns |
+| [Skill Index](SKILL.md) | All 123 skills by category |
+| [Implementation Review](docs/cli-specs/2026-04-06-ask-cli-implementation-review.md) | Architecture details |
 
 ## Governance
 
-- License: Apache 2.0 (`LICENSE`)
-- Contributing: `CONTRIBUTING.md`
-- Security: `SECURITY.md`
-
-<!-- AGENT-FIRST-WORKFLOW:START -->
-## Agent-first workflow
-
-1. Create or update a plan in `.agent/PLANS.md`
-2. Validate: `python3 ~/.codex/scripts/plan-graph-lint.py .agent/PLANS.md`
-3. Verify: `./bin/ask repo validate --ephemeral`
-<!-- AGENT-FIRST-WORKFLOW:END -->
+- **License:** Apache 2.0
+- **Skills:** 123 total across 7 topic clusters
+- **Validation:** 10+ automated checks via `ask repo validate`
+- **Compatibility:** Codex, Claude Code, Gemini/Antigravity
