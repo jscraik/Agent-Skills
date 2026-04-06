@@ -256,7 +256,6 @@ def try_fuzzy_parse(raw_args: List[str], robot_mode: bool = False) -> Tuple[Opti
 
         if action not in valid_actions:
             # Try fuzzy match on action
-            matched = False
             if action in FUZZY_MATCHES:
                 corrected = FUZZY_MATCHES[action]
                 if corrected in valid_actions:
@@ -265,7 +264,6 @@ def try_fuzzy_parse(raw_args: List[str], robot_mode: bool = False) -> Tuple[Opti
                     else:
                         correction_note = format_correction(action, corrected, robot_mode)
                     action = corrected
-                    matched = True
             else:
                 guess = get_closest_match(action, valid_actions)
                 if guess:
@@ -274,7 +272,6 @@ def try_fuzzy_parse(raw_args: List[str], robot_mode: bool = False) -> Tuple[Opti
                     else:
                         correction_note = format_correction(action, guess, robot_mode)
                     action = guess
-                    matched = True
 
             # If we couldn't match to a valid action, preserve the original action
             # so later VALID_ACTIONS validation can produce the proper unknown-action message
