@@ -11,6 +11,7 @@
 .narrative/
 .skillsctl/
 .codex/
+.playwright-mcp/
 
 # Local dependency caches
 node_modules/
