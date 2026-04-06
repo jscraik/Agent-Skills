@@ -346,12 +346,14 @@ See `references/ce-anti-patterns.md` for full catalog with detection and fixes:
 - Anti-patterns: `references/ce-anti-patterns.md`, Verification: `references/verification-first.md`
 
 ## See Also
+
 | Skill | Purpose |
 |---|---|
 | [[compound-engineering-router]] | Choose CE stage |
 | [[ce-brainstorm]] | Clarify WHAT/WHY |
 | [[product-spec]] | Product contract |
 | [[linear]] | Issue creation |
+
 **Topic map:** [[product-ops]]
 ## Gotchas
 - None yet.

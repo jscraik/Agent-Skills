@@ -137,6 +137,15 @@ def build_antigravity_config(codex_config):
 
         # Apply NAME_MAPPING to get the target server name
         target_name = NAME_MAPPING.get(server_name, server_name)
+
+        # Check for collision with existing entry
+        if target_name in mcp_servers:
+            logging.warning(
+                "Skipping '%s' -> '%s': target already exists (from '%s')",
+                server_name, target_name, server_name if target_name == server_name else "mapped source"
+            )
+            continue
+
         mcp_servers[target_name] = mcp_obj
 
     # Antigravity ships sequentially-thinking by default typically
