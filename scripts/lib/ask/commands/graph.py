@@ -26,18 +26,29 @@ def _build_index(data: dict):
         rev[e["to"]].append(e)
     return node_map, fwd, rev
 
-def _find_node(data: dict, query: str) -> str | None:
-    """Finds a skill node by query (exact match, prefix, or substring)."""
+def _find_node(data: dict, query: str) -> tuple[str | None, list[str] | None]:
+    """Finds a skill node by query (exact match, prefix, or substring).
+
+    Returns:
+        Tuple of (matched_node_id, ambiguous_matches).
+        - If exact match: returns (node_id, None)
+        - If single partial match: returns (node_id, None)
+        - If multiple matches: returns (None, list_of_matches)
+        - If no match: returns (None, None)
+    """
     nodes = {n["id"] for n in data["nodes"]}
     if query in nodes:
-        return query
+        return query, None
     matches = sorted(n for n in nodes if query.lower() in n.lower())
     if len(matches) == 1:
-        return matches[0]
+        return matches[0], None
     if len(matches) > 1:
         prefixed = [m for m in matches if m.startswith(query.lower())]
-        return prefixed[0] if prefixed else matches[0]
-    return None
+        if len(prefixed) == 1:
+            return prefixed[0], None
+        # Return ambiguous matches for caller to handle
+        return None, (prefixed if prefixed else matches)
+    return None, None
 
 def _bfs_path(fwd: dict, start: str, end: str, max_depth: int = 6) -> list[str] | None:
     """Finds shortest path between two skills via BFS."""
@@ -78,8 +89,17 @@ def graph_related(repo_root: Path, skill: str, depth: int = 1, reverse: bool = F
         return result
     
     node_map, fwd, rev = _build_index(data)
-    start = _find_node(data, skill)
-    
+    start, ambiguous = _find_node(data, skill)
+
+    if ambiguous:
+        result.status = "error"
+        result.errors.append(ErrorObject(
+            code="ERR_VALIDATION",
+            message=f"Ambiguous skill name '{skill}'. Matches: {', '.join(ambiguous[:5])}",
+            fix_suggestion="Use a more specific skill name."
+        ))
+        return result
+
     if not start:
         result.status = "error"
         result.errors.append(ErrorObject(
@@ -87,7 +107,7 @@ def graph_related(repo_root: Path, skill: str, depth: int = 1, reverse: bool = F
             message=f"Skill not found: '{skill}'"
         ))
         return result
-    
+
     # Build related skills list
     adj = rev if reverse else fwd
     in_deg = {n["id"]: n.get("in_degree", 0) for n in node_map.values()}
@@ -194,8 +214,17 @@ def graph_info(repo_root: Path, skill: str) -> CallResult:
         return result
     
     node_map, fwd, rev = _build_index(data)
-    start = _find_node(data, skill)
-    
+    start, ambiguous = _find_node(data, skill)
+
+    if ambiguous:
+        result.status = "error"
+        result.errors.append(ErrorObject(
+            code="ERR_VALIDATION",
+            message=f"Ambiguous skill name '{skill}'. Matches: {', '.join(ambiguous[:5])}",
+            fix_suggestion="Use a more specific skill name."
+        ))
+        return result
+
     if not start:
         result.status = "error"
         result.errors.append(ErrorObject(
@@ -203,7 +232,7 @@ def graph_info(repo_root: Path, skill: str) -> CallResult:
             message=f"Skill not found: '{skill}'"
         ))
         return result
-    
+
     n = node_map.get(start, {"id": start})
     out_edges = sorted(fwd.get(start, []), key=lambda e: -e.get("weight", 1.0))
     in_edges = sorted(rev.get(start, []), key=lambda e: -e.get("weight", 1.0))
@@ -240,28 +269,64 @@ def graph_chain(repo_root: Path, from_skill: str, to_skill: str) -> CallResult:
         return result
     
     node_map, fwd, rev = _build_index(data)
-    start = _find_node(data, from_skill)
-    end = _find_node(data, to_skill)
-    
-    if not start or not end:
+    start, start_ambiguous = _find_node(data, from_skill)
+    end, end_ambiguous = _find_node(data, to_skill)
+
+    if start_ambiguous:
         result.status = "error"
         result.errors.append(ErrorObject(
             code="ERR_VALIDATION",
-            message=f"Could not resolve both skills: '{from_skill}' → '{to_skill}'"
+            message=f"Ambiguous skill name '{from_skill}'. Matches: {', '.join(start_ambiguous[:5])}",
+            fix_suggestion="Use a more specific skill name."
         ))
         return result
-    
+
+    if end_ambiguous:
+        result.status = "error"
+        result.errors.append(ErrorObject(
+            code="ERR_VALIDATION",
+            message=f"Ambiguous skill name '{to_skill}'. Matches: {', '.join(end_ambiguous[:5])}",
+            fix_suggestion="Use a more specific skill name."
+        ))
+        return result
+
+    if not start or not end:
+        missing = []
+        if not start:
+            missing.append(f"'{from_skill}'")
+        if not end:
+            missing.append(f"'{to_skill}'")
+        result.status = "error"
+        result.errors.append(ErrorObject(
+            code="ERR_VALIDATION",
+            message=f"Skill(s) not found: {', '.join(missing)}"
+        ))
+        return result
+
     path = _bfs_path(fwd, start, end)
-    
+
+    if path is None:
+        # Skills exist but no path found between them
+        result.status = "error"
+        result.errors.append(ErrorObject(
+            code="ERR_VALIDATION",
+            message=f"No path found between '{start}' and '{end}' within max depth.",
+            fix_suggestion="Try increasing the search depth or check if skills are in different disconnected clusters."
+        ))
+        result.data["from"] = start
+        result.data["to"] = end
+        result.data["path"] = None
+        result.data["hops"] = None
+        result.data["reachable"] = False
+        return result
+
     result.status = "success"
     result.data["from"] = start
     result.data["to"] = end
     result.data["path"] = path
-    result.data["hops"] = len(path) - 1 if path else None
-    result.data["reachable"] = path is not None
-    
-    if path:
-        result.metadata["next_steps"] = [f"ask graph info {s}" for s in path]
+    result.data["hops"] = len(path) - 1
+    result.data["reachable"] = True
+    result.metadata["next_steps"] = [f"ask graph info {s}" for s in path]
     return result
 
 def graph_list(repo_root: Path, topic: str = None, tier: str = None) -> CallResult:
