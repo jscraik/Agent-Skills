@@ -35,12 +35,7 @@
 - Prefer repository-root commands over guessed defaults.
 
 ## PR gate structure
-Current `pr-pipeline` orchestration for pull requests:
-1. `pr-template` runs first.
-2. `repo-validate` and `authoring-family-gate` run after `pr-template`.
-3. `harness-preflight` depends on both `repo-validate` and `authoring-family-gate`.
-
-This dependency order is intentional: harness checks should only run after the repository-wide validation and authoring-family governance checks succeed.
+See [CI Required Checks](./12-ci-required-checks.md) for the complete dependency policy and workflow orchestration.
 
 ## Authoring-family contract behavior
 `authoring-family-gate` invokes `bash scripts/validate_skill_authoring_family.sh`.

@@ -38,5 +38,5 @@ Policy intent:
 When job names, dependency edges, or gate responsibilities change:
 1. Update `.github/workflows/pr-pipeline.yml` comments and job definitions.
 2. Update `docs/agents/04-validation.md` and `docs/agents/07b-agent-governance.md`.
-3. Update `docs/agents/17-ci-required-checks.md` to reflect current required check names and dependency policy.
+3. Update `docs/agents/12-ci-required-checks.md` to reflect current required check names and dependency policy.
 4. Reconcile any external required-check registries (for example `.harness/ci-required-checks.json`) with workflow reality.

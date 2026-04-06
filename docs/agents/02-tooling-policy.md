@@ -39,8 +39,8 @@
 - `bash scripts/codex-preflight.sh --stack auto --mode required`
 - `bash scripts/sync_skills.sh`
 - `python3 scripts/docs_lint.py --mode warn --config docs-policy.json`
-- `python3 ~/.codex/scripts/plan-graph-lint.py .agent/PLANS.md`
-- `bash ~/.codex/scripts/verify-work.sh`
+- `python3 ~/.codex/scripts/plan-graph-lint.py .agent/PLANS.md` (external dependency)
+- `bash scripts/verify-work.sh` (repo-local wrapper preferred over `~/.codex` version)
 
 ## Skill line-budget policy
 
