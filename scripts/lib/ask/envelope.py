@@ -3,7 +3,7 @@ import uuid
 import re
 import os
 from dataclasses import dataclass, asdict, field
-from typing import Any, List, Optional, Dict
+from typing import Any, Optional
 from enum import IntEnum
 
 
@@ -61,15 +61,15 @@ def _get_trace_id() -> str:
 class CallResult:
     status: str = "success"
     trace_id: str = field(default_factory=_get_trace_id)
-    metadata: Dict[str, Any] = field(default_factory=lambda: {
+    metadata: dict[str, Any] = field(default_factory=lambda: {
         "version": "0.1.0",
         "command": "unknown",
         "next_steps": [],
         "correction_note": None,
     })
-    data: Dict[str, Any] = field(default_factory=dict)
-    telemetry: Dict[str, Any] = field(default_factory=dict)
-    errors: List[ErrorObject] = field(default_factory=list)
+    data: dict[str, Any] = field(default_factory=dict)
+    telemetry: dict[str, Any] = field(default_factory=dict)
+    errors: list[ErrorObject] = field(default_factory=list)
 
     def to_json(self, repo_root: Optional[str] = None) -> str:
         """Serializes to JSON with fail-closed redaction of paths and secrets."""
