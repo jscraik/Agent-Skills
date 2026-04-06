@@ -441,6 +441,28 @@ def main():
         # Re-raise if it's a help request (code 0)
         if e.code == 0:
             sys.exit(0)
+        # Parse failed - determine if it's an unknown command or bad arguments
+        # Extract potential topic/action from raw_args for validation
+        potential_topic, potential_action, _, _ = try_fuzzy_parse(raw_args, robot_mode=False)
+        is_known_command = (
+            potential_topic in VALID_TOPICS and
+            potential_action in VALID_ACTIONS.get(potential_topic, [])
+        )
+        if is_known_command:
+            # Known command with bad/missing arguments - preserve argparse's error
+            result = CallResult()
+            result.status = "error"
+            result.errors.append(ErrorObject(
+                code=ErrorCode.ERR_VALIDATION,
+                message=f"Invalid arguments for 'ask {potential_topic} {potential_action}'",
+                fix_suggestion=f"Run 'ask {potential_topic} {potential_action} --help' for usage."
+            ))
+            if "--json" in raw_args:
+                print(result.to_json())
+            else:
+                print(f"❌ {result.errors[0].message}")
+                print(f"\n💡 {result.errors[0].fix_suggestion}")
+            sys.exit(2)
         # Parse failed - try fuzzy matching if robot mode
         if robot_mode:
             parsed_topic, parsed_action, remaining_args, correction_note = try_fuzzy_parse(raw_args, robot_mode=True)
