@@ -639,6 +639,23 @@ def main() -> int:
         )
     wave2_ready = not wave2_blockers
 
+    # Build triage summary for blockers with owners/acceptance criteria
+    triage_summary: List[Dict[str, Any]] = []
+    for wave_name, wave_blockers in [
+        ("wave-0-controls", wave0_blockers),
+        ("wave-1-manual", wave1_blockers),
+        ("wave-2-co-pilot", wave2_blockers),
+    ]:
+        for blocker in wave_blockers:
+            triage_summary.append({
+                "wave": wave_name,
+                "code": blocker.get("code", "UNKNOWN"),
+                "owner": blocker.get("owner", "unassigned"),
+                "due_date": blocker.get("due_date"),
+                "escalation_date": blocker.get("escalation_date"),
+                "acceptance": "pending" if blocker.get("due_date") else "triage-needed",
+            })
+
     wave_readiness = {
         "schema_version": "1.0",
         "generated_at": generated_at,
@@ -658,6 +675,7 @@ def main() -> int:
             "telemetry_window_start": telemetry_window_start,
             "telemetry_window_end": telemetry_window_end,
             "telemetry_freshness_ok": telemetry_freshness_ok,
+            "triage_summary": triage_summary,
         },
         "waves": {
             "wave-0-controls": {
@@ -703,6 +721,21 @@ def main() -> int:
             },
         },
     }
+
+    # Governance check: blockers with dates must have owners
+    for wave_name, wave_blockers in [
+        ("wave-0-controls", wave0_blockers),
+        ("wave-1-manual", wave1_blockers),
+        ("wave-2-co-pilot", wave2_blockers),
+    ]:
+        for blocker in wave_blockers:
+            has_dates = blocker.get("due_date") or blocker.get("escalation_date")
+            owner = blocker.get("owner", "unassigned")
+            if has_dates and (not owner or owner == "unassigned"):
+                raise SystemExit(
+                    f"FAIL governance: {wave_name} blocker {blocker.get('code', 'UNKNOWN')} "
+                    f"has dates but no owner assigned"
+                )
 
     readiness_path = (repo_root / args.wave_readiness_out).resolve()
     readiness_path.parent.mkdir(parents=True, exist_ok=True)

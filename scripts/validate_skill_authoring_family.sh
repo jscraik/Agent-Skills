@@ -392,6 +392,28 @@ EOF
   echo "[family-gate] lineage: branch=${git_branch} sha=${git_sha}"
 fi
 
+# ---------------------------------------------------------------------------
+# Quarterly review date freshness check
+# ---------------------------------------------------------------------------
+# Parse the criteria.md file and check if quarterly review is overdue
+if [[ -f ".harness/quality/criteria.md" ]]; then
+  # Look for pattern like "quarterly (90 days from last review)" or similar
+  # Extract any explicit dates and check if they're in the past
+  if grep -qE 'next due.*20[0-9]{2}-[0-9]{2}-[0-9]{2}' .harness/quality/criteria.md 2>/dev/null; then
+    next_due=$(grep -oE 'next due.*20[0-9]{2}-[0-9]{2}-[0-9]{2}' .harness/quality/criteria.md | grep -oE '20[0-9]{2}-[0-9]{2}-[0-9]{2}' | head -1)
+    if [[ -n "$next_due" ]]; then
+      # Compare date (works on macOS and Linux)
+      next_due_epoch=$(date -j -f "%Y-%m-%d" "$next_due" +%s 2>/dev/null || date -d "$next_due" +%s 2>/dev/null || echo "")
+      today_epoch=$(date +%s)
+      if [[ -n "$next_due_epoch" && "$today_epoch" -gt "$next_due_epoch" ]]; then
+        echo "[family-gate] WARN: Quarterly review date ($next_due) is overdue"
+        echo "[family-gate]        Update .harness/quality/criteria.md with new review date"
+        # Non-blocking: warn only, don't exit 1
+      fi
+    fi
+  fi
+fi
+
 echo
 if [[ "${SKILL_FAMILY_LIVE_EVALS:-0}" == "1" ]]; then
   if [[ "$release_ready" == "1" ]]; then
