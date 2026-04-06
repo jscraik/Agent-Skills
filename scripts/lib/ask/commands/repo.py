@@ -3,7 +3,7 @@ import subprocess
 import json
 import re
 from pathlib import Path
-from typing import Dict, Any, List
+from typing import List
 from ask.envelope import CallResult, ErrorObject
 from ask.context import find_repo_root
 
