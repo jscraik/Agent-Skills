@@ -1,5 +1,12 @@
 # CLI Lifecycle and Error Standards (2026 Update)
 
+## Table of Contents
+
+- [1. Regeneration Metadata](#1-regeneration-metadata)
+- [2. Universal Response Envelope](#2-universal-response-envelope)
+- [3. Interface Evolution (The "Fold" Pattern)](#3-interface-evolution-the-fold-pattern)
+- [4. Auth Orchestration](#4-auth-orchestration)
+
 To achieve "Gold Standard" status, a CLI must manage its own evolution and provide machine-readable error surfaces that allow autonomous agents to self-correct.
 
 ## 1. Regeneration Metadata
