@@ -28,12 +28,31 @@ import urllib.parse
 import uuid
 import zipfile
 
-# Semantic redundancy check imports
+# Semantic redundancy check imports (use importlib to avoid sys.path manipulation)
+def _load_builder_module(module_name: str):
+    """Load a module from utilities/skill-builder/scripts using importlib."""
+    module_path = Path(__file__).resolve().parents[3] / "utilities" / "skill-builder" / "scripts" / f"{module_name}.py"
+    if not module_path.exists():
+        return None
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(f"_builder_{module_name}", str(module_path))
+    if spec and spec.loader:
+        mod = importlib.util.module_from_spec(spec)
+        sys.modules[f"_builder_{module_name}"] = mod
+        spec.loader.exec_module(mod)
+        return mod
+    return None
+
+
 try:
-    sys.path.append(os.path.join(os.path.dirname(__file__), "../../../utilities/skill-builder/scripts"))
-    from skill_router import route
-    from skill_catalog import load_catalog
-    HAS_ROUTER = True
+    _router_mod = _load_builder_module("skill_router")
+    _catalog_mod = _load_builder_module("skill_catalog")
+    if _router_mod and _catalog_mod:
+        route = _router_mod.route
+        load_catalog = _catalog_mod.load_catalog
+        HAS_ROUTER = True
+    else:
+        HAS_ROUTER = False
 except ImportError:
     HAS_ROUTER = False
 
