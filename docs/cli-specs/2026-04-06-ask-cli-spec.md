@@ -96,6 +96,16 @@ ask graph list(topicFilter?: string, tier?: string)
 
 ask graph topics()
 /** Lists all topic clusters in the skill graph. */
+
+# Global Options (all commands)
+ask [...] --json
+/** Output machine-parseable JSON with CallResult envelope. */
+
+ask [...] --robot | --agent-mode | -r
+/** Enable AI-friendly mode: fuzzy matching, helpful corrections, verbose guidance. */
+
+ask [...] --trace-id <id>
+/** Inject trace ID for distributed log correlation. */
 ```
 
 ### Response Envelope (`CallResult`)
@@ -177,6 +187,59 @@ Apply fail-closed redaction to all outputs:
 | **CA8** | Graph Search | `ask graph find security --tier stable` | Returns matching stable-tier security skills. |
 | **CA9** | Graph Pathfinding | `ask graph chain skill-creator skill-installer` | Returns shortest path between skills. |
 | **CA10** | Agent Next Steps | `ask graph info <skill> --json` | `metadata.next_steps` includes related commands. |
+| **CA11** | Robot Mode Fuzzy | `ask skill list --robot` | Corrects to `ask skills list` with guidance. |
+| **CA12** | Robot Mode Correction | `ask skills ls --robot --json` | `metadata.correction_note` explains the fix. |
+| **CA13** | Helpful Errors | `ask invalid-command` | Error includes similar valid commands + examples. |
+
+## Robot Mode (AI Agent Interface)
+
+The CLI includes a dedicated **Robot Mode** (`--robot`, `--agent-mode`, `-r`) designed for AI coding agents.
+
+### Philosophy
+
+- **Honor clear intent:** When the agent's intent is legible but syntax is off, honor the command and provide guidance.
+- **Educational errors:** When intent is unclear, provide detailed error messages with examples.
+- **Structured output:** All responses include machine-parseable guidance via `metadata` fields.
+
+### Fuzzy Matching
+
+Robot mode enables fuzzy command matching:
+
+| Typo | Correction | Guidance |
+|------|------------|----------|
+| `ask skill list` | `ask skills list` | "Use 'skills' for exact matching next time" |
+| `ask skills ls` | `ask skills list` | "Use 'list' for exact matching next time" |
+| `ask graph search X` | `ask graph find X` | "Use 'find' for exact matching next time" |
+| `ask eval benchmark` | `ask evals benchmark` | "Use 'evals' for exact matching next time" |
+
+### Error Message Format
+
+When a command cannot be parsed (even with fuzzy matching):
+
+```
+❌ Unknown topic: 'invalid-topic'
+
+💡 Did you mean 'ask skills'?
+   Valid topics: repo, skills, plugins, evals, graph
+
+📚 Examples:
+   • ask skills list
+   • ask skills audit backend/cli-spec --level strict
+   • ask graph find security
+```
+
+### JSON Output with Corrections
+
+```json
+{
+  "status": "success",
+  "metadata": {
+    "correction_note": "🤖 Robot mode: Interpreting 'skill' as 'skills' 💡 Tip: Use 'skills' for exact matching next time.",
+    "next_steps": ["ask skills audit backend/cli-spec --level strict"]
+  },
+  "data": { ... }
+}
+```
 
 ## Definition of Done
 - [ ] CLI handles `SIGINT` (Ctrl+C) gracefully with clean exit.
