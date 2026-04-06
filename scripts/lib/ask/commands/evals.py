@@ -1,4 +1,3 @@
-import os
 import subprocess
 from pathlib import Path
 from ask.envelope import CallResult, ErrorObject
