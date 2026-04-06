@@ -2,6 +2,12 @@
 
 **Canonical governance surface for skill-authoring family release-grade quality.**
 
+## Table of Contents
+- [Active Metrics](#active-metrics)
+- [Failure Routing](#failure-routing)
+- [Governance Cadence](#governance-cadence)
+- [Related Artifacts](#related-artifacts)
+
 This file is the authoritative quality gate for the active skill-authoring family:
 - `utilities/skill-builder`
 - `skills-system/skill-creator`

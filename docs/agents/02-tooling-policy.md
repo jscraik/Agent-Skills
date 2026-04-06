@@ -6,6 +6,7 @@
 - [Verified command style](#verified-command-style)
 - [Package command map](#package-command-map)
 - [Useful checks](#useful-checks)
+- [Skill line-budget policy](#skill-line-budget-policy)
 
 ## Tools
 - Use `rg`, `fd`, `jq` from repo workflow.
@@ -40,3 +41,7 @@
 - `python3 scripts/docs_lint.py --mode warn --config docs-policy.json`
 - `python3 ~/.codex/scripts/plan-graph-lint.py .agent/PLANS.md`
 - `bash ~/.codex/scripts/verify-work.sh`
+
+## Skill line-budget policy
+
+When a `SKILL.md` exceeds the 360-line split budget (`PD_SKILLMD_TOO_LONG`), **never delete content** to bring it under the limit. Move the bulk section(s) to `references/<topic>.md` under the skill directory and replace with a one-line link. Removing blank lines or navigation-only TOC entries (no prose content) is acceptable as a last resort. Owner rule: context is never lost, only relocated.
