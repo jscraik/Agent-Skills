@@ -3,11 +3,8 @@
 import unittest
 import tempfile
 import shutil
-import signal
-import os
 import sys
 from pathlib import Path
-from unittest.mock import patch, MagicMock
 
 # Add scripts/lib to path
 repo_root = Path(__file__).resolve().parents[1]

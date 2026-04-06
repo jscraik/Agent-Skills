@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -51,7 +51,7 @@ class SkillState:
     current_state: ReadinessState = ReadinessState.STARTER_VALID
     block_reason: Optional[str] = None
     history: List[StateRecord] = field(default_factory=list)
-    updated_at: str = field(default_factory=lambda: datetime.utcnow().isoformat())
+    updated_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -81,7 +81,7 @@ class SkillState:
             )
         
         record = StateRecord(
-            timestamp=datetime.utcnow().isoformat(),
+            timestamp=datetime.now(timezone.utc).isoformat(),
             from_state=self.current_state.value,
             to_state=new_state.value,
             reason=reason,
@@ -102,6 +102,7 @@ class SkillState:
         state_dir.mkdir(parents=True, exist_ok=True)
         path = state_dir / f"{self.skill_name}.json"
         path.write_text(json.dumps(self.to_dict(), indent=2))
+        path.chmod(0o600)  # Owner read/write only
         return path
 
     @classmethod
@@ -115,7 +116,7 @@ class SkillState:
             skill_name=data["skill_name"],
             current_state=ReadinessState(data["current_state"]),
             block_reason=data.get("block_reason"),
-            updated_at=data.get("updated_at", datetime.utcnow().isoformat()),
+            updated_at=data.get("updated_at", datetime.now(timezone.utc).isoformat()),
         )
         state.history = [
             StateRecord(
@@ -134,7 +135,7 @@ class SkillState:
         """Create initial state for a new skill."""
         state = cls(skill_name=skill_name)
         state.history.append(StateRecord(
-            timestamp=datetime.utcnow().isoformat(),
+            timestamp=datetime.now(timezone.utc).isoformat(),
             from_state=None,
             to_state=ReadinessState.STARTER_VALID.value,
             reason="Initial creation via quick_validate",

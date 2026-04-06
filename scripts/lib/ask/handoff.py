@@ -5,11 +5,11 @@ from __future__ import annotations
 import json
 import os
 from dataclasses import dataclass, asdict, field
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from .envelope import ErrorCode, CallResult
+from .envelope import ErrorCode, CallResult, ErrorObject
 
 
 @dataclass
@@ -55,7 +55,7 @@ class HandoffPackage:
     """Creator-to-builder handoff artifact per SA2-SA3 spec."""
     schema_version: str = "1.0"
     skill_name: str = ""
-    created_at: str = field(default_factory=lambda: datetime.utcnow().isoformat())
+    created_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
     goal: str = ""
     boundary_summary: str = ""
     trigger_contexts: List[str] = field(default_factory=list)
@@ -101,9 +101,10 @@ class HandoffPackage:
         """Write handoff package to .agent/handoff/ directory."""
         handoff_dir = repo_root / ".agent" / "handoff"
         handoff_dir.mkdir(parents=True, exist_ok=True)
-        timestamp = datetime.utcnow().strftime("%Y%m%d%H%M%S")
+        timestamp = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
         path = handoff_dir / f"{self.skill_name}-{timestamp}.yaml"
         path.write_text(self.to_yaml())
+        path.chmod(0o600)  # Owner read/write only
         return path
 
     @classmethod
@@ -178,11 +179,11 @@ def require_handoff(repo_root: Path, skill_name: str) -> CallResult:
     if not handoff_path:
         return CallResult(
             status="error",
-            errors=[{
-                "code": ErrorCode.ERR_INVALID_HANDOFF,
-                "message": f"No HandoffPackage found for '{skill_name}' (SA2)",
-                "fix_suggestion": f"Run skill-creator for '{skill_name}' to generate handoff package",
-            }],
+            errors=[ErrorObject(
+                code=ErrorCode.ERR_INVALID_HANDOFF,
+                message=f"No HandoffPackage found for '{skill_name}' (SA2)",
+                fix_suggestion=f"Run skill-creator for '{skill_name}' to generate handoff package",
+            )],
         )
     try:
         pkg = HandoffPackage.load(handoff_path)
@@ -190,11 +191,11 @@ def require_handoff(repo_root: Path, skill_name: str) -> CallResult:
         if validation_errors:
             return CallResult(
                 status="error",
-                errors=[{
-                    "code": ErrorCode.ERR_INVALID_HANDOFF,
-                    "message": f"HandoffPackage for '{skill_name}' is incomplete: {', '.join(validation_errors)}",
-                    "fix_suggestion": "Complete the handoff package before proceeding to hardening",
-                }],
+                errors=[ErrorObject(
+                    code=ErrorCode.ERR_INVALID_HANDOFF,
+                    message=f"HandoffPackage for '{skill_name}' is incomplete: {', '.join(validation_errors)}",
+                    fix_suggestion="Complete the handoff package before proceeding to hardening",
+                )],
             )
         return CallResult(
             status="success",
@@ -203,8 +204,8 @@ def require_handoff(repo_root: Path, skill_name: str) -> CallResult:
     except Exception as e:
         return CallResult(
             status="error",
-            errors=[{
-                "code": ErrorCode.ERR_SCHEMA_INVALID,
-                "message": f"Failed to parse HandoffPackage for '{skill_name}': {e}",
-            }],
+            errors=[ErrorObject(
+                code=ErrorCode.ERR_SCHEMA_INVALID,
+                message=f"Failed to parse HandoffPackage for '{skill_name}': {e}",
+            )],
         )

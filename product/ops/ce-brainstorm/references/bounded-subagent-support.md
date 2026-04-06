@@ -17,14 +17,16 @@ Ask a short blocking approval question via the platform's blocking question tool
 If approved, run these bounded internal subagents in parallel:
 
 ### repo-research-analyst
-```
+
+```text
 "Find similar features, conventions, or patterns relevant to: <topic>
 - Max 20 files, max 4 MB total read
 - Return a <=400 word summary with file:line refs"
 ```
 
 ### learnings-researcher
-```
+
+```text
 "Find prior learnings relevant to: <topic>
 - Check .harness/memory/LEARNINGS.md first when it exists
 - Then docs/solutions/ for directly relevant entries

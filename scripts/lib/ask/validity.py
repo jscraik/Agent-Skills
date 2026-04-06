@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -24,6 +24,22 @@ class IterationEvidence:
     qualitative_notes: str = ""
     quantitative_score: Optional[float] = None
 
+    VALID_BASELINE_TYPES = {"no_skill", "prior_snapshot", "neutral_repo"}
+    VALID_RESULTS = {"improved", "regressed", "neutral", "inconclusive"}
+
+    def __post_init__(self):
+        """Validate baseline_type and comparison_result values."""
+        if self.baseline_type not in self.VALID_BASELINE_TYPES:
+            raise ValueError(
+                f"Invalid baseline_type: {self.baseline_type}. "
+                f"Must be one of: {self.VALID_BASELINE_TYPES}"
+            )
+        if self.comparison_result not in self.VALID_RESULTS:
+            raise ValueError(
+                f"Invalid comparison_result: {self.comparison_result}. "
+                f"Must be one of: {self.VALID_RESULTS}"
+            )
+
 
 @dataclass
 class ContractValidityEvidence:
@@ -33,7 +49,7 @@ class ContractValidityEvidence:
     """
     skill_name: str
     schema_version: str = "1.0"
-    created_at: str = field(default_factory=lambda: datetime.utcnow().isoformat())
+    created_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
     
     # Source of validity
     handoff_package_path: str = ""
@@ -96,6 +112,7 @@ class ContractValidityEvidence:
         validity_dir.mkdir(parents=True, exist_ok=True)
         path = validity_dir / f"{self.skill_name}.json"
         path.write_text(json.dumps(self.to_dict(), indent=2))
+        path.chmod(0o600)  # Owner read/write only
         return path
 
     @classmethod
