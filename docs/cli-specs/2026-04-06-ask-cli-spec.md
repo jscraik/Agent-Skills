@@ -29,20 +29,32 @@ This specification has been deepened to include:
 graph TD
     ask[ask] --> skills[skills]
     ask --> repo[repo]
-    ask --> mcp[mcp]
-    
+    ask --> plugins[plugins]
+    ask --> evals[evals]
+    ask --> graph[graph]
+
     skills --> sync[sync]
     skills --> list[list]
     skills --> audit[audit]
     skills --> install[install]
     skills --> fold[fold]
-    
+    skills --> init[init]
+
     repo --> validate[validate]
     repo --> status[status]
-    repo --> graph[graph]
-    
-    mcp --> mcp_sync[sync]
-    mcp --> mcp_verify[verify]
+
+    plugins --> plugins_init[init]
+
+    evals --> evals_run[run]
+    evals --> benchmark[benchmark]
+    evals --> dashboard[dashboard]
+
+    graph --> graph_related[related]
+    graph --> graph_find[find]
+    graph --> graph_info[info]
+    graph --> graph_chain[chain]
+    graph --> graph_list[list]
+    graph --> graph_topics[topics]
 ```
 
 ## Interface Contract
@@ -67,8 +79,23 @@ ask skills fold(source: string, target: string, sensitivity?: float)
 ask repo status(verbose?: boolean)
 /** Returns overall health, sync status, and lint issues. */
 
-ask repo graph(format?: "mermaid" | "json", focus?: string)
-/** Generates or queries the dependency/skill graph. */
+ask graph related(skill: string, depth?: int, reverse?: boolean, topicFilter?: string, tier?: string)
+/** Finds related skills in the graph. Depth controls BFS traversal (default 1). */
+
+ask graph find(query: string, topicFilter?: string, tier?: string)
+/** Full-text search across skill names and topics. */
+
+ask graph info(skill: string)
+/** Returns full node details: topic, tier, degree, stability, all links. */
+
+ask graph chain(from: string, to: string)
+/** Finds shortest path between two skills via BFS. */
+
+ask graph list(topicFilter?: string, tier?: string)
+/** Lists all skills with optional topic/tier filtering. */
+
+ask graph topics()
+/** Lists all topic clusters in the skill graph. */
 ```
 
 ### Response Envelope (`CallResult`)
@@ -146,6 +173,10 @@ Apply fail-closed redaction to all outputs:
 | **CA4** | Error Mapping | `ask skills audit /etc/passwd` | Exit 2; JSON error `ERR_PATH_TRAVERSAL`. |
 | **CA5** | Redundancy Catch | `ask skills install <overlap>` | Exit 4; Confidence score in JSON `data`. |
 | **CA6** | Telemetry Output | `ask skills list --json` | Includes `telemetry` object in envelope. |
+| **CA7** | Graph Navigation | `ask graph related skill-builder --json` | Returns related skills with weights and topics. |
+| **CA8** | Graph Search | `ask graph find security --tier stable` | Returns matching stable-tier security skills. |
+| **CA9** | Graph Pathfinding | `ask graph chain skill-creator skill-installer` | Returns shortest path between skills. |
+| **CA10** | Agent Next Steps | `ask graph info <skill> --json` | `metadata.next_steps` includes related commands. |
 
 ## Definition of Done
 - [ ] CLI handles `SIGINT` (Ctrl+C) gracefully with clean exit.
