@@ -35,7 +35,7 @@ For complex commands with 10+ flags, do not overwhelm the user (or the agent's c
 - **Schema-First:** Support `--schema` to output the full machine-readable definition.
 
 ## 3. The "Minting" Pattern (Schema-to-CLI)
-Design your CLI as a thin wrapper around a JSON-schema definition. 
+Design your CLI as a thin wrapper around a JSON-schema definition.
 
 - **Validation Parity:** Use the same JSON-schema validator for both the API and the CLI.
 - **Auto-Generated Flags:** Mapping camelCase schema keys to kebab-case CLI flags should be deterministic.
