@@ -343,7 +343,7 @@ def summarize_audits(audits: Sequence[ArtifactStatus]) -> Dict[str, Any]:
         counts[audit.status] = counts.get(audit.status, 0) + 1
     return {
         "generated_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
-        "runs_root": str((Path(audits[0].run_dir).parent) if audits else Path("artifacts/skill-graphs/runs")),
+        "runs_root": str((Path(audits[0].run_dir).parent.relative_to(Path.cwd())) if audits else Path("artifacts/skill-graphs/runs")),
         "counts": counts,
         "total_runs": len(audits),
         "run_status_counts": counts,

@@ -1,6 +1,6 @@
 {
   "generated_at": "2026-04-05T15:54:16Z",
-  "runs_root": "/Users/jamiecraik/dev/agent-skills/artifacts/skill-graphs/runs",
+  "runs_root": "artifacts/skill-graphs/runs",
   "counts": {
     "compliant": 0,
     "missing_mandatory": 85,
@@ -15,6 +15,7 @@
     "empty": 0
   },
   "compliance_rate": 0.0,
+  "_comment": "Non-compliant run sweep; remediation in progress. This manifest tracks actual state, not target state.",
   "waived_non_compliant": 2,
   "runs": [
     {

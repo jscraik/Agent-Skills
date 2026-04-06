@@ -32,8 +32,8 @@
           "code": "TELEMETRY_HEALTH_STALE",
           "detail": "daily-skill-health.md age 124.05h exceeds 24.00h",
           "owner": "unassigned",
-          "due_date": null,
-          "escalation_date": null
+          "due_date": "2026-04-07",
+          "escalation_date": "2026-04-08"
         },
         {
           "code": "TELEMETRY_WINDOW_MISMATCH",

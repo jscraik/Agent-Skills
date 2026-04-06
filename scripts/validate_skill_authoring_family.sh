@@ -220,8 +220,77 @@ else
 fi
 
 # Track per-skill evidence for the release-ready index
-declare -A skill_evidence_paths
-declare -A skill_outcomes
+# Using parallel indexed arrays for Bash 3.2+ compatibility (avoid associative arrays)
+skill_dirs_ordered=()
+skill_evidence_paths_ordered=()
+skill_outcomes_ordered=()
+
+# Helper: get index of skill_dir in ordered array (or -1 if not found)
+_get_skill_index() {
+  local target="$1"
+  local i
+  for i in "${!skill_dirs_ordered[@]}"; do
+    if [[ "${skill_dirs_ordered[$i]}" == "$target" ]]; then
+      echo "$i"
+      return
+    fi
+  done
+  echo "-1"
+}
+
+# Helper: set evidence path for skill_dir
+_set_evidence_path() {
+  local skill="$1"
+  local path="$2"
+  local idx
+  idx=$(_get_skill_index "$skill")
+  if [[ "$idx" == "-1" ]]; then
+    skill_dirs_ordered+=("$skill")
+    skill_evidence_paths_ordered+=("$path")
+    skill_outcomes_ordered+=("")
+  else
+    skill_evidence_paths_ordered[$idx]="$path"
+  fi
+}
+
+# Helper: set outcome for skill_dir
+_set_outcome() {
+  local skill="$1"
+  local outcome="$2"
+  local idx
+  idx=$(_get_skill_index "$skill")
+  if [[ "$idx" == "-1" ]]; then
+    skill_dirs_ordered+=("$skill")
+    skill_evidence_paths_ordered+=("")
+    skill_outcomes_ordered+=("$outcome")
+  else
+    skill_outcomes_ordered[$idx]="$outcome"
+  fi
+}
+
+# Helper: get evidence path for skill_dir (returns empty if not found)
+_get_evidence_path() {
+  local skill="$1"
+  local idx
+  idx=$(_get_skill_index "$skill")
+  if [[ "$idx" == "-1" ]]; then
+    echo ""
+  else
+    echo "${skill_evidence_paths_ordered[$idx]}"
+  fi
+}
+
+# Helper: get outcome for skilldir (returns "unknown" if not found)
+_get_outcome() {
+  local skill="$1"
+  local idx
+  idx=$(_get_skill_index "$skill")
+  if [[ "$idx" == "-1" ]]; then
+    echo "unknown"
+  else
+    echo "${skill_outcomes_ordered[$idx]:-unknown}"
+  fi
+}
 
 for skill_dir in "${skill_dirs[@]}"; do
   echo
@@ -235,7 +304,7 @@ for skill_dir in "${skill_dirs[@]}"; do
     skill_slug="${skill_dir//\//-}"
     if [[ "$release_ready" == "1" ]]; then
       skill_evidence_path="${evidence_run_dir}/${skill_slug}"
-      skill_evidence_paths["$skill_dir"]="$skill_evidence_path"
+      _set_evidence_path "$skill_dir" "$skill_evidence_path"
       "$python_bin" utilities/skill-builder/scripts/run_skill_evals.py "$skill_dir" \
         --runner codex \
         --eval-mode smoke \
@@ -260,7 +329,7 @@ for skill_dir in "${skill_dirs[@]}"; do
         --eval-mode release \
         "${codex_profile_args[@]+"${codex_profile_args[@]}"}"
     fi
-    skill_outcomes["$skill_dir"]="passed"
+    _set_outcome "$skill_dir" "passed"
   else
     "$python_bin" utilities/skill-builder/scripts/run_skill_evals.py "$skill_dir" \
       --list-cases \
@@ -268,7 +337,7 @@ for skill_dir in "${skill_dirs[@]}"; do
     "$python_bin" utilities/skill-builder/scripts/run_skill_evals.py "$skill_dir" \
       --list-cases \
       --eval-mode release
-    skill_outcomes["$skill_dir"]="structural-only"
+    _set_outcome "$skill_dir" "structural-only"
   fi
 
   "$python_bin" utilities/skill-builder/scripts/openclaw_skill_guard.py "$skill_dir" \
@@ -296,8 +365,8 @@ if [[ "$release_ready" == "1" ]] && [[ -n "$evidence_run_dir" ]]; then
   for skill_dir in "${skill_dirs[@]}"; do
     [[ "$first" == "0" ]] && skills_json+=","
     first=0
-    outcome="${skill_outcomes[$skill_dir]:-unknown}"
-    evpath="${skill_evidence_paths[$skill_dir]:-}"
+    outcome=$(_get_outcome "$skill_dir")
+    evpath=$(_get_evidence_path "$skill_dir")
     skills_json+="{\"skill\":\"${skill_dir}\",\"outcome\":\"${outcome}\",\"evidence_path\":\"${evpath}\"}"
   done
   skills_json+="]"
