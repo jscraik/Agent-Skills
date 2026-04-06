@@ -2459,5 +2459,5 @@
     "actions": {}
   },
   "waiver_file": "artifacts/skill-graphs/pilot/artifact-parity-waivers.json",
-  "status": "ok"
+  "status": "non_compliant_remediation_in_progress"
 }

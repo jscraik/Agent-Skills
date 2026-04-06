@@ -60,6 +60,10 @@ This repository is the canonical source of Codex skills, linked operator docs, a
 
 - Before implementing multi-file edits or complex automation for a simple information request, pause and ask: `Would a direct answer or simple command suffice?`
 
+## Skill line-budget policy
+
+When a `SKILL.md` exceeds the 360-line split budget (`PD_SKILLMD_TOO_LONG`), **never delete content** to bring it under the limit. Move the bulk section(s) to `references/<topic>.md` under the skill directory and replace with a one-line link. Removing blank lines or navigation-only TOC entries (no prose content) is acceptable as a last resort. Owner rule: context is never lost, only relocated.
+
 ## Browser/Playwright
 
 - When browser tooling cannot access local files directly, immediately start `python3 -m http.server` in the relevant directory instead of cycling through fragile workarounds or abandoning the browser approach.
