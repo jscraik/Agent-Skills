@@ -72,11 +72,11 @@ Utilize specialized sub-agents to assist with investigative research into the co
 Define clear goals for these research passes, utilizing the context discovered in earlier steps.
 
 - **Discovery Research:** Use codebase researchers to find similar implementations. Goals should include search vectors like:
- - **Structural Similarity:** Checking for identical underlying API usage (e.g., `Intl.DateTimeFormat` or `setTimeout`).
- - **Naming Conventions:** Identifying existing symbols with similar naming patterns (e.g., `*Format*` or `*Debounce*`).
- - **Comments & Documentation:** Searching for keywords from JSDoc that describe similar behavior elsewhere.
- - **Architectural Fit:** Determining where this type of logic is currently centralized.
- - **Refactoring Potential:** Identifying how the new code could be adjusted to use existing logic.
+- **Structural Similarity:** Checking for identical underlying API usage (e.g., `Intl.DateTimeFormat` or `setTimeout`).
+- **Naming Conventions:** Identifying existing symbols with similar naming patterns (e.g., `*Format*` or `*Debounce*`).
+- **Comments & Documentation:** Searching for keywords from JSDoc that describe similar behavior elsewhere.
+- **Architectural Fit:** Determining where this type of logic is currently centralized.
+- **Refactoring Potential:** Identifying how the new code could be adjusted to use existing logic.
 - **Detailed Comparison:** Perform semantic comparisons against existing modules. For example: "Examine the implementation of the new component in the PR and compare it against all components in the UI package to see if any could be extended instead."
 - **Direct Checks:** For simple, unambiguous checks (e.g., checking dependencies in `package.json`), use local search tools directly.
 
@@ -95,7 +95,7 @@ If you discover that the PR duplicates existing functionality or ignores a best 
 - **Explain the Value:** Briefly explain why reusing the existing code is beneficial (e.g., maintainability, consistency, built-in edge case handling).
 
 Example comment:
-> "It looks like this PR introduces a new `formatDate` utility. We already have a robust, tested `formatDate` function in `utilities/date-helpers.ts`. 
+> "It looks like this PR introduces a new `formatDate` utility. We already have a robust, tested `formatDate` function in `utilities/date-helpers.ts`.
 >
 > You can replace your implementation by importing it like this:
 > ```typescript
@@ -122,6 +122,7 @@ Review the detailed contracts and evaluation cases before making changes:
 - `references/evals.yaml`
 
 Run these checks and fail fast: stop at the first failed gate and do not proceed.
+
 ```bash
 python3 scripts/diagnose_skill.py github/review-duplication
 python3 utilities/skill-builder/scripts/quick_validate.py github/review-duplication --mode strict

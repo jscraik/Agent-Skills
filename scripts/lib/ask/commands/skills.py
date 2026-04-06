@@ -38,7 +38,7 @@ def list_skills(repo_root: Path, category: str = None) -> CallResult:
             continue
         skills_data.append({
             "name": entry.name,
-            "path": str(entry.source_dir.relative_to(repo_root)),
+            "path": str(entry.source_dir.relative_to(repo_root)) if entry.source_dir.is_relative_to(repo_root) else str(entry.source_dir),
             "category": entry.category,
             "description": entry.description
         })
@@ -272,6 +272,8 @@ def sync_skills(repo_root: Path, scope: str = "workspace", dry_run: bool = False
     for entry in entries:
         skill_name = entry.name
         target_link = skills_dir / skill_name
+        if not entry.source_dir.is_relative_to(repo_root):
+            continue
         rel_to_root = entry.source_dir.relative_to(repo_root)
         source_rel = os.path.join("../..", str(rel_to_root))
         plan["symlinks"].append({"from": str(target_link), "to": source_rel})
