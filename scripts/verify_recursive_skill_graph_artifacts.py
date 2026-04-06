@@ -497,7 +497,10 @@ def main() -> int:
             else "fail"
         )
     else:
-        manifest["status"] = "ok"
+        # Derive status from actual compliance counts
+        compliant_count = counts.get("compliant", 0)
+        total = len(audits)
+        manifest["status"] = "ok" if (total > 0 and compliant_count == total) else "non_compliant"
 
     manifest_path.parent.mkdir(parents=True, exist_ok=True)
     manifest = _stabilize_generated_at(manifest, manifest_path)

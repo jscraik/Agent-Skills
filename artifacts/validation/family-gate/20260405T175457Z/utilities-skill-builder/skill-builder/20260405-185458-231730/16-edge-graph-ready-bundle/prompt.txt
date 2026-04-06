@@ -1,3 +1,0 @@
-$skill-builder
-
-I want a new repo skill that should improve our skill graph too. In this first response, keep the required headings and make the deliverables mention both cross-skill navigation and task-profile metadata.

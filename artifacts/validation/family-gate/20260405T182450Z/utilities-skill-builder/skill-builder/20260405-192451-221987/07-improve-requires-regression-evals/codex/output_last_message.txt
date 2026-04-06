@@ -1,5 +1,0 @@
-Yes—**evals still run when improving an existing skill**.
-
-- For iterative `improve` work: run **`run_skill_evals.py --eval-mode smoke`** in the round loop (`iterative_fail_fast`) after edits.
-- For promotion/package readiness (e.g., `ready_for_install_handoff` / `ready_for_plugin_handoff`): run **release-mode evals** (`--eval-mode release`) and keep the `release_manifest.json`/scorecard evidence.
-- If evals cannot run (blocked environment), do **not skip silently**; record blocker state (`comparison_blocked`) and proceed only with explicit workaround/next-step triage.

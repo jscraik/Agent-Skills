@@ -1,3 +1,0 @@
-$skill-builder
-
-Can you improve a skill whose frontmatter description currently contains XML-like tags such as <tool> and <script>? In this first response, require sanitizer-safe wording and avoid leaving angle brackets in the final guidance.

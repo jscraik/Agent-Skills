@@ -1,3 +1,0 @@
-$skill-builder
-
-Audit and harden this skill, then package it as a plugin. Do not let packaging skip the lifecycle checks.

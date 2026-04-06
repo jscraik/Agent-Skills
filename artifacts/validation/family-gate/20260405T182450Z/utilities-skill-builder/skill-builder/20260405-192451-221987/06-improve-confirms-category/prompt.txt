@@ -1,3 +1,0 @@
-$skill-builder
-
-Can you improve a code review skill that keeps over-triggering? In this first response, use the required headings and confirm the likely skill category before drafting.

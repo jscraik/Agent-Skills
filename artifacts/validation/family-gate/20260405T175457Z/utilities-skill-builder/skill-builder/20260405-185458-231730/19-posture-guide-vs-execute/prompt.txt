@@ -1,3 +1,0 @@
-$skill-builder
-
-Can you keep this in guided mode and explain assumptions and checks before any edits?

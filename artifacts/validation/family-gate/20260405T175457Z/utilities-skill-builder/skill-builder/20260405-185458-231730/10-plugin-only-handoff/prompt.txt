@@ -1,3 +1,0 @@
-$skill-builder
-
-The standalone skill is already validated. I only want it packaged as a Codex plugin, not re-authored.

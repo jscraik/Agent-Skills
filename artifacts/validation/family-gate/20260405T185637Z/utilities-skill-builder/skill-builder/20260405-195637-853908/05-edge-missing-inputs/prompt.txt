@@ -1,3 +1,0 @@
-$skill-builder
-
-Can you create a production deployment skill if I did not specify platform? In this headless eval, do not call request_user_input; instead list the missing inputs under the required headings and do not invent details.
