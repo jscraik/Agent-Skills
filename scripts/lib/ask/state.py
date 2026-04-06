@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import json
+import os
+import tempfile
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
@@ -97,13 +99,56 @@ class SkillState:
             self.block_reason = None
 
     def write(self, repo_root: Path) -> Path:
-        """Write state to .agent/state/ directory."""
+        """Write state to .agent/state/ directory atomically.
+
+        Uses temp-file + atomic rename to prevent corruption during concurrent writes.
+        Also sets restrictive permissions (0o600) on the state file.
+        """
         state_dir = repo_root / ".agent" / "state"
         state_dir.mkdir(parents=True, exist_ok=True)
-        path = state_dir / f"{self.skill_name}.json"
-        path.write_text(json.dumps(self.to_dict(), indent=2))
-        path.chmod(0o600)  # Owner read/write only
-        return path
+        final_path = state_dir / f"{self.skill_name}.json"
+
+        # Write to temp file in the same directory (for atomic rename)
+        # Use a hidden temp file to avoid globbing issues
+        temp_fd = None
+        temp_path = None
+        try:
+            # Create temp file in the same directory for atomic rename
+            temp_fd, temp_path_str = tempfile.mkstemp(
+                dir=state_dir,
+                prefix=f".{self.skill_name}.tmp-",
+                suffix=".json"
+            )
+            temp_path = Path(temp_path_str)
+
+            # Write JSON data
+            data = json.dumps(self.to_dict(), indent=2)
+            os.write(temp_fd, data.encode('utf-8'))
+            os.fsync(temp_fd)  # Ensure data is flushed to disk
+            os.close(temp_fd)
+            temp_fd = None
+
+            # Set restrictive permissions before moving
+            temp_path.chmod(0o600)
+
+            # Atomic rename: this is guaranteed to be atomic on POSIX systems
+            os.replace(temp_path, final_path)
+
+        except Exception:
+            # Clean up temp file on any error
+            if temp_fd is not None:
+                try:
+                    os.close(temp_fd)
+                except OSError:
+                    pass
+            if temp_path is not None and temp_path.exists():
+                try:
+                    temp_path.unlink()
+                except OSError:
+                    pass
+            raise
+
+        return final_path
 
     @classmethod
     def load(cls, repo_root: Path, skill_name: str) -> Optional[SkillState]:
