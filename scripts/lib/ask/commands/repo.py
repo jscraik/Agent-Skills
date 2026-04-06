@@ -102,8 +102,11 @@ def check_hub_stability(repo_root: Path, changed_files: List[str] = None) -> Cal
                                 f"without a deprecation notice. Add a ## Deprecation section to the "
                                 f"last committed version before removal."
                             )
-                    except Exception:
-                        pass
+                    except Exception as e:
+                        errors.append(
+                            f"Unable to validate stable skill deletion for '{skill}' due to error reading "
+                            f"or parsing skill-edges.json: {e}"
+                        )
                 continue
 
             try:
