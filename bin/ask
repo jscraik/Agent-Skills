@@ -30,7 +30,7 @@ from ask.commands.plugins import init_plugin
 from ask.commands.evals import run_evals, benchmark_portfolio, dashboard_report
 from ask.commands.graph import graph_related, graph_find, graph_info, graph_chain, graph_list, graph_topics
 from ask.commands.mcp import sync_mcp
-from ask.handoff import HandoffPackage, require_handoff
+import ask.handoff
 from ask.state import ReadinessState, SkillState
 from ask.validity import ContractValidityEvidence, check_install_validity
 
