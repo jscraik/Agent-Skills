@@ -1,5 +1,18 @@
 # CLI Specification Artifacts
 
+## Table of Contents
+
+- [1. Artifact Path & Naming](#1-artifact-path--naming)
+- [2. Mandatory Frontmatter](#2-mandatory-frontmatter)
+- [3. Required Sections (Full Depth)](#3-required-sections-full-depth)
+  - [Strategic Alignment](#strategic-alignment)
+  - [Command Hierarchy](#command-hierarchy)
+  - [Interface Contract](#interface-contract)
+  - [Operation Lifecycle](#operation-lifecycle)
+  - [Security & Safety](#security--safety)
+  - [Acceptance and Test Matrix](#acceptance-and-test-matrix)
+- [4. Acceptance Criteria Rubric](#4-acceptance-criteria-rubric)
+
 Every specification produced by the `cli-spec` skill must adhere to the **Implementation-Grade** standard. This ensures that the spec is a binding technical contract that a developer or agent can implement without ambiguity.
 
 ## 1. Artifact Path & Naming
