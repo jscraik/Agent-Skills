@@ -1,0 +1,15 @@
+tool: claude-code
+date: 2026-04-06
+prompt: |
+  Run the skill-authoring family certification pipeline:
+  1. Fix shadow cycle CI workflow (daily schedule, contents: write, commit-back)
+  2. Run shadow cycle locally to generate fresh telemetry
+  3. Regenerate wave-readiness and artifact-parity manifests
+  4. Run release-ready family gate
+  5. Commit and open PR
+context: |
+  Three gaps blocking release-ready certification:
+  - TELEMETRY_HEALTH_STALE (generated 2026-03-31, >5 days old)
+  - Artifact parity at 0% (85/87 missing_mandatory)
+  - No evidence-index.json exists
+model: glm-5.1
