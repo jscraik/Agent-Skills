@@ -8,6 +8,24 @@ agent_compatible: true
 schema_version: 1
 ---
 
+## Table of Contents
+
+- [Enhancement Summary](#enhancement-summary)
+- [Strategic Alignment](#strategic-alignment)
+- [Command Hierarchy](#command-hierarchy)
+- [Interface Contract](#interface-contract)
+  - [Type-Safe Signatures](#type-safe-signatures)
+  - [Response Envelope (`CallResult`)](#response-envelope-callresult)
+- [Operation Lifecycle](#operation-lifecycle)
+  - [State Model: Skill Installation (`skills install`)](#state-model-skill-installation-skills-install)
+  - [Error Registry (Exit Codes)](#error-registry-exit-codes)
+- [Security & Safety](#security--safety)
+  - [Adversarial Validation](#adversarial-validation)
+  - [Redaction Policy](#redaction-policy)
+- [Acceptance and Test Matrix](#acceptance-and-test-matrix)
+- [Robot Mode (AI Agent Interface)](#robot-mode-ai-agent-interface)
+- [Definition of Done](#definition-of-done)
+
 # ask (Agent Skills Kit) CLI Specification
 
 ## Enhancement Summary
