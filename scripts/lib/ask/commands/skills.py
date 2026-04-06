@@ -76,6 +76,28 @@ def init_skill(repo_root: Path, name: str, category: str, description: str) -> C
 def audit_skill(repo_root: Path, skill_path: str, level: str = "compat") -> CallResult:
     """Runs structural and security audits on a skill."""
     result = CallResult()
+
+    # Path traversal protection: resolve and verify path is within repo
+    try:
+        resolved_path = (repo_root / skill_path).resolve()
+        resolved_root = repo_root.resolve()
+        if not str(resolved_path).startswith(str(resolved_root)):
+            result.status = "error"
+            result.errors.append(ErrorObject(
+                code="ERR_PATH_TRAVERSAL",
+                message=f"Path traversal detected: '{skill_path}' resolves outside repository root.",
+                fix_suggestion="Use a relative path within the repository."
+            ))
+            return result
+    except Exception as e:
+        result.status = "error"
+        result.errors.append(ErrorObject(
+            code="ERR_VALIDATION",
+            message=f"Invalid path: {e}",
+            fix_suggestion="Check the path format and try again."
+        ))
+        return result
+
     diag_cmd = ["python3", "scripts/diagnose_skill.py", skill_path]
     diag_proc = subprocess.run(diag_cmd, cwd=str(repo_root), capture_output=True, text=True)
     result.data["diagnostics"] = {"exit_code": diag_proc.returncode, "stdout": diag_proc.stdout, "stderr": diag_proc.stderr}
@@ -101,11 +123,40 @@ def audit_skill(repo_root: Path, skill_path: str, level: str = "compat") -> Call
         
     return result
 
-def install_skill(repo_root: Path, url: str, remediate: bool = False, dest: str = "github") -> CallResult:
+def install_skill(repo_root: Path, url: str, remediate: bool = False, dest: str = "github", dry_run: bool = False) -> CallResult:
     """Installs a skill from GitHub, wrapping the hardened installer script."""
     result = CallResult()
     dest_path = repo_root / dest
-    
+
+    # Parse skill name from URL for preview
+    skill_name = url.split("/")[-1].replace(".git", "") if "/" in url else url
+    target_path = dest_path / skill_name
+
+    # Check for existing skill conflict
+    if target_path.exists():
+        result.status = "error"
+        result.errors.append(ErrorObject(
+            code="ERR_CONFLICT",
+            message=f"Skill '{skill_name}' already exists at '{target_path.relative_to(repo_root)}'.",
+            fix_suggestion=f"Remove the existing skill or choose a different destination with --dest."
+        ))
+        result.data["skill_name"] = skill_name
+        result.data["existing_path"] = str(target_path.relative_to(repo_root))
+        return result
+
+    if dry_run:
+        # Preview mode: show what would happen without making changes
+        result.status = "success"
+        result.data["dry_run"] = True
+        result.data["skill_name"] = skill_name
+        result.data["target_path"] = str(target_path.relative_to(repo_root))
+        result.data["url"] = url
+        result.data["remediate"] = remediate
+        result.metadata["next_steps"] = [
+            f"ask skills install {url} --dest {dest}" + (" --remediate" if remediate else "")
+        ]
+        return result
+
     cmd = [
         "python3", "skills-system/skill-installer/scripts/install-skill-from-github.py",
         "--url", url,
@@ -114,14 +165,14 @@ def install_skill(repo_root: Path, url: str, remediate: bool = False, dest: str 
         "--allow-unpinned-ref",
         "--validation-level", "compat"
     ]
-    
+
     if remediate:
         cmd.append("--remediate")
-        
+
     process = subprocess.run(cmd, cwd=str(repo_root), capture_output=True, text=True)
     result.data["raw_output"] = process.stdout
     result.data["raw_error"] = process.stderr
-    
+
     if process.returncode == 0:
         result.status = "success"
         match = re.search(r"Installed (.*?) to", process.stdout)
@@ -131,7 +182,7 @@ def install_skill(repo_root: Path, url: str, remediate: bool = False, dest: str 
     else:
         result.status = "error"
         result.errors.append(ErrorObject(code="ERR_RUNTIME", message=process.stderr.strip() or "Installation failed."))
-        
+
     return result
 
 def fold_skills(repo_root: Path, source: str, target: str, sensitivity: float = 0.2) -> CallResult:
@@ -163,9 +214,15 @@ def fold_skills(repo_root: Path, source: str, target: str, sensitivity: float = 
         match = candidates[0]
         result.data["overlap_score"] = match.confidence
         result.data["rationale"] = match.rationale
-        
+
         if match.confidence >= sensitivity:
-            result.status = "success"
+            # High overlap - emit CONFLICT to indicate redundancy issue
+            result.status = "error"
+            result.errors.append(ErrorObject(
+                code="ERR_REDUNDANCY",
+                message=f"High overlap ({int(match.confidence * 100)}%) detected between '{source}' and '{target}'.",
+                fix_suggestion=f"Consider folding '{source}' into '{target}' to reduce redundancy."
+            ))
             result.data["recommendation"] = f"FOLD: High overlap ({int(match.confidence * 100)}%) detected."
         else:
             result.status = "success"

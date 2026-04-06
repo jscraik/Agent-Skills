@@ -40,17 +40,13 @@ This skill provides a structured workflow for investigating a codebase during a 
 - If no existing implementation is found after thorough search, report this clearly rather than assuming duplication exists.
 
 ## Gotchas
-- Always use repo-relative paths, never absolute paths.
-- Never expose secrets or sensitive data in review comments.
+- **Absolute Paths:** When referencing files, use repo-relative paths (e.g., `utilities/date-helpers.ts`), never absolute paths from your local filesystem.
+- **Redaction:** Never print, log, or commit secrets, API keys, or other sensitive data discovered during investigation.
+- **Privacy:** Always redact PII or sensitive values in review comments or logs.
 - Be specific: provide exact file paths and symbol names when identifying existing code.
 
 ## Philosophy
 Code reuse is a foundational principle for maintainable systems. Every reinvented utility increases the maintenance burden and cognitive load on the team. This skill prioritizes the discovery of existing "well-lit paths" over the acceptance of new implementations for solved problems.
-
-## Constraints
-- **Absolute Paths:** When referencing files, use repo-relative paths (e.g., `utilities/date-helpers.ts`), never absolute paths from your local filesystem.
-- **Redaction:** Never print, log, or commit secrets, API keys, or other sensitive data discovered during investigation.
-- **Privacy:** Always redact PII or sensitive values in review comments or logs.
 
 ## Workflow: Investigating for Duplication
 

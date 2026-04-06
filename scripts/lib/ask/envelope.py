@@ -41,10 +41,9 @@ class CallResult:
             json_str = re.sub(pattern, "<REDACTED_SECRET>", json_str)
             
         # 2. Redact Absolute Paths
+        # For security, we redact home directory in error messages and logs
+        # But we preserve repo_root in data fields for programmatic use
         home_dir = os.path.expanduser("~")
         json_str = json_str.replace(home_dir, "<USER_HOME>")
-        
-        if repo_root:
-            json_str = json_str.replace(repo_root, "<REPO_ROOT>")
-            
+
         return json_str

@@ -28,14 +28,18 @@ class TestAskCLI(unittest.TestCase):
         """CA1: Verify ask repo status correctly identifies the repo root."""
         cmd = ["python3", "bin/ask", "repo", "status", "--json"]
         result = subprocess.run(cmd, capture_output=True, text=True)
-        
+
         self.assertEqual(result.returncode, 0)
         output = json.loads(result.stdout)
-        
+
         self.assertEqual(output["status"], "success")
         self.assertIn("repo_root", output["data"])
         # Verify it found the actual current directory or a parent
-        self.assertTrue(os.path.isdir(output["data"]["repo_root"]))
+        # Handle redacted paths by substituting back the home directory
+        repo_root = output["data"]["repo_root"]
+        if "<USER_HOME>" in repo_root:
+            repo_root = repo_root.replace("<USER_HOME>", os.path.expanduser("~"))
+        self.assertTrue(os.path.isdir(repo_root), f"repo_root is not a directory: {repo_root}")
 
     def test_skills_list(self):
         """CA1: Verify ask skills list returns a catalog of skills."""

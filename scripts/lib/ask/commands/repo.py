@@ -1,7 +1,9 @@
 import os
 import subprocess
+import json
+import re
 from pathlib import Path
-from typing import Dict, Any
+from typing import Dict, Any, List
 from ask.envelope import CallResult, ErrorObject
 from ask.context import find_repo_root
 
@@ -55,5 +57,79 @@ def repo_validate(repo_root: Path, ephemeral: bool = False) -> CallResult:
             message=f"Validation failed with {required_failures} required failures.",
             fix_suggestion="Review the validation logs in artifacts/validation/latest/"
         ))
-        
+
+    return result
+
+def check_hub_stability(repo_root: Path, changed_files: List[str] = None) -> CallResult:
+    """CI gate: blocks deletion/rename of stable skills without deprecation notice."""
+    result = CallResult()
+
+    # Build list of all SKILL.md files
+    stable_skills = []
+    errors = []
+
+    FRONTMATTER_RE = re.compile(r"^---\r?\n(.*?)\r?\n---", re.DOTALL)
+    STABLE_RE = re.compile(r"^stability\s*:\s*stable\s*$", re.MULTILINE)
+
+    for md in sorted(repo_root.rglob("SKILL.md")):
+        try:
+            content = md.read_text(encoding="utf-8", errors="replace")
+            fm = FRONTMATTER_RE.search(content)
+            if fm and STABLE_RE.search(fm.group(1)):
+                skill = md.parts[-2]
+                stable_skills.append(skill)
+        except Exception:
+            continue
+
+    # If checking specific changed files
+    if changed_files:
+        for f in changed_files:
+            p = repo_root / f
+            if p.name != "SKILL.md":
+                continue
+            skill = p.parts[-2] if len(p.parts) >= 2 else str(p)
+
+            if not p.exists():
+                # File was deleted - check against stable skills list or edges file
+                edges_file = repo_root / "ops" / "metrics" / "graph" / "skill-edges.json"
+                if edges_file.exists():
+                    try:
+                        data = json.loads(edges_file.read_text())
+                        stable_ids = {n["id"] for n in data.get("nodes", []) if n.get("stability") == "stable"}
+                        if skill in stable_ids:
+                            errors.append(
+                                f"STABLE SKILL DELETED: '{skill}' is marked stable and was deleted "
+                                f"without a deprecation notice. Add a ## Deprecation section to the "
+                                f"last committed version before removal."
+                            )
+                    except Exception:
+                        pass
+                continue
+
+            try:
+                content = p.read_text(encoding="utf-8", errors="replace")
+                fm = FRONTMATTER_RE.search(content)
+                if not (fm and STABLE_RE.search(fm.group(1))):
+                    continue
+
+                # Stable skill exists - check required fields
+                if not re.search(r"^name\s*:", fm.group(1), re.MULTILINE):
+                    errors.append(f"STABLE SKILL MISSING 'name': {skill}")
+                if not re.search(r"^description\s*:", fm.group(1), re.MULTILINE):
+                    errors.append(f"STABLE SKILL MISSING 'description': {skill}")
+            except Exception:
+                continue
+
+    result.data["stable_skills"] = sorted(stable_skills)
+    result.data["stable_count"] = len(stable_skills)
+    result.data["checked_files"] = len(changed_files) if changed_files else 0
+
+    if errors:
+        result.status = "error"
+        result.data["errors"] = errors
+        for e in errors:
+            result.errors.append(ErrorObject(code="ERR_VALIDATION", message=e))
+    else:
+        result.status = "success"
+
     return result

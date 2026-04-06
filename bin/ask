@@ -25,10 +25,11 @@ sys.path.append(str(repo_root_path / "utilities" / "skill-builder" / "scripts"))
 from ask.envelope import CallResult, ErrorObject
 from ask.context import find_repo_root
 from ask.commands.skills import list_skills, sync_skills, audit_skill, install_skill, fold_skills, init_skill
-from ask.commands.repo import repo_status, repo_validate
+from ask.commands.repo import repo_status, repo_validate, check_hub_stability
 from ask.commands.plugins import init_plugin
 from ask.commands.evals import run_evals, benchmark_portfolio, dashboard_report
 from ask.commands.graph import graph_related, graph_find, graph_info, graph_chain, graph_list, graph_topics
+from ask.commands.mcp import sync_mcp
 
 # Error Code Mapping
 ERROR_MAP = {
@@ -44,13 +45,14 @@ ERROR_MAP = {
 }
 
 # Valid commands for fuzzy matching
-VALID_TOPICS = ["repo", "skills", "plugins", "evals", "graph"]
+VALID_TOPICS = ["repo", "skills", "plugins", "evals", "graph", "mcp"]
 VALID_ACTIONS = {
-    "repo": ["status", "validate"],
+    "repo": ["status", "validate", "check-stability"],
     "skills": ["list", "sync", "audit", "install", "fold", "init"],
     "plugins": ["init"],
     "evals": ["run", "benchmark", "dashboard"],
-    "graph": ["related", "find", "info", "chain", "list", "topics"]
+    "graph": ["related", "find", "info", "chain", "list", "topics"],
+    "mcp": ["sync"]
 }
 
 # Common mistakes and their corrections
@@ -65,6 +67,8 @@ FUZZY_MATCHES = {
     "plug": "plugins",
     "eval": "evals",
     "evaluation": "evals",
+    "mcp": "mcp",
+    "mc": "mcp",
     # Action typos for skills
     "aud": "audit",
     "audt": "audit",
@@ -165,6 +169,12 @@ def build_helpful_error(topic: Optional[str], action: Optional[str], raw_args: L
         examples.extend([
             "ask repo status",
             "ask repo validate --ephemeral",
+            "ask repo check-stability",
+        ])
+    if topic == "mcp" or not topic:
+        examples.extend([
+            "ask mcp sync",
+            "ask mcp sync --dry-run",
         ])
 
     # Build the full error message
@@ -279,7 +289,10 @@ def main():
     
     repo_validate_parser = repo_subparsers.add_parser("validate", help="Run all repository validations", parents=[global_parser])
     repo_validate_parser.add_argument("--ephemeral", action="store_true", help="Do not mutate repo validation artifacts")
-    
+
+    repo_stability_parser = repo_subparsers.add_parser("check-stability", help="Check stable skills not deleted without deprecation", parents=[global_parser])
+    repo_stability_parser.add_argument("--changed-files", nargs="+", default=[], help="Changed SKILL.md files to check")
+
     # --- skills ---
     skills_parser = subparsers.add_parser("skills", help="Skill management", parents=[global_parser])
     skills_subparsers = skills_parser.add_subparsers(dest="action")
@@ -363,6 +376,13 @@ def main():
 
     graph_subparsers.add_parser("topics", help="List all topic clusters", parents=[global_parser])
 
+    # --- mcp ---
+    mcp_parser = subparsers.add_parser("mcp", help="MCP configuration management", parents=[global_parser])
+    mcp_subparsers = mcp_parser.add_subparsers(dest="action")
+
+    mcp_sync_parser = mcp_subparsers.add_parser("sync", help="Sync MCP config from Codex to Antigravity", parents=[global_parser])
+    mcp_sync_parser.add_argument("--dry-run", action="store_true", help="Preview changes without writing")
+
     # Pre-parse to check for help
     if not filtered_args or filtered_args[0] in ("-h", "--help"):
         parser.print_help()
@@ -378,7 +398,11 @@ def main():
         args = parser.parse_args(filtered_args)
         parsed_topic = args.topic
         parsed_action = getattr(args, 'action', None)
-    except SystemExit:
+    except SystemExit as e:
+        # argparse raises SystemExit(0) for --help, SystemExit(2) for errors
+        # Re-raise if it's a help request (code 0)
+        if e.code == 0:
+            sys.exit(0)
         # Parse failed - try fuzzy matching if robot mode
         if robot_mode:
             parsed_topic, parsed_action, remaining_args, correction_note = try_fuzzy_parse(filtered_args, robot_mode=True)
@@ -443,6 +467,8 @@ def main():
             result = repo_status(repo_root, verbose=args.verbose)
         elif args.action == "validate":
             result = repo_validate(repo_root, ephemeral=args.ephemeral)
+        elif args.action == "check-stability":
+            result = check_hub_stability(repo_root, changed_files=args.changed_files or [])
             
     elif args.topic == "skills":
         if args.action == "list":
@@ -452,8 +478,7 @@ def main():
         elif args.action == "audit":
             result = audit_skill(repo_root, skill_path=args.path, level=args.level)
         elif args.action == "install":
-            # For now install_skill script doesn't support --dry-run directly but we could add it
-            result = install_skill(repo_root, url=args.url, remediate=args.remediate, dest=args.dest)
+            result = install_skill(repo_root, url=args.url, remediate=args.remediate, dest=args.dest, dry_run=args.dry_run)
         elif args.action == "fold":
             result = fold_skills(repo_root, source=args.source, target=args.target, sensitivity=args.sensitivity)
         elif args.action == "init":
@@ -491,6 +516,10 @@ def main():
         elif args.action == "topics":
             result = graph_topics(repo_root)
 
+    elif args.topic == "mcp":
+        if args.action == "sync":
+            result = sync_mcp(repo_root, dry_run=args.dry_run)
+
     # Finalize Telemetry
     result.telemetry["latency_ms"] = int((time.time() - start_time) * 1000)
     if args.trace_id:
@@ -512,6 +541,10 @@ def main():
                     print(f"  Synced: {result.data['skills_synced']}")
                 elif args.topic == "repo" and args.action == "validate":
                     print(f"✅ Validation passed! ({result.data['warn_only_issues']} warnings)")
+                elif args.topic == "repo" and args.action == "check-stability":
+                    print(f"✅ Stability check passed ({result.data['stable_count']} stable skills)")
+                    if args.changed_files:
+                        print(f"   Checked {result.data['checked_files']} changed file(s)")
                 elif args.topic == "skills" and args.action == "list":
                     print(f"Discovered {len(result.data['skills'])} skills:")
                     for skill in result.data["skills"]:
@@ -526,8 +559,18 @@ def main():
                     print(f"✅ Audit passed: {args.path}")
                     print(result.data["diagnostics"]["stdout"])
                 elif args.topic == "skills" and args.action == "install":
-                    print(f"✅ Installed skill: {result.data.get('skill_name', args.url)}")
-                    print(result.data.get("raw_output", ""))
+                    if result.data.get("dry_run"):
+                        print(f"🔍 Dry run - would install:")
+                        print(f"   URL: {result.data.get('url')}")
+                        print(f"   Skill: {result.data.get('skill_name')}")
+                        print(f"   Target: {result.data.get('target_path')}")
+                        if result.data.get('remediate'):
+                            print(f"   Remediate: Yes (scaffold missing files)")
+                        print(f"\n💡 To actually install, run:")
+                        print(f"   {result.metadata.get('next_steps', ['ask skills install <url>'])[0]}")
+                    else:
+                        print(f"✅ Installed skill: {result.data.get('skill_name', args.url)}")
+                        print(result.data.get("raw_output", ""))
                 elif args.topic == "skills" and args.action == "fold":
                     print(f"✅ Result: {result.data['recommendation']}")
                     print(f"  Overlap Score: {result.data['overlap_score']}")
@@ -546,6 +589,15 @@ def main():
                         print(result.data.get("raw_output", ""))
                     elif args.action == "dashboard":
                         print(f"✅ {result.data['message']}")
+                elif args.topic == "mcp" and args.action == "sync":
+                    if result.data.get("dry_run"):
+                        print(f"🔍 Dry run - would sync {result.data['server_count']} MCP server(s):")
+                        for server in result.data.get("servers", []):
+                            print(f"   • {server}")
+                        print(f"\n   Target: {result.data['target_path']}")
+                    else:
+                        print(f"✅ Synced {result.data['server_count']} MCP servers to {result.data['target_path']}")
+                        print("   Restart Antigravity or type '/refresh' to pick up changes.")
                 elif args.topic == "graph":
                     if args.action == "related":
                         print(f"\n📊 {result.data['skill']} [{result.data['direction']}, depth={result.data['depth']}]")
@@ -657,9 +709,17 @@ def main():
                 elif args.topic == "repo":
                     if args.action == "validate":
                         print(result.data.get("raw_output", ""))
+                    if args.action == "check-stability" and "errors" in result.data:
+                        for e in result.data["errors"]:
+                            print(f"   ERROR: {e}")
                     print("\n📚 Repo examples:")
                     print("   ask repo status")
                     print("   ask repo validate --ephemeral")
+                    print("   ask repo check-stability --changed-files backend/cli-spec/SKILL.md")
+                elif args.topic == "mcp":
+                    print("\n📚 MCP examples:")
+                    print("   ask mcp sync")
+                    print("   ask mcp sync --dry-run")
 
     # Semantic Exit Code
     if result.status == "success":
