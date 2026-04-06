@@ -204,7 +204,7 @@ for artifact in "$OUTPUT_DIR"/*-"${VERSION}"-"${GIT_SHA_SHORT}"; do
         sha256=$(sha256sum "$artifact" | cut -d' ' -f1)
         size=$(stat -c%s "$artifact" 2>/dev/null || stat -f%z "$artifact")
         
-        ARTIFACTS=$(echo "$ARTIFACTS" | jq --arg n "$name" --arg p "$artifact" --arg s "$sha256" --argjson sz "$size" \
+        ARTIFACTS=$(echo "$ARTIFACTS" | jq --arg n "$name" --arg p "$name" --arg s "$sha256" --argjson sz "$size" \
             '. + [{"name": $n, "path": $p, "sha256": $s, "size": $sz, "signature_valid": false}]')
     fi
 done

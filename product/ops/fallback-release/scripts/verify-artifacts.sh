@@ -77,9 +77,11 @@ echo ""
 echo "[4/6] Verifying checksums..."
 cd "$ARTIFACT_DIR"
 CHECKSUM_ERRORS=0
+CHECKSUM_COUNT=0
 
 for shafile in *.sha256; do
     if [[ -f "$shafile" ]]; then
+        ((CHECKSUM_COUNT++)) || true
         if ! sha256sum -c "$shafile" > /dev/null 2>&1; then
             echo "ERROR: Checksum failed for $shafile"
             ((CHECKSUM_ERRORS++)) || true
@@ -87,8 +89,11 @@ for shafile in *.sha256; do
     fi
 done
 
-if [[ $CHECKSUM_ERRORS -eq 0 ]]; then
-    echo "✓ All checksums valid"
+if [[ $CHECKSUM_COUNT -eq 0 ]]; then
+    echo "ERROR: No checksum files found"
+    EXIT_CODE=1
+elif [[ $CHECKSUM_ERRORS -eq 0 ]]; then
+    echo "✓ All checksums valid ($CHECKSUM_COUNT files)"
 else
     echo "✗ $CHECKSUM_ERRORS checksum(s) failed"
     EXIT_CODE=1
@@ -98,9 +103,11 @@ fi
 echo ""
 echo "[5/6] Verifying GPG signatures..."
 SIG_ERRORS=0
+SIG_COUNT=0
 
 for sigfile in *.asc; do
     if [[ -f "$sigfile" ]]; then
+        ((SIG_COUNT++)) || true
         artifact="${sigfile%.asc}"
         if [[ -f "$artifact" ]]; then
             if ! gpg --verify "$sigfile" "$artifact" > /dev/null 2>&1; then
@@ -111,8 +118,11 @@ for sigfile in *.asc; do
     fi
 done
 
-if [[ $SIG_ERRORS -eq 0 ]]; then
-    echo "✓ All signatures valid"
+if [[ $SIG_COUNT -eq 0 ]]; then
+    echo "ERROR: No signature files found"
+    EXIT_CODE=1
+elif [[ $SIG_ERRORS -eq 0 ]]; then
+    echo "✓ All signatures valid ($SIG_COUNT files)"
 else
     echo "✗ $SIG_ERRORS signature(s) failed"
     EXIT_CODE=1
