@@ -11,6 +11,13 @@ if [[ -z "$ARTIFACT_DIR" ]]; then
     exit 1
 fi
 
+# Normalize ARTIFACT_DIR to absolute path before any cd/use
+if command -v realpath >/dev/null 2>&1; then
+    ARTIFACT_DIR=$(realpath -m "$ARTIFACT_DIR")
+elif command -v readlink >/dev/null 2>&1; then
+    ARTIFACT_DIR=$(readlink -f "$ARTIFACT_DIR" 2>/dev/null || echo "$ARTIFACT_DIR")
+fi
+
 if [[ ! -d "$ARTIFACT_DIR" ]]; then
     echo "ERROR: Directory not found: $ARTIFACT_DIR"
     exit 1

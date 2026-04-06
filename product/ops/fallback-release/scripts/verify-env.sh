@@ -124,9 +124,14 @@ if [[ -f rust-toolchain.toml ]]; then
     # Portable alternative to grep -oP (Perl regex)
     REQUIRED_RUST=$(sed -n 's/.*channel = "\([^"]*\)".*/\1/p' rust-toolchain.toml | head -1)
     REQUIRED_RUST=${REQUIRED_RUST:-stable}
-    # Extract version number using grep -E (POSIX) instead of -P (Perl)
-    CURRENT_RUST=$(rustc --version | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
-    log_info "Required Rust: $REQUIRED_RUST, Current: $CURRENT_RUST"
+    # Only check rustc if it's installed
+    if command -v rustc >/dev/null 2>&1; then
+        CURRENT_RUST=$(rustc --version | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
+        log_info "Required Rust: $REQUIRED_RUST, Current: $CURRENT_RUST"
+    else
+        CURRENT_RUST="not installed"
+        log_warn "Required Rust: $REQUIRED_RUST, Current: $CURRENT_RUST"
+    fi
 else
     log_warn "No rust-toolchain.toml found"
 fi
@@ -170,15 +175,25 @@ log_info "Checking artifact cache credentials..."
 if [[ -n "${FALLBACK_CACHE_ENDPOINT:-}" ]]; then
     log_info "Cache endpoint: $FALLBACK_CACHE_ENDPOINT"
     
-    # Test connectivity
+    # Test connectivity (honor FALLBACK_CACHE_ENDPOINT if set)
     if command -v aws > /dev/null && [[ -n "${AWS_ACCESS_KEY_ID:-}" ]]; then
-        if aws s3 ls "s3://${FALLBACK_CACHE_BUCKET:-fallback-releases}/" > /dev/null 2>&1; then
+        aws_endpoint_args=""
+        if [[ -n "${FALLBACK_CACHE_ENDPOINT:-}" ]]; then
+            aws_endpoint_args="--endpoint-url $FALLBACK_CACHE_ENDPOINT"
+        fi
+        # shellcheck disable=SC2086
+        if aws s3 ls "s3://${FALLBACK_CACHE_BUCKET:-fallback-releases}/" $aws_endpoint_args > /dev/null 2>&1; then
             log_info "AWS S3 connectivity: OK"
         else
             log_error "AWS S3 connectivity failed"
         fi
     elif command -v s3cmd > /dev/null; then
-        if s3cmd ls "s3://${FALLBACK_CACHE_BUCKET:-fallback-releases}/" > /dev/null 2>&1; then
+        s3cmd_host_args=""
+        if [[ -n "${FALLBACK_CACHE_ENDPOINT:-}" ]]; then
+            s3cmd_host_args="--host $FALLBACK_CACHE_ENDPOINT --host-bucket $FALLBACK_CACHE_ENDPOINT"
+        fi
+        # shellcheck disable=SC2086
+        if s3cmd ls "s3://${FALLBACK_CACHE_BUCKET:-fallback-releases}/" $s3cmd_host_args > /dev/null 2>&1; then
             log_info "S3cmd connectivity: OK"
         else
             log_error "S3cmd connectivity failed"

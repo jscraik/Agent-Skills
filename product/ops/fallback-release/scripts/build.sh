@@ -184,16 +184,21 @@ fi
 jq --argjson tc "$TOOLCHAIN" '.toolchain = $tc' "$MANIFEST_FILE" > "${MANIFEST_FILE}.tmp" && mv "${MANIFEST_FILE}.tmp" "$MANIFEST_FILE"
 log_step "toolchain_recorded"
 
-# 6. Run tests (unless skipped)
-if [[ "$SKIP_TESTS" == false ]]; then
-    echo "[6/8] Running tests..."
-    if ! cargo test --locked; then
-        echo "ERROR: Tests failed"
-        exit 1
+# 6. Run tests (unless skipped) - only for Rust projects
+if [[ -f Cargo.toml ]]; then
+    if [[ "$SKIP_TESTS" == false ]]; then
+        echo "[6/8] Running tests..."
+        if ! cargo test --locked; then
+            echo "ERROR: Tests failed"
+            exit 1
+        fi
+        log_step "tests_passed"
+    else
+        echo "[6/8] Skipping tests (--skip-tests)"
+        log_step "tests_skipped"
     fi
-    log_step "tests_passed"
 else
-    echo "[6/8] Skipping tests (--skip-tests)"
+    echo "[6/8] Skipping tests (no Cargo.toml found)"
     log_step "tests_skipped"
 fi
 
