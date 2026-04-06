@@ -1,5 +1,13 @@
 # Advanced CLI Patterns (2026 Update)
 
+## Table of Contents
+
+- [1. Type-Safe Help Signatures](#1-type-safe-help-signatures)
+- [2. Progressive Help Disclosure](#2-progressive-help-disclosure)
+- [3. The "Minting" Pattern (Schema-to-CLI)](#3-the-minting-pattern-schema-to-cli)
+- [4. Interaction Flexibility](#4-interaction-flexibility)
+- [5. Agent-Native Context Discipline](#5-agent-native-context-discipline)
+
 These patterns represent the "Gold Standard" for technical and agent-native CLIs, inspired by modern tool-calling protocols (like MCP) and high-performance developer tools.
 
 ## 1. Type-Safe Help Signatures
