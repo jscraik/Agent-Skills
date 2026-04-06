@@ -7,7 +7,7 @@ class TestAskCLI(unittest.TestCase):
     def test_json_envelope_format(self):
         """CA1: Verify ask --json returns a valid CallResult envelope."""
         # Using -p to pass a dummy command if needed, or just root --json
-        cmd = ["python3", "bin/ask", "--json"]
+        cmd = [sys.executable, "bin/ask", "--json"]
         result = subprocess.run(cmd, capture_output=True, text=True)
         
         self.assertEqual(result.returncode, 0, f"CLI failed with stderr: {result.stderr}")
