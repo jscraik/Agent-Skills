@@ -445,7 +445,7 @@ def _check_redundancy(skill_path: Path, skill_name: str) -> None:
 
         if candidates and candidates[0].confidence >= 0.2:
             match = candidates[0]
-            print(f"\n⚠  POTENTIAL REDUNDANCY DETECTED")
+            print("\n⚠  POTENTIAL REDUNDANCY DETECTED")
             print(
                 f"The skill '{skill_name}' has potential functional overlap ({int(match.confidence * 100)}%) with an existing skill:"
             )
