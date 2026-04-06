@@ -448,7 +448,7 @@ def main():
             if not parsed_topic or not parsed_action:
                 # Still couldn't parse - show helpful error
                 repo_root = find_repo_root()
-                result = build_helpful_error(parsed_topic, parsed_action, filtered_args, repo_root)
+                result = build_helpful_error(parsed_topic, parsed_action, raw_args, repo_root)
                 if "--json" in raw_args:
                     print(result.to_json())
                 else:
