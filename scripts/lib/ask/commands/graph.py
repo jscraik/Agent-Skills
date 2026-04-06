@@ -9,12 +9,55 @@ def _get_graph_path(repo_root: Path) -> Path:
     """Returns the path to skill-edges.json."""
     return repo_root / "ops" / "metrics" / "graph" / "skill-edges.json"
 
-def _load_graph(repo_root: Path) -> Optional[dict]:
-    """Loads the skill graph from skill-edges.json."""
+def _load_graph(repo_root: Path) -> tuple[Optional[dict], Optional[ErrorObject]]:
+    """Loads the skill graph from skill-edges.json.
+
+    Returns:
+        Tuple of (graph_data, error). If error is not None, graph_data is None.
+    """
     edges_path = _get_graph_path(repo_root)
     if not edges_path.exists():
-        return None
-    return json.loads(edges_path.read_text())
+        return None, ErrorObject(
+            code="ERR_DEPENDENCY",
+            message="Skill graph data not found.",
+            fix_suggestion="Run: python3 scripts/build-adjacency-yaml.py ."
+        )
+    try:
+        data = json.loads(edges_path.read_text())
+    except json.JSONDecodeError as e:
+        return None, ErrorObject(
+            code="ERR_DEPENDENCY",
+            message=f"Skill graph is not valid JSON: {e}",
+            fix_suggestion="Regenerate the graph with: python3 scripts/build-adjacency-yaml.py ."
+        )
+
+    # Validate required keys
+    if "nodes" not in data or "edges" not in data:
+        return None, ErrorObject(
+            code="ERR_DEPENDENCY",
+            message="Skill graph is missing required 'nodes' or 'edges' keys.",
+            fix_suggestion="Regenerate the graph with: python3 scripts/build-adjacency-yaml.py ."
+        )
+
+    # Validate node structure
+    for i, node in enumerate(data.get("nodes", [])):
+        if "id" not in node:
+            return None, ErrorObject(
+                code="ERR_DEPENDENCY",
+                message=f"Skill graph node at index {i} is missing required 'id' field.",
+                fix_suggestion="Regenerate the graph with: python3 scripts/build-adjacency-yaml.py ."
+            )
+
+    # Validate edge structure
+    for i, edge in enumerate(data.get("edges", [])):
+        if "from" not in edge or "to" not in edge:
+            return None, ErrorObject(
+                code="ERR_DEPENDENCY",
+                message=f"Skill graph edge at index {i} is missing required 'from' or 'to' fields.",
+                fix_suggestion="Regenerate the graph with: python3 scripts/build-adjacency-yaml.py ."
+            )
+
+    return data, None
 
 def _build_index(data: dict):
     """Builds node map and forward/reverse edge indices."""
@@ -77,15 +120,11 @@ def graph_related(repo_root: Path, skill: str, depth: int = 1, reverse: bool = F
                   topic: str = None, tier: str = None) -> CallResult:
     """Finds related skills in the skill graph."""
     result = CallResult()
-    data = _load_graph(repo_root)
-    
-    if data is None:
+    data, error = _load_graph(repo_root)
+
+    if error:
         result.status = "error"
-        result.errors.append(ErrorObject(
-            code="ERR_DEPENDENCY",
-            message="Skill graph data not found.",
-            fix_suggestion="Run: python3 scripts/build-adjacency-yaml.py ."
-        ))
+        result.errors.append(error)
         return result
     
     node_map, fwd, rev = _build_index(data)
@@ -158,14 +197,11 @@ def graph_related(repo_root: Path, skill: str, depth: int = 1, reverse: bool = F
 def graph_find(repo_root: Path, query: str, topic: str = None, tier: str = None) -> CallResult:
     """Full-text search across skill names and topics."""
     result = CallResult()
-    data = _load_graph(repo_root)
-    
-    if data is None:
+    data, error = _load_graph(repo_root)
+
+    if error:
         result.status = "error"
-        result.errors.append(ErrorObject(
-            code="ERR_DEPENDENCY",
-            message="Skill graph data not found."
-        ))
+        result.errors.append(error)
         return result
     
     ql = query.lower()
@@ -203,14 +239,11 @@ def graph_find(repo_root: Path, query: str, topic: str = None, tier: str = None)
 def graph_info(repo_root: Path, skill: str) -> CallResult:
     """Returns full node details including topic, tier, degree, and links."""
     result = CallResult()
-    data = _load_graph(repo_root)
-    
-    if data is None:
+    data, error = _load_graph(repo_root)
+
+    if error:
         result.status = "error"
-        result.errors.append(ErrorObject(
-            code="ERR_DEPENDENCY",
-            message="Skill graph data not found."
-        ))
+        result.errors.append(error)
         return result
     
     node_map, fwd, rev = _build_index(data)
@@ -258,14 +291,11 @@ def graph_info(repo_root: Path, skill: str) -> CallResult:
 def graph_chain(repo_root: Path, from_skill: str, to_skill: str) -> CallResult:
     """Finds the shortest path between two skills."""
     result = CallResult()
-    data = _load_graph(repo_root)
-    
-    if data is None:
+    data, error = _load_graph(repo_root)
+
+    if error:
         result.status = "error"
-        result.errors.append(ErrorObject(
-            code="ERR_DEPENDENCY",
-            message="Skill graph data not found."
-        ))
+        result.errors.append(error)
         return result
     
     node_map, fwd, rev = _build_index(data)
@@ -332,14 +362,11 @@ def graph_chain(repo_root: Path, from_skill: str, to_skill: str) -> CallResult:
 def graph_list(repo_root: Path, topic: str = None, tier: str = None) -> CallResult:
     """Lists all skills with optional filtering."""
     result = CallResult()
-    data = _load_graph(repo_root)
-    
-    if data is None:
+    data, error = _load_graph(repo_root)
+
+    if error:
         result.status = "error"
-        result.errors.append(ErrorObject(
-            code="ERR_DEPENDENCY",
-            message="Skill graph data not found."
-        ))
+        result.errors.append(error)
         return result
     
     nodes = data["nodes"]
@@ -360,14 +387,11 @@ def graph_list(repo_root: Path, topic: str = None, tier: str = None) -> CallResu
 def graph_topics(repo_root: Path) -> CallResult:
     """Lists all topic clusters in the skill graph."""
     result = CallResult()
-    data = _load_graph(repo_root)
-    
-    if data is None:
+    data, error = _load_graph(repo_root)
+
+    if error:
         result.status = "error"
-        result.errors.append(ErrorObject(
-            code="ERR_DEPENDENCY",
-            message="Skill graph data not found."
-        ))
+        result.errors.append(error)
         return result
     
     topics: dict[str, int] = defaultdict(int)
