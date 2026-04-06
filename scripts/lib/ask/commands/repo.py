@@ -37,7 +37,20 @@ def repo_validate(repo_root: Path, ephemeral: bool = False) -> CallResult:
     stdout = process.stdout
     required_failures = 0
     warn_only_issues = 0
-    
+
+    # Handle early exit case where validation script fails before producing summary
+    if "- required_failures:" not in stdout and "- warn_only_issues:" not in stdout:
+        result.data["required_failures"] = 1  # Assume failure if no summary lines
+        result.data["warn_only_issues"] = 0
+        result.data["raw_output"] = stdout
+        result.status = "error"
+        result.errors.append(ErrorObject(
+            code="ERR_VALIDATION",
+            message="Validation script failed before producing summary output.",
+            fix_suggestion="Check validation logs for script errors."
+        ))
+        return result
+
     for line in stdout.splitlines():
         if "- required_failures:" in line:
             required_failures = int(line.split(":")[-1].strip())

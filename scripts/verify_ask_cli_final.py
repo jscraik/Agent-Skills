@@ -19,7 +19,7 @@ def run_ca_test(name, cmd):
                 if data.get("errors"):
                     print(f"  Error: {data['errors'][0]['message']}")
                 return False
-        except Exception as e:
+        except json.JSONDecodeError as e:
             print(f"FAILED (Invalid JSON: {e})")
             print(f"STDOUT: {result.stdout}")
             return False
@@ -45,9 +45,16 @@ def main():
     
     success = True
     for name, cmd in tests:
-        if not run_ca_test(name, cmd):
-            if "CA4" in name: # Expected error
-                continue
+        test_passed = run_ca_test(name, cmd)
+        if "CA4" in name:
+            # CA4 tests error handling - we expect it to fail (return False)
+            # If it returns True, the error mapping isn't working correctly
+            if test_passed:
+                print("  -> CA4 unexpectedly passed - error mapping may be broken")
+                success = False
+            else:
+                print("  -> CA4 correctly detected invalid path (expected failure)")
+        elif not test_passed:
             success = False
             
     if success:

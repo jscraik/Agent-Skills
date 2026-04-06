@@ -9,15 +9,16 @@
 
 Read when: spawning internal research subagents during Phase 1.1 (Standard or Deep scope)
 
-## Approval gate
-Ask a short blocking approval question via the platform's blocking question tool (`AskUserQuestion`, `request_user_input`, or `ask_user`) before spawning subagents, unless the user has already explicitly approved delegation.
+## Policy
+This operational quick-reference delegates enforceable rules to the [Canonical Agent Delegation Policy](../../docs/agents/agent-delegation-policy.md). In brief:
+- **Approval required**: Blocking user confirmation before spawning subagents
+- **Research roles**: repo-research-analyst, learnings-researcher (bounded scope)
+- **Fallback**: Serial grounding when tools unavailable
+- **Constraints**: No unapproved delegation; synthesize before proceeding
 
-## Research roles
-
-If approved, run these bounded internal subagents in parallel:
+## Quick Reference
 
 ### repo-research-analyst
-
 ```text
 "Find similar features, conventions, or patterns relevant to: <topic>
 - Max 20 files, max 4 MB total read
@@ -25,18 +26,9 @@ If approved, run these bounded internal subagents in parallel:
 ```
 
 ### learnings-researcher
-
 ```text
 "Find prior learnings relevant to: <topic>
 - Check .harness/memory/LEARNINGS.md first when it exists
 - Then docs/solutions/ for directly relevant entries
 - Return only directly relevant findings, <=200 words total"
 ```
-
-## Fallback
-If approval is not granted, the tool is unavailable, or subagents are unnecessary, perform the equivalent grounding serially in the main thread.
-
-## Constraints
-- Do not spawn subagents without user approval
-- Keep research bounded to prevent context pressure
-- Synthesize findings into the main thread before proceeding

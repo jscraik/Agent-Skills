@@ -103,12 +103,31 @@ def audit_skill(repo_root: Path, skill_path: str, level: str = "compat") -> Call
     result.data["diagnostics"] = {"exit_code": diag_proc.returncode, "stdout": diag_proc.stdout, "stderr": diag_proc.stderr}
     
     if level == "strict":
+        # Security gate (skill_gate.py)
         gate_cmd = ["python3", "utilities/skill-builder/scripts/skill_gate.py", skill_path, "--require-security-evals", "--pi-high-fail", "--require-fail-fast"]
         gate_proc = subprocess.run(gate_cmd, cwd=str(repo_root), capture_output=True, text=True)
         result.data["security_gate"] = {"exit_code": gate_proc.returncode, "stdout": gate_proc.stdout, "stderr": gate_proc.stderr}
         if gate_proc.returncode != 0:
             result.status = "error"
             result.errors.append(ErrorObject(code="ERR_VALIDATION", message="Security gate failed."))
+            return result
+
+        # Family benchmarks validation
+        family_cmd = ["python3", "scripts/validate_skill_authoring_family_benchmarks.py", skill_path]
+        family_proc = subprocess.run(family_cmd, cwd=str(repo_root), capture_output=True, text=True)
+        result.data["family_benchmarks"] = {"exit_code": family_proc.returncode, "stdout": family_proc.stdout, "stderr": family_proc.stderr}
+        if family_proc.returncode != 0:
+            result.status = "error"
+            result.errors.append(ErrorObject(code="ERR_VALIDATION", message="Family benchmarks validation failed."))
+            return result
+
+        # OpenClaw skill guard
+        openclaw_cmd = ["python3", "utilities/skill-builder/scripts/openclaw_skill_guard.py", skill_path, "--mode", "both", "--format", "text"]
+        openclaw_proc = subprocess.run(openclaw_cmd, cwd=str(repo_root), capture_output=True, text=True)
+        result.data["openclaw_guard"] = {"exit_code": openclaw_proc.returncode, "stdout": openclaw_proc.stdout, "stderr": openclaw_proc.stderr}
+        if openclaw_proc.returncode != 0:
+            result.status = "error"
+            result.errors.append(ErrorObject(code="ERR_VALIDATION", message="OpenClaw guard validation failed."))
             return result
 
     if diag_proc.returncode == 0:

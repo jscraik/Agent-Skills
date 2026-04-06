@@ -337,7 +337,7 @@ artifacts/skill-graphs/pilot/artifact-parity-manifest.json
 | AC2 | `wave-readiness.json` `wave-0-controls.ready: true`, zero blockers | R3 | Python check exits 0 |
 | AC3 | `artifact-parity-manifest.json` compliance_rate > 0.0 | R2 | `jq .compliance_rate` > 0 — NOT MET (compliance_rate currently 0.0) |
 | AC4 | `recursive-skill-shadow.yml` CI job passes on schedule with commit-back | R5 | Actions UI shows green; git log shows telemetry commit |
-| AC5 | Family gate exits 0 in structural mode (PR CI) | R4 | `pr-pipeline.yml` passes |
+| AC5 | Family gate exits 0 in structural mode (PR CI) | R4 | `authoring-family-gate` CI job passes |
 | AC6 | Release-ready gate exits 0 with `evidence-index.json` (local/manual cert) | R4 | Evidence index shows all 4 skills `outcome: passed` — NOT MET (evidence-index.json not yet generated with passing outcomes) |
 
 ## Execution Ledger

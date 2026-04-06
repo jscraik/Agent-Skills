@@ -208,9 +208,30 @@ def try_fuzzy_parse(raw_args: List[str], robot_mode: bool = False) -> Tuple[Opti
     if not raw_args:
         return None, None, [], None
 
+    # Skip leading global flags (--json, --trace-id, --robot, etc.)
+    GLOBAL_FLAGS = {"--json", "--trace-id", "--robot", "--agent-mode", "-r", "--help", "-h"}
+    prefix_flags = []
+    idx = 0
+    while idx < len(raw_args) and raw_args[idx].startswith("-"):
+        flag = raw_args[idx]
+        if flag in GLOBAL_FLAGS:
+            prefix_flags.append(flag)
+            idx += 1
+            # Also consume the value for flags that take one
+            if flag in {"--trace-id"} and idx < len(raw_args) and not raw_args[idx].startswith("-"):
+                prefix_flags.append(raw_args[idx])
+                idx += 1
+        else:
+            break
+
+    # Work with remaining args after global flags
+    working_args = raw_args[idx:]
+    if not working_args:
+        return None, None, raw_args, None
+
     correction_note = None
-    topic = raw_args[0]
-    remaining = raw_args[1:]
+    topic = working_args[0]
+    remaining = working_args[1:]
 
     # Try fuzzy match on topic
     if topic not in VALID_TOPICS:
@@ -261,7 +282,9 @@ def try_fuzzy_parse(raw_args: List[str], robot_mode: bool = False) -> Tuple[Opti
 
         remaining = remaining[1:]
 
-    return topic, action, remaining, correction_note
+    # Combine prefix flags with remaining args for downstream processing
+    full_remaining = prefix_flags + remaining
+    return topic, action, full_remaining, correction_note
 
 def main():
     start_time = time.time()
@@ -423,19 +446,33 @@ def main():
                 # Still couldn't parse - show helpful error
                 repo_root = find_repo_root()
                 result = build_helpful_error(parsed_topic, parsed_action, filtered_args, repo_root)
-                print(result.to_json() if "--json" in raw_args else result.errors[0].message)
+                if "--json" in raw_args:
+                    print(result.to_json())
+                else:
+                    print(result.errors[0].message)
                 sys.exit(2)
+            # Valid topic/action found - will reparse below
         else:
             # Not in robot mode - show standard error with hint
-            print("❌ Unknown command. Use --robot to enable flexible parsing.")
-            print("\n📚 Quick examples:")
-            print("  ask skills list")
-            print("  ask repo status")
-            print("  ask graph find security")
+            if "--json" in raw_args:
+                result = CallResult()
+                result.status = "error"
+                result.errors.append(ErrorObject(
+                    code="ERR_VALIDATION",
+                    message="Unknown command. Use --robot to enable flexible parsing.",
+                    fix_suggestion="Valid topics: repo, skills, plugins, evals, graph"
+                ))
+                print(result.to_json())
+            else:
+                print("❌ Unknown command. Use --robot to enable flexible parsing.")
+                print("\n📚 Quick examples:")
+                print("  ask skills list")
+                print("  ask repo status")
+                print("  ask graph find security")
             sys.exit(2)
 
     # If fuzzy matching failed to produce valid command
-    if correction_note and parsed_topic and (parsed_topic not in VALID_TOPICS or parsed_action not in VALID_ACTIONS.get(parsed_topic, [])):
+    if parsed_topic and (parsed_topic not in VALID_TOPICS or parsed_action not in VALID_ACTIONS.get(parsed_topic, [])):
         # Still invalid after fuzzy matching
         repo_root = find_repo_root()
         result = build_helpful_error(parsed_topic, parsed_action, remaining_args, repo_root)
@@ -447,8 +484,8 @@ def main():
                 print(f"\n{correction_note}")
         sys.exit(2)
 
-    # Re-parse with corrected values if needed
-    if correction_note and parsed_topic and parsed_topic in VALID_TOPICS:
+    # Re-parse with corrected values if needed (always reparse if we have valid topic/action from fuzzy match)
+    if parsed_topic and parsed_topic in VALID_TOPICS:
         # Rebuild the command line with corrected values
         corrected_args = [parsed_topic]
         if parsed_action:
@@ -468,8 +505,6 @@ def main():
     result = CallResult()
     if args.trace_id:
         result.trace_id = args.trace_id
-
-    result.metadata["command"] = " ".join(sys.argv[1:])
 
     # Print correction note if in human mode
     if correction_note and not args.json:
@@ -521,7 +556,15 @@ def main():
             if args.with_references: companion.append("references")
             if args.with_workflows: companion.append("workflows")
             result = init_plugin(repo_root, name=args.name, with_marketplace=args.with_marketplace, companion_folders=companion)
-            
+        else:
+            result.status = "error"
+            action_msg = f"unknown action '{args.action}'" if args.action else "missing action"
+            result.errors.append(ErrorObject(
+                code="ERR_VALIDATION",
+                message=f"{action_msg} for topic 'plugins'",
+                fix_suggestion="Valid actions: init"
+            ))
+
     elif args.topic == "evals":
         if args.action == "run":
             result = run_evals(repo_root, path=args.path, mode=args.mode)
@@ -529,6 +572,14 @@ def main():
             result = benchmark_portfolio(repo_root)
         elif args.action == "dashboard":
             result = dashboard_report(repo_root)
+        else:
+            result.status = "error"
+            action_msg = f"unknown action '{args.action}'" if args.action else "missing action"
+            result.errors.append(ErrorObject(
+                code="ERR_VALIDATION",
+                message=f"{action_msg} for topic 'evals'",
+                fix_suggestion="Valid actions: run, benchmark, dashboard"
+            ))
 
     elif args.topic == "graph":
         if args.action == "related":
@@ -544,22 +595,39 @@ def main():
             result = graph_list(repo_root, topic=args.topic_filter, tier=args.tier)
         elif args.action == "topics":
             result = graph_topics(repo_root)
+        else:
+            result.status = "error"
+            action_msg = f"unknown action '{args.action}'" if args.action else "missing action"
+            result.errors.append(ErrorObject(
+                code="ERR_VALIDATION",
+                message=f"{action_msg} for topic 'graph'",
+                fix_suggestion="Valid actions: related, find, info, chain, list, topics"
+            ))
 
     elif args.topic == "mcp":
         if args.action == "sync":
             result = sync_mcp(repo_root, dry_run=args.dry_run)
+        else:
+            result.status = "error"
+            action_msg = f"unknown action '{args.action}'" if args.action else "missing action"
+            result.errors.append(ErrorObject(
+                code="ERR_VALIDATION",
+                message=f"{action_msg} for topic 'mcp'",
+                fix_suggestion="Valid actions: sync"
+            ))
+
+    # Finalize Result Metadata (before output dispatch so both JSON and human modes see it)
+    result.metadata["command"] = " ".join(sys.argv[1:])
+    if correction_note:
+        result.metadata["correction_note"] = correction_note.replace("\n", " ")
 
     # Finalize Telemetry
     result.telemetry["latency_ms"] = int((time.time() - start_time) * 1000)
     if args.trace_id:
         result.trace_id = args.trace_id # Ensure it persists if command function replaced result
-    
+
     # Dispatch Output
     if args.json:
-        result.metadata["command"] = " ".join(sys.argv[1:])
-        # Add correction note to metadata if present
-        if correction_note:
-            result.metadata["correction_note"] = correction_note.replace("\n", " ")
         print(result.to_json(repo_root=str(repo_root)))
     else:
         if result.status == "success":

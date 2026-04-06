@@ -64,7 +64,7 @@ ask skills audit <path> --level strict  # Mandatory hardening
 
 **Folding strategy:** If `ask skills fold source target` returns confidence ≥ 0.2, fold rather than duplicate.
 
-**Line budget:** Keep `SKILL.md` body ≤ 300 lines. Move bulk content to `references/<topic>.md`.
+**Line budget:** Keep `SKILL.md` body ≤ 360 lines (see `docs/agents/02-tooling-policy.md`). Move bulk content to `references/<topic>.md`.
 
 ## Browser/Playwright
 
