@@ -132,7 +132,7 @@ def graph_related(repo_root: Path, skill: str, depth: int = 1, reverse: bool = F
     result.data["count"] = len(related)
     result.data["direction"] = "in-links" if reverse else "out-links"
     result.data["depth"] = depth
-    result.metadata["next_steps"] = [f"ask repo graph info {start}"]
+    result.metadata["next_steps"] = [f"ask graph info {start}"]
     return result
 
 def graph_find(repo_root: Path, query: str, topic: str = None, tier: str = None) -> CallResult:
@@ -177,7 +177,7 @@ def graph_find(repo_root: Path, query: str, topic: str = None, tier: str = None)
     result.data["query"] = query
     result.data["matches"] = [n for _, n in scored]
     result.data["count"] = len(scored)
-    result.metadata["next_steps"] = [f"ask repo graph info <skill>"]
+    result.metadata["next_steps"] = [f"ask graph info <skill>"]
     return result
 
 def graph_info(repo_root: Path, skill: str) -> CallResult:
@@ -221,7 +221,7 @@ def graph_info(repo_root: Path, skill: str) -> CallResult:
         "stability": n.get("stability", "unknown"),
     }
     result.metadata["next_steps"] = [
-        f"ask repo graph related {start}",
+        f"ask graph related {start}",
         f"ask skills audit {start} --level strict"
     ]
     return result
@@ -261,7 +261,7 @@ def graph_chain(repo_root: Path, from_skill: str, to_skill: str) -> CallResult:
     result.data["reachable"] = path is not None
     
     if path:
-        result.metadata["next_steps"] = [f"ask repo graph info {s}" for s in path]
+        result.metadata["next_steps"] = [f"ask graph info {s}" for s in path]
     return result
 
 def graph_list(repo_root: Path, topic: str = None, tier: str = None) -> CallResult:
@@ -289,7 +289,7 @@ def graph_list(repo_root: Path, topic: str = None, tier: str = None) -> CallResu
     result.data["skills"] = nodes
     result.data["count"] = len(nodes)
     result.data["filters"] = {"topic": topic, "tier": tier}
-    result.metadata["next_steps"] = [f"ask repo graph info {n['id']}" for n in nodes[:3]]
+    result.metadata["next_steps"] = [f"ask graph info {n['id']}" for n in nodes[:3]]
     return result
 
 def graph_topics(repo_root: Path) -> CallResult:
@@ -313,5 +313,5 @@ def graph_topics(repo_root: Path) -> CallResult:
     result.status = "success"
     result.data["topics"] = dict(sorted(topics.items(), key=lambda x: -x[1]))
     result.data["count"] = len(topics)
-    result.metadata["next_steps"] = ["ask repo graph list --topic <topic>"]
+    result.metadata["next_steps"] = ["ask graph list --topic <topic>"]
     return result

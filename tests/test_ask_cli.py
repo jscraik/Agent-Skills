@@ -2,6 +2,7 @@ import unittest
 import subprocess
 import json
 import os
+import sys
 
 class TestAskCLI(unittest.TestCase):
     def test_json_envelope_format(self):
@@ -70,17 +71,17 @@ class TestAskCLI(unittest.TestCase):
         self.assertIn("symlinks", output["data"]["plan"])
 
     def test_skills_install_dry_run(self):
-        """CA2: Verify ask skills install (mocked via dry-run or similar) identifies redundancy."""
-        # Using a URL that we know overlaps with something existing if possible
-        # For now, just test basic command structure and response
-        cmd = ["python3", "bin/ask", "skills", "install", "https://github.com/google-gemini/gemini-cli/tree/main/.gemini/skills/review-duplication", "--json"]
+        """CA2: Verify ask skills install --dry-run returns a plan without making changes."""
+        # Using --dry-run to avoid actual network calls and mutations
+        cmd = ["python3", "bin/ask", "skills", "install", "https://github.com/google-gemini/gemini-cli/tree/main/.gemini/skills/review-duplication", "--dry-run", "--json"]
         result = subprocess.run(cmd, capture_output=True, text=True)
-        
-        # This will actually run the installer, so we check for status: success or expected conflict
+
+        # Dry run should succeed and return installation plan
         output = json.loads(result.stdout)
         self.assertIn(output["status"], ["success", "error"])
         if output["status"] == "success":
             self.assertIn("skill_name", output["data"])
+            self.assertTrue(output["data"].get("dry_run", False), "Expected dry_run to be True")
 
     def test_trace_id_from_env(self):
         """CA2: ASK_TRACE_ID environment variable propagates to output."""
