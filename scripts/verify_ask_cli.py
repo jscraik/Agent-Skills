@@ -26,7 +26,7 @@ def run_ca_test(name, cmd):
                 print("FAILED")
                 print(f"JSON Status: {data.get('status')}")
                 return False
-        except:
+        except json.JSONDecodeError:
             print("FAILED (Invalid JSON)")
             return False
     
