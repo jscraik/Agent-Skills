@@ -347,7 +347,6 @@ See `references/ce-anti-patterns.md`:
 
 ## References
 - `references/review-modes.md`, `references/findings-and-todos.md`, `references/contract.yaml`
-
 ## Gotchas
 - `latest` ambiguous; resolve explicitly
 ## See Also

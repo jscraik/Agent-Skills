@@ -85,12 +85,18 @@ cases:
     category: negative
     should_trigger: false
     prompt: "Refactor this React component to use hooks"
+    acceptance:
+      - type: skill_not_selected
+        expected_skill: "insight-report"
 
   - id: negative-real-time
     name: not for real-time monitoring
     category: negative
     should_trigger: false
     prompt: "Monitor my Codex sessions live as they happen"
+    acceptance:
+      - type: skill_not_selected
+        expected_skill: "insight-report"
 
 metadata:
   last_updated: "2026-04-05"

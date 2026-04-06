@@ -1,6 +1,6 @@
 ---
 name: insight-report
-description: Generate comprehensive HTML insights from Codex OTEL data using local Ollama LLMs. Local LLM-powered facet extraction for personalized analytics and actionable recommendations.
+description: "WHAT: Generate comprehensive HTML insights from Codex OTEL data using local Ollama LLMs. WHEN: Use when the user asks for usage analytics, workflow patterns, Codex session summaries, or recommendations for improving their development workflow."
 metadata:
   skill-type: data_fetch_analysis
 ---
@@ -185,6 +185,13 @@ Note: `general_analytics` is currently under development (default: false).
 - First report may show "no data" (wait for sessions)
 - Large windows (30+ days) with LLM: 2-5 minutes
 - Facet extraction limited to 50 recent sessions
+- Secrets and sensitive data are redacted by default in session content
+
+## Safety
+
+- Session data is processed locally by Ollama and never sent to external APIs
+- API keys and secrets in session content are redacted by default in the HTML report
+- Reports are saved to local filesystem only (`$HOME/dev/config/codex/usage-data/`)
 
 ## Anti-patterns
 
