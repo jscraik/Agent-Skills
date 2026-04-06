@@ -12,7 +12,7 @@ def run_evals(repo_root: Path, path: str, mode: str = "smoke") -> CallResult:
         "--eval-mode", mode
     ]
     
-    process = subprocess.run(cmd, cwd=str(repo_root), capture_output=True, text=True)
+    process = subprocess.run(cmd, cwd=str(repo_root), capture_output=True, text=True, timeout=300)
     
     result.data["raw_output"] = process.stdout
     result.data["raw_error"] = process.stderr
@@ -30,7 +30,7 @@ def benchmark_portfolio(repo_root: Path) -> CallResult:
     result = CallResult()
     
     cmd = ["python3", "utilities/skill-builder/scripts/benchmark_skill_portfolio.py"]
-    process = subprocess.run(cmd, cwd=str(repo_root), capture_output=True, text=True)
+    process = subprocess.run(cmd, cwd=str(repo_root), capture_output=True, text=True, timeout=300)
     
     result.data["raw_output"] = process.stdout
     result.data["raw_error"] = process.stderr
@@ -47,7 +47,7 @@ def dashboard_report(repo_root: Path) -> CallResult:
     result = CallResult()
     
     cmd = ["python3", "utilities/skill-builder/scripts/build_skill_eval_dashboard.py"]
-    process = subprocess.run(cmd, cwd=str(repo_root), capture_output=True, text=True)
+    process = subprocess.run(cmd, cwd=str(repo_root), capture_output=True, text=True, timeout=300)
     
     result.data["raw_output"] = process.stdout
     result.data["raw_error"] = process.stderr

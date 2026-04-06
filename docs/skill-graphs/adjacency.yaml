@@ -486,6 +486,7 @@ playwright-interactive:
   fixing-accessibility: Test keyboard navigation and focus via Playwright
   ui-visual-regression: Capture Playwright screenshots for regression baselines
 plugin-creator:
+  cli-spec: Consult the technical contract for the ask CLI
   codex-agent-creator: Add or refine agent roles inside the plugin
   codex-plugin-builder: Promote scaffold into a full plugin package with governance
     checks

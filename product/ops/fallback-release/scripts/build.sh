@@ -209,6 +209,12 @@ for artifact in "$OUTPUT_DIR"/*-"${VERSION}"-"${GIT_SHA_SHORT}"; do
     fi
 done
 
+# Fail if no artifacts were produced
+if [[ $(echo "$ARTIFACTS" | jq length) -eq 0 ]]; then
+    echo "ERROR: No build artifacts were produced"
+    exit 1
+fi
+
 jq --argjson artifacts "$ARTIFACTS" '.artifacts = $artifacts' "$MANIFEST_FILE" > "${MANIFEST_FILE}.tmp" && mv "${MANIFEST_FILE}.tmp" "$MANIFEST_FILE"
 log_step "manifest_finalized"
 

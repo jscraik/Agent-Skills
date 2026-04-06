@@ -86,9 +86,14 @@ Avoid these failures:
 
 Run checks in order and fail fast: stop at first failure, fix it, then rerun from the failed gate.
 
+Validate the generated plugin artifacts (not this authoring skill):
+
 ```bash
-# Structural and Security Audit
-bin/ask skills audit skills-system/plugin-creator --level strict
+# Validate the created plugin scaffold
+python3 utilities/skill-builder/scripts/openclaw_skill_guard.py .codex-plugin --mode both
+
+# Run family benchmark validation
+python3 scripts/validate_skill_authoring_family_benchmarks.py .codex-plugin
 
 # Full Repository Health
 bin/ask repo validate --ephemeral

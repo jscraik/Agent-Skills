@@ -8,8 +8,8 @@ ERRORS=0
 WARNINGS=0
 
 log_info() { echo "[INFO] $*"; }
-log_warn() { echo "[WARN] $*"; ((WARNINGS++)); }
-log_error() { echo "[ERROR] $*"; ((ERRORS++)); }
+log_warn() { echo "[WARN] $*"; ((WARNINGS++)) || true; }
+log_error() { echo "[ERROR] $*"; ((ERRORS++)) || true; }
 
 echo "=== Fallback Release Environment Verification ==="
 echo "Timestamp: $(date -u +"%Y-%m-%dT%H:%M:%SZ")"
