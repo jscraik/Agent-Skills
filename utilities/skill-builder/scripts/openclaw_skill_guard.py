@@ -255,7 +255,7 @@ SOURCE_RULES: List[SourceRule] = [
         # Subprocess-based curl invocations are separately covered by the network_usage rule.
         requires_context=compile_safe_regex(
             r"(?:"
-            r"requests\.(?:get|post|put|patch|delete|request|head|options|Session)\s*\("
+            r"requests\.(?:get|post|put|patch|delete|request|head|options|Session|session)\s*\("
             r"|fetch\s*\("  # Capture both literal URL and variable-based fetch calls
             r"|axios\.(?:get|post|put|patch|delete|request|create)\s*\("
             r"|httpx\.(?:get|post|put|patch|delete|request|Client|AsyncClient)\s*\("

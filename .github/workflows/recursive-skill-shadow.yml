@@ -12,10 +12,10 @@ on:
         required: false
         default: "7"
   schedule:
-    - cron: "0 13 * * 1"
+    - cron: "7 6 * * *"
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   shadow-cycle:

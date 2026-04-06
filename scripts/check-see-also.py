@@ -40,7 +40,7 @@ TOPIC_MAPS = {
 }
 
 SA_TABLE_RE = re.compile(
-    r"## See Also\s*\n\| Skill \| .+? \|\n\|---\|---\|\n((?:\|.*\|\n?)*)",
+    r"## See Also\s*\n\| Skill \| .+? \|\n\|[-]+\|[-]+\|\n((?:\|.*\|\n?)*)",
     re.DOTALL
 )
 

@@ -709,7 +709,8 @@ def main(argv: Sequence[str]) -> int:
                 else:
                     print("[family-benchmark] baseline check: no regressions detected")
             except Exception as exc:  # noqa: BLE001
-                print(f"[family-benchmark] WARN: could not load baseline: {exc}")
+                print(f"[family-benchmark] ERROR: could not load/parse baseline: {exc}", file=sys.stderr)
+                return 1
 
     all_findings = list(findings) + regression_findings
 
