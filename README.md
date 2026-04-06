@@ -1,24 +1,17 @@
 # Agent Skills
 
-A governed repository of 123+ skills for AI coding agents (Codex, Claude, Gemini). Built around the **Agent Skills Kit (`ask`)** CLI—designed for both humans and autonomous agents.
+A governed repository of **129 skills** for AI coding agents (Codex, Claude, Gemini). Built around the **Agent Skills Kit (`ask`)** CLI.
 
-## Why this exists
-
-**The problem:** AI agents need reliable, versioned skills with validation, provenance, and discoverability. Ad-hoc prompts fail at scale.
-
-**The solution:** This repository provides:
-- **Author once, project everywhere** – Write skills in standard Markdown, sync to multiple runtime formats
-- **Quality gates** – Every skill passes structural, security, and behavioral validation
-- **Living skill graph** – 123 skills organized in 7 topic clusters with relationship mapping
+**What this gives you:**
+- **One place for skills** – Author in Markdown, sync to any runtime
+- **Quality gates** – Structural, security, and behavioral validation for every skill
+- **Living skill graph** – Browse 129 skills across 7 topic clusters with relationship mapping
 - **Agent-native CLI** – Fuzzy matching, JSON output, trace IDs, helpful errors
 
-## Quick start (60 seconds)
+## Quick start
 
 ```bash
-# Health check
-./bin/ask repo status
-
-# See what skills exist
+# See what's available
 ./bin/ask graph topics
 
 # Validate the repository
@@ -28,11 +21,12 @@ A governed repository of 123+ skills for AI coding agents (Codex, Claude, Gemini
 ./bin/ask skills sync --scope user
 ```
 
-## What the CLI can do
+## What you can do
 
 ### Discover skills
+
 ```bash
-# Search across 123 skills
+# Search 129 skills
 ./bin/ask graph find security --tier stable
 
 # See related skills
@@ -40,17 +34,15 @@ A governed repository of 123+ skills for AI coding agents (Codex, Claude, Gemini
 
 # Find path between skills
 ./bin/ask graph chain skill-creator skill-installer
-
-# Browse by topic cluster
-./bin/ask graph topics
 ```
 
 ### Validate quality
+
 ```bash
 # Quick structural check
 ./bin/ask skills audit backend/cli-spec --level compat
 
-# Full security audit
+# Full security audit  
 ./bin/ask skills audit backend/cli-spec --level strict
 
 # Run evaluation suite
@@ -61,32 +53,33 @@ A governed repository of 123+ skills for AI coding agents (Codex, Claude, Gemini
 ```
 
 ### Manage lifecycle
+
 ```bash
 # Install from GitHub with auto-remediation
 ./bin/ask skills install https://github.com/owner/repo --remediate
 
-# Check for duplicate functionality
+# Check for overlap
 ./bin/ask skills fold source-skill target-skill
 
-# Create new skill scaffold
+# Create new skill
 ./bin/ask skills init my-skill --category backend --description "Does X when Y"
 
 # Create plugin scaffold
 ./bin/ask plugins init my-plugin --with-marketplace
 ```
 
-### Robot mode (for AI agents)
+## Robot mode for AI agents
 
-When your intent is clear but syntax is off, use `--robot` (or `-r`):
+When intent is clear but syntax is off, use `--robot` (or `-r`):
 
 ```bash
-# These all work and get corrected:
+# These work and get corrected:
 ./bin/ask skill list --robot          # → skills list
-./bin/ask skills ls --robot           # → skills list  
+./bin/ask skills ls --robot           # → skills list
 ./bin/ask graph search X --robot      # → graph find X
 ```
 
-**Error handling:** When intent is unclear, you get helpful errors with examples:
+Errors include suggestions and examples:
 ```
 ❌ Unknown topic: 'invalid'
 
@@ -98,16 +91,16 @@ When your intent is clear but syntax is off, use `--robot` (or `-r`):
    • ask graph find security
 ```
 
-## Programmatic usage (CI/agents)
+## Programmatic usage
 
 ```bash
 # JSON output with trace IDs
 ./bin/ask repo status --json --trace-id "build-123"
 
-# Fuzzy matching with corrections
+# Check for corrections
 ./bin/ask skill list --robot --json | jq '.metadata.correction_note'
 
-# Ephemeral validation (no repo mutation)
+# Ephemeral validation (read-only)
 ./bin/ask repo validate --ephemeral
 ```
 
@@ -124,36 +117,46 @@ When your intent is clear but syntax is off, use `--robot` (or `-r`):
 }
 ```
 
+## Skill graph (7 topic clusters)
+
+| Topic | Skills | Examples |
+|-------|--------|----------|
+| frontend-ui | 27 | react-ui-patterns, shadcn-ui, figma |
+| agent-ops | 22 | skill-builder, skill-creator, evals-router |
+| backend-platform | 16 | cli-spec, mcp-builder, workers-mcp |
+| product-strategy | 13 | product-spec, ce-spec, ce-plan |
+| security-ops | 7 | security-best-practices, security-threat-model |
+| content-publishing | 5 | slides, youtube-titles-thumbnails |
+| mobile-native | 4 | xcode-makefiles, test-xcode |
+
 ## Repository layout
 
 ```
 agent-skills/
 ├── bin/ask                   # CLI entry point
-├── ask skills sync           # Flat projection to .agents/skills/
+├── .agents/skills/           # Flat runtime projection
 │
-├── backend/                  # Backend platform skills (16)
-├── frontend/                 # Frontend UI skills (27)
-├── product/                  # Product strategy skills (13)
-├── auth/                     # Security operations skills (7)
-├── skills-system/            # Meta-skills (installer, creator, etc.)
+├── backend/                  # Backend platform (16 skills)
+├── frontend/                 # Frontend UI (27 skills)
+├── product/                  # Product strategy (13 skills)
+├── auth/                     # Security operations (7 skills)
+├── skills-system/            # Meta-skills (installer, creator)
 │
 ├── scripts/lib/ask/          # CLI implementation
-├── docs/cli-specs/           # Implementation contracts
+├── docs/cli-specs/           # Command specifications
 └── ops/metrics/graph/        # Skill relationship data
 ```
 
 ## Documentation
 
-| Document | Purpose |
-|----------|---------|
-| [CLI Specification](docs/cli-specs/2026-04-06-ask-cli-spec.md) | Full command reference |
-| [Agent Guide](AGENTS.md) | AI agent workflow patterns |
-| [Skill Index](SKILL.md) | All 123 skills by category |
-| [Implementation Review](docs/cli-specs/2026-04-06-ask-cli-implementation-review.md) | Architecture details |
+- **[CLI Specification](docs/cli-specs/2026-04-06-ask-cli-spec.md)** – Complete command reference
+- **[Agent Guide](AGENTS.md)** – AI agent workflow patterns
+- **[Skill Index](SKILL.md)** – All 129 skills by category
+- **[Implementation Review](docs/cli-specs/2026-04-06-ask-cli-implementation-review.md)** – Architecture details
 
 ## Governance
 
 - **License:** Apache 2.0
-- **Skills:** 123 total across 7 topic clusters
-- **Validation:** 10+ automated checks via `ask repo validate`
+- **Skills:** 129 total across 7 topic clusters
+- **Validation:** 10+ automated checks via `./bin/ask repo validate`
 - **Compatibility:** Codex, Claude Code, Gemini/Antigravity
