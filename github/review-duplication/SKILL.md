@@ -11,8 +11,8 @@ metadata:
 ## Table of Contents
 
 - [Overview](#overview)
-- [Inputs](#inputs)
-- [Outputs](#outputs)
+- [Required inputs](#required-inputs)
+- [Deliverables](#deliverables)
 - [Workflow](#workflow-investigating-for-duplication)
 - [Examples](#examples)
 - [See Also](#see-also)
@@ -24,17 +24,6 @@ Use this skill during code reviews to proactively investigate the codebase for d
 ## Overview
 This skill provides a structured workflow for investigating a codebase during a code review to identify duplicated logic, reinvented utilities, and missed opportunities to reuse established patterns. By executing this workflow, you ensure that new code integrates seamlessly with the existing project architecture.
 
-## Inputs
-- **Code Review Context:** The PR diff or new code being introduced.
-- **Codebase Access:** Ability to search and read files throughout the repository.
-- **Project Documentation:** Access to existing style guides or component libraries.
-
-## Outputs
-- **Review Comments:** Actionable feedback identifying duplicated logic.
-- **Reuse Guidance:** Specific paths and symbols that should be used instead.
-- **Refactoring Suggestions:** Brief explanation of how to integrate existing code.
-- **Contract:** Adheres to `schema_version: 1` output standards.
-
 ## Required inputs
 - Code Review Context: The PR diff or new code being introduced.
 - Codebase Access: Ability to search and read files throughout the repository.
@@ -44,6 +33,7 @@ This skill provides a structured workflow for investigating a codebase during a 
 - Review comments identifying duplicated logic with specific file paths and symbols.
 - Reuse guidance showing how to integrate existing code.
 - Refactoring suggestions where applicable.
+- Contract: Adheres to `schema_version: 1` output standards.
 
 ## Failure mode
 - If codebase search tools are unavailable, stop and report the blocker.
