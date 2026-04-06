@@ -476,7 +476,15 @@ def main():
             result = repo_validate(repo_root, ephemeral=args.ephemeral)
         elif args.action == "check-stability":
             result = check_hub_stability(repo_root, changed_files=args.changed_files or [])
-            
+        else:
+            result.status = "error"
+            action_msg = f"unknown action '{args.action}'" if args.action else "missing action"
+            result.errors.append(ErrorObject(
+                code="ERR_VALIDATION",
+                message=f"{action_msg} for topic 'repo'",
+                fix_suggestion="Valid actions: status, validate, check-stability"
+            ))
+
     elif args.topic == "skills":
         if args.action == "list":
             result = list_skills(repo_root, category=args.category)
@@ -490,6 +498,14 @@ def main():
             result = fold_skills(repo_root, source=args.source, target=args.target, sensitivity=args.sensitivity)
         elif args.action == "init":
             result = init_skill(repo_root, name=args.name, category=args.category, description=args.description)
+        else:
+            result.status = "error"
+            action_msg = f"unknown action '{args.action}'" if args.action else "missing action"
+            result.errors.append(ErrorObject(
+                code="ERR_VALIDATION",
+                message=f"{action_msg} for topic 'skills'",
+                fix_suggestion="Valid actions: list, sync, audit, install, fold, init"
+            ))
             
     elif args.topic == "plugins":
         if args.action == "init":
