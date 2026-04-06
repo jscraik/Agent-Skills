@@ -1,5 +1,24 @@
 # Implemented-but-Unreachable Functionality Audit
 
+## Table of Contents
+
+- [1. Dead UI Controls (CLI Arguments Defined but Not Used)](#1-dead-ui-controls-cli-arguments-defined-but-not-used)
+  - [Issue: `--dry-run` for `ask skills install`](#issue---dry-run-for-ask-skills-install)
+- [2. Orphaned Standalone Scripts (Implemented but No CLI Integration)](#2-orphaned-standalone-scripts-implemented-but-no-cli-integration)
+  - [2.1 `scripts/sync_mcp.py`](#21-scriptssync_mcppy)
+  - [2.2 `scripts/check-hub-stability.py`](#22-scriptscheck-hub-stabilitypy)
+  - [2.3 `scripts/skill_router_metrics.py`](#23-scriptsskill_router_metricspy)
+  - [2.4 `scripts/skill_spotlight.py`](#24-scriptsskill_spotlightpy)
+  - [2.5 `scripts/run_skill_genome_loop.py`](#25-scriptsrun_skill_genome_looppy)
+  - [2.6 Analysis/Build Scripts (No CLI Wiring)](#26-analysisbuild-scripts-no-cli-wiring)
+- [3. Unused Error Codes (Defined but Never Emitted)](#3-unused-error-codes-defined-but-never-emitted)
+- [4. Partially Implemented Features](#4-partially-implemented-features)
+  - [4.1 `ask plugins init` companion folders](#41-ask-plugins-init-companion-folders)
+  - [4.2 `ask skills fold` sensitivity parameter](#42-ask-skills-fold-sensitivity-parameter)
+  - [4.3 Graph command filters](#43-graph-command-filters)
+- [5. Summary Table](#5-summary-table)
+- [6. Recommended Priority](#6-recommended-priority)
+
 ## 1. Dead UI Controls (CLI Arguments Defined but Not Used)
 
 ### Issue: `--dry-run` for `ask skills install`
