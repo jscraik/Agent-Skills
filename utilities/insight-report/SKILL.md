@@ -74,7 +74,7 @@ curl -fsSL https://ollama.com/install.sh | sh
 # Uses your installed models (qwen3-coder recommended)
 
 # 3. Generate report
-python3 skills/insight-report/scripts/run_insight_report.py
+python3 utilities/insight-report/scripts/run_insight_report.py
 ```
 
 ## Report Sections
@@ -137,7 +137,7 @@ python3 skills/insight-report/scripts/run_insight_report.py
 ## Workflow
 
 ```bash
-python3 skills/insight-report/scripts/run_insight_report.py [options]
+python3 utilities/insight-report/scripts/run_insight_report.py [options]
 
 # Process:
 # 1. Parse OTEL spans from ~/.agents/otel-collector/
@@ -218,21 +218,21 @@ Note: `general_analytics` is currently under development (default: false).
 **Standard weekly review:**
 ```
 User: "Generate my weekly insights"
-→ python3 skills/insight-report/scripts/run_insight_report.py
+→ python3 utilities/insight-report/scripts/run_insight_report.py
 → Full analysis with qwen3-coder
 ```
 
 **Quick metrics (no LLM):**
 ```
 User: "Just the numbers"
-→ python3 skills/insight-report/scripts/run_insight_report.py --skip-llm
+→ python3 utilities/insight-report/scripts/run_insight_report.py --skip-llm
 → 5 seconds vs 60 seconds
 ```
 
 **Monthly with better model:**
 ```
 User: "Monthly report"
-→ python3 skills/insight-report/scripts/run_insight_report.py \
+→ python3 utilities/insight-report/scripts/run_insight_report.py \
     --days 30 --model llama3.1:8b --no-open
 ```
 
