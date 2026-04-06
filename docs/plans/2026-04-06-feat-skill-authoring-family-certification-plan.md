@@ -67,7 +67,7 @@ and needs no credentials or model access.
 
 ## Critical Path
 
-```
+```text
 P0 (CI fix) ──► P1 (shadow run) ──► P2 (wave-0 verify) ──► P3 (release gate)
                      │
                      └──► also produces run artifacts (fixes parity — no separate step needed)
@@ -304,7 +304,7 @@ by design — the gate exit code is the repo-visible certification signal.
 artifacts, parity manifest, wave-readiness) in a PR so CI automation takes over.
 
 **Files to commit:**
-```
+```text
 .github/workflows/recursive-skill-shadow.yml   # daily schedule + write-back
 docs/skill-graphs/telemetry/daily-skill-health.md
 artifacts/skill-graphs/runs/                   # new compliant run dirs
