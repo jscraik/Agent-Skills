@@ -31,14 +31,14 @@
         {
           "code": "TELEMETRY_HEALTH_STALE",
           "detail": "daily-skill-health.md age 124.05h exceeds 24.00h",
-          "owner": "unassigned",
+          "owner": "jscraik",
           "due_date": "2026-04-07",
           "escalation_date": "2026-04-08"
         },
         {
           "code": "TELEMETRY_WINDOW_MISMATCH",
           "detail": "daily-skill-health.md window mismatch (expected 2026-03-30..2026-04-05, actual 2026-03-25..2026-03-31)",
-          "owner": "unassigned",
+          "owner": "jscraik",
           "due_date": null,
           "escalation_date": null
         }
