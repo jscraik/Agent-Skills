@@ -95,37 +95,65 @@ fi
 
 # 3. Prepare output directory
 echo "[3/8] Preparing output directory..."
+if [[ -d "$OUTPUT_DIR" ]] && [[ "$(ls -A "$OUTPUT_DIR" 2>/dev/null)" ]]; then
+    echo "ERROR: Output directory is not empty: $OUTPUT_DIR"
+    echo "Please specify an empty directory or remove existing contents."
+    exit 1
+fi
 mkdir -p "$OUTPUT_DIR"
 MANIFEST_FILE="$OUTPUT_DIR/fallback-build-manifest.json"
 TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 BUILD_ID=$(uuidgen 2>/dev/null || cat /proc/sys/kernel/random/uuid 2>/dev/null || echo "build-$(date +%s)")
 
-# 4. Create initial manifest
+# 4. Create initial manifest using jq for proper escaping
 echo "[4/8] Creating build manifest..."
-cat > "$MANIFEST_FILE" << MANIFEST
-{
-  "schema_version": "1.0.0",
-  "build_id": "$BUILD_ID",
-  "version": "$VERSION",
-  "git_sha": "$GIT_SHA",
-  "git_sha_short": "$GIT_SHA_SHORT",
-  "timestamp": "$TIMESTAMP",
-  "builder": {
-    "hostname": "$(hostname)",
-    "os": "$(uname -s)",
-    "arch": "$(uname -m)",
-    "user": "$(whoami)"
-  },
-  "ci_fallback": {
-    "reason": "${FALLBACK_REASON:-manual}",
-    "incident_url": "${INCIDENT_URL:-null}",
-    "triggered_by": "$(whoami)"
-  },
-  "toolchain": {},
-  "artifacts": [],
-  "build_log": []
-}
-MANIFEST
+
+# Handle optional incident_url: use null if empty/unset
+if [[ -n "${INCIDENT_URL:-}" ]]; then
+    incident_url_arg="--arg incident_url \"$INCIDENT_URL\""
+    incident_url_json='$incident_url'
+else
+    incident_url_arg=""
+    incident_url_json='null'
+fi
+
+# Build manifest with jq for proper JSON escaping
+jq -n \
+    --arg schema_version "1.0.0" \
+    --arg build_id "$BUILD_ID" \
+    --arg version "$VERSION" \
+    --arg git_sha "$GIT_SHA" \
+    --arg git_sha_short "$GIT_SHA_SHORT" \
+    --arg timestamp "$TIMESTAMP" \
+    --arg hostname "$(hostname)" \
+    --arg os "$(uname -s)" \
+    --arg arch "$(uname -m)" \
+    --arg user "$(whoami)" \
+    --arg fallback_reason "${FALLBACK_REASON:-manual}" \
+    --arg triggered_by "$(whoami)" \
+    $incident_url_arg \
+    '{
+        schema_version: $schema_version,
+        build_id: $build_id,
+        version: $version,
+        git_sha: $git_sha,
+        git_sha_short: $git_sha_short,
+        timestamp: $timestamp,
+        builder: {
+            hostname: $hostname,
+            os: $os,
+            arch: $arch,
+            user: $user
+        },
+        ci_fallback: {
+            reason: $fallback_reason,
+            incident_url: '$incident_url_json',
+            triggered_by: $triggered_by
+        },
+        toolchain: {},
+        artifacts: [],
+        build_log: []
+    }' > "$MANIFEST_FILE"
 
 # Log build step
 log_step() {
@@ -181,11 +209,14 @@ if [[ -f Cargo.toml ]]; then
         strip "$binary" 2>/dev/null || true
     done
     
-    # Copy artifacts
+    # Copy artifacts and record exact paths
+    COPIED_ARTIFACTS=()
     for binary in target/release/*; do
         if [[ -f "$binary" && -x "$binary" && ! "$binary" =~ \.(d|rlib|so|dylib)$ ]]; then
             name=$(basename "$binary")
-            cp "$binary" "$OUTPUT_DIR/${name}-${VERSION}-${GIT_SHA_SHORT}"
+            dest_path="$OUTPUT_DIR/${name}-${VERSION}-${GIT_SHA_SHORT}"
+            cp "$binary" "$dest_path"
+            COPIED_ARTIFACTS+=("$dest_path")
         fi
     done
 else
@@ -195,15 +226,15 @@ fi
 
 log_step "build_complete"
 
-# 8. Update manifest with artifacts
+# 8. Update manifest with artifacts from recorded paths (not re-globbing)
 echo "[8/8] Finalizing manifest..."
 ARTIFACTS='[]'
-for artifact in "$OUTPUT_DIR"/*-"${VERSION}"-"${GIT_SHA_SHORT}"; do
-    if [[ -f "$artifact" ]]; then
-        name=$(basename "$artifact")
-        sha256=$(sha256sum "$artifact" | cut -d' ' -f1)
-        size=$(stat -c%s "$artifact" 2>/dev/null || stat -f%z "$artifact")
-        
+for artifact_path in "${COPIED_ARTIFACTS[@]}"; do
+    if [[ -f "$artifact_path" ]]; then
+        name=$(basename "$artifact_path")
+        sha256=$(sha256sum "$artifact_path" | cut -d' ' -f1)
+        size=$(stat -c%s "$artifact_path" 2>/dev/null || stat -f%z "$artifact_path")
+
         ARTIFACTS=$(echo "$ARTIFACTS" | jq --arg n "$name" --arg p "$name" --arg s "$sha256" --argjson sz "$size" \
             '. + [{"name": $n, "path": $p, "sha256": $s, "size": $sz, "signature_valid": false}]')
     fi
@@ -226,7 +257,7 @@ echo "Manifest: $MANIFEST_FILE"
 echo "Build ID: $BUILD_ID"
 echo ""
 echo "Next steps:"
-echo "  1. Sign artifacts: ./scripts/fallback-release/sign-artifacts.sh $OUTPUT_DIR"
-echo "  2. Verify artifacts: ./scripts/fallback-release/verify-artifacts.sh $OUTPUT_DIR"
-echo "  3. Test installer: ./scripts/fallback-release/test-installer.sh $VERSION $OUTPUT_DIR"
-echo "  4. Publish: ./scripts/fallback-release/publish.sh $VERSION $OUTPUT_DIR"
+echo "  1. Sign artifacts: ./fallback-release/sign-artifacts.sh \"$OUTPUT_DIR\""
+echo "  2. Verify artifacts: ./fallback-release/verify-artifacts.sh \"$OUTPUT_DIR\""
+echo "  3. Test installer: ./fallback-release/test-installer.sh \"$VERSION\" \"$OUTPUT_DIR\""
+echo "  4. Publish: ./fallback-release/publish.sh \"$VERSION\" \"$OUTPUT_DIR\""

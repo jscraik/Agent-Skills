@@ -60,71 +60,83 @@ echo "[3/6] Verifying artifact files..."
 ARTIFACT_COUNT=$(jq '.artifacts | length' "$MANIFEST_FILE")
 echo "Expected artifacts: $ARTIFACT_COUNT"
 
-jq -r '.artifacts[].name' "$MANIFEST_FILE" | while read -r name; do
+while IFS= read -r name; do
     artifact_path="$ARTIFACT_DIR/$name"
     if [[ ! -f "$artifact_path" ]]; then
         echo "ERROR: Artifact missing: $name"
         EXIT_CODE=1
     fi
-done
+done < <(jq -r '.artifacts[].name' "$MANIFEST_FILE")
 
 if [[ $EXIT_CODE -eq 0 ]]; then
     echo "✓ All artifacts present"
 fi
 
-# 4. Verify checksums
+# 4. Verify checksums (iterate manifest artifacts, not glob)
 echo ""
 echo "[4/6] Verifying checksums..."
 cd "$ARTIFACT_DIR"
 CHECKSUM_ERRORS=0
 CHECKSUM_COUNT=0
 
-for shafile in *.sha256; do
+while IFS= read -r name; do
+    shafile="${name}.sha256"
     if [[ -f "$shafile" ]]; then
         ((CHECKSUM_COUNT++)) || true
         if ! sha256sum -c "$shafile" > /dev/null 2>&1; then
             echo "ERROR: Checksum failed for $shafile"
             ((CHECKSUM_ERRORS++)) || true
         fi
+    else
+        echo "ERROR: Missing checksum file: $shafile"
+        ((CHECKSUM_ERRORS++)) || true
+        ((CHECKSUM_COUNT++)) || true  # Count as expected but missing
     fi
-done
+done < <(jq -r '.artifacts[].name' "$MANIFEST_FILE")
+
+EXPECTED_COUNT=$(jq '.artifacts | length' "$MANIFEST_FILE")
 
 if [[ $CHECKSUM_COUNT -eq 0 ]]; then
     echo "ERROR: No checksum files found"
     EXIT_CODE=1
-elif [[ $CHECKSUM_ERRORS -eq 0 ]]; then
+elif [[ $CHECKSUM_ERRORS -eq 0 && $CHECKSUM_COUNT -eq $EXPECTED_COUNT ]]; then
     echo "✓ All checksums valid ($CHECKSUM_COUNT files)"
 else
-    echo "✗ $CHECKSUM_ERRORS checksum(s) failed"
+    echo "✗ $CHECKSUM_ERRORS checksum(s) failed (expected $EXPECTED_COUNT, found $CHECKSUM_COUNT)"
     EXIT_CODE=1
 fi
 
-# 5. Verify signatures
+# 5. Verify signatures (iterate manifest artifacts, not glob)
 echo ""
 echo "[5/6] Verifying GPG signatures..."
 SIG_ERRORS=0
 SIG_COUNT=0
 
-for sigfile in *.asc; do
+while IFS= read -r name; do
+    sigfile="${name}.asc"
+    artifact="$name"
     if [[ -f "$sigfile" ]]; then
         ((SIG_COUNT++)) || true
-        artifact="${sigfile%.asc}"
         if [[ -f "$artifact" ]]; then
             if ! gpg --verify "$sigfile" "$artifact" > /dev/null 2>&1; then
                 echo "ERROR: Signature verification failed for $artifact"
                 ((SIG_ERRORS++)) || true
             fi
         fi
+    else
+        echo "ERROR: Missing signature file: $sigfile"
+        ((SIG_ERRORS++)) || true
+        ((SIG_COUNT++)) || true  # Count as expected but missing
     fi
-done
+done < <(jq -r '.artifacts[].name' "$MANIFEST_FILE")
 
 if [[ $SIG_COUNT -eq 0 ]]; then
     echo "ERROR: No signature files found"
     EXIT_CODE=1
-elif [[ $SIG_ERRORS -eq 0 ]]; then
+elif [[ $SIG_ERRORS -eq 0 && $SIG_COUNT -eq $EXPECTED_COUNT ]]; then
     echo "✓ All signatures valid ($SIG_COUNT files)"
 else
-    echo "✗ $SIG_ERRORS signature(s) failed"
+    echo "✗ $SIG_ERRORS signature(s) failed (expected $EXPECTED_COUNT, found $SIG_COUNT)"
     EXIT_CODE=1
 fi
 

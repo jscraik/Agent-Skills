@@ -20,24 +20,63 @@ log_info "Checking git repository..."
 if ! git rev-parse --git-dir > /dev/null 2>&1; then
     log_error "Not in a git repository"
 else
-    log_info "Git repository: $(git remote get-url origin 2>/dev/null || echo 'unknown')"
+    # Sanitize git URL to remove credentials before logging
+    raw_url=$(git remote get-url origin 2>/dev/null || echo 'unknown')
+    # Remove user:password@ from URLs (e.g., https://user:pass@host -> https://host)
+    sanitized_url=$(echo "$raw_url" | sed -E 's|://[^:]+:[^@]+@|://|g')
+    log_info "Git repository: $sanitized_url"
     log_info "Current branch: $(git branch --show-current)"
     log_info "Git SHA: $(git rev-parse --short HEAD)"
 fi
 
-# 2. Check disk space
+# 2. Check disk space (portable: works on both Linux and macOS)
 log_info "Checking disk space..."
-AVAILABLE_GB=$(df -BG . | awk 'NR==2 {print $4}' | tr -d 'G')
+# Use df without -BG flag (GNU-only) and parse generically
+AVAILABLE_KB=$(df . | awk 'NR==2 {print $4}')
+# Convert KB to GB (handle both 1024 and 1000 based)
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    # macOS: df returns 512-byte blocks by default
+    AVAILABLE_GB=$((AVAILABLE_KB / 1024 / 1024))
+else
+    # Linux: df returns 1K blocks by default
+    AVAILABLE_GB=$((AVAILABLE_KB / 1024 / 1024))
+fi
 if [[ "$AVAILABLE_GB" -lt 10 ]]; then
     log_error "Insufficient disk space: ${AVAILABLE_GB}GB available (need 10GB+)"
 else
     log_info "Disk space: ${AVAILABLE_GB}GB available"
 fi
 
-# 3. Check memory
+# 3. Check memory (portable: works on both Linux and macOS)
 log_info "Checking memory..."
-if command -v free > /dev/null; then
-    AVAILABLE_MEM=$(free -g | awk '/^Mem:/{print $7}')
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    # macOS: use vm_statistics or sysctl
+    if command -v sysctl > /dev/null; then
+        # Get free memory in bytes (vm_statistics for page-based calc or sysctl for total)
+        PAGE_SIZE=$(vm_statistics 2>/dev/null | awk '/page size/{print $8}' || echo 4096)
+        FREE_PAGES=$(vm_statistics 2>/dev/null | awk '/Pages free/{print $3}' || echo 0)
+        INACTIVE_PAGES=$(vm_statistics 2>/dev/null | awk '/Pages inactive/{print $3}' || echo 0)
+        if [[ "$FREE_PAGES" -gt 0 ]]; then
+            FREE_BYTES=$(( (FREE_PAGES + INACTIVE_PAGES) * PAGE_SIZE ))
+            AVAILABLE_MEM=$(( FREE_BYTES / 1024 / 1024 / 1024 ))
+            if [[ "$AVAILABLE_MEM" -lt 4 ]]; then
+                log_warn "Low memory: ${AVAILABLE_MEM}GB available (recommend 8GB+)"
+            else
+                log_info "Memory: ${AVAILABLE_MEM}GB available"
+            fi
+        else
+            # Fallback: total memory from sysctl
+            TOTAL_BYTES=$(sysctl -n hw.memsize 2>/dev/null || echo 0)
+            TOTAL_GB=$(( TOTAL_BYTES / 1024 / 1024 / 1024 ))
+            log_info "Total memory: ${TOTAL_GB}GB (cannot determine free memory)"
+        fi
+    else
+        log_warn "Cannot check memory (sysctl not available)"
+    fi
+elif command -v free > /dev/null; then
+    # Linux: use free without -g flag and parse
+    AVAILABLE_KB=$(free | awk '/^Mem:/{print $7}')
+    AVAILABLE_MEM=$((AVAILABLE_KB / 1024 / 1024))
     if [[ "$AVAILABLE_MEM" -lt 4 ]]; then
         log_warn "Low memory: ${AVAILABLE_MEM}GB available (recommend 8GB+)"
     else
@@ -72,13 +111,21 @@ check_tool "sha256sum"
 check_tool "gpg" "gpg --version | head -1"
 check_tool "jq"
 check_tool "curl"
-check_tool "aws" "aws --version" || check_tool "s3cmd" "s3cmd --version"
+# Check for S3 client: aws first, then s3cmd - only error if both fail
+if ! check_tool "aws" "aws --version" 2>/dev/null; then
+    if ! check_tool "s3cmd" "s3cmd --version" 2>/dev/null; then
+        log_error "No S3 client found (tried: aws, s3cmd)"
+    fi
+fi
 
 # 5. Check Rust toolchain matches project
 log_info "Checking Rust toolchain..."
 if [[ -f rust-toolchain.toml ]]; then
-    REQUIRED_RUST=$(grep -oP '(?<=channel = ")[^"]+' rust-toolchain.toml || echo "stable")
-    CURRENT_RUST=$(rustc --version | grep -oP '\d+\.\d+\.\d+')
+    # Portable alternative to grep -oP (Perl regex)
+    REQUIRED_RUST=$(sed -n 's/.*channel = "\([^"]*\)".*/\1/p' rust-toolchain.toml | head -1)
+    REQUIRED_RUST=${REQUIRED_RUST:-stable}
+    # Extract version number using grep -E (POSIX) instead of -P (Perl)
+    CURRENT_RUST=$(rustc --version | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
     log_info "Required Rust: $REQUIRED_RUST, Current: $CURRENT_RUST"
 else
     log_warn "No rust-toolchain.toml found"
@@ -94,7 +141,12 @@ if gpg --list-secret-keys --keyid-format LONG "$GPG_KEY" > /dev/null 2>&1; then
     # Check key expiration
     EXPIRES=$(gpg --list-keys --with-colons "$GPG_KEY" | grep ^pub | cut -d: -f7)
     if [[ -n "$EXPIRES" ]]; then
-        EXPIRES_DATE=$(date -d "@$EXPIRES" 2>/dev/null || date -r "$EXPIRES")
+        # Portable date formatting: Linux uses -d @timestamp, macOS uses -r timestamp
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+            EXPIRES_DATE=$(date -r "$EXPIRES" 2>/dev/null || echo "unknown")
+        else
+            EXPIRES_DATE=$(date -d "@$EXPIRES" 2>/dev/null || echo "unknown")
+        fi
         DAYS_UNTIL=$(( (EXPIRES - $(date +%s)) / 86400 ))
         if [[ $DAYS_UNTIL -lt 30 ]]; then
             log_warn "GPG key expires in $DAYS_UNTIL days"
