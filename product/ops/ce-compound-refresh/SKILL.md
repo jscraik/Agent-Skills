@@ -36,7 +36,6 @@ This workflow produces refreshed, consolidated, or marked-stale documentation. I
 - [References](#references)
 - [See Also](#see-also)
 - [Decision feedback protocol](#decision-feedback-protocol)
-- [Gotchas](#gotchas)
 
 ## Working agreement
 - Treat as maintenance stage for `docs/solutions/`, not generic doc-polish

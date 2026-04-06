@@ -186,7 +186,7 @@ if command -v "$ruff_bin" >/dev/null 2>&1; then
     exit 2
   fi
 else
-  echo "[family-gate] WARN: ruff not found; skipping Python lint (install via: pip install ruff)"
+  echo "[family-gate] WARN: ruff not found; skipping Python lint (install via: pip install ruff or brew install ruff)"
 fi
 
 echo "[family-gate] validating ${#skill_dirs[@]} skill authoring family members"
@@ -216,7 +216,7 @@ if "$python_bin" -m pytest --version >/dev/null 2>&1; then
     exit 2
   fi
 else
-  echo "[family-gate] WARN: pytest not found; skipping unit tests (install via: pip install pytest)"
+  echo "[family-gate] WARN: pytest not found; skipping unit tests (install via: pip install pytest or brew install python)"
 fi
 
 # Track per-skill evidence for the release-ready index

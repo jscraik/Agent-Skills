@@ -350,7 +350,6 @@ See `references/ce-anti-patterns.md`:
 
 ## Gotchas
 - `latest` ambiguous; resolve explicitly
-
 ## See Also
 | Skill | When to use |
 |---|---|
