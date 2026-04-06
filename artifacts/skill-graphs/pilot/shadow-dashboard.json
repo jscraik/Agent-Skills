@@ -7,7 +7,7 @@
     "frontend-ui-design",
     "react-ui-patterns"
   ],
-  "pilot_profiles_file": "/Users/jamiecraik/dev/agent-skills/docs/skill-graphs/schemas/examples/pilot-profiles.json",
+  "pilot_profiles_file": "docs/skill-graphs/schemas/examples/pilot-profiles.json",
   "window_days": 7,
   "current_window": "2026-03-31..2026-04-06",
   "current": {
