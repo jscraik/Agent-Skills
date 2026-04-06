@@ -49,6 +49,41 @@ jobs:
             --mode warn \
             --report-json /tmp/docs-lint-shadow.json
 
+      - name: Verify telemetry freshness
+        run: |
+          python3 - <<'PY'
+          import sys
+          from pathlib import Path
+          from datetime import datetime, timezone, timedelta
+
+          content = Path("docs/skill-graphs/telemetry/daily-skill-health.md").read_text()
+          for line in content.splitlines():
+              if line.startswith("- Generated at:"):
+                  ts = line.split("`")[1].strip()
+                  generated = datetime.fromisoformat(ts.replace("Z", "+00:00"))
+                  age = datetime.now(timezone.utc) - generated
+                  if age > timedelta(hours=24):
+                      print(f"FAIL: daily-skill-health.md is {age} old (limit: 24h)", file=sys.stderr)
+                      sys.exit(1)
+                  print(f"OK: telemetry age {age}")
+                  sys.exit(0)
+          print("FAIL: could not parse Generated at timestamp", file=sys.stderr)
+          sys.exit(1)
+          PY
+
+      - name: Commit telemetry artifacts
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/skill-graphs/telemetry/daily-skill-health.md \
+                  artifacts/skill-graphs/runs/ \
+                  artifacts/skill-graphs/onboarding/wave-readiness.json \
+                  artifacts/skill-graphs/pilot/artifact-parity-manifest.json \
+                  artifacts/skill-graphs/telemetry/ || true
+          git diff --cached --quiet || git commit \
+            -m "chore(telemetry): daily skill-health refresh [skip ci]"
+          git push
+
       - name: Upload shadow artifacts
         uses: actions/upload-artifact@v7
         with:
