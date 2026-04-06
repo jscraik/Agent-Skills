@@ -2,7 +2,6 @@
 """MCP (Model Context Protocol) configuration sync commands."""
 import os
 import json
-import logging
 import re
 import shlex
 from pathlib import Path
