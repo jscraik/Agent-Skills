@@ -1,5 +1,17 @@
 # Gold Standard CLI Design (April 2026)
 
+## Table of Contents
+
+- [1. The Dual-Mode Pattern](#1-the-dual-mode-pattern)
+- [2. Core Functional Requirements](#2-core-functional-requirements)
+  - [Structured Data First](#structured-data-first)
+  - [Predictive Execution (Dry-Run)](#predictive-execution-dry-run)
+  - [Observability & Traceability](#observability--traceability)
+  - [Safety Gates](#safety-gates)
+- [3. UX Patterns from Industry Leaders](#3-ux-patterns-from-industry-leaders)
+- [4. Agentic Interaction Metrics](#4-agentic-interaction-metrics)
+- [5. Environment Standards](#5-environment-standards)
+
 The 2026 Gold Standard for command-line interfaces has evolved from being purely human-centric to **Agent-Native**. A modern CLI must be equally efficient for a human at a terminal and an autonomous agent operating in a loop.
 
 ## 1. The Dual-Mode Pattern
