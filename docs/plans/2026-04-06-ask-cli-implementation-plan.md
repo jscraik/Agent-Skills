@@ -75,7 +75,7 @@ Goal: Implement state-changing operations with dry-run and atomic promotion.
 | Layer | Tool | Requirement |
 | :--- | :--- | :--- |
 | **Unit** | `unittest` | Validate `CallResult` serialization and redaction logic. |
-| **Contract** | `scripts/ask_contract_test.py` | Verify every command returns schema-valid JSON. |
+| **Contract** | `scripts/verify_ask_cli.py` | Verify every command returns schema-valid JSON. |
 | **E2E** | `bats` or `pytest` | Run the `CA1` through `CA6` scenarios defined in the spec. |
 
 ## Rollout & Safety
