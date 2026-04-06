@@ -18,4 +18,4 @@
 Use `repo:<name>:task:<id>` style session ids when calling local-memory tools.
 
 ## See Also
-- [Local Memory Skill](../../utilities/local-memory/SKILL.md) - Tool reference and usage examples
+- [Local Memory Skill](/utilities/local-memory/SKILL.md) - Tool reference and usage examples

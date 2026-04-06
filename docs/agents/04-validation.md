@@ -35,7 +35,7 @@
 - Prefer repository-root commands over guessed defaults.
 
 ## PR gate structure
-See [CI Required Checks](./12-ci-required-checks.md) for the complete dependency policy and workflow orchestration.
+See [CI Required Checks](/docs/agents/12-ci-required-checks.md) for the complete dependency policy and workflow orchestration.
 
 ## Authoring-family contract behavior
 `authoring-family-gate` invokes `bash scripts/validate_skill_authoring_family.sh`.
