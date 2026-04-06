@@ -361,6 +361,10 @@ feature-video:
   sora: Generate synthetic video only when the request is not tied to real product
     footage
   stitch-remotion: Build a walkthrough from Stitch screens
+fallback-release:
+  production-deployment: Deploy fallback-built artifacts to production
+  release: Primary release path when CI is healthy
+  verification-before-completion: Validate fallback artifacts before publication
 figma:
   better-icons: Source icons via Figma designs and export to Iconify
   design-system: Extract Figma tokens to drive the repository design system
@@ -497,6 +501,11 @@ process-watch:
   systematic-debugging: Use alongside process-watch for root-cause diagnosis
   verification-before-completion: Confirm processes are healthy before marking work
     done
+production-deployment:
+  1password: Inject deployment secrets via 1Password CLI
+  cloudflare-deploy: Deploy specifically to the Cloudflare platform
+  release: Orchestrate the release flow before deployment
+  workers-mcp: Deploy MCP servers as production-ready workers
 product-design-critic:
   brainstorming: Explore design alternatives before critical review
   frontend-ui-design: Apply critique findings to UI component implementation
@@ -620,7 +629,7 @@ skill-builder:
   skill-installer: Install, import, or repair runtime visibility when the skill package
     is already valid and the remaining work is distribution
 skill-creator:
-  codex-plugin-builder: Packaging a validated standalone skill into a plugin deliverable
+  cli-spec: Consult the technical contract for the ask CLI
   skill-builder: Lifecycle hardening, comparative eval rounds, and release-quality
     contract upgrades
   skill-installer: Installing already-valid skills into Codex environments

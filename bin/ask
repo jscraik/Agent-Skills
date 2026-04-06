@@ -276,9 +276,8 @@ def try_fuzzy_parse(raw_args: List[str], robot_mode: bool = False) -> Tuple[Opti
                     action = guess
                     matched = True
 
-            # If we couldn't match to a valid action, clear it
-            if not matched:
-                action = None
+            # If we couldn't match to a valid action, preserve the original action
+            # so later VALID_ACTIONS validation can produce the proper unknown-action message
 
         remaining = remaining[1:]
 
@@ -540,7 +539,7 @@ def main():
         result = CallResult()
         result.status = "error"
         result.errors.append(ErrorObject(
-            code="ERR_VALIDATION",
+            code=ErrorCode.ERR_VALIDATION,
             message="Failed to parse command arguments.",
             fix_suggestion="Check command format and try again."
         ))
@@ -570,7 +569,7 @@ def main():
             result.status = "error"
             action_msg = f"unknown action '{args.action}'" if args.action else "missing action"
             result.errors.append(ErrorObject(
-                code="ERR_VALIDATION",
+                code=ErrorCode.ERR_VALIDATION,
                 message=f"{action_msg} for topic 'repo'",
                 fix_suggestion="Valid actions: status, validate, check-stability"
             ))
@@ -592,7 +591,7 @@ def main():
             result.status = "error"
             action_msg = f"unknown action '{args.action}'" if args.action else "missing action"
             result.errors.append(ErrorObject(
-                code="ERR_VALIDATION",
+                code=ErrorCode.ERR_VALIDATION,
                 message=f"{action_msg} for topic 'skills'",
                 fix_suggestion="Valid actions: list, sync, audit, install, fold, init"
             ))
@@ -609,7 +608,7 @@ def main():
             result.status = "error"
             action_msg = f"unknown action '{args.action}'" if args.action else "missing action"
             result.errors.append(ErrorObject(
-                code="ERR_VALIDATION",
+                code=ErrorCode.ERR_VALIDATION,
                 message=f"{action_msg} for topic 'plugins'",
                 fix_suggestion="Valid actions: init"
             ))
@@ -625,7 +624,7 @@ def main():
             result.status = "error"
             action_msg = f"unknown action '{args.action}'" if args.action else "missing action"
             result.errors.append(ErrorObject(
-                code="ERR_VALIDATION",
+                code=ErrorCode.ERR_VALIDATION,
                 message=f"{action_msg} for topic 'evals'",
                 fix_suggestion="Valid actions: run, benchmark, dashboard"
             ))
@@ -648,7 +647,7 @@ def main():
             result.status = "error"
             action_msg = f"unknown action '{args.action}'" if args.action else "missing action"
             result.errors.append(ErrorObject(
-                code="ERR_VALIDATION",
+                code=ErrorCode.ERR_VALIDATION,
                 message=f"{action_msg} for topic 'graph'",
                 fix_suggestion="Valid actions: related, find, info, chain, list, topics"
             ))
@@ -660,7 +659,7 @@ def main():
             result.status = "error"
             action_msg = f"unknown action '{args.action}'" if args.action else "missing action"
             result.errors.append(ErrorObject(
-                code="ERR_VALIDATION",
+                code=ErrorCode.ERR_VALIDATION,
                 message=f"{action_msg} for topic 'mcp'",
                 fix_suggestion="Valid actions: sync"
             ))
