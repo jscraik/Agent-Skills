@@ -337,6 +337,15 @@ def sync_skills(repo_root: Path, scope: str = "workspace", dry_run: bool = False
         for src, dst in targets:
             plan["symlinks"].append({"from": str(dst), "to": str(src)})
             logs.append(_create_symlink(src, dst, dry_run))
+        # Guard: antigravity source directory must exist before syncing
+        if not antigravity_skills_dir.exists():
+            result.status = "error"
+            result.errors.append(ErrorObject(
+                code="ERR_DEPENDENCY",
+                message=f"Antigravity skills directory not found: {antigravity_skills_dir}",
+                fix_suggestion="Ensure the skills-antigravity directory exists or use --scope workspace"
+            ))
+            return result
         antigravity_dest = home / ".gemini" / "antigravity" / "skills"
         plan["writes"].append(str(antigravity_dest))
         logs.append(_sync_dir_copy(antigravity_skills_dir, antigravity_dest, dry_run))
