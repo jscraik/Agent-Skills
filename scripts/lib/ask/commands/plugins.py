@@ -4,7 +4,7 @@ from pathlib import Path
 from ask.envelope import CallResult, ErrorObject
 
 # Allow-list for companion folder types per plugin-creator contract
-_ALLOWED_COMPANION_FOLDERS = {"skills", "hooks", "scripts", "assets", "mcp", "apps"}
+_ALLOWED_COMPANION_FOLDERS = {"skills", "hooks", "scripts", "assets", "mcp", "apps", "references", "workflows"}
 
 def init_plugin(repo_root: Path, name: str, with_marketplace: bool = False, companion_folders: list[str] = None) -> CallResult:
     """Initializes a new plugin scaffold."""

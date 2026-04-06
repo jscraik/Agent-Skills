@@ -74,8 +74,7 @@ class CallResult:
     def to_json(self, repo_root: Optional[str] = None) -> str:
         """Serializes to JSON with fail-closed redaction of paths and secrets."""
         raw_dict = asdict(self)
-        json_str = json.dumps(raw_dict, indent=2, ensure_ascii=False)
-        
+
         # 1. Redact Secrets (Gold Standard 2026 patterns)
         secret_patterns = [
             r"sk-[a-zA-Z0-9]{20,}",       # OpenAI-style
@@ -83,16 +82,41 @@ class CallResult:
             r"AIza[a-zA-Z0-9_-]{35,}",    # Google API Key
             r"Bearer\s+[a-zA-Z0-9._-]{20,}", # JWT/Bearer tokens
         ]
+
+        # 2. Redact paths in error messages and free-text fields, but preserve data fields
+        home_dir = os.path.expanduser("~")
+
+        def redact_string(s: str) -> str:
+            """Redact secrets and paths from a string."""
+            for pattern in secret_patterns:
+                s = re.sub(pattern, "<REDACTED_SECRET>", s)
+            if repo_root:
+                s = s.replace(os.path.abspath(repo_root), "<REPO_ROOT>")
+            s = s.replace(home_dir, "<USER_HOME>")
+            return s
+
+        def redact_errors(errors: list) -> list:
+            """Redact paths from error messages only."""
+            redacted = []
+            for err in errors:
+                redacted_err = {
+                    "code": err.get("code", ""),
+                    "message": redact_string(err.get("message", "")),
+                }
+                if err.get("fix_suggestion"):
+                    redacted_err["fix_suggestion"] = redact_string(err["fix_suggestion"])
+                if err.get("help_url"):
+                    redacted_err["help_url"] = err["help_url"]
+                redacted.append(redacted_err)
+            return redacted
+
+        # Redact in errors and metadata strings, but NOT in data fields
+        if "errors" in raw_dict:
+            raw_dict["errors"] = redact_errors(raw_dict["errors"])
+
+        # Redact secrets globally (they should never appear anywhere)
+        json_str = json.dumps(raw_dict, indent=2, ensure_ascii=False)
         for pattern in secret_patterns:
             json_str = re.sub(pattern, "<REDACTED_SECRET>", json_str)
-            
-        # 2. Redact Absolute Paths
-        # For security, we redact repo_root and home directory in error messages and logs
-        # Redact repo_root FIRST (before home_dir) to handle nested paths correctly
-        if repo_root:
-            resolved_root = os.path.abspath(repo_root)
-            json_str = json_str.replace(resolved_root, "<REPO_ROOT>")
-        home_dir = os.path.expanduser("~")
-        json_str = json_str.replace(home_dir, "<USER_HOME>")
 
         return json_str

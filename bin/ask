@@ -484,9 +484,10 @@ def main():
                 print(f"\n{correction_note}")
         sys.exit(2)
 
-    # Re-parse with corrected values if needed (always reparse if we have valid topic/action from fuzzy match)
-    if parsed_topic and parsed_topic in VALID_TOPICS:
-        # Rebuild the command line with corrected values
+    # Re-parse with corrected values if needed (only if we came from fuzzy matching path)
+    # remaining_args is only populated by try_fuzzy_parse, so check if we need to reparse
+    if remaining_args and parsed_topic and parsed_topic in VALID_TOPICS:
+        # Rebuild the command line with corrected values from fuzzy match
         corrected_args = [parsed_topic]
         if parsed_action:
             corrected_args.append(parsed_action)
