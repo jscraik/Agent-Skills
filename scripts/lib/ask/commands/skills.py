@@ -1,6 +1,5 @@
 import os
 from pathlib import Path
-from typing import List, Dict, Any, Tuple
 from ask.envelope import CallResult
 from skill_catalog import discover_skill_entries
 
