@@ -293,7 +293,8 @@ def main():
     raw_args = sys.argv[1:]
     robot_mode = any(flag in raw_args for flag in ["--robot", "--agent-mode", "-r"])
 
-    # Remove robot flags before argparse sees them
+    # Keep raw_args intact for parse_args() so robot flags are properly handled
+    # Use filtered_args only for early help detection (before parser setup)
     filtered_args = [a for a in raw_args if a not in ["--robot", "--agent-mode", "-r"]]
 
     # Use a parent parser for global flags to share them with subcommands
@@ -429,9 +430,10 @@ def main():
     parsed_action = None
     remaining_args = []
     correction_note = None
+    fuzzy_matched = False  # Track if fuzzy matching was used
 
     try:
-        args = parser.parse_args(filtered_args)
+        args = parser.parse_args(raw_args)
         parsed_topic = args.topic
         parsed_action = getattr(args, 'action', None)
     except SystemExit as e:
@@ -441,7 +443,8 @@ def main():
             sys.exit(0)
         # Parse failed - try fuzzy matching if robot mode
         if robot_mode:
-            parsed_topic, parsed_action, remaining_args, correction_note = try_fuzzy_parse(filtered_args, robot_mode=True)
+            parsed_topic, parsed_action, remaining_args, correction_note = try_fuzzy_parse(raw_args, robot_mode=True)
+            fuzzy_matched = parsed_topic is not None
             if not parsed_topic or not parsed_action:
                 # Still couldn't parse - show helpful error
                 repo_root = find_repo_root()
@@ -458,7 +461,7 @@ def main():
                 result = CallResult()
                 result.status = "error"
                 result.errors.append(ErrorObject(
-                    code="ERR_VALIDATION",
+                    code=ErrorCode.ERR_VALIDATION,
                     message="Unknown command. Use --robot to enable flexible parsing.",
                     fix_suggestion="Valid topics: repo, skills, plugins, evals, graph"
                 ))
@@ -475,7 +478,7 @@ def main():
     if parsed_topic and (parsed_topic not in VALID_TOPICS or parsed_action not in VALID_ACTIONS.get(parsed_topic, [])):
         # Still invalid after fuzzy matching
         repo_root = find_repo_root()
-        result = build_helpful_error(parsed_topic, parsed_action, remaining_args, repo_root)
+        result = build_helpful_error(parsed_topic, parsed_action, raw_args, repo_root)
         if "--json" in raw_args:
             print(result.to_json())
         else:
@@ -485,8 +488,8 @@ def main():
         sys.exit(2)
 
     # Re-parse with corrected values if needed (only if we came from fuzzy matching path)
-    # remaining_args is only populated by try_fuzzy_parse, so check if we need to reparse
-    if remaining_args and parsed_topic and parsed_topic in VALID_TOPICS:
+    # fuzzy_matched indicates try_fuzzy_parse was used successfully
+    if fuzzy_matched and parsed_topic and parsed_topic in VALID_TOPICS:
         # Rebuild the command line with corrected values from fuzzy match
         corrected_args = [parsed_topic]
         if parsed_action:

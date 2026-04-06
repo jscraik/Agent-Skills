@@ -4,6 +4,7 @@
 - [Workflow](#workflow)
 - [Store rules](#store-rules)
 - [Minimal session convention](#minimal-session-convention)
+- [See Also](#see-also)
 
 ## Workflow
 1. Bootstrap memory before durable notes.

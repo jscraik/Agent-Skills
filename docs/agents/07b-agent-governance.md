@@ -24,4 +24,4 @@
 - The gate is satisfied only when `scripts/validate_skill_authoring_family.sh` passes for all family members.
 - Do not mark a skill-authoring-family pull request merge-ready while this gate is failing or missing.
 
-See [CI Required Checks](/docs/agents/12-ci-required-checks.md) for the complete PR gate dependency policy.
+See [CI Required Checks](/docs/agents/17-ci-required-checks.md) for the complete PR gate dependency policy.

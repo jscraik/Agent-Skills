@@ -50,7 +50,7 @@ Active family:
 | Trusted live eval evidence (P1) | `artifacts/validation/family-gate/<run-ts>/evidence-index.json` | pending trusted run |
 | Security hardening (P2) | OpenClaw output in gate run — 0 warnings | complete |
 | Quality uplift (P3) | `docs/reference/skill-authoring-family-quality-baseline.md` | complete |
-| Governance scorecard (P4) | this file | complete |
+| Governance scorecard (P4) | `docs/reference/skill-authoring-family-gold-scorecard.md` | complete |
 
 **To advance to `gold` status:** run with `SKILL_FAMILY_RELEASE_READY=1 SKILL_FAMILY_LIVE_EVALS=1 SKILL_FAMILY_LIVE_EVALS_TRUSTED=1` and link the resulting `evidence-index.json` here.
 
