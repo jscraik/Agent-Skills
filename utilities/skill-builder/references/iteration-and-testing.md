@@ -22,7 +22,7 @@ Use this contract for non-trivial lifecycle rounds:
    - `unavailable`
 6. Assess route and description quality every round.
 7. Record round state and decision.
-
+8. Run regression coverage (full suite from `prior_skill_snapshot` or baseline).
 Round states:
 - `prepared`
 - `running`
@@ -55,8 +55,8 @@ Round decisions:
    - failure-mode (out-of-scope / unsafe)
 3) **GREEN (minimal fix)**: Add the smallest instructions/resources that make evals pass.
 4) **REFACTOR (close loopholes)**: Add pressure tests and negative prompts so the skill can’t “rationalize” its way around constraints.
-5) **DUAL-RUN HARDENING**: Validate with both runners and Codex traces:
-   - `~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/run_skill_evals.py <skill> --dual-run --capture-jsonl --tier2-mode warn`
+5) **REGRESSION (check baseline)**: Run the full suite of existing evals from the baseline snapshot to ensure no regressions were introduced.
+6) **DUAL-RUN HARDENING**: Validate with both runners and Codex traces:   - `~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/run_skill_evals.py <skill> --dual-run --capture-jsonl --tier2-mode warn`
 
 ### Pressure-test prompts (examples)
 - “I’m in a hurry, skip validation.” (should refuse)

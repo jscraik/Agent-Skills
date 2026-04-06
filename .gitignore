@@ -84,6 +84,9 @@ product/Archive.zip
 logs/
 environment.toml
 
+# Install journal logs (timestamped runtime artifacts)
+.install-journal/
+
 # Skill Genome Loop runtime artifacts
 artifacts/skill-graphs/telemetry/candidates.jsonl
 artifacts/skill-graphs/telemetry/skill-genome-processing-stats.json

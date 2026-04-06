@@ -517,12 +517,17 @@ def main() -> int:
         telemetry_window_end = telemetry_health.window_end
 
         freshness_checks_ok = True
+        remediation_target_date = (datetime.now(timezone.utc) + timedelta(days=1)).date().isoformat()
         if telemetry_health.generated_at is None:
             freshness_checks_ok = False
             wave0_blockers.append(
                 {
                     "code": "TELEMETRY_HEALTH_STALE",
                     "detail": "daily-skill-health.md missing parseable Generated at timestamp",
+                    "remediation": {
+                        "owner": "platform-ops",
+                        "targetDate": remediation_target_date,
+                    },
                 }
             )
         else:
@@ -534,6 +539,10 @@ def main() -> int:
                     {
                         "code": "TELEMETRY_HEALTH_STALE",
                         "detail": f"daily-skill-health.md age {age_hours:.2f}h exceeds {max_age_hours:.2f}h",
+                        "remediation": {
+                            "owner": "platform-ops",
+                            "targetDate": remediation_target_date,
+                        },
                     }
                 )
 

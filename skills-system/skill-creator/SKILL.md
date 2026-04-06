@@ -7,7 +7,7 @@ metadata:
 
 # Skill Creator
 
-Create the first usable version of a skill, then hand off non-trivial lifecycle work to `skill-builder`.
+Create the first usable version of a skill using the unified **Agent Skills Kit (`ask`)** CLI, then hand off non-trivial lifecycle work to `skill-builder`.
 
 ## When to use
 
@@ -71,7 +71,7 @@ Starter-authoring should optimize for clarity, portability, and clean ownership 
 
 - Keep frontmatter canonical: required keys are `name` and `description`; optional official keys are `license`, `compatibility`, `allowed-tools`, and `metadata`.
 - Do not invent extra top-level frontmatter keys.
-- Ensure `description` is action-oriented and routing-strong (what the skill does, when to use it, and what is out of scope).
+- Ensure `description` is action-oriented and routing-strong.
 - Never expose secrets, tokens, private keys, or personal data in examples or generated files.
 - Redact sensitive strings by default when showing logs, manifests, commands, or sample outputs.
 - Keep references one level deep from `SKILL.md`; avoid deeply nested discovery trees.
@@ -81,22 +81,17 @@ Starter-authoring should optimize for clarity, portability, and clean ownership 
 
 1. Clarify scope and collect concrete trigger examples.
 2. Derive the smallest reusable package (`scripts`, `references`, `assets`) from those examples.
-3. Initialize or complete the scaffold.
+3. Initialize or complete the scaffold via the unified CLI (`ask skills init`).
 4. Fill `SKILL.md` and `agents/openai.yaml` with bounded, role-correct guidance.
 5. Add or update contract/eval artifacts for non-trivial starters.
-6. Run validation gates, including OpenClaw and smoke eval execution, and fix failures.
+6. Run validation gates, including `ask skills audit` and smoke eval execution, and fix failures.
 7. If lifecycle hardening is needed, create `references/handoff-package.md` and hand off to `skill-builder`.
 
-Scaffold command:
+Primary command:
 
 ```bash
-skills-system/skill-creator/scripts/init_skill.py <skill-name> --path "${CODEX_HOME:-$HOME/.codex}/skills" [--resources scripts,references,assets] [--examples]
-```
-
-Generate `agents/openai.yaml` interface fields when needed:
-
-```bash
-skills-system/skill-creator/scripts/generate_openai_yaml.py <path/to/skill-folder> --interface display_name="..." --interface short_description="..." --interface default_prompt="..."
+# Initialize a new skill scaffold
+bin/ask skills init <skill-name> --category <category> --description "..."
 ```
 
 ## Anti-Patterns
@@ -111,7 +106,7 @@ Avoid these common failures:
 ## Examples
 
 - When the user asks: "Can you build a starter skill for incident postmortems and include a references template?"
-- When the user says: "I already ran `init_skill.py`; help me finish this scaffold so we can hand it to skill-builder."
+- When the user says: "I need a first-pass scaffold for a new cloud provider CLI."
 - When the user asks: "Please create the initial skill package now and include a handoff artifact for hardening."
 
 ## Validation
@@ -119,12 +114,11 @@ Avoid these common failures:
 Run gates in order and fail fast: stop at the first failed gate, fix it, then rerun from that gate onward.
 
 ```bash
-~/.venvs/pyyaml/bin/python skills-system/skill-creator/scripts/quick_validate.py <path/to/skill-folder>
-~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/skill_gate.py <path/to/skill-folder> --require-security-evals --pi-high-fail --require-fail-fast
-~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/openclaw_skill_guard.py <path/to/skill-folder> --mode both --format text
-~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/run_skill_evals.py <path/to/skill-folder> --list-cases --eval-mode smoke
-~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/run_skill_evals.py <path/to/skill-folder> --runner codex --eval-mode smoke
-~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/run_skill_evals.py <path/to/skill-folder> --runner codex --eval-mode release
+# Structural and Security Audit
+bin/ask skills audit <path/to/skill-folder> --level strict
+
+# Full Repository Health
+bin/ask repo validate --ephemeral
 ```
 
 Family gate note:
@@ -137,6 +131,6 @@ Family gate note:
 |---|---|
 | [[skill-builder]] | Lifecycle hardening, comparative eval rounds, and release-quality contract upgrades |
 | [[skill-installer]] | Installing already-valid skills into Codex environments |
-| [[codex-plugin-builder]] | Packaging a validated standalone skill into a plugin deliverable |
+| [[ask-cli-spec]] | Consult the technical contract for the ask CLI |
 
 **Topic map:** [[agent-ops]]

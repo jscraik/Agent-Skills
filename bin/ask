@@ -1,20 +1,43 @@
 #!/usr/bin/env python3
 import sys
 import argparse
+import time
 from pathlib import Path
 
 # Add scripts/lib and scripts to path
-repo_root = Path(__file__).resolve().parents[1]
-sys.path.append(str(repo_root / "scripts" / "lib"))
-sys.path.append(str(repo_root / "scripts"))
+repo_root_path = Path(__file__).resolve().parents[1]
+# Insert at end to allow dynamic loading to take priority when needed
+sys.path.append(str(repo_root_path / "scripts" / "lib"))
+sys.path.append(str(repo_root_path / "scripts"))
+sys.path.append(str(repo_root_path / "utilities" / "skill-builder" / "scripts"))
 
 from ask.envelope import CallResult
 from ask.context import find_repo_root
-from ask.commands.skills import list_skills, sync_skills
+from ask.commands.skills import list_skills, sync_skills, audit_skill, install_skill, fold_skills, init_skill
+from ask.commands.repo import repo_status, repo_validate
+from ask.commands.plugins import init_plugin
+from ask.commands.evals import run_evals, benchmark_portfolio, dashboard_report
+
+# Error Code Mapping
+ERROR_MAP = {
+    "SUCCESS": 0,
+    "ERR_RUNTIME": 1,
+    "ERR_VALIDATION": 2,
+    "ERR_PI_GUARD": 2,
+    "ERR_PATH_TRAVERSAL": 2,
+    "ERR_DEPENDENCY": 3,
+    "ERR_CONFLICT": 4,
+    "ERR_REDUNDANCY": 4,
+    "ERR_AUTH": 5
+}
 
 def main():
+    start_time = time.time()
+    
+    # Use a parent parser for global flags to share them with subcommands
     global_parser = argparse.ArgumentParser(add_help=False)
     global_parser.add_argument("--json", action="store_true", help="Output results in JSON format")
+    global_parser.add_argument("--trace-id", help="Trace ID for correlating logs", default=os.environ.get("ASK_TRACE_ID"))
     
     parser = argparse.ArgumentParser(prog="ask", description="Agent Skills Kit CLI", parents=[global_parser])
     subparsers = parser.add_subparsers(dest="topic")
@@ -25,6 +48,9 @@ def main():
     
     repo_status_parser = repo_subparsers.add_parser("status", help="Show repository status", parents=[global_parser])
     repo_status_parser.add_argument("--verbose", action="store_true", help="Include more details")
+    
+    repo_validate_parser = repo_subparsers.add_parser("validate", help="Run all repository validations", parents=[global_parser])
+    repo_validate_parser.add_argument("--ephemeral", action="store_true", help="Do not mutate repo validation artifacts")
     
     # --- skills ---
     skills_parser = subparsers.add_parser("skills", help="Skill management", parents=[global_parser])
@@ -37,47 +63,173 @@ def main():
     skills_sync_parser.add_argument("--scope", choices=["user", "workspace"], default="workspace", help="Tier to sync")
     skills_sync_parser.add_argument("--dry-run", action="store_true", help="Preview changes")
     
+    skills_audit_parser = skills_subparsers.add_parser("audit", help="Run audits on a skill", parents=[global_parser])
+    skills_audit_parser.add_argument("path", help="Path to the skill directory")
+    skills_audit_parser.add_argument("--level", choices=["compat", "strict"], default="compat", help="Audit depth")
+    
+    skills_install_parser = skills_subparsers.add_parser("install", help="Install a skill from GitHub", parents=[global_parser])
+    skills_install_parser.add_argument("url", help="GitHub URL of the skill")
+    skills_install_parser.add_argument("--dest", default="github", help="Destination category directory")
+    skills_install_parser.add_argument("--remediate", action="store_true", help="Scaffold missing contract/eval files")
+    skills_install_parser.add_argument("--dry-run", action="store_true", help="Preview installation")
+    
+    skills_fold_parser = skills_subparsers.add_parser("fold", help="Suggest folding source into target", parents=[global_parser])
+    skills_fold_parser.add_argument("source", help="Skill to be folded")
+    skills_fold_parser.add_argument("target", help="Skill to merge into")
+    skills_fold_parser.add_argument("--sensitivity", type=float, default=0.2, help="Overlap threshold")
+    
+    skills_init_parser = skills_subparsers.add_parser("init", help="Initialize a new skill scaffold", parents=[global_parser])
+    skills_init_parser.add_argument("name", help="Name of the new skill")
+    skills_init_parser.add_argument("--category", required=True, help="Category directory")
+    skills_init_parser.add_argument("--description", required=True, help="Short routing description")
+    
+    # --- plugins ---
+    plugins_parser = subparsers.add_parser("plugins", help="Plugin management", parents=[global_parser])
+    plugins_subparsers = plugins_parser.add_subparsers(dest="action")
+    
+    plugins_init_parser = plugins_subparsers.add_parser("init", help="Initialize a new plugin scaffold", parents=[global_parser])
+    plugins_init_parser.add_argument("name", help="Name of the new plugin")
+    plugins_init_parser.add_argument("--with-marketplace", action="store_true", help="Add to local marketplace")
+    plugins_init_parser.add_argument("--with-scripts", action="store_true", help="Add scripts directory")
+    plugins_init_parser.add_argument("--with-assets", action="store_true", help="Add assets directory")
+    plugins_init_parser.add_argument("--with-references", action="store_true", help="Add references directory")
+    plugins_init_parser.add_argument("--with-workflows", action="store_true", help="Add workflows directory")
+    
+    # --- evals ---
+    evals_parser = subparsers.add_parser("evals", help="Evaluation and Benchmarking", parents=[global_parser])
+    evals_subparsers = evals_parser.add_subparsers(dest="action")
+    
+    evals_run_parser = evals_subparsers.add_parser("run", help="Run evaluation cases for a skill", parents=[global_parser])
+    evals_run_parser.add_argument("path", help="Path to the skill directory")
+    evals_run_parser.add_argument("--mode", choices=["smoke", "release"], default="smoke", help="Evaluation mode")
+    
+    evals_subparsers.add_parser("benchmark", help="Run full repository benchmark suite", parents=[global_parser])
+    evals_subparsers.add_parser("dashboard", help="Generate evaluation dashboard", parents=[global_parser])
+    
     args = parser.parse_args()
     
     repo_root = find_repo_root()
     result = CallResult()
+    if args.trace_id:
+        result.trace_id = args.trace_id
+        
     result.metadata["command"] = " ".join(sys.argv[1:])
     
     if args.topic == "repo":
         if args.action == "status":
-            result.data["repo_root"] = str(repo_root)
-            result.data["is_git"] = (repo_root / ".git").exists()
-            result.status = "success"
+            result = repo_status(repo_root, verbose=args.verbose)
+        elif args.action == "validate":
+            result = repo_validate(repo_root, ephemeral=args.ephemeral)
             
     elif args.topic == "skills":
         if args.action == "list":
             result = list_skills(repo_root, category=args.category)
         elif args.action == "sync":
             result = sync_skills(repo_root, scope=args.scope, dry_run=args.dry_run)
+        elif args.action == "audit":
+            result = audit_skill(repo_root, skill_path=args.path, level=args.level)
+        elif args.action == "install":
+            # For now install_skill script doesn't support --dry-run directly but we could add it
+            result = install_skill(repo_root, url=args.url, remediate=args.remediate, dest=args.dest)
+        elif args.action == "fold":
+            result = fold_skills(repo_root, source=args.source, target=args.target, sensitivity=args.sensitivity)
+        elif args.action == "init":
+            result = init_skill(repo_root, name=args.name, category=args.category, description=args.description)
+            
+    elif args.topic == "plugins":
+        if args.action == "init":
+            companion = []
+            if args.with_scripts: companion.append("scripts")
+            if args.with_assets: companion.append("assets")
+            if args.with_references: companion.append("references")
+            if args.with_workflows: companion.append("workflows")
+            result = init_plugin(repo_root, name=args.name, with_marketplace=args.with_marketplace, companion_folders=companion)
+            
+    elif args.topic == "evals":
+        if args.action == "run":
+            result = run_evals(repo_root, path=args.path, mode=args.mode)
+        elif args.action == "benchmark":
+            result = benchmark_portfolio(repo_root)
+        elif args.action == "dashboard":
+            result = dashboard_report(repo_root)
+    
+    # Finalize Telemetry
+    result.telemetry["latency_ms"] = int((time.time() - start_time) * 1000)
+    if args.trace_id:
+        result.trace_id = args.trace_id # Ensure it persists if command function replaced result
     
     # Dispatch Output
     if args.json:
-        # Ensure command is updated in metadata if it was replaced by result from command function
         result.metadata["command"] = " ".join(sys.argv[1:])
-        print(result.to_json())
+        print(result.to_json(repo_root=str(repo_root)))
     else:
         if result.status == "success":
             if args.topic:
                 if args.topic == "repo" and args.action == "status":
                     print(f"✅ Success: {result.metadata['command']}")
                     print(f"  Root: {result.data['repo_root']}")
+                    print(f"  Synced: {result.data['skills_synced']}")
+                elif args.topic == "repo" and args.action == "validate":
+                    print(f"✅ Validation passed! ({result.data['warn_only_issues']} warnings)")
                 elif args.topic == "skills" and args.action == "list":
                     print(f"Discovered {len(result.data['skills'])} skills:")
                     for skill in result.data["skills"]:
                         print(f"  - {skill['name']} [{skill['category']}]")
                 elif args.topic == "skills" and args.action == "sync":
                     print(f"✅ Planned sync: {len(result.data['plan']['symlinks'])} symlinks.")
+                    for log in result.data.get("logs", []):
+                        print(f"  {log}")
                     if args.dry_run:
                         print("  (Dry run - no changes made)")
+                elif args.topic == "skills" and args.action == "audit":
+                    print(f"✅ Audit passed: {args.path}")
+                    print(result.data["diagnostics"]["stdout"])
+                elif args.topic == "skills" and args.action == "install":
+                    print(f"✅ Installed skill: {result.data.get('skill_name', args.url)}")
+                    print(result.data.get("raw_output", ""))
+                elif args.topic == "skills" and args.action == "fold":
+                    print(f"✅ Result: {result.data['recommendation']}")
+                    print(f"  Overlap Score: {result.data['overlap_score']}")
+                    print(f"  Rationale: {result.data['rationale']}")
+                elif args.topic == "skills" and args.action == "init":
+                    print(f"✅ {result.data['message']}")
+                elif args.topic == "plugins" and args.action == "init":
+                    print(f"✅ {result.data['message']}")
+                    print(result.data.get("raw_output", ""))
+                elif args.topic == "evals":
+                    if args.action == "run":
+                        print(f"✅ Evaluation complete for {args.path}")
+                        print(result.data.get("raw_output", ""))
+                    elif args.action == "benchmark":
+                        print(f"✅ Benchmark suite complete.")
+                        print(result.data.get("raw_output", ""))
+                    elif args.action == "dashboard":
+                        print(f"✅ {result.data['message']}")
             else:
                 parser.print_help()
         else:
             print(f"❌ Error: {result.errors[0].message if result.errors else 'Unknown error'}")
+            if args.topic == "skills" and args.action == "audit":
+                if "diagnostics" in result.data: print(result.data["diagnostics"]["stdout"])
+                if "security_gate" in result.data: print(result.data["security_gate"]["stdout"])
+            elif args.topic == "skills" and args.action in ("install", "fold", "init"):
+                if "raw_output" in result.data: print(result.data["raw_output"])
+                if "raw_error" in result.data: print(result.data["raw_error"])
+            elif args.topic == "plugins" and args.action == "init":
+                if "raw_output" in result.data: print(result.data["raw_output"])
+                if "raw_error" in result.data: print(result.data["raw_error"])
+            elif args.topic == "evals" and args.action == "run":
+                if "raw_output" in result.data: print(result.data["raw_output"])
+                if "raw_error" in result.data: print(result.data["raw_error"])
+            elif args.topic == "repo" and args.action == "validate":
+                print(result.data.get("raw_output", ""))
+
+    # Semantic Exit Code
+    if result.status == "success":
+        sys.exit(0)
+    else:
+        error_code = result.errors[0].code if result.errors else "ERR_RUNTIME"
+        sys.exit(ERROR_MAP.get(error_code, 1))
 
 if __name__ == "__main__":
     main()
