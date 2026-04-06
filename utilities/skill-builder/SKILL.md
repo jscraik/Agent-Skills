@@ -1,6 +1,6 @@
 ---
 name: skill-builder
-description: Improve, audit, compare, validate, and package Codex skills, including SKILL.md, references, evals, scripts, and standalone-skill handoff prep. Use when lifecycle hardening, routing, quality gates, or standalone skill packaging is the primary job, not first-draft scaffolding, pure installation, or plugin conversion.
+description: Improve and validate Codex skill quality using automated audits and comparative hardening loops. Use when hardening skill routing, workflows, and safety before release, or when packaging validated standalone skills for distribution, rather than for first-draft scaffolding or pure installation.
 metadata:
   skill-type: code_quality_review
   lifecycle_state: active
@@ -335,6 +335,9 @@ Reference files:
 | [[skill-installer]] | Install, import, or repair runtime visibility when the skill package is already valid and the remaining work is distribution |
 
 **Topic map:** [[agent-ops]]
+
+## Remember
+The agent is capable of extraordinary work in this domain. These guidelines unlock that potential—they don't constrain it. Use judgment, adapt to context, and push boundaries when appropriate.
 
 ## Failure mode
 - If out of scope, say why and offer the nearest next skill-appropriate next step.

@@ -361,14 +361,14 @@ for skill_dir in "${skill_dirs[@]}"; do
 
   "$python_bin" utilities/skill-builder/scripts/openclaw_skill_guard.py "$skill_dir" \
     --mode both \
-    --format text || true
+    --format text
 
   "$python_bin" utilities/skill-builder/scripts/analyze_skill.py "$skill_dir" \
     --min-pass 60 \
-    --no-emoji || true
+    --no-emoji
 
   "$python_bin" utilities/skill-builder/scripts/upgrade_skill.py "$skill_dir" \
-    --format text || true
+    --format text
 
 done
 

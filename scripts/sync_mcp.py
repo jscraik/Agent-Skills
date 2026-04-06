@@ -37,14 +37,17 @@ def build_antigravity_config(codex_config):
         "repo-prompt": "repoprompt",
     }
     
-    # Source .env files with a timeout to avoid blocking on empty FIFOs
-    # We use a short timeout; if it fails, we assume the environment is already set or 1Password is locked.
+    # Loader to source .env files (handles regular files and FIFOs with 0.5s timeout)
     source_env = (
         'for f in ~/.codex/.env ~/dev/config/.env; do '
-        '[ -f "$f" ] && { timeout 0.5s sh -c ". $f && env -0" | xargs -0 -I {} export {} 2>/dev/null || true; }; '
+        '[ -e "$f" ] && { tmp=$(mktemp); timeout 0.5s cat "$f" > "$tmp" || true; [ -s "$tmp" ] && . "$tmp"; rm -f "$tmp"; }; '
         'done'
     )
-    wrapper = f"set -a; {source_env}; set +a"
+    # Ensure Homebrew and Mise shims are on the PATH for npx and other tools
+    wrapper = (
+        'export PATH="/opt/homebrew/bin:$HOME/.local/share/mise/shims:$PATH"; '
+        f'set -a; {source_env}; set +a'
+    )
     
     servers = codex_config.get("mcp_servers", {})
     for server_name, config in servers.items():
@@ -105,20 +108,27 @@ def build_antigravity_config(codex_config):
         else:
             continue
             
+        # Deduplicate remote servers by URL
+        if "url" in config:
+            is_duplicate = False
+            for existing_mcp in mcp_servers.values():
+                if existing_mcp.get("command") == "sh" and any(config["url"] in arg for arg in existing_mcp.get("args", [])):
+                    is_duplicate = True
+                    break
+            if is_duplicate:
+                logging.info("Skipping duplicate remote server URL: %s", config["url"])
+                continue
+            
         mcp_servers[mcp_name] = mcp_obj
 
-    # Antigravity ships sequentially-thinking by default typically
-    if "sequential-thinking" not in mcp_servers:
-        mcp_servers["sequential-thinking"] = {
-            "command": "npx",
-            "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
-        }
-        
     # User requested agentation MCP to be globally available in Antigravity
     if "agentation" not in mcp_servers:
         mcp_servers["agentation"] = {
             "command": "sh",
-            "args": ["-c", f"{wrapper}; exec npx -y agentation-mcp server"]
+            "args": [
+                "-c",
+                f"{wrapper}; exec npx -y agentation-mcp server"
+            ]
         }
 
     return {"mcpServers": mcp_servers}
