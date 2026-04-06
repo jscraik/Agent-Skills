@@ -18,6 +18,7 @@ from ask.commands.skills import list_skills, sync_skills, audit_skill, install_s
 from ask.commands.repo import repo_status, repo_validate
 from ask.commands.plugins import init_plugin
 from ask.commands.evals import run_evals, benchmark_portfolio, dashboard_report
+from ask.commands.graph import graph_related, graph_find, graph_info, graph_chain, graph_list, graph_topics
 
 # Error Code Mapping
 ERROR_MAP = {
@@ -106,7 +107,36 @@ def main():
     
     evals_subparsers.add_parser("benchmark", help="Run full repository benchmark suite", parents=[global_parser])
     evals_subparsers.add_parser("dashboard", help="Generate evaluation dashboard", parents=[global_parser])
-    
+
+    # --- graph ---
+    graph_parser = subparsers.add_parser("graph", help="Skill graph navigation and discovery", parents=[global_parser])
+    graph_subparsers = graph_parser.add_subparsers(dest="action")
+
+    graph_related_parser = graph_subparsers.add_parser("related", help="Find related skills", parents=[global_parser])
+    graph_related_parser.add_argument("skill", help="Skill name to find relations for")
+    graph_related_parser.add_argument("--depth", type=int, default=1, help="BFS depth")
+    graph_related_parser.add_argument("--reverse", action="store_true", help="Follow in-links instead of out-links")
+    graph_related_parser.add_argument("--topic-filter", dest="topic_filter", help="Filter by topic")
+    graph_related_parser.add_argument("--tier", choices=["stable", "growing", "experimental"], help="Filter by tier")
+
+    graph_find_parser = graph_subparsers.add_parser("find", help="Search for skills", parents=[global_parser])
+    graph_find_parser.add_argument("query", help="Search query")
+    graph_find_parser.add_argument("--topic-filter", dest="topic_filter", help="Filter by topic")
+    graph_find_parser.add_argument("--tier", choices=["stable", "growing", "experimental"], help="Filter by tier")
+
+    graph_info_parser = graph_subparsers.add_parser("info", help="Show skill details", parents=[global_parser])
+    graph_info_parser.add_argument("skill", help="Skill name")
+
+    graph_chain_parser = graph_subparsers.add_parser("chain", help="Find path between skills", parents=[global_parser])
+    graph_chain_parser.add_argument("from_skill", help="Starting skill")
+    graph_chain_parser.add_argument("to_skill", help="Target skill")
+
+    graph_list_parser = graph_subparsers.add_parser("list", help="List all skills in graph", parents=[global_parser])
+    graph_list_parser.add_argument("--topic-filter", dest="topic_filter", help="Filter by topic")
+    graph_list_parser.add_argument("--tier", choices=["stable", "growing", "experimental"], help="Filter by tier")
+
+    graph_subparsers.add_parser("topics", help="List all topic clusters", parents=[global_parser])
+
     args = parser.parse_args()
     
     repo_root = find_repo_root()
@@ -153,7 +183,22 @@ def main():
             result = benchmark_portfolio(repo_root)
         elif args.action == "dashboard":
             result = dashboard_report(repo_root)
-    
+
+    elif args.topic == "graph":
+        if args.action == "related":
+            result = graph_related(repo_root, skill=args.skill, depth=args.depth,
+                                   reverse=args.reverse, topic=args.topic_filter, tier=args.tier)
+        elif args.action == "find":
+            result = graph_find(repo_root, query=args.query, topic=args.topic_filter, tier=args.tier)
+        elif args.action == "info":
+            result = graph_info(repo_root, skill=args.skill)
+        elif args.action == "chain":
+            result = graph_chain(repo_root, from_skill=args.from_skill, to_skill=args.to_skill)
+        elif args.action == "list":
+            result = graph_list(repo_root, topic=args.topic_filter, tier=args.tier)
+        elif args.action == "topics":
+            result = graph_topics(repo_root)
+
     # Finalize Telemetry
     result.telemetry["latency_ms"] = int((time.time() - start_time) * 1000)
     if args.trace_id:
@@ -206,6 +251,62 @@ def main():
                         print(result.data.get("raw_output", ""))
                     elif args.action == "dashboard":
                         print(f"✅ {result.data['message']}")
+                elif args.topic == "graph":
+                    if args.action == "related":
+                        print(f"\n📊 {result.data['skill']} [{result.data['direction']}, depth={result.data['depth']}]")
+                        print(f"   Found {result.data['count']} related skill(s)\n")
+                        for r in result.data['related'][:15]:
+                            tier_icon = "★" if r['tier'] == 'stable' else ("◆" if r['tier'] == 'growing' else "◇")
+                            weight = f" ×{r['weight']:.1f}" if r['weight'] > 1.2 else ""
+                            print(f"   {tier_icon} {r['skill']} [{r['topic']}]{weight}")
+                            if r['description']:
+                                print(f"      {r['description'][:70]}")
+                        if result.data['count'] > 15:
+                            print(f"\n   ... and {result.data['count'] - 15} more")
+                        print()
+                    elif args.action == "find":
+                        print(f"\n🔍 Search: '{result.data['query']}' ({result.data['count']} match(es))\n")
+                        for n in result.data['matches'][:20]:
+                            tier_icon = "★" if n.get('tier') == 'stable' else ("◆" if n.get('tier') == 'growing' else "◇")
+                            print(f"   {tier_icon} {n['id']} [{n.get('topic', '?')}] ↓{n.get('in_degree', 0)}")
+                        print()
+                    elif args.action == "info":
+                        n = result.data['node']
+                        tier_icon = "★" if n.get('tier') == 'stable' else ("◆" if n.get('tier') == 'growing' else "◇")
+                        print(f"\n📋 {result.data['skill']}")
+                        print(f"   Topic:     {n.get('topic', 'unknown')}")
+                        print(f"   Tier:      {tier_icon} {n.get('tier', 'experimental')}")
+                        print(f"   Stability: {n.get('stability', 'unknown')}")
+                        print(f"   In-links:  {result.data['metrics']['in_degree']}")
+                        print(f"   Out-links: {result.data['metrics']['out_degree']}")
+                        out_edges = result.data['out_edges']
+                        if out_edges:
+                            print(f"\n   Links to:")
+                            for e in out_edges[:10]:
+                                w = f" ×{e['weight']:.1f}" if e.get('weight', 1) > 1.2 else ""
+                                print(f"      → {e['to']}{w}")
+                        print()
+                    elif args.action == "chain":
+                        if result.data['reachable']:
+                            path_str = " → ".join(result.data['path'])
+                            print(f"\n🔗 Chain ({result.data['hops']} hops):\n   {path_str}\n")
+                        else:
+                            print(f"\n❌ No path found from {result.data['from']} to {result.data['to']}\n")
+                    elif args.action == "list":
+                        filters = result.data['filters']
+                        filter_str = f"topic={filters['topic']}" if filters['topic'] else "all"
+                        if filters['tier']:
+                            filter_str += f", tier={filters['tier']}"
+                        print(f"\n📚 Skills [{filter_str}] ({result.data['count']} result(s))\n")
+                        for n in result.data['skills']:
+                            tier_icon = "★" if n.get('tier') == 'stable' else ("◆" if n.get('tier') == 'growing' else "◇")
+                            print(f"   {tier_icon} {n['id']:<35} [{n.get('topic', '?')}] ↓{n.get('in_degree', 0)}")
+                        print()
+                    elif args.action == "topics":
+                        print(f"\n🏷️  Topic Clusters ({result.data['count']} topics)\n")
+                        for topic, count in result.data['topics'].items():
+                            print(f"   {topic:<25} {count} skill(s)")
+                        print()
             else:
                 parser.print_help()
         else:

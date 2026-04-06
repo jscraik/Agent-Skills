@@ -1,6 +1,6 @@
 ---
 name: plugin-creator
-description: Scaffold local Codex plugins with a contract-valid `.codex-plugin/plugin.json`, optional companion folders, and marketplace entries with explicit policy defaults using the unified **Agent Skills Kit (`ask`)** CLI.
+description: Scaffold local Codex plugins with a contract-valid `.codex-plugin/plugin.json`, optional companion folders, and marketplace entries. Use when the user asks to create a new plugin skeleton, generate plugin.json, or add marketplace entries.
 metadata:
   short-description: Scaffold plugin skeletons and marketplace entries
 ---
@@ -31,10 +31,16 @@ Minimum inputs:
 
 ## Outputs
 
-Expected outputs:
+Expected outputs (schema_version: 1):
 - `<plugin-root>/<plugin-name>/.codex-plugin/plugin.json`;
 - optional companion folders selected by flags;
 - marketplace entry at `.agents/plugins/marketplace.json` when requested.
+
+## Resources
+
+- **scripts/**: Contains `create_basic_plugin.py` for deterministic scaffold generation.
+- **references/**: Contains contract definitions (`contract.yaml`), evaluation spec (`evals.yaml`), plugin JSON spec (`plugin-json-spec.md`), and task profile (`task-profile.json`).
+- **assets/**: Contains plugin icons and visual assets (`plugin-creator.png`, `plugin-creator-small.svg`).
 
 ## Philosophy
 
@@ -94,6 +100,6 @@ bin/ask repo validate --ephemeral
 |---|---|
 | [[codex-plugin-builder]] | Promote scaffold into a full plugin package with governance checks |
 | [[skill-builder]] | Improve bundled skill quality before plugin release |
-| [[ask-cli-spec]] | Consult the technical contract for the ask CLI |
+| [[cli-spec]] | Consult the technical contract for the ask CLI |
 
 **Topic map:** [[agent-ops]]

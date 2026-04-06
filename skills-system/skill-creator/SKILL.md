@@ -131,6 +131,6 @@ Family gate note:
 |---|---|
 | [[skill-builder]] | Lifecycle hardening, comparative eval rounds, and release-quality contract upgrades |
 | [[skill-installer]] | Installing already-valid skills into Codex environments |
-| [[ask-cli-spec]] | Consult the technical contract for the ask CLI |
+| [[cli-spec]] | Consult the technical contract for the ask CLI |
 
 **Topic map:** [[agent-ops]]

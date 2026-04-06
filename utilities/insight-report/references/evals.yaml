@@ -67,7 +67,7 @@ cases:
       - type: skill_selected
         expected_skill: "insight-report"
       - type: regex
-        value: '(?i)(30 days|pdf|--pdf)'
+        value: '(?i)(30 days|html|report\.html)'
 
   - id: no-data-scenario
     name: no session data available
