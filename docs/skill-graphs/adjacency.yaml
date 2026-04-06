@@ -169,6 +169,8 @@ ce-plan:
   product-spec: Use when the plan should be blocked until the product contract is
     made explicit
 ce-review:
+  agent-native-audit: Audit whether the workflow is broadly agent-operable rather
+    than just merge-ready
   ce-technical-review: Produce a severity-ranked engineering issue list instead of
     a package-level readiness synthesis
   ce-work: Execute the approved work once review confirms the branch is ready to advance
@@ -412,9 +414,11 @@ imagegen:
   visual-explainer: Embed generated images as hero banners in HTML explainers
   youtube-titles-thumbnails: Generate thumbnail concept images for YouTube packaging
 insight-report:
+  codex-automation-architect: Convert repeated recommendations into scheduled automations
   codex-home-audit: Follow up on report-detected local environment drift
   codex-sessions-skill-scan: Build a session quality baseline before generating the
     report
+  visual-explainer: Convert report outcomes into an executive visual explainer
 interview-me:
   architecture-interview: Structure a concrete architecture choice into a decision
     record

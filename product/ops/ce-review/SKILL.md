@@ -353,6 +353,7 @@ See `references/ce-anti-patterns.md`:
 ## See Also
 | Skill | When to use |
 |---|---|
+| [[agent-native-audit]] | Audit agent-operability vs merge-readiness |
 | [[ce-technical-review]] | Severity-ranked engineering issues |
 | [[ce-work]] | Execute approved work |
 | [[gh-workflow]] | GitHub merge readiness |
