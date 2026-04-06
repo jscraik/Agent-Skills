@@ -333,11 +333,7 @@ def sync_skills(repo_root: Path, scope: str = "workspace", dry_run: bool = False
             logs.append(_create_symlink(Path(source_rel), target_link, dry_run))
     elif scope == "user":
         home = Path.home()
-        targets = [(skills_dir, repo_root / "skills"), (skills_dir, home / ".claude" / "skills"), (skills_dir, home / ".agents" / "skills"), (skills_dir, home / ".codex" / "skills"), (antigravity_skills_dir, home / ".antigravity" / "skills")]
-        for src, dst in targets:
-            plan["symlinks"].append({"from": str(dst), "to": str(src)})
-            logs.append(_create_symlink(src, dst, dry_run))
-        # Guard: antigravity source directory must exist before syncing
+        # Guard: antigravity source directory must exist before any mutations
         if not antigravity_skills_dir.exists():
             result.status = "error"
             result.errors.append(ErrorObject(
@@ -346,6 +342,10 @@ def sync_skills(repo_root: Path, scope: str = "workspace", dry_run: bool = False
                 fix_suggestion="Ensure the skills-antigravity directory exists or use --scope workspace"
             ))
             return result
+        targets = [(skills_dir, repo_root / "skills"), (skills_dir, home / ".claude" / "skills"), (skills_dir, home / ".agents" / "skills"), (skills_dir, home / ".codex" / "skills"), (antigravity_skills_dir, home / ".antigravity" / "skills")]
+        for src, dst in targets:
+            plan["symlinks"].append({"from": str(dst), "to": str(src)})
+            logs.append(_create_symlink(src, dst, dry_run))
         antigravity_dest = home / ".gemini" / "antigravity" / "skills"
         plan["writes"].append(str(antigravity_dest))
         logs.append(_sync_dir_copy(antigravity_skills_dir, antigravity_dest, dry_run))
