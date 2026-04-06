@@ -2573,10 +2573,16 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     scorecard_path = Path(args.scorecard_out).expanduser().resolve() if args.scorecard_out else (reports_base / "scorecard.json")
     scorecard_path.parent.mkdir(parents=True, exist_ok=True)
     scorecard_path.write_text(json.dumps(summary, indent=2, ensure_ascii=False), encoding="utf-8")
+    def _rel(p: Path) -> str:
+        try:
+            return str(p.relative_to(workspace_root))
+        except ValueError:
+            return str(p)
+
     summary["artifacts"] = {
-        "reports_base": str(reports_base),
-        "summary": str(summary_path),
-        "scorecard": str(scorecard_path),
+        "reports_base": _rel(reports_base),
+        "summary": _rel(summary_path),
+        "scorecard": _rel(scorecard_path),
     }
     if comparison_review_paths:
         unique_paths = sorted(set(comparison_review_paths))
@@ -2584,8 +2590,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     summary["neutral_baseline_approvals_used"] = sorted(used_neutral_baseline_approvals)
     release_manifest_path = reports_base / "release_manifest.json"
     junit_path = Path(args.junit_out).expanduser().resolve() if args.junit_out else (reports_base / "junit.xml")
-    summary["artifacts"]["release_manifest"] = str(release_manifest_path)
-    summary["artifacts"]["junit"] = str(junit_path)
+    summary["artifacts"]["release_manifest"] = _rel(release_manifest_path)
+    summary["artifacts"]["junit"] = _rel(junit_path)
     _write_junit_report(summary, junit_path)
     release_manifest = {
         "schema_version": "1.0",
@@ -2601,7 +2607,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             "readiness_summary": summary["readiness_summary"],
             "round_state_summary": summary["round_state_summary"],
             "neutral_baseline_approvals_used": summary["neutral_baseline_approvals_used"],
-            "reports_base": str(reports_base),
+            "reports_base": _rel(reports_base),
         },
         "artifacts": summary["artifacts"],
     }
