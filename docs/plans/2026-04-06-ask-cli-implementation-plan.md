@@ -71,6 +71,7 @@ Goal: Implement state-changing operations with dry-run and atomic promotion.
 - [x] **AC4:** `ask skills install --dry-run` returns a `plan` object in JSON mode. (Traceable to spec CA2).
 
 ## Verification-First Strategy
+
 | Layer | Tool | Requirement |
 | :--- | :--- | :--- |
 | **Unit** | `unittest` | Validate `CallResult` serialization and redaction logic. |
