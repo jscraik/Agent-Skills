@@ -81,14 +81,28 @@ def audit_skill(repo_root: Path, skill_path: str, level: str = "compat") -> Call
     try:
         resolved_path = (repo_root / skill_path).resolve()
         resolved_root = repo_root.resolve()
-        if not str(resolved_path).startswith(str(resolved_root)):
-            result.status = "error"
-            result.errors.append(ErrorObject(
-                code="ERR_PATH_TRAVERSAL",
-                message=f"Path traversal detected: '{skill_path}' resolves outside repository root.",
-                fix_suggestion="Use a relative path within the repository."
-            ))
-            return result
+        # Use is_relative_to for proper boundary check (not just string prefix)
+        try:
+            if not resolved_path.is_relative_to(resolved_root):
+                result.status = "error"
+                result.errors.append(ErrorObject(
+                    code="ERR_PATH_TRAVERSAL",
+                    message=f"Path traversal detected: '{skill_path}' resolves outside repository root.",
+                    fix_suggestion="Use a relative path within the repository."
+                ))
+                return result
+        except AttributeError:
+            # Python <3.9 fallback: check path components
+            try:
+                resolved_path.relative_to(resolved_root)
+            except ValueError:
+                result.status = "error"
+                result.errors.append(ErrorObject(
+                    code="ERR_PATH_TRAVERSAL",
+                    message=f"Path traversal detected: '{skill_path}' resolves outside repository root.",
+                    fix_suggestion="Use a relative path within the repository."
+                ))
+                return result
     except Exception as e:
         result.status = "error"
         result.errors.append(ErrorObject(

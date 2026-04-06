@@ -501,6 +501,21 @@ def main():
 
         args = parser.parse_args(corrected_args)
 
+    # Guard: args must be initialized before use (catches robot-mode parse edge cases)
+    if 'args' not in locals() or args is None:
+        result = CallResult()
+        result.status = "error"
+        result.errors.append(ErrorObject(
+            code="ERR_VALIDATION",
+            message="Failed to parse command arguments.",
+            fix_suggestion="Check command format and try again."
+        ))
+        if "--json" in raw_args:
+            print(result.to_json())
+        else:
+            print("❌ Failed to parse command arguments.")
+        sys.exit(2)
+
     repo_root = find_repo_root()
     result = CallResult()
     if args.trace_id:
