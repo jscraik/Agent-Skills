@@ -9,6 +9,19 @@ plan_depth: standard
 
 # ask (Agent Skills Kit) CLI Implementation Plan
 
+## Table of Contents
+
+- [Problem Statement](#problem-statement)
+- [Implementation Strategy](#implementation-strategy)
+- [Proposed Structure](#proposed-structure)
+- [P0: Scaffolding and Core Envelope](#p0-scaffolding-and-core-envelope)
+- [P1: Context and Repo Commands](#p1-context-and-repo-commands)
+- [P2: Skill Lifecycle (Read-Only)](#p2-skill-lifecycle-read-only)
+- [P3: Skill Operations (Mutations)](#p3-skill-operations-mutations)
+- [Verification-First Strategy](#verification-first-strategy)
+- [Rollout & Safety](#rollout--safety)
+- [Definition of Done](#definition-of-done)
+
 ## Problem Statement
 The `agent-skills` project needs a unified, agent-native CLI to replace the current fragmented set of shell and Python scripts. This plan sequences the creation of the `ask` CLI, following the technical contract defined in `docs/cli-specs/2026-04-06-ask-cli-spec.md`.
 
