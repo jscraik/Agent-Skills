@@ -122,8 +122,13 @@ class TestAtomicPromotion(unittest.TestCase):
             security_evals_passed=True,
             qualitative_review_completed=True,
         )
+        from ask.validity import IterationEvidence
         evidence.iteration_rounds.append(
-            evidence.__class__.__dict__["__dataclass_fields__"]["iteration_rounds"].default_factory()
+            IterationEvidence(
+                round_id="round-001",
+                baseline_type="no_skill",
+                comparison_result="improved",
+            )
         )
         evidence.write(self.repo_root)
         

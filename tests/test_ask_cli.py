@@ -82,5 +82,16 @@ class TestAskCLI(unittest.TestCase):
         if output["status"] == "success":
             self.assertIn("skill_name", output["data"])
 
+    def test_trace_id_from_env(self):
+        """CA2: ASK_TRACE_ID environment variable propagates to output."""
+        env = os.environ.copy()
+        env["ASK_TRACE_ID"] = "test-trace-123"
+        cmd = ["python3", "bin/ask", "repo", "status", "--json"]
+        result = subprocess.run(cmd, capture_output=True, text=True, env=env)
+        
+        self.assertEqual(result.returncode, 0)
+        output = json.loads(result.stdout)
+        self.assertEqual(output["trace_id"], "test-trace-123")
+
 if __name__ == "__main__":
     unittest.main()
