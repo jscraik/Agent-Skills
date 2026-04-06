@@ -165,18 +165,7 @@ def install_skill(repo_root: Path, url: str, remediate: bool = False, dest: str 
     skill_name = url.split("/")[-1].replace(".git", "") if "/" in url else url
     target_path = dest_path / skill_name
 
-    # Check for existing skill conflict
-    if target_path.exists():
-        result.status = "error"
-        result.errors.append(ErrorObject(
-            code="ERR_CONFLICT",
-            message=f"Skill '{skill_name}' already exists at '{target_path.relative_to(repo_root)}'.",
-            fix_suggestion=f"Remove the existing skill or choose a different destination with --dest."
-        ))
-        result.data["skill_name"] = skill_name
-        result.data["existing_path"] = str(target_path.relative_to(repo_root))
-        return result
-
+    # Handle dry-run first (before any side-effect checks)
     if dry_run:
         # Preview mode: show what would happen without making changes
         result.status = "success"
@@ -188,6 +177,18 @@ def install_skill(repo_root: Path, url: str, remediate: bool = False, dest: str 
         result.metadata["next_steps"] = [
             f"ask skills install {url} --dest {dest}" + (" --remediate" if remediate else "")
         ]
+        return result
+
+    # Check for existing skill conflict (only for actual installation)
+    if target_path.exists():
+        result.status = "error"
+        result.errors.append(ErrorObject(
+            code="ERR_CONFLICT",
+            message=f"Skill '{skill_name}' already exists at '{target_path.relative_to(repo_root)}'.",
+            fix_suggestion=f"Remove the existing skill or choose a different destination with --dest."
+        ))
+        result.data["skill_name"] = skill_name
+        result.data["existing_path"] = str(target_path.relative_to(repo_root))
         return result
 
     cmd = [
