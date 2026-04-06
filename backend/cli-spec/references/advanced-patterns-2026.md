@@ -18,6 +18,7 @@ Move beyond traditional columnar help text. For developer-focused tools, use Typ
 - **JSDoc Integration:** Embed brief parameter descriptions as block comments `/** ... */`.
 
 **Example:**
+
 ```typescript
 skylink vm create(name: string, region: "us-east" | "eu-west", tags?: string[])
 /**
