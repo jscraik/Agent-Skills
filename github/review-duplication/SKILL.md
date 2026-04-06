@@ -130,3 +130,13 @@ Run these checks and fail fast: stop at the first failed gate and do not proceed
 python3 scripts/diagnose_skill.py github/review-duplication
 python3 utilities/skill-builder/scripts/quick_validate.py github/review-duplication --mode strict
 ```
+
+## See Also
+
+| Skill | When to use |
+|-------|-------------|
+| [[backend-engineer]] | When duplication is found in backend code |
+| [[frontend-ui-design]] | When duplication is found in UI components |
+| [[codex-home-audit]] | When reviewing Codex configuration for duplicates |
+
+**Topic map:** [[github]]
