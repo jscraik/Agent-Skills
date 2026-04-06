@@ -1,129 +1,157 @@
 ---
 name: cli-spec
-description: Plan and draft CLI UX and surface area (commands, flags, help, output). Use when specifying or refactoring a command-line interface.
+description: Create an implementation-grade CLI specification when the user requests a binding technical contract for a new or existing command-line interface.
 metadata:
   skill-type: scaffolding_templates
 ---
 
-# CLI Spec
+# CLI Spec (Implementation-Grade)
+
+**Note: The current year is 2026.** Use this when dating specification artifacts.
+
+`ce-spec` defines system contracts. `cli-spec` defines the **CLI Implementation Contract** (command trees, JSON schemas, dry-run plans, and safety gates).
+
+This skill produces a technical contract at `docs/cli-specs/`. It does **not** produce implementation code.
 
 ## Table of Contents
-- [Standards snapshot](#standards-snapshot)
+- [Working agreement](#working-agreement)
 - [When to use](#when-to-use)
-- [When not to use](#when-not-to-use)
-- [Required inputs](#required-inputs)
-- [Deliverables](#deliverables)
-- [Philosophy](#philosophy)
+- [Inputs](#inputs)
+- [Outputs](#outputs)
 - [Workflow](#workflow)
-- [Verification](#verification)
+- [Artifact contracts](#artifact-contracts)
+- [Validation and Gates](#validation-and-gates)
+- [Philosophy](#philosophy)
 - [Constraints](#constraints)
 - [Anti-patterns](#anti-patterns)
-- [Response format](#response-format)
-- [Remember](#remember)
+- [Examples](#examples)
+- [Response format](#call-signature)
+- [See Also](#see-also)
 
-## Standards snapshot (March 2026)
-- Design CLIs for both humans and automation unless the request explicitly narrows the audience.
-- Make output predictable, composable, and easy to script.
-- Treat safety, exit codes, and non-interactive behavior as first-class design requirements.
+## Working agreement
+- Specification answers **WHAT** the CLI owns, how it behaves in dual-mode (Human/Agent), and how correctness is verified.
+- Use the most authoritative source; do not invent behavior that belongs in a parent product spec.
+- Prefer the smallest spec that removes ambiguity; scope to one tool or 3-5 tightly coupled commands.
+- Leave a written artifact in `docs/cli-specs/` for substantial work.
+- Every acceptance criterion must have a stable **`CA`** ID (e.g., `CA1`, `CA2`).
 
 ## When to use
-- Specify a new CLI surface area.
-- Refactor an existing CLI’s commands, flags, output, or help behavior.
-- Review a CLI proposal for consistency, usability, and scriptability.
-- Define a command tree, error model, config precedence, or automation-safe UX.
+Use this skill when you need a binding technical design for a CLI before planning or coding begins.
 
-## When not to use
-- Full backend or application implementation with no CLI design decision in scope.
-- Generic shell scripting help where there is no CLI product or interface to specify.
-- Visual UX or frontend workflow design.
+Primary triggers:
+- "Create an implementation-grade CLI spec for [context]."
+- "Turn this brainstorm into a formal CLI contract."
+- "Refactor this legacy CLI into a Gold Standard 2026 interface."
+- "Define the command tree, JSON schema, and safety gates for [tool]."
 
-## Required inputs
-- Command name and one-sentence purpose.
-- Primary users: humans, automation, or both.
-- Inputs and outputs: args, stdin, files, URLs, structured output, exit-code needs.
-- Safety requirements: confirmations, dry-run, non-interactive mode, access constraints.
-- Platform/runtime constraints and any compatibility promises.
+## Inputs
+- **Source:** A brainstorm path, feature description, or legacy tool definition.
+- **Audience:** Human-first, Agent-first, or Dual-mode hybrid.
+- **Constraints:** Secret handling requirements, platform limits, and ecosystem (Rust, Go, etc.).
 
-If key details are missing, ask only the minimum needed to lock the interface shape.
-
-## Deliverables
-- Command tree and usage synopsis.
-- Flags and arguments table with defaults, requiredness, and semantics.
-- Output contract: stdout vs stderr, machine-readable modes, quiet/verbose behavior.
-- Exit-code and failure-mode map.
-- Config and env precedence.
-- Example invocations covering the common path plus at least one safety-sensitive or automation path.
-
-## Philosophy
-- Human-friendly by default, automation-friendly by design.
-- Predictability beats cleverness.
-- Destructive actions should be obviously safe or obviously gated.
-- The help text is part of the product, not documentation afterthought.
+## Outputs
+- **Technical Contract:** A markdown file in `docs/cli-specs/` following the `schema_version: 1` standard.
+- **CA Matrix:** A set of stable CLI Acceptance IDs for verification.
+- **JSON Schemas:** Machine-readable definitions for all command outputs.
 
 ## Workflow
-1. Identify the core jobs the CLI must do and keep verbs distinct.
-2. Separate what belongs in subcommands from what belongs in flags.
-3. Define the output contract before polishing syntax so scripting expectations stay stable.
-4. Design failure behavior explicitly: validation errors, operational errors, and partial success.
-5. Add safety controls for destructive or expensive operations.
-6. Verify naming consistency across synopsis, examples, flags, and exit codes.
 
-## Verification
-- Check that every command and flag is named consistently across all sections.
-- Verify config precedence is explicit and non-contradictory.
-- Verify destructive operations have confirmation, force, or dry-run behavior when appropriate.
-- Verify at least one automation-safe example uses structured output or non-interactive mode when relevant.
+### Phase 1: Local Grounding
+Research existing CLI patterns in the repository to ensure consistency.
+- Use `repo-research-analyst` to find similar tools.
+- Check `references/cli-guidelines.md` for local standards.
+- Consult `assets/cli-spec.png` for the canonical command tree layout.
 
-## Validation
-- Verify the spec names the command tree, output contract, and exit rules explicitly.
-- Verify examples match the declared syntax exactly.
-- Use `references/cli-guidelines.md` and other `references/` docs in this skill folder as the default rubric before inventing custom CLI rules.
-- Reuse any skill `assets/` templates that help keep the spec structure consistent.
+### Phase 2: Build the Contract
+Draft the technical specification. Ensure the document answers:
+- **Strategic Alignment:** Problem statement and audience goals.
+- **Command Model:** The `<topic> <action>` hierarchy.
+- **Type-Safe Signatures:** TypeScript-style help declarations.
+- **Response Envelope:** The `CallResult` JSON contract (trace_id, status, errors).
+- **Safety Spec:** Detailed `--dry-run` behavior and plan schema.
+- **Acceptance Matrix:** Sequential `CA` IDs for happy and failure paths.
+
+### Phase 3: Write the Artifact
+Save the spec to `docs/cli-specs/YYYY-MM-DD-<name>-cli-spec.md`. Use the canonical frontmatter from `references/cli-spec-artifacts.md`.
+
+## Artifact contracts
+- **Standard Path:** `docs/cli-specs/YYYY-MM-DD-<tool-name>-cli-spec.md`
+- **Stable IDs:** Use `CA1`, `CA2` for all verification items.
+- **Output:** Must include a JSON schema for all machine-readable endpoints.
+
+## Validation and Gates
+Fail fast: stop at first failed gate and do not proceed. Review the detailed contracts before claiming completion:
+- `references/contract.yaml`
+- `references/evals.yaml`
+- `references/gold-standard-2026.md`
+- `references/cli-spec-artifacts.md`
+- `references/advanced-patterns-2026.md`
+- `references/lifecycle-and-errors-2026.md`
+
+Run these checks:
+```bash
+python3 scripts/diagnose_skill.py backend/cli-spec
+python3 utilities/skill-builder/scripts/quick_validate.py backend/cli-spec --mode strict
+```
+
+## Philosophy
+- **Predictability beats Cleverness:** A command should be deterministic.
+- **The "Plan" Pattern:** Always show what *would* happen before changing state.
+- **Agent-Native DX:** Structured data is a first-class requirement, not an export option.
 
 ## Constraints
-- Never recommend passing secrets directly via command-line flags when env vars, stdin, files, or secret stores are more appropriate.
-- Do not invent unsupported behavior and present it as existing.
-- Prefer plain, stable nouns and verbs over brand-heavy or novelty naming.
+- **Absolute Paths:** Do not use absolute paths from your local machine in examples.
+- **Redaction:** Always redact secrets, API keys, or PII when providing sample outputs or logs.
+- **Scope:** Do not implement logic; stay focused on the interface contract.
 
 ## Anti-patterns
-- Overloading one command with unrelated behaviors instead of using clear subcommands.
-- Designing output purely for human reading and leaving automation as an afterthought.
-- Hiding destructive behavior behind ambiguous verbs.
-- Specifying flags or examples that conflict with the stated precedence or output rules.
-- Treating `--json` as an afterthought instead of a contract.
+- **God Commands:** Overloading a single command with too many flags.
+- **Regex-Parsing:** Forcing users to parse text output instead of providing JSON.
+- **Vague Errors:** Returning non-zero exit codes without a machine-readable error object.
 
 ## Examples
-- "Design a CLI for syncing issues from stdin or a file and returning JSON results."
-- "Refactor this CLI spec so destructive commands require `--force` or a confirmation step."
+- **When the user asks:** "I need an implementation-grade spec for a CLI that manages our S3 bucket permissions. Save it to docs."
+- **When the user says:** "Refactor the `mcporter` command tree into a formal CLI contract with `CA` IDs and JSON schemas."
+- **When the user asks:** "Create a Gold Standard 2026 spec for a new internal tool called 'vault-sync'."
 
 ## Response format
 Use these headings in order:
-1. `## When to use`
-2. `## Inputs`
-3. `## Outputs`
-4. `## Command model`
-5. `## Output and exit rules`
-6. `## Safety rules`
-7. `## Verification`
+1. `## Strategic alignment` (Confirming Gold Standard goals)
+2. `## Command model` (The `<topic> <action>` tree)
+3. `## Type-safe Signatures` (TypeScript-style help)
+4. `## Response Envelope and Exits` (The `CallResult` contract)
+5. `## Safety and Dry-run spec`
+6. `## Verification checklist (CA IDs)`
 
-## See Also
+## Required inputs
+- Tool name, primary ecosystem (e.g., Rust, Go, Node), and target audience.
+- Interaction Model: human, agent, or dual-mode hybrid.
+- Data Flow: inbound (args, stdin, files) and outbound (structured JSON, logs, exit codes).
+- Security Posture: secret management requirements and isolation levels.
+- Maturity Level: prototype or production-grade "Gold" CLI.
 
-| Skill | When to use together |
-|---|---|
-| [[writing-plans]] | Turn the CLI spec into an implementation plan |
-| [[test-driven-development]] | Write CLI acceptance tests from the spec |
-| [[docs-expert]] | Document the CLI surface after speccing it |
-| [[product-spec]] | Produce a broader product spec alongside the CLI spec |
-
-**Topic map:** [[backend-platform]]
-
-## Remember
-- A good CLI spec reduces implementation churn later.
-- Optimize for the common path, but make failure and automation paths explicit.
-- If the CLI will be used by agents or scripts, design for deterministic parsing from the start.
-
-## Gotchas
-- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.
+## Deliverables
+- Command Hierarchy: logical `<topic> <action>` tree.
+- Flags & Schema: comprehensive table with type-safety and defaults.
+- Output Contract: JSON schema, field masking, and `next_steps` metadata.
+- Failure Model: semantic exit codes and machine-readable error objects.
+- Safety Spec: dry-run behavior and confirmation gates.
 
 ## Failure mode
-- If the command goals, user workflows, or output contract are underspecified, stop, name the ambiguity, and fall back to a smaller CLI surface proposal before locking in flags or behaviors.
+- If required inputs are incomplete, stop and request clarification before proceeding.
+- If the CLI design conflicts with established project patterns, flag this explicitly and suggest alternatives.
+- If safety gates cannot be met, do not proceed with the spec.
+
+## Gotchas
+- **Absolute Paths:** Never use absolute paths from your local machine in examples.
+- **Secret Redaction:** Always redact secrets, API keys, or PII in sample outputs.
+- **NO_COLOR Standard:** Respect the `NO_COLOR` environment variable standard in all output examples.
+
+## See Also
+| Skill | When to use together |
+|---|---|
+| [[ce-spec]] | Use when the CLI is a front for a broader system spec |
+| [[agent-native-architecture]] | Ensure the CLI fits into an autonomous workflow |
+| [[docs-expert]] | Generate user-facing docs from the technical contract |
+
+**Topic map:** [[backend-platform]]

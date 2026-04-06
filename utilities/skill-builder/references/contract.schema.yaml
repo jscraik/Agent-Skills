@@ -1,0 +1,91 @@
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: "Skill Contract"
+description: "JSON Schema for skill-authoring family contract.yaml files (schema_version 1.x)"
+type: object
+
+required:
+  - purpose
+  - schema_version
+  - triggers
+  - inputs
+  - outputs
+  - non_goals
+  - risks
+
+additionalProperties: true
+
+properties:
+  schema_version:
+    type: [string, number]
+    description: "Contract schema version, e.g. 1.1"
+
+  purpose:
+    type: string
+    minLength: 10
+    description: "Short statement of why this skill contract exists"
+
+  triggers:
+    type: array
+    minItems: 1
+    items:
+      type: string
+      minLength: 1
+    description: "Phrases or conditions that cause this skill to activate"
+
+  inputs:
+    type: array
+    minItems: 1
+    items:
+      type: string
+      minLength: 1
+    description: "Expected inputs this skill consumes"
+
+  outputs:
+    type: array
+    minItems: 1
+    items:
+      type: string
+      minLength: 1
+    description: "Artifacts or deliverables this skill produces"
+
+  non_goals:
+    type: array
+    minItems: 1
+    items:
+      type: string
+      minLength: 1
+    description: "Explicit scope exclusions"
+
+  risks:
+    type: array
+    minItems: 1
+    items:
+      type: string
+      minLength: 1
+    description: "Known risks and mitigations"
+
+  output_contract:
+    type: object
+    description: "Structured contract for deterministic output format"
+    properties:
+      schema_version:
+        type: string
+      required_fields:
+        type: array
+        items:
+          type: string
+      optional_fields:
+        type: array
+        items:
+          type: string
+    additionalProperties: true
+
+  rollback_procedure:
+    type: string
+    minLength: 20
+    description: "Steps to revert a bad deployment of this skill"
+
+  observability:
+    type: string
+    minLength: 20
+    description: "How to monitor skill health in production"

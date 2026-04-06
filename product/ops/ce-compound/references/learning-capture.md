@@ -222,6 +222,82 @@ Rules:
 - treat the upstream schema and templates as richer guidance, not disposable background
 - if the target repo does not use schema-driven `docs/solutions/`, fall back to the canonical local categories and shape
 
+## Project Brain Integration (Dual Write)
+
+When the target repo has a `.harness/` directory, use dual-write to both `docs/solutions/` and Project Brain:
+
+### Phase: Dual Write (after creating docs/solutions/ doc)
+
+1. **Map to domain**: Determine `.harness/knowledge/{domain}/` from problem category
+   - build-errors → build
+   - test-failures → testing
+   - runtime-errors → runtime
+   - performance-issues → performance
+   - security-issues → security
+   - database-issues → data
+   - etc.
+
+2. **Write to knowledge**: Append to `.harness/knowledge/{domain}/knowledge.md`:
+   ```yaml
+   ---
+   title: "{problem summary}"
+   type: knowledge
+   confirmed: YYYY-MM-DD
+   source: docs/solutions/{category}/{filename}.md
+   tags: [ce-compound, {category}]
+   ---
+   
+   ## Problem
+   {symptom}
+   
+   ## Root Cause
+   {root cause}
+   
+   ## Solution
+   {solution}
+   
+   ## Prevention
+   {prevention strategy}
+   ```
+
+3. **Sync to Local Memory MCP**:
+   ```
+   observe(
+     content="{problem summary} → {solution summary}",
+     level="learning",
+     tags=[
+       "project-brain:{repo}",
+       "type:knowledge",
+       "domain:{domain}",
+       "source:ce-compound"
+     ],
+     session_id="project-brain:{repo}"
+   )
+   ```
+
+4. **Check for promotion**: If similar solution exists 3+ times:
+   - Promote to `.harness/knowledge/{domain}/rules.md`
+   - Update observe() tags to include `"type:rule"`
+   - Mark as "Promoted from knowledge (3+ confirmations)"
+
+### Promotion Path
+```
+First capture     → docs/solutions/ + .harness/knowledge/{domain}/knowledge.md
+                  → observe(tags=["type:knowledge", ...])
+                  
+Second occurrence → Update existing knowledge.md, increment frequency counter
+
+Third occurrence  → Promote to rules.md
+                  → observe(tags=["type:rule", ...])
+                  → Mark status: "Active (promoted YYYY-MM-DD)"
+```
+
+### Anti-patterns to Avoid
+- Writing only to docs/solutions/ when .harness/ exists
+- Creating duplicate entries in knowledge.md without checking
+- Forgetting to sync to Local Memory MCP
+- Promoting to rules without 3+ confirmations
+
 ## Preconditions
 
 Advisory checks:
@@ -261,3 +337,17 @@ Direct entry into learning-capture mode is justified when the user says things l
 
 Manual override:
 - use `ce-compound [context]` to capture the learning immediately without waiting for an explicit auto-detect-style cue
+
+---
+
+## Common Mistakes to Avoid
+
+| ❌ Wrong | ✅ Correct |
+|----------|-----------|
+| Subagents write files like `context-analysis.md`, `solution-draft.md` | Subagents return text data; orchestrator writes one final file |
+| Research and assembly run in parallel | Research completes → then assembly runs |
+| Multiple files created during workflow | One solution doc written or updated: `docs/solutions/[category]/[filename].md` (plus optional small edit to AGENTS.md/CLAUDE.md for discoverability) |
+| Creating a new doc when an existing doc covers the same problem | Check overlap assessment; update the existing doc when overlap is high |
+| Skipping to implementation without validating upstream artifacts | Resume from earliest incomplete or untrusted stage |
+| Documenting unverified or still-changing fixes | Wait for verified solution before learning capture |
+| Broadening `ce-compound-refresh` into repo-wide sweep without evidence | Recommend refresh only for clear stale-doc candidates |

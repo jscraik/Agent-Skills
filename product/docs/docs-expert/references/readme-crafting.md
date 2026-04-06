@@ -353,16 +353,18 @@ tool do-thing
 
 ---
 
-## Critical Rules
+## 8 Critical Rules
 
-1. Lead with value, not installation - TL;DR before Quick Start.
-2. Fast start must still be safe - prefer package managers or verified checksummed downloads.
-3. Every feature claim needs an example - show, do not tell.
-4. Comparison tables beat prose - scannable beats readable.
-5. Be honest about limitations - builds trust, saves support time.
-6. Installation paths must be verified - include only methods the repo actually supports.
-7. Architecture diagrams for complex tools - ASCII art is fine.
-8. Troubleshooting section is mandatory - top 5 errors with fixes.
+| # | Rule | Implementation |
+|---|------|----------------|
+| 1 | Lead with value, not installation | TL;DR before Quick Start |
+| 2 | Fast start must still be safe | Prefer package managers or verified checksummed downloads |
+| 3 | Every feature claim needs an example | Show, do not tell |
+| 4 | Comparison tables beat prose | Scannable beats readable |
+| 5 | Be honest about limitations | Builds trust, saves support time |
+| 6 | Installation paths must be verified | Include only methods the repo actually supports |
+| 7 | Architecture diagrams for complex tools | ASCII art is fine |
+| 8 | Troubleshooting section is mandatory | Top 5 errors with fixes |
 
 ---
 
@@ -430,26 +432,26 @@ This provides AI agents with scannable reference without loading the full README
 
 ---
 
-## Checklist
-
-Before publishing:
+## Pre-Publish Checklist
 
 ```
-[] Hero section with illustration + badges + one-liner + quick install
-[] TL;DR with Problem/Solution/Feature table
-[] Quick example (5-10 commands)
-[] Only verified and supported installation methods documented
-[] Every command has usage examples
-[] Architecture diagram for complex tools
-[] Comparison table vs at least 2 alternatives
-[] Troubleshooting section (top 5 errors)
-[] Honest Limitations section
-[] FAQ with 5+ questions
-[] Visibility metadata reviewed (topics, social preview, repo description)
-[] All code blocks are copy-paste ready
-[] No broken links or badges
-[] Consistent terminology throughout
-[] Grammar/spelling checked
+□ Hero section with illustration + badges + one-liner + quick install
+□ TL;DR with Problem/Solution/Feature table
+□ Quick example (5-10 commands)
+□ Design Philosophy (3-5 principles)
+□ Comparison table vs at least 2 alternatives
+□ 3+ installation methods documented
+□ Quick Start with numbered steps
+□ Every command has usage examples
+□ Configuration with full example + comments
+□ Architecture diagram for complex tools
+□ Troubleshooting section (top 5 errors)
+□ Honest Limitations section
+□ FAQ with 5+ questions
+□ All code blocks are copy-paste ready
+□ No broken links or badges
+□ Consistent terminology throughout
+□ Grammar/spelling checked
 ```
 
 ---
@@ -496,6 +498,42 @@ Study these READMEs for patterns:
 | https://github.com/ogham/exa | Screenshot galleries, color themes |
 | https://github.com/starship/starship | Preset configurations, installation matrix |
 | https://github.com/jqlang/jq | Tutorial progression, manual links |
+
+---
+
+## One-Page Quick Reference
+
+Print this. All key patterns at a glance.
+
+### Golden Structure
+
+```
+1. HERO    → illustration + badges + one-liner + quick install
+2. TL;DR   → Problem + Solution + Feature table
+3. EXAMPLE → 5-10 commands showing core workflow
+4. REFERENCE → Philosophy, Comparison, Install, Commands, Config, Architecture
+5. SUPPORT → Troubleshooting, Limitations, FAQ, Contributing, License
+```
+
+### Anti-Patterns Quick Fix
+
+| Don't | Do Instead |
+|-------|------------|
+| Installation first | TL;DR first |
+| "This is a tool that..." | "Solves X by doing Y" |
+| Screenshot-heavy | ASCII + code blocks |
+| Abstract claims | Concrete examples |
+| Hide limitations | Dedicated section |
+| Single install method | 3+ methods |
+| Skip troubleshooting | Top 5 errors |
+
+### Badge Order
+
+1. CI status (most important)
+2. License
+3. Version/Release
+4. Package registry
+5. Optional: coverage, downloads
 
 ---
 

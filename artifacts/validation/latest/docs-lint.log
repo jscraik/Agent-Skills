@@ -1,1 +1,2 @@
-docs-lint mode=warn scanned_files=113 errors=0 warnings=0
+docs-lint mode=warn scanned_files=117 errors=0 warnings=1
+WARNING docs/reference/skill-authoring-family-gold-scorecard.md:53 vague-file-reference - Potential vague file reference; use an explicit path.

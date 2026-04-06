@@ -4,6 +4,7 @@
 - [Workflow](#workflow)
 - [Store rules](#store-rules)
 - [Minimal session convention](#minimal-session-convention)
+- [See Also](#see-also)
 
 ## Workflow
 1. Bootstrap memory before durable notes.
@@ -16,3 +17,6 @@
 
 ## Minimal session convention
 Use `repo:<name>:task:<id>` style session ids when calling local-memory tools.
+
+## See Also
+- [Local Memory Skill](/utilities/local-memory/SKILL.md) - Tool reference and usage examples

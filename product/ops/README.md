@@ -20,6 +20,7 @@ Compound engineering, planning, and operational execution skills.
 - [compound-engineering-router](/product/ops/compound-engineering-router/SKILL.md)
 - [decide-build-primitive](/product/ops/decide-build-primitive/SKILL.md)
 - [linear](/product/ops/linear/SKILL.md)
+- [production-deployment](/product/ops/production-deployment/SKILL.md)
 - [release](/product/ops/release/SKILL.md)
 - [resolve-todo-parallel](/product/ops/resolve-todo-parallel/SKILL.md)
 - [triage](/product/ops/triage/SKILL.md)

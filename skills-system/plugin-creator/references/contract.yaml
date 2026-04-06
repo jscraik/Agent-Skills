@@ -23,3 +23,17 @@ risks:
   - malformed plugin metadata; mitigated by deterministic scaffold defaults
   - marketplace policy drift; mitigated by required explicit policy fields
   - accidental overwrite; mitigated by force-only replacement semantics
+rollback_procedure: >
+  If plugin-creator generates a malformed scaffold (invalid plugin.json, missing required policy
+  fields, or incorrect directory structure), delete the generated plugin directory and re-invoke
+  with corrected inputs. Validate the scaffold with: python utilities/skill-builder/scripts/skill_gate.py
+  <plugin-dir> --format text before use. For regressions in the skill itself, restore
+  skills-system/plugin-creator/SKILL.md from git, re-run the family gate, and confirm
+  plugin.json schema compliance before re-deploying.
+observability: >
+  Monitor plugin-creator via: (1) plugin.json schema compliance on generated scaffolds —
+  missing required_policy fields are a scaffold regression signal; (2) marketplace entry
+  completeness (policy and category fields present) after each generation run; (3) family gate
+  CI pass/fail for skills-system/plugin-creator; (4) accidental overwrite incidents logged
+  via force-flag usage frequency — high frequency suggests caller confusion that warrants
+  improved trigger discrimination.

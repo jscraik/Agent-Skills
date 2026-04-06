@@ -12,10 +12,10 @@ on:
         required: false
         default: "7"
   schedule:
-    - cron: "0 13 * * 1"
+    - cron: "7 6 * * *"
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   shadow-cycle:
@@ -48,6 +48,46 @@ jobs:
             --config docs-policy.json \
             --mode warn \
             --report-json /tmp/docs-lint-shadow.json
+
+      - name: Verify telemetry freshness
+        run: |
+          python3 - <<'PY'
+          import sys
+          from pathlib import Path
+          from datetime import datetime, timezone, timedelta
+
+          content = Path("docs/skill-graphs/telemetry/daily-skill-health.md").read_text()
+          for line in content.splitlines():
+              if line.startswith("- Generated at:"):
+                  ts = line.split("`")[1].strip()
+                  generated = datetime.fromisoformat(ts.replace("Z", "+00:00"))
+                  age = datetime.now(timezone.utc) - generated
+                  if age > timedelta(hours=24):
+                      print(f"FAIL: daily-skill-health.md is {age} old (limit: 24h)", file=sys.stderr)
+                      sys.exit(1)
+                  print(f"OK: telemetry age {age}")
+                  sys.exit(0)
+          print("FAIL: could not parse Generated at timestamp", file=sys.stderr)
+          sys.exit(1)
+          PY
+
+      - name: Commit telemetry artifacts
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          # Add each path separately so missing paths don't block others
+          git add docs/skill-graphs/telemetry/daily-skill-health.md 2>/dev/null || true
+          git add artifacts/skill-graphs/runs/ 2>/dev/null || true
+          git add artifacts/skill-graphs/onboarding/wave-readiness.json 2>/dev/null || true
+          git add artifacts/skill-graphs/pilot/artifact-parity-manifest.json 2>/dev/null || true
+          git add artifacts/skill-graphs/pilot/shadow-dashboard.json 2>/dev/null || true
+          git add artifacts/skill-graphs/pilot/shadow-baseline.json 2>/dev/null || true
+          git add artifacts/skill-graphs/telemetry/ 2>/dev/null || true
+          git add docs/skill-graphs/pilots/ui-skills-shadow-results.md 2>/dev/null || true
+          git add docs/skill-graphs/pilots/ui-skills-pilot-readout.md 2>/dev/null || true
+          git diff --cached --quiet || git commit \
+            -m "chore(telemetry): daily skill-health refresh [skip ci]"
+          git push origin HEAD:${{ github.ref_name }}
 
       - name: Upload shadow artifacts
         uses: actions/upload-artifact@v7

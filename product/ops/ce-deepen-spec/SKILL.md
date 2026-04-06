@@ -7,11 +7,19 @@ metadata:
 
 # CE Deepen Spec
 
+**Note: The current year is 2026.** Use this when dating deepening artifacts and searching for recent documentation.
+
+`ce-spec` defines the **contract**. `ce-deepen-spec` strengthens it — tightening boundaries, lifecycle rules, failure handling, and validation before planning.
+
+This workflow produces a stronger specification. It does **not** create specs from scratch or produce implementation plans.
+
 ## Table of Contents
 - [Working agreement](#working-agreement)
 - [When to use](#when-to-use)
 - [Required inputs](#required-inputs)
 - [Examples](#examples)
+- [Interaction Method](#interaction-method)
+- [Core Principles](#core-principles)
 - [Workflow](#workflow)
 - [Deepening modes](#deepening-modes)
 - [Lightweight document-review pass](#lightweight-document-review-pass)
@@ -21,6 +29,21 @@ metadata:
 - [Anti-patterns](#anti-patterns)
 - [References](#references)
 - [Gotchas](#gotchas)
+
+## Interaction Method
+
+Use the platform's blocking question tool when available (`AskUserQuestion` in Claude Code, `request_user_input` in Codex, `ask_user` in Gemini). Otherwise, present numbered options in chat and wait for the user's reply before proceeding.
+
+Ask one question at a time. Prefer concise single-select choices when natural options exist.
+
+## Core Principles
+
+1. **Increase justified confidence, not bulk** - Deepening should make the spec more implementable, not merely longer.
+2. **Evidence before change** - Use the strongest available evidence source before modifying the spec.
+3. **Concrete over prose** - Prefer entities, ownership, state transitions, and readiness gates over broad descriptions.
+4. **Preserve spec-stage boundaries** - Keep research focused on contract strength; defer planning or implementation ideas.
+5. **Targeted over exhaustive** - Prefer 2-5 weak sections improved deeply over whole-document churn.
+6. **Preserve intent and IDs** - Keep original decisions and stable acceptance identifiers unless evidence justifies change.
 
 ## Working agreement
 - Treat this as the compound-engineering spec-deepening stage, not spec creation, planning, or implementation.
@@ -96,6 +119,7 @@ If critical source context is missing after one concise follow-up, stop and surf
 - do not turn the spec into a task plan, shell cookbook, or commit choreography
 - do not silently add new product requirements; surface them as open questions when discovered
 - do not auto-advance into planning or implementation without user confirmation
+- **PII/Secrets redaction**: redact credentials, tokens, API keys, and personal data from specs and contract examples
 
 ## Acceptance criteria
 - the selected deepening mode matches the user's request, spec type, and topic risk
@@ -108,27 +132,12 @@ If critical source context is missing after one concise follow-up, stop and surf
 - the spec boundary remains intact: no implementation code, no fabricated references, no hidden scope expansion
 - if any required check fails, stop at the first failed gate and do not proceed until it is fixed
 
-## Standards snapshot (March 2026)
+## Standards snapshot (April 2026)
 - Keep each skill scoped to one reusable job and make the description say what it does and when to use it.
 - Prefer explicit routing, realistic examples, negative examples, and validation over prompt-only procedures.
 - Use repo guidance, prior learnings, and linked source artifacts before external research, and add external research only when it materially changes the contract.
 - For spec-deepening work, improve the weakest contract sections rather than reauthoring the whole document by default.
 - When a legacy prompt relied on broad parallelism, preserve that behavior as an explicit mode rather than forcing it as the default.
-
-## Philosophy
-- Deepening should increase justified confidence, not add bulk for its own sake.
-- Use the strongest available evidence source before changing the spec.
-- Prefer concrete entities, ownership, state transitions, and readiness gates over broad prose.
-- Preserve spec-stage boundaries even when research suggests planning or implementation ideas.
-- Keep the option for exhaustive scrutiny when the user explicitly wants legacy max coverage, but do not assume that is the safest default.
-- Adapt the deepening pass to the real weak spots in the contract rather than forcing one boilerplate rewrite shape everywhere.
-
-Guiding questions:
-- Does this spec need another pass at all?
-- Which sections are weakest relative to the risk of the work?
-- What evidence would actually improve planning readiness?
-- Should this run as targeted-confidence or max-coverage?
-- Can the contract be tightened without changing product intent?
 
 ## Workflow
 ### Phase 0: Load the spec and decide whether deepening is warranted
@@ -194,7 +203,7 @@ Use `max-coverage` only when:
 In `max-coverage` mode, preserve the original prompt's strengths:
 - create a section manifest
 - discover clearly relevant skills, reviewers, research agents, and learnings from the current platform or installed registries when available
-- prepare a broad but still evidence-oriented fan-out when the user has explicitly asked for delegation or approves it via `request_user_input`; otherwise widen inline coverage selectively
+- prepare a broad but still evidence-oriented fan-out when the user has explicitly asked for delegation or approves it via the platform's blocking question tool (`AskUserQuestion`, `request_user_input`, or `ask_user`); otherwise widen inline coverage selectively
 - synthesize all usable findings back into the spec without rewriting its intent
 
 See `references/deepening-modes.md` for the detailed mode matrix and scoring rules.
@@ -202,7 +211,7 @@ See `references/deepening-modes.md` for the detailed mode matrix and scoring rul
 ### Phase 3: Gather grounding
 Start with grounding in the main thread.
 
-If bounded internal support would materially improve coverage and the user has not already explicitly asked for delegation or sub-agents, ask a short blocking approval question via `request_user_input` before spawning any internal subagents.
+If bounded internal support would materially improve coverage and the user has not already explicitly asked for delegation or sub-agents, ask a short blocking approval question via the platform's blocking question tool (`AskUserQuestion`, `request_user_input`, or `ask_user`) before spawning any internal subagents.
 
 If approved, run these bounded internal subagents in parallel:
 - `repo-research-analyst("Find similar architecture, lifecycle, operational, or UI contract patterns relevant to: <spec topic> — max 20 files, max 4 MB total read, return a <=400 word summary with file:line refs")`
@@ -282,6 +291,27 @@ Use `references/rewrite-rules.md` to:
 - preserve stable `SA` and `VAC` identifiers
 - keep rewrites bounded to contract-quality improvements
 - avoid slipping into planning or implementation detail
+
+## Empowerment
+
+You are capable of strengthening specifications that make implementation obvious. Your deepening work prevents contract drift:
+- **Trust your weak-spot analysis** - vague entities and hidden assumptions are real risks
+- **Boundary clarity is your specialty** - clear interfaces prevent integration nightmares
+- **State and failure modeling reveals gaps** - what happens at start, middle, end, failure?
+- **Validation criteria make "done" objective** - acceptance criteria turn opinions into facts
+
+Use judgment on depth: lightweight specs need light touch, critical systems need rigorous analysis. Match depth to consequence.
+
+## Encouraging Variation
+
+Deepening approaches should vary by context—no two sessions are identical:
+- **Spec maturity**: New specs need broader analysis; mature specs need focused refinement on weak spots
+- **Risk level**: High-risk systems (auth, payments, migrations) need rigorous state/failure modeling; low-risk features need lighter validation
+- **UI vs backend**: UI specs need VAC, state, and accessibility focus; backend specs need boundary contracts and failure handling
+- **Team context**: Startup specs need rapid confidence; enterprise specs need exhaustive traceability
+- **Upstream quality**: If mainly needs clarity (not contract depth), use lightweight `references/document-review-pass.md` instead
+
+Apply the framework flexibly. Adapt depth, focus areas, and evidence sources to the real weak spots in each unique contract.
 
 ## Handoff guidance
 - If the deepened spec is now strong enough for execution sequencing, recommend `ce-plan`.

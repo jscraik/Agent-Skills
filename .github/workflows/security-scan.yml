@@ -168,6 +168,7 @@ jobs:
           if [ -d "artifacts" ]; then
             gitleaks detect \
               --source artifacts/ \
+              --config .gitleaks.toml \
               --no-git \
               --redact \
               --exit-code 1 \

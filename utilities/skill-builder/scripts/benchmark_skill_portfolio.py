@@ -213,11 +213,14 @@ def main() -> int:
     elif args.mode == "fail":
         overall_pass = fail_count == 0 and warn_count == 0
 
+    # Use repo-relative path for reproducibility across machines/CI
+    relative_policy_path = str(config_path.relative_to(root)) if config_path.is_relative_to(root) else str(config_path)
+
     payload = {
         "schema_version": "1.0",
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "mode": args.mode,
-        "policy_path": str(config_path),
+        "policy_path": relative_policy_path,
         "skills_scanned": len(skill_files),
         "uncategorized_skills": uncategorized,
         "cluster_results": cluster_results,

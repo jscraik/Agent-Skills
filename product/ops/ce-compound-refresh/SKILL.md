@@ -7,6 +7,12 @@ metadata:
 
 # CE Compound Refresh
 
+**Note: The current year is 2026.** Use this when dating refresh artifacts and searching for recent documentation.
+
+`ce-compound-refresh` maintains the trustworthiness of `docs/solutions/` — reviewing stale learnings and pattern docs against current codebase reality.
+
+This workflow produces refreshed, consolidated, or marked-stale documentation. It does **not** implement code or create new solutions from scratch.
+
 ## Table of Contents
 - [Working agreement](#working-agreement)
 - [When to use](#when-to-use)
@@ -15,7 +21,9 @@ metadata:
 - [Failure mode](#failure-mode)
 - [Constraints](#constraints)
 - [Acceptance criteria](#acceptance-criteria)
-- [Standards snapshot (March 2026)](#standards-snapshot-march-2026)
+- [Interaction Method](#interaction-method)
+- [Core Principles](#core-principles)
+- [Standards snapshot (April 2026)](#standards-snapshot-april-2026)
 - [Philosophy](#philosophy)
 - [Workflow](#workflow)
 - [Modes](#modes)
@@ -28,14 +36,12 @@ metadata:
 - [References](#references)
 - [See Also](#see-also)
 - [Decision feedback protocol](#decision-feedback-protocol)
-- [Gotchas](#gotchas)
 
 ## Working agreement
-- Treat `ce-compound-refresh` as the maintenance stage for `docs/solutions/`, not as a generic doc-polish or code-review lane.
-- Keep the refresh order explicit: inspect individual learnings first, then inspect derived pattern docs that depend on them.
-- Evaluate document-set shape as well as single-doc accuracy. If multiple docs now cover the same problem with compatible guidance, consolidate the set instead of preserving silent drift risk.
-- Match documentation to current repo truth. If the code changed, refresh the doc; do not debate whether the code change was intentional inside this workflow.
-- Prefer no-write `Keep` outcomes over churn. Only edit when the result materially improves trustworthiness.
+- Treat as maintenance stage for `docs/solutions/`, not generic doc-polish
+- Inspect individual learnings first, then derived pattern docs
+- Consolidate overlapping docs; prefer `Keep` over churn
+- Match docs to repo truth; refresh when code changes
 - Use external docs only when a stale claim depends on current framework or library behavior; otherwise stay repo-first.
 
 ## When to use
@@ -101,6 +107,7 @@ If evidence is insufficient to write a trustworthy replacement, do not invent a 
 - do not broaden a narrow refresh into a repo-wide sweep without evidence
 - do not use external docs when repo evidence is sufficient
 - do not let auto-memory notes outrank conversation or codebase evidence
+- use the platform's blocking question tool (`AskUserQuestion`, `request_user_input`, or `ask_user`) only when one blocking choice materially changes scope or maintenance outcome
 
 ## Acceptance criteria
 - the skill chooses `interactive` or `autonomous` before asking questions or applying actions
@@ -115,7 +122,21 @@ If evidence is insufficient to write a trustworthy replacement, do not invent a 
 - the final report is full markdown, not a one-line summary
 - if any required check fails, stop at the first failed gate and do not proceed until it is fixed or triaged
 
-## Standards snapshot (March 2026)
+## Interaction Method
+
+Use the platform's blocking question tool when available (`AskUserQuestion` in Claude Code, `request_user_input` in Codex, `ask_user` in Gemini). Otherwise, present numbered options in chat and wait for the user's reply before proceeding.
+
+Ask one question at a time. Prefer concise single-select choices when natural options exist.
+
+## Core Principles
+
+1. **Conservative accuracy over maximum rewriting** - Prefer no-write `Keep` outcomes over churn.
+2. **Doc accuracy over doc age** - Match documentation to current repo truth.
+3. **Repo-first** - Use external docs only when stale claims depend on current framework behavior.
+4. **Evaluate document-set shape** - Consolidate overlapping docs instead of preserving silent drift.
+5. **Precision over frenzy** - Refresh work should feel like gardening, not a repo-wide cleanup.
+
+## Standards snapshot (April 2026)
 - Keep the skill scoped to one reusable maintenance job, with routing language that says what it does and when to use it.
 - Prefer repo truth, explicit evidence, and selective external verification over speculative rewriting.
 - Keep `SKILL.md` lean and move detailed decision trees, report formats, and git follow-up logic into `references/`.
@@ -238,11 +259,11 @@ Use `autonomous` when:
 
 ## Execution rules
 - Prefer the main thread for small scopes, short docs, or any run where delegation was not explicitly requested or approved.
-- If 1-2 heavy artifacts would benefit from delegation and the user has not already explicitly asked for sub-agents, ask a short blocking approval question via `request_user_input` before spawning sequential subagents.
+- If 1-2 heavy artifacts would benefit from delegation and the user has not already explicitly asked for sub-agents, ask a short blocking approval question via the platform's question tool (`AskUserQuestion`, `request_user_input`, or `ask_user`) before spawning sequential subagents.
 - Use sequential subagents for 1-2 heavy artifacts only after explicit user request or approval.
 - Use parallel investigation subagents only for independent artifacts with low overlap and only after explicit user request or approval.
 - Use replacement subagents one at a time, sequentially, and only after explicit user request or approval.
-- When spawning subagents, preserve the dedicated file-search/read-first instruction and separate memory-sourced evidence from codebase-sourced evidence.
+- When spawning subagents, include this instruction: "Use dedicated file search and read tools (Glob, Grep, Read) for all investigation. Do NOT use shell commands (ls, find, cat, grep, test, bash) for file operations." Also separate memory-sourced evidence from codebase-sourced evidence.
 - When replacing a learning, write the successor in `ce-compound` learning-capture format and archive the superseded source after the successor exists.
 
 ## Validation
@@ -273,44 +294,66 @@ Use `autonomous` when:
 - AVOID broad stale-doc sweeps that skip triage, evidence gathering, or per-file reporting
 
 ## Encouraging variation
-IMPORTANT: Outputs should vary based on scope, evidence quality, and mode.
-- Focused runs should feel decisive and compact.
-- Batch runs should group obvious keeps and updates, then isolate higher-risk replace or archive decisions.
-- Broad sweeps should feel incremental and triaged rather than dumping a giant queue.
-- Reports should differ meaningfully when the evidence points to mostly Keeps, mostly Updates, or heavy stale marking.
+Outputs vary by scope: focused runs compact, batch runs group keeps, broad sweeps incremental.
 
 ## Examples
-When the user asks things like:
-- "Run `ce:compound-refresh auth` after the auth refactor and update anything stale."
-- "Use `ce:compound-refresh mode:autonomous payments` and just apply safe maintenance without questions."
-- "Use `ce:compound-refresh mode:autofix auth` and normalize that older flag to the current autonomous flow."
-- "These retry learnings overlap now. Consolidate the canonical doc and archive the redundant one if it adds no unique value."
-- "This solution doc was retrieved during debugging, but it no longer matches the code. Refresh it."
-- "Review the `docs/solutions/patterns/` docs for CI because the old learnings may have drifted."
-- "We renamed the session-token stack months ago. Find the related learnings and either update, replace, or archive them."
+- "Run `ce:compound-refresh auth` after the auth refactor."
+- "Use `mode:autonomous` to apply safe maintenance."
+- "Consolidate overlapping retry learnings."
+- "Refresh docs that no longer match the code."
+
+## Project Brain Integration
+
+When `.harness/` exists, refresh both locations per `references/project-brain-refresh.md`: `docs/solutions/` AND `.harness/knowledge/{domain}/`; update Local Memory MCP; promotion at 3+ confirmations.
 
 ## References
 - Contract: `references/contract.yaml`
 - Evals: `references/evals.yaml`
 - Prompt parity map: `references/source-parity.md`
-- Detailed refresh workflow: `references/refresh-workflow.md`
+- Refresh workflow: `references/refresh-workflow.md`
+- Project Brain: `../ce-compound/references/learning-capture.md`
+
+## Discoverability check
+
+After the refresh report is generated, check whether AGENTS.md/CLAUDE.md surfaces `docs/solutions/` to agents:
+
+1. Identify which root-level instruction files exist. Read them to find the substantive file (ignore shims that `@`-include another file).
+2. Assess whether an agent would learn:
+   - That a searchable knowledge store exists
+   - Its structure (category organization, YAML frontmatter fields)
+   - When to search it (before implementing/debugging in documented areas)
+3. If already surfaced appropriately, no action.
+4. If not, draft the smallest addition that communicates these three things:
+   - Prefer a single line in an existing section (architecture tree, directory listing)
+   - Only create a new section as last resort
+   - Keep tone informational: "relevant when implementing or debugging" not "always check before implementing"
+
+In interactive mode: explain why this matters, show the proposed change, then use the platform's question tool to get consent before editing.
+
+In autonomous mode: include as a "Discoverability recommendation" in the report — do not edit instruction files (autofix scope is doc maintenance, not project config).
+
+## Empowerment
+
+You are capable of maintaining a trustworthy knowledge base. Your refresh work prevents knowledge decay:
+- **Trust your evidence** - code changed → doc should change
+- **Prefer Keep over churn** - edit only with material improvement
+- **Promotion/demotion is your call** - 3+ confirmations = promote; contradictions = demote
+
+Use judgment: focused runs for urgent updates, batch runs for maintenance sweeps.
 
 ## See Also
 
 | Skill | When to use together |
 |---|---|
-| [[ce-compound]] | Capture newly solved issues before or after targeted refresh maintenance |
-| [[ce-review]] | Validate current implementation readiness when drift in docs may reflect broader product risk |
-| [[ce-technical-review]] | Audit focused technical correctness when the stale-doc signal points to code-level risk, not just doc maintenance |
+| [[ce-compound]] | Capture new issues before/after refresh |
+| [[ce-review]] | Validate implementation readiness |
+| [[ce-technical-review]] | Audit technical correctness |
+| Project Brain | When `.harness/` exists for knowledge refresh |
 
 **Topic map:** [[product-ops]]
 
 ## Decision feedback protocol
-<!-- decision-feedback-protocol:v2 -->
-- If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.
-- Capture `decision`, `outcome`, and `confidence`.
-- Persist feedback with `python3 utilities/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
-<!-- /decision-feedback-protocol -->
+Capture `decision`, `outcome`, `confidence` via platform's question tool post-run. Persist with `record_skill_feedback.py`.
 
 ## Gotchas
-- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.
+- None yet.

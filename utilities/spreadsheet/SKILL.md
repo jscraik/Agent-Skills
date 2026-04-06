@@ -36,7 +36,7 @@ Create, edit, analyze, and validate spreadsheets with strong defaults for formul
 - The updated or newly created spreadsheet artifact, or a clear blocked result when dependencies are missing.
 - A short evidence summary covering formulas, formatting, recalculation, and validation.
 - Notes on any missing recalculation or rendering capability that still requires local review.
-- If requested, a structured status report with a `schema_version` field.
+- If requested, a structured status report with `schema_version: 1` aligned to `references/contract.yaml`.
 
 ## Failure mode
 - If dependency installation or rendering support is unavailable, report the exact blocker and stop instead of improvising.

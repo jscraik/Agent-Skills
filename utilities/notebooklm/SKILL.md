@@ -47,6 +47,7 @@ Operate NotebookLM workflows with script-backed execution and explicit verificat
 - Completed NotebookLM action or clear blocked state.
 - Evidence summary of commands executed and validation checks.
 - Next action if additional user confirmation is required.
+- If requested, a structured status report with `schema_version: 1` aligned to `references/contract.yaml`.
 
 ## Failure mode
 If auth is stale, the target notebook/source cannot be identified, or the script result cannot be verified, stop at that blocker, report the exact failed gate, and do not fabricate a successful NotebookLM action.

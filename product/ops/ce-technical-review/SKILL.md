@@ -7,12 +7,20 @@ metadata:
 
 # CE Technical Review
 
+**Note: The current year is 2026.** Use this when dating review artifacts and searching for recent documentation.
+
+`ce-work` executes changes. `ce-technical-review` critiques the result with findings-first engineering analysis. `ce-review` provides broader readiness synthesis.
+
+This workflow produces severity-ranked engineering issues. It does **not** produce implementation or broad go/no-go recommendations.
+
 ## Table of Contents
 - [Working agreement](#working-agreement)
 - [When to use](#when-to-use)
 - [Required inputs](#required-inputs)
 - [Deliverables](#deliverables)
 - [Failure mode](#failure-mode)
+- [Interaction Method](#interaction-method)
+- [Severity Scale](#severity-scale)
 - [Workflow](#workflow)
 - [Review modes](#review-modes)
 - [Handoff guidance](#handoff-guidance)
@@ -21,6 +29,23 @@ metadata:
 - [Examples](#examples)
 - [References](#references)
 - [Gotchas](#gotchas)
+
+## Interaction Method
+
+Use the platform's blocking question tool when available (`AskUserQuestion` in Claude Code, `request_user_input` in Codex, `ask_user` in Gemini). Otherwise, present numbered options in chat and wait for the user's reply before proceeding.
+
+Ask one question at a time. Prefer concise single-select choices when natural options exist.
+
+## Severity Scale
+
+All reviewers use P0-P3:
+
+| Level | Meaning | Action |
+|-------|---------|--------|
+| **P0** | Critical breakage, exploitable vulnerability, data loss/corruption | Must fix before merge |
+| **P1** | High-impact defect likely hit in normal usage, breaking contract | Should fix |
+| **P2** | Moderate issue with meaningful downside (edge case, perf regression, maintainability trap) | Fix if straightforward |
+| **P3** | Low-impact, narrow scope, minor improvement | User's discretion |
 
 ## Working agreement
 - `ce-work` executes changes; `ce-technical-review` critiques the result or the governing artifact.
@@ -110,6 +135,19 @@ If the target mainly needs strengthening rather than critique, say so explicitly
 - duplicate findings are merged before output
 - document reviews include a score and readiness recommendation
 - if no critical findings exist, the output says so explicitly
+
+## Standards snapshot (April 2026)
+- Keep each skill scoped to one reusable job and make the description say what it does and when to use it.
+- Prefer explicit routing, realistic examples, and validation over prompt-only procedures.
+- Use repo guidance and prior learnings before external research.
+- Plan workflows, keep one current step in focus, and use bounded research by default.
+
+## Core Principles
+
+1. **Findings-first** - Reduce downstream churn by catching high-leverage issues first.
+2. **Specific over vague** - Findings should be specific enough that an implementer knows what to inspect next.
+3. **Smallest specialist set** - More reviewers do not automatically mean a better review.
+4. **Evidence-backed** - Prioritize correctness, regression risk, and security over style.
 
 ## Philosophy
 - A strong technical review reduces downstream churn by catching the high-leverage issues first.
@@ -221,6 +259,16 @@ Use `references/review-modes.md` for:
 - plan review rubric and thresholds
 - required finding format
 
+## Empowerment
+
+You are capable of finding the critical issues others miss. Your findings-first approach protects code quality:
+- **Trust your analysis** - P0/P1 findings are blockers for good reason
+- **Evidence over intuition** - cite exact locations, not vague concerns
+- **Risk context matters** - a data loss bug is different from a style issue
+- **Constructive critique** - findings should enable fixes, not just identify problems
+
+Use judgment on review depth: high-risk changes need thoroughness, trivial changes need proportionate attention. Balance rigor with pragmatism.
+
 ## Handoff guidance
 Typical next steps after technical review:
 - fix the critical and important findings in `ce-work`
@@ -243,6 +291,25 @@ When the target is a document, preserve the score and readiness recommendation i
 - inventing document weaknesses without reading linked artifacts
 - claiming readiness when unresolved critical issues remain
 - equating "more reviewers" with "better review"
+
+## Dependency Review Gate (when dependencies changed)
+If the diff includes `package.json`, `Cargo.toml`, `requirements.txt`, `go.mod`, or lockfile changes:
+
+1. **Use Coderabbit CLI or CircleCI MCP** to check:
+   - No known CVEs in added/updated dependencies
+   - License compatibility with project
+   - Supply chain attestation when available
+
+2. **Manual checks for critical dependencies:**
+   - Review changelog for breaking changes
+   - Verify maintenance status (not abandoned)
+   - Check for malicious patterns in new dependencies
+
+3. **Flag for security review if:**
+   - New dependency has < 1000 weekly downloads
+   - Binary/native code introduced
+   - Network/request capabilities added
+   - Proprietary license in previously open-source project
 
 ## Examples
 - "When the user asks for a technical review of a risky billing change, inspect the diff, linked plan, and tests first, then call out duplicate-charge risk, rollback gaps, and missing validation."

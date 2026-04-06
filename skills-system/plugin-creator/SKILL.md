@@ -1,6 +1,6 @@
 ---
 name: plugin-creator
-description: Scaffold local Codex plugins with a contract-valid `.codex-plugin/plugin.json`, optional companion folders, and marketplace entries with explicit policy defaults. Use when creating a plugin skeleton or updating local marketplace metadata, not for skill hardening or installation workflows.
+description: Scaffold local Codex plugins with a contract-valid `.codex-plugin/plugin.json`, optional companion folders, and marketplace entries. Use when the user asks to create a new plugin skeleton, generate plugin.json, or add marketplace entries.
 metadata:
   short-description: Scaffold plugin skeletons and marketplace entries
 ---
@@ -12,126 +12,92 @@ metadata:
 Use this skill when the user asks to:
 - create a new local plugin skeleton;
 - generate `.codex-plugin/plugin.json` with valid baseline fields;
-- add or update local marketplace entries in `.agents/plugins/marketplace.json`.
+- add or update local marketplace entries.
 
 Do not use this skill as primary owner for:
 - skill lifecycle hardening and eval upgrades;
-- installing skills into Codex directories;
-- full plugin packaging, release, or validation programs beyond scaffold scope.
+- full plugin packaging beyond scaffold scope.
 
 Handoffs:
 - to `skill-builder` when bundled skills need quality hardening;
-- to `codex-plugin-builder` for full plugin package assembly and governance checks;
-- to `skill-installer` when the user actually needs skill distribution/import.
+- to `codex-plugin-builder` for full plugin package assembly and governance checks.
 
 ## Inputs
 
 Minimum inputs:
 - plugin name (will be normalized to lowercase hyphen-case);
-- target parent path (`plugins/` repo-local or home-local alternative);
-- optional folder toggles (`--with-skills`, `--with-hooks`, `--with-scripts`, `--with-assets`, `--with-mcp`, `--with-apps`);
-- marketplace intent (`--with-marketplace`, optional marketplace path override);
-- overwrite intent (`--force` only when explicit replacement is requested).
-
-If requirements are broad, start with 2-3 focused surfaces (manifest, folder scaffold, marketplace entry), then defer advanced packaging to handoff skills.
-
-Contract resources to reference during scaffold work:
-- `references/plugin-json-spec.md`
-- `references/contract.yaml`
-- `references/evals.yaml`
-- `references/task-profile.json`
+- optional companion folder flags (`--with-<type>`);
+- marketplace intent (`--with-marketplace`).
 
 ## Outputs
 
-Expected outputs:
+Expected outputs (schema_version: 1):
 - `<plugin-root>/<plugin-name>/.codex-plugin/plugin.json`;
 - optional companion folders selected by flags;
-- marketplace entry at `<root>/.agents/plugins/marketplace.json` when requested.
+- marketplace entry at `.agents/plugins/marketplace.json` when requested.
 
-Output contract notes:
-- generated JSON payloads should remain machine-checkable;
-- include `schema_version` when introducing strict structured report contracts.
+## Resources
 
-Marketplace entry contract must keep explicit:
-- `policy.installation`
-- `policy.authentication`
-- `category`
+- **scripts/**: Contains `create_basic_plugin.py` for deterministic scaffold generation.
+- **references/**: Contains contract definitions (`contract.yaml`), evaluation spec (`evals.yaml`), plugin JSON spec (`plugin-json-spec.md`), and task profile (`task-profile.json`).
+- **assets/**: Contains plugin icons and visual assets (`plugin-creator.png`, `plugin-creator-small.svg`).
 
 ## Philosophy
 
 Plugin scaffolding should be deterministic and policy-forward:
 - normalize names once and reuse consistently;
 - keep defaults explicit so downstream automation is stable;
-- preserve existing marketplace metadata unless user asks to replace it;
 - separate scaffold creation from deeper packaging lifecycle decisions.
 
 ## Constraints
 
 - Keep `.codex-plugin/plugin.json` present in every generated plugin.
-- Keep plugin folder name and `plugin.json.name` aligned.
-- Preserve marketplace root `interface.displayName` when already present.
 - Never output secrets, tokens, or private credentials in generated manifests.
 - Redact sensitive values in any shared logs or snippets by default.
-- Add `policy.products` only when the user explicitly asks for product gating.
-- Keep plugin branding assets under `assets/` and treat them as optional, not blocking scaffold validity.
 
 ## Procedure
 
-1. Normalize plugin name and confirm parent path scope (repo-local vs home-local).
-2. Run scaffold script for base plugin structure.
+1. Normalize plugin name.
+2. Run scaffold via the unified CLI (`ask plugins init`).
 3. Add optional folders only when requested.
 4. Generate or update marketplace entry with explicit policy defaults.
-5. Apply `--force` only with explicit overwrite intent.
-6. Validate generated outputs before handoff (`plugin.json` contract, marketplace policy defaults, and no implicit `policy.products` insertion).
+5. Validate generated outputs before handoff.
 
-Core commands:
-
-```bash
-python3 .agents/skills/plugin-creator/scripts/create_basic_plugin.py <plugin-name>
-python3 .agents/skills/plugin-creator/scripts/create_basic_plugin.py <plugin-name> --with-marketplace
-python3 .agents/skills/plugin-creator/scripts/create_basic_plugin.py <plugin-name> --with-skills --with-hooks --with-scripts --with-assets --with-mcp --with-apps --with-marketplace
-```
-
-Home-local example:
+Core command:
 
 ```bash
-python3 .agents/skills/plugin-creator/scripts/create_basic_plugin.py <plugin-name> \
-  --path ~/plugins \
-  --marketplace-path ~/.agents/plugins/marketplace.json \
-  --with-marketplace
+# Initialize a new plugin scaffold with marketplace entry
+bin/ask plugins init <plugin-name> --with-marketplace --with-scripts --with-assets
 ```
 
 ## Anti-Patterns
 
 Avoid these failures:
 - mixing plugin scaffold scope with full package governance work;
-- silently overwriting existing entries without explicit `--force` intent;
-- omitting policy defaults (`installation`, `authentication`, `category`);
-- writing absolute repo paths into marketplace `source.path` values;
-- shipping manifest or marketplace examples that expose sensitive values.
+- silently overwriting existing entries without explicit intent;
+- writing absolute repo paths into marketplace `source.path` values.
 
 ## Examples
 
 - When the user asks: "Can you create a repo-local plugin scaffold named `incident-tools` and add marketplace entry?"
-- When the user says: "Help me set up a home-local plugin in `~/plugins` and update `~/.agents/plugins/marketplace.json`."
-- When the user asks: "Please generate the plugin skeleton with skills/hooks/scripts folders but keep policy defaults unchanged."
+- When the user says: "Help me set up a new plugin skeleton with scripts and assets folders."
 
 ## Validation
 
 Run checks in order and fail fast: stop at first failure, fix it, then rerun from the failed gate.
 
-```bash
-~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/quick_validate.py skills-system/plugin-creator
-~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/skill_gate.py skills-system/plugin-creator --require-security-evals --pi-high-fail --require-fail-fast
-~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/openclaw_skill_guard.py skills-system/plugin-creator --mode both --format text
-~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/run_skill_evals.py skills-system/plugin-creator --list-cases --eval-mode smoke
-~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/run_skill_evals.py skills-system/plugin-creator --runner codex --eval-mode smoke
-~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/run_skill_evals.py skills-system/plugin-creator --runner codex --eval-mode release
-```
+Validate the generated plugin artifacts (not this authoring skill):
 
-Family gate note:
-- `scripts/validate_skill_authoring_family.sh` defaults to structural contract/security checks (smoke+release case listing).
-- Live Codex smoke+release execution is trusted-lane only with `SKILL_FAMILY_LIVE_EVALS=1 SKILL_FAMILY_LIVE_EVALS_TRUSTED=1`.
+```bash
+# Validate the created plugin scaffold
+python3 utilities/skill-builder/scripts/openclaw_skill_guard.py .codex-plugin --mode both
+
+# Run family benchmark validation
+python3 scripts/validate_skill_authoring_family_benchmarks.py .codex-plugin
+
+# Full Repository Health
+bin/ask repo validate --ephemeral
+```
 
 ## See Also
 
@@ -139,6 +105,6 @@ Family gate note:
 |---|---|
 | [[codex-plugin-builder]] | Promote scaffold into a full plugin package with governance checks |
 | [[skill-builder]] | Improve bundled skill quality before plugin release |
-| [[codex-agent-creator]] | Add or refine agent roles inside the plugin |
+| [[cli-spec]] | Consult the technical contract for the ask CLI |
 
 **Topic map:** [[agent-ops]]

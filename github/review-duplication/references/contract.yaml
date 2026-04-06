@@ -1,0 +1,37 @@
+schema_version: 1
+skill: review-duplication
+type: code_quality_review
+purpose: >
+  To proactively identify duplicated logic, reinvented utilities, and missed reuse opportunities during code reviews.
+triggers:
+  - user: "Review this PR for duplication."
+  - user: "Does this logic already exist in the codebase?"
+  - lifecycle: "pre-commit review"
+inputs:
+  - code_review_context: "PR diff or source code"
+  - codebase_access: "Search and read capabilities"
+outputs:
+  - review_comments: "Identification of redundant code"
+  - reuse_guidance: "Paths/symbols to reuse"
+non_goals:
+  - "General bug hunting (unless related to duplication)"
+  - "Automated refactoring (propose, don't execute)"
+risks:
+  - "False positives in highly unique business logic"
+  - "Missing duplication in obscure or unmapped directories"
+task_profile:
+  complexity: medium
+  risk_level: low
+  category: review
+  primary_tool: codebase_investigator
+  secondary_tools:
+    - generalist
+    - grep_search
+    - read_file
+    - glob
+  output_format: markdown
+  approval_gate: none
+  validation:
+    - structural_analysis
+    - semantic_mapping
+    - redundancy_check

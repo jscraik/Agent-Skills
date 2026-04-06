@@ -226,9 +226,8 @@ python utilities/skill-builder/scripts/build_skill_eval_dashboard.py --reports-r
 ```
 
 Use when:
-- building baseline/regression dashboards from stored scorecards
+- building baseline/regression dashboards from stored scorecards (regression coverage)
 - tracking tier1/tier2 trend deltas over time
-
 ## benchmark_skill_portfolio.py
 
 ```bash

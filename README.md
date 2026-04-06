@@ -1,183 +1,162 @@
 # Agent Skills
 
-Canonical skill repository for Codex, Claude Code, and Gemini/Antigravity.
+A governed repository of **129 skills** for AI coding agents (Codex, Claude, Gemini). Built around the **Agent Skills Kit (`ask`)** CLI.
 
-This repo gives you one place to author skills, validate quality,
-and sync runtime-ready projections.
+**What this gives you:**
+- **One place for skills** – Author in Markdown, sync to any runtime
+- **Quality gates** – Structural, security, and behavioral validation for every skill
+- **Living skill graph** – Browse 129 skills across 7 topic clusters with relationship mapping
+- **Agent-native CLI** – Fuzzy matching, JSON output, trace IDs, helpful errors
 
-## Table of Contents
-- [Why teams use this repo](#why-teams-use-this-repo)
-- [What is implemented today](#what-is-implemented-today)
-- [Quickstart](#quickstart)
-- [Common workflows](#common-workflows)
-- [Why the claims are credible](#why-the-claims-are-credible)
-- [Operational limits](#operational-limits)
-- [Repository layout](#repository-layout)
-- [Directory map](#directory-map)
-- [Documentation](#documentation)
-
-## Why teams use this repo
-
-- **Single source of truth**: author a skill once, then project it to
-  multiple agent runtimes with `just sync`.
-- **Lower review risk**: every change can run through deterministic
-  validation (`scripts/validate_all.sh`) with per-check logs.
-- **Safer automation**: routing and recursive improvement workflows
-  include explicit control files, promotion gates,
-  and artifact verification.
-
-## What is implemented today
-
-- **Large skill catalog**: currently 100+ `SKILL.md` assets
-  across domain folders and system skills.
-- **Cross-runtime projection**: `scripts/sync_skills.sh` rebuilds
-  projections with lock + timeout protections and path safety checks.
-- **Deterministic skill router**:
-  `utilities/skill-builder/scripts/skill_router.py` returns ranked
-  candidates, confidence, rationale, and policy decisions.
-- **Guarded recursive loop**: `scripts/run_skill_genome_loop.py`
-  supports kill-switch/rollout controls, redaction filters,
-  watermark-based processing, and bounded output.
-- **Promotion governance**: `scripts/human_promote_recursive_run.sh`
-  enforces reviewer policy signatures, allowlist checks, run-dir
-  confinement, and write-once blockers.
-- **Artifact parity checks**:
-  `scripts/verify_recursive_skill_graph_artifacts.py` classifies run
-  artifacts and can fail strict mode in CI.
-- **CI coverage**: 13 GitHub workflows cover PR hygiene, skill quality,
-  promotion validation, security scanning, and governance checks.
-
-## Quickstart
+## Quick start
 
 ```bash
-# 1) Health check
-just status
+# See what's available
+./bin/ask graph topics
 
-# 2) Validate repo state
-just validate
+# Validate the repository
+./bin/ask repo validate --ephemeral
 
-# 3) Sync skills to runtime projections
-just sync
-
-# 4) Optional: sync MCP config into Antigravity format
-python3 scripts/sync_mcp.py
+# Sync to your runtime
+./bin/ask skills sync --scope user
 ```
 
-## Common workflows
+## What you can do
 
-### 1) Add or update a skill
+### Discover skills
 
 ```bash
-# scaffold from template
-mkdir -p frontend/my-skill
-cp templates/SKILL.md.template frontend/my-skill/SKILL.md
+# Search 129 skills
+./bin/ask graph find security --tier stable
 
-# run quality checks
-just diagnose
-just validate
+# See related skills
+./bin/ask graph related skill-builder --depth 2
 
-# rebuild projections
-just sync
+# Find path between skills
+./bin/ask graph chain skill-creator skill-installer
 ```
 
-### 2) Run CI-equivalent checks locally
+### Validate quality
 
 ```bash
-# preflight + sync + validation bundle
-bash scripts/verify-work.sh
+# Quick structural check
+./bin/ask skills audit backend/cli-spec --level compat
 
-# validation-only path
-bash scripts/validate_all.sh
+# Full security audit  
+./bin/ask skills audit backend/cli-spec --level strict
+
+# Run evaluation suite
+./bin/ask evals run backend/cli-spec --mode smoke
+
+# Validate entire repository
+./bin/ask repo validate --ephemeral
 ```
 
-### 3) Route a task to likely skills
+### Manage lifecycle
 
 ```bash
-python3 utilities/skill-builder/scripts/skill_router.py \
-  --query "fix failing GitHub Actions checks" \
-  --top-k 3 \
-  --json
+# Install from GitHub with auto-remediation
+./bin/ask skills install https://github.com/owner/repo --remediate
+
+# Check for overlap
+./bin/ask skills fold source-skill target-skill
+
+# Create new skill
+./bin/ask skills init my-skill --category backend --description "Does X when Y"
+
+# Create plugin scaffold
+./bin/ask plugins init my-plugin --with-marketplace
 ```
 
-### 4) Operate recursive improvement safely
+## Robot mode for AI agents
+
+When intent is clear but syntax is off, use `--robot` (or `-r`):
 
 ```bash
-# preview candidates
-just genome-loop
-
-# generate candidates
-just genome-loop-live
-
-# review and approve
-python3 scripts/review_candidates.py --list
-python3 scripts/review_candidates.py --approve <candidate_id>
+# These work and get corrected:
+./bin/ask skill list --robot          # → skills list
+./bin/ask skills ls --robot           # → skills list
+./bin/ask graph search X --robot      # → graph find X
 ```
 
-## Why the claims are credible
+Errors include suggestions and examples:
+```
+❌ Unknown topic: 'invalid'
 
-- **Validation is deterministic and logged**: `scripts/validate_all.sh`
-  runs required + warn checks and writes artifacts to
-  `artifacts/validation/`.
-- **Routing is policy-aware**: `skill_router.py` returns ranked
-  candidates with confidence, uncertainty reasons, policy mode
-  decisions, and guardrail outcomes.
-- **Promotion is governance-hardened**:
-  `human_promote_recursive_run.sh` enforces signed reviewer policy,
-  allowlist checks, run-dir confinement, and write-once blockers.
-- **Recursive artifacts are verifiable**:
-  `verify_recursive_skill_graph_artifacts.py` classifies run states
-  and supports strict CI failures.
-- **MCP sync is tested for real drift**: `test_sync_mcp.py` covers
-  stdio/HTTP mapping, env header injection, default injection,
-  and corrupted JSON recovery.
+💡 Did you mean 'ask skills'?
+   Valid topics: repo, skills, plugins, evals, graph
 
-## Operational limits
+📚 Examples:
+   • ask skills list
+   • ask graph find security
+```
 
-- Skill versioning is repo-level, not per-skill semver.
-- Sync is local projection; cross-machine distribution is still git-based.
-- Tier-2 eval paths require local CLI/model auth availability on the runner.
-- Some helper commands may be policy-gated depending on your Codex
-  runtime approval settings.
+## Programmatic usage
+
+```bash
+# JSON output with trace IDs
+./bin/ask repo status --json --trace-id "build-123"
+
+# Check for corrections
+./bin/ask skill list --robot --json | jq '.metadata.correction_note'
+
+# Ephemeral validation (read-only)
+./bin/ask repo validate --ephemeral
+```
+
+**Response envelope** (all commands):
+```json
+{
+  "status": "success",
+  "trace_id": "uuid",
+  "metadata": {
+    "next_steps": ["ask skills audit ..."],
+    "correction_note": "..."
+  },
+  "data": { ... }
+}
+```
+
+## Skill graph (7 topic clusters)
+
+| Topic | Skills | Examples |
+|-------|--------|----------|
+| frontend-ui | 27 | react-ui-patterns, shadcn-ui, figma |
+| agent-ops | 22 | skill-builder, skill-creator, evals-router |
+| backend-platform | 16 | cli-spec, mcp-builder, workers-mcp |
+| product-strategy | 13 | product-spec, ce-spec, ce-plan |
+| security-ops | 7 | security-best-practices, security-threat-model |
+| content-publishing | 5 | slides, youtube-titles-thumbnails |
+| mobile-native | 4 | xcode-makefiles, test-xcode |
 
 ## Repository layout
 
-```text
-agent-skills/
-├── auth/ backend/ frontend/ github/ interview/ ops/ product/ utilities/
-├── skills-system/            # system-level skills
-├── .agents/skills/           # flat projection surface
-├── skills-antigravity/       # Antigravity projection
-├── scripts/                  # sync, validation, genome loop, governance tools
-├── artifacts/                # generated reports, telemetry, run outputs
-├── docs/                     # runbooks, specs, governance docs
-└── templates/                # skill and eval templates
 ```
-
-## Directory map
-
-Need a navigable root + subdirectory index?
-See [DIRECTORY_MAP.md](DIRECTORY_MAP.md).
+agent-skills/
+├── bin/ask                   # CLI entry point
+├── .agents/skills/           # Flat runtime projection
+│
+├── backend/                  # Backend platform (16 skills)
+├── frontend/                 # Frontend UI (27 skills)
+├── product/                  # Product strategy (13 skills)
+├── auth/                     # Security operations (7 skills)
+├── skills-system/            # Meta-skills (installer, creator)
+│
+├── scripts/lib/ask/          # CLI implementation
+├── docs/cli-specs/           # Command specifications
+└── ops/metrics/graph/        # Skill relationship data
+```
 
 ## Documentation
 
-- [Skills index](SKILL.md)
-- [Directory map](DIRECTORY_MAP.md)
-- [Contributor docs](docs/index.md)
-- [Governed solutions](docs/solutions/README.md)
-- [Skill genome loop runbook](docs/skill-graphs/runbooks/skill-genome-loop.md)
-- [Agent governance](docs/agents/06-security-and-governance.md)
+- **[CLI Specification](docs/cli-specs/2026-04-06-ask-cli-spec.md)** – Complete command reference
+- **[Agent Guide](AGENTS.md)** – AI agent workflow patterns
+- **[Skill Index](SKILL.md)** – All 129 skills by category
+- **[Implementation Review](docs/cli-specs/2026-04-06-ask-cli-implementation-review.md)** – Architecture details
 
 ## Governance
 
-- License: Apache 2.0 (`LICENSE`)
-- Contributing: `CONTRIBUTING.md`
-- Security: `SECURITY.md`
-- Code of Conduct: `CODE_OF_CONDUCT.md`
-
-<!-- AGENT-FIRST-WORKFLOW:START -->
-## Agent-first workflow
-
-1. Create or update a plan in `.agent/PLANS.md`
-2. Validate: `python3 ~/.codex/scripts/plan-graph-lint.py .agent/PLANS.md`
-3. Verify: `bash scripts/verify-work.sh`
-<!-- AGENT-FIRST-WORKFLOW:END -->
+- **License:** Apache 2.0
+- **Skills:** 129 total across 7 topic clusters
+- **Validation:** 10+ automated checks via `./bin/ask repo validate`
+- **Compatibility:** Codex, Claude Code, Gemini/Antigravity

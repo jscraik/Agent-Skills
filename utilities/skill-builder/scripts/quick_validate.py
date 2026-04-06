@@ -29,11 +29,11 @@ import os
 import re
 import sys
 from pathlib import Path
-from typing import Any, Dict, Optional, Sequence, Tuple
+from typing import Any, Dict, Optional, Sequence
 
-try:
-    import yaml  # type: ignore
-except ModuleNotFoundError:
+import importlib.util as _ilu
+
+if _ilu.find_spec("yaml") is None:
     preferred = Path.home() / ".venvs" / "pyyaml" / "bin" / "python"
     already_reexec = os.environ.get("SKILL_CREATOR_PYYAML_REEXEC") == "1"
     if preferred.exists() and not already_reexec:
@@ -42,6 +42,21 @@ except ModuleNotFoundError:
         os.execve(str(preferred), [str(preferred), __file__, *sys.argv[1:]], env)
     print("ERROR: PyYAML is required (pip install pyyaml).", file=sys.stderr)
     raise SystemExit(1)
+
+del _ilu
+
+# ---------------------------------------------------------------------------
+# Shared frontmatter parser (sibling module)
+# ---------------------------------------------------------------------------
+_SCRIPT_DIR = Path(__file__).resolve().parent
+if str(_SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(_SCRIPT_DIR))
+
+from yaml_frontmatter import (  # noqa: E402  # type: ignore[import]
+    parse_frontmatter as _parse_frontmatter_shared,
+    read_text as _read_text_shared,
+    resolve_skill_md_path as _resolve_skill_md_path_shared,
+)
 
 
 TARGET_NAME_LIMITS = {"portable": 64, "codex": 64, "claude": 64}
@@ -60,58 +75,9 @@ COMPAT_ALLOWED_KEYS = {
     "metadata",
 }
 
-_FRONTMATTER_DELIM_RE = re.compile(r"^\s*---\s*$")
-
-
-def resolve_skill_md_path(path_like: str) -> Path:
-    p = Path(path_like).expanduser().resolve()
-    if p.is_dir():
-        return p / "SKILL.md"
-    return p
-
-
-def read_text(path: Path) -> str:
-    try:
-        return path.read_text(encoding="utf-8")
-    except UnicodeDecodeError:
-        return path.read_text(encoding="utf-8", errors="replace")
-
-
-def parse_frontmatter(raw_text: str) -> Tuple[Dict[str, Any], str]:
-    lines = raw_text.splitlines(keepends=True)
-
-    # Find first non-empty line; frontmatter must start there.
-    first_nonempty: Optional[int] = None
-    for i, line in enumerate(lines):
-        if line.strip():
-            first_nonempty = i
-            break
-    if first_nonempty is None:
-        raise ValueError("SKILL.md is empty")
-
-    if not _FRONTMATTER_DELIM_RE.match(lines[first_nonempty]):
-        raise ValueError("Missing YAML frontmatter. Expected `---` as the first non-empty line.")
-
-    # Find closing delimiter
-    end_idx: Optional[int] = None
-    for j in range(first_nonempty + 1, len(lines)):
-        if _FRONTMATTER_DELIM_RE.match(lines[j]):
-            end_idx = j
-            break
-    if end_idx is None:
-        raise ValueError("Unterminated YAML frontmatter. Missing closing `---`.")
-
-    yaml_text = "".join(lines[first_nonempty + 1 : end_idx])
-    fm_obj = yaml.safe_load(yaml_text) if yaml_text.strip() else {}
-    if fm_obj is None:
-        fm: Dict[str, Any] = {}
-    elif isinstance(fm_obj, dict):
-        fm = fm_obj
-    else:
-        raise ValueError("Frontmatter YAML must be a mapping/object (key: value pairs).")
-
-    body = "".join(lines[end_idx + 1 :]).lstrip("\n")
-    return fm, body
+# Local aliases for the shared implementations (backwards-compatible names).
+resolve_skill_md_path = _resolve_skill_md_path_shared
+read_text = _read_text_shared
 
 
 def fail(msg: str) -> None:
@@ -155,15 +121,15 @@ def validate_frontmatter(fm: Dict[str, Any], *, target: str, mode: str) -> None:
 def main(argv: Optional[Sequence[str]] = None) -> int:
     """
     Validate a SKILL.md file's YAML frontmatter according to command-line options and return a CLI exit code.
-    
+
     Parses command-line arguments (path, --target, --mode), resolves the given path to a SKILL.md file, reads and parses its YAML frontmatter, and runs frontmatter validation. On success, prints a confirmation message and returns 0.
-    
+
     Parameters:
         argv (Optional[Sequence[str]]): Optional sequence of command-line arguments to parse (typically sys.argv[1:]). If omitted, the process's command-line arguments are used.
-    
+
     Returns:
         int: 0 on successful validation.
-    
+
     Notes:
         On validation failure or other errors, the function terminates the process with exit code 1 via the module's fail() helper.
     """
@@ -189,7 +155,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     try:
         raw = read_text(skill_md)
-        fm, _body = parse_frontmatter(raw)
+        fm, _body, _fm_start, _fm_end = _parse_frontmatter_shared(raw)
     except Exception as e:
         fail(str(e))
 

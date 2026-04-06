@@ -43,6 +43,7 @@ Install a lightweight local task workflow for one repo without dragging in exter
 - Installed or upgraded `scripts/task.sh` workflow.
 - Canonical task files under `tasks/`.
 - A short note on the main commands available after setup.
+- If requested, a structured status report with `schema_version: 1` aligned to `references/contract.yaml`.
 
 ## Philosophy
 - Local task tracking should be fast enough to actually use.

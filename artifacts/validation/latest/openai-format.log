@@ -1,1 +1,5 @@
-scripts/lint_openai_skill_format.sh: line 141: /dev/fd/63: No such file or directory
+Checked files: 122
+Errors: 0
+Warnings: 0
+Mode: strict
+OpenAI skill format lint passed

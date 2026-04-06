@@ -42,7 +42,7 @@ for path_entry in (str(REPO_ROOT), str(SCRIPT_DIR)):
     if path_entry not in sys.path:
         sys.path.insert(0, path_entry)
 
-from defusedxml import ElementTree as ET
+from defusedxml import ElementTree as ET  # noqa: E402
 
 try:
     import yaml  # type: ignore
@@ -261,13 +261,20 @@ def _utc_now_iso() -> str:
     return dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
 
-def _resolve_optional_case_artifact_path(case_dir: Path, artifact: Optional[str]) -> Optional[str]:
+def _resolve_optional_case_artifact_path(case_dir: Path, artifact: Optional[str], workspace_root: Optional[Path] = None) -> Optional[str]:
     if artifact is None:
         return None
     candidate = Path(artifact)
     if candidate.is_absolute():
-        return str(candidate)
-    return str((case_dir / candidate).resolve())
+        result = candidate
+    else:
+        result = (case_dir / candidate).resolve()
+    if workspace_root:
+        try:
+            return str(result.relative_to(workspace_root))
+        except ValueError:
+            pass
+    return str(result)
 
 
 def _normalize_eval_modes(raw: Any, *, case_number: int) -> Optional[Tuple[str, ...]]:
@@ -823,7 +830,7 @@ def detect_skill_selected(
 def extract_rubric_metrics(parsed_json: Any) -> Optional[Dict[str, Any]]:
     """
     Extracts rubric-style metrics from a parsed JSON object.
-    
+
     When the input is a mapping containing any of the keys "overall_pass", "score", or "checks",
     this returns a dictionary with the extracted metrics. The returned mapping may include:
     - "overall_pass": the boolean value from the input when present.
@@ -831,7 +838,7 @@ def extract_rubric_metrics(parsed_json: Any) -> Optional[Dict[str, Any]]:
     - "checks_count": the number of entries in the "checks" list when present.
     - "checks_passed": count of check entries with a boolean `"pass": true`.
     - "checks_failed": count of check entries with a boolean `"pass": false`.
-    
+
     Returns:
         A dict with the extracted metrics as described above, or `None` if the input is not a mapping
         or contains none of the recognized rubric fields.
@@ -868,11 +875,11 @@ def extract_rubric_metrics(parsed_json: Any) -> Optional[Dict[str, Any]]:
 def _acceptance_skip_reason(*, exit_code: int, output_text: str) -> Optional[str]:
     """
     Return a skip reason when acceptance assertions should be skipped because the runner failed and produced no final output.
-    
+
     Parameters:
         exit_code (int): The runner process exit code.
         output_text (str): The runner's final output text.
-    
+
     Returns:
         Optional[str]: A human-readable skip reason when acceptance checks should be skipped, or `None` when they should be performed.
     """
@@ -903,7 +910,7 @@ def run_codex_exec(
 ) -> Tuple[int, str, str, List[str]]:
     """
     Run the Codex CLI `exec` command with the provided prompt and capture outputs and warnings.
-    
+
     Parameters:
         workspace_root (Path): Working directory for the Codex subprocess.
         prompt (str): Prompt text supplied to Codex via stdin.
@@ -920,7 +927,7 @@ def run_codex_exec(
         timeout_profile (str): Timeout profile name used when `timeout_sec` is not provided.
         extra_codex_args (Optional[List[str]]): Additional CLI arguments appended to the command.
         fallback_profile (Optional[str]): If the first run fails due to unsupported reasoning.summary, retry with this profile.
-    
+
     Returns:
         Tuple[int, str, str, List[str]]: A tuple of `(exit_code, stdout, stderr, warnings)`. `exit_code` may be
         127 when the Codex CLI is not found and 124 on timeout. `stdout` and `stderr` are the subprocess outputs;
@@ -1216,14 +1223,14 @@ def _filter_cases(
 ) -> List[EvalCase]:
     """
     Filter eval cases by case id/name substring and by category.
-    
+
     Parameters:
         case_filters (Sequence[str]): Substring terms (case-insensitive) to match against each case's `id` or `name`. An empty sequence disables id/name filtering.
         categories (Sequence[str]): Category names to include (case-insensitive). An empty sequence disables category filtering.
-    
+
     Returns:
         List[EvalCase]: The subset of `cases` that match all provided filters.
-    
+
     Raises:
         ValueError: If any provided category is not in the allowed set, or if no cases match the supplied filters.
     """
@@ -1260,10 +1267,10 @@ def _filter_cases(
 def _codex_cli_prefix(codex_bin: Optional[Path]) -> List[str]:
     """
     Builds the command prefix to invoke the Codex CLI, preferring a bundled `node` executable when present.
-    
+
     Parameters:
         codex_bin (Optional[Path]): Path to a specific `codex` binary. If `None`, the system `codex` command name is used.
-    
+
     Returns:
         List[str]: Sequence of command tokens to run the CLI:
             - `["node", "<codex_bin>"]` if a sibling `node` executable exists next to `codex_bin`,
@@ -1281,10 +1288,10 @@ def _codex_cli_prefix(codex_bin: Optional[Path]) -> List[str]:
 def _codex_exec_prefix(codex_bin: Optional[Path]) -> List[str]:
     """
     Build the command token prefix for invoking the Codex CLI `exec` subcommand.
-    
+
     Parameters:
         codex_bin (Optional[Path]): Optional path to a specific `codex` binary to prefer; if `None` the default resolver is used.
-    
+
     Returns:
         List[str]: A list of command tokens forming the prefix (e.g. `["codex", "exec"]` or `["node", "...", "codex", "exec"]`).
     """
@@ -1294,12 +1301,12 @@ def _codex_exec_prefix(codex_bin: Optional[Path]) -> List[str]:
 def _effective_codex_home(codex_home: Optional[Path]) -> Path:
     """
     Resolve the effective CODEX_HOME directory to use for Codex operations.
-    
+
     If `codex_home` is provided, it is used; otherwise the `CODEX_HOME` environment variable is used if set; if neither is present, defaults to `~/.codex`. The returned Path is expanded and resolved to an absolute path.
-    
+
     Parameters:
         codex_home (Optional[Path]): Optional override path for CODEX_HOME.
-    
+
     Returns:
         Path: Absolute, expanded, resolved path to the Codex home directory.
     """
@@ -1310,11 +1317,11 @@ def _effective_codex_home(codex_home: Optional[Path]) -> Path:
 def _codex_env(*, codex_bin: Optional[Path], codex_home: Optional[Path]) -> Dict[str, str]:
     """
     Builds an environment mapping configured for running the Codex CLI.
-    
+
     Parameters:
         codex_bin (Optional[Path]): Path to the Codex binary; when provided, its parent directory is prepended to the `PATH`.
         codex_home (Optional[Path]): Desired Codex home directory; when `None` an effective home is resolved via `_effective_codex_home`.
-    
+
     Returns:
         Dict[str, str]: A copy of the current environment with `CODEX_HOME` set and `PATH` modified if `codex_bin` was provided.
     """
@@ -1329,10 +1336,10 @@ def _codex_env(*, codex_bin: Optional[Path], codex_home: Optional[Path]) -> Dict
 def _codex_auth_env_keys(env: Dict[str, str]) -> List[str]:
     """
     Return the Codex authentication environment variable names that are present and non-empty in the provided environment mapping.
-    
+
     Parameters:
         env (Dict[str, str]): Mapping of environment variable names to their values (typically os.environ).
-    
+
     Returns:
         List[str]: Keys from `_CODEX_AUTH_ENV_VARS` whose corresponding value in `env` is non-empty after trimming.
     """
@@ -1346,11 +1353,11 @@ def _codex_login_status(
 ) -> Tuple[int, str, str]:
     """
     Check the Codex CLI authentication status by running `codex login status`.
-    
+
     Parameters:
         codex_bin (Optional[Path]): Path to the Codex binary to use; if None the system PATH is used.
         codex_home (Optional[Path]): Codex home directory to set via the `CODEX_HOME` environment variable.
-    
+
     Returns:
         Tuple[int, str, str]: A tuple of `(exit_code, stdout, stderr)`.
             - `exit_code`: the subprocess return code; `127` if the Codex CLI was not found, `124` if the command timed out.
@@ -1376,14 +1383,14 @@ def _preflight_codex_live_runner(
 ) -> Tuple[List[str], List[str]]:
     """
     Validate that the configured Codex home/bin provide authenticated state required for live `codex exec` runs.
-    
+
     Performs checks for the existence of the effective CODEX_HOME, presence of an auth.json file or auth-related environment variables, and attempts a short `codex login status` probe. Collects any blocking error messages and non-blocking warnings but does not raise exceptions.
-    
+
     Parameters:
         workspace_root (Path): Repository/workspace root used to detect repo-local `.codex`.
         codex_bin (Optional[Path]): Optional path to a Codex binary to use for login status probing.
         codex_home (Optional[Path]): Optional explicit Codex home directory; if omitted an effective default is used.
-    
+
     Returns:
         Tuple[List[str], List[str]]: A pair (errors, warnings).
             - errors: blocking issues that should prevent live Codex execution (e.g., missing home or missing authentication).
@@ -1457,10 +1464,10 @@ def _preflight_codex_live_runner(
 def _codex_help_text(codex_bin: Optional[Path]) -> Optional[str]:
     """
     Retrieve and cache the combined help text for the Codex CLI.
-    
+
     Parameters:
         codex_bin (Optional[Path]): Path to the Codex binary to query. If omitted, the system "codex" command will be used.
-    
+
     Returns:
         Optional[str]: Combined stdout and stderr produced by running the help command, or `None` if the executable is not available or the help invocation failed.
     """
@@ -1510,11 +1517,11 @@ def _has_skip_git_repo_check(extra_codex_args: Optional[Sequence[str]]) -> bool:
 def build_arg_parser() -> argparse.ArgumentParser:
     """
     Builds and returns the command-line argument parser for run_skill_evals.py.
-    
+
     The parser includes options for selecting cases and runners, eval suite mode and categories,
     timeout and runtime configuration, Codex/Claude/Gemini CLI overrides and extra flags,
     JSONL capture and reporting paths, and tier2 gating behavior.
-    
+
     Returns:
         argparse.ArgumentParser: A parser configured with the script's CLI options.
     """
@@ -1707,6 +1714,16 @@ def _resolve_path(path_like: str, *, base: Path) -> Path:
     if p.is_absolute():
         return p.resolve()
     return (base / p).resolve()
+
+
+def _make_relative(path: Optional[Path], base: Path) -> str:
+    """Convert absolute path to relative path from base, or return as-is if not possible."""
+    if path is None:
+        return ""
+    try:
+        return str(path.relative_to(base))
+    except ValueError:
+        return str(path)
 
 
 def _extract_min_rubric_score(budgets: Optional[Dict[str, Any]]) -> Optional[float]:
@@ -1978,12 +1995,12 @@ def run_discovery_smoke(
 def main(argv: Optional[Sequence[str]] = None) -> int:
     """
     Run the full skill evaluation workflow from parsed CLI arguments, execute selected runners against eval cases, and write evaluation reports.
-    
+
     This function parses and validates CLI arguments (or the provided argv list), loads the skill and eval cases, selects and runs configured runners for each case (including deterministic trace evaluation when enabled), aggregates per-runner and per-case results, emits artifacts (reports, scorecard, junit, release manifest), and determines an overall pass/fail decision.
-    
+
     Parameters:
         argv (Optional[Sequence[str]]): Optional list of CLI arguments to parse instead of sys.argv[1:].
-    
+
     Returns:
         int: Exit code: `0` when required gates pass; `1` for configuration/IO/preflight errors; `2` when evaluation gates fail.
     """
@@ -2189,7 +2206,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "tool": "run_skill_evals",
         "generated_at": _utc_now_iso(),
         "skill": skill_name,
-        "skill_path": str(skill_dir),
+        "skill_path": _make_relative(skill_dir, workspace_root),
         "skill_release": {
             "name": skill_name,
             "version": str(skill_frontmatter.get("version") or "0.0.0+local"),
@@ -2244,7 +2261,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             cli_timeout_sec=args.timeout_sec,
             cli_timeout_profile=args.timeout_profile,
         )
-        comparison_review_artifact = _resolve_optional_case_artifact_path(case_dir, c.comparison_review_artifact)
+        comparison_review_artifact = _resolve_optional_case_artifact_path(case_dir, c.comparison_review_artifact, workspace_root)
         neutral_baseline_approval: Optional[Dict[str, Any]] = None
         if c.baseline_type == "neutral_repo_baseline":
             approval_id = c.neutral_baseline_approval_id or ""
@@ -2464,11 +2481,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 "tier2_findings": runner_tier2_findings,
                 "warnings": runner_warnings,
                 "artifacts": {
-                    "dir": str(runner_dir),
-                    "final": str(runner_dir / "final.txt"),
-                    "stdout": str(runner_dir / "stdout.txt"),
-                    "stderr": str(runner_dir / "stderr.txt"),
-                    "jsonl": str(jsonl_path) if jsonl_path else None,
+                    "dir": _make_relative(runner_dir, workspace_root),
+                    "final": _make_relative(runner_dir / "final.txt", workspace_root),
+                    "stdout": _make_relative(runner_dir / "stdout.txt", workspace_root),
+                    "stderr": _make_relative(runner_dir / "stderr.txt", workspace_root),
+                    "jsonl": _make_relative(jsonl_path, workspace_root) if jsonl_path else None,
                 },
                 "metrics": runner_metrics,
                 "used_schema": bool(schema_path and runner_name == "codex"),
@@ -2506,7 +2523,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 timeout_sec=case_timeout_sec,
                 timeout_profile=case_timeout_profile,
             ),
-            "dir": str(case_dir),
+            "dir": _make_relative(case_dir, workspace_root),
             "runners": runner_records,
             "passed": case_pass,
             "tier1_failed": case_tier1_failed,
@@ -2556,10 +2573,16 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     scorecard_path = Path(args.scorecard_out).expanduser().resolve() if args.scorecard_out else (reports_base / "scorecard.json")
     scorecard_path.parent.mkdir(parents=True, exist_ok=True)
     scorecard_path.write_text(json.dumps(summary, indent=2, ensure_ascii=False), encoding="utf-8")
+    def _rel(p: Path) -> str:
+        try:
+            return str(p.relative_to(workspace_root))
+        except ValueError:
+            return str(p)
+
     summary["artifacts"] = {
-        "reports_base": str(reports_base),
-        "summary": str(summary_path),
-        "scorecard": str(scorecard_path),
+        "reports_base": _rel(reports_base),
+        "summary": _rel(summary_path),
+        "scorecard": _rel(scorecard_path),
     }
     if comparison_review_paths:
         unique_paths = sorted(set(comparison_review_paths))
@@ -2567,8 +2590,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     summary["neutral_baseline_approvals_used"] = sorted(used_neutral_baseline_approvals)
     release_manifest_path = reports_base / "release_manifest.json"
     junit_path = Path(args.junit_out).expanduser().resolve() if args.junit_out else (reports_base / "junit.xml")
-    summary["artifacts"]["release_manifest"] = str(release_manifest_path)
-    summary["artifacts"]["junit"] = str(junit_path)
+    summary["artifacts"]["release_manifest"] = _rel(release_manifest_path)
+    summary["artifacts"]["junit"] = _rel(junit_path)
     _write_junit_report(summary, junit_path)
     release_manifest = {
         "schema_version": "1.0",
@@ -2584,7 +2607,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             "readiness_summary": summary["readiness_summary"],
             "round_state_summary": summary["round_state_summary"],
             "neutral_baseline_approvals_used": summary["neutral_baseline_approvals_used"],
-            "reports_base": str(reports_base),
+            "reports_base": _rel(reports_base),
         },
         "artifacts": summary["artifacts"],
     }

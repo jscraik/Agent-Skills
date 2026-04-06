@@ -1,0 +1,111 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://agent-skills.io/schemas/handoff-package/v1",
+  "title": "HandoffPackage",
+  "description": "Schema for skill-creator to skill-builder handoff artifact (SA2-SA3)",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "skill_name",
+    "created_at",
+    "goal",
+    "boundary_summary",
+    "trigger_contexts",
+    "resource_inventory",
+    "starter_prompts",
+    "known_risks",
+    "validation_state",
+    "authoring_state"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0"
+    },
+    "skill_name": {
+      "type": "string",
+      "description": "Name of the skill being handed off"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "goal": {
+      "type": "string",
+      "description": "What this skill helps the user accomplish"
+    },
+    "boundary_summary": {
+      "type": "string",
+      "description": "What is in scope and out of scope for this skill"
+    },
+    "trigger_contexts": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1,
+      "description": "When a user would invoke this skill"
+    },
+    "resource_inventory": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["type", "path", "description"],
+        "properties": {
+          "type": { "enum": ["skill_md", "reference", "script", "schema", "other"] },
+          "path": { "type": "string" },
+          "description": { "type": "string" }
+        }
+      }
+    },
+    "starter_prompts": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1,
+      "maxItems": 5,
+      "description": "2-3 realistic prompts a user would actually say"
+    },
+    "known_risks": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Known risks or unknowns that builder should address"
+    },
+    "validation_state": {
+      "type": "object",
+      "required": ["quick_validate_passed", "timestamp"],
+      "properties": {
+        "quick_validate_passed": { "type": "boolean" },
+        "timestamp": { "type": "string" },
+        "validator_version": { "type": "string" },
+        "findings": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "level": { "enum": ["info", "warn", "fail"] },
+              "code": { "type": "string" },
+              "message": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "authoring_state": {
+      "type": "object",
+      "required": ["is_trivial", "ready_for_builder"],
+      "properties": {
+        "is_trivial": {
+          "type": "boolean",
+          "description": "True for simple skills that don't need hardening"
+        },
+        "ready_for_builder": {
+          "type": "boolean",
+          "description": "True when handoff package is complete and ready"
+        },
+        "interview_rounds": { "type": "integer" },
+        "assumptions_made": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    }
+  }
+}

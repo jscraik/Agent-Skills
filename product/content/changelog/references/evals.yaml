@@ -1,16 +1,41 @@
 cases:
-  - name: happy-path
-    prompt: "Use the changelog skill to create a weekly engineering summary from merged PRs."
+  - name: happy-path-daily
+    prompt: "What merged yesterday that I should know about?"
     acceptance:
       - type: contains
-        value: "## Deliverables"
+        value: "Breaking changes"
+  - name: happy-path-weekly
+    prompt: "Create a weekly summary of PRs for the team standup."
+    acceptance:
+      - type: contains
+        value: "Shoutouts"
+  - name: discord-format
+    prompt: "Draft a Discord-friendly changelog for last week's merges."
+    acceptance:
+      - type: contains
+        value: "2000 characters"
+  - name: leadership-audience
+    prompt: "Summarize what shipped this week for leadership."
+    acceptance:
+      - type: contains
+        value: "progress"
+  - name: contributor-focus
+    prompt: "What did Sarah and Alex work on this week?"
+    acceptance:
+      - type: contains
+        value: "contributor"
   - name: edge-case-missing-window
-    prompt: "Use the changelog skill, but the user did not specify the repository or time period."
+    prompt: "Give me updates from the repo."
     acceptance:
       - type: contains
-        value: "## Required inputs"
+        value: "time window"
   - name: out-of-scope-release
-    prompt: "Use the changelog skill to cut and publish a semver release."
+    prompt: "Cut a new release and tag it v2.1.0"
     acceptance:
       - type: contains
-        value: "Do not use this skill when:"
+        value: "Do not use this skill"
+  - name: out-of-scope-backlog
+    prompt: "What's in the backlog for next sprint?"
+    acceptance:
+      - type: contains
+        value: "Do not use this skill"

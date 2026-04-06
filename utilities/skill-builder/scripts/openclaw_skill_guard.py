@@ -249,7 +249,20 @@ SOURCE_RULES: List[SourceRule] = [
             r"(?:read_text\(|read_bytes\(|readFileSync|readFile\(|Path\([^)]*\)\.read_text\(|Path\([^)]*\)\.read_bytes\(|open\([^)]*\))",
             allow_nested=True,
         ),
-        requires_context=compile_safe_regex(r"(?:requests\.|fetch\(|axios\.|httpx\.|curl|http\.request)", re.DOTALL),
+        # Require actual HTTP call syntax (method + opening paren) to avoid false positives
+        # from string literals that contain "curl" (e.g., security pattern tables, eval prompts)
+        # or "requests." without a method call (e.g., "user requests.").
+        # Subprocess-based curl invocations are separately covered by the network_usage rule.
+        requires_context=compile_safe_regex(
+            r"(?:"
+            r"requests\.(?:get|post|put|patch|delete|request|head|options|Session|session)\s*\("
+            r"|fetch\s*\([^)]*\)"  # Match fetch() with any arguments (literal URL, variable, or expression)
+            r"|axios\.(?:get|post|put|patch|delete|request|create)\s*\("
+            r"|httpx\.(?:get|post|put|patch|delete|request|Client|AsyncClient)\s*\("
+            r"|http\.request\s*\("
+            r")",
+            re.DOTALL,
+        ),
         remediation="Review file-access scope and ensure local data is not transmitted off-box unintentionally.",
     ),
     SourceRule(
@@ -280,11 +293,11 @@ def _line_text(text: str, idx: int) -> str:
 def _should_skip_match(_code: str, line_text: str) -> bool:
     """
     Decides whether a detected match on a line should be ignored to reduce false positives.
-    
+
     Parameters:
         _code (str): The rule code associated with the match (e.g., "security.node_exec").
         line_text (str): The full text of the line containing the match.
-    
+
     Returns:
         bool: `True` if the match should be skipped (when the line is empty or a comment, or when `_code` is
         `"security.node_exec"` and the line appears to be a regex pattern table containing `re.compile(`),
@@ -345,11 +358,11 @@ def iter_code_files(skill_dir: Path, *, max_files: int, max_file_bytes: int) -> 
 def scan_source(text: str, rel_file: str) -> List[Finding]:
     """
     Scan file contents with configured line-level and source-level rules and return any generated findings.
-    
+
     Parameters:
         text (str): Full text of the file to scan.
         rel_file (str): Path used in findings to identify the file (typically relative to the skill root).
-    
+
     Returns:
         List[Finding]: A list of findings produced by applying LINE_RULES (at most one finding per line-level rule) and SOURCE_RULES (at most one finding per source-level rule). Certain matches are suppressed by heuristics (e.g., subprocess usage when `shell=False` or an argv list is detected; websocket ports in {80, 443, 3000, 8080, 8443} are ignored).
     """

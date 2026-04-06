@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-04-05T20:29:49Z",
+  "skills": [
+    "utilities/skill-builder",
+    "skills-system/skill-creator",
+    "skills-system/skill-installer",
+    "skills-system/plugin-creator"
+  ],
+  "findings": [
+    {
+      "level": "WARN",
+      "code": "EVALS_DET_CHECK_COVERAGE",
+      "skill": "utilities/skill-builder"
+    },
+    {
+      "level": "WARN",
+      "code": "EVALS_DET_CHECK_COVERAGE",
+      "skill": "skills-system/skill-creator"
+    },
+    {
+      "level": "WARN",
+      "code": "EVALS_CASE_COUNT_MINIMAL",
+      "skill": "skills-system/skill-installer"
+    },
+    {
+      "level": "WARN",
+      "code": "EVALS_CASE_COUNT_MINIMAL",
+      "skill": "skills-system/plugin-creator"
+    },
+    {
+      "level": "WARN",
+      "code": "EVALS_DET_CHECK_COVERAGE",
+      "skill": "skills-system/plugin-creator"
+    }
+  ],
+  "summary": {
+    "fail_count": 0,
+    "warn_count": 5
+  }
+}
