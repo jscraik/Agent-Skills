@@ -107,28 +107,47 @@ class SkillState:
 
     @classmethod
     def load(cls, repo_root: Path, skill_name: str) -> Optional[SkillState]:
-        """Load state from file or return None."""
+        """Load state from file or return None.
+
+        Validates schema before loading. Returns None if file is missing or invalid.
+        """
         path = repo_root / ".agent" / "state" / f"{skill_name}.json"
         if not path.exists():
             return None
-        data = json.loads(path.read_text())
-        state = cls(
-            skill_name=data["skill_name"],
-            current_state=ReadinessState(data["current_state"]),
-            block_reason=data.get("block_reason"),
-            updated_at=data.get("updated_at", datetime.now(timezone.utc).isoformat()),
-        )
-        state.history = [
-            StateRecord(
-                h["timestamp"],
-                h.get("from_state"),
-                h["to_state"],
-                h["reason"],
-                h["actor"],
+        try:
+            data = json.loads(path.read_text())
+            # Schema validation
+            if not isinstance(data, dict):
+                raise ValueError("State file must contain a JSON object")
+            if "skill_name" not in data:
+                raise ValueError("Missing required field: skill_name")
+            if "current_state" not in data:
+                raise ValueError("Missing required field: current_state")
+            if data["current_state"] not in [s.value for s in ReadinessState]:
+                raise ValueError(f"Invalid current_state: {data['current_state']}")
+            if "history" in data and not isinstance(data["history"], list):
+                raise ValueError("history must be a list")
+
+            state = cls(
+                skill_name=data["skill_name"],
+                current_state=ReadinessState(data["current_state"]),
+                block_reason=data.get("block_reason"),
+                updated_at=data.get("updated_at", datetime.now(timezone.utc).isoformat()),
             )
-            for h in data.get("history", [])
-        ]
-        return state
+            state.history = [
+                StateRecord(
+                    h["timestamp"],
+                    h.get("from_state"),
+                    h["to_state"],
+                    h["reason"],
+                    h["actor"],
+                )
+                for h in data.get("history", [])
+            ]
+            return state
+        except (json.JSONDecodeError, ValueError, KeyError) as e:
+            # Invalid state file - return None to trigger re-creation
+            return None
 
     @classmethod
     def create(cls, repo_root: Path, skill_name: str, actor: str = "skill-creator") -> SkillState:

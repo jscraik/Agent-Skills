@@ -7,11 +7,13 @@ from pathlib import Path
 def run_ca_test(name, cmd):
     print(f"Running {name}...", end=" ", flush=True)
     result = subprocess.run(cmd, capture_output=True, text=True)
-    if result.returncode != 0 and "--json" not in cmd:
+
+    # Fail fast on non-zero exit code before any JSON parsing
+    if result.returncode != 0:
         print("FAILED")
         print(f"Error: {result.stderr}")
         return False
-    
+
     if "--json" in cmd:
         try:
             data = json.loads(result.stdout)
@@ -29,12 +31,17 @@ def run_ca_test(name, cmd):
         except json.JSONDecodeError:
             print("FAILED (Invalid JSON)")
             return False
-    
+
     print("PASSED")
     return True
 
 def main():
-    repo_root = Path(__file__).resolve().parents[1]
+    script_dir = Path(__file__).resolve().parent
+    repo_root = script_dir.parent
+    # Validate we found the repo root
+    if not (repo_root / ".git").exists():
+        print("ERROR: Could not locate repository root")
+        return 1
     ask_bin = str(repo_root / "bin" / "ask")
     
     tests = [

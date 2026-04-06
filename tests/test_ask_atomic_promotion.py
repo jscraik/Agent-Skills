@@ -240,5 +240,137 @@ class TestQuarantineLifecycle(unittest.TestCase):
         self.assertTrue((dest_dir / "SKILL.md").exists())
 
 
+class TestConcurrentAccess(unittest.TestCase):
+    """Test concurrent state access and validation (P3)."""
+
+    def setUp(self):
+        self.temp_dir = tempfile.mkdtemp()
+        self.repo_root = Path(self.temp_dir)
+        (self.repo_root / ".agent" / "state").mkdir(parents=True)
+
+    def tearDown(self):
+        shutil.rmtree(self.temp_dir, ignore_errors=True)
+
+    def test_concurrent_state_transitions(self):
+        """P3: Concurrent state transitions are handled safely."""
+        import threading
+        skill_name = "concurrent-skill"
+
+        # Create initial state
+        state = SkillState.create(self.repo_root, skill_name)
+
+        errors = []
+        success_count = [0]
+
+        def transition_worker(worker_id):
+            try:
+                # Each worker loads, transitions, and writes
+                for i in range(5):
+                    loaded = SkillState.load(self.repo_root, skill_name)
+                    if loaded:
+                        if loaded.current_state == ReadinessState.STARTER_VALID:
+                            loaded.transition(
+                                ReadinessState.COMPARISON_INCOMPLETE,
+                                reason=f"Worker {worker_id} iteration {i}",
+                                actor=f"worker-{worker_id}"
+                            )
+                        elif loaded.current_state == ReadinessState.COMPARISON_INCOMPLETE:
+                            loaded.transition(
+                                ReadinessState.BLOCKED,
+                                reason=f"Worker {worker_id} blocking",
+                                actor=f"worker-{worker_id}"
+                            )
+                            loaded.transition(
+                                ReadinessState.COMPARISON_INCOMPLETE,
+                                reason=f"Worker {worker_id} retry",
+                                actor=f"worker-{worker_id}"
+                            )
+                        loaded.write(self.repo_root)
+                        success_count[0] += 1
+            except Exception as e:
+                errors.append(str(e))
+
+        # Run multiple threads
+        threads = []
+        for i in range(3):
+            t = threading.Thread(target=transition_worker, args=(i,))
+            threads.append(t)
+            t.start()
+
+        for t in threads:
+            t.join()
+
+        # Verify no exceptions and state is valid
+        self.assertEqual(errors, [], f"Concurrent access errors: {errors}")
+        self.assertGreater(success_count[0], 0, "No successful transitions")
+
+        # Final state should be valid
+        final_state = SkillState.load(self.repo_root, skill_name)
+        self.assertIsNotNone(final_state)
+        self.assertIn(final_state.current_state, [
+            ReadinessState.STARTER_VALID,
+            ReadinessState.COMPARISON_INCOMPLETE,
+            ReadinessState.BLOCKED
+        ])
+
+
+class TestSchemaValidation(unittest.TestCase):
+    """Test schema validation for state files (P3)."""
+
+    def setUp(self):
+        self.temp_dir = tempfile.mkdtemp()
+        self.repo_root = Path(self.temp_dir)
+        (self.repo_root / ".agent" / "state").mkdir(parents=True)
+
+    def tearDown(self):
+        shutil.rmtree(self.temp_dir, ignore_errors=True)
+
+    def test_load_invalid_json_returns_none(self):
+        """P3: Invalid JSON state file returns None."""
+        skill_name = "invalid-json"
+        state_path = self.repo_root / ".agent" / "state" / f"{skill_name}.json"
+        state_path.write_text("not valid json")
+
+        result = SkillState.load(self.repo_root, skill_name)
+        self.assertIsNone(result)
+
+    def test_load_missing_required_fields_returns_none(self):
+        """P3: State file missing required fields returns None."""
+        skill_name = "missing-fields"
+        state_path = self.repo_root / ".agent" / "state" / f"{skill_name}.json"
+        state_path.write_text('{"block_reason": "test"}')
+
+        result = SkillState.load(self.repo_root, skill_name)
+        self.assertIsNone(result)
+
+    def test_load_invalid_state_value_returns_none(self):
+        """P3: Invalid current_state value returns None."""
+        skill_name = "invalid-state"
+        state_path = self.repo_root / ".agent" / "state" / f"{skill_name}.json"
+        state_path.write_text('{"skill_name": "test", "current_state": "invalid_state"}')
+
+        result = SkillState.load(self.repo_root, skill_name)
+        self.assertIsNone(result)
+
+    def test_load_non_object_json_returns_none(self):
+        """P3: Non-object JSON in state file returns None."""
+        skill_name = "array-state"
+        state_path = self.repo_root / ".agent" / "state" / f"{skill_name}.json"
+        state_path.write_text('["not", "an", "object"]')
+
+        result = SkillState.load(self.repo_root, skill_name)
+        self.assertIsNone(result)
+
+    def test_load_valid_state_succeeds(self):
+        """P3: Valid state file loads correctly."""
+        skill_name = "valid-state"
+        state = SkillState.create(self.repo_root, skill_name)
+
+        loaded = SkillState.load(self.repo_root, skill_name)
+        self.assertIsNotNone(loaded)
+        self.assertEqual(loaded.skill_name, skill_name)
+        self.assertEqual(loaded.current_state, ReadinessState.STARTER_VALID)
+
+
 if __name__ == "__main__":
     unittest.main()

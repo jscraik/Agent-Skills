@@ -88,10 +88,21 @@ class TestAskCLI(unittest.TestCase):
         env["ASK_TRACE_ID"] = "test-trace-123"
         cmd = ["python3", "bin/ask", "repo", "status", "--json"]
         result = subprocess.run(cmd, capture_output=True, text=True, env=env)
-        
+
         self.assertEqual(result.returncode, 0)
         output = json.loads(result.stdout)
         self.assertEqual(output["trace_id"], "test-trace-123")
+
+    def test_trace_id_flag_overrides_env(self):
+        """CA2: --trace-id flag overrides ASK_TRACE_ID environment variable."""
+        env = os.environ.copy()
+        env["ASK_TRACE_ID"] = "env-trace-456"
+        cmd = ["python3", "bin/ask", "repo", "status", "--json", "--trace-id", "flag-trace-789"]
+        result = subprocess.run(cmd, capture_output=True, text=True, env=env)
+
+        self.assertEqual(result.returncode, 0)
+        output = json.loads(result.stdout)
+        self.assertEqual(output["trace_id"], "flag-trace-789")  # Flag wins
 
 if __name__ == "__main__":
     unittest.main()
