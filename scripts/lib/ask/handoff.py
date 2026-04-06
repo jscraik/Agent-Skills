@@ -11,6 +11,13 @@ from typing import Any, Dict, List, Optional
 
 from .envelope import ErrorCode, CallResult, ErrorObject
 
+# Optional PyYAML import with graceful fallback
+yaml = None
+try:
+    import yaml
+except ImportError:
+    pass
+
 
 @dataclass
 class ResourceItem:
@@ -90,7 +97,11 @@ class HandoffPackage:
 
     def to_yaml(self) -> str:
         """Serialize to YAML format."""
-        import yaml
+        if yaml is None:
+            raise RuntimeError(
+                "PyYAML is required for YAML serialization but is not installed. "
+                "Install it with: pip install pyyaml"
+            )
         return yaml.dump(self.to_dict(), default_flow_style=False, sort_keys=False)
 
     def to_json(self) -> str:
@@ -110,7 +121,11 @@ class HandoffPackage:
     @classmethod
     def load(cls, path: Path) -> HandoffPackage:
         """Load handoff package from file."""
-        import yaml
+        if yaml is None:
+            raise RuntimeError(
+                "PyYAML is required to load handoff packages but is not installed. "
+                "Install it with: pip install pyyaml"
+            )
         data = yaml.safe_load(path.read_text())
         pkg = cls()
         pkg.schema_version = data.get("schema_version", "1.0")
