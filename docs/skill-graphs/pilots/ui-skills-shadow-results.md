@@ -1,5 +1,7 @@
 # UI Skills Shadow Results (Phase 2)
 
+> **Note:** This document contains example/hypothetical pilot data for demonstration purposes. The run IDs and timestamps shown are illustrative examples of what a completed pilot window would look like. Actual runs in `artifacts/skill-graphs/runs/` may differ.
+
 Shadow mode runs evaluator + checkpoint adversarial checks without automatic improvement writes.
 
 ## Table of Contents
