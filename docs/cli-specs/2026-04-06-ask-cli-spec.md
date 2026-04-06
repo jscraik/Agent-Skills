@@ -91,7 +91,7 @@ ask skills audit(path: string, level?: "compat" | "strict")
 ask skills install(url: string, remediate?: boolean, dest?: string)
 /** @param remediate - Scaffolds missing contract/eval files if true. */
 
-ask skills fold(source: string, target: string, sensitivity?: float)
+ask skills fold(source: string, target: string, sensitivity?: number)
 /** @param sensitivity - Overlap threshold (default 0.2). */
 
 ask repo status(verbose?: boolean)
