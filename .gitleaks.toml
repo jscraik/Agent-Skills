@@ -19,7 +19,7 @@ paths = [
   "(^|/)artifacts/skill-graphs/runs/",
   "(^|/)artifacts/validation/.*/(stderr|stdout|final|output)\\.txt$",
   "(^|/)artifacts/validation/.*/codex/(stderr|stdout|result)\\.(txt|json)$",
-  "(^|/).cache/",
+  "(^|/)\\.cache/",
 ]
 regexes = [
   "\\[REDACTED\\]",

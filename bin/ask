@@ -1,0 +1,84 @@
+#!/usr/bin/env python3
+import sys
+import os
+import argparse
+from pathlib import Path
+
+# Add scripts/lib and scripts to path
+repo_root = Path(__file__).resolve().parents[1]
+sys.path.append(str(repo_root / "scripts" / "lib"))
+sys.path.append(str(repo_root / "scripts"))
+
+from ask.envelope import CallResult
+from ask.context import find_repo_root
+from ask.commands.skills import list_skills, sync_skills
+
+def main():
+    global_parser = argparse.ArgumentParser(add_help=False)
+    global_parser.add_argument("--json", action="store_true", help="Output results in JSON format")
+    
+    parser = argparse.ArgumentParser(prog="ask", description="Agent Skills Kit CLI", parents=[global_parser])
+    subparsers = parser.add_subparsers(dest="topic")
+    
+    # --- repo ---
+    repo_parser = subparsers.add_parser("repo", help="Repository management", parents=[global_parser])
+    repo_subparsers = repo_parser.add_subparsers(dest="action")
+    
+    repo_status_parser = repo_subparsers.add_parser("status", help="Show repository status", parents=[global_parser])
+    repo_status_parser.add_argument("--verbose", action="store_true", help="Include more details")
+    
+    # --- skills ---
+    skills_parser = subparsers.add_parser("skills", help="Skill management", parents=[global_parser])
+    skills_subparsers = skills_parser.add_subparsers(dest="action")
+    
+    skills_list_parser = skills_subparsers.add_parser("list", help="List discovered skills", parents=[global_parser])
+    skills_list_parser.add_argument("--category", help="Filter by category")
+    
+    skills_sync_parser = skills_subparsers.add_parser("sync", help="Synchronize skill symlinks", parents=[global_parser])
+    skills_sync_parser.add_argument("--scope", choices=["user", "workspace"], default="workspace", help="Tier to sync")
+    skills_sync_parser.add_argument("--dry-run", action="store_true", help="Preview changes")
+    
+    args = parser.parse_args()
+    
+    repo_root = find_repo_root()
+    result = CallResult()
+    result.metadata["command"] = " ".join(sys.argv[1:])
+    
+    if args.topic == "repo":
+        if args.action == "status":
+            result.data["repo_root"] = str(repo_root)
+            result.data["is_git"] = (repo_root / ".git").exists()
+            result.status = "success"
+            
+    elif args.topic == "skills":
+        if args.action == "list":
+            result = list_skills(repo_root, category=args.category)
+        elif args.action == "sync":
+            result = sync_skills(repo_root, scope=args.scope, dry_run=args.dry_run)
+    
+    # Dispatch Output
+    if args.json:
+        # Ensure command is updated in metadata if it was replaced by result from command function
+        result.metadata["command"] = " ".join(sys.argv[1:])
+        print(result.to_json())
+    else:
+        if result.status == "success":
+            if args.topic:
+                if args.topic == "repo" and args.action == "status":
+                    print(f"✅ Success: {result.metadata['command']}")
+                    print(f"  Root: {result.data['repo_root']}")
+                elif args.topic == "skills" and args.action == "list":
+                    print(f"Discovered {len(result.data['skills'])} skills:")
+                    for skill in result.data["skills"]:
+                        print(f"  - {skill['name']} [{skill['category']}]")
+                elif args.topic == "skills" and args.action == "sync":
+                    print(f"✅ Planned sync: {len(result.data['plan']['symlinks'])} symlinks.")
+                    if args.dry_run:
+                        print("  (Dry run - no changes made)")
+            else:
+                parser.print_help()
+        else:
+            print(f"❌ Error: {result.errors[0].message if result.errors else 'Unknown error'}")
+
+if __name__ == "__main__":
+    main()

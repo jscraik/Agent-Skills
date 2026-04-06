@@ -390,6 +390,7 @@ if [[ "$release_ready" == "1" ]] && [[ -n "$evidence_run_dir" ]]; then
   done
   skills_json+="]"
 
+  runner_label="${SKILL_FAMILY_RUNNER:-codex}"
   codex_profile_label="${SKILL_FAMILY_CODEX_PROFILE:-default}"
 
   cat >"$index_path" <<EOF
@@ -398,6 +399,7 @@ if [[ "$release_ready" == "1" ]] && [[ -n "$evidence_run_dir" ]]; then
   "generated_at": "${run_timestamp}",
   "branch": "${git_branch}",
   "commit_sha": "${git_sha}",
+  "runner": "${runner_label}",
   "freshness_window_days": 7,
   "mode": "release-ready",
   "codex_profile": "${codex_profile_label}",
