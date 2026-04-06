@@ -22,7 +22,7 @@ sys.path.append(str(repo_root_path / "scripts" / "lib"))
 sys.path.append(str(repo_root_path / "scripts"))
 sys.path.append(str(repo_root_path / "utilities" / "skill-builder" / "scripts"))
 
-from ask.envelope import CallResult, ErrorObject
+from ask.envelope import CallResult, ErrorObject, ErrorCode, ExitCode
 from ask.context import find_repo_root
 from ask.commands.skills import list_skills, sync_skills, audit_skill, install_skill, fold_skills, init_skill
 from ask.commands.repo import repo_status, repo_validate, check_hub_stability
@@ -30,18 +30,24 @@ from ask.commands.plugins import init_plugin
 from ask.commands.evals import run_evals, benchmark_portfolio, dashboard_report
 from ask.commands.graph import graph_related, graph_find, graph_info, graph_chain, graph_list, graph_topics
 from ask.commands.mcp import sync_mcp
+from ask.handoff import HandoffPackage, require_handoff
+from ask.state import ReadinessState, SkillState
+from ask.validity import ContractValidityEvidence, check_install_validity
 
-# Error Code Mapping
+# Error Code Mapping (per spec Error Registry)
 ERROR_MAP = {
-    "SUCCESS": 0,
-    "ERR_RUNTIME": 1,
-    "ERR_VALIDATION": 2,
-    "ERR_PI_GUARD": 2,
-    "ERR_PATH_TRAVERSAL": 2,
-    "ERR_DEPENDENCY": 3,
-    "ERR_CONFLICT": 4,
-    "ERR_REDUNDANCY": 4,
-    "ERR_AUTH": 5
+    ErrorCode.SUCCESS: ExitCode.SUCCESS,
+    ErrorCode.ERR_RUNTIME: ExitCode.ERR_RUNTIME,
+    ErrorCode.ERR_VALIDATION: ExitCode.ERR_VALIDATION,
+    ErrorCode.ERR_PI_GUARD: ExitCode.ERR_VALIDATION,
+    ErrorCode.ERR_PATH_TRAVERSAL: ExitCode.ERR_VALIDATION,
+    ErrorCode.ERR_SCHEMA_INVALID: ExitCode.ERR_VALIDATION,
+    ErrorCode.ERR_INVALID_HANDOFF: ExitCode.ERR_VALIDATION,
+    ErrorCode.ERR_INVALID_STATE: ExitCode.ERR_VALIDATION,
+    ErrorCode.ERR_DEPENDENCY: ExitCode.ERR_DEPENDENCY,
+    ErrorCode.ERR_CONFLICT: ExitCode.ERR_CONFLICT,
+    ErrorCode.ERR_REDUNDANCY: ExitCode.ERR_CONFLICT,
+    ErrorCode.ERR_AUTH: ExitCode.ERR_AUTH,
 }
 
 # Valid commands for fuzzy matching
@@ -186,7 +192,7 @@ def build_helpful_error(topic: Optional[str], action: Optional[str], raw_args: L
         full_message += "\n".join(f"   • {e}" for e in examples[:4])
 
     result.errors.append(ErrorObject(
-        code="ERR_VALIDATION",
+        code=ErrorCode.ERR_VALIDATION,
         message=full_message,
         fix_suggestion="Use 'ask --help' for full usage information."
     ))

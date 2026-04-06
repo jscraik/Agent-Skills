@@ -1063,18 +1063,18 @@ def main(argv: list[str]) -> int:
                     "trusted_repo_allowlist": sorted(trusted_repos),
                     "trusted_repo_overrides": trusted_repo_overrides,
                     "quarantine_to_promote": True,
-                    "rollback_journal": journal_path,
+                    "rollback_journal": _normalize_path_for_journal(journal_path, dest_root),
                     "validation_level": args.validation_level,
                     "allow_ssh_fallback": bool(args.allow_ssh_fallback),
                 },
                 "install": {
-                    "destination_root": dest_root,
-                    "quarantine_root": quarantine_root,
+                    "destination_root": _normalize_path_for_journal(dest_root, dest_root),
+                    "quarantine_root": _normalize_path_for_journal(quarantine_root, dest_root),
                     "skills": [
                         {
                             "name": staged.skill_name,
                             "source_path": staged.source_path,
-                            "destination_path": staged.destination_dir,
+                            "destination_path": _normalize_path_for_journal(staged.destination_dir, dest_root),
                             "tree_sha256": staged.tree_sha256,
                             "file_count": staged.file_count,
                             "bytes_total": staged.bytes_total,

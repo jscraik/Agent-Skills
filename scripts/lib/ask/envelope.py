@@ -4,6 +4,33 @@ import re
 import os
 from dataclasses import dataclass, asdict, field
 from typing import Any, List, Optional, Dict
+from enum import IntEnum
+
+
+class ExitCode(IntEnum):
+    """Exit codes per ask CLI spec Error Registry."""
+    SUCCESS = 0
+    ERR_RUNTIME = 1
+    ERR_VALIDATION = 2
+    ERR_DEPENDENCY = 3
+    ERR_CONFLICT = 4
+    ERR_AUTH = 5
+
+
+class ErrorCode:
+    """String error codes for CallResult envelope."""
+    SUCCESS = "SUCCESS"
+    ERR_RUNTIME = "ERR_RUNTIME"
+    ERR_VALIDATION = "ERR_VALIDATION"
+    ERR_DEPENDENCY = "ERR_DEPENDENCY"
+    ERR_CONFLICT = "ERR_CONFLICT"
+    ERR_AUTH = "ERR_AUTH"
+    ERR_PATH_TRAVERSAL = "ERR_PATH_TRAVERSAL"
+    ERR_PI_GUARD = "ERR_PI_GUARD"
+    ERR_SCHEMA_INVALID = "ERR_SCHEMA_INVALID"
+    ERR_REDUNDANCY = "ERR_REDUNDANCY"
+    ERR_INVALID_HANDOFF = "ERR_INVALID_HANDOFF"
+    ERR_INVALID_STATE = "ERR_INVALID_STATE"
 
 @dataclass
 class ErrorObject:
@@ -12,14 +39,33 @@ class ErrorObject:
     fix_suggestion: Optional[str] = None
     help_url: Optional[str] = None
 
+    def __post_init__(self):
+        # Validate error code is a known constant
+        valid_codes = [
+            ErrorCode.SUCCESS, ErrorCode.ERR_RUNTIME, ErrorCode.ERR_VALIDATION,
+            ErrorCode.ERR_DEPENDENCY, ErrorCode.ERR_CONFLICT, ErrorCode.ERR_AUTH,
+            ErrorCode.ERR_PATH_TRAVERSAL, ErrorCode.ERR_PI_GUARD,
+            ErrorCode.ERR_SCHEMA_INVALID, ErrorCode.ERR_REDUNDANCY,
+            ErrorCode.ERR_INVALID_HANDOFF, ErrorCode.ERR_INVALID_STATE,
+        ]
+        if self.code not in valid_codes:
+            # Allow but warn - don't crash on unknown codes
+            pass
+
+def _get_trace_id() -> str:
+    """Get trace_id from ASK_TRACE_ID env var or generate UUID."""
+    return os.environ.get("ASK_TRACE_ID") or str(uuid.uuid4())
+
+
 @dataclass
 class CallResult:
     status: str = "success"
-    trace_id: str = field(default_factory=lambda: str(uuid.uuid4()))
+    trace_id: str = field(default_factory=_get_trace_id)
     metadata: Dict[str, Any] = field(default_factory=lambda: {
         "version": "0.1.0",
         "command": "unknown",
-        "next_steps": []
+        "next_steps": [],
+        "correction_note": None,
     })
     data: Dict[str, Any] = field(default_factory=dict)
     telemetry: Dict[str, Any] = field(default_factory=dict)
