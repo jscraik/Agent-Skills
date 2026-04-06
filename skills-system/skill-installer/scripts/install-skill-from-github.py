@@ -98,20 +98,79 @@ class InstallError(Exception):
     pass
 
 
+def _normalize_path_for_journal(value: object, dest_root: str | None = None) -> object:
+    """Normalize filesystem paths to be environment-agnostic.
+
+    - Relativizes paths within dest_root
+    - Replaces home directory with ~
+    - Replaces temp directories with <TMP_DIR>
+    - Keeps relative paths as-is
+    """
+    if not isinstance(value, str):
+        return value
+
+    # Handle empty or non-path strings
+    if not value or os.path.sep not in value:
+        return value
+
+    # Expand home and get real paths for comparison
+    home = os.path.expanduser("~")
+    real_value = os.path.realpath(value) if os.path.isabs(value) else value
+
+    # Replace home directory with ~
+    if real_value.startswith(home):
+        real_value = "~" + real_value[len(home):]
+    elif value.startswith(home):
+        real_value = "~" + value[len(home):]
+
+    # Replace temp directories with placeholder (check both real and original path)
+    tmp_dirs = [tempfile.gettempdir(), "/var/folders", "/tmp", "/var/tmp"]
+    for tmp in tmp_dirs:
+        if real_value.startswith(tmp) or value.startswith(tmp):
+            # Extract the skill-install directory name which contains run-id
+            parts = real_value.split(os.sep)
+            for i, part in enumerate(parts):
+                if part.startswith("skill-install-") or part.startswith("codex"):
+                    return f"<TMP_DIR>/{'/'.join(parts[i:])}"
+            # Fallback: just use basename
+            return f"<TMP_DIR>/{os.path.basename(real_value)}"
+
+    # Relativize paths within dest_root if provided
+    if dest_root:
+        real_dest = os.path.realpath(dest_root)
+        if real_value.startswith(real_dest):
+            rel = os.path.relpath(real_value, real_dest)
+            return f"<DEST_ROOT>/{rel}"
+        elif real_value.startswith(dest_root):
+            rel = os.path.relpath(real_value, dest_root)
+            return f"<DEST_ROOT>/{rel}"
+
+    return real_value
+
+
 class JournalWriter:
     """Append-only install journal for rollback and audit diagnostics."""
 
-    def __init__(self, path: str):
+    def __init__(self, path: str, dest_root: str | None = None):
         self.path = path
+        self.dest_root = dest_root
         os.makedirs(os.path.dirname(path), exist_ok=True)
         with open(self.path, "a", encoding="utf-8"):
             pass
 
     def write(self, event: str, **details: object) -> None:
+        # Normalize paths in details
+        normalized = {}
+        for key, value in details.items():
+            if isinstance(value, list):
+                normalized[key] = [_normalize_path_for_journal(item, self.dest_root) for item in value]
+            else:
+                normalized[key] = _normalize_path_for_journal(value, self.dest_root)
+
         row = {
             "timestamp": _utc_now_iso(),
             "event": event,
-            "details": details,
+            "details": normalized,
         }
         with open(self.path, "a", encoding="utf-8") as file_handle:
             file_handle.write(json.dumps(row, ensure_ascii=False) + "\n")
@@ -871,7 +930,7 @@ def main(argv: list[str]) -> int:
         provenance_dir = os.path.realpath(args.provenance_dir or _default_provenance_dir(dest_root))
         journal_dir = os.path.realpath(args.journal_dir or _default_journal_dir(dest_root))
         journal_path = os.path.join(journal_dir, f"{run_id}.jsonl")
-        journal = JournalWriter(journal_path)
+        journal = JournalWriter(journal_path, dest_root=dest_root)
 
         journal.write(
             "install_started",
