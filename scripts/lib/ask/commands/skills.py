@@ -11,6 +11,14 @@ from ask.envelope import CallResult, ErrorObject
 from ask.context import find_repo_root
 from skill_discovery import discover_skill_entries
 
+
+def _get_python_interpreter() -> str:
+    """Return the Python interpreter path, preferring PyYAML venv if available."""
+    preferred = Path.home() / ".venvs" / "pyyaml" / "bin" / "python"
+    if preferred.exists():
+        return str(preferred)
+    return "python3"
+
 # Explicitly load builder-specific logic using absolute paths to avoid namespace collisions
 def _load_builder_module(repo_root: Path, module_name: str):
     module_path = repo_root / "utilities" / "skill-builder" / "scripts" / f"{module_name}.py"
@@ -49,9 +57,9 @@ def list_skills(repo_root: Path, category: Optional[str] = None) -> CallResult:
 def init_skill(repo_root: Path, name: str, category: str, description: str) -> CallResult:
     """Initializes a new skill scaffold using the repo template logic."""
     result = CallResult()
-    
+
     cmd = [
-        "python3", "utilities/skill-builder/scripts/init_skill.py",
+        _get_python_interpreter(), "utilities/skill-builder/scripts/init_skill.py",
         name,
         "--category", category,
         "--description", description,
@@ -60,7 +68,7 @@ def init_skill(repo_root: Path, name: str, category: str, description: str) -> C
         "--maturity", "experimental",
         "--lifecycle-state", "incubating"
     ]
-    
+
     process = subprocess.run(cmd, cwd=str(repo_root), capture_output=True, text=True)
     
     if process.returncode == 0:
@@ -112,13 +120,15 @@ def audit_skill(repo_root: Path, skill_path: str, level: str = "compat") -> Call
         ))
         return result
 
-    diag_cmd = ["python3", "scripts/diagnose_skill.py", skill_path]
+    python = _get_python_interpreter()
+
+    diag_cmd = [python, "scripts/diagnose_skill.py", skill_path]
     diag_proc = subprocess.run(diag_cmd, cwd=str(repo_root), capture_output=True, text=True)
     result.data["diagnostics"] = {"exit_code": diag_proc.returncode, "stdout": diag_proc.stdout, "stderr": diag_proc.stderr}
-    
+
     if level == "strict":
         # Security gate (skill_gate.py)
-        gate_cmd = ["python3", "utilities/skill-builder/scripts/skill_gate.py", skill_path, "--require-security-evals", "--pi-high-fail", "--require-fail-fast"]
+        gate_cmd = [python, "utilities/skill-builder/scripts/skill_gate.py", skill_path, "--require-security-evals", "--pi-high-fail", "--require-fail-fast"]
         gate_proc = subprocess.run(gate_cmd, cwd=str(repo_root), capture_output=True, text=True)
         result.data["security_gate"] = {"exit_code": gate_proc.returncode, "stdout": gate_proc.stdout, "stderr": gate_proc.stderr}
         if gate_proc.returncode != 0:
@@ -127,7 +137,7 @@ def audit_skill(repo_root: Path, skill_path: str, level: str = "compat") -> Call
             return result
 
         # Family benchmarks validation
-        family_cmd = ["python3", "scripts/validate_skill_authoring_family_benchmarks.py", skill_path]
+        family_cmd = [python, "scripts/validate_skill_authoring_family_benchmarks.py", skill_path]
         family_proc = subprocess.run(family_cmd, cwd=str(repo_root), capture_output=True, text=True)
         result.data["family_benchmarks"] = {"exit_code": family_proc.returncode, "stdout": family_proc.stdout, "stderr": family_proc.stderr}
         if family_proc.returncode != 0:
@@ -136,7 +146,7 @@ def audit_skill(repo_root: Path, skill_path: str, level: str = "compat") -> Call
             return result
 
         # OpenClaw skill guard
-        openclaw_cmd = ["python3", "utilities/skill-builder/scripts/openclaw_skill_guard.py", skill_path, "--mode", "both", "--format", "text"]
+        openclaw_cmd = [python, "utilities/skill-builder/scripts/openclaw_skill_guard.py", skill_path, "--mode", "both", "--format", "text"]
         openclaw_proc = subprocess.run(openclaw_cmd, cwd=str(repo_root), capture_output=True, text=True)
         result.data["openclaw_guard"] = {"exit_code": openclaw_proc.returncode, "stdout": openclaw_proc.stdout, "stderr": openclaw_proc.stderr}
         if openclaw_proc.returncode != 0:
@@ -192,7 +202,7 @@ def install_skill(repo_root: Path, url: str, remediate: bool = False, dest: str 
         return result
 
     cmd = [
-        "python3", "skills-system/skill-installer/scripts/install-skill-from-github.py",
+        _get_python_interpreter(), "skills-system/skill-installer/scripts/install-skill-from-github.py",
         "--url", url,
         "--dest", str(dest_path),
         "--validation-level", "compat"
