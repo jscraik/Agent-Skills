@@ -433,7 +433,15 @@ def main():
     fuzzy_matched = False  # Track if fuzzy matching was used
 
     try:
-        args = parser.parse_args(raw_args)
+        # In robot mode, suppress parser error output to stderr since we handle
+        # fuzzy corrections ourselves. This prevents parser noise from contaminating
+        # structured output flows that expect clean results.
+        if robot_mode:
+            import contextlib
+            with contextlib.redirect_stderr(open(os.devnull, 'w')):
+                args = parser.parse_args(raw_args)
+        else:
+            args = parser.parse_args(raw_args)
         parsed_topic = args.topic
         parsed_action = getattr(args, 'action', None)
     except SystemExit as e:
