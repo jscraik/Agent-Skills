@@ -160,20 +160,12 @@ ce-ideate:
 ce-plan:
   ce-brainstorm: Use first when the work still needs WHAT/WHY clarification before
     sequencing
-  ce-reliability-review: Review reliability posture before executing reliability-sensitive
-    plans
   compound-engineering-router: Use to choose the correct compound-engineering stage
     before or after planning
   linear: Use after plan completion when the user wants the plan turned into a Linear
     issue with read-before-write safeguards
   product-spec: Use when the plan should be blocked until the product contract is
     made explicit
-ce-reliability-review:
-  ce-plan: Relate reliability review back to planning for reliability-sensitive execution
-  ce-review: Follow reliability review with package readiness verification
-  ce-spec: Connect reliability requirements back to specification
-  ce-technical-review: Pair reliability review with technical correctness audit
-  systematic-debugging: Root-cause reliability issues when needed
 
 ce-review:
   agent-native-audit: Audit whether the workflow is broadly agent-operable rather
@@ -189,12 +181,6 @@ ce-spec:
   compound-engineering-router: Use to choose the correct compound-engineering stage
     before or after specification
 
-ce-tdd:
-  ce-plan: Plan test-driven implementation phases
-  ce-review: Review test coverage and implementation completeness
-  ce-work: Execute test-driven development cycles
-  linear: Track TDD tasks in Linear issues
-  test-driven-development: Apply TDD methodology within compound engineering
 ce-technical-review:
   agent-native-audit: Review agent-operability or workflow autonomy rather than code-level
     engineering risk

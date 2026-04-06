@@ -281,7 +281,7 @@ For services/high-risk work, model failures per `references/production-considera
 | **Retry safety** | Idempotency |
 | **Resource limits** | Circuit breakers |
 
-Route to `[[ce-reliability-review]]` for new services or high blast radius.
+For services or high blast radius work, include reliability modeling in the plan.
 
 ### Phase 7: Write the plan artifact
 Ensure the destination directory exists before writing:
@@ -350,7 +350,6 @@ See `references/ce-anti-patterns.md` for full catalog with detection and fixes:
 |---|---|
 | [[compound-engineering-router]] | Choose CE stage |
 | [[ce-brainstorm]] | Clarify WHAT/WHY |
-| [[ce-reliability-review]] | Reliability analysis |
 | [[product-spec]] | Product contract |
 | [[linear]] | Issue creation |
 **Topic map:** [[product-ops]]
