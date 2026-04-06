@@ -161,8 +161,6 @@ def install_skill(repo_root: Path, url: str, remediate: bool = False, dest: str 
         "python3", "skills-system/skill-installer/scripts/install-skill-from-github.py",
         "--url", url,
         "--dest", str(dest_path),
-        "--allow-untrusted-source",
-        "--allow-unpinned-ref",
         "--validation-level", "compat"
     ]
 
