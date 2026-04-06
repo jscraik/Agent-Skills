@@ -75,11 +75,12 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add docs/skill-graphs/telemetry/daily-skill-health.md \
-                  artifacts/skill-graphs/runs/ \
-                  artifacts/skill-graphs/onboarding/wave-readiness.json \
-                  artifacts/skill-graphs/pilot/artifact-parity-manifest.json \
-                  artifacts/skill-graphs/telemetry/ || true
+          # Add each path separately so missing paths don't block others
+          git add docs/skill-graphs/telemetry/daily-skill-health.md 2>/dev/null || true
+          git add artifacts/skill-graphs/runs/ 2>/dev/null || true
+          git add artifacts/skill-graphs/onboarding/wave-readiness.json 2>/dev/null || true
+          git add artifacts/skill-graphs/pilot/artifact-parity-manifest.json 2>/dev/null || true
+          git add artifacts/skill-graphs/telemetry/ 2>/dev/null || true
           git diff --cached --quiet || git commit \
             -m "chore(telemetry): daily skill-health refresh [skip ci]"
           git push
