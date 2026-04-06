@@ -344,11 +344,11 @@ artifacts/skill-graphs/pilot/artifact-parity-manifest.json
 
 | Phase | Status | Notes |
 |-------|--------|-------|
-| P0 — Fix shadow CI workflow | `pending` | Write `.github/workflows/recursive-skill-shadow.yml` changes |
-| P1 — Local shadow cycle run | `pending` | Run after P0 file is written (no CI trigger needed) |
-| P2 — Verify wave-0 passes | `pending` | Checkpoint gate; must be `ready: true` before P3 |
-| P3 — Release-ready gate | `pending` | Requires P2 to pass |
-| P4 — PR with artifacts + CI fix | `pending` | Final delivery |
+| P0 — Fix shadow CI workflow | `done` | Already committed in c3ab24d (daily schedule, write-back, freshness check) |
+| P1 — Local shadow cycle run | `done` | 8 runs across 4 profiles, 6 passed, 2 escalated (expected) |
+| P2 — Verify wave-0 passes | `done` | wave-0-controls.ready=true, zero blockers |
+| P3 — Release-ready gate | `done` | Structural gate passed (live evals deferred to Codex CI) |
+| P4 — PR with artifacts + CI fix | `done` | PR #86 updated, AI artifacts committed |
 
 ## Risks
 

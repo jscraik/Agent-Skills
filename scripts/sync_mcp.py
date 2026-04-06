@@ -7,10 +7,13 @@ import re
 import shlex
 
 try:
-    import tomli as tomllib
+    import tomllib
 except ModuleNotFoundError:
-    logging.error("Error: Please install tomli if using Python < 3.11: pip install tomli")
-    sys.exit(1)
+    try:
+        import tomli as tomllib
+    except ModuleNotFoundError:
+        logging.error("Error: Please install tomli if using Python < 3.11: pip install tomli")
+        sys.exit(1)
 
 CODEX_CONFIG_PATH = os.path.expanduser("~/.codex/config.toml")
 ANTIGRAVITY_MCP_PATH = os.path.expanduser("~/.gemini/antigravity/mcp_config.json")
