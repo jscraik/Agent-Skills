@@ -8,6 +8,16 @@ metadata:
 
 # Review Duplication
 
+## Table of Contents
+
+- [Overview](#overview)
+- [Inputs](#inputs)
+- [Outputs](#outputs)
+- [Workflow](#workflow-investigating-for-duplication)
+- [Examples](#examples)
+- [See Also](#see-also)
+- [Validation](#validation)
+
 ## When to use
 Use this skill during code reviews to proactively investigate the codebase for duplicated functionality, reinvented wheels, or failure to reuse existing project best practices and shared utilities.
 
