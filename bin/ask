@@ -229,6 +229,7 @@ def try_fuzzy_parse(raw_args: List[str], robot_mode: bool = False) -> Tuple[Opti
 
         if action not in valid_actions:
             # Try fuzzy match on action
+            matched = False
             if action in FUZZY_MATCHES:
                 corrected = FUZZY_MATCHES[action]
                 if corrected in valid_actions:
@@ -237,6 +238,7 @@ def try_fuzzy_parse(raw_args: List[str], robot_mode: bool = False) -> Tuple[Opti
                     else:
                         correction_note = format_correction(action, corrected, robot_mode)
                     action = corrected
+                    matched = True
             else:
                 guess = get_closest_match(action, valid_actions)
                 if guess:
@@ -245,6 +247,11 @@ def try_fuzzy_parse(raw_args: List[str], robot_mode: bool = False) -> Tuple[Opti
                     else:
                         correction_note = format_correction(action, guess, robot_mode)
                     action = guess
+                    matched = True
+
+            # If we couldn't match to a valid action, clear it
+            if not matched:
+                action = None
 
         remaining = remaining[1:]
 
@@ -406,10 +413,10 @@ def main():
         # Parse failed - try fuzzy matching if robot mode
         if robot_mode:
             parsed_topic, parsed_action, remaining_args, correction_note = try_fuzzy_parse(filtered_args, robot_mode=True)
-            if not parsed_topic:
+            if not parsed_topic or not parsed_action:
                 # Still couldn't parse - show helpful error
                 repo_root = find_repo_root()
-                result = build_helpful_error(None, None, filtered_args, repo_root)
+                result = build_helpful_error(parsed_topic, parsed_action, filtered_args, repo_root)
                 print(result.to_json() if "--json" in raw_args else result.errors[0].message)
                 sys.exit(2)
         else:
@@ -421,8 +428,8 @@ def main():
             print("  ask graph find security")
             sys.exit(2)
 
-    # If we have fuzzy matches, rebuild args
-    if correction_note and (parsed_topic not in VALID_TOPICS or parsed_action not in VALID_ACTIONS.get(parsed_topic, [])):
+    # If fuzzy matching failed to produce valid command
+    if correction_note and parsed_topic and (parsed_topic not in VALID_TOPICS or parsed_action not in VALID_ACTIONS.get(parsed_topic, [])):
         # Still invalid after fuzzy matching
         repo_root = find_repo_root()
         result = build_helpful_error(parsed_topic, parsed_action, remaining_args, repo_root)
@@ -435,7 +442,7 @@ def main():
         sys.exit(2)
 
     # Re-parse with corrected values if needed
-    if correction_note and parsed_topic:
+    if correction_note and parsed_topic and parsed_topic in VALID_TOPICS:
         # Rebuild the command line with corrected values
         corrected_args = [parsed_topic]
         if parsed_action:
