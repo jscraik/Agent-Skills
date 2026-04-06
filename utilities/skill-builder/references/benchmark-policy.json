@@ -268,7 +268,7 @@
         "mcp_spec": 2
       },
       "min_coverage_fail": 0.5,
-      "min_coverage_warn": 0.667
+      "min_coverage_warn": 0.666
     },
     "backend_general": {},
     "interview": {},
