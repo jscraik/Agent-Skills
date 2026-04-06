@@ -277,7 +277,7 @@ cases:
     eval_modes: [smoke, release]
     should_trigger: true
     prepend_skill: true
-    prompt: "When improving an existing skill, should evals still run? Keep this concise and explicit."
+    prompt: "When improving an existing skill, evals must still run (including regression coverage). Keep this concise and explicit."
     deterministic_checks:
       forbidden_commands:
         - "curl"
