@@ -378,37 +378,44 @@ done
 if [[ "$release_ready" == "1" ]] && [[ -n "$evidence_run_dir" ]]; then
   index_path="${evidence_run_dir}/evidence-index.json"
 
-  # Build skills JSON array
-  skills_json="["
-  first=1
-  for skill_dir in "${skill_dirs[@]}"; do
-    [[ "$first" == "0" ]] && skills_json+=","
-    first=0
-    outcome=$(_get_outcome "$skill_dir")
-    evpath=$(_get_evidence_path "$skill_dir")
-    skills_json+="{\"skill\":\"${skill_dir}\",\"outcome\":\"${outcome}\",\"evidence_path\":\"${evpath}\"}"
-  done
-  skills_json+="]"
-
   runner_label="${SKILL_FAMILY_RUNNER:-codex}"
   codex_profile_label="${SKILL_FAMILY_CODEX_PROFILE:-default}"
 
-  cat >"$index_path" <<EOF
-{
-  "schema_version": 1,
-  "generated_at": "${run_timestamp}",
-  "branch": "${git_branch}",
-  "commit_sha": "${git_sha}",
-  "runner": "${runner_label}",
-  "freshness_window_days": 7,
-  "mode": "release-ready",
-  "codex_profile": "${codex_profile_label}",
-  "evidence_dir": "${evidence_run_dir}",
-  "skill_coverage": ${skills_json},
-  "degraded_mode_policy": "runner failures block closeout; retry-limited reruns are required before marking release-ready; one successful trusted rerun per skill is the minimum evidence standard",
-  "note": "This index satisfies the P1 trusted live eval release gate. Stale artifacts older than freshness_window_days or from non-descendant commits must be rejected at closeout time."
-}
-EOF
+  # Build skills JSON array safely with jq
+  skills_json_array="[]"
+  for skill_dir in "${skill_dirs[@]}"; do
+    outcome=$(_get_outcome "$skill_dir")
+    evpath=$(_get_evidence_path "$skill_dir")
+    skills_json_array=$(echo "$skills_json_array" | jq \
+      --arg skill "$skill_dir" \
+      --arg outcome "$outcome" \
+      --arg evpath "$evpath" \
+      '. + [{skill: $skill, outcome: $outcome, evidence_path: $evpath}]')
+  done
+
+  # Write entire index with jq to safely escape all values
+  jq -n \
+    --arg ts "$run_timestamp" \
+    --arg branch "$git_branch" \
+    --arg sha "$git_sha" \
+    --arg runner "$runner_label" \
+    --arg profile "$codex_profile_label" \
+    --arg dir "$evidence_run_dir" \
+    --argjson skills "$skills_json_array" \
+    '{
+      schema_version: 1,
+      generated_at: $ts,
+      branch: $branch,
+      commit_sha: $sha,
+      runner: $runner,
+      freshness_window_days: 7,
+      mode: "release-ready",
+      codex_profile: $profile,
+      evidence_dir: $dir,
+      skill_coverage: $skills,
+      degraded_mode_policy: "runner failures block closeout; retry-limited reruns are required before marking release-ready; one successful trusted rerun per skill is the minimum evidence standard",
+      note: "This index satisfies the P1 trusted live eval release gate. Stale artifacts older than freshness_window_days or from non-descendant commits must be rejected at closeout time."
+    }' > "$index_path"
   echo "[family-gate] evidence index written: ${index_path}"
   echo "[family-gate] lineage: branch=${git_branch} sha=${git_sha}"
 fi
