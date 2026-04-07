@@ -190,7 +190,6 @@ def cmd_find(data, args):
     as_json = args.get("json", False)
     topic_f = args.get("topic")
     tier_f  = args.get("tier")
-    node_map, fwd, rev = build_index(data)
     ql = query.lower()
     scored: list[tuple[float, dict]] = []
     for n in data["nodes"]:
