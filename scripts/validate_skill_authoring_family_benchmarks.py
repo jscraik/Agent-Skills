@@ -3,8 +3,10 @@
 
 This script enforces equivalent contract/eval/security baseline requirements for:
 - utilities/skill-builder
+- utilities/plugin-builder
 - skills-system/skill-creator
 - skills-system/skill-installer
+- skills-system/plugin-installer
 - skills-system/plugin-creator
 
 It is designed for CI and local gates where live LLM eval execution is not required.
@@ -46,8 +48,10 @@ _CONTRACT_SCHEMA_PATH = _SCHEMA_DIR / "contract.schema.yaml"
 _EVALS_SCHEMA_PATH = _SCHEMA_DIR / "evals.schema.yaml"
 DEFAULT_FAMILY_SKILLS = (
     "utilities/skill-builder",
+    "utilities/plugin-builder",
     "skills-system/skill-creator",
     "skills-system/skill-installer",
+    "skills-system/plugin-installer",
     "skills-system/plugin-creator",
 )
 

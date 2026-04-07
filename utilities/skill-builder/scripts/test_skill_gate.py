@@ -30,7 +30,7 @@ class SkillGateHeuristicTests(unittest.TestCase):
             path=skill_md,
             raw="---\nname: skill-builder\ndescription: test\n---\nbody",
             frontmatter={"name": "skill-builder", "description": "test"},
-            body="See `../codex-plugin-builder/references/plugin-contract.md` for plugin contracts.",
+            body="See `../plugin-builder/references/plugin-contract.md` for plugin contracts.",
             fm_start_line=1,
             fm_end_line=4,
         )

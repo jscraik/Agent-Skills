@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """Skill graph navigation and discovery for agent-native workflows."""
 import json
 from pathlib import Path

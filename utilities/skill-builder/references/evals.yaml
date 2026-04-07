@@ -43,6 +43,13 @@ cases:
     should_trigger: true
     prepend_skill: true
     prompt: "Can you improve a skill so it works in Codex and Claude without adding dependencies? In this first response, use the required headings and keep the compatibility posture portable."
+    deterministic_checks:
+      forbidden_commands:
+        - "curl"
+        - "wget"
+        - "rm -rf"
+        - "netcat"
+        - "nc"
     acceptance:
       - type: contains
         value: "## Scope and triggers"
@@ -349,7 +356,7 @@ cases:
     prompt: "The standalone skill is already validated. I only want it packaged as a Codex plugin, not re-authored."
     acceptance:
       - type: regex
-        value: "(?i)(codex-plugin-builder)"
+        value: "(?i)(plugin-builder)"
       - type: regex
         value: "(?i)(plugin package|plugin packaging|plugin-owned)"
       - type: regex
@@ -383,7 +390,7 @@ cases:
       - type: regex
         value: "(?i)(audit|harden|validate|quality gates)"
       - type: regex
-        value: "(?i)(codex-plugin-builder)"
+        value: "(?i)(plugin-builder)"
       - type: regex
         value: "(?i)(after the skill is valid|once the standalone skill is contract-valid|do not skip validation|validation-first)"
 

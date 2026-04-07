@@ -1,0 +1,5 @@
+interface:
+  display_name: "Plugin Installer"
+  short_description: "Install and verify third-party Codex plugins with provenance and rollback safety"
+  icon_small: "./assets/skill-installer-small.svg"
+  icon_large: "./assets/skill-installer.png"

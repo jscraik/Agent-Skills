@@ -22,7 +22,7 @@ Do not use this skill as primary owner for:
 Handoffs:
 - to `skill-creator` for first-pass authoring;
 - to `skill-builder` for lifecycle hardening and contract/eval upgrades;
-- to `codex-plugin-builder` when the deliverable must ship as a plugin package.
+- to `plugin-builder` when the deliverable must ship as a plugin package.
 
 ## Inputs
 
@@ -145,6 +145,6 @@ Family gate note:
 |---|---|
 | [[skill-creator]] | Author or complete a starter skill before installation |
 | [[skill-builder]] | Harden and validate an existing skill before install/distribution |
-| [[codex-plugin-builder]] | Package a validated skill as a plugin deliverable |
+| [[plugin-builder]] | Package a validated skill as a plugin deliverable |
 
 **Topic map:** [[agent-ops]]

@@ -60,6 +60,19 @@ cases:
       - type: regex
         value: "(?i)(explicit approval|opt-in|requires --method git|transport boundary)"
 
+  - id: edge-existing-destination-conflict
+    name: edge existing destination conflict
+    category: edge
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: false
+    prompt: "This skill name already exists in my destination folder. Reinstall it safely without silent overwrite and tell me the rename or destination options."
+    acceptance:
+      - type: regex
+        value: "(?i)(already exists|conflict|overwrite|cannot proceed)"
+      - type: regex
+        value: "(?i)(name|destination|--name|--dest|choose a different)"
+
   - id: negative-authoring-request
     name: negative authoring request
     category: negative
@@ -125,5 +138,5 @@ cases:
         value: "(?i)(symlink|not allowed|reject|quarantine|validation)"
 
 metadata:
-  last_updated: "2026-04-05"
+  last_updated: "2026-04-07"
   review_status: "validated"

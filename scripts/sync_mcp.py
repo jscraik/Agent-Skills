@@ -5,6 +5,8 @@ import json
 import logging
 import re
 import shlex
+import shutil
+import subprocess
 
 try:
     import tomllib  # stdlib (Python ≥ 3.11)
@@ -12,12 +14,19 @@ except ModuleNotFoundError:
     try:
         import tomli as tomllib  # type: ignore[no-redef]  # third-party backport
     except ModuleNotFoundError:
-        logging.error("Error: Please install tomli: pip install tomli")
-        sys.exit(1)
+        tomllib = None
 
 CODEX_CONFIG_PATH = os.path.expanduser("~/.codex/config.toml")
 ANTIGRAVITY_MCP_PATH = os.path.expanduser("~/.gemini/antigravity/mcp_config.json")
 ENV_VAR_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
+FALLBACK_PYTHONS = (
+    "python3.12",
+    "/usr/local/bin/python3.12",
+    "/opt/homebrew/bin/python3.12",
+    "python3.11",
+    "/usr/local/bin/python3.11",
+    "/opt/homebrew/bin/python3.11",
+)
 
 
 def is_valid_env_var_name(value):
@@ -27,12 +36,58 @@ def load_codex_config():
     if not os.path.exists(CODEX_CONFIG_PATH):
         print(f"Error: Could not find {CODEX_CONFIG_PATH}")
         sys.exit(1)
-    
-    with open(CODEX_CONFIG_PATH, "rb") as f:
-        return tomllib.load(f)
+
+    if tomllib is not None:
+        with open(CODEX_CONFIG_PATH, "rb") as f:
+            return tomllib.load(f)
+
+    fallback = _load_toml_with_newer_python(CODEX_CONFIG_PATH)
+    if fallback is not None:
+        return fallback
+
+    logging.error(
+        "Error: Could not parse TOML with Python %s. Install tomli or ensure python3.11+/python3.12 is available.",
+        sys.version.split()[0],
+    )
+    sys.exit(1)
+
+
+def _load_toml_with_newer_python(path):
+    """Parse TOML via an available Python 3.11+ interpreter when possible."""
+    loader = (
+        "import json, sys, tomllib;"
+        "print(json.dumps(tomllib.load(open(sys.argv[1], 'rb'))))"
+    )
+    for candidate in _iter_fallback_pythons():
+        if candidate is None:
+            continue
+        try:
+            proc = subprocess.run(
+                [candidate, "-c", loader, path],
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            return json.loads(proc.stdout)
+        except (OSError, subprocess.CalledProcessError, json.JSONDecodeError):
+            continue
+    return None
+
+
+def _iter_fallback_pythons():
+    for candidate in FALLBACK_PYTHONS:
+        if os.path.isabs(candidate):
+            if os.path.exists(candidate):
+                yield candidate
+            continue
+        resolved = shutil.which(candidate)
+        if resolved:
+            yield resolved
 
 # Optional: Map Codex server names to Antigravity names (can cause collisions)
-NAME_MAPPING = {}
+NAME_MAPPING = {
+    "repo-prompt": "repoprompt",
+}
 
 
 def _detect_mapping_collisions(servers, name_mapping):
@@ -71,8 +126,14 @@ def _detect_mapping_collisions(servers, name_mapping):
 def build_antigravity_config(codex_config):
     mcp_servers = {}
 
-    # Source .env files and then execute the configured command safely.
-    wrapper = "set -a; [ -f ~/.codex/.env ] && . ~/.codex/.env >/dev/null 2>&1; [ -f ~/dev/config/.env ] && . ~/dev/config/.env >/dev/null 2>&1; set +a"
+    # Source .env files and ensure Node/npm tool paths are available.
+    wrapper = (
+        'export PATH="/opt/homebrew/bin:/usr/local/bin:$HOME/.local/share/mise/shims:$PATH"; '
+        "set -a; "
+        "[ -f ~/.codex/.env ] && . ~/.codex/.env >/dev/null 2>&1; "
+        "[ -f ~/dev/config/.env ] && . ~/dev/config/.env >/dev/null 2>&1; "
+        "set +a"
+    )
 
     servers = codex_config.get("mcp_servers", {})
 

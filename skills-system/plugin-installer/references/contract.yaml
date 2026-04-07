@@ -1,0 +1,32 @@
+schema_version: "1.1"
+purpose: >
+  Define the install-stage contract for plugin-installer so third-party plugins are
+  imported with trusted provenance, staged validation, and atomic rollback-safe activation.
+triggers:
+  - user asks to install a Codex plugin from GitHub
+  - user asks to verify installed plugin integrity before activation
+  - user asks to restore missing plugin visibility via reinstall
+inputs:
+  - source repository and plugin path
+  - pinned ref or explicit unpinned override
+  - destination plugin root
+  - validation policy strict|compat
+outputs:
+  - installed plugin under CODEX_HOME/plugins
+  - provenance manifest with source ref and resolved commit
+  - rollback journal with staged and promoted install events
+non_goals:
+  - plugin package conversion or hardening workflows
+  - standalone skill authoring/hardening
+  - bypassing trust and provenance checks silently
+risks:
+  - supply-chain drift from moving refs; mitigated by pinning policy
+  - partial activation failures; mitigated by quarantine-to-promote and rollback
+  - weak traceability; mitigated by persisted manifest and journal artifacts
+rollback_procedure: >
+  If an install produces an unusable plugin, use the rollback journal to identify
+  promoted directories, remove them from CODEX_HOME/plugins, and reinstall from the
+  previous pinned ref. Never skip quarantine validation during recovery.
+observability: >
+  Monitor plugin-installer via provenance manifest presence, quarantine-to-promote
+  success rate, validator pass rate, and rollback frequency.

@@ -27,7 +27,7 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - [Utilities — Codex Plugin Builder — Fixtures — Arscontexta Codex — Skills](#utilities-codex-plugin-builder-fixtures-arscontexta-codex-skills)
 
 ## Summary
-- `total_skills`: 127
+- `total_skills`: 125
 - `catalog_source`: repository skill scan
 
 ## Catalog
@@ -134,7 +134,7 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - `ce-work` — Execute a plan, todo list, or tightly scoped spec with traceable progress, validation, contract-drift control, UI execution gates, and optional external delegation. Use when the user wants compound-engineering work implemented, not just planned.
 - `compound-engineering-router` — Route compound-engineering requests to the correct CE stage or support meta-mode. Use when the user wants CE ideation, spec, planning, work, review, compound learning, or context compaction and the right stage is not yet explicit.
 - `decide-build-primitive` — Use this skill to analyze whether a capability should become a Skill, Custom Prompt, or Agent automation when the user is packaging or automating a workflow and the right Codex primitive is not yet clear.
-- `fallback-release` — Execute deterministic fallback releases when primary CI is unavailable. Use when GitHub Actions are stalled due to queue congestion, rate limits, or incidents, and critical releases cannot wait.
+- `fallback-release` — Execute deterministic fallback releases when primary CI is unavailable. Use when GitHub Actions is stalled due to queue congestion, rate limits, or incidents, and critical releases cannot wait.
 - `linear` — Manage Linear issues, projects, and docs through the Linear MCP workflow with consistent read/create/update operations. Use when a user asks to triage, create, update, or report on Linear work items.
 - `production-deployment` — Deploy and manage production services across various platforms with automated verification and rollback safety.
 - `release` — Cut a clean semver release from the main branch using the repo's release flow. Use when the user wants a tagged Cargo release, not generic deployment or changelog drafting.
@@ -216,3 +216,4 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 ## Utilities — Codex Plugin Builder — Fixtures — Arscontexta Codex — Skills
 
 - `arscontexta` — Analyze Ars Contexta vault state in Codex and recommend setup, health, and next-command actions. Use this skill when users ask for Ars Contexta help, routing, or health triage.
+

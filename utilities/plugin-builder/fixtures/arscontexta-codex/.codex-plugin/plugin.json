@@ -1,0 +1,44 @@
+{
+  "name": "arscontexta-codex",
+  "version": "0.1.0",
+  "description": "Fixture plugin package used to validate plugin-builder contract checks.",
+  "author": {
+    "name": "Fixture Maintainers",
+    "email": "fixture@example.com",
+    "url": "https://github.com/agenticnotetaking/arscontexta"
+  },
+  "homepage": "https://github.com/agenticnotetaking/arscontexta",
+  "repository": "https://github.com/agenticnotetaking/arscontexta",
+  "license": "MIT",
+  "keywords": [
+    "fixture",
+    "plugin-builder"
+  ],
+  "skills": "./skills/",
+  "hooks": "./hooks.json",
+  "mcpServers": "./.mcp.json",
+  "apps": "./.app.json",
+  "interface": {
+    "displayName": "Ars Contexta Codex Fixture",
+    "shortDescription": "Fixture metadata for plugin validation",
+    "longDescription": "Fixture plugin package used to test contract enforcement in plugin-builder validators.",
+    "developerName": "Fixture Maintainers",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/agenticnotetaking/arscontexta",
+    "privacyPolicyURL": "https://openai.com/policies/row-privacy-policy/",
+    "termsOfServiceURL": "https://openai.com/policies/row-terms-of-use/",
+    "defaultPrompt": "Validate this fixture plugin against the contract.",
+    "brandColor": "#3B82F6",
+    "composerIcon": "./assets/icon.png",
+    "logo": "./assets/logo.png",
+    "screenshots": [
+      "./assets/screenshot1.png",
+      "./assets/screenshot2.png",
+      "./assets/screenshot3.png"
+    ]
+  }
+}

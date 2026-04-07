@@ -85,3 +85,5 @@ Repo-specific agent knowledge base. Append-only.
 - **2026-04-05 [Codex]:** Equivalent CI gates in this repo can drift on Python dependency setup (`repo-validate` vs `authoring-family-gate`) and produce contradictory outcomes on the same commit. -> Keep parity by installing shared deps (for example `pyyaml`) in each equivalent lane or centralizing setup in the workflow.
 
 - **2026-04-05 [Codex]:** `skill-installer` diagnostic logs that echo override payloads can trigger CodeQL `Clear-text logging of sensitive information` alerts. -> Log redacted metadata (for example override count/presence) instead of raw override values.
+
+- **2026-04-07 [Codex]:** `python3 scripts/sync_mcp.py` can fail on macOS when system Python 3.9 lacks `tomli`, and `shutil.which("python3.12")` can still miss the interpreter in constrained PATH sessions. -> Add a TOML-load fallback that probes absolute interpreter paths (`/usr/local/bin/python3.12`, `/opt/homebrew/bin/python3.12`, etc.) and parses via `tomllib` in that subprocess.

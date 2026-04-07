@@ -53,23 +53,22 @@ _ensure_tomli_available()
 sys.path.insert(0, str(SCRIPT_DIR))
 import sync_mcp  # noqa: E402
 
-WRAPPER = (
-    "set -a; "
-    "[ -f ~/.codex/.env ] && . ~/.codex/.env >/dev/null 2>&1; "
-    "[ -f ~/dev/config/.env ] && . ~/dev/config/.env >/dev/null 2>&1; "
-    "set +a; exec "
-)
-
-
 # ---------------------------------------------------------------------------
 # Helper
 # ---------------------------------------------------------------------------
-def _exec_string(mcp_obj: dict) -> str:
-    """Return the exec portion of the sh -c arg (strips the wrapper prefix)."""
+def _shell_script(mcp_obj: dict) -> str:
+    """Return the shell script provided as the `sh -c` argument."""
     assert mcp_obj["command"] == "sh"
-    sh_arg = mcp_obj["args"][1]
-    assert sh_arg.startswith(WRAPPER), f"Missing wrapper prefix in: {sh_arg!r}"
-    return sh_arg[len(WRAPPER):]
+    assert mcp_obj["args"][0] == "-c"
+    return mcp_obj["args"][1]
+
+
+def _assert_wrapper_present(shell_script: str) -> None:
+    """Validate required environment bootstrap fragments."""
+    assert "set -a;" in shell_script
+    assert "~/.codex/.env" in shell_script
+    assert "~/dev/config/.env" in shell_script
+    assert "set +a" in shell_script
 
 
 # ---------------------------------------------------------------------------
@@ -92,10 +91,14 @@ class TestBuildAntigravityConfigStdio(unittest.TestCase):
 
     def test_stdio_server_exec_contains_command_and_args(self):
         cfg = self._config({"s": {"command": "npx", "args": ["-y", "pkg@1.0"]}})
-        exec_str = _exec_string(cfg["mcpServers"]["s"])
-        self.assertIn("npx", exec_str)
-        self.assertIn("-y", exec_str)
-        self.assertIn("pkg@1.0", exec_str)
+        obj = cfg["mcpServers"]["s"]
+        script = _shell_script(obj)
+        _assert_wrapper_present(script)
+        self.assertIn('exec "$@"', script)
+        self.assertEqual(obj["args"][2], "sync-mcp")
+        self.assertEqual(obj["args"][3], "npx")
+        self.assertIn("-y", obj["args"])
+        self.assertIn("pkg@1.0", obj["args"])
 
     def test_disabled_server_is_excluded(self):
         cfg = self._config({
@@ -117,33 +120,37 @@ class TestBuildAntigravityConfigHttp(unittest.TestCase):
 
     def test_http_server_uses_mcp_remote(self):
         cfg = self._config({"url": "https://example.com/mcp"})
-        exec_str = _exec_string(cfg["mcpServers"]["srv"])
-        self.assertIn("mcp-remote", exec_str)
-        self.assertIn("https://example.com/mcp", exec_str)
+        script = _shell_script(cfg["mcpServers"]["srv"])
+        _assert_wrapper_present(script)
+        self.assertIn("mcp-remote", script)
+        self.assertIn("https://example.com/mcp", script)
 
     def test_bearer_token_env_var_added_as_auth_header(self):
         cfg = self._config({"url": "https://api.example.com/mcp", "bearer_token_env_var": "MY_TOKEN"})
-        exec_str = _exec_string(cfg["mcpServers"]["srv"])
-        self.assertIn("Authorization", exec_str)
-        self.assertIn("$MY_TOKEN", exec_str)
+        script = _shell_script(cfg["mcpServers"]["srv"])
+        _assert_wrapper_present(script)
+        self.assertIn("Authorization", script)
+        self.assertIn("MY_TOKEN", script)
 
     def test_env_http_headers_added(self):
         cfg = self._config({
             "url": "https://api.example.com/mcp",
             "env_http_headers": {"X-Api-Key": "SOME_KEY"},
         })
-        exec_str = _exec_string(cfg["mcpServers"]["srv"])
-        self.assertIn("X-Api-Key", exec_str)
-        self.assertIn("$SOME_KEY", exec_str)
+        script = _shell_script(cfg["mcpServers"]["srv"])
+        _assert_wrapper_present(script)
+        self.assertIn("X-Api-Key", script)
+        self.assertIn("SOME_KEY", script)
 
     def test_multiple_env_http_headers(self):
         cfg = self._config({
             "url": "https://api.example.com/mcp",
             "env_http_headers": {"X-Key1": "K1", "X-Key2": "K2"},
         })
-        exec_str = _exec_string(cfg["mcpServers"]["srv"])
-        self.assertIn("$K1", exec_str)
-        self.assertIn("$K2", exec_str)
+        script = _shell_script(cfg["mcpServers"]["srv"])
+        _assert_wrapper_present(script)
+        self.assertIn("K1", script)
+        self.assertIn("K2", script)
 
 
 class TestBuildAntigravityConfigDefaults(unittest.TestCase):
