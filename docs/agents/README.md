@@ -24,6 +24,7 @@
 - [10-agent-testing-gates](/docs/agents/10-agent-testing-gates.md)
 - [11-ai-review-governance](/docs/agents/11-ai-review-governance.md)
 - [12-ci-required-checks](/docs/agents/12-ci-required-checks.md)
+- [13-workflow-and-safety-guidance](/docs/agents/13-workflow-and-safety-guidance.md)
 
 ## Quick picks
 

@@ -25,6 +25,7 @@ Create and maintain concise, high-signal AGENTS guidance with progressive disclo
 - [Project-tailored repo baseline](#project-tailored-repo-baseline)
 - [Anti-patterns](#anti-patterns)
 - [Variation](#variation)
+- [AGENTS.md Template Guidance](#agentsmd-template-guidance)
 - [Mandatory workflow snippet](#mandatory-workflow-snippet)
 - [Examples](#examples)
 - [Resource map](#resource-map)
@@ -39,6 +40,8 @@ Create and maintain concise, high-signal AGENTS guidance with progressive disclo
 - Use this skill when the user wants the project's instruction surface audited so required instruction files are present, current, correctly routed, and accurately disclosed.
 
 ## Standards snapshot (April 2026)
+
+Use this section as an adaptation guideline for generated AGENTS.md files, not runtime policy.
 
 - Keep root `AGENTS.md` minimal and route depth into linked docs.
 - Start with 2-3 focused surfaces for a first pass: usually the root `AGENTS.md`, one linked-doc tree, and only one nested override if it is truly needed.
@@ -96,7 +99,27 @@ Run discovery for underspecified AGENTS creation or refactor requests.
 - Keep the confirmation round compact as well: summarize only the current AGENTS update shape, list assumptions only when needed, and end with the single confirmation question.
 - For out-of-scope responses, keep the compact structure expected by the evals: `## When to use`, `## Deliverables`, and `## Required inputs`.
 
+## AGENTS.md Template Guidance
+
+Reference guidance for AGENTS.md templates — adapt before emitting; not runtime/operational instructions.
+
+Treat this as a template adaptation block. Runtime behavior is defined in:
+- [AGENTS.md](../../../AGENTS.md)
+- [CLAUDE.md](../../../CLAUDE.md)
+- [GEMINI.md](../../../GEMINI.md)
+
+Canonical shared guidance text lives in [Workflow and safety guidance](../../../docs/agents/13-workflow-and-safety-guidance.md). Keep this section as references, not duplicated runtime policy:
+- Testing → [Workflow and safety guidance](../../../docs/agents/13-workflow-and-safety-guidance.md#testing)
+- Git Workflow → [Workflow and safety guidance](../../../docs/agents/13-workflow-and-safety-guidance.md#git-workflow)
+- Configuration Files → [Workflow and safety guidance](../../../docs/agents/13-workflow-and-safety-guidance.md#configuration-files)
+- Code Review Fixes → [Workflow and safety guidance](../../../docs/agents/13-workflow-and-safety-guidance.md#code-review-fixes)
+- Shell Scripting → [Workflow and safety guidance](../../../docs/agents/13-workflow-and-safety-guidance.md#shell-scripting)
+- Refactoring → [Workflow and safety guidance](../../../docs/agents/13-workflow-and-safety-guidance.md#refactoring)
+- Documentation → [Workflow and safety guidance](../../../docs/agents/13-workflow-and-safety-guidance.md#documentation)
+
 ## Deliverables
+
+Use this section as an adaptation checklist for generated AGENTS.md outputs.
 
 - Updated minimal root `AGENTS.md`.
 - Updated scoped overrides when a nested directory truly needs different rules.
@@ -188,6 +211,8 @@ If command truth, path ownership, or instruction precedence cannot be verified, 
 - Keep `Startup workflow` and `Supplemental context` concise and operator-focused.
 
 ## Anti-patterns
+
+Use this section as an anti-pattern check when adapting or generating AGENTS.md files.
 
 - Do not dump full policy documents into root AGENTS.
 - Never duplicate the same instruction across many files without need.

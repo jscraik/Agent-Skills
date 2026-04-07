@@ -15,6 +15,7 @@ metadata:
 - [Required inputs](#required-inputs)
 - [Discovery interview](#discovery-interview)
 - [Deliverables](#deliverables)
+- [Fix CodeRabbit Review Comments](#fix-coderabbit-review-comments)
 - [Failure mode](#failure-mode)
 - [Output contract](#output-contract)
 - [Corpus and evidence policy](#corpus-and-evidence-policy)
@@ -80,6 +81,37 @@ metadata:
 - Optional draft snippets for `.coderabbit.yaml` or PR command playbooks.
 - Clear boundary notes when docs are stale, missing, or require live verification.
 - If asked for structured output, return the JSON shape in this file's Output contract section.
+
+## Fix CodeRabbit Review Comments
+
+This flow is for an external CodeRabbit CLI workflow (not a local corpus command). If a PR number is provided, check out the PR branch first, then run the supported CLI review command.
+
+### Prerequisites
+
+- Install the CodeRabbit CLI from the official installer:
+
+  ```bash
+  curl -fsSL https://cli.coderabbit.ai/install.sh | sh
+  ```
+
+- Authenticate the CLI and confirm it is available in the active environment.
+
+1. Fetch all open CodeRabbit comments via API or local dump.
+2. Categorize each comment by type: `types`, `security`, `validation`, `linting`, `tests`.
+3. Fix each category in batch, by file type, running tests after each batch.
+4. Commit with message: `fix: address CodeRabbit review comments`.
+5. Verify all comments are resolved before finishing.
+
+Example command entry (explicit, CLI-driven flow):
+
+```bash
+# Review changes in the checked-out PR branch (local CLI)
+gh pr checkout <pr-number>
+cr --plain
+
+# If the short `cr` wrapper is unavailable in your environment:
+coderabbit review --plain
+```
 
 ## Setup quickstart
 1. Confirm the target platform and repository constraints before drafting config.
@@ -183,7 +215,7 @@ Fast path for low-latency responses:
 ## References
 - `references/contract.yaml`
 - `references/evals.yaml`
-- Corpus root: `/Users/jamiecraik/dev/agent-skills/utilities/coderabbit/references/coderabbit-docs`
+- Corpus root: `utilities/coderabbit/references/coderabbit-docs`
 
 ## See Also
 

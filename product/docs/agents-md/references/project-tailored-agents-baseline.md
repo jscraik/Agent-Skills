@@ -130,7 +130,8 @@ The current script supports Local Memory modes `off`, `optional`, and `required`
 
 If Local Memory is enabled, preserve these checks:
 - `local-memory` is installed.
-- `jq` and `curl` are installed because the script uses both for Local Memory verification.
+- `jq` is installed for parsing JSON during Local Memory verification.
+- `curl` is installed for REST endpoint checks, including `REST health succeeds`.
 - The daemon is running.
 - `local-memory status --json` returns a usable JSON payload.
 - `rest_api_port` resolves to a numeric value.

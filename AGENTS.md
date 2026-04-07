@@ -12,6 +12,14 @@ Canonical source of Codex skills, operator docs, and agent workflows.
 - [Unified Interface](#unified-interface-ask)
 - [Robot Mode](#robot-mode)
 - [Agent-Specific Guidance](#agent-specific-guidance)
+- [Testing](#testing)
+- [Shell Scripting](#shell-scripting)
+- [Git Workflow](#git-workflow)
+- [Configuration Files](#configuration-files)
+- [Code Review Fixes](#code-review-fixes)
+- [Refactoring](#refactoring)
+- [Documentation](#documentation)
+- [Browser/Playwright](#browserplaywright)
 - [Skill Management](#skill-management)
 - [See Also](#see-also)
 
@@ -53,6 +61,34 @@ When intent is clear but syntax is off, the CLI honors your command and shows co
 |------|---------|
 | [CLAUDE.md](./CLAUDE.md) | Claude Code specific (AI artifacts, PR workflow) |
 | [GEMINI.md](./GEMINI.md) | Gemini/Antigravity notes |
+
+## Testing
+
+For shared testing workflow guidance, see [Workflow and Safety Guidance](./docs/agents/13-workflow-and-safety-guidance.md#testing).
+
+## Shell Scripting
+
+For shared shell scripting guidance, see [Workflow and Safety Guidance](./docs/agents/13-workflow-and-safety-guidance.md#shell-scripting).
+
+## Git Workflow
+
+For shared git workflow guidance, see [Workflow and Safety Guidance](./docs/agents/13-workflow-and-safety-guidance.md#git-workflow).
+
+## Configuration Files
+
+For shared configuration-file guidance, see [Workflow and Safety Guidance](./docs/agents/13-workflow-and-safety-guidance.md#configuration-files).
+
+## Code Review Fixes
+
+For shared review-comment fix guidance, see [Workflow and Safety Guidance](./docs/agents/13-workflow-and-safety-guidance.md#code-review-fixes).
+
+## Refactoring
+
+For shared refactoring guidance, see [Workflow and Safety Guidance](./docs/agents/13-workflow-and-safety-guidance.md#refactoring).
+
+## Documentation
+
+For shared documentation guidance, see [Workflow and Safety Guidance](./docs/agents/13-workflow-and-safety-guidance.md#documentation).
 
 ## Skill Management
 

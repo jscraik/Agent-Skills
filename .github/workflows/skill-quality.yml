@@ -98,6 +98,8 @@ jobs:
       - name: Install deps
         run: python -m pip install --upgrade pip pyyaml
       - name: Validate skill authoring family (eval + security parity)
+        env:
+          SKILL_FAMILY_LOCAL_MEMORY_MODE: optional
         run: bash scripts/validate_skill_authoring_family.sh
 
   eval-baseline:

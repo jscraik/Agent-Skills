@@ -12,11 +12,17 @@ For repository-wide rules, see [AGENTS.md](./AGENTS.md).
 
 - [Claude-Only Instructions](#claude-only-instructions)
 - [MCP Configuration](#mcp-configuration)
+- [Shell Scripting](#shell-scripting)
 - [Code Quality](#code-quality)
 - [Testing](#testing)
+- [Git Workflow](#git-workflow)
 - [PR Workflow](#pr-workflow)
 - [Error Handling](#error-handling)
 - [Browser/Playwright](#browserplaywright)
+- [Configuration Files](#configuration-files)
+- [Code Review Fixes](#code-review-fixes)
+- [Refactoring](#refactoring)
+- [Documentation](#documentation)
 
 ## Claude-Only Instructions
 
@@ -55,6 +61,10 @@ claude mcp add <name> -- <command>
 
 For 1Password: use `[ -e ]` instead of `[ -f ]` for named pipes.
 
+## Shell Scripting
+
+For shared workflow guidance, see [AGENTS.md](./AGENTS.md). For shared shell-scripting guidance, see the canonical guidance in that file.
+
 ## Code Quality
 
 | Task | Command |
@@ -66,10 +76,11 @@ Fix all errors before marking complete.
 
 ## Testing
 
-- Run full test suite before committing
-- Mock `process.exit` in CLI tests to prevent hangs
-- Run full suite after auth/CLI/async changes
+For shared workflow guidance, see [AGENTS.md](./AGENTS.md). For shared testing guidance, see the canonical guidance in that file.
 
+## Git Workflow
+
+For shared git workflow guidance, see [AGENTS.md](./AGENTS.md), which points to the canonical workflow and safety guidance.
 ## PR Workflow
 
 - Check **all** review comments before marking complete
@@ -84,6 +95,22 @@ When encountering API errors or failures, suggest a concrete workaround that adv
 ## Browser/Playwright
 
 When browser tooling cannot access local files directly, immediately start `python3 -m http.server` in the relevant directory.
+
+## Configuration Files
+
+For shared configuration-files guidance, see [AGENTS.md](./AGENTS.md). For YAML and configuration validation, use the canonical guidance there.
+
+## Code Review Fixes
+
+For shared review-comment fix guidance, see [AGENTS.md](./AGENTS.md).
+
+## Refactoring
+
+For shared refactoring guidance, see [AGENTS.md](./AGENTS.md). For interface-first refactoring and downstream updates, follow the canonical guidance there.
+
+## Documentation
+
+For shared documentation guidance, see [AGENTS.md](./AGENTS.md). For plan-file formatting conventions, use the canonical guidance there.
 
 ---
 
