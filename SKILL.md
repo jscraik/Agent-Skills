@@ -27,7 +27,7 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - [Utilities — Codex Plugin Builder — Fixtures — Arscontexta Codex — Skills](#utilities-codex-plugin-builder-fixtures-arscontexta-codex-skills)
 
 ## Summary
-- `total_skills`: 124
+- `total_skills`: 125
 - `catalog_source`: repository skill scan
 
 ## Catalog
@@ -40,7 +40,7 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 ## Backend
 
 - `backend-engineer` — Plan and review safe backend extensions for existing services (Cloudflare Workers + Hono primary). Use this skill when patching or adding backend features in an existing codebase.
-- `cli-spec` — Plan and draft CLI UX and surface area (commands, flags, help, output). Use when specifying or refactoring a command-line interface.
+- `cli-spec` — Create an implementation-grade CLI specification when the user requests a binding technical contract for a new or existing command-line interface.
 - `mcp-builder` — Create general-purpose MCP servers and tool schemas for standard integrations. Use when building MCP services without OAuth/billing/Apps UI requirements.
 - `workers-mcp` — Create and deploy production-ready MCP servers on Cloudflare Workers. Use when building a Workers-hosted MCP server with auth, billing, and operational guardrails.
 
@@ -89,6 +89,7 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 
 - `gh-workflow` — Operate the GitHub lifecycle through `gh`: issue work, PR readiness checks, PR preparation, review handling, CI diagnosis, and merge execution. Use when the user wants GitHub state changed, advanced, or reconciled.
 - `resolve-pr-parallel` — Resolve multiple unresolved GitHub PR review threads in parallel by applying fixes, responding, and closing verified threads. Use when the user wants a broad PR-comment cleanup sweep, not readiness classification or one-off comment handling.
+- `review-duplication` — Proactively investigate for duplicated functionality during code reviews.
 
 ## Interview
 
@@ -133,7 +134,9 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - `ce-work` — Execute a plan, todo list, or tightly scoped spec with traceable progress, validation, contract-drift control, UI execution gates, and optional external delegation. Use when the user wants compound-engineering work implemented, not just planned.
 - `compound-engineering-router` — Route compound-engineering requests to the correct CE stage or support meta-mode. Use when the user wants CE ideation, spec, planning, work, review, compound learning, or context compaction and the right stage is not yet explicit.
 - `decide-build-primitive` — Use this skill to analyze whether a capability should become a Skill, Custom Prompt, or Agent automation when the user is packaging or automating a workflow and the right Codex primitive is not yet clear.
+- `fallback-release` — Execute deterministic fallback releases when primary CI is unavailable. Use when GitHub Actions is stalled due to queue congestion, rate limits, or incidents, and critical releases cannot wait.
 - `linear` — Manage Linear issues, projects, and docs through the Linear MCP workflow with consistent read/create/update operations. Use when a user asks to triage, create, update, or report on Linear work items.
+- `production-deployment` — Deploy and manage production services across various platforms with automated verification and rollback safety.
 - `release` — Cut a clean semver release from the main branch using the repo's release flow. Use when the user wants a tagged Cargo release, not generic deployment or changelog drafting.
 - `resolve-todo-parallel` — Resolve file-based `todos/` items in bounded parallel with dependency ordering and cleanup. Use when the todo sweep itself is the job to coordinate, not generic implementation work.
 - `triage` — Triage file-based `todos/` findings into ready, skipped, or revised states before execution. Use when the repo already uses the file-based todo workflow and the user wants approval-style triage, not tracker triage or todo execution.
@@ -188,7 +191,7 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - `diagram-cli` — Generate, validate, and refresh @brainwav/diagram architecture artifacts and context packs. Use when the user wants repository architecture diagrams for onboarding, PR impact, or CI drift checks, not hand-drawn product mock diagrams.
 - `evals-router` — Route and guide LLM evaluation work such as evaluator design, error analysis, RAG evals, and synthetic eval data. Use when the user wants eval-specific workflow help, not product analytics or ordinary QA.
 - `fix-mise` — Use this skill to diagnose and repair mise trust or runtime selection problems and reconcile `~/.config/mise/config.toml` with required tool versions when commands fail because mise shims or trust state are broken.
-- `insight-report` — Generate comprehensive HTML insights from Codex OTEL data using local Ollama LLMs. Local LLM-powered facet extraction for personalized analytics and actionable recommendations.
+- `insight-report` — WHAT: Generate comprehensive HTML insights from Codex OTEL data using local Ollama LLMs. WHEN: Use when the user asks for usage analytics, workflow patterns, Codex session summaries, or recommendations for improving their development workflow.
 - `markdown-converter` — Convert source files into Markdown outputs using the bundled converter workflow. Use when a user asks to transform documents, notes, or technical files into clean Markdown format.
 - `notebooklm` — Analyze NotebookLM workflows for notebook management, question answering, and audio or video overviews. Use when the user wants NotebookLM actions from this environment, not general browsing or note writing.
 - `orchestrating-subagents` — Plan and run Codex subagent workflows using installed roles and Codex-native delegation tools. Use when the user explicitly wants subagents, parallel delegation, or swarm-style orchestration, not ordinary single-agent work or role creation.
@@ -198,7 +201,7 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - `repoprompt` — Plan and troubleshoot Repo Prompt integration across editors, agents, MCP, and CLI workflows. Use when the user wants Repo Prompt configured, adopted, or compared inside an AI coding setup.
 - `reproduce-bug` — Reproduce or investigate a bug from a Linear issue or GitHub issue, preserving tracker context, symptoms, and repro steps. Use when the user wants issue-driven debugging rather than a freeform root-cause review.
 - `simple-tasks` — Install a lightweight local task workflow backed by `tasks/TASKS.md` and `scripts/task.sh`. Use when the user wants simple in-repo task coordination, not team issue-tracker management.
-- `skill-builder` — Improve, audit, compare, validate, and package Codex skills, including SKILL.md, references, evals, scripts, and standalone-skill handoff prep. Use when lifecycle hardening, routing, quality gates, or standalone skill packaging is the primary job, not first-draft scaffolding, pure installation, or plugin conversion.
+- `skill-builder` — Improve and validate Codex skill quality using automated audits and comparative hardening loops. Use when hardening skill routing, workflows, and safety before release, or when packaging validated standalone skills for distribution, rather than for first-draft scaffolding or pure installation.
 - `slides` — Create, edit, validate, or debug PowerPoint-compatible slide decks with PptxGenJS and visual overflow checks. Use when the user wants `.pptx` work, not generic web UI design or prose editing.
 - `spreadsheet` — Create, edit, analyze, or format spreadsheets with formula-aware workflows and visual review. Use when the user wants `.xlsx`, `.csv`, or `.tsv` work, not plain text tables.
 - `systematic-debugging` — Diagnose production bugs, regressions, or failing checks from concrete evidence before code changes. Use when the user wants a safe root-cause analysis and fix plan, not immediate speculative implementation.

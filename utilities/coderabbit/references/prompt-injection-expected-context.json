@@ -1,0 +1,34 @@
+{
+  "path_patterns": [
+    "assets/**",
+    "examples/**",
+    "references/evals*.yaml",
+    "references/evals-v2-migration.md",
+    "references/prompt-injection-expected-context.json",
+    "references/coderabbit-docs/**",
+    "references/discovery-interview.md",
+    "references/contract.yaml",
+    "scripts/skill_gate.py",
+    "scripts/openclaw_skill_guard.py",
+    "scripts/recursive_skill_loop.py",
+    "scripts/generate_pressure_tests.py",
+    "scripts/migrate_evals_v2.py",
+    "scripts/run_skill_evals.py",
+    "scripts/run_skill_graph_smoke.py",
+    "workflows/create-new-skill.md"
+  ],
+  "context_signals": [
+    "prompt injection",
+    "adversarial",
+    "jailbreak",
+    "forbidden_commands",
+    "security coverage",
+    "red team",
+    "regex",
+    "re.compile(",
+    "pattern"
+  ],
+  "skip_binary_globs": [
+    "assets/**"
+  ]
+}

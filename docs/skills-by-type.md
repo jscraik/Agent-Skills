@@ -12,14 +12,14 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 - `library_api_reference`: 8
 - `product_verification`: 9
 - `data_fetch_analysis`: 6
-- `team_automation`: 36
+- `team_automation`: 37
 - `scaffolding_templates`: 27
-- `code_quality_review`: 15
-- `ci_cd_deployment`: 6
+- `code_quality_review`: 16
+- `ci_cd_deployment`: 7
 - `runbook`: 5
 - `infrastructure_ops`: 6
 - `invalid`: 0
-- `total_tagged`: 118
+- `total_tagged`: 121
 
 ## Semantic Types
 
@@ -83,6 +83,7 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 - `orchestrating-subagents` — `utilities`
 - `product-design-critic` — `product/strategy`
 - `product-spec` — `product/specs`
+- `production-deployment` — `product/ops`
 - `project-improver` — `product/strategy`
 - `resolve-todo-parallel` — `product/ops`
 - `simple-tasks` — `utilities`
@@ -137,6 +138,7 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 - `every-style-editor` — `product/content`
 - `fixing-accessibility` — `frontend/website`
 - `fixing-metadata` — `frontend/website`
+- `review-duplication` — `github`
 - `security-best-practices` — `product/security`
 - `skill-builder` — `utilities`
 - `test-driven-development` — `utilities`
@@ -146,6 +148,7 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 
 - `circleci` — `utilities`
 - `cloudflare-deploy` — `product/domain`
+- `fallback-release` — `product/ops`
 - `gh-workflow` — `github`
 - `release` — `product/ops`
 - `resolve-pr-parallel` — `github`

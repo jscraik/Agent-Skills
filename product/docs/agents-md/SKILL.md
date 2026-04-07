@@ -25,9 +25,16 @@ Create and maintain concise, high-signal AGENTS guidance with progressive disclo
 - [Project-tailored repo baseline](#project-tailored-repo-baseline)
 - [Anti-patterns](#anti-patterns)
 - [Variation](#variation)
+- [Shell Scripting](#shell-scripting)
+- [Refactoring](#refactoring)
+- [Documentation](#documentation)
 - [Mandatory workflow snippet](#mandatory-workflow-snippet)
 - [Examples](#examples)
 - [Resource map](#resource-map)
+- [Testing](#testing)
+- [Git Workflow](#git-workflow)
+- [Configuration Files](#configuration-files)
+- [Code Review Fixes](#code-review-fixes)
 - [Decision feedback protocol](#decision-quality-feedback)
 
 ## When to use
@@ -95,6 +102,34 @@ Run discovery for underspecified AGENTS creation or refactor requests.
 - In the confirmation round, include `Assumptions:` when any remain and end with one simple confirmation question such as `Does this capture it well enough for me to build?`.
 - Keep the confirmation round compact as well: summarize only the current AGENTS update shape, list assumptions only when needed, and end with the single confirmation question.
 - For out-of-scope responses, keep the compact structure expected by the evals: `## When to use`, `## Deliverables`, and `## Required inputs`.
+
+## Testing
+
+After fixing any code, always run the relevant test suite to verify the fix works before committing. If tests fail, debug and iterate rather than committing broken code.
+
+## Git Workflow
+
+When working with git branches, prefer merge over rebase for complex histories (>50 commits). Always run `git status` and resolve conflicts systematically before proceeding with changes.
+
+## Configuration Files
+
+For YAML schema changes and configuration files, validate against the schema immediately after editing. Do not assume syntax is correct without verification.
+
+## Code Review Fixes
+
+When fixing CodeRabbit or automated review comments, batch related fixes by file type and verify each category (types, security, validation, linting) before moving to the next.
+
+## Shell Scripting
+
+When modifying shell scripts or configuration files, always use non-interactive command patterns. Avoid commands that require user input (like `op read`) because they can hang in CI/CD and other headless environments.
+
+## Refactoring
+
+When refactoring interfaces that affect multiple files, update interface/type definitions first, then systematically update all consumers before running tests. Verify no conflated concerns exist (for example, subcommand and mode flags combined together).
+
+## Documentation
+
+Always format markdown plan files cleanly before writing. Avoid stray backticks, inconsistent heading levels, and mixed quote styles. Use `prettier --write` or equivalent for markdown files.
 
 ## Deliverables
 
