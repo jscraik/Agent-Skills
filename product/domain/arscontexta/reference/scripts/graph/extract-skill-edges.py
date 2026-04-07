@@ -13,7 +13,7 @@ Outputs ops/metrics/graph/skill-edges.json with weighted edges:
 Usage:
   python3 extract-skill-edges.py <vault_root> <edges_out>
 """
-import json, math, pathlib, re, sys
+import json, pathlib, re, sys
 from collections import Counter
 from datetime import datetime, timezone
 
@@ -46,8 +46,8 @@ if sw_path.exists():
     try:
         sw_data = json.loads(sw_path.read_text())
         session_weights = sw_data.get("weights", {})
-    except Exception:
-        pass
+    except (OSError, json.JSONDecodeError):
+        session_weights = {}
 
 def get_weight(a: str, b: str) -> float:
     key = ":".join(sorted([a, b]))
@@ -146,8 +146,8 @@ for _md in VAULT_ROOT.rglob("SKILL.md"):
             _m = _STA.search(_fm.group(1))
             if _m:
                 _stability[_skill] = _m.group(1)
-    except Exception:
-        pass
+    except (OSError, UnicodeError):
+        continue
 
 for node in nodes:
     node["in_degree"]  = in_deg.get(node["id"], 0)

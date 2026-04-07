@@ -17,7 +17,6 @@ from __future__ import annotations
 
 import argparse
 import difflib
-import gzip
 import json
 import os
 import re
@@ -28,13 +27,11 @@ from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any
 
 HOME = Path.home()
 USAGE_DIR = HOME / "dev" / "config" / "codex" / "usage-data"
 REPORT_HTML = USAGE_DIR / "report.html"
 FACETS_CACHE = USAGE_DIR / "facets-cache.json"
-META_CACHE = USAGE_DIR / "session-meta-cache.json"
 
 # Data sources
 SESSIONS_DIR = HOME / ".codex" / "sessions"
@@ -252,8 +249,8 @@ def parse_session_file(file_path):
                                         msg_date = datetime.fromisoformat(msg_timestamp.replace('Z', '+00:00'))
                                         message_hours.append(msg_date.hour)
                                         user_message_timestamps.append(msg_timestamp)
-                                    except:
-                                        pass
+                                    except (TypeError, ValueError):
+                                        continue
                                 
                                 if last_assistant_timestamp and msg_timestamp:
                                     try:
@@ -262,8 +259,8 @@ def parse_session_file(file_path):
                                         response_time = (user_time - assistant_time).total_seconds()
                                         if 2 < response_time < 3600:
                                             user_response_times.append(response_time)
-                                    except:
-                                        pass
+                                    except (TypeError, ValueError):
+                                        continue
                             
                             if isinstance(content, str) and '[Request interrupted by user' in content:
                                 errors += 1
@@ -315,7 +312,7 @@ def parse_session_file(file_path):
                                             lines_added += content.count('\n') + 1
                 except json.JSONDecodeError:
                     continue
-    except Exception:
+    except (OSError, UnicodeError):
         return None
     
     if not session_meta:
@@ -341,12 +338,12 @@ def parse_session_file(file_path):
                     try:
                         last_msg_time = datetime.fromisoformat(ts.replace('Z', '+00:00'))
                         break
-                    except:
-                        pass
+                    except (TypeError, ValueError):
+                        continue
             if last_msg_time:
                 duration_minutes = (last_msg_time - start).total_seconds() / 60
-        except:
-            pass
+        except (TypeError, ValueError):
+            duration_minutes = 0
     
     return {
         'session_id': session_meta.get('id', 'unknown'),
@@ -419,8 +416,8 @@ def detect_multi_clauding(sessions):
                     'ts': datetime.fromisoformat(ts.replace('Z', '+00:00')).timestamp() * 1000,
                     'session_id': session['session_id']
                 })
-            except:
-                pass
+            except (TypeError, ValueError):
+                continue
     
     all_messages.sort(key=lambda x: x['ts'])
     
@@ -494,7 +491,7 @@ def check_ollama_available(model):
         data = json.loads(result.stdout)
         models = [m.get("name", "") for m in data.get("models", [])]
         return any(model in m or m in model for m in models)
-    except Exception:
+    except (OSError, subprocess.SubprocessError, json.JSONDecodeError):
         return False
 
 
@@ -524,7 +521,7 @@ def ollama_generate(prompt, model, system=""):
         
         response = json.loads(result.stdout)
         return response.get("response", "")
-    except Exception:
+    except (OSError, subprocess.SubprocessError, json.JSONDecodeError):
         return ""
 
 
@@ -534,8 +531,8 @@ def load_cached_facets():
         if FACETS_CACHE.exists():
             with open(FACETS_CACHE, 'r') as f:
                 return json.load(f)
-    except:
-        pass
+    except (OSError, json.JSONDecodeError):
+        return {}
     return {}
 
 
@@ -545,8 +542,8 @@ def save_cached_facets(cache):
         USAGE_DIR.mkdir(parents=True, exist_ok=True)
         with open(FACETS_CACHE, 'w') as f:
             json.dump(cache, f, indent=2)
-    except:
-        pass
+    except OSError:
+        return
 
 
 def load_cached_session_meta(session_id):
@@ -556,8 +553,8 @@ def load_cached_session_meta(session_id):
         if cache_path.exists():
             with open(cache_path, 'r') as f:
                 return json.load(f)
-    except:
-        pass
+    except (OSError, json.JSONDecodeError):
+        return None
     return None
 
 
@@ -569,8 +566,8 @@ def save_session_meta(session_id, meta):
         cache_path = meta_dir / f"{session_id}.json"
         with open(cache_path, 'w') as f:
             json.dump(meta, f, indent=2)
-    except:
-        pass
+    except OSError:
+        return
 
 
 def extract_facets_with_llm(session_id, transcript, model, cache):
@@ -632,8 +629,8 @@ RESPOND WITH ONLY A VALID JSON OBJECT:
             facet['session_id'] = session_id
             cache[session_id] = facet
             return facet
-    except:
-        pass
+    except (json.JSONDecodeError, TypeError, ValueError):
+        return None
     return None
 
 
@@ -862,7 +859,7 @@ SESSIONS:
                         print(f"  ✗ {name} - no JSON found")
                 else:
                     print(f"  ✗ {name} - no response")
-            except Exception as e:
+            except (TimeoutError, ValueError, TypeError, json.JSONDecodeError) as e:
                 print(f"  ✗ {name} - {e}")
     
     # Generate At a Glance
@@ -915,8 +912,8 @@ HORIZON:
                 if json_match:
                     insights['at_a_glance'] = json.loads(json_match.group())
                     print("  ✓ at_a_glance")
-            except:
-                pass
+            except (json.JSONDecodeError, TypeError, ValueError):
+                insights.pop("at_a_glance", None)
     
     return insights
 

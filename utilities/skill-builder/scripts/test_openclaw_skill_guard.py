@@ -84,7 +84,7 @@ class OpenClawSkillGuardTests(unittest.TestCase):
             # Only one file scanned, so we should not see both signatures.
             codes = {f.code for f in findings}
             self.assertTrue("security.subprocess_usage" in codes or "security.os_system" in codes)
-            self.assertFalse({"security.subprocess_usage", "security.os_system"} <= codes)
+            self.assertLess(len(codes.intersection({"security.subprocess_usage", "security.os_system"})), 2)
 
     def test_security_checks_scan_modern_typescript_extensions(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

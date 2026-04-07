@@ -1,14 +1,12 @@
 import os
 import shutil
 import subprocess
-import tempfile
 import re
 import sys
 import importlib.util
 from pathlib import Path
-from typing import List, Dict, Any, Tuple, Optional
+from typing import Optional
 from ask.envelope import CallResult, ErrorObject
-from ask.context import find_repo_root
 from skill_discovery import discover_skill_entries
 
 

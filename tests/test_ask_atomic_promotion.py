@@ -10,7 +10,6 @@ from pathlib import Path
 repo_root = Path(__file__).resolve().parents[1]
 sys.path.append(str(repo_root / "scripts" / "lib"))
 
-from ask.envelope import CallResult, ErrorCode
 from ask.state import SkillState, ReadinessState
 from ask.validity import ContractValidityEvidence, check_install_validity
 from ask.handoff import HandoffPackage
@@ -146,7 +145,7 @@ class TestAtomicPromotion(unittest.TestCase):
     def test_invalid_state_transition_raises(self):
         """SA17: Invalid state transitions are rejected."""
         skill_name = "test-skill"
-        state = SkillState.create(self.repo_root, skill_name)
+        SkillState.create(self.repo_root, skill_name)
         
         # Cannot go from starter_valid to downstream_ready directly
         with self.assertRaises(ValueError) as ctx:
@@ -257,7 +256,7 @@ class TestConcurrentAccess(unittest.TestCase):
         skill_name = "concurrent-skill"
 
         # Create initial state
-        state = SkillState.create(self.repo_root, skill_name)
+        SkillState.create(self.repo_root, skill_name)
 
         errors = []
         success_count = [0]
@@ -364,7 +363,7 @@ class TestSchemaValidation(unittest.TestCase):
     def test_load_valid_state_succeeds(self):
         """P3: Valid state file loads correctly."""
         skill_name = "valid-state"
-        state = SkillState.create(self.repo_root, skill_name)
+        SkillState.create(self.repo_root, skill_name)
 
         loaded = SkillState.load(self.repo_root, skill_name)
         self.assertIsNotNone(loaded)

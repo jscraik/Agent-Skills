@@ -51,14 +51,13 @@ except ModuleNotFoundError:  # pragma: no cover
         env["SKILL_CREATOR_PYYAML_REEXEC"] = "1"
         os.execve(str(preferred), [str(preferred), __file__, *sys.argv[1:]], env)
 
-    print(
+    sys.stderr.write(
         "ERROR: PyYAML is required to run skill_gate.py.\n\n"
         "Fix (recommended):\n"
         "  ~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/skill_gate.py <path/to/skill-dir-or-SKILL.md>\n\n"
         "Notes:\n"
         "  - Do not use utilities/skill-builder/.venv/bin/python (this repo does not ship that venv).\n"
-        "  - If ~/.venvs/pyyaml doesn't exist, create a venv with PyYAML installed.",
-        file=sys.stderr,
+        "  - If ~/.venvs/pyyaml doesn't exist, create a venv with PyYAML installed."
     )
     raise SystemExit(1)
 

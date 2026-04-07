@@ -9,7 +9,6 @@ import tempfile
 import textwrap
 import unittest
 from pathlib import Path
-from unittest import mock
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 if str(SCRIPT_DIR) not in sys.path:
@@ -231,7 +230,7 @@ class RunSkillEvalsModeTests(unittest.TestCase):
             default_home.mkdir(parents=True)
             (default_home / "auth.json").write_text("{}", encoding="utf-8")
 
-            with mock.patch("run_skill_evals.Path.home", return_value=home_root):
+            with unittest.mock.patch("run_skill_evals.Path.home", return_value=home_root):
                 errors, warnings = _preflight_codex_live_runner(
                     workspace_root=workspace_root,
                     codex_bin=None,
@@ -250,9 +249,9 @@ class RunSkillEvalsModeTests(unittest.TestCase):
             codex_home = workspace_root / ".codex"
             codex_home.mkdir()
             (codex_home / "auth.json").write_text("{}", encoding="utf-8")
-            fake_proc = mock.Mock(returncode=0, stdout="Logged in using ChatGPT\n", stderr="")
+            fake_proc = unittest.mock.Mock(returncode=0, stdout="Logged in using ChatGPT\n", stderr="")
 
-            with mock.patch("run_skill_evals.sp.run", return_value=fake_proc) as mocked_run:
+            with unittest.mock.patch("run_skill_evals.sp.run", return_value=fake_proc) as mocked_run:
                 errors, warnings = _preflight_codex_live_runner(
                     workspace_root=workspace_root,
                     codex_bin=None,
@@ -268,10 +267,10 @@ class RunSkillEvalsModeTests(unittest.TestCase):
             workspace_root = Path(tmpdir)
             codex_home = workspace_root / ".codex"
             codex_home.mkdir()
-            fake_proc = mock.Mock(returncode=1, stdout="Not logged in\n", stderr="")
+            fake_proc = unittest.mock.Mock(returncode=1, stdout="Not logged in\n", stderr="")
 
-            with mock.patch("run_skill_evals.sp.run", return_value=fake_proc):
-                with mock.patch.dict("run_skill_evals.os.environ", {"OPENAI_API_KEY": "sk-test"}, clear=False):
+            with unittest.mock.patch("run_skill_evals.sp.run", return_value=fake_proc):
+                with unittest.mock.patch.dict("run_skill_evals.os.environ", {"OPENAI_API_KEY": "sk-test"}, clear=False):
                     errors, warnings = _preflight_codex_live_runner(
                         workspace_root=workspace_root,
                         codex_bin=None,

@@ -24,7 +24,6 @@ STABLE_RE      = re.compile(r"^stability\s*:\s*stable\s*$", re.MULTILINE)
 DEPRECATION_RE = re.compile(r"(?:deprecated|deprecation|migration)", re.IGNORECASE)
 
 errors: list[str] = []
-warnings: list[str] = []
 
 # If no changed files provided, scan all and just report stable skills
 if not changed_files:

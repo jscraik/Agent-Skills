@@ -10,7 +10,6 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
-from unittest import mock
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -496,7 +495,7 @@ class RecursiveLoopCaptureTests(unittest.TestCase):
         )
 
         with self.assertRaises(KeyboardInterrupt):
-            with mock.patch.object(
+            with unittest.mock.patch.object(
                 RECURSIVE_LOOP_MODULE,
                 "prompt_for_feedback",
                 side_effect=KeyboardInterrupt(),

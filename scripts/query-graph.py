@@ -153,7 +153,7 @@ def cmd_relate(data, args):
     as_json    = args.get("json", False)
     topic_f    = args.get("topic")
     tier_f     = args.get("tier")
-    node_map, fwd, rev = build_index(data)
+    node_map, _, _ = build_index(data)
     start = find_node(data, query)
     if not start:
         _not_found(data, query); sys.exit(1)

@@ -1,11 +1,9 @@
-import os
 import subprocess
 import json
 import re
 from pathlib import Path
 from typing import List
 from ask.envelope import CallResult, ErrorObject
-from ask.context import find_repo_root
 
 def repo_status(repo_root: Path, verbose: bool = False) -> CallResult:
     """Returns overall health, sync status, and lint issues."""

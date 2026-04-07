@@ -66,7 +66,7 @@ for _md in sorted(ROOT.rglob("SKILL.md")):
         _rel = _md.relative_to(ROOT)
         _skill_paths[_skill] = f"{GITHUB_BASE}/{_rel}"
     except ValueError:
-        pass
+        continue
 
 skill_urls_json = json.dumps(_skill_paths)
 

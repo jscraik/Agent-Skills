@@ -13,7 +13,7 @@ Exit codes:
   0 = clean
   1 = drift detected (configurable threshold via DRIFT_THRESHOLD env var, default 0)
 """
-import json, os, pathlib, re, sys
+import os, pathlib, re, sys
 
 try:
     import yaml

@@ -68,11 +68,10 @@ except ModuleNotFoundError:  # pragma: no cover
         env["SKILL_CREATOR_PYYAML_REEXEC"] = "1"
         os.execve(str(preferred), [str(preferred), __file__, *sys.argv[1:]], env)
     else:
-        print(
+        sys.stderr.write(
             "ERROR: PyYAML is required to run run_skill_evals.py.\n\n"
             "Fix:\n"
-            "  ~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/run_skill_evals.py <path/to/skill-dir-or-SKILL.md>\n",
-            file=sys.stderr,
+            "  ~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/run_skill_evals.py <path/to/skill-dir-or-SKILL.md>\n"
         )
         raise SystemExit(1)
 
