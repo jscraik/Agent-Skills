@@ -15,6 +15,18 @@ Default behavior:
 - treat `plugin-builder` as the canonical owner for plugin hardening and conversion;
 - preserve backwards compatibility for older instructions and references.
 
+## Required inputs
+
+- explicit mention of `codex-plugin-builder` in the request or source document;
+- plugin package path or source location (repo/path/ref) when implementation work is requested;
+- desired validation depth (`smoke` or `full`) if the user already specified one.
+
+## Deliverables
+
+- routing acknowledgement that this alias is delegating to canonical `plugin-builder`;
+- plugin-builder-aligned output (changes, checks, and safety notes) without alias drift;
+- explicit blocker reporting when package hardening cannot proceed safely.
+
 ## Procedure
 
 1. Acknowledge legacy alias usage.
@@ -29,6 +41,19 @@ Run canonical plugin-builder checks:
 python3 utilities/plugin-builder/scripts/plugin_builder.py validate <path/to/plugin>
 python3 utilities/plugin-builder/scripts/plugin_builder.py audit-compat <path/to/plugin> --marketplace-path .agents/plugins/marketplace.json
 ```
+
+## Failure mode
+
+- If the request is about pure install/provenance work, route to `plugin-installer`.
+- If the request is standalone skill hardening, route to `skill-builder`.
+- If plugin boundaries, source provenance, or destination paths are ambiguous, pause and clarify before editing.
+
+## Gotchas
+
+- Symptom: output keeps using `codex-plugin-builder` terminology end-to-end.
+- Cause: alias handling skipped canonical handoff language.
+- Do instead: treat this skill as a compatibility shim and execute with `plugin-builder` contract.
+- Check: final output names `plugin-builder` as canonical owner and only mentions alias compatibility once.
 
 ## See Also
 

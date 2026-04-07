@@ -25,6 +25,7 @@ Build and harden safe, focused plugin packages for Codex workflows.
 - [Constraints and safety](#constraints-and-safety)
 - [Anti-patterns](#anti-patterns)
 - [Failure mode](#failure-mode)
+- [Gotchas](#gotchas)
 - [See Also](#see-also)
 
 ## When to use
@@ -125,6 +126,12 @@ If the request is out of scope, route clearly:
 - `skill-builder` for standalone skill hardening;
 - `plugin-installer` for installation/provenance workflows;
 - `mcp-builder` for MCP servers not tied to plugin packaging.
+
+## Gotchas
+- Symptom: plugin conversion is treated as a straight install workflow.
+- Cause: packaging and distribution boundaries were collapsed.
+- Do instead: complete `plugin-builder` contract and compatibility checks before handing off install work.
+- Check: `validate` and `audit-compat` evidence exists before any installer handoff.
 
 ## See Also
 | Skill | When to use |
