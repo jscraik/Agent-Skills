@@ -3,9 +3,9 @@ set -euo pipefail
 
 # Run repo preflight before any path-sensitive operations
 if [[ -f "scripts/codex-preflight.sh" ]]; then
-  bash scripts/codex-preflight.sh --stack auto --mode required
+  bash scripts/codex-preflight.sh --stack auto --mode required --bins "git,bash,sed,jq,curl,python3"
 elif [[ -f "$(dirname "${BASH_SOURCE[0]}")/codex-preflight.sh" ]]; then
-  bash "$(dirname "${BASH_SOURCE[0]}")/codex-preflight.sh" --stack auto --mode required
+  bash "$(dirname "${BASH_SOURCE[0]}")/codex-preflight.sh" --stack auto --mode required --bins "git,bash,sed,jq,curl,python3"
 else
   echo "WARNING: codex-preflight.sh not found, skipping preflight"
 fi
