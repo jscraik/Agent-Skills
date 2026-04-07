@@ -15,9 +15,9 @@ Keep `ck`, `cz`, and `cc` pinned to their intended providers even after CLI upda
 From any shell:
 
 ```bash
-bash /Users/jamiecraik/dev/agent-skills/.agents/skills/claude-alias/scripts/claude_alias_guard.sh --check
-bash /Users/jamiecraik/dev/agent-skills/.agents/skills/claude-alias/scripts/claude_alias_guard.sh --repair
-bash /Users/jamiecraik/dev/agent-skills/.agents/skills/claude-alias/scripts/claude_alias_guard.sh --check
+bash /Users/jamiecraik/dev/Agent-Skills/utilities/claude-alias/scripts/claude_alias_guard.sh --check
+bash /Users/jamiecraik/dev/Agent-Skills/utilities/claude-alias/scripts/claude_alias_guard.sh --repair
+bash /Users/jamiecraik/dev/Agent-Skills/utilities/claude-alias/scripts/claude_alias_guard.sh --check
 ```
 
 ## What the guard enforces
@@ -28,10 +28,17 @@ bash /Users/jamiecraik/dev/agent-skills/.agents/skills/claude-alias/scripts/clau
   - `~/.claude/zai_settings.json` -> `/Users/jamiecraik/dev/config/claude/zai_settings.json`
 - Exactly one alias source line in `~/.zshrc`
 - Stable alias routing (`ck`/`cz`/`cc`)
+- API-key-only provider launches (`--bare`) for `ck` and `cz`
+- provider-state cleanup in base `claude()` (clears `CLAUDE_CONFIG_DIR` and provider-only env vars)
+- OAuth scrub coverage across default and provider config dirs
 - Pinned model defaults in provider settings JSON
 - No literal `${VAR}` placeholders in provider settings JSON env blocks
 
 ## Troubleshooting
+
+- Guard passes but startup still shows `Auth conflict`:
+  - Run `claude auth logout` once and retry `cz`.
+  - The wrappers now launch provider modes with `--bare`, so persistent conflict after logout is likely upstream CLI/runtime drift.
 
 - Guard passes but CLI still returns 401:
   - Routing is likely correct; credentials are likely expired or mismatched.
@@ -43,4 +50,3 @@ bash /Users/jamiecraik/dev/agent-skills/.agents/skills/claude-alias/scripts/clau
 - Guard keeps failing on symlink checks:
   - Confirm the config repo exists at `/Users/jamiecraik/dev/config`.
   - If repo path changed, set `CLAUDE_CONFIG_ROOT` before running guard.
-

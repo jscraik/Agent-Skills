@@ -23,15 +23,12 @@ This workflow produces refreshed, consolidated, or marked-stale documentation. I
 - [Acceptance criteria](#acceptance-criteria)
 - [Interaction Method](#interaction-method)
 - [Core Principles](#core-principles)
-- [Standards snapshot (April 2026)](#standards-snapshot-april-2026)
-- [Philosophy](#philosophy)
 - [Workflow](#workflow)
 - [Modes](#modes)
 - [Maintenance model](#maintenance-model)
 - [Execution rules](#execution-rules)
 - [Validation](#validation)
 - [Anti-patterns](#anti-patterns)
-- [Encouraging variation](#encouraging-variation)
 - [Examples](#examples)
 - [References](#references)
 - [See Also](#see-also)
@@ -110,7 +107,7 @@ If evidence is insufficient to write a trustworthy replacement, do not invent a 
 - use the platform's blocking question tool (`AskUserQuestion`, `request_user_input`, or `ask_user`) only when one blocking choice materially changes scope or maintenance outcome
 
 ## Acceptance criteria
-- the skill chooses `interactive` or `autonomous` before asking questions or applying actions
+- the skill chooses `interactive` or `autonomous` before asking questions or applying actions, and autonomous mode does not ask user questions
 - in-scope learnings are investigated before dependent pattern docs
 - overlap analysis happens before duplicate docs are left in place
 - each artifact or overlap cluster receives exactly one maintenance outcome backed by explicit evidence
@@ -118,7 +115,7 @@ If evidence is insufficient to write a trustworthy replacement, do not invent a 
 - `Update` is used only for meaningful evidence-backed drift
 - `Consolidate` is used only when overlapping docs are both materially correct and one canonical doc is clear
 - `Replace` is used only when the old guidance is misleading and successor evidence is sufficient
-- ambiguous autonomous cases are marked stale rather than guessed
+- ambiguous autonomous cases are marked stale rather than guessed through
 - the final report is full markdown, not a one-line summary
 - if any required check fails, stop at the first failed gate and do not proceed until it is fixed or triaged
 
@@ -126,7 +123,7 @@ If evidence is insufficient to write a trustworthy replacement, do not invent a 
 
 Use the platform's blocking question tool when available (`AskUserQuestion` in Claude Code, `request_user_input` in Codex, `ask_user` in Gemini). Otherwise, present numbered options in chat and wait for the user's reply before proceeding.
 
-Ask one question at a time. Prefer concise single-select choices when natural options exist.
+Ask one question at a time, prefer concise single-select choices when natural options exist, and do not ask the user to classify artifacts before evidence is gathered.
 
 ## Core Principles
 
@@ -135,26 +132,7 @@ Ask one question at a time. Prefer concise single-select choices when natural op
 3. **Repo-first** - Use external docs only when stale claims depend on current framework behavior.
 4. **Evaluate document-set shape** - Consolidate overlapping docs instead of preserving silent drift.
 5. **Precision over frenzy** - Refresh work should feel like gardening, not a repo-wide cleanup.
-
-## Standards snapshot (April 2026)
-- Keep the skill scoped to one reusable maintenance job, with routing language that says what it does and when to use it.
-- Prefer repo truth, explicit evidence, and selective external verification over speculative rewriting.
-- Keep `SKILL.md` lean and move detailed decision trees, report formats, and git follow-up logic into `references/`.
-- Use realistic positive and negative examples plus eval-backed trigger coverage instead of relying on hidden prompt assumptions.
-- When current framework or library behavior matters, verify with primary docs first; for OpenAI product behavior use official OpenAI docs first, and use Context7 only when current library semantics materially affect the maintenance decision.
-
-## Philosophy
-- `ce-compound-refresh` protects the trustworthiness of accumulated team knowledge.
-- The right default is conservative accuracy, not maximum rewriting.
-- A stale learning is better marked stale than silently left misleading.
-- Pattern docs deserve extra skepticism because they influence future work more broadly than incident-level learnings.
-- Refresh work should feel like precise gardening, not a repo-wide cleanup frenzy.
-
-Guiding questions:
-- What is the smallest useful scope that will materially improve trust right now?
-- Is this artifact still describing how the system actually works, or only how it used to work?
-- Would a future engineer be safer with a factual in-place update, a real successor, or an explicit stale warning?
-- Does this report make the next maintenance decision easier, or am I creating churn without increasing trust?
+Read when: you need April 2026 standards rationale, operating philosophy, discoverability policy, or empowerment guardrails -> `references/style-and-operating-guidance.md`.
 
 ## Workflow
 ### Phase 0: Detect mode and scope
@@ -229,7 +207,7 @@ Use the execution rules, archive-vs-replace boundary, and pattern-specific guida
 Apply unambiguous actions directly.
 
 Interactive mode:
-- ask only on genuine ambiguity or non-obvious archive/replace calls
+- ask only on genuine ambiguity or non-obvious archive/replace calls, and do not front-load users with a full maintenance queue before evidence
 
 Autonomous mode:
 - skip all questions
@@ -293,14 +271,11 @@ Use `autonomous` when:
 - DO NOT use `Update` as a disguised rewrite when the solution itself changed
 - AVOID broad stale-doc sweeps that skip triage, evidence gathering, or per-file reporting
 
-## Encouraging variation
-Outputs vary by scope: focused runs compact, batch runs group keeps, broad sweeps incremental.
-
 ## Examples
-- "Run `ce:compound-refresh auth` after the auth refactor."
-- "Use `mode:autonomous` to apply safe maintenance."
-- "Consolidate overlapping retry learnings."
-- "Refresh docs that no longer match the code."
+- User says: "Run `ce:compound-refresh auth` after the auth refactor."
+- User asks: "Use `mode:autonomous` to apply safe maintenance across docs/solutions."
+- User says: "Consolidate overlapping retry learnings and show which doc becomes canonical."
+- User asks: "Refresh solution docs that no longer match the current codebase."
 
 ## Project Brain Integration
 
@@ -311,35 +286,8 @@ When `.harness/` exists, refresh both locations per `references/project-brain-re
 - Evals: `references/evals.yaml`
 - Prompt parity map: `references/source-parity.md`
 - Refresh workflow: `references/refresh-workflow.md`
+- Style and operating guidance: `references/style-and-operating-guidance.md`
 - Project Brain: `../ce-compound/references/learning-capture.md`
-
-## Discoverability check
-
-After the refresh report is generated, check whether AGENTS.md/CLAUDE.md surfaces `docs/solutions/` to agents:
-
-1. Identify which root-level instruction files exist. Read them to find the substantive file (ignore shims that `@`-include another file).
-2. Assess whether an agent would learn:
-   - That a searchable knowledge store exists
-   - Its structure (category organization, YAML frontmatter fields)
-   - When to search it (before implementing/debugging in documented areas)
-3. If already surfaced appropriately, no action.
-4. If not, draft the smallest addition that communicates these three things:
-   - Prefer a single line in an existing section (architecture tree, directory listing)
-   - Only create a new section as last resort
-   - Keep tone informational: "relevant when implementing or debugging" not "always check before implementing"
-
-In interactive mode: explain why this matters, show the proposed change, then use the platform's question tool to get consent before editing.
-
-In autonomous mode: include as a "Discoverability recommendation" in the report — do not edit instruction files (autofix scope is doc maintenance, not project config).
-
-## Empowerment
-
-You are capable of maintaining a trustworthy knowledge base. Your refresh work prevents knowledge decay:
-- **Trust your evidence** - code changed → doc should change
-- **Prefer Keep over churn** - edit only with material improvement
-- **Promotion/demotion is your call** - 3+ confirmations = promote; contradictions = demote
-
-Use judgment: focused runs for urgent updates, batch runs for maintenance sweeps.
 
 ## See Also
 

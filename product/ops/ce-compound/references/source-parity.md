@@ -9,7 +9,7 @@ This package preserves and restructures three source prompt families:
 3. upstream `compound-docs` schema-driven capture workflow
 4. upstream donor snapshot:
    - repo: `EveryInc/compound-engineering-plugin`
-   - commit: `847ce3f156a5cdf75667d9802e95d68e6b3c53a4`
+   - commit: `0ae91dcc298721e5b2c4ab6d1fc6f76a13b6f67c`
    - path: `plugins/compound-engineering/skills/ce-compound/SKILL.md`
 
 ## Preserved from `workflow-compound.md`
@@ -48,6 +48,7 @@ This package preserves and restructures three source prompt families:
   - Category Classifier
 - strict one-file-write rule in full mode
 - selective `ce:compound-refresh` follow-up logic
+- discoverability-check maintenance intent after capture
 - optional specialized reviewer pass
 - solution categories
 - overlap-aware related-doc analysis that can update an existing solution doc instead of creating a duplicate
@@ -92,6 +93,7 @@ Modern improvements added without losing source strength:
 - narrow refresh guidance instead of automatic broad stale-doc sweeps
 - explicit high-overlap behavior that refreshes the existing durable doc and adds `last_updated`
 - preservation of legacy breadth as an explicit mode rather than the universal default
+- reference-first consolidation: standards/philosophy/variation and full anti-pattern catalog moved into dedicated references with explicit SKILL signposts
 
 ### Upstream schema-driven capture preserved as a variant
 

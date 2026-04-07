@@ -8,7 +8,7 @@ cases:
     category: happy
     should_trigger: true
     prepend_skill: true
-    prompt: "Use $ce-reliability-review on this service and tell me what can fail."
+    prompt: "We're deploying this service tomorrow and I'm worried about outages. Please run a reliability review and tell me the first failure modes we should address."
     acceptance:
       - type: skill_selected
         expected_skill: "ce-reliability-review"
@@ -20,7 +20,7 @@ cases:
     category: happy
     should_trigger: true
     prepend_skill: false
-    prompt: "We're launching a new payment processing service next week. Review it for reliability risks, especially what happens when Stripe or our database goes down."
+    prompt: "We're launching a new payment processing service next week. Review reliability risks, especially Stripe and database outage behavior."
     acceptance:
       - type: skill_selected
         expected_skill: "ce-reliability-review"
@@ -32,7 +32,7 @@ cases:
     category: happy
     should_trigger: true
     prepend_skill: false
-    prompt: "Review the dependency chain between these three services for cascading failure risk."
+    prompt: "We split checkout across three services this sprint. Please review the dependency chain for cascading-failure risk and blast radius."
     acceptance:
       - type: skill_selected
         expected_skill: "ce-reliability-review"
@@ -44,7 +44,7 @@ cases:
     category: happy
     should_trigger: true
     prepend_skill: false
-    prompt: "Is this user-facing API ready from an SLO perspective? Check availability targets and error budgets."
+    prompt: "Is this user-facing API actually ready from an SLO perspective? Please check availability targets, error budgets, and alert alignment."
     acceptance:
       - type: skill_selected
         expected_skill: "ce-reliability-review"
@@ -56,7 +56,7 @@ cases:
     category: edge
     should_trigger: true
     prepend_skill: false
-    prompt: "Check whether our circuit breaker and retry coverage is complete for the checkout flow dependencies."
+    prompt: "Checkout now depends on Stripe, Redis, and a tax API. Check whether timeout, circuit-breaker, and retry coverage is complete."
     acceptance:
       - type: skill_selected
         expected_skill: "ce-reliability-review"
@@ -68,7 +68,7 @@ cases:
     category: edge
     should_trigger: true
     prepend_skill: false
-    prompt: "What happens to this service under sustained load? I'm worried about connection pool exhaustion and memory pressure."
+    prompt: "Traffic spikes hurt us last month. Under sustained load, what fails first in this service? I'm worried about pool exhaustion and memory pressure."
     acceptance:
       - type: skill_selected
         expected_skill: "ce-reliability-review"

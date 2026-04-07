@@ -1,6 +1,6 @@
 ---
 name: ce-tdd
-description: "Execute test-driven development with vertical tracer bullets inside ce-work. Use when implementing behavior changes with a test-first posture, red-green-refactor loops, or when ce-plan specifies TDD execution."
+description: "Build behavior-safe code changes with TDD and RED/GREEN evidence. Use when ce-plan or ce-work requires TDD for a concrete behavior target."
 metadata:
   skill-type: team_automation
   lifecycle_state: active
@@ -149,6 +149,7 @@ Before writing any code:
 - Confirm which behaviors to test (prioritize — you can't test everything)
 - Identify opportunities for deep modules (small interface, deep implementation)
 - Design interfaces for testability (dependency injection, return results over side effects)
+- If the user explicitly requests delegation, select reviewer lanes from `references/sub-agent-map.md` before fan-out.
 - List the behaviors to test (not implementation steps)
 - Get user approval on the plan
 
@@ -208,6 +209,7 @@ Per cycle, verify:
 - [ ] Code is minimal for this test
 - [ ] No speculative features added
 - [ ] RED and GREEN evidence captured
+- [ ] RED and GREEN command outputs are captured with the expected failure/pass reasons
 
 ## Validation
 Fail fast: **stop at the first failed gate** and do not proceed until fixed.
@@ -267,10 +269,10 @@ IMPORTANT: Outputs should vary based on the behavior under test, the risk level,
 - Do not converge on one pattern when a context-specific approach is safer.
 
 ## Examples
-- "Implement the retry behavior for transient API failures using vertical tracer bullets."
-- "Fix this cache invalidation bug with a failing regression test first, then minimal fix."
-- "The plan says `Execution note: test-first` for unit P2 — use ce-tdd posture."
-- "Red-green-refactor loop for the new auth session rotation flow."
+- User says: "Implement retry behavior for transient API failures using vertical tracer bullets and show RED→GREEN evidence each slice."
+- User says: "Fix this cache invalidation bug with a failing regression test first, then the smallest possible fix."
+- User says: "My plan unit `P2` has `Execution note: test-first`; run this in strict ce-tdd posture."
+- User says: "Do red-green-refactor for auth session rotation and stop if a slice cannot produce a meaningful failing test."
 
 ## References
 - Good and bad test examples: `references/tests.md`
@@ -278,6 +280,12 @@ IMPORTANT: Outputs should vary based on the behavior under test, the risk level,
 - Deep module design: `references/deep-modules.md`
 - Interface design for testability: `references/interface-design.md`
 - Refactor candidates: `references/refactoring.md`
+- Contract: `references/contract.yaml`
+- Evals: `references/evals.yaml`
+- Task profile: `references/task-profile.json`
+- Source parity and likeness review: `references/source-parity.md`
+- Sub-agent routing map: `references/sub-agent-map.md`
+- Script extension guidance: `scripts/README.md`
 
 ## See Also
 

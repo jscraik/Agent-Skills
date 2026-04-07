@@ -6,7 +6,6 @@ from __future__ import annotations
 import argparse
 import json
 import re
-from datetime import date
 from pathlib import Path
 from typing import Any
 
@@ -17,18 +16,9 @@ DEFAULT_MARKETPLACE_PATH = Path.cwd() / ".agents" / "plugins" / "marketplace.jso
 DEFAULT_INSTALL_POLICY = "AVAILABLE"
 DEFAULT_AUTH_POLICY = "ON_INSTALL"
 DEFAULT_CATEGORY = "Productivity"
-DEFAULT_MARKETPLACE_DISPLAY_NAME = "Local Plugins"
-DEFAULT_VERSION = "0.1.0"
-DEFAULT_LIFECYCLE_STATE = "incubating"
-DEFAULT_MATURITY = "experimental"
-DEFAULT_REVIEW_CADENCE = "quarterly"
-DEFAULT_AUTHOR_EMAIL = "maintainers@example.com"
-DEFAULT_AUTHOR_URL = "https://github.com/example"
-DEFAULT_LICENSE = "MIT"
+DEFAULT_MARKETPLACE_DISPLAY_NAME = "[TODO: Marketplace Display Name]"
 VALID_INSTALL_POLICIES = {"NOT_AVAILABLE", "AVAILABLE", "INSTALLED_BY_DEFAULT"}
 VALID_AUTH_POLICIES = {"ON_INSTALL", "ON_USE"}
-VALID_LIFECYCLE_STATES = {"incubating", "active", "maintenance", "deprecated"}
-VALID_MATURITY_LEVELS = {"experimental", "validated", "canonical"}
 
 
 def normalize_plugin_name(plugin_name: str) -> str:
@@ -50,98 +40,49 @@ def validate_plugin_name(plugin_name: str) -> None:
         )
 
 
-def plugin_display_name(plugin_name: str) -> str:
-    return " ".join(part.capitalize() for part in plugin_name.split("-"))
-
-
-def default_owner_name(plugin_name: str) -> str:
-    return f"{plugin_display_name(plugin_name)} Maintainers"
-
-
-def default_repository_url(plugin_name: str) -> str:
-    return f"{DEFAULT_AUTHOR_URL}/{plugin_name}"
-
-
-def default_homepage_url(plugin_name: str) -> str:
-    return f"https://example.com/plugins/{plugin_name}"
-
-
-def build_plugin_json(
-    plugin_name: str,
-    *,
-    description: str | None,
-    owner: str | None,
-    review_cadence: str | None,
-    last_reviewed: str,
-    lifecycle_state: str,
-    maturity: str,
-    category: str,
-    with_skills: bool,
-    with_hooks: bool,
-    with_mcp: bool,
-    with_apps: bool,
-) -> dict[str, Any]:
-    legacy_mode = bool(description and owner and review_cadence)
-    resolved_owner = owner or default_owner_name(plugin_name)
-    resolved_description = description or f"Plugin scaffold for {plugin_display_name(plugin_name)} workflows."
-    resolved_review_cadence = review_cadence or DEFAULT_REVIEW_CADENCE
-
-    display_name = plugin_display_name(plugin_name)
-    payload: dict[str, Any] = {
-        "schema_version": 1,
+def build_plugin_json(plugin_name: str) -> dict:
+    return {
         "name": plugin_name,
-        "version": DEFAULT_VERSION,
-        "description": resolved_description,
+        "version": "[TODO: 1.2.0]",
+        "description": "[TODO: Brief plugin description]",
         "author": {
-            "name": resolved_owner,
-            "email": DEFAULT_AUTHOR_EMAIL,
-            "url": DEFAULT_AUTHOR_URL,
+            "name": "[TODO: Author Name]",
+            "email": "[TODO: author@example.com]",
+            "url": "[TODO: https://github.com/author]",
         },
-        "homepage": default_homepage_url(plugin_name),
-        "repository": default_repository_url(plugin_name),
-        "license": DEFAULT_LICENSE,
-        "keywords": ["plugin", plugin_name, "codex"],
-        "governance": {
-            "lifecycle_state": lifecycle_state,
-            "maturity": maturity,
-            "owner": resolved_owner,
-            "review_cadence": resolved_review_cadence,
-            "last_reviewed": last_reviewed,
-            "metadata_source": "plugin_manifest",
-        },
+        "homepage": "[TODO: https://docs.example.com/plugin]",
+        "repository": "[TODO: https://github.com/author/plugin]",
+        "license": "[TODO: MIT]",
+        "keywords": ["[TODO: keyword1]", "[TODO: keyword2]"],
+        "skills": "[TODO: ./skills/]",
+        "hooks": "[TODO: ./hooks.json]",
+        "mcpServers": "[TODO: ./.mcp.json]",
+        "apps": "[TODO: ./.app.json]",
         "interface": {
-            "displayName": display_name,
-            "shortDescription": resolved_description,
-            "longDescription": (
-                f"Codex plugin scaffold for {display_name} with governance metadata, "
-                "optional runtime surfaces, and marketplace-ready structure."
-            ),
-            "developerName": resolved_owner,
-            "category": category,
-            "capabilities": ["Interactive", "Read"],
+            "displayName": "[TODO: Plugin Display Name]",
+            "shortDescription": "[TODO: Short description for subtitle]",
+            "longDescription": "[TODO: Long description for details page]",
+            "developerName": "[TODO: OpenAI]",
+            "category": "[TODO: Productivity]",
+            "capabilities": ["[TODO: Interactive]", "[TODO: Write]"],
+            "websiteURL": "[TODO: https://openai.com/]",
+            "privacyPolicyURL": "[TODO: https://openai.com/policies/row-privacy-policy/]",
+            "termsOfServiceURL": "[TODO: https://openai.com/policies/row-terms-of-use/]",
             "defaultPrompt": [
-                f"Help me run {display_name} workflows and report validated outcomes."
+                "[TODO: Summarize my inbox and draft replies for me.]",
+                "[TODO: Find open bugs and turn them into tickets.]",
+                "[TODO: Review today's meetings and flag gaps.]",
             ],
-            "brandColor": "#3B82F6",
+            "brandColor": "[TODO: #3B82F6]",
+            "composerIcon": "[TODO: ./assets/icon.png]",
+            "logo": "[TODO: ./assets/logo.png]",
+            "screenshots": [
+                "[TODO: ./assets/screenshot1.png]",
+                "[TODO: ./assets/screenshot2.png]",
+                "[TODO: ./assets/screenshot3.png]",
+            ],
         },
     }
-    if not legacy_mode:
-        payload["interface"].update(
-            {
-                "websiteURL": default_homepage_url(plugin_name),
-                "privacyPolicyURL": "https://example.com/privacy",
-                "termsOfServiceURL": "https://example.com/terms",
-            }
-        )
-    if with_skills:
-        payload["skills"] = "./skills/"
-    if with_hooks:
-        payload["hooks"] = "./hooks.json"
-    if with_mcp:
-        payload["mcpServers"] = "./.mcp.json"
-    if with_apps:
-        payload["apps"] = "./.app.json"
-    return payload
 
 
 def build_marketplace_entry(
@@ -171,7 +112,7 @@ def load_json(path: Path) -> dict[str, Any]:
 
 def build_default_marketplace() -> dict[str, Any]:
     return {
-        "name": "local-marketplace",
+        "name": "[TODO: marketplace-name]",
         "interface": {
             "displayName": DEFAULT_MARKETPLACE_DISPLAY_NAME,
         },
@@ -233,7 +174,7 @@ def write_json(path: Path, data: dict, force: bool) -> None:
         handle.write("\n")
 
 
-def create_json_file(path: Path, payload: dict, force: bool) -> None:
+def create_stub_file(path: Path, payload: dict, force: bool) -> None:
     if path.exists() and not force:
         return
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -244,7 +185,7 @@ def create_json_file(path: Path, payload: dict, force: bool) -> None:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Create a plugin skeleton with a complete plugin.json manifest."
+        description="Create a plugin skeleton with placeholder plugin.json."
     )
     parser.add_argument("plugin_name")
     parser.add_argument(
@@ -259,10 +200,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--with-hooks", action="store_true", help="Create hooks/ directory")
     parser.add_argument("--with-scripts", action="store_true", help="Create scripts/ directory")
     parser.add_argument("--with-assets", action="store_true", help="Create assets/ directory")
-    parser.add_argument("--with-mcp", action="store_true", help="Create .mcp.json scaffold")
-    parser.add_argument("--with-apps", action="store_true", help="Create .app.json scaffold")
-    parser.add_argument("--with-references", action="store_true", help="Create references/ directory")
-    parser.add_argument("--with-workflows", action="store_true", help="Create workflows/ directory")
+    parser.add_argument("--with-mcp", action="store_true", help="Create .mcp.json placeholder")
+    parser.add_argument("--with-apps", action="store_true", help="Create .app.json placeholder")
     parser.add_argument(
         "--with-marketplace",
         action="store_true",
@@ -297,61 +236,8 @@ def parse_args() -> argparse.Namespace:
         default=DEFAULT_CATEGORY,
         help="Marketplace category value",
     )
-    parser.add_argument(
-        "--description",
-        help="Legacy lifecycle-aware scaffold description. Use with --owner and --review-cadence.",
-    )
-    parser.add_argument(
-        "--owner",
-        help="Legacy lifecycle-aware scaffold owner. Use with --description and --review-cadence.",
-    )
-    parser.add_argument(
-        "--review-cadence",
-        help="Legacy lifecycle-aware scaffold cadence. Use with --description and --owner.",
-    )
-    parser.add_argument(
-        "--last-reviewed",
-        default=date.today().isoformat(),
-        help="ISO date for lifecycle review in legacy mode (defaults to today)",
-    )
-    parser.add_argument(
-        "--lifecycle-state",
-        default=DEFAULT_LIFECYCLE_STATE,
-        choices=sorted(VALID_LIFECYCLE_STATES),
-        help="Initial lifecycle state in legacy mode",
-    )
-    parser.add_argument(
-        "--maturity",
-        default=DEFAULT_MATURITY,
-        choices=sorted(VALID_MATURITY_LEVELS),
-        help="Initial maturity level in legacy mode",
-    )
     parser.add_argument("--force", action="store_true", help="Overwrite existing files")
-    args = parser.parse_args()
-
-    has_description = bool(args.description)
-    has_owner = bool(args.owner)
-    has_review_cadence = bool(args.review_cadence)
-    legacy_requested = has_description or has_owner or has_review_cadence
-
-    if (has_description or has_owner) and not has_review_cadence:
-        parser.error("--review-cadence is required when --description or --owner is provided.")
-    if has_review_cadence and not has_description:
-        parser.error("--description is required when --review-cadence is provided.")
-    if has_review_cadence and not has_owner:
-        parser.error("--owner is required when --review-cadence is provided.")
-
-    if not legacy_requested and (
-        args.last_reviewed != date.today().isoformat()
-        or args.lifecycle_state != DEFAULT_LIFECYCLE_STATE
-        or args.maturity != DEFAULT_MATURITY
-    ):
-        parser.error(
-            "--last-reviewed, --lifecycle-state, and --maturity require legacy mode "
-            "(--description, --owner, and --review-cadence)."
-        )
-
-    return args
+    return parser.parse_args()
 
 
 def main() -> None:
@@ -366,46 +252,27 @@ def main() -> None:
     plugin_root.mkdir(parents=True, exist_ok=True)
 
     plugin_json_path = plugin_root / ".codex-plugin" / "plugin.json"
-    write_json(
-        plugin_json_path,
-        build_plugin_json(
-            plugin_name,
-            description=args.description,
-            owner=args.owner,
-            review_cadence=args.review_cadence,
-            last_reviewed=args.last_reviewed,
-            lifecycle_state=args.lifecycle_state,
-            maturity=args.maturity,
-            category=args.category,
-            with_skills=args.with_skills,
-            with_hooks=args.with_hooks,
-            with_mcp=args.with_mcp,
-            with_apps=args.with_apps,
-        ),
-        args.force,
-    )
+    write_json(plugin_json_path, build_plugin_json(plugin_name), args.force)
 
     optional_directories = {
         "skills": args.with_skills,
         "hooks": args.with_hooks,
         "scripts": args.with_scripts,
         "assets": args.with_assets,
-        "references": args.with_references,
-        "workflows": args.with_workflows,
     }
     for folder, enabled in optional_directories.items():
         if enabled:
             (plugin_root / folder).mkdir(parents=True, exist_ok=True)
 
     if args.with_mcp:
-        create_json_file(
+        create_stub_file(
             plugin_root / ".mcp.json",
             {"mcpServers": {}},
             args.force,
         )
 
     if args.with_apps:
-        create_json_file(
+        create_stub_file(
             plugin_root / ".app.json",
             {
                 "apps": {},
@@ -413,7 +280,6 @@ def main() -> None:
             args.force,
         )
 
-    marketplace_path: Path | None = None
     if args.with_marketplace:
         marketplace_path = Path(args.marketplace_path).expanduser().resolve()
         update_marketplace_json(
@@ -427,7 +293,7 @@ def main() -> None:
 
     print(f"Created plugin scaffold: {plugin_root}")
     print(f"plugin manifest: {plugin_json_path}")
-    if marketplace_path is not None:
+    if args.with_marketplace:
         print(f"marketplace manifest: {marketplace_path}")
 
 

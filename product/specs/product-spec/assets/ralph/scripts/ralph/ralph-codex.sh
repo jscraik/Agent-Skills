@@ -30,7 +30,7 @@ MODEL="${RALPH_MODEL:-gpt-5-codex}"
 
 # Codex safety knobs
 SANDBOX="${RALPH_SANDBOX:-workspace-write}"        # read-only | workspace-write | danger-full-access
-ASK_APPROVAL="${RALPH_ASK_APPROVAL:-never}"        # untrusted | on-failure | on-request | never
+ASK_APPROVAL="${RALPH_ASK_APPROVAL:-never}"        # untrusted | on-request | never
 ENABLE_SEARCH="${RALPH_ENABLE_SEARCH:-false}"      # true | false
 
 # Task sources
@@ -116,7 +116,7 @@ Options:
   -n, --iterations N            Max iterations (default: 20)
   -m, --model MODEL             Codex model (default: gpt-5-codex)
   -s, --sandbox POLICY          read-only|workspace-write|danger-full-access
-  -a, --ask-for-approval MODE   untrusted|on-failure|on-request|never
+  -a, --ask-for-approval MODE   untrusted|on-request|never (legacy flag; ignored if unsupported)
       --search BOOL             true|false (enable web search tool in Codex)
 
 Task / state:
@@ -826,7 +826,10 @@ EOF
   fi
 
   # Run codex exec
-  codex_args=(exec --cd "$WORKSPACE" --model "$MODEL" --sandbox "$SANDBOX" --ask-for-approval "$ASK_APPROVAL" --color never --output-last-message "$last_msg_file")
+  codex_args=(exec --cd "$WORKSPACE" --model "$MODEL" --sandbox "$SANDBOX" --color never --output-last-message "$last_msg_file")
+  if codex_supports_flag "--ask-for-approval"; then
+    codex_args+=(--ask-for-approval "$ASK_APPROVAL")
+  fi
 
   if [[ "$ENABLE_SEARCH" == "true" ]]; then
     codex_args+=(--search true)

@@ -13,8 +13,7 @@ Running `scripts/sync_skills.sh` automatically creates/updates:
 | **Claude Code** | `~/.claude/skills` | ✅ auto-synced |
 | **OpenAI Agents/Codex** | `~/.agents/skills` | ✅ auto-synced |
 | **OpenAI Codex (compat)** | `~/.codex/skills` | ✅ auto-synced |
-| **Antigravity** | `~/.gemini/antigravity/skills` | ✅ auto-synced |
-| **Antigravity (alt)** | `~/.gemini/skills` | ✅ auto-synced |
+| **Antigravity (flat)** | `~/.gemini/antigravity/skills` | ✅ auto-synced (copy) |
 | **Antigravity (legacy)** | `~/.antigravity/skills` | ✅ auto-synced |
 | **Antigravity path file** | `~/.gemini/antigravity/skills.txt` | ✅ auto-synced |
 

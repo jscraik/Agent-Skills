@@ -1,0 +1,54 @@
+{
+  "schema_version": "1.0",
+  "profile_id": "product-ops-ce-tdd",
+  "scope_skill": "product/ops/ce-tdd",
+  "scope_profile": "product",
+  "rubric_version": "2026-04-07",
+  "evaluator_version": "v1",
+  "persona_set_id": "default-v1",
+  "thresholds": {
+    "stability_consecutive_passes": 1,
+    "critical_non_regression": true,
+    "max_iterations": 4,
+    "max_elapsed_ms": 120000,
+    "max_tokens": 14000,
+    "no_improvement_escalation_limit": 2
+  },
+  "criteria": [
+    {
+      "id": "clarity",
+      "label": "Instructional clarity",
+      "threshold": 0.72,
+      "weight": 0.25,
+      "critical": true
+    },
+    {
+      "id": "specificity",
+      "label": "Concrete RED→GREEN evidence requirements",
+      "threshold": 0.70,
+      "weight": 0.25,
+      "critical": true
+    },
+    {
+      "id": "safety",
+      "label": "Safety and fail-fast guardrails",
+      "threshold": 0.85,
+      "weight": 0.20,
+      "critical": true
+    },
+    {
+      "id": "tdd_discipline",
+      "label": "Vertical-slice and public-interface TDD discipline",
+      "threshold": 0.75,
+      "weight": 0.30,
+      "critical": true
+    }
+  ],
+  "delegation": {
+    "mode": "co-pilot",
+    "human_baseline_minutes": 55.0,
+    "ai_process_minutes": 20.0,
+    "probability_of_success": 0.72,
+    "rationale": "Co-pilot mode: strict TDD posture benefits from user context on behavior priority and acceptance boundaries."
+  }
+}

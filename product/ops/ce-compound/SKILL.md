@@ -21,7 +21,6 @@ This workflow produces workflow coordination and durable learning artifacts. It 
 - [Failure mode](#failure-mode)
 - [Constraints](#constraints)
 - [Acceptance criteria](#acceptance-criteria)
-- [Philosophy](#philosophy)
 - [Interaction Method](#interaction-method)
 - [Core Principles](#core-principles)
 - [Workflow](#workflow)
@@ -31,7 +30,6 @@ This workflow produces workflow coordination and durable learning artifacts. It 
 - [Handoff guidance](#handoff-guidance)
 - [Validation](#validation)
 - [Anti-patterns](#anti-patterns)
-- [Encouraging variation](#encouraging-variation)
 - [Examples](#examples)
 - [References](#references)
 - [See Also](#see-also)
@@ -51,13 +49,14 @@ Ask one question at a time. Prefer concise single-select choices when natural op
 3. **Evidence before external guidance** - Prefer repository artifacts, prior learnings, and linked CE documents.
 4. **One current stage, one next step** - Keep the user moving with clear status and focused progression.
 5. **Knowledge capture is part of the workflow** - Durable learnings are not an afterthought.
+Read when: you need April 2026 standards rationale, operating philosophy, variation guidance, or discoverability-check policy -> `references/style-and-operating-guidance.md`.
 
 ## Working agreement
 - Treat `ce-compound` as the compound-engineering orchestration layer, not a generic implementation or review lane.
 - Keep two valid entry shapes explicit:
-  - lifecycle orchestration across ideate -> brainstorm -> spec -> deepen-spec -> technical review -> plan -> deepen-plan -> technical review -> work (with optional tdd posture) -> review -> compound
+  - lifecycle orchestration across brainstorm -> spec -> deepen-spec -> technical review -> plan -> deepen-plan -> technical review -> work -> review -> compound
   - direct solved-problem capture when implementation is already complete and the goal is durable `docs/solutions/` knowledge
-- Preserve stage boundaries. Use `ce-ideate`, `ce-brainstorm`, `ce-spec`, `ce-plan`, `ce-tdd`, `ce-work`, `ce-review`, and `ce-technical-review` for their actual jobs instead of collapsing everything into one prompt body.
+- Preserve stage boundaries. Use `ce-brainstorm`, `ce-spec`, `ce-plan`, `ce-work`, `ce-review`, and `ce-technical-review` for their actual jobs instead of collapsing everything into one prompt body.
 - Prefer repository artifacts, prior learnings, and linked CE documents before external guidance.
 - Keep the user moving with one explicit current stage, one next command, and one coherent status summary.
 
@@ -136,20 +135,6 @@ If an upstream artifact gate fails in lifecycle mode, keep the workflow at the e
 - UI-impacting lifecycle work inserts the required UI checkpoints before implementation
 - stage boundaries remain intact: orchestration is not treated as implementation, and learning capture is not treated as generic review
 - if any required check fails, stop at the first failed gate and do not proceed until it is fixed
-
-## Standards snapshot (April 2026)
-- Keep the skill scoped to one reusable operational job and make the description say what it does and when to use it.
-- Prefer explicit routing, realistic positive/negative examples, and eval-backed trigger coverage over hidden prompt assumptions.
-- Use repository truth, prior artifacts, and documented learnings before broad external research.
-- Keep one explicit current stage in focus and keep plan or stage state synchronized rather than letting the workflow drift.
-- Preserve legacy breadth as an explicit mode when it is genuinely valuable, instead of making maximal fan-out the default.
-
-## Philosophy
-- `ce-compound` is the workflow spine: it decides where the user is, what is already trustworthy, and what comes next.
-- The workflow should feel lighter than the old prompt pack, not weaker.
-- Durable learnings are part of the workflow, not an afterthought.
-- Each completed stage should reduce uncertainty for the next one.
-- Knowledge compounds only when the final learning artifact is specific, searchable, and faithful to the verified fix.
 
 ## Workflow
 ### Phase 0: Determine compound mode
@@ -246,16 +231,7 @@ For the canonical solved-problem workflow, categories, refresh rules, success ou
 ## Handoff guidance
 After lifecycle orchestration, hand off to exactly one next CE stage unless the user explicitly asks for alternatives.
 
-Typical next steps:
-- `ce-ideate`
-- `ce-brainstorm`
-- `ce-spec`
-- `ce-deepen-spec`
-- `ce-technical-review`
-- `ce-plan`
-- `ce-deepen-plan`
-- `ce-work` (with optional `ce-tdd` posture; `ce-tdd` is not a standalone lifecycle stage)
-- `ce-review`
+Use the canonical downstream stage list and stage-exit routing rules in `references/lifecycle-modes.md`.
 
 After learning capture:
 - stop with the new `docs/solutions/` artifact when the documentation is sufficient
@@ -265,10 +241,7 @@ After learning capture:
 
 ## Project Brain Integration
 
-When `.harness/` exists, dual-write to Project Brain per `references/project-brain-integration.md`:
-- Write to `docs/solutions/` AND `.harness/knowledge/{domain}/`
-- Sync to Local Memory MCP
-- Promotion: 1st → knowledge; 3rd → rules
+When `.harness/` exists, use the dual-write and promotion workflow in `references/project-brain-integration.md`.
 
 ## Validation
 - fail fast: stop at the first failed gate, fix or report it, rerun that gate, then continue
@@ -290,34 +263,21 @@ See `references/learning-capture.md` for detailed workflow pitfalls and correct 
 - using solved-problem capture to document unverified or still-changing fixes
 - broadening `ce-compound-refresh` into a repo-wide sweep without evidence
 - allowing helper agents to write intermediate files during learning capture full mode
-- creating a second solution doc when an existing one already covers the same problem, root cause, and solution
+- creating duplicate solution docs when high-overlap evidence supports refreshing an existing artifact
 - collapsing lifecycle orchestration and knowledge capture into vague generic advice
 - fabricating stage evidence, learnings, cross-references, or current-doc claims
-- **Skipping the Compound Step**: Plan→Work→Review but not capturing learnings
-- **Lava Flow**: Accumulated dead code nobody dares remove
-- **Documentation Decay**: Docs become outdated and untrusted
-- **Project Brain Miss**: Not syncing to .harness/ when it exists
-
-See `references/ce-anti-patterns.md` for full catalog.
-See `references/learning-capture.md` for Project Brain integration.
-
-## Encouraging variation
-IMPORTANT: Outputs should vary based on whether the user needs orchestration, resume guidance, or direct learning capture.
-- Adapt the stage summary to the actual artifact state instead of reciting the full lifecycle every time.
-- Adapt the learning-capture depth to the problem's complexity and the selected `full` or `compact-safe` mode.
-- Adapt refresh guidance to the strength of the stale-doc evidence; do not recommend maintenance just because related docs exist.
-- No two runs should look the same unless the artifact state, risk, and learning-capture evidence are effectively identical.
+Read when: you need the full anti-pattern catalog and remedies -> `references/ce-anti-patterns.md`.
 
 ## Auto-Invoke and Success Output
 
 Auto-invoke triggers and success output format are documented in `references/learning-capture.md`.
 
 ## Examples
-- "I have a brainstorm doc. What's the first real CE stage?"
-- "We have brainstorm, spec, and draft plan. Resume from earliest weak stage."
-- "Production issue is fixed. Capture it in `docs/solutions/` while fresh."
-- "Session is tight—write lightweight solution doc, skip fan-out."
-- "Same bug again. Update existing doc instead of creating duplicate."
+- User says: "Run `ce-compound` from `docs/brainstorms/2026-04-06-queue-retry-requirements.md` and tell me the first incomplete CE stage."
+- User asks: "We already have brainstorm, spec, and draft plan docs; resume from the earliest weak stage and give me one next command."
+- User says: "The production auth bug is fixed; capture the learning in `docs/solutions/` while context is fresh."
+- User asks: "Use `compact-safe` mode this turn because context is tight, then tell me if we should run `ce-compound-refresh` next."
+- User says: "We solved this retry bug again; refresh the existing solution doc instead of creating a duplicate."
 
 ## References
 - Contract: `references/contract.yaml`
@@ -325,6 +285,8 @@ Auto-invoke triggers and success output format are documented in `references/lea
 - Prompt parity map: `references/source-parity.md`
 - Lifecycle stages and gates: `references/lifecycle-modes.md`
 - Solved-problem capture workflow: `references/learning-capture.md`
+- Style and operating guidance: `references/style-and-operating-guidance.md`
+- Anti-pattern catalog: `references/ce-anti-patterns.md`
 - Canonical frontmatter schema: `references/schema.yaml`
 - YAML schema quick reference: `references/yaml-schema.md`
 - Resolution templates by track: `assets/resolution-template.md`
@@ -334,18 +296,18 @@ Auto-invoke triggers and success output format are documented in `references/lea
 - Imported critical-pattern template: `references/compound-docs-critical-pattern-template.md`
 
 ## See Also
+
 | Skill | When to use together |
 |---|---|
 | [[compound-engineering-router]] | Route selection before entering a stage |
-| [[ce-ideate]] | Ranked ideas before brainstorming |
 | [[ce-brainstorm]] | WHAT/WHY clarity first |
 | [[ce-plan]] | Implementation planning |
-| [[ce-tdd]] | Test-first execution posture |
 | [[ce-work]] | Ready for execution |
 | [[ce-review]] | Merge/readiness review |
 | Project Brain | When `.harness/` exists for knowledge capture |
 
 **Topic map:** [[product-ops]]
+
 ## Decision feedback protocol
 <!-- decision-feedback-protocol:v2 -->
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.

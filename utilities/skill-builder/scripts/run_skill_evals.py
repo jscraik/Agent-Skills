@@ -916,7 +916,7 @@ def run_codex_exec(
         output_last_message_path (Path): File path where the CLI's "last message" output will be written.
         output_schema_path (Optional[Path]): Path to an output schema file to pass via `--output-schema` (if any).
         sandbox (str): Sandbox name to pass via `--sandbox`.
-        ask_for_approval (Optional[str]): Value for `--ask-for-approval` when supported by the Codex CLI.
+        ask_for_approval (Optional[str]): Legacy value for `--ask-for-approval` when supported by the Codex CLI.
         model (Optional[str]): Model name to pass via `--model`.
         profile (Optional[str]): Active Codex profile name to pass via `--profile`.
         codex_home (Optional[Path]): Directory to set as `CODEX_HOME` in the subprocess environment.
@@ -947,12 +947,7 @@ def run_codex_exec(
 
         if ask_for_approval:
             supports = _codex_supports_exec_flag(codex_bin, "--ask-for-approval")
-            if supports is False:
-                warnings.append(
-                    "Codex CLI does not support --ask-for-approval; running without it. "
-                    "Upgrade Codex CLI if you need this flag."
-                )
-            else:
+            if supports is not False:
                 cmd.extend(["--ask-for-approval", ask_for_approval])
 
         cmd.extend([
@@ -1584,8 +1579,11 @@ def build_arg_parser() -> argparse.ArgumentParser:
     p.add_argument(
         "--ask-for-approval",
         default=None,
-        choices=["untrusted", "on-failure", "on-request", "never"],
-        help="Codex approval mode (optional; older codex versions may not support this flag).",
+        choices=["untrusted", "on-request", "never"],
+        help=(
+            "Legacy Codex approval mode flag. Prefer configuring approval policy via profile/config; "
+            "ignored when the active Codex CLI does not support --ask-for-approval."
+        ),
     )
     p.add_argument(
         "--timeout-sec",

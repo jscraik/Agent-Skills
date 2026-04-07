@@ -8,7 +8,7 @@
 
 ## Source inputs
 This package was synthesized from:
-- `https://github.com/EveryInc/compound-engineering-plugin/tree/847ce3f156a5cdf75667d9802e95d68e6b3c53a4/plugins/compound-engineering/skills/ce-review`
+- `https://github.com/EveryInc/compound-engineering-plugin/tree/0ae91dcc298721e5b2c4ab6d1fc6f76a13b6f67c/plugins/compound-engineering/skills/ce-review`
 - `config/codex/prompts/workflow-review.md`
 - the longer legacy `ce:review` prompt that emphasized exhaustive multi-agent review, serial/parallel modes, conditional migration specialists, protected-artifact filtering, todo capture, and optional end-to-end follow-up
 
@@ -21,7 +21,7 @@ This package was synthesized from:
 - always-on `agent-native-reviewer` and `learnings-researcher`
 - conditional exact-role reviewer fanout by language and risk
 - protected-artifact cleanup filtering
-- severity ranking using `P1 | P2 | P3`
+- severity ranking using `P0 | P1 | P2 | P3`
 - merge recommendation for code review and readiness recommendation for artifact review
 - optional todo-follow-up after synthesis using the supplied `file-todos` naming and template rules
 - `mode:autofix` residual findings landing as ready-to-execute todo work instead of fresh pending triage
@@ -39,6 +39,9 @@ This package was synthesized from:
 - aligned external-doc usage to repo-first review, official OpenAI docs first for OpenAI-product behavior, and Context7 only when current framework/library behavior needs confirmation
 - modernized institutional-knowledge lookup to prefer `.harness/memory/LEARNINGS.md`, then compatibility learnings files, then targeted `docs/solutions/`
 - kept the stakeholder/scenario deep-dive as a high-risk escalation lane instead of forcing every review into maximal output
+- relocated standards and style-layer guidance into `references/style-and-operating-guidance.md` so route-critical behavior stays concise while preserving decision-quality context
+- restored an explicit anti-pattern catalog in `references/ce-anti-patterns.md` so SKILL references remain resolvable
+- added deterministic broad-review role mapping in `references/sub-agent-map.md` and aligned risk lanes to explicit specialist agents (`security-reviewer`, `performance-reviewer`, `reliability-reviewer`, `api-contract-reviewer`)
 
 ## Known constraints
 - The legacy prompt assumed more aggressive fix-oriented follow-up automation than this package makes mandatory. In this skill, write-capable remediation remains a follow-up stage rather than a default part of review mode.

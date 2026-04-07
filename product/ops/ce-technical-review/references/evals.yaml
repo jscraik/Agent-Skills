@@ -13,7 +13,7 @@ cases:
       - type: skill_selected
         expected_skill: "ce-technical-review"
       - type: regex
-        value: "(?i)(code-diff-review|Critical|Important|Nice-to-have)"
+        value: "(?i)(code-diff-review|P0|P1|P2|P3|Critical|Important|Nice-to-have)"
 
   - id: current-branch-diff
     name: current branch diff
@@ -37,7 +37,7 @@ cases:
       - type: skill_selected
         expected_skill: "ce-technical-review"
       - type: regex
-        value: "(?i)(Rails|reviewer|merge|Critical|Important)"
+        value: "(?i)(Rails|reviewer|merge|P0|P1|Critical|Important)"
 
   - id: spec-readiness-score
     name: spec readiness score
@@ -73,7 +73,7 @@ cases:
       - type: skill_selected
         expected_skill: "ce-technical-review"
       - type: regex
-        value: "(?i)(data integrity|performance|migration|Critical|Important)"
+        value: "(?i)(data integrity|performance|migration|P0|P1|Critical|Important)"
 
   - id: no-critical-findings
     name: no critical findings output
@@ -85,7 +85,7 @@ cases:
       - type: skill_selected
         expected_skill: "ce-technical-review"
       - type: regex
-        value: "(?i)(No critical technical findings found|Critical|Important)"
+        value: "(?i)(No critical technical findings found|P0|P1|Critical|Important)"
 
   - id: document-strengthening-not-review
     name: document strengthening not review

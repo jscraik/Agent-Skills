@@ -19,7 +19,7 @@ inputs:
 
 outputs:
   - deterministic pass/fail check summary from guard script
-  - repaired symlinks and normalized alias source line when repair mode is used
+  - repaired symlinks, normalized alias source line, and canonical wrapper hardening when repair mode is used
   - explicit remaining blocker if auth still fails after routing checks pass
 
 non_goals:

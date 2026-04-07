@@ -117,7 +117,7 @@ Notes:
   - `--scorecard-out /absolute/or/relative/path.json`
 - Write JUnit XML for CI test ingestion with:
   - `--junit-out /absolute/or/relative/path.xml`
-- In CI, prefer `--ask-for-approval never` to avoid prompts.
+- In CI, set approval behavior in `~/.codex/config.toml` or a profile; avoid passing legacy `--ask-for-approval` unless your Codex CLI explicitly supports it.
 - Keep `--sandbox read-only` unless the eval requires edits.
 - If Codex evals time out during MCP startup, increase the subprocess timeout via:
   - `CODEX_EVAL_TIMEOUT_SEC=600` (or higher)

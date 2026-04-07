@@ -135,7 +135,7 @@ def audit_skill(repo_root: Path, skill_path: str, level: str = "compat") -> Call
             return result
 
         # Family benchmarks validation
-        family_cmd = [python, "scripts/validate_skill_authoring_family_benchmarks.py", skill_path]
+        family_cmd = [python, "scripts/validate_skill_authoring_family_benchmarks.py", "--skill", skill_path]
         family_proc = subprocess.run(family_cmd, cwd=str(repo_root), capture_output=True, text=True)
         result.data["family_benchmarks"] = {"exit_code": family_proc.returncode, "stdout": family_proc.stdout, "stderr": family_proc.stderr}
         if family_proc.returncode != 0:

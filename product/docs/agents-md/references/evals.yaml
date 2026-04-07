@@ -172,7 +172,7 @@ cases:
     prompt: "What exact command should I run from repo root to verify which instructions Codex is using?"
     acceptance:
       - type: contains
-        value: "codex --ask-for-approval never \"Summarize the current instructions.\""
+        value: "codex \"Summarize the current instructions.\""
 
   - id: verify-active-instructions-nested
     name: verify-active-instructions-nested
@@ -183,7 +183,7 @@ cases:
     prompt: "What exact command should I run from a subdirectory to confirm a nested override is active?"
     acceptance:
       - type: contains
-        value: "codex --cd <subdir> --ask-for-approval never \"Show which instruction files are active.\""
+        value: "codex --cd <subdir> \"Show which instruction files are active.\""
 
   - id: empty-file-ignored-guidance
     name: empty-file-ignored-guidance

@@ -183,6 +183,7 @@ Identify the review target and gather architectural context.
 - Map the service boundary: what does this service own, and what does it depend on?
 - Identify all integration points (databases, caches, queues, external APIs, internal services)
 - Read any linked plan/spec reliability sections as the adherence baseline
+- For multi-surface targets, select reviewer lanes from `references/sub-agent-map.md` before fan-out
 
 ### Phase 1: Map failure domains
 For each integration point and internal component, evaluate across the review dimensions in `references/resilience-patterns.md`:
@@ -312,17 +313,18 @@ IMPORTANT: Outputs should vary based on the architecture, dependency profile, an
 - Do not apply a cookie-cutter resilience checklist when context-specific analysis is safer.
 
 ## Examples
-- "Review this new payment service for reliability risks before we go live. I care most about what happens when Stripe is down and whether we can lose transactions."
-- "Do a reliability review of the current branch. The change adds a new external API dependency and I want to know our failure story."
-- "Check whether our circuit breaker coverage is complete for the checkout flow."
-- "Review `docs/specs/2026-04-01-event-pipeline-spec.md` for reliability gaps before I plan implementation."
-- "What happens to this service under sustained load? Review the resource exhaustion and back-pressure story."
-- "We have three new microservices. Review the dependency chain for cascading failure risk."
+- User says: "Review this new payment service for reliability risks before go-live. I care most about Stripe outage behavior and transaction durability."
+- User says: "Run a reliability review on my current branch; we just added an external tax API and I need the failure story."
+- User says: "Check whether circuit breaker and timeout coverage is complete for the checkout dependency chain."
+- User says: "Review `docs/specs/2026-04-01-event-pipeline-spec.md` for reliability gaps before I move to planning."
+- User says: "Under sustained load, what fails first in this service? Focus on pool exhaustion and back-pressure."
+- User says: "We split into three microservices; map cascading-failure risk across the dependency chain."
 
 ## References
 - [Resilience Patterns](./references/resilience-patterns.md)
 - [Contract](./references/contract.yaml)
 - [Evals](./references/evals.yaml)
+- [Sub-Agent Map](./references/sub-agent-map.md)
 
 ## See Also
 

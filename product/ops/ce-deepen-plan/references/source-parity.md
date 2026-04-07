@@ -16,7 +16,7 @@ This document maps the original plan-deepening prompts to `product/ops/ce-deepen
 - `/Users/jamiecraik/dev/config/codex/prompts/deepen-plan.md`
 - user-provided legacy `deepen-plan` prompt body with broad skill/agent discovery
 - user-provided `deepen-plan-beta` prompt body with selective, risk-weighted deepening
-- lightweight review doctrine imported from upstream `document-review`
+- lightweight review doctrine imported from upstream `document-review` (`EveryInc/compound-engineering-plugin` commit `0ae91dcc298721e5b2c4ab6d1fc6f76a13b6f67c`)
 - migration target: `/Users/jamiecraik/dev/Agent-Skills/product/ops/ce-deepen-plan/`
 
 ## Parity mapping

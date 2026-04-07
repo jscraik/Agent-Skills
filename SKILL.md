@@ -27,7 +27,7 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - [Utilities — Codex Plugin Builder — Fixtures — Arscontexta Codex — Skills](#utilities-codex-plugin-builder-fixtures-arscontexta-codex-skills)
 
 ## Summary
-- `total_skills`: 126
+- `total_skills`: 125
 - `catalog_source`: repository skill scan
 
 ## Catalog
@@ -164,9 +164,9 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 ## Skills System
 
 - `openai-docs` — Use when the user asks how to build with OpenAI products or APIs and needs up-to-date official documentation with citations, help choosing the latest model for a use case, or explicit GPT-5.4 upgrade and prompt-upgrade guidance; prioritize OpenAI docs MCP tools, use bundled references only as helper context, and restrict any fallback browsing to official OpenAI domains.
-- `plugin-creator` — Scaffold plugin skeletons and marketplace entries
-- `skill-creator` — Create first-pass skill scaffolds with clear handoff
-- `skill-installer` — Install validated skills with provenance and rollback safety
+- `plugin-creator` — Create and scaffold plugin directories for Codex with a required `.codex-plugin/plugin.json`, optional plugin folders/files, and baseline placeholders you can edit before publishing or testing. Use when Codex needs to create a new local plugin, add optional plugin structure, or generate or update repo-root `.agents/plugins/marketplace.json` entries for plugin ordering and availability metadata.
+- `skill-creator` — Create or update a skill
+- `skill-installer` — Install curated skills from openai/skills or other repos
 
 ## Utilities
 
@@ -216,3 +216,4 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 ## Utilities — Codex Plugin Builder — Fixtures — Arscontexta Codex — Skills
 
 - `arscontexta` — Analyze Ars Contexta vault state in Codex and recommend setup, health, and next-command actions. Use this skill when users ask for Ars Contexta help, routing, or health triage.
+

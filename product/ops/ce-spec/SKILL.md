@@ -332,10 +332,10 @@ IMPORTANT: Outputs should vary based on spec mode, risk, system complexity, and 
 - No two specs should read the same unless the requirements, constraints, and source artifacts are effectively identical.
 
 ## Examples
-- "Turn this brainstorm into an implementation-grade spec before we plan it."
-- "Revise this existing spec so it is explicit about failures, observability, and validation."
-- "This feature needs a UI contract before planning; write the UI spec."
-- "I need a spec that is precise enough for `ce-plan` to use without inventing behavior."
+- "Turn `docs/brainstorms/2026-04-07-checkout-retry-requirements.md` into an implementation-grade spec with retry caps, idempotency keys, and failure telemetry before `ce-plan`."
+- "Revise `docs/specs/2026-03-21-session-rotation-spec.md` so token expiry behavior, rollback conditions, and observability events are explicit."
+- "This billing settings feature needs a companion UI contract before planning; write the UI spec with loading, empty, and error states plus `VAC` IDs."
+- "Convert this duplicate-webhook bug report into a spec with acceptance IDs and concrete validation steps that `ce-plan` can execute without inventing behavior."
 ## References
 - Contract: `references/contract.yaml`
 - Evals: `references/evals.yaml`

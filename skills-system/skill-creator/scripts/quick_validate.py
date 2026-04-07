@@ -13,17 +13,7 @@ MAX_SKILL_NAME_LENGTH = 64
 
 
 def validate_skill(skill_path):
-    """
-    Validate a skill directory containing a SKILL.md file.
-    
-    Performs minimal checks on SKILL.md: presence of YAML frontmatter, valid YAML dictionary, allowed top-level properties, required `name` and `description` fields, and constraints on `name` (hyphen-case, no edge/consecutive hyphens, length <= 64) and `description` (no `<` or `>`, length <= 1024).
-    
-    Parameters:
-        skill_path (str | Path): Path to the skill directory containing `SKILL.md`.
-    
-    Returns:
-        tuple[bool, str]: `True` and a success message if the skill is valid; otherwise `False` and a message describing the first validation error encountered.
-    """
+    """Basic validation of a skill"""
     skill_path = Path(skill_path)
 
     skill_md = skill_path / "SKILL.md"
@@ -47,7 +37,7 @@ def validate_skill(skill_path):
     except yaml.YAMLError as e:
         return False, f"Invalid YAML in frontmatter: {e}"
 
-    allowed_properties = {"name", "description", "license", "compatibility", "allowed-tools", "metadata"}
+    allowed_properties = {"name", "description", "license", "allowed-tools", "metadata"}
 
     unexpected_keys = set(frontmatter.keys()) - allowed_properties
     if unexpected_keys:

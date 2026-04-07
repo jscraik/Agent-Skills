@@ -16,7 +16,7 @@ This document maps the original spec-deepening prompt in `/Users/jamiecraik/dev/
 - `/Users/jamiecraik/dev/config/codex/prompts/deepen-spec.md`
 - donor patterns borrowed intentionally from `/Users/jamiecraik/dev/Agent-Skills/product/ops/ce-deepen-plan/`
 - spec-structure alignment borrowed intentionally from `/Users/jamiecraik/dev/Agent-Skills/product/ops/ce-spec/`
-- lightweight review doctrine imported from upstream `document-review`
+- lightweight review doctrine imported from upstream `document-review` (`EveryInc/compound-engineering-plugin` commit `0ae91dcc298721e5b2c4ab6d1fc6f76a13b6f67c`)
 - migration target: `/Users/jamiecraik/dev/Agent-Skills/product/ops/ce-deepen-spec/`
 
 ## Parity mapping
