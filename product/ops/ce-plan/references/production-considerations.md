@@ -127,7 +127,7 @@ Per implementation unit, document:
 - Fallback behavior when partial degradation occurs
 - Monitoring/alerting for failure detection
 
-See `../ce-reliability-review/references/resilience-patterns.md` for detailed patterns (circuit breaker, bulkhead, retry, etc.).
+See the `[[ce-reliability-review]]` skill and its `references/resilience-patterns.md` for detailed patterns (circuit breaker, bulkhead, retry, etc.).
 
 ### When to Route to ce-reliability-review
 
@@ -136,3 +136,4 @@ Route to `[[ce-reliability-review]]` if:
 - There are multiple external dependencies
 - The blast radius of failure is high (user-facing, financial, data integrity)
 - The user explicitly asks for reliability analysis
+- The plan includes SLO targets that need validation
