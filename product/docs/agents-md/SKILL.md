@@ -104,18 +104,18 @@ Run discovery for underspecified AGENTS creation or refactor requests.
 Reference guidance for AGENTS.md templates — adapt before emitting; not runtime/operational instructions.
 
 Treat this as a template adaptation block. Runtime behavior is defined in:
-- [AGENTS.md](../../AGENTS.md)
-- [CLAUDE.md](../../CLAUDE.md)
-- [GEMINI.md](../../GEMINI.md)
+- [AGENTS.md](../../../AGENTS.md)
+- [CLAUDE.md](../../../CLAUDE.md)
+- [GEMINI.md](../../../GEMINI.md)
 
-Canonical shared guidance text lives in [Workflow and safety guidance](../../docs/agents/13-workflow-and-safety-guidance.md). Keep this section as references, not duplicated runtime policy:
-- Testing → [Workflow and safety guidance](../../docs/agents/13-workflow-and-safety-guidance.md#testing)
-- Git Workflow → [Workflow and safety guidance](../../docs/agents/13-workflow-and-safety-guidance.md#git-workflow)
-- Configuration Files → [Workflow and safety guidance](../../docs/agents/13-workflow-and-safety-guidance.md#configuration-files)
-- Code Review Fixes → [Workflow and safety guidance](../../docs/agents/13-workflow-and-safety-guidance.md#code-review-fixes)
-- Shell Scripting → [Workflow and safety guidance](../../docs/agents/13-workflow-and-safety-guidance.md#shell-scripting)
-- Refactoring → [Workflow and safety guidance](../../docs/agents/13-workflow-and-safety-guidance.md#refactoring)
-- Documentation → [Workflow and safety guidance](../../docs/agents/13-workflow-and-safety-guidance.md#documentation)
+Canonical shared guidance text lives in [Workflow and safety guidance](../../../docs/agents/13-workflow-and-safety-guidance.md). Keep this section as references, not duplicated runtime policy:
+- Testing → [Workflow and safety guidance](../../../docs/agents/13-workflow-and-safety-guidance.md#testing)
+- Git Workflow → [Workflow and safety guidance](../../../docs/agents/13-workflow-and-safety-guidance.md#git-workflow)
+- Configuration Files → [Workflow and safety guidance](../../../docs/agents/13-workflow-and-safety-guidance.md#configuration-files)
+- Code Review Fixes → [Workflow and safety guidance](../../../docs/agents/13-workflow-and-safety-guidance.md#code-review-fixes)
+- Shell Scripting → [Workflow and safety guidance](../../../docs/agents/13-workflow-and-safety-guidance.md#shell-scripting)
+- Refactoring → [Workflow and safety guidance](../../../docs/agents/13-workflow-and-safety-guidance.md#refactoring)
+- Documentation → [Workflow and safety guidance](../../../docs/agents/13-workflow-and-safety-guidance.md#documentation)
 
 ## Deliverables
 

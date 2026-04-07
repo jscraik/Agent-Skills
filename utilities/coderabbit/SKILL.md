@@ -84,7 +84,7 @@ metadata:
 
 ## Fix CodeRabbit Review Comments
 
-This flow is for an external CodeRabbit CLI workflow (not a local corpus command) and is used when the user provides a PR number and asks to address open CodeRabbit findings.
+This flow is for an external CodeRabbit CLI workflow (not a local corpus command). If a PR number is provided, check out the PR branch first, then run the supported CLI review command.
 
 ### Prerequisites
 
@@ -103,7 +103,12 @@ This flow is for an external CodeRabbit CLI workflow (not a local corpus command
 Example command entry:
 
 ```bash
-coderabbit <pr-number>
+# Review changes in the checked-out PR branch (local CLI)
+gh pr checkout <pr-number>
+coderabbit --plain
+
+# If your environment uses the short command name:
+coderabbit review --plain
 ```
 
 ## Setup quickstart
