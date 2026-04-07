@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-06T13:26:16Z",
-  "current_window": "2026-03-31..2026-04-06",
+  "generated_at": "2026-04-07T06:44:05Z",
+  "current_window": "2026-04-01..2026-04-07",
   "source_artifacts": {
     "dashboard_json": "artifacts/skill-graphs/pilot/shadow-dashboard.json",
     "failure_patterns_jsonl": "artifacts/skill-graphs/telemetry/failure-pattern-candidates.jsonl",
@@ -84,7 +84,7 @@
         ],
         "failure_candidates": [
           {
-            "run_id": "run_20260406T132616265769Z_50ef7d_17b84f02",
+            "run_id": "run_20260407T064405259532Z_50ef7d_8e9f024",
             "stop_reason": "evaluator_conflict",
             "terminal_status": "escalated",
             "quality_uplift": 0.278
@@ -92,7 +92,7 @@
         ]
       },
       "recommendations": [
-        "Capture an Ars Contexta note for frontend-ui-design centered on Restraint and composition, Accessibility contract, and State completeness, using run_20260406T132616265769Z_50ef7d_17b84f02 as the seed evidence set.",
+        "Capture an Ars Contexta note for frontend-ui-design centered on Restraint and composition, Accessibility contract, and State completeness, using run_20260407T064405259532Z_50ef7d_8e9f024 as the seed evidence set.",
         "At each reevaluation checkpoint, explicitly reassess whether the objective should pivot toward Accessibility contract and State completeness; treat that as search refinement, not failure.",
         "Keep these interventions at documentation level for now, and only promote a pattern upward once it repeats cleanly without reopening regressions."
       ],
@@ -178,7 +178,7 @@
         ],
         "failure_candidates": [
           {
-            "run_id": "run_20260406T132616151793Z_04dd5b_17b7fd06",
+            "run_id": "run_20260407T064405056266Z_04dd5b_8e4d06e",
             "stop_reason": "evaluator_conflict",
             "terminal_status": "escalated",
             "quality_uplift": 0.113
@@ -186,7 +186,7 @@
         ]
       },
       "recommendations": [
-        "Capture an Ars Contexta note for interface-craft centered on Safety/compliance compliance, Concrete implementation detail, and Instructional clarity, using run_20260406T132616151793Z_04dd5b_17b7fd06 as the seed evidence set.",
+        "Capture an Ars Contexta note for interface-craft centered on Safety/compliance compliance, Concrete implementation detail, and Instructional clarity, using run_20260407T064405056266Z_04dd5b_8e4d06e as the seed evidence set.",
         "At each reevaluation checkpoint, explicitly reassess whether the objective should pivot toward Instructional clarity; treat that as search refinement, not failure.",
         "Keep these interventions at documentation level for now, and only promote a pattern upward once it repeats cleanly without reopening regressions."
       ],

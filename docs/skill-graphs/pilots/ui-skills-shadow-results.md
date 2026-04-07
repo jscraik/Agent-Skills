@@ -1,7 +1,5 @@
 # UI Skills Shadow Results (Phase 2)
 
-> **Note:** This document contains example/hypothetical pilot data for demonstration purposes. The run IDs and timestamps shown are illustrative examples of what a completed pilot window would look like. Actual runs in `artifacts/skill-graphs/runs/` may differ.
-
 Shadow mode runs evaluator + checkpoint adversarial checks without automatic improvement writes.
 
 ## Table of Contents
@@ -20,7 +18,7 @@ Shadow mode runs evaluator + checkpoint adversarial checks without automatic imp
 
 ## Window summary
 
-- Window: `2026-03-31..2026-04-06`
+- Window: `2026-04-01..2026-04-07`
 - Baseline source: `frozen_snapshot` (`2026-03-25..2026-03-31`)
 - Runs total: `8`
 - Runs by profile:
@@ -50,14 +48,14 @@ Shadow mode runs evaluator + checkpoint adversarial checks without automatic imp
 
 | Run | Profile | Status | Stop reason | Iterations | Uplift | Non-regression | Tokens |
 |---|---|---|---|---:|---:|:---:|---:|
-| run_20260406T132616036114Z_cbb8d4_17b7ac4e | ui-ux-creative-coding | passed | pass | 2 | +0.046 | ❌ | 378 |
-| run_20260406T132616095953Z_5b4309_17b7dfa8 | interface-craft | passed | pass | 2 | +0.064 | ❌ | 357 |
-| run_20260406T132616151793Z_04dd5b_17b7fd06 | interface-craft | escalated | evaluator_conflict | 1 | +0.113 | ✅ | 157 |
-| run_20260406T132616211252Z_1c1272_17b82ad5 | frontend-ui-design | passed | pass | 4 | +0.249 | ❌ | 4407 |
-| run_20260406T132616265769Z_50ef7d_17b84f02 | frontend-ui-design | escalated | evaluator_conflict | 5 | +0.278 | ❌ | 5685 |
-| run_20260406T132616322434Z_c6442d_17b8782b | react-ui-patterns | passed | pass | 2 | +0.158 | ❌ | 389 |
-| run_20260406T132616374674Z_f93d59_17b89117 | react-ui-patterns | passed | pass | 2 | +0.172 | ✅ | 399 |
-| run_20260406T132615979078Z_4270e1_17b7880e | ui-ux-creative-coding | passed | pass | 2 | +0.179 | ✅ | 394 |
+| run_20260407T064405056266Z_04dd5b_8e4d06e | interface-craft | escalated | evaluator_conflict | 1 | +0.113 | ✅ | 157 |
+| run_20260407T064405159287Z_1c1272_8e7ad51 | frontend-ui-design | passed | pass | 4 | +0.249 | ❌ | 4407 |
+| run_20260407T064405259532Z_50ef7d_8e9f024 | frontend-ui-design | escalated | evaluator_conflict | 5 | +0.278 | ❌ | 5685 |
+| run_20260407T064405363942Z_c6442d_8ec82bd | react-ui-patterns | passed | pass | 2 | +0.158 | ❌ | 389 |
+| run_20260407T064405465228Z_f93d59_8ee1174 | react-ui-patterns | passed | pass | 2 | +0.172 | ✅ | 399 |
+| run_20260407T064404758172Z_4270e1_8dc80eb | ui-ux-creative-coding | passed | pass | 2 | +0.179 | ✅ | 394 |
+| run_20260407T064404855416Z_cbb8d4_8dec4e9 | ui-ux-creative-coding | passed | pass | 2 | +0.046 | ❌ | 378 |
+| run_20260407T064404953569Z_5b4309_8e1fa81 | interface-craft | passed | pass | 2 | +0.064 | ❌ | 357 |
 
 ## Exit gate checks
 
