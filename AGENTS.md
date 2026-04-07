@@ -64,32 +64,31 @@ When intent is clear but syntax is off, the CLI honors your command and shows co
 
 ## Testing
 
-After fixing any code, always run the relevant test suite to verify the fix works before committing. If tests fail, debug and iterate rather than committing broken code.
+For shared testing workflow guidance, see [Workflow and Safety Guidance](./docs/agents/13-workflow-and-safety-guidance.md#testing).
 
 ## Shell Scripting
 
-When modifying shell scripts or configuration files, always use non-interactive command patterns. Avoid commands that require user input (like `op read` from 1Password) - they hang in CI/CD and headless environments.
+For shared shell scripting guidance, see [Workflow and Safety Guidance](./docs/agents/13-workflow-and-safety-guidance.md#shell-scripting).
 
 ## Git Workflow
 
-When working with git branches, prefer merge over rebase for complex histories (>50 commits). Always run `git status` and resolve conflicts systematically before proceeding with changes.
-For git operations like cherry-picking or branch syncing, prefer direct file restoration (`git checkout source_branch -- path/to/file`) over complex cherry-pick workflows when only specific files are needed.
+For shared git workflow guidance, see [Workflow and Safety Guidance](./docs/agents/13-workflow-and-safety-guidance.md#git-workflow).
 
 ## Configuration Files
 
-For YAML schema changes and configuration files, validate against the schema immediately after editing. Do not assume syntax is correct without verification.
+For shared configuration-file guidance, see [Workflow and Safety Guidance](./docs/agents/13-workflow-and-safety-guidance.md#configuration-files).
 
 ## Code Review Fixes
 
-When fixing CodeRabbit or automated review comments, batch related fixes by file type and verify each category (types, security, validation, linting) before moving to the next category.
+For shared review-comment fix guidance, see [Workflow and Safety Guidance](./docs/agents/13-workflow-and-safety-guidance.md#code-review-fixes).
 
 ## Refactoring
 
-When refactoring interfaces that affect multiple files, first update the interface/type definitions, then systematically update all consumers before running tests. Verify no 'conflated' concerns exist (e.g., subcommand vs. mode flags).
+For shared refactoring guidance, see [Workflow and Safety Guidance](./docs/agents/13-workflow-and-safety-guidance.md#refactoring).
 
 ## Documentation
 
-Always format markdown plan files cleanly before writing - avoid stray backticks, inconsistent heading levels, or mixed quote styles. Use `prettier --write` or equivalent for markdown files.
+For shared documentation guidance, see [Workflow and Safety Guidance](./docs/agents/13-workflow-and-safety-guidance.md#documentation).
 
 ## Skill Management
 

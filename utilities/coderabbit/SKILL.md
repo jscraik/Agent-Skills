@@ -84,7 +84,15 @@ metadata:
 
 ## Fix CodeRabbit Review Comments
 
-Use this flow when the user provides a PR number and asks to address open CodeRabbit findings:
+This flow is for an external CodeRabbit CLI workflow (not a local corpus command) and is used when the user provides a PR number and asks to address open CodeRabbit findings.
+
+### Prerequisites
+
+- Install the CodeRabbit CLI from the official installer:
+  ```bash
+  curl -fsSL https://cli.coderabbit.ai/install.sh | sh
+  ```
+- Authenticate the CLI and confirm it is available in the active environment.
 
 1. Fetch all open CodeRabbit comments via API or local dump.
 2. Categorize each comment by type: `types`, `security`, `validation`, `linting`, `tests`.
@@ -92,7 +100,7 @@ Use this flow when the user provides a PR number and asks to address open CodeRa
 4. Commit with message: `fix: address CodeRabbit review comments`.
 5. Verify all comments are resolved before finishing.
 
-Command entry:
+Example command entry:
 
 ```bash
 coderabbit <pr-number>

@@ -63,7 +63,7 @@ For 1Password: use `[ -e ]` instead of `[ -f ]` for named pipes.
 
 ## Shell Scripting
 
-When modifying shell scripts or configuration files, always use non-interactive command patterns. Avoid commands that require user input (like `op read` from 1Password) - they hang in CI/CD and headless environments.
+For shared workflow guidance, see [AGENTS.md](./AGENTS.md). For shared shell-scripting guidance, see the canonical guidance in that file.
 
 ## Code Quality
 
@@ -76,18 +76,12 @@ Fix all errors before marking complete.
 
 ## Testing
 
-After fixing any code, always run the relevant test suite to verify the fix works before committing. If tests fail, debug and iterate rather than committing broken code.
-
-Existing guidance:
-
-- Run full test suite before committing
-- Mock `process.exit` in CLI tests to prevent hangs
-- Run full suite after auth/CLI/async changes
+For shared workflow guidance, see [AGENTS.md](./AGENTS.md). For shared testing guidance, see the canonical guidance in that file.
 
 ## Git Workflow
 
-When working with git branches, prefer merge over rebase for complex histories (>50 commits). Always run `git status` and resolve conflicts systematically before proceeding with changes.
-For git operations like cherry-picking or branch syncing, prefer direct file restoration (`git checkout source_branch -- path/to/file`) over complex cherry-pick workflows when only specific files are needed.
+When working with git branches, prefer to merge rather than rebase for complex histories (>50 commits). Always run `git status` and resolve conflicts systematically before proceeding with changes.
+For shared git workflow guidance, see [AGENTS.md](./AGENTS.md). For git operations like cherry-picking or branch syncing, follow the canonical guidance in that file.
 
 ## PR Workflow
 
@@ -106,19 +100,19 @@ When browser tooling cannot access local files directly, immediately start `pyth
 
 ## Configuration Files
 
-For YAML schema changes and configuration files, validate against the schema immediately after editing. Do not assume syntax is correct without verification.
+For shared configuration-files guidance, see [AGENTS.md](./AGENTS.md). For YAML and configuration validation, use the canonical guidance there.
 
 ## Code Review Fixes
 
-When fixing CodeRabbit or automated review comments, batch related fixes by file type and verify each category (types, security, validation, linting) before moving to the next.
+For shared review-comment fix guidance, see [AGENTS.md](./AGENTS.md).
 
 ## Refactoring
 
-When refactoring interfaces that affect multiple files, first update the interface/type definitions, then systematically update all consumers before running tests. Verify no 'conflated' concerns exist (e.g., subcommand vs. mode flags).
+For shared refactoring guidance, see [AGENTS.md](./AGENTS.md). For interface-first refactoring and downstream updates, follow the canonical guidance there.
 
 ## Documentation
 
-Always format markdown plan files cleanly before writing - avoid stray backticks, inconsistent heading levels, or mixed quote styles. Use `prettier --write` or equivalent for markdown files.
+For shared documentation guidance, see [AGENTS.md](./AGENTS.md). For plan-file formatting conventions, use the canonical guidance there.
 
 ---
 

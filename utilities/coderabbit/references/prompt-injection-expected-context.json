@@ -17,17 +17,6 @@
     "scripts/run_skill_graph_smoke.py",
     "workflows/create-new-skill.md"
   ],
-  "context_signals": [
-    "prompt injection",
-    "adversarial",
-    "jailbreak",
-    "forbidden_commands",
-    "security coverage",
-    "red team",
-    "regex",
-    "re.compile(",
-    "pattern"
-  ],
   "skip_binary_globs": [
     "assets/**"
   ]

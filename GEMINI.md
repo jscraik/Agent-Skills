@@ -42,7 +42,7 @@ For 1Password: use `[ -e ]` instead of `[ -f ]` for named-pipe checks.
 ## Shell Script Portability
 
 Prefer `[ -e "..." ]` over `[ -f "..." ]` for existence checks to support named pipes and special files.
-When modifying shell scripts or configuration files, always use non-interactive command patterns. Avoid commands that require user input (like `op read` from 1Password) - they hang in CI/CD and headless environments.
+For shell scripts in shared workflows, see [AGENTS.md](./AGENTS.md). (When modifying shell scripts or configuration files, use non-interactive command patterns and avoid commands requiring user input such as `op read` from 1Password.)
 
 ## TypeScript Configuration
 
@@ -53,27 +53,29 @@ Run `pnpm typecheck` after significant TypeScript changes (or repo-native equiva
 ## TypeScript Development
 
 When refactoring interfaces that affect multiple files, first update the interface/type definitions, then systematically update all consumers before running tests. Verify no 'conflated' concerns exist (e.g., subcommand vs. mode flags).
+For cross-file TypeScript refactoring in generated AGENTS guidance, see [workflow and safety guidance](/docs/agents/13-workflow-and-safety-guidance.md#refactoring).
 
 ## Testing
 
-After fixing any code, always run the relevant test suite to verify the fix works before committing. If tests fail, debug and iterate rather than committing broken code.
+For testing guidance used across shared operational instructions, see [Workflow and Safety Guidance](/docs/agents/13-workflow-and-safety-guidance.md#testing).
 
 ## Git Workflow
 
-When working with git branches, prefer merge over rebase for complex histories (>50 commits). Always run `git status` and resolve conflicts systematically before proceeding with changes.
+When working with git branches, prefer to merge rather than rebase for complex histories (>50 commits). Always run `git status` and resolve conflicts systematically before proceeding with changes.
 For git operations like cherry-picking or branch syncing, prefer direct file restoration (`git checkout source_branch -- path/to/file`) over complex cherry-pick workflows when only specific files are needed.
+For shared workflow references, see [AGENTS.md](./AGENTS.md).
 
 ## Configuration Files
 
-For YAML schema changes and configuration files, validate against the schema immediately after editing. Do not assume syntax is correct without verification.
+For configuration guidance, see [Workflow and Safety Guidance](/docs/agents/13-workflow-and-safety-guidance.md#configuration-files) and [AGENTS.md](./AGENTS.md).
 
 ## Code Review Fixes
 
-When fixing CodeRabbit or automated review comments, batch related fixes by file type and verify each category (types, security, validation, linting) before moving to the next.
+For shared review-comment handling, see [Workflow and Safety Guidance](/docs/agents/13-workflow-and-safety-guidance.md#code-review-fixes) and [AGENTS.md](./AGENTS.md).
 
 ## Documentation
 
-Always format markdown plan files cleanly before writing - avoid stray backticks, inconsistent heading levels, or mixed quote styles. Use `prettier --write` or equivalent for markdown files.
+For formatting and generated-document guidance, see [Workflow and Safety Guidance](/docs/agents/13-workflow-and-safety-guidance.md#documentation) and [AGENTS.md](./AGENTS.md).
 
 ## Examples
 

@@ -25,16 +25,10 @@ Create and maintain concise, high-signal AGENTS guidance with progressive disclo
 - [Project-tailored repo baseline](#project-tailored-repo-baseline)
 - [Anti-patterns](#anti-patterns)
 - [Variation](#variation)
-- [Shell Scripting](#shell-scripting)
-- [Refactoring](#refactoring)
-- [Documentation](#documentation)
+- [AGENTS.md Template Guidance](#agents-md-template-guidance)
 - [Mandatory workflow snippet](#mandatory-workflow-snippet)
 - [Examples](#examples)
 - [Resource map](#resource-map)
-- [Testing](#testing)
-- [Git Workflow](#git-workflow)
-- [Configuration Files](#configuration-files)
-- [Code Review Fixes](#code-review-fixes)
 - [Decision feedback protocol](#decision-quality-feedback)
 
 ## When to use
@@ -46,6 +40,8 @@ Create and maintain concise, high-signal AGENTS guidance with progressive disclo
 - Use this skill when the user wants the project's instruction surface audited so required instruction files are present, current, correctly routed, and accurately disclosed.
 
 ## Standards snapshot (April 2026)
+
+Use this section as an adaptation guideline for generated AGENTS.md files, not runtime policy.
 
 - Keep root `AGENTS.md` minimal and route depth into linked docs.
 - Start with 2-3 focused surfaces for a first pass: usually the root `AGENTS.md`, one linked-doc tree, and only one nested override if it is truly needed.
@@ -103,35 +99,27 @@ Run discovery for underspecified AGENTS creation or refactor requests.
 - Keep the confirmation round compact as well: summarize only the current AGENTS update shape, list assumptions only when needed, and end with the single confirmation question.
 - For out-of-scope responses, keep the compact structure expected by the evals: `## When to use`, `## Deliverables`, and `## Required inputs`.
 
-## Testing
+## AGENTS.md Template Guidance
 
-After fixing any code, always run the relevant test suite to verify the fix works before committing. If tests fail, debug and iterate rather than committing broken code.
+Reference guidance for AGENTS.md templates — adapt before emitting; not runtime/operational instructions.
 
-## Git Workflow
+Treat this as a template adaptation block. Runtime behavior is defined in:
+- [AGENTS.md](../../AGENTS.md)
+- [CLAUDE.md](../../CLAUDE.md)
+- [GEMINI.md](../../GEMINI.md)
 
-When working with git branches, prefer merge over rebase for complex histories (>50 commits). Always run `git status` and resolve conflicts systematically before proceeding with changes.
-
-## Configuration Files
-
-For YAML schema changes and configuration files, validate against the schema immediately after editing. Do not assume syntax is correct without verification.
-
-## Code Review Fixes
-
-When fixing CodeRabbit or automated review comments, batch related fixes by file type and verify each category (types, security, validation, linting) before moving to the next.
-
-## Shell Scripting
-
-When modifying shell scripts or configuration files, always use non-interactive command patterns. Avoid commands that require user input (like `op read`) because they can hang in CI/CD and other headless environments.
-
-## Refactoring
-
-When refactoring interfaces that affect multiple files, update interface/type definitions first, then systematically update all consumers before running tests. Verify no conflated concerns exist (for example, subcommand and mode flags combined together).
-
-## Documentation
-
-Always format markdown plan files cleanly before writing. Avoid stray backticks, inconsistent heading levels, and mixed quote styles. Use `prettier --write` or equivalent for markdown files.
+Canonical shared guidance text lives in [Workflow and safety guidance](../../docs/agents/13-workflow-and-safety-guidance.md). Keep this section as references, not duplicated runtime policy:
+- Testing → [Workflow and safety guidance](../../docs/agents/13-workflow-and-safety-guidance.md#testing)
+- Git Workflow → [Workflow and safety guidance](../../docs/agents/13-workflow-and-safety-guidance.md#git-workflow)
+- Configuration Files → [Workflow and safety guidance](../../docs/agents/13-workflow-and-safety-guidance.md#configuration-files)
+- Code Review Fixes → [Workflow and safety guidance](../../docs/agents/13-workflow-and-safety-guidance.md#code-review-fixes)
+- Shell Scripting → [Workflow and safety guidance](../../docs/agents/13-workflow-and-safety-guidance.md#shell-scripting)
+- Refactoring → [Workflow and safety guidance](../../docs/agents/13-workflow-and-safety-guidance.md#refactoring)
+- Documentation → [Workflow and safety guidance](../../docs/agents/13-workflow-and-safety-guidance.md#documentation)
 
 ## Deliverables
+
+Use this section as an adaptation checklist for generated AGENTS.md outputs.
 
 - Updated minimal root `AGENTS.md`.
 - Updated scoped overrides when a nested directory truly needs different rules.
@@ -223,6 +211,8 @@ If command truth, path ownership, or instruction precedence cannot be verified, 
 - Keep `Startup workflow` and `Supplemental context` concise and operator-focused.
 
 ## Anti-patterns
+
+Use this section as an anti-pattern check when adapting or generating AGENTS.md files.
 
 - Do not dump full policy documents into root AGENTS.
 - Never duplicate the same instruction across many files without need.
