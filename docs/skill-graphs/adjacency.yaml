@@ -67,8 +67,7 @@ architecture-interview:
   security-threat-model: Run a threat model alongside architecture decisions
   writing-plans: Convert ADR output into an implementation plan
 arscontexta:
-  plugin-builder: Bundle this skill into plugin workflows and run plugin-level
-    validations
+  plugin-builder: Bundle this skill into plugin workflows and run plugin-level validations
   skill-builder: Improve, validate, and package the Ars Contexta skill after operational
     updates
 atlas:
@@ -160,6 +159,13 @@ ce-plan:
   compound-engineering-router: Choose CE stage
   linear: Issue creation
   product-spec: Product contract
+ce-reliability-review:
+  ce-deepen-spec: Strengthen spec with reliability requirements from review
+  ce-plan: Plan reliability implementation units from review findings
+  ce-review: Package-level readiness synthesis including reliability
+  ce-technical-review: Broader code quality and engineering findings beyond reliability
+  production-deployment: Deploy with reliability verification gates
+  security-threat-model: Security-specific threat modeling complement to reliability
 ce-review:
   agent-native-audit: Audit agent-operability vs merge-readiness
   ce-technical-review: Severity-ranked engineering issues
@@ -257,13 +263,12 @@ codex-hooks-builder:
     govern
   codex-home-audit: Audit an existing Codex home installation for hook drift or unsafe
     config
-  plugin-builder: Package the hooks together with related skills or agents in
-    a plugin
   gh-workflow: Ship and review hook-pack changes through the GitHub lifecycle
+  plugin-builder: Package the hooks together with related skills or agents in a plugin
 codex-plugin-builder:
   plugin-builder: Canonical plugin hardening and conversion skill
-  plugin-installer: Install and verify third-party plugins from GitHub
   plugin-creator: Scaffold a minimal plugin package before hardening
+  plugin-installer: Install and verify third-party plugins from GitHub
 codex-sessions-skill-scan:
   codex-home-audit: Run alongside a full home directory audit
   evals-router: Route evaluation work for under-performing skills
@@ -297,10 +302,10 @@ create-auth:
 decide-build-primitive:
   codex-automation-architect: Use after `AGENT_AUTOMATION` decision to design the
     automation contract
-  plugin-builder: Use after `SKILL` decision when the skill needs plugin packaging
-    for distribution
   compound-engineering-router: Use when the capability spans multiple workflow types
     and routing is unclear
+  plugin-builder: Use after `SKILL` decision when the skill needs plugin packaging
+    for distribution
   skill-builder: Use after `SKILL` decision is made to scaffold and quality-gate the
     skill
 deep-interview:
@@ -490,8 +495,7 @@ plugin-builder:
   skill-builder: Harden standalone skills before plugin packaging
 plugin-creator:
   cli-spec: Consult the technical contract for the ask CLI
-  plugin-builder: Promote scaffold into a full plugin package with governance
-    checks
+  plugin-builder: Promote scaffold into a full plugin package with governance checks
   skill-builder: Improve bundled skill quality before plugin release
 plugin-installer:
   plugin-builder: Harden/convert plugin packages before distribution install
@@ -621,12 +625,12 @@ simple-tasks:
   linear: Escalate to Linear when tasks need team-wide visibility
   verification-before-completion: Mark tasks done only after verification evidence
 skill-builder:
-  plugin-builder: Package a contract-valid standalone skill when the deliverable
-    explicitly becomes a plugin
   codex-sessions-skill-scan: Audit skill coverage, failures, and overlap using real
     session evidence instead of authoring doctrine alone
   decide-build-primitive: Decide whether the capability should be a skill, prompt,
     or agent before authoring it
+  plugin-builder: Package a contract-valid standalone skill when the deliverable explicitly
+    becomes a plugin
   skill-installer: Install, import, or repair runtime visibility when the skill package
     is already valid and the remaining work is distribution
 skill-creator:
