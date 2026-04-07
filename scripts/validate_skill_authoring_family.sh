@@ -2,10 +2,16 @@
 set -euo pipefail
 
 # Run repo preflight before any path-sensitive operations
+preflight_mode="${SKILL_FAMILY_LOCAL_MEMORY_MODE:-required}"
+if [[ "$preflight_mode" != "required" && "$preflight_mode" != "optional" ]]; then
+  echo "[family-gate] ERROR: SKILL_FAMILY_LOCAL_MEMORY_MODE must be 'required' or 'optional' (got '$preflight_mode')"
+  exit 1
+fi
+
 if [[ -f "scripts/codex-preflight.sh" ]]; then
-  bash scripts/codex-preflight.sh --stack auto --mode required --bins "git,bash,sed,jq,curl,python3"
+  bash scripts/codex-preflight.sh --stack auto --mode "$preflight_mode" --bins "git,bash,sed,jq,curl,python3"
 elif [[ -f "$(dirname "${BASH_SOURCE[0]}")/codex-preflight.sh" ]]; then
-  bash "$(dirname "${BASH_SOURCE[0]}")/codex-preflight.sh" --stack auto --mode required --bins "git,bash,sed,jq,curl,python3"
+  bash "$(dirname "${BASH_SOURCE[0]}")/codex-preflight.sh" --stack auto --mode "$preflight_mode" --bins "git,bash,sed,jq,curl,python3"
 else
   echo "WARNING: codex-preflight.sh not found, skipping preflight"
 fi

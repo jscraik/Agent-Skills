@@ -124,19 +124,15 @@ ce-brainstorm:
   compound-engineering-router: Use to choose the right compound-engineering stage
     before or after brainstorming
 ce-compound:
-  ce-brainstorm: Use when the lifecycle needs WHAT/WHY clarity first
-  ce-plan: Use when orchestration lands at implementation planning
-  ce-review: Use when implementation is complete and merge/readiness review is the
-    next stage
-  ce-work: Use when the workflow is ready for execution
-  compound-engineering-router: Use when the user needs the correct CE route selected
-    before entering a stage
+  ce-brainstorm: WHAT/WHY clarity first
+  ce-plan: Implementation planning
+  ce-review: Merge/readiness review
+  ce-work: Ready for execution
+  compound-engineering-router: Route selection before entering a stage
 ce-compound-refresh:
-  ce-compound: Capture newly solved issues before or after targeted refresh maintenance
-  ce-review: Validate current implementation readiness when drift in docs may reflect
-    broader product risk
-  ce-technical-review: Audit focused technical correctness when the stale-doc signal
-    points to code-level risk, not just doc maintenance
+  ce-compound: Capture new issues before/after refresh
+  ce-review: Validate implementation readiness
+  ce-technical-review: Audit technical correctness
 ce-deepen-plan:
   ce-plan: Use before deepening when the plan does not yet exist
   ce-spec: Use when deepening reveals that the plan is blocked by missing contract-level
@@ -158,29 +154,32 @@ ce-ideate:
   ce-plan: Use only after a brainstormed direction has been selected and specified
     enough to plan
 ce-plan:
-  ce-brainstorm: Use first when the work still needs WHAT/WHY clarification before
-    sequencing
-  compound-engineering-router: Use to choose the correct compound-engineering stage
-    before or after planning
-  linear: Use after plan completion when the user wants the plan turned into a Linear
-    issue with read-before-write safeguards
-  product-spec: Use when the plan should be blocked until the product contract is
-    made explicit
-
+  ce-brainstorm: Clarify WHAT/WHY
+  compound-engineering-router: Choose CE stage
+  linear: Issue creation
+  product-spec: Product contract
+ce-reliability-review:
+  ce-plan: Incorporate reliability phases and acceptance criteria
+  ce-review: Broad readiness synthesis, not detailed reliability analysis
+  ce-spec: Define failure model and recovery requirements in the contract
+  ce-technical-review: Code-level engineering issues, not failure scenario modeling
+  systematic-debugging: When investigating a specific failure that already occurred
 ce-review:
-  agent-native-audit: Audit whether the workflow is broadly agent-operable rather
-    than just merge-ready
-  ce-technical-review: Produce a severity-ranked engineering issue list instead of
-    a package-level readiness synthesis
-  ce-work: Execute the approved work once review confirms the branch is ready to advance
-  gh-workflow: Run GitHub-native merge readiness and blocker checks before lifecycle
-    actions
+  agent-native-audit: Audit agent-operability vs merge-readiness
+  ce-technical-review: Severity-ranked engineering issues
+  ce-work: Execute approved work
+  gh-workflow: GitHub merge readiness
 ce-spec:
   ce-brainstorm: Use first when the work still needs WHAT and WHY clarification
   ce-plan: Use after spec completion when the contract is ready for execution sequencing
   compound-engineering-router: Use to choose the correct compound-engineering stage
     before or after specification
-
+ce-tdd:
+  ce-plan: When test strategy needs planning before TDD
+  ce-review: Contract acceptance after TDD completion
+  ce-work: General execution without strict TDD
+  linear: Issue creation and progress tracking
+  test-driven-development: Broader TDD guidance without CE-stage framing
 ce-technical-review:
   agent-native-audit: Review agent-operability or workflow autonomy rather than code-level
     engineering risk
@@ -189,25 +188,11 @@ ce-technical-review:
   gh-workflow: Gate merge readiness in GitHub after the technical review is complete
   systematic-debugging: Investigate root cause first when the risky behavior is not
     yet well understood
-ce-reliability-review:
-  ce-plan: Incorporate reliability phases and acceptance criteria
-  ce-review: Broad readiness synthesis, not detailed reliability analysis
-  ce-spec: Define failure model and recovery requirements in the contract
-  ce-technical-review: Code-level engineering issues, not failure scenario modeling
-  systematic-debugging: When investigating a specific failure that already occurred
-ce-tdd:
-  ce-plan: When test strategy needs planning before TDD
-  ce-review: Contract acceptance after TDD completion
-  ce-work: General execution without strict TDD
-  linear: Issue creation and progress tracking
-  test-driven-development: Broader TDD guidance without CE-stage framing
 ce-work:
-  ce-compound: Preserve durable learnings or resume the broader CE lifecycle around
-    the work
-  ce-plan: Build the execution-ready plan before implementation starts
-  ce-review: Review the delivered package and next-step readiness after execution
-  test-browser: Run deterministic browser verification for changed web flows before
-    completion
+  ce-compound: Preserve learnings
+  ce-plan: Build execution-ready plan
+  ce-review: Review after execution
+  test-browser: Browser verification
 cf-crawl:
   cloudflare-deploy: Deploy and authenticate the crawl target on Cloudflare
   context7: Supplement crawl results with library documentation
@@ -232,9 +217,9 @@ claude-alias:
   bootstrap: Bootstrap a local development environment from a GitHub repository URL
   fix-mise: Diagnose and repair mise trust/runtime issues
 cli-spec:
-  agent-native-architecture: Ensure the CLI fits into an autonomous agent workflow
+  agent-native-architecture: Ensure the CLI fits into an autonomous workflow
   ce-spec: Use when the CLI is a front for a broader system spec
-  docs-expert: Document the CLI surface after speccing it
+  docs-expert: Generate user-facing docs from the technical contract
 cloudflare-deploy:
   backend-engineer: Extend the backend before deploying
   cf-crawl: Run Cloudflare Browser Rendering crawls on the deployed site
@@ -274,8 +259,7 @@ codex-hooks-builder:
     a plugin
   gh-workflow: Ship and review hook-pack changes through the GitHub lifecycle
 codex-plugin-builder:
-  codex-agent-creator: Add agent roles to the plugin bundle alongside skills and
-    hooks
+  codex-agent-creator: Add agent roles to the plugin bundle alongside skills and hooks
   decide-build-primitive: Decide whether the capability belongs in a plugin at all
   skill-builder: Harden and validate a standalone skill before plugin packaging or
     conversion work begins
@@ -362,6 +346,10 @@ every-style-editor:
     edits
   youtube-titles-thumbnails: Tighten packaging copy once the tone and messaging are
     set
+fallback-release:
+  production-deployment: Deploy fallback-built artifacts to production
+  release: Primary release path when CI is healthy
+  verification-before-completion: Validate fallback artifacts before publication
 favicon-generator:
   cloudflare-deploy: Include favicon assets in Cloudflare Pages deployments
   design-system: Keep favicon palette consistent with design-system tokens
@@ -373,10 +361,6 @@ feature-video:
   sora: Generate synthetic video only when the request is not tied to real product
     footage
   stitch-remotion: Build a walkthrough from Stitch screens
-fallback-release:
-  production-deployment: Deploy fallback-built artifacts to production
-  release: Primary release path when CI is healthy
-  verification-before-completion: Validate fallback artifacts before publication
 figma:
   better-icons: Source icons via Figma designs and export to Iconify
   design-system: Extract Figma tokens to drive the repository design system
@@ -429,11 +413,10 @@ imagegen:
   visual-explainer: Embed generated images as hero banners in HTML explainers
   youtube-titles-thumbnails: Generate thumbnail concept images for YouTube packaging
 insight-report:
-  codex-automation-architect: Convert repeated recommendations into scheduled automations
-  codex-home-audit: Follow up on report-detected local environment drift
-  codex-sessions-skill-scan: Build a session quality baseline before generating the
-    report
-  visual-explainer: Convert report outcomes into an executive visual explainer
+  codex-automation-architect: Convert recommendations into automations
+  codex-home-audit: Check Codex setup health
+  codex-sessions-skill-scan: Analyze skill usage
+  visual-explainer: Convert outcomes into visual explainers
 interview-me:
   architecture-interview: Structure a concrete architecture choice into a decision
     record
@@ -512,11 +495,6 @@ process-watch:
   systematic-debugging: Use alongside process-watch for root-cause diagnosis
   verification-before-completion: Confirm processes are healthy before marking work
     done
-production-deployment:
-  1password: Inject deployment secrets via 1Password CLI
-  cloudflare-deploy: Deploy specifically to the Cloudflare platform
-  release: Orchestrate the release flow before deployment
-  workers-mcp: Deploy MCP servers as production-ready workers
 product-design-critic:
   brainstorming: Explore design alternatives before critical review
   frontend-ui-design: Apply critique findings to UI component implementation
@@ -533,6 +511,11 @@ product-spec:
     grounding
   security-threat-model: Use on the resulting spec/API to identify and model security
     risks early
+production-deployment:
+  1password: Inject deployment secrets via 1Password CLI
+  cloudflare-deploy: Deploy specifically to the Cloudflare platform
+  release: Orchestrate the release flow before deployment
+  workers-mcp: Deploy MCP servers as production-ready workers
 project-improver:
   architecture-interview: Validate architectural improvements via structured interview
   brainstorming: Brainstorm improvement ideas before running the improver
@@ -579,11 +562,6 @@ repoprompt:
   ce-plan: Ground implementation plans with Repo Prompt context
   compound-engineering-router: Feed repo context into compound engineering workflows
   context7: Combine with Context7 for richer library context in prompts
-review-duplication:
-  backend-engineer: Check backend code for duplicated functionality
-  codex-home-audit: Review Codex configuration for duplicates
-  frontend-ui-design: Check UI components for duplication
-
 reproduce-bug:
   gh-workflow: Follow up on GitHub issues or PR state after the bug is understood
   linear: Pull issue context from the local tracker before reproducing the bug
@@ -600,6 +578,10 @@ resolve-todo-parallel:
   orchestrating-subagents: Coordinate explicit subagent fan-out when runtime and user
     approval allow it
   triage: Review pending todo findings before execution begins
+review-duplication:
+  backend-engineer: When duplication is found in backend code
+  codex-home-audit: When reviewing Codex configuration for duplicates
+  frontend-ui-design: When duplication is found in UI components
 security-best-practices:
   1password: Findings involving secrets management — use for secure injection patterns
   create-auth: Security review often surfaces auth issues — use this for implementation

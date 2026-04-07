@@ -15,6 +15,7 @@ CANONICAL_PREFIXES = {
     "frontend/",
     "github/",
     "interview/",
+    "skills-antigravity/",
     "personas/",
     "product/",
     "skills-system/",
