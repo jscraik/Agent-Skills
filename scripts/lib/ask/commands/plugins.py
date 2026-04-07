@@ -45,7 +45,7 @@ def init_plugin(
         for folder in companion_folders:
             cmd.append(f"--with-{folder}")
 
-    process = subprocess.run(cmd, cwd=str(repo_root), capture_output=True, text=True)
+    process = subprocess.run(cmd, cwd=str(repo_root), capture_output=True, text=True, check=False)
 
     if process.returncode == 0:
         result.status = "success"
@@ -135,7 +135,7 @@ def install_plugin(
     if allow_unpinned_ref:
         cmd.append("--allow-unpinned-ref")
 
-    process = subprocess.run(cmd, cwd=str(repo_root), capture_output=True, text=True)
+    process = subprocess.run(cmd, cwd=str(repo_root), capture_output=True, text=True, check=False)
     result.data["raw_output"] = process.stdout
     result.data["raw_error"] = process.stderr
 

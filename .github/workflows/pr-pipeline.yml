@@ -55,7 +55,7 @@ jobs:
 
       - name: Run repo validation
         env:
-          SKILL_FAMILY_LOCAL_MEMORY_MODE: required
+          SKILL_FAMILY_LOCAL_MEMORY_MODE: optional
         run: bash scripts/validate_all.sh
 
       - name: Run skill diagnostics
@@ -85,7 +85,7 @@ jobs:
 
       - name: Run authoring family contract/eval/security gate
         env:
-          SKILL_FAMILY_LOCAL_MEMORY_MODE: required
+          SKILL_FAMILY_LOCAL_MEMORY_MODE: optional
         run: bash scripts/validate_skill_authoring_family.sh
 
   # CI orchestration policy: harness-preflight must wait for both repo-validate

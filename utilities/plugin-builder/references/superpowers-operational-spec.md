@@ -58,15 +58,23 @@ errors:
 metadata:
   owner: obra
   max_duration: "session_start <= 5s, skill_dispatch <= user-driven"
-  escalation: "escalate when Codex-native install is absent, skill surface is invalid, or hook adaptation requires provider-specific behavior not supported in Codex"
+  escalation: "notify:team:obra via:alerting/issue_tracker when Codex-native install is absent, skill surface is invalid, or hook adaptation requires provider-specific behavior not supported in Codex"
   plugin_scope:
     - native_codex_skill_install
     - startup_context_injection
     - skill_first_workflow_routing
     - deprecated_command_redirection
+  canonical_capabilities:
+    - codex_native_install_detect
+    - codex_skill_link
+    - session_context_inject
+    - deprecated_command_redirect
+    - skill_dispatch
+    - agent_dispatch
 ```
 
 ## Plugin Registry
+Registry entries mirror `metadata.canonical_capabilities` and should not introduce non-canonical capability IDs.
 ```yaml
 plugin_registry:
   superpowers:
@@ -81,6 +89,7 @@ plugin_registry:
 ```
 
 ## Capability Map
+Capability map entries reference the canonical IDs defined in `metadata.canonical_capabilities`.
 ```yaml
 capability_map:
   codex_native_install_detect:
@@ -108,7 +117,8 @@ capability_map:
 - `codex_skill_link` is idempotent when the target symlink or equivalent discovery path already resolves to the same `skills/` directory.
 - `session_context_inject` is idempotent per session-start event: repeated identical injections in the same session must not create divergent state.
 - `deprecated_command_redirect` is idempotent: repeated redirects resolve to the same canonical skill target.
-- `skill_dispatch` and `agent_dispatch` are not globally idempotent because they depend on user task context, but transition selection must remain deterministic for the same `(state,event,guard)` tuple.
+- `skill_dispatch` and `agent_dispatch` are not globally idempotent because they depend on user task context, but transition selection must remain deterministic for the same `(state,event)` input by either mutually-exclusive guards or explicit row-order priority.
+- Determinism enforcement: the authoring-family gate should reject transition sets without either mutually-exclusive guards or declared row-order priority.
 
 ## Invariants
 - `skills/` is the canonical runtime surface.
@@ -118,9 +128,12 @@ capability_map:
 - every plugin capability invocation must reference `superpowers` in `plugin_registry`.
 - `TERMINAL_SUCCESS` is valid only if Codex-native install is verified and skill routing resolves to a concrete skill or agent capability.
 - provider-specific hook glue from the source implementation must not be copied verbatim into Codex runtime behavior; only hook intent is portable.
+- Static enforcement reference: conversion/build validation via `utilities/plugin-builder/scripts/plugin_builder.py validate` should reject outputs that violate capability registration, surface ranking policy, or canonical-runtime-surface requirements.
+- Runtime enforcement reference: skill router/orchestrator runtime assertions should enforce terminal-state semantics (`TERMINAL_SUCCESS`, failure terminals) during execution tracing.
 
 ## Transition Table
 Transition table is the source of truth.
+Guards are evaluated top-to-bottom; first matching guard wins. Order guards from most specific to most general, with timeout/broad failure rows last for each `(state,event)` set.
 
 | S | E | G | A | P | R | N |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -192,10 +205,10 @@ Dry-run algorithm:
 ```text
 1. Start with input state S and event E.
 2. Filter transition table rows where S and E match exactly.
-3. Evaluate guards in row order until exactly one guard resolves true.
+3. Evaluate guards in declaration order and select the first guard that resolves true.
 4. Emit A, P, R, and N as the simulated transition.
 5. If no guard resolves true, return FAILURE:VALIDATION_ERROR and transition to FAIL_VALIDATION.
-6. If more than one guard resolves true, treat the table as invalid and return FAILURE:SYSTEM_ERROR to FAIL_SYSTEM.
+6. If more than one guard resolves true, keep row-order priority and use the first matching row.
 ```
 
 ## Transition Tracing

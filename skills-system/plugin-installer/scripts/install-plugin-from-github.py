@@ -322,6 +322,9 @@ def main(argv: list[str] | None = None) -> int:
         _validate_ref_token(ref_from_url)
 
         repo_id = f"{owner.lower()}/{repo.lower()}"
+        trust_overridden = bool(args.allow_untrusted_source)
+        pin_overridden = bool(args.allow_unpinned_ref)
+        trust_policy = "allowlist_override" if trust_overridden else "allowlist_enforced"
         trust_allowlist = {_normalize_repo_id(text) for text in DEFAULT_TRUSTED_REPOS}
         trust_allowlist.update(_normalize_repo_id(text) for text in args.trusted_repo)
         if not args.allow_untrusted_source and repo_id not in trust_allowlist:
@@ -352,6 +355,9 @@ def main(argv: list[str] | None = None) -> int:
             "path": plugin_path,
             "dest_root": dest_root,
             "validation_level": args.validation_level,
+            "trust_policy": trust_policy,
+            "trust_overridden": trust_overridden,
+            "pin_overridden": pin_overridden,
         })
 
         repo_root = _download_repo_zip(owner, repo, resolved_commit, tmp_dir)
@@ -367,7 +373,16 @@ def main(argv: list[str] | None = None) -> int:
         stage_dir = os.path.join(stage_root, plugin_name)
         os.makedirs(stage_root, exist_ok=True)
         shutil.copytree(candidate, stage_dir)
-        _write_journal_row(journal_path, "plugin_staged", {"stage_dir": stage_dir, "plugin_name": plugin_name})
+        _write_journal_row(
+            journal_path,
+            "plugin_staged",
+            {
+                "stage_dir": stage_dir,
+                "plugin_name": plugin_name,
+                "trust_overridden": trust_overridden,
+                "pin_overridden": pin_overridden,
+            },
+        )
 
         _run_plugin_validation(stage_dir, args.validation_level, journal_path)
 
@@ -375,7 +390,17 @@ def main(argv: list[str] | None = None) -> int:
         if os.path.exists(destination):
             raise InstallError(f"Destination already exists: {destination}")
         os.replace(stage_dir, destination)
-        _write_journal_row(journal_path, "plugin_promoted", {"destination": destination})
+        install_path = os.path.relpath(destination, dest_root)
+        _write_journal_row(
+            journal_path,
+            "plugin_promoted",
+            {
+                "destination": destination,
+                "install_path": install_path,
+                "trust_overridden": trust_overridden,
+                "pin_overridden": pin_overridden,
+            },
+        )
 
         provenance = {
             "schema_version": "1.0",
@@ -389,7 +414,11 @@ def main(argv: list[str] | None = None) -> int:
                 "path": plugin_path,
             },
             "destination": destination,
+            "install_path": install_path,
             "validation_level": args.validation_level,
+            "trust_policy": trust_policy,
+            "trust_overridden": trust_overridden,
+            "pin_overridden": pin_overridden,
         }
         _write_json_atomic(_provenance_path(dest_root, run_id), provenance)
         _write_journal_row(journal_path, "run_completed", {"destination": destination})

@@ -19,7 +19,7 @@
 This spec models the Codex-oriented conversion and packaged runtime behavior for the `compound-engineering` plugin within the marketplace-style source repo:
 - marketplace root and plugin root must be resolved separately;
 - provider-specific manifests are migration references, not Codex runtime surfaces;
-- command-like content may resolve to `skills/`, `prompts/`, or both;
+- command-like content resolves to `skills/` as the runtime surface, with optional `interface.defaultPrompt` discoverability text;
 - inline MCP and file-based MCP configuration must be reconciled before runtime use.
 
 ## Operational Mode
@@ -36,7 +36,6 @@ capabilities:
   - command_classify
   - mcp_reconcile
   - skill_dispatch
-  - prompt_dispatch
   - agent_dispatch
 result_status:
   - SUCCESS
@@ -77,7 +76,6 @@ plugin_registry:
       - command_classify
       - mcp_reconcile
       - skill_dispatch
-      - prompt_dispatch
       - agent_dispatch
 ```
 
@@ -95,16 +93,13 @@ capability_map:
     description: "Validate manifest-declared custom paths and owned plugin surfaces."
   command_classify:
     plugin_id: compound-engineering
-    description: "Classify command-like content into Codex skills, prompts, or both."
+    description: "Classify command-like content into Codex skills with optional interface.defaultPrompt entry text."
   mcp_reconcile:
     plugin_id: compound-engineering
     description: "Reconcile inline MCP definitions with file-based MCP config."
   skill_dispatch:
     plugin_id: compound-engineering
     description: "Dispatch a classified skill surface."
-  prompt_dispatch:
-    plugin_id: compound-engineering
-    description: "Dispatch a classified prompt surface."
   agent_dispatch:
     plugin_id: compound-engineering
     description: "Dispatch an optional agent surface."
@@ -127,6 +122,7 @@ capability_map:
 
 ## Transition Table
 Transition table is the source of truth.
+Guards are evaluated top-to-bottom and first match wins; order rows from most specific to most general, with timeouts/fallback failures last.
 
 | S | E | G | A | P | R | N |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -179,10 +175,10 @@ stateDiagram-v2
 ```text
 1. Start with input state S and event E.
 2. Filter transition rows where S and E match exactly.
-3. Evaluate guards in row order until exactly one guard resolves true.
+3. Evaluate guards in row order and select the first guard that resolves true.
 4. Emit A, P, R, and N as the simulated transition.
 5. If no guard resolves true, return FAILURE:VALIDATION_ERROR to FAIL_VALIDATION.
-6. If more than one guard resolves true, treat the table as invalid and return FAILURE:SYSTEM_ERROR to FAIL_SYSTEM.
+6. If more than one guard resolves true, keep row-order precedence and use the first matching row.
 ```
 
 ## Transition Tracing

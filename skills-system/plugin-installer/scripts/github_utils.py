@@ -12,6 +12,10 @@ _REPO_RE = re.compile(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
 
 
 def github_request(url: str, user_agent: str, timeout: float = 10.0) -> bytes:
+    parsed = urllib.parse.urlparse(url)
+    if parsed.scheme not in {"http", "https"}:
+        raise ValueError(f"Unsupported URL scheme for github_request: '{parsed.scheme or '<empty>'}'")
+
     headers = {"User-Agent": user_agent}
     token = os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN")
     if token:

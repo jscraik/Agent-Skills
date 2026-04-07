@@ -38,14 +38,18 @@ Use this reference when `hooks/` are requested in a plugin scaffold or conversio
 - Use `matcher` only where runtime supports event matching semantics.
 - For `Stop` hooks, include deterministic block rationale paths.
 
-## Provisional/unsupported notes (must be flagged)
+## Provisional/unsupported notes (recommended to flag)
 - `type: "prompt"`: parsed, not executed.
 - `type: "agent"`: parsed, not executed.
 - `"async": true`: parsed, skipped.
-- Any behavior not tied to the source anchors above must be marked as inferred.
+- Any behavior not tied to the source anchors above should be marked as inferred.
 
 ## Output contract for plugin conversion reports
-When `hooks/` are touched, include:
+When `hooks/` are touched, it is recommended to include:
 - `verified_hooks_behavior`: list with source anchors.
 - `provisional_hooks_behavior`: list with reason and risk.
 - `hook_conversion_assumptions`: concise assumptions requiring follow-up validation.
+
+Caveat:
+- Current `plugin-builder` and `plugin-installer` flows do not yet enforce handler-type/async execution semantics or require these report fields at validation time; treat this section as advisory reporting guidance.
+- TODO: add explicit enforcement in plugin conversion/install validators and link the follow-up implementation issue when tracked.

@@ -10,9 +10,15 @@ metadata:
 ## When to use
 
 Use this skill when the user asks to:
-- list installable third-party plugins from curated or explicit sources;
 - install a contract-valid plugin from GitHub path or repository ref;
 - verify plugin integrity and restore missing plugin visibility.
+
+List mode:
+- list installable third-party plugins from curated or explicit sources.
+- minimum inputs: source catalog/URL query context only (no install path/destination required).
+- examples:
+  - inspect curated plugin sources and shortlist install candidates before writing
+  - `bin/ask plugins install <url> --dry-run --path <plugin-path>` for install-preview style listing
 
 Do not use this skill as primary owner for:
 - plugin package authoring or conversion hardening;
@@ -26,7 +32,7 @@ Handoffs:
 
 ## Inputs
 
-Minimum inputs:
+Install mode minimum inputs:
 - install source (`--repo` or `--url`, plus `--path` plugin root);
 - destination root (default `${CODEX_HOME:-$HOME/.codex}/plugins`);
 - trust policy (trusted repo allowlist or explicit override);
@@ -104,7 +110,8 @@ python3 utilities/plugin-builder/scripts/plugin_builder.py validate <installed-p
 ```
 
 Family gate note:
-- `scripts/validate_skill_authoring_family.sh` now enforces structural contract/security checks for `plugin-installer`.
+- `authoring-family-gate` (CI job) runs `bash scripts/validate_skill_authoring_family.sh`.
+- The merge contract for this family is enforced by `authoring-family-gate`, including structural contract/schema checks plus benchmark/security parity for `plugin-installer`.
 - Live Codex smoke+release execution is trusted-lane only with `SKILL_FAMILY_LIVE_EVALS=1 SKILL_FAMILY_LIVE_EVALS_TRUSTED=1`.
 
 ## See Also

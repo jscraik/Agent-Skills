@@ -254,10 +254,8 @@ Typical next steps:
 - `ce-technical-review`
 - `ce-plan`
 - `ce-deepen-plan`
-- `ce-tdd`
-- `ce-work`
-- `ce-review`
 - `ce-work` (with optional `ce-tdd` posture; `ce-tdd` is not a standalone lifecycle stage)
+- `ce-review`
 
 After learning capture:
 - stop with the new `docs/solutions/` artifact when the documentation is sufficient

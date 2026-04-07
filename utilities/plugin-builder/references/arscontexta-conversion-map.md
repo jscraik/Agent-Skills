@@ -84,8 +84,8 @@ plugins/arscontexta/
     add-domain/
     reseed/
     upgrade/
-  prompts/                           # optional; include only if prompt assets add value
-    arscontexta-quickstart.md
+  references/
+    arscontexta-quickstart.md        # optional reference text; not a runtime prompt surface
     arscontexta-setup-checklist.md
   hooks.json
   hooks/
@@ -107,7 +107,7 @@ plugins/arscontexta/
 ```
 
 Notes:
-- `prompts/` is optional and should hold Codex prompt assets, not one-to-one duplicates of every skill.
+- Runtime packaging remains skill-first; if prompt text is retained, keep it under `references/` as migration/support documentation, not as a runtime `prompts/` surface.
 - a valid first pass may ship no `prompts/` directory at all if the conversion does not need prompt assets.
 - `agents/` is optional and should only contain agent assets that remain useful in Codex.
 - `references/` is the correct place to preserve rich source material required by setup, migration, or generation flows.

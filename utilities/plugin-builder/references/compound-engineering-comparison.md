@@ -124,6 +124,6 @@ For compound-engineering style repos, the safest conversion flow is:
 2. Read the selected plugin manifest plus any sibling provider manifests.
 3. Inventory only manifest-owned surfaces under that plugin root.
 4. Compare README claims to actual tree structure, but trust the tree.
-5. Normalize command-like artifacts into `skills/`, `prompts/`, or both based on current implementation semantics.
+5. Normalize command-like artifacts into `skills/` as the canonical runtime surface; when needed, keep `interface.defaultPrompt` as the discoverable runtime entrypoint and treat any retained `prompts/` content as non-canonical migration documentation only.
 6. Convert MCP config into a stable `.mcp.json` file.
 7. Preserve non-Codex provider metadata as migration references, not runtime surfaces.

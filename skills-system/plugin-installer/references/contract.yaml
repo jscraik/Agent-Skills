@@ -9,12 +9,13 @@ triggers:
 inputs:
   - source repository and plugin path
   - pinned ref or explicit unpinned override
+  - trust policy (allowlist default with optional explicit override)
   - destination plugin root
   - validation policy strict|compat
 outputs:
   - installed plugin under <destination root>/<plugin-name>
-  - provenance manifest with source ref, resolved commit, and destination-root-relative install path
-  - rollback journal with staged and promoted install events relative to the destination root
+  - provenance manifest with source ref, resolved commit, destination-root-relative install path, trust_policy, trust_overridden, and pin_overridden
+  - rollback journal with staged and promoted install events relative to the destination root, including trust_overridden and pin_overridden on staged/promoted events
 non_goals:
   - plugin package conversion or hardening workflows
   - standalone skill authoring/hardening
@@ -26,7 +27,8 @@ risks:
 rollback_procedure: >
   If an install produces an unusable plugin, use the rollback journal to identify
   promoted directories, remove them from the configured destination root, and reinstall from the
-  previous pinned ref. Never skip quarantine validation during recovery.
+  previous pinned ref. Preserve trust_policy/override metadata in the recovery record and never
+  skip quarantine validation during recovery.
 observability: >
   Monitor plugin-installer via provenance manifest presence, quarantine-to-promote
   success rate, validator pass rate, and rollback frequency.

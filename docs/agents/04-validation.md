@@ -40,6 +40,11 @@ See [CI Required Checks](/docs/agents/12-ci-required-checks.md) for the complete
 ## Authoring-family contract behavior
 `authoring-family-gate` invokes `bash scripts/validate_skill_authoring_family.sh`.
 
+CI local-memory policy:
+- In PR CI, `SKILL_FAMILY_LOCAL_MEMORY_MODE` is set to `optional`.
+- Expected behavior: local-memory preflight runs in warn-and-continue mode in CI, while remaining contract/eval/security checks continue to enforce pass/fail outcomes.
+- Use `required` only in lanes where `local-memory` is guaranteed available.
+
 That script enforces equivalent governance for:
 - `utilities/skill-builder`
 - `skills-system/skill-creator`

@@ -94,6 +94,7 @@ Session: `[PROMPT: artifacts/ai/sessions/YYYY-MM-DD-<slug>.json]`
 - [ ] Considered backward compatibility / migrations (Optional)
 - [ ] Verified no secrets are committed (tokens, keys, passwords)
 - [ ] Confirmed CI is green (or explained failures)
+- [ ] For authoring-family changes, confirmed `authoring-family-gate` passed (CI runs with `SKILL_FAMILY_LOCAL_MEMORY_MODE=optional`, so only local-memory preflight is warning-only)
 
 ## Release notes
 

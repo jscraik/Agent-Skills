@@ -20,6 +20,7 @@ Reviewers should expect this gate to enforce:
 - Evals contract/security coverage including prompt-injection fail cases.
 - OpenClaw security guard execution.
 - Structural smoke/release eval case coverage (or trusted-lane live eval execution when explicitly enabled).
+- In CI this gate runs with `SKILL_FAMILY_LOCAL_MEMORY_MODE=optional`, so local-memory preflight is advisory there; reviewers should still require all remaining contract/eval/security checks to pass.
 
 ## Gate dependency policy
 See [CI Required Checks](/docs/agents/12-ci-required-checks.md) for the canonical PR gate dependency policy.

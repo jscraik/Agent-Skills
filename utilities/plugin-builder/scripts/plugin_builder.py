@@ -78,6 +78,8 @@ OPTIONAL_INTERFACE_STRING_FIELDS = [
     "termsOfServiceURL",
     "brandColor",
 ]
+# NOTE: interface.defaultPrompt is intentionally excluded from OPTIONAL_INTERFACE_STRING_FIELDS.
+# It is validated separately because the contract allows either a string or an array of strings.
 OPTIONAL_INTERFACE_PATH_FIELDS = ["composerIcon", "logo"]
 
 CLAUDE_TO_CODEX_TERMINOLOGY = {
