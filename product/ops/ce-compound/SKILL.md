@@ -335,7 +335,6 @@ Auto-invoke triggers and success output format are documented in `references/lea
 - Imported critical-pattern template: `references/compound-docs-critical-pattern-template.md`
 
 ## See Also
-
 | Skill | When to use together |
 |---|---|
 | [[compound-engineering-router]] | Route selection before entering a stage |
@@ -348,7 +347,6 @@ Auto-invoke triggers and success output format are documented in `references/lea
 | Project Brain | When `.harness/` exists for knowledge capture |
 
 **Topic map:** [[product-ops]]
-
 ## Decision feedback protocol
 <!-- decision-feedback-protocol:v2 -->
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.
