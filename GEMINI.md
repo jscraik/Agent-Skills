@@ -42,7 +42,7 @@ For 1Password: use `[ -e ]` instead of `[ -f ]` for named-pipe checks.
 ## Shell Script Portability
 
 Prefer `[ -e "..." ]` over `[ -f "..." ]` for existence checks to support named pipes and special files.
-For shell scripts in shared workflows, see [AGENTS.md](./AGENTS.md). (When modifying shell scripts or configuration files, use non-interactive command patterns and avoid commands requiring user input such as `op read` from 1Password.)
+For shell scripts in shared workflows, see [AGENTS.md](./AGENTS.md). (When modifying shell scripts or configuration files, use non-interactive command patterns and avoid commands requiring user input, such as `op read` from 1Password.)
 
 ## TypeScript Configuration
 
