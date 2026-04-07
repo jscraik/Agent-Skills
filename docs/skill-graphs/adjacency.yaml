@@ -158,12 +158,6 @@ ce-plan:
   compound-engineering-router: Choose CE stage
   linear: Issue creation
   product-spec: Product contract
-ce-reliability-review:
-  ce-plan: Incorporate reliability phases and acceptance criteria
-  ce-review: Broad readiness synthesis, not detailed reliability analysis
-  ce-spec: Define failure model and recovery requirements in the contract
-  ce-technical-review: Code-level engineering issues, not failure scenario modeling
-  systematic-debugging: When investigating a specific failure that already occurred
 ce-review:
   agent-native-audit: Audit agent-operability vs merge-readiness
   ce-technical-review: Severity-ranked engineering issues
@@ -174,12 +168,6 @@ ce-spec:
   ce-plan: Use after spec completion when the contract is ready for execution sequencing
   compound-engineering-router: Use to choose the correct compound-engineering stage
     before or after specification
-ce-tdd:
-  ce-plan: When test strategy needs planning before TDD
-  ce-review: Contract acceptance after TDD completion
-  ce-work: General execution without strict TDD
-  linear: Issue creation and progress tracking
-  test-driven-development: Broader TDD guidance without CE-stage framing
 ce-technical-review:
   agent-native-audit: Review agent-operability or workflow autonomy rather than code-level
     engineering risk
@@ -484,11 +472,20 @@ playwright-interactive:
   agentation: Wire Playwright automation into Agentation self-driving
   fixing-accessibility: Test keyboard navigation and focus via Playwright
   ui-visual-regression: Capture Playwright screenshots for regression baselines
+plugin-builder:
+  plugin-creator: Start from a minimal plugin scaffold before hardening
+  plugin-installer: Install and verify third-party plugins from GitHub with provenance
+    + rollback controls
+  skill-builder: Harden standalone skills before plugin packaging
 plugin-creator:
   cli-spec: Consult the technical contract for the ask CLI
   codex-plugin-builder: Promote scaffold into a full plugin package with governance
     checks
   skill-builder: Improve bundled skill quality before plugin release
+plugin-installer:
+  plugin-builder: Harden/convert plugin packages before distribution install
+  plugin-creator: Scaffold a local plugin package before hardening or install
+  skill-installer: Install standalone skills when plugin packaging is unnecessary
 process-watch:
   codex-home-audit: Check process health during a Codex home audit
   fix-mise: Diagnose mise shim CPU/memory issues via process-watch
