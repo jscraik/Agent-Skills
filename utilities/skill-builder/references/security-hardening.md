@@ -72,7 +72,6 @@ For non-interactive runs (`codex exec`), prefer least privilege:
 - For edits: `--full-auto` or `--sandbox workspace-write`
 - Avoid `--sandbox danger-full-access` unless you are inside an isolated runner.
 
-In CI, set approvals explicitly to avoid hanging on prompts:
-- `--ask-for-approval never`
+In CI, set approvals in profile/config (`approval_policy` in `~/.codex/config.toml`) so non-interactive runs do not block on prompts.
 
 Never use `--dangerously-bypass-approvals-and-sandbox` / `--yolo` unless you are inside an externally hardened, disposable environment.

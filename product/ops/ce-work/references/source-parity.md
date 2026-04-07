@@ -14,8 +14,8 @@ This document records how the prompt sources for the execution stage were migrat
 - canonical source prompt:
   - `/Users/jamiecraik/dev/config/codex/prompts/workflow-work.md`
 - donor prompts explicitly preserved:
-  - `https://github.com/EveryInc/compound-engineering-plugin/tree/847ce3f156a5cdf75667d9802e95d68e6b3c53a4/plugins/compound-engineering/skills/ce-work`
-  - `https://github.com/EveryInc/compound-engineering-plugin/tree/847ce3f156a5cdf75667d9802e95d68e6b3c53a4/plugins/compound-engineering/skills/ce-work-beta`
+  - `https://github.com/EveryInc/compound-engineering-plugin/tree/0ae91dcc298721e5b2c4ab6d1fc6f76a13b6f67c/plugins/compound-engineering/skills/ce-work`
+  - `https://github.com/EveryInc/compound-engineering-plugin/tree/0ae91dcc298721e5b2c4ab6d1fc6f76a13b6f67c/plugins/compound-engineering/skills/ce-work-beta`
 - packaging target:
   - `/Users/jamiecraik/dev/Agent-Skills/product/ops/ce-work/`
 
@@ -51,6 +51,9 @@ This document records how the prompt sources for the execution stage were migrat
 - Donor bare-prompt execution was preserved only as a tiny, low-risk compatibility path; this repo still keeps artifact-led execution as the default.
 - Parallel execution is preserved as an execution strategy, but the skill avoids assuming that every platform or turn permits subagent spawning.
 - `contract.yaml` and `evals.yaml` were added to improve routing reliability and validation coverage.
+- non-route-critical standards and philosophy guidance were relocated to `references/style-and-operating-guidance.md` so `SKILL.md` stays execution-focused without losing context
+- deterministic execution and verification role mapping is now explicit in `references/sub-agent-map.md`
+- missing supporting references were restored for operational completeness: `references/mcp-integration.md` and `references/ce-anti-patterns.md`
 
 ## No-loss checklist
 - plan, todo, and direct-spec execution paths are still present

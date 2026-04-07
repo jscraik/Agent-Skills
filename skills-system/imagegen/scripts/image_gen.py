@@ -18,8 +18,6 @@ import re
 import sys
 import time
 from typing import Any, Dict, Iterable, List, Optional, Tuple
-import traceback
-import logging
 
 from io import BytesIO
 
@@ -813,10 +811,7 @@ class _SingleFile:
             try:
                 self._handle.close()
             except Exception:
-                # Log close failures instead of silently ignoring them, but do not
-                # suppress any exception from the with-block itself.
-                traceback.print_exc()
-                logging.warning("Failed to close file %s", self._path, exc_info=True)
+                pass
         return False
 
 
@@ -834,10 +829,7 @@ class _FileBundle:
             try:
                 handle.close()
             except Exception:
-                # Log close failures while ensuring they do not mask exceptions
-                # raised inside the with-block.
-                traceback.print_exc()
-                logging.warning("Failed to close input file handle", exc_info=True)
+                pass
         return False
 
 

@@ -2,7 +2,7 @@
 
 Read when: an existing requirements document, system spec, or UI spec mostly needs refinement before planning rather than deeper contract expansion.
 
-Imported from the upstream `document-review` skill in `EveryInc/compound-engineering-plugin` commit `0fdc25a36cabea4ce9e2ae47ff69c1a9a2de8f0b`, adapted for `ce-deepen-spec`.
+Imported from the upstream `document-review` skill in `EveryInc/compound-engineering-plugin` commit `0ae91dcc298721e5b2c4ab6d1fc6f76a13b6f67c`, adapted for `ce-deepen-spec`.
 
 ## Purpose
 

@@ -25,104 +25,107 @@ ALLOWED_RESOURCES = {"scripts", "references", "assets"}
 
 SKILL_TEMPLATE = """---
 name: {skill_name}
-description: "Use when a request maps directly to the {skill_name} workflow and needs deterministic, evidence-backed outputs."
+description: [TODO: Complete and informative explanation of what the skill does and when to use it. Include WHEN to use this skill - specific scenarios, file types, or tasks that trigger it.]
 ---
 
 # {skill_title}
 
 ## Overview
 
-This skill provides a focused execution path for {skill_title} tasks with clear inputs, explicit outputs, and validation-first delivery.
+[TODO: 1-2 sentences explaining what this skill enables]
 
-## When to use
+## Structuring This Skill
 
-- Trigger when the user asks for {skill_title}-specific work with concrete artifacts.
-- Route elsewhere when another skill has a tighter contract for the request.
+[TODO: Choose the structure that best fits this skill's purpose. Common patterns:
 
-## Inputs
+**1. Workflow-Based** (best for sequential processes)
+- Works well when there are clear step-by-step procedures
+- Example: DOCX skill with "Workflow Decision Tree" -> "Reading" -> "Creating" -> "Editing"
+- Structure: ## Overview -> ## Workflow Decision Tree -> ## Step 1 -> ## Step 2...
 
-- User objective and success criteria.
-- Required files, paths, or repository context.
-- Constraints (time, safety, tooling, and validation requirements).
+**2. Task-Based** (best for tool collections)
+- Works well when the skill offers different operations/capabilities
+- Example: PDF skill with "Quick Start" -> "Merge PDFs" -> "Split PDFs" -> "Extract Text"
+- Structure: ## Overview -> ## Quick Start -> ## Task Category 1 -> ## Task Category 2...
 
-## Workflow
+**3. Reference/Guidelines** (best for standards or specifications)
+- Works well for brand guidelines, coding standards, or requirements
+- Example: Brand styling with "Brand Guidelines" -> "Colors" -> "Typography" -> "Features"
+- Structure: ## Overview -> ## Guidelines -> ## Specifications -> ## Usage...
 
-1. Confirm scope and gather the minimum context required to proceed safely.
-2. Run the narrowest proof or probe first.
-3. Execute the implementation path with deterministic commands.
-4. Validate outputs and summarize evidence.
+**4. Capabilities-Based** (best for integrated systems)
+- Works well when the skill provides multiple interrelated features
+- Example: Product Management with "Core Capabilities" -> numbered capability list
+- Structure: ## Overview -> ## Core Capabilities -> ### 1. Feature -> ### 2. Feature...
 
-## Deliverables
+Patterns can be mixed and matched as needed. Most skills combine patterns (e.g., start with task-based, add workflow for complex operations).
 
-- Concrete output artifacts with exact paths.
-- Commands executed and validation results.
-- Any blockers, root cause, and next safest action.
+Delete this entire "Structuring This Skill" section when done - it's just guidance.]
 
-## Validation
+## [TODO: Replace with the first main section based on chosen structure]
 
-- Run the smallest relevant checks first, then broaden only as needed.
-- Stop at first failing gate and report the failure before continuing.
+[TODO: Add content here. See examples in existing skills:
+- Code samples for technical skills
+- Decision trees for complex workflows
+- Concrete examples with realistic user requests
+- References to scripts/templates/references as needed]
 
-## Failure mode
+## Resources (optional)
 
-- If required context is missing or unsafe actions are requested, pause and ask one targeted clarification.
-- If tooling fails, provide a concrete fallback command path.
+Create only the resource directories this skill actually needs. Delete this section if no resources are required.
 
-## Gotchas
+### scripts/
+Executable code (Python/Bash/etc.) that can be run directly to perform specific operations.
 
-- Avoid broad edits before proving the smallest path works.
-- Keep outputs deterministic and file-path explicit.
+**Examples from other skills:**
+- PDF skill: `fill_fillable_fields.py`, `extract_form_field_info.py` - utilities for PDF manipulation
+- DOCX skill: `document.py`, `utilities.py` - Python modules for document processing
 
-## Resources
+**Appropriate for:** Python scripts, shell scripts, or any executable code that performs automation, data processing, or specific operations.
 
-- `scripts/`: executable helpers for repeatable operations.
-- `references/`: detailed docs loaded when needed.
-- `assets/`: templates and files used in produced outputs.
+**Note:** Scripts may be executed without loading into context, but can still be read by Codex for patching or environment adjustments.
 
-## Examples
+### references/
+Documentation and reference material intended to be loaded into context to inform Codex's process and thinking.
 
-- Triggering prompt: "Run {skill_name} on this repo and provide validated outputs."
-- Non-triggering prompt: "Give me unrelated brainstorming ideas without execution."
+**Examples from other skills:**
+- Product management: `communication.md`, `context_building.md` - detailed workflow guides
+- BigQuery: API reference documentation and query examples
+- Finance: Schema documentation, company policies
 
+**Appropriate for:** In-depth documentation, API references, database schemas, comprehensive guides, or any detailed information that Codex should reference while working.
+
+### assets/
+Files not intended to be loaded into context, but rather used within the output Codex produces.
+
+**Examples from other skills:**
+- Brand styling: PowerPoint template files (.pptx), logo files
+- Frontend builder: HTML/React boilerplate project directories
+- Typography: Font files (.ttf, .woff2)
+
+**Appropriate for:** Templates, boilerplate code, document templates, images, icons, fonts, or any files meant to be copied or used in the final output.
+
+---
+
+**Not every skill requires all three types of resources.**
 """
 
 EXAMPLE_SCRIPT = '''#!/usr/bin/env python3
 """
 Example helper script for {skill_name}
 
-This helper validates inputs and prints a deterministic execution summary.
+This is a placeholder script that can be executed directly.
+Replace with actual implementation or delete if not needed.
+
+Example real scripts from other skills:
+- pdf/scripts/fill_fillable_fields.py - Fills PDF form fields
+- pdf/scripts/convert_pdf_to_images.py - Converts PDF pages to images
 """
 
-from __future__ import annotations
-
-import argparse
-import json
-from pathlib import Path
-
-
-def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Run {skill_name} helper")
-    parser.add_argument("--input", default="", help="Optional input path")
-    parser.add_argument("--output", default="./artifacts/{skill_name}-summary.json", help="Output summary path")
-    parser.add_argument("--dry-run", action="store_true", help="Print intended actions without writing files")
-    return parser.parse_args()
-
-
 def main():
-    args = parse_args()
-    output_path = Path(args.output).expanduser()
-    payload = {{
-        "skill": "{skill_name}",
-        "input": args.input or None,
-        "mode": "dry-run" if args.dry_run else "execute",
-        "status": "ok",
-    }}
-    if args.dry_run:
-        print(json.dumps(payload, indent=2))
-        return
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    output_path.write_text(json.dumps(payload, indent=2) + "\\n", encoding="utf-8")
-    print(f"Wrote summary to {{output_path}}")
+    print("This is an example script for {skill_name}")
+    # TODO: Add actual script logic here
+    # This could be data processing, file conversion, API calls, etc.
 
 if __name__ == "__main__":
     main()
@@ -130,28 +133,64 @@ if __name__ == "__main__":
 
 EXAMPLE_REFERENCE = """# Reference Documentation for {skill_title}
 
-Use this file for durable domain context that is too large for `SKILL.md`.
+This is a placeholder for detailed reference documentation.
+Replace with actual reference content or delete if not needed.
 
-## Recommended Sections
+Example real reference docs from other skills:
+- product-management/references/communication.md - Comprehensive guide for status updates
+- product-management/references/context_building.md - Deep-dive on gathering context
+- bigquery/references/ - API references and query examples
 
-- Scope and non-scope
+## When Reference Docs Are Useful
+
+Reference docs are ideal for:
+- Comprehensive API documentation
+- Detailed workflow guides
+- Complex multi-step processes
+- Information too lengthy for main SKILL.md
+- Content that's only needed for specific use cases
+
+## Structure Suggestions
+
+### API Reference Example
 - Overview
-- Invariants and safety constraints
-- Step-by-step operational workflow
-- Validation checklist
+- Authentication
+- Endpoints with examples
+- Error codes
+- Rate limits
+
+### Workflow Guide Example
+- Prerequisites
+- Step-by-step instructions
+- Common patterns
 - Troubleshooting
-- Links to related docs/scripts
+- Best practices
 """
 
 EXAMPLE_ASSET = """# Example Asset File
 
-Use this location for templates or files consumed by generated outputs.
+This placeholder represents where asset files would be stored.
+Replace with actual asset files (templates, images, fonts, etc.) or delete if not needed.
 
-## Asset Rules
+Asset files are NOT intended to be loaded into context, but rather used within
+the output Codex produces.
 
-- Keep assets versioned and small enough for repo policy.
-- Do not store secrets, API keys, or personal data.
-- Reference assets from `SKILL.md` using relative paths.
+Example asset files from other skills:
+- Brand guidelines: logo.png, slides_template.pptx
+- Frontend builder: hello-world/ directory with HTML/React boilerplate
+- Typography: custom-font.ttf, font-family.woff2
+- Data: sample_data.csv, test_dataset.json
+
+## Common Asset Types
+
+- Templates: .pptx, .docx, boilerplate directories
+- Images: .png, .jpg, .svg, .gif
+- Fonts: .ttf, .otf, .woff, .woff2
+- Boilerplate code: Project directories, starter files
+- Icons: .ico, .svg
+- Data files: .csv, .json, .xml, .yaml
+
+Note: This is a text placeholder. Actual assets can be any file type.
 """
 
 
@@ -277,7 +316,7 @@ def init_skill(skill_name, path, resources, include_examples, interface_override
     # Print next steps
     print(f"\n[OK] Skill '{skill_name}' initialized successfully at {skill_dir}")
     print("\nNext steps:")
-    print("1. Refine SKILL.md with your exact trigger boundaries, workflow, and validation gates")
+    print("1. Edit SKILL.md to complete the TODO items and update the description")
     if resources:
         if include_examples:
             print("2. Customize or delete the example files in scripts/, references/, and assets/")

@@ -1,150 +1,58 @@
 ---
 name: skill-installer
-description: Install contract-valid Codex skills from curated registries or GitHub sources into `$CODEX_HOME/skills` with provenance, quarantine validation, and rollback safeguards. Use when distribution and visibility repair are the primary goals after authoring quality is already established.
+description: Install Codex skills into $CODEX_HOME/skills from a curated list or a GitHub repo path. Use when a user asks to list installable skills, install a curated skill, or install a skill from another repo (including private repos).
 metadata:
-  short-description: Install validated skills with provenance and rollback safety
+  short-description: Install curated skills from openai/skills or other repos
 ---
 
 # Skill Installer
 
-## When to use
+Helps install skills. By default these are from https://github.com/openai/skills/tree/main/skills/.curated, but users can also provide other locations. Experimental skills live in https://github.com/openai/skills/tree/main/skills/.experimental and can be installed the same way.
 
-Use this skill when the user asks to:
-- list installable skills from curated or experimental registries;
-- install a contract-valid skill from curated sources or GitHub path;
-- restore missing skill visibility by reinstalling into a clean destination path.
+Use the helper scripts based on the task:
+- List skills when the user asks what is available, or if the user uses this skill without specifying what to do. Default listing is `.curated`, but you can pass `--path skills/.experimental` when they ask about experimental skills.
+- Install from the curated list when the user provides a skill name.
+- Install from another repo when the user provides a GitHub repo/path (including private repos).
 
-Do not use this skill as primary owner for:
-- creating new skills from scratch;
-- lifecycle hardening, eval tuning, or routing optimization;
-- plugin packaging workflows.
+Install skills with the helper scripts.
 
-Handoffs:
-- to `skill-creator` for first-pass authoring;
-- to `skill-builder` for lifecycle hardening and contract/eval upgrades;
-- to `plugin-builder` when the deliverable must ship as a plugin package.
+## Communication
 
-## Inputs
+When listing skills, output approximately as follows, depending on the context of the user's request. If they ask about experimental skills, list from `.experimental` instead of `.curated` and label the source accordingly:
+"""
+Skills from {repo}:
+1. skill-1
+2. skill-2 (already installed)
+3. ...
+Which ones would you like installed?
+"""
 
-Minimum inputs:
-- install source (`--repo`/`--url`, and one or more `--path` values);
-- destination root (default `${CODEX_HOME:-$HOME/.codex}/skills`);
-- trust policy (trusted repo allowlist or explicit override);
-- provenance pin (`--ref` commit SHA unless explicit override);
-- validation policy (`--validation-level strict|compat`).
+After installing a skill, tell the user: "Restart Codex to pick up new skills."
 
-If scope expands beyond install/distribution, narrow to install-only and hand off adjacent work.
+## Scripts
 
-Contract resources to read before risky installs:
-- `references/contract.yaml`
-- `references/evals.yaml`
-- `references/task-profile.json`
+All of these scripts use network, so when running in the sandbox, request escalation when running them.
 
-## Outputs
+- `scripts/list-skills.py` (prints skills list with installed annotations)
+- `scripts/list-skills.py --format json`
+- Example (experimental list): `scripts/list-skills.py --path skills/.experimental`
+- `scripts/install-skill-from-github.py --repo <owner>/<repo> --path <path/to/skill> [<path/to/skill> ...]`
+- `scripts/install-skill-from-github.py --url https://github.com/<owner>/<repo>/tree/<ref>/<path>`
+- Example (experimental skill): `scripts/install-skill-from-github.py --repo openai/skills --path skills/.experimental/<skill-name>`
 
-Expected outputs from a successful run:
-- installed skill directory at `<dest>/<skill-name>`;
-- quarantine promotion evidence;
-- rollback journal at `<dest>/.install-journal/skill-installer/<run-id>.jsonl`;
-- provenance manifest at `<dest>/.provenance/skill-installer/<run-id>.json`.
+## Behavior and Options
 
-Structured output contract:
-- provenance manifests include `schema_version` and run metadata;
-- staged validator results are recorded per skill for auditability.
+- Defaults to direct download for public GitHub repos.
+- If download fails with auth/permission errors, falls back to git sparse checkout.
+- Aborts if the destination skill directory already exists.
+- Installs into `$CODEX_HOME/skills/<skill-name>` (defaults to `~/.codex/skills`).
+- Multiple `--path` values install multiple skills in one run, each named from the path basename unless `--name` is supplied.
+- Options: `--ref <ref>` (default `main`), `--dest <path>`, `--method auto|download|git`.
 
-User-facing closeout:
-- list what was installed and source ref;
-- include any trust override used;
-- remind user to restart Codex to refresh skill discovery.
+## Notes
 
-## Philosophy
-
-Installation is downstream execution, not authoring judgment:
-- trust boundaries must be explicit before activation;
-- provenance must be durable and machine-checkable;
-- activation should be transactional so failures roll back cleanly;
-- installer behavior should remain predictable under pressure.
-
-Adapt the trust policy and validation depth to different source contexts and deployment environments. Each install workflow is unique — vary quarantine depth, provenance detail, and override scope to match the actual risk level of the source. Diverse environments (curated registries, GitHub paths, offline caches) each require context-specific trust decisions. A capable installer enables reliable skill distribution without requiring users to accept one-size-fits-all defaults. Explore the validation options and customize behavior to match your team's security posture before any activation step.
-
-## Constraints
-
-- Prefer curated or explicitly trusted sources by default.
-- Require pinned commit refs unless an explicit override is approved.
-- Stage in quarantine before promotion; never activate unvalidated content directly.
-- Network access is required only for GitHub install paths; keep an explicit host allowlist of `github.com`, `api.github.com`, and `codeload.github.com`.
-- Keep transport boundaries explicit: SSH fallback is opt-in (`--allow-ssh-fallback`) and only allowed with `--method git`; call it out in closeout when used.
-- Never print secrets, access tokens, or private credentials in output.
-- Redact sensitive values in logs/manifests before sharing snippets.
-- Keep installation scope focused; do not drift into authoring or plugin packaging work.
-- If icon or UX assets are bundled for installer docs, keep them under `assets/` and reference them explicitly in change notes.
-
-## Procedure
-
-1. Resolve install source and requested skill paths.
-2. Validate trust allowlist and ref pinning policy.
-3. Validate path/ref tokens (`--path` and `--ref`) before any Git command execution.
-4. Fetch source via download and use git fallback only when failure class and transport policy allow it.
-5. Stage each skill in quarantine.
-6. Run staged validators via the unified CLI (`ask skills audit`) when validation level is strict.
-7. Promote staged skills atomically.
-8. Write rollback journal and provenance manifest.
-9. Report installed skills and restart guidance.
-
-Primary commands:
-
-```bash
-bin/ask skills list
-bin/ask skills list --category experimental
-bin/ask skills install https://github.com/<owner>/<repo> --remediate
-```
-
-Key options for the underlying logic:
-- `--trusted-repo <owner/repo>`
-- `--allow-untrusted-source`
-- `--allow-unpinned-ref`
-- `--allow-ssh-fallback` (requires `--method git`)
-- `--validation-level strict|compat`
-- `--provenance-dir <path>`
-- `--journal-dir <path>`
-
-## Anti-Patterns
-
-Avoid these failures:
-- installing from floating branch refs without explicit approval;
-- bypassing quarantine validation in strict environments;
-- treating installer as a place to redesign skill behavior;
-- continuing after failed validation or failed promotion;
-- omitting provenance and rollback evidence from closeout.
-
-## Examples
-
-- When the user asks: "Can you list curated skills and install one for PR triage?"
-- When the user says: "Help me install this GitHub skill at a pinned commit and keep provenance logs."
-- When the user asks: "Please reinstall this known-good skill because it disappeared from my list."
-
-## Validation
-
-Run these checks and fail fast: if any gate fails, stop immediately, fix, then rerun from that gate.
-
-```bash
-# Verify the installer logic itself
-./bin/ask repo validate --ephemeral
-
-# Verify a specific installed skill
-./bin/ask skills audit github/new-skill --level strict
-```
-
-Family gate note:
-- `scripts/validate_skill_authoring_family.sh` runs structural contract/security checks by default (lists smoke+release cases).
-- Live Codex smoke+release execution is trusted-lane only with `SKILL_FAMILY_LIVE_EVALS=1 SKILL_FAMILY_LIVE_EVALS_TRUSTED=1`.
-
-## See Also
-
-| Skill | When to use together |
-|---|---|
-| [[skill-creator]] | Author or complete a starter skill before installation |
-| [[skill-builder]] | Harden and validate an existing skill before install/distribution |
-| [[plugin-builder]] | Package a validated skill as a plugin deliverable |
-
-**Topic map:** [[agent-ops]]
+- Curated listing is fetched from `https://github.com/openai/skills/tree/main/skills/.curated` via the GitHub API. If it is unavailable, explain the error and exit.
+- Private GitHub repos can be accessed via existing git credentials or optional `GITHUB_TOKEN`/`GH_TOKEN` for download.
+- Git fallback tries HTTPS first, then SSH.
+- The skills at https://github.com/openai/skills/tree/main/skills/.system are preinstalled, so no need to help users install those. If they ask, just explain this. If they insist, you can download and overwrite.
+- Installed annotations come from `$CODEX_HOME/skills`.

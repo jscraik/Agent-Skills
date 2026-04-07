@@ -101,6 +101,8 @@ Review order:
 5. synthesize findings and return a readiness recommendation instead of a merge recommendation
 
 ## Reviewer coverage map
+Use deterministic readiness-reviewer selection.
+
 Always include:
 - `agent-native-reviewer`
 - `learnings-researcher`
@@ -115,9 +117,19 @@ Add by signal:
 - `design-implementation-reviewer` for Figma-sensitive or visual implementation review
 - `data-integrity-guardian` for schema, persistence, or correctness-sensitive changes
 - `schema-drift-detector` when schema dump drift is present
-- `security-sentinel` for auth, trust boundaries, secrets, or untrusted input
-- `performance-oracle` for hot paths, scale, query load, or latency concerns
+- `api-contract-reviewer` for public/downstream API changes
+- `security-reviewer` for auth, trust boundaries, secrets, or untrusted input
+- `performance-reviewer` for hot paths, scale, query load, or latency concerns
+- `reliability-reviewer` for failure, retry, and partial-state hazards
 - `deployment-verification-agent` for rollout-sensitive changes
+
+Execution order:
+1. baseline readiness lanes
+2. language specialists
+3. risk specialists
+4. deployment verification where rollout risk exists
+
+For deterministic per-target role selection, use `references/sub-agent-map.md`.
 
 Optional deeper-think lane for high-risk or broad reviews:
 - run a stakeholder/scenario synthesis pass across developer, operations, user, security, and business lenses

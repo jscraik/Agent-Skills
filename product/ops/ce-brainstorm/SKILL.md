@@ -10,7 +10,6 @@ metadata:
 **Note: The current year is 2026.** Use this when dating requirements documents and checking recent artifacts.
 
 `ce-ideate` answers "What are the strongest ideas worth exploring?" `ce-brainstorm` answers "What exactly should one chosen idea mean?"
-
 This workflow produces a requirements document that clarifies WHAT to build and why. It does **not** produce implementation plans or code.
 
 ## Table of Contents
@@ -22,15 +21,11 @@ This workflow produces a requirements document that clarifies WHAT to build and 
 - [Constraints](#constraints)
 - [Acceptance criteria](#acceptance-criteria)
 - [Core Principles](#core-principles)
-- [Philosophy](#philosophy)
 - [Interaction Rules](#interaction-rules)
-- [Output Guidance](#output-guidance)
-- [Standards snapshot](#standards-snapshot)
 - [Workflow](#workflow)
 - [Output summary](#output-summary)
 - [Validation](#validation)
 - [Anti-patterns](#anti-patterns)
-- [Encouraging variation](#encouraging-variation)
 - [Examples](#examples)
 - [References](#references)
 - [See Also](#see-also)
@@ -96,6 +91,7 @@ If critical context remains missing after one concise follow-up, stop and surfac
 - for time-sensitive or externally sourced claims, retrieve current sources and cite dates
 - do not auto-advance to planning or spec without user confirmation
 - keep implementation details such as libraries, schemas, endpoints, and file layouts out of the requirements doc unless the brainstorm is inherently about a technical or architectural decision
+- keep outputs concise and use repo-relative paths when referencing files
 - **PII/Secrets redaction**: redact all personal data, tokens, credentials, API keys, and sensitive values from requirements docs, examples, and summaries
 
 ## Acceptance criteria
@@ -103,7 +99,7 @@ If critical context remains missing after one concise follow-up, stop and surfac
 - Key decisions, rationale, questions, success criteria captured
 - Explicit `spec_required`, `risk_level`, `complexity` values
 - Doc is concrete enough that `ce-plan` does not need to invent behavior
-- Clear next-step options provided; fail-fast on check failures
+- Clear next-step options provided; fail fast on check failures
 
 ## Core Principles
 
@@ -113,12 +109,7 @@ If critical context remains missing after one concise follow-up, stop and surfac
 4. **Keep implementation out** - No libraries, schemas, endpoints unless inherently technical.
 5. **Right-size the artifact** - Simple work gets compact docs; larger work gets fuller docs.
 6. **Apply YAGNI to carrying cost, not coding effort** - Prefer the simplest approach that delivers value. Avoid speculative complexity, but low-cost polish is worth including when easy to maintain.
-
-## Philosophy
-
-- Narrow the decision space instead of expanding it.
-- Prefer the smallest approach that creates meaningful user value.
-- Ask only the questions that unlock the next trustworthy decision.
+Read when: you need facilitation philosophy, April 2026 standards context, or output variation guidance -> `references/style-and-philosophy.md`.
 
 ## Interaction Rules
 
@@ -126,16 +117,6 @@ If critical context remains missing after one concise follow-up, stop and surfac
 2. **Prefer single-select multiple choice** - Use single-select when choosing one direction, one priority, or one next step.
 3. **Use multi-select rarely and intentionally** - Use it only for compatible sets such as goals, constraints, non-goals, or success criteria that can all coexist. If prioritization matters, follow up by asking which selected item is primary.
 4. **Use the platform's question tool when available** - When asking the user a question, prefer the platform's blocking question tool if one exists (`AskUserQuestion` in Claude Code, `request_user_input` in Codex, `ask_user` in Gemini). Otherwise, present numbered options in chat and wait for the user's reply before proceeding.
-
-## Output Guidance
-
-- **Keep outputs concise** - Prefer short sections, brief bullets, and only enough detail to support the next decision.
-- **Use repo-relative paths** - When referencing files, use paths relative to the repo root (e.g., `src/models/user.rb`), never absolute paths. Absolute paths make documents non-portable across machines and teammates.
-
-## Standards snapshot (April 2026)
-- Keep each skill scoped to one reusable job and make the description say what it does and when to use it.
-- Prefer explicit routing, realistic examples, and validation over prompt-only procedures.
-- Use repo guidance and prior learnings before external research.
 
 ## Workflow
 
@@ -146,6 +127,14 @@ If the user references an existing brainstorm topic or document, or there is an 
 - Read the document
 - Confirm with the user before resuming: "Found an existing requirements doc for [topic]. Should I continue from this, or start fresh?"
 - If resuming, summarize the current state briefly, continue from its existing decisions and outstanding questions, and update the existing document instead of creating a duplicate
+
+#### 0.1b Classify Task Domain
+Before Phase 0.2, classify the request:
+- **Software**: references code, repositories, APIs, databases, or asks to build/modify/debug/deploy software. Continue this CE workflow.
+- **Non-software brainstorming**: no software signals and the user wants to explore/decide in another domain. Route to `brainstorming` and stop this CE workflow.
+- **Neither**: quick factual question, direct task, or error triage that does not need brainstorming. Respond directly and skip brainstorm phases.
+
+If domain is ambiguous, ask one targeted question before proceeding.
 
 #### 0.2 Assess Whether Brainstorming Is Needed
 **Clear requirements indicators:**
@@ -187,28 +176,16 @@ If nothing obvious appears after a short scan, say so and continue. Two rules go
 2. **Defer design decisions to planning** — Implementation details like schemas, migration strategies, endpoint structure, or deployment topology belong in planning, not here — unless the brainstorm is itself about a technical or architectural decision.
 
 #### 1.2 Product Pressure Test
-Before generating approaches, challenge the request to catch misframing. Match depth to scope:
-
-**Lightweight:**
-- Is this solving the real user problem?
-- Are we duplicating something that already covers this?
-- Is there a clearly better framing with near-zero extra cost?
-
-**Standard:**
-- Is this the right problem, or a proxy for a more important one?
-- What user or business outcome actually matters here?
-- What happens if we do nothing?
-- Is there a nearby framing that creates more user value without more carrying cost?
-- Given the current project state, what is the single highest-leverage move right now?
-
-**Deep** — Standard questions plus:
-- What durable capability should this create in 6-12 months?
-- Does this move the product toward that, or is it only a local patch?
+Before generating approaches, challenge the request to catch misframing using the scope-matched prompts in `references/brainstorm-workflow-details.md`.
+- Always include at least one "do nothing or simplify" check.
+- For deep scope, include 6-12 month durability checks.
+- Use this pressure test to sharpen the conversation, not to bulldoze user intent.
 
 #### 1.3 Collaborative Dialogue
 Follow the Interaction Rules above. Use the platform's blocking question tool when available.
 
 **Guidelines:**
+- Ask what the user is already thinking before offering your own ideas.
 - Start broad (problem, users, value) then narrow (constraints, exclusions, edge cases)
 - Clarify the problem frame, validate assumptions, and ask about success criteria
 - Make requirements concrete enough that planning will not need to invent behavior
@@ -221,18 +198,21 @@ Follow the Interaction Rules above. Use the platform's blocking question tool wh
 ### Phase 2: Explore Approaches
 If multiple plausible directions remain, propose **2-3 concrete approaches** based on research and conversation. Otherwise state the recommended direction directly.
 
+Use at least one non-obvious angle when helpful: inversion ("what if we did the opposite?"), constraint removal ("what if X were not a limitation?"), or analogy from another domain.
+
+Present approaches first, then evaluate; this avoids anchoring the user on one recommendation too early.
+
 When useful, include one deliberately higher-upside alternative:
 - Identify what adjacent addition or reframing would most increase usefulness, compounding value, or durability without disproportionate carrying cost. Present it as a challenger option alongside the baseline, not as the default.
 
 For each approach, provide:
-- Brief description (2-3 sentences)
-- Pros and cons
-- Key risks or unknowns
-- When it's best suited
+- Brief description (2-3 sentences), pros/cons, key risks, and best-fit context.
+Read when: you need the full approach-card format -> `references/brainstorm-workflow-details.md`.
 
-Lead with your recommendation and explain why. Prefer simpler solutions when added complexity creates real carrying cost, but do not reject low-cost, high-value polish just because it is not strictly necessary.
+After presenting all approaches, state your recommendation and explain why. Prefer simpler solutions when added complexity creates real carrying cost, but do not reject low-cost, high-value polish just because it is not strictly necessary.
 
 If one approach is clearly best and alternatives are not meaningful, skip the menu and state the recommendation directly.
+If relevant, call out whether the selected direction is reusing an existing pattern, extending an existing capability, or building net new.
 
 ### Phase 3: Decide Whether a Spec is Required
 Derive:
@@ -287,28 +267,13 @@ When blockers are resolved, offer the next step that matches `spec_required`, `r
 Recommend spec first when `spec_required` is `lite` or `full`. Recommend planning directly only when `spec_required` is `none` and no blockers remain.
 
 ## Output summary
-When the brainstorm is complete, present a compact summary that includes:
-- `Brainstorm complete!`
-- the requirements document path under `docs/brainstorms/`, when one exists
-- the chosen `spec_required`, `risk_level`, and `complexity`
-- the recommended next workflow stage
-
-Keep the closeout easy to scan so the next handoff is obvious.
-If blockers remain and the user pauses, present:
-- `Brainstorm paused.`
-- the requirements document path and remaining blockers, when they exist
-- the instruction to resume `ce-brainstorm` before planning
+Use the closeout templates in `references/brainstorm-workflow-details.md`.
+- Completion closeout must include requirements path (if any), `spec_required`, `risk_level`, `complexity`, and recommended next stage.
+- Pause closeout must include remaining blockers and explicit resume guidance.
 
 ## Validation
-- fail fast: stop at the first failed gate, do not proceed until it is fixed, rerun that gate, then continue
-- verify that brainstorming is actually the right stage before proceeding
-- verify the recommendation includes `spec_required`, `risk_level`, and `complexity`
-- verify the requirements artifact path is correct when writing a new document
-- verify legacy brainstorm docs are only resumed or preserved intentionally
-- verify the requirements doc is concrete enough that planning will not need to invent product behavior, scope boundaries, or success criteria
-- verify the handoff recommendation matches the recorded risk, complexity, and blocker state
-- verify the research roles are named exactly when subagent support is recommended
-- report exact failures and the smallest safe fix if a check does not pass
+- fail-fast is mandatory: stop at first failed gate, fix/triage, rerun, then continue.
+- Run the full checklist in `references/brainstorm-workflow-details.md` before completion.
 
 ## Anti-patterns
 - Asking too many questions at once; drifting into implementation sequencing
@@ -317,14 +282,10 @@ If blockers remain and the user pauses, present:
 - Auto-triggering next stage without user confirmation
 - Letting requirements drift into implementation details that belong in planning
 
-## Encouraging variation
-Outputs should vary based on feature, repo context, and ambiguity level. Adapt questions to unresolved decisions; adapt recommendations to real constraints. No two brainstorms should read the same unless requirements and context are identical.
-
 ## Examples
-- "Help me think through access request approval before we commit to a build"
-- "Compare first-run onboarding options — planning task or needs a spec?"
-- "Is this retry-and-recovery workflow small enough to plan directly?"
-- "Resume the brainstorm doc and tell me whether to spec or plan next"
+- User says: "We have three dashboard personalization ideas; run `ce-brainstorm` and recommend one direction with clear requirements before we plan."
+- User says: "Compare first-run onboarding options for our repo setup flow and decide whether this should go to `ce-spec` or directly to `ce-plan`."
+- User asks: "Resume `docs/brainstorms/2026-04-02-agent-feedback-loop-requirements.md`, resolve remaining blockers, then tell me the next CE stage."
 
 ## References
 - Contract: `references/contract.yaml`
@@ -333,11 +294,11 @@ Outputs should vary based on feature, repo context, and ambiguity level. Adapt q
 - Requirements artifact guide: `references/requirements-artifact-guide.md`
 - Visual communication guide: `references/visual-communication-guide.md`
 - Workflow details: `references/brainstorm-workflow-details.md`
+- Style and philosophy: `references/style-and-philosophy.md`
 - Bounded subagent support: `references/bounded-subagent-support.md`
 - Lightweight document-review pass: `references/document-review-pass.md`
 
 ## See Also
-
 | Skill | When to use together |
 |---|---|
 | [[compound-engineering-router]] | Use to choose the right compound-engineering stage before or after brainstorming |

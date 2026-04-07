@@ -1,6 +1,6 @@
 ---
 name: ce-deepen-plan
-description: Deepen an existing implementation plan or review pass so sequencing, verification, and risk treatment are solid before execution. Use when the user wants a second-pass plan hardening step, not first-pass planning.
+description: Deepen an existing implementation plan so sequencing, verification, and risk treatment are strong enough for execution. Use when the user wants CE-stage plan hardening before ce-work.
 metadata:
   skill-type: team_automation
 ---
@@ -224,6 +224,7 @@ When `max-coverage` is selected, also:
 - apply clearly matched skills from the current platform or installed registries
 - scan deeper learning docs under `docs/solutions/`
 - run a broader reviewer sweep for plan sections that benefit from multiple specialist views only when delegation was explicitly requested or approved; otherwise expand the inline sweep selectively
+- select reviewer lanes using `references/sub-agent-map.md` so the split `document-review` personas map consistently to plan-deepening needs
 
 Treat all approved subagents as internal support for the deepening stage, not separate top-level operators the user must coordinate.
 
@@ -297,7 +298,6 @@ See `references/deepening-modes.md` for scoring heuristics, execution modes, and
 - Use `references/rewrite-rules.md` for the canonical enhancement-summary template, allowed rewrites, and final checks.
 
 ## Empowerment
-
 You are capable of transforming good plans into excellent plans through systematic deepening. Your analysis prevents execution surprises:
 - **Trust your gap analysis** - if dependencies are unclear, flag them
 - **Sequencing is your expertise** - the order matters as much as the tasks
@@ -336,10 +336,9 @@ IMPORTANT: Outputs should vary based on plan depth, topic risk, and the selected
 - No two deepening passes should read the same unless the plans, gaps, and evidence sources are effectively identical.
 
 ## Examples
-- "Stress-test this plan before we start building."
-- "Please deepen the rollout and verification sections."
-- "This migration plan still feels thin around risk and sequencing."
-- "I want the plan stronger, but only where it is actually weak."
+- User says: "Please deepen `docs/plans/2026-04-07-checkout-retry-rollout-plan.md`; rollout, rollback, and verification still feel weak."
+- User says: "Stress-test this migration plan before implementation and focus only on the genuinely weak sections."
+- User says: "Before we start `ce-work`, tighten sequencing and risk treatment in this plan without rewriting the whole document."
 
 ## References
 - Contract: `references/contract.yaml`
@@ -348,6 +347,7 @@ IMPORTANT: Outputs should vary based on plan depth, topic risk, and the selected
 - Deepening modes and scoring: `references/deepening-modes.md`
 - Lightweight document-review pass: `references/document-review-pass.md`
 - Rewrite rules and final checks: `references/rewrite-rules.md`
+- Sub-agent routing map: `references/sub-agent-map.md`
 ## See Also
 | Skill | When to use together |
 |---|---|

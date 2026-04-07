@@ -102,28 +102,13 @@ Checklist triggers:
   - rollout, monitoring, migration, privacy, or security concerns are missing when relevant
 
 ## Agent mapping
-- `Requirements Trace / Open Questions`
-  - `spec-flow-analyzer`
-  - `repo-research-analyst`
-- `Context & Research / Sources & References`
-  - `learnings-researcher`
-  - `framework-docs-researcher`
-  - `best-practices-researcher`
-- `Key Technical Decisions`
-  - `architecture-strategist`
-  - optional official-doc or best-practice researcher
-- `High-Level Technical Design`
-  - `architecture-strategist`
-  - `repo-research-analyst`
-- `Implementation Units`
-  - `repo-research-analyst`
-  - `pattern-recognition-specialist`
-  - optional `spec-flow-analyzer`
-- `System-Wide Impact`
-  - `architecture-strategist`
-  - plus the specialist that matches the actual risk: `performance-oracle`, `security-sentinel`, `data-integrity-guardian`
-- `Risks & Dependencies / Operational Notes`
-  - choose the specialist that matches the risk: `security-sentinel`, `data-integrity-guardian`, `data-migration-expert`, `deployment-verification-agent`, `performance-oracle`
+Use `references/sub-agent-map.md` as the canonical lane map.
+
+Default lanes:
+- `repo-research-analyst`
+- `learnings-researcher`
+
+Then add only the specialist lanes that match selected weak sections (for example `feasibility-reviewer`, `scope-guardian-reviewer`, `security-lens-reviewer`, `reliability-reviewer`, `deployment-verification-agent`, `api-contract-reviewer`).
 
 ## Execution modes
 ### `direct`

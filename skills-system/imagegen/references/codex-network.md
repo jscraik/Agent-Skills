@@ -8,8 +8,8 @@ This guidance is intentionally isolated from `SKILL.md` because it can vary by e
 The fallback CLI uses the OpenAI Image API, so it needs outbound network access. In many Codex setups, network access is disabled by default and/or the approval policy requires confirmation before networked commands run.
 
 ## Important note about approvals vs network
-- `--ask-for-approval never` suppresses approval prompts.
-- It does **not** by itself enable network access.
+- Approval behavior is managed by your Codex config/profile (for example `approval_policy` in `~/.codex/config.toml`).
+- Approval settings do **not** by themselves enable network access.
 - In `workspace-write`, network access still depends on your Codex configuration (for example `[sandbox_workspace_write] network_access = true`).
 
 ## How do I reduce repeated approval prompts?

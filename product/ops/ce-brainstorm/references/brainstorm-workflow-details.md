@@ -30,3 +30,43 @@ Use the lightest set that gives a trustworthy recommendation.
 - ask the standard questions
 - add: what durable capability should this create in 6-12 months?
 - add: does this move the product toward that, or is it only a local patch?
+
+Use these prompts to sharpen the conversation, not to bulldoze user intent.
+
+## Approach card format
+
+For each approach in Phase 2, include:
+- brief description (2-3 sentences)
+- pros and cons
+- key risks or unknowns
+- when it is best suited
+
+Present all approaches first, then recommendation, to avoid early anchoring.
+Use at least one non-obvious angle when helpful (inversion, constraint removal, analogy).
+
+## Closeout templates
+
+Completion closeout:
+- `Brainstorm complete!`
+- requirements path under `docs/brainstorms/` (when one exists)
+- chosen `spec_required`, `risk_level`, `complexity`
+- recommended next workflow stage
+
+Pause closeout:
+- `Brainstorm paused.`
+- requirements path and remaining blockers (when they exist)
+- instruction to resume `ce-brainstorm` before planning
+
+## Validation checklist
+
+Run fail-fast validation before completion:
+- verify task-domain classification happened before deeper brainstorm phases
+- verify brainstorming is actually the right stage
+- verify recommendation includes `spec_required`, `risk_level`, `complexity`
+- verify requirements artifact path for new docs
+- verify legacy brainstorm docs are resumed intentionally
+- verify requirements are concrete enough that planning will not invent behavior
+- verify multiple plausible approaches were shown before recommendation when the option space was open
+- verify handoff recommendation matches risk, complexity, and blocker state
+- verify research roles are named exactly when subagent support is recommended
+- report exact failures and the smallest safe fix

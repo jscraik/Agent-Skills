@@ -34,6 +34,24 @@ cases:
       - type: regex
         value: "(?i)(--repair|repair command)"
 
+  - id: auth-conflict-api-key-mode
+    name: auth conflict api-key mode hardening
+    category: edge
+    eval_modes: [release]
+    should_trigger: true
+    prepend_skill: false
+    timeout_sec: 180
+    prompt: "I get 'Auth conflict: token + ANTHROPIC_API_KEY' when launching cz. Give me the exact remediation order to keep API-key mode stable and include the one-time auth reset command."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "claude-alias"
+      - type: regex
+        value: "(?i)(--repair)"
+      - type: regex
+        value: "(?i)(--bare|api-key-only)"
+      - type: contains
+        value: "claude auth logout"
+
   - id: negative-offtopic-shell-customization
     name: negative off-topic shell customization
     category: negative
@@ -87,6 +105,6 @@ cases:
         value: "(?i)(prompt injection|jailbreak|cannot|refuse|safety)"
 
 metadata:
-  last_updated: "2026-04-05"
+  last_updated: "2026-04-07"
   author: "Jamie Craik + Codex"
   review_status: "draft"

@@ -17,6 +17,10 @@ This workflow produces a durable implementation plan. It does **not** implement 
 - [Working agreement](#working-agreement)
 - [When to use](#when-to-use)
 - [Required inputs](#required-inputs)
+- [Deliverables](#deliverables)
+- [Failure mode](#failure-mode)
+- [Constraints](#constraints)
+- [Acceptance criteria](#acceptance-criteria)
 - [Interaction Method](#interaction-method)
 - [Core Principles](#core-principles)
 - [Plan Quality Bar](#plan-quality-bar)
@@ -26,7 +30,9 @@ This workflow produces a durable implementation plan. It does **not** implement 
 - [Handoff guidance](#handoff-guidance)
 - [Validation](#validation)
 - [Anti-patterns](#anti-patterns)
+- [Examples](#examples)
 - [References](#references)
+- [See Also](#see-also)
 - [Gotchas](#gotchas)
 
 ## Working agreement
@@ -51,6 +57,7 @@ Ask one question at a time. Prefer a concise single-select choice when natural o
 5. **Separate planning from execution discovery** - Resolve planning-time questions here. Explicitly defer execution-time unknowns to implementation.
 6. **Keep the plan portable** - The plan should work as a living document, review artifact, or issue body without embedding tool-specific executor instructions.
 7. **Carry execution posture lightly when it matters** - If the request or repo context clearly implies test-first or characterization-first, reflect that as a lightweight signal.
+Read when: you need April 2026 standards rationale, planning philosophy, or variation guidance -> `references/style-and-operating-guidance.md`.
 
 ## Plan Quality Bar
 
@@ -147,12 +154,6 @@ If critical context remains missing after one concise follow-up, stop and surfac
 - the plan contains explicit phase exit criteria and execution-control guidance
 - if any required check fails, stop at the first failed gate and do not proceed until it is fixed
 
-## Standards snapshot (April 2026)
-- Keep each skill scoped to one reusable job and make the description say what it does and when to use it.
-- Prefer explicit routing, realistic examples, and validation over prompt-only procedures.
-- Use repo guidance, origin context, and prior learnings before external research.
-- Plan workflows, keep one current step in focus, and use bounded research by default.
-
 ## Workflow
 ### Phase 0: Resume, source, and classify
 Determine the planning baseline before writing anything substantial.
@@ -230,58 +231,18 @@ Prototype planning modes:
 
 For full UI artifact rules, prototype-delivery details, and `UP` / `UAC` / `VAC` structure, use `references/ui-modes.md` and `references/plan-artifacts.md`.
 
-### Phase 5b: Testing Strategy
-Per `references/production-considerations.md`:
+### Phase 5b: Testing, verification, and rollout controls
+Apply only the controls relevant to the selected mode and risk profile.
 
-| Type | When |
-|------|------|
-| **Unit** | Business logic |
-| **Integration** | Cross-layer work |
-| **Contract** | API boundaries |
-| **E2E** | Critical flows |
-
-Rules: cross-layer needs integration; external APIs need contract tests.
-
-### Phase 5d: Verification-First Planning
-Every unit needs verification strategy per `references/verification-first.md`:
-
-| Type | When | How |
-|------|------|-----|
-| **Test oracle** | All changes | Tests verify behavior through public interfaces |
-| **Type check** | Typed langs | Static analysis |
-| **Lint** | All repos | Pattern enforcement |
-| **Self-check** | AI-generated | Compare to spec |
-
-Rules: tests describe _what_ not _how_; survive refactors; no horizontal slicing (see `references/ce-anti-patterns.md`).
-
-### Phase 5e: Rollout Strategy
-Per `references/production-considerations.md`:
-
-| Type | Approach |
-|------|----------|
-| **Feature Flag** | Dark launch → gradual % → GA |
-| **Canary** | Deploy to subset, monitor, expand |
-| **Blue/Green** | Parallel environments |
-| **DB Migration** | Backward-compatible steps |
-
-Rules: flags need removal criteria; plan rollback.
+Use:
+- `references/production-considerations.md` for testing-pyramid expectations, observability, rollout, rollback, and reliability controls
+- `references/verification-first.md` for verification-first requirements, anti-horizontal-slicing guidance, and per-unit verification gates
 
 ### Phase 6: Gap analysis
 Run `spec-flow-analyzer("<source>")`; incorporate: missed flows, edge cases, testing/rollout/UI gaps.
 
-### Phase 6.5: Reliability Modeling
-For services/high-risk work, model failures per `references/production-considerations.md`:
-
-| Domain | Check |
-|--------|-------|
-| **Failure modes** | Network, disk, dependency, timeout |
-| **Cascading** | Containment strategy |
-| **Degradation** | What remains when deps fail |
-| **Recovery** | Auto/manual, time to recover |
-| **Retry safety** | Idempotency |
-| **Resource limits** | Circuit breakers |
-
-For services or high blast radius work, include reliability modeling in the plan.
+### Phase 6.5: Reliability modeling (conditional)
+For services or high blast-radius work, include explicit failure-domain and recovery modeling using `references/production-considerations.md`.
 
 ### Phase 7: Write the plan artifact
 Ensure the destination directory exists before writing:
@@ -336,6 +297,7 @@ See `references/ce-anti-patterns.md` for full catalog with detection and fixes:
 - **Horizontal Slicing**, **80/20 Imbalance**, **No Plan Mode**
 
 ## Examples
+User says:
 - "Turn this approved spec into an implementation plan with phases, tests, rollout, and acceptance IDs."
 - "Please plan this bug fix from the bug report and tell me the safest execution order."
 
@@ -344,6 +306,7 @@ See `references/ce-anti-patterns.md` for full catalog with detection and fixes:
 - Source parity: `references/source-parity.md`, UI modes: `references/ui-modes.md`
 - Plan templates: `references/plan-artifacts.md`, Production: `references/production-considerations.md`
 - Anti-patterns: `references/ce-anti-patterns.md`, Verification: `references/verification-first.md`
+- Standards and operating guidance: `references/style-and-operating-guidance.md`
 
 ## See Also
 
@@ -355,5 +318,6 @@ See `references/ce-anti-patterns.md` for full catalog with detection and fixes:
 | [[linear]] | Issue creation |
 
 **Topic map:** [[product-ops]]
+
 ## Gotchas
 - None yet.

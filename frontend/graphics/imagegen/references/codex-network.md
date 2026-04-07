@@ -18,10 +18,10 @@ sandbox_mode = "workspace-write"
 network_access = true
 ```
 
-Or for a single session:
+Or for a single session (approval policy comes from your active config/profile):
 
 ```
-codex --sandbox workspace-write --ask-for-approval never
+codex --sandbox workspace-write
 ```
 
 ## Safety note

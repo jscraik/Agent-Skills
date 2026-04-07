@@ -26,14 +26,11 @@ This workflow produces a ranked ideation artifact in `docs/ideation/`. It does *
 - [Acceptance criteria](#acceptance-criteria)
 - [Interaction Method](#interaction-method)
 - [Core Principles](#core-principles)
-- [Standards snapshot (April 2026)](#standards-snapshot-april-2026)
-- [Philosophy](#philosophy)
 - [Workflow](#workflow)
 - [Focus modes](#focus-modes)
 - [Execution rules](#execution-rules)
 - [Validation](#validation)
 - [Anti-patterns](#anti-patterns)
-- [Encouraging variation](#encouraging-variation)
 - [Examples](#examples)
 - [References](#references)
 - [See Also](#see-also)
@@ -55,6 +52,7 @@ Ask one question at a time. Prefer concise single-select choices when natural op
 5. **Use agent diversity to improve the candidate pool** - Parallel sub-agents are a support mechanism for richer idea generation and critique, not the core workflow itself.
 6. **Preserve the artifact early** - Write the ideation document before presenting results so work survives interruptions.
 7. **Route action into brainstorming** - Ideation identifies promising directions; `ce-brainstorm` defines the selected one precisely enough for planning.
+Read when: you need April 2026 standards rationale, ideation philosophy, or output variation guidance -> `references/style-and-operating-guidance.md`.
 
 ## Working agreement
 - Treat `ce-ideate` as the compound-engineering stage that decides which ideas are worth exploring next, not as generic brainstorming, planning, or implementation.
@@ -146,27 +144,6 @@ If no `docs/ideation/` directory exists, create it before writing the durable ar
 - the ideation artifact is written or updated before any handoff, Proof sharing, or session end
 - if any required check fails, stop at the first failed gate and do not proceed until it is fixed or triaged
 
-## Standards snapshot (April 2026)
-- Keep the skill scoped to one reusable job with routing-first frontmatter that says what it does and when to use it.
-- Use progressive disclosure: keep `SKILL.md` focused on route-critical behavior and move templates, frame logic, and artifact details into `references/`.
-- Prefer realistic positive and negative examples plus eval-backed routing tests over hidden prompt assumptions.
-- Preserve strong internal reasoning loops with explicit critique and verification rather than one-pass idea dumping.
-- Keep external research out of the default runtime path for this stage; repo evidence comes first, while the skill package itself should still be built and maintained against current OpenAI and Codex guidance.
-
-## Philosophy
-- Good ideation is grounded divergence plus disciplined rejection.
-- The first obvious ideas are rarely the best ideas.
-- The artifact matters because good directions are easy to lose between sessions.
-- Issue themes can sharpen ideation, but they should not imprison it inside reported pain alone.
-- The orchestrator's real job is not to think of a lot of ideas. It is to identify which ideas survive skeptical scrutiny and deserve deeper exploration.
-- Prefer practical brilliance over speculative novelty. A strong survivor should feel unusually useful, not merely interesting.
-
-Guiding questions:
-- What improvements are actually supported by the repo's current shape and pain points?
-- Which ideas create leverage for future work instead of isolated local wins?
-- Which candidates are merely plausible, and which ones are worth spending a brainstorm on?
-- If a future teammate opened the ideation doc cold, would they understand why the survivors won?
-
 ## Workflow
 ### Phase 0: Resume and scope
 Check `docs/ideation/` for relevant ideation docs from the last 30 days. If one clearly matches the current focus or subsystem, offer `continue | start fresh`.
@@ -202,47 +179,14 @@ If approval is not granted, the tool is unavailable, or subagents are unnecessar
 
 Use the frame-selection, merge, dedupe, and cross-cutting synthesis rules in `references/ideation-workflow.md`.
 
-### Phase 3: Adversarial filtering
-Attack the merged list skeptically.
+### Phases 3-6: Filter, present, preserve, hand off
+After Phase 2 merge and synthesis are complete, load `references/post-ideation-workflow.md` and run:
+- adversarial filtering
+- review checkpoint formatting
+- artifact write and resume semantics
+- refine or handoff routing
 
-Prefer a two-layer critique:
-- skeptical critique subagents when delegation was explicitly requested or approved
-- orchestrator-owned final scoring and ranking
-
-If delegation was not explicitly requested or approved, perform the skeptical critique inline before final scoring and ranking.
-
-Use the rejection criteria and survivor rubric in `references/ideation-workflow.md`, including value, complexity, reliability, adoption, reversibility, and evidence-fit checks.
-
-### Phase 4: Review checkpoint
-Present only the surviving ideas in structured form before final preservation:
-- title
-- description
-- rationale
-- downsides
-- confidence
-- estimated complexity
-- optional bucket:
-  - `quick win`
-  - `high leverage`
-  - `strategic bet`
-
-Also include a short rejection summary so the user can see that the list was challenged, not merely ranked.
-
-### Phase 5: Write the ideation artifact
-Write or update the durable ideation doc when the candidate set is good enough to preserve, and always before:
-- `ce-brainstorm`
-- Proof sharing
-- session end
-
-Use the artifact path, markdown structure, and session-log rules in `references/ideation-workflow.md`.
-
-### Phase 6: Refine or hand off
-After the review checkpoint, route to one of:
-1. brainstorm a selected idea
-2. refine the ideation
-3. share to Proof
-4. end the session
-
+Do not load `references/post-ideation-workflow.md` before Phase 2 candidate generation completes.
 Do not skip from ideation directly to planning or implementation.
 
 ## Focus modes
@@ -286,16 +230,8 @@ Do not skip from ideation directly to planning or implementation.
 - DO NOT let issue themes erase higher-leverage opportunities outside the reported pain
 - AVOID writing the durable artifact so early that it freezes weak survivors before review
 
-## Encouraging variation
-IMPORTANT: Outputs should vary with focus, repo shape, and evidence quality.
-- Open-ended ideation should feel wider and more exploratory.
-- Focused ideation should lean harder into local leverage and adjacent opportunities.
-- Issue-grounded ideation should visibly distinguish user-reported themes from code-observed pain points.
-- High-signal repos may justify bolder survivors; low-signal repos should show more conservative confidence.
-- Rejection summaries should reflect the actual weaknesses of the discarded ideas, not a canned reason list.
-
 ## Examples
-When the user asks things like:
+User says:
 - "Use `ce:ideate` and tell me what this repo should improve next."
 - "Give me the top 3 improvements for the auth subsystem before we brainstorm one."
 - "Surprise me with grounded improvements for this project."
@@ -307,7 +243,9 @@ When the user asks things like:
 - Contract: `references/contract.yaml`
 - Evals: `references/evals.yaml`
 - Prompt parity map: `references/source-parity.md`
-- Detailed ideation workflow: `references/ideation-workflow.md`
+- Phase 0-2 ideation workflow: `references/ideation-workflow.md`
+- Phase 3-6 post-ideation workflow: `references/post-ideation-workflow.md`
+- Standards and operating guidance: `references/style-and-operating-guidance.md`
 
 ## See Also
 

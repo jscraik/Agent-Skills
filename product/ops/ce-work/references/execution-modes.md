@@ -11,6 +11,8 @@
 ## Purpose
 This note captures how `ce-work` chooses an execution lane and task strategy without bloating the main skill body.
 
+For deterministic specialist/delegate role selection, use `references/sub-agent-map.md`.
+
 ## Primary lanes
 - `plan-led`
   - default for `docs/plans/*.md` and `docs/ui-plans/*.md`

@@ -69,29 +69,47 @@ Thresholds:
 - `1 pt` work can proceed without guessing next steps, and adherence can be audited during execution and review
 
 ## Reviewer coverage map
-Baseline defaults:
-- `code-simplicity-reviewer` always
-- `architecture-strategist` for specs, plans, and architecture-heavy diffs
+Use deterministic, technical-first reviewer selection.
 
-Add by signal:
-- `dhh-rails-reviewer` when Ruby/Rails review quality is central
-- `kieran-rails-reviewer` when Ruby/Rails files changed
-- `kieran-typescript-reviewer` when TypeScript or JavaScript files changed
-- `kieran-python-reviewer` when Python files changed
-- `julik-frontend-races-reviewer` when async frontend controllers or DOM lifecycle risks appear
-- `security-sentinel` for auth, secrets, trust boundaries, or untrusted-input handling
-- `performance-oracle` for hot paths, query scale, latency, or performance regressions
-- `data-integrity-guardian` for schema, migration, persistence, or correctness-sensitive changes
+Always include:
+- `correctness-reviewer`
+- `testing-reviewer`
+- `code-simplicity-reviewer`
+
+Document-review baseline:
+- `spec-flow-analyzer`
+- `feasibility-reviewer`
+
+Add by language and risk signal:
+- `kieran-rails-reviewer` for Ruby/Rails changes
+- `kieran-typescript-reviewer` for TypeScript/JavaScript changes
+- `kieran-python-reviewer` for Python changes
+- `api-contract-reviewer` for public API/contract surface changes
+- `julik-frontend-races-reviewer` for async UI timing and DOM lifecycle risk
+- `security-reviewer` for auth/authz, secrets, trust boundaries, or untrusted input
+- `performance-reviewer` for hot paths, query scale, or latency regressions
+- `data-integrity-guardian` for schema, migration, or persistence correctness risks
 - `schema-drift-detector` when schema dump drift is part of the change
-- `deployment-verification-agent` when rollout or operational verification is part of the contract
-- `spec-flow-analyzer` for flow, edge-case, and requirements gaps in document review
-- `every-style-editor` only after the technical pass when wording cleanup materially helps
+- `reliability-reviewer` for partial-state, retry, and failure-mode hazards
+- `deployment-verification-agent` when rollout/rollback verification is contract-critical
+- `architecture-strategist` for multi-module design or architecture-heavy changes
+- `maintainability-reviewer` when complexity/coupling risk is elevated
 
-Run reviewers in bounded parallel when platform and policy allow. Otherwise apply the same lenses serially.
+Execution order:
+1. baseline reviewers
+2. language specialists
+3. risk specialists
+4. architecture/maintainability cross-cuts when needed
+
+Run reviewers in bounded parallel when platform and policy allow; otherwise apply the same selection serially.
+
+Avoid in technical baseline mapping:
+- editorial-only roles
+- style-first convention critics before correctness/testing risk is covered
 
 ## Required finding format
 For each finding include:
-- severity
+- severity (`P0 | P1 | P2 | P3`)
 - exact location:
   - `file:line` when available
   - section heading for docs

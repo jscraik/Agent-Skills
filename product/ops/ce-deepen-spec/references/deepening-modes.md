@@ -108,27 +108,14 @@ Checklist triggers:
   - product questions and technical questions are mixed together
 
 ## Agent mapping
-- `Problem Statement / Goals / Non-Goals`
-  - `repo-research-analyst`
-  - optional `spec-flow-analyzer` when user-flow or contract flow is unclear
-- `System Boundary / Core Domain Model / Interfaces`
-  - `architecture-strategist`
-  - `repo-research-analyst`
-- `Main Flow / Lifecycle / Open Questions`
-  - `spec-flow-analyzer`
-  - `architecture-strategist`
-- `Invariants / Safety Requirements`
-  - choose the specialist that matches the actual risk: `security-sentinel`, `data-integrity-guardian`
-- `Failure Model and Recovery / Observability`
-  - `architecture-strategist`
-  - plus the matching specialist: `deployment-verification-agent`, `performance-oracle`, `security-sentinel`, `data-integrity-guardian`
-- `Acceptance and Test Matrix / Visual Acceptance Criteria`
-  - `spec-flow-analyzer`
-  - `repo-research-analyst`
-- `Context / References gaps`
-  - `learnings-researcher`
-  - `framework-docs-researcher`
-  - `best-practices-researcher`
+Use `references/sub-agent-map.md` as the canonical lane map.
+
+Default lanes:
+- `repo-research-analyst`
+- `learnings-researcher`
+- `spec-flow-analyzer`
+
+Then add only the specialist lanes that match selected weak sections (for example `architecture-strategist`, `design-lens-reviewer`, `security-lens-reviewer`, `reliability-reviewer`, `api-contract-reviewer`, `deployment-verification-agent`).
 
 ## Execution modes
 ### `direct`

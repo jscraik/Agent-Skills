@@ -111,7 +111,7 @@ Example configuration:
 ```toml
 model_provider = "openai"
 model = "gpt-5.3-codex-spark"
-approval_policy = "on-failure"
+approval_policy = "on-request"
 sandbox_mode = "workspace-write"
 
 # Enable telemetry

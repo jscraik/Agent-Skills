@@ -19,14 +19,14 @@ This document maps the original planning prompts in `/Users/jamiecraik/dev/confi
 - `/Users/jamiecraik/dev/config/codex/prompts/ce:plan-beta` (prompt body provided by user during merge/update)
 - upstream donor snapshot:
   - repo: `EveryInc/compound-engineering-plugin`
-  - commit: `847ce3f156a5cdf75667d9802e95d68e6b3c53a4`
+  - commit: `0ae91dcc298721e5b2c4ab6d1fc6f76a13b6f67c`
   - path: `plugins/compound-engineering/skills/ce-plan/SKILL.md`
 - Migration target: `/Users/jamiecraik/dev/Agent-Skills/product/ops/ce-plan/`
 
 ## Parity mapping
 | Prompt surface | Preserved in skill | Notes |
 |---|---|---|
-| `workflow-plan` general planning contract | `SKILL.md` overall structure, `## Workflow`, `## Artifact contracts`, `## Planning-mode handshake` | Preserved directly |
+| `workflow-plan` general planning contract | `SKILL.md` overall structure, `## Workflow`, `## Plan Quality Bar`, `## Planning-mode handshake` | Preserved directly |
 | planning answers HOW, not contract invention | `## Working agreement`, `## Constraints` | Preserved directly |
 | source resolution order | `## Workflow` -> `Phase 0` | Preserved and split by general vs UI mode |
 | spec-first and brainstorm fallback logic | `## Workflow` -> `Phase 0` | Preserved directly |
@@ -35,13 +35,13 @@ This document maps the original planning prompts in `/Users/jamiecraik/dev/confi
 | conditional external research | `## Workflow` -> `Phase 2` | Preserved directly |
 | consolidate constraints, non-goals, invariants, and learnings | `## Workflow` -> `Phase 3` | Preserved directly |
 | stable `P` and `AC` IDs | `## Workflow` -> `Phase 4`, `## Acceptance criteria` | Preserved directly |
-| traceability matrix and execution control | `## Workflow` -> `Phase 4`, `## Artifact contracts` | Preserved directly |
-| Execution Ledger + planning-mode sync | `## Artifact contracts`, `## Planning-mode handshake` | Preserved directly |
+| traceability matrix and execution control | `## Workflow` -> `Phase 4`, `references/plan-artifacts.md` | Preserved directly |
+| Execution Ledger + planning-mode sync | `references/plan-artifacts.md`, `## Planning-mode handshake` | Preserved directly |
 | spec-flow gap analysis | `## Workflow` -> `Phase 6` | Preserved directly |
 | post-write verification and fail-fast patching | `## Workflow` -> `Phase 8`, `## Validation` | Preserved directly |
 | `workflow-plan-ui` Prototype Pack brief | `## Workflow` -> `Phase 5` | Preserved as the `ui-enhanced-plan` prototype-pack branch |
 | `workflow-plan-ui` prototype-to-production mapping | `## Workflow` -> `Phase 5` | Preserved directly |
-| `workflow-ui-plan` dedicated UI artifact and `UP` / `UAC` / `VAC` rules | `## Workflow` -> `Phase 5`, `## Artifact contracts` | Preserved as the `dedicated-ui-plan` branch |
+| `workflow-ui-plan` dedicated UI artifact and `UP` / `UAC` / `VAC` rules | `## Workflow` -> `Phase 5`, `references/plan-artifacts.md` | Preserved as the `dedicated-ui-plan` branch |
 | `workflow-ui-plan` prototype-first direction phase | `## Workflow` -> `Phase 5` | Preserved directly as the dedicated UI mode default |
 | `ce:plan-beta` WHAT/HOW/WORK framing | `## Working agreement` | Preserved directly |
 | `ce:plan-beta` existing-plan resume/update behavior | `## Workflow` -> `Phase 0` | Preserved directly |
@@ -78,6 +78,8 @@ This document maps the original planning prompts in `/Users/jamiecraik/dev/confi
 - The donor prompt's sequenced `docs/plans/YYYY-MM-DD-NNN-...` filename convention was adapted to the repo's stable `docs/plans/YYYY-MM-DD-<type>-<descriptive-name>-plan.md` convention. This preserves durability without forcing filename churn across existing local plan artifacts.
 - The beta prompt's `-beta-plan.md` filename pattern was not adopted into stable `ce-plan`; the canonical skill keeps the existing stable plan filename convention to avoid unnecessary artifact churn across the repo. This is an intentional portability decision, not a loss of planning behavior.
 - The beta prompt's inline Proof-share and tracker-mutation branches were not moved into the core planning skill. `ce-plan` remains focused on producing the plan artifact, then handing off to dedicated tracker workflows such as `[[linear]]`.
+- Progressive-disclosure hardening keeps `SKILL.md` route-critical while relocating standards rationale and planning philosophy to `references/style-and-operating-guidance.md` with explicit read-when signposting.
+- Repeated operational tables for testing, verification, rollout, and reliability were deduplicated from `SKILL.md`; canonical details remain in `references/production-considerations.md` and `references/verification-first.md` so nuance is preserved without bloating the main route map.
 
 ## No-loss checklist
 - General planning still answers HOW and not the contract-level WHAT.

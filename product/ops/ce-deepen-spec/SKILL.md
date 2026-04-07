@@ -84,15 +84,10 @@ If the spec path is missing, ask one direct question:
 Do not proceed until you have a valid spec file path.
 
 ## Examples
-Use when:
-- "Can you deepen `docs/specs/2026-03-20-feat-issue-runner-spec.md`? The failure model still ignores cancellation, retry caps, and workspace cleanup."
-- "Please stress-test `docs/ui-specs/2026-03-22-checkout-ui-spec.md`. The VAC matrix does not cover keyboard focus, loading, or empty states."
-- "Before we hand this auth session spec to `ce-plan`, strengthen the safety, observability, and validation sections and ground any permission assumptions in current docs."
-
-Do not use when:
-- "Write the first spec from this brainstorm."
-- "Turn this finished spec into an implementation plan."
-- "Implement the feature now and skip spec work."
+- User says: "Deepen `docs/specs/2026-03-20-feat-issue-runner-spec.md`; cancellation, retry caps, and workspace cleanup are still underspecified."
+- User says: "Stress-test `docs/ui-specs/2026-03-22-checkout-ui-spec.md`; VAC coverage for keyboard, loading, and empty states is thin."
+- User says: "Before handing this auth session spec to `ce-plan`, tighten safety and observability and ground permission assumptions in current docs."
+- User says: "Run max-coverage on `docs/specs/2026-04-04-billing-reconciliation-spec.md` and include directly relevant learnings from `docs/solutions/`."
 
 ## Deliverables
 - a deepening-mode decision: `targeted-confidence | max-coverage`
@@ -229,6 +224,7 @@ When `max-coverage` is selected, also:
 - apply clearly matched skills from the current platform or installed registries
 - scan deeper learnings under `docs/solutions/`
 - run a broader reviewer sweep for spec sections that benefit from multiple specialist views only when delegation was explicitly requested or approved; otherwise expand the inline sweep selectively
+- select reviewer lanes using `references/sub-agent-map.md` so the split `document-review` personas map consistently to spec-deepening needs
 
 ### Phase 4: Choose research execution mode
 Use `direct` mode by default when the selected research scope is small enough for inline synthesis.
@@ -337,7 +333,7 @@ Apply the framework flexibly. Adapt depth, focus areas, and evidence sources to 
 - using exhaustive fan-out by default when targeted-confidence would do the job
 
 ## References
-- `references/deepening-modes.md`, `references/document-review-pass.md`, `references/rewrite-rules.md`, `references/contract.yaml`, `references/evals.yaml`, `references/source-parity.md`
+- `references/deepening-modes.md`, `references/document-review-pass.md`, `references/rewrite-rules.md`, `references/sub-agent-map.md`, `references/contract.yaml`, `references/evals.yaml`, `references/source-parity.md`
 
 ## Gotchas
 - Read the full spec before deciding what is weak; local thinness may be intentional because another section already carries the contract.

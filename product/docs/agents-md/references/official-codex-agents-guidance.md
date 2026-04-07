@@ -25,9 +25,9 @@ Use this reference when updating `AGENTS.md` skills or auditing repo instruction
 
 ## Verification Commands
 - Root scope:
-  - `codex --ask-for-approval never "Summarize the current instructions."`
+  - `codex "Summarize the current instructions."`
 - Nested scope:
-  - `codex --cd <subdir> --ask-for-approval never "Show which instruction files are active."`
+  - `codex --cd <subdir> "Show which instruction files are active."`
 - Audit/logging:
   - inspect `~/.codex/log/codex-tui.log`
   - inspect recent `session-*.jsonl` if session logging is enabled

@@ -188,8 +188,8 @@ If command truth, path ownership, or instruction precedence cannot be verified, 
 - Confirm no stale rule survives when the repo evidence has moved, such as renamed scripts, deleted folders, outdated quality checks, or retired fallback instruction files.
 - Confirm the final instruction set clearly discloses where durable guidance lives, which files are canonical, which files are supplemental, and which files are legacy or migration candidates.
 - Provide the official verification commands when applicable:
-  - `codex --ask-for-approval never "Summarize the current instructions."`
-  - `codex --cd <subdir> --ask-for-approval never "Show which instruction files are active."`
+  - `codex "Summarize the current instructions."`
+  - `codex --cd <subdir> "Show which instruction files are active."`
 - Confirm no contradictory instructions remain unresolved.
 - Fail fast: stop at first critical contradiction and request decision.
 

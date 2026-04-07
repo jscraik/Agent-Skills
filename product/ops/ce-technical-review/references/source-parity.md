@@ -12,6 +12,7 @@ This document records how `/Users/jamiecraik/dev/config/codex/prompts/technical_
 
 ## Source prompt and migration target
 - source:
+  - `https://github.com/EveryInc/compound-engineering-plugin/tree/0ae91dcc298721e5b2c4ab6d1fc6f76a13b6f67c/plugins/compound-engineering/skills/ce-technical-review`
   - `/Users/jamiecraik/dev/config/codex/prompts/technical_review.md`
 - migration target:
   - `/Users/jamiecraik/dev/Agent-Skills/product/ops/ce-technical-review/`
@@ -40,6 +41,8 @@ This document records how `/Users/jamiecraik/dev/config/codex/prompts/technical_
 - `contract.yaml` and `evals.yaml` were added to improve routing reliability and quality gating.
 - The skill explicitly routes document-strengthening needs toward `ce-deepen-spec` or `ce-deepen-plan` rather than forcing critique-only output when the better next step is obvious.
 - Current-doc retrieval is now explicit and conditional: repo evidence stays primary, while official docs and Context7 are used only when framework or library behavior materially affects a finding.
+- Non-route-critical standards/philosophy guidance is preserved in `references/style-and-operating-guidance.md` so `SKILL.md` can stay route-focused.
+- Reviewer fanout is now deterministic and sub-agent explicit via `references/sub-agent-map.md`, with technical-first baseline lanes (`correctness-reviewer`, `testing-reviewer`, `code-simplicity-reviewer`).
 
 ## No-loss checklist
 - code/diff review remains supported

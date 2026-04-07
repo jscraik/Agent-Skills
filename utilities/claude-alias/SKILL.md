@@ -6,7 +6,7 @@ metadata:
   lifecycle_state: active
   maturity: experimental
   owner: Jamie Craik
-  last_updated: 2026-04-05
+  last_updated: 2026-04-07
   review_cadence: quarterly
   metadata_source: frontmatter
 ---
@@ -61,10 +61,16 @@ bash <path-to-skill>/scripts/claude_alias_guard.sh --check
 ```bash
 bash <path-to-skill>/scripts/claude_alias_guard.sh --repair
 ```
+Repair mode now hardens the canonical alias wrapper as well as shell/source-link drift.
 
 3. Re-run check mode and require a clean pass.
 
-4. If provider auth still fails after routing is clean, treat it as credential scope/expiry and not alias drift. Preserve the fixed routing state and report the precise auth error.
+4. If provider auth still fails after repair, run one explicit auth-state reset and retest:
+```bash
+claude auth logout
+cz --version
+```
+If failures persist after that, treat it as credential scope/expiry and not alias drift.
 
 ## Validation
 
@@ -75,6 +81,9 @@ The skill is considered successful only when all checks pass:
   - `ck` -> `claude-kimi`
   - `cz` -> `claude-zai`
   - `cc` -> `claude`
+- provider launchers enforce API-key-only mode (`--bare`) to prevent token+key auth conflicts.
+- `claude()` clears provider-only env state (including `CLAUDE_CONFIG_DIR`) before first-party runs.
+- OAuth scrub covers `~/.claude.json`, `~/.claude/.claude.json`, `~/.claude_kimi/.claude.json`, and `~/.claude_zai/.claude.json`.
 - `kimi_settings.json` and `zai_settings.json` contain pinned model env values and no literal `${VAR}` placeholders.
 - Validation is fail-fast: stop at the first failed gate, repair, then rerun from that gate.
 
@@ -107,6 +116,7 @@ Keep Claude alias routing deterministic:
 
 - Pass/fail summary with each guard check result.
 - Exact files repaired (if any).
+- Canonical wrapper hardening status (`updated` or `unchanged`) from repair mode.
 - Any remaining auth blocker with the safest next command.
 
 ## Failure handling

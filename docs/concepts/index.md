@@ -40,10 +40,10 @@ The `/.agents/skills/` directory contains symlinks to all skills. This design:
 
 The sync script (`scripts/sync_skills.sh`) creates symlinks in:
 - `~/.agents/skills`
+- `~/.agents/agent-skills` (repo root)
 - `~/.codex/skills`
 - `~/.claude/skills`
-- `~/.gemini/skills`
-- `~/.gemini/antigravity/skills`
+- `~/.gemini/antigravity/skills` (projection)
 
 ## Deprecations and Aliases
 

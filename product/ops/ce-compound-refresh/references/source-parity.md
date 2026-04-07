@@ -10,7 +10,7 @@
 This package is aligned against the upstream donor skill at:
 
 - repository: `EveryInc/compound-engineering-plugin`
-- commit: `847ce3f156a5cdf75667d9802e95d68e6b3c53a4`
+- commit: `0ae91dcc298721e5b2c4ab6d1fc6f76a13b6f67c`
 - path: `plugins/compound-engineering/skills/ce-compound-refresh/SKILL.md`
 
 The local package still applies Codex/OpenAI progressive-disclosure packaging on top of that donor.
@@ -40,6 +40,7 @@ The local package still applies Codex/OpenAI progressive-disclosure packaging on
   - filename
   - content search
 - focused, batch, and broad routing with broad-scope triage
+- interactive question pacing that avoids front-loading large decision queues before evidence
 - investigation dimensions:
   - references
   - recommended solution
@@ -55,6 +56,7 @@ The local package still applies Codex/OpenAI progressive-disclosure packaging on
 - problem-domain check before archive
 - replacement via successor writing in `ce-compound` learning-capture format
 - full markdown report for every processed file
+- discoverability review against root instruction files after report generation
 - branch-aware commit follow-up after refresh actions
 
 ## Intentional modernizations
@@ -70,8 +72,13 @@ The local package still applies Codex/OpenAI progressive-disclosure packaging on
   - consolidate still identifies the canonical doc and redundant sibling
   - fully redundant or obsolete docs are archived with metadata rather than removed outright
   - this preserves local safety and traceability while keeping the donor's document-set analysis intact
+- preserved upstream autonomous strictness while keeping local archive semantics:
+  - autonomous runs do not ask questions
+  - ambiguous cases are stale-marked conservatively
+  - write failures move to report recommendations without blocking the run
 - softened the subagent file-tool instruction just enough to remain portable across current harnesses while preserving the original dedicated-file-tools preference
 - elevated `Stale` to a first-class reported outcome so autonomous conservatism is visible rather than implicit
+- moved standards/philosophy/discoverability/empowerment detail into `references/style-and-operating-guidance.md` so `SKILL.md` stays routing-first while preserving high-value operating context
 
 ## Known constraints
 - the source prompt assumed platform-specific blocking question tools. This package preserves the one-question-at-a-time behavior, but actual question tooling remains harness-dependent.

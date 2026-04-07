@@ -29,7 +29,6 @@ CODEX_EVAL_TIMEOUT_SEC=600 \
   --claude-zai-settings /absolute/path/zai_settings.json \
   --capture-jsonl \
   --tier2-mode warn \
-  --ask-for-approval never \
   --sandbox read-only
 ```
 
