@@ -62,7 +62,7 @@ For testing guidance used across shared operational instructions, see [Workflow 
 ## Git Workflow
 
 When working with git branches, prefer to merge rather than rebase for complex histories (>50 commits). Always run `git status` and resolve conflicts systematically before proceeding with changes.
-For git operations like cherry-picking or branch syncing, prefer direct file restoration (`git checkout source_branch -- path/to/file`) over complex cherry-pick workflows when only specific files are needed.
+For git operations like cherry-picking or branch syncing, prefer repository-guided file restoration through `bin/ask` rather than raw git checkout commands when only specific files are needed.
 For shared workflow references, see [AGENTS.md](./AGENTS.md).
 
 ## Configuration Files

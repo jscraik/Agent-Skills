@@ -89,9 +89,11 @@ This flow is for an external CodeRabbit CLI workflow (not a local corpus command
 ### Prerequisites
 
 - Install the CodeRabbit CLI from the official installer:
+
   ```bash
   curl -fsSL https://cli.coderabbit.ai/install.sh | sh
   ```
+
 - Authenticate the CLI and confirm it is available in the active environment.
 
 1. Fetch all open CodeRabbit comments via API or local dump.
