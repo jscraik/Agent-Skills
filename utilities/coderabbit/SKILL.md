@@ -102,14 +102,14 @@ This flow is for an external CodeRabbit CLI workflow (not a local corpus command
 4. Commit with message: `fix: address CodeRabbit review comments`.
 5. Verify all comments are resolved before finishing.
 
-Example command entry:
+Example command entry (explicit, CLI-driven flow):
 
 ```bash
 # Review changes in the checked-out PR branch (local CLI)
 gh pr checkout <pr-number>
-coderabbit --plain
+cr --plain
 
-# If your environment uses the short command name:
+# If the short `cr` wrapper is unavailable in your environment:
 coderabbit review --plain
 ```
 

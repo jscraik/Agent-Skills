@@ -80,7 +80,7 @@ For shared workflow guidance, see [AGENTS.md](./AGENTS.md). For shared testing g
 
 ## Git Workflow
 
-When working with git branches, prefer to merge rather than rebase for complex histories (>50 commits). Always run `git status` and resolve conflicts systematically before proceeding with changes.
+When working with git branches, prefer to merge rather than rebase for complex histories (>50 commits). Always run `ask repo status` and resolve conflicts systematically before proceeding with changes.
 For shared git workflow guidance, see [AGENTS.md](./AGENTS.md). For git operations like cherry-picking or branch syncing, follow the canonical guidance in that file.
 
 ## PR Workflow
