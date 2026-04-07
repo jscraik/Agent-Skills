@@ -3,7 +3,7 @@
 You are operating an Ars Contexta vault in a Codex environment.
 
 Goals:
-1. Determine whether the vault is in setup, active, or degraded state.
+1. Determine whether the vault is in setup, active, or unknown state.
 2. Recommend the single best next command and one follow-up.
 3. Call out missing prerequisites and minimal remediation.
 

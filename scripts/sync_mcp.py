@@ -20,6 +20,7 @@ CODEX_CONFIG_PATH = os.path.expanduser("~/.codex/config.toml")
 ANTIGRAVITY_MCP_PATH = os.path.expanduser("~/.gemini/antigravity/mcp_config.json")
 ENV_VAR_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 FALLBACK_PYTHONS = (
+    "python3",
     "python3.12",
     "/usr/local/bin/python3.12",
     "/opt/homebrew/bin/python3.12",
@@ -55,8 +56,9 @@ def load_codex_config():
 def _load_toml_with_newer_python(path):
     """Parse TOML via an available Python 3.11+ interpreter when possible."""
     loader = (
-        "import json, sys, tomllib;"
-        "print(json.dumps(tomllib.load(open(sys.argv[1], 'rb'))))"
+        "import json, sys, tomllib\n"
+        "with open(sys.argv[1], 'rb') as f:\n"
+        "    print(json.dumps(tomllib.load(f)))"
     )
     for candidate in _iter_fallback_pythons():
         if candidate is None:
@@ -75,13 +77,28 @@ def _load_toml_with_newer_python(path):
 
 
 def _iter_fallback_pythons():
+    seen = set()
     for candidate in FALLBACK_PYTHONS:
         if os.path.isabs(candidate):
-            if os.path.exists(candidate):
-                yield candidate
+            resolved = candidate if os.path.exists(candidate) else None
+        else:
+            resolved = shutil.which(candidate)
+
+        if not resolved or resolved in seen:
             continue
-        resolved = shutil.which(candidate)
-        if resolved:
+
+        try:
+            version_check = subprocess.run(
+                [resolved, "-c", "import sys; raise SystemExit(0 if sys.version_info >= (3, 11) else 1)"],
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+        except OSError:
+            continue
+
+        if version_check.returncode == 0:
+            seen.add(resolved)
             yield resolved
 
 # Optional: Map Codex server names to Antigravity names (can cause collisions)
@@ -128,11 +145,11 @@ def build_antigravity_config(codex_config):
 
     # Source .env files and ensure Node/npm tool paths are available.
     wrapper = (
-        'export PATH="/opt/homebrew/bin:/usr/local/bin:$HOME/.local/share/mise/shims:$PATH"; '
         "set -a; "
         "[ -f ~/.codex/.env ] && . ~/.codex/.env >/dev/null 2>&1; "
         "[ -f ~/dev/config/.env ] && . ~/dev/config/.env >/dev/null 2>&1; "
-        "set +a"
+        "set +a; "
+        'export PATH="/opt/homebrew/bin:/usr/local/bin:$HOME/.local/share/mise/shims:$PATH"'
     )
 
     servers = codex_config.get("mcp_servers", {})

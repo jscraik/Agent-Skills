@@ -373,6 +373,7 @@ def main():
     plugins_install_parser.add_argument("url", help="GitHub URL of the plugin source")
     plugins_install_parser.add_argument("--path", required=True, help="Plugin directory path inside source repo")
     plugins_install_parser.add_argument("--name", help="Override installed plugin name")
+    plugins_install_parser.add_argument("--ref", help="Pinned Git ref to install (recommended: commit SHA)")
     plugins_install_parser.add_argument("--dest", default="plugins/third-party", help="Destination directory relative to repo root")
     plugins_install_parser.add_argument("--validation-level", choices=["strict", "compat"], default="compat", help="Installer validation depth")
     plugins_install_parser.add_argument("--allow-untrusted-source", action="store_true", help="Allow non-allowlisted source repos")
@@ -618,6 +619,7 @@ def main():
                 url=args.url,
                 plugin_path=args.path,
                 name=args.name,
+                ref=args.ref,
                 dest=args.dest,
                 validation_level=args.validation_level,
                 allow_untrusted_source=args.allow_untrusted_source,

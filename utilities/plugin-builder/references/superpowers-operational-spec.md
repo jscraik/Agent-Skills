@@ -27,7 +27,7 @@ Assumption:
 
 ## Operational Mode
 - `STRICT`: fail on missing native Codex prerequisites, invalid skill surface, or unsupported hook adaptation.
-- `ADVISORY`: allow inspection and dry-run tracing to continue through non-fatal warnings, but do not mark runtime execution as `SUCCESS` unless invariants hold.
+- `ADVISORY`: allow inspection and dry-run tracing to continue through non-fatal warnings, but do not mark runtime execution as `TERMINAL_SUCCESS` unless invariants hold.
 
 ## Plugin Contract
 ```yaml
@@ -40,7 +40,8 @@ capabilities:
   - skill_dispatch
   - agent_dispatch
 result_status:
-  - SUCCESS
+  - STEP_SUCCESS
+  - TERMINAL_SUCCESS
   - FAILURE
   - RETRYABLE
 errors:
@@ -113,9 +114,9 @@ capability_map:
 - `skills/` is the canonical runtime surface.
 - deprecated command files must never outrank their canonical skill targets.
 - failure states are terminal.
-- success state is terminal.
+- `TERMINAL_SUCCESS` state is terminal.
 - every plugin capability invocation must reference `superpowers` in `plugin_registry`.
-- `SUCCESS` is valid only if Codex-native install is verified and skill routing resolves to a concrete skill or agent capability.
+- `TERMINAL_SUCCESS` is valid only if Codex-native install is verified and skill routing resolves to a concrete skill or agent capability.
 - provider-specific hook glue from the source implementation must not be copied verbatim into Codex runtime behavior; only hook intent is portable.
 
 ## Transition Table
@@ -123,25 +124,25 @@ Transition table is the source of truth.
 
 | S | E | G | A | P | R | N |
 | --- | --- | --- | --- | --- | --- | --- |
-| SOURCE_IDENTIFIED | inspect_requested | source repo reachable and mode in {STRICT, ADVISORY} | inspect Codex support surfaces | `superpowers.codex_native_install_detect` | SUCCESS | CODEX_SUPPORT_CLASSIFIED |
+| SOURCE_IDENTIFIED | inspect_requested | source repo reachable and mode in {STRICT, ADVISORY} | inspect Codex support surfaces | `superpowers.codex_native_install_detect` | STEP_SUCCESS | CODEX_SUPPORT_CLASSIFIED |
 | SOURCE_IDENTIFIED | inspect_requested | source repo unreachable | record inspection failure | `superpowers.codex_native_install_detect` | FAILURE:SYSTEM_ERROR | FAIL_SYSTEM |
-| CODEX_SUPPORT_CLASSIFIED | install_requested | native Codex docs present and `skills/` exists | verify or create Codex skill link | `superpowers.codex_skill_link` | SUCCESS | SKILLS_LINKED |
+| CODEX_SUPPORT_CLASSIFIED | install_requested | native Codex docs present and `skills/` exists | verify or create Codex skill link | `superpowers.codex_skill_link` | STEP_SUCCESS | SKILLS_LINKED |
 | CODEX_SUPPORT_CLASSIFIED | install_requested | native Codex docs missing or `skills/` missing | block installation | `superpowers.codex_skill_link` | FAILURE:VALIDATION_ERROR | FAIL_VALIDATION |
 | CODEX_SUPPORT_CLASSIFIED | install_requested | filesystem write or symlink dependency unavailable | report blocked install dependency | `superpowers.codex_skill_link` | FAILURE:BLOCKED_DEPENDENCY | FAIL_BLOCKED |
 | CODEX_SUPPORT_CLASSIFIED | install_requested | install action exceeds allowed duration | record retryable install timeout | `superpowers.codex_skill_link` | RETRYABLE:PLUGIN_TIMEOUT | FAIL_TIMEOUT |
-| SKILLS_LINKED | session_started | startup context hook supported | inject using-superpowers startup context | `superpowers.session_context_inject` | SUCCESS | SESSION_CONTEXT_READY |
+| SKILLS_LINKED | session_started | startup context hook supported | inject using-superpowers startup context | `superpowers.session_context_inject` | STEP_SUCCESS | SESSION_CONTEXT_READY |
 | SKILLS_LINKED | session_started | startup hook adaptation violates policy or requires unsupported provider-specific glue in STRICT mode | reject hook activation | `superpowers.session_context_inject` | FAILURE:POLICY_FAIL | FAIL_POLICY |
 | SKILLS_LINKED | session_started | hook execution fails | record hook runtime failure | `superpowers.session_context_inject` | FAILURE:PLUGIN_FAILURE | FAIL_PLUGIN |
 | SKILLS_LINKED | session_started | hook execution exceeds allowed duration | record retryable hook timeout | `superpowers.session_context_inject` | RETRYABLE:PLUGIN_TIMEOUT | FAIL_TIMEOUT |
-| SESSION_CONTEXT_READY | command_invoked | command file is deprecated redirect shim and canonical skill target exists | redirect to canonical skill | `superpowers.deprecated_command_redirect` | SUCCESS | COMMAND_REDIRECTED |
+| SESSION_CONTEXT_READY | command_invoked | command file is deprecated redirect shim and canonical skill target exists | redirect to canonical skill | `superpowers.deprecated_command_redirect` | STEP_SUCCESS | COMMAND_REDIRECTED |
 | SESSION_CONTEXT_READY | command_invoked | command file exists but redirect target is missing | fail redirect validation | `superpowers.deprecated_command_redirect` | FAILURE:VALIDATION_ERROR | FAIL_VALIDATION |
-| SESSION_CONTEXT_READY | skill_requested | requested skill exists | dispatch requested skill | `superpowers.skill_dispatch` | SUCCESS | SKILL_ACTIVE |
+| SESSION_CONTEXT_READY | skill_requested | requested skill exists | dispatch requested skill | `superpowers.skill_dispatch` | STEP_SUCCESS | SKILL_ACTIVE |
 | SESSION_CONTEXT_READY | skill_requested | requested skill missing | fail skill lookup | `superpowers.skill_dispatch` | FAILURE:VALIDATION_ERROR | FAIL_VALIDATION |
-| SESSION_CONTEXT_READY | agent_requested | requested agent exists and runtime supports agents | dispatch requested agent | `superpowers.agent_dispatch` | SUCCESS | SKILL_ACTIVE |
+| SESSION_CONTEXT_READY | agent_requested | requested agent exists and runtime supports agents | dispatch requested agent | `superpowers.agent_dispatch` | STEP_SUCCESS | SKILL_ACTIVE |
 | SESSION_CONTEXT_READY | agent_requested | requested agent missing or runtime does not support agents | fail agent lookup | `superpowers.agent_dispatch` | FAILURE:PLUGIN_FAILURE | FAIL_PLUGIN |
-| COMMAND_REDIRECTED | redirect_resolved | canonical skill target exists | dispatch redirected skill | `superpowers.skill_dispatch` | SUCCESS | SKILL_ACTIVE |
+| COMMAND_REDIRECTED | redirect_resolved | canonical skill target exists | dispatch redirected skill | `superpowers.skill_dispatch` | STEP_SUCCESS | SKILL_ACTIVE |
 | COMMAND_REDIRECTED | redirect_resolved | canonical skill dispatch fails | record redirected skill failure | `superpowers.skill_dispatch` | FAILURE:PLUGIN_FAILURE | FAIL_PLUGIN |
-| SKILL_ACTIVE | work_completed | skill or agent work completed without plugin error | finalize workflow result | `superpowers.skill_dispatch` | SUCCESS | SUCCESS |
+| SKILL_ACTIVE | work_completed | skill or agent work completed without plugin error | finalize workflow result | `superpowers.skill_dispatch` | TERMINAL_SUCCESS | TERMINAL_SUCCESS |
 | SKILL_ACTIVE | work_failed | capability returns non-retryable plugin failure | record runtime plugin failure | `superpowers.skill_dispatch` | FAILURE:PLUGIN_FAILURE | FAIL_PLUGIN |
 | SKILL_ACTIVE | work_failed | capability times out | record retryable runtime timeout | `superpowers.skill_dispatch` | RETRYABLE:PLUGIN_TIMEOUT | FAIL_TIMEOUT |
 
@@ -166,7 +167,7 @@ stateDiagram-v2
     SESSION_CONTEXT_READY --> FAIL_PLUGIN: agent_requested
     COMMAND_REDIRECTED --> SKILL_ACTIVE: redirect_resolved
     COMMAND_REDIRECTED --> FAIL_PLUGIN: redirect_resolved
-    SKILL_ACTIVE --> SUCCESS: work_completed
+    SKILL_ACTIVE --> TERMINAL_SUCCESS: work_completed
     SKILL_ACTIVE --> FAIL_PLUGIN: work_failed
     SKILL_ACTIVE --> FAIL_TIMEOUT: work_failed
 ```
@@ -228,5 +229,5 @@ logs:
   from_state: "<state>"
   to_state: "<state>"
   correlation_id: "<trace or request id>"
-  result: "SUCCESS | FAILURE:<error> | RETRYABLE:<error>"
+  result: "STEP_SUCCESS | TERMINAL_SUCCESS | FAILURE:<error> | RETRYABLE:<error>"
 ```

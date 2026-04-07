@@ -1,4 +1,5 @@
 import subprocess
+import re
 from pathlib import Path
 from typing import List, Optional
 
@@ -6,6 +7,7 @@ from ask.envelope import CallResult, ErrorObject
 
 # Allow-list for companion folder types per plugin-creator contract
 _ALLOWED_COMPANION_FOLDERS = {"skills", "hooks", "scripts", "assets", "mcp", "apps", "references", "workflows"}
+_INSTALL_SUMMARY_RE = re.compile(r"Installed\s+([a-z0-9][a-z0-9-]{0,63})\s+to\s+(.+)")
 
 
 def init_plugin(
@@ -64,6 +66,7 @@ def install_plugin(
     plugin_path: str,
     *,
     name: Optional[str] = None,
+    ref: Optional[str] = None,
     dest: str = "plugins/third-party",
     validation_level: str = "compat",
     allow_untrusted_source: bool = False,
@@ -74,30 +77,37 @@ def install_plugin(
     result = CallResult()
 
     dest_path = repo_root / dest
-    inferred_name = (name or url.split("/")[-1].replace(".git", "")).strip() or "plugin"
-    target_path = dest_path / inferred_name
+    requested_name = (name or "").strip() or None
+    target_path = dest_path / requested_name if requested_name else None
 
     if dry_run:
         result.status = "success"
         result.data["dry_run"] = True
         result.data["url"] = url
         result.data["plugin_path"] = plugin_path
-        result.data["plugin_name"] = inferred_name
-        try:
-            result.data["target_path"] = str(target_path.relative_to(repo_root))
-        except ValueError:
-            result.data["target_path"] = str(target_path)
-        result.metadata["next_steps"] = [
-            f"ask plugins install {url} --path {plugin_path} --dest {dest}"
-        ]
+        result.data["plugin_name"] = requested_name or "unknown"
+        if target_path is not None:
+            try:
+                result.data["target_path"] = str(target_path.relative_to(repo_root))
+            except ValueError:
+                result.data["target_path"] = str(target_path)
+        else:
+            result.data["target_path"] = "unknown"
+        next_step = f"ask plugins install {url} --path {plugin_path} --dest {dest}"
+        if ref:
+            next_step += f" --ref {ref}"
+        result.metadata["next_steps"] = [next_step]
         return result
 
-    if target_path.exists():
+    # If --name is explicit we can preflight destination conflict. Otherwise
+    # installer-derived manifest name is authoritative and conflict checks must
+    # run after that name is resolved by the installer.
+    if target_path is not None and target_path.exists():
         result.status = "error"
         result.errors.append(
             ErrorObject(
                 code="ERR_CONFLICT",
-                message=f"Plugin '{inferred_name}' already exists at '{target_path}'.",
+                message=f"Plugin '{requested_name}' already exists at '{target_path}'.",
                 fix_suggestion="Choose a different --name/--dest or remove the existing plugin first.",
             )
         )
@@ -116,8 +126,10 @@ def install_plugin(
         validation_level,
     ]
 
-    if name:
-        cmd.extend(["--name", name])
+    if requested_name:
+        cmd.extend(["--name", requested_name])
+    if ref:
+        cmd.extend(["--ref", ref])
     if allow_untrusted_source:
         cmd.append("--allow-untrusted-source")
     if allow_unpinned_ref:
@@ -128,9 +140,23 @@ def install_plugin(
     result.data["raw_error"] = process.stderr
 
     if process.returncode == 0:
+        installed_name = requested_name
+        installed_path: Optional[str] = None
+        for line in process.stdout.splitlines():
+            match = _INSTALL_SUMMARY_RE.search(line.strip())
+            if match:
+                installed_name = match.group(1)
+                installed_path = match.group(2).strip()
+                break
+
         result.status = "success"
-        result.data["message"] = f"Installed plugin '{name or inferred_name}'"
-        result.data["plugin_name"] = name or inferred_name
+        if installed_name:
+            result.data["message"] = f"Installed plugin '{installed_name}'"
+            result.data["plugin_name"] = installed_name
+        else:
+            result.data["message"] = "Installed plugin."
+        if installed_path:
+            result.data["target_path"] = installed_path
         return result
 
     result.status = "error"

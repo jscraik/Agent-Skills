@@ -13,5 +13,5 @@ After TDD cycle, look for:
 
 - Never refactor while RED — get to GREEN first
 - Run tests after each refactor step
-- If a refactor breaks tests but not behavior, the tests were wrong — fix the tests
+- After fixing any code, always run the relevant test suite to verify the fix works before committing. If tests fail, debug and iterate to determine whether behavior regressed or assertions are brittle, and only modify tests after confirming no regression.
 - Keep refactors scoped to the current behavior area

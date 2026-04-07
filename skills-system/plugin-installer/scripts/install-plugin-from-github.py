@@ -33,7 +33,7 @@ DEFAULT_REF = "main"
 PINNED_REF_RE = re.compile(r"^[0-9a-fA-F]{40}$")
 DEFAULT_TRUSTED_REPOS = {
     "openai/plugins",
-    "jamiecraik/agent-skills",
+    "jscraik/Agent-Skills",
 }
 
 
@@ -80,6 +80,10 @@ def _parse_github_url(url: str, default_ref: str) -> tuple[str, str, str, str | 
         raise InstallError("Invalid GitHub URL.")
 
     owner, repo = parts[0], parts[1]
+    if repo.endswith(".git"):
+        repo = repo[:-4]
+        if not repo:
+            raise InstallError("Invalid GitHub URL repo segment.")
     ref = default_ref
     subpath = ""
 
@@ -294,6 +298,7 @@ def main(argv: list[str] | None = None) -> int:
     args = _parse_args(argv or sys.argv[1:])
     destination: str | None = None
     journal_path: str | None = None
+    tmp_dir: str | None = None
 
     try:
         if not args.url and not args.repo:
@@ -317,7 +322,7 @@ def main(argv: list[str] | None = None) -> int:
         _validate_ref_token(ref_from_url)
 
         repo_id = f"{owner.lower()}/{repo.lower()}"
-        trust_allowlist = set(DEFAULT_TRUSTED_REPOS)
+        trust_allowlist = {_normalize_repo_id(text) for text in DEFAULT_TRUSTED_REPOS}
         trust_allowlist.update(_normalize_repo_id(text) for text in args.trusted_repo)
         if not args.allow_untrusted_source and repo_id not in trust_allowlist:
             raise InstallError(
@@ -349,7 +354,7 @@ def main(argv: list[str] | None = None) -> int:
             "validation_level": args.validation_level,
         })
 
-        repo_root = _download_repo_zip(owner, repo, ref_from_url, tmp_dir)
+        repo_root = _download_repo_zip(owner, repo, resolved_commit, tmp_dir)
         candidate = os.path.join(repo_root, os.path.normpath(plugin_path))
         _assert_path_within_repo(repo_root, candidate)
 
@@ -408,6 +413,9 @@ def main(argv: list[str] | None = None) -> int:
                 _write_journal_row(journal_path, "rollback_removed_destination", {"destination": destination})
         print(f"ERROR: unexpected installer failure: {exc}", file=sys.stderr)
         return 1
+    finally:
+        if tmp_dir:
+            shutil.rmtree(tmp_dir, ignore_errors=True)
 
 
 if __name__ == "__main__":

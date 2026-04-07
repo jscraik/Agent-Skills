@@ -137,18 +137,20 @@ Transition table is the source of truth.
 | MARKETPLACE_RESOLVED | plugin_selected | selection depends on unavailable repo metadata or blocked local access | record blocked dependency | `compound-engineering.plugin_root_select` | FAILURE:BLOCKED_DEPENDENCY | FAIL_BLOCKED |
 | PLUGIN_ROOT_READY | validate_requested | manifest-declared paths are valid and remain within plugin root | validate owned plugin surfaces | `compound-engineering.surface_validate` | SUCCESS | SURFACES_READY |
 | PLUGIN_ROOT_READY | validate_requested | manifest-declared paths escape plugin root or required surfaces are missing | record surface validation failure | `compound-engineering.surface_validate` | FAILURE:VALIDATION_ERROR | FAIL_VALIDATION |
-| SURFACES_READY | classify_requested | command-like content can be classified unambiguously into skill, prompt, or both | classify command surfaces semantically | `compound-engineering.command_classify` | SUCCESS | ROUTING_READY |
+| SURFACES_READY | classify_requested | command-like content can be classified unambiguously into skill-owned runtime behavior (with optional `interface.defaultPrompt` entry text) | classify command surfaces semantically | `compound-engineering.command_classify` | SUCCESS | ROUTING_READY |
 | SURFACES_READY | classify_requested | command-like content is ambiguous or conflicts with live tree semantics | record classification policy failure | `compound-engineering.command_classify` | FAILURE:POLICY_FAIL | FAIL_POLICY |
 | ROUTING_READY | mcp_requested | inline and file-based MCP definitions agree or only one canonical source exists | reconcile MCP configuration | `compound-engineering.mcp_reconcile` | SUCCESS | SESSION_READY |
 | ROUTING_READY | mcp_requested | MCP definitions drift or cannot be reconciled deterministically | record MCP validation failure | `compound-engineering.mcp_reconcile` | FAILURE:VALIDATION_ERROR | FAIL_VALIDATION |
 | ROUTING_READY | mcp_requested | MCP reconciliation exceeds allowed duration | record retryable MCP timeout | `compound-engineering.mcp_reconcile` | RETRYABLE:PLUGIN_TIMEOUT | FAIL_TIMEOUT |
 | SESSION_READY | request_received | request resolves uniquely to a classified skill surface | dispatch skill | `compound-engineering.skill_dispatch` | SUCCESS | WORK_ACTIVE |
-| SESSION_READY | request_received | request resolves uniquely to a classified prompt surface | dispatch prompt | `compound-engineering.prompt_dispatch` | SUCCESS | WORK_ACTIVE |
 | SESSION_READY | request_received | request resolves uniquely to an agent surface and runtime supports agents | dispatch agent | `compound-engineering.agent_dispatch` | SUCCESS | WORK_ACTIVE |
 | SESSION_READY | request_received | request does not resolve to any enabled classified surface | record routing validation failure | `compound-engineering.command_classify` | FAILURE:VALIDATION_ERROR | FAIL_VALIDATION |
-| WORK_ACTIVE | work_completed | active capability completed without plugin error | finalize workflow result | `compound-engineering.skill_dispatch` | SUCCESS | SUCCESS |
-| WORK_ACTIVE | work_failed | active capability returned non-retryable plugin failure | record runtime plugin failure | `compound-engineering.skill_dispatch` | FAILURE:PLUGIN_FAILURE | FAIL_PLUGIN |
-| WORK_ACTIVE | work_failed | active capability exceeded allowed duration | record retryable runtime timeout | `compound-engineering.skill_dispatch` | RETRYABLE:PLUGIN_TIMEOUT | FAIL_TIMEOUT |
+| WORK_ACTIVE | work_completed | active capability completed without plugin error and the originating dispatch was skill | finalize workflow result | `compound-engineering.skill_dispatch` | SUCCESS | SUCCESS |
+| WORK_ACTIVE | work_completed | active capability completed without plugin error and the originating dispatch was agent | finalize workflow result | `compound-engineering.agent_dispatch` | SUCCESS | SUCCESS |
+| WORK_ACTIVE | work_failed | active capability returned non-retryable plugin failure and the originating dispatch was skill | record runtime plugin failure | `compound-engineering.skill_dispatch` | FAILURE:PLUGIN_FAILURE | FAIL_PLUGIN |
+| WORK_ACTIVE | work_failed | active capability returned non-retryable plugin failure and the originating dispatch was agent | record runtime plugin failure | `compound-engineering.agent_dispatch` | FAILURE:PLUGIN_FAILURE | FAIL_PLUGIN |
+| WORK_ACTIVE | work_failed | active capability exceeded allowed duration and the originating dispatch was skill | record retryable runtime timeout | `compound-engineering.skill_dispatch` | RETRYABLE:PLUGIN_TIMEOUT | FAIL_TIMEOUT |
+| WORK_ACTIVE | work_failed | active capability exceeded allowed duration and the originating dispatch was agent | record retryable runtime timeout | `compound-engineering.agent_dispatch` | RETRYABLE:PLUGIN_TIMEOUT | FAIL_TIMEOUT |
 
 ## Diagram
 ```mermaid
@@ -165,7 +167,6 @@ stateDiagram-v2
     ROUTING_READY --> SESSION_READY: mcp_requested
     ROUTING_READY --> FAIL_VALIDATION: mcp_requested
     ROUTING_READY --> FAIL_TIMEOUT: mcp_requested
-    SESSION_READY --> WORK_ACTIVE: request_received
     SESSION_READY --> WORK_ACTIVE: request_received
     SESSION_READY --> WORK_ACTIVE: request_received
     SESSION_READY --> FAIL_VALIDATION: request_received

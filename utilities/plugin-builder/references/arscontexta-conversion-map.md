@@ -299,7 +299,7 @@ If any of the above is omitted, record the omission as an intentional defer with
 2. Fill `.codex-plugin/plugin.json` using the mapping above.
 3. Copy `README.md` and `LICENSE`, then rewrite Claude-specific terminology.
 4. Convert plugin-owned `skills/` first.
-5. Add a minimal `prompts/` set only if prompt assets materially help the Codex UX.
+5. Convert command-like or prompt-like source material into `skills/` entries; if a lightweight entrypoint is useful, use `interface.defaultPrompt` in the manifest instead of emitting a runtime `prompts/` surface.
 6. Preserve `agents/knowledge-guide.md` as optional agent asset.
 7. Add `.mcp.json` starter config only if the qmd example is still valid for the intended deployment.
 8. Convert only verified hook behavior into `hooks.json`.
@@ -312,10 +312,10 @@ After conversion, run these checks:
 
 ```bash
 python3 utilities/plugin-builder/scripts/plugin_builder.py validate plugins/arscontexta --require-marketplace --marketplace-path .agents/plugins/marketplace.json --show-terminology-map
-~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/quick_validate.py plugins/arscontexta/skills/setup
-~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/skill_gate.py plugins/arscontexta/skills/setup
-~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/analyze_skill.py plugins/arscontexta/skills/setup
-~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/openclaw_skill_guard.py plugins/arscontexta/skills/setup --mode both
+python3 utilities/skill-builder/scripts/quick_validate.py plugins/arscontexta/skills/setup
+python3 utilities/skill-builder/scripts/skill_gate.py plugins/arscontexta/skills/setup
+python3 utilities/skill-builder/scripts/analyze_skill.py plugins/arscontexta/skills/setup
+python3 utilities/skill-builder/scripts/openclaw_skill_guard.py plugins/arscontexta/skills/setup --mode both
 ```
 
 Recommended package-level review questions:

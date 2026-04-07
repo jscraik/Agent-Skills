@@ -12,9 +12,9 @@ inputs:
   - destination plugin root
   - validation policy strict|compat
 outputs:
-  - installed plugin under CODEX_HOME/plugins
-  - provenance manifest with source ref and resolved commit
-  - rollback journal with staged and promoted install events
+  - installed plugin under <destination root>/<plugin-name>
+  - provenance manifest with source ref, resolved commit, and destination-root-relative install path
+  - rollback journal with staged and promoted install events relative to the destination root
 non_goals:
   - plugin package conversion or hardening workflows
   - standalone skill authoring/hardening
@@ -25,7 +25,7 @@ risks:
   - weak traceability; mitigated by persisted manifest and journal artifacts
 rollback_procedure: >
   If an install produces an unusable plugin, use the rollback journal to identify
-  promoted directories, remove them from CODEX_HOME/plugins, and reinstall from the
+  promoted directories, remove them from the configured destination root, and reinstall from the
   previous pinned ref. Never skip quarantine validation during recovery.
 observability: >
   Monitor plugin-installer via provenance manifest presence, quarantine-to-promote

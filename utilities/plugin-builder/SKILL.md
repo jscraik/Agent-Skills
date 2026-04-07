@@ -134,6 +134,7 @@ If the request is out of scope, route clearly:
 - Check: `validate` and `audit-compat` evidence exists before any installer handoff.
 
 ## See Also
+
 | Skill | When to use |
 |---|---|
 | [[plugin-installer]] | Install and verify third-party plugins from GitHub with provenance + rollback controls |

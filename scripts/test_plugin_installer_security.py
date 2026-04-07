@@ -63,7 +63,12 @@ class PluginInstallerSecurityTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmpdir:
             plugin_dir = Path(tmpdir) / "sample-plugin"
             _write_min_plugin(plugin_dir)
-            os.symlink("/etc/hosts", plugin_dir / "leak.txt")
+            leak_target = Path(tmpdir) / "leak.txt"
+            leak_target.write_text("secret\n", encoding="utf-8")
+            try:
+                os.symlink(leak_target, plugin_dir / "leak.txt")
+            except OSError as exc:
+                self.skipTest(f"symlink creation not permitted on this platform: {exc}")
 
             with self.assertRaises(installer.InstallError):
                 installer._validate_plugin_root(str(plugin_dir))

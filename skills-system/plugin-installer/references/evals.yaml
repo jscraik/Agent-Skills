@@ -14,6 +14,10 @@ cases:
         value: "(?i)(install|plugin|github|provenance)"
       - type: regex
         value: "(?i)(rollback|quarantine|restart codex)"
+      - type: regex
+        value: "(?i)(commit\\s+[0-9a-f]{7,40}|tag\\s+v\\d+\\.\\d+|--ref\\s+[0-9a-f]{7,40}|pinned\\s+ref)"
+      - type: regex
+        value: "(?i)(trusted source|trust provenance|verify signature|check checksum|trusted repo)"
 
   - id: implicit-plugin-reinstall
     name: implicit plugin reinstall

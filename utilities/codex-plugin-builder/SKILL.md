@@ -38,8 +38,10 @@ Default behavior:
 Run canonical plugin-builder checks:
 
 ```bash
-python3 utilities/plugin-builder/scripts/plugin_builder.py validate <path/to/plugin>
+python3 utilities/plugin-builder/scripts/plugin_builder.py inspect-local <plugin-name> --path plugins
+python3 utilities/plugin-builder/scripts/plugin_builder.py validate <path/to/plugin> --require-marketplace --marketplace-path .agents/plugins/marketplace.json
 python3 utilities/plugin-builder/scripts/plugin_builder.py audit-compat <path/to/plugin> --marketplace-path .agents/plugins/marketplace.json
+python3 utilities/plugin-builder/scripts/plugin_builder.py audit-marketplace --marketplace-path .agents/plugins/marketplace.json --plugins-path plugins
 ```
 
 ## Failure mode
@@ -62,5 +64,9 @@ python3 utilities/plugin-builder/scripts/plugin_builder.py audit-compat <path/to
 | [[plugin-builder]] | Canonical plugin hardening and conversion skill |
 | [[plugin-installer]] | Install and verify third-party plugins from GitHub |
 | [[plugin-creator]] | Scaffold a minimal plugin package before hardening |
+
+codex-plugin-builder -> plugin-builder  
+codex-plugin-builder -> plugin-installer  
+codex-plugin-builder -> plugin-creator
 
 **Topic map:** [[agent-ops]]

@@ -62,12 +62,9 @@ Conversion rule:
 The repo README says its Codex converter emits a prompt and skill pair for each command.
 
 Conversion rule:
-- do not assume Claude `commands/` has a one-to-one mapping to only `prompts/`;
-- a command may map to:
-  - `prompts/`,
-  - `skills/`,
-  - or both,
-  depending on whether the target runtime benefits from both discoverable prompt entrypoints and reusable workflow instructions.
+- do not assume Claude `commands/` maps to a runtime `prompts/` surface;
+- map command behavior into `skills/` as the canonical runtime surface;
+- when a discoverable entrypoint is needed, set `interface.defaultPrompt` on the skill-owning plugin manifest instead of emitting `prompts/`.
 
 ### 5. Custom path support in source manifests
 The test fixtures demonstrate manifest fields like:

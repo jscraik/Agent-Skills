@@ -22,7 +22,7 @@ Do not use this skill as primary owner for:
 Handoffs:
 - to `plugin-builder` for package hardening and conversion;
 - to `plugin-creator` for first-pass local scaffold creation;
-- to `skill-builder` when bundled skills are not yet contract-valid.
+- to `skill-installer` when installed skills need lifecycle hardening or contract/eval upgrades.
 
 ## Inputs
 
@@ -98,7 +98,7 @@ Avoid these failures:
 Run checks in order and fail fast: stop at first failure, fix it, then rerun from the failed gate.
 
 ```bash
-python3 skills-system/plugin-installer/scripts/install-plugin-from-github.py --url https://github.com/<owner>/<repo> --path plugins/<plugin-name> --validation-level strict --allow-untrusted-source --allow-unpinned-ref
+python3 skills-system/plugin-installer/scripts/install-plugin-from-github.py --url https://github.com/<owner>/<repo> --path plugins/<plugin-name> --validation-level strict
 python3 utilities/plugin-builder/scripts/plugin_builder.py validate <installed-plugin-path>
 ./bin/ask repo validate --ephemeral
 ```

@@ -142,9 +142,12 @@ Transition table is the source of truth.
 | ORIENTED | skill_requested | request resolves to a package-owned knowledge or onboarding skill | dispatch package-owned skill | `arscontexta.skill_dispatch` | SUCCESS | WORK_ACTIVE |
 | ORIENTED | skill_requested | request resolves to a maintenance skill such as health or reseed | dispatch maintenance skill | `arscontexta.maintenance_dispatch` | SUCCESS | WORK_ACTIVE |
 | ORIENTED | skill_requested | request does not resolve to a packaged skill or only matches generated output not yet materialized | record routing validation failure | `arscontexta.skill_dispatch` | FAILURE:VALIDATION_ERROR | FAIL_VALIDATION |
-| WORK_ACTIVE | work_completed | active capability completed without plugin error | finalize workflow result | `arscontexta.skill_dispatch` | SUCCESS | SUCCESS |
-| WORK_ACTIVE | work_failed | active capability returned non-retryable plugin failure | record runtime plugin failure | `arscontexta.skill_dispatch` | FAILURE:PLUGIN_FAILURE | FAIL_PLUGIN |
-| WORK_ACTIVE | work_failed | active capability exceeded allowed duration | record retryable runtime timeout | `arscontexta.skill_dispatch` | RETRYABLE:PLUGIN_TIMEOUT | FAIL_TIMEOUT |
+| WORK_ACTIVE | work_completed | active capability completed without plugin error and active dispatcher is `arscontexta.skill_dispatch` | finalize workflow result | `arscontexta.skill_dispatch` | SUCCESS | SUCCESS |
+| WORK_ACTIVE | work_completed | active capability completed without plugin error and active dispatcher is `arscontexta.maintenance_dispatch` | finalize workflow result | `arscontexta.maintenance_dispatch` | SUCCESS | SUCCESS |
+| WORK_ACTIVE | work_failed | active capability returned non-retryable plugin failure and active dispatcher is `arscontexta.skill_dispatch` | record runtime plugin failure | `arscontexta.skill_dispatch` | FAILURE:PLUGIN_FAILURE | FAIL_PLUGIN |
+| WORK_ACTIVE | work_failed | active capability returned non-retryable plugin failure and active dispatcher is `arscontexta.maintenance_dispatch` | record runtime plugin failure | `arscontexta.maintenance_dispatch` | FAILURE:PLUGIN_FAILURE | FAIL_PLUGIN |
+| WORK_ACTIVE | work_failed | active capability exceeded allowed duration and active dispatcher is `arscontexta.skill_dispatch` | record retryable runtime timeout | `arscontexta.skill_dispatch` | RETRYABLE:PLUGIN_TIMEOUT | FAIL_TIMEOUT |
+| WORK_ACTIVE | work_failed | active capability exceeded allowed duration and active dispatcher is `arscontexta.maintenance_dispatch` | record retryable runtime timeout | `arscontexta.maintenance_dispatch` | RETRYABLE:PLUGIN_TIMEOUT | FAIL_TIMEOUT |
 
 ## Diagram
 ```mermaid
@@ -190,7 +193,7 @@ Transition code format:
 logs:
   workflow_id: "<uuid>"
   plugin_id: "arscontexta"
-  capability: "<capability name>"
+  capability: "<active dispatcher capability>"
   transition_code: "TC::<from_state>::<event>::<to_state>"
   from_state: "<state>"
   to_state: "<state>"

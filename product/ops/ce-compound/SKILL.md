@@ -55,7 +55,7 @@ Ask one question at a time. Prefer concise single-select choices when natural op
 ## Working agreement
 - Treat `ce-compound` as the compound-engineering orchestration layer, not a generic implementation or review lane.
 - Keep two valid entry shapes explicit:
-  - lifecycle orchestration across ideate -> brainstorm -> spec -> deepen-spec -> technical review -> plan -> deepen-plan -> technical review -> work -> tdd -> review -> compound
+  - lifecycle orchestration across ideate -> brainstorm -> spec -> deepen-spec -> technical review -> plan -> deepen-plan -> technical review -> work (with optional tdd posture) -> review -> compound
   - direct solved-problem capture when implementation is already complete and the goal is durable `docs/solutions/` knowledge
 - Preserve stage boundaries. Use `ce-ideate`, `ce-brainstorm`, `ce-spec`, `ce-plan`, `ce-tdd`, `ce-work`, `ce-review`, and `ce-technical-review` for their actual jobs instead of collapsing everything into one prompt body.
 - Prefer repository artifacts, prior learnings, and linked CE documents before external guidance.
@@ -257,6 +257,7 @@ Typical next steps:
 - `ce-tdd`
 - `ce-work`
 - `ce-review`
+- `ce-work` (with optional `ce-tdd` posture; `ce-tdd` is not a standalone lifecycle stage)
 
 After learning capture:
 - stop with the new `docs/solutions/` artifact when the documentation is sufficient

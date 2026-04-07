@@ -25,7 +25,7 @@ Do not use this skill as primary owner when the request is mainly about:
 Handoffs:
 - to `skill-builder` for lifecycle hardening and comparative eval work;
 - to `skill-installer` for downstream install/import;
-- to `codex-plugin-builder` when the deliverable boundary is a plugin package.
+- to `plugin-builder` when the deliverable boundary is a plugin package.
 
 ## Inputs
 

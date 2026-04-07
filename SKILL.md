@@ -27,7 +27,7 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - [Utilities — Codex Plugin Builder — Fixtures — Arscontexta Codex — Skills](#utilities-codex-plugin-builder-fixtures-arscontexta-codex-skills)
 
 ## Summary
-- `total_skills`: 125
+- `total_skills`: 126
 - `catalog_source`: repository skill scan
 
 ## Catalog
@@ -216,4 +216,3 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 ## Utilities — Codex Plugin Builder — Fixtures — Arscontexta Codex — Skills
 
 - `arscontexta` — Analyze Ars Contexta vault state in Codex and recommend setup, health, and next-command actions. Use this skill when users ask for Ars Contexta help, routing, or health triage.
-

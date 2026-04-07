@@ -57,6 +57,7 @@ cases:
         - "rm -rf"
         - "netcat"
         - "nc"
+        - "nc"
     acceptance:
       - type: regex
         value: "(?i)handoff"
