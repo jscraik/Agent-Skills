@@ -1,16 +1,16 @@
 {
-  "generated_at": "2026-04-06T17:41:10Z",
+  "generated_at": "2026-04-07T13:02:42Z",
   "runs_root": "artifacts/skill-graphs/runs",
   "counts": {
     "compliant": 0,
-    "missing_mandatory": 85,
+    "missing_mandatory": 93,
     "legacy_partial": 2,
     "empty": 0
   },
-  "total_runs": 87,
+  "total_runs": 95,
   "run_status_counts": {
     "compliant": 0,
-    "missing_mandatory": 85,
+    "missing_mandatory": 93,
     "legacy_partial": 2,
     "empty": 0
   },
@@ -2449,6 +2449,292 @@
       "blocker_code": null,
       "notes": [
         "run.json is missing or unreadable"
+      ]
+    },
+    {
+      "run_dir": "artifacts/skill-graphs/runs/run_20260407T064404758172Z_4270e1_8dc80eb",
+      "status": "missing_mandatory",
+      "waived": false,
+      "required_files": [
+        "capture_record.json",
+        "events.jsonl",
+        "evidence_packet.json",
+        "iteration_journal.jsonl",
+        "lesson_candidates.json",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "missing_files": [
+        "events.jsonl"
+      ],
+      "present_files": [
+        "capture_record.json",
+        "evidence_packet.json",
+        "iteration_journal.jsonl",
+        "lesson_candidates.json",
+        "lesson_observations.json",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "promotion_state": "draft",
+      "auto_capture_enabled": true,
+      "terminal_status": "passed",
+      "stop_reason": "pass",
+      "blocker_code": null,
+      "notes": [
+        "terminal_status=passed",
+        "stop_reason=pass"
+      ]
+    },
+    {
+      "run_dir": "artifacts/skill-graphs/runs/run_20260407T064404855416Z_cbb8d4_8dec4e9",
+      "status": "missing_mandatory",
+      "waived": false,
+      "required_files": [
+        "capture_record.json",
+        "events.jsonl",
+        "evidence_packet.json",
+        "iteration_journal.jsonl",
+        "lesson_candidates.json",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "missing_files": [
+        "events.jsonl"
+      ],
+      "present_files": [
+        "capture_record.json",
+        "evidence_packet.json",
+        "iteration_journal.jsonl",
+        "lesson_candidates.json",
+        "lesson_observations.json",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "promotion_state": "draft",
+      "auto_capture_enabled": true,
+      "terminal_status": "passed",
+      "stop_reason": "pass",
+      "blocker_code": null,
+      "notes": [
+        "terminal_status=passed",
+        "stop_reason=pass"
+      ]
+    },
+    {
+      "run_dir": "artifacts/skill-graphs/runs/run_20260407T064404953569Z_5b4309_8e1fa81",
+      "status": "missing_mandatory",
+      "waived": false,
+      "required_files": [
+        "capture_record.json",
+        "events.jsonl",
+        "evidence_packet.json",
+        "iteration_journal.jsonl",
+        "lesson_candidates.json",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "missing_files": [
+        "events.jsonl"
+      ],
+      "present_files": [
+        "capture_record.json",
+        "evidence_packet.json",
+        "iteration_journal.jsonl",
+        "lesson_candidates.json",
+        "lesson_observations.json",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "promotion_state": "draft",
+      "auto_capture_enabled": true,
+      "terminal_status": "passed",
+      "stop_reason": "pass",
+      "blocker_code": null,
+      "notes": [
+        "terminal_status=passed",
+        "stop_reason=pass"
+      ]
+    },
+    {
+      "run_dir": "artifacts/skill-graphs/runs/run_20260407T064405056266Z_04dd5b_8e4d06e",
+      "status": "missing_mandatory",
+      "waived": false,
+      "required_files": [
+        "capture_record.json",
+        "events.jsonl",
+        "evidence_packet.json",
+        "iteration_journal.jsonl",
+        "lesson_candidates.json",
+        "promotion_decision.json",
+        "run.json",
+        "run_blocker.json"
+      ],
+      "missing_files": [
+        "events.jsonl"
+      ],
+      "present_files": [
+        "capture_record.json",
+        "evidence_packet.json",
+        "iteration_journal.jsonl",
+        "lesson_candidates.json",
+        "lesson_observations.json",
+        "promotion_decision.json",
+        "run.json",
+        "run_blocker.json"
+      ],
+      "promotion_state": "draft",
+      "auto_capture_enabled": true,
+      "terminal_status": "escalated",
+      "stop_reason": "evaluator_conflict",
+      "blocker_code": "evaluator_conflict",
+      "notes": [
+        "terminal_status=escalated",
+        "stop_reason=evaluator_conflict",
+        "blocker_code=evaluator_conflict"
+      ]
+    },
+    {
+      "run_dir": "artifacts/skill-graphs/runs/run_20260407T064405159287Z_1c1272_8e7ad51",
+      "status": "missing_mandatory",
+      "waived": false,
+      "required_files": [
+        "capture_record.json",
+        "events.jsonl",
+        "evidence_packet.json",
+        "iteration_journal.jsonl",
+        "lesson_candidates.json",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "missing_files": [
+        "events.jsonl"
+      ],
+      "present_files": [
+        "capture_record.json",
+        "evidence_packet.json",
+        "iteration_journal.jsonl",
+        "lesson_candidates.json",
+        "lesson_observations.json",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "promotion_state": "draft",
+      "auto_capture_enabled": true,
+      "terminal_status": "passed",
+      "stop_reason": "pass",
+      "blocker_code": null,
+      "notes": [
+        "terminal_status=passed",
+        "stop_reason=pass"
+      ]
+    },
+    {
+      "run_dir": "artifacts/skill-graphs/runs/run_20260407T064405259532Z_50ef7d_8e9f024",
+      "status": "missing_mandatory",
+      "waived": false,
+      "required_files": [
+        "capture_record.json",
+        "events.jsonl",
+        "evidence_packet.json",
+        "iteration_journal.jsonl",
+        "lesson_candidates.json",
+        "promotion_decision.json",
+        "run.json",
+        "run_blocker.json"
+      ],
+      "missing_files": [
+        "events.jsonl"
+      ],
+      "present_files": [
+        "capture_record.json",
+        "evidence_packet.json",
+        "iteration_journal.jsonl",
+        "lesson_candidates.json",
+        "lesson_observations.json",
+        "promotion_decision.json",
+        "run.json",
+        "run_blocker.json"
+      ],
+      "promotion_state": "draft",
+      "auto_capture_enabled": true,
+      "terminal_status": "escalated",
+      "stop_reason": "evaluator_conflict",
+      "blocker_code": "evaluator_conflict",
+      "notes": [
+        "terminal_status=escalated",
+        "stop_reason=evaluator_conflict",
+        "blocker_code=evaluator_conflict"
+      ]
+    },
+    {
+      "run_dir": "artifacts/skill-graphs/runs/run_20260407T064405363942Z_c6442d_8ec82bd",
+      "status": "missing_mandatory",
+      "waived": false,
+      "required_files": [
+        "capture_record.json",
+        "events.jsonl",
+        "evidence_packet.json",
+        "iteration_journal.jsonl",
+        "lesson_candidates.json",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "missing_files": [
+        "events.jsonl"
+      ],
+      "present_files": [
+        "capture_record.json",
+        "evidence_packet.json",
+        "iteration_journal.jsonl",
+        "lesson_candidates.json",
+        "lesson_observations.json",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "promotion_state": "draft",
+      "auto_capture_enabled": true,
+      "terminal_status": "passed",
+      "stop_reason": "pass",
+      "blocker_code": null,
+      "notes": [
+        "terminal_status=passed",
+        "stop_reason=pass"
+      ]
+    },
+    {
+      "run_dir": "artifacts/skill-graphs/runs/run_20260407T064405465228Z_f93d59_8ee1174",
+      "status": "missing_mandatory",
+      "waived": false,
+      "required_files": [
+        "capture_record.json",
+        "events.jsonl",
+        "evidence_packet.json",
+        "iteration_journal.jsonl",
+        "lesson_candidates.json",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "missing_files": [
+        "events.jsonl"
+      ],
+      "present_files": [
+        "capture_record.json",
+        "evidence_packet.json",
+        "iteration_journal.jsonl",
+        "lesson_candidates.json",
+        "lesson_observations.json",
+        "promotion_decision.json",
+        "run.json"
+      ],
+      "promotion_state": "draft",
+      "auto_capture_enabled": true,
+      "terminal_status": "passed",
+      "stop_reason": "pass",
+      "blocker_code": null,
+      "notes": [
+        "terminal_status=passed",
+        "stop_reason=pass"
       ]
     }
   ],
