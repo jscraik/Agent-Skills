@@ -163,7 +163,7 @@ Follow-up expectations:
 | Skill | When to use together |
 |---|---|
 | [[skill-builder]] | Use after `SKILL` decision is made to scaffold and quality-gate the skill |
-| [[codex-plugin-builder]] | Use after `SKILL` decision when the skill needs plugin packaging for distribution |
+| [[plugin-builder]] | Use after `SKILL` decision when the skill needs plugin packaging for distribution |
 | [[codex-automation-architect]] | Use after `AGENT_AUTOMATION` decision to design the automation contract |
 | [[compound-engineering-router]] | Use when the capability spans multiple workflow types and routing is unclear |
 

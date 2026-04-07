@@ -11,19 +11,20 @@
 Choose the smallest correct workflow route for a compound-engineering request.
 
 ## Route criteria
-| Route | Choose when | Packaged skill path | Legacy prompt alias | Typical agent fan-out |
-|---|---|---|---|
-| ideate | The user wants ranked improvement directions before choosing one to define in depth. | `product/ops/ce-ideate` | none | `repo-research-analyst`, `learnings-researcher`, optional issue-intelligence support |
-| brainstorm | The request is still exploratory or has multiple valid shapes. | `product/ops/ce-brainstorm` | `codex/prompts/workflow-brainstorm.md` | `repo-research-analyst`, `learnings-researcher` |
-| spec | The user needs an implementation-ready spec from a rough idea. | `product/ops/ce-spec` | `codex/prompts/workflow-spec.md` | `repo-research-analyst`, `learnings-researcher`, optional research roles |
-| deepen-spec | A spec exists but lacks rigor, edge cases, or operational detail. | `product/ops/ce-deepen-spec` | `codex/prompts/deepen-spec.md` | `repo-research-analyst`, `learnings-researcher`, optional research roles |
-| plan | A spec is ready and the next need is execution planning, including test mode, tracer-bullet-first decisions, and validation gates. | `product/ops/ce-plan` | `codex/prompts/workflow-plan.md` | research roles plus `spec-flow-analyzer` |
-| deepen-plan | A plan exists but needs stronger sequencing, gates, TDD declarations, or validation coverage. | `product/ops/ce-deepen-plan` | `codex/prompts/deepen-plan.md` | research roles |
-| work | The spec and plan are sufficiently ready for implementation, and the TDD/tracer-bullet contract is explicit enough to execute safely. Default to one supervisor agent owning the lane. | `product/ops/ce-work` | `codex/prompts/workflow-work.md` | usually none by default; bounded internal reviewers only if justified |
-| review | The need is broad readiness, synthesis, go-no-go, or package-level review. | `product/ops/ce-review` | `codex/prompts/workflow-review.md` | reviewer mix based on risk areas |
-| technical-review | The need is a deep engineering critique of code, diff, PR, or branch. | `product/ops/ce-technical-review` | `codex/prompts/technical_review.md` | specialist reviewers by language or risk area |
-| compound | The user wants a multi-stage orchestration or is unsure but clearly needs coordinated workflow help. | `product/ops/ce-compound` | `codex/prompts/workflow-compound.md` | research roles plus optional specialized reviewers |
-| compound-refresh | The user wants to refresh stale learnings or pattern docs in `docs/solutions/` against current code reality. | `product/ops/ce-compound-refresh` | none | usually none by default; bounded investigation support if scope is broad |
+| Route | Choose when | Packaged skill path | Legacy prompt alias (deprecated) | Typical agent fan-out |
+|---|---|---|---|---|
+| ideate | The user wants ranked improvement directions before choosing one to define in depth. | `.agents/skills/ce-ideate` | none | `repo-research-analyst`, `learnings-researcher`, optional issue-intelligence support |
+| brainstorm | The request is still exploratory or has multiple valid shapes. | `.agents/skills/ce-brainstorm` | `codex/prompts/workflow-brainstorm.md` | `repo-research-analyst`, `learnings-researcher` |
+| spec | The user needs an implementation-ready spec from a rough idea. | `.agents/skills/ce-spec` | `codex/prompts/workflow-spec.md` | `repo-research-analyst`, `learnings-researcher`, optional research roles |
+| deepen-spec | A spec exists but lacks rigor, edge cases, or operational detail. | `.agents/skills/ce-deepen-spec` | `codex/prompts/deepen-spec.md` | `repo-research-analyst`, `learnings-researcher`, optional research roles |
+| plan | A spec is ready and the next need is execution planning, including test mode, tracer-bullet-first decisions, and validation gates. | `.agents/skills/ce-plan` | `codex/prompts/workflow-plan.md` | research roles plus `spec-flow-analyzer` |
+| deepen-plan | A plan exists but needs stronger sequencing, gates, TDD declarations, or validation coverage. | `.agents/skills/ce-deepen-plan` | `codex/prompts/deepen-plan.md` | research roles |
+| tdd | The plan specifies test-first execution posture and the user wants vertical tracer bullet TDD discipline during `ce-work`. | `.agents/skills/ce-tdd` | none | none by default |
+| work | The spec and plan are sufficiently ready for implementation, and the TDD/tracer-bullet contract is explicit enough to execute safely. Default to one supervisor agent owning the lane. | `.agents/skills/ce-work` | `codex/prompts/workflow-work.md` | usually none by default; bounded internal reviewers only if justified |
+| review | The need is broad readiness, synthesis, go-no-go, or package-level review. | `.agents/skills/ce-review` | `codex/prompts/workflow-review.md` | reviewer mix based on risk areas |
+| technical-review | The need is a deep engineering critique of code, diff, PR, or branch. | `.agents/skills/ce-technical-review` | `codex/prompts/technical_review.md` | specialist reviewers by language or risk area |
+| compound | The user wants a multi-stage orchestration or is unsure but clearly needs coordinated workflow help. | `.agents/skills/ce-compound` | `codex/prompts/workflow-compound.md` | research roles plus optional specialized reviewers |
+| compound-refresh | The user wants to refresh stale learnings or pattern docs in `docs/solutions/` against current code reality. | `.agents/skills/ce-compound-refresh` | none | usually none by default; bounded investigation support if scope is broad |
 
 ## UI routing
 

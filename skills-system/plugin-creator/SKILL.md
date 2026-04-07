@@ -20,7 +20,7 @@ Do not use this skill as primary owner for:
 
 Handoffs:
 - to `skill-builder` when bundled skills need quality hardening;
-- to `codex-plugin-builder` for full plugin package assembly and governance checks.
+- to `plugin-builder` for full plugin package assembly and governance checks.
 
 ## Inputs
 
@@ -103,7 +103,7 @@ bin/ask repo validate --ephemeral
 
 | Skill | When to use together |
 |---|---|
-| [[codex-plugin-builder]] | Promote scaffold into a full plugin package with governance checks |
+| [[plugin-builder]] | Promote scaffold into a full plugin package with governance checks |
 | [[skill-builder]] | Improve bundled skill quality before plugin release |
 | [[cli-spec]] | Consult the technical contract for the ask CLI |
 

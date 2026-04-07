@@ -1,7 +1,8 @@
+from __future__ import annotations
+
 """Skill graph navigation and discovery for agent-native workflows."""
 import json
 from pathlib import Path
-from typing import List, Dict, Any, Optional
 from collections import defaultdict, deque
 from ask.envelope import CallResult, ErrorObject
 
@@ -9,7 +10,7 @@ def _get_graph_path(repo_root: Path) -> Path:
     """Returns the path to skill-edges.json."""
     return repo_root / "ops" / "metrics" / "graph" / "skill-edges.json"
 
-def _load_graph(repo_root: Path) -> tuple[Optional[dict], Optional[ErrorObject]]:
+def _load_graph(repo_root: Path) -> tuple[dict | None, ErrorObject | None]:
     """Loads the skill graph from skill-edges.json.
 
     Returns:

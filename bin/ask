@@ -26,7 +26,7 @@ from ask.envelope import CallResult, ErrorObject, ErrorCode, ExitCode
 from ask.context import find_repo_root
 from ask.commands.skills import list_skills, sync_skills, audit_skill, install_skill, fold_skills, init_skill
 from ask.commands.repo import repo_status, repo_validate, check_hub_stability
-from ask.commands.plugins import init_plugin
+from ask.commands.plugins import init_plugin, install_plugin
 from ask.commands.evals import run_evals, benchmark_portfolio, dashboard_report
 from ask.commands.graph import graph_related, graph_find, graph_info, graph_chain, graph_list, graph_topics
 from ask.commands.mcp import sync_mcp
@@ -55,7 +55,7 @@ VALID_TOPICS = ["repo", "skills", "plugins", "evals", "graph", "mcp"]
 VALID_ACTIONS = {
     "repo": ["status", "validate", "check-stability"],
     "skills": ["list", "sync", "audit", "install", "fold", "init"],
-    "plugins": ["init"],
+    "plugins": ["init", "install"],
     "evals": ["run", "benchmark", "dashboard"],
     "graph": ["related", "find", "info", "chain", "list", "topics"],
     "mcp": ["sync"]
@@ -368,6 +368,17 @@ def main():
     plugins_init_parser.add_argument("--with-assets", action="store_true", help="Add assets directory")
     plugins_init_parser.add_argument("--with-references", action="store_true", help="Add references directory")
     plugins_init_parser.add_argument("--with-workflows", action="store_true", help="Add workflows directory")
+
+    plugins_install_parser = plugins_subparsers.add_parser("install", help="Install a plugin from GitHub", parents=[global_parser])
+    plugins_install_parser.add_argument("url", help="GitHub URL of the plugin source")
+    plugins_install_parser.add_argument("--path", required=True, help="Plugin directory path inside source repo")
+    plugins_install_parser.add_argument("--name", help="Override installed plugin name")
+    plugins_install_parser.add_argument("--ref", help="Pinned Git ref to install (recommended: commit SHA)")
+    plugins_install_parser.add_argument("--dest", default="plugins/third-party", help="Destination directory relative to repo root")
+    plugins_install_parser.add_argument("--validation-level", choices=["strict", "compat"], default="compat", help="Installer validation depth")
+    plugins_install_parser.add_argument("--allow-untrusted-source", action="store_true", help="Allow non-allowlisted source repos")
+    plugins_install_parser.add_argument("--allow-unpinned-ref", action="store_true", help="Allow non-SHA refs (e.g. main)")
+    plugins_install_parser.add_argument("--dry-run", action="store_true", help="Preview installation without writing")
     
     # --- evals ---
     evals_parser = subparsers.add_parser("evals", help="Evaluation and Benchmarking", parents=[global_parser])
@@ -602,13 +613,26 @@ def main():
             if args.with_references: companion.append("references")
             if args.with_workflows: companion.append("workflows")
             result = init_plugin(repo_root, name=args.name, with_marketplace=args.with_marketplace, companion_folders=companion)
+        elif args.action == "install":
+            result = install_plugin(
+                repo_root,
+                url=args.url,
+                plugin_path=args.path,
+                name=args.name,
+                ref=args.ref,
+                dest=args.dest,
+                validation_level=args.validation_level,
+                allow_untrusted_source=args.allow_untrusted_source,
+                allow_unpinned_ref=args.allow_unpinned_ref,
+                dry_run=args.dry_run,
+            )
         else:
             result.status = "error"
             action_msg = f"unknown action '{args.action}'" if args.action else "missing action"
             result.errors.append(ErrorObject(
                 code=ErrorCode.ERR_VALIDATION,
                 message=f"{action_msg} for topic 'plugins'",
-                fix_suggestion="Valid actions: init"
+                fix_suggestion="Valid actions: init, install"
             ))
 
     elif args.topic == "evals":
@@ -723,6 +747,19 @@ def main():
                 elif args.topic == "plugins" and args.action == "init":
                     print(f"✅ {result.data['message']}")
                     print(result.data.get("raw_output", ""))
+                elif args.topic == "plugins" and args.action == "install":
+                    if result.data.get("dry_run"):
+                        print("🔍 Dry run - would install plugin:")
+                        print(f"   URL: {result.data.get('url')}")
+                        print(f"   Source path: {result.data.get('plugin_path')}")
+                        print(f"   Name: {result.data.get('plugin_name')}")
+                        print(f"   Target: {result.data.get('target_path')}")
+                        print("\n💡 To actually install, run:")
+                        print(f"   {result.metadata.get('next_steps', ['ask plugins install <url> --path <path>'])[0]}")
+                    else:
+                        print(f"✅ {result.data.get('message', 'Plugin installed.')}")
+                        if result.data.get("raw_output"):
+                            print(result.data["raw_output"])
                 elif args.topic == "evals":
                     if args.action == "run":
                         print(f"✅ Evaluation complete for {args.path}")
@@ -828,11 +865,12 @@ def main():
                     elif args.action == "install":
                         print("\n📚 Install examples:")
                         print("   ask skills install https://github.com/user/repo --remediate")
-            elif args.topic == "plugins" and args.action == "init":
+            elif args.topic == "plugins" and args.action in ("init", "install"):
                 if "raw_output" in result.data: print(result.data["raw_output"])
                 if "raw_error" in result.data: print(result.data["raw_error"])
                 print("\n📚 Plugin examples:")
                 print("   ask plugins init my-plugin --with-marketplace")
+                print("   ask plugins install https://github.com/<owner>/<repo> --path plugins/<name>")
             elif args.topic == "evals":
                 if "raw_output" in result.data: print(result.data["raw_output"])
                 if "raw_error" in result.data: print(result.data["raw_error"])

@@ -33,7 +33,7 @@ Use this skill when the request is to:
 
 Do not use this skill for:
 - generic repo automation that is not Codex hooks;
-- plugin packaging work that belongs in `codex-plugin-builder`;
+- plugin packaging work that belongs in `plugin-builder`;
 - unsupported hook types presented as stable runtime behavior.
 
 ## Philosophy
@@ -198,7 +198,7 @@ bash scripts/lint_skill_types.sh
 ## See Also
 | Skill | When to use |
 |---|---|
-| [[codex-plugin-builder]] | Package the hooks together with related skills or agents in a plugin |
+| [[plugin-builder]] | Package the hooks together with related skills or agents in a plugin |
 | [[codex-home-audit]] | Audit an existing Codex home installation for hook drift or unsafe config |
 | [[codex-agent-creator]] | Create or update agent roles that the hooks should invoke or govern |
 | [[gh-workflow]] | Ship and review hook-pack changes through the GitHub lifecycle |

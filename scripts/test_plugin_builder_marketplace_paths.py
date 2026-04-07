@@ -10,7 +10,7 @@ from pathlib import Path
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-MODULE_PATH = REPO_ROOT / "utilities" / "codex-plugin-builder" / "scripts" / "plugin_builder.py"
+MODULE_PATH = REPO_ROOT / "utilities" / "plugin-builder" / "scripts" / "plugin_builder.py"
 SPEC = importlib.util.spec_from_file_location("plugin_builder", MODULE_PATH)
 assert SPEC and SPEC.loader
 plugin_builder = importlib.util.module_from_spec(SPEC)

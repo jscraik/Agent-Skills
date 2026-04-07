@@ -59,7 +59,7 @@ Use this skill when the user asks to:
 - refine skill-graph contracts tied to recursive workflow operations;
 - prepare a contract-valid skill for install/distribute handoff or finish bounded distribution work when lifecycle judgment is already settled.
 
-Keep this skill out of scope for: first-draft skill scaffolding (`skill-creator`); pure install/import or runtime-visibility work once the skill is already valid (`skill-installer`); unrelated app feature coding; generic bug-fixing outside skill quality; routine non-skill docs edits; plugin conversion (`codex-plugin-builder`); session-scan coverage (`codex-sessions-skill-scan`).
+Keep this skill out of scope for: first-draft skill scaffolding (`skill-creator`); pure install/import or runtime-visibility work once the skill is already valid (`skill-installer`); unrelated app feature coding; generic bug-fixing outside skill quality; routine non-skill docs edits; plugin conversion (`plugin-builder`); session-scan coverage (`codex-sessions-skill-scan`).
 
 ## Iteration Round Contract
 For non-trivial lifecycle work, use one explicit round model:
@@ -83,7 +83,7 @@ Use one additive artifact model:
 - `release_manifest.json`: thin release-facing snapshot that points to richer artifacts.
 - `comparison_review.md` (optional, run-scoped): qualitative review notes when JSON alone is not enough.
 Readiness states must stay distinct: `starter_valid`, `comparison_incomplete`, `comparison_blocked`, `downstream_ready`.
-Downstream handoff guardrail: `skill-installer` and `codex-plugin-builder` are downstream-only. Hand off only when `ContractValidityEvidence` exists and lifecycle judgment is complete.
+Downstream handoff guardrail: `skill-installer` and `plugin-builder` are downstream-only. Hand off only when `ContractValidityEvidence` exists and lifecycle judgment is complete.
 
 ## Category confirmation
 For `create` and `improve` mode, confirm the primary category before drafting:
@@ -322,7 +322,7 @@ Reference files:
 - Preserve relevant upstream context when importing: keep high-value references, examples, and caveat docs unless they are clearly redundant or out of scope, and signpost them from the wrapper skill.
 - Validate in quarantine before atomic move/swap; rollback on write failure.
 - Hand off pure installation or runtime-visibility work on an already-valid skill to `skill-installer`.
-- Hand off plugin conversion to `codex-plugin-builder` once the standalone skill is contract-valid and the deliverable boundary becomes a plugin.
+- Hand off plugin conversion to `plugin-builder` once the standalone skill is contract-valid and the deliverable boundary becomes a plugin.
 - Hand off session coverage scans to `codex-sessions-skill-scan`.
 - Use `references/advanced-workflow.md` for full install-distribute mechanics and checklists.
 
@@ -330,7 +330,7 @@ Reference files:
 | Skill | When to use |
 |---|---|
 | [[decide-build-primitive]] | Decide whether the capability should be a skill, prompt, or agent before authoring it |
-| [[codex-plugin-builder]] | Package a contract-valid standalone skill when the deliverable explicitly becomes a plugin |
+| [[plugin-builder]] | Package a contract-valid standalone skill when the deliverable explicitly becomes a plugin |
 | [[codex-sessions-skill-scan]] | Audit skill coverage, failures, and overlap using real session evidence instead of authoring doctrine alone |
 | [[skill-installer]] | Install, import, or repair runtime visibility when the skill package is already valid and the remaining work is distribution |
 

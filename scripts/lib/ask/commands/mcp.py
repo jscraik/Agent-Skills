@@ -4,6 +4,8 @@ import os
 import json
 import re
 import shlex
+import shutil
+import subprocess
 from pathlib import Path
 from ask.envelope import CallResult, ErrorObject
 
@@ -18,6 +20,15 @@ except ModuleNotFoundError:
 CODEX_CONFIG_PATH = os.path.expanduser("~/.codex/config.toml")
 ANTIGRAVITY_MCP_PATH = os.path.expanduser("~/.gemini/antigravity/mcp_config.json")
 ENV_VAR_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
+FALLBACK_PYTHONS = (
+    "python3",
+    "python3.12",
+    "/usr/local/bin/python3.12",
+    "/opt/homebrew/bin/python3.12",
+    "python3.11",
+    "/usr/local/bin/python3.11",
+    "/opt/homebrew/bin/python3.11",
+)
 
 
 def is_valid_env_var_name(value):
@@ -29,10 +40,59 @@ def load_codex_config():
         return None
 
     if tomllib is None:
-        return None
+        return _load_toml_with_newer_python(CODEX_CONFIG_PATH)
 
     with open(CODEX_CONFIG_PATH, "rb") as f:
         return tomllib.load(f)
+
+
+def _load_toml_with_newer_python(path: str):
+    """Parse TOML via an available Python 3.11+ interpreter when possible."""
+    loader = (
+        "import json, sys, tomllib\n"
+        "with open(sys.argv[1], 'rb') as f:\n"
+        "    print(json.dumps(tomllib.load(f)))"
+    )
+    for candidate in _iter_fallback_pythons():
+        if candidate is None:
+            continue
+        try:
+            proc = subprocess.run(
+                [candidate, "-c", loader, path],
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            return json.loads(proc.stdout)
+        except (OSError, subprocess.CalledProcessError, json.JSONDecodeError):
+            continue
+    return None
+
+
+def _iter_fallback_pythons():
+    seen = set()
+    for candidate in FALLBACK_PYTHONS:
+        if os.path.isabs(candidate):
+            resolved = candidate if os.path.exists(candidate) else None
+        else:
+            resolved = shutil.which(candidate)
+
+        if not resolved or resolved in seen:
+            continue
+
+        try:
+            version_check = subprocess.run(
+                [resolved, "-c", "import sys; raise SystemExit(0 if sys.version_info >= (3, 11) else 1)"],
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+        except OSError:
+            continue
+
+        if version_check.returncode == 0:
+            seen.add(resolved)
+            yield resolved
 
 
 def build_antigravity_config(codex_config):
@@ -41,16 +101,13 @@ def build_antigravity_config(codex_config):
         "repo-prompt": "repoprompt",
     }
 
-    # Loader to source .env files (handles regular files and FIFOs with 0.5s timeout)
-    source_env = (
-        'for f in ~/.codex/.env ~/dev/config/.env; do '
-        '[ -e "$f" ] && { tmp=$(mktemp); timeout 0.5s cat "$f" > "$tmp" || true; [ -s "$tmp" ] && . "$tmp"; rm -f "$tmp"; }; '
-        'done'
-    )
-    # Ensure Homebrew and Mise shims are on the PATH for npx and other tools
+    # Source .env files and ensure Node/npm tool paths are available.
     wrapper = (
-        'export PATH="/opt/homebrew/bin:$HOME/.local/share/mise/shims:$PATH"; '
-        f'set -a; {source_env}; set +a'
+        "set -a; "
+        "[ -f ~/.codex/.env ] && . ~/.codex/.env >/dev/null 2>&1; "
+        "[ -f ~/dev/config/.env ] && . ~/dev/config/.env >/dev/null 2>&1; "
+        "set +a; "
+        'export PATH="/opt/homebrew/bin:/usr/local/bin:$HOME/.local/share/mise/shims:$PATH"'
     )
 
     servers = codex_config.get("mcp_servers", {})
@@ -137,12 +194,12 @@ def sync_mcp(repo_root: Path, dry_run: bool = False) -> CallResult:
     """Sync MCP configuration from Codex to Antigravity."""
     result = CallResult()
 
-    if tomllib is None:
+    if tomllib is None and not list(_iter_fallback_pythons()):
         result.status = "error"
         result.errors.append(ErrorObject(
             code="ERR_DEPENDENCY",
-            message="tomli/tomllib not available. Install tomli: pip install tomli",
-            fix_suggestion="pip install tomli"
+            message="tomli/tomllib not available and no python3.11+/python3.12 fallback found.",
+            fix_suggestion="Install tomli (`python3 -m pip install --user tomli`) or install Python 3.11+"
         ))
         return result
 

@@ -135,26 +135,37 @@ Guiding questions:
 
 ## Prerequisites
 Before routing:
-1. confirm the target repo contains the packaged CE skills under `product/ops/`
+1. confirm whether the target repo contains packaged CE skills under `.agents/skills/`
 2. confirm the target repo contains matching role configs when the route recommends specialist agents
 3. confirm shell and tooling preflight for any repo inspection or validation work
 4. if NotebookLM enrichment is requested or clearly helpful, use the canonical NotebookLM skill and its `run.py` wrapper
+
+If packaged CE skill directories are missing, enter degraded routing mode:
+- report the missing `.agents/skills/<route>` paths explicitly;
+- fall back to source skill paths in this repository only when the user approves that degraded mode;
+- otherwise stop with a validation blocker instead of pretending the packaged route exists.
 
 ## Route map
 See `workflows/route-selection.md` for the canonical route table and `workflows/meta-modes.md` for the support modes.
 
 Packaged CE routes:
-- `ideate` -> `product/ops/ce-ideate`
-- `brainstorm` -> `product/ops/ce-brainstorm`
-- `spec` -> `product/ops/ce-spec`
-- `deepen-spec` -> `product/ops/ce-deepen-spec`
-- `plan` -> `product/ops/ce-plan`
-- `deepen-plan` -> `product/ops/ce-deepen-plan`
-- `work` -> `product/ops/ce-work`
-- `review` -> `product/ops/ce-review`
-- `technical-review` -> `product/ops/ce-technical-review`
-- `compound` -> `product/ops/ce-compound`
-- `compound-refresh` -> `product/ops/ce-compound-refresh`
+- `ideate` -> `.agents/skills/ce-ideate`
+- `brainstorm` -> `.agents/skills/ce-brainstorm`
+- `spec` -> `.agents/skills/ce-spec`
+- `deepen-spec` -> `.agents/skills/ce-deepen-spec`
+- `plan` -> `.agents/skills/ce-plan`
+- `deepen-plan` -> `.agents/skills/ce-deepen-plan`
+- `tdd` -> `.agents/skills/ce-tdd`
+- `work` -> `.agents/skills/ce-work`
+- `review` -> `.agents/skills/ce-review`
+- `technical-review` -> `.agents/skills/ce-technical-review`
+- `compound` -> `.agents/skills/ce-compound`
+- `compound-refresh` -> `.agents/skills/ce-compound-refresh`
+
+Degraded fallback (only when packaged skills are absent and user approves):
+- map route names to source paths under `product/ops/<skill-name>/SKILL.md`;
+- keep the same route rationale and validation gates;
+- clearly label output as degraded because packaged runtime parity is unavailable.
 
 Meta-modes:
 - `context-compaction` -> summarize state for a clean continuation; no backing prompt file

@@ -55,9 +55,9 @@ Ask one question at a time. Prefer concise single-select choices when natural op
 ## Working agreement
 - Treat `ce-compound` as the compound-engineering orchestration layer, not a generic implementation or review lane.
 - Keep two valid entry shapes explicit:
-  - lifecycle orchestration across brainstorm -> spec -> deepen-spec -> technical review -> plan -> deepen-plan -> technical review -> work -> review -> compound
+  - lifecycle orchestration across ideate -> brainstorm -> spec -> deepen-spec -> technical review -> plan -> deepen-plan -> technical review -> work (with optional tdd posture) -> review -> compound
   - direct solved-problem capture when implementation is already complete and the goal is durable `docs/solutions/` knowledge
-- Preserve stage boundaries. Use `ce-brainstorm`, `ce-spec`, `ce-plan`, `ce-work`, `ce-review`, and `ce-technical-review` for their actual jobs instead of collapsing everything into one prompt body.
+- Preserve stage boundaries. Use `ce-ideate`, `ce-brainstorm`, `ce-spec`, `ce-plan`, `ce-tdd`, `ce-work`, `ce-review`, and `ce-technical-review` for their actual jobs instead of collapsing everything into one prompt body.
 - Prefer repository artifacts, prior learnings, and linked CE documents before external guidance.
 - Keep the user moving with one explicit current stage, one next command, and one coherent status summary.
 
@@ -247,13 +247,14 @@ For the canonical solved-problem workflow, categories, refresh rules, success ou
 After lifecycle orchestration, hand off to exactly one next CE stage unless the user explicitly asks for alternatives.
 
 Typical next steps:
+- `ce-ideate`
 - `ce-brainstorm`
 - `ce-spec`
 - `ce-deepen-spec`
 - `ce-technical-review`
 - `ce-plan`
 - `ce-deepen-plan`
-- `ce-work`
+- `ce-work` (with optional `ce-tdd` posture; `ce-tdd` is not a standalone lifecycle stage)
 - `ce-review`
 
 After learning capture:
@@ -333,18 +334,18 @@ Auto-invoke triggers and success output format are documented in `references/lea
 - Imported critical-pattern template: `references/compound-docs-critical-pattern-template.md`
 
 ## See Also
-
 | Skill | When to use together |
 |---|---|
 | [[compound-engineering-router]] | Route selection before entering a stage |
+| [[ce-ideate]] | Ranked ideas before brainstorming |
 | [[ce-brainstorm]] | WHAT/WHY clarity first |
 | [[ce-plan]] | Implementation planning |
+| [[ce-tdd]] | Test-first execution posture |
 | [[ce-work]] | Ready for execution |
 | [[ce-review]] | Merge/readiness review |
 | Project Brain | When `.harness/` exists for knowledge capture |
 
 **Topic map:** [[product-ops]]
-
 ## Decision feedback protocol
 <!-- decision-feedback-protocol:v2 -->
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.

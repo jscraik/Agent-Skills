@@ -19,6 +19,10 @@ Within `.github/workflows/pr-pipeline.yml`, the governance-critical checks are:
 `authoring-family-gate` runs:
 - `bash scripts/validate_skill_authoring_family.sh`
 
+CI mode policy:
+- `repo-validate` and `authoring-family-gate` set `SKILL_FAMILY_LOCAL_MEMORY_MODE=optional`.
+- This keeps local-memory preflight as warning-only in CI while preserving fail-closed enforcement for contract/eval/security gate failures.
+
 This gate enforces contract/eval/security behavior for:
 - `utilities/skill-builder`
 - `skills-system/skill-creator`

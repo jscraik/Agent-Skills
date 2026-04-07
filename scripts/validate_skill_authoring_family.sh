@@ -26,8 +26,10 @@ fi
 
 skill_dirs=(
   "utilities/skill-builder"
+  "utilities/plugin-builder"
   "skills-system/skill-creator"
   "skills-system/skill-installer"
+  "skills-system/plugin-installer"
   "skills-system/plugin-creator"
 )
 

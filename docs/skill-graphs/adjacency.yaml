@@ -67,8 +67,7 @@ architecture-interview:
   security-threat-model: Run a threat model alongside architecture decisions
   writing-plans: Convert ADR output into an implementation plan
 arscontexta:
-  codex-plugin-builder: Bundle this skill into plugin workflows and run plugin-level
-    validations
+  plugin-builder: Bundle this skill into plugin workflows and run plugin-level validations
   skill-builder: Improve, validate, and package the Ars Contexta skill after operational
     updates
 atlas:
@@ -125,8 +124,10 @@ ce-brainstorm:
     before or after brainstorming
 ce-compound:
   ce-brainstorm: WHAT/WHY clarity first
+  ce-ideate: Ranked ideas before brainstorming
   ce-plan: Implementation planning
   ce-review: Merge/readiness review
+  ce-tdd: Test-first execution posture
   ce-work: Ready for execution
   compound-engineering-router: Route selection before entering a stage
 ce-compound-refresh:
@@ -159,11 +160,12 @@ ce-plan:
   linear: Issue creation
   product-spec: Product contract
 ce-reliability-review:
-  ce-plan: Incorporate reliability phases and acceptance criteria
-  ce-review: Broad readiness synthesis, not detailed reliability analysis
-  ce-spec: Define failure model and recovery requirements in the contract
-  ce-technical-review: Code-level engineering issues, not failure scenario modeling
-  systematic-debugging: When investigating a specific failure that already occurred
+  ce-deepen-spec: Strengthen spec with reliability requirements from review
+  ce-plan: Plan reliability implementation units from review findings
+  ce-review: Package-level readiness synthesis including reliability
+  ce-technical-review: Broader code quality and engineering findings beyond reliability
+  production-deployment: Deploy with reliability verification gates
+  security-threat-model: Security-specific threat modeling complement to reliability
 ce-review:
   agent-native-audit: Audit agent-operability vs merge-readiness
   ce-technical-review: Severity-ranked engineering issues
@@ -171,15 +173,21 @@ ce-review:
   gh-workflow: GitHub merge readiness
 ce-spec:
   ce-brainstorm: Use first when the work still needs WHAT and WHY clarification
+  ce-deepen-spec: Use when an existing spec lacks rigor, edge cases, or operational
+    detail
+  ce-ideate: Use when ranked improvement directions are needed before specification
   ce-plan: Use after spec completion when the contract is ready for execution sequencing
+  ce-tdd: Use when the spec declares test-first execution posture
+  ce-technical-review: Use for engineering critique of the spec before planning
   compound-engineering-router: Use to choose the correct compound-engineering stage
     before or after specification
 ce-tdd:
-  ce-plan: When test strategy needs planning before TDD
-  ce-review: Contract acceptance after TDD completion
-  ce-work: General execution without strict TDD
-  linear: Issue creation and progress tracking
-  test-driven-development: Broader TDD guidance without CE-stage framing
+  ce-plan: 'ce-plan specifies TDD posture via `Execution note: test-first`'
+  ce-work: ce-tdd is the test-first execution posture inside ce-work
+  systematic-debugging: Run the TDD loop inside debugging workflow for each fix
+  test-driven-development: Standalone TDD discipline for non-CE contexts
+  verification-before-completion: Verify the full test suite is green before claiming
+    done
 ce-technical-review:
   agent-native-audit: Review agent-operability or workflow autonomy rather than code-level
     engineering risk
@@ -255,16 +263,12 @@ codex-hooks-builder:
     govern
   codex-home-audit: Audit an existing Codex home installation for hook drift or unsafe
     config
-  codex-plugin-builder: Package the hooks together with related skills or agents in
-    a plugin
   gh-workflow: Ship and review hook-pack changes through the GitHub lifecycle
+  plugin-builder: Package the hooks together with related skills or agents in a plugin
 codex-plugin-builder:
-  codex-agent-creator: Add agent roles to the plugin bundle alongside skills and hooks
-  decide-build-primitive: Decide whether the capability belongs in a plugin at all
-  skill-builder: Harden and validate a standalone skill before plugin packaging or
-    conversion work begins
-  skill-installer: Install a contract-valid skill directly when full plugin packaging
-    is unnecessary
+  plugin-builder: Canonical plugin hardening and conversion skill
+  plugin-creator: Scaffold a minimal plugin package before hardening
+  plugin-installer: Install and verify third-party plugins from GitHub
 codex-sessions-skill-scan:
   codex-home-audit: Run alongside a full home directory audit
   evals-router: Route evaluation work for under-performing skills
@@ -298,10 +302,10 @@ create-auth:
 decide-build-primitive:
   codex-automation-architect: Use after `AGENT_AUTOMATION` decision to design the
     automation contract
-  codex-plugin-builder: Use after `SKILL` decision when the skill needs plugin packaging
-    for distribution
   compound-engineering-router: Use when the capability spans multiple workflow types
     and routing is unclear
+  plugin-builder: Use after `SKILL` decision when the skill needs plugin packaging
+    for distribution
   skill-builder: Use after `SKILL` decision is made to scaffold and quality-gate the
     skill
 deep-interview:
@@ -484,11 +488,19 @@ playwright-interactive:
   agentation: Wire Playwright automation into Agentation self-driving
   fixing-accessibility: Test keyboard navigation and focus via Playwright
   ui-visual-regression: Capture Playwright screenshots for regression baselines
+plugin-builder:
+  plugin-creator: Start from a minimal plugin scaffold before hardening
+  plugin-installer: Install and verify third-party plugins from GitHub with provenance
+    + rollback controls
+  skill-builder: Harden standalone skills before plugin packaging
 plugin-creator:
   cli-spec: Consult the technical contract for the ask CLI
-  codex-plugin-builder: Promote scaffold into a full plugin package with governance
-    checks
+  plugin-builder: Promote scaffold into a full plugin package with governance checks
   skill-builder: Improve bundled skill quality before plugin release
+plugin-installer:
+  plugin-builder: Harden/convert plugin packages before distribution install
+  plugin-creator: Scaffold a local plugin package before hardening or install
+  skill-installer: Install standalone skills when plugin packaging is unnecessary
 process-watch:
   codex-home-audit: Check process health during a Codex home audit
   fix-mise: Diagnose mise shim CPU/memory issues via process-watch
@@ -613,12 +625,12 @@ simple-tasks:
   linear: Escalate to Linear when tasks need team-wide visibility
   verification-before-completion: Mark tasks done only after verification evidence
 skill-builder:
-  codex-plugin-builder: Package a contract-valid standalone skill when the deliverable
-    explicitly becomes a plugin
   codex-sessions-skill-scan: Audit skill coverage, failures, and overlap using real
     session evidence instead of authoring doctrine alone
   decide-build-primitive: Decide whether the capability should be a skill, prompt,
     or agent before authoring it
+  plugin-builder: Package a contract-valid standalone skill when the deliverable explicitly
+    becomes a plugin
   skill-installer: Install, import, or repair runtime visibility when the skill package
     is already valid and the remaining work is distribution
 skill-creator:
@@ -627,7 +639,7 @@ skill-creator:
     contract upgrades
   skill-installer: Installing already-valid skills into Codex environments
 skill-installer:
-  codex-plugin-builder: Package a validated skill as a plugin deliverable
+  plugin-builder: Package a validated skill as a plugin deliverable
   skill-builder: Harden and validate an existing skill before install/distribution
   skill-creator: Author or complete a starter skill before installation
 slides:

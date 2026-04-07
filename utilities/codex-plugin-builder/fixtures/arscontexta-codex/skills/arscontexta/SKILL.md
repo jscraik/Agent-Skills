@@ -128,7 +128,7 @@ Fail fast: stop at the first failed gate, fix it, and rerun from `quick_validate
 | Skill | When to use together |
 |---|---|
 | [[skill-builder]] | Improve, validate, and package the Ars Contexta skill after operational updates |
-| [[codex-plugin-builder]] | Bundle this skill into plugin workflows and run plugin-level validations |
+| [[plugin-builder]] | Bundle this skill into plugin workflows and run plugin-level validations |
 
 **Topic map:** [[agent-ops]]
 
