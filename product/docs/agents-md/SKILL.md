@@ -25,7 +25,7 @@ Create and maintain concise, high-signal AGENTS guidance with progressive disclo
 - [Project-tailored repo baseline](#project-tailored-repo-baseline)
 - [Anti-patterns](#anti-patterns)
 - [Variation](#variation)
-- [AGENTS.md Template Guidance](#agents-md-template-guidance)
+- [AGENTS.md Template Guidance](#agentsmd-template-guidance)
 - [Mandatory workflow snippet](#mandatory-workflow-snippet)
 - [Examples](#examples)
 - [Resource map](#resource-map)

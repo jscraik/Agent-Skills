@@ -213,7 +213,7 @@ Fast path for low-latency responses:
 ## References
 - `references/contract.yaml`
 - `references/evals.yaml`
-- Corpus root: `references/coderabbit-docs`
+- Corpus root: `utilities/coderabbit/references/coderabbit-docs`
 
 ## See Also
 
