@@ -125,8 +125,10 @@ ce-brainstorm:
     before or after brainstorming
 ce-compound:
   ce-brainstorm: WHAT/WHY clarity first
+  ce-ideate: Ranked ideas before brainstorming
   ce-plan: Implementation planning
   ce-review: Merge/readiness review
+  ce-tdd: Test-first execution posture
   ce-work: Ready for execution
   compound-engineering-router: Route selection before entering a stage
 ce-compound-refresh:
@@ -165,9 +167,21 @@ ce-review:
   gh-workflow: GitHub merge readiness
 ce-spec:
   ce-brainstorm: Use first when the work still needs WHAT and WHY clarification
+  ce-deepen-spec: Use when an existing spec lacks rigor, edge cases, or operational
+    detail
+  ce-ideate: Use when ranked improvement directions are needed before specification
   ce-plan: Use after spec completion when the contract is ready for execution sequencing
+  ce-tdd: Use when the spec declares test-first execution posture
+  ce-technical-review: Use for engineering critique of the spec before planning
   compound-engineering-router: Use to choose the correct compound-engineering stage
     before or after specification
+ce-tdd:
+  ce-plan: 'ce-plan specifies TDD posture via `Execution note: test-first`'
+  ce-work: ce-tdd is the test-first execution posture inside ce-work
+  systematic-debugging: Run the TDD loop inside debugging workflow for each fix
+  test-driven-development: Standalone TDD discipline for non-CE contexts
+  verification-before-completion: Verify the full test suite is green before claiming
+    done
 ce-technical-review:
   agent-native-audit: Review agent-operability or workflow autonomy rather than code-level
     engineering risk
@@ -247,9 +261,12 @@ codex-hooks-builder:
     a plugin
   gh-workflow: Ship and review hook-pack changes through the GitHub lifecycle
 codex-plugin-builder:
-  plugin-builder: Canonical plugin hardening and conversion skill
-  plugin-creator: Scaffold a minimal plugin package before hardening
-  plugin-installer: Install and verify third-party plugins from GitHub
+  codex-agent-creator: Add agent roles to the plugin bundle alongside skills and hooks
+  decide-build-primitive: Decide whether the capability belongs in a plugin at all
+  skill-builder: Harden and validate a standalone skill before plugin packaging or
+    conversion work begins
+  skill-installer: Install a contract-valid skill directly when full plugin packaging
+    is unnecessary
 codex-sessions-skill-scan:
   codex-home-audit: Run alongside a full home directory audit
   evals-router: Route evaluation work for under-performing skills
@@ -476,7 +493,8 @@ plugin-builder:
   skill-builder: Harden standalone skills before plugin packaging
 plugin-creator:
   cli-spec: Consult the technical contract for the ask CLI
-  plugin-builder: Promote scaffold into a full plugin package with governance checks
+  codex-plugin-builder: Promote scaffold into a full plugin package with governance
+    checks
   skill-builder: Improve bundled skill quality before plugin release
 plugin-installer:
   plugin-builder: Harden/convert plugin packages before distribution install
@@ -606,12 +624,12 @@ simple-tasks:
   linear: Escalate to Linear when tasks need team-wide visibility
   verification-before-completion: Mark tasks done only after verification evidence
 skill-builder:
+  codex-plugin-builder: Package a contract-valid standalone skill when the deliverable
+    explicitly becomes a plugin
   codex-sessions-skill-scan: Audit skill coverage, failures, and overlap using real
     session evidence instead of authoring doctrine alone
   decide-build-primitive: Decide whether the capability should be a skill, prompt,
     or agent before authoring it
-  plugin-builder: Package a contract-valid standalone skill when the deliverable explicitly
-    becomes a plugin
   skill-installer: Install, import, or repair runtime visibility when the skill package
     is already valid and the remaining work is distribution
 skill-creator:
@@ -620,7 +638,7 @@ skill-creator:
     contract upgrades
   skill-installer: Installing already-valid skills into Codex environments
 skill-installer:
-  plugin-builder: Package a validated skill as a plugin deliverable
+  codex-plugin-builder: Package a validated skill as a plugin deliverable
   skill-builder: Harden and validate an existing skill before install/distribution
   skill-creator: Author or complete a starter skill before installation
 slides:
