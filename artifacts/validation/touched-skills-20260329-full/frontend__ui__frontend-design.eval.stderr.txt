@@ -6,3 +6,4 @@ Traceback (most recent call last):
   File "utilities/skill-builder/scripts/run_skill_evals.py", line 249, in load_evals
     raise ValueError("evals.yaml must be a mapping with `cases: [...]`.")
 ValueError: evals.yaml must be a mapping with `cases: [...]`.
+FOLLOW_UP: historical validation artifact preserved; current config uses frontend/ui/frontend-design/references/evals.yaml with top-level `cases`.

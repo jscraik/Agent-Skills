@@ -2484,7 +2484,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                     "final": _make_relative(runner_dir / "final.txt", workspace_root),
                     "stdout": _make_relative(runner_dir / "stdout.txt", workspace_root),
                     "stderr": _make_relative(runner_dir / "stderr.txt", workspace_root),
-                    "jsonl": _make_relative(jsonl_path, workspace_root) if jsonl_path else None,
+                    # Only advertise JSONL as an artifact when it actually exists.
+                    "jsonl": _make_relative(jsonl_path, workspace_root) if (jsonl_path and jsonl_path.exists()) else None,
                 },
                 "metrics": runner_metrics,
                 "used_schema": bool(schema_path and runner_name == "codex"),

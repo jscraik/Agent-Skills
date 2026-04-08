@@ -5,8 +5,10 @@
   "skill": "frontend/ui/ui-ux-creative-coding/SKILL.md",
   "skill_path": "frontend/ui/ui-ux-creative-coding/SKILL.md",
   "name": "ui-ux-creative-coding",
-  "decision": "pass",
-  "exit_code": 0,
-  "failed": false,
-  "findings": []
+  "decision": "fail",
+  "exit_code": 2,
+  "failed": true,
+  "findings": [
+    "Gate decision reconciled with eval output: frontend__ui__ui-ux-creative-coding.eval.stdout.txt reports RESULT: FAIL."
+  ]
 }

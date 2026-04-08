@@ -16,7 +16,7 @@
     "final": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/05-trigger-professional-ui-contract/codex/final.txt",
     "stdout": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/05-trigger-professional-ui-contract/codex/stdout.txt",
     "stderr": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/05-trigger-professional-ui-contract/codex/stderr.txt",
-    "jsonl": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/05-trigger-professional-ui-contract/codex/codex_events.jsonl"
+    "jsonl": null
   },
   "metrics": {
     "trace": {

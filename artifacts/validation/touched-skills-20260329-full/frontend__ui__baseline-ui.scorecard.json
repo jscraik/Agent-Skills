@@ -13,7 +13,7 @@
     "source_commit": "4e49ba25e2b97f4b579e9fc3e67eacf568adcf4d",
     "source_branch": "main"
   },
-  "workspace_root": "~/dev/agent-skills",
+  "workspace_root": ".",
   "runner_mode": "codex",
   "eval_mode": "release",
   "tier2_mode": "warn",
