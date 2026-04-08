@@ -131,25 +131,21 @@ Use this shape when structured output is requested:
 ```json
 {
   "schema_version": 1,
-  "topic": "configuration|commands|cli|integrations|tools|planner|reporting|troubleshooting",
-  "question": "string",
+  "recommendation": "string",
   "evidence": [
     {
       "path": "string",
       "reason": "string"
     }
   ],
-  "recommendation": "string",
   "snippet": "string|null",
-  "risk": "none|low|medium|high",
-  "blocker": "string|null",
-  "next_step": "string"
+  "risk_note": "string"
 }
 ```
 
 Contract rules:
 - Always include `schema_version`.
-- Keep `snippet` and `blocker` as `null` when unavailable.
+- Keep `snippet` as `null` when unavailable.
 - Prefer 2 or more evidence entries for non-trivial recommendations.
 
 ## Corpus and evidence policy

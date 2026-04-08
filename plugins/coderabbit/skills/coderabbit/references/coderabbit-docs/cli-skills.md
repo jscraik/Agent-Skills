@@ -101,6 +101,7 @@ The skill uses these CodeRabbit CLI flags internally:
 | `--plain` | Detailed plain text output |
 | `-t` | Review type (all, committed, uncommitted) |
 | `--base` | Branch to compare against |
+| `--base-commit` | Compare against a specific commit hash |
 
 #### Autonomous workflow
 

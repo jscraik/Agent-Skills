@@ -96,7 +96,7 @@ When a recipe runs, CodeRabbit provides the agent with:
 - **PR title and description**
 - **CodeRabbit's PR summary** (walkthrough and objectives)
 - **Global coding guidelines** from `reviews.path_instructions` in your config
-- Full **repository access** via Read, Write, Edit, Glob, Grep, and Bash tools
+- **Repository access scoped by assigned roles and policy** (for example Read, Write, Edit, Glob, Grep, and Bash only when permitted)
 
 This means your recipes can reference project conventions, coding standards, and PR intent without you needing to repeat that context in every recipe.
 

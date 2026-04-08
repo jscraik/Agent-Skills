@@ -8,15 +8,66 @@ The CodeRabbit CLI runs on Windows Subsystem for Linux (WSL), allowing you to ac
 
 ## Video of install steps
 
+For a visual walkthrough, use the official guide page where the install flow is maintained: [WSL on Windows](https://docs.coderabbit.ai/cli/wsl-windows).
+
 ## Why use CodeRabbit CLI on WSL
+
+WSL gives you Linux-native shell tooling on Windows, which is usually the cleanest path for reproducible CLI workflows.
+
+- Keep Windows IDE ergonomics while running CLI automation in Linux.
+- Avoid many Windows-specific PATH and shell-compatibility issues.
+- Match CI-like environments more closely for local review/debug loops.
 
 ## Prerequisites
 
+- Windows with WSL 2 enabled and at least one Linux distribution installed.
+- Basic CLI dependencies in WSL: `curl`, `unzip`, and `git`.
+- A repository checked out inside WSL (recommended for performance).
+
+Quick checks:
+
+```bash
+wsl -l -v
+which curl unzip git
+```
+
 ## Installation
+
+Install the CLI from WSL and confirm it is available:
+
+```bash
+curl -fsSL https://cli.coderabbit.ai/install.sh | sh
+coderabbit --version
+```
+
+Expected result: the version command prints a semantic version and exits with status `0`.
 
 ## Authentication
 
+Start browser-based login from WSL:
+
+```bash
+coderabbit auth login
+coderabbit auth status
+```
+
+If your organization uses token-based auth, follow your internal credential policy before running review commands.
+
 ## Usage workflow
+
+End-to-end first run:
+
+```bash
+cd ~/projects/my-repo
+git status
+coderabbit --type uncommitted --plain
+```
+
+Typical flow:
+1. Make or pull changes.
+2. Run `coderabbit` in WSL.
+3. Iterate on feedback until the diff is clean.
+4. Commit and push from the same WSL workspace.
 
 ### Running code reviews
 
