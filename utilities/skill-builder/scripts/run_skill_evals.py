@@ -2257,7 +2257,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     used_neutral_baseline_approvals: Set[str] = set()
 
     summary: Dict[str, Any] = {
-        "schema_version": "2.1",
+        "schema_version": "2.2",
         "tool": "run_skill_evals",
         "generated_at": _utc_now_iso(),
         "skill": skill_name,
@@ -2272,6 +2272,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             "source_branch": git_meta.get("branch"),
         },
         "workspace_root": str(workspace_root),
+        # Contract note: sanitizer rewrites repo-root absolute paths to "." in emitted artifacts.
+        "workspace_root_contract": "'.' is a sanitized sentinel that represents the repository root.",
         "runner_mode": ",".join(selected_runners),
         "eval_mode": args.eval_mode,
         "tier2_mode": args.tier2_mode,

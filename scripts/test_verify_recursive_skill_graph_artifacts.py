@@ -362,6 +362,105 @@ class VerifyRecursiveSkillGraphArtifactsTests(unittest.TestCase):
             self.assertEqual(entry["waived"], True)
             self.assertEqual(entry["waiver_id"], "hist-001")
 
+    def test_waiver_applies_to_alias_matches_events_jsonl(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="artifact-parity-") as tmpdir:
+            runs_root = Path(tmpdir) / "runs"
+            runs_root.mkdir()
+            waiver_file = Path(tmpdir) / "waivers.json"
+            self._create_run(
+                runs_root,
+                "run_missing_events_waived",
+                present={
+                    "run.json": self._run_obj(run_id="run_missing_events_waived"),
+                    "iteration_journal.jsonl": [
+                        {"run_id": "run_missing_events_waived", "iteration_id": 1},
+                    ],
+                    "promotion_decision.json": {
+                        "schema_version": "1.1",
+                        "run_id": "run_missing_events_waived",
+                        "lesson_id": "lesson-missing-events",
+                        "decision": "candidate",
+                    },
+                    "capture_record.json": {"schema_version": "1.0"},
+                    "evidence_packet.json": {"schema_version": "1.0"},
+                    "lesson_candidates.json": {"items": []},
+                },
+            )
+            _write_json(
+                waiver_file,
+                {
+                    "schema_version": "1.0",
+                    "waived_runs": [
+                        {
+                            "waiver_id": "evt-001",
+                            "run_dir": "run_missing_events_waived",
+                            "allowed_statuses": ["missing_mandatory"],
+                            "applies_to": ["event_envelope"],
+                            "reason": "events envelope missing for historical run",
+                            "approved_by": "test",
+                            "created_at": "2026-03-11T00:00:00Z",
+                        }
+                    ],
+                },
+            )
+
+            code, manifest = self._run_verifier(runs_root, strict=True, waiver_file=waiver_file)
+            self.assertEqual(code, 0)
+            self.assertEqual(manifest.get("status"), "ok")
+            entry = self._run_entry(manifest, runs_root / "run_missing_events_waived")
+            self.assertEqual(entry["status"], "missing_mandatory")
+            self.assertEqual(entry["waived"], True)
+            self.assertEqual(entry["waiver_id"], "evt-001")
+
+    def test_waiver_applies_to_mismatch_does_not_waive(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="artifact-parity-") as tmpdir:
+            runs_root = Path(tmpdir) / "runs"
+            runs_root.mkdir()
+            waiver_file = Path(tmpdir) / "waivers.json"
+            self._create_run(
+                runs_root,
+                "run_missing_events_not_waived",
+                present={
+                    "run.json": self._run_obj(run_id="run_missing_events_not_waived"),
+                    "iteration_journal.jsonl": [
+                        {"run_id": "run_missing_events_not_waived", "iteration_id": 1},
+                    ],
+                    "promotion_decision.json": {
+                        "schema_version": "1.1",
+                        "run_id": "run_missing_events_not_waived",
+                        "lesson_id": "lesson-missing-events-2",
+                        "decision": "candidate",
+                    },
+                    "capture_record.json": {"schema_version": "1.0"},
+                    "evidence_packet.json": {"schema_version": "1.0"},
+                    "lesson_candidates.json": {"items": []},
+                },
+            )
+            _write_json(
+                waiver_file,
+                {
+                    "schema_version": "1.0",
+                    "waived_runs": [
+                        {
+                            "waiver_id": "evt-002",
+                            "run_dir": "run_missing_events_not_waived",
+                            "allowed_statuses": ["missing_mandatory"],
+                            "applies_to": ["capture_record.json"],
+                            "reason": "scope mismatch should not apply",
+                            "approved_by": "test",
+                            "created_at": "2026-03-11T00:00:00Z",
+                        }
+                    ],
+                },
+            )
+
+            code, manifest = self._run_verifier(runs_root, strict=True, waiver_file=waiver_file)
+            self.assertEqual(code, 3)
+            self.assertEqual(manifest.get("status"), "fail")
+            entry = self._run_entry(manifest, runs_root / "run_missing_events_not_waived")
+            self.assertEqual(entry["status"], "missing_mandatory")
+            self.assertEqual(entry["waived"], False)
+
     def test_prune_empty_dry_run_does_not_remove_and_records_candidate(self) -> None:
         with tempfile.TemporaryDirectory(prefix="artifact-parity-") as tmpdir:
             runs_root = Path(tmpdir) / "runs"

@@ -34,6 +34,10 @@ REQUIRED_OPTIONAL_BLOCKER_FILES: Dict[str, Set[str]] = {
 DEFAULT_MANIFEST = "artifacts/skill-graphs/pilot/artifact-parity-manifest.json"
 DEFAULT_WAIVER_FILE = "artifacts/skill-graphs/pilot/artifact-parity-waivers.json"
 
+WAIVER_APPLIES_TO_ALIASES: Dict[str, Set[str]] = {
+    "events.jsonl": {"events.jsonl", "event_envelope"},
+}
+
 def _display_path(path: Path) -> str:
     """Render repo-relative paths when possible and avoid leaking home paths."""
     resolved = path.resolve()
@@ -382,6 +386,10 @@ def load_waivers(path: Path) -> Dict[str, Dict[str, Any]]:
 
 
 def resolve_waiver(audit: ArtifactStatus, waivers: Dict[str, Dict[str, Any]]) -> Optional[Dict[str, Any]]:
+    missing_tokens = {str(item).strip().lower() for item in audit.missing if str(item).strip()}
+    expanded_missing_tokens = set(missing_tokens)
+    for token in missing_tokens:
+        expanded_missing_tokens.update(WAIVER_APPLIES_TO_ALIASES.get(token, set()))
     candidates = [audit.run_dir_relative, str(audit.run_dir), audit.run_dir.name]
     for key in candidates:
         waiver = waivers.get(key)
@@ -392,6 +400,12 @@ def resolve_waiver(audit: ArtifactStatus, waivers: Dict[str, Dict[str, Any]]) ->
             allowed_values = {str(item).strip() for item in allowed}
             if audit.status not in allowed_values:
                 continue
+        applies_to = waiver.get("applies_to")
+        if isinstance(applies_to, list) and applies_to:
+            scoped_tokens = {str(item).strip().lower() for item in applies_to if str(item).strip()}
+            if scoped_tokens and "*" not in scoped_tokens and "any" not in scoped_tokens:
+                if not (expanded_missing_tokens & scoped_tokens):
+                    continue
         return waiver
     return None
 
