@@ -20,6 +20,7 @@ plan_depth: standard
 - [P3: Skill Operations (Mutations)](#p3-skill-operations-mutations)
 - [Verification-First Strategy](#verification-first-strategy)
 - [Rollout & Safety](#rollout--safety)
+- [Task Graph (id and depends_on)](#task-graph-id-and-depends_on)
 - [Definition of Done](#definition-of-done)
 
 ## Problem Statement
@@ -82,6 +83,27 @@ Goal: Implement state-changing operations with dry-run and atomic promotion.
 - **Adherence:** All mutations must use the `QUARANTINE` -> `ATOMIC PROMOTION` state model.
 - **Rollback:** `SIGINT` handler must trigger immediate cleanup of temporary directories.
 - **Sanitization:** Centralized `redact()` function applied to all `CallResult` outputs.
+
+## Task Graph (id and depends_on)
+
+```yaml
+tasks:
+  - id: P0
+    title: Scaffold the ask entrypoint and enforce CallResult envelope semantics.
+    depends_on: []
+  - id: P1
+    title: Implement repo context resolution plus repo status and validation commands.
+    depends_on: [P0]
+  - id: P2
+    title: Deliver read-only skill lifecycle surfaces with structured audit output.
+    depends_on: [P0, P1]
+  - id: P3
+    title: Add mutation workflows with dry-run, quarantine, and atomic promotion guarantees.
+    depends_on: [P1, P2]
+  - id: V1
+    title: Run contract, unit, and end-to-end verification gates for CA1 through CA6.
+    depends_on: [P3]
+```
 
 ## Definition of Done
 - [ ] `bin/ask` is in the user's path and executable.

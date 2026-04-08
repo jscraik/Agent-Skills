@@ -58,10 +58,22 @@ plugins/skill-factory/skills/*
 !plugins/skill-factory/skills/skill-builder/**
 !plugins/skill-factory/skills/skill-creator/**
 !plugins/skill-factory/skills/skill-installer/**
+# Keep plugin-factory plugin skills tracked despite global skills/ ignore.
+!plugins/plugin-factory/skills/
+plugins/plugin-factory/skills/*
+!plugins/plugin-factory/skills/plugin-builder/
+!plugins/plugin-factory/skills/plugin-creator/
+!plugins/plugin-factory/skills/plugin-installer/
+!plugins/plugin-factory/skills/plugin-builder/**
+!plugins/plugin-factory/skills/plugin-creator/**
+!plugins/plugin-factory/skills/plugin-installer/**
 # Keep generated/runtime debris ignored inside tracked skill-factory skills.
 plugins/skill-factory/skills/**/.DS_Store
 plugins/skill-factory/skills/**/__pycache__/
 plugins/skill-factory/skills/skill-builder/artifacts/
+# Keep generated/runtime debris ignored inside tracked plugin-factory skills.
+plugins/plugin-factory/skills/**/.DS_Store
+plugins/plugin-factory/skills/**/__pycache__/
 skills-antigravity/
 sync-symlink/
 

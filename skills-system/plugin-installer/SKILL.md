@@ -66,6 +66,7 @@ Installation is downstream execution, not package design judgment:
 - require pinned commit refs unless explicit override is approved;
 - stage in quarantine before promotion; never activate unvalidated plugin content directly;
 - network access is required only for GitHub install paths;
+- `uv` must be available on `PATH` for installer Python helper execution;
 - never print secrets, access tokens, or credentials in output.
 
 ## Procedure
@@ -82,7 +83,7 @@ Core commands:
 
 ```bash
 bin/ask plugins install https://github.com/<owner>/<repo> --path plugins/<plugin-name>
-python3 skills-system/plugin-installer/scripts/install-plugin-from-github.py --url https://github.com/<owner>/<repo> --path plugins/<plugin-name>
+uv run python skills-system/plugin-installer/scripts/install-plugin-from-github.py --url https://github.com/<owner>/<repo> --path plugins/<plugin-name>
 ```
 
 ## Anti-Patterns
@@ -104,8 +105,8 @@ Avoid these failures:
 Run checks in order and fail fast: stop at first failure, fix it, then rerun from the failed gate.
 
 ```bash
-python3 skills-system/plugin-installer/scripts/install-plugin-from-github.py --url https://github.com/<owner>/<repo> --path plugins/<plugin-name> --validation-level strict
-python3 utilities/plugin-builder/scripts/plugin_builder.py validate <installed-plugin-path>
+uv run python skills-system/plugin-installer/scripts/install-plugin-from-github.py --url https://github.com/<owner>/<repo> --path plugins/<plugin-name> --validation-level strict
+uv run python utilities/plugin-builder/scripts/plugin_builder.py validate <installed-plugin-path>
 ./bin/ask repo validate --ephemeral
 ```
 

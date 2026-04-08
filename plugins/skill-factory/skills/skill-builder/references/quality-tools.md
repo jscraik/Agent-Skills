@@ -126,7 +126,6 @@ Notes:
 Outputs:
 - PASS/FAIL per case with report artifacts under artifacts/reports/skills/
 - merged scorecard JSON (default: `<run>/scorecard.json`, or `--scorecard-out`)
-  - scorecard schema `2.2` includes `workspace_root_contract`; when artifacts are sanitized, `workspace_root` may be `"."` to represent the repo root sentinel.
 - release manifest JSON (default: `<run>/release_manifest.json`)
 - JUnit XML (default: `<run>/junit.xml`, or `--junit-out`)
 

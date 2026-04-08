@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-04-08T10:26:12Z",
+  "generated_at": "2026-04-08T20:58:24Z",
   "runs_root": "artifacts/skill-graphs/runs",
   "counts": {
     "compliant": 0,
@@ -15,12 +15,12 @@
     "empty": 0
   },
   "compliance_rate": 0.0,
-  "waived_non_compliant": 2,
+  "waived_non_compliant": 8,
   "runs": [
     {
       "run_dir": "artifacts/skill-graphs/runs/run_001",
       "status": "legacy_partial",
-      "waived": true,
+      "waived": false,
       "required_files": [
         "capture_record.json",
         "events.jsonl",
@@ -49,16 +49,12 @@
       "notes": [
         "terminal_status=passed",
         "stop_reason=approval_granted"
-      ],
-      "waiver_reason": "Historical seed run predates mandatory capture envelope outputs and only includes run.json/events.jsonl.",
-      "waiver_id": "hist-legacy-partial-run-001",
-      "waiver_approved_by": "agent-skills-maintainers",
-      "waiver_created_at": "2026-04-05T00:00:00Z"
+      ]
     },
     {
       "run_dir": "artifacts/skill-graphs/runs/run_002",
       "status": "legacy_partial",
-      "waived": true,
+      "waived": false,
       "required_files": [
         "capture_record.json",
         "events.jsonl",
@@ -87,11 +83,7 @@
       "notes": [
         "terminal_status=passed",
         "stop_reason=approval_granted"
-      ],
-      "waiver_reason": "Historical seed run predates mandatory capture envelope outputs and only includes run.json/events.jsonl.",
-      "waiver_id": "hist-legacy-partial-run-002",
-      "waiver_approved_by": "agent-skills-maintainers",
-      "waiver_created_at": "2026-04-05T00:00:00Z"
+      ]
     },
     {
       "run_dir": "artifacts/skill-graphs/runs/run_20260220T144703Z_425b7a",
@@ -2454,7 +2446,7 @@
     {
       "run_dir": "artifacts/skill-graphs/runs/run_20260407T064404758172Z_4270e1_8dc80eb",
       "status": "missing_mandatory",
-      "waived": false,
+      "waived": true,
       "required_files": [
         "capture_record.json",
         "events.jsonl",
@@ -2484,12 +2476,16 @@
       "notes": [
         "terminal_status=passed",
         "stop_reason=pass"
-      ]
+      ],
+      "waiver_reason": "Historical run is missing events.jsonl while base artifacts remain available; waived pending replay/backfill.",
+      "waiver_id": "event-envelope-missing-8dc80eb",
+      "waiver_approved_by": "agent-skills-maintainers",
+      "waiver_created_at": "2026-04-05T00:00:00Z"
     },
     {
       "run_dir": "artifacts/skill-graphs/runs/run_20260407T064404855416Z_cbb8d4_8dec4e9",
       "status": "missing_mandatory",
-      "waived": false,
+      "waived": true,
       "required_files": [
         "capture_record.json",
         "events.jsonl",
@@ -2519,12 +2515,16 @@
       "notes": [
         "terminal_status=passed",
         "stop_reason=pass"
-      ]
+      ],
+      "waiver_reason": "Historical run is missing events.jsonl while base artifacts remain available; waived pending replay/backfill.",
+      "waiver_id": "event-envelope-missing-8dec4e9",
+      "waiver_approved_by": "agent-skills-maintainers",
+      "waiver_created_at": "2026-04-05T00:00:00Z"
     },
     {
       "run_dir": "artifacts/skill-graphs/runs/run_20260407T064404953569Z_5b4309_8e1fa81",
       "status": "missing_mandatory",
-      "waived": false,
+      "waived": true,
       "required_files": [
         "capture_record.json",
         "events.jsonl",
@@ -2554,12 +2554,16 @@
       "notes": [
         "terminal_status=passed",
         "stop_reason=pass"
-      ]
+      ],
+      "waiver_reason": "Historical run is missing events.jsonl while base artifacts remain available; waived pending replay/backfill.",
+      "waiver_id": "event-envelope-missing-8e1fa81",
+      "waiver_approved_by": "agent-skills-maintainers",
+      "waiver_created_at": "2026-04-05T00:00:00Z"
     },
     {
       "run_dir": "artifacts/skill-graphs/runs/run_20260407T064405056266Z_04dd5b_8e4d06e",
       "status": "missing_mandatory",
-      "waived": false,
+      "waived": true,
       "required_files": [
         "capture_record.json",
         "events.jsonl",
@@ -2592,12 +2596,16 @@
         "terminal_status=escalated",
         "stop_reason=evaluator_conflict",
         "blocker_code=evaluator_conflict"
-      ]
+      ],
+      "waiver_reason": "Historical run is missing events.jsonl while base artifacts remain available; waived pending replay/backfill.",
+      "waiver_id": "event-envelope-missing-8e4d06e",
+      "waiver_approved_by": "agent-skills-maintainers",
+      "waiver_created_at": "2026-04-05T00:00:00Z"
     },
     {
       "run_dir": "artifacts/skill-graphs/runs/run_20260407T064405159287Z_1c1272_8e7ad51",
       "status": "missing_mandatory",
-      "waived": false,
+      "waived": true,
       "required_files": [
         "capture_record.json",
         "events.jsonl",
@@ -2627,12 +2635,16 @@
       "notes": [
         "terminal_status=passed",
         "stop_reason=pass"
-      ]
+      ],
+      "waiver_reason": "Historical run is missing events.jsonl while base artifacts remain available; waived pending replay/backfill.",
+      "waiver_id": "event-envelope-missing-8e7ad51",
+      "waiver_approved_by": "agent-skills-maintainers",
+      "waiver_created_at": "2026-04-05T00:00:00Z"
     },
     {
       "run_dir": "artifacts/skill-graphs/runs/run_20260407T064405259532Z_50ef7d_8e9f024",
       "status": "missing_mandatory",
-      "waived": false,
+      "waived": true,
       "required_files": [
         "capture_record.json",
         "events.jsonl",
@@ -2665,12 +2677,16 @@
         "terminal_status=escalated",
         "stop_reason=evaluator_conflict",
         "blocker_code=evaluator_conflict"
-      ]
+      ],
+      "waiver_reason": "Historical run is missing events.jsonl while base artifacts remain available; waived pending replay/backfill.",
+      "waiver_id": "event-envelope-missing-8e9f024",
+      "waiver_approved_by": "agent-skills-maintainers",
+      "waiver_created_at": "2026-04-05T00:00:00Z"
     },
     {
       "run_dir": "artifacts/skill-graphs/runs/run_20260407T064405363942Z_c6442d_8ec82bd",
       "status": "missing_mandatory",
-      "waived": false,
+      "waived": true,
       "required_files": [
         "capture_record.json",
         "events.jsonl",
@@ -2700,12 +2716,16 @@
       "notes": [
         "terminal_status=passed",
         "stop_reason=pass"
-      ]
+      ],
+      "waiver_reason": "Historical run is missing events.jsonl while base artifacts remain available; waived pending replay/backfill.",
+      "waiver_id": "event-envelope-missing-8ec82bd",
+      "waiver_approved_by": "agent-skills-maintainers",
+      "waiver_created_at": "2026-04-05T00:00:00Z"
     },
     {
       "run_dir": "artifacts/skill-graphs/runs/run_20260407T064405465228Z_f93d59_8ee1174",
       "status": "missing_mandatory",
-      "waived": false,
+      "waived": true,
       "required_files": [
         "capture_record.json",
         "events.jsonl",
@@ -2735,7 +2755,11 @@
       "notes": [
         "terminal_status=passed",
         "stop_reason=pass"
-      ]
+      ],
+      "waiver_reason": "Historical run is missing events.jsonl while base artifacts remain available; waived pending replay/backfill.",
+      "waiver_id": "event-envelope-missing-8ee1174",
+      "waiver_approved_by": "agent-skills-maintainers",
+      "waiver_created_at": "2026-04-05T00:00:00Z"
     },
     {
       "run_dir": "artifacts/skill-graphs/runs/run_20260408T064526421324Z_4270e1_93980eb",

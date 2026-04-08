@@ -220,6 +220,19 @@ def canonical_skill_map(skill_files: List[Path], repo_root: Path) -> Dict[str, P
         name = parse_frontmatter(skill_file).get("name", "").strip()
         if name:
             mapping.setdefault(name, skill_file)
+
+    # Some canonical skill aliases are symlinked into non-plugin roots and may not
+    # be discovered by rglob() in all environments. Include governed non-plugin
+    # paths directly so packaged copies can still inherit canonical metadata.
+    for governed_rel in sorted(GOVERNED_SKILL_PATHS):
+        if governed_rel.startswith("plugins/"):
+            continue
+        candidate = repo_root / governed_rel
+        if not candidate.exists():
+            continue
+        name = parse_frontmatter(candidate).get("name", "").strip()
+        if name:
+            mapping.setdefault(name, candidate)
     return mapping
 
 

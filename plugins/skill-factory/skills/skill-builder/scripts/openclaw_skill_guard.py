@@ -40,16 +40,6 @@ class Rule:
     remediation: str | None = None
 
 
-@dataclass(frozen=True)
-class SourceRule:
-    level: str
-    code: str
-    message: str
-    pattern: Pattern[str]
-    requires_context: Pattern[str] | None = None
-    remediation: str | None = None
-
-
 SCANNABLE_EXTENSIONS = {
     ".py",
     ".js",
@@ -223,8 +213,8 @@ LINE_RULES: List[Rule] = [
     ),
 ]
 
-SOURCE_RULES: List[SourceRule] = [
-    SourceRule(
+SOURCE_RULES: List[Rule] = [
+    Rule(
         "warn",
         "security.network_usage",
         "Network calls detected in scripts.",
@@ -234,14 +224,31 @@ SOURCE_RULES: List[SourceRule] = [
         ),
         remediation="Document and enforce explicit network allowlists and offline defaults.",
     ),
-    SourceRule(
+    Rule(
         "critical",
         "security.env_harvesting",
         "Environment access combined with network send detected.",
         compile_safe_regex(r"(os\.environ|getenv\(|process\.env).{0,200}(requests\.|fetch\(|axios\.|httpx\.|curl)", re.DOTALL),
         remediation="Avoid sending env-derived data over network; explicitly redact and isolate secrets.",
     ),
-    SourceRule(
+    Rule(
+        "critical",
+        "security.unsafe_deserialization",
+        "Unsafe deserialization API detected (`pickle.loads`/`yaml.load`/`marshal.loads`).",
+        compile_safe_regex(r"\b(?:pickle\.loads\(|dill\.loads\(|marshal\.loads\(|yaml\.load\s*\()"),
+        remediation="Use safe, typed serialization formats and avoid executing untrusted serialized payloads.",
+    ),
+    Rule(
+        "warn",
+        "security.tls_verification_disabled",
+        "TLS verification bypass detected in network configuration.",
+        compile_safe_regex(
+            r"\b(?:verify\s*=\s*False|rejectUnauthorized\s*:\s*false|NODE_TLS_REJECT_UNAUTHORIZED\s*=\s*[\"']?0|urllib3\.disable_warnings\s*\()",
+            re.IGNORECASE,
+        ),
+        remediation="Keep TLS verification enabled and trust only explicit CA bundles when needed.",
+    ),
+    Rule(
         "warn",
         "security.potential_exfiltration",
         "File reads combined with network send detected.",
@@ -265,14 +272,14 @@ SOURCE_RULES: List[SourceRule] = [
         ),
         remediation="Review file-access scope and ensure local data is not transmitted off-box unintentionally.",
     ),
-    SourceRule(
+    Rule(
         "warn",
         "security.hex_obfuscation",
         "Hex-encoded string sequence detected (possible obfuscation).",
         compile_safe_regex(r"(?:\\x[0-9a-fA-F]{2}){6,}", allow_nested=True),
         remediation="Replace opaque encoded payloads with readable source or document the benign encoding reason.",
     ),
-    SourceRule(
+    Rule(
         "warn",
         "security.base64_obfuscation",
         "Large base64 payload with decode call detected (possible obfuscation).",
@@ -312,6 +319,19 @@ def _should_skip_match(_code: str, line_text: str) -> bool:
         # False-positive guard: regex pattern tables that mention node exec/spawn
         # are detection definitions, not executable process launches.
         return True
+    return False
+
+
+def _should_skip_source_match(code: str, line_text: str) -> bool:
+    stripped = line_text.strip()
+    if not stripped:
+        return True
+    if stripped.startswith("#"):
+        return True
+    if code == "security.unsafe_deserialization":
+        # Allow explicit safe-loader patterns; unsafe yaml.load() calls remain flagged.
+        if "SafeLoader" in line_text or "CSafeLoader" in line_text:
+            return True
     return False
 
 
@@ -400,19 +420,28 @@ def scan_source(text: str, rel_file: str) -> List[Finding]:
     for rule in SOURCE_RULES:
         if rule.requires_context and not rule.requires_context.search(text):
             continue
-        m = rule.pattern.search(text)
-        if not m:
-            continue
-        out.append(
-            Finding(
-                rule.level,
-                rule.code,
-                rule.message,
-                rel_file,
-                _line_no(text, m.start()),
-                remediation=rule.remediation,
+        start = 0
+        while start < len(text):
+            m = rule.pattern.search(text, start)
+            if not m:
+                break
+            line_text = _line_text(text, m.start())
+            if _should_skip_source_match(rule.code, line_text):
+                # Advance by one character so we can recover from broad matches
+                # that start in comments and span into executable lines.
+                start = m.start() + 1
+                continue
+            out.append(
+                Finding(
+                    rule.level,
+                    rule.code,
+                    rule.message,
+                    rel_file,
+                    _line_no(text, m.start()),
+                    remediation=rule.remediation,
+                )
             )
-        )
+            break
 
     return out
 

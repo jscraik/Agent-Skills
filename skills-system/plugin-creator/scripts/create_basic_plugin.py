@@ -19,6 +19,10 @@ DEFAULT_CATEGORY = "Productivity"
 DEFAULT_MARKETPLACE_DISPLAY_NAME = "[TODO: Marketplace Display Name]"
 VALID_INSTALL_POLICIES = {"NOT_AVAILABLE", "AVAILABLE", "INSTALLED_BY_DEFAULT"}
 VALID_AUTH_POLICIES = {"ON_INSTALL", "ON_USE"}
+VALID_POLICY_PRODUCTS = {"CHATGPT", "CODEX", "ATLAS"}
+DEFAULT_POLICY_PRODUCTS = ["CODEX"]
+OPENAI_MARKETPLACE_RELATIVE_PATH = ".agents/plugins/marketplace.json"
+LEGACY_MARKETPLACE_RELATIVE_PATH = "plugins/marketplace.json"
 
 
 def normalize_plugin_name(plugin_name: str) -> str:
@@ -37,6 +41,11 @@ def validate_plugin_name(plugin_name: str) -> None:
         raise ValueError(
             f"Plugin name '{plugin_name}' is too long ({len(plugin_name)} characters). "
             f"Maximum is {MAX_PLUGIN_NAME_LENGTH} characters."
+        )
+    if not re.fullmatch(r"[a-z0-9](?:-?[a-z0-9]){0,63}", plugin_name):
+        raise ValueError(
+            "Plugin name must be kebab-case and match "
+            "`[a-z0-9](?:-?[a-z0-9]){0,63}`."
         )
 
 
@@ -87,27 +96,128 @@ def build_plugin_json(plugin_name: str) -> dict:
 
 def build_marketplace_entry(
     plugin_name: str,
+    plugin_root: Path,
+    marketplace_path: Path,
     install_policy: str,
     auth_policy: str,
+    policy_products: list[str],
     category: str,
+    *,
+    allow_legacy_marketplace_path: bool,
 ) -> dict[str, Any]:
     return {
         "name": plugin_name,
         "source": {
             "source": "local",
-            "path": f"./plugins/{plugin_name}",
+            "path": _relative_repo_source_path(
+                plugin_root,
+                marketplace_path,
+                allow_legacy_marketplace_path=allow_legacy_marketplace_path,
+            ),
         },
         "policy": {
             "installation": install_policy,
             "authentication": auth_policy,
+            "products": policy_products,
         },
         "category": category,
     }
 
 
 def load_json(path: Path) -> dict[str, Any]:
-    with path.open() as handle:
+    with path.open(encoding="utf-8") as handle:
         return json.load(handle)
+
+
+def _normalize_policy_products(raw_products: Any) -> tuple[list[str], list[str]]:
+    if raw_products is None:
+        return [], []
+    if not isinstance(raw_products, list):
+        return [], ["<non-list>"]
+
+    normalized: list[str] = []
+    invalid: list[str] = []
+    for value in raw_products:
+        if not isinstance(value, str) or not value.strip():
+            invalid.append(str(value))
+            continue
+        token = value.strip().upper()
+        if token not in VALID_POLICY_PRODUCTS:
+            invalid.append(value.strip())
+            continue
+        if token not in normalized:
+            normalized.append(token)
+    return normalized, invalid
+
+
+def _effective_policy_products(raw_products: list[str] | None) -> list[str]:
+    candidates = raw_products or list(DEFAULT_POLICY_PRODUCTS)
+    normalized, invalid = _normalize_policy_products(candidates)
+    if invalid:
+        raise ValueError(
+            f"Invalid --product values {sorted(set(invalid))}. "
+            f"Allowed values are {sorted(VALID_POLICY_PRODUCTS)}."
+        )
+    if not normalized:
+        return list(DEFAULT_POLICY_PRODUCTS)
+    return normalized
+
+
+def _path_within_root(root: Path, candidate: Path) -> bool:
+    try:
+        candidate.relative_to(root)
+    except ValueError:
+        return False
+    return True
+
+
+def _marketplace_repo_root(
+    marketplace_path: Path,
+    *,
+    allow_legacy_marketplace_path: bool,
+) -> Path:
+    resolved = marketplace_path.resolve()
+    if resolved.name != "marketplace.json":
+        raise ValueError("marketplace path must end with 'marketplace.json'.")
+
+    plugins_dir = resolved.parent
+    if plugins_dir.name != "plugins":
+        raise ValueError(
+            "marketplace path must live under '.agents/plugins/' "
+            "or legacy 'plugins/' directory."
+        )
+
+    dot_agents_or_root = plugins_dir.parent
+    if dot_agents_or_root.name == ".agents":
+        return dot_agents_or_root.parent
+
+    if allow_legacy_marketplace_path:
+        return dot_agents_or_root
+
+    relative_path = resolved.as_posix()
+    raise ValueError(
+        f"OpenAI/Codex marketplace mode requires '{OPENAI_MARKETPLACE_RELATIVE_PATH}'. "
+        f"Legacy path '{LEGACY_MARKETPLACE_RELATIVE_PATH}' is disabled by default. "
+        f"Got '{relative_path}'. Pass --allow-legacy-marketplace-path to override."
+    )
+
+
+def _relative_repo_source_path(
+    plugin_root: Path,
+    marketplace_path: Path,
+    *,
+    allow_legacy_marketplace_path: bool,
+) -> str:
+    repo_root = _marketplace_repo_root(
+        marketplace_path,
+        allow_legacy_marketplace_path=allow_legacy_marketplace_path,
+    )
+    resolved_plugin_root = plugin_root.resolve()
+    if not _path_within_root(repo_root, resolved_plugin_root):
+        raise ValueError(
+            f"Plugin root '{resolved_plugin_root}' must stay within repo root '{repo_root}'."
+        )
+    return f"./{resolved_plugin_root.relative_to(repo_root).as_posix()}"
 
 
 def build_default_marketplace() -> dict[str, Any]:
@@ -129,10 +239,14 @@ def validate_marketplace_interface(payload: dict[str, Any]) -> None:
 def update_marketplace_json(
     marketplace_path: Path,
     plugin_name: str,
+    plugin_root: Path,
     install_policy: str,
     auth_policy: str,
+    policy_products: list[str],
     category: str,
     force: bool,
+    *,
+    allow_legacy_marketplace_path: bool,
 ) -> None:
     if marketplace_path.exists():
         payload = load_json(marketplace_path)
@@ -148,7 +262,16 @@ def update_marketplace_json(
     if not isinstance(plugins, list):
         raise ValueError(f"{marketplace_path} field 'plugins' must be an array.")
 
-    new_entry = build_marketplace_entry(plugin_name, install_policy, auth_policy, category)
+    new_entry = build_marketplace_entry(
+        plugin_name,
+        plugin_root,
+        marketplace_path,
+        install_policy,
+        auth_policy,
+        policy_products,
+        category,
+        allow_legacy_marketplace_path=allow_legacy_marketplace_path,
+    )
 
     for index, entry in enumerate(plugins):
         if isinstance(entry, dict) and entry.get("name") == plugin_name:
@@ -169,7 +292,7 @@ def write_json(path: Path, data: dict, force: bool) -> None:
     if path.exists() and not force:
         raise FileExistsError(f"{path} already exists. Use --force to overwrite.")
     path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("w") as handle:
+    with path.open("w", encoding="utf-8") as handle:
         json.dump(data, handle, indent=2)
         handle.write("\n")
 
@@ -178,7 +301,7 @@ def create_stub_file(path: Path, payload: dict, force: bool) -> None:
     if path.exists() and not force:
         return
     path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("w") as handle:
+    with path.open("w", encoding="utf-8") as handle:
         json.dump(payload, handle, indent=2)
         handle.write("\n")
 
@@ -206,9 +329,8 @@ def parse_args() -> argparse.Namespace:
         "--with-marketplace",
         action="store_true",
         help=(
-            "Create or update <cwd>/.agents/plugins/marketplace.json. "
-            "Marketplace entries always point to ./plugins/<plugin-name> relative to the "
-            "marketplace root."
+            "Create or update marketplace.json. "
+            "By default, OpenAI/Codex mode expects <root>/.agents/plugins/marketplace.json."
         ),
     )
     parser.add_argument(
@@ -217,6 +339,24 @@ def parse_args() -> argparse.Namespace:
         help=(
             "Path to marketplace.json (defaults to <cwd>/.agents/plugins/marketplace.json). "
             "For a home-rooted marketplace, use <home>/.agents/plugins/marketplace.json."
+        ),
+    )
+    parser.add_argument(
+        "--product",
+        action="append",
+        choices=sorted(VALID_POLICY_PRODUCTS),
+        default=None,
+        help=(
+            "Marketplace policy.products value. Repeat for multiple products. "
+            "Defaults to CODEX."
+        ),
+    )
+    parser.add_argument(
+        "--allow-legacy-marketplace-path",
+        action="store_true",
+        help=(
+            "Allow legacy plugins/marketplace.json layout instead of strict "
+            ".agents/plugins/marketplace.json."
         ),
     )
     parser.add_argument(
@@ -250,6 +390,7 @@ def main() -> None:
 
     plugin_root = (Path(args.path).expanduser().resolve() / plugin_name)
     plugin_root.mkdir(parents=True, exist_ok=True)
+    policy_products = _effective_policy_products(args.product)
 
     plugin_json_path = plugin_root / ".codex-plugin" / "plugin.json"
     write_json(plugin_json_path, build_plugin_json(plugin_name), args.force)
@@ -285,10 +426,13 @@ def main() -> None:
         update_marketplace_json(
             marketplace_path,
             plugin_name,
+            plugin_root,
             args.install_policy,
             args.auth_policy,
+            policy_products,
             args.category,
             args.force,
+            allow_legacy_marketplace_path=bool(args.allow_legacy_marketplace_path),
         )
 
     print(f"Created plugin scaffold: {plugin_root}")

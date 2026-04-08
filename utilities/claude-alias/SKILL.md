@@ -43,11 +43,11 @@ Route elsewhere when:
 
 ## Inputs
 
-- Config repo root (default: `~/dev/config`)
+- Config repo root (default: `/Users/jamiecraik/dev/configs`)
 - Expected canonical alias targets:
-  - `~/.claude/claude-aliases.sh` -> `~/dev/config/claude/bin/claude-aliases.sh`
-  - `~/.claude/kimi_settings.json` -> `~/dev/config/claude/kimi_settings.json`
-  - `~/.claude/zai_settings.json` -> `~/dev/config/claude/zai_settings.json`
+  - `~/.claude/claude-aliases.sh` -> `/Users/jamiecraik/dev/configs/claude/bin/claude-aliases.sh`
+  - `~/.claude/kimi_settings.json` -> `/Users/jamiecraik/dev/configs/claude/kimi_settings.json`
+  - `~/.claude/zai_settings.json` -> `/Users/jamiecraik/dev/configs/claude/zai_settings.json`
 - Shell startup file: `~/.zshrc`
 
 ## Workflow
@@ -127,7 +127,7 @@ Keep Claude alias routing deterministic:
 
 ## Required inputs
 
-- Config repo root path (default: `~/dev/config`)
+- Config repo root path (default: `/Users/jamiecraik/dev/configs`)
 - Shell startup file path (default: `~/.zshrc`)
 - Claude settings links under `~/.claude/`
 
