@@ -152,3 +152,13 @@ Read these files based on the task:
 - [references/contract.yaml](./references/contract.yaml): Machine-checkable purpose, triggers, inputs, outputs, risks.
 - [references/evals.yaml](./references/evals.yaml): Evaluation cases and deterministic safety guards.
 - [references/handoff-package-template.md](./references/handoff-package-template.md): Handoff structure for reviewer-ready summaries.
+
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[skill-builder]] | Harden and benchmark completed skill drafts before release |
+| [[skill-installer]] | Install already-validated skills into Codex environments |
+| [[plugin-creator]] | Package finished skills into a plugin distribution scaffold |
+
+**Topic map:** [[agent-ops]]

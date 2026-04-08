@@ -121,10 +121,8 @@ ce-brainstorm:
   ce-spec: Hand off medium or high-risk brainstorm outputs into a durable spec
 ce-compound:
   ce-brainstorm: WHAT/WHY clarity first
-  ce-ideate: Ranked ideas before brainstorming
   ce-plan: Implementation planning
   ce-review: Merge/readiness review
-  ce-tdd: Test-first execution posture
   ce-work: Ready for execution
 ce-compound-refresh:
   ce-compound: Capture new issues before/after refresh
@@ -236,6 +234,7 @@ codex-agent-creator:
     agents
   decide-build-primitive: Decide whether the capability should be an agent, skill,
     or automation first
+codex-agent-builder: {}
 codex-automation-architect:
   ce-plan: Plan the automation contract before implementing
   codex-agent-creator: Create the agent role the automation will run under
@@ -448,16 +447,11 @@ og-image-creator:
   favicon-generator: Generate OG images and favicons as a complete brand suite
   fixing-metadata: Wire generated OG images into correct meta tags
   imagegen: Use imagegen for non-route-specific image generation
-openai-docs:
-  chatgpt-apps: Implement or troubleshoot Apps SDK projects after the relevant OpenAI
-    docs are retrieved
-  coding-harness: Check current harness guidance when OpenAI tooling questions are
-    part of a repo bootstrap or upgrade workflow
-  context7: Retrieve current third-party library docs when the question is not OpenAI-specific
+openai-docs: {}
 orchestrating-subagents:
   ce-work: Execute a plan once the orchestration decision is made and the task is
     implementation-ready
-  codex-agent-creator: Create or update the agent roles that the orchestration plan
+  codex-agent-builder: Create or update the agent roles that the orchestration plan
     needs
   resolve-pr-parallel: Apply bounded parallelism to PR review resolution rather than
     general subagent orchestration
@@ -474,9 +468,9 @@ plugin-builder:
     + rollback controls
   skill-builder: Harden standalone skills before plugin packaging
 plugin-creator:
-  cli-spec: Consult the technical contract for the ask CLI
   plugin-builder: Promote scaffold into a full plugin package with governance checks
-  skill-builder: Improve bundled skill quality before plugin release
+  plugin-installer: Install and verify plugin packages after creation and hardening
+  skill-creator: Build standalone skills that may later be bundled into a plugin
 plugin-installer:
   plugin-builder: Harden/convert plugin packages before distribution install
   plugin-creator: Scaffold a local plugin package before hardening or install
@@ -613,14 +607,11 @@ skill-builder:
   skill-installer: Install, import, or repair runtime visibility when the skill package
     is already valid and the remaining work is distribution
 skill-creator:
-  cli-spec: Consult the technical contract for the ask CLI
+  plugin-creator: Package finished skills into a plugin distribution scaffold
   skill-builder: Lifecycle hardening, comparative eval rounds, and release-quality
     contract upgrades
   skill-installer: Installing already-valid skills into Codex environments
-skill-installer:
-  plugin-builder: Package a validated skill as a plugin deliverable
-  skill-builder: Harden and validate an existing skill before install/distribution
-  skill-creator: Author or complete a starter skill before installation
+skill-installer: {}
 slides:
   beautiful-mermaid: Embed high-quality Mermaid diagrams in slide decks
   imagegen: Generate illustrative images for slide backgrounds

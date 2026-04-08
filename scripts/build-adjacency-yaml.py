@@ -5,7 +5,7 @@ files and write docs/skill-graphs/adjacency.yaml as the canonical data source.
 
 Run once to bootstrap; subsequent updates are made by editing the YAML directly.
 """
-import pathlib, re, sys, yaml  # needs PyYAML
+import os, pathlib, re, subprocess, sys, yaml  # needs PyYAML
 
 ROOT     = pathlib.Path(sys.argv[1]) if len(sys.argv) > 1 else pathlib.Path(".")
 OUT_YAML = ROOT / "docs/skill-graphs/adjacency.yaml"
@@ -41,7 +41,33 @@ def is_canonical_skill_md(path: pathlib.Path) -> bool:
         return False
     return any(rel.startswith(prefix) for prefix in CANONICAL_PREFIXES)
 
-for md in sorted(ROOT.rglob("SKILL.md")):
+def iter_skill_md_files(root: pathlib.Path):
+    # Prefer tracked files so generated/untracked projections do not pollute output.
+    git_cmd = ["git", "-C", str(root), "ls-files"]
+    proc = subprocess.run(git_cmd, capture_output=True, text=True, check=False)
+    if proc.returncode == 0:
+        yielded: set[pathlib.Path] = set()
+        for rel in proc.stdout.splitlines():
+            tracked_path = root / rel
+            if rel.endswith("/SKILL.md"):
+                skill_path = tracked_path
+            elif tracked_path.is_symlink() and tracked_path.resolve().is_dir():
+                skill_path = tracked_path / "SKILL.md"
+            else:
+                continue
+
+            if skill_path.exists() and skill_path not in yielded:
+                yielded.add(skill_path)
+                yield skill_path
+        return
+
+    # Fallback for non-git contexts.
+    for current_root, _, files in os.walk(root, followlinks=True):
+        if "SKILL.md" in files:
+            yield pathlib.Path(current_root) / "SKILL.md"
+
+
+for md in sorted(iter_skill_md_files(ROOT)):
     if not is_canonical_skill_md(md):
         continue
     skill = md.parts[-2]

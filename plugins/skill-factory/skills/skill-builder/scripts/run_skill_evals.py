@@ -42,7 +42,13 @@ for path_entry in (str(REPO_ROOT), str(SCRIPT_DIR)):
     if path_entry not in sys.path:
         sys.path.insert(0, path_entry)
 
-from defusedxml import ElementTree as ET  # noqa: E402
+try:
+    from defusedxml import ElementTree as ET  # type: ignore # noqa: E402
+except ModuleNotFoundError:  # pragma: no cover
+    # CI lanes may not include defusedxml; fall back to stdlib parser.
+    # Security-sensitive XML parsing in this script should still prefer
+    # defusedxml when available.
+    import xml.etree.ElementTree as ET  # noqa: E402
 
 try:
     import yaml  # type: ignore

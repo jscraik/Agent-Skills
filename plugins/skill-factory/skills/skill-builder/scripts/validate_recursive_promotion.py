@@ -1159,9 +1159,18 @@ def main() -> int:
         )
         return 1
 
-    # Write report to stdout as single-line JSON for JSONL compatibility
-    # (consumers parse stdout with splitlines() + json.loads(line))
-    print(json.dumps(report, separators=(",", ":")))
+    # Write a compact, non-sensitive summary to stdout as single-line JSON.
+    # Full report details remain available through --write-report when needed.
+    summary = {
+        "validator": report.get("validator"),
+        "run_id": report.get("run_id"),
+        "decision_file": report.get("decision_file"),
+        "status": report.get("status"),
+        "error_count": report.get("error_count"),
+        "warning_count": report.get("warning_count"),
+        "decision": report.get("decision"),
+    }
+    print(json.dumps(summary, separators=(",", ":")))
 
     # Also write to disk when explicitly requested (with pretty formatting)
     if args.write_report:
