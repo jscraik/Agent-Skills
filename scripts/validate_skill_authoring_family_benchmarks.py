@@ -19,6 +19,7 @@ import importlib.util
 import json
 import os
 import re
+import shutil
 import sys
 from dataclasses import dataclass
 from datetime import date, datetime, timezone
@@ -28,13 +29,36 @@ from typing import Any, Dict, List, Sequence, Set
 try:
     import yaml  # type: ignore
 except ModuleNotFoundError as exc:  # pragma: no cover
-    preferred = Path.home() / ".venvs" / "pyyaml" / "bin" / "python"
     already_reexec = os.environ.get("SKILL_FAMILY_PYYAML_REEXEC") == "1"
-    if preferred.exists() and not already_reexec and __name__ == "__main__":
+    if not already_reexec and __name__ == "__main__":
         env = dict(os.environ)
         env["SKILL_FAMILY_PYYAML_REEXEC"] = "1"
-        os.execve(str(preferred), [str(preferred), __file__, *sys.argv[1:]], env)
-    raise SystemExit("PyYAML is required for validate_skill_authoring_family_benchmarks.py") from exc
+        uv_bin = shutil.which("uv")
+        if uv_bin:
+            os.execvpe(
+                uv_bin,
+                [
+                    uv_bin,
+                    "run",
+                    "--python",
+                    "3.12",
+                    "--with",
+                    "pyyaml",
+                    "--with",
+                    "jsonschema",
+                    "python",
+                    __file__,
+                    *sys.argv[1:],
+                ],
+                env,
+            )
+        preferred = Path.home() / ".venvs" / "pyyaml" / "bin" / "python"
+        if preferred.exists():
+            os.execve(str(preferred), [str(preferred), __file__, *sys.argv[1:]], env)
+    raise SystemExit(
+        "PyYAML is required for validate_skill_authoring_family_benchmarks.py. "
+        "Run with `uv run --python 3.12 --with pyyaml --with jsonschema python ...`."
+    ) from exc
 
 _JSONSCHEMA_AVAILABLE = importlib.util.find_spec("jsonschema") is not None
 
@@ -153,7 +177,7 @@ def _validate_with_schema(
                 f"{fail_code}_NO_JSONSCHEMA",
                 skill_rel,
                 f"jsonschema not installed; skipping schema validation for {context}. "
-                "Install via: pip install jsonschema",
+                "Install via: uv pip install jsonschema (or run with `uv run --with jsonschema ...`).",
             )
         )
         return findings

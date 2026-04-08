@@ -41,6 +41,19 @@ required_failures=0
 warn_only_issues=0
 cleanup_ephemeral_logs=0
 
+python_cmd=(python3)
+python_cmd_display="python3"
+if [[ -n "${PYTHON_BIN:-}" ]]; then
+  python_cmd=("$PYTHON_BIN")
+  python_cmd_display="$PYTHON_BIN"
+elif command -v mise >/dev/null 2>&1 && command -v uv >/dev/null 2>&1; then
+  python_cmd=(mise exec -- uv run --python 3.12 python)
+  python_cmd_display="mise exec -- uv run --python 3.12 python"
+elif command -v uv >/dev/null 2>&1; then
+  python_cmd=(uv run --python 3.12 python)
+  python_cmd_display="uv run --python 3.12 python"
+fi
+
 if [[ "$output_mode" == "ephemeral" ]]; then
   run_dir="$(mktemp -d "${TMPDIR:-/tmp}/agent-skills-validate-all.XXXXXX")"
   cleanup_ephemeral_logs=1
@@ -100,23 +113,25 @@ run_check() {
 
 echo "🔍 Running all validations..."
 echo "📁 Validation logs: $run_dir"
+echo "🐍 Python launcher: $python_cmd_display"
 if [[ "$output_mode" == "ephemeral" ]]; then
   echo "🧹 Ephemeral mode: repo validation artifacts will not be updated"
 fi
 echo ""
 
 run_check warn plan-graphs "📊 Validating plan graphs..." ./scripts/validate_plan_graphs.sh
-run_check warn recursive-artifacts "🔄 Verifying skill graph artifacts..." python3 scripts/verify_recursive_skill_graph_artifacts.py --quiet
-run_check warn docs-lint "📚 Running docs lint..." python3 scripts/docs_lint.py --mode warn --config docs-policy.json
-run_check required question-lifecycle "❓ Verifying question lifecycle contract..." python3 scripts/verify_question_lifecycle_contract.py
-run_check required skill-lifecycle-tests "🧪 Running lifecycle readiness tests..." python3 scripts/test_skill_lifecycle_validation.py
-run_check warn skill-catalog "🧭 Verifying skill catalog freshness..." python3 scripts/verify_skill_catalog_freshness.py --strict
+run_check warn recursive-artifacts "🔄 Verifying skill graph artifacts..." "${python_cmd[@]}" scripts/verify_recursive_skill_graph_artifacts.py --quiet
+run_check warn docs-lint "📚 Running docs lint..." "${python_cmd[@]}" scripts/docs_lint.py --mode warn --config docs-policy.json
+run_check required question-lifecycle "❓ Verifying question lifecycle contract..." "${python_cmd[@]}" scripts/verify_question_lifecycle_contract.py
+run_check required skill-lifecycle-tests "🧪 Running lifecycle readiness tests..." "${python_cmd[@]}" scripts/test_skill_lifecycle_validation.py
+run_check warn skill-catalog "🧭 Verifying skill catalog freshness..." "${python_cmd[@]}" scripts/verify_skill_catalog_freshness.py --strict
+run_check required plugin-shadowing "🪞 Checking plugin skill shadowing..." bash scripts/check_plugin_skill_shadowing.sh
 run_check required skill-types "🏷️  Linting semantic skill-type tags..." bash scripts/lint_skill_types.sh
 run_check required openai-format "🧩 Linting OpenAI skill format..." bash scripts/lint_openai_skill_format.sh --mode strict
 run_check required progressive-disclosure "📐 Linting progressive disclosure quality..." bash scripts/lint_progressive_disclosure.sh --mode strict
 run_check required skill-authoring-family "👨‍👩‍👧‍👦 Validating skill authoring family gate..." bash scripts/validate_skill_authoring_family.sh
-run_check required gotcha-store "🧠 Validating gotcha candidate store..." python3 scripts/gotcha_pipeline.py validate
-run_check warn router-schema "🛡️  Verifying router schema tooling..." python3 scripts/verify_router_schema.py --fail-on-sensitive-fields
+run_check required gotcha-store "🧠 Validating gotcha candidate store..." "${python_cmd[@]}" scripts/gotcha_pipeline.py validate
+run_check warn router-schema "🛡️  Verifying router schema tooling..." "${python_cmd[@]}" scripts/verify_router_schema.py --fail-on-sensitive-fields
 
 echo ""
 echo "Validation summary:"

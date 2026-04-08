@@ -1,21 +1,72 @@
 import os
+import shlex
 import shutil
 import subprocess
 import re
 import sys
 import importlib.util
 from pathlib import Path
-from typing import Optional
+from typing import List, Optional
 from ask.envelope import CallResult, ErrorObject
 from skill_discovery import discover_skill_entries
 
 
-def _get_python_interpreter() -> str:
-    """Return the Python interpreter path, preferring PyYAML venv if available."""
+def _get_python_command(with_packages: Optional[List[str]] = None) -> List[str]:
+    """Build a Python launcher command with deterministic uv-first resolution."""
+    configured = os.environ.get("PYTHON_BIN", "").strip()
+    if configured:
+        return shlex.split(configured)
+
+    packages = [pkg for pkg in (with_packages or []) if pkg]
+
+    if shutil.which("mise") and shutil.which("uv"):
+        cmd: List[str] = ["mise", "exec", "--", "uv", "run", "--python", "3.12"]
+        for pkg in packages:
+            cmd.extend(["--with", pkg])
+        cmd.append("python")
+        return cmd
+
+    if shutil.which("uv"):
+        cmd = ["uv", "run", "--python", "3.12"]
+        for pkg in packages:
+            cmd.extend(["--with", pkg])
+        cmd.append("python")
+        return cmd
+
     preferred = Path.home() / ".venvs" / "pyyaml" / "bin" / "python"
     if preferred.exists():
-        return str(preferred)
-    return "python3"
+        return [str(preferred)]
+    return ["python3"]
+
+
+def extract_family_fail_lines(stdout: str) -> List[str]:
+    """Extract normalized FAIL lines from family benchmark stdout."""
+    failures: List[str] = []
+    for raw_line in stdout.splitlines():
+        line = raw_line.strip()
+        if line.startswith(("- FAIL ", "FAIL ")):
+            failures.append(line.lstrip("- "))
+    return failures
+
+
+def _summarize_family_benchmark_failure(stdout: str, stderr: str, limit: int = 3) -> Optional[str]:
+    """Return a compact summary of FAIL lines from family benchmark output."""
+    fail_lines = extract_family_fail_lines(stdout)
+
+    if fail_lines:
+        head = fail_lines[:limit]
+        summary = "; ".join(head)
+        remainder = len(fail_lines) - len(head)
+        if remainder > 0:
+            summary += f"; +{remainder} more"
+        return summary
+
+    for raw_line in stderr.splitlines():
+        line = raw_line.strip()
+        if line:
+            return line
+
+    return None
 
 # Explicitly load builder-specific logic using absolute paths to avoid namespace collisions
 def _load_builder_module(repo_root: Path, module_name: str):
@@ -56,8 +107,8 @@ def init_skill(repo_root: Path, name: str, category: str, description: str) -> C
     """Initializes a new skill scaffold using the repo template logic."""
     result = CallResult()
 
-    cmd = [
-        _get_python_interpreter(), "utilities/skill-builder/scripts/init_skill.py",
+    cmd = _get_python_command(["pyyaml"]) + [
+        "utilities/skill-builder/scripts/init_skill.py",
         name,
         "--category", category,
         "--description", description,
@@ -118,15 +169,15 @@ def audit_skill(repo_root: Path, skill_path: str, level: str = "compat") -> Call
         ))
         return result
 
-    python = _get_python_interpreter()
+    python = _get_python_command(["pyyaml", "jsonschema"])
 
-    diag_cmd = [python, "scripts/diagnose_skill.py", skill_path]
+    diag_cmd = python + ["scripts/diagnose_skill.py", skill_path]
     diag_proc = subprocess.run(diag_cmd, cwd=str(repo_root), capture_output=True, text=True)
     result.data["diagnostics"] = {"exit_code": diag_proc.returncode, "stdout": diag_proc.stdout, "stderr": diag_proc.stderr}
 
     if level == "strict":
         # Security gate (skill_gate.py)
-        gate_cmd = [python, "utilities/skill-builder/scripts/skill_gate.py", skill_path, "--require-security-evals", "--pi-high-fail", "--require-fail-fast"]
+        gate_cmd = python + ["utilities/skill-builder/scripts/skill_gate.py", skill_path, "--require-security-evals", "--pi-high-fail", "--require-fail-fast"]
         gate_proc = subprocess.run(gate_cmd, cwd=str(repo_root), capture_output=True, text=True)
         result.data["security_gate"] = {"exit_code": gate_proc.returncode, "stdout": gate_proc.stdout, "stderr": gate_proc.stderr}
         if gate_proc.returncode != 0:
@@ -135,16 +186,29 @@ def audit_skill(repo_root: Path, skill_path: str, level: str = "compat") -> Call
             return result
 
         # Family benchmarks validation
-        family_cmd = [python, "scripts/validate_skill_authoring_family_benchmarks.py", "--skill", skill_path]
+        family_cmd = python + ["scripts/validate_skill_authoring_family_benchmarks.py", "--skill", skill_path]
         family_proc = subprocess.run(family_cmd, cwd=str(repo_root), capture_output=True, text=True)
         result.data["family_benchmarks"] = {"exit_code": family_proc.returncode, "stdout": family_proc.stdout, "stderr": family_proc.stderr}
         if family_proc.returncode != 0:
+            summary = _summarize_family_benchmark_failure(family_proc.stdout, family_proc.stderr)
+            message = "Family benchmarks validation failed."
+            if summary:
+                message = f"{message} First failures: {summary}"
+            quoted_skill_path = shlex.quote(skill_path)
+
             result.status = "error"
-            result.errors.append(ErrorObject(code="ERR_VALIDATION", message="Family benchmarks validation failed."))
+            result.errors.append(ErrorObject(
+                code="ERR_VALIDATION",
+                message=message,
+                fix_suggestion=(
+                    "Inspect data.family_benchmarks for full output, or run: "
+                    f"mise exec -- uv run --python 3.12 --with pyyaml --with jsonschema python scripts/validate_skill_authoring_family_benchmarks.py --skill {quoted_skill_path} --format text"
+                ),
+            ))
             return result
 
         # OpenClaw skill guard
-        openclaw_cmd = [python, "utilities/skill-builder/scripts/openclaw_skill_guard.py", skill_path, "--mode", "both", "--format", "text"]
+        openclaw_cmd = python + ["utilities/skill-builder/scripts/openclaw_skill_guard.py", skill_path, "--mode", "both", "--format", "text"]
         openclaw_proc = subprocess.run(openclaw_cmd, cwd=str(repo_root), capture_output=True, text=True)
         result.data["openclaw_guard"] = {"exit_code": openclaw_proc.returncode, "stdout": openclaw_proc.stdout, "stderr": openclaw_proc.stderr}
         if openclaw_proc.returncode != 0:
@@ -203,14 +267,14 @@ def install_skill(repo_root: Path, url: str, remediate: bool = False, dest: str 
         result.errors.append(ErrorObject(
             code="ERR_CONFLICT",
             message=f"Skill '{skill_name}' already exists at '{display_path}'.",
-            fix_suggestion=f"Remove the existing skill or choose a different destination with --dest."
+            fix_suggestion="Remove the existing skill or choose a different destination with --dest."
         ))
         result.data["skill_name"] = skill_name
         result.data["existing_path"] = display_path
         return result
 
-    cmd = [
-        _get_python_interpreter(), "skills-system/skill-installer/scripts/install-skill-from-github.py",
+    cmd = _get_python_command(["pyyaml"]) + [
+        "skills-system/skill-installer/scripts/install-skill-from-github.py",
         "--url", url,
         "--dest", str(dest_path),
         "--validation-level", "compat"

@@ -47,11 +47,10 @@ VALID_METADATA_SOURCES = {"frontmatter", "plugin_manifest", "inherited"}
 GOVERNED_SKILL_PATHS = {
     "utilities/coding-harness/SKILL.md",
     "utilities/skill-builder/SKILL.md",
-    "product/ops/compound-engineering-router/SKILL.md",
-    "plugins/compound-engineering-router/skills/compound-engineering-router/SKILL.md",
+    "plugins/skill-factory/skills/skill-builder/SKILL.md",
 }
 GOVERNED_PLUGIN_MANIFEST_PATHS = {
-    "plugins/compound-engineering-router/.codex-plugin/plugin.json",
+    "plugins/skill-factory/.codex-plugin/plugin.json",
 }
 SOLUTION_SKIP_FILENAMES = {"README.md", "solution-entry-template.md"}
 PLACEHOLDER_PATTERNS = (

@@ -1,0 +1,17 @@
+{
+  "schema_version": "1.0",
+  "profile_id": "plugins-coderabbit-code-review",
+  "scope_skill": "plugins/coderabbit/skills/code-review",
+  "scope_profile": "plugins/coderabbit",
+  "delegation": {
+    "mode": "co-pilot",
+    "human_baseline_minutes": 35,
+    "ai_process_minutes": 12,
+    "probability_of_success": 0.8,
+    "rationale": "AI triage plus human risk acceptance."
+  },
+  "learning_posture": {
+    "supported": ["learn", "guided", "execute"],
+    "default": "guided"
+  }
+}

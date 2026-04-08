@@ -13,7 +13,7 @@ triggers:
   - user asks to prevent alias drift in shell/config files
 
 inputs:
-  - optional config root path (default: /Users/jamiecraik/dev/config)
+  - optional config root path (default: /Users/jamiecraik/dev/configs)
   - shell startup file path (default: ~/.zshrc)
   - claude settings links under ~/.claude/
 

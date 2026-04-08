@@ -10,12 +10,12 @@ Read when: you need to verify that `workflow-spec.md`, `workflow-spec-ui.md`, an
 - [No-loss checklist](#no-loss-checklist)
 
 ## Purpose
-This document maps the original specification prompts in `/Users/jamiecraik/dev/config/codex/prompts/` to the skill at `product/ops/ce-spec/` so the prompt-to-skill migration stays auditable.
+This document maps the original specification prompts in `/Users/jamiecraik/dev/configs/codex/prompts/` to the skill at `product/ops/ce-spec/` so the prompt-to-skill migration stays auditable.
 
 ## Source prompts
-- `/Users/jamiecraik/dev/config/codex/prompts/workflow-spec.md`
-- `/Users/jamiecraik/dev/config/codex/prompts/workflow-spec-ui.md`
-- `/Users/jamiecraik/dev/config/codex/prompts/workflow-ui-spec.md`
+- `/Users/jamiecraik/dev/configs/codex/prompts/workflow-spec.md`
+- `/Users/jamiecraik/dev/configs/codex/prompts/workflow-spec-ui.md`
+- `/Users/jamiecraik/dev/configs/codex/prompts/workflow-ui-spec.md`
 - Migration target: `/Users/jamiecraik/dev/Agent-Skills/product/ops/ce-spec/`
 
 ## Parity mapping

@@ -9,20 +9,20 @@
 
 ## Canonical runtime scripts
 - Skill wrapper (preferred): `/Users/jamiecraik/dev/agent-skills/utilities/insight-report/scripts/run_insight_report.py`
-- Report generator: `/Users/jamiecraik/dev/config/codex/scripts/generate-insight-report.py`
-- Project brief collector: `/Users/jamiecraik/dev/config/codex/scripts/collect-project-brief.py`
-- Dynamic analyzer: `/Users/jamiecraik/dev/config/codex/scripts/dynamic_insights.py`
+- Report generator: `/Users/jamiecraik/dev/configs/codex/scripts/generate-insight-report.py`
+- Project brief collector: `/Users/jamiecraik/dev/configs/codex/scripts/collect-project-brief.py`
+- Dynamic analyzer: `/Users/jamiecraik/dev/configs/codex/scripts/dynamic_insights.py`
 
 ## Primary outputs
-- Output root: `/Users/jamiecraik/dev/config/codex/usage-data`
-- HTML report: `/Users/jamiecraik/dev/config/codex/usage-data/report.html`
-- PDF report: `/Users/jamiecraik/dev/config/codex/usage-data/report.pdf`
-- Facets: `/Users/jamiecraik/dev/config/codex/usage-data/facets/latest.json`
-- Project brief: `/Users/jamiecraik/dev/config/codex/usage-data/project-brief.json`
+- Output root: `/Users/jamiecraik/dev/configs/codex/usage-data`
+- HTML report: `/Users/jamiecraik/dev/configs/codex/usage-data/report.html`
+- PDF report: `/Users/jamiecraik/dev/configs/codex/usage-data/report.pdf`
+- Facets: `/Users/jamiecraik/dev/configs/codex/usage-data/facets/latest.json`
+- Project brief: `/Users/jamiecraik/dev/configs/codex/usage-data/project-brief.json`
 - Fact snapshots:
-  - `/Users/jamiecraik/dev/config/codex/usage-data/fact-snapshots/facts.json`
-  - `/Users/jamiecraik/dev/config/codex/usage-data/fact-snapshots/sources.json`
-  - `/Users/jamiecraik/dev/config/codex/usage-data/fact-snapshots/freshness.json`
+  - `/Users/jamiecraik/dev/configs/codex/usage-data/fact-snapshots/facts.json`
+  - `/Users/jamiecraik/dev/configs/codex/usage-data/fact-snapshots/sources.json`
+  - `/Users/jamiecraik/dev/configs/codex/usage-data/fact-snapshots/freshness.json`
 
 ## Validation checklist
 - `project-brief.json` exists.

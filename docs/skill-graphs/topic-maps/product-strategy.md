@@ -27,7 +27,6 @@ covers:
 ## Ideation & Exploration
 
 - [[brainstorming]] — Pre-planning exploration for ambiguous requests: clarify what to build, compare 2-3 approaches, recommend a direction.
-- [[compound-engineering-router]] — Route compound-engineering requests to the correct workflow prompt or meta-mode (brainstorm, spec, plan, work, review).
 
 ## Specification & Planning
 

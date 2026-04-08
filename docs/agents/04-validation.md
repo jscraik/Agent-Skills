@@ -21,7 +21,7 @@
   - Re-read [managed-asset-lifecycle.md](/Users/jamiecraik/dev/Agent-Skills/docs/reference/managed-asset-lifecycle.md) before editing.
   - Keep lifecycle truth in the authoritative in-file source, not a sidecar-first shadow registry.
   - Treat derived catalogs or indexes as stale until regenerated when they disagree with the authoritative source.
-  - Use [compound-engineering-router plugin manifest](/Users/jamiecraik/dev/Agent-Skills/plugins/compound-engineering-router/.codex-plugin/plugin.json) as the phase-one plugin proof target and [compound-engineering-router packaged skill](/Users/jamiecraik/dev/Agent-Skills/plugins/compound-engineering-router/skills/compound-engineering-router/SKILL.md) as the phase-one packaged-skill proof target.
+  - Use [skill-factory plugin manifest](/Users/jamiecraik/dev/agent-skills/plugins/skill-factory/.codex-plugin/plugin.json) as the phase-one plugin proof target and [skill-factory packaged skill-builder](/Users/jamiecraik/dev/agent-skills/plugins/skill-factory/skills/skill-builder/SKILL.md) as the phase-one packaged-skill proof target.
 
 ## Config-sensitive checks
 - For edits to `package.json`, CI workflows, `settings.json`, or similar config files:

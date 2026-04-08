@@ -19,9 +19,24 @@ fi
 repo_root="$(cd -P "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
 cd "$repo_root"
 
-python_bin="${PYTHON_BIN:-$HOME/.venvs/pyyaml/bin/python}"
-if [[ ! -x "$python_bin" ]]; then
-  python_bin="python3"
+python_cmd=()
+python_cmd_display=""
+
+if [[ -n "${PYTHON_BIN:-}" ]]; then
+  python_cmd=("$PYTHON_BIN")
+  python_cmd_display="$PYTHON_BIN"
+elif command -v mise >/dev/null 2>&1 && command -v uv >/dev/null 2>&1; then
+  python_cmd=(mise exec -- uv run --python 3.12 --with pyyaml --with jsonschema python)
+  python_cmd_display="mise exec -- uv run --python 3.12 --with pyyaml --with jsonschema python"
+elif command -v uv >/dev/null 2>&1; then
+  python_cmd=(uv run --python 3.12 --with pyyaml --with jsonschema python)
+  python_cmd_display="uv run --python 3.12 --with pyyaml --with jsonschema python"
+elif [[ -x "$HOME/.venvs/pyyaml/bin/python" ]]; then
+  python_cmd=("$HOME/.venvs/pyyaml/bin/python")
+  python_cmd_display="$HOME/.venvs/pyyaml/bin/python"
+else
+  python_cmd=(python3)
+  python_cmd_display="python3"
 fi
 
 skill_dirs=(
@@ -74,7 +89,7 @@ assert_security_eval_contract() {
   report_file="$(mktemp "${TMPDIR:-/tmp}/skill-authoring-family-gate.XXXXXX")"
   trap 'rm -f "$report_file"' RETURN
 
-  if ! "$python_bin" utilities/skill-builder/scripts/skill_gate.py "$skill_dir" \
+  if ! "${python_cmd[@]}" utilities/skill-builder/scripts/skill_gate.py "$skill_dir" \
     --require-security-evals \
     --pi-high-fail \
     --require-fail-fast \
@@ -84,7 +99,7 @@ assert_security_eval_contract() {
     :
   fi
 
-  "$python_bin" - "$report_file" "$skill_dir" <<'PY'
+  "${python_cmd[@]}" - "$report_file" "$skill_dir" <<'PY'
 import json
 import sys
 
@@ -159,7 +174,7 @@ if [[ "$release_ready" == "1" ]]; then
   fi
 fi
 
-echo "[family-gate] using python: $python_bin"
+echo "[family-gate] using python: $python_cmd_display"
 
 # ---------------------------------------------------------------------------
 # P1.2: shellcheck gate — lint all gate/validation shell scripts
@@ -216,7 +231,7 @@ if command -v "$ruff_bin" >/dev/null 2>&1; then
     exit 2
   fi
 else
-  echo "[family-gate] WARN: ruff not found; skipping Python lint (install via: pip install ruff or brew install ruff)"
+  echo "[family-gate] WARN: ruff not found; skipping Python lint (install via: uv tool install ruff, uv pip install ruff, or brew install ruff)"
 fi
 
 echo "[family-gate] validating ${#skill_dirs[@]} skill authoring family members"
@@ -231,14 +246,14 @@ else
   echo "[family-gate] live eval mode disabled: structural eval contract checks only (smoke+release case listings)"
 fi
 
-"$python_bin" scripts/validate_skill_authoring_family_benchmarks.py
+"${python_cmd[@]}" scripts/validate_skill_authoring_family_benchmarks.py
 
 # ---------------------------------------------------------------------------
 # P1.x: pytest unit gate — run validator unit tests
 # ---------------------------------------------------------------------------
-if "$python_bin" -m pytest --version >/dev/null 2>&1; then
+if "${python_cmd[@]}" -m pytest --version >/dev/null 2>&1; then
   echo "[family-gate] running pytest unit tests..."
-  if "$python_bin" -m pytest utilities/skill-builder/scripts/test_skill_gate.py \
+  if "${python_cmd[@]}" -m pytest utilities/skill-builder/scripts/test_skill_gate.py \
       -q --tb=short; then
     echo "[family-gate] pytest passed"
   else
@@ -246,7 +261,7 @@ if "$python_bin" -m pytest --version >/dev/null 2>&1; then
     exit 2
   fi
 else
-  echo "[family-gate] WARN: pytest not found; skipping unit tests (install via: pip install pytest or brew install python)"
+  echo "[family-gate] WARN: pytest not found; skipping unit tests (install via: uv run --with pytest ... , uv pip install pytest, or brew install python)"
 fi
 
 # Track per-skill evidence for the release-ready index
@@ -326,7 +341,7 @@ for skill_dir in "${skill_dirs[@]}"; do
   echo
   echo "[family-gate] === $skill_dir ==="
 
-  "$python_bin" utilities/skill-builder/scripts/quick_validate.py "$skill_dir" --mode compat
+  "${python_cmd[@]}" utilities/skill-builder/scripts/quick_validate.py "$skill_dir" --mode compat
 
   assert_security_eval_contract "$skill_dir"
 
@@ -336,26 +351,26 @@ for skill_dir in "${skill_dirs[@]}"; do
     if [[ "$release_ready" == "1" ]]; then
       skill_evidence_path="${evidence_run_dir}/${skill_slug}"
       _set_evidence_path "$skill_dir" "$skill_evidence_path"
-      "$python_bin" utilities/skill-builder/scripts/run_skill_evals.py "$skill_dir" \
+      "${python_cmd[@]}" utilities/skill-builder/scripts/run_skill_evals.py "$skill_dir" \
         "${runner_args[@]}" \
         --eval-mode smoke \
         --reports-dir "$skill_evidence_path" \
         "${codex_profile_args[@]+"${codex_profile_args[@]}"}" || skill_eval_failed=1
-      "$python_bin" utilities/skill-builder/scripts/run_skill_evals.py "$skill_dir" \
+      "${python_cmd[@]}" utilities/skill-builder/scripts/run_skill_evals.py "$skill_dir" \
         "${runner_args[@]}" \
         --eval-mode release \
         --reports-dir "$skill_evidence_path" \
         "${codex_profile_args[@]+"${codex_profile_args[@]}"}" || skill_eval_failed=1
-      "$python_bin" utilities/skill-builder/scripts/ci_skill_quality_gate.py \
+      "${python_cmd[@]}" utilities/skill-builder/scripts/ci_skill_quality_gate.py \
         "$skill_evidence_path" \
         --tier2-mode warn \
         --format text || skill_eval_failed=1
     else
-      "$python_bin" utilities/skill-builder/scripts/run_skill_evals.py "$skill_dir" \
+      "${python_cmd[@]}" utilities/skill-builder/scripts/run_skill_evals.py "$skill_dir" \
         "${runner_args[@]}" \
         --eval-mode smoke \
         "${codex_profile_args[@]+"${codex_profile_args[@]}"}" || skill_eval_failed=1
-      "$python_bin" utilities/skill-builder/scripts/run_skill_evals.py "$skill_dir" \
+      "${python_cmd[@]}" utilities/skill-builder/scripts/run_skill_evals.py "$skill_dir" \
         "${runner_args[@]}" \
         --eval-mode release \
         "${codex_profile_args[@]+"${codex_profile_args[@]}"}" || skill_eval_failed=1
@@ -367,24 +382,24 @@ for skill_dir in "${skill_dirs[@]}"; do
       echo "[family-gate] WARN: live evals had failures for $skill_dir — recording outcome as failed"
     fi
   else
-    "$python_bin" utilities/skill-builder/scripts/run_skill_evals.py "$skill_dir" \
+    "${python_cmd[@]}" utilities/skill-builder/scripts/run_skill_evals.py "$skill_dir" \
       --list-cases \
       --eval-mode smoke
-    "$python_bin" utilities/skill-builder/scripts/run_skill_evals.py "$skill_dir" \
+    "${python_cmd[@]}" utilities/skill-builder/scripts/run_skill_evals.py "$skill_dir" \
       --list-cases \
       --eval-mode release
     _set_outcome "$skill_dir" "structural-only"
   fi
 
-  "$python_bin" utilities/skill-builder/scripts/openclaw_skill_guard.py "$skill_dir" \
+  "${python_cmd[@]}" utilities/skill-builder/scripts/openclaw_skill_guard.py "$skill_dir" \
     --mode both \
     --format text
 
-  "$python_bin" utilities/skill-builder/scripts/analyze_skill.py "$skill_dir" \
+  "${python_cmd[@]}" utilities/skill-builder/scripts/analyze_skill.py "$skill_dir" \
     --min-pass 60 \
     --no-emoji
 
-  "$python_bin" utilities/skill-builder/scripts/upgrade_skill.py "$skill_dir" \
+  "${python_cmd[@]}" utilities/skill-builder/scripts/upgrade_skill.py "$skill_dir" \
     --format text
 
 done

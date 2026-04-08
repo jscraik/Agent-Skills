@@ -1,21 +1,21 @@
 {
-  "generated_at": "2026-04-07T17:41:07Z",
+  "generated_at": "2026-04-08T10:26:12Z",
   "runs_root": "artifacts/skill-graphs/runs",
   "counts": {
     "compliant": 0,
-    "missing_mandatory": 12,
-    "legacy_partial": 6,
+    "missing_mandatory": 101,
+    "legacy_partial": 2,
     "empty": 0
   },
-  "total_runs": 18,
+  "total_runs": 103,
   "run_status_counts": {
     "compliant": 0,
-    "missing_mandatory": 12,
-    "legacy_partial": 6,
+    "missing_mandatory": 101,
+    "legacy_partial": 2,
     "empty": 0
   },
   "compliance_rate": 0.0,
-  "waived_non_compliant": 0,
+  "waived_non_compliant": 2,
   "prune_empty": {
     "enabled": false,
     "dry_run": false,

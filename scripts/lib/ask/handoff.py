@@ -99,7 +99,7 @@ class HandoffPackage:
         if yaml is None:
             raise RuntimeError(
                 "PyYAML is required for YAML serialization but is not installed. "
-                "Install it with: pip install pyyaml"
+                "Install it with: uv pip install pyyaml"
             )
         return yaml.dump(self.to_dict(), default_flow_style=False, sort_keys=False)
 
@@ -123,7 +123,7 @@ class HandoffPackage:
         if yaml is None:
             raise RuntimeError(
                 "PyYAML is required to load handoff packages but is not installed. "
-                "Install it with: pip install pyyaml"
+                "Install it with: uv pip install pyyaml"
             )
         data = yaml.safe_load(path.read_text())
         pkg = cls()

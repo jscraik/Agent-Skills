@@ -12,7 +12,7 @@ This document records how the prompt sources for the execution stage were migrat
 
 ## Source prompts and donor patterns
 - canonical source prompt:
-  - `/Users/jamiecraik/dev/config/codex/prompts/workflow-work.md`
+  - `/Users/jamiecraik/dev/configs/codex/prompts/workflow-work.md`
 - donor prompts explicitly preserved:
   - `https://github.com/EveryInc/compound-engineering-plugin/tree/0ae91dcc298721e5b2c4ab6d1fc6f76a13b6f67c/plugins/compound-engineering/skills/ce-work`
   - `https://github.com/EveryInc/compound-engineering-plugin/tree/0ae91dcc298721e5b2c4ab6d1fc6f76a13b6f67c/plugins/compound-engineering/skills/ce-work-beta`

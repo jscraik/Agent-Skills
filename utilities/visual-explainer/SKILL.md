@@ -286,7 +286,7 @@ Before delivering, verify:
 
 ## Runtime guardrails
 
-- If supporting scripts require YAML-aware tooling, run them with `~/.venvs/pyyaml/bin/python` (not system `python`).
+- If supporting scripts require YAML-aware tooling, run them with `mise exec -- uv run --python 3.12 --with pyyaml --with jsonschema python ...` (fallback: `uv run ...`).
 - If `PyYAML` is missing, fail fast with an explicit fix command instead of retrying ambiguous interpreters.
 - If the right artifact is still unclear after reading the source material, stop and choose the diagram type before writing HTML.
 

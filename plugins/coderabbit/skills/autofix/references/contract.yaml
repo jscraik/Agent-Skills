@@ -1,0 +1,30 @@
+schema_version: 1
+name: autofix
+purpose: Resolve unresolved CodeRabbit review threads on the active PR via approval-aware manual or batch autofix workflow.
+triggers:
+  - User asks to autofix or resolve CodeRabbit review comments.
+  - User wants CodeRabbit feedback applied in manual or auto mode.
+inputs:
+  - name: repository_state
+    type: object
+    description: Branch status, working tree cleanliness, and push state.
+  - name: pr_number
+    type: integer
+    description: Open PR number associated with the active branch.
+  - name: unresolved_threads
+    type: array
+    description: Unresolved review threads authored by CodeRabbit bot identities.
+  - name: mode
+    type: enum
+    values: [manual, auto]
+    description: Whether fixes are approved per issue or applied in batch.
+outputs:
+  - name: fix_plan
+    type: array
+    description: Ordered list of parsed issues and intended fixes.
+  - name: applied_changes
+    type: array
+    description: Files changed with issue linkage.
+  - name: summary_comment
+    type: string
+    description: Final PR summary comment text.

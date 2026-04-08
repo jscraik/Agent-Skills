@@ -301,7 +301,6 @@ Use the closeout templates in `references/brainstorm-workflow-details.md`.
 ## See Also
 | Skill | When to use together |
 |---|---|
-| [[compound-engineering-router]] | Use to choose the right compound-engineering stage before or after brainstorming |
 | [[ce-spec]] | Hand off medium or high-risk brainstorm outputs into a durable spec |
 | [[ce-plan]] | Hand off low-risk, well-resolved brainstorm outputs into implementation planning |
 | [[brainstorming]] | Use when the user needs a broader, non-compound brainstorming workflow |

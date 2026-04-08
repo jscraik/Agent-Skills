@@ -8,7 +8,7 @@ def _load_jsonschema():
     try:
         import jsonschema  # type: ignore
     except ModuleNotFoundError:
-        sys.stderr.write("ERROR: jsonschema is required. Install with: python3 -m pip install jsonschema\n")
+        sys.stderr.write("ERROR: jsonschema is required. Install with: uv pip install jsonschema\n")
         return None
     return jsonschema
 

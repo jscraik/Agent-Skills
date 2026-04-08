@@ -65,7 +65,6 @@ covers:
 
 ## Workflow Planning & Routing
 
-- [[compound-engineering-router]] — Route compound-engineering requests to the correct workflow prompt or meta-mode.
 - [[ce-plan]] — Create execution-ready implementation plans with sequencing, validation, and rollout guidance.
 - [[brainstorming]] — Pre-planning exploration for ambiguous requests: clarify, compare 2-3 approaches, recommend a direction.
 - [[interview-me]] — Interactive, multiple-choice interview for requirements discovery; turns ideas into execution-ready specs.

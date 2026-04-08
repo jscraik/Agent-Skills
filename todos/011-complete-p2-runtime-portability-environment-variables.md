@@ -15,7 +15,7 @@ dependencies: []
 The plan, examples, and validation commands assume `/Users/jamiecraik/...` absolute paths throughout, which makes the plan non-portable to other workspaces, CI agents, or containerized environments unless manually rewritten.
 
 ## Findings
-- Absolute paths are used in execution contract, validation commands, and task list (e.g., `/Users/jamiecraik/dev/config/...`, `/Users/jamiecraik/dev/agent-skills/...`) in multiple sections.
+- Absolute paths are used in execution contract, validation commands, and task list (e.g., `/Users/jamiecraik/dev/configs/...`, `/Users/jamiecraik/dev/agent-skills/...`) in multiple sections.
 - This appears at least at: `docs/plans/...:254-257`, `377-403`, `405-451`, `520-531`, `659-687`.
 
 ## Proposed Solutions

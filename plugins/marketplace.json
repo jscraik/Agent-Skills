@@ -17,10 +17,10 @@
       "category": "Productivity"
     },
     {
-      "name": "compound-engineering-router",
+      "name": "skill-factory",
       "source": {
         "source": "local",
-        "path": "./plugins/compound-engineering-router"
+        "path": "./plugins/skill-factory"
       },
       "policy": {
         "installation": "AVAILABLE",
@@ -29,10 +29,10 @@
       "category": "Productivity"
     },
     {
-      "name": "skill-builder",
+      "name": "coderabbit",
       "source": {
         "source": "local",
-        "path": "./plugins/skill-builder"
+        "path": "./plugins/coderabbit"
       },
       "policy": {
         "installation": "AVAILABLE",

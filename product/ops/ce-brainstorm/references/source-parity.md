@@ -13,7 +13,7 @@ Read when: you need to verify that `ce-brainstorm` preserves the legacy brainsto
 This document maps the legacy brainstorm prompt plus the upstream `compound-engineering-plugin` `ce-brainstorm` skill to the local skill at `product/ops/ce-brainstorm/` so upstream-sync and prompt-to-skill migration remain auditable.
 
 ## Source inputs
-- legacy prompt: `/Users/jamiecraik/dev/config/codex/prompts/workflow-brainstorm.md`
+- legacy prompt: `/Users/jamiecraik/dev/configs/codex/prompts/workflow-brainstorm.md`
 - upstream donor skill: `https://raw.githubusercontent.com/EveryInc/compound-engineering-plugin/0ae91dcc298721e5b2c4ab6d1fc6f76a13b6f67c/plugins/compound-engineering/skills/ce-brainstorm/SKILL.md`
 - migration target: `/Users/jamiecraik/dev/Agent-Skills/product/ops/ce-brainstorm/`
 - lightweight review doctrine adapted locally in `references/document-review-pass.md`

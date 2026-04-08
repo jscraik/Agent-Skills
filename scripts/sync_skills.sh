@@ -214,7 +214,7 @@ skill_files_cmd() {
   local root=""
   for root in "${skill_roots[@]}"; do
     [ -d "$root" ] || continue
-    find "$root" \
+    find -L "$root" \
       -path "*/_archive/*" -prune -o \
       -path "*/assets/*" -prune -o \
       -path "*/rules/*" -prune -o \
@@ -231,7 +231,7 @@ extra_skill_files_cmd() {
       if git ls-files --error-unmatch "$extra_skill" >/dev/null 2>&1; then
         echo "$extra_skill"
       fi
-    done < <(find "./.agents/skills" -mindepth 2 -maxdepth 3 -name "SKILL.md" -print)
+    done < <(find -L "./.agents/skills" -mindepth 2 -maxdepth 3 -name "SKILL.md" -print)
   fi
   if [ -d "./skills" ]; then
     while IFS= read -r extra_skill; do
@@ -242,7 +242,7 @@ extra_skill_files_cmd() {
         ./skills/.system/*) continue ;;
       esac
       echo "$extra_skill"
-    done < <(find "./skills" -mindepth 2 -maxdepth 3 -name "SKILL.md" -print)
+    done < <(find -L "./skills" -mindepth 2 -maxdepth 3 -name "SKILL.md" -print)
   fi
 }
 
@@ -264,6 +264,25 @@ all_skill_files_cmd() {
       }
     }
   '
+}
+
+# Collect plugin-exported skill names once so standalone duplicates (for example
+# `utilities/coderabbit`) can be suppressed from the flat runtime surface when a
+# plugin provides the canonical copy.
+plugin_skill_names="$(
+  find -L "./plugins" \
+    -path "./plugins/*/skills/*/SKILL.md" -print 2>/dev/null \
+    | awk -F/ '{print $(NF-1)}' \
+    | sort -u
+)"
+plugin_skill_names_ws=" $(printf '%s\n' "$plugin_skill_names" | tr '\n' ' ') "
+
+plugin_exports_skill_name() {
+  local skill_name="$1"
+  case "$plugin_skill_names_ws" in
+    *" $skill_name "*) return 0 ;;
+    *) return 1 ;;
+  esac
 }
 
 # Extract `metadata.skill-type` (or `metadata.skill_type`) from frontmatter.
@@ -302,6 +321,28 @@ extract_skill_type() {
     }
   ' "$skill_path"
 }
+
+# Return success when a discovered skill path resolves to a plugin-owned bundle
+# under plugins/<plugin>/skills/<skill>. These should not appear as standalone
+# entries in the flat runtime skill list.
+is_plugin_owned_skill_path() {
+  local skill_path="$1"
+  local skill_dir_rel=""
+  local skill_dir_abs=""
+  local skill_dir_real=""
+
+  skill_dir_rel="$(dirname "$skill_path")"
+  skill_dir_abs="$repo_root/${skill_dir_rel#./}"
+  if [ ! -d "$skill_dir_abs" ]; then
+    return 1
+  fi
+  skill_dir_real="$(cd "$skill_dir_abs" 2>/dev/null && pwd -P || true)"
+  case "$skill_dir_real" in
+    "$repo_root_real"/plugins/*/skills/*) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
 while IFS= read -r skill_path; do
   # Skip the root index.
   if [ "$skill_path" = "./SKILL.md" ]; then
@@ -309,6 +350,14 @@ while IFS= read -r skill_path; do
   fi
   skill_dir="$(dirname "$skill_path")"
   skill_name="$(basename "$skill_dir")"
+  if is_plugin_owned_skill_path "$skill_path"; then
+    echo "Skipping plugin-owned skill from flat runtime list: $skill_name"
+    continue
+  fi
+  if plugin_exports_skill_name "$skill_name"; then
+    echo "Skipping standalone skill shadowed by plugin bundle: $skill_name"
+    continue
+  fi
   skill_dir_abs="$repo_root/$skill_dir"
   # Relative path from $skills_dir (.agents/skills/) back to the skill source.
   # Strip the leading './' from skill_dir to get e.g. 'auth/create-auth',
@@ -619,9 +668,15 @@ HEADER
     if [ "$skill_path" = "./SKILL.md" ]; then
       continue
     fi
-
     skill_dir="$(dirname "$skill_path")"
     skill_name="$(basename "$skill_dir")"
+    if is_plugin_owned_skill_path "$skill_path"; then
+      continue
+    fi
+    if plugin_exports_skill_name "$skill_name"; then
+      continue
+    fi
+
     category="$(dirname "$skill_dir" | sed 's|^\./||; s|^\.||')"
     safe_category="$(echo "$category" | tr '/' '_')"
 
@@ -696,6 +751,14 @@ generate_skill_type_index() {
     if [ "$skill_path" = "./SKILL.md" ]; then
       continue
     fi
+    skill_dir="$(dirname "$skill_path")"
+    skill_name="$(basename "$skill_dir")"
+    if is_plugin_owned_skill_path "$skill_path"; then
+      continue
+    fi
+    if plugin_exports_skill_name "$skill_name"; then
+      continue
+    fi
 
     skill_type_raw="$(extract_skill_type "$skill_path" | tr '\n' ' ' | sed -E 's/[[:space:]]+/ /g; s/^[[:space:]]+//; s/[[:space:]]+$//')"
     if [ -z "$skill_type_raw" ]; then
@@ -703,8 +766,6 @@ generate_skill_type_index() {
     fi
 
     skill_type="$(echo "$skill_type_raw" | tr '[:upper:]' '[:lower:]' | sed -E 's/[[:space:]-]+/_/g')"
-    skill_dir="$(dirname "$skill_path")"
-    skill_name="$(basename "$skill_dir")"
     category="$(dirname "$skill_dir" | sed 's|^\./||; s|^\.||')"
 
     case "$skill_type" in
@@ -886,6 +947,67 @@ sync_skill_path_file() {
   echo "[OK] Wrote skill path file: $target_file -> $rendered_dir"
 }
 
+# Keep home-level plugin source paths aligned with the canonical repo plugins.
+# Some plugin installers resolve marketplace relative paths (./plugins/<name>)
+# against $HOME, so this mirror prevents "path is not a directory" failures.
+sync_home_plugin_mirrors() {
+  local marketplace_file="$1"
+  local canonical_plugins_dir="$2"
+  local home_plugins_dir="$3"
+  local plugin_name=""
+  local source_dir=""
+  local target_dir=""
+
+  if [ ! -f "$marketplace_file" ]; then
+    echo "[WARN] Marketplace file missing: $marketplace_file (skipping home plugin mirrors)."
+    return 0
+  fi
+
+  mkdir -p "$home_plugins_dir"
+
+  while IFS= read -r plugin_name; do
+    [ -n "$plugin_name" ] || continue
+    source_dir="$canonical_plugins_dir/$plugin_name"
+    target_dir="$home_plugins_dir/$plugin_name"
+
+    if [ ! -d "$source_dir" ]; then
+      echo "[WARN] Plugin listed in marketplace but missing in canonical dir: $source_dir"
+      continue
+    fi
+
+    if [ -L "$target_dir" ]; then
+      if ln -sfn "$source_dir" "$target_dir"; then
+        echo "[OK] Updated home plugin symlink: $target_dir -> $source_dir"
+      else
+        echo "[WARN] Unable to update home plugin symlink $target_dir -> $source_dir"
+      fi
+    elif [ -e "$target_dir" ]; then
+      echo "[WARN] $target_dir exists as a non-symlink; leaving it untouched."
+      echo "       Move/remove it to allow canonical mirror linking."
+    else
+      if ln -s "$source_dir" "$target_dir"; then
+        echo "[OK] Created home plugin symlink: $target_dir -> $source_dir"
+      else
+        echo "[WARN] Unable to create home plugin symlink $target_dir -> $source_dir"
+      fi
+    fi
+  done < <(
+    python3 - "$marketplace_file" <<'PY'
+import json
+import sys
+
+path = sys.argv[1]
+with open(path, "r", encoding="utf-8") as fh:
+    data = json.load(fh)
+
+for plugin in data.get("plugins", []):
+    name = plugin.get("name")
+    if isinstance(name, str) and name.strip():
+        print(name.strip())
+PY
+  )
+}
+
 # Sync to Claude Code, OpenAI Codex/Agents, and Gemini loaders.
 sync_user_skills "$skills_dir" "$repo_root/skills" 1
 sync_user_skills "$plugins_dir" "$repo_root/.agents/plugins" 1
@@ -899,6 +1021,7 @@ sync_user_skills "$plugins_dir" "$HOME/.codex/plugins" 1
 sync_user_skills "$antigravity_skills_dir" "$HOME/.gemini/antigravity/skills" 1 copy
 sync_user_skills "$antigravity_skills_dir" "$HOME/.antigravity/skills"
 sync_skill_path_file "$antigravity_skills_dir" "$antigravity_skills_txt"
+sync_home_plugin_mirrors "$plugins_dir/marketplace.json" "$plugins_dir" "$HOME/plugins"
 
 chmod +x "$repo_root/scripts/sync_skills.sh"
 

@@ -105,7 +105,7 @@ def build_antigravity_config(codex_config):
     wrapper = (
         "set -a; "
         "[ -f ~/.codex/.env ] && . ~/.codex/.env >/dev/null 2>&1; "
-        "[ -f ~/dev/config/.env ] && . ~/dev/config/.env >/dev/null 2>&1; "
+        "[ -f ~/dev/configs/.env ] && . ~/dev/configs/.env >/dev/null 2>&1; "
         "set +a; "
         'export PATH="/opt/homebrew/bin:/usr/local/bin:$HOME/.local/share/mise/shims:$PATH"'
     )
@@ -199,7 +199,7 @@ def sync_mcp(repo_root: Path, dry_run: bool = False) -> CallResult:
         result.errors.append(ErrorObject(
             code="ERR_DEPENDENCY",
             message="tomli/tomllib not available and no python3.11+/python3.12 fallback found.",
-            fix_suggestion="Install tomli (`python3 -m pip install --user tomli`) or install Python 3.11+"
+            fix_suggestion="Install tomli (`uv pip install tomli`) or install Python 3.11+"
         ))
         return result
 

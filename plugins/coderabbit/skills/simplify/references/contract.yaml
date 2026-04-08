@@ -1,0 +1,33 @@
+schema_version: "1.1"
+purpose: >
+  Define the simplify-stage contract for post-change cleanup so changed code is reviewed
+  for reuse, quality, and efficiency, then updated with behavior-preserving fixes.
+triggers:
+  - user asks to simplify or clean up changed files before merge
+  - user asks for a refactor polish pass on an existing diff
+  - user asks for duplication, quality, and efficiency improvements without feature expansion
+inputs:
+  - unified diff context from git diff or git diff HEAD
+  - changed file paths and nearby code context
+  - optional additional focus areas from the user
+outputs:
+  - grouped findings for reuse, quality, and efficiency
+  - applied fixes with file-level traceability
+  - skipped findings with concise reason
+  - final summary confirming fixed items or already-clean status
+non_goals:
+  - introducing new product features unrelated to current diffs
+  - broad architecture rewrites outside changed scope
+  - speculative optimization with no concrete signal
+risks:
+  - behavior drift from aggressive refactors
+  - false positives from static-only review
+  - cleanup churn that harms readability
+rollback_procedure: >
+  If simplify edits introduce regressions, revert only the simplify-touched files from git,
+  re-run targeted validations, and reapply fixes incrementally in smaller batches. Keep the
+  original diff snapshot and findings list so skipped or reverted fixes remain traceable.
+observability: >
+  Track simplify runs by recording: diff source used (staged vs unstaged), number of findings
+  per review lane (reuse, quality, efficiency), number of applied vs skipped fixes, and whether
+  post-fix validation passed. Spikes in reverted fixes indicate over-aggressive cleanup criteria.

@@ -1,1 +1,4 @@
-Catalog check complete. assets=136 healthy=136 degraded=0 blocked=0 duplicates=0
+Lifecycle readiness findings:
+- plugins/skill-factory/skills/skill-builder/SKILL.md [packaged_skill] -> blocked
+  - representation_split_brain: packaged skill has no canonical source skill for inheritance
+Catalog check complete. assets=143 healthy=142 degraded=0 blocked=1 duplicates=0

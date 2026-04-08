@@ -345,7 +345,6 @@ IMPORTANT: Outputs should vary based on spec mode, risk, system complexity, and 
 ## See Also
 | Skill | When to use together |
 |---|---|
-| [[compound-engineering-router]] | Use to choose the correct compound-engineering stage before or after specification |
 | [[ce-ideate]] | Use when ranked improvement directions are needed before specification |
 | [[ce-brainstorm]] | Use first when the work still needs WHAT and WHY clarification |
 | [[ce-deepen-spec]] | Use when an existing spec lacks rigor, edge cases, or operational detail |

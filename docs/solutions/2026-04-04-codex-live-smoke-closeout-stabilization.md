@@ -68,7 +68,7 @@ The durable closeout pattern for future work is:
 - Clarification-contract fix for ambiguous standalone-skill versus plugin prompts:
   [SKILL.md](/Users/jamiecraik/dev/agent-skills/utilities/skill-builder/SKILL.md)
 - Authenticated Codex-home rule-pack repair:
-  [automation.rules](/Users/jamiecraik/dev/config/codex/rules/automation.rules)
+  [automation.rules](/Users/jamiecraik/dev/configs/codex/rules/automation.rules)
 
 Validated on 2026-04-04 with:
 - `python3 utilities/skill-builder/scripts/run_skill_evals.py utilities/skill-builder --eval-mode smoke --runner codex --case builder-round-metadata-contract`

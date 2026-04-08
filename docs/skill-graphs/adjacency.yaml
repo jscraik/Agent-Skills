@@ -44,7 +44,6 @@ agentation:
 agents-md:
   codex-agent-creator: Create agent roles that AGENTS.md will reference
   codex-home-audit: Audit the full Codex home dir after AGENTS.md refactors
-  compound-engineering-router: Route compound workflows referenced in AGENTS.md
   docs-expert: Apply docs polish and community-health guidance to AGENTS.md
   skill-builder: Build new skills that will be registered in AGENTS.md
 alignment-checkpoint:
@@ -120,16 +119,11 @@ ce-brainstorm:
   ce-plan: Hand off low-risk, well-resolved brainstorm outputs into implementation
     planning
   ce-spec: Hand off medium or high-risk brainstorm outputs into a durable spec
-  compound-engineering-router: Use to choose the right compound-engineering stage
-    before or after brainstorming
 ce-compound:
   ce-brainstorm: WHAT/WHY clarity first
-  ce-ideate: Ranked ideas before brainstorming
   ce-plan: Implementation planning
   ce-review: Merge/readiness review
-  ce-tdd: Test-first execution posture
   ce-work: Ready for execution
-  compound-engineering-router: Route selection before entering a stage
 ce-compound-refresh:
   ce-compound: Capture new issues before/after refresh
   ce-review: Validate implementation readiness
@@ -138,13 +132,10 @@ ce-deepen-plan:
   ce-plan: Use before deepening when the plan does not yet exist
   ce-spec: Use when deepening reveals that the plan is blocked by missing contract-level
     decisions
-  compound-engineering-router: Use to route into or out of the deepening stage
 ce-deepen-spec:
   ce-deepen-plan: Strengthen the implementation plan after the spec contract is solid
   ce-spec: Draft or tighten the base compound-engineering spec before a deepening
     pass
-  compound-engineering-router: Route into the correct CE stage when the next step
-    is still unclear
   product-spec: Use the broader planning-spec pipeline instead of the narrower CE
     contract path
 ce-ideate:
@@ -156,7 +147,6 @@ ce-ideate:
     enough to plan
 ce-plan:
   ce-brainstorm: Clarify WHAT/WHY
-  compound-engineering-router: Choose CE stage
   linear: Issue creation
   product-spec: Product contract
 ce-reliability-review:
@@ -179,8 +169,6 @@ ce-spec:
   ce-plan: Use after spec completion when the contract is ready for execution sequencing
   ce-tdd: Use when the spec declares test-first execution posture
   ce-technical-review: Use for engineering critique of the spec before planning
-  compound-engineering-router: Use to choose the correct compound-engineering stage
-    before or after specification
 ce-tdd:
   ce-plan: 'ce-plan specifies TDD posture via `Execution note: test-first`'
   ce-work: ce-tdd is the test-first execution posture inside ce-work
@@ -282,12 +270,6 @@ coding-harness:
     applying fixes
   verification-before-completion: Add a stronger final verification pass before claiming
     a repo change is complete
-compound-engineering-router:
-  architecture-interview: Route architecture decisions through the structured interview
-  brainstorming: Start with brainstorming before routing to a compound workflow
-  ce-plan: Generate the implementation plan the compound mode targets
-  product-spec: Produce a spec before routing to the work or review mode
-  skill-builder: Build skills that compound workflows will invoke
 context7:
   backend-engineer: Use Context7 to check API docs during backend work
   mcp-builder: Reference Context7 docs when building MCP tool schemas
@@ -302,8 +284,7 @@ create-auth:
 decide-build-primitive:
   codex-automation-architect: Use after `AGENT_AUTOMATION` decision to design the
     automation contract
-  compound-engineering-router: Use when the capability spans multiple workflow types
-    and routing is unclear
+  ce-plan: Use when the capability is CE-scoped and needs concrete stage planning
   plugin-builder: Use after `SKILL` decision when the skill needs plugin packaging
     for distribution
   skill-builder: Use after `SKILL` decision is made to scaffold and quality-gate the
@@ -432,7 +413,6 @@ interview-me:
 linear:
   alignment-checkpoint: Gate Linear issue creation behind intent alignment
   ce-plan: Convert Linear issues into sequenced implementation plans
-  compound-engineering-router: Route compound work captured as Linear issues
   gh-workflow: Link Linear issues to GitHub PRs during delivery
   simple-tasks: Use for lightweight local task tracking between Linear syncs
 markdown-converter:
@@ -453,8 +433,6 @@ nano-banana-builder:
   mcp-builder: Expose Nano Banana generation as MCP tools
   sora: Follow image generation with AI video for richer content
 notebooklm:
-  compound-engineering-router: Use NotebookLM evidence to inform compound workflow
-    routing
   insight-report: Feed session insights into NotebookLM for deeper analysis
   markdown-converter: Convert docs to markdown before uploading to NotebookLM
   video-transcript-downloader: Download transcripts to feed as NotebookLM sources
@@ -468,12 +446,7 @@ og-image-creator:
   favicon-generator: Generate OG images and favicons as a complete brand suite
   fixing-metadata: Wire generated OG images into correct meta tags
   imagegen: Use imagegen for non-route-specific image generation
-openai-docs:
-  chatgpt-apps: Implement or troubleshoot Apps SDK projects after the relevant OpenAI
-    docs are retrieved
-  coding-harness: Check current harness guidance when OpenAI tooling questions are
-    part of a repo bootstrap or upgrade workflow
-  context7: Retrieve current third-party library docs when the question is not OpenAI-specific
+openai-docs: {}
 orchestrating-subagents:
   ce-work: Execute a plan once the orchestration decision is made and the task is
     implementation-ready
@@ -494,9 +467,9 @@ plugin-builder:
     + rollback controls
   skill-builder: Harden standalone skills before plugin packaging
 plugin-creator:
-  cli-spec: Consult the technical contract for the ask CLI
   plugin-builder: Promote scaffold into a full plugin package with governance checks
-  skill-builder: Improve bundled skill quality before plugin release
+  plugin-installer: Install and verify plugin packages after creation and hardening
+  skill-creator: Build standalone skills that may later be bundled into a plugin
 plugin-installer:
   plugin-builder: Harden/convert plugin packages before distribution install
   plugin-creator: Scaffold a local plugin package before hardening or install
@@ -572,7 +545,6 @@ remotion:
 repoprompt:
   agents-md: Use Repo Prompt context packs alongside AGENTS.md
   ce-plan: Ground implementation plans with Repo Prompt context
-  compound-engineering-router: Feed repo context into compound engineering workflows
   context7: Combine with Context7 for richer library context in prompts
 reproduce-bug:
   gh-workflow: Follow up on GitHub issues or PR state after the bug is understood
@@ -634,14 +606,11 @@ skill-builder:
   skill-installer: Install, import, or repair runtime visibility when the skill package
     is already valid and the remaining work is distribution
 skill-creator:
-  cli-spec: Consult the technical contract for the ask CLI
+  plugin-creator: Package finished skills into a plugin distribution scaffold
   skill-builder: Lifecycle hardening, comparative eval rounds, and release-quality
     contract upgrades
   skill-installer: Installing already-valid skills into Codex environments
-skill-installer:
-  plugin-builder: Package a validated skill as a plugin deliverable
-  skill-builder: Harden and validate an existing skill before install/distribution
-  skill-creator: Author or complete a starter skill before installation
+skill-installer: {}
 slides:
   beautiful-mermaid: Embed high-quality Mermaid diagrams in slide decks
   imagegen: Generate illustrative images for slide backgrounds

@@ -5,7 +5,7 @@ The HTML report structure and content sections.
 ## File Location
 
 ```
-file://$HOME/dev/config/codex/usage-data/report.html
+file://$HOME/dev/configs/codex/usage-data/report.html
 ```
 
 Also saved with timestamp: `~/.codex/usage-data/report-{YYYY-MM-DD}.html`

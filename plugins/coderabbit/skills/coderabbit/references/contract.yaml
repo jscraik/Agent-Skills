@@ -1,0 +1,52 @@
+schema_version: 1
+name: coderabbit
+purpose: Provide retrieval-first CodeRabbit guidance from local crawl artifacts for configuration, commands, CLI, integrations, and workflow decisions.
+triggers:
+  - User asks for CodeRabbit setup or configuration guidance.
+  - User asks for CodeRabbit PR commands or workflow behavior.
+  - User asks for CodeRabbit CLI usage or integration details.
+  - User asks for feature comparison across CodeRabbit capabilities such as Autofix, Simplify, or reporting.
+inputs:
+  - name: goal
+    type: string
+    description: Desired outcome such as snippet, explanation, troubleshooting, or migration guidance.
+  - name: topic
+    type: enum
+    values: [configuration, commands, cli, integrations, tools, planner, reporting, troubleshooting]
+    description: Requested CodeRabbit topic area.
+  - name: platform
+    type: enum
+    values: [github, gitlab, bitbucket, azure_devops, self_hosted, unknown]
+    description: Hosting platform for platform-specific guidance.
+  - name: target_file
+    type: string
+    description: Optional repository file path for implementation snippets, for example .coderabbit.yaml.
+  - name: constraints
+    type: array
+    description: Optional policy or rollout constraints from the user.
+outputs:
+  - name: recommendation
+    type: string
+    description: Actionable response grounded in local corpus evidence.
+  - name: evidence
+    type: array
+    description: Referenced corpus paths supporting the recommendation.
+  - name: snippet
+    type: string
+    description: Optional copy-ready snippet for config or command usage.
+  - name: risk_note
+    type: string
+    description: Notes about stale docs or assumptions when live verification is unavailable.
+success_criteria:
+  - Every non-trivial recommendation is backed by local corpus files.
+  - Platform-specific guidance is correctly scoped.
+  - Structured outputs include schema_version when requested.
+  - Out-of-scope requests are routed without forcing this skill.
+non_goals:
+  - Live account introspection or mutation in CodeRabbit SaaS.
+  - Generic CI/CD migration not centered on CodeRabbit.
+  - Cloudflare crawl orchestration itself.
+risks:
+  - Corpus staleness relative to current vendor docs.
+  - Over-broad recommendations when topic or platform is ambiguous.
+  - Conflicts between repo policy and vendor examples.

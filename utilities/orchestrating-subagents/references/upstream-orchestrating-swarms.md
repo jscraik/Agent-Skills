@@ -56,7 +56,7 @@ Keep:
 - synthesize centrally
 
 Translate to Codex:
-- use `explorer`, `reviewer`, `framework-docs-researcher`, and narrower installed specialists
+- use `explorer`, `correctness-reviewer`, `framework-docs-researcher`, and narrower installed specialists
 - wait on subagents from the parent thread
 - integrate findings before returning
 

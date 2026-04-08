@@ -22,6 +22,7 @@ Index for repository automation, validation, and maintenance scripts.
 - `lint_skill_types.sh`
 - `validate_skill_authoring_family.sh`
 - `validate_skill_authoring_family_benchmarks.py`
+- `check_plugin_skill_shadowing.sh`
 - `verify_skill_catalog_freshness.py`
 - `verify_recursive_skill_graph_artifacts.py`
 

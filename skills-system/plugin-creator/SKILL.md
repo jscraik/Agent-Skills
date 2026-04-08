@@ -5,6 +5,31 @@ description: Create and scaffold plugin directories for Codex with a required `.
 
 # Plugin Creator
 
+## Core Philosophy
+
+- Create the smallest viable plugin package first, then expand only where the user asks.
+- Keep discovery and install behavior predictable: canonical paths, canonical manifest shape, explicit defaults.
+- Bias toward safe scaffolding over opinionated completion; placeholders are intentional and easier to review.
+
+## Anti-Patterns to Avoid
+
+- Do not generate plugin files without the required `.codex-plugin/plugin.json`.
+- Do not write marketplace entries with missing `policy.installation`, `policy.authentication`, or `category`.
+- Do not assume repo-local versus home-local targets when the request is ambiguous.
+- Do not reorder existing marketplace plugin entries unless explicitly requested.
+
+## Scope Guardrails
+
+- First pass should stay focused on 2-3 surfaces: scaffold, manifest placeholders, and optional marketplace entry.
+- Add optional folders (`skills/`, `hooks/`, `scripts/`, `assets/`, `.mcp.json`, `.app.json`) only when requested.
+- Treat policy product gating as out of scope by default unless the user explicitly asks for `policy.products`.
+
+## Encouraging Variation
+
+- Adapt scaffolding detail to context: repo plugin, home-local plugin, or migration patch.
+- Keep the canonical contract unchanged while varying examples, command shape, and guidance depth.
+- Avoid one-size-fits-all responses when the user requests partial scaffolds or path-specific behavior.
+
 ## Quick Start
 
 1. Run the scaffold script:
@@ -158,3 +183,18 @@ After editing `SKILL.md`, run:
 ```bash
 python3 <path-to-skill-creator>/scripts/quick_validate.py .agents/skills/plugin-creator
 ```
+
+Fail-fast rule:
+
+- Stop at the first failed validation check and do not continue packaging or marketplace edits until the failure is fixed.
+- If quick validation fails, report the exact failing command output and rerun validation only after applying a targeted fix.
+
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[plugin-builder]] | Harden scaffolded plugins before distribution, conversion, or release |
+| [[plugin-installer]] | Install and verify plugin packages after creation and hardening |
+| [[skill-creator]] | Build standalone skills that may later be bundled into a plugin |
+
+**Topic map:** [[agent-ops]]

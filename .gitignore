@@ -38,6 +38,30 @@ utilities/codex-plugin-builder/fixtures/arscontexta-codex/skills/*
 !utilities/codex-plugin-builder/fixtures/arscontexta-codex/skills/arscontexta/
 utilities/codex-plugin-builder/fixtures/arscontexta-codex/skills/arscontexta/*
 !utilities/codex-plugin-builder/fixtures/arscontexta-codex/skills/arscontexta/SKILL.md
+# Keep coderabbit plugin skills tracked despite global skills/ ignore.
+!plugins/coderabbit/skills/
+plugins/coderabbit/skills/*
+!plugins/coderabbit/skills/autofix/
+!plugins/coderabbit/skills/code-review/
+!plugins/coderabbit/skills/coderabbit/
+!plugins/coderabbit/skills/simplify/
+!plugins/coderabbit/skills/autofix/**
+!plugins/coderabbit/skills/code-review/**
+!plugins/coderabbit/skills/coderabbit/**
+!plugins/coderabbit/skills/simplify/**
+# Keep skill-factory plugin skills tracked despite global skills/ ignore.
+!plugins/skill-factory/skills/
+plugins/skill-factory/skills/*
+!plugins/skill-factory/skills/skill-builder/
+!plugins/skill-factory/skills/skill-creator/
+!plugins/skill-factory/skills/skill-installer/
+!plugins/skill-factory/skills/skill-builder/**
+!plugins/skill-factory/skills/skill-creator/**
+!plugins/skill-factory/skills/skill-installer/**
+# Keep generated/runtime debris ignored inside tracked skill-factory skills.
+plugins/skill-factory/skills/**/.DS_Store
+plugins/skill-factory/skills/**/__pycache__/
+plugins/skill-factory/skills/skill-builder/artifacts/
 skills-antigravity/
 sync-symlink/
 

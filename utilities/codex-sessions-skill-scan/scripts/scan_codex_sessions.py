@@ -667,8 +667,8 @@ def render_report(
         _md_list(
             [
                 "If you see paths like `design/product-spec/...`: replace with `product/specs/product-spec/...`.",
-                "If validation scripts fail with `ModuleNotFoundError: yaml`: run them with `~/.venvs/pyyaml/bin/python`.",
-                "If errors show `python: command not found`: prefer explicit interpreters (`python3` for stdlib scripts; `~/.venvs/pyyaml/bin/python` for skill gates).",
+                "If validation scripts fail with `ModuleNotFoundError: yaml`: run them with `uv run --python 3.12 --with pyyaml --with jsonschema python ...`.",
+                "If errors show `python: command not found`: prefer explicit launchers (`mise exec -- uv run --python 3.12 python ...` for repo scripts).",
                 "If `~` is not expanding in a tool config: replace with an absolute path (e.g. `/home/<user>/...`).",
             ]
         )

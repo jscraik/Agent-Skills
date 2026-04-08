@@ -18,7 +18,7 @@
 ## 2026-03-01 18:03 UTC
 
 **State:** Inbox: 0 | Notes: 0 | Orphans: 0 | Dangling: 0 | Stale: 0 | Obs: 0 | Tensions: 0 | Queue: 0 | Sessions: 527 | Goals: missing
-**Recommended:** Create /Users/jamiecraik/dev/config/vaults/arscontexta/ops/goals.md
+**Recommended:** Create /Users/jamiecraik/dev/configs/vaults/arscontexta/ops/goals.md
 **Rationale:** The prior two /next runs already recommended /remember --mine-sessions; to avoid recommendation loop and improve alignment quality, define explicit goals first so subsequent automation can prioritize which session backlog to mine first.
 **Priority:** session
 
@@ -32,7 +32,7 @@
 ## 2026-03-04 18:02 UTC
 
 **State:** Inbox: 0 | Notes: 1 | Obs: 0 | Tensions: 0 | Queue: 0 | Sessions(unmined): 1 (current.json) | Health: 1 FAIL (Link Health), 1 WARN (Schema)
-**Recommended:** Fix the dangling link flagged in /Users/jamiecraik/dev/config/vaults/arscontexta/ops/observations/session-archives-are-metadata-only-need-transcript-capture.md (line 19)
+**Recommended:** Fix the dangling link flagged in /Users/jamiecraik/dev/configs/vaults/arscontexta/ops/observations/session-archives-are-metadata-only-need-transcript-capture.md (line 19)
 **Rationale:** Link-health failures are session-priority because broken traversal paths reduce retrieval reliability immediately; clearing this blocker keeps the first note+observation chain trustworthy before additional capture work.
 **Priority:** session
 

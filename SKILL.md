@@ -24,10 +24,9 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - [Product — Strategy](#product-strategy)
 - [Skills System](#skills-system)
 - [Utilities](#utilities)
-- [Utilities — Codex Plugin Builder — Fixtures — Arscontexta Codex — Skills](#utilities-codex-plugin-builder-fixtures-arscontexta-codex-skills)
 
 ## Summary
-- `total_skills`: 125
+- `total_skills`: 123
 - `catalog_source`: repository skill scan
 
 ## Catalog
@@ -124,18 +123,18 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - `ce-brainstorm` — Run the compound-engineering brainstorm stage to clarify WHAT to build, compare viable directions, and capture a right-sized requirements document before spec, planning, or lightweight direct work. Use when the user wants CE-stage exploration, is unsure about scope or direction, or needs help deciding whether a spec is required.
 - `ce-compound` — Analyze compound-engineering artifact state and capture verified solved problems into durable `docs/solutions/` knowledge, including refreshing an existing solution doc instead of creating a duplicate when the same problem is solved again. Use when the user needs a CE request started or resumed from the right place, or wants a fresh fix turned into reusable team knowledge.
 - `ce-compound-refresh` — Review and refresh stale `docs/solutions/` learnings and pattern docs against the current codebase, including overlap consolidation when multiple docs now cover the same ground after refactors, migrations, or dependency upgrades.
-- `ce-deepen-plan` — Deepen an existing implementation plan or review pass so sequencing, verification, and risk treatment are solid before execution. Use when the user wants a second-pass plan hardening step, not first-pass planning.
+- `ce-deepen-plan` — Deepen an existing implementation plan so sequencing, verification, and risk treatment are strong enough for execution. Use when the user wants CE-stage plan hardening before ce-work.
 - `ce-deepen-spec` — Deepen an existing system or UI spec so boundaries, lifecycle rules, failure handling, and validation are strong enough for planning. Use when the user wants CE-stage spec hardening or a requirements review pass before planning.
 - `ce-ideate` — Generate and rank grounded improvement ideas for the current project before committing to one direction. Use when the user wants CE-stage idea generation before brainstorming in depth, not a general product brainstorm.
 - `ce-plan` — Own the compound-engineering planning stage by turning a spec, brainstorm, bug report, or feature description into an execution-ready implementation plan. Use when the user wants either the CE planning stage or canonical generic multi-step implementation planning.
-- `ce-review` — Review PRs, branches, diffs, and workflow artifacts for package-level go/no-go readiness when users ask for broad synthesis instead of findings-first technical critique.
+- `ce-reliability-review` — Review services, APIs, and multi-component systems for reliability risks including failure modes, cascading failures, resilience gaps, and SLO readiness. Use when the work involves new services, significant service changes, multiple external dependencies, or high blast-radius failure scenarios.
+- `ce-review` — Review PRs, branches, diffs, and workflow artifacts for package-level go/no-go readiness with severity-ranked synthesis. Use when users need readiness synthesis rather than detailed technical-risk critique.
 - `ce-spec` — Own the compound-engineering spec stage by turning a brainstorm, existing spec, UI source, or feature description into an implementation-grade contract. Use when the user wants the CE WHAT-before-planning artifact, not a broader product-planning pipeline.
-- `ce-technical-review` — Run a findings-first technical review on a diff, PR, branch, file set, spec, or plan. Use when the user wants severity-ranked engineering issues with exact locations, not broad readiness synthesis.
+- `ce-tdd` — Build behavior-safe code changes with TDD and RED/GREEN evidence. Use when ce-plan or ce-work requires TDD for a concrete behavior target.
+- `ce-technical-review` — Review a diff, PR, branch, file set, spec, or plan to produce severity-ranked engineering issues with exact locations. Use when the user needs technical risk findings rather than broad readiness synthesis.
 - `ce-work` — Execute a plan, todo list, or tightly scoped spec with traceable progress, validation, contract-drift control, UI execution gates, and optional external delegation. Use when the user wants compound-engineering work implemented, not just planned.
-- `compound-engineering-router` — Route compound-engineering requests to the correct CE stage or support meta-mode. Use when the user wants CE ideation, spec, planning, work, review, compound learning, or context compaction and the right stage is not yet explicit.
 - `decide-build-primitive` — Use this skill to analyze whether a capability should become a Skill, Custom Prompt, or Agent automation when the user is packaging or automating a workflow and the right Codex primitive is not yet clear.
 - `fallback-release` — Execute deterministic fallback releases when primary CI is unavailable. Use when GitHub Actions is stalled due to queue congestion, rate limits, or incidents, and critical releases cannot wait.
-- `linear` — Manage Linear issues, projects, and docs through the Linear MCP workflow with consistent read/create/update operations. Use when a user asks to triage, create, update, or report on Linear work items.
 - `production-deployment` — Deploy and manage production services across various platforms with automated verification and rollback safety.
 - `release` — Cut a clean semver release from the main branch using the repo's release flow. Use when the user wants a tagged Cargo release, not generic deployment or changelog drafting.
 - `resolve-todo-parallel` — Resolve file-based `todos/` items in bounded parallel with dependency ordering and cleanup. Use when the todo sweep itself is the job to coordinate, not generic implementation work.
@@ -165,8 +164,7 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 
 - `openai-docs` — Use when the user asks how to build with OpenAI products or APIs and needs up-to-date official documentation with citations, help choosing the latest model for a use case, or explicit GPT-5.4 upgrade and prompt-upgrade guidance; prioritize OpenAI docs MCP tools, use bundled references only as helper context, and restrict any fallback browsing to official OpenAI domains.
 - `plugin-creator` — Create and scaffold plugin directories for Codex with a required `.codex-plugin/plugin.json`, optional plugin folders/files, and baseline placeholders you can edit before publishing or testing. Use when Codex needs to create a new local plugin, add optional plugin structure, or generate or update repo-root `.agents/plugins/marketplace.json` entries for plugin ordering and availability metadata.
-- `skill-creator` — Create or update a skill
-- `skill-installer` — Install curated skills from openai/skills or other repos
+- `plugin-installer` — Install validated plugins with provenance and rollback safety
 
 ## Utilities
 
@@ -180,12 +178,11 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - `cf-crawl` — Crawl sites through Cloudflare Browser Rendering's `/crawl` API and export markdown or JSON results. Use when the user wants a Cloudflare-managed crawl job, not generic browser automation or scraping.
 - `circleci` — Plan, migrate, debug, or harden CircleCI pipelines and related delivery workflows. Use when the user wants CircleCI-specific config, testing, deployment, secrets, or policy help, not generic CI advice.
 - `claude-alias` — Diagnose, repair, and harden Claude wrapper alias routing (`ck`, `cz`, `cc`) when provider configs drift or auth/model conflicts return the wrong backend.
-- `coderabbit` — Answer CodeRabbit setup, configuration, knowledge-base, review-command, tool, and rollout questions by retrieving evidence from the local crawl corpus. Use when a user needs repository-local CodeRabbit documentation to decide how to configure, operate, or troubleshoot CodeRabbit, not when they need generic CI authoring or live SaaS state changes.
 - `codex-agent-creator` — Create, install, and validate Codex custom subagents as standalone `.codex/agents/*.toml` files with safe minimal-change updates. Use when the user wants custom agent definitions created or upgraded, not orchestration of running agent threads.
 - `codex-automation-architect` — Design, review, or merge Codex app automations using current OpenAI/Codex guidance and validation. Use when the user wants recurring Codex automation workflows built, audited, or consolidated.
 - `codex-home-audit` — Audit a Codex home directory for control-plane drift, risky state, and cleanup opportunities across config, agents, hooks, skills, plugins, and telemetry. Use when the user wants a dated Codex home health review.
 - `codex-hooks-builder` — Create, upgrade, or audit Codex hook packs for repo-local or user-level `.codex` installs. Use when the user wants hook runtime files or hook-script hardening, not general agent role creation.
-- `codex-plugin-builder` — Create, convert, or validate Codex plugin packages that bundle skills, hooks, agents, and MCP metadata. Use when the deliverable is clearly a plugin package, not when standalone skill lifecycle hardening or generic app work is still the main job.
+- `codex-plugin-builder` — Compatibility alias for `plugin-builder`. Use when legacy prompts reference `codex-plugin-builder`; this skill immediately routes work to `plugin-builder` without changing package behavior.
 - `codex-sessions-skill-scan` — Scan Codex session history for skill failures, usage patterns, and coverage gaps. Use when the user wants daily skill-health monitoring or evidence-backed recommendations about installing, improving, merging, or pruning skills.
 - `coding-harness` — Use when a repository needs `@brainwav/coding-harness` installed, bootstrapped, updated, audited, or explained. Covers `harness init`, harness-managed CI migration, governance checks, and Codex environment action-sync guidance. Do not use for unrelated coding, general deployment, or broad cloud work.
 - `diagram-cli` — Generate, validate, and refresh @brainwav/diagram architecture artifacts and context packs. Use when the user wants repository architecture diagrams for onboarding, PR impact, or CI drift checks, not hand-drawn product mock diagrams.
@@ -195,13 +192,13 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - `markdown-converter` — Convert source files into Markdown outputs using the bundled converter workflow. Use when a user asks to transform documents, notes, or technical files into clean Markdown format.
 - `notebooklm` — Analyze NotebookLM workflows for notebook management, question answering, and audio or video overviews. Use when the user wants NotebookLM actions from this environment, not general browsing or note writing.
 - `orchestrating-subagents` — Plan and run Codex subagent workflows using installed roles and Codex-native delegation tools. Use when the user explicitly wants subagents, parallel delegation, or swarm-style orchestration, not ordinary single-agent work or role creation.
+- `plugin-builder` — Harden, convert, and validate Codex plugin packages that bundle skills, hooks, agents, and MCP metadata. Use when the deliverable is clearly a plugin package and needs contract-grade safety checks, not when standalone skill lifecycle hardening is still unresolved.
 - `process-watch` — Analyze system processes and resource usage to diagnose runaway CPU/memory/IO, identify culprits, and propose next diagnostic steps. Use when investigating performance spikes or leaks.
 - `rclone` — Upload, sync, verify, or inspect files in remote storage with rclone. Use when the user wants S3, R2, B2, Google Drive, Dropbox, or similar remote file operations, not local file moves or app deployment.
 - `recon-workbench` — Run authorized, evidence-backed Recon Workbench (rwb) workflows (doctor/authorize/plan/run/summarize/manifest/validate/reconcile) and produce evidence-cited findings. Use when interrogating macOS/iOS, web/React, or OSS targets under explicit scope/permission.
 - `repoprompt` — Plan and troubleshoot Repo Prompt integration across editors, agents, MCP, and CLI workflows. Use when the user wants Repo Prompt configured, adopted, or compared inside an AI coding setup.
 - `reproduce-bug` — Reproduce or investigate a bug from a Linear issue or GitHub issue, preserving tracker context, symptoms, and repro steps. Use when the user wants issue-driven debugging rather than a freeform root-cause review.
 - `simple-tasks` — Install a lightweight local task workflow backed by `tasks/TASKS.md` and `scripts/task.sh`. Use when the user wants simple in-repo task coordination, not team issue-tracker management.
-- `skill-builder` — Improve and validate Codex skill quality using automated audits and comparative hardening loops. Use when hardening skill routing, workflows, and safety before release, or when packaging validated standalone skills for distribution, rather than for first-draft scaffolding or pure installation.
 - `slides` — Create, edit, validate, or debug PowerPoint-compatible slide decks with PptxGenJS and visual overflow checks. Use when the user wants `.pptx` work, not generic web UI design or prose editing.
 - `spreadsheet` — Create, edit, analyze, or format spreadsheets with formula-aware workflows and visual review. Use when the user wants `.xlsx`, `.csv`, or `.tsv` work, not plain text tables.
 - `systematic-debugging` — Diagnose production bugs, regressions, or failing checks from concrete evidence before code changes. Use when the user wants a safe root-cause analysis and fix plan, not immediate speculative implementation.
@@ -212,8 +209,3 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - `visual-explainer` — Generate self-contained HTML explainers for systems, diffs, plans, or data with clearer visual presentation than plain text. Use when the user wants a diagram or visual technical explainer, or when a large ASCII table would be hard to scan.
 - `writing-plans` — Compatibility wrapper for generic implementation planning. Use when the user asks for a general plan and route the work to `ce-plan` in `generic-plan` mode.
 - `xcode-makefiles` — Install strict Xcode Makefile tooling for iOS/macOS projects, including build/run/test scripts with AGENT_NAME-based per-agent isolation under build/. Use when a project needs reproducible local CLI builds without full app scaffolding.
-
-## Utilities — Codex Plugin Builder — Fixtures — Arscontexta Codex — Skills
-
-- `arscontexta` — Analyze Ars Contexta vault state in Codex and recommend setup, health, and next-command actions. Use this skill when users ask for Ars Contexta help, routing, or health triage.
-
