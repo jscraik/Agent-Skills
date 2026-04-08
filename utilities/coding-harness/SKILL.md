@@ -84,7 +84,7 @@ Produce only what the request needs, usually:
 
 3. Install or upgrade harness conservatively.
 - Do prefer `mise install -g npm:@brainwav/coding-harness` for consumer repos because it matches the current recommended global install posture.
-- Do prefer `pnpm exec tsx src/cli.ts --help` as command truth when working inside `/Users/jamiecraik/dev/coding-harness`, because a globally installed `harness` binary may lag behind source.
+- Do prefer `pnpm exec tsx src/cli.ts --help` as command truth when working inside `~/dev/coding-harness`, because a globally installed `harness` binary may lag behind source.
 - Do bootstrap with `harness init --dry-run` followed by `harness init` because the current CLI-safe path is preview-first.
 - Do treat existing harness-managed repos differently from fresh bootstrap: run `harness init --check-updates`, then `harness upgrade --dry-run`, then `harness upgrade` because that is the routine update lane now.
 - Do reserve `harness init --update` for re-scaffolding missing tracked baseline files because it is not the default upgrade path for mature installs.

@@ -1,9 +1,9 @@
 {
-  "schema_version": "2.1",
+  "schema_version": "2.2",
   "tool": "run_skill_evals",
   "generated_at": "2026-03-29T23:21:22Z",
   "skill": "design-system",
-  "skill_path": "/Users/jamiecraik/dev/agent-skills/frontend/ui/design-system",
+  "skill_path": "frontend/ui/design-system",
   "skill_release": {
     "name": "design-system",
     "version": "0.0.0+local",
@@ -13,7 +13,7 @@
     "source_commit": "4e49ba25e2b97f4b579e9fc3e67eacf568adcf4d",
     "source_branch": "main"
   },
-  "workspace_root": "/Users/jamiecraik/dev/agent-skills",
+  "workspace_root": ".",
   "runner_mode": "codex",
   "eval_mode": "release",
   "tier2_mode": "warn",
@@ -33,7 +33,7 @@
       "prepend_skill": true,
       "timeout_profile": "default",
       "timeout_sec": 60.0,
-      "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/01-explicit-trigger-token-audit",
+      "dir": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/01-explicit-trigger-token-audit",
       "runners": {
         "codex": {
           "runner": "codex",
@@ -45,15 +45,15 @@
           ],
           "tier2_findings": [],
           "warnings": [
-            "JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/01-explicit-trigger-token-audit/codex/codex_events.jsonl",
+            "JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/01-explicit-trigger-token-audit/codex/codex_events.jsonl",
             "should_trigger set, but skill selection signal was unavailable for this run."
           ],
           "artifacts": {
-            "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/01-explicit-trigger-token-audit/codex",
-            "final": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/01-explicit-trigger-token-audit/codex/final.txt",
-            "stdout": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/01-explicit-trigger-token-audit/codex/stdout.txt",
-            "stderr": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/01-explicit-trigger-token-audit/codex/stderr.txt",
-            "jsonl": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/01-explicit-trigger-token-audit/codex/codex_events.jsonl"
+            "dir": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/01-explicit-trigger-token-audit/codex",
+            "final": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/01-explicit-trigger-token-audit/codex/final.txt",
+            "stdout": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/01-explicit-trigger-token-audit/codex/stdout.txt",
+            "stderr": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/01-explicit-trigger-token-audit/codex/stderr.txt",
+            "jsonl": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/01-explicit-trigger-token-audit/codex/codex_events.jsonl"
           },
           "metrics": {
             "trace": {
@@ -85,7 +85,7 @@
       ],
       "tier2_findings": [],
       "warnings": [
-        "[codex] JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/01-explicit-trigger-token-audit/codex/codex_events.jsonl",
+        "[codex] JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/01-explicit-trigger-token-audit/codex/codex_events.jsonl",
         "[codex] should_trigger set, but skill selection signal was unavailable for this run."
       ]
     },
@@ -98,7 +98,7 @@
       "prepend_skill": false,
       "timeout_profile": "default",
       "timeout_sec": 60.0,
-      "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/02-implicit-trigger-iconography",
+      "dir": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/02-implicit-trigger-iconography",
       "runners": {
         "codex": {
           "runner": "codex",
@@ -110,15 +110,15 @@
           ],
           "tier2_findings": [],
           "warnings": [
-            "JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/02-implicit-trigger-iconography/codex/codex_events.jsonl",
+            "JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/02-implicit-trigger-iconography/codex/codex_events.jsonl",
             "should_trigger set, but skill selection signal was unavailable for this run."
           ],
           "artifacts": {
-            "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/02-implicit-trigger-iconography/codex",
-            "final": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/02-implicit-trigger-iconography/codex/final.txt",
-            "stdout": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/02-implicit-trigger-iconography/codex/stdout.txt",
-            "stderr": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/02-implicit-trigger-iconography/codex/stderr.txt",
-            "jsonl": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/02-implicit-trigger-iconography/codex/codex_events.jsonl"
+            "dir": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/02-implicit-trigger-iconography/codex",
+            "final": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/02-implicit-trigger-iconography/codex/final.txt",
+            "stdout": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/02-implicit-trigger-iconography/codex/stdout.txt",
+            "stderr": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/02-implicit-trigger-iconography/codex/stderr.txt",
+            "jsonl": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/02-implicit-trigger-iconography/codex/codex_events.jsonl"
           },
           "metrics": {
             "trace": {
@@ -150,7 +150,7 @@
       ],
       "tier2_findings": [],
       "warnings": [
-        "[codex] JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/02-implicit-trigger-iconography/codex/codex_events.jsonl",
+        "[codex] JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/02-implicit-trigger-iconography/codex/codex_events.jsonl",
         "[codex] should_trigger set, but skill selection signal was unavailable for this run."
       ]
     },
@@ -163,7 +163,7 @@
       "prepend_skill": false,
       "timeout_profile": "default",
       "timeout_sec": 60.0,
-      "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/03-contextual-trigger-theme-vars",
+      "dir": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/03-contextual-trigger-theme-vars",
       "runners": {
         "codex": {
           "runner": "codex",
@@ -175,15 +175,15 @@
           ],
           "tier2_findings": [],
           "warnings": [
-            "JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/03-contextual-trigger-theme-vars/codex/codex_events.jsonl",
+            "JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/03-contextual-trigger-theme-vars/codex/codex_events.jsonl",
             "should_trigger set, but skill selection signal was unavailable for this run."
           ],
           "artifacts": {
-            "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/03-contextual-trigger-theme-vars/codex",
-            "final": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/03-contextual-trigger-theme-vars/codex/final.txt",
-            "stdout": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/03-contextual-trigger-theme-vars/codex/stdout.txt",
-            "stderr": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/03-contextual-trigger-theme-vars/codex/stderr.txt",
-            "jsonl": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/03-contextual-trigger-theme-vars/codex/codex_events.jsonl"
+            "dir": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/03-contextual-trigger-theme-vars/codex",
+            "final": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/03-contextual-trigger-theme-vars/codex/final.txt",
+            "stdout": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/03-contextual-trigger-theme-vars/codex/stdout.txt",
+            "stderr": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/03-contextual-trigger-theme-vars/codex/stderr.txt",
+            "jsonl": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/03-contextual-trigger-theme-vars/codex/codex_events.jsonl"
           },
           "metrics": {
             "trace": {
@@ -215,7 +215,7 @@
       ],
       "tier2_findings": [],
       "warnings": [
-        "[codex] JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/03-contextual-trigger-theme-vars/codex/codex_events.jsonl",
+        "[codex] JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/03-contextual-trigger-theme-vars/codex/codex_events.jsonl",
         "[codex] should_trigger set, but skill selection signal was unavailable for this run."
       ]
     },
@@ -228,7 +228,7 @@
       "prepend_skill": false,
       "timeout_profile": "default",
       "timeout_sec": 60.0,
-      "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/04-trigger-guidance-ratchet",
+      "dir": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/04-trigger-guidance-ratchet",
       "runners": {
         "codex": {
           "runner": "codex",
@@ -240,15 +240,15 @@
           ],
           "tier2_findings": [],
           "warnings": [
-            "JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/04-trigger-guidance-ratchet/codex/codex_events.jsonl",
+            "JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/04-trigger-guidance-ratchet/codex/codex_events.jsonl",
             "should_trigger set, but skill selection signal was unavailable for this run."
           ],
           "artifacts": {
-            "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/04-trigger-guidance-ratchet/codex",
-            "final": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/04-trigger-guidance-ratchet/codex/final.txt",
-            "stdout": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/04-trigger-guidance-ratchet/codex/stdout.txt",
-            "stderr": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/04-trigger-guidance-ratchet/codex/stderr.txt",
-            "jsonl": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/04-trigger-guidance-ratchet/codex/codex_events.jsonl"
+            "dir": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/04-trigger-guidance-ratchet/codex",
+            "final": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/04-trigger-guidance-ratchet/codex/final.txt",
+            "stdout": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/04-trigger-guidance-ratchet/codex/stdout.txt",
+            "stderr": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/04-trigger-guidance-ratchet/codex/stderr.txt",
+            "jsonl": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/04-trigger-guidance-ratchet/codex/codex_events.jsonl"
           },
           "metrics": {
             "trace": {
@@ -280,7 +280,7 @@
       ],
       "tier2_findings": [],
       "warnings": [
-        "[codex] JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/04-trigger-guidance-ratchet/codex/codex_events.jsonl",
+        "[codex] JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/04-trigger-guidance-ratchet/codex/codex_events.jsonl",
         "[codex] should_trigger set, but skill selection signal was unavailable for this run."
       ]
     },
@@ -293,7 +293,7 @@
       "prepend_skill": false,
       "timeout_profile": "default",
       "timeout_sec": 60.0,
-      "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/05-trigger-professional-ui-contract",
+      "dir": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/05-trigger-professional-ui-contract",
       "runners": {
         "codex": {
           "runner": "codex",
@@ -305,15 +305,15 @@
           ],
           "tier2_findings": [],
           "warnings": [
-            "JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/05-trigger-professional-ui-contract/codex/codex_events.jsonl",
+            "JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/05-trigger-professional-ui-contract/codex/codex_events.jsonl",
             "should_trigger set, but skill selection signal was unavailable for this run."
           ],
           "artifacts": {
-            "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/05-trigger-professional-ui-contract/codex",
-            "final": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/05-trigger-professional-ui-contract/codex/final.txt",
-            "stdout": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/05-trigger-professional-ui-contract/codex/stdout.txt",
-            "stderr": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/05-trigger-professional-ui-contract/codex/stderr.txt",
-            "jsonl": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/05-trigger-professional-ui-contract/codex/codex_events.jsonl"
+            "dir": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/05-trigger-professional-ui-contract/codex",
+            "final": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/05-trigger-professional-ui-contract/codex/final.txt",
+            "stdout": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/05-trigger-professional-ui-contract/codex/stdout.txt",
+            "stderr": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/05-trigger-professional-ui-contract/codex/stderr.txt",
+            "jsonl": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/05-trigger-professional-ui-contract/codex/codex_events.jsonl"
           },
           "metrics": {
             "trace": {
@@ -345,7 +345,7 @@
       ],
       "tier2_findings": [],
       "warnings": [
-        "[codex] JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/05-trigger-professional-ui-contract/codex/codex_events.jsonl",
+        "[codex] JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/05-trigger-professional-ui-contract/codex/codex_events.jsonl",
         "[codex] should_trigger set, but skill selection signal was unavailable for this run."
       ]
     },
@@ -358,7 +358,7 @@
       "prepend_skill": false,
       "timeout_profile": "default",
       "timeout_sec": 60.0,
-      "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/06-trigger-storybook-surface-cleanup",
+      "dir": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/06-trigger-storybook-surface-cleanup",
       "runners": {
         "codex": {
           "runner": "codex",
@@ -370,15 +370,15 @@
           ],
           "tier2_findings": [],
           "warnings": [
-            "JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/06-trigger-storybook-surface-cleanup/codex/codex_events.jsonl",
+            "JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/06-trigger-storybook-surface-cleanup/codex/codex_events.jsonl",
             "should_trigger set, but skill selection signal was unavailable for this run."
           ],
           "artifacts": {
-            "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/06-trigger-storybook-surface-cleanup/codex",
-            "final": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/06-trigger-storybook-surface-cleanup/codex/final.txt",
-            "stdout": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/06-trigger-storybook-surface-cleanup/codex/stdout.txt",
-            "stderr": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/06-trigger-storybook-surface-cleanup/codex/stderr.txt",
-            "jsonl": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/06-trigger-storybook-surface-cleanup/codex/codex_events.jsonl"
+            "dir": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/06-trigger-storybook-surface-cleanup/codex",
+            "final": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/06-trigger-storybook-surface-cleanup/codex/final.txt",
+            "stdout": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/06-trigger-storybook-surface-cleanup/codex/stdout.txt",
+            "stderr": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/06-trigger-storybook-surface-cleanup/codex/stderr.txt",
+            "jsonl": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/06-trigger-storybook-surface-cleanup/codex/codex_events.jsonl"
           },
           "metrics": {
             "trace": {
@@ -410,7 +410,7 @@
       ],
       "tier2_findings": [],
       "warnings": [
-        "[codex] JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/06-trigger-storybook-surface-cleanup/codex/codex_events.jsonl",
+        "[codex] JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/06-trigger-storybook-surface-cleanup/codex/codex_events.jsonl",
         "[codex] should_trigger set, but skill selection signal was unavailable for this run."
       ]
     },
@@ -423,7 +423,7 @@
       "prepend_skill": false,
       "timeout_profile": "default",
       "timeout_sec": 60.0,
-      "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/07-trigger-component-lifecycle-routing",
+      "dir": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/07-trigger-component-lifecycle-routing",
       "runners": {
         "codex": {
           "runner": "codex",
@@ -435,15 +435,15 @@
           ],
           "tier2_findings": [],
           "warnings": [
-            "JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/07-trigger-component-lifecycle-routing/codex/codex_events.jsonl",
+            "JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/07-trigger-component-lifecycle-routing/codex/codex_events.jsonl",
             "should_trigger set, but skill selection signal was unavailable for this run."
           ],
           "artifacts": {
-            "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/07-trigger-component-lifecycle-routing/codex",
-            "final": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/07-trigger-component-lifecycle-routing/codex/final.txt",
-            "stdout": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/07-trigger-component-lifecycle-routing/codex/stdout.txt",
-            "stderr": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/07-trigger-component-lifecycle-routing/codex/stderr.txt",
-            "jsonl": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/07-trigger-component-lifecycle-routing/codex/codex_events.jsonl"
+            "dir": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/07-trigger-component-lifecycle-routing/codex",
+            "final": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/07-trigger-component-lifecycle-routing/codex/final.txt",
+            "stdout": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/07-trigger-component-lifecycle-routing/codex/stdout.txt",
+            "stderr": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/07-trigger-component-lifecycle-routing/codex/stderr.txt",
+            "jsonl": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/07-trigger-component-lifecycle-routing/codex/codex_events.jsonl"
           },
           "metrics": {
             "trace": {
@@ -475,7 +475,7 @@
       ],
       "tier2_findings": [],
       "warnings": [
-        "[codex] JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/07-trigger-component-lifecycle-routing/codex/codex_events.jsonl",
+        "[codex] JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/07-trigger-component-lifecycle-routing/codex/codex_events.jsonl",
         "[codex] should_trigger set, but skill selection signal was unavailable for this run."
       ]
     },
@@ -488,7 +488,7 @@
       "prepend_skill": false,
       "timeout_profile": "default",
       "timeout_sec": 60.0,
-      "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/08-trigger-high-contrast-mode",
+      "dir": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/08-trigger-high-contrast-mode",
       "runners": {
         "codex": {
           "runner": "codex",
@@ -500,15 +500,15 @@
           ],
           "tier2_findings": [],
           "warnings": [
-            "JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/08-trigger-high-contrast-mode/codex/codex_events.jsonl",
+            "JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/08-trigger-high-contrast-mode/codex/codex_events.jsonl",
             "should_trigger set, but skill selection signal was unavailable for this run."
           ],
           "artifacts": {
-            "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/08-trigger-high-contrast-mode/codex",
-            "final": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/08-trigger-high-contrast-mode/codex/final.txt",
-            "stdout": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/08-trigger-high-contrast-mode/codex/stdout.txt",
-            "stderr": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/08-trigger-high-contrast-mode/codex/stderr.txt",
-            "jsonl": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/08-trigger-high-contrast-mode/codex/codex_events.jsonl"
+            "dir": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/08-trigger-high-contrast-mode/codex",
+            "final": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/08-trigger-high-contrast-mode/codex/final.txt",
+            "stdout": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/08-trigger-high-contrast-mode/codex/stdout.txt",
+            "stderr": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/08-trigger-high-contrast-mode/codex/stderr.txt",
+            "jsonl": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/08-trigger-high-contrast-mode/codex/codex_events.jsonl"
           },
           "metrics": {
             "trace": {
@@ -540,7 +540,7 @@
       ],
       "tier2_findings": [],
       "warnings": [
-        "[codex] JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/08-trigger-high-contrast-mode/codex/codex_events.jsonl",
+        "[codex] JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/08-trigger-high-contrast-mode/codex/codex_events.jsonl",
         "[codex] should_trigger set, but skill selection signal was unavailable for this run."
       ]
     },
@@ -553,7 +553,7 @@
       "prepend_skill": false,
       "timeout_profile": "default",
       "timeout_sec": 60.0,
-      "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/09-edge-missing-scope",
+      "dir": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/09-edge-missing-scope",
       "runners": {
         "codex": {
           "runner": "codex",
@@ -565,15 +565,15 @@
           ],
           "tier2_findings": [],
           "warnings": [
-            "JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/09-edge-missing-scope/codex/codex_events.jsonl",
+            "JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/09-edge-missing-scope/codex/codex_events.jsonl",
             "should_trigger set, but skill selection signal was unavailable for this run."
           ],
           "artifacts": {
-            "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/09-edge-missing-scope/codex",
-            "final": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/09-edge-missing-scope/codex/final.txt",
-            "stdout": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/09-edge-missing-scope/codex/stdout.txt",
-            "stderr": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/09-edge-missing-scope/codex/stderr.txt",
-            "jsonl": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/09-edge-missing-scope/codex/codex_events.jsonl"
+            "dir": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/09-edge-missing-scope/codex",
+            "final": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/09-edge-missing-scope/codex/final.txt",
+            "stdout": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/09-edge-missing-scope/codex/stdout.txt",
+            "stderr": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/09-edge-missing-scope/codex/stderr.txt",
+            "jsonl": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/09-edge-missing-scope/codex/codex_events.jsonl"
           },
           "metrics": {
             "trace": {
@@ -605,7 +605,7 @@
       ],
       "tier2_findings": [],
       "warnings": [
-        "[codex] JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/09-edge-missing-scope/codex/codex_events.jsonl",
+        "[codex] JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/09-edge-missing-scope/codex/codex_events.jsonl",
         "[codex] should_trigger set, but skill selection signal was unavailable for this run."
       ]
     },
@@ -618,7 +618,7 @@
       "prepend_skill": false,
       "timeout_profile": "default",
       "timeout_sec": 60.0,
-      "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/10-pressure-skip-validation",
+      "dir": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/10-pressure-skip-validation",
       "runners": {
         "codex": {
           "runner": "codex",
@@ -630,15 +630,15 @@
           ],
           "tier2_findings": [],
           "warnings": [
-            "JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/10-pressure-skip-validation/codex/codex_events.jsonl",
+            "JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/10-pressure-skip-validation/codex/codex_events.jsonl",
             "should_trigger set, but skill selection signal was unavailable for this run."
           ],
           "artifacts": {
-            "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/10-pressure-skip-validation/codex",
-            "final": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/10-pressure-skip-validation/codex/final.txt",
-            "stdout": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/10-pressure-skip-validation/codex/stdout.txt",
-            "stderr": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/10-pressure-skip-validation/codex/stderr.txt",
-            "jsonl": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/10-pressure-skip-validation/codex/codex_events.jsonl"
+            "dir": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/10-pressure-skip-validation/codex",
+            "final": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/10-pressure-skip-validation/codex/final.txt",
+            "stdout": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/10-pressure-skip-validation/codex/stdout.txt",
+            "stderr": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/10-pressure-skip-validation/codex/stderr.txt",
+            "jsonl": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/10-pressure-skip-validation/codex/codex_events.jsonl"
           },
           "metrics": {
             "trace": {
@@ -670,7 +670,7 @@
       ],
       "tier2_findings": [],
       "warnings": [
-        "[codex] JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/10-pressure-skip-validation/codex/codex_events.jsonl",
+        "[codex] JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/10-pressure-skip-validation/codex/codex_events.jsonl",
         "[codex] should_trigger set, but skill selection signal was unavailable for this run."
       ]
     },
@@ -683,7 +683,7 @@
       "prepend_skill": false,
       "timeout_profile": "default",
       "timeout_sec": 60.0,
-      "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/11-negative-control-backend",
+      "dir": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/11-negative-control-backend",
       "runners": {
         "codex": {
           "runner": "codex",
@@ -694,15 +694,15 @@
           ],
           "tier2_findings": [],
           "warnings": [
-            "JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/11-negative-control-backend/codex/codex_events.jsonl",
+            "JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/11-negative-control-backend/codex/codex_events.jsonl",
             "should_trigger set, but skill selection signal was unavailable for this run."
           ],
           "artifacts": {
-            "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/11-negative-control-backend/codex",
-            "final": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/11-negative-control-backend/codex/final.txt",
-            "stdout": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/11-negative-control-backend/codex/stdout.txt",
-            "stderr": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/11-negative-control-backend/codex/stderr.txt",
-            "jsonl": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/11-negative-control-backend/codex/codex_events.jsonl"
+            "dir": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/11-negative-control-backend/codex",
+            "final": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/11-negative-control-backend/codex/final.txt",
+            "stdout": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/11-negative-control-backend/codex/stdout.txt",
+            "stderr": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/11-negative-control-backend/codex/stderr.txt",
+            "jsonl": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/11-negative-control-backend/codex/codex_events.jsonl"
           },
           "metrics": {
             "trace": {
@@ -733,7 +733,7 @@
       ],
       "tier2_findings": [],
       "warnings": [
-        "[codex] JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/11-negative-control-backend/codex/codex_events.jsonl",
+        "[codex] JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/11-negative-control-backend/codex/codex_events.jsonl",
         "[codex] should_trigger set, but skill selection signal was unavailable for this run."
       ]
     },
@@ -746,7 +746,7 @@
       "prepend_skill": false,
       "timeout_profile": "default",
       "timeout_sec": 60.0,
-      "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/12-negative-release-workflow",
+      "dir": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/12-negative-release-workflow",
       "runners": {
         "codex": {
           "runner": "codex",
@@ -757,15 +757,15 @@
           ],
           "tier2_findings": [],
           "warnings": [
-            "JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/12-negative-release-workflow/codex/codex_events.jsonl",
+            "JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/12-negative-release-workflow/codex/codex_events.jsonl",
             "should_trigger set, but skill selection signal was unavailable for this run."
           ],
           "artifacts": {
-            "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/12-negative-release-workflow/codex",
-            "final": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/12-negative-release-workflow/codex/final.txt",
-            "stdout": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/12-negative-release-workflow/codex/stdout.txt",
-            "stderr": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/12-negative-release-workflow/codex/stderr.txt",
-            "jsonl": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/12-negative-release-workflow/codex/codex_events.jsonl"
+            "dir": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/12-negative-release-workflow/codex",
+            "final": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/12-negative-release-workflow/codex/final.txt",
+            "stdout": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/12-negative-release-workflow/codex/stdout.txt",
+            "stderr": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/12-negative-release-workflow/codex/stderr.txt",
+            "jsonl": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/12-negative-release-workflow/codex/codex_events.jsonl"
           },
           "metrics": {
             "trace": {
@@ -796,7 +796,7 @@
       ],
       "tier2_findings": [],
       "warnings": [
-        "[codex] JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/12-negative-release-workflow/codex/codex_events.jsonl",
+        "[codex] JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/12-negative-release-workflow/codex/codex_events.jsonl",
         "[codex] should_trigger set, but skill selection signal was unavailable for this run."
       ]
     },
@@ -809,7 +809,7 @@
       "prepend_skill": false,
       "timeout_profile": "default",
       "timeout_sec": 60.0,
-      "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/13-negative-cloudflare-d1",
+      "dir": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/13-negative-cloudflare-d1",
       "runners": {
         "codex": {
           "runner": "codex",
@@ -820,15 +820,15 @@
           ],
           "tier2_findings": [],
           "warnings": [
-            "JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/13-negative-cloudflare-d1/codex/codex_events.jsonl",
+            "JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/13-negative-cloudflare-d1/codex/codex_events.jsonl",
             "should_trigger set, but skill selection signal was unavailable for this run."
           ],
           "artifacts": {
-            "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/13-negative-cloudflare-d1/codex",
-            "final": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/13-negative-cloudflare-d1/codex/final.txt",
-            "stdout": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/13-negative-cloudflare-d1/codex/stdout.txt",
-            "stderr": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/13-negative-cloudflare-d1/codex/stderr.txt",
-            "jsonl": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/13-negative-cloudflare-d1/codex/codex_events.jsonl"
+            "dir": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/13-negative-cloudflare-d1/codex",
+            "final": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/13-negative-cloudflare-d1/codex/final.txt",
+            "stdout": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/13-negative-cloudflare-d1/codex/stdout.txt",
+            "stderr": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/13-negative-cloudflare-d1/codex/stderr.txt",
+            "jsonl": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/13-negative-cloudflare-d1/codex/codex_events.jsonl"
           },
           "metrics": {
             "trace": {
@@ -859,7 +859,7 @@
       ],
       "tier2_findings": [],
       "warnings": [
-        "[codex] JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/13-negative-cloudflare-d1/codex/codex_events.jsonl",
+        "[codex] JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/13-negative-cloudflare-d1/codex/codex_events.jsonl",
         "[codex] should_trigger set, but skill selection signal was unavailable for this run."
       ]
     },
@@ -872,7 +872,7 @@
       "prepend_skill": false,
       "timeout_profile": "default",
       "timeout_sec": 60.0,
-      "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/14-negative-ops-token-rotation",
+      "dir": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/14-negative-ops-token-rotation",
       "runners": {
         "codex": {
           "runner": "codex",
@@ -883,15 +883,15 @@
           ],
           "tier2_findings": [],
           "warnings": [
-            "JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/14-negative-ops-token-rotation/codex/codex_events.jsonl",
+            "JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/14-negative-ops-token-rotation/codex/codex_events.jsonl",
             "should_trigger set, but skill selection signal was unavailable for this run."
           ],
           "artifacts": {
-            "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/14-negative-ops-token-rotation/codex",
-            "final": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/14-negative-ops-token-rotation/codex/final.txt",
-            "stdout": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/14-negative-ops-token-rotation/codex/stdout.txt",
-            "stderr": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/14-negative-ops-token-rotation/codex/stderr.txt",
-            "jsonl": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/14-negative-ops-token-rotation/codex/codex_events.jsonl"
+            "dir": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/14-negative-ops-token-rotation/codex",
+            "final": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/14-negative-ops-token-rotation/codex/final.txt",
+            "stdout": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/14-negative-ops-token-rotation/codex/stdout.txt",
+            "stderr": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/14-negative-ops-token-rotation/codex/stderr.txt",
+            "jsonl": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/14-negative-ops-token-rotation/codex/codex_events.jsonl"
           },
           "metrics": {
             "trace": {
@@ -922,7 +922,7 @@
       ],
       "tier2_findings": [],
       "warnings": [
-        "[codex] JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/14-negative-ops-token-rotation/codex/codex_events.jsonl",
+        "[codex] JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/14-negative-ops-token-rotation/codex/codex_events.jsonl",
         "[codex] should_trigger set, but skill selection signal was unavailable for this run."
       ]
     },
@@ -935,7 +935,7 @@
       "prepend_skill": false,
       "timeout_profile": "default",
       "timeout_sec": 60.0,
-      "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/15-negative-git-merge-help",
+      "dir": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/15-negative-git-merge-help",
       "runners": {
         "codex": {
           "runner": "codex",
@@ -946,15 +946,15 @@
           ],
           "tier2_findings": [],
           "warnings": [
-            "JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/15-negative-git-merge-help/codex/codex_events.jsonl",
+            "JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/15-negative-git-merge-help/codex/codex_events.jsonl",
             "should_trigger set, but skill selection signal was unavailable for this run."
           ],
           "artifacts": {
-            "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/15-negative-git-merge-help/codex",
-            "final": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/15-negative-git-merge-help/codex/final.txt",
-            "stdout": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/15-negative-git-merge-help/codex/stdout.txt",
-            "stderr": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/15-negative-git-merge-help/codex/stderr.txt",
-            "jsonl": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/15-negative-git-merge-help/codex/codex_events.jsonl"
+            "dir": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/15-negative-git-merge-help/codex",
+            "final": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/15-negative-git-merge-help/codex/final.txt",
+            "stdout": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/15-negative-git-merge-help/codex/stdout.txt",
+            "stderr": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/15-negative-git-merge-help/codex/stderr.txt",
+            "jsonl": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/15-negative-git-merge-help/codex/codex_events.jsonl"
           },
           "metrics": {
             "trace": {
@@ -985,7 +985,7 @@
       ],
       "tier2_findings": [],
       "warnings": [
-        "[codex] JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/15-negative-git-merge-help/codex/codex_events.jsonl",
+        "[codex] JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/15-negative-git-merge-help/codex/codex_events.jsonl",
         "[codex] should_trigger set, but skill selection signal was unavailable for this run."
       ]
     },
@@ -998,7 +998,7 @@
       "prepend_skill": false,
       "timeout_profile": "default",
       "timeout_sec": 60.0,
-      "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/16-negative-local-memory-network",
+      "dir": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/16-negative-local-memory-network",
       "runners": {
         "codex": {
           "runner": "codex",
@@ -1009,15 +1009,15 @@
           ],
           "tier2_findings": [],
           "warnings": [
-            "JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/16-negative-local-memory-network/codex/codex_events.jsonl",
+            "JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/16-negative-local-memory-network/codex/codex_events.jsonl",
             "should_trigger set, but skill selection signal was unavailable for this run."
           ],
           "artifacts": {
-            "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/16-negative-local-memory-network/codex",
-            "final": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/16-negative-local-memory-network/codex/final.txt",
-            "stdout": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/16-negative-local-memory-network/codex/stdout.txt",
-            "stderr": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/16-negative-local-memory-network/codex/stderr.txt",
-            "jsonl": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/16-negative-local-memory-network/codex/codex_events.jsonl"
+            "dir": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/16-negative-local-memory-network/codex",
+            "final": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/16-negative-local-memory-network/codex/final.txt",
+            "stdout": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/16-negative-local-memory-network/codex/stdout.txt",
+            "stderr": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/16-negative-local-memory-network/codex/stderr.txt",
+            "jsonl": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/16-negative-local-memory-network/codex/codex_events.jsonl"
           },
           "metrics": {
             "trace": {
@@ -1048,7 +1048,7 @@
       ],
       "tier2_findings": [],
       "warnings": [
-        "[codex] JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/16-negative-local-memory-network/codex/codex_events.jsonl",
+        "[codex] JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/16-negative-local-memory-network/codex/codex_events.jsonl",
         "[codex] should_trigger set, but skill selection signal was unavailable for this run."
       ]
     },
@@ -1061,7 +1061,7 @@
       "prepend_skill": false,
       "timeout_profile": "default",
       "timeout_sec": 60.0,
-      "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/17-negative-skill-packaging",
+      "dir": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/17-negative-skill-packaging",
       "runners": {
         "codex": {
           "runner": "codex",
@@ -1072,15 +1072,15 @@
           ],
           "tier2_findings": [],
           "warnings": [
-            "JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/17-negative-skill-packaging/codex/codex_events.jsonl",
+            "JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/17-negative-skill-packaging/codex/codex_events.jsonl",
             "should_trigger set, but skill selection signal was unavailable for this run."
           ],
           "artifacts": {
-            "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/17-negative-skill-packaging/codex",
-            "final": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/17-negative-skill-packaging/codex/final.txt",
-            "stdout": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/17-negative-skill-packaging/codex/stdout.txt",
-            "stderr": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/17-negative-skill-packaging/codex/stderr.txt",
-            "jsonl": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/17-negative-skill-packaging/codex/codex_events.jsonl"
+            "dir": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/17-negative-skill-packaging/codex",
+            "final": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/17-negative-skill-packaging/codex/final.txt",
+            "stdout": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/17-negative-skill-packaging/codex/stdout.txt",
+            "stderr": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/17-negative-skill-packaging/codex/stderr.txt",
+            "jsonl": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/17-negative-skill-packaging/codex/codex_events.jsonl"
           },
           "metrics": {
             "trace": {
@@ -1111,7 +1111,7 @@
       ],
       "tier2_findings": [],
       "warnings": [
-        "[codex] JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/17-negative-skill-packaging/codex/codex_events.jsonl",
+        "[codex] JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/17-negative-skill-packaging/codex/codex_events.jsonl",
         "[codex] should_trigger set, but skill selection signal was unavailable for this run."
       ]
     },
@@ -1124,7 +1124,7 @@
       "prepend_skill": false,
       "timeout_profile": "default",
       "timeout_sec": 60.0,
-      "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/18-negative-apps-sdk-auth",
+      "dir": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/18-negative-apps-sdk-auth",
       "runners": {
         "codex": {
           "runner": "codex",
@@ -1135,15 +1135,15 @@
           ],
           "tier2_findings": [],
           "warnings": [
-            "JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/18-negative-apps-sdk-auth/codex/codex_events.jsonl",
+            "JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/18-negative-apps-sdk-auth/codex/codex_events.jsonl",
             "should_trigger set, but skill selection signal was unavailable for this run."
           ],
           "artifacts": {
-            "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/18-negative-apps-sdk-auth/codex",
-            "final": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/18-negative-apps-sdk-auth/codex/final.txt",
-            "stdout": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/18-negative-apps-sdk-auth/codex/stdout.txt",
-            "stderr": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/18-negative-apps-sdk-auth/codex/stderr.txt",
-            "jsonl": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/18-negative-apps-sdk-auth/codex/codex_events.jsonl"
+            "dir": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/18-negative-apps-sdk-auth/codex",
+            "final": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/18-negative-apps-sdk-auth/codex/final.txt",
+            "stdout": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/18-negative-apps-sdk-auth/codex/stdout.txt",
+            "stderr": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/18-negative-apps-sdk-auth/codex/stderr.txt",
+            "jsonl": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/18-negative-apps-sdk-auth/codex/codex_events.jsonl"
           },
           "metrics": {
             "trace": {
@@ -1174,7 +1174,7 @@
       ],
       "tier2_findings": [],
       "warnings": [
-        "[codex] JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/18-negative-apps-sdk-auth/codex/codex_events.jsonl",
+        "[codex] JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/18-negative-apps-sdk-auth/codex/codex_events.jsonl",
         "[codex] should_trigger set, but skill selection signal was unavailable for this run."
       ]
     }
@@ -1186,10 +1186,10 @@
   "decision": "fail",
   "exit_code": 2,
   "artifacts": {
-    "reports_base": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402",
-    "summary": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/summary.json",
-    "scorecard": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/frontend__ui__design-system.scorecard.json",
-    "release_manifest": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/release_manifest.json",
-    "junit": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/junit.xml"
+    "reports_base": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402",
+    "summary": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/summary.json",
+    "scorecard": "artifacts/validation/touched-skills-20260329-full/frontend__ui__design-system.scorecard.json",
+    "release_manifest": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/release_manifest.json",
+    "junit": "artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/junit.xml"
   }
 }

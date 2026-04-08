@@ -172,3 +172,4 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 
 - No invalid semantic type tags detected.
 
+- No invalid semantic type tags detected.

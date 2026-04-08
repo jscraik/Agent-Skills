@@ -34,7 +34,19 @@ if not EDGES_IN.exists():
         sys.exit(1)
 
 data = json.loads(EDGES_IN.read_text())
-graph_json = json.dumps(data)
+
+
+def _json_for_inline_script(payload):
+    """Serialize JSON safely for embedding inside an inline <script> block."""
+    return (
+        json.dumps(payload)
+        .replace("<", "\\u003c")
+        .replace(">", "\\u003e")
+        .replace("&", "\\u0026")
+    )
+
+
+graph_json = _json_for_inline_script(data)
 
 node_count = data.get("node_count", len(data.get("nodes", [])))
 edge_count = data.get("edge_count", len(data.get("edges", [])))
@@ -68,7 +80,7 @@ for _md in sorted(ROOT.rglob("SKILL.md")):
     except ValueError:
         continue
 
-skill_urls_json = json.dumps(_skill_paths)
+skill_urls_json = _json_for_inline_script(_skill_paths)
 
 html = f"""<!DOCTYPE html>
 <html lang="en">

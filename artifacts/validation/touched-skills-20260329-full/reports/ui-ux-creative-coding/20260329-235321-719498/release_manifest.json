@@ -17,13 +17,13 @@
     "runner_mode": "codex",
     "tier2_mode": "warn",
     "capture_jsonl": true,
-    "reports_base": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498"
+    "reports_base": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498"
   },
   "artifacts": {
-    "reports_base": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498",
-    "summary": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/summary.json",
-    "scorecard": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/frontend__ui__ui-ux-creative-coding.scorecard.json",
-    "release_manifest": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/release_manifest.json",
-    "junit": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/junit.xml"
+    "reports_base": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498",
+    "summary": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/summary.json",
+    "scorecard": "artifacts/validation/touched-skills-20260329-full/frontend__ui__ui-ux-creative-coding.scorecard.json",
+    "release_manifest": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/release_manifest.json",
+    "junit": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/junit.xml"
   }
 }

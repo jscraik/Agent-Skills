@@ -6,7 +6,7 @@
   "exit_code": 0,
   "name": "ui-ux-creative-coding",
   "description": "Use this skill to build and polish an existing React or Tauri UI with purposeful animation, transitions, micro-interactions, stronger interaction rhythm, and accessibility refinements when the visual direction is already set and the user wants targeted implementation-ready polish, not a full redesign.",
-  "path": "/Users/jamiecraik/dev/agent-skills/frontend/ui/ui-ux-creative-coding/SKILL.md",
+  "path": "frontend/ui/ui-ux-creative-coding/SKILL.md",
   "total_score": 145,
   "max_total": 165,
   "categories": [
