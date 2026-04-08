@@ -274,7 +274,6 @@ Do not overload either level. The agent sees all merged AGENTS files. Keep each 
 | [[codex-home-audit]] | Audit the full Codex home dir after AGENTS.md refactors |
 | [[codex-agent-creator]] | Create agent roles that AGENTS.md will reference |
 | [[docs-expert]] | Apply docs polish and community-health guidance to AGENTS.md |
-| [[compound-engineering-router]] | Route compound workflows referenced in AGENTS.md |
 
 **Topic map:** [[agent-ops]]
 

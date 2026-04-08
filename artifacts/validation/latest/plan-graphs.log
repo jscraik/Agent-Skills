@@ -28,4 +28,11 @@
 [OK] /Users/jamiecraik/dev/agent-skills/docs/plans/2026-04-04-feat-skill-authoring-family-iteration-upgrade-plan.md: task graph lint passed (1 graph block(s)).
 [plan-graph] lint docs/plans/2026-04-05-feat-skill-authoring-family-gold-standard-upgrade-plan.md
 [OK] /Users/jamiecraik/dev/agent-skills/docs/plans/2026-04-05-feat-skill-authoring-family-gold-standard-upgrade-plan.md: task graph lint passed (1 graph block(s)).
-[plan-graph] all plan files passed
+[plan-graph] lint docs/plans/2026-04-06-ask-cli-implementation-plan.md
+[FAIL] /Users/jamiecraik/dev/agent-skills/docs/plans/2026-04-06-ask-cli-implementation-plan.md: no YAML task graph block with `tasks:` found.
+[plan-graph] lint docs/plans/2026-04-06-feat-skill-authoring-family-certification-plan.md
+[FAIL] /Users/jamiecraik/dev/agent-skills/docs/plans/2026-04-06-feat-skill-authoring-family-certification-plan.md: no YAML task graph block with `tasks:` found.
+
+[plan-graph] ⚠️  2 plan file(s) need task graphs:
+  - docs/plans/2026-04-06-ask-cli-implementation-plan.md
+  - docs/plans/2026-04-06-feat-skill-authoring-family-certification-plan.md

@@ -299,7 +299,6 @@ Auto-invoke triggers and success output format are documented in `references/lea
 
 | Skill | When to use together |
 |---|---|
-| [[compound-engineering-router]] | Route selection before entering a stage |
 | [[ce-brainstorm]] | WHAT/WHY clarity first |
 | [[ce-plan]] | Implementation planning |
 | [[ce-work]] | Ready for execution |

@@ -95,8 +95,8 @@ Codex repo schema source:
   - includes `pre-tool-use`, `post-tool-use`, `session-start`, `user-prompt-submit`, and `stop` command input/output schemas.
 
 Local operational reference used as a builder-pattern source:
-- `/Users/jamiecraik/dev/config/codex/hooks/README.md`
-- `/Users/jamiecraik/dev/config/codex/hooks/hooks.json`
-- `/Users/jamiecraik/dev/config/codex/hooks/session-start.sh`
-- `/Users/jamiecraik/dev/config/codex/hooks/user-prompt-submit.sh`
-- `/Users/jamiecraik/dev/config/codex/hooks/stop-guard.sh`
+- `/Users/jamiecraik/dev/configs/codex/hooks/README.md`
+- `/Users/jamiecraik/dev/configs/codex/hooks/hooks.json`
+- `/Users/jamiecraik/dev/configs/codex/hooks/session-start.sh`
+- `/Users/jamiecraik/dev/configs/codex/hooks/user-prompt-submit.sh`
+- `/Users/jamiecraik/dev/configs/codex/hooks/stop-guard.sh`

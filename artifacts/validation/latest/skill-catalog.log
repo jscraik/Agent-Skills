@@ -1,6 +1,4 @@
 Lifecycle readiness findings:
-- utilities/claude-alias/SKILL.md [skill] -> blocked
-  - missing_metadata: governed skill missing `review_cadence`
-  - missing_metadata: governed skill missing `metadata_source`
-  - missing_metadata: invalid maturity `draft`
-Catalog check complete. assets=135 healthy=134 degraded=0 blocked=1 duplicates=0
+- plugins/skill-factory/skills/skill-builder/SKILL.md [packaged_skill] -> blocked
+  - representation_split_brain: packaged skill has no canonical source skill for inheritance
+Catalog check complete. assets=143 healthy=142 degraded=0 blocked=1 duplicates=0

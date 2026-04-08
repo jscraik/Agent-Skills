@@ -312,7 +312,6 @@ User says:
 
 | Skill | Purpose |
 |---|---|
-| [[compound-engineering-router]] | Choose CE stage |
 | [[ce-brainstorm]] | Clarify WHAT/WHY |
 | [[product-spec]] | Product contract |
 | [[linear]] | Issue creation |

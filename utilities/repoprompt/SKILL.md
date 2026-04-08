@@ -192,7 +192,6 @@ Read when needed:
 |---|---|
 | [[context7]] | Combine with Context7 for richer library context in prompts |
 | [[agents-md]] | Use Repo Prompt context packs alongside AGENTS.md |
-| [[compound-engineering-router]] | Feed repo context into compound engineering workflows |
 | [[ce-plan]] | Ground implementation plans with Repo Prompt context |
 
 **Topic map:** [[agent-ops]]

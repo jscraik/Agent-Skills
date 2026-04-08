@@ -31,6 +31,29 @@ class SkillEntry:
     description: str
 
 
+def _plugin_skill_names() -> set[str]:
+    names: set[str] = set()
+    plugins_root = REPO_ROOT / "plugins"
+    if not plugins_root.is_dir():
+        return names
+
+    for skill_md in sorted(plugins_root.rglob("SKILL.md")):
+        if skill_md.parent.parent.name != "skills":
+            continue
+        names.add(skill_md.parent.name)
+    return names
+
+
+def _is_plugin_owned_skill_dir(path: Path) -> bool:
+    try:
+        rel = path.resolve().relative_to(REPO_ROOT)
+    except ValueError:
+        return False
+
+    parts = rel.parts
+    return len(parts) >= 3 and parts[0] == "plugins" and parts[-2] == "skills"
+
+
 def _iter_flat_skill_dirs() -> Iterable[Path]:
     if not FLAT_SKILLS_DIR.is_dir():
         return []
@@ -122,6 +145,7 @@ def _normalize_description(text: str) -> str:
 def discover_skill_entries(source: str = "auto") -> List[SkillEntry]:
     seen: set[str] = set()
     entries: List[SkillEntry] = []
+    plugin_skill_names = _plugin_skill_names()
     if source == "flat":
         skill_dirs = list(_iter_flat_skill_dirs())
     elif source == "repo":
@@ -138,6 +162,8 @@ def discover_skill_entries(source: str = "auto") -> List[SkillEntry]:
         fm = _parse_frontmatter(skill_md)
         name = skill_dir.name.strip() or source_dir.name
         if not name or name in seen:
+            continue
+        if name in plugin_skill_names and not _is_plugin_owned_skill_dir(source_dir):
             continue
 
         try:

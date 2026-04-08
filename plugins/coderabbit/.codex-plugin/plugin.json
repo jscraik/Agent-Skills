@@ -2,7 +2,7 @@
   "schema_version": 1,
   "name": "coderabbit",
   "version": "0.1.0",
-  "description": "CodeRabbit skill bundle for review guidance, autofix support, and local documentation-backed operations.",
+  "description": "CodeRabbit skill bundle for review guidance, simplify/autofix support, and local documentation-backed operations.",
   "author": {
     "name": "Jamie Craik",
     "url": "https://github.com/jscraik"
@@ -14,13 +14,14 @@
     "coderabbit",
     "code-review",
     "autofix",
+    "simplify",
     "plugin"
   ],
   "skills": "./skills/",
   "interface": {
     "displayName": "CodeRabbit",
-    "shortDescription": "CodeRabbit review and autofix skills",
-    "longDescription": "Bundles CodeRabbit operational skills including local docs-driven guidance, code-review support, and autofix workflows.",
+    "shortDescription": "CodeRabbit review, simplify, and autofix skills",
+    "longDescription": "Bundles CodeRabbit operational skills including local docs-driven guidance, code-review support, simplify cleanup workflows, and autofix workflows.",
     "developerName": "Jamie Craik",
     "category": "Productivity",
     "capabilities": [
@@ -29,7 +30,7 @@
       "Write"
     ],
     "websiteURL": "https://www.coderabbit.ai",
-    "defaultPrompt": "Help me review and refine this PR with CodeRabbit workflows.",
+    "defaultPrompt": "Help me review, simplify, and refine this PR with CodeRabbit workflows.",
     "brandColor": "#3B82F6"
   },
   "source": {

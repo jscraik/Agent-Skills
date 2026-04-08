@@ -63,7 +63,7 @@ Inheritance requirements:
 - if the mapping is missing, ambiguous, or lossy, the packaged asset must declare the required lifecycle fields directly
 
 Phase-one packaged proof target:
-- [compound-engineering-router packaged skill](/Users/jamiecraik/dev/Agent-Skills/plugins/compound-engineering-router/skills/compound-engineering-router/SKILL.md)
+- [skill-factory packaged skill-builder](/Users/jamiecraik/dev/agent-skills/plugins/skill-factory/skills/skill-builder/SKILL.md)
 
 ## Lifecycle Readiness States
 
@@ -98,5 +98,5 @@ Entries that are only short-lived execution notes or incident journals do not qu
 
 Use these seed targets when proving the baseline across asset categories:
 - canonical skill: [coding-harness/SKILL.md](/Users/jamiecraik/dev/Agent-Skills/utilities/coding-harness/SKILL.md)
-- packaged skill: [compound-engineering-router packaged skill](/Users/jamiecraik/dev/Agent-Skills/plugins/compound-engineering-router/skills/compound-engineering-router/SKILL.md)
-- plugin package: [compound-engineering-router plugin manifest](/Users/jamiecraik/dev/Agent-Skills/plugins/compound-engineering-router/.codex-plugin/plugin.json)
+- packaged skill: [skill-factory packaged skill-builder](/Users/jamiecraik/dev/agent-skills/plugins/skill-factory/skills/skill-builder/SKILL.md)
+- plugin package: [skill-factory plugin manifest](/Users/jamiecraik/dev/agent-skills/plugins/skill-factory/.codex-plugin/plugin.json)

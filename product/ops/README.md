@@ -17,7 +17,6 @@ Compound engineering, planning, and operational execution skills.
 - [ce-spec](/product/ops/ce-spec/SKILL.md)
 - [ce-technical-review](/product/ops/ce-technical-review/SKILL.md)
 - [ce-work](/product/ops/ce-work/SKILL.md)
-- [compound-engineering-router](/product/ops/compound-engineering-router/SKILL.md)
 - [decide-build-primitive](/product/ops/decide-build-primitive/SKILL.md)
 - [linear](/product/ops/linear/SKILL.md)
 - [production-deployment](/product/ops/production-deployment/SKILL.md)

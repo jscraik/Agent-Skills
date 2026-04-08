@@ -10,10 +10,10 @@ Read when: you need to verify that the legacy `deepen-spec` prompt was migrated 
 - [No-loss checklist](#no-loss-checklist)
 
 ## Purpose
-This document maps the original spec-deepening prompt in `/Users/jamiecraik/dev/config/codex/prompts/` to the skill at `product/ops/ce-deepen-spec/` so the prompt-to-skill migration stays auditable.
+This document maps the original spec-deepening prompt in `/Users/jamiecraik/dev/configs/codex/prompts/` to the skill at `product/ops/ce-deepen-spec/` so the prompt-to-skill migration stays auditable.
 
 ## Source prompts and donor patterns
-- `/Users/jamiecraik/dev/config/codex/prompts/deepen-spec.md`
+- `/Users/jamiecraik/dev/configs/codex/prompts/deepen-spec.md`
 - donor patterns borrowed intentionally from `/Users/jamiecraik/dev/Agent-Skills/product/ops/ce-deepen-plan/`
 - spec-structure alignment borrowed intentionally from `/Users/jamiecraik/dev/Agent-Skills/product/ops/ce-spec/`
 - lightweight review doctrine imported from upstream `document-review` (`EveryInc/compound-engineering-plugin` commit `0ae91dcc298721e5b2c4ab6d1fc6f76a13b6f67c`)

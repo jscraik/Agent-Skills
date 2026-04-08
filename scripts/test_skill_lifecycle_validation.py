@@ -16,11 +16,22 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = REPO_ROOT / "scripts" / "verify_skill_catalog_freshness.py"
+SHADOW_SCRIPT = REPO_ROOT / "scripts" / "check_plugin_skill_shadowing.sh"
 
 
 def run_validator(repo_root: Path) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
         ["python3", str(SCRIPT), "--repo-root", str(repo_root), "--strict"],
+        cwd=REPO_ROOT,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+
+def run_shadow_check(repo_root: Path) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        ["bash", str(SHADOW_SCRIPT), "--repo-root", str(repo_root)],
         cwd=REPO_ROOT,
         text=True,
         capture_output=True,
@@ -315,6 +326,39 @@ class SkillLifecycleValidationTests(unittest.TestCase):
             self.assertEqual(result.returncode, 0, result.stderr or result.stdout)
             self.assertIn("duplicates=0", result.stdout)
             self.assertNotIn("Duplicate skill names", result.stdout)
+
+    def test_plugin_shadowing_check_passes_without_overlap(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo_root = Path(tmpdir)
+            write_text(
+                repo_root / "plugins" / "coderabbit" / "skills" / "coderabbit" / "SKILL.md",
+                "# plugin skill",
+            )
+            write_text(
+                repo_root / ".agents" / "skills" / "other-skill" / "SKILL.md",
+                "# flat skill",
+            )
+
+            result = run_shadow_check(repo_root)
+            self.assertEqual(result.returncode, 0, result.stderr or result.stdout)
+            self.assertIn("Plugin-shadowing check passed", result.stdout)
+
+    def test_plugin_shadowing_check_fails_with_overlap(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo_root = Path(tmpdir)
+            write_text(
+                repo_root / "plugins" / "coderabbit" / "skills" / "coderabbit" / "SKILL.md",
+                "# plugin skill",
+            )
+            write_text(
+                repo_root / ".agents" / "skills" / "coderabbit" / "SKILL.md",
+                "# flat skill",
+            )
+
+            result = run_shadow_check(repo_root)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("Plugin-shadowing check failed", result.stderr)
+            self.assertIn("- coderabbit", result.stderr)
 
 
 if __name__ == "__main__":

@@ -67,7 +67,7 @@ def _assert_wrapper_present(shell_script: str) -> None:
     """Validate required environment bootstrap fragments."""
     assert "set -a;" in shell_script
     assert "~/.codex/.env" in shell_script
-    assert "~/dev/config/.env" in shell_script
+    assert "~/dev/configs/.env" in shell_script
     assert "set +a" in shell_script
 
 

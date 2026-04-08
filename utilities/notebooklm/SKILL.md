@@ -126,7 +126,6 @@ If auth is stale, the target notebook/source cannot be identified, or the script
 | [[video-transcript-downloader]] | Download transcripts to feed as NotebookLM sources |
 | [[markdown-converter]] | Convert docs to markdown before uploading to NotebookLM |
 | [[insight-report]] | Feed session insights into NotebookLM for deeper analysis |
-| [[compound-engineering-router]] | Use NotebookLM evidence to inform compound workflow routing |
 
 **Topic map:** [[product-strategy]]
 

@@ -23,9 +23,9 @@ bash /Users/jamiecraik/dev/Agent-Skills/utilities/claude-alias/scripts/claude_al
 ## What the guard enforces
 
 - Canonical symlinks:
-  - `~/.claude/claude-aliases.sh` -> `/Users/jamiecraik/dev/config/claude/bin/claude-aliases.sh`
-  - `~/.claude/kimi_settings.json` -> `/Users/jamiecraik/dev/config/claude/kimi_settings.json`
-  - `~/.claude/zai_settings.json` -> `/Users/jamiecraik/dev/config/claude/zai_settings.json`
+  - `~/.claude/claude-aliases.sh` -> `/Users/jamiecraik/dev/configs/claude/bin/claude-aliases.sh`
+  - `~/.claude/kimi_settings.json` -> `/Users/jamiecraik/dev/configs/claude/kimi_settings.json`
+  - `~/.claude/zai_settings.json` -> `/Users/jamiecraik/dev/configs/claude/zai_settings.json`
 - Exactly one alias source line in `~/.zshrc`
 - Stable alias routing (`ck`/`cz`/`cc`)
 - API-key-only provider launches (`--bare`) for `ck` and `cz`
@@ -48,5 +48,5 @@ bash /Users/jamiecraik/dev/Agent-Skills/utilities/claude-alias/scripts/claude_al
   - Install `jq` (`brew install jq`) or run a fallback JSON inspection command.
 
 - Guard keeps failing on symlink checks:
-  - Confirm the config repo exists at `/Users/jamiecraik/dev/config`.
+  - Confirm the config repo exists at `/Users/jamiecraik/dev/configs`.
   - If repo path changed, set `CLAUDE_CONFIG_ROOT` before running guard.

@@ -351,7 +351,6 @@ IMPORTANT: Outputs should vary based on plan depth, topic risk, and the selected
 ## See Also
 | Skill | When to use together |
 |---|---|
-| [[compound-engineering-router]] | Use to route into or out of the deepening stage |
 | [[ce-plan]] | Use before deepening when the plan does not yet exist |
 | [[ce-spec]] | Use when deepening reveals that the plan is blocked by missing contract-level decisions |
 **Topic map:** [[product-ops]]

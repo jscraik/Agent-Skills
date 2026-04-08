@@ -169,8 +169,8 @@ Keep the startup sequence short and operator-facing:
 ## Supplemental context
 
 Optional extra context files can be mentioned when they exist and fit the repo's workflow:
-- `~/dev/config/codex/instructions/Learning.md`
-- `~/dev/config/codex/instructions/Learnings.md`
+- `~/dev/configs/codex/instructions/Learning.md`
+- `~/dev/configs/codex/instructions/Learnings.md`
 - legacy repo notes like `FORJAMIE.md`, but only when the file still exists and the repo intentionally uses it
 
 Treat organization `instructions/Learning.md` or `instructions/Learnings.md` as supplemental context, not a replacement for repo-local instructions.

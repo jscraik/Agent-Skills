@@ -8,12 +8,12 @@
 - [No-loss checklist](#no-loss-checklist)
 
 ## Purpose
-This document records how `/Users/jamiecraik/dev/config/codex/prompts/technical_review.md` was migrated into the CE skill package so the conversion stays auditable.
+This document records how `/Users/jamiecraik/dev/configs/codex/prompts/technical_review.md` was migrated into the CE skill package so the conversion stays auditable.
 
 ## Source prompt and migration target
 - source:
   - `https://github.com/EveryInc/compound-engineering-plugin/tree/0ae91dcc298721e5b2c4ab6d1fc6f76a13b6f67c/plugins/compound-engineering/skills/ce-technical-review`
-  - `/Users/jamiecraik/dev/config/codex/prompts/technical_review.md`
+  - `/Users/jamiecraik/dev/configs/codex/prompts/technical_review.md`
 - migration target:
   - `/Users/jamiecraik/dev/Agent-Skills/product/ops/ce-technical-review/`
 

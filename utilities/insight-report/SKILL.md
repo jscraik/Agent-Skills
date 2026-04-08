@@ -49,8 +49,8 @@ Optional:
 
 ## Deliverables
 
-- HTML report: `file://$HOME/dev/config/codex/usage-data/report.html`
-- Facet cache: `$HOME/dev/config/codex/usage-data/facets-cache.json`
+- HTML report: `file://$HOME/dev/configs/codex/usage-data/report.html`
+- Facet cache: `$HOME/dev/configs/codex/usage-data/facets-cache.json`
 - Report includes:
   - Session stats (count, duration, success rate)
   - Tool usage charts
@@ -202,7 +202,7 @@ Note: `general_analytics` is currently under development (default: false).
 
 - Session data is processed locally by Ollama and never sent to external APIs
 - API keys and secrets in session content are redacted by default in the HTML report
-- Reports are saved to local filesystem only (`$HOME/dev/config/codex/usage-data/`)
+- Reports are saved to local filesystem only (`$HOME/dev/configs/codex/usage-data/`)
 
 ## Anti-patterns
 
@@ -239,7 +239,7 @@ User: "Monthly report"
 ## References
 
 - Generator: `scripts/run_insight_report.py`
-- Facet cache: `$HOME/dev/config/codex/usage-data/facets-cache.json`
+- Facet cache: `$HOME/dev/configs/codex/usage-data/facets-cache.json`
 - OTEL paths: `~/.agents/otel-collector/`
 
 ## See Also

@@ -202,7 +202,6 @@ Documentation & Collaboration: `list_documents`, `get_document`, `create_documen
 | [[gh-workflow]] | Link Linear issues to GitHub PRs during delivery |
 | [[simple-tasks]] | Use for lightweight local task tracking between Linear syncs |
 | [[alignment-checkpoint]] | Gate Linear issue creation behind intent alignment |
-| [[compound-engineering-router]] | Route compound work captured as Linear issues |
 
 **Topic map:** [[agent-ops]]
 

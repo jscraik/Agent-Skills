@@ -111,6 +111,7 @@ run_check warn docs-lint "📚 Running docs lint..." python3 scripts/docs_lint.p
 run_check required question-lifecycle "❓ Verifying question lifecycle contract..." python3 scripts/verify_question_lifecycle_contract.py
 run_check required skill-lifecycle-tests "🧪 Running lifecycle readiness tests..." python3 scripts/test_skill_lifecycle_validation.py
 run_check warn skill-catalog "🧭 Verifying skill catalog freshness..." python3 scripts/verify_skill_catalog_freshness.py --strict
+run_check required plugin-shadowing "🪞 Checking plugin skill shadowing..." bash scripts/check_plugin_skill_shadowing.sh
 run_check required skill-types "🏷️  Linting semantic skill-type tags..." bash scripts/lint_skill_types.sh
 run_check required openai-format "🧩 Linting OpenAI skill format..." bash scripts/lint_openai_skill_format.sh --mode strict
 run_check required progressive-disclosure "📐 Linting progressive disclosure quality..." bash scripts/lint_progressive_disclosure.sh --mode strict

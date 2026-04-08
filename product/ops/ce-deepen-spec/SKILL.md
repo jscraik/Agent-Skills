@@ -346,7 +346,6 @@ Apply the framework flexibly. Adapt depth, focus areas, and evidence sources to 
 |---|---|
 | [[ce-spec]] | Draft or tighten the base compound-engineering spec before a deepening pass |
 | [[ce-deepen-plan]] | Strengthen the implementation plan after the spec contract is solid |
-| [[compound-engineering-router]] | Route into the correct CE stage when the next step is still unclear |
 | [[product-spec]] | Use the broader planning-spec pipeline instead of the narrower CE contract path |
 
 **Topic map:** [[agent-ops]]

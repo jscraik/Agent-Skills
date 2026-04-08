@@ -1,6 +1,0 @@
-interface:
-  display_name: "Compound Engineering Router"
-  short_description: "Routes compound-engineering tasks to the correct prompt and specialist review path."
-
-policy:
-  allow_implicit_invocation: true

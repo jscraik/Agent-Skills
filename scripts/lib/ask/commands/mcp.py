@@ -105,7 +105,7 @@ def build_antigravity_config(codex_config):
     wrapper = (
         "set -a; "
         "[ -f ~/.codex/.env ] && . ~/.codex/.env >/dev/null 2>&1; "
-        "[ -f ~/dev/config/.env ] && . ~/dev/config/.env >/dev/null 2>&1; "
+        "[ -f ~/dev/configs/.env ] && . ~/dev/configs/.env >/dev/null 2>&1; "
         "set +a; "
         'export PATH="/opt/homebrew/bin:/usr/local/bin:$HOME/.local/share/mise/shims:$PATH"'
     )
