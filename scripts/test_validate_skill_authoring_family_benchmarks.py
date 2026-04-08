@@ -8,7 +8,6 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
-from unittest import mock
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -38,7 +37,7 @@ class FamilyBenchmarkCanonicalizationTests(unittest.TestCase):
             alias_parent.mkdir(parents=True, exist_ok=True)
             (alias_parent / "skill-builder").symlink_to("../plugins/skill-factory/skills/skill-builder")
 
-            with mock.patch.object(self.module, "REPO_ROOT", root):
+            with unittest.mock.patch.object(self.module, "REPO_ROOT", root):
                 canonical = self.module._canonical_skill_rel("utilities/skill-builder")
 
             self.assertEqual(canonical, "plugins/skill-factory/skills/skill-builder")
@@ -52,7 +51,7 @@ class FamilyBenchmarkCanonicalizationTests(unittest.TestCase):
             alias_parent.mkdir(parents=True, exist_ok=True)
             (alias_parent / "skill-builder").symlink_to("../plugins/skill-factory/skills/skill-builder")
 
-            with mock.patch.object(self.module, "REPO_ROOT", root):
+            with unittest.mock.patch.object(self.module, "REPO_ROOT", root):
                 deduped = self.module._dedupe_requested_skills(
                     ("utilities/skill-builder", "plugins/skill-factory/skills/skill-builder")
                 )
@@ -90,10 +89,10 @@ class FamilyBenchmarkCanonicalizationTests(unittest.TestCase):
             (alias_parent / "skill-builder").symlink_to("../plugins/skill-factory/skills/skill-builder")
 
             with (
-                mock.patch.object(self.module, "REPO_ROOT", root),
-                mock.patch.object(self.module, "_validate_contract", return_value=[]),
-                mock.patch.object(self.module, "_validate_evals", return_value=[]),
-                mock.patch.object(self.module, "_validate_reference_pi", return_value=[]),
+                unittest.mock.patch.object(self.module, "REPO_ROOT", root),
+                unittest.mock.patch.object(self.module, "_validate_contract", return_value=[]),
+                unittest.mock.patch.object(self.module, "_validate_evals", return_value=[]),
+                unittest.mock.patch.object(self.module, "_validate_reference_pi", return_value=[]),
             ):
                 findings = self.module._validate_skill("utilities/skill-builder")
 
