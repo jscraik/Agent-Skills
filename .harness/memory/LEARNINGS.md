@@ -87,3 +87,5 @@ Repo-specific agent knowledge base. Append-only.
 - **2026-04-05 [Codex]:** `skill-installer` diagnostic logs that echo override payloads can trigger CodeQL `Clear-text logging of sensitive information` alerts. -> Log redacted metadata (for example override count/presence) instead of raw override values.
 
 - **2026-04-07 [Codex]:** `python3 scripts/sync_mcp.py` can fail on macOS when system Python 3.9 lacks `tomli`, and `shutil.which("python3.12")` can still miss the interpreter in constrained PATH sessions. -> Add a TOML-load fallback that probes absolute interpreter paths (`/usr/local/bin/python3.12`, `/opt/homebrew/bin/python3.12`, etc.) and parses via `tomllib` in that subprocess.
+
+- **2026-04-08 [Codex]:** 1Password-backed SSH/Git flows can fail in login-shell automation with `Could not open a connection to your authentication agent` when `SSH_AUTH_SOCK` is only exported in `.zshrc`. -> Export the 1Password agent socket from `.zprofile` (and keep `.zshrc` aligned), then verify with `zsh -lc 'ssh-add -l'` and `ssh -T git@github.com`.

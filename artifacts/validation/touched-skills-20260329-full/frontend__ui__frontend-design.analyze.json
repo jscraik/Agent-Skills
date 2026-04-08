@@ -6,7 +6,7 @@
   "exit_code": 0,
   "name": "frontend-design",
   "description": "Route broad frontend design requests to the correct local UI skill after classifying intent and maturity. Use when the user asks for frontend design generally and the specific design owner is not yet clear.",
-  "path": "/Users/jamiecraik/dev/agent-skills/frontend/ui/frontend-design/SKILL.md",
+  "path": "frontend/ui/frontend-design/SKILL.md",
   "total_score": 87,
   "max_total": 165,
   "categories": [

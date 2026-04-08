@@ -1,6 +1,1 @@
-Lifecycle readiness findings:
-- utilities/claude-alias/SKILL.md [skill] -> blocked
-  - missing_metadata: governed skill missing `review_cadence`
-  - missing_metadata: governed skill missing `metadata_source`
-  - missing_metadata: invalid maturity `draft`
-Catalog check complete. assets=135 healthy=134 degraded=0 blocked=1 duplicates=0
+Catalog check complete. assets=136 healthy=136 degraded=0 blocked=0 duplicates=0

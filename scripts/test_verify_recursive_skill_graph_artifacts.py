@@ -398,6 +398,54 @@ class VerifyRecursiveSkillGraphArtifactsTests(unittest.TestCase):
             )
             self.assertFalse((runs_root / "run_empty").exists())
 
+    def test_manifest_uses_repo_relative_paths_when_runs_root_is_in_repo(self) -> None:
+        artifacts_root = REPO_ROOT / "artifacts"
+        artifacts_root.mkdir(parents=True, exist_ok=True)
+        with tempfile.TemporaryDirectory(prefix="artifact-parity-in-repo-", dir=artifacts_root) as tmpdir:
+            runs_root = Path(tmpdir) / "runs"
+            runs_root.mkdir()
+            run_dir = self._create_run(
+                runs_root,
+                "run_under_repo",
+                present={
+                    "run.json": self._run_obj(run_id="run_under_repo"),
+                    "iteration_journal.jsonl": [
+                        {"run_id": "run_under_repo", "iteration_id": 1},
+                    ],
+                    "events.jsonl": [
+                        {
+                            "schema_version": "1.0",
+                            "event_id": "evt-1",
+                            "ts": "2026-02-26T12:00:00Z",
+                            "run_id": "run_under_repo",
+                            "skill_name": "ui-ux-creative-coding",
+                            "task_profile": "ui",
+                            "event_type": "run_initialized",
+                            "severity": "info",
+                            "terminal_status": "passed",
+                            "stop_reason": "pass",
+                        },
+                    ],
+                    "promotion_decision.json": {
+                        "schema_version": "1.1",
+                        "run_id": "run_under_repo",
+                        "lesson_id": "lesson-under-repo",
+                        "decision": "candidate",
+                    },
+                    "capture_record.json": {"schema_version": "1.0"},
+                    "evidence_packet.json": {"schema_version": "1.0"},
+                    "lesson_candidates.json": {"items": []},
+                },
+            )
+            code, manifest = self._run_verifier(runs_root, strict=False)
+            self.assertEqual(code, 0)
+            self.assertEqual(manifest["runs_root"], str(runs_root.relative_to(REPO_ROOT)))
+            self.assertNotIn(str(Path.home()), manifest["runs_root"])
+            self.assertEqual(
+                self._run_entry(manifest, run_dir)["run_dir"],
+                str(run_dir.relative_to(REPO_ROOT)),
+            )
+
 
 if __name__ == "__main__":
     unittest.main()

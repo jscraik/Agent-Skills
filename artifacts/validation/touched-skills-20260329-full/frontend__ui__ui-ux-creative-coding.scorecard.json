@@ -3,7 +3,7 @@
   "tool": "run_skill_evals",
   "generated_at": "2026-03-29T22:53:21Z",
   "skill": "ui-ux-creative-coding",
-  "skill_path": "/Users/jamiecraik/dev/agent-skills/frontend/ui/ui-ux-creative-coding",
+  "skill_path": "frontend/ui/ui-ux-creative-coding",
   "skill_release": {
     "name": "ui-ux-creative-coding",
     "version": "0.0.0+local",
@@ -13,7 +13,7 @@
     "source_commit": "4e49ba25e2b97f4b579e9fc3e67eacf568adcf4d",
     "source_branch": "main"
   },
-  "workspace_root": "/Users/jamiecraik/dev/agent-skills",
+  "workspace_root": "~/dev/agent-skills",
   "runner_mode": "codex",
   "eval_mode": "release",
   "tier2_mode": "warn",
@@ -33,7 +33,7 @@
       "prepend_skill": true,
       "timeout_profile": "default",
       "timeout_sec": 60.0,
-      "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/01-case-01",
+      "dir": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/01-case-01",
       "runners": {
         "codex": {
           "runner": "codex",
@@ -47,15 +47,15 @@
           ],
           "tier2_findings": [],
           "warnings": [
-            "JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/01-case-01/codex/codex_events.jsonl",
+            "JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/01-case-01/codex/codex_events.jsonl",
             "should_trigger set, but skill selection signal was unavailable for this run."
           ],
           "artifacts": {
-            "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/01-case-01/codex",
-            "final": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/01-case-01/codex/final.txt",
-            "stdout": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/01-case-01/codex/stdout.txt",
-            "stderr": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/01-case-01/codex/stderr.txt",
-            "jsonl": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/01-case-01/codex/codex_events.jsonl"
+            "dir": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/01-case-01/codex",
+            "final": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/01-case-01/codex/final.txt",
+            "stdout": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/01-case-01/codex/stdout.txt",
+            "stderr": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/01-case-01/codex/stderr.txt",
+            "jsonl": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/01-case-01/codex/codex_events.jsonl"
           },
           "metrics": {
             "trace": {
@@ -89,7 +89,7 @@
       ],
       "tier2_findings": [],
       "warnings": [
-        "[codex] JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/01-case-01/codex/codex_events.jsonl",
+        "[codex] JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/01-case-01/codex/codex_events.jsonl",
         "[codex] should_trigger set, but skill selection signal was unavailable for this run."
       ]
     },
@@ -102,7 +102,7 @@
       "prepend_skill": true,
       "timeout_profile": "default",
       "timeout_sec": 60.0,
-      "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/02-case-02",
+      "dir": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/02-case-02",
       "runners": {
         "codex": {
           "runner": "codex",
@@ -114,15 +114,15 @@
           ],
           "tier2_findings": [],
           "warnings": [
-            "JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/02-case-02/codex/codex_events.jsonl",
+            "JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/02-case-02/codex/codex_events.jsonl",
             "should_trigger set, but skill selection signal was unavailable for this run."
           ],
           "artifacts": {
-            "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/02-case-02/codex",
-            "final": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/02-case-02/codex/final.txt",
-            "stdout": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/02-case-02/codex/stdout.txt",
-            "stderr": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/02-case-02/codex/stderr.txt",
-            "jsonl": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/02-case-02/codex/codex_events.jsonl"
+            "dir": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/02-case-02/codex",
+            "final": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/02-case-02/codex/final.txt",
+            "stdout": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/02-case-02/codex/stdout.txt",
+            "stderr": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/02-case-02/codex/stderr.txt",
+            "jsonl": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/02-case-02/codex/codex_events.jsonl"
           },
           "metrics": {
             "trace": {
@@ -154,7 +154,7 @@
       ],
       "tier2_findings": [],
       "warnings": [
-        "[codex] JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/02-case-02/codex/codex_events.jsonl",
+        "[codex] JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/02-case-02/codex/codex_events.jsonl",
         "[codex] should_trigger set, but skill selection signal was unavailable for this run."
       ]
     },
@@ -167,7 +167,7 @@
       "prepend_skill": true,
       "timeout_profile": "default",
       "timeout_sec": 60.0,
-      "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/03-case-03",
+      "dir": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/03-case-03",
       "runners": {
         "codex": {
           "runner": "codex",
@@ -179,15 +179,15 @@
           ],
           "tier2_findings": [],
           "warnings": [
-            "JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/03-case-03/codex/codex_events.jsonl",
+            "JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/03-case-03/codex/codex_events.jsonl",
             "should_trigger set, but skill selection signal was unavailable for this run."
           ],
           "artifacts": {
-            "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/03-case-03/codex",
-            "final": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/03-case-03/codex/final.txt",
-            "stdout": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/03-case-03/codex/stdout.txt",
-            "stderr": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/03-case-03/codex/stderr.txt",
-            "jsonl": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/03-case-03/codex/codex_events.jsonl"
+            "dir": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/03-case-03/codex",
+            "final": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/03-case-03/codex/final.txt",
+            "stdout": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/03-case-03/codex/stdout.txt",
+            "stderr": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/03-case-03/codex/stderr.txt",
+            "jsonl": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/03-case-03/codex/codex_events.jsonl"
           },
           "metrics": {
             "trace": {
@@ -219,7 +219,7 @@
       ],
       "tier2_findings": [],
       "warnings": [
-        "[codex] JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/03-case-03/codex/codex_events.jsonl",
+        "[codex] JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/03-case-03/codex/codex_events.jsonl",
         "[codex] should_trigger set, but skill selection signal was unavailable for this run."
       ]
     },
@@ -232,7 +232,7 @@
       "prepend_skill": true,
       "timeout_profile": "default",
       "timeout_sec": 60.0,
-      "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/04-case-04",
+      "dir": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/04-case-04",
       "runners": {
         "codex": {
           "runner": "codex",
@@ -244,15 +244,15 @@
           ],
           "tier2_findings": [],
           "warnings": [
-            "JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/04-case-04/codex/codex_events.jsonl",
+            "JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/04-case-04/codex/codex_events.jsonl",
             "should_trigger set, but skill selection signal was unavailable for this run."
           ],
           "artifacts": {
-            "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/04-case-04/codex",
-            "final": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/04-case-04/codex/final.txt",
-            "stdout": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/04-case-04/codex/stdout.txt",
-            "stderr": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/04-case-04/codex/stderr.txt",
-            "jsonl": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/04-case-04/codex/codex_events.jsonl"
+            "dir": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/04-case-04/codex",
+            "final": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/04-case-04/codex/final.txt",
+            "stdout": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/04-case-04/codex/stdout.txt",
+            "stderr": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/04-case-04/codex/stderr.txt",
+            "jsonl": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/04-case-04/codex/codex_events.jsonl"
           },
           "metrics": {
             "trace": {
@@ -284,7 +284,7 @@
       ],
       "tier2_findings": [],
       "warnings": [
-        "[codex] JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/04-case-04/codex/codex_events.jsonl",
+        "[codex] JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/04-case-04/codex/codex_events.jsonl",
         "[codex] should_trigger set, but skill selection signal was unavailable for this run."
       ]
     },
@@ -297,7 +297,7 @@
       "prepend_skill": true,
       "timeout_profile": "default",
       "timeout_sec": 60.0,
-      "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/05-case-05",
+      "dir": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/05-case-05",
       "runners": {
         "codex": {
           "runner": "codex",
@@ -310,15 +310,15 @@
           ],
           "tier2_findings": [],
           "warnings": [
-            "JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/05-case-05/codex/codex_events.jsonl",
+            "JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/05-case-05/codex/codex_events.jsonl",
             "should_trigger set, but skill selection signal was unavailable for this run."
           ],
           "artifacts": {
-            "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/05-case-05/codex",
-            "final": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/05-case-05/codex/final.txt",
-            "stdout": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/05-case-05/codex/stdout.txt",
-            "stderr": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/05-case-05/codex/stderr.txt",
-            "jsonl": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/05-case-05/codex/codex_events.jsonl"
+            "dir": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/05-case-05/codex",
+            "final": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/05-case-05/codex/final.txt",
+            "stdout": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/05-case-05/codex/stdout.txt",
+            "stderr": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/05-case-05/codex/stderr.txt",
+            "jsonl": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/05-case-05/codex/codex_events.jsonl"
           },
           "metrics": {
             "trace": {
@@ -351,7 +351,7 @@
       ],
       "tier2_findings": [],
       "warnings": [
-        "[codex] JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/05-case-05/codex/codex_events.jsonl",
+        "[codex] JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/05-case-05/codex/codex_events.jsonl",
         "[codex] should_trigger set, but skill selection signal was unavailable for this run."
       ]
     },
@@ -364,7 +364,7 @@
       "prepend_skill": false,
       "timeout_profile": "default",
       "timeout_sec": 60.0,
-      "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/06-case-06",
+      "dir": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/06-case-06",
       "runners": {
         "codex": {
           "runner": "codex",
@@ -377,15 +377,15 @@
           ],
           "tier2_findings": [],
           "warnings": [
-            "JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/06-case-06/codex/codex_events.jsonl",
+            "JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/06-case-06/codex/codex_events.jsonl",
             "should_trigger set, but skill selection signal was unavailable for this run."
           ],
           "artifacts": {
-            "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/06-case-06/codex",
-            "final": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/06-case-06/codex/final.txt",
-            "stdout": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/06-case-06/codex/stdout.txt",
-            "stderr": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/06-case-06/codex/stderr.txt",
-            "jsonl": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/06-case-06/codex/codex_events.jsonl"
+            "dir": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/06-case-06/codex",
+            "final": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/06-case-06/codex/final.txt",
+            "stdout": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/06-case-06/codex/stdout.txt",
+            "stderr": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/06-case-06/codex/stderr.txt",
+            "jsonl": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/06-case-06/codex/codex_events.jsonl"
           },
           "metrics": {
             "trace": {
@@ -418,7 +418,7 @@
       ],
       "tier2_findings": [],
       "warnings": [
-        "[codex] JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/06-case-06/codex/codex_events.jsonl",
+        "[codex] JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/06-case-06/codex/codex_events.jsonl",
         "[codex] should_trigger set, but skill selection signal was unavailable for this run."
       ]
     },
@@ -431,7 +431,7 @@
       "prepend_skill": false,
       "timeout_profile": "default",
       "timeout_sec": 60.0,
-      "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/07-case-07",
+      "dir": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/07-case-07",
       "runners": {
         "codex": {
           "runner": "codex",
@@ -444,15 +444,15 @@
           ],
           "tier2_findings": [],
           "warnings": [
-            "JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/07-case-07/codex/codex_events.jsonl",
+            "JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/07-case-07/codex/codex_events.jsonl",
             "should_trigger set, but skill selection signal was unavailable for this run."
           ],
           "artifacts": {
-            "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/07-case-07/codex",
-            "final": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/07-case-07/codex/final.txt",
-            "stdout": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/07-case-07/codex/stdout.txt",
-            "stderr": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/07-case-07/codex/stderr.txt",
-            "jsonl": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/07-case-07/codex/codex_events.jsonl"
+            "dir": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/07-case-07/codex",
+            "final": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/07-case-07/codex/final.txt",
+            "stdout": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/07-case-07/codex/stdout.txt",
+            "stderr": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/07-case-07/codex/stderr.txt",
+            "jsonl": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/07-case-07/codex/codex_events.jsonl"
           },
           "metrics": {
             "trace": {
@@ -485,7 +485,7 @@
       ],
       "tier2_findings": [],
       "warnings": [
-        "[codex] JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/07-case-07/codex/codex_events.jsonl",
+        "[codex] JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/07-case-07/codex/codex_events.jsonl",
         "[codex] should_trigger set, but skill selection signal was unavailable for this run."
       ]
     },
@@ -498,7 +498,7 @@
       "prepend_skill": false,
       "timeout_profile": "default",
       "timeout_sec": 60.0,
-      "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/08-case-08",
+      "dir": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/08-case-08",
       "runners": {
         "codex": {
           "runner": "codex",
@@ -512,15 +512,15 @@
           ],
           "tier2_findings": [],
           "warnings": [
-            "JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/08-case-08/codex/codex_events.jsonl",
+            "JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/08-case-08/codex/codex_events.jsonl",
             "should_trigger set, but skill selection signal was unavailable for this run."
           ],
           "artifacts": {
-            "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/08-case-08/codex",
-            "final": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/08-case-08/codex/final.txt",
-            "stdout": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/08-case-08/codex/stdout.txt",
-            "stderr": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/08-case-08/codex/stderr.txt",
-            "jsonl": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/08-case-08/codex/codex_events.jsonl"
+            "dir": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/08-case-08/codex",
+            "final": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/08-case-08/codex/final.txt",
+            "stdout": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/08-case-08/codex/stdout.txt",
+            "stderr": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/08-case-08/codex/stderr.txt",
+            "jsonl": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/08-case-08/codex/codex_events.jsonl"
           },
           "metrics": {
             "trace": {
@@ -554,7 +554,7 @@
       ],
       "tier2_findings": [],
       "warnings": [
-        "[codex] JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/08-case-08/codex/codex_events.jsonl",
+        "[codex] JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/08-case-08/codex/codex_events.jsonl",
         "[codex] should_trigger set, but skill selection signal was unavailable for this run."
       ]
     },
@@ -567,7 +567,7 @@
       "prepend_skill": false,
       "timeout_profile": "default",
       "timeout_sec": 60.0,
-      "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/09-case-09",
+      "dir": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/09-case-09",
       "runners": {
         "codex": {
           "runner": "codex",
@@ -581,15 +581,15 @@
           ],
           "tier2_findings": [],
           "warnings": [
-            "JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/09-case-09/codex/codex_events.jsonl",
+            "JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/09-case-09/codex/codex_events.jsonl",
             "should_trigger set, but skill selection signal was unavailable for this run."
           ],
           "artifacts": {
-            "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/09-case-09/codex",
-            "final": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/09-case-09/codex/final.txt",
-            "stdout": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/09-case-09/codex/stdout.txt",
-            "stderr": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/09-case-09/codex/stderr.txt",
-            "jsonl": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/09-case-09/codex/codex_events.jsonl"
+            "dir": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/09-case-09/codex",
+            "final": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/09-case-09/codex/final.txt",
+            "stdout": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/09-case-09/codex/stdout.txt",
+            "stderr": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/09-case-09/codex/stderr.txt",
+            "jsonl": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/09-case-09/codex/codex_events.jsonl"
           },
           "metrics": {
             "trace": {
@@ -623,7 +623,7 @@
       ],
       "tier2_findings": [],
       "warnings": [
-        "[codex] JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/09-case-09/codex/codex_events.jsonl",
+        "[codex] JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/09-case-09/codex/codex_events.jsonl",
         "[codex] should_trigger set, but skill selection signal was unavailable for this run."
       ]
     },
@@ -636,7 +636,7 @@
       "prepend_skill": true,
       "timeout_profile": "default",
       "timeout_sec": 60.0,
-      "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/10-case-10",
+      "dir": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/10-case-10",
       "runners": {
         "codex": {
           "runner": "codex",
@@ -651,15 +651,15 @@
           ],
           "tier2_findings": [],
           "warnings": [
-            "JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/10-case-10/codex/codex_events.jsonl",
+            "JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/10-case-10/codex/codex_events.jsonl",
             "should_trigger set, but skill selection signal was unavailable for this run."
           ],
           "artifacts": {
-            "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/10-case-10/codex",
-            "final": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/10-case-10/codex/final.txt",
-            "stdout": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/10-case-10/codex/stdout.txt",
-            "stderr": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/10-case-10/codex/stderr.txt",
-            "jsonl": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/10-case-10/codex/codex_events.jsonl"
+            "dir": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/10-case-10/codex",
+            "final": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/10-case-10/codex/final.txt",
+            "stdout": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/10-case-10/codex/stdout.txt",
+            "stderr": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/10-case-10/codex/stderr.txt",
+            "jsonl": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/10-case-10/codex/codex_events.jsonl"
           },
           "metrics": {
             "trace": {
@@ -694,7 +694,7 @@
       ],
       "tier2_findings": [],
       "warnings": [
-        "[codex] JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/10-case-10/codex/codex_events.jsonl",
+        "[codex] JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/10-case-10/codex/codex_events.jsonl",
         "[codex] should_trigger set, but skill selection signal was unavailable for this run."
       ]
     },
@@ -707,7 +707,7 @@
       "prepend_skill": false,
       "timeout_profile": "default",
       "timeout_sec": 60.0,
-      "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/11-case-11",
+      "dir": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/11-case-11",
       "runners": {
         "codex": {
           "runner": "codex",
@@ -721,15 +721,15 @@
           ],
           "tier2_findings": [],
           "warnings": [
-            "JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/11-case-11/codex/codex_events.jsonl",
+            "JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/11-case-11/codex/codex_events.jsonl",
             "should_trigger set, but skill selection signal was unavailable for this run."
           ],
           "artifacts": {
-            "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/11-case-11/codex",
-            "final": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/11-case-11/codex/final.txt",
-            "stdout": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/11-case-11/codex/stdout.txt",
-            "stderr": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/11-case-11/codex/stderr.txt",
-            "jsonl": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/11-case-11/codex/codex_events.jsonl"
+            "dir": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/11-case-11/codex",
+            "final": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/11-case-11/codex/final.txt",
+            "stdout": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/11-case-11/codex/stdout.txt",
+            "stderr": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/11-case-11/codex/stderr.txt",
+            "jsonl": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/11-case-11/codex/codex_events.jsonl"
           },
           "metrics": {
             "trace": {
@@ -763,7 +763,7 @@
       ],
       "tier2_findings": [],
       "warnings": [
-        "[codex] JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/11-case-11/codex/codex_events.jsonl",
+        "[codex] JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/11-case-11/codex/codex_events.jsonl",
         "[codex] should_trigger set, but skill selection signal was unavailable for this run."
       ]
     },
@@ -776,7 +776,7 @@
       "prepend_skill": false,
       "timeout_profile": "default",
       "timeout_sec": 60.0,
-      "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/12-case-12",
+      "dir": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/12-case-12",
       "runners": {
         "codex": {
           "runner": "codex",
@@ -790,15 +790,15 @@
           ],
           "tier2_findings": [],
           "warnings": [
-            "JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/12-case-12/codex/codex_events.jsonl",
+            "JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/12-case-12/codex/codex_events.jsonl",
             "should_trigger set, but skill selection signal was unavailable for this run."
           ],
           "artifacts": {
-            "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/12-case-12/codex",
-            "final": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/12-case-12/codex/final.txt",
-            "stdout": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/12-case-12/codex/stdout.txt",
-            "stderr": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/12-case-12/codex/stderr.txt",
-            "jsonl": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/12-case-12/codex/codex_events.jsonl"
+            "dir": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/12-case-12/codex",
+            "final": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/12-case-12/codex/final.txt",
+            "stdout": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/12-case-12/codex/stdout.txt",
+            "stderr": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/12-case-12/codex/stderr.txt",
+            "jsonl": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/12-case-12/codex/codex_events.jsonl"
           },
           "metrics": {
             "trace": {
@@ -832,7 +832,7 @@
       ],
       "tier2_findings": [],
       "warnings": [
-        "[codex] JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/12-case-12/codex/codex_events.jsonl",
+        "[codex] JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/12-case-12/codex/codex_events.jsonl",
         "[codex] should_trigger set, but skill selection signal was unavailable for this run."
       ]
     },
@@ -845,7 +845,7 @@
       "prepend_skill": false,
       "timeout_profile": "default",
       "timeout_sec": 60.0,
-      "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/13-case-13",
+      "dir": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/13-case-13",
       "runners": {
         "codex": {
           "runner": "codex",
@@ -857,15 +857,15 @@
           ],
           "tier2_findings": [],
           "warnings": [
-            "JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/13-case-13/codex/codex_events.jsonl",
+            "JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/13-case-13/codex/codex_events.jsonl",
             "should_trigger set, but skill selection signal was unavailable for this run."
           ],
           "artifacts": {
-            "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/13-case-13/codex",
-            "final": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/13-case-13/codex/final.txt",
-            "stdout": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/13-case-13/codex/stdout.txt",
-            "stderr": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/13-case-13/codex/stderr.txt",
-            "jsonl": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/13-case-13/codex/codex_events.jsonl"
+            "dir": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/13-case-13/codex",
+            "final": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/13-case-13/codex/final.txt",
+            "stdout": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/13-case-13/codex/stdout.txt",
+            "stderr": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/13-case-13/codex/stderr.txt",
+            "jsonl": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/13-case-13/codex/codex_events.jsonl"
           },
           "metrics": {
             "trace": {
@@ -897,7 +897,7 @@
       ],
       "tier2_findings": [],
       "warnings": [
-        "[codex] JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/13-case-13/codex/codex_events.jsonl",
+        "[codex] JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/13-case-13/codex/codex_events.jsonl",
         "[codex] should_trigger set, but skill selection signal was unavailable for this run."
       ]
     },
@@ -910,7 +910,7 @@
       "prepend_skill": true,
       "timeout_profile": "default",
       "timeout_sec": 60.0,
-      "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/14-case-14",
+      "dir": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/14-case-14",
       "runners": {
         "codex": {
           "runner": "codex",
@@ -925,15 +925,15 @@
           ],
           "tier2_findings": [],
           "warnings": [
-            "JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/14-case-14/codex/codex_events.jsonl",
+            "JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/14-case-14/codex/codex_events.jsonl",
             "should_trigger set, but skill selection signal was unavailable for this run."
           ],
           "artifacts": {
-            "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/14-case-14/codex",
-            "final": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/14-case-14/codex/final.txt",
-            "stdout": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/14-case-14/codex/stdout.txt",
-            "stderr": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/14-case-14/codex/stderr.txt",
-            "jsonl": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/14-case-14/codex/codex_events.jsonl"
+            "dir": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/14-case-14/codex",
+            "final": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/14-case-14/codex/final.txt",
+            "stdout": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/14-case-14/codex/stdout.txt",
+            "stderr": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/14-case-14/codex/stderr.txt",
+            "jsonl": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/14-case-14/codex/codex_events.jsonl"
           },
           "metrics": {
             "trace": {
@@ -968,7 +968,7 @@
       ],
       "tier2_findings": [],
       "warnings": [
-        "[codex] JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/14-case-14/codex/codex_events.jsonl",
+        "[codex] JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/14-case-14/codex/codex_events.jsonl",
         "[codex] should_trigger set, but skill selection signal was unavailable for this run."
       ]
     },
@@ -981,7 +981,7 @@
       "prepend_skill": true,
       "timeout_profile": "default",
       "timeout_sec": 60.0,
-      "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/15-case-15",
+      "dir": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/15-case-15",
       "runners": {
         "codex": {
           "runner": "codex",
@@ -994,15 +994,15 @@
           ],
           "tier2_findings": [],
           "warnings": [
-            "JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/15-case-15/codex/codex_events.jsonl",
+            "JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/15-case-15/codex/codex_events.jsonl",
             "should_trigger set, but skill selection signal was unavailable for this run."
           ],
           "artifacts": {
-            "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/15-case-15/codex",
-            "final": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/15-case-15/codex/final.txt",
-            "stdout": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/15-case-15/codex/stdout.txt",
-            "stderr": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/15-case-15/codex/stderr.txt",
-            "jsonl": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/15-case-15/codex/codex_events.jsonl"
+            "dir": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/15-case-15/codex",
+            "final": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/15-case-15/codex/final.txt",
+            "stdout": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/15-case-15/codex/stdout.txt",
+            "stderr": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/15-case-15/codex/stderr.txt",
+            "jsonl": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/15-case-15/codex/codex_events.jsonl"
           },
           "metrics": {
             "trace": {
@@ -1035,7 +1035,7 @@
       ],
       "tier2_findings": [],
       "warnings": [
-        "[codex] JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/15-case-15/codex/codex_events.jsonl",
+        "[codex] JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/15-case-15/codex/codex_events.jsonl",
         "[codex] should_trigger set, but skill selection signal was unavailable for this run."
       ]
     },
@@ -1048,7 +1048,7 @@
       "prepend_skill": true,
       "timeout_profile": "default",
       "timeout_sec": 60.0,
-      "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/16-case-16",
+      "dir": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/16-case-16",
       "runners": {
         "codex": {
           "runner": "codex",
@@ -1060,16 +1060,16 @@
           ],
           "tier2_findings": [],
           "warnings": [
-            "JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/16-case-16/codex/codex_events.jsonl",
+            "JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/16-case-16/codex/codex_events.jsonl",
             "No events found in JSONL trace.",
             "should_trigger set, but skill selection signal was unavailable for this run."
           ],
           "artifacts": {
-            "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/16-case-16/codex",
-            "final": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/16-case-16/codex/final.txt",
-            "stdout": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/16-case-16/codex/stdout.txt",
-            "stderr": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/16-case-16/codex/stderr.txt",
-            "jsonl": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/16-case-16/codex/codex_events.jsonl"
+            "dir": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/16-case-16/codex",
+            "final": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/16-case-16/codex/final.txt",
+            "stdout": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/16-case-16/codex/stdout.txt",
+            "stderr": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/16-case-16/codex/stderr.txt",
+            "jsonl": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/16-case-16/codex/codex_events.jsonl"
           },
           "metrics": {
             "trace": {
@@ -1101,7 +1101,7 @@
       ],
       "tier2_findings": [],
       "warnings": [
-        "[codex] JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/16-case-16/codex/codex_events.jsonl",
+        "[codex] JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/16-case-16/codex/codex_events.jsonl",
         "[codex] No events found in JSONL trace.",
         "[codex] should_trigger set, but skill selection signal was unavailable for this run."
       ]
@@ -1114,10 +1114,10 @@
   "decision": "fail",
   "exit_code": 2,
   "artifacts": {
-    "reports_base": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498",
-    "summary": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/summary.json",
-    "scorecard": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/frontend__ui__ui-ux-creative-coding.scorecard.json",
-    "release_manifest": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/release_manifest.json",
-    "junit": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/junit.xml"
+    "reports_base": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498",
+    "summary": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/summary.json",
+    "scorecard": "artifacts/validation/touched-skills-20260329-full/frontend__ui__ui-ux-creative-coding.scorecard.json",
+    "release_manifest": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/release_manifest.json",
+    "junit": "artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/junit.xml"
   }
 }

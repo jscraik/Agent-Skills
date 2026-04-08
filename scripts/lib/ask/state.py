@@ -140,12 +140,12 @@ class SkillState:
                 try:
                     os.close(temp_fd)
                 except OSError:
-                    temp_fd = None
+                    pass
             if temp_path is not None and temp_path.exists():
                 try:
                     temp_path.unlink()
                 except OSError:
-                    temp_path = None
+                    pass
             raise
 
         return final_path

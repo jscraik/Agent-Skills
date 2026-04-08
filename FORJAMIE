@@ -1,0 +1,3 @@
+# FORJAMIE
+
+- **2026-04-08:** 1Password CLI + SSH agent reliability fix: export `SSH_AUTH_SOCK` from `.zprofile` (not only `.zshrc`) and include `brAInwav Development` in `~/.config/1Password/ssh/agent.toml`. Validation checks: `zsh -lc 'ssh-add -l'`, `ssh -T git@github.com`, and `op run --env-file /Users/jamiecraik/.codex/.env -- <command>`.

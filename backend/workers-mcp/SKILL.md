@@ -32,7 +32,7 @@ metadata:
 - Review deployment or runtime safety for a Workers MCP surface.
 
 ## When not to use
-- Standard MCP integrations that do not need Workers hosting or billing/auth complexity. Use [`mcp-builder`](/Users/jamiecraik/dev/agent-skills/backend/mcp-builder/SKILL.md).
+- Standard MCP integrations that do not need Workers hosting or billing/auth complexity. Use [`mcp-builder`](/backend/mcp-builder/SKILL.md).
 - Frontend-only ChatGPT Apps UI work with no server/runtime ownership.
 - Generic Cloudflare app deployment that is not MCP-specific.
 

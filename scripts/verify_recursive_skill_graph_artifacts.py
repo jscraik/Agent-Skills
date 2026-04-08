@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Set, Tuple
 
 RUNNER = "artifacts/skill-graphs/runs"
+REPO_ROOT = Path(__file__).resolve().parents[1]
 
 REQUIRED_BASE_FILES: Set[str] = {
     "run.json",
@@ -33,12 +34,17 @@ REQUIRED_OPTIONAL_BLOCKER_FILES: Dict[str, Set[str]] = {
 DEFAULT_MANIFEST = "artifacts/skill-graphs/pilot/artifact-parity-manifest.json"
 DEFAULT_WAIVER_FILE = "artifacts/skill-graphs/pilot/artifact-parity-waivers.json"
 
-def _make_relative_path(path: Path, base: Path) -> str:
-    """Return relative path if under base, otherwise return absolute path."""
+def _display_path(path: Path) -> str:
+    """Render repo-relative paths when possible and avoid leaking home paths."""
+    resolved = path.resolve()
     try:
-        return str(path.relative_to(base))
+        return str(resolved.relative_to(REPO_ROOT))
     except ValueError:
-        return str(path)
+        home = Path.home().resolve()
+        try:
+            return str(Path("~") / resolved.relative_to(home))
+        except ValueError:
+            return str(resolved)
 
 
 LEGACY_RUN_FILE_SETS = {
@@ -69,10 +75,7 @@ class ArtifactStatus:
 
     @property
     def run_dir_relative(self) -> str:
-        try:
-            return str(self.run_dir.relative_to(Path.cwd()))
-        except ValueError:
-            return str(self.run_dir)
+        return _display_path(self.run_dir)
 
 
 def parse_args() -> argparse.Namespace:
@@ -340,7 +343,7 @@ def scan_run_dirs(explicit: Sequence[str], runs_root: str) -> List[Path]:
     return sorted(p for p in root.glob("run_*") if p.is_dir())
 
 
-def summarize_audits(audits: Sequence[ArtifactStatus]) -> Dict[str, Any]:
+def summarize_audits(audits: Sequence[ArtifactStatus], runs_root: Path) -> Dict[str, Any]:
     counts: Dict[str, int] = {
         "compliant": 0,
         "missing_mandatory": 0,
@@ -351,7 +354,7 @@ def summarize_audits(audits: Sequence[ArtifactStatus]) -> Dict[str, Any]:
         counts[audit.status] = counts.get(audit.status, 0) + 1
     return {
         "generated_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
-        "runs_root": str(_make_relative_path(Path(audits[0].run_dir).parent, Path.cwd()) if audits else Path("artifacts/skill-graphs/runs")),
+        "runs_root": _display_path(runs_root),
         "counts": counts,
         "total_runs": len(audits),
         "run_status_counts": counts,
@@ -395,10 +398,11 @@ def resolve_waiver(audit: ArtifactStatus, waivers: Dict[str, Dict[str, Any]]) ->
 
 def make_manifest(
     audits: Sequence[ArtifactStatus],
+    runs_root: Path,
     run_state_check: bool,
     waivers: Dict[str, Dict[str, Any]],
 ) -> Dict[str, Any]:
-    summary = summarize_audits(audits)
+    summary = summarize_audits(audits, runs_root)
     summary["waived_non_compliant"] = 0
     runs_payload: List[Dict[str, Any]] = []
     for audit in audits:
@@ -471,6 +475,7 @@ def run_prune_empty(audits: Sequence[ArtifactStatus], dry_run: bool) -> Dict[str
 
 def main() -> int:
     args = parse_args()
+    runs_root = Path(args.runs_root).resolve()
     run_dirs = scan_run_dirs(args.run_dir, args.runs_root)
     waivers = load_waivers(Path(args.waiver_file))
 
@@ -484,7 +489,12 @@ def main() -> int:
             if state:
                 audit.notes.append(f"prune_empty={state}")
 
-    manifest = make_manifest(audits, run_state_check=args.run_state_check, waivers=waivers)
+    manifest = make_manifest(
+        audits,
+        runs_root=runs_root,
+        run_state_check=args.run_state_check,
+        waivers=waivers,
+    )
     manifest["prune_empty"] = {
         "enabled": bool(args.prune_empty),
         "dry_run": bool(args.dry_run),
@@ -546,7 +556,12 @@ def main() -> int:
             else:
                 print(
                     json.dumps(
-                        make_manifest(audits, run_state_check=args.run_state_check, waivers=waivers),
+                        make_manifest(
+                            audits,
+                            runs_root=runs_root,
+                            run_state_check=args.run_state_check,
+                            waivers=waivers,
+                        ),
                         indent=2,
                     )
                 )

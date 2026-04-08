@@ -53,10 +53,10 @@ Install a broad, deconflicted frontend design entrypoint that preserves the upst
 ## When not to use
 - Do not use when the request already names or clearly implies the correct narrower skill.
 - Do not use for backend-only work with no UI surface.
-- Do not use for token-layer or design-system changes as the primary task. Use [`design-system`](/Users/jamiecraik/dev/Agent-Skills/frontend/ui/design-system/SKILL.md).
-- Do not use for motion-only or polish-only refinement after the visual direction is already set. Use [`ui-ux-creative-coding`](/Users/jamiecraik/dev/Agent-Skills/frontend/ui/ui-ux-creative-coding/SKILL.md).
-- Do not use for straightforward production UI planning or implementation when the request is already clearly standard product UI. Use [`frontend-ui-design`](/Users/jamiecraik/dev/Agent-Skills/frontend/ui/frontend-ui-design/SKILL.md).
-- Do not use when the user already wants an accessible screen flow, a concrete component plan, or a visually led surface with production-ready structure. Use [`frontend-ui-design`](/Users/jamiecraik/dev/Agent-Skills/frontend/ui/frontend-ui-design/SKILL.md).
+- Do not use for token-layer or design-system changes as the primary task. Use [`design-system`](/frontend/ui/design-system/SKILL.md).
+- Do not use for motion-only or polish-only refinement after the visual direction is already set. Use [`ui-ux-creative-coding`](/frontend/ui/ui-ux-creative-coding/SKILL.md).
+- Do not use for straightforward production UI planning or implementation when the request is already clearly standard product UI. Use [`frontend-ui-design`](/frontend/ui/frontend-ui-design/SKILL.md).
+- Do not use when the user already wants an accessible screen flow, a concrete component plan, or a visually led surface with production-ready structure. Use [`frontend-ui-design`](/frontend/ui/frontend-ui-design/SKILL.md).
 
 ## Required inputs
 - Target UI surface and stack.
@@ -139,14 +139,14 @@ Install a broad, deconflicted frontend design entrypoint that preserves the upst
 ## Routing map
 - `frontend-design` is the umbrella and compatibility entrypoint.
 - Treat it as a front door, not a long-term owner, unless the ambiguity itself is the core job.
-- Use [`frontend-ui-design`](/Users/jamiecraik/dev/Agent-Skills/frontend/ui/frontend-ui-design/SKILL.md) when the work is standard product UI, accessible component planning, or a visually led surface that still needs production-ready structure.
-- Use [`ui-ux-creative-coding`](/Users/jamiecraik/dev/Agent-Skills/frontend/ui/ui-ux-creative-coding/SKILL.md) when the visual thesis already exists and the main task is motion, interaction rhythm, or refinement.
-- Use [`design-system`](/Users/jamiecraik/dev/Agent-Skills/frontend/ui/design-system/SKILL.md) when tokens, aliases, mapped variables, or theme structure are the center of gravity.
+- Use [`frontend-ui-design`](/frontend/ui/frontend-ui-design/SKILL.md) when the work is standard product UI, accessible component planning, or a visually led surface that still needs production-ready structure.
+- Use [`ui-ux-creative-coding`](/frontend/ui/ui-ux-creative-coding/SKILL.md) when the visual thesis already exists and the main task is motion, interaction rhythm, or refinement.
+- Use [`design-system`](/frontend/ui/design-system/SKILL.md) when tokens, aliases, mapped variables, or theme structure are the center of gravity.
 - If the user already asks for one of the narrower skills by name or unmistakable scope, skip this wrapper and use the narrower skill directly.
-- Read [`references/upstream-frontend-design.md`](/Users/jamiecraik/dev/Agent-Skills/frontend/ui/frontend-design/references/upstream-frontend-design.md) when you need the full imported compound-engineering design doctrine, module breakdown, and litmus checks.
+- Read [`references/upstream-frontend-design.md`](/frontend/ui/frontend-design/references/upstream-frontend-design.md) when you need the full imported compound-engineering design doctrine, module breakdown, and litmus checks.
 
 ## Routing matrix contract
-- Use [`frontend/ui/references/skill-routing-matrix-2026.md`](/Users/jamiecraik/dev/agent-skills/frontend/ui/references/skill-routing-matrix-2026.md) before changing trigger wording or overlap examples.
+- Use [`frontend/ui/references/skill-routing-matrix-2026.md`](/frontend/ui/references/skill-routing-matrix-2026.md) before changing trigger wording or overlap examples.
 - Apply the matrix tie-breaker rules exactly:
   - narrow owner beats broad owner;
   - explicit implementation verbs route to `frontend-ui-design`;
@@ -154,12 +154,12 @@ Install a broad, deconflicted frontend design entrypoint that preserves the upst
   - motion-only refinement routes to `ui-ux-creative-coding`.
 
 ## Overlap matrix
-- Read [`references/overlap-matrix.md`](/Users/jamiecraik/dev/Agent-Skills/frontend/ui/frontend-design/references/overlap-matrix.md) before widening this skill's trigger wording.
+- Read [`references/overlap-matrix.md`](/frontend/ui/frontend-design/references/overlap-matrix.md) before widening this skill's trigger wording.
 - The matrix documents the boundary between this wrapper and `frontend-ui-design`, `ui-ux-creative-coding`, and `design-system`, with examples of when to route immediately instead of triggering this umbrella.
 
 ## Upstream preservation
 - This skill intentionally does not flatten the upstream CE `frontend-design` skill into a weaker summary.
-- The full upstream guidance is preserved in [`references/upstream-frontend-design.md`](/Users/jamiecraik/dev/Agent-Skills/frontend/ui/frontend-design/references/upstream-frontend-design.md).
+- The full upstream guidance is preserved in [`references/upstream-frontend-design.md`](/frontend/ui/frontend-design/references/upstream-frontend-design.md).
 - The local wrapper changes only two things:
   - deconflict broad triggering against stronger local frontend skills;
   - route broad asks into the local frontend skill graph instead of duplicating overlapping procedures.
@@ -183,8 +183,8 @@ Install a broad, deconflicted frontend design entrypoint that preserves the upst
 - Confirm a visual thesis, content plan, and interaction plan exist before implementation recommendations begin.
 - Confirm the narrower local skill is named explicitly when routing is appropriate.
 - Confirm visual verification is part of the completion contract.
-- Confirm trigger coverage in [`references/evals.yaml`](/Users/jamiecraik/dev/Agent-Skills/frontend/ui/frontend-design/references/evals.yaml) still distinguishes this wrapper from nearby skills.
-- Confirm [`references/overlap-matrix.md`](/Users/jamiecraik/dev/Agent-Skills/frontend/ui/frontend-design/references/overlap-matrix.md) still matches the nearby skill descriptions after any local-skill updates.
+- Confirm trigger coverage in [`references/evals.yaml`](/frontend/ui/frontend-design/references/evals.yaml) still distinguishes this wrapper from nearby skills.
+- Confirm [`references/overlap-matrix.md`](/frontend/ui/frontend-design/references/overlap-matrix.md) still matches the nearby skill descriptions after any local-skill updates.
 - Confirm routing and recommendations remain compliant with `frontend/ui/references/design-system-integration-contract.md`.
 - Confirm `frontend/ui/references/skill-routing-matrix-2026.md` still matches this skill's trigger language and handoff rules.
 - Keep scope tight: start with one decisive route choice before expanding into broader planning.
