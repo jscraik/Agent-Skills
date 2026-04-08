@@ -72,7 +72,7 @@ cases:
     prompt: "Run simplify and return exact validation commands with pass/fail/blocked outcomes and skipped-finding reasons."
     acceptance:
       - type: regex
-        value: "(?i)(validation commands|pass|fail|blocked|skipped findings)"
+        value: "(?i)(validation commands|pass|fail|blocked|skipped findings\\s*[:\\-\\(]\\s*\\S+)"
 
   - id: simplify-negative-new-build
     name: negative new feature build

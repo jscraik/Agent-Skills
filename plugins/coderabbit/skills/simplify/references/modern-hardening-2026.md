@@ -37,7 +37,7 @@ Before `Phase 1: Identify Changes`, capture a deterministic baseline:
    - Use PR base commit when available.
    - Fallback to `git merge-base HEAD origin/main` for local cleanup flows.
 2. Record scope artifact:
-   - diff source (`git diff` or `git diff HEAD`),
+   - diff source (`git diff HEAD`),
    - baseline commit SHA,
    - changed file list,
    - exclusions (generated files, lock noise, vendored code) with reason.
@@ -147,7 +147,7 @@ Use additive fields in final simplify output when this overlay is active:
 ```yaml
 schema_version: 1
 modern_overlay: "2026"
-diff_source: "git diff|git diff HEAD"
+diff_source: "git diff HEAD"
 baseline_commit: "<sha>"
 files_reviewed:
   - path: "<path>"
@@ -159,8 +159,10 @@ findings_by_category:
   cross_cutting: []
 fixes_applied: []
 skipped_findings_with_reason: []
-validation_commands: []
-validation_outcomes: []
+validation_evidence:
+  - command: "<exact command>"
+    outcome: "pass|fail|blocked"
+    blocker_reason: "<optional reason when blocked>"
 risk_notes: []
 follow_ups: []
 ```

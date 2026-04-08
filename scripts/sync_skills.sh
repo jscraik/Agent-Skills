@@ -682,6 +682,9 @@ HEADER
     fi
     skill_dir="$(dirname "$skill_path")"
     skill_name="$(basename "$skill_dir")"
+    if is_hidden_flat_skill_name "$skill_name"; then
+      continue
+    fi
     if is_plugin_owned_skill_path "$skill_path"; then
       continue
     fi
@@ -765,6 +768,9 @@ generate_skill_type_index() {
     fi
     skill_dir="$(dirname "$skill_path")"
     skill_name="$(basename "$skill_dir")"
+    if is_hidden_flat_skill_name "$skill_name"; then
+      continue
+    fi
     if is_plugin_owned_skill_path "$skill_path"; then
       continue
     fi

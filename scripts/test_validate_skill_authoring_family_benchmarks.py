@@ -6,8 +6,8 @@ from __future__ import annotations
 import importlib.util
 import sys
 import tempfile
-import unittest
 from pathlib import Path
+import unittest
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
