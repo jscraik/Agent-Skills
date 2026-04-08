@@ -24,7 +24,15 @@ sys.path.append(str(repo_root_path / "utilities" / "skill-builder" / "scripts"))
 
 from ask.envelope import CallResult, ErrorObject, ErrorCode, ExitCode
 from ask.context import find_repo_root
-from ask.commands.skills import list_skills, sync_skills, audit_skill, install_skill, fold_skills, init_skill
+from ask.commands.skills import (
+    list_skills,
+    sync_skills,
+    audit_skill,
+    install_skill,
+    fold_skills,
+    init_skill,
+    extract_family_fail_lines,
+)
 from ask.commands.repo import repo_status, repo_validate, check_hub_stability
 from ask.commands.plugins import init_plugin, install_plugin
 from ask.commands.evals import run_evals, benchmark_portfolio, dashboard_report
@@ -114,16 +122,6 @@ def format_correction(original: str, corrected: str, robot_mode: bool = False) -
     if robot_mode:
         return f"🤖 Robot mode: Interpreting '{original}' as '{corrected}'\n   💡 Tip: Use '{corrected}' for exact matching next time."
     return f"💡 Did you mean: '{corrected}'? (Use --robot to auto-correct)"
-
-
-def _extract_family_fail_lines(stdout: str) -> List[str]:
-    """Extract normalized FAIL lines from family benchmark stdout."""
-    failures: List[str] = []
-    for raw_line in stdout.splitlines():
-        line = raw_line.strip()
-        if line.startswith("- FAIL ") or line.startswith("FAIL "):
-            failures.append(line.lstrip("- "))
-    return failures
 
 
 def build_helpful_error(topic: Optional[str], action: Optional[str], raw_args: List[str], repo_root: Path) -> CallResult:
@@ -860,7 +858,7 @@ def main():
                 if args.action == "audit":
                     family_data = result.data.get("family_benchmarks")
                     if isinstance(family_data, dict) and int(family_data.get("exit_code", 0) or 0) != 0:
-                        fail_lines = _extract_family_fail_lines(str(family_data.get("stdout", "")))
+                        fail_lines = extract_family_fail_lines(str(family_data.get("stdout", "")))
                         if fail_lines:
                             print("\n🔎 Family benchmark failures (first 3):")
                             for fail in fail_lines[:3]:

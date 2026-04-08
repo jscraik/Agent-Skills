@@ -1,6 +1,6 @@
 # Checked-in seed copy for the external helper role consumed by the compound-engineering router.
 # Canonical installed runtime path:
-# /Users/jamiecraik/dev/config/codex/agents/repo-research-analyst/repo-research-analyst.toml
+# /Users/jamiecraik/dev/configs/codex/agents/repo-research-analyst/repo-research-analyst.toml
 
 model = "gpt-5.4"
 model_reasoning_effort = "low"

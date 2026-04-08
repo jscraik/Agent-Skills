@@ -6,7 +6,7 @@ from unittest.mock import patch
 
 # Add scripts/lib to path for ask package imports.
 repo_root = Path(__file__).resolve().parents[1]
-sys.path.append(str(repo_root / "scripts" / "lib"))
+sys.path.insert(0, str(repo_root / "scripts" / "lib"))
 
 from ask.commands.skills import audit_skill, _summarize_family_benchmark_failure
 
@@ -50,7 +50,7 @@ class TestAskSkillsErrors(unittest.TestCase):
             subprocess.CompletedProcess(args=[], returncode=2, stdout=family_stdout, stderr=""),
         ]
 
-        result = audit_skill(repo_root=Path("/tmp/repo"), skill_path="backend/cli-spec", level="strict")
+        result = audit_skill(repo_root=repo_root, skill_path="backend/cli-spec", level="strict")
 
         self.assertEqual(result.status, "error")
         self.assertTrue(result.errors)

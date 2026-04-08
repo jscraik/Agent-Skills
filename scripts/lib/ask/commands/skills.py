@@ -1,11 +1,12 @@
 import os
+import shlex
 import shutil
 import subprocess
 import re
 import sys
 import importlib.util
 from pathlib import Path
-from typing import Optional
+from typing import List, Optional
 from ask.envelope import CallResult, ErrorObject
 from skill_discovery import discover_skill_entries
 
@@ -18,13 +19,19 @@ def _get_python_interpreter() -> str:
     return "python3"
 
 
-def _summarize_family_benchmark_failure(stdout: str, stderr: str, limit: int = 3) -> Optional[str]:
-    """Return a compact summary of FAIL lines from family benchmark output."""
-    fail_lines = []
+def extract_family_fail_lines(stdout: str) -> List[str]:
+    """Extract normalized FAIL lines from family benchmark stdout."""
+    failures: List[str] = []
     for raw_line in stdout.splitlines():
         line = raw_line.strip()
-        if line.startswith("- FAIL ") or line.startswith("FAIL "):
-            fail_lines.append(line.lstrip("- "))
+        if line.startswith(("- FAIL ", "FAIL ")):
+            failures.append(line.lstrip("- "))
+    return failures
+
+
+def _summarize_family_benchmark_failure(stdout: str, stderr: str, limit: int = 3) -> Optional[str]:
+    """Return a compact summary of FAIL lines from family benchmark output."""
+    fail_lines = extract_family_fail_lines(stdout)
 
     if fail_lines:
         head = fail_lines[:limit]
@@ -167,6 +174,7 @@ def audit_skill(repo_root: Path, skill_path: str, level: str = "compat") -> Call
             message = "Family benchmarks validation failed."
             if summary:
                 message = f"{message} First failures: {summary}"
+            quoted_skill_path = shlex.quote(skill_path)
 
             result.status = "error"
             result.errors.append(ErrorObject(
@@ -174,7 +182,7 @@ def audit_skill(repo_root: Path, skill_path: str, level: str = "compat") -> Call
                 message=message,
                 fix_suggestion=(
                     "Inspect data.family_benchmarks for full output, or run: "
-                    f"{python} scripts/validate_skill_authoring_family_benchmarks.py --skill {skill_path} --format text"
+                    f"python3 scripts/validate_skill_authoring_family_benchmarks.py --skill {quoted_skill_path} --format text"
                 ),
             ))
             return result

@@ -5,7 +5,7 @@ Codex plugin package for the existing `compound-engineering-router` workflow ski
 ## Table of Contents
 - [Included Surfaces](#included-surfaces)
 - [Source Of Truth](#source-of-truth)
-- [Verified Agents](#verified-agents)
+- [Agent Dependencies](#agent-dependencies)
 - [Usage](#usage)
 - [Validation](#validation)
 - [Notes](#notes)

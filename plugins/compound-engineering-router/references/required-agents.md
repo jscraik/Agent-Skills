@@ -2,7 +2,7 @@
 
 ## Table of Contents
 - [Purpose](#purpose)
-- [Verified Roles](#verified-roles)
+- [Core Roles](#core-roles)
 - [Checked-In Seeds](#checked-in-seeds)
 - [Route Mapping](#route-mapping)
 - [Validation Note](#validation-note)
@@ -49,4 +49,4 @@ These seed files are recovery and sync artifacts, not plugin runtime surfaces. T
 - `compound-refresh`: usually none by default; bounded investigation support is optional when the refresh scope is broad
 
 ## Validation Note
-These role names were checked against `/Users/jamiecraik/dev/config/codex/config.toml` during plugin sync on `2026-03-23`.
+These role names were checked against the active Codex config during plugin sync on `2026-03-23` (canonical runtime root: `/Users/jamiecraik/dev/configs/codex/`).

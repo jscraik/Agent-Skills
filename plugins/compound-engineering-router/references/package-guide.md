@@ -5,7 +5,7 @@ This package wraps the existing `compound-engineering-router` skill in a Codex p
 ## Table of Contents
 - [Package Layout](#package-layout)
 - [Helper Ownership](#helper-ownership)
-- [Verified External Agents](#verified-external-agents)
+- [External Agent Dependencies](#external-agent-dependencies)
 - [Sync Workflow](#sync-workflow)
 - [Validation Commands](#validation-commands)
 
