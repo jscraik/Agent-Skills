@@ -12,9 +12,12 @@ inputs:
   - optional additional focus areas from the user
 outputs:
   - grouped findings for reuse, quality, and efficiency
+  - optional cross-cutting findings when modern hardening overlay is enabled
   - applied fixes with file-level traceability
   - skipped findings with concise reason
   - final summary confirming fixed items or already-clean status
+  - deterministic validation evidence (command, outcome, blocker reason)
+  - optional baseline metadata (compare base, risk tier map) for high-risk cleanups
 non_goals:
   - introducing new product features unrelated to current diffs
   - broad architecture rewrites outside changed scope
@@ -30,4 +33,6 @@ rollback_procedure: >
 observability: >
   Track simplify runs by recording: diff source used (staged vs unstaged), number of findings
   per review lane (reuse, quality, efficiency), number of applied vs skipped fixes, and whether
-  post-fix validation passed. Spikes in reverted fixes indicate over-aggressive cleanup criteria.
+  post-fix validation passed. When modern hardening is active, also track baseline commit, risk
+  tiers by file, cross-cutting finding counts, and measured vs not-measured efficiency claims.
+  Spikes in reverted fixes indicate over-aggressive cleanup criteria.

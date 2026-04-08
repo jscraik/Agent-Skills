@@ -21,6 +21,7 @@ Run a focused cleanup pass over changed code to improve reuse, quality, and effi
 - [Inputs](#inputs)
 - [Outputs](#outputs)
 - [Workflow](#workflow)
+- [Modern Hardening Overlay (2026)](#modern-hardening-overlay-2026)
 - [Validation](#validation)
 - [Constraints](#constraints)
 - [Anti-patterns](#anti-patterns)
@@ -74,9 +75,9 @@ Do not use this skill for net-new feature development with no existing diff.
 
 ### Phase 2: Launch Three Review Agents in Parallel
 
-Launch all three agents concurrently in one delegation step when possible. Give each agent the full diff, file paths, and the same behavior-preservation constraint.
+If and only if the user explicitly requested subagent delegation, launch all three agents concurrently in one delegation step when possible. Give each agent the full diff, file paths, and the same behavior-preservation constraint.
 
-If the environment does not support true parallel launch, run the same three review passes sequentially with isolated scopes and keep outputs separate.
+If delegation was not explicitly requested, run the same three review passes inline in the main thread. If delegation was requested but the environment does not support true parallel launch, run the three delegated passes sequentially with isolated scopes and keep outputs separate.
 
 #### Agent 1: Code Reuse Review
 
@@ -118,6 +119,31 @@ Review for:
 4. If a finding is a false positive or low value, skip it without debate and continue.
 5. Summarize what was fixed, or explicitly state that code was already clean.
 
+## Modern Hardening Overlay (2026)
+
+Use this additive overlay for high-signal cleanup passes while preserving all existing simplify behavior:
+
+1. Capture an explicit baseline before review:
+   - detect the compare base (PR base when available; fallback to merge-base)
+   - record changed-file scope, exclusions, and diff source
+   - assign light risk tiers so validation depth scales with impact
+2. Run cross-cutting checks in addition to the three core review lanes:
+   - contract drift on exported symbols, schema shapes, and payload contracts
+   - async correctness (cancellation, stale closure, race, dropped promise handling)
+   - observability hygiene (no high-cardinality telemetry in hot paths)
+   - reliability guards (timeouts, retries, backoff, and resource cleanup)
+3. Apply fix-quality gates:
+   - require behavior-preserving rationale for each non-trivial fix
+   - favor smallest reversible edits first
+   - skip speculative micro-optimizations without evidence
+4. Emit deterministic evidence:
+   - validation commands run
+   - pass/fail/blocked outcomes
+   - skipped findings and reasons
+
+Read when you need the full modern checklist and output schema:
+- `references/modern-hardening-2026.md`
+
 ## Validation
 
 Run after fixes:
@@ -151,3 +177,4 @@ Run after fixes:
 ## References
 
 - `../coderabbit/references/coderabbit-docs/finishing-touches-simplify.md`
+- `references/modern-hardening-2026.md`
