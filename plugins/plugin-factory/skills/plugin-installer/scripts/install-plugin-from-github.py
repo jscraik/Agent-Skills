@@ -130,11 +130,6 @@ def _validate_ref_token(ref: str) -> None:
         raise InstallError("Ref must not start with '-'.")
 
 
-def _resolve_commit_sha(owner: str, repo: str, ref: str) -> str:
-    resolved_commit, _, _ = _resolve_commit_provenance(owner, repo, ref)
-    return resolved_commit
-
-
 def _resolve_commit_payload(owner: str, repo: str, ref: str) -> dict[str, object]:
     encoded_ref = urllib.parse.quote(ref, safe="")
     api_url = f"https://api.github.com/repos/{owner}/{repo}/commits/{encoded_ref}"
