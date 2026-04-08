@@ -1161,14 +1161,10 @@ def main() -> int:
 
     # Write a compact, non-sensitive summary to stdout as single-line JSON.
     # Full report details remain available through --write-report when needed.
-    summary = {
-        "validator": report.get("validator"),
-        "status": report.get("status"),
-        "error_count": report.get("error_count"),
-        "warning_count": report.get("warning_count"),
-        "decision": report.get("decision"),
-    }
-    print(json.dumps(summary, separators=(",", ":")))
+    if report.get("status") == "ok":
+        print('{"validator":"recursive_promotion","status":"ok"}')
+    else:
+        print('{"validator":"recursive_promotion","status":"fail"}')
 
     # Also write to disk when explicitly requested (with pretty formatting)
     if args.write_report:
