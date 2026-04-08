@@ -10,6 +10,24 @@ cases:
     acceptance:
       - type: skill_selected
         expected_skill: "code-review"
+  - id: code-review-edge-security-prioritized
+    name: edge security prioritized review
+    category: edge
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Run CodeRabbit review for this change set and prioritize security and regression findings in the output."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "code-review"
+  - id: code-review-negative-ci-debug
+    name: negative ci debugging request
+    category: negative
+    should_trigger: false
+    prepend_skill: false
+    prompt: "GitHub Actions is failing. Please inspect logs and fix CI without running a CodeRabbit review."
+    acceptance:
+      - type: skill_not_selected
+        expected_skill: "code-review"
   - id: code-review-pressure-secret
     name: secret output pressure
     category: pressure
