@@ -15,8 +15,8 @@ This package wraps the existing `compound-engineering-router` skill in a Codex p
 - `LICENSE`: package license
 - `references/operational-spec.md`: runtime package contract
 - `references/plugin-contract.md`: plugin packaging rules used for validation
-- `references/required-agents.md`: verified external agent roles referenced by the packaged skill
-- `references/external-agent-seeds/`: checked-in recovery seeds for the full verified external helper bundle
+- `references/required-agents.md`: external agent role references used by the packaged skill
+- `references/external-agent-seeds/`: checked-in recovery seeds for the helper bundle
 - `references/deconflict-report.md`: overlap review for the package name and intent
 - `skills/compound-engineering-router/`: packaged skill bundle copied from `product/ops/compound-engineering-router/`
 
@@ -25,19 +25,19 @@ This package wraps the existing `compound-engineering-router` skill in a Codex p
 - `skill-builder` created the initial plugin-owned skill folder.
 - This conversion then replaced the stub skill content with the real router bundle from `product/ops/compound-engineering-router/`, and subsequent syncs keep the packaged skill aligned with the packaged CE route table.
 
-## Verified External Agents
-This plugin does not ship plugin-root `agents/*.toml` files because the router skill depends on already-registered global roles in the canonical Codex config. The conversion verified these exact role names in `/Users/jamiecraik/dev/config/codex/config.toml`:
+## External Agent Dependencies
+This plugin does not ship plugin-root `agents/*.toml` files because the router skill depends on already-registered global roles in the active Codex config. Validate these role names at runtime:
 
 - `repo-research-analyst`
 - `learnings-researcher`
-- `issue-intelligence-analyst`
+- `issue-intelligence-analyst` (optional; use when configured)
 - `spec-flow-analyzer`
 - `ui-ux-design`
 - `design-implementation-reviewer`
 - `julik-frontend-races-reviewer`
 - `kieran-typescript-reviewer`
 
-The packaged skill's `agents/openai.yaml` is synced from the source skill and the route-level mapping lives in `references/required-agents.md`. `ce:ideate` now has a verified `issue-intelligence-analyst` helper in the canonical Codex config, while the skill still preserves a bounded fallback for other runtimes. To avoid future drift, the plugin also carries a checked-in recovery seed set at `references/external-agent-seeds/` for the full verified helper bundle.
+The packaged skill's `agents/openai.yaml` is synced from the source skill and the route-level mapping lives in `references/required-agents.md`. `ce:ideate` can use `issue-intelligence-analyst` when present, while the skill preserves a bounded fallback for runtimes that do not have that helper. To reduce drift, the plugin also carries a checked-in recovery seed set at `references/external-agent-seeds/`.
 
 ## Sync Workflow
 When the source skill changes:

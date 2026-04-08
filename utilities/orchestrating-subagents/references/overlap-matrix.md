@@ -19,7 +19,7 @@ Use this matrix to keep `orchestrating-subagents` focused on Codex-native delega
 | "Convert this old orchestrating-swarms prompt into Codex subagents." | Legacy workflow translation into Codex-native orchestration | `orchestrating-subagents` |
 | "Create a new reviewer role for my Codex config." | Role creation or update | `codex-agent-builder` |
 | "Set up worktrees so multiple agents can edit safely." | Checkout isolation strategy and worktree operations | `using-git-worktrees` |
-| "I just need to know how Codex subagents work." | Product guidance and docs-backed explanation | `codex-guide` or `openai-docs` |
+| "I just need to know how Codex subagents work." | Product guidance and docs-backed explanation | `openai-docs` |
 | "Resolve all review comments on this PR in parallel." | PR-thread remediation workflow | `resolve-pr-parallel` |
 | "Implement the approved plan end to end." | Execution of the underlying feature or fix | `ce-work` |
 | "Design or harden a recurring Codex automation." | Automation architecture, not one-off orchestration | `codex-automation-architect` |

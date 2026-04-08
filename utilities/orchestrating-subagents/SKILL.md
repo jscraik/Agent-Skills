@@ -41,7 +41,7 @@ Do not use this skill when:
 - The user wants a normal single-agent implementation with no delegation.
 - The user only wants to create, install, or update a role definition. Route that part to `codex-agent-builder`.
 - The main need is isolated checkouts or parallel write safety via worktrees. Route to `using-git-worktrees`.
-- The task is a generic Codex product question with no orchestration design need. Route to `codex-guide` or `openai-docs`.
+- The task is a generic Codex product question with no orchestration design need. Route to `openai-docs`.
 
 ## Required context and assumptions
 - The user has explicitly permitted subagent or parallel-agent work.
@@ -51,6 +51,7 @@ Do not use this skill when:
 - Existing installed roles are preferred over inventing new ones. If a genuinely missing role blocks the design, co-trigger `codex-agent-builder`.
 
 ## Deliverables and results
+- A response that can be emitted as `schema_version: 1` structured output when the caller requests schema-bound output mode.
 - A Codex-native orchestration plan or execution flow.
 - A recommended role roster using installed agents first.
 - A write strategy decision:
@@ -74,7 +75,7 @@ Do not use this skill when:
 
 3. **Choose the smallest useful roster**
    - Use `explorer` for read-only codebase mapping and file discovery.
-   - Use `reviewer` for general correctness, regression, and missing-test review when no narrower reviewer is already the clear fit.
+   - Use `correctness-reviewer` for general correctness, regression, and missing-test review when no narrower reviewer is already the clear fit.
    - Use `framework-docs-researcher` for official docs and version-specific API verification.
    - Use specialist reviewers such as `security-sentinel`, `performance-oracle`, `architecture-strategist`, or language reviewers when the request is clearly specialized.
    - Use `worker` for bounded implementation tasks with explicit file ownership.
@@ -122,6 +123,7 @@ Required gates:
 6. Finished outputs are reviewed and integrated before completion is reported.
 
 ## Constraints and safety
+- Redact secrets, credentials, tokens, and sensitive data by default.
 - Start read-only unless the delegated work genuinely requires edits.
 - Subagents inherit the parent sandbox and approvals posture; keep least privilege unless there is a clear reason to widen it.
 - Never run same-file or same-surface write fan-out in one checkout.
@@ -144,7 +146,7 @@ Required gates:
 - Preserve the useful doctrine from upstream skills, but translate it into the real Codex runtime rather than emulating another tool's internals.
 
 ## Variation and adaptation
-- For PR review, prefer a read-only roster such as `explorer` + `reviewer` + one or two specialists.
+- For PR review, prefer a read-only roster such as `explorer` + `correctness-reviewer` + one or two specialists.
 - For docs-backed implementation, pair `explorer` or `worker` with `framework-docs-researcher`.
 - For long-running checks, add `monitor` instead of tying up the main thread.
 - For write-heavy multi-slice implementation, either partition file ownership tightly or route to `using-git-worktrees`.
@@ -156,11 +158,11 @@ Required gates:
 - You can keep parallel edits safe by choosing worktrees or narrower ownership when needed.
 
 ## Examples
-- "Spawn one agent per review concern on this branch, wait for all of them, and summarize the findings."
-- "Translate this old swarm workflow into Codex subagents and use the roles we already have installed."
-- "Use explorer, reviewer, and framework-docs-researcher to audit this PR against main."
-- "Fan out implementation across two independent directories, but only if the write boundaries are safe; otherwise tell me to use worktrees."
-- "Design the smallest useful Codex subagent roster for a flaky UI bug and a long-running verification loop."
+- "On branch `codex/fix-payment-timeouts`, spawn one review specialist per concern and give me one merged findings report before any code edits."
+- "I have an old orchestrating-swarms prompt from last quarter. Convert it to Codex subagents without changing the execution intent."
+- "For PR #482, run `explorer`, `correctness-reviewer`, and `framework-docs-researcher` in read-only mode and summarize blockers first."
+- "I need parallel edits in `apps/api/` and `docs/`. Only do fan-out if write scopes are disjoint; otherwise route me to worktrees."
+- "Help me design the smallest safe subagent roster for a flaky checkout flow plus a long-running verification monitor."
 
 ## References
 - `references/codex-subagents-2026.md`

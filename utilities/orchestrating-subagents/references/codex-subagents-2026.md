@@ -54,7 +54,7 @@ This environment already includes a strong installed roster:
 - `architecture-strategist`
 - multiple language-specific reviewers
 
-The main general-purpose roster gap for Codex-native review fan-out was a lightweight `reviewer` role, which this conversion adds.
+For general-purpose review fan-out, use `correctness-reviewer` as the default base reviewer and add narrower specialists only when justified.
 
 ## Implications for this skill
 - Keep the root agent as the orchestrator.

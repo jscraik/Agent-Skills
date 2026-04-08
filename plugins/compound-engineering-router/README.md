@@ -27,19 +27,19 @@ Codex plugin package for the existing `compound-engineering-router` workflow ski
 
 When updating the router logic, keep the packaged skill bundle aligned with the source skill until the plugin becomes the canonical maintenance path.
 
-## Verified Agents
-The packaged skill depends on globally configured agent roles rather than plugin-owned `.toml` files. These exact roles were verified against `/Users/jamiecraik/dev/config/codex/config.toml` during plugin sync:
+## Agent Dependencies
+The packaged skill depends on globally configured agent roles rather than plugin-owned `.toml` files. Validate these role names against the active Codex config at runtime:
 
 - `repo-research-analyst`
 - `learnings-researcher`
-- `issue-intelligence-analyst`
+- `issue-intelligence-analyst` (optional; use when configured)
 - `spec-flow-analyzer`
 - `ui-ux-design`
 - `design-implementation-reviewer`
 - `julik-frontend-races-reviewer`
 - `kieran-typescript-reviewer`
 
-See `references/required-agents.md` for the route-by-route mapping. `ce:ideate` now has a verified `issue-intelligence-analyst` route when issue-tracker intent is active, while the skill itself still keeps a bounded direct fallback for runtimes that lack the helper. The package also includes a checked-in seed set at `references/external-agent-seeds/` for the full verified helper bundle so dependencies can be reinstalled deterministically instead of relying on one live workstation copy.
+See `references/required-agents.md` for the route-by-route mapping. `ce:ideate` can use `issue-intelligence-analyst` when issue-tracker intent is active and the helper is present; otherwise, keep the bounded direct fallback path. The package also includes a checked-in seed set at `references/external-agent-seeds/` so dependencies can be reinstalled deterministically instead of relying on one live workstation copy.
 
 ## Usage
 Validate the package:
