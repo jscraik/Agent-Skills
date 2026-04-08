@@ -17,8 +17,7 @@ PSScriptAnalyzer runs on files with the following extensions:
 You can enable or disable PSScriptAnalyzer in your CodeRabbit configuration (see Tools reference and Configuration reference).
 ## Links
 
-- PSScriptAnalyzer GitHub
+- [PSScriptAnalyzer GitHub](https://github.com/PowerShell/PSScriptAnalyzer)
 
-- PSScriptAnalyzer documentation
-
+- [PSScriptAnalyzer documentation](https://learn.microsoft.com/powershell/utility-modules/psscriptanalyzer/overview)
 Prisma LintPylint
