@@ -16,6 +16,50 @@ Use the helper scripts based on the task:
 
 Install skills with the helper scripts.
 
+## When To Use
+
+- The user asks to list installable skills from curated or experimental catalogs.
+- The user asks to install one or more skills from `openai/skills` or another GitHub repo/path.
+- The user asks to install skills from a private GitHub repository with existing credentials.
+
+## Inputs
+
+- User intent: list mode vs install mode.
+- Source details: `--repo` + `--path`, or GitHub tree URL.
+- Destination details: optional `--dest` override (default `$CODEX_HOME/skills`).
+- Optional install controls: `--ref`, `--method`, and explicit replacement intent if destination exists.
+
+## Outputs
+
+- A clear summary of what was listed or installed.
+- Concrete paths for installed skills (`$CODEX_HOME/skills/<skill-name>`).
+- Explicit restart reminder after install: "Restart Codex to pick up new skills."
+- If blocked, exact error and next corrective step.
+- Visual catalog assets available for packaging/UI docs:
+  - `assets/skill-installer.png`
+  - `assets/skill-installer-small.svg`
+
+## Constraints and Safety
+
+- Treat repo URLs/paths as untrusted input; never execute user input through shell interpolation.
+- Never overwrite an existing destination skill directory unless the user explicitly requests replacement behavior.
+- Do not expose secrets or tokens in output; redact `GITHUB_TOKEN`, `GH_TOKEN`, and credential-bearing URLs.
+- Network access is limited to GitHub surfaces required by these scripts:
+  - `github.com`
+  - `api.github.com`
+  - `raw.githubusercontent.com`
+  - `codeload.github.com`
+  - `objects.githubusercontent.com`
+- If the requested source is outside the allowlist or ambiguous, stop and ask before proceeding.
+
+## Procedure
+
+1. Classify request as list vs install.
+2. Resolve source explicitly (`--repo`/`--path` or `--url`) and confirm destination.
+3. Run the smallest relevant helper command from the `Scripts` section.
+4. Verify expected outcome (listed skills or installed directory contents).
+5. Report result with exact paths, restart reminder, and any blockers.
+
 ## Core Philosophy
 
 - Safe provenance first: confirm source and destination before writing to disk.
@@ -66,6 +110,29 @@ Reference details:
 - Installs into `$CODEX_HOME/skills/<skill-name>` (defaults to `~/.codex/skills`).
 - Multiple `--path` values install multiple skills in one run, each named from the path basename unless `--name` is supplied.
 - Options: `--ref <ref>` (default `main`), `--dest <path>`, `--method auto|download|git`.
+
+## Validation
+
+- Fail fast: stop at the first failed gate and do not continue to additional install steps.
+- For listing flows, command must exit `0` and return parseable skill rows (or documented JSON output).
+- For install flows, destination must contain `SKILL.md` under `$CODEX_HOME/skills/<skill-name>`.
+- On failures, surface the exact command error and the next minimal retry command.
+
+## Examples
+
+```bash
+# List curated skills
+scripts/list-skills.py
+
+# List experimental skills
+scripts/list-skills.py --path skills/.experimental
+
+# Install one curated skill
+scripts/install-skill-from-github.py --repo openai/skills --path skills/.curated/<skill-name>
+
+# Install from GitHub URL
+scripts/install-skill-from-github.py --url https://github.com/<owner>/<repo>/tree/<ref>/<path>
+```
 
 ## Notes
 

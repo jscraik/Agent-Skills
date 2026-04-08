@@ -1,6 +1,6 @@
 ---
 name: resolve-todo-parallel
-description: Resolve file-based `todos/` items in bounded parallel with dependency ordering and cleanup. Use when the todo sweep itself is the job to coordinate, not generic implementation work.
+description: "WHAT: Resolve file-based `todos/` items with dependency-aware serial or bounded-parallel execution, verification, and cleanup controls. WHEN: Use when a todo-sweep is the primary task, not generic single-feature implementation."
 metadata:
   skill-type: team_automation
 ---
@@ -18,6 +18,7 @@ metadata:
 - [Protected artifacts](#protected-artifacts)
 - [Workflow](#workflow)
 - [Validation](#validation)
+- [Philosophy](#philosophy)
 - [Constraints](#constraints)
 - [Anti-patterns](#anti-patterns)
 - [Examples](#examples)
@@ -112,7 +113,7 @@ Contract rules:
 3. Group todos by dependency and execution risk.
 4. Choose the execution lane:
    - `bounded-parallel` for independent items when the user or runtime explicitly allows delegation
-   - `serial` when items overlap, delegation is unavailable, or explicit parallel approval is missing
+   - `serial` when items overlap, delegation is unavailable, or explicit parallel delegation request is missing
 5. Resolve each todo using the narrowest appropriate implementation workflow.
 6. Verify each resolved todo before marking it done.
 7. Present results before any commit, push, or destructive cleanup.
@@ -120,11 +121,17 @@ Contract rules:
 9. If approved, clean up completed todo files or update their status so the backlog stays actionable.
 
 ## Validation
+- fail fast: stop at the first failed gate, fix or report it, rerun that gate, then continue
 - Verify the repo actually has a `todos/` directory before using this skill.
 - Verify the chosen execution mode matches dependency reality and runtime permission.
 - Verify every resolved todo has implementation evidence and explicit validation.
 - Verify protected compound-engineering artifacts were not deleted by a cleanup pass.
 - Verify cleanup only happens after resolution, not as a speculative tidy-up step.
+
+## Philosophy
+- Keep execution evidence-backed and dependency-aware before parallelism.
+- Favor correctness and traceability over raw throughput in todo sweeps.
+- Preserve project artifacts and user approval boundaries over automatic cleanup.
 
 ## Constraints
 - Do not assume subagents or parallel delegation are allowed; respect the runtime and the user's request.
@@ -167,6 +174,6 @@ Contract rules:
 | [[triage]] | Review pending todo findings before execution begins |
 | [[ce-work]] | Execute a single scoped implementation path instead of a todo sweep |
 | [[ce-compound]] | Capture durable learnings that emerge from repeated todo fixes |
-| [[orchestrating-subagents]] | Coordinate explicit subagent fan-out when runtime and user approval allow it |
+| [[orchestrating-subagents]] | Coordinate explicit subagent fan-out when runtime and an explicit user delegation request allow it |
 
 **Topic map:** [[agent-ops]]

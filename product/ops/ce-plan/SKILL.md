@@ -182,9 +182,9 @@ Source resolution order:
 Rules: preserve checkboxes when updating; carry forward problem frame and requirements from source docs; treat specs as source of truth; recommend spec stage if required; bootstrap only when no artifacts exist; reclassify questions (product blockers to `ce-brainstorm`, technical stay); classify depth as `lightweight | standard | deep`. Increase depth for multi-phase, high-risk, or cross-boundary work.
 
 ### Phase 1: Research local context
-Start inline. If subagents would help and user hasn't pre-approved, ask first.
+Start inline by default.
 
-If approved, run in parallel:
+If the user explicitly requested delegation, run in parallel:
 - `repo-research-analyst` for patterns and conventions
 - `learnings-researcher` for prior learnings
 
@@ -194,7 +194,7 @@ Detect execution-posture signals (test-first, external-delegate) from request or
 ### Phase 2: Run external research conditionally
 Run external research for high-risk or unfamiliar work where best practices affect planning. Lean in when local patterns are absent; skip when strong patterns exist.
 
-Ask before spawning research subagents if not pre-approved. If approved, run `best-practices-researcher` and `framework-docs-researcher`.
+Run `best-practices-researcher` and `framework-docs-researcher` only when the user explicitly requested delegation. Otherwise perform the equivalent external research inline.
 
 Reclassify `lightweight` → `standard` if research reveals external contract surfaces.
 

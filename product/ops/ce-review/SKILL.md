@@ -203,8 +203,7 @@ Add conditional reviewers by target shape: `architecture-strategist` (multi-modu
 
 Execution strategy:
 - use serial review in the main thread by default
-- if multiple independent specialist reviewers would materially improve the review and the user has not already explicitly asked for delegation or sub-agents, ask a short blocking approval question via the platform's blocking question tool (`AskUserQuestion`, `request_user_input`, or `ask_user`) before spawning them
-- when approved, run the selected reviewer set in bounded parallel
+- if multiple independent specialist reviewers would materially improve the review and the user has explicitly asked for delegation or sub-agents, run the selected reviewer set in bounded parallel
 - switch to serial when the session is long, the reviewer set is large, or the platform cannot safely hold all results inline
 - preserve reviewer body context from `compound-engineering.local.md` when available
 

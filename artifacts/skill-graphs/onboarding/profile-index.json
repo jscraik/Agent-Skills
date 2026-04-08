@@ -1,21 +1,21 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-06T17:39:58Z",
-  "decision_date": "2026-04-06",
-  "active_skill_count": 81,
-  "expected_count": 81,
+  "generated_at": "2026-04-08T22:55:29Z",
+  "decision_date": "2026-04-08",
+  "active_skill_count": 79,
+  "expected_count": 0,
   "inventory_policy": "docs/skill-graphs/governance/inventory-policy.json",
   "system_slice_mode": "exclude",
   "summary": {
-    "valid_count": 81,
+    "valid_count": 79,
     "invalid_count": 0,
     "missing_profile_count": 0,
     "missing_binding_count": 0,
-    "missing_legacy_binding_count": 81,
+    "missing_legacy_binding_count": 79,
     "invalid_binding_count": 0,
     "wave_counts": {
       "wave-1-manual": 9,
-      "wave-2-co-pilot": 72
+      "wave-2-co-pilot": 70
     }
   },
   "skills": [
@@ -548,17 +548,6 @@
       "errors": []
     },
     {
-      "skill_path": "product/ops/compound-engineering-router/SKILL.md",
-      "scope_skill": "product/ops/compound-engineering-router",
-      "wave": "wave-2-co-pilot",
-      "profile_path": "product/ops/compound-engineering-router/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
-      "profile_binding_mode": "implicit-default",
-      "delegation_mode": "co-pilot",
-      "status": "valid",
-      "errors": []
-    },
-    {
       "skill_path": "product/ops/decide-build-primitive/SKILL.md",
       "scope_skill": "product/ops/decide-build-primitive",
       "wave": "wave-2-co-pilot",
@@ -827,17 +816,6 @@
       "scope_skill": "utilities/repoprompt",
       "wave": "wave-2-co-pilot",
       "profile_path": "utilities/repoprompt/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
-      "profile_binding_mode": "implicit-default",
-      "delegation_mode": "co-pilot",
-      "status": "valid",
-      "errors": []
-    },
-    {
-      "skill_path": "utilities/skill-builder/SKILL.md",
-      "scope_skill": "utilities/skill-builder",
-      "wave": "wave-2-co-pilot",
-      "profile_path": "utilities/skill-builder/references/task-profile.json",
       "profile_binding": "references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",

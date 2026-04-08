@@ -4,15 +4,15 @@ type: code_quality_review
 purpose: >
   To proactively identify duplicated logic, reinvented utilities, and missed reuse opportunities during code reviews.
 triggers:
-  - user: "Review this PR for duplication."
-  - user: "Does this logic already exist in the codebase?"
-  - lifecycle: "pre-commit review"
+  - review this PR for duplication
+  - determine whether newly introduced logic already exists in the codebase
+  - run during pre-commit or pull-request review
 inputs:
-  - code_review_context: "PR diff or source code"
-  - codebase_access: "Search and read capabilities"
+  - code review context (PR diff or source code)
+  - codebase access (search and read capabilities)
 outputs:
-  - review_comments: "Identification of redundant code"
-  - reuse_guidance: "Paths/symbols to reuse"
+  - review comments identifying redundant code
+  - reuse guidance with paths and symbols to reuse
 non_goals:
   - "General bug hunting (unless related to duplication)"
   - "Automated refactoring (propose, don't execute)"

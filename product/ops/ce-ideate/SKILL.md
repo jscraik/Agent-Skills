@@ -58,7 +58,7 @@ Read when: you need April 2026 standards rationale, ideation philosophy, or outp
 - Treat `ce-ideate` as the compound-engineering stage that decides which ideas are worth exploring next, not as generic brainstorming, planning, or implementation.
 - Ground ideation in the actual repo first. Do not generate detached product advice that ignores the current codebase, docs, or issue signals.
 - Preserve the core mechanism: generate many ideas first, critique the full combined list second, explain only the survivors in detail.
-- Use subagents to widen idea diversity and critique quality only when the user has explicitly asked for delegation or approves it via `request_user_input`; otherwise widen the pool and critique inline without delegating.
+- Use subagents to widen idea diversity and critique quality only when the user has explicitly asked for delegation; otherwise widen the pool and critique inline without delegating.
 - Keep the stage boundary explicit: `ce-ideate` ranks candidate directions, `ce-brainstorm` defines one chosen direction, and later CE stages turn that direction into specs and plans.
 - Stay repo-first by default. Use repo context, `docs/solutions/`, and issue-tracker evidence when relevant. Do not add external market or web research unless the user explicitly asks for it.
 - Be candid. Do not keep weak ideas out of politeness, novelty bias, or a desire to pad the shortlist.
@@ -168,14 +168,12 @@ Generate the full candidate pool before critique.
 
 By default, generate the candidate pool inline in the main thread.
 
-If wider parallel ideation would materially improve coverage and the user has not already explicitly asked for delegation or sub-agents, ask a short blocking approval question via `request_user_input` before spawning ideation subagents.
-
-When approved:
+If the user has explicitly asked for delegation and wider parallel ideation would materially improve coverage:
 - each ideation subagent targets about 7-8 raw ideas
 - the merged list usually lands around 20-30 unique candidates after dedupe
 - the orchestrator may synthesize a few stronger cross-cutting combinations
 
-If approval is not granted, the tool is unavailable, or subagents are unnecessary, generate the full candidate pool inline before critique.
+If delegation was not explicitly requested, the tool is unavailable, or subagents are unnecessary, generate the full candidate pool inline before critique.
 
 Use the frame-selection, merge, dedupe, and cross-cutting synthesis rules in `references/ideation-workflow.md`.
 
@@ -198,9 +196,9 @@ Do not skip from ideation directly to planning or implementation.
 ## Execution rules
 - Use the platform's blocking question tool (`AskUserQuestion`, `request_user_input`, or `ask_user`) and ask one question at a time.
 - Keep the initial codebase scan shallow; do not do deep implementation analysis before ideating.
-- Use `repo-research-analyst` and `learnings-researcher` for bounded grounding only when delegation was explicitly requested or approved; otherwise perform the equivalent grounding inline.
+- Use `repo-research-analyst` and `learnings-researcher` for bounded grounding only when delegation was explicitly requested; otherwise perform the equivalent grounding inline.
 - If an issue-intelligence helper exists, use it for issue-theme clustering. Otherwise do a bounded direct issue-theme pass with available repo and issue tools, and clearly note the fallback.
-- When ideation subagents are explicitly requested or approved, run them in the foreground because their outputs are needed before the next phase.
+- When ideation subagents are explicitly requested, run them in the foreground because their outputs are needed before the next phase.
 - Give ideation subagents starting biases, not hard fences. Cross-cutting ideas are allowed.
 - Keep final survivor scoring in the orchestrator so ranking remains consistent.
 - Prepare the preservation-ready content as you go, but keep the main repo artifact write after the review checkpoint unless handoff, sharing, or session end would otherwise risk losing the work.
