@@ -2,7 +2,7 @@ import os
 import shutil
 import sys
 import tempfile
-import unittest
+from unittest import TestCase, main
 from pathlib import Path
 from unittest import mock
 
@@ -14,7 +14,7 @@ sys.path.append(str(REPO_ROOT / "scripts"))
 from ask.commands import skills as skills_commands
 
 
-class TestAskSkillsSyncSecurity(unittest.TestCase):
+class TestAskSkillsSyncSecurity(TestCase):
     def setUp(self) -> None:
         self.temp_dir = tempfile.mkdtemp(prefix="ask-sync-security-")
         self.repo_root = Path(self.temp_dir) / "repo"
@@ -63,4 +63,4 @@ class TestAskSkillsSyncSecurity(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    unittest.main()
+    main()
