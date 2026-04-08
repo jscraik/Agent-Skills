@@ -21,13 +21,13 @@ Luacheck supports the following configuration files:
 - `luacheckrc.lua`
 
 Luacheck does not require configuration to run. If no configuration file is found, it will use default settings.
-## When we skip LuaCheck
-CodeRabbit will skip running LuaCheck when:
+## When we skip Luacheck
+CodeRabbit will skip running Luacheck when:
 
-- LuaCheck is already running in GitHub workflows.
+- Luacheck is already running in GitHub workflows.
 
 ## Ignored rules
-The following LuaCheck rules are automatically ignored:
+The following Luacheck rules are automatically ignored:
 
 - `W113` - Accessing an undefined global variable
 
@@ -40,8 +40,8 @@ The following LuaCheck rules are automatically ignored:
 - `W612` - A line contains trailing whitespace
 
 ## Profile behavior
-In **Chill** mode, LuaCheck only reports errors (not warnings).
-In **Assertive** mode, LuaCheck reports both errors and warnings.
+In **Chill** mode, Luacheck only reports errors (not warnings).
+In **Assertive** mode, Luacheck reports both errors and warnings.
 ## Features
 Luacheck can detect:
 
@@ -57,6 +57,5 @@ Luacheck can detect:
 
 ## Links
 
-- Luacheck GitHub Repository
-
-- Luacheck Documentation
+- [Luacheck GitHub Repository](https://github.com/lunarmodules/luacheck)
+- [Luacheck Documentation](https://luacheck.readthedocs.io/)

@@ -4,7 +4,7 @@ source: https://docs.coderabbit.ai/configuration/example/other/mintlify-document
 
 # Sample Configuration for Mintlify-based Documentation
 
-```yaml
+````yaml
 # yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
 language: "en-US"
 reviews:
@@ -58,4 +58,4 @@ reviews:
     - path: "changelog.mdx"
       instructions: |
         Verify changelog entries follow consistent formatting: date, clear title, and include relevant links. Check that new entries are added chronologically.
-```
+````

@@ -10,7 +10,11 @@ Custom recipes let you encode your team's repeated finishing-touch tasks -- thin
 
 ## How it works
 
+Custom finishing touches run as named recipes in pull request context. When a recipe is triggered, CodeRabbit sends the recipe instructions with PR metadata and changed files to an agent, then opens a follow-up PR with proposed updates.
+
 ## Supported Platforms
+
+Custom finishing touches are available in repositories where CodeRabbit's finishing touches workflow is enabled. Triggering can happen from PR comments or from the Finishing Touches checkbox interface in the walkthrough.
 
 ## Configuration
 
@@ -52,13 +56,13 @@ You can define up to **5 custom recipes** per repository. Recipe names are match
 
 ## Triggering recipes
 
-```
+```text
 @coderabbitai run cleanup stale imports
 ```
 
 Recipe names can include spaces. Quoting is optional:
 
-```
+```text
 @coderabbitai run "tighten types"
 ```
 
@@ -68,13 +72,13 @@ The command is matched case-insensitively and can appear anywhere in a comment, 
 
 To try out a finishing touch without committing it to your config, use the evaluate command directly in a PR comment:
 
-```
+```text
 @coderabbitai evaluate custom finishing touch --name <name> --instructions <text>
 ```
 
 For example:
 
-```
+```text
 @coderabbitai evaluate custom finishing touch --name "sort imports" --instructions "Sort all import statements alphabetically within each import group in the changed files."
 ```
 

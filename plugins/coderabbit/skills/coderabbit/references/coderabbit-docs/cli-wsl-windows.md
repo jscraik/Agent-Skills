@@ -24,7 +24,7 @@ The CodeRabbit CLI runs on Windows Subsystem for Linux (WSL), allowing you to ac
 
 Control what CodeRabbit analyzes:
 
-```
+```bash
 # Review only uncommitted changes
 coderabbit --type uncommitted
 
@@ -53,7 +53,7 @@ You can edit files in Windows IDEs (VS Code, Visual Studio, etc.) while running 
 
 If you use git in both Windows and WSL, you may need to configure line endings:
 
-```
+```bash
 # In WSL
 git config --global core.autocrlf input
 ```
@@ -68,19 +68,19 @@ If `coderabbit` isn't recognized after installation:
 
 1. **Verify installation**: Check if the binary exists:
 
-   ```
+   ```bash
    ls -la ~/.coderabbit/bin/coderabbit
    ```
 2. **Reload shell configuration**:
 
-   ```
+   ```bash
    source ~/.bashrc
    # or
    source ~/.zshrc
    ```
 3. **Manually add to PATH** (if needed):
 
-   ```
+   ```bash
    echo 'export PATH="$HOME/.coderabbit/bin:$PATH"' >> ~/.bashrc
    source ~/.bashrc
    ```
@@ -129,7 +129,7 @@ You can access your WSL files from Windows Explorer:
 
 You can invoke WSL commands from Windows PowerShell:
 
-```
+```bash
 wsl coderabbit --version
 wsl -e bash -c "cd ~/projects/my-repo && coderabbit"
 ```

@@ -162,7 +162,7 @@ Required gates:
 - "I have an old orchestrating-swarms prompt from last quarter. Convert it to Codex subagents without changing the execution intent."
 - "For PR #482, run `explorer`, `correctness-reviewer`, and `framework-docs-researcher` in read-only mode and summarize blockers first."
 - "I need parallel edits in `apps/api/` and `docs/`. Only do fan-out if write scopes are disjoint; otherwise route me to worktrees."
-- "Help me design the smallest safe subagent roster for a flaky checkout flow plus a long-running verification monitor."
+- "Help me design the smallest safe subagent roster for a flaky checkout flow, plus a long-running verification monitor."
 
 ## References
 - `references/codex-subagents-2026.md`

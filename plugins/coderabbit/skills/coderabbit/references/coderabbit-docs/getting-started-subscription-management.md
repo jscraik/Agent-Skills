@@ -2,6 +2,8 @@
 source: https://docs.coderabbit.ai/getting-started/subscription-management
 ---
 
+# Subscription management
+
 Manage your CodeRabbit subscription, billing, and team seats from your organization settings. Access invoice history, upgrade or downgrade plans, and adjust seat counts as your team grows or changes.
 
 Organization owners and admins can manage subscriptions. See [administrative
@@ -13,15 +15,15 @@ Assignment](/management/seat-assignment).
 
 ## Subscription management tasks
 
-## Billing and invoices
+### Billing and invoices overview
 
 Download invoices and view payment history for accounting
 
-## Plans and seats
+### Plans and seats overview
 
 Change subscription plans and adjust seat counts for your team
 
-## CLI Usage-based Add-On
+### CLI Usage-based Add-On overview
 
 Buy and manage credits for unrestricted CodeRabbit CLI access
 

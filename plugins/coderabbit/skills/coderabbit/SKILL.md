@@ -31,7 +31,7 @@ metadata:
 
 ## Standards snapshot
 - Treat local crawl artifacts as the primary source of truth for CodeRabbit guidance.
-- Prefer retrieval-first answers: locate evidence in `utilities/coderabbit/references/coderabbit-docs` before drafting recommendations.
+- Prefer retrieval-first answers: locate evidence in `plugins/coderabbit/skills/coderabbit/references/coderabbit-docs` before drafting recommendations.
 - Return concrete, actionable steps with file-backed provenance whenever possible.
 - Distinguish local-corpus answers from live/vendor-state assumptions.
 - Escalate missing-doc or stale-doc risk explicitly instead of guessing.
@@ -153,7 +153,7 @@ Contract rules:
 - Prefer 2 or more evidence entries for non-trivial recommendations.
 
 ## Corpus and evidence policy
-- Primary corpus root: `utilities/coderabbit/references/coderabbit-docs`.
+- Primary corpus root: `plugins/coderabbit/skills/coderabbit/references/coderabbit-docs`.
 - First-pass retrieval should use targeted search against slug and body text, then open only relevant files.
 - Treat metadata line `source: https://docs.coderabbit.ai/...` as provenance.
 - Preserve exact command names and config keys from corpus evidence.
@@ -161,7 +161,7 @@ Contract rules:
 
 ## Workflow
 1. Classify user request into one topic: config, commands, CLI, integrations, tools, planner, reporting, or troubleshooting.
-2. Retrieve the smallest evidence set from `utilities/coderabbit/references/coderabbit-docs` using targeted search terms.
+2. Retrieve the smallest evidence set from `plugins/coderabbit/skills/coderabbit/references/coderabbit-docs` using targeted search terms.
 3. Extract exact command/config primitives and summarize with source paths.
 4. Draft an answer tailored to the user's platform and requested depth.
 5. If user requests implementation artifacts, provide file-ready snippets and clearly mark assumptions.
@@ -215,7 +215,7 @@ Fast path for low-latency responses:
 ## References
 - `references/contract.yaml`
 - `references/evals.yaml`
-- Corpus root: `utilities/coderabbit/references/coderabbit-docs`
+- Corpus root: `plugins/coderabbit/skills/coderabbit/references/coderabbit-docs`
 
 ## See Also
 

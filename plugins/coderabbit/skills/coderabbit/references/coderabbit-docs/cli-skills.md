@@ -16,7 +16,7 @@ Skills complement the existing agent integrations documented in the CLI section.
 
 Before installing skills, make sure the CodeRabbit CLI is installed and authenticated:
 
-```
+```bash
 # Install the CodeRabbit CLI
 curl -fsSL https://cli.coderabbit.ai/install.sh | sh
 
@@ -34,7 +34,7 @@ First-class support includes Claude Code, Cursor, Codex, GitHub Copilot, and Gem
 
 Install the CodeRabbit skills package using `npx`:
 
-```
+```bash
 npx skills add coderabbitai/skills
 ```
 
@@ -51,7 +51,7 @@ Customize how skills are installed with these flags:
 
 ### Installation commands
 
-```
+```bash
 # Install for all detected agents in the current project
 npx skills add coderabbitai/skills
 
@@ -112,7 +112,7 @@ The agent continues iterating until no Critical or Warning issues remain, then p
 
 The `autofix` skill fetches unresolved CodeRabbit review threads on your current branch's pull request and helps you apply fixes interactively or in batch.
 
-#### Triggering the skill
+#### Triggering the autofix skill
 
 Activate the skill using natural language inside your AI agent:
 
@@ -122,7 +122,7 @@ Activate the skill using natural language inside your AI agent:
 
 The agent reads the installed `SKILL.md` file, finds your open PR, and pulls unresolved CodeRabbit review threads.
 
-#### How it works
+#### How autofix works
 
 When triggered, the agent will:
 
@@ -160,7 +160,7 @@ In both modes, the skill uses CodeRabbit's "Prompt for AI Agents" (the agent-rea
 
 Use these commands to confirm your CLI setup is working before filing a skills-related issue:
 
-```
+```bash
 # Check the installed CLI version
 coderabbit --version
 

@@ -86,7 +86,7 @@ scripts/init_skill.py <skill-name> --path <output-directory> [--resources script
 5. Generate or refresh `agents/openai.yaml` when needed:
 
 ```bash
-plugins/skill-factory/skills/skill-creator/scripts/generate_openai_yaml.py <path/to/skill-folder> --interface key=value
+python3 plugins/skill-factory/skills/skill-creator/scripts/generate_openai_yaml.py <path/to/skill-folder> --interface key=value
 ```
 
 6. Forward-test complex changes with independent runs that use realistic artifacts and task prompts.
@@ -138,9 +138,11 @@ Safety and quality constraints:
 
 Example requests this skill should handle:
 
-- "Create a `gh-release-notes` skill in `${CODEX_HOME:-$HOME/.codex}/skills`, include `references/contract.yaml` and `references/evals.yaml`, then run strict audit."
-- "Refactor this oversized `SKILL.md` by moving deep implementation details into `references/` while keeping behavior and triggers unchanged."
-- "After I updated trigger phrasing in frontmatter, regenerate `agents/openai.yaml` and confirm metadata parity."
+- "I want to create a `gh-release-notes` skill in `${CODEX_HOME:-$HOME/.codex}/skills`, include `references/contract.yaml` and `references/evals.yaml`, and then run a strict audit."
+- "My `SKILL.md` is too long. Can you move deep implementation details into `references/` while keeping behavior and triggers unchanged?"
+- "I updated trigger phrasing in frontmatter. Please regenerate `agents/openai.yaml` and confirm metadata parity."
+
+Encourage users to phrase requests in their own words and include concrete artifacts when possible.
 
 ## References
 
