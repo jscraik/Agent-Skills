@@ -40,16 +40,6 @@ class Rule:
     remediation: str | None = None
 
 
-@dataclass(frozen=True)
-class SourceRule:
-    level: str
-    code: str
-    message: str
-    pattern: Pattern[str]
-    requires_context: Pattern[str] | None = None
-    remediation: str | None = None
-
-
 SCANNABLE_EXTENSIONS = {
     ".py",
     ".js",
@@ -223,8 +213,8 @@ LINE_RULES: List[Rule] = [
     ),
 ]
 
-SOURCE_RULES: List[SourceRule] = [
-    SourceRule(
+SOURCE_RULES: List[Rule] = [
+    Rule(
         "warn",
         "security.network_usage",
         "Network calls detected in scripts.",
@@ -234,21 +224,21 @@ SOURCE_RULES: List[SourceRule] = [
         ),
         remediation="Document and enforce explicit network allowlists and offline defaults.",
     ),
-    SourceRule(
+    Rule(
         "critical",
         "security.env_harvesting",
         "Environment access combined with network send detected.",
         compile_safe_regex(r"(os\.environ|getenv\(|process\.env).{0,200}(requests\.|fetch\(|axios\.|httpx\.|curl)", re.DOTALL),
         remediation="Avoid sending env-derived data over network; explicitly redact and isolate secrets.",
     ),
-    SourceRule(
+    Rule(
         "critical",
         "security.unsafe_deserialization",
         "Unsafe deserialization API detected (`pickle.loads`/`yaml.load`/`marshal.loads`).",
         compile_safe_regex(r"\b(?:pickle\.loads\(|dill\.loads\(|marshal\.loads\(|yaml\.load\s*\()"),
         remediation="Use safe, typed serialization formats and avoid executing untrusted serialized payloads.",
     ),
-    SourceRule(
+    Rule(
         "warn",
         "security.tls_verification_disabled",
         "TLS verification bypass detected in network configuration.",
@@ -258,7 +248,7 @@ SOURCE_RULES: List[SourceRule] = [
         ),
         remediation="Keep TLS verification enabled and trust only explicit CA bundles when needed.",
     ),
-    SourceRule(
+    Rule(
         "warn",
         "security.potential_exfiltration",
         "File reads combined with network send detected.",
@@ -282,14 +272,14 @@ SOURCE_RULES: List[SourceRule] = [
         ),
         remediation="Review file-access scope and ensure local data is not transmitted off-box unintentionally.",
     ),
-    SourceRule(
+    Rule(
         "warn",
         "security.hex_obfuscation",
         "Hex-encoded string sequence detected (possible obfuscation).",
         compile_safe_regex(r"(?:\\x[0-9a-fA-F]{2}){6,}", allow_nested=True),
         remediation="Replace opaque encoded payloads with readable source or document the benign encoding reason.",
     ),
-    SourceRule(
+    Rule(
         "warn",
         "security.base64_obfuscation",
         "Large base64 payload with decode call detected (possible obfuscation).",

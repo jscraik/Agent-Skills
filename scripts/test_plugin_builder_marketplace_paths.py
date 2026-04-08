@@ -8,6 +8,7 @@ import importlib.util
 import json
 import tempfile
 import unittest
+from unittest import mock
 from pathlib import Path
 
 
@@ -102,6 +103,13 @@ def _run_validate(
 
 
 class PluginBuilderMarketplacePathTests(unittest.TestCase):
+    def test_uv_python_command_requires_uv_binary(self) -> None:
+        with mock.patch.object(plugin_builder.shutil, "which", return_value=None):
+            with self.assertRaises(RuntimeError) as context:
+                plugin_builder._uv_python_command()
+
+        self.assertIn("uv is required", str(context.exception))
+
     def test_repo_root_relative_path_for_plugins_marketplace(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             repo_root = Path(tmpdir)

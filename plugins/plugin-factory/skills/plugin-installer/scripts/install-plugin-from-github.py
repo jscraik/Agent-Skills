@@ -6,6 +6,7 @@ Installer guarantees:
 - source trust allowlist enforced by default
 - plugin staged in quarantine before promotion
 - strict mode runs plugin-builder validation before activation
+- Python helper execution requires uv in PATH
 - rollback journal and provenance manifest persisted for each run
 """
 
@@ -33,6 +34,7 @@ DEFAULT_REF = "main"
 PINNED_REF_RE = re.compile(r"^[0-9a-fA-F]{40}$")
 PLUGIN_NAME_RE = re.compile(r"^[a-z0-9](?:-?[a-z0-9]){0,63}$")
 VERIFICATION_TIME_RE = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$")
+UV_INSTALL_HINT = "Install uv from https://docs.astral.sh/uv/getting-started/installation/."
 SEMVER_RE = re.compile(
     r"^v?(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)"
     r"(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?"
@@ -506,7 +508,7 @@ def _resolve_install_plugin_name(
 def _uv_python_command() -> list[str]:
     uv_bin = shutil.which("uv")
     if not uv_bin:
-        raise InstallError("uv is required for Python execution but was not found in PATH.")
+        raise InstallError(f"uv is required for plugin install validation but was not found in PATH. {UV_INSTALL_HINT}")
     return [uv_bin, "run", "python"]
 
 
@@ -873,7 +875,7 @@ def _rollback_install_state(
 
 
 def _parse_args(argv: list[str]) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Install a Codex plugin from GitHub.")
+    parser = argparse.ArgumentParser(description="Install a Codex plugin from GitHub (requires uv in PATH).")
     parser.add_argument("--url", help="GitHub URL (supports /tree/<ref>/<path>).")
     parser.add_argument("--repo", help="GitHub repo in owner/repo format.")
     parser.add_argument("--path", required=False, help="Plugin directory path inside repo.")
@@ -1048,7 +1050,7 @@ def main(argv: list[str] | None = None) -> int:
             override_name=args.name,
             allow_manifest_name_mismatch=bool(args.allow_manifest_name_mismatch),
         )
-        if not re.fullmatch(r"[a-z0-9](?:-?[a-z0-9]){0,63}", plugin_name):
+        if not PLUGIN_NAME_RE.fullmatch(plugin_name):
             raise InstallError("Plugin name must be kebab-case and <=64 chars.")
 
         stage_root = os.path.join(tmp_dir, "stage")

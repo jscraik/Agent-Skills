@@ -49,6 +49,7 @@ Handoffs:
 - requested plugin surfaces (`skills/`, `hooks.json`, `agents/`, `.mcp.json`, `.app.json`);
 - source URL/path and pinned ref when converting third-party sources;
 - validation depth (`none`, `smoke`, `full`).
+- `uv` available on `PATH` (required for helper script execution).
 
 ## Deliverables
 Produce only what the request needs:
@@ -88,20 +89,20 @@ No two plugin hardening runs should look identical when risk context differs.
 Core commands:
 
 ```bash
-python3 utilities/plugin-builder/scripts/plugin_builder.py inspect-source <source-path-or-repo>
-python3 utilities/plugin-builder/scripts/plugin_builder.py scaffold <plugin-name> --path plugins --with-marketplace
-python3 utilities/plugin-builder/scripts/plugin_builder.py validate <path/to/plugin> --require-marketplace --marketplace-path .agents/plugins/marketplace.json
+uv run python utilities/plugin-builder/scripts/plugin_builder.py inspect-source <source-path-or-repo>
+uv run python utilities/plugin-builder/scripts/plugin_builder.py scaffold <plugin-name> --path plugins --with-marketplace
+uv run python utilities/plugin-builder/scripts/plugin_builder.py validate <path/to/plugin> --require-marketplace --marketplace-path .agents/plugins/marketplace.json
 ```
 
 ## Validation
 Run checks in order and fail fast: stop at first failure, fix it, then rerun from that gate.
 
 ```bash
-python3 utilities/plugin-builder/scripts/plugin_builder.py inspect-local <plugin-name> --path plugins
-python3 utilities/plugin-builder/scripts/plugin_builder.py validate <path/to/plugin> --require-marketplace --marketplace-path .agents/plugins/marketplace.json
-python3 utilities/plugin-builder/scripts/plugin_builder.py audit-compat <path/to/plugin> --marketplace-path .agents/plugins/marketplace.json
-python3 utilities/plugin-builder/scripts/plugin_builder.py audit-marketplace --marketplace-path .agents/plugins/marketplace.json --plugins-path plugins
-python3 utilities/plugin-builder/scripts/plugin_builder.py normalize-marketplace --marketplace-path .agents/plugins/marketplace.json --plugins-path plugins --write
+uv run python utilities/plugin-builder/scripts/plugin_builder.py inspect-local <plugin-name> --path plugins
+uv run python utilities/plugin-builder/scripts/plugin_builder.py validate <path/to/plugin> --require-marketplace --marketplace-path .agents/plugins/marketplace.json
+uv run python utilities/plugin-builder/scripts/plugin_builder.py audit-compat <path/to/plugin> --marketplace-path .agents/plugins/marketplace.json
+uv run python utilities/plugin-builder/scripts/plugin_builder.py audit-marketplace --marketplace-path .agents/plugins/marketplace.json --plugins-path plugins
+uv run python utilities/plugin-builder/scripts/plugin_builder.py normalize-marketplace --marketplace-path .agents/plugins/marketplace.json --plugins-path plugins --write
 ```
 
 Family gate note:

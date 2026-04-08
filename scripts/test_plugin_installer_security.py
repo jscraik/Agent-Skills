@@ -41,6 +41,13 @@ def _write_min_plugin(plugin_dir: Path) -> None:
 
 
 class PluginInstallerSecurityTests(unittest.TestCase):
+    def test_uv_python_command_requires_uv_binary(self) -> None:
+        with mock.patch.object(installer.shutil, "which", return_value=None):
+            with self.assertRaises(installer.InstallError) as context:
+                installer._uv_python_command()
+
+        self.assertIn("uv is required", str(context.exception))
+
     def test_validate_relative_path_rejects_option_like_path(self) -> None:
         with self.assertRaises(installer.InstallError):
             installer._validate_relative_path("--dangerous")

@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-"""Scaffold and validate Codex plugin packages plus marketplace entries."""
+"""Scaffold and validate Codex plugin packages plus marketplace entries.
+
+This tool requires `uv` for Python helper execution in scaffold flows.
+"""
 
 from __future__ import annotations
 
@@ -40,6 +43,7 @@ VALID_POLICY_PRODUCTS = {"CHATGPT", "CODEX", "ATLAS"}
 DEFAULT_POLICY_PRODUCTS = ["CODEX"]
 OPENAI_MARKETPLACE_RELATIVE_PATH = ".agents/plugins/marketplace.json"
 PINNED_COMMIT_RE = re.compile(r"^[0-9a-fA-F]{40}$")
+UV_INSTALL_HINT = "Install uv from https://docs.astral.sh/uv/getting-started/installation/."
 SOURCE_PROVIDER_MANIFESTS = (
     ".claude-plugin/plugin.json",
     ".cursor-plugin/plugin.json",
@@ -410,7 +414,10 @@ def _run_helper(command: list[str], description: str) -> str:
 def _uv_python_command() -> list[str]:
     uv_bin = shutil.which("uv")
     if not uv_bin:
-        raise RuntimeError("uv is required for Python helper execution but was not found in PATH.")
+        raise RuntimeError(
+            "uv is required for Python helper execution in plugin-builder but was not found in PATH. "
+            f"{UV_INSTALL_HINT}"
+        )
     return [uv_bin, "run", "python"]
 
 
@@ -3359,7 +3366,7 @@ def _run_audit_compat(args: argparse.Namespace) -> int:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Scaffold and validate Codex plugin packages."
+        description="Scaffold and validate Codex plugin packages (requires uv in PATH)."
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
 

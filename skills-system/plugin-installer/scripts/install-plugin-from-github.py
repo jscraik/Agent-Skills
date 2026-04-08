@@ -7,6 +7,7 @@ Installer guarantees:
 - plugin staged in quarantine before promotion
 - strict mode runs plugin-builder validation before activation
 - rollback journal and provenance manifest persisted for each run
+- uv is required for Python helper execution during staged validation
 """
 
 from __future__ import annotations
@@ -43,6 +44,7 @@ DEFAULT_TRUSTED_REPOS = {
     "openai/plugins",
     "jscraik/Agent-Skills",
 }
+UV_INSTALL_HINT = "Install uv from https://docs.astral.sh/uv/getting-started/installation/."
 
 
 class InstallError(Exception):
@@ -554,7 +556,10 @@ def _resolve_install_plugin_name(
 def _uv_python_command() -> list[str]:
     uv_bin = shutil.which("uv")
     if not uv_bin:
-        raise InstallError("uv is required for Python execution but was not found in PATH.")
+        raise InstallError(
+            "uv is required for Python execution in this installer but was not found in PATH. "
+            f"{UV_INSTALL_HINT}"
+        )
     return [uv_bin, "run", "python"]
 
 
@@ -921,7 +926,9 @@ def _rollback_install_state(
 
 
 def _parse_args(argv: list[str]) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Install a Codex plugin from GitHub.")
+    parser = argparse.ArgumentParser(
+        description="Install a Codex plugin from GitHub (requires uv in PATH)."
+    )
     parser.add_argument("--url", help="GitHub URL (supports /tree/<ref>/<path>).")
     parser.add_argument("--repo", help="GitHub repo in owner/repo format.")
     parser.add_argument("--path", required=False, help="Plugin directory path inside repo.")

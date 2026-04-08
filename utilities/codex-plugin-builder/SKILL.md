@@ -20,6 +20,7 @@ Default behavior:
 - explicit mention of `codex-plugin-builder` in the request or source document;
 - plugin package path or source location (repo/path/ref) when implementation work is requested;
 - desired validation depth (`smoke` or `full`) if the user already specified one.
+- `uv` available on `PATH` (required by the canonical plugin-builder scripts).
 
 ## Deliverables
 
@@ -38,10 +39,10 @@ Default behavior:
 Run canonical plugin-factory checks:
 
 ```bash
-python3 plugins/plugin-factory/skills/plugin-builder/scripts/plugin_builder.py inspect-local <plugin-name> --path plugins
-python3 plugins/plugin-factory/skills/plugin-builder/scripts/plugin_builder.py validate <path/to/plugin> --require-marketplace --marketplace-path .agents/plugins/marketplace.json
-python3 plugins/plugin-factory/skills/plugin-builder/scripts/plugin_builder.py audit-compat <path/to/plugin> --marketplace-path .agents/plugins/marketplace.json
-python3 plugins/plugin-factory/skills/plugin-builder/scripts/plugin_builder.py audit-marketplace --marketplace-path .agents/plugins/marketplace.json --plugins-path plugins
+uv run python plugins/plugin-factory/skills/plugin-builder/scripts/plugin_builder.py inspect-local <plugin-name> --path plugins
+uv run python plugins/plugin-factory/skills/plugin-builder/scripts/plugin_builder.py validate <path/to/plugin> --require-marketplace --marketplace-path .agents/plugins/marketplace.json
+uv run python plugins/plugin-factory/skills/plugin-builder/scripts/plugin_builder.py audit-compat <path/to/plugin> --marketplace-path .agents/plugins/marketplace.json
+uv run python plugins/plugin-factory/skills/plugin-builder/scripts/plugin_builder.py audit-marketplace --marketplace-path .agents/plugins/marketplace.json --plugins-path plugins
 ```
 
 ## Failure mode
