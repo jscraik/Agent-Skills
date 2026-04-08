@@ -86,7 +86,7 @@ scripts/init_skill.py <skill-name> --path <output-directory> [--resources script
 5. Generate or refresh `agents/openai.yaml` when needed:
 
 ```bash
-scripts/generate_openai_yaml.py <path/to/skill-folder> --interface key=value
+plugins/skill-factory/skills/skill-creator/scripts/generate_openai_yaml.py <path/to/skill-folder> --interface key=value
 ```
 
 6. Forward-test complex changes with independent runs that use realistic artifacts and task prompts.

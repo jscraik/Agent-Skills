@@ -29,13 +29,15 @@ CodeRabbit will skip running LuaCheck when:
 ## Ignored rules
 The following LuaCheck rules are automatically ignored:
 
-- `W113` - accessing undefined variable
+- `W113` - Accessing an undefined global variable
 
-- `W611` - line too long
+- `W611` - A line consists of nothing but whitespace
 
-- `W112` - line contains only whitespace
+- `W112` - Mutating an undefined global variable
 
-- `W631` - line that ends with whitespace
+- `W631` - Line is too long
+
+- `W612` - A line contains trailing whitespace
 
 ## Profile behavior
 In **Chill** mode, LuaCheck only reports errors (not warnings).

@@ -234,7 +234,6 @@ codex-agent-creator:
     agents
   decide-build-primitive: Decide whether the capability should be an agent, skill,
     or automation first
-codex-agent-builder: {}
 codex-automation-architect:
   ce-plan: Plan the automation contract before implementing
   codex-agent-creator: Create the agent role the automation will run under
@@ -451,7 +450,7 @@ openai-docs: {}
 orchestrating-subagents:
   ce-work: Execute a plan once the orchestration decision is made and the task is
     implementation-ready
-  codex-agent-builder: Create or update the agent roles that the orchestration plan
+  codex-agent-creator: Create or update the agent roles that the orchestration plan
     needs
   resolve-pr-parallel: Apply bounded parallelism to PR review resolution rather than
     general subagent orchestration

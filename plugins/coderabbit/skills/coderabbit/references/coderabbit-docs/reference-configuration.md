@@ -33,24 +33,24 @@ Settings related to reviews.
 - **high_level_summary_placeholder**: Placeholder in the PR description that CodeRabbit replaces with the summary. Defaults to "@coderabbitai summary".
 - **high_level_summary_in_walkthrough**: Include the high-level summary in the walkthrough comment. Defaults to false.
 - **auto_title_placeholder**: Add this keyword to the PR title to auto-generate a title. Defaults to "@coderabbitai".
-- **review_status**: Post review status messages in the walkthrough summary comment. Defaults to true.
+- **review_status_post**: Post review status messages in the walkthrough summary comment. Defaults to true.
 - **review_details**: Post review details (ignored files, extra context used, suppressed comments, etc.). Defaults to false.
 - **commit_status**: Set the commit status to 'pending' when review is in progress and 'success' when complete. Defaults to true.
 - **commit_status_fail**: Set commit status to 'failure' when the PR cannot be reviewed. Defaults to false.
-- **walkthrough_collapsible**: Wrap the walkthrough in a Markdown collapsible section. Defaults to true.
+- **collapse_walkthrough**: Wrap the walkthrough in a Markdown collapsible section. Defaults to true.
 - **changed_files_summary**: Include a summary of the changed files in the walkthrough. Defaults to true.
 - **sequence_diagrams**: Include sequence diagrams in the walkthrough. Defaults to true.
 - **estimate_code_review_effort**: Include estimated code review effort in the walkthrough. Defaults to true.
-- **issue_assessment**: Include assessment of how well changes address linked issues. Defaults to true.
+- **assess_linked_issues**: Include assessment of how well changes address linked issues. Defaults to true.
 - **related_issues**: Include potentially related issues in the walkthrough. Defaults to true.
 - **related_prs**: Include potentially related PRs in the walkthrough. Defaults to true.
-- **suggest_labels**: Suggest labels based on the changes. Defaults to true.
+- **suggested_labels**: Suggest labels based on the changes. Defaults to true.
 - **labeling_instructions**: Define allowed labels and when to suggest them. Defaults to [].
 - **auto_apply_labels**: Automatically apply suggested labels to the PR. Defaults to false.
-- **suggest_reviewers**: Suggest reviewers based on the changes. Defaults to true.
+- **suggested_reviewers**: Suggest reviewers based on the changes. Defaults to true.
 - **auto_assign_reviewers**: Automatically assign suggested reviewers. Defaults to false.
 - **poem**: Generate a poem in the walkthrough comment. Defaults to true.
-- **fortune**: Post a fortune message while review is running. Defaults to true.
+- **in_progress_fortune**: Post a fortune message while review is running. Defaults to true.
 - **enable_prompt_for_ai_agents**: Include the 'Prompt for AI Agents' section in inline review comments. Defaults to true.
 - **path_filters**: Specify file patterns to include or exclude using glob patterns. Defaults to [].
 - **path_instructions**: Add path-specific guidance for code review. Defaults to [].
