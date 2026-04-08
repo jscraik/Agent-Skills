@@ -16,6 +16,17 @@ changed_run_count=0
 
 changed_run_dirs=()
 
+refresh_global_parity_manifest() {
+  mkdir -p "$(dirname "$parity_manifest")"
+  # Keep canonical manifest repo-wide even when strict checks are changed-only.
+  if ! python3 scripts/verify_recursive_skill_graph_artifacts.py \
+    --manifest "$parity_manifest" \
+    --runs-root "$runs_root" \
+    > /dev/null; then
+    :
+  fi
+}
+
 require_option_value() {
   local opt="$1"
   if [[ $# -lt 2 || -z "${2:-}" || "${2:-}" == --* ]]; then
@@ -185,18 +196,20 @@ path.write_text(
 )
 PY
       mkdir -p "$(dirname "$parity_manifest")"
-      if ! python3 scripts/verify_recursive_skill_graph_artifacts.py \
-        --manifest "$parity_manifest" \
-        --runs-root "$runs_root" \
-        > /dev/null; then
-        :
-      fi
+      refresh_global_parity_manifest
       exit 0
     fi
   fi
 
   mkdir -p "$(dirname "$parity_manifest")"
-  strict_args=("--strict" "--run-state-check" "--manifest" "$parity_manifest" "--runs-root" "$runs_root")
+  strict_manifest="$parity_manifest"
+  if [[ "$changed_only" -eq 1 && "$changed_run_count" -gt 0 ]]; then
+    strict_manifest="${parity_manifest%.json}.changed-only.json"
+    if [[ "$strict_manifest" == "$parity_manifest" ]]; then
+      strict_manifest="${parity_manifest}.changed-only"
+    fi
+  fi
+  strict_args=("--strict" "--run-state-check" "--manifest" "$strict_manifest" "--runs-root" "$runs_root")
   if [[ "$changed_only" -eq 1 && "$changed_run_count" -gt 0 ]]; then
     for run_dir in "${changed_run_dirs[@]}"; do
       strict_args+=("--run-dir" "$run_dir")
@@ -206,6 +219,7 @@ PY
     echo "[promotion-ci] strict run-parity validation failed" >&2
     status=1
   fi
+  refresh_global_parity_manifest
   if [[ "$status" -ne 0 ]]; then
     exit 2
   fi
@@ -252,7 +266,14 @@ PY
 
 if [[ "$strict_runs" -eq 1 ]]; then
   mkdir -p "$(dirname "$parity_manifest")"
-  strict_args=("--strict" "--run-state-check" "--manifest" "$parity_manifest" "--runs-root" "$runs_root")
+  strict_manifest="$parity_manifest"
+  if [[ "$changed_only" -eq 1 && "$changed_run_count" -gt 0 ]]; then
+    strict_manifest="${parity_manifest%.json}.changed-only.json"
+    if [[ "$strict_manifest" == "$parity_manifest" ]]; then
+      strict_manifest="${parity_manifest}.changed-only"
+    fi
+  fi
+  strict_args=("--strict" "--run-state-check" "--manifest" "$strict_manifest" "--runs-root" "$runs_root")
   if [[ "$changed_only" -eq 1 && "$changed_run_count" -gt 0 ]]; then
     for run_dir in "${changed_run_dirs[@]}"; do
       strict_args+=("--run-dir" "$run_dir")
@@ -262,6 +283,7 @@ if [[ "$strict_runs" -eq 1 ]]; then
     echo "[promotion-ci] strict run-parity validation failed" >&2
     status=1
   fi
+  refresh_global_parity_manifest
 fi
 
 python3 - <<'PY'
