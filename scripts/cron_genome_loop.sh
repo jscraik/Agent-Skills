@@ -23,12 +23,19 @@ log "=== Starting nightly skill genome loop ==="
 # Change to repo root
 cd "$REPO_ROOT"
 
+python_cmd=(python3)
+if command -v mise >/dev/null 2>&1 && command -v uv >/dev/null 2>&1; then
+    python_cmd=(mise exec -- uv run --python 3.12 python)
+elif command -v uv >/dev/null 2>&1; then
+    python_cmd=(uv run --python 3.12 python)
+fi
+
 # Pull latest changes (optional, uncomment if needed)
 # git pull origin main >> "$LOG_FILE" 2>&1
 
 # Run genome loop
 log "Running genome loop..."
-python3 scripts/run_skill_genome_loop.py >> "$LOG_FILE" 2>&1
+"${python_cmd[@]}" scripts/run_skill_genome_loop.py >> "$LOG_FILE" 2>&1
 GENOME_EXIT=$?
 
 if [ $GENOME_EXIT -eq 0 ]; then
@@ -38,7 +45,7 @@ else
 fi
 
 # Check for pending candidates
-PENDING_COUNT=$(python3 scripts/review_candidates.py --list 2>/dev/null | grep -c "Candidate:" || echo "0")
+PENDING_COUNT=$("${python_cmd[@]}" scripts/review_candidates.py --list 2>/dev/null | grep -c "Candidate:" || echo "0")
 log "Pending candidates awaiting review: $PENDING_COUNT"
 
 # If candidates pending, send notification (optional - uncomment and configure)

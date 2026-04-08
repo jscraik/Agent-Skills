@@ -24,10 +24,10 @@ except ModuleNotFoundError as exc:  # pragma: no cover - environment-dependent
     if any(arg in {"-h", "--help"} for arg in sys.argv[1:]):
         print("Process Watch - monitor system processes, resources, and ports")
         print("Requires optional dependencies: psutil, rich, typer")
-        print("Install with: python3 -m pip install psutil rich typer")
+        print("Install with: uv pip install psutil rich typer")
         raise SystemExit(0) from None
     print(
-        f"ERROR: Missing dependency '{missing}'. Install with: python3 -m pip install psutil rich typer",
+        f"ERROR: Missing dependency '{missing}'. Install with: uv pip install psutil rich typer",
         file=sys.stderr,
     )
     raise SystemExit(1) from None
