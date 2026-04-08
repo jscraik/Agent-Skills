@@ -11,21 +11,21 @@ Use this page to record expansion-gate evidence after pilot runs.
 
 ## Readout metadata
 
-- Window: `2026-04-01..2026-04-07`
-- Baseline: `2026-03-25..2026-03-31` via `frozen_snapshot`
-- Total runs: `8`
+- Window: `2026-04-02..2026-04-08`
+- Baseline: `_bootstrap pending_`
+- Total runs: `16`
 - Runs per profile:
-  - `ui-ux-creative-coding`: `2`
-  - `interface-craft`: `2`
-  - `frontend-ui-design`: `2`
-  - `react-ui-patterns`: `2`
+  - `ui-ux-creative-coding`: `4`
+  - `interface-craft`: `4`
+  - `frontend-ui-design`: `4`
+  - `react-ui-patterns`: `4`
 - Reviewer(s): `_pending_`
 
 ## Scorecard
 
-- Repeat failure pattern rate delta: `+6.7pp` (target: `<= -35.0pp` reduction)
-- First-pass acceptance delta: `+0.0pp` (target: `>= +20.0pp`)
-- Iterations median / p90: `2.00` / `4.30` (target: `<=2 / <=4`)
+- Repeat failure pattern rate delta: `n/a` (target: `<= -35.0pp` reduction)
+- First-pass acceptance delta: `n/a` (target: `>= +20.0pp`)
+- Iterations median / p90: `2.00` / `4.50` (target: `<=2 / <=4`)
 - Quality uplift median: `0.165` (target: `>= +0.120`)
 - Critical non-regression compliance: `37.5%` (target: `100.0%`)
 - Terminal non-regression compliance: `100.0%` (monitor recovery separately)
@@ -39,14 +39,13 @@ Use this page to record expansion-gate evidence after pilot runs.
 
 - Decision: `HOLD`
 - Reason:
-  - insufficient sample size (8/40)
-  - ui-ux-creative-coding below required run count (2/10)
-  - interface-craft below required run count (2/10)
-  - frontend-ui-design below required run count (2/10)
-  - react-ui-patterns below required run count (2/10)
+  - insufficient sample size (16/40)
+  - ui-ux-creative-coding below required run count (4/10)
+  - interface-craft below required run count (4/10)
+  - frontend-ui-design below required run count (4/10)
+  - react-ui-patterns below required run count (4/10)
   - critical non-regression compliance below 100%
-  - first-pass acceptance delta below +20pp
-  - repeat failure pattern reduction below 35%
+  - baseline window unavailable for delta KPIs
 
 ## Follow-ups
 

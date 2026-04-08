@@ -18,36 +18,44 @@ Shadow mode runs evaluator + checkpoint adversarial checks without automatic imp
 
 ## Window summary
 
-- Window: `2026-04-01..2026-04-07`
-- Baseline source: `frozen_snapshot` (`2026-03-25..2026-03-31`)
-- Runs total: `8`
+- Window: `2026-04-02..2026-04-08`
+- Baseline source: `bootstrap pending`
+- Runs total: `16`
 - Runs by profile:
-  - `ui-ux-creative-coding`: `2`
-  - `interface-craft`: `2`
-  - `frontend-ui-design`: `2`
-  - `react-ui-patterns`: `2`
+  - `ui-ux-creative-coding`: `4`
+  - `interface-craft`: `4`
+  - `frontend-ui-design`: `4`
+  - `react-ui-patterns`: `4`
 
 ### KPI snapshot
 
-- Repeat failure pattern rate: `25.0%` (delta vs baseline: `+6.7pp`)
-- First-pass acceptance: `0.0%` (delta vs baseline: `+0.0pp`)
-- Iterations median / p90: `2.00` / `4.30`
+- Repeat failure pattern rate: `25.0%` (delta vs baseline: `n/a`)
+- First-pass acceptance: `0.0%` (delta vs baseline: `n/a`)
+- Iterations median / p90: `2.00` / `4.50`
 - Quality uplift median: `0.165`; positive uplift rate: `100.0%`
 - Critical non-regression compliance: `37.5%`
 - Terminal non-regression compliance: `100.0%`
 - Non-regression recovered: `62.5%`
 - Budget compliance: `100.0%`
 - Evaluator flip rate: `8.8%`
-- Capture coverage: `100.0%` (`8/8` runs with capture artifacts)
-- Confidence bucket distribution: `high=0` `medium=3` `low=5` `unknown=0`
-- Injection usage rate: `25.0%` (`2/8` runs, total lessons `2`, suppressed-by-controls runs `0`)
-- Rollout mode distribution: `active=8` `observe_only=0` `off=0` `other=0`
-- Uplift gate decisions (promotion/auto-apply): `pass=0/0` `insufficient_data=8/8` `regressed=0/0`
+- Capture coverage: `100.0%` (`16/16` runs with capture artifacts)
+- Confidence bucket distribution: `high=0` `medium=6` `low=10` `unknown=0`
+- Injection usage rate: `25.0%` (`4/16` runs, total lessons `4`, suppressed-by-controls runs `0`)
+- Rollout mode distribution: `active=16` `observe_only=0` `off=0` `other=0`
+- Uplift gate decisions (promotion/auto-apply): `pass=0/0` `insufficient_data=16/16` `regressed=0/0`
 
 ## Run log
 
 | Run | Profile | Status | Stop reason | Iterations | Uplift | Non-regression | Tokens |
 |---|---|---|---|---:|---:|:---:|---:|
+| run_20260408T064527014926Z_50ef7d_946f024 | frontend-ui-design | escalated | evaluator_conflict | 5 | +0.278 | ❌ | 5685 |
+| run_20260408T064527137168Z_c6442d_94982bd | react-ui-patterns | passed | pass | 2 | +0.158 | ❌ | 389 |
+| run_20260408T064527254102Z_f93d59_94b1174 | react-ui-patterns | passed | pass | 2 | +0.172 | ✅ | 399 |
+| run_20260408T064526421324Z_4270e1_93980eb | ui-ux-creative-coding | passed | pass | 2 | +0.179 | ✅ | 394 |
+| run_20260408T064526538395Z_cbb8d4_93bc4e9 | ui-ux-creative-coding | passed | pass | 2 | +0.046 | ❌ | 378 |
+| run_20260408T064526656356Z_5b4309_93efa81 | interface-craft | passed | pass | 2 | +0.064 | ❌ | 357 |
+| run_20260408T064526774193Z_04dd5b_940d06e | interface-craft | escalated | evaluator_conflict | 1 | +0.113 | ✅ | 157 |
+| run_20260408T064526894446Z_1c1272_943ad51 | frontend-ui-design | passed | pass | 4 | +0.249 | ❌ | 4407 |
 | run_20260407T064405056266Z_04dd5b_8e4d06e | interface-craft | escalated | evaluator_conflict | 1 | +0.113 | ✅ | 157 |
 | run_20260407T064405159287Z_1c1272_8e7ad51 | frontend-ui-design | passed | pass | 4 | +0.249 | ❌ | 4407 |
 | run_20260407T064405259532Z_50ef7d_8e9f024 | frontend-ui-design | escalated | evaluator_conflict | 5 | +0.278 | ❌ | 5685 |
