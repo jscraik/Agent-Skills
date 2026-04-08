@@ -43,6 +43,19 @@ TOPIC_MAPS = {
     "mobile-native", "index",
 }
 
+SKILL_REF_RE = re.compile(r"^[a-z0-9][a-z0-9_-]*$")
+
+
+def normalize_skill_ref(target: str) -> str:
+    """Normalize optional namespace-qualified refs (e.g. plugin-factory:plugin-builder)."""
+    normalized = target.strip()
+    if ":" not in normalized:
+        return normalized
+    _, suffix = normalized.split(":", 1)
+    if SKILL_REF_RE.match(suffix):
+        return suffix
+    return normalized
+
 # ── 1. Extract SKILL.md edges ─────────────────────────────────────────────────
 skill_edges: set[tuple] = set()
 seen_skills: set[str] = set()   # dedup by skill name — matches build-adjacency-yaml.py
@@ -98,7 +111,7 @@ for md in sorted(iter_skill_md_files(ROOT)):
     for row in sa_block.group(1).splitlines():
         m = re.match(r"\|\s*\[\[([^\]]+)\]\]\s*\|", row)
         if m:
-            target = m.group(1).strip()
+            target = normalize_skill_ref(m.group(1))
             if target not in TOPIC_MAPS:
                 skill_edges.add((skill, target))
 
@@ -108,17 +121,19 @@ unknown_targets: set[tuple] = set()
 if ADJ_YAML.exists() and HAS_YAML:
     adj = yaml.safe_load(ADJ_YAML.read_text()) or {}
     defined_nodes = {
-        skill for skill, refs in adj.items()
+        normalize_skill_ref(skill) for skill, refs in adj.items()
         if isinstance(refs, dict)
     }
     for skill, refs in adj.items():
         if not isinstance(refs, dict):
             continue
+        skill_ref = normalize_skill_ref(skill)
         for target in refs:
-            if target not in TOPIC_MAPS:
-                yaml_edges.add((skill, target))
-                if target not in defined_nodes:
-                    unknown_targets.add((skill, target))
+            target_ref = normalize_skill_ref(target)
+            if target_ref not in TOPIC_MAPS:
+                yaml_edges.add((skill_ref, target_ref))
+                if target_ref not in defined_nodes:
+                    unknown_targets.add((skill_ref, target_ref))
 elif not HAS_YAML:
     print("WARNING: pyyaml not installed — skipping adjacency.yaml validation", file=sys.stderr)
     sys.exit(0)
