@@ -285,6 +285,41 @@ def load_approver_count(path: Path) -> Optional[int]:
     return approvers
 
 
+def load_prior_expected_count(path: Path) -> Optional[int]:
+    if not path.exists():
+        return None
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return None
+    value = payload.get("expected_count")
+    if isinstance(value, int) and value > 0:
+        return value
+    return None
+
+
+def resolve_expected_count(
+    *,
+    requested_expected_count: Optional[int],
+    prior_expected_count: Optional[int],
+    active_skill_count: int,
+) -> int:
+    if requested_expected_count is not None and requested_expected_count > 0:
+        expected_count = requested_expected_count
+    elif prior_expected_count is not None and prior_expected_count > 0:
+        expected_count = prior_expected_count
+    else:
+        # Fallback to authoritative inventory size when no explicit non-zero target is provided.
+        expected_count = active_skill_count
+
+    if expected_count < active_skill_count:
+        raise SystemExit(
+            "FAIL governance: expected_count must be >= active_skill_count "
+            f"(expected_count={expected_count}, active_skill_count={active_skill_count})"
+        )
+    return expected_count
+
+
 def blockers_with_sla(items: Iterable[Dict[str, Any]]) -> List[Dict[str, Any]]:
     out: List[Dict[str, Any]] = []
     for item in items:
@@ -297,6 +332,66 @@ def blockers_with_sla(items: Iterable[Dict[str, Any]]) -> List[Dict[str, Any]]:
             }
         )
     return out
+
+
+def _default_blocker_owner(wave_name: str, code: str) -> str:
+    by_code = {
+        "MISSING_CONTROL_FILE": "platform-ops",
+        "TELEMETRY_HEALTH_MISSING": "platform-ops",
+        "TELEMETRY_HEALTH_STALE": "platform-ops",
+        "TELEMETRY_WINDOW_MISMATCH": "platform-ops",
+        "EVENT_ENVELOPE_ERRORS": "telemetry-ops",
+        "APPROVER_POLICY_INVALID": "governance",
+        "APPROVER_CAPACITY": "governance",
+        "MANUAL_SKILL_VALIDATION": "manual-onboarding",
+        "COPILOT_SKILL_VALIDATION": "copilot-onboarding",
+        "WAVE0_NOT_READY": "release-coordination",
+        "WAVE1_NOT_READY": "release-coordination",
+    }
+    if code in by_code:
+        return by_code[code]
+    if wave_name == "wave-0-controls":
+        return "platform-ops"
+    if wave_name == "wave-1-manual":
+        return "manual-onboarding"
+    return "copilot-onboarding"
+
+
+def _default_sla_dates(decision_date: str, wave_name: str) -> Tuple[str, str]:
+    try:
+        base = datetime.fromisoformat(decision_date).date()
+    except ValueError:
+        base = datetime.now(timezone.utc).date()
+
+    due_offsets = {
+        "wave-0-controls": 0,
+        "wave-1-manual": 1,
+        "wave-2-co-pilot": 2,
+    }
+    due_offset = due_offsets.get(wave_name, 1)
+    due_date = (base + timedelta(days=due_offset)).isoformat()
+    escalation_date = (base + timedelta(days=due_offset + 2)).isoformat()
+    return due_date, escalation_date
+
+
+def apply_blocker_sla_defaults(
+    *,
+    wave_name: str,
+    blocker: Dict[str, Any],
+    decision_date: str,
+) -> Dict[str, Any]:
+    code = str(blocker.get("code", "UNKNOWN"))
+    due_default, escalation_default = _default_sla_dates(decision_date, wave_name)
+    owner = blocker.get("owner")
+    due_date = blocker.get("due_date")
+    escalation_date = blocker.get("escalation_date")
+
+    return {
+        **blocker,
+        "owner": owner if owner and owner != "unassigned" else _default_blocker_owner(wave_name, code),
+        "due_date": due_date or due_default,
+        "escalation_date": escalation_date or escalation_default,
+    }
 
 
 def parse_args() -> argparse.Namespace:
@@ -359,13 +454,20 @@ def main() -> int:
         system_slice_mode_override=args.system_slice_mode,
     )
     generated_at = iso_now()
+    profile_index_path = (repo_root / args.profile_index_out).resolve()
+    prior_expected_count = load_prior_expected_count(profile_index_path)
+    expected_count = resolve_expected_count(
+        requested_expected_count=args.expected_count,
+        prior_expected_count=prior_expected_count,
+        active_skill_count=len(entries),
+    )
 
-    if args.expected_count and len(entries) != args.expected_count:
+    if len(entries) != expected_count:
         print(
             json.dumps(
                 {
                     "error": "active skill count mismatch",
-                    "expected": args.expected_count,
+                    "expected": expected_count,
                     "actual": len(entries),
                 },
                 indent=2,
@@ -449,7 +551,7 @@ def main() -> int:
         "generated_at": generated_at,
         "decision_date": args.decision_date,
         "active_skill_count": len(entries),
-        "expected_count": args.expected_count,
+        "expected_count": expected_count,
         "inventory_policy": str(policy.source_path.relative_to(repo_root)),
         "system_slice_mode": policy.system_slice_mode,
         "summary": {
@@ -466,7 +568,6 @@ def main() -> int:
         "skills": profile_rows,
     }
 
-    profile_index_path = (repo_root / args.profile_index_out).resolve()
     profile_index_path.parent.mkdir(parents=True, exist_ok=True)
     profile_index_path.write_text(json.dumps(profile_index, indent=2) + "\n", encoding="utf-8")
 
@@ -648,6 +749,20 @@ def main() -> int:
         )
     wave2_ready = not wave2_blockers
 
+    # Normalize SLA fields so release gating remains actionable.
+    wave0_blockers = [
+        apply_blocker_sla_defaults(wave_name="wave-0-controls", blocker=b, decision_date=args.decision_date)
+        for b in wave0_blockers
+    ]
+    wave1_blockers = [
+        apply_blocker_sla_defaults(wave_name="wave-1-manual", blocker=b, decision_date=args.decision_date)
+        for b in wave1_blockers
+    ]
+    wave2_blockers = [
+        apply_blocker_sla_defaults(wave_name="wave-2-co-pilot", blocker=b, decision_date=args.decision_date)
+        for b in wave2_blockers
+    ]
+
     # Build triage summary for blockers with owners/acceptance criteria
     triage_summary: List[Dict[str, Any]] = []
     for wave_name, wave_blockers in [
@@ -738,12 +853,13 @@ def main() -> int:
         ("wave-2-co-pilot", wave2_blockers),
     ]:
         for blocker in wave_blockers:
-            has_dates = blocker.get("due_date") or blocker.get("escalation_date")
             owner = blocker.get("owner", "unassigned")
-            if has_dates and (not owner or owner == "unassigned"):
+            due_date = blocker.get("due_date")
+            escalation_date = blocker.get("escalation_date")
+            if not owner or owner == "unassigned" or not due_date or not escalation_date:
                 raise SystemExit(
                     f"FAIL governance: {wave_name} blocker {blocker.get('code', 'UNKNOWN')} "
-                    f"has dates but no owner assigned"
+                    "must include owner, due_date, and escalation_date"
                 )
 
     readiness_path = (repo_root / args.wave_readiness_out).resolve()

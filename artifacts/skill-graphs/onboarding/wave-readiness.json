@@ -21,33 +21,33 @@
       {
         "wave": "wave-0-controls",
         "code": "EVENT_ENVELOPE_ERRORS",
-        "owner": "unassigned",
-        "due_date": null,
-        "escalation_date": null,
+        "owner": "telemetry-ops",
+        "due_date": "2026-04-08",
+        "escalation_date": "2026-04-10",
         "acceptance": "triage-needed"
       },
       {
         "wave": "wave-1-manual",
         "code": "WAVE0_NOT_READY",
-        "owner": "unassigned",
-        "due_date": null,
-        "escalation_date": null,
+        "owner": "release-coordination",
+        "due_date": "2026-04-09",
+        "escalation_date": "2026-04-11",
         "acceptance": "triage-needed"
       },
       {
         "wave": "wave-2-co-pilot",
         "code": "WAVE1_NOT_READY",
-        "owner": "unassigned",
-        "due_date": null,
-        "escalation_date": null,
+        "owner": "release-coordination",
+        "due_date": "2026-04-10",
+        "escalation_date": "2026-04-12",
         "acceptance": "triage-needed"
       },
       {
         "wave": "wave-2-co-pilot",
         "code": "EVENT_ENVELOPE_ERRORS",
-        "owner": "unassigned",
-        "due_date": null,
-        "escalation_date": null,
+        "owner": "telemetry-ops",
+        "due_date": "2026-04-10",
+        "escalation_date": "2026-04-12",
         "acceptance": "triage-needed"
       }
     ]
@@ -65,9 +65,9 @@
         {
           "code": "EVENT_ENVELOPE_ERRORS",
           "detail": "Unresolved event envelope errors in decision window: 8",
-          "owner": "unassigned",
-          "due_date": null,
-          "escalation_date": null
+          "owner": "telemetry-ops",
+          "due_date": "2026-04-08",
+          "escalation_date": "2026-04-10"
         }
       ]
     },
@@ -85,9 +85,9 @@
         {
           "code": "WAVE0_NOT_READY",
           "detail": "Wave 1 blocked until Wave 0 controls verification passes",
-          "owner": "unassigned",
-          "due_date": null,
-          "escalation_date": null
+          "owner": "release-coordination",
+          "due_date": "2026-04-09",
+          "escalation_date": "2026-04-11"
         }
       ]
     },
@@ -107,16 +107,16 @@
         {
           "code": "WAVE1_NOT_READY",
           "detail": "Wave 2 blocked until Wave 1 manual onboarding passes",
-          "owner": "unassigned",
-          "due_date": null,
-          "escalation_date": null
+          "owner": "release-coordination",
+          "due_date": "2026-04-10",
+          "escalation_date": "2026-04-12"
         },
         {
           "code": "EVENT_ENVELOPE_ERRORS",
           "detail": "Wave 2 requires zero unresolved event envelope errors (actual=8)",
-          "owner": "unassigned",
-          "due_date": null,
-          "escalation_date": null
+          "owner": "telemetry-ops",
+          "due_date": "2026-04-10",
+          "escalation_date": "2026-04-12"
         }
       ]
     }

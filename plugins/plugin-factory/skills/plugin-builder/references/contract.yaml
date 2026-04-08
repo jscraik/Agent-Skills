@@ -6,15 +6,18 @@ triggers:
   - user asks to scaffold or harden a Codex plugin package
   - user asks to convert a third-party plugin source into Codex structure
   - user asks to validate plugin contract and marketplace compatibility before release
+  - user asks to inject plugin-linked agent roles from existing configs or purpose-built agents
 inputs:
   - plugin name and package root
   - source URL/path and pinned ref when conversion is requested
   - requested plugin surfaces and optional marketplace wiring
   - validation depth and acceptance threshold
+  - optional agent injection mode (`reuse-existing` from `/Users/jamiecraik/dev/configs/codex/agents` or `create-purpose-built` via `codex-agent-builder`)
 outputs:
   - contract-valid plugin package rooted at plugins/<plugin-name>
   - validation summary for plugin contract, compatibility, and marketplace checks
   - deconflict and conversion evidence when external sources are involved
+  - optional role-injection summary with selected/generated role file paths
 non_goals:
   - standalone skill lifecycle hardening prior to plugin packaging
   - pure plugin installation/distribution operations
@@ -23,6 +26,7 @@ risks:
   - conversion drift from incomplete source inspection; mitigated by inspect-before-write workflow
   - marketplace policy drift; mitigated by audit and normalize checks
   - unsafe execution of third-party scripts; mitigated by explicit no-execute posture
+  - role drift across plugin surfaces; mitigated by explicit reuse/create decision and role-file validation
 rollback_procedure: >
   If plugin hardening introduces regressions, remove the generated package surfaces,
   restore the prior plugin directory from git, and rerun scaffold plus validation gates.

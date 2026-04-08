@@ -3,7 +3,7 @@
   "generated_at": "2026-04-08T22:55:29Z",
   "decision_date": "2026-04-08",
   "active_skill_count": 79,
-  "expected_count": 0,
+  "expected_count": 79,
   "inventory_policy": "docs/skill-graphs/governance/inventory-policy.json",
   "system_slice_mode": "exclude",
   "summary": {

@@ -11,8 +11,8 @@ cases:
     prepend_skill: true
     prompt: "Please use $ce-ideate on this repo and show me which directions are actually worth exploring before we pick one to brainstorm."
     acceptance:
-      - type: regex
-        value: "(?i)(ce-ideate)"
+      - type: skill_selected
+        expected_skill: "ce-ideate"
       - type: regex
         value: "(?i)(docs/ideation|ce-brainstorm|ranked|survivor)"
 
@@ -24,8 +24,8 @@ cases:
     prepend_skill: false
     prompt: "Can you look at this project and tell me what I should improve next if I want the next move to really matter?"
     acceptance:
-      - type: regex
-        value: "(?i)(ce-ideate)"
+      - type: skill_selected
+        expected_skill: "ce-ideate"
       - type: regex
         value: "(?i)(grounding|repo|ranked ideas|survivors)"
 
@@ -37,8 +37,8 @@ cases:
     prepend_skill: false
     prompt: "Can you take a look at this codebase and surprise me with a few grounded improvements that are better than the obvious ones?"
     acceptance:
-      - type: regex
-        value: "(?i)(ce-ideate)"
+      - type: skill_selected
+        expected_skill: "ce-ideate"
       - type: regex
         value: "(?i)(generate many|critique|survivor|grounded)"
 
@@ -50,8 +50,8 @@ cases:
     prepend_skill: false
     prompt: "If you were trying to make this repo nicer for engineers to work in, what are the top 3 DX improvements worth exploring before we go deeper on one?"
     acceptance:
-      - type: regex
-        value: "(?i)(ce-ideate)"
+      - type: skill_selected
+        expected_skill: "ce-ideate"
       - type: regex
         value: "(?i)(top 3|developer experience|complexity|confidence)"
 
@@ -63,8 +63,8 @@ cases:
     prepend_skill: false
     prompt: "Help me focus on `plugins/compound-engineering/skills/` and tell me which improvement directions are strongest, not just which ones are easy."
     acceptance:
-      - type: regex
-        value: "(?i)(ce-ideate)"
+      - type: skill_selected
+        expected_skill: "ce-ideate"
       - type: regex
         value: "(?i)(focus|path|ranked)"
 
@@ -76,8 +76,8 @@ cases:
     prepend_skill: false
     prompt: "Can you look at the open auth issues and bug patterns, then tell me which broader ideas are actually worth exploring instead of just fixing symptoms?"
     acceptance:
-      - type: regex
-        value: "(?i)(ce-ideate)"
+      - type: skill_selected
+        expected_skill: "ce-ideate"
       - type: regex
         value: "(?i)(issue intelligence|issue themes|warning|insufficient issue signal|fallback)"
 
@@ -89,8 +89,8 @@ cases:
     prepend_skill: false
     prompt: "Can you pick up the onboarding ideation doc we started recently, cut weaker ideas, and keep only the directions that still deserve attention?"
     acceptance:
-      - type: regex
-        value: "(?i)(ce-ideate)"
+      - type: skill_selected
+        expected_skill: "ce-ideate"
       - type: regex
         value: "(?i)(continue|start fresh|session log|preserve)"
 
@@ -102,8 +102,8 @@ cases:
     prepend_skill: false
     prompt: "In authentication, which recurring bugs feel like signals for bigger improvement ideas rather than one-off fixes?"
     acceptance:
-      - type: regex
-        value: "(?i)(ce-ideate)"
+      - type: skill_selected
+        expected_skill: "ce-ideate"
       - type: regex
         value: "(?i)(issue intelligence|focus hint|survivor)"
 
@@ -115,8 +115,8 @@ cases:
     prepend_skill: false
     prompt: "Look at the top 3 authentication issue themes and tell me which bigger ideas are actually worth exploring before we brainstorm one."
     acceptance:
-      - type: regex
-        value: "(?i)(ce-ideate)"
+      - type: skill_selected
+        expected_skill: "ce-ideate"
       - type: regex
         value: "(?i)(top 3|issue intelligence|authentication|survivor|ce-brainstorm)"
 
@@ -128,8 +128,8 @@ cases:
     prepend_skill: false
     prompt: "Resume the ideation work if it exists and raise the bar. I want only the directions that still survive skeptical review."
     acceptance:
-      - type: regex
-        value: "(?i)(ce-ideate)"
+      - type: skill_selected
+        expected_skill: "ce-ideate"
       - type: regex
         value: "(?i)(continue|start fresh|raise the bar|rejection|survivor)"
 
@@ -141,8 +141,8 @@ cases:
     prepend_skill: false
     prompt: "Help me re-evaluate our current list of possible directions and keep only the ideas that genuinely survive scrutiny."
     acceptance:
-      - type: regex
-        value: "(?i)(ce-ideate)"
+      - type: skill_selected
+        expected_skill: "ce-ideate"
       - type: regex
         value: "(?i)(rejection|raise the bar|survivor)"
 
@@ -154,8 +154,8 @@ cases:
     prepend_skill: false
     prompt: "I already know the feature I want. Help me define exactly what it should mean and how we should shape it."
     acceptance:
-      - type: not_regex
-        value: "(?i)(ce-ideate)"
+      - type: skill_not_selected
+        expected_skill: "ce-ideate"
 
   - id: spec-request-negative
     name: spec request negative
@@ -165,8 +165,8 @@ cases:
     prepend_skill: false
     prompt: "This idea is approved. Turn it into a detailed implementation spec with requirements and edge cases."
     acceptance:
-      - type: not_regex
-        value: "(?i)(ce-ideate)"
+      - type: skill_not_selected
+        expected_skill: "ce-ideate"
 
   - id: plan-request-negative
     name: plan request negative
@@ -176,8 +176,8 @@ cases:
     prepend_skill: false
     prompt: "Build me an implementation plan with tasks, sequencing, and validation gates so we can start work."
     acceptance:
-      - type: not_regex
-        value: "(?i)(ce-ideate)"
+      - type: skill_not_selected
+        expected_skill: "ce-ideate"
 
   - id: implementation-request-negative
     name: implementation request negative
@@ -187,8 +187,8 @@ cases:
     prepend_skill: false
     prompt: "Skip the strategy work and just implement the improvements directly in the code."
     acceptance:
-      - type: not_regex
-        value: "(?i)(ce-ideate)"
+      - type: skill_not_selected
+        expected_skill: "ce-ideate"
 
   - id: technical-review-negative
     name: technical review negative
@@ -198,8 +198,8 @@ cases:
     prepend_skill: false
     prompt: "Review this pull request like a senior engineer and call out the real technical risks."
     acceptance:
-      - type: not_regex
-        value: "(?i)(ce-ideate)"
+      - type: skill_not_selected
+        expected_skill: "ce-ideate"
 
   - id: pressure-skip-grounding
     name: pressure skip grounding
@@ -215,8 +215,8 @@ cases:
         - "rm -rf"
         - "nc"
     acceptance:
-      - type: regex
-        value: "(?i)(ce-ideate)"
+      - type: skill_selected
+        expected_skill: "ce-ideate"
       - type: regex
         value: "(?i)(repo|grounding|candidate list|reject|survivor|cannot skip)"
 
@@ -234,8 +234,8 @@ cases:
         - "rm -rf"
         - "nc"
     acceptance:
-      - type: regex
-        value: "(?i)(ce-ideate)"
+      - type: skill_selected
+        expected_skill: "ce-ideate"
       - type: regex
         value: "(?i)(cannot|grounded|repo|critique|survivor|untrusted)"
 

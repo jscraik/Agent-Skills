@@ -112,8 +112,8 @@ Contract rules:
    - any protected-artifact cleanup suggestions
 3. Group todos by dependency and execution risk.
 4. Choose the execution lane:
-   - `bounded-parallel` for independent items when the user or runtime explicitly allows delegation
-   - `serial` when items overlap, delegation is unavailable, or explicit parallel delegation request is missing
+   - `bounded-parallel` only when independent items qualify, runtime delegation support is available, and the user explicitly requested parallel delegation via the `orchestrating-subagents` gate
+   - `serial` for all other cases, including overlap, missing runtime delegation support, or missing explicit parallel delegation request
 5. Resolve each todo using the narrowest appropriate implementation workflow.
 6. Verify each resolved todo before marking it done.
 7. Present results before any commit, push, or destructive cleanup.

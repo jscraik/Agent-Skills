@@ -197,7 +197,7 @@ Do not skip from ideation directly to planning or implementation.
 - Use the platform's blocking question tool (`AskUserQuestion`, `request_user_input`, or `ask_user`) and ask one question at a time.
 - Keep the initial codebase scan shallow; do not do deep implementation analysis before ideating.
 - Use `repo-research-analyst` and `learnings-researcher` for bounded grounding only when delegation was explicitly requested; otherwise perform the equivalent grounding inline.
-- If an issue-intelligence helper exists, use it for issue-theme clustering. Otherwise do a bounded direct issue-theme pass with available repo and issue tools, and clearly note the fallback.
+- If an issue-intelligence helper exists, use it for issue-theme clustering. Otherwise, do a bounded direct issue-theme pass with available repo and issue tools, and clearly note the fallback.
 - When ideation subagents are explicitly requested, run them in the foreground because their outputs are needed before the next phase.
 - Give ideation subagents starting biases, not hard fences. Cross-cutting ideas are allowed.
 - Keep final survivor scoring in the orchestrator so ranking remains consistent.

@@ -11,8 +11,8 @@ cases:
     prepend_skill: true
     prompt: "Please use $ce-compound-refresh on the auth learnings because the refactor likely made some docs stale."
     acceptance:
-      - type: regex
-        value: "(?i)(ce-compound-refresh)"
+      - type: skill_selected
+        expected_skill: "ce-compound-refresh"
       - type: regex
         value: "(?i)(interactive|autonomous|focused|batch|docs/solutions|Keep|Update|Consolidate|Replace|Archive)"
 
@@ -24,8 +24,8 @@ cases:
     prepend_skill: false
     prompt: "Run ce:compound-refresh mode:autonomous payments and apply any safe stale-doc maintenance without asking me questions."
     acceptance:
-      - type: regex
-        value: "(?i)(ce-compound-refresh)"
+      - type: skill_selected
+        expected_skill: "ce-compound-refresh"
       - type: regex
         value: "(?i)(autonomous|Applied|Recommended|mark.*stale|payments|Consolidate)"
 
@@ -37,8 +37,8 @@ cases:
     prepend_skill: false
     prompt: "Run ce:compound-refresh mode:autofix auth and use the older upstream flag without asking me follow-up questions."
     acceptance:
-      - type: regex
-        value: "(?i)(ce-compound-refresh)"
+      - type: skill_selected
+        expected_skill: "ce-compound-refresh"
       - type: regex
         value: "(?i)(mode:autofix|autonomous|Applied|Recommended|auth)"
 
@@ -50,8 +50,8 @@ cases:
     prepend_skill: false
     prompt: "The CI pattern docs under docs/solutions/patterns probably drifted after the pipeline rewrite. Refresh them against the current code."
     acceptance:
-      - type: regex
-        value: "(?i)(ce-compound-refresh)"
+      - type: skill_selected
+        expected_skill: "ce-compound-refresh"
       - type: regex
         value: "(?i)(pattern docs|learnings first|derived guidance|CI|Replace|Update)"
 
@@ -63,8 +63,8 @@ cases:
     prepend_skill: false
     prompt: "I found an old solution doc during debugging, but it no longer matches the code. Can you refresh it and mark it stale if the replacement evidence is weak?"
     acceptance:
-      - type: regex
-        value: "(?i)(ce-compound-refresh)"
+      - type: skill_selected
+        expected_skill: "ce-compound-refresh"
       - type: regex
         value: "(?i)(stale|replacement evidence|current code|docs/solutions)"
 
@@ -76,8 +76,8 @@ cases:
     prepend_skill: false
     prompt: "Please do a stale-doc sweep across docs/solutions after the platform migration and start with the highest-impact cluster."
     acceptance:
-      - type: regex
-        value: "(?i)(ce-compound-refresh)"
+      - type: skill_selected
+        expected_skill: "ce-compound-refresh"
       - type: regex
         value: "(?i)(broad|triage|cluster|impact|starting area)"
 
@@ -89,8 +89,8 @@ cases:
     prepend_skill: false
     prompt: "Two payment retry learnings now say nearly the same thing after the migration. Refresh the set, choose the canonical doc, and consolidate any overlapping guidance."
     acceptance:
-      - type: regex
-        value: "(?i)(ce-compound-refresh)"
+      - type: skill_selected
+        expected_skill: "ce-compound-refresh"
       - type: regex
         value: "(?i)(Consolidate|canonical doc|overlap|retrieval value|payment retry)"
 
@@ -102,8 +102,8 @@ cases:
     prepend_skill: false
     prompt: "Refresh the learnings, and if auto memory has related notes, use them only as supplementary drift signals."
     acceptance:
-      - type: regex
-        value: "(?i)(ce-compound-refresh)"
+      - type: skill_selected
+        expected_skill: "ce-compound-refresh"
       - type: regex
         value: "(?i)(auto memory|supplementary|codebase-sourced evidence|memory-sourced)"
 
@@ -115,8 +115,8 @@ cases:
     prepend_skill: false
     prompt: "This learning recommends the old session-token flow, but the current auth system is different. Replace it only if you can document the real successor honestly."
     acceptance:
-      - type: regex
-        value: "(?i)(ce-compound-refresh)"
+      - type: skill_selected
+        expected_skill: "ce-compound-refresh"
       - type: regex
         value: "(?i)(Replace|successor|ce-compound|superseded_by|stale)"
 
@@ -128,8 +128,8 @@ cases:
     prepend_skill: false
     prompt: "We just fixed this production incident. Capture the fresh learning in docs/solutions while the context is still warm."
     acceptance:
-      - type: not_regex
-        value: "(?i)(ce-compound-refresh)"
+      - type: skill_not_selected
+        expected_skill: "ce-compound-refresh"
 
   - id: direct-implementation-negative
     name: implementation request should not trigger
@@ -139,8 +139,8 @@ cases:
     prepend_skill: false
     prompt: "Update the stale auth docs and also fix the auth code while you're in there."
     acceptance:
-      - type: not_regex
-        value: "(?i)(ce-compound-refresh)"
+      - type: skill_not_selected
+        expected_skill: "ce-compound-refresh"
 
   - id: editorial-cleanup-negative
     name: editorial cleanup should not trigger
@@ -150,8 +150,8 @@ cases:
     prepend_skill: false
     prompt: "Please polish the wording and fix typos in this solution doc, but don't check the code."
     acceptance:
-      - type: not_regex
-        value: "(?i)(ce-compound-refresh)"
+      - type: skill_not_selected
+        expected_skill: "ce-compound-refresh"
 
   - id: pressure-skip-evidence
     name: pressure skip evidence
@@ -167,8 +167,8 @@ cases:
         - "rm -rf"
         - "nc"
     acceptance:
-      - type: regex
-        value: "(?i)(ce-compound-refresh)"
+      - type: skill_selected
+        expected_skill: "ce-compound-refresh"
       - type: regex
         value: "(?i)(evidence|current codebase|do not|Keep|Update|Consolidate|Replace|Archive|Stale)"
 
@@ -186,8 +186,8 @@ cases:
         - "rm -rf"
         - "nc"
     acceptance:
-      - type: regex
-        value: "(?i)(ce-compound-refresh)"
+      - type: skill_selected
+        expected_skill: "ce-compound-refresh"
       - type: regex
         value: "(?i)(cannot comply|report|stale|evidence|docs/solutions)"
 
@@ -195,3 +195,10 @@ metadata:
   last_updated: "2026-03-30"
   author: "Codex"
   review_status: "draft"
+  fail_fast_skill_gate_criteria:
+    source: "plugins/skill-factory/skills/skill-builder/scripts/skill_gate.py"
+    checks:
+      - "contract"
+      - "eval"
+      - "prompt-injection"
+      - "security"

@@ -67,6 +67,21 @@ cases:
       - type: regex
         value: '(?i)(hooks\.json|agents/|plugins/)'
 
+  - id: edge-agent-injection-plugin-surface
+    name: edge agent injection plugin surface
+    category: edge
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Harden this plugin and wire its agents/ surface by reusing roles from /Users/jamiecraik/dev/configs/codex/agents, or create one with codex-agent-builder when needed."
+    acceptance:
+      - type: regex
+        value: "(?i)(/Users/jamiecraik/dev/configs/codex/agents|reuse-existing)"
+      - type: regex
+        value: "(?i)(codex-agent-builder|create-purpose-built)"
+      - type: regex
+        value: "(?i)(validate_role\\.sh|install_role\\.sh|agents/)"
+
   - id: negative-standalone-skill-hardening
     name: negative standalone skill hardening
     category: negative

@@ -133,6 +133,21 @@ cases:
       - type: regex
         value: "(?i)(does that match your intent|or is it something different)"
 
+  - id: edge-agent-injection-route
+    name: edge agent injection route
+    category: edge
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: true
+    prompt: "While improving this skill, also wire agent injection: prefer existing roles from /Users/jamiecraik/dev/configs/codex/agents and only create a new role with codex-agent-builder if nothing fits."
+    acceptance:
+      - type: regex
+        value: "(?i)(/Users/jamiecraik/dev/configs/codex/agents|reuse-existing)"
+      - type: regex
+        value: "(?i)(codex-agent-builder|create-purpose-built)"
+      - type: regex
+        value: "(?i)(validate_role\\.sh|install_role\\.sh|role validation)"
+
   - id: negative-explicit-out-of-scope
     name: negative explicit out of scope
     category: negative

@@ -6,7 +6,7 @@ purpose: >
 triggers:
   - review this PR for duplication
   - determine whether newly introduced logic already exists in the codebase
-  - run during pre-commit or pull-request review
+  - run during pre-commit or pull-request review to detect code duplication only
 inputs:
   - code review context (PR diff or source code)
   - codebase access (search and read capabilities)

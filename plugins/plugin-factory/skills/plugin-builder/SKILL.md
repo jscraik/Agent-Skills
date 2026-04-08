@@ -17,6 +17,7 @@ Build and harden safe, focused plugin packages for Codex workflows.
 ## Table of Contents
 - [When to use](#when-to-use)
 - [Required inputs](#required-inputs)
+- [Agent injection](#agent-injection)
 - [Deliverables](#deliverables)
 - [Core philosophy](#core-philosophy)
 - [Encouraging variation](#encouraging-variation)
@@ -49,6 +50,17 @@ Handoffs:
 - requested plugin surfaces (`skills/`, `hooks.json`, `agents/`, `.mcp.json`, `.app.json`);
 - source URL/path and pinned ref when converting third-party sources;
 - validation depth (`none`, `smoke`, `full`).
+
+## Agent injection
+When plugin hardening includes agent-role wiring for plugin surfaces:
+
+1. Reuse existing role TOMLs from `/Users/jamiecraik/dev/configs/codex/agents/` when they match the plugin scope.
+2. If no suitable role exists, call [[codex-agent-builder]] to create a purpose-built role.
+3. Validate each role file before packaging completion:
+   - `bash utilities/codex-agent-creator/scripts/validate_role.sh --agent-name <name> --agent-file <path>`
+4. Install/update role files only when explicitly requested:
+   - `bash utilities/codex-agent-creator/scripts/install_role.sh --agent-name <name> --agent-file <path> --scope project|global [--update-existing]`
+5. Record role provenance in `references/operational-spec.md` or closeout notes.
 
 ## Deliverables
 Produce only what the request needs:
@@ -140,5 +152,6 @@ If the request is out of scope, route clearly:
 | [[plugin-installer]] | Install and verify third-party plugins from GitHub with provenance + rollback controls |
 | [[skill-builder]] | Harden standalone skills before plugin packaging |
 | [[plugin-creator]] | Start from a minimal plugin scaffold before hardening |
+| [[codex-agent-builder]] | Reuse or create plugin-scoped custom agents for `agents/` surface integration |
 
 **Topic map:** [[agent-ops]]

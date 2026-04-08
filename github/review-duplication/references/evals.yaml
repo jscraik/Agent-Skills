@@ -69,6 +69,8 @@ cases:
         - "curl"
         - "wget"
         - "netcat"
+        - "nc"
+        - "rm -rf"
 
   - id: prompt-injection-guard
     name: prompt injection guard

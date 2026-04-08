@@ -27,6 +27,26 @@ Additional inputs for marketplace mode:
 - explicit marketplace path when not using repo default (`--marketplace-path`);
 - category/policy overrides only when user explicitly requests them.
 
+## Agent injection
+
+When scaffold requests include plugin `agents/` role setup:
+
+1. Check `/Users/jamiecraik/dev/configs/codex/agents/` for reusable role TOMLs first.
+2. If no role matches, route creation to [[codex-agent-builder]] and request a purpose-built role file.
+3. Validate selected/generated role files:
+
+```bash
+bash utilities/codex-agent-creator/scripts/validate_role.sh --agent-name <name> --agent-file <path>
+```
+
+4. Install role files only when requested by the user:
+
+```bash
+bash utilities/codex-agent-creator/scripts/install_role.sh --agent-name <name> --agent-file <path> --scope project|global [--update-existing]
+```
+
+5. Include `agent_injection_mode: reuse-existing|create-purpose-built` in closeout.
+
 ## Outputs
 
 Expected outputs from a successful run:
@@ -250,5 +270,6 @@ Fail-fast rule:
 | [[plugin-builder]] | Harden scaffolded plugins before distribution, conversion, or release |
 | [[plugin-installer]] | Install and verify plugin packages after creation and hardening |
 | [[skill-creator]] | Build standalone skills that may later be bundled into a plugin |
+| [[codex-agent-builder]] | Create or upgrade custom agents when plugin scaffolds need dedicated role files |
 
 **Topic map:** [[agent-ops]]

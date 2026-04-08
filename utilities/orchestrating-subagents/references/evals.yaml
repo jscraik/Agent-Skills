@@ -72,7 +72,7 @@ cases:
         value: "(?i)(using-git-worktrees|single-agent|unsafe|same checkout)"
 
   - id: subagents-role-gap
-    name: missing role escalates to codex-agent-builder
+    name: missing role escalates to codex-agent-creator
     category: edge
     should_trigger: true
     prepend_skill: false
@@ -80,7 +80,7 @@ cases:
     prompt: "Design a subagent workflow for invoice parsing, but we need a brand-new OCR role first because it is missing from our config."
     acceptance:
       - type: regex
-        value: "(?i)(codex-agent-builder|missing role|create a new role)"
+        value: "(?i)(codex-agent-creator|missing role|create a new role)"
 
   - id: subagents-negative-role-only
     name: pure role creation is out of scope
@@ -91,7 +91,7 @@ cases:
     prompt: "Create a new global role named `api-auditor` with `gpt-5.4-mini` and medium reasoning effort."
     acceptance:
       - type: regex
-        value: "(?i)(codex-agent-builder|role)"
+        value: "(?i)(codex-agent-creator|role)"
 
   - id: subagents-negative-worktree-only
     name: worktree setup is owned elsewhere

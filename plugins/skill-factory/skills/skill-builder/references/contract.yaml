@@ -4,18 +4,21 @@ schema_version: 1.1
 triggers:
   - user asks to create, improve, audit, compare, benchmark, or package a Codex skill
   - user asks to tighten skill routing, validation gates, or safety contracts
+  - user asks to wire skill lifecycle work to existing or purpose-built custom agents
 inputs:
   - mode selection (create, improve, eval, benchmark-lite, graph, package, install-distribute)
   - skill objective and constraints
   - target environment (codex, claude, portable)
   - conformance profile (native or imported)
   - prompt coverage (happy, edge, should-not-trigger)
+  - optional agent injection strategy (`reuse-existing` from `/Users/jamiecraik/dev/configs/codex/agents` or `create-purpose-built` via `codex-agent-builder`)
 outputs:
   - scoped response with required headings
   - implementation plan or concrete file edits
   - validator/eval evidence for non-trivial work
   - dual-grade evidence when upstream eval metadata is present (gold gates + upstream-grade pass)
   - deterministic JSON summary block for improve/eval/benchmark-lite responses
+  - optional agent-injection decision with selected/generated role file path
 output_contract:
   schema_version: "1.0"
   required_fields:
@@ -43,6 +46,7 @@ risks:
   - duplicate/foldable installs; mitigated by mandatory full-scan deconflict across installed operational skills before any install/update write
   - false overlap from system/meta skills; mitigated by default exclusion of `.system` and creator/meta scaffolding skills (for example `skill-creator`) unless explicitly requested
   - upstream/native grading drift; mitigated by unified conformance profiles that always run gold gates and optionally run upstream-grade checks when source metadata exists
+  - incorrect role reuse across unrelated skills; mitigated by explicit `reuse-existing` versus `create-purpose-built` decision and role-file validation
 rollback_procedure: >
   If skill-builder produces degraded output (missing required headings, incorrect mode routing, or
   invalid validator evidence), revert to the previous SKILL.md by restoring the last known-good git

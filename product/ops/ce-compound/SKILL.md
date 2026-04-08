@@ -172,7 +172,7 @@ For `full-lifecycle` and `resume-from-stage`, use the stage sequence, stage exit
 
 For `learning-capture`, use the solved-problem workflow in `references/learning-capture.md`, including:
 - auto-memory scan
-- approval-gated research helper roles in `full` mode
+- explicit-request-only helper roles in `full` mode
 - one-file-write rule
 - selective `ce-compound-refresh` follow-up
 - optional specialized reviewer pass

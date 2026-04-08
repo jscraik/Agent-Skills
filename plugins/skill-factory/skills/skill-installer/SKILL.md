@@ -29,11 +29,32 @@ Install skills with the helper scripts.
 - Destination details: optional `--dest` override (default `$CODEX_HOME/skills`).
 - Optional install controls: `--ref`, `--method`, and explicit replacement intent if destination exists.
 
+## Agent Injection
+
+When install requests include role wiring for the newly installed skill:
+
+1. Look for reusable role TOMLs in `/Users/jamiecraik/dev/configs/codex/agents/`.
+2. If no suitable role exists, route role creation to [[codex-agent-builder]].
+3. Validate candidate role files before reporting success:
+
+```bash
+bash utilities/codex-agent-creator/scripts/validate_role.sh --agent-name <name> --agent-file <path>
+```
+
+4. If asked to install/update the role, run:
+
+```bash
+bash utilities/codex-agent-creator/scripts/install_role.sh --agent-name <name> --agent-file <path> --scope project|global [--update-existing]
+```
+
+5. Report one explicit mode in the closeout: `reuse-existing` or `create-purpose-built`.
+
 ## Outputs
 
 - A clear summary of what was listed or installed.
 - Concrete paths for installed skills (`$CODEX_HOME/skills/<skill-name>`).
 - Explicit restart reminder after install: "Restart Codex to pick up new skills."
+- Optional agent-injection summary with the selected role file path.
 - If blocked, exact error and next corrective step.
 - Visual catalog assets available for packaging/UI docs:
   - `assets/skill-installer.png`
@@ -141,3 +162,4 @@ scripts/install-skill-from-github.py --url https://github.com/<owner>/<repo>/tre
 - Git fallback tries HTTPS first, then SSH.
 - The skills at https://github.com/openai/skills/tree/main/skills/.system are preinstalled, so no need to help users install those. If they ask, just explain this. If they insist, you can download and overwrite.
 - Installed annotations come from `$CODEX_HOME/skills`.
+- For dedicated role creation during install handoff, use [[codex-agent-builder]].

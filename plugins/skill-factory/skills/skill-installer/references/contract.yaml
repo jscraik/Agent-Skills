@@ -6,15 +6,18 @@ triggers:
   - user asks to list available skills from curated or explicit repo sources
   - user asks to install contract-valid skills from GitHub repo paths
   - user asks to repair missing installed-skill visibility
+  - user asks to attach custom-agent roles while installing skills
 inputs:
   - source repository and skill path(s)
   - pinned source ref or explicit unpinned override
   - destination skill root
   - install method preference (download, git, auto)
+  - optional agent injection mode and source role path
 outputs:
   - installed skills under CODEX_HOME/skills
   - provenance manifest with requested ref and resolved commit
   - rollback journal capturing staged and promoted install events
+  - optional role-injection outcome with reuse/create decision and validated role file path
 non_goals:
   - authoring or lifecycle hardening of skill behavior
   - plugin package creation or marketplace scaffolding
@@ -23,6 +26,7 @@ risks:
   - supply chain drift from moving refs; mitigated by enforced ref pinning
   - partial activation failures; mitigated by quarantine-to-promote and rollback
   - weak traceability; mitigated by persisted manifest and journal artifacts
+  - attaching unrelated roles to installed skills; mitigated by explicit source-path checks and role validation via codex-agent-builder scripts
 rollback_procedure: >
   If an install produces an unusable or malicious skill, use the rollback journal artifact to
   identify the staged install entry and delete the promoted skill directory from CODEX_HOME/skills.

@@ -14,6 +14,7 @@ Create and evolve Codex skills that are reusable, auditable, and easy for anothe
 - [When to Use](#when-to-use)
 - [Philosophy](#philosophy)
 - [Inputs](#inputs)
+- [Agent Injection](#agent-injection)
 - [Outputs](#outputs)
 - [Procedure](#procedure)
 - [Validation](#validation)
@@ -57,6 +58,26 @@ Assumptions and requirements:
 - The skill name uses lowercase letters, digits, and hyphens.
 - `SKILL.md` frontmatter includes valid `name` and `description`.
 - The skill body is navigation-first and delegates deep detail to `references/`.
+
+## Agent Injection
+
+When the new skill needs a dedicated subagent path, handle role wiring during scaffold creation:
+
+1. Check for reusable role TOMLs in `/Users/jamiecraik/dev/configs/codex/agents/`.
+2. If no reusable role exists, invoke [[codex-agent-builder]] to create a purpose-built agent file.
+3. Validate the selected/generated role file:
+
+```bash
+bash utilities/codex-agent-creator/scripts/validate_role.sh --agent-name <name> --agent-file <path>
+```
+
+4. If the user asks to install the role, run:
+
+```bash
+bash utilities/codex-agent-creator/scripts/install_role.sh --agent-name <name> --agent-file <path> --scope project|global [--update-existing]
+```
+
+5. Include the agent route in handoff notes as `agent_injection_mode: reuse-existing|create-purpose-built`.
 
 ## Outputs
 
@@ -162,5 +183,6 @@ Read these files based on the task:
 | [[skill-builder]] | Harden and benchmark completed skill drafts before release |
 | [[skill-installer]] | Install already-validated skills into Codex environments |
 | [[plugin-creator]] | Package finished skills into a plugin distribution scaffold |
+| [[codex-agent-builder]] | Create or update custom agents when skill workflows need dedicated role files |
 
 **Topic map:** [[agent-ops]]

@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "profile_id": "skills-system-skill-creator",
+  "profile_id": "plugins/skill-factory/skills/skill-creator",
   "scope_skill": "plugins/skill-factory/skills/skill-creator",
   "scope_profile": "skills-system",
   "rubric_version": "2026-04-05",
