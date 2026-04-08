@@ -37,7 +37,7 @@ Top-level constraints:
 - `interface.short_description`: Human-facing short UI blurb (25–64 chars) for quick scanning.
 - `interface.icon_small`: Path to a small icon asset (relative to skill dir). Default to `./assets/` and place icons in the skill's `assets/` folder.
 - `interface.icon_large`: Path to a larger logo asset (relative to skill dir). Default to `./assets/` and place icons in the skill's `assets/` folder.
-- `interface.brand_color`: Hex color used for UI accents (e.g., badges).
+- `interface.brand_color`: RGB color code (`#RRGGBB`) used for UI accents (e.g., badges).
 - `interface.default_prompt`: Default prompt snippet inserted when invoking the skill.
 - `dependencies.tools[].type`: Dependency category. Only `mcp` is supported for now.
 - `dependencies.tools[].value`: Identifier of the tool or dependency.

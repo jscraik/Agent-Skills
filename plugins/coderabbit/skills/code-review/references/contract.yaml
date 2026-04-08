@@ -1,0 +1,14 @@
+schema_version: 1
+name: code-review
+purpose: Run and interpret CodeRabbit CLI review results with severity-prioritized actions and optional iterative fix loops.
+triggers:
+  - User requests CodeRabbit code review or quality/security check.
+inputs:
+  - name: change_scope
+    type: enum
+    values: [all, committed, uncommitted]
+    description: Diff scope for CodeRabbit review.
+outputs:
+  - name: findings
+    type: array
+    description: Severity-grouped findings with affected file context.

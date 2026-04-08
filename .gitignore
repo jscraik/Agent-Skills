@@ -38,6 +38,15 @@ utilities/codex-plugin-builder/fixtures/arscontexta-codex/skills/*
 !utilities/codex-plugin-builder/fixtures/arscontexta-codex/skills/arscontexta/
 utilities/codex-plugin-builder/fixtures/arscontexta-codex/skills/arscontexta/*
 !utilities/codex-plugin-builder/fixtures/arscontexta-codex/skills/arscontexta/SKILL.md
+# Keep coderabbit plugin skills tracked despite global skills/ ignore.
+!plugins/coderabbit/skills/
+plugins/coderabbit/skills/*
+!plugins/coderabbit/skills/autofix/
+!plugins/coderabbit/skills/code-review/
+!plugins/coderabbit/skills/coderabbit/
+!plugins/coderabbit/skills/autofix/**
+!plugins/coderabbit/skills/code-review/**
+!plugins/coderabbit/skills/coderabbit/**
 skills-antigravity/
 sync-symlink/
 

@@ -1,0 +1,17 @@
+{
+  "schema_version": "1.0",
+  "profile_id": "plugins-coderabbit-autofix",
+  "scope_skill": "plugins/coderabbit/skills/autofix",
+  "scope_profile": "plugins/coderabbit",
+  "delegation": {
+    "mode": "co-pilot",
+    "human_baseline_minutes": 45,
+    "ai_process_minutes": 15,
+    "probability_of_success": 0.75,
+    "rationale": "Autofix requires human checkpointing for high-risk edits."
+  },
+  "learning_posture": {
+    "supported": ["learn", "guided", "execute"],
+    "default": "guided"
+  }
+}
