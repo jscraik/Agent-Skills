@@ -17,6 +17,30 @@ def _get_python_interpreter() -> str:
         return str(preferred)
     return "python3"
 
+
+def _summarize_family_benchmark_failure(stdout: str, stderr: str, limit: int = 3) -> Optional[str]:
+    """Return a compact summary of FAIL lines from family benchmark output."""
+    fail_lines = []
+    for raw_line in stdout.splitlines():
+        line = raw_line.strip()
+        if line.startswith("- FAIL ") or line.startswith("FAIL "):
+            fail_lines.append(line.lstrip("- "))
+
+    if fail_lines:
+        head = fail_lines[:limit]
+        summary = "; ".join(head)
+        remainder = len(fail_lines) - len(head)
+        if remainder > 0:
+            summary += f"; +{remainder} more"
+        return summary
+
+    for raw_line in stderr.splitlines():
+        line = raw_line.strip()
+        if line:
+            return line
+
+    return None
+
 # Explicitly load builder-specific logic using absolute paths to avoid namespace collisions
 def _load_builder_module(repo_root: Path, module_name: str):
     module_path = repo_root / "utilities" / "skill-builder" / "scripts" / f"{module_name}.py"
@@ -139,8 +163,20 @@ def audit_skill(repo_root: Path, skill_path: str, level: str = "compat") -> Call
         family_proc = subprocess.run(family_cmd, cwd=str(repo_root), capture_output=True, text=True)
         result.data["family_benchmarks"] = {"exit_code": family_proc.returncode, "stdout": family_proc.stdout, "stderr": family_proc.stderr}
         if family_proc.returncode != 0:
+            summary = _summarize_family_benchmark_failure(family_proc.stdout, family_proc.stderr)
+            message = "Family benchmarks validation failed."
+            if summary:
+                message = f"{message} First failures: {summary}"
+
             result.status = "error"
-            result.errors.append(ErrorObject(code="ERR_VALIDATION", message="Family benchmarks validation failed."))
+            result.errors.append(ErrorObject(
+                code="ERR_VALIDATION",
+                message=message,
+                fix_suggestion=(
+                    "Inspect data.family_benchmarks for full output, or run: "
+                    f"{python} scripts/validate_skill_authoring_family_benchmarks.py --skill {skill_path} --format text"
+                ),
+            ))
             return result
 
         # OpenClaw skill guard
@@ -203,7 +239,7 @@ def install_skill(repo_root: Path, url: str, remediate: bool = False, dest: str 
         result.errors.append(ErrorObject(
             code="ERR_CONFLICT",
             message=f"Skill '{skill_name}' already exists at '{display_path}'.",
-            fix_suggestion=f"Remove the existing skill or choose a different destination with --dest."
+            fix_suggestion="Remove the existing skill or choose a different destination with --dest."
         ))
         result.data["skill_name"] = skill_name
         result.data["existing_path"] = display_path

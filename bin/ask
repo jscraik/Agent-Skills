@@ -116,6 +116,16 @@ def format_correction(original: str, corrected: str, robot_mode: bool = False) -
     return f"💡 Did you mean: '{corrected}'? (Use --robot to auto-correct)"
 
 
+def _extract_family_fail_lines(stdout: str) -> List[str]:
+    """Extract normalized FAIL lines from family benchmark stdout."""
+    failures: List[str] = []
+    for raw_line in stdout.splitlines():
+        line = raw_line.strip()
+        if line.startswith("- FAIL ") or line.startswith("FAIL "):
+            failures.append(line.lstrip("- "))
+    return failures
+
+
 def build_helpful_error(topic: Optional[str], action: Optional[str], raw_args: List[str], repo_root: Path) -> CallResult:
     """Build a helpful error message with examples."""
     result = CallResult()
@@ -724,13 +734,13 @@ def main():
                     print(result.data["diagnostics"]["stdout"])
                 elif args.topic == "skills" and args.action == "install":
                     if result.data.get("dry_run"):
-                        print(f"🔍 Dry run - would install:")
+                        print("🔍 Dry run - would install:")
                         print(f"   URL: {result.data.get('url')}")
                         print(f"   Skill: {result.data.get('skill_name')}")
                         print(f"   Target: {result.data.get('target_path')}")
                         if result.data.get('remediate'):
-                            print(f"   Remediate: Yes (scaffold missing files)")
-                        print(f"\n💡 To actually install, run:")
+                            print("   Remediate: Yes (scaffold missing files)")
+                        print("\n💡 To actually install, run:")
                         print(f"   {result.metadata.get('next_steps', ['ask skills install <url>'])[0]}")
                     else:
                         print(f"✅ Installed skill: {result.data.get('skill_name', args.url)}")
@@ -762,7 +772,7 @@ def main():
                         print(f"✅ Evaluation complete for {args.path}")
                         print(result.data.get("raw_output", ""))
                     elif args.action == "benchmark":
-                        print(f"✅ Benchmark suite complete.")
+                        print("✅ Benchmark suite complete.")
                         print(result.data.get("raw_output", ""))
                     elif args.action == "dashboard":
                         print(f"✅ {result.data['message']}")
@@ -805,7 +815,7 @@ def main():
                         print(f"   Out-links: {result.data['metrics']['out_degree']}")
                         out_edges = result.data['out_edges']
                         if out_edges:
-                            print(f"\n   Links to:")
+                            print("\n   Links to:")
                             for e in out_edges[:10]:
                                 w = f" ×{e['weight']:.1f}" if e.get('weight', 1) > 1.2 else ""
                                 print(f"      → {e['to']}{w}")
@@ -836,8 +846,10 @@ def main():
         else:
             # Enhanced error output with examples
             error = result.errors[0] if result.errors else ErrorObject(code=ErrorCode.ERR_RUNTIME, message="Unknown error")
-
-            print(f"❌ Error: {error.message}")
+            error_message = error.message
+            if args.topic == "skills" and args.action == "audit" and " First failures:" in error_message:
+                error_message = error_message.split(" First failures:", 1)[0]
+            print(f"❌ Error: {error_message}")
 
                 # Add fix suggestion if available
             if error.fix_suggestion:
@@ -846,6 +858,23 @@ def main():
                 # Add examples based on the current context
             if args.topic == "skills":
                 if args.action == "audit":
+                    family_data = result.data.get("family_benchmarks")
+                    if isinstance(family_data, dict) and int(family_data.get("exit_code", 0) or 0) != 0:
+                        fail_lines = _extract_family_fail_lines(str(family_data.get("stdout", "")))
+                        if fail_lines:
+                            print("\n🔎 Family benchmark failures (first 3):")
+                            for fail in fail_lines[:3]:
+                                print(f"   - {fail}")
+                            remaining = len(fail_lines) - 3
+                            if remaining > 0:
+                                print(f"   ... and {remaining} more (use --json for full details)")
+                        else:
+                            for raw_line in str(family_data.get("stderr", "")).splitlines():
+                                line = raw_line.strip()
+                                if line:
+                                    print("\n🔎 Family benchmark error:")
+                                    print(f"   {line}")
+                                    break
                     if "diagnostics" in result.data: print(result.data["diagnostics"]["stdout"])
                     if "security_gate" in result.data: print(result.data["security_gate"]["stdout"])
                     print("\n📚 Audit examples:")
