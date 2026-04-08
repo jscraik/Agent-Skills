@@ -16,6 +16,7 @@ complexity: medium
 - [Scope Boundaries](#scope-boundaries)
 - [Critical Path](#critical-path)
 - [Implementation Phases](#implementation-phases)
+- [Task Graph (id and depends_on)](#task-graph-id-and-depends_on)
 - [Acceptance Criteria](#acceptance-criteria)
 - [Execution Ledger](#execution-ledger)
 - [Risks](#risks)
@@ -326,6 +327,27 @@ artifacts/skill-graphs/pilot/artifact-parity-manifest.json
 - [ ] AC4 — Shadow cycle CI job passes in PR checks (AC4)
 - [ ] AC5 — `validate_skill_authoring_family.sh` exits 0 in structural mode in PR checks (AC5)
 - [ ] AI artifact governance: save session summary to `artifacts/ai/sessions/2026-04-06-skill-authoring-family-certification.json`
+
+## Task Graph (id and depends_on)
+
+```yaml
+tasks:
+  - id: P0
+    title: Fix shadow-cycle workflow schedule, permissions, and telemetry write-back.
+    depends_on: []
+  - id: P1
+    title: Run one-shot local shadow cycle to refresh telemetry and run artifacts.
+    depends_on: [P0]
+  - id: P2
+    title: Validate wave-0 readiness gate from regenerated readiness artifacts.
+    depends_on: [P1]
+  - id: P3
+    title: Execute release-ready family gate and verify evidence index outcomes.
+    depends_on: [P2]
+  - id: P4
+    title: Commit refreshed artifacts and open PR with certification evidence.
+    depends_on: [P0, P1, P2, P3]
+```
 
 ---
 

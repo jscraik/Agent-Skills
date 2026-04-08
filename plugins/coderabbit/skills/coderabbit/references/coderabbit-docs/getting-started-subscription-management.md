@@ -2,6 +2,8 @@
 source: https://docs.coderabbit.ai/getting-started/subscription-management
 ---
 
+# Subscription management
+
 Manage your CodeRabbit subscription, billing, and team seats from your organization settings. Access invoice history, upgrade or downgrade plans, and adjust seat counts as your team grows or changes.
 
 Organization owners and admins can manage subscriptions. See [administrative
@@ -13,15 +15,15 @@ Assignment](/management/seat-assignment).
 
 ## Subscription management tasks
 
-## Billing and invoices
+### Billing and invoices overview
 
 Download invoices and view payment history for accounting
 
-## Plans and seats
+### Plans and seats overview
 
 Change subscription plans and adjust seat counts for your team
 
-## CLI Usage-based Add-On
+### CLI Usage-based Add-On overview
 
 Buy and manage credits for unrestricted CodeRabbit CLI access
 
@@ -35,13 +37,13 @@ Choose your seat count
 
 Select the number of seats you need for your paid subscription. This is your
 initial seat count and can be different from the number of users who had
-seats during trial.
+seats during the trial.
 
 Select activation timing
 
 Choose when billing should start:
 
-* **Activate Immediately**: Billing starts now and your trial ends immediately
+* **Activate Immediately**: Billing starts now, and your trial ends immediately
 * **Activate After Trial**: Billing starts when your trial period expires, giving you the remainder of your trial to continue evaluating
 
 Complete activation
@@ -55,7 +57,7 @@ modes](/management/seat-assignment).
 
 ## Reactivating a Cancelled Subscription
 
-Returning to CodeRabbit after cancellation? Reactivation works similarly to trial activation, but without trial timing options since you’re already a returning customer.
+Returning to CodeRabbit after cancellation? Reactivation works similarly to trial activation, but without trial timing options, since you’re already a returning customer.
 
 ### Reactivate with custom seat count
 
@@ -138,7 +140,7 @@ When you add seats or upgrade your plan mid-month, billing is handled automatica
 
 New seats are always billed at the prorated price for the remainder of the billing cycle.
 
-Common subscription scenarios
+### Common subscription scenarios
 
 * **Growing team**
   : Add seats before onboarding new team members to ensure immediate access
@@ -172,13 +174,3 @@ Review usage and transaction history
 
 Track total credits purchased, remaining balance, and recent usage events in
 the same tab.
-
-## What’s next
-
-## Manage team roles
-
-Control who can access CodeRabbit and manage administrative settings
-
-## Organization settings
-
-Configure organization-wide preferences and policies

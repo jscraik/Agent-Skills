@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import shutil
 import subprocess
 import sys
 from datetime import date
@@ -14,6 +15,7 @@ from typing import Any, Iterable
 
 
 MAX_PLUGIN_NAME_LENGTH = 64
+PLUGIN_NAME_RE = re.compile(r"^[a-z0-9](?:-?[a-z0-9]){0,63}$")
 REPO_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_PLUGIN_PARENT = REPO_ROOT / "plugins"
 DEFAULT_MARKETPLACE_PATH = REPO_ROOT / ".agents" / "plugins" / "marketplace.json"
@@ -34,6 +36,10 @@ DEFAULT_MARKETPLACE_NAME = "local-marketplace"
 DEFAULT_MARKETPLACE_DISPLAY_NAME = "Local Plugins"
 VALID_INSTALL_POLICIES = {"NOT_AVAILABLE", "AVAILABLE", "INSTALLED_BY_DEFAULT"}
 VALID_AUTH_POLICIES = {"ON_INSTALL", "ON_USE"}
+VALID_POLICY_PRODUCTS = {"CHATGPT", "CODEX", "ATLAS"}
+DEFAULT_POLICY_PRODUCTS = ["CODEX"]
+OPENAI_MARKETPLACE_RELATIVE_PATH = ".agents/plugins/marketplace.json"
+PINNED_COMMIT_RE = re.compile(r"^[0-9a-fA-F]{40}$")
 SOURCE_PROVIDER_MANIFESTS = (
     ".claude-plugin/plugin.json",
     ".cursor-plugin/plugin.json",
@@ -401,6 +407,13 @@ def _run_helper(command: list[str], description: str) -> str:
     raise RuntimeError("\n".join(details))
 
 
+def _uv_python_command() -> list[str]:
+    uv_bin = shutil.which("uv")
+    if not uv_bin:
+        raise RuntimeError("uv is required for Python helper execution but was not found in PATH.")
+    return [uv_bin, "run", "python"]
+
+
 def normalize_plugin_name(plugin_name: str) -> str:
     """Normalize a plugin name to lowercase hyphen-case."""
     normalized = plugin_name.strip().lower()
@@ -418,7 +431,7 @@ def validate_plugin_name(plugin_name: str) -> None:
             f"Plugin name '{plugin_name}' is too long ({len(plugin_name)} characters). "
             f"Maximum is {MAX_PLUGIN_NAME_LENGTH} characters."
         )
-    if not re.fullmatch(r"[a-z0-9](?:-?[a-z0-9]){0,63}", plugin_name):
+    if not PLUGIN_NAME_RE.fullmatch(plugin_name):
         raise ValueError(
             "Plugin name must be kebab-case and match "
             "`[a-z0-9](?:-?[a-z0-9]){0,63}`."
@@ -649,17 +662,25 @@ def build_marketplace_entry(
     marketplace_path: Path,
     install_policy: str,
     auth_policy: str,
+    policy_products: list[str],
     category: str,
+    *,
+    strict_openai_layout: bool = False,
 ) -> dict[str, Any]:
     return {
         "name": plugin_name,
         "source": {
             "source": "local",
-            "path": _relative_repo_source_path(plugin_root, marketplace_path),
+            "path": _relative_repo_source_path(
+                plugin_root,
+                marketplace_path,
+                strict_openai_layout=strict_openai_layout,
+            ),
         },
         "policy": {
             "installation": install_policy,
             "authentication": auth_policy,
+            "products": policy_products,
         },
         "category": category,
     }
@@ -723,7 +744,7 @@ def _marketplace_repo_root(marketplace_path: Path) -> Path:
     relative_marketplace = resolved_path.relative_to(repo_root).as_posix()
     if relative_marketplace in {
         "plugins/marketplace.json",
-        ".agents/plugins/marketplace.json",
+        OPENAI_MARKETPLACE_RELATIVE_PATH,
     }:
         return repo_root
 
@@ -733,8 +754,29 @@ def _marketplace_repo_root(marketplace_path: Path) -> Path:
     )
 
 
-def _relative_repo_source_path(plugin_root: Path, marketplace_path: Path) -> str:
+def _marketplace_relative_path(marketplace_path: Path, repo_root: Path) -> str:
+    return marketplace_path.resolve().relative_to(repo_root).as_posix()
+
+
+def _enforce_openai_marketplace_layout(marketplace_path: Path, repo_root: Path) -> None:
+    relative_marketplace = _marketplace_relative_path(marketplace_path, repo_root)
+    if relative_marketplace == OPENAI_MARKETPLACE_RELATIVE_PATH:
+        return
+    raise ValueError(
+        "OpenAI/Codex marketplace mode requires '.agents/plugins/marketplace.json'. "
+        f"Got '{relative_marketplace}' instead."
+    )
+
+
+def _relative_repo_source_path(
+    plugin_root: Path,
+    marketplace_path: Path,
+    *,
+    strict_openai_layout: bool = False,
+) -> str:
     repo_root = _marketplace_repo_root(marketplace_path)
+    if strict_openai_layout:
+        _enforce_openai_marketplace_layout(marketplace_path, repo_root)
     resolved_plugin_root = plugin_root.resolve()
     if not _path_within_root(repo_root, resolved_plugin_root):
         raise ValueError(
@@ -744,10 +786,68 @@ def _relative_repo_source_path(plugin_root: Path, marketplace_path: Path) -> str
     return f"./{relative_path}"
 
 
+def _marketplace_source_path_hint(
+    source_path: Any,
+    *,
+    expected_path: str,
+    marketplace_path: Path,
+) -> str:
+    if not isinstance(source_path, str) or not source_path.strip():
+        return (
+            f"Set source.path to '{expected_path}'. "
+            f"Paths are resolved from the repo root that contains '{marketplace_path.name}'."
+        )
+    if ".." in source_path:
+        return (
+            f"source.path uses '..' but paths resolve from repo root. "
+            f"Use '{expected_path}' instead of '{source_path}'."
+        )
+    if not source_path.startswith("./"):
+        return (
+            f"source.path should start with './' and resolve from repo root. "
+            f"Use '{expected_path}'."
+        )
+    return f"Use '{expected_path}' to point at the canonical plugin package path."
+
+
 def _check_string_list(value: Any, field_name: str) -> list[str]:
     if not isinstance(value, list) or not all(isinstance(item, str) for item in value):
         return [f"{field_name} must be an array of strings."]
     return []
+
+
+def _normalize_policy_products(raw_products: Any) -> tuple[list[str], list[str]]:
+    if raw_products is None:
+        return [], []
+    if not isinstance(raw_products, list):
+        return [], ["must be an array of product names"]
+
+    normalized: list[str] = []
+    invalid: list[str] = []
+    for value in raw_products:
+        if not isinstance(value, str) or not value.strip():
+            invalid.append(str(value))
+            continue
+        token = value.strip().upper()
+        if token not in VALID_POLICY_PRODUCTS:
+            invalid.append(value.strip())
+            continue
+        if token not in normalized:
+            normalized.append(token)
+    return normalized, invalid
+
+
+def _effective_policy_products(raw_products: list[str] | None) -> list[str]:
+    candidates = raw_products or list(DEFAULT_POLICY_PRODUCTS)
+    normalized, invalid = _normalize_policy_products(candidates)
+    if invalid:
+        raise ValueError(
+            f"Invalid --product values {sorted(set(invalid))}. "
+            f"Allowed values are {sorted(VALID_POLICY_PRODUCTS)}."
+        )
+    if not normalized:
+        return list(DEFAULT_POLICY_PRODUCTS)
+    return normalized
 
 
 def _check_declared_plugin_path(
@@ -822,9 +922,16 @@ def update_marketplace_json(
     plugin_root: Path,
     install_policy: str,
     auth_policy: str,
+    policy_products: list[str],
     category: str | None,
     force: bool,
+    *,
+    strict_openai_layout: bool = False,
 ) -> None:
+    if strict_openai_layout:
+        repo_root = _marketplace_repo_root(marketplace_path)
+        _enforce_openai_marketplace_layout(marketplace_path, repo_root)
+
     if marketplace_path.exists():
         payload = load_json(marketplace_path)
     else:
@@ -842,7 +949,9 @@ def update_marketplace_json(
         marketplace_path,
         install_policy,
         auth_policy,
+        policy_products,
         effective_category,
+        strict_openai_layout=strict_openai_layout,
     )
 
     for index, entry in enumerate(plugins):
@@ -871,6 +980,8 @@ def _normalize_marketplace_entry(
     entry: dict[str, Any],
     marketplace_path: Path,
     plugins_path: Path,
+    *,
+    strict_openai_layout: bool = False,
 ) -> tuple[dict[str, Any], list[str]]:
     notes: list[str] = []
     normalized = dict(entry)
@@ -882,7 +993,11 @@ def _normalize_marketplace_entry(
     normalized["name"] = plugin_name
     plugin_root = plugins_path / plugin_name
     plugin_payload = _load_plugin_payload(plugin_root)
-    expected_path = _relative_repo_source_path(plugin_root, marketplace_path)
+    expected_path = _relative_repo_source_path(
+        plugin_root,
+        marketplace_path,
+        strict_openai_layout=strict_openai_layout,
+    )
 
     source = normalized.get("source")
     if not isinstance(source, dict):
@@ -920,9 +1035,22 @@ def _normalize_marketplace_entry(
     policy["authentication"] = auth_policy
     if "products" in normalized and "products" not in policy:
         policy["products"] = normalized["products"]
+    normalized_products, invalid_products = _normalize_policy_products(policy.get("products"))
+    if invalid_products:
+        notes.append(
+            f"{plugin_name}: removed invalid policy.products values {sorted(set(invalid_products))}; "
+            f"allowed values are {sorted(VALID_POLICY_PRODUCTS)}"
+        )
+    if not normalized_products:
+        normalized_products = list(DEFAULT_POLICY_PRODUCTS)
+        notes.append(
+            f"{plugin_name}: filled missing policy.products with {normalized_products}"
+        )
+    policy["products"] = normalized_products
     normalized["policy"] = policy
     normalized.pop("installPolicy", None)
     normalized.pop("authPolicy", None)
+    normalized.pop("products", None)
 
     category = normalized.get("category")
     if not isinstance(category, str) or not category.strip():
@@ -940,7 +1068,13 @@ def _normalize_marketplace_entry(
 def _audit_marketplace(
     marketplace_path: Path,
     plugins_path: Path,
+    *,
+    strict_openai_layout: bool = False,
 ) -> dict[str, Any]:
+    if strict_openai_layout:
+        repo_root = _marketplace_repo_root(marketplace_path)
+        _enforce_openai_marketplace_layout(marketplace_path, repo_root)
+
     payload = load_json(marketplace_path)
     _ensure_marketplace_interface(payload)
     plugins = payload.get("plugins")
@@ -977,6 +1111,7 @@ def _audit_marketplace(
                 name,
                 plugin_root,
                 marketplace_path,
+                strict_openai_layout=strict_openai_layout,
             )
         )
         if not source_plugin_root.exists():
@@ -1051,7 +1186,13 @@ def _audit_marketplace(
 def _normalize_marketplace_payload(
     marketplace_path: Path,
     plugins_path: Path,
+    *,
+    strict_openai_layout: bool = False,
 ) -> tuple[dict[str, Any], list[str]]:
+    if strict_openai_layout:
+        repo_root = _marketplace_repo_root(marketplace_path)
+        _enforce_openai_marketplace_layout(marketplace_path, repo_root)
+
     payload = load_json(marketplace_path) if marketplace_path.exists() else build_default_marketplace()
     _ensure_marketplace_interface(payload)
     plugins = payload.setdefault("plugins", [])
@@ -1068,6 +1209,7 @@ def _normalize_marketplace_payload(
             entry,
             marketplace_path,
             plugins_path,
+            strict_openai_layout=strict_openai_layout,
         )
         plugin_name = normalized_entry["name"]
         if plugin_name in seen_names:
@@ -1138,25 +1280,25 @@ def _render_readme_template(plugin_name: str, enabled_surfaces: dict[str, bool])
         .replace("- Optional: <editor plugins>, <CLI helpers>", "- Optional: `jq`, `yq`, and Codex runtime tooling for deeper validation")
         .replace(
             "# commands the repo actually supports",
-            f"python3 utilities/plugin-builder/scripts/plugin_builder.py scaffold {plugin_name} --path plugins --with-skills --with-marketplace",
+            f"uv run python utilities/plugin-builder/scripts/plugin_builder.py scaffold {plugin_name} --path plugins --with-skills --with-marketplace",
         )
         .replace(
             "### 2) Run it\n```sh\n```\n",
             "### 2) Run it\n```sh\n"
-            f"python3 utilities/plugin-builder/scripts/plugin_builder.py validate plugins/{plugin_name} --require-marketplace --marketplace-path .agents/plugins/marketplace.json\n"
+            f"uv run python utilities/plugin-builder/scripts/plugin_builder.py validate plugins/{plugin_name} --require-marketplace --marketplace-path .agents/plugins/marketplace.json\n"
             "```\n",
         )
         .replace("- <what success looks like>", "- The plugin manifest validates and the package surfaces exist at the expected relative paths")
         .replace("### Do <task> to achieve <result>", "### Add or refine plugin-owned skills")
         .replace("- What you get:", "- What you get: a `skills/<skill>/` bundle generated through `skill-builder`")
         .replace("- Steps:\n```sh\n```\n- Verify:", "- Steps:\n```sh\n"
-            f"python3 utilities/plugin-builder/scripts/plugin_builder.py scaffold {plugin_name} --path plugins --with-skills --force\n"
+            f"uv run python utilities/plugin-builder/scripts/plugin_builder.py scaffold {plugin_name} --path plugins --with-skills --force\n"
             "```\n- Verify: confirm `skills/<skill>/SKILL.md`, `references/`, `scripts/`, `assets/`, and `agents/openai.yaml` exist\n")
         .replace("### Configure <thing> so that <result>", "### Validate package integrity before publishing")
         .replace("- Options table (if applicable):", "- Package surfaces:\n" + surface_lines + "\n")
         .replace("### Symptom: <what the reader sees>", "### Symptom: validation reports missing plugin-owned surfaces")
         .replace("Cause:\nFix:\n```sh\n```\n", "Cause: the scaffold was partial or a helper-generated surface was removed.\nFix:\n```sh\n"
-            f"python3 utilities/plugin-builder/scripts/plugin_builder.py scaffold {plugin_name} --path plugins --with-skills --with-agents --force\n"
+            f"uv run python utilities/plugin-builder/scripts/plugin_builder.py scaffold {plugin_name} --path plugins --with-skills --with-agents --force\n"
             "```\n")
         .replace("- [ ] <criterion 1>", "- [ ] manifest exists at `.codex-plugin/plugin.json`")
         .replace("- [ ] <criterion 2>", "- [ ] plugin-owned skills and agents were scaffolded through shared builders when requested")
@@ -1206,7 +1348,7 @@ def _package_guide_template(plugin_name: str, enabled_surfaces: dict[str, bool])
         .replace(
             "### 2) Run it\n```sh\n```\n",
             "### 2) Run it\n```sh\n"
-            f"python3 utilities/plugin-builder/scripts/plugin_builder.py validate plugins/{plugin_name}\n"
+            f"uv run python utilities/plugin-builder/scripts/plugin_builder.py validate plugins/{plugin_name}\n"
             "```\n",
         )
         .replace("- <what success looks like>", "- Every declared surface exists and helper-owned folders are in the expected locations")
@@ -1222,7 +1364,7 @@ def _package_guide_template(plugin_name: str, enabled_surfaces: dict[str, bool])
         .replace("- Options table (if applicable):", "- Package tree:\n" + surface_lines + "\n")
         .replace("### Symptom: <what the reader sees>", "### Symptom: a plugin surface exists but does not match the owning helper contract")
         .replace("Cause:\nFix:\n```sh\n```\n", "Cause: the surface was hand-edited or generated with the wrong helper.\nFix:\n```sh\n"
-            f"python3 utilities/plugin-builder/scripts/plugin_builder.py scaffold {plugin_name} --path plugins --with-skills --with-agents --force\n"
+            f"uv run python utilities/plugin-builder/scripts/plugin_builder.py scaffold {plugin_name} --path plugins --with-skills --with-agents --force\n"
             "```\n")
         .replace("- [ ] <criterion 1>", "- [ ] helper ownership of each surface is documented")
         .replace("- [ ] <criterion 2>", "- [ ] package layout matches the manifest and generated docs")
@@ -1686,7 +1828,16 @@ def _operational_spec_template(
 
 
 def _is_relative_plugin_path(value: Any) -> bool:
-    return isinstance(value, str) and value.startswith("./")
+    if not isinstance(value, str) or not value.startswith("./"):
+        return False
+    relative = value[2:]
+    if not relative:
+        return False
+    path_obj = Path(relative)
+    for component in path_obj.parts:
+        if component in ("", ".", ".."):
+            return False
+    return True
 
 
 def _path_within_root(root: Path, candidate: Path) -> bool:
@@ -1743,7 +1894,7 @@ def _scaffold_plugin_skill(skill_root: Path, skill_name: str, force: bool) -> st
         return f"skill-builder: kept existing plugin skill at {skill_dir}"
 
     command = [
-        sys.executable,
+        *_uv_python_command(),
         str(SKILL_BUILDER_INIT),
         skill_name,
         "--path",
@@ -2186,6 +2337,179 @@ def _check_required_fields(
     return failures
 
 
+def _normalize_allowlist(values: list[str] | None) -> set[str]:
+    if not values:
+        return set()
+    return {value.strip().lower() for value in values if isinstance(value, str) and value.strip()}
+
+
+def _normalize_domain_allowlist(values: list[str] | None) -> set[str]:
+    if not values:
+        return set()
+    normalized: set[str] = set()
+    for value in values:
+        if not isinstance(value, str):
+            continue
+        candidate = value.strip().lower().lstrip("@")
+        if candidate:
+            normalized.add(candidate)
+    return normalized
+
+
+def _check_provenance_manifest(
+    provenance_path: Path,
+    plugin_root: Path,
+    *,
+    require_signed_provenance: bool,
+    allowed_signer_emails: set[str],
+    allowed_signer_domains: set[str],
+    allowed_signer_logins: set[str],
+) -> list[str]:
+    if not provenance_path.exists():
+        return [f"Provenance manifest not found: {provenance_path}"]
+
+    try:
+        payload = load_json(provenance_path)
+    except Exception as exc:  # noqa: BLE001
+        return [f"Provenance manifest is invalid JSON: {provenance_path}: {exc}"]
+
+    if not isinstance(payload, dict):
+        return [f"Provenance manifest must contain a JSON object: {provenance_path}"]
+
+    failures: list[str] = []
+    plugin_name = payload.get("plugin_name")
+    if isinstance(plugin_name, str) and plugin_name.strip() and plugin_name.strip() != plugin_root.name:
+        failures.append(
+            f"Provenance plugin_name '{plugin_name.strip()}' does not match plugin directory '{plugin_root.name}'."
+        )
+    elif plugin_name is not None and not isinstance(plugin_name, str):
+        failures.append("Provenance field 'plugin_name' must be a string when present.")
+
+    source = payload.get("source")
+    if not isinstance(source, dict):
+        failures.append("Provenance field 'source' must be an object.")
+    else:
+        resolved_commit = source.get("resolved_commit")
+        if not isinstance(resolved_commit, str) or not PINNED_COMMIT_RE.fullmatch(resolved_commit.strip()):
+            failures.append(
+                "Provenance source.resolved_commit must be a 40-character commit SHA."
+            )
+        for key in ("owner", "repo", "path"):
+            value = source.get(key)
+            if value is not None and not isinstance(value, str):
+                failures.append(f"Provenance source.{key} must be a string when present.")
+
+    verified_state: bool | None = None
+    commit_verification = payload.get("commit_verification")
+    if not isinstance(commit_verification, dict):
+        failures.append("Provenance field 'commit_verification' must be an object.")
+    else:
+        verified = commit_verification.get("verified")
+        if not isinstance(verified, bool):
+            failures.append("Provenance commit_verification.verified must be a boolean.")
+            verified = False
+        verified_state = verified
+        reason = commit_verification.get("reason")
+        reason_text = reason.strip().lower() if isinstance(reason, str) and reason.strip() else "unknown"
+        if reason is not None and not isinstance(reason, str):
+            failures.append("Provenance commit_verification.reason must be a string when present.")
+        if require_signed_provenance and verified is not True:
+            failures.append(
+                "Provenance manifest indicates unsigned or unverified source commit "
+                f"(reason='{reason_text}')."
+            )
+        if require_signed_provenance and verified is True and reason_text != "valid":
+            failures.append(
+                "Provenance commit verification reason must be 'valid' when signed provenance is required. "
+                f"Observed reason='{reason_text}'."
+            )
+
+    signer_identity = payload.get("signer_identity")
+    allowlist_enabled = bool(allowed_signer_emails or allowed_signer_domains or allowed_signer_logins)
+    if allowlist_enabled:
+        if verified_state is not True:
+            failures.append(
+                "Signer allowlist checks require provenance commit_verification.verified=true."
+            )
+        reason = None
+        if isinstance(commit_verification, dict):
+            raw_reason = commit_verification.get("reason")
+            if isinstance(raw_reason, str):
+                stripped = raw_reason.strip().lower()
+                reason = stripped if stripped else "unknown"
+            elif raw_reason is None:
+                reason = "unknown"
+        if reason != "valid":
+            failures.append(
+                "Signer allowlist checks require provenance commit_verification.reason='valid'. "
+                f"Observed reason='{reason or 'unknown'}'."
+            )
+        observed_emails: set[str] = set()
+        observed_attested_logins: set[str] = set()
+        metadata_emails: set[str] = set()
+        metadata_logins: set[str] = set()
+        if isinstance(signer_identity, dict):
+            raw_emails = signer_identity.get("attested_emails")
+            if raw_emails is None:
+                raw_emails = signer_identity.get("emails")
+            if isinstance(raw_emails, list):
+                observed_emails = {
+                    value.strip().lower()
+                    for value in raw_emails
+                    if isinstance(value, str) and value.strip()
+                }
+            raw_logins = signer_identity.get("attested_logins")
+            if raw_logins is None:
+                raw_logins = signer_identity.get("logins")
+            if isinstance(raw_logins, list):
+                observed_attested_logins = {
+                    value.strip().lower()
+                    for value in raw_logins
+                    if isinstance(value, str) and value.strip()
+                }
+            raw_metadata_emails = signer_identity.get("metadata_emails")
+            if isinstance(raw_metadata_emails, list):
+                metadata_emails = {
+                    value.strip().lower()
+                    for value in raw_metadata_emails
+                    if isinstance(value, str) and value.strip()
+                }
+            raw_metadata_logins = signer_identity.get("metadata_logins")
+            if isinstance(raw_metadata_logins, list):
+                metadata_logins = {
+                    value.strip().lower()
+                    for value in raw_metadata_logins
+                    if isinstance(value, str) and value.strip()
+                }
+        observed_logins = observed_attested_logins if observed_attested_logins else metadata_logins
+        login_identity_source = "attested" if observed_attested_logins else ("metadata" if metadata_logins else "none")
+        observed_domains = {
+            value.rsplit("@", 1)[1]
+            for value in observed_emails
+            if "@" in value and value.rsplit("@", 1)[1]
+        }
+
+        matched_email = (not allowed_signer_emails) or bool(observed_emails & allowed_signer_emails)
+        matched_domain = (not allowed_signer_domains) or bool(observed_domains & allowed_signer_domains)
+        matched_login = (not allowed_signer_logins) or bool(observed_logins & allowed_signer_logins)
+        if not (matched_email and matched_domain and matched_login):
+            failures.append(
+                "Provenance signer identity did not match allowlist policy. "
+                f"allowed_emails={sorted(allowed_signer_emails)} "
+                f"allowed_domains={sorted(allowed_signer_domains)} "
+                f"allowed_logins={sorted(allowed_signer_logins)} "
+                f"observed_attested_emails={sorted(observed_emails)} "
+                f"observed_domains={sorted(observed_domains)} "
+                f"observed_signer_logins={sorted(observed_logins)} "
+                f"observed_login_source={login_identity_source} "
+                f"observed_attested_logins={sorted(observed_attested_logins)} "
+                f"metadata_emails={sorted(metadata_emails)} "
+                f"metadata_logins={sorted(metadata_logins)}."
+            )
+
+    return failures
+
+
 def _check_plugin_skill_surface(plugin_root: Path, payload: dict[str, Any]) -> list[str]:
     skills_value = payload.get("skills")
     if not _is_relative_plugin_path(skills_value):
@@ -2342,8 +2666,15 @@ def _check_marketplace_entry(
     plugin_name: str,
     plugin_root: Path,
     marketplace_path: Path,
+    *,
+    strict_openai_layout: bool = False,
 ) -> list[str]:
     failures: list[str] = []
+    expected_path = _relative_repo_source_path(
+        plugin_root,
+        marketplace_path,
+        strict_openai_layout=strict_openai_layout,
+    )
     interface = marketplace_payload.get("interface")
     if interface is not None:
         if not isinstance(interface, dict):
@@ -2377,21 +2708,28 @@ def _check_marketplace_entry(
                 f"marketplace plugin '{plugin_name}' source.source must be 'local'."
             )
         source_path = source.get("path")
+        source_path_hint = _marketplace_source_path_hint(
+            source_path,
+            expected_path=expected_path,
+            marketplace_path=marketplace_path,
+        )
         if not _is_relative_plugin_path(source_path):
             failures.append(
-                f"marketplace plugin '{plugin_name}' source.path must be a './'-prefixed path relative to the repo root."
+                f"marketplace plugin '{plugin_name}' source.path must be a './'-prefixed path relative to the repo root. "
+                f"{source_path_hint}"
             )
         else:
             repo_root = _marketplace_repo_root(marketplace_path)
             resolved_source_root = (repo_root / source_path[2:]).resolve()
             if not _path_within_root(repo_root, resolved_source_root):
                 failures.append(
-                    f"marketplace plugin '{plugin_name}' source.path must stay within repo root '{repo_root}'."
+                    f"marketplace plugin '{plugin_name}' source.path must stay within repo root '{repo_root}'. "
+                    f"{source_path_hint}"
                 )
             elif resolved_source_root != plugin_root.resolve():
-                expected_path = _relative_repo_source_path(plugin_root, marketplace_path)
                 failures.append(
-                    f"marketplace plugin '{plugin_name}' source.path resolves to '{resolved_source_root}', expected '{expected_path}'."
+                    f"marketplace plugin '{plugin_name}' source.path resolves to '{resolved_source_root}', expected '{expected_path}'. "
+                    f"{source_path_hint}"
                 )
 
     policy = plugin_entry.get("policy")
@@ -2416,6 +2754,23 @@ def _check_marketplace_entry(
             f"marketplace plugin '{plugin_name}' policy.authentication "
             f"(or legacy authPolicy) must be one of "
             f"{sorted(VALID_AUTH_POLICIES)}."
+        )
+
+    policy_products = None
+    if isinstance(policy, dict):
+        policy_products = policy.get("products")
+    if policy_products is None:
+        policy_products = plugin_entry.get("products")
+    normalized_products, invalid_products = _normalize_policy_products(policy_products)
+    if not normalized_products:
+        failures.append(
+            f"marketplace plugin '{plugin_name}' policy.products must include at least one product from "
+            f"{sorted(VALID_POLICY_PRODUCTS)}."
+        )
+    if invalid_products:
+        failures.append(
+            f"marketplace plugin '{plugin_name}' policy.products contains invalid values {sorted(set(invalid_products))}; "
+            f"allowed values are {sorted(VALID_POLICY_PRODUCTS)}."
         )
 
     category = plugin_entry.get("category")
@@ -2543,13 +2898,18 @@ def _print_audit_report(report: dict[str, Any]) -> None:
     print(json.dumps(report, indent=2))
 
 
-def _print_findings(findings: list[str]) -> None:
+def _print_findings(findings: list[dict[str, str]]) -> None:
     if not findings:
         print("PASS: plugin contract validation succeeded.")
         return
-    print("FAIL: plugin contract validation found issues:")
+    error_count = sum(1 for item in findings if item.get("severity") == "error")
+    warning_count = sum(1 for item in findings if item.get("severity") == "warning")
+    status = "FAIL" if error_count else "WARN"
+    print(f"{status}: plugin contract validation findings (errors={error_count}, warnings={warning_count}):")
     for finding in findings:
-        print(f"  - {finding}")
+        severity = str(finding.get("severity") or "error").upper()
+        message = str(finding.get("message") or "").strip()
+        print(f"  - [{severity}] {message}")
 
 
 def _run_scaffold(args: argparse.Namespace) -> int:
@@ -2638,6 +2998,8 @@ def _run_scaffold(args: argparse.Namespace) -> int:
         archetype=archetype,
         enabled_surfaces=enabled_surfaces,
     )
+    policy_products = _effective_policy_products(args.product)
+    strict_openai_layout = not bool(args.allow_legacy_marketplace_path)
 
     plugin_root.mkdir(parents=True, exist_ok=True)
 
@@ -2732,8 +3094,10 @@ def _run_scaffold(args: argparse.Namespace) -> int:
             plugin_root,
             args.install_policy,
             args.auth_policy,
+            policy_products,
             effective_category,
             args.force,
+            strict_openai_layout=strict_openai_layout,
         )
 
     print(f"Created plugin scaffold: {plugin_root}")
@@ -2754,7 +3118,13 @@ def _run_scaffold(args: argparse.Namespace) -> int:
 
 def _run_validate(args: argparse.Namespace) -> int:
     plugin_root = Path(args.plugin_path).expanduser().resolve()
-    findings: list[str] = []
+    findings: list[dict[str, str]] = []
+    allowed_signer_emails = _normalize_allowlist(args.allow_signer_email)
+    allowed_signer_domains = _normalize_domain_allowlist(args.allow_signer_domain)
+    allowed_signer_logins = _normalize_allowlist(args.allow_signer_login)
+
+    def add_finding(severity: str, message: str) -> None:
+        findings.append({"severity": severity, "message": message})
 
     if not plugin_root.exists() or not plugin_root.is_dir():
         print(f"ERROR: plugin path is not a directory: {plugin_root}", file=sys.stderr)
@@ -2763,11 +3133,12 @@ def _run_validate(args: argparse.Namespace) -> int:
     for required_rel in REQUIRED_PLUGIN_ROOT_FILES:
         required_path = plugin_root / required_rel
         if not required_path.exists():
-            findings.append(f"Missing required file: {required_path}")
+            add_finding("error", f"Missing required file: {required_path}")
 
     legacy_claude_manifest = plugin_root / ".claude-plugin" / "plugin.json"
     if legacy_claude_manifest.exists():
-        findings.append(
+        add_finding(
+            "error",
             "Detected legacy Claude manifest `.claude-plugin/plugin.json`. "
             "Converted Codex packages must use `.codex-plugin/plugin.json` as runtime manifest."
         )
@@ -2775,7 +3146,8 @@ def _run_validate(args: argparse.Namespace) -> int:
     for deprecated_surface in ("prompts", "commands", "slash-commands"):
         deprecated_path = plugin_root / deprecated_surface
         if deprecated_path.exists():
-            findings.append(
+            add_finding(
+                "warning",
                 f"Deprecated runtime surface detected: {deprecated_path}. "
                 "Fold prompt or command content into skills/ and keep only interface.defaultPrompt as optional entry text."
             )
@@ -2783,48 +3155,107 @@ def _run_validate(args: argparse.Namespace) -> int:
     plugin_json_path = plugin_root / ".codex-plugin" / "plugin.json"
     source_inspection = _inspect_source_root(plugin_root)
     if not plugin_json_path.exists() and source_inspection["plugin_roots"]:
-        findings.append(
+        add_finding(
+            "error",
             "Path looks like a source marketplace/plugin repo with provider manifests, not a converted Codex package. "
             "Run `plugin_builder.py inspect-source <path>` first."
         )
 
     if plugin_json_path.exists():
-        findings.extend(_check_plugin_manifest(plugin_json_path))
+        for message in _check_plugin_manifest(plugin_json_path):
+            add_finding("error", message)
         overlap_report = _find_existing_plugin_overlaps(
             plugin_root.name,
             plugin_root.parent,
             exclude_root=plugin_root,
         )
         if overlap_report["exact_matches"] or overlap_report["similar_matches"]:
-            findings.append(
+            add_finding(
+                "warning",
                 "Local plugin overlap detected in sibling plugin directory. "
                 "Review references/deconflict-report.md and confirm merge/fold/improve intent."
             )
             deconflict_report_path = plugin_root / "references" / "deconflict-report.md"
             if not deconflict_report_path.exists():
-                findings.append(
+                add_finding(
+                    "warning",
                     f"Missing deconflict report for overlapping plugin intent: {deconflict_report_path}"
                 )
 
+    provenance_manifest_path: Path | None = None
+    if args.provenance_manifest:
+        provenance_manifest_path = Path(args.provenance_manifest).expanduser().resolve()
+    elif args.require_signed_provenance:
+        provenance_manifest_path = plugin_root / ".codex-plugin" / "provenance.json"
+
+    if provenance_manifest_path is not None:
+        for message in _check_provenance_manifest(
+            provenance_manifest_path,
+            plugin_root,
+            require_signed_provenance=bool(args.require_signed_provenance),
+            allowed_signer_emails=allowed_signer_emails,
+            allowed_signer_domains=allowed_signer_domains,
+            allowed_signer_logins=allowed_signer_logins,
+        ):
+            add_finding("error", message)
+
     marketplace_path = Path(args.marketplace_path).expanduser().resolve()
+    strict_openai_layout = not bool(args.allow_legacy_marketplace_path)
+    extra_marketplace_paths = [
+        Path(raw_path).expanduser().resolve()
+        for raw_path in (args.extra_marketplace_path or [])
+    ]
+    all_marketplace_paths = list(dict.fromkeys([marketplace_path, *extra_marketplace_paths]))
     if args.require_marketplace:
-        if not marketplace_path.exists():
-            findings.append(
-                f"Marketplace file required but missing: {marketplace_path}"
-            )
-        else:
-            marketplace_payload = load_json(marketplace_path)
-            findings.extend(
-                _check_marketplace_entry(
+        readable_marketplaces = 0
+        validated_in_marketplace = 0
+        delayed_errors: list[str] = []
+        for path in all_marketplace_paths:
+            if not path.exists():
+                add_finding("warning", f"Marketplace file unavailable: {path}")
+                continue
+            try:
+                marketplace_payload = load_json(path)
+            except Exception as exc:  # noqa: BLE001
+                add_finding("warning", f"Marketplace load failed for '{path}': {exc}")
+                continue
+            readable_marketplaces += 1
+            try:
+                entry_failures = _check_marketplace_entry(
                     marketplace_payload,
                     plugin_root.name,
                     plugin_root,
-                    marketplace_path,
+                    path,
+                    strict_openai_layout=strict_openai_layout,
                 )
+            except Exception as exc:  # noqa: BLE001
+                delayed_errors.append(f"{path}: {exc}")
+                continue
+            if not entry_failures:
+                validated_in_marketplace += 1
+                continue
+            for message in entry_failures:
+                delayed_errors.append(f"{path}: {message}")
+
+        if readable_marketplaces == 0:
+            add_finding(
+                "error",
+                "Marketplace validation failed: no readable marketplace manifests were available.",
             )
+        elif validated_in_marketplace == 0:
+            add_finding(
+                "error",
+                "Marketplace validation failed: plugin entry did not validate in any readable marketplace manifest.",
+            )
+            for message in delayed_errors:
+                add_finding("error", message)
+        elif delayed_errors:
+            for message in delayed_errors:
+                add_finding("warning", message)
 
     _print_findings(findings)
-    return 0 if not findings else 2
+    has_errors = any(item.get("severity") == "error" for item in findings)
+    return 2 if has_errors else 0
 
 
 def _run_inspect_source(args: argparse.Namespace) -> int:
@@ -2860,7 +3291,15 @@ def _run_audit_marketplace(args: argparse.Namespace) -> int:
     if not marketplace_path.exists():
         print(f"ERROR: marketplace path does not exist: {marketplace_path}", file=sys.stderr)
         return 1
-    report = _audit_marketplace(marketplace_path, plugins_path)
+    try:
+        report = _audit_marketplace(
+            marketplace_path,
+            plugins_path,
+            strict_openai_layout=not bool(args.allow_legacy_marketplace_path),
+        )
+    except ValueError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 1
     _print_audit_report(report)
     has_errors = any(item.get("severity") == "error" for item in report["findings"])
     return 2 if has_errors else 0
@@ -2869,7 +3308,15 @@ def _run_audit_marketplace(args: argparse.Namespace) -> int:
 def _run_normalize_marketplace(args: argparse.Namespace) -> int:
     marketplace_path = Path(args.marketplace_path).expanduser().resolve()
     plugins_path = Path(args.plugins_path).expanduser().resolve()
-    payload, notes = _normalize_marketplace_payload(marketplace_path, plugins_path)
+    try:
+        payload, notes = _normalize_marketplace_payload(
+            marketplace_path,
+            plugins_path,
+            strict_openai_layout=not bool(args.allow_legacy_marketplace_path),
+        )
+    except ValueError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 1
     changed = True
     if marketplace_path.exists():
         current_payload = load_json(marketplace_path)
@@ -2897,6 +3344,13 @@ def _run_audit_compat(args: argparse.Namespace) -> int:
     if args.marketplace_path:
         marketplace_path = Path(args.marketplace_path).expanduser().resolve()
         if marketplace_path.exists():
+            if not args.allow_legacy_marketplace_path:
+                try:
+                    repo_root = _marketplace_repo_root(marketplace_path)
+                    _enforce_openai_marketplace_layout(marketplace_path, repo_root)
+                except ValueError as exc:
+                    print(f"ERROR: {exc}", file=sys.stderr)
+                    return 1
             marketplace_payload = load_json(marketplace_path)
     report = _audit_plugin_compatibility(plugin_root, marketplace_payload=marketplace_payload)
     _print_audit_report(report)
@@ -2973,6 +3427,21 @@ def parse_args() -> argparse.Namespace:
         help="Path to marketplace.json (defaults to <repo>/.agents/plugins/marketplace.json).",
     )
     scaffold_parser.add_argument(
+        "--product",
+        action="append",
+        choices=sorted(VALID_POLICY_PRODUCTS),
+        default=None,
+        help=(
+            "Marketplace policy.products value. Repeat for multiple products. "
+            "Defaults to CODEX."
+        ),
+    )
+    scaffold_parser.add_argument(
+        "--allow-legacy-marketplace-path",
+        action="store_true",
+        help="Allow legacy plugins/marketplace.json layout instead of strict .agents/plugins/marketplace.json.",
+    )
+    scaffold_parser.add_argument(
         "--install-policy",
         default=DEFAULT_INSTALL_POLICY,
         choices=sorted(VALID_INSTALL_POLICIES),
@@ -3006,6 +3475,12 @@ def parse_args() -> argparse.Namespace:
         help="Path to marketplace.json for entry checks.",
     )
     validate_parser.add_argument(
+        "--extra-marketplace-path",
+        action="append",
+        default=[],
+        help="Additional marketplace manifests to load with graceful partial-failure handling.",
+    )
+    validate_parser.add_argument(
         "--require-marketplace",
         action="store_true",
         help="Fail when marketplace.json or plugin entry is missing.",
@@ -3014,6 +3489,41 @@ def parse_args() -> argparse.Namespace:
         "--show-terminology-map",
         action="store_true",
         help="Print Claude->Codex terminology mapping reference.",
+    )
+    validate_parser.add_argument(
+        "--allow-legacy-marketplace-path",
+        action="store_true",
+        help="Allow legacy plugins/marketplace.json layout instead of strict .agents/plugins/marketplace.json.",
+    )
+    validate_parser.add_argument(
+        "--provenance-manifest",
+        help="Optional provenance manifest JSON path for source-commit verification checks.",
+    )
+    validate_parser.add_argument(
+        "--require-signed-provenance",
+        action="store_true",
+        help=(
+            "Require provenance commit verification to be signed/verified. "
+            "Defaults to `<plugin>/.codex-plugin/provenance.json` when --provenance-manifest is omitted."
+        ),
+    )
+    validate_parser.add_argument(
+        "--allow-signer-email",
+        action="append",
+        default=[],
+        help="Require provenance signer identity to include one of these exact email addresses.",
+    )
+    validate_parser.add_argument(
+        "--allow-signer-domain",
+        action="append",
+        default=[],
+        help="Require provenance signer identity to include one of these email domains.",
+    )
+    validate_parser.add_argument(
+        "--allow-signer-login",
+        action="append",
+        default=[],
+        help="Require provenance signer identity to include one of these GitHub logins.",
     )
 
     inspect_parser = subparsers.add_parser(
@@ -3051,6 +3561,11 @@ def parse_args() -> argparse.Namespace:
         default=str(DEFAULT_PLUGIN_PARENT),
         help="Path to the local plugins directory.",
     )
+    audit_marketplace_parser.add_argument(
+        "--allow-legacy-marketplace-path",
+        action="store_true",
+        help="Allow legacy plugins/marketplace.json layout instead of strict .agents/plugins/marketplace.json.",
+    )
 
     normalize_marketplace_parser = subparsers.add_parser(
         "normalize-marketplace",
@@ -3071,6 +3586,11 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Write the normalized payload back to marketplace.json.",
     )
+    normalize_marketplace_parser.add_argument(
+        "--allow-legacy-marketplace-path",
+        action="store_true",
+        help="Allow legacy plugins/marketplace.json layout instead of strict .agents/plugins/marketplace.json.",
+    )
 
     audit_compat_parser = subparsers.add_parser(
         "audit-compat",
@@ -3081,6 +3601,11 @@ def parse_args() -> argparse.Namespace:
         "--marketplace-path",
         default=str(DEFAULT_MARKETPLACE_PATH),
         help="Optional marketplace.json path for category and entry comparison.",
+    )
+    audit_compat_parser.add_argument(
+        "--allow-legacy-marketplace-path",
+        action="store_true",
+        help="Allow legacy plugins/marketplace.json layout instead of strict .agents/plugins/marketplace.json.",
     )
 
     return parser.parse_args()

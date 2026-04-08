@@ -21,7 +21,7 @@ Add custom review instructions for specific file paths using glob patterns. Inst
 
 .coderabbit.yaml
 
-```
+```yaml
 reviews:
   path_instructions:
     - path: "src/controllers/**"
@@ -67,7 +67,7 @@ Patterns prefixed with `!` **exclude** paths from review (for example, `!dist/**
 
 .coderabbit.yaml
 
-```
+```yaml
 reviews:
   path_filters:
     - "!dist/**"
@@ -185,7 +185,7 @@ By default, CodeRabbit intentionally skips certain file paths and extensions -- 
 | `!**/*.gif` | GIF image |
 | `!**/*.bmp` | BMP image |
 | `!**/*.tiff` | TIFF image |
-| `!**/*.webm` | WebM image |
+| `!**/*.webm` | WebM video |
 | `!**/*.ttf` | TrueType font |
 | `!**/*.otf` | OpenType font |
 | `!**/*.woff` | Web Open Font Format |

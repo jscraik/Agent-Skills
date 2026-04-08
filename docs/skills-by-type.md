@@ -12,14 +12,14 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 - `library_api_reference`: 7
 - `product_verification`: 9
 - `data_fetch_analysis`: 6
-- `team_automation`: 37
-- `scaffolding_templates`: 28
+- `team_automation`: 36
+- `scaffolding_templates`: 27
 - `code_quality_review`: 16
 - `ci_cd_deployment`: 7
 - `runbook`: 4
 - `infrastructure_ops`: 6
 - `invalid`: 0
-- `total_tagged`: 120
+- `total_tagged`: 118
 
 ## Semantic Types
 
@@ -113,7 +113,6 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 - `mcp-builder` — `backend`
 - `nano-banana-builder` — `frontend/graphics`
 - `og-image-creator` — `frontend/graphics`
-- `plugin-builder` — `utilities`
 - `shadcn-ui` — `frontend/ui`
 - `sora` — `frontend/graphics`
 - `stitch-loop` — `frontend/tools`
@@ -172,3 +171,4 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 ## Validation Notes
 
 - No invalid semantic type tags detected.
+
