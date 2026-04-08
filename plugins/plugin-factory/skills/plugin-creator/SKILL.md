@@ -5,6 +5,54 @@ description: Create and scaffold plugin directories for Codex with a required `.
 
 # Plugin Creator
 
+## When to use
+
+Use this skill when the user asks to:
+- scaffold a new local Codex plugin with the required `.codex-plugin/plugin.json`;
+- add optional plugin folders/files (`skills/`, `hooks/`, `scripts/`, `assets/`, `.mcp.json`, `.app.json`);
+- generate or update marketplace entries at `<repo-root>/.agents/plugins/marketplace.json` (or the equivalent home-local path).
+
+Do not use this skill as primary owner for:
+- plugin hardening or conversion work (handoff to `plugin-builder`);
+- plugin installation/provenance workflows (handoff to `plugin-installer`).
+
+## Inputs
+
+Minimum inputs for scaffold mode:
+- target plugin name (normalized to lower-case hyphen-case, max 64 chars);
+- parent plugin directory (`plugins/` by default, or explicit `--path`);
+- overwrite intent (`--force`) only when replacing an existing plugin folder.
+
+Additional inputs for marketplace mode:
+- explicit marketplace path when not using repo default (`--marketplace-path`);
+- category/policy overrides only when user explicitly requests them.
+
+## Outputs
+
+Expected outputs from a successful run:
+- plugin root at `<parent-plugin-directory>/<plugin-name>/`;
+- required manifest at `<plugin-root>/.codex-plugin/plugin.json`;
+- optional companion folders/files requested by flags;
+- optional marketplace entry with `policy.installation`, `policy.authentication`, and `category`.
+
+Structured output contract:
+- `schema_version: 1`
+- `result`: `created` | `updated` | `blocked`
+- `artifacts`: created/updated paths
+- `warnings`: non-fatal policy or compatibility notes
+
+User-facing closeout:
+- summarize generated paths and whether marketplace changed;
+- call out defaults that were applied versus explicit user overrides.
+
+## Constraints
+
+- never create a plugin without `.codex-plugin/plugin.json`;
+- never reorder existing marketplace plugin entries unless explicitly requested;
+- only include `policy.products` when explicitly requested;
+- if target location is ambiguous (repo-local vs home-local), ask before writing marketplace data;
+- redact or omit secrets, tokens, credentials, and sensitive data from command output and summaries.
+
 ## Core Philosophy
 
 - Create the smallest viable plugin package first, then expand only where the user asks.
@@ -188,6 +236,12 @@ Fail-fast rule:
 
 - Stop at the first failed validation check and do not continue packaging or marketplace edits until the failure is fixed.
 - If quick validation fails, report the exact failing command output and rerun validation only after applying a targeted fix.
+
+## Examples
+
+- "Create a plugin scaffold named `design-tools` under `plugins/` and keep placeholders in `plugin.json`."
+- "Add `--with-marketplace` for my new plugin and keep default installation/authentication policy."
+- "Create a home-local plugin under `~/plugins` and update `~/.agents/plugins/marketplace.json`."
 
 ## See Also
 

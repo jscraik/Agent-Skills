@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "profile_id": "utilities-plugin-builder",
-  "scope_skill": "utilities/plugin-builder",
+  "scope_skill": "plugins/plugin-factory/skills/plugin-builder",
   "scope_profile": "utilities",
   "rubric_version": "2026-04-07",
   "evaluator_version": "v1",

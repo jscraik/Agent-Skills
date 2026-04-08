@@ -12,19 +12,10 @@
       },
       "policy": {
         "installation": "AVAILABLE",
-        "authentication": "ON_INSTALL"
-      },
-      "category": "Productivity"
-    },
-    {
-      "name": "skill-factory",
-      "source": {
-        "source": "local",
-        "path": "./plugins/skill-factory"
-      },
-      "policy": {
-        "installation": "AVAILABLE",
-        "authentication": "ON_INSTALL"
+        "authentication": "ON_INSTALL",
+        "products": [
+          "CODEX"
+        ]
       },
       "category": "Productivity"
     },
@@ -36,7 +27,10 @@
       },
       "policy": {
         "installation": "AVAILABLE",
-        "authentication": "ON_INSTALL"
+        "authentication": "ON_INSTALL",
+        "products": [
+          "CODEX"
+        ]
       },
       "category": "Productivity"
     },
@@ -45,6 +39,21 @@
       "source": {
         "source": "local",
         "path": "./plugins/plugin-factory"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL",
+        "products": [
+          "CODEX"
+        ]
+      },
+      "category": "Productivity"
+    },
+    {
+      "name": "skill-factory",
+      "source": {
+        "source": "local",
+        "path": "./plugins/skill-factory"
       },
       "policy": {
         "installation": "AVAILABLE",

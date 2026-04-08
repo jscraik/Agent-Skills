@@ -179,9 +179,17 @@ fi
 # appear as user-selectable skills in Codex. Lifecycle family skills such as
 # `skill-creator` and `skill-installer` are intentionally visible again.
 hidden_flat_skills=(
+  "codex-plugin-builder"
   "skillgrade-graders"
   "skillgrade-setup"
 )
+is_hidden_flat_skill_name() {
+  local skill_name="$1"
+  case " ${hidden_flat_skills[*]} " in
+    *" $skill_name "*) return 0 ;;
+    *) return 1 ;;
+  esac
+}
 for hidden_skill in "${hidden_flat_skills[@]}"; do
   if [ -e "$skills_dir/$hidden_skill" ]; then
     if rm -rf -- "$skills_dir/$hidden_skill"; then
@@ -350,6 +358,10 @@ while IFS= read -r skill_path; do
   fi
   skill_dir="$(dirname "$skill_path")"
   skill_name="$(basename "$skill_dir")"
+  if is_hidden_flat_skill_name "$skill_name"; then
+    echo "Skipping hidden flat skill: $skill_name"
+    continue
+  fi
   if is_plugin_owned_skill_path "$skill_path"; then
     echo "Skipping plugin-owned skill from flat runtime list: $skill_name"
     continue
