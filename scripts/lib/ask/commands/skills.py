@@ -297,19 +297,46 @@ def _create_symlink(source: Path, target: Path, dry_run: bool = False) -> str:
         target.symlink_to(source)
     return f"{action} symlink: {target} -> {source}"
 
+def _find_symlink_entries(source: Path) -> list[Path]:
+    """Return symlink entries under source (including source itself)."""
+    symlinks: list[Path] = []
+    if source.is_symlink():
+        symlinks.append(source)
+        return symlinks
+    if not source.exists() or not source.is_dir():
+        return symlinks
+
+    for root, dirs, files in os.walk(source, topdown=True, followlinks=False):
+        dirs[:] = [d for d in dirs if d not in (".git", "node_modules", "__pycache__")]
+        for name in dirs + files:
+            candidate = Path(root) / name
+            if candidate.is_symlink():
+                symlinks.append(candidate)
+    return symlinks
+
 def _sync_dir_copy(source: Path, target: Path, dry_run: bool = False) -> str:
     """Sync directory via copy (rsync-like)."""
+    symlink_entries = _find_symlink_entries(source)
+    if symlink_entries:
+        rel = symlink_entries[0]
+        rel_text = str(rel.relative_to(source)) if rel != source else "."
+        raise ValueError(f"Symlinks are not allowed in sync source: {source} (first: {rel_text})")
+
     if not dry_run:
         target.mkdir(parents=True, exist_ok=True)
         for item in source.iterdir():
             if item.name in ('.git', 'node_modules', '__pycache__'):
                 continue
             dest = target / item.name
+            if item.is_symlink():
+                raise ValueError(f"Symlink entries are not allowed in sync source: {item}")
             if item.is_dir():
-                if dest.exists(): shutil.rmtree(dest)
-                shutil.copytree(item, dest)
+                if dest.exists():
+                    shutil.rmtree(dest)
+                # Preserve symlink objects defensively if one appears mid-copy.
+                shutil.copytree(item, dest, symlinks=True)
             else:
-                shutil.copy2(item, dest)
+                shutil.copy2(item, dest, follow_symlinks=False)
     return f"Synced directory: {target} (copy)"
 
 def sync_skills(repo_root: Path, scope: str = "workspace", dry_run: bool = False) -> CallResult:
@@ -340,13 +367,43 @@ def sync_skills(repo_root: Path, scope: str = "workspace", dry_run: bool = False
                 fix_suggestion="Ensure the skills-antigravity directory exists or use --scope workspace"
             ))
             return result
+        if antigravity_skills_dir.is_symlink():
+            result.status = "error"
+            result.errors.append(ErrorObject(
+                code="ERR_VALIDATION",
+                message=f"Refusing to sync from symlinked antigravity directory: {antigravity_skills_dir}",
+                fix_suggestion="Replace skills-antigravity symlink with a real directory before running user scope sync."
+            ))
+            return result
+        symlink_entries = _find_symlink_entries(antigravity_skills_dir)
+        if symlink_entries:
+            rel = str(symlink_entries[0].relative_to(antigravity_skills_dir))
+            result.status = "error"
+            result.errors.append(ErrorObject(
+                code="ERR_VALIDATION",
+                message=(
+                    f"Refusing to sync skills-antigravity with symlink entries "
+                    f"(first: {rel})."
+                ),
+                fix_suggestion="Remove symlinks from skills-antigravity and rerun ask skills sync --scope user."
+            ))
+            return result
         targets = [(skills_dir, repo_root / "skills"), (skills_dir, home / ".claude" / "skills"), (skills_dir, home / ".agents" / "skills"), (skills_dir, home / ".codex" / "skills"), (antigravity_skills_dir, home / ".antigravity" / "skills")]
         for src, dst in targets:
             plan["symlinks"].append({"from": str(dst), "to": str(src)})
             logs.append(_create_symlink(src, dst, dry_run))
         antigravity_dest = home / ".gemini" / "antigravity" / "skills"
         plan["writes"].append(str(antigravity_dest))
-        logs.append(_sync_dir_copy(antigravity_skills_dir, antigravity_dest, dry_run))
+        try:
+            logs.append(_sync_dir_copy(antigravity_skills_dir, antigravity_dest, dry_run))
+        except ValueError as exc:
+            result.status = "error"
+            result.errors.append(ErrorObject(
+                code="ERR_VALIDATION",
+                message=str(exc),
+                fix_suggestion="Remove symlinks from sync source and retry."
+            ))
+            return result
     else:
         result.status = "error"
         result.errors.append(ErrorObject(

@@ -17,13 +17,13 @@
     "runner_mode": "codex",
     "tier2_mode": "warn",
     "capture_jsonl": true,
-    "reports_base": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047"
+    "reports_base": "artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047"
   },
   "artifacts": {
-    "reports_base": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047",
-    "summary": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/summary.json",
-    "scorecard": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/product__strategy__product-design-critic.scorecard.json",
-    "release_manifest": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/release_manifest.json",
-    "junit": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/junit.xml"
+    "reports_base": "artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047",
+    "summary": "artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/summary.json",
+    "scorecard": "artifacts/validation/touched-skills-20260329-full/product__strategy__product-design-critic.scorecard.json",
+    "release_manifest": "artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/release_manifest.json",
+    "junit": "artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/junit.xml"
   }
 }

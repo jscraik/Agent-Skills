@@ -6,7 +6,7 @@
   "exit_code": 0,
   "name": "product-design-critic",
   "description": "Critique product surfaces and flows with opinionated UX judgment about hierarchy, trust, and jobs-to-be-done. Use when the user wants product-level interaction or workflow critique, not pure visual styling advice.",
-  "path": "/Users/jamiecraik/dev/agent-skills/product/strategy/product-design-critic/SKILL.md",
+  "path": "product/strategy/product-design-critic/SKILL.md",
   "total_score": 158,
   "max_total": 165,
   "categories": [

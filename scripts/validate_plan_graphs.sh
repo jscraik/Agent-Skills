@@ -36,6 +36,30 @@ fi
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$repo_root"
 
+sanitize_plan_graph_output() {
+  python3 - "$repo_root" "${HOME:-}" <<'PY'
+import os
+import pathlib
+import re
+import sys
+
+repo_root = pathlib.Path(sys.argv[1]).resolve()
+home_raw = sys.argv[2]
+home = pathlib.Path(home_raw).resolve() if home_raw else None
+
+for raw_line in sys.stdin:
+    line = raw_line.rstrip("\n")
+    repo_prefix = str(repo_root)
+    line = line.replace(repo_prefix + os.sep, "")
+    line = line.replace(repo_prefix, ".")
+    if home is not None:
+        line = line.replace(str(home), "~")
+    line = re.sub(r"/Users/[^/]+", "/Users/<redacted>", line)
+    line = re.sub(r"/home/[^/]+", "/home/<redacted>", line)
+    print(line)
+PY
+}
+
 paths=(".agent/PLANS.md")
 while IFS= read -r path; do
   paths+=("$path")
@@ -45,7 +69,7 @@ status=0
 failed_plans=()
 for path in "${paths[@]}"; do
   echo "[plan-graph] lint $path"
-  if ! python3 "$LINTER" "$path" 2>&1; then
+  if ! python3 "$LINTER" "$path" 2>&1 | sanitize_plan_graph_output; then
     status=1
     failed_plans+=("$path")
   fi

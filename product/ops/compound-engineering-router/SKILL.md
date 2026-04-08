@@ -34,7 +34,7 @@ metadata:
 
 ## Working agreement
 - Keep `SKILL.md` as the map; keep durable detail in `references/` and `workflows/`.
-- Treat `/Users/jamiecraik/dev/Agent-Skills` as the primary target repo for packaged CE skills. Use `/Users/jamiecraik/dev/config` only as a legacy compatibility source when the user explicitly wants the original prompt-pack mapping.
+- Treat `$REPO_ROOT` as the primary target repo for packaged CE skills. Use `~/dev/config` only as a legacy compatibility source when the user explicitly wants the original prompt-pack mapping.
 - Prefer the smallest route or meta-mode that fits.
 - Keep scope tight: choose one route, or at most 2-3 focused candidates when ambiguity remains after one question.
 - Route to existing packaged CE skills and configured agents instead of duplicating their instructions.
@@ -70,7 +70,7 @@ Non-triggers:
 
 ## Required inputs
 - user request or artifact to route: idea, spec, plan, task, branch, PR, diff, postmortem, or review ask
-- target repo context; default to `/Users/jamiecraik/dev/Agent-Skills`
+- target repo context; default to `$REPO_ROOT`
 - enough signal to choose one route safely; ask a single concise follow-up only if the route is ambiguous
 - for `technical-review`, at least one of: file set, diff, PR, branch, stack, or focus area
 - for `context-compaction` or `guardrail-extract`, the current state summary, failure note, or artifact set to compress or convert

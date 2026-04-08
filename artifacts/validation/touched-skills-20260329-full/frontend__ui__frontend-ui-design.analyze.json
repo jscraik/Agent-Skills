@@ -6,7 +6,7 @@
   "exit_code": 0,
   "name": "frontend-ui-design",
   "description": "Design or implement production-ready frontend UI components and screens with strong visual direction, layout rhythm, spacing hierarchy, accessibility, and reusable structure. Use when the user wants standard UI build or redesign work, including fixing crowded or structurally weak layouts, not design-system governance or post-direction polish only.",
-  "path": "/Users/jamiecraik/dev/agent-skills/frontend/ui/frontend-ui-design/SKILL.md",
+  "path": "frontend/ui/frontend-ui-design/SKILL.md",
   "total_score": 121,
   "max_total": 165,
   "categories": [

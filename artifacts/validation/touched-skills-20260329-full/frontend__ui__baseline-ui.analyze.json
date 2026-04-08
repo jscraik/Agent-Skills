@@ -6,7 +6,7 @@
   "exit_code": 0,
   "name": "baseline-ui",
   "description": "Check Tailwind UI work for accessibility, performance, theming, responsive behavior, and anti-patterns. Use when the user wants guardrail-style UI validation, scored technical audits, or targeted cleanup, not a full redesign.",
-  "path": "/Users/jamiecraik/dev/agent-skills/frontend/ui/baseline-ui/SKILL.md",
+  "path": "frontend/ui/baseline-ui/SKILL.md",
   "total_score": 135,
   "max_total": 165,
   "categories": [

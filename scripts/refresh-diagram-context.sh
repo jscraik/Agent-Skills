@@ -276,7 +276,8 @@ writeFileSync(
 	`${JSON.stringify(
 		{
 			generatedAt: new Date().toISOString(),
-			rootPath: rootDir,
+			// Keep manifest portable and avoid leaking developer host paths.
+			rootPath: ".",
 			diagramDir: ".diagram",
 			diagrams,
 		},

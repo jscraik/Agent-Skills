@@ -17,13 +17,13 @@
     "runner_mode": "codex",
     "tier2_mode": "warn",
     "capture_jsonl": true,
-    "reports_base": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/baseline-ui/20260330-001722-423606"
+    "reports_base": "artifacts/validation/touched-skills-20260329-full/reports/baseline-ui/20260330-001722-423606"
   },
   "artifacts": {
-    "reports_base": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/baseline-ui/20260330-001722-423606",
-    "summary": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/baseline-ui/20260330-001722-423606/summary.json",
-    "scorecard": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/frontend__ui__baseline-ui.scorecard.json",
-    "release_manifest": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/baseline-ui/20260330-001722-423606/release_manifest.json",
-    "junit": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/baseline-ui/20260330-001722-423606/junit.xml"
+    "reports_base": "artifacts/validation/touched-skills-20260329-full/reports/baseline-ui/20260330-001722-423606",
+    "summary": "artifacts/validation/touched-skills-20260329-full/reports/baseline-ui/20260330-001722-423606/summary.json",
+    "scorecard": "artifacts/validation/touched-skills-20260329-full/frontend__ui__baseline-ui.scorecard.json",
+    "release_manifest": "artifacts/validation/touched-skills-20260329-full/reports/baseline-ui/20260330-001722-423606/release_manifest.json",
+    "junit": "artifacts/validation/touched-skills-20260329-full/reports/baseline-ui/20260330-001722-423606/junit.xml"
   }
 }

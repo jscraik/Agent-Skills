@@ -1,8 +1,9 @@
 Traceback (most recent call last):
-  File "/Users/jamiecraik/dev/agent-skills/utilities/skill-builder/scripts/run_skill_evals.py", line 2124, in <module>
+  File "utilities/skill-builder/scripts/run_skill_evals.py", line 2124, in <module>
     raise SystemExit(main())
-  File "/Users/jamiecraik/dev/agent-skills/utilities/skill-builder/scripts/run_skill_evals.py", line 1603, in main
+  File "utilities/skill-builder/scripts/run_skill_evals.py", line 1603, in main
     cases = load_evals(evals_path)
-  File "/Users/jamiecraik/dev/agent-skills/utilities/skill-builder/scripts/run_skill_evals.py", line 249, in load_evals
+  File "utilities/skill-builder/scripts/run_skill_evals.py", line 249, in load_evals
     raise ValueError("evals.yaml must be a mapping with `cases: [...]`.")
 ValueError: evals.yaml must be a mapping with `cases: [...]`.
+FOLLOW_UP: Fixed in 3c0bcb40; historical validation artifact preserved; current config uses frontend/ui/frontend-design/references/evals.yaml with top-level `cases`.

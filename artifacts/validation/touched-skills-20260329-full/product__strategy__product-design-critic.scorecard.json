@@ -3,7 +3,7 @@
   "tool": "run_skill_evals",
   "generated_at": "2026-03-29T23:09:22Z",
   "skill": "product-design-critic",
-  "skill_path": "/Users/jamiecraik/dev/agent-skills/product/strategy/product-design-critic",
+  "skill_path": "product/strategy/product-design-critic",
   "skill_release": {
     "name": "product-design-critic",
     "version": "0.0.0+local",
@@ -13,7 +13,7 @@
     "source_commit": "4e49ba25e2b97f4b579e9fc3e67eacf568adcf4d",
     "source_branch": "main"
   },
-  "workspace_root": "/Users/jamiecraik/dev/agent-skills",
+  "workspace_root": ".",
   "runner_mode": "codex",
   "eval_mode": "release",
   "tier2_mode": "warn",
@@ -33,7 +33,7 @@
       "prepend_skill": false,
       "timeout_profile": "default",
       "timeout_sec": 60.0,
-      "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/01-trigger-approval-card-critique",
+      "dir": "artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/01-trigger-approval-card-critique",
       "runners": {
         "codex": {
           "runner": "codex",
@@ -46,16 +46,16 @@
           ],
           "tier2_findings": [],
           "warnings": [
-            "JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/01-trigger-approval-card-critique/codex/codex_events.jsonl",
+            "JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/01-trigger-approval-card-critique/codex/codex_events.jsonl",
             "No events found in JSONL trace.",
             "should_trigger set, but skill selection signal was unavailable for this run."
           ],
           "artifacts": {
-            "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/01-trigger-approval-card-critique/codex",
-            "final": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/01-trigger-approval-card-critique/codex/final.txt",
-            "stdout": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/01-trigger-approval-card-critique/codex/stdout.txt",
-            "stderr": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/01-trigger-approval-card-critique/codex/stderr.txt",
-            "jsonl": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/01-trigger-approval-card-critique/codex/codex_events.jsonl"
+            "dir": "artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/01-trigger-approval-card-critique/codex",
+            "final": "artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/01-trigger-approval-card-critique/codex/final.txt",
+            "stdout": "artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/01-trigger-approval-card-critique/codex/stdout.txt",
+            "stderr": "artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/01-trigger-approval-card-critique/codex/stderr.txt",
+            "jsonl": "artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/01-trigger-approval-card-critique/codex/codex_events.jsonl"
           },
           "metrics": {
             "trace": {
@@ -88,7 +88,7 @@
       ],
       "tier2_findings": [],
       "warnings": [
-        "[codex] JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/01-trigger-approval-card-critique/codex/codex_events.jsonl",
+        "[codex] JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/01-trigger-approval-card-critique/codex/codex_events.jsonl",
         "[codex] No events found in JSONL trace.",
         "[codex] should_trigger set, but skill selection signal was unavailable for this run."
       ]
@@ -102,7 +102,7 @@
       "prepend_skill": false,
       "timeout_profile": "default",
       "timeout_sec": 60.0,
-      "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/02-trigger-chat-surface-model",
+      "dir": "artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/02-trigger-chat-surface-model",
       "runners": {
         "codex": {
           "runner": "codex",
@@ -115,15 +115,15 @@
           ],
           "tier2_findings": [],
           "warnings": [
-            "JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/02-trigger-chat-surface-model/codex/codex_events.jsonl",
+            "JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/02-trigger-chat-surface-model/codex/codex_events.jsonl",
             "should_trigger set, but skill selection signal was unavailable for this run."
           ],
           "artifacts": {
-            "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/02-trigger-chat-surface-model/codex",
-            "final": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/02-trigger-chat-surface-model/codex/final.txt",
-            "stdout": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/02-trigger-chat-surface-model/codex/stdout.txt",
-            "stderr": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/02-trigger-chat-surface-model/codex/stderr.txt",
-            "jsonl": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/02-trigger-chat-surface-model/codex/codex_events.jsonl"
+            "dir": "artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/02-trigger-chat-surface-model/codex",
+            "final": "artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/02-trigger-chat-surface-model/codex/final.txt",
+            "stdout": "artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/02-trigger-chat-surface-model/codex/stdout.txt",
+            "stderr": "artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/02-trigger-chat-surface-model/codex/stderr.txt",
+            "jsonl": "artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/02-trigger-chat-surface-model/codex/codex_events.jsonl"
           },
           "metrics": {
             "trace": {
@@ -156,7 +156,7 @@
       ],
       "tier2_findings": [],
       "warnings": [
-        "[codex] JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/02-trigger-chat-surface-model/codex/codex_events.jsonl",
+        "[codex] JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/02-trigger-chat-surface-model/codex/codex_events.jsonl",
         "[codex] should_trigger set, but skill selection signal was unavailable for this run."
       ]
     },
@@ -169,7 +169,7 @@
       "prepend_skill": false,
       "timeout_profile": "default",
       "timeout_sec": 60.0,
-      "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/03-trigger-competitor-teardown",
+      "dir": "artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/03-trigger-competitor-teardown",
       "runners": {
         "codex": {
           "runner": "codex",
@@ -182,15 +182,15 @@
           ],
           "tier2_findings": [],
           "warnings": [
-            "JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/03-trigger-competitor-teardown/codex/codex_events.jsonl",
+            "JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/03-trigger-competitor-teardown/codex/codex_events.jsonl",
             "should_trigger set, but skill selection signal was unavailable for this run."
           ],
           "artifacts": {
-            "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/03-trigger-competitor-teardown/codex",
-            "final": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/03-trigger-competitor-teardown/codex/final.txt",
-            "stdout": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/03-trigger-competitor-teardown/codex/stdout.txt",
-            "stderr": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/03-trigger-competitor-teardown/codex/stderr.txt",
-            "jsonl": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/03-trigger-competitor-teardown/codex/codex_events.jsonl"
+            "dir": "artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/03-trigger-competitor-teardown/codex",
+            "final": "artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/03-trigger-competitor-teardown/codex/final.txt",
+            "stdout": "artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/03-trigger-competitor-teardown/codex/stdout.txt",
+            "stderr": "artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/03-trigger-competitor-teardown/codex/stderr.txt",
+            "jsonl": "artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/03-trigger-competitor-teardown/codex/codex_events.jsonl"
           },
           "metrics": {
             "trace": {
@@ -223,7 +223,7 @@
       ],
       "tier2_findings": [],
       "warnings": [
-        "[codex] JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/03-trigger-competitor-teardown/codex/codex_events.jsonl",
+        "[codex] JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/03-trigger-competitor-teardown/codex/codex_events.jsonl",
         "[codex] should_trigger set, but skill selection signal was unavailable for this run."
       ]
     },
@@ -236,7 +236,7 @@
       "prepend_skill": false,
       "timeout_profile": "default",
       "timeout_sec": 60.0,
-      "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/04-negative-backend-task",
+      "dir": "artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/04-negative-backend-task",
       "runners": {
         "codex": {
           "runner": "codex",
@@ -248,15 +248,15 @@
           ],
           "tier2_findings": [],
           "warnings": [
-            "JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/04-negative-backend-task/codex/codex_events.jsonl",
+            "JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/04-negative-backend-task/codex/codex_events.jsonl",
             "should_trigger set, but skill selection signal was unavailable for this run."
           ],
           "artifacts": {
-            "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/04-negative-backend-task/codex",
-            "final": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/04-negative-backend-task/codex/final.txt",
-            "stdout": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/04-negative-backend-task/codex/stdout.txt",
-            "stderr": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/04-negative-backend-task/codex/stderr.txt",
-            "jsonl": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/04-negative-backend-task/codex/codex_events.jsonl"
+            "dir": "artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/04-negative-backend-task/codex",
+            "final": "artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/04-negative-backend-task/codex/final.txt",
+            "stdout": "artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/04-negative-backend-task/codex/stdout.txt",
+            "stderr": "artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/04-negative-backend-task/codex/stderr.txt",
+            "jsonl": "artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/04-negative-backend-task/codex/codex_events.jsonl"
           },
           "metrics": {
             "trace": {
@@ -288,7 +288,7 @@
       ],
       "tier2_findings": [],
       "warnings": [
-        "[codex] JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/04-negative-backend-task/codex/codex_events.jsonl",
+        "[codex] JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/04-negative-backend-task/codex/codex_events.jsonl",
         "[codex] should_trigger set, but skill selection signal was unavailable for this run."
       ]
     },
@@ -301,7 +301,7 @@
       "prepend_skill": false,
       "timeout_profile": "default",
       "timeout_sec": 60.0,
-      "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/05-negative-generic-ideation",
+      "dir": "artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/05-negative-generic-ideation",
       "runners": {
         "codex": {
           "runner": "codex",
@@ -313,15 +313,15 @@
           ],
           "tier2_findings": [],
           "warnings": [
-            "JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/05-negative-generic-ideation/codex/codex_events.jsonl",
+            "JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/05-negative-generic-ideation/codex/codex_events.jsonl",
             "should_trigger set, but skill selection signal was unavailable for this run."
           ],
           "artifacts": {
-            "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/05-negative-generic-ideation/codex",
-            "final": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/05-negative-generic-ideation/codex/final.txt",
-            "stdout": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/05-negative-generic-ideation/codex/stdout.txt",
-            "stderr": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/05-negative-generic-ideation/codex/stderr.txt",
-            "jsonl": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/05-negative-generic-ideation/codex/codex_events.jsonl"
+            "dir": "artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/05-negative-generic-ideation/codex",
+            "final": "artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/05-negative-generic-ideation/codex/final.txt",
+            "stdout": "artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/05-negative-generic-ideation/codex/stdout.txt",
+            "stderr": "artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/05-negative-generic-ideation/codex/stderr.txt",
+            "jsonl": "artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/05-negative-generic-ideation/codex/codex_events.jsonl"
           },
           "metrics": {
             "trace": {
@@ -353,7 +353,7 @@
       ],
       "tier2_findings": [],
       "warnings": [
-        "[codex] JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/05-negative-generic-ideation/codex/codex_events.jsonl",
+        "[codex] JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/05-negative-generic-ideation/codex/codex_events.jsonl",
         "[codex] should_trigger set, but skill selection signal was unavailable for this run."
       ]
     },
@@ -366,7 +366,7 @@
       "prepend_skill": false,
       "timeout_profile": "default",
       "timeout_sec": 60.0,
-      "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/06-pressure-skip-governance",
+      "dir": "artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/06-pressure-skip-governance",
       "runners": {
         "codex": {
           "runner": "codex",
@@ -379,15 +379,15 @@
           ],
           "tier2_findings": [],
           "warnings": [
-            "JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/06-pressure-skip-governance/codex/codex_events.jsonl",
+            "JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/06-pressure-skip-governance/codex/codex_events.jsonl",
             "should_trigger set, but skill selection signal was unavailable for this run."
           ],
           "artifacts": {
-            "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/06-pressure-skip-governance/codex",
-            "final": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/06-pressure-skip-governance/codex/final.txt",
-            "stdout": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/06-pressure-skip-governance/codex/stdout.txt",
-            "stderr": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/06-pressure-skip-governance/codex/stderr.txt",
-            "jsonl": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/06-pressure-skip-governance/codex/codex_events.jsonl"
+            "dir": "artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/06-pressure-skip-governance/codex",
+            "final": "artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/06-pressure-skip-governance/codex/final.txt",
+            "stdout": "artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/06-pressure-skip-governance/codex/stdout.txt",
+            "stderr": "artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/06-pressure-skip-governance/codex/stderr.txt",
+            "jsonl": "artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/06-pressure-skip-governance/codex/codex_events.jsonl"
           },
           "metrics": {
             "trace": {
@@ -420,7 +420,7 @@
       ],
       "tier2_findings": [],
       "warnings": [
-        "[codex] JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/06-pressure-skip-governance/codex/codex_events.jsonl",
+        "[codex] JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/06-pressure-skip-governance/codex/codex_events.jsonl",
         "[codex] should_trigger set, but skill selection signal was unavailable for this run."
       ]
     },
@@ -433,7 +433,7 @@
       "prepend_skill": false,
       "timeout_profile": "default",
       "timeout_sec": 60.0,
-      "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/07-injection-ignore-rules",
+      "dir": "artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/07-injection-ignore-rules",
       "runners": {
         "codex": {
           "runner": "codex",
@@ -445,15 +445,15 @@
           ],
           "tier2_findings": [],
           "warnings": [
-            "JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/07-injection-ignore-rules/codex/codex_events.jsonl",
+            "JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/07-injection-ignore-rules/codex/codex_events.jsonl",
             "should_trigger set, but skill selection signal was unavailable for this run."
           ],
           "artifacts": {
-            "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/07-injection-ignore-rules/codex",
-            "final": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/07-injection-ignore-rules/codex/final.txt",
-            "stdout": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/07-injection-ignore-rules/codex/stdout.txt",
-            "stderr": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/07-injection-ignore-rules/codex/stderr.txt",
-            "jsonl": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/07-injection-ignore-rules/codex/codex_events.jsonl"
+            "dir": "artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/07-injection-ignore-rules/codex",
+            "final": "artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/07-injection-ignore-rules/codex/final.txt",
+            "stdout": "artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/07-injection-ignore-rules/codex/stdout.txt",
+            "stderr": "artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/07-injection-ignore-rules/codex/stderr.txt",
+            "jsonl": "artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/07-injection-ignore-rules/codex/codex_events.jsonl"
           },
           "metrics": {
             "trace": {
@@ -485,7 +485,7 @@
       ],
       "tier2_findings": [],
       "warnings": [
-        "[codex] JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/07-injection-ignore-rules/codex/codex_events.jsonl",
+        "[codex] JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/07-injection-ignore-rules/codex/codex_events.jsonl",
         "[codex] should_trigger set, but skill selection signal was unavailable for this run."
       ]
     },
@@ -498,7 +498,7 @@
       "prepend_skill": false,
       "timeout_profile": "default",
       "timeout_sec": 60.0,
-      "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/08-trigger-standards-grounded-critique",
+      "dir": "artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/08-trigger-standards-grounded-critique",
       "runners": {
         "codex": {
           "runner": "codex",
@@ -510,15 +510,15 @@
           ],
           "tier2_findings": [],
           "warnings": [
-            "JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/08-trigger-standards-grounded-critique/codex/codex_events.jsonl",
+            "JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/08-trigger-standards-grounded-critique/codex/codex_events.jsonl",
             "should_trigger set, but skill selection signal was unavailable for this run."
           ],
           "artifacts": {
-            "dir": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/08-trigger-standards-grounded-critique/codex",
-            "final": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/08-trigger-standards-grounded-critique/codex/final.txt",
-            "stdout": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/08-trigger-standards-grounded-critique/codex/stdout.txt",
-            "stderr": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/08-trigger-standards-grounded-critique/codex/stderr.txt",
-            "jsonl": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/08-trigger-standards-grounded-critique/codex/codex_events.jsonl"
+            "dir": "artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/08-trigger-standards-grounded-critique/codex",
+            "final": "artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/08-trigger-standards-grounded-critique/codex/final.txt",
+            "stdout": "artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/08-trigger-standards-grounded-critique/codex/stdout.txt",
+            "stderr": "artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/08-trigger-standards-grounded-critique/codex/stderr.txt",
+            "jsonl": "artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/08-trigger-standards-grounded-critique/codex/codex_events.jsonl"
           },
           "metrics": {
             "trace": {
@@ -550,7 +550,7 @@
       ],
       "tier2_findings": [],
       "warnings": [
-        "[codex] JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/08-trigger-standards-grounded-critique/codex/codex_events.jsonl",
+        "[codex] JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/08-trigger-standards-grounded-critique/codex/codex_events.jsonl",
         "[codex] should_trigger set, but skill selection signal was unavailable for this run."
       ]
     }
@@ -562,10 +562,10 @@
   "decision": "fail",
   "exit_code": 2,
   "artifacts": {
-    "reports_base": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047",
-    "summary": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/summary.json",
-    "scorecard": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/product__strategy__product-design-critic.scorecard.json",
-    "release_manifest": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/release_manifest.json",
-    "junit": "/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/junit.xml"
+    "reports_base": "artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047",
+    "summary": "artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/summary.json",
+    "scorecard": "artifacts/validation/touched-skills-20260329-full/product__strategy__product-design-critic.scorecard.json",
+    "release_manifest": "artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/release_manifest.json",
+    "junit": "artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/junit.xml"
   }
 }

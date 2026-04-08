@@ -1,8 +1,8 @@
 Skill evals: baseline-ui
-Reports: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/baseline-ui/20260330-001722-423606
-Scorecard: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/frontend__ui__baseline-ui.scorecard.json
-Release manifest: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/baseline-ui/20260330-001722-423606/release_manifest.json
-JUnit: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/baseline-ui/20260330-001722-423606/junit.xml
+Reports: artifacts/validation/touched-skills-20260329-full/reports/baseline-ui/20260330-001722-423606
+Scorecard: artifacts/validation/touched-skills-20260329-full/frontend__ui__baseline-ui.scorecard.json
+Release manifest: artifacts/validation/touched-skills-20260329-full/reports/baseline-ui/20260330-001722-423606/release_manifest.json
+JUnit: artifacts/validation/touched-skills-20260329-full/reports/baseline-ui/20260330-001722-423606/junit.xml
 Runner mode: codex
 Eval mode: release
 Timeout profile: default

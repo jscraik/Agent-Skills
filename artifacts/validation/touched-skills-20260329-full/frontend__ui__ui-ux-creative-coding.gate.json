@@ -2,11 +2,13 @@
   "schema_version": "1.1",
   "tool": "skill_gate",
   "generated_at": "2026-03-29T22:53:21Z",
-  "skill": "/Users/jamiecraik/dev/agent-skills/frontend/ui/ui-ux-creative-coding/SKILL.md",
-  "skill_path": "/Users/jamiecraik/dev/agent-skills/frontend/ui/ui-ux-creative-coding/SKILL.md",
+  "skill": "frontend/ui/ui-ux-creative-coding/SKILL.md",
+  "skill_path": "frontend/ui/ui-ux-creative-coding/SKILL.md",
   "name": "ui-ux-creative-coding",
-  "decision": "pass",
-  "exit_code": 0,
-  "failed": false,
-  "findings": []
+  "decision": "fail",
+  "exit_code": 2,
+  "failed": true,
+  "findings": [
+    "Gate decision reconciled with eval output: frontend__ui__ui-ux-creative-coding.eval.stdout.txt reports RESULT: FAIL."
+  ]
 }

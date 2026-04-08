@@ -36,7 +36,7 @@ metadata:
 - [Remember](#remember)
 
 ## Working agreement
-- Follow `/Users/jamiecraik/dev/design-system/AGENTS.md` and treat docs as maps.
+- Follow the repo-root `AGENTS.md` and treat docs as maps.
 - Prefer retrieval-led reasoning: inspect canonical files before proposing answers/changes.
 - This skill is a design/brand map for the repo; when token or visual guidance is requested, validate both design contracts (`docs/design-system/CHARTER.md`, `docs/design-system/UPSTREAM_ALIGNMENT.md`) and canonical token sources before editing.
 - Use `zsh -lc`, `rg`, `fd`, and `jq`; avoid `grep`/`find` for repo-wide scans.
