@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import logging
 import os
 import tempfile
 from dataclasses import dataclass, field
@@ -12,6 +13,8 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from .envelope import ErrorCode
+
+logger = logging.getLogger(__name__)
 
 
 class ReadinessState(str, Enum):
@@ -139,13 +142,13 @@ class SkillState:
             if temp_fd is not None:
                 try:
                     os.close(temp_fd)
-                except OSError:
-                    pass
+                except OSError as cleanup_error:
+                    logger.debug("State cleanup could not close temp fd", exc_info=cleanup_error)
             if temp_path is not None and temp_path.exists():
                 try:
                     temp_path.unlink()
-                except OSError:
-                    pass
+                except OSError as cleanup_error:
+                    logger.debug("State cleanup could not remove temp file %s", temp_path, exc_info=cleanup_error)
             raise
 
         return final_path

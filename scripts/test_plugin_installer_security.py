@@ -7,8 +7,8 @@ import importlib.util
 import os
 import sys
 import tempfile
-import unittest
 from unittest import mock
+from unittest import TestCase, main
 from pathlib import Path
 
 
@@ -40,7 +40,7 @@ def _write_min_plugin(plugin_dir: Path) -> None:
     )
 
 
-class PluginInstallerSecurityTests(unittest.TestCase):
+class PluginInstallerSecurityTests(TestCase):
     def test_uv_python_command_requires_uv_binary(self) -> None:
         with mock.patch.object(installer.shutil, "which", return_value=None):
             with self.assertRaises(installer.InstallError) as context:
@@ -304,4 +304,4 @@ class PluginInstallerSecurityTests(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    unittest.main()
+    main()

@@ -810,8 +810,9 @@ class _SingleFile:
         if self._handle:
             try:
                 self._handle.close()
-            except Exception:
-                pass
+            except OSError:
+                # Best-effort close during teardown; preserve caller's control flow.
+                return False
         return False
 
 
@@ -828,8 +829,9 @@ class _FileBundle:
         for handle in self._handles:
             try:
                 handle.close()
-            except Exception:
-                pass
+            except OSError:
+                # Best-effort close during teardown; preserve caller's control flow.
+                continue
         return False
 
 

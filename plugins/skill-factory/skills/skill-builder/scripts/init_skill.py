@@ -507,8 +507,9 @@ def init_skill(
             run_py.write_text(PYTHON_RUNNER_TEMPLATE % {"skill_name": skill_name}, encoding="utf-8")
             try:
                 run_py.chmod(run_py.stat().st_mode | 0o111)
-            except Exception:
-                pass
+            except OSError as error:
+                # Non-fatal: preserve scaffolding even if execute bit cannot be set.
+                print(f"[WARN] Could not mark scripts/run.py as executable: {error}", file=sys.stderr)
             print("[OK] Created scripts/run.py")
 
     if run_type == "container":

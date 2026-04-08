@@ -7,7 +7,7 @@ import argparse
 import json
 import re
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 
 MAX_PLUGIN_NAME_LENGTH = 64
@@ -421,6 +421,7 @@ def main() -> None:
             args.force,
         )
 
+    marketplace_path: Optional[Path] = None
     if args.with_marketplace:
         marketplace_path = Path(args.marketplace_path).expanduser().resolve()
         update_marketplace_json(
@@ -437,7 +438,7 @@ def main() -> None:
 
     print(f"Created plugin scaffold: {plugin_root}")
     print(f"plugin manifest: {plugin_json_path}")
-    if args.with_marketplace:
+    if marketplace_path is not None:
         print(f"marketplace manifest: {marketplace_path}")
 
 

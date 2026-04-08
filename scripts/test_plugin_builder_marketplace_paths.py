@@ -7,8 +7,8 @@ import argparse
 import importlib.util
 import json
 import tempfile
-import unittest
 from unittest import mock
+from unittest import TestCase, main
 from pathlib import Path
 
 
@@ -102,7 +102,7 @@ def _run_validate(
     return plugin_builder._run_validate(args)
 
 
-class PluginBuilderMarketplacePathTests(unittest.TestCase):
+class PluginBuilderMarketplacePathTests(TestCase):
     def test_uv_python_command_requires_uv_binary(self) -> None:
         with mock.patch.object(plugin_builder.shutil, "which", return_value=None):
             with self.assertRaises(RuntimeError) as context:
@@ -496,4 +496,4 @@ class PluginBuilderMarketplacePathTests(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    unittest.main()
+    main()
