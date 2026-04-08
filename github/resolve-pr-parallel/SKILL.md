@@ -29,7 +29,7 @@ Use a focused GitHub remediation workflow for unresolved PR review threads. Pres
 ## Standards snapshot (March 2026)
 - Use GitHub CLI and GraphQL as the source of truth for unresolved review threads and resolution status.
 - Separate readiness review from remediation. Audit first, fix second.
-- Keep CI-provider strategy separate from review-thread remediation. This skill verifies thread state and requested fixes; CircleCI workflow design or CircleCI-specific diagnosis belongs to [`circleci`](/Users/jamiecraik/dev/Agent-Skills/utilities/circleci/SKILL.md).
+- Keep CI-provider strategy separate from review-thread remediation. This skill verifies thread state and requested fixes; CircleCI workflow design or CircleCI-specific diagnosis belongs to [`circleci`](/utilities/circleci/SKILL.md).
 - Do not resolve a review thread until the requested change or reviewer reply is actually ready.
 - Keep parallel fanout bounded. Run at most 4 remediation workers at a time unless the user explicitly wants a different policy.
 - Re-fetch unresolved, non-outdated threads after push before claiming completion.
@@ -41,11 +41,11 @@ Use a focused GitHub remediation workflow for unresolved PR review threads. Pres
 - Handle mixed review feedback where some threads need code changes and others need reviewer replies, while keeping one verified completion pass.
 
 ## When not to use
-- Do not use for PR readiness, policy, or merge-blocker review. Use [`gh-workflow`](/Users/jamiecraik/dev/Agent-Skills/github/gh-workflow/SKILL.md) in `pr_readiness` mode.
-- Do not use for broad GitHub lifecycle work like PR creation, review requests, or server-side merge. Use [`gh-workflow`](/Users/jamiecraik/dev/Agent-Skills/github/gh-workflow/SKILL.md).
-- Do not use for CI-only diagnosis. Use [`github:gh-fix-ci`](/Users/jamiecraik/dev/agent-skills/plugins/cache/openai-curated/github/f78e3ad49297672a905eb7afb6aa0cef34edc79e/skills/gh-fix-ci/SKILL.md).
-- Do not use for CircleCI workflow design, migration, policy, or CircleCI-specific pipeline diagnosis. Use [`circleci`](/Users/jamiecraik/dev/Agent-Skills/utilities/circleci/SKILL.md).
-- Do not use for a generic code review or technical critique with no remediation ask. Use [`ce-review`](/Users/jamiecraik/dev/Agent-Skills/product/ops/ce-review/SKILL.md) or [`ce-technical-review`](/Users/jamiecraik/dev/Agent-Skills/product/ops/ce-technical-review/SKILL.md).
+- Do not use for PR readiness, policy, or merge-blocker review. Use [`gh-workflow`](/github/gh-workflow/SKILL.md) in `pr_readiness` mode.
+- Do not use for broad GitHub lifecycle work like PR creation, review requests, or server-side merge. Use [`gh-workflow`](/github/gh-workflow/SKILL.md).
+- Do not use for CI-only diagnosis. Use [`github:gh-fix-ci`](/plugins/cache/openai-curated/github/f78e3ad49297672a905eb7afb6aa0cef34edc79e/skills/gh-fix-ci/SKILL.md).
+- Do not use for CircleCI workflow design, migration, policy, or CircleCI-specific pipeline diagnosis. Use [`circleci`](/utilities/circleci/SKILL.md).
+- Do not use for a generic code review or technical critique with no remediation ask. Use [`ce-review`](/product/ops/ce-review/SKILL.md) or [`ce-technical-review`](/product/ops/ce-technical-review/SKILL.md).
 - Do not use when the user only wants to address one or two specifically named comments manually. Use `gh-workflow` in `pr_review_comments` mode instead.
 
 ## Required inputs
@@ -60,7 +60,7 @@ Use a focused GitHub remediation workflow for unresolved PR review threads. Pres
 - Fixes or reviewer replies for each unresolved thread.
 - Commit, push, and GitHub thread-resolution evidence.
 - A final verification result that shows either zero unresolved non-outdated threads or a precise blocked-state summary.
-- If requested, a structured status report matching [`references/contract.yaml`](/Users/jamiecraik/dev/Agent-Skills/github/resolve-pr-parallel/references/contract.yaml) with `schema_version: 1`.
+- If requested, a structured status report matching [`references/contract.yaml`](/github/resolve-pr-parallel/references/contract.yaml) with `schema_version: 1`.
 
 ## Workflow
 1. **Resolve the PR context and baseline safety state.**
@@ -82,11 +82,11 @@ Use a focused GitHub remediation workflow for unresolved PR review threads. Pres
    - Commit the resolved batch with a clear feedback-oriented message.
    - Push before resolving GitHub threads so GitHub state reflects the actual branch state.
 6. Resolve completed threads.
-   - Use [`scripts/resolve-pr-thread`](/Users/jamiecraik/dev/Agent-Skills/github/resolve-pr-parallel/scripts/resolve-pr-thread) for single-thread resolution.
-   - Use [`scripts/resolve-pr-threads-batch`](/Users/jamiecraik/dev/Agent-Skills/github/resolve-pr-parallel/scripts/resolve-pr-threads-batch) when multiple threads are ready at once.
+   - Use [`scripts/resolve-pr-thread`](/github/resolve-pr-parallel/scripts/resolve-pr-thread) for single-thread resolution.
+   - Use [`scripts/resolve-pr-threads-batch`](/github/resolve-pr-parallel/scripts/resolve-pr-threads-batch) when multiple threads are ready at once.
    - Resolve only the threads whose requested change or reply is complete and verified.
 7. Verify the final state.
-   - Re-run [`scripts/get-pr-comments`](/Users/jamiecraik/dev/Agent-Skills/github/resolve-pr-parallel/scripts/get-pr-comments) after push and thread resolution.
+   - Re-run [`scripts/get-pr-comments`](/github/resolve-pr-parallel/scripts/get-pr-comments) after push and thread resolution.
    - Completion means an empty array `[]` for unresolved, non-outdated threads, or an explicit blocked-state explanation for anything left open.
 
 ## Parallel execution contract
@@ -101,14 +101,14 @@ Use a focused GitHub remediation workflow for unresolved PR review threads. Pres
 - If the user did not actually ask for parallel delegation or the platform cannot support it safely, process the same per-thread checklist serially and keep the output contract unchanged.
 
 ## Routing map
-- Read [`references/overlap-matrix.md`](/Users/jamiecraik/dev/Agent-Skills/github/resolve-pr-parallel/references/overlap-matrix.md) before widening this skill's trigger wording.
-- Use [`gh-workflow`](/Users/jamiecraik/dev/Agent-Skills/github/gh-workflow/SKILL.md) in `pr_readiness` mode when the user wants to know whether a PR is ready, not to fix it.
-- Use [`gh-workflow`](/Users/jamiecraik/dev/Agent-Skills/github/gh-workflow/SKILL.md) when the work is a selected-comment response, broader PR lifecycle task, or one-mode GitHub operation.
-- Use [`circleci`](/Users/jamiecraik/dev/Agent-Skills/utilities/circleci/SKILL.md) when the blocker is CircleCI workflow design, migration, policy, or provider-specific diagnosis rather than GitHub thread remediation.
-- Use [`ce-review`](/Users/jamiecraik/dev/Agent-Skills/product/ops/ce-review/SKILL.md) or [`ce-technical-review`](/Users/jamiecraik/dev/Agent-Skills/product/ops/ce-technical-review/SKILL.md) when the user wants critique rather than remediation.
+- Read [`references/overlap-matrix.md`](/github/resolve-pr-parallel/references/overlap-matrix.md) before widening this skill's trigger wording.
+- Use [`gh-workflow`](/github/gh-workflow/SKILL.md) in `pr_readiness` mode when the user wants to know whether a PR is ready, not to fix it.
+- Use [`gh-workflow`](/github/gh-workflow/SKILL.md) when the work is a selected-comment response, broader PR lifecycle task, or one-mode GitHub operation.
+- Use [`circleci`](/utilities/circleci/SKILL.md) when the blocker is CircleCI workflow design, migration, policy, or provider-specific diagnosis rather than GitHub thread remediation.
+- Use [`ce-review`](/product/ops/ce-review/SKILL.md) or [`ce-technical-review`](/product/ops/ce-technical-review/SKILL.md) when the user wants critique rather than remediation.
 
 ## Upstream preservation
-- The imported compound-engineering source is preserved in [`references/upstream-resolve-pr-parallel.md`](/Users/jamiecraik/dev/Agent-Skills/github/resolve-pr-parallel/references/upstream-resolve-pr-parallel.md).
+- The imported compound-engineering source is preserved in [`references/upstream-resolve-pr-parallel.md`](/github/resolve-pr-parallel/references/upstream-resolve-pr-parallel.md).
 - The local install keeps the same core flow:
   - fetch unresolved review threads
   - plan per-thread work

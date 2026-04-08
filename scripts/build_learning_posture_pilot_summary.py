@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Build pilot conformance summary for learning-preserving posture work."""
+"""Build pilot conformance summary for learning-preserving posture work.
+
+Artifact paths from scorecards are resolved against repo root so this script is
+safe to run from any current working directory.
+"""
 
 from __future__ import annotations
 
@@ -25,6 +29,7 @@ VALID_TAGS = {
     "ai_led_debugging",
 }
 TELEMETRY_DIR = Path("artifacts/skill-graphs/pilot/telemetry")
+REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
 def collect_json(path: Path) -> dict:
@@ -53,6 +58,14 @@ def collect_jsonl(path: Path) -> list[dict[str, Any]]:
         if isinstance(parsed, dict):
             events.append(parsed)
     return events
+
+
+def resolve_artifact_path(path_like: str, workspace_root: Path) -> Path:
+    """Resolve artifact paths deterministically, independent of current cwd."""
+    candidate = Path(path_like).expanduser()
+    if candidate.is_absolute():
+        return candidate
+    return (workspace_root / candidate).resolve()
 
 
 def latest_scorecard(skill_path: str) -> Tuple[dict, Path | None]:
@@ -130,7 +143,7 @@ def summarize_trace_and_selection(case: dict) -> Dict[str, Any]:
         jsonl_path = artifacts.get("jsonl")
         if not isinstance(jsonl_path, str) or not jsonl_path:
             continue
-        events = collect_jsonl(Path(jsonl_path))
+        events = collect_jsonl(resolve_artifact_path(jsonl_path, REPO_ROOT))
         if events:
             trace_present = True
             if any(event.get("type") in {"error", "turn.failed"} for event in events):

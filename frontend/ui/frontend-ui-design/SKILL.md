@@ -50,10 +50,10 @@ metadata:
 - Audit existing UI for accessibility, token use, state coverage, or implementation readiness.
 
 ## When not to use
-- Motion-first or experimental creative-coding work. Use [`ui-ux-creative-coding`](/Users/jamiecraik/dev/agent-skills/frontend/ui/ui-ux-creative-coding/SKILL.md).
+- Motion-first or experimental creative-coding work. Use [`ui-ux-creative-coding`](/frontend/ui/ui-ux-creative-coding/SKILL.md).
 - Backend or infra-only work with no UI surface.
 - Brand-only exploration with no product UI deliverable.
-- Broad ambiguous frontend-design requests that do not yet declare implementation intent. Start with [`frontend-design`](/Users/jamiecraik/dev/agent-skills/frontend/ui/frontend-design/SKILL.md).
+- Broad ambiguous frontend-design requests that do not yet declare implementation intent. Start with [`frontend-design`](/frontend/ui/frontend-design/SKILL.md).
 
 ## Routing boundary contract
 - Own requests with explicit implementation or redesign intent, including verbs like `build`, `implement`, `redesign`, `fix layout`, and `create screen`.

@@ -1,6 +1,6 @@
 {
   "generated_at": "2026-03-31T14:51:21Z",
-  "runs_root": "/Users/jamiecraik/dev/agent-skills/artifacts/skill-graphs/runs",
+  "runs_root": "artifacts/skill-graphs/runs",
   "counts": {
     "compliant": 74,
     "missing_mandatory": 0,

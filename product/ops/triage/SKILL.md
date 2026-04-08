@@ -40,10 +40,10 @@ Use a focused file-based todo triage workflow that sits between finding generati
 - The user wants the missing approval bridge between `ce-review` and `resolve-todo-parallel`.
 
 ## When not to use
-- Do not use for generic product or issue-tracker triage. Use [`linear`](/Users/jamiecraik/dev/Agent-Skills/product/ops/linear/SKILL.md).
-- Do not use to create findings from a review. Use [`ce-review`](/Users/jamiecraik/dev/Agent-Skills/product/ops/ce-review/SKILL.md).
-- Do not use to execute approved todo work. Use [`resolve-todo-parallel`](/Users/jamiecraik/dev/Agent-Skills/product/ops/resolve-todo-parallel/SKILL.md) or `ce-work` for single-item execution.
-- Do not use for local `tasks/TASKS.md` workflows. Use [`simple-tasks`](/Users/jamiecraik/dev/Agent-Skills/utilities/simple-tasks/SKILL.md).
+- Do not use for generic product or issue-tracker triage. Use [`linear`](/product/ops/linear/SKILL.md).
+- Do not use to create findings from a review. Use [`ce-review`](/product/ops/ce-review/SKILL.md).
+- Do not use to execute approved todo work. Use [`resolve-todo-parallel`](/product/ops/resolve-todo-parallel/SKILL.md) or `ce-work` for single-item execution.
+- Do not use for local `tasks/TASKS.md` workflows. Use [`simple-tasks`](/utilities/simple-tasks/SKILL.md).
 - Do not use when the repo has no `todos/` workflow and the user is asking for generic prioritization advice.
 
 ## Required inputs
@@ -67,7 +67,7 @@ Use a focused file-based todo triage workflow that sits between finding generati
 - Renamed todo files and updated frontmatter for approved items.
 - Deleted or intentionally preserved skipped items, depending on the repo workflow and user intent.
 - A final summary with counts, affected files, and the next recommended workflow step.
-- If requested, a structured status report matching [`references/contract.yaml`](/Users/jamiecraik/dev/Agent-Skills/product/ops/triage/references/contract.yaml) with `schema_version: 1`.
+- If requested, a structured status report matching [`references/contract.yaml`](/product/ops/triage/references/contract.yaml) with `schema_version: 1`.
 
 ## Workflow
 1. Discover the triage source.
@@ -103,14 +103,14 @@ Use a focused file-based todo triage workflow that sits between finding generati
   - Keep the item pending when user intent, evidence, or dependencies are not strong enough for approval.
 
 ## Routing map
-- Read [`references/overlap-matrix.md`](/Users/jamiecraik/dev/Agent-Skills/product/ops/triage/references/overlap-matrix.md) before widening this skill's trigger wording.
-- Use [`ce-review`](/Users/jamiecraik/dev/Agent-Skills/product/ops/ce-review/SKILL.md) to generate findings and initial pending todo artifacts.
-- Use [`resolve-todo-parallel`](/Users/jamiecraik/dev/Agent-Skills/product/ops/resolve-todo-parallel/SKILL.md) once approved items are `ready`.
-- Use [`linear`](/Users/jamiecraik/dev/Agent-Skills/product/ops/linear/SKILL.md) for team tracker triage and issue updates.
-- Use [`simple-tasks`](/Users/jamiecraik/dev/Agent-Skills/utilities/simple-tasks/SKILL.md) for lightweight `tasks/TASKS.md` flows instead of file-based `todos/`.
+- Read [`references/overlap-matrix.md`](/product/ops/triage/references/overlap-matrix.md) before widening this skill's trigger wording.
+- Use [`ce-review`](/product/ops/ce-review/SKILL.md) to generate findings and initial pending todo artifacts.
+- Use [`resolve-todo-parallel`](/product/ops/resolve-todo-parallel/SKILL.md) once approved items are `ready`.
+- Use [`linear`](/product/ops/linear/SKILL.md) for team tracker triage and issue updates.
+- Use [`simple-tasks`](/utilities/simple-tasks/SKILL.md) for lightweight `tasks/TASKS.md` flows instead of file-based `todos/`.
 
 ## Upstream preservation
-- The imported compound-engineering source is preserved in [`references/upstream-triage.md`](/Users/jamiecraik/dev/Agent-Skills/product/ops/triage/references/upstream-triage.md).
+- The imported compound-engineering source is preserved in [`references/upstream-triage.md`](/product/ops/triage/references/upstream-triage.md).
 - The local install keeps the core upstream flow:
   - present findings one by one
   - decide `yes | next | custom`

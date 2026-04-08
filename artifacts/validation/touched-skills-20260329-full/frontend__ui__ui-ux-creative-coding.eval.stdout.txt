@@ -1,8 +1,8 @@
 Skill evals: ui-ux-creative-coding
-Reports: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498
-Scorecard: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/frontend__ui__ui-ux-creative-coding.scorecard.json
-Release manifest: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/release_manifest.json
-JUnit: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/junit.xml
+Reports: artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498
+Scorecard: artifacts/validation/touched-skills-20260329-full/frontend__ui__ui-ux-creative-coding.scorecard.json
+Release manifest: artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/release_manifest.json
+JUnit: artifacts/validation/touched-skills-20260329-full/reports/ui-ux-creative-coding/20260329-235321-719498/junit.xml
 Runner mode: codex
 Eval mode: release
 Timeout profile: default

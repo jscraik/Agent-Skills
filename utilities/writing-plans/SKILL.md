@@ -7,7 +7,7 @@ metadata:
 
 # Writing Plans
 
-This skill has been folded into [`ce-plan`](/Users/jamiecraik/dev/Agent-Skills/product/ops/ce-plan/SKILL.md). Keep this wrapper only for compatibility and route execution-planning work to `ce-plan` using `generic-plan` mode.
+This skill has been folded into [`ce-plan`](/product/ops/ce-plan/SKILL.md). Keep this wrapper only for compatibility and route execution-planning work to `ce-plan` using `generic-plan` mode.
 
 ## Standards snapshot (March 2026)
 - `ce-plan` is now the canonical owner for execution-planning behavior.
@@ -22,7 +22,7 @@ This skill has been folded into [`ce-plan`](/Users/jamiecraik/dev/Agent-Skills/p
 ## When not to use
 - Do not author a separate planning workflow here.
 - Do not keep this wrapper as a competing owner beside `ce-plan`.
-- Do not use this wrapper when the caller can go straight to [`ce-plan`](/Users/jamiecraik/dev/Agent-Skills/product/ops/ce-plan/SKILL.md).
+- Do not use this wrapper when the caller can go straight to [`ce-plan`](/product/ops/ce-plan/SKILL.md).
 
 ## Required inputs
 - The same planning inputs that `ce-plan` expects for `generic-plan` mode:
@@ -31,7 +31,7 @@ This skill has been folded into [`ce-plan`](/Users/jamiecraik/dev/Agent-Skills/p
   - constraints such as timeline, rollout risk, approvals, or compatibility expectations.
 
 ## Deliverables
-- Immediate routing to [`ce-plan`](/Users/jamiecraik/dev/Agent-Skills/product/ops/ce-plan/SKILL.md) with `generic-plan` selected.
+- Immediate routing to [`ce-plan`](/product/ops/ce-plan/SKILL.md) with `generic-plan` selected.
 - No separate planning doctrine, checklist, or artifact contract beyond what `ce-plan` already owns.
 
 ## Failure mode
@@ -40,13 +40,13 @@ This skill has been folded into [`ce-plan`](/Users/jamiecraik/dev/Agent-Skills/p
 
 ## Workflow
 1. Detect that the request is generic implementation planning rather than a different upstream stage.
-2. Route immediately to [`ce-plan`](/Users/jamiecraik/dev/Agent-Skills/product/ops/ce-plan/SKILL.md).
+2. Route immediately to [`ce-plan`](/product/ops/ce-plan/SKILL.md).
 3. Use `generic-plan` mode there.
 4. Preserve this wrapper only as a compatibility entrypoint.
 
 ## Validation
 - Verify this wrapper does not drift into a second independent planning workflow.
-- Verify routing points to [`ce-plan`](/Users/jamiecraik/dev/Agent-Skills/product/ops/ce-plan/SKILL.md) as the canonical owner.
+- Verify routing points to [`ce-plan`](/product/ops/ce-plan/SKILL.md) as the canonical owner.
 - Fail fast if this wrapper starts to diverge from `ce-plan` behavior.
 
 ## Anti-patterns

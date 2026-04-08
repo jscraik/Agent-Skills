@@ -7,6 +7,7 @@ import argparse
 from dataclasses import dataclass
 import os
 import shutil
+import stat
 import subprocess
 import sys
 import tempfile
@@ -105,6 +106,9 @@ def _run_git(args: list[str]) -> None:
 def _safe_extract_zip(zip_file: zipfile.ZipFile, dest_dir: str) -> None:
     dest_root = os.path.realpath(dest_dir)
     for info in zip_file.infolist():
+        mode = (info.external_attr >> 16) & 0o177777
+        if stat.S_IFMT(mode) == stat.S_IFLNK:
+            raise InstallError(f"Archive contains symlink entry: {info.filename}")
         extracted_path = os.path.realpath(os.path.join(dest_dir, info.filename))
         if extracted_path == dest_root or extracted_path.startswith(dest_root + os.sep):
             continue
@@ -173,7 +177,8 @@ def _copy_skill(src: str, dest_dir: str) -> None:
     os.makedirs(os.path.dirname(dest_dir), exist_ok=True)
     if os.path.exists(dest_dir):
         raise InstallError(f"Destination already exists: {dest_dir}")
-    shutil.copytree(src, dest_dir)
+    # Preserve symlink objects if any slip through validation, so copy never dereferences host files.
+    shutil.copytree(src, dest_dir, symlinks=True)
 
 
 def _build_repo_url(owner: str, repo: str) -> str:

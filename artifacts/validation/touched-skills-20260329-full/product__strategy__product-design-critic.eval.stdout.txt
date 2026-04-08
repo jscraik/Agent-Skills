@@ -1,8 +1,8 @@
 Skill evals: product-design-critic
-Reports: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047
-Scorecard: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/product__strategy__product-design-critic.scorecard.json
-Release manifest: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/release_manifest.json
-JUnit: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/junit.xml
+Reports: artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047
+Scorecard: artifacts/validation/touched-skills-20260329-full/product__strategy__product-design-critic.scorecard.json
+Release manifest: artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/release_manifest.json
+JUnit: artifacts/validation/touched-skills-20260329-full/reports/product-design-critic/20260330-000922-119047/junit.xml
 Runner mode: codex
 Eval mode: release
 Timeout profile: default

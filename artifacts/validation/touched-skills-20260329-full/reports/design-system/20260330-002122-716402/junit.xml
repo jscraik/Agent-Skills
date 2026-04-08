@@ -4,172 +4,172 @@
     <failure message="tier1 failure">[codex] codex returned non-zero exit code: 124
 [codex] contains failed: 'Brand → Alias → Mapped'</failure>
     <system-out>warnings:
-[codex] JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/01-explicit-trigger-token-audit/codex/codex_events.jsonl
+[codex] JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/01-explicit-trigger-token-audit/codex/codex_events.jsonl
 [codex] should_trigger set, but skill selection signal was unavailable for this run.
 
 artifacts_dir:
-/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/01-explicit-trigger-token-audit</system-out>
+artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/01-explicit-trigger-token-audit</system-out>
   </testcase>
   <testcase name="implicit-trigger-iconography" classname="design-system" time="60.0">
     <failure message="tier1 failure">[codex] codex returned non-zero exit code: 124
 [codex] contains failed: '@design-studio/ui/icons'</failure>
     <system-out>warnings:
-[codex] JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/02-implicit-trigger-iconography/codex/codex_events.jsonl
+[codex] JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/02-implicit-trigger-iconography/codex/codex_events.jsonl
 [codex] should_trigger set, but skill selection signal was unavailable for this run.
 
 artifacts_dir:
-/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/02-implicit-trigger-iconography</system-out>
+artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/02-implicit-trigger-iconography</system-out>
   </testcase>
   <testcase name="contextual-trigger-theme-vars" classname="design-system" time="60.0">
     <failure message="tier1 failure">[codex] codex returned non-zero exit code: 124
 [codex] contains failed: 'packages/ui/src/styles/theme.css'</failure>
     <system-out>warnings:
-[codex] JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/03-contextual-trigger-theme-vars/codex/codex_events.jsonl
+[codex] JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/03-contextual-trigger-theme-vars/codex/codex_events.jsonl
 [codex] should_trigger set, but skill selection signal was unavailable for this run.
 
 artifacts_dir:
-/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/03-contextual-trigger-theme-vars</system-out>
+artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/03-contextual-trigger-theme-vars</system-out>
   </testcase>
   <testcase name="trigger-guidance-ratchet" classname="design-system" time="60.0">
     <failure message="tier1 failure">[codex] codex returned non-zero exit code: 124
 [codex] contains failed: '.design-system-guidance.json'</failure>
     <system-out>warnings:
-[codex] JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/04-trigger-guidance-ratchet/codex/codex_events.jsonl
+[codex] JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/04-trigger-guidance-ratchet/codex/codex_events.jsonl
 [codex] should_trigger set, but skill selection signal was unavailable for this run.
 
 artifacts_dir:
-/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/04-trigger-guidance-ratchet</system-out>
+artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/04-trigger-guidance-ratchet</system-out>
   </testcase>
   <testcase name="trigger-professional-ui-contract" classname="design-system" time="60.0">
     <failure message="tier1 failure">[codex] codex returned non-zero exit code: 124
 [codex] contains failed: 'PROFESSIONAL_UI_CONTRACT'</failure>
     <system-out>warnings:
-[codex] JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/05-trigger-professional-ui-contract/codex/codex_events.jsonl
+[codex] JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/05-trigger-professional-ui-contract/codex/codex_events.jsonl
 [codex] should_trigger set, but skill selection signal was unavailable for this run.
 
 artifacts_dir:
-/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/05-trigger-professional-ui-contract</system-out>
+artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/05-trigger-professional-ui-contract</system-out>
   </testcase>
   <testcase name="trigger-storybook-surface-cleanup" classname="design-system" time="60.0">
     <failure message="tier1 failure">[codex] codex returned non-zero exit code: 124
 [codex] contains failed: 'packages/ui/src/storybook/design-system'</failure>
     <system-out>warnings:
-[codex] JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/06-trigger-storybook-surface-cleanup/codex/codex_events.jsonl
+[codex] JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/06-trigger-storybook-surface-cleanup/codex/codex_events.jsonl
 [codex] should_trigger set, but skill selection signal was unavailable for this run.
 
 artifacts_dir:
-/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/06-trigger-storybook-surface-cleanup</system-out>
+artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/06-trigger-storybook-surface-cleanup</system-out>
   </testcase>
   <testcase name="trigger-component-lifecycle-routing" classname="design-system" time="60.0">
     <failure message="tier1 failure">[codex] codex returned non-zero exit code: 124
 [codex] contains failed: 'COMPONENT_LIFECYCLE'</failure>
     <system-out>warnings:
-[codex] JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/07-trigger-component-lifecycle-routing/codex/codex_events.jsonl
+[codex] JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/07-trigger-component-lifecycle-routing/codex/codex_events.jsonl
 [codex] should_trigger set, but skill selection signal was unavailable for this run.
 
 artifacts_dir:
-/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/07-trigger-component-lifecycle-routing</system-out>
+artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/07-trigger-component-lifecycle-routing</system-out>
   </testcase>
   <testcase name="trigger-high-contrast-mode" classname="design-system" time="60.0">
     <failure message="tier1 failure">[codex] codex returned non-zero exit code: 124
 [codex] contains failed: 'highContrast'</failure>
     <system-out>warnings:
-[codex] JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/08-trigger-high-contrast-mode/codex/codex_events.jsonl
+[codex] JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/08-trigger-high-contrast-mode/codex/codex_events.jsonl
 [codex] should_trigger set, but skill selection signal was unavailable for this run.
 
 artifacts_dir:
-/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/08-trigger-high-contrast-mode</system-out>
+artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/08-trigger-high-contrast-mode</system-out>
   </testcase>
   <testcase name="edge-missing-scope" classname="design-system" time="60.0">
     <failure message="tier1 failure">[codex] codex returned non-zero exit code: 124
 [codex] regex failed: /(?i)(clarify|which area|scope|component)/</failure>
     <system-out>warnings:
-[codex] JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/09-edge-missing-scope/codex/codex_events.jsonl
+[codex] JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/09-edge-missing-scope/codex/codex_events.jsonl
 [codex] should_trigger set, but skill selection signal was unavailable for this run.
 
 artifacts_dir:
-/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/09-edge-missing-scope</system-out>
+artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/09-edge-missing-scope</system-out>
   </testcase>
   <testcase name="pressure-skip-validation" classname="design-system" time="60.0">
     <failure message="tier1 failure">[codex] codex returned non-zero exit code: 124
 [codex] regex failed: /(?i)(must|won't|cannot|validate|layer)/</failure>
     <system-out>warnings:
-[codex] JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/10-pressure-skip-validation/codex/codex_events.jsonl
+[codex] JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/10-pressure-skip-validation/codex/codex_events.jsonl
 [codex] should_trigger set, but skill selection signal was unavailable for this run.
 
 artifacts_dir:
-/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/10-pressure-skip-validation</system-out>
+artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/10-pressure-skip-validation</system-out>
   </testcase>
   <testcase name="negative-control-backend" classname="design-system" time="60.0">
     <failure message="tier1 failure">[codex] codex returned non-zero exit code: 124</failure>
     <system-out>warnings:
-[codex] JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/11-negative-control-backend/codex/codex_events.jsonl
+[codex] JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/11-negative-control-backend/codex/codex_events.jsonl
 [codex] should_trigger set, but skill selection signal was unavailable for this run.
 
 artifacts_dir:
-/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/11-negative-control-backend</system-out>
+artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/11-negative-control-backend</system-out>
   </testcase>
   <testcase name="negative-release-workflow" classname="design-system" time="60.0">
     <failure message="tier1 failure">[codex] codex returned non-zero exit code: 124</failure>
     <system-out>warnings:
-[codex] JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/12-negative-release-workflow/codex/codex_events.jsonl
+[codex] JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/12-negative-release-workflow/codex/codex_events.jsonl
 [codex] should_trigger set, but skill selection signal was unavailable for this run.
 
 artifacts_dir:
-/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/12-negative-release-workflow</system-out>
+artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/12-negative-release-workflow</system-out>
   </testcase>
   <testcase name="negative-cloudflare-d1" classname="design-system" time="60.0">
     <failure message="tier1 failure">[codex] codex returned non-zero exit code: 124</failure>
     <system-out>warnings:
-[codex] JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/13-negative-cloudflare-d1/codex/codex_events.jsonl
+[codex] JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/13-negative-cloudflare-d1/codex/codex_events.jsonl
 [codex] should_trigger set, but skill selection signal was unavailable for this run.
 
 artifacts_dir:
-/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/13-negative-cloudflare-d1</system-out>
+artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/13-negative-cloudflare-d1</system-out>
   </testcase>
   <testcase name="negative-ops-token-rotation" classname="design-system" time="60.0">
     <failure message="tier1 failure">[codex] codex returned non-zero exit code: 124</failure>
     <system-out>warnings:
-[codex] JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/14-negative-ops-token-rotation/codex/codex_events.jsonl
+[codex] JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/14-negative-ops-token-rotation/codex/codex_events.jsonl
 [codex] should_trigger set, but skill selection signal was unavailable for this run.
 
 artifacts_dir:
-/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/14-negative-ops-token-rotation</system-out>
+artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/14-negative-ops-token-rotation</system-out>
   </testcase>
   <testcase name="negative-git-merge-help" classname="design-system" time="60.0">
     <failure message="tier1 failure">[codex] codex returned non-zero exit code: 124</failure>
     <system-out>warnings:
-[codex] JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/15-negative-git-merge-help/codex/codex_events.jsonl
+[codex] JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/15-negative-git-merge-help/codex/codex_events.jsonl
 [codex] should_trigger set, but skill selection signal was unavailable for this run.
 
 artifacts_dir:
-/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/15-negative-git-merge-help</system-out>
+artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/15-negative-git-merge-help</system-out>
   </testcase>
   <testcase name="negative-local-memory-network" classname="design-system" time="60.0">
     <failure message="tier1 failure">[codex] codex returned non-zero exit code: 124</failure>
     <system-out>warnings:
-[codex] JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/16-negative-local-memory-network/codex/codex_events.jsonl
+[codex] JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/16-negative-local-memory-network/codex/codex_events.jsonl
 [codex] should_trigger set, but skill selection signal was unavailable for this run.
 
 artifacts_dir:
-/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/16-negative-local-memory-network</system-out>
+artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/16-negative-local-memory-network</system-out>
   </testcase>
   <testcase name="negative-skill-packaging" classname="design-system" time="60.0">
     <failure message="tier1 failure">[codex] codex returned non-zero exit code: 124</failure>
     <system-out>warnings:
-[codex] JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/17-negative-skill-packaging/codex/codex_events.jsonl
+[codex] JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/17-negative-skill-packaging/codex/codex_events.jsonl
 [codex] should_trigger set, but skill selection signal was unavailable for this run.
 
 artifacts_dir:
-/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/17-negative-skill-packaging</system-out>
+artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/17-negative-skill-packaging</system-out>
   </testcase>
   <testcase name="negative-apps-sdk-auth" classname="design-system" time="60.0">
     <failure message="tier1 failure">[codex] codex returned non-zero exit code: 124</failure>
     <system-out>warnings:
-[codex] JSONL file not found: /Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/18-negative-apps-sdk-auth/codex/codex_events.jsonl
+[codex] JSONL file not found: artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/18-negative-apps-sdk-auth/codex/codex_events.jsonl
 [codex] should_trigger set, but skill selection signal was unavailable for this run.
 
 artifacts_dir:
-/Users/jamiecraik/dev/agent-skills/artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/18-negative-apps-sdk-auth</system-out>
+artifacts/validation/touched-skills-20260329-full/reports/design-system/20260330-002122-716402/18-negative-apps-sdk-auth</system-out>
   </testcase>
 </testsuite>

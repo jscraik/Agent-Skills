@@ -1732,6 +1732,62 @@ def _make_relative(path: Optional[Path], base: Path) -> str:
         return str(path)
 
 
+def _workspace_path_aliases(workspace_root: Path) -> List[str]:
+    """Return absolute workspace path variants that should be sanitized in artifacts."""
+    resolved = str(workspace_root.resolve())
+    aliases = {resolved}
+    # Historical artifacts sometimes used a different case for this repo path.
+    if "Agent-Skills" in resolved:
+        aliases.add(resolved.replace("Agent-Skills", "agent-skills"))
+    if "agent-skills" in resolved:
+        aliases.add(resolved.replace("agent-skills", "Agent-Skills"))
+    return sorted(aliases, key=len, reverse=True)
+
+
+def _sanitize_artifact_text(text: str, workspace_root: Path) -> str:
+    """Normalize absolute workspace paths in textual artifacts to repo-relative form."""
+    if not text:
+        return text
+    out = text
+    for alias in _workspace_path_aliases(workspace_root):
+        # Preserve path suffixes: /abs/repo/path/file -> ./file
+        out = re.sub(rf"{re.escape(alias)}(?=/)", ".", out)
+        out = out.replace(alias, ".")
+    return out
+
+
+def _sanitize_artifact_value(value: Any, workspace_root: Path) -> Any:
+    """Recursively sanitize absolute workspace paths from nested JSON-ish structures."""
+    if isinstance(value, str):
+        return _sanitize_artifact_text(value, workspace_root)
+    if isinstance(value, list):
+        return [_sanitize_artifact_value(v, workspace_root) for v in value]
+    if isinstance(value, dict):
+        return {k: _sanitize_artifact_value(v, workspace_root) for k, v in value.items()}
+    return value
+
+
+def _sanitize_text_file(path: Path, workspace_root: Path) -> None:
+    try:
+        original = path.read_text(encoding="utf-8")
+    except (UnicodeDecodeError, OSError):
+        return
+    sanitized = _sanitize_artifact_text(original, workspace_root)
+    if sanitized != original:
+        path.write_text(sanitized, encoding="utf-8")
+
+
+def _sanitize_artifact_tree(root: Path, workspace_root: Path) -> None:
+    """Best-effort scrub of absolute workspace paths across generated report artifacts."""
+    text_suffixes = {".json", ".txt", ".md", ".log", ".xml", ".jsonl"}
+    for candidate in root.rglob("*"):
+        if not candidate.is_file():
+            continue
+        if candidate.suffix.lower() not in text_suffixes:
+            continue
+        _sanitize_text_file(candidate, workspace_root)
+
+
 def _extract_min_rubric_score(budgets: Optional[Dict[str, Any]]) -> Optional[float]:
     if not budgets:
         return None
@@ -2208,7 +2264,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     used_neutral_baseline_approvals: Set[str] = set()
 
     summary: Dict[str, Any] = {
-        "schema_version": "2.1",
+        "schema_version": "2.2",
         "tool": "run_skill_evals",
         "generated_at": _utc_now_iso(),
         "skill": skill_name,
@@ -2223,6 +2279,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             "source_branch": git_meta.get("branch"),
         },
         "workspace_root": str(workspace_root),
+        # Contract note: sanitizer rewrites repo-root absolute paths to "." in emitted artifacts.
+        "workspace_root_contract": "'.' is a sanitized sentinel that represents the repository root.",
         "runner_mode": ",".join(selected_runners),
         "eval_mode": args.eval_mode,
         "tier2_mode": args.tier2_mode,
@@ -2350,10 +2408,13 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                     fallback_profile=codex_fallback_profile,
                 )
 
-            (runner_dir / "stderr.txt").write_text(stderr or "", encoding="utf-8")
-            (runner_dir / "stdout.txt").write_text(stdout or "", encoding="utf-8")
+            stderr_text = _sanitize_artifact_text(stderr or "", workspace_root)
+            stdout_text = _sanitize_artifact_text(stdout or "", workspace_root)
+            (runner_dir / "stderr.txt").write_text(stderr_text, encoding="utf-8")
+            (runner_dir / "stdout.txt").write_text(stdout_text, encoding="utf-8")
 
             output_text = output_path.read_text(encoding="utf-8") if output_path.exists() else ""
+            output_text = _sanitize_artifact_text(output_text, workspace_root)
             (runner_dir / "final.txt").write_text(output_text, encoding="utf-8")
 
             runner_tier1_failures: List[str] = []
@@ -2371,7 +2432,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                         "--codex-arg=--skip-git-repo-check for ephemeral temp directories."
                     )
 
-            if runner_name == "codex" and jsonl_path is not None:
+            jsonl_available = bool(jsonl_path and jsonl_path.exists())
+            if runner_name == "codex" and jsonl_available and jsonl_path is not None:
                 events, parse_warnings = load_jsonl_events(jsonl_path)
                 runner_warnings.extend(parse_warnings)
 
@@ -2391,7 +2453,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                     trace_result = evaluate_trace(events, deterministic_checks=None, budgets=None)
                     runner_metrics["trace"] = trace_result.to_dict()["metrics"]
 
-            if runner_name == "codex" and (c.deterministic_checks or c.budgets) and jsonl_path is None:
+            if runner_name == "codex" and (not jsonl_available):
+                trace_result = evaluate_trace([], deterministic_checks=None, budgets=None)
+                runner_metrics["trace"] = trace_result.to_dict()["metrics"]
+
+            if runner_name == "codex" and (c.deterministic_checks or c.budgets) and (not jsonl_available):
                 runner_tier1_failures.append(
                     "deterministic_checks/budgets requested but Codex JSONL was not captured (enable --capture-jsonl)."
                 )
@@ -2483,25 +2549,27 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 "runner": runner_name,
                 "exit_code": rc,
                 "passed": len(runner_tier1_failures) == 0,
-                "tier1_failures": runner_tier1_failures,
-                "tier2_findings": runner_tier2_findings,
-                "warnings": runner_warnings,
+                "tier1_failures": [_sanitize_artifact_text(x, workspace_root) for x in runner_tier1_failures],
+                "tier2_findings": [_sanitize_artifact_text(x, workspace_root) for x in runner_tier2_findings],
+                "warnings": [_sanitize_artifact_text(x, workspace_root) for x in runner_warnings],
                 "artifacts": {
                     "dir": _make_relative(runner_dir, workspace_root),
                     "final": _make_relative(runner_dir / "final.txt", workspace_root),
                     "stdout": _make_relative(runner_dir / "stdout.txt", workspace_root),
                     "stderr": _make_relative(runner_dir / "stderr.txt", workspace_root),
-                    "jsonl": _make_relative(jsonl_path, workspace_root) if jsonl_path else None,
+                    # Only advertise JSONL as an artifact when it actually exists.
+                    "jsonl": _make_relative(jsonl_path, workspace_root) if (jsonl_path and jsonl_path.exists()) else None,
                 },
-                "metrics": runner_metrics,
+                "metrics": _sanitize_artifact_value(runner_metrics, workspace_root),
                 "used_schema": bool(schema_path and runner_name == "codex"),
             }
+            runner_record = _sanitize_artifact_value(runner_record, workspace_root)
             (runner_dir / "result.json").write_text(json.dumps(runner_record, indent=2, ensure_ascii=False), encoding="utf-8")
 
             runner_records[runner_name] = runner_record
             case_tier1_failures.extend([f"[{runner_name}] {x}" for x in runner_tier1_failures])
             case_tier2_findings.extend([f"[{runner_name}] {x}" for x in runner_tier2_findings])
-            case_warnings.extend([f"[{runner_name}] {x}" for x in runner_warnings])
+            case_warnings.extend([f"[{runner_name}] {x}" for x in runner_record["warnings"]])
 
         case_tier1_failed = len(case_tier1_failures) > 0
         case_tier2_failed = len(case_tier2_findings) > 0
@@ -2534,10 +2602,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             "passed": case_pass,
             "tier1_failed": case_tier1_failed,
             "tier2_failed": case_tier2_failed,
-            "tier1_failures": case_tier1_failures,
-            "tier2_findings": case_tier2_findings,
-            "warnings": case_warnings,
+            "tier1_failures": [_sanitize_artifact_text(x, workspace_root) for x in case_tier1_failures],
+            "tier2_findings": [_sanitize_artifact_text(x, workspace_root) for x in case_tier2_findings],
+            "warnings": [_sanitize_artifact_text(x, workspace_root) for x in case_warnings],
         }
+        case_record = _sanitize_artifact_value(case_record, workspace_root)
 
         (case_dir / "result.json").write_text(json.dumps(case_record, indent=2, ensure_ascii=False), encoding="utf-8")
 
@@ -2573,6 +2642,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     summary["decision"] = "pass" if summary["passed"] else "fail"
     summary["exit_code"] = 0 if summary["passed"] else 2
 
+    summary = _sanitize_artifact_value(summary, workspace_root)
     summary_path = reports_base / "summary.json"
     summary_path.write_text(json.dumps(summary, indent=2, ensure_ascii=False), encoding="utf-8")
 
@@ -2617,9 +2687,16 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         },
         "artifacts": summary["artifacts"],
     }
+    release_manifest = _sanitize_artifact_value(release_manifest, workspace_root)
     release_manifest_path.write_text(json.dumps(release_manifest, indent=2, ensure_ascii=False), encoding="utf-8")
     summary_path.write_text(json.dumps(summary, indent=2, ensure_ascii=False), encoding="utf-8")
     scorecard_path.write_text(json.dumps(summary, indent=2, ensure_ascii=False), encoding="utf-8")
+
+    _sanitize_artifact_tree(reports_base, workspace_root)
+    _sanitize_text_file(scorecard_path, workspace_root)
+    _sanitize_text_file(summary_path, workspace_root)
+    _sanitize_text_file(release_manifest_path, workspace_root)
+    _sanitize_text_file(junit_path, workspace_root)
 
     if args.format == "json":
         print(json.dumps(summary, indent=2, ensure_ascii=False))

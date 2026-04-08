@@ -4,10 +4,12 @@
 from __future__ import annotations
 
 import importlib.util
+import io
 import os
 import sys
 import tempfile
 import unittest
+import zipfile
 from pathlib import Path
 from unittest.mock import patch
 
@@ -96,6 +98,41 @@ class SkillInstallerSecurityTests(unittest.TestCase):
 
             with self.assertRaises(installer.InstallError):
                 installer._validate_skill(str(skill_dir))
+
+    def test_copy_skill_preserves_symlink_instead_of_dereferencing(self) -> None:
+        if not hasattr(os, "symlink"):
+            self.skipTest("symlink not supported on this platform")
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            src = Path(tmpdir) / "src-skill"
+            _write_min_skill(src)
+            secret = Path(tmpdir) / "secret.txt"
+            secret.write_text("sensitive", encoding="utf-8")
+            link_path = src / "leak.txt"
+            os.symlink(secret, link_path)
+
+            dest = Path(tmpdir) / "installed" / "src-skill"
+            installer._copy_skill(str(src), str(dest))
+
+            copied_link = dest / "leak.txt"
+            self.assertTrue(copied_link.is_symlink(), "copy should preserve symlink objects")
+            self.assertEqual(os.readlink(copied_link), str(secret))
+
+    def test_safe_extract_zip_rejects_symlink_entries(self) -> None:
+        zip_buffer = io.BytesIO()
+        with zipfile.ZipFile(zip_buffer, "w") as zip_file:
+            zip_file.writestr("repo-main/sample-skill/SKILL.md", "# Sample\n")
+            symlink_info = zipfile.ZipInfo("repo-main/sample-skill/leak.txt")
+            symlink_info.create_system = 3
+            symlink_info.external_attr = 0o120777 << 16
+            zip_file.writestr(symlink_info, "/etc/hosts")
+
+        zip_buffer.seek(0)
+        with tempfile.TemporaryDirectory() as tmpdir:
+            with zipfile.ZipFile(zip_buffer, "r") as zip_file:
+                with self.assertRaises(installer.InstallError) as ctx:
+                    installer._safe_extract_zip(zip_file, tmpdir)
+        self.assertIn("symlink", str(ctx.exception).lower())
 
     def test_assert_path_within_repo_rejects_escape(self) -> None:
         with self.assertRaises(installer.InstallError):
@@ -198,6 +235,55 @@ class SkillInstallerSecurityTests(unittest.TestCase):
 
             self.assertEqual(exit_code, 1)
             self.assertFalse((dest / "demo").exists(), "promotion should roll back when manifest write fails")
+
+    def test_main_rejects_malicious_symlink_repo_payload(self) -> None:
+        if not hasattr(os, "symlink"):
+            self.skipTest("symlink not supported on this platform")
+
+        pinned_ref = "a" * 40
+        source = installer.Source(owner="octocat", repo="skills", ref=pinned_ref, paths=["skills/demo"])
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo_root = Path(tmpdir) / "repo"
+            skill_path = repo_root / "skills" / "demo"
+            _write_min_skill(skill_path)
+
+            secret = Path(tmpdir) / "secret.txt"
+            secret.write_text("do-not-copy", encoding="utf-8")
+            os.symlink(secret, skill_path / "leak.txt")
+
+            dest = Path(tmpdir) / "dest"
+            args = [
+                "--repo",
+                "octocat/skills",
+                "--path",
+                "skills/demo",
+                "--ref",
+                pinned_ref,
+                "--dest",
+                str(dest),
+                "--validation-level",
+                "compat",
+                "--allow-untrusted-source",
+            ]
+
+            stderr_buffer = io.StringIO()
+            with patch.object(installer, "_resolve_source", return_value=source):
+                with patch.object(
+                    installer,
+                    "_prepare_repo",
+                    return_value=installer.PreparedRepo(
+                        repo_root=str(repo_root),
+                        resolved_commit=pinned_ref,
+                        source_method="download",
+                    ),
+                ):
+                    with patch("sys.stderr", stderr_buffer):
+                        exit_code = installer.main(args)
+
+            self.assertEqual(exit_code, 1)
+            self.assertIn("symlink", stderr_buffer.getvalue().lower())
+            self.assertFalse((dest / "demo").exists(), "skill must not be promoted on symlink validation failure")
 
     def test_main_rejects_ssh_fallback_without_git_method(self) -> None:
         pinned_ref = "a" * 40
