@@ -44,6 +44,8 @@ Use initialization for new skills:
 scripts/init_skill.py <skill-name> --path <output-directory> [--resources scripts,references,assets] [--examples]
 ```
 
+Run this from the repository root where `scripts/init_skill.py` exists. If you are outside that root, call the script with an absolute path.
+
 Defaults and naming:
 
 - Use `${CODEX_HOME:-$HOME/.codex}/skills` when no path is provided.

@@ -2,32 +2,30 @@
 source: https://docs.coderabbit.ai/finishing-touches/unit-test-generation
 ---
 
+# Unit Test Generation
+
 ## Platform support
 
-AI coding tools let you write code 10x faster, but comprehensive testing still happens manually. CodeRabbit bridges this gap by analyzing your code changes and generating sophisticated unit tests that understand your project's patterns, testing frameworks, and edge cases.
+AI coding tools accelerate implementation, but complete test coverage still requires deliberate review. CodeRabbit helps close that gap by generating tests based on your project's framework and patterns.
 
 ## How it works
 
-CodeRabbit's test generation goes beyond basic templates. It understands your project's testing patterns and generates tests that actually integrate with your existing test suite.
+CodeRabbit's test generation goes beyond templates. It analyzes your test conventions and generates tests intended to integrate into your existing suite.
 
 ## Output delivery options
 
 - Separate PR
 - Same PR commit
 
-**Recommended for most teams** CodeRabbit creates a new pull request
-containing all generated tests. This approach keeps your feature PR focused
-while allowing independent review of test code. **Key advantage**:
-CodeRabbit automatically fixes CI/CD integration issues. If tests fail due
-to missing dependencies, import errors, or configuration problems,
-CodeRabbit analyzes your GitHub Actions logs and pushes fixes. This means
-you get working tests, not just test code that looks right.
+**Recommended for most teams:** generate tests in a separate PR. This keeps feature PR scope focused while enabling targeted review of generated tests.
+
+CodeRabbit can often suggest CI/CD-related fixes (for example import or dependency issues) when test runs fail, but outcomes still depend on repository setup and available logs.
 
 ## Path-specific customization
 
-Configure test generation for different parts of your codebase using `.coderabbit.yaml`:
+Configure generation behavior in `.coderabbit.yaml`:
 
-```
+```yaml
 code_generation:
   unit_tests:
     path_instructions:
@@ -48,5 +46,4 @@ code_generation:
           Mock complex props and verify state changes.
 ```
 
-These instructions become part of CodeRabbit's context for future test generation, continuously improving test quality and consistency across your codebase.
-Unit test generation is part of CodeRabbit's finishing touches - adding the comprehensive test coverage that ensures code quality and maintainability.
+These instructions become part of future generation context and can improve consistency over time.

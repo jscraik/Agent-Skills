@@ -5,41 +5,38 @@ source: https://docs.coderabbit.ai/tools/dotenv
 # Dotenv Linter
 
 ## Files
-Dotenv Linter will run on files with the following patterns:
+
+Dotenv Linter runs on these file patterns:
 
 - `**/.env`
-
 - `**/.env.*`
 
-We will not run against files that do not start with `.env` (e.g., `test.env`). However `.env.dev` or `.env.local` is fine.
+Files that do not start with `.env` (for example `test.env`) are ignored.
 
-Dotenv Linter does not require configuration to run and automatically anlysises `.env` files. If no configuration file is found, it will use default settings.
-## When we skip dotenv-linter
-CodeRabbit will skip running dotenv-linter when:
+## Configuration
 
-- No `.env` files are found in the pull request.
+Dotenv Linter does not require a configuration file. It analyzes supported `.env` files with default rules.
 
+## When CodeRabbit skips dotenv-linter
+
+CodeRabbit skips dotenv-linter when:
+
+- No `.env` files are present in the pull request.
 - dotenv-linter is already running in GitHub workflows.
 
 ## Notes
 
-- All dotenv-linter issues are treated as warnings (dotenv-linter does not distinguish severity levels).
+- All dotenv-linter findings are treated as warnings (dotenv-linter does not expose severity levels).
 
 ## Features
+
 Dotenv Linter can detect:
 
-- Key duplication
-
+- Duplicate keys
 - Missing values
-
-- Incorrect formatting
-
+- Formatting issues
 - Invalid characters
-
-- And many more issues
 
 ## Links
 
-- Dotenv Linter GitHub Repository
-
-detektember-template-lint
+- [Dotenv Linter GitHub Repository](https://github.com/dotenv-linter/dotenv-linter)

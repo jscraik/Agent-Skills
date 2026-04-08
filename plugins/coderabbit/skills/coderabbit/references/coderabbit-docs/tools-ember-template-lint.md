@@ -5,49 +5,48 @@ source: https://docs.coderabbit.ai/tools/ember-template-lint
 # ember-template-lint
 
 ## Files
-ember-template-lint runs on files with the following extensions:
+
+ember-template-lint runs on:
 
 - `.hbs`
 
 ## Configuration
-ember-template-lint reads its configuration from your repository automatically. Supported config files include:
+
+Supported config files:
 
 - `.template-lintrc.js`
-
 - `.template-lintrc.cjs`
-
 - `.template-lintrc.mjs`
-
 - `.template-lintrc.json`
-
 - `.template-lintrc.yaml`
-
 - `.template-lintrc.yml`
 
-If no config file is found, ember-template-lint runs with its default rule set.
-To enable or disable ember-template-lint, use your `.coderabbit.yaml` file or the CodeRabbit web UI:
-- .coderabbit.yaml
-- Web UI
-.coderabbit.yaml
+If no config file is found, ember-template-lint uses default rules.
 
-`reviews:
- tools:
- emberTemplateLint:
- enabled: true
-`Go to **Reviews → Tools → ember-template-lint** in your organization or repository settings and toggle ember-template-lint `on` or `off`.
+To enable/disable ember-template-lint, use `.coderabbit.yaml` or the CodeRabbit UI.
+
+### `.coderabbit.yaml`
+
+```yaml
+reviews:
+  tools:
+    emberTemplateLint:
+      enabled: true
+```
+
+### Web UI
+
+Go to **Reviews → Tools → ember-template-lint** and toggle it on or off.
+
 ## When CodeRabbit skips ember-template-lint
-CodeRabbit skips ember-template-lint when:
+
+CodeRabbit skips this tool when:
 
 - No `.hbs` files are present in the pull request diff.
+- ember-template-lint is already running in CI (detected via GitHub Checks).
 
-- ember-template-lint is already running as a step in your CI pipeline (detected via GitHub Checks).
+## What's next
 
-## What’s next
-
-## All supported toolsBrowse the complete list of linters, security analyzers, and CI/CD integrations available in CodeRabbit.
-
-## Tools referenceExplore detailed specifications and capabilities of all available CodeRabbit tools.
-
-## Configuration referenceFull reference for all available options, including how to enable, disable, and tune individual tools.
-
-Dotenv LinterESLint
+- [All supported tools](/tools/list)
+- [Tools reference](/reference/tools)
+- [Configuration reference](/reference/configuration)

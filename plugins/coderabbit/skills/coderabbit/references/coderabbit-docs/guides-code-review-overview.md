@@ -4,76 +4,62 @@ source: https://docs.coderabbit.ai/guides/code-review-overview
 
 # Code Review Overview
 
-Transform your code review process with CodeRabbit's AI-powered analysis that delivers comprehensive feedback within minutes of creating a pull request. Get detailed summaries, security insights, and improvement suggestions that help your team ship better code faster.
+Transform your code review process with CodeRabbit's AI-powered analysis that delivers feedback within minutes of opening a pull request. You get summaries, security insights, and improvement suggestions that help teams ship higher-quality code faster.
 
-## What CodeRabbit does for your pull requests
+## What CodeRabbit does for pull requests
 
-CodeRabbit automatically analyzes every pull request with a multi-layered approach that combines the best of AI and industry-standard tools.
-
-## How automatic reviews work
+CodeRabbit automatically analyzes pull requests with a multi-layer approach that combines AI and industry-standard tooling.
 
 ## Review types and severity levels
 
-CodeRabbit categorizes its feedback into different types and severity levels to help you prioritize and address issues effectively.
+CodeRabbit categorizes feedback so teams can prioritize issues.
 
 ### Review types
 
-CodeRabbit provides three types of review feedback:
-
-- **Potential issue** - Identifies potential bugs, security vulnerabilities, or problematic code patterns
-- **Refactor suggestion** - Recommends code improvements for maintainability, performance, or best practices
-- **Nitpick** - Suggests minor style or formatting improvements (only in Assertive mode)
+- **Potential issue**: Potential bugs, security vulnerabilities, or risky code patterns.
+- **Refactor suggestion**: Improvements for maintainability, performance, or best practices.
+- **Nitpick**: Minor style and formatting suggestions (Assertive mode).
 
 ### Severity levels
 
-Each review comment is assigned a severity level to indicate its importance:
+- **Critical**: Could cause outages, data loss, or severe security impact.
+- **Major**: Significant functional or performance concerns.
+- **Minor**: Important improvements with lower immediate impact.
+- **Trivial**: Low-impact code-quality suggestions.
+- **Info**: Informational context that may not require action.
 
-- **Critical** - Severe issues that could cause system failures, security breaches, or data loss
-- **Major** - Significant problems that impact functionality or performance
-- **Minor** - Issues that should be addressed but don't critically impact the system
-- **Trivial** - Low-impact suggestions for code quality improvements
-- **Info** - Informational comments or context without requiring action
+## Review triggers
 
-### Review triggers and events
-
-CodeRabbit automatically initiates reviews based on these repository activities:
-
-**Full comprehensive review** when a new pull request is created:
-- Complete analysis of all proposed changes
+**Full review** on new pull requests:
+- Complete analysis of proposed changes
 - Security and quality assessment
-- Code style and best practices review
+- Style and best-practice checks
 
-**Incremental review** when existing pull requests receive new commits:
-- Focus on newly added changes
-- Updates to previous recommendations
-- Maintains conversation context
+**Incremental review** on new commits to existing pull requests:
+- Focus on newly introduced changes
+- Update recommendations as the PR evolves
+- Preserve ongoing context
 
-## Interactive code reviews with CodeRabbit
+## Interactive code reviews with `@coderabbitai`
 
-Once CodeRabbit reviews your pull request, you can engage in dynamic conversations and request specific actions by mentioning `@coderabbitai` in your comments.
+After CodeRabbit posts feedback, you can ask follow-up questions and request actions directly in PR comments.
 
-### Smart conversation capabilities
+CodeRabbit can use the repository context available to the pull request when generating responses.
 
-Ask CodeRabbit questions about your code changes, architecture decisions, or implementation approaches. It has access to your entire repository for informed responses.
-
-```
+```text
 @coderabbitai Why did you suggest using a factory pattern here?
 ```
 
-Manage CodeRabbit's review behavior for specific pull requests:
-
-```
+```text
 @coderabbitai pause
 @coderabbitai resume
 @coderabbitai resolve
 ```
 
-Request CodeRabbit to generate documentation:
-
-```
+```text
 @coderabbitai generate docstrings
 ```
 
 ## Next steps
 
-Ready to dive deeper into CodeRabbit's capabilities? Explore these essential features to maximize your code review experience.
+Explore related guides to tune review instructions, focus areas, and review style for your team.

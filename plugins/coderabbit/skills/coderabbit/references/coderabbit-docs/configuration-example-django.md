@@ -30,7 +30,7 @@ reviews:
           - Avoid adding comments relating to importing modules.
     - path: "tests/*.py"
       instructions: |
-        - There is no sensitive information in the test files. All data handled is procedural/generic and non-sensitive.
+        - Test fixtures should use synthetic or redacted data only. Do not include real credentials, customer data, or secrets in test files.
 chat:
   auto_reply: true
 ```

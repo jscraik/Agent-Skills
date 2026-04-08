@@ -138,9 +138,9 @@ Safety and quality constraints:
 
 Example requests this skill should handle:
 
-- "Create a `gh-release-notes` skill in `${CODEX_HOME:-$HOME/.codex}/skills` and include `references/contract.yaml` plus `references/evals.yaml`."
-- "This skill fails strict audit for missing `constraints` and oversized `SKILL.md`; move deep material into references and keep behavior unchanged."
-- "Refresh `agents/openai.yaml` for this skill after updating triggers in frontmatter and confirm metadata parity."
+- "Create a `gh-release-notes` skill in `${CODEX_HOME:-$HOME/.codex}/skills`, include `references/contract.yaml` and `references/evals.yaml`, then run strict audit."
+- "Refactor this oversized `SKILL.md` by moving deep implementation details into `references/` while keeping behavior and triggers unchanged."
+- "After I updated trigger phrasing in frontmatter, regenerate `agents/openai.yaml` and confirm metadata parity."
 
 ## References
 

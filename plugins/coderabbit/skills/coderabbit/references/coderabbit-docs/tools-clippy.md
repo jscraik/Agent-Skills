@@ -4,47 +4,41 @@ source: https://docs.coderabbit.ai/tools/clippy
 
 # Clippy
 
-## Supported Files
-Clippy will run on files with the following extensions:
+## Supported files
+
+Clippy runs on Rust files:
 
 - `*.rs`
 
 ## Configuration
-Clippy supports the following configuration files:
+
+Clippy supports:
 
 - `clippy.toml`
-
 - `.clippy.toml`
 
-Clippy does not require configuration to run. If no configuration file is found, it will use default settings.A Cargo.toml is required.
-## When we skip Clippy
-CodeRabbit will skip running Clippy when:
+Clippy does not require explicit configuration, but a `Cargo.toml` file must exist for the project.
 
-- No Rust files (`.rs`) are found in the pull request.
+## When CodeRabbit skips Clippy
 
-- No `Cargo.toml` file is found in the repository.
+CodeRabbit skips Clippy when:
 
+- No Rust files (`.rs`) are present in the pull request.
+- No `Cargo.toml` exists in the repository.
 - Clippy is already running in GitHub workflows.
 
 ## Features
-Clippy can detect many code quality issues such as:
+
+Clippy can detect:
 
 - Style violations
-
 - Common mistakes
-
 - Performance issues
-
 - Deprecated code patterns
-
-- And many more Rust-specific issues
+- Other Rust-specific quality concerns
 
 ## Links
 
-- Clippy GitHub Repository
-
-- Clippy Documentation
-
-- Available Lints
-
-CircleCIClang-Tidy
+- [Clippy GitHub Repository](https://github.com/rust-lang/rust-clippy)
+- [Clippy Documentation](https://doc.rust-lang.org/clippy/)
+- [Clippy Lints](https://rust-lang.github.io/rust-clippy/master/)

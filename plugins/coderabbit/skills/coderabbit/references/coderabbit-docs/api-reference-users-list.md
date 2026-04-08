@@ -4,15 +4,13 @@ source: https://docs.coderabbit.ai/api-reference/users-list
 
 # Users
 
-List all users in your organization with optional filtering by seat assignment and role status.
+List users in your organization with optional filtering by seat assignment and role.
 
 ## GET /v1/users
 
-Requires **Admin** role. See Role-based access for details.
+Requires **Admin** role. This feature is available only on the **Enterprise plan**.
 
-This feature is available exclusively as part of the **Enterprise plan**.
-
-### cURL Example
+### cURL example
 
 ```bash
 curl --request GET \
@@ -23,14 +21,15 @@ curl --request GET \
 ### Authorization
 
 **x-coderabbitai-api-key** (string, header, required)
-API key for authentication. You can create an API key from the CodeRabbit dashboard.
 
-### Query Parameters
+API key for authentication. Create API keys in the CodeRabbit dashboard.
+
+### Query parameters
 
 | Parameter | Type | Default | Description |
 |---|---|---|---|
-| `seat_filter` | enum\<string\> | `all` | Filter users by seat assignment status. Options: `all`, `assigned`, `unassigned` |
-| `role_filter` | enum\<string\> | `all` | Filter users by role status. Options: `all`, `member`, `admin` |
+| `seat_filter` | enum<string> | `all` | Filter by seat status: `all`, `assigned`, `unassigned`. |
+| `role_filter` | enum<string> | `all` | Filter by role: `all`, `cr_member`, `cr_admin`. |
 
 ### Response (200)
 
@@ -46,7 +45,7 @@ API key for authentication. You can create an API key from the CodeRabbit dashbo
 }
 ```
 
-### Error Responses
+### Error responses
 
 | Status | Description |
 |---|---|

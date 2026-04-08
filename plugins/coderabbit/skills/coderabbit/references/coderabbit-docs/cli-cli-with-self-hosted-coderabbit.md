@@ -4,57 +4,57 @@ source: https://docs.coderabbit.ai/cli/cli-with-self-hosted-CodeRabbit
 
 # Use with self-hosted CodeRabbit
 
-Configure the CodeRabbit CLI to work with your organization's self-hosted CodeRabbit instance. This setup gives you all the benefits of AI-powered code reviews while maintaining full control over your code and data.
+Configure the CodeRabbit CLI to work with your organization's self-hosted instance so reviews stay in your controlled environment.
 
 ## Prerequisites
 
-Before connecting to your self-hosted instance, ensure:
+Before connecting to your self-hosted instance:
 
 ### CLI version
 
-CodeRabbit CLI version 0.3.5 or higher installed
+Install CodeRabbit CLI version `0.3.5` or newer.
 
 ### Clean setup
 
-Log out of the extension if you were previously connected to the managed service (`coderabbit auth logout`)
+If you previously used the managed service, log out first:
+
+```bash
+coderabbit auth logout
+```
 
 ## Connect your self-hosted instance
 
 ### Install CLI
 
-Download and install the CodeRabbit CLI to start reviewing code locally.
+Download the installer script, inspect it, then run it:
 
-```
-curl -fsSL https://cli.coderabbit.ai/install.sh | sh
+```bash
+curl -fsSL https://cli.coderabbit.ai/install.sh -o /tmp/coderabbit-install.sh
+sh /tmp/coderabbit-install.sh
 ```
 
 ### Restart your shell
 
-After installation, restart your shell or reload your shell configuration.
-
-```
-# Restart your shell or run:
+```bash
 source ~/.zshrc
 ```
 
 ### Authenticate
 
-Link your CodeRabbit account to enable personalized reviews based on your team's patterns.
-
-```
+```bash
 coderabbit auth login --self-hosted
 ```
 
-This is going to ask you for more details in the further steps.
+The CLI will guide you through subsequent prompts.
 
 ### Select your Git provider
 
-Select the Git provider from the list using arrow keys to connect the CLI with.
+Choose the provider in the interactive prompt.
 
-### Enter your self-hosted CodeRabbit url
+### Enter your self-hosted CodeRabbit URL
 
-Provide your self-hosted CodeRabbit's url: "your-self-hosted-coderabbit-url/". Verify the url validation.
+Provide your self-hosted URL (for example, `https://your-self-hosted-coderabbit-url/`) and confirm validation.
 
-### Complete the signin with an Access Token
+### Complete sign-in with an access token
 
-Follow the browser redirect to sign in and copy the access token from your git provider back to your CLI.
+Follow the browser redirect, sign in to your Git provider, and paste the generated token back into the CLI prompt.

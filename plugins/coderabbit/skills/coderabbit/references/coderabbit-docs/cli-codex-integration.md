@@ -4,65 +4,63 @@ source: https://docs.coderabbit.ai/cli/codex-integration
 
 # Codex Integration
 
-Enable Codex to execute CodeRabbit directly in your development workflow. Let AI code, review, and fix issues autonomously without human intervention.
+Enable Codex to execute CodeRabbit in your development workflow so code generation, review, and fix loops can run continuously.
 
 ## Get continuous code review with Codex
 
-Codex executes CodeRabbit directly as part of its development process. Ask Codex to implement a feature, run a code review, and fix any issues. CodeRabbit catches race conditions, memory leaks, and logic errors, then Codex applies the fixes with full context about the problems.
+Codex can run CodeRabbit as part of feature development: implement changes, run review, and apply fixes from findings.
 
-**Windows users:** Codex has experimental Windows support. For the best experience on Windows, use WSL (Windows Subsystem for Linux). See our WSL on Windows guide for setup instructions.
-
-The integration creates a tight feedback loop: CodeRabbit analyzes your code changes and surfaces specific issues, then Codex applies the fixes based on CodeRabbit's context-rich feedback.
+**Windows users:** Codex has experimental Windows support. Prefer WSL for best results.
 
 ## Why integrate these tools
 
-- **Expert issue detection**: CodeRabbit spots race conditions, memory leaks, and logic errors that generic linters miss
-- **AI-powered fixes**: Codex implements fixes with full context from CodeRabbit's analysis
-- **Context preservation**: CodeRabbit's `--prompt-only` mode gives Codex succinct context about issues
-- **Continuous workflow**: Stay in development flow without switching between tools
+- **Issue detection**: CodeRabbit finds logic and security issues that basic linters can miss.
+- **AI-assisted fixes**: Codex can apply fixes using CodeRabbit feedback context.
+- **Context preservation**: `--prompt-only` mode gives concise issue context for Codex.
+- **Continuous workflow**: Less context switching between tools.
 
 ## Prerequisites
 
-1. **Install Codex**: Follow platform-specific instructions
-2. **Install CodeRabbit CLI**:
+1. **Install Codex** using platform-specific instructions.
+2. **Install CodeRabbit CLI** (download, inspect, then run installer):
+
    ```bash
-   curl -fsSL https://cli.coderabbit.ai/install.sh | sh
+   curl -fsSL https://cli.coderabbit.ai/install.sh -o /tmp/coderabbit-install.sh
+   sh /tmp/coderabbit-install.sh
    source ~/.zshrc
    ```
-3. **Authenticate CodeRabbit within Codex**:
-   - Request escalated permissions: `Please run: coderabbit auth login`
-   - Grant network permissions when prompted
-   - Get authentication link from Codex
-   - Complete authentication in browser
-   - Paste token back to Codex
-4. **Verify setup**: `Run: coderabbit auth status`
 
-### About Codex approval modes
+3. **Authenticate CodeRabbit from Codex**:
+   - Request `coderabbit auth login`.
+   - Grant network permissions when prompted.
+   - Complete browser authentication flow.
+4. **Verify setup**:
 
-- **Auto** (default): Can read files, make edits, and run commands. Requires approval for network access.
-- **Read Only**: Chat and planning mode
-- **Full Access**: Complete access without approval (use with caution)
+   ```bash
+   coderabbit auth status
+   ```
+
+## About Codex approval modes
+
+- **Auto** (default): Read/edit/commands allowed; network requires approval.
+- **Read Only**: Planning/chat only.
+- **Full Access**: No approval prompts (use with caution).
 
 ## Integration workflow
 
 ### Basic workflow
 
-1. **Request implementation + review**:
-   ```
-   Please implement phase 7.3 of the planning doc and then run coderabbit --prompt-only,
-   let it run as long as it needs and fix any issues.
-   ```
-2. **Codex implements and runs CodeRabbit**
-3. **CodeRabbit analysis and fix implementation**
-4. **Automated issue resolution**
+1. Request implementation and review.
+2. Codex implements and runs CodeRabbit.
+3. CodeRabbit returns findings.
+4. Codex applies fixes and re-validates.
 
-### Example: AI fitness tracker integration
+Example request:
 
-1. Start the feature on a new branch
-2. Tell Codex to implement and run CodeRabbit
-3. CodeRabbit identifies issues (API error handling, memory leaks, race conditions, input validation)
-4. Codex automatically applies fixes
-5. Verification continues until all critical issues resolved
+```text
+Please implement phase 7.3 of the planning doc and then run coderabbit --prompt-only,
+let it run as long as needed, and fix any issues it reports.
+```
 
 ## Optimization tips
 
@@ -72,15 +70,11 @@ The integration creates a tight feedback loop: CodeRabbit analyzes your code cha
 coderabbit --prompt-only
 ```
 
-This mode provides:
-- Succinct issue context
-- Token-efficient formatting
-- Specific file locations and line numbers
-- Suggested fix approaches
+This mode provides concise issue context, file/line locations, and suggested fix directions.
 
 ### Configure CodeRabbit for Codex
 
-CodeRabbit automatically reads your `agents.md` file. Add context there about code review standards and architectural preferences.
+CodeRabbit reads your `AGENTS.md` guidance. Add review standards and architecture preferences there.
 
 This is a Pro paid plan feature.
 
@@ -88,24 +82,24 @@ This is a Pro paid plan feature.
 
 ### CodeRabbit not finding issues
 
-1. Check authentication: `coderabbit auth login`
-2. Verify git status
-3. Review file types
-4. Try different modes: `coderabbit --plain`
+1. Re-authenticate: `coderabbit auth login`
+2. Verify git status and changed files
+3. Confirm file types are supported
+4. Try plain mode: `coderabbit --plain`
 
 ### Codex not applying fixes
 
-1. Check authentication: `coderabbit auth status`
-2. Use prompt-only mode
-3. Provide explicit context
-4. Check if review finished
-5. Address timeout issues
+1. Verify auth: `coderabbit auth status`
+2. Use `--prompt-only`
+3. Provide explicit task context
+4. Ensure review run completed
+5. Reduce changeset size if timeouts occur
 
 ### Managing review duration
 
-Reviews may take 8 to 30+ minutes:
+Reviews can take 8 to 30+ minutes:
 
-1. Review smaller changesets
-2. Use `--type uncommitted` for only uncommitted changes
-3. Configure base branch: `--base develop` or `--base main`
-4. Work on focused feature branches
+1. Keep changesets focused
+2. Use `--type uncommitted` for local delta-only reviews
+3. Set base branch explicitly (`--base develop` or `--base main`)
+4. Work from feature branches

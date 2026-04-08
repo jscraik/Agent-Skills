@@ -4,17 +4,15 @@ source: https://docs.coderabbit.ai/api-reference/users-seat-assignment-mode
 
 # Seat Assignment Mode
 
-Update the seat assignment mode for the organization. Only accessible by fully self-hosted organizations with enterprise plans.
+Update the organization seat-assignment mode. This endpoint is available only to fully self-hosted organizations on enterprise plans.
 
 ## POST /v1/users/seats/assignment
 
-Requires **Admin** role. See Role-based access for details.
+Requires **Admin** role. See Seat assignment docs for mode behavior.
 
-Only available for **fully self-hosted** organizations. See Seat assignment for details on assignment modes.
+To fetch the current mode before updating, call `GET /v1/users` and read the seat-assignment mode in the response payload.
 
-To retrieve the current seat assignment mode, use the Users endpoint. The seat assignment mode is included in the response.
-
-### cURL Example
+### cURL example
 
 ```bash
 curl --request POST \
@@ -29,13 +27,12 @@ curl --request POST \
 ### Authorization
 
 **x-coderabbitai-api-key** (string, header, required)
-API key for authentication. You can create an API key from the CodeRabbit dashboard.
 
-### Body Parameters
+### Body parameters
 
 | Parameter | Type | Required | Description |
 |---|---|---|---|
-| `mode` | enum\<string\> | Yes | The seat assignment mode to set. Options: `automatic`, `manual` |
+| `mode` | enum<string> | Yes | Seat assignment mode: `automatic`, `manual`. |
 
 ### Response (200)
 
@@ -45,7 +42,7 @@ API key for authentication. You can create an API key from the CodeRabbit dashbo
 }
 ```
 
-### Error Responses
+### Error responses
 
 | Status | Description |
 |---|---|

@@ -2,17 +2,21 @@
 source: https://docs.coderabbit.ai/getting-started/yaml-configuration
 ---
 
-In this guide, we will cover the configuration using a YAML file. For the complete list of available options, see the [Configuration Reference](/reference/configuration). For ready-to-use examples tailored to specific frameworks and languages, see [Configuration Examples](/configuration/example).
+# YAML Configuration
 
-Move existing UI configuration to a YAML file?Use the `@coderabbitai configuration` command on any PR to get the current configuration in a YAML format. You can then copy the configuration to a `.coderabbit.yaml` file in the root of your repository.
+In this guide, we cover configuring CodeRabbit with a `.coderabbit.yaml` file. For the full option list, see the [Configuration Reference](/reference/configuration). For framework-specific templates, see [Configuration Examples](/configuration/example).
 
-## Configure CodeRabbit using a YAML File
+## Export existing UI configuration
 
-`.coderabbit.yaml` configuration file must be located in the root of the repository. The configuration present in the feature branch under review will be automatically detected and used by CodeRabbit for that review.
+If you already configured settings in the UI, use the `@coderabbitai configuration` command on any PR to export the current settings as YAML. Copy that output into a `.coderabbit.yaml` file at repository root.
 
-### Example Configuration
+## Configure CodeRabbit using a YAML file
 
-```
+The `.coderabbit.yaml` file must be located at repository root. CodeRabbit uses the version from the feature branch under review.
+
+### Example configuration
+
+```yaml
 # yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
 language: "en-US"
 early_access: false
@@ -30,36 +34,24 @@ chat:
   auto_reply: true
 ```
 
-## Configuration Options
+## Configuration options
 
-The configuration file supports numerous options for customizing CodeRabbit’s behavior. For the complete list of available configuration options and their descriptions, see the [configuration reference](/reference/configuration#reference).
-
-## Configuration Reference
-
-Complete documentation of all options
-
-## Configuration Examples
-
-Ready-to-use examples for popular frameworks and languages
-
-Please note that code reviews commence with new pull requests or incremental commits to existing pull requests once the CodeRabbit app is installed. Should you have any questions or require assistance, visit the [support page](/support).
+The configuration file supports many options for customizing CodeRabbit behavior. For complete option descriptions, see the [Configuration Reference](/reference/configuration#reference).
 
 ## Shared configuration
 
-Shared configuration is not recommended, as it may expose sensitive
-configuration details. Please use [Central
-Configuration](/configuration/central-configuration) for managing
-configurations across multiple repositories and [Configuration
-Inheritance](/configuration/configuration-inheritance) for reusing
-configurations across different layers.
+Shared configuration is generally not recommended because it can expose sensitive settings. Prefer [Central Configuration](/configuration/central-configuration) for multi-repository management and [Configuration Inheritance](/configuration/configuration-inheritance) for layered reuse.
 
-If you are self-hosting CodeRabbit in an air-gapped environment, you can use the shared configuration feature to share the configuration across multiple repositories.
-To use shared configuration, you need to:
+If you are self-hosting CodeRabbit in an air-gapped environment, shared configuration can still be used. In that case:
 
-1. Create a `.coderabbit.yaml` file and host it in a location that is publicly accessible (e.g., a web server, a public GitHub Gist).
-2. Create a `.coderabbit.yaml` file in the root of your repository with the following content:
+1. Host your shared `.coderabbit.yaml` at an internal URL that is reachable by your repositories.
+2. Reference it from each repository-level `.coderabbit.yaml`:
 
-```
+```yaml
 remote_config:
   url: "https://your-config-location/.coderabbit.yaml"
 ```
+
+## Need help?
+
+Code reviews begin on new pull requests or incremental commits after app installation. If you need help, visit the [support page](/support).

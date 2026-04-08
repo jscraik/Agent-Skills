@@ -4,44 +4,41 @@ source: https://docs.coderabbit.ai/overview/pull-request-review
 
 # Pull Request Reviews
 
-Within moments of opening a pull request, CodeRabbit analyzes your code with multiple AI models and provides actionable feedback, catching issues that are easy to miss in manual reviews.
+Within moments of opening a pull request, CodeRabbit analyzes your code with multiple AI models and provides actionable feedback that can be easy to miss in manual reviews.
 
 ## Automatic and incremental
 
-CodeRabbit reviews new pull requests automatically and updates its feedback as you push new commits -- focusing on what changed.
+CodeRabbit reviews new pull requests automatically and updates feedback as you push new commits.
 
-- **New PRs**: Full analysis of all changes with detailed findings
-- **New commits**: Incremental reviews that track what's new since the last review
-- **Every update**: Fresh insights without repeating resolved comments
+- **New PRs**: Full analysis of changed files with detailed findings.
+- **New commits**: Incremental analysis focused on newly introduced deltas.
+- **Every update**: Fresh insights without repeating resolved comments.
 
-Zero config to start: just open a PR and get the results! This documentation will guide you through review instructions, focus areas, and review style tuning to make the outcome even better.
+Zero config to start: open a PR and review the results. You can then tune review instructions, focus areas, and style.
 
 ## Connected to your workflow
 
-CodeRabbit links relevant issues from GitHub, Jira, or Linear to your pull requests, ensuring nothing falls through the cracks. It validates changes against issue requirements and acceptance criteria, catching misalignments before merge.
-No more hunting through issue trackers to understand what a PR should accomplish, context is right there when you need it.
+CodeRabbit links relevant issues from GitHub, Jira, or Linear to pull requests. It validates changes against issue intent and acceptance criteria so mismatches can be caught before merge.
 
-## Beyond your CI/CD pipeline
+## Beyond CI/CD checks
 
-While your linters catch style issues and security scanners flag known vulnerabilities, CodeRabbit understands context:
+Linters and scanners are essential, but CodeRabbit also reasons about code behavior in context:
 
-- Detects bugs that static analyzers miss
-- Suggests architecture improvements based on your full repository
-- Identifies performance bottlenecks in your logic
-- Points out maintainability issues before they compound
-
-Think of it as an experienced teammate who's always available for that first review. The same second!
+- Finds logic issues that static analyzers may miss
+- Suggests design or architecture improvements using relevant repository context
+- Flags potential performance bottlenecks
+- Highlights maintainability concerns early
 
 ## Keep the conversation going
 
-Every review comment is the start of a conversation. Reply to ask for clarification, request code examples, or discuss alternatives:
+Every review comment can be continued as a conversation. Ask for clarification, alternatives, or concrete examples:
 
-```
+```text
 @coderabbitai Suggest a better approach for this error handling
 ```
 
-CodeRabbit has full repository context and can explain its reasoning, generate code, or adjust suggestions based on your feedback.
+CodeRabbit can explain reasoning and adjust recommendations based on follow-up context.
 
 ## What's next
 
-Pull request reviews are just the beginning. CodeRabbit also works in your IDE and from the command line, bringing AI assistance directly into your development workflow.
+Pull request reviews are only one workflow surface. CodeRabbit can also run in IDE and CLI workflows.

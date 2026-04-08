@@ -2,13 +2,15 @@
 source: https://docs.coderabbit.ai/configuration/configuration-inheritance
 ---
 
-Configuration inheritance allows you to share common settings across repositories while still allowing individual repositories to customize specific values. When enabled, CodeRabbit merges configuration from parent levels instead of using only the highest-priority source.
+# Configuration Inheritance
+
+Configuration inheritance lets you share defaults across repositories while still customizing local behavior. When `inheritance: true` is enabled, CodeRabbit merges parent and child configuration instead of using only the highest-priority source.
 
 ## Enabling inheritance
 
-Add `inheritance: true` at the root level of your `.coderabbit.yaml` file:
+Add `inheritance: true` at the root of `.coderabbit.yaml`:
 
-```
+```yaml
 # yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
 inheritance: true
 reviews:
@@ -19,13 +21,11 @@ reviews:
 
 When inheritance is enabled:
 
-1. CodeRabbit merges values from the parent configuration level
-2. If the parent also has `inheritance: true`, the chain continues to the grandparent level
-3. The chain stops at the first level where `inheritance:false` or not set
+1. CodeRabbit merges values from the parent level.
+2. If the parent also enables inheritance, the merge continues upward.
+3. The chain stops at the first level where `inheritance: false` (or unset).
 
 ## Configuration hierarchy
-
-CodeRabbit resolves configuration from multiple levels. Without inheritance, only the highest-priority source is used. With inheritance enabled, values merge across levels.
 
 ### Cloud/SaaS deployment
 
@@ -48,11 +48,9 @@ CodeRabbit resolves configuration from multiple levels. Without inheritance, onl
 
 ## How inheritance works
 
-When you enable inheritance, CodeRabbit walks up the configuration hierarchy and merges values. The merge behavior depends on the data type.
+### Inheritance chain example
 
-### How the inheritance chain works
-
-```
+```text
 Repository YAML (inheritance: true)
        ↓ merges with
 Central YAML (inheritance: true)
@@ -61,24 +59,23 @@ Organization UI (inheritance: false)
        ✗ chain stops here
 ```
 
-- Each level with `inheritance: true` merges with its parent
-- The chain stops at the first level where `inheritance:false` or unset
-- Missing configuration levels are skipped automatically
+- Each level with `inheritance: true` merges with its parent.
+- The chain stops when `inheritance` is false or unset.
+- Missing levels are skipped.
 
 ### Merge behavior by type
 
 | Type | Behavior |
 | --- | --- |
-| __Objects__ | Deep merge - child properties override parent properties at each nesting level |
-| __Arrays__ | Child items first, then unique parent items appended (deduplicated by `path`, `label`, `name`, `id`, or `key`) |
-| __Scalars__ | Simple override - child value wins when defined |
+| Objects | Deep merge; child properties override parent properties at matching paths. |
+| Arrays | Child-first; then unique parent items appended (dedupe by `path`, `label`, `name`, `id`, `key`). |
+| Scalars | Child value overrides parent value when defined. |
 
-### Example
+## Example
 
-This example demonstrates all three merge behaviors.
-__Repository configuration__ (`.coderabbit.yaml`):
+### Repository configuration (`.coderabbit.yaml`)
 
-```
+```yaml
 inheritance: true
 language: "de-DE"
 reviews:
@@ -92,9 +89,9 @@ reviews:
       instructions: "Validate API contracts"
 ```
 
-__Central configuration__ (`coderabbit/.coderabbit.yaml`):
+### Central configuration (`coderabbit/.coderabbit.yaml`)
 
-```
+```yaml
 inheritance: true
 language: "en-US"
 reviews:
@@ -115,71 +112,44 @@ chat:
   art: false
 ```
 
-__Merged result__:
+### Merged result
 
-```
-language: "de-DE" # scalar: child wins
+```yaml
+language: "de-DE"
 reviews:
-  profile: assertive # scalar: child wins
-  request_changes_workflow: true # object: inherited from central
-  high_level_summary: true # object: inherited from central
+  profile: assertive
+  request_changes_workflow: true
+  high_level_summary: true
   auto_review:
-    enabled: true # object: inherited from central
-    drafts: false # scalar: child wins
-  path_instructions: # array: child-first, then unique parent items
+    enabled: true
+    drafts: false
+  path_instructions:
     - path: "src/**"
-      instructions: "Use strict TypeScript settings" # from repo
+      instructions: "Use strict TypeScript settings"
     - path: "api/**"
-      instructions: "Validate API contracts" # from repo
+      instructions: "Validate API contracts"
     - path: "docs/**"
-      instructions: "Check for grammar and clarity" # from central (unique)
+      instructions: "Check for grammar and clarity"
     - path: "tests/**"
-      instructions: "Ensure adequate test coverage" # from central (unique)
+      instructions: "Ensure adequate test coverage"
 chat:
-  art: false # object: inherited from central
+  art: false
 ```
 
 ## Common use cases
 
 ### Organization-wide defaults
 
-Set up common settings in your central `coderabbit` repository, then enable inheritance in individual repositories to use those defaults while customizing specific values.
-__Central configuration__ (`organization/coderabbit/.coderabbit.yaml`):
-
-```
-inheritance: true
-reviews:
-  profile: chill
-  request_changes_workflow: true
-  high_level_summary: true
-  path_instructions:
-    - path: "**/*.test.*"
-      instructions: "Verify test coverage and edge cases"
-chat:
-  art: false
-```
-
-__Repository configuration__ (`organization/my-repo/.coderabbit.yaml`):
-
-```
-inheritance: true
-reviews:
-  profile: assertive # This repo needs stricter reviews
-  path_instructions:
-    - path: "src/api/**"
-      instructions: "Ensure backward compatibility"
-```
-
-The repository inherits all central settings but uses an assertive review profile and adds API-specific instructions.
+Use a central `coderabbit` repository for defaults, then enable inheritance in individual repositories for targeted overrides.
 
 ### Team-specific configurations (GitLab)
 
-GitLab's nested group structure allows team-specific configurations. Each team can have their own `coderabbit` repository with settings that inherit from parent groups.
+GitLab nested groups can layer configuration naturally:
 
-```
-company/coderabbit                     # Organization defaults
-company/backend/coderabbit             # Backend team settings (inherits from company)
-company/backend/payments/coderabbit    # Payments team settings (inherits from backend)
+```text
+company/coderabbit
+company/backend/coderabbit
+company/backend/payments/coderabbit
 ```
 
-Each level can enable inheritance to merge with its parent while adding team-specific customizations.
+Each level can merge parent settings while adding team-specific rules.
