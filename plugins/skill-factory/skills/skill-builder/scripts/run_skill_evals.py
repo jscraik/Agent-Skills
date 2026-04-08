@@ -26,6 +26,7 @@ from __future__ import annotations
 
 import argparse
 import datetime as dt
+import html
 import json
 import os
 import re
@@ -41,14 +42,6 @@ REPO_ROOT = SCRIPT_DIR.parents[2]
 for path_entry in (str(REPO_ROOT), str(SCRIPT_DIR)):
     if path_entry not in sys.path:
         sys.path.insert(0, path_entry)
-
-try:
-    from defusedxml import ElementTree as ET  # type: ignore # noqa: E402
-except ModuleNotFoundError:  # pragma: no cover
-    # CI lanes may not include defusedxml; fall back to stdlib parser.
-    # Security-sensitive XML parsing in this script should still prefer
-    # defusedxml when available.
-    import xml.etree.ElementTree as ET  # noqa: E402
 
 try:
     import yaml  # type: ignore
@@ -511,37 +504,44 @@ def _write_junit_report(summary: Dict[str, Any], destination: Path) -> None:
         for case in summary.get("cases", [])
         if case.get("tier1_failed") or (tier2_fail_mode and case.get("tier2_failed"))
     )
-    suite = ET.Element(
-        "testsuite",
-        name=str(summary.get("skill") or "skill-evals"),
-        tests=str(len(summary.get("cases", []))),
-        failures=str(junit_failures),
-        errors="0",
-    )
+    suite_attrs = {
+        "name": str(summary.get("skill") or "skill-evals"),
+        "tests": str(len(summary.get("cases", []))),
+        "failures": str(junit_failures),
+        "errors": "0",
+    }
     if summary.get("generated_at"):
-        suite.set("timestamp", str(summary["generated_at"]))
+        suite_attrs["timestamp"] = str(summary["generated_at"])
     if summary.get("run_id"):
-        suite.set("id", str(summary["run_id"]))
+        suite_attrs["id"] = str(summary["run_id"])
+
+    lines: List[str] = ['<?xml version="1.0" encoding="utf-8"?>']
+    suite_open = " ".join(f'{k}="{html.escape(v, quote=True)}"' for k, v in suite_attrs.items())
+    lines.append(f"<testsuite {suite_open}>")
     for case in summary.get("cases", []):
-        case_el = ET.SubElement(
-            suite,
-            "testcase",
-            name=str(case.get("id") or case.get("name") or "unknown"),
-            classname=str(summary.get("skill") or "skill-evals"),
-            time=str(case.get("timeout_sec") or 0),
-        )
+        case_attrs = {
+            "name": str(case.get("id") or case.get("name") or "unknown"),
+            "classname": str(summary.get("skill") or "skill-evals"),
+            "time": str(case.get("timeout_sec") or 0),
+        }
+        case_open = " ".join(f'{k}="{html.escape(v, quote=True)}"' for k, v in case_attrs.items())
+        lines.append(f"  <testcase {case_open}>")
         if case.get("tier1_failed"):
-            failure = ET.SubElement(case_el, "failure", message="tier1 failure")
             detail = "\n".join(case.get("tier1_failures") or []) or "tier1 failure"
-            failure.text = detail
+            lines.append('    <failure message="tier1 failure">')
+            lines.append(html.escape(detail))
+            lines.append("    </failure>")
         elif case.get("tier2_failed"):
+            detail = "\n".join(case.get("tier2_findings") or []) or "tier2 findings"
             if tier2_fail_mode:
-                failure = ET.SubElement(case_el, "failure", message="tier2 findings in fail mode")
-                failure.text = "\n".join(case.get("tier2_findings") or []) or "tier2 findings"
+                lines.append('    <failure message="tier2 findings in fail mode">')
+                lines.append(html.escape(detail))
+                lines.append("    </failure>")
             else:
-                skipped = ET.SubElement(case_el, "skipped", message="tier2 findings in warn/off mode")
-                skipped.text = "\n".join(case.get("tier2_findings") or [])
-        system_out = ET.SubElement(case_el, "system-out")
+                lines.append('    <skipped message="tier2 findings in warn/off mode">')
+                lines.append(html.escape(detail))
+                lines.append("    </skipped>")
+
         chunks: List[str] = []
         if case.get("warnings"):
             chunks.append("warnings:\n" + "\n".join(case["warnings"]))
@@ -549,11 +549,14 @@ def _write_junit_report(summary: Dict[str, Any], destination: Path) -> None:
             chunks.append("tier2_findings:\n" + "\n".join(case["tier2_findings"]))
         if case.get("dir"):
             chunks.append(f"artifacts_dir:\n{case['dir']}")
-        system_out.text = "\n\n".join(chunks)
+        lines.append("    <system-out>")
+        lines.append(html.escape("\n\n".join(chunks)))
+        lines.append("    </system-out>")
+        lines.append("  </testcase>")
+    lines.append("</testsuite>")
+
     destination.parent.mkdir(parents=True, exist_ok=True)
-    tree = ET.ElementTree(suite)
-    ET.indent(tree, space="  ")
-    tree.write(destination, encoding="utf-8", xml_declaration=True)
+    destination.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
 def _json_get_path(obj: Any, path: str) -> Any:

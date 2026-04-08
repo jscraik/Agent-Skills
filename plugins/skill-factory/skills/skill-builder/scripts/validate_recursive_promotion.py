@@ -9,7 +9,6 @@ import hmac
 import json
 import os
 import re
-import sys
 from hashlib import sha256
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set
@@ -1153,7 +1152,8 @@ def main() -> int:
                 {
                     "validator": "recursive_promotion",
                     "status": "error",
-                    "error": str(exc),
+                    "error": "validation_failed",
+                    "error_type": exc.__class__.__name__,
                 }
             )
         )
@@ -1163,8 +1163,6 @@ def main() -> int:
     # Full report details remain available through --write-report when needed.
     summary = {
         "validator": report.get("validator"),
-        "run_id": report.get("run_id"),
-        "decision_file": report.get("decision_file"),
         "status": report.get("status"),
         "error_count": report.get("error_count"),
         "warning_count": report.get("warning_count"),
