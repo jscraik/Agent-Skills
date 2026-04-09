@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "name": "plugin-factory",
+  "name": "harness-engineering",
   "version": "0.1.0",
-  "description": "Bundle the plugin-authoring family in one plugin: plugin-builder, plugin-creator, and plugin-installer with their scripts and reference materials.",
+  "description": "Bundle the compound-engineering workflow family for ideation, specification, planning, implementation, and review.",
   "author": {
     "name": "Jamie Craik",
     "url": "https://github.com/jscraik"
@@ -12,10 +12,10 @@
   "license": "Apache-2.0",
   "keywords": [
     "plugin",
-    "plugin-factory",
-    "plugin-builder",
-    "plugin-creator",
-    "plugin-installer",
+    "harness-engineering",
+    "compound-engineering",
+    "planning",
+    "review",
     "codex"
   ],
   "governance": {
@@ -23,14 +23,17 @@
     "maturity": "canonical",
     "owner": "Agent Skills Team",
     "review_cadence": "quarterly",
-    "last_reviewed": "2026-04-08",
+    "last_reviewed": "2026-04-09",
     "metadata_source": "plugin_manifest"
   },
   "skills": "./skills/",
+  "hooks": "./hooks/",
+  "mcpServers": "./.mcp.json",
+  "apps": "./.app.json",
   "interface": {
-    "displayName": "Plugin Factory",
-    "shortDescription": "Create, harden, and install Codex plugins",
-    "longDescription": "A Codex plugin package that bundles the plugin-authoring family: plugin-builder, plugin-creator, and plugin-installer.",
+    "displayName": "Harness Engineering",
+    "shortDescription": "Run the full compound-engineering workflow",
+    "longDescription": "A Codex plugin package that bundles compound-engineering lifecycle skills, from ideation through execution and review.",
     "developerName": "Jamie Craik",
     "category": "Productivity",
     "capabilities": [
@@ -41,7 +44,7 @@
     "websiteURL": "https://github.com/jscraik/Agent-Skills",
     "privacyPolicyURL": "https://github.com/jscraik/Agent-Skills/blob/main/README.md#privacy-and-data-handling",
     "termsOfServiceURL": "https://github.com/jscraik/Agent-Skills/blob/main/LICENSE",
-    "defaultPrompt": "Help me create, harden, and install a Codex plugin package.",
-    "brandColor": "#3B82F6"
+    "defaultPrompt": "Help me run compound-engineering workflow stages end to end.",
+    "brandColor": "#0EA5E9"
   }
 }
