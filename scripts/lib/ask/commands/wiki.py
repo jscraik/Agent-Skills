@@ -7,6 +7,7 @@ import re
 import shutil
 import subprocess
 import os
+import yaml
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import List, Optional
@@ -47,31 +48,43 @@ def wiki_lint(repo_root: Path, *, wiki_root: str, max_age_days: int) -> CallResu
         "--max-age-days",
         str(max_age_days),
     ]
-    process = subprocess.run(cmd, cwd=str(repo_root), capture_output=True, text=True, check=False)
-    output = process.stdout.strip()
-    error_output = process.stderr.strip()
 
-    result.data["wiki_root"] = wiki_root
-    result.data["max_age_days"] = max_age_days
-    result.data["raw_output"] = output
-    if error_output:
-        result.data["raw_error"] = error_output
+    try:
+        process = subprocess.run(cmd, cwd=str(repo_root), capture_output=True, text=True, check=False, timeout=60)
+        output = process.stdout.strip()
+        error_output = process.stderr.strip()
 
-    if process.returncode == 0:
-        result.status = "success"
-        result.data["message"] = "Wiki lint passed."
-        result.metadata["next_steps"] = ["ask wiki ingest '<title>' --source '<source>' --summary '<summary>'"]
-        return result
+        result.data["wiki_root"] = wiki_root
+        result.data["max_age_days"] = max_age_days
+        result.data["raw_output"] = output
+        if error_output:
+            result.data["raw_error"] = error_output
 
-    result.status = "error"
-    result.errors.append(
-        ErrorObject(
-            code="ERR_VALIDATION",
-            message=output or error_output or "Wiki lint failed.",
-            fix_suggestion="Review lint output and update docs/skill-ops-wiki/wiki pages or links.",
+        if process.returncode == 0:
+            result.status = "success"
+            result.data["message"] = "Wiki lint passed."
+            result.metadata["next_steps"] = ["ask wiki ingest '<title>' --source '<source>' --summary '<summary>'"]
+            return result
+
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=output or error_output or "Wiki lint failed.",
+                fix_suggestion="Review lint output and update docs/skill-ops-wiki/wiki pages or links.",
+            )
         )
-    )
-    return result
+        return result
+    except (OSError, subprocess.TimeoutExpired) as e:
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=f"Failed to execute wiki_lint: {e}",
+                fix_suggestion="Ensure scripts/wiki_lint.py exists and is executable.",
+            )
+        )
+        return result
 
 
 def _safe_summary(value: str) -> str:
@@ -221,6 +234,32 @@ def wiki_add(
     cleaned_source = source.strip()
     cleaned_intent = intent.strip().lower()
     cleaned_status = status.strip().lower()
+
+    # Validate intent
+    if destination is None and cleaned_intent not in INTENT_TO_DESTINATION:
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=f"Unrecognized intent '{cleaned_intent}'. Must be one of: {', '.join(INTENT_TO_DESTINATION.keys())}",
+                fix_suggestion="Use a valid intent: finding, playbook, design-asset, or lesson-learned.",
+            )
+        )
+        return result
+
+    # Validate status
+    allowed_statuses = {"verified", "fix-now", "draft", "active"}
+    if cleaned_status not in allowed_statuses:
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=f"Unrecognized status '{cleaned_status}'. Must be one of: {', '.join(sorted(allowed_statuses))}",
+                fix_suggestion="Use a valid status: active, draft, fix-now, or verified.",
+            )
+        )
+        return result
+
     destination_rel = (destination or INTENT_TO_DESTINATION.get(cleaned_intent, "")).strip().strip("/")
     cleaned_tags = [t.strip() for t in (tags or []) if t and t.strip()]
 
@@ -258,6 +297,26 @@ def wiki_add(
         )
         return result
 
+    # Sanitize destination_rel to prevent path traversal
+    destination_parts = []
+    for part in destination_rel.split("/"):
+        part = part.strip()
+        if part and part != ".." and part != ".":
+            destination_parts.append(part)
+
+    if not destination_parts:
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message="Destination path is invalid or empty after sanitization.",
+                fix_suggestion="Use a valid destination path without '..' or '.' segments.",
+            )
+        )
+        return result
+
+    destination_rel = "/".join(destination_parts)
+
     timestamp = datetime.now(timezone.utc)
     timestamp_compact = timestamp.strftime("%Y%m%dT%H%M%SZ")
     date_iso = timestamp.strftime("%Y-%m-%d")
@@ -266,7 +325,22 @@ def wiki_add(
     note_dir = wiki_dir / destination_rel
     note_filename = f"{slug}.md"
     note_path = _with_collision_suffix(note_dir / note_filename, timestamp_compact)
-    note_rel = note_path.relative_to(wiki_dir).as_posix()
+
+    # Validate that note_path is within wiki_dir
+    try:
+        resolved_note_path = note_path.resolve()
+        resolved_wiki_dir = wiki_dir.resolve()
+        note_rel = resolved_note_path.relative_to(resolved_wiki_dir).as_posix()
+    except ValueError:
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message="Destination path escapes wiki directory.",
+                fix_suggestion="Use a valid destination within the wiki directory.",
+            )
+        )
+        return result
 
     tags_line = ", ".join(cleaned_tags) if cleaned_tags else "none"
     safe_summary = _safe_summary(cleaned_summary)
@@ -280,15 +354,19 @@ def wiki_add(
         frontmatter_type = cleaned_intent
         frontmatter_status = cleaned_status
 
+    # Build frontmatter dict and serialize with YAML to prevent injection
+    frontmatter_dict = {
+        "title": cleaned_title,
+        "type": frontmatter_type,
+        "status": frontmatter_status,
+        "triage_status": cleaned_status,
+        "last_reviewed": date_iso,
+        "sources": [cleaned_source],
+    }
+    frontmatter_yaml = yaml.safe_dump(frontmatter_dict, default_flow_style=False, allow_unicode=True)
     frontmatter_lines = [
         "---",
-        f"title: {cleaned_title}",
-        f"type: {frontmatter_type}",
-        f"status: {frontmatter_status}",
-        f"triage_status: {cleaned_status}",
-        f"last_reviewed: {date_iso}",
-        "sources:",
-        f"  - {cleaned_source}",
+        frontmatter_yaml.rstrip(),
         "---",
         "",
     ]
@@ -514,6 +592,23 @@ def wiki_add_asset(
     stored_path = raw_assets_dir / stored_name
     stored_repo_rel = f"docs/skill-ops-wiki/raw/assets/{stored_name}"
     markdown_asset_link = f"../../raw/assets/{stored_name}"
+
+    # Preflight validation before mutating storage
+    preflight_result = wiki_add(
+        repo_root,
+        title=title,
+        summary=summary,
+        source=source.strip() or str(asset_input),
+        intent="design-asset",
+        status=status,
+        destination=destination,
+        tags=tags or [],
+        asset_link=markdown_asset_link,
+        dry_run=True,
+    )
+
+    if preflight_result.status == "error":
+        return preflight_result
 
     if not dry_run:
         raw_assets_dir.mkdir(parents=True, exist_ok=True)
