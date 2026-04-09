@@ -1,11 +1,11 @@
 ---
-name: codex-sessions-skill-scan
+name: skill-refactor
 description: Scan Codex session history for skill failures, usage patterns, and coverage gaps. Use when the user wants daily skill-health monitoring or evidence-backed recommendations about installing, improving, merging, or pruning skills.
 metadata:
   skill-type: data_fetch_analysis
 ---
 
-# Codex Sessions Skill Scan
+# Skill Refactor
 
 ## Table of Contents
 - [Overview](#overview)
@@ -53,7 +53,7 @@ Both modes are evidence-first and privacy-aware.
 Run:
 ```bash
 cd ~/dev/agent-skills
-python3 utilities/codex-sessions-skill-scan/scripts/scan_codex_sessions.py --days 1 --include-otel
+python3 utilities/skill-refactor/scripts/scan_codex_sessions.py --days 1 --include-otel
 ```
 
 ## Philosophy
@@ -154,8 +154,8 @@ python3 utilities/skill-builder/scripts/skill_gate.py <skill-folder>
 - Fail fast: stop at the first failed gate, fix it, then re-run.
 - This skill’s scan script is stdlib-only; run it with `python3`.
 - When changing skill files, validate with:
-  - `python3 utilities/skill-builder/scripts/quick_validate.py utilities/codex-sessions-skill-scan`
-  - `python3 utilities/skill-builder/scripts/skill_gate.py utilities/codex-sessions-skill-scan`
+  - `python3 utilities/skill-builder/scripts/quick_validate.py utilities/skill-refactor`
+  - `python3 utilities/skill-builder/scripts/skill_gate.py utilities/skill-refactor`
 
 References used by skill-gate:
 - `references/contract.yaml`

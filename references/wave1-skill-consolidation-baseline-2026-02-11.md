@@ -8,7 +8,7 @@
 Source command:
 
 ```bash
-python3 utilities/codex-sessions-skill-scan/scripts/scan_codex_sessions.py --days 3650
+python3 utilities/skill-refactor/scripts/scan_codex_sessions.py --days 3650
 ```
 
 Target skill invocation counts at baseline:

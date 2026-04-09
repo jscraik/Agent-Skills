@@ -248,7 +248,7 @@ User: "Monthly report"
 |-------|-------------|
 | [[codex-automation-architect]] | Convert recommendations into automations |
 | [[codex-home-audit]] | Check Codex setup health |
-| [[codex-sessions-skill-scan]] | Analyze skill usage |
+| [[skill-refactor]] | Analyze skill usage |
 | [[visual-explainer]] | Convert outcomes into visual explainers |
 
 **Topic map:** [[agent-ops]]

@@ -121,7 +121,7 @@ Minimize drift by:
 | Skill | When to use together |
 |---|---|
 | [[agents-md]] | Refactor AGENTS.md based on audit findings |
-| [[codex-sessions-skill-scan]] | Run a skill health scan alongside the home audit |
+| [[skill-refactor]] | Run a skill health scan alongside the home audit |
 | [[insight-report]] | Generate a usage report to inform audit priorities |
 | [[verification-before-completion]] | Verify fixes before marking the audit complete |
 | [[fix-mise]] | Fix mise trust/runtime issues found during audit |

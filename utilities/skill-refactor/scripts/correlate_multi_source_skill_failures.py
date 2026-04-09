@@ -47,11 +47,11 @@ NOISE_RE = re.compile(
     re.I,
 )
 NONZERO_RELEVANT_RE = re.compile(
-    r"SKILL\.md|agent-skills/(?:utilities|skills-system|frontend|product|backend|personas)|scan_codex_sessions|codex-sessions-skill-scan|skill-builder|quick_validate|skill_gate|run_skill_evals|command not found: (rg|fd)",
+    r"SKILL\.md|agent-skills/(?:utilities|skills-system|frontend|product|backend|personas)|scan_codex_sessions|skill-refactor|skill-builder|quick_validate|skill_gate|run_skill_evals|command not found: (rg|fd)",
     re.I,
 )
 TOOL_FAILURE_RELEVANT_RE = re.compile(
-    r"SKILL\.md|agent-skills/(?:utilities|skills-system|frontend|product|backend|personas)|codex-sessions-skill-scan|skill-builder|quick_validate|skill_gate|run_skill_evals",
+    r"SKILL\.md|agent-skills/(?:utilities|skills-system|frontend|product|backend|personas)|skill-refactor|skill-builder|quick_validate|skill_gate|run_skill_evals",
     re.I,
 )
 SKILL_ERROR_CONTEXT_RE = re.compile(r"ERROR:|FileNotFoundError|Traceback|\bfail(?:ed)?\b|\bIssue\b", re.I)

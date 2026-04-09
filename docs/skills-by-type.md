@@ -45,7 +45,7 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 
 ### Data Fetch Analysis
 
-- `codex-sessions-skill-scan` — `utilities`
+- `skill-refactor` — `utilities`
 - `insight-report` — `utilities`
 - `notebooklm` — `utilities`
 - `security-ownership-map` — `product/security`

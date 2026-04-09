@@ -101,7 +101,7 @@
     "utilities/codex-automation-architect",
     "utilities/codex-home-audit",
     "utilities/codex-prompt-creator",
-    "utilities/codex-sessions-skill-scan",
+    "utilities/skill-refactor",
     "utilities/diagram-context-refresh",
     "utilities/executing-plans",
     "utilities/fix-mise",
