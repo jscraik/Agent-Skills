@@ -11,21 +11,21 @@ Use this page to record expansion-gate evidence after pilot runs.
 
 ## Readout metadata
 
-- Window: `2026-04-02..2026-04-08`
+- Window: `2026-04-03..2026-04-09`
 - Baseline: `_bootstrap pending_`
-- Total runs: `16`
+- Total runs: `24`
 - Runs per profile:
-  - `ui-ux-creative-coding`: `4`
-  - `interface-craft`: `4`
-  - `frontend-ui-design`: `4`
-  - `react-ui-patterns`: `4`
+  - `ui-ux-creative-coding`: `6`
+  - `interface-craft`: `6`
+  - `frontend-ui-design`: `6`
+  - `react-ui-patterns`: `6`
 - Reviewer(s): `_pending_`
 
 ## Scorecard
 
 - Repeat failure pattern rate delta: `n/a` (target: `<= -35.0pp` reduction)
 - First-pass acceptance delta: `n/a` (target: `>= +20.0pp`)
-- Iterations median / p90: `2.00` / `4.50` (target: `<=2 / <=4`)
+- Iterations median / p90: `2.00` / `4.70` (target: `<=2 / <=4`)
 - Quality uplift median: `0.165` (target: `>= +0.120`)
 - Critical non-regression compliance: `37.5%` (target: `100.0%`)
 - Terminal non-regression compliance: `100.0%` (monitor recovery separately)
@@ -39,11 +39,11 @@ Use this page to record expansion-gate evidence after pilot runs.
 
 - Decision: `HOLD`
 - Reason:
-  - insufficient sample size (16/40)
-  - ui-ux-creative-coding below required run count (4/10)
-  - interface-craft below required run count (4/10)
-  - frontend-ui-design below required run count (4/10)
-  - react-ui-patterns below required run count (4/10)
+  - insufficient sample size (24/40)
+  - ui-ux-creative-coding below required run count (6/10)
+  - interface-craft below required run count (6/10)
+  - frontend-ui-design below required run count (6/10)
+  - react-ui-patterns below required run count (6/10)
   - critical non-regression compliance below 100%
   - baseline window unavailable for delta KPIs
 

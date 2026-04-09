@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "captured_at": "2026-04-08T06:45:27Z",
-  "window": "2026-04-02..2026-04-08",
+  "captured_at": "2026-04-09T06:45:32Z",
+  "window": "2026-04-03..2026-04-09",
   "window_days": 7,
   "sample_ready": false,
   "pilot_profiles": [
@@ -11,17 +11,17 @@
     "react-ui-patterns"
   ],
   "summary": {
-    "runs_total": 16,
+    "runs_total": 24,
     "by_profile": {
-      "ui-ux-creative-coding": 4,
-      "interface-craft": 4,
-      "frontend-ui-design": 4,
-      "react-ui-patterns": 4
+      "ui-ux-creative-coding": 6,
+      "interface-craft": 6,
+      "frontend-ui-design": 6,
+      "react-ui-patterns": 6
     },
     "repeat_failure_rate": 0.25,
     "first_pass_acceptance_rate": 0.0,
     "median_iterations": 2.0,
-    "p90_iterations": 4.5,
+    "p90_iterations": 4.7,
     "quality_uplift_median": 0.165,
     "quality_uplift_positive_rate": 1.0,
     "critical_non_regression_compliance": 0.375,
@@ -29,14 +29,14 @@
     "non_regression_recovered_rate": 0.625,
     "budget_compliance": 1.0,
     "evaluator_flip_rate": 0.0875,
-    "capture_records_written": 16,
+    "capture_records_written": 24,
     "capture_coverage_rate": 1.0,
     "auto_capture_enabled_rate": 1.0,
     "auto_apply_enabled_rate": 1.0,
     "confidence_bucket_counts": {
       "high": 0,
-      "medium": 6,
-      "low": 10,
+      "medium": 9,
+      "low": 15,
       "unknown": 0
     },
     "confidence_bucket_distribution": {
@@ -45,23 +45,23 @@
       "low": 0.625,
       "unknown": 0.0
     },
-    "runs_with_injection": 4,
-    "runs_with_retrieved_lessons": 4,
+    "runs_with_injection": 6,
+    "runs_with_retrieved_lessons": 6,
     "suppressed_injection_runs": 0,
     "injection_usage_rate": 0.25,
-    "total_injected_lessons": 4,
+    "total_injected_lessons": 6,
     "average_injected_lessons_per_run": 0.25,
     "rollout_mode_counts": {
       "off": 0,
       "observe_only": 0,
-      "active": 16,
+      "active": 24,
       "other": 0
     },
     "uplift_promotion_decision_counts": {
       "pass": 0,
       "hold": 0,
       "regressed": 0,
-      "insufficient_data": 16,
+      "insufficient_data": 24,
       "insufficient_match_quality": 0,
       "unknown": 0
     },
@@ -69,7 +69,7 @@
       "pass": 0,
       "hold": 0,
       "regressed": 0,
-      "insufficient_data": 16,
+      "insufficient_data": 24,
       "insufficient_match_quality": 0,
       "unknown": 0
     }
