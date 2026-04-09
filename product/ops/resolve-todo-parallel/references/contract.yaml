@@ -6,38 +6,17 @@ triggers:
   - User wants dependency-aware or bounded-parallel execution across multiple todo items.
   - User wants todo cleanup after verified resolution.
 inputs:
-  - name: todo_scope
-    type: string
-    description: Specific todo ID, filename pattern, or all pending todos.
-  - name: repo_has_todos
-    type: boolean
-    description: Whether the target repo has a file-based `todos/` workflow.
-  - name: execution_preference
-    type: enum
-    values: [serial, bounded-parallel, auto]
-    description: Requested or inferred execution mode.
-  - name: cleanup_approval
-    type: boolean
-    description: Whether completed todo cleanup is approved.
-  - name: commit_push_approval
-    type: boolean
-    description: Whether commit or push actions are approved.
+  - todo scope (specific todo ID, filename pattern, or all pending todos)
+  - whether the repo uses a file-based `todos/` workflow
+  - requested execution preference (serial, bounded-parallel, or auto)
+  - whether completed todo cleanup is approved
+  - whether commit or push actions are approved
 outputs:
-  - name: execution_plan
-    type: string
-    description: Dependency-aware plan for serial or bounded-parallel execution.
-  - name: resolved_todos
-    type: array
-    description: Todos resolved during the run.
-  - name: blocked_todos
-    type: array
-    description: Todos blocked by dependencies, missing context, or approval limits.
-  - name: lessons_documented
-    type: string
-    description: Optional docs/solutions path created via compound capture.
-  - name: cleanup_summary
-    type: string
-    description: What todo cleanup happened and what remains pending approval.
+  - dependency-aware execution plan for serial or bounded-parallel work
+  - list of resolved todos
+  - list of blocked todos with blocker reasons
+  - optional lessons documentation path created via compound capture
+  - cleanup summary describing completed and pending actions
 success_criteria:
   - Todo discovery happens before execution.
   - Parallel execution is used only for genuinely independent items.

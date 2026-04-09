@@ -23,7 +23,7 @@ For most repos, start with three hooks:
 1. `SessionStart`
 - Add a short repo-aware context string.
 - Mention dirty worktree state, branch, and validation hints.
-- Use `matcher: "^(startup|resume)$"` so the hook stays explicit.
+- Use `matcher: "^(startup|resume|clear)$"` so startup/resume coverage is explicit and clear-source sessions remain compatible.
 
 2. `UserPromptSubmit`
 - Block direct attempts to ignore system, developer, or repo instructions.
@@ -39,13 +39,15 @@ Optional, when explicitly requested:
 
 4. `PreToolUse` (Bash-only today)
 - Use for narrow, high-confidence command interception.
-- Match on `tool_name` and remember it currently equals `Bash`.
+- Match on `tool_name` and remember Codex currently emits `Bash` for this event.
+- Keep matcher patterns explicit (`^Bash$` for narrow scope, or `*`/empty string only when broad matching is intentional).
 - Keep a clear note that this is a guardrail, not complete enforcement.
 
 5. `PostToolUse` (Bash-only today)
 - Use for after-command feedback and additional context.
 - Do not treat it as rollback because command side effects have already happened.
 - Use it only when the extra latency is worth the additional safety signal.
+- Include `statusMessage` so operators can see which post-tool guardrail is running.
 
 ## Project vs user scope
 Prefer project scope when:

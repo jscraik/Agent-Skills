@@ -253,7 +253,9 @@ fi
 # ---------------------------------------------------------------------------
 if "${python_cmd[@]}" -m pytest --version >/dev/null 2>&1; then
   echo "[family-gate] running pytest unit tests..."
-  if "${python_cmd[@]}" -m pytest utilities/skill-builder/scripts/test_skill_gate.py \
+  if "${python_cmd[@]}" -m pytest \
+      utilities/skill-builder/scripts/test_skill_gate.py \
+      scripts/test_validate_skill_authoring_family_benchmarks.py \
       -q --tb=short; then
     echo "[family-gate] pytest passed"
   else

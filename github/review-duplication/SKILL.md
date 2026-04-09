@@ -17,6 +17,7 @@ metadata:
 - [Examples](#examples)
 - [See Also](#see-also)
 - [Validation](#validation)
+- [Constraints](#constraints)
 
 ## When to use
 Use this skill during code reviews to proactively investigate the codebase for duplicated functionality, reinvented wheels, or failure to reuse existing project best practices and shared utilities.
@@ -67,7 +68,7 @@ Think about where this type of code *would* live if it already existed in the pr
 **Check Package Files:** Before flagging a custom implementation of a complex algorithm, check `package.json` to see if a standard library (like `lodash` or `uuid`) is already installed that provides this functionality.
 
 ### 3. Investigate the Codebase (Sub-Agent Delegation)
-Utilize specialized sub-agents to assist with investigative research into the codebase. These assistants are capable of deep semantic mapping and wide-ranging searches.
+Use specialized sub-agents only when the user explicitly requests delegation. Otherwise run the same investigation inline in the main thread.
 
 Define clear goals for these research passes, utilizing the context discovered in earlier steps.
 
@@ -115,6 +116,12 @@ Example comment:
 - **Surface-Level Review:** Only checking naming without verifying the underlying logic or APIs used.
 - **Absolute Path Usage:** Providing local machine paths that the PR author cannot use.
 - **Vague Feedback:** Telling the author "this already exists" without providing the specific path or symbol to reuse.
+
+## Constraints
+- Do not execute destructive or network bootstrap commands as part of investigation.
+- Keep file and symbol references repo-relative in findings and guidance.
+- Do not expose secrets, tokens, or sensitive values found during review.
+- Keep delegation optional and use subagents only when explicitly requested.
 
 ## Validation
 Review the detailed contracts and evaluation cases before making changes:

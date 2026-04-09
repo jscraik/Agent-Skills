@@ -69,7 +69,7 @@ Do not use this skill when:
    - Read `references/upstream-orchestrating-swarms.md` when translating older `Task`, `Teammate`, `team_name`, or inbox concepts into Codex-native behavior.
 
 2. **Decide whether subagents are actually warranted**
-   - Use subagents only when the user explicitly asked for delegation or when the work can proceed in parallel without blocking the immediate next local step.
+   - Use subagents only when the user explicitly asked for delegation.
    - Keep simple or tightly coupled tasks local because unnecessary fan-out adds latency, token cost, and coordination risk.
    - Prefer read-heavy fan-out first because it reduces shared-write conflicts and context pollution.
 

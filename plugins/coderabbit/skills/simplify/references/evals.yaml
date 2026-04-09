@@ -50,6 +50,30 @@ cases:
       - type: regex
         value: "(?i)(skip|false positive|low value|deduplicate)"
 
+  - id: simplify-modern-contract-drift
+    name: modern overlay contract drift checks
+    category: happy
+    eval_modes: [release]
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Do a simplify pass on this API diff and explicitly check for schema or exported-contract drift before making cleanup edits."
+    acceptance:
+      - type: regex
+        value: "(?i)(contract drift|schema|exported|compatibility|cross-cutting)"
+      - type: regex
+        value: "(?i)(behavior-preserving|preserve behavior)"
+
+  - id: simplify-modern-deterministic-evidence
+    name: deterministic evidence output
+    category: edge
+    eval_modes: [release]
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Run simplify and return exact validation commands with pass/fail/blocked outcomes and skipped-finding reasons."
+    acceptance:
+      - type: regex
+        value: "(?i)(validation commands|pass|fail|blocked|skipped findings\\s*[:\\-\\(]\\s*\\S+)"
+
   - id: simplify-negative-new-build
     name: negative new feature build
     category: negative

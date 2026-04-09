@@ -15,7 +15,7 @@ Codex hooks are contract-sensitive. This skill should scaffold only what is expl
 
 ## Docs snapshot
 - Primary source checked: `https://developers.openai.com/codex/hooks`.
-- Verification date for this skill: March 30, 2026.
+- Verification date for this skill: April 9, 2026.
 
 ## Runtime surface
 `hooks.json` is discovered from active config-layer folders.
@@ -31,11 +31,12 @@ Documented handler type:
 - `type: "command"`
 
 Matcher behavior:
-- `SessionStart.matcher` matches `source` (`startup` or `resume`).
-- `PreToolUse.matcher` matches `tool_name` (currently always `Bash`).
-- `PostToolUse.matcher` matches `tool_name` (currently always `Bash`).
+- `SessionStart.matcher` matches `source` (`startup`, `resume`, or `clear`).
+- `PreToolUse.matcher` matches `tool_name` (current generated input schema uses `const: "Bash"`).
+- `PostToolUse.matcher` matches `tool_name` (current generated input schema uses `const: "Bash"`).
 - `UserPromptSubmit.matcher` is currently not used.
 - `Stop.matcher` is currently not used.
+- For matcher-enabled events, omitted matcher, `*`, and empty string all behave as match-all.
 
 Timeout behavior:
 - `timeout` is in seconds.
@@ -58,6 +59,7 @@ Event-specific behavior:
 - `SessionStart`
   - plain text on stdout is added as context.
   - JSON supports `hookSpecificOutput.additionalContext`.
+  - generated input schema includes source values `startup`, `resume`, and `clear`; visible runtime flow today uses `startup` and `resume`.
 - `PreToolUse`
   - currently supports Bash tool interception only.
   - JSON supports `hookSpecificOutput.permissionDecision: "deny"` and `permissionDecisionReason`.
@@ -78,11 +80,21 @@ Event-specific behavior:
   - `decision: "block"` creates a continuation prompt rather than rejecting the turn.
   - if any matching `Stop` hook returns `continue: false`, that takes precedence.
 
+Config parsing caveats:
+- `type: "prompt"` and `type: "agent"` are parsed but skipped with runtime warnings.
+- `"async": true` command hooks are parsed but skipped with runtime warnings.
+- `statusMessage` is supported and should be used for longer-running hooks.
+
+Cross-runtime forward compatibility:
+- Some compatible runtimes include extra hook metadata fields (for example `agent_id` and `agent_type` on subagent-originated hooks).
+- Hook scripts should ignore unknown fields and parse only the keys they need.
+
 ## Design implications
 - Keep the default scaffold to the three-hook starter (`SessionStart`, `UserPromptSubmit`, `Stop`) because it provides strong baseline value with minimal latency.
 - Add `PreToolUse` or `PostToolUse` only when the user asks for command guardrails that justify additional turn-time cost.
 - Keep command paths absolute in generated packs to prevent cwd-dependent failures.
 - Keep guardrails narrow and auditable; document that Bash interception is helpful but not a complete enforcement boundary.
+- Use short `statusMessage` strings for hooks that can take more than a second because this improves operator observability.
 
 ## Source anchors
 Official documentation:
@@ -93,6 +105,13 @@ Codex repo schema source:
 - Generated hook schemas:
   - `https://github.com/openai/codex/tree/main/codex-rs/hooks/schema/generated`
   - includes `pre-tool-use`, `post-tool-use`, `session-start`, `user-prompt-submit`, and `stop` command input/output schemas.
+- Runtime selection and matcher behavior:
+  - `https://github.com/openai/codex/tree/main/codex-rs/hooks/src/events/common.rs`
+  - `https://github.com/openai/codex/tree/main/codex-rs/hooks/src/engine/discovery.rs`
+  - `https://github.com/openai/codex/tree/main/codex-rs/hooks/src/engine/config.rs`
+
+Cross-runtime compatibility reference:
+- `https://github.com/anthropics/claude-code/blob/main/src/entrypoints/sdk/coreSchemas.ts`
 
 Local operational reference used as a builder-pattern source:
 - `/Users/jamiecraik/dev/configs/codex/hooks/README.md`

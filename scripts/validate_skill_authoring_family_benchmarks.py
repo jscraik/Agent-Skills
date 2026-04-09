@@ -219,6 +219,29 @@ def _normalize_skill_name(skill_dir: Path) -> str:
     return skill_dir.name
 
 
+def _canonical_skill_rel(skill_rel: str) -> str:
+    """Return canonical repo-relative skill path for the given relative path."""
+    repo_root = REPO_ROOT.resolve()
+    requested = (repo_root / skill_rel).resolve()
+    try:
+        return requested.relative_to(repo_root).as_posix()
+    except ValueError:
+        return skill_rel.strip("/")
+
+
+def _dedupe_requested_skills(skills: Sequence[str]) -> tuple[str, ...]:
+    """Deduplicate requested skills by canonical resolved path while preserving order."""
+    seen: set[str] = set()
+    deduped: list[str] = []
+    for skill in skills:
+        canonical = _canonical_skill_rel(skill)
+        if canonical in seen:
+            continue
+        seen.add(canonical)
+        deduped.append(skill)
+    return tuple(deduped)
+
+
 def _case_has_pi_language(case: Dict[str, Any]) -> bool:
     haystacks = [str(case.get("name", "")), str(case.get("prompt", ""))]
     low = "\n".join(haystacks).lower()
@@ -445,7 +468,7 @@ def _validate_evals(skill_rel: str, skill_dir: Path) -> List[Finding]:
     return findings
 
 
-def _validate_task_profile(skill_rel: str, skill_dir: Path) -> List[Finding]:
+def _validate_task_profile(skill_rel: str, skill_dir: Path, *, expected_scope_skill: str) -> List[Finding]:
     findings: List[Finding] = []
     profile_path = skill_dir / "references" / "task-profile.json"
     if not profile_path.exists():
@@ -470,13 +493,13 @@ def _validate_task_profile(skill_rel: str, skill_dir: Path) -> List[Finding]:
         )
 
     scope_skill = str(profile.get("scope_skill", "")).strip()
-    if scope_skill != skill_rel:
+    if scope_skill != expected_scope_skill:
         findings.append(
             Finding(
                 "FAIL",
                 "TASK_PROFILE_SCOPE",
                 skill_rel,
-                f"scope_skill must equal {skill_rel} (found: {scope_skill or 'missing'})",
+                f"scope_skill must equal {expected_scope_skill} (found: {scope_skill or 'missing'})",
             )
         )
 
@@ -563,6 +586,7 @@ def _validate_reference_pi(skill_rel: str, skill_dir: Path) -> List[Finding]:
 
 def _validate_skill(skill_rel: str) -> List[Finding]:
     skill_dir = (REPO_ROOT / skill_rel).resolve()
+    canonical_rel = _canonical_skill_rel(skill_rel)
     findings: List[Finding] = []
 
     if not skill_dir.exists():
@@ -574,7 +598,7 @@ def _validate_skill(skill_rel: str) -> List[Finding]:
 
     findings.extend(_validate_contract(skill_rel, skill_dir))
     findings.extend(_validate_evals(skill_rel, skill_dir))
-    findings.extend(_validate_task_profile(skill_rel, skill_dir))
+    findings.extend(_validate_task_profile(skill_rel, skill_dir, expected_scope_skill=canonical_rel))
     findings.extend(_validate_reference_pi(skill_rel, skill_dir))
     return findings
 
@@ -644,7 +668,7 @@ def main(argv: Sequence[str]) -> int:
     )
     args = parser.parse_args(list(argv))
 
-    skills = tuple(args.skill) if args.skill else DEFAULT_FAMILY_SKILLS
+    skills = _dedupe_requested_skills(tuple(args.skill) if args.skill else DEFAULT_FAMILY_SKILLS)
     findings: List[Finding] = []
     for skill in skills:
         findings.extend(_validate_skill(skill))

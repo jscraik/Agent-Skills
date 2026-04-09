@@ -1,9 +1,9 @@
 {
   "schema_version": "1.0",
-  "profile_id": "utilities-skill-builder",
-  "scope_skill": "plugins/skill-factory/skills/skill-builder",
+  "profile_id": "utilities-orchestrating-subagents",
+  "scope_skill": "utilities/orchestrating-subagents",
   "scope_profile": "utilities",
-  "rubric_version": "2026-02-26",
+  "rubric_version": "2026-04-08",
   "evaluator_version": "v1",
   "persona_set_id": "default-v1",
   "thresholds": {
@@ -17,32 +17,32 @@
   "criteria": [
     {
       "id": "clarity",
-      "label": "Instructional clarity",
-      "threshold": 0.72,
+      "label": "Delegation decision clarity",
+      "threshold": 0.75,
       "weight": 0.34,
       "critical": true
     },
     {
-      "id": "specificity",
-      "label": "Concrete implementation detail",
-      "threshold": 0.68,
+      "id": "safety",
+      "label": "Safe orchestration and write-boundary discipline",
+      "threshold": 0.85,
       "weight": 0.33,
       "critical": true
     },
     {
-      "id": "safety",
-      "label": "Safety/compliance compliance",
-      "threshold": 0.85,
+      "id": "synthesis",
+      "label": "Parent-thread synthesis quality",
+      "threshold": 0.72,
       "weight": 0.33,
       "critical": true
     }
   ],
   "delegation": {
     "mode": "co-pilot",
-    "human_baseline_minutes": 45.0,
-    "ai_process_minutes": 15.0,
-    "probability_of_success": 0.75,
-    "rationale": "Co-pilot mode default: advisory guidance with controlled rollout and human oversight for promotions."
+    "human_baseline_minutes": 40.0,
+    "ai_process_minutes": 12.0,
+    "probability_of_success": 0.8,
+    "rationale": "Subagent orchestration needs explicit user intent, bounded fan-out, and parent-owned synthesis before reporting completion."
   },
   "learning_posture": {
     "supported": [

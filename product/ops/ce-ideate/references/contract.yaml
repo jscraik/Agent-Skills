@@ -18,12 +18,12 @@ inputs:
   - optional constraints, risks, audience, or success criteria
 
 outputs:
-  - a chosen ideation route: fresh or resume
+  - chosen ideation route (fresh or resume)
   - a short grounding summary from the repo, learnings, and optional issue intelligence
   - a merged candidate list generated before filtering
   - explicit rejection reasons for discarded ideas
   - a ranked survivor set suitable for `ce-brainstorm`
-  - optional survivor buckets: quick win, high leverage, strategic bet
+  - optional survivor buckets (quick win, high leverage, strategic bet)
   - a durable `docs/ideation/YYYY-MM-DD-<topic>-ideation.md` artifact before any handoff, sharing, or session end
   - a recommended next workflow stage, usually `ce-brainstorm`
 

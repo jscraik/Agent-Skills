@@ -39,6 +39,26 @@ Install mode minimum inputs:
 - provenance pin (`--ref` commit SHA unless explicit override);
 - validation policy (`--validation-level strict|compat`).
 
+## Agent injection
+
+When the install flow includes plugin role activation:
+
+1. Reuse role TOMLs from `/Users/jamiecraik/dev/configs/codex/agents/` if they match the plugin use case.
+2. If no suitable role exists, create one through [[codex-agent-builder]] before final install handoff.
+3. Validate role files prior to activation:
+
+```bash
+bash utilities/codex-agent-creator/scripts/validate_role.sh --agent-name <name> --agent-file <path>
+```
+
+4. If the user requests role installation/update, run:
+
+```bash
+bash utilities/codex-agent-creator/scripts/install_role.sh --agent-name <name> --agent-file <path> --scope project|global [--update-existing]
+```
+
+5. Report route as `reuse-existing` or `create-purpose-built` with resolved role path.
+
 ## Outputs
 
 Expected outputs from a successful run:
@@ -121,5 +141,6 @@ Family gate note:
 | [[plugin-builder]] | Harden/convert plugin packages before distribution install |
 | [[plugin-creator]] | Scaffold a local plugin package before hardening or install |
 | [[skill-installer]] | Install standalone skills when plugin packaging is unnecessary |
+| [[codex-agent-builder]] | Build or update role TOMLs when plugin install workflows require dedicated agents |
 
 **Topic map:** [[agent-ops]]

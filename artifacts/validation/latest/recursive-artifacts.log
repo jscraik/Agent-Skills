@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-04-08T10:26:12Z",
+  "generated_at": "2026-04-08T20:58:24Z",
   "runs_root": "artifacts/skill-graphs/runs",
   "counts": {
     "compliant": 0,
@@ -15,7 +15,7 @@
     "empty": 0
   },
   "compliance_rate": 0.0,
-  "waived_non_compliant": 2,
+  "waived_non_compliant": 8,
   "prune_empty": {
     "enabled": false,
     "dry_run": false,

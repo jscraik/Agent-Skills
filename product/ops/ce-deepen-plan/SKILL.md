@@ -198,7 +198,7 @@ Use `max-coverage` only when:
 In `max-coverage` mode, preserve the original prompt's strengths:
 - create a section manifest
 - discover available skills, reviewers, research agents, and learnings from the current platform and installed registries when available
-- prepare a broad but still evidence-oriented fan-out when the user has explicitly asked for delegation or approves it via the platform's blocking question tool (`AskUserQuestion`, `request_user_input`, or `ask_user`); otherwise widen inline coverage selectively
+- prepare a broad but still evidence-oriented fan-out only when the user has explicitly asked for delegation; otherwise widen inline coverage selectively
 - synthesize all usable findings back into the plan without rewriting its intent
 
 See `references/deepening-modes.md` for the detailed mode matrix and selection rules.
@@ -206,13 +206,11 @@ See `references/deepening-modes.md` for the detailed mode matrix and selection r
 ### Phase 3: Gather grounding
 Start with grounding in the main thread.
 
-If bounded internal support would materially improve coverage and the user has not already explicitly asked for delegation or sub-agents, ask a short blocking approval question via the platform's blocking question tool (`AskUserQuestion`, `request_user_input`, or `ask_user`) before spawning any internal subagents.
-
-If approved, run these bounded internal subagents in parallel:
+If the user has explicitly asked for delegation, run these bounded internal subagents in parallel:
 - `repo-research-analyst("Find repo patterns, file targets, and sequencing clues relevant to: <plan topic> — max 20 files, max 4 MB total read, return a <=400 word summary with file:line refs")`
 - `learnings-researcher("Find prior learnings relevant to: <plan topic> — check .harness/memory/LEARNINGS.md first when it exists, then instructions/Learnings.md for compatibility, then scan only directly relevant docs/solutions entries. Return only directly relevant findings, <=200 words total.")`
 
-If approval is not granted, the tool is unavailable, or subagents are unnecessary, perform the equivalent grounding serially in the main thread.
+If delegation was not explicitly requested, the tool is unavailable, or subagents are unnecessary, perform the equivalent grounding serially in the main thread.
 
 Add conditional external research only when the section gaps justify it:
 - `best-practices-researcher("<section or plan topic> — max 5 external sources, <=300 word summary, cite URLs and dates")`
@@ -223,10 +221,10 @@ When frameworks or libraries are central, use Context7 or equivalent official-do
 When `max-coverage` is selected, also:
 - apply clearly matched skills from the current platform or installed registries
 - scan deeper learning docs under `docs/solutions/`
-- run a broader reviewer sweep for plan sections that benefit from multiple specialist views only when delegation was explicitly requested or approved; otherwise expand the inline sweep selectively
+- run a broader reviewer sweep for plan sections that benefit from multiple specialist views only when delegation was explicitly requested; otherwise expand the inline sweep selectively
 - select reviewer lanes using `references/sub-agent-map.md` so the split `document-review` personas map consistently to plan-deepening needs
 
-Treat all approved subagents as internal support for the deepening stage, not separate top-level operators the user must coordinate.
+Treat all delegated subagents as internal support for the deepening stage, not separate top-level operators the user must coordinate.
 
 ### Phase 4: Choose research execution mode
 Use `direct` mode by default when the selected research scope is small enough for inline synthesis.

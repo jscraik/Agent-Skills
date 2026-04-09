@@ -172,7 +172,7 @@ For `full-lifecycle` and `resume-from-stage`, use the stage sequence, stage exit
 
 For `learning-capture`, use the solved-problem workflow in `references/learning-capture.md`, including:
 - auto-memory scan
-- approval-gated research helper roles in `full` mode
+- explicit-request-only helper roles in `full` mode
 - one-file-write rule
 - selective `ce-compound-refresh` follow-up
 - optional specialized reviewer pass
@@ -207,7 +207,7 @@ For the detailed lifecycle stage contract, use `references/lifecycle-modes.md`.
 ## Learning-capture rules
 - Preserve the legacy `full` mode as the default solved-problem capture lane.
 - Preserve `compact-safe` as an explicit opt-in for context-constrained runs.
-- In `full` mode, if helper roles would materially improve coverage and the user has not already explicitly asked for delegation or sub-agents, ask a short blocking approval question via `request_user_input` before spawning them; otherwise gather the same evidence inline.
+- In `full` mode, use helper roles only when the user has explicitly asked for delegation or sub-agents; otherwise gather the same evidence inline.
 - In `full` mode, subagents or helper roles return text only; the orchestrator writes the single final file.
 - In `full` mode, check for high-overlap existing solution docs before writing; refresh the existing doc when the same problem, root cause, and solution are already documented rather than creating a duplicate.
 - Auto-memory notes are supplementary evidence only and must be labeled when they materially influence the final document.

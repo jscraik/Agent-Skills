@@ -167,7 +167,7 @@ Scan the repo before substantive brainstorming. Match depth to scope:
 
 *Topic Scan* — Search for relevant terms. Read the most relevant existing artifact if one exists (brainstorm, plan, spec, skill, feature doc). Skim adjacent examples covering similar behavior.
 
-*Bounded Internal Support* — For `Standard`/`Deep` scope, ask approval via blocking question tool before spawning subagents. See `references/bounded-subagent-support.md` for exact research role prompts and fallback rules.
+*Bounded Internal Support* — For `Standard`/`Deep` scope, use subagents only when the user explicitly requests delegation. Otherwise run the same support inline. See `references/bounded-subagent-support.md` for exact research role prompts and fallback rules.
 
 If nothing obvious appears after a short scan, say so and continue. Two rules govern technical depth during the scan:
 

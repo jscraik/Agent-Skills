@@ -6,15 +6,18 @@ triggers:
   - user asks to scaffold a new Codex plugin directory
   - user asks to create optional plugin companion folders/files
   - user asks to create or update local marketplace entries for plugin visibility
+  - user asks to attach or generate plugin-scoped custom-agent role files
 inputs:
   - plugin name and desired parent path
   - local scope choice (repo-local or home-local)
   - optional folders and metadata overrides
   - marketplace update intent
+  - optional agent injection source path or `create-purpose-built` request
 outputs:
   - normalized plugin folder with required .codex-plugin/plugin.json
   - optional folders/files requested by flags
   - marketplace entry with required policy and category fields when enabled
+  - optional role-injection summary including validated role file path
 non_goals:
   - authoring lifecycle hardening for bundled skills
   - installing remote skills from curated/github sources
@@ -23,6 +26,7 @@ risks:
   - malformed plugin metadata; mitigated by deterministic scaffold defaults
   - marketplace policy drift; mitigated by required explicit policy fields
   - accidental overwrite; mitigated by force-only replacement semantics
+  - plugin role mismatch; mitigated by explicit role selection mode and role validation before install
 rollback_procedure: >
   If plugin-creator generates a malformed scaffold (invalid plugin.json, missing required policy
   fields, or incorrect directory structure), delete the generated plugin directory and re-invoke

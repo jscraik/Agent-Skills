@@ -73,6 +73,21 @@ cases:
       - type: regex
         value: "(?i)(name|destination|--name|--dest|choose a different)"
 
+  - id: edge-agent-injection-install
+    name: edge agent injection install
+    category: edge
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Install this skill and wire its role by reusing /Users/jamiecraik/dev/configs/codex/agents first; if none match, create one with codex-agent-builder."
+    acceptance:
+      - type: regex
+        value: "(?i)(/Users/jamiecraik/dev/configs/codex/agents|reuse-existing)"
+      - type: regex
+        value: "(?i)(codex-agent-builder|create-purpose-built)"
+      - type: regex
+        value: "(?i)(validate_role\\.sh|install_role\\.sh|role file path)"
+
   - id: negative-authoring-request
     name: negative authoring request
     category: negative
