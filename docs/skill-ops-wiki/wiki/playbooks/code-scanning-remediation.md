@@ -33,5 +33,5 @@ gh run watch <run-id> --exit-status
 
 ## Failure Handling
 
-- If command execution is blocked by runtime policy, apply [AskForApproval Policy Block](../failures/askforapproval-policy-bug.md) mitigation.
-- If commit signing fails, apply [1Password Git Signing Buffer Error](../failures/onepassword-git-signing-buffer.md) mitigation.
+- If command execution is blocked by runtime policy, apply [AskForApproval Policy Block](/docs/skill-ops-wiki/wiki/failures/askforapproval-policy-bug.md) mitigation.
+- If commit signing fails, apply [1Password Git Signing Buffer Error](/docs/skill-ops-wiki/wiki/failures/onepassword-git-signing-buffer.md) mitigation.
