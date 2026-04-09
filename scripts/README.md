@@ -25,6 +25,7 @@ Index for repository automation, validation, and maintenance scripts.
 - `check_plugin_skill_shadowing.sh`
 - `verify_skill_catalog_freshness.py`
 - `verify_recursive_skill_graph_artifacts.py`
+- `wiki_lint.py`
 
 ## Sync and projection
 - `sync_skills.sh`
