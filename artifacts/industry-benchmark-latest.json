@@ -1,17 +1,17 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-07T19:00:00.241299+00:00",
+  "generated_at": "2026-04-09T22:46:09.638424+00:00",
   "mode": "warn",
   "policy_path": "utilities/skill-builder/references/benchmark-policy.json",
-  "skills_scanned": 81,
+  "skills_scanned": 75,
   "uncategorized_skills": [],
   "cluster_results": [
     {
       "cluster": "frontend_ui",
       "description": "Frontend and UI implementation skills",
-      "skills": 19,
+      "skills": 18,
       "skills_with_any_marker": 8,
-      "coverage": 0.4211,
+      "coverage": 0.4444,
       "marker_hits": {
         "react_19": 8,
         "next_16": 6,
@@ -51,8 +51,8 @@
     {
       "cluster": "cloudflare_backend",
       "description": "Backend and Cloudflare platform skills",
-      "skills": 2,
-      "skills_with_any_marker": 2,
+      "skills": 1,
+      "skills_with_any_marker": 1,
       "coverage": 1.0,
       "marker_hits": {
         "react_19": 0,
@@ -62,7 +62,7 @@
         "wcag_2_2": 0,
         "owasp_top10": 0,
         "gha_sha_pin": 0,
-        "cloudflare_workers": 2,
+        "cloudflare_workers": 1,
         "mcp_spec": 0
       },
       "fails": [],
@@ -114,9 +114,9 @@
     {
       "cluster": "mcp",
       "description": "MCP and protocol-aware builder skills",
-      "skills": 3,
-      "skills_with_any_marker": 2,
-      "coverage": 0.6667,
+      "skills": 2,
+      "skills_with_any_marker": 1,
+      "coverage": 0.5,
       "marker_hits": {
         "react_19": 0,
         "next_16": 0,
@@ -125,11 +125,13 @@
         "wcag_2_2": 0,
         "owasp_top10": 0,
         "gha_sha_pin": 0,
-        "cloudflare_workers": 1,
-        "mcp_spec": 2
+        "cloudflare_workers": 0,
+        "mcp_spec": 1
       },
       "fails": [],
-      "warns": [],
+      "warns": [
+        "coverage warn: 0.500 < 0.666"
+      ],
       "pass": true
     },
     {
@@ -198,7 +200,7 @@
     {
       "cluster": "product_ops",
       "description": "Product strategy, planning, and operational workflow skills",
-      "skills": 17,
+      "skills": 15,
       "skills_with_any_marker": 0,
       "coverage": 0.0,
       "marker_hits": {
@@ -240,7 +242,7 @@
     {
       "cluster": "utilities_general",
       "description": "General utility and workflow support skills",
-      "skills": 23,
+      "skills": 22,
       "skills_with_any_marker": 0,
       "coverage": 0.0,
       "marker_hits": {
@@ -262,7 +264,7 @@
   "summary": {
     "cluster_count": 12,
     "fail_count": 0,
-    "warn_count": 0,
+    "warn_count": 1,
     "overall_pass": true
   }
 }
