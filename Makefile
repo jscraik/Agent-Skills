@@ -62,32 +62,32 @@ dev: ## Start development server
 	pnpm dev
 
 build: ## Build for production
-	@if [[ -f "package.json" ]]; then pnpm build; else echo "Skipping build (no package.json)"; fi
+	@if [ -f "package.json" ]; then pnpm build; else echo "Skipping build (no package.json)"; fi
 
 # === Quality ===
 
 lint: ## Run linter
-	@if [[ -f "package.json" ]]; then pnpm lint; else echo "Skipping lint (no package.json)"; fi
+	@if [ -f "package.json" ]; then pnpm lint; else echo "Skipping lint (no package.json)"; fi
 
 docs-lint: ## Lint markdown/docs
-	@if [[ -f "package.json" ]]; then pnpm docs:lint; else echo "Skipping docs:lint (no package.json)"; fi
+	@if [ -f "package.json" ]; then pnpm docs:lint; else echo "Skipping docs:lint (no package.json)"; fi
 
 fmt: ## Format code
-	@if [[ -f "package.json" ]]; then pnpm fmt; else echo "Skipping fmt (no package.json)"; fi
+	@if [ -f "package.json" ]; then pnpm fmt; else echo "Skipping fmt (no package.json)"; fi
 
 typecheck: ## Run TypeScript type checking
-	@if [[ -f "package.json" ]]; then pnpm typecheck; else echo "Skipping typecheck (no package.json)"; fi
+	@if [ -f "package.json" ]; then pnpm typecheck; else echo "Skipping typecheck (no package.json)"; fi
 
 test: ## Run tests
-	@if [[ -f "package.json" ]]; then pnpm test; else echo "Skipping test (no package.json)"; fi
+	@if [ -f "package.json" ]; then pnpm test; else echo "Skipping test (no package.json)"; fi
 
 check: ## Run all required quality gates
-	@if [[ -f "package.json" ]]; then pnpm check; else echo "Skipping check (no package.json)"; fi
+	@if [ -f "package.json" ]; then pnpm check; else echo "Skipping check (no package.json)"; fi
 
 # === Security ===
 
 audit: ## Run security audit
-	@if [[ -f "package.json" ]]; then pnpm audit; else echo "Skipping audit (no package.json)"; fi
+	@if [ -f "package.json" ]; then pnpm audit; else echo "Skipping audit (no package.json)"; fi
 
 secrets: ## Scan for secrets with gitleaks
 	@gitleaks detect --source . --verbose || (echo "Install gitleaks: brew install gitleaks" && exit 1)
@@ -107,7 +107,7 @@ reset: clean ## Full reset: clean and reinstall
 
 ci: ## Run CI-equivalent local checks
 	@# Skills/config repos don't have application code
-	if [[ -f "package.json" ]]; then \
+	if [ -f "package.json" ]; then \
 		pnpm check; \
 	else \
 		echo "Skipping pnpm check (skills/config repository - no application code)"; \

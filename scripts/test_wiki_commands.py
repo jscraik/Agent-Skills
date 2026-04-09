@@ -13,7 +13,7 @@ import sys
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-sys.path.append(str(REPO_ROOT / "scripts" / "lib"))
+sys.path.insert(0, str(REPO_ROOT / "scripts" / "lib"))
 
 from ask.commands import wiki as wiki_commands  # noqa: E402
 

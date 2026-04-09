@@ -103,10 +103,25 @@ def _strip_frontmatter(markdown: str) -> str:
     return markdown
 
 
-def _with_collision_suffix(path: Path, timestamp_compact: str) -> Path:
-    if not path.exists():
-        return path
-    return path.with_name(f"{path.stem}-{timestamp_compact}{path.suffix}")
+def _with_collision_suffix(directory: Path, filename: str, timestamp_compact: str) -> str:
+    candidate = directory / filename
+    if not candidate.exists():
+        return filename
+
+    stem = Path(filename).stem
+    suffix = Path(filename).suffix
+    base = f"{stem}-{timestamp_compact}"
+
+    candidate_name = f"{base}{suffix}"
+    if not (directory / candidate_name).exists():
+        return candidate_name
+
+    counter = 1
+    while True:
+        candidate_name = f"{base}-{counter}{suffix}"
+        if not (directory / candidate_name).exists():
+            return candidate_name
+        counter += 1
 
 
 def _default_index() -> str:
@@ -324,7 +339,8 @@ def wiki_add(
 
     note_dir = wiki_dir / destination_rel
     note_filename = f"{slug}.md"
-    note_path = _with_collision_suffix(note_dir / note_filename, timestamp_compact)
+    note_filename = _with_collision_suffix(note_dir, note_filename, timestamp_compact)
+    note_path = note_dir / note_filename
 
     # Validate that note_path is within wiki_dir
     try:
@@ -589,9 +605,10 @@ def wiki_add_asset(
     ext = asset_input.suffix or ".bin"
     asset_slug = _slugify(title or asset_input.stem)
     stored_name = f"{timestamp}-{asset_slug}{ext.lower()}"
-    stored_path = raw_assets_dir / stored_name
-    stored_repo_rel = f"docs/skill-ops-wiki/raw/assets/{stored_name}"
-    markdown_asset_link = f"../../raw/assets/{stored_name}"
+    safe_name = _with_collision_suffix(raw_assets_dir, stored_name, timestamp)
+    stored_path = raw_assets_dir / safe_name
+    stored_repo_rel = f"docs/skill-ops-wiki/raw/assets/{safe_name}"
+    markdown_asset_link = f"../../raw/assets/{safe_name}"
 
     # Preflight validation before mutating storage
     preflight_result = wiki_add(
@@ -676,8 +693,8 @@ def wiki_ingest(
     date_iso = timestamp.strftime("%Y-%m-%d")
     slug = _slugify(title)
     raw_filename = f"{timestamp_compact}-{slug}.md"
-    raw_path = _with_collision_suffix(raw_dir / raw_filename, timestamp_compact)
-    raw_filename = raw_path.name
+    raw_filename = _with_collision_suffix(raw_dir, raw_filename, timestamp_compact)
+    raw_path = raw_dir / raw_filename
 
     cleaned_sources = [s.strip() for s in sources if s and s.strip()]
     cleaned_tags = [t.strip() for t in tags if t and t.strip()]
