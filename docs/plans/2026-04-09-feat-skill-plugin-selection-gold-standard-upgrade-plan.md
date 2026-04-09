@@ -38,149 +38,151 @@ deepened: 2026-04-09
 **Deepened on:** 2026-04-09  
 **Mode:** targeted-confidence  
 **Research execution mode:** direct  
-**Selected weak sections:** Context and Research, Implementation Units, Execution Control Gates, Risks and Dependencies
+**Key areas improved:** execution gate evidence, required-severity enforcement, and closeout verification traceability
 
-- Added comparative grounding from `codex` and `claude-code` patterns so deterministic selection, collision handling, and plugin-state boundaries are anchored to concrete reference implementations.
-- Strengthened `P0-P3` verification expectations to require explicit contract evidence, not only generic "tests pass" language.
-- Tightened execution gates with concrete blocking signals and release-readiness evidence expectations.
-- Expanded risks into trigger/detection/mitigation form so execution can fail fast and recover without widening scope.
+- Added explicit weak-section deepening manifest to keep the pass bounded and auditable.
+- Tightened execution control gates with concrete evidence signals per phase instead of generic completion statements.
+- Strengthened validation closeout to explicitly handle required-vs-warn gate semantics and reduce false release confidence.
 
-### Section Manifest (Deepening Pass)
+## Section Manifest (Deepening Pass)
 
-| Section | Confidence gap observed | Deepening action |
-| --- | --- | --- |
-| Context and Research | Strong local code refs, but thin comparative grounding for why these contracts are the right wave-1 shape | Added cross-repo comparative evidence and decision linkage |
-| Implementation Units | Verification language was directionally correct but not strict enough to prevent "green by assertion" outcomes | Tightened verification and exit criteria for `P0-P3` with explicit contract evidence |
-| Execution Control Gates | Gates existed but lacked explicit blocking signal semantics | Added measurable gate criteria tied to policy identity, replay determinism, and artifact validity |
-| Risks and Dependencies | Risks were present but mitigation lacked trigger/detection structure | Replaced with operational risk matrix including mitigation and contingency paths |
+| Section                 | Confidence gap observed                                                                 | Deepening action                                                                   |
+| ----------------------- | --------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| Context and Research    | Repo evidence existed but did not explicitly anchor current gate-severity behavior      | Added direct validation-surface evidence from `validate_all` and lifecycle tooling |
+| P4 Validation unit      | Closeout criteria did not explicitly enforce required severity for spec-critical checks | Added explicit required check set and artifact-backed gate evidence expectations   |
+| Execution Control Gates | Gates were directionally correct but lacked concrete pass/fail evidence handles         | Added explicit evidence targets per gate so readiness decisions are reproducible   |
+| Risks and Dependencies  | Missing explicit risk for gate severity mismatch leading to false confidence            | Added severity mismatch risk with mitigation/contingency tied to release posture   |
 
 ## Overview
 
-Deliver the wave-1 selection baseline defined by the governing spec so `ask` selection behavior is deterministic, explainable, and auditable across skills and plugins.
-
-This plan sequences four implementation units:
-
-- establish one canonical discovery-policy source used by route/discovery/sync surfaces;
-- add first-class `ask skills route` output with explicit decision contracts;
-- expand `ask plugins` from install-heavy to read-only state visibility (`list/status/doctor`);
-- add deterministic selection-contract fixtures and validation artifacts to prevent drift.
+Deliver the wave-1 selection contract from `docs/specs/2026-04-09-feat-skill-plugin-selection-gold-standard-spec.md` as an execution sequence that closes remaining gaps across intent routing, catalog diagnostics, starter ergonomics, plugin visibility semantics, and validation gates.
 
 Plan mode: `standard-plan`  
-Plan depth: `standard`  
-Execution posture: contract-first, deterministic-fixture-first.
+Plan depth: `deep`  
+Deepening mode: `targeted-confidence`  
+Research execution mode: `direct`  
+Execution posture: contract-first and verification-first using vertical slices per implementation unit.
 
 ## Problem Frame
 
-`agent-skills` already contains routing and catalog primitives, but user-facing selection behavior is still fragmented:
+`agent-skills` already has substantial baseline work in place (`skills route`, plugin state snapshots, and selection contract tooling), but the spec-level gold standard still requires cohesive delivery across all selection surfaces and gates:
 
-- no first-class route command at `ask` boundary;
-- discovery policy logic is duplicated between Python discovery helpers and shell sync behavior;
-- plugin UX is centered on `init/install` rather than ongoing state visibility;
-- selection quality is not yet enforced by a dedicated deterministic contract gate with durable artifacts.
+- `ask skills goal` must formalize intent guidance and route-to-goal status translation.
+- `ask repo doctor-catalog --strict` must enforce deterministic parity and trend behavior.
+- Required-surface parity must stay canonical across `README.md`, root `SKILL.md`, `ask skills list`, and route considered metadata.
+- Starter-oriented discovery and alias normalization need consistent UX and telemetry.
+- Validation must enforce hard gates, trend handling, docs requirements, and `ask_cli_modularity` evidence.
 
-Without a coordinated upgrade, ambiguity handling, policy drift, and shadowing behavior can regress silently and erode operator trust.
+Without an integrated rollout plan, partial compliance can appear green locally while violating spec acceptance items (`SA1-SA25`) in aggregate.
 
 ## Requirements Trace
 
-- R1. First-class route command must return deterministic, explainable selection decisions.
-  Trace: spec `SA1`, `SA2`, `SA3`, `SA4`, `SA13`.
-- R2. Candidate ordering and considered-set boundaries must be explicit and deterministic.
-  Trace: spec `SA17`, `SA18`.
-- R3. Discovery policy must have a single canonical source with parity checks across route/discovery/sync.
-  Trace: spec `SA5`, `SA14`.
-- R4. Plugin lifecycle wave-1 must expose read-only `list`, `status`, `doctor` views.
-  Trace: spec `SA6`, `SA7`, `SA8`.
-- R5. Shadowing must enforce wave-1 no-exception policy with explicit remediation behavior.
-  Trace: spec `SA15`, `SA19`.
-- R6. Non-success/no-candidate behavior must be externally visible and machine-consistent.
-  Trace: spec `SA12` plus decision-status/failure-class mapping.
-- R7. Validation must emit routing-quality artifacts with policy identity and explainability completeness.
-  Trace: spec `SA10`, `SA16`.
-- R8. Deterministic fixture gates must fail fast on regressions.
-  Trace: spec `SA9`, `SA11`.
+- R1. Route contract remains deterministic and explainable at CLI boundary.
+  Trace: spec `SA1`, `SA2`, `SA3`, `SA4`, `SA5`, `SA21`.
+- R2. Intent entrypoint returns one recommendation, alternatives, and disambiguation under one contract.
+  Trace: spec `SA10`, `SA11`, `SA22`.
+- R3. Catalog truth is canonical and parity-locked across required surfaces.
+  Trace: spec `SA7`, `SA8`, `SA9`, `SA25`.
+- R4. Strict diagnostics use deterministic trend rules and explicit blocking outcomes.
+  Trace: spec lifecycle strict-mode semantics and `SA23`, `SA25`.
+- R5. Starter-oriented discovery exists and is policy-consistent.
+  Trace: spec `SA12`, requirements `R15-R17`.
+- R6. Plugin visibility remains read-only with explicit state groups and non-success guidance.
+  Trace: spec `SA14`, `SA15`, `SA19`.
+- R7. Validation gates and artifacts enforce contract integrity and modularity guardrails.
+  Trace: spec `SA16`, `SA17`, `SA18`, `SA20`, `SA23`, `SA24`.
+- R8. Onboarding docs include a five-minute success path with required sectioning.
+  Trace: spec `SA13`.
 
 ## Scope Boundaries
 
 In scope:
 
-- `ask` command surface and command handlers for skills/plugins selection behavior.
-- shared discovery-policy source consumed by discovery and sync pathways.
-- read-only plugin state command family for wave 1.
-- deterministic fixture and validation-gate additions for selection quality.
+- `bin/ask` command surfaces for `skills route`, `skills goal`, starter-oriented discovery, and `repo doctor-catalog` alias/canonical behavior.
+- Canonical catalog parity and policy identity enforcement across required surfaces.
+- Strict-mode trend computation against canonical history artifacts.
+- Read-only plugin lifecycle visibility contract hardening.
+- Validation and observability gates including `ask_cli_modularity` and routing-quality artifacts.
+- Documentation required by spec (`docs/agents/5-minute-success-path.md`).
 
 Out of scope:
 
-- plugin mutation commands (`enable`, `disable`, `refresh`) in this wave.
-- plugin packaging format redesign or installer trust-policy redesign.
-- router algorithm replacement unless current internals violate the contract.
-- non-selection feature work unrelated to routing/discovery/plugin-state quality.
+- Plugin mutation operations (`enable`, `disable`, `refresh`).
+- Packaging/installer trust-policy redesign.
+- Non-selection product features.
+- Runtime algorithm overhaul of the core router beyond contract compliance work.
 
 ## Context and Research
 
 ### Relevant Code and Patterns
 
 - `bin/ask`
-  - canonical topic/action parser and dispatch logic; currently lacks `skills route` and plugin state actions.
+  - central parser/dispatch and alias correction boundary.
 - `scripts/lib/ask/commands/skills.py`
-  - current `skills` action handlers and router module loading path; natural insertion point for route contract surface.
-- `scripts/lib/ask/commands/plugins.py`
-  - current `plugins init/install` implementation; extension point for read-only lifecycle state commands.
-- `scripts/skill_discovery.py`
-  - canonicalized skill enumeration logic used by `skills list` and related flows.
-- `scripts/sync_skills.sh`
-  - flat-surface sync logic currently carrying independent policy constants.
-- `scripts/check_plugin_skill_shadowing.sh`
-  - existing overlap gate to preserve as authoritative shadowing validator.
-- `scripts/test_skill_lifecycle_validation.py`
-  - lifecycle and shadowing contract tests; suitable place for expanded selection-policy parity tests.
-- `tests/test_ask_cli.py`
-  - CLI command-surface coverage; baseline for new route/plugins state command assertions.
+  - existing route behavior; expansion point for goal and starter-mode behavior.
+- `scripts/lib/ask/selection_contract.py`
+  - canonical route decision envelope and status mapping baseline.
+- `scripts/lib/ask/commands/repo.py`
+  - diagnostic command surface; extension point for `doctor-catalog`.
+- `scripts/lib/ask/commands/plugins.py` and `scripts/lib/ask/plugin_state.py`
+  - read-only plugin lifecycle visibility contract.
+- `scripts/selection_policy.py` and `scripts/skill_discovery.py`
+  - policy identity and discovery/parity source behavior.
+- `scripts/verify_selection_contract.py`, `scripts/verify_router_schema.py`, `scripts/test_skill_lifecycle_validation.py`, `scripts/validate_all.sh`
+  - validation and artifact orchestration.
+- `tests/test_ask_cli.py`, `tests/test_ask_skills_route.py`, `tests/test_ask_plugins_state.py`, `tests/fixtures/selection-contract/route-fixtures.json`
+  - existing coverage foundation to extend.
 
 ### Institutional Learnings
 
-- Keep deterministic routing outputs explainable at CLI boundary, not only internal router events.
-- Treat shadowing failures as release blockers, and keep sync/parity checks explicit.
-- Preserve command contracts in `ask` rather than introducing parallel one-off scripts.
+- Keep one canonical catalog truth source and expose drift explicitly rather than masking with fallback behavior.
+- Make route/goal failures machine-readable with explicit operator action so humans and agents can recover deterministically.
+- Keep CLI orchestration maintainable by preserving parser/dispatch thinness and pushing business logic into command modules and contract helpers.
 
-### Comparative Evidence (Codex + Claude Code)
+### External References
 
-- `~/dev/codex/codex-rs/core-skills/src/injection.rs`, `~/dev/codex/codex-rs/core-skills/src/mention_counts.rs`, and `~/dev/codex/codex-rs/core/src/plugins/mentions.rs`
-  - justify explicit ambiguity/collision handling and deterministic mention resolution at the CLI contract boundary.
-- `~/dev/codex/codex-rs/core-skills/src/loader.rs` and `~/dev/codex/codex-rs/core-skills/src/manager.rs`
-  - justify deterministic precedence and dedupe semantics keyed to one policy identity source.
-- `~/dev/claude-code/src/tools/ToolSearchTool/ToolSearchTool.ts` and `~/dev/claude-code/src/query.ts`
-  - justify explicit per-turn tool/discovery refresh semantics and visible pending-state reporting.
-- `~/dev/claude-code/src/utils/plugins/pluginLoader.ts`, `~/dev/claude-code/src/utils/plugins/installedPluginsManager.ts`, and `~/dev/claude-code/src/services/plugins/pluginOperations.ts`
-  - justify strict separation of installed metadata versus enabled/active runtime state, which this plan keeps read-only in wave 1.
+- None required for this plan; repository spec and implementation state provide sufficient planning evidence.
+
+### Direct Repository Evidence for Gate Semantics
+
+- `scripts/validate_all.sh` currently runs `selection-contract` as a required check and writes routing-quality output to run artifacts, while `plan-graphs`, `docs-lint`, `skill-catalog`, and `router-schema` run as warn checks.
+- `scripts/test_skill_lifecycle_validation.py` directly exercises `scripts/verify_skill_catalog_freshness.py`, so lifecycle parity behavior should be treated as first-class evidence in parity gates.
+- `scripts/README.md` explicitly defines sync/projection ownership under one lane (`sync_skills.sh`, `sync_skills_sandbox_safe.sh`, `skill_catalog.py`), which should remain the planning anchor for catalog projection integrity.
+
+### Spec-Critical Check Set (Wave 1)
+
+- `selection-contract` (`scripts/verify_selection_contract.py`)
+- `router-schema` (`scripts/verify_router_schema.py --fail-on-sensitive-fields`)
+- `skill-catalog` (`scripts/verify_skill_catalog_freshness.py --strict`)
+- `docs-lint` (`scripts/docs_lint.py` with required section enforcement for `First Validated Outcome`)
+- `ask_cli_modularity` (`scripts/verify_ask_cli_modularity.py`, surfaced as a required aggregate validation check)
 
 ## Key Technical Decisions
 
-- Decision 1: Introduce `ask skills route` as the single first-class operator entrypoint for selection decisions.
-  - Rationale: makes selection correctness inspectable and testable in the same CLI surface users already depend on.
-- Decision 2: Create one shared discovery-policy module as the source of truth for roots, hidden names, and exclusion segments.
-  - Rationale: removes policy drift between `scripts/skill_discovery.py` and `scripts/sync_skills.sh`.
-- Decision 3: Keep wave-1 plugin lifecycle state strictly read-only (`list/status/doctor`) and model installed/activation/health states explicitly.
-  - Rationale: aligns with governing spec risk posture while improving operator observability immediately.
-- Decision 4: Add a dedicated selection-contract validator that emits machine-readable routing-quality artifacts per run.
-  - Rationale: prevents regressions in ambiguity handling, considered-set behavior, and failure taxonomy.
-- Decision 5: Keep `scripts/check_plugin_skill_shadowing.sh` as authoritative overlap gate and make its outcomes traceable in route-quality reporting.
-  - Rationale: avoids parallel/competing shadow validators.
+- Decision 1: Update the existing plan artifact in place rather than creating a new parallel plan.
+  - Rationale: this topic already has a canonical date-scoped plan path and should not fork execution history.
+- Decision 2: Sequence catalog/policy parity work before adding goal and strict diagnostics behavior.
+  - Rationale: route/goal/doctor correctness depends on stable parity and policy identity substrate.
+- Decision 3: Treat strict trend history as a canonical artifact concern, not a best-effort runtime guess.
+  - Rationale: spec now requires deterministic blocking outcomes for insufficient history in strict mode.
+- Decision 4: Keep plugin state commands read-only and contract-hardening only.
+  - Rationale: preserves wave-1 risk boundary while improving observability and operator trust.
+- Decision 5: Use one closeout unit for validation gates, docs requirements, and modularity evidence.
+  - Rationale: these are release-readiness controls that should converge at the end of sequencing.
 
 ## Open Questions
 
 ### Resolved During Planning
 
-- Should wave-1 include plugin mutation operations?
-  - Resolution: no; remain read-only per governing spec boundaries.
-- Should route-quality evidence be optional in validation?
-  - Resolution: no; contract-validator output is required for selection-ready status.
+- Should this execution plan assume greenfield route/plugin scaffolding?
+  - Resolution: no. Plan assumes existing baseline implementations and focuses on spec-complete hardening.
+- Should strict mode rely on ad-hoc run data?
+  - Resolution: no. Use canonical history artifact (`artifacts/selection-quality/history.jsonl`) only.
 
 ### Deferred to Implementation
 
-- Exact JSON schema file location for route decision payload (`schema/` vs command-local schema helper).
-  - Defer to implementation for best fit with existing `ask` envelope/schema patterns.
-- Whether route-quality artifacts should be emitted as one aggregate file or split by fixture group.
-  - Defer after first implementation pass and validator ergonomics review.
+- Starter-mode command shape (`ask skills list --starter` vs `ask skills starter`) remains open in spec and should be resolved in implementation with explicit backwards-compatibility notes.
+- Goal alternatives policy (fixed at two vs policy-configurable) remains open and should be codified without violating v1 contract guarantees.
 
 ## High-Level Technical Design
 
@@ -188,71 +190,73 @@ Out of scope:
 
 ```mermaid
 flowchart TD
-  A["Canonical Discovery Policy"] --> B["skills route Candidate Build"]
-  B --> C["Deterministic Ordering and Considered Set"]
-  C --> D["SelectionDecision Payload"]
-  D --> E["ask Output and Error Taxonomy"]
-  A --> F["skill_discovery and sync_skills parity"]
-  F --> G["shadowing gate and policy parity checks"]
-  E --> H["selection contract fixtures"]
-  G --> H
-  H --> I["routing-quality artifact in validation"]
+  A["CatalogManifest + Policy Identity"] --> B["Route Decision Contract"]
+  B --> C["Goal Decision Translation"]
+  A --> D["Doctor Catalog Diagnostics"]
+  D --> E["Strict Trend Evaluation"]
+  B --> F["Starter Mode + Alias Normalization"]
+  C --> G["Selection Quality Artifacts"]
+  D --> G
+  F --> G
+  G --> H["Validation Gates + Docs Gate + Modularity Gate"]
 ```
 
 ## Implementation Units
 
-- [ ] **P0 / Canonical Discovery Policy Consolidation**
+- [ ] **P0 / Canonical Catalog and Policy Parity Substrate**
 
-**Goal:** Remove policy drift by defining one canonical discovery-policy source consumed by discovery and sync surfaces.
+**Goal:** Ensure required selection surfaces derive from one canonical catalog and policy identity before downstream command-surface hardening.
 
-**Requirements:** R3, R5
+**Requirements:** R1, R3
 
 **Dependencies:** None
 
 **Files:**
 
-- Create: `scripts/selection_policy.py`
+- Modify: `scripts/selection_policy.py`
 - Modify: `scripts/skill_discovery.py`
 - Modify: `scripts/sync_skills.sh`
+- Modify: `scripts/skill_catalog.py`
+- Modify: `scripts/verify_skill_catalog_freshness.py`
 - Modify: `scripts/test_skill_lifecycle_validation.py`
+- Projection targets regenerated by tooling: `README.md`, `SKILL.md`
 - Test: `scripts/test_skill_lifecycle_validation.py`
-- Test: `scripts/verify_skill_catalog_freshness.py`
-- Test: `scripts/check_plugin_skill_shadowing.sh`
 
 **Approach:**
 
-- Move roots, hidden names, and excluded-scan segments into `scripts/selection_policy.py`.
-- Make `scripts/skill_discovery.py` import policy constants/functions from this module.
-- Make `scripts/sync_skills.sh` consume policy data from the same module (for example, via deterministic JSON/shell export), eliminating duplicated constant blocks.
-- Preserve existing shadowing gate behavior while ensuring policy parity identity can be derived from the same source.
+- Make projection-generator ownership explicit: `scripts/skill_catalog.py` owns canonical manifest derivation and `scripts/sync_skills.sh` owns projection refresh into `README.md` and root `SKILL.md`.
+- Normalize required-surface count derivation (`README.md`, root `SKILL.md`, `ask skills list`, route considered metadata) to one canonical source.
+- Ensure policy identity is exported consistently for route and diagnostics pathways.
+- Keep parity failures explicit and blocking in validator outputs.
+
+**Execution note:** Use vertical slices by surface pair (catalog source -> one projected surface -> validator assertion) to avoid horizontal test drift.
 
 **Patterns to follow:**
 
-- Existing `scripts/skill_discovery.py` dataclass-based catalog flow.
-- Existing fail-fast guard style in `scripts/sync_skills.sh` and `scripts/check_plugin_skill_shadowing.sh`.
+- Existing policy/discovery coupling in `scripts/selection_policy.py` and `scripts/skill_discovery.py`.
+- Existing lifecycle gate behavior in `scripts/test_skill_lifecycle_validation.py`.
 
 **Test scenarios:**
 
-- policy-driven hidden names are identical between discovery and sync pathways;
-- policy updates in one place propagate to both pathways without manual duplication;
-- shadowing gate still blocks overlap scenarios after policy centralization.
+- required surfaces report identical canonical counts;
+- parity drift yields deterministic blocking diagnostics;
+- policy identity is identical across route and diagnostics payload sources.
 
 **Verification:**
 
-- route/discovery/sync surfaces expose one shared `policy_identity` derived from `scripts/selection_policy.py`;
-- lifecycle validation proves parity across discovery and sync, and shadowing validation remains release-blocking.
+- parity validators fail on intentional surface mismatch and pass when aligned;
+- lifecycle validation output includes one shared policy identity evidence.
 
 **Exit criteria:**
 
-- no duplicated discovery-policy constant sets remain in sync/discovery entrypoints;
-- policy-parity evidence is emitted from lifecycle validation with matching policy identity across surfaces;
-- shadowing gate continues to fail on overlap and provide explicit remediation hints.
+- required-surface parity is deterministic and canonicalized;
+- policy identity parity is externally verifiable.
 
-- [ ] **P1 / First-Class `ask skills route` Contract Surface**
+- [ ] **P1 / Route and Goal Contract Completion**
 
-**Goal:** Add deterministic, explainable route output at CLI boundary, including non-success taxonomy mapping.
+**Goal:** Complete the route-to-goal contract so intent entrypoint behavior is deterministic and fully spec-compliant.
 
-**Requirements:** R1, R2, R6
+**Requirements:** R1, R2, R7
 
 **Dependencies:** P0
 
@@ -260,229 +264,300 @@ flowchart TD
 
 - Modify: `bin/ask`
 - Modify: `scripts/lib/ask/commands/skills.py`
-- Create: `scripts/lib/ask/selection_contract.py`
+- Modify: `scripts/lib/ask/selection_contract.py`
+- Modify: `scripts/verify_selection_contract.py`
 - Modify: `tests/test_ask_cli.py`
-- Create: `tests/test_ask_skills_route.py`
-- Modify: `scripts/verify_router_schema.py`
+- Modify: `tests/test_ask_skills_route.py`
+- Create: `tests/test_ask_skills_goal.py`
+- Create: `tests/fixtures/selection-contract/goal-fixtures.json`
 
 **Approach:**
 
-- Add `skills route <request>` parser/action wiring in `bin/ask` (`VALID_ACTIONS`, help text, dispatch, human/json output branches).
-- Introduce selection-contract builder in `scripts/lib/ask/selection_contract.py` to normalize:
-  - `decision_status` and `failure_class` mapping,
-  - deterministic ordering metadata,
-  - considered-set boundaries (`considered_limit`, truncation details),
-  - selected/considered/excluded candidate explainability fields.
-- Reuse existing router internals via `scripts/lib/ask/commands/skills.py` without replacing underlying routing engine.
-- Ensure explicit degraded output for no-candidate outcomes and unresolved ambiguity payload for non-deterministic collisions.
+- Add canonical `skills goal` surface and alias normalization (`ask goal` -> `ask skills goal`).
+- Enforce goal non-success translation to `intent_unresolved` while preserving route-level non-success taxonomy internally.
+- Ensure `goal_decision` payload includes required fields (`schema_version`, decision/failure/operator metadata, recommendation/alternatives/disambiguation).
+- Extend fixture validation to include goal cases and route-to-goal translation behavior.
+
+**Execution note:** Add one behavior slice at a time (resolved, ambiguity-derived unresolved, no-candidate unresolved) with matching fixture assertions.
 
 **Patterns to follow:**
 
-- Existing `CallResult` envelope and error handling patterns in `bin/ask`.
-- Existing router module loading strategy in `scripts/lib/ask/commands/skills.py`.
+- Existing `CallResult`/`ErrorObject` envelope patterns in `bin/ask`.
+- Existing route contract assembly flow in `scripts/lib/ask/selection_contract.py`.
 
 **Test scenarios:**
 
-- route returns deterministic selected candidates with rationale/confidence;
-- ambiguous collisions return deterministic winner or explicit unresolved payload;
-- no-candidate requests return `degraded_no_candidates` with mapped `NO_ELIGIBLE_CANDIDATES` failure class;
-- considered-set fields are present and stable in JSON output.
+- goal resolved output returns one recommendation and up to two alternatives;
+- goal non-success outputs always map to `intent_unresolved` with disambiguation prompts;
+- alias correction preserves canonical command guidance in normal and robot mode.
 
 **Verification:**
 
-- `ask skills route` works in both human and `--json` modes with consistent envelopes;
-- route payload includes `decision_status`, `failure_class` (when non-resolved), `considered_limit`, and truncation metadata;
-- deterministic replay assertions confirm stable output ordering for identical request/catalog inputs.
+- route and goal schemas validate under fixture runner;
+- CLI tests cover canonical and alias invocations;
+- non-success outputs include non-empty `operator_action`.
 
 **Exit criteria:**
 
-- first-class route command is available and contract-complete for wave-1 statuses;
-- route outputs satisfy spec `SA1-SA4`, `SA12`, `SA13`, `SA17`, `SA18`;
-- unresolved ambiguity and no-candidate degraded behavior are externally visible and machine-consistent.
+- `skills goal` contract and alias behavior meet `SA10`, `SA11`, `SA21`, `SA22`;
+- goal fixtures are deterministic and gate-enforced.
 
-- [ ] **P2 / Plugin Read-Only State Lifecycle Commands**
+- [ ] **P2 / Catalog Doctor and Strict-Mode Determinism**
 
-**Goal:** Add `ask plugins list/status/doctor` with installed/activation/health state separation.
+**Goal:** Deliver `ask repo doctor-catalog` with strict-mode semantics and deterministic trend-source behavior.
 
-**Requirements:** R4, R5
+**Requirements:** R3, R4, R7
 
 **Dependencies:** P0
 
 **Files:**
 
 - Modify: `bin/ask`
-- Modify: `scripts/lib/ask/commands/plugins.py`
-- Create: `scripts/lib/ask/plugin_state.py`
+- Modify: `scripts/lib/ask/commands/repo.py`
+- Modify: `scripts/verify_skill_catalog_freshness.py`
+- Modify: `scripts/verify_selection_contract.py`
+- Modify: `scripts/test_skill_lifecycle_validation.py`
+- Create: `tests/test_ask_repo_doctor_catalog.py`
 - Modify: `tests/test_ask_cli.py`
-- Create: `tests/test_ask_plugins_state.py`
+- Create: `artifacts/selection-quality/history.jsonl` (bootstrap artifact contract)
 
 **Approach:**
 
-- Extend plugin action set and parser wiring for `list`, `status`, and `doctor`.
-- Implement read-only state snapshots in `scripts/lib/ask/plugin_state.py` with explicit groups:
-  - installed metadata,
-  - activation visibility by repo context,
-  - health diagnostics and blockers.
-- Keep `init/install` flows intact and ensure new read-only commands introduce no mutation side effects.
-- Align doctor output with existing shadowing and catalog freshness checks where practical.
+- Implement canonical `repo doctor-catalog` output contract and alias normalization (`ask doctor catalog` -> `ask repo doctor-catalog`).
+- Enforce strict-mode escalation rules, including missing projection/policy stamps and soft-gate deterioration breaches.
+- Compute trend state exclusively from `artifacts/selection-quality/history.jsonl` and block strict outcomes when history is insufficient.
+- Define ownership semantics for `artifacts/selection-quality/history.jsonl`: append-only per completed validation run, oldest-first retention pruning by explicit cap, and schema-preserving writes only through validation/reporting pathways.
+
+**Execution note:** Build strict-mode behavior with explicit synthetic-history fixtures before wiring to live history updates.
 
 **Patterns to follow:**
 
-- Existing plugin command error handling in `scripts/lib/ask/commands/plugins.py`.
-- Existing non-mutating diagnostic command behavior in `scripts/lib/ask/commands/repo.py`.
+- Existing repo command diagnostic formatting in `scripts/lib/ask/commands/repo.py`.
+- Existing strict/degraded handling style in `scripts/verify_skill_catalog_freshness.py`.
 
 **Test scenarios:**
 
-- list/status/doctor return machine-readable outputs with required state groups;
-- commands perform no writes in dry-run and normal read-only execution;
-- doctor surfaces overlap/parity blockers consistently with validator outputs.
+- default mode validates required surfaces only;
+- strict mode blocks on missing projections/policy stamps;
+- strict mode returns `trend_insufficient_history` with blocking reason when history is below threshold.
 
 **Verification:**
 
-- plugin state commands produce stable envelopes and consistent state grouping (`installed_state`, `activation_state`, `health_state`);
-- read-only integrity checks confirm no command-path mutation side effects for wave-1 plugin state actions;
-- doctor output aligns with shadowing/parity diagnostics used by validation gates.
+- doctor-catalog contract tests cover default and strict behavior;
+- strict trend evaluation is deterministic across replayed history snapshots;
+- history artifact writes follow append-only + bounded-retention semantics and preserve schema-valid entries after prune operations.
 
 **Exit criteria:**
 
-- plugin lifecycle read-only surface is complete for wave 1;
-- spec `SA6-SA8` behavior is met without adding mutation operations;
-- plugin-state error outcomes remain explicit and actionable (`PLUGIN_STATE_UNAVAILABLE` contract path).
+- `doctor-catalog` and strict semantics satisfy `SA9`, `SA23`, `SA25`;
+- canonical history dependency is explicit and test-covered.
 
-- [ ] **P3 / Selection Contract Fixtures and Validation Artifactization**
+- [ ] **P3 / Starter Discovery and Plugin Visibility Hardening**
 
-**Goal:** Add deterministic selection contract tests and routing-quality artifacts to validation flow.
+**Goal:** Finalize starter-mode UX and read-only plugin lifecycle contract alignment.
 
-**Requirements:** R7, R8
+**Requirements:** R5, R6, R7
 
-**Dependencies:** P1, P2
+**Dependencies:** P0
 
 **Files:**
 
-- Create: `scripts/verify_selection_contract.py`
-- Create: `tests/fixtures/selection-contract/route-fixtures.json`
-- Modify: `scripts/validate_all.sh`
-- Modify: `scripts/verify_router_schema.py`
-- Modify: `scripts/test_skill_lifecycle_validation.py`
-- Test: `tests/test_ask_skills_route.py`
-- Test: `scripts/test_skill_lifecycle_validation.py`
-- Test: `scripts/verify_selection_contract.py`
-- Modify: `docs/specs/2026-04-09-feat-skill-plugin-selection-gold-standard-spec.md` (only if artifact location decision needs codified clarification)
+- Modify: `bin/ask`
+- Modify: `scripts/lib/ask/commands/skills.py`
+- Modify: `scripts/lib/ask/commands/plugins.py`
+- Modify: `scripts/lib/ask/plugin_state.py`
+- Modify: `tests/test_ask_cli.py`
+- Modify: `tests/test_ask_plugins_state.py`
+- Create: `tests/test_ask_skills_starter.py`
 
 **Approach:**
 
-- Add deterministic fixture runner for selection decision outputs covering:
-  - ordering/truncation rules,
-  - ambiguity and no-candidate statuses,
-  - failure taxonomy visibility,
-  - policy parity identity assertions.
-- Emit routing-quality artifact into `artifacts/validation/latest/routing-quality.json` with policy identity, decision-status counts, failure distribution, and explainability completeness metrics.
-- Add validator gate invocation to `scripts/validate_all.sh` as required failure for contract regressions.
+- Add starter-oriented discovery behavior using stable-signal archetype filtering and deterministic ordering.
+- Keep plugin visibility commands strictly read-only and enforce explicit non-success guidance for degraded plugin doctor output.
+- Ensure alias and canonical command guidance remain consistent in help/correction output.
+
+**Execution note:** Implement starter filtering independently from ranking logic to keep regression radius small.
 
 **Patterns to follow:**
 
-- Existing required/warn check orchestration in `scripts/validate_all.sh`.
-- Existing lifecycle validator style in `scripts/test_skill_lifecycle_validation.py`.
+- Existing plugin snapshot grouping in `scripts/lib/ask/plugin_state.py`.
+- Existing skills list command shape in `scripts/lib/ask/commands/skills.py`.
 
 **Test scenarios:**
 
-- fixture diffs fail when rank/order/explainability contracts regress;
-- parity mismatch fails with explicit surface diagnostics;
-- routing-quality artifact is emitted and schema-valid for each validation run.
+- starter mode returns deterministic prioritized subset by archetype;
+- plugin `list/status/doctor` expose required state groups without filesystem mutation side effects;
+- plugin doctor degraded paths include blockers and operator guidance.
 
 **Verification:**
 
-- validation fails fast on selection contract regressions;
-- route-quality artifacts are present and comparable run-over-run;
-- validation fails when route/discovery/sync policy identities diverge.
+- starter-mode tests verify deterministic candidate ordering and bounded output scope;
+- plugin-state tests verify read-only behavior and expected degraded contract shape.
 
 **Exit criteria:**
 
-- spec `SA9-SA11`, `SA14-SA16` are enforced by deterministic gates;
-- routing-quality artifacts are available in validation outputs for audit;
-- `validate_all` treats missing or schema-invalid routing-quality artifact output as a required failure.
+- `SA12`, `SA14`, `SA15`, and `SA19` are covered by passing deterministic tests;
+- no mutation side effects are introduced on plugin visibility commands.
+
+- [ ] **P4 / Validation, Modularity, and Onboarding Closeout Gates**
+
+**Goal:** Enforce final quality gates and docs criteria required for release-ready status.
+
+**Requirements:** R7, R8
+
+**Dependencies:** P1, P2, P3
+
+**Files:**
+
+- Modify: `scripts/validate_all.sh`
+- Modify: `scripts/verify_selection_contract.py`
+- Modify: `scripts/verify_router_schema.py`
+- Modify: `scripts/verify_ask_cli.py`
+- Modify: `scripts/verify_ask_cli_final.py`
+- Create or Modify: `scripts/verify_ask_cli_modularity.py`
+- Modify: `scripts/docs_lint.py`
+- Modify: `docs-policy.json`
+- Create: `config/schemas/selection-gate-severity.v1.schema.json`
+- Create: `docs/agents/5-minute-success-path.md`
+- Modify: `docs/specs/2026-04-09-feat-skill-plugin-selection-gold-standard-spec.md` (only if command-shape decisions require spec closeout updates)
+- Modify: `tests/test_ask_cli.py`
+- Modify: `tests/test_ask_skills_route.py`
+- Create or Modify: `tests/test_ask_repo_doctor_catalog.py`
+- Create or Modify: `tests/test_ask_skills_goal.py`
+- Create or Modify: `tests/test_ask_skills_starter.py`
+- Create or Modify: `tests/test_ask_plugins_state.py`
+
+**Approach:**
+
+- Promote the wave-1 spec-critical check set (`selection-contract`, `router-schema`, `skill-catalog --strict`, docs gate, `ask_cli_modularity`) to `required` severity in aggregate validation.
+- Add/confirm required validation checks for selection contract, strict diagnostics behavior, and canonical `ask_cli_modularity` evidence.
+- Ensure routing-quality artifacts encode hard/soft-gate outcomes and are persisted for trend tracking.
+- Emit canonical G4 severity evidence artifact at `artifacts/validation/latest/selection-gate-severity.json` from aggregate validation, including check name, mode (`required|warn`), result, and rationale, validated against `config/schemas/selection-gate-severity.v1.schema.json`.
+- Treat persistent validation output as the release-readiness source of truth; ephemeral runs are non-authoritative for G4 closeout evidence.
+- Author onboarding doc with required `First Validated Outcome` section and validate through docs gate.
+
+**Execution note:** Gate each closeout check independently and fail fast on first required failure.
+
+**Patterns to follow:**
+
+- Existing required/warn check structure in `scripts/validate_all.sh`.
+- Existing docs-lint integration approach in repo validation scripts.
+
+**Test scenarios:**
+
+- required checks fail when `ask_cli_modularity` evidence is absent;
+- validation fails when routing-quality artifact is missing or schema-invalid;
+- validation fails when `selection-gate-severity.json` is missing, schema-invalid, or reports a spec-critical check outside `required`;
+- validation fails when required check `ask-cli-modularity` is absent from aggregate validation output;
+- docs gate fails if `First Validated Outcome` section is missing;
+- CLI and command-surface tests (`tests/test_ask_cli.py`, route/goal/starter/doctor/plugin suites) fail when required payload fields, alias guidance, or strict-mode blockers regress.
+
+**Verification:**
+
+- aggregate validation emits required artifacts and passes with no required failures;
+- docs and modularity checks are reflected in run output and release evidence;
+- release-readiness evidence comes from persistent validation output and includes `artifacts/validation/latest/selection-gate-severity.json`, confirming every wave-1 spec-critical check is `required`.
+
+**Exit criteria:**
+
+- `SA13`, `SA16`, `SA17`, `SA18`, `SA20`, `SA23`, `SA24` are gate-enforced;
+- `SA25` strict-mode coverage remains enforced under required validation severity;
+- plan closeout is backed by deterministic validation evidence.
 
 ## Task Graph (id and depends_on)
 
 ```yaml
 tasks:
   - id: P0
-    title: Centralize discovery policy and remove sync/discovery drift.
+    title: Canonical catalog and policy parity substrate
     depends_on: []
   - id: P1
-    title: Add first-class ask skills route decision contract at CLI boundary.
+    title: Route and goal contract completion
     depends_on: [P0]
   - id: P2
-    title: Add read-only plugin lifecycle state commands list/status/doctor.
+    title: Catalog doctor and strict-mode determinism
     depends_on: [P0]
   - id: P3
-    title: Add deterministic selection contract fixtures and validation artifacts.
-    depends_on: [P1, P2]
+    title: Starter discovery and plugin visibility hardening
+    depends_on: [P0]
+  - id: P4
+    title: Validation, modularity, and onboarding closeout gates
+    depends_on: [P1, P2, P3]
 ```
 
 ## Execution Control Gates
 
-- **G0 / Policy Gate:** Do not start `P1` or `P2` until canonical discovery policy source is shared across discovery and sync surfaces and parity evidence exposes one matching `policy_identity`.
-- **G1 / Route Contract Gate:** Do not start `P3` until `skills route` payload includes required status/failure mapping, considered-set metadata, and deterministic replay stability in fixture tests.
-- **G2 / Read-Only Integrity Gate:** Do not mark `P2` complete until plugin state commands prove no mutation side effects and doctor outputs align with shadowing/parity validators.
-- **G3 / Validation Gate:** Do not mark plan complete until deterministic selection-contract validation is required in `validate_all`, emits `artifacts/validation/latest/routing-quality.json`, and fails on missing or schema-invalid artifacts.
+- **G0 / Canonical Parity Gate:** Do not start `P1-P3` until required-surface parity and policy identity evidence are stable and reproducible in lifecycle and catalog-freshness validation outputs.
+- **G1 / Route-Goal Contract Gate:** Do not mark `P1` complete until non-success translation and operator-action semantics are fixture-validated across route and goal suites.
+- **G2 / Strict Diagnostics Gate:** Do not mark `P2` complete until strict-mode insufficient-history and deterioration paths are deterministic, blocking, and replay-stable against canonical history artifacts.
+- **G3 / Read-Only Integrity Gate:** Do not mark `P3` complete until plugin visibility commands prove zero mutation side effects and degraded-doctor outputs include actionable remediation.
+- **G4 / Release Readiness Gate:** Do not close `P4` until persistent validation output refreshes `artifacts/validation/latest/selection-gate-severity.json` and confirms all wave-1 spec-critical checks are `required` and passing, alongside selection-contract artifacts, modularity checks, and docs criteria.
 
 ## System-Wide Impact
 
-- **Interaction graph:** `bin/ask` parser + command handlers + discovery/sync scripts + validation pipeline become one coordinated contract surface.
-- **Error propagation:** non-success selection decisions become explicit CLI-level statuses with actionable operator metadata.
-- **State lifecycle risks:** discovery policy drift and shadowing overlap are elevated from implicit behavior to explicit release gates.
-- **API surface parity:** route/discovery/sync/plugin-state semantics remain synchronized through shared policy identity.
-- **Integration coverage:** validator fixtures cover cross-layer behavior that unit tests alone cannot prove.
+- **Interaction graph:** `bin/ask` parser/alias layer and command modules (`skills`, `repo`, `plugins`) become one coherent contract surface.
+- **Error propagation:** route/goal/catalog/plugin non-success states use deterministic status and operator-action paths.
+- **State lifecycle risks:** strict trend history and parity sources move from implicit assumptions to explicit managed artifacts.
+- **API surface parity:** canonical and alias command behaviors stay synchronized for humans and agent callers.
+- **Integration coverage:** fixture and lifecycle gates verify cross-surface behavior beyond per-module unit tests.
 
 ## Risks and Dependencies
 
-| Risk | Trigger | Detection signal | Mitigation | Contingency |
-| --- | --- | --- | --- | --- |
-| Parser/dispatch drift for new `ask` actions | New `skills route` and plugin-state actions added across parser and dispatch | CLI tests pass partially but action dispatch mismatch appears in route/state commands | Update `VALID_ACTIONS`, subparsers, and dispatch branches in one implementation unit and keep command-surface tests coupled | Roll back only the new action wiring behind existing parser contracts until parity tests are green |
-| Shell/Python policy interoperability drift | `scripts/sync_skills.sh` cannot consume policy output from Python source cleanly | Discovery/sync parity mismatch under lifecycle validation | Use deterministic machine export from `scripts/selection_policy.py` and assert policy-identity parity in validator output | Keep sync path read-only and block `P1/P2` progression until parity identity matches |
-| Fixture brittleness creates false positives | Legitimate contract evolution changes stable fields without fixture governance update | Deterministic fixture failures without semantic behavior regression | Keep fixtures scoped to contract fields (status/order/explainability/parity) and define fixture update protocol in validator docs | Require explicit fixture-intent annotation before accepting baseline updates |
-| Validation runtime growth slows iteration | Added contract checks and artifact generation increase gate time | Noticeable expansion of `validate_all` duration in repeated runs | Keep fixture corpus bounded to high-risk collision/no-candidate/parity cases; move wide corpus to optional deep suite | Temporarily isolate slow scenarios in non-required lane while preserving required contract gates |
-| Repo-wide plan-graph baseline noise masks scoped signal | `scripts/validate_plan_graphs.sh` fails on historical plan backlog unrelated to this feature | Wrapper fails while direct lint for this plan passes | Treat scoped plan lint as the blocking signal for this artifact and track wrapper backlog separately | Record backlog as a separate governance item rather than widening this implementation scope |
+| Risk                                   | Trigger                                                           | Detection signal                                                                  | Mitigation                                                                                         | Contingency                                                                            |
+| -------------------------------------- | ----------------------------------------------------------------- | --------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| Route/goal translation drift           | Goal surface evolves independently from route contract            | Goal tests pass but failure taxonomy differs from route constraints               | Keep goal mapping logic centralized and fixture-validated in one contract path                     | Temporarily gate `skills goal` behind strict validation failure until mapping is fixed |
+| Strict-mode false positives            | History artifact missing, stale, or malformed                     | `doctor-catalog --strict` blocks unexpectedly across environments                 | Enforce canonical history path, schema validation, and deterministic insufficient-history handling | Treat history corruption as explicit blocking diagnostic with remediation guidance     |
+| Catalog projection mismatch recurrence | Required surfaces continue deriving counts from divergent paths   | parity diagnostics flap across runs                                               | Tie all required surfaces to canonical manifest generation and projection pipeline                 | Block downstream phases until parity drift is resolved                                 |
+| Validation severity mismatch           | Spec-critical checks remain warn-only in release lane             | `validate_all` appears green on required checks while spec outcomes still degrade | Promote wave-1 spec-critical checks to `required` and emit canonical severity evidence artifact    | Block release-ready status until required severity and artifact evidence are aligned   |
+| Parser/dispatch sprawl in `bin/ask`    | New actions add business logic to top-level file                  | modularity checks regress or become noisy                                         | Keep behavior in command modules and verify with `ask_cli_modularity` gate                         | Roll back latest parser edits and reintroduce via module wiring only                   |
+| Docs gate lag                          | Onboarding doc lands without required section or drifts over time | docs lint or validation gate fails during release prep                            | Add docs gate assertion tied to required section heading                                           | Hold release-ready status until docs requirement is restored                           |
 
 ## Documentation and Operational Notes
 
-- Keep this plan as the canonical execution artifact for the selection baseline wave.
-- Maintain one routing-quality artifact per validation run for comparability.
-- If blockers represent durable governance work, route follow-up via issue tracking with explicit evidence links.
-- Preserve wave-1 boundary: read-only plugin lifecycle only.
-- Rollout expectation: ship `skills route` and plugin read-only state commands behind normal CLI release flow with validation artifacts attached to release evidence.
-- Rollback expectation: if parser/dispatch or selection-contract gates regress, disable only new route/state action wiring while preserving existing `ask` command surfaces.
+- Preserve the existing plan path as the canonical execution artifact for this wave.
+- Maintain canonical artifact history at `artifacts/selection-quality/history.jsonl` and ensure retention policy is implemented with deterministic append/rotation behavior.
+- Keep release evidence focused on required gates and explicit blocker reasons; wave-1 spec-critical checks must not rely on warn-only posture.
+- Rollback posture: disable newly added action wiring or strict-mode pathways selectively while preserving existing stable command surfaces.
 
 ## Execution Ledger (Planning Mode)
 
 STEP_ID | status (pending|in_progress|completed) | owner | evidence
-P0 | in_progress | codex | Planning artifact authored; source and target files identified; ready to start canonical policy extraction
-P1 | pending | codex | Awaiting G0
-P2 | pending | codex | Awaiting G0
-P3 | pending | codex | Awaiting G1 and G2
+P0 | in_progress | codex | Plan updated to spec v1 closeout scope; canonical parity substrate defined as first execution step.
+P1 | pending | codex | Awaiting G0.
+P2 | pending | codex | Awaiting G0.
+P3 | pending | codex | Awaiting G0.
+P4 | pending | codex | Awaiting G1, G2, and G3.
 
 ## Acceptance Checklist
 
-- [ ] AC1 (R1): `ask skills route` exists and returns ranked, explainable decisions with deterministic behavior.
-- [ ] AC2 (R2): route outputs include canonical ordering metadata, `considered_limit`, and truncation/considered boundaries.
-- [ ] AC3 (R3): one canonical discovery-policy source is consumed by discovery and sync, and policy parity is verifiable.
-- [ ] AC4 (R4): `ask plugins list/status/doctor` return read-only lifecycle state outputs with installed/activation/health grouping.
-- [ ] AC5 (R5): plugin-shadowing no-exception wave-1 policy is enforced with explicit remediation guidance.
-- [ ] AC6 (R6): non-success selection taxonomy includes explicit no-candidate degradation behavior and external failure-class visibility.
-- [ ] AC7 (R7): validation emits routing-quality artifacts including policy identity, status counts, failure distribution, and explainability completeness.
-- [ ] AC8 (R8): deterministic selection fixtures fail fast on contract regressions and are integrated into repo validation flow.
+- [ ] AC1 (R1): Route outputs satisfy deterministic and explainable `SelectionDecision` contract fields. Trace: `SA1-SA5`, `SA21`.
+- [ ] AC2 (R2): Goal surface returns required recommendation/alternative/disambiguation payload and deterministic non-success translation. Trace: `SA10`, `SA11`, `SA22`.
+- [ ] AC3 (R3): Required catalog surfaces are parity-locked to one canonical manifest source. Trace: `SA7`, `SA8`, `SA9`.
+- [ ] AC4 (R4): Strict diagnostics block on trend deterioration and insufficient history using canonical history source. Trace: `SA23`, `SA25`.
+- [ ] AC5 (R5): Starter-oriented discovery mode is deterministic and policy-consistent. Trace: `SA12`.
+- [ ] AC6 (R6): Plugin state `list/status/doctor` remain read-only and expose required state groups. Trace: `SA14`, `SA15`.
+- [ ] AC7 (R6): Plugin-skill shadowing remains blocking in wave 1 with actionable remediation signals. Trace: `SA19`.
+- [ ] AC8 (R7): Selection fixtures and lifecycle validations fail fast on contract regressions. Trace: `SA16`, `SA18`.
+- [ ] AC9 (R7): Routing-quality artifact includes required metrics and hard/soft-gate outcomes. Trace: `SA17`, `SA23`, `SA24`.
+- [ ] AC10 (R7): Repo validation output includes canonical `ask_cli_modularity` gate evidence. Trace: `SA20`.
+- [ ] AC11 (R8): `docs/agents/5-minute-success-path.md` exists with required `First Validated Outcome` section and passes docs gate. Trace: `SA13`.
+- [ ] AC12 (R1-R8): Aggregate release-readiness gate passes with no required failures across route, goal, catalog, plugin, docs, and modularity checks, and no wave-1 spec-critical checks left warn-only.
+- [ ] AC13 (R7-R8): `artifacts/validation/latest/selection-gate-severity.json` exists, is schema-valid, and records all wave-1 spec-critical checks as `required`.
 
 ## Sources and References
 
 - Governing requirements: `docs/brainstorms/2026-04-09-skill-plugin-selection-gold-standard-requirements.md`
 - Governing spec: `docs/specs/2026-04-09-feat-skill-plugin-selection-gold-standard-spec.md`
+- Plan artifact template: `plugins/cache/agent-skills-local/harness-engineering/local/skills/ce-plan/references/plan-artifacts.md`
 - CLI entrypoint: `bin/ask`
 - Skills commands: `scripts/lib/ask/commands/skills.py`
-- Plugin commands: `scripts/lib/ask/commands/plugins.py`
-- Discovery helper: `scripts/skill_discovery.py`
-- Sync pipeline: `scripts/sync_skills.sh`
-- Shadowing gate: `scripts/check_plugin_skill_shadowing.sh`
-- Lifecycle validator: `scripts/test_skill_lifecycle_validation.py`
-- Validation orchestrator: `scripts/validate_all.sh`
-- Existing CLI tests: `tests/test_ask_cli.py`, `tests/test_ask_skills_errors.py`, `tests/test_ask_skills_sync_security.py`
+- Repo diagnostics commands: `scripts/lib/ask/commands/repo.py`
+- Plugins commands: `scripts/lib/ask/commands/plugins.py`
+- Route contract builder: `scripts/lib/ask/selection_contract.py`
+- Plugin state collector: `scripts/lib/ask/plugin_state.py`
+- Policy and discovery: `scripts/selection_policy.py`, `scripts/skill_discovery.py`
+- Validators: `scripts/verify_selection_contract.py`, `scripts/verify_router_schema.py`, `scripts/test_skill_lifecycle_validation.py`, `scripts/validate_all.sh`
+- CLI modularity validators: `scripts/verify_ask_cli.py`, `scripts/verify_ask_cli_final.py`
+- Modularity and gate-severity schema surfaces: `scripts/verify_ask_cli_modularity.py`, `config/schemas/selection-gate-severity.v1.schema.json`
+- Validation and sync runbook: `scripts/README.md`
+- Existing tests and fixtures: `tests/test_ask_cli.py`, `tests/test_ask_skills_route.py`, `tests/test_ask_plugins_state.py`, `tests/fixtures/selection-contract/route-fixtures.json`
