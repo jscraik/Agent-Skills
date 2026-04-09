@@ -12,14 +12,17 @@ A governed repository of **116 skills** for AI coding agents (Codex, Claude, Gem
 ## Quick start
 
 ```bash
+# One-time per shell: load repo environment and add ask to PATH
+source scripts/codex_env_common.sh && codex_apply_env
+
 # See what's available
-./bin/ask graph topics
+ask graph topics
 
 # Validate the repository
-./bin/ask repo validate --ephemeral
+ask repo validate --ephemeral
 
 # Sync to your runtime
-./bin/ask skills sync --scope user
+ask skills sync --scope user
 ```
 
 ## What you can do

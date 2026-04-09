@@ -31,7 +31,7 @@ Documented handler type:
 - `type: "command"`
 
 Matcher behavior:
-- `SessionStart.matcher` matches `source` (`startup`, `resume`, or `clear`).
+- `SessionStart.matcher` matches `source` (`startup` or `resume` in the current documented runtime).
 - `PreToolUse.matcher` matches `tool_name` (current generated input schema uses `const: "Bash"`).
 - `PostToolUse.matcher` matches `tool_name` (current generated input schema uses `const: "Bash"`).
 - `UserPromptSubmit.matcher` is currently not used.
@@ -59,7 +59,7 @@ Event-specific behavior:
 - `SessionStart`
   - plain text on stdout is added as context.
   - JSON supports `hookSpecificOutput.additionalContext`.
-  - generated input schema includes source values `startup`, `resume`, and `clear`; visible runtime flow today uses `startup` and `resume`.
+  - current documented runtime values are `startup` and `resume`; do not rely on undocumented extra source values in generated matchers.
 - `PreToolUse`
   - currently supports Bash tool interception only.
   - JSON supports `hookSpecificOutput.permissionDecision: "deny"` and `permissionDecisionReason`.
@@ -94,6 +94,9 @@ Cross-runtime forward compatibility:
 - Add `PreToolUse` or `PostToolUse` only when the user asks for command guardrails that justify additional turn-time cost.
 - Keep command paths absolute in generated packs to prevent cwd-dependent failures.
 - Keep guardrails narrow and auditable; document that Bash interception is helpful but not a complete enforcement boundary.
+- Keep `PreToolUse` and `PostToolUse` scripts self-guarding because current matcher scope stops at `Bash`; command intent and file relevance must be classified inside the hook.
+- Treat `PostToolUse` as advisory by default because it cannot undo completed side effects.
+- Keep `SessionStart` enrichment fail-open on optional dependency failures.
 - Use short `statusMessage` strings for hooks that can take more than a second because this improves operator observability.
 
 ## Source anchors
