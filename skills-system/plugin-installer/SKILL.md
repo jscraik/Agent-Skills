@@ -119,5 +119,7 @@ Family gate note:
 
 | Skill | When to use together |
 |---|---|
+| [[plugin-builder]] | Run package hardening and contract checks before install/provenance execution |
+| [[plugin-creator]] | Scaffold a new local plugin before moving into install or visibility repair |
 
 **Topic map:** [[agent-ops]]

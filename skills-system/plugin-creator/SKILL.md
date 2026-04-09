@@ -193,5 +193,7 @@ Fail-fast rule:
 
 | Skill | When to use together |
 |---|---|
+| [[plugin-builder]] | Harden a scaffolded plugin package before publishing or validation-heavy handoff |
+| [[plugin-installer]] | Install and verify a contract-valid plugin after packaging is complete |
 
 **Topic map:** [[agent-ops]]
