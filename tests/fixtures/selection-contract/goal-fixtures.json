@@ -1,0 +1,77 @@
+{
+  "schema_version": 1,
+  "fixtures": [
+    {
+      "id": "goal-resolved-from-route",
+      "route_decision": {
+        "decision_status": "resolved",
+        "policy_identity": "fixture-policy",
+        "selected_candidates": [
+          {
+            "candidate_id": "skill:create-auth::auth/create-auth",
+            "candidate_type": "skill",
+            "name": "create-auth",
+            "path": "auth/create-auth",
+            "confidence": 0.93,
+            "rationale": ["keyword overlap=2"]
+          },
+          {
+            "candidate_id": "skill:best-practices::auth/best-practices",
+            "candidate_type": "skill",
+            "name": "best-practices",
+            "path": "auth/best-practices",
+            "confidence": 0.82,
+            "rationale": ["adjacent concern"]
+          },
+          {
+            "candidate_id": "skill:context7::product/docs/context7",
+            "candidate_type": "skill",
+            "name": "context7",
+            "path": "product/docs/context7",
+            "confidence": 0.74,
+            "rationale": ["docs support"]
+          }
+        ],
+        "considered_candidates": []
+      },
+      "expected": {
+        "decision_status": "resolved",
+        "failure_class": null,
+        "recommended_name": "create-auth",
+        "alternative_names": [
+          "best-practices",
+          "context7"
+        ]
+      }
+    },
+    {
+      "id": "goal-unresolved-from-route-ambiguity",
+      "route_decision": {
+        "decision_status": "unresolved_ambiguity",
+        "policy_identity": "fixture-policy",
+        "failure_class": "AMBIGUITY_UNRESOLVED",
+        "operator_action": "Narrow the request or mention an exact skill path to resolve ambiguity.",
+        "selected_candidates": [],
+        "considered_candidates": [],
+        "ambiguity_set": [
+          {
+            "name": "ce-review",
+            "path": "plugins/harness-engineering/skills/ce-review",
+            "confidence": 0.81
+          },
+          {
+            "name": "ce-technical-review",
+            "path": "plugins/harness-engineering/skills/ce-technical-review",
+            "confidence": 0.79
+          }
+        ]
+      },
+      "expected": {
+        "decision_status": "intent_unresolved",
+        "failure_class": "INTENT_UNRESOLVED",
+        "recommended_name": null,
+        "alternative_names": []
+      }
+    }
+  ]
+}

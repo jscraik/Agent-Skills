@@ -15,5 +15,10 @@
   "allow_trailing_slash_links": false,
   "exclude_paths": [
     "/docs/vendor"
-  ]
+  ],
+  "required_sections": {
+    "/docs/agents/5-minute-success-path.md": [
+      "First Validated Outcome"
+    ]
+  }
 }

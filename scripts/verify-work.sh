@@ -145,19 +145,25 @@ run_check "repo-validation" bash "scripts/validate_all.sh" "--${validate_output_
 echo
 echo "=== verify-work summary ==="
 echo "passed:  ${#passed_checks[@]}"
-for check in "${passed_checks[@]}"; do
-  echo "  - $check"
-done
+if ((${#passed_checks[@]} > 0)); then
+  for check in "${passed_checks[@]}"; do
+    echo "  - $check"
+  done
+fi
 
 echo "skipped: ${#skipped_checks[@]}"
-for check in "${skipped_checks[@]}"; do
-  echo "  - $check"
-done
+if ((${#skipped_checks[@]} > 0)); then
+  for check in "${skipped_checks[@]}"; do
+    echo "  - $check"
+  done
+fi
 
 echo "failed:  ${#failed_checks[@]}"
-for check in "${failed_checks[@]}"; do
-  echo "  - $check"
-done
+if ((${#failed_checks[@]} > 0)); then
+  for check in "${failed_checks[@]}"; do
+    echo "  - $check"
+  done
+fi
 
 if ((${#failed_checks[@]} > 0)); then
   exit 1

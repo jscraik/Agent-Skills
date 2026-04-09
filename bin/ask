@@ -27,6 +27,7 @@ from ask.context import find_repo_root
 from ask.commands.skills import (
     list_skills,
     route_skills,
+    goal_skills,
     sync_skills,
     audit_skill,
     install_skill,
@@ -34,7 +35,7 @@ from ask.commands.skills import (
     init_skill,
     extract_family_fail_lines,
 )
-from ask.commands.repo import repo_status, repo_validate, check_hub_stability
+from ask.commands.repo import repo_status, repo_validate, check_hub_stability, doctor_catalog
 from ask.commands.plugins import (
     init_plugin,
     install_plugin,
@@ -66,8 +67,8 @@ ERROR_MAP = {
 # Valid commands for fuzzy matching
 VALID_TOPICS = ["repo", "skills", "plugins", "evals", "graph", "mcp", "wiki"]
 VALID_ACTIONS = {
-    "repo": ["status", "validate", "check-stability"],
-    "skills": ["list", "route", "sync", "audit", "install", "fold", "init"],
+    "repo": ["status", "validate", "check-stability", "doctor-catalog"],
+    "skills": ["list", "route", "goal", "starter", "sync", "audit", "install", "fold", "init"],
     "plugins": ["list", "status", "doctor", "init", "install"],
     "evals": ["run", "benchmark", "dashboard"],
     "graph": ["related", "find", "info", "chain", "list", "topics"],
@@ -117,6 +118,9 @@ FUZZY_MATCHES = {
     "chain": "chain",
     "path": "chain",
     "route": "chain",
+    "goal": "goal",
+    "doctor": "doctor-catalog",
+    "catalog": "doctor-catalog",
     "topics": "topics",
     "tags": "topics",
     "categories": "topics",
@@ -125,7 +129,6 @@ FUZZY_MATCHES = {
     "import": "ingest",
     "add": "add",
     "triage": "add",
-    "query": "query",
     "lookup": "query",
     "asset": "add-asset",
     "add-asset": "add-asset",
@@ -145,6 +148,23 @@ def format_correction(original: str, corrected: str, robot_mode: bool = False) -
     if robot_mode:
         return f"🤖 Robot mode: Interpreting '{original}' as '{corrected}'\n   💡 Tip: Use '{corrected}' for exact matching next time."
     return f"💡 Did you mean: '{corrected}'? (Use --robot to auto-correct)"
+
+
+def consume_global_prefix_flags(raw_args: List[str]) -> Tuple[List[str], List[str]]:
+    """Split leading global flags from positional command tokens."""
+    global_flags = {"--json", "--trace-id", "--robot", "--agent-mode", "-r", "--help", "-h"}
+    prefix_flags: List[str] = []
+    idx = 0
+    while idx < len(raw_args) and raw_args[idx].startswith("-"):
+        flag = raw_args[idx]
+        if flag not in global_flags:
+            break
+        prefix_flags.append(flag)
+        idx += 1
+        if flag in {"--trace-id"} and idx < len(raw_args) and not raw_args[idx].startswith("-"):
+            prefix_flags.append(raw_args[idx])
+            idx += 1
+    return prefix_flags, raw_args[idx:]
 
 
 def build_helpful_error(topic: Optional[str], action: Optional[str], raw_args: List[str], repo_root: Path) -> CallResult:
@@ -191,6 +211,8 @@ def build_helpful_error(topic: Optional[str], action: Optional[str], raw_args: L
         examples.extend([
             "ask skills list",
             "ask skills route \"find me the right skill for this request\"",
+            "ask skills goal \"implement this feature safely\"",
+            "ask skills starter --archetype delivery",
             "ask skills audit backend/cli-spec --level strict",
             "ask skills init my-skill --category backend --description 'Does something useful'",
         ])
@@ -204,6 +226,7 @@ def build_helpful_error(topic: Optional[str], action: Optional[str], raw_args: L
         examples.extend([
             "ask repo status",
             "ask repo validate --ephemeral",
+            "ask repo doctor-catalog --strict",
             "ask repo check-stability",
         ])
     if topic == "mcp" or not topic:
@@ -247,27 +270,24 @@ def try_fuzzy_parse(raw_args: List[str], robot_mode: bool = False) -> Tuple[Opti
         return None, None, [], None
 
     # Skip leading global flags (--json, --trace-id, --robot, etc.)
-    GLOBAL_FLAGS = {"--json", "--trace-id", "--robot", "--agent-mode", "-r", "--help", "-h"}
-    prefix_flags = []
-    idx = 0
-    while idx < len(raw_args) and raw_args[idx].startswith("-"):
-        flag = raw_args[idx]
-        if flag in GLOBAL_FLAGS:
-            prefix_flags.append(flag)
-            idx += 1
-            # Also consume the value for flags that take one
-            if flag in {"--trace-id"} and idx < len(raw_args) and not raw_args[idx].startswith("-"):
-                prefix_flags.append(raw_args[idx])
-                idx += 1
-        else:
-            break
-
-    # Work with remaining args after global flags
-    working_args = raw_args[idx:]
+    prefix_flags, working_args = consume_global_prefix_flags(raw_args)
     if not working_args:
         return None, None, raw_args, None
 
     correction_note = None
+
+    # Alias normalization:
+    # - ask goal "<intent>" -> ask skills goal "<intent>"
+    # - ask doctor catalog -> ask repo doctor-catalog
+    if working_args[0] == "goal":
+        topic = "skills"
+        action = "goal"
+        return topic, action, prefix_flags + working_args[1:], format_correction("goal", "skills goal", robot_mode)
+    if len(working_args) >= 2 and working_args[0] == "doctor" and working_args[1] == "catalog":
+        topic = "repo"
+        action = "doctor-catalog"
+        return topic, action, prefix_flags + working_args[2:], format_correction("doctor catalog", "repo doctor-catalog", robot_mode)
+
     topic = working_args[0]
     remaining = working_args[1:]
 
@@ -364,6 +384,15 @@ def main():
 
     # Check for robot mode in raw args before parsing
     raw_args = sys.argv[1:]
+    alias_correction_note = None
+    prefix_flags, positional_args = consume_global_prefix_flags(raw_args)
+    if positional_args and positional_args[0] == "goal":
+        raw_args = [*prefix_flags, "skills", "goal", *positional_args[1:]]
+        alias_correction_note = "💡 Alias: 'ask goal' maps to 'ask skills goal'."
+    elif len(positional_args) >= 2 and positional_args[0] == "doctor" and positional_args[1] == "catalog":
+        raw_args = [*prefix_flags, "repo", "doctor-catalog", *positional_args[2:]]
+        alias_correction_note = "💡 Alias: 'ask doctor catalog' maps to 'ask repo doctor-catalog'."
+
     robot_mode = any(flag in raw_args for flag in ["--robot", "--agent-mode", "-r"])
 
     # Keep raw_args intact for parse_args() so robot flags are properly handled
@@ -403,6 +432,12 @@ def main():
 
     repo_stability_parser = repo_subparsers.add_parser("check-stability", help="Check stable skills not deleted without deprecation", parents=[global_parser])
     repo_stability_parser.add_argument("--changed-files", nargs="+", default=[], help="Changed SKILL.md files to check")
+    repo_doctor_catalog_parser = repo_subparsers.add_parser(
+        "doctor-catalog",
+        help="Diagnose canonical catalog parity drift",
+        parents=[global_parser],
+    )
+    repo_doctor_catalog_parser.add_argument("--strict", action="store_true", help="Enable strict trend and stamp enforcement")
 
     # --- skills ---
     skills_parser = subparsers.add_parser("skills", help="Skill management", parents=[global_parser])
@@ -410,11 +445,23 @@ def main():
     
     skills_list_parser = skills_subparsers.add_parser("list", help="List discovered skills", parents=[global_parser])
     skills_list_parser.add_argument("--category", help="Filter by category")
+    skills_list_parser.add_argument("--starter", action="store_true", help="Return starter-mode curated skills")
+    skills_list_parser.add_argument("--archetype", default="general", help="Starter archetype (general|delivery|review|docs)")
+    skills_list_parser.add_argument("--limit", type=int, default=12, help="Max starter skills to return")
 
     skills_route_parser = skills_subparsers.add_parser("route", help="Route a request to matching skills", parents=[global_parser])
     skills_route_parser.add_argument("request", nargs="+", help="Request text to route")
     skills_route_parser.add_argument("--top-k", type=int, default=3, help="Max ranked candidates to return")
     skills_route_parser.add_argument("--considered-limit", type=int, default=20, help="Max eligible candidates considered before truncation")
+
+    skills_goal_parser = skills_subparsers.add_parser("goal", help="Resolve intent into one recommended skill", parents=[global_parser])
+    skills_goal_parser.add_argument("intent", nargs="+", help="Intent text to route")
+    skills_goal_parser.add_argument("--top-k", type=int, default=3, help="Max ranked candidates to consider")
+    skills_goal_parser.add_argument("--considered-limit", type=int, default=20, help="Max eligible candidates considered before truncation")
+
+    skills_starter_parser = skills_subparsers.add_parser("starter", help="List starter-mode curated skills", parents=[global_parser])
+    skills_starter_parser.add_argument("--archetype", default="general", help="Starter archetype (general|delivery|review|docs)")
+    skills_starter_parser.add_argument("--limit", type=int, default=12, help="Max starter skills to return")
     
     skills_sync_parser = skills_subparsers.add_parser("sync", help="Synchronize skill symlinks", parents=[global_parser])
     skills_sync_parser.add_argument("--scope", choices=["user", "workspace"], default="workspace", help="Tier to sync")
@@ -580,7 +627,7 @@ def main():
     parsed_topic = None
     parsed_action = None
     remaining_args = []
-    correction_note = None
+    correction_note = alias_correction_note
     fuzzy_matched = False  # Track if fuzzy matching was used
 
     try:
@@ -703,6 +750,15 @@ def main():
             print("❌ Failed to parse command arguments.")
         sys.exit(2)
 
+    # Preserve leading global flags even when subparser defaults would overwrite them.
+    prefix_flags, _ = consume_global_prefix_flags(raw_args)
+    if "--json" in prefix_flags:
+        args.json = True
+    if "--trace-id" in prefix_flags:
+        trace_idx = prefix_flags.index("--trace-id")
+        if trace_idx + 1 < len(prefix_flags):
+            args.trace_id = prefix_flags[trace_idx + 1]
+
     repo_root = find_repo_root()
     result = CallResult()
     if args.trace_id:
@@ -719,24 +775,47 @@ def main():
             result = repo_validate(repo_root, ephemeral=args.ephemeral)
         elif args.action == "check-stability":
             result = check_hub_stability(repo_root, changed_files=args.changed_files or [])
+        elif args.action == "doctor-catalog":
+            result = doctor_catalog(repo_root, strict=args.strict)
         else:
             result.status = "error"
             action_msg = f"unknown action '{args.action}'" if args.action else "missing action"
             result.errors.append(ErrorObject(
                 code=ErrorCode.ERR_VALIDATION,
                 message=f"{action_msg} for topic 'repo'",
-                fix_suggestion="Valid actions: status, validate, check-stability"
+                fix_suggestion="Valid actions: status, validate, check-stability, doctor-catalog"
             ))
 
     elif args.topic == "skills":
         if args.action == "list":
-            result = list_skills(repo_root, category=args.category)
+            result = list_skills(
+                repo_root,
+                category=args.category,
+                starter=args.starter,
+                archetype=args.archetype,
+                limit=args.limit,
+            )
         elif args.action == "route":
             result = route_skills(
                 repo_root,
                 request=" ".join(args.request),
                 top_k=args.top_k,
                 considered_limit=args.considered_limit,
+            )
+        elif args.action == "goal":
+            result = goal_skills(
+                repo_root,
+                intent_text=" ".join(args.intent),
+                top_k=args.top_k,
+                considered_limit=args.considered_limit,
+            )
+        elif args.action == "starter":
+            result = list_skills(
+                repo_root,
+                category=None,
+                starter=True,
+                archetype=args.archetype,
+                limit=args.limit,
             )
         elif args.action == "sync":
             result = sync_skills(repo_root, scope=args.scope, dry_run=args.dry_run)
@@ -754,7 +833,7 @@ def main():
             result.errors.append(ErrorObject(
                 code=ErrorCode.ERR_VALIDATION,
                 message=f"{action_msg} for topic 'skills'",
-                fix_suggestion="Valid actions: list, route, sync, audit, install, fold, init"
+                fix_suggestion="Valid actions: list, route, goal, starter, sync, audit, install, fold, init"
             ))
             
     elif args.topic == "plugins":
@@ -1033,12 +1112,29 @@ def main():
                     print(f"✅ Stability check passed ({result.data['stable_count']} stable skills)")
                     if args.changed_files:
                         print(f"   Checked {result.data['checked_files']} changed file(s)")
+                elif args.topic == "repo" and args.action == "doctor-catalog":
+                    report = result.data.get("catalog_parity", {})
+                    print(f"✅ Catalog parity: {report.get('decision_status', 'resolved')}")
+                    print(f"  Canonical count: {report.get('canonical_count')}")
+                    print(f"  Policy identity: {report.get('policy_identity')}")
+                    for surface in report.get("surfaces", []):
+                        print(
+                            "  - "
+                            f"{surface.get('surface_name')}: "
+                            f"{surface.get('observed_count')} / {surface.get('canonical_count')} "
+                            f"(parity_ok={surface.get('parity_ok')})"
+                        )
                 elif args.topic == "skills" and args.action == "list":
                     print(f"Discovered {len(result.data['skills'])} skills:")
                     for skill in result.data["skills"]:
                         print(f"  - {skill['name']} [{skill['category']}]")
                     if result.data.get("policy_identity"):
                         print(f"Policy identity: {result.data['policy_identity']}")
+                    if result.data.get("starter_mode"):
+                        print(
+                            f"Starter mode: archetype={result.data.get('starter_archetype')} "
+                            f"limit={result.data.get('starter_limit')}"
+                        )
                 elif args.topic == "skills" and args.action == "route":
                     decision = result.data["decision"]
                     print(f"🧭 Route decision: {decision['decision_status']}")
@@ -1069,6 +1165,33 @@ def main():
                                 f"  - {candidate.get('name')} ({candidate.get('path')}) "
                                 f"confidence={candidate.get('confidence', 0.0):.4f}"
                             )
+                elif args.topic == "skills" and args.action == "goal":
+                    goal = result.data["goal_decision"]
+                    print(f"🎯 Goal decision: {goal['decision_status']}")
+                    print(f"Policy identity: {goal['policy_identity']}")
+                    recommended = goal.get("recommended_candidate")
+                    if recommended:
+                        print(
+                            f"Recommended: {recommended.get('name')} "
+                            f"({recommended.get('path')})"
+                        )
+                    alternatives = goal.get("alternative_candidates", [])
+                    if alternatives:
+                        print("Alternatives:")
+                        for candidate in alternatives:
+                            print(f"  - {candidate.get('name')} ({candidate.get('path')})")
+                    prompts = goal.get("disambiguation_prompts", [])
+                    if prompts:
+                        print("Disambiguation prompts:")
+                        for prompt in prompts:
+                            print(f"  - {prompt}")
+                elif args.topic == "skills" and args.action == "starter":
+                    print(
+                        f"Starter skills ({len(result.data['skills'])}) "
+                        f"[{result.data.get('starter_archetype', 'general')}]"
+                    )
+                    for skill in result.data["skills"]:
+                        print(f"  - {skill['name']} [{skill['category']}]")
                 elif args.topic == "skills" and args.action == "sync":
                     print(f"✅ Planned sync: {len(result.data['plan']['symlinks'])} symlinks.")
                     for log in result.data.get("logs", []):
@@ -1261,6 +1384,19 @@ def main():
                             f"confidence={candidate.get('confidence', 0.0):.4f}"
                         )
                 print("")
+            if args.topic == "skills" and args.action == "goal" and result.data.get("goal_decision"):
+                goal = result.data["goal_decision"]
+                print(f"🎯 Goal decision: {goal.get('decision_status', 'unknown')}")
+                if goal.get("failure_class"):
+                    print(f"Failure class: {goal['failure_class']}")
+                if goal.get("operator_action"):
+                    print(f"Operator action: {goal['operator_action']}")
+                prompts = goal.get("disambiguation_prompts") or []
+                if prompts:
+                    print("Disambiguation prompts:")
+                    for prompt in prompts:
+                        print(f"  - {prompt}")
+                print("")
             error_message = error.message
             if args.topic == "skills" and args.action == "audit" and " First failures:" in error_message:
                 error_message = error_message.split(" First failures:", 1)[0]
@@ -1333,6 +1469,7 @@ def main():
                 print("\n📚 Repo examples:")
                 print("   ask repo status")
                 print("   ask repo validate --ephemeral")
+                print("   ask repo doctor-catalog --strict")
                 print("   ask repo check-stability --changed-files backend/cli-spec/SKILL.md")
             elif args.topic == "mcp":
                 print("\n📚 MCP examples:")

@@ -75,6 +75,86 @@ class TestAskCLI(unittest.TestCase):
         self.assertIn("considered_limit", decision)
         self.assertIn("selected_candidates", decision)
 
+    def test_skills_goal_json_contract(self):
+        """
+        Ensure the `ask skills goal create` CLI returns a JSON envelope containing a `goal_decision` with required fields.
+        
+        Asserts the top-level `status` and `data` keys exist and that `data.goal_decision` includes `schema_version`, `decision_status`, `policy_identity`, `recommended_candidate`, and `alternative_candidates`.
+        """
+        cmd = ["python3", "bin/ask", "skills", "goal", "create auth integration", "--json"]
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        self.assertTrue(result.stdout.strip(), f"Expected JSON output, stderr: {result.stderr}")
+        output = json.loads(result.stdout)
+        self.assertIn("status", output)
+        self.assertIn("data", output)
+        self.assertIn("goal_decision", output["data"])
+        goal = output["data"]["goal_decision"]
+        self.assertEqual(goal.get("schema_version"), "goal-decision.v1")
+        self.assertIn("decision_status", goal)
+        self.assertIn("policy_identity", goal)
+        self.assertIn("recommended_candidate", goal)
+        self.assertIn("alternative_candidates", goal)
+
+    def test_repo_doctor_catalog_json_contract(self):
+        """
+        Verify `ask repo doctor-catalog --json` returns a catalog parity payload with required fields.
+        
+        Asserts the CLI emits non-empty JSON and that `data.catalog_parity` contains `schema_version`, `drift_detected` and `surfaces`.
+        """
+        cmd = [__import__("sys").executable, "bin/ask", "repo", "doctor-catalog", "--json"]
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        self.assertTrue(result.stdout.strip(), f"Expected JSON output, stderr: {result.stderr}")
+        output = json.loads(result.stdout)
+        self.assertIn("status", output)
+        self.assertIn("catalog_parity", output.get("data", {}))
+        report = output["data"]["catalog_parity"]
+        self.assertEqual(report.get("schema_version"), "catalog-parity.v1")
+        self.assertIn("drift_detected", report)
+        self.assertIn("surfaces", report)
+
+    def test_goal_alias_normalization(self):
+        """
+        Ensure the `goal create` CLI alias returns a skills-style goal decision in the JSON envelope.
+        
+        Runs `bin/ask goal create auth integration --json`, asserts stdout contains JSON and that `data.goal_decision` exists.
+        """
+        cmd = [__import__("sys").executable, "bin/ask", "goal", "create auth integration", "--json"]
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        self.assertTrue(result.stdout.strip(), f"Expected JSON output, stderr: {result.stderr}")
+        output = json.loads(result.stdout)
+        self.assertIn("goal_decision", output.get("data", {}))
+
+    def test_goal_alias_normalization_with_prefix_global_flag(self):
+        """CA1: Verify ask --json goal alias maps to ask skills goal."""
+        cmd = [__import__("sys").executable, "bin/ask", "--json", "goal", "create auth integration"]
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+        self.assertTrue(result.stdout.strip(), f"Expected JSON output, stderr: {result.stderr}")
+        output = json.loads(result.stdout)
+        self.assertIn("goal_decision", output.get("data", {}))
+
+    def test_doctor_catalog_alias_normalization_with_prefix_global_flag(self):
+        """CA1: Verify ask --json doctor catalog alias maps to repo doctor-catalog."""
+        cmd = [__import__("sys").executable, "bin/ask", "--json", "doctor", "catalog"]
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+        self.assertTrue(result.stdout.strip(), f"Expected JSON output, stderr: {result.stderr}")
+        output = json.loads(result.stdout)
+        self.assertIn("catalog_parity", output.get("data", {}))
+
+    def test_skills_starter_mode(self):
+        """
+        Verify the CLI `skills starter` command returns starter-mode catalogue metadata for the chosen archetype.
+        
+        Runs `bin/ask skills starter --archetype delivery --limit 5 --json` and asserts the process exits with code 0, the JSON envelope `status` is `"success"`, `data.starter_mode` is truthy, `data.starter_archetype` equals `"delivery"`, and `data.skills` is a list.
+        """
+        cmd = [__import__("sys").executable, "bin/ask", "skills", "starter", "--archetype", "delivery", "--limit", "5", "--json"]
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+        self.assertEqual(result.returncode, 0, f"skills starter failed: {result.stderr}")
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "success")
+        self.assertTrue(output["data"].get("starter_mode"))
+        self.assertEqual(output["data"].get("starter_archetype"), "delivery")
+        self.assertIsInstance(output["data"].get("skills"), list)
+
     def test_plugins_list_state(self):
         """CA1: Verify ask plugins list returns lifecycle state groups."""
         cmd = ["python3", "bin/ask", "plugins", "list", "--json"]

@@ -28,32 +28,6 @@ EXCLUDED_REPO_SCAN_SEGMENTS = set(POLICY_EXCLUDED_SCAN_SEGMENTS)
 # scripts/sync_skills.sh hidden_flat_skills.
 HIDDEN_FLAT_SKILL_NAMES = set(POLICY_HIDDEN_FLAT_SKILL_NAMES)
 
-# Ignore SKILL.md files in implementation/support subtrees that are not
-# runtime-selectable skills.
-EXCLUDED_REPO_SCAN_SEGMENTS = {
-    "_archive",
-    "assets",
-    "rules",
-    "scripts",
-    "fixtures",
-    "examples",
-    "templates",
-    "references",
-    "agents",
-}
-
-# Keep hidden/internal skills out of runtime discovery. This mirrors
-# scripts/sync_skills.sh hidden_flat_skills.
-HIDDEN_FLAT_SKILL_NAMES = {
-    "coderabbit",
-    "linear",
-    "plugin-builder",
-    "plugin-creator",
-    "plugin-installer",
-    "skillgrade-graders",
-    "skillgrade-setup",
-}
-
 
 @dataclass(frozen=True)
 class SkillEntry:

@@ -16,11 +16,27 @@ if str(SCRIPTS_ROOT) not in sys.path:
 from ask.envelope import CallResult, ErrorObject
 from skill_discovery import discover_skill_entries, get_policy_identity
 from selection_policy import REPO_SCAN_ROOTS
-from ask.selection_contract import EligibleCandidate, build_decision_payload, canonical_sort_key
+from ask.catalog_parity import compute_catalog_parity
+from ask.selection_contract import (
+    EligibleCandidate,
+    build_decision_payload,
+    build_goal_decision,
+    canonical_sort_key,
+)
 
 
 def _get_python_command(with_packages: Optional[List[str]] = None) -> List[str]:
-    """Build a Python launcher command with deterministic uv-first resolution."""
+    """
+    Constructs a platform-appropriate Python invocation command prioritising uv/mise wrappers when available.
+    
+    The returned command is chosen with this observable precedence: a non-empty PYTHON_BIN environment value, a `mise`+`uv` wrapper, an `uv` wrapper, a user virtualenv at `~/.venvs/pyyaml/bin/python`, then the system `python3`.
+    
+    Parameters:
+        with_packages (Optional[List[str]]): Optional iterable of package names to request via `--with` when using a wrapper that accepts package flags; falsy entries are ignored.
+    
+    Returns:
+        List[str]: Tokenised command suitable for subprocess invocation to run Python.
+    """
     configured = os.environ.get("PYTHON_BIN", "").strip()
     if configured:
         return shlex.split(configured)
@@ -83,8 +99,35 @@ class _RouterSkill:
     description: str
     skill_path: str
 
+
+STARTER_ARCHETYPES = {
+    "general": (
+        "ce-brainstorm",
+        "ce-spec",
+        "ce-plan",
+        "ce-work",
+        "ce-technical-review",
+        "gh-workflow",
+        "docs-expert",
+        "context7",
+    ),
+    "delivery": ("ce-plan", "ce-work", "ce-review", "gh-workflow", "coding-harness"),
+    "review": ("ce-technical-review", "ce-review", "agent-native-audit", "security-best-practices"),
+    "docs": ("agents-md", "docs-expert", "context7", "openai-docs"),
+}
+
 # Explicitly load builder-specific logic using absolute paths to avoid namespace collisions
 def _load_builder_module(repo_root: Path, module_name: str):
+    """
+    Load a skill-builder script from the repository and return it as an imported module.
+    
+    Parameters:
+        repo_root (Path): Repository root used to locate `utilities/skill-builder/scripts/<module_name>.py`.
+        module_name (str): Script base name (without `.py`) to load.
+    
+    Returns:
+        module (types.ModuleType | None): The imported module object if the script exists and is loaded, `None` otherwise.
+    """
     module_path = repo_root / "utilities" / "skill-builder" / "scripts" / f"{module_name}.py"
     if not module_path.exists():
         return None
@@ -101,9 +144,86 @@ def _load_builder_module(repo_root: Path, module_name: str):
         return mod
     return None
 
-def list_skills(repo_root: Path, category: Optional[str] = None) -> CallResult:
+def _canonical_entries(repo_root: Path) -> list:
+    """
+    Return skill entries whose source directory is inside the repository root.
+    
+    Parameters:
+    	repo_root (Path): Repository root used to filter discovered skill entries.
+    
+    Returns:
+    	entries (list): List of discovered skill entries whose `source_dir` is relative to `repo_root`.
+    """
+    return [
+        entry
+        for entry in discover_skill_entries(source="repo")
+        if entry.source_dir.is_relative_to(repo_root)
+    ]
+
+
+def _starter_entries(entries: list, archetype: str, limit: int) -> list:
+    """
+    Selects a deterministic subset of skill entries for starter mode.
+    
+    Prefers skills listed in the chosen archetype (in archetype order) and, if needed, appends additional entries from the provided list until a bounded minimum of 1 up to `limit` items is reached. Unknown archetype keys fall back to the "general" archetype.
+    
+    Parameters:
+        entries (list): Iterable of skill entry objects; each must expose a `name` attribute.
+        archetype (str): Archetype key whose ordered starter names guide preferred selection.
+        limit (int): Maximum number of entries to return; values below 1 are treated as 1.
+    
+    Returns:
+        list: Ordered list of selected entries (length >= 1 and <= `limit`), preferring archetype-specified names first and then remaining entries in input order.
+    """
+    bounded_limit = max(1, int(limit))
+    archetype_key = archetype if archetype in STARTER_ARCHETYPES else "general"
+    preferred = list(STARTER_ARCHETYPES[archetype_key])
+    by_name = {entry.name: entry for entry in entries}
+    selected = [by_name[name] for name in preferred if name in by_name]
+    if len(selected) >= bounded_limit:
+        return selected[:bounded_limit]
+
+    seen = {item.name for item in selected}
+    for entry in entries:
+        if entry.name in seen:
+            continue
+        selected.append(entry)
+        if len(selected) >= bounded_limit:
+            break
+    return selected
+
+
+def list_skills(
+    repo_root: Path,
+    category: Optional[str] = None,
+    *,
+    starter: bool = False,
+    archetype: str = "general",
+    limit: int = 12,
+) -> CallResult:
+    """
+    Return a listing of skills in the repository, optionally filtered or reduced to a deterministic "starter" subset.
+    
+    Parameters:
+    	repo_root (Path): Root path of the repository to discover skills from; entries outside this root are excluded.
+    	category (Optional[str]): Case-insensitive substring filter applied to each skill's category; omit to include all.
+    	starter (bool): When true, return a deterministic, archetype-ordered subset of skills instead of the full set.
+    	archetype (str): Archetype key to select starter skills from; falls back to "general" when unknown.
+    	limit (int): Maximum number of skills to return when `starter` is true; coerced to at least 1.
+    
+    Returns:
+    	CallResult: Result with `status == "success"` and `data` containing:
+    		- "skills": list of objects with keys `name`, `path` (repository-relative when possible), `category`, `description`
+    		- "policy_identity": current policy identity string
+    		- When `starter` is true, also includes:
+    			- "starter_mode": true
+    			- "starter_archetype": resolved archetype key
+    			- "starter_limit": effective integer limit
+    """
     result = CallResult()
-    entries = discover_skill_entries(source="auto")
+    entries = _canonical_entries(repo_root)
+    if starter:
+        entries = _starter_entries(entries, archetype=archetype, limit=limit)
     skills_data = []
     for entry in entries:
         if category and category.lower() not in entry.category.lower():
@@ -116,6 +236,10 @@ def list_skills(repo_root: Path, category: Optional[str] = None) -> CallResult:
         })
     result.data["skills"] = skills_data
     result.data["policy_identity"] = get_policy_identity()
+    if starter:
+        result.data["starter_mode"] = True
+        result.data["starter_archetype"] = archetype if archetype in STARTER_ARCHETYPES else "general"
+        result.data["starter_limit"] = max(1, int(limit))
     result.status = "success"
     return result
 
@@ -378,7 +502,23 @@ def route_skills(
     top_k: int = 3,
     considered_limit: int = 20,
 ) -> CallResult:
-    """Route a request to deterministic skill candidates with explainability."""
+    """
+    Route a textual request to ranked skill candidates and build a decision payload.
+    
+    Parameters:
+        repo_root (Path): Repository root used to discover canonical skill entries.
+        request (str): Textual request to route; must be non-empty after trimming.
+        top_k (int): Number of top-ranked skills to return (bounded to at least 1).
+        considered_limit (int): Maximum number of candidate skills to consider when routing (bounded to at least 1).
+    
+    Returns:
+        CallResult: Result object whose `data` contains:
+            - `decision`: the decision payload produced by the routing logic.
+            - `catalog_parity`: parity information comparing catalog and routing considerations.
+            - `policy_identity`: policy identity used for the decision.
+            - `decision_status`: the decision's status string.
+        On error, `status` will be "error" and `errors` will include one or more `ErrorObject` entries describing validation, dependency or runtime issues.
+    """
     result = CallResult()
     query = request.strip()
     if not query:
@@ -405,9 +545,7 @@ def route_skills(
         return result
 
     eligible_candidates: list[EligibleCandidate] = []
-    for entry in discover_skill_entries(source="repo"):
-        if not entry.source_dir.is_relative_to(repo_root):
-            continue
+    for entry in _canonical_entries(repo_root):
         rel_path = entry.source_dir.relative_to(repo_root).as_posix()
         eligible_candidates.append(
             EligibleCandidate(
@@ -438,6 +576,12 @@ def route_skills(
         for candidate in ranked
     ]
 
+    catalog_parity = compute_catalog_parity(
+        repo_root,
+        strict=False,
+        route_considered_total=len(ordered_candidates),
+    )
+
     decision = build_decision_payload(
         request=query,
         policy_identity=get_policy_identity(),
@@ -446,10 +590,12 @@ def route_skills(
         eligible_candidates=ordered_candidates,
         ranked_candidates=ranked_payload,
         uncertainty_reasons=list(uncertainty_reasons),
+        catalog_parity_ok=not bool(catalog_parity.get("drift_detected")),
     )
 
     decision_status = decision["decision_status"]
     result.data["decision"] = decision
+    result.data["catalog_parity"] = catalog_parity
     result.data["policy_identity"] = decision["policy_identity"]
     result.data["decision_status"] = decision_status
 
@@ -463,6 +609,8 @@ def route_skills(
         code = "ERR_CONFLICT"
     elif failure_class == "DISCOVERY_POLICY_DRIFT":
         code = "ERR_DEPENDENCY"
+    elif failure_class == "CATALOG_PARITY_DRIFT":
+        code = "ERR_VALIDATION"
 
     result.status = "error"
     result.errors.append(
@@ -474,8 +622,83 @@ def route_skills(
     )
     return result
 
+
+def goal_skills(
+    repo_root: Path,
+    intent_text: str,
+    top_k: int = 3,
+    considered_limit: int = 20,
+) -> CallResult:
+    """
+    Builds a goal-oriented decision from an intent by routing the intent to skills and converting the resulting route decision into a goal decision.
+    
+    Parameters:
+    	repo_root (Path): Repository root used to discover and route against skills.
+    	intent_text (str): Natural-language intent to resolve into a goal decision.
+    	top_k (int): Maximum number of top candidate skills to return from routing.
+    	considered_limit (int): Number of skills to consider during routing.
+    
+    Returns:
+    	CallResult: Contains:
+    		- `data["goal_decision"]` (dict): The constructed goal decision payload.
+    		- `data["decision_status"]` (str): Final goal decision status.
+    		- `data["policy_identity"]` (dict): Policy identity associated with the decision.
+    		- `data["route_decision_status"]` (optional[str]): Status of the underlying route decision.
+    		On success (`decision_status == "resolved"`) the result.status is `"success"`. On failure the result.status is `"error"` and result.errors includes an ErrorObject with `code="ERR_VALIDATION"` and a `fix_suggestion` when available. If the routing step did not produce a decision payload the result.error contains an ErrorObject with `code="ERR_RUNTIME"`.
+    """
+    result = CallResult()
+    route_result = route_skills(
+        repo_root,
+        request=intent_text,
+        top_k=max(1, int(top_k)),
+        considered_limit=max(1, int(considered_limit)),
+    )
+    route_decision = route_result.data.get("decision") if isinstance(route_result.data, dict) else None
+    if not isinstance(route_decision, dict):
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_RUNTIME",
+                message="Route decision payload missing while building goal decision.",
+                fix_suggestion="Retry `ask skills goal` after restoring route command health.",
+            )
+        )
+        return result
+
+    goal_decision = build_goal_decision(route_decision)
+    result.data["goal_decision"] = goal_decision
+    result.data["decision_status"] = goal_decision["decision_status"]
+    result.data["policy_identity"] = goal_decision["policy_identity"]
+    result.data["route_decision_status"] = route_decision.get("decision_status")
+
+    if goal_decision["decision_status"] == "resolved":
+        result.status = "success"
+        return result
+
+    result.status = "error"
+    result.errors.append(
+        ErrorObject(
+            code="ERR_VALIDATION",
+            message=f"skills goal returned {goal_decision['decision_status']}",
+            fix_suggestion=goal_decision.get("operator_action"),
+        )
+    )
+    return result
+
 def _create_symlink(source: Path, target: Path, dry_run: bool = False) -> str:
-    """Safely create or update a symlink."""
+    """
+    Create or update a symbolic link at `target` that points to `source`.
+    
+    Ensures `target.parent` exists. If `target` already exists and is a directory (and not a symlink) it is removed; otherwise the existing file or symlink is unlinked before creating the new link. When `dry_run` is True no filesystem mutations are performed.
+    
+    Parameters:
+        source (Path): Path the new symlink should point to.
+        target (Path): Path at which to create or update the symlink.
+        dry_run (bool): If True, do not modify the filesystem; only simulate the action.
+    
+    Returns:
+        str: Human-readable action summary, e.g. "Created symlink: <target> -> <source>" or "Updated symlink: <target> -> <source>".
+    """
     action = "Created" if not target.exists() else "Updated"
     if not dry_run:
         target.parent.mkdir(parents=True, exist_ok=True)
