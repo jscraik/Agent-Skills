@@ -203,10 +203,10 @@ codex-automation-architect:
   verification-before-completion: Validate automation output before declaring done
 codex-home-audit:
   agents-md: Refactor AGENTS.md based on audit findings
-  skill-refactor: Run a skill health scan alongside the home audit
   fix-mise: Fix mise trust/runtime issues found during audit
   insight-report: Generate a usage report to inform audit priorities
   process-watch: Check process resource usage during a home directory audit
+  skill-refactor: Run a skill health scan alongside the home audit
   verification-before-completion: Verify fixes before marking the audit complete
 codex-hooks-builder:
   codex-agent-creator: Create or update agent roles that the hooks should invoke or
@@ -214,10 +214,6 @@ codex-hooks-builder:
   codex-home-audit: Audit an existing Codex home installation for hook drift or unsafe
     config
   gh-workflow: Ship and review hook-pack changes through the GitHub lifecycle
-skill-refactor:
-  codex-home-audit: Run alongside a full home directory audit
-  evals-router: Route evaluation work for under-performing skills
-  insight-report: Turn session scan findings into a polished usage report
 coding-harness:
   bootstrap: Clone and bootstrap a repository before coding-harness setup begins
   circleci: Work on CircleCI-specific pipeline design or migration details beyond
@@ -396,6 +392,20 @@ playwright-interactive:
   agentation: Wire Playwright automation into Agentation self-driving
   fixing-accessibility: Test keyboard navigation and focus via Playwright
   ui-visual-regression: Capture Playwright screenshots for regression baselines
+plugin-builder:
+  plugin-creator: Create the initial plugin scaffold before hardening/conversion workflows
+  plugin-installer: Handle downstream installation, provenance, and rollback after
+    package validation
+plugin-creator:
+  plugin-builder: Harden a scaffolded plugin package before publishing or validation-heavy
+    handoff
+  plugin-installer: Install and verify a contract-valid plugin after packaging is
+    complete
+plugin-installer:
+  plugin-builder: Run package hardening and contract checks before install/provenance
+    execution
+  plugin-creator: Scaffold a new local plugin before moving into install or visibility
+    repair
 process-watch:
   codex-home-audit: Check process health during a Codex home audit
   fix-mise: Diagnose mise shim CPU/memory issues via process-watch
@@ -507,13 +517,19 @@ shadcn-ui:
 skill-builder:
   codex-agent-creator: Reuse existing agent TOMLs or create role-specific custom agents
     for skill-linked delegation flows
-  skill-refactor: Audit skill coverage, failures, and overlap using real
-    session evidence instead of authoring doctrine alone
   decide-build-primitive: Decide whether the capability should be a skill, prompt,
     or agent before authoring it
+  skill-refactor: Audit skill coverage, failures, and overlap using real session evidence
+    instead of authoring doctrine alone
 skill-creator:
   codex-agent-creator: Create or update custom agents when skill workflows need dedicated
     role files
+skill-refactor:
+  codex-home-audit: Run alongside a full home directory audit
+  evals-router: Route evaluation work for under-performing skills
+  insight-report: Turn session scan findings into a polished usage report
+skillify:
+  skill-creator: Create first-draft skill scaffolds before hardening
 slides:
   beautiful-mermaid: Embed high-quality Mermaid diagrams in slide decks
   imagegen: Generate illustrative images for slide backgrounds
