@@ -4,6 +4,7 @@ import re
 from pathlib import Path
 from typing import List
 from ask.envelope import CallResult, ErrorObject
+from ask.catalog_parity import compute_catalog_parity
 
 def repo_status(repo_root: Path, verbose: bool = False) -> CallResult:
     """Returns overall health, sync status, and lint issues."""
@@ -69,6 +70,30 @@ def repo_validate(repo_root: Path, ephemeral: bool = False) -> CallResult:
             fix_suggestion="Review the validation logs in artifacts/validation/latest/"
         ))
 
+    return result
+
+
+def doctor_catalog(repo_root: Path, strict: bool = False) -> CallResult:
+    """Return canonical catalog parity diagnostics."""
+    result = CallResult()
+    report = compute_catalog_parity(repo_root, strict=strict)
+    result.data["catalog_parity"] = report
+    result.data["decision_status"] = report.get("decision_status")
+    result.data["policy_identity"] = report.get("policy_identity")
+
+    if not report.get("drift_detected"):
+        result.status = "success"
+        return result
+
+    result.status = "error"
+    result.errors.append(
+        ErrorObject(
+            code="ERR_VALIDATION",
+            message=f"doctor-catalog detected drift: {report.get('drift_class')}",
+            fix_suggestion=report.get("operator_action")
+            or "Run sync/projection tooling and rerun doctor-catalog.",
+        )
+    )
     return result
 
 def check_hub_stability(repo_root: Path, changed_files: List[str] = None) -> CallResult:

@@ -28,6 +28,7 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 ## Summary
 - `total_skills`: 116
 - `catalog_source`: repository skill scan
+- `policy_identity`: a97bdfca10970fcb
 
 ## Catalog
 

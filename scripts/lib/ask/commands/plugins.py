@@ -49,6 +49,7 @@ def doctor_plugins_state(repo_root: Path) -> CallResult:
         result.status = "success"
         return result
 
+    result.data["operator_action"] = "Inspect data.health_state.blockers and resolve failing checks before retrying."
     result.status = "error"
     result.errors.append(
         ErrorObject(

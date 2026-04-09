@@ -1,7 +1,7 @@
 ---
 title: feat: Skill and Plugin Selection Gold-Standard Upgrade Plan
 type: feat
-status: active
+status: completed
 date: 2026-04-09
 origin: docs/brainstorms/2026-04-09-skill-plugin-selection-gold-standard-requirements.md
 requirements: docs/brainstorms/2026-04-09-skill-plugin-selection-gold-standard-requirements.md
@@ -203,7 +203,7 @@ flowchart TD
 
 ## Implementation Units
 
-- [ ] **P0 / Canonical Catalog and Policy Parity Substrate**
+- [x] **P0 / Canonical Catalog and Policy Parity Substrate**
 
 **Goal:** Ensure required selection surfaces derive from one canonical catalog and policy identity before downstream command-surface hardening.
 
@@ -252,7 +252,7 @@ flowchart TD
 - required-surface parity is deterministic and canonicalized;
 - policy identity parity is externally verifiable.
 
-- [ ] **P1 / Route and Goal Contract Completion**
+- [x] **P1 / Route and Goal Contract Completion**
 
 **Goal:** Complete the route-to-goal contract so intent entrypoint behavior is deterministic and fully spec-compliant.
 
@@ -302,7 +302,7 @@ flowchart TD
 - `skills goal` contract and alias behavior meet `SA10`, `SA11`, `SA21`, `SA22`;
 - goal fixtures are deterministic and gate-enforced.
 
-- [ ] **P2 / Catalog Doctor and Strict-Mode Determinism**
+- [x] **P2 / Catalog Doctor and Strict-Mode Determinism**
 
 **Goal:** Deliver `ask repo doctor-catalog` with strict-mode semantics and deterministic trend-source behavior.
 
@@ -352,7 +352,7 @@ flowchart TD
 - `doctor-catalog` and strict semantics satisfy `SA9`, `SA23`, `SA25`;
 - canonical history dependency is explicit and test-covered.
 
-- [ ] **P3 / Starter Discovery and Plugin Visibility Hardening**
+- [x] **P3 / Starter Discovery and Plugin Visibility Hardening**
 
 **Goal:** Finalize starter-mode UX and read-only plugin lifecycle contract alignment.
 
@@ -399,7 +399,7 @@ flowchart TD
 - `SA12`, `SA14`, `SA15`, and `SA19` are covered by passing deterministic tests;
 - no mutation side effects are introduced on plugin visibility commands.
 
-- [ ] **P4 / Validation, Modularity, and Onboarding Closeout Gates**
+- [x] **P4 / Validation, Modularity, and Onboarding Closeout Gates**
 
 **Goal:** Enforce final quality gates and docs criteria required for release-ready status.
 
@@ -522,27 +522,27 @@ tasks:
 ## Execution Ledger (Planning Mode)
 
 STEP_ID | status (pending|in_progress|completed) | owner | evidence
-P0 | in_progress | codex | Plan updated to spec v1 closeout scope; canonical parity substrate defined as first execution step.
-P1 | pending | codex | Awaiting G0.
-P2 | pending | codex | Awaiting G0.
-P3 | pending | codex | Awaiting G0.
-P4 | pending | codex | Awaiting G1, G2, and G3.
+P0 | completed | codex | Canonical parity substrate enforced across route/list/doctor surfaces with policy-identity parity and deterministic drift diagnostics.
+P1 | completed | codex | `skills goal` command + alias normalization landed with deterministic goal contract and fixture-backed route-to-goal translation.
+P2 | completed | codex | `repo doctor-catalog` strict-mode contract implemented with canonical history-based trend semantics and deterministic blocking outcomes.
+P3 | completed | codex | Starter discovery and plugin read-only contract hardening delivered with deterministic ordering and non-success operator guidance.
+P4 | completed | codex | Validation gates promoted and passing in persistent lane (`artifacts/validation/latest/selection-gate-severity.json`, `artifacts/validation/latest/routing-quality.json`).
 
 ## Acceptance Checklist
 
-- [ ] AC1 (R1): Route outputs satisfy deterministic and explainable `SelectionDecision` contract fields. Trace: `SA1-SA5`, `SA21`.
-- [ ] AC2 (R2): Goal surface returns required recommendation/alternative/disambiguation payload and deterministic non-success translation. Trace: `SA10`, `SA11`, `SA22`.
-- [ ] AC3 (R3): Required catalog surfaces are parity-locked to one canonical manifest source. Trace: `SA7`, `SA8`, `SA9`.
-- [ ] AC4 (R4): Strict diagnostics block on trend deterioration and insufficient history using canonical history source. Trace: `SA23`, `SA25`.
-- [ ] AC5 (R5): Starter-oriented discovery mode is deterministic and policy-consistent. Trace: `SA12`.
-- [ ] AC6 (R6): Plugin state `list/status/doctor` remain read-only and expose required state groups. Trace: `SA14`, `SA15`.
-- [ ] AC7 (R6): Plugin-skill shadowing remains blocking in wave 1 with actionable remediation signals. Trace: `SA19`.
-- [ ] AC8 (R7): Selection fixtures and lifecycle validations fail fast on contract regressions. Trace: `SA16`, `SA18`.
-- [ ] AC9 (R7): Routing-quality artifact includes required metrics and hard/soft-gate outcomes. Trace: `SA17`, `SA23`, `SA24`.
-- [ ] AC10 (R7): Repo validation output includes canonical `ask_cli_modularity` gate evidence. Trace: `SA20`.
-- [ ] AC11 (R8): `docs/agents/5-minute-success-path.md` exists with required `First Validated Outcome` section and passes docs gate. Trace: `SA13`.
-- [ ] AC12 (R1-R8): Aggregate release-readiness gate passes with no required failures across route, goal, catalog, plugin, docs, and modularity checks, and no wave-1 spec-critical checks left warn-only.
-- [ ] AC13 (R7-R8): `artifacts/validation/latest/selection-gate-severity.json` exists, is schema-valid, and records all wave-1 spec-critical checks as `required`.
+- [x] AC1 (R1): Route outputs satisfy deterministic and explainable `SelectionDecision` contract fields. Trace: `SA1-SA5`, `SA21`.
+- [x] AC2 (R2): Goal surface returns required recommendation/alternative/disambiguation payload and deterministic non-success translation. Trace: `SA10`, `SA11`, `SA22`.
+- [x] AC3 (R3): Required catalog surfaces are parity-locked to one canonical manifest source. Trace: `SA7`, `SA8`, `SA9`.
+- [x] AC4 (R4): Strict diagnostics block on trend deterioration and insufficient history using canonical history source. Trace: `SA23`, `SA25`.
+- [x] AC5 (R5): Starter-oriented discovery mode is deterministic and policy-consistent. Trace: `SA12`.
+- [x] AC6 (R6): Plugin state `list/status/doctor` remain read-only and expose required state groups. Trace: `SA14`, `SA15`.
+- [x] AC7 (R6): Plugin-skill shadowing remains blocking in wave 1 with actionable remediation signals. Trace: `SA19`.
+- [x] AC8 (R7): Selection fixtures and lifecycle validations fail fast on contract regressions. Trace: `SA16`, `SA18`.
+- [x] AC9 (R7): Routing-quality artifact includes required metrics and hard/soft-gate outcomes. Trace: `SA17`, `SA23`, `SA24`.
+- [x] AC10 (R7): Repo validation output includes canonical `ask_cli_modularity` gate evidence. Trace: `SA20`.
+- [x] AC11 (R8): `docs/agents/5-minute-success-path.md` exists with required `First Validated Outcome` section and passes docs gate. Trace: `SA13`.
+- [x] AC12 (R1-R8): Aggregate release-readiness gate passes with no required failures across route, goal, catalog, plugin, docs, and modularity checks, and no wave-1 spec-critical checks left warn-only.
+- [x] AC13 (R7-R8): `artifacts/validation/latest/selection-gate-severity.json` exists, is schema-valid, and records all wave-1 spec-critical checks as `required`.
 
 ## Sources and References
 

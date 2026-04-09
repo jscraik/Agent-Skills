@@ -26,6 +26,7 @@ deepened: 2026-04-09
 - [Failure Model and Recovery](#failure-model-and-recovery)
 - [Observability](#observability)
 - [Acceptance and Test Matrix](#acceptance-and-test-matrix)
+- [Verification Targets](#verification-targets)
 - [Open Questions](#open-questions)
 - [Definition of Done](#definition-of-done)
 
@@ -111,7 +112,7 @@ Not owned by this spec:
 
 - `GoalRecommendation`
   - Intent-entrypoint payload.
-  - Required fields: `recommended_candidate`, `alternative_candidates` (exactly 2 when available), `disambiguation_prompts`, `decision_status`, `policy_identity`.
+  - Required fields: `schema_version`, `recommended_candidate`, `alternative_candidates` (exactly 2 when available), `disambiguation_prompts`, `decision_status`, `failure_class`, `operator_action`, `policy_identity`.
 
 - `PluginCandidate` (deferred)
   - Cross-type routing candidate for future waves.
@@ -127,7 +128,7 @@ Not owned by this spec:
 
 - `CatalogParityReport`
   - Diagnostic payload for trust-state checks.
-  - Required fields: `policy_identity`, `canonical_count`, `surfaces`, `drift_detected`, `blocking_reason`.
+  - Required fields: `schema_version`, `policy_identity`, `canonical_count`, `surfaces`, `drift_detected`, `drift_class`, `blocking_reason`, `operator_action`.
 
 - `PluginStateSnapshot`
   - Read-only plugin lifecycle state.
@@ -153,11 +154,13 @@ Not owned by this spec:
 8. Score/rank via router.
 9. Build `SelectionDecision` with explicit selected and excluded reasons.
 10. Resolve terminal status using deterministic precedence:
-   - `blocked_policy_drift`
-   - `blocked_catalog_parity`
-   - `unresolved_ambiguity`
-   - `degraded_no_candidates`
-   - `resolved`
+
+- `blocked_policy_drift`
+- `blocked_catalog_parity`
+- `unresolved_ambiguity`
+- `degraded_no_candidates`
+- `resolved`
+
 11. Emit decision and quality telemetry.
 
 ### B. Intent lifecycle (`ask skills goal`)
@@ -167,16 +170,24 @@ Not owned by this spec:
 3. If route status is `resolved`, select one recommendation plus two alternatives when available.
 4. If route status is non-resolved, emit `intent_unresolved` with structured disambiguation prompts.
 5. Produce concise disambiguation prompts when confidence is close or constraints are missing.
-6. Return `GoalRecommendation` with decision status and policy identity.
+6. Return `GoalRecommendation` including all required fields: `schema_version`, `recommended_candidate`, `alternative_candidates`, `disambiguation_prompts`, `decision_status`, `failure_class`, `operator_action`, and `policy_identity`.
 
 ### C. Catalog trust lifecycle (`ask repo doctor-catalog`)
 
 1. Read canonical counts from `CatalogManifest`.
 2. Read projected counts for `README`, root `SKILL.md`, `ask skills list`, and route considered metadata.
 3. Compare each surface to canonical counts.
-4. Return `CatalogParityReport` with `drift_detected`, drift class, and blocking reason.
+4. Return `CatalogParityReport` including all required fields: `schema_version`, `policy_identity`, `canonical_count`, `surfaces`, `drift_detected`, `drift_class`, `blocking_reason`, and `operator_action`.
 5. Emit `blocked_catalog_parity` when any required surface parity fails.
 6. Fail validation when any required surface parity fails.
+
+Strict mode semantics (`--strict`):
+
+- Default mode checks required surfaces only (`README`, root `SKILL.md`, `ask skills list`, route considered metadata).
+- Strict mode additionally treats missing surface projections and missing per-surface policy identity stamps as blocking drift, not warnings.
+- Strict mode escalates soft-gate deterioration signals into blocking catalog diagnostics when deterioration thresholds are breached.
+- Strict mode computes soft-gate deterioration only from the canonical routing-quality history artifact at `artifacts/selection-quality/history.jsonl`.
+- If strict mode has insufficient trend history (`<7` prior completed runs from canonical history), it must return a blocking outcome with `drift_class: trend_insufficient_history` and `blocking_reason: insufficient_history`.
 
 ### D. Plugin visibility lifecycle (`ask plugins list|status|doctor`)
 
@@ -190,6 +201,13 @@ Lifecycle ownership rule:
 - Route and goal must not mutate catalog or plugin state.
 - Catalog diagnostics must not mutate catalog sources.
 - Plugin visibility must not mutate plugin activation/install state.
+- Canonical manifest/projection ownership is explicit:
+  - `scripts/skill_catalog.py` owns canonical catalog manifest derivation.
+  - `scripts/sync_skills.sh` owns required projection refresh for root `SKILL.md` and `README.md`.
+- Strict trend history ownership is explicit:
+  - `artifacts/selection-quality/history.jsonl` is append-only per completed validation run.
+  - retention pruning is oldest-first under explicit cap and must preserve schema-valid entries.
+  - direct mutation outside validation/reporting pathways is out of contract.
 
 ## Interfaces and Dependencies
 
@@ -203,11 +221,11 @@ Primary interfaces:
 
 Normative CLI grammar (wave 1):
 
-| Surface | Canonical syntax | Required output contract |
-| --- | --- | --- |
-| Skills route | `ask skills route \"<request>\" [--top-k N] [--considered-limit N]` | `decision` payload with `schema_version`, `decision_status`, `failure_class`, considered metadata |
-| Intent route | `ask skills goal \"<intent_text>\" [--top-k N] [--considered-limit N]` | `goal_decision` payload with one `recommended_candidate`, up to two `alternative_candidates`, `disambiguation_prompts`, `decision_status`, `failure_class`, `policy_identity` |
-| Catalog diagnostics | `ask repo doctor-catalog [--strict]` | `catalog_parity` payload with `canonical_count`, per-surface observed counts, `drift_detected`, `drift_class`, `blocking_reason`, `policy_identity` |
+| Surface             | Canonical syntax                                                       | Required output contract                                                                                                                                                                                                                                 |
+| ------------------- | ---------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Skills route        | `ask skills route \"<request>\" [--top-k N] [--considered-limit N]`    | `decision` payload containing all required `SelectionDecision` fields (`schema_version`, `request_id`, `policy_identity`, `decision_status`, `failure_class`, `operator_action`, considered metadata, ordering, selected/considered/excluded candidates) |
+| Intent route        | `ask skills goal \"<intent_text>\" [--top-k N] [--considered-limit N]` | `goal_decision` payload with `schema_version`, one `recommended_candidate`, up to two `alternative_candidates`, `disambiguation_prompts`, `decision_status`, `failure_class`, `operator_action`, `policy_identity`                                       |
+| Catalog diagnostics | `ask repo doctor-catalog [--strict]`                                   | `catalog_parity` payload with `schema_version`, `canonical_count`, per-surface observed counts, `drift_detected`, `drift_class`, `blocking_reason`, `operator_action`, `policy_identity`                                                                 |
 
 Compatibility aliases:
 
@@ -219,7 +237,10 @@ Governance and parity dependencies:
 
 - Canonical discovery policy identity from selection policy/discovery layer.
 - Canonical catalog manifest and projection generators used by docs and CLI surfaces.
+  - Canonical manifest source: `scripts/skill_catalog.py`.
+  - Projection refresh source: `scripts/sync_skills.sh`.
 - Validation wrappers (`scripts/verify-work.sh`, `ask repo validate`) to run fail-fast parity and routing quality gates.
+- Canonical routing-quality trend history source at `artifacts/selection-quality/history.jsonl`, consumed by strict catalog diagnostics and validation trend checks.
 
 Contract versioning dependencies:
 
@@ -281,36 +302,38 @@ Recovery posture:
 
 Required decision/error/exit mapping:
 
-| Surface outcome | `decision_status` | `failure_class` | CLI `ErrorCode` | Exit code class |
-| --- | --- | --- | --- | --- |
-| Route/goal success | `resolved` | `null` | `SUCCESS` | `SUCCESS` |
-| Ambiguity unresolved | `unresolved_ambiguity` | `AMBIGUITY_UNRESOLVED` | `ERR_CONFLICT` | `ERR_CONFLICT` |
-| Policy parity blocked | `blocked_policy_drift` | `DISCOVERY_POLICY_DRIFT` | `ERR_DEPENDENCY` | `ERR_DEPENDENCY` |
-| No eligible candidates | `degraded_no_candidates` | `NO_ELIGIBLE_CANDIDATES` | `ERR_VALIDATION` | `ERR_VALIDATION` |
-| Catalog parity blocked | `blocked_catalog_parity` | `CATALOG_PARITY_DRIFT` | `ERR_VALIDATION` | `ERR_VALIDATION` |
-| Intent unresolved | `intent_unresolved` | `INTENT_UNRESOLVED` | `ERR_VALIDATION` | `ERR_VALIDATION` |
-| Plugin state unavailable | `degraded` (plugin doctor) | `PLUGIN_STATE_UNAVAILABLE` | `ERR_VALIDATION` | `ERR_VALIDATION` |
+| Surface outcome                                                    | `decision_status`          | `failure_class`            | CLI `ErrorCode`  | Exit code class  |
+| ------------------------------------------------------------------ | -------------------------- | -------------------------- | ---------------- | ---------------- |
+| Route success                                                      | `resolved`                 | `null`                     | `SUCCESS`        | `SUCCESS`        |
+| Goal success                                                       | `resolved`                 | `null`                     | `SUCCESS`        | `SUCCESS`        |
+| Route ambiguity unresolved                                         | `unresolved_ambiguity`     | `AMBIGUITY_UNRESOLVED`     | `ERR_CONFLICT`   | `ERR_CONFLICT`   |
+| Route policy parity blocked                                        | `blocked_policy_drift`     | `DISCOVERY_POLICY_DRIFT`   | `ERR_DEPENDENCY` | `ERR_DEPENDENCY` |
+| Route no eligible candidates                                       | `degraded_no_candidates`   | `NO_ELIGIBLE_CANDIDATES`   | `ERR_VALIDATION` | `ERR_VALIDATION` |
+| Route catalog parity blocked                                       | `blocked_catalog_parity`   | `CATALOG_PARITY_DRIFT`     | `ERR_VALIDATION` | `ERR_VALIDATION` |
+| Goal non-success translation (from any route non-resolved outcome) | `intent_unresolved`        | `INTENT_UNRESOLVED`        | `ERR_VALIDATION` | `ERR_VALIDATION` |
+| Plugin state unavailable                                           | `degraded` (plugin doctor) | `PLUGIN_STATE_UNAVAILABLE` | `ERR_VALIDATION` | `ERR_VALIDATION` |
 
 Deterministic failure precedence rules:
 
 - If policy and catalog parity both fail, outcome must be `blocked_policy_drift`.
-- `intent_unresolved` applies only to goal surface after route non-resolved outcomes are translated into goal guidance payloads.
+- `intent_unresolved` applies only to goal surface and must be used for any goal non-success after translating upstream route non-resolved outcomes.
 - `degraded_no_candidates` is valid only when blocking parity gates have passed.
-- Each non-success outcome must include a non-empty `operator_action`.
+- Each non-success route/goal/catalog outcome must include a non-empty `operator_action`.
+- Plugin doctor non-success must include at least one blocking reason and explicit remediation guidance.
 
 Required operator signals:
 
-| Failure class | Required operator signal |
-| --- | --- |
-| `DISCOVERY_POLICY_DRIFT` | mismatched policy identities by surface |
-| `CATALOG_PARITY_DRIFT` | canonical count and per-surface observed counts |
-| `AMBIGUITY_UNRESOLVED` | top conflicting candidates and disambiguation prompt |
-| `NO_ELIGIBLE_CANDIDATES` | request fingerprint, policy identity, eligibility hint |
-| `INCOMPLETE_EXPLAINABILITY` | missing field list by candidate/decision id |
-| `INTENT_UNRESOLVED` | why recommendation could not be safely resolved |
-| `PLUGIN_STATE_UNAVAILABLE` | missing or invalid plugin state source |
-| `PLUGIN_SKILL_SHADOWING` | overlapping names and ownership hint |
-| `SELECTION_REGRESSION` | fixture ids and behavioral diff summary |
+| Failure class               | Required operator signal                               |
+| --------------------------- | ------------------------------------------------------ |
+| `DISCOVERY_POLICY_DRIFT`    | mismatched policy identities by surface                |
+| `CATALOG_PARITY_DRIFT`      | canonical count and per-surface observed counts        |
+| `AMBIGUITY_UNRESOLVED`      | top conflicting candidates and disambiguation prompt   |
+| `NO_ELIGIBLE_CANDIDATES`    | request fingerprint, policy identity, eligibility hint |
+| `INCOMPLETE_EXPLAINABILITY` | missing field list by candidate/decision id            |
+| `INTENT_UNRESOLVED`         | why recommendation could not be safely resolved        |
+| `PLUGIN_STATE_UNAVAILABLE`  | missing or invalid plugin state source                 |
+| `PLUGIN_SKILL_SHADOWING`    | overlapping names and ownership hint                   |
+| `SELECTION_REGRESSION`      | fixture ids and behavioral diff summary                |
 
 ## Observability
 
@@ -332,6 +355,7 @@ Required artifacts:
 
 - `RoutingQualityArtifact` for route and goal decisions.
 - `CatalogParityReport` artifact from diagnostic checks.
+- Canonical trend history artifact at `artifacts/selection-quality/history.jsonl` for strict-mode deterioration checks.
 
 Artifact minimum fields:
 
@@ -349,17 +373,24 @@ Readiness gates:
 - Hard gate G1: required-surface catalog parity must be 100% before release progression.
 - Hard gate G2: explainability completeness must be 100% for resolved decisions.
 - Hard gate G3: failure mapping completeness must be 100% for non-success outcomes.
-- Soft gate G4: unresolved ambiguity and no-candidate rates must remain visible and trend-stable across releases.
+- Soft gate G4: unresolved ambiguity and no-candidate rates must remain visible and trend-stable across releases using a rolling 14-run window.
+
+Soft-gate deterioration thresholds:
+
+- Deterioration is true when either metric increases by more than 20% relative to the rolling baseline median and by at least +1 absolute percentage point.
+- Baseline is the median of the previous 7 completed validation runs within the rolling window.
+- Insufficient history (<7 runs) is reported as `trend_insufficient_history` and cannot be treated as healthy-by-default.
 
 Breach behavior:
 
 - Any hard-gate breach blocks release-ready status.
 - Soft-gate deterioration requires explicit operator note in validation artifact before progression.
+- Strict-mode diagnostics must block on insufficient or schema-invalid canonical history; missing history cannot be treated as healthy-by-default.
 
 ## Acceptance and Test Matrix
 
 - SA1: `ask skills route` accepts freeform requests and returns deterministic ranked skill candidates.
-- SA2: Route output includes `schema_version`, `request_id`, `policy_identity`, `decision_status`, and selected/excluded candidate sets.
+- SA2: Route output includes every required `SelectionDecision` field: `schema_version`, `request_id`, `policy_identity`, `decision_status`, `failure_class`, `operator_action`, `considered_limit`, `considered_total`, `considered_truncated`, `truncated_count`, `ordering`, `selected_candidates`, `considered_candidates`, and `excluded_candidates`.
 - SA3: Selected candidates include confidence and rationale; considered non-selected candidates include exclusion reason.
 - SA4: Ambiguity yields deterministic winner only when rules resolve; otherwise returns explicit `unresolved_ambiguity` payload.
 - SA5: Candidate ordering is canonicalized before scoring/truncation and output includes considered-limit/truncation metadata.
@@ -377,22 +408,49 @@ Breach behavior:
 - SA17: Validation emits routing-quality artifacts with unresolved-ambiguity, no-candidate, and rejection-reason metrics.
 - SA18: Validation fails fast on explainability gaps, policy drift, and catalog parity drift.
 - SA19: Plugin-skill shadowing is a blocking readiness failure in wave 1.
-- SA20: CLI command architecture preserves modular command handlers with measurable constraints: `bin/ask` remains parse/dispatch only for skills/plugins and gate verification includes a static ownership check from repo validation.
+- SA20: CLI command architecture preserves modular command handlers with measurable constraints: `bin/ask` remains parse/dispatch only for skills/plugins and gate verification includes the canonical `ask_cli_modularity` validation check in repo validation output.
 - SA21: Route, goal, and catalog diagnostic surfaces implement deterministic terminal-status precedence exactly as specified in lifecycle and failure-precedence rules.
 - SA22: Route/goal/catalog payloads expose explicit schema versions with v1 backward-compatibility guarantees for additive-only changes.
 - SA23: Validation artifacts encode hard-gate and soft-gate outcomes, and hard-gate breaches block release-ready status.
 - SA24: Alias-to-canonical command normalization is deterministic and reported in observability metrics.
+- SA25: `ask repo doctor-catalog --strict` enforces strict-mode semantics and reports strict-mode failures as blocking outcomes.
+
+## Verification Targets
+
+Required implementation and verification targets:
+
+- CLI command-surface behavior:
+  - `tests/test_ask_cli.py`
+  - `tests/test_ask_skills_route.py`
+  - `tests/test_ask_skills_goal.py`
+  - `tests/test_ask_repo_doctor_catalog.py`
+  - `tests/test_ask_skills_starter.py`
+  - `tests/test_ask_plugins_state.py`
+- Contract and schema validators:
+  - `scripts/verify_selection_contract.py`
+  - `scripts/verify_router_schema.py`
+  - `scripts/verify_ask_cli.py`
+  - `scripts/verify_ask_cli_final.py`
+- Catalog and lifecycle parity gates:
+  - `scripts/verify_skill_catalog_freshness.py`
+  - `scripts/test_skill_lifecycle_validation.py`
+- Aggregate release-readiness gate:
+  - `scripts/validate_all.sh`
+
+Verification expectation:
+
+- Route, goal, starter, catalog-diagnostics, and plugin-state contracts are all enforced by deterministic tests and validators in the targets above.
+- Required gates fail fast when contract-required payload fields, parity outcomes, strict-mode semantics, or modularity evidence regress.
 
 ## Open Questions
 
 - Exact output schema shape for `ask skills goal` and whether alternatives remain fixed at two or become configurable by policy.
 - Starter-mode namespace shape (`ask skills list --starter` vs `ask skills starter`) and default archetype taxonomy.
-- Artifact storage path and retention policy for cross-run routing-quality and parity diagnostics.
 - Whether v2 should include interactive fallback prompts for unresolved statuses without changing CI semantics.
 
 ## Definition of Done
 
-- All acceptance criteria `SA1`-`SA24` are implemented and validated.
+- All acceptance criteria `SA1`-`SA25` are implemented and validated.
 - Required routing and parity artifacts are emitted in repo validation flows.
 - Catalog trust mismatch reproductions are eliminated for required surfaces.
 - Wave-1 plugin visibility remains read-only and shadowing-protected.

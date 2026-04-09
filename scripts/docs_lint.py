@@ -17,6 +17,7 @@ from typing import Iterable
 LINK_RE = re.compile(r"!?\[[^\]]*\]\(([^)\n]+)\)")
 FILE_PATH_RE = re.compile(r"[A-Za-z0-9_./-]+[.][A-Za-z0-9]+")
 VAGUE_REF_RE = re.compile(r"\b(server file|config file|this file|that file|the file)\b", re.IGNORECASE)
+HEADING_RE = re.compile(r"^(#{1,6})\s+(.+?)\s*$")
 
 
 @dataclass
@@ -39,6 +40,7 @@ def load_config(config_path: Path) -> dict:
         "allow_relative_links": False,
         "allow_trailing_slash_links": False,
         "exclude_paths": [],
+        "required_sections": {},
     }
     defaults.update(cfg)
     return defaults
@@ -224,6 +226,63 @@ def index_file_issues(repo_root: Path, config: dict) -> list[Issue]:
     return issues
 
 
+def required_section_issues(repo_root: Path, config: dict) -> list[Issue]:
+    issues: list[Issue] = []
+    required_sections = config.get("required_sections", {})
+    if not isinstance(required_sections, dict):
+        return issues
+
+    for raw_path, raw_sections in required_sections.items():
+        rel_path = str(raw_path).strip()
+        if not rel_path:
+            continue
+        target = (repo_root / rel_path.lstrip("/")).resolve()
+        if not target.exists():
+            issues.append(
+                Issue(
+                    code="missing-required-doc",
+                    severity="error",
+                    file="/" + rel_path.lstrip("/"),
+                    line=1,
+                    message="Required documentation file is missing.",
+                    suggestion="Create the required doc path and include the mandated section headings.",
+                )
+            )
+            continue
+
+        expected_sections = [str(section).strip() for section in (raw_sections or []) if str(section).strip()]
+        headings: set[str] = set()
+        with target.open("r", encoding="utf-8") as f:
+            in_fence = False
+            for line in f:
+                stripped = line.strip()
+                if stripped.startswith("```"):
+                    in_fence = not in_fence
+                    continue
+                if in_fence:
+                    continue
+                match = HEADING_RE.match(stripped)
+                if not match:
+                    continue
+                heading_text = match.group(2).strip().rstrip("#").strip()
+                headings.add(heading_text)
+
+        for section in expected_sections:
+            if section not in headings:
+                issues.append(
+                    Issue(
+                        code="missing-required-section",
+                        severity="error",
+                        file="/" + target.relative_to(repo_root).as_posix(),
+                        line=1,
+                        message=f"Required section heading missing: {section}",
+                        suggestion=f"Add a markdown heading exactly named '{section}'.",
+                    )
+                )
+
+    return issues
+
+
 def emit_text_summary(issues: Iterable[Issue], effective_mode: str, scanned_files: int) -> None:
     issues = list(issues)
     errors = [i for i in issues if i.severity == "error"]
@@ -255,6 +314,7 @@ def main() -> int:
     for md in files:
         issues.extend(lint_file(md, repo_root, config))
     issues.extend(index_file_issues(repo_root, config))
+    issues.extend(required_section_issues(repo_root, config))
 
     emit_text_summary(issues, effective_mode, len(files))
 

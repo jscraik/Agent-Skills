@@ -50,7 +50,8 @@ class TestAskSkillsRoute(unittest.TestCase):
 
         with patch("ask.commands.skills.discover_skill_entries", return_value=entries):
             with patch("ask.commands.skills._load_builder_module", return_value=_RouterStub(ranked, [])):
-                result = route_skills(REPO_ROOT, "review this change", top_k=1, considered_limit=2)
+                with patch("ask.commands.skills.compute_catalog_parity", return_value={"drift_detected": False}):
+                    result = route_skills(REPO_ROOT, "review this change", top_k=1, considered_limit=2)
 
         self.assertEqual(result.status, "success")
         decision = result.data["decision"]
@@ -99,7 +100,8 @@ class TestAskSkillsRoute(unittest.TestCase):
                 "ask.commands.skills._load_builder_module",
                 return_value=_RouterStub(ranked, ["top_candidates_close_score"]),
             ):
-                result = route_skills(REPO_ROOT, "help me pick one", top_k=2, considered_limit=5)
+                with patch("ask.commands.skills.compute_catalog_parity", return_value={"drift_detected": False}):
+                    result = route_skills(REPO_ROOT, "help me pick one", top_k=2, considered_limit=5)
 
         self.assertEqual(result.status, "error")
         decision = result.data["decision"]
@@ -120,7 +122,8 @@ class TestAskSkillsRoute(unittest.TestCase):
 
         with patch("ask.commands.skills.discover_skill_entries", return_value=entries):
             with patch("ask.commands.skills._load_builder_module", return_value=_RouterStub([], [])):
-                result = route_skills(REPO_ROOT, "no match expected", top_k=1, considered_limit=5)
+                with patch("ask.commands.skills.compute_catalog_parity", return_value={"drift_detected": False}):
+                    result = route_skills(REPO_ROOT, "no match expected", top_k=1, considered_limit=5)
 
         self.assertEqual(result.status, "error")
         decision = result.data["decision"]

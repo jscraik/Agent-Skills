@@ -75,6 +75,54 @@ class TestAskCLI(unittest.TestCase):
         self.assertIn("considered_limit", decision)
         self.assertIn("selected_candidates", decision)
 
+    def test_skills_goal_json_contract(self):
+        """CA1: Verify ask skills goal exposes goal-decision fields."""
+        cmd = ["python3", "bin/ask", "skills", "goal", "create auth integration", "--json"]
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        self.assertTrue(result.stdout.strip(), f"Expected JSON output, stderr: {result.stderr}")
+        output = json.loads(result.stdout)
+        self.assertIn("status", output)
+        self.assertIn("data", output)
+        self.assertIn("goal_decision", output["data"])
+        goal = output["data"]["goal_decision"]
+        self.assertIn("schema_version", goal)
+        self.assertIn("decision_status", goal)
+        self.assertIn("policy_identity", goal)
+        self.assertIn("recommended_candidate", goal)
+        self.assertIn("alternative_candidates", goal)
+
+    def test_repo_doctor_catalog_json_contract(self):
+        """CA1: Verify ask repo doctor-catalog returns parity payload."""
+        cmd = ["python3", "bin/ask", "repo", "doctor-catalog", "--json"]
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        self.assertTrue(result.stdout.strip(), f"Expected JSON output, stderr: {result.stderr}")
+        output = json.loads(result.stdout)
+        self.assertIn("status", output)
+        self.assertIn("catalog_parity", output.get("data", {}))
+        report = output["data"]["catalog_parity"]
+        self.assertIn("schema_version", report)
+        self.assertIn("drift_detected", report)
+        self.assertIn("surfaces", report)
+
+    def test_goal_alias_normalization(self):
+        """CA1: Verify ask goal alias maps to ask skills goal."""
+        cmd = ["python3", "bin/ask", "goal", "create auth integration", "--json"]
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        self.assertTrue(result.stdout.strip(), f"Expected JSON output, stderr: {result.stderr}")
+        output = json.loads(result.stdout)
+        self.assertIn("goal_decision", output.get("data", {}))
+
+    def test_skills_starter_mode(self):
+        """CA1: Verify starter mode returns curated catalog metadata."""
+        cmd = ["python3", "bin/ask", "skills", "starter", "--archetype", "delivery", "--limit", "5", "--json"]
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, f"skills starter failed: {result.stderr}")
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "success")
+        self.assertTrue(output["data"].get("starter_mode"))
+        self.assertEqual(output["data"].get("starter_archetype"), "delivery")
+        self.assertIsInstance(output["data"].get("skills"), list)
+
     def test_plugins_list_state(self):
         """CA1: Verify ask plugins list returns lifecycle state groups."""
         cmd = ["python3", "bin/ask", "plugins", "list", "--json"]

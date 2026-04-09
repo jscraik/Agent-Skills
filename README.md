@@ -1,11 +1,12 @@
 # Agent Skills
 
-A governed repository of **129 skills** for AI coding agents (Codex, Claude, Gemini). Built around the **Agent Skills Kit (`ask`)** CLI.
+A governed repository of **116 skills** for AI coding agents (Codex, Claude, Gemini). Built around the **Agent Skills Kit (`ask`)** CLI.
 
 **What this gives you:**
+
 - **One place for skills** – Author in Markdown, sync to any runtime
 - **Quality gates** – Structural, security, and behavioral validation for every skill
-- **Living skill graph** – Browse 129 skills across 7 topic clusters with relationship mapping
+- **Living skill graph** – Browse 116 skills across 7 topic clusters with relationship mapping
 - **Agent-native CLI** – Fuzzy matching, JSON output, trace IDs, helpful errors
 
 ## Quick start
@@ -26,7 +27,7 @@ A governed repository of **129 skills** for AI coding agents (Codex, Claude, Gem
 ### Discover skills
 
 ```bash
-# Search 129 skills
+# Search 116 skills
 ./bin/ask graph find security --tier stable
 
 # See related skills
@@ -42,7 +43,7 @@ A governed repository of **129 skills** for AI coding agents (Codex, Claude, Gem
 # Quick structural check
 ./bin/ask skills audit backend/cli-spec --level compat
 
-# Full security audit  
+# Full security audit
 ./bin/ask skills audit backend/cli-spec --level strict
 
 # Run evaluation suite
@@ -80,6 +81,7 @@ When intent is clear but syntax is off, use `--robot` (or `-r`):
 ```
 
 Errors include suggestions and examples:
+
 ```
 ❌ Unknown topic: 'invalid'
 
@@ -105,6 +107,7 @@ Errors include suggestions and examples:
 ```
 
 **Response envelope** (all commands):
+
 ```json
 {
   "status": "success",
@@ -119,15 +122,15 @@ Errors include suggestions and examples:
 
 ## Skill graph (7 topic clusters)
 
-| Topic | Skills | Examples |
-|-------|--------|----------|
-| frontend-ui | 27 | react-ui-patterns, shadcn-ui, figma |
-| agent-ops | 22 | skill-builder, skill-creator, evals-router |
-| backend-platform | 16 | cli-spec, mcp-builder, workers-mcp |
-| product-strategy | 13 | product-spec, ce-spec, ce-plan |
-| security-ops | 7 | security-best-practices, security-threat-model |
-| content-publishing | 5 | slides, youtube-titles-thumbnails |
-| mobile-native | 4 | xcode-makefiles, test-xcode |
+| Topic              | Skills | Examples                                       |
+| ------------------ | ------ | ---------------------------------------------- |
+| frontend-ui        | 27     | react-ui-patterns, shadcn-ui, figma            |
+| agent-ops          | 22     | skill-builder, skill-creator, evals-router     |
+| backend-platform   | 16     | cli-spec, mcp-builder, workers-mcp             |
+| product-strategy   | 13     | product-spec, ce-spec, ce-plan                 |
+| security-ops       | 7      | security-best-practices, security-threat-model |
+| content-publishing | 5      | slides, youtube-titles-thumbnails              |
+| mobile-native      | 4      | xcode-makefiles, test-xcode                    |
 
 ## Repository layout
 
@@ -151,7 +154,7 @@ agent-skills/
 
 - **[CLI Specification](docs/cli-specs/2026-04-06-ask-cli-spec.md)** – Complete command reference
 - **[Agent Guide](AGENTS.md)** – AI agent workflow patterns
-- **[Skill Index](SKILL.md)** – All 129 skills by category
+- **[Skill Index](SKILL.md)** – All 116 skills by category
 - **[Implementation Review](docs/cli-specs/2026-04-06-ask-cli-implementation-review.md)** – Architecture details
 
 ## Privacy and Data Handling
@@ -161,6 +164,6 @@ This repository stores skill source, docs, and validation artifacts for local-fi
 ## Governance
 
 - **License:** Apache 2.0
-- **Skills:** 129 total across 7 topic clusters
+- **Skills:** 116 total across 7 topic clusters
 - **Validation:** 10+ automated checks via `./bin/ask repo validate`
 - **Compatibility:** Codex, Claude Code, Gemini/Antigravity

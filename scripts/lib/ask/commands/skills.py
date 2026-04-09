@@ -16,7 +16,13 @@ if str(SCRIPTS_ROOT) not in sys.path:
 from ask.envelope import CallResult, ErrorObject
 from skill_discovery import discover_skill_entries, get_policy_identity
 from selection_policy import REPO_SCAN_ROOTS
-from ask.selection_contract import EligibleCandidate, build_decision_payload, canonical_sort_key
+from ask.catalog_parity import compute_catalog_parity
+from ask.selection_contract import (
+    EligibleCandidate,
+    build_decision_payload,
+    build_goal_decision,
+    canonical_sort_key,
+)
 
 
 def _get_python_command(with_packages: Optional[List[str]] = None) -> List[str]:
@@ -83,6 +89,23 @@ class _RouterSkill:
     description: str
     skill_path: str
 
+
+STARTER_ARCHETYPES = {
+    "general": (
+        "ce-brainstorm",
+        "ce-spec",
+        "ce-plan",
+        "ce-work",
+        "ce-technical-review",
+        "gh-workflow",
+        "docs-expert",
+        "context7",
+    ),
+    "delivery": ("ce-plan", "ce-work", "ce-review", "gh-workflow", "coding-harness"),
+    "review": ("ce-technical-review", "ce-review", "agent-native-audit", "security-best-practices"),
+    "docs": ("agents-md", "docs-expert", "context7", "openai-docs"),
+}
+
 # Explicitly load builder-specific logic using absolute paths to avoid namespace collisions
 def _load_builder_module(repo_root: Path, module_name: str):
     module_path = repo_root / "utilities" / "skill-builder" / "scripts" / f"{module_name}.py"
@@ -101,9 +124,45 @@ def _load_builder_module(repo_root: Path, module_name: str):
         return mod
     return None
 
-def list_skills(repo_root: Path, category: Optional[str] = None) -> CallResult:
+def _canonical_entries(repo_root: Path) -> list:
+    return [
+        entry
+        for entry in discover_skill_entries(source="repo")
+        if entry.source_dir.is_relative_to(repo_root)
+    ]
+
+
+def _starter_entries(entries: list, archetype: str, limit: int) -> list:
+    bounded_limit = max(1, int(limit))
+    archetype_key = archetype if archetype in STARTER_ARCHETYPES else "general"
+    preferred = list(STARTER_ARCHETYPES[archetype_key])
+    by_name = {entry.name: entry for entry in entries}
+    selected = [by_name[name] for name in preferred if name in by_name]
+    if len(selected) >= bounded_limit:
+        return selected[:bounded_limit]
+
+    seen = {item.name for item in selected}
+    for entry in entries:
+        if entry.name in seen:
+            continue
+        selected.append(entry)
+        if len(selected) >= bounded_limit:
+            break
+    return selected
+
+
+def list_skills(
+    repo_root: Path,
+    category: Optional[str] = None,
+    *,
+    starter: bool = False,
+    archetype: str = "general",
+    limit: int = 12,
+) -> CallResult:
     result = CallResult()
-    entries = discover_skill_entries(source="auto")
+    entries = _canonical_entries(repo_root)
+    if starter:
+        entries = _starter_entries(entries, archetype=archetype, limit=limit)
     skills_data = []
     for entry in entries:
         if category and category.lower() not in entry.category.lower():
@@ -116,6 +175,10 @@ def list_skills(repo_root: Path, category: Optional[str] = None) -> CallResult:
         })
     result.data["skills"] = skills_data
     result.data["policy_identity"] = get_policy_identity()
+    if starter:
+        result.data["starter_mode"] = True
+        result.data["starter_archetype"] = archetype if archetype in STARTER_ARCHETYPES else "general"
+        result.data["starter_limit"] = max(1, int(limit))
     result.status = "success"
     return result
 
@@ -405,9 +468,7 @@ def route_skills(
         return result
 
     eligible_candidates: list[EligibleCandidate] = []
-    for entry in discover_skill_entries(source="repo"):
-        if not entry.source_dir.is_relative_to(repo_root):
-            continue
+    for entry in _canonical_entries(repo_root):
         rel_path = entry.source_dir.relative_to(repo_root).as_posix()
         eligible_candidates.append(
             EligibleCandidate(
@@ -438,6 +499,13 @@ def route_skills(
         for candidate in ranked
     ]
 
+    catalog_parity = compute_catalog_parity(
+        repo_root,
+        strict=False,
+        skills_list_count=len(_canonical_entries(repo_root)),
+        route_considered_total=len(ordered_candidates),
+    )
+
     decision = build_decision_payload(
         request=query,
         policy_identity=get_policy_identity(),
@@ -446,10 +514,12 @@ def route_skills(
         eligible_candidates=ordered_candidates,
         ranked_candidates=ranked_payload,
         uncertainty_reasons=list(uncertainty_reasons),
+        catalog_parity_ok=not bool(catalog_parity.get("drift_detected")),
     )
 
     decision_status = decision["decision_status"]
     result.data["decision"] = decision
+    result.data["catalog_parity"] = catalog_parity
     result.data["policy_identity"] = decision["policy_identity"]
     result.data["decision_status"] = decision_status
 
@@ -463,6 +533,8 @@ def route_skills(
         code = "ERR_CONFLICT"
     elif failure_class == "DISCOVERY_POLICY_DRIFT":
         code = "ERR_DEPENDENCY"
+    elif failure_class == "CATALOG_PARITY_DRIFT":
+        code = "ERR_VALIDATION"
 
     result.status = "error"
     result.errors.append(
@@ -470,6 +542,52 @@ def route_skills(
             code=code,
             message=f"skills route returned {decision_status}",
             fix_suggestion=decision.get("operator_action"),
+        )
+    )
+    return result
+
+
+def goal_skills(
+    repo_root: Path,
+    intent_text: str,
+    top_k: int = 3,
+    considered_limit: int = 20,
+) -> CallResult:
+    result = CallResult()
+    route_result = route_skills(
+        repo_root,
+        request=intent_text,
+        top_k=max(1, int(top_k)),
+        considered_limit=max(1, int(considered_limit)),
+    )
+    route_decision = route_result.data.get("decision") if isinstance(route_result.data, dict) else None
+    if not isinstance(route_decision, dict):
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_RUNTIME",
+                message="Route decision payload missing while building goal decision.",
+                fix_suggestion="Retry `ask skills goal` after restoring route command health.",
+            )
+        )
+        return result
+
+    goal_decision = build_goal_decision(route_decision)
+    result.data["goal_decision"] = goal_decision
+    result.data["decision_status"] = goal_decision["decision_status"]
+    result.data["policy_identity"] = goal_decision["policy_identity"]
+    result.data["route_decision_status"] = route_decision.get("decision_status")
+
+    if goal_decision["decision_status"] == "resolved":
+        result.status = "success"
+        return result
+
+    result.status = "error"
+    result.errors.append(
+        ErrorObject(
+            code="ERR_VALIDATION",
+            message=f"skills goal returned {goal_decision['decision_status']}",
+            fix_suggestion=goal_decision.get("operator_action"),
         )
     )
     return result
