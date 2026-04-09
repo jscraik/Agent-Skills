@@ -25,7 +25,7 @@ rollback_procedure: >
   If the generated SKILL.md is malformed, mismatched to the user intent, or saved to the wrong
   location, discard the generated files and regenerate from the latest confirmed interview
   answers. If regressions are introduced in this skill package, restore the previous
-  utilities/skillify files from git and rerun strict audit.
+  plugins/skill-factory/skills/skillify files from git and rerun strict audit.
 observability: >
   Monitor quality through (1) quick_validate pass rate for generated skill packages, (2) strict
   ask skills audit outcomes, (3) frequency of user-requested rewrites after draft review, and

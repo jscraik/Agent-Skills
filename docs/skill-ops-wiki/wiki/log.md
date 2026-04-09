@@ -16,4 +16,4 @@
 - Intent: `lesson-learned`
 - Status: `verified`
 - Source: /docs/skill-ops-wiki/wiki/sources/llm-wiki.md
-- Note: `docs/skill-ops-wiki/wiki/learnings/llm-wiki-reference.md`
+- Note: `/docs/skill-ops-wiki/wiki/learnings/llm-wiki-reference.md`

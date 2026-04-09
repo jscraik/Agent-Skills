@@ -109,7 +109,7 @@ Codex-native workflow for converting a just-completed conversation into a reusab
 - Draft has no TODO markers and is internally consistent.
 
 ### 7) Review and save
-- Present full `SKILL.md` draft in a fenced `yaml` block.
+- Present full `SKILL.md` draft in a fenced `markdown` block.
 - Ask for confirmation via `request_user_input` with a concise prompt.
 - On approval, write files and report:
   - saved path;

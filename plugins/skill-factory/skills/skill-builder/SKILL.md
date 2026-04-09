@@ -337,6 +337,7 @@ Reference files:
 - Use `references/advanced-workflow.md` for full install-distribute mechanics and checklists.
 
 ## See Also
+
 | Skill | When to use |
 |---|---|
 | [[decide-build-primitive]] | Decide whether the capability should be a skill, prompt, or agent before authoring it |
