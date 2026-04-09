@@ -121,10 +121,13 @@ Codex-native workflow for converting a just-completed conversation into a reusab
 
 ## Validation
 - Run:
+
 ```bash
-python3 plugins/skill-factory/skills/skill-creator/scripts/quick_validate.py utilities/skillify
-./bin/ask skills audit utilities/skillify --level strict --robot
+python3 plugins/skill-factory/skills/skill-creator/scripts/quick_validate.py plugins/skill-factory/skills/skillify
+./bin/ask skills audit plugins/skill-factory/skills/skillify --level strict --robot
+bash scripts/validate_skill_authoring_family.sh
 ```
+
 - Fail fast and fix the first reported issue before final handoff.
 
 ## Anti-patterns
@@ -151,9 +154,11 @@ python3 plugins/skill-factory/skills/skill-creator/scripts/quick_validate.py uti
 - `references/evals.yaml`
 
 ## See Also
+
 | Skill | When to use |
 |---|---|
 | [[skill-creator]] | Create first-draft skill scaffolds before hardening |
 | [[skill-installer]] | Install and surface a validated skill across Codex catalogs |
+
 
 **Topic map:** [[agent-ops]]
