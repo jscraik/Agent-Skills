@@ -23,6 +23,14 @@ class TestAskPluginsState(unittest.TestCase):
 
         plugin_manifest = self.repo_root / "plugins" / "example-plugin" / ".codex-plugin" / "plugin.json"
         plugin_manifest.parent.mkdir(parents=True, exist_ok=True)
+        (self.repo_root / "plugins" / "example-plugin" / "README.md").write_text(
+            "# Example Plugin\n\nTest fixture plugin.\n",
+            encoding="utf-8",
+        )
+        assets_dir = self.repo_root / "plugins" / "example-plugin" / "assets"
+        assets_dir.mkdir(parents=True, exist_ok=True)
+        (assets_dir / "icon.png").write_bytes(b"fixture-icon")
+        (assets_dir / "logo.png").write_bytes(b"fixture-logo")
         plugin_manifest.write_text(
             json.dumps(
                 {
@@ -30,7 +38,20 @@ class TestAskPluginsState(unittest.TestCase):
                     "name": "example-plugin",
                     "version": "0.1.0",
                     "description": "Example plugin",
+                    "skills": "./skills/",
                     "governance": {"owner": "Agent Skills Team"},
+                    "interface": {
+                        "displayName": "Example Plugin",
+                        "shortDescription": "Example short description",
+                        "longDescription": "Example long description",
+                        "developerName": "Agent Skills Team",
+                        "category": "Productivity",
+                        "capabilities": ["Interactive", "Read"],
+                        "websiteURL": "https://example.com",
+                        "defaultPrompt": "Help with example workflows.",
+                        "composerIcon": "./assets/icon.png",
+                        "logo": "./assets/logo.png",
+                    },
                 }
             )
             + "\n",
@@ -91,6 +112,92 @@ class TestAskPluginsState(unittest.TestCase):
         self.assertEqual(result.data["health_state"]["status"], "degraded")
         blockers = result.data["health_state"]["blockers"]
         self.assertTrue(any("PLUGIN_SKILL_SHADOWING" in blocker for blocker in blockers))
+
+    def test_doctor_reports_empty_readme_warning(self) -> None:
+        (self.repo_root / "plugins" / "example-plugin" / "README.md").write_text("", encoding="utf-8")
+
+        with patch(
+            "ask.plugin_state.subprocess.run",
+            return_value=subprocess.CompletedProcess(
+                args=[],
+                returncode=0,
+                stdout="Plugin-shadowing check passed",
+                stderr="",
+            ),
+        ):
+            result = doctor_plugins_state(self.repo_root)
+
+        self.assertEqual(result.status, "success")
+        quality = result.data["health_state"]["checks"]["plugin_package_quality"]
+        plugin_row = quality["plugins"][0]
+        self.assertEqual(plugin_row["issues"], [])
+        self.assertIn("README missing or empty", plugin_row["warnings"])
+
+    def test_doctor_accepts_hooks_only_manifest(self) -> None:
+        manifest_path = self.repo_root / "plugins" / "example-plugin" / ".codex-plugin" / "plugin.json"
+        manifest_payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+        manifest_payload.pop("skills", None)
+        manifest_payload["hooks"] = "./hooks.json"
+        manifest_path.write_text(json.dumps(manifest_payload) + "\n", encoding="utf-8")
+
+        with patch(
+            "ask.plugin_state.subprocess.run",
+            return_value=subprocess.CompletedProcess(
+                args=[],
+                returncode=0,
+                stdout="Plugin-shadowing check passed",
+                stderr="",
+            ),
+        ):
+            result = doctor_plugins_state(self.repo_root)
+
+        self.assertEqual(result.status, "success")
+        quality = result.data["health_state"]["checks"]["plugin_package_quality"]
+        plugin_row = quality["plugins"][0]
+        self.assertEqual(plugin_row["issues"], [])
+
+    def test_doctor_reports_missing_asset_warning(self) -> None:
+        (self.repo_root / "plugins" / "example-plugin" / "assets" / "icon.png").unlink()
+
+        with patch(
+            "ask.plugin_state.subprocess.run",
+            return_value=subprocess.CompletedProcess(
+                args=[],
+                returncode=0,
+                stdout="Plugin-shadowing check passed",
+                stderr="",
+            ),
+        ):
+            result = doctor_plugins_state(self.repo_root)
+
+        self.assertEqual(result.status, "success")
+        quality = result.data["health_state"]["checks"]["plugin_package_quality"]
+        plugin_row = quality["plugins"][0]
+        self.assertEqual(plugin_row["issues"], [])
+        self.assertTrue(any("interface.composerIcon" in warning for warning in plugin_row["warnings"]))
+
+    def test_doctor_reports_asset_path_escape_warning(self) -> None:
+        manifest_path = self.repo_root / "plugins" / "example-plugin" / ".codex-plugin" / "plugin.json"
+        manifest_payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+        manifest_payload["interface"]["logo"] = "../../outside/logo.png"
+        manifest_path.write_text(json.dumps(manifest_payload) + "\n", encoding="utf-8")
+
+        with patch(
+            "ask.plugin_state.subprocess.run",
+            return_value=subprocess.CompletedProcess(
+                args=[],
+                returncode=0,
+                stdout="Plugin-shadowing check passed",
+                stderr="",
+            ),
+        ):
+            result = doctor_plugins_state(self.repo_root)
+
+        self.assertEqual(result.status, "success")
+        quality = result.data["health_state"]["checks"]["plugin_package_quality"]
+        plugin_row = quality["plugins"][0]
+        self.assertEqual(plugin_row["issues"], [])
+        self.assertTrue(any("escapes plugin root" in warning for warning in plugin_row["warnings"]))
 
 
 if __name__ == "__main__":

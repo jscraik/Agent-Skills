@@ -1,0 +1,6 @@
+interface:
+  display_name: Frontend Design
+  short_description: Analyze broad frontend design requests and route them to the
+    correct local UI skill after classifying intent and matu...
+  icon_small: ./assets/icon-small.png
+  icon_large: ./assets/icon-large.png

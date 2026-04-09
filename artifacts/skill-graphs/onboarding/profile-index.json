@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-09T20:44:22Z",
+  "generated_at": "2026-04-09T21:40:55Z",
   "decision_date": "2026-04-09",
   "active_skill_count": 75,
   "expected_count": 75,
@@ -691,17 +691,6 @@
       "errors": []
     },
     {
-      "skill_path": "utilities/codex-sessions-skill-scan/SKILL.md",
-      "scope_skill": "utilities/codex-sessions-skill-scan",
-      "wave": "wave-2-co-pilot",
-      "profile_path": "utilities/codex-sessions-skill-scan/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
-      "profile_binding_mode": "implicit-default",
-      "delegation_mode": "co-pilot",
-      "status": "valid",
-      "errors": []
-    },
-    {
       "skill_path": "utilities/fix-mise/SKILL.md",
       "scope_skill": "utilities/fix-mise",
       "wave": "wave-1-manual",
@@ -772,6 +761,17 @@
       "scope_skill": "utilities/repoprompt",
       "wave": "wave-2-co-pilot",
       "profile_path": "utilities/repoprompt/references/task-profile.json",
+      "profile_binding": "references/task-profile.json",
+      "profile_binding_mode": "implicit-default",
+      "delegation_mode": "co-pilot",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "utilities/skill-refactor/SKILL.md",
+      "scope_skill": "utilities/skill-refactor",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "utilities/skill-refactor/references/task-profile.json",
       "profile_binding": "references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",

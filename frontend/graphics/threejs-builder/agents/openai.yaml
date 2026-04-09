@@ -1,0 +1,6 @@
+interface:
+  display_name: Threejs Builder
+  short_description: Build and validate simple, performant Three.js web apps using
+    modern ES module patterns
+  icon_small: ./assets/icon-small.png
+  icon_large: ./assets/icon-large.png

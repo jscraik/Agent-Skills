@@ -1,0 +1,5 @@
+interface:
+  display_name: Remotion
+  short_description: Best-practice guidance for Remotion (React video)
+  icon_small: ./assets/icon-small.png
+  icon_large: ./assets/icon-large.png

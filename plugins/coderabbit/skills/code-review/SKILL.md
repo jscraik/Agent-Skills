@@ -31,20 +31,29 @@ triggers:
 - Severity-grouped findings (critical, warning, info).
 - Task list for issues requiring follow-up.
 - Optional fix loop summary and rerun status.
+- Standardized handoff envelope:
+  - `schema_version`
+  - `summary`
+  - `actions`
+  - `validation`
+  - `risk_note`
+  - `next_step`
 
 ## Procedure
 1. Verify prerequisites:
-- `coderabbit --version`
-- `coderabbit auth status`
+   - `coderabbit --version`
+   - `coderabbit auth status`
 2. If missing CLI/auth, provide official install/login path and stop.
 3. Run review with requested scope and output mode:
-- `coderabbit review --prompt-only`
-- `coderabbit review --plain`
-4. Group findings by severity and surface file-specific actions.
-5. If user requested autonomous loop:
-- implement or apply fixes,
-- rerun review,
-- repeat until critical/warning findings are cleared or deferred.
+   - `coderabbit review --prompt-only`
+   - `coderabbit review --plain`
+4. Normalize plain output with:
+   - `python3 plugins/coderabbit/skills/code-review/scripts/parse_plain_review.py --input <path-or->`
+5. Group findings by severity and surface file-specific actions.
+6. If user requested autonomous loop:
+   - implement or apply fixes,
+   - rerun review,
+   - repeat until critical/warning findings are cleared or deferred.
 
 ## Validation
 - Fail fast on missing CLI or unauthenticated state.
@@ -73,4 +82,5 @@ triggers:
 - `references/contract.yaml`
 - `references/evals.yaml`
 - `references/task-profile.json`
+- `scripts/parse_plain_review.py`
 - https://docs.coderabbit.ai/cli

@@ -1,0 +1,42 @@
+schema_version: 1
+
+purpose: >
+  Generate and critically filter grounded improvement directions for the current
+  project before brainstorming one in depth, then preserve the ranked ideation
+  result in `docs/ideation/`.
+
+triggers:
+  - the user wants to know what to improve next in the current project
+  - the user wants idea generation, ranked project directions, or surprising but grounded improvements
+  - the user wants issue or bug themes translated into candidate directions before brainstorming
+  - the user wants an ideation artifact written or resumed in `docs/ideation/`
+
+inputs:
+  - an optional focus hint such as a subsystem, path, concept, constraint, or volume override
+  - access to the current repo and prior ideation docs
+  - optional issue-tracker intent when the user wants issue-theme analysis included
+  - optional constraints, risks, audience, or success criteria
+
+outputs:
+  - chosen ideation route (fresh or resume)
+  - a short grounding summary from the repo, learnings, and optional issue intelligence
+  - a merged candidate list generated before filtering
+  - explicit rejection reasons for discarded ideas
+  - a ranked survivor set suitable for `ce-brainstorm`
+  - optional survivor buckets (quick win, high leverage, strategic bet)
+  - a durable `docs/ideation/YYYY-MM-DD-<topic>-ideation.md` artifact before any handoff, sharing, or session end
+  - a recommended next workflow stage, usually `ce-brainstorm`
+
+non_goals:
+  - direct brainstorming of one chosen idea in depth
+  - specification writing, implementation planning, or code changes
+  - generic market research detached from the repo
+  - lowering the quality bar just to force a large survivor list
+
+risks:
+  - generic or detached ideas; mitigate with repo-first grounding and explicit issue-theme handling
+  - ranking before divergence; mitigate with generate-first, critique-second workflow
+  - weak survivor quality; mitigate with adversarial filtering and orchestrator-owned scoring
+  - novelty bias or complexity creep; mitigate with explicit value-versus-complexity, reliability, adoption, and reversibility checks
+  - overlap with brainstorming; mitigate with explicit stage boundary and `ce-brainstorm` handoff
+  - loss of work across sessions; mitigate with ideation artifact preservation before handoff, sharing, or session end

@@ -1,0 +1,9 @@
+interface:
+  display_name: "CE Spec"
+  short_description: "Turn a brainstorm, feature description, or UI source into a system spec or UI spec that planning can trust."
+
+policy:
+  allow_implicit_invocation: true
+
+dependencies:
+  tools: []

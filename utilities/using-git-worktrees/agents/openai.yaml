@@ -1,13 +1,8 @@
 interface:
   display_name: Using Git Worktrees
-  short_description: Align Codex and Claude worktree setup, sync strategy, and cleanup safety.
+  short_description: Align Codex and Claude worktree setup, sync strategy, and cleanup
+    safety.
+  icon_small: ./assets/icon-small.png
+  icon_large: ./assets/icon-large.png
 policy:
   allow_implicit_invocation: false
-
-# dependencies:
-#   tools:
-#     - type: "mcp"
-#       value: "serverName"
-#       description: "MCP server description"
-#       transport: "streamable_http"
-#       url: "https://example.com/mcp"

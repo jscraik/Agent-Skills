@@ -1,0 +1,6 @@
+interface:
+  display_name: Resolve PR Parallel
+  short_description: Resolve multiple unresolved GitHub PR review threads in parallel
+    by applying fixes, responding, and closing verified...
+  icon_small: ./assets/icon-small.png
+  icon_large: ./assets/icon-large.png

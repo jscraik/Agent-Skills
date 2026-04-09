@@ -1,6 +1,6 @@
 ---
 name: simplify
-description: Review changed code for reuse, quality, and efficiency, then apply cleanup fixes. This skill should be used when users request post-implementation simplification, refactoring, or final pre-merge cleanup of changed files.
+description: Review changed code for reuse, quality, efficiency, and behavior-preserving refactor polish. This skill should be used when users request post-implementation simplification or pre-merge maintainability cleanup on an existing diff.
 version: 0.1.0
 triggers:
   - coderabbit.?simplify
@@ -22,6 +22,7 @@ Run a focused cleanup pass over changed code to improve reuse, quality, and effi
 - [Outputs](#outputs)
 - [Workflow](#workflow)
 - [Modern Hardening Overlay (2026)](#modern-hardening-overlay-2026)
+- [Refactor Playbook Overlay](#refactor-playbook-overlay)
 - [Validation](#validation)
 - [Constraints](#constraints)
 - [Anti-patterns](#anti-patterns)
@@ -34,6 +35,7 @@ Run a focused cleanup pass over changed code to improve reuse, quality, and effi
 - Bias toward existing project utilities before introducing new helpers.
 - Keep findings actionable: identify issue, apply fix, then verify.
 - Use parallel specialist review for coverage, then one integrated edit pass.
+- Refactor in small reversible steps and keep validation tight after each meaningful edit cluster.
 
 ## When to Use
 
@@ -43,8 +45,10 @@ Use this skill when:
 - User asks for a cleanup/refactor pass after implementing a feature.
 - User asks for reuse, quality, and efficiency improvements before merge.
 - User wants a final polish pass that preserves behavior.
+- User asks for surgical refactors on changed code (for example: extract methods, reduce duplication, improve naming, replace magic values, simplify nested conditionals).
 
 Do not use this skill for net-new feature development with no existing diff.
+Do not use this skill for broad architecture rewrites across untouched areas.
 
 ## Inputs
 
@@ -58,8 +62,16 @@ Do not use this skill for net-new feature development with no existing diff.
 - `schema_version: 1` result summary.
 - Files reviewed and diff source used.
 - Findings and fixes grouped by reuse, quality, and efficiency.
+- Refactor operations applied (for example: extract-method, rename, guard-clauses, deduplicate helper) when relevant.
 - Skipped findings with brief reason.
 - Validation evidence run after edits.
+- Standardized handoff envelope:
+  - `schema_version`
+  - `summary`
+  - `actions`
+  - `validation`
+  - `risk_note`
+  - `next_step`
 
 ## Workflow
 
@@ -98,6 +110,8 @@ Review for:
 5. Stringly-typed logic that should use constants, unions, or existing typed primitives.
 6. Unnecessary JSX nesting that adds no layout value.
 7. Unnecessary comments that explain WHAT instead of non-obvious WHY.
+8. Long functions/modules that should be split into smaller focused units without behavior change.
+9. Nested conditional chains that should use guard clauses or clearer branching.
 
 #### Agent 3: Efficiency Review
 
@@ -144,6 +158,23 @@ Use this additive overlay for high-signal cleanup passes while preserving all ex
 Read when you need the full modern checklist and output schema:
 - `references/modern-hardening-2026.md`
 
+## Refactor Playbook Overlay
+
+Use this overlay when the user asks for "refactor", "clean up structure", or "make this easier to maintain" while preserving behavior.
+
+1. Pick the smallest valid operation first:
+   - extract method/function
+   - rename symbols for intent clarity
+   - deduplicate repeated logic via existing helpers first
+   - replace magic values with named constants
+   - flatten nested conditionals with guard clauses
+2. Keep scope anchored to changed files unless the user explicitly widens scope.
+3. Prefer incremental edits over pattern-heavy rewrites; introduce patterns only when they remove a concrete smell.
+4. Record skipped suggestions when risk is high, tests are missing, or evidence is insufficient.
+
+Read when you need the full smell catalog, operation checklist, and examples:
+- `references/refactor-playbook.md`
+
 ## Validation
 
 Run after fixes:
@@ -167,14 +198,26 @@ Run after fixes:
 - Repeating near-identical findings across agents without deduplication.
 - Applying speculative micro-optimizations with no observable benefit.
 - Keeping explanatory comments that restate obvious code behavior.
+- Introducing broad new abstraction layers when a local extract/rename would resolve the smell.
 
 ## Examples
 
 - "I’m done with this fix. Before I push, can you clean up duplication and obvious inefficiencies in the files I changed?"
 - "Please run a simplify pass on this PR diff and tighten up quality issues without changing behavior."
 - "I refactored auth handlers today; do a final cleanup check for reuse opportunities and hot-path waste."
+- "Refactor this changed service surgically: break down long functions and improve naming, but do not change behavior."
+
+## See Also
+
+| Skill | When to use |
+|---|---|
+| [[code-review]] | Run CodeRabbit CLI review to surface and prioritize risk findings before fix work |
+| [[autofix]] | Resolve unresolved CodeRabbit PR review comments in guided or batch mode |
+
+**Topic map:** [[code-quality]]
 
 ## References
 
 - `../coderabbit/references/coderabbit-docs/finishing-touches-simplify.md`
 - `references/modern-hardening-2026.md`
+- `references/refactor-playbook.md`

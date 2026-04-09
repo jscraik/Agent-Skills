@@ -1,0 +1,6 @@
+interface:
+  display_name: Best Practices
+  short_description: Audit Better Auth integrations for secure patterns, config mistakes,
+    and operational gaps
+  icon_small: ./assets/icon-small.png
+  icon_large: ./assets/icon-large.png

@@ -122,8 +122,8 @@ Codex-native workflow for converting a just-completed conversation into a reusab
 ## Validation
 - Run:
 ```bash
-python3 plugins/skill-factory/skills/skill-creator/scripts/quick_validate.py utilities/skillify
-./bin/ask skills audit utilities/skillify --level strict --robot
+python3 utilities/skill-builder/scripts/quick_validate.py <path/to/skill-folder>
+./bin/ask skills audit <path/to/skill-folder> --level strict --robot
 ```
 - Fail fast and fix the first reported issue before final handoff.
 

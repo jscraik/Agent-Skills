@@ -33,20 +33,29 @@ triggers:
 - Applied code changes tied to specific issues.
 - Optional single consolidated commit and optional push.
 - End-of-run PR comment summarizing what was fixed.
+- Standardized handoff envelope:
+  - `schema_version`
+  - `summary`
+  - `actions`
+  - `validation`
+  - `risk_note`
+  - `next_step`
 
 ## Procedure
 1. Load and follow repository `AGENTS.md` instructions before edits.
 2. Check `git status` and unpushed commits; warn user when review may be stale.
 3. Find the open PR for the current branch.
 4. Fetch unresolved review threads and filter to CodeRabbit bot authors.
-5. Parse issue metadata (severity, title, location, prompt text).
-6. Ask user for mode:
-- `manual`: show each proposed fix and request approval.
-- `auto`: apply all actionable fixes in order.
-7. Apply fixes, track changed files, and preserve original issue ordering.
-8. If changes exist, create one consolidated commit.
-9. Offer validation checks before push.
-10. If approved, push and post one final summary comment on the PR.
+5. Prefer deterministic retrieval via:
+   - `python3 plugins/coderabbit/skills/autofix/scripts/fetch_unresolved_threads.py --owner <owner> --repo <repo> --pr <number>`
+6. Parse issue metadata (severity, title, location, prompt text).
+7. Ask user for mode:
+   - `manual`: show each proposed fix and request approval.
+   - `auto`: apply all actionable fixes in order.
+8. Apply fixes, track changed files, and preserve original issue ordering.
+9. If changes exist, create one consolidated commit.
+10. Offer validation checks before push.
+11. If approved, push and post one final summary comment on the PR.
 
 ## Validation
 - Fail fast: stop immediately on missing PR context or no unresolved CodeRabbit threads.
@@ -75,4 +84,5 @@ triggers:
 - `references/contract.yaml`
 - `references/evals.yaml`
 - `references/task-profile.json`
+- `scripts/fetch_unresolved_threads.py`
 - `github.md`

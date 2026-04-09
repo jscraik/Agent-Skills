@@ -17,7 +17,6 @@ Build and harden safe, focused plugin packages for Codex workflows.
 ## Table of Contents
 - [When to use](#when-to-use)
 - [Required inputs](#required-inputs)
-- [Agent injection](#agent-injection)
 - [Deliverables](#deliverables)
 - [Core philosophy](#core-philosophy)
 - [Encouraging variation](#encouraging-variation)
@@ -50,17 +49,7 @@ Handoffs:
 - requested plugin surfaces (`skills/`, `hooks.json`, `agents/`, `.mcp.json`, `.app.json`);
 - source URL/path and pinned ref when converting third-party sources;
 - validation depth (`none`, `smoke`, `full`).
-
-## Agent injection
-When plugin hardening includes agent-role wiring for plugin surfaces:
-
-1. Reuse existing role TOMLs from `/Users/jamiecraik/dev/configs/codex/agents/` when they match the plugin scope.
-2. If no suitable role exists, call [[codex-agent-builder]] to create a purpose-built role.
-3. Validate each role file before packaging completion:
-   - `bash utilities/codex-agent-creator/scripts/validate_role.sh --agent-name <name> --agent-file <path>`
-4. Install/update role files only when explicitly requested:
-   - `bash utilities/codex-agent-creator/scripts/install_role.sh --agent-name <name> --agent-file <path> --scope project|global [--update-existing]`
-5. Record role provenance in `references/operational-spec.md` or closeout notes.
+- `uv` available on `PATH` (required for helper script execution).
 
 ## Deliverables
 Produce only what the request needs:
@@ -100,20 +89,20 @@ No two plugin hardening runs should look identical when risk context differs.
 Core commands:
 
 ```bash
-python3 utilities/plugin-builder/scripts/plugin_builder.py inspect-source <source-path-or-repo>
-python3 utilities/plugin-builder/scripts/plugin_builder.py scaffold <plugin-name> --path plugins --with-marketplace
-python3 utilities/plugin-builder/scripts/plugin_builder.py validate <path/to/plugin> --require-marketplace --marketplace-path .agents/plugins/marketplace.json
+uv run python utilities/plugin-builder/scripts/plugin_builder.py inspect-source <source-path-or-repo>
+uv run python utilities/plugin-builder/scripts/plugin_builder.py scaffold <plugin-name> --path plugins --with-marketplace
+uv run python utilities/plugin-builder/scripts/plugin_builder.py validate <path/to/plugin> --require-marketplace --marketplace-path .agents/plugins/marketplace.json
 ```
 
 ## Validation
 Run checks in order and fail fast: stop at first failure, fix it, then rerun from that gate.
 
 ```bash
-python3 utilities/plugin-builder/scripts/plugin_builder.py inspect-local <plugin-name> --path plugins
-python3 utilities/plugin-builder/scripts/plugin_builder.py validate <path/to/plugin> --require-marketplace --marketplace-path .agents/plugins/marketplace.json
-python3 utilities/plugin-builder/scripts/plugin_builder.py audit-compat <path/to/plugin> --marketplace-path .agents/plugins/marketplace.json
-python3 utilities/plugin-builder/scripts/plugin_builder.py audit-marketplace --marketplace-path .agents/plugins/marketplace.json --plugins-path plugins
-python3 utilities/plugin-builder/scripts/plugin_builder.py normalize-marketplace --marketplace-path .agents/plugins/marketplace.json --plugins-path plugins --write
+uv run python utilities/plugin-builder/scripts/plugin_builder.py inspect-local <plugin-name> --path plugins
+uv run python utilities/plugin-builder/scripts/plugin_builder.py validate <path/to/plugin> --require-marketplace --marketplace-path .agents/plugins/marketplace.json
+uv run python utilities/plugin-builder/scripts/plugin_builder.py audit-compat <path/to/plugin> --marketplace-path .agents/plugins/marketplace.json
+uv run python utilities/plugin-builder/scripts/plugin_builder.py audit-marketplace --marketplace-path .agents/plugins/marketplace.json --plugins-path plugins
+uv run python utilities/plugin-builder/scripts/plugin_builder.py normalize-marketplace --marketplace-path .agents/plugins/marketplace.json --plugins-path plugins --write
 ```
 
 Family gate note:
@@ -149,6 +138,7 @@ If the request is out of scope, route clearly:
 
 | Skill | When to use |
 |---|---|
-| [[codex-agent-builder]] | Reuse or create plugin-scoped custom agents for `agents/` surface integration |
+| [[plugin-creator]] | Create the initial plugin scaffold before hardening/conversion workflows |
+| [[plugin-installer]] | Handle downstream installation, provenance, and rollback after package validation |
 
 **Topic map:** [[agent-ops]]

@@ -1,0 +1,6 @@
+interface:
+  display_name: Stitch React Components
+  short_description: Convert Stitch screens into modular Vite or React components
+    with extracted structure and style-system alignment
+  icon_small: ./assets/icon-small.png
+  icon_large: ./assets/icon-large.png

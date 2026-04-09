@@ -1,0 +1,6 @@
+interface:
+  display_name: Docs Expert
+  short_description: Audit and rewrite repository documentation, runbooks, and in-code
+    docs with repo-visibility and brand-quality checks
+  icon_small: ./assets/icon-small.png
+  icon_large: ./assets/icon-large.png

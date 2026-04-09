@@ -1,4 +1,7 @@
 interface:
-  display_name: "Security Ownership Map"
-  short_description: "Map maintainers, bus factor, and sensitive code ownership"
-  default_prompt: "Build a security ownership map for this repository and identify bus-factor risks in sensitive code."
+  display_name: Security Ownership Map
+  short_description: Map maintainers, bus factor, and sensitive code ownership
+  icon_small: ./assets/icon-small.png
+  icon_large: ./assets/icon-large.png
+  default_prompt: Build a security ownership map for this repository and identify
+    bus-factor risks in sensitive code.

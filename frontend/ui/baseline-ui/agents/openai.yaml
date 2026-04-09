@@ -1,0 +1,6 @@
+interface:
+  display_name: Baseline UI
+  short_description: Check Tailwind UI work for accessibility, performance, theming,
+    responsive behavior, and anti-patterns
+  icon_small: ./assets/icon-small.png
+  icon_large: ./assets/icon-large.png

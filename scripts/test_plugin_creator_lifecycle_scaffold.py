@@ -43,6 +43,7 @@ class PluginCreatorLifecycleScaffoldTests(unittest.TestCase):
             self.assertEqual(result.returncode, 0, result.stderr or result.stdout)
 
             manifest_path = Path(tmpdir) / "example-plugin" / ".codex-plugin" / "plugin.json"
+            readme_path = Path(tmpdir) / "example-plugin" / "README.md"
             payload = json.loads(manifest_path.read_text(encoding="utf-8"))
             self.assertEqual(payload["schema_version"], 1)
             self.assertEqual(payload["description"], "Plugin for testing lifecycle-aware scaffolds.")
@@ -55,6 +56,10 @@ class PluginCreatorLifecycleScaffoldTests(unittest.TestCase):
             self.assertEqual(payload["skills"], "./skills/")
             self.assertEqual(payload["mcpServers"], "./.mcp.json")
             self.assertNotIn("[TODO:", manifest_path.read_text(encoding="utf-8"))
+            self.assertEqual(
+                readme_path.read_text(encoding="utf-8"),
+                "# Example Plugin\n\nPlugin for testing lifecycle-aware scaffolds.\n",
+            )
 
     def test_requires_review_cadence_for_governed_plugin_scaffold(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -69,6 +74,21 @@ class PluginCreatorLifecycleScaffoldTests(unittest.TestCase):
             )
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("--review-cadence", result.stderr)
+
+    def test_requires_owner_and_review_cadence_when_description_sets_lifecycle_mode(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            result = _run(
+                "example-plugin",
+                "--path",
+                tmpdir,
+                "--description",
+                "Plugin for testing lifecycle-aware scaffolds.",
+            )
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn(
+                "requires --description, --owner, and --review-cadence",
+                result.stderr,
+            )
 
 
 if __name__ == "__main__":

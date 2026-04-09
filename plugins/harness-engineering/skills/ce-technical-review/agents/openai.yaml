@@ -1,0 +1,9 @@
+interface:
+  display_name: "CE Technical Review"
+  short_description: "Run focused technical critique on diffs, PRs, specs, and plans with severity-ranked findings and readiness guidance."
+
+policy:
+  allow_implicit_invocation: true
+
+dependencies:
+  tools: []

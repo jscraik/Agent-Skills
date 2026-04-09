@@ -1,0 +1,6 @@
+interface:
+  display_name: Repoprompt
+  short_description: Plan and troubleshoot Repo Prompt integration across editors,
+    agents, MCP, and CLI workflows
+  icon_small: ./assets/icon-small.png
+  icon_large: ./assets/icon-large.png

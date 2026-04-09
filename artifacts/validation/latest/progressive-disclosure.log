@@ -1,13 +1,13 @@
 WARN  product/ops/ce-deepen-plan/SKILL.md: SKILL.md exceeds target length (lines=356, target=320)
 WARN  product/ops/ce-deepen-spec/SKILL.md: SKILL.md exceeds target length (lines=349, target=320)
-WARN  product/ops/ce-plan/SKILL.md: SKILL.md exceeds target length (lines=322, target=320)
+WARN  product/ops/ce-plan/SKILL.md: SKILL.md exceeds target length (lines=321, target=320)
 WARN  product/ops/ce-reliability-review/SKILL.md: SKILL.md exceeds target length (lines=347, target=320)
 WARN  product/ops/ce-review/SKILL.md: SKILL.md exceeds target length (lines=334, target=320)
 WARN  product/ops/ce-spec/SKILL.md: SKILL.md exceeds target length (lines=353, target=320)
 WARN  product/ops/ce-technical-review/SKILL.md: SKILL.md exceeds target length (lines=326, target=320)
 WARN  product/ops/ce-work/SKILL.md: SKILL.md exceeds target length (lines=322, target=320)
 WARN  product/strategy/product-design-critic/SKILL.md: SKILL.md exceeds target length (lines=351, target=320)
-Checked files: 109
+Checked files: 110
 Errors: 0
 Warnings: 9
 Mode: strict

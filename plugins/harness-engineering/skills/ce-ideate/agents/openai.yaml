@@ -1,0 +1,9 @@
+interface:
+  display_name: "CE Ideate"
+  short_description: "Generate, challenge, and rank grounded project-improvement ideas before ce-brainstorm."
+
+policy:
+  allow_implicit_invocation: true
+
+dependencies:
+  tools: []

@@ -1,0 +1,6 @@
+interface:
+  display_name: Recon Workbench
+  short_description: Run authorized, evidence-backed Recon Workbench (rwb) workflows
+    (doctor/authorize/plan/run/summarize/manifest/validat...
+  icon_small: ./assets/icon-small.png
+  icon_large: ./assets/icon-large.png

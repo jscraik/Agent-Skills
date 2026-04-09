@@ -41,10 +41,10 @@ Planning heuristic:
 Use initialization for new skills:
 
 ```bash
-scripts/init_skill.py <skill-name> --path <output-directory> [--resources scripts,references,assets] [--examples]
+python3 scripts/init_skill.py <skill-name> --path <output-directory> [--resources scripts,references,assets] [--examples]
 ```
 
-Run this from the repository root where `scripts/init_skill.py` exists. If you are outside that root, call the script with an absolute path.
+Run this from the repository root where `scripts/init_skill.py` exists. If you are outside that root, call it with `python3 /absolute/path/to/init_skill.py ...`.
 
 Defaults and naming:
 
@@ -70,7 +70,7 @@ When updating metadata:
 Run baseline and strict checks:
 
 ```bash
-scripts/quick_validate.py <path/to/skill-folder>
+python3 scripts/quick_validate.py <path/to/skill-folder>
 ./bin/ask skills audit <path/to/skill-folder> --level strict --robot
 ```
 

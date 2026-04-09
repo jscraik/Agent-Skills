@@ -1,0 +1,3 @@
+interface:
+  display_name: "Skill Factory"
+  short_description: "Route to create, improve, install, or skillify lanes"

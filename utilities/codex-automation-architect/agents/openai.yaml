@@ -1,22 +1,24 @@
 interface:
-  display_name: "Codex Automation Architect"
-  short_description: "Create/review/merge Codex automations with hardened validation"
-  default_prompt: "Design or audit Codex automations, run blocker/permission preflight, and return merge-ready recommendations with validation evidence."
-
+  display_name: Codex Automation Architect
+  short_description: Create/review/merge Codex automations with hardened validation
+  icon_small: ./assets/icon-small.png
+  icon_large: ./assets/icon-large.png
+  default_prompt: Design or audit Codex automations, run blocker/permission preflight,
+    and return merge-ready recommendations with validation evidence.
 dependencies:
   tools:
-    - type: "mcp"
-      value: "openaiDeveloperDocs"
-      description: "OpenAI/Codex official docs MCP"
-      transport: "streamable_http"
-      url: "https://developers.openai.com/mcp"
-    - type: "mcp"
-      value: "codexRepo"
-      description: "Codex repository MCP for releases/docs/search grounding"
-      transport: "local_connector"
-      url: "app://codex_repo"
-    - type: "mcp"
-      value: "context7"
-      description: "Context7 MCP for RRULE and dependency best-practice grounding"
-      transport: "local_connector"
-      url: "app://context7"
+  - type: mcp
+    value: openaiDeveloperDocs
+    description: OpenAI/Codex official docs MCP
+    transport: streamable_http
+    url: https://developers.openai.com/mcp
+  - type: mcp
+    value: codexRepo
+    description: Codex repository MCP for releases/docs/search grounding
+    transport: local_connector
+    url: app://codex_repo
+  - type: mcp
+    value: context7
+    description: Context7 MCP for RRULE and dependency best-practice grounding
+    transport: local_connector
+    url: app://context7

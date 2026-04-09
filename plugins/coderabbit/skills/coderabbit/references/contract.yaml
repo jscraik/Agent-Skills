@@ -25,6 +25,15 @@ inputs:
     type: array
     description: Optional policy or rollout constraints from the user.
 outputs:
+  - name: schema_version
+    type: integer
+    description: Output envelope schema version (always 1).
+  - name: summary
+    type: string
+    description: High-level recommendation summary.
+  - name: actions
+    type: array
+    description: Concrete steps the user or agent should execute.
   - name: recommendation
     type: string
     description: Actionable response grounded in local corpus evidence.
@@ -37,6 +46,12 @@ outputs:
   - name: risk_note
     type: string
     description: Notes about stale docs or assumptions when live verification is unavailable.
+  - name: validation
+    type: array
+    description: Validation commands and outcomes (pass, fail, blocked).
+  - name: next_step
+    type: string
+    description: Safest immediate follow-up action.
 success_criteria:
   - Every non-trivial recommendation is backed by local corpus files.
   - Platform-specific guidance is correctly scoped.

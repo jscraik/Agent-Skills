@@ -49,6 +49,18 @@ The `plugin-factory` plugin helps you:
 - Keep scripts, references, and assets shipped with each family skill.
 
 ## Validation
+Sync packaged skills from canonical sources first:
+
+```sh
+bash scripts/sync_plugin_factory_family.sh
+```
+
+Verify packaged/source parity:
+
+```sh
+python3 scripts/test_plugin_factory_family_parity.py
+```
+
 Validate the package:
 
 ```sh

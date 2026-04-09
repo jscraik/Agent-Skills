@@ -1,0 +1,6 @@
+interface:
+  display_name: Interview Me
+  short_description: Use this skill to analyze underspecified requests through a short
+    interview and surface missing tradeoffs, assumption...
+  icon_small: ./assets/icon-small.png
+  icon_large: ./assets/icon-large.png

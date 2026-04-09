@@ -1,0 +1,222 @@
+{
+  "schema_version": 1,
+  "plugin": "harness-engineering",
+  "entrypoint": "ce-compound",
+  "routes": [
+    {
+      "intent": "stage-routing-or-resume",
+      "match": [
+        "where do we start",
+        "resume workflow",
+        "what stage next",
+        "unknown stage"
+      ],
+      "skill": "ce-compound",
+      "required_inputs": [
+        "problem or artifact path",
+        "constraints",
+        "execution preference"
+      ],
+      "output": "stage decision + exact next command"
+    },
+    {
+      "intent": "ideation-and-option-generation",
+      "match": [
+        "ce-ideate",
+        "brainstorm",
+        "idea generation",
+        "explore options"
+      ],
+      "skill": "ce-ideate",
+      "required_inputs": [
+        "problem statement",
+        "constraints",
+        "success signals"
+      ],
+      "output": "ranked implementation opportunities and recommendation"
+    },
+    {
+      "intent": "brainstorm-and-requirements-shaping",
+      "match": [
+        "ce-brainstorm",
+        "shape requirements",
+        "compare directions"
+      ],
+      "skill": "ce-brainstorm",
+      "required_inputs": [
+        "problem statement",
+        "constraints",
+        "success signals"
+      ],
+      "output": "requirements-oriented options with recommendation"
+    },
+    {
+      "intent": "specification",
+      "match": [
+        "write a spec",
+        "define contract",
+        "requirements artifact"
+      ],
+      "skill": "ce-spec",
+      "required_inputs": [
+        "approved direction",
+        "scope boundaries",
+        "acceptance criteria"
+      ],
+      "output": "implementation-grade specification"
+    },
+    {
+      "intent": "planning",
+      "match": [
+        "ce-plan",
+        "create implementation plan",
+        "execution plan",
+        "sequence the work"
+      ],
+      "skill": "ce-plan",
+      "required_inputs": [
+        "governing spec or equivalent",
+        "constraints and risks",
+        "verification expectations"
+      ],
+      "output": "execution-ready plan with validation sequence"
+    },
+    {
+      "intent": "deepen-spec-artifact",
+      "match": [
+        "ce-deepen-spec",
+        "harden spec",
+        "deepen specification"
+      ],
+      "skill": "ce-deepen-spec",
+      "required_inputs": [
+        "existing spec path",
+        "known risk areas",
+        "acceptance and failure expectations"
+      ],
+      "output": "spec with stronger boundaries, failure handling, and validation detail"
+    },
+    {
+      "intent": "deepen-plan-artifact",
+      "match": [
+        "ce-deepen-plan",
+        "harden plan",
+        "deepen implementation plan"
+      ],
+      "skill": "ce-deepen-plan",
+      "required_inputs": [
+        "existing plan path",
+        "sequencing or risk concerns",
+        "verification expectations"
+      ],
+      "output": "plan with stronger sequencing, risk treatment, and validation gates"
+    },
+    {
+      "intent": "execution",
+      "match": [
+        "ce-work",
+        "implement",
+        "execute plan",
+        "ship this"
+      ],
+      "skill": "ce-work",
+      "required_inputs": [
+        "plan/todo/spec target",
+        "repo conventions",
+        "verification gates"
+      ],
+      "output": "implemented changes + validation + handoff package"
+    },
+    {
+      "intent": "readiness-synthesis-review",
+      "match": [
+        "ce-review",
+        "go/no-go",
+        "readiness review",
+        "pre-merge review"
+      ],
+      "skill": "ce-review",
+      "required_inputs": [
+        "diff/PR target",
+        "acceptance baseline",
+        "review scope"
+      ],
+      "output": "severity-ranked readiness synthesis and routing"
+    },
+    {
+      "intent": "deep-technical-review",
+      "match": [
+        "ce-technical-review",
+        "technical review",
+        "deep critique",
+        "engineering risks"
+      ],
+      "skill": "ce-technical-review",
+      "required_inputs": [
+        "target diff/files",
+        "spec/plan baseline when available"
+      ],
+      "output": "findings-first technical issues with locations"
+    },
+    {
+      "intent": "reliability-review",
+      "match": [
+        "ce-reliability-review",
+        "resilience review",
+        "failure modes",
+        "SLO readiness",
+        "cascading failure"
+      ],
+      "skill": "ce-reliability-review",
+      "required_inputs": [
+        "service/API target",
+        "dependency context",
+        "failure impact context"
+      ],
+      "output": "reliability risks and resilience recommendations"
+    },
+    {
+      "intent": "solved-problem-capture",
+      "match": [
+        "capture learning",
+        "document solved issue",
+        "docs/solutions update"
+      ],
+      "skill": "ce-compound",
+      "required_inputs": [
+        "verified fix evidence",
+        "artifact context",
+        "desired capture mode"
+      ],
+      "output": "durable solution artifact and next-stage routing"
+    },
+    {
+      "intent": "docs-solutions-maintenance",
+      "match": [
+        "refresh docs/solutions",
+        "stale solution docs",
+        "consolidate overlap"
+      ],
+      "skill": "ce-compound-refresh",
+      "required_inputs": [
+        "refresh scope",
+        "mode preference",
+        "evidence source paths"
+      ],
+      "output": "refresh/consolidation report with evidence"
+    }
+  ],
+  "not_this_plugin": [
+    {
+      "intent": "coding-harness-cli-operations",
+      "examples": [
+        "harness init",
+        "harness upgrade",
+        "harness ci-migrate",
+        "harness check-environment"
+      ],
+      "route_to_skill": "coding-harness",
+      "reason": "These operations belong to @brainwav/coding-harness setup and governance, not CE stage orchestration."
+    }
+  ]
+}

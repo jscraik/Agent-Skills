@@ -1,0 +1,6 @@
+interface:
+  display_name: Fixing Metadata
+  short_description: Audit and fix HTML metadata including titles, descriptions, canonical
+    URLs, Open Graph tags, Twitter cards, favicons,...
+  icon_small: ./assets/icon-small.png
+  icon_large: ./assets/icon-large.png

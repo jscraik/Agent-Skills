@@ -14,8 +14,6 @@ Use the helper scripts based on the task:
 - Install from the curated list when the user provides a skill name.
 - Install from another repo when the user provides a GitHub repo/path (including private repos).
 
-Install skills with the helper scripts.
-
 ## When To Use
 
 - The user asks to list installable skills from curated or experimental catalogs.
@@ -33,7 +31,7 @@ Install skills with the helper scripts.
 
 When install requests include role wiring for the newly installed skill:
 
-1. Look for reusable role TOMLs in `/Users/jamiecraik/dev/configs/codex/agents/`.
+1. Look for reusable role TOMLs in `./configs/codex/agents/` when present, then fall back to project/global `.codex/agents/`.
 2. If no suitable role exists, route role creation to [[codex-agent-builder]].
 3. Validate candidate role files before reporting success:
 
@@ -109,14 +107,14 @@ After installing a skill, tell the user: "Restart Codex to pick up new skills."
 
 ## Scripts
 
-All of these scripts use network, so when running in the sandbox, request escalation when running them.
+These scripts require network access to GitHub surfaces. Confirm source and destination before running them.
 
-- `scripts/list-skills.py` (prints skills list with installed annotations)
-- `scripts/list-skills.py --format json`
-- Example (experimental list): `scripts/list-skills.py --path skills/.experimental`
-- `scripts/install-skill-from-github.py --repo <owner>/<repo> --path <path/to/skill> [<path/to/skill> ...]`
-- `scripts/install-skill-from-github.py --url https://github.com/<owner>/<repo>/tree/<ref>/<path>`
-- Example (experimental skill): `scripts/install-skill-from-github.py --repo openai/skills --path skills/.experimental/<skill-name>`
+- `python3 scripts/list-skills.py` (prints skills list with installed annotations)
+- `python3 scripts/list-skills.py --format json`
+- Example (experimental list): `python3 scripts/list-skills.py --path skills/.experimental`
+- `python3 scripts/install-skill-from-github.py --repo <owner>/<repo> --path <path/to/skill> [<path/to/skill> ...]`
+- `python3 scripts/install-skill-from-github.py --url https://github.com/<owner>/<repo>/tree/<ref>/<path>`
+- Example (experimental skill): `python3 scripts/install-skill-from-github.py --repo openai/skills --path skills/.experimental/<skill-name>`
 
 Reference details:
 
@@ -143,16 +141,16 @@ Reference details:
 
 ```bash
 # List curated skills
-scripts/list-skills.py
+python3 scripts/list-skills.py
 
 # List experimental skills
-scripts/list-skills.py --path skills/.experimental
+python3 scripts/list-skills.py --path skills/.experimental
 
 # Install one curated skill
-scripts/install-skill-from-github.py --repo openai/skills --path skills/.curated/<skill-name>
+python3 scripts/install-skill-from-github.py --repo openai/skills --path skills/.curated/<skill-name>
 
 # Install from GitHub URL
-scripts/install-skill-from-github.py --url https://github.com/<owner>/<repo>/tree/<ref>/<path>
+python3 scripts/install-skill-from-github.py --url https://github.com/<owner>/<repo>/tree/<ref>/<path>
 ```
 
 ## Notes

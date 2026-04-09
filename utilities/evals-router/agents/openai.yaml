@@ -1,4 +1,8 @@
 interface:
-  display_name: "Evals Router"
-  short_description: "Route LLM evaluation work to the right workflow: audit, error analysis, judge design, validation, RAG eval, synthetic data, or review UI."
-  default_prompt: "Route this evaluation-method request to the best-fit workflow, explain why it fits, and call out the smallest practical next step."
+  display_name: Evals Router
+  short_description: 'Route LLM evaluation work to the right workflow: audit, error
+    analysis, judge design, validation, RAG eval, synthetic data, or review UI.'
+  icon_small: ./assets/icon-small.png
+  icon_large: ./assets/icon-large.png
+  default_prompt: Route this evaluation-method request to the best-fit workflow, explain
+    why it fits, and call out the smallest practical next step.

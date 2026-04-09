@@ -1,0 +1,9 @@
+interface:
+  display_name: "CE Work"
+  short_description: "Execute plans, tasks, or tiny direct requests with synchronized progress, validation, UI gates, guarded delegation, and shipping hygiene."
+
+policy:
+  allow_implicit_invocation: true
+
+dependencies:
+  tools: []

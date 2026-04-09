@@ -1,0 +1,6 @@
+interface:
+  display_name: UI Visual Regression
+  short_description: Review and validate Storybook, Playwright, and Argos visual regression
+    diffs
+  icon_small: ./assets/icon-small.png
+  icon_large: ./assets/icon-large.png

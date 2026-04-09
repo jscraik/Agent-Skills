@@ -1,0 +1,6 @@
+interface:
+  display_name: Video Transcript Downloader
+  short_description: Download video or audio and extract transcripts or subtitles
+    with yt-dlp and ffmpeg
+  icon_small: ./assets/icon-small.png
+  icon_large: ./assets/icon-large.png

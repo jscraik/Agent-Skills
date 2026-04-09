@@ -1,6 +1,10 @@
 interface:
-  display_name: "CircleCI"
-  short_description: "Migration and best-practice guidance for CircleCI workflow, deployment, security, and policy design."
-  default_prompt: "Use local CircleCI references and cf-crawl artifacts first, then provide phase-based migration, policy, and deployment guidance."
+  display_name: CircleCI
+  short_description: Migration and best-practice guidance for CircleCI workflow, deployment,
+    security, and policy design.
+  icon_small: ./assets/icon-small.png
+  icon_large: ./assets/icon-large.png
+  default_prompt: Use local CircleCI references and cf-crawl artifacts first, then
+    provide phase-based migration, policy, and deployment guidance.
 policy:
   allow_implicit_invocation: true

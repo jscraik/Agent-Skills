@@ -1,9 +1,10 @@
 interface:
-  display_name: "Agent-Native Architecture"
-  short_description: "Design applications where agents operate as first-class users with parity, composability, and shared-workspace patterns."
-
+  display_name: Agent-Native Architecture
+  short_description: Design applications where agents operate as first-class users
+    with parity, composability, and shared-workspace patterns.
+  icon_small: ./assets/icon-small.png
+  icon_large: ./assets/icon-large.png
 policy:
   allow_implicit_invocation: true
-
 dependencies:
   tools: []

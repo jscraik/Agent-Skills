@@ -1,0 +1,6 @@
+interface:
+  display_name: Better Icons
+  short_description: Search and extract SVG icons from Iconify collections through
+    the better-icons CLI or MCP
+  icon_small: ./assets/icon-small.png
+  icon_large: ./assets/icon-large.png

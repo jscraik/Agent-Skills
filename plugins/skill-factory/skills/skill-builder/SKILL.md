@@ -194,7 +194,7 @@ If critical inputs are missing, ask only the minimum needed to proceed safely.
 ## Agent injection
 When the request includes skill-linked subagent support, wire it explicitly during `create`, `improve`, or `install-distribute`:
 
-1. Reuse-first discovery: check `/Users/jamiecraik/dev/configs/codex/agents/`, then project/global `.codex/agents/`.
+1. Reuse-first discovery: check repo-shared agents in `./configs/codex/agents/` when present, then project/global `.codex/agents/`.
 2. If no suitable role exists, hand off role creation to [[codex-agent-creator]] and request a purpose-built agent with explicit `model`, `model_reasoning_effort`, and scope.
 3. Validate candidate role files: `bash utilities/codex-agent-creator/scripts/validate_role.sh --agent-name <name> --agent-file <path>`.
 4. Install/update role files only when requested: `bash utilities/codex-agent-creator/scripts/install_role.sh --agent-name <name> --agent-file <path> --scope project|global [--update-existing]`.

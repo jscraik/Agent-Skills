@@ -19,12 +19,30 @@ inputs:
     values: [manual, auto]
     description: Whether fixes are approved per issue or applied in batch.
 outputs:
+  - name: schema_version
+    type: integer
+    description: Output envelope schema version (always 1).
+  - name: summary
+    type: string
+    description: High-level autofix run outcome.
   - name: fix_plan
     type: array
     description: Ordered list of parsed issues and intended fixes.
   - name: applied_changes
     type: array
     description: Files changed with issue linkage.
+  - name: actions
+    type: array
+    description: Human or agent actions remaining after applied fixes.
+  - name: validation
+    type: array
+    description: Validation commands and outcomes (pass, fail, blocked).
+  - name: risk_note
+    type: string
+    description: Key risks, caveats, or unresolved blockers.
+  - name: next_step
+    type: string
+    description: Safest immediate follow-up action.
   - name: summary_comment
     type: string
     description: Final PR summary comment text.
@@ -38,3 +56,5 @@ non_goals:
 risks:
   - Applying stale feedback when branch changes are not pushed.
   - Over-applying low-priority findings without user approval.
+execution_primitives:
+  - python3 plugins/coderabbit/skills/autofix/scripts/fetch_unresolved_threads.py --owner <owner> --repo <repo> --pr <number>

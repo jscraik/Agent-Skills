@@ -1,0 +1,6 @@
+interface:
+  display_name: Backend Engineer
+  short_description: Plan and review safe backend extensions for existing services
+    (Cloudflare Workers + Hono primary)
+  icon_small: ./assets/icon-small.png
+  icon_large: ./assets/icon-large.png

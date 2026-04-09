@@ -1,0 +1,6 @@
+interface:
+  display_name: Triage
+  short_description: Triage file-based `todos/` findings into ready, skipped, or revised
+    states before execution
+  icon_small: ./assets/icon-small.png
+  icon_large: ./assets/icon-large.png

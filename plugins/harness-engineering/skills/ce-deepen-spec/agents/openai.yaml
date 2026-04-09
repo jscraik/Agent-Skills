@@ -1,0 +1,9 @@
+interface:
+  display_name: "CE Deepen Spec"
+  short_description: "Stress-test and strengthen an existing system spec or UI spec with tighter boundaries, lifecycle detail, and validation before planning."
+
+policy:
+  allow_implicit_invocation: true
+
+dependencies:
+  tools: []

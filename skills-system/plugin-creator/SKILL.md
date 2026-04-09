@@ -42,7 +42,7 @@ description: Create and scaffold plugin directories for Codex with a required `.
 python3 .agents/skills/plugin-creator/scripts/create_basic_plugin.py <plugin-name>
 ```
 
-2. Open `<plugin-path>/.codex-plugin/plugin.json` and replace `[TODO: ...]` placeholders.
+2. Open `<plugin-path>/.codex-plugin/plugin.json` and replace the sample values with your real plugin metadata.
 
 3. Generate or update the repo marketplace entry when the plugin should appear in Codex UI ordering:
 
@@ -138,9 +138,9 @@ python3 .agents/skills/plugin-creator/scripts/create_basic_plugin.py my-plugin -
 
 ```json
 {
-  "name": "[TODO: marketplace-name]",
+  "name": "example-marketplace",
   "interface": {
-    "displayName": "[TODO: Marketplace Display Name]"
+    "displayName": "Example Marketplace"
   },
   "plugins": [
     {

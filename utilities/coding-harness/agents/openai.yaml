@@ -1,3 +1,7 @@
 interface:
-  display_name: "Coding Harness"
-  short_description: "Install, bootstrap, update, audit, and explain @brainwav/coding-harness with command-accurate setup flows, governance checks, and environment action-sync guidance."
+  display_name: Coding Harness
+  short_description: Install, bootstrap, update, audit, and explain @brainwav/coding-harness
+    with command-accurate setup flows, governance checks, and environment action-sync
+    guidance.
+  icon_small: ./assets/icon-small.png
+  icon_large: ./assets/icon-large.png

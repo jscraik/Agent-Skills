@@ -1,0 +1,5 @@
+interface:
+  display_name: Context7
+  short_description: Retrieve current third-party library documentation through Context7
+  icon_small: ./assets/icon-small.png
+  icon_large: ./assets/icon-large.png

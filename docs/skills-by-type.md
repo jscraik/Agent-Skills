@@ -45,10 +45,10 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 
 ### Data Fetch Analysis
 
-- `skill-refactor` — `utilities`
 - `insight-report` — `utilities`
 - `notebooklm` — `utilities`
 - `security-ownership-map` — `product/security`
+- `skill-refactor` — `utilities`
 - `spreadsheet` — `utilities`
 
 ### Team Automation

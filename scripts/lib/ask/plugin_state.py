@@ -132,6 +132,107 @@ def _run_shadowing_check(repo_root: Path) -> dict[str, Any]:
     }
 
 
+def _is_nonempty_markdown(path: Path) -> bool:
+    if not path.exists():
+        return False
+    try:
+        content = path.read_text(encoding="utf-8")
+    except OSError:
+        return False
+    return bool(content.strip())
+
+
+def _missing_or_blank_fields(payload: dict[str, Any], required_fields: tuple[str, ...]) -> list[str]:
+    return [field for field in required_fields if payload.get(field) in (None, "")]
+
+
+def _local_asset_warning(plugin_path: Path, asset_key: str, asset_ref: str) -> str | None:
+    if asset_ref.startswith("http://") or asset_ref.startswith("https://"):
+        return None
+
+    plugin_root = plugin_path.resolve()
+    asset_path = (plugin_path / asset_ref).resolve()
+    try:
+        asset_path.relative_to(plugin_root)
+    except ValueError:
+        return f"referenced asset escapes plugin root: interface.{asset_key} -> {asset_ref}"
+
+    if not asset_path.exists():
+        return f"referenced asset missing: interface.{asset_key} -> {asset_ref}"
+    return None
+
+
+def _package_quality_check(repo_root: Path, installed: list[dict[str, Any]]) -> dict[str, Any]:
+    required_manifest_fields = ("schema_version", "name", "version", "description", "interface")
+    required_interface_fields = (
+        "displayName",
+        "shortDescription",
+        "longDescription",
+        "developerName",
+        "category",
+        "capabilities",
+        "websiteURL",
+        "defaultPrompt",
+    )
+
+    plugin_rows: list[dict[str, Any]] = []
+    has_failures = False
+
+    for plugin in installed:
+        plugin_name = str(plugin.get("name") or "unknown")
+        plugin_path = repo_root / str(plugin.get("path") or "")
+        manifest_path = repo_root / str(plugin.get("manifest_path") or "")
+
+        issues: list[str] = []
+        warnings: list[str] = []
+
+        readme_path = plugin_path / "README.md"
+        if not _is_nonempty_markdown(readme_path):
+            warnings.append("README missing or empty")
+
+        manifest_payload, manifest_error = _load_json(manifest_path)
+        if manifest_payload is None:
+            issues.append(f"manifest unavailable for quality checks: {manifest_error}")
+        else:
+            missing_manifest_fields = _missing_or_blank_fields(manifest_payload, required_manifest_fields)
+            if missing_manifest_fields:
+                issues.append(f"manifest missing core fields: {', '.join(missing_manifest_fields)}")
+
+            interface_payload = manifest_payload.get("interface")
+            if not isinstance(interface_payload, dict):
+                issues.append("manifest interface payload is missing or invalid")
+            else:
+                missing_interface_fields = _missing_or_blank_fields(interface_payload, required_interface_fields)
+                if missing_interface_fields:
+                    issues.append(f"manifest interface missing core fields: {', '.join(missing_interface_fields)}")
+
+                for asset_key in ("composerIcon", "logo"):
+                    asset_ref = interface_payload.get(asset_key)
+                    if not isinstance(asset_ref, str) or not asset_ref.strip():
+                        continue
+                    warning = _local_asset_warning(plugin_path, asset_key, asset_ref)
+                    if warning is not None:
+                        warnings.append(warning)
+
+        if issues:
+            has_failures = True
+
+        plugin_rows.append(
+            {
+                "name": plugin_name,
+                "ok": not issues,
+                "issues": issues,
+                "warnings": warnings,
+            }
+        )
+
+    return {
+        "ok": not has_failures,
+        "plugin_count": len(plugin_rows),
+        "plugins": plugin_rows,
+    }
+
+
 def collect_plugin_state(
     repo_root: Path,
     *,
@@ -177,6 +278,10 @@ def collect_plugin_state(
         checks["plugin_shadowing"] = shadow_check
         if not shadow_check["ok"]:
             blockers.append("PLUGIN_SKILL_SHADOWING: shadowing gate failed")
+        package_quality = _package_quality_check(repo_root, installed)
+        checks["plugin_package_quality"] = package_quality
+        if not package_quality["ok"]:
+            blockers.append("PLUGIN_PACKAGE_QUALITY: plugin package checks failed")
 
     return {
         "installed_state": {

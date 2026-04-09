@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "profile_id": "skills-system-plugin-creator",
-  "scope_skill": "plugins/plugin-factory/skills/plugin-creator",
+  "scope_skill": "skills-system/plugin-creator",
   "scope_profile": "skills-system",
   "rubric_version": "2026-04-05",
   "evaluator_version": "v1",

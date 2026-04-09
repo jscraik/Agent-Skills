@@ -2,7 +2,7 @@
   "schema_version": 1,
   "name": "harness-engineering",
   "version": "0.1.0",
-  "description": "Bundle the compound-engineering workflow family for ideation, specification, planning, implementation, and review.",
+  "description": "Bundle the compound-engineering lifecycle for ideation, spec, planning, execution, reliability review, and readiness review.",
   "author": {
     "name": "Jamie Craik",
     "url": "https://github.com/jscraik"
@@ -27,14 +27,12 @@
     "metadata_source": "plugin_manifest"
   },
   "skills": "./skills/",
-  "mcpServers": "./.mcp.json",
-  "apps": "./.app.json",
   "interface": {
     "displayName": "Harness Engineering",
-    "shortDescription": "Run the full compound-engineering workflow",
-    "longDescription": "A Codex plugin package that bundles compound-engineering lifecycle skills, from ideation through execution and review.",
+    "shortDescription": "Route and run the compound-engineering lifecycle",
+    "longDescription": "A Codex plugin package that bundles compound-engineering lifecycle skills for stage routing, implementation execution, and readiness reviews. This plugin covers CE workflow orchestration, not @brainwav/coding-harness setup or CI scaffold management.",
     "developerName": "Jamie Craik",
-    "category": "Productivity",
+    "category": "Coding",
     "capabilities": [
       "Interactive",
       "Read",
@@ -43,7 +41,9 @@
     "websiteURL": "https://github.com/jscraik/Agent-Skills",
     "privacyPolicyURL": "https://github.com/jscraik/Agent-Skills/blob/main/README.md#privacy-and-data-handling",
     "termsOfServiceURL": "https://github.com/jscraik/Agent-Skills/blob/main/LICENSE",
-    "defaultPrompt": "Help me run compound-engineering workflow stages end to end.",
-    "brandColor": "#0EA5E9"
+    "defaultPrompt": "Use ce-compound to route this request to the right CE stage and provide exact next-step commands.",
+    "brandColor": "#0EA5E9",
+    "composerIcon": "./assets/icon.png",
+    "logo": "./assets/logo.png"
   }
 }

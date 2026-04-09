@@ -1,0 +1,6 @@
+interface:
+  display_name: Systematic Debugging
+  short_description: Diagnose production bugs, regressions, or failing checks from
+    concrete evidence before code changes
+  icon_small: ./assets/icon-small.png
+  icon_large: ./assets/icon-large.png
