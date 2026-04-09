@@ -27,9 +27,9 @@ Effective 2026-04-05, the active skill-authoring gate family consists of four me
 - `skills-system/skill-installer`
 - `skills-system/plugin-creator`
 
-`utilities/codex-plugin-builder` is an **adjacent handoff surface**, not an active gate-family member. It remains a valid downstream target for full plugin packaging after lifecycle validity is established.
+`utilities/plugin-builder` is an **adjacent handoff surface**, not an active gate-family member. It remains a valid downstream target for full plugin packaging after lifecycle validity is established.
 
-This decision closes the boundary drift where the gate script used `plugin-creator` but the governing spec and maturity matrix still named `codex-plugin-builder` as a core family member.
+This decision closes the boundary drift where the gate script used `plugin-creator` but the governing spec and maturity matrix still named `plugin-builder` as a core family member.
 
 ## Active Gate Family
 
@@ -46,9 +46,9 @@ Enforced by: `scripts/validate_skill_authoring_family.sh`
 
 | Skill | Role | When to use |
 |---|---|---|
-| `codex-plugin-builder` | Full plugin packaging and governance | Downstream handoff from `skill-builder` once `ContractValidityEvidence` exists and remaining work is full plugin packaging |
+| `plugin-builder` | Full plugin packaging and governance | Downstream handoff from `skill-builder` once `ContractValidityEvidence` exists and remaining work is full plugin packaging |
 
-`codex-plugin-builder` is **not validated** by the family gate script. It is a legitimate handoff target described in the governing spec for plugin packaging workflows.
+`plugin-builder` is **not validated** by the family gate script. It is a legitimate handoff target described in the governing spec for plugin packaging workflows.
 
 ## Authority Order
 
@@ -67,7 +67,7 @@ The following sources were updated on 2026-04-05 to reflect the canonical bounda
 
 | File | Change |
 |---|---|
-| `docs/reference/skill-authoring-validation-maturity-matrix.md` | Purpose section: replaced `utilities/codex-plugin-builder` with `skills-system/plugin-creator`; added boundary note |
+| `docs/reference/skill-authoring-validation-maturity-matrix.md` | Purpose section: replaced `utilities/plugin-builder` with `skills-system/plugin-creator`; added boundary note |
 | `docs/specs/2026-04-03-feat-skill-authoring-family-contract-spec.md` | System Boundary, Core Domain Model, role table, invariant, and SA1: distinguish active gate family from adjacent surface |
 
 The gate script `scripts/validate_skill_authoring_family.sh` already used the correct membership — no change required.
@@ -81,15 +81,15 @@ Two-layer parity model (Decision 2a from the gold-standard upgrade plan):
 - Entry point for new work; produces starter artifacts before hardening
 
 **Enhancement layer** (harden and package):
-- Skills: `skill-builder` (skill lifecycle), `codex-plugin-builder` (full plugin packaging)
+- Skills: `skill-builder` (skill lifecycle), `plugin-builder` (full plugin packaging)
 - Requires valid starter artifacts from the first layer before beginning
 
 This parallel structure keeps skill workflows and plugin workflows mentally symmetric while preserving current gate ownership.
 
 ## Compatibility Notes
 
-- All handoff references to `codex-plugin-builder` in specs, SKILL files, and evals remain valid. The adjacency designation changes its **gate-membership status**, not its usefulness as a downstream surface.
-- `skill-builder` may still hand off to `codex-plugin-builder` when `ContractValidityEvidence` exists. This path is unchanged.
+- All handoff references to `plugin-builder` in specs, SKILL files, and evals remain valid. The adjacency designation changes its **gate-membership status**, not its usefulness as a downstream surface.
+- `skill-builder` may still hand off to `plugin-builder` when `ContractValidityEvidence` exists. This path is unchanged.
 - `plugin-creator`'s `evals.yaml` and `agents/openai.yaml` are gate-validated as of this upgrade pass.
 
 ## Scorecard Link
@@ -102,7 +102,7 @@ This decision record is linked from the governance scorecard at:
 If a downstream contract consumer breaks because `plugin-creator` was promoted into a gate it cannot yet satisfy, the rollback is:
 
 1. Remove `skills-system/plugin-creator` from the `skill_dirs` array in `scripts/validate_skill_authoring_family.sh`.
-2. Revert the boundary-membership changes in the spec and matrix (restore `codex-plugin-builder` as the gate member).
+2. Revert the boundary-membership changes in the spec and matrix (restore `plugin-builder` as the gate member).
 3. Record the regression in `.harness/memory/LEARNINGS.md` with root cause.
 4. Open a follow-up issue before re-attempting the promotion.
 

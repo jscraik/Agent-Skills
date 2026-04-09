@@ -134,7 +134,7 @@ GitHub workflow work is only complete when the repository state and the GitHub s
 
 | Skill | When to use together |
 |---|---|
-| `github:gh-fix-ci` (plugin) | Focused CI diagnosis mode when the only task is debugging a failing Actions check |
+| `github:github` (plugin) | Connector-first GitHub triage before selecting a `gh-workflow` mode |
 | [[resolve-pr-parallel]] | Resolve many unresolved review threads when a one-thread-at-a-time loop is too slow |
 | [[verification-before-completion]] | Gate all merge claims with fresh `gh pr checks` and `git log` evidence |
 | [[systematic-debugging]] | When PR CI failures reveal a code-level bug that needs root-cause investigation |

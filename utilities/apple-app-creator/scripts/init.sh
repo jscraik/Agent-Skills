@@ -18,7 +18,6 @@ Options:
   --git-init auto|never
   --git-commit prompt|always|never
   --with-xcode-makefiles | --skip-xcode-makefiles
-  --with-simple-tasks | --skip-simple-tasks
   --dry-run
   --no-prompt
 USAGE
@@ -34,7 +33,6 @@ DEPLOYMENT_TARGET=""
 SIM_NAME=""
 AGENT_NAME_INPUT="${AGENT_NAME:-}"
 INSTALL_XCODE_MAKEFILES=1
-INSTALL_SIMPLE_TASKS=1
 GIT_INIT_MODE="auto"
 GIT_COMMIT_MODE="prompt"
 DRY_RUN=0
@@ -92,14 +90,6 @@ while [[ $# -gt 0 ]]; do
       ;;
     --skip-xcode-makefiles)
       INSTALL_XCODE_MAKEFILES=0
-      shift
-      ;;
-    --with-simple-tasks)
-      INSTALL_SIMPLE_TASKS=1
-      shift
-      ;;
-    --skip-simple-tasks)
-      INSTALL_SIMPLE_TASKS=0
       shift
       ;;
     --dry-run)
@@ -224,7 +214,6 @@ if [[ -z "$AGENT_NAME_INPUT" ]]; then
 fi
 
 INSTALL_XCODE_MAKEFILES="$(prompt_yes_no "Install xcode-makefiles toolkit" "1" "$INSTALL_XCODE_MAKEFILES")"
-INSTALL_SIMPLE_TASKS="$(prompt_yes_no "Install simple-tasks workflow" "1" "$INSTALL_SIMPLE_TASKS")"
 GIT_INIT_MODE="$(prompt_if_missing "Git init behavior (auto|never)" "$GIT_INIT_MODE" "auto")"
 GIT_COMMIT_MODE="$(prompt_if_missing "Baseline commit behavior (prompt|always|never)" "$GIT_COMMIT_MODE" "prompt")"
 
@@ -276,11 +265,6 @@ if [[ "$INSTALL_XCODE_MAKEFILES" == "1" ]]; then
   scaffold_args+=(--with-xcode-makefiles)
 else
   scaffold_args+=(--skip-xcode-makefiles)
-fi
-if [[ "$INSTALL_SIMPLE_TASKS" == "1" ]]; then
-  scaffold_args+=(--with-simple-tasks)
-else
-  scaffold_args+=(--skip-simple-tasks)
 fi
 if [[ $DRY_RUN -eq 1 ]]; then
   scaffold_args+=(--dry-run)

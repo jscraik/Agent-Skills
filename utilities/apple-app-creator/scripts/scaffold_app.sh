@@ -25,7 +25,6 @@ Options:
   --git-init auto|never
   --git-commit prompt|always|never
   --with-xcode-makefiles | --skip-xcode-makefiles
-  --with-simple-tasks | --skip-simple-tasks
   --dry-run
 USAGE
 }
@@ -41,7 +40,6 @@ SIM_NAME=""
 AGENT_NAME_INPUT="${AGENT_NAME:-}"
 REGENERATE=0
 INSTALL_XCODE_MAKEFILES=1
-INSTALL_SIMPLE_TASKS=1
 GIT_INIT_MODE="auto"
 GIT_COMMIT_MODE="prompt"
 DRY_RUN=0
@@ -106,14 +104,6 @@ while [[ $# -gt 0 ]]; do
       INSTALL_XCODE_MAKEFILES=0
       shift
       ;;
-    --with-simple-tasks)
-      INSTALL_SIMPLE_TASKS=1
-      shift
-      ;;
-    --skip-simple-tasks)
-      INSTALL_SIMPLE_TASKS=0
-      shift
-      ;;
     --dry-run)
       DRY_RUN=1
       shift
@@ -161,15 +151,9 @@ fi
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SKILLS_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 XCODE_INSTALLER="$SKILLS_ROOT/xcode-makefiles/scripts/install.sh"
-TASK_INSTALLER="$SKILLS_ROOT/simple-tasks/scripts/install.sh"
 
 if [[ $INSTALL_XCODE_MAKEFILES -eq 1 && ! -x "$XCODE_INSTALLER" ]]; then
   echo "Missing xcode-makefiles installer at $XCODE_INSTALLER" >&2
-  exit 1
-fi
-
-if [[ $INSTALL_SIMPLE_TASKS -eq 1 && ! -x "$TASK_INSTALLER" ]]; then
-  echo "Missing simple-tasks installer at $TASK_INSTALLER" >&2
   exit 1
 fi
 
@@ -401,18 +385,6 @@ if [[ $INSTALL_XCODE_MAKEFILES -eq 1 ]]; then
   "$XCODE_INSTALLER" "${xcode_args[@]}"
 fi
 
-if [[ $INSTALL_SIMPLE_TASKS -eq 1 ]]; then
-  task_args=(
-    --project-dir "$OUTPUT"
-    --mode "$SUBSKILL_MODE"
-  )
-  if [[ $DRY_RUN -eq 1 ]]; then
-    task_args+=(--dry-run)
-  fi
-
-  "$TASK_INSTALLER" "${task_args[@]}"
-fi
-
 apply_git_lifecycle
 
 echo ""
@@ -424,7 +396,4 @@ if [[ $INSTALL_XCODE_MAKEFILES -eq 1 ]]; then
   echo "  make diagnose"
   echo "  make build"
   echo "  make test"
-fi
-if [[ $INSTALL_SIMPLE_TASKS -eq 1 ]]; then
-  echo "  scripts/task.sh summary --last-24h"
 fi

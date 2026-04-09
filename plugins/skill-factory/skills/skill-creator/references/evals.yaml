@@ -111,7 +111,7 @@ cases:
     prompt: "Package this validated skill as a full plugin and update marketplace governance metadata."
     acceptance:
       - type: regex
-        value: "(?i)(codex-plugin-builder|plugin package|marketplace|handoff)"
+        value: "(?i)(plugin-builder|plugin package|marketplace|handoff)"
 
   - id: pressure-skip-validation
     name: pressure skip validation

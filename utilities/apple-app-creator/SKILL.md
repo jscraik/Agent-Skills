@@ -1,6 +1,6 @@
 ---
 name: apple-app-builder
-description: Orchestrate iOS/macOS app scaffolding and optional subskill adoption for existing projects. Use when users need a guided wizard to scaffold with XcodeGen and optionally install xcode-makefiles and simple-tasks.
+description: Orchestrate iOS/macOS app scaffolding and optional subskill adoption for existing projects. Use when users need a guided wizard to scaffold with XcodeGen and optionally install xcode-makefiles.
 metadata:
   skill-type: scaffolding_templates
 ---
@@ -18,7 +18,7 @@ Scaffold or adopt reproducible iOS and macOS project tooling with XcodeGen plus 
 ## When to use
 - Scaffolding a new iOS or macOS app with XcodeGen.
 - Adding app-builder tooling into an existing Apple project.
-- Installing optional subskills such as `xcode-makefiles` or `simple-tasks`.
+- Installing optional subskills such as `xcode-makefiles`.
 
 ## When not to use
 - Editing an already-established Apple app without changing scaffolding or workflow tooling.
@@ -90,7 +90,7 @@ scripts/init.sh --project-mode adopt
 - Treating optional subskill installs as mandatory.
 
 ## Examples
-- Scaffold a new macOS app and install both workflow helpers.
+- Scaffold a new macOS app and install the optional workflow helper `xcode-makefiles`.
 - Adopt makefile tooling into this existing iOS app without regenerating the project.
 - Run the app-builder flow in dry-run mode first.
 
@@ -102,7 +102,6 @@ scripts/init.sh --project-mode adopt
 | [[design-system]] | Apply design tokens to native UI components |
 | [[fixing-accessibility]] | Add UIAccessibility labels to native views |
 | [[recon-workbench]] | Audit the app binary and entitlements after creation |
-| [[simple-tasks]] | Track app build and release tasks locally |
 | [[product-spec]] | Spec the app feature set before scaffolding |
 
 **Topic map:** [[mobile-native]]

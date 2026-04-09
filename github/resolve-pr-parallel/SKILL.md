@@ -43,7 +43,7 @@ Use a focused GitHub remediation workflow for unresolved PR review threads. Pres
 ## When not to use
 - Do not use for PR readiness, policy, or merge-blocker review. Use [`gh-workflow`](/github/gh-workflow/SKILL.md) in `pr_readiness` mode.
 - Do not use for broad GitHub lifecycle work like PR creation, review requests, or server-side merge. Use [`gh-workflow`](/github/gh-workflow/SKILL.md).
-- Do not use for CI-only diagnosis. Use [`github:gh-fix-ci`](/plugins/cache/openai-curated/github/f78e3ad49297672a905eb7afb6aa0cef34edc79e/skills/gh-fix-ci/SKILL.md).
+- Do not use for CI-only diagnosis. Use [`gh-workflow`](/github/gh-workflow/SKILL.md) in `ci_diagnose` mode.
 - Do not use for CircleCI workflow design, migration, policy, or CircleCI-specific pipeline diagnosis. Use [`circleci`](/utilities/circleci/SKILL.md).
 - Do not use for a generic code review or technical critique with no remediation ask. Use [`ce-review`](/product/ops/ce-review/SKILL.md) or [`ce-technical-review`](/product/ops/ce-technical-review/SKILL.md).
 - Do not use when the user only wants to address one or two specifically named comments manually. Use `gh-workflow` in `pr_review_comments` mode instead.
@@ -157,7 +157,7 @@ Use a focused GitHub remediation workflow for unresolved PR review threads. Pres
 | Skill | When to use |
 |---|---|
 | [[gh-workflow]] | Handle a single-threaded PR lifecycle or smaller review loop without fan-out |
-| `github:gh-fix-ci` (plugin) | Debug failing Actions checks discovered while resolving review feedback |
+| `github:github` (plugin) | Connector-first repository and PR triage before choosing remediation |
 | [[systematic-debugging]] | Diagnose a stubborn defect before continuing to resolve review feedback |
 
 **Topic map:** [[backend-platform]]

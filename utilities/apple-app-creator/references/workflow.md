@@ -6,11 +6,10 @@
    - `adopt`: install selected subskills into existing project
 3. Default selected subskills:
    - `xcode-makefiles`
-   - `simple-tasks`
 4. Apply git onboarding policy:
    - `--git-init auto|never`
    - `--git-commit prompt|always|never`
-5. Print next commands (`make diagnose/build/test`, `scripts/task.sh summary --last-24h`).
+5. Print next commands (`make diagnose/build/test`).
 
 Defaults
 - Project mode: `new`
@@ -19,7 +18,7 @@ Defaults
 - iOS deployment target: `18.0`
 - macOS deployment target: `15.4`
 - iOS simulator: `auto`
-- Subskill installs: both enabled
+- Subskill installs: `xcode-makefiles` enabled
 - Git init: `auto`
 - Baseline commit: `prompt`
 

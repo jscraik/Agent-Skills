@@ -79,7 +79,7 @@ The following skills appear in multiple topic maps or serve cross-cutting concer
 ```
 [[decide-build-primitive]] (agent-ops)
   → [[skill-builder]] (agent-ops)
-  → [[codex-plugin-builder]] (agent-ops)
+  → [[plugin-builder]] (agent-ops)
   → [[verification-before-completion]] (agent-ops)
 ```
 

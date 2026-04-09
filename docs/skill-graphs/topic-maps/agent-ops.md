@@ -34,7 +34,7 @@ covers:
 
 - [[skill-builder]] — Create, revise, benchmark, and quality-gate Codex skills (SKILL.md + scripts + evals + packaging).
 - [[codex-agent-creator]] — Create and install Codex custom multi-agent roles under `agents/` with a role definition and `openai.yaml` metadata.
-- [[codex-plugin-builder]] — Create, convert, and validate Codex plugin packages: skills, prompts, hooks, agents, and MCP metadata.
+- [[plugin-builder]] — Create, convert, and validate Codex plugin packages: skills, prompts, hooks, agents, and MCP metadata.
 - [[decide-build-primitive]] — Analyze and decide the right Codex primitive: Skill, Custom Prompt, or Agent automation.
 - [[arscontexta]] — Install, validate, or maintain Ars Contexta parity in Codex; mirror skills/prompts/agents/automations.
 - [[codex-automation-architect]] — Create, review, and merge Codex app automations with environment preflight and multi-runner validation.
@@ -59,7 +59,6 @@ covers:
 
 ## Task & Session Management
 
-- [[simple-tasks]] — Lightweight in-progress task coordination via `scripts/task.sh` and `tasks/TASKS.md`.
 - [[linear]] — Manage Linear issues, projects, and docs through the Linear MCP workflow.
 - [[alignment-checkpoint]] — Intent-alignment gate for ambiguous/high-stakes requests; requires explicit `/proceed` approval before tool use.
 
@@ -84,7 +83,7 @@ covers:
 
 ## Cross-links
 
-- Building a new skill? [[brainstorming]] → [[skill-builder]] → [[decide-build-primitive]] → [[codex-plugin-builder]].
+- Building a new skill? [[brainstorming]] → [[skill-builder]] → [[decide-build-primitive]] → [[plugin-builder]].
 - Debugging a failing automation? [[systematic-debugging]] → [[evals-router]] → [[verification-before-completion]].
 - Session health check? [[codex-sessions-skill-scan]] → [[insight-report]].
 - Topic maps: [[backend-platform]] | [[product-strategy]] | [[security-ops]]

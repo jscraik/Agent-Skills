@@ -53,13 +53,13 @@ cases:
       - type: regex
         value: "(?i)(linear|backlog|team)"
 
-  - id: triage-negative-simple-tasks
+  - id: triage-negative-task-tooling
     name: negative tasks workflow
     category: negative
     prompt: "Set up a lightweight tasks/TASKS.md workflow for this repo."
     acceptance:
       - type: regex
-        value: "(?i)(simple-tasks|tasks/TASKS.md)"
+        value: "(?i)(?=.*\\bce-work\\b)(?=.*\\btasks/TASKS\\.md).*"
 
   - id: triage-negative-review-generation
     name: negative review-generation request

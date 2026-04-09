@@ -9,10 +9,8 @@ Canonical GitHub skill: `gh-workflow`
 The following deprecated aliases were retired and removed on **February 24, 2026**:
 
 - `gh-actions-fix` -> `ci_diagnose`
-- `gh-address-comments` -> `pr_review_comments`
 - `gh-issue-fix` -> `issue_fix`
 - `gh-pr-local` -> `pr_prepare` (or `intake` for discovery)
-- `yeet` -> `pr_prepare`
 
 ## Historical sunset plan (superseded)
 - May 12, 2026 (superseded by early retirement on February 24, 2026)

@@ -43,7 +43,6 @@ Use a focused file-based todo triage workflow that sits between finding generati
 - Do not use for generic product or issue-tracker triage. Use [`linear`](/product/ops/linear/SKILL.md).
 - Do not use to create findings from a review. Use [`ce-review`](/product/ops/ce-review/SKILL.md).
 - Do not use to execute approved todo work. Use [`resolve-todo-parallel`](/product/ops/resolve-todo-parallel/SKILL.md) or `ce-work` for single-item execution.
-- Do not use for local `tasks/TASKS.md` workflows. Use [`simple-tasks`](/utilities/simple-tasks/SKILL.md).
 - Do not use when the repo has no `todos/` workflow and the user is asking for generic prioritization advice.
 
 ## Required inputs
@@ -107,7 +106,6 @@ Use a focused file-based todo triage workflow that sits between finding generati
 - Use [`ce-review`](/product/ops/ce-review/SKILL.md) to generate findings and initial pending todo artifacts.
 - Use [`resolve-todo-parallel`](/product/ops/resolve-todo-parallel/SKILL.md) once approved items are `ready`.
 - Use [`linear`](/product/ops/linear/SKILL.md) for team tracker triage and issue updates.
-- Use [`simple-tasks`](/utilities/simple-tasks/SKILL.md) for lightweight `tasks/TASKS.md` flows instead of file-based `todos/`.
 
 ## Upstream preservation
 - The imported compound-engineering source is preserved in [`references/upstream-triage.md`](/product/ops/triage/references/upstream-triage.md).

@@ -47,7 +47,7 @@ The skill-authoring family is now clearer at the routing level than it was befor
 - `skill-creator` owns starter authoring and scaffold-bound edits in [skills-system/skill-creator/SKILL.md](/Users/jamiecraik/dev/agent-skills/skills-system/skill-creator/SKILL.md#L1)
 - `skill-builder` owns lifecycle hardening, validators, evals, and standalone packaging in [utilities/skill-builder/SKILL.md](/Users/jamiecraik/dev/agent-skills/utilities/skill-builder/SKILL.md#L1)
 - `skill-installer` owns already-valid install and import execution in [skills-system/skill-installer/SKILL.md](/Users/jamiecraik/dev/agent-skills/skills-system/skill-installer/SKILL.md#L1)
-- `codex-plugin-builder` owns plugin packaging once the deliverable boundary is a plugin in [utilities/codex-plugin-builder/SKILL.md](/Users/jamiecraik/dev/agent-skills/utilities/codex-plugin-builder/SKILL.md#L1)
+- `plugin-builder` owns plugin packaging once the deliverable boundary is a plugin in [utilities/plugin-builder/SKILL.md](/Users/jamiecraik/dev/agent-skills/utilities/plugin-builder/SKILL.md#L1)
 
 That routing work solved the major family-overlap problem. The remaining weakness is loop maturity rather than role ambiguity.
 
@@ -86,7 +86,7 @@ This spec closes that gap without undoing the family split that now works.
 ## System Boundary
 
 Owned by this spec:
-- the preserved routing and ownership relationship across `skill-creator`, `skill-builder`, `skill-installer`, and `plugin-creator` (active gate family); `codex-plugin-builder` remains an adjacent handoff surface for full plugin packaging and is not a gate-family member
+- the preserved routing and ownership relationship across `skill-creator`, `skill-builder`, `skill-installer`, and `plugin-creator` (active gate family); `plugin-builder` remains an adjacent handoff surface for full plugin packaging and is not a gate-family member
 - the creator-to-builder handoff contract for non-trivial skills
 - the `skill-builder` iteration loop for baseline comparison, evidence capture, review, tuning, and reruns
 - the rules for when a skill is ready to hand off into install/import or plugin packaging
@@ -111,7 +111,7 @@ Not owned by this spec:
     - `skill-installer`
     - `plugin-creator`
   - Adjacent handoff surface (not a gate-family member):
-    - `codex-plugin-builder` — full plugin packaging; valid handoff target from `skill-builder` once lifecycle validity is established
+    - `plugin-builder` — full plugin packaging; valid handoff target from `skill-builder` once lifecycle validity is established
 
 - `PrimaryJob`
   - The strongest lifecycle responsibility of a `SkillSurface`.
@@ -119,7 +119,9 @@ Not owned by this spec:
     - `starter_authoring`
     - `expert_lifecycle_maintenance`
     - `skill_installation`
+    - `plugin_scaffolding`
     - `plugin_packaging`
+  - `authoring-family-gate` CI contract must validate schema parity for active gate members (`skill-creator`, `skill-builder`, `skill-installer`, `plugin-creator`) so `PrimaryJob` and routing fields stay harmonized across all four.
 
 - `RoutingIntent`
   - The normalized dominant user intent already governed by the current family contract.
@@ -232,7 +234,7 @@ Not owned by this spec:
 | `skill-builder` | `expert_lifecycle_maintenance` | improve routing, harden workflow, compare candidate vs baseline behavior, evaluate, package a validated standalone skill, prepare downstream handoff | pure install/import, plugin conversion without lifecycle judgment, unrelated feature work |
 | `skill-installer` | `skill_installation` | install, import, list, project, or repair visibility for an already-valid skill package | first-draft creation, lifecycle benchmarking, plugin packaging |
 | `plugin-creator` *(gate member)* | `plugin_scaffolding` | scaffold a new plugin skeleton, generate a valid `plugin.json`, add or update local marketplace entries | skill lifecycle hardening, install execution, full plugin packaging and governance programs |
-| `codex-plugin-builder` *(adjacent)* | `plugin_packaging` | convert or package a contract-valid standalone skill as a full plugin with governance checks | first-draft creation, lifecycle benchmarking, install-only work; not a gate-family member |
+| `plugin-builder` *(adjacent)* | `plugin_packaging` | convert or package a contract-valid standalone skill as a full plugin with governance checks | first-draft creation, lifecycle benchmarking, install-only work; not a gate-family member |
 
 ## Main Flow / Lifecycle
 
@@ -243,7 +245,7 @@ The existing family routing contract remains the baseline:
 - `improve_skill` and `audit_or_validate_skill` route to `skill-builder`
 - `install_skill` routes to `skill-installer`
 - `package_standalone_skill` routes to `skill-builder`
-- `package_as_plugin` routes to `codex-plugin-builder`
+- `package_as_plugin` routes to `plugin-builder`
 
 Mixed-intent rules remain in force:
 - lifecycle-shaping work wins over install execution
@@ -356,7 +358,7 @@ Required widening rule:
 
 Downstream handoff rules:
 - `skill-builder` may hand off to `skill-installer` only when `ContractValidityEvidence` exists and the remaining work is install/import/projection/visibility
-- `skill-builder` may hand off to `codex-plugin-builder` only when `ContractValidityEvidence` exists and the remaining work is plugin packaging
+- `skill-builder` may hand off to `plugin-builder` only when `ContractValidityEvidence` exists and the remaining work is plugin packaging
 - downstream surfaces must not self-attest lifecycle validity when the comparative loop is incomplete or inconclusive
 - a `quick_validate.py` pass or equivalent creator-stage success alone is never sufficient downstream validity evidence for install or plugin handoff
 
@@ -376,7 +378,7 @@ Downstream handoff rules:
   - current runner surface for smoke and release evals
 - [skills-system/skill-installer/SKILL.md](/Users/jamiecraik/dev/agent-skills/skills-system/skill-installer/SKILL.md)
   - downstream install/import surface
-- [utilities/codex-plugin-builder/SKILL.md](/Users/jamiecraik/dev/agent-skills/utilities/codex-plugin-builder/SKILL.md)
+- [utilities/plugin-builder/SKILL.md](/Users/jamiecraik/dev/agent-skills/utilities/plugin-builder/SKILL.md)
   - downstream plugin packaging surface
 
 ### Source contract boundary
@@ -414,7 +416,7 @@ Explicitly rejected imports:
 
 ## Invariants / Safety Requirements
 
-- The family split remains intact: `skill-creator` creates, `skill-builder` hardens, `skill-installer` installs, `plugin-creator` scaffolds plugins. `codex-plugin-builder` is an adjacent handoff surface for full plugin packaging and is not a gate-family member.
+- The family split remains intact: `skill-creator` creates, `skill-builder` hardens, `skill-installer` installs, `plugin-creator` scaffolds plugins. `plugin-builder` is an adjacent handoff surface for full plugin packaging and is not a gate-family member.
 - `skill-creator` validation is an early correctness gate, not proof that a skill is lifecycle-ready.
 - A non-trivial creator-to-builder transition must leave behind a durable `HandoffPackage`.
 - `skill-builder` must compare candidate behavior against an explicit baseline in the canonical non-trivial loop.
@@ -515,7 +517,7 @@ Minimum readiness checks for planning:
 
 ## Acceptance and Test Matrix
 
-- SA1. The family split remains preserved: `skill-creator` owns starter authoring, `skill-builder` owns lifecycle hardening, `skill-installer` owns install/import of already-valid skills, and `plugin-creator` owns plugin scaffolding. `codex-plugin-builder` is an adjacent handoff surface for full plugin packaging and is not a gate-family member.
+- SA1. The family split remains preserved: `skill-creator` owns starter authoring, `skill-builder` owns lifecycle hardening, `skill-installer` owns install/import of already-valid skills, and `plugin-creator` owns plugin scaffolding. `plugin-builder` is an adjacent handoff surface for full plugin packaging and is not a gate-family member.
 - SA2. Non-trivial creator-stage work ends with a durable `HandoffPackage` rather than a purely implicit referral.
 - SA2a. The phase-one `HandoffPackage` is represented as a dedicated repo-visible artifact file.
 - SA3. The `HandoffPackage` includes at least: skill goal, boundary summary, trigger contexts, resource inventory, 2-3 realistic starter prompts, known risks or unknowns, validation state, and authoring state.
@@ -525,7 +527,7 @@ Minimum readiness checks for planning:
 - SA7. Description and routing assessment is part of every non-trivial round, and edits cannot be skipped when the evidence shows trigger-quality weakness, ambiguity, or misleading descriptions.
 - SA8. Wider reruns happen only after smaller-sample evidence establishes directional confidence or exposes the need for stronger prompts or grading first.
 - SA9. `skill-builder` may hand off to `skill-installer` only when `ContractValidityEvidence` exists and the remaining work is pure install/import/visibility execution.
-- SA10. `skill-builder` may hand off to `codex-plugin-builder` only when `ContractValidityEvidence` exists and the remaining work is pure plugin packaging.
+- SA10. `skill-builder` may hand off to `plugin-builder` only when `ContractValidityEvidence` exists and the remaining work is pure plugin packaging.
 - SA11. The upgraded loop reuses repo-native eval and reporting surfaces where practical rather than requiring a literal Anthropic-style workspace and viewer contract.
 - SA12. The workflow explains evaluation and review stages clearly enough that a less technical user can understand why the candidate is being compared against a baseline and what the results mean.
 - SA13. Planning can consume this spec without inventing the handoff artifact shape, baseline rules, iteration stages, evidence requirements, or downstream handoff gates.

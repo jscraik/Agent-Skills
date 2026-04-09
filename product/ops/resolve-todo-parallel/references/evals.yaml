@@ -81,8 +81,8 @@ cases:
       - type: regex
         value: "(?i)(ce-work|plan)"
 
-  - id: simple-tasks-negative
-    name: simple tasks negative
+  - id: task-tooling-negative
+    name: task tooling negative
     category: negative
     eval_modes: [smoke, release]
     should_trigger: false
@@ -92,7 +92,7 @@ cases:
       - type: not_regex
         value: "(?i)\\bresolve-todo-parallel\\b"
       - type: regex
-        value: "(?i)(simple-tasks|install)"
+        value: "(?i)(ce-work|install)"
 
   - id: todo-creation-negative
     name: todo creation negative

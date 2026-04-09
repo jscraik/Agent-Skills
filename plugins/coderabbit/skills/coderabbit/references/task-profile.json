@@ -1,8 +1,8 @@
 {
   "schema_version": "1.0",
-  "profile_id": "utilities-coderabbit",
-  "scope_skill": "utilities/coderabbit",
-  "scope_profile": "utilities",
+  "profile_id": "plugins-coderabbit-coderabbit",
+  "scope_skill": "plugins/coderabbit/skills/coderabbit",
+  "scope_profile": "plugins/coderabbit",
   "rubric_version": "2026-02-26",
   "evaluator_version": "v1",
   "persona_set_id": "default-v1",

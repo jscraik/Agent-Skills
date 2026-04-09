@@ -57,7 +57,6 @@ apple-app-creator:
   fixing-accessibility: Add UIAccessibility labels to native views
   product-spec: Spec the app feature set before scaffolding
   recon-workbench: Audit the app binary and entitlements after creation
-  simple-tasks: Track app build and release tasks locally
   xcode-makefiles: Add reproducible CLI builds after scaffolding the app
 architecture-interview:
   brainstorming: Explore options before the architecture interview
@@ -253,8 +252,7 @@ codex-hooks-builder:
     config
   gh-workflow: Ship and review hook-pack changes through the GitHub lifecycle
   plugin-builder: Package the hooks together with related skills or agents in a plugin
-codex-plugin-builder:
-  plugin-builder: Canonical plugin hardening and conversion skill
+plugin-builder:
   plugin-creator: Scaffold a minimal plugin package before hardening
   plugin-installer: Install and verify third-party plugins from GitHub
 codex-sessions-skill-scan:
@@ -414,7 +412,6 @@ linear:
   alignment-checkpoint: Gate Linear issue creation behind intent alignment
   ce-plan: Convert Linear issues into sequenced implementation plans
   gh-workflow: Link Linear issues to GitHub PRs during delivery
-  simple-tasks: Use for lightweight local task tracking between Linear syncs
 markdown-converter:
   cf-crawl: Feed Cloudflare crawl outputs into the markdown converter for cleanup
   docs-expert: Polish converted docs to meet repository quality standards
@@ -562,10 +559,6 @@ resolve-todo-parallel:
   orchestrating-subagents: Coordinate explicit subagent fan-out when runtime and user
     approval allow it
   triage: Review pending todo findings before execution begins
-review-duplication:
-  backend-engineer: When duplication is found in backend code
-  codex-home-audit: When reviewing Codex configuration for duplicates
-  frontend-ui-design: When duplication is found in UI components
 security-best-practices:
   1password: Findings involving secrets management — use for secure injection patterns
   create-auth: Security review often surfaces auth issues — use this for implementation
@@ -591,11 +584,6 @@ shadcn-ui:
   figma: Use Figma designs as reference for shadcn/ui customisation
   fixing-accessibility: Fix accessibility issues in shadcn/ui interactive components
   react-ui-patterns: Apply React composition patterns to shadcn/ui components
-simple-tasks:
-  alignment-checkpoint: Capture approved action items as simple tasks
-  ce-plan: Seed task list from a finished implementation plan
-  linear: Escalate to Linear when tasks need team-wide visibility
-  verification-before-completion: Mark tasks done only after verification evidence
 skill-builder:
   codex-sessions-skill-scan: Audit skill coverage, failures, and overlap using real
     session evidence instead of authoring doctrine alone
