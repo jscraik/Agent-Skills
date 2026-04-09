@@ -23,6 +23,10 @@ Codex plugin package that bundles the skill-authoring family in one installable 
   - `scripts/`
   - `templates/`
   - `workflows/`
+- `skills/skillify/`
+  - `SKILL.md`
+  - `agents/`
+  - `references/`
 - `skills/skill-installer/`
   - `SKILL.md`
   - `agents/`
@@ -34,10 +38,12 @@ Codex plugin package that bundles the skill-authoring family in one installable 
 - Source skill family:
   - `skills-system/skill-creator/`
   - `utilities/skill-builder/`
+  - `utilities/skillify/`
   - `skills-system/skill-installer/`
 - Packaged skill family:
   - `plugins/skill-factory/skills/skill-creator/`
   - `plugins/skill-factory/skills/skill-builder/`
+  - `plugins/skill-factory/skills/skillify/`
   - `plugins/skill-factory/skills/skill-installer/`
 - Repo: `https://github.com/jscraik/Agent-Skills`
 
@@ -46,6 +52,7 @@ When updating family logic, keep packaged skills aligned with the source family 
 ## Usage
 The `skill-factory` plugin helps you:
 - Create new skills and scaffolds (`skill-creator`).
+- Capture completed workflows into reusable skill contracts (`skillify`).
 - Improve and harden skills (`skill-builder`).
 - Install and verify plugins from trusted sources (`skill-installer`).
 - Keep scripts, references, and assets shipped with each family skill.
@@ -62,5 +69,6 @@ Validate bundled skills:
 ```sh
 python3 utilities/skill-builder/scripts/quick_validate.py plugins/skill-factory/skills/skill-builder
 python3 utilities/skill-builder/scripts/quick_validate.py plugins/skill-factory/skills/skill-creator
+python3 utilities/skill-builder/scripts/quick_validate.py plugins/skill-factory/skills/skillify
 python3 utilities/skill-builder/scripts/quick_validate.py plugins/skill-factory/skills/skill-installer
 ```

@@ -1,0 +1,3 @@
+interface:
+  display_name: "Skillify (Codex)"
+  short_description: "Turn a completed Codex workflow into a reusable skill package"

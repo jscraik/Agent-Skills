@@ -55,9 +55,11 @@ plugins/skill-factory/skills/*
 !plugins/skill-factory/skills/skill-builder/
 !plugins/skill-factory/skills/skill-creator/
 !plugins/skill-factory/skills/skill-installer/
+!plugins/skill-factory/skills/skillify/
 !plugins/skill-factory/skills/skill-builder/**
 !plugins/skill-factory/skills/skill-creator/**
 !plugins/skill-factory/skills/skill-installer/**
+!plugins/skill-factory/skills/skillify/**
 # Keep plugin-factory plugin skills tracked despite global skills/ ignore.
 !plugins/plugin-factory/skills/
 plugins/plugin-factory/skills/*

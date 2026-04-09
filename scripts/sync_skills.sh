@@ -996,7 +996,148 @@ PY
   )
 }
 
+# Keep repo-local plugin caches aligned with the marketplace so Codex surfaces
+# freshly updated plugin skills immediately in runtime discovery.
+# Cache layout: plugins/cache/<marketplace-name>/<plugin-name>/local
+sync_local_marketplace_cache() {
+  local marketplace_file="$1"
+  local cache_root="$2"
+  local cache_state_dir=""
+  local keep_file=""
+  local marketplace_keep_file=""
+  local marketplace_name=""
+  local plugin_name=""
+  local source_path=""
+  local source_dir=""
+  local marketplace_dir=""
+  local target_plugin_dir=""
+  local target_local_dir=""
+  local cached_skill_dir=""
+  local skill_name=""
+  local tracked_marketplace_dir=""
+
+  if [ ! -f "$marketplace_file" ]; then
+    echo "[WARN] Marketplace file missing: $marketplace_file (skipping local marketplace cache sync)."
+    return 0
+  fi
+
+  mkdir -p "$cache_root"
+  cache_state_dir="$(mktemp -d)"
+  cleanup_paths+=("$cache_state_dir")
+  keep_file="$cache_state_dir/cache.keep"
+  marketplace_keep_file="$cache_state_dir/marketplace.keep"
+  : > "$keep_file"
+  : > "$marketplace_keep_file"
+
+  while IFS=$'\t' read -r marketplace_name plugin_name source_path; do
+    [ -n "$marketplace_name" ] || continue
+    [ -n "$plugin_name" ] || continue
+    [ -n "$source_path" ] || continue
+
+    case "$source_path" in
+      ./*) source_dir="$repo_root/${source_path#./}" ;;
+      *)
+        echo "[WARN] Unsupported marketplace source.path for $plugin_name: $source_path (expected ./... path)"
+        continue
+        ;;
+    esac
+
+    if [ ! -d "$source_dir" ]; then
+      echo "[WARN] Cache source plugin directory missing for $plugin_name: $source_dir"
+      continue
+    fi
+
+    target_plugin_dir="$cache_root/$marketplace_name/$plugin_name"
+    marketplace_dir="$cache_root/$marketplace_name"
+    target_local_dir="$target_plugin_dir/local"
+    printf '%s\n' "$marketplace_dir" >> "$marketplace_keep_file"
+    mkdir -p "$target_local_dir"
+    printf '%s\n' "$target_plugin_dir" >> "$keep_file"
+
+    if command -v rsync >/dev/null 2>&1; then
+      rsync -a \
+        --delete \
+        --exclude '.git' \
+        --exclude 'node_modules' \
+        --exclude '__pycache__' \
+        --exclude '.DS_Store' \
+        "$source_dir/" "$target_local_dir/"
+    else
+      rm -rf -- "$target_local_dir"
+      mkdir -p "$target_local_dir"
+      cp -R "$source_dir"/. "$target_local_dir"/
+      rm -rf -- "$target_local_dir/.git" "$target_local_dir/node_modules" "$target_local_dir/__pycache__"
+      find "$target_local_dir" -name '.DS_Store' -type f -delete
+    fi
+
+    # Avoid duplicate "System" + "Personal" skill rows in pickers when a
+    # plugin exports a skill that already exists in skills-system.
+    if [ -d "$target_local_dir/skills" ]; then
+      for cached_skill_dir in "$target_local_dir/skills"/*; do
+        [ -d "$cached_skill_dir" ] || continue
+        skill_name="$(basename "$cached_skill_dir")"
+        if [ -f "$system_skills_dir/$skill_name/SKILL.md" ]; then
+          rm -rf -- "$cached_skill_dir"
+          echo "[OK] Suppressed duplicate cached skill (system already provides it): $plugin_name/$skill_name"
+        fi
+      done
+    fi
+  done < <(
+    python3 - "$marketplace_file" <<'PY'
+import json
+import sys
+
+path = sys.argv[1]
+with open(path, "r", encoding="utf-8") as fh:
+    data = json.load(fh)
+
+marketplace_name = data.get("name")
+if not isinstance(marketplace_name, str) or not marketplace_name.strip():
+    marketplace_name = "local-marketplace"
+marketplace_name = marketplace_name.strip()
+
+for plugin in data.get("plugins", []):
+    if not isinstance(plugin, dict):
+        continue
+    name = plugin.get("name")
+    if not isinstance(name, str) or not name.strip():
+        continue
+    source = plugin.get("source")
+    if not isinstance(source, dict):
+        continue
+    source_type = source.get("source")
+    source_path = source.get("path")
+    if source_type != "local":
+        continue
+    if not isinstance(source_path, str) or not source_path.strip():
+        continue
+    print(f"{marketplace_name}\t{name.strip()}\t{source_path.strip()}")
+PY
+  )
+
+  # Prune stale local-cache plugin dirs only inside marketplaces represented in
+  # this marketplace file. Do not touch other cache families (for example
+  # openai-curated snapshots).
+  while IFS= read -r tracked_marketplace_dir; do
+    [ -n "$tracked_marketplace_dir" ] || continue
+    [ -d "$tracked_marketplace_dir" ] || continue
+    while IFS= read -r existing_plugin_dir; do
+      [ -n "$existing_plugin_dir" ] || continue
+      if ! grep -Fqx "$existing_plugin_dir" "$keep_file"; then
+        rm -rf -- "$existing_plugin_dir"
+        echo "[OK] Removed stale local cache plugin dir: $existing_plugin_dir"
+      fi
+    done < <(find "$tracked_marketplace_dir" -mindepth 1 -maxdepth 1 -type d -print)
+
+    if [ -d "$tracked_marketplace_dir" ] && [ -z "$(find "$tracked_marketplace_dir" -mindepth 1 -maxdepth 1 -type d -print -quit)" ]; then
+      rm -rf -- "$tracked_marketplace_dir"
+      echo "[OK] Removed empty marketplace cache dir: $tracked_marketplace_dir"
+    fi
+  done < <(sort -u "$marketplace_keep_file")
+}
+
 # Sync to Claude Code, OpenAI Codex/Agents, and Gemini loaders.
+sync_local_marketplace_cache "$plugins_dir/marketplace.json" "$plugins_dir/cache"
 sync_user_skills "$skills_dir" "$repo_root/skills" 1
 sync_user_skills "$plugins_dir" "$repo_root/.agents/plugins" 1
 sync_user_skills "$skills_dir" "$HOME/.claude/skills"
