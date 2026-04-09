@@ -10,7 +10,7 @@ import os
 import yaml
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import List, Optional
+from typing import Optional
 
 from ask.envelope import CallResult, ErrorObject
 
@@ -179,7 +179,7 @@ def _upsert_index_entry(index_path: Path, *, title: str, relative_link: str, sum
             rows = ["", "| Page | Summary |", "| --- | --- |"] + rows
 
         replaced = False
-        new_rows: List[str] = []
+        new_rows: list[str] = []
         for line in rows:
             if link_token in line and line.strip().startswith("|"):
                 new_rows.append(row)
@@ -217,7 +217,7 @@ def wiki_add(
     intent: str,
     status: str,
     destination: Optional[str] = None,
-    tags: Optional[List[str]] = None,
+    tags: Optional[list[str]] = None,
     asset_link: Optional[str] = None,
     dry_run: bool = False,
 ) -> CallResult:
@@ -248,14 +248,14 @@ def wiki_add(
         return result
 
     # Validate status
-    allowed_statuses = {"verified", "fix-now", "draft", "active"}
+    allowed_statuses = {"verified", "fix-now", "draft", "active", "needs-verification"}
     if cleaned_status not in allowed_statuses:
         result.status = "error"
         result.errors.append(
             ErrorObject(
                 code="ERR_VALIDATION",
                 message=f"Unrecognized status '{cleaned_status}'. Must be one of: {', '.join(sorted(allowed_statuses))}",
-                fix_suggestion="Use a valid status: active, draft, fix-now, or verified.",
+                fix_suggestion="Use a valid status: active, draft, fix-now, needs-verification, or verified.",
             )
         )
         return result
@@ -451,7 +451,7 @@ def _extract_title(markdown: str, fallback: str) -> str:
     return fallback
 
 
-def _extract_snippet(markdown: str, tokens: List[str]) -> str:
+def _extract_snippet(markdown: str, tokens: list[str]) -> str:
     body = _strip_frontmatter(markdown)
     lines = [line.strip() for line in body.splitlines() if line.strip()]
     for line in lines:
@@ -560,7 +560,7 @@ def wiki_add_asset(
     source: str = "",
     status: str = "verified",
     destination: str = "assets/ui",
-    tags: Optional[List[str]] = None,
+    tags: Optional[list[str]] = None,
     dry_run: bool = False,
 ) -> CallResult:
     """Copy an asset into wiki raw storage and add a linked wiki asset note."""
@@ -641,9 +641,9 @@ def wiki_ingest(
     repo_root: Path,
     *,
     title: str,
-    sources: List[str],
+    sources: list[str],
     summary: str,
-    tags: List[str],
+    tags: list[str],
     dry_run: bool = False,
 ) -> CallResult:
     """Capture a raw source ingest note and append a wiki log entry."""
@@ -676,7 +676,8 @@ def wiki_ingest(
     date_iso = timestamp.strftime("%Y-%m-%d")
     slug = _slugify(title)
     raw_filename = f"{timestamp_compact}-{slug}.md"
-    raw_path = raw_dir / raw_filename
+    raw_path = _with_collision_suffix(raw_dir / raw_filename, timestamp_compact)
+    raw_filename = raw_path.name
 
     cleaned_sources = [s.strip() for s in sources if s and s.strip()]
     cleaned_tags = [t.strip() for t in tags if t and t.strip()]

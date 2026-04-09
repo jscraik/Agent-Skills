@@ -62,7 +62,7 @@ dev: ## Start development server
 	pnpm dev
 
 build: ## Build for production
-	pnpm build
+	@if [[ -f "package.json" ]]; then pnpm build; else echo "Skipping build (no package.json)"; fi
 
 # === Quality ===
 
