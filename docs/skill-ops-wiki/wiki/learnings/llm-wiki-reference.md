@@ -1,10 +1,10 @@
 ---
-last_reviewed: '2026-04-09'
+last_reviewed: null
 sources:
-- /Users/jamiecraik/dev/agent-skills/docs/skill-ops-wiki/wiki/sources/llm-wiki.md
-status: verified
+- docs/skill-ops-wiki/wiki/sources/llm-wiki.md
+status: pending
 title: LLM Wiki Reference
-triage_status: verified
+triage_status: needs-validation
 type: lesson-learned
 ---
 # LLM Wiki Reference
