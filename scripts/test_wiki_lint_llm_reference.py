@@ -36,13 +36,30 @@ DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
 
 def _section_text(text: str, heading: str) -> str:
-    """Return the body text under a given ## heading (up to the next ## or EOF)."""
+    """
+    Extracts the markdown body under a level-2 heading.
+    
+    Parameters:
+        text (str): The full markdown document to search.
+        heading (str): The exact heading title (without leading `## `).
+    
+    Returns:
+        str: The content under the first matching `## {heading}` (excluding the heading line), up to the next `## ` or end of file; empty string if not found.
+    """
     match = re.search(rf"(?ms)^## {re.escape(heading)}\n(.*?)(?=^## |\Z)", text)
     return match.group(1) if match else ""
 
 
 def _toc_line(text: str) -> list[str]:
-    """Return lines that look like TOC entries (- [Name](#anchor))."""
+    """
+    Locate table-of-contents lines formatted as "- [Name](#anchor)" in the given markdown text.
+    
+    Parameters:
+    	text (str): Markdown content to scan for TOC-style entries.
+    
+    Returns:
+    	matching_lines (list[str]): List of matching lines with surrounding whitespace removed.
+    """
     return [ln.strip() for ln in text.splitlines() if re.match(r"^- \[.+\]\(#.+\)$", ln.strip())]
 
 
@@ -55,6 +72,14 @@ class TestLlmWikiReferenceFile(unittest.TestCase):
     """Validate the structure and frontmatter of the new reference note."""
 
     def setUp(self) -> None:
+        """
+        Prepare the test fixture by loading the LLM wiki reference file and parsing its frontmatter.
+        
+        Stores:
+            self.path: Path to docs/skill-ops-wiki/wiki/learnings/llm-wiki-reference.md
+            self.text: File contents decoded as UTF-8
+            self.frontmatter: Parsed YAML frontmatter from the file (or {} if none)
+        """
         self.path = WIKI_ROOT / "learnings" / "llm-wiki-reference.md"
         self.text = self.path.read_text(encoding="utf-8")
         self.frontmatter = wiki_lint._read_frontmatter(self.path)
@@ -63,6 +88,11 @@ class TestLlmWikiReferenceFile(unittest.TestCase):
         self.assertTrue(self.path.exists(), "llm-wiki-reference.md must exist")
 
     def test_frontmatter_present(self) -> None:
+        """
+        Verify the markdown file contains non-empty YAML frontmatter.
+        
+        Asserts that the parsed frontmatter is present and not empty, protecting against a missing or malformed frontmatter block in the reference markdown.
+        """
         self.assertTrue(self.frontmatter, "Frontmatter must not be empty")
 
     def test_frontmatter_title(self) -> None:
@@ -75,6 +105,11 @@ class TestLlmWikiReferenceFile(unittest.TestCase):
         self.assertEqual(self.frontmatter.get("status"), "verified")
 
     def test_frontmatter_last_reviewed_present(self) -> None:
+        """
+        Verify the frontmatter includes a 'last_reviewed' field.
+        
+        Checks that the parsed YAML frontmatter for the test fixture contains the key 'last_reviewed'.
+        """
         self.assertIn("last_reviewed", self.frontmatter)
 
     def test_frontmatter_last_reviewed_value(self) -> None:
@@ -89,6 +124,11 @@ class TestLlmWikiReferenceFile(unittest.TestCase):
         )
 
     def test_frontmatter_sources_list_non_empty(self) -> None:
+        """
+        Ensure the frontmatter `sources` field is present and contains at least one non-blank entry.
+        
+        Checks that the `sources` key exists in the parsed frontmatter; if it is a list it must have length > 0, otherwise its string representation must not be empty or whitespace.
+        """
         sources = self.frontmatter.get("sources")
         self.assertIsNotNone(sources, "sources key must be present")
         # Parsed as a list by _read_frontmatter when written as YAML list.
@@ -98,6 +138,11 @@ class TestLlmWikiReferenceFile(unittest.TestCase):
             self.assertTrue(str(sources).strip(), "sources value must not be blank")
 
     def test_has_h1_heading(self) -> None:
+        """
+        Ensure the file contains a top-level "# LLM Wiki Reference" H1 heading.
+        
+        Asserts that the document text includes a line starting with "# LLM Wiki Reference".
+        """
         self.assertIsNotNone(
             re.search(r"^# LLM Wiki Reference", self.text, re.MULTILINE),
             "File must contain a top-level '# LLM Wiki Reference' heading",
@@ -110,6 +155,11 @@ class TestLlmWikiReferenceFile(unittest.TestCase):
         self.assertIn("## Source", self.text)
 
     def test_source_section_links_to_llm_wiki(self) -> None:
+        """
+        Check that the "Source" section links to the LLM wiki source file.
+        
+        Asserts that the markdown body under the "## Source" heading contains the path `llm-wiki.md`.
+        """
         source_body = _section_text(self.text, "Source")
         self.assertIn("llm-wiki.md", source_body)
 
@@ -118,6 +168,11 @@ class TestLlmWikiReferenceFile(unittest.TestCase):
         self.assertIn("lesson-learned", triage_body)
 
     def test_triage_section_contains_status(self) -> None:
+        """
+        Assert that the document's "Triage" section contains the required "verified" status.
+        
+        This test extracts the `## Triage` section and checks that the text includes the literal token `verified`, ensuring the page was marked as verified in triage.
+        """
         triage_body = _section_text(self.text, "Triage")
         self.assertIn("verified", triage_body)
 
@@ -138,6 +193,11 @@ class TestLlmWikiReferenceFrontmatterEdgeCases(unittest.TestCase):
     """Regression tests for quirks introduced by the new reference file."""
 
     def setUp(self) -> None:
+        """
+        Prepare the test fixture by locating the LLM wiki reference file and parsing its YAML frontmatter.
+        
+        Sets `self.path` to the repository's `learnings/llm-wiki-reference.md` path and sets `self.frontmatter` to the parsed frontmatter dictionary for use by the test methods.
+        """
         self.path = WIKI_ROOT / "learnings" / "llm-wiki-reference.md"
         self.frontmatter = wiki_lint._read_frontmatter(self.path)
 
@@ -159,6 +219,9 @@ class TestLlmWikiReferenceFrontmatterEdgeCases(unittest.TestCase):
             )
 
     def test_triage_status_field_present(self) -> None:
+        """
+        Verify the frontmatter contains a `triage_status` field with the value 'verified'.
+        """
         self.assertIn("triage_status", self.frontmatter)
         self.assertEqual(self.frontmatter["triage_status"], "verified")
 
@@ -172,16 +235,36 @@ class TestLlmWikiSourceFile(unittest.TestCase):
     """Validate the structure of the imported LLM wiki source document."""
 
     def setUp(self) -> None:
+        """
+        Prepare the test fixture by locating and loading the LLM wiki source markdown.
+        
+        Sets two attributes on the test instance:
+        - `self.path`: Path to `wiki/sources/llm-wiki.md` under the repository wiki root.
+        - `self.text`: File contents decoded as UTF-8.
+        """
         self.path = WIKI_ROOT / "sources" / "llm-wiki.md"
         self.text = self.path.read_text(encoding="utf-8")
 
     def test_file_exists(self) -> None:
+        """
+        Check that the source file 'sources/llm-wiki.md' exists in the wiki repository.
+        
+        Asserts presence of the required source markdown used by the LLM reference tests.
+        """
         self.assertTrue(self.path.exists(), "sources/llm-wiki.md must exist")
 
     def test_file_lives_in_sources_directory(self) -> None:
+        """
+        Asserts the test file is located in a directory named "sources".
+        """
         self.assertEqual(self.path.parent.name, "sources")
 
     def test_has_h1_heading(self) -> None:
+        """
+        Checks the document contains a top-level H1 heading starting with "LLM Wiki".
+        
+        Asserts that the file text includes a line beginning with "# LLM Wiki".
+        """
         self.assertRegex(self.text, r"^# LLM Wiki", re.MULTILINE)
 
     def test_no_frontmatter(self) -> None:
@@ -193,6 +276,11 @@ class TestLlmWikiSourceFile(unittest.TestCase):
         self.assertIn("## The core idea", self.text)
 
     def test_has_architecture_section(self) -> None:
+        """
+        Check that the source markdown includes an "## Architecture" section.
+        
+        Asserts that the loaded file text contains the required "## Architecture" heading to ensure the source document exposes architecture-related content.
+        """
         self.assertIn("## Architecture", self.text)
 
     def test_has_operations_section(self) -> None:
@@ -230,6 +318,13 @@ class TestIndexMdSourcesSection(unittest.TestCase):
     """Validate the Sources section added to index.md by this PR."""
 
     def setUp(self) -> None:
+        """
+        Prepare test fixture by locating and loading the wiki root's index.md for content-based assertions.
+        
+        Sets:
+        - self.path: Path to WIKI_ROOT/index.md
+        - self.text: UTF‑8 decoded file contents used to validate TOC entries and section ordering.
+        """
         self.path = WIKI_ROOT / "index.md"
         self.text = self.path.read_text(encoding="utf-8")
 
@@ -244,6 +339,11 @@ class TestIndexMdSourcesSection(unittest.TestCase):
         self.assertIn("## Sources", self.text)
 
     def test_learnings_section_contains_llm_wiki_reference(self) -> None:
+        """
+        Assert the '## Learnings' section of the index contains an entry for "LLM Wiki Reference".
+        
+        Checks that the extracted body under the "Learnings" heading includes the text "LLM Wiki Reference", ensuring the new reference note is linked from the index.
+        """
         learnings_body = _section_text(self.text, "Learnings")
         self.assertIn("LLM Wiki Reference", learnings_body)
 
@@ -256,14 +356,29 @@ class TestIndexMdSourcesSection(unittest.TestCase):
         self.assertIn("Reference note for externally provided LLM wiki markdown", learnings_body)
 
     def test_sources_section_contains_llm_wiki_source(self) -> None:
+        """
+        Verify the 'Sources' section of index.md includes the "LLM Wiki Source" entry.
+        
+        This test extracts the body under the "Sources" heading and asserts it contains the text "LLM Wiki Source".
+        """
         sources_body = _section_text(self.text, "Sources")
         self.assertIn("LLM Wiki Source", sources_body)
 
     def test_sources_entry_links_to_correct_path(self) -> None:
+        """
+        Check that the "Sources" section contains a link to the LLM wiki source file.
+        
+        Asserts that the Sources section text includes the path `sources/llm-wiki.md`.
+        """
         sources_body = _section_text(self.text, "Sources")
         self.assertIn("sources/llm-wiki.md", sources_body)
 
     def test_sources_entry_has_summary(self) -> None:
+        """
+        Verify the `## Sources` section contains the expected summary for the LLM source.
+        
+        Asserts that the Sources section body includes the text "Imported source markdown for the LLM reference note".
+        """
         sources_body = _section_text(self.text, "Sources")
         self.assertIn("Imported source markdown for the LLM reference note", sources_body)
 
@@ -303,6 +418,11 @@ class TestLogMdTriageEntry(unittest.TestCase):
     """Validate the new triage log entry added by this PR."""
 
     def setUp(self) -> None:
+        """
+        Prepare the test fixture by locating and reading the wiki log file into the instance.
+        
+        Sets `self.path` to the wiki `log.md` path and `self.text` to its UTF-8 file contents for subsequent assertions about triage entries and log structure.
+        """
         self.path = WIKI_ROOT / "log.md"
         self.text = self.path.read_text(encoding="utf-8")
 
@@ -314,13 +434,25 @@ class TestLogMdTriageEntry(unittest.TestCase):
         )
 
     def test_triage_entry_date(self) -> None:
+        """
+        Verify there is exactly one triage log entry for 'LLM Wiki Reference' dated 2026-04-09.
+        
+        Asserts the parsed log entries include a single entry with action `triage` and title `LLM Wiki Reference`, and that its associated date equals `2026-04-09`.
+        """
         entries = LOG_ENTRY_RE.findall(self.text)
         triage_dates = [d for d, action, title in entries if action == "triage" and title == "LLM Wiki Reference"]
         self.assertEqual(len(triage_dates), 1, "Exactly one triage entry for LLM Wiki Reference")
         self.assertEqual(triage_dates[0], "2026-04-09")
 
     def _triage_entry_body(self) -> str:
-        """Extract the body of the LLM Wiki Reference triage entry from log.md."""
+        """
+        Extract the markdown body for the "LLM Wiki Reference" triage log entry dated 2026-04-09.
+        
+        The returned text covers the entry content from the line following the entry header up to the next top-level `##` heading or end of file.
+        
+        Returns:
+            str: The entry body without the leading header; empty string if the entry is not present.
+        """
         match = re.search(
             r"(?ms)^## \[2026-04-09\] triage \| LLM Wiki Reference\n(.*?)(?=^## |\Z)",
             self.text,
@@ -332,6 +464,11 @@ class TestLogMdTriageEntry(unittest.TestCase):
         self.assertIn("lesson-learned", body)
 
     def test_triage_entry_contains_status(self) -> None:
+        """
+        Verify the triage log entry body includes the expected verification status.
+        
+        Asserts that the extracted triage entry body contains the string "verified".
+        """
         body = self._triage_entry_body()
         self.assertIn("verified", body)
 
@@ -340,6 +477,11 @@ class TestLogMdTriageEntry(unittest.TestCase):
         self.assertIn("llm-wiki-reference.md", body)
 
     def test_log_has_h1_heading(self) -> None:
+        """
+        Check that the wiki log file contains the main H1 heading.
+        
+        Asserts the file text includes a top-level heading "# Skill Ops Wiki Log".
+        """
         self.assertRegex(self.text, r"^# Skill Ops Wiki Log", re.MULTILINE)
 
     def test_log_entry_count_at_least_three(self) -> None:
@@ -348,11 +490,20 @@ class TestLogMdTriageEntry(unittest.TestCase):
         self.assertGreaterEqual(len(entries), 3, "log.md must have at least 3 entries")
 
     def test_prior_entries_preserved(self) -> None:
+        """
+        Ensure historical log entries are retained in the log file.
+        
+        Asserts that the log text still contains the prior entries "bootstrap" and "seed".
+        """
         self.assertIn("bootstrap", self.text)
         self.assertIn("seed", self.text)
 
     def test_triage_is_last_entry(self) -> None:
-        """The triage entry should be appended after existing entries."""
+        """
+        Verify the most recent log entry is a triage action for "LLM Wiki Reference".
+        
+        Asserts the last parsed log entry has action `triage` and title `LLM Wiki Reference`.
+        """
         entries = LOG_ENTRY_RE.findall(self.text)
         self.assertEqual(entries[-1][1], "triage")
         self.assertEqual(entries[-1][2], "LLM Wiki Reference")
@@ -368,10 +519,20 @@ class TestWikiLintOnActualWiki(unittest.TestCase):
 
     def setUp(self) -> None:
         # Use a far-future date so no stale-page warnings fire on newly added pages.
+        """
+        Prepare test fixtures by running the wiki linter against the repository wiki with a fixed audit date.
+        
+        Sets `self.now` to 2026-04-09 and stores the linter results in `self.issues` by calling `wiki_lint.lint_wiki(WIKI_ROOT, max_age_days=60, now=self.now)`.
+        """
         self.now = date(2026, 4, 9)
         self.issues = wiki_lint.lint_wiki(WIKI_ROOT, max_age_days=60, now=self.now)
 
     def test_no_broken_links_from_llm_reference(self) -> None:
+        """
+        Assert that there are no 'broken-link' linter issues referencing the LLM reference page.
+        
+        Checks the collected linter issues for any with code "broken-link" whose path includes "llm-wiki-reference" and fails the test if any such issues are found, listing them in the failure message.
+        """
         broken = [
             i for i in self.issues
             if i.code == "broken-link" and "llm-wiki-reference" in i.path
@@ -379,6 +540,11 @@ class TestWikiLintOnActualWiki(unittest.TestCase):
         self.assertEqual(broken, [], f"Unexpected broken links: {broken}")
 
     def test_no_broken_links_from_llm_source(self) -> None:
+        """
+        Assert that there are no 'broken-link' lint issues referencing the LLM wiki source file.
+        
+        Checks the collected linter issues for any item with code "broken-link" whose path contains "llm-wiki" and fails the test if any are present, reporting the unexpected broken links.
+        """
         broken = [
             i for i in self.issues
             if i.code == "broken-link" and "llm-wiki" in i.path
@@ -386,6 +552,11 @@ class TestWikiLintOnActualWiki(unittest.TestCase):
         self.assertEqual(broken, [], f"Unexpected broken links in llm-wiki.md: {broken}")
 
     def test_no_bad_date_errors_for_new_files(self) -> None:
+        """
+        Assert that there are no `bad-date` lint issues affecting any files related to the LLM wiki.
+        
+        Checks the collected linter issues and fails the test if any issue has code `bad-date` and references a path containing `llm-wiki`, reporting the unexpected issues.
+        """
         bad_date = [
             i for i in self.issues
             if i.code == "bad-date" and ("llm-wiki" in i.path)
@@ -414,6 +585,21 @@ class TestWikiLintSyntheticWiki(unittest.TestCase):
     """
 
     def _make_wiki(self, tmp: Path) -> Path:
+        """
+        Create a synthetic wiki directory tree used as a test fixture for wiki linter tests.
+        
+        The function writes a small wiki under the given temporary directory containing:
+        - index.md with relative links to the sample learnings and sources pages,
+        - log.md with a triage entry for "LLM Wiki Reference",
+        - learnings/llm-wiki-reference.md with YAML frontmatter and a Source section linking to the source file,
+        - sources/llm-wiki.md with minimal content.
+        
+        Parameters:
+            tmp (Path): Temporary directory in which the wiki tree will be created.
+        
+        Returns:
+            Path: Path to the created `wiki` directory.
+        """
         wiki = tmp / "wiki"
         (wiki / "learnings").mkdir(parents=True)
         (wiki / "sources").mkdir(parents=True)
@@ -476,6 +662,11 @@ class TestWikiLintSyntheticWiki(unittest.TestCase):
             self.assertEqual(missing, [], f"Missing index links: {missing}")
 
     def test_no_orphan_pages_in_synthetic_wiki(self) -> None:
+        """
+        Verifies the linter reports no orphan pages for a synthetic wiki fixture.
+        
+        Creates a temporary wiki containing linked index, learnings and sources pages, runs wiki_lint.lint_wiki with a fixed date, and asserts that no issues with code "orphan-page" are returned.
+        """
         with tempfile.TemporaryDirectory() as tmp:
             wiki = self._make_wiki(Path(tmp))
             issues = wiki_lint.lint_wiki(wiki, max_age_days=60, now=date(2026, 4, 9))
@@ -483,7 +674,11 @@ class TestWikiLintSyntheticWiki(unittest.TestCase):
             self.assertEqual(orphans, [], f"Orphan pages detected: {orphans}")
 
     def test_missing_index_link_fires_when_page_omitted(self) -> None:
-        """Removing a page from the index must trigger missing-index-link."""
+        """
+        Check that removing a learnings page from index.md causes a `missing-index-link` linter issue.
+        
+        Creates a synthetic wiki, omits the `learnings/llm-wiki-reference.md` entry from index.md and asserts the linter reports that path as a `missing-index-link`.
+        """
         with tempfile.TemporaryDirectory() as tmp:
             wiki = self._make_wiki(Path(tmp))
             # Overwrite index.md to omit llm-wiki-reference.md
@@ -510,7 +705,11 @@ class TestWikiLintSyntheticWiki(unittest.TestCase):
             self.assertTrue(len(broken) >= 1, "Expected at least one broken-link issue")
 
     def test_orphan_fires_when_source_not_linked_from_index(self) -> None:
-        """A source page with no inbound links from anywhere must be flagged as orphan."""
+        """
+        Verifies that a source page with no inbound links is reported as an orphan.
+        
+        Creates a temporary wiki fixture, removes all links to sources/llm-wiki.md from the index and the reference note, runs the linter, and asserts an `orphan-page` issue is reported for `sources/llm-wiki.md`.
+        """
         with tempfile.TemporaryDirectory() as tmp:
             wiki = self._make_wiki(Path(tmp))
             # Remove sources/llm-wiki.md from index and from the reference note
@@ -549,6 +748,15 @@ class TestReadFrontmatterUnit(unittest.TestCase):
     """Unit-test the _read_frontmatter helper with content patterns from the new files."""
 
     def _parse(self, content: str) -> dict:
+        """
+        Create a temporary Markdown file from `content`, parse its YAML frontmatter using `wiki_lint._read_frontmatter`, and return the parsed result.
+        
+        Parameters:
+        	content (str): Markdown file contents to be written for parsing.
+        
+        Returns:
+        	(dict): Parsed frontmatter mapping (empty dict if no frontmatter found). The temporary file is deleted before returning.
+        """
         with tempfile.NamedTemporaryFile(suffix=".md", mode="w", encoding="utf-8", delete=False) as f:
             f.write(content)
             tmp_path = Path(f.name)
@@ -604,6 +812,11 @@ class TestReadFrontmatterUnit(unittest.TestCase):
         self.assertEqual(fm, {})
 
     def test_file_without_frontmatter_delimiter_returns_empty(self) -> None:
+        """
+        Verify that parsing a file without YAML frontmatter delimiters returns an empty dict.
+        
+        The test supplies markdown content with no leading frontmatter delimiter and asserts that the frontmatter parser returns {}.
+        """
         fm = self._parse("# Just a Heading\n\nNo frontmatter here.\n")
         self.assertEqual(fm, {})
 
