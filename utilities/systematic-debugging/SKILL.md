@@ -87,7 +87,7 @@ metadata:
 ## See Also
 | Skill | When to use |
 |---|---|
-| `github:gh-fix-ci` (plugin) | Investigate a failing GitHub Actions check instead of a general bug report |
+| [[gh-workflow]] | Use `ci_diagnose` mode for GitHub check failures that need lifecycle context |
 | [[test-driven-development]] | Capture the root cause as a failing test before or alongside the fix |
 | [[verification-before-completion]] | Prove the fix works before claiming the debugging loop is done |
 | [[ce-plan]] | Re-plan the approach when repeated fixes fail and the current path is not converging |

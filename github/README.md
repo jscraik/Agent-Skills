@@ -17,8 +17,7 @@ GitHub workflow and PR operations skill directory.
 - Plugin mirror note:
   plugin-scoped skills under
   `plugins/cache/openai-curated/github/.../skills/`
-  stay connector-first (`github`, `yeet`, `gh-fix-ci`,
-  `gh-address-comments`).
+  stay connector-first (`github`).
 - Repo-local `github/*` skills stay `gh`-first with richer governance and
   validation framing.
 - Deprecated aliases were retired on `2026-02-24`.

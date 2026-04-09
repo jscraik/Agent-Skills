@@ -26,7 +26,7 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - [Utilities](#utilities)
 
 ## Summary
-- `total_skills`: 117
+- `total_skills`: 116
 - `catalog_source`: repository skill scan
 
 ## Catalog
@@ -88,7 +88,6 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 
 - `gh-workflow` — Operate the GitHub lifecycle through `gh`: issue work, PR readiness checks, PR preparation, review handling, CI diagnosis, and merge execution. Use when the user wants GitHub state changed, advanced, or reconciled.
 - `resolve-pr-parallel` — Resolve multiple unresolved GitHub PR review threads in parallel by applying fixes, responding, and closing verified threads. Use when the user wants a broad PR-comment cleanup sweep, not readiness classification or one-off comment handling.
-- `review-duplication` — Proactively investigate for duplicated functionality during code reviews.
 
 ## Interview
 

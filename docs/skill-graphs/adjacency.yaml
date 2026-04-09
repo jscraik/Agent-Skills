@@ -560,10 +560,6 @@ resolve-todo-parallel:
   orchestrating-subagents: Coordinate explicit subagent fan-out when runtime and user
     approval allow it
   triage: Review pending todo findings before execution begins
-review-duplication:
-  backend-engineer: When duplication is found in backend code
-  codex-home-audit: When reviewing Codex configuration for duplicates
-  frontend-ui-design: When duplication is found in UI components
 security-best-practices:
   1password: Findings involving secrets management — use for secure injection patterns
   create-auth: Security review often surfaces auth issues — use this for implementation

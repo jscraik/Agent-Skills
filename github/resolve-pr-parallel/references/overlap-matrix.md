@@ -20,7 +20,7 @@ Use this matrix to keep `resolve-pr-parallel` focused on remediation of all unre
 | "Is this PR ready to merge?" | Readiness and blocker audit | `gh-workflow (pr_readiness mode)` |
 | "Handle review comments 2 and 4 only." | Selected-comment workflow | `gh-workflow` |
 | "Prepare this branch as a PR and request review." | Broader GitHub lifecycle management | `gh-workflow` |
-| "Why are the PR checks failing?" | CI diagnosis | `github:gh-fix-ci` (plugin) |
+| "Why are the PR checks failing?" | CI diagnosis | `gh-workflow` (`ci_diagnose`) |
 | "How should this repo's CircleCI workflow gate PR remediation and deploys?" | CircleCI workflow design and policy | `circleci` |
 | "Do a broad readiness review of this branch." | Package-level review | `ce-review` |
 | "Find the engineering risks in this PR." | Technical critique, not remediation | `ce-technical-review` |

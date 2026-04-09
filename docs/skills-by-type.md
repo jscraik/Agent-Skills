@@ -3,7 +3,6 @@
 Generated from `metadata.skill-type` tags in skill frontmatter. This index complements the directory-based catalog in `SKILL.md`.
 
 ## Table of Contents
-
 - [Summary](#summary)
 - [Semantic Types](#semantic-types)
 - [Validation Notes](#validation-notes)
@@ -15,12 +14,12 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 - `data_fetch_analysis`: 6
 - `team_automation`: 35
 - `scaffolding_templates`: 26
-- `code_quality_review`: 16
+- `code_quality_review`: 15
 - `ci_cd_deployment`: 7
 - `runbook`: 4
 - `infrastructure_ops`: 6
 - `invalid`: 0
-- `total_tagged`: 116
+- `total_tagged`: 115
 
 ## Semantic Types
 
@@ -136,7 +135,6 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 - `every-style-editor` — `product/content`
 - `fixing-accessibility` — `frontend/website`
 - `fixing-metadata` — `frontend/website`
-- `review-duplication` — `github`
 - `security-best-practices` — `product/security`
 - `test-driven-development` — `utilities`
 - `verification-before-completion` — `utilities`
@@ -170,3 +168,4 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 ## Validation Notes
 
 - No invalid semantic type tags detected.
+
