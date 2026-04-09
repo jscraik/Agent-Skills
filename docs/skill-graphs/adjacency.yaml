@@ -65,10 +65,6 @@ architecture-interview:
   product-spec: Produce a detailed spec after the architecture is decided
   security-threat-model: Run a threat model alongside architecture decisions
   writing-plans: Convert ADR output into an implementation plan
-arscontexta:
-  plugin-builder: Bundle this skill into plugin workflows and run plugin-level validations
-  skill-builder: Improve, validate, and package the Ars Contexta skill after operational
-    updates
 atlas:
   agent-browser: Complement Atlas AppleScript control with browser automation
   notebooklm: Cross-reference Atlas conversations with NotebookLM notebooks
@@ -208,6 +204,7 @@ chatgpt-apps:
 circleci:
   backend-engineer: Wire backend deployments into CircleCI workflows
   cloudflare-deploy: Deploy to Cloudflare as part of a CircleCI pipeline
+  gh-workflow: Manage CircleCI-related pull request updates and merge flow in GitHub
   verification-before-completion: Verify pipeline output before marking complete
 claude-alias:
   bootstrap: Bootstrap a local development environment from a GitHub repository URL
@@ -222,12 +219,6 @@ cloudflare-deploy:
   fixing-metadata: Fix OG/meta tags on deployed pages
   verification-before-completion: Verify deployment is healthy before completing
   workers-mcp: Deploy MCP server as part of the Cloudflare stack
-coderabbit:
-  cf-crawl: Refresh or expand the local CodeRabbit docs corpus before analysis
-  circleci: Pair CodeRabbit guidance with broader CircleCI migration and policy workflows
-  context7: Cross-check third-party library docs when CodeRabbit guidance references
-    external tools
-  gh-workflow: Apply CodeRabbit guidance while executing GitHub PR lifecycle changes
 codex-agent-creator:
   agents-md: Update repo instructions to reference or govern the new agent roles
   codex-automation-architect: Design recurring automations that orchestrate the installed
@@ -597,6 +588,8 @@ simple-tasks:
   linear: Escalate to Linear when tasks need team-wide visibility
   verification-before-completion: Mark tasks done only after verification evidence
 skill-builder:
+  codex-agent-builder: Package finalized skill behavior as a reusable Codex subagent
+    when agentization is the next operational step
   codex-sessions-skill-scan: Audit skill coverage, failures, and overlap using real
     session evidence instead of authoring doctrine alone
   decide-build-primitive: Decide whether the capability should be a skill, prompt,
@@ -606,6 +599,8 @@ skill-builder:
   skill-installer: Install, import, or repair runtime visibility when the skill package
     is already valid and the remaining work is distribution
 skill-creator:
+  codex-agent-builder: Promote stable skill workflows into dedicated Codex agent
+    roles when role-specific execution is preferred
   plugin-creator: Package finished skills into a plugin distribution scaffold
   skill-builder: Lifecycle hardening, comparative eval rounds, and release-quality
     contract upgrades
@@ -648,6 +643,7 @@ stitch-remotion:
 systematic-debugging:
   ce-plan: Re-plan the approach when repeated fixes fail and the current path is not
     converging
+  gh-workflow: Push verified debugging fixes through PR checks and merge gates
   test-driven-development: Capture the root cause as a failing test before or alongside
     the fix
   verification-before-completion: Prove the fix works before claiming the debugging
