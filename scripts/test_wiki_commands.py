@@ -6,7 +6,6 @@ from __future__ import annotations
 import contextlib
 import re
 import tempfile
-import shutil
 import unittest
 from pathlib import Path
 
