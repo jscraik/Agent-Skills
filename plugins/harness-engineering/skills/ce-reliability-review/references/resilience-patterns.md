@@ -58,7 +58,7 @@ Detailed patterns for reliability review assessments. Use this reference during 
 **Review checkpoints:**
 - Is a timeout set at every network call, database query, and external API invocation?
 - Are timeouts tuned to the dependency's expected latency? (not default library values)
-- Do timeouts compose? (total request timeout > sum of serial dependency timeouts is a bug)
+- Do timeouts compose? (total request timeout < sum of serial dependency timeouts is a bug)
 - Is there a global request timeout as a safety net?
 - Are timeout values documented and monitored?
 

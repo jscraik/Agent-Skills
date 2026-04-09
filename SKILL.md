@@ -26,7 +26,7 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - [Utilities](#utilities)
 
 ## Summary
-- `total_skills`: 110
+- `total_skills`: 113
 - `catalog_source`: repository skill scan
 - `policy_identity`: a97bdfca10970fcb
 
@@ -198,4 +198,3 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - `verification-before-completion` — Validate completion claims with fresh command evidence. Use when you are about to claim work is complete, fixed, or passing.
 - `visual-explainer` — Generate self-contained HTML explainers for systems, diffs, plans, or data with clearer visual presentation than plain text. Use when the user wants a diagram or visual technical explainer, or when a large ASCII table would be hard to scan.
 - `writing-plans` — Compatibility wrapper for generic implementation planning. Use when the user asks for a general plan and route the work to `ce-plan` in `generic-plan` mode.
-

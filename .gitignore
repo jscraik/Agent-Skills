@@ -50,34 +50,7 @@ plugins/coderabbit/skills/*
 !plugins/coderabbit/skills/coderabbit/**
 !plugins/coderabbit/skills/simplify/**
 # Keep harness-engineering plugin skills tracked despite global skills/ ignore.
-!plugins/harness-engineering/skills/
-plugins/harness-engineering/skills/*
-!plugins/harness-engineering/skills/ce-brainstorm/
-!plugins/harness-engineering/skills/ce-compound/
-!plugins/harness-engineering/skills/ce-compound-refresh/
-!plugins/harness-engineering/skills/ce-deepen-plan/
-!plugins/harness-engineering/skills/ce-deepen-spec/
-!plugins/harness-engineering/skills/ce-ideate/
-!plugins/harness-engineering/skills/ce-plan/
-!plugins/harness-engineering/skills/ce-reliability-review/
-!plugins/harness-engineering/skills/ce-review/
-!plugins/harness-engineering/skills/ce-spec/
-!plugins/harness-engineering/skills/ce-tdd/
-!plugins/harness-engineering/skills/ce-technical-review/
-!plugins/harness-engineering/skills/ce-work/
-!plugins/harness-engineering/skills/ce-brainstorm/**
-!plugins/harness-engineering/skills/ce-compound/**
-!plugins/harness-engineering/skills/ce-compound-refresh/**
-!plugins/harness-engineering/skills/ce-deepen-plan/**
-!plugins/harness-engineering/skills/ce-deepen-spec/**
-!plugins/harness-engineering/skills/ce-ideate/**
-!plugins/harness-engineering/skills/ce-plan/**
-!plugins/harness-engineering/skills/ce-reliability-review/**
-!plugins/harness-engineering/skills/ce-review/**
-!plugins/harness-engineering/skills/ce-spec/**
-!plugins/harness-engineering/skills/ce-tdd/**
-!plugins/harness-engineering/skills/ce-technical-review/**
-!plugins/harness-engineering/skills/ce-work/**
+!plugins/harness-engineering/skills/**
 # Keep skill-factory plugin skills tracked despite global skills/ ignore.
 !plugins/skill-factory/skills/
 plugins/skill-factory/skills/*

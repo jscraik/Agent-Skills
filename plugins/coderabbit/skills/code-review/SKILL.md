@@ -48,7 +48,7 @@ triggers:
    - `coderabbit review --prompt-only`
    - `coderabbit review --plain`
 4. Normalize plain output with:
-   - `python3 plugins/coderabbit/skills/code-review/scripts/parse_plain_review.py --input <path-or->`
+   - `python3 plugins/coderabbit/skills/code-review/scripts/parse_plain_review.py --input <file-or-stdin>`
 5. Group findings by severity and surface file-specific actions.
 6. If user requested autonomous loop:
    - implement or apply fixes,

@@ -1,6 +1,7 @@
 interface:
   display_name: Og Image Creator
   short_description: Generate brand-aligned Open Graph images for existing routes
-    by inspecting a web codebase and rendering assets with P...
+    by inspecting a web codebase and rendering assets with programmatic templates
+    and brand styles
   icon_small: ./assets/icon-small.png
   icon_large: ./assets/icon-large.png

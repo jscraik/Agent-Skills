@@ -27,8 +27,8 @@ outputs:
     type: string
     description: High-level review outcome summary.
   - name: findings
-    type: array
-    description: Severity-grouped findings with affected file context.
+    type: object
+    description: Severity-grouped findings with affected file context (object with severity keys containing arrays of findings).
   - name: actions
     type: array
     description: Prioritized tasks for critical and warning issues.
@@ -55,4 +55,4 @@ risks:
   - False confidence when review is run against the wrong diff scope.
   - Sensitive data leakage if review summaries include raw secrets.
 execution_primitives:
-  - python3 plugins/coderabbit/skills/code-review/scripts/parse_plain_review.py --input <path-or->
+  - python3 plugins/coderabbit/skills/code-review/scripts/parse_plain_review.py --input <file-or-stdin>

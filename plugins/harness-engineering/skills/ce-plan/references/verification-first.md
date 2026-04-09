@@ -14,7 +14,7 @@ Every implementation unit must include verification strategy before execution.
 ## Core Rules
 
 1. **Tests describe behavior, not implementation**
-   - Good: "user can checkout with valid cart"
+   - Good: "user can check out with valid cart"
    - Bad: "validateCart method is called with correct arguments"
 
 2. **Tests must survive internal refactors**

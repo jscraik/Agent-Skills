@@ -4,6 +4,8 @@ Read when: a brainstorm-produced requirements document mostly needs refinement b
 
 Imported from the upstream `ce-brainstorm` workflow in `EveryInc/compound-engineering-plugin` commit `847ce3f156a5cdf75667d9802e95d68e6b3c53a4`, adapted for local `ce-brainstorm`.
 
+**Note:** This content is similar to `ce-deepen-spec/references/document-review-pass.md`. Check for a canonical shared version before making changes.
+
 ## Purpose
 
 Improve requirements documents through a lightweight structured review.

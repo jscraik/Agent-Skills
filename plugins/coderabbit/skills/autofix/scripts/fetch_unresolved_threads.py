@@ -16,16 +16,24 @@ CODERABBIT_AUTHORS = {
 }
 
 GRAPHQL_QUERY = """
-query($owner:String!, $repo:String!, $pr:Int!) {
+query($owner:String!, $repo:String!, $pr:Int!, $threadCursor:String, $commentCursor:String) {
   repository(owner:$owner, name:$repo) {
     pullRequest(number:$pr) {
-      reviewThreads(first:100) {
+      reviewThreads(first:100, after:$threadCursor) {
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
         nodes {
           isResolved
           path
           line
           startLine
-          comments(first:10) {
+          comments(first:10, after:$commentCursor) {
+            pageInfo {
+              hasNextPage
+              endCursor
+            }
             nodes {
               databaseId
               body
@@ -40,7 +48,7 @@ query($owner:String!, $repo:String!, $pr:Int!) {
 """
 
 
-def _run_gh_graphql(owner: str, repo: str, pr: int) -> dict[str, Any]:
+def _run_gh_graphql(owner: str, repo: str, pr: int, thread_cursor: str | None = None) -> dict[str, Any]:
     cmd = [
         "gh",
         "api",
@@ -54,7 +62,9 @@ def _run_gh_graphql(owner: str, repo: str, pr: int) -> dict[str, Any]:
         "-f",
         f"query={GRAPHQL_QUERY}",
     ]
-    proc = subprocess.run(cmd, capture_output=True, text=True, check=False)
+    if thread_cursor is not None:
+        cmd.extend(["-F", f"threadCursor={thread_cursor}"])
+    proc = subprocess.run(cmd, capture_output=True, text=True, check=False, timeout=30)
     if proc.returncode != 0:
         raise RuntimeError(proc.stderr.strip() or "gh graphql request failed")
     try:
@@ -78,15 +88,20 @@ def _is_coderabbit_author(login: Any) -> bool:
     return login.strip().lower() in CODERABBIT_AUTHORS
 
 
-def _extract_unresolved_threads(payload: dict[str, Any]) -> list[dict[str, Any]]:
-    root = payload.get("data", {}).get("repository", {}).get("pullRequest", {})
+def _extract_unresolved_threads(payload: dict[str, Any], thread_offset: int = 0) -> tuple[list[dict[str, Any]], bool, str | None]:
+    root = (payload.get("data") or {}).get("repository", {}).get("pullRequest", {})
     if not isinstance(root, dict) or not root:
         raise RuntimeError("pull request not found in GitHub response")
 
-    nodes = root.get("reviewThreads", {}).get("nodes", [])
+    review_threads = (root.get("reviewThreads") or {})
+    nodes = review_threads.get("nodes", [])
+    page_info = review_threads.get("pageInfo", {})
+    has_next = page_info.get("hasNextPage", False)
+    end_cursor = page_info.get("endCursor")
+
     results: list[dict[str, Any]] = []
 
-    for index, node in enumerate(nodes, start=1):
+    for index, node in enumerate(nodes, start=thread_offset + 1):
         if node.get("isResolved") is True:
             continue
 
@@ -115,7 +130,7 @@ def _extract_unresolved_threads(payload: dict[str, Any]) -> list[dict[str, Any]]
                 "start_line": node.get("startLine"),
             }
         )
-    return results
+    return results, has_next, end_cursor
 
 
 def main() -> int:
@@ -126,8 +141,25 @@ def main() -> int:
     args = parser.parse_args()
 
     try:
-        payload = _run_gh_graphql(args.owner, args.repo, args.pr)
-        unresolved = _extract_unresolved_threads(payload)
+        all_unresolved: list[dict[str, Any]] = []
+        thread_cursor: str | None = None
+        thread_offset = 0
+
+        while True:
+            try:
+                payload = _run_gh_graphql(args.owner, args.repo, args.pr, thread_cursor)
+            except subprocess.TimeoutExpired as exc:
+                raise RuntimeError(f"gh graphql request timed out after {exc.timeout}s") from exc
+
+            unresolved, has_next, end_cursor = _extract_unresolved_threads(payload, thread_offset)
+            all_unresolved.extend(unresolved)
+
+            if not has_next or end_cursor is None:
+                break
+
+            thread_cursor = end_cursor
+            thread_offset += 100
+
     except RuntimeError as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1
@@ -139,8 +171,8 @@ def main() -> int:
                 "owner": args.owner,
                 "repo": args.repo,
                 "pr": args.pr,
-                "unresolved_count": len(unresolved),
-                "unresolved_threads": unresolved,
+                "unresolved_count": len(all_unresolved),
+                "unresolved_threads": all_unresolved,
             },
             indent=2,
             sort_keys=True,

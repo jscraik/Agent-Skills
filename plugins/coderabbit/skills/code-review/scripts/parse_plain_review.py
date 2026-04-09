@@ -64,8 +64,15 @@ def parse_plain_output(text: str) -> dict[str, object]:
             continue
 
         bullet = _extract_bullet(line)
-        if current is not None and bullet is not None:
-            findings[current].append(bullet)
+        if bullet is not None:
+            # Check if the extracted bullet text itself contains a tagged severity
+            bullet_tagged_match = TAGGED_FINDING_PATTERN.match(bullet)
+            if bullet_tagged_match is not None:
+                severity = bullet_tagged_match.group(1).lower()
+                findings[severity].append(bullet_tagged_match.group(2).strip())
+                current = severity
+            elif current is not None:
+                findings[current].append(bullet)
 
     counts = {severity: len(entries) for severity, entries in findings.items()}
     return {

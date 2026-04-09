@@ -64,11 +64,13 @@ Call stage skills directly when stage intent is explicit:
 Validate plugin contract and marketplace registration:
 
 ```sh
-python3 utilities/plugin-builder/scripts/plugin_builder.py validate plugins/harness-engineering --require-marketplace --marketplace-path .agents/plugins/marketplace.json --allow-legacy-marketplace-path
+python3 utilities/plugin-builder/scripts/plugin_builder.py validate plugins/harness-engineering --require-marketplace --marketplace-path .agents/plugins/marketplace.json
 ```
 
 Audit marketplace alignment:
 
 ```sh
-python3 utilities/plugin-builder/scripts/plugin_builder.py audit-marketplace --marketplace-path .agents/plugins/marketplace.json --plugins-path plugins --allow-legacy-marketplace-path
+python3 utilities/plugin-builder/scripts/plugin_builder.py audit-marketplace --marketplace-path .agents/plugins/marketplace.json --plugins-path plugins
 ```
+
+**Note:** If you encounter legacy marketplace path issues, you can temporarily use `--allow-legacy-marketplace-path` as an explicit troubleshooting option.

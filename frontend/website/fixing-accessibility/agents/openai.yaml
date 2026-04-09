@@ -1,6 +1,6 @@
 interface:
   display_name: Fixing Accessibility
   short_description: Audit and fix HTML accessibility issues including ARIA labels,
-    keyboard navigation, focus management, color contrast,...
+    keyboard navigation, focus management, and color contrast.
   icon_small: ./assets/icon-small.png
   icon_large: ./assets/icon-large.png

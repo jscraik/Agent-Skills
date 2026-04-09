@@ -4,6 +4,8 @@ Read when: an existing requirements document, system spec, or UI spec mostly nee
 
 Imported from the upstream `document-review` skill in `EveryInc/compound-engineering-plugin` commit `0ae91dcc298721e5b2c4ab6d1fc6f76a13b6f67c`, adapted for `ce-deepen-spec`.
 
+**Note:** This content is similar to `ce-brainstorm/references/document-review-pass.md`. Check for a canonical shared version before making changes.
+
 ## Purpose
 
 Improve requirements or spec documents through a lightweight structured review.

@@ -8,7 +8,7 @@
 |---|---|---|
 | A multi-step user workflow or process | Mermaid flow diagram or ASCII flow with annotations | After Problem Frame, or under its own `## User Flow` heading for substantial flows (>10 nodes) |
 | 3+ behavioral modes, variants, or states | Markdown comparison table | Within the Requirements section |
-| 3+ interacting participants (user roles, system components, external services) | Mermaid or ASCII relationship diagram | After Problem Frame, or under its own `## Architecture` heading |
+| 3+ interacting participants (user roles, system components, external services) | Mermaid or ASCII relationship diagram | After Problem Frame, or under a dedicated `## Architecture` heading when containing 3+ interacting participants |
 | Multiple competing approaches being compared | Comparison table | Within Phase 2 approach exploration |
 
 ## When to Skip
