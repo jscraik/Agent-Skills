@@ -138,7 +138,6 @@ class TestCodexApplyEnvBinPrepend(unittest.TestCase):
         self.assertEqual(result.returncode, 0)
         path_entries = result.stdout.strip().split(":")
         # Check that any entry ends with /bin and corresponds to the repo
-        bin_entries = [e for e in path_entries if e.endswith("/bin") and "codex" not in e.lower() or e.endswith("/bin")]
         repo_bin = None
         for entry in path_entries:
             if entry.endswith("/bin") and Path(entry).parent == REPO_ROOT:
