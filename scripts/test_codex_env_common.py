@@ -22,7 +22,17 @@ SCRIPT_PATH = REPO_ROOT / "scripts" / "codex_env_common.sh"
 
 
 def _bash(snippet: str, env: dict | None = None, cwd: str | None = None) -> subprocess.CompletedProcess:
-    """Run a bash snippet, returning the CompletedProcess."""
+    """
+    Execute a bash snippet and return the completed process result.
+    
+    Parameters:
+        snippet (str): Shell code to run under `bash -c`.
+        env (dict | None): Environment variable overrides merged on top of the current environment.
+        cwd (str | None): Working directory in which to run the snippet.
+    
+    Returns:
+        subprocess.CompletedProcess: The completed process containing `stdout`, `stderr` and `returncode`.
+    """
     base_env = {k: v for k, v in os.environ.items()}
     if env:
         base_env.update(env)
@@ -36,7 +46,20 @@ def _bash(snippet: str, env: dict | None = None, cwd: str | None = None) -> subp
 
 
 def _source_and_run(extra: str, env: dict | None = None, cwd: str | None = None) -> subprocess.CompletedProcess:
-    """Source codex_env_common.sh then run extra snippet."""
+    """
+    Source the codex_env_common.sh script in a bash subshell and then execute the provided shell snippet.
+    
+    The snippet is executed after the script is sourced so any functions or environment variables defined by
+    codex_env_common.sh are available to the snippet.
+    
+    Parameters:
+        extra (str): Shell commands to run after sourcing the script.
+        env (dict | None): Environment overrides merged with the current process environment for the subprocess.
+        cwd (str | None): Working directory for the subprocess.
+    
+    Returns:
+        subprocess.CompletedProcess: The completed process result containing return code, stdout and stderr.
+    """
     snippet = f'source "{SCRIPT_PATH}"\n{extra}'
     return _bash(snippet, env=env, cwd=cwd)
 
@@ -56,7 +79,11 @@ class TestCodexRepoRoot(unittest.TestCase):
         self.assertTrue(result.stdout.strip(), "CODEX_REPO_ROOT must not be empty")
 
     def test_codex_repo_root_is_absolute_path(self) -> None:
-        """CODEX_REPO_ROOT must be an absolute path."""
+        """
+        Ensure CODEX_REPO_ROOT is an absolute path.
+        
+        Asserts that after sourcing the environment script, the `CODEX_REPO_ROOT` value starts with '/'.
+        """
         result = _source_and_run('printf "%s" "$CODEX_REPO_ROOT"')
         self.assertEqual(result.returncode, 0)
         root = result.stdout.strip()
@@ -129,7 +156,12 @@ class TestCodexApplyEnvBinPrepend(unittest.TestCase):
         self.assertIn(str(REPO_ROOT / "bin"), result.stdout, "CODEX_REPO_ROOT/bin must be in PATH after codex_apply_env")
 
     def test_apply_env_places_repo_bin_before_local_bin(self) -> None:
-        """$CODEX_REPO_ROOT/bin must appear before $HOME/.local/bin in PATH."""
+        """
+        Ensure $CODEX_REPO_ROOT/bin appears before $HOME/.local/bin in PATH.
+        
+        If ~/.local/bin is absent the test only asserts that the repository bin is present.
+        If the repository bin is not found in PATH the test is skipped.
+        """
         result = _source_and_run(
             'codex_apply_env; printf "%s" "$PATH"',
             cwd=str(REPO_ROOT),
@@ -170,7 +202,12 @@ class TestCodexApplyEnvBinPrepend(unittest.TestCase):
         self.assertLessEqual(count, 1, f"CODEX_REPO_ROOT/bin appeared {count} times in PATH (expected at most 1)")
 
     def test_apply_env_does_not_add_nonexistent_bin(self) -> None:
-        """If CODEX_REPO_ROOT/bin does not exist, it must not be added to PATH."""
+        """
+        Ensure that when CODEX_REPO_ROOT/bin does not exist it is not prepended to PATH.
+        
+        Uses a temporary directory without a `bin/` subdirectory, sources the script, runs `codex_apply_env`
+        and asserts that `<tmp>/bin` is not present in the resulting `PATH`.
+        """
         with tempfile.TemporaryDirectory() as tmp:
             # tmp has no bin/ subdirectory
             result = _bash(
@@ -187,7 +224,11 @@ class TestCodexApplyEnvBinPrepend(unittest.TestCase):
                              f"{bin_dir} must not be added when the directory does not exist")
 
     def test_apply_env_adds_bin_when_directory_exists(self) -> None:
-        """When $CODEX_REPO_ROOT/bin exists as a directory, it must be added to PATH."""
+        """
+        Ensure the repository 'bin' directory is added to PATH when it exists.
+        
+        Sets CODEX_REPO_ROOT to a temporary directory containing a `bin/` subdirectory, runs `codex_apply_env`, and asserts that that `bin` path appears among PATH entries.
+        """
         with tempfile.TemporaryDirectory() as tmp:
             bin_dir = Path(tmp) / "bin"
             bin_dir.mkdir()
@@ -223,7 +264,11 @@ class TestCodexPrependPathIfExists(unittest.TestCase):
     """Verify codex_prepend_path_if_exists handles edge cases correctly."""
 
     def test_skips_empty_entry(self) -> None:
-        """An empty string must not be added to PATH."""
+        """
+        Ensure codex_prepend_path_if_exists does not add an empty entry to PATH.
+        
+        Uses PATH "/usr/bin:/bin" and asserts that calling codex_prepend_path_if_exists "" leaves PATH unchanged.
+        """
         original_path = "/usr/bin:/bin"
         result = _bash(
             f'source "{SCRIPT_PATH}"; '
@@ -236,7 +281,11 @@ class TestCodexPrependPathIfExists(unittest.TestCase):
         self.assertEqual(result.stdout.strip(), original_path)
 
     def test_skips_nonexistent_directory(self) -> None:
-        """A path that does not exist on disk must not be added."""
+        """
+        Ensure codex_prepend_path_if_exists does not add a non-existent directory to PATH.
+        
+        Validates the behaviour by setting PATH to a known value, attempting to prepend a path that does not exist on disk, and asserting the PATH remains unchanged.
+        """
         original_path = "/usr/bin:/bin"
         nonexistent = "/totally/nonexistent/path/12345"
         result = _bash(
@@ -249,7 +298,7 @@ class TestCodexPrependPathIfExists(unittest.TestCase):
         self.assertNotIn(nonexistent, result.stdout)
 
     def test_prepends_existing_directory(self) -> None:
-        """An existing directory must be prepended to PATH."""
+        """Ensure codex_prepend_path_if_exists prepends an existing directory to the front of PATH."""
         with tempfile.TemporaryDirectory() as tmp:
             original_path = "/usr/bin:/bin"
             result = _bash(
@@ -302,22 +351,39 @@ class TestScriptSourceability(unittest.TestCase):
     """Verify the script can be sourced without errors."""
 
     def test_script_sources_without_error(self) -> None:
-        """Sourcing codex_env_common.sh must exit 0."""
+        """
+        Assert that sourcing scripts/codex_env_common.sh completes successfully (exit status 0).
+        
+        This test protects against syntax or runtime errors in the script; on failure it exposes the script's stderr for diagnosis.
+        """
         result = _bash(f'source "{SCRIPT_PATH}"')
         self.assertEqual(result.returncode, 0, f"Sourcing failed: {result.stderr}")
 
     def test_script_is_idempotent_when_sourced_twice(self) -> None:
-        """Sourcing twice must not cause errors."""
+        """
+        Ensure sourcing the shell script twice does not produce errors.
+        
+        This protects against side-effects, redefinition errors or other failures when the script is sourced multiple times in the same shell.
+        """
         result = _bash(f'source "{SCRIPT_PATH}"; source "{SCRIPT_PATH}"')
         self.assertEqual(result.returncode, 0, f"Double-source failed: {result.stderr}")
 
     def test_codex_apply_env_function_is_defined_after_source(self) -> None:
-        """codex_apply_env must be defined as a function after sourcing."""
+        """
+        Ensure the shell function `codex_apply_env` is defined after sourcing the script.
+        
+        Protects against regressions where sourcing scripts/codex_env_common.sh does not expose `codex_apply_env` as a shell function.
+        """
         result = _source_and_run("declare -f codex_apply_env > /dev/null && echo defined")
         self.assertEqual(result.returncode, 0)
         self.assertIn("defined", result.stdout)
 
     def test_codex_prepend_path_if_exists_function_is_defined(self) -> None:
+        """
+        Verify that the shell function `codex_prepend_path_if_exists` is available after sourcing the script.
+        
+        Sources the module in a subshell and asserts the function name is declared in the resulting shell environment.
+        """
         result = _source_and_run("declare -f codex_prepend_path_if_exists > /dev/null && echo defined")
         self.assertEqual(result.returncode, 0)
         self.assertIn("defined", result.stdout)

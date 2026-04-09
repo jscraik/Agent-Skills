@@ -33,6 +33,12 @@ class TestBuildHooksJsonMatcher(unittest.TestCase):
     """Verify SessionStart matcher reflects the PR change (removed |clear)."""
 
     def _make_paths(self) -> tuple[Path, Path, Path]:
+        """
+        Provide the three expected hook script paths used by the tests.
+        
+        Returns:
+            tuple[Path, Path, Path]: Paths for the session-start, user-prompt-submit and stop-guard hook scripts, in that order.
+        """
         return (
             Path("/fake/hooks/session-start.sh"),
             Path("/fake/hooks/user-prompt-submit.sh"),
@@ -40,6 +46,17 @@ class TestBuildHooksJsonMatcher(unittest.TestCase):
         )
 
     def _parse(self, timeout: int = 10) -> dict:
+        """
+        Parse scaffold_hook_pack.build_hooks_json() output using the test's standard hook paths.
+        
+        Calls the builder with the test's predefined hook script paths and the given timeout, then decodes and returns the resulting JSON structure.
+        
+        Parameters:
+            timeout (int): Timeout value to embed in generated hook entries.
+        
+        Returns:
+            dict: The parsed JSON object produced by the builder.
+        """
         session, user_prompt, stop = self._make_paths()
         raw = scaffold_hook_pack.build_hooks_json(
             session_start_path=session,
@@ -68,6 +85,11 @@ class TestBuildHooksJsonMatcher(unittest.TestCase):
         self.assertIn("startup", matcher)
 
     def test_session_start_matcher_includes_resume(self) -> None:
+        """
+        Ensure the SessionStart hook's matcher contains the literal 'resume'.
+        
+        Verifies that the generated hooks JSON includes 'resume' in the first `SessionStart` matcher entry.
+        """
         payload = self._parse()
         matcher = payload["hooks"]["SessionStart"][0]["matcher"]
         self.assertIn("resume", matcher)
@@ -103,10 +125,20 @@ class TestBuildHooksJsonMatcher(unittest.TestCase):
         self.assertIn("UserPromptSubmit", payload["hooks"])
 
     def test_hooks_json_has_stop_key(self) -> None:
+        """
+        Verifies that the generated hooks JSON includes a 'Stop' entry under the top-level 'hooks' key.
+        
+        Ensures the parsed payload contains "Stop" as one of the hook names.
+        """
         payload = self._parse()
         self.assertIn("Stop", payload["hooks"])
 
     def test_session_start_hook_type_is_command(self) -> None:
+        """
+        Verify the SessionStart hook entry is defined as a command.
+        
+        Parses the generated hooks JSON and asserts that the first entry under `hooks.SessionStart` has its `type` field equal to `"command"`.
+        """
         payload = self._parse()
         hook_entry = payload["hooks"]["SessionStart"][0]["hooks"][0]
         self.assertEqual(hook_entry["type"], "command")
@@ -196,6 +228,11 @@ class TestWriteText(unittest.TestCase):
             self.assertEqual(path.read_text(encoding="utf-8"), "expected content")
 
     def test_raises_without_force_when_file_exists(self) -> None:
+        """
+        Verifies that write_text raises FileExistsError when the destination file already exists and force is False.
+        
+        Creates an existing file with content, then attempts to write new content without using force to ensure the function refuses to overwrite and raises FileExistsError.
+        """
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / "file.txt"
             path.write_text("original", encoding="utf-8")
@@ -226,7 +263,17 @@ class TestMainProjectScope(unittest.TestCase):
     """Integration tests for the project-scope scaffold output."""
 
     def _run_main(self, target_root: Path, force: bool = False, timeout: int = 10) -> dict:
-        """Run main() with project scope and return parsed JSON summary."""
+        """
+        Invoke scaffold_hook_pack.main() as if called with `--scope project`, capture its stdout and return the parsed JSON summary.
+        
+        Parameters:
+            target_root (Path): Filesystem root passed to `--target-root` for the run.
+            force (bool): If true, include `--force` in the CLI arguments to allow overwriting.
+            timeout (int): Value passed to `--timeout` (the function under test may bound this value).
+        
+        Returns:
+            dict: The JSON-decoded summary emitted to stdout by main().
+        """
         import io
         from contextlib import redirect_stdout
 
@@ -311,6 +358,11 @@ class TestMainProjectScope(unittest.TestCase):
             self.assertTrue(mode & stat.S_IXUSR)
 
     def test_project_scope_stop_guard_is_executable(self) -> None:
+        """
+        Check that the generated project-scope stop-guard hook script is user-executable.
+        
+        Verifies the user execute permission bit is set on .codex/hooks/stop-guard.sh after running the scaffolding routine for the project scope.
+        """
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             self._run_main(root)
@@ -319,7 +371,11 @@ class TestMainProjectScope(unittest.TestCase):
             self.assertTrue(mode & stat.S_IXUSR)
 
     def test_project_scope_hooks_json_matcher_is_startup_resume(self) -> None:
-        """The generated hooks.json must use the new matcher without 'clear'."""
+        """
+        Verify that a project-scoped hooks.json defines the SessionStart matcher exactly as ^(startup|resume)$.
+        
+        Asserts the generated .codex/hooks.json contains a SessionStart hook whose first matcher equals "^(startup|resume)$" (ensuring it does not include "clear").
+        """
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             self._run_main(root)
@@ -329,6 +385,11 @@ class TestMainProjectScope(unittest.TestCase):
             self.assertEqual(matcher, "^(startup|resume)$")
 
     def test_project_scope_hooks_json_matcher_excludes_clear(self) -> None:
+        """
+        Ensure the generated SessionStart hook matcher for project scope excludes the string "clear".
+        
+        This protects against templates or matcher-generation logic that would treat a terminal clear event as a recognised hook source; the test runs the scaffolding for a project target and asserts the serialized `SessionStart` matcher does not contain `"clear"`.
+        """
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             self._run_main(root)
@@ -386,6 +447,15 @@ class TestMainUserScope(unittest.TestCase):
     """Integration tests for user-scope scaffold layout."""
 
     def _run_main_user(self, target_root: Path) -> dict:
+        """
+        Run scaffold_hook_pack.main() with user scope and capture the JSON summary it writes to stdout.
+        
+        Parameters:
+        	target_root (Path): Root directory to use as the target for user-scoped scaffolding.
+        
+        Returns:
+        	summary (dict): The parsed JSON summary emitted to stdout by main().
+        """
         import io
         import sys as _sys
 
@@ -429,6 +499,11 @@ class TestMainUserScope(unittest.TestCase):
             self.assertEqual(summary["scope"], "user")
 
     def test_user_scope_hooks_json_matcher_correct(self) -> None:
+        """
+        Ensure that when scaffolding hooks for user scope the SessionStart hook's matcher is exactly "^(startup|resume)$".
+        
+        This protects against regressions that would alter the required session-start matcher in the generated hooks.json for user-scoped installations.
+        """
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             self._run_main_user(root)
@@ -447,6 +522,11 @@ class TestSessionStartTemplate(unittest.TestCase):
     """Verify session_start_template() content is compatible with PR changes."""
 
     def setUp(self) -> None:
+        """
+        Initialises the test fixture by loading the session start hook template into self.text.
+        
+        This makes the template text available to individual test methods for assertions about its contents.
+        """
         self.text = scaffold_hook_pack.session_start_template()
 
     def test_template_is_non_empty(self) -> None:

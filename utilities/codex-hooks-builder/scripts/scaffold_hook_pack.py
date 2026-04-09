@@ -59,16 +59,16 @@ def build_hooks_json(
     timeout: int,
 ) -> str:
     """
-    Builds the content for a Codex hooks.json describing the three command hooks used by the scaffold.
+    Create the JSON content for a Codex `hooks.json` that defines the three scaffold command hooks.
     
     Parameters:
-        session_start_path (Path): Path to the session-start hook script; used as the command for the SessionStart hook.
-        user_prompt_submit_path (Path): Path to the user-prompt-submit hook script; used as the command for the UserPromptSubmit hook.
-        stop_guard_path (Path): Path to the stop-guard hook script; used as the command for the Stop hook.
+        session_start_path (Path): Path to the session-start hook script used as the `SessionStart` command.
+        user_prompt_submit_path (Path): Path to the user-prompt-submit hook script used as the `UserPromptSubmit` command.
+        stop_guard_path (Path): Path to the stop-guard hook script used as the `Stop` command.
         timeout (int): Timeout in seconds applied to each command hook.
     
     Returns:
-        json_text (str): Pretty-printed JSON suitable for writing to hooks.json, ending with a trailing newline.
+        json_text (str): Pretty-printed JSON for `hooks.json`, including a trailing newline.
     """
     payload = {
         "hooks": {
