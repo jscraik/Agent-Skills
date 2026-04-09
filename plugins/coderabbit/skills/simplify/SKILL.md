@@ -78,8 +78,8 @@ Do not use this skill for broad architecture rewrites across untouched areas.
 ### Phase 1: Identify Changes
 
 1. Determine diff source:
-   - If staged changes exist, use `git diff HEAD`.
-   - Otherwise, use `git diff`.
+   - If staged changes exist, use `bin/ask -- git diff HEAD`.
+   - Otherwise, use `bin/ask -- git diff`.
 2. If the diff is empty:
    - Review the most recently modified files mentioned by the user.
    - If no files were mentioned, review files edited earlier in the current session.

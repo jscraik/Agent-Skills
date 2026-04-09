@@ -44,6 +44,6 @@
     "defaultPrompt": "Use ce-compound to route this request to the right CE stage and provide exact next-step commands.",
     "brandColor": "#0EA5E9",
     "composerIcon": "./assets/icon.png",
-    "logo": "./assets/logo.png"
+    "logo": "./assets/icon.png"
   }
 }

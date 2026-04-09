@@ -81,5 +81,5 @@ observe({
 
 ## See Also
 
-- `../ce-compound/references/project-brain-integration.md` - Initial capture
-- `../ce-compound/references/learning-capture.md` - Capture workflow
+- `../../ce-compound/references/project-brain-integration.md` - Initial capture
+- `../../ce-compound/references/learning-capture.md` - Capture workflow

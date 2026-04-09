@@ -138,7 +138,7 @@ Rules:
 - if missing, empty, or unreadable, skip it
 - use semantic judgment, not keyword matching
 - treat memory as supplementary only
-- tag any memory-sourced evidence with `(auto memory [claude])`
+- tag any memory-sourced evidence with `(auto memory)`
 - if memory contradicts codebase evidence, treat it as cautionary context rather than truth
 
 ### Update vs Replace
@@ -276,7 +276,7 @@ If the user has not already explicitly asked for delegation or sub-agents, ask a
 
 When spawning any approved subagent, include this instruction:
 
-> Use dedicated file search and read tools for all investigation. Do not use shell commands for file operations unless those tools are unavailable in the current harness. Also read `MEMORY.md` from the auto-memory directory if it exists, and report memory-sourced drift signals separately from codebase-sourced evidence, tagged with `(auto memory [claude])`.
+> Use dedicated file search and read tools for all investigation. Do not use shell commands for file operations unless those tools are unavailable in the current harness. Also read `MEMORY.md` from the auto-memory directory if it exists, and report memory-sourced drift signals separately from codebase-sourced evidence, tagged with `(auto memory)`.
 
 Subagent roles:
 - investigation subagents: read-only, return file path, evidence, recommended action, confidence, and open questions
@@ -452,7 +452,7 @@ Summary header:
 ```text
 Compound Refresh Summary
 ========================
-Scanned: N learnings
+Scanned: N artifacts (N learnings, M patterns)
 
 Kept: X
 Updated: Y

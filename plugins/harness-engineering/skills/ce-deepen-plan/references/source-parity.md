@@ -13,11 +13,11 @@ Read when: you need to verify that the legacy `deepen-plan` and `deepen-plan-bet
 This document maps the original plan-deepening prompts to `product/ops/ce-deepen-plan/` so the prompt-to-skill migration stays auditable.
 
 ## Source prompts
-- `/Users/jamiecraik/dev/configs/codex/prompts/deepen-plan.md`
+- `configs/codex/prompts/deepen-plan.md`
 - user-provided legacy `deepen-plan` prompt body with broad skill/agent discovery
 - user-provided `deepen-plan-beta` prompt body with selective, risk-weighted deepening
-- lightweight review doctrine imported from upstream `document-review` (`EveryInc/compound-engineering-plugin` commit `0ae91dcc298721e5b2c4ab6d1fc6f76a13b6f67c`)
-- migration target: `/Users/jamiecraik/dev/Agent-Skills/product/ops/ce-deepen-plan/`
+- lightweight review doctrine imported from upstream `document-review` (`EveryInc/compound-engineering-plugin` commit `0ae91dcc298721e5b2c4ab6d1fc6f76a13b6f67c`: `https://github.com/EveryInc/compound-engineering-plugin/blob/0ae91dcc298721e5b2c4ab6d1fc6f76a13b6f67c/plugins/compound-engineering/skills/document-review/SKILL.md`)
+- migration target: `product/ops/ce-deepen-plan/`
 
 ## Parity mapping
 | Prompt behavior | Preserved in skill | Notes |

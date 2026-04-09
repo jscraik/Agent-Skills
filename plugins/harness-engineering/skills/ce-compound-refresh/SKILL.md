@@ -286,7 +286,7 @@ When `.harness/` exists, refresh both locations per `references/project-brain-re
 - Prompt parity map: `references/source-parity.md`
 - Refresh workflow: `references/refresh-workflow.md`
 - Style and operating guidance: `references/style-and-operating-guidance.md`
-- Project Brain: `../ce-compound/references/learning-capture.md`
+- Project Brain: `references/project-brain-refresh.md`
 
 ## See Also
 

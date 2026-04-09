@@ -36,7 +36,7 @@ This workflow produces a durable implementation plan. It does **not** implement 
 - [Gotchas](#gotchas)
 
 ## Working agreement
-- `ce:brainstorm` defines WHAT, `ce-plan` defines HOW, `ce-work` executes.
+- `ce-brainstorm` defines WHAT, `ce-plan` defines HOW, `ce-work` executes.
 - Use the lightest planning mode that fits: `generic-plan` for plain sequencing, CE modes when stage artifacts matter.
 - Prefer the smallest plan that still protects safety, governance, and delivery confidence.
 - Keep planning portable: capture decisions, files, sequencing, risks, and verification — not shell choreography or implementation code.

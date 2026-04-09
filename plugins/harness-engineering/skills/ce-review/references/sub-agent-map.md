@@ -48,7 +48,6 @@ Deterministic order:
 1. baseline readiness lanes
 2. language specialists
 3. risk specialists
-4. deployment verification lane when rollout risk is present
 
 Avoid in baseline mapping:
 - editorial-only roles

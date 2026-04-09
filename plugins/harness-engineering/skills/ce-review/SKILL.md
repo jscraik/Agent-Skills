@@ -198,7 +198,6 @@ Always include:
 - `learnings-researcher`
 - `code-simplicity-reviewer`
 
-Add conditional reviewers by target shape: `architecture-strategist` (multi-module/design), `kieran-rails-reviewer` (Rails), `kieran-typescript-reviewer` (TS/JS), `kieran-python-reviewer` (Python), `julik-frontend-races-reviewer` (async UI), `design-implementation-reviewer` (UI/Figma), `data-integrity-guardian` (schema/migrations), `schema-drift-detector` (schema drift), `security-sentinel` (auth/secrets), `performance-oracle` (hot paths), `deployment-verification-agent` (rollout risk).
 Add conditional reviewers by target shape: `architecture-strategist` (multi-module/design), `kieran-rails-reviewer` (Rails), `kieran-typescript-reviewer` (TS/JS), `kieran-python-reviewer` (Python), `julik-frontend-races-reviewer` (async UI), `design-implementation-reviewer` (UI/Figma), `data-integrity-guardian` (schema/migrations), `schema-drift-detector` (schema drift), `api-contract-reviewer` (public/downstream API changes), `security-reviewer` (auth/secrets/trust boundaries), `performance-reviewer` (hot paths), `reliability-reviewer` (failure and retry hazards), `deployment-verification-agent` (rollout risk).
 
 Execution strategy:
@@ -331,4 +330,5 @@ See `references/ce-anti-patterns.md`:
 | [[ce-technical-review]] | Severity-ranked engineering issues |
 | [[ce-work]] | Execute approved work |
 | [[gh-workflow]] | GitHub merge readiness |
+
 **Topic map:** [[agent-ops]]

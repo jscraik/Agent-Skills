@@ -41,13 +41,13 @@ Todo files use:
 Components:
 - `issue_id`: sequential numeric identifier such as `001`, `002`, `003`; never reuse IDs
 - `status`: `pending`, `ready`, or `complete`
-- `priority`: `p1`, `p2`, or `p3`
+- `priority`: `P1`, `P2`, or `P3`
 - `description`: concise kebab-case summary
 
 Examples:
-- `001-pending-p1-mailer-test.md`
-- `002-ready-p1-fix-n-plus-1.md`
-- `005-complete-p2-refactor-csv.md`
+- `001-pending-P1-mailer-test.md`
+- `002-ready-P1-fix-n-plus-1.md`
+- `005-complete-P2-refactor-csv.md`
 
 ## Frontmatter contract
 Use this exact frontmatter shape:
@@ -55,7 +55,7 @@ Use this exact frontmatter shape:
 ```yaml
 ---
 status: pending
-priority: p2
+priority: P2
 issue_id: "003"
 tags: [code-review]
 dependencies: []

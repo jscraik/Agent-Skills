@@ -25,13 +25,13 @@ outputs:
   - dependency failure matrix when multiple external dependencies exist
   - SLO readiness assessment when the target is user-facing
   - explicit no-critical-findings statement when appropriate
-  - schema_version: 1 when the caller requests structured output
+  - "schema_version: 1 when the caller requests structured output"
 
 non_goals:
   - implementing resilience fixes
   - performance optimization without reliability context
   - general code quality review without reliability focus
-  - security threat modeling
+  - security threat modeling beyond reliability-impacting security factors (route broader auth/secrets risk to `security-reviewer`)
   - planning reliability implementation
 
 risks:

@@ -3,13 +3,10 @@ name: coderabbit
 description: Answer CodeRabbit setup, configuration, knowledge-base, review-command, tool, and rollout questions by retrieving evidence from the local crawl corpus. Use when a user needs repository-local CodeRabbit documentation to decide how to configure, operate, or troubleshoot CodeRabbit, not when they need generic CI authoring or live SaaS state changes.
 version: 0.2.0
 triggers:
-  - coderabbit
-  - coderabbit.?config
-  - coderabbit.?docs
-  - coderabbit.?commands
-  - coderabbit.?cli
-  - coderabbit.?integrations
-  - coderabbit.?setup
+  - Human example: user asks about CodeRabbit configuration
+  - Human example: user asks about CodeRabbit docs or command usage
+  - Human example: user asks about CodeRabbit CLI or integrations
+  - Human example: user asks about CodeRabbit setup or rollout
 metadata:
   skill-type: library_api_reference
 ---
@@ -45,6 +42,8 @@ metadata:
 - Return concrete, actionable steps with file-backed provenance whenever possible.
 - Distinguish local-corpus answers from live/vendor-state assumptions.
 - Escalate missing-doc or stale-doc risk explicitly instead of guessing.
+
+Routing note: these trigger lines are human-facing examples only. Runtime router scoring uses skill `name`, `description`, and `skill_path`.
 
 ## Philosophy
 - Use a setup-first framework: baseline configuration, safety checks, then optional advanced features.

@@ -10,18 +10,18 @@ Read when: you need to verify that `workflow-plan.md`, `workflow-plan-ui.md`, `w
 - [No-loss checklist](#no-loss-checklist)
 
 ## Purpose
-This document maps the original planning prompts in `/Users/jamiecraik/dev/configs/codex/prompts/` to the skill at `product/ops/ce-plan/` so the prompt-to-skill migration stays auditable.
+This document maps the original planning prompts in `configs/codex/prompts/` to the skill at `product/ops/ce-plan/` so the prompt-to-skill migration stays auditable.
 
 ## Source prompts
-- `/Users/jamiecraik/dev/configs/codex/prompts/workflow-plan.md`
-- `/Users/jamiecraik/dev/configs/codex/prompts/workflow-plan-ui.md`
-- `/Users/jamiecraik/dev/configs/codex/prompts/workflow-ui-plan.md`
-- `/Users/jamiecraik/dev/configs/codex/prompts/ce:plan-beta` (prompt body provided by user during merge/update)
+- `configs/codex/prompts/workflow-plan.md`
+- `configs/codex/prompts/workflow-plan-ui.md`
+- `configs/codex/prompts/workflow-ui-plan.md`
+- `configs/codex/prompts/ce:plan-beta` (prompt body provided by user during merge/update)
 - upstream donor snapshot:
   - repo: `EveryInc/compound-engineering-plugin`
   - commit: `0ae91dcc298721e5b2c4ab6d1fc6f76a13b6f67c`
   - path: `plugins/compound-engineering/skills/ce-plan/SKILL.md`
-- Migration target: `/Users/jamiecraik/dev/Agent-Skills/product/ops/ce-plan/`
+- Migration target: `product/ops/ce-plan/`
 
 ## Parity mapping
 | Prompt surface | Preserved in skill | Notes |

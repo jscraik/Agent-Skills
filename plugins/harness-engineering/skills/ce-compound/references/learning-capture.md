@@ -34,6 +34,7 @@ Critical rule:
 - no helper fan-out
 - one sequential pass
 - minimal but complete solution document
+- only the orchestrator writes `docs/solutions/[category]/[filename].md`
 
 ## Phase 0.5: Auto memory scan
 
@@ -53,7 +54,7 @@ and codebase findings take priority over these notes.
 
 Rules:
 - pass the supplement to the Context Analyzer and Solution Extractor in full mode
-- if memory notes materially influence the final doc, label them with `(auto memory [claude])`
+- if memory notes materially influence the final doc, label them with `(auto memory)`
 - if memory notes contradict the verified fix or conversation, treat them as cautionary context rather than truth
 
 ## Full-mode phases

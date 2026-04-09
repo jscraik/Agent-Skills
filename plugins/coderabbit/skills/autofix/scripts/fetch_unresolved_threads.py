@@ -15,21 +15,24 @@ CODERABBIT_AUTHORS = {
     "coderabbitai[bot]",
 }
 
-GRAPHQL_QUERY = """
-query($owner:String!, $repo:String!, $pr:Int!, $threadCursor:String, $commentCursor:String) {
+GH_TIMEOUT_SECONDS = 30
+
+GRAPHQL_REVIEW_THREADS_QUERY = """
+query($owner:String!, $repo:String!, $pr:Int!, $cursor:String) {
   repository(owner:$owner, name:$repo) {
     pullRequest(number:$pr) {
-      reviewThreads(first:100, after:$threadCursor) {
+      reviewThreads(first:100, after:$cursor) {
         pageInfo {
           hasNextPage
           endCursor
         }
         nodes {
+          id
           isResolved
           path
           line
           startLine
-          comments(first:10, after:$commentCursor) {
+          comments(first:100) {
             pageInfo {
               hasNextPage
               endCursor
@@ -47,30 +50,59 @@ query($owner:String!, $repo:String!, $pr:Int!, $threadCursor:String, $commentCur
 }
 """
 
+GRAPHQL_THREAD_COMMENTS_QUERY = """
+query($threadId: ID!, $commentsCursor: String) {
+  node(id:$threadId) {
+    ... on PullRequestReviewThread {
+      comments(first:100, after:$commentsCursor) {
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+        nodes {
+          databaseId
+          body
+          author { login }
+        }
+      }
+    }
+  }
+}
+"""
 
-def _run_gh_graphql(owner: str, repo: str, pr: int, thread_cursor: str | None = None) -> dict[str, Any]:
+
+def _run_gh_graphql(query: str, variables: dict[str, Any]) -> dict[str, Any]:
     cmd = [
         "gh",
         "api",
         "graphql",
-        "-F",
-        f"owner={owner}",
-        "-F",
-        f"repo={repo}",
-        "-F",
-        f"pr={pr}",
         "-f",
-        f"query={GRAPHQL_QUERY}",
+        f"query={query}",
     ]
-    if thread_cursor is not None:
-        cmd.extend(["-F", f"threadCursor={thread_cursor}"])
-    proc = subprocess.run(cmd, capture_output=True, text=True, check=False, timeout=30)
+    for key, value in variables.items():
+        if value is None:
+            continue
+        cmd.extend(["-F", f"{key}={value}"])
+
+    try:
+        proc = subprocess.run(
+            cmd,
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=GH_TIMEOUT_SECONDS,
+        )
+    except subprocess.TimeoutExpired as exc:
+        raise RuntimeError(f"gh graphql request timed out after {GH_TIMEOUT_SECONDS}s") from exc
+
     if proc.returncode != 0:
         raise RuntimeError(proc.stderr.strip() or "gh graphql request failed")
+
     try:
         payload = json.loads(proc.stdout)
     except json.JSONDecodeError as exc:
         raise RuntimeError(f"failed to parse gh output: {exc}") from exc
+
     errors = payload.get("errors")
     if isinstance(errors, list) and errors:
         message = "; ".join(
@@ -79,6 +111,7 @@ def _run_gh_graphql(owner: str, repo: str, pr: int, thread_cursor: str | None = 
             if isinstance(item, dict)
         )
         raise RuntimeError(f"gh graphql returned errors: {message or 'unknown GraphQL error'}")
+
     return payload
 
 
@@ -88,24 +121,91 @@ def _is_coderabbit_author(login: Any) -> bool:
     return login.strip().lower() in CODERABBIT_AUTHORS
 
 
-def _extract_unresolved_threads(payload: dict[str, Any], thread_offset: int = 0) -> tuple[list[dict[str, Any]], bool, str | None]:
-    root = (payload.get("data") or {}).get("repository", {}).get("pullRequest", {})
-    if not isinstance(root, dict) or not root:
-        raise RuntimeError("pull request not found in GitHub response")
+def _collect_review_threads(owner: str, repo: str, pr: int) -> list[dict[str, Any]]:
+    cursor: str | None = None
+    threads: list[dict[str, Any]] = []
 
-    review_threads = (root.get("reviewThreads") or {})
-    nodes = review_threads.get("nodes", [])
-    page_info = review_threads.get("pageInfo", {})
-    has_next = page_info.get("hasNextPage", False)
-    end_cursor = page_info.get("endCursor")
+    while True:
+        payload = _run_gh_graphql(
+            GRAPHQL_REVIEW_THREADS_QUERY,
+            {
+                "owner": owner,
+                "repo": repo,
+                "pr": pr,
+                "cursor": cursor,
+            },
+        )
+
+        root = (payload.get("data") or {}).get("repository", {}).get("pullRequest", {})
+        if not isinstance(root, dict) or not root:
+            raise RuntimeError("pull request not found in GitHub response")
+
+        review_threads = root.get("reviewThreads") or {}
+        nodes = review_threads.get("nodes", [])
+        if not isinstance(nodes, list):
+            raise RuntimeError("invalid reviewThreads nodes payload")
+        threads.extend(node for node in nodes if isinstance(node, dict))
+
+        page_info = review_threads.get("pageInfo") or {}
+        has_next_page = bool(page_info.get("hasNextPage"))
+        cursor = page_info.get("endCursor")
+        if not has_next_page:
+            break
+        if not isinstance(cursor, str) or not cursor:
+            raise RuntimeError("missing reviewThreads endCursor during pagination")
+
+    return threads
+
+
+def _collect_all_comments(thread: dict[str, Any]) -> list[dict[str, Any]]:
+    comments_conn = thread.get("comments") or {}
+    nodes = comments_conn.get("nodes", [])
+    if not isinstance(nodes, list):
+        nodes = []
+
+    all_comments: list[dict[str, Any]] = [node for node in nodes if isinstance(node, dict)]
+    page_info = comments_conn.get("pageInfo") or {}
+    has_next_page = bool(page_info.get("hasNextPage"))
+    cursor = page_info.get("endCursor")
+    thread_id = thread.get("id")
+
+    while has_next_page:
+        if not isinstance(thread_id, str) or not thread_id:
+            raise RuntimeError("missing review thread id during comment pagination")
+        if not isinstance(cursor, str) or not cursor:
+            raise RuntimeError("missing comments endCursor during pagination")
+
+        payload = _run_gh_graphql(
+            GRAPHQL_THREAD_COMMENTS_QUERY,
+            {
+                "threadId": thread_id,
+                "commentsCursor": cursor,
+            },
+        )
+
+        node = (payload.get("data") or {}).get("node") or {}
+        comments = node.get("comments") or {}
+        page_nodes = comments.get("nodes", [])
+        if isinstance(page_nodes, list):
+            all_comments.extend(comment for comment in page_nodes if isinstance(comment, dict))
+
+        page_info = comments.get("pageInfo") or {}
+        has_next_page = bool(page_info.get("hasNextPage"))
+        cursor = page_info.get("endCursor")
+
+    return all_comments
+
+
+def _extract_unresolved_threads(threads: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    if not isinstance(threads, list):
+        raise RuntimeError("invalid review thread payload")
 
     results: list[dict[str, Any]] = []
-
-    for index, node in enumerate(nodes, start=thread_offset + 1):
-        if node.get("isResolved") is True:
+    for index, thread in enumerate(threads, start=1):
+        if thread.get("isResolved") is True:
             continue
 
-        comments = (node.get("comments") or {}).get("nodes", [])
+        comments = _collect_all_comments(thread)
         if not comments:
             continue
 
@@ -125,12 +225,13 @@ def _extract_unresolved_threads(payload: dict[str, Any], thread_offset: int = 0)
                 "comment_id": matching_comment.get("databaseId"),
                 "author": (matching_comment.get("author") or {}).get("login"),
                 "body": matching_comment.get("body", ""),
-                "path": node.get("path"),
-                "line": node.get("line"),
-                "start_line": node.get("startLine"),
+                "path": thread.get("path"),
+                "line": thread.get("line"),
+                "start_line": thread.get("startLine"),
             }
         )
-    return results, has_next, end_cursor
+
+    return results
 
 
 def main() -> int:
@@ -141,25 +242,8 @@ def main() -> int:
     args = parser.parse_args()
 
     try:
-        all_unresolved: list[dict[str, Any]] = []
-        thread_cursor: str | None = None
-        thread_offset = 0
-
-        while True:
-            try:
-                payload = _run_gh_graphql(args.owner, args.repo, args.pr, thread_cursor)
-            except subprocess.TimeoutExpired as exc:
-                raise RuntimeError(f"gh graphql request timed out after {exc.timeout}s") from exc
-
-            unresolved, has_next, end_cursor = _extract_unresolved_threads(payload, thread_offset)
-            all_unresolved.extend(unresolved)
-
-            if not has_next or end_cursor is None:
-                break
-
-            thread_cursor = end_cursor
-            thread_offset += 100
-
+        threads = _collect_review_threads(args.owner, args.repo, args.pr)
+        all_unresolved = _extract_unresolved_threads(threads)
     except RuntimeError as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1

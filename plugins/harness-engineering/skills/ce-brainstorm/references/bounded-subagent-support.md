@@ -10,7 +10,7 @@
 Read when: spawning internal research subagents during Phase 1.1 (Standard or Deep scope)
 
 ## Policy
-This operational quick-reference documents approval, roles, fallback, and constraints inline. In brief:
+This operational quick-reference defines the enforceable delegation rules inline. In brief:
 - **Approval required**: Blocking user confirmation before spawning subagents
 - **Research roles**: repo-research-analyst, learnings-researcher (bounded scope)
 - **Fallback**: Serial grounding when tools unavailable
@@ -28,7 +28,7 @@ This operational quick-reference documents approval, roles, fallback, and constr
 ### learnings-researcher
 ```text
 "Find prior learnings relevant to: <topic>
-- Check .harness/memory/LEARNINGS.md first when it exists (may contain project-specific solved-problem patterns)
+- Check .harness/memory/LEARNINGS.md first when it exists (see docs/agents/03-local-memory.md for governance)
 - Then docs/solutions/ for directly relevant entries
 - Return only directly relevant findings, <=200 words total"
 ```

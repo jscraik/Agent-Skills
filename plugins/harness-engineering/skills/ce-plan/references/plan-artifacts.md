@@ -294,12 +294,12 @@ If the repo has additional plan-graph or structural linting, run it as an extra 
 ## Handoff options
 Offer the clearest next-step options that fit the mode:
 1. Open the plan in an editor for review
-2. Run `workflow-review`
+2. Run `ce-review`
 3. Review and refine
-4. Proceed to `deepen-plan`
-5. Run `technical-review`
+4. Proceed to `ce-deepen-plan`
+5. Run `ce-technical-review`
 6. Generate or merge a companion UI plan when UI work is in scope
-7. Start `workflow-work`
+7. Start `ce-work`
 8. Create an issue in the tracker
 
 Stable-skill note:

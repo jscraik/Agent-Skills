@@ -44,6 +44,7 @@ tags: [keyword1, keyword2, keyword3]
 [The actual fix that worked - provide specific details]
 
 **Code changes** (if applicable):
+
 ```ruby
 # Before (broken):
 [Show the problematic code]
@@ -53,12 +54,14 @@ tags: [keyword1, keyword2, keyword3]
 ```
 
 **Database migration** (if applicable):
+
 ```ruby
 # Migration change:
 [Show what was changed in the migration]
 ```
 
 **Commands run** (if applicable):
+
 ```bash
 # Steps taken to fix:
 [Commands or actions]

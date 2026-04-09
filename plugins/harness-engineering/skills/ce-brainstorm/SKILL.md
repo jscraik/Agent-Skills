@@ -299,6 +299,7 @@ Use the closeout templates in `references/brainstorm-workflow-details.md`.
 - Lightweight document-review pass: `references/document-review-pass.md`
 
 ## See Also
+
 | Skill | When to use together |
 |---|---|
 | [[ce-spec]] | Hand off medium or high-risk brainstorm outputs into a durable spec |

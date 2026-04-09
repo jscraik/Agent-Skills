@@ -2,7 +2,7 @@
 
 ## Source prompts
 
-This package preserves and restructures three source prompt families:
+This package preserves and restructures the following source prompt families:
 
 1. `config/codex/prompts/workflow-compound.md`
 2. legacy `ce:compound` solved-problem capture prompt

@@ -13,13 +13,13 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 - `product_verification`: 8
 - `data_fetch_analysis`: 5
 - `team_automation`: 25
-- `scaffolding_templates`: 24
+- `scaffolding_templates`: 23
 - `code_quality_review`: 12
 - `ci_cd_deployment`: 6
 - `runbook`: 4
 - `infrastructure_ops`: 5
 - `invalid`: 0
-- `total_tagged`: 95
+- `total_tagged`: 94
 
 ## Semantic Types
 
@@ -93,7 +93,6 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 - `favicon-generator` — `frontend/graphics`
 - `frontend-design` — `frontend/ui`
 - `frontend-ui-design` — `frontend/ui`
-- `imagegen` — `frontend/graphics`
 - `mcp-builder` — `backend`
 - `nano-banana-builder` — `frontend/graphics`
 - `og-image-creator` — `frontend/graphics`

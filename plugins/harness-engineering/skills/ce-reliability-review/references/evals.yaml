@@ -121,7 +121,7 @@ cases:
       - type: skill_selected
         expected_skill: "ce-reliability-review"
       - type: regex
-        value: "(?i)(untrusted input|critical findings|cannot|evidence|validation)"
+        value: "(?i)(untrusted input|critical findings|cannot validate|unable to verify|refuse to|no evidence|validation failed)"
 
 metadata:
   last_updated: "2026-04-07"

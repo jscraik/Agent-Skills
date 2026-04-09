@@ -36,6 +36,7 @@ When `.harness/` directory exists, use dual-write to both `docs/solutions/` and 
 - Promote to `rules.md`
 - `observe(tags=["type:rule", ...])`
 - Add header:
+
   ```markdown
   ---
   title: "{problem}"

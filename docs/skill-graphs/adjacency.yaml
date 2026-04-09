@@ -524,6 +524,7 @@ skill-builder:
 skill-creator:
   codex-agent-creator: Create or update custom agents when skill workflows need dedicated
     role files
+  skillify: Refine and package reusable workflows from completed sessions
 skill-refactor:
   codex-home-audit: Run alongside a full home directory audit
   evals-router: Route evaluation work for under-performing skills

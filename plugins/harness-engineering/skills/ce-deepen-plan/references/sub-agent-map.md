@@ -27,7 +27,8 @@ Add by weak section signal:
 - partial-state, retries, degradation, or failure handling: `reliability-reviewer`
 - architecture-heavy boundary decisions: `architecture-strategist`
 - public/downstream API contract impact: `api-contract-reviewer`
-- migration or persistence correctness risk: `data-integrity-guardian` or `data-migration-expert`
+- persistence correctness or integrity risk: `data-integrity-guardian`
+- migration-specific correctness risk: `data-migration-expert`
 - rollout, rollback, and production verification depth: `deployment-verification-agent`
 
 ## Research lanes

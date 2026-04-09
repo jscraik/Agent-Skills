@@ -73,4 +73,5 @@ Audit marketplace alignment:
 python3 utilities/plugin-builder/scripts/plugin_builder.py audit-marketplace --marketplace-path .agents/plugins/marketplace.json --plugins-path plugins
 ```
 
-**Note:** If you encounter legacy marketplace path issues, you can temporarily use `--allow-legacy-marketplace-path` as an explicit troubleshooting option.
+Troubleshooting note:
+- Use `--allow-legacy-marketplace-path` only as an explicit temporary compatibility override.

@@ -1,6 +1,6 @@
 interface:
   display_name: React UI Patterns
   short_description: Provide concrete React UI composition patterns for TypeScript
-    + Tailwind + Radix, including state, routing, and component patterns
+    + Tailwind + Radix, including state, routing, and component patterns.
   icon_small: ./assets/icon-small.png
   icon_large: ./assets/icon-large.png

@@ -13,6 +13,7 @@ from dataclasses import dataclass, asdict
 from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Iterable
+from urllib.parse import urlparse
 
 LINK_RE = re.compile(r"!?\[[^\]]*\]\(([^)\n]+)\)")
 FILE_PATH_RE = re.compile(r"[A-Za-z0-9_./-]+[.][A-Za-z0-9]+")
@@ -345,6 +346,139 @@ def required_section_issues(repo_root: Path, config: dict) -> list[Issue]:
     return issues
 
 
+def _github_anchor_slug(heading: str) -> str:
+    slug = heading.strip().lower()
+    slug = re.sub(r"`+", "", slug)
+    slug = re.sub(r"[^\w\s-]", "", slug)
+    slug = re.sub(r"\s+", "-", slug)
+    slug = re.sub(r"-{2,}", "-", slug)
+    return slug.strip("-")
+
+
+def _extract_heading_anchors(path: Path) -> set[str]:
+    anchors: set[str] = set()
+    with path.open("r", encoding="utf-8") as f:
+        in_fence = False
+        for line in f:
+            stripped = line.strip()
+            if stripped.startswith("```"):
+                in_fence = not in_fence
+                continue
+            if in_fence:
+                continue
+            match = HEADING_RE.match(stripped)
+            if not match:
+                continue
+            heading_text = match.group(2).strip().rstrip("#").strip()
+            anchor = _github_anchor_slug(heading_text)
+            if anchor:
+                anchors.add(anchor)
+    return anchors
+
+
+def _resolve_github_blob_url(repo_root: Path, raw_url: str) -> tuple[Path | None, str]:
+    parsed = urlparse(raw_url)
+    if parsed.scheme not in {"http", "https"} or parsed.netloc.lower() != "github.com":
+        return None, parsed.fragment
+    if "/blob/" not in parsed.path:
+        return None, parsed.fragment
+    after_blob = parsed.path.split("/blob/", 1)[1]
+    if "/" not in after_blob:
+        return None, parsed.fragment
+    _, repo_relative = after_blob.split("/", 1)
+    return (repo_root / repo_relative).resolve(), parsed.fragment
+
+
+def plugin_manifest_url_issues(repo_root: Path) -> list[Issue]:
+    issues: list[Issue] = []
+    anchor_cache: dict[Path, set[str]] = {}
+
+    for manifest in sorted(repo_root.glob("plugins/**/.codex-plugin/plugin.json")):
+        rel_manifest = "/" + manifest.relative_to(repo_root).as_posix()
+        try:
+            payload = json.loads(manifest.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            issues.append(
+                Issue(
+                    code="invalid-plugin-manifest-json",
+                    severity="error",
+                    file=rel_manifest,
+                    line=1,
+                    message=f"Failed to parse plugin.json: {exc}",
+                    suggestion="Fix malformed JSON before running docs lint.",
+                )
+            )
+            continue
+
+        interface = payload.get("interface")
+        if not isinstance(interface, dict):
+            continue
+
+        for key in ("privacyPolicyURL", "termsOfServiceURL"):
+            raw_url = interface.get(key)
+            if not isinstance(raw_url, str) or not raw_url.strip():
+                continue
+
+            resolved, anchor = _resolve_github_blob_url(repo_root, raw_url.strip())
+            if resolved is None:
+                continue
+            if not resolved.is_relative_to(repo_root):
+                issues.append(
+                    Issue(
+                        code="plugin-interface-url-outside-repo",
+                        severity="error",
+                        file=rel_manifest,
+                        line=1,
+                        message=f"{key} points outside the repository: {raw_url}",
+                        suggestion=f"Update {key} to a repository-local docs URL.",
+                    )
+                )
+                continue
+            if not resolved.exists():
+                issues.append(
+                    Issue(
+                        code="plugin-interface-url-missing-target",
+                        severity="error",
+                        file=rel_manifest,
+                        line=1,
+                        message=f"{key} target does not exist: {raw_url}",
+                        suggestion=f"Fix {key} to reference an existing file.",
+                    )
+                )
+                continue
+
+            if resolved.suffix.lower() != ".md":
+                continue
+
+            if not anchor:
+                issues.append(
+                    Issue(
+                        code="plugin-interface-url-missing-anchor",
+                        severity="warning",
+                        file=rel_manifest,
+                        line=1,
+                        message=f"{key} points to markdown without an anchor: {raw_url}",
+                        suggestion=f"Add a stable heading anchor to {key} when linking markdown docs.",
+                    )
+                )
+                continue
+
+            anchors = anchor_cache.setdefault(resolved, _extract_heading_anchors(resolved))
+            if anchor not in anchors:
+                issues.append(
+                    Issue(
+                        code="plugin-interface-url-invalid-anchor",
+                        severity="error",
+                        file=rel_manifest,
+                        line=1,
+                        message=f"{key} anchor '#{anchor}' not found in {resolved.relative_to(repo_root).as_posix()}",
+                        suggestion=f"Update {key} to an existing markdown heading anchor.",
+                    )
+                )
+
+    return issues
+
+
 def emit_text_summary(issues: Iterable[Issue], effective_mode: str, scanned_files: int) -> None:
     """
     Print a concise text report of lint issues including a summary header and one line per issue.
@@ -398,6 +532,7 @@ def main() -> int:
         issues.extend(lint_file(md, repo_root, config))
     issues.extend(index_file_issues(repo_root, config))
     issues.extend(required_section_issues(repo_root, config))
+    issues.extend(plugin_manifest_url_issues(repo_root))
 
     emit_text_summary(issues, effective_mode, len(files))
 

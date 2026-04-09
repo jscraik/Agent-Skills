@@ -295,7 +295,7 @@ rsearch --help
 '''
 
 [[actions]]
-name = "Tooling"
+name = "WSearch"
 icon = "tool"
 command = '''
 wsearch --help

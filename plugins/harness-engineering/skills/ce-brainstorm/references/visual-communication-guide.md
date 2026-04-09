@@ -8,14 +8,14 @@
 |---|---|---|
 | A multi-step user workflow or process | Mermaid flow diagram or ASCII flow with annotations | After Problem Frame, or under its own `## User Flow` heading for substantial flows (>10 nodes) |
 | 3+ behavioral modes, variants, or states | Markdown comparison table | Within the Requirements section |
-| 3+ interacting participants (user roles, system components, external services) | Mermaid or ASCII relationship diagram | After Problem Frame, or under a dedicated `## Architecture` heading when containing 3+ interacting participants |
+| 3+ interacting participants (user roles, system components, external services) | Mermaid or ASCII relationship diagram | After Problem Frame, or under its own `## Architecture` heading when the diagram is substantial or has 3+ interacting participants |
 | Multiple competing approaches being compared | Comparison table | Within Phase 2 approach exploration |
 
 ## When to Skip
 
 - Prose already communicates the concept clearly
 - The diagram would just restate the requirements in visual form without adding comprehension value
-- The visual describes implementation architecture, data schemas, state machines, or code structure (that belongs in `ce:plan`)
+- The visual describes implementation architecture, data schemas, state machines, or code structure (that belongs in `ce-plan`)
 - The brainstorm is simple and linear with no multi-step flows, mode comparisons, or multi-participant interactions
 
 ## Format Selection
@@ -25,7 +25,7 @@
 - **Markdown tables** for mode/variant comparisons and approach comparisons.
 - Keep diagrams proportionate to the content. A simple 5-step workflow gets 5-10 nodes. A complex workflow with decision branches and annotations at each step may need 15-20 nodes — that is fine if every node earns its place.
 - Place inline at the point of relevance, not in a separate section.
-- Conceptual level only — user flows, information flows, mode comparisons, component responsibilities. Not implementation architecture, data schemas, or code structure.
+- Conceptual level only — user flows, information flows, mode comparisons, and component responsibilities. A dedicated `## Architecture` section is allowed for substantial conceptual diagrams (especially 3+ interacting participants). Keep implementation architecture, data schemas, and code structure in `ce-plan`.
 - Prose is authoritative: when a visual aid and surrounding prose disagree, the prose governs.
 
 ## Verification

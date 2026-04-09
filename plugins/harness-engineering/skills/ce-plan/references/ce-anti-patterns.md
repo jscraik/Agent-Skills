@@ -358,7 +358,7 @@ Planning replaced with synchronous discussion.
 | Big Batch | Large PRs, conflicts | Vertical slices, daily integration |
 | Horizontal Slicing | Brittle tests, no early feedback | ce-tdd vertical slices |
 | Vibe Coding | No specs, vague requests | STOP, route to ce-plan |
-| Shotgun Debugging | Random changes, no hypothesis | [[systematic-debugging]] |
+| Shotgun Debugging | Random changes, no hypothesis | Route to [[systematic-debugging]] for root-cause analysis |
 | Doer as Checker | Bugs slip through | Separate review agents |
 | Style Over Substance | Nits while tests fail | Contract acceptance first |
 | Silent Drift | Code != spec | Update governing artifact |

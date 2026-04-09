@@ -28,7 +28,20 @@ outputs:
     description: High-level review outcome summary.
   - name: findings
     type: object
-    description: Severity-grouped findings with affected file context (object with severity keys containing arrays of findings).
+    description: Severity-keyed findings map where each severity contains an array of finding entries.
+    properties:
+      critical:
+        type: array
+        items:
+          type: string
+      warning:
+        type: array
+        items:
+          type: string
+      info:
+        type: array
+        items:
+          type: string
   - name: actions
     type: array
     description: Prioritized tasks for critical and warning issues.

@@ -1,7 +1,7 @@
 # Harness Development Makefile
 # Run `make help` to see available commands
 
-.PHONY: help install setup preflight hooks hooks-pre-commit hooks-pre-push secrets-staged docs-style-changed related-tests semgrep-changed diagrams-check dev build lint docs-lint fmt typecheck test check audit secrets security clean reset ci diagrams env-check
+.PHONY: help install setup preflight hooks hooks-pre-commit hooks-commit-msg hooks-pre-push secrets-staged docs-style-changed related-tests semgrep-changed diagrams-check dev build lint docs-lint fmt typecheck test check audit secrets security clean reset ci diagrams env-check
 
 # Default target
 help: ## Show this help message
@@ -24,22 +24,25 @@ hooks: ## Setup git hooks
 	node scripts/setup-git-hooks.js
 
 hooks-pre-commit: ## Run local pre-commit gates before creating a commit
-	pnpm lint
-	pnpm docs:lint
-	pnpm typecheck
-	$(MAKE) secrets-staged
-	$(MAKE) docs-style-changed
-	$(MAKE) related-tests
+	bash scripts/validate_all.sh --ephemeral
+
+hooks-commit-msg: ## Validate commit message policy (use HOOK_COMMIT_MSG or HOOK_COMMIT_MSG_FILE=/path)
+	@tmp_file="$$(mktemp)"; \
+	trap 'rm -f "$$tmp_file"' EXIT; \
+	if [ -n "$${HOOK_COMMIT_MSG:-}" ]; then \
+		printf '%s\n' "$${HOOK_COMMIT_MSG}" > "$$tmp_file"; \
+	elif [ -n "$${HOOK_COMMIT_MSG_FILE:-}" ]; then \
+		cat "$${HOOK_COMMIT_MSG_FILE}" > "$$tmp_file"; \
+	elif [ -n "$${MSG_FILE:-}" ]; then \
+		cat "$${MSG_FILE}" > "$$tmp_file"; \
+	else \
+		echo "Usage: HOOK_COMMIT_MSG=\"feat: test\" make hooks-commit-msg or make hooks-commit-msg HOOK_COMMIT_MSG_FILE=/path/to/commit-msg" >&2; \
+		exit 2; \
+	fi; \
+	node scripts/validate-commit-msg.js "$$tmp_file"
 
 hooks-pre-push: ## Run local pre-push governance gates before pushing
-	pnpm exec tsx src/cli.ts docs-gate --mode required --json
-	@bash ./scripts/check-diagram-freshness.sh
-	pnpm exec tsx src/cli.ts tooling-audit --path . --json
-	@bash ./scripts/check-environment.sh
-	$(MAKE) semgrep-changed
-	pnpm test
-	pnpm build
-	pnpm audit
+	python3 scripts/diagnose_skill.py --all
 
 secrets-staged: ## Scan staged content for secrets before committing
 	pnpm run secrets:staged

@@ -13,12 +13,13 @@ Read when: you need to verify that `ce-brainstorm` preserves the legacy brainsto
 This document maps the legacy brainstorm prompt plus the upstream `compound-engineering-plugin` `ce-brainstorm` skill to the local skill at `product/ops/ce-brainstorm/` so upstream-sync and prompt-to-skill migration remain auditable.
 
 ## Source inputs
-- legacy prompt: `/Users/jamiecraik/dev/configs/codex/prompts/workflow-brainstorm.md`
+- legacy prompt: `configs/codex/prompts/workflow-brainstorm.md`
 - upstream donor skill: `https://raw.githubusercontent.com/EveryInc/compound-engineering-plugin/0ae91dcc298721e5b2c4ab6d1fc6f76a13b6f67c/plugins/compound-engineering/skills/ce-brainstorm/SKILL.md`
-- migration target: `/Users/jamiecraik/dev/Agent-Skills/product/ops/ce-brainstorm/`
+- migration target: `product/ops/ce-brainstorm/`
 - lightweight review doctrine adapted locally in `references/document-review-pass.md`
 
 ## Parity mapping
+
 | Source behavior | Preserved in skill | Notes |
 |---|---|---|
 | brainstorm answers WHAT to build before HOW | `## Working agreement`, `## Constraints`, `## Workflow` | Preserved directly |
@@ -39,6 +40,7 @@ This document maps the legacy brainstorm prompt plus the upstream `compound-engi
 | hand off into spec, planning, or direct work only when blocker state permits it | `## Workflow` -> `Phase 6` | Preserved and adapted to local CE skill names |
 | concise completion or pause summary | `## Output summary` | Preserved directly |
 | fail-fast validation and anti-pattern boundaries | `## Validation`, `## Anti-patterns`, `references/brainstorm-workflow-details.md` | Preserved and upgraded with repo-specific checks |
+
 
 ## Intentional modernizations
 - Prompt-only control syntax such as `argument-hint` and slash-command handoffs were translated into durable skill guidance plus local `ce-spec`, `ce-plan`, and `ce-work` handoff language.

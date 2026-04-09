@@ -124,7 +124,7 @@ If the target is primarily a planning question rather than a review of existing 
 ## Acceptance criteria
 - fail fast at the first blocking prerequisite or unusable target; do not proceed with a partial review
 - all failure domains from the review dimensions are evaluated against the target
-- findings are categorized into `Critical | Important | Nice-to-have`
+- findings are categorized into `P0 | P1 | P2 | P3`
 - each finding includes failure scenario, blast radius, location, mitigation, and confidence
 - resilience checklist coverage is assessed and gaps are explicit
 - duplicate findings are merged before output
@@ -234,9 +234,9 @@ When multiple dependencies exist, produce:
 Merge overlapping findings.
 
 Ranking rules:
-- `Critical` for single points of failure, cascading failure paths, data loss risk, missing recovery, and unprotected high-traffic dependencies
-- `Important` for missing resilience patterns on likely failure modes, weak degradation, incomplete observability
-- `Nice-to-have` for worthwhile operational improvements, documentation, and monitoring enhancements
+- `P0` for single points of failure, cascading failure paths, data loss risk, missing recovery, and unprotected high-traffic dependencies
+- `P1` for missing resilience patterns on likely failure modes, weak degradation, and incomplete observability
+- `P2` and `P3` for worthwhile operational improvements, documentation, and monitoring enhancements
 
 If a suspected issue is plausible but not well-supported by evidence, convert it into an open question instead of overstating it as a finding.
 

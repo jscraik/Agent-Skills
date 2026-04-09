@@ -7,7 +7,7 @@ WARN  product/ops/ce-spec/SKILL.md: SKILL.md exceeds target length (lines=353, t
 WARN  product/ops/ce-technical-review/SKILL.md: SKILL.md exceeds target length (lines=326, target=320)
 WARN  product/ops/ce-work/SKILL.md: SKILL.md exceeds target length (lines=322, target=320)
 WARN  product/strategy/product-design-critic/SKILL.md: SKILL.md exceeds target length (lines=351, target=320)
-Checked files: 110
+Checked files: 109
 Errors: 0
 Warnings: 9
 Mode: strict

@@ -36,27 +36,27 @@ Batch-mode guardrails:
 - Extract smaller functions with descriptive names.
 - Keep orchestration in the top-level function.
 
-2. Duplication:
+1. Duplication:
 - Reuse existing utilities first.
 - If no utility exists, extract one narrowly scoped helper.
 
-3. Oversized module/class:
+1. Oversized module/class:
 - Split by responsibility only when call boundaries are clear.
 - Prefer low-risk extraction over interface redesign in simplify mode.
 
-4. Long parameter list:
+1. Long parameter list:
 - Introduce a parameter object or typed options shape.
 - Keep call sites readable; avoid over-engineered builders unless already used.
 
-5. Primitive obsession and magic values:
+1. Primitive obsession and magic values:
 - Replace repeated literals with named constants or unions/enums.
 - Use domain types where the codebase already supports them.
 
-6. Nested conditionals:
+1. Nested conditionals:
 - Use guard clauses for invalid/early-exit paths.
 - Keep happy-path flow linear.
 
-7. Dead code:
+1. Dead code:
 - Remove unused imports, stale helpers, and commented-out code.
 - Do not preserve dead code "just in case"; git history is the backup.
 

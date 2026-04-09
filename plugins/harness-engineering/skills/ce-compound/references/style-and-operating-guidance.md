@@ -36,6 +36,6 @@ If discoverability is already clear, no action.
 If not clear, propose the smallest natural addition in existing instruction sections.
 
 Interaction rule:
-- when explicit user consent is available (interactive session), ask for approval before editing instruction docs
-- when explicit user consent is not available (autonomous/non-interactive session), record recommendation and do not edit
+- ask for explicit user consent before editing instruction docs
 - if the session is in `compact-safe` mode and context is tight, prefer reporting a recommendation over expanding scope
+- if the session is autonomous or non-interactive, record a recommendation and do not edit instruction docs

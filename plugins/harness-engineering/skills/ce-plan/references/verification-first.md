@@ -34,13 +34,13 @@ Every implementation unit must include verification strategy before execution.
 ## Anti-Pattern: Horizontal Slicing
 
 **WRONG:**
-```
+```text
 RED: Write tests 1-5
 GREEN: Write implementations 1-5
 ```
 
 **RIGHT (vertical slices):**
-```
+```text
 RED→GREEN: Test 1 → Impl 1
 RED→GREEN: Test 2 → Impl 2
 ...

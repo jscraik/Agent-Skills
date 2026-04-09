@@ -158,7 +158,7 @@ for action in "${required_codex_actions[@]}"; do
 	fi
 done
 
-	required_make_targets=("help" "install" "setup" "preflight" "hooks" "hooks-pre-commit" "hooks-pre-push" "secrets-staged" "docs-style-changed" "related-tests" "semgrep-changed" "diagrams-check" "lint" "docs-lint" "fmt" "typecheck" "test" "check" "audit" "secrets" "security" "clean" "reset" "ci" "diagrams" "env-check")
+	required_make_targets=("help" "install" "setup" "preflight" "hooks" "hooks-pre-commit" "hooks-commit-msg" "hooks-pre-push" "secrets-staged" "docs-style-changed" "related-tests" "semgrep-changed" "diagrams-check" "lint" "docs-lint" "fmt" "typecheck" "test" "check" "audit" "secrets" "security" "clean" "reset" "ci" "diagrams" "env-check")
 	for target in "${required_make_targets[@]}"; do
 		if ! rg -q "^${target}:" "$MAKEFILE_PATH"; then
 			echo "Error: required Makefile target '$target' is missing from $MAKEFILE_PATH"
@@ -166,15 +166,56 @@ done
 		fi
 	done
 
-	required_prek_hooks=("pre-commit|make hooks-pre-commit" "pre-push|make hooks-pre-push")
-	for hook_spec in "${required_prek_hooks[@]}"; do
-		hook_name="${hook_spec%%|*}"
-		hook_command="${hook_spec#*|}"
-		if ! rg -Fq "${hook_name} = [\"${hook_command}\"]" "$PREK_CONFIG_PATH"; then
-			echo "Error: required prek hook '$hook_name' is missing or out of date in $PREK_CONFIG_PATH"
-			exit 1
-		fi
-	done
+	python3 - "$PREK_CONFIG_PATH" <<'PY'
+import sys
+import tomllib
+
+path = sys.argv[1]
+with open(path, "rb") as fh:
+    data = tomllib.load(fh)
+
+if data.get("default_install_hook_types") != ["pre-commit", "commit-msg", "pre-push"]:
+    raise SystemExit(f"Error: default_install_hook_types must be canonical in {path}")
+
+hooks = {}
+for repo in data.get("repos", []):
+    if repo.get("repo") != "local":
+        continue
+    for hook in repo.get("hooks", []):
+        hook_id = hook.get("id")
+        if hook_id:
+            hooks[hook_id] = hook
+
+expected = {
+    "hooks-pre-commit": {
+        "entry": "make hooks-pre-commit",
+        "stages": ["pre-commit"],
+    },
+    "hooks-commit-msg": {
+        "entry": 'bash -lc \'make hooks-commit-msg HOOK_COMMIT_MSG_FILE="$1"\' --',
+        "stages": ["commit-msg"],
+    },
+    "hooks-pre-push": {
+        "entry": "make hooks-pre-push",
+        "stages": ["pre-push"],
+    },
+}
+
+for hook_id, contract in expected.items():
+    hook = hooks.get(hook_id)
+    if not hook:
+        raise SystemExit(f"Error: required prek hook '{hook_id}' is missing in {path}")
+    if hook.get("entry") != contract["entry"]:
+        raise SystemExit(f"Error: required prek hook '{hook_id}' has the wrong entry in {path}")
+    if hook.get("stages") != contract["stages"]:
+        raise SystemExit(f"Error: required prek hook '{hook_id}' has the wrong stages in {path}")
+PY
+
+	if [[ -f "$REPO_ROOT/.pre-commit-config.yaml" ]]; then
+		echo "Error: legacy .pre-commit-config.yaml must be removed from $REPO_ROOT" >&2
+		echo "Fix: keep prek.toml as the single source of truth for git hooks." >&2
+		exit 1
+	fi
 
 	if [[ -f "$PACKAGE_JSON_PATH" ]]; then
 		required_package_scripts=("secrets:staged|bash scripts/check-staged-secrets.sh" "docs:style:changed|bash scripts/check-doc-style.sh" "test:related|bash scripts/check-related-tests.sh" "semgrep:changed|bash scripts/check-semgrep-changed.sh")
@@ -190,18 +231,11 @@ done
 			fi
 		done
 
-		required_simple_git_hooks=("pre-commit|make hooks-pre-commit" "commit-msg|node scripts/validate-commit-msg.js \$1" "pre-push|make hooks-pre-push")
-		for hook_spec in "${required_simple_git_hooks[@]}"; do
-			hook_name="${hook_spec%%|*}"
-			hook_command="${hook_spec#*|}"
-			if ! jq -e --arg hook_name "$hook_name" --arg hook_command "$hook_command" '
-				.["simple-git-hooks"][$hook_name] == $hook_command
-			' "$PACKAGE_JSON_PATH" >/dev/null; then
-				echo "Error: simple-git-hooks entry '$hook_name' is missing or out of date in $PACKAGE_JSON_PATH"
-				echo "Fix: run node scripts/setup-git-hooks.js"
-				exit 1
-			fi
-		done
+		if jq -e 'has("simple-git-hooks") or ((.devDependencies // {}) | has("simple-git-hooks"))' "$PACKAGE_JSON_PATH" >/dev/null; then
+			echo "Error: legacy simple-git-hooks metadata must be removed from $PACKAGE_JSON_PATH"
+			echo "Fix: run node scripts/setup-git-hooks.js"
+			exit 1
+		fi
 
 		has_package_marker() {
 			local marker="$1"
