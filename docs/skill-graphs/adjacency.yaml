@@ -253,7 +253,6 @@ codex-hooks-builder:
   gh-workflow: Ship and review hook-pack changes through the GitHub lifecycle
   plugin-builder: Package the hooks together with related skills or agents in a plugin
 plugin-builder:
-  plugin-builder: Canonical plugin hardening and conversion skill
   plugin-creator: Scaffold a minimal plugin package before hardening
   plugin-installer: Install and verify third-party plugins from GitHub
 codex-sessions-skill-scan:

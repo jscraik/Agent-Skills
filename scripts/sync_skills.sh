@@ -238,6 +238,22 @@ skill_files_cmd() {
       -path "*/scripts/*" -prune -o \
       -name "SKILL.md" -print
   done
+
+  local plugin_skills_root=""
+  for plugin_skills_root in ./plugins/*/skills; do
+    [ -d "$plugin_skills_root" ] || continue
+    find -L "$plugin_skills_root" \
+      -path "*/_archive/*" -prune -o \
+      -path "*/assets/*" -prune -o \
+      -path "*/fixtures/*" -prune -o \
+      -path "*/examples/*" -prune -o \
+      -path "*/templates/*" -prune -o \
+      -path "*/references/*" -prune -o \
+      -path "*/agents/*" -prune -o \
+      -path "*/rules/*" -prune -o \
+      -path "*/scripts/*" -prune -o \
+      -name "SKILL.md" -print
+  done
 }
 
 # Include supplemental skills that intentionally live outside canonical

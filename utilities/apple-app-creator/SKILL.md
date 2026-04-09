@@ -90,7 +90,7 @@ scripts/init.sh --project-mode adopt
 - Treating optional subskill installs as mandatory.
 
 ## Examples
-- Scaffold a new macOS app and install both workflow helpers.
+- Scaffold a new macOS app and install the optional workflow helper `xcode-makefiles`.
 - Adopt makefile tooling into this existing iOS app without regenerating the project.
 - Run the app-builder flow in dry-run mode first.
 

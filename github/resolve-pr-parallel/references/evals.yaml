@@ -71,7 +71,7 @@ cases:
     prompt: "Investigate why the PR checks are failing in GitHub Actions."
     acceptance:
       - type: regex
-        value: "(?i)(gh-workflow|ci_diagnose|ci)"
+        value: "(?i)(gh-workflow|ci_diagnose)"
 
   - id: resolve-pr-parallel-negative-circleci
     name: negative CircleCI workflow strategy

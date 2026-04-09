@@ -119,7 +119,9 @@ Not owned by this spec:
     - `starter_authoring`
     - `expert_lifecycle_maintenance`
     - `skill_installation`
+    - `plugin_scaffolding`
     - `plugin_packaging`
+  - `authoring-family-gate` CI contract must validate schema parity for active gate members (`skill-creator`, `skill-builder`, `skill-installer`, `plugin-creator`) so `PrimaryJob` and routing fields stay harmonized across all four.
 
 - `RoutingIntent`
   - The normalized dominant user intent already governed by the current family contract.

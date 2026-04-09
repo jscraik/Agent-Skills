@@ -59,7 +59,7 @@ cases:
     prompt: "Set up a lightweight tasks/TASKS.md workflow for this repo."
     acceptance:
       - type: regex
-        value: "(?i)(ce-work|tasks/TASKS\\.md)"
+        value: "(?i)(?=.*\\bce-work\\b)(?=.*\\btasks/TASKS\\.md).*"
 
   - id: triage-negative-review-generation
     name: negative review-generation request

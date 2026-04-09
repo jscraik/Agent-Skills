@@ -6,12 +6,13 @@ name = "agent-skills local environment"
 script = '''
 set -euo pipefail
 
-printf '%s\n' '[codex] setup: /Users/jamiecraik/dev/agent-skills'
+printf '[codex] setup: %s\n' "${PWD}"
 
 export PATH="/opt/homebrew/bin:/usr/local/bin:$HOME/.local/share/mise/shims:$HOME/.local/bin:$PATH"
 
 if command -v mise >/dev/null 2>&1; then
   eval "$(mise activate bash)" >/dev/null 2>&1 || true
+  mise install --yes >/dev/null 2>&1 || true
 fi
 
 missing_tools=0

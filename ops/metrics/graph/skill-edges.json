@@ -509,7 +509,7 @@
       "tier": "growing"
     },
     {
-      "id": "codex-plugin-builder",
+      "id": "plugin-builder",
       "topic": "agent-ops",
       "in_degree": 6,
       "out_degree": 5,
@@ -741,31 +741,31 @@
     },
     {
       "from": "decide-build-primitive",
-      "to": "codex-plugin-builder",
+      "to": "plugin-builder",
       "weight": 4.555,
       "desc": "Use after `SKILL` decision when the skill needs plugin packaging for distribution"
     },
     {
-      "from": "codex-plugin-builder",
+      "from": "plugin-builder",
       "to": "skill-builder",
       "weight": 4.555,
       "desc": "Build and quality-gate the plugin-owned skills before packaging them here"
     },
     {
-      "from": "codex-plugin-builder",
+      "from": "plugin-builder",
       "to": "decide-build-primitive",
       "weight": 4.555,
       "desc": "Use before building to confirm a plugin is the right packaging choice"
     },
     {
-      "from": "codex-plugin-builder",
+      "from": "plugin-builder",
       "to": "mcp-builder",
       "weight": 4.555,
       "desc": "For standalone MCP server development without plugin packaging overhead"
     },
     {
       "from": "skill-builder",
-      "to": "codex-plugin-builder",
+      "to": "plugin-builder",
       "weight": 4.555,
       "desc": "Package a validated skill into a distributable plugin; runs after quality gates pass"
     },
@@ -1125,7 +1125,7 @@
     },
     {
       "from": "skill-installer",
-      "to": "codex-plugin-builder",
+      "to": "plugin-builder",
       "weight": 1.0,
       "desc": "Bundle multiple skills into a plugin before installing"
     },
@@ -2037,7 +2037,7 @@
     },
     {
       "from": "arscontexta",
-      "to": "codex-plugin-builder",
+      "to": "plugin-builder",
       "weight": 1.0,
       "desc": "Package Ars Contexta surfaces into a Codex plugin"
     },
@@ -2559,7 +2559,7 @@
     },
     {
       "from": "codex-agent-creator",
-      "to": "codex-plugin-builder",
+      "to": "plugin-builder",
       "weight": 1.0,
       "desc": "Package the agent role into a distributable plugin"
     },
@@ -2589,7 +2589,7 @@
     },
     {
       "from": "codex-automation-architect",
-      "to": "codex-plugin-builder",
+      "to": "plugin-builder",
       "weight": 1.0,
       "desc": "Package automations into a plugin for distribution"
     },
@@ -2648,13 +2648,13 @@
       "desc": "Check process resource usage during a home directory audit"
     },
     {
-      "from": "codex-plugin-builder",
+      "from": "plugin-builder",
       "to": "verification-before-completion",
       "weight": 1.0,
       "desc": "Gate \"plugin is done\" with validator evidence before committing"
     },
     {
-      "from": "codex-plugin-builder",
+      "from": "plugin-builder",
       "to": "arscontexta",
       "weight": 1.0,
       "desc": "When packaging Ars Contexta surfaces into a Codex plugin"

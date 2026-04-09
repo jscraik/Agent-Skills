@@ -84,6 +84,18 @@ def _iter_repo_skill_dirs() -> Iterable[Path]:
     return dirs
 
 
+def _is_plugin_owned_skill_dir(skill_dir: Path) -> bool:
+    try:
+        rel = skill_dir.resolve().relative_to(REPO_ROOT)
+    except ValueError:
+        return False
+
+    parts = rel.parts
+    if not parts or parts[0] != "plugins":
+        return False
+    return "skills" in parts[1:-1]
+
+
 def _frontmatter_block(text: str) -> List[str]:
     lines = text.splitlines()
     if len(lines) < 3 or lines[0].strip() != "---":
@@ -168,7 +180,9 @@ def discover_skill_entries(source: str = "auto") -> List[SkillEntry]:
         name = skill_dir.name.strip() or source_dir.name
         if not name or name in seen:
             continue
-        if name in HIDDEN_FLAT_SKILL_NAMES:
+        if name in HIDDEN_FLAT_SKILL_NAMES and not _is_plugin_owned_skill_dir(
+            source_dir
+        ):
             continue
 
         try:
