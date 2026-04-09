@@ -233,7 +233,7 @@ class TestLlmWikiReferenceFrontmatterEdgeCases(unittest.TestCase):
         raw = str(self.frontmatter.get("last_reviewed", ""))
         # Confirm the raw value retains quotes as parsed by _read_frontmatter.
         # DATE_RE requires no surrounding characters.
-        if raw.startswith("'") or raw.startswith('"'):
+        if raw.startswith(("'", '"')):
             self.assertFalse(
                 DATE_RE.match(raw),
                 "Quoted date should NOT match DATE_RE — linter would emit bad-date "
@@ -866,9 +866,11 @@ class TestReadFrontmatterUnit(unittest.TestCase):
     def test_parses_sources_as_list(self) -> None:
         """
         Verify that frontmatter `sources` is parsed as a list containing the source path.
-        
+
         Asserts that the parsed frontmatter returns `sources` as a list of length 1 and that the single entry includes the filename `llm-wiki.md`.
         """
+        # NOTE: The absolute path below is intentionally legacy/invalid and only used
+        # to verify that _parse/_read_frontmatter returns a list and preserves content.
         fm = self._parse(
             "---\ntitle: T\ntype: t\nstatus: s\nlast_reviewed: 2026-04-09\nsources:\n"
             "- /Users/jamiecraik/dev/agent-skills/docs/skill-ops-wiki/wiki/sources/llm-wiki.md\n---\n# H\n"
