@@ -115,7 +115,7 @@
       "description": "OpenAI and ChatGPT Apps skills",
       "include_prefixes": [
         "product/domain/chatgpt-apps",
-        "frontend/graphics/imagegen",
+        "skills-system/imagegen",
         "frontend/graphics/sora",
         "frontend/graphics/nano-banana-builder",
         "utilities/codex-automation-architect"

@@ -51,7 +51,6 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 
 - `better-icons` — Search and extract SVG icons from Iconify collections through the better-icons CLI or MCP. Use when the user needs production-ready icons for UI work, not custom illustration design.
 - `favicon-generator` — Generate complete favicon/app icon suites with templates and assets. Use when the user needs favicons or app icons for a web/app project.
-- `imagegen` — Generate or edit images through the OpenAI Image API using the bundled CLI. Use when the user wants text-to-image, inpainting, background changes, or batch image variants and has API access configured.
 - `nano-banana-builder` — Build web applications that use Google's Nano Banana image APIs for generation and iterative editing workflows. Use when a user asks to prototype or ship a Nano Banana powered image product from text-to-image to multi-turn editing.
 - `og-image-creator` — Generate brand-aligned Open Graph images for existing routes by inspecting a web codebase and rendering assets with Playwright components. Use when a user asks for route-specific OG image generation or refresh in an existing app.
 - `sora` — Generate, remix, manage, or download videos through OpenAI's Sora API using the bundled CLI. Use when the user wants AI video generation or asset retrieval, not traditional video editing.
@@ -159,6 +158,7 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 
 ## Skills System
 
+- `imagegen` — Generate or edit raster images when the task benefits from AI-created bitmap visuals such as photos, illustrations, textures, sprites, mockups, or transparent-background cutouts. Use when Codex should create a brand-new image, transform an existing image, or derive visual variants from references, and the output should be a bitmap asset rather than repo-native code or vector. Do not use when the task is better handled by editing existing SVG/vector/code-native assets, extending an established icon or logo system, or building the visual directly in HTML/CSS/canvas.
 - `openai-docs` — Use when the user asks how to build with OpenAI products or APIs and needs up-to-date official documentation with citations, help choosing the latest model for a use case, or explicit GPT-5.4 upgrade and prompt-upgrade guidance; prioritize OpenAI docs MCP tools, use bundled references only as helper context, and restrict any fallback browsing to official OpenAI domains.
 
 ## Utilities

@@ -8,7 +8,6 @@ Graphics and media generation skills for frontend workflows.
 ## Skills
 - [better-icons](/frontend/graphics/better-icons/SKILL.md)
 - [favicon-generator](/frontend/graphics/favicon-generator/SKILL.md)
-- [imagegen](/frontend/graphics/imagegen/SKILL.md)
 - [nano-banana-builder](/frontend/graphics/nano-banana-builder/SKILL.md)
 - [og-image-creator](/frontend/graphics/og-image-creator/SKILL.md)
 - [sora](/frontend/graphics/sora/SKILL.md)

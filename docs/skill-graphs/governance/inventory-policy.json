@@ -12,7 +12,7 @@
     "backend/mkit-builder",
     "frontend/graphics/better-icons",
     "frontend/graphics/favicon-generator",
-    "frontend/graphics/imagegen",
+    "skills-system/imagegen",
     "frontend/graphics/nano-banana-builder",
     "frontend/graphics/og-image-creator",
     "frontend/graphics/sora",
