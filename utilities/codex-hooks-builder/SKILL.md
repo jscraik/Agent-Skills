@@ -102,10 +102,12 @@ For reusable scaffolding inside this repository, use:
 - Do treat `SessionStart`, `PreToolUse`, `PostToolUse`, `UserPromptSubmit`, and `Stop` as the currently documented event surface.
 - Do use `type: "command"` because command hooks are the documented and supported handler type.
 - Do apply matcher semantics by event because matching differs across events:
-  - `SessionStart.matcher` matches `source` (`startup` or `resume`);
-  - `PreToolUse.matcher` and `PostToolUse.matcher` match `tool_name` (currently `Bash`);
+  - `SessionStart.matcher` matches `source` (`startup`, `resume`, or `clear`);
+  - `PreToolUse.matcher` and `PostToolUse.matcher` match `tool_name`; in current Codex input schemas this is `Bash`, and matcher supports regex plus `*` or empty-string match-all;
   - `UserPromptSubmit.matcher` and `Stop.matcher` are currently not used.
 - Do keep timeout behavior explicit because `timeout` defaults to `600` seconds and `timeoutSec` is an accepted alias.
+- Do include short `statusMessage` strings for slower hooks because this makes hook latency visible in the UI.
+- Do parse input payloads defensively because future runtimes may include extra fields (for example subagent metadata such as `agent_id` and `agent_type`).
 
 4. Scaffold from the deterministic helper first.
 - Do run `python3 utilities/codex-hooks-builder/scripts/scaffold_hook_pack.py --target-root <path> --scope <project|user>` because it emits absolute command paths and current starter scripts.
@@ -189,6 +191,7 @@ bash scripts/lint_skill_types.sh
 - If the request needs unsupported hook handler types, say so clearly, scaffold only supported command hooks, and mark unsupported behavior as deferred.
 - If the target root cannot be verified, stop before writing and ask for the exact root path.
 - If validation tooling such as `jq` is missing, scaffold the files if requested but report the missing verification step explicitly.
+- If `hooks.json` includes `type: "prompt"`, `type: "agent"`, or `"async": true`, report that current Codex runtime parses these but skips them, then keep only supported sync command hooks.
 
 ## Gotchas
 - `PreToolUse` and `PostToolUse` are currently Bash-focused guardrails, not full enforcement boundaries -> scope these hooks narrowly and document bypass limits -> confirm with `references/runtime-contract.md`.
