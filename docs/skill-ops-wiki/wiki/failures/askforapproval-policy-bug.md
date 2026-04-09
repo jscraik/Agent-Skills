@@ -4,8 +4,8 @@ type: failure
 status: active
 last_reviewed: 2026-04-09
 sources:
-  - /Users/jamiecraik/.codex/memories/MEMORY.md
-  - /Users/jamiecraik/dev/Agent-Skills/FORJAMIE
+  - .codex/memories/MEMORY.md
+  - repo://FORJAMIE
 ---
 
 # AskForApproval Policy Block

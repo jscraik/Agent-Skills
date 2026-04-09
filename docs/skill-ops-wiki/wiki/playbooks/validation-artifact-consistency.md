@@ -4,8 +4,8 @@ type: playbook
 status: active
 last_reviewed: 2026-04-09
 sources:
-  - /Users/jamiecraik/dev/Agent-Skills/artifacts
-  - /Users/jamiecraik/dev/Agent-Skills/scripts/verify_recursive_skill_graph_artifacts.py
+  - artifacts
+  - scripts/verify_recursive_skill_graph_artifacts.py
 ---
 
 # Validation Artifact Consistency
@@ -31,5 +31,5 @@ Keep emitted artifacts internally coherent so CI/review signals are trustworthy.
 
 ## Related
 
-- [Code Scanning Remediation](/docs/skill-ops-wiki/wiki/playbooks/code-scanning-remediation.md)
-- [Git Conflict Resolution for Validation Logs](/docs/skill-ops-wiki/wiki/playbooks/git-conflict-resolution-validation-logs.md)
+- [Code Scanning Remediation](./code-scanning-remediation.md)
+- [Git Conflict Resolution for Validation Logs](./git-conflict-resolution-validation-logs.md)

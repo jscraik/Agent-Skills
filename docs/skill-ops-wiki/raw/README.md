@@ -3,4 +3,4 @@
 Immutable source evidence for Skill Ops Wiki updates.
 
 Add source snapshots or links here before ingestion when you need traceable provenance.
-Do not edit source content after capture; add a new file instead.
+Avoid editing source content after capture; prefer adding a new file to preserve history (collision-safe writes are not yet enforced).

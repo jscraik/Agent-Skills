@@ -4,7 +4,7 @@ type: playbook
 status: active
 last_reviewed: 2026-04-09
 sources:
-  - /Users/jamiecraik/.codex/memories/MEMORY.md
+  - .codex/memories/MEMORY.md
   - https://github.com/jscraik/Agent-Skills/security/code-scanning
 ---
 

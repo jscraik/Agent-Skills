@@ -24,22 +24,42 @@ class Issue:
     message: str
 
 
-def _read_frontmatter(path: Path) -> dict[str, str]:
+def _read_frontmatter(path: Path) -> dict[str, str | list[str]]:
     text = path.read_text(encoding="utf-8")
     lines = text.splitlines()
     if len(lines) < 3 or lines[0].strip() != "---":
         return {}
 
-    out: dict[str, str] = {}
-    for line in lines[1:]:
-        if line.strip() == "---":
+    out: dict[str, str | list[str]] = {}
+    idx = 1
+    while idx < len(lines):
+        line = lines[idx].strip()
+        if line == "---":
             break
-        match = FRONTMATTER_KEY_RE.match(line.strip())
-        if not match:
-            continue
-        key = match.group(1).strip()
-        value = match.group(2).strip()
-        out[key] = value
+        match = FRONTMATTER_KEY_RE.match(line)
+        if match:
+            key = match.group(1).strip()
+            value = match.group(2).strip()
+            out[key] = value
+            idx += 1
+        elif line.endswith(":"):
+            # Multi-line list handling (e.g., sources:)
+            key = line.rstrip(":")
+            list_values: list[str] = []
+            idx += 1
+            while idx < len(lines):
+                next_line = lines[idx]
+                if next_line.strip().startswith("- "):
+                    list_values.append(next_line.strip()[2:].strip())
+                    idx += 1
+                elif next_line.strip() and not next_line.strip().startswith("#"):
+                    break
+                else:
+                    idx += 1
+                    break
+            out[key] = list_values
+        else:
+            idx += 1
     return out
 
 
@@ -56,7 +76,7 @@ def _extract_links(path: Path) -> list[str]:
     return links
 
 
-def _resolve_link(source: Path, target: str, wiki_root: Path) -> Path | None:
+def _resolve_link(source: Path, target: str) -> Path | None:
     target_no_anchor = target.split("#", 1)[0].strip()
     if not target_no_anchor:
         return None
@@ -84,9 +104,18 @@ def lint_wiki(wiki_root: Path, max_age_days: int, now: date) -> list[Issue]:
 
         frontmatter = _read_frontmatter(page)
         if rel.startswith(("failures/", "playbooks/")):
-            for key in ("title", "type", "status", "last_reviewed"):
+            for key in ("title", "type", "status", "last_reviewed", "sources"):
                 if key not in frontmatter:
                     issues.append(Issue("missing-frontmatter", "error", rel, f"Missing frontmatter key: {key}"))
+
+            # Validate sources field content
+            if "sources" in frontmatter:
+                sources_value = frontmatter["sources"]
+                if isinstance(sources_value, list):
+                    if not sources_value:
+                        issues.append(Issue("empty-sources", "error", rel, "sources field is empty (must contain at least one entry)"))
+                elif isinstance(sources_value, str) and not sources_value.strip():
+                    issues.append(Issue("empty-sources", "error", rel, "sources field is empty (must contain at least one entry)"))
 
             last_reviewed = frontmatter.get("last_reviewed", "")
             if last_reviewed and DATE_RE.match(last_reviewed):
@@ -105,7 +134,7 @@ def lint_wiki(wiki_root: Path, max_age_days: int, now: date) -> list[Issue]:
                 issues.append(Issue("bad-date", "error", rel, f"Invalid last_reviewed format: {last_reviewed}"))
 
         for link in _extract_links(page):
-            resolved = _resolve_link(page, link, wiki_root)
+            resolved = _resolve_link(page, link)
             if resolved is None:
                 continue
             if resolved.suffix != ".md":
@@ -119,7 +148,7 @@ def lint_wiki(wiki_root: Path, max_age_days: int, now: date) -> list[Issue]:
     index_links = set()
     if index_path.exists():
         for link in _extract_links(index_path):
-            resolved = _resolve_link(index_path, link, wiki_root)
+            resolved = _resolve_link(index_path, link)
             if resolved is not None:
                 index_links.add(resolved)
 
@@ -175,7 +204,7 @@ def main(argv: Iterable[str] | None = None) -> int:
     for issue in issues:
         print(f"- [{issue.severity.upper()}] {issue.path} :: {issue.code} :: {issue.message}")
 
-    return 1 if errors else 0
+    return 1 if errors or warnings else 0
 
 
 if __name__ == "__main__":

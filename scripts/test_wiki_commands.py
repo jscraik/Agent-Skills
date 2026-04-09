@@ -109,7 +109,9 @@ This body line discusses signing flow behavior and should be selected.
         query = wiki_commands.wiki_query(repo_root, query="signing")
         self.assertEqual(query.status, "success")
         self.assertGreaterEqual(query.data.get("count", 0), 1)
-        first = query.data["results"][0]
+        results = query.data.get("results", [])
+        self.assertGreater(len(results), 0, "Expected at least one result")
+        first = results[0]
         self.assertIn("body line discusses signing", first.get("snippet", "").lower())
         self.assertNotIn("title:", first.get("snippet", "").lower())
 

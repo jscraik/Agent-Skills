@@ -313,13 +313,22 @@ def try_fuzzy_parse(raw_args: List[str], robot_mode: bool = False) -> Tuple[Opti
     return topic, action, full_remaining, correction_note
 
 
+def _safe_input(prompt: str) -> Optional[str]:
+    """Prompt with defensive handling of EOFError and KeyboardInterrupt."""
+    try:
+        return input(prompt)
+    except (EOFError, KeyboardInterrupt):
+        print("\n\nInteractive input cancelled by user.")
+        raise SystemExit(130)
+
+
 def _prompt_choice(prompt: str, options: List[str]) -> str:
     """Prompt the operator for one option using 1-based indexing."""
     print(prompt)
     for idx, option in enumerate(options, start=1):
         print(f"  {idx}. {option}")
     while True:
-        raw = input("> ").strip()
+        raw = _safe_input("> ").strip()
         if raw.isdigit():
             choice = int(raw)
             if 1 <= choice <= len(options):
@@ -332,7 +341,7 @@ def _prompt_choice(prompt: str, options: List[str]) -> str:
 def _prompt_nonempty(prompt: str) -> str:
     """Prompt until a non-empty string is entered."""
     while True:
-        value = input(prompt).strip()
+        value = _safe_input(prompt).strip()
         if value:
             return value
         print("This value cannot be empty.")
@@ -340,7 +349,7 @@ def _prompt_nonempty(prompt: str) -> str:
 
 def _prompt_optional(prompt: str) -> str:
     """Prompt for an optional value (can be empty)."""
-    return input(prompt).strip()
+    return _safe_input(prompt).strip()
 
 def main():
     start_time = time.time()

@@ -4,7 +4,7 @@ type: playbook
 status: active
 last_reviewed: 2026-04-09
 sources:
-  - /Users/jamiecraik/dev/Agent-Skills/artifacts/validation/latest
+  - artifacts/validation/latest
 ---
 
 # Git Conflict Resolution for Validation Logs

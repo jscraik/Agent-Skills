@@ -454,7 +454,7 @@ def wiki_query(
             }
         )
 
-    ranked.sort(key=lambda item: (item["score"], item["path"]), reverse=True)
+    ranked.sort(key=lambda item: (-item["score"], item["path"]))
     capped = ranked[: max(1, min(limit, 25))]
 
     result.status = "success"
@@ -513,7 +513,7 @@ def wiki_add_asset(
     stored_name = f"{timestamp}-{asset_slug}{ext.lower()}"
     stored_path = raw_assets_dir / stored_name
     stored_repo_rel = f"docs/skill-ops-wiki/raw/assets/{stored_name}"
-    markdown_asset_link = f"/{stored_repo_rel}"
+    markdown_asset_link = f"../../raw/assets/{stored_name}"
 
     if not dry_run:
         raw_assets_dir.mkdir(parents=True, exist_ok=True)
