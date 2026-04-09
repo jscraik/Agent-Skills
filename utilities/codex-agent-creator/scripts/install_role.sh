@@ -11,6 +11,8 @@ Options:
   --project-root PATH      Project root for --scope project (default: current directory)
   --agents-dir PATH        Override target agents directory
   --config PATH            Override target config.toml for optional [agents] limits
+  --allow-project-config-write
+                          Allow writing <project>/.codex/config.toml when --scope project
   --nickname-candidates CSV
                            Optional comma-separated display names to write to nickname_candidates
   --update-existing        Allow updating an existing custom agent file
@@ -32,6 +34,7 @@ agent_file=""
 nickname_candidates_csv=""
 update_existing="false"
 deprecated_disable_multi_agent="false"
+allow_project_config_write="false"
 max_threads=""
 max_depth=""
 job_max_runtime_seconds=""
@@ -59,6 +62,8 @@ while [[ $# -gt 0 ]]; do
     --config)
       require_option_value "$1" "${2:-}"
       config_path="$2"; shift 2 ;;
+    --allow-project-config-write)
+      allow_project_config_write="true"; shift ;;
     --agent-name|--role-name)
       require_option_value "$1" "${2:-}"
       agent_name="$2"; shift 2 ;;
@@ -162,6 +167,17 @@ if [[ -z "$config_path" ]]; then
     config_path="${HOME}/.codex/config.toml"
   else
     config_path="${project_root}/.codex/config.toml"
+  fi
+fi
+
+if [[ -n "$max_threads" || -n "$max_depth" || -n "$job_max_runtime_seconds" ]]; then
+  if [[ "$scope" == "project" && "$allow_project_config_write" != "true" ]]; then
+    project_codex_config="${project_root%/}/.codex/config.toml"
+    if [[ "$config_path" == "$project_codex_config" || "$config_path" == ".codex/config.toml" ]]; then
+      echo "Refusing to write project-scoped Codex config: $config_path" >&2
+      echo "Use --allow-project-config-write to opt in explicitly, or pass --config ~/.codex/config.toml." >&2
+      exit 1
+    fi
   fi
 fi
 
