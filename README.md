@@ -1,12 +1,12 @@
 # Agent Skills
 
-A governed repository of **116 skills** for AI coding agents (Codex, Claude, Gemini). Built around the **Agent Skills Kit (`ask`)** CLI.
+A governed repository of **109 skills** for AI coding agents (Codex, Claude, Gemini). Built around the **Agent Skills Kit (`ask`)** CLI.
 
 **What this gives you:**
 
 - **One place for skills** – Author in Markdown, sync to any runtime
 - **Quality gates** – Structural, security, and behavioral validation for every skill
-- **Living skill graph** – Browse 116 skills across 7 topic clusters with relationship mapping
+- **Living skill graph** – Browse 109 skills across 7 topic clusters with relationship mapping
 - **Agent-native CLI** – Fuzzy matching, JSON output, trace IDs, helpful errors
 
 ## Quick start
@@ -30,7 +30,7 @@ ask skills sync --scope user
 ### Discover skills
 
 ```bash
-# Search 116 skills
+# Search skills
 ./bin/ask graph find security --tier stable
 
 # See related skills
@@ -125,17 +125,17 @@ Errors include suggestions and examples:
 
 ## Skill graph (manual topic clusters, non-canonical)
 
-This table is a human-oriented grouping for quick navigation and is not used for parity enforcement. Canonical catalog parity uses `discover_skill_entries()` and `catalog_parity` and currently expects **116** skills.
+This table is a human-oriented grouping for quick navigation and is not used for parity enforcement. Canonical catalog parity uses `discover_skill_entries()` and `catalog_parity` and currently expects **109** skills.
 
 | Topic              | Skills | Examples                                       |
 | ------------------ | ------ | ---------------------------------------------- |
-| frontend-ui        | 27     | react-ui-patterns, shadcn-ui, figma            |
-| agent-ops          | 22     | skill-builder, skill-creator, evals-router     |
-| backend-platform   | 16     | cli-spec, mcp-builder, workers-mcp             |
-| product-strategy   | 13     | product-spec, ce-spec, ce-plan                 |
+| frontend-ui        | 28     | react-ui-patterns, shadcn-ui, design-system    |
+| agent-ops          | 38     | skill-builder, skill-creator, evals-router     |
+| backend-platform   | 13     | cli-spec, mcp-builder, backend-engineer        |
+| product-strategy   | 12     | product-spec, ce-spec, ce-plan                 |
 | security-ops       | 7      | security-best-practices, security-threat-model |
-| content-publishing | 5      | slides, youtube-titles-thumbnails              |
-| mobile-native      | 4      | xcode-makefiles, test-xcode                    |
+| content-publishing | 8      | slides, youtube-titles-thumbnails              |
+| mobile-native      | 3      | atlas, process-watch                           |
 
 ## Repository layout
 
@@ -144,11 +144,14 @@ agent-skills/
 ├── bin/ask                   # CLI entry point
 ├── .agents/skills/           # Flat runtime projection
 │
-├── backend/                  # Backend platform (16 skills)
-├── frontend/                 # Frontend UI (27 skills)
-├── product/                  # Product strategy (13 skills)
-├── auth/                     # Security operations (7 skills)
-├── skills-system/            # Meta-skills (installer, creator)
+├── auth/                     # Authentication and security skills
+├── backend/                  # Backend and API skills
+├── frontend/                 # Frontend UI, tools, and graphics skills
+├── github/                   # GitHub workflow skills
+├── interview/                # Structured interview and discovery skills
+├── product/                  # Product strategy and operations skills
+├── skills-system/            # Core system-level skills
+├── utilities/                # Agent operations and platform utilities
 │
 ├── scripts/lib/ask/          # CLI implementation
 ├── docs/cli-specs/           # Command specifications
@@ -159,7 +162,7 @@ agent-skills/
 
 - **[CLI Specification](docs/cli-specs/2026-04-06-ask-cli-spec.md)** – Complete command reference
 - **[Agent Guide](AGENTS.md)** – AI agent workflow patterns
-- **[Skill Index](SKILL.md)** – All 116 skills by category
+- **[Skill Index](SKILL.md)** – All 109 skills by category
 - **[Implementation Review](docs/cli-specs/2026-04-06-ask-cli-implementation-review.md)** – Architecture details
 
 ## Privacy and Data Handling
@@ -169,6 +172,6 @@ This repository stores skill source, docs, and validation artifacts for local-fi
 ## Governance
 
 - **License:** Apache 2.0
-- **Skills:** 116 canonical total (manual cluster table above is non-canonical)
+- **Skills:** 109 canonical total (manual cluster table above is non-canonical)
 - **Validation:** 10+ automated checks via `./bin/ask repo validate`
 - **Compatibility:** Codex, Claude Code, Gemini/Antigravity

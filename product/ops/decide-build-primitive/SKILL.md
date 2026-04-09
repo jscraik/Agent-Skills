@@ -162,8 +162,6 @@ Follow-up expectations:
 
 | Skill | When to use together |
 |---|---|
-| [[skill-builder]] | Use after `SKILL` decision is made to scaffold and quality-gate the skill |
-| [[plugin-builder]] | Use after `SKILL` decision when the skill needs plugin packaging for distribution |
 | [[codex-automation-architect]] | Use after `AGENT_AUTOMATION` decision to design the automation contract |
 | [[ce-plan]] | Use when the capability is CE-scoped and needs concrete stage planning |
 

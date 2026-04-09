@@ -110,7 +110,6 @@ Generate route-aware social preview images that feel native to the product inste
 | [[fixing-metadata]] | Wire generated OG images into correct meta tags |
 | [[favicon-generator]] | Generate OG images and favicons as a complete brand suite |
 | [[imagegen]] | Use imagegen for non-route-specific image generation |
-| [[cloudflare-deploy]] | Serve OG images via Cloudflare Pages after generation |
 
 **Topic map:** [[frontend-ui]]
 

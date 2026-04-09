@@ -340,9 +340,7 @@ Reference files:
 | Skill | When to use |
 |---|---|
 | [[decide-build-primitive]] | Decide whether the capability should be a skill, prompt, or agent before authoring it |
-| [[plugin-builder]] | Package a contract-valid standalone skill when the deliverable explicitly becomes a plugin |
 | [[codex-sessions-skill-scan]] | Audit skill coverage, failures, and overlap using real session evidence instead of authoring doctrine alone |
-| [[skill-installer]] | Install, import, or repair runtime visibility when the skill package is already valid and the remaining work is distribution |
 | [[codex-agent-creator]] | Reuse existing agent TOMLs or create role-specific custom agents for skill-linked delegation flows |
 
 **Topic map:** [[agent-ops]]

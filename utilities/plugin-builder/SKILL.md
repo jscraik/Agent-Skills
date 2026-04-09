@@ -138,8 +138,5 @@ If the request is out of scope, route clearly:
 
 | Skill | When to use |
 |---|---|
-| [[plugin-installer]] | Install and verify third-party plugins from GitHub with provenance + rollback controls |
-| [[skill-builder]] | Harden standalone skills before plugin packaging |
-| [[plugin-creator]] | Start from a minimal plugin scaffold before hardening |
 
 **Topic map:** [[agent-ops]]

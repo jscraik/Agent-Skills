@@ -92,7 +92,6 @@ Use this skill for precise metadata remediation, not broad SEO platform rewrites
 | [[fixing-accessibility]] | Fix ARIA and semantic HTML alongside metadata |
 | [[og-image-creator]] | Generate OG images that the metadata tags will reference |
 | [[favicon-generator]] | Add favicon tags alongside other head metadata |
-| [[cloudflare-deploy]] | Verify metadata is served correctly after Cloudflare deployment |
 
 **Topic map:** [[frontend-ui]]
 

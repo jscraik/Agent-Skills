@@ -32,7 +32,7 @@ metadata:
 - Review an existing MCP server for schema quality, discoverability, safety, or protocol fit.
 
 ## When not to use
-- Workers-hosted, auth-heavy, or billing-aware MCP products. Use [`workers-mcp`](/backend/workers-mcp/SKILL.md) when that operational surface matters.
+- Workers-hosted, auth-heavy, or billing-aware MCP products. Use the Cloudflare plugin skill `cloudflare:building-mcp-server-on-cloudflare` when that operational surface matters.
 - ChatGPT Apps SDK apps or widget/UI-integrated experiences.
 - Generic backend work with no MCP contract in scope.
 
@@ -90,7 +90,7 @@ metadata:
 
 | Skill | When to use together |
 |---|---|
-| [[workers-mcp]] | Host the MCP server on Cloudflare when cloud deployment is needed |
+| `cloudflare:building-mcp-server-on-cloudflare` | Host the MCP server on Cloudflare when cloud deployment is needed |
 | [[chatgpt-apps]] | Connect the MCP server to a ChatGPT Apps SDK integration |
 | [[openai-docs]] | Use official MCP schema docs when designing tool schemas |
 | [[backend-engineer]] | Add MCP tools to an existing backend service |

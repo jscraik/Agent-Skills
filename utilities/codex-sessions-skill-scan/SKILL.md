@@ -169,7 +169,6 @@ References used by skill-gate:
 |---|---|
 | [[insight-report]] | Turn session scan findings into a polished usage report |
 | [[codex-home-audit]] | Run alongside a full home directory audit |
-| [[skill-builder]] | Act on skill failures discovered in the scan |
 | [[evals-router]] | Route evaluation work for under-performing skills |
 
 **Topic map:** [[agent-ops]]

@@ -1,6 +1,5 @@
 purpose: >
-  Define expected behavior for app-builder to scaffold or adopt iOS/macOS projects,
-  optionally installing xcode-makefiles.
+  Define expected behavior for app-builder to scaffold or adopt iOS/macOS projects.
 schema_version: 1.0
 triggers:
   - user asks to scaffold a new iOS/macOS app from templates
@@ -8,9 +7,9 @@ triggers:
 inputs:
   - project mode (new or adopt)
   - app metadata for new mode (name, bundle id, platform, framework, output dir)
-  - optional subskill selection and git onboarding flags
+  - git onboarding flags
 outputs:
-  - scaffolded or updated project with selected subskills installed
+  - scaffolded or updated project with app-builder workflow defaults
   - exact next-step commands for local build/run flow
 non_goals:
   - replacing existing product architecture or app logic not requested by user

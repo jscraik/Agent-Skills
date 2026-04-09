@@ -1,21 +1,21 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-08T22:55:29Z",
-  "decision_date": "2026-04-08",
-  "active_skill_count": 79,
-  "expected_count": 79,
+  "generated_at": "2026-04-09T20:44:22Z",
+  "decision_date": "2026-04-09",
+  "active_skill_count": 75,
+  "expected_count": 75,
   "inventory_policy": "docs/skill-graphs/governance/inventory-policy.json",
   "system_slice_mode": "exclude",
   "summary": {
-    "valid_count": 79,
+    "valid_count": 75,
     "invalid_count": 0,
     "missing_profile_count": 0,
     "missing_binding_count": 0,
-    "missing_legacy_binding_count": 79,
+    "missing_legacy_binding_count": 75,
     "invalid_binding_count": 0,
     "wave_counts": {
       "wave-1-manual": 9,
-      "wave-2-co-pilot": 70
+      "wave-2-co-pilot": 66
     }
   },
   "skills": [
@@ -68,17 +68,6 @@
       "scope_skill": "backend/mcp-builder",
       "wave": "wave-2-co-pilot",
       "profile_path": "backend/mcp-builder/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
-      "profile_binding_mode": "implicit-default",
-      "delegation_mode": "co-pilot",
-      "status": "valid",
-      "errors": []
-    },
-    {
-      "skill_path": "backend/workers-mcp/SKILL.md",
-      "scope_skill": "backend/workers-mcp",
-      "wave": "wave-2-co-pilot",
-      "profile_path": "backend/workers-mcp/references/task-profile.json",
       "profile_binding": "references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
@@ -178,17 +167,6 @@
       "scope_skill": "frontend/tools/agentation",
       "wave": "wave-2-co-pilot",
       "profile_path": "frontend/tools/agentation/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
-      "profile_binding_mode": "implicit-default",
-      "delegation_mode": "co-pilot",
-      "status": "valid",
-      "errors": []
-    },
-    {
-      "skill_path": "frontend/tools/figma/SKILL.md",
-      "scope_skill": "frontend/tools/figma",
-      "wave": "wave-2-co-pilot",
-      "profile_path": "frontend/tools/figma/references/task-profile.json",
       "profile_binding": "references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
@@ -405,17 +383,6 @@
       "errors": []
     },
     {
-      "skill_path": "product/domain/cloudflare-deploy/SKILL.md",
-      "scope_skill": "product/domain/cloudflare-deploy",
-      "wave": "wave-2-co-pilot",
-      "profile_path": "product/domain/cloudflare-deploy/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
-      "profile_binding_mode": "implicit-default",
-      "delegation_mode": "co-pilot",
-      "status": "valid",
-      "errors": []
-    },
-    {
       "skill_path": "product/domain/oak-api/SKILL.md",
       "scope_skill": "product/domain/oak-api",
       "wave": "wave-2-co-pilot",
@@ -552,17 +519,6 @@
       "scope_skill": "product/ops/decide-build-primitive",
       "wave": "wave-2-co-pilot",
       "profile_path": "product/ops/decide-build-primitive/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
-      "profile_binding_mode": "implicit-default",
-      "delegation_mode": "co-pilot",
-      "status": "valid",
-      "errors": []
-    },
-    {
-      "skill_path": "product/ops/linear/SKILL.md",
-      "scope_skill": "product/ops/linear",
-      "wave": "wave-2-co-pilot",
-      "profile_path": "product/ops/linear/references/task-profile.json",
       "profile_binding": "references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",

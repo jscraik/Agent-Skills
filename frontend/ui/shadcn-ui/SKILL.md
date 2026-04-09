@@ -147,7 +147,6 @@ Use shadcn/ui as a code-ownership workflow, not as a drop-in component dependenc
 | [[design-system]] | Override shadcn/ui tokens with design-system aliases |
 | [[baseline-ui]] | Validate shadcn/ui component usage against baseline rules |
 | [[fixing-accessibility]] | Fix accessibility issues in shadcn/ui interactive components |
-| [[figma]] | Use Figma designs as reference for shadcn/ui customisation |
 
 **Topic map:** [[frontend-ui]]
 

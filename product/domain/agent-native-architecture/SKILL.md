@@ -276,7 +276,6 @@ You are in good shape when:
 | [[agent-native-audit]] | Audit whether an existing repo or workflow already meets agent-native operating principles |
 | [[architecture-interview]] | Structure tradeoff-heavy architecture choices into an ADR-style decision |
 | [[mcp-builder]] | Build general MCP servers once the tool surface is clear |
-| [[workers-mcp]] | Deploy an agent-native MCP surface on Cloudflare Workers |
 | [[chatgpt-apps]] | Apply agent-native patterns inside a ChatGPT Apps SDK product |
 
 **Topic map:** [[backend-platform]]

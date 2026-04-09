@@ -112,7 +112,6 @@ uvx markitdown scan.pdf -d -e "https://your-resource.cognitiveservices.azure.com
 | [[visual-explainer]] | Present converted content as a visual HTML page |
 | [[spreadsheet]] | Convert tabular data alongside markdown conversion |
 | [[notebooklm]] | Feed converted markdown to NotebookLM for analysis |
-| [[cf-crawl]] | Feed Cloudflare crawl outputs into the markdown converter for cleanup |
 
 **Topic map:** [[content-publishing]]
 

@@ -237,7 +237,6 @@ For direct scaffold requests, provide plan + implementation in one pass. Default
 | Skill | When to use together |
 |---|---|
 | [[mcp-builder]] | Build the underlying MCP server the Apps SDK connects to |
-| [[workers-mcp]] | Host the MCP server on Cloudflare Workers |
 | [[openai-docs]] | Reference official Apps SDK documentation |
 | [[oak-api]] | Integrate Oak curriculum content into ChatGPT App workflows |
 | [[fixing-metadata]] | Ensure App pages have correct meta and CSP headers |

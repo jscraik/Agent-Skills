@@ -217,7 +217,6 @@ Fast path for low-latency responses:
 
 | Skill | When to use together |
 |---|---|
-| [[cf-crawl]] | Refresh or expand the local CodeRabbit docs corpus before analysis |
 | [[gh-workflow]] | Apply CodeRabbit guidance while executing GitHub PR lifecycle changes |
 | [[circleci]] | Pair CodeRabbit guidance with broader CircleCI migration and policy workflows |
 | [[context7]] | Cross-check third-party library docs when CodeRabbit guidance references external tools |

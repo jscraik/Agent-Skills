@@ -107,8 +107,7 @@
     "cloudflare_backend": {
       "description": "Backend and Cloudflare platform skills",
       "include_prefixes": [
-        "backend/backend-engineer",
-        "product/domain/cloudflare-deploy"
+        "backend/backend-engineer"
       ]
     },
     "openai_apps": {
@@ -132,7 +131,6 @@
       "description": "MCP and protocol-aware builder skills",
       "include_prefixes": [
         "backend/mcp-builder",
-        "backend/workers-mcp",
         "product/docs/context7",
         "product/domain/chatgpt-apps"
       ]

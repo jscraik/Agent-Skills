@@ -106,7 +106,6 @@ Keep the route crisp. The goal is not to explain all of evaluation; it is to pic
 |---|---|
 | [[systematic-debugging]] | When eval pipeline bugs emerge — debug root cause before redesigning the eval |
 | [[verification-before-completion]] | Gate "eval is ready" claims with concrete calibration or human-label evidence |
-| [[skill-builder]] | When the eval workflow should be packaged as a reusable Codex skill |
 | [[test-driven-development]] | For the implementation layer of the review tooling or judge prompt validation tests |
 
 **Topic map:** [[agent-ops]]

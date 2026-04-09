@@ -138,9 +138,6 @@ Family gate note:
 
 | Skill | When to use together |
 |---|---|
-| [[plugin-builder]] | Harden/convert plugin packages before distribution install |
-| [[plugin-creator]] | Scaffold a local plugin package before hardening or install |
-| [[skill-installer]] | Install standalone skills when plugin packaging is unnecessary |
 | [[codex-agent-builder]] | Build or update role TOMLs when plugin install workflows require dedicated agents |
 
 **Topic map:** [[agent-ops]]

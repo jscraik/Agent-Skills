@@ -110,7 +110,6 @@ Build or migrate Better Auth integrations for TypeScript and JavaScript apps wit
 | [[security-best-practices]] | Apply secure defaults during auth implementation |
 | [[1password]] | Inject auth secrets via 1Password CLI |
 | [[mcp-builder]] | Secure MCP server authentication using Better Auth |
-| [[workers-mcp]] | Add auth to Workers-hosted MCP endpoints |
 | [[security-threat-model]] | Model auth attack surface before implementing |
 
 **Topic map:** [[security-ops]]

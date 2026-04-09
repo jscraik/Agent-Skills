@@ -180,9 +180,6 @@ Read these files based on the task:
 
 | Skill | When to use together |
 |---|---|
-| [[skill-builder]] | Harden and benchmark completed skill drafts before release |
-| [[skill-installer]] | Install already-validated skills into Codex environments |
-| [[plugin-creator]] | Package finished skills into a plugin distribution scaffold |
 | [[codex-agent-creator]] | Create or update custom agents when skill workflows need dedicated role files |
 
 **Topic map:** [[agent-ops]]

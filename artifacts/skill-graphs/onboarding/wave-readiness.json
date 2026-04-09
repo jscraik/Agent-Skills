@@ -1,54 +1,54 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-08T22:55:29Z",
-  "decision_date": "2026-04-08",
+  "generated_at": "2026-04-09T20:44:22Z",
+  "decision_date": "2026-04-09",
   "summary": {
-    "active_skill_count": 79,
+    "active_skill_count": 75,
     "manual_skill_count": 9,
-    "co_pilot_skill_count": 70,
-    "profile_valid_count": 79,
+    "co_pilot_skill_count": 66,
+    "profile_valid_count": 75,
     "profile_invalid_count": 0,
     "event_envelope_errors": 8,
-    "event_envelope_errors_total": 8,
-    "event_envelope_errors_waived": 0,
+    "event_envelope_errors_total": 16,
+    "event_envelope_errors_waived": 8,
     "event_envelope_errors_unresolved": 8,
     "approver_count": 2,
-    "telemetry_generated_at": "2026-04-08T06:45:27Z",
-    "telemetry_window_start": "2026-04-02",
-    "telemetry_window_end": "2026-04-08",
+    "telemetry_generated_at": "2026-04-09T06:45:32Z",
+    "telemetry_window_start": "2026-04-03",
+    "telemetry_window_end": "2026-04-09",
     "telemetry_freshness_ok": true,
     "triage_summary": [
       {
         "wave": "wave-0-controls",
         "code": "EVENT_ENVELOPE_ERRORS",
         "owner": "telemetry-ops",
-        "due_date": "2026-04-08",
-        "escalation_date": "2026-04-10",
-        "acceptance": "triage-needed"
+        "due_date": "2026-04-09",
+        "escalation_date": "2026-04-11",
+        "acceptance": "pending"
       },
       {
         "wave": "wave-1-manual",
         "code": "WAVE0_NOT_READY",
         "owner": "release-coordination",
-        "due_date": "2026-04-09",
-        "escalation_date": "2026-04-11",
-        "acceptance": "triage-needed"
+        "due_date": "2026-04-10",
+        "escalation_date": "2026-04-12",
+        "acceptance": "pending"
       },
       {
         "wave": "wave-2-co-pilot",
         "code": "WAVE1_NOT_READY",
         "owner": "release-coordination",
-        "due_date": "2026-04-10",
-        "escalation_date": "2026-04-12",
-        "acceptance": "triage-needed"
+        "due_date": "2026-04-11",
+        "escalation_date": "2026-04-13",
+        "acceptance": "pending"
       },
       {
         "wave": "wave-2-co-pilot",
         "code": "EVENT_ENVELOPE_ERRORS",
         "owner": "telemetry-ops",
-        "due_date": "2026-04-10",
-        "escalation_date": "2026-04-12",
-        "acceptance": "triage-needed"
+        "due_date": "2026-04-11",
+        "escalation_date": "2026-04-13",
+        "acceptance": "pending"
       }
     ]
   },
@@ -66,8 +66,8 @@
           "code": "EVENT_ENVELOPE_ERRORS",
           "detail": "Unresolved event envelope errors in decision window: 8",
           "owner": "telemetry-ops",
-          "due_date": "2026-04-08",
-          "escalation_date": "2026-04-10"
+          "due_date": "2026-04-09",
+          "escalation_date": "2026-04-11"
         }
       ]
     },
@@ -86,8 +86,8 @@
           "code": "WAVE0_NOT_READY",
           "detail": "Wave 1 blocked until Wave 0 controls verification passes",
           "owner": "release-coordination",
-          "due_date": "2026-04-09",
-          "escalation_date": "2026-04-11"
+          "due_date": "2026-04-10",
+          "escalation_date": "2026-04-12"
         }
       ]
     },
@@ -100,23 +100,23 @@
         "telemetry_freshness_ok": true
       },
       "coverage": {
-        "total": 70,
-        "valid": 70
+        "total": 66,
+        "valid": 66
       },
       "blockers": [
         {
           "code": "WAVE1_NOT_READY",
           "detail": "Wave 2 blocked until Wave 1 manual onboarding passes",
           "owner": "release-coordination",
-          "due_date": "2026-04-10",
-          "escalation_date": "2026-04-12"
+          "due_date": "2026-04-11",
+          "escalation_date": "2026-04-13"
         },
         {
           "code": "EVENT_ENVELOPE_ERRORS",
           "detail": "Wave 2 requires zero unresolved event envelope errors (actual=8)",
           "owner": "telemetry-ops",
-          "due_date": "2026-04-10",
-          "escalation_date": "2026-04-12"
+          "due_date": "2026-04-11",
+          "escalation_date": "2026-04-13"
         }
       ]
     }

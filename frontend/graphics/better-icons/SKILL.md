@@ -101,7 +101,6 @@ Search, compare, and export Iconify icons without drifting into inconsistent ico
 |---|---|
 | [[frontend-ui-design]] | Source icons for UI components being designed |
 | [[design-system]] | Integrate icon tokens into the design system |
-| [[figma]] | Export icons for use in Figma designs |
 | [[shadcn-ui]] | Add Iconify icons to shadcn/ui component projects |
 | [[favicon-generator]] | Use alongside favicon generation for icon-family consistency |
 

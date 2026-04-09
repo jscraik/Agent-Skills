@@ -121,7 +121,6 @@ If bootstrap fails:
 | Skill | When to use together |
 |---|---|
 | [[fix-mise]] | Repair mise trust issues blocking the bootstrapped environment |
-| [[cloudflare-deploy]] | Deploy the bootstrapped project to Cloudflare |
 | [[gh-workflow]] | Set up GitHub PR workflow after bootstrap |
 | [[verification-before-completion]] | Verify the bootstrap is working before continuing |
 

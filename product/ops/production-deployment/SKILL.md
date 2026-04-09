@@ -108,8 +108,6 @@ Automate the deployment of software services to production environments with a f
 |---|---|
 | [[release]] | Orchestrate the release flow before deployment |
 | [[1password]] | Inject deployment secrets via 1Password CLI |
-| [[cloudflare-deploy]] | Deploy specifically to the Cloudflare platform |
-| [[workers-mcp]] | Deploy MCP servers as production-ready workers |
 
 **Topic map:** [[ops-engineering]]
 

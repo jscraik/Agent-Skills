@@ -267,9 +267,6 @@ Fail-fast rule:
 
 | Skill | When to use together |
 |---|---|
-| [[plugin-builder]] | Harden scaffolded plugins before distribution, conversion, or release |
-| [[plugin-installer]] | Install and verify plugin packages after creation and hardening |
-| [[skill-creator]] | Build standalone skills that may later be bundled into a plugin |
 | [[codex-agent-builder]] | Create or upgrade custom agents when plugin scaffolds need dedicated role files |
 
 **Topic map:** [[agent-ops]]

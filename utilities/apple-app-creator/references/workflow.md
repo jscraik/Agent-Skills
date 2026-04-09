@@ -2,14 +2,15 @@
 
 1. Run doctor to verify Xcode, XcodeGen, and CLI tools.
 2. Choose mode:
-   - `new`: scaffold app + install selected subskills
-   - `adopt`: install selected subskills into existing project
-3. Default selected subskills:
-   - `xcode-makefiles`
+   - `new`: scaffold app
+   - `adopt`: apply app-builder workflow into existing project
+3. Apply platform defaults:
+   - iOS deployment target: `18.0`
+   - macOS deployment target: `15.4`
 4. Apply git onboarding policy:
    - `--git-init auto|never`
    - `--git-commit prompt|always|never`
-5. Print next commands (`make diagnose/build/test`).
+5. Print next commands.
 
 Defaults
 - Project mode: `new`
@@ -18,7 +19,6 @@ Defaults
 - iOS deployment target: `18.0`
 - macOS deployment target: `15.4`
 - iOS simulator: `auto`
-- Subskill installs: `xcode-makefiles` enabled
 - Git init: `auto`
 - Baseline commit: `prompt`
 
@@ -31,9 +31,7 @@ Optional onboarding
 
 Adopt mode constraints
 - Existing-project mode is non-destructive and does not regenerate app sources.
-- In adopt mode, provide `--platform` when installing `xcode-makefiles`.
 
 Tooling behavior
-- App creator delegates build and task tooling to subskills.
-- This skill no longer owns makefile/task implementation details directly.
+- App creator owns scaffold and adoption flow only.
 - Auto-commit is skipped for pre-existing dirty repos to avoid sweeping unrelated edits.

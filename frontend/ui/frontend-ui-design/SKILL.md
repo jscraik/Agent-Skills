@@ -226,7 +226,6 @@ metadata:
 |---|---|
 | [[design-system]] | Ground component design in the token layer |
 | [[baseline-ui]] | Validate components against baseline UI rules after design |
-| [[figma]] | Use Figma designs as reference for implementation |
 | [[fixing-accessibility]] | Apply accessibility fixes during component design |
 | [[ui-ux-creative-coding]] | Add motion and creative polish to designed components |
 

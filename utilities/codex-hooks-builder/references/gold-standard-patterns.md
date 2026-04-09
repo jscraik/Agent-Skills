@@ -26,7 +26,7 @@ For most repos, start with three hooks:
 - Use `matcher: "^(startup|resume)$"` so the starter matches the current documented runtime without depending on undocumented extra source values.
 
 2. `UserPromptSubmit`
-- Block direct attempts to ignore system, developer, or repo instructions.
+- Block direct attempts to waive higher-priority system, developer, or repo instructions.
 - Add small context for risky shortcut prompts such as skipping validation or using destructive commands.
 - Keep this narrow so normal prompts are unaffected.
 

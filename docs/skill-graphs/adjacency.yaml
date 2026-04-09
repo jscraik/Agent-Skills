@@ -10,10 +10,8 @@
 
 1password:
   bootstrap: Provision dev environment secrets via 1Password during bootstrap
-  cloudflare-deploy: Inject secrets into Cloudflare deployments via op run
   create-auth: Inject credentials into authentication flows via 1Password
   security-best-practices: Apply secret management best practices alongside 1Password
-  workers-mcp: Secure MCP server secrets with 1Password injection
 agent-browser:
   agentation: Wire agent-browser actions into Agentation self-driving mode
   atlas: Use Atlas for macOS ChatGPT app control vs agent-browser for web
@@ -27,7 +25,6 @@ agent-native-architecture:
     decision
   chatgpt-apps: Apply agent-native patterns inside a ChatGPT Apps SDK product
   mcp-builder: Build general MCP servers once the tool surface is clear
-  workers-mcp: Deploy an agent-native MCP surface on Cloudflare Workers
 agent-native-audit:
   agents-md: Tighten repo instructions after finding discoverability gaps
   codex-home-audit: Audit the Codex home surface instead of a single repo
@@ -45,19 +42,12 @@ agents-md:
   codex-agent-creator: Create agent roles that AGENTS.md will reference
   codex-home-audit: Audit the full Codex home dir after AGENTS.md refactors
   docs-expert: Apply docs polish and community-health guidance to AGENTS.md
-  skill-builder: Build new skills that will be registered in AGENTS.md
 alignment-checkpoint:
   brainstorming: Explore approaches once intent is aligned
   ce-plan: Move from approved intent to an execution-ready plan
   decide-build-primitive: Decide the right primitive after intent is confirmed
   interview-me: Follow with structured interview to clarify requirements
   product-spec: Produce a spec once ambiguity is resolved
-apple-app-creator:
-  design-system: Apply design tokens to native UI components
-  fixing-accessibility: Add UIAccessibility labels to native views
-  product-spec: Spec the app feature set before scaffolding
-  recon-workbench: Audit the app binary and entitlements after creation
-  xcode-makefiles: Add reproducible CLI builds after scaffolding the app
 architecture-interview:
   brainstorming: Explore options before the architecture interview
   diagram-cli: Generate architecture diagrams from ADR decisions
@@ -69,10 +59,8 @@ atlas:
   notebooklm: Cross-reference Atlas conversations with NotebookLM notebooks
   openai-docs: Reference official ChatGPT documentation for Atlas features
 backend-engineer:
-  cloudflare-deploy: Deploy the backend extension to Cloudflare Workers
   mcp-builder: Build MCP server tools alongside the backend
   security-best-practices: Apply security hardening to new backend endpoints
-  workers-mcp: Add MCP tooling to the backend surface
   writing-plans: Plan backend extensions before implementing
 baseline-ui:
   design-system: Apply design tokens that baseline-ui validates
@@ -93,11 +81,9 @@ best-practices:
 better-icons:
   design-system: Integrate icon tokens into the design system
   favicon-generator: Use alongside favicon generation for icon-family consistency
-  figma: Export icons for use in Figma designs
   frontend-ui-design: Source icons for UI components being designed
   shadcn-ui: Add Iconify icons to shadcn/ui component projects
 bootstrap:
-  cloudflare-deploy: Deploy the bootstrapped project to Cloudflare
   fix-mise: Repair mise trust issues blocking the bootstrapped environment
   gh-workflow: Set up GitHub PR workflow after bootstrap
   verification-before-completion: Verify the bootstrap is working before continuing
@@ -142,7 +128,6 @@ ce-ideate:
     enough to plan
 ce-plan:
   ce-brainstorm: Clarify WHAT/WHY
-  linear: Issue creation
   product-spec: Product contract
 ce-reliability-review:
   ce-deepen-spec: Strengthen spec with reliability requirements from review
@@ -184,11 +169,6 @@ ce-work:
   ce-plan: Build execution-ready plan
   ce-review: Review after execution
   test-browser: Browser verification
-cf-crawl:
-  cloudflare-deploy: Deploy and authenticate the crawl target on Cloudflare
-  context7: Supplement crawl results with library documentation
-  markdown-converter: Convert crawl output into clean Markdown
-  visual-explainer: Present crawl findings in an HTML report
 changelog:
   every-style-editor: Polish the final changelog for a branded external audience
   feature-video: Pair a release-note summary with a visual walkthrough artifact
@@ -199,10 +179,8 @@ chatgpt-apps:
   mcp-builder: Build the underlying MCP server the Apps SDK connects to
   oak-api: Integrate Oak curriculum content into ChatGPT App workflows
   openai-docs: Reference official Apps SDK documentation
-  workers-mcp: Host the MCP server on Cloudflare Workers
 circleci:
   backend-engineer: Wire backend deployments into CircleCI workflows
-  cloudflare-deploy: Deploy to Cloudflare as part of a CircleCI pipeline
   gh-workflow: Diagnose GitHub check blockers around CircleCI-driven delivery work
   verification-before-completion: Verify pipeline output before marking complete
 claude-alias:
@@ -212,12 +190,6 @@ cli-spec:
   agent-native-architecture: Ensure the CLI fits into an autonomous workflow
   ce-spec: Use when the CLI is a front for a broader system spec
   docs-expert: Generate user-facing docs from the technical contract
-cloudflare-deploy:
-  backend-engineer: Extend the backend before deploying
-  cf-crawl: Run Cloudflare Browser Rendering crawls on the deployed site
-  fixing-metadata: Fix OG/meta tags on deployed pages
-  verification-before-completion: Verify deployment is healthy before completing
-  workers-mcp: Deploy MCP server as part of the Cloudflare stack
 codex-agent-creator:
   agents-md: Update repo instructions to reference or govern the new agent roles
   codex-automation-architect: Design recurring automations that orchestrate the installed
@@ -242,15 +214,10 @@ codex-hooks-builder:
   codex-home-audit: Audit an existing Codex home installation for hook drift or unsafe
     config
   gh-workflow: Ship and review hook-pack changes through the GitHub lifecycle
-  plugin-builder: Package the hooks together with related skills or agents in a plugin
-plugin-builder:
-  plugin-creator: Scaffold a minimal plugin package before hardening
-  plugin-installer: Install and verify third-party plugins from GitHub
 codex-sessions-skill-scan:
   codex-home-audit: Run alongside a full home directory audit
   evals-router: Route evaluation work for under-performing skills
   insight-report: Turn session scan findings into a polished usage report
-  skill-builder: Act on skill failures discovered in the scan
 coding-harness:
   bootstrap: Clone and bootstrap a repository before coding-harness setup begins
   circleci: Work on CircleCI-specific pipeline design or migration details beyond
@@ -269,15 +236,10 @@ create-auth:
   mcp-builder: Secure MCP server authentication using Better Auth
   security-best-practices: Apply secure defaults during auth implementation
   security-threat-model: Model auth attack surface before implementing
-  workers-mcp: Add auth to Workers-hosted MCP endpoints
 decide-build-primitive:
+  ce-plan: Use when the capability is CE-scoped and needs concrete stage planning
   codex-automation-architect: Use after `AGENT_AUTOMATION` decision to design the
     automation contract
-  ce-plan: Use when the capability is CE-scoped and needs concrete stage planning
-  plugin-builder: Use after `SKILL` decision when the skill needs plugin packaging
-    for distribution
-  skill-builder: Use after `SKILL` decision is made to scaffold and quality-gate the
-    skill
 deep-interview:
   architecture-interview: Use when deep-interview surfaces a major architectural tradeoff
     requiring structured review
@@ -306,7 +268,6 @@ docs-expert:
   visual-explainer: Present a complex system, workflow, or docs audit as a visual
     artifact
 evals-router:
-  skill-builder: When the eval workflow should be packaged as a reusable Codex skill
   systematic-debugging: When eval pipeline bugs emerge — debug root cause before redesigning
     the eval
   test-driven-development: For the implementation layer of the review tooling or judge
@@ -325,7 +286,6 @@ fallback-release:
   release: Primary release path when CI is healthy
   verification-before-completion: Validate fallback artifacts before publication
 favicon-generator:
-  cloudflare-deploy: Include favicon assets in Cloudflare Pages deployments
   design-system: Keep favicon palette consistent with design-system tokens
   fixing-metadata: Pair with metadata fixes to ensure correct favicon references
   og-image-creator: Generate OG images alongside favicons for complete brand suite
@@ -335,12 +295,6 @@ feature-video:
   sora: Generate synthetic video only when the request is not tied to real product
     footage
   stitch-remotion: Build a walkthrough from Stitch screens
-figma:
-  better-icons: Source icons via Figma designs and export to Iconify
-  design-system: Extract Figma tokens to drive the repository design system
-  frontend-ui-design: Implement Figma designs as production-ready components
-  og-image-creator: Use Figma designs as reference for OG image generation
-  stitch-react-components: Convert Figma/Stitch screens into modular React components
 fix-mise:
   bootstrap: Fix mise before retrying the bootstrap
   codex-home-audit: Address mise issues found during a home directory audit
@@ -354,14 +308,11 @@ fixing-accessibility:
   frontend-ui-design: Apply accessibility constraints during component design
   playwright-interactive: Test keyboard and focus behaviour via Playwright
 fixing-metadata:
-  cloudflare-deploy: Verify metadata is served correctly after Cloudflare deployment
   favicon-generator: Add favicon tags alongside other head metadata
   fixing-accessibility: Fix ARIA and semantic HTML alongside metadata
   og-image-creator: Generate OG images that the metadata tags will reference
 frontend-design:
   design-system: Route token, alias, or system-governance work to the dedicated owner
-  figma: Pull design context from Figma before choosing the downstream implementation
-    skill
   frontend-ui-design: Hand off once the request clearly becomes standard UI build
     or redesign work
   ui-ux-creative-coding: Route post-direction polish and motion refinement to the
@@ -369,7 +320,6 @@ frontend-design:
 frontend-ui-design:
   baseline-ui: Validate components against baseline UI rules after design
   design-system: Ground component design in the token layer
-  figma: Use Figma designs as reference for implementation
   fixing-accessibility: Apply accessibility fixes during component design
   ui-ux-creative-coding: Add motion and creative polish to designed components
 gh-workflow:
@@ -399,12 +349,7 @@ interview-me:
   deep-interview: Deepen an existing draft doc or spec rather than running a lighter
     clarifying interview
   product-spec: Turn the clarified outcome into a fuller product-planning specification
-linear:
-  alignment-checkpoint: Gate Linear issue creation behind intent alignment
-  ce-plan: Convert Linear issues into sequenced implementation plans
-  gh-workflow: Link Linear issues to GitHub PRs during delivery
 markdown-converter:
-  cf-crawl: Feed Cloudflare crawl outputs into the markdown converter for cleanup
   docs-expert: Polish converted docs to meet repository quality standards
   notebooklm: Feed converted markdown to NotebookLM for analysis
   spreadsheet: Convert tabular data alongside markdown conversion
@@ -414,7 +359,6 @@ mcp-builder:
   chatgpt-apps: Connect the MCP server to a ChatGPT Apps SDK integration
   openai-docs: Use official MCP schema docs when designing tool schemas
   security-best-practices: Apply security hardening to MCP server endpoints
-  workers-mcp: Host the MCP server on Cloudflare when cloud deployment is needed
 nano-banana-builder:
   chatgpt-apps: Integrate Nano Banana image APIs into a ChatGPT App
   imagegen: Use as fallback for static image generation outside Nano Banana
@@ -430,11 +374,14 @@ oak-api:
   mcp-builder: Expose Oak API as MCP tools for agent workflows
   product-spec: Spec the learning experience before implementing
 og-image-creator:
-  cloudflare-deploy: Serve OG images via Cloudflare Pages after generation
   favicon-generator: Generate OG images and favicons as a complete brand suite
   fixing-metadata: Wire generated OG images into correct meta tags
   imagegen: Use imagegen for non-route-specific image generation
-openai-docs: {}
+openai-docs:
+  chatgpt-apps: Use with Apps SDK implementation tasks that need official OpenAI API
+    references.
+  context7: Use when third-party library docs are needed alongside OpenAI docs.
+  mcp-builder: Pair when building MCP servers that integrate OpenAI APIs.
 orchestrating-subagents:
   ce-work: Execute a plan once the orchestration decision is made and the task is
     implementation-ready
@@ -449,19 +396,6 @@ playwright-interactive:
   agentation: Wire Playwright automation into Agentation self-driving
   fixing-accessibility: Test keyboard navigation and focus via Playwright
   ui-visual-regression: Capture Playwright screenshots for regression baselines
-plugin-builder:
-  plugin-creator: Start from a minimal plugin scaffold before hardening
-  plugin-installer: Install and verify third-party plugins from GitHub with provenance
-    + rollback controls
-  skill-builder: Harden standalone skills before plugin packaging
-plugin-creator:
-  plugin-builder: Promote scaffold into a full plugin package with governance checks
-  plugin-installer: Install and verify plugin packages after creation and hardening
-  skill-creator: Build standalone skills that may later be bundled into a plugin
-plugin-installer:
-  plugin-builder: Harden/convert plugin packages before distribution install
-  plugin-creator: Scaffold a local plugin package before hardening or install
-  skill-installer: Install standalone skills when plugin packaging is unnecessary
 process-watch:
   codex-home-audit: Check process health during a Codex home audit
   fix-mise: Diagnose mise shim CPU/memory issues via process-watch
@@ -486,9 +420,7 @@ product-spec:
     risks early
 production-deployment:
   1password: Inject deployment secrets via 1Password CLI
-  cloudflare-deploy: Deploy specifically to the Cloudflare platform
   release: Orchestrate the release flow before deployment
-  workers-mcp: Deploy MCP servers as production-ready workers
 project-improver:
   architecture-interview: Validate architectural improvements via structured interview
   brainstorming: Brainstorm improvement ideas before running the improver
@@ -497,7 +429,6 @@ project-improver:
   security-threat-model: Include security improvements in the improvement scope
 rclone:
   1password: Inject remote credentials or secrets safely into the runtime
-  cf-crawl: Export crawl results locally, then move them to remote storage
   feature-video: Upload generated demo artifacts after rendering or capture
   video-transcript-downloader: Transfer downloaded media or transcripts to long-term
     storage
@@ -536,7 +467,6 @@ repoprompt:
   context7: Combine with Context7 for richer library context in prompts
 reproduce-bug:
   gh-workflow: Follow up on GitHub issues or PR state after the bug is understood
-  linear: Pull issue context from the local tracker before reproducing the bug
   systematic-debugging: Move from reproduction evidence into a deeper root-cause analysis
   test-browser: Reproduce or verify browser-facing regressions with route-level evidence
 resolve-pr-parallel:
@@ -547,8 +477,8 @@ resolve-pr-parallel:
 resolve-todo-parallel:
   ce-compound: Capture durable learnings that emerge from repeated todo fixes
   ce-work: Execute a single scoped implementation path instead of a todo sweep
-  orchestrating-subagents: Coordinate explicit subagent fan-out when runtime and user
-    approval allow it
+  orchestrating-subagents: Coordinate explicit subagent fan-out when runtime and an
+    explicit user delegation request allow it
   triage: Review pending todo findings before execution begins
 security-best-practices:
   1password: Findings involving secrets management — use for secure injection patterns
@@ -572,28 +502,18 @@ security-threat-model:
 shadcn-ui:
   baseline-ui: Validate shadcn/ui component usage against baseline rules
   design-system: Override shadcn/ui tokens with design-system aliases
-  figma: Use Figma designs as reference for shadcn/ui customisation
   fixing-accessibility: Fix accessibility issues in shadcn/ui interactive components
   react-ui-patterns: Apply React composition patterns to shadcn/ui components
 skill-builder:
-  codex-agent-creator: Reuse existing agent TOMLs or create role-specific custom
-    agents for skill-linked delegation flows
+  codex-agent-creator: Reuse existing agent TOMLs or create role-specific custom agents
+    for skill-linked delegation flows
   codex-sessions-skill-scan: Audit skill coverage, failures, and overlap using real
     session evidence instead of authoring doctrine alone
   decide-build-primitive: Decide whether the capability should be a skill, prompt,
     or agent before authoring it
-  plugin-builder: Package a contract-valid standalone skill when the deliverable explicitly
-    becomes a plugin
-  skill-installer: Install, import, or repair runtime visibility when the skill package
-    is already valid and the remaining work is distribution
 skill-creator:
   codex-agent-creator: Create or update custom agents when skill workflows need dedicated
     role files
-  plugin-creator: Package finished skills into a plugin distribution scaffold
-  skill-builder: Lifecycle hardening, comparative eval rounds, and release-quality
-    contract upgrades
-  skill-installer: Installing already-valid skills into Codex environments
-skill-installer: {}
 slides:
   beautiful-mermaid: Embed high-quality Mermaid diagrams in slide decks
   imagegen: Generate illustrative images for slide backgrounds
@@ -618,7 +538,6 @@ stitch-loop:
 stitch-react-components:
   baseline-ui: Validate converted components against baseline UI rules
   design-system: Align converted components with the design-system token layer
-  figma: Use Figma context alongside Stitch for richer conversion
   react-ui-patterns: Apply React composition patterns to converted components
   stitch-loop: Generate the Stitch screens that this skill converts
 stitch-remotion:
@@ -631,8 +550,8 @@ stitch-remotion:
 systematic-debugging:
   ce-plan: Re-plan the approach when repeated fixes fail and the current path is not
     converging
-  gh-workflow: When PR CI failures reveal a code-level bug that needs root-cause
-    investigation
+  gh-workflow: Use `ci_diagnose` mode for GitHub check failures that need lifecycle
+    context
   test-driven-development: Capture the root cause as a failing test before or alongside
     the fix
   verification-before-completion: Prove the fix works before claiming the debugging
@@ -651,9 +570,6 @@ test-driven-development:
     fix
   verification-before-completion: 'Explicit gate: verify the full test suite is green
     before claiming done'
-test-xcode:
-  apple-app-creator: Scaffold a new Apple app project before runtime verification
-  xcode-makefiles: Install or upgrade the CLI-first Xcode build toolkit
 threejs-builder:
   agentation: Automate Three.js scene interactions for testing
   frontend-ui-design: Provide the design context Three.js scene should match
@@ -661,15 +577,12 @@ threejs-builder:
   visual-explainer: Embed Three.js scenes in HTML explainer pages
 triage:
   ce-work: Execute the approved work once triage decisions are made
-  linear: Route to tracker-first triage when the work lives in Linear instead of repo
-    todo files
   resolve-todo-parallel: Resolve a batch of approved todo items in parallel rather
     than triaging them
   systematic-debugging: Diagnose unclear or flaky findings before deciding whether
     they belong in the queue
 ui-cloner:
   design-system: Map cloned design tokens into your design system
-  figma: Use Figma as the intermediate for cloned designs
   frontend-ui-design: Adapt the cloned design system to your brand
   stitch-loop: Feed cloned UI design into Stitch for iterative generation
 ui-ux-creative-coding:
@@ -712,12 +625,6 @@ visual-explainer:
     final explainer
   slides: Use a presentation deck instead of a scrollable HTML explainer when the
     format fits better
-workers-mcp:
-  chatgpt-apps: Connect the Workers MCP server to a ChatGPT App
-  cloudflare-deploy: Deploy the full Workers-hosted MCP stack
-  mcp-builder: Build the MCP server before deploying it on Workers
-  openai-docs: Reference MCP schema and tool definitions
-  security-best-practices: Apply auth and security hardening to the MCP endpoint
 writing-plans:
   brainstorming: Use first when scope is still ambiguous — resolve approach before
     planning steps
@@ -727,11 +634,6 @@ writing-plans:
   systematic-debugging: When 3+ fix attempts fail, restart with this skill to re-plan
     the approach
   verification-before-completion: Embed in the plan's final task to gate "done" claims
-xcode-makefiles:
-  apple-app-creator: Install xcode-makefiles after scaffolding with apple-app-creator
-  circleci: Integrate Make targets into CircleCI pipeline
-  recon-workbench: Audit Makefile build outputs for security
-  verification-before-completion: Verify Make targets build cleanly before completing
 youtube-hooks-scripts:
   notebooklm: Use NotebookLM to generate audio overviews from scripts
   product-spec: Spec the content series before scripting individual videos

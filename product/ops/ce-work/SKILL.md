@@ -272,7 +272,7 @@ See `references/execution-modes.md` for the exact rules.
 After successful execution:
 - technical review or PR review
 - follow-up `ce-work` for remaining units
-- issue creation/update via `[[linear]]` or repo tracker
+- issue creation/update via tracker workflow or repo tracker
 - operational rollout verification
 
 Keep artifact path in handoff for traceability.

@@ -121,8 +121,6 @@ If blocked by missing critical information, insert `## Questions` before `## Pla
 
 | Skill | When to use together |
 |---|---|
-| [[cloudflare-deploy]] | Deploy the backend extension to Cloudflare Workers |
-| [[workers-mcp]] | Add MCP tooling to the backend surface |
 | [[mcp-builder]] | Build MCP server tools alongside the backend |
 | [[security-best-practices]] | Apply security hardening to new backend endpoints |
 | [[writing-plans]] | Plan backend extensions before implementing |

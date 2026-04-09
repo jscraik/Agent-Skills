@@ -161,7 +161,6 @@ Contract rules:
 
 | Skill | When to use together |
 |---|---|
-| [[linear]] | Pull issue context from the local tracker before reproducing the bug |
 | [[systematic-debugging]] | Move from reproduction evidence into a deeper root-cause analysis |
 | [[test-browser]] | Reproduce or verify browser-facing regressions with route-level evidence |
 | [[gh-workflow]] | Follow up on GitHub issues or PR state after the bug is understood |
