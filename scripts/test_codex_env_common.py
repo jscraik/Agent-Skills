@@ -136,17 +136,6 @@ class TestCodexApplyEnvBinPrepend(unittest.TestCase):
             cwd=str(REPO_ROOT),
         )
         self.assertEqual(result.returncode, 0)
-        path_entries = result.stdout.strip().split(":")
-        # Check that any entry ends with /bin and corresponds to the repo
-        repo_bin = None
-        for entry in path_entries:
-            if entry.endswith("/bin") and Path(entry).parent == REPO_ROOT:
-                repo_bin = entry
-                break
-            # Also check if it matches the actual repo bin dir
-            if Path(entry) == (REPO_ROOT / "bin"):
-                repo_bin = entry
-                break
         # At minimum, PATH should have the repo's bin if it exists or CODEX_REPO_ROOT/bin
         # The exact path depends on where git says the root is
         self.assertIn(str(REPO_ROOT / "bin"), result.stdout, "CODEX_REPO_ROOT/bin must be in PATH after codex_apply_env")
