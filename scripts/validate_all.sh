@@ -47,8 +47,14 @@ if [[ -n "${PYTHON_BIN:-}" ]]; then
   python_cmd=("$PYTHON_BIN")
   python_cmd_display="$PYTHON_BIN"
 elif command -v mise >/dev/null 2>&1 && command -v uv >/dev/null 2>&1; then
-  python_cmd=(mise exec -- uv run --python 3.12 python)
-  python_cmd_display="mise exec -- uv run --python 3.12 python"
+  if mise exec -- uv run --python 3.12 python -c "import sys" >/dev/null 2>&1; then
+    python_cmd=(mise exec -- uv run --python 3.12 python)
+    python_cmd_display="mise exec -- uv run --python 3.12 python"
+  elif uv run --python 3.12 python -c "import sys" >/dev/null 2>&1; then
+    python_cmd=(uv run --python 3.12 python)
+    python_cmd_display="uv run --python 3.12 python"
+    echo "⚠️  Python launcher fallback: mise/uv probe failed, using uv directly"
+  fi
 elif command -v uv >/dev/null 2>&1; then
   python_cmd=(uv run --python 3.12 python)
   python_cmd_display="uv run --python 3.12 python"
@@ -132,6 +138,7 @@ run_check required progressive-disclosure "📐 Linting progressive disclosure q
 run_check required skill-authoring-family "👨‍👩‍👧‍👦 Validating skill authoring family gate..." bash scripts/validate_skill_authoring_family.sh
 run_check required gotcha-store "🧠 Validating gotcha candidate store..." "${python_cmd[@]}" scripts/gotcha_pipeline.py validate
 run_check warn router-schema "🛡️  Verifying router schema tooling..." "${python_cmd[@]}" scripts/verify_router_schema.py --fail-on-sensitive-fields
+run_check required selection-contract "🎯 Verifying selection contract fixtures..." "${python_cmd[@]}" scripts/verify_selection_contract.py --artifact "$run_dir/routing-quality.json"
 
 echo ""
 echo "Validation summary:"

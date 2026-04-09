@@ -28,3 +28,13 @@ outputs:
   - name: summary_comment
     type: string
     description: Final PR summary comment text.
+success_criteria:
+  - Only unresolved CodeRabbit threads are used as fix sources.
+  - Fixes preserve issue ordering and create one consolidated commit when changes exist.
+  - Sensitive values are redacted in all generated output.
+non_goals:
+  - General refactoring outside CodeRabbit findings.
+  - Live SaaS account administration.
+risks:
+  - Applying stale feedback when branch changes are not pushed.
+  - Over-applying low-priority findings without user approval.

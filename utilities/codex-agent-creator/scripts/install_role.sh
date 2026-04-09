@@ -39,6 +39,21 @@ max_threads=""
 max_depth=""
 job_max_runtime_seconds=""
 
+normalize_path() {
+  local raw_path="$1"
+  if command -v realpath >/dev/null 2>&1; then
+    realpath -m "$raw_path"
+    return 0
+  fi
+  python3 - "$raw_path" <<'PY'
+import os
+import sys
+
+value = sys.argv[1]
+print(os.path.normpath(os.path.realpath(os.path.abspath(value))))
+PY
+}
+
 require_option_value() {
   local opt="$1"
   if [[ $# -lt 2 || -z "${2:-}" || "${2:-}" == --* ]]; then
@@ -172,8 +187,10 @@ fi
 
 if [[ -n "$max_threads" || -n "$max_depth" || -n "$job_max_runtime_seconds" ]]; then
   if [[ "$scope" == "project" && "$allow_project_config_write" != "true" ]]; then
-    project_codex_config="${project_root%/}/.codex/config.toml"
-    if [[ "$config_path" == "$project_codex_config" || "$config_path" == ".codex/config.toml" ]]; then
+    project_codex_config="$(normalize_path "${project_root%/}/.codex/config.toml")"
+    cwd_codex_config="$(normalize_path ".codex/config.toml")"
+    effective_config_path="$(normalize_path "$config_path")"
+    if [[ "$effective_config_path" == "$project_codex_config" || "$effective_config_path" == "$cwd_codex_config" ]]; then
       echo "Refusing to write project-scoped Codex config: $config_path" >&2
       echo "Use --allow-project-config-write to opt in explicitly, or pass --config ~/.codex/config.toml." >&2
       exit 1

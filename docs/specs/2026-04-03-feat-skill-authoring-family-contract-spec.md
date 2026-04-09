@@ -13,6 +13,7 @@ deepened: 2026-04-04
 # Skill Authoring Family Contract and Iteration Spec
 
 ## Table of Contents
+
 - [Enhancement Summary](#enhancement-summary)
 - [Problem Statement](#problem-statement)
 - [Goals](#goals)
@@ -44,6 +45,7 @@ deepened: 2026-04-04
 ## Problem Statement
 
 The skill-authoring family is now clearer at the routing level than it was before:
+
 - `skill-creator` owns starter authoring and scaffold-bound edits in [skills-system/skill-creator/SKILL.md](/Users/jamiecraik/dev/agent-skills/skills-system/skill-creator/SKILL.md#L1)
 - `skill-builder` owns lifecycle hardening, validators, evals, and standalone packaging in [utilities/skill-builder/SKILL.md](/Users/jamiecraik/dev/agent-skills/utilities/skill-builder/SKILL.md#L1)
 - `skill-installer` owns already-valid install and import execution in [skills-system/skill-installer/SKILL.md](/Users/jamiecraik/dev/agent-skills/skills-system/skill-installer/SKILL.md#L1)
@@ -52,11 +54,13 @@ The skill-authoring family is now clearer at the routing level than it was befor
 That routing work solved the major family-overlap problem. The remaining weakness is loop maturity rather than role ambiguity.
 
 Current repo evidence shows:
+
 - `skill-creator` still ends primarily with starter drafting plus `quick_validate.py` in [skills-system/skill-creator/SKILL.md](/Users/jamiecraik/dev/agent-skills/skills-system/skill-creator/SKILL.md#L373)
 - `skill-builder` already has validators, smoke and release eval modes, and description optimization hooks in [utilities/skill-builder/SKILL.md](/Users/jamiecraik/dev/agent-skills/utilities/skill-builder/SKILL.md#L247), but does not yet expose one explicit iterative loop that compares candidate behavior against a baseline and bundles the resulting evidence coherently
 - the seam between creation and hardening is described, but not yet captured as a durable artifact that a maintainer or planner can rely on
 
 The result is a contract gap:
+
 - first-draft creation can succeed without preserving the exact context the next stage needs
 - hardening can happen without a clearly specified paired-comparison loop
 - planners would still have to invent handoff format, evidence expectations, and baseline rules ad hoc
@@ -86,6 +90,7 @@ This spec closes that gap without undoing the family split that now works.
 ## System Boundary
 
 Owned by this spec:
+
 - the preserved routing and ownership relationship across `skill-creator`, `skill-builder`, `skill-installer`, and `plugin-creator` (active gate family); `plugin-builder` remains an adjacent handoff surface for full plugin packaging and is not a gate-family member
 - the creator-to-builder handoff contract for non-trivial skills
 - the `skill-builder` iteration loop for baseline comparison, evidence capture, review, tuning, and reruns
@@ -93,6 +98,7 @@ Owned by this spec:
 - the minimum observability and acceptance requirements that make the upgraded loop planning-ready
 
 Not owned by this spec:
+
 - specific code patches to `SKILL.md`, `references/evals.yaml`, or helper scripts
 - a repo-wide redesign of every skill eval artifact
 - unrelated routing behavior outside the skill-authoring family
@@ -228,19 +234,20 @@ Not owned by this spec:
 
 ### Canonical routing roles for phase one
 
-| Skill surface | Primary job | Strongest triggers | Non-triggers |
-|---|---|---|---|
-| `skill-creator` | `starter_authoring` | create a first draft, finish a just-created scaffold, turn an already-understood workflow into a starter skill shape | benchmark-heavy hardening, install execution, plugin packaging, broad lifecycle audit |
-| `skill-builder` | `expert_lifecycle_maintenance` | improve routing, harden workflow, compare candidate vs baseline behavior, evaluate, package a validated standalone skill, prepare downstream handoff | pure install/import, plugin conversion without lifecycle judgment, unrelated feature work |
-| `skill-installer` | `skill_installation` | install, import, list, project, or repair visibility for an already-valid skill package | first-draft creation, lifecycle benchmarking, plugin packaging |
-| `plugin-creator` *(gate member)* | `plugin_scaffolding` | scaffold a new plugin skeleton, generate a valid `plugin.json`, add or update local marketplace entries | skill lifecycle hardening, install execution, full plugin packaging and governance programs |
-| `plugin-builder` *(adjacent)* | `plugin_packaging` | convert or package a contract-valid standalone skill as a full plugin with governance checks | first-draft creation, lifecycle benchmarking, install-only work; not a gate-family member |
+| Skill surface                    | Primary job                    | Strongest triggers                                                                                                                                   | Non-triggers                                                                                |
+| -------------------------------- | ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `skill-creator`                  | `starter_authoring`            | create a first draft, finish a just-created scaffold, turn an already-understood workflow into a starter skill shape                                 | benchmark-heavy hardening, install execution, plugin packaging, broad lifecycle audit       |
+| `skill-builder`                  | `expert_lifecycle_maintenance` | improve routing, harden workflow, compare candidate vs baseline behavior, evaluate, package a validated standalone skill, prepare downstream handoff | pure install/import, plugin conversion without lifecycle judgment, unrelated feature work   |
+| `skill-installer`                | `skill_installation`           | install, import, list, project, or repair visibility for an already-valid skill package                                                              | first-draft creation, lifecycle benchmarking, plugin packaging                              |
+| `plugin-creator` _(gate member)_ | `plugin_scaffolding`           | scaffold a new plugin skeleton, generate a valid `plugin.json`, add or update local marketplace entries                                              | skill lifecycle hardening, install execution, full plugin packaging and governance programs |
+| `plugin-builder` _(adjacent)_    | `plugin_packaging`             | convert or package a contract-valid standalone skill as a full plugin with governance checks                                                         | first-draft creation, lifecycle benchmarking, install-only work; not a gate-family member   |
 
 ## Main Flow / Lifecycle
 
 ### 1. Preserve the current routing contract
 
 The existing family routing contract remains the baseline:
+
 - `create_skill` routes to `skill-creator`
 - `improve_skill` and `audit_or_validate_skill` route to `skill-builder`
 - `install_skill` routes to `skill-installer`
@@ -248,6 +255,7 @@ The existing family routing contract remains the baseline:
 - `package_as_plugin` routes to `plugin-builder`
 
 Mixed-intent rules remain in force:
+
 - lifecycle-shaping work wins over install execution
 - plugin packaging does not preempt unresolved lifecycle judgment
 - low-confidence or deliverable-ambiguous requests still fail to route clarification rather than guessed ownership
@@ -257,6 +265,7 @@ Mixed-intent rules remain in force:
 `skill-creator` owns the first-draft stage.
 
 Required creator-stage behavior:
+
 - extract intent from the current conversation before re-asking obvious questions
 - establish the starter skill boundary, likely trigger contexts, and reusable resource inventory
 - scaffold or finish the starter skill shape
@@ -264,6 +273,7 @@ Required creator-stage behavior:
 - decide whether the work can safely stop at starter authoring or whether lifecycle hardening is now the dominant concern
 
 Stop rule:
+
 - if the work remains truly scaffold-bound and no lifecycle hardening, routing, packaging, or benchmark concern is requested, `skill-creator` may finish without a downstream handoff
 - otherwise, `skill-creator` must produce a `HandoffPackage` and route the next lifecycle stage to `skill-builder`
 
@@ -272,6 +282,7 @@ Stop rule:
 The handoff from `skill-creator` to `skill-builder` is a normal lifecycle transition for non-trivial skills, not an exceptional recovery path.
 
 Required handoff fields:
+
 - `skill_goal`
   - what the skill is intended to enable
 - `boundary_summary`
@@ -290,6 +301,7 @@ Required handoff fields:
   - whether the candidate is brand-new, scaffold-complete, or partially hardened already
 
 Handoff integrity rules:
+
 - the handoff package must be durable and inspectable by planning or later maintainers
 - the smallest durable representation for phase one is a dedicated repo-visible artifact file rather than an inline-only chat summary or ad hoc markdown fragment
 - the handoff must minimize rediscovery but must not smuggle in a predetermined success judgment
@@ -350,6 +362,7 @@ Each `IterationRound` must follow this contract:
 The loop must not jump straight from starter prompts to wide release-style coverage without first establishing directional confidence.
 
 Required widening rule:
+
 - a wider rerun is appropriate only after a smaller comparison round provides enough evidence that the candidate is plausibly better or at least meaningfully different from the baseline
 - if the small round is inconclusive because prompts, assertions, or grading are weak, repair the comparison first rather than scaling noise
 - when the skill risk justifies it, the wider rerun should expand beyond happy-path prompts to include representative edge cases and adversarial or failure-oriented cases rather than only more of the same prompt shape
@@ -357,6 +370,7 @@ Required widening rule:
 ### 6. Downstream lifecycle handoffs stay gated
 
 Downstream handoff rules:
+
 - `skill-builder` may hand off to `skill-installer` only when `ContractValidityEvidence` exists and the remaining work is install/import/projection/visibility
 - `skill-builder` may hand off to `plugin-builder` only when `ContractValidityEvidence` exists and the remaining work is plugin packaging
 - downstream surfaces must not self-attest lifecycle validity when the comparative loop is incomplete or inconclusive
@@ -390,14 +404,17 @@ Downstream handoff rules:
 ### External guidance dependencies
 
 This spec uses the Anthropic pinned `skill-creator` reference as a workflow-quality source, not as a packaging or ownership template:
+
 - [Anthropic `skill-creator` at pinned commit `98669c11ca63e9c81c11501e1437e5c47b556621`](https://github.com/anthropics/skills/tree/98669c11ca63e9c81c11501e1437e5c47b556621/skills/skill-creator)
 
 This spec also depends on current official OpenAI and Codex guidance as of **2026-04-04**:
+
 - [Codex best practices: Turn repeatable work into skills](https://developers.openai.com/codex/learn/best-practices/#turn-repeatable-work-into-skills)
 - [Codex customization: Skills](https://developers.openai.com/codex/concepts/customization/#skills)
 - [OpenAI evaluation best practices](https://developers.openai.com/api/docs/guides/evaluation-best-practices/#example-qa-over-docs)
 
 Imported ideas allowed by this spec:
+
 - explicit intent capture from conversation context
 - paired candidate-versus-baseline comparison
 - timing and token evidence when available
@@ -405,12 +422,14 @@ Imported ideas allowed by this spec:
 - description optimization as a named loop stage
 
 Imported guidance from current official docs:
+
 - keep each skill scoped to one job
 - start from 2 to 3 concrete use cases and trigger phrases a user would actually say
 - keep descriptions focused on what the skill does and when to use it
 - grow eval sets over time with representative typical, edge, and adversarial cases when risk justifies it
 
 Explicitly rejected imports:
+
 - collapsing `skill-creator` and `skill-builder` into one owner
 - adopting Anthropic's file layout, workspace layout, or viewer contract literally where repo-native surfaces already exist
 
@@ -489,6 +508,7 @@ Explicitly rejected imports:
 The upgraded loop must be visible through repo artifacts rather than chat memory alone.
 
 Required signals:
+
 - a durable creator-to-builder handoff artifact file exists for non-trivial creator output
 - iteration rounds record an explicit `IterationRoundState`
 - iteration rounds record the chosen baseline type and round decision
@@ -502,12 +522,14 @@ Required signals:
 - blocked rounds are distinguishable from passed rounds in repo-visible artifacts
 
 Suggested verification surfaces:
+
 - `quick_validate.py` or equivalent creator-stage validation evidence
 - `python3 utilities/skill-builder/scripts/run_skill_evals.py utilities/skill-builder --eval-mode smoke`
 - `python3 utilities/skill-builder/scripts/run_skill_evals.py utilities/skill-builder --eval-mode release`
 - repo-visible scorecards, manifests, or summary artifacts produced by the canonical eval flow
 
 Minimum readiness checks for planning:
+
 - the spec identifies a smallest durable representation for `HandoffPackage`
 - the spec defines canonical baseline rules for new and existing skills
 - the spec defines the minimum evidence set for a non-trivial `IterationRound`

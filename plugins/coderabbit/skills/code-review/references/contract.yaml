@@ -3,12 +3,39 @@ name: code-review
 purpose: Run and interpret CodeRabbit CLI review results with severity-prioritized actions and optional iterative fix loops.
 triggers:
   - User requests CodeRabbit code review or quality/security check.
+  - User asks for CodeRabbit review in autonomous implement-review-fix workflow.
 inputs:
   - name: change_scope
     type: enum
     values: [all, committed, uncommitted]
     description: Diff scope for CodeRabbit review.
+  - name: base_reference
+    type: string
+    description: Optional base branch or commit for comparison.
+  - name: output_mode
+    type: enum
+    values: [prompt-only, plain]
+    description: Review output format.
+  - name: auth_state
+    type: string
+    description: Result of CodeRabbit auth status check.
 outputs:
   - name: findings
     type: array
     description: Severity-grouped findings with affected file context.
+  - name: action_list
+    type: array
+    description: Prioritized tasks for critical and warning issues.
+  - name: rerun_status
+    type: string
+    description: Outcome after iterative fix and rerun cycle.
+success_criteria:
+  - Review command matches requested scope and mode.
+  - Critical/warning findings are surfaced before informational notes.
+  - Safety constraints and redaction are enforced in summaries.
+non_goals:
+  - Direct mutation of CodeRabbit SaaS account state.
+  - Non-CodeRabbit generic architecture reviews.
+risks:
+  - False confidence when review is run against the wrong diff scope.
+  - Sensitive data leakage if review summaries include raw secrets.

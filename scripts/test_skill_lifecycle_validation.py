@@ -17,6 +17,9 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = REPO_ROOT / "scripts" / "verify_skill_catalog_freshness.py"
 SHADOW_SCRIPT = REPO_ROOT / "scripts" / "check_plugin_skill_shadowing.sh"
+SELECTION_POLICY_SCRIPT = REPO_ROOT / "scripts" / "selection_policy.py"
+SKILL_DISCOVERY_SCRIPT = REPO_ROOT / "scripts" / "skill_discovery.py"
+SYNC_SCRIPT = REPO_ROOT / "scripts" / "sync_skills.sh"
 
 
 def run_validator(repo_root: Path) -> subprocess.CompletedProcess[str]:
@@ -52,6 +55,32 @@ def load_validator_module():
     spec = importlib.util.spec_from_file_location("verify_skill_catalog_freshness", SCRIPT)
     if spec is None or spec.loader is None:
         raise RuntimeError(f"Failed to load validator module from {SCRIPT}")
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+def load_selection_policy_module():
+    script_dir = str(SELECTION_POLICY_SCRIPT.parent)
+    if script_dir not in sys.path:
+        sys.path.insert(0, script_dir)
+    spec = importlib.util.spec_from_file_location("selection_policy", SELECTION_POLICY_SCRIPT)
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f"Failed to load selection policy module from {SELECTION_POLICY_SCRIPT}")
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+def load_skill_discovery_module():
+    script_dir = str(SKILL_DISCOVERY_SCRIPT.parent)
+    if script_dir not in sys.path:
+        sys.path.insert(0, script_dir)
+    spec = importlib.util.spec_from_file_location("skill_discovery", SKILL_DISCOVERY_SCRIPT)
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f"Failed to load skill discovery module from {SKILL_DISCOVERY_SCRIPT}")
     module = importlib.util.module_from_spec(spec)
     sys.modules[spec.name] = module
     spec.loader.exec_module(module)
@@ -392,6 +421,18 @@ class SkillLifecycleValidationTests(unittest.TestCase):
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("Plugin-shadowing check failed", result.stderr)
             self.assertIn("- coderabbit", result.stderr)
+
+    def test_selection_policy_identity_matches_discovery_identity(self) -> None:
+        selection_policy = load_selection_policy_module()
+        skill_discovery = load_skill_discovery_module()
+        self.assertEqual(selection_policy.policy_identity(), skill_discovery.get_policy_identity())
+
+    def test_sync_script_consumes_selection_policy_exports(self) -> None:
+        content = SYNC_SCRIPT.read_text(encoding="utf-8")
+        self.assertIn("selection_policy.py", content)
+        self.assertIn("SELECTION_POLICY_REPO_SCAN_ROOTS", content)
+        self.assertIn("SELECTION_POLICY_EXCLUDED_SEGMENTS", content)
+        self.assertIn("SELECTION_POLICY_HIDDEN_FLAT_SKILLS", content)
 
 
 if __name__ == "__main__":

@@ -23,6 +23,7 @@ deepened: 2026-04-05
 - Tightened the risk model with trigger-based mitigations, rollback expectations, and owner-level accountability signals.
 
 ## Table of Contents
+
 - [Overview](#overview)
 - [Problem Frame](#problem-frame)
 - [Requirements Trace](#requirements-trace)
@@ -44,12 +45,14 @@ deepened: 2026-04-05
 ## Overview
 
 Close the remaining gap between "contract-complete" and "gold industry standard" for the skill-authoring family:
+
 - `utilities/skill-builder`
 - `skills-system/skill-creator`
 - `skills-system/skill-installer`
 - `skills-system/plugin-creator`
 
 This plan upgrades the family from structural pass posture into release-grade posture by:
+
 - reconciling family-boundary drift across specs, reference docs, and validators;
 - making trusted live eval evidence mandatory for release readiness;
 - eliminating outstanding security warnings in family tooling;
@@ -64,6 +67,7 @@ Execution posture: contract-first, security-first, live-evidence-required.
 ## Problem Frame
 
 The family currently passes structural gates, but several readiness gaps remain before it can be treated as "gold standard":
+
 - active enforcement scripts use `plugin-creator`, while core spec/reference text still mixes in `plugin-builder` as a family member;
 - live runner checks are still optional in default family validation mode;
 - `skill-builder` script surfaces still emit potential exfiltration warnings under OpenClaw;
@@ -93,6 +97,7 @@ Without a focused final hardening pass, the family can appear complete while sti
 ## Scope Boundaries
 
 In scope:
+
 - family contract docs and references:
   - `docs/specs/2026-04-03-feat-skill-authoring-family-contract-spec.md`
   - `docs/reference/skill-authoring-validation-maturity-matrix.md`
@@ -109,6 +114,7 @@ In scope:
 - family eval and security tooling in `utilities/skill-builder/scripts/` and `references/`.
 
 Out of scope:
+
 - broad repo-wide skill-router redesign;
 - renaming unrelated non-family skills;
 - plugin marketplace architecture changes unrelated to family quality;
@@ -199,6 +205,7 @@ flowchart TD
 **Dependencies:** None
 
 **Files:**
+
 - Modify: `docs/specs/2026-04-03-feat-skill-authoring-family-contract-spec.md`
 - Modify: `docs/reference/skill-authoring-validation-maturity-matrix.md`
 - Create: `docs/reference/skill-authoring-family-boundary-decision.md`
@@ -206,6 +213,7 @@ flowchart TD
 - Test: `rg -n "skill-creator|skill-builder|skill-installer|plugin-creator|plugin-builder" docs/specs docs/reference scripts/validate_skill_authoring_family.sh scripts/validate_skill_authoring_family_benchmarks.py`
 
 **Approach:**
+
 - Adopt one explicit "active family" statement used by all release-readiness artifacts.
 - Preserve compatibility notes where `plugin-builder` remains an adjacent handoff surface.
 - Keep historical completed plans intact; update only active reference and contract surfaces.
@@ -216,6 +224,7 @@ flowchart TD
   - rollback condition when downstream contract consumers break.
 
 **Test scenarios:**
+
 - family member list is identical across active spec, matrix, and gate scripts;
 - adjacency wording does not reintroduce ownership ambiguity.
 - boundary-decision record unambiguously states layered ownership:
@@ -223,10 +232,12 @@ flowchart TD
   - enhancement-layer hardening/packaging (`skill-builder`, `plugin-builder`).
 
 **Verification:**
+
 - no active family doc contradicts gate-level family membership.
 - boundary decision record exists and links to the reconciled active sources.
 
 **Exit criteria:**
+
 - one canonical family boundary appears across all active contract and validation docs.
 - `docs/reference/skill-authoring-family-boundary-decision.md` is present, reviewed, and linked from the scorecard plan.
 
@@ -239,6 +250,7 @@ flowchart TD
 **Dependencies:** P0
 
 **Files:**
+
 - Modify: `scripts/validate_skill_authoring_family.sh`
 - Modify: `docs/reference/skill-authoring-validation-maturity-matrix.md`
 - Modify: relevant validation docs under `docs/agents/` where family closeout checks are described
@@ -246,6 +258,7 @@ flowchart TD
 - Test: `SKILL_FAMILY_LIVE_EVALS=1 SKILL_FAMILY_LIVE_EVALS_TRUSTED=1 bash scripts/validate_skill_authoring_family.sh`
 
 **Approach:**
+
 - Introduce explicit release-ready mode that requires trusted live execution.
 - Keep fast structural mode for local iteration.
 - Document artifact retention and required evidence paths for both smoke and release runs.
@@ -258,6 +271,7 @@ flowchart TD
 - Define degraded-evidence handling: allow retry-limited reruns for transient runner failures, but block closeout until trusted live evidence is present.
 
 **Test scenarios:**
+
 - non-trusted live invocation fails with clear guidance;
 - trusted invocation runs both smoke and release for each family skill;
 - release-ready closeout blocks if live evidence is missing.
@@ -265,12 +279,14 @@ flowchart TD
 - stale trusted artifacts (older than freshness window or from non-descendant commits) are rejected at gate time.
 
 **Verification:**
+
 - release readiness check cannot pass without trusted live eval artifacts.
 - retry-limited live-runner failures are documented as operational noise only when a successful trusted rerun exists for the same scope.
 - gate progression from `P1` to `P2` is blocked unless trusted execution proof is archived.
 - trusted evidence metadata includes branch, commit SHA, run timestamp, and artifact path for freshness and lineage checks.
 
 **Exit criteria:**
+
 - "gold readiness" language is formally tied to trusted live execution evidence.
 - at least one trusted live evidence set is linked from the operational scorecard path.
 - all linked trusted evidence satisfies freshness and branch-lineage constraints.
@@ -284,6 +300,7 @@ flowchart TD
 **Dependencies:** P1
 
 **Files:**
+
 - Modify: `utilities/skill-builder/scripts/analyze_skill.py`
 - Modify: `utilities/skill-builder/scripts/generate_pressure_tests.py`
 - Modify: `utilities/skill-builder/scripts/skill_gate.py`
@@ -294,20 +311,24 @@ flowchart TD
 - Test: `bash scripts/validate_skill_authoring_family.sh`
 
 **Approach:**
+
 - eliminate or guard flagged file-read/network-send patterns with explicit allowlist and safety checks;
 - add adversarial cases for exfiltration, tool abuse, and retrieval contamination patterns;
 - keep deterministic command guards intact and extend where high-value;
 - require any residual warning to carry a time-bound risk-acceptance record with owner, expiry, and compensating controls at `docs/reference/skill-authoring-family-risk-acceptance.md`.
 
 **Test scenarios:**
+
 - OpenClaw returns no unresolved warnings for family-critical scripts;
 - new adversarial cases appear in smoke or release inventories as designed;
 - family gate remains stable and reproducible.
 
 **Verification:**
+
 - security hardening is validated by scanners and by eval contract checks.
 
 **Exit criteria:**
+
 - zero unresolved security warnings in family gate output, or explicit documented risk-acceptance artifact with owner and expiration.
 - any residual acceptance entries reference compensating controls and a removal date.
 
@@ -320,6 +341,7 @@ flowchart TD
 **Dependencies:** P0, P2
 
 **Files:**
+
 - Modify: `skills-system/skill-installer/SKILL.md`
 - Modify: `skills-system/plugin-creator/SKILL.md`
 - Modify: `skills-system/skill-creator/SKILL.md` (only if handoff clarity requires parity edits)
@@ -330,6 +352,7 @@ flowchart TD
 - Test: `bash scripts/validate_skill_authoring_family.sh`
 
 **Approach:**
+
 - improve variation-rich triggers and realistic user prompt coverage;
 - tighten first-pass scope language to reduce cross-family confusion;
 - improve empowerment and next-step guidance while retaining strict safety boundaries.
@@ -349,17 +372,20 @@ flowchart TD
   - record one baseline-freeze timestamp and prohibit mid-pass baseline replacement without an explicit change note linked from the scorecard.
 
 **Test scenarios:**
+
 - improved analyzer subscores for variation, empowerment, and scope focus;
 - no new role-overlap regressions in routing language.
 - baseline-to-target comparison can be audited from one document without replaying historical logs.
 - baseline metadata is complete enough to reproduce the exact baseline run definition.
 
 **Verification:**
+
 - analyzer and eval outputs confirm clearer routing and stronger operator confidence signals.
 - hybrid threshold checks (floor + delta + no-regression) are explicitly recorded in the quality baseline artifact.
 - baseline lineage and freeze metadata are present and unchanged during the `P3` execution window unless explicitly approved.
 
 **Exit criteria:**
+
 - both `skill-installer` and `plugin-creator` clear explicit hybrid thresholds and pass family gate.
 
 - [ ] **P4 / Governance Scorecard and Freshness Operations**
@@ -371,6 +397,7 @@ flowchart TD
 **Dependencies:** P1, P2, P3
 
 **Files:**
+
 - Create: `docs/reference/skill-authoring-family-gold-scorecard.md`
 - Modify: `docs/reference/skill-authoring-validation-maturity-matrix.md`
 - Modify: `docs/reference/skill-authoring-family-boundary-decision.md`
@@ -380,6 +407,7 @@ flowchart TD
 - Test: `rg -n "live eval|security|adversarial|freshness|owner|SLO|scorecard" docs/reference .harness/quality`
 
 **Approach:**
+
 - define explicit metrics: live-eval pass rate, flake rate, warning count, regression escape rate, doc-freshness SLA;
 - define ownership and escalation rules for failed gates;
 - document cadence and sources for official-doc refresh checks.
@@ -391,13 +419,16 @@ flowchart TD
   - trusted live evidence index.
 
 **Test scenarios:**
+
 - each metric has owner, threshold, and evidence path;
 - failed metric conditions map to durable issue-routing behavior.
 
 **Verification:**
+
 - readiness status can be determined from one scorecard snapshot without re-running ad hoc analysis.
 
 **Exit criteria:**
+
 - repeatable governance loop exists and is documented with clear pass/fail semantics.
 
 ## Task Graph (id and depends_on)

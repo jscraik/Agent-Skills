@@ -12,14 +12,14 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 - `library_api_reference`: 7
 - `product_verification`: 9
 - `data_fetch_analysis`: 6
-- `team_automation`: 35
+- `team_automation`: 25
 - `scaffolding_templates`: 26
-- `code_quality_review`: 15
+- `code_quality_review`: 12
 - `ci_cd_deployment`: 7
 - `runbook`: 4
 - `infrastructure_ops`: 6
 - `invalid`: 0
-- `total_tagged`: 115
+- `total_tagged`: 102
 
 ## Semantic Types
 
@@ -60,16 +60,6 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 - `architecture-interview` — `interview`
 - `atlas` — `utilities`
 - `brainstorming` — `product/strategy`
-- `ce-brainstorm` — `product/ops`
-- `ce-compound-refresh` — `product/ops`
-- `ce-compound` — `product/ops`
-- `ce-deepen-plan` — `product/ops`
-- `ce-deepen-spec` — `product/ops`
-- `ce-ideate` — `product/ops`
-- `ce-plan` — `product/ops`
-- `ce-spec` — `product/ops`
-- `ce-tdd` — `product/ops`
-- `ce-work` — `product/ops`
 - `changelog` — `product/content`
 - `codex-automation-architect` — `utilities`
 - `coding-harness` — `utilities`
@@ -126,9 +116,6 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 - `agents-md` — `product/docs`
 - `baseline-ui` — `frontend/ui`
 - `best-practices` — `auth`
-- `ce-reliability-review` — `product/ops`
-- `ce-review` — `product/ops`
-- `ce-technical-review` — `product/ops`
 - `codex-home-audit` — `utilities`
 - `docs-expert` — `product/docs`
 - `evals-router` — `utilities`
