@@ -138,7 +138,7 @@ If the request is out of scope, route clearly:
 
 | Skill | When to use |
 |---|---|
-| [[plugin-creator]] | Create the initial plugin scaffold before hardening/conversion workflows |
-| [[plugin-installer]] | Handle downstream installation, provenance, and rollback after package validation |
+| [[plugin-creator]] | Scaffold a minimal plugin shell before hardening and compatibility checks |
+| [[plugin-installer]] | Install validated plugin packages after build-time hardening is complete |
 
 **Topic map:** [[agent-ops]]
