@@ -21,6 +21,7 @@
     },
     "generated_at": {
       "type": "string",
+      "format": "date-time",
       "minLength": 1
     },
     "all_required_passed": {
@@ -66,7 +67,8 @@
             "type": [
               "string",
               "null"
-            ]
+            ],
+            "minLength": 1
           }
         }
       }

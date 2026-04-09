@@ -305,18 +305,20 @@ def required_section_issues(repo_root: Path, config: dict) -> list[Issue]:
                 heading_text = match.group(2).strip().rstrip("#").strip()
                 headings.add(heading_text)
 
-        for section in expected_sections:
-            if section not in headings:
-                issues.append(
-                    Issue(
-                        code="missing-required-section",
-                        severity="error",
-                        file="/" + target.relative_to(repo_root).as_posix(),
-                        line=1,
-                        message=f"Required section heading missing: {section}",
-                        suggestion=f"Add a markdown heading exactly named '{section}'.",
-                    )
+        issues.extend(
+            [
+                Issue(
+                    code="missing-required-section",
+                    severity="error",
+                    file="/" + target.relative_to(repo_root).as_posix(),
+                    line=1,
+                    message=f"Required section heading missing: {section}",
+                    suggestion=f"Add a markdown heading exactly named '{section}'.",
                 )
+                for section in expected_sections
+                if section not in headings
+            ]
+        )
 
     return issues
 

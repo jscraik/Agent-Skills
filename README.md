@@ -120,7 +120,9 @@ Errors include suggestions and examples:
 }
 ```
 
-## Skill graph (7 topic clusters)
+## Skill graph (manual topic clusters, non-canonical)
+
+This table is a human-oriented grouping for quick navigation and is not used for parity enforcement. Canonical catalog parity uses `discover_skill_entries()` and `catalog_parity` and currently expects **116** skills.
 
 | Topic              | Skills | Examples                                       |
 | ------------------ | ------ | ---------------------------------------------- |
@@ -164,6 +166,6 @@ This repository stores skill source, docs, and validation artifacts for local-fi
 ## Governance
 
 - **License:** Apache 2.0
-- **Skills:** 116 total across 7 topic clusters
+- **Skills:** 116 canonical total (manual cluster table above is non-canonical)
 - **Validation:** 10+ automated checks via `./bin/ask repo validate`
 - **Compatibility:** Codex, Claude Code, Gemini/Antigravity

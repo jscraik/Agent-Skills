@@ -218,7 +218,7 @@ def compute_catalog_parity(
             "canonical_count": canonical_count,
             "parity_ok": skill_index_count == canonical_count,
             "policy_identity": skill_index_policy_identity,
-            "policy_identity_required": False,
+            "policy_identity_required": True,
         },
         {
             "surface_name": "ask skills list",
@@ -295,4 +295,3 @@ def compute_catalog_parity(
         "strict_mode": strict,
     }
     return report
-

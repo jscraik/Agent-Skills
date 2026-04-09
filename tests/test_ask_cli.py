@@ -124,6 +124,22 @@ class TestAskCLI(unittest.TestCase):
         output = json.loads(result.stdout)
         self.assertIn("goal_decision", output.get("data", {}))
 
+    def test_goal_alias_normalization_with_prefix_global_flag(self):
+        """CA1: Verify ask --json goal alias maps to ask skills goal."""
+        cmd = ["python3", "bin/ask", "--json", "goal", "create auth integration"]
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+        self.assertTrue(result.stdout.strip(), f"Expected JSON output, stderr: {result.stderr}")
+        output = json.loads(result.stdout)
+        self.assertIn("goal_decision", output.get("data", {}))
+
+    def test_doctor_catalog_alias_normalization_with_prefix_global_flag(self):
+        """CA1: Verify ask --json doctor catalog alias maps to repo doctor-catalog."""
+        cmd = ["python3", "bin/ask", "--json", "doctor", "catalog"]
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+        self.assertTrue(result.stdout.strip(), f"Expected JSON output, stderr: {result.stderr}")
+        output = json.loads(result.stdout)
+        self.assertIn("catalog_parity", output.get("data", {}))
+
     def test_skills_starter_mode(self):
         """
         Verify the CLI `skills starter` command returns starter-mode catalogue metadata for the chosen archetype.

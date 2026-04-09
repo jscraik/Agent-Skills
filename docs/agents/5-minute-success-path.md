@@ -36,6 +36,6 @@ Use `data.catalog_parity.operator_action` as the next operator step before rerou
 
 ## What To Run Next
 
-- Full release-readiness checks: `bash scripts/validate_all.sh --persistent`
+- Full release-readiness checks: `bash scripts/verify-work.sh`
 - Command reference: `/AGENTS.md`
 - Workflow and safety defaults: `/docs/agents/13-workflow-and-safety-guidance.md`

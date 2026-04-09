@@ -147,6 +147,8 @@ def validate_goal_decision(payload: Dict[str, Any]) -> List[str]:
         List[str]: A list of validation issue messages; empty if the payload conforms to the expected schema and constraints.
     """
     issues: List[str] = []
+    if payload.get("schema_version") != "goal-decision.v1":
+        issues.append("invalid schema_version: expected 'goal-decision.v1'")
     required = {
         "schema_version",
         "policy_identity",
@@ -196,6 +198,8 @@ def validate_catalog_parity(payload: Dict[str, Any]) -> List[str]:
         List[str]: A list of human-readable issue messages; empty when the payload satisfies all checks.
     """
     issues: List[str] = []
+    if payload.get("schema_version") != "catalog-parity.v1":
+        issues.append("invalid schema_version: expected 'catalog-parity.v1'")
     required = {
         "schema_version",
         "policy_identity",
@@ -247,6 +251,8 @@ def validate_routing_quality(payload: Dict[str, Any]) -> List[str]:
         list[str]: A list of human-readable issue messages describing validation failures; empty if the payload passes validation.
     """
     issues: List[str] = []
+    if payload.get("schema_version") != "routing-quality.v1":
+        issues.append("invalid schema_version: expected 'routing-quality.v1'")
     required = {
         "schema_version",
         "run_id",

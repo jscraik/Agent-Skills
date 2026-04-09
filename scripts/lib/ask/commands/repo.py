@@ -123,17 +123,29 @@ def doctor_catalog(repo_root: Path, strict: bool = False) -> CallResult:
     result.data["decision_status"] = report.get("decision_status")
     result.data["policy_identity"] = report.get("policy_identity")
 
-    if not report.get("drift_detected"):
+    drift_detected = report.get("drift_detected")
+    if drift_detected is False:
         result.status = "success"
+        return result
+
+    if drift_detected is True:
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=f"doctor-catalog detected drift: {report.get('drift_class')}",
+                fix_suggestion=report.get("operator_action")
+                or "Run sync/projection tooling and rerun doctor-catalog.",
+            )
+        )
         return result
 
     result.status = "error"
     result.errors.append(
         ErrorObject(
-            code="ERR_VALIDATION",
-            message=f"doctor-catalog detected drift: {report.get('drift_class')}",
-            fix_suggestion=report.get("operator_action")
-            or "Run sync/projection tooling and rerun doctor-catalog.",
+            code="ERR_RUNTIME",
+            message="doctor-catalog report missing required drift_detected boolean.",
+            fix_suggestion="Regenerate catalog parity diagnostics and rerun doctor-catalog.",
         )
     )
     return result

@@ -105,8 +105,14 @@ def _validate_against_schema(payload: dict[str, Any], schema_path: Path) -> list
         issues.append("schema_version must be selection-gate-severity.v1")
     if not isinstance(payload.get("run_id"), str) or not payload["run_id"].strip():
         issues.append("run_id must be a non-empty string")
-    if not isinstance(payload.get("generated_at"), str) or not payload["generated_at"].strip():
+    generated_at = payload.get("generated_at")
+    if not isinstance(generated_at, str) or not generated_at.strip():
         issues.append("generated_at must be a non-empty string")
+    else:
+        try:
+            datetime.fromisoformat(generated_at.replace("Z", "+00:00"))
+        except ValueError:
+            issues.append("generated_at must be a valid ISO 8601 date-time string")
     if not isinstance(payload.get("all_required_passed"), bool):
         issues.append("all_required_passed must be boolean")
 
@@ -127,6 +133,9 @@ def _validate_against_schema(payload: dict[str, Any], schema_path: Path) -> list
             issues.append(f"checks[{idx}].mode must be required|warn")
         if check.get("result") not in {"pass", "fail", "blocked"}:
             issues.append(f"checks[{idx}].result must be pass|fail|blocked")
+        log_file = check.get("log_file")
+        if log_file is not None and (not isinstance(log_file, str) or not log_file.strip()):
+            issues.append(f"checks[{idx}].log_file must be null or a non-empty string")
 
     return issues
 

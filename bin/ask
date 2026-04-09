@@ -150,6 +150,23 @@ def format_correction(original: str, corrected: str, robot_mode: bool = False) -
     return f"💡 Did you mean: '{corrected}'? (Use --robot to auto-correct)"
 
 
+def consume_global_prefix_flags(raw_args: List[str]) -> Tuple[List[str], List[str]]:
+    """Split leading global flags from positional command tokens."""
+    global_flags = {"--json", "--trace-id", "--robot", "--agent-mode", "-r", "--help", "-h"}
+    prefix_flags: List[str] = []
+    idx = 0
+    while idx < len(raw_args) and raw_args[idx].startswith("-"):
+        flag = raw_args[idx]
+        if flag not in global_flags:
+            break
+        prefix_flags.append(flag)
+        idx += 1
+        if flag in {"--trace-id"} and idx < len(raw_args) and not raw_args[idx].startswith("-"):
+            prefix_flags.append(raw_args[idx])
+            idx += 1
+    return prefix_flags, raw_args[idx:]
+
+
 def build_helpful_error(topic: Optional[str], action: Optional[str], raw_args: List[str], repo_root: Path) -> CallResult:
     """Build a helpful error message with examples."""
     result = CallResult()
@@ -253,23 +270,7 @@ def try_fuzzy_parse(raw_args: List[str], robot_mode: bool = False) -> Tuple[Opti
         return None, None, [], None
 
     # Skip leading global flags (--json, --trace-id, --robot, etc.)
-    GLOBAL_FLAGS = {"--json", "--trace-id", "--robot", "--agent-mode", "-r", "--help", "-h"}
-    prefix_flags = []
-    idx = 0
-    while idx < len(raw_args) and raw_args[idx].startswith("-"):
-        flag = raw_args[idx]
-        if flag in GLOBAL_FLAGS:
-            prefix_flags.append(flag)
-            idx += 1
-            # Also consume the value for flags that take one
-            if flag in {"--trace-id"} and idx < len(raw_args) and not raw_args[idx].startswith("-"):
-                prefix_flags.append(raw_args[idx])
-                idx += 1
-        else:
-            break
-
-    # Work with remaining args after global flags
-    working_args = raw_args[idx:]
+    prefix_flags, working_args = consume_global_prefix_flags(raw_args)
     if not working_args:
         return None, None, raw_args, None
 
@@ -384,11 +385,12 @@ def main():
     # Check for robot mode in raw args before parsing
     raw_args = sys.argv[1:]
     alias_correction_note = None
-    if raw_args and raw_args[0] == "goal":
-        raw_args = ["skills", "goal", *raw_args[1:]]
+    prefix_flags, positional_args = consume_global_prefix_flags(raw_args)
+    if positional_args and positional_args[0] == "goal":
+        raw_args = [*prefix_flags, "skills", "goal", *positional_args[1:]]
         alias_correction_note = "💡 Alias: 'ask goal' maps to 'ask skills goal'."
-    elif len(raw_args) >= 2 and raw_args[0] == "doctor" and raw_args[1] == "catalog":
-        raw_args = ["repo", "doctor-catalog", *raw_args[2:]]
+    elif len(positional_args) >= 2 and positional_args[0] == "doctor" and positional_args[1] == "catalog":
+        raw_args = [*prefix_flags, "repo", "doctor-catalog", *positional_args[2:]]
         alias_correction_note = "💡 Alias: 'ask doctor catalog' maps to 'ask repo doctor-catalog'."
 
     robot_mode = any(flag in raw_args for flag in ["--robot", "--agent-mode", "-r"])
@@ -747,6 +749,15 @@ def main():
         else:
             print("❌ Failed to parse command arguments.")
         sys.exit(2)
+
+    # Preserve leading global flags even when subparser defaults would overwrite them.
+    prefix_flags, _ = consume_global_prefix_flags(raw_args)
+    if "--json" in prefix_flags:
+        args.json = True
+    if "--trace-id" in prefix_flags:
+        trace_idx = prefix_flags.index("--trace-id")
+        if trace_idx + 1 < len(prefix_flags):
+            args.trace_id = prefix_flags[trace_idx + 1]
 
     repo_root = find_repo_root()
     result = CallResult()

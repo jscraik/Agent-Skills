@@ -579,7 +579,6 @@ def route_skills(
     catalog_parity = compute_catalog_parity(
         repo_root,
         strict=False,
-        skills_list_count=len(_canonical_entries(repo_root)),
         route_considered_total=len(ordered_candidates),
     )
 

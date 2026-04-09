@@ -149,18 +149,34 @@ def build_decision_payload(
     decision_status = "resolved"
     ambiguity_set: list[dict] = []
 
+    def _clear_selection(block_reason: str) -> None:
+        nonlocal selected_payload, excluded_payload
+        selected_ids = set(selected_lookup.keys())
+        for candidate in considered_payload:
+            if candidate.get("candidate_id") in selected_ids:
+                candidate["candidate_state"] = "excluded"
+                candidate["exclusion_reason"] = block_reason
+                candidate.pop("confidence", None)
+                candidate.pop("rationale", None)
+                candidate.pop("rank", None)
+        selected_lookup.clear()
+        selected_payload = []
+        excluded_payload = []
+        for candidate in considered_payload:
+            excluded_item = dict(candidate)
+            excluded_item["candidate_state"] = "excluded"
+            excluded_item["exclusion_reason"] = excluded_item.get("exclusion_reason") or block_reason
+            excluded_payload.append(excluded_item)
+
     if not policy_parity_ok:
         decision_status = "blocked_policy_drift"
-        selected_payload = []
-        excluded_payload = considered_payload.copy()
+        _clear_selection("blocked_policy_drift")
     elif not catalog_parity_ok:
         decision_status = "blocked_catalog_parity"
-        selected_payload = []
-        excluded_payload = considered_payload.copy()
+        _clear_selection("blocked_catalog_parity")
     elif not ranked_candidates or float(ranked_candidates[0].get("confidence", 0.0)) <= 0:
         decision_status = "degraded_no_candidates"
-        selected_payload = []
-        excluded_payload = considered_payload.copy()
+        _clear_selection("degraded_no_candidates")
     else:
         top_candidates_close = len(ranked_candidates) >= 2 and abs(
             float(ranked_candidates[0].get("confidence", 0.0))
@@ -168,7 +184,7 @@ def build_decision_payload(
         ) < 0.08
         if "top_candidates_close_score" in uncertainty_reasons or top_candidates_close:
             decision_status = "unresolved_ambiguity"
-            selected_payload = []
+            _clear_selection("unresolved_ambiguity")
             ambiguity_set = [
                 {
                     "name": c.get("skill_name"),

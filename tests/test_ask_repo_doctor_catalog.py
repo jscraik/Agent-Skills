@@ -2,6 +2,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import patch
 
 
@@ -28,16 +29,22 @@ class TestAskRepoDoctorCatalog(unittest.TestCase):
             encoding="utf-8",
         )
 
-    def _write_root_index(self, repo_root: Path, count: int) -> None:
+    def _write_root_index(self, repo_root: Path, count: int, policy_identity: str = "0123456789abcdef") -> None:
         """
-        Write or overwrite the repository root SKILL.md index with a summary recording the total number of skills.
-        
+        Write or overwrite the repository root SKILL.md index with summary fields.
+
         Parameters:
-        	repo_root (Path): Root directory of the repository where SKILL.md will be written.
-        	count (int): Number to set for the `total_skills` field in the generated index.
+            repo_root (Path): Root directory of the repository where SKILL.md will be written.
+            count (int): Number to set for the `total_skills` field in the generated index.
+            policy_identity (str): Policy identity stamp to write in the generated index.
         """
         (repo_root / "SKILL.md").write_text(
-            f"# Agent Skills Index\n\n## Summary\n- `total_skills`: {count}\n",
+            (
+                "# Agent Skills Index\n\n"
+                "## Summary\n"
+                f"- `total_skills`: {count}\n"
+                f"- `policy_identity`: {policy_identity}\n"
+            ),
             encoding="utf-8",
         )
 
@@ -57,7 +64,11 @@ class TestAskRepoDoctorCatalog(unittest.TestCase):
                 encoding="utf-8",
             )
 
-            with patch("ask.catalog_parity.discover_skill_entries", return_value=[object()]):
+            stub = SimpleNamespace(name="demo", source_dir=repo / "utilities" / "demo")
+            with patch("ask.catalog_parity.discover_skill_entries", return_value=[stub]), patch(
+                "ask.catalog_parity.get_policy_identity",
+                return_value="0123456789abcdef",
+            ):
                 result = doctor_catalog(repo, strict=False)
             self.assertEqual(result.status, "error")
             report = result.data["catalog_parity"]
@@ -81,7 +92,11 @@ class TestAskRepoDoctorCatalog(unittest.TestCase):
                 encoding="utf-8",
             )
             # Matching counts, but no history artifact => strict should block.
-            with patch("ask.catalog_parity.discover_skill_entries", return_value=[object()]):
+            stub = SimpleNamespace(name="demo", source_dir=repo / "utilities" / "demo")
+            with patch("ask.catalog_parity.discover_skill_entries", return_value=[stub]), patch(
+                "ask.catalog_parity.get_policy_identity",
+                return_value="0123456789abcdef",
+            ):
                 result = doctor_catalog(repo, strict=True)
             self.assertEqual(result.status, "error")
             report = result.data["catalog_parity"]

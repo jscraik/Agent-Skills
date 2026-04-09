@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import logging
 from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
@@ -19,6 +20,8 @@ sys.path.insert(0, str(REPO_ROOT / "scripts" / "lib"))
 
 from selection_policy import policy_identity
 from ask.selection_contract import EligibleCandidate, build_decision_payload, build_goal_decision
+
+logger = logging.getLogger(__name__)
 
 
 def parse_args() -> argparse.Namespace:
@@ -125,6 +128,8 @@ def _append_history(
     	max_runs (int): Maximum number of history rows to retain; values less than 1 are treated as 1.
     """
     existing_rows: list[dict[str, Any]] = []
+    discarded_count = 0
+    discarded_lines: list[str] = []
     if history_path.exists():
         for raw in history_path.read_text(encoding="utf-8", errors="ignore").splitlines():
             line = raw.strip()
@@ -133,10 +138,16 @@ def _append_history(
             try:
                 payload = json.loads(line)
             except json.JSONDecodeError:
+                discarded_count += 1
+                discarded_lines.append(line)
                 continue
             if not isinstance(payload, dict):
+                discarded_count += 1
+                discarded_lines.append(line)
                 continue
             if "unresolved_ambiguity_rate" not in payload or "no_candidate_rate" not in payload:
+                discarded_count += 1
+                discarded_lines.append(line)
                 continue
             existing_rows.append(payload)
 
@@ -148,6 +159,18 @@ def _append_history(
         "".join(json.dumps(item, sort_keys=True) + "\n" for item in bounded_rows),
         encoding="utf-8",
     )
+
+    if discarded_count:
+        logger.warning(
+            "Discarded %d malformed or incompatible history rows while parsing %s",
+            discarded_count,
+            history_path,
+        )
+        corrupt_path = history_path.with_suffix(history_path.suffix + ".corrupt")
+        corrupt_path.parent.mkdir(parents=True, exist_ok=True)
+        with corrupt_path.open("a", encoding="utf-8") as handle:
+            for line in discarded_lines:
+                handle.write(line + "\n")
 
 
 def main() -> int:
@@ -295,7 +318,8 @@ def main() -> int:
                 if goal_decision.get("decision_status") != "resolved" and not goal_decision.get("failure_class"):
                     failure_mapping_failures += 1
 
-                status_counter[str(goal_decision.get("decision_status"))] += 1
+                status_key = goal_decision.get("decision_status") or "none"
+                status_counter[str(status_key)] += 1
                 failure_key = goal_decision.get("failure_class") or "none"
                 failure_counter[str(failure_key)] += 1
                 goal_results.append(
@@ -347,6 +371,7 @@ def main() -> int:
             "failed": len(failed),
             "explainability_failures": explainability_failures,
         },
+        # Backward compatibility: both keys intentionally mirror status_counter.
         "decision_status_counts": dict(status_counter),
         "status_counts": dict(status_counter),
         "failure_class_counts": dict(failure_counter),
